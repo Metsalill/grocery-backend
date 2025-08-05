@@ -86,3 +86,8 @@ async def list_products():
     async with app.state.db.acquire() as conn:
         rows = await conn.fetch("SELECT store, product, price FROM prices ORDER BY store")
     return [dict(row) for row in rows]
+
+import uvicorn
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8000)
