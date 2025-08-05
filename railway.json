@@ -1,0 +1,10 @@
+{
+  "plugins": [],
+  "jobs": {
+    "image_updater": {
+      "command": "python image_updater.py",
+      "restart": "never",
+      "schedule": "@daily"
+    }
+  }
+}
