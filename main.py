@@ -55,7 +55,8 @@ async def upload_prices(file: UploadFile = File(...)):
 
     # Store in DB
     async with app.state.db.acquire() as conn:
-        for _, row in df.iterrows():
+        print(await conn.fetch("SELECT * FROM products;"))  # ✅ move here
+        for _, row in df.iterrows():  
             await conn.execute("""
                 INSERT INTO prices (store, product, price) 
                 VALUES ($1, $2, $3)
