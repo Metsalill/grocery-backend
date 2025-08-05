@@ -84,7 +84,7 @@ async def compare_basket(grocery_list: GroceryList):
                 )
                 for row in rows:
                     prices.setdefault(row["store"], 0.0)
-                    prices[row["store"]] += row["price"]
+                    prices[row["store"]] += float(row["price"])
 
         if not prices:
             raise HTTPException(status_code=404, detail="No matching products found")
