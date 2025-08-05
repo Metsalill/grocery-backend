@@ -1,8 +1,7 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 from fastapi.responses import HTMLResponse
-from fastapi import Form
+from pydantic import BaseModel
 import shutil
 import pandas as pd
 import io
@@ -53,23 +52,20 @@ async def upload_prices(file: UploadFile = File(...)):
         contents = await file.read()
         df = pd.read_excel(io.BytesIO(contents))
 
-        required_columns = {"Toode", "Hind (€)"}
+        required_columns = {"Toode", "Tootja", "Kogus", "Hind (€)"}
         if not required_columns.issubset(df.columns):
             raise HTTPException(status_code=400, detail="Missing required columns in Excel")
 
-        # Infer store name from filename
         store_name = file.filename.replace("_extended_prices.xlsx", "").replace("_", " ").title()
 
-        # Store in DB
         async with app.state.db.acquire() as conn:
-            print(await conn.fetch("SELECT * FROM products;"))  # optional debug
-
             for _, row in df.iterrows():
                 await conn.execute("""
-                    INSERT INTO prices (store, product, price)
-                    VALUES ($1, $2, $3)
-                    ON CONFLICT (store, product) DO UPDATE SET price = EXCLUDED.price
-                """, store_name, row["Toode"], float(row["Hind (€)"]))
+                    INSERT INTO prices (store, product, manufacturer, amount, price)
+                    VALUES ($1, $2, $3, $4, $5)
+                    ON CONFLICT (store, product, manufacturer, amount) DO UPDATE
+                    SET price = EXCLUDED.price
+                """, store_name, row["Toode"], row["Tootja"], row["Kogus"], float(row["Hind (€)"]))
 
         return {"status": "success", "store": store_name, "items_uploaded": len(df)}
 
@@ -95,22 +91,16 @@ async def compare_basket(grocery_list: GroceryList):
         if not prices:
             raise HTTPException(status_code=404, detail="No matching products found")
 
-        return dict(
-    sorted(
-        {store: round(total, 2) for store, total in prices.items()}.items(),
-        key=lambda x: x[1]
-    )
-)
+        return dict(sorted({store: round(total, 2) for store, total in prices.items()}.items(), key=lambda x: x[1]))
 
     except Exception as e:
-        # Show detailed error
         raise HTTPException(status_code=500, detail=str(e))
 
 # Endpoint to list all stored products
 @app.get("/products")
 async def list_products():
     async with app.state.db.acquire() as conn:
-        rows = await conn.fetch("SELECT store, product, price FROM prices ORDER BY store")
+        rows = await conn.fetch("SELECT store, product, manufacturer, amount, price FROM prices ORDER BY store")
     return [dict(row) for row in rows]
 
 # 🔍 New endpoint: search products by name (for image-grid frontend)
@@ -145,8 +135,7 @@ async def dashboard():
     html += "</ul>"
     return html
 
-
-@app.post("/upload")  # ← moved out of dashboard function
+@app.post("/upload")
 async def upload_image(product: str = Form(...), image: UploadFile = Form(...)):
     filename = f"{product.replace(' ', '_')}.jpg"
     path = f"static/images/{filename}"
