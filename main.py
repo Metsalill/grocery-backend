@@ -95,6 +95,20 @@ async def list_products():
         rows = await conn.fetch("SELECT store, product, price FROM prices ORDER BY store")
     return [dict(row) for row in rows]
 
+# 🔍 New endpoint: search products by name (for image-grid frontend)
+@app.get("/search-products")
+async def search_products(query: str):
+    async with app.state.db.acquire() as conn:
+        rows = await conn.fetch("""
+            SELECT DISTINCT product, image_url 
+            FROM prices 
+            WHERE LOWER(product) ILIKE '%' || LOWER($1) || '%' 
+            ORDER BY product 
+            LIMIT 10
+        """, query)
+    return [{"name": row["product"], "image": row["image_url"]} for row in rows]
+
+
 import uvicorn
 
 if __name__ == "__main__":
