@@ -40,30 +40,37 @@ class GroceryList(BaseModel):
 # Endpoint to upload Excel and store in DB
 @app.post("/upload-prices")
 async def upload_prices(file: UploadFile = File(...)):
-    if not file.filename.endswith(".xlsx"):
-        raise HTTPException(status_code=400, detail="Only .xlsx files are supported")
+    try:
+        if not file.filename.endswith(".xlsx"):
+            raise HTTPException(status_code=400, detail="Only .xlsx files are supported")
 
-    contents = await file.read()
-    df = pd.read_excel(io.BytesIO(contents))
+        contents = await file.read()
+        df = pd.read_excel(io.BytesIO(contents))
 
-    required_columns = {"Toode", "Hind (€)"}
-    if not required_columns.issubset(df.columns):
-        raise HTTPException(status_code=400, detail="Missing required columns in Excel")
+        required_columns = {"Toode", "Hind (€)"}
+        if not required_columns.issubset(df.columns):
+            raise HTTPException(status_code=400, detail="Missing required columns in Excel")
 
-    # Infer store name from filename
-    store_name = file.filename.replace("_extended_prices.xlsx", "").replace("_", " ").title()
+        # Infer store name from filename
+        store_name = file.filename.replace("_extended_prices.xlsx", "").replace("_", " ").title()
 
-    # Store in DB
-    async with app.state.db.acquire() as conn:
-        print(await conn.fetch("SELECT * FROM products;"))  # ✅ move here
-        for _, row in df.iterrows():  
-            await conn.execute("""
-                INSERT INTO prices (store, product, price) 
-                VALUES ($1, $2, $3)
-                ON CONFLICT (store, product) DO UPDATE SET price = EXCLUDED.price
-            """, store_name, row["Toode"], float(row["Hind (€)"]))
+        # Store in DB
+        async with app.state.db.acquire() as conn:
+            print(await conn.fetch("SELECT * FROM products;"))  # optional debug
 
-    return {"status": "success", "store": store_name, "items_uploaded": len(df)}
+            for _, row in df.iterrows():
+                await conn.execute("""
+                    INSERT INTO prices (store, product, price)
+                    VALUES ($1, $2, $3)
+                    ON CONFLICT (store, product) DO UPDATE SET price = EXCLUDED.price
+                """, store_name, row["Toode"], float(row["Hind (€)"]))
+
+        return {"status": "success", "store": store_name, "items_uploaded": len(df)}
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return {"status": "error", "detail": str(e)}
 
 # Endpoint to compare basket prices
 @app.post("/compare")
