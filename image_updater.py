@@ -5,6 +5,8 @@ import aiohttp
 import asyncio
 import pandas as pd
 from urllib.parse import quote
+from dotenv import load_dotenv
+load_dotenv()
 
 # Load DB URL from environment
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/grocerydb")
