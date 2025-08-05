@@ -56,7 +56,7 @@ async def upload_prices(file: UploadFile = File(...)):
         if not required_columns.issubset(df.columns):
             raise HTTPException(status_code=400, detail="Missing required columns in Excel")
 
-        store_name = file.filename.replace("_extended_prices.xlsx", "").replace("_", " ").title()
+        store_name = file.filename.replace(".xlsx", "").replace("_tooted", "").replace("_", " ").title()
 
         async with app.state.db.acquire() as conn:
             for _, row in df.iterrows():
