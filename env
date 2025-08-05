@@ -1,0 +1,4 @@
+# Supabase or PostgreSQL connection string
+DATABASE_URL=postgresql://postgres:GqBpVvlcPKIazjWH@db.hancqdkbuskqlxttlmgj.supabase.co:5432/postgres
+
+
