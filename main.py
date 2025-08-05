@@ -75,18 +75,25 @@ async def upload_prices(file: UploadFile = File(...)):
 # Endpoint to compare basket prices
 @app.post("/compare")
 async def compare_basket(grocery_list: GroceryList):
-    async with app.state.db.acquire() as conn:
-        prices = {}
-        for item in grocery_list.items:
-            rows = await conn.fetch("SELECT store, price FROM prices WHERE LOWER(product) = LOWER($1)", item.name)
-            for row in rows:
-                prices.setdefault(row["store"], 0.0)
-                prices[row["store"]] += row["price"]
+    try:
+        async with app.state.db.acquire() as conn:
+            prices = {}
+            for item in grocery_list.items:
+                rows = await conn.fetch(
+                    "SELECT store, price FROM prices WHERE LOWER(product) = LOWER($1)", item.name
+                )
+                for row in rows:
+                    prices.setdefault(row["store"], 0.0)
+                    prices[row["store"]] += row["price"]
 
-    if not prices:
-        raise HTTPException(status_code=404, detail="No matching products found")
+        if not prices:
+            raise HTTPException(status_code=404, detail="No matching products found")
 
-    return dict(sorted(prices.items(), key=lambda x: x[1]))
+        return dict(sorted(prices.items(), key=lambda x: x[1]))
+
+    except Exception as e:
+        # Show detailed error
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Endpoint to list all stored products
 @app.get("/products")
