@@ -89,7 +89,12 @@ async def compare_basket(grocery_list: GroceryList):
         if not prices:
             raise HTTPException(status_code=404, detail="No matching products found")
 
-        return dict(sorted(prices.items(), key=lambda x: x[1]))
+        return dict(
+    sorted(
+        {store: round(total, 2) for store, total in prices.items()}.items(),
+        key=lambda x: x[1]
+    )
+)
 
     except Exception as e:
         # Show detailed error
