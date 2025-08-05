@@ -1,6 +1,9 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from fastapi.responses import HTMLResponse
+from fastapi import Form
+import shutil
 import pandas as pd
 import io
 import asyncpg
@@ -8,6 +11,9 @@ import os
 from typing import List
 
 app = FastAPI()
+
+from fastapi.staticfiles import StaticFiles
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Allow CORS for frontend testing
 app.add_middleware(
@@ -120,6 +126,44 @@ async def search_products(query: str):
         """, query)
     return [{"name": row["product"], "image": row["image_url"]} for row in rows]
 
+@app.get("/", response_class=HTMLResponse)
+async def dashboard():
+    async with app.state.db.acquire() as conn:
+        rows = await conn.fetch("SELECT product, image_url FROM prices WHERE note = 'Kontrolli visuaali!'")
+    html = "<h2>Missing Product Images</h2><ul>"
+    for row in rows:
+        html += f"""
+        <li>
+            <b>{row['product']}</b><br>
+            <form action="/upload" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="product" value="{row['product']}"/>
+                <input type="file" name="image"/>
+                <button type="submit">Upload</button>
+            </form>
+        </li>
+        """
+    html += "</ul>"
+    return html
+
+
+@app.post("/upload")  # ← moved out of dashboard function
+async def upload_image(product: str = Form(...), image: UploadFile = Form(...)):
+    filename = f"{product.replace(' ', '_')}.jpg"
+    path = f"static/images/{filename}"
+
+    os.makedirs("static/images", exist_ok=True)
+    with open(path, "wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
+
+    image_url = f"/static/images/{filename}"
+
+    async with app.state.db.acquire() as conn:
+        await conn.execute(
+            "UPDATE prices SET image_url = $1, note = '' WHERE product = $2",
+            image_url, product
+        )
+
+    return {"status": "success", "product": product}
 
 import uvicorn
 
