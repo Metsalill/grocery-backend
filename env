@@ -1,7 +1,7 @@
-# Supabase or PostgreSQL connection string
-DATABASE_URL=postgresql://postgres:GqBpVvlcPKIazjWH@db.hancqdkbuskqlxttlmgj.supabase.co:5432/postgres
-
 SWAGGER_USERNAME=god
 SWAGGER_PASSWORD=sdskjdlskuwodjw8723hEEWGEEWRHK
+# Supabase or PostgreSQL connection string
+DATABASE_URL=postgresql://postgres:GqBpVvlcPKIazjWH@db.hancqdkbuskqlxttlmgj.supabase.co:5432/postgres
+JWT_SECRET=xzkcjxzlkjcxzlkc0sdsd654fdsvdsojf89032kj2hdsaskldnuwi290jeskslöa98
 
 
