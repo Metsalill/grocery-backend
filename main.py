@@ -1,4 +1,4 @@
-from auth import router as auth_router, db_pool as auth_db_pool
+from auth import router as auth_router
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
