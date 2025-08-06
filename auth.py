@@ -28,12 +28,21 @@ class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
 # Helper: create JWT token
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+# Helper: create password reset token
+def create_reset_token(email: str):
+    expire = datetime.utcnow() + timedelta(minutes=15)
+    return jwt.encode({"sub": email, "exp": expire, "scope": "password_reset"}, SECRET_KEY, algorithm=ALGORITHM)
 
 # Helper: verify password
 def verify_password(plain_password, hashed_password):
@@ -63,14 +72,14 @@ async def register(user: UserIn, request: Request):
         return {"status": "success", "message": "User registered successfully"}
 
     except Exception as e:
-        print("❌ REGISTER ERROR:", str(e))  # <- this will show in logs
+        print("❌ REGISTER ERROR:", str(e))
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 # LOGIN
 @router.post("/login", response_model=TokenOut)
 async def login(user: UserIn, request: Request):
     async with request.app.state.db.acquire() as conn:
-        db_user = await conn.fetchrow("SELECT * FROM users WHERE email = $1", user.email)
+        db_user = await conn.fetchrow("SELECT * FROM users WHERE email = $1 AND deleted_at IS NULL", user.email)
         if not db_user or not verify_password(user.password, db_user["password_hash"]):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
@@ -88,12 +97,12 @@ async def get_current_user(request: Request, token: str = Depends(lambda: get_to
         raise HTTPException(status_code=401, detail="Invalid token")
 
     async with request.app.state.db.acquire() as conn:
-        user = await conn.fetchrow("SELECT * FROM users WHERE email = $1", email)
+        user = await conn.fetchrow("SELECT email, first_name, last_name, phone, role, created_at FROM users WHERE email = $1 AND deleted_at IS NULL", email)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
     return dict(user)
 
-# Simple token extractor
+# Extract bearer token
 def get_token_from_header(authorization: str = Header(...)):
     if not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing or invalid token")
@@ -101,21 +110,14 @@ def get_token_from_header(authorization: str = Header(...)):
 
 @router.get("/me")
 async def read_current_user(user=Depends(get_current_user)):
-    return {
-        "email": user["email"],
-        "first_name": user["first_name"],
-        "last_name": user["last_name"],
-        "phone": user["phone"],
-        "role": user["role"],
-        "created_at": user["created_at"]
-    }
+    return user
 
 @router.get("/users")
 async def list_users(request: Request, user=Depends(get_current_user)):
     if user["role"] != "superuser":
         raise HTTPException(status_code=403, detail="Not authorized")
     async with request.app.state.db.acquire() as conn:
-        users = await conn.fetch("SELECT email, first_name, last_name, phone, role, created_at FROM users")
+        users = await conn.fetch("SELECT email, first_name, last_name, phone, role, created_at FROM users WHERE deleted_at IS NULL")
         return [dict(u) for u in users]
 
 @router.post("/make-superuser")
@@ -138,9 +140,36 @@ async def demote_user(email: EmailStr, request: Request, user=Depends(get_curren
 async def delete_user(request: Request, user=Depends(get_current_user)):
     try:
         async with request.app.state.db.acquire() as conn:
-            await conn.execute("DELETE FROM users WHERE email = $1", user["email"])
-        return {"status": "success", "message": f"User {user['email']} deleted"}
+            await conn.execute("UPDATE users SET deleted_at = NOW() WHERE email = $1", user["email"])
+        return {"status": "success", "message": f"User {user['email']} soft-deleted"}
     except Exception as e:
         print("❌ DELETE ERROR:", str(e))
         raise HTTPException(status_code=500, detail="Failed to delete user")
 
+@router.post("/request-password-reset")
+async def request_password_reset(email: EmailStr, request: Request):
+    async with request.app.state.db.acquire() as conn:
+        user = await conn.fetchrow("SELECT * FROM users WHERE email = $1 AND deleted_at IS NULL", email)
+        if not user:
+            raise HTTPException(status_code=404, detail="Email not found")
+
+    reset_token = create_reset_token(email)
+    return {"reset_token": reset_token}
+
+@router.post("/reset-password")
+async def reset_password(data: ResetPasswordRequest, request: Request):
+    try:
+        payload = jwt.decode(data.token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("scope") != "password_reset":
+            raise HTTPException(status_code=401, detail="Invalid token scope")
+        email = payload.get("sub")
+        if email is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+    hashed_pw = get_password_hash(data.new_password)
+    async with request.app.state.db.acquire() as conn:
+        await conn.execute("UPDATE users SET password_hash = $1 WHERE email = $2", hashed_pw, email)
+
+    return {"status": "success", "message": "Password reset successful"}
