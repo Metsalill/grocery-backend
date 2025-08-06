@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Header
 from pydantic import BaseModel, EmailStr
 from passlib.context import CryptContext
 from jose import JWTError, jwt
@@ -94,7 +94,7 @@ async def get_current_user(request: Request, token: str = Depends(lambda: get_to
     return dict(user)
 
 # Simple token extractor
-def get_token_from_header(authorization: str = Depends(lambda: os.getenv("HTTP_AUTHORIZATION", ""))):
+def get_token_from_header(authorization: str = Header(...)):
     if not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing or invalid token")
     return authorization.split(" ")[1]
@@ -143,3 +143,4 @@ async def delete_user(request: Request, user=Depends(get_current_user)):
     except Exception as e:
         print("❌ DELETE ERROR:", str(e))
         raise HTTPException(status_code=500, detail="Failed to delete user")
+
