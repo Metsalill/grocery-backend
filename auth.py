@@ -60,13 +60,13 @@ async def register(user: UserIn, request: Request):
 
 # LOGIN
 @router.post("/login", response_model=TokenOut)
-async def login(user: UserIn, request: Request):
-    async with request.app.state.db.acquire() as conn:
+async def login(user: UserIn):
+    async with db_pool.acquire() as conn:
         db_user = await conn.fetchrow("SELECT * FROM users WHERE email = $1", user.email)
         if not db_user or not verify_password(user.password, db_user["password_hash"]):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
-     = create_(data={"sub": user.email})
+    access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token}
 
 # GET CURRENT USER
@@ -94,6 +94,7 @@ def get_token_from_header(authorization: str = Depends(lambda: os.getenv("HTTP_A
 @router.get("/me")
 async def read_current_user(user=Depends(get_current_user)):
     return {"email": user["email"], "created_at": user["created_at"]}
+
 
 
 
