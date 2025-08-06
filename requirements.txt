@@ -6,3 +6,5 @@ asyncpg
 python-multipart
 aiohttp
 python-dotenv
+python-jose[cryptography]
+passlib[bcrypt]
