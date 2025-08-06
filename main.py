@@ -1,3 +1,4 @@
+from auth import router as auth_router, db_pool as auth_db_pool
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
@@ -29,7 +30,8 @@ DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5
 # Database connection pool
 @app.on_event("startup")
 async def startup():
-    app.state.db = await asyncpg.create_pool(DATABASE_URL)
+    auth_db_pool = await asyncpg.create_pool(DATABASE_URL)
+    app.state.db = auth_db_pool
 
 @app.on_event("shutdown")
 async def shutdown():
@@ -177,6 +179,8 @@ async def upload_image(product: str = Form(...), image: UploadFile = Form(...)):
         )
 
     return {"status": "success", "product": product}
+
+app.include_router(auth_router)
 
 import uvicorn
 
