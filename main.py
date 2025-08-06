@@ -4,12 +4,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
+import os
 load_dotenv()
+
+print("🟢 Swagger username from env:", os.getenv("SWAGGER_USERNAME"))
+print("🟢 Swagger password from env:", os.getenv("SWAGGER_PASSWORD"))
 import shutil
 import pandas as pd
 import io
 import asyncpg
-import os
+
 from typing import List
 
 app = FastAPI()
