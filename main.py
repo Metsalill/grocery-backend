@@ -182,6 +182,40 @@ async def upload_image(product: str = Form(...), image: UploadFile = Form(...)):
 
 app.include_router(auth_router)
 
+from fastapi.openapi.utils import get_openapi
+from fastapi.security import HTTPBearer
+
+bearer_scheme = HTTPBearer()
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    openapi_schema = get_openapi(
+        title="Grocery App",
+        version="1.0.0",
+        description="Compare prices, upload product data, and manage users",
+        routes=app.routes,
+    )
+
+    openapi_schema["components"]["securitySchemes"] = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT"
+        }
+    }
+
+    # Apply BearerAuth globally to all endpoints
+    for path in openapi_schema["paths"].values():
+        for operation in path.values():
+            operation.setdefault("security", [{"BearerAuth": []}])
+
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
+
 import uvicorn
 
 if __name__ == "__main__":
