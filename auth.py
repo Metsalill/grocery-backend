@@ -97,24 +97,30 @@ async def login(login_data: LoginIn, request: Request):
     return {"access_token": access_token}
 
 
-async def get_current_user(request: Request, token: str = Depends(lambda: get_token_from_header())):
+from fastapi import Request, Header, HTTPException, status
+
+async def get_current_user(request: Request, authorization: str = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid token")
+    
+    token = authorization.split(" ")[1]
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
-        if email is None:
+        email = payload.get("sub")
+        if not email:
             raise HTTPException(status_code=401, detail="Invalid token")
+
+           async with request.app.state.db.acquire() as conn:
+            user = await conn.fetchrow("""
+                SELECT email, first_name, last_name, phone, role, created_at 
+                FROM users WHERE email = $1 AND deleted_at IS NULL
+            """, email)
+            if not user:
+                raise HTTPException(status_code=404, detail="User not found")
+            return dict(user)
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
-
-    async with request.app.state.db.acquire() as conn:
-        user = await conn.fetchrow(
-            "SELECT email, first_name, last_name, phone, role, created_at FROM users WHERE email = $1 AND deleted_at IS NULL",
-            email,
-        )
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-    return dict(user)
-
 
 @router.get("/me")
 async def read_current_user(user=Depends(get_current_user)):
@@ -187,3 +193,4 @@ async def reset_password(data: ResetPasswordRequest, request: Request):
         await conn.execute("UPDATE users SET password_hash = $1 WHERE email = $2", hashed_pw, email)
 
     return {"status": "success", "message": "Password reset successful"}
+
