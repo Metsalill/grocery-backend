@@ -79,7 +79,7 @@ async def get_current_user(token: str = Depends(lambda: get_token_from_header())
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-    async with db_pool.acquire() as conn:
+    async with request.app.state.db.acquire() as conn:
         user = await conn.fetchrow("SELECT * FROM users WHERE email = $1", email)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
@@ -94,4 +94,5 @@ def get_token_from_header(authorization: str = Depends(lambda: os.getenv("HTTP_A
 @router.get("/me")
 async def read_current_user(user=Depends(get_current_user)):
     return {"email": user["email"], "created_at": user["created_at"]}
+
 
