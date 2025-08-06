@@ -109,8 +109,23 @@ async def compare_basket(grocery_list: GroceryList):
 @app.get("/products")
 async def list_products():
     async with app.state.db.acquire() as conn:
-        rows = await conn.fetch("SELECT store, product, manufacturer, amount, price FROM prices ORDER BY store")
-    return [dict(row) for row in rows]
+        rows = await conn.fetch("""
+            SELECT store, product, price, manufacturer, amount, image_url, note 
+            FROM prices 
+            ORDER BY store
+        """)
+    return [
+        {
+            "store": row["store"],
+            "product": row["product"],
+            "price": round(float(row["price"]), 4),
+            "manufacturer": row["manufacturer"],
+            "amount": row["amount"],
+            "image_url": row["image_url"],
+            "note": row["note"]
+        }
+        for row in rows
+    ]
 
 # 🔍 New endpoint: search products by name (for image-grid frontend)
 @app.get("/search-products")
