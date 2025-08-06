@@ -66,8 +66,8 @@ async def login(user: UserIn, request: Request):
         if not db_user or not verify_password(user.password, db_user["password_hash"]):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    access_token = create_access_token(data={"sub": user.email})
-    return {"access_token": access_token}}
+     = create_(data={"sub": user.email})
+    return {"access_token": access_token}
 
 # GET CURRENT USER
 async def get_current_user(token: str = Depends(lambda: get_token_from_header())):
@@ -94,5 +94,6 @@ def get_token_from_header(authorization: str = Depends(lambda: os.getenv("HTTP_A
 @router.get("/me")
 async def read_current_user(user=Depends(get_current_user)):
     return {"email": user["email"], "created_at": user["created_at"]}
+
 
 
