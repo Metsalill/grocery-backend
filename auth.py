@@ -46,20 +46,25 @@ def get_password_hash(password):
 # REGISTER
 @router.post("/register")
 async def register(user: UserIn, request: Request):
-    async with request.app.state.db.acquire() as conn:
-        existing = await conn.fetchrow("SELECT * FROM users WHERE email = $1", user.email)
-        if existing:
-            raise HTTPException(status_code=400, detail="Email already registered")
+    try:
+        async with request.app.state.db.acquire() as conn:
+            existing = await conn.fetchrow("SELECT * FROM users WHERE email = $1", user.email)
+            if existing:
+                raise HTTPException(status_code=400, detail="Email already registered")
 
-        hashed_pw = get_password_hash(user.password)
-        await conn.execute(
-            """
-            INSERT INTO users (email, password_hash, first_name, last_name, phone, role)
-            VALUES ($1, $2, $3, $4, $5, 'regular')
-            """,
-            user.email, hashed_pw, user.first_name, user.last_name, user.phone
-        )
-    return {"status": "success", "message": "User registered successfully"}
+            hashed_pw = get_password_hash(user.password)
+            await conn.execute(
+                """
+                INSERT INTO users (email, password_hash, first_name, last_name, phone, role)
+                VALUES ($1, $2, $3, $4, $5, 'regular')
+                """,
+                user.email, hashed_pw, user.first_name, user.last_name, user.phone
+            )
+        return {"status": "success", "message": "User registered successfully"}
+
+    except Exception as e:
+        print("❌ REGISTER ERROR:", str(e))  # <- this will show in logs
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 # LOGIN
 @router.post("/login", response_model=TokenOut)
@@ -104,3 +109,4 @@ async def read_current_user(user=Depends(get_current_user)):
         "role": user["role"],
         "created_at": user["created_at"]
     }
+
