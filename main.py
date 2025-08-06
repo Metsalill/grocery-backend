@@ -3,6 +3,8 @@ from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
+from dotenv import load_dotenv
+load_dotenv()
 import shutil
 import pandas as pd
 import io
@@ -23,6 +25,32 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+import base64
+from fastapi import Request, Response
+from starlette.middleware.base import BaseHTTPMiddleware
+
+class SwaggerAuthMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app):
+        super().__init__(app)
+        self.username = os.getenv("SWAGGER_USERNAME")
+        self.password = os.getenv("SWAGGER_PASSWORD")
+
+    async def dispatch(self, request: Request, call_next):
+        protected_paths = ["/docs", "/redoc", "/openapi.json"]
+        if any(request.url.path.startswith(p) for p in protected_paths):
+            auth = request.headers.get("Authorization")
+            expected = f"{self.username}:{self.password}"
+            expected_encoded = "Basic " + base64.b64encode(expected.encode()).decode()
+            if auth != expected_encoded:
+                return Response(
+                    status_code=401,
+                    headers={"WWW-Authenticate": "Basic"},
+                    content="Unauthorized access to documentation."
+                )
+        return await call_next(request)
+
+app.add_middleware(SwaggerAuthMiddleware)
 
 # DATABASE URL (replace with your actual Supabase/Postgres URL)
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/grocerydb")
