@@ -28,6 +28,9 @@ class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
+class DeleteUserRequest(BaseModel):
+    email: EmailStr
+
 # Helper: create JWT token
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
@@ -109,4 +112,16 @@ async def read_current_user(user=Depends(get_current_user)):
         "role": user["role"],
         "created_at": user["created_at"]
     }
+
+@router.delete("/delete-user")
+async def delete_user(data: DeleteUserRequest, user=Depends(get_current_user), request: Request = None):
+    if user.get("role") != "superuser":
+        raise HTTPException(status_code=403, detail="Only superusers can delete users")
+
+    async with request.app.state.db.acquire() as conn:
+        result = await conn.execute("DELETE FROM users WHERE email = $1", data.email)
+        if result == "DELETE 0":
+            raise HTTPException(status_code=404, detail="User not found")
+
+    return {"status": "success", "message": f"User {data.email} deleted"}
 
