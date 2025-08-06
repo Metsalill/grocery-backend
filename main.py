@@ -7,8 +7,6 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 
-print("🟢 Swagger username from env:", os.getenv("SWAGGER_USERNAME"))
-print("🟢 Swagger password from env:", os.getenv("SWAGGER_PASSWORD"))
 import shutil
 import pandas as pd
 import io
