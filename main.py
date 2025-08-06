@@ -118,7 +118,7 @@ async def list_products():
         {
             "store": row["store"],
             "product": row["product"],
-            "price": round(float(row["price"]), 4),
+            "price": round(float(row["price"]), 2),
             "manufacturer": row["manufacturer"],
             "amount": row["amount"],
             "image_url": row["image_url"],
