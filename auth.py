@@ -16,13 +16,17 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Models
+# MODELS
 class UserIn(BaseModel):
     email: EmailStr
     password: str
     first_name: str
     last_name: str = ""
     phone: str = ""
+
+class LoginIn(BaseModel):
+    email: EmailStr
+    password: str
 
 class TokenOut(BaseModel):
     access_token: str
@@ -32,7 +36,7 @@ class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
 
-# JWT helpers
+# HELPERS
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
@@ -43,40 +47,19 @@ def create_reset_token(email: str):
     expire = datetime.utcnow() + timedelta(minutes=15)
     return jwt.encode({"sub": email, "exp": expire, "scope": "password_reset"}, SECRET_KEY, algorithm=ALGORITHM)
 
-# Password helpers
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password):
     return pwd_context.hash(password)
 
-# Extract bearer token
 def get_token_from_header(authorization: str = Header(default=None)):
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Missing or invalid token")
     return authorization.split(" ")[1]
 
-# GET CURRENT USER
-async def get_current_user(request: Request, token: str = Depends(get_token_from_header)):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
-        if email is None:
-            raise HTTPException(status_code=401, detail="Invalid token")
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+# ROUTES
 
-    async with request.app.state.db.acquire() as conn:
-        user = await conn.fetchrow("""
-            SELECT email, first_name, last_name, phone, role, created_at 
-            FROM users 
-            WHERE email = $1 AND deleted_at IS NULL
-        """, email)
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-    return dict(user)
-
-# REGISTER
 @router.post("/register")
 async def register(user: UserIn, request: Request):
     try:
@@ -86,51 +69,67 @@ async def register(user: UserIn, request: Request):
                 raise HTTPException(status_code=400, detail="Email already registered")
 
             hashed_pw = get_password_hash(user.password)
-            await conn.execute("""
+            await conn.execute(
+                """
                 INSERT INTO users (email, password_hash, first_name, last_name, phone, role)
                 VALUES ($1, $2, $3, $4, $5, 'regular')
-            """, user.email, hashed_pw, user.first_name, user.last_name, user.phone)
-
+                """,
+                user.email, hashed_pw, user.first_name, user.last_name, user.phone
+            )
         return {"status": "success", "message": "User registered successfully"}
 
     except Exception as e:
         print("❌ REGISTER ERROR:", str(e))
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-# LOGIN
+
 @router.post("/login", response_model=TokenOut)
-async def login(user: UserIn, request: Request):
+async def login(login_data: LoginIn, request: Request):
     async with request.app.state.db.acquire() as conn:
-        db_user = await conn.fetchrow(
-            "SELECT * FROM users WHERE email = $1 AND deleted_at IS NULL", user.email)
-        if not db_user or not verify_password(user.password, db_user["password_hash"]):
+        db_user = await conn.fetchrow("SELECT * FROM users WHERE email = $1 AND deleted_at IS NULL", login_data.email)
+        if not db_user or not verify_password(login_data.password, db_user["password_hash"]):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
     access_token = create_access_token(
-        data={"sub": user.email},
+        data={"sub": login_data.email},
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
     return {"access_token": access_token}
 
-# GET ME
+
+async def get_current_user(request: Request, token: str = Depends(lambda: get_token_from_header())):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    async with request.app.state.db.acquire() as conn:
+        user = await conn.fetchrow(
+            "SELECT email, first_name, last_name, phone, role, created_at FROM users WHERE email = $1 AND deleted_at IS NULL",
+            email,
+        )
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+    return dict(user)
+
+
 @router.get("/me")
 async def read_current_user(user=Depends(get_current_user)):
     return user
 
-# LIST USERS
+
 @router.get("/users")
 async def list_users(request: Request, user=Depends(get_current_user)):
     if user["role"] != "superuser":
         raise HTTPException(status_code=403, detail="Not authorized")
     async with request.app.state.db.acquire() as conn:
-        users = await conn.fetch("""
-            SELECT email, first_name, last_name, phone, role, created_at 
-            FROM users 
-            WHERE deleted_at IS NULL
-        """)
+        users = await conn.fetch("SELECT email, first_name, last_name, phone, role, created_at FROM users WHERE deleted_at IS NULL")
         return [dict(u) for u in users]
 
-# PROMOTE USER
+
 @router.post("/make-superuser")
 async def promote_user(email: EmailStr, request: Request, user=Depends(get_current_user)):
     if user["role"] != "superuser":
@@ -139,7 +138,7 @@ async def promote_user(email: EmailStr, request: Request, user=Depends(get_curre
         await conn.execute("UPDATE users SET role = 'superuser' WHERE email = $1", email)
     return {"status": "success", "message": f"User {email} promoted to superuser"}
 
-# DEMOTE USER
+
 @router.post("/make-regular")
 async def demote_user(email: EmailStr, request: Request, user=Depends(get_current_user)):
     if user["role"] != "superuser":
@@ -148,7 +147,7 @@ async def demote_user(email: EmailStr, request: Request, user=Depends(get_curren
         await conn.execute("UPDATE users SET role = 'regular' WHERE email = $1", email)
     return {"status": "success", "message": f"User {email} demoted to regular"}
 
-# SOFT DELETE
+
 @router.delete("/delete-user")
 async def delete_user(request: Request, user=Depends(get_current_user)):
     try:
@@ -159,7 +158,7 @@ async def delete_user(request: Request, user=Depends(get_current_user)):
         print("❌ DELETE ERROR:", str(e))
         raise HTTPException(status_code=500, detail="Failed to delete user")
 
-# PASSWORD RESET - REQUEST TOKEN
+
 @router.post("/request-password-reset")
 async def request_password_reset(email: EmailStr, request: Request):
     async with request.app.state.db.acquire() as conn:
@@ -170,7 +169,7 @@ async def request_password_reset(email: EmailStr, request: Request):
     reset_token = create_reset_token(email)
     return {"reset_token": reset_token}
 
-# PASSWORD RESET - APPLY NEW PASSWORD
+
 @router.post("/reset-password")
 async def reset_password(data: ResetPasswordRequest, request: Request):
     try:
