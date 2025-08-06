@@ -28,9 +28,6 @@ class TokenOut(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
-class DeleteUserRequest(BaseModel):
-    email: EmailStr
-
 # Helper: create JWT token
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
@@ -77,7 +74,7 @@ async def login(user: UserIn, request: Request):
         if not db_user or not verify_password(user.password, db_user["password_hash"]):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    access_token = create_access_token(data={"sub": user.email})
+    access_token = create_access_token(data={"sub": user.email}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     return {"access_token": access_token}
 
 # GET CURRENT USER
@@ -113,15 +110,36 @@ async def read_current_user(user=Depends(get_current_user)):
         "created_at": user["created_at"]
     }
 
-@router.delete("/delete-user")
-async def delete_user(data: DeleteUserRequest, user=Depends(get_current_user), request: Request = None):
-    if user.get("role") != "superuser":
-        raise HTTPException(status_code=403, detail="Only superusers can delete users")
-
+@router.get("/users")
+async def list_users(request: Request, user=Depends(get_current_user)):
+    if user["role"] != "superuser":
+        raise HTTPException(status_code=403, detail="Not authorized")
     async with request.app.state.db.acquire() as conn:
-        result = await conn.execute("DELETE FROM users WHERE email = $1", data.email)
-        if result == "DELETE 0":
-            raise HTTPException(status_code=404, detail="User not found")
+        users = await conn.fetch("SELECT email, first_name, last_name, phone, role, created_at FROM users")
+        return [dict(u) for u in users]
 
-    return {"status": "success", "message": f"User {data.email} deleted"}
+@router.post("/make-superuser")
+async def promote_user(email: EmailStr, request: Request, user=Depends(get_current_user)):
+    if user["role"] != "superuser":
+        raise HTTPException(status_code=403, detail="Not authorized")
+    async with request.app.state.db.acquire() as conn:
+        await conn.execute("UPDATE users SET role = 'superuser' WHERE email = $1", email)
+    return {"status": "success", "message": f"User {email} promoted to superuser"}
 
+@router.post("/make-regular")
+async def demote_user(email: EmailStr, request: Request, user=Depends(get_current_user)):
+    if user["role"] != "superuser":
+        raise HTTPException(status_code=403, detail="Not authorized")
+    async with request.app.state.db.acquire() as conn:
+        await conn.execute("UPDATE users SET role = 'regular' WHERE email = $1", email)
+    return {"status": "success", "message": f"User {email} demoted to regular"}
+
+@router.delete("/delete-user")
+async def delete_user(request: Request, user=Depends(get_current_user)):
+    try:
+        async with request.app.state.db.acquire() as conn:
+            await conn.execute("DELETE FROM users WHERE email = $1", user["email"])
+        return {"status": "success", "message": f"User {user['email']} deleted"}
+    except Exception as e:
+        print("❌ DELETE ERROR:", str(e))
+        raise HTTPException(status_code=500, detail="Failed to delete user")
