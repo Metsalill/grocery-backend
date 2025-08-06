@@ -67,6 +67,14 @@ async def upload_prices(file: UploadFile = File(...)):
                     SET price = EXCLUDED.price
                 """, store_name, row["Toode"], row["Tootja"], row["Kogus"], float(row["Hind (€)"]))
 
+        # NEW: set note if image is missing
+await conn.execute("""
+    UPDATE prices
+    SET note = 'Kontrolli visuaali!'
+    WHERE store = $1 AND product = $2 AND manufacturer = $3 AND amount = $4
+      AND (image_url IS NULL OR image_url = '')
+""", store_name, row["Toode"], row["Tootja"], row["Kogus"])
+
         return {"status": "success", "store": store_name, "items_uploaded": len(df)}
 
     except Exception as e:
