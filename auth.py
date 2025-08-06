@@ -77,9 +77,13 @@ async def register(user: UserIn, request: Request):
         print("❌ REGISTER ERROR:", str(e))
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
+class LoginUser(BaseModel):
+    email: EmailStr
+    password: str
+
 # LOGIN
 @router.post("/login", response_model=TokenOut)
-async def login(user: UserIn, request: Request):
+async def login(user: LoginUser, request: Request):
     async with request.app.state.db.acquire() as conn:
         db_user = await conn.fetchrow("SELECT * FROM users WHERE email = $1 AND deleted_at IS NULL", user.email)
         if not db_user or not verify_password(user.password, db_user["password_hash"]):
@@ -196,3 +200,4 @@ async def reset_password(data: ResetPasswordRequest, request: Request):
         await conn.execute("UPDATE users SET password_hash = $1 WHERE email = $2", hashed_pw, email)
 
     return {"status": "success", "message": "Password reset successful"}
+
