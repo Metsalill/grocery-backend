@@ -49,8 +49,7 @@ async def get_current_user(request: Request, authorization: str = Header(None)):
         raise HTTPException(status_code=401, detail="Invalid token")
 
 @router.get("/users/me")
-async def read_users_me(current_user: User = Depends(get_current_user)):
-    return current_user
+async def read_users_me(current_user = Depends(get_current_user)):
 
 # JWT settings
 SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-key")
@@ -204,6 +203,7 @@ async def reset_password(data: ResetPasswordRequest, request: Request):
         await conn.execute("UPDATE users SET password_hash = $1 WHERE email = $2", hashed_pw, email)
 
     return {"status": "success", "message": "Password reset successful"}
+
 
 
 
