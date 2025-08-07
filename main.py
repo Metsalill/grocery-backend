@@ -84,7 +84,14 @@ async def upload_prices(file: UploadFile = File(...)):
         contents = await file.read()
         df = pd.read_excel(io.BytesIO(contents))
 
-        required_columns = {"Toode", "Tootja", "Kogus", "Hind (€)"}
+        df.rename(columns={
+            "Toode": "product",
+            "Tootja": "manufacturer",
+            "Kogus": "amount",
+            "Hind (€)": "price"
+        }, inplace=True)
+
+        required_columns = {"product", "manufacturer", "amount", "price"}
         if not required_columns.issubset(df.columns):
             raise HTTPException(status_code=400, detail="Missing required columns in Excel")
 
@@ -92,21 +99,19 @@ async def upload_prices(file: UploadFile = File(...)):
 
         async with app.state.db.acquire() as conn:
             for _, row in df.iterrows():
-                # Insert or update price
                 await conn.execute("""
                     INSERT INTO prices (store, product, manufacturer, amount, price)
                     VALUES ($1, $2, $3, $4, $5)
                     ON CONFLICT (store, product, manufacturer, amount) DO UPDATE
                     SET price = EXCLUDED.price
-                """, store_name, row["Toode"], row["Tootja"], row["Kogus"], float(row["Hind (€)"]))
+                """, store_name, row["product"], row["manufacturer"], row["amount"], float(row["price"]))
 
-                # Mark missing image with note
                 await conn.execute("""
                     UPDATE prices
                     SET note = 'Kontrolli visuaali!'
                     WHERE store = $1 AND product = $2 AND manufacturer = $3 AND amount = $4
                     AND (image_url IS NULL OR image_url = '')
-                """, store_name, row["Toode"], row["Tootja"], row["Kogus"])
+                """, store_name, row["product"], row["manufacturer"], row["amount"])
 
         return {"status": "success", "store": store_name, "items_uploaded": len(df)}
 
@@ -236,7 +241,6 @@ def custom_openapi():
         }
     }
 
-    # Apply BearerAuth globally to all endpoints
     for path in openapi_schema["paths"].values():
         for operation in path.values():
             operation.setdefault("security", [{"BearerAuth": []}])
