@@ -8,6 +8,46 @@ import os
 
 router = APIRouter()
 
+# CURRENT USER (with god mode)
+async def get_current_user(request: Request, authorization: str = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid token")
+
+    token = authorization.split(" ")[1]
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("sub")
+        if not email:
+            raise HTTPException(status_code=401, detail="Invalid token")
+
+        # God mode
+        if email == "marko@minetech.ee":
+            return {
+                "email": email,
+                "role": "superuser",
+                "first_name": "Marko",
+                "last_name": "",
+                "phone": "",
+                "created_at": datetime.utcnow()
+            }
+
+        async with request.app.state.db.acquire() as conn:
+            user = await conn.fetchrow(
+                """
+                SELECT email, first_name, last_name, phone, role, created_at 
+                FROM users 
+                WHERE email = $1 AND deleted_at IS NULL
+                """, email
+            )
+            if not user:
+                raise HTTPException(status_code=404, detail="User not found")
+
+            return dict(user)
+
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
 @router.get("/users/me")
 async def read_users_me(current_user: User = Depends(get_current_user)):
     return current_user
@@ -96,46 +136,6 @@ async def login(user: LoginUser, request: Request):
     access_token = create_access_token(data={"sub": user.email}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     return {"access_token": access_token}
 
-# CURRENT USER (with god mode)
-async def get_current_user(request: Request, authorization: str = Header(None)):
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing or invalid token")
-
-    token = authorization.split(" ")[1]
-
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email = payload.get("sub")
-        if not email:
-            raise HTTPException(status_code=401, detail="Invalid token")
-
-        # God mode
-        if email == "marko@minetech.ee":
-            return {
-                "email": email,
-                "role": "superuser",
-                "first_name": "Marko",
-                "last_name": "",
-                "phone": "",
-                "created_at": datetime.utcnow()
-            }
-
-        async with request.app.state.db.acquire() as conn:
-            user = await conn.fetchrow(
-                """
-                SELECT email, first_name, last_name, phone, role, created_at 
-                FROM users 
-                WHERE email = $1 AND deleted_at IS NULL
-                """, email
-            )
-            if not user:
-                raise HTTPException(status_code=404, detail="User not found")
-
-            return dict(user)
-
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
 # ROUTES
 @router.get("/me")
 async def read_current_user(user=Depends(get_current_user)):
@@ -204,5 +204,6 @@ async def reset_password(data: ResetPasswordRequest, request: Request):
         await conn.execute("UPDATE users SET password_hash = $1 WHERE email = $2", hashed_pw, email)
 
     return {"status": "success", "message": "Password reset successful"}
+
 
 
