@@ -1,5 +1,5 @@
 from auth import router as auth_router
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Query
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
@@ -13,7 +13,6 @@ import io
 import asyncpg
 from typing import List
 from fastapi.staticfiles import StaticFiles
-from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 import base64
 import uvicorn
@@ -91,9 +90,11 @@ async def upload_prices(file: UploadFile = File(...)):
         if not required_columns.issubset(df.columns):
             raise HTTPException(status_code=400, detail="Missing required columns in Excel")
 
+        # Extract store name from filename
         store_name = file.filename.replace(".xlsx", "").replace("_tooted", "").replace("_", " ").title()
 
         async with app.state.db.acquire() as conn:
+            # 1. Find or insert store
             store_row = await conn.fetchrow("SELECT id FROM stores WHERE name = $1", store_name)
             if not store_row:
                 await conn.execute("""
@@ -104,6 +105,7 @@ async def upload_prices(file: UploadFile = File(...)):
 
             store_id = store_row["id"]
 
+            # 2. Insert products with store_id
             for _, row in df.iterrows():
                 await conn.execute("""
                     INSERT INTO prices (store_id, product, manufacturer, amount, price)
@@ -126,35 +128,144 @@ async def upload_prices(file: UploadFile = File(...)):
         traceback.print_exc()
         return {"status": "error", "detail": str(e)}
 
-# Nearby stores by geolocation
-@app.get("/stores/nearby")
-async def get_nearby_stores(lat: float = Query(...), lon: float = Query(...), radius_km: float = Query(5.0)):
+# Compare basket with location filtering
+@app.post("/compare")
+async def compare_basket(grocery_list: GroceryList, lat: float = Form(...), lon: float = Form(...), radius_km: float = 5.0):
     try:
         async with app.state.db.acquire() as conn:
-            rows = await conn.fetch("SELECT id, name, chain, lat, lon FROM stores")
+            # 1. Find nearby stores
+            store_rows = await conn.fetch("SELECT id, name, lat, lon FROM stores")
+            nearby_store_ids = []
 
-        result = []
-        for row in rows:
-            store_coords = (row["lat"], row["lon"])
-            user_coords = (lat, lon)
-            distance_km = geodesic(user_coords, store_coords).km
+            for row in store_rows:
+                store_location = (row["lat"], row["lon"])
+                user_location = (lat, lon)
+                if geodesic(store_location, user_location).km <= radius_km:
+                    nearby_store_ids.append(row["id"])
 
-            if distance_km <= radius_km:
-                result.append({
-                    "id": row["id"],
-                    "name": row["name"],
-                    "chain": row["chain"],
-                    "lat": row["lat"],
-                    "lon": row["lon"],
-                    "distance_km": round(distance_km, 2)
-                })
+            if not nearby_store_ids:
+                raise HTTPException(status_code=404, detail="No stores found within given radius")
 
-        return sorted(result, key=lambda x: x["distance_km"])
+            # 2. Fetch prices for only nearby stores
+            prices = {}
+
+            for item in grocery_list.items:
+                rows = await conn.fetch("""
+                    SELECT s.name AS store_name, p.price 
+                    FROM prices p
+                    JOIN stores s ON p.store_id = s.id
+                    WHERE LOWER(p.product) = LOWER($1)
+                    AND s.id = ANY($2::int[])
+                """, item.product, nearby_store_ids)
+
+                for row in rows:
+                    store = row["store_name"]
+                    unit_price = float(row["price"])
+                    total_price = unit_price * item.quantity
+
+                    prices.setdefault(store, 0.0)
+                    prices[store] += total_price
+
+            if not prices:
+                raise HTTPException(status_code=404, detail="No matching products found in nearby stores")
+
+            return dict(sorted({store: round(total, 2) for store, total in prices.items()}.items(), key=lambda x: x[1]))
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Remaining endpoints unchanged...
+# Get all products
+@app.get("/products")
+async def list_products():
+    async with app.state.db.acquire() as conn:
+        rows = await conn.fetch("""
+            SELECT s.name as store, p.product, p.price, p.manufacturer, p.amount, p.image_url, p.note 
+            FROM prices p
+            JOIN stores s ON p.store_id = s.id
+            ORDER BY s.name
+        """)
+    return [
+        {
+            "store": row["store"],
+            "product": row["product"],
+            "price": round(float(row["price"]), 2),
+            "manufacturer": row["manufacturer"],
+            "amount": row["amount"],
+            "image_url": row["image_url"],
+            "note": row["note"]
+        }
+        for row in rows
+    ]
+
+@app.get("/search-products")
+async def search_products(query: str):
+    async with app.state.db.acquire() as conn:
+        rows = await conn.fetch("""
+            SELECT DISTINCT product, image_url 
+            FROM prices 
+            WHERE LOWER(product) ILIKE '%' || LOWER($1) || '%' 
+            ORDER BY product 
+            LIMIT 10
+        """, query)
+    return [{"name": row["product"], "image": row["image_url"]} for row in rows]
+
+@app.get("/stores/nearby")
+async def stores_nearby(lat: float, lon: float, radius_km: float = 5.0):
+    async with app.state.db.acquire() as conn:
+        rows = await conn.fetch("SELECT id, name, chain, lat, lon FROM stores")
+
+    result = []
+    for row in rows:
+        store_location = (row["lat"], row["lon"])
+        user_location = (lat, lon)
+        distance_km = geodesic(user_location, store_location).km
+
+        if distance_km <= radius_km:
+            result.append({
+                "id": row["id"],
+                "name": row["name"],
+                "chain": row["chain"],
+                "lat": row["lat"],
+                "lon": row["lon"],
+                "distance_km": round(distance_km, 2)
+            })
+
+    return sorted(result, key=lambda x: x["distance_km"])
+
+@app.get("/", response_class=HTMLResponse)
+async def dashboard():
+    async with app.state.db.acquire() as conn:
+        rows = await conn.fetch("SELECT product, image_url FROM prices WHERE note = 'Kontrolli visuaali!'")
+    html = "<h2>Missing Product Images</h2><ul>"
+    for row in rows:
+        html += f"""
+        <li>
+            <b>{row['product']}</b><br>
+            <form action=\"/upload\" method=\"post\" enctype=\"multipart/form-data\">
+                <input type=\"hidden\" name=\"product\" value=\"{row['product']}\"/>
+                <input type=\"file\" name=\"image\"/>
+                <button type=\"submit\">Upload</button>
+            </form>
+        </li>
+        """
+    html += "</ul>"
+    return html
+
+@app.post("/upload")
+async def upload_image(product: str = Form(...), image: UploadFile = Form(...)):
+    filename = f"{product.replace(' ', '_')}.jpg"
+    path = f"static/images/{filename}"
+
+    os.makedirs("static/images", exist_ok=True)
+    with open(path, "wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
+
+    image_url = f"/static/images/{filename}"
+
+    async with app.state.db.acquire() as conn:
+        await conn.execute("UPDATE prices SET image_url = $1, note = '' WHERE product = $2", image_url, product)
+
+    return {"status": "success", "product": product}
 
 # Auth router
 app.include_router(auth_router)
