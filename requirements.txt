@@ -11,3 +11,4 @@ passlib[bcrypt]
 pydantic[email]
 bcrypt==4.0.1
 python-dotenv
+geopy
