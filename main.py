@@ -1,5 +1,5 @@
 from auth import router as auth_router
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form, Request, Response
+from fastapi import FastAPI, UploadFile, File, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
@@ -69,7 +69,15 @@ class GroceryItem(BaseModel):
 class GroceryList(BaseModel):
     items: List[GroceryItem]
 
+class CompareRequest(BaseModel):
+    grocery_list: GroceryList
+    lat: float
+    lon: float
+    radius_km: float = 10.0
+
 # Upload prices
+from fastapi import Form
+
 @app.post("/upload-prices")
 async def upload_prices(
     file: UploadFile = File(...),
@@ -94,11 +102,9 @@ async def upload_prices(
         if not required_columns.issubset(df.columns):
             raise HTTPException(status_code=400, detail="Missing required columns in Excel")
 
-        # Extract store name from filename
         store_name = file.filename.replace(".xlsx", "").replace("_tooted", "").replace("_", " ").title()
 
         async with app.state.db.acquire() as conn:
-            # 1. Find or insert store with lat/lon
             store_row = await conn.fetchrow("SELECT id FROM stores WHERE name = $1", store_name)
             if not store_row:
                 await conn.execute("""
@@ -109,7 +115,6 @@ async def upload_prices(
 
             store_id = store_row["id"]
 
-            # 2. Insert products with store_id
             for _, row in df.iterrows():
                 await conn.execute("""
                     INSERT INTO prices (store_id, product, manufacturer, amount, price)
@@ -132,12 +137,15 @@ async def upload_prices(
         traceback.print_exc()
         return {"status": "error", "detail": str(e)}
 
-# Compare basket with location filtering
 @app.post("/compare")
-async def compare_basket(grocery_list: GroceryList, lat: float = Form(...), lon: float = Form(...), radius_km: float = 10.0):
+async def compare_basket(body: CompareRequest):
     try:
+        grocery_list = body.grocery_list
+        lat = body.lat
+        lon = body.lon
+        radius_km = body.radius_km
+
         async with app.state.db.acquire() as conn:
-            # 1. Find nearby stores
             store_rows = await conn.fetch("SELECT id, name, lat, lon FROM stores")
             nearby_store_ids = []
 
@@ -150,7 +158,6 @@ async def compare_basket(grocery_list: GroceryList, lat: float = Form(...), lon:
             if not nearby_store_ids:
                 raise HTTPException(status_code=404, detail="No stores found within given radius")
 
-            # 2. Fetch prices for only nearby stores
             prices = {}
 
             for item in grocery_list.items:
@@ -166,7 +173,6 @@ async def compare_basket(grocery_list: GroceryList, lat: float = Form(...), lon:
                     store = row["store_name"]
                     unit_price = float(row["price"])
                     total_price = unit_price * item.quantity
-
                     prices.setdefault(store, 0.0)
                     prices[store] += total_price
 
@@ -178,7 +184,6 @@ async def compare_basket(grocery_list: GroceryList, lat: float = Form(...), lon:
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Get all products
 @app.get("/products")
 async def list_products():
     async with app.state.db.acquire() as conn:
