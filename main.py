@@ -71,7 +71,11 @@ class GroceryList(BaseModel):
 
 # Upload prices
 @app.post("/upload-prices")
-async def upload_prices(file: UploadFile = File(...)):
+async def upload_prices(
+    file: UploadFile = File(...),
+    lat: float = Form(0.0),
+    lon: float = Form(0.0),
+):
     try:
         if not file.filename.endswith(".xlsx"):
             raise HTTPException(status_code=400, detail="Only .xlsx files are supported")
@@ -100,7 +104,7 @@ async def upload_prices(file: UploadFile = File(...)):
                 await conn.execute("""
                     INSERT INTO stores (name, chain, lat, lon)
                     VALUES ($1, $2, $3, $4)
-                """, store_name, store_name.split()[0], 0.0, 0.0)
+                """, store_name, store_name.split()[0], lat, lon)
                 store_row = await conn.fetchrow("SELECT id FROM stores WHERE name = $1", store_name)
 
             store_id = store_row["id"]
