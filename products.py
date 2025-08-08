@@ -1,15 +1,13 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request  # 🛠️ Add Request import
 from geopy.distance import geodesic
 
 router = APIRouter()
 
-
 def format_price(price):
     return round(float(price), 2)
 
-
 @router.get("/products")
-async def list_products(request: Request):  # ← FIXED HERE
+async def list_products(request: Request):  # ✅ Type hint Request here
     async with request.app.state.db.acquire() as conn:
         rows = await conn.fetch("""
             SELECT s.name as store, p.product, p.price, p.manufacturer, p.amount, p.image_url, p.note 
@@ -30,9 +28,8 @@ async def list_products(request: Request):  # ← FIXED HERE
         for row in rows
     ]
 
-
 @router.get("/search-products")
-async def search_products(query: str, request):
+async def search_products(query: str, request: Request):  # ✅ Same here
     async with request.app.state.db.acquire() as conn:
         rows = await conn.fetch("""
             SELECT DISTINCT product, image_url 
