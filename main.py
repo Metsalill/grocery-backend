@@ -130,7 +130,7 @@ async def upload_prices(file: UploadFile = File(...)):
 
 # Compare basket with location filtering
 @app.post("/compare")
-async def compare_basket(grocery_list: GroceryList, lat: float = Form(...), lon: float = Form(...), radius_km: float = 5.0):
+async def compare_basket(grocery_list: GroceryList, lat: float = Form(...), lon: float = Form(...), radius_km: float = 10.0):
     try:
         async with app.state.db.acquire() as conn:
             # 1. Find nearby stores
