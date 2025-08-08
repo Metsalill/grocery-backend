@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from typing import List
 from geopy.distance import geodesic
@@ -19,7 +19,7 @@ class CompareRequest(BaseModel):
     radius_km: float = 10.0
 
 @router.post("/compare")
-async def compare_basket(body: CompareRequest, request):
+async def compare_basket(body: CompareRequest, request: Request):  # ✅ Fixed
     try:
         grocery_list = body.grocery_list
         lat = body.lat
