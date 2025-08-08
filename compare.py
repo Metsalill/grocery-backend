@@ -5,7 +5,6 @@ from geopy.distance import geodesic
 
 router = APIRouter()
 
-# Pydantic models
 class GroceryItem(BaseModel):
     product: str
     quantity: int = 1
