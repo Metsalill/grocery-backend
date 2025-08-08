@@ -74,7 +74,7 @@ class GroceryList(BaseModel):
 async def upload_prices(
     file: UploadFile = File(...),
     lat: float = Form(0.0),
-    lon: float = Form(0.0),
+    lon: float = Form(0.0)
 ):
     try:
         if not file.filename.endswith(".xlsx"):
@@ -98,7 +98,7 @@ async def upload_prices(
         store_name = file.filename.replace(".xlsx", "").replace("_tooted", "").replace("_", " ").title()
 
         async with app.state.db.acquire() as conn:
-            # 1. Find or insert store
+            # 1. Find or insert store with lat/lon
             store_row = await conn.fetchrow("SELECT id FROM stores WHERE name = $1", store_name)
             if not store_row:
                 await conn.execute("""
