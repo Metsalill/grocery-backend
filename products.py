@@ -9,7 +9,7 @@ def format_price(price):
 
 
 @router.get("/products")
-async def list_products(request):
+async def list_products(request: Request):  # ← FIXED HERE
     async with request.app.state.db.acquire() as conn:
         rows = await conn.fetch("""
             SELECT s.name as store, p.product, p.price, p.manufacturer, p.amount, p.image_url, p.note 
