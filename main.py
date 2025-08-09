@@ -22,8 +22,16 @@ from upload_prices import router as upload_router
 # Load .env
 load_dotenv()
 
+# ---------- Absolute static paths (fixes 404 on Railway) ----------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+IMAGES_DIR = os.path.join(STATIC_DIR, "images")
+os.makedirs(IMAGES_DIR, exist_ok=True)
+# ------------------------------------------------------------------
+
 app = FastAPI()
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Mount the absolute directory
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # Optional: cache static images aggressively (good for CDN)
 @app.middleware("http")
@@ -136,8 +144,7 @@ async def upload_image(
     manufacturer: str = Form(""),
     amount: str = Form("")
 ):
-    # save to /static/images
-    os.makedirs("static/images", exist_ok=True)
+    # safe filename
     safe_base = (
         product.replace("/", "_")
                .replace("\\", "_")
@@ -147,8 +154,9 @@ async def upload_image(
     # keep original extension if present, default to .jpg
     ext = os.path.splitext(image.filename or "")[1].lower() or ".jpg"
     filename = f"{safe_base}{ext}"
-    file_path = os.path.join("static", "images", filename)
 
+    # save under absolute images dir
+    file_path = os.path.join(IMAGES_DIR, filename)
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(image.file, buffer)
 
@@ -176,7 +184,17 @@ async def upload_image(
                  WHERE LOWER(product) = LOWER($1)
             """, product.strip(), image_url)
 
-    return {"status": "success", "product": product, "image_url": image_url}
+    # tiny debug so you can verify the file exists right after upload
+    saved = os.path.exists(file_path)
+    size_bytes = os.path.getsize(file_path) if saved else 0
+
+    return {
+        "status": "success",
+        "product": product,
+        "image_url": image_url,
+        "saved": saved,     # <-- remove later if you like
+        "bytes": size_bytes # <-- remove later if you like
+    }
 
 # Swagger bearer token support (for API docs)
 bearer_scheme = HTTPBearer()
