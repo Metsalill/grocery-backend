@@ -14,12 +14,13 @@ async def upload_prices(
     from main import app  # Access DB pool from main
 
     try:
-        if not file.filename.endswith(".xlsx"):
+        if not file.filename.lower().endswith(".xlsx"):
             raise HTTPException(status_code=400, detail="Only .xlsx files are supported")
 
         contents = await file.read()
         df = pd.read_excel(io.BytesIO(contents))
 
+        # Map Estonian headers -> canonical
         df.rename(columns={
             "Toode": "product",
             "Tootja": "manufacturer",
@@ -29,45 +30,75 @@ async def upload_prices(
 
         required_columns = {"product", "manufacturer", "amount", "price"}
         if not required_columns.issubset(df.columns):
-            raise HTTPException(status_code=400, detail="Missing required columns in Excel")
+            missing = required_columns - set(df.columns)
+            raise HTTPException(status_code=400, detail=f"Missing required columns in Excel: {', '.join(missing)}")
 
-        store_name = file.filename.replace(".xlsx", "").replace("_tooted", "").replace("_", " ").title()
+        # Clean up types/whitespace
+        for col in ["product", "manufacturer", "amount"]:
+            df[col] = df[col].astype(str).fillna("").str.strip()
+        df["price"] = pd.to_numeric(df["price"], errors="coerce")
+
+        # Basic validation
+        if df["product"].eq("").any():
+            raise HTTPException(status_code=400, detail="Some rows have empty 'product' values")
+        if df["price"].isna().any():
+            raise HTTPException(status_code=400, detail="Some rows have non-numeric 'price' values")
+
+        # Infer store name from file name
+        store_name = (
+            file.filename.replace(".xlsx", "")
+                         .replace("_tooted", "")
+                         .replace("_", " ")
+                         .title()
+        )
 
         async with app.state.db.acquire() as conn:
+            # Ensure store exists (use first word as chain if not provided elsewhere)
             store_row = await conn.fetchrow("SELECT id FROM stores WHERE name = $1", store_name)
             if not store_row:
-                await conn.execute("""
+                await conn.execute(
+                    """
                     INSERT INTO stores (name, chain, lat, lon)
                     VALUES ($1, $2, $3, $4)
-                """, store_name, store_name.split()[0], lat, lon)
+                    """,
+                    store_name, store_name.split()[0], lat, lon
+                )
                 store_row = await conn.fetchrow("SELECT id FROM stores WHERE name = $1", store_name)
 
             store_id = store_row["id"]
 
             # Insert/update prices
             for _, row in df.iterrows():
-                await conn.execute("""
+                await conn.execute(
+                    """
                     INSERT INTO prices (store_id, product, manufacturer, amount, price)
                     VALUES ($1, $2, $3, $4, $5)
                     ON CONFLICT (store_id, product, manufacturer, amount) DO UPDATE
                     SET price = EXCLUDED.price
-                """, store_id, row["product"], row["manufacturer"], row["amount"], float(row["price"]))
+                    """,
+                    store_id, row["product"], row["manufacturer"], row["amount"], float(row["price"])
+                )
 
-            # 🔹 Bulk auto-flag missing images for THIS store
-            await conn.execute("""
+            # 🔹 Bulk auto-flag missing images for THIS store (use NULL, not 'missing.jpg')
+            await conn.execute(
+                """
                 UPDATE prices
-                SET image_url = 'missing.jpg',
-                    note      = COALESCE(NULLIF(note, ''), 'Kontrolli visuaali!')
-                WHERE store_id = $1
-                  AND (image_url IS NULL OR image_url = '')
-            """, store_id)
+                   SET image_url = NULL,
+                       note      = COALESCE(NULLIF(note, ''), 'Kontrolli visuaali!')
+                 WHERE store_id = $1
+                   AND (image_url IS NULL OR image_url = '')
+                """,
+                store_id
+            )
 
         return {
             "status": "success",
             "store": store_name,
-            "items_uploaded": len(df)
+            "items_uploaded": int(len(df)),
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         import traceback
         traceback.print_exc()
