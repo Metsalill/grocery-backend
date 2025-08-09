@@ -25,6 +25,14 @@ load_dotenv()
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+# Optional: cache static images aggressively (good for CDN)
+@app.middleware("http")
+async def add_cache_headers(request: Request, call_next):
+    resp: Response = await call_next(request)
+    if request.url.path.startswith("/static/"):
+        resp.headers.setdefault("Cache-Control", "public, max-age=31536000, immutable")
+    return resp
+
 # CORS for frontend (tighten later)
 app.add_middleware(
     CORSMiddleware,
@@ -139,12 +147,15 @@ async def upload_image(
     # keep original extension if present, default to .jpg
     ext = os.path.splitext(image.filename or "")[1].lower() or ".jpg"
     filename = f"{safe_base}{ext}"
-    path = os.path.join("static", "images", filename)
+    file_path = os.path.join("static", "images", filename)
 
-    with open(path, "wb") as buffer:
+    with open(file_path, "wb") as buffer:
         shutil.copyfileobj(image.file, buffer)
 
-    image_url = f"/static/images/{filename}"
+    # build absolute (CDN) URL if configured; else relative
+    cdn_base = os.getenv("CDN_BASE_URL") or os.getenv("PUBLIC_BASE_URL") or ""
+    image_path = f"/static/images/{filename}"
+    image_url = f"{cdn_base.rstrip('/')}{image_path}" if cdn_base else image_path
 
     # update ALL rows across stores for same product (+ optional manufacturer/amount)
     async with app.state.db.acquire() as conn:
