@@ -6,15 +6,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/grocerydb")
-
-PLACEHOLDER_URL = "missing.jpg"          # keep consistent with app usage
-REVIEW_NOTE     = "Kontrolli visuaali!"  # only set if note is empty/null
+REVIEW_NOTE  = "Kontrolli visuaali!"  # only set if note is empty/null
 
 async def update_images():
     pool = await asyncpg.create_pool(DATABASE_URL)
     try:
         async with pool.acquire() as conn:
-            # How many rows currently missing images?
+            # Count rows currently missing images
             missing = await conn.fetchval("""
                 SELECT COUNT(*) FROM prices
                 WHERE image_url IS NULL OR image_url = ''
@@ -25,17 +23,17 @@ async def update_images():
                 print("Nothing to do.")
                 return
 
-            # Bulk update in one shot:
+            # Bulk update: set image_url to NULL and add note if empty
             status = await conn.execute("""
                 UPDATE prices
-                   SET image_url = $1,
-                       note = COALESCE(NULLIF(note, ''), $2)
+                   SET image_url = NULL,
+                       note = COALESCE(NULLIF(note, ''), $1)
                  WHERE image_url IS NULL OR image_url = ''
-            """, PLACEHOLDER_URL, REVIEW_NOTE)
+            """, REVIEW_NOTE)
 
-            # asyncpg returns status like "UPDATE 123"
+            # asyncpg returns "UPDATE <n>"
             updated = int(status.split()[-1]) if status else 0
-            print(f"✅ Flagged {updated} rows with placeholder image and review note.")
+            print(f"✅ Flagged {updated} rows (image_url=NULL, note set when empty).")
     finally:
         await pool.close()
 
