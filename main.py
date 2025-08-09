@@ -53,17 +53,19 @@ class SwaggerAuthMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(SwaggerAuthMiddleware)
 
-# --- Tiny admin guard (header-based) ---
-ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
-
-def admin_guard(req: Request):
-    """
-    Minimal guard for admin-only routes.
-    Send header:  x-admin-token: <ADMIN_TOKEN>
-    """
-    token = req.headers.get("x-admin-token", "")
-    if not ADMIN_TOKEN or token != ADMIN_TOKEN:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
+# --- Reuse the same Basic Auth for admin pages (/ and /upload) ---
+def basic_guard(req: Request):
+    username = os.getenv("SWAGGER_USERNAME")
+    password = os.getenv("SWAGGER_PASSWORD")
+    if not username or not password:
+        # Fail closed if creds not configured
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Admin auth not configured")
+    expected = "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode()
+    auth = req.headers.get("Authorization")
+    if auth != expected:
+        # Triggers browser's native login prompt; credentials will be cached and sent with form posts too
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized",
+                            headers={"WWW-Authenticate": "Basic"})
 
 # DB Pool
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -82,8 +84,8 @@ app.include_router(compare_router)
 app.include_router(products_router)
 app.include_router(upload_router)
 
-# Dashboard for missing product images (admin only)
-@app.get("/", response_class=HTMLResponse, dependencies=[Depends(admin_guard)])
+# Dashboard for missing product images (Basic Auth)
+@app.get("/", response_class=HTMLResponse, dependencies=[Depends(basic_guard)])
 async def dashboard():
     async with app.state.db.acquire() as conn:
         rows = await conn.fetch("""
@@ -118,8 +120,8 @@ async def dashboard():
     html += "</ul>"
     return html
 
-# Upload image once → apply to all matching products across stores (admin only)
-@app.post("/upload", dependencies=[Depends(admin_guard)])
+# Upload image once → apply to all matching products across stores (Basic Auth)
+@app.post("/upload", dependencies=[Depends(basic_guard)])
 async def upload_image(
     product: str = Form(...),
     image: UploadFile = Form(...),
