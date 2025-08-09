@@ -44,6 +44,7 @@ async def upload_prices(
 
             store_id = store_row["id"]
 
+            # Insert/update prices
             for _, row in df.iterrows():
                 await conn.execute("""
                     INSERT INTO prices (store_id, product, manufacturer, amount, price)
@@ -52,14 +53,20 @@ async def upload_prices(
                     SET price = EXCLUDED.price
                 """, store_id, row["product"], row["manufacturer"], row["amount"], float(row["price"]))
 
-                await conn.execute("""
-                    UPDATE prices
-                    SET note = 'Kontrolli visuaali!'
-                    WHERE store_id = $1 AND product = $2 AND manufacturer = $3 AND amount = $4
-                    AND (image_url IS NULL OR image_url = '')
-                """, store_id, row["product"], row["manufacturer"], row["amount"])
+            # 🔹 Bulk auto-flag missing images for THIS store
+            await conn.execute("""
+                UPDATE prices
+                SET image_url = 'missing.jpg',
+                    note      = COALESCE(NULLIF(note, ''), 'Kontrolli visuaali!')
+                WHERE store_id = $1
+                  AND (image_url IS NULL OR image_url = '')
+            """, store_id)
 
-        return {"status": "success", "store": store_name, "items_uploaded": len(df)}
+        return {
+            "status": "success",
+            "store": store_name,
+            "items_uploaded": len(df)
+        }
 
     except Exception as e:
         import traceback
