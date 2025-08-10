@@ -404,7 +404,7 @@ def custom_openapi():
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
-app.openapi = custom_openapi()
+app.openapi = custom_openapi  # <-- no parentheses
 
 if __name__ == "__main__":
     # For local dev only; on Railway you're using the start command.
