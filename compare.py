@@ -3,7 +3,15 @@ from pydantic import BaseModel, confloat, conint
 from typing import List, Dict
 from geopy.distance import geodesic
 
+# import the throttle decorator (from main.py or utils.throttle if you split it)
+from main import throttle
+
 router = APIRouter()
+
+# ---- server-side caps (extra safety on top of pydantic) ----
+MAX_ITEMS = 50
+MIN_RADIUS = 0.1
+MAX_RADIUS = 15.0
 
 # Quantity must be at least 1
 class GroceryItem(BaseModel):
@@ -18,9 +26,10 @@ class CompareRequest(BaseModel):
     grocery_list: GroceryList
     lat: float
     lon: float
-    radius_km: confloat(ge=0.1, le=15.0) = 2.0
+    radius_km: confloat(ge=MIN_RADIUS, le=MAX_RADIUS) = 2.0
 
 @router.post("/compare")
+@throttle(limit=30, window=60)  # compare is heavier: 30 req/min per IP
 async def compare_basket(body: CompareRequest, request: Request):
     """
     Compare a user's grocery_list across nearby stores (within radius_km)
@@ -39,7 +48,18 @@ async def compare_basket(body: CompareRequest, request: Request):
         grocery_list = body.grocery_list
         user_lat = body.lat
         user_lon = body.lon
-        radius_km = float(body.radius_km)
+        # clamp radius again server-side, even though pydantic already validates
+        radius_km = float(max(MIN_RADIUS, min(MAX_RADIUS, float(body.radius_km))))
+
+        # basic validation
+        if not grocery_list.items:
+            raise HTTPException(status_code=400, detail="Basket is empty")
+        if len(grocery_list.items) > MAX_ITEMS:
+            raise HTTPException(status_code=400, detail=f"Basket too large (>{MAX_ITEMS} items)")
+        # reject obviously junk product names (helps against blind scrapes)
+        for it in grocery_list.items:
+            if not it.product or not it.product.strip():
+                raise HTTPException(status_code=400, detail="Product name cannot be empty")
 
         user_location = (user_lat, user_lon)
 
@@ -84,7 +104,7 @@ async def compare_basket(body: CompareRequest, request: Request):
                     WHERE LOWER(p.product) = LOWER($1)
                       AND s.id = ANY($2::int[])
                     """,
-                    item.product,
+                    item.product.strip(),
                     nearby_store_ids
                 )
 
