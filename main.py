@@ -152,10 +152,22 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
-        if path.startswith("/static/") or path in ("/robots.txt", "/healthz"):
+
+        # Skip static, health, robots, and docs-related endpoints
+        if (
+            path.startswith("/static/")
+            or path in ("/robots.txt", "/healthz", "/favicon.ico")
+            or path.startswith("/docs")
+            or path.startswith("/redoc")
+            or path.startswith("/openapi.json")
+        ):
             return await call_next(request)
 
-        token = (request.headers.get("authorization") or "").split()[-1] or "anon"
+        # Defensive token parsing
+        authz = request.headers.get("authorization") or ""
+        parts = authz.split()
+        token = parts[1] if (len(parts) == 2 and parts[0].lower() == "bearer") else "anon"
+
         ip = request.client.host if request.client else "unknown"
         key_user = f"rl:u:{token}"
         key_ip = f"rl:ip:{ip}"
@@ -168,6 +180,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 n_user = await self._hit_local(key_user)
                 n_ip = await self._hit_local(key_ip)
         except Exception:
+            # fail-open on limiter errors
             return await call_next(request)
 
         if n_user > RATE_PER_MIN or n_ip > RATE_PER_MIN:
