@@ -13,6 +13,16 @@ import os
 import shutil
 import uvicorn
 import asyncpg
+import time
+import asyncio
+from functools import wraps
+from typing import Optional
+
+# --- Optional Redis (auto if REDIS_URL is set) ---
+try:
+    import aioredis  # type: ignore
+except Exception:
+    aioredis = None  # graceful fallback
 
 from auth import router as auth_router
 from compare import router as compare_router
@@ -39,15 +49,24 @@ async def add_cache_headers(request: Request, call_next):
     resp: Response = await call_next(request)
     if request.url.path.startswith("/static/"):
         resp.headers.setdefault("Cache-Control", "public, max-age=31536000, immutable")
+    # small security set
+    resp.headers.setdefault("X-Frame-Options", "DENY")
+    resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+    resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    # CSP is conservative; adjust if you host web frontend here
+    resp.headers.setdefault("Content-Security-Policy", "default-src 'none'; img-src * data: blob:; media-src *;")
     return resp
 
-# CORS for frontend (tighten later)
+# --------- CORS (tighten via env) ----------
+# Set APP_WEB_ORIGIN="https://your.site" or comma-separate multiple
+origins_env = (os.getenv("APP_WEB_ORIGIN") or "").strip()
+allow_origins = [o.strip() for o in origins_env.split(",") if o.strip()] or ["*"]  # keep * until you set env
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allow_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET","POST","PUT","DELETE","OPTIONS"],
+    allow_headers=["Authorization","Content-Type"],
 )
 
 # Swagger Basic Auth (for /docs, /redoc, /openapi.json)
@@ -69,8 +88,17 @@ class SwaggerAuthMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(SwaggerAuthMiddleware)
 
-# --- Reuse the same Basic Auth for admin pages (/ and /upload) ---
+# --- Reuse the same Basic Auth for admin pages (/ and /upload) + optional IP allowlist ---
+def _admin_ip_allowed(req: Request) -> bool:
+    allow_env = os.getenv("ADMIN_IP_ALLOWLIST", "").strip()
+    if not allow_env:
+        return True
+    allowed = {ip.strip() for ip in allow_env.split(",") if ip.strip()}
+    return req.client and req.client.host in allowed
+
 def basic_guard(req: Request):
+    if not _admin_ip_allowed(req):
+        raise HTTPException(status_code=403, detail="Admin IP not allowed")
     username = os.getenv("SWAGGER_USERNAME")
     password = os.getenv("SWAGGER_PASSWORD")
     if not username or not password:
@@ -83,6 +111,92 @@ def basic_guard(req: Request):
             detail="Unauthorized",
             headers={"WWW-Authenticate": "Basic"},
         )
+
+# ------------- Rate limiting middleware (per IP + per token) -------------
+RATE_PER_MIN = int(os.getenv("RATE_LIMIT_PER_MINUTE", "300"))   # global soft cap
+WINDOW = 60
+
+class RateLimitMiddleware(BaseHTTPMiddleware):
+    def __init__(self, app):
+        super().__init__(app)
+        self.redis_url: Optional[str] = os.getenv("REDIS_URL")
+        self.redis = None
+        self.local_counts = {}  # {(key, bucket): count}
+
+    async def _hit_local(self, key: str) -> int:
+        now_bucket = int(time.time() // WINDOW)
+        k = (key, now_bucket)
+        self.local_counts[k] = self.local_counts.get(k, 0) + 1
+        # prune old buckets occasionally
+        if len(self.local_counts) > 5000:
+            old = [kk for kk in self.local_counts if kk[1] < now_bucket]
+            for kk in old:
+                self.local_counts.pop(kk, None)
+        return self.local_counts[k]
+
+    async def _hit_redis(self, key: str) -> int:
+        if self.redis is None:
+            # lazily connect
+            self.redis = await aioredis.from_url(self.redis_url, encoding="utf-8", decode_responses=True)
+        bucket = f"{key}:{int(time.time()//WINDOW)}"
+        n = await self.redis.incr(bucket)
+        if n == 1:
+            await self.redis.expire(bucket, WINDOW)
+        return n
+
+    async def dispatch(self, request: Request, call_next):
+        # Skip static and docs
+        path = request.url.path
+        if path.startswith("/static/") or path in ("/robots.txt", "/healthz"):
+            return await call_next(request)
+
+        token = (request.headers.get("authorization") or "").split()[-1] or "anon"
+        ip = request.client.host if request.client else "unknown"
+        key_user = f"rl:u:{token}"
+        key_ip = f"rl:ip:{ip}"
+
+        try:
+            if aioredis and self.redis_url:
+                n_user = await self._hit_redis(key_user)
+                n_ip = await self._hit_redis(key_ip)
+            else:
+                n_user = await self._hit_local(key_user)
+                n_ip = await self._hit_local(key_ip)
+        except Exception:
+            # fail-open on limiter errors
+            return await call_next(request)
+
+        if n_user > RATE_PER_MIN or n_ip > RATE_PER_MIN:
+            return JSONResponse({"detail": "rate limit"}, status_code=429)
+
+        return await call_next(request)
+
+app.add_middleware(RateLimitMiddleware)
+
+# ----------- Tiny per-route throttle decorator (reuse on search endpoints) -----------
+def throttle(limit:int, window:int=60):
+    buckets = {}
+    lock = asyncio.Lock()
+    def decorator(fn):
+        @wraps(fn)
+        async def wrapper(*args, **kwargs):
+            request: Request = kwargs.get("request")
+            if not request:
+                # try positional
+                for a in args:
+                    if isinstance(a, Request):
+                        request = a
+                        break
+            ip = request.client.host if request and request.client else "unknown"
+            name = fn.__name__
+            bucket = (ip, name, int(time.time()//window))
+            async with lock:
+                buckets[bucket] = buckets.get(bucket, 0) + 1
+                if buckets[bucket] > limit:
+                    raise HTTPException(status_code=429, detail="Too many requests")
+            return await fn(*args, **kwargs)
+        return wrapper
+    return decorator
 
 # DB Pool
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -101,9 +215,24 @@ app.include_router(compare_router)
 app.include_router(products_router)
 app.include_router(upload_router)
 
+# robots.txt (policy helps your legal footing)
+@app.get("/robots.txt", response_class=PlainTextResponse := type(
+    "PlainTextResponse",
+    (Response,),
+    {"media_type": "text/plain"}
+))
+async def robots():
+    # Disallow API/data endpoints
+    return "User-agent: *\nDisallow: /products\nDisallow: /search-products\nDisallow: /compare\n"
+
+# Simple health check
+@app.get("/healthz")
+async def healthz():
+    return {"ok": True}
+
 # Dashboard for missing product images (Basic Auth)
 @app.get("/", response_class=HTMLResponse, dependencies=[Depends(basic_guard)])
-async def dashboard():
+async def dashboard(request: Request):
     async with app.state.db.acquire() as conn:
         rows = await conn.fetch("""
             SELECT DISTINCT
@@ -138,6 +267,8 @@ async def dashboard():
     return html
 
 # Upload image once → apply to all matching products across stores (Basic Auth)
+MAX_UPLOAD_MB = int(os.getenv("MAX_IMAGE_MB", "6"))
+
 @app.post("/upload", dependencies=[Depends(basic_guard)])
 async def upload_image(
     request: Request,                                     # ⬅️ need Request to decide HTML vs JSON
@@ -151,6 +282,11 @@ async def upload_image(
         return "text/html" in accept and "application/json" not in accept
 
     try:
+        # reject large files early if content-length is provided
+        cl = request.headers.get("content-length")
+        if cl and int(cl) > MAX_UPLOAD_MB * 1024 * 1024:
+            raise HTTPException(413, f"Image too large (>{MAX_UPLOAD_MB}MB)")
+
         # safe filename
         safe_base = (
             product.replace("/", "_")
@@ -168,6 +304,14 @@ async def upload_image(
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
 
+        # size check after save (fallback)
+        try:
+            if os.path.getsize(file_path) > MAX_UPLOAD_MB * 1024 * 1024:
+                os.remove(file_path)
+                raise HTTPException(413, f"Image too large (>{MAX_UPLOAD_MB}MB)")
+        except Exception:
+            pass
+
         # build absolute (CDN) URL if configured; else relative
         cdn_base = os.getenv("CDN_BASE_URL") or os.getenv("PUBLIC_BASE_URL") or ""
         image_path = f"/static/images/{filename}"
@@ -176,7 +320,7 @@ async def upload_image(
         # update ALL rows across stores for same product (+ optional manufacturer/amount)
         async with app.state.db.acquire() as conn:
             if manufacturer or amount:
-                status = await conn.execute("""
+                status_txt = await conn.execute("""
                     UPDATE prices
                        SET image_url = $4,
                            note = CASE WHEN note = 'Kontrolli visuaali!' THEN '' ELSE note END
@@ -185,7 +329,7 @@ async def upload_image(
                        AND LOWER(COALESCE(amount,'')) = LOWER($3)
                 """, product.strip(), manufacturer.strip(), amount.strip(), image_url)
             else:
-                status = await conn.execute("""
+                status_txt = await conn.execute("""
                     UPDATE prices
                        SET image_url = $2,
                            note = CASE WHEN note = 'Kontrolli visuaali!' THEN '' ELSE note END
@@ -194,7 +338,7 @@ async def upload_image(
 
         updated_rows = 0
         try:
-            updated_rows = int((status or "0").split()[-1])
+            updated_rows = int((status_txt or "0").split()[-1])
         except Exception:
             pass
 
@@ -221,6 +365,8 @@ async def upload_image(
             "bytes": size_bytes
         })
 
+    except HTTPException:
+        raise
     except Exception as e:
         if wants_html(request):
             return HTMLResponse(
@@ -261,4 +407,4 @@ def custom_openapi():
 app.openapi = custom_openapi
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True, log_level="debug")
+    uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("PORT","8000")), reload=True, log_level="debug")
