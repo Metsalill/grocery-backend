@@ -42,7 +42,18 @@ STATIC_DIR = os.getenv("STATIC_DIR", os.path.join(BASE_DIR, "static"))
 IMAGES_DIR = os.path.join(STATIC_DIR, "images")
 os.makedirs(IMAGES_DIR, exist_ok=True)
 
-app = FastAPI()
+# ---------- Env-based docs toggle ----------
+ENV = (os.getenv("ENV") or "development").lower()
+ENABLE_DOCS = ENV != "production"
+
+app = FastAPI(
+    title="Grocery App",
+    version="1.0.0",
+    docs_url="/docs" if ENABLE_DOCS else None,
+    redoc_url="/redoc" if ENABLE_DOCS else None,
+    openapi_url="/openapi.json" if ENABLE_DOCS else None,
+)
+
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # Optional: cache static images aggressively (good for CDN)
@@ -77,7 +88,7 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 
-# Swagger Basic Auth
+# Swagger Basic Auth (attach only if docs exist)
 class SwaggerAuthMiddleware(BaseHTTPMiddleware):
     def __init__(self, app):
         super().__init__(app)
@@ -94,7 +105,8 @@ class SwaggerAuthMiddleware(BaseHTTPMiddleware):
                 return Response(status_code=401, headers={"WWW-Authenticate": "Basic"}, content="Unauthorized")
         return await call_next(request)
 
-app.add_middleware(SwaggerAuthMiddleware)
+if ENABLE_DOCS:
+    app.add_middleware(SwaggerAuthMiddleware)
 
 # --- Optional simple request logger (enable with LOG_REQUESTS=true) ---
 if (os.getenv("LOG_REQUESTS") or "").lower() in {"1", "true", "yes"}:
@@ -404,7 +416,7 @@ def custom_openapi():
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
-app.openapi = custom_openapi  # <-- no parentheses
+app.openapi = custom_openapi  # <-- keep as a callable, not the result
 
 if __name__ == "__main__":
     # For local dev only; on Railway you're using the start command.
