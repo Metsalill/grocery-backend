@@ -22,15 +22,15 @@ from upload_prices import router as upload_router
 # Load .env
 load_dotenv()
 
-# ---------- Absolute static paths (fixes 404 on Railway) ----------
+# ---------- Static paths (env-first for Railway Volume) ----------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-STATIC_DIR = os.path.join(BASE_DIR, "static")
+# If STATIC_DIR is set (e.g., /data/static on Railway), use it; otherwise use repo's ./static
+STATIC_DIR = os.getenv("STATIC_DIR", os.path.join(BASE_DIR, "static"))
 IMAGES_DIR = os.path.join(STATIC_DIR, "images")
 os.makedirs(IMAGES_DIR, exist_ok=True)
-# ------------------------------------------------------------------
+# -----------------------------------------------------------------
 
 app = FastAPI()
-# Mount the absolute directory
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 # Optional: cache static images aggressively (good for CDN)
@@ -74,14 +74,15 @@ def basic_guard(req: Request):
     username = os.getenv("SWAGGER_USERNAME")
     password = os.getenv("SWAGGER_PASSWORD")
     if not username or not password:
-        # Fail closed if creds not configured
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Admin auth not configured")
     expected = "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode()
     auth = req.headers.get("Authorization")
     if auth != expected:
-        # Triggers browser's native login prompt; credentials will be cached and sent with form posts too
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized",
-                            headers={"WWW-Authenticate": "Basic"})
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+            headers={"WWW-Authenticate": "Basic"},
+        )
 
 # DB Pool
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -155,8 +156,9 @@ async def upload_image(
     ext = os.path.splitext(image.filename or "")[1].lower() or ".jpg"
     filename = f"{safe_base}{ext}"
 
-    # save under absolute images dir
+    # save under images dir (volume-backed if STATIC_DIR=/data/static)
     file_path = os.path.join(IMAGES_DIR, filename)
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(image.file, buffer)
 
@@ -184,7 +186,6 @@ async def upload_image(
                  WHERE LOWER(product) = LOWER($1)
             """, product.strip(), image_url)
 
-    # tiny debug so you can verify the file exists right after upload
     saved = os.path.exists(file_path)
     size_bytes = os.path.getsize(file_path) if saved else 0
 
@@ -192,8 +193,8 @@ async def upload_image(
         "status": "success",
         "product": product,
         "image_url": image_url,
-        "saved": saved,     # <-- remove later if you like
-        "bytes": size_bytes # <-- remove later if you like
+        "saved": saved,
+        "bytes": size_bytes
     }
 
 # Swagger bearer token support (for API docs)
