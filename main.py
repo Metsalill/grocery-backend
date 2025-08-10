@@ -64,8 +64,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
     allow_credentials=True,
-    allow_methods=["GET","POST","PUT","DELETE","OPTIONS"],
-    allow_headers=["Authorization","Content-Type"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 # Swagger Basic Auth
@@ -86,6 +86,15 @@ class SwaggerAuthMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 app.add_middleware(SwaggerAuthMiddleware)
+
+# --- Optional simple request logger (enable with LOG_REQUESTS=true) ---
+if (os.getenv("LOG_REQUESTS") or "").lower() in {"1", "true", "yes"}:
+    @app.middleware("http")
+    async def _req_logger(request: Request, call_next):
+        logger.info(f"➡ {request.method} {request.url.path} from {request.client.host if request.client else 'unknown'}")
+        resp = await call_next(request)
+        logger.info(f"⬅ {request.method} {request.url.path} -> {resp.status_code}")
+        return resp
 
 # --- Admin guard ---
 def _admin_ip_allowed(req: Request) -> bool:
@@ -178,7 +187,6 @@ async def startup():
         app.state.db = await asyncpg.create_pool(DATABASE_URL, timeout=DB_CONNECT_TIMEOUT)
         logger.info("✅ DB pool created")
     except Exception as e:
-        # Don't crash the app on cold starts; routes that need DB will error appropriately.
         app.state.db = None
         logger.error(f"⚠️ Failed to connect to DB at startup: {e}")
 
@@ -202,15 +210,14 @@ app.include_router(upload_router)
 async def robots():
     return "User-agent: *\nDisallow: /products\nDisallow: /search-products\nDisallow: /compare\n"
 
-# Simple health check (does not depend on DB)
-@app.get("/healthz")
+# Simple health check (plain text, no DB)
+@app.get("/healthz", response_class=PlainTextResponse)
 async def healthz():
-    return {"ok": True}
+    return "ok"
 
 # Dashboard
 @app.get("/", response_class=HTMLResponse, dependencies=[Depends(basic_guard)])
 async def dashboard(request: Request):
-    # if DB didn't connect yet, show a friendly message instead of erroring
     if getattr(app.state, "db", None) is None:
         return HTMLResponse("<h2>DB not ready yet. Try again in a few seconds.</h2>", status_code=503)
 
@@ -375,8 +382,8 @@ def custom_openapi():
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
-app.openapi = custom_openapi
+app.openapi = custom_openapi()
 
 if __name__ == "__main__":
     # For local dev only; on Railway you're using the start command.
-    uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("PORT","8000")), reload=True, log_level="debug")
+    uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("PORT", "8000")), reload=True, log_level="debug")
