@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Request, Query, HTTPException
 from typing import Optional
 
-# throttle decorator comes from main.py (or utils.throttle if you split it)
-from main import throttle
+# import from utils.throttle instead of main.py to avoid circular import
+from utils.throttle import throttle
 
 router = APIRouter()
 
