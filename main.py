@@ -14,6 +14,7 @@ import shutil
 import uvicorn
 import asyncpg
 import time
+import logging
 from typing import Optional
 
 # import throttle from a helper to avoid circular imports
@@ -32,6 +33,8 @@ from upload_prices import router as upload_router
 
 # Load .env
 load_dotenv()
+
+logger = logging.getLogger("uvicorn.error")
 
 # ---------- Static paths ----------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -165,16 +168,28 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(RateLimitMiddleware)
 
-# --- DB Pool ---
+# --- DB Pool (resilient startup) ---
 DATABASE_URL = os.getenv("DATABASE_URL")
+DB_CONNECT_TIMEOUT = float(os.getenv("DB_CONNECT_TIMEOUT", "8"))
 
 @app.on_event("startup")
 async def startup():
-    app.state.db = await asyncpg.create_pool(DATABASE_URL)
+    try:
+        app.state.db = await asyncpg.create_pool(DATABASE_URL, timeout=DB_CONNECT_TIMEOUT)
+        logger.info("✅ DB pool created")
+    except Exception as e:
+        # Don't crash the app on cold starts; routes that need DB will error appropriately.
+        app.state.db = None
+        logger.error(f"⚠️ Failed to connect to DB at startup: {e}")
 
 @app.on_event("shutdown")
 async def shutdown():
-    await app.state.db.close()
+    try:
+        if getattr(app.state, "db", None):
+            await app.state.db.close()
+            logger.info("🔌 DB pool closed")
+    except Exception as e:
+        logger.error(f"Shutdown error: {e}")
 
 # Include routes
 app.include_router(auth_router)
@@ -187,7 +202,7 @@ app.include_router(upload_router)
 async def robots():
     return "User-agent: *\nDisallow: /products\nDisallow: /search-products\nDisallow: /compare\n"
 
-# Simple health check
+# Simple health check (does not depend on DB)
 @app.get("/healthz")
 async def healthz():
     return {"ok": True}
@@ -195,6 +210,10 @@ async def healthz():
 # Dashboard
 @app.get("/", response_class=HTMLResponse, dependencies=[Depends(basic_guard)])
 async def dashboard(request: Request):
+    # if DB didn't connect yet, show a friendly message instead of erroring
+    if getattr(app.state, "db", None) is None:
+        return HTMLResponse("<h2>DB not ready yet. Try again in a few seconds.</h2>", status_code=503)
+
     async with app.state.db.acquire() as conn:
         rows = await conn.fetch("""
             SELECT DISTINCT
@@ -272,6 +291,9 @@ async def upload_image(
         cdn_base = os.getenv("CDN_BASE_URL") or os.getenv("PUBLIC_BASE_URL") or ""
         image_path = f"/static/images/{filename}"
         image_url = f"{cdn_base.rstrip('/')}{image_path}" if cdn_base else image_path
+
+        if getattr(app.state, "db", None) is None:
+            raise HTTPException(status_code=503, detail="Database not ready")
 
         async with app.state.db.acquire() as conn:
             if manufacturer or amount:
@@ -356,4 +378,5 @@ def custom_openapi():
 app.openapi = custom_openapi
 
 if __name__ == "__main__":
+    # For local dev only; on Railway you're using the start command.
     uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("PORT","8000")), reload=True, log_level="debug")
