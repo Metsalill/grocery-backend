@@ -1,18 +1,27 @@
-from fastapi import APIRouter, Request, Query
+from fastapi import APIRouter, Request, Query, HTTPException
 from typing import Optional
 
+# throttle decorator comes from main.py (or utils.throttle if you split it)
+from main import throttle
+
 router = APIRouter()
+
+MAX_LIMIT = 50  # hard cap to avoid huge pages
 
 def format_price(price) -> float:
     return round(float(price), 2)
 
 @router.get("/products")
+@throttle(limit=120, window=60)  # up to 120 req/min per IP for listing
 async def list_products(
     request: Request,
     q: Optional[str] = Query("", description="Search by product name"),
     offset: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=200),  # 🔹 default first 20
+    limit: int = Query(20, ge=1, le=200),  # UI hint; hard-capped below
 ):
+    # enforce server-side cap
+    limit = min(int(limit), MAX_LIMIT)
+
     like = f"%{q.strip()}%" if q else "%"
 
     async with request.app.state.db.acquire() as conn:
@@ -66,11 +75,17 @@ async def list_products(
     }
 
 @router.get("/search-products")
+@throttle(limit=30, window=60)  # tighter: search is a hot target
 async def search_products(
     request: Request,
-    query: str = Query(..., min_length=1)
+    query: str = Query(..., min_length=2)  # enforce min length
 ):
-    like = f"%{query.strip()}%"
+    q = query.strip()
+    # deny wildcard-only or junk queries that tend to be used by scrapers
+    if not q or set(q) <= {"%", "*"}:
+        raise HTTPException(status_code=400, detail="Query too broad")
+
+    like = f"%{q}%"
 
     async with request.app.state.db.acquire() as conn:
         rows = await conn.fetch("""
