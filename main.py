@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse   # ⬅️ add JSONResponse
 from dotenv import load_dotenv
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -140,62 +140,94 @@ async def dashboard():
 # Upload image once → apply to all matching products across stores (Basic Auth)
 @app.post("/upload", dependencies=[Depends(basic_guard)])
 async def upload_image(
+    request: Request,                                     # ⬅️ need Request to decide HTML vs JSON
     product: str = Form(...),
     image: UploadFile = Form(...),
     manufacturer: str = Form(""),
     amount: str = Form("")
 ):
-    # safe filename
-    safe_base = (
-        product.replace("/", "_")
-               .replace("\\", "_")
-               .replace(" ", "_")
-               .strip()
-    )
-    # keep original extension if present, default to .jpg
-    ext = os.path.splitext(image.filename or "")[1].lower() or ".jpg"
-    filename = f"{safe_base}{ext}"
+    def wants_html(req: Request) -> bool:
+        accept = (req.headers.get("accept") or "").lower()
+        return "text/html" in accept and "application/json" not in accept
 
-    # save under images dir (volume-backed if STATIC_DIR=/data/static)
-    file_path = os.path.join(IMAGES_DIR, filename)
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(image.file, buffer)
+    try:
+        # safe filename
+        safe_base = (
+            product.replace("/", "_")
+                   .replace("\\", "_")
+                   .replace(" ", "_")
+                   .strip()
+        )
+        # keep original extension if present, default to .jpg
+        ext = os.path.splitext(image.filename or "")[1].lower() or ".jpg"
+        filename = f"{safe_base}{ext}"
 
-    # build absolute (CDN) URL if configured; else relative
-    cdn_base = os.getenv("CDN_BASE_URL") or os.getenv("PUBLIC_BASE_URL") or ""
-    image_path = f"/static/images/{filename}"
-    image_url = f"{cdn_base.rstrip('/')}{image_path}" if cdn_base else image_path
+        # save under images dir (volume-backed if STATIC_DIR=/data/static)
+        file_path = os.path.join(IMAGES_DIR, filename)
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
 
-    # update ALL rows across stores for same product (+ optional manufacturer/amount)
-    async with app.state.db.acquire() as conn:
-        if manufacturer or amount:
-            await conn.execute("""
-                UPDATE prices
-                   SET image_url = $4,
-                       note = CASE WHEN note = 'Kontrolli visuaali!' THEN '' ELSE note END
-                 WHERE LOWER(product) = LOWER($1)
-                   AND LOWER(COALESCE(manufacturer,'')) = LOWER($2)
-                   AND LOWER(COALESCE(amount,'')) = LOWER($3)
-            """, product.strip(), manufacturer.strip(), amount.strip(), image_url)
-        else:
-            await conn.execute("""
-                UPDATE prices
-                   SET image_url = $2,
-                       note = CASE WHEN note = 'Kontrolli visuaali!' THEN '' ELSE note END
-                 WHERE LOWER(product) = LOWER($1)
-            """, product.strip(), image_url)
+        # build absolute (CDN) URL if configured; else relative
+        cdn_base = os.getenv("CDN_BASE_URL") or os.getenv("PUBLIC_BASE_URL") or ""
+        image_path = f"/static/images/{filename}"
+        image_url = f"{cdn_base.rstrip('/')}{image_path}" if cdn_base else image_path
 
-    saved = os.path.exists(file_path)
-    size_bytes = os.path.getsize(file_path) if saved else 0
+        # update ALL rows across stores for same product (+ optional manufacturer/amount)
+        async with app.state.db.acquire() as conn:
+            if manufacturer or amount:
+                status = await conn.execute("""
+                    UPDATE prices
+                       SET image_url = $4,
+                           note = CASE WHEN note = 'Kontrolli visuaali!' THEN '' ELSE note END
+                     WHERE LOWER(product) = LOWER($1)
+                       AND LOWER(COALESCE(manufacturer,'')) = LOWER($2)
+                       AND LOWER(COALESCE(amount,'')) = LOWER($3)
+                """, product.strip(), manufacturer.strip(), amount.strip(), image_url)
+            else:
+                status = await conn.execute("""
+                    UPDATE prices
+                       SET image_url = $2,
+                           note = CASE WHEN note = 'Kontrolli visuaali!' THEN '' ELSE note END
+                     WHERE LOWER(product) = LOWER($1)
+                """, product.strip(), image_url)
 
-    return {
-        "status": "success",
-        "product": product,
-        "image_url": image_url,
-        "saved": saved,
-        "bytes": size_bytes
-    }
+        updated_rows = 0
+        try:
+            updated_rows = int((status or "0").split()[-1])
+        except Exception:
+            pass
+
+        if wants_html(request):
+            # friendly confirmation page
+            html = f"""
+            <h2>✅ Image uploaded</h2>
+            <p><b>Product:</b> {product}</p>
+            <p><b>Rows updated:</b> {updated_rows}</p>
+            <p><img src="{image_url}" alt="{product}" style="max-width:520px;height:auto;border:1px solid #eee"/></p>
+            <p><a href="/">← Back to Missing Product Images</a></p>
+            """
+            return HTMLResponse(html)
+
+        # default JSON for API clients
+        saved = os.path.exists(file_path)
+        size_bytes = os.path.getsize(file_path) if saved else 0
+        return JSONResponse({
+            "status": "success",
+            "product": product,
+            "image_url": image_url,
+            "rows_updated": updated_rows,
+            "saved": saved,
+            "bytes": size_bytes
+        })
+
+    except Exception as e:
+        if wants_html(request):
+            return HTMLResponse(
+                f"<h2>❌ Upload failed</h2><pre>{str(e)}</pre><p><a href='/'>← Back</a></p>",
+                status_code=500
+            )
+        raise
 
 # Swagger bearer token support (for API docs)
 bearer_scheme = HTTPBearer()
