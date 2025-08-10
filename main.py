@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse  # ⬅️ added PlainTextResponse
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from dotenv import load_dotenv
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -15,8 +15,10 @@ import uvicorn
 import asyncpg
 import time
 import asyncio
-from functools import wraps
 from typing import Optional
+
+# import throttle from a helper to avoid circular imports
+from utils.throttle import throttle  # <-- make sure this file exists
 
 # --- Optional Redis (auto if REDIS_URL is set) ---
 try:
@@ -164,30 +166,6 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(RateLimitMiddleware)
 
-# --- Per-route throttle decorator ---
-def throttle(limit:int, window:int=60):
-    buckets = {}
-    lock = asyncio.Lock()
-    def decorator(fn):
-        @wraps(fn)
-        async def wrapper(*args, **kwargs):
-            request: Request = kwargs.get("request")
-            if not request:
-                for a in args:
-                    if isinstance(a, Request):
-                        request = a
-                        break
-            ip = request.client.host if request and request.client else "unknown"
-            name = fn.__name__
-            bucket = (ip, name, int(time.time()//window))
-            async with lock:
-                buckets[bucket] = buckets.get(bucket, 0) + 1
-                if buckets[bucket] > limit:
-                    raise HTTPException(status_code=429, detail="Too many requests")
-            return await fn(*args, **kwargs)
-        return wrapper
-    return decorator
-
 # --- DB Pool ---
 DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -306,77 +284,3 @@ async def upload_image(
                        AND LOWER(COALESCE(manufacturer,'')) = LOWER($2)
                        AND LOWER(COALESCE(amount,'')) = LOWER($3)
                 """, product.strip(), manufacturer.strip(), amount.strip(), image_url)
-            else:
-                status_txt = await conn.execute("""
-                    UPDATE prices
-                       SET image_url = $2,
-                           note = CASE WHEN note = 'Kontrolli visuaali!' THEN '' ELSE note END
-                     WHERE LOWER(product) = LOWER($1)
-                """, product.strip(), image_url)
-
-        updated_rows = 0
-        try:
-            updated_rows = int((status_txt or "0").split()[-1])
-        except Exception:
-            pass
-
-        if wants_html(request):
-            html = f"""
-            <h2>✅ Image uploaded</h2>
-            <p><b>Product:</b> {product}</p>
-            <p><b>Rows updated:</b> {updated_rows}</p>
-            <p><img src="{image_url}" alt="{product}" style="max-width:520px;height:auto;border:1px solid #eee"/></p>
-            <p><a href="/">← Back to Missing Product Images</a></p>
-            """
-            return HTMLResponse(html)
-
-        saved = os.path.exists(file_path)
-        size_bytes = os.path.getsize(file_path) if saved else 0
-        return JSONResponse({
-            "status": "success",
-            "product": product,
-            "image_url": image_url,
-            "rows_updated": updated_rows,
-            "saved": saved,
-            "bytes": size_bytes
-        })
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        if wants_html(request):
-            return HTMLResponse(
-                f"<h2>❌ Upload failed</h2><pre>{str(e)}</pre><p><a href='/'>← Back</a></p>",
-                status_code=500
-            )
-        raise
-
-# Swagger bearer token
-bearer_scheme = HTTPBearer()
-
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-    openapi_schema = get_openapi(
-        title="Grocery App",
-        version="1.0.0",
-        description="Compare prices, upload product data, and manage users",
-        routes=app.routes,
-    )
-    openapi_schema["components"]["securitySchemes"] = {
-        "BearerAuth": {
-            "type": "http",
-            "scheme": "bearer",
-            "bearerFormat": "JWT"
-        }
-    }
-    for path in openapi_schema["paths"].values():
-        for operation in path.values():
-            operation.setdefault("security", [{"BearerAuth": []}])
-    app.openapi_schema = openapi_schema
-    return app.openapi_schema
-
-app.openapi = custom_openapi
-
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("PORT","8000")), reload=True, log_level="debug")
