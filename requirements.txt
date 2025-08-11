@@ -10,6 +10,6 @@ python-jose[cryptography]
 passlib[bcrypt]
 pydantic[email]
 bcrypt==4.0.1
-python-dotenv
 geopy
-google-auth>=2.29.0
+google-auth[requests]>=2.29.0
+requests>=2.31.0
