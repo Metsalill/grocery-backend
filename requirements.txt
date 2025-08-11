@@ -12,4 +12,4 @@ pydantic[email]
 bcrypt==4.0.1
 python-dotenv
 geopy
-google-auth
+google-auth>=2.29.0
