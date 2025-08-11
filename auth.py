@@ -5,6 +5,10 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 import os
 
+# NEW: Google token verify
+from google.oauth2 import id_token as google_id_token
+from google.auth.transport import requests as google_requests
+
 router = APIRouter()
 
 # ===== JWT & password settings (top-level so they exist before use) =====
@@ -32,6 +36,10 @@ class TokenOut(BaseModel):
 class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
+
+# NEW: Google login input
+class GoogleLoginIn(BaseModel):
+    id_token: str
 
 # ===== Helpers =====
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
@@ -145,6 +153,59 @@ async def login(user: LoginUser, request: Request):
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
     return {"access_token": access_token}
+
+# NEW: Google login/registration (mobile-friendly, verifies ID token)
+@router.post("/auth/login/google", response_model=TokenOut)
+async def login_with_google(payload: GoogleLoginIn, request: Request):
+    audience = os.getenv("GOOGLE_AUDIENCE")
+    if not audience:
+        raise HTTPException(status_code=500, detail="Server missing GOOGLE_AUDIENCE")
+
+    try:
+        claims = google_id_token.verify_oauth2_token(
+            payload.id_token,
+            google_requests.Request(),
+            audience,
+        )
+        # Optional: issuer check
+        allowed_issuers = (os.getenv("GOOGLE_ALLOWED_ISSUERS") or "https://accounts.google.com,accounts.google.com").split(",")
+        if claims.get("iss") not in allowed_issuers:
+            raise ValueError("Invalid token issuer")
+
+        email = (claims.get("email") or "").lower()
+        if not email or not claims.get("email_verified", False):
+            raise ValueError("Email not present/verified")
+
+        first_name = claims.get("given_name") or (claims.get("name") or "").split(" ")[0] if claims.get("name") else ""
+        last_name = claims.get("family_name") or ""
+
+        pool = _db_pool_or_503(request)
+        async with pool.acquire() as conn:
+            existing = await conn.fetchrow(
+                "SELECT email FROM users WHERE LOWER(email) = LOWER($1) AND deleted_at IS NULL",
+                email,
+            )
+            if not existing:
+                # passwordless account for Google sign-in
+                await conn.execute(
+                    """
+                    INSERT INTO users (email, password_hash, first_name, last_name, phone, role)
+                    VALUES ($1, NULL, $2, $3, '', 'regular')
+                    """,
+                    email, first_name, last_name,
+                )
+
+        access_token = create_access_token(
+            data={"sub": email},
+            expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+        )
+        return {"access_token": access_token}
+
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+    except Exception as e:
+        print("❌ GOOGLE LOGIN ERROR:", str(e))
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Google token")
 
 @router.get("/me")
 async def read_current_user(user=Depends(get_current_user)):
