@@ -5,13 +5,13 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 import os
 
-# NEW: Google token verify
+# Google token verify
 from google.oauth2 import id_token as google_id_token
 from google.auth.transport import requests as google_requests
 
 router = APIRouter()
 
-# ===== JWT & password settings (top-level so they exist before use) =====
+# ===== JWT & password settings =====
 SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-key")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
@@ -37,7 +37,6 @@ class ResetPasswordRequest(BaseModel):
     token: str
     new_password: str
 
-# NEW: Google login input
 class GoogleLoginIn(BaseModel):
     id_token: str
 
@@ -52,12 +51,14 @@ def create_reset_token(email: str) -> str:
     expire = datetime.utcnow() + timedelta(minutes=15)
     return jwt.encode({"sub": email, "exp": expire, "scope": "password_reset"}, SECRET_KEY, algorithm=ALGORITHM)
 
-# >>> UPDATED: null-safe password verification
+# Null-safe password verify (SSO users have NULL password_hash)
 def verify_password(plain_password, hashed_password) -> bool:
-    # If the account has no password (e.g., Google SSO), do not attempt to verify
-    if not hashed_password:               # handles None or empty string
+    if not hashed_password:
         return False
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        return pwd_context.verify(plain_password, hashed_password)
+    except Exception:
+        return False
 
 def get_password_hash(password) -> str:
     return pwd_context.hash(password)
@@ -120,15 +121,19 @@ async def register(user: UserIn, request: Request):
         email = user.email.lower()
         pool = _db_pool_or_503(request)
         async with pool.acquire() as conn:
-            existing = await conn.fetchrow("SELECT 1 FROM users WHERE LOWER(email) = LOWER($1)", email)
+            existing = await conn.fetchrow(
+                "SELECT 1 FROM users WHERE LOWER(email) = LOWER($1)",
+                email
+            )
             if existing:
                 raise HTTPException(status_code=400, detail="Email already registered")
 
             hashed_pw = get_password_hash(user.password)
+            # Local (password) account
             await conn.execute(
                 """
-                INSERT INTO users (email, password_hash, first_name, last_name, phone, role)
-                VALUES ($1, $2, $3, $4, $5, 'regular')
+                INSERT INTO users (email, password_hash, first_name, last_name, phone, role, auth_provider, email_verified)
+                VALUES ($1, $2, $3, $4, $5, 'regular', 'local', false)
                 """,
                 email, hashed_pw, user.first_name, user.last_name, user.phone
             )
@@ -140,7 +145,6 @@ async def register(user: UserIn, request: Request):
         print("❌ REGISTER ERROR:", str(e))
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
-# >>> UPDATED: safer classic login (blocks SSO-only accounts)
 @router.post("/login", response_model=TokenOut)
 async def login(user: LoginUser, request: Request):
     email = user.email.lower()
@@ -148,7 +152,7 @@ async def login(user: LoginUser, request: Request):
     async with pool.acquire() as conn:
         db_user = await conn.fetchrow(
             """
-            SELECT email, password_hash
+            SELECT email, password_hash, auth_provider
             FROM users
             WHERE LOWER(email) = LOWER($1) AND deleted_at IS NULL
             """,
@@ -158,8 +162,8 @@ async def login(user: LoginUser, request: Request):
         if not db_user:
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
-        # If password_hash is NULL, this account was created via SSO
-        if not db_user["password_hash"]:
+        # Block SSO-only accounts from password login
+        if db_user.get("auth_provider") != "local":
             raise HTTPException(
                 status_code=401,
                 detail="This account uses Google sign-in. Use 'Continue with Google' or reset your password."
@@ -174,7 +178,7 @@ async def login(user: LoginUser, request: Request):
     )
     return {"access_token": access_token}
 
-# NEW: Google login/registration (mobile-friendly, verifies ID token)
+# Google login/registration (verifies ID token)
 @router.post("/auth/login/google", response_model=TokenOut)
 async def login_with_google(payload: GoogleLoginIn, request: Request):
     audience = os.getenv("GOOGLE_AUDIENCE")
@@ -187,8 +191,9 @@ async def login_with_google(payload: GoogleLoginIn, request: Request):
             google_requests.Request(),
             audience,
         )
-        # Optional: issuer check
-        allowed_issuers = (os.getenv("GOOGLE_ALLOWED_ISSUERS") or "https://accounts.google.com,accounts.google.com").split(",")
+
+        allowed_issuers = (os.getenv("GOOGLE_ALLOWED_ISSUERS") or
+                           "https://accounts.google.com,accounts.google.com").split(",")
         if claims.get("iss") not in allowed_issuers:
             raise ValueError("Invalid token issuer")
 
@@ -196,21 +201,22 @@ async def login_with_google(payload: GoogleLoginIn, request: Request):
         if not email or not claims.get("email_verified", False):
             raise ValueError("Email not present/verified")
 
-        # names are optional in Google profile
         first_name = claims.get("given_name") or ((claims.get("name") or "").split(" ")[0] if claims.get("name") else "")
         last_name = claims.get("family_name") or ""
 
         pool = _db_pool_or_503(request)
         async with pool.acquire() as conn:
-            # Idempotent, passwordless insert/update. Never writes password_hash.
+            # Upsert Google user. Never set a password_hash.
             await conn.execute(
                 """
-                INSERT INTO users (email, password_hash, first_name, last_name, phone, role)
-                VALUES ($1, NULL, $2, $3, '', 'regular')
+                INSERT INTO users (email, password_hash, first_name, last_name, phone, role, auth_provider, email_verified)
+                VALUES ($1, NULL, $2, $3, '', 'regular', 'google', true)
                 ON CONFLICT (email)
                 DO UPDATE SET
-                    first_name = EXCLUDED.first_name,
-                    last_name  = EXCLUDED.last_name
+                    first_name     = EXCLUDED.first_name,
+                    last_name      = EXCLUDED.last_name,
+                    auth_provider  = 'google',
+                    email_verified = true
                 """,
                 email, first_name, last_name,
             )
@@ -300,6 +306,9 @@ async def reset_password(data: ResetPasswordRequest, request: Request):
     hashed_pw = get_password_hash(data.new_password)
     pool = _db_pool_or_503(request)
     async with pool.acquire() as conn:
-        await conn.execute("UPDATE users SET password_hash = $1 WHERE LOWER(email) = LOWER($2)", hashed_pw, email)
+        await conn.execute(
+            "UPDATE users SET password_hash = $1, auth_provider = 'local' WHERE LOWER(email) = LOWER($2)",
+            hashed_pw, email
+        )
 
     return {"status": "success", "message": "Password reset successful"}
