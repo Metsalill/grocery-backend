@@ -7,13 +7,15 @@ import asyncio
 import asyncpg
 
 from auth import get_current_user
-from settings import get_db_pool             # returns asyncpg pool
-from compare import compute_compare          # reusable core
+from settings import get_db_pool
+from compare import compute_compare
 
 router = APIRouter(prefix="/basket-history", tags=["basket-history"])
 
+
 def get_user_id(user):
     return user["id"] if isinstance(user, dict) else getattr(user, "id", None)
+
 
 # ---------- Schemas ----------
 class BasketItemIn(BaseModel):
@@ -24,13 +26,15 @@ class BasketItemIn(BaseModel):
     size_text: Optional[str] = None
     image_url: Optional[str] = None
 
+
 class SaveBasketIn(BaseModel):
     items: List[BasketItemIn]
-    lat: float                                # needed for compare
-    lon: float                                # needed for compare
+    lat: float
+    lon: float
     radius_km: float = 10.0
-    selected_store_id: Optional[int] = None   # if client wants to force a store
+    selected_store_id: Optional[int] = None
     note: Optional[str] = None
+
 
 class BasketSummaryOut(BaseModel):
     id: int
@@ -38,6 +42,7 @@ class BasketSummaryOut(BaseModel):
     winner_store_name: Optional[str]
     winner_total: Optional[float]
     radius_km: Optional[float]
+
 
 class BasketDetailOut(BaseModel):
     id: int
@@ -50,17 +55,14 @@ class BasketDetailOut(BaseModel):
     note: Optional[str]
     items: List[dict]
 
+
 # ---------- Routes ----------
 @router.post("", response_model=BasketSummaryOut)
 async def save_basket(
     payload: SaveBasketIn,
-    user = Depends(get_current_user),
+    user=Depends(get_current_user),
     pool: asyncpg.pool.Pool = Depends(get_db_pool),
 ):
-    """
-    Saves a snapshot of the user's basket. Uses compute_compare(...) to price items,
-    picks the winner (or selected_store_id), and persists header + items.
-    """
     uid = get_user_id(user)
     if not uid:
         raise HTTPException(status_code=401, detail="Unauthorized")
@@ -79,7 +81,7 @@ async def save_basket(
     if not stores:
         raise HTTPException(status_code=400, detail="No stores found within given radius")
 
-    # 2) Decide winner store
+    # 2) Decide winner
     stores_sorted = sorted(stores, key=lambda s: s["total"])
     winner = None
     if payload.selected_store_id is not None:
@@ -92,8 +94,10 @@ async def save_basket(
         async with conn.transaction():
             head = await conn.fetchrow(
                 """
-                INSERT INTO basket_history (user_id, radius_km, winner_store_id, winner_store_name, winner_total, stores, note)
-                VALUES ($1,$2,$3,$4,$5,$6,$7)
+                INSERT INTO basket_history (
+                    user_id, radius_km, winner_store_id, winner_store_name,
+                    winner_total, stores, note
+                ) VALUES ($1,$2,$3,$4,$5,$6,$7)
                 RETURNING id, created_at, winner_store_name, winner_total, radius_km
                 """,
                 uid,
@@ -101,12 +105,12 @@ async def save_basket(
                 winner["store_id"],
                 winner["store_name"],
                 winner["total"],
-                stores,                     # JSONB snapshot of all stores
+                stores,
                 payload.note,
             )
             basket_id = head["id"]
 
-            # map per-product price info from the winner
+            # map per-product price info from winner
             price_map = { (i.get("product") or "").strip().lower(): i for i in (winner.get("items") or []) }
 
             tasks = []
@@ -145,9 +149,10 @@ async def save_basket(
         radius_km=float(head["radius_km"]) if head["radius_km"] is not None else None,
     )
 
+
 @router.get("", response_model=List[BasketSummaryOut])
 async def list_baskets(
-    user = Depends(get_current_user),
+    user=Depends(get_current_user),
     pool: asyncpg.pool.Pool = Depends(get_db_pool),
 ):
     uid = get_user_id(user)
@@ -171,10 +176,11 @@ async def list_baskets(
         for r in rows
     ]
 
+
 @router.get("/{basket_id}", response_model=BasketDetailOut)
 async def get_basket(
     basket_id: int,
-    user = Depends(get_current_user),
+    user=Depends(get_current_user),
     pool: asyncpg.pool.Pool = Depends(get_db_pool),
 ):
     uid = get_user_id(user)
@@ -212,10 +218,11 @@ async def get_basket(
         items=[dict(r) for r in items],
     )
 
+
 @router.delete("/{basket_id}")
 async def delete_basket(
     basket_id: int,
-    user = Depends(get_current_user),
+    user=Depends(get_current_user),
     pool: asyncpg.pool.Pool = Depends(get_db_pool),
 ):
     uid = get_user_id(user)
