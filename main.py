@@ -20,6 +20,7 @@ from compare import router as compare_router
 from products import router as products_router
 from upload_prices import router as upload_router
 from admin.routes import router as admin_router  # dashboard + upload
+from basket_history import router as basket_history_router   # <-- NEW
 
 logger = logging.getLogger("uvicorn.error")
 os.makedirs(IMAGES_DIR, exist_ok=True)
@@ -77,12 +78,19 @@ app.include_router(auth_router)
 app.include_router(compare_router)
 app.include_router(products_router)
 app.include_router(upload_router)
-app.include_router(admin_router)  # "/" dashboard + /upload
+app.include_router(admin_router)                 # "/" dashboard + /upload
+app.include_router(basket_history_router)        # <-- NEW
 
 # robots.txt + health
 @app.get("/robots.txt", response_class=PlainTextResponse)
 async def robots():
-    return "User-agent: *\nDisallow: /products\nDisallow: /search-products\nDisallow: /compare\n"
+    return (
+        "User-agent: *\n"
+        "Disallow: /products\n"
+        "Disallow: /search-products\n"
+        "Disallow: /compare\n"
+        "Disallow: /basket-history\n"            # <-- NEW
+    )
 
 @app.get("/healthz", response_class=PlainTextResponse)
 async def healthz():
