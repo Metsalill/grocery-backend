@@ -6,6 +6,7 @@ from datetime import datetime
 import asyncio
 import asyncpg
 import json
+import traceback  # <= for detailed error logs
 
 from auth import get_current_user
 from settings import get_db_pool
@@ -108,7 +109,7 @@ async def save_basket(
         raise HTTPException(status_code=400, detail="No valid winner store found")
 
     # Resolve winner fields with safe fallbacks
-    winner_store_id = winner.get("store_id")
+    winner_store_id = winner.get("store_id")  # keep None if your DB allows NULL here
     winner_store_name = (winner.get("store_name") or "Unknown store").strip()
     winner_total = float(winner.get("total") or 0.0)
     winner_total = max(0.0, min(round(winner_total, 2), 9999.99))  # clamp to numeric(6,2)-ish
@@ -187,6 +188,7 @@ async def save_basket(
                 "items_count": len(payload.items),
             },
         )
+        traceback.print_exc()
         raise
 
     return BasketSummaryOut(
