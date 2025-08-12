@@ -5,6 +5,7 @@ from typing import List, Optional
 from datetime import datetime
 import asyncio
 import asyncpg
+import json  # <-- NEW
 
 from auth import get_current_user
 from settings import get_db_pool
@@ -80,15 +81,14 @@ async def save_basket(
     # ---- Normalize compare payload to a 'stores' list (new or legacy shape) ----
     stores = cmp.get("stores")
     if not stores:
-        # legacy: {results:[{store,total,distance_km}], totals:{...}}
         legacy_results = cmp.get("results") or []
         stores = [
             {
-                "store_id": None,  # unknown in legacy response
+                "store_id": None,
                 "store_name": r.get("store"),
                 "total": float(r.get("total", 0)),
                 "distance_km": r.get("distance_km"),
-                "items": [],  # no per-item breakdown available
+                "items": [],
             }
             for r in legacy_results
             if r.get("store") is not None
@@ -113,7 +113,7 @@ async def save_basket(
                 INSERT INTO basket_history (
                     user_id, radius_km, winner_store_id, winner_store_name,
                     winner_total, stores, note
-                ) VALUES ($1,$2,$3,$4,$5,$6,$7)
+                ) VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7)
                 RETURNING id, created_at, winner_store_name, winner_total, radius_km
                 """,
                 uid,
@@ -121,7 +121,7 @@ async def save_basket(
                 winner.get("store_id"),
                 winner.get("store_name"),
                 float(winner.get("total") or 0),
-                stores,  # JSONB snapshot of all candidate stores
+                json.dumps(stores),  # <-- serialize to JSON for jsonb column
                 payload.note,
             )
             basket_id = head["id"]
