@@ -15,8 +15,29 @@ from compare import compute_compare
 router = APIRouter(prefix="/basket-history", tags=["basket-history"])
 
 
+# ---------- helpers ----------
 def get_user_id(user):
-    return user["id"] if isinstance(user, dict) else getattr(user, "id", None)
+    """
+    Be tolerant about the shape coming from get_current_user().
+    Accept dicts or objects with any of: id, user_id, uid, sub.
+    """
+    if not user:
+        return None
+
+    if isinstance(user, dict):
+        return (
+            user.get("id")
+            or user.get("user_id")
+            or user.get("uid")
+            or user.get("sub")
+        )
+
+    return (
+        getattr(user, "id", None)
+        or getattr(user, "user_id", None)
+        or getattr(user, "uid", None)
+        or getattr(user, "sub", None)
+    )
 
 
 # ---------- Schemas ----------
@@ -65,8 +86,11 @@ async def save_basket(
     user=Depends(get_current_user),
     pool: asyncpg.pool.Pool = Depends(get_db_pool),
 ):
-    uid = get_user_id(user)
+    raw_uid = get_user_id(user)
+    uid = str(raw_uid) if raw_uid is not None else ""
     if not uid:
+        # Tiny breadcrumb so we can see what shape we got
+        print("AUTH_USER_SHAPE_DEBUG(save_basket):", type(user).__name__, getattr(user, "__dict__", None))
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     # 1) Compute pricing snapshot
@@ -178,7 +202,7 @@ async def save_basket(
             type(e).__name__,
             str(e),
             {
-                "uid": str(uid),
+                "uid": uid,
                 "radius_km": payload.radius_km,
                 "winner_store_id": winner_store_id,
                 "winner_store_name": winner_store_name,
@@ -205,7 +229,12 @@ async def list_baskets(
     user=Depends(get_current_user),
     pool: asyncpg.pool.Pool = Depends(get_db_pool),
 ):
-    uid = get_user_id(user)
+    raw_uid = get_user_id(user)
+    uid = str(raw_uid) if raw_uid is not None else ""
+    if not uid:
+        print("AUTH_USER_SHAPE_DEBUG(list_baskets):", type(user).__name__, getattr(user, "__dict__", None))
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
     rows = await pool.fetch(
         """
         SELECT id, created_at, winner_store_name, winner_total, radius_km
@@ -233,7 +262,12 @@ async def get_basket(
     user=Depends(get_current_user),
     pool: asyncpg.pool.Pool = Depends(get_db_pool),
 ):
-    uid = get_user_id(user)
+    raw_uid = get_user_id(user)
+    uid = str(raw_uid) if raw_uid is not None else ""
+    if not uid:
+        print("AUTH_USER_SHAPE_DEBUG(get_basket):", type(user).__name__, getattr(user, "__dict__", None))
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
     head = await pool.fetchrow(
         """
         SELECT id, created_at, radius_km, winner_store_id, winner_store_name, winner_total, stores, note
@@ -275,7 +309,12 @@ async def delete_basket(
     user=Depends(get_current_user),
     pool: asyncpg.pool.Pool = Depends(get_db_pool),
 ):
-    uid = get_user_id(user)
+    raw_uid = get_user_id(user)
+    uid = str(raw_uid) if raw_uid is not None else ""
+    if not uid:
+        print("AUTH_USER_SHAPE_DEBUG(delete_basket):", type(user).__name__, getattr(user, "__dict__", None))
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
     res = await pool.execute(
         """
         UPDATE basket_history
