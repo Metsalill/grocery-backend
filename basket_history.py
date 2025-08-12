@@ -77,7 +77,23 @@ async def save_basket(
         radius_km=payload.radius_km,
     )
 
-    stores = cmp.get("stores") or []
+    # ---- Normalize compare payload to a 'stores' list (new or legacy shape) ----
+    stores = cmp.get("stores")
+    if not stores:
+        # legacy: {results:[{store,total,distance_km}], totals:{...}}
+        legacy_results = cmp.get("results") or []
+        stores = [
+            {
+                "store_id": None,  # unknown in legacy response
+                "store_name": r.get("store"),
+                "total": float(r.get("total", 0)),
+                "distance_km": r.get("distance_km"),
+                "items": [],  # no per-item breakdown available
+            }
+            for r in legacy_results
+            if r.get("store") is not None
+        ]
+
     if not stores:
         raise HTTPException(status_code=400, detail="No stores found within given radius")
 
@@ -85,7 +101,7 @@ async def save_basket(
     stores_sorted = sorted(stores, key=lambda s: s["total"])
     winner = None
     if payload.selected_store_id is not None:
-        winner = next((s for s in stores_sorted if s["store_id"] == payload.selected_store_id), None)
+        winner = next((s for s in stores_sorted if s.get("store_id") == payload.selected_store_id), None)
     if winner is None:
         winner = stores_sorted[0]
 
@@ -102,16 +118,19 @@ async def save_basket(
                 """,
                 uid,
                 payload.radius_km,
-                winner["store_id"],
-                winner["store_name"],
-                winner["total"],
-                stores,
+                winner.get("store_id"),
+                winner.get("store_name"),
+                float(winner.get("total") or 0),
+                stores,  # JSONB snapshot of all candidate stores
                 payload.note,
             )
             basket_id = head["id"]
 
-            # map per-product price info from winner
-            price_map = { (i.get("product") or "").strip().lower(): i for i in (winner.get("items") or []) }
+            # map per-product price info from winner (may be empty in legacy path)
+            price_map = {
+                (i.get("product") or "").strip().lower(): i
+                for i in (winner.get("items") or [])
+            }
 
             tasks = []
             for it in payload.items:
@@ -133,8 +152,8 @@ async def save_basket(
                     it.unit,
                     price,
                     line_total,
-                    winner["store_id"],
-                    winner["store_name"],
+                    winner.get("store_id"),
+                    winner.get("store_name"),
                     it.image_url,
                     it.brand,
                     it.size_text,
