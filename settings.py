@@ -1,6 +1,8 @@
 # settings.py
 import os
 from dotenv import load_dotenv
+from fastapi import Request, HTTPException
+import asyncpg
 
 load_dotenv()
 
@@ -30,3 +32,15 @@ WINDOW = 60
 
 CDN_BASE_URL = os.getenv("CDN_BASE_URL") or os.getenv("PUBLIC_BASE_URL") or ""
 MAX_UPLOAD_MB = int(os.getenv("MAX_IMAGE_MB", "6"))
+
+
+# ---- Helper for accessing DB pool in routes ----
+def get_db_pool(request: Request) -> asyncpg.pool.Pool:
+    """
+    Dependency to fetch the asyncpg pool from app.state.
+    Raises HTTPException if the pool is missing (e.g., before startup).
+    """
+    pool = getattr(request.app.state, "db", None)
+    if pool is None:
+        raise HTTPException(status_code=500, detail="DB pool not initialized")
+    return pool
