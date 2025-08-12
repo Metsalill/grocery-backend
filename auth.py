@@ -52,7 +52,11 @@ def create_reset_token(email: str) -> str:
     expire = datetime.utcnow() + timedelta(minutes=15)
     return jwt.encode({"sub": email, "exp": expire, "scope": "password_reset"}, SECRET_KEY, algorithm=ALGORITHM)
 
+# >>> UPDATED: null-safe password verification
 def verify_password(plain_password, hashed_password) -> bool:
+    # If the account has no password (e.g., Google SSO), do not attempt to verify
+    if not hashed_password:               # handles None or empty string
+        return False
     return pwd_context.verify(plain_password, hashed_password)
 
 def get_password_hash(password) -> str:
@@ -136,16 +140,32 @@ async def register(user: UserIn, request: Request):
         print("❌ REGISTER ERROR:", str(e))
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
+# >>> UPDATED: safer classic login (blocks SSO-only accounts)
 @router.post("/login", response_model=TokenOut)
 async def login(user: LoginUser, request: Request):
     email = user.email.lower()
     pool = _db_pool_or_503(request)
     async with pool.acquire() as conn:
         db_user = await conn.fetchrow(
-            "SELECT * FROM users WHERE LOWER(email) = LOWER($1) AND deleted_at IS NULL",
+            """
+            SELECT email, password_hash
+            FROM users
+            WHERE LOWER(email) = LOWER($1) AND deleted_at IS NULL
+            """,
             email
         )
-        if not db_user or not verify_password(user.password, db_user["password_hash"]):
+
+        if not db_user:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+
+        # If password_hash is NULL, this account was created via SSO
+        if not db_user["password_hash"]:
+            raise HTTPException(
+                status_code=401,
+                detail="This account uses Google sign-in. Use 'Continue with Google' or reset your password."
+            )
+
+        if not verify_password(user.password, db_user["password_hash"]):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
     access_token = create_access_token(
@@ -176,24 +196,24 @@ async def login_with_google(payload: GoogleLoginIn, request: Request):
         if not email or not claims.get("email_verified", False):
             raise ValueError("Email not present/verified")
 
-        first_name = claims.get("given_name") or (claims.get("name") or "").split(" ")[0] if claims.get("name") else ""
+        # names are optional in Google profile
+        first_name = claims.get("given_name") or ((claims.get("name") or "").split(" ")[0] if claims.get("name") else "")
         last_name = claims.get("family_name") or ""
 
         pool = _db_pool_or_503(request)
         async with pool.acquire() as conn:
-            existing = await conn.fetchrow(
-                "SELECT email FROM users WHERE LOWER(email) = LOWER($1) AND deleted_at IS NULL",
-                email,
+            # Idempotent, passwordless insert/update. Never writes password_hash.
+            await conn.execute(
+                """
+                INSERT INTO users (email, password_hash, first_name, last_name, phone, role)
+                VALUES ($1, NULL, $2, $3, '', 'regular')
+                ON CONFLICT (email)
+                DO UPDATE SET
+                    first_name = EXCLUDED.first_name,
+                    last_name  = EXCLUDED.last_name
+                """,
+                email, first_name, last_name,
             )
-            if not existing:
-                # passwordless account for Google sign-in
-                await conn.execute(
-                    """
-                    INSERT INTO users (email, password_hash, first_name, last_name, phone, role)
-                    VALUES ($1, NULL, $2, $3, '', 'regular')
-                    """,
-                    email, first_name, last_name,
-                )
 
         access_token = create_access_token(
             data={"sub": email},
