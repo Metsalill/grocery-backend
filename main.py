@@ -2,10 +2,12 @@
 import os
 import logging
 import asyncpg
+import traceback  # <-- NEW
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.base import BaseHTTPMiddleware  # <-- NEW
 
 from settings import (
     ENABLE_DOCS, STATIC_DIR, IMAGES_DIR,
@@ -19,8 +21,8 @@ from auth import router as auth_router
 from compare import router as compare_router
 from products import router as products_router
 from upload_prices import router as upload_router
-from admin.routes import router as admin_router  # dashboard + upload
-from basket_history import router as basket_history_router   # <-- NEW
+from admin.routes import router as admin_router
+from basket_history import router as basket_history_router
 
 logger = logging.getLogger("uvicorn.error")
 os.makedirs(IMAGES_DIR, exist_ok=True)
@@ -32,6 +34,21 @@ app = FastAPI(
     redoc_url="/redoc" if ENABLE_DOCS else None,
     openapi_url="/openapi.json" if ENABLE_DOCS else None,
 )
+
+# --- Traceback middleware (DEV helper) ---
+class TraceLogMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        try:
+            return await call_next(request)
+        except Exception:
+            logger.error("\n===== UNCAUGHT EXCEPTION =====")
+            logger.error("Path: %s %s", request.method, request.url.path)
+            logger.error(traceback.format_exc())
+            logger.error("===== END TRACE =====\n")
+            raise
+
+app.add_middleware(TraceLogMiddleware)
+# -----------------------------------------
 
 # Static + headers
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -78,8 +95,8 @@ app.include_router(auth_router)
 app.include_router(compare_router)
 app.include_router(products_router)
 app.include_router(upload_router)
-app.include_router(admin_router)                 # "/" dashboard + /upload
-app.include_router(basket_history_router)        # <-- NEW
+app.include_router(admin_router)
+app.include_router(basket_history_router)
 
 # robots.txt + health
 @app.get("/robots.txt", response_class=PlainTextResponse)
@@ -89,7 +106,7 @@ async def robots():
         "Disallow: /products\n"
         "Disallow: /search-products\n"
         "Disallow: /compare\n"
-        "Disallow: /basket-history\n"            # <-- NEW
+        "Disallow: /basket-history\n"
     )
 
 @app.get("/healthz", response_class=PlainTextResponse)
