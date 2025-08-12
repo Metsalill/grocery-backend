@@ -111,8 +111,7 @@ async def save_basket(
     winner_store_id = winner.get("store_id")
     winner_store_name = (winner.get("store_name") or "Unknown store").strip()
     winner_total = float(winner.get("total") or 0.0)
-    # keep within numeric(6,2) range just in case
-    winner_total = max(0.0, min(round(winner_total, 2), 9999.99))
+    winner_total = max(0.0, min(round(winner_total, 2), 9999.99))  # clamp to numeric(6,2)-ish
 
     # Serialize candidate stores for jsonb
     stores_json = json.dumps(stores, ensure_ascii=False)
@@ -126,7 +125,7 @@ async def save_basket(
                     INSERT INTO basket_history (
                         user_id, radius_km, winner_store_id, winner_store_name,
                         winner_total, stores, note
-                    ) VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7)
+                    ) VALUES ($1::uuid,$2,$3,$4,$5,$6::jsonb,$7)
                     RETURNING id, created_at, winner_store_name, winner_total, radius_km
                     """,
                     uid,
@@ -173,7 +172,6 @@ async def save_basket(
                     ))
                 await asyncio.gather(*tasks)
     except Exception as e:
-        # One concise log line to Railway
         print(
             "SAVE_BASKET_ERROR:",
             type(e).__name__,
@@ -210,7 +208,7 @@ async def list_baskets(
         """
         SELECT id, created_at, winner_store_name, winner_total, radius_km
         FROM basket_history
-        WHERE user_id=$1 AND deleted_at IS NULL
+        WHERE user_id=$1::uuid AND deleted_at IS NULL
         ORDER BY created_at DESC
         """,
         uid,
@@ -238,7 +236,7 @@ async def get_basket(
         """
         SELECT id, created_at, radius_km, winner_store_id, winner_store_name, winner_total, stores, note
         FROM basket_history
-        WHERE id=$1 AND user_id=$2 AND deleted_at IS NULL
+        WHERE id=$1 AND user_id=$2::uuid AND deleted_at IS NULL
         """,
         basket_id,
         uid,
@@ -280,7 +278,7 @@ async def delete_basket(
         """
         UPDATE basket_history
         SET deleted_at = NOW()
-        WHERE id=$1 AND user_id=$2 AND deleted_at IS NULL
+        WHERE id=$1 AND user_id=$2::uuid AND deleted_at IS NULL
         """,
         basket_id,
         uid,
