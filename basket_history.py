@@ -88,7 +88,7 @@ async def save_basket(
                 "store_name": r.get("store"),
                 "total": float(r.get("total", 0) or 0),
                 "distance_km": r.get("distance_km"),
-                "items": [],  # no per-item breakdown available in legacy
+                "items": [],  # legacy: no per-item breakdown
             }
             for r in legacy_results
             if r.get("store") is not None
@@ -109,70 +109,87 @@ async def save_basket(
 
     # Resolve winner fields with safe fallbacks
     winner_store_id = winner.get("store_id")
-    winner_store_name = winner.get("store_name") or "Unknown store"
-    winner_total = float(winner.get("total") or 0)
-
-    # If your DB column were NOT NULL, you could force a sentinel like 0:
-    # if winner_store_id is None:
-    #     winner_store_id = 0
+    winner_store_name = (winner.get("store_name") or "Unknown store").strip()
+    winner_total = float(winner.get("total") or 0.0)
+    # keep within numeric(6,2) range just in case
+    winner_total = max(0.0, min(round(winner_total, 2), 9999.99))
 
     # Serialize candidate stores for jsonb
     stores_json = json.dumps(stores, ensure_ascii=False)
 
-    # 4) Persist header + items
-    async with pool.acquire() as conn:
-        async with conn.transaction():
-            head = await conn.fetchrow(
-                """
-                INSERT INTO basket_history (
-                    user_id, radius_km, winner_store_id, winner_store_name,
-                    winner_total, stores, note
-                ) VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7)
-                RETURNING id, created_at, winner_store_name, winner_total, radius_km
-                """,
-                uid,
-                payload.radius_km,
-                winner_store_id,
-                winner_store_name,
-                winner_total,
-                stores_json,
-                payload.note,
-            )
-            basket_id = head["id"]
-
-            # Map per-product price info from winner (may be empty in legacy path)
-            price_map = {
-                (i.get("product") or "").strip().lower(): i
-                for i in (winner.get("items") or [])
-            }
-
-            tasks = []
-            for it in payload.items:
-                key = (it.product or "").strip().lower()
-                pinfo = price_map.get(key)
-                price = float(pinfo["price"]) if (pinfo and pinfo.get("price") is not None) else None
-                line_total = (price * float(it.quantity)) if price is not None else None
-
-                tasks.append(conn.execute(
+    # 4) Persist header + items (guarded for clearer error logs)
+    try:
+        async with pool.acquire() as conn:
+            async with conn.transaction():
+                head = await conn.fetchrow(
                     """
-                    INSERT INTO basket_items (
-                        basket_id, product, quantity, unit, price, line_total,
-                        store_id, store_name, image_url, brand, size_text
-                    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+                    INSERT INTO basket_history (
+                        user_id, radius_km, winner_store_id, winner_store_name,
+                        winner_total, stores, note
+                    ) VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7)
+                    RETURNING id, created_at, winner_store_name, winner_total, radius_km
                     """,
-                    basket_id,
-                    it.product,
-                    float(it.quantity),
-                    it.unit,
-                    price,
-                    line_total,
+                    uid,
+                    payload.radius_km,
                     winner_store_id,
                     winner_store_name,
-                    it.image_url,
-                    it.brand,
-                    it.size_text,
-                ))
-            await asyncio.gather(*tasks)
+                    winner_total,
+                    stores_json,
+                    payload.note,
+                )
+                basket_id = head["id"]
+
+                # Map per-product price info from winner (may be empty in legacy path)
+                price_map = {
+                    (i.get("product") or "").strip().lower(): i
+                    for i in (winner.get("items") or [])
+                }
+
+                tasks = []
+                for it in payload.items:
+                    key = (it.product or "").strip().lower()
+                    pinfo = price_map.get(key)
+                    price = float(pinfo["price"]) if (pinfo and pinfo.get("price") is not None) else None
+                    line_total = (price * float(it.quantity)) if price is not None else None
+
+                    tasks.append(conn.execute(
+                        """
+                        INSERT INTO basket_items (
+                            basket_id, product, quantity, unit, price, line_total,
+                            store_id, store_name, image_url, brand, size_text
+                        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+                        """,
+                        basket_id,
+                        it.product,
+                        float(it.quantity),
+                        it.unit,
+                        price,
+                        line_total,
+                        winner_store_id,
+                        winner_store_name,
+                        it.image_url,
+                        it.brand,
+                        it.size_text,
+                    ))
+                await asyncio.gather(*tasks)
+    except Exception as e:
+        # One concise log line to Railway
+        print(
+            "SAVE_BASKET_ERROR:",
+            type(e).__name__,
+            str(e),
+            {
+                "uid": str(uid),
+                "radius_km": payload.radius_km,
+                "winner_store_id": winner_store_id,
+                "winner_store_name": winner_store_name,
+                "winner_total": winner_total,
+                "stores_is_str": isinstance(stores_json, str),
+                "stores_len": len(stores_json) if isinstance(stores_json, str) else None,
+                "items_count": len(payload.items),
+            },
+        )
+        raise
 
     return BasketSummaryOut(
         id=head["id"],
