@@ -31,7 +31,6 @@ import random
 import re
 import sys
 import time
-from dataclasses import dataclass
 from datetime import datetime, timezone
 from urllib.parse import urljoin, urlparse
 
@@ -44,24 +43,23 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 # Config
 BASE = "https://prismamarket.ee"
 SEEDS = [
-    "/en/tooted/joogid",  # beverages
-    "/en/tooted/piim-munad-ja-rasvad",  # milk, eggs & fats
-    "/en/tooted/puu-ja-koogiviljad",  # fruit & veg
-    "/en/tooted/leivad-kupsised-ja-kupsetised",  # bakery
-    "/en/tooted/kuivtooted-ja-kupsetamine",  # dry & baking
-    "/en/tooted/kulmutatud-toidud",  # frozen foods
-    "/en/tooted/kala-ja-mereannid",  # fish & seafood
-    "/en/tooted/food-market/liha",  # meat
-    "/en/tooted/food-market/valmistoit",  # prepared
+    "/en/tooted/joogid",                      # beverages
+    "/en/tooted/piim-munad-ja-rasvad",        # milk, eggs & fats
+    "/en/tooted/puu-ja-koogiviljad",          # fruit & veg
+    "/en/tooted/leivad-kupsised-ja-kupsetised",# bakery
+    "/en/tooted/kuivtooted-ja-kupsetamine",   # dry & baking
+    "/en/tooted/kulmutatud-toidud",           # frozen foods
+    "/en/tooted/kala-ja-mereannid",           # fish & seafood
+    "/en/tooted/food-market/liha",            # meat
+    "/en/tooted/food-market/valmistoit",      # prepared
 ]
 PRODUCT_PATH = "/toode/"
 CATEGORY_PATH = "/tooted/"
-AMOUNT_RE = re.compile(r"(\d+[\,\.]?\d*\s?(?:kg|g|l|ml|cl|dl|tk|pcs|pk|pack|x\s*\d+\s*(?:g|ml|l)))", re.I)
+AMOUNT_RE = re.compile(r"(\d+[\.,]?\d*\s?(?:kg|g|l|ml|cl|dl|tk|pcs|pk|pack|x\s*\d+\s*(?:g|ml|l)))", re.I)
 EAN_RE = re.compile(r"(\d{8,14})$")
 
 # -----------------------------------------------------------------------------
 # Small utils
-
 def jitter(a=0.6, b=1.4):
     time.sleep(random.uniform(a, b))
 
@@ -70,18 +68,13 @@ def clean(s: str | None) -> str:
         return ""
     return re.sub(r"\s+", " ", s).strip()
 
-def now_iso() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-
 def is_in_whitelist(url: str) -> bool:
     path = urlparse(url).path
     return any(path.startswith(seed) for seed in SEEDS)
 
 # -----------------------------------------------------------------------------
 # DB
-
 def get_database_url() -> str:
-    # Try importing settings.DATABASE_URL if present
     try:
         import settings  # type: ignore
         db = getattr(settings, "DATABASE_URL", None)
@@ -101,6 +94,7 @@ CREATE TABLE IF NOT EXISTS {PRODUCTS_TABLE} (
     id SERIAL PRIMARY KEY,
     ean TEXT UNIQUE,
     product_name TEXT,
+    name TEXT,
     amount TEXT,
     brand TEXT,
     manufacturer TEXT,
@@ -116,17 +110,18 @@ CREATE TABLE IF NOT EXISTS {PRODUCTS_TABLE} (
 
 UPSERT_SQL = f"""
 INSERT INTO {PRODUCTS_TABLE} (
-    ean, product_name, amount, brand, manufacturer,
+    ean, product_name, name, amount, brand, manufacturer,
     country_of_manufacture, category_1, category_2, category_3,
     image_url, source_url, last_seen_utc
 )
 VALUES (
-    %(ean)s, %(product_name)s, %(amount)s, %(brand)s, %(manufacturer)s,
+    %(ean)s, %(product_name)s, %(name)s, %(amount)s, %(brand)s, %(manufacturer)s,
     %(country_of_manufacture)s, %(category_1)s, %(category_2)s, %(category_3)s,
     %(image_url)s, %(source_url)s, %(last_seen_utc)s
 )
 ON CONFLICT (ean) DO UPDATE SET
     product_name = EXCLUDED.product_name,
+    name = EXCLUDED.name,
     amount = EXCLUDED.amount,
     brand = EXCLUDED.brand,
     manufacturer = EXCLUDED.manufacturer,
@@ -140,7 +135,6 @@ ON CONFLICT (ean) DO UPDATE SET
 ;
 """
 
-
 def db_connect() -> PGConn:
     dsn = get_database_url()
     conn = psycopg2.connect(dsn)
@@ -151,7 +145,6 @@ def db_connect() -> PGConn:
 
 # -----------------------------------------------------------------------------
 # Extraction helpers
-
 def extract_title(page) -> str:
     try:
         return clean(page.locator("h1").first.inner_text())
@@ -172,7 +165,6 @@ def extract_image_url(page) -> str:
     return ""
 
 def extract_label_value(page, labels: list[str]) -> str:
-    # Try quick DOM method first (more reliable than regexing HTML)
     for label in labels:
         try:
             lab = page.locator(f"xpath=//*[contains(normalize-space(.), '{label}')] ")
@@ -182,7 +174,6 @@ def extract_label_value(page, labels: list[str]) -> str:
                     return clean(sib.first.inner_text())
         except Exception:
             continue
-    # Fallback: regex scan of HTML in case DOM lookup fails
     try:
         html = page.content()
         for label in labels:
@@ -197,7 +188,7 @@ def extract_label_value(page, labels: list[str]) -> str:
     return ""
 
 def extract_ean(page, url: str) -> str:
-    val = extract_label_value(page, ["EAN", "EAN-kood", "Ribakood"])  # EN → EE fallbacks
+    val = extract_label_value(page, ["EAN", "EAN-kood", "Ribakood"])
     if val and re.fullmatch(r"\d{8,14}", val):
         return val
     m = EAN_RE.search(url)
@@ -235,9 +226,7 @@ def infer_brand_from_title(title: str) -> str:
 
 # -----------------------------------------------------------------------------
 # Listing crawling
-
 def collect_links_from_listing(page, current_url: str) -> tuple[set[str], set[str]]:
-    # Scroll to reveal lazy content
     try:
         last_h = 0
         for _ in range(8):
@@ -274,7 +263,6 @@ def collect_links_from_listing(page, current_url: str) -> tuple[set[str], set[st
 
 # -----------------------------------------------------------------------------
 # Main crawl → DB
-
 def crawl_to_db(max_products: int = 500, headless: bool = True):
     conn = db_connect()
     rows_written = 0
@@ -309,7 +297,6 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
                 if c not in seen_categories and c not in to_visit:
                     to_visit.append(c)
 
-            # Try next pagination buttons if present
             try:
                 for _ in range(10):
                     next_btn = page.locator("a[rel='next'], button:has-text('Next'), a:has-text('Next')")
@@ -358,6 +345,7 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
                 rec = {
                     "ean": ean,
                     "product_name": title,
+                    "name": title,  # <-- populate legacy NOT NULL column
                     "amount": amount,
                     "brand": brand,
                     "manufacturer": manufacturer,
@@ -373,7 +361,6 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
                     cur.execute(UPSERT_SQL, rec)
                     rows_written += 1
                 except Exception as e:
-                    # Keep going; print and continue
                     print(f"UPSERT failed for EAN {ean}: {e}")
                     conn.rollback()
                 else:
@@ -383,7 +370,6 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
     print(f"Upserted {rows_written} rows into '{PRODUCTS_TABLE}'.")
 
 # -----------------------------------------------------------------------------
-
 def main():
     ap = argparse.ArgumentParser(description="Prisma.ee FOOD & DRINKS → Postgres")
     ap.add_argument("--max-products", type=int, default=500)
