@@ -1,0 +1,42 @@
+name: Prisma → DB Scrape
+
+on:
+  workflow_dispatch: {}         # manual "Run workflow" button
+  schedule:
+    # 02:00 Tallinn = 23:00 UTC (previous day) during summer (UTC+3)
+    - cron: "0 23 * * *"
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      # optional override; remove if you want the default "products"
+      # PRODUCTS_TABLE: products
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Python deps
+        run: |
+          pip install --upgrade pip
+          pip install playwright psycopg2-binary
+
+      - name: Install Chromium for Playwright
+        run: python -m playwright install chromium
+
+      # (Optional) prove .env is NOT required; we use Actions secrets instead
+      # - name: Load .env (optional)
+      #   run: pip install python-dotenv
+
+      - name: Run Prisma scraper → Postgres
+        run: |
+          python scripts/prisma_food_scrape_to_db.py --max-products 1000 --headless 1
