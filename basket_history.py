@@ -7,6 +7,7 @@ import asyncio
 import asyncpg
 import json
 import traceback
+import uuid  # <-- NEW
 
 from auth import get_current_user
 from settings import get_db_pool
@@ -14,7 +15,7 @@ from compare import compute_compare
 
 router = APIRouter(prefix="/basket-history", tags=["basket-history"])
 
-# ---------------- helpers ----------------
+# ---------- helpers ----------
 def _extract_user_id(obj):
     if not obj:
         return None
@@ -25,9 +26,10 @@ def _extract_user_id(obj):
                 return v
         for k in ("user", "account", "data", "profile"):
             inner = obj.get(k)
-            found = _extract_user_id(inner)
-            if found:
-                return found
+            if inner:
+                got = _extract_user_id(inner)
+                if got:
+                    return got
         return None
     for k in ("id", "user_id", "uid", "sub", "userId", "uuid"):
         v = getattr(obj, k, None)
@@ -35,43 +37,51 @@ def _extract_user_id(obj):
             return v
     for k in ("user", "account", "data", "profile"):
         inner = getattr(obj, k, None)
-        found = _extract_user_id(inner)
-        if found:
-            return found
+        if inner:
+            got = _extract_user_id(inner)
+            if got:
+                return got
     return None
 
-def _log_shape(where: str, user) -> None:
-    keys = list(user.keys()) if isinstance(user, dict) else [
-        k for k in dir(user) if not k.startswith("_")
-    ]
-    print(f"AUTH_USER_SHAPE_DEBUG({where}):", type(user).__name__, "keys:", keys)
+def _coerce_to_uuid_str(value: object) -> str:
+    """
+    Return a UUID string. If `value` already looks like a UUID, use it.
+    Otherwise create a deterministic UUID v5 from the given value.
+    """
+    s = str(value)
+    try:
+        return str(uuid.UUID(s))
+    except Exception:
+        # deterministic UUID based on a stable namespace + the value
+        return str(uuid.uuid5(uuid.NAMESPACE_URL, f"grocery-user:{s}"))
 
 async def resolve_user_id(user, pool: asyncpg.pool.Pool) -> Optional[str]:
     """
-    Return the user's UUID as a string.
-    1) Try to extract directly from the user object.
-    2) Fallback: if `email` exists, look up ID from DB.
+    Resolve a *UUID string* for the current user.
+    1) Try extracting an id/uid/sub from the user object.
+    2) Else, if we have an email, look up users.id and coerce to UUID.
     """
-    uid = _extract_user_id(user)
-    if uid:
-        return str(uid)
+    direct = _extract_user_id(user)
+    if direct:
+        return _coerce_to_uuid_str(direct)
 
-    # Fallback via email lookup
     email = user.get("email") if isinstance(user, dict) else getattr(user, "email", None)
     if email:
         try:
             async with pool.acquire() as conn:
                 row = await conn.fetchrow("SELECT id FROM users WHERE email=$1 LIMIT 1", email)
-            if row and row["id"]:
-                return str(row["id"])
+            if row:
+                return _coerce_to_uuid_str(row["id"])
         except Exception as e:
             print("RESOLVE_UID_ERROR:", type(e).__name__, str(e))
             traceback.print_exc()
 
-    _log_shape("resolve_user_id", user)
+    # Debug breadcrumb if all else fails
+    keys = list(user.keys()) if isinstance(user, dict) else [k for k in dir(user) if not k.startswith("_")]
+    print("AUTH_USER_SHAPE_DEBUG(resolve_user_id):", type(user).__name__, "keys:", keys)
     return None
 
-# ---------------- Schemas ----------------
+# ---------- Schemas ----------
 class BasketItemIn(BaseModel):
     product: str = Field(..., description="Product name (same as used in /compare)")
     quantity: float = 1
@@ -106,7 +116,7 @@ class BasketDetailOut(BaseModel):
     note: Optional[str]
     items: List[dict]
 
-# ---------------- Routes ----------------
+# ---------- Routes ----------
 @router.post("", response_model=BasketSummaryOut)
 async def save_basket(
     payload: SaveBasketIn,
@@ -127,7 +137,7 @@ async def save_basket(
         radius_km=payload.radius_km,
     )
 
-    # 2) Normalize compare payload to 'stores'
+    # 2) Normalize compare payload to a 'stores' list
     stores = cmp.get("stores")
     if not stores:
         legacy_results = cmp.get("results") or []
@@ -145,11 +155,10 @@ async def save_basket(
     if not stores:
         raise HTTPException(status_code=400, detail="No stores found within given radius")
 
-    # 3) Winner
+    # 3) Decide winner
     stores_sorted = sorted(stores, key=lambda s: s["total"])
-    winner = None
-    if payload.selected_store_id is not None:
-        winner = next((s for s in stores_sorted if s.get("store_id") == payload.selected_store_id), None)
+    winner = next((s for s in stores_sorted if s.get("store_id") == payload.selected_store_id), None) \
+             if payload.selected_store_id is not None else None
     if winner is None:
         winner = stores_sorted[0]
     winner_store_id = winner.get("store_id")
@@ -170,7 +179,7 @@ async def save_basket(
                     ) VALUES ($1::uuid,$2,$3,$4,$5,$6::jsonb,$7)
                     RETURNING id, created_at, winner_store_name, winner_total, radius_km
                     """,
-                    uid,
+                    uid,  # <-- UUID string (real UUID or deterministic v5)
                     payload.radius_km,
                     winner_store_id,
                     winner_store_name,
@@ -223,8 +232,7 @@ async def save_basket(
                 "winner_store_id": winner_store_id,
                 "winner_store_name": winner_store_name,
                 "winner_total": winner_total,
-                "stores_is_str": isinstance(stores_json, str),
-                "stores_len": len(stores_json) if isinstance(stores_json, str) else None,
+                "stores_len": len(stores_json),
                 "items_count": len(payload.items),
             },
         )
@@ -238,7 +246,6 @@ async def save_basket(
         winner_total=float(head["winner_total"]) if head["winner_total"] is not None else None,
         radius_km=float(head["radius_km"]) if head["radius_km"] is not None else None,
     )
-
 
 @router.get("", response_model=List[BasketSummaryOut])
 async def list_baskets(
@@ -268,7 +275,6 @@ async def list_baskets(
         )
         for r in rows
     ]
-
 
 @router.get("/{basket_id}", response_model=BasketDetailOut)
 async def get_basket(
@@ -313,7 +319,6 @@ async def get_basket(
         note=head["note"],
         items=[dict(r) for r in items],
     )
-
 
 @router.delete("/{basket_id}")
 async def delete_basket(
