@@ -1,24 +1,15 @@
-name: Prisma → DB Scrape + CSV Artifact
-
-on:
-  workflow_dispatch: {}
-  schedule:
-    # 02:00 Tallinn ≈ 23:00 UTC during summer (UTC+3)
-    - cron: "0 23 * * *"
-
 jobs:
   scrape:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      PRODUCTS_TABLE: products   # be explicit
 
     steps:
-      - name: Check out repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
@@ -28,24 +19,30 @@ jobs:
           pip install --upgrade pip
           pip install playwright psycopg2-binary
 
-      - name: Install Chromium for Playwright
-        run: python -m playwright install chromium
+      # IMPORTANT: install browser WITH system deps
+      - name: Install Chromium + deps
+        run: python -m playwright install --with-deps chromium
 
-      # 1) Run the DB upsert (writes straight into Railway Postgres)
+      # Debug: show which DB the runner is connected to
+      - name: Debug DB identity
+        run: |
+          python - <<'PY'
+          import os, psycopg2
+          conn = psycopg2.connect(os.environ["DATABASE_URL"])
+          cur = conn.cursor()
+          cur.execute("SELECT current_database(), inet_server_addr();")
+          print("DB identity:", cur.fetchone())
+          PY
+
       - name: Run Prisma → DB
-        run: |
-          python scripts/prisma_food_scrape_to_db.py --max-products 1000 --headless 1
+        run: python scripts/prisma_food_scrape_to_db.py --max-products 400 --headless 1
 
-      # 2) Run the CSV scraper to also produce a CSV file for download
       - name: Produce CSV export
-        run: |
-          python scripts/prisma_food_scraper.py --out prisma_foods.csv --max-products 1000 --headless 1
-          echo "CSV rows:" $(grep -c '^' prisma_foods.csv)
+        run: python scripts/prisma_food_scraper.py --out prisma_foods.csv --max-products 400 --headless 1
 
-      # 3) Upload CSV artifact
-      - name: Upload CSV artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: prisma_foods.csv
-          path: prisma_foods.csv
-          if-no-files-found: error
+      - name: Preview CSV size
+        run: |
+          wc -l prisma_foods.csv || true
+          head -n 5 prisma_foods.csv || true
+
+      - uses
