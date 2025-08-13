@@ -32,4 +32,41 @@ jobs:
       - name: Install Chromium + deps
         run: python -m playwright install --with-deps chromium
 
-      # ---- DIAGNOSTICS -------------------------------------
+      # Diagnostics (prints DB host/db so we know we're hitting the right one)
+      - name: Assert DATABASE_URL & connect
+        run: |
+          python - <<'PY'
+          import os, sys, urllib.parse, psycopg2
+          url = os.getenv("DATABASE_URL")
+          if not url:
+            print("ERROR: DATABASE_URL secret is missing."); sys.exit(2)
+          p = urllib.parse.urlparse(url)
+          print("DATABASE_URL host:", p.hostname, "db:", p.path.lstrip('/'))
+          try:
+            conn = psycopg2.connect(url)
+            cur = conn.cursor()
+            cur.execute("SELECT current_database(), inet_server_addr();")
+            print("DB identity:", cur.fetchone())
+          except Exception as e:
+            print("DB connect error:", e); sys.exit(3)
+          PY
+
+      # ---- RUN THE SCRAPER (DB UPSERT) --------------------------------------
+      - name: Run Prisma → DB (UPSERT by EAN)
+        run: |
+          python scripts/prisma_food_scrape_to_db.py --max-products 400 --headless 1
+      # ----------------------------------------------------------------------
+
+      # Also produce a CSV you can download from the run
+      - name: Produce CSV export
+        run: |
+          python scripts/prisma_food_scraper.py --out prisma_foods.csv --max-products 400 --headless 1
+          echo "CSV line count (incl header):"; wc -l prisma_foods.csv || true
+          echo "Preview:"; head -n 5 prisma_foods.csv || true
+
+      - name: Upload CSV artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: prisma_foods.csv
+          path: prisma_foods.csv
+          if-no-files-found: error
