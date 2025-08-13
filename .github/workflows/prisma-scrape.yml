@@ -1,9 +1,9 @@
-name: Prisma → DB Scrape
+name: Prisma → DB Scrape + CSV Artifact
 
 on:
-  workflow_dispatch: {}         # manual "Run workflow" button
+  workflow_dispatch: {}
   schedule:
-    # 02:00 Tallinn = 23:00 UTC (previous day) during summer (UTC+3)
+    # 02:00 Tallinn ≈ 23:00 UTC during summer (UTC+3)
     - cron: "0 23 * * *"
 
 jobs:
@@ -11,8 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
-      # optional override; remove if you want the default "products"
-      # PRODUCTS_TABLE: products
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     steps:
@@ -33,10 +31,21 @@ jobs:
       - name: Install Chromium for Playwright
         run: python -m playwright install chromium
 
-      # (Optional) prove .env is NOT required; we use Actions secrets instead
-      # - name: Load .env (optional)
-      #   run: pip install python-dotenv
-
-      - name: Run Prisma scraper → Postgres
+      # 1) Run the DB upsert (writes straight into Railway Postgres)
+      - name: Run Prisma → DB
         run: |
           python scripts/prisma_food_scrape_to_db.py --max-products 1000 --headless 1
+
+      # 2) Run the CSV scraper to also produce a CSV file for download
+      - name: Produce CSV export
+        run: |
+          python scripts/prisma_food_scraper.py --out prisma_foods.csv --max-products 1000 --headless 1
+          echo "CSV rows:" $(grep -c '^' prisma_foods.csv)
+
+      # 3) Upload CSV artifact
+      - name: Upload CSV artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: prisma_foods.csv
+          path: prisma_foods.csv
+          if-no-files-found: error
