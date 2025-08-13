@@ -101,7 +101,7 @@ class BasketDetailOut(BaseModel):
     winner_store_id: Optional[int]
     winner_store_name: Optional[str]
     winner_total: Optional[float]
-    stores: Optional[dict]
+    stores: Optional[List[dict]]  # <-- list of stores (normalized)
     note: Optional[str]
     items: List[dict]
 
@@ -296,8 +296,25 @@ async def get_basket(
             if not head:
                 raise HTTPException(status_code=404, detail="Basket not found")
 
-            # Ensure we always give the client a dict (not None) for jsonb "stores"
-            stores_payload = head["stores"] or {}
+            # Normalize "stores" into a list[dict] regardless of storage format
+            raw_stores = head["stores"]
+            stores_payload: Optional[List[dict]] = None
+            if isinstance(raw_stores, list):
+                stores_payload = raw_stores
+            elif isinstance(raw_stores, dict):
+                stores_payload = [raw_stores]
+            elif isinstance(raw_stores, str):
+                try:
+                    parsed = json.loads(raw_stores)
+                    if isinstance(parsed, list):
+                        stores_payload = parsed
+                    elif isinstance(parsed, dict):
+                        stores_payload = [parsed]
+                except Exception:
+                    stores_payload = None
+            # Default to [] instead of None for nicer client handling
+            if stores_payload is None:
+                stores_payload = []
 
             items = await conn.fetch(
                 """
