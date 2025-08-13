@@ -6,7 +6,7 @@ from datetime import datetime
 import asyncio
 import asyncpg
 import json
-import traceback  # <= for detailed error logs
+import traceback
 
 from auth import get_current_user
 from settings import get_db_pool
@@ -14,17 +14,10 @@ from compare import compute_compare
 
 router = APIRouter(prefix="/basket-history", tags=["basket-history"])
 
-
-# ---------- helpers ----------
+# ---------------- helpers ----------------
 def _extract_user_id(obj):
-    """
-    Robustly extract a user id from dicts/objects, including nested 'user'/'account'/'data'.
-    Looks for common field names: id, user_id, uid, sub, userId, uuid.
-    """
     if not obj:
         return None
-
-    # dict case
     if isinstance(obj, dict):
         for k in ("id", "user_id", "uid", "sub", "userId", "uuid"):
             v = obj.get(k)
@@ -36,8 +29,6 @@ def _extract_user_id(obj):
             if found:
                 return found
         return None
-
-    # object case
     for k in ("id", "user_id", "uid", "sub", "userId", "uuid"):
         v = getattr(obj, k, None)
         if v:
@@ -49,20 +40,38 @@ def _extract_user_id(obj):
             return found
     return None
 
-
-def get_user_id(user):
-    return _extract_user_id(user)
-
-
-def _log_missing_uid(where: str, user) -> None:
+def _log_shape(where: str, user) -> None:
     keys = list(user.keys()) if isinstance(user, dict) else [
         k for k in dir(user) if not k.startswith("_")
     ]
-    # Log type and top-level keys only (no values)
     print(f"AUTH_USER_SHAPE_DEBUG({where}):", type(user).__name__, "keys:", keys)
 
+async def resolve_user_id(user, pool: asyncpg.pool.Pool) -> Optional[str]:
+    """
+    Return the user's UUID as a string.
+    1) Try to extract directly from the user object.
+    2) Fallback: if `email` exists, look up ID from DB.
+    """
+    uid = _extract_user_id(user)
+    if uid:
+        return str(uid)
 
-# ---------- Schemas ----------
+    # Fallback via email lookup
+    email = user.get("email") if isinstance(user, dict) else getattr(user, "email", None)
+    if email:
+        try:
+            async with pool.acquire() as conn:
+                row = await conn.fetchrow("SELECT id FROM users WHERE email=$1 LIMIT 1", email)
+            if row and row["id"]:
+                return str(row["id"])
+        except Exception as e:
+            print("RESOLVE_UID_ERROR:", type(e).__name__, str(e))
+            traceback.print_exc()
+
+    _log_shape("resolve_user_id", user)
+    return None
+
+# ---------------- Schemas ----------------
 class BasketItemIn(BaseModel):
     product: str = Field(..., description="Product name (same as used in /compare)")
     quantity: float = 1
@@ -70,7 +79,6 @@ class BasketItemIn(BaseModel):
     brand: Optional[str] = None
     size_text: Optional[str] = None
     image_url: Optional[str] = None
-
 
 class SaveBasketIn(BaseModel):
     items: List[BasketItemIn]
@@ -80,14 +88,12 @@ class SaveBasketIn(BaseModel):
     selected_store_id: Optional[int] = None
     note: Optional[str] = None
 
-
 class BasketSummaryOut(BaseModel):
     id: int
     created_at: datetime
     winner_store_name: Optional[str]
     winner_total: Optional[float]
     radius_km: Optional[float]
-
 
 class BasketDetailOut(BaseModel):
     id: int
@@ -100,18 +106,15 @@ class BasketDetailOut(BaseModel):
     note: Optional[str]
     items: List[dict]
 
-
-# ---------- Routes ----------
+# ---------------- Routes ----------------
 @router.post("", response_model=BasketSummaryOut)
 async def save_basket(
     payload: SaveBasketIn,
     user=Depends(get_current_user),
     pool: asyncpg.pool.Pool = Depends(get_db_pool),
 ):
-    raw_uid = get_user_id(user)
-    uid = str(raw_uid) if raw_uid is not None else ""
+    uid = await resolve_user_id(user, pool)
     if not uid:
-        _log_missing_uid("save_basket", user)
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     # 1) Compute pricing snapshot
@@ -124,7 +127,7 @@ async def save_basket(
         radius_km=payload.radius_km,
     )
 
-    # 2) Normalize compare payload to a 'stores' list (new or legacy shape)
+    # 2) Normalize compare payload to 'stores'
     stores = cmp.get("stores")
     if not stores:
         legacy_results = cmp.get("results") or []
@@ -134,35 +137,28 @@ async def save_basket(
                 "store_name": r.get("store"),
                 "total": float(r.get("total", 0) or 0),
                 "distance_km": r.get("distance_km"),
-                "items": [],  # legacy: no per-item breakdown
+                "items": [],
             }
             for r in legacy_results
             if r.get("store") is not None
         ]
-
     if not stores:
         raise HTTPException(status_code=400, detail="No stores found within given radius")
 
-    # 3) Decide winner (respect override if provided)
+    # 3) Winner
     stores_sorted = sorted(stores, key=lambda s: s["total"])
     winner = None
     if payload.selected_store_id is not None:
         winner = next((s for s in stores_sorted if s.get("store_id") == payload.selected_store_id), None)
     if winner is None:
-        winner = stores_sorted[0] if stores_sorted else None
-    if not winner:
-        raise HTTPException(status_code=400, detail="No valid winner store found")
-
-    # Resolve winner fields with safe fallbacks
-    winner_store_id = winner.get("store_id")  # keep None if DB allows NULL
+        winner = stores_sorted[0]
+    winner_store_id = winner.get("store_id")
     winner_store_name = (winner.get("store_name") or "Unknown store").strip()
-    winner_total = float(winner.get("total") or 0.0)
-    winner_total = max(0.0, min(round(winner_total, 2), 9999.99))  # clamp to numeric(6,2)-ish
+    winner_total = max(0.0, min(round(float(winner.get("total") or 0.0), 2), 9999.99))
 
-    # Serialize candidate stores for jsonb
     stores_json = json.dumps(stores, ensure_ascii=False)
 
-    # 4) Persist header + items
+    # 4) Persist
     try:
         async with pool.acquire() as conn:
             async with conn.transaction():
@@ -184,7 +180,6 @@ async def save_basket(
                 )
                 basket_id = head["id"]
 
-                # Map per-product price info from winner (may be empty in legacy path)
                 price_map = {
                     (i.get("product") or "").strip().lower(): i
                     for i in (winner.get("items") or [])
@@ -250,10 +245,8 @@ async def list_baskets(
     user=Depends(get_current_user),
     pool: asyncpg.pool.Pool = Depends(get_db_pool),
 ):
-    raw_uid = get_user_id(user)
-    uid = str(raw_uid) if raw_uid is not None else ""
+    uid = await resolve_user_id(user, pool)
     if not uid:
-        _log_missing_uid("list_baskets", user)
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     rows = await pool.fetch(
@@ -283,10 +276,8 @@ async def get_basket(
     user=Depends(get_current_user),
     pool: asyncpg.pool.Pool = Depends(get_db_pool),
 ):
-    raw_uid = get_user_id(user)
-    uid = str(raw_uid) if raw_uid is not None else ""
+    uid = await resolve_user_id(user, pool)
     if not uid:
-        _log_missing_uid("get_basket", user)
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     head = await pool.fetchrow(
@@ -330,10 +321,8 @@ async def delete_basket(
     user=Depends(get_current_user),
     pool: asyncpg.pool.Pool = Depends(get_db_pool),
 ):
-    raw_uid = get_user_id(user)
-    uid = str(raw_uid) if raw_uid is not None else ""
+    uid = await resolve_user_id(user, pool)
     if not uid:
-        _log_missing_uid("delete_basket", user)
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     res = await pool.execute(
