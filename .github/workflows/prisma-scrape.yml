@@ -33,7 +33,7 @@ jobs:
       - name: Install Chromium + deps
         run: python -m playwright install --with-deps chromium
 
-      # --- Diagnostics: verify the secret and DB connectivity (no heredocs) ---
+      # --- Diagnostics: verify the secret and DB connectivity ---
       - name: Print DATABASE_URL host/db
         run: >
           python -c
@@ -58,9 +58,10 @@ jobs:
       - name: Run Prisma → DB (UPSERT by EAN)
         run: python scripts/prisma_food_scrape_to_db.py --max-products 400 --headless 1
 
-      - name: Produce CSV export
+      # Export fresh Prisma products to CSV from the DB using your script
+      - name: Produce CSV export (DB → CSV)
         run: |
-          python scripts/prisma_food_scraper.py --out prisma_foods.csv --max-products 400 --headless 1
+          python scripts/db_export_csv.py prisma_foods.csv
           echo "CSV line count (incl header):"; wc -l prisma_foods.csv || true
           echo "Preview:"; head -n 5 prisma_foods.csv || true
 
