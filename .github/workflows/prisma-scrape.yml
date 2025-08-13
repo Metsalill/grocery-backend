@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
-      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}   # <- Railway URL secret
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
       PRODUCTS_TABLE: products
       PYTHONUNBUFFERED: "1"
 
@@ -33,9 +33,7 @@ jobs:
       - name: Install Chromium + deps
         run: python -m playwright install --with-deps chromium
 
-      # --- Diagnostics: verify the secret and DB connectivity -----------------
       - name: Assert DATABASE_URL & connect
-        shell: bash
         run: |
           echo "Running DB connectivity check…"
           python - <<'PY'
@@ -57,7 +55,6 @@ except Exception as e:
     print("DB connect error:", e); sys.exit(3)
 PY
           echo "DB connectivity check finished."
-      # -----------------------------------------------------------------------
 
       - name: Run Prisma → DB (UPSERT by EAN)
         run: |
