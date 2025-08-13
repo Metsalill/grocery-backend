@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
-      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}   # Railway URL secret
       PRODUCTS_TABLE: products
       PYTHONUNBUFFERED: "1"
 
@@ -33,28 +33,18 @@ jobs:
       - name: Install Chromium + deps
         run: python -m playwright install --with-deps chromium
 
-      - name: Assert DATABASE_URL & connect
+      # --- Diagnostics: verify the secret and DB connectivity (no heredoc) ---
+      - name: Print DATABASE_URL host/db
         run: |
-          echo "Running DB connectivity check…"
-          python - <<'PY'
-import os, sys, urllib.parse, psycopg2
-url = os.getenv("DATABASE_URL")
-if not url:
-    print("ERROR: DATABASE_URL secret is missing."); sys.exit(2)
-p = urllib.parse.urlparse(url)
-print("DATABASE_URL host:", p.hostname, "db:", p.path.lstrip('/'))
-if p.hostname and "supabase.co" in p.hostname:
-    print("ERROR: DATABASE_URL still points to Supabase. Update RW_DATABASE_URL to Railway."); sys.exit(2)
-try:
-    conn = psycopg2.connect(url)
-    cur = conn.cursor()
-    cur.execute("SELECT current_database(), inet_server_addr();")
-    print("DB identity:", cur.fetchone())
-    conn.close()
-except Exception as e:
-    print("DB connect error:", e); sys.exit(3)
-PY
-          echo "DB connectivity check finished."
+          python -c "import os,urllib.parse as u; x=u.urlparse(os.environ['DATABASE_URL']); print('DATABASE_URL host:', x.hostname, 'db:', x.path.lstrip('/'))"
+          python -c "import os,sys,urllib.parse as u; h=u.urlparse(os.environ['DATABASE_URL']).hostname; \
+if h and 'supabase.co' in h: print('ERROR: DATABASE_URL still points to Supabase. Update RW_DATABASE_URL to Railway.'); sys.exit(2)"
+
+      - name: Connect test (DB identity)
+        run: |
+          python -c "import os,psycopg2 as p; c=p.connect(os.environ['DATABASE_URL']); cur=c.cursor(); \
+cur.execute('SELECT current_database(), inet_server_addr();'); print('DB identity:', cur.fetchone()); c.close()"
+      # ----------------------------------------------------------------------
 
       - name: Run Prisma → DB (UPSERT by EAN)
         run: |
