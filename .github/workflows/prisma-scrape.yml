@@ -1,4 +1,4 @@
-name: Prisma → DB Scrape + CSV Artifact
+name: Prisma DB Scrape + CSV Artifact
 
 on:
   workflow_dispatch: {}
@@ -33,22 +33,30 @@ jobs:
       - name: Install Chromium + deps
         run: python -m playwright install --with-deps chromium
 
-      # --- Diagnostics: verify the secret and DB connectivity (no heredoc) ---
+      # --- Diagnostics: verify the secret and DB connectivity (no heredocs) ---
       - name: Print DATABASE_URL host/db
-        run: |
-          python -c "import os,urllib.parse as u; x=u.urlparse(os.environ['DATABASE_URL']); print('DATABASE_URL host:', x.hostname, 'db:', x.path.lstrip('/'))"
-          python -c "import os,sys,urllib.parse as u; h=u.urlparse(os.environ['DATABASE_URL']).hostname; \
-if h and 'supabase.co' in h: print('ERROR: DATABASE_URL still points to Supabase. Update RW_DATABASE_URL to Railway.'); sys.exit(2)"
+        run: >
+          python -c
+          "import os,urllib.parse as u; x=u.urlparse(os.environ['DATABASE_URL']);
+          print('DATABASE_URL host:', x.hostname, 'db:', x.path.lstrip('/'))"
+
+      - name: Ensure not Supabase
+        run: >
+          python -c
+          "import os,sys,urllib.parse as u; h=u.urlparse(os.environ['DATABASE_URL']).hostname;
+          (sys.exit(2) if (h and 'supabase.co' in h) else print('OK: Railway host detected'))"
 
       - name: Connect test (DB identity)
-        run: |
-          python -c "import os,psycopg2 as p; c=p.connect(os.environ['DATABASE_URL']); cur=c.cursor(); \
-cur.execute('SELECT current_database(), inet_server_addr();'); print('DB identity:', cur.fetchone()); c.close()"
-      # ----------------------------------------------------------------------
+        run: >
+          python -c
+          "import os,psycopg2 as p;
+          c=p.connect(os.environ['DATABASE_URL']);cur=c.cursor();
+          cur.execute('SELECT current_database(), inet_server_addr();');
+          print('DB identity:', cur.fetchone()); c.close()"
+      # ------------------------------------------------------------------------
 
       - name: Run Prisma → DB (UPSERT by EAN)
-        run: |
-          python scripts/prisma_food_scrape_to_db.py --max-products 400 --headless 1
+        run: python scripts/prisma_food_scrape_to_db.py --max-products 400 --headless 1
 
       - name: Produce CSV export
         run: |
