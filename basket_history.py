@@ -16,28 +16,50 @@ router = APIRouter(prefix="/basket-history", tags=["basket-history"])
 
 
 # ---------- helpers ----------
-def get_user_id(user):
+def _extract_user_id(obj):
     """
-    Be tolerant about the shape coming from get_current_user().
-    Accept dicts or objects with any of: id, user_id, uid, sub.
+    Robustly extract a user id from dicts/objects, including nested 'user'/'account'/'data'.
+    Looks for common field names: id, user_id, uid, sub, userId, uuid.
     """
-    if not user:
+    if not obj:
         return None
 
-    if isinstance(user, dict):
-        return (
-            user.get("id")
-            or user.get("user_id")
-            or user.get("uid")
-            or user.get("sub")
-        )
+    # dict case
+    if isinstance(obj, dict):
+        for k in ("id", "user_id", "uid", "sub", "userId", "uuid"):
+            v = obj.get(k)
+            if v:
+                return v
+        for k in ("user", "account", "data", "profile"):
+            inner = obj.get(k)
+            found = _extract_user_id(inner)
+            if found:
+                return found
+        return None
 
-    return (
-        getattr(user, "id", None)
-        or getattr(user, "user_id", None)
-        or getattr(user, "uid", None)
-        or getattr(user, "sub", None)
-    )
+    # object case
+    for k in ("id", "user_id", "uid", "sub", "userId", "uuid"):
+        v = getattr(obj, k, None)
+        if v:
+            return v
+    for k in ("user", "account", "data", "profile"):
+        inner = getattr(obj, k, None)
+        found = _extract_user_id(inner)
+        if found:
+            return found
+    return None
+
+
+def get_user_id(user):
+    return _extract_user_id(user)
+
+
+def _log_missing_uid(where: str, user) -> None:
+    keys = list(user.keys()) if isinstance(user, dict) else [
+        k for k in dir(user) if not k.startswith("_")
+    ]
+    # Log type and top-level keys only (no values)
+    print(f"AUTH_USER_SHAPE_DEBUG({where}):", type(user).__name__, "keys:", keys)
 
 
 # ---------- Schemas ----------
@@ -89,8 +111,7 @@ async def save_basket(
     raw_uid = get_user_id(user)
     uid = str(raw_uid) if raw_uid is not None else ""
     if not uid:
-        # Tiny breadcrumb so we can see what shape we got
-        print("AUTH_USER_SHAPE_DEBUG(save_basket):", type(user).__name__, getattr(user, "__dict__", None))
+        _log_missing_uid("save_basket", user)
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     # 1) Compute pricing snapshot
@@ -133,7 +154,7 @@ async def save_basket(
         raise HTTPException(status_code=400, detail="No valid winner store found")
 
     # Resolve winner fields with safe fallbacks
-    winner_store_id = winner.get("store_id")  # keep None if your DB allows NULL here
+    winner_store_id = winner.get("store_id")  # keep None if DB allows NULL
     winner_store_name = (winner.get("store_name") or "Unknown store").strip()
     winner_total = float(winner.get("total") or 0.0)
     winner_total = max(0.0, min(round(winner_total, 2), 9999.99))  # clamp to numeric(6,2)-ish
@@ -141,7 +162,7 @@ async def save_basket(
     # Serialize candidate stores for jsonb
     stores_json = json.dumps(stores, ensure_ascii=False)
 
-    # 4) Persist header + items (guarded for clearer error logs)
+    # 4) Persist header + items
     try:
         async with pool.acquire() as conn:
             async with conn.transaction():
@@ -232,7 +253,7 @@ async def list_baskets(
     raw_uid = get_user_id(user)
     uid = str(raw_uid) if raw_uid is not None else ""
     if not uid:
-        print("AUTH_USER_SHAPE_DEBUG(list_baskets):", type(user).__name__, getattr(user, "__dict__", None))
+        _log_missing_uid("list_baskets", user)
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     rows = await pool.fetch(
@@ -265,7 +286,7 @@ async def get_basket(
     raw_uid = get_user_id(user)
     uid = str(raw_uid) if raw_uid is not None else ""
     if not uid:
-        print("AUTH_USER_SHAPE_DEBUG(get_basket):", type(user).__name__, getattr(user, "__dict__", None))
+        _log_missing_uid("get_basket", user)
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     head = await pool.fetchrow(
@@ -312,7 +333,7 @@ async def delete_basket(
     raw_uid = get_user_id(user)
     uid = str(raw_uid) if raw_uid is not None else ""
     if not uid:
-        print("AUTH_USER_SHAPE_DEBUG(delete_basket):", type(user).__name__, getattr(user, "__dict__", None))
+        _log_missing_uid("delete_basket", user)
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     res = await pool.execute(
