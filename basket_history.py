@@ -101,7 +101,7 @@ class BasketDetailOut(BaseModel):
     winner_store_id: Optional[int]
     winner_store_name: Optional[str]
     winner_total: Optional[float]
-    stores: Optional[List[dict]]  # <-- list of stores (normalized)
+    stores: Optional[List[dict]]  # normalized list
     note: Optional[str]
     items: List[dict]
 
@@ -178,13 +178,11 @@ async def save_basket(
                 )
                 basket_id = head["id"]
 
-                # Per-product details (may be empty in legacy)
                 price_map = {
                     (i.get("product") or "").strip().lower(): i
                     for i in (winner.get("items") or [])
                 }
 
-                # batch insert items (no concurrent ops)
                 rows = []
                 for it in payload.items:
                     key = (it.product or "").strip().lower()
@@ -193,17 +191,9 @@ async def save_basket(
                     line_total = (price * float(it.quantity)) if price is not None else None
 
                     rows.append((
-                        basket_id,            # $1
-                        it.product,           # $2
-                        float(it.quantity),   # $3
-                        it.unit,              # $4
-                        price,                # $5
-                        line_total,           # $6
-                        winner_store_id,      # $7
-                        winner_store_name,    # $8
-                        it.image_url,         # $9
-                        it.brand,             # $10
-                        it.size_text,         # $11
+                        basket_id, it.product, float(it.quantity), it.unit,
+                        price, line_total, winner_store_id, winner_store_name,
+                        it.image_url, it.brand, it.size_text
                     ))
 
                 if rows:
@@ -253,7 +243,12 @@ async def list_baskets(
 
     rows = await pool.fetch(
         """
-        SELECT id, created_at, winner_store_name, winner_total, radius_km
+        SELECT
+          id,
+          created_at,
+          winner_store_name,
+          winner_total::float8   AS winner_total,   -- cast numerics
+          radius_km::float8      AS radius_km
         FROM basket_history
         WHERE user_id=$1::uuid AND deleted_at IS NULL
         ORDER BY created_at DESC
@@ -265,8 +260,8 @@ async def list_baskets(
             id=r["id"],
             created_at=r["created_at"],
             winner_store_name=r["winner_store_name"],
-            winner_total=float(r["winner_total"]) if r["winner_total"] is not None else None,
-            radius_km=float(r["radius_km"]) if r["radius_km"] is not None else None,
+            winner_total=r["winner_total"],
+            radius_km=r["radius_km"],
         )
         for r in rows
     ]
@@ -285,8 +280,15 @@ async def get_basket(
         async with pool.acquire() as conn:
             head = await conn.fetchrow(
                 """
-                SELECT id, created_at, radius_km, winner_store_id, winner_store_name,
-                       winner_total, stores, note
+                SELECT
+                  id,
+                  created_at,
+                  radius_km::float8        AS radius_km,      -- cast
+                  winner_store_id,
+                  winner_store_name,
+                  winner_total::float8     AS winner_total,   -- cast
+                  stores,
+                  note
                 FROM basket_history
                 WHERE id=$1 AND user_id=$2::uuid AND deleted_at IS NULL
                 """,
@@ -296,7 +298,7 @@ async def get_basket(
             if not head:
                 raise HTTPException(status_code=404, detail="Basket not found")
 
-            # Normalize "stores" into a list[dict] regardless of storage format
+            # Normalize "stores" into a list[dict]
             raw_stores = head["stores"]
             stores_payload: Optional[List[dict]] = None
             if isinstance(raw_stores, list):
@@ -312,14 +314,22 @@ async def get_basket(
                         stores_payload = [parsed]
                 except Exception:
                     stores_payload = None
-            # Default to [] instead of None for nicer client handling
             if stores_payload is None:
                 stores_payload = []
 
             items = await conn.fetch(
                 """
-                SELECT product, quantity, unit, price, line_total, store_id, store_name,
-                       image_url, brand, size_text
+                SELECT
+                  product,
+                  quantity::float8   AS quantity,   -- cast
+                  unit,
+                  price::float8      AS price,      -- cast
+                  line_total::float8 AS line_total, -- cast
+                  store_id,
+                  store_name,
+                  image_url,
+                  brand,
+                  size_text
                 FROM basket_items
                 WHERE basket_id=$1
                 ORDER BY id
@@ -330,10 +340,10 @@ async def get_basket(
         return BasketDetailOut(
             id=head["id"],
             created_at=head["created_at"],
-            radius_km=float(head["radius_km"]) if head["radius_km"] is not None else None,
+            radius_km=head["radius_km"],
             winner_store_id=head["winner_store_id"],
             winner_store_name=head["winner_store_name"],
-            winner_total=float(head["winner_total"]) if head["winner_total"] is not None else None,
+            winner_total=head["winner_total"],
             stores=stores_payload,
             note=head["note"],
             items=[dict(r) for r in items],
