@@ -1,29 +1,40 @@
+name: Prisma → DB Scrape + CSV Artifact
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    # 02:00 Tallinn ≈ 23:00 UTC during summer (UTC+3)
+    - cron: "0 23 * * *"
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      PRODUCTS_TABLE: products   # be explicit
+      PRODUCTS_TABLE: products
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repo
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
 
       - name: Install Python deps
         run: |
+          python -V
           pip install --upgrade pip
           pip install playwright psycopg2-binary
 
-      # IMPORTANT: install browser WITH system deps
+      # Install Chromium *with* system deps (important for CI)
       - name: Install Chromium + deps
         run: python -m playwright install --with-deps chromium
 
-      # Debug: show which DB the runner is connected to
+      # Debug: confirm which DB we connect to
       - name: Debug DB identity
         run: |
           python - <<'PY'
@@ -34,15 +45,24 @@ jobs:
           print("DB identity:", cur.fetchone())
           PY
 
+      # 1) Run the DB upsert
       - name: Run Prisma → DB
-        run: python scripts/prisma_food_scrape_to_db.py --max-products 400 --headless 1
-
-      - name: Produce CSV export
-        run: python scripts/prisma_food_scraper.py --out prisma_foods.csv --max-products 400 --headless 1
-
-      - name: Preview CSV size
         run: |
+          python scripts/prisma_food_scrape_to_db.py --max-products 400 --headless 1
+
+      # 2) Also produce a CSV so you can download it
+      - name: Produce CSV export
+        run: |
+          python scripts/prisma_food_scraper.py --out prisma_foods.csv --max-products 400 --headless 1
+          echo "CSV line count (incl header):"
           wc -l prisma_foods.csv || true
+          echo "Preview:"
           head -n 5 prisma_foods.csv || true
 
-      - uses
+      # 3) Upload CSV artifact
+      - name: Upload CSV artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: prisma_foods.csv
+          path: prisma_foods.csv
+          if-no-files-found: error
