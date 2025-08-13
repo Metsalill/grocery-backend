@@ -10,8 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
-      # Use the Railway DB secret you created
-      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}   # <- Railway URL secret
       PRODUCTS_TABLE: products
       PYTHONUNBUFFERED: "1"
 
@@ -34,21 +33,45 @@ jobs:
       - name: Install Chromium + deps
         run: python -m playwright install --with-deps chromium
 
-      # Diagnostics (prints DB host/db so we know we're hitting the right one)
+      # --- Diagnostics: verify the secret and DB connectivity -----------------
       - name: Assert DATABASE_URL & connect
         shell: bash
         run: |
+          echo "Running DB connectivity check…"
           python - <<'PY'
-          import os, sys, urllib.parse, psycopg2
-          url = os.getenv("DATABASE_URL")
-          if not url:
-            print("ERROR: DATABASE_URL secret is missing."); sys.exit(2)
-          p = urllib.parse.urlparse(url)
-          print("DATABASE_URL host:", p.hostname, "db:", p.path.lstrip('/'))
-          if p.hostname and "supabase.co" in p.hostname:
-            print("ERROR: DATABASE_URL still points to Supabase. Update RW_DATABASE_URL to Railway."); sys.exit(2)
-          try:
-            conn = psycopg2.connect(url)
-            cur = conn.cursor()
-            cur.execute("SELECT current_database(), inet_server_addr();")
-            print("DB identity:", cur.fetchone(
+import os, sys, urllib.parse, psycopg2
+url = os.getenv("DATABASE_URL")
+if not url:
+    print("ERROR: DATABASE_URL secret is missing."); sys.exit(2)
+p = urllib.parse.urlparse(url)
+print("DATABASE_URL host:", p.hostname, "db:", p.path.lstrip('/'))
+if p.hostname and "supabase.co" in p.hostname:
+    print("ERROR: DATABASE_URL still points to Supabase. Update RW_DATABASE_URL to Railway."); sys.exit(2)
+try:
+    conn = psycopg2.connect(url)
+    cur = conn.cursor()
+    cur.execute("SELECT current_database(), inet_server_addr();")
+    print("DB identity:", cur.fetchone())
+    conn.close()
+except Exception as e:
+    print("DB connect error:", e); sys.exit(3)
+PY
+          echo "DB connectivity check finished."
+      # -----------------------------------------------------------------------
+
+      - name: Run Prisma → DB (UPSERT by EAN)
+        run: |
+          python scripts/prisma_food_scrape_to_db.py --max-products 400 --headless 1
+
+      - name: Produce CSV export
+        run: |
+          python scripts/prisma_food_scraper.py --out prisma_foods.csv --max-products 400 --headless 1
+          echo "CSV line count (incl header):"; wc -l prisma_foods.csv || true
+          echo "Preview:"; head -n 5 prisma_foods.csv || true
+
+      - name: Upload CSV artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: prisma_foods.csv
+          path: prisma_foods.csv
+          if-no-files-found: error
