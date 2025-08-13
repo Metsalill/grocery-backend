@@ -7,7 +7,7 @@ import asyncio
 import asyncpg
 import json
 import traceback
-import uuid  # <-- NEW
+import uuid  # <-- keep
 
 from auth import get_current_user
 from settings import get_db_pool
@@ -44,23 +44,13 @@ def _extract_user_id(obj):
     return None
 
 def _coerce_to_uuid_str(value: object) -> str:
-    """
-    Return a UUID string. If `value` already looks like a UUID, use it.
-    Otherwise create a deterministic UUID v5 from the given value.
-    """
     s = str(value)
     try:
         return str(uuid.UUID(s))
     except Exception:
-        # deterministic UUID based on a stable namespace + the value
         return str(uuid.uuid5(uuid.NAMESPACE_URL, f"grocery-user:{s}"))
 
 async def resolve_user_id(user, pool: asyncpg.pool.Pool) -> Optional[str]:
-    """
-    Resolve a *UUID string* for the current user.
-    1) Try extracting an id/uid/sub from the user object.
-    2) Else, if we have an email, look up users.id and coerce to UUID.
-    """
     direct = _extract_user_id(user)
     if direct:
         return _coerce_to_uuid_str(direct)
@@ -76,7 +66,6 @@ async def resolve_user_id(user, pool: asyncpg.pool.Pool) -> Optional[str]:
             print("RESOLVE_UID_ERROR:", type(e).__name__, str(e))
             traceback.print_exc()
 
-    # Debug breadcrumb if all else fails
     keys = list(user.keys()) if isinstance(user, dict) else [k for k in dir(user) if not k.startswith("_")]
     print("AUTH_USER_SHAPE_DEBUG(resolve_user_id):", type(user).__name__, "keys:", keys)
     return None
@@ -179,7 +168,7 @@ async def save_basket(
                     ) VALUES ($1::uuid,$2,$3,$4,$5,$6::jsonb,$7)
                     RETURNING id, created_at, winner_store_name, winner_total, radius_km
                     """,
-                    uid,  # <-- UUID string (real UUID or deterministic v5)
+                    uid,
                     payload.radius_km,
                     winner_store_id,
                     winner_store_name,
@@ -189,38 +178,45 @@ async def save_basket(
                 )
                 basket_id = head["id"]
 
+                # Per-product details (may be empty in legacy)
                 price_map = {
                     (i.get("product") or "").strip().lower(): i
                     for i in (winner.get("items") or [])
                 }
 
-                tasks = []
+                # --- batch insert items with executemany (no concurrent ops) ---
+                rows = []
                 for it in payload.items:
                     key = (it.product or "").strip().lower()
                     pinfo = price_map.get(key)
                     price = float(pinfo["price"]) if (pinfo and pinfo.get("price") is not None) else None
                     line_total = (price * float(it.quantity)) if price is not None else None
 
-                    tasks.append(conn.execute(
+                    rows.append((
+                        basket_id,            # $1
+                        it.product,           # $2
+                        float(it.quantity),   # $3
+                        it.unit,              # $4
+                        price,                # $5
+                        line_total,           # $6
+                        winner_store_id,      # $7
+                        winner_store_name,    # $8
+                        it.image_url,         # $9
+                        it.brand,             # $10
+                        it.size_text,         # $11
+                    ))
+
+                if rows:
+                    await conn.executemany(
                         """
                         INSERT INTO basket_items (
                             basket_id, product, quantity, unit, price, line_total,
                             store_id, store_name, image_url, brand, size_text
                         ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
                         """,
-                        basket_id,
-                        it.product,
-                        float(it.quantity),
-                        it.unit,
-                        price,
-                        line_total,
-                        winner_store_id,
-                        winner_store_name,
-                        it.image_url,
-                        it.brand,
-                        it.size_text,
-                    ))
-                await asyncio.gather(*tasks)
+                        rows,
+                    )
+                # ----------------------------------------------------------------
     except Exception as e:
         print(
             "SAVE_BASKET_ERROR:",
