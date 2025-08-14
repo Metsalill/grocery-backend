@@ -3,7 +3,8 @@
 """
 Prisma.ee FOOD & DRINKS scraper → direct Postgres upsert
 
-- Crawls all grocery categories under /tooted/ and /en/tooted/ (autodiscovers subcats)
+- Crawls grocery categories under /tooted/ and /en/tooted/ (auto-discovers subcats)
+- Filters to FOOD/DRINKS only (skips appliances, pets, cosmetics, etc.)
 - Extracts Prisma product metadata (incl. EAN) and UPSERTs into Postgres
 - Keyed by EAN so re-runs will keep the latest metadata
 
@@ -25,12 +26,38 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 # Config
 BASE = "https://prismamarket.ee"
 
-# Start from both EN and ET roots so we don't miss locale switches
-SEEDS = ["/en/tooted/", "/tooted/"]  # root listings (both locales)
+# Start from both EN and ET roots + food-market so we don't miss locale switches
+SEEDS = ["/en/tooted/", "/tooted/", "/en/food-market/", "/food-market/"]
 
 # Paths
 CATEGORY_PREFIXES = ("/en/tooted/", "/tooted/", "/en/food-market/", "/food-market/")
 PRODUCT_PREFIXES  = ("/en/toode/", "/toode/")
+
+# FOOD-ONLY whitelist (keeps grocery sections, excludes non-food)
+_ALLOW_KEYS = (
+    # high-level groceries
+    "toit", "joog", "food-market",
+    # common food areas
+    "leivad", "küpsised", "kook", "saia", "bakery",
+    "piim", "munad", "rasvad", "dairy", "eggs", "juust", "jogurt", "või",
+    "puu", "köögivil", "fruit", "vegetable", "salat", "herb",
+    "liha", "kana", "sealiha", "veis", "lamb", "kalkun", "hakkliha",
+    "kala", "mereann", "tuna", "lõhe", "räim", "heering",
+    "külmutatud", "frozen",
+    "kuivtooted", "pasta", "riis", "teravili", "jahu", "suhkur",
+    "õli", "maitseaine", "kastmed", "konserv", "konservid",
+    "snack", "suupisted", "pähkl", "müsl",
+    "valmistoit", "ready", "supp", "püree",
+    "joogid", "vein", "õlu", "siider", "limonaad", "vesi", "mahl",
+    "magus", "maiustused", "šokolaad",
+)
+_DENY_KEYS = (
+    "kodumasinad", "elektroonika", "kodukaubad", "kodu", "sisustus",
+    "kosmeetika", "hügieen", "ilutooted",
+    "riided", "jalatsid", "lapsed", "mänguasjad",
+    "lemmikloom", "kass", "koer",
+    "aia", "auto", "tööriist", "spord", "jõulud", "kingitused"
+)
 
 # -------- Amount / EAN patterns (enhanced) -----------------------------------
 PACK_RE   = re.compile(r"(\d+)\s*[x×]\s*(\d+(?:[\.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
@@ -49,37 +76,39 @@ def is_category_path(path: str) -> bool:
 def is_product_path(path: str) -> bool:
     return any(path.startswith(p) for p in PRODUCT_PREFIXES)
 
+def _has_any(s: str, keys: tuple[str, ...]) -> bool:
+    s = s.lower()
+    return any(k in s for k in keys)
+
 def is_in_whitelist(url: str) -> bool:
-    # allow all grocery categories in both locales (incl. food-market sections)
+    """
+    Allow only FOOD/DRINKS categories.
+    - Path must be a category path
+    - Must contain an allow key (or be under food-market)
+    - Must NOT contain a deny key
+    """
     path = urlparse(url).path
-    return is_category_path(path)
+    if not is_category_path(path):
+        return False
+    if _has_any(path, _DENY_KEYS):
+        return False
+    return "food-market" in path or _has_any(path, _ALLOW_KEYS)
 
 # -----------------------------------------------------------------------------
 # Food group mapper (normalize per-store categories)
 def map_food_group(c1: str, c2: str, c3: str, title: str) -> str:
     t = " ".join([c1, c2, c3, title]).lower()
-
     def has(*keys): return any(k in t for k in keys)
-
-    if has("joogid", "drink", "water", "juice", "soda", "beer", "wine", "kõvad joogid"):
-        return "drinks"
-    if has("leivad", "küpsised", "kook", "saia", "bakery", "pastry", "biscuit", "bread", "cake"):
-        return "bakery"
-    if has("piim", "juust", "kohuke", "kohupiim", "või", "jogurt", "dairy", "eggs", "munad", "cream"):
-        return "dairy_eggs"
-    if has("puu", "köögivil", "vegetable", "fruit", "salat", "herb"):
-        return "produce"
-    if has("liha", "meat", "kana", "chicken", "beef", "pork", "lamb", "veal", "ham", "saus"):
-        return "meat"
-    if has("kala", "fish", "lõhe", "räim", "heering", "tuna", "shrimp", "kammkarp", "mereann", "seafood"):
-        return "fish"
-    if has("külmutatud", "frozen"):
-        return "frozen"
+    if has("joogid", "drink", "water", "juice", "soda", "beer", "wine", "kõvad joogid"): return "drinks"
+    if has("leivad", "küpsised", "kook", "saia", "bakery", "pastry", "biscuit", "bread", "cake"): return "bakery"
+    if has("piim", "juust", "kohuke", "kohupiim", "või", "jogurt", "dairy", "eggs", "munad", "cream"): return "dairy_eggs"
+    if has("puu", "köögivil", "vegetable", "fruit", "salat", "herb"): return "produce"
+    if has("liha", "meat", "kana", "chicken", "beef", "pork", "lamb", "veal", "ham", "saus"): return "meat"
+    if has("kala", "fish", "lõhe", "räim", "heering", "tuna", "shrimp", "kammkarp", "mereann", "seafood"): return "fish"
+    if has("külmutatud", "frozen"): return "frozen"
     if has("kuivtooted", "pasta", "riis", "rice", "jahu", "flour", "sugar", "suhkur", "oil", "õli",
-           "konserv", "canned", "maitseaine", "spice", "kastme", "sauce", "teravili", "cereal", "snack", "pähkl", "müsl"):
-        return "pantry"
-    if has("valmistoit", "prepared", "ready"):
-        return "prepared"
+           "konserv", "canned", "maitseaine", "spice", "kastme", "sauce", "teravili", "cereal", "snack", "pähkl", "müsl"): return "pantry"
+    if has("valmistoit", "prepared", "ready"): return "prepared"
     return "other"
 
 # -----------------------------------------------------------------------------
@@ -116,8 +145,6 @@ CREATE TABLE IF NOT EXISTS {PRODUCTS_TABLE} (
     last_seen_utc TIMESTAMPTZ
 );
 """
-
-# ensure column exists if table already created earlier
 ADD_FOOD_GROUP_SQL = f"ALTER TABLE {PRODUCTS_TABLE} ADD COLUMN IF NOT EXISTS food_group TEXT;"
 CREATE_FOOD_GROUP_INDEX_SQL = f"CREATE INDEX IF NOT EXISTS idx_{PRODUCTS_TABLE}_food_group ON {PRODUCTS_TABLE}(food_group);"
 
@@ -166,11 +193,7 @@ def extract_title(page) -> str:
     except Exception: return ""
 
 def extract_image_url(page) -> str:
-    sels = [
-        "main img[alt][src]",
-        "img[alt][src]",
-        "img[src]",
-    ]
+    sels = ["main img[alt][src]", "img[alt][src]", "img[src]"]
     for sel in sels:
         try:
             img = page.locator(sel).first
@@ -183,7 +206,6 @@ def extract_image_url(page) -> str:
     return ""
 
 def extract_label_value(page, labels: list[str]) -> str:
-    # 1) exact text nodes → nearest following value (div/span/p)
     for label in labels:
         try:
             lab = page.locator(f"xpath=//*[normalize-space(.)='{label}']").first
@@ -192,7 +214,6 @@ def extract_label_value(page, labels: list[str]) -> str:
                 if sib.count() > 0:
                     return clean(sib.inner_text())
         except Exception: pass
-    # 2) fuzzy contains → nearest following value
     for label in labels:
         try:
             lab = page.locator(f"xpath=//*[contains(normalize-space(.), '{label}')]").first
@@ -201,7 +222,6 @@ def extract_label_value(page, labels: list[str]) -> str:
                 if sib.count() > 0:
                     return clean(sib.inner_text())
         except Exception: pass
-    # 3) common detail layouts (dl/dt/dd)
     try:
         for label in labels:
             dt = page.locator(f"xpath=//dt[normalize-space()='{label}'] | //dt[contains(normalize-space(),'{label}')]").first
@@ -210,7 +230,6 @@ def extract_label_value(page, labels: list[str]) -> str:
                 if dd.count() > 0:
                     return clean(dd.inner_text())
     except Exception: pass
-    # 4) fallback: regex in raw HTML
     try:
         html = page.content()
         for label in labels:
@@ -256,9 +275,7 @@ def extract_breadcrumbs(page) -> list[str]:
                     if t: texts.append(t)
                 if texts: break
         except Exception: continue
-
     texts = [t for t in texts if t.lower() not in {"home", "avaleht"}]
-
     if not texts:
         try:
             scripts = page.locator("script[type='application/ld+json']")
@@ -273,11 +290,10 @@ def extract_breadcrumbs(page) -> list[str]:
                         texts = [t for t in texts if t]
                         if texts: break
         except Exception: pass
-
     return texts[-3:]
 
 def parse_amount_from_title(title: str) -> str:
-    t = BONUS_RE.sub("", title)  # drop "+20%" promos
+    t = BONUS_RE.sub("", title)
     m = PACK_RE.search(t)
     if m:
         qty, num, unit = m.groups()
@@ -424,7 +440,7 @@ def collect_links_from_listing(page, current_url: str) -> tuple[set[str], set[st
 
 # -----------------------------------------------------------------------------
 # Main crawl → DB
-def crawl_to_db(max_products: int = 500, headless: bool = True):
+def crawl_to_db(max_products: int = 500, headless: bool = True, discover_cap: int = 120):
     conn = db_connect()
     rows_written = 0
     skipped_no_ean = 0
@@ -441,10 +457,12 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
         seen_categories = set()
         to_visit = [urljoin(BASE, s) for s in SEEDS]
 
-        # Phase A: discover product links
-        while to_visit and len(product_urls) < max_products:
+        # Phase A: discover product links (food-only)
+        while to_visit and len(product_urls) < max_products and len(seen_categories) < discover_cap:
             cat_url = to_visit.pop(0)
             if cat_url in seen_categories: continue
+            if not is_in_whitelist(cat_url):  # safety (seed duplicates)
+                continue
             seen_categories.add(cat_url)
             try:
                 page.goto(cat_url, timeout=30000)
@@ -459,7 +477,7 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
                     to_visit.append(c)
 
             print(f"[DISCOVER] {cat_url} → +{len(prod)} products, +{len(cats)} cats "
-                  f"(totals: products={len(product_urls)}, queue={len(to_visit)})")
+                  f"(totals: products={len(product_urls)}, seen={len(seen_categories)}, queue={len(to_visit)})")
 
             if len(product_urls) >= max_products:
                 break
@@ -517,7 +535,7 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
         browser.close()
 
     # Run summary
-    print(f"Discovered {len(product_urls)} product URLs under whitelisted categories.")
+    print(f"Discovered {len(product_urls)} product URLs (food-only).")
     print(f"Upserted {rows_written} rows into '{PRODUCTS_TABLE}'. Skipped (no EAN): {skipped_no_ean}.")
 
 # -----------------------------------------------------------------------------
@@ -525,8 +543,9 @@ def main():
     ap = argparse.ArgumentParser(description="Prisma.ee FOOD & DRINKS → Postgres")
     ap.add_argument("--max-products", type=int, default=500)
     ap.add_argument("--headless", type=int, default=1)
+    ap.add_argument("--discover-cap", type=int, default=120, help="Max categories to visit during discovery before visiting products")
     args = ap.parse_args()
-    crawl_to_db(max_products=args.max_products, headless=bool(args.headless))
+    crawl_to_db(max_products=args.max_products, headless=bool(args.headless), discover_cap=int(args.discover_cap))
 
 if __name__ == "__main__":
     try:
