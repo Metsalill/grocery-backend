@@ -55,8 +55,12 @@ SEEDS = [
 ]
 PRODUCT_PATH = "/toode/"
 CATEGORY_PATH = "/tooted/"
-AMOUNT_RE = re.compile(r"(\d+[\.,]?\d*\s?(?:kg|g|l|ml|cl|dl|tk|pcs|pk|pack|x\s*\d+\s*(?:g|ml|l)))", re.I)
-EAN_RE = re.compile(r"(\d{8,14})$")
+
+# -------- Amount / EAN patterns (enhanced) -----------------------------------
+PACK_RE   = re.compile(r"(\d+)\s*[x×]\s*(\d+(?:[\.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
+SIMPLE_RE = re.compile(r"\b(\d+(?:[\.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
+BONUS_RE  = re.compile(r"\+\s*\d+%")  # e.g. "500 g + 20%"
+EAN_RE    = re.compile(r"(\d{8,14})$")
 
 # -----------------------------------------------------------------------------
 # Small utils
@@ -165,15 +169,37 @@ def extract_image_url(page) -> str:
     return ""
 
 def extract_label_value(page, labels: list[str]) -> str:
+    # 1) exact text nodes → nearest following value (div/span/p)
     for label in labels:
         try:
-            lab = page.locator(f"xpath=//*[contains(normalize-space(.), '{label}')] ")
+            lab = page.locator(f"xpath=//*[normalize-space(.)='{label}']").first
             if lab.count() > 0:
-                sib = lab.first.locator("xpath=following::*[self::div or self::span or self::p][1]")
+                sib = lab.locator("xpath=following::*[self::div or self::span or self::p][1]")
                 if sib.count() > 0:
-                    return clean(sib.first.inner_text())
+                    return clean(sib.inner_text())
         except Exception:
-            continue
+            pass
+    # 2) fuzzy contains → nearest following value
+    for label in labels:
+        try:
+            lab = page.locator(f"xpath=//*[contains(normalize-space(.), '{label}')]").first
+            if lab.count() > 0:
+                sib = lab.locator("xpath=following::*[self::div or self::span or self::p][1]")
+                if sib.count() > 0:
+                    return clean(sib.inner_text())
+        except Exception:
+            pass
+    # 3) common detail layouts (dl/dt/dd)
+    try:
+        for label in labels:
+            dt = page.locator(f"xpath=//dt[normalize-space()='{label}'] | //dt[contains(normalize-space(),'{label}')]").first
+            if dt.count() > 0:
+                dd = dt.locator("xpath=following-sibling::dd[1]")
+                if dd.count() > 0:
+                    return clean(dd.inner_text())
+    except Exception:
+        pass
+    # 4) fallback: regex in raw HTML
     try:
         html = page.content()
         for label in labels:
@@ -195,26 +221,75 @@ def extract_ean(page, url: str) -> str:
     return m.group(1) if m else ""
 
 def extract_country(page) -> str:
-    return extract_label_value(page, ["Country of manufacture", "Valmistajariik", "Päritoluriik"]) or ""
+    return extract_label_value(page, [
+        "Country of manufacture", "Country of origin", "Valmistajariik", "Päritoluriik"
+    ]) or ""
 
 def extract_manufacturer(page) -> str:
-    return extract_label_value(page, ["Manufacturer", "Tootja"]) or ""
+    return extract_label_value(page, [
+        "Manufacturer", "Tootja", "Producer"
+    ]) or ""
 
 def extract_breadcrumbs(page) -> list[str]:
-    crumbs = []
-    try:
-        els = page.locator("nav a[href*='/tooted/']")
-        for i in range(els.count()):
-            txt = clean(els.nth(i).inner_text())
-            if txt:
-                crumbs.append(txt)
-    except Exception:
-        pass
-    return crumbs[-3:]
+    # Try several breadcrumb patterns
+    sels = [
+        "nav[aria-label='breadcrumb'] a",
+        "nav.breadcrumb a",
+        "ol.breadcrumb a",
+        "a.breadcrumb__link",
+        "nav a[href*='/tooted/']",
+    ]
+    texts = []
+    for sel in sels:
+        try:
+            els = page.locator(sel)
+            if els.count() > 0:
+                for i in range(min(10, els.count())):
+                    t = clean(els.nth(i).inner_text())
+                    if t:
+                        texts.append(t)
+                if texts:
+                    break
+        except Exception:
+            continue
+
+    # Remove obvious site-level crumbs (e.g., "Home")
+    texts = [t for t in texts if t.lower() not in {"home", "avaleht"}]
+
+    # Try JSON-LD breadcrumbs as a fallback
+    if not texts:
+        try:
+            scripts = page.locator("script[type='application/ld+json']")
+            for i in range(scripts.count()):
+                raw = scripts.nth(i).inner_text()
+                if "BreadcrumbList" in raw:
+                    import json
+                    data = json.loads(raw)
+                    if isinstance(data, dict) and data.get("@type") == "BreadcrumbList":
+                        items = data.get("itemListElement", [])
+                        texts = [clean(it.get("name", "")) for it in items if isinstance(it, dict)]
+                        texts = [t for t in texts if t]
+                        if texts:
+                            break
+        except Exception:
+            pass
+
+    # Keep only the last 3 most specific levels
+    return texts[-3:]
 
 def parse_amount_from_title(title: str) -> str:
-    m = AMOUNT_RE.search(title)
-    return m.group(0) if m else ""
+    t = BONUS_RE.sub("", title)  # drop "+20%" kind of promos
+    m = PACK_RE.search(t)
+    if m:
+        qty, num, unit = m.groups()
+        num = num.replace(",", ".")
+        return f"{qty}x{num} {unit}".replace(" .", " ")
+    m = SIMPLE_RE.search(t)
+    if m:
+        num, unit = m.groups()
+        num = num.replace(",", ".")
+        return f"{num} {unit}"
+    return ""
 
 def infer_brand_from_title(title: str) -> str:
     parts = title.split()
@@ -266,6 +341,9 @@ def collect_links_from_listing(page, current_url: str) -> tuple[set[str], set[st
 def crawl_to_db(max_products: int = 500, headless: bool = True):
     conn = db_connect()
     rows_written = 0
+    skipped_no_ean = 0
+    product_urls = set()
+
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=headless)
         context = browser.new_context(user_agent=(
@@ -276,7 +354,6 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
 
         seen_categories = set()
         to_visit = [urljoin(BASE, s) for s in SEEDS]
-        product_urls = set()
 
         # Phase A: discover product links
         while to_visit and len(product_urls) < max_products:
@@ -331,6 +408,7 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
                 title = extract_title(page)
                 ean = extract_ean(page, url)
                 if not ean:
+                    skipped_no_ean += 1
                     continue
                 amount = parse_amount_from_title(title)
                 brand = infer_brand_from_title(title)
@@ -345,7 +423,7 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
                 rec = {
                     "ean": ean,
                     "product_name": title,
-                    "name": title,  # <-- populate legacy NOT NULL column
+                    "name": title,  # legacy NOT NULL column
                     "amount": amount,
                     "brand": brand,
                     "manufacturer": manufacturer,
@@ -367,7 +445,10 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
                     conn.commit()
 
         browser.close()
-    print(f"Upserted {rows_written} rows into '{PRODUCTS_TABLE}'.")
+
+    # Run summary
+    print(f"Discovered {len(product_urls)} product URLs under whitelisted categories.")
+    print(f"Upserted {rows_written} rows into '{PRODUCTS_TABLE}'. Skipped (no EAN): {skipped_no_ean}.")
 
 # -----------------------------------------------------------------------------
 def main():
