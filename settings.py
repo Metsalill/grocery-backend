@@ -43,6 +43,12 @@ VALID_IMAGE_MIME = {
 }
 
 # -----------------------------------------------------------------------------
+# Admin-only token for the manual image upload API
+# -----------------------------------------------------------------------------
+# Set ADMIN_UPLOAD_TOKEN in your env to enable /api/upload-image
+ADMIN_UPLOAD_TOKEN = (os.getenv("ADMIN_UPLOAD_TOKEN") or "").strip()
+
+# -----------------------------------------------------------------------------
 # Cloudflare R2 / S3-compatible storage
 # -----------------------------------------------------------------------------
 # If you set these in Railway → Variables, the app will use R2 for hosted images.
