@@ -18,7 +18,7 @@ jobs:
       LOG_REQUESTS: "0"
 
       # DB
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       DB_CONNECT_TIMEOUT: "10"
 
       # R2 / S3
