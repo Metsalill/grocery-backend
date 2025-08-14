@@ -3,7 +3,7 @@
 """
 Prisma.ee FOOD & DRINKS scraper → direct Postgres upsert
 
-- Scrapes only grocery categories (whitelist) and auto-discovers subcats
+- Crawls all grocery categories under /en/tooted/ and auto-discovers subcats
 - Extracts Prisma product metadata (incl. EAN) and UPSERTs into Postgres
 - Keyed by EAN so re-runs will keep the latest metadata
 
@@ -24,17 +24,9 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 # -----------------------------------------------------------------------------
 # Config
 BASE = "https://prismamarket.ee"
-SEEDS = [
-    "/en/tooted/joogid",                      # beverages
-    "/en/tooted/piim-munad-ja-rasvad",        # milk, eggs & fats
-    "/en/tooted/puu-ja-koogiviljad",          # fruit & veg
-    "/en/tooted/leivad-kupsised-ja-kupsetised",# bakery
-    "/en/tooted/kuivtooted-ja-kupsetamine",   # dry & baking
-    "/en/tooted/kulmutatud-toidud",           # frozen foods
-    "/en/tooted/kala-ja-mereannid",           # fish & seafood
-    "/en/tooted/food-market/liha",            # meat
-    "/en/tooted/food-market/valmistoit",      # prepared
-]
+
+# Broadened crawl: discover everything under groceries root
+SEEDS = ["/en/tooted/"]            # start from the root listing
 PRODUCT_PATH = "/toode/"
 CATEGORY_PATH = "/tooted/"
 
@@ -48,9 +40,10 @@ EAN_RE    = re.compile(r"(\d{8,14})$")
 # Small utils
 def jitter(a=0.6, b=1.4): time.sleep(random.uniform(a, b))
 def clean(s: str | None) -> str: return re.sub(r"\s+", " ", s or "").strip()
+
 def is_in_whitelist(url: str) -> bool:
-    path = urlparse(url).path
-    return any(path.startswith(seed) for seed in SEEDS)
+    # allow everything under /en/tooted/
+    return urlparse(url).path.startswith("/en/tooted/")
 
 # -----------------------------------------------------------------------------
 # Food group mapper (normalize per-store categories)
@@ -164,15 +157,20 @@ def extract_title(page) -> str:
     except Exception: return ""
 
 def extract_image_url(page) -> str:
-    for sel in ["main img[alt]", "img[alt][src]"]:
+    sels = [
+        "main img[alt][src]",
+        "img[alt][src]",
+        "img[src]",
+    ]
+    for sel in sels:
         try:
             img = page.locator(sel).first
             if img.count() > 0:
                 src = img.get_attribute("src")
                 if src:
-                    from urllib.parse import urljoin as _join
-                    return _join(BASE, src)
-        except Exception: pass
+                    return urljoin(BASE, src)
+        except Exception:
+            continue
     return ""
 
 def extract_label_value(page, labels: list[str]) -> str:
@@ -232,7 +230,6 @@ def extract_manufacturer(page) -> str:
     ]) or ""
 
 def extract_breadcrumbs(page) -> list[str]:
-    # Try several breadcrumb patterns
     sels = [
         "nav[aria-label='breadcrumb'] a",
         "nav.breadcrumb a",
@@ -251,10 +248,8 @@ def extract_breadcrumbs(page) -> list[str]:
                 if texts: break
         except Exception: continue
 
-    # Remove obvious site-level crumbs (e.g., "Home")
     texts = [t for t in texts if t.lower() not in {"home", "avaleht"}]
 
-    # Try JSON-LD breadcrumbs as a fallback
     if not texts:
         try:
             scripts = page.locator("script[type='application/ld+json']")
@@ -270,7 +265,6 @@ def extract_breadcrumbs(page) -> list[str]:
                         if texts: break
         except Exception: pass
 
-    # Keep only the last 3 most specific levels
     return texts[-3:]
 
 def parse_amount_from_title(title: str) -> str:
@@ -295,11 +289,106 @@ def infer_brand_from_title(title: str) -> str:
     return parts[0]
 
 # -----------------------------------------------------------------------------
-# Listing crawling
+# Listing helpers
+def paginate_listing(page, max_pages: int = 40):
+    """
+    Reveal more products via:
+    - 'Load more' buttons
+    - Infinite scroll
+    - Classic next link
+    Stops when no progress or max_pages reached.
+    """
+    def page_height():
+        try:
+            return page.evaluate("document.body.scrollHeight")
+        except Exception:
+            return 0
+
+    load_more_selectors = [
+        "button:has-text('Load more')",
+        "button:has-text('Show more')",
+        "button:has-text('Load More')",
+        "[data-testid*='load'][data-testid*='more']",
+        "button[aria-label*='more']",
+    ]
+    next_selectors = [
+        "a[rel='next']",
+        "a.pagination__next",
+        "button:has-text('Next')",
+        "a:has-text('Next')",
+    ]
+
+    pages_clicked = 0
+    prev_h = -1
+
+    while pages_clicked < max_pages:
+        progressed = False
+
+        # 1) 'Load more'
+        for sel in load_more_selectors:
+            try:
+                btn = page.locator(sel)
+                if btn.count() > 0 and btn.first.is_enabled():
+                    btn.first.click()
+                    page.wait_for_load_state("domcontentloaded")
+                    jitter(0.6, 1.2)
+                    new_h = page_height()
+                    if new_h > prev_h:
+                        prev_h = new_h
+                        progressed = True
+                        pages_clicked += 1
+                        break
+            except Exception:
+                continue
+        if progressed:
+            continue
+
+        # 2) Infinite scroll
+        try:
+            cur_h = page_height()
+            page.mouse.wheel(0, 20000)
+            jitter(0.5, 1.0)
+            new_h = page_height()
+            if new_h > cur_h:
+                prev_h = new_h
+                progressed = True
+        except Exception:
+            pass
+        if progressed:
+            continue
+
+        # 3) Classic "next"
+        for sel in next_selectors:
+            try:
+                nxt = page.locator(sel)
+                if nxt.count() > 0 and nxt.first.is_enabled():
+                    nxt.first.click()
+                    page.wait_for_load_state("domcontentloaded")
+                    jitter(0.6, 1.2)
+                    new_h = page_height()
+                    if new_h >= prev_h:
+                        prev_h = new_h
+                        progressed = True
+                        pages_clicked += 1
+                        break
+            except Exception:
+                continue
+        if progressed:
+            continue
+
+        break  # no way to progress
+
 def collect_links_from_listing(page, current_url: str) -> tuple[set[str], set[str]]:
+    # reveal as many items as possible
+    try:
+        paginate_listing(page, max_pages=60)
+    except Exception:
+        pass
+
+    # final deep scroll
     try:
         last_h = 0
-        for _ in range(8):
+        for _ in range(6):
             page.mouse.wheel(0, 20000); jitter(0.4, 0.9)
             h = page.evaluate("document.body.scrollHeight")
             if h == last_h: break
@@ -360,20 +449,8 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
                 if c not in seen_categories and c not in to_visit:
                     to_visit.append(c)
 
-            try:
-                for _ in range(10):
-                    next_btn = page.locator("a[rel='next'], button:has-text('Next'), a:has-text('Next')")
-                    if next_btn.count() == 0: break
-                    next_btn.first.click()
-                    page.wait_for_load_state("domcontentloaded"); jitter()
-                    prod2, cats2 = collect_links_from_listing(page, cat_url)
-                    product_urls.update(prod2)
-                    for c in cats2:
-                        if c not in seen_categories and c not in to_visit:
-                            to_visit.append(c)
-                    if len(product_urls) >= max_products: break
-            except Exception: pass
-            if len(product_urls) >= max_products: break
+            if len(product_urls) >= max_products:
+                break
 
         # Phase B: visit products → UPSERT
         with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
