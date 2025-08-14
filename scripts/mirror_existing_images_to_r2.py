@@ -41,66 +41,62 @@ from settings import (
 
 PRISMA_HOST = "prismamarket.ee"
 
-def jitter(a=0.6, b=1.4): time.sleep(random.uniform(a, b))
+
+# ------------------------ small utils ------------------------
+def jitter(a: float = 0.6, b: float = 1.4) -> None:
+    time.sleep(random.uniform(a, b))
+
 
 def guess_ext_from_mime(m: str) -> str:
     m = (m or "").lower()
-    if "jpeg" in m or m == "image/jpg": return "jpg"
-    if "png" in m: return "png"
-    if "webp" in m: return "webp"
-    if "gif" in m: return "gif"
+    if "jpeg" in m or m == "image/jpg":
+        return "jpg"
+    if "png" in m:
+        return "png"
+    if "webp" in m:
+        return "webp"
+    if "gif" in m:
+        return "gif"
     return "jpg"
 
+
+# ------------------------- DB helpers ------------------------
 def db_connect() -> PGConn:
     conn = psycopg2.connect(DATABASE_URL, connect_timeout=int(DB_CONNECT_TIMEOUT))
     conn.autocommit = True
     return conn
 
+
 def select_to_mirror(conn: PGConn, limit: int) -> list[dict]:
     """
     Pick rows with a non-empty image_url that are NOT already on our R2 public base.
     Prefer to catch prisma URLs explicitly too.
+    Returns list of dicts (via RealDictCursor).
     """
-    with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
-        cur.execute(
-            """
-            SELECT id, ean, product_name, image_url
-            FROM products
-            WHERE image_url IS NOT NULL
-              AND image_url <> ''
-              AND (
-                    %(r2base)s = '' OR image_url NOT ILIKE %(r2base_like)s
-                  )
-              AND (
-                    image_url ILIKE '%%prismamarket.ee%%'
-                    OR %(r2base)s = ''  -- if no R2 base set, mirror everything external
-                  )
-            ORDER BY id
-            LIMIT %s
-            """,
-            (
-                limit,
-            ),
-            # psycopg2 doesn’t support named params mixed with %s easily; do manual dict:
-        )
-        # Re-run with dict args cleanly:
-    with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
-        r2base = (R2_PUBLIC_BASE or "").strip()
-        r2like = f"%{r2base}%" if r2base else ""
-        cur.execute(
-            """
-            SELECT id, ean, product_name, image_url
-            FROM products
-            WHERE image_url IS NOT NULL
-              AND image_url <> ''
-              AND (%(r2base)s = '' OR image_url NOT ILIKE %(r2like)s)
-              AND (image_url ILIKE '%%prismamarket.ee%%' OR %(r2base)s = '')
-            ORDER BY id
-            LIMIT %(limit)s
-            """,
-            {"r2base": r2base, "r2like": r2like, "limit": limit},
-        )
-        return [dict(r) for r in cur.fetchall()]
+    r2base = (R2_PUBLIC_BASE or "").strip()
+    r2like = f"%{r2base}%" if r2base else ""
+
+    SQL = """
+        SELECT id, ean, product_name, image_url
+        FROM products
+        WHERE image_url IS NOT NULL
+          AND image_url <> ''
+          -- Skip anything already pointing at our own R2/public base (when set)
+          AND (%(r2base)s = '' OR image_url NOT ILIKE %(r2like)s)
+          -- Otherwise prefer explicit prismamarket.ee images; if r2 base isn't set,
+          -- allow any http(s) external URL to be mirrored
+          AND (
+                image_url ILIKE '%%prismamarket.ee%%'
+                OR (%(r2base)s = '' AND image_url ~* '^https?://')
+              )
+        ORDER BY id
+        LIMIT %(limit)s
+    """
+    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        cur.execute(SQL, {"r2base": r2base, "r2like": r2like, "limit": limit})
+        rows = cur.fetchall()  # list[RealDictRow]
+        return list(rows)
+
 
 def update_image_url(conn: PGConn, pid: int, url: str) -> None:
     with conn.cursor() as cur:
@@ -109,6 +105,8 @@ def update_image_url(conn: PGConn, pid: int, url: str) -> None:
             (url, datetime.now(timezone.utc), pid),
         )
 
+
+# ------------------------- R2 helpers ------------------------
 def get_r2_client():
     if not (R2_S3_ENDPOINT and R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY and R2_BUCKET):
         raise RuntimeError("R2 not configured")
@@ -120,6 +118,7 @@ def get_r2_client():
         region_name=R2_REGION or "auto",
     )
 
+
 def head_exists(client, key: str) -> bool:
     try:
         client.head_object(Bucket=R2_BUCKET, Key=key)
@@ -128,6 +127,7 @@ def head_exists(client, key: str) -> bool:
         if e.response.get("Error", {}).get("Code") in {"404", "NoSuchKey", "NotFound"}:
             return False
         raise
+
 
 def upload_bytes(client, data: bytes, key: str, content_type: str) -> str:
     client.put_object(
@@ -139,12 +139,25 @@ def upload_bytes(client, data: bytes, key: str, content_type: str) -> str:
     )
     return r2_public_url(key)
 
+
 def should_mirror(url: str) -> bool:
-    host = urlparse(url).netloc.lower()
+    """
+    Skip if already on our R2 public base. Otherwise mirror if it's
+    an http(s) URL and either belongs to prismamarket.ee or (when R2 base unset)
+    any external host.
+    """
+    if not url or not url.lower().startswith(("http://", "https://")):
+        return False
     if R2_PUBLIC_BASE and url.startswith(R2_PUBLIC_BASE):
         return False
-    return True if PRISMA_HOST in host or True else False  # mirror anything external if no R2 base set
+    host = urlparse(url).netloc.lower()
+    if PRISMA_HOST in host:
+        return True
+    # If no R2 public base configured, allow mirroring any external http(s) sources.
+    return not bool(R2_PUBLIC_BASE)
 
+
+# --------------------------- main flow ---------------------------
 def mirror(limit: int = 1000, overwrite: bool = False):
     conn = db_connect()
     client = get_r2_client()
@@ -172,7 +185,7 @@ def mirror(limit: int = 1000, overwrite: bool = False):
             ean = (r.get("ean") or "").strip()
             src = r["image_url"]
 
-            if not src or not should_mirror(src):
+            if not should_mirror(src):
                 skipped += 1
                 continue
 
@@ -182,7 +195,8 @@ def mirror(limit: int = 1000, overwrite: bool = False):
                     print(f"[{pid}] download failed: {resp.status_code}")
                     failed += 1
                     continue
-                ctype = resp.headers.get("content-type", "")
+
+                ctype = resp.headers.get("content-type", "") or "image/jpeg"
                 ext = guess_ext_from_mime(ctype)
                 fname = f"{ean}.{ext}" if ean else f"id-{pid}.{ext}"
                 key = f"{R2_PREFIX}prisma/{fname}"
@@ -207,6 +221,7 @@ def mirror(limit: int = 1000, overwrite: bool = False):
             jitter()
 
     print(f"\nMirroring complete. Done: {done}, Skipped: {skipped}, Failed: {failed}.")
+
 
 if __name__ == "__main__":
     import argparse
