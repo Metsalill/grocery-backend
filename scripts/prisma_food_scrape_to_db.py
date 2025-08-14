@@ -4,6 +4,7 @@
 Prisma.ee FOOD & DRINKS scraper → direct Postgres upsert
 
 - Crawls all grocery categories under /tooted/ and /en/tooted/ (autodiscovers subcats)
+- Skips irrelevant non-food categories via an exclusion list
 - Extracts Prisma product metadata (incl. EAN) and UPSERTs into Postgres
 - Keyed by EAN so re-runs will keep the latest metadata
 
@@ -47,12 +48,35 @@ def is_category_path(path: str) -> bool:
     return any(path.startswith(p) for p in CATEGORY_PREFIXES)
 
 def is_product_path(path: str) -> bool:
-    return any(path.startswith(p) for p in PRODUCT_PREFIXES)
+    p = path.lower()
+    return p.startswith("/toode/") or p.startswith("/en/toode/")
+
+# -----------------------------------------------------------------------------
+# Whitelist / blacklist filtering  (simple substring match, case-insensitive)
+EXCLUDED_CATEGORY_KEYWORDS = [
+    # home & decor
+    "sisustus", "kodutekstiil", "valgustus", "kardin", "jouluvalgustid", "vaikesed-sisustuskaubad", "kuunlad",
+    # pets
+    "lemmikloom",
+    # sports & outdoor
+    "sport", "pallimangud", "jalgrattasoit", "ujumine", "matkamine", "tervisesport",
+    # baby & kids
+    "lapsed", "manguasjad", "lutid", "beebi", "lapsehooldus",
+    # seasonal/other
+    "ideed-ja-hooajad"
+]
 
 def is_in_whitelist(url: str) -> bool:
-    # allow all grocery categories in both locales (incl. food-market sections)
-    path = urlparse(url).path
-    return is_category_path(path)
+    """
+    Allow categories only if they are under known category prefixes
+    AND do not contain excluded keywords (non-food departments).
+    """
+    path = urlparse(url).path.lower()
+    if not is_category_path(path):
+        return False
+    if any(ex in path for ex in EXCLUDED_CATEGORY_KEYWORDS):
+        return False
+    return True
 
 # -----------------------------------------------------------------------------
 # Food group mapper (normalize per-store categories)
@@ -319,12 +343,21 @@ def paginate_listing(page, max_pages: int = 80):
         "button:has-text('Load More')",
         "[data-testid*='load'][data-testid*='more']",
         "button[aria-label*='more']",
+        # extra variants
+        "[data-testid='load-more']",
+        "button:has-text('Load more products')",
+        "button:has-text('Show more products')",
+        "button:has-text('Näita rohkem')",
     ]
     next_selectors = [
         "a[rel='next']",
         "a.pagination__next",
         "button:has-text('Next')",
         "a:has-text('Next')",
+        # extra variants
+        "a.pagination-next",
+        "button[aria-label='Next page']",
+        "[data-testid='pagination-next']",
     ]
 
     pages_clicked = 0
@@ -388,6 +421,12 @@ def paginate_listing(page, max_pages: int = 80):
         break  # no way to progress
 
 def collect_links_from_listing(page, current_url: str) -> tuple[set[str], set[str]]:
+    # wait a moment for tiles/anchors to render
+    try:
+        page.wait_for_selector("a[href*='/toode/'], a[href*='/en/toode/']", timeout=6000)
+    except Exception:
+        pass
+
     # reveal as many items as possible
     try:
         paginate_listing(page, max_pages=100)
@@ -437,6 +476,26 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
             "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
         ))
         page = context.new_page()
+
+        # --- Accept cookies once (so product grids aren't blocked) ------------
+        def accept_cookies(page):
+            for sel in [
+                "button:has-text('Accept all')",
+                "button:has-text('Accept cookies')",
+                "button:has-text('Nõustu')",
+                "button[aria-label*='accept']",
+            ]:
+                try:
+                    btn = page.locator(sel)
+                    if btn.count() > 0 and btn.first.is_enabled():
+                        btn.first.click()
+                        page.wait_for_load_state("domcontentloaded")
+                        jitter(0.2, 0.6)
+                        return
+                except Exception:
+                    pass
+        accept_cookies(page)
+        # ---------------------------------------------------------------------
 
         seen_categories = set()
         to_visit = [urljoin(BASE, s) for s in SEEDS]
