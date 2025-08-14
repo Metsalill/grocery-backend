@@ -2,12 +2,12 @@
 import os
 import logging
 import asyncpg
-import traceback  # <-- NEW
+import traceback  # <-- DEV helper
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from fastapi.staticfiles import StaticFiles
-from starlette.middleware.base import BaseHTTPMiddleware  # <-- NEW
+from starlette.middleware.base import BaseHTTPMiddleware  # <-- DEV helper
 
 from settings import (
     ENABLE_DOCS, STATIC_DIR, IMAGES_DIR,
@@ -17,13 +17,15 @@ from settings import (
 from middlewares.headers import security_and_cache_headers
 from middlewares.rate_limit import RateLimitMiddleware
 from middlewares.docs_guard import SwaggerAuthMiddleware
+
 from auth import router as auth_router
 from compare import router as compare_router
 from products import router as products_router
 from upload_prices import router as upload_router
 from admin.routes import router as admin_router
 from basket_history import router as basket_history_router
-from api.upload_image import router as upload_image_router   # <-- NEW
+from api.upload_image import router as upload_image_router            # manual R2 upload
+from admin.image_gallery import router as image_admin_router          # <-- NEW: image gallery
 
 logger = logging.getLogger("uvicorn.error")
 os.makedirs(IMAGES_DIR, exist_ok=True)
@@ -98,7 +100,8 @@ app.include_router(products_router)
 app.include_router(upload_router)
 app.include_router(admin_router)
 app.include_router(basket_history_router)
-app.include_router(upload_image_router)   # <-- NEW (manual R2 upload endpoint)
+app.include_router(upload_image_router)   # manual R2 upload endpoint
+app.include_router(image_admin_router)    # <-- NEW: /admin/images gallery
 
 # robots.txt + health
 @app.get("/robots.txt", response_class=PlainTextResponse)
@@ -109,7 +112,8 @@ async def robots():
         "Disallow: /search-products\n"
         "Disallow: /compare\n"
         "Disallow: /basket-history\n"
-        "Disallow: /api/upload-image\n"  # optional: hide the manual upload endpoint
+        "Disallow: /api/upload-image\n"
+        "Disallow: /admin/images\n"  # <-- NEW: hide gallery from bots
     )
 
 @app.get("/healthz", response_class=PlainTextResponse)
