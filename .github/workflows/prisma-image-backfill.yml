@@ -52,7 +52,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt || true
           # Ensure we have the few we need even if not pinned:
-          pip install playwright psycopg2-binary boto3
+          pip install playwright psycopg2-binary boto3 httpx
 
       - name: Install Playwright browsers
         run: |
@@ -62,3 +62,9 @@ jobs:
         run: |
           # Backfill phase: set to 1000; after you’re done, drop to ~200
           python scripts/prisma_image_scraper.py --limit 1000 --headless 1
+
+      - name: Mirror existing external images to R2
+        run: |
+          # Mirrors any existing external images (e.g., prisma CDN) into our own R2
+          # Set limit high temporarily if doing a first-time mirror
+          python scripts/mirror_existing_images_to_r2.py --limit 1000 --overwrite 0
