@@ -1,4 +1,6 @@
 # services/r2_client.py
+import hashlib
+import mimetypes
 import boto3
 from botocore.exceptions import ClientError
 from settings import (
@@ -7,10 +9,6 @@ from settings import (
 )
 
 def get_r2_client():
-    """
-    Returns a boto3 S3 client for Cloudflare R2.
-    Raises RuntimeError if R2 is not configured.
-    """
     if not USE_R2:
         raise RuntimeError("R2 is not configured in settings")
     return boto3.client(
@@ -21,10 +19,16 @@ def get_r2_client():
         region_name=R2_REGION
     )
 
+def generate_r2_key(file_bytes: bytes, original_filename: str = None) -> str:
+    """
+    Generate a stable hash-based key for deduplication.
+    Example: abc123.webp
+    """
+    sha1 = hashlib.sha1(file_bytes).hexdigest()
+    ext = mimetypes.guess_extension(mimetypes.guess_type(original_filename or "")[0] or "image/webp")
+    return f"{R2_PREFIX}{sha1}{ext}"
+
 def upload_image_to_r2(file_bytes: bytes, key: str, content_type: str) -> str:
-    """
-    Uploads an image to R2 and returns its public URL.
-    """
     client = get_r2_client()
     try:
         client.put_object(
@@ -32,22 +36,31 @@ def upload_image_to_r2(file_bytes: bytes, key: str, content_type: str) -> str:
             Key=key,
             Body=file_bytes,
             ContentType=content_type,
-            ACL="public-read"  # Needed if using a public bucket
+            ACL="public-read"
         )
     except ClientError as e:
         raise RuntimeError(f"R2 upload failed: {e}")
-
     return r2_public_url(key)
 
 def delete_image_from_r2(key: str) -> bool:
-    """
-    Deletes an image from R2. Returns True if deleted, False if not found.
-    """
     client = get_r2_client()
     try:
         client.delete_object(Bucket=R2_BUCKET, Key=key)
         return True
     except ClientError as e:
         if e.response["Error"]["Code"] == "NoSuchKey":
+            return False
+        raise
+
+def image_exists_in_r2(key: str) -> bool:
+    """
+    Returns True if the object exists in R2, False otherwise.
+    """
+    client = get_r2_client()
+    try:
+        client.head_object(Bucket=R2_BUCKET, Key=key)
+        return True
+    except ClientError as e:
+        if e.response["Error"]["Code"] == "404":
             return False
         raise
