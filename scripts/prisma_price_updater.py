@@ -12,7 +12,8 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 STORE_ID = int(os.getenv("PRISMA_STORE_ID", "14"))  # Prisma Online (Tallinn)
 PRICE_RE = re.compile(r"(\d+[.,]?\d*)")  # extract number from "€3.29", "3,29 €", etc.
 
-def jitter(a=0.4, b=1.1): time.sleep(random.uniform(a, b))
+def jitter(a=0.4, b=1.1):
+    time.sleep(random.uniform(a, b))
 
 def get_db() -> psycopg2.extensions.connection:
     dsn = os.getenv("DATABASE_URL")
@@ -34,40 +35,50 @@ def pick_price_text(page) -> str:
     for sel in sels:
         try:
             loc = page.locator(sel)
-            if loc.count() == 0: continue
+            if loc.count() == 0:
+                continue
             # meta content case
             if "meta" in sel:
                 val = loc.first.get_attribute("content")
-                if val: return val
+                if val:
+                    return val
             txt = loc.first.inner_text().strip()
-            if txt: return txt
+            if txt:
+                return txt
         except Exception:
             continue
     return ""
 
 def parse_price(val: str) -> float | None:
-    if not val: return None
-    m = PRICE_RE.search(val.replace("\u00A0"," ").replace(",", "."))
-    if not m: return None
+    if not val:
+        return None
+    m = PRICE_RE.search(val.replace("\u00A0", " ").replace(",", "."))
+    if not m:
+        return None
     try:
         return round(float(m.group(1)), 2)
     except Exception:
         return None
 
 def load_prisma_products(conn, limit: int | None):
-    q = """
-    SELECT id, source_url, product_name
-    FROM products
-    WHERE source_url ILIKE '%prismamarket.ee%'
-    ORDER BY last_seen_utc DESC NULLS LAST
     """
-    if limit:
-        q += " LIMIT %s"
-        args = (limit,)
-    else:
-        args = None
+    Return rows (id, source_url, product_name) for Prisma products.
+    Bind both the ILIKE pattern and LIMIT to avoid '%' formatting issues.
+    """
+    sql = """
+        SELECT id, source_url, product_name
+        FROM products
+        WHERE source_url ILIKE %s
+        ORDER BY last_seen_utc DESC NULLS LAST
+    """
+    params = ['%prismamarket.ee%']
+
+    if limit is not None:
+        sql += " LIMIT %s"
+        params.append(limit)
+
     with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
-        cur.execute(q, args)
+        cur.execute(sql, params)
         return cur.fetchall()
 
 def insert_price(conn, product_id: int, price: float):
@@ -88,6 +99,7 @@ def main():
     if not rows:
         print("No Prisma products found.")
         return
+    print(f"Loaded {len(rows)} Prisma products to price.")
 
     wrote, skipped = 0, 0
     with sync_playwright() as p:
