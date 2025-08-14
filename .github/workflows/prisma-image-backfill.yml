@@ -54,9 +54,9 @@ jobs:
           # Ensure we have the few we need even if not pinned:
           pip install playwright psycopg2-binary boto3
 
-      - name: Install Playwright browser
+      - name: Install Playwright browsers
         run: |
-          python -m playwright install chromium --with-deps
+          python -m playwright install --with-deps
 
       - name: Run Prisma image backfill
         run: |
