@@ -23,6 +23,7 @@ from products import router as products_router
 from upload_prices import router as upload_router
 from admin.routes import router as admin_router
 from basket_history import router as basket_history_router
+from api.upload_image import router as upload_image_router   # <-- NEW
 
 logger = logging.getLogger("uvicorn.error")
 os.makedirs(IMAGES_DIR, exist_ok=True)
@@ -97,6 +98,7 @@ app.include_router(products_router)
 app.include_router(upload_router)
 app.include_router(admin_router)
 app.include_router(basket_history_router)
+app.include_router(upload_image_router)   # <-- NEW (manual R2 upload endpoint)
 
 # robots.txt + health
 @app.get("/robots.txt", response_class=PlainTextResponse)
@@ -107,6 +109,7 @@ async def robots():
         "Disallow: /search-products\n"
         "Disallow: /compare\n"
         "Disallow: /basket-history\n"
+        "Disallow: /api/upload-image\n"  # optional: hide the manual upload endpoint
     )
 
 @app.get("/healthz", response_class=PlainTextResponse)
