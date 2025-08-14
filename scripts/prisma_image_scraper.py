@@ -15,13 +15,24 @@ Run:
   python scripts/prisma_image_scraper.py --limit 500 --headless 1
 """
 from __future__ import annotations
+
 import argparse
 import os
 import re
+import sys
 import time
 import random
 from typing import Optional, Tuple
 from urllib.parse import urljoin, urlparse
+from pathlib import Path
+
+# ---------------------------------------------------------------------------
+# Ensure repo root is importable so `settings.py` resolves even when CWD differs
+# (e.g. in GitHub Actions). This assumes the script lives in `<root>/scripts/`.
+# ---------------------------------------------------------------------------
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 import psycopg2
 import psycopg2.extras
@@ -35,7 +46,7 @@ BASE = "https://prismamarket.ee"
 
 # -----------------------------------------------------------------------------
 # Small utils
-def jitter(a=0.6, b=1.4) -> None:
+def jitter(a: float = 0.6, b: float = 1.4) -> None:
     time.sleep(random.uniform(a, b))
 
 def clean(s: Optional[str]) -> str:
@@ -87,7 +98,7 @@ def select_missing_images(conn: PGConn, limit: int) -> list[dict]:
           AND source_url IS NOT NULL
           AND source_url <> ''
           AND POSITION('prismamarket.ee' IN source_url) > 0
-        ORDER BY id
+        ORDER BY id ASC
         LIMIT %s
     """
     with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
@@ -140,13 +151,21 @@ def extract_image_src(page) -> Optional[str]:
         except Exception:
             continue
 
-    # Fallback to OpenGraph
+    # Fallback to OpenGraph / link rel
     try:
         og = page.locator("meta[property='og:image']").first
         if og.count() > 0:
             content = og.get_attribute("content")
             if content:
                 return content
+    except Exception:
+        pass
+    try:
+        link = page.locator("link[rel='image_src']").first
+        if link.count() > 0:
+            href = link.get_attribute("href")
+            if href:
+                return href
     except Exception:
         pass
 
