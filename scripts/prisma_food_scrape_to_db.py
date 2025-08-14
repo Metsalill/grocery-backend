@@ -63,7 +63,16 @@ EXCLUDED_CATEGORY_KEYWORDS = [
     # baby & kids
     "lapsed", "manguasjad", "lutid", "beebi", "lapsehooldus",
     # seasonal/other
-    "ideed-ja-hooajad"
+    "ideed-ja-hooajad",
+    # electronics & appliances
+    "kodumasinad-ja-elektroonika", "meelelahutuselektroonika", "lambid-patareid-ja-taskulambid",
+    "vaikesed-kodumasinad", "ilu-ja-tervis",
+    # kitchenware & household items
+    "kook-ja-lauakatmine", "uhekordsed-noud", "kirja-ja-kontoritarbed", "autojuhtimine",
+    "remondi-ja-turvatooted", "kotid", "aed-ja-lilled", "meisterdamine", "ajakirjad",
+    "omblus-ja-kasitootarbed", "kulmutus-ja-kokkamisvahendid",
+    # cosmetics & hygiene
+    "kosmeetika-ja-hugieen", "meigitooted"
 ]
 
 def is_in_whitelist(url: str) -> bool:
