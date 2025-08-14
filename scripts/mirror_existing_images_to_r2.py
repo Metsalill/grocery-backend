@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Mirror existing external product images → Cloudflare R2
+Mirror existing Prisma-hosted product images → Cloudflare R2
 
-- Selects products whose image_url is non-empty and NOT already on our R2 public base
-  (or explicitly on prismamarket.ee)
-- Downloads image with proper headers, uploads to R2 as <R2_PREFIX>prisma/<ean or id>.<ext>
-- Updates products.image_url -> our public R2 URL
+- Selects products whose image_url is non-empty AND hosted on *.prismamarket.ee
+  and NOT already on our R2 public base.
+- Downloads the image, uploads to R2 as <R2_PREFIX>prisma/<ean or id>.<ext>
+- Updates products.image_url to our public R2 URL
 - Skips if object key already exists in R2 (HEAD succeeds), unless --overwrite 1
 
 Run:
@@ -20,7 +20,6 @@ from pathlib import Path
 from urllib.parse import urlparse
 from datetime import datetime, timezone
 
-# Make repo root importable
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -39,64 +38,47 @@ from settings import (
     r2_public_url,
 )
 
-PRISMA_HOST = "prismamarket.ee"
+PRISMA_DOMAIN_RE = re.compile(r"https?://([a-z0-9-]+\.)*prismamarket\.ee\b", re.IGNORECASE)
 
-
-# ------------------------ small utils ------------------------
-def jitter(a: float = 0.6, b: float = 1.4) -> None:
-    time.sleep(random.uniform(a, b))
-
+def jitter(a=0.6, b=1.4): time.sleep(random.uniform(a, b))
 
 def guess_ext_from_mime(m: str) -> str:
     m = (m or "").lower()
-    if "jpeg" in m or m == "image/jpg":
-        return "jpg"
-    if "png" in m:
-        return "png"
-    if "webp" in m:
-        return "webp"
-    if "gif" in m:
-        return "gif"
+    if "jpeg" in m or m == "image/jpg": return "jpg"
+    if "png" in m: return "png"
+    if "webp" in m: return "webp"
+    if "gif" in m: return "gif"
     return "jpg"
 
-
-# ------------------------- DB helpers ------------------------
 def db_connect() -> PGConn:
     conn = psycopg2.connect(DATABASE_URL, connect_timeout=int(DB_CONNECT_TIMEOUT))
     conn.autocommit = True
     return conn
 
-
 def select_to_mirror(conn: PGConn, limit: int) -> list[dict]:
     """
-    Pick rows with a non-empty image_url that are NOT already on our R2 public base.
-    Prefer to catch prisma URLs explicitly too.
-    Returns list of dicts (via RealDictCursor).
+    Pick rows with a non-empty image_url that:
+      - are hosted on *.prismamarket.ee
+      - are NOT already on our R2 public base
     """
     r2base = (R2_PUBLIC_BASE or "").strip()
     r2like = f"%{r2base}%" if r2base else ""
 
-    SQL = """
+    sql = """
         SELECT id, ean, product_name, image_url
         FROM products
         WHERE image_url IS NOT NULL
           AND image_url <> ''
-          -- Skip anything already pointing at our own R2/public base (when set)
+          -- only prisma domain (any subdomain)
+          AND image_url ~* '://([a-z0-9-]+\\.)*prismamarket\\.ee'
+          -- not already on our R2
           AND (%(r2base)s = '' OR image_url NOT ILIKE %(r2like)s)
-          -- Otherwise prefer explicit prismamarket.ee images; if r2 base isn't set,
-          -- allow any http(s) external URL to be mirrored
-          AND (
-                image_url ILIKE '%%prismamarket.ee%%'
-                OR (%(r2base)s = '' AND image_url ~* '^https?://')
-              )
         ORDER BY id
         LIMIT %(limit)s
     """
-    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-        cur.execute(SQL, {"r2base": r2base, "r2like": r2like, "limit": limit})
-        rows = cur.fetchall()  # list[RealDictRow]
-        return list(rows)
-
+    with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+        cur.execute(sql, {"r2base": r2base, "r2like": r2like, "limit": limit})
+        return [dict(r) for r in cur.fetchall()]
 
 def update_image_url(conn: PGConn, pid: int, url: str) -> None:
     with conn.cursor() as cur:
@@ -105,8 +87,6 @@ def update_image_url(conn: PGConn, pid: int, url: str) -> None:
             (url, datetime.now(timezone.utc), pid),
         )
 
-
-# ------------------------- R2 helpers ------------------------
 def get_r2_client():
     if not (R2_S3_ENDPOINT and R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY and R2_BUCKET):
         raise RuntimeError("R2 not configured")
@@ -118,7 +98,6 @@ def get_r2_client():
         region_name=R2_REGION or "auto",
     )
 
-
 def head_exists(client, key: str) -> bool:
     try:
         client.head_object(Bucket=R2_BUCKET, Key=key)
@@ -127,7 +106,6 @@ def head_exists(client, key: str) -> bool:
         if e.response.get("Error", {}).get("Code") in {"404", "NoSuchKey", "NotFound"}:
             return False
         raise
-
 
 def upload_bytes(client, data: bytes, key: str, content_type: str) -> str:
     client.put_object(
@@ -139,35 +117,21 @@ def upload_bytes(client, data: bytes, key: str, content_type: str) -> str:
     )
     return r2_public_url(key)
 
-
 def should_mirror(url: str) -> bool:
-    """
-    Skip if already on our R2 public base. Otherwise mirror if it's
-    an http(s) URL and either belongs to prismamarket.ee or (when R2 base unset)
-    any external host.
-    """
-    if not url or not url.lower().startswith(("http://", "https://")):
-        return False
     if R2_PUBLIC_BASE and url.startswith(R2_PUBLIC_BASE):
         return False
-    host = urlparse(url).netloc.lower()
-    if PRISMA_HOST in host:
-        return True
-    # If no R2 public base configured, allow mirroring any external http(s) sources.
-    return not bool(R2_PUBLIC_BASE)
+    return bool(PRISMA_DOMAIN_RE.match(url))
 
-
-# --------------------------- main flow ---------------------------
 def mirror(limit: int = 1000, overwrite: bool = False):
     conn = db_connect()
     client = get_r2_client()
 
     rows = select_to_mirror(conn, limit)
     if not rows:
-        print("Nothing to mirror (all rows already on R2 or no matches).")
+        print("Nothing to mirror (no prisma-hosted images or all already on R2).")
         return
 
-    print(f"Found {len(rows)} images to mirror → R2.")
+    print(f"Found {len(rows)} prisma-hosted images to mirror → R2.")
     done = skipped = failed = 0
 
     headers = {
@@ -185,7 +149,7 @@ def mirror(limit: int = 1000, overwrite: bool = False):
             ean = (r.get("ean") or "").strip()
             src = r["image_url"]
 
-            if not should_mirror(src):
+            if not src or not should_mirror(src):
                 skipped += 1
                 continue
 
@@ -195,8 +159,7 @@ def mirror(limit: int = 1000, overwrite: bool = False):
                     print(f"[{pid}] download failed: {resp.status_code}")
                     failed += 1
                     continue
-
-                ctype = resp.headers.get("content-type", "") or "image/jpeg"
+                ctype = resp.headers.get("content-type", "")
                 ext = guess_ext_from_mime(ctype)
                 fname = f"{ean}.{ext}" if ean else f"id-{pid}.{ext}"
                 key = f"{R2_PREFIX}prisma/{fname}"
@@ -222,10 +185,9 @@ def mirror(limit: int = 1000, overwrite: bool = False):
 
     print(f"\nMirroring complete. Done: {done}, Skipped: {skipped}, Failed: {failed}.")
 
-
 if __name__ == "__main__":
     import argparse
-    ap = argparse.ArgumentParser(description="Mirror existing product images to R2")
+    ap = argparse.ArgumentParser(description="Mirror prisma-hosted product images to R2")
     ap.add_argument("--limit", type=int, default=1000)
     ap.add_argument("--overwrite", type=int, default=0, help="1 to re-upload and replace even if key exists")
     args = ap.parse_args()
