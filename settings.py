@@ -57,9 +57,13 @@ R2_BUCKET = os.getenv("R2_BUCKET", "").strip()
 # If you have a Cloudflare custom domain pointing to the bucket, put that here instead.
 R2_PUBLIC_BASE = (os.getenv("R2_PUBLIC_BASE") or CDN_BASE_URL).rstrip("/")
 
-# S3 API endpoint for R2. If not provided, auto-derive from the account id.
-# Example: https://<accountid>.r2.cloudflarestorage.com
-R2_S3_ENDPOINT = os.getenv("R2_S3_ENDPOINT", "").strip()
+# S3 API endpoint for R2.
+# Prefer Railway’s R2_ENDPOINT if present, else fall back to R2_S3_ENDPOINT.
+# If neither is provided but account id exists, auto-derive.
+R2_S3_ENDPOINT = (
+    os.getenv("R2_ENDPOINT", "").strip()
+    or os.getenv("R2_S3_ENDPOINT", "").strip()
+)
 if not R2_S3_ENDPOINT and R2_ACCOUNT_ID:
     R2_S3_ENDPOINT = f"https://{R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
 
@@ -70,7 +74,13 @@ R2_REGION = os.getenv("R2_REGION", "auto")
 USE_R2 = all([R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET, R2_S3_ENDPOINT])
 
 # Where in the bucket to store product images (you can change anytime)
-R2_PREFIX = os.getenv("R2_PREFIX", "products/").lstrip("/")
+# Accept optional R2_PREFIX and normalize to "prefix/" (with trailing slash) if provided.
+_raw_prefix = os.getenv("R2_PREFIX", "products/").strip()
+if _raw_prefix:
+    _raw_prefix = _raw_prefix.lstrip("/")
+    if not _raw_prefix.endswith("/"):
+        _raw_prefix += "/"
+R2_PREFIX = _raw_prefix
 
 def r2_public_url(key: str) -> str:
     """
