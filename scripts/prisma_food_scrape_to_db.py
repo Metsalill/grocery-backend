@@ -3,7 +3,7 @@
 """
 Prisma.ee FOOD & DRINKS scraper → direct Postgres upsert
 
-- Crawls all grocery categories under /en/tooted/ and auto-discovers subcats
+- Crawls all grocery categories under /tooted/ and /en/tooted/ (autodiscovers subcats)
 - Extracts Prisma product metadata (incl. EAN) and UPSERTs into Postgres
 - Keyed by EAN so re-runs will keep the latest metadata
 
@@ -25,10 +25,12 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 # Config
 BASE = "https://prismamarket.ee"
 
-# Broadened crawl: discover everything under groceries root
-SEEDS = ["/en/tooted/"]            # start from the root listing
-PRODUCT_PATH = "/toode/"
-CATEGORY_PATH = "/tooted/"
+# Start from both EN and ET roots so we don't miss locale switches
+SEEDS = ["/en/tooted/", "/tooted/"]  # root listings (both locales)
+
+# Paths
+CATEGORY_PREFIXES = ("/en/tooted/", "/tooted/", "/en/food-market/", "/food-market/")
+PRODUCT_PREFIXES  = ("/en/toode/", "/toode/")
 
 # -------- Amount / EAN patterns (enhanced) -----------------------------------
 PACK_RE   = re.compile(r"(\d+)\s*[x×]\s*(\d+(?:[\.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
@@ -41,9 +43,16 @@ EAN_RE    = re.compile(r"(\d{8,14})$")
 def jitter(a=0.6, b=1.4): time.sleep(random.uniform(a, b))
 def clean(s: str | None) -> str: return re.sub(r"\s+", " ", s or "").strip()
 
+def is_category_path(path: str) -> bool:
+    return any(path.startswith(p) for p in CATEGORY_PREFIXES)
+
+def is_product_path(path: str) -> bool:
+    return any(path.startswith(p) for p in PRODUCT_PREFIXES)
+
 def is_in_whitelist(url: str) -> bool:
-    # allow everything under /en/tooted/
-    return urlparse(url).path.startswith("/en/tooted/")
+    # allow all grocery categories in both locales (incl. food-market sections)
+    path = urlparse(url).path
+    return is_category_path(path)
 
 # -----------------------------------------------------------------------------
 # Food group mapper (normalize per-store categories)
@@ -290,7 +299,7 @@ def infer_brand_from_title(title: str) -> str:
 
 # -----------------------------------------------------------------------------
 # Listing helpers
-def paginate_listing(page, max_pages: int = 40):
+def paginate_listing(page, max_pages: int = 80):
     """
     Reveal more products via:
     - 'Load more' buttons
@@ -381,7 +390,7 @@ def paginate_listing(page, max_pages: int = 40):
 def collect_links_from_listing(page, current_url: str) -> tuple[set[str], set[str]]:
     # reveal as many items as possible
     try:
-        paginate_listing(page, max_pages=60)
+        paginate_listing(page, max_pages=100)
     except Exception:
         pass
 
@@ -406,9 +415,9 @@ def collect_links_from_listing(page, current_url: str) -> tuple[set[str], set[st
             if not href: continue
             url = urljoin(BASE, href)
             path = urlparse(url).path
-            if PRODUCT_PATH in path:
+            if is_product_path(path):
                 prod.add(url)
-            elif path.startswith(CATEGORY_PATH) and is_in_whitelist(url):
+            elif is_category_path(path) and is_in_whitelist(url):
                 cats.add(url)
         except Exception: continue
     return prod, cats
@@ -448,6 +457,9 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
             for c in cats:
                 if c not in seen_categories and c not in to_visit:
                     to_visit.append(c)
+
+            print(f"[DISCOVER] {cat_url} → +{len(prod)} products, +{len(cats)} cats "
+                  f"(totals: products={len(product_urls)}, queue={len(to_visit)})")
 
             if len(product_urls) >= max_products:
                 break
