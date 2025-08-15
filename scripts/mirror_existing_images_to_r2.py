@@ -21,10 +21,11 @@ Run:
 from __future__ import annotations
 
 import os, re, time, random, sys
-from typing import Optional, Tuple, List, Dict
+from typing import List, Dict
 from pathlib import Path
 from datetime import datetime, timezone
 
+# --- make repo root importable so `settings.py` resolves in CI as well ---
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -45,23 +46,28 @@ from settings import (
 
 # Accept both Prisma domain and S-group CDN used by Prisma
 ALLOWED_HOST_RE = re.compile(
-    r"https?://([a-z0-9-]+\.)*(prismamarket\.ee|s-cloud\.fi)\b",
+    r"^https?://([a-z0-9-]+\.)*(prismamarket\.ee|s-cloud\.fi)\b",
     re.IGNORECASE,
 )
 
 # Backfill default: 6000 (set MIRROR_LIMIT=200 later for steady-state)
 ENV_DEFAULT_LIMIT = int(os.getenv("MIRROR_LIMIT", "6000"))
-BATCH_SIZE = int(os.getenv("MIRROR_BATCH", "500"))
+BATCH_SIZE = int(os.getenv("MIRROR_BATCH", "500"))  # rows fetched per page
 
-def jitter(a=0.6, b=1.4): time.sleep(random.uniform(a, b))
+def jitter(a: float = 0.6, b: float = 1.4) -> None:
+    time.sleep(random.uniform(a, b))
 
 def guess_ext_from_mime(m: str) -> str:
     m = (m or "").lower()
-    if "jpeg" in m or m == "image/jpg": return "jpg"
-    if "png" in m: return "png"
-    if "webp" in m: return "webp"
-    if "gif" in m: return "gif"
-    # we explicitly do not keep svg here; force jpg default to avoid unsupported previews
+    if "jpeg" in m or m == "image/jpg":
+        return "jpg"
+    if "png" in m:
+        return "png"
+    if "webp" in m:
+        return "webp"
+    if "gif" in m:
+        return "gif"
+    # intentionally avoid svg; default to jpeg
     return "jpg"
 
 def db_connect() -> PGConn:
@@ -84,7 +90,7 @@ def select_to_mirror(conn: PGConn, limit: int) -> List[Dict]:
         WHERE image_url IS NOT NULL
           AND image_url <> ''
           -- only allowed hosts (regex)
-          AND image_url ~* '://([a-z0-9-]+\\.)*(prismamarket\\.ee|s-cloud\\.fi)\\b'
+          AND image_url ~* '^https?://([a-z0-9-]+\\.)*(prismamarket\\.ee|s-cloud\\.fi)\\b'
           -- not already on our R2
           AND (%(r2base)s = '' OR image_url NOT ILIKE %(r2like)s)
         ORDER BY id
@@ -126,7 +132,7 @@ def upload_bytes(client, data: bytes, key: str, content_type: str) -> str:
         Bucket=R2_BUCKET,
         Key=key,
         Body=data,
-        ContentType=content_type or "image/jpeg",
+        ContentType=(content_type or "image/jpeg"),
         ACL="public-read",
     )
     return r2_public_url(key)
@@ -224,8 +230,12 @@ def mirror(limit: int = ENV_DEFAULT_LIMIT, overwrite: bool = False):
 if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(description="Mirror prisma/s-cloud hosted product images to R2")
-    ap.add_argument("--limit", type=int, default=ENV_DEFAULT_LIMIT,
-                    help="Max rows to process (defaults to env MIRROR_LIMIT or 6000). Drop to 200 after backfilling.")
+    ap.add_argument(
+        "--limit",
+        type=int,
+        default=ENV_DEFAULT_LIMIT,
+        help="Max rows to process (defaults to env MIRROR_LIMIT or 6000). Drop to 200 after backfilling.",
+    )
     ap.add_argument("--overwrite", type=int, default=0, help="1 to re-upload even if key exists")
     args = ap.parse_args()
     mirror(limit=args.limit, overwrite=bool(args.overwrite))
