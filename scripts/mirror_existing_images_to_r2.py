@@ -9,13 +9,17 @@ Mirror existing Prisma-hosted product images → Cloudflare R2
 - Updates products.image_url to our public R2 URL
 - Skips if object key already exists in R2 (HEAD succeeds), unless --overwrite 1
 
+Backfill phase:
+  Default limit is 6000 to sweep everything.
+  When you’re done backfilling, drop to ~200 per run (set env MIRROR_LIMIT=200 or pass --limit 200).
+
 Run:
-  python scripts/mirror_existing_images_to_r2.py --limit 1000 --overwrite 0
+  python scripts/mirror_existing_images_to_r2.py --limit 6000 --overwrite 0
 """
 from __future__ import annotations
 
 import sys, os, re, time, random
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List, Dict
 from pathlib import Path
 from urllib.parse import urlparse
 from datetime import datetime, timezone
@@ -40,6 +44,10 @@ from settings import (
 
 PRISMA_DOMAIN_RE = re.compile(r"https?://([a-z0-9-]+\.)*prismamarket\.ee\b", re.IGNORECASE)
 
+# Backfill default: 6000 (set MIRROR_LIMIT=200 later for steady-state)
+ENV_DEFAULT_LIMIT = int(os.getenv("MIRROR_LIMIT", "6000"))
+BATCH_SIZE = int(os.getenv("MIRROR_BATCH", "500"))  # number of rows fetched per DB page
+
 def jitter(a=0.6, b=1.4): time.sleep(random.uniform(a, b))
 
 def guess_ext_from_mime(m: str) -> str:
@@ -55,7 +63,7 @@ def db_connect() -> PGConn:
     conn.autocommit = True
     return conn
 
-def select_to_mirror(conn: PGConn, limit: int) -> list[dict]:
+def select_to_mirror(conn: PGConn, limit: int) -> List[Dict]:
     """
     Pick rows with a non-empty image_url that:
       - are hosted on *.prismamarket.ee
@@ -122,17 +130,12 @@ def should_mirror(url: str) -> bool:
         return False
     return bool(PRISMA_DOMAIN_RE.match(url))
 
-def mirror(limit: int = 1000, overwrite: bool = False):
+def mirror(limit: int = ENV_DEFAULT_LIMIT, overwrite: bool = False):
     conn = db_connect()
     client = get_r2_client()
 
-    rows = select_to_mirror(conn, limit)
-    if not rows:
-        print("Nothing to mirror (no prisma-hosted images or all already on R2).")
-        return
-
-    print(f"Found {len(rows)} prisma-hosted images to mirror → R2.")
-    done = skipped = failed = 0
+    remaining = max(0, limit)
+    total_done = total_skipped = total_failed = 0
 
     headers = {
         "Referer": "https://prismamarket.ee/",
@@ -144,51 +147,73 @@ def mirror(limit: int = 1000, overwrite: bool = False):
     }
 
     with httpx.Client(timeout=25.0, follow_redirects=True, headers=headers) as http:
-        for r in rows:
-            pid = r["id"]
-            ean = (r.get("ean") or "").strip()
-            src = r["image_url"]
+        batch_no = 1
+        while remaining > 0:
+            fetch_n = min(BATCH_SIZE, remaining)
+            rows = select_to_mirror(conn, fetch_n)
+            if not rows:
+                if total_done + total_skipped + total_failed == 0:
+                    print("Nothing to mirror (no prisma-hosted images or all already on R2).")
+                break
 
-            if not src or not should_mirror(src):
-                skipped += 1
-                continue
+            print(f"Batch {batch_no}: processing {len(rows)} images…")
+            done = skipped = failed = 0
 
-            try:
-                resp = http.get(src)
-                if resp.status_code != 200 or not resp.content:
-                    print(f"[{pid}] download failed: {resp.status_code}")
-                    failed += 1
+            for r in rows:
+                pid = r["id"]
+                ean = (r.get("ean") or "").strip()
+                src = r["image_url"]
+
+                if not src or not should_mirror(src):
+                    skipped += 1
                     continue
-                ctype = resp.headers.get("content-type", "")
-                ext = guess_ext_from_mime(ctype)
-                fname = f"{ean}.{ext}" if ean else f"id-{pid}.{ext}"
-                key = f"{R2_PREFIX}prisma/{fname}"
 
-                if not overwrite and head_exists(client, key):
-                    public_url = r2_public_url(key)
+                try:
+                    resp = http.get(src)
+                    if resp.status_code != 200 or not resp.content:
+                        print(f"[{pid}] download failed: {resp.status_code}")
+                        failed += 1
+                        continue
+                    ctype = resp.headers.get("content-type", "")
+                    ext = guess_ext_from_mime(ctype)
+                    fname = f"{ean}.{ext}" if ean else f"id-{pid}.{ext}"
+                    key = f"{R2_PREFIX}prisma/{fname}"
+
+                    if not overwrite and head_exists(client, key):
+                        public_url = r2_public_url(key)
+                        update_image_url(conn, pid, public_url)
+                        print(f"[{pid}] ✔ exists → updated DB only")
+                        done += 1
+                        jitter()
+                        continue
+
+                    public_url = upload_bytes(client, resp.content, key, ctype)
                     update_image_url(conn, pid, public_url)
-                    print(f"[{pid}] ✔ exists → updated DB only")
+                    print(f"[{pid}] ✅ mirrored → {public_url}")
                     done += 1
-                    jitter()
-                    continue
 
-                public_url = upload_bytes(client, resp.content, key, ctype)
-                update_image_url(conn, pid, public_url)
-                print(f"[{pid}] ✅ mirrored → {public_url}")
-                done += 1
+                except Exception as e:
+                    print(f"[{pid}] error: {e}")
+                    failed += 1
 
-            except Exception as e:
-                print(f"[{pid}] error: {e}")
-                failed += 1
+                jitter()
 
-            jitter()
+            print(f"Batch {batch_no} complete. Done: {done}, Skipped: {skipped}, Failed: {failed}.")
+            total_done += done
+            total_skipped += skipped
+            total_failed += failed
 
-    print(f"\nMirroring complete. Done: {done}, Skipped: {skipped}, Failed: {failed}.")
+            remaining -= len(rows)
+            batch_no += 1
+
+    print(f"\nMirroring complete. Total Done: {total_done}, Skipped: {total_skipped}, Failed: {total_failed}.")
 
 if __name__ == "__main__":
     import argparse
     ap = argparse.ArgumentParser(description="Mirror prisma-hosted product images to R2")
-    ap.add_argument("--limit", type=int, default=1000)
-    ap.add_argument("--overwrite", type=int, default=0, help="1 to re-upload and replace even if key exists")
+    ap.add_argument("--limit", type=int, default=ENV_DEFAULT_LIMIT,
+                    help="Max rows to process (defaults to env MIRROR_LIMIT or 6000). "
+                         "Drop to 200 after backfilling.")
+    ap.add_argument("--overwrite", type=int, default=0, help="1 to re-upload even if key exists")
     args = ap.parse_args()
     mirror(limit=args.limit, overwrite=bool(args.overwrite))
