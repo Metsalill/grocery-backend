@@ -17,12 +17,13 @@ from __future__ import annotations
 import argparse, os, random, re, sys, time
 from datetime import datetime, timezone
 from urllib.parse import urljoin, urlparse
+from pathlib import Path
 
 import psycopg2, psycopg2.extras
 from psycopg2.extensions import connection as PGConn
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeout
 
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # Config
 BASE = "https://prismamarket.ee"
 
@@ -39,7 +40,7 @@ SIMPLE_RE = re.compile(r"\b(\d+(?:[\.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
 BONUS_RE  = re.compile(r"\+\s*\d+%")  # e.g. "500 g + 20%"
 EAN_RE    = re.compile(r"(\d{8,14})$")
 
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # Small utils
 def jitter(a=0.6, b=1.4): time.sleep(random.uniform(a, b))
 def clean(s: str | None) -> str: return re.sub(r"\s+", " ", s or "").strip()
@@ -51,7 +52,7 @@ def is_product_path(path: str) -> bool:
     p = path.lower()
     return p.startswith("/toode/") or p.startswith("/en/toode/")
 
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # Whitelist / blacklist filtering  (simple substring match, case-insensitive)
 EXCLUDED_CATEGORY_KEYWORDS = [
     # home & decor
@@ -87,7 +88,7 @@ def is_in_whitelist(url: str) -> bool:
         return False
     return True
 
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # Food group mapper (normalize per-store categories)
 def map_food_group(c1: str, c2: str, c3: str, title: str) -> str:
     t = " ".join([c1, c2, c3, title]).lower()
@@ -115,7 +116,7 @@ def map_food_group(c1: str, c2: str, c3: str, title: str) -> str:
         return "prepared"
     return "other"
 
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # DB
 def get_database_url() -> str:
     try:
@@ -150,10 +151,18 @@ CREATE TABLE IF NOT EXISTS {PRODUCTS_TABLE} (
 );
 """
 
-# ensure column exists if table already created earlier
+# New: indexes/constraints
 ADD_FOOD_GROUP_SQL = f"ALTER TABLE {PRODUCTS_TABLE} ADD COLUMN IF NOT EXISTS food_group TEXT;"
 CREATE_FOOD_GROUP_INDEX_SQL = f"CREATE INDEX IF NOT EXISTS idx_{PRODUCTS_TABLE}_food_group ON {PRODUCTS_TABLE}(food_group);"
+CREATE_SOURCE_URL_INDEX_SQL = f"CREATE INDEX IF NOT EXISTS idx_{PRODUCTS_TABLE}_source_url ON {PRODUCTS_TABLE}(source_url);"
+# Partial unique index avoids treating empty strings as duplicates
+CREATE_EAN_UNIQUE_SQL = f"""
+CREATE UNIQUE INDEX IF NOT EXISTS uq_{PRODUCTS_TABLE}_ean
+ON {PRODUCTS_TABLE} (ean)
+WHERE ean IS NOT NULL AND ean <> '';
+"""
 
+# Upsert that avoids overwriting good values with blanks
 UPSERT_SQL = f"""
 INSERT INTO {PRODUCTS_TABLE} (
     ean, product_name, name, amount, brand, manufacturer,
@@ -166,18 +175,18 @@ VALUES (
     %(food_group)s, %(image_url)s, %(source_url)s, %(last_seen_utc)s
 )
 ON CONFLICT (ean) DO UPDATE SET
-    product_name = EXCLUDED.product_name,
-    name         = EXCLUDED.name,
-    amount       = EXCLUDED.amount,
-    brand        = EXCLUDED.brand,
-    manufacturer = EXCLUDED.manufacturer,
-    country_of_manufacture = EXCLUDED.country_of_manufacture,
-    category_1   = EXCLUDED.category_1,
-    category_2   = EXCLUDED.category_2,
-    category_3   = EXCLUDED.category_3,
-    food_group   = EXCLUDED.food_group,
-    image_url    = EXCLUDED.image_url,
-    source_url   = EXCLUDED.source_url,
+    product_name = CASE WHEN NULLIF(EXCLUDED.product_name,'') IS NOT NULL THEN EXCLUDED.product_name ELSE {PRODUCTS_TABLE}.product_name END,
+    name         = CASE WHEN NULLIF(EXCLUDED.name,'')         IS NOT NULL THEN EXCLUDED.name         ELSE {PRODUCTS_TABLE}.name         END,
+    amount       = CASE WHEN NULLIF(EXCLUDED.amount,'')       IS NOT NULL THEN EXCLUDED.amount       ELSE {PRODUCTS_TABLE}.amount       END,
+    brand        = CASE WHEN NULLIF(EXCLUDED.brand,'')        IS NOT NULL THEN EXCLUDED.brand        ELSE {PRODUCTS_TABLE}.brand        END,
+    manufacturer = CASE WHEN NULLIF(EXCLUDED.manufacturer,'') IS NOT NULL THEN EXCLUDED.manufacturer ELSE {PRODUCTS_TABLE}.manufacturer END,
+    country_of_manufacture = CASE WHEN NULLIF(EXCLUDED.country_of_manufacture,'') IS NOT NULL THEN EXCLUDED.country_of_manufacture ELSE {PRODUCTS_TABLE}.country_of_manufacture END,
+    category_1   = CASE WHEN NULLIF(EXCLUDED.category_1,'')   IS NOT NULL THEN EXCLUDED.category_1   ELSE {PRODUCTS_TABLE}.category_1   END,
+    category_2   = CASE WHEN NULLIF(EXCLUDED.category_2,'')   IS NOT NULL THEN EXCLUDED.category_2   ELSE {PRODUCTS_TABLE}.category_2   END,
+    category_3   = CASE WHEN NULLIF(EXCLUDED.category_3,'')   IS NOT NULL THEN EXCLUDED.category_3   ELSE {PRODUCTS_TABLE}.category_3   END,
+    food_group   = CASE WHEN NULLIF(EXCLUDED.food_group,'')   IS NOT NULL THEN EXCLUDED.food_group   ELSE {PRODUCTS_TABLE}.food_group   END,
+    image_url    = CASE WHEN NULLIF(EXCLUDED.image_url,'')    IS NOT NULL THEN EXCLUDED.image_url    ELSE {PRODUCTS_TABLE}.image_url    END,
+    source_url   = CASE WHEN NULLIF(EXCLUDED.source_url,'')   IS NOT NULL THEN EXCLUDED.source_url   ELSE {PRODUCTS_TABLE}.source_url   END,
     last_seen_utc= EXCLUDED.last_seen_utc
 ;
 """
@@ -190,9 +199,11 @@ def db_connect() -> PGConn:
         cur.execute(CREATE_TABLE_SQL)
         cur.execute(ADD_FOOD_GROUP_SQL)
         cur.execute(CREATE_FOOD_GROUP_INDEX_SQL)
+        cur.execute(CREATE_SOURCE_URL_INDEX_SQL)
+        cur.execute(CREATE_EAN_UNIQUE_SQL)
     return conn
 
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # Extraction helpers
 def extract_title(page) -> str:
     try: return clean(page.locator("h1").first.inner_text())
@@ -330,7 +341,7 @@ def infer_brand_from_title(title: str) -> str:
         return f"{parts[0]} {parts[1]}"
     return parts[0]
 
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # Listing helpers
 def paginate_listing(page, max_pages: int = 80):
     """
@@ -470,7 +481,7 @@ def collect_links_from_listing(page, current_url: str) -> tuple[set[str], set[st
         except Exception: continue
     return prod, cats
 
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 # Main crawl → DB
 def crawl_to_db(max_products: int = 500, headless: bool = True):
     conn = db_connect()
@@ -588,7 +599,7 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
     print(f"Discovered {len(product_urls)} product URLs under whitelisted categories.")
     print(f"Upserted {rows_written} rows into '{PRODUCTS_TABLE}'. Skipped (no EAN): {skipped_no_ean}.")
 
-# -----------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 def main():
     ap = argparse.ArgumentParser(description="Prisma.ee FOOD & DRINKS → Postgres")
     ap.add_argument("--max-products", type=int, default=500)
