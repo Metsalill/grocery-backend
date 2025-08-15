@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Mirror existing Prisma-hosted product images → Cloudflare R2
+Mirror existing Prisma/S-group hosted product images → Cloudflare R2
 
-- Selects products whose image_url is non-empty AND hosted on *.prismamarket.ee
+- Selects products with a non-empty image_url hosted on:
+    * *.prismamarket.ee   (Prisma pages/CDN variants)
+    * *.s-cloud.fi        (S-group CDN used by Prisma)
   and NOT already on our R2 public base.
 - Downloads the image, uploads to R2 as <R2_PREFIX>prisma/<ean or id>.<ext>
 - Updates products.image_url to our public R2 URL
@@ -11,19 +13,17 @@ Mirror existing Prisma-hosted product images → Cloudflare R2
 
 Backfill phase:
   Default limit is 6000 to sweep everything.
-  When you’re done backfilling, drop to ~200 per run (set env MIRROR_LIMIT=200 or pass --limit 200).
+  After backfilling, drop to ~200 per run (set MIRROR_LIMIT=200 or pass --limit 200).
 
 Run:
   python scripts/mirror_existing_images_to_r2.py --limit 6000 --overwrite 0
 """
 from __future__ import annotations
 
-import sys, os, re, time, random
+import os, re, time, random, sys
 from typing import Optional, Tuple, List, Dict
 from pathlib import Path
-from urllib.parse import urlparse
 from datetime import datetime, timezone
-import mimetypes
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
@@ -43,62 +43,26 @@ from settings import (
     r2_public_url,
 )
 
-PRISMA_DOMAIN_RE = re.compile(r"https?://([a-z0-9-]+\.)*prismamarket\.ee\b", re.IGNORECASE)
+# Accept both Prisma domain and S-group CDN used by Prisma
+ALLOWED_HOST_RE = re.compile(
+    r"https?://([a-z0-9-]+\.)*(prismamarket\.ee|s-cloud\.fi)\b",
+    re.IGNORECASE,
+)
 
 # Backfill default: 6000 (set MIRROR_LIMIT=200 later for steady-state)
 ENV_DEFAULT_LIMIT = int(os.getenv("MIRROR_LIMIT", "6000"))
-BATCH_SIZE = int(os.getenv("MIRROR_BATCH", "500"))  # number of rows fetched per DB page
+BATCH_SIZE = int(os.getenv("MIRROR_BATCH", "500"))
 
-mimetypes.init()
+def jitter(a=0.6, b=1.4): time.sleep(random.uniform(a, b))
 
-def jitter(a=0.6, b=1.4): 
-    time.sleep(random.uniform(a, b))
-
-# ---------- MIME / extension helpers (AVIF/WebP aware) ----------
-def _ext_from_url(url: str) -> str:
-    if not url:
-        return ""
-    stem = url.split("?", 1)[0].split("#", 1)[0]
-    if "." in stem:
-        ext = stem.rsplit(".", 1)[1].lower()
-        return "jpg" if ext == "jpeg" else ext
-    return ""
-
-def guess_ext_from_mime(m: str, url_hint: str = "") -> str:
-    """
-    Map common image content-types to a sensible extension.
-    If mime is unknown, try guessing from the URL; finally default to jpg.
-    """
+def guess_ext_from_mime(m: str) -> str:
     m = (m or "").lower()
-    if "image/jpeg" in m or m == "image/jpg" or "jpeg" in m:
-        return "jpg"
-    if "image/png" in m or m.endswith("/png") or "png" in m:
-        return "png"
-    if "image/webp" in m or "webp" in m:
-        return "webp"
-    if "image/avif" in m or "avif" in m:
-        return "avif"
-    if "image/gif" in m or "gif" in m:
-        return "gif"
-    # try URL
-    url_ext = _ext_from_url(url_hint)
-    if url_ext in {"jpg", "png", "webp", "avif", "gif"}:
-        return url_ext
+    if "jpeg" in m or m == "image/jpg": return "jpg"
+    if "png" in m: return "png"
+    if "webp" in m: return "webp"
+    if "gif" in m: return "gif"
+    # we explicitly do not keep svg here; force jpg default to avoid unsupported previews
     return "jpg"
-
-def choose_content_type(server_ct: str, ext: str) -> str:
-    """
-    Prefer server-provided content-type; else derive from ext; fallback to image/jpeg.
-    """
-    ct = (server_ct or "").lower().strip()
-    if ct.startswith("image/"):
-        return ct
-    if ext:
-        guessed = mimetypes.types_map.get("." + ext)
-        if guessed and guessed.startswith("image/"):
-            return guessed
-    return "image/jpeg"
-# ---------------------------------------------------------------
 
 def db_connect() -> PGConn:
     conn = psycopg2.connect(DATABASE_URL, connect_timeout=int(DB_CONNECT_TIMEOUT))
@@ -108,7 +72,7 @@ def db_connect() -> PGConn:
 def select_to_mirror(conn: PGConn, limit: int) -> List[Dict]:
     """
     Pick rows with a non-empty image_url that:
-      - are hosted on *.prismamarket.ee
+      - are hosted on *.prismamarket.ee or *.s-cloud.fi
       - are NOT already on our R2 public base
     """
     r2base = (R2_PUBLIC_BASE or "").strip()
@@ -119,8 +83,8 @@ def select_to_mirror(conn: PGConn, limit: int) -> List[Dict]:
         FROM products
         WHERE image_url IS NOT NULL
           AND image_url <> ''
-          -- only prisma domain (any subdomain)
-          AND image_url ~* '://([a-z0-9-]+\\.)*prismamarket\\.ee'
+          -- only allowed hosts (regex)
+          AND image_url ~* '://([a-z0-9-]+\\.)*(prismamarket\\.ee|s-cloud\\.fi)\\b'
           -- not already on our R2
           AND (%(r2base)s = '' OR image_url NOT ILIKE %(r2like)s)
         ORDER BY id
@@ -170,7 +134,7 @@ def upload_bytes(client, data: bytes, key: str, content_type: str) -> str:
 def should_mirror(url: str) -> bool:
     if R2_PUBLIC_BASE and url.startswith(R2_PUBLIC_BASE):
         return False
-    return bool(PRISMA_DOMAIN_RE.match(url))
+    return bool(ALLOWED_HOST_RE.match(url))
 
 def mirror(limit: int = ENV_DEFAULT_LIMIT, overwrite: bool = False):
     conn = db_connect()
@@ -195,7 +159,7 @@ def mirror(limit: int = ENV_DEFAULT_LIMIT, overwrite: bool = False):
             rows = select_to_mirror(conn, fetch_n)
             if not rows:
                 if total_done + total_skipped + total_failed == 0:
-                    print("Nothing to mirror (no prisma-hosted images or all already on R2).")
+                    print("Nothing to mirror (no allowed-host images or all already on R2).")
                 break
 
             print(f"Batch {batch_no}: processing {len(rows)} images…")
@@ -217,10 +181,14 @@ def mirror(limit: int = ENV_DEFAULT_LIMIT, overwrite: bool = False):
                         failed += 1
                         continue
 
-                    server_ct = resp.headers.get("content-type", "")
-                    ext = guess_ext_from_mime(server_ct, src)
-                    ctype = choose_content_type(server_ct, ext)
+                    ctype = (resp.headers.get("content-type") or "").lower()
+                    # Skip SVGs & obvious non-raster types
+                    if "svg" in ctype or ctype.startswith("text/"):
+                        print(f"[{pid}] skipping unsupported type: {ctype}")
+                        skipped += 1
+                        continue
 
+                    ext = guess_ext_from_mime(ctype)
                     fname = f"{ean}.{ext}" if ean else f"id-{pid}.{ext}"
                     key = f"{R2_PREFIX}prisma/{fname}"
 
@@ -234,7 +202,7 @@ def mirror(limit: int = ENV_DEFAULT_LIMIT, overwrite: bool = False):
 
                     public_url = upload_bytes(client, resp.content, key, ctype)
                     update_image_url(conn, pid, public_url)
-                    print(f"[{pid}] ✅ mirrored → {public_url} [{ctype}]")
+                    print(f"[{pid}] ✅ mirrored → {public_url}")
                     done += 1
 
                 except Exception as e:
@@ -255,10 +223,9 @@ def mirror(limit: int = ENV_DEFAULT_LIMIT, overwrite: bool = False):
 
 if __name__ == "__main__":
     import argparse
-    ap = argparse.ArgumentParser(description="Mirror prisma-hosted product images to R2")
+    ap = argparse.ArgumentParser(description="Mirror prisma/s-cloud hosted product images to R2")
     ap.add_argument("--limit", type=int, default=ENV_DEFAULT_LIMIT,
-                    help="Max rows to process (defaults to env MIRROR_LIMIT or 6000). "
-                         "Drop to 200 after backfilling.")
+                    help="Max rows to process (defaults to env MIRROR_LIMIT or 6000). Drop to 200 after backfilling.")
     ap.add_argument("--overwrite", type=int, default=0, help="1 to re-upload even if key exists")
     args = ap.parse_args()
     mirror(limit=args.limit, overwrite=bool(args.overwrite))
