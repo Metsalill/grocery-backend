@@ -23,6 +23,7 @@ from typing import Optional, Tuple, List, Dict
 from pathlib import Path
 from urllib.parse import urlparse
 from datetime import datetime, timezone
+import mimetypes
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
@@ -48,15 +49,56 @@ PRISMA_DOMAIN_RE = re.compile(r"https?://([a-z0-9-]+\.)*prismamarket\.ee\b", re.
 ENV_DEFAULT_LIMIT = int(os.getenv("MIRROR_LIMIT", "6000"))
 BATCH_SIZE = int(os.getenv("MIRROR_BATCH", "500"))  # number of rows fetched per DB page
 
-def jitter(a=0.6, b=1.4): time.sleep(random.uniform(a, b))
+mimetypes.init()
 
-def guess_ext_from_mime(m: str) -> str:
+def jitter(a=0.6, b=1.4): 
+    time.sleep(random.uniform(a, b))
+
+# ---------- MIME / extension helpers (AVIF/WebP aware) ----------
+def _ext_from_url(url: str) -> str:
+    if not url:
+        return ""
+    stem = url.split("?", 1)[0].split("#", 1)[0]
+    if "." in stem:
+        ext = stem.rsplit(".", 1)[1].lower()
+        return "jpg" if ext == "jpeg" else ext
+    return ""
+
+def guess_ext_from_mime(m: str, url_hint: str = "") -> str:
+    """
+    Map common image content-types to a sensible extension.
+    If mime is unknown, try guessing from the URL; finally default to jpg.
+    """
     m = (m or "").lower()
-    if "jpeg" in m or m == "image/jpg": return "jpg"
-    if "png" in m: return "png"
-    if "webp" in m: return "webp"
-    if "gif" in m: return "gif"
+    if "image/jpeg" in m or m == "image/jpg" or "jpeg" in m:
+        return "jpg"
+    if "image/png" in m or m.endswith("/png") or "png" in m:
+        return "png"
+    if "image/webp" in m or "webp" in m:
+        return "webp"
+    if "image/avif" in m or "avif" in m:
+        return "avif"
+    if "image/gif" in m or "gif" in m:
+        return "gif"
+    # try URL
+    url_ext = _ext_from_url(url_hint)
+    if url_ext in {"jpg", "png", "webp", "avif", "gif"}:
+        return url_ext
     return "jpg"
+
+def choose_content_type(server_ct: str, ext: str) -> str:
+    """
+    Prefer server-provided content-type; else derive from ext; fallback to image/jpeg.
+    """
+    ct = (server_ct or "").lower().strip()
+    if ct.startswith("image/"):
+        return ct
+    if ext:
+        guessed = mimetypes.types_map.get("." + ext)
+        if guessed and guessed.startswith("image/"):
+            return guessed
+    return "image/jpeg"
+# ---------------------------------------------------------------
 
 def db_connect() -> PGConn:
     conn = psycopg2.connect(DATABASE_URL, connect_timeout=int(DB_CONNECT_TIMEOUT))
@@ -174,8 +216,11 @@ def mirror(limit: int = ENV_DEFAULT_LIMIT, overwrite: bool = False):
                         print(f"[{pid}] download failed: {resp.status_code}")
                         failed += 1
                         continue
-                    ctype = resp.headers.get("content-type", "")
-                    ext = guess_ext_from_mime(ctype)
+
+                    server_ct = resp.headers.get("content-type", "")
+                    ext = guess_ext_from_mime(server_ct, src)
+                    ctype = choose_content_type(server_ct, ext)
+
                     fname = f"{ean}.{ext}" if ean else f"id-{pid}.{ext}"
                     key = f"{R2_PREFIX}prisma/{fname}"
 
@@ -189,7 +234,7 @@ def mirror(limit: int = ENV_DEFAULT_LIMIT, overwrite: bool = False):
 
                     public_url = upload_bytes(client, resp.content, key, ctype)
                     update_image_url(conn, pid, public_url)
-                    print(f"[{pid}] ✅ mirrored → {public_url}")
+                    print(f"[{pid}] ✅ mirrored → {public_url} [{ctype}]")
                     done += 1
 
                 except Exception as e:
