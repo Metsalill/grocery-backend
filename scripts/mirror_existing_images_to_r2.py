@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Mirror existing Prisma/S-group hosted product images → Cloudflare R2
+Mirror existing external product images → Cloudflare R2
 
-- Selects products with a non-empty image_url hosted on:
-    * *.prismamarket.ee   (Prisma pages/CDN variants)
-    * *.s-cloud.fi        (S-group CDN used by Prisma)
-  and NOT already on our R2 public base.
+- Selects products with a non-empty image_url that:
+    * starts with http(s)://
+    * is NOT already on our R2 public base
 - Downloads the image, uploads to R2 as <R2_PREFIX>prisma/<ean or id>.<ext>
 - Updates products.image_url to our public R2 URL
 - Skips if object key already exists in R2 (HEAD succeeds), unless --overwrite 1
+- Skips SVG/text responses to avoid placeholders/unsupported formats.
 
 Backfill phase:
   Default limit is 6000 to sweep everything.
@@ -44,11 +44,8 @@ from settings import (
     r2_public_url,
 )
 
-# Accept both Prisma domain and S-group CDN used by Prisma
-ALLOWED_HOST_RE = re.compile(
-    r"^https?://([a-z0-9-]+\.)*(prismamarket\.ee|s-cloud\.fi)\b",
-    re.IGNORECASE,
-)
+# Mirror ANY http(s) image that isn't already on our R2
+HTTP_URL_RE = re.compile(r"^https?://", re.IGNORECASE)
 
 # Backfill default: 6000 (set MIRROR_LIMIT=200 later for steady-state)
 ENV_DEFAULT_LIMIT = int(os.getenv("MIRROR_LIMIT", "6000"))
@@ -78,8 +75,8 @@ def db_connect() -> PGConn:
 def select_to_mirror(conn: PGConn, limit: int) -> List[Dict]:
     """
     Pick rows with a non-empty image_url that:
-      - are hosted on *.prismamarket.ee or *.s-cloud.fi
-      - are NOT already on our R2 public base
+      - starts with http(s)://
+      - is NOT already on our R2 public base
     """
     r2base = (R2_PUBLIC_BASE or "").strip()
     r2like = f"%{r2base}%" if r2base else ""
@@ -89,9 +86,7 @@ def select_to_mirror(conn: PGConn, limit: int) -> List[Dict]:
         FROM products
         WHERE image_url IS NOT NULL
           AND image_url <> ''
-          -- only allowed hosts (regex)
-          AND image_url ~* '^https?://([a-z0-9-]+\\.)*(prismamarket\\.ee|s-cloud\\.fi)\\b'
-          -- not already on our R2
+          AND image_url ~* '^https?://'
           AND (%(r2base)s = '' OR image_url NOT ILIKE %(r2like)s)
         ORDER BY id
         LIMIT %(limit)s
@@ -140,7 +135,7 @@ def upload_bytes(client, data: bytes, key: str, content_type: str) -> str:
 def should_mirror(url: str) -> bool:
     if R2_PUBLIC_BASE and url.startswith(R2_PUBLIC_BASE):
         return False
-    return bool(ALLOWED_HOST_RE.match(url))
+    return bool(HTTP_URL_RE.match(url))
 
 def mirror(limit: int = ENV_DEFAULT_LIMIT, overwrite: bool = False):
     conn = db_connect()
@@ -165,7 +160,7 @@ def mirror(limit: int = ENV_DEFAULT_LIMIT, overwrite: bool = False):
             rows = select_to_mirror(conn, fetch_n)
             if not rows:
                 if total_done + total_skipped + total_failed == 0:
-                    print("Nothing to mirror (no allowed-host images or all already on R2).")
+                    print("Nothing to mirror (no http(s) images or all already on R2).")
                 break
 
             print(f"Batch {batch_no}: processing {len(rows)} images…")
@@ -229,7 +224,7 @@ def mirror(limit: int = ENV_DEFAULT_LIMIT, overwrite: bool = False):
 
 if __name__ == "__main__":
     import argparse
-    ap = argparse.ArgumentParser(description="Mirror prisma/s-cloud hosted product images to R2")
+    ap = argparse.ArgumentParser(description="Mirror external (http/https) product images to R2")
     ap.add_argument(
         "--limit",
         type=int,
