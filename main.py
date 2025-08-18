@@ -1,5 +1,6 @@
 # main.py
 import os
+import sys
 import logging
 import asyncpg
 import traceback  # <-- DEV helper
@@ -8,6 +9,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware  # <-- DEV helper
+
+# --- ensure app root on sys.path so "services" imports resolve in Railway ---
+APP_ROOT = os.path.dirname(os.path.abspath(__file__))
+if APP_ROOT not in sys.path:
+    sys.path.insert(0, APP_ROOT)
 
 from settings import (
     ENABLE_DOCS, STATIC_DIR, IMAGES_DIR,
@@ -19,7 +25,7 @@ from middlewares.rate_limit import RateLimitMiddleware
 from middlewares.docs_guard import SwaggerAuthMiddleware
 
 from auth import router as auth_router
-from compare import router as compare_router
+from compare import router as compare_router          # no compute_compare import
 from products import router as products_router
 from upload_prices import router as upload_router
 from admin.routes import router as admin_router
