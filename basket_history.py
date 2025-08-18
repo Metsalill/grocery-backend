@@ -1,5 +1,5 @@
 # basket_history.py
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime
@@ -359,3 +359,163 @@ async def get_basket(
         print("GET_BASKET_ERROR:", type(e).__name__, str(e), {"basket_id": basket_id, "uid": uid})
         traceback.print_exc()
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
+# ---------- New: re-check a saved basket and save as NEW ----------
+class RecompareIn(BaseModel):
+    lat: Optional[float] = None
+    lon: Optional[float] = None
+    radius_km: Optional[float] = None
+    selected_store_id: Optional[int] = None
+    note: Optional[str] = None
+
+@router.post("/{basket_id}/recompare", response_model=BasketSummaryOut)
+async def recompare_and_save_new(
+    basket_id: int,
+    payload: RecompareIn = Body(default=RecompareIn()),
+    user=Depends(get_current_user),
+    pool: asyncpg.pool.Pool = Depends(get_db_pool),
+):
+    uid = await resolve_user_id(user, pool)
+    if not uid:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    # 1) Load original basket snapshot (items + saved origin/radius)
+    async with pool.acquire() as conn:
+        head = await conn.fetchrow(
+            """
+            SELECT
+              id,
+              radius_km::float8  AS radius_km,
+              origin_lat::float8 AS origin_lat,
+              origin_lon::float8 AS origin_lon
+            FROM basket_history
+            WHERE id=$1 AND user_id=$2::uuid AND deleted_at IS NULL
+            """,
+            basket_id, uid,
+        )
+        if not head:
+            raise HTTPException(status_code=404, detail="Basket not found")
+
+        items = await conn.fetch(
+            """
+            SELECT product, quantity::float8 AS quantity
+            FROM basket_items
+            WHERE basket_id=$1
+            ORDER BY id
+            """,
+            basket_id,
+        )
+
+    if not items:
+        raise HTTPException(status_code=400, detail="Basket has no items to recompare")
+
+    # 2) Choose coords/radius (override > saved > defaults)
+    use_lat = payload.lat if payload.lat is not None else head["origin_lat"]
+    use_lon = payload.lon if payload.lon is not None else head["origin_lon"]
+    use_radius = payload.radius_km if payload.radius_km is not None else head["radius_km"] or 10.0
+
+    if use_lat is None or use_lon is None:
+        raise HTTPException(status_code=400, detail="No origin coordinates available; pass lat/lon")
+
+    # 3) Recompute with current prices
+    item_tuples = [(r["product"], int(r["quantity"])) for r in items]
+    cmp = await compare_basket_service(
+        pool=pool,
+        items=item_tuples,
+        lat=float(use_lat),
+        lon=float(use_lon),
+        radius_km=float(use_radius),
+        require_all_items=True,
+    )
+
+    stores = cmp.get("stores") or []
+    if not stores:
+        legacy_results = cmp.get("results") or []
+        stores = [
+            {
+                "store_id": None,
+                "store_name": r.get("store"),
+                "total": float(r.get("total", 0) or 0),
+                "distance_km": r.get("distance_km"),
+                "items": [],
+            }
+            for r in legacy_results
+            if r.get("store") is not None
+        ]
+    if not stores:
+        raise HTTPException(status_code=400, detail="No stores found for current prices")
+
+    stores_sorted = sorted(stores, key=lambda s: s["total"])
+    winner = next((s for s in stores_sorted if s.get("store_id") == payload.selected_store_id), None) \
+             if payload.selected_store_id is not None else None
+    if winner is None:
+        winner = stores_sorted[0]
+
+    winner_store_id = winner.get("store_id")
+    winner_store_name = (winner.get("store_name") or "Unknown store").strip()
+    winner_total = max(0.0, min(round(float(winner.get("total") or 0.0), 2), 999999.99))
+    stores_json = json.dumps(stores, ensure_ascii=False)
+
+    # 4) Persist as a NEW basket_history row (do not mutate the old one)
+    try:
+        async with pool.acquire() as conn:
+            async with conn.transaction():
+                head_new = await conn.fetchrow(
+                    """
+                    INSERT INTO basket_history (
+                        user_id, radius_km, origin_lat, origin_lon,
+                        winner_store_id, winner_store_name,
+                        winner_total, stores, note
+                    ) VALUES ($1::uuid,$2,$3,$4,$5,$6,$7,$8::jsonb,$9)
+                    RETURNING id, created_at, winner_store_name, winner_total, radius_km
+                    """,
+                    uid,
+                    float(use_radius),
+                    float(use_lat),
+                    float(use_lon),
+                    winner_store_id,
+                    winner_store_name,
+                    winner_total,
+                    stores_json,
+                    payload.note or f"Recomputed from basket #{basket_id}",
+                )
+                new_id = head_new["id"]
+
+                # Map product -> price for winner items (if present)
+                price_map = {
+                    (i.get("product") or "").strip().lower(): i
+                    for i in (winner.get("items") or [])
+                }
+                rows = []
+                for r in items:
+                    key = (r["product"] or "").strip().lower()
+                    pinfo = price_map.get(key)
+                    price = float(pinfo["price"]) if (pinfo and pinfo.get("price") is not None) else None
+                    line_total = (price * float(r["quantity"])) if price is not None else None
+                    rows.append((
+                        new_id, r["product"], float(r["quantity"]), None,
+                        price, line_total, winner_store_id, winner_store_name,
+                        None, None, None
+                    ))
+                if rows:
+                    await conn.executemany(
+                        """
+                        INSERT INTO basket_items (
+                            basket_id, product, quantity, unit, price, line_total,
+                            store_id, store_name, image_url, brand, size_text
+                        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+                        """,
+                        rows,
+                    )
+    except Exception:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail="Failed to save recomputed basket")
+
+    return BasketSummaryOut(
+        id=head_new["id"],
+        created_at=head_new["created_at"],
+        winner_store_name=head_new["winner_store_name"],
+        winner_total=float(head_new["winner_total"]) if head_new["winner_total"] is not None else None,
+        radius_km=float(head_new["radius_km"]) if head_new["radius_km"] is not None else None,
+    )
