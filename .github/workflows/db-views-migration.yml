@@ -1,20 +1,19 @@
 name: DB Views Migration (latest & cheapest)
 
 on:
-  # run manually from the Actions tab
   workflow_dispatch: {}
-  # (optional) also run whenever the views file changes on main
   push:
     branches: [ main ]
     paths:
-      - "migrations/2025-08-18-views-latest-and-cheapest.sql"
+      - "migrations/*.sql"
+      - ".github/workflows/db-views-migration.yml"
 
 jobs:
   migrate-views:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}  # set in repo Settings → Secrets
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}  # e.g. postgres://.../db?sslmode=require
 
     steps:
       - name: Checkout
@@ -24,16 +23,28 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client
+          psql --version
 
-      - name: Apply migration (views)
+      - name: Apply migrations (all .sql, sorted)
+        shell: bash
         run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
-            -f migrations/2025-08-18-views-latest-and-cheapest.sql
+          shopt -s nullglob
+          files=(migrations/*.sql)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No migration files found in migrations/ — skipping."
+            exit 0
+          fi
+          # Sort filenames to ensure deterministic order
+          IFS=$'\n' files=($(sort <<<"${files[*]}")); unset IFS
+          for f in "${files[@]}"; do
+            echo "Applying: $f"
+            psql -X "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
+          done
 
       - name: Smoke test
         run: |
-          echo "List views:" && psql "$DATABASE_URL" -c '\dv'
+          echo "List views:" && psql -X "$DATABASE_URL" -c '\dv' || true
           echo "Sample latest-store prices:" && \
-            psql "$DATABASE_URL" -c "SELECT * FROM public.v_latest_store_prices LIMIT 5;"
+            psql -X "$DATABASE_URL" -c "SELECT * FROM public.v_latest_store_prices LIMIT 5;" || true
           echo "Sample cheapest-offer:" && \
-            psql "$DATABASE_URL" -c "SELECT * FROM public.v_cheapest_offer LIMIT 5;"
+            psql -X "$DATABASE_URL" -c "SELECT * FROM public.v_cheapest_offer LIMIT 5;" || true
