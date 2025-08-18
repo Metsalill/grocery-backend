@@ -1,9 +1,9 @@
-name: Prisma → Price Update
+name: Prisma → Price Update (daily)
 
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "0 */6 * * *"   # every 6h UTC
+    - cron: "0 3 * * *"   # run once a day at 03:00 UTC
 
 jobs:
   update-prices:
@@ -12,6 +12,8 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
       PRISMA_STORE_ID: "14"
+      PRICE_CURRENCY: "EUR"
+      PRICE_TYPE: "regular"
       PYTHONUNBUFFERED: "1"
 
     steps:
@@ -28,10 +30,15 @@ jobs:
         run: |
           python -V
           pip install --upgrade pip
+          pip install -r requirements.txt || true
           pip install playwright psycopg2-binary
 
       - name: Install Chromium + deps
         run: python -m playwright install --with-deps chromium
 
-      - name: Update Prisma prices
+      # optional warm-up on 5 items (keeps failures small if site changes)
+      - name: Smoke test (5)
+        run: python scripts/prisma_price_updater.py --max-products 5 --headless 1
+
+      - name: Update Prisma prices (batch 500)
         run: python scripts/prisma_price_updater.py --max-products 500 --headless 1
