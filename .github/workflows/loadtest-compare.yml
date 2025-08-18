@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       base_url:
-        description: "https://grocery-backend-production-66f0.up.railway.app"
+        description: "Backend base URL (e.g. https://grocery-backend-xxxx.up.railway.app)"
         required: true
       lat:
-        description: "59.34146"
+        description: "Latitude"
         required: true
       lon:
-        description: "24.61468"
+        description: "Longitude"
         required: true
       radius:
         description: "Radius km"
