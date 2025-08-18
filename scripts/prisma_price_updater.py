@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Fetch current prices for Prisma products and insert into prices(product_id, store_id, price, seen_at).
+Fetch current prices for Prisma products and write:
+  - price_history(product_id, amount, currency, captured_at, store_id, price_type, source_url)
+  - prices(product_id, store_id, price, seen_at)  [canonical: one row per product]
 """
 
 import os, re, sys, time, random, argparse
@@ -9,8 +11,10 @@ from datetime import datetime, timezone
 import psycopg2, psycopg2.extras
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeout
 
-STORE_ID = int(os.getenv("PRISMA_STORE_ID", "14"))  # Prisma Online (Tallinn)
-PRICE_RE = re.compile(r"(\d+[.,]?\d*)")  # extract number from "€3.29", "3,29 €", etc.
+STORE_ID   = int(os.getenv("PRISMA_STORE_ID", "14"))   # Prisma Online (Tallinn)
+CURRENCY   = os.getenv("PRICE_CURRENCY", "EUR")
+PRICE_TYPE = os.getenv("PRICE_TYPE", "regular")        # free text; keep if you ever add promos
+PRICE_RE   = re.compile(r"(\d+[.,]?\d*)")              # extract number from "€3.29", "3,29 €", etc.
 
 def jitter(a=0.4, b=1.1):
     time.sleep(random.uniform(a, b))
@@ -21,23 +25,21 @@ def get_db() -> psycopg2.extensions.connection:
         print("DATABASE_URL missing")
         sys.exit(2)
     conn = psycopg2.connect(dsn)
-    conn.autocommit = True
+    conn.autocommit = False  # we commit per product so history + canonical stay consistent
     return conn
 
 def pick_price_text(page) -> str:
-    # Try several likely selectors; adjust as the site evolves
     sels = [
-        "[data-testid*='price']",              # generic testid
-        "[class*='price']", "[class*='Price']",# css class fragments
-        "span:has-text('€')", "div:has-text('€')",
-        "meta[itemprop='price'][content]"      # structured price
+        "[data-testid*='price']",
+        "[class*='price']","[class*='Price']",
+        "span:has-text('€')","div:has-text('€')",
+        "meta[itemprop='price'][content]"
     ]
     for sel in sels:
         try:
             loc = page.locator(sel)
             if loc.count() == 0:
                 continue
-            # meta content case
             if "meta" in sel:
                 val = loc.first.get_attribute("content")
                 if val:
@@ -62,17 +64,15 @@ def parse_price(val: str) -> float | None:
 
 def load_prisma_products(conn, limit: int | None):
     """
-    Return rows (id, source_url, product_name) for Prisma products.
-    Bind both the ILIKE pattern and LIMIT to avoid '%' formatting issues.
+    Return rows (id, source_url) for Prisma products.
     """
     sql = """
-        SELECT id, source_url, product_name
+        SELECT id, source_url
         FROM products
         WHERE source_url ILIKE %s
         ORDER BY last_seen_utc DESC NULLS LAST
     """
     params = ['%prismamarket.ee%']
-
     if limit is not None:
         sql += " LIMIT %s"
         params.append(limit)
@@ -81,12 +81,44 @@ def load_prisma_products(conn, limit: int | None):
         cur.execute(sql, params)
         return cur.fetchall()
 
-def insert_price(conn, product_id: int, price: float):
+def write_price(conn, *, product_id: int, price: float, source_url: str):
+    """
+    In ONE transaction:
+      1) Append to price_history
+      2) Upsert into prices (unique on product_id)
+         Rule: update only if the incoming row is newer OR
+               same timestamp but cheaper.
+    """
+    seen_at = datetime.now(timezone.utc)
     with conn.cursor() as cur:
+        # 1) append history
         cur.execute(
-            "INSERT INTO prices (product_id, store_id, price, seen_at) VALUES (%s, %s, %s, %s)",
-            (product_id, STORE_ID, price, datetime.now(timezone.utc))
+            """
+            INSERT INTO price_history
+              (product_id, amount, currency, captured_at, store_id, price_type, source_url)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """,
+            (product_id, price, CURRENCY, seen_at, STORE_ID, PRICE_TYPE, source_url)
         )
+
+        # 2) canonical upsert
+        cur.execute(
+            """
+            INSERT INTO prices (product_id, store_id, price, seen_at)
+            VALUES (%s, %s, %s, %s)
+            ON CONFLICT (product_id) DO UPDATE
+            SET store_id = EXCLUDED.store_id,
+                price    = EXCLUDED.price,
+                seen_at  = EXCLUDED.seen_at
+            WHERE
+              -- prefer newer snapshot
+              EXCLUDED.seen_at > prices.seen_at
+              -- if same timestamp, keep the cheaper one
+              OR (EXCLUDED.seen_at = prices.seen_at AND EXCLUDED.price < prices.price)
+            """,
+            (product_id, STORE_ID, price, seen_at)
+        )
+    conn.commit()
 
 def main():
     ap = argparse.ArgumentParser(description="Prisma price updater")
@@ -111,8 +143,8 @@ def main():
         page = ctx.new_page()
 
         for r in rows:
-            pid = r["id"]
-            url = r["source_url"]
+            pid = int(r["id"])
+            url = r["source_url"] or ""
             try:
                 page.goto(url, timeout=30000)
                 page.wait_for_load_state("domcontentloaded")
@@ -128,13 +160,19 @@ def main():
                 continue
 
             try:
-                insert_price(conn, pid, price)
+                write_price(conn, product_id=pid, price=price, source_url=url)
                 wrote += 1
             except Exception as e:
-                print(f"price insert failed for product_id={pid}: {e}")
                 conn.rollback()
+                print(f"price write failed for product_id={pid}: {e}")
 
         browser.close()
+
+    # leave connection in autocommit=False, but no open txs
+    try:
+        conn.close()
+    except Exception:
+        pass
 
     print(f"Prices written: {wrote}, skipped: {skipped}, scanned: {len(rows)}")
 
