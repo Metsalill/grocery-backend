@@ -25,22 +25,24 @@ def get_db() -> psycopg2.extensions.connection:
         print("DATABASE_URL missing")
         sys.exit(2)
     conn = psycopg2.connect(dsn)
-    conn.autocommit = False  # we commit per product so history + canonical stay consistent
+    conn.autocommit = False  # commit per product so history + canonical stay consistent
     return conn
 
 def pick_price_text(page) -> str:
     sels = [
         "[data-testid*='price']",
-        "[class*='price']","[class*='Price']",
-        "span:has-text('€')","div:has-text('€')",
-        "meta[itemprop='price'][content]"
+        "[class*='price']", "[class*='Price']",
+        "[itemprop='price'][content]",
+        "meta[itemprop='price'][content]",
+        "span:has-text('€')", "div:has-text('€')"
     ]
     for sel in sels:
         try:
             loc = page.locator(sel)
             if loc.count() == 0:
                 continue
-            if "meta" in sel:
+            # meta/content case
+            if ("meta" in sel) or ("[itemprop='price'][content]" in sel):
                 val = loc.first.get_attribute("content")
                 if val:
                     return val
@@ -111,9 +113,7 @@ def write_price(conn, *, product_id: int, price: float, source_url: str):
                 price    = EXCLUDED.price,
                 seen_at  = EXCLUDED.seen_at
             WHERE
-              -- prefer newer snapshot
               EXCLUDED.seen_at > prices.seen_at
-              -- if same timestamp, keep the cheaper one
               OR (EXCLUDED.seen_at = prices.seen_at AND EXCLUDED.price < prices.price)
             """,
             (product_id, STORE_ID, price, seen_at)
@@ -142,12 +142,30 @@ def main():
         ))
         page = ctx.new_page()
 
+        # One-time cookie accept (best-effort)
+        def accept_cookies():
+            for sel in [
+                "button:has-text('Accept all')",
+                "button:has-text('Accept cookies')",
+                "button:has-text('Nõustu')",
+                "button[aria-label*='accept']",
+            ]:
+                try:
+                    btn = page.locator(sel)
+                    if btn.count() > 0 and btn.first.is_enabled():
+                        btn.first.click()
+                        jitter(0.2, 0.6)
+                        return
+                except Exception:
+                    pass
+
         for r in rows:
             pid = int(r["id"])
             url = r["source_url"] or ""
             try:
                 page.goto(url, timeout=30000)
                 page.wait_for_load_state("domcontentloaded")
+                accept_cookies()
                 jitter()
             except PlaywrightTimeout:
                 skipped += 1
@@ -168,7 +186,6 @@ def main():
 
         browser.close()
 
-    # leave connection in autocommit=False, but no open txs
     try:
         conn.close()
     except Exception:
