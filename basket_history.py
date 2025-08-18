@@ -127,6 +127,16 @@ async def save_basket(
         require_all_items=True,
     )
 
+    # NEW: fail early if names didn't resolve
+    if cmp.get("missing_products"):
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": "Some products could not be resolved",
+                "missing_products": cmp["missing_products"],
+            },
+        )
+
     # 2) Normalize compare payload to a 'stores' list
     stores = cmp.get("stores")
     if not stores:
