@@ -5,7 +5,6 @@ SELECT
   pr.store_id,
   pr.price,
   pr.seen_at,
-  s.code  AS store_code,
   s.name  AS store_name
 FROM prices pr
 JOIN (
