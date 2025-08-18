@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       base_url:
-        description: "Backend base URL (e.g. https://grocery-backend-xxxx.up.railway.app)"
+        description: "Backend base URL (e.g. https://grocery-backend-production-66f0.up.railway.app)"
         required: true
       lat:
         description: "Latitude"
@@ -40,7 +40,7 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -49,34 +49,37 @@ jobs:
       - run: pip install httpx
 
       - name: Run load test
+        env:
+          BASE_URL:      ${{ github.event.inputs.base_url }}
+          LAT:           ${{ github.event.inputs.lat }}
+          LON:           ${{ github.event.inputs.lon }}
+          RADIUS:        ${{ github.event.inputs.radius }}
+          CONCURRENCY:   ${{ github.event.inputs.concurrency }}
+          REQUESTS:      ${{ github.event.inputs.requests }}
+          ITEMS:         ${{ github.event.inputs.items }}
+          TARGET_RPS:    ${{ github.event.inputs.target_rps }}
+          AUTH_BEARER:   ${{ github.event.inputs.auth_bearer }}
+          PRODUCTS_FILE: ${{ github.event.inputs.products_file }}
         run: |
           mkdir -p out
           CMD="python scripts/loadtest_compare.py \
-            --base-url '${{ inputs.base_url }}' \
-            --lat '${{ inputs.lat }}' --lon '${{ inputs.lon }}' --radius '${{ inputs.radius }}' \
-            --concurrency '${{ inputs.concurrency }}' --requests '${{ inputs.requests }}' \
-            --items '${{ inputs.items }}' --target-rps '${{ inputs.target_rps }}' \
+            --base-url \"$BASE_URL\" \
+            --lat \"$LAT\" --lon \"$LON\" --radius \"$RADIUS\" \
+            --concurrency \"$CONCURRENCY\" --requests \"$REQUESTS\" \
+            --items \"$ITEMS\" --target-rps \"$TARGET_RPS\" \
             --out out/summary.json"
-          if [ -n "${{ inputs.auth_bearer }}" ]; then
-            CMD="$CMD --auth-bearer '${{ inputs.auth_bearer }}'"
+          if [ -n "$AUTH_BEARER" ]; then
+            CMD="$CMD --auth-bearer \"$AUTH_BEARER\""
           fi
-          if [ -n "${{ inputs.products_file }}" ]; then
-            CMD="$CMD --products-file '${{ inputs.products_file }}'"
+          if [ -n "$PRODUCTS_FILE" ]; then
+            CMD="$CMD --products-file \"$PRODUCTS_FILE\""
           fi
           echo "$CMD"
           bash -lc "$CMD" | tee out/run.log
 
       - name: Fail if too many errors
+        env:
+          MAX_ERRORS: ${{ github.event.inputs.max_errors }}
         run: |
           ERRORS=$(grep -oE 'Errors: [0-9]+' out/run.log | awk '{print $2}')
-          ERRORS=${ERRORS:-0}
-          echo "Errors: $ERRORS"
-          if [ "$ERRORS" -gt "${{ inputs.max_errors }}" ]; then
-            echo "Too many errors ($ERRORS > ${{ inputs.max_errors }})"
-            exit 1
-          fi
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: compare-loadtest
-          path: out/
+          ERR
