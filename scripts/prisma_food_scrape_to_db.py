@@ -80,6 +80,9 @@ EXCLUDED_CATEGORY_KEYWORDS = [
     "kodumasinad", "elektroonika", "meelelahutuselektroonika",
     "vaikesed-kodumasinad", "lambid-patareid-ja-taskulambid",
     "ilu-ja-tervis", "kosmeetika", "meigitooted", "hugieen",
+
+    # vitamins / supplements / sport nutrition (non-food)
+    "loodustooted-ja-toidulisandid",
 ]
 
 def is_in_whitelist(url: str) -> bool:
