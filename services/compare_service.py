@@ -1,44 +1,69 @@
 # services/compare_service.py
 from typing import List, Dict, Optional, Tuple, Any
 
+# --- Resolver: names → product_ids -------------------------------------------
 async def resolve_product_ids_by_name(pool, names: List[str]) -> Dict[str, int]:
-    # Minimal resolver; replace with your catalog logic or fuzzy match
+    """
+    Resolve a list of product names to product IDs.
+    Currently exact LOWER() matches; you can extend this with fuzzy matching.
+    """
+    lowered = [n.strip().lower() for n in names if n and n.strip()]
+    if not lowered:
+        return {}
+
     q = """
-      SELECT id AS product_id, product AS name
+      SELECT id AS product_id, LOWER(product) AS name
       FROM products
       WHERE LOWER(product) = ANY($1::text[])
     """
-    # normalize to lower for exact match
-    lowered = [n.strip().lower() for n in names if n and n.strip()]
     async with pool.acquire() as conn:
         rows = await conn.fetch(q, lowered)
-    # map back by name (lower)
-    return {r["name"].lower(): int(r["product_id"]) for r in rows}
 
+    return {r["name"]: int(r["product_id"]) for r in rows}
+
+
+# --- Core service -------------------------------------------------------------
 async def compare_basket_service(
     pool,
-    items: List[Tuple[str, int]],  # (product_name, quantity) or swap to product_ids for best accuracy
+    items: List[Tuple[str, int]],  # (product_name, quantity)
     lat: Optional[float],
     lon: Optional[float],
     radius_km: Optional[float] = 10.0,
     require_all_items: bool = True,
 ) -> Dict[str, Any]:
-    if not items:
-        return {"stores": [], "results": [], "totals": {}, "radius_km": radius_km}
+    """
+    Compare basket prices across stores using v_latest_store_prices.
+    Returns the cheapest store(s), totals, and a breakdown for the best store.
+    """
 
-    # 1) Resolve products to IDs (prefer doing this earlier in your pipeline)
+    if not items:
+        return {
+            "stores": [],
+            "results": [],
+            "totals": {},
+            "radius_km": radius_km,
+        }
+
+    # --- 1. Resolve products to IDs ------------------------------------------
     names = [n for (n, _) in items]
     name_to_id = await resolve_product_ids_by_name(pool, names)
+
     missing_names = [n for n in names if n.strip().lower() not in name_to_id]
     if missing_names:
-        # you can choose to fail or continue; here we fail to keep semantics clear
-        return {"stores": [], "results": [], "totals": {}, "missing_products": missing_names, "radius_km": radius_km}
+        # Fail early but report missing names
+        return {
+            "stores": [],
+            "results": [],
+            "totals": {},
+            "missing_products": missing_names,
+            "radius_km": radius_km,
+        }
 
     product_ids = [name_to_id[n.strip().lower()] for n, _ in items]
     qty_map = {name_to_id[n.strip().lower()]: int(q) for n, q in items}
     needed = len(set(product_ids))
 
-    # 2) Build the query: geo-filtered or not. Uses v_latest_store_prices.
+    # --- 2. Build query (geo-filtered vs non-geo) ----------------------------
     if lat is not None and lon is not None and radius_km is not None:
         sql = """
         WITH candidates AS (
@@ -49,7 +74,10 @@ async def compare_basket_service(
           FROM v_latest_store_prices lsp
           JOIN stores s ON s.id = lsp.store_id
           WHERE lsp.product_id = ANY($1::int[])
-            AND earth_distance(ll_to_earth($2::float8, $3::float8), ll_to_earth(s.lat, s.lon)) <= $4::int
+            AND earth_distance(
+                  ll_to_earth($2::float8, $3::float8),
+                  ll_to_earth(s.lat, s.lon)
+                ) <= $4::int
         ),
         per_store AS (
           SELECT
@@ -65,8 +93,10 @@ async def compare_basket_service(
         SELECT
           ps.store_id,
           s.name AS store_name,
-          -- Distance is optional; add if you want it inline:
-          earth_distance(ll_to_earth($2::float8, $3::float8), ll_to_earth(s.lat, s.lon)) / 1000.0 AS distance_km,
+          earth_distance(
+            ll_to_earth($2::float8, $3::float8),
+            ll_to_earth(s.lat, s.lon)
+          ) / 1000.0 AS distance_km,
           ps.total
         FROM per_store ps
         JOIN stores s ON s.id = ps.store_id
@@ -77,8 +107,8 @@ async def compare_basket_service(
             product_ids,
             float(lat),
             float(lon),
-            int((radius_km or 10.0) * 1000),
-            [qty_map[pid] for pid in product_ids],
+            int((radius_km or 10.0) * 1000),         # meters
+            [qty_map[pid] for pid in product_ids],  # quantities aligned
             bool(require_all_items),
             int(needed),
         ]
@@ -123,18 +153,18 @@ async def compare_basket_service(
     async with pool.acquire() as conn:
         rows = await conn.fetch(sql, *params)
 
-    # Optional: fetch per-item breakdown for the best store
-    breakdown_sql = """
-      SELECT product_id, price::numeric AS price
-      FROM v_latest_store_prices
-      WHERE store_id = $1 AND product_id = ANY($2::int[])
-    """
-
+    # --- 3. Per-item breakdown for the best store ----------------------------
     stores_payload = []
     totals_map = {}
     if rows:
         best = rows[0]
         best_store_id = int(best["store_id"])
+
+        breakdown_sql = """
+          SELECT product_id, price::numeric AS price
+          FROM v_latest_store_prices
+          WHERE store_id = $1 AND product_id = ANY($2::int[])
+        """
         async with pool.acquire() as conn:
             bd = await conn.fetch(breakdown_sql, best_store_id, product_ids)
         price_by_pid = {int(r["product_id"]): float(r["price"]) for r in bd}
@@ -156,7 +186,7 @@ async def compare_basket_service(
                     for pid in product_ids
                 ]
             else:
-                items_array = []  # keep light; fetch on demand if needed
+                items_array = []  # lightweight for non-best stores
 
             stores_payload.append({
                 "store_id": sid,
@@ -167,8 +197,13 @@ async def compare_basket_service(
             })
             totals_map[name] = round(total, 2)
 
+    # --- 4. Back-compat + response -------------------------------------------
     legacy_results = [
-        {"store": s["store_name"], "total": s["total"], "distance_km": s["distance_km"]}
+        {
+            "store": s["store_name"],
+            "total": s["total"],
+            "distance_km": s["distance_km"],
+        }
         for s in stores_payload
     ]
 
