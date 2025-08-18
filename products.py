@@ -76,10 +76,13 @@ async def list_products(
 
 @router.get("/search-products")
 @throttle(limit=30, window=60)  # tighter: search is a hot target
-async def search_products(
+async def search_products_legacy(
     request: Request,
     query: str = Query(..., min_length=2)  # enforce min length
 ):
+    """
+    Legacy LIKE-based search for quick suggestions. Kept for back-compat.
+    """
     q = query.strip()
     # deny wildcard-only or junk queries that tend to be used by scrapers
     if not q or set(q) <= {"%", "*"}:
@@ -104,3 +107,64 @@ async def search_products(
         """, like)
 
     return [{"name": r["product"], "image": r["image_url"]} for r in rows]
+
+# ------------------ NEW: Trigram + prefix autocomplete ------------------
+
+@router.get("/products/search")
+@throttle(limit=60, window=60)  # balanced; autocomplete gets frequent hits
+async def products_search(
+    request: Request,
+    q: str = Query(..., min_length=1, max_length=64, description="Search text"),
+    limit: int = Query(10, ge=1, le=50),
+):
+    """
+    Autocomplete using pg_trgm similarity + prefix boost.
+    Prefers the `products` table; falls back to a LIKE search on `prices`
+    if `products` or pg_trgm isn't available.
+    Returns [{id, name}] (id may be null on fallback).
+    """
+    term = q.strip()
+    if not term:
+        return []
+
+    # Primary: products table with trigram
+    sql_products = """
+    WITH input AS (SELECT $1::text AS q)
+    SELECT p.id, p.product AS name
+    FROM products p, input
+    WHERE p.product ILIKE q || '%'         -- prefix boost
+       OR p.product % q                    -- trigram similarity (pg_trgm)
+    ORDER BY
+      CASE WHEN p.product ILIKE q || '%' THEN 0 ELSE 1 END,
+      similarity(p.product, q) DESC,
+      p.product ASC
+    LIMIT $2
+    """
+
+    # Fallback: DISTINCT names from prices with LIKE only
+    sql_fallback = """
+    WITH input AS (SELECT $1::text AS q)
+    SELECT name FROM (
+      SELECT DISTINCT p.product AS name
+      FROM prices p, input
+      WHERE p.product ILIKE q || '%'
+         OR p.product ILIKE '%' || q || '%'
+    ) t
+    ORDER BY
+      CASE WHEN name ILIKE $1 || '%' THEN 0 ELSE 1 END,
+      name ASC
+    LIMIT $2
+    """
+
+    async with request.app.state.db.acquire() as conn:
+        try:
+            rows = await conn.fetch(sql_products, term, limit)
+            if rows:
+                return [{"id": r["id"], "name": r["name"]} for r in rows]
+            # no hits? fall back to LIKE to be generous
+            fb = await conn.fetch(sql_fallback, term, limit)
+            return [{"id": None, "name": r["name"]} for r in fb]
+        except Exception:
+            # products table or pg_trgm might be missing in some envs
+            fb = await conn.fetch(sql_fallback, term, limit)
+            return [{"id": None, "name": r["name"]} for r in fb]
