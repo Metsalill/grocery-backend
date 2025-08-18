@@ -164,13 +164,16 @@ async def save_basket(
                 head = await conn.fetchrow(
                     """
                     INSERT INTO basket_history (
-                        user_id, radius_km, winner_store_id, winner_store_name,
+                        user_id, radius_km, origin_lat, origin_lon,
+                        winner_store_id, winner_store_name,
                         winner_total, stores, note
-                    ) VALUES ($1::uuid,$2,$3,$4,$5,$6::jsonb,$7)
+                    ) VALUES ($1::uuid,$2,$3,$4,$5,$6,$7,$8::jsonb,$9)
                     RETURNING id, created_at, winner_store_name, winner_total, radius_km
                     """,
                     uid,
                     payload.radius_km,
+                    payload.lat,
+                    payload.lon,
                     winner_store_id,
                     winner_store_name,
                     winner_total,
