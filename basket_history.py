@@ -11,7 +11,7 @@ import uuid  # <-- keep
 
 from auth import get_current_user
 from settings import get_db_pool
-from compare import compute_compare
+from services.compare_service import compare_basket_service  # updated import
 
 router = APIRouter(prefix="/basket-history", tags=["basket-history"])
 
@@ -116,14 +116,15 @@ async def save_basket(
     if not uid:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
-    # 1) Compute pricing snapshot
+    # 1) Compute pricing snapshot (using new service)
     items_tuples = [(it.product, int(it.quantity)) for it in payload.items]
-    cmp = await compute_compare(
+    cmp = await compare_basket_service(
         pool=pool,
         items=items_tuples,
-        user_lat=payload.lat,
-        user_lon=payload.lon,
+        lat=payload.lat,
+        lon=payload.lon,
         radius_km=payload.radius_km,
+        require_all_items=True,
     )
 
     # 2) Normalize compare payload to a 'stores' list
@@ -231,150 +232,3 @@ async def save_basket(
         winner_total=float(head["winner_total"]) if head["winner_total"] is not None else None,
         radius_km=float(head["radius_km"]) if head["radius_km"] is not None else None,
     )
-
-@router.get("", response_model=List[BasketSummaryOut])
-async def list_baskets(
-    user=Depends(get_current_user),
-    pool: asyncpg.pool.Pool = Depends(get_db_pool),
-):
-    uid = await resolve_user_id(user, pool)
-    if not uid:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
-    rows = await pool.fetch(
-        """
-        SELECT
-          id,
-          created_at,
-          winner_store_name,
-          winner_total::float8   AS winner_total,   -- cast numerics
-          radius_km::float8      AS radius_km
-        FROM basket_history
-        WHERE user_id=$1::uuid AND deleted_at IS NULL
-        ORDER BY created_at DESC
-        """,
-        uid,
-    )
-    return [
-        BasketSummaryOut(
-            id=r["id"],
-            created_at=r["created_at"],
-            winner_store_name=r["winner_store_name"],
-            winner_total=r["winner_total"],
-            radius_km=r["radius_km"],
-        )
-        for r in rows
-    ]
-
-@router.get("/{basket_id}", response_model=BasketDetailOut)
-async def get_basket(
-    basket_id: int,
-    user=Depends(get_current_user),
-    pool: asyncpg.pool.Pool = Depends(get_db_pool),
-):
-    uid = await resolve_user_id(user, pool)
-    if not uid:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
-    try:
-        async with pool.acquire() as conn:
-            head = await conn.fetchrow(
-                """
-                SELECT
-                  id,
-                  created_at,
-                  radius_km::float8        AS radius_km,      -- cast
-                  winner_store_id,
-                  winner_store_name,
-                  winner_total::float8     AS winner_total,   -- cast
-                  stores,
-                  note
-                FROM basket_history
-                WHERE id=$1 AND user_id=$2::uuid AND deleted_at IS NULL
-                """,
-                basket_id,
-                uid,
-            )
-            if not head:
-                raise HTTPException(status_code=404, detail="Basket not found")
-
-            # Normalize "stores" into a list[dict]
-            raw_stores = head["stores"]
-            stores_payload: Optional[List[dict]] = None
-            if isinstance(raw_stores, list):
-                stores_payload = raw_stores
-            elif isinstance(raw_stores, dict):
-                stores_payload = [raw_stores]
-            elif isinstance(raw_stores, str):
-                try:
-                    parsed = json.loads(raw_stores)
-                    if isinstance(parsed, list):
-                        stores_payload = parsed
-                    elif isinstance(parsed, dict):
-                        stores_payload = [parsed]
-                except Exception:
-                    stores_payload = None
-            if stores_payload is None:
-                stores_payload = []
-
-            items = await conn.fetch(
-                """
-                SELECT
-                  product,
-                  quantity::float8   AS quantity,   -- cast
-                  unit,
-                  price::float8      AS price,      -- cast
-                  line_total::float8 AS line_total, -- cast
-                  store_id,
-                  store_name,
-                  image_url,
-                  brand,
-                  size_text
-                FROM basket_items
-                WHERE basket_id=$1
-                ORDER BY id
-                """,
-                basket_id,
-            )
-
-        return BasketDetailOut(
-            id=head["id"],
-            created_at=head["created_at"],
-            radius_km=head["radius_km"],
-            winner_store_id=head["winner_store_id"],
-            winner_store_name=head["winner_store_name"],
-            winner_total=head["winner_total"],
-            stores=stores_payload,
-            note=head["note"],
-            items=[dict(r) for r in items],
-        )
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        print("GET_BASKET_ERROR:", type(e).__name__, str(e), {"basket_id": basket_id, "uid": uid})
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail="Internal Server Error")
-
-@router.delete("/{basket_id}")
-async def delete_basket(
-    basket_id: int,
-    user=Depends(get_current_user),
-    pool: asyncpg.pool.Pool = Depends(get_db_pool),
-):
-    uid = await resolve_user_id(user, pool)
-    if not uid:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
-    res = await pool.execute(
-        """
-        UPDATE basket_history
-        SET deleted_at = NOW()
-        WHERE id=$1 AND user_id=$2::uuid AND deleted_at IS NULL
-        """,
-        basket_id,
-        uid,
-    )
-    if res.split()[-1] == "0":
-        raise HTTPException(status_code=404, detail="Basket not found")
-    return {"ok": True}
