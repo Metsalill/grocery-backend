@@ -55,25 +55,31 @@ def is_product_path(path: str) -> bool:
 # ---------------------------------------------------------------------------
 # Whitelist / blacklist filtering  (simple substring match, case-insensitive)
 EXCLUDED_CATEGORY_KEYWORDS = [
-    # home & decor
-    "sisustus", "kodutekstiil", "valgustus", "kardin", "jouluvalgustid", "vaikesed-sisustuskaubad", "kuunlad",
+    # home & decor / household goods
+    "sisustus", "kodutekstiil", "valgustus", "kardin", "jouluvalgustid",
+    "vaikesed-sisustuskaubad", "kuunlad", "kook-ja-lauakatmine",
+    "uhekordsed-noud", "kirja-ja-kontoritarbed", "remondi-ja-turvatooted",
+    "kulmutus-ja-kokkamisvahendid", "omblus-ja-kasitootarbed",
+    "meisterdamine", "ajakirjad", "autojuhtimine", "kotid",
+    "aed-ja-lilled",
+
     # pets
     "lemmikloom",
+
     # sports & outdoor
-    "sport", "pallimangud", "jalgrattasoit", "ujumine", "matkamine", "tervisesport",
-    # baby & kids
-    "lapsed", "manguasjad", "lutid", "beebi", "lapsehooldus",
-    # seasonal/other
+    "sport", "pallimangud", "jalgrattasoit", "ujumine",
+    "matkamine", "tervisesport",
+
+    # baby & kids (non-food)
+    "manguasjad", "lutid", "lapsehooldus",
+
+    # seasonal / ideas
     "ideed-ja-hooajad",
-    # electronics & appliances
-    "kodumasinad-ja-elektroonika", "meelelahutuselektroonika", "lambid-patareid-ja-taskulambid",
-    "vaikesed-kodumasinad", "ilu-ja-tervis",
-    # kitchenware & household items
-    "kook-ja-lauakatmine", "uhekordsed-noud", "kirja-ja-kontoritarbed", "autojuhtimine",
-    "remondi-ja-turvatooted", "kotid", "aed-ja-lilled", "meisterdamine", "ajakirjad",
-    "omblus-ja-kasitootarbed", "kulmutus-ja-kokkamisvahendid",
-    # cosmetics & hygiene
-    "kosmeetika-ja-hugieen", "meigitooted"
+
+    # electronics & appliances / health & beauty
+    "kodumasinad", "elektroonika", "meelelahutuselektroonika",
+    "vaikesed-kodumasinad", "lambid-patareid-ja-taskulambid",
+    "ilu-ja-tervis", "kosmeetika", "meigitooted", "hugieen",
 ]
 
 def is_in_whitelist(url: str) -> bool:
