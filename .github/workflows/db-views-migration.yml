@@ -1,0 +1,39 @@
+name: DB Views Migration (latest & cheapest)
+
+on:
+  # run manually from the Actions tab
+  workflow_dispatch: {}
+  # (optional) also run whenever the views file changes on main
+  push:
+    branches: [ main ]
+    paths:
+      - "migrations/2025-08-18-views-latest-and-cheapest.sql"
+
+jobs:
+  migrate-views:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}  # set in repo Settings → Secrets
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install psql client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Apply migration (views)
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+            -f migrations/2025-08-18-views-latest-and-cheapest.sql
+
+      - name: Smoke test
+        run: |
+          echo "List views:" && psql "$DATABASE_URL" -c '\dv'
+          echo "Sample latest-store prices:" && \
+            psql "$DATABASE_URL" -c "SELECT * FROM public.v_latest_store_prices LIMIT 5;"
+          echo "Sample cheapest-offer:" && \
+            psql "$DATABASE_URL" -c "SELECT * FROM public.v_cheapest_offer LIMIT 5;"
