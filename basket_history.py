@@ -1,5 +1,5 @@
 # basket_history.py
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime
@@ -235,3 +235,127 @@ async def save_basket(
         winner_total=float(head["winner_total"]) if head["winner_total"] is not None else None,
         radius_km=float(head["radius_km"]) if head["radius_km"] is not None else None,
     )
+
+
+# ---------- New: get a saved basket (snapshot + optional live recompute) ----------
+@router.get("/{basket_id}")
+async def get_basket(
+    basket_id: int,
+    include_current: bool = Query(False, description="If true, recompute current prices for the saved items"),
+    lat: Optional[float] = Query(None, description="Override origin latitude for recompute"),
+    lon: Optional[float] = Query(None, description="Override origin longitude for recompute"),
+    radius_km: Optional[float] = Query(None, description="Override search radius for recompute"),
+    user=Depends(get_current_user),
+    pool: asyncpg.pool.Pool = Depends(get_db_pool),
+):
+    uid = await resolve_user_id(user, pool)
+    if not uid:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    try:
+        async with pool.acquire() as conn:
+            head = await conn.fetchrow(
+                """
+                SELECT
+                  id,
+                  created_at,
+                  radius_km::float8        AS radius_km,
+                  origin_lat::float8       AS origin_lat,
+                  origin_lon::float8       AS origin_lon,
+                  winner_store_id,
+                  winner_store_name,
+                  winner_total::float8     AS winner_total,
+                  stores,
+                  note
+                FROM basket_history
+                WHERE id=$1 AND user_id=$2::uuid AND deleted_at IS NULL
+                """,
+                basket_id,
+                uid,
+            )
+            if not head:
+                raise HTTPException(status_code=404, detail="Basket not found")
+
+            # Normalize "stores" into a list[dict]
+            raw_stores = head["stores"]
+            stores_payload: Optional[List[dict]] = None
+            if isinstance(raw_stores, list):
+                stores_payload = raw_stores
+            elif isinstance(raw_stores, dict):
+                stores_payload = [raw_stores]
+            elif isinstance(raw_stores, str):
+                try:
+                    parsed = json.loads(raw_stores)
+                    if isinstance(parsed, list):
+                        stores_payload = parsed
+                    elif isinstance(parsed, dict):
+                        stores_payload = [parsed]
+                except Exception:
+                    stores_payload = None
+            if stores_payload is None:
+                stores_payload = []
+
+            items = await conn.fetch(
+                """
+                SELECT
+                  product,
+                  quantity::float8   AS quantity,
+                  unit,
+                  price::float8      AS price,
+                  line_total::float8 AS line_total,
+                  store_id,
+                  store_name,
+                  image_url,
+                  brand,
+                  size_text
+                FROM basket_items
+                WHERE basket_id=$1
+                ORDER BY id
+                """,
+                basket_id,
+            )
+
+        # Base snapshot (historical)
+        snapshot = {
+            "id": head["id"],
+            "created_at": head["created_at"],
+            "radius_km": head["radius_km"],
+            "origin_lat": head["origin_lat"],
+            "origin_lon": head["origin_lon"],
+            "winner_store_id": head["winner_store_id"],
+            "winner_store_name": head["winner_store_name"],
+            "winner_total": head["winner_total"],
+            "stores": stores_payload,
+            "note": head["note"],
+            "items": [dict(r) for r in items],
+        }
+
+        # Optionally add current recomputation (live prices)
+        if not include_current:
+            return snapshot
+
+        use_lat = lat if lat is not None else head["origin_lat"]
+        use_lon = lon if lon is not None else head["origin_lon"]
+        use_radius = radius_km if radius_km is not None else head["radius_km"]
+
+        if use_lat is None or use_lon is None:
+            current = {"error": "origin coordinates unavailable; pass lat/lon to recompute"}
+        else:
+            item_tuples = [(r["product"], int(r["quantity"])) for r in items]
+            current = await compare_basket_service(
+                pool=pool,
+                items=item_tuples,
+                lat=float(use_lat),
+                lon=float(use_lon),
+                radius_km=float(use_radius or 10.0),
+                require_all_items=True,
+            )
+
+        return {"snapshot": snapshot, "current": current}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("GET_BASKET_ERROR:", type(e).__name__, str(e), {"basket_id": basket_id, "uid": uid})
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail="Internal Server Error")
