@@ -1,17 +1,15 @@
 from fastapi import APIRouter, Request, Query, HTTPException
 from typing import Optional
 from asyncpg import exceptions as pgerr
-
 from utils.throttle import throttle
 
 router = APIRouter()
 MAX_LIMIT = 50
 
-
 def fmt_price(v):
     return round(float(v), 2) if v is not None else None
 
-
+# -------- /products --------
 @router.get("/products")
 @throttle(limit=120, window=60)
 async def list_products(
@@ -23,7 +21,7 @@ async def list_products(
     limit = min(int(limit), MAX_LIMIT)
     like = f"%{q.strip()}%" if q else "%"
 
-    # A) Old schema: prices.product (text)
+    # Old schema: prices.product (text)
     SQL_TOTAL_PLAIN = """
         SELECT COUNT(*) FROM (
           SELECT 1
@@ -53,16 +51,15 @@ async def list_products(
         LIMIT  $3
     """
 
-    # B) New schema: prices.product_id → join to products for **name only**
-    # (manufacturer/amount come ONLY from prices; products table might not have them)
+    # New schema: prices.product_id -> products (name or product_name)
     SQL_TOTAL_JOIN = """
         SELECT COUNT(*) FROM (
           SELECT 1
           FROM prices p
           LEFT JOIN products pr ON pr.id = p.product_id
-          WHERE LOWER(COALESCE(pr.product, pr.name, '')) LIKE LOWER($1)
+          WHERE LOWER(COALESCE(pr.product_name, pr.name, '')) LIKE LOWER($1)
           GROUP BY
-            COALESCE(pr.product, pr.name, ''),
+            COALESCE(pr.product_name, pr.name, ''),
             COALESCE(p.manufacturer, ''),
             COALESCE(p.amount, '')
         ) t
@@ -70,14 +67,14 @@ async def list_products(
     SQL_ROWS_JOIN = """
         WITH base AS (
           SELECT
-            COALESCE(pr.product, pr.name, '') AS product,
-            COALESCE(p.manufacturer, '')      AS manufacturer,
-            COALESCE(p.amount, '')            AS amount,
+            COALESCE(pr.product_name, pr.name, '') AS product,
+            COALESCE(p.manufacturer, '')           AS manufacturer,
+            COALESCE(p.amount, '')                 AS amount,
             p.price,
             p.image_url
           FROM prices p
           LEFT JOIN products pr ON pr.id = p.product_id
-          WHERE LOWER(COALESCE(pr.product, pr.name, '')) LIKE LOWER($1)
+          WHERE LOWER(COALESCE(pr.product_name, pr.name, '')) LIKE LOWER($1)
         ),
         grouped AS (
           SELECT
@@ -98,15 +95,15 @@ async def list_products(
         LIMIT  $3
     """
 
-    # C) Last resort: show names from products (no price rollups)
+    # Products-only fallback (no prices)
     SQL_TOTAL_PRODUCTS_ONLY = """
         SELECT COUNT(*)
         FROM products pr
-        WHERE LOWER(COALESCE(pr.product, pr.name, '')) LIKE LOWER($1)
+        WHERE LOWER(COALESCE(pr.product_name, pr.name, '')) LIKE LOWER($1)
     """
     SQL_ROWS_PRODUCTS_ONLY = """
         SELECT
-          COALESCE(pr.product, pr.name, '') AS product,
+          COALESCE(pr.product_name, pr.name, '') AS product,
           ''::text AS manufacturer,
           ''::text AS amount,
           NULL::float8 AS min_price,
@@ -114,14 +111,13 @@ async def list_products(
           0::int AS store_count,
           NULL::text AS image_url
         FROM products pr
-        WHERE LOWER(COALESCE(pr.product, pr.name, '')) LIKE LOWER($1)
-        ORDER BY COALESCE(pr.product, pr.name, '')
+        WHERE LOWER(COALESCE(pr.product_name, pr.name, '')) LIKE LOWER($1)
+        ORDER BY COALESCE(pr.product_name, pr.name, '')
         OFFSET $2
         LIMIT  $3
     """
 
     async with request.app.state.db.acquire() as conn:
-        # Try A → B → C, catching column/table issues cleanly
         try:
             total = await conn.fetchval(SQL_TOTAL_PLAIN, like)
             rows = []
@@ -139,7 +135,6 @@ async def list_products(
                     total = await conn.fetchval(SQL_TOTAL_PRODUCTS_ONLY, like) or 0
                     rows = await conn.fetch(SQL_ROWS_PRODUCTS_ONLY, like, offset, limit)
         except (pgerr.UndefinedTableError, pgerr.UndefinedColumnError):
-            # prices.product path not available → try B / C
             try:
                 total = await conn.fetchval(SQL_TOTAL_JOIN, like)
                 if total and total > 0:
@@ -164,7 +159,7 @@ async def list_products(
     return {"total": total or 0, "offset": offset, "limit": limit, "items": items}
 
 
-# ---- Legacy suggestions (now also safe for product_id schema) ----
+# ---- Legacy suggestions (safe for product_id schema too) ----
 @router.get("/search-products")
 @throttle(limit=30, window=60)
 async def search_products_legacy(
@@ -193,11 +188,11 @@ async def search_products_legacy(
     SQL_SUGGEST_JOIN = """
         WITH base AS (
           SELECT
-            COALESCE(pr.product, pr.name, '') AS product,
+            COALESCE(pr.product_name, pr.name, '') AS product,
             p.image_url
           FROM prices p
           LEFT JOIN products pr ON pr.id = p.product_id
-          WHERE LOWER(COALESCE(pr.product, pr.name, '')) LIKE LOWER($1)
+          WHERE LOWER(COALESCE(pr.product_name, pr.name, '')) LIKE LOWER($1)
         ),
         grouped AS (
           SELECT
@@ -223,7 +218,7 @@ async def search_products_legacy(
     return [{"name": r["product"], "image": r["image_url"]} for r in rows]
 
 
-# ---- Trigram autocomplete (unchanged; safe fallbacks) ----
+# ---- Trigram autocomplete (fallback updated too) ----
 @router.get("/products/search")
 @throttle(limit=60, window=60)
 async def products_search(
@@ -239,28 +234,28 @@ async def products_search(
     WITH input AS (SELECT $1::text AS q)
     SELECT
       p.id,
-      COALESCE(p.product, p.name) AS name
+      COALESCE(p.product_name, p.name) AS name
     FROM products p, input
     WHERE
-          COALESCE(p.product, p.name) ILIKE q || '%'
-       OR COALESCE(p.product, p.name) % q
-       OR COALESCE(p.product, p.name) ILIKE '%' || q || '%'
+          COALESCE(p.product_name, p.name) ILIKE q || '%'
+       OR COALESCE(p.product_name, p.name) % q
+       OR COALESCE(p.product_name, p.name) ILIKE '%' || q || '%'
     ORDER BY
-      CASE WHEN COALESCE(p.product, p.name) ILIKE q || '%' THEN 0 ELSE 1 END,
-      similarity(COALESCE(p.product, p.name), q) DESC,
-      COALESCE(p.product, p.name) ASC
+      CASE WHEN COALESCE(p.product_name, p.name) ILIKE q || '%' THEN 0 ELSE 1 END,
+      similarity(COALESCE(p.product_name, p.name), q) DESC,
+      COALESCE(p.product_name, p.name) ASC
     LIMIT $2
     """
 
     sql_fallback = """
     WITH input AS (SELECT $1::text AS q)
     SELECT name FROM (
-      SELECT DISTINCT COALESCE(pr.product, pr.name) AS name
+      SELECT DISTINCT COALESCE(pr.product_name, pr.name) AS name
       FROM prices p
       LEFT JOIN products pr ON pr.id = p.product_id
       , input
-      WHERE COALESCE(pr.product, pr.name) ILIKE q || '%'
-         OR COALESCE(pr.product, pr.name) ILIKE '%' || q || '%'
+      WHERE COALESCE(pr.product_name, pr.name) ILIKE q || '%'
+         OR COALESCE(pr.product_name, pr.name) ILIKE '%' || q || '%'
     ) t
     ORDER BY
       CASE WHEN name ILIKE $1 || '%' THEN 0 ELSE 1 END,
