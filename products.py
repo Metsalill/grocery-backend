@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, Query, HTTPException
 from typing import Optional
+from asyncpg import exceptions as pgerr  # for graceful fallbacks
 
 # import from utils.throttle instead of main.py to avoid circular import
 from utils.throttle import throttle
@@ -164,7 +165,11 @@ async def products_search(
             # no hits? fall back to LIKE to be generous
             fb = await conn.fetch(sql_fallback, term, limit)
             return [{"id": None, "name": r["name"]} for r in fb]
-        except Exception:
+        except (pgerr.UndefinedTableError, pgerr.UndefinedFunctionError, pgerr.UndefinedObjectError):
             # products table or pg_trgm might be missing in some envs
+            fb = await conn.fetch(sql_fallback, term, limit)
+            return [{"id": None, "name": r["name"]} for r in fb]
+        except Exception:
+            # last-resort generic fallback
             fb = await conn.fetch(sql_fallback, term, limit)
             return [{"id": None, "name": r["name"]} for r in fb]
