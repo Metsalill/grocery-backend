@@ -127,14 +127,12 @@ async def save_basket(
         require_all_items=True,
     )
 
-    # NEW: fail early if names didn't resolve
-    if cmp.get("missing_products"):
+    # ✴️ Tiny guard: fail early if names didn't resolve
+    missing = (cmp.get("missing_products") or cmp.get("missing") or [])
+    if missing:
         raise HTTPException(
             status_code=400,
-            detail={
-                "message": "Some products could not be resolved",
-                "missing_products": cmp["missing_products"],
-            },
+            detail={"message": "Some products could not be resolved", "missing_products": missing},
         )
 
     # 2) Normalize compare payload to a 'stores' list
@@ -156,7 +154,7 @@ async def save_basket(
         raise HTTPException(status_code=400, detail="No stores found within given radius")
 
     # 3) Decide winner
-    stores_sorted = sorted(stores, key=lambda s: s["total"])
+    stores_sorted = sorted(stores, key=lambda s: (s.get("total") if s.get("total") is not None else float("inf")))
     winner = next((s for s in stores_sorted if s.get("store_id") == payload.selected_store_id), None) \
              if payload.selected_store_id is not None else None
     if winner is None:
@@ -439,6 +437,14 @@ async def recompare_and_save_new(
         require_all_items=True,
     )
 
+    # ✴️ Guard here too (shouldn't usually happen for saved items, but safe)
+    missing = (cmp.get("missing_products") or cmp.get("missing") or [])
+    if missing:
+        raise HTTPException(
+            status_code=400,
+            detail={"message": "Some products could not be resolved", "missing_products": missing},
+        )
+
     stores = cmp.get("stores") or []
     if not stores:
         legacy_results = cmp.get("results") or []
@@ -456,7 +462,7 @@ async def recompare_and_save_new(
     if not stores:
         raise HTTPException(status_code=400, detail="No stores found for current prices")
 
-    stores_sorted = sorted(stores, key=lambda s: s["total"])
+    stores_sorted = sorted(stores, key=lambda s: (s.get("total") if s.get("total") is not None else float("inf")))
     winner = next((s for s in stores_sorted if s.get("store_id") == payload.selected_store_id), None) \
              if payload.selected_store_id is not None else None
     if winner is None:
