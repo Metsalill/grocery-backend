@@ -31,8 +31,8 @@ from upload_prices import router as upload_router
 from admin.routes import router as admin_router
 from basket_history import router as basket_history_router
 from api.upload_image import router as upload_image_router            # manual R2 upload
-from admin.image_gallery import router as image_admin_router          # <-- NEW: image gallery
-from stores import router as stores_router                            # <-- NEW: stores endpoints
+from admin.image_gallery import router as image_admin_router          # /admin/images gallery
+from stores import router as stores_router                            # NEW: /stores endpoints
 
 logger = logging.getLogger("uvicorn.error")
 os.makedirs(IMAGES_DIR, exist_ok=True)
@@ -69,7 +69,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOW_ORIGINS,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
     allow_headers=["Authorization", "Content-Type"],
 )
 
@@ -108,8 +108,8 @@ app.include_router(upload_router)
 app.include_router(admin_router)
 app.include_router(basket_history_router)
 app.include_router(upload_image_router)   # manual R2 upload endpoint
-app.include_router(image_admin_router)    # <-- /admin/images gallery
-app.include_router(stores_router)         # <-- NEW: /stores routes
+app.include_router(image_admin_router)    # /admin/images gallery
+app.include_router(stores_router)         # NEW: /stores routes
 
 # robots.txt + health
 @app.get("/robots.txt", response_class=PlainTextResponse)
@@ -117,7 +117,9 @@ async def robots():
     return (
         "User-agent: *\n"
         "Disallow: /products\n"
+        "Disallow: /products/search\n"
         "Disallow: /search-products\n"
+        "Disallow: /stores\n"
         "Disallow: /compare\n"
         "Disallow: /basket-history\n"
         "Disallow: /api/upload-image\n"
