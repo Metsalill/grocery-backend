@@ -26,94 +26,157 @@ async def list_products(
     limit = min(int(limit), MAX_LIMIT)
     like = f"%{q.strip()}%" if q else "%"
 
-    async with request.app.state.db.acquire() as conn:
-        # ----- primary: group from PRICES -----
-        total = await conn.fetchval(
-            """
-            SELECT COUNT(*) FROM (
-              SELECT 1
-              FROM prices p
-              WHERE LOWER(p.product) LIKE LOWER($1)
-              GROUP BY p.product, COALESCE(p.manufacturer,''), COALESCE(p.amount,'')
-            ) t
-            """,
-            like,
+    # SQL for schema with prices.product (text)
+    SQL_TOTAL_PLAIN = """
+        SELECT COUNT(*) FROM (
+          SELECT 1
+          FROM prices p
+          WHERE LOWER(p.product) LIKE LOWER($1)
+          GROUP BY p.product, COALESCE(p.manufacturer,''), COALESCE(p.amount,'')
+        ) t
+    """
+    SQL_ROWS_PLAIN = """
+        WITH grouped AS (
+          SELECT
+            p.product,
+            COALESCE(p.manufacturer,'') AS manufacturer,
+            COALESCE(p.amount,'')       AS amount,
+            MIN(p.price)                AS min_price,
+            MAX(p.price)                AS max_price,
+            COUNT(*)                    AS store_count,
+            (ARRAY_AGG(p.image_url ORDER BY (p.image_url IS NULL) ASC))[1] AS image_url
+          FROM prices p
+          WHERE LOWER(p.product) LIKE LOWER($1)
+          GROUP BY p.product, COALESCE(p.manufacturer,''), COALESCE(p.amount,'')
         )
+        SELECT *
+        FROM grouped
+        ORDER BY product
+        OFFSET $2
+        LIMIT  $3
+    """
 
-        rows = []
-        if total and total > 0:
-            rows = await conn.fetch(
-                """
-                WITH grouped AS (
-                  SELECT
-                    p.product,
-                    COALESCE(p.manufacturer,'') AS manufacturer,
-                    COALESCE(p.amount,'')       AS amount,
-                    MIN(p.price)                AS min_price,
-                    MAX(p.price)                AS max_price,
-                    COUNT(*)                    AS store_count,
-                    (ARRAY_AGG(p.image_url ORDER BY (p.image_url IS NULL) ASC))[1] AS image_url
-                  FROM prices p
-                  WHERE LOWER(p.product) LIKE LOWER($1)
-                  GROUP BY p.product, COALESCE(p.manufacturer,''), COALESCE(p.amount,'')
-                )
-                SELECT *
-                FROM grouped
-                ORDER BY product
-                OFFSET $2
-                LIMIT  $3
-                """,
-                like, offset, limit,
-            )
-        else:
-            # ----- fallback: surface names from PRODUCTS (no price data) -----
+    # SQL for schema with prices.product_id (join to products for name)
+    SQL_TOTAL_JOIN = """
+        SELECT COUNT(*) FROM (
+          SELECT 1
+          FROM prices p
+          LEFT JOIN products pr ON pr.id = p.product_id
+          WHERE LOWER(COALESCE(pr.product, pr.name, '')) LIKE LOWER($1)
+          GROUP BY
+            COALESCE(pr.product, pr.name, ''),
+            COALESCE(p.manufacturer, pr.manufacturer, ''),
+            COALESCE(p.amount, pr.amount, '')
+        ) t
+    """
+    SQL_ROWS_JOIN = """
+        WITH base AS (
+          SELECT
+            COALESCE(pr.product, pr.name, '') AS product,
+            COALESCE(p.manufacturer, pr.manufacturer, '') AS manufacturer,
+            COALESCE(p.amount, pr.amount, '') AS amount,
+            p.price,
+            p.image_url
+          FROM prices p
+          LEFT JOIN products pr ON pr.id = p.product_id
+          WHERE LOWER(COALESCE(pr.product, pr.name, '')) LIKE LOWER($1)
+        ),
+        grouped AS (
+          SELECT
+            product,
+            manufacturer,
+            amount,
+            MIN(price) AS min_price,
+            MAX(price) AS max_price,
+            COUNT(*)   AS store_count,
+            (ARRAY_AGG(image_url ORDER BY (image_url IS NULL) ASC))[1] AS image_url
+          FROM base
+          GROUP BY product, manufacturer, amount
+        )
+        SELECT *
+        FROM grouped
+        ORDER BY product
+        OFFSET $2
+        LIMIT  $3
+    """
+
+    # Ultimate fallback: show names straight from products (no price rollups)
+    SQL_TOTAL_PRODUCTS_ONLY = """
+        SELECT COUNT(*)
+        FROM products pr
+        WHERE LOWER(COALESCE(pr.product, pr.name, '')) LIKE LOWER($1)
+    """
+    SQL_ROWS_PRODUCTS_ONLY = """
+        SELECT
+          COALESCE(pr.product, pr.name, '') AS product,
+          ''::text AS manufacturer,
+          ''::text AS amount,
+          NULL::float8 AS min_price,
+          NULL::float8 AS max_price,
+          0::int AS store_count,
+          NULL::text AS image_url
+        FROM products pr
+        WHERE LOWER(COALESCE(pr.product, pr.name, '')) LIKE LOWER($1)
+        ORDER BY COALESCE(pr.product, pr.name, '')
+        OFFSET $2
+        LIMIT  $3
+    """
+
+    async with request.app.state.db.acquire() as conn:
+        try:
+            # Try old schema first (prices.product)
+            total = await conn.fetchval(SQL_TOTAL_PLAIN, like)
+            rows = []
+            if total and total > 0:
+                rows = await conn.fetch(SQL_ROWS_PLAIN, like, offset, limit)
+            else:
+                # If no matches there, try the joined path (prices.product_id)
+                total = await conn.fetchval(SQL_TOTAL_JOIN, like)
+                if total and total > 0:
+                    rows = await conn.fetch(SQL_ROWS_JOIN, like, offset, limit)
+                else:
+                    # Finally, surface plain names from products only
+                    total = await conn.fetchval(SQL_TOTAL_PRODUCTS_ONLY, like) or 0
+                    rows = await conn.fetch(SQL_ROWS_PRODUCTS_ONLY, like, offset, limit)
+        except pgerr.UndefinedColumnError:
+            # prices.product doesn't exist -> use joined path
             try:
-                total = await conn.fetchval(
-                    """
-                    SELECT COUNT(*) FROM products p
-                    WHERE LOWER(COALESCE(p.product, p.name)) LIKE LOWER($1)
-                    """,
-                    like,
-                )
-                rows = await conn.fetch(
-                    """
-                    SELECT
-                      COALESCE(p.product, p.name) AS product,
-                      ''::text                    AS manufacturer,
-                      ''::text                    AS amount,
-                      0::float8                   AS min_price,
-                      0::float8                   AS max_price,
-                      0::int                      AS store_count,
-                      NULL::text                  AS image_url
-                    FROM products p
-                    WHERE LOWER(COALESCE(p.product, p.name)) LIKE LOWER($1)
-                    ORDER BY COALESCE(p.product, p.name)
-                    OFFSET $2
-                    LIMIT  $3
-                    """,
-                    like, offset, limit,
-                )
-            except (pgerr.UndefinedTableError, pgerr.UndefinedColumnError):
-                total = 0
+                total = await conn.fetchval(SQL_TOTAL_JOIN, like)
                 rows = []
+                if total and total > 0:
+                    rows = await conn.fetch(SQL_ROWS_JOIN, like, offset, limit)
+                else:
+                    total = await conn.fetchval(SQL_TOTAL_PRODUCTS_ONLY, like) or 0
+                    rows = await conn.fetch(SQL_ROWS_PRODUCTS_ONLY, like, offset, limit)
+            except (pgerr.UndefinedTableError, pgerr.UndefinedColumnError):
+                # products table also missing? return empty
+                total, rows = 0, []
+        except (pgerr.UndefinedTableError, pgerr.UndefinedObjectError):
+            # prices table missing? fall back to products-only if present
+            try:
+                total = await conn.fetchval(SQL_TOTAL_PRODUCTS_ONLY, like) or 0
+                rows = await conn.fetch(SQL_ROWS_PRODUCTS_ONLY, like, offset, limit)
+            except Exception:
+                total, rows = 0, []
+        # any other exception will bubble via middleware
 
     def _fmt(v):
         return format_price(v) if v is not None else None
 
-    items = []
-    for r in rows:
-        d = dict(r)  # <-- convert Record -> dict so .get() is safe
-        items.append({
-            "product": d.get("product", ""),
-            "manufacturer": d.get("manufacturer", ""),
-            "amount": d.get("amount", ""),
-            "min_price": _fmt(d.get("min_price")),
-            "max_price": _fmt(d.get("max_price")),
-            "store_count": d.get("store_count", 0),
-            "image_url": d.get("image_url"),
-        })
+    items = [
+        {
+            "product": r["product"],
+            "manufacturer": r["manufacturer"],
+            "amount": r["amount"],
+            "min_price": _fmt(r.get("min_price")),
+            "max_price": _fmt(r.get("max_price")),
+            "store_count": r["store_count"],
+            "image_url": r.get("image_url"),
+        }
+        for r in rows
+    ]
 
-    return {"total": int(total or 0), "offset": offset, "limit": limit, "items": items}
+    return {"total": total or 0, "offset": offset, "limit": limit, "items": items}
 
 
 # ------------------ Legacy: LIKE suggestions from PRICES ------------------
@@ -128,24 +191,50 @@ async def search_products_legacy(
         raise HTTPException(status_code=400, detail="Query too broad")
     like = f"%{q}%"
 
-    async with request.app.state.db.acquire() as conn:
-        rows = await conn.fetch(
-            """
-            WITH grouped AS (
-              SELECT
-                p.product,
-                (ARRAY_AGG(p.image_url ORDER BY (p.image_url IS NULL) ASC))[1] AS image_url
-              FROM prices p
-              WHERE LOWER(p.product) LIKE LOWER($1)
-              GROUP BY p.product
-            )
-            SELECT product, image_url
-            FROM grouped
-            ORDER BY product
-            LIMIT 10
-            """,
-            like,
+    SQL_SUGGEST_PLAIN = """
+        WITH grouped AS (
+          SELECT
+            p.product,
+            (ARRAY_AGG(p.image_url ORDER BY (p.image_url IS NULL) ASC))[1] AS image_url
+          FROM prices p
+          WHERE LOWER(p.product) LIKE LOWER($1)
+          GROUP BY p.product
         )
+        SELECT product, image_url
+        FROM grouped
+        ORDER BY product
+        LIMIT 10
+    """
+
+    SQL_SUGGEST_JOIN = """
+        WITH base AS (
+          SELECT
+            COALESCE(pr.product, pr.name, '') AS product,
+            p.image_url
+          FROM prices p
+          LEFT JOIN products pr ON pr.id = p.product_id
+          WHERE LOWER(COALESCE(pr.product, pr.name, '')) LIKE LOWER($1)
+        ),
+        grouped AS (
+          SELECT
+            product,
+            (ARRAY_AGG(image_url ORDER BY (image_url IS NULL) ASC))[1] AS image_url
+          FROM base
+          GROUP BY product
+        )
+        SELECT product, image_url
+        FROM grouped
+        ORDER BY product
+        LIMIT 10
+    """
+
+    async with request.app.state.db.acquire() as conn:
+        try:
+            rows = await conn.fetch(SQL_SUGGEST_PLAIN, like)
+        except pgerr.UndefinedColumnError:
+            rows = await conn.fetch(SQL_SUGGEST_JOIN, like)
+        except (pgerr.UndefinedTableError, pgerr.UndefinedObjectError):
+            rows = []  # no prices table at all
 
     return [{"name": r["product"], "image": r["image_url"]} for r in rows]
 
@@ -182,10 +271,12 @@ async def products_search(
     sql_fallback = """
     WITH input AS (SELECT $1::text AS q)
     SELECT name FROM (
-      SELECT DISTINCT p.product AS name
-      FROM prices p, input
-      WHERE p.product ILIKE q || '%'
-         OR p.product ILIKE '%' || q || '%'
+      SELECT DISTINCT COALESCE(pr.product, pr.name) AS name
+      FROM prices p
+      LEFT JOIN products pr ON pr.id = p.product_id
+      , input
+      WHERE COALESCE(pr.product, pr.name) ILIKE q || '%'
+         OR COALESCE(pr.product, pr.name) ILIKE '%' || q || '%'
     ) t
     ORDER BY
       CASE WHEN name ILIKE $1 || '%' THEN 0 ELSE 1 END,
@@ -200,7 +291,11 @@ async def products_search(
                 return [{"id": r["id"], "name": r["name"]} for r in rows]
             fb = await conn.fetch(sql_fallback, term, limit)
             return [{"id": None, "name": r["name"]} for r in fb]
-        except (pgerr.UndefinedTableError, pgerr.UndefinedFunctionError, pgerr.UndefinedObjectError):
+        except (
+            pgerr.UndefinedTableError,
+            pgerr.UndefinedFunctionError,
+            pgerr.UndefinedObjectError,
+        ):
             fb = await conn.fetch(sql_fallback, term, limit)
             return [{"id": None, "name": r["name"]} for r in fb]
         except Exception:
