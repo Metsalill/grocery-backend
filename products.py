@@ -1,32 +1,29 @@
 from fastapi import APIRouter, Request, Query, HTTPException
 from typing import Optional
-from asyncpg import exceptions as pgerr  # for graceful fallbacks
+from asyncpg import exceptions as pgerr
 
-# import from utils.throttle instead of main.py to avoid circular import
 from utils.throttle import throttle
 
 router = APIRouter()
+MAX_LIMIT = 50
 
-MAX_LIMIT = 50  # hard cap to avoid huge pages
 
-
-def format_price(price) -> float:
-    return round(float(price), 2)
+def fmt_price(v):
+    return round(float(v), 2) if v is not None else None
 
 
 @router.get("/products")
-@throttle(limit=120, window=60)  # up to 120 req/min per IP for listing
+@throttle(limit=120, window=60)
 async def list_products(
     request: Request,
     q: Optional[str] = Query("", description="Search by product name"),
     offset: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=200),  # UI hint; hard-capped below
+    limit: int = Query(20, ge=1, le=200),
 ):
-    # enforce server-side cap
     limit = min(int(limit), MAX_LIMIT)
     like = f"%{q.strip()}%" if q else "%"
 
-    # SQL for schema with prices.product (text)
+    # A) Old schema: prices.product (text)
     SQL_TOTAL_PLAIN = """
         SELECT COUNT(*) FROM (
           SELECT 1
@@ -56,7 +53,8 @@ async def list_products(
         LIMIT  $3
     """
 
-    # SQL for schema with prices.product_id (join to products for name)
+    # B) New schema: prices.product_id → join to products for **name only**
+    # (manufacturer/amount come ONLY from prices; products table might not have them)
     SQL_TOTAL_JOIN = """
         SELECT COUNT(*) FROM (
           SELECT 1
@@ -65,16 +63,16 @@ async def list_products(
           WHERE LOWER(COALESCE(pr.product, pr.name, '')) LIKE LOWER($1)
           GROUP BY
             COALESCE(pr.product, pr.name, ''),
-            COALESCE(p.manufacturer, pr.manufacturer, ''),
-            COALESCE(p.amount, pr.amount, '')
+            COALESCE(p.manufacturer, ''),
+            COALESCE(p.amount, '')
         ) t
     """
     SQL_ROWS_JOIN = """
         WITH base AS (
           SELECT
             COALESCE(pr.product, pr.name, '') AS product,
-            COALESCE(p.manufacturer, pr.manufacturer, '') AS manufacturer,
-            COALESCE(p.amount, pr.amount, '') AS amount,
+            COALESCE(p.manufacturer, '')      AS manufacturer,
+            COALESCE(p.amount, '')            AS amount,
             p.price,
             p.image_url
           FROM prices p
@@ -100,7 +98,7 @@ async def list_products(
         LIMIT  $3
     """
 
-    # Ultimate fallback: show names straight from products (no price rollups)
+    # C) Last resort: show names from products (no price rollups)
     SQL_TOTAL_PRODUCTS_ONLY = """
         SELECT COUNT(*)
         FROM products pr
@@ -123,65 +121,52 @@ async def list_products(
     """
 
     async with request.app.state.db.acquire() as conn:
+        # Try A → B → C, catching column/table issues cleanly
         try:
-            # Try old schema first (prices.product)
             total = await conn.fetchval(SQL_TOTAL_PLAIN, like)
             rows = []
             if total and total > 0:
                 rows = await conn.fetch(SQL_ROWS_PLAIN, like, offset, limit)
             else:
-                # If no matches there, try the joined path (prices.product_id)
-                total = await conn.fetchval(SQL_TOTAL_JOIN, like)
-                if total and total > 0:
-                    rows = await conn.fetch(SQL_ROWS_JOIN, like, offset, limit)
-                else:
-                    # Finally, surface plain names from products only
+                try:
+                    total = await conn.fetchval(SQL_TOTAL_JOIN, like)
+                    if total and total > 0:
+                        rows = await conn.fetch(SQL_ROWS_JOIN, like, offset, limit)
+                    else:
+                        total = await conn.fetchval(SQL_TOTAL_PRODUCTS_ONLY, like) or 0
+                        rows = await conn.fetch(SQL_ROWS_PRODUCTS_ONLY, like, offset, limit)
+                except (pgerr.UndefinedTableError, pgerr.UndefinedColumnError):
                     total = await conn.fetchval(SQL_TOTAL_PRODUCTS_ONLY, like) or 0
                     rows = await conn.fetch(SQL_ROWS_PRODUCTS_ONLY, like, offset, limit)
-        except pgerr.UndefinedColumnError:
-            # prices.product doesn't exist -> use joined path
+        except (pgerr.UndefinedTableError, pgerr.UndefinedColumnError):
+            # prices.product path not available → try B / C
             try:
                 total = await conn.fetchval(SQL_TOTAL_JOIN, like)
-                rows = []
                 if total and total > 0:
                     rows = await conn.fetch(SQL_ROWS_JOIN, like, offset, limit)
                 else:
                     total = await conn.fetchval(SQL_TOTAL_PRODUCTS_ONLY, like) or 0
                     rows = await conn.fetch(SQL_ROWS_PRODUCTS_ONLY, like, offset, limit)
             except (pgerr.UndefinedTableError, pgerr.UndefinedColumnError):
-                # products table also missing? return empty
-                total, rows = 0, []
-        except (pgerr.UndefinedTableError, pgerr.UndefinedObjectError):
-            # prices table missing? fall back to products-only if present
-            try:
                 total = await conn.fetchval(SQL_TOTAL_PRODUCTS_ONLY, like) or 0
                 rows = await conn.fetch(SQL_ROWS_PRODUCTS_ONLY, like, offset, limit)
-            except Exception:
-                total, rows = 0, []
-        # any other exception will bubble via middleware
 
-    def _fmt(v):
-        return format_price(v) if v is not None else None
-
-    items = [
-        {
-            "product": r["product"],
-            "manufacturer": r["manufacturer"],
-            "amount": r["amount"],
-            "min_price": _fmt(r.get("min_price")),
-            "max_price": _fmt(r.get("max_price")),
-            "store_count": r["store_count"],
-            "image_url": r.get("image_url"),
-        }
-        for r in rows
-    ]
+    items = [{
+        "product": r["product"],
+        "manufacturer": r["manufacturer"],
+        "amount": r["amount"],
+        "min_price": fmt_price(r.get("min_price")),
+        "max_price": fmt_price(r.get("max_price")),
+        "store_count": r["store_count"],
+        "image_url": r.get("image_url"),
+    } for r in rows]
 
     return {"total": total or 0, "offset": offset, "limit": limit, "items": items}
 
 
-# ------------------ Legacy: LIKE suggestions from PRICES ------------------
+# ---- Legacy suggestions (now also safe for product_id schema) ----
 @router.get("/search-products")
-@throttle(limit=30, window=60)  # tighter: search is a hot target
+@throttle(limit=30, window=60)
 async def search_products_legacy(
     request: Request,
     query: str = Query(..., min_length=2),
@@ -205,7 +190,6 @@ async def search_products_legacy(
         ORDER BY product
         LIMIT 10
     """
-
     SQL_SUGGEST_JOIN = """
         WITH base AS (
           SELECT
@@ -234,12 +218,12 @@ async def search_products_legacy(
         except pgerr.UndefinedColumnError:
             rows = await conn.fetch(SQL_SUGGEST_JOIN, like)
         except (pgerr.UndefinedTableError, pgerr.UndefinedObjectError):
-            rows = []  # no prices table at all
+            rows = []
 
     return [{"name": r["product"], "image": r["image_url"]} for r in rows]
 
 
-# ------------------ NEW: Trigram + prefix autocomplete ------------------
+# ---- Trigram autocomplete (unchanged; safe fallbacks) ----
 @router.get("/products/search")
 @throttle(limit=60, window=60)
 async def products_search(
