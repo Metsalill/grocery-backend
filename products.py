@@ -14,23 +14,6 @@ def format_price(price) -> float:
     return round(float(price), 2)
 
 
-# ---------- helpers: discover actual column names on a table ----------
-async def _columns(conn, table: str) -> set[str]:
-    rows = await conn.fetch("""
-        SELECT column_name
-        FROM information_schema.columns
-        WHERE table_schema='public' AND table_name=$1
-    """, table)
-    return {r["column_name"] for r in rows}
-
-
-def _pick(cols: set[str], *candidates: str) -> Optional[str]:
-    for c in candidates:
-        if c in cols:
-            return c
-    return None
-
-
 @router.get("/products")
 @throttle(limit=120, window=60)  # up to 120 req/min per IP for listing
 async def list_products(
@@ -44,186 +27,193 @@ async def list_products(
     like = f"%{q.strip()}%" if q else "%"
 
     async with request.app.state.db.acquire() as conn:
-        # discover actual column names on prices
-        cols = await _columns(conn, "prices")
-        name_col = _pick(cols, "product", "name", "toode")
-        if not name_col:
-            # cannot operate without a name column
-            return {"total": 0, "offset": offset, "limit": limit, "items": []}
-
-        brand_col = _pick(cols, "manufacturer", "brand", "tootja")
-        amount_col = _pick(cols, "amount", "size_text", "kogus")
-        image_col = _pick(cols, "image_url", "image", "img_url", "pilt")
-
-        # build expressions safely (only from discovered identifiers)
-        brand_expr = f"COALESCE(p.{brand_col}, '')" if brand_col else "''"
-        amount_expr = f"COALESCE(p.{amount_col}, '')" if amount_col else "''"
-        image_expr = (
-            f"(ARRAY_AGG(p.{image_col} ORDER BY (p.{image_col} IS NULL) ASC))[1]"
-            if image_col else "NULL"
-        )
-
-        total_sql = f"""
+        # ----- primary: group from PRICES -----
+        total = await conn.fetchval(
+            """
             SELECT COUNT(*) FROM (
               SELECT 1
               FROM prices p
-              WHERE LOWER(p.{name_col}) LIKE LOWER($1)
-              GROUP BY p.{name_col}, {brand_expr}, {amount_expr}
+              WHERE LOWER(p.product) LIKE LOWER($1)
+              GROUP BY p.product, COALESCE(p.manufacturer,''), COALESCE(p.amount,'')
             ) t
-        """
-        total = await conn.fetchval(total_sql, like)
+            """,
+            like,
+        )
 
-        page_sql = f"""
-            WITH grouped AS (
-              SELECT
-                p.{name_col} AS product,
-                {brand_expr}  AS manufacturer,
-                {amount_expr} AS amount,
-                MIN(p.price)  AS min_price,
-                MAX(p.price)  AS max_price,
-                COUNT(*)      AS store_count,
-                {image_expr}  AS image_url
-              FROM prices p
-              WHERE LOWER(p.{name_col}) LIKE LOWER($1)
-              GROUP BY p.{name_col}, {brand_expr}, {amount_expr}
+        rows = []
+        if total and total > 0:
+            rows = await conn.fetch(
+                """
+                WITH grouped AS (
+                  SELECT
+                    p.product,
+                    COALESCE(p.manufacturer,'') AS manufacturer,
+                    COALESCE(p.amount,'')       AS amount,
+                    MIN(p.price)                AS min_price,
+                    MAX(p.price)                AS max_price,
+                    COUNT(*)                    AS store_count,
+                    (ARRAY_AGG(p.image_url ORDER BY (p.image_url IS NULL) ASC))[1] AS image_url
+                  FROM prices p
+                  WHERE LOWER(p.product) LIKE LOWER($1)
+                  GROUP BY p.product, COALESCE(p.manufacturer,''), COALESCE(p.amount,'')
+                )
+                SELECT *
+                FROM grouped
+                ORDER BY product
+                OFFSET $2
+                LIMIT  $3
+                """,
+                like,
+                offset,
+                limit,
             )
-            SELECT *
-            FROM grouped
-            ORDER BY product
-            OFFSET $2
-            LIMIT  $3
-        """
-        rows = await conn.fetch(page_sql, like, offset, limit)
+        else:
+            # ----- fallback: surface names from PRODUCTS (no price data) -----
+            try:
+                # count from products
+                total = await conn.fetchval(
+                    """
+                    SELECT COUNT(*) FROM products p
+                    WHERE LOWER(COALESCE(p.product, p.name)) LIKE LOWER($1)
+                    """,
+                    like,
+                )
 
-    items = [{
-        "product": r["product"],
-        "manufacturer": r["manufacturer"],
-        "amount": r["amount"],
-        "min_price": format_price(r["min_price"]),
-        "max_price": format_price(r["max_price"]),
-        "store_count": r["store_count"],
-        "image_url": r["image_url"],
-    } for r in rows]
+                rows = await conn.fetch(
+                    """
+                    SELECT
+                      COALESCE(p.product, p.name) AS product,
+                      ''::text                    AS manufacturer,
+                      ''::text                    AS amount,
+                      0::float8                   AS min_price,
+                      0::float8                   AS max_price,
+                      0::int                      AS store_count,
+                      NULL::text                  AS image_url
+                    FROM products p
+                    WHERE LOWER(COALESCE(p.product, p.name)) LIKE LOWER($1)
+                    ORDER BY COALESCE(p.product, p.name)
+                    OFFSET $2
+                    LIMIT  $3
+                    """,
+                    like,
+                    offset,
+                    limit,
+                )
+            except (pgerr.UndefinedTableError, pgerr.UndefinedColumnError):
+                # If products table doesn't exist, just return empty list
+                total = 0
+                rows = []
 
-    return {
-        "total": total,
-        "offset": offset,
-        "limit": limit,
-        "items": items,
-    }
+    def _fmt(v):
+        return format_price(v) if v is not None else None
+
+    items = [
+        {
+            "product": r["product"],
+            "manufacturer": r["manufacturer"],
+            "amount": r["amount"],
+            "min_price": _fmt(r.get("min_price")),
+            "max_price": _fmt(r.get("max_price")),
+            "store_count": r["store_count"],
+            "image_url": r.get("image_url"),
+        }
+        for r in rows
+    ]
+
+    return {"total": total or 0, "offset": offset, "limit": limit, "items": items}
 
 
+# ------------------ Legacy: LIKE suggestions from PRICES ------------------
 @router.get("/search-products")
 @throttle(limit=30, window=60)  # tighter: search is a hot target
 async def search_products_legacy(
     request: Request,
-    query: str = Query(..., min_length=2)  # enforce min length
+    query: str = Query(..., min_length=2),
 ):
-    """
-    Legacy LIKE-based search for quick suggestions. Kept for back-compat.
-    """
     q = query.strip()
-    # deny wildcard-only or junk queries that tend to be used by scrapers
     if not q or set(q) <= {"%", "*"}:
         raise HTTPException(status_code=400, detail="Query too broad")
+    like = f"%{q}%"
 
     async with request.app.state.db.acquire() as conn:
-        cols = await _columns(conn, "prices")
-        name_col = _pick(cols, "product", "name", "toode") or "name"
-        image_col = _pick(cols, "image_url", "image", "img_url", "pilt")
-
-        image_expr = (
-            f"(ARRAY_AGG(p.{image_col} ORDER BY (p.{image_col} IS NULL) ASC))[1]"
-            if image_col else "NULL"
-        )
-        like = f"%{q}%"
-
-        sql = f"""
+        rows = await conn.fetch(
+            """
             WITH grouped AS (
               SELECT
-                p.{name_col} AS product,
-                {image_expr} AS image_url
+                p.product,
+                (ARRAY_AGG(p.image_url ORDER BY (p.image_url IS NULL) ASC))[1] AS image_url
               FROM prices p
-              WHERE LOWER(p.{name_col}) LIKE LOWER($1)
-              GROUP BY p.{name_col}
+              WHERE LOWER(p.product) LIKE LOWER($1)
+              GROUP BY p.product
             )
             SELECT product, image_url
             FROM grouped
             ORDER BY product
             LIMIT 10
-        """
-        rows = await conn.fetch(sql, like)
+            """,
+            like,
+        )
 
     return [{"name": r["product"], "image": r["image_url"]} for r in rows]
 
 
 # ------------------ NEW: Trigram + prefix autocomplete ------------------
-
 @router.get("/products/search")
-@throttle(limit=60, window=60)  # balanced; autocomplete gets frequent hits
+@throttle(limit=60, window=60)
 async def products_search(
     request: Request,
     q: str = Query(..., min_length=1, max_length=64, description="Search text"),
     limit: int = Query(10, ge=1, le=50),
 ):
-    """
-    Autocomplete using pg_trgm similarity + prefix boost.
-    Prefers the `products` table (name field); falls back to a LIKE search on `prices`
-    if `products` or pg_trgm isn't available.
-    Returns [{id, name}] (id may be null on fallback).
-    """
     term = q.strip()
     if not term:
         return []
 
-    # Primary: products table with trigram on 'name'
     sql_products = """
     WITH input AS (SELECT $1::text AS q)
-    SELECT p.id, p.name AS name
+    SELECT
+      p.id,
+      COALESCE(p.product, p.name) AS name
     FROM products p, input
-    WHERE p.name ILIKE q || '%'
-       OR p.name % q
+    WHERE
+          COALESCE(p.product, p.name) ILIKE q || '%'
+       OR COALESCE(p.product, p.name) % q
+       OR COALESCE(p.product, p.name) ILIKE '%' || q || '%'
     ORDER BY
-      CASE WHEN p.name ILIKE q || '%' THEN 0 ELSE 1 END,
-      similarity(p.name, q) DESC,
-      p.name ASC
+      CASE WHEN COALESCE(p.product, p.name) ILIKE q || '%' THEN 0 ELSE 1 END,
+      similarity(COALESCE(p.product, p.name), q) DESC,
+      COALESCE(p.product, p.name) ASC
+    LIMIT $2
+    """
+
+    sql_fallback = """
+    WITH input AS (SELECT $1::text AS q)
+    SELECT name FROM (
+      SELECT DISTINCT p.product AS name
+      FROM prices p, input
+      WHERE p.product ILIKE q || '%'
+         OR p.product ILIKE '%' || q || '%'
+    ) t
+    ORDER BY
+      CASE WHEN name ILIKE $1 || '%' THEN 0 ELSE 1 END,
+      name ASC
     LIMIT $2
     """
 
     async with request.app.state.db.acquire() as conn:
-        # Fallback needs the correct "name" column from prices
-        cols = await _columns(conn, "prices")
-        name_col = _pick(cols, "product", "name", "toode") or "name"
-
-        sql_fallback = f"""
-        WITH input AS (SELECT $1::text AS q)
-        SELECT name FROM (
-          SELECT DISTINCT p.{name_col} AS name
-          FROM prices p, input
-          WHERE p.{name_col} ILIKE q || '%'
-             OR p.{name_col} ILIKE '%' || q || '%'
-        ) t
-        ORDER BY
-          CASE WHEN name ILIKE $1 || '%' THEN 0 ELSE 1 END,
-          name ASC
-        LIMIT $2
-        """
-
         try:
             rows = await conn.fetch(sql_products, term, limit)
             if rows:
                 return [{"id": r["id"], "name": r["name"]} for r in rows]
-            # no hits? fall back to LIKE to be generous
             fb = await conn.fetch(sql_fallback, term, limit)
             return [{"id": None, "name": r["name"]} for r in fb]
-        except (pgerr.UndefinedTableError,
-                pgerr.UndefinedFunctionError,
-                pgerr.UndefinedObjectError,
-                pgerr.UndefinedColumnError):
-            # products table or pg_trgm might be missing in some envs
+        except (
+            pgerr.UndefinedTableError,
+            pgerr.UndefinedFunctionError,
+            pgerr.UndefinedObjectError,
+        ):
             fb = await conn.fetch(sql_fallback, term, limit)
             return [{"id": None, "name": r["name"]} for r in fb]
         except Exception:
-            # last-resort generic fallback
             fb = await conn.fetch(sql_fallback, term, limit)
             return [{"id": None, "name": r["name"]} for r in fb]
