@@ -10,9 +10,7 @@ router = APIRouter()
 MAX_LIMIT = 50  # hard cap to avoid huge pages
 
 
-def format_price(price) -> Optional[float]:
-    if price is None:
-        return None
+def format_price(price) -> float:
     return round(float(price), 2)
 
 
@@ -65,58 +63,55 @@ async def list_products(
                 OFFSET $2
                 LIMIT  $3
                 """,
-                like,
-                offset,
-                limit,
+                like, offset, limit,
             )
         else:
             # ----- fallback: surface names from PRODUCTS (no price data) -----
             try:
-                # count from products
                 total = await conn.fetchval(
                     """
                     SELECT COUNT(*) FROM products p
-                    WHERE LOWER(COALESCE(p.product, p.name, p.product_name)) LIKE LOWER($1)
+                    WHERE LOWER(COALESCE(p.product, p.name)) LIKE LOWER($1)
                     """,
                     like,
                 )
-
                 rows = await conn.fetch(
                     """
                     SELECT
-                      COALESCE(p.product, p.name, p.product_name) AS product,
+                      COALESCE(p.product, p.name) AS product,
                       ''::text                    AS manufacturer,
                       ''::text                    AS amount,
-                      NULL::numeric               AS min_price,
-                      NULL::numeric               AS max_price,
+                      0::float8                   AS min_price,
+                      0::float8                   AS max_price,
                       0::int                      AS store_count,
                       NULL::text                  AS image_url
                     FROM products p
-                    WHERE LOWER(COALESCE(p.product, p.name, p.product_name)) LIKE LOWER($1)
-                    ORDER BY COALESCE(p.product, p.name, p.product_name)
+                    WHERE LOWER(COALESCE(p.product, p.name)) LIKE LOWER($1)
+                    ORDER BY COALESCE(p.product, p.name)
                     OFFSET $2
                     LIMIT  $3
                     """,
-                    like,
-                    offset,
-                    limit,
+                    like, offset, limit,
                 )
             except (pgerr.UndefinedTableError, pgerr.UndefinedColumnError):
                 total = 0
                 rows = []
 
-    items = [
-        {
-            "product": r["product"],
-            "manufacturer": r["manufacturer"],
-            "amount": r["amount"],
-            "min_price": format_price(r["min_price"]),
-            "max_price": format_price(r["max_price"]),
-            "store_count": r["store_count"],
-            "image_url": r["image_url"],
-        }
-        for r in rows
-    ]
+    def _fmt(v):
+        return format_price(v) if v is not None else None
+
+    items = []
+    for r in rows:
+        d = dict(r)  # <-- convert Record -> dict so .get() is safe
+        items.append({
+            "product": d.get("product", ""),
+            "manufacturer": d.get("manufacturer", ""),
+            "amount": d.get("amount", ""),
+            "min_price": _fmt(d.get("min_price")),
+            "max_price": _fmt(d.get("max_price")),
+            "store_count": d.get("store_count", 0),
+            "image_url": d.get("image_url"),
+        })
 
     return {"total": int(total or 0), "offset": offset, "limit": limit, "items": items}
 
@@ -171,16 +166,16 @@ async def products_search(
     WITH input AS (SELECT $1::text AS q)
     SELECT
       p.id,
-      COALESCE(p.product, p.name, p.product_name) AS name
+      COALESCE(p.product, p.name) AS name
     FROM products p, input
     WHERE
-          COALESCE(p.product, p.name, p.product_name) ILIKE q || '%'
-       OR COALESCE(p.product, p.name, p.product_name) % q
-       OR COALESCE(p.product, p.name, p.product_name) ILIKE '%' || q || '%'
+          COALESCE(p.product, p.name) ILIKE q || '%'
+       OR COALESCE(p.product, p.name) % q
+       OR COALESCE(p.product, p.name) ILIKE '%' || q || '%'
     ORDER BY
-      CASE WHEN COALESCE(p.product, p.name, p.product_name) ILIKE q || '%' THEN 0 ELSE 1 END,
-      similarity(COALESCE(p.product, p.name, p.product_name), q) DESC,
-      COALESCE(p.product, p.name, p.product_name) ASC
+      CASE WHEN COALESCE(p.product, p.name) ILIKE q || '%' THEN 0 ELSE 1 END,
+      similarity(COALESCE(p.product, p.name), q) DESC,
+      COALESCE(p.product, p.name) ASC
     LIMIT $2
     """
 
@@ -205,11 +200,7 @@ async def products_search(
                 return [{"id": r["id"], "name": r["name"]} for r in rows]
             fb = await conn.fetch(sql_fallback, term, limit)
             return [{"id": None, "name": r["name"]} for r in fb]
-        except (
-            pgerr.UndefinedTableError,
-            pgerr.UndefinedFunctionError,
-            pgerr.UndefinedObjectError,
-        ):
+        except (pgerr.UndefinedTableError, pgerr.UndefinedFunctionError, pgerr.UndefinedObjectError):
             fb = await conn.fetch(sql_fallback, term, limit)
             return [{"id": None, "name": r["name"]} for r in fb]
         except Exception:
