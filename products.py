@@ -128,17 +128,21 @@ async def products_search(
     if not term:
         return []
 
-    # Primary: products table with trigram
+    # Primary: products table with trigram (handle either "product" or "name" column)
     sql_products = """
     WITH input AS (SELECT $1::text AS q)
-    SELECT p.id, p.product AS name
+    SELECT
+      p.id,
+      COALESCE(p.product, p.name) AS name
     FROM products p, input
-    WHERE p.product ILIKE q || '%'         -- prefix boost
-       OR p.product % q                    -- trigram similarity (pg_trgm)
+    WHERE
+          COALESCE(p.product, p.name) ILIKE q || '%'       -- prefix boost
+       OR COALESCE(p.product, p.name) % q                  -- trigram similarity (pg_trgm)
+       OR COALESCE(p.product, p.name) ILIKE '%' || q || '%' -- broad contains
     ORDER BY
-      CASE WHEN p.product ILIKE q || '%' THEN 0 ELSE 1 END,
-      similarity(p.product, q) DESC,
-      p.product ASC
+      CASE WHEN COALESCE(p.product, p.name) ILIKE q || '%' THEN 0 ELSE 1 END,
+      similarity(COALESCE(p.product, p.name), q) DESC,
+      COALESCE(p.product, p.name) ASC
     LIMIT $2
     """
 
@@ -162,7 +166,7 @@ async def products_search(
             rows = await conn.fetch(sql_products, term, limit)
             if rows:
                 return [{"id": r["id"], "name": r["name"]} for r in rows]
-            # no hits? fall back to LIKE to be generous
+            # No hits? be generous and try LIKE on prices
             fb = await conn.fetch(sql_fallback, term, limit)
             return [{"id": None, "name": r["name"]} for r in fb]
         except (pgerr.UndefinedTableError, pgerr.UndefinedFunctionError, pgerr.UndefinedObjectError):
