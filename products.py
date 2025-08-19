@@ -9,8 +9,27 @@ router = APIRouter()
 
 MAX_LIMIT = 50  # hard cap to avoid huge pages
 
+
 def format_price(price) -> float:
     return round(float(price), 2)
+
+
+# ---------- helpers: discover actual column names on a table ----------
+async def _columns(conn, table: str) -> set[str]:
+    rows = await conn.fetch("""
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_schema='public' AND table_name=$1
+    """, table)
+    return {r["column_name"] for r in rows}
+
+
+def _pick(cols: set[str], *candidates: str) -> Optional[str]:
+    for c in candidates:
+        if c in cols:
+            return c
+    return None
+
 
 @router.get("/products")
 @throttle(limit=120, window=60)  # up to 120 req/min per IP for listing
@@ -22,41 +41,59 @@ async def list_products(
 ):
     # enforce server-side cap
     limit = min(int(limit), MAX_LIMIT)
-
     like = f"%{q.strip()}%" if q else "%"
 
     async with request.app.state.db.acquire() as conn:
-        # total distinct products (for pagination UI)
-        total = await conn.fetchval("""
+        # discover actual column names on prices
+        cols = await _columns(conn, "prices")
+        name_col = _pick(cols, "product", "name", "toode")
+        if not name_col:
+            # cannot operate without a name column
+            return {"total": 0, "offset": offset, "limit": limit, "items": []}
+
+        brand_col = _pick(cols, "manufacturer", "brand", "tootja")
+        amount_col = _pick(cols, "amount", "size_text", "kogus")
+        image_col = _pick(cols, "image_url", "image", "img_url", "pilt")
+
+        # build expressions safely (only from discovered identifiers)
+        brand_expr = f"COALESCE(p.{brand_col}, '')" if brand_col else "''"
+        amount_expr = f"COALESCE(p.{amount_col}, '')" if amount_col else "''"
+        image_expr = (
+            f"(ARRAY_AGG(p.{image_col} ORDER BY (p.{image_col} IS NULL) ASC))[1]"
+            if image_col else "NULL"
+        )
+
+        total_sql = f"""
             SELECT COUNT(*) FROM (
               SELECT 1
               FROM prices p
-              WHERE LOWER(p.product) LIKE LOWER($1)
-              GROUP BY p.product, COALESCE(p.manufacturer,''), COALESCE(p.amount,'')
+              WHERE LOWER(p.{name_col}) LIKE LOWER($1)
+              GROUP BY p.{name_col}, {brand_expr}, {amount_expr}
             ) t
-        """, like)
+        """
+        total = await conn.fetchval(total_sql, like)
 
-        # page of grouped products
-        rows = await conn.fetch("""
+        page_sql = f"""
             WITH grouped AS (
               SELECT
-                p.product,
-                COALESCE(p.manufacturer,'') AS manufacturer,
-                COALESCE(p.amount,'')       AS amount,
-                MIN(p.price)                AS min_price,
-                MAX(p.price)                AS max_price,
-                COUNT(*)                    AS store_count,
-                (ARRAY_AGG(p.image_url ORDER BY (p.image_url IS NULL) ASC))[1] AS image_url
+                p.{name_col} AS product,
+                {brand_expr}  AS manufacturer,
+                {amount_expr} AS amount,
+                MIN(p.price)  AS min_price,
+                MAX(p.price)  AS max_price,
+                COUNT(*)      AS store_count,
+                {image_expr}  AS image_url
               FROM prices p
-              WHERE LOWER(p.product) LIKE LOWER($1)
-              GROUP BY p.product, COALESCE(p.manufacturer,''), COALESCE(p.amount,'')
+              WHERE LOWER(p.{name_col}) LIKE LOWER($1)
+              GROUP BY p.{name_col}, {brand_expr}, {amount_expr}
             )
             SELECT *
             FROM grouped
             ORDER BY product
             OFFSET $2
             LIMIT  $3
-        """, like, offset, limit)
+        """
+        rows = await conn.fetch(page_sql, like, offset, limit)
 
     items = [{
         "product": r["product"],
@@ -75,6 +112,7 @@ async def list_products(
         "items": items,
     }
 
+
 @router.get("/search-products")
 @throttle(limit=30, window=60)  # tighter: search is a hot target
 async def search_products_legacy(
@@ -89,25 +127,35 @@ async def search_products_legacy(
     if not q or set(q) <= {"%", "*"}:
         raise HTTPException(status_code=400, detail="Query too broad")
 
-    like = f"%{q}%"
-
     async with request.app.state.db.acquire() as conn:
-        rows = await conn.fetch("""
+        cols = await _columns(conn, "prices")
+        name_col = _pick(cols, "product", "name", "toode") or "name"
+        image_col = _pick(cols, "image_url", "image", "img_url", "pilt")
+
+        image_expr = (
+            f"(ARRAY_AGG(p.{image_col} ORDER BY (p.{image_col} IS NULL) ASC))[1]"
+            if image_col else "NULL"
+        )
+        like = f"%{q}%"
+
+        sql = f"""
             WITH grouped AS (
               SELECT
-                p.product,
-                (ARRAY_AGG(p.image_url ORDER BY (p.image_url IS NULL) ASC))[1] AS image_url
+                p.{name_col} AS product,
+                {image_expr} AS image_url
               FROM prices p
-              WHERE LOWER(p.product) LIKE LOWER($1)
-              GROUP BY p.product
+              WHERE LOWER(p.{name_col}) LIKE LOWER($1)
+              GROUP BY p.{name_col}
             )
             SELECT product, image_url
             FROM grouped
             ORDER BY product
             LIMIT 10
-        """, like)
+        """
+        rows = await conn.fetch(sql, like)
 
     return [{"name": r["product"], "image": r["image_url"]} for r in rows]
+
 
 # ------------------ NEW: Trigram + prefix autocomplete ------------------
 
@@ -120,7 +168,7 @@ async def products_search(
 ):
     """
     Autocomplete using pg_trgm similarity + prefix boost.
-    Prefers the `products` table; falls back to a LIKE search on `prices`
+    Prefers the `products` table (name field); falls back to a LIKE search on `prices`
     if `products` or pg_trgm isn't available.
     Returns [{id, name}] (id may be null on fallback).
     """
@@ -128,48 +176,50 @@ async def products_search(
     if not term:
         return []
 
-    # Primary: products table with trigram (handle either "product" or "name" column)
+    # Primary: products table with trigram on 'name'
     sql_products = """
     WITH input AS (SELECT $1::text AS q)
-    SELECT
-      p.id,
-      COALESCE(p.product, p.name) AS name
+    SELECT p.id, p.name AS name
     FROM products p, input
-    WHERE
-          COALESCE(p.product, p.name) ILIKE q || '%'       -- prefix boost
-       OR COALESCE(p.product, p.name) % q                  -- trigram similarity (pg_trgm)
-       OR COALESCE(p.product, p.name) ILIKE '%' || q || '%' -- broad contains
+    WHERE p.name ILIKE q || '%'
+       OR p.name % q
     ORDER BY
-      CASE WHEN COALESCE(p.product, p.name) ILIKE q || '%' THEN 0 ELSE 1 END,
-      similarity(COALESCE(p.product, p.name), q) DESC,
-      COALESCE(p.product, p.name) ASC
-    LIMIT $2
-    """
-
-    # Fallback: DISTINCT names from prices with LIKE only
-    sql_fallback = """
-    WITH input AS (SELECT $1::text AS q)
-    SELECT name FROM (
-      SELECT DISTINCT p.product AS name
-      FROM prices p, input
-      WHERE p.product ILIKE q || '%'
-         OR p.product ILIKE '%' || q || '%'
-    ) t
-    ORDER BY
-      CASE WHEN name ILIKE $1 || '%' THEN 0 ELSE 1 END,
-      name ASC
+      CASE WHEN p.name ILIKE q || '%' THEN 0 ELSE 1 END,
+      similarity(p.name, q) DESC,
+      p.name ASC
     LIMIT $2
     """
 
     async with request.app.state.db.acquire() as conn:
+        # Fallback needs the correct "name" column from prices
+        cols = await _columns(conn, "prices")
+        name_col = _pick(cols, "product", "name", "toode") or "name"
+
+        sql_fallback = f"""
+        WITH input AS (SELECT $1::text AS q)
+        SELECT name FROM (
+          SELECT DISTINCT p.{name_col} AS name
+          FROM prices p, input
+          WHERE p.{name_col} ILIKE q || '%'
+             OR p.{name_col} ILIKE '%' || q || '%'
+        ) t
+        ORDER BY
+          CASE WHEN name ILIKE $1 || '%' THEN 0 ELSE 1 END,
+          name ASC
+        LIMIT $2
+        """
+
         try:
             rows = await conn.fetch(sql_products, term, limit)
             if rows:
                 return [{"id": r["id"], "name": r["name"]} for r in rows]
-            # No hits? be generous and try LIKE on prices
+            # no hits? fall back to LIKE to be generous
             fb = await conn.fetch(sql_fallback, term, limit)
             return [{"id": None, "name": r["name"]} for r in fb]
-        except (pgerr.UndefinedTableError, pgerr.UndefinedFunctionError, pgerr.UndefinedObjectError):
+        except (pgerr.UndefinedTableError,
+                pgerr.UndefinedFunctionError,
+                pgerr.UndefinedObjectError,
+                pgerr.UndefinedColumnError):
             # products table or pg_trgm might be missing in some envs
             fb = await conn.fetch(sql_fallback, term, limit)
             return [{"id": None, "name": r["name"]} for r in fb]
