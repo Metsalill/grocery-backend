@@ -10,7 +10,9 @@ router = APIRouter()
 MAX_LIMIT = 50  # hard cap to avoid huge pages
 
 
-def format_price(price) -> float:
+def format_price(price) -> Optional[float]:
+    if price is None:
+        return None
     return round(float(price), 2)
 
 
@@ -74,7 +76,7 @@ async def list_products(
                 total = await conn.fetchval(
                     """
                     SELECT COUNT(*) FROM products p
-                    WHERE LOWER(COALESCE(p.product, p.name)) LIKE LOWER($1)
+                    WHERE LOWER(COALESCE(p.product, p.name, p.product_name)) LIKE LOWER($1)
                     """,
                     like,
                 )
@@ -82,16 +84,16 @@ async def list_products(
                 rows = await conn.fetch(
                     """
                     SELECT
-                      COALESCE(p.product, p.name) AS product,
+                      COALESCE(p.product, p.name, p.product_name) AS product,
                       ''::text                    AS manufacturer,
                       ''::text                    AS amount,
-                      0::float8                   AS min_price,
-                      0::float8                   AS max_price,
+                      NULL::numeric               AS min_price,
+                      NULL::numeric               AS max_price,
                       0::int                      AS store_count,
                       NULL::text                  AS image_url
                     FROM products p
-                    WHERE LOWER(COALESCE(p.product, p.name)) LIKE LOWER($1)
-                    ORDER BY COALESCE(p.product, p.name)
+                    WHERE LOWER(COALESCE(p.product, p.name, p.product_name)) LIKE LOWER($1)
+                    ORDER BY COALESCE(p.product, p.name, p.product_name)
                     OFFSET $2
                     LIMIT  $3
                     """,
@@ -100,27 +102,23 @@ async def list_products(
                     limit,
                 )
             except (pgerr.UndefinedTableError, pgerr.UndefinedColumnError):
-                # If products table doesn't exist, just return empty list
                 total = 0
                 rows = []
-
-    def _fmt(v):
-        return format_price(v) if v is not None else None
 
     items = [
         {
             "product": r["product"],
             "manufacturer": r["manufacturer"],
             "amount": r["amount"],
-            "min_price": _fmt(r.get("min_price")),
-            "max_price": _fmt(r.get("max_price")),
+            "min_price": format_price(r["min_price"]),
+            "max_price": format_price(r["max_price"]),
             "store_count": r["store_count"],
-            "image_url": r.get("image_url"),
+            "image_url": r["image_url"],
         }
         for r in rows
     ]
 
-    return {"total": total or 0, "offset": offset, "limit": limit, "items": items}
+    return {"total": int(total or 0), "offset": offset, "limit": limit, "items": items}
 
 
 # ------------------ Legacy: LIKE suggestions from PRICES ------------------
@@ -173,16 +171,16 @@ async def products_search(
     WITH input AS (SELECT $1::text AS q)
     SELECT
       p.id,
-      COALESCE(p.product, p.name) AS name
+      COALESCE(p.product, p.name, p.product_name) AS name
     FROM products p, input
     WHERE
-          COALESCE(p.product, p.name) ILIKE q || '%'
-       OR COALESCE(p.product, p.name) % q
-       OR COALESCE(p.product, p.name) ILIKE '%' || q || '%'
+          COALESCE(p.product, p.name, p.product_name) ILIKE q || '%'
+       OR COALESCE(p.product, p.name, p.product_name) % q
+       OR COALESCE(p.product, p.name, p.product_name) ILIKE '%' || q || '%'
     ORDER BY
-      CASE WHEN COALESCE(p.product, p.name) ILIKE q || '%' THEN 0 ELSE 1 END,
-      similarity(COALESCE(p.product, p.name), q) DESC,
-      COALESCE(p.product, p.name) ASC
+      CASE WHEN COALESCE(p.product, p.name, p.product_name) ILIKE q || '%' THEN 0 ELSE 1 END,
+      similarity(COALESCE(p.product, p.name, p.product_name), q) DESC,
+      COALESCE(p.product, p.name, p.product_name) ASC
     LIMIT $2
     """
 
