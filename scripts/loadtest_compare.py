@@ -2,7 +2,6 @@
 import argparse, asyncio, json, random, time
 import httpx
 from collections import Counter
-from statistics import median
 
 DEFAULT_PRODUCTS = [
     "Milk","Eggs","Bread","Butter","Cheese","Sugar","Salt","Flour",
@@ -13,8 +12,11 @@ def build_basket(all_products, n_items):
     picks = random.sample(all_products, k=min(n_items, len(all_products)))
     return [{"product": p, "quantity": random.randint(1, 2)} for p in picks]
 
-async def one_request(client, url, lat, lon, radius, items_per_req, all_products,
-                      headers, results, status_counts, err_types, err_samples, timeout_s):
+async def one_request(
+    client, url, lat, lon, radius, items_per_req, all_products,
+    headers, results, status_counts, exc_types, exc_samples,
+    http_err_counts, http_err_samples, timeout_s
+):
     payload = {
         "grocery_list": {"items": build_basket(all_products, items_per_req)},
         "lat": lat, "lon": lon, "radius_km": radius
@@ -26,15 +28,21 @@ async def one_request(client, url, lat, lon, radius, items_per_req, all_products
         code = r.status_code
         results.append((code, dt))
         status_counts[code] = status_counts.get(code, 0) + 1
+
+        if code != 200:
+            http_err_counts[code] += 1
+            if code not in http_err_samples:
+                # store a small snippet so logs stay readable
+                body = r.text
+                http_err_samples[code] = body[:500]
     except Exception as e:
         dt = (time.perf_counter() - t0) * 1000
         results.append(("ERR", dt))
         status_counts["ERR"] = status_counts.get("ERR", 0) + 1
         et = type(e).__name__
-        err_types[et] += 1
-        # keep first example for this error type
-        if et not in err_samples:
-            err_samples[et] = repr(e)
+        exc_types[et] += 1
+        if et not in exc_samples:
+            exc_samples[et] = repr(e)
 
 async def main():
     ap = argparse.ArgumentParser()
@@ -63,8 +71,10 @@ async def main():
 
     results: list[tuple[object, float]] = []
     status_counts: dict[object, int] = {}
-    error_types: Counter = Counter()
-    error_samples: dict[str, str] = {}
+    exc_types: Counter = Counter()
+    exc_samples: dict[str, str] = {}
+    http_err_counts: Counter = Counter()
+    http_err_samples: dict[int, str] = {}
 
     headers = {}
     if args.auth_bearer:
@@ -79,7 +89,6 @@ async def main():
         interval = (1.0 / args.target_rps) if args.target_rps and args.target_rps > 0 else 0.0
 
         async def scheduled(i: int):
-            # simple pacing: schedule each request at start + i*interval
             if interval > 0:
                 target = start + i * interval
                 now = time.perf_counter()
@@ -88,9 +97,9 @@ async def main():
                     await asyncio.sleep(delay)
             async with sem:
                 await one_request(
-                    client, url, args.lat, args.lon, args.radius, args.items,
-                    all_products, headers, results, status_counts,
-                    error_types, error_samples, args.timeout
+                    client, url, args.lat, args.lon, args.radius, args.items, all_products,
+                    headers, results, status_counts, exc_types, exc_samples,
+                    http_err_counts, http_err_samples, args.timeout
                 )
 
         await asyncio.gather(*[asyncio.create_task(scheduled(i)) for i in range(args.requests)])
@@ -116,12 +125,17 @@ async def main():
     print(f"Total: {total}; OK: {len(oks)}; Errors: {errs}; Elapsed: {elapsed_s:.2f}s; "
           f"Throughput: {total/elapsed_s:.2f} req/s")
     print("Status counts:", dict(sorted(status_counts.items(), key=lambda kv: str(kv[0]))))
-    if error_types:
-        print("Errors by type:", dict(error_types))
-        # print one example if available
-        et, cnt = next(iter(error_types.items()))
-        if et in error_samples:
-            print("Sample error:", f"{et}: {error_samples[et]}")
+    if exc_types:
+        print("Client exceptions by type:", dict(exc_types))
+        et, cnt = next(iter(exc_types.items()))
+        if et in exc_samples:
+            print("Sample exception:", f"{et}: {exc_samples[et]}")
+    if http_err_counts:
+        print("HTTP errors by code:", dict(http_err_counts))
+        # show first sample (likely 500)
+        first_code = next(iter(http_err_counts))
+        if first_code in http_err_samples:
+            print(f"Sample {first_code} body:\n{http_err_samples[first_code]}\n")
     if oks:
         print(f"P50: {p50:.1f} ms; P90: {p90:.1f} ms; P95: {p95:.1f} ms; P99: {p99:.1f} ms; "
               f"Avg: {sum(oks)/len(oks):.1f} ms; Max: {max(oks):.1f} ms")
@@ -134,8 +148,10 @@ async def main():
             "elapsed_seconds": elapsed_s,
             "throughput_rps": total/elapsed_s if elapsed_s > 0 else None,
             "status_counts": status_counts,
-            "error_types": dict(error_types),
-            "error_samples": error_samples,
+            "client_exception_types": dict(exc_types),
+            "client_exception_samples": exc_samples,
+            "http_error_codes": dict(http_err_counts),
+            "http_error_samples": {str(k): v for k, v in http_err_samples.items()},
             "latency_ms": {
                 "p50": p50, "p90": p90, "p95": p95, "p99": p99,
                 "avg": (sum(oks)/len(oks) if oks else None),
