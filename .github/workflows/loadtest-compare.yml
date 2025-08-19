@@ -40,13 +40,32 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install httpx
+
+      - name: Install deps
+        run: pip install --disable-pip-version-check httpx
+
+      - name: Preflight checks
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url }}
+        run: |
+          set -x
+          echo "GET $BASE_URL/healthz"
+          curl -sS -D - "$BASE_URL/healthz" || true
+          echo
+          echo "POST $BASE_URL/compare (tiny payload)"
+          curl -sS -D - -H "Content-Type: application/json" \
+            -X POST "$BASE_URL/compare" \
+            --data '{"grocery_list":{"items":[{"product":"Milk","quantity":1}]},
+                     "lat":59.43,"lon":24.75,"radius_km":2}' || true
+          echo
 
       - name: Run load test
         env:
+          PYTHONUNBUFFERED: "1"
           BASE_URL:    ${{ github.event.inputs.base_url }}
           LAT:         ${{ github.event.inputs.lat }}
           LON:         ${{ github.event.inputs.lon }}
@@ -82,7 +101,9 @@ jobs:
             exit 1
           fi
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: compare-loadtest
           path: out/
