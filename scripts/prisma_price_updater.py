@@ -3,7 +3,7 @@
 """
 Fetch current prices for Prisma products and write:
   - price_history(product_id, amount, currency, captured_at, store_id, price_type, source_url)
-  - prices(product_id, store_id, price, seen_at)  [canonical: one row per product]
+  - prices(product_id UNIQUE, store_id, price, currency, collected_at, source_url)
 """
 
 import os, re, sys, time, random, argparse
@@ -14,7 +14,7 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 STORE_ID   = int(os.getenv("PRISMA_STORE_ID", "14"))   # Prisma Online (Tallinn)
 CURRENCY   = os.getenv("PRICE_CURRENCY", "EUR")
 PRICE_TYPE = os.getenv("PRICE_TYPE", "regular")        # free text; keep if you ever add promos
-PRICE_RE   = re.compile(r"(\d+[.,]?\d*)")              # extract number from "€3.29", "3,29 €", etc.
+PRICE_RE   = re.compile(r"(\d+(?:[.,]\d*)?)")          # extract number from "€3.29", "3,29 €", etc.
 
 def jitter(a=0.4, b=1.1):
     time.sleep(random.uniform(a, b))
@@ -28,13 +28,53 @@ def get_db() -> psycopg2.extensions.connection:
     conn.autocommit = False  # commit per product so history + canonical stay consistent
     return conn
 
+# --- Make sure tables/columns/indexes exist (idempotent) ----------------------
+def ensure_schema(conn):
+    with conn.cursor() as cur:
+        # price_history (append-only)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS price_history (
+              id          SERIAL PRIMARY KEY,
+              product_id  INT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+              amount      NUMERIC(10,2) NOT NULL,
+              currency    TEXT DEFAULT 'EUR',
+              captured_at TIMESTAMPTZ NOT NULL,
+              store_id    INT NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+              price_type  TEXT,
+              source_url  TEXT
+            );
+        """)
+        # prices (canonical: one row per product)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS prices (
+              id           SERIAL PRIMARY KEY,
+              product_id   INT NOT NULL UNIQUE REFERENCES products(id) ON DELETE CASCADE,
+              store_id     INT NOT NULL REFERENCES stores(id),
+              price        NUMERIC(10,2) NOT NULL,
+              currency     TEXT DEFAULT 'EUR',
+              collected_at TIMESTAMPTZ NOT NULL,
+              source_url   TEXT
+            );
+        """)
+        # Columns that might be missing in older DBs
+        cur.execute("ALTER TABLE prices ADD COLUMN IF NOT EXISTS collected_at TIMESTAMPTZ;")
+        cur.execute("ALTER TABLE prices ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'EUR';")
+        cur.execute("ALTER TABLE prices ADD COLUMN IF NOT EXISTS source_url TEXT;")
+        # Indexes
+        cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS uq_prices_product ON prices(product_id);")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_prices_store ON prices(store_id);")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_prices_time ON prices(collected_at DESC);")
+    conn.commit()
+
 def pick_price_text(page) -> str:
     sels = [
         "[data-testid*='price']",
-        "[class*='price']", "[class*='Price']",
+        "[class*='price']",
+        "[class*='Price']",
         "[itemprop='price'][content]",
         "meta[itemprop='price'][content]",
-        "span:has-text('€')", "div:has-text('€')"
+        "span:has-text('€')",
+        "div:has-text('€')",
     ]
     for sel in sels:
         try:
@@ -53,10 +93,12 @@ def pick_price_text(page) -> str:
             continue
     return ""
 
-def parse_price(val: str) -> float | None:
+def parse_price(val: str):
     if not val:
         return None
-    m = PRICE_RE.search(val.replace("\u00A0", " ").replace(",", "."))
+    # normalize NBSP and comma as decimal separator
+    val = val.replace("\u00A0", " ").replace(",", ".")
+    m = PRICE_RE.search(val)
     if not m:
         return None
     try:
@@ -91,7 +133,7 @@ def write_price(conn, *, product_id: int, price: float, source_url: str):
          Rule: update only if the incoming row is newer OR
                same timestamp but cheaper.
     """
-    seen_at = datetime.now(timezone.utc)
+    ts = datetime.now(timezone.utc)
     with conn.cursor() as cur:
         # 1) append history
         cur.execute(
@@ -100,23 +142,25 @@ def write_price(conn, *, product_id: int, price: float, source_url: str):
               (product_id, amount, currency, captured_at, store_id, price_type, source_url)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             """,
-            (product_id, price, CURRENCY, seen_at, STORE_ID, PRICE_TYPE, source_url)
+            (product_id, price, CURRENCY, ts, STORE_ID, PRICE_TYPE, source_url)
         )
 
-        # 2) canonical upsert
+        # 2) canonical upsert (note: collected_at, not seen_at)
         cur.execute(
             """
-            INSERT INTO prices (product_id, store_id, price, seen_at)
-            VALUES (%s, %s, %s, %s)
+            INSERT INTO prices (product_id, store_id, price, currency, collected_at, source_url)
+            VALUES (%s, %s, %s, %s, %s, %s)
             ON CONFLICT (product_id) DO UPDATE
-            SET store_id = EXCLUDED.store_id,
-                price    = EXCLUDED.price,
-                seen_at  = EXCLUDED.seen_at
+            SET store_id     = EXCLUDED.store_id,
+                price        = EXCLUDED.price,
+                currency     = EXCLUDED.currency,
+                collected_at = EXCLUDED.collected_at,
+                source_url   = EXCLUDED.source_url
             WHERE
-              EXCLUDED.seen_at > prices.seen_at
-              OR (EXCLUDED.seen_at = prices.seen_at AND EXCLUDED.price < prices.price)
+              EXCLUDED.collected_at > prices.collected_at
+              OR (EXCLUDED.collected_at = prices.collected_at AND EXCLUDED.price < prices.price)
             """,
-            (product_id, STORE_ID, price, seen_at)
+            (product_id, STORE_ID, price, CURRENCY, ts, source_url)
         )
     conn.commit()
 
@@ -127,6 +171,8 @@ def main():
     args = ap.parse_args()
 
     conn = get_db()
+    ensure_schema(conn)
+
     rows = load_prisma_products(conn, args.max_products)
     if not rows:
         print("No Prisma products found.")
