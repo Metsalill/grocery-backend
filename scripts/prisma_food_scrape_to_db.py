@@ -3,19 +3,10 @@
 """
 Prisma.ee FOOD & DRINKS scraper → direct Postgres upsert (canonical schema)
 
-- Crawls all grocery categories under /tooted/ and /en/tooted/
-- Extracts Prisma product metadata (incl. EAN) and UPSERTs into Postgres
-- Keyed by EAN so re-runs will keep the latest metadata
-
-Canonical columns this script writes:
+Canonical products columns written:
   products(ean UNIQUE, name, size_text, brand, manufacturer,
            country_of_manufacture, category_1..3, food_group, image_url,
            source_url, last_seen_utc)
-
-Run:
-  pip install playwright psycopg2-binary
-  python -m playwright install chromium
-  python scripts/prisma_food_scrape_to_db.py --max-products 500 --headless 1
 """
 from __future__ import annotations
 import argparse
@@ -25,8 +16,6 @@ import re
 import sys
 import time
 from datetime import datetime, timezone
-from pathlib import Path
-from typing import Optional
 from urllib.parse import urljoin, urlparse
 
 import psycopg2
@@ -37,19 +26,16 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 # ---------------------------------------------------------------------------
 # Config
 BASE = "https://prismamarket.ee"
-
-# Start from both EN and ET roots so we don't miss locale switches
 SEEDS = ["/en/tooted/", "/tooted/"]  # root listings (both locales)
-
-# Paths
 CATEGORY_PREFIXES = ("/en/tooted/", "/tooted/", "/en/food-market/", "/food-market/")
 PRODUCT_PREFIXES = ("/en/toode/", "/toode/")
 
-# -------- Amount / EAN patterns (enhanced) -----------------------------------
-PACK_RE = re.compile(r"(\d+)\s*[x×]\s*(\d+(?:[\.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
+# -------- Amount / EAN patterns ---------------------------------------------
+PACK_RE   = re.compile(r"(\d+)\s*[x×]\s*(\d+(?:[\.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
 SIMPLE_RE = re.compile(r"\b(\d+(?:[\.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
-BONUS_RE = re.compile(r"\+\s*\d+%")  # e.g. "500 g + 20%"
-EAN_RE = re.compile(r"(\d{8,14})$")
+PIECES_RE = re.compile(r"\b(\d+)\s*(?:tk|pcs?|pk|pack)\b", re.I)
+BONUS_RE  = re.compile(r"\+\s*\d+%")  # e.g. "500 g + 20%"
+EAN_RE    = re.compile(r"(\d{8,14})$")
 
 # ---------------------------------------------------------------------------
 # Small utils
@@ -67,70 +53,37 @@ def is_product_path(path: str) -> bool:
     return p.startswith("/toode/") or p.startswith("/en/toode/")
 
 # ---------------------------------------------------------------------------
-# Whitelist / blacklist filtering  (simple substring match, case-insensitive)
+# Whitelist / blacklist filtering
 EXCLUDED_CATEGORY_KEYWORDS = [
-    # home & decor / household goods
-    "sisustus", "kodutekstiil", "valgustus", "kardin", "jouluvalgustid",
-    "vaikesed-sisustuskaubad", "kuunlad", "kook-ja-lauakatmine",
-    "uhekordsed-noud", "kirja-ja-kontoritarbed", "remondi-ja-turvatooted",
-    "kulmutus-ja-kokkamisvahendid", "omblus-ja-kasitootarbed",
-    "meisterdamine", "ajakirjad", "autojuhtimine", "kotid",
-    "aed-ja-lilled",
-    # pets
-    "lemmikloom",
-    # sports & outdoor
-    "sport", "pallimangud", "jalgrattasoit", "ujumine",
-    "matkamine", "tervisesport",
-    # baby & kids (non-food)
-    "manguasjad", "lutid", "lapsehooldus",
-    # seasonal / ideas
-    "ideed-ja-hooajad",
-    # electronics & appliances / health & beauty
-    "kodumasinad", "elektroonika", "meelelahutuselektroonika",
-    "vaikesed-kodumasinad", "lambid-patareid-ja-taskulambid",
-    "ilu-ja-tervis", "kosmeetika", "meigitooted", "hugieen",
-    # vitamins / supplements / sport nutrition (non-food)
-    "loodustooted-ja-toidulisandid",
+    "sisustus","kodutekstiil","valgustus","kardin","jouluvalgustid","vaikesed-sisustuskaubad","kuunlad",
+    "kook-ja-lauakatmine","uhekordsed-noud","kirja-ja-kontoritarbed","remondi-ja-turvatooted",
+    "kulmutus-ja-kokkamisvahendid","omblus-ja-kasitootarbed","meisterdamine","ajakirjad","autojuhtimine",
+    "kotid","aed-ja-lilled","lemmikloom","sport","pallimangud","jalgrattasoit","ujumine","matkamine",
+    "tervisesport","manguasjad","lutid","lapsehooldus","ideed-ja-hooajad","kodumasinad","elektroonika",
+    "meelelahutuselektroonika","vaikesed-kodumasinad","lambid-patareid-ja-taskulambid",
+    "ilu-ja-tervis","kosmeetika","meigitooted","hugieen","loodustooted-ja-toidulisandid",
 ]
-
 def is_in_whitelist(url: str) -> bool:
-    """
-    Allow categories only if they are under known category prefixes
-    AND do not contain excluded keywords (non-food departments).
-    """
     path = urlparse(url).path.lower()
-    if not is_category_path(path):
-        return False
-    if any(ex in path for ex in EXCLUDED_CATEGORY_KEYWORDS):
-        return False
+    if not is_category_path(path): return False
+    if any(ex in path for ex in EXCLUDED_CATEGORY_KEYWORDS): return False
     return True
 
 # ---------------------------------------------------------------------------
 # Food group mapper (normalize per-store categories)
 def map_food_group(c1: str, c2: str, c3: str, title: str) -> str:
     t = " ".join([c1, c2, c3, title]).lower()
-
     def has(*keys): return any(k in t for k in keys)
-
-    if has("joogid", "drink", "water", "juice", "soda", "beer", "wine", "kõvad joogid"):
-        return "drinks"
-    if has("leivad", "küpsised", "kook", "saia", "bakery", "pastry", "biscuit", "bread", "cake"):
-        return "bakery"
-    if has("piim", "juust", "kohuke", "kohupiim", "või", "jogurt", "dairy", "eggs", "munad", "cream"):
-        return "dairy_eggs"
-    if has("puu", "köögivil", "vegetable", "fruit", "salat", "herb"):
-        return "produce"
-    if has("liha", "meat", "kana", "chicken", "beef", "pork", "lamb", "veal", "ham", "saus"):
-        return "meat"
-    if has("kala", "fish", "lõhe", "räim", "heering", "tuna", "shrimp", "kammkarp", "mereann", "seafood"):
-        return "fish"
-    if has("külmutatud", "frozen"):
-        return "frozen"
-    if has("kuivtooted", "pasta", "riis", "rice", "jahu", "flour", "sugar", "suhkur", "oil", "õli",
-           "konserv", "canned", "maitseaine", "spice", "kastme", "sauce", "teravili", "cereal", "snack", "pähkl", "müsl"):
-        return "pantry"
-    if has("valmistoit", "prepared", "ready"):
-        return "prepared"
+    if has("joogid","drink","water","juice","soda","beer","wine","kõvad joogid"): return "drinks"
+    if has("leivad","küpsised","kook","saia","bakery","pastry","biscuit","bread","cake"): return "bakery"
+    if has("piim","juust","kohuke","kohupiim","või","jogurt","dairy","eggs","munad","cream"): return "dairy_eggs"
+    if has("puu","köögivil","vegetable","fruit","salat","herb"): return "produce"
+    if has("liha","meat","kana","chicken","beef","pork","lamb","veal","ham","saus"): return "meat"
+    if has("kala","fish","lõhe","räim","heering","tuna","shrimp","kammkarp","mereann","seafood"): return "fish"
+    if has("külmutatud","frozen"): return "frozen"
+    if has("kuivtooted","pasta","riis","rice","jahu","flour","sugar","suhkur","oil","õli","konserv","canned",
+            "maitseaine","spice","kastme","sauce","teravili","cereal","snack","pähkl","müsl"): return "pantry"
+    if has("valmistoit","prepared","ready"): return "prepared"
     return "other"
 
 # ---------------------------------------------------------------------------
@@ -139,18 +92,15 @@ def get_database_url() -> str:
     try:
         import settings  # type: ignore
         db = getattr(settings, "DATABASE_URL", None)
-        if db:
-            return db
+        if db: return db
     except Exception:
         pass
     db = os.getenv("DATABASE_URL")
-    if not db:
-        raise RuntimeError("DATABASE_URL not set (env or settings.py)")
+    if not db: raise RuntimeError("DATABASE_URL not set (env or settings.py)")
     return db
 
 PRODUCTS_TABLE = os.getenv("PRODUCTS_TABLE", "products")
 
-# Canonical products table (no product_name/amount; uses name/size_text)
 CREATE_TABLE_SQL = f"""
 CREATE TABLE IF NOT EXISTS {PRODUCTS_TABLE} (
     id SERIAL PRIMARY KEY,
@@ -170,18 +120,15 @@ CREATE TABLE IF NOT EXISTS {PRODUCTS_TABLE} (
 );
 """
 
-# Indexes / constraints (idempotent)
 CREATE_EAN_UNIQUE_SQL = f"""
--- Keep NULL/'' allowed but unique when present
 CREATE UNIQUE INDEX IF NOT EXISTS uq_{PRODUCTS_TABLE}_ean
 ON {PRODUCTS_TABLE} (ean)
 WHERE ean IS NOT NULL AND ean <> '';
 """
-CREATE_FOOD_GROUP_INDEX_SQL = f"CREATE INDEX IF NOT EXISTS idx_{PRODUCTS_TABLE}_food_group ON {PRODUCTS_TABLE}(food_group);"
-CREATE_SOURCE_URL_INDEX_SQL = f"CREATE INDEX IF NOT EXISTS idx_{PRODUCTS_TABLE}_source_url ON {PRODUCTS_TABLE}(source_url);"
-CREATE_NAME_LOWER_IDX_SQL = f"CREATE INDEX IF NOT EXISTS idx_{PRODUCTS_TABLE}_name_lower ON {PRODUCTS_TABLE}(LOWER(name));"
+CREATE_FOOD_GROUP_INDEX_SQL  = f"CREATE INDEX IF NOT EXISTS idx_{PRODUCTS_TABLE}_food_group  ON {PRODUCTS_TABLE}(food_group);"
+CREATE_SOURCE_URL_INDEX_SQL  = f"CREATE INDEX IF NOT EXISTS idx_{PRODUCTS_TABLE}_source_url ON {PRODUCTS_TABLE}(source_url);"
+CREATE_NAME_LOWER_IDX_SQL    = f"CREATE INDEX IF NOT EXISTS idx_{PRODUCTS_TABLE}_name_lower ON {PRODUCTS_TABLE}(LOWER(name));"
 
-# Upsert that avoids overwriting good values with blanks
 UPSERT_SQL = f"""
 INSERT INTO {PRODUCTS_TABLE} (
     ean, name, size_text, brand, manufacturer,
@@ -213,7 +160,6 @@ def db_connect() -> PGConn:
     conn = psycopg2.connect(dsn)
     conn.autocommit = True
     with conn.cursor() as cur:
-        # table + indexes
         cur.execute(CREATE_TABLE_SQL)
         cur.execute(CREATE_EAN_UNIQUE_SQL)
         cur.execute(CREATE_FOOD_GROUP_INDEX_SQL)
@@ -223,6 +169,7 @@ def db_connect() -> PGConn:
 
 # ---------------------------------------------------------------------------
 # Extraction helpers
+
 def extract_title(page) -> str:
     try:
         return clean(page.locator("h1").first.inner_text())
@@ -230,11 +177,7 @@ def extract_title(page) -> str:
         return ""
 
 def extract_image_url(page) -> str:
-    sels = [
-        "main img[alt][src]",
-        "img[alt][src]",
-        "img[src]",
-    ]
+    sels = ["main img[alt][src]", "img[alt][src]", "img[src]"]
     for sel in sels:
         try:
             img = page.locator(sel).first
@@ -247,7 +190,7 @@ def extract_image_url(page) -> str:
     return ""
 
 def extract_label_value(page, labels: list[str]) -> str:
-    # 1) exact text nodes → nearest following value (div/span/p)
+    # exact text nodes → nearest following value (div/span/p)
     for label in labels:
         try:
             lab = page.locator(f"xpath=//*[normalize-space(.)='{label}']").first
@@ -257,7 +200,7 @@ def extract_label_value(page, labels: list[str]) -> str:
                     return clean(sib.inner_text())
         except Exception:
             pass
-    # 2) fuzzy contains → nearest following value
+    # fuzzy contains → nearest following value
     for label in labels:
         try:
             lab = page.locator(f"xpath=//*[contains(normalize-space(.), '{label}')]").first
@@ -267,7 +210,7 @@ def extract_label_value(page, labels: list[str]) -> str:
                     return clean(sib.inner_text())
         except Exception:
             pass
-    # 3) dl/dt/dd
+    # dl/dt/dd structures
     try:
         for label in labels:
             dt = page.locator(f"xpath=//dt[normalize-space()='{label}'] | //dt[contains(normalize-space(),'{label}')]").first
@@ -277,7 +220,7 @@ def extract_label_value(page, labels: list[str]) -> str:
                     return clean(dd.inner_text())
     except Exception:
         pass
-    # 4) fallback: regex in raw HTML
+    # fallback: regex in raw HTML
     try:
         html = page.content()
         for label in labels:
@@ -293,8 +236,7 @@ def extract_label_value(page, labels: list[str]) -> str:
 
 def extract_ean(page, url: str) -> str:
     val = extract_label_value(page, ["EAN", "EAN-kood", "Ribakood"])
-    if val and re.fullmatch(r"\d{8,14}", val):
-        return val
+    if val and re.fullmatch(r"\d{8,14}", val): return val
     m = EAN_RE.search(url)
     return m.group(1) if m else ""
 
@@ -304,56 +246,11 @@ def extract_country(page) -> str:
     ]) or ""
 
 def extract_manufacturer(page) -> str:
-    return extract_label_value(page, [
-        "Manufacturer", "Tootja", "Producer"
-    ]) or ""
-
-def extract_breadcrumbs(page) -> list[str]:
-    sels = [
-        "nav[aria-label='breadcrumb'] a",
-        "nav.breadcrumb a",
-        "ol.breadcrumb a",
-        "a.breadcrumb__link",
-        "nav a[href*='/tooted/']",
-    ]
-    texts = []
-    for sel in sels:
-        try:
-            els = page.locator(sel)
-            if els.count() > 0:
-                for i in range(min(10, els.count())):
-                    t = clean(els.nth(i).inner_text())
-                    if t:
-                        texts.append(t)
-                if texts:
-                    break
-        except Exception:
-            continue
-
-    texts = [t for t in texts if t.lower() not in {"home", "avaleht"}]
-
-    if not texts:
-        try:
-            scripts = page.locator("script[type='application/ld+json']")
-            for i in range(scripts.count()):
-                raw = scripts.nth(i).inner_text()
-                if "BreadcrumbList" in raw:
-                    import json
-                    data = json.loads(raw)
-                    if isinstance(data, dict) and data.get("@type") == "BreadcrumbList":
-                        items = data.get("itemListElement", [])
-                        texts = [clean(it.get("name", "")) for it in items if isinstance(it, dict)]
-                        texts = [t for t in texts if t]
-                        if texts:
-                            break
-        except Exception:
-            pass
-
-    return texts[-3:]
+    return extract_label_value(page, ["Manufacturer", "Tootja", "Producer"]) or ""
 
 def parse_amount_from_title(title: str) -> str:
     """Returns canonical size_text like '390 g' or '6x330 ml'."""
-    t = BONUS_RE.sub("", title)  # drop "+20%" promos
+    t = BONUS_RE.sub("", title)
     m = PACK_RE.search(t)
     if m:
         qty, num, unit = m.groups()
@@ -364,12 +261,81 @@ def parse_amount_from_title(title: str) -> str:
         num, unit = m.groups()
         num = num.replace(",", ".")
         return f"{num} {unit}"
+    m = PIECES_RE.search(t)
+    if m:
+        return f"{m.group(1)} pcs"
     return ""
+
+def normalize_size_text(s: str) -> str:
+    """Lowercase, collapse spaces, dot-decimals, unify units; return '' if not parseable."""
+    if not s: return ""
+    s = clean(s).lower().replace(",", ".")
+    # Direct recognition
+    m = PACK_RE.search(s)
+    if m:
+        qty, num, unit = m.groups()
+        return f"{int(qty)}x{num} {unit}"
+    m = SIMPLE_RE.search(s)
+    if m:
+        num, unit = m.groups()
+        return f"{num} {unit}"
+    m = PIECES_RE.search(s)
+    if m:
+        return f"{m.group(1)} pcs"
+    # Bare unit in name like ", kg"
+    if re.search(r"\bkg\b", s): return "kg"
+    if re.search(r"\bl\b", s):  return "l"
+    return ""
+
+def extract_size_text(page, title: str) -> str:
+    """
+    Try to read size from product details first, fallback to title.
+    """
+    # 1) Common labels (ET/EN)
+    lbl_val = extract_label_value(page, [
+        "Net weight", "Net quantity", "Net content", "Net mass",
+        "Kogus", "Maht", "Neto kogus", "Netokogus", "Pakendi suurus",
+        "Pakendi maht", "Suurus", "Kaal", "Weight", "Volume", "Size"
+    ])
+    size = normalize_size_text(lbl_val)
+    if size:
+        return size
+
+    # 2) JSON-LD clues
+    try:
+        import json
+        scripts = page.locator("script[type='application/ld+json']")
+        for i in range(min(8, scripts.count())):
+            raw = scripts.nth(i).inner_text()
+            data = json.loads(raw)
+            def walk(obj):
+                if isinstance(obj, dict):
+                    for k, v in obj.items():
+                        if isinstance(v, (str, int, float)) and str(k).lower() in {
+                            "weight","netweight","size","contentSize","packageSize","volume","netContent"
+                        }:
+                            cand = normalize_size_text(str(v))
+                            if cand: return cand
+                        r = walk(v)
+                        if r: return r
+                elif isinstance(obj, list):
+                    for it in obj:
+                        r = walk(it)
+                        if r: return r
+                return ""
+            cand = walk(data)
+            if cand:
+                return cand
+    except Exception:
+        pass
+
+    # 3) Title
+    t = parse_amount_from_title(title)
+    return normalize_size_text(t)
 
 def infer_brand_from_title(title: str) -> str:
     parts = title.split()
-    if not parts:
-        return ""
+    if not parts: return ""
     if len(parts) >= 2 and parts[0][:1].isupper() and parts[1][:1].isupper():
         return f"{parts[0]} {parts[1]}"
     return parts[0]
@@ -377,14 +343,6 @@ def infer_brand_from_title(title: str) -> str:
 # ---------------------------------------------------------------------------
 # Listing helpers
 def paginate_listing(page, max_pages: int = 80):
-    """
-    Reveal more products via:
-    - 'Load more' buttons
-    - Infinite scroll
-    - Classic next link
-    Stops when no progress or max_pages reached.
-    """
-
     def page_height():
         try:
             return page.evaluate("document.body.scrollHeight")
@@ -392,24 +350,14 @@ def paginate_listing(page, max_pages: int = 80):
             return 0
 
     load_more_selectors = [
-        "button:has-text('Load more')",
-        "button:has-text('Show more')",
-        "button:has-text('Load More')",
-        "[data-testid*='load'][data-testid*='more']",
-        "button[aria-label*='more']",
-        "[data-testid='load-more']",
-        "button:has-text('Load more products')",
-        "button:has-text('Show more products')",
-        "button:has-text('Näita rohkem')",
+        "button:has-text('Load more')","button:has-text('Show more')","button:has-text('Load More')",
+        "[data-testid*='load'][data-testid*='more']","button[aria-label*='more']",
+        "[data-testid='load-more']","button:has-text('Load more products')",
+        "button:has-text('Show more products')","button:has-text('Näita rohkem')",
     ]
     next_selectors = [
-        "a[rel='next']",
-        "a.pagination__next",
-        "button:has-text('Next')",
-        "a:has-text('Next')",
-        "a.pagination-next",
-        "button[aria-label='Next page']",
-        "[data-testid='pagination-next']",
+        "a[rel='next']","a.pagination__next","button:has-text('Next')","a:has-text('Next')",
+        "a.pagination-next","button[aria-label='Next page']","[data-testid='pagination-next']",
     ]
 
     pages_clicked = 0
@@ -417,8 +365,6 @@ def paginate_listing(page, max_pages: int = 80):
 
     while pages_clicked < max_pages:
         progressed = False
-
-        # 1) 'Load more'
         for sel in load_more_selectors:
             try:
                 btn = page.locator(sel)
@@ -434,10 +380,8 @@ def paginate_listing(page, max_pages: int = 80):
                         break
             except Exception:
                 continue
-        if progressed:
-            continue
+        if progressed: continue
 
-        # 2) Infinite scroll
         try:
             cur_h = page_height()
             page.mouse.wheel(0, 20000)
@@ -448,10 +392,8 @@ def paginate_listing(page, max_pages: int = 80):
                 progressed = True
         except Exception:
             pass
-        if progressed:
-            continue
+        if progressed: continue
 
-        # 3) Classic "next"
         for sel in next_selectors:
             try:
                 nxt = page.locator(sel)
@@ -467,33 +409,27 @@ def paginate_listing(page, max_pages: int = 80):
                         break
             except Exception:
                 continue
-        if progressed:
-            continue
+        if progressed: continue
 
         break  # no way to progress
 
 def collect_links_from_listing(page, current_url: str) -> tuple[set[str], set[str]]:
-    # wait a moment for tiles/anchors to render
     try:
         page.wait_for_selector("a[href*='/toode/'], a[href*='/en/toode/']", timeout=6000)
     except Exception:
         pass
 
-    # reveal as many items as possible
     try:
         paginate_listing(page, max_pages=100)
     except Exception:
         pass
 
-    # final deep scroll
     try:
         last_h = 0
         for _ in range(6):
-            page.mouse.wheel(0, 20000)
-            jitter(0.4, 0.9)
+            page.mouse.wheel(0, 20000); jitter(0.4, 0.9)
             h = page.evaluate("document.body.scrollHeight")
-            if h == last_h:
-                break
+            if h == last_h: break
             last_h = h
     except Exception:
         pass
@@ -508,8 +444,7 @@ def collect_links_from_listing(page, current_url: str) -> tuple[set[str], set[st
     for i in range(count):
         try:
             href = anchors.nth(i).get_attribute("href")
-            if not href:
-                continue
+            if not href: continue
             url = urljoin(BASE, href)
             path = urlparse(url).path
             if is_product_path(path):
@@ -536,13 +471,11 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
         ))
         page = context.new_page()
 
-        # --- Accept cookies once (so product grids aren't blocked) ------------
+        # Accept cookies best-effort
         def accept_cookies(page):
             for sel in [
-                "button:has-text('Accept all')",
-                "button:has-text('Accept cookies')",
-                "button:has-text('Nõustu')",
-                "button[aria-label*='accept']",
+                "button:has-text('Accept all')","button:has-text('Accept cookies')",
+                "button:has-text('Nõustu')","button[aria-label*='accept']",
             ]:
                 try:
                     btn = page.locator(sel)
@@ -553,9 +486,7 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
                         return
                 except Exception:
                     pass
-
         accept_cookies(page)
-        # ---------------------------------------------------------------------
 
         seen_categories = set()
         to_visit = [urljoin(BASE, s) for s in SEEDS]
@@ -563,13 +494,11 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
         # Phase A: discover product links
         while to_visit and len(product_urls) < max_products:
             cat_url = to_visit.pop(0)
-            if cat_url in seen_categories:
-                continue
+            if cat_url in seen_categories: continue
             seen_categories.add(cat_url)
             try:
                 page.goto(cat_url, timeout=30000)
-                page.wait_for_load_state("domcontentloaded")
-                jitter()
+                page.wait_for_load_state("domcontentloaded"); jitter()
             except PlaywrightTimeout:
                 continue
 
@@ -590,8 +519,7 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
             for url in list(product_urls)[:max_products]:
                 try:
                     page.goto(url, timeout=30000)
-                    page.wait_for_load_state("domcontentloaded")
-                    jitter()
+                    page.wait_for_load_state("domcontentloaded"); jitter()
                 except PlaywrightTimeout:
                     continue
 
@@ -601,12 +529,14 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
                     skipped_no_ean += 1
                     continue
 
-                size_text = parse_amount_from_title(title)
+                # >>> NEW: robust size extraction
+                size_text = extract_size_text(page, title)
+
                 brand = infer_brand_from_title(title)
                 manufacturer = extract_manufacturer(page)
                 country = extract_country(page)
                 image_url = extract_image_url(page)
-                crumbs = extract_breadcrumbs(page)
+                crumbs = extract_breadcrumbs(page := page) if 'extract_breadcrumbs' in globals() else []
                 c1 = crumbs[0] if len(crumbs) > 0 else ""
                 c2 = crumbs[1] if len(crumbs) > 1 else ""
                 c3 = crumbs[2] if len(crumbs) > 2 else ""
@@ -638,7 +568,6 @@ def crawl_to_db(max_products: int = 500, headless: bool = True):
 
         browser.close()
 
-    # Run summary
     print(f"Discovered {len(product_urls)} product URLs under whitelisted categories.")
     print(f"Upserted {rows_written} rows into '{PRODUCTS_TABLE}'. Skipped (no EAN): {skipped_no_ean}.")
 
