@@ -3,11 +3,13 @@
 
 BEGIN;
 
--- Drop dependent view first
+-- Drop dependent view first so we can change the base view's column list
 DROP VIEW IF EXISTS public.v_cheapest_offer;
 
--- Latest row per (product, store)
-CREATE OR REPLACE VIEW public.v_latest_store_prices AS
+-- Drop and recreate the base view (column list changes: adds collected_at)
+DROP VIEW IF EXISTS public.v_latest_store_prices;
+
+CREATE VIEW public.v_latest_store_prices AS
 SELECT DISTINCT ON (pr.product_id, pr.store_id)
   pr.product_id,
   pr.store_id,
@@ -24,8 +26,8 @@ ORDER BY
   pr.store_id,
   COALESCE(pr.collected_at, pr.seen_at) DESC NULLS LAST;
 
--- Cheapest current offer per product
-CREATE OR REPLACE VIEW public.v_cheapest_offer AS
+-- Recreate the dependent view
+CREATE VIEW public.v_cheapest_offer AS
 WITH latest AS (
   SELECT
     product_id, store_id, price, collected_at, seen_at,
