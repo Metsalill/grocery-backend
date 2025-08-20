@@ -12,8 +12,6 @@ MAX_CONCURRENCY = int(os.getenv("CONCURRENCY", "5"))
 REQ_DELAY = float(os.getenv("REQ_DELAY", "0.8"))
 EAN_LIMIT = int(os.getenv("EAN_LIMIT", "0"))  # 0 = no limit
 
-# ------------------------- helpers -------------------------
-
 def norm(s: str | None) -> str:
     if not s:
         return ""
@@ -27,7 +25,6 @@ def load_banned(path="data/selver_excluded_keywords.txt"):
             return [ln.strip().lower() for ln in f if ln.strip() and not ln.startswith("#")]
     except FileNotFoundError:
         return []
-
 BANNED = load_banned()
 
 def looks_banned(name: str, cat: str, url: str) -> bool:
@@ -68,7 +65,6 @@ def pick_product(ld: dict) -> bool:
 
 def extract_from_jsonld(ld: dict) -> tuple[str, str, float, str]:
     name = norm(ld.get("name") or "")
-    # Common EAN/GTIN fields
     ean = ld.get("gtin13") or ld.get("gtin") or ld.get("sku") or ""
     ean = re.sub(r"\D", "", str(ean))
     offers = ld.get("offers") or {}
@@ -101,12 +97,6 @@ def extract_breadcrumbs(ld_blocks: list[dict]) -> str:
     return ""
 
 def ssl_context_for(url: str) -> ssl.SSLContext | None:
-    """
-    Emulate libpq-ish sslmode for asyncpg.
-    - require/prefer/allow -> encrypt but don't verify (CERT_NONE)
-    - verify-ca/verify-full -> default context (verify)
-    - disable -> None
-    """
     q = parse_qs(urlparse(url).query)
     mode = (q.get("sslmode", ["require"])[0] or "require").lower()
     if mode == "disable":
@@ -125,15 +115,12 @@ def get_db_url_env() -> str:
         db_url = "postgresql://" + db_url[len("postgres://"):]
     return db_url
 
-# ------------------------- HTTP -------------------------
-
 async def fetch_text(session: aiohttp.ClientSession, url: str) -> str:
     async with session.get(url, timeout=aiohttp.ClientTimeout(total=30)) as r:
         r.raise_for_status()
         return await r.text()
 
 async def parse_search_result(session: aiohttp.ClientSession, ean: str) -> str | None:
-    """Search by EAN and return absolute URL of the first product hit."""
     url = urljoin(SELVER_BASE, SEARCH_PATH) + urlencode({"q": ean})
     try:
         html = await fetch_text(session, url)
@@ -143,7 +130,6 @@ async def parse_search_result(session: aiohttp.ClientSession, ean: str) -> str |
     first = soup.select_one("a.product-item-link")
     if first and first.get("href"):
         return urljoin(SELVER_BASE, first["href"])
-    # fallback to any plausible product link
     alt = soup.select_one("a[href*='/toode'], a[href*='/product']")
     if alt and alt.get("href"):
         return urljoin(SELVER_BASE, alt["href"])
@@ -159,14 +145,12 @@ async def parse_product_page(session: aiohttp.ClientSession, url: str) -> dict |
     prod = next((ld for ld in ld_blocks if pick_product(ld)), None)
     if not prod:
         return None
-
     name, ean_ld, price, currency = extract_from_jsonld(prod)
     cat_path = extract_breadcrumbs(ld_blocks)
     if looks_banned(name, cat_path, url):
         return None
-
     return {
-        "ext_id": url,  # stable enough; used as key in candidates
+        "ext_id": url,
         "name": name,
         "ean_raw": ean_ld or "",
         "size_text": guess_size(name),
@@ -175,8 +159,6 @@ async def parse_product_page(session: aiohttp.ClientSession, url: str) -> dict |
         "category_path": cat_path,
         "category_leaf": cat_path.split(" / ")[-1] if cat_path else "",
     }
-
-# ------------------------- DB -------------------------
 
 async def fetch_eans_from_db(db_url: str) -> list[tuple[str, int]]:
     ctx = ssl_context_for(db_url)
@@ -190,11 +172,10 @@ async def fetch_eans_from_db(db_url: str) -> list[tuple[str, int]]:
     """)
     await conn.close()
     items = [(r["ean_norm"], r["product_id"]) for r in rows]
-    if EAN_LIMIT > 0:
-        items = items[:EAN_LIMIT]
+    limit = EAN_LIMIT
+    if limit > 0:
+        items = items[:limit]
     return items
-
-# ------------------------- main runner -------------------------
 
 async def runner():
     db_url = get_db_url_env()
@@ -212,31 +193,40 @@ async def runner():
         "Accept-Language": "et-EE,et;q=0.9,en;q=0.8",
     }
 
-    async with aiohttp.ClientSession(headers=headers) as session, \
-            open(out_path, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(
-            f,
-            fieldnames=["ext_id", "name", "ean_raw", "size_text", "price", "currency", "category_path", "category_leaf"],
-        )
-        writer.writeheader()
+    async with aiohttp.ClientSession(headers=headers) as session:
+        # open() is a normal context manager; keep it separate from the async one
+        with open(out_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(
+                f,
+                fieldnames=[
+                    "ext_id",
+                    "name",
+                    "ean_raw",
+                    "size_text",
+                    "price",
+                    "currency",
+                    "category_path",
+                    "category_leaf",
+                ],
+            )
+            writer.writeheader()
 
-        async def process(ean: str):
-            async with sem:
-                try:
-                    url = await parse_search_result(session, ean)
-                    await asyncio.sleep(REQ_DELAY)
-                    if not url:
+            async def process(ean: str):
+                async with sem:
+                    try:
+                        url = await parse_search_result(session, ean)
+                        await asyncio.sleep(REQ_DELAY)
+                        if not url:
+                            return
+                        item = await parse_product_page(session, url)
+                        await asyncio.sleep(REQ_DELAY)
+                        if not item:
+                            return
+                        writer.writerow(item)
+                    except Exception:
                         return
-                    item = await parse_product_page(session, url)
-                    await asyncio.sleep(REQ_DELAY)
-                    if not item:
-                        return
-                    writer.writerow(item)
-                except Exception:
-                    # best-effort scraping: skip on any error
-                    return
 
-        await asyncio.gather(*(process(e) for e, _ in eans))
+            await asyncio.gather(*(process(e) for e, _ in eans))
 
 if __name__ == "__main__":
     asyncio.run(runner())
