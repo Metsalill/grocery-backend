@@ -106,37 +106,50 @@ async def _candidate_stores(
 
 async def _resolve_products(conn: asyncpg.Connection, names: List[str]) -> Dict[str, asyncpg.Record]:
     """
-    Exact (case-insensitive) name resolution.
-    Returns mapping normalized_name -> product row with needed fields.
-    Tries to fetch qty fields; falls back to minimal set if columns not present.
+    Resolve products by exact, case-insensitive match against products.name OR product_aliases.alias.
+
+    Returns mapping:
+        normalized_input_name -> product row (id, name, size_text, net_qty, net_unit, pack_count)
+
+    Why map by *input* name?
+        The rest of the pipeline looks up by_norm[_norm(original_name)].
+        If a user types an alias (e.g., "coke 1.5l"), we must key the map by that alias,
+        not by the canonical product name, otherwise it would look "missing".
+
+    Falls back to products-only if the aliases table/columns are missing.
     """
     if not names:
         return {}
-    uniq = sorted({ _norm(n) for n in names if n and n.strip() })
+    keys = sorted({ _norm(n) for n in names if n and n.strip() })
+
+    sql_with_aliases = """
+    WITH keys AS (SELECT unnest($1::text[]) AS k)
+    SELECT DISTINCT ON (keys.k)
+      keys.k AS match_key,
+      p.id, p.name, p.size_text, p.net_qty, p.net_unit, p.pack_count
+    FROM products p
+    LEFT JOIN product_aliases a ON a.product_id = p.id
+    JOIN keys ON keys.k = lower(p.name) OR keys.k = lower(a.alias)
+    ORDER BY keys.k, p.id
+    """
+
+    sql_products_only = """
+    WITH keys AS (SELECT unnest($1::text[]) AS k)
+    SELECT DISTINCT ON (keys.k)
+      keys.k AS match_key,
+      p.id, p.name, p.size_text, p.net_qty, p.net_unit, p.pack_count
+    FROM products p
+    JOIN keys ON keys.k = lower(p.name)
+    ORDER BY keys.k, p.id
+    """
 
     try:
-        rows = await conn.fetch(
-            """
-            SELECT id, name, size_text, net_qty, net_unit, pack_count
-            FROM products
-            WHERE lower(name) = ANY($1::text[])
-            """,
-            uniq,
-        )
-    except (pgerr.UndefinedColumnError, pgerr.UndefinedTableError):
-        rows = await conn.fetch(
-            """
-            SELECT id, name, size_text
-            FROM products
-            WHERE lower(name) = ANY($1::text[])
-            """,
-            uniq,
-        )
+        rows = await conn.fetch(sql_with_aliases, keys)
+    except (pgerr.UndefinedTableError, pgerr.UndefinedColumnError):
+        rows = await conn.fetch(sql_products_only, keys)
 
-    by_norm: Dict[str, asyncpg.Record] = {}
-    for r in rows:
-        by_norm[_norm(r["name"])] = r
-    return by_norm
+    # Map by the *input* normalized key so alias lookups succeed.
+    return { _rv(r, "match_key"): r for r in rows }
 
 async def _latest_prices(
     conn: asyncpg.Connection,
