@@ -7,8 +7,13 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE INDEX IF NOT EXISTS idx_stores_earth
   ON stores USING gist (ll_to_earth(lat, lon));
 
-CREATE INDEX IF NOT EXISTS idx_products_lower_name
-  ON products (LOWER(product));
+-- Correct name-based indexes (use products.name, not "product")
+CREATE INDEX IF NOT EXISTS idx_products_name_lower
+  ON products (lower(name));
 
-CREATE INDEX IF NOT EXISTS idx_products_trgm_product
-  ON products USING gin (product gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_products_name_trgm
+  ON products USING gin (lower(name) gin_trgm_ops);
+
+-- Optional: speed up latest-price lookups
+CREATE INDEX IF NOT EXISTS ix_prices_latest
+  ON prices (product_id, store_id, collected_at DESC);
