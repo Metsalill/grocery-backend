@@ -9,7 +9,8 @@ jobs:
   crawl-and-upsert:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # Use the PUBLIC connection string (external)
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
     steps:
       - name: Checkout
@@ -26,45 +27,69 @@ jobs:
 
       - name: Prepare workspace
         run: |
+          set -euo pipefail
           mkdir -p data
-          # Optional curated category list: one URL per line (absolute or relative)
-          # If you commit data/selver_categories.txt it will be used; otherwise a tiny built-in seed is used.
+
+      - name: Install psql client & DB ping
+        run: |
+          set -euo pipefail
+          if echo "$DATABASE_URL" | grep -q 'railway\.internal'; then
+            echo "::error::DATABASE_URL points to an internal hostname. Use DATABASE_URL_PUBLIC."
+            exit 1
+          fi
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\conninfo"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT now();"
 
       - name: Crawl Selver categories
         env:
-          OUTPUT_CSV: data/selver.csv              # loader expects this name
+          OUTPUT_CSV: data/selver.csv          # loader expects this name
           CONCURRENCY: "3"
           REQ_DELAY: "0.8"
-          PAGE_LIMIT: "0"                          # 0 = no limit; set for testing
+          PAGE_LIMIT: "0"                      # 0 = no limit; set >0 for testing
           CATEGORIES_FILE: data/selver_categories.txt
         run: python scripts/selver_crawl_categories.py
 
       - name: Load CSV into staging & upsert
         run: |
           set -euo pipefail
+
+          # If the crawl produced nothing, bail out gracefully
+          if [ ! -s data/selver.csv ]; then
+            echo "No rows in data/selver.csv — skipping load."
+            exit 0
+          fi
+
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           BEGIN;
 
           -- ensure staging exists (idempotent)
           CREATE TABLE IF NOT EXISTS public.staging_selver_products (
-            ext_id text PRIMARY KEY,
-            name text NOT NULL,
-            ean_raw text,
-            ean_norm text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '\D','','g')) STORED,
-            size_text text,
-            price numeric(12,2) NOT NULL,
-            currency text DEFAULT 'EUR',
+            ext_id        text PRIMARY KEY,
+            name          text NOT NULL,
+            ean_raw       text,
+            ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '\D','','g')) STORED,
+            size_text     text,
+            price         numeric(12,2) NOT NULL,
+            currency      text DEFAULT 'EUR',
             category_path text,
             category_leaf text,
-            collected_at timestamp with time zone DEFAULT now()
+            collected_at  timestamptz DEFAULT now()
           );
           CREATE INDEX IF NOT EXISTS ix_selver_ean  ON public.staging_selver_products (ean_norm);
           CREATE INDEX IF NOT EXISTS ix_selver_name_trgm ON public.staging_selver_products USING gin (name gin_trgm_ops);
 
           TRUNCATE TABLE public.staging_selver_products;
 
-          \copy public.staging_selver_products (ext_id,name,ean_raw,size_text,price,currency,category_path,category_leaf)
-                FROM 'data/selver.csv' WITH (FORMAT csv, HEADER true);
+          COMMIT;
+          SQL
+
+          # Use CSV HEADER form to avoid the WITH(...) parse error
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+            -c "\copy public.staging_selver_products (ext_id,name,ean_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER"
+
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          BEGIN;
 
           -- Exclude non-food categories (same idea as Prisma)
           WITH banned(kw) AS (
@@ -86,8 +111,9 @@ jobs:
             FROM public.staging_selver_products st
             WHERE NOT EXISTS (
               SELECT 1 FROM banned
-              WHERE lower(COALESCE(st.category_path,'') || ' ' || COALESCE(st.category_leaf,'') || ' ' || COALESCE(st.name,''))
-                    LIKE '%' || banned.kw || '%'
+              WHERE lower(COALESCE(st.category_path,'') || ' ' ||
+                          COALESCE(st.category_leaf,'') || ' ' ||
+                          COALESCE(st.name,'')) LIKE '%' || banned.kw || '%'
             )
           )
           INSERT INTO public.prices (store_id, product_id, price, currency, collected_at)
