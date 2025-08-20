@@ -199,8 +199,8 @@ async def runner():
         "Cache-Control": "no-cache",
     }
 
-    async with aiohttp.ClientSession(headers=headers) as session, \
-            open(OUTPUT, "w", newline="", encoding="utf-8") as f:
+    # Open file with a normal context manager, then open the async session.
+    with open(OUTPUT, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(
             f,
             fieldnames=[
@@ -216,22 +216,25 @@ async def runner():
         )
         w.writeheader()
 
-        async def process(ean: str):
-            async with sem:
-                try:
-                    url = await parse_search_result(session, ean)
-                    await asyncio.sleep(REQ_DELAY)
-                    if not url:
-                        return
-                    item = await parse_product_page(session, url)
-                    await asyncio.sleep(REQ_DELAY)
-                    if not item:
-                        return
-                    w.writerow(item)
-                except Exception:
-                    return
+        async with aiohttp.ClientSession(headers=headers) as session:
 
-        await asyncio.gather(*(process(e) for e, _ in eans))
+            async def process(ean: str):
+                async with sem:
+                    try:
+                        url = await parse_search_result(session, ean)
+                        await asyncio.sleep(REQ_DELAY)
+                        if not url:
+                            return
+                        item = await parse_product_page(session, url)
+                        await asyncio.sleep(REQ_DELAY)
+                        if not item:
+                            return
+                        w.writerow(item)
+                    except Exception:
+                        # keep going on single-item failures
+                        return
+
+            await asyncio.gather(*(process(e) for e, _ in eans))
 
 if __name__ == "__main__":
     asyncio.run(runner())
