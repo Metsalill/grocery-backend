@@ -144,42 +144,19 @@ async def _latest_prices(
     store_ids: List[int],
 ) -> List[asyncpg.Record]:
     """
-    Latest price per (product_id, store_id) using DISTINCT ON.
-    Tries collected_at first, falls back to seen_at if needed.
+    Latest price per (product_id, store_id) via view v_latest_store_prices.
     """
     if not product_ids or not store_ids:
         return []
-
-    sql_collected = """
-    WITH wp AS (SELECT unnest($1::int[]) AS product_id),
-         ws AS (SELECT unnest($2::int[]) AS store_id),
-         latest AS (
-           SELECT DISTINCT ON (pr.product_id, pr.store_id)
-              pr.product_id, pr.store_id, pr.price, pr.collected_at
-           FROM prices pr
-           JOIN wp ON wp.product_id = pr.product_id
-           JOIN ws ON ws.store_id = pr.store_id
-           ORDER BY pr.product_id, pr.store_id, pr.collected_at DESC NULLS LAST
-         )
-    SELECT * FROM latest
-    """
-    sql_seen = """
-    WITH wp AS (SELECT unnest($1::int[]) AS product_id),
-         ws AS (SELECT unnest($2::int[]) AS store_id),
-         latest AS (
-           SELECT DISTINCT ON (pr.product_id, pr.store_id)
-              pr.product_id, pr.store_id, pr.price, pr.seen_at
-           FROM prices pr
-           JOIN wp ON wp.product_id = pr.product_id
-           JOIN ws ON ws.store_id = pr.store_id
-           ORDER BY pr.product_id, pr.store_id, pr.seen_at DESC NULLS LAST
-         )
-    SELECT * FROM latest
-    """
-    try:
-        return await conn.fetch(sql_collected, product_ids, store_ids)
-    except pgerr.UndefinedColumnError:
-        return await conn.fetch(sql_seen, product_ids, store_ids)
+    return await conn.fetch(
+        """
+        SELECT product_id, store_id, price, collected_at
+        FROM v_latest_store_prices
+        WHERE product_id = ANY($1::int[])
+          AND store_id  = ANY($2::int[])
+        """,
+        product_ids, store_ids,
+    )
 
 # --------------- public service ----------------
 
