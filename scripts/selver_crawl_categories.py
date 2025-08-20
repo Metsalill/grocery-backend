@@ -1,193 +1,257 @@
 #!/usr/bin/env python3
-import os, re, csv, asyncio, json, unicodedata
+import os, re, csv, asyncio, json
 from urllib.parse import urljoin, urlparse, parse_qs
 import aiohttp
 from bs4 import BeautifulSoup
 
 BASE = "https://www.selver.ee"
-OUT = os.getenv("OUTPUT_CSV", "data/selver.csv")
-CONC = int(os.getenv("CONCURRENCY", "4"))
-REQ_DELAY = float(os.getenv("REQ_DELAY", "0.7"))
-PAGE_LIMIT = int(os.getenv("PAGE_LIMIT", "0"))  # 0=no limit
-CATS_FILE = os.getenv("CATEGORIES_FILE", "data/selver_categories.txt")
+OUTPUT = os.getenv("OUTPUT_CSV", "data/selver.csv")
+CATEGORIES_FILE = os.getenv("CATEGORIES_FILE", "data/selver_categories.txt")
+CONCURRENCY = int(os.getenv("CONCURRENCY", "3"))
+REQ_DELAY = float(os.getenv("REQ_DELAY", "0.8"))
+PAGE_LIMIT = int(os.getenv("PAGE_LIMIT", "0"))  # 0 = unlimited
 
-DEFAULT_SEEDS = [
-    "https://www.selver.ee/e-selver/puu-ja-koogiviljad",
-    "https://www.selver.ee/e-selver/piimatooted-ja-munad",
-    "https://www.selver.ee/e-selver/leivad-saia-ja-saialised",
-    "https://www.selver.ee/e-selver/liha-ja-kalatooted",
-    "https://www.selver.ee/e-selver/valmistoit",
-    "https://www.selver.ee/e-selver/kuivained",
-    "https://www.selver.ee/e-selver/suupisted-ja-maiustused",
-    "https://www.selver.ee/e-selver/jook",
-    "https://www.selver.ee/e-selver/kulmutatud-toit",
-    "https://www.selver.ee/e-selver/laste-toit",
+# very broad “non-food” filter
+BANNED = [
+    "sisustus","kodutekstiil","valgustus","kardin","jouluvalgustid",
+    "vaikesed-sisustuskaubad","kuunlad","kook-ja-lauakatmine",
+    "uhekordsed-noud","kirja-ja-kontoritarbed","remondi-ja-turvatooted",
+    "kulmutus-ja-kokkamisvahendid","omblus-ja-kasitootarbed","meisterdamine",
+    "ajakirjad","autojuhtimine","kotid","aed-ja-lilled","lemmikloom",
+    "sport","pallimangud","jalgrattasoit","ujumine","matkamine",
+    "tervisesport","manguasjad","lutid","lapsehooldus","ideed-ja-hooajad",
+    "kodumasinad","elektroonika","meelelahutuselektroonika",
+    "vaikesed-kodumasinad","lambid-patareid-ja-taskulambid",
+    "ilu-ja-tervis","kosmeetika","meigitooted","hugieen",
+    "loodustooted-ja-toidulisandid",
 ]
 
-EXCLUDE = set("""
-sisustus kodutekstiil valgustus kardin jouluvalgustid vaikesed-sisustuskaubad kuunlad
-kook-ja-lauakatmine uhekordsed-noud kirja-ja-kontoritarbed remondi-ja-turvatooted
-kulmutus-ja-kokkamisvahendid omblus-ja-kasitootarbed meisterdamine ajakirjad autojuhtimine
-kotid aed-ja-lilled lemmikloom sport pallimangud jalgrattasoit ujumine matkamine
-tervisesport manguasjad lutid lapsehooldus ideed-ja-hooajad kodumasinad elektroonika
-meelelahutuselektroonika vaikesed-kodumasinad lambid-patareid-ja-taskulambid
-ilu-ja-tervis kosmeetika meigitooted hugieen loodustooted-ja-toidulisandid
-""".split())
+HEADERS = {
+    "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                   "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "et-EE,et;q=0.9,en;q=0.8",
+    "Referer": BASE,
+    "Cache-Control": "no-cache",
+}
 
-def n(s: str | None) -> str:
-    if not s: return ""
-    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode("ascii")
-    return " ".join(s.split())
+def looks_banned(url_or_text: str) -> bool:
+    t = (url_or_text or "").lower()
+    return any(kw in t for kw in BANNED)
 
-def load_seeds() -> list[str]:
-    try:
-        with open(CATS_FILE, "r", encoding="utf-8") as f:
-            seeds = [ln.strip() for ln in f if ln.strip() and not ln.startswith("#")]
-            if seeds:
-                return seeds
-    except FileNotFoundError:
-        pass
-    return DEFAULT_SEEDS
-
-def is_food_category(url: str) -> bool:
-    low = url.lower()
-    return "/e-selver/" in low and not any(k in low for k in EXCLUDE)
-
-async def fetch(session, url: str) -> tuple[str, str]:
-    async with session.get(url, timeout=aiohttp.ClientTimeout(total=35), allow_redirects=True) as r:
+async def fetch_html(session, url: str) -> tuple[str, str]:
+    async with session.get(url, timeout=aiohttp.ClientTimeout(total=30), allow_redirects=True) as r:
         r.raise_for_status()
         return await r.text(), str(r.url)
 
-def parse_jsonld(soup: BeautifulSoup) -> list[dict]:
+def extract_jsonld_list(soup: BeautifulSoup) -> list[dict]:
     out = []
-    for t in soup.find_all("script", {"type": "application/ld+json"}):
+    for tag in soup.find_all("script", {"type": "application/ld+json"}):
         try:
-            data = json.loads(t.string or "{}")
+            data = json.loads(tag.string or "{}")
             if isinstance(data, list): out.extend(data)
             else: out.append(data)
-        except Exception: pass
+        except Exception:
+            pass
     return out
 
-def pick_product(ld: dict) -> bool:
-    t = ld.get("@type")
-    if isinstance(t, str): t = [t.lower()]
-    if isinstance(t, list): t = [str(x).lower() for x in t]
-    return bool(t) and ("product" in t or "schema:product" in t)
+def product_urls_from_soup(soup: BeautifulSoup) -> set[str]:
+    # 1) obvious product cards
+    sels = [
+        "a.product-item-link",
+        "li.product-item a.product-item-link",
+        "a[href*='/toode/']",
+        "a[href*='/product/']",
+        "a[href*='/e-selver/']:has(img)",  # sometimes product tiles live under e-selver/
+    ]
+    urls = set()
+    for sel in sels:
+        for a in soup.select(sel):
+            href = a.get("href")
+            if href:
+                urls.add(href)
 
-def get_price_currency(ld: dict) -> tuple[float, str]:
-    offers = ld.get("offers") or {}
-    if isinstance(offers, list): offers = offers[0] if offers else {}
-    cur = (offers.get("priceCurrency") or "EUR").upper()
-    raw = str(offers.get("price", "0")).replace(",", ".")
-    try: price = float(raw)
-    except Exception: price = 0.0
-    return price, cur
+    # 2) fallback: ItemList JSON-LD
+    for block in extract_jsonld_list(soup):
+        if str(block.get("@type")).lower() in ("itemlist", "schema:itemlist"):
+            items = block.get("itemListElement") or []
+            for it in items:
+                # Many schemas use {"item": {"@id": "...", "url": "..."}} or direct "url"
+                item = it.get("item") if isinstance(it, dict) else None
+                url = None
+                if isinstance(item, dict):
+                    url = item.get("url") or item.get("@id")
+                if not url and isinstance(it, dict):
+                    url = it.get("url")
+                if url:
+                    urls.add(url)
+    return {url for url in urls if "/toode/" in url or "/product/" in url}
 
-def extract_breadcrumbs(ld_blocks: list[dict]) -> str:
-    for ld in ld_blocks:
-        t = str(ld.get("@type","")).lower()
-        if t in ("breadcrumblist","schema:breadcrumblist"):
-            try:
-                items = ld.get("itemListElement") or []
-                return " / ".join(n(x["item"]["name"]) for x in items if x.get("item"))
-            except Exception: pass
-    return ""
-
-def ean_from_details(soup: BeautifulSoup) -> str:
-    # Look for a “Ribakood/EAN/SKU” label followed by numbers
-    text = soup.get_text(" ", strip=True)
-    m = re.search(r"(Ribakood|EAN(?:-kood)?|SKU)\s*[:\-]?\s*(\d{8,14})", text, re.I)
-    if m: return m.group(2)
-    # Table-style dt/dd
-    for dt in soup.select("dt"):
-        lab = n(dt.get_text(" ", strip=True)).lower()
-        if any(k in lab for k in ("ribakood","ean","sku")):
-            dd = dt.find_next("dd")
-            if dd:
-                m2 = re.search(r"\d{8,14}", dd.get_text(" ", strip=True))
-                if m2: return m2.group(0)
-    return ""
-
-async def parse_product(session, url: str) -> dict | None:
-    html, final = await fetch(session, url)
-    soup = BeautifulSoup(html, "lxml")
-    ld_blocks = parse_jsonld(soup)
-    prod = next((ld for ld in ld_blocks if pick_product(ld)), None)
-    if not prod:
+def next_page_url(soup: BeautifulSoup, cur_url: str) -> str | None:
+    # multiple patterns for pagination
+    cand = (soup.select_one("a[rel='next']") or
+            soup.select_one("a.page-next") or
+            soup.select_one("a.pagination-next") or
+            soup.select_one("a[href*='?p=']"))
+    href = cand.get("href") if cand else None
+    if not href:
         return None
-    name = n(prod.get("name") or "")
-    price, currency = get_price_currency(prod)
-    ean = re.sub(r"\D", "", str(prod.get("gtin13") or prod.get("gtin") or prod.get("sku") or ""))
-    if not ean:
-        ean = ean_from_details(soup)
-    cat_path = extract_breadcrumbs(ld_blocks)
-    size = None
-    m = re.search(r"(\b\d+(?:[.,]\d+)?\s?(?:g|kg|ml|l)\b)", name, re.I)
-    if m: size = m.group(1).replace(",", ".")
-    return {
-        "ext_id": final,
-        "name": name,
-        "ean_raw": ean,
-        "size_text": size or "",
-        "price": price,
-        "currency": currency,
-        "category_path": cat_path,
-        "category_leaf": cat_path.split(" / ")[-1] if cat_path else "",
-    }
+    return urljoin(cur_url, href)
 
-def extract_links_from_category(html: str, base_url: str) -> tuple[set[str], str | None]:
-    soup = BeautifulSoup(html, "lxml")
-    cards = soup.select("a.product-item-link") or soup.select("li.product-item a[href*='/toode/']")
-    prods = {urljoin(base_url, a["href"]) for a in cards if a.get("href")}
-    # next page
-    nxt = soup.select_one("a[rel='next']") or soup.select_one("a.pages-item-next a") or soup.select_one("a[href*='?p=']")
-    next_url = urljoin(base_url, nxt["href"]) if nxt and nxt.get("href") else None
-    return prods, next_url
+def normalize_price(txt: str) -> float:
+    txt = (txt or "").strip().replace("\xa0", " ").replace(",", ".")
+    m = re.search(r"(\d+(?:\.\d+)?)", txt)
+    return float(m.group(1)) if m else 0.0
 
-async def crawl_category(session, start_url: str, writer, sem: asyncio.Semaphore):
-    if not is_food_category(start_url):
-        return
-    seen_pages = set()
-    pages_done = 0
-    url = start_url
-    while url and (PAGE_LIMIT == 0 or pages_done < PAGE_LIMIT):
-        if url in seen_pages: break
-        seen_pages.add(url)
-        try:
-            html, final = await fetch(session, url)
-        except Exception:
+def extract_price_from_card(card: BeautifulSoup) -> float:
+    # several possible price spans
+    for sel in [".price", ".price-final_price .price", ".amount", "[data-price-amount]"]:
+        el = card.select_one(sel)
+        if el and el.get_text(strip=True):
+            return normalize_price(el.get_text(strip=True))
+        if el and el.has_attr("data-price-amount"):
+            try: return float(el["data-price-amount"])
+            except Exception: pass
+    return 0.0
+
+async def scrape_category(session, url: str, writer, seen_products: set[str], page_limit: int = 0):
+    if looks_banned(url):
+        return 0
+    pages = 0
+    new_rows = 0
+    cur = url
+    while cur:
+        html, cur_final = await fetch_html(session, cur)
+        soup = BeautifulSoup(html, "lxml")
+
+        # product tiles
+        grid = soup.select("li.product-item, div.product-item, div.product-item-info")
+        links = product_urls_from_soup(soup)
+        # tie prices if possible (best-effort)
+        if grid and links:
+            # try pairing by index count
+            cards = []
+            for li in soup.select("li.product-item, div.product-item-info, div.product-item"):
+                a = li.select_one("a.product-item-link") or li.select_one("a[href*='/toode/']")
+                href = a.get("href") if a else None
+                if href:
+                    cards.append((href, extract_price_from_card(li)))
+
+            price_map = {href: price for (href, price) in cards}
+        else:
+            price_map = {}
+
+        wrote_this_page = 0
+        for href in links:
+            if looks_banned(href): continue
+            if href in seen_products: continue
+            seen_products.add(href)
+
+            price = price_map.get(href, 0.0)
+            writer.writerow({
+                "ext_id": href,
+                "name": "",                # filled by loader match, not needed here
+                "ean_raw": "",             # we only need ext_id + price for candidates too
+                "size_text": "",
+                "price": f"{price:.2f}" if price else "",
+                "currency": "EUR",
+                "category_path": "",
+                "category_leaf": "",
+            })
+            wrote_this_page += 1
+            new_rows += 1
+
+        pages += 1
+        if page_limit and pages >= page_limit:
             break
-        prods, next_url = extract_links_from_category(html, final)
-        for p in prods:
-            async with sem:
-                try:
-                    item = await parse_product(session, p)
-                    await asyncio.sleep(REQ_DELAY)
-                    if item:
-                        writer.writerow(item)
-                except Exception:
-                    pass
-        url = next_url
-        pages_done += 1
+
+        nxt = next_page_url(soup, cur_final)
+        if nxt and nxt != cur_final:
+            cur = nxt
+        else:
+            break
+
+        await asyncio.sleep(REQ_DELAY)
+
+    return new_rows
+
+async def discover_categories(session) -> list[str]:
+    # Try to get main nav categories from homepage
+    html, final = await fetch_html(session, BASE)
+    soup = BeautifulSoup(html, "lxml")
+    cats = set()
+
+    # broad nav anchors; prefer /e-selver/ or /catalog/ type paths
+    for a in soup.select("a[href]"):
+        href = a.get("href")
+        if not href: continue
+        url = urljoin(final, href)
+        p = urlparse(url).path.lower()
+        if any(seg in p for seg in ("/e-selver", "/catalog", "/tooted", "/food")):
+            if not looks_banned(url):
+                cats.add(url)
+
+    # If nothing found, fallback to a few common top-levels
+    if not cats:
+        fallback = [
+            "/e-selver/liha-ja-kalatooted",
+            "/e-selver/piimatooted-ja-munad",
+            "/e-selver/joogid",
+            "/e-selver/kuivtooted",
+            "/e-selver/kulmutatud-tooted",
+            "/e-selver/leib-sai-ja-kondiitritooted",
+        ]
+        cats = {urljoin(BASE, x) for x in fallback}
+
+    # De-dup
+    out = sorted({c for c in cats if c.startswith("http")})
+    return out
+
+def load_categories_from_file() -> list[str]:
+    if not os.path.exists(CATEGORIES_FILE):
+        return []
+    rows = []
+    with open(CATEGORIES_FILE, "r", encoding="utf-8") as f:
+        for ln in f:
+            ln = ln.strip()
+            if ln and not ln.startswith("#"):
+                rows.append(ln)
+    return rows
 
 async def main():
-    os.makedirs(os.path.dirname(OUT) or ".", exist_ok=True)
-    seeds = load_seeds()
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "et-EE,et;q=0.9,en;q=0.8",
-        "Referer": BASE,
-    }
-    sem = asyncio.Semaphore(CONC)
-    async with aiohttp.ClientSession(headers=headers) as session:
-        with open(OUT, "w", newline="", encoding="utf-8") as f:
-            w = csv.DictWriter(f, fieldnames=[
-                "ext_id","name","ean_raw","size_text","price","currency","category_path","category_leaf"
-            ])
-            w.writeheader()
-            tasks = [crawl_category(session, s, w, sem) for s in seeds]
-            await asyncio.gather(*tasks)
+    os.makedirs(os.path.dirname(OUTPUT), exist_ok=True)
+    sem = asyncio.Semaphore(CONCURRENCY)
+    seen_products: set[str] = set()
+
+    # CSV header
+    f = open(OUTPUT, "w", newline="", encoding="utf-8")
+    w = csv.DictWriter(f, fieldnames=[
+        "ext_id","name","ean_raw","size_text","price","currency","category_path","category_leaf"
+    ])
+    w.writeheader()
+
+    # gather category list
+    cats = load_categories_from_file()
+    async with aiohttp.ClientSession(headers=HEADERS) as session:
+        if not cats:
+            cats = await discover_categories(session)
+
+        # filter only “food-ish” and not banned
+        cats = [c for c in cats if not looks_banned(c)]
+        print(f"[selver] Categories to crawl: {len(cats)}")
+
+        async def work(url):
+            async with sem:
+                try:
+                    got = await scrape_category(session, url, w, seen_products, PAGE_LIMIT)
+                    print(f"[selver] {url} → +{got} products (total so far: {len(seen_products)})")
+                except Exception as e:
+                    print(f"[selver] ERR {url}: {e}")
+
+        await asyncio.gather(*(work(u) for u in cats))
+
+    f.close()
+    print(f"[selver] Finished. Unique product URLs written: {len(seen_products)}")
 
 if __name__ == "__main__":
     asyncio.run(main())
