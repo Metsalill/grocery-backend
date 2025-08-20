@@ -1,7 +1,7 @@
 name: Selver by EAN (scrape + upsert)
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: {}
   schedule:
     - cron: "17 3 * * *"  # 03:17 UTC daily
 
@@ -9,7 +9,8 @@ jobs:
   selver-by-ean:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # Use the public DB endpoint so GitHub runners can connect
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
     steps:
       - name: Checkout
@@ -26,6 +27,13 @@ jobs:
 
       - name: Prepare workspace
         run: mkdir -p data
+
+      - name: DB ping
+        run: |
+          set -euo pipefail
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\conninfo"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT now();"
 
       - name: Scrape Selver by EAN
         env:
@@ -81,8 +89,7 @@ jobs:
             FROM public.staging_selver_products st
             WHERE NOT EXISTS (
               SELECT 1 FROM banned
-              WHERE lower(COALESCE(st.category_path,'') || ' ' || COALESCE(st.category_leaf,'') || ' ' || COALESCE(st.name,''))
-                    LIKE '%' || banned.kw || '%'
+              WHERE lower(COALESCE(st.category_path,'') || ' ' || COALESCE(st.category_leaf,'') || ' ' || COALESCE(st.name,'')) LIKE '%' || banned.kw || '%'
             )
           )
           INSERT INTO public.prices (store_id, product_id, price, currency, collected_at)
