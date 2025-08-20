@@ -37,6 +37,24 @@ jobs:
           CATEGORIES_FILE: data/selver_categories.txt
         run: python scripts/selver_crawl_categories.py
 
+      # Choose a public, SSL-enabled DB URL for GitHub-hosted runners
+      - name: Select DB URL (public & SSL)
+        shell: bash
+        run: |
+          set -e
+          DB="${{ secrets.DATABASE_URL_PUBLIC }}"
+          if [ -z "$DB" ]; then DB="${{ secrets.DATABASE_URL }}"; fi
+          DB="${DB/postgres:\/\//postgresql://}"
+          if ! echo "$DB" | grep -qi 'sslmode='; then
+            if echo "$DB" | grep -q '?'; then DB="${DB}&sslmode=require"; else DB="${DB}?sslmode=require"; fi
+          fi
+          echo "DATABASE_URL=$DB" >> "$GITHUB_ENV"
+
+      - name: Show CSV head (debug)
+        run: |
+          ls -l data || true
+          head -n 5 data/selver.csv || true
+
       - name: Load CSV into staging & upsert
         shell: bash
         run: |
