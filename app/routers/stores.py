@@ -2,7 +2,6 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 import asyncpg
 from asyncpg import exceptions as pgerr
-from typing import List
 import math
 
 from settings import get_db_pool
@@ -31,15 +30,46 @@ async def nearby_stores(
 ):
     """
     Returns stores within radius_km, ordered by distance ASC.
-    Uses Postgres earthdistance if present; falls back to Python haversine.
+    Prefers Postgres cube+earthdistance with earth_box prefilter; falls back to earthdistance-only;
+    finally falls back to Python haversine with SQL bbox prefilter.
     """
     if pool is None:
         raise HTTPException(status_code=500, detail="DB not ready")
 
-    sql_earth = """
+    # Bounding box (used in Python fallback and optional SQL prefilter)
+    lat_deg = radius_km / 111.0
+    # avoid division by zero near the poles
+    cos_lat = max(math.cos(math.radians(lat)), 1e-6)
+    lon_deg = radius_km / (111.0 * cos_lat)
+    min_lat, max_lat = lat - lat_deg, lat + lat_deg
+    min_lon, max_lon = lon - lon_deg, lon + lon_deg
+
+    sql_earth_box = """
+    -- Requires: CREATE EXTENSION cube; CREATE EXTENSION earthdistance;
     SELECT
       s.id,
       s.name,
+      s.chain,
+      s.lat,
+      s.lon,
+      earth_distance(ll_to_earth($1::float8, $2::float8), ll_to_earth(s.lat, s.lon)) / 1000.0 AS distance_km
+    FROM stores s
+    WHERE s.lat IS NOT NULL AND s.lon IS NOT NULL
+      -- fast prefilter using earth_box to limit to a circle's bounding region
+      AND earth_box(ll_to_earth($1::float8, $2::float8), $3::float8 * 1000.0) @> ll_to_earth(s.lat, s.lon)
+      -- exact circle filter
+      AND earth_distance(ll_to_earth($1::float8, $2::float8), ll_to_earth(s.lat, s.lon)) <= ($3::float8 * 1000.0)
+    ORDER BY distance_km ASC, s.id
+    OFFSET $4
+    LIMIT  $5
+    """
+
+    sql_earth_simple = """
+    -- Works with earthdistance (cube optional but not required here)
+    SELECT
+      s.id,
+      s.name,
+      s.chain,
       s.lat,
       s.lon,
       earth_distance(ll_to_earth($1::float8, $2::float8), ll_to_earth(s.lat, s.lon)) / 1000.0 AS distance_km
@@ -52,14 +82,16 @@ async def nearby_stores(
     """
 
     async with pool.acquire() as conn:
+        # Try fast path with earth_box prefilter
         try:
             rows = await conn.fetch(
-                sql_earth, float(lat), float(lon), float(radius_km), int(offset), int(limit)
+                sql_earth_box, float(lat), float(lon), float(radius_km), int(offset), int(limit)
             )
             items = [
                 {
                     "id": r["id"],
                     "name": r["name"],
+                    "chain": r["chain"],
                     "lat": float(r["lat"]) if r["lat"] is not None else None,
                     "lon": float(r["lon"]) if r["lon"] is not None else None,
                     "distance_km": round(float(r["distance_km"]), 2) if r["distance_km"] is not None else None,
@@ -68,10 +100,35 @@ async def nearby_stores(
             ]
             return {"items": items, "offset": offset, "limit": limit}
         except (pgerr.UndefinedFunctionError, pgerr.UndefinedObjectError):
-            # Fallback: compute in Python if earthdistance isn't available
-            all_rows = await conn.fetch(
-                "SELECT id, name, lat, lon FROM stores WHERE lat IS NOT NULL AND lon IS NOT NULL"
-            )
+            # Fall back to earthdistance-only (no cube/earth_box)
+            try:
+                rows = await conn.fetch(
+                    sql_earth_simple, float(lat), float(lon), float(radius_km), int(offset), int(limit)
+                )
+                items = [
+                    {
+                        "id": r["id"],
+                        "name": r["name"],
+                        "chain": r["chain"],
+                        "lat": float(r["lat"]) if r["lat"] is not None else None,
+                        "lon": float(r["lon"]) if r["lon"] is not None else None,
+                        "distance_km": round(float(r["distance_km"]), 2) if r["distance_km"] is not None else None,
+                    }
+                    for r in rows
+                ]
+                return {"items": items, "offset": offset, "limit": limit}
+            except (pgerr.UndefinedFunctionError, pgerr.UndefinedObjectError):
+                # Final fallback: Python haversine with SQL bbox prefilter
+                all_rows = await conn.fetch(
+                    """
+                    SELECT id, name, chain, lat, lon
+                    FROM stores
+                    WHERE lat IS NOT NULL AND lon IS NOT NULL
+                      AND lat BETWEEN $1 AND $2
+                      AND lon BETWEEN $3 AND $4
+                    """,
+                    float(min_lat), float(max_lat), float(min_lon), float(max_lon),
+                )
 
     # Python fallback distance calculation + filter + sort + paginate
     computed = []
@@ -81,6 +138,7 @@ async def nearby_stores(
             computed.append({
                 "id": r["id"],
                 "name": r["name"],
+                "chain": r["chain"],
                 "lat": float(r["lat"]),
                 "lon": float(r["lon"]),
                 "distance_km": round(d, 2),
