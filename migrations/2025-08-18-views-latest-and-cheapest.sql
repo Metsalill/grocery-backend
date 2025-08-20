@@ -4,14 +4,13 @@
 BEGIN;
 
 -- Latest row per (product, store)
--- Works whether you have collected_at or only seen_at.
 CREATE OR REPLACE VIEW public.v_latest_store_prices AS
 SELECT DISTINCT ON (pr.product_id, pr.store_id)
   pr.product_id,
   pr.store_id,
   pr.price,
-  COALESCE(pr.collected_at, pr.seen_at) AS collected_at, -- canonical "latest" timestamp
-  pr.seen_at,                                            -- keep for backward-compat
+  COALESCE(pr.collected_at, pr.seen_at) AS collected_at, -- canonical "latest"
+  pr.seen_at,                                            -- keep for back-compat
   s.name      AS store_name,
   s.chain     AS store_chain,
   s.is_online AS is_online
@@ -23,7 +22,6 @@ ORDER BY
   COALESCE(pr.collected_at, pr.seen_at) DESC NULLS LAST;
 
 -- Cheapest current offer per product
--- Tie-breakers: newest collected_at, then lower store_id (stable)
 CREATE OR REPLACE VIEW public.v_cheapest_offer AS
 WITH latest AS (
   SELECT
