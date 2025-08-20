@@ -1,0 +1,126 @@
+name: Selver Category Crawl (food)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "42 3 * * *"  # 03:42 UTC daily
+
+jobs:
+  crawl-and-upsert:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          pip install -r requirements-scraper.txt || pip install aiohttp beautifulsoup4 lxml asyncpg
+
+      - name: Prepare workspace
+        run: |
+          mkdir -p data
+          # Optional curated category list: one URL per line (absolute or relative)
+          # If you commit data/selver_categories.txt it will be used; otherwise a tiny built-in seed is used.
+
+      - name: Crawl Selver categories
+        env:
+          OUTPUT_CSV: data/selver.csv              # loader expects this name
+          CONCURRENCY: "3"
+          REQ_DELAY: "0.8"
+          PAGE_LIMIT: "0"                          # 0 = no limit; set for testing
+          CATEGORIES_FILE: data/selver_categories.txt
+        run: python scripts/selver_crawl_categories.py
+
+      - name: Load CSV into staging & upsert
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          BEGIN;
+
+          -- ensure staging exists (idempotent)
+          CREATE TABLE IF NOT EXISTS public.staging_selver_products (
+            ext_id text PRIMARY KEY,
+            name text NOT NULL,
+            ean_raw text,
+            ean_norm text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '\D','','g')) STORED,
+            size_text text,
+            price numeric(12,2) NOT NULL,
+            currency text DEFAULT 'EUR',
+            category_path text,
+            category_leaf text,
+            collected_at timestamp with time zone DEFAULT now()
+          );
+          CREATE INDEX IF NOT EXISTS ix_selver_ean  ON public.staging_selver_products (ean_norm);
+          CREATE INDEX IF NOT EXISTS ix_selver_name_trgm ON public.staging_selver_products USING gin (name gin_trgm_ops);
+
+          TRUNCATE TABLE public.staging_selver_products;
+
+          \copy public.staging_selver_products (ext_id,name,ean_raw,size_text,price,currency,category_path,category_leaf)
+                FROM 'data/selver.csv' WITH (FORMAT csv, HEADER true);
+
+          -- Exclude non-food categories (same idea as Prisma)
+          WITH banned(kw) AS (
+            VALUES
+            ('sisustus'),('kodutekstiil'),('valgustus'),('kardin'),('jouluvalgustid'),
+            ('vaikesed-sisustuskaubad'),('kuunlad'),('kook-ja-lauakatmine'),
+            ('uhekordsed-noud'),('kirja-ja-kontoritarbed'),('remondi-ja-turvatooted'),
+            ('kulmutus-ja-kokkamisvahendid'),('omblus-ja-kasitootarbed'),('meisterdamine'),
+            ('ajakirjad'),('autojuhtimine'),('kotid'),('aed-ja-lilled'),('lemmikloom'),
+            ('sport'),('pallimangud'),('jalgrattasoit'),('ujumine'),('matkamine'),
+            ('tervisesport'),('manguasjad'),('lutid'),('lapsehooldus'),('ideed-ja-hooajad'),
+            ('kodumasinad'),('elektroonika'),('meelelahutuselektroonika'),
+            ('vaikesed-kodumasinad'),('lambid-patareid-ja-taskulambid'),
+            ('ilu-ja-tervis'),('kosmeetika'),('meigitooted'),('hugieen'),
+            ('loodustooted-ja-toidulisandid')
+          ),
+          filtered AS (
+            SELECT st.*
+            FROM public.staging_selver_products st
+            WHERE NOT EXISTS (
+              SELECT 1 FROM banned
+              WHERE lower(COALESCE(st.category_path,'') || ' ' || COALESCE(st.category_leaf,'') || ' ' || COALESCE(st.name,''))
+                    LIKE '%' || banned.kw || '%'
+            )
+          )
+          INSERT INTO public.prices (store_id, product_id, price, currency, collected_at)
+          SELECT
+            (SELECT id FROM public.stores WHERE name='Selver e-pood'),
+            pe.product_id,
+            f.price, f.currency, now()
+          FROM filtered f
+          JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm
+          ON CONFLICT ON CONSTRAINT uq_prices_store_product DO UPDATE
+            SET price = EXCLUDED.price,
+                currency = EXCLUDED.currency,
+                collected_at = EXCLUDED.collected_at;
+
+          -- queue unmatched (Selver products not in Prisma)
+          INSERT INTO public.selver_candidates (ext_id, ean_norm, name, size_text, price, currency, category_path, category_leaf)
+          SELECT f.ext_id, f.ean_norm, f.name, f.size_text, f.price, f.currency, f.category_path, f.category_leaf
+          FROM filtered f
+          LEFT JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm
+          WHERE pe.product_id IS NULL
+          ON CONFLICT (ext_id) DO UPDATE
+            SET price         = EXCLUDED.price,
+                currency      = EXCLUDED.currency,
+                size_text     = COALESCE(EXCLUDED.size_text, public.selver_candidates.size_text),
+                category_path = COALESCE(EXCLUDED.category_path, public.selver_candidates.category_path),
+                category_leaf = COALESCE(EXCLUDED.category_leaf, public.selver_candidates.category_leaf),
+                last_seen     = now();
+
+          COMMIT;
+
+          -- quick report
+          SELECT
+            (SELECT COUNT(*) FROM public.staging_selver_products) AS staged,
+            (SELECT COUNT(*) FROM public.prices WHERE store_id=(SELECT id FROM public.stores WHERE name='Selver e-pood')) AS price_rows,
+            (SELECT COUNT(*) FROM public.selver_candidates) AS candidates;
+          SQL
