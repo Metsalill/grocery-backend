@@ -1,0 +1,6 @@
+ext_id,name,ean,size_text,price,currency
+S-0001,Pasta Spaghetti 500 g,8001040034514,500 g,1.19,EUR
+S-0002,Tomato Passata 700 ml,80004555,700 ml,1.49,EUR
+S-0003,Olive Oil Extra Virgin 1 l,8001234567890,1 l,7.99,EUR
+S-0004,Milk 2.5% 1 l,4740125000012,1 l,1.09,EUR
+S-0005,Butter 82% 200 g,4740125000029,200 g,2.49,EUR
