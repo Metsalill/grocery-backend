@@ -20,10 +20,34 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update && sudo apt-get install -y postgresql-client
-          # show connection info (host/port/db), masks credentials automatically
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\conninfo"
-          # simple query
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT now();"
+
+      # Ensure required columns exist (idempotent)
+      - name: Ensure qty columns exist
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          BEGIN;
+          ALTER TABLE public.products
+            ADD COLUMN IF NOT EXISTS pack_pattern TEXT,
+            ADD COLUMN IF NOT EXISTS net_qty NUMERIC,
+            ADD COLUMN IF NOT EXISTS net_unit TEXT,
+            ADD COLUMN IF NOT EXISTS pack_count INTEGER;
+          DO $$
+          BEGIN
+            IF NOT EXISTS (
+              SELECT 1 FROM pg_constraint WHERE conname = 'products_net_unit_chk'
+            ) THEN
+              ALTER TABLE public.products
+                ADD CONSTRAINT products_net_unit_chk CHECK (net_unit IN ('g','ml'));
+            END IF;
+          END$$;
+          CREATE INDEX IF NOT EXISTS idx_products_net ON public.products (net_unit, net_qty);
+          COMMIT;
+          SQL
+          # Optional: show the columns to confirm
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\d+ public.products"
 
       - name: Install deps
         run: pip install asyncpg
