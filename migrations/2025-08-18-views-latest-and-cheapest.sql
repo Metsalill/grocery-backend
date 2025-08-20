@@ -1,7 +1,10 @@
 -- 2025-08-18-views-latest-and-cheapest.sql
--- Creates/updates both views used by the API
+-- Recreate views without any ALTER ... RENAME COLUMN
 
 BEGIN;
+
+-- Drop the dependent view first to avoid dependency issues
+DROP VIEW IF EXISTS public.v_cheapest_offer;
 
 -- Latest row per (product, store)
 CREATE OR REPLACE VIEW public.v_latest_store_prices AS
