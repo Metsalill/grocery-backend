@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import os, re, csv, asyncio, ssl, json, unicodedata
-from urllib.parse import urljoin, urlencode
+from urllib.parse import urljoin, urlencode, urlparse, parse_qs
 import aiohttp
 from bs4 import BeautifulSoup
 import asyncpg
@@ -12,6 +12,31 @@ OUTPUT = os.getenv("OUTPUT_CSV", "data/selver.csv")
 MAX_CONCURRENCY = int(os.getenv("CONCURRENCY", "5"))
 REQ_DELAY = float(os.getenv("REQ_DELAY", "0.8"))
 
+# ---------------- DB SSL handling (like libpq) ----------------
+def ssl_context_for(url: str) -> ssl.SSLContext | None:
+    """
+    Emulate libpq sslmode semantics for asyncpg:
+      - require/prefer/allow -> encrypt but do NOT verify cert/hostname
+      - verify-ca/verify-full -> verify (default context)
+      - disable -> no TLS
+    """
+    try:
+        q = parse_qs(urlparse(url).query)
+        mode = (q.get("sslmode", ["require"])[0] or "require").lower()
+    except Exception:
+        mode = "require"
+
+    if mode == "disable":
+        return None
+
+    ctx = ssl.create_default_context()
+    if mode in ("require", "prefer", "allow"):
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+    # verify-ca / verify-full keep defaults (verify)
+    return ctx
+
+# ---------------- helpers ----------------
 def norm(s: str | None) -> str:
     if not s:
         return ""
@@ -61,7 +86,6 @@ def pick_product(ld: dict) -> bool:
 
 def extract_from_jsonld(ld: dict) -> tuple[str, str, float, str]:
     name = norm(ld.get("name") or "")
-    # EAN/GTIN candidates commonly used
     ean = ld.get("gtin13") or ld.get("gtin") or ld.get("sku") or ""
     ean = re.sub(r"\D", "", str(ean))
     offers = ld.get("offers") or {}
@@ -85,26 +109,24 @@ def extract_breadcrumbs(ld_blocks: list[dict]) -> str:
                 continue
     return ""
 
-# NEW: fetch full page and return both HTML and the final URL (after redirects)
+# ------------- HTTP helpers -------------
 async def fetch_page(session, url: str) -> tuple[str, str]:
     async with session.get(url, timeout=aiohttp.ClientTimeout(total=30), allow_redirects=True) as r:
         r.raise_for_status()
         html = await r.text()
         return html, str(r.url)
 
-# UPDATED: detect when the search URL itself is a direct product page
 async def parse_search_result(session, ean: str) -> str | None:
     search_url = urljoin(SELVER_BASE, SEARCH_PATH) + urlencode({"q": ean})
     html, final_url = await fetch_page(session, search_url)
 
     soup = BeautifulSoup(html, "lxml")
-    # If this is already a product page (exact match), return it
+    # If already a product page (exact match)
     ld_blocks = parse_jsonld_scripts(soup)
-    prod = next((ld for ld in ld_blocks if pick_product(ld)), None)
-    if prod:
+    if next((ld for ld in ld_blocks if pick_product(ld)), None):
         return final_url
 
-    # Otherwise pick the first product card link in results
+    # Otherwise pick first product card
     first = (
         soup.select_one("a.product-item-link")
         or soup.select_one("li.product-item a[href*='/toode/']")
@@ -127,7 +149,7 @@ async def parse_product_page(session, url: str) -> dict | None:
         return None
 
     return {
-        "ext_id": url,  # used as a stable key for selver_candidates
+        "ext_id": url,
         "name": name,
         "ean_raw": ean_ld or "",
         "size_text": guess_size(name),
@@ -137,8 +159,14 @@ async def parse_product_page(session, url: str) -> dict | None:
         "category_leaf": cat_path.split(" / ")[-1] if cat_path else "",
     }
 
+# ------------- DB -------------
 async def fetch_eans_from_db(db_url: str) -> list[tuple[str, int]]:
-    conn = await asyncpg.connect(dsn=db_url, ssl=ssl.create_default_context())
+    # normalize and choose SSL behavior based on sslmode
+    if db_url.startswith("postgres://"):
+        db_url = "postgresql://" + db_url[len("postgres://") :]
+    ctx = ssl_context_for(db_url)
+
+    conn = await asyncpg.connect(dsn=db_url, ssl=ctx, timeout=30)
     rows = await conn.fetch(
         """
         SELECT DISTINCT pe.ean_norm, pe.product_id
@@ -149,6 +177,7 @@ async def fetch_eans_from_db(db_url: str) -> list[tuple[str, int]]:
     await conn.close()
     return [(r["ean_norm"], r["product_id"]) for r in rows]
 
+# ------------- main runner -------------
 async def runner():
     db_url = os.environ["DATABASE_URL"]
     eans = await fetch_eans_from_db(db_url)
@@ -159,7 +188,6 @@ async def runner():
     os.makedirs(os.path.dirname(OUTPUT), exist_ok=True)
     sem = asyncio.Semaphore(MAX_CONCURRENCY)
 
-    # more browser-like headers = better chance of consistent HTML
     headers = {
         "User-Agent": (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -201,7 +229,6 @@ async def runner():
                         return
                     w.writerow(item)
                 except Exception:
-                    # swallow & continue so one failure doesn't kill the batch
                     return
 
         await asyncio.gather(*(process(e) for e, _ in eans))
