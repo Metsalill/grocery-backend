@@ -1,4 +1,7 @@
--- migrations/2025-08-21-store-price-fallback.sql
+-- 2025-08-21-store-price-fallback.sql
+-- Fallback: use mapped source store's prices when a destination store
+-- has no own price; own prices always win.
+
 BEGIN;
 
 CREATE TABLE IF NOT EXISTS public.store_price_source (
@@ -9,10 +12,11 @@ CREATE TABLE IF NOT EXISTS public.store_price_source (
 
 CREATE INDEX IF NOT EXISTS ix_sps_source ON public.store_price_source(source_store_id);
 
--- Rebuild views to prefer a store's own prices, else fall back to the mapped source
+-- Rebuild views
 DROP VIEW IF EXISTS public.v_cheapest_offer;
 DROP VIEW IF EXISTS public.v_latest_store_prices;
 
+CREATE VIEW public.v_latest_store_prices AS
 WITH latest_self AS (
   SELECT DISTINCT ON (pr.product_id, pr.store_id)
     pr.product_id,
@@ -21,7 +25,8 @@ WITH latest_self AS (
     COALESCE(pr.collected_at, pr.seen_at) AS collected_at,
     pr.seen_at
   FROM public.prices pr
-  ORDER BY pr.product_id, pr.store_id, COALESCE(pr.collected_at, pr.seen_at) DESC NULLS LAST
+  ORDER BY pr.product_id, pr.store_id,
+           COALESCE(pr.collected_at, pr.seen_at) DESC NULLS LAST
 ),
 latest_src AS (
   SELECT DISTINCT ON (pr.product_id, pr.store_id)
@@ -31,19 +36,20 @@ latest_src AS (
     COALESCE(pr.collected_at, pr.seen_at) AS collected_at,
     pr.seen_at
   FROM public.prices pr
-  ORDER BY pr.product_id, pr.store_id, COALESCE(pr.collected_at, pr.seen_at) DESC NULLS LAST
+  ORDER BY pr.product_id, pr.store_id,
+           COALESCE(pr.collected_at, pr.seen_at) DESC NULLS LAST
 ),
 store_map AS (
-  -- Map each destination (real) store to the price source (or itself if not mapped)
+  -- destination store with its price source (or itself if no mapping)
   SELECT s.id AS dest_store_id, COALESCE(m.source_store_id, s.id) AS src_store_id
   FROM public.stores s
   LEFT JOIN public.store_price_source m ON m.store_id = s.id
 ),
 resolved AS (
-  -- Priority 1: store's own latest price
+  -- priority 1: store's own latest price
   SELECT
     ls.product_id,
-    ls.store_id                AS store_id,
+    ls.store_id                         AS store_id,
     ls.price,
     ls.collected_at,
     ls.seen_at,
@@ -56,22 +62,21 @@ resolved AS (
 
   UNION ALL
 
-  -- Priority 2: fallback to mapped source store's latest price
+  -- priority 2: fallback to mapped source store's latest price
   SELECT
     lsrc.product_id,
-    sm.dest_store_id           AS store_id,          -- expose the real store
+    sm.dest_store_id                    AS store_id,     -- expose real store
     lsrc.price,
     lsrc.collected_at,
     lsrc.seen_at,
-    ds.name     AS store_name,
-    ds.chain    AS store_chain,
+    ds.name      AS store_name,
+    ds.chain     AS store_chain,
     ds.is_online AS is_online,
-    2           AS priority
+    2            AS priority
   FROM store_map sm
   JOIN latest_src lsrc ON lsrc.store_id = sm.src_store_id
   JOIN public.stores ds ON ds.id = sm.dest_store_id
 )
-CREATE VIEW public.v_latest_store_prices AS
 SELECT DISTINCT ON (product_id, store_id)
   product_id,
   store_id,
@@ -84,7 +89,6 @@ SELECT DISTINCT ON (product_id, store_id)
 FROM resolved
 ORDER BY product_id, store_id, priority ASC, collected_at DESC NULLS LAST;
 
--- Dependent view (unchanged semantics)
 CREATE VIEW public.v_cheapest_offer AS
 WITH latest AS (
   SELECT
