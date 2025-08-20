@@ -4,7 +4,7 @@
 BEGIN;
 
 -- Latest row per (product, store)
--- Use DISTINCT ON with a unified timestamp so it works whether you have collected_at or only seen_at.
+-- Works whether you have collected_at or only seen_at.
 CREATE OR REPLACE VIEW public.v_latest_store_prices AS
 SELECT DISTINCT ON (pr.product_id, pr.store_id)
   pr.product_id,
@@ -23,10 +23,13 @@ ORDER BY
   COALESCE(pr.collected_at, pr.seen_at) DESC NULLS LAST;
 
 -- Cheapest current offer per product
--- tie-breakers: newest collected_at (coalesced), then lower store_id (stable)
+-- Tie-breakers: newest collected_at, then lower store_id (stable)
 CREATE OR REPLACE VIEW public.v_cheapest_offer AS
 WITH latest AS (
-  SELECT * FROM public.v_latest_store_prices
+  SELECT
+    product_id, store_id, price, collected_at, seen_at,
+    store_name, store_chain, is_online
+  FROM public.v_latest_store_prices
 ),
 ranked AS (
   SELECT
@@ -39,7 +42,9 @@ ranked AS (
     ) AS rn
   FROM latest
 )
-SELECT *
+SELECT
+  product_id, store_id, price, collected_at, seen_at,
+  store_name, store_chain, is_online
 FROM ranked
 WHERE rn = 1;
 
