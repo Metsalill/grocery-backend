@@ -1,15 +1,32 @@
 name: Backfill product qty
 on: workflow_dispatch
+
 jobs:
   run:
     runs-on: ubuntu-latest
+    # Use the PUBLIC DB URL for GitHub-hosted runners
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      - run: pip install asyncpg
+          python-version: "3.11"
+
+      # Quick sanity check that the DB host is reachable
+      - name: DB ping
+        run: |
+          set -euo pipefail
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          # show connection info (host/port/db), masks credentials automatically
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\conninfo"
+          # simple query
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT now();"
+
+      - name: Install deps
+        run: pip install asyncpg
+
       - name: Run backfill script
         run: python scripts/backfill_qty.py
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
