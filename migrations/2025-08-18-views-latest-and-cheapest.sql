@@ -4,28 +4,26 @@
 BEGIN;
 
 -- Latest row per (product, store)
+-- Use DISTINCT ON with a unified timestamp so it works whether you have collected_at or only seen_at.
 CREATE OR REPLACE VIEW public.v_latest_store_prices AS
-SELECT
+SELECT DISTINCT ON (pr.product_id, pr.store_id)
   pr.product_id,
   pr.store_id,
   pr.price,
-  pr.seen_at,
+  COALESCE(pr.collected_at, pr.seen_at) AS collected_at, -- canonical "latest" timestamp
+  pr.seen_at,                                            -- keep for backward-compat
   s.name      AS store_name,
   s.chain     AS store_chain,
   s.is_online AS is_online
 FROM public.prices pr
-JOIN (
-  SELECT product_id, store_id, MAX(seen_at) AS max_seen
-  FROM public.prices
-  GROUP BY product_id, store_id
-) last
-  ON last.product_id = pr.product_id
- AND last.store_id   = pr.store_id
- AND last.max_seen   = pr.seen_at
-LEFT JOIN public.stores s ON s.id = pr.store_id;
+LEFT JOIN public.stores s ON s.id = pr.store_id
+ORDER BY
+  pr.product_id,
+  pr.store_id,
+  COALESCE(pr.collected_at, pr.seen_at) DESC NULLS LAST;
 
 -- Cheapest current offer per product
--- tie-breakers: newest seen_at, then lower store_id (stable)
+-- tie-breakers: newest collected_at (coalesced), then lower store_id (stable)
 CREATE OR REPLACE VIEW public.v_cheapest_offer AS
 WITH latest AS (
   SELECT * FROM public.v_latest_store_prices
@@ -35,7 +33,9 @@ ranked AS (
     latest.*,
     ROW_NUMBER() OVER (
       PARTITION BY product_id
-      ORDER BY price ASC, seen_at DESC, store_id ASC
+      ORDER BY price ASC,
+               collected_at DESC NULLS LAST,
+               store_id ASC
     ) AS rn
   FROM latest
 )
