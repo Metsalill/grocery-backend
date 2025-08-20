@@ -3,7 +3,7 @@
 
 BEGIN;
 
--- Drop the dependent view first to avoid dependency issues
+-- Drop dependent view first
 DROP VIEW IF EXISTS public.v_cheapest_offer;
 
 -- Latest row per (product, store)
