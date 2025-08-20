@@ -109,6 +109,79 @@ def extract_breadcrumbs(ld_blocks: list[dict]) -> str:
                 continue
     return ""
 
+# --------- HTML fallbacks (Ribakood + price) ----------
+EAN_DIGITS = re.compile(r"\d{8,14}")
+
+def extract_ribakood_from_html(soup: BeautifulSoup) -> str:
+    """Find 'Ribakood' on the page and return digits only."""
+    label_re = re.compile(r"\bribakood\b", re.I)
+
+    # table tr > th/td or td/td
+    for tr in soup.select("table tr"):
+        cells = [c.get_text(" ", strip=True) for c in tr.find_all(["th", "td"], recursive=False)]
+        if not cells:
+            continue
+        if label_re.search(cells[0]):
+            val = cells[-1] if len(cells) > 1 else ""
+            digits = re.sub(r"\D", "", val)
+            if EAN_DIGITS.fullmatch(digits or ""):
+                return digits
+
+    # definition list dt/dd
+    for dt in soup.select("dt"):
+        if label_re.search(dt.get_text(" ", strip=True)):
+            dd = dt.find_next_sibling("dd")
+            if dd:
+                digits = re.sub(r"\D", "", dd.get_text(" ", strip=True))
+                if EAN_DIGITS.fullmatch(digits or ""):
+                    return digits
+
+    # generic label node then sibling
+    for node in soup.find_all(string=label_re):
+        parent = node.parent
+        if parent:
+            sib = parent.find_next_sibling()
+            if sib:
+                digits = re.sub(r"\D", "", sib.get_text(" ", strip=True))
+                if EAN_DIGITS.fullmatch(digits or ""):
+                    return digits
+
+    return ""
+
+def extract_price_currency_fallback(soup: BeautifulSoup) -> tuple[float, str]:
+    """Try to get price/currency when JSON-LD is absent or incomplete."""
+    # itemprop
+    pmeta = soup.select_one("[itemprop=price]")
+    cmeta = soup.select_one("[itemprop=priceCurrency]")
+    if pmeta and pmeta.get("content"):
+        try:
+            price = float(str(pmeta["content"]).replace(",", "."))
+            currency = (cmeta.get("content") if cmeta and cmeta.get("content") else "EUR").upper()
+            return price, currency
+        except Exception:
+            pass
+
+    # data-price-amount
+    amt = soup.select_one("[data-price-amount]")
+    if amt and amt.get("data-price-amount"):
+        try:
+            return float(str(amt["data-price-amount"]).replace(",", ".")), "EUR"
+        except Exception:
+            pass
+
+    # visible price span
+    span = soup.select_one("span.price, .price-wrapper .price")
+    if span:
+        txt = span.get_text(" ", strip=True)
+        m = re.search(r"(\d+(?:[.,]\d+)?)", txt)
+        if m:
+            try:
+                return float(m.group(1).replace(",", ".")), ("EUR" if "€" in txt or "eur" in txt.lower() else "EUR")
+            except Exception:
+                pass
+
+    return 0.0, "EUR"
+
 # ------------- HTTP helpers -------------
 async def fetch_page(session, url: str) -> tuple[str, str]:
     async with session.get(url, timeout=aiohttp.ClientTimeout(total=30), allow_redirects=True) as r:
@@ -140,10 +213,22 @@ async def parse_product_page(session, url: str) -> dict | None:
     soup = BeautifulSoup(html, "lxml")
     ld_blocks = parse_jsonld_scripts(soup)
     prod = next((ld for ld in ld_blocks if pick_product(ld)), None)
-    if not prod:
-        return None
 
-    name, ean_ld, price, currency = extract_from_jsonld(prod)
+    name, ean_ld, price, currency = "", "", 0.0, "EUR"
+    if prod:
+        name, ean_ld, price, currency = extract_from_jsonld(prod)
+
+    # Fallbacks when JSON-LD is missing/incomplete
+    if not ean_ld:
+        ean_ld = extract_ribakood_from_html(soup) or ""
+
+    if not name:
+        title = soup.select_one("h1, .page-title .base")
+        name = norm(title.get_text(" ", strip=True)) if title else ""
+
+    if not price or price <= 0:
+        price, currency = extract_price_currency_fallback(soup)
+
     cat_path = extract_breadcrumbs(ld_blocks)
     if looks_banned(name, cat_path, url):
         return None
