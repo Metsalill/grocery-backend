@@ -5,9 +5,14 @@ on:
   schedule:
     - cron: "42 3 * * *"  # 03:42 UTC daily
 
+concurrency:
+  group: selver-category-crawl
+  cancel-in-progress: true
+
 jobs:
   crawl-and-upsert:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
@@ -34,9 +39,10 @@ jobs:
           PYTHONUNBUFFERED: "1"           # live python stdout/stderr
           DEBUG: "pw:api"                 # verbose Playwright action logs
           OUTPUT_CSV: data/selver.csv
-          REQ_DELAY: "0.8"
-          PAGE_LIMIT: "0"
+          REQ_DELAY: "0.6"
+          PAGE_LIMIT: "0"                 # 0 = crawl all pages
           CATEGORIES_FILE: data/selver_categories.txt
+          ALLOWLIST_ONLY: "1"             # use strict allowlist in the script
         run: |
           set -euo pipefail
           set -x
@@ -102,17 +108,12 @@ jobs:
             data/selver_run.log
             data/selver_debug/**/*.png
           if-no-files-found: warn
+          retention-days: 7
 
-      - name: Load CSV into staging & upsert
+      - name: Prepare DB (staging & helper tables)
         shell: bash
         run: |
           set -euo pipefail
-
-          if [ ! -s data/selver.csv ]; then
-            echo "No rows in data/selver.csv — skipping load."
-            exit 0
-          fi
-
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           BEGIN;
           CREATE TABLE IF NOT EXISTS public.staging_selver_products (
@@ -129,9 +130,38 @@ jobs:
           );
           CREATE INDEX IF NOT EXISTS ix_selver_ean       ON public.staging_selver_products (ean_norm);
           CREATE INDEX IF NOT EXISTS ix_selver_name_trgm ON public.staging_selver_products USING gin (name gin_trgm_ops);
-          TRUNCATE TABLE public.staging_selver_products;
+
+          -- Ensure store exists
+          INSERT INTO public.stores (name, chain)
+          SELECT 'Selver e-pood', 'Selver'
+          WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE name='Selver e-pood');
+
+          -- Candidates table for unlinked EANs
+          CREATE TABLE IF NOT EXISTS public.selver_candidates (
+            ext_id        text PRIMARY KEY,
+            ean_norm      text,
+            name          text,
+            size_text     text,
+            price         numeric(12,2),
+            currency      text,
+            category_path text,
+            category_leaf text,
+            last_seen     timestamptz DEFAULT now()
+          );
           COMMIT;
+
+          TRUNCATE TABLE public.staging_selver_products;
           SQL
+
+      - name: Load CSV into staging & upsert
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ ! -s data/selver.csv ]; then
+            echo "No rows in data/selver.csv — skipping load."
+            exit 0
+          fi
 
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c \
             "\copy public.staging_selver_products (ext_id,name,ean_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER"
