@@ -2,10 +2,26 @@ name: "Selver Category Crawl (food)"
 
 on:
   workflow_dispatch:
+    inputs:
+      click_products:
+        description: "Click into PDPs (1) vs direct links (0)"
+        required: false
+        default: "0"
+      page_limit:
+        description: "Max pages per category (0 = all)"
+        required: false
+        default: "0"
+      log_console:
+        description: "Page console logging (0 | warn | all)"
+        required: false
+        default: "0"
+      req_delay:
+        description: "Seconds between steps"
+        required: false
+        default: "0.6"
   schedule:
     - cron: "42 3 * * *"  # 03:42 UTC daily
 
-# replace your current concurrency block with this:
 concurrency:
   group: ${{ github.event_name == 'workflow_dispatch' && format('selver-category-crawl-{0}', github.run_id) || 'selver-category-crawl' }}
   cancel-in-progress: true
@@ -26,6 +42,14 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-scraper.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
       - name: Install deps (crawler + Playwright)
         run: |
           pip install -r requirements-scraper.txt || pip install aiohttp beautifulsoup4 lxml asyncpg playwright
@@ -37,13 +61,16 @@ jobs:
       - name: Crawl Selver categories (Playwright)
         shell: bash
         env:
-          PYTHONUNBUFFERED: "1"           # live python stdout/stderr
-          DEBUG: "pw:api"                 # verbose Playwright action logs
+          PYTHONUNBUFFERED: "1"                     # live python stdout/stderr
+          # (intentionally NOT setting DEBUG=pw:api to keep logs quiet)
           OUTPUT_CSV: data/selver.csv
-          REQ_DELAY: "0.6"
-          PAGE_LIMIT: "0"                 # 0 = crawl all pages
+          REQ_DELAY: ${{ github.event_name == 'workflow_dispatch' && inputs.req_delay || '0.6' }}
+          PAGE_LIMIT: ${{ github.event_name == 'workflow_dispatch' && inputs.page_limit || '0' }}   # 0 = all
           CATEGORIES_FILE: data/selver_categories.txt
-          ALLOWLIST_ONLY: "1"             # use strict allowlist in the script
+          ALLOWLIST_ONLY: "1"                       # strict allowlist in script
+          USE_ROUTER: "1"
+          CLICK_PRODUCTS: ${{ github.event_name == 'workflow_dispatch' && inputs.click_products || '0' }}
+          LOG_CONSOLE: ${{ github.event_name == 'workflow_dispatch' && inputs.log_console || '0' }}
         run: |
           set -euo pipefail
           set -x
@@ -121,6 +148,7 @@ jobs:
             ext_id        text PRIMARY KEY,
             name          text NOT NULL,
             ean_raw       text,
+            sku_raw       text, -- new optional column kept for reference
             ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '\D','','g')) STORED,
             size_text     text,
             price         numeric(12,2) NOT NULL,
@@ -129,6 +157,10 @@ jobs:
             category_leaf text,
             collected_at  timestamptz DEFAULT now()
           );
+          -- Ensure new column exists if table predated this workflow
+          ALTER TABLE public.staging_selver_products
+            ADD COLUMN IF NOT EXISTS sku_raw text;
+
           CREATE INDEX IF NOT EXISTS ix_selver_ean       ON public.staging_selver_products (ean_norm);
           CREATE INDEX IF NOT EXISTS ix_selver_name_trgm ON public.staging_selver_products USING gin (name gin_trgm_ops);
 
@@ -164,8 +196,9 @@ jobs:
             exit 0
           fi
 
+          # Now includes sku_raw; downstream that ignores extra columns stays safe.
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c \
-            "\copy public.staging_selver_products (ext_id,name,ean_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER"
+            "\copy public.staging_selver_products (ext_id,name,ean_raw,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER"
 
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           DO $$
