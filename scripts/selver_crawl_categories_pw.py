@@ -1,4 +1,5 @@
 # … (header & imports unchanged)
+import os  # needed for os.makedirs / os.path.dirname
 
 BLOCK_HOSTS = {
     "adobe.com", "assets.adobedtm.com", "adobedtm.com", "demdex.net", "omtrdc.net",
