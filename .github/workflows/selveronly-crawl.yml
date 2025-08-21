@@ -1,4 +1,4 @@
-name: Selver Category Crawl (food)
+name: "Selver Category Crawl (food)"
 
 on:
   workflow_dispatch:
@@ -31,33 +31,34 @@ jobs:
       - name: Crawl Selver categories (Playwright)
         shell: bash
         env:
-          PYTHONUNBUFFERED: "1"           # live prints from Python
+          PYTHONUNBUFFERED: "1"           # live python stdout/stderr
+          DEBUG: "pw:api"                 # verbose Playwright action logs
           OUTPUT_CSV: data/selver.csv
           REQ_DELAY: "0.8"
-          PAGE_LIMIT: "0"                 # 0 = no page cap
+          PAGE_LIMIT: "0"
           CATEGORIES_FILE: data/selver_categories.txt
-          DEBUG: ""                       # set to "pw:api" for verbose PW logs
         run: |
           set -euo pipefail
+          set -x
           echo "::group::Runtime info"
           python --version
           echo "Start (UTC): $(date -u)"
           echo "::endgroup::"
 
-          # Run crawler; tee to a log we can show and upload
+          # Run crawler for up to 12 minutes, line-buffered, and tee the log
           stdbuf -oL -eL timeout 12m python -u scripts/selver_crawl_categories_pw.py \
             2>&1 | tee data/selver_run.log
           status=${PIPESTATUS[0]}
 
           echo "End (UTC): $(date -u) — crawler exit code: ${status}"
-          # Always show quick file stats so we can see if anything was produced
+
           echo "::group::Crawler outputs"
-          ls -l data || true
-          du -h data/selver.csv 2>/dev/null || true
-          du -h data/selver_run.log 2>/dev/null || true
+          ls -lah data || true
+          [ -f data/selver.csv ] && { echo "CSV size:"; wc -l data/selver.csv; du -h data/selver.csv; } || echo "CSV not found"
+          [ -f data/selver_run.log ] && { echo "Log size:"; du -h data/selver_run.log; } || echo "Log not found"
           echo "::endgroup::"
 
-          # Do not fail the job even if the crawler returned non-zero
+          # don't fail the job if crawler non-zero — we still want artifacts
           if [ "${status}" -ne 0 ]; then
             echo "::warning::Crawler exited non-zero (${status}); continuing"
           fi
@@ -65,8 +66,12 @@ jobs:
       - name: Dump crawler log (tail)
         if: always()
         run: |
-          echo "----- last 200 lines of data/selver_run.log -----"
-          tail -n 200 data/selver_run.log || echo "(no log found)"
+          echo "----- last 300 lines of data/selver_run.log -----"
+          if [ -f data/selver_run.log ]; then
+            tail -n 300 data/selver_run.log
+          else
+            echo "(no log found)"
+          fi
 
       - name: Install psql client
         run: |
@@ -135,8 +140,7 @@ jobs:
           DO $$
           BEGIN
             IF EXISTS (
-              SELECT 1
-              FROM pg_constraint c
+              SELECT 1 FROM pg_constraint c
               JOIN pg_class t ON t.oid = c.conrelid
               WHERE c.conname = 'uq_prices_store_product'
                 AND t.relname = 'prices'
