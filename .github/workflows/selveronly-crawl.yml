@@ -31,16 +31,30 @@ jobs:
       - name: Crawl Selver categories (Playwright)
         shell: bash
         env:
-          PYTHONUNBUFFERED: "1"
+          PYTHONUNBUFFERED: "1"           # unbuffered Python prints
           OUTPUT_CSV: data/selver.csv
           REQ_DELAY: "0.8"
-          PAGE_LIMIT: "0"                   # 0 = no page cap
+          PAGE_LIMIT: "0"                 # 0 = no page cap
           CATEGORIES_FILE: data/selver_categories.txt
+          # Set DEBUG to "pw:api" temporarily if we want Playwright API logs
+          DEBUG: ""
         run: |
           set -euo pipefail
-          timeout 12m python scripts/selver_crawl_categories_pw.py || {
-            echo "::warning::Crawler exited non-zero (continuing: will still upload CSV and attempt load)";
-          }
+          echo "::group::Runtime info"
+          python --version
+          echo "Start (UTC): $(date -u)"
+          echo "::endgroup::"
+
+          # Force line-buffered stdout/err and tee into a log we can inspect later.
+          # timeout ensures we never hang this job indefinitely.
+          stdbuf -oL -eL timeout 12m python -u scripts/selver_crawl_categories_pw.py \
+            2>&1 | tee data/selver_run.log
+          status=${PIPESTATUS[0]}
+
+          echo "End (UTC): $(date -u) — crawler exit code: ${status}"
+          if [ "${status}" -ne 0 ]; then
+            echo "::warning::Crawler exited non-zero (${status}); continuing to next steps"
+          fi
 
       - name: Install psql client
         run: |
@@ -56,7 +70,7 @@ jobs:
           wc -l data/selver.csv || true
           echo "---- first 10 lines ----"
           head -n 10 data/selver.csv || true
-
+          # Fallback if empty but sample exists
           if [ ! -s data/selver.csv ] && [ -s data/selver-sample.csv ]; then
             echo "Crawl produced no rows; using data/selver-sample.csv as fallback."
             cp -f data/selver-sample.csv data/selver.csv
@@ -69,6 +83,7 @@ jobs:
           name: selver-crawl-${{ github.run_id }}
           path: |
             data/selver.csv
+            data/selver_run.log
             data/selver_debug/**/*.png
           if-no-files-found: warn
 
