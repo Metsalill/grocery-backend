@@ -5,8 +5,9 @@ on:
   schedule:
     - cron: "42 3 * * *"  # 03:42 UTC daily
 
+# replace your current concurrency block with this:
 concurrency:
-  group: selver-category-crawl
+  group: ${{ github.event_name == 'workflow_dispatch' && format('selver-category-crawl-{0}', github.run_id) || 'selver-category-crawl' }}
   cancel-in-progress: true
 
 jobs:
