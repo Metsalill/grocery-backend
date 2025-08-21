@@ -364,13 +364,30 @@ def _router(route, request):
     try:
         url = request.url
         host = urlparse(url).netloc.lower()
-        # Only consider blocking known 3rd-party hosts; always let selver.ee through
+        # Only block known 3rd-party hosts; always let selver.ee through.
         if _should_block(url) and not host.endswith("selver.ee"):
-            return route.abort()
-        return route.continue_()
+            route.abort()
+        else:
+            route.continue_()
     except Exception:
-        # On any unexpected error, fail open so we don't break navigation
-        return route.continue_()
+        # Fail open so we don't break navigation.
+        try:
+            route.continue_()
+        except Exception:
+            pass
+
+# ---------------------------------------------------------------------------
+# Console logger (robust across Playwright versions)
+
+def _console_logger(msg):
+    try:
+        t = getattr(msg, "type", None)
+        t = t() if callable(t) else (t or "")
+        txt = getattr(msg, "text", None)
+        txt = txt() if callable(txt) else (txt or "")
+        print(f"[pw] {t} {txt}")
+    except Exception:
+        pass
 
 # ---------------------------------------------------------------------------
 # Main crawl
@@ -401,8 +418,8 @@ def crawl():
             page.set_default_navigation_timeout(15000)
             page.set_default_timeout(8000)
 
-            # (optional) pipe console to logs for visibility
-            page.on("console", lambda msg: print(f"[pw] {msg.type()} {msg.text()}"))
+            # pipe console to logs for visibility (safe across versions)
+            page.on("console", _console_logger)
 
             # ---- seeds
             print("[selver] collecting seeds…")
