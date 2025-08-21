@@ -36,7 +36,9 @@ jobs:
           CATEGORIES_FILE: data/selver_categories.txt
         run: python scripts/selver_crawl_categories_pw.py
 
-      # (keep your existing "Load CSV into staging & upsert" step exactly as you have it)
+      - name: Install psql client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
       - name: Load CSV into staging & upsert
         shell: bash
         run: |
@@ -45,6 +47,7 @@ jobs:
             echo "No rows in data/selver.csv — skipping load."
             exit 0
           fi
+
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           BEGIN;
           CREATE TABLE IF NOT EXISTS public.staging_selver_products (
@@ -71,10 +74,15 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           DO $$
           BEGIN
+            IF NOT EXISTS (SELECT 1 FROM public.stores WHERE name='Selver e-pood') THEN
+              INSERT INTO public.stores(name, chain, is_online) VALUES ('Selver e-pood','Selver',true);
+            END IF;
+
             IF EXISTS (
-              SELECT 1 FROM pg_constraint c
+              SELECT 1
+              FROM pg_constraint c
               JOIN pg_class t ON t.oid = c.conrelid
-              WHERE c.conname = 'uq_prices_store_product' AND t.relname='prices'
+              WHERE c.conname = 'uq_prices_store_product' AND t.relname = 'prices'
             ) THEN
               WITH banned(kw) AS ( VALUES
                 ('sisustus'),('kodutekstiil'),('valgustus'),('kardin'),('jouluvalgustid'),
@@ -90,7 +98,8 @@ jobs:
                 ('loodustooted-ja-toidulisandid')
               ),
               filtered AS (
-                SELECT st.* FROM public.staging_selver_products st
+                SELECT st.*
+                FROM public.staging_selver_products st
                 WHERE NOT EXISTS (
                   SELECT 1 FROM banned
                   WHERE lower(COALESCE(st.category_path,'') || ' ' ||
@@ -114,9 +123,33 @@ jobs:
             END IF;
           END$$;
 
+          -- Use the same banned filter for candidates to avoid non-food noise
+          WITH banned(kw) AS ( VALUES
+            ('sisustus'),('kodutekstiil'),('valgustus'),('kardin'),('jouluvalgustid'),
+            ('vaikesed-sisustuskaubad'),('kuunlad'),('kook-ja-lauakatmine'),
+            ('uhekordsed-noud'),('kirja-ja-kontoritarbed'),('remondi-ja-turvatooted'),
+            ('kulmutus-ja-kokkamisvahendid'),('omblus-ja-kasitootarbed'),('meisterdamine'),
+            ('ajakirjad'),('autojuhtimine'),('kotid'),('aed-ja-lilled'),('lemmikloom'),
+            ('sport'),('pallimangud'),('jalgrattasoit'),('ujumine'),('matkamine'),
+            ('tervisesport'),('manguasjad'),('lutid'),('lapsehooldus'),('ideed-ja-hooajad'),
+            ('kodumasinad'),('elektroonika'),('meelelahutuselektroonika'),
+            ('vaikesed-kodumasinad'),('lambid-patareid-ja-taskulambid'),
+            ('ilu-ja-tervis'),('kosmeetika'),('meigitooted'),('hugieen'),
+            ('loodustooted-ja-toidulisandid')
+          ),
+          filtered AS (
+            SELECT st.*
+            FROM public.staging_selver_products st
+            WHERE NOT EXISTS (
+              SELECT 1 FROM banned
+              WHERE lower(COALESCE(st.category_path,'') || ' ' ||
+                          COALESCE(st.category_leaf,'') || ' ' ||
+                          COALESCE(st.name,'')) LIKE '%' || banned.kw || '%'
+            )
+          )
           INSERT INTO public.selver_candidates (ext_id, ean_norm, name, size_text, price, currency, category_path, category_leaf)
           SELECT f.ext_id, f.ean_norm, f.name, f.size_text, f.price, f.currency, f.category_path, f.category_leaf
-          FROM public.staging_selver_products f
+          FROM filtered f
           LEFT JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm
           WHERE pe.product_id IS NULL
           ON CONFLICT (ext_id) DO UPDATE
