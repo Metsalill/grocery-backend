@@ -67,7 +67,7 @@ BANNED_KEYWORDS = {
 # Size finder (best-effort from title)
 SIZE_RE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
 
-# Third-party noise to block
+# Third-party noise to block (unused now; kept for reference)
 BLOCK_HOSTS = {
     "adobe.com","assets.adobedtm.com","adobedtm.com","demdex.net","omtrdc.net",
     "googletagmanager.com","google-analytics.com","doubleclick.net","facebook.net",
@@ -187,14 +187,32 @@ def accept_cookies(page):
         except Exception:
             pass
 
-def safe_goto(page, url: str, timeout: int = 20000) -> bool:
+def safe_goto(page, url: str, timeout: int = 30000) -> bool:
     try:
         page.goto(url, wait_until="domcontentloaded", timeout=timeout)
         accept_cookies(page)
+        # let the SPA fetch & render before we read anchors
+        try:
+            page.wait_for_load_state("networkidle", timeout=timeout)
+        except Exception:
+            pass
+        time.sleep(0.6)
         return True
     except Exception as e:
         print(f"[selver] NAV FAIL {url} -> {type(e).__name__}: {e}")
         return False
+
+def _wait_listing_ready(page):
+    """Give the SPA a chance to draw product cards/links."""
+    try:
+        for _ in range(6):
+            if (page.locator("button:has-text('OSTA')").count() > 0 or
+                page.locator("a[href^='/'][href*='-'] img").count() > 0 or
+                page.locator(".product, .product-list, .productgrid").count() > 0):
+                return
+            time.sleep(0.5)
+    except Exception:
+        pass
 
 # ---------------------------------------------------------------------------
 # Discovery
@@ -204,6 +222,7 @@ def _extract_category_links(page) -> list[str]:
     Pull canonical category links from the current page.
     Reads real <a href="..."> (not router props), filters to category-like paths.
     """
+    _wait_listing_ready(page)
     try:
         hrefs = page.evaluate("""
           [...document.querySelectorAll('a[href^="/"]')]
@@ -293,14 +312,18 @@ def _max_page_number(page) -> int:
 
 def collect_product_links_from_listing(page, seed_url: str) -> set[str]:
     links: set[str] = set()
-    # determine total pages
+
+    # make sure current page (seed) has rendered before reading pagination
+    _wait_listing_ready(page)
     max_pages = _max_page_number(page)
     if PAGE_LIMIT > 0:
         max_pages = min(max_pages, PAGE_LIMIT)
+
     for n in range(1, max_pages + 1):
         url = seed_url if n == 1 else _with_page(seed_url, n)
         if not safe_goto(page, url):
             continue
+        _wait_listing_ready(page)
         time.sleep(REQ_DELAY)
 
         try:
@@ -414,7 +437,7 @@ def jsonld_pick_breadcrumbs(blocks: list[dict]) -> list[str]:
     return []
 
 # ---------------------------------------------------------------------------
-# Request router (block noisy 3P but never Selver)
+# Request router (kept for reference; NOT used now)
 
 def _router(route, request):
     try:
@@ -444,22 +467,34 @@ def crawl():
 
         with sync_playwright() as p:
             print("[selver] launching chromium (headless)")
-            browser = p.chromium.launch(headless=True)
-            context = browser.new_context(
-                user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                            "AppleWebKit(537.36) Chrome/124.0 Safari/537.36")
+            browser = p.chromium.launch(
+                headless=True,
+                args=["--disable-blink-features=AutomationControlled",
+                      "--no-sandbox", "--disable-dev-shm-usage"]
             )
-            context.route("**/*", _router)
+            context = browser.new_context(
+                locale="et-EE",
+                user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                            "AppleWebKit/537.36 (KHTML, like Gecko) "
+                            "Chrome/124.0.0.0 Safari/537.36"),
+                extra_http_headers={
+                    "Accept-Language": "et-EE,et;q=0.9,en-US;q=0.8,en;q=0.7",
+                    "Upgrade-Insecure-Requests": "1",
+                },
+                ignore_https_errors=True,
+            )
+            # IMPORTANT: do NOT install the router; it breaks SPA data fetches
+            # context.route("**/*", _router)
 
             page = context.new_page()
-            page.set_default_navigation_timeout(20000)
-            page.set_default_timeout(8000)
+            page.set_default_navigation_timeout(30000)
+            page.set_default_timeout(10000)
             page.on("console", lambda m: print(f"[pw] {m.type}: {m.text}"))
 
             # ---- seeds (canonical, no /e-selver/)
             print("[selver] collecting seeds…")
             # Start from strict allowlist
-            seeds: list[str] = [urljoin(BASE, p) for p in STRICT_ALLOWLIST]
+            seeds: list[str] = [urljoin(BASE, pth) for pth in STRICT_ALLOWLIST]
 
             # Optional: merge extra seeds from file
             if os.path.exists(CATEGORIES_FILE):
