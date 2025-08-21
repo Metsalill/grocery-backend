@@ -29,6 +29,27 @@ REQ_DELAY = float(os.getenv("REQ_DELAY", "0.6"))
 PAGE_LIMIT = int(os.getenv("PAGE_LIMIT", "0"))  # 0 = no limit
 CATEGORIES_FILE = os.getenv("CATEGORIES_FILE", "data/selver_categories.txt")
 
+# Strict allowlist of FOOD roots/leaves (canonical, no /e-selver/)
+STRICT_ALLOWLIST = [
+    "/puu-ja-koogiviljad",
+    "/liha-ja-kalatooted",
+    "/piimatooted-munad-void",
+    "/juustud",
+    "/leivad-saiad-kondiitritooted",
+    "/valmistoidud",
+    "/kuivained-hommikusoogid-hoidised",
+    "/maitseained-ja-puljongid",                 # family
+    "/maitseained-ja-puljongid/kastmed",         # leaf
+    "/maitseained-ja-puljongid/olid-ja-aadikad", # õlid ja äädikad (diacritics stripped)
+    "/suupisted-ja-maiustused",
+    "/joogid",
+    "/sugavkylm",                                # frozen (slug variant)
+    "/kulmutatud-toidukaubad",                   # alt frozen slug
+    "/suurpakendid",
+]
+# If 1, crawl only the allowlist (and pages under those roots). If 0, use allowlist as seeds but allow BFS.
+ALLOWLIST_ONLY = int(os.getenv("ALLOWLIST_ONLY", "1")) == 1
+
 # Ban obvious non-food areas (for category discovery)
 BANNED_KEYWORDS = {
     "sisustus","kodutekstiil","valgustus","kardin","jouluvalgustid",
@@ -96,6 +117,12 @@ def _clean_abs(href: str) -> str | None:
     # strip query/fragment, unify trailing slash
     return urlunsplit((parts.scheme, parts.netloc, parts.path.rstrip("/"), "", ""))
 
+def _in_allowlist(path: str) -> bool:
+    if not STRICT_ALLOWLIST:
+        return True
+    p = (path or "/").rstrip("/")
+    return any(p == root or p.startswith(root + "/") for root in STRICT_ALLOWLIST)
+
 def _is_selver_product_like(url: str) -> bool:
     u = urlparse(url)
     host = (u.netloc or urlparse(BASE).netloc).lower()
@@ -123,6 +150,8 @@ def _is_category_like_path(path: str) -> bool:
     no digits in the last segment, and NOT a PDP nor banned keyword.
     """
     p = (path or "/").lower()
+    if ALLOWLIST_ONLY and STRICT_ALLOWLIST and not _in_allowlist(p):
+        return False
     if "/e-selver/" in p or p.startswith("/ru/"):
         return False
     if any(bad in p for bad in BANNED_KEYWORDS):
@@ -189,6 +218,8 @@ def _extract_category_links(page) -> list[str]:
         if not u:
             continue
         path = urlparse(u).path
+        if ALLOWLIST_ONLY and STRICT_ALLOWLIST and not _in_allowlist(path):
+            continue
         if _is_category_like_path(path) and u not in seen:
             seen.add(u)
             out.append(u)
@@ -427,7 +458,10 @@ def crawl():
 
             # ---- seeds (canonical, no /e-selver/)
             print("[selver] collecting seeds…")
-            seeds: list[str] = []
+            # Start from strict allowlist
+            seeds: list[str] = [urljoin(BASE, p) for p in STRICT_ALLOWLIST]
+
+            # Optional: merge extra seeds from file
             if os.path.exists(CATEGORIES_FILE):
                 with open(CATEGORIES_FILE, "r", encoding="utf-8") as cf:
                     for ln in cf:
@@ -437,15 +471,13 @@ def crawl():
                             if u:
                                 seeds.append(u)
 
+            # If still empty (unlikely), do a light discovery bootstrap
             if not seeds:
-                # Start at home and the main section landing; harvest canonical links
                 base_starts = [BASE, urljoin(BASE, "/")]
                 for su in base_starts:
                     if safe_goto(page, su):
                         time.sleep(REQ_DELAY)
                         seeds.extend(_extract_category_links(page))
-
-                # As a fallback, probe a few well-known top groups to open the left menu tree
                 for probe in [
                     "/maailma-kook-maitseained-puljongid",
                     "/puu-ja-koogiviljad",
@@ -460,7 +492,8 @@ def crawl():
 
             # De-dup and keep order
             seeds = list(dict.fromkeys(seeds))
-            cats = discover_categories(page, seeds)
+
+            cats = seeds if ALLOWLIST_ONLY else discover_categories(page, seeds)
 
             print(f"[selver] Categories to crawl: {len(cats)}")
             for cu in cats[:40]:
