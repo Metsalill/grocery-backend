@@ -38,10 +38,13 @@ BANNED_KEYWORDS = {  # lowercased substrings
 # Size finder (best-effort from title)
 SIZE_RE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
 
-# Third-party noise to block
+# Third-party noise to block (extended)
 BLOCK_HOSTS = {
     "adobe.com", "assets.adobedtm.com", "adobedtm.com", "demdex.net", "omtrdc.net",
     "googletagmanager.com", "google-analytics.com", "doubleclick.net", "facebook.net",
+    "cookiebot.com", "consent.cookiebot.com", "imgct.cookiebot.com",
+    "klevu.com", "js.klevu.com", "klimg.klevu.com",
+    "cobrowsing.promon.net",
 }
 
 # Paths that are definitely not product detail pages
@@ -90,7 +93,7 @@ def _is_selver_product_like(url: str) -> bool:
     return path.count("/") >= 1
 
 # ---------------------------------------------------------------------------
-# Cookies & navigation
+# Cookies / overlays / navigation
 
 def accept_cookies(page):
     for sel in [
@@ -98,7 +101,7 @@ def accept_cookies(page):
         "button:has-text('Nõustun')",
         "button:has-text('Accept')",
         "button[aria-label*='accept']",
-        "button:has-text('Luba kõik')",  # some variations
+        "button:has-text('Luba kõik')",
     ]:
         try:
             btn = page.locator(sel)
@@ -110,11 +113,25 @@ def accept_cookies(page):
         except Exception:
             pass
 
+def quiesce_overlays(page):
+    """Remove common overlays that may steal focus or cover content."""
+    try:
+        page.evaluate("""
+            for (const sel of [
+              '#klevu_min_ltr', '.klevu-mlntr', '.klevu-fluid',
+              '.Notification.fixed', '#onetrust-consent-sdk',
+              '#CookiebotDialog', 'iframe[name="_uspapiLocator"]'
+            ]) { document.querySelectorAll(sel).forEach(n => n.remove()); }
+        """)
+    except Exception:
+        pass
+
 def safe_goto(page, url: str, timeout: int = 15000) -> bool:
     """Navigate and return True/False instead of throwing."""
     try:
         page.goto(url, wait_until="domcontentloaded", timeout=timeout)
         accept_cookies(page)
+        quiesce_overlays(page)
         return True
     except Exception as e:
         print(f"[selver] NAV FAIL {url} -> {type(e).__name__}: {e}")
@@ -141,6 +158,7 @@ def discover_categories(page, start_urls: list[str]) -> list[str]:
             page.goto(url, timeout=30000)
             page.wait_for_load_state("domcontentloaded")
             accept_cookies(page)
+            quiesce_overlays(page)
         except TimeoutError:
             continue
         time.sleep(REQ_DELAY)
@@ -235,6 +253,7 @@ def collect_product_links(page, page_limit: int = 0) -> set[str]:
             page.wait_for_load_state("domcontentloaded")
             time.sleep(REQ_DELAY)
             accept_cookies(page)
+            quiesce_overlays(page)
         except Exception:
             break
 
@@ -264,7 +283,7 @@ def breadcrumbs(page) -> list[str]:
 
 def extract_price(page) -> tuple[float, str]:
     # find something like "5,99 €" on product page
-    for sel in ["text=/€/","span:has-text('€')","div:has-text('€')"]:
+    for sel in ["text=/€/", "span:has-text('€')", "div:has-text('€')"]:
         try:
             node = page.locator(sel).first
             if node and node.count() > 0:
@@ -322,7 +341,7 @@ def jsonld_pick_product(blocks: list[dict]) -> dict:
     for b in blocks:
         t = (b.get("@type") or "")
         t_low = t.lower() if isinstance(t, str) else ""
-        if "product" in t_low or any(k in b for k in ("gtin13","gtin","sku")):
+        if "product" in t_low or any(k in b for k in ("gtin13", "gtin", "sku")):
             return b
     return {}
 
@@ -337,6 +356,21 @@ def jsonld_pick_breadcrumbs(blocks: list[dict]) -> list[str]:
             except Exception:
                 continue
     return []
+
+# ---------------------------------------------------------------------------
+# Request router (blocks noisy third parties but never Selver)
+
+def _router(route, request):
+    try:
+        url = request.url
+        host = urlparse(url).netloc.lower()
+        # Only consider blocking known 3rd-party hosts; always let selver.ee through
+        if _should_block(url) and not host.endswith("selver.ee"):
+            return route.abort()
+        return route.continue_()
+    except Exception:
+        # On any unexpected error, fail open so we don't break navigation
+        return route.continue_()
 
 # ---------------------------------------------------------------------------
 # Main crawl
@@ -361,19 +395,7 @@ def crawl():
                 user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36")
             )
-def _router(route, request):
-    try:
-        url = request.url
-        host = urlparse(url).netloc.lower()
-        # Only consider blocking known 3rd-party hosts; always let selver.ee through
-        if _should_block(url) and not host.endswith("selver.ee"):
-            return route.abort()
-        return route.continue_()
-    except Exception:
-        # On any unexpected error, fail open so we don't break navigation
-        return route.continue_()
-
-context.route("**/*", _router)
+            context.route("**/*", _router)
 
             page = context.new_page()
             page.set_default_navigation_timeout(15000)
@@ -412,7 +434,7 @@ context.route("**/*", _router)
             for cu in cats:
                 print(f"[selver]   {cu}")
 
-            # ---- crawl
+            # ---- crawl categories -> collect product URLs
             product_urls: set[str] = set()
             for ci, cu in enumerate(cats, 1):
                 if not safe_goto(page, cu):
@@ -429,7 +451,7 @@ context.route("**/*", _router)
                 product_urls.update(links)
                 print(f"[selver] {cu} → +{len(links)} products (total so far: {len(product_urls)})")
 
-            # ---- visit product pages
+            # ---- visit product pages -> write rows
             rows_written = 0
             for i, pu in enumerate(sorted(product_urls), 1):
                 if not _is_selver_product_like(pu):  # safety
