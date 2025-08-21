@@ -179,39 +179,46 @@ def discover_categories(page, start_urls: list[str]) -> list[str]:
 # ---------------------------------------------------------------------------
 # Listing helpers (infinite-scroll + pagination)
 
-def _harvest_links_on_page(page) -> set[str]:
-    links: set[str] = set()
+def _harvest_via_js(page) -> set[str]:
+    """Fast DOM-wide href sweep; then filter to product-like."""
     try:
-        as_ = page.locator("a[href]")
-        cnt = as_.count()
-        for i in range(cnt):
-            href = as_.nth(i).get_attribute("href")
-            if not href: continue
-            u = urljoin(BASE, href)
-            if _is_selver_product_like(u):
-                links.add(u)
+        hrefs = page.evaluate("""
+            Array.from(new Set(
+              Array.from(document.querySelectorAll('a[href]'))
+                   .map(a => a.getAttribute('href') || '')
+                   .filter(Boolean)
+            ))
+        """)
     except Exception:
-        pass
-    return links
+        hrefs = []
+    out: set[str] = set()
+    for href in hrefs:
+        u = urljoin(BASE, href)
+        if _is_selver_product_like(u):
+            out.add(u)
+    return out
 
 def collect_product_links(page, page_limit: int = 0) -> set[str]:
     """On a category page, infinite-scrolls and/or paginates to collect product links."""
     links: set[str] = set()
     pages_seen = 0
 
-    def infinite_scroll(max_rounds=25, settle_rounds=2):
+    def infinite_scroll(max_rounds=40, settle_rounds=3):
         nonlocal links
         last_count = -1
         same_count = 0
-        for round_i in range(max_rounds):
-            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        for _ in range(max_rounds):
             try:
-                page.wait_for_load_state("networkidle", timeout=4000)
+                page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
             except Exception:
                 pass
-            time.sleep(REQ_DELAY)
+            try:
+                page.wait_for_load_state("networkidle", timeout=4500)
+            except Exception:
+                pass
+            time.sleep(0.35)
             accept_cookies(page); quiesce_overlays(page)
-            links |= _harvest_links_on_page(page)
+            links |= _harvest_via_js(page)
 
             if len(links) == last_count:
                 same_count += 1
@@ -245,6 +252,22 @@ def collect_product_links(page, page_limit: int = 0) -> set[str]:
         except Exception:
             break
 
+    # Debug peek
+    if links:
+        sample = list(sorted(links))[:5]
+        print(f"[selver]   harvested {len(links)} product-like links; sample: {sample}")
+    else:
+        try:
+            any_hrefs = page.evaluate("""
+                Array.from(new Set(
+                  Array.from(document.querySelectorAll('a[href]'))
+                       .slice(0, 12)
+                       .map(a => a.getAttribute('href'))
+                ))
+            """)
+            print(f"[selver]   no product-like links; first anchors on page: {any_hrefs}")
+        except Exception:
+            print("[selver]   no product-like links; (JS href probe failed)")
     return links
 
 # ---------------------------------------------------------------------------
@@ -376,7 +399,7 @@ def crawl():
             page.set_default_navigation_timeout(15000)
             page.set_default_timeout(8000)
 
-            # FIX: .type and .text are PROPERTIES in Playwright Python
+            # NOTE: .type / .text are properties in Playwright Python
             page.on("console", lambda m: print(f"[pw] {m.type}: {m.text}"))
 
             # ---- seeds
@@ -415,6 +438,10 @@ def crawl():
                     try: page.screenshot(path=f"{dbg_dir}/cat_nav_fail_{ci}.png", full_page=True)
                     except Exception: pass
                     continue
+
+                # Rare SPA bounce guard
+                if page.url.startswith("about:blank"):
+                    safe_goto(page, cu)
 
                 time.sleep(REQ_DELAY)
                 links = collect_product_links(page, page_limit=PAGE_LIMIT)
