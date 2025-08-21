@@ -79,8 +79,8 @@ jobs:
           echo "Start (UTC): $(date -u)"
           echo "::endgroup::"
 
-          # Run crawler for up to 12 minutes, line-buffered, and tee the log
-          stdbuf -oL -eL timeout 12m python -u scripts/selver_crawl_categories_pw.py \
+          # Run crawler for up to 25 minutes, allow 60s for clean shutdown
+          stdbuf -oL -eL timeout -k 60s 25m python -u scripts/selver_crawl_categories_pw.py \
             2>&1 | tee data/selver_run.log
           status=${PIPESTATUS[0]}
 
