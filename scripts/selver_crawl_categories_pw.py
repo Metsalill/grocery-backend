@@ -5,14 +5,22 @@
 Selver category crawler → CSV (staging_selver_products)
 
 Fixes:
-- Uses canonical category URLs (no `/e-selver/`)
-- Paginates with `?page=N` (e.g. 1..14), not infinite scroll
+- Uses canonical category URLs (no /e-selver/)
+- Paginates with ?page=N (e.g. 1..14), not infinite scroll
 - Collects PDP links from listing pages only
 - Visits PDPs and extracts: ext_id(url), name, ean_raw, size_text, price, currency,
   category_path, category_leaf.
+- (New) Blocks noisy 3P assets + tight router (reduces CORS spam & speeds up pages)
+- (New) Console output quenched by default; enable full logs with VERBOSE_CONSOLE=1
 
 Run:
   OUTPUT_CSV=data/selver.csv python scripts/selver_crawl_categories_pw.py
+
+Env toggles:
+  HEADLESS=0            # show browser for debugging (default 1)
+  PAGE_LIMIT=3          # cap listing pagination (0 = no cap)
+  ALLOWLIST_ONLY=1      # only crawl the allowlist roots (default 1)
+  VERBOSE_CONSOLE=1     # print all console logs (default 0 → only warnings/errors)
 """
 
 from __future__ import annotations
@@ -28,6 +36,8 @@ OUTPUT = os.getenv("OUTPUT_CSV", "data/selver.csv")
 REQ_DELAY = float(os.getenv("REQ_DELAY", "0.6"))
 PAGE_LIMIT = int(os.getenv("PAGE_LIMIT", "0"))  # 0 = no limit
 CATEGORIES_FILE = os.getenv("CATEGORIES_FILE", "data/selver_categories.txt")
+HEADLESS = int(os.getenv("HEADLESS", "1")) == 1
+VERBOSE_CONSOLE = int(os.getenv("VERBOSE_CONSOLE", "0")) == 1
 
 # Strict allowlist of FOOD roots/leaves (canonical, no /e-selver/)
 STRICT_ALLOWLIST = [
@@ -67,12 +77,20 @@ BANNED_KEYWORDS = {
 # Size finder (best-effort from title)
 SIZE_RE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
 
-# Third-party noise to block (unused now; kept for reference)
+# Third-party noise to block (expanded)
 BLOCK_HOSTS = {
+    # existing…
     "adobe.com","assets.adobedtm.com","adobedtm.com","demdex.net","omtrdc.net",
     "googletagmanager.com","google-analytics.com","doubleclick.net","facebook.net",
     "cookiebot.com","consent.cookiebot.com","imgct.cookiebot.com",
     "klevu.com","js.klevu.com","klimg.klevu.com","promon.net",
+    # new (seen in logs)
+    "consentcdn.cookiebot.com",
+    "js-agent.newrelic.com","nr-data.net","newrelic.com",
+    "pingdom.net","rum-collector-2.pingdom.net",
+    "typekit.net","use.typekit.net","p.typekit.net",
+    "cdn.jsdelivr.net","googletagservices.com",
+    "hotjar.com","static.hotjar.com",
 }
 
 ALLOWED_HOSTS = {"www.selver.ee", "selver.ee"}
@@ -437,14 +455,34 @@ def jsonld_pick_breadcrumbs(blocks: list[dict]) -> list[str]:
     return []
 
 # ---------------------------------------------------------------------------
-# Request router (kept for reference; NOT used now)
+# Request router (tight, allows Selver; blocks common 3P noise)
 
 def _router(route, request):
     try:
         url = request.url
         host = urlparse(url).netloc.lower()
-        if any(host == d or host.endswith("." + d) for d in BLOCK_HOSTS) and not host.endswith("selver.ee"):
+
+        # Always allow Selver first
+        if host.endswith("selver.ee") or host in ALLOWED_HOSTS:
+            return route.continue_()
+
+        # Block by resource type for non-Selver origins
+        rtype = request.resource_type
+        if rtype in ("image", "font", "media", "stylesheet", "websocket"):
             return route.abort()
+
+        # Kill 3P JS/XHR entirely (metrics/trackers/CDNs)
+        if rtype in ("script", "xhr", "fetch"):
+            return route.abort()
+
+        # Explicit domain blocklist (belt & suspenders)
+        for d in BLOCK_HOSTS:
+            try:
+                if host == d or host.endswith("." + d):
+                    return route.abort()
+            except Exception:
+                continue
+
         return route.continue_()
     except Exception:
         return route.continue_()
@@ -466,9 +504,9 @@ def crawl():
         w.writeheader()
 
         with sync_playwright() as p:
-            print("[selver] launching chromium (headless)")
+            print("[selver] launching chromium (headless)" if HEADLESS else "[selver] launching chromium (headed)")
             browser = p.chromium.launch(
-                headless=True,
+                headless=HEADLESS,
                 args=["--disable-blink-features=AutomationControlled",
                       "--no-sandbox", "--disable-dev-shm-usage"]
             )
@@ -479,17 +517,30 @@ def crawl():
                             "Chrome/124.0.0.0 Safari/537.36"),
                 extra_http_headers={
                     "Accept-Language": "et-EE,et;q=0.9,en-US;q=0.8,en;q=0.7",
-                    "Upgrade-Insecure-Requests": "1",
+                    # NOTE: do NOT send Upgrade-Insecure-Requests: 1 → triggers CORS preflight failures upstream
                 },
                 ignore_https_errors=True,
             )
-            # IMPORTANT: do NOT install the router; it breaks SPA data fetches
-            # context.route("**/*", _router)
+
+            # Install the tight router (safe for SPA; allows Selver only)
+            context.route("**/*", _router)
 
             page = context.new_page()
-            page.set_default_navigation_timeout(30000)
-            page.set_default_timeout(10000)
-            page.on("console", lambda m: print(f"[pw] {m.type}: {m.text}"))
+            # Slightly tighter timeouts to avoid hanging on blocked assets
+            page.set_default_navigation_timeout(20000)
+            page.set_default_timeout(8000)
+
+            if VERBOSE_CONSOLE:
+                page.on("console", lambda m: print(f"[pw] {m.type}: {m.text}"))
+            else:
+                def _log_only_warnings_and_errors(m):
+                    try:
+                        if m.type in ("warning", "error"):
+                            t = (m.text or "").replace("\n", " ").strip()
+                            print(f"[pw] {m.type}: {t[:880]}")
+                    except Exception:
+                        pass
+                page.on("console", _log_only_warnings_and_errors)
 
             # ---- seeds (canonical, no /e-selver/)
             print("[selver] collecting seeds…")
