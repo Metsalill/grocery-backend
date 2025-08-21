@@ -29,7 +29,7 @@ concurrency:
 jobs:
   crawl-and-upsert:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60   # give headroom for a long crawl + DB work
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
@@ -79,10 +79,14 @@ jobs:
           echo "Start (UTC): $(date -u)"
           echo "::endgroup::"
 
-          # Run crawler for up to 25 minutes, allow 60s for clean shutdown
-          stdbuf -oL -eL timeout -k 60s 25m python -u scripts/selver_crawl_categories_pw.py \
+          # Soft-run: allow partial results on timeout (exit 124) and still continue the job.
+          set +e
+          set +o pipefail
+          stdbuf -oL -eL timeout -k 60s 40m python -u scripts/selver_crawl_categories_pw.py \
             2>&1 | tee data/selver_run.log
           status=${PIPESTATUS[0]}
+          set -o pipefail
+          set -e
 
           echo "End (UTC): $(date -u) — crawler exit code: ${status}"
 
@@ -92,8 +96,9 @@ jobs:
           [ -f data/selver_run.log ] && { echo "Log size:"; du -h data/selver_run.log; } || echo "Log not found"
           echo "::endgroup::"
 
-          # don't fail the job if crawler non-zero — we still want artifacts
-          if [ "${status}" -ne 0 ]; then
+          if [ "${status}" -eq 124 ]; then
+            echo "::warning::Crawler hit the time budget (timeout 40m). Continuing with partial results."
+          elif [ "${status}" -ne 0 ]; then
             echo "::warning::Crawler exited non-zero (${status}); continuing"
           fi
 
@@ -148,7 +153,7 @@ jobs:
             ext_id        text PRIMARY KEY,
             name          text NOT NULL,
             ean_raw       text,
-            sku_raw       text, -- new optional column kept for reference
+            sku_raw       text, -- optional column for SKU capture
             ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '\D','','g')) STORED,
             size_text     text,
             price         numeric(12,2) NOT NULL,
@@ -157,7 +162,7 @@ jobs:
             category_leaf text,
             collected_at  timestamptz DEFAULT now()
           );
-          -- Ensure new column exists if table predated this workflow
+          -- Backfill column if table existed before
           ALTER TABLE public.staging_selver_products
             ADD COLUMN IF NOT EXISTS sku_raw text;
 
@@ -196,7 +201,7 @@ jobs:
             exit 0
           fi
 
-          # Now includes sku_raw; downstream that ignores extra columns stays safe.
+          # Includes sku_raw; downstream readers that ignore extra columns remain safe.
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c \
             "\copy public.staging_selver_products (ext_id,name,ean_raw,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER"
 
