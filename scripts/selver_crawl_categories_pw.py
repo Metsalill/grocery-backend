@@ -57,6 +57,29 @@ def is_food_category(path: str) -> bool:
         return False
     return not any(bad in p for bad in BANNED_KEYWORDS)
 
+# -------------------- Playwright helpers --------------------
+
+BLOCK_HOSTS = {
+    # Adobe privacy/analytics that sometimes stalls page "load"
+    "adobe.com", "assets.adobedtm.com", "adobedtm.com", "demdex.net", "omtrdc.net",
+    # a few common trackers (harmless to block)
+    "googletagmanager.com", "google-analytics.com", "doubleclick.net", "facebook.net",
+}
+
+def _should_block(url: str) -> bool:
+    h = urlparse(url).netloc.lower()
+    return any(h == d or h.endswith("." + d) for d in BLOCK_HOSTS)
+
+def safe_goto(page, url: str, timeout: int = 30000) -> bool:
+    """Navigate but only wait for DOMContentLoaded; return False on timeout."""
+    try:
+        page.goto(url, wait_until="domcontentloaded", timeout=timeout)
+        return True
+    except TimeoutError:
+        return False
+
+# -------------------- Discovery / parsing --------------------
+
 def discover_categories(page, start_urls: list[str]) -> list[str]:
     """BFS over category pages; read sidebar & content category tiles."""
     seen, queue, out = set(), list(start_urls), []
@@ -71,10 +94,7 @@ def discover_categories(page, start_urls: list[str]) -> list[str]:
 
     while queue:
         url = queue.pop(0)
-        try:
-            page.goto(url, timeout=30000)
-            page.wait_for_load_state("domcontentloaded")
-        except TimeoutError:
+        if not safe_goto(page, url):
             continue
         time.sleep(REQ_DELAY)
 
@@ -258,6 +278,8 @@ def extract_ean(page, url: str) -> str:
     # 3) nothing found
     return ""
 
+# -------------------- Main --------------------
+
 def crawl():
     os.makedirs(os.path.dirname(OUTPUT) or ".", exist_ok=True)
     with open(OUTPUT, "w", newline="", encoding="utf-8") as f:
@@ -278,6 +300,11 @@ def crawl():
                     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
                 )
             )
+
+            # Block troublesome analytics/Adobe requests that can stall "load"
+            context.route("**/*", lambda route, req:
+                route.abort() if _should_block(req.url) else route.continue_())
+
             page = context.new_page()
 
             # 1) initial seeds
@@ -291,33 +318,31 @@ def crawl():
                         seeds.append(urljoin(BASE, ln))
             if not seeds:
                 # auto discover top food categories from /e-selver
-                page.goto(urljoin(BASE, "/e-selver"), timeout=30000)
-                page.wait_for_load_state("domcontentloaded")
-                accept_cookies(page)
-                time.sleep(REQ_DELAY)
-                # collect top-level category links
-                top = set()
-                for sel in [
-                    "a[href*='/e-selver/']",
-                    "nav a[href*='/e-selver/']",
-                    "aside a[href*='/e-selver/']",
-                ]:
-                    try:
-                        aa = page.locator(sel)
-                        for i in range(aa.count()):
-                            href = aa.nth(i).get_attribute("href")
-                            if not href:
-                                continue
-                            u = urljoin(BASE, href)
-                            if is_food_category(urlparse(u).path):
-                                top.add(u)
-                    except Exception:
-                        pass
-                seeds = sorted(top)
+                if safe_goto(page, urljoin(BASE, "/e-selver")):
+                    accept_cookies(page)
+                    time.sleep(REQ_DELAY)
+                    # collect top-level category links
+                    top = set()
+                    for sel in [
+                        "a[href*='/e-selver/']",
+                        "nav a[href*='/e-selver/']",
+                        "aside a[href*='/e-selver/']",
+                    ]:
+                        try:
+                            aa = page.locator(sel)
+                            for i in range(aa.count()):
+                                href = aa.nth(i).get_attribute("href")
+                                if not href:
+                                    continue
+                                u = urljoin(BASE, href)
+                                if is_food_category(urlparse(u).path):
+                                    top.add(u)
+                        except Exception:
+                            pass
+                    seeds = sorted(top)
 
             # 2) discover all nested food categories
             cats = discover_categories(page, seeds)
-            # print listing to job log
             print(f"[selver] Categories to crawl: {len(cats)}")
             for cu in cats:
                 print(f"[selver] {cu}")
@@ -325,22 +350,16 @@ def crawl():
             # 3) crawl each category → product URLs
             product_urls: set[str] = set()
             for cu in cats:
-                try:
-                    page.goto(cu, timeout=30000)
-                    page.wait_for_load_state("domcontentloaded")
-                    time.sleep(REQ_DELAY)
-                    links = collect_product_links(page, page_limit=PAGE_LIMIT)
-                    product_urls.update(links)
-                    print(f"[selver] {cu} → +{len(links)} products (total so far: {len(product_urls)})")
-                except TimeoutError:
+                if not safe_goto(page, cu):
                     continue
+                time.sleep(REQ_DELAY)
+                links = collect_product_links(page, page_limit=PAGE_LIMIT)
+                product_urls.update(links)
+                print(f"[selver] {cu} → +{len(links)} products (total so far: {len(product_urls)})")
 
             # 4) visit product pages → write rows
             for i, pu in enumerate(sorted(product_urls)):
-                try:
-                    page.goto(pu, timeout=30000)
-                    page.wait_for_load_state("domcontentloaded")
-                except TimeoutError:
+                if not safe_goto(page, pu):
                     continue
                 time.sleep(REQ_DELAY)
 
@@ -356,7 +375,7 @@ def crawl():
                 cat_path = " / ".join(crumbs)
                 cat_leaf = crumbs[-1] if crumbs else ""
 
-                # skip obvious junk (no name or no price at all)
+                # skip obvious junk (no name)
                 if not name:
                     continue
 
