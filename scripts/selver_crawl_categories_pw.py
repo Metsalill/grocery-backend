@@ -1,304 +1,383 @@
 #!/usr/bin/env python3
-# Selver category → products (Playwright)
+# -*- coding: utf-8 -*-
+
+"""
+Selver (e-selver) category crawler -> CSV (for staging_selver_products)
+Auto-discovers food categories, paginates, then visits product pages and extracts:
+  ext_id (url), name, ean_raw, size_text, price, currency, category_path, category_leaf
+"""
+
+from __future__ import annotations
 import os
-import csv
-import json
 import re
+import csv
 import time
 from urllib.parse import urljoin, urlparse
 
-from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
+from playwright.sync_api import sync_playwright, TimeoutError
 
 BASE = "https://www.selver.ee"
 
 OUTPUT = os.getenv("OUTPUT_CSV", "data/selver.csv")
 REQ_DELAY = float(os.getenv("REQ_DELAY", "0.8"))
-PAGE_LIMIT = int(os.getenv("PAGE_LIMIT", "0"))  # 0 = no explicit cap
+PAGE_LIMIT = int(os.getenv("PAGE_LIMIT", "0"))  # 0 = no limit
 CATEGORIES_FILE = os.getenv("CATEGORIES_FILE", "data/selver_categories.txt")
 
-HEADERS = [
-    "ext_id", "name", "ean_raw", "size_text",
-    "price", "currency", "category_path", "category_leaf",
-]
+# Ban obvious non-food areas
+BANNED_KEYWORDS = {  # lowercased substrings
+    "sisustus", "kodutekstiil", "valgustus", "kardin", "jouluvalgustid",
+    "vaikesed-sisustuskaubad", "kuunlad", "kirja-ja-kontoritarbed",
+    "remondi-ja-turvatooted", "omblus-ja-kasitootarbed", "meisterdamine",
+    "ajakirjad", "autojuhtimine", "kotid", "aed-ja-lilled", "lemmikloom",
+    "sport", "pallimangud", "jalgrattasoit", "ujumine", "matkamine",
+    "tervisesport", "manguasjad", "lutid", "lapsehooldus", "ideed-ja-hooajad",
+    "kodumasinad", "elektroonika", "meelelahutuselektroonika",
+    "vaikesed-kodumasinad", "lambid-patareid-ja-taskulambid",
+    "ilu-ja-tervis", "kosmeetika", "meigitooted", "hugieen",
+    "loodustooted-ja-toidulisandid",
+}
 
-EAN_RE = re.compile(r"\b(\d{8,14})\b")
+# Size finder (best-effort from title)
+SIZE_RE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
 
-DEFAULT_CATS = [
-    "/e-selver/puu-ja-koogiviljad",
-    "/e-selver/piimatooted-ja-munad",
-    "/e-selver/leiavad-saia-ja-saiakesed",
-    "/e-selver/liha-ja-kalatooted",
-    "/e-selver/liha-ja-kalatooted/sealiha",
-    "/e-selver/liha-ja-kalatooted/veiseliha",
-    "/e-selver/liha-ja-kalatooted/kanaliha",
-    "/e-selver/liha-ja-kalatooted/kala-ja-mereannid",
-    "/e-selver/valmistoit",
-    "/e-selver/kuivained",
-    "/e-selver/kuivained/pasta-riis-ja-teraviljad",
-    "/e-selver/kuivained/jahu-suhkur-ja-kupsetamine",
-    "/e-selver/kuivained/konservid-ja-purgitooted",
-    "/e-selver/maitseained-kastmed-ja-oliivid",
-    "/e-selver/suupisted-ja-maiustused",
-    "/e-selver/jook",
-    "/e-selver/jook/karastusjoogid-ja-vesi",
-    "/e-selver/mahlad-ja-joogid",
-    "/e-selver/kulmutatud-toit",
-    "/e-selver/laste-toit",
-]
+def normspace(s: str) -> str:
+    return re.sub(r"\s+", " ", s or "").strip()
 
-def load_categories() -> list[str]:
-    if os.path.exists(CATEGORIES_FILE):
-        with open(CATEGORIES_FILE, "r", encoding="utf-8") as f:
-            cats = [ln.strip() for ln in f if ln.strip() and not ln.startswith("#")]
-    else:
-        cats = DEFAULT_CATS
-    # normalize to absolute + start from first page explicitly (?p=1)
-    out = []
-    for c in cats:
-        url = c if c.startswith("http") else urljoin(BASE, c)
-        if "?" in url:
-            out.append(url)
-        else:
-            out.append(url + "?p=1")
-    return out
+def guess_size_from_title(title: str) -> str:
+    m = SIZE_RE.search(title or "")
+    if not m:
+        return ""
+    num, unit = m.groups()
+    return f"{num.replace(',', '.')} {unit.lower()}"
+
+def is_food_category(path: str) -> bool:
+    """We only want /e-selver/... categories and skip banned keywords."""
+    p = path.lower()
+    if not p.startswith("/e-selver/"):
+        return False
+    return not any(bad in p for bad in BANNED_KEYWORDS)
+
+def discover_categories(page, start_urls: list[str]) -> list[str]:
+    """BFS over category pages; read sidebar & content category tiles."""
+    seen, queue, out = set(), list(start_urls), []
+
+    def push(url: str):
+        path = urlparse(url).path
+        if path in seen:
+            return
+        if is_food_category(path):
+            seen.add(path)
+            queue.append(url)
+
+    while queue:
+        url = queue.pop(0)
+        try:
+            page.goto(url, timeout=30000)
+            page.wait_for_load_state("domcontentloaded")
+        except TimeoutError:
+            continue
+        time.sleep(REQ_DELAY)
+
+        # record the category itself
+        out.append(url)
+
+        # left-nav / tiles / chips / “sub categories”
+        for sel in [
+            "nav a[href*='/e-selver/']",
+            "aside a[href*='/e-selver/']",
+            "a.category-card, a[href*='/e-selver/']",
+        ]:
+            try:
+                links = page.locator(sel)
+                for i in range(min(500, links.count())):
+                    href = links.nth(i).get_attribute("href")
+                    if not href:
+                        continue
+                    u = urljoin(BASE, href)
+                    if is_food_category(urlparse(u).path):
+                        push(u)
+            except Exception:
+                pass
+
+    # unique & stable
+    uniq = []
+    seen = set()
+    for u in out:
+        p = urlparse(u).path
+        if p not in seen:
+            uniq.append(u)
+            seen.add(p)
+    return uniq
 
 def accept_cookies(page):
     for sel in [
         "button:has-text('Nõustu')",
-        "button:has-text('Nõustu kõigiga')",
+        "button:has-text('Nõustun')",
         "button:has-text('Accept')",
-        "[data-testid*='accept'][role='button']",
-        "button[aria-label*='Nõustu']",
+        "button[aria-label*='accept']",
     ]:
         try:
-            b = page.locator(sel).first
-            if b.count() > 0 and b.is_enabled():
-                b.click()
+            btn = page.locator(sel)
+            if btn.count() > 0 and btn.first.is_enabled():
+                btn.first.click(timeout=3000)
                 page.wait_for_load_state("domcontentloaded")
-                break
+                time.sleep(0.3)
+                return
         except Exception:
             pass
 
-def wait_idle(page, secs=0.4):
-    try:
-        page.wait_for_load_state("domcontentloaded", timeout=10000)
-    except PWTimeout:
-        pass
-    time.sleep(secs)
+def collect_product_links(page, page_limit: int = 0) -> set[str]:
+    """On a category page, paginate & collect product card links."""
+    links: set[str] = set()
+    pages_seen = 0
 
-def page_has_products(page) -> bool:
-    try:
-        page.wait_for_selector("li.product-item, .product-items .product-item", timeout=6000)
-        return True
-    except Exception:
-        # some categories still lazy-load; scroll a bit
-        try:
-            page.mouse.wheel(0, 20000)
-            page.wait_for_selector("li.product-item, .product-items .product-item", timeout=4000)
-            return True
-        except Exception:
-            return False
-
-def collect_product_links(page) -> set[str]:
-    # robust selectors for Selver product cards
-    js = """
-    () => Array.from(
-      document.querySelectorAll(
-        'li.product-item a.product-item-link, ' +
-        '.product-item-info a.product-item-link, ' +
-        '.product-item a[href]:not([href^="#"])'
-      )
-    ).map(a => a.href)
-    """
-    hrefs = []
-    try:
-        hrefs = page.evaluate(js)
-    except Exception:
-        pass
-    urls = set()
-    for h in hrefs or []:
-        try:
-            u = urljoin(BASE, h)
-            p = urlparse(u).path
-            # exclude category & internal anchors; product links on Selver do NOT start with /e-selver
-            if not p.startswith("/e-selver") and not p.startswith("/cart") and not p.startswith("/customer"):
-                urls.add(u.split("?")[0])
-        except Exception:
-            continue
-    return urls
-
-def next_page_url(cur_url: str, page_idx: int) -> str:
-    # Selver supports ?p=2,3… for pagination
-    if "p=" in cur_url:
-        base = re.sub(r"[?&]p=\d+", "", cur_url)
-        sep = "&" if "?" in base else "?"
-        return f"{base}{sep}p={page_idx}"
-    else:
-        sep = "&" if "?" in cur_url else "?"
-        return f"{cur_url}{sep}p={page_idx}"
-
-def parse_jsonld(texts: list[str]) -> dict | None:
-    for raw in texts:
-        try:
-            data = json.loads(raw)
-            block = None
-            if isinstance(data, list):
-                for it in data:
-                    t = it.get("@type")
-                    if (isinstance(t, str) and t.lower() == "product") or (isinstance(t, list) and "Product" in t):
-                        block = it; break
-            elif isinstance(data, dict):
-                t = data.get("@type")
-                if (isinstance(t, str) and t.lower() == "product") or (isinstance(t, list) and "Product" in t):
-                    block = data
-            if block:
-                return block
-        except Exception:
-            continue
-    return None
-
-def extract_from_product(page, url: str) -> dict | None:
-    # name & breadcrumbs
-    try:
-        name = page.locator("h1").first.inner_text().strip()
-    except Exception:
-        name = ""
-
-    # JSON-LD for price/currency (+ optional gtin)
-    price = 0.0
-    currency = "EUR"
-    ean = ""
-    try:
-        scripts = [page.locator("script[type='application/ld+json']").nth(i).inner_text()
-                   for i in range(min(6, page.locator("script[type='application/ld+json']").count()))]
-        ld = parse_jsonld(scripts)
-        if ld:
-            offers = ld.get("offers") or {}
-            if isinstance(offers, list):
-                offers = offers[0] if offers else {}
-            pr = str(offers.get("price", "0")).replace(",", ".") or "0"
+    def grab_cards():
+        # product cards: link around name or image
+        found = 0
+        for sel in [
+            "a.product-card__link",
+            "a[href]:has(img)",
+            "a[href][data-product-id]",
+            "a[href]:not([href*='/e-selver/'])",
+        ]:
             try:
-                price = float(pr)
-            except Exception:
-                price = 0.0
-            currency = (offers.get("priceCurrency") or "EUR").upper()
-            ean = str(ld.get("gtin13") or ld.get("gtin") or ld.get("sku") or "").strip()
-    except Exception:
-        pass
-
-    # EAN fallback from “Ribakood” field
-    if not ean:
-        val = ""
-        try:
-            # exact text “Ribakood” → closest following value
-            lab = page.locator("xpath=//*[normalize-space()='Ribakood']").first
-            if lab.count() > 0:
-                dd = lab.locator("xpath=following::*[self::div or self::span or self::p][1]")
-                if dd.count() > 0:
-                    val = dd.inner_text().strip()
-        except Exception:
-            pass
-        if not val:
-            try:
-                html = page.content()
-                m = re.search(r"Ribakood\s*</[^>]*>\s*([^<>{}]+)<", html, re.I)
-                if m:
-                    val = re.sub(r"<[^>]+>", " ", m.group(1)).strip()
+                as_ = page.locator(sel)
+                cnt = as_.count()
+                for i in range(cnt):
+                    href = as_.nth(i).get_attribute("href")
+                    if not href:
+                        continue
+                    u = urljoin(BASE, href)
+                    path = urlparse(u).path
+                    # exclude category/filters & obvious non-product
+                    if "/e-selver/" in path:
+                        continue
+                    if "#" in u:
+                        continue
+                    # crude heuristic: keep only non-category leaf pages
+                    if path.count("/") >= 1:
+                        links.add(u)
+                        found += 1
             except Exception:
                 pass
-        m = EAN_RE.search(val)
-        if m:
-            ean = m.group(1)
+        return found
 
-    # breadcrumbs -> category path/leaf
-    crumbs = []
+    def can_progress():
+        # next page / load more
+        for sel in [
+            "a[rel='next']",
+            "a[aria-label*='Next']",
+            "button:has-text('Näita rohkem')",
+            "button:has-text('Load more')",
+            "a.page-link:has-text('>')",
+        ]:
+            if page.locator(sel).count() > 0:
+                return sel
+        return None
+
+    while True:
+        pages_seen += 1
+        grab_cards()
+
+        if page_limit and pages_seen >= page_limit:
+            break
+
+        nxt = can_progress()
+        if not nxt:
+            break
+        try:
+            page.locator(nxt).first.click(timeout=5000)
+            page.wait_for_load_state("domcontentloaded")
+            time.sleep(REQ_DELAY)
+        except Exception:
+            break
+
+    return links
+
+def breadcrumbs(page) -> list[str]:
+    # try various breadcrumb structures
+    for sel in [
+        "nav ol li a",          # common
+        "nav.breadcrumbs a",
+        "ol.breadcrumbs a",
+    ]:
+        try:
+            items = page.locator(sel)
+            if items.count() > 0:
+                vals = []
+                for i in range(items.count()):
+                    vals.append(normspace(items.nth(i).inner_text()))
+                vals = [v for v in vals if v and v.lower() != "e-selver"]
+                if vals:
+                    return vals
+        except Exception:
+            pass
+    return []
+
+def extract_price(page) -> tuple[float, str]:
+    # find something like "5,99 €" on product page
+    for sel in [
+        "text=/€/",
+        "span:has-text('€')",
+        "div:has-text('€')",
+    ]:
+        try:
+            node = page.locator(sel).first
+            if node and node.count() > 0:
+                txt = node.inner_text()
+                m = re.search(r"(\d+(?:[.,]\d+)?)\s*€", txt)
+                if m:
+                    return float(m.group(1).replace(",", ".")), "EUR"
+        except Exception:
+            pass
+    return 0.0, "EUR"
+
+def extract_ean(page, url: str) -> str:
+    # read nearby labels (Ribakood / EAN / EAN-kood)
+    labels = ["Ribakood", "EAN", "EAN-kood", "EAN kood", "GTIN"]
+    # 1) label → following value
+    for lab in labels:
+        try:
+            el = page.locator(f"xpath=//*[normalize-space()='{lab}']").first
+            if el.count() > 0:
+                nxt = el.locator("xpath=following::*[self::div or self::span or self::p][1]")
+                if nxt.count() > 0:
+                    txt = normspace(nxt.inner_text())
+                    if re.fullmatch(r"\d{8,14}", txt):
+                        return txt
+        except Exception:
+            pass
+    # 2) regex over HTML
     try:
-        for a in page.locator("nav a, .breadcrumbs a").all():
-            try:
-                t = a.inner_text().strip()
-                if t and t.lower() not in {"e-selver"}:
-                    crumbs.append(t)
-            except Exception:
-                continue
+        html = page.content()
+        m = re.search(r"(?:Ribakood|EAN(?:-kood)?)\D*?(\d{8,14})", html, re.I)
+        if m:
+            return m.group(1)
     except Exception:
         pass
-    category_path = " / ".join(crumbs)
-    category_leaf = crumbs[-1] if crumbs else ""
+    # 3) nothing found
+    return ""
 
-    # quick size from name
-    m = re.search(r"(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml)\b", name, re.I)
-    size_text = m.group(0).replace(",", ".") if m else ""
-
-    if not name:
-        return None
-    return {
-        "ext_id": url,
-        "name": name,
-        "ean_raw": ean,
-        "size_text": size_text,
-        "price": price,
-        "currency": currency,
-        "category_path": category_path,
-        "category_leaf": category_leaf,
-    }
-
-def main():
-    cats = load_categories()
+def crawl():
     os.makedirs(os.path.dirname(OUTPUT) or ".", exist_ok=True)
+    with open(OUTPUT, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(
+            f,
+            fieldnames=[
+                "ext_id", "name", "ean_raw", "size_text", "price", "currency",
+                "category_path", "category_leaf",
+            ],
+        )
+        w.writeheader()
 
-    with open(OUTPUT, "w", newline="", encoding="utf-8") as f, sync_playwright() as pw:
-        writer = csv.DictWriter(f, fieldnames=HEADERS)
-        writer.writeheader()
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            context = browser.new_context(
+                user_agent=(
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+                )
+            )
+            page = context.new_page()
 
-        browser = pw.chromium.launch(headless=True)
-        context = browser.new_context(user_agent=(
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-            "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
-        ))
-        page = context.new_page()
+            # 1) initial seeds
+            seeds: list[str] = []
+            if os.path.exists(CATEGORIES_FILE):
+                with open(CATEGORIES_FILE, "r", encoding="utf-8") as cf:
+                    for ln in cf:
+                        ln = ln.strip()
+                        if not ln or ln.startswith("#"):
+                            continue
+                        seeds.append(urljoin(BASE, ln))
+            if not seeds:
+                # auto discover top food categories from /e-selver
+                page.goto(urljoin(BASE, "/e-selver"), timeout=30000)
+                page.wait_for_load_state("domcontentloaded")
+                accept_cookies(page)
+                time.sleep(REQ_DELAY)
+                # collect top-level category links
+                top = set()
+                for sel in [
+                    "a[href*='/e-selver/']",
+                    "nav a[href*='/e-selver/']",
+                    "aside a[href*='/e-selver/']",
+                ]:
+                    try:
+                        aa = page.locator(sel)
+                        for i in range(aa.count()):
+                            href = aa.nth(i).get_attribute("href")
+                            if not href:
+                                continue
+                            u = urljoin(BASE, href)
+                            if is_food_category(urlparse(u).path):
+                                top.add(u)
+                    except Exception:
+                        pass
+                seeds = sorted(top)
 
-        all_products = set()
+            # 2) discover all nested food categories
+            cats = discover_categories(page, seeds)
+            # print listing to job log
+            print(f"[selver] Categories to crawl: {len(cats)}")
+            for cu in cats:
+                print(f"[selver] {cu}")
 
-        for cat in cats:
-            cur_page = 1
-            seen_zero = 0
-            while True:
-                url = next_page_url(cat, cur_page)
+            # 3) crawl each category → product URLs
+            product_urls: set[str] = set()
+            for cu in cats:
                 try:
-                    page.goto(url, timeout=30000)
-                except PWTimeout:
-                    break
-                accept_cookies(page)
-                wait_idle(page, REQ_DELAY)
+                    page.goto(cu, timeout=30000)
+                    page.wait_for_load_state("domcontentloaded")
+                    time.sleep(REQ_DELAY)
+                    links = collect_product_links(page, page_limit=PAGE_LIMIT)
+                    product_urls.update(links)
+                    print(f"[selver] {cu} → +{len(links)} products (total so far: {len(product_urls)})")
+                except TimeoutError:
+                    continue
 
-                if not page_has_products(page):
-                    seen_zero += 1
-                    if seen_zero >= 1:
-                        break
-                links = collect_product_links(page)
-                print(f"[selver] {url} → +{len(links)} products (page {cur_page})")
-                if not links:
-                    break
+            # 4) visit product pages → write rows
+            for i, pu in enumerate(sorted(product_urls)):
+                try:
+                    page.goto(pu, timeout=30000)
+                    page.wait_for_load_state("domcontentloaded")
+                except TimeoutError:
+                    continue
+                time.sleep(REQ_DELAY)
 
-                all_products |= links
+                try:
+                    name = normspace(page.locator("h1").first.inner_text())
+                except Exception:
+                    name = ""
 
-                cur_page += 1
-                if PAGE_LIMIT and cur_page > PAGE_LIMIT:
-                    break
+                price, currency = extract_price(page)
+                ean = extract_ean(page, pu)
+                size_text = guess_size_from_title(name)
+                crumbs = breadcrumbs(page)
+                cat_path = " / ".join(crumbs)
+                cat_leaf = crumbs[-1] if crumbs else ""
 
-        # Visit products
-        for i, url in enumerate(sorted(all_products)):
-            try:
-                page.goto(url, timeout=30000)
-                accept_cookies(page)
-                wait_idle(page, REQ_DELAY)
-                rec = extract_from_product(page, url)
-                if rec:
-                    writer.writerow(rec)
-            except Exception:
-                continue
+                # skip obvious junk (no name or no price at all)
+                if not name:
+                    continue
 
-        browser.close()
+                w.writerow({
+                    "ext_id": pu,
+                    "name": name,
+                    "ean_raw": ean,
+                    "size_text": size_text,
+                    "price": f"{price:.2f}",
+                    "currency": currency,
+                    "category_path": cat_path,
+                    "category_leaf": cat_leaf,
+                })
+
+                if (i + 1) % 25 == 0:
+                    f.flush()
+
+            browser.close()
 
 if __name__ == "__main__":
-    main()
+    try:
+        crawl()
+    except KeyboardInterrupt:
+        pass
