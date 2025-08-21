@@ -32,15 +32,16 @@ jobs:
       - name: Crawl Selver categories (Playwright)
         shell: bash
         env:
+          PYTHONUNBUFFERED: "1"            # stream prints immediately
           OUTPUT_CSV: data/selver.csv
           REQ_DELAY: "0.8"
           PAGE_LIMIT: "0"                   # 0 = no page cap
           CATEGORIES_FILE: data/selver_categories.txt
         run: |
           set -euo pipefail
-          # Bound the crawl so it can't hang forever; keep the job alive even if it fails.
+          # Bound the crawl, but continue the job even if the crawler returns non-zero
           timeout 12m python scripts/selver_crawl_categories_pw.py || {
-            echo "::warning::Crawler exited non-zero (continuing to debug/upload artifacts)";
+            echo "::warning::Crawler exited non-zero (continuing: will still upload CSV and attempt load)";
           }
 
       - name: Install psql client
