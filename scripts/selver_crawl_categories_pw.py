@@ -1,267 +1,304 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Selver category crawler (Playwright) -> CSV for staging loader.
-
-Env:
-  OUTPUT_CSV        (default: data/selver.csv)
-  CATEGORIES_FILE   (default: data/selver_categories.txt)
-  PAGE_LIMIT        (default: 0 = unlimited)
-  REQ_DELAY         (default: 0.8 seconds polite sleep)
-"""
-
-import csv
+# Selver category → products (Playwright)
 import os
+import csv
+import json
 import re
 import time
-from pathlib import Path
-from urllib.parse import urljoin, urlparse, parse_qs, urlencode
+from urllib.parse import urljoin, urlparse
 
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 
 BASE = "https://www.selver.ee"
-OUTPUT_CSV = os.getenv("OUTPUT_CSV", "data/selver.csv")
-CATEGORIES_FILE = os.getenv("CATEGORIES_FILE", "data/selver_categories.txt")
-PAGE_LIMIT = int(os.getenv("PAGE_LIMIT", "0"))
+
+OUTPUT = os.getenv("OUTPUT_CSV", "data/selver.csv")
 REQ_DELAY = float(os.getenv("REQ_DELAY", "0.8"))
+PAGE_LIMIT = int(os.getenv("PAGE_LIMIT", "0"))  # 0 = no explicit cap
+CATEGORIES_FILE = os.getenv("CATEGORIES_FILE", "data/selver_categories.txt")
 
-# --- helpers -----------------------------------------------------------------
+HEADERS = [
+    "ext_id", "name", "ean_raw", "size_text",
+    "price", "currency", "category_path", "category_leaf",
+]
 
-def dbg(msg: str):
-    print(f"[selver] {msg}", flush=True)
+EAN_RE = re.compile(r"\b(\d{8,14})\b")
 
-def norm_space(s: str) -> str:
-    return re.sub(r"\s+", " ", (s or "").strip())
+DEFAULT_CATS = [
+    "/e-selver/puu-ja-koogiviljad",
+    "/e-selver/piimatooted-ja-munad",
+    "/e-selver/leiavad-saia-ja-saiakesed",
+    "/e-selver/liha-ja-kalatooted",
+    "/e-selver/liha-ja-kalatooted/sealiha",
+    "/e-selver/liha-ja-kalatooted/veiseliha",
+    "/e-selver/liha-ja-kalatooted/kanaliha",
+    "/e-selver/liha-ja-kalatooted/kala-ja-mereannid",
+    "/e-selver/valmistoit",
+    "/e-selver/kuivained",
+    "/e-selver/kuivained/pasta-riis-ja-teraviljad",
+    "/e-selver/kuivained/jahu-suhkur-ja-kupsetamine",
+    "/e-selver/kuivained/konservid-ja-purgitooted",
+    "/e-selver/maitseained-kastmed-ja-oliivid",
+    "/e-selver/suupisted-ja-maiustused",
+    "/e-selver/jook",
+    "/e-selver/jook/karastusjoogid-ja-vesi",
+    "/e-selver/mahlad-ja-joogid",
+    "/e-selver/kulmutatud-toit",
+    "/e-selver/laste-toit",
+]
 
-SIZE_RE = re.compile(r"\b(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
-
-def guess_size_from_name(name: str) -> str:
-    m = SIZE_RE.search(name or "")
-    if not m:
-        return ""
-    num, unit = m.groups()
-    return f"{num.replace(',', '.')} {unit.lower()}"
+def load_categories() -> list[str]:
+    if os.path.exists(CATEGORIES_FILE):
+        with open(CATEGORIES_FILE, "r", encoding="utf-8") as f:
+            cats = [ln.strip() for ln in f if ln.strip() and not ln.startswith("#")]
+    else:
+        cats = DEFAULT_CATS
+    # normalize to absolute + start from first page explicitly (?p=1)
+    out = []
+    for c in cats:
+        url = c if c.startswith("http") else urljoin(BASE, c)
+        if "?" in url:
+            out.append(url)
+        else:
+            out.append(url + "?p=1")
+    return out
 
 def accept_cookies(page):
-    # Try several common phrasings (ET + EN)
-    candidates = [
-        "Nõustu", "Nõustun", "Nõustun kõik", "Luban kõik", "Aksepteeri",
-        "Accept all", "Accept", "Allow all", "I agree",
-    ]
-    for txt in candidates:
+    for sel in [
+        "button:has-text('Nõustu')",
+        "button:has-text('Nõustu kõigiga')",
+        "button:has-text('Accept')",
+        "[data-testid*='accept'][role='button']",
+        "button[aria-label*='Nõustu']",
+    ]:
         try:
-            btn = page.get_by_role("button", name=re.compile(txt, re.I))
-            if btn and btn.count() > 0:
-                btn.first.click(timeout=2000)
-                time.sleep(0.4)
-                return
+            b = page.locator(sel).first
+            if b.count() > 0 and b.is_enabled():
+                b.click()
+                page.wait_for_load_state("domcontentloaded")
+                break
         except Exception:
             pass
-    # fallbacks: any “cookie” consent button
+
+def wait_idle(page, secs=0.4):
     try:
-        btn = page.locator("button:has-text('cookie'), button:has-text('küps')")
-        if btn and btn.count() > 0:
-            btn.first.click(timeout=2000)
-            time.sleep(0.4)
+        page.wait_for_load_state("domcontentloaded", timeout=10000)
+    except PWTimeout:
+        pass
+    time.sleep(secs)
+
+def page_has_products(page) -> bool:
+    try:
+        page.wait_for_selector("li.product-item, .product-items .product-item", timeout=6000)
+        return True
+    except Exception:
+        # some categories still lazy-load; scroll a bit
+        try:
+            page.mouse.wheel(0, 20000)
+            page.wait_for_selector("li.product-item, .product-items .product-item", timeout=4000)
+            return True
+        except Exception:
+            return False
+
+def collect_product_links(page) -> set[str]:
+    # robust selectors for Selver product cards
+    js = """
+    () => Array.from(
+      document.querySelectorAll(
+        'li.product-item a.product-item-link, ' +
+        '.product-item-info a.product-item-link, ' +
+        '.product-item a[href]:not([href^="#"])'
+      )
+    ).map(a => a.href)
+    """
+    hrefs = []
+    try:
+        hrefs = page.evaluate(js)
     except Exception:
         pass
-
-def read_categories() -> list[str]:
-    paths: list[str] = []
-    p = Path(CATEGORIES_FILE)
-    if p.exists():
-        for ln in p.read_text(encoding="utf-8").splitlines():
-            ln = ln.strip()
-            if not ln or ln.startswith("#"):
-                continue
-            url = ln if ln.startswith("http") else urljoin(BASE, ln)
-            paths.append(url)
-    if paths:
-        return paths
-    # small safe default seed (food)
-    return [
-        urljoin(BASE, "/e-selver/liha-ja-kalatooted/sealiha"),
-        urljoin(BASE, "/e-selver/puu-ja-koogiviljad"),
-    ]
-
-def with_page_param(url: str, page_no: int) -> str:
-    u = urlparse(url)
-    qs = dict(parse_qs(u.query))
-    qs["p"] = [str(page_no)]
-    new_q = urlencode([(k, v[0]) for k, v in qs.items()])
-    return u._replace(query=new_q).geturl()
-
-def gather_product_links(page) -> set[str]:
-    """Collect product links from a category page."""
     urls = set()
-    # Magento product cards usually expose this anchor:
-    anchors = page.locator("a.product-item-link[href]")
-    try:
-        n = anchors.count()
-    except PWTimeout:
-        n = 0
-    for i in range(n):
+    for h in hrefs or []:
         try:
-            href = anchors.nth(i).get_attribute("href")
-            if not href:
-                continue
-            url = href if href.startswith("http") else urljoin(BASE, href)
-            urls.add(url)
+            u = urljoin(BASE, h)
+            p = urlparse(u).path
+            # exclude category & internal anchors; product links on Selver do NOT start with /e-selver
+            if not p.startswith("/e-selver") and not p.startswith("/cart") and not p.startswith("/customer"):
+                urls.add(u.split("?")[0])
         except Exception:
             continue
     return urls
 
-def extract_ean_from_html(html: str) -> str:
-    # Look for "Ribakood" followed by digits, or GTIN fields
-    m = re.search(r"Ribakood[^0-9]{0,40}(\d{8,14})", html, re.I | re.S)
-    if m:
-        return m.group(1)
-    m = re.search(r"(?:gtin13|gtin|sku)[^0-9]{0,20}(\d{8,14})", html, re.I)
-    return m.group(1) if m else ""
+def next_page_url(cur_url: str, page_idx: int) -> str:
+    # Selver supports ?p=2,3… for pagination
+    if "p=" in cur_url:
+        base = re.sub(r"[?&]p=\d+", "", cur_url)
+        sep = "&" if "?" in base else "?"
+        return f"{base}{sep}p={page_idx}"
+    else:
+        sep = "&" if "?" in cur_url else "?"
+        return f"{cur_url}{sep}p={page_idx}"
 
-def extract_price_currency_from_html(html: str) -> tuple[float, str]:
-    # Prefer JSON-ld price, otherwise price-wrapper
-    m = re.search(r'"price"\s*:\s*"?(?P<p>[\d.,]+)"?\s*,\s*"priceCurrency"\s*:\s*"(?P<c>[A-Z]{3})"', html, re.I)
-    if m:
-        p = float(m.group("p").replace(",", "."))
-        return p, m.group("c").upper()
-    m = re.search(r'data-price-amount="([\d.,]+)"', html, re.I)
-    if m:
-        return float(m.group(1).replace(",", ".")), "EUR"
-    return 0.0, "EUR"
-
-def extract_breadcrumbs_text(page) -> list[str]:
-    # Try several breadcrumb containers; return list of crumb names
-    sels = [
-        "nav.breadcrumbs li a",
-        ".breadcrumbs a",
-        "nav.breadcrumbs li, .breadcrumbs li",
-    ]
-    for sel in sels:
+def parse_jsonld(texts: list[str]) -> dict | None:
+    for raw in texts:
         try:
-            items = page.locator(sel)
-            if items.count() > 0:
-                texts = [norm_space(items.nth(i).inner_text()) for i in range(min(items.count(), 12))]
-                return [t for t in texts if t]
+            data = json.loads(raw)
+            block = None
+            if isinstance(data, list):
+                for it in data:
+                    t = it.get("@type")
+                    if (isinstance(t, str) and t.lower() == "product") or (isinstance(t, list) and "Product" in t):
+                        block = it; break
+            elif isinstance(data, dict):
+                t = data.get("@type")
+                if (isinstance(t, str) and t.lower() == "product") or (isinstance(t, list) and "Product" in t):
+                    block = data
+            if block:
+                return block
         except Exception:
             continue
-    return []
+    return None
 
-# --- main crawl ---------------------------------------------------------------
+def extract_from_product(page, url: str) -> dict | None:
+    # name & breadcrumbs
+    try:
+        name = page.locator("h1").first.inner_text().strip()
+    except Exception:
+        name = ""
 
-def crawl():
-    cats = read_categories()
-    dbg(f"Categories to crawl: {len(cats)}")
+    # JSON-LD for price/currency (+ optional gtin)
+    price = 0.0
+    currency = "EUR"
+    ean = ""
+    try:
+        scripts = [page.locator("script[type='application/ld+json']").nth(i).inner_text()
+                   for i in range(min(6, page.locator("script[type='application/ld+json']").count()))]
+        ld = parse_jsonld(scripts)
+        if ld:
+            offers = ld.get("offers") or {}
+            if isinstance(offers, list):
+                offers = offers[0] if offers else {}
+            pr = str(offers.get("price", "0")).replace(",", ".") or "0"
+            try:
+                price = float(pr)
+            except Exception:
+                price = 0.0
+            currency = (offers.get("priceCurrency") or "EUR").upper()
+            ean = str(ld.get("gtin13") or ld.get("gtin") or ld.get("sku") or "").strip()
+    except Exception:
+        pass
 
-    # We’ll visit all product pages we see under those categories.
-    seen_product_urls: set[str] = set()
+    # EAN fallback from “Ribakood” field
+    if not ean:
+        val = ""
+        try:
+            # exact text “Ribakood” → closest following value
+            lab = page.locator("xpath=//*[normalize-space()='Ribakood']").first
+            if lab.count() > 0:
+                dd = lab.locator("xpath=following::*[self::div or self::span or self::p][1]")
+                if dd.count() > 0:
+                    val = dd.inner_text().strip()
+        except Exception:
+            pass
+        if not val:
+            try:
+                html = page.content()
+                m = re.search(r"Ribakood\s*</[^>]*>\s*([^<>{}]+)<", html, re.I)
+                if m:
+                    val = re.sub(r"<[^>]+>", " ", m.group(1)).strip()
+            except Exception:
+                pass
+        m = EAN_RE.search(val)
+        if m:
+            ean = m.group(1)
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        ctx = browser.new_context(user_agent=(
+    # breadcrumbs -> category path/leaf
+    crumbs = []
+    try:
+        for a in page.locator("nav a, .breadcrumbs a").all():
+            try:
+                t = a.inner_text().strip()
+                if t and t.lower() not in {"e-selver"}:
+                    crumbs.append(t)
+            except Exception:
+                continue
+    except Exception:
+        pass
+    category_path = " / ".join(crumbs)
+    category_leaf = crumbs[-1] if crumbs else ""
+
+    # quick size from name
+    m = re.search(r"(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml)\b", name, re.I)
+    size_text = m.group(0).replace(",", ".") if m else ""
+
+    if not name:
+        return None
+    return {
+        "ext_id": url,
+        "name": name,
+        "ean_raw": ean,
+        "size_text": size_text,
+        "price": price,
+        "currency": currency,
+        "category_path": category_path,
+        "category_leaf": category_leaf,
+    }
+
+def main():
+    cats = load_categories()
+    os.makedirs(os.path.dirname(OUTPUT) or ".", exist_ok=True)
+
+    with open(OUTPUT, "w", newline="", encoding="utf-8") as f, sync_playwright() as pw:
+        writer = csv.DictWriter(f, fieldnames=HEADERS)
+        writer.writeheader()
+
+        browser = pw.chromium.launch(headless=True)
+        context = browser.new_context(user_agent=(
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
             "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
         ))
-        page = ctx.new_page()
+        page = context.new_page()
 
-        # Phase A: discover product URLs
+        all_products = set()
+
         for cat in cats:
-            total_here = 0
-            page_no = 1
+            cur_page = 1
+            seen_zero = 0
             while True:
-                if PAGE_LIMIT and page_no > PAGE_LIMIT:
-                    break
-                url = with_page_param(cat, page_no)
+                url = next_page_url(cat, cur_page)
                 try:
-                    page.goto(url, wait_until="domcontentloaded", timeout=30000)
-                    accept_cookies(page)
-                    # Wait for grid; don’t fail the whole crawl if it times out
-                    try:
-                        page.wait_for_selector("a.product-item-link", timeout=8000)
-                    except Exception:
-                        pass
-                    time.sleep(REQ_DELAY)
+                    page.goto(url, timeout=30000)
                 except PWTimeout:
                     break
+                accept_cookies(page)
+                wait_idle(page, REQ_DELAY)
 
-                found = gather_product_links(page)
-                if not found:
-                    dbg(f"{url} → +0 products (page {page_no})")
-                    # Stop if page has no items
+                if not page_has_products(page):
+                    seen_zero += 1
+                    if seen_zero >= 1:
+                        break
+                links = collect_product_links(page)
+                print(f"[selver] {url} → +{len(links)} products (page {cur_page})")
+                if not links:
                     break
 
-                new_urls = found - seen_product_urls
-                seen_product_urls.update(new_urls)
-                total_here += len(new_urls)
-                dbg(f"{url} → +{len(new_urls)} products (page {page_no})")
+                all_products |= links
 
-                # Detect presence of “next” link. Magento uses li.pages-item-next > a
-                has_next = False
-                try:
-                    nxt = page.locator("li.pages-item-next a[href]")
-                    has_next = nxt.count() > 0
-                except Exception:
-                    pass
-
-                page_no += 1
-                if not has_next:
+                cur_page += 1
+                if PAGE_LIMIT and cur_page > PAGE_LIMIT:
                     break
 
-        dbg(f"Discovered product URLs: {len(seen_product_urls)}")
-
-        # Phase B: visit each product page and extract fields
-        out_path = Path(OUTPUT_CSV)
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        with out_path.open("w", newline="", encoding="utf-8") as f:
-            w = csv.DictWriter(
-                f,
-                fieldnames=[
-                    "ext_id", "name", "ean_raw", "size_text",
-                    "price", "currency", "category_path", "category_leaf",
-                ],
-            )
-            w.writeheader()
-
-            for i, url in enumerate(sorted(seen_product_urls)):
-                try:
-                    page.goto(url, wait_until="domcontentloaded", timeout=30000)
-                    accept_cookies(page)
-                    time.sleep(REQ_DELAY)
-
-                    # Name (H1)
-                    try:
-                        name = norm_space(page.locator("h1").first.inner_text())
-                    except Exception:
-                        name = ""
-
-                    html = page.content()
-
-                    ean = extract_ean_from_html(html)
-                    price, currency = extract_price_currency_from_html(html)
-
-                    crumbs = extract_breadcrumbs_text(page)
-                    cat_path = " / ".join(crumbs)
-                    leaf = crumbs[-1] if crumbs else ""
-
-                    size_text = guess_size_from_name(name)
-
-                    w.writerow({
-                        "ext_id": url,
-                        "name": name,
-                        "ean_raw": ean,
-                        "size_text": size_text,
-                        "price": f"{price:.2f}",
-                        "currency": currency or "EUR",
-                        "category_path": cat_path,
-                        "category_leaf": leaf,
-                    })
-                except Exception:
-                    # Keep crawling even if single product fails
-                    continue
+        # Visit products
+        for i, url in enumerate(sorted(all_products)):
+            try:
+                page.goto(url, timeout=30000)
+                accept_cookies(page)
+                wait_idle(page, REQ_DELAY)
+                rec = extract_from_product(page, url)
+                if rec:
+                    writer.writerow(rec)
+            except Exception:
+                continue
 
         browser.close()
 
-    dbg(f"Finished. CSV written: {OUTPUT_CSV}")
-
 if __name__ == "__main__":
-    crawl()
+    main()
