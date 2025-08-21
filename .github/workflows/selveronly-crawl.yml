@@ -31,13 +31,12 @@ jobs:
       - name: Crawl Selver categories (Playwright)
         shell: bash
         env:
-          PYTHONUNBUFFERED: "1"           # unbuffered Python prints
+          PYTHONUNBUFFERED: "1"           # live prints from Python
           OUTPUT_CSV: data/selver.csv
           REQ_DELAY: "0.8"
           PAGE_LIMIT: "0"                 # 0 = no page cap
           CATEGORIES_FILE: data/selver_categories.txt
-          # Set DEBUG to "pw:api" temporarily if we want Playwright API logs
-          DEBUG: ""
+          DEBUG: ""                       # set to "pw:api" for verbose PW logs
         run: |
           set -euo pipefail
           echo "::group::Runtime info"
@@ -45,16 +44,29 @@ jobs:
           echo "Start (UTC): $(date -u)"
           echo "::endgroup::"
 
-          # Force line-buffered stdout/err and tee into a log we can inspect later.
-          # timeout ensures we never hang this job indefinitely.
+          # Run crawler; tee to a log we can show and upload
           stdbuf -oL -eL timeout 12m python -u scripts/selver_crawl_categories_pw.py \
             2>&1 | tee data/selver_run.log
           status=${PIPESTATUS[0]}
 
           echo "End (UTC): $(date -u) — crawler exit code: ${status}"
+          # Always show quick file stats so we can see if anything was produced
+          echo "::group::Crawler outputs"
+          ls -l data || true
+          du -h data/selver.csv 2>/dev/null || true
+          du -h data/selver_run.log 2>/dev/null || true
+          echo "::endgroup::"
+
+          # Do not fail the job even if the crawler returned non-zero
           if [ "${status}" -ne 0 ]; then
-            echo "::warning::Crawler exited non-zero (${status}); continuing to next steps"
+            echo "::warning::Crawler exited non-zero (${status}); continuing"
           fi
+
+      - name: Dump crawler log (tail)
+        if: always()
+        run: |
+          echo "----- last 200 lines of data/selver_run.log -----"
+          tail -n 200 data/selver_run.log || echo "(no log found)"
 
       - name: Install psql client
         run: |
@@ -70,7 +82,6 @@ jobs:
           wc -l data/selver.csv || true
           echo "---- first 10 lines ----"
           head -n 10 data/selver.csv || true
-          # Fallback if empty but sample exists
           if [ ! -s data/selver.csv ] && [ -s data/selver-sample.csv ]; then
             echo "Crawl produced no rows; using data/selver-sample.csv as fallback."
             cp -f data/selver-sample.csv data/selver.csv
