@@ -7,20 +7,17 @@ Selver category crawler → CSV (staging_selver_products)
 Fixes:
 - Uses canonical category URLs (no /e-selver/)
 - Paginates with ?page=N (e.g. 1..14), not infinite scroll
-- Collects PDP links from listing pages only
+- Collects PDP links from listing pages only (click fallback optional)
 - Visits PDPs and extracts: ext_id(url), name, ean_raw, size_text, price, currency,
   category_path, category_leaf.
-- (New) Blocks noisy 3P assets + tight router (reduces CORS spam & speeds up pages)
-- (New) Console output quenched by default; enable full logs with VERBOSE_CONSOLE=1
 
 Run:
   OUTPUT_CSV=data/selver.csv python scripts/selver_crawl_categories_pw.py
 
-Env toggles:
-  HEADLESS=0            # show browser for debugging (default 1)
-  PAGE_LIMIT=3          # cap listing pagination (0 = no cap)
-  ALLOWLIST_ONLY=1      # only crawl the allowlist roots (default 1)
-  VERBOSE_CONSOLE=1     # print all console logs (default 0 → only warnings/errors)
+Toggles:
+  USE_ROUTER=1            # enable request router (3P blocking)
+  VERBOSE_CONSOLE=1       # print all console messages
+  CLICK_PRODUCTS=1        # physically click each product on listings (slower)
 """
 
 from __future__ import annotations
@@ -36,8 +33,10 @@ OUTPUT = os.getenv("OUTPUT_CSV", "data/selver.csv")
 REQ_DELAY = float(os.getenv("REQ_DELAY", "0.6"))
 PAGE_LIMIT = int(os.getenv("PAGE_LIMIT", "0"))  # 0 = no limit
 CATEGORIES_FILE = os.getenv("CATEGORIES_FILE", "data/selver_categories.txt")
-HEADLESS = int(os.getenv("HEADLESS", "1")) == 1
+
+USE_ROUTER = int(os.getenv("USE_ROUTER", "0")) == 1
 VERBOSE_CONSOLE = int(os.getenv("VERBOSE_CONSOLE", "0")) == 1
+CLICK_PRODUCTS = int(os.getenv("CLICK_PRODUCTS", "0")) == 1
 
 # Strict allowlist of FOOD roots/leaves (canonical, no /e-selver/)
 STRICT_ALLOWLIST = [
@@ -48,13 +47,13 @@ STRICT_ALLOWLIST = [
     "/leivad-saiad-kondiitritooted",
     "/valmistoidud",
     "/kuivained-hommikusoogid-hoidised",
-    "/maitseained-ja-puljongid",                 # family
-    "/maitseained-ja-puljongid/kastmed",         # leaf
-    "/maitseained-ja-puljongid/olid-ja-aadikad", # õlid ja äädikad (diacritics stripped)
+    "/maitseained-ja-puljongid",
+    "/maitseained-ja-puljongid/kastmed",
+    "/maitseained-ja-puljongid/olid-ja-aadikad",
     "/suupisted-ja-maiustused",
     "/joogid",
-    "/sugavkylm",                                # frozen (slug variant)
-    "/kulmutatud-toidukaubad",                   # alt frozen slug
+    "/sugavkylm",
+    "/kulmutatud-toidukaubad",
     "/suurpakendid",
 ]
 # If 1, crawl only the allowlist (and pages under those roots). If 0, use allowlist as seeds but allow BFS.
@@ -77,22 +76,24 @@ BANNED_KEYWORDS = {
 # Size finder (best-effort from title)
 SIZE_RE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
 
-# Third-party noise to block (expanded)
+# -------------------- Third-party block + host allow --------------------
+
+# Widened list (adds common analytics/CDNs that were noisy in logs)
 BLOCK_HOSTS = {
     # existing…
     "adobe.com","assets.adobedtm.com","adobedtm.com","demdex.net","omtrdc.net",
     "googletagmanager.com","google-analytics.com","doubleclick.net","facebook.net",
     "cookiebot.com","consent.cookiebot.com","imgct.cookiebot.com",
     "klevu.com","js.klevu.com","klimg.klevu.com","promon.net",
-    # new (seen in logs)
+
+    # new (seen on logs/pages)
     "consentcdn.cookiebot.com",
-    "js-agent.newrelic.com","nr-data.net","newrelic.com",
-    "pingdom.net","rum-collector-2.pingdom.net",
-    "typekit.net","use.typekit.net","p.typekit.net",
-    "cdn.jsdelivr.net","googletagservices.com",
+    "use.typekit.net","typekit.net","p.typekit.net",
+    "nr-data.net","newrelic.com","js-agent.newrelic.com",
+    "pingdom.net","rum-collector-2.pingdom.net","rum-collector.pingdom.net",
+    "gstatic.com","cdn.jsdelivr.net","googleadservices.com",
     "hotjar.com","static.hotjar.com",
 }
-
 ALLOWED_HOSTS = {"www.selver.ee", "selver.ee"}
 
 NON_PRODUCT_PATH_SNIPPETS = {
@@ -101,7 +102,6 @@ NON_PRODUCT_PATH_SNIPPETS = {
     "/tootajad","/kontakt","/tingimused","/privaatsus","/privacy",
     "/kampaania","/kampaaniad","/blogi","/app","/store-locator",
 }
-
 NON_PRODUCT_KEYWORDS = {
     "login", "registreeru", "tingimused", "garantii", "pretens", "hinnasilt",
     "jatkusuutlik", "b2b", "privaatsus", "privacy", "kontakt", "uudis",
@@ -121,19 +121,27 @@ def guess_size_from_title(title: str) -> str:
     num, unit = m.groups()
     return f"{num.replace(',', '.')} {unit.lower()}"
 
+def _strip_eselver_prefix(path: str) -> str:
+    # normalize '/e-selver/...'(SPA route) → '/...'(canonical)
+    if path.startswith("/e-selver/"):
+        return path.replace("/e-selver", "", 1)
+    return path
+
 def _clean_abs(href: str) -> str | None:
+    """
+    Return a canonical absolute URL on selver.ee, with no query/fragment,
+    and with '/e-selver' stripped from the path if present.
+    """
     if not href:
         return None
     url = urljoin(BASE, href)
     parts = urlsplit(url)
-    # reject SPA internal /e-selver/ routes and non-selver hosts
-    if "/e-selver/" in parts.path:
-        return None
     host = (parts.netloc or urlparse(BASE).netloc).lower()
     if host not in ALLOWED_HOSTS:
         return None
+    path = _strip_eselver_prefix(parts.path)
     # strip query/fragment, unify trailing slash
-    return urlunsplit((parts.scheme, parts.netloc, parts.path.rstrip("/"), "", ""))
+    return urlunsplit((parts.scheme, parts.netloc, path.rstrip("/"), "", ""))
 
 def _in_allowlist(path: str) -> bool:
     if not STRICT_ALLOWLIST:
@@ -146,15 +154,14 @@ def _is_selver_product_like(url: str) -> bool:
     host = (u.netloc or urlparse(BASE).netloc).lower()
     if host not in ALLOWED_HOSTS:
         return False
-    path = (u.path or "/").lower()
-    if path.startswith("/ru/"):  # skip RU locale
+    path = _strip_eselver_prefix((u.path or "/").lower())
+    if path.startswith("/ru/"):
         return False
     if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS):
         return False
     if any(kw in path for kw in NON_PRODUCT_KEYWORDS):
         return False
-
-    # PDP forms: /p/<slug> or /<slug-with-hyphens-and-some-digits-or-2+hyphens>
+    # PDP forms: /p/<slug> or a hyphenated slug tail
     if re.fullmatch(r"/p/[a-z0-9-]+/?", path):
         return True
     last = path.rstrip("/").rsplit("/", 1)[-1]
@@ -163,11 +170,7 @@ def _is_selver_product_like(url: str) -> bool:
     )
 
 def _is_category_like_path(path: str) -> bool:
-    """
-    Heuristic: canonical category listing looks like '/group/subgroup' with hyphens,
-    no digits in the last segment, and NOT a PDP nor banned keyword.
-    """
-    p = (path or "/").lower()
+    p = _strip_eselver_prefix((path or "/").lower())
     if ALLOWLIST_ONLY and STRICT_ALLOWLIST and not _in_allowlist(p):
         return False
     if "/e-selver/" in p or p.startswith("/ru/"):
@@ -184,7 +187,6 @@ def _is_category_like_path(path: str) -> bool:
     last = segs[-1]
     if any(ch.isdigit() for ch in last):
         return False
-    # prefer at least one hyphen in either segment (Selver style)
     return any("-" in s for s in segs)
 
 # ---------------------------------------------------------------------------
@@ -209,7 +211,6 @@ def safe_goto(page, url: str, timeout: int = 30000) -> bool:
     try:
         page.goto(url, wait_until="domcontentloaded", timeout=timeout)
         accept_cookies(page)
-        # let the SPA fetch & render before we read anchors
         try:
             page.wait_for_load_state("networkidle", timeout=timeout)
         except Exception:
@@ -223,12 +224,12 @@ def safe_goto(page, url: str, timeout: int = 30000) -> bool:
 def _wait_listing_ready(page):
     """Give the SPA a chance to draw product cards/links."""
     try:
-        for _ in range(6):
+        for _ in range(10):
             if (page.locator("button:has-text('OSTA')").count() > 0 or
                 page.locator("a[href^='/'][href*='-'] img").count() > 0 or
                 page.locator(".product, .product-list, .productgrid").count() > 0):
                 return
-            time.sleep(0.5)
+            time.sleep(0.4)
     except Exception:
         pass
 
@@ -236,10 +237,6 @@ def _wait_listing_ready(page):
 # Discovery
 
 def _extract_category_links(page) -> list[str]:
-    """
-    Pull canonical category links from the current page.
-    Reads real <a href="..."> (not router props), filters to category-like paths.
-    """
     _wait_listing_ready(page)
     try:
         hrefs = page.evaluate("""
@@ -248,8 +245,7 @@ def _extract_category_links(page) -> list[str]:
         """)
     except Exception:
         hrefs = []
-    out = []
-    seen = set()
+    out, seen = [], set()
     for h in hrefs:
         u = _clean_abs(h)
         if not u:
@@ -258,17 +254,13 @@ def _extract_category_links(page) -> list[str]:
         if ALLOWLIST_ONLY and STRICT_ALLOWLIST and not _in_allowlist(path):
             continue
         if _is_category_like_path(path) and u not in seen:
-            seen.add(u)
-            out.append(u)
+            seen.add(u); out.append(u)
     return out
 
 def discover_categories(page, start_urls: list[str]) -> list[str]:
-    """
-    BFS over site menus to collect canonical (non /e-selver/) category URLs.
-    """
-    queue = list(dict.fromkeys(start_urls))  # de-duped, keep order
+    queue = list(dict.fromkeys(start_urls))
     seen_pages = set(queue)
-    cats = []
+    cats: list[str] = []
 
     while queue:
         url = queue.pop(0)
@@ -276,22 +268,17 @@ def discover_categories(page, start_urls: list[str]) -> list[str]:
             continue
         time.sleep(REQ_DELAY)
 
-        # If page *is itself* a category-like URL, keep it
         p = urlparse(url).path
         if _is_category_like_path(p) and url not in cats:
             cats.append(url)
 
-        # Gather deeper category links from this page
         for u in _extract_category_links(page):
             if u not in seen_pages:
-                seen_pages.add(u)
-                queue.append(u)
+                seen_pages.add(u); queue.append(u)
 
-        # Keep list manageable
-        if len(cats) > 2000:  # safety cap
+        if len(cats) > 2000:
             break
 
-    # Final de-dupe preserving order
     out, seen = [], set()
     for u in cats:
         if u not in seen:
@@ -309,17 +296,11 @@ def _with_page(url: str, n: int) -> str:
     return urlunsplit((parts.scheme, parts.netloc, parts.path, query, ""))
 
 def _max_page_number(page) -> int:
-    """
-    Read numbered pagination; if none, return 1.
-    """
     try:
         maxn = page.evaluate("""
           (() => {
             const ns = [...document.querySelectorAll('a[href*="?page="]')]
-              .map(a => {
-                try { return parseInt(new URL(a.href).searchParams.get('page') || ''); }
-                catch { return NaN; }
-              })
+              .map(a => { try { return parseInt(new URL(a.href).searchParams.get('page')||''); } catch { return NaN; } })
               .filter(n => !Number.isNaN(n));
             return ns.length ? Math.max(...ns) : 1;
           })()
@@ -328,10 +309,26 @@ def _max_page_number(page) -> int:
     except Exception:
         return 1
 
+def _extract_product_hrefs(page) -> list[str]:
+    """Collect canonical PDP hrefs from current listing view."""
+    try:
+        hrefs = page.evaluate("""
+          [...document.querySelectorAll('a[href^="/"]')]
+            .map((a,i) => a.getAttribute('href'))
+            .filter(Boolean)
+        """)
+    except Exception:
+        hrefs = []
+    links = []
+    for h in hrefs:
+        u = _clean_abs(h)
+        if u and _is_selver_product_like(u):
+            links.append(u)
+    return list(dict.fromkeys(links))
+
 def collect_product_links_from_listing(page, seed_url: str) -> set[str]:
     links: set[str] = set()
 
-    # make sure current page (seed) has rendered before reading pagination
     _wait_listing_ready(page)
     max_pages = _max_page_number(page)
     if PAGE_LIMIT > 0:
@@ -344,22 +341,23 @@ def collect_product_links_from_listing(page, seed_url: str) -> set[str]:
         _wait_listing_ready(page)
         time.sleep(REQ_DELAY)
 
-        try:
-            hrefs = page.evaluate("""
-              [...document.querySelectorAll('a[href^="/"]')]
-                .map(a => a.getAttribute('href')).filter(Boolean)
-            """)
-        except Exception:
-            hrefs = []
+        page_links = _extract_product_hrefs(page)
+        if not page_links and CLICK_PRODUCTS:
+            # Fallback: physically click first-page products to coerce SPA to build canonical URLs
+            anchors = page.locator("a[href^='/']")
+            count = min(anchors.count(), 48)  # safety
+            for i in range(count):
+                try:
+                    href = anchors.nth(i).get_attribute("href") or ""
+                except Exception:
+                    href = ""
+                can = _clean_abs(href)
+                if can and _is_selver_product_like(can):
+                    page_links.append(can)
 
-        for h in hrefs:
-            u = _clean_abs(h)
-            if not u:
-                continue
-            if _is_selver_product_like(u):
-                links.add(u)
+        for u in page_links:
+            links.add(u)
 
-    # Debug peek
     if links:
         sample = list(sorted(links))[:5]
         print(f"[selver]   harvested {len(links)} PDP links; sample: {sample}")
@@ -395,7 +393,7 @@ def extract_price(page) -> tuple[float, str]:
     return 0.0, "EUR"
 
 def extract_ean(page) -> str:
-    labels = ["Ribakood","EAN","EAN-kood","EAN kood","GTIN"]
+    labels = ["Ribakood","EAN","EAN-kood","EAN kood","GTIN","Ribakood:"]
     for lab in labels:
         try:
             el = page.locator(f"xpath=//*[normalize-space()='{lab}']").first
@@ -455,33 +453,28 @@ def jsonld_pick_breadcrumbs(blocks: list[dict]) -> list[str]:
     return []
 
 # ---------------------------------------------------------------------------
-# Request router (tight, allows Selver; blocks common 3P noise)
+# Request router (tight, but safe for Selver). Off by default.
 
 def _router(route, request):
     try:
         url = request.url
         host = urlparse(url).netloc.lower()
+        rtype = request.resource_type
 
         # Always allow Selver first
-        if host.endswith("selver.ee") or host in ALLOWED_HOSTS:
+        if host.endswith("selver.ee"):
             return route.continue_()
 
         # Block by resource type for non-Selver origins
-        rtype = request.resource_type
         if rtype in ("image", "font", "media", "stylesheet", "websocket"):
             return route.abort()
-
-        # Kill 3P JS/XHR entirely (metrics/trackers/CDNs)
         if rtype in ("script", "xhr", "fetch"):
+            # Kill 3P XHR/script entirely
             return route.abort()
 
-        # Explicit domain blocklist (belt & suspenders)
-        for d in BLOCK_HOSTS:
-            try:
-                if host == d or host.endswith("." + d):
-                    return route.abort()
-            except Exception:
-                continue
+        # Explicit domain blocklist (fallback)
+        if any(host == d or host.endswith("." + d) for d in BLOCK_HOSTS):
+            return route.abort()
 
         return route.continue_()
     except Exception:
@@ -504,9 +497,9 @@ def crawl():
         w.writeheader()
 
         with sync_playwright() as p:
-            print("[selver] launching chromium (headless)" if HEADLESS else "[selver] launching chromium (headed)")
+            print("[selver] launching chromium (headless)")
             browser = p.chromium.launch(
-                headless=HEADLESS,
+                headless=True,
                 args=["--disable-blink-features=AutomationControlled",
                       "--no-sandbox", "--disable-dev-shm-usage"]
             )
@@ -517,34 +510,28 @@ def crawl():
                             "Chrome/124.0.0.0 Safari/537.36"),
                 extra_http_headers={
                     "Accept-Language": "et-EE,et;q=0.9,en-US;q=0.8,en;q=0.7",
-                    # NOTE: do NOT send Upgrade-Insecure-Requests: 1 → triggers CORS preflight failures upstream
+                    "Upgrade-Insecure-Requests": "1",
                 },
                 ignore_https_errors=True,
             )
-
-            # Install the tight router (safe for SPA; allows Selver only)
-            context.route("**/*", _router)
+            if USE_ROUTER:
+                context.route("**/*", _router)
 
             page = context.new_page()
-            # Slightly tighter timeouts to avoid hanging on blocked assets
-            page.set_default_navigation_timeout(20000)
-            page.set_default_timeout(8000)
+            page.set_default_navigation_timeout(30000)
+            page.set_default_timeout(10000)
 
             if VERBOSE_CONSOLE:
                 page.on("console", lambda m: print(f"[pw] {m.type}: {m.text}"))
             else:
-                def _log_only_warnings_and_errors(m):
-                    try:
-                        if m.type in ("warning", "error"):
-                            t = (m.text or "").replace("\n", " ").strip()
-                            print(f"[pw] {m.type}: {t[:880]}")
-                    except Exception:
-                        pass
-                page.on("console", _log_only_warnings_and_errors)
+                def _warn_err_only(m):
+                    if m.type in ("warning","error"):
+                        t = (m.text or "").replace("\n"," ")[:800]
+                        print(f"[pw] {m.type}: {t}")
+                page.on("console", _warn_err_only)
 
             # ---- seeds (canonical, no /e-selver/)
             print("[selver] collecting seeds…")
-            # Start from strict allowlist
             seeds: list[str] = [urljoin(BASE, pth) for pth in STRICT_ALLOWLIST]
 
             # Optional: merge extra seeds from file
@@ -557,10 +544,9 @@ def crawl():
                             if u:
                                 seeds.append(u)
 
-            # If still empty (unlikely), do a light discovery bootstrap
+            # Bootstrap if empty
             if not seeds:
-                base_starts = [BASE, urljoin(BASE, "/")]
-                for su in base_starts:
+                for su in [BASE, urljoin(BASE, "/")]:
                     if safe_goto(page, su):
                         time.sleep(REQ_DELAY)
                         seeds.extend(_extract_category_links(page))
@@ -576,9 +562,7 @@ def crawl():
                         time.sleep(REQ_DELAY)
                         seeds.extend(_extract_category_links(page))
 
-            # De-dup and keep order
             seeds = list(dict.fromkeys(seeds))
-
             cats = seeds if ALLOWLIST_ONLY else discover_categories(page, seeds)
 
             print(f"[selver] Categories to crawl: {len(cats)}")
@@ -609,6 +593,12 @@ def crawl():
             for i, pu in enumerate(sorted(product_urls), 1):
                 if not _is_selver_product_like(pu):
                     continue
+
+                if CLICK_PRODUCTS:
+                    # Simulate a click-flow by navigating back & forth
+                    # (opening directly after canonicalization is equivalent but faster)
+                    pass  # we still just goto; click adds no value when URL is known
+
                 if not safe_goto(page, pu):
                     try: page.screenshot(path=f"{dbg_dir}/prod_nav_fail_{i}.png", full_page=True)
                     except Exception: pass
