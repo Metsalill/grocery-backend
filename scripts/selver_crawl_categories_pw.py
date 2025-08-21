@@ -4,22 +4,28 @@
 """
 Selver category crawler → CSV (staging_selver_products)
 
-Guarantees PDP data:
-- Collects PDP links from listings and remembers the source listing page.
-- Opens PDPs directly; if EAN/SKU missing, falls back to **click-through** on the
-  original listing to force SPA hydration, then extracts again.
-- CSV now includes sku_raw.
+Guaranteed PDP data:
+- Collect PDP links from listings and remember which listing page each link came from.
+- Open PDPs directly; if EAN/SKU missing, fall back to **click-through** from the original
+  listing to force SPA hydration, then extract again.
+- CSV columns: ext_id, name, ean_raw, sku_raw, size_text, price, currency, category_path, category_leaf.
 
-Other improvements:
-- Canonical URLs (no /e-selver/)
-- Pagination via ?page=N
-- Widened 3P blocklist & optional tight router (USE_ROUTER=1)
-- Quiet console by default (VERBOSE_CONSOLE=1 for full logs)
+Noise & speed fixes:
+- Canonical URLs (no /e-selver/) and pagination via ?page=N.
+- **Router ON by default**: aborts non-Selver scripts/xhr/fetch/fonts/stylesheet/websocket.
+- **Removed** the problematic 'Upgrade-Insecure-Requests' header.
+- **Block service workers** to avoid GTM SW iframes.
+- Wider 3P blocklist.
+- Console is quiet by default. Use LOG_CONSOLE=warn or LOG_CONSOLE=all to see messages.
 
 Run:
   OUTPUT_CSV=data/selver.csv python scripts/selver_crawl_categories_pw.py
-Env:
-  USE_ROUTER=1 | VERBOSE_CONSOLE=1
+
+Env toggles:
+  ALLOWLIST_ONLY=1 (default) | 0
+  PAGE_LIMIT=0 (no cap)
+  USE_ROUTER=1 (default) | 0
+  LOG_CONSOLE=0 (default) | warn | all
 """
 
 from __future__ import annotations
@@ -37,8 +43,8 @@ REQ_DELAY = float(os.getenv("REQ_DELAY", "0.6"))
 PAGE_LIMIT = int(os.getenv("PAGE_LIMIT", "0"))  # 0 = no limit
 CATEGORIES_FILE = os.getenv("CATEGORIES_FILE", "data/selver_categories.txt")
 
-USE_ROUTER = int(os.getenv("USE_ROUTER", "0")) == 1
-VERBOSE_CONSOLE = int(os.getenv("VERBOSE_CONSOLE", "0")) == 1
+USE_ROUTER = int(os.getenv("USE_ROUTER", "1")) == 1
+LOG_CONSOLE = (os.getenv("LOG_CONSOLE", "0") or "0").lower()  # 0|off, warn, all
 
 # Strict allowlist of FOOD roots/leaves (canonical, no /e-selver/)
 STRICT_ALLOWLIST = [
@@ -75,13 +81,14 @@ BANNED_KEYWORDS = {
 
 SIZE_RE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
 
-# ---------- 3P noise ----------
+# ---------- Third-party noise to block ----------
 BLOCK_HOSTS = {
+    # existing…
     "adobe.com","assets.adobedtm.com","adobedtm.com","demdex.net","omtrdc.net",
     "googletagmanager.com","google-analytics.com","doubleclick.net","facebook.net",
     "cookiebot.com","consent.cookiebot.com","imgct.cookiebot.com",
     "klevu.com","js.klevu.com","klimg.klevu.com","promon.net",
-    # extra commonly seen
+    # more 3P commonly seen on Selver
     "consentcdn.cookiebot.com","use.typekit.net","typekit.net","p.typekit.net",
     "nr-data.net","newrelic.com","js-agent.newrelic.com",
     "pingdom.net","rum-collector.pingdom.net","rum-collector-2.pingdom.net",
@@ -207,7 +214,6 @@ def _wait_listing_ready(page):
         pass
 
 def _wait_pdp_ready(page):
-    """Wait for PDP to be usable (name + either JSON-LD or attribute table)."""
     for _ in range(20):
         if page.locator("h1").count() > 0:
             if (page.locator("script[type='application/ld+json']").count() > 0 or
@@ -354,8 +360,7 @@ def extract_price(page) -> tuple[float, str]:
     return 0.0, "EUR"
 
 def extract_ean_and_sku(page) -> tuple[str, str]:
-    """Return (ean_raw, sku_raw) from PDP content."""
-    # JSON-LD first
+    # JSON-LD
     try:
         scripts = page.locator("script[type='application/ld+json']")
         for i in range(min(6, scripts.count())):
@@ -377,7 +382,7 @@ def extract_ean_and_sku(page) -> tuple[str, str]:
     except Exception:
         pass
 
-    # Label scan
+    # Markup/labels
     try:
         html = page.content()
         m = re.search(r"(?:Ribakood|EAN(?:-kood)?)\D*?(\d{8,14})", html, re.I)
@@ -427,7 +432,7 @@ def jsonld_pick_breadcrumbs(blocks: List[dict]) -> List[str]:
     return []
 
 # ---------------------------------------------------------------------------
-# Request router (optional; OFF by default)
+# Request router (ON by default)
 
 def _router(route, request):
     try:
@@ -435,14 +440,17 @@ def _router(route, request):
         host = urlparse(url).netloc.lower()
         rtype = request.resource_type
 
+        # Always allow Selver origin
         if host.endswith("selver.ee"):
             return route.continue_()
 
+        # Block noisy resource types for non-Selver origins
         if rtype in ("image", "font", "media", "stylesheet", "websocket"):
             return route.abort()
         if rtype in ("script", "xhr", "fetch"):
             return route.abort()
 
+        # Explicit domain blocklist
         if any(host == d or host.endswith("." + d) for d in BLOCK_HOSTS):
             return route.abort()
 
@@ -454,10 +462,6 @@ def _router(route, request):
 # Click-through fallback
 
 def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
-    """
-    Go to listing_url, click the product anchor that points to product_url (or its /e-selver form).
-    Returns True if PDP seems ready.
-    """
     if not listing_url:
         return False
     if not safe_goto(page, listing_url):
@@ -465,7 +469,6 @@ def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
     _wait_listing_ready(page)
     time.sleep(0.2)
 
-    # Build selectors that match both canonical and SPA routes
     path = urlparse(product_url).path
     eselver_path = "/e-selver" + path if not path.startswith("/e-selver/") else path
     candidates = [
@@ -480,7 +483,6 @@ def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
         try:
             if a.count() > 0 and a.is_visible():
                 a.click(timeout=5000)
-                # Wait for SPA PDP
                 for _ in range(20):
                     up = urlparse(page.url).path.lower()
                     if "/p/" in up or up.rstrip("/").endswith(path.rstrip("/").rsplit("/",1)[-1]):
@@ -523,9 +525,10 @@ def crawl():
                             "Chrome/124.0.0.0 Safari/537.36"),
                 extra_http_headers={
                     "Accept-Language": "et-EE,et;q=0.9,en-US;q=0.8,en;q=0.7",
-                    "Upgrade-Insecure-Requests": "1",
+                    # DO NOT send 'Upgrade-Insecure-Requests': it breaks CORS on 3P
                 },
                 ignore_https_errors=True,
+                service_workers="block",  # avoid GTM SW iframes
             )
             if USE_ROUTER:
                 context.route("**/*", _router)
@@ -534,14 +537,15 @@ def crawl():
             page.set_default_navigation_timeout(30000)
             page.set_default_timeout(10000)
 
-            if VERBOSE_CONSOLE:
+            if LOG_CONSOLE == "all":
                 page.on("console", lambda m: print(f"[pw] {m.type}: {m.text}"))
-            else:
+            elif LOG_CONSOLE == "warn":
                 def _warn_err_only(m):
                     if m.type in ("warning","error"):
                         t = (m.text or "").replace("\n"," ")[:800]
                         print(f"[pw] {m.type}: {t}")
                 page.on("console", _warn_err_only)
+            # else: quiet
 
             # ---- seeds
             print("[selver] collecting seeds…")
@@ -592,7 +596,6 @@ def crawl():
 
                 got = safe_goto(page, pu)
                 if not got:
-                    # try click fallback immediately if nav failed
                     got = open_product_via_click(page, prod2listing.get(pu, ""), pu)
                     if not got:
                         try: page.screenshot(path=f"{dbg_dir}/prod_nav_fail_{i}.png", full_page=True)
@@ -623,7 +626,6 @@ def crawl():
                     ean = ean or ean2
                     sku = sku or sku2
 
-                # If still missing EAN+SKU, force click-through from listing and re-extract
                 if not (ean or sku):
                     if open_product_via_click(page, prod2listing.get(pu, ""), pu):
                         time.sleep(0.3)
