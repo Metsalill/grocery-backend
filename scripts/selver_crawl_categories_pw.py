@@ -47,6 +47,9 @@ BLOCK_HOSTS = {
     "cobrowsing.promon.net",
 }
 
+# Hosts we consider valid for product pages
+ALLOWED_HOSTS = {"www.selver.ee", "selver.ee"}
+
 # Paths that are definitely not product detail pages
 NON_PRODUCT_PATH_SNIPPETS = {
     "/e-selver/","/ostukorv","/cart","/checkout","/search","/otsi",
@@ -79,17 +82,31 @@ def _should_block(url: str) -> bool:
     return any(h == d or h.endswith("." + d) for d in BLOCK_HOSTS)
 
 def _is_selver_product_like(url: str) -> bool:
+    """
+    Accept only real PDPs:
+      • https://www.selver.ee/<hyphenated-slug>
+      • https://www.selver.ee/p/<hyphenated-slug>
+    Reject:
+      • category trees (/e-selver/..., /liha-ja-kalatooted/..., etc.)
+      • the homepage (/), simple single-word pages (/jook), RU locale (/ru/...)
+      • any other subdomains.
+    """
     u = urlparse(url)
-    host_ok = u.netloc.lower().endswith("selver.ee") or (u.netloc == "" and url.startswith("/"))
-    if not host_ok:
+    host = (u.netloc or urlparse(BASE).netloc).lower()
+    if host not in ALLOWED_HOSTS:
         return False
+
     path = (u.path or "/").lower()
+    if path.startswith("/ru/"):
+        return False
     if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS):
         return False
-    # products are sluggy paths (no file extension, at least 1 segment)
-    if "." in path.rsplit("/", 1)[-1]:
-        return False
-    return path.count("/") >= 1
+    # PDPs are single segment hyphenated slugs or /p/<slug>
+    if re.fullmatch(r"/[a-z0-9-]+/?", path):
+        return "-" in path and path != "/"  # avoid root & simple one-word pages like /jook
+    if re.fullmatch(r"/p/[a-z0-9-]+/?", path):
+        return True
+    return False
 
 # ---------------------------------------------------------------------------
 # Cookies / overlays / navigation
@@ -184,16 +201,23 @@ def _harvest_via_js(page) -> set[str]:
     try:
         hrefs = page.evaluate("""
             Array.from(new Set(
-              Array.from(document.querySelectorAll('a[href]'))
+              Array.from(document.querySelectorAll('a[href]:not(.Store-locale__language)'))
                    .map(a => a.getAttribute('href') || '')
                    .filter(Boolean)
             ))
         """)
     except Exception:
         hrefs = []
+
     out: set[str] = set()
     for href in hrefs:
+        # ignore anchors and javascript: links quickly
+        if href.startswith("#") or href.lower().startswith("javascript:"):
+            continue
         u = urljoin(BASE, href)
+        pu = urlparse(u)
+        if (pu.netloc or urlparse(BASE).netloc).lower() not in ALLOWED_HOSTS:
+            continue
         if _is_selver_product_like(u):
             out.add(u)
     return out
