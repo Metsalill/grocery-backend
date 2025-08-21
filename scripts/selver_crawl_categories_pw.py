@@ -4,26 +4,29 @@
 """
 Selver category crawler → CSV (staging_selver_products)
 
-Fixes:
-- Uses canonical category URLs (no /e-selver/)
-- Paginates with ?page=N (e.g. 1..14), not infinite scroll
-- Collects PDP links from listing pages only (click fallback optional)
-- Visits PDPs and extracts: ext_id(url), name, ean_raw, size_text, price, currency,
-  category_path, category_leaf.
+Guarantees PDP data:
+- Collects PDP links from listings and remembers the source listing page.
+- Opens PDPs directly; if EAN/SKU missing, falls back to **click-through** on the
+  original listing to force SPA hydration, then extracts again.
+- CSV now includes sku_raw.
+
+Other improvements:
+- Canonical URLs (no /e-selver/)
+- Pagination via ?page=N
+- Widened 3P blocklist & optional tight router (USE_ROUTER=1)
+- Quiet console by default (VERBOSE_CONSOLE=1 for full logs)
 
 Run:
   OUTPUT_CSV=data/selver.csv python scripts/selver_crawl_categories_pw.py
-
-Toggles:
-  USE_ROUTER=1            # enable request router (3P blocking)
-  VERBOSE_CONSOLE=1       # print all console messages
-  CLICK_PRODUCTS=1        # physically click each product on listings (slower)
+Env:
+  USE_ROUTER=1 | VERBOSE_CONSOLE=1
 """
 
 from __future__ import annotations
 import os, re, csv, time, json
+from typing import Dict, Set, Tuple, List
 from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit, parse_qs, urlencode
-from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeout
+from playwright.sync_api import sync_playwright
 
 # ---------------------------------------------------------------------------
 # Config
@@ -36,7 +39,6 @@ CATEGORIES_FILE = os.getenv("CATEGORIES_FILE", "data/selver_categories.txt")
 
 USE_ROUTER = int(os.getenv("USE_ROUTER", "0")) == 1
 VERBOSE_CONSOLE = int(os.getenv("VERBOSE_CONSOLE", "0")) == 1
-CLICK_PRODUCTS = int(os.getenv("CLICK_PRODUCTS", "0")) == 1
 
 # Strict allowlist of FOOD roots/leaves (canonical, no /e-selver/)
 STRICT_ALLOWLIST = [
@@ -56,10 +58,8 @@ STRICT_ALLOWLIST = [
     "/kulmutatud-toidukaubad",
     "/suurpakendid",
 ]
-# If 1, crawl only the allowlist (and pages under those roots). If 0, use allowlist as seeds but allow BFS.
 ALLOWLIST_ONLY = int(os.getenv("ALLOWLIST_ONLY", "1")) == 1
 
-# Ban obvious non-food areas (for category discovery)
 BANNED_KEYWORDS = {
     "sisustus","kodutekstiil","valgustus","kardin","jouluvalgustid",
     "vaikesed-sisustuskaubad","kuunlad","kirja-ja-kontoritarbed",
@@ -73,24 +73,18 @@ BANNED_KEYWORDS = {
     "loodustooted-ja-toidulisandid",
 }
 
-# Size finder (best-effort from title)
 SIZE_RE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
 
-# -------------------- Third-party block + host allow --------------------
-
-# Widened list (adds common analytics/CDNs that were noisy in logs)
+# ---------- 3P noise ----------
 BLOCK_HOSTS = {
-    # existing…
     "adobe.com","assets.adobedtm.com","adobedtm.com","demdex.net","omtrdc.net",
     "googletagmanager.com","google-analytics.com","doubleclick.net","facebook.net",
     "cookiebot.com","consent.cookiebot.com","imgct.cookiebot.com",
     "klevu.com","js.klevu.com","klimg.klevu.com","promon.net",
-
-    # new (seen on logs/pages)
-    "consentcdn.cookiebot.com",
-    "use.typekit.net","typekit.net","p.typekit.net",
+    # extra commonly seen
+    "consentcdn.cookiebot.com","use.typekit.net","typekit.net","p.typekit.net",
     "nr-data.net","newrelic.com","js-agent.newrelic.com",
-    "pingdom.net","rum-collector-2.pingdom.net","rum-collector.pingdom.net",
+    "pingdom.net","rum-collector.pingdom.net","rum-collector-2.pingdom.net",
     "gstatic.com","cdn.jsdelivr.net","googleadservices.com",
     "hotjar.com","static.hotjar.com",
 }
@@ -122,16 +116,9 @@ def guess_size_from_title(title: str) -> str:
     return f"{num.replace(',', '.')} {unit.lower()}"
 
 def _strip_eselver_prefix(path: str) -> str:
-    # normalize '/e-selver/...'(SPA route) → '/...'(canonical)
-    if path.startswith("/e-selver/"):
-        return path.replace("/e-selver", "", 1)
-    return path
+    return path.replace("/e-selver", "", 1) if path.startswith("/e-selver/") else path
 
 def _clean_abs(href: str) -> str | None:
-    """
-    Return a canonical absolute URL on selver.ee, with no query/fragment,
-    and with '/e-selver' stripped from the path if present.
-    """
     if not href:
         return None
     url = urljoin(BASE, href)
@@ -140,7 +127,6 @@ def _clean_abs(href: str) -> str | None:
     if host not in ALLOWED_HOSTS:
         return None
     path = _strip_eselver_prefix(parts.path)
-    # strip query/fragment, unify trailing slash
     return urlunsplit((parts.scheme, parts.netloc, path.rstrip("/"), "", ""))
 
 def _in_allowlist(path: str) -> bool:
@@ -155,15 +141,10 @@ def _is_selver_product_like(url: str) -> bool:
     if host not in ALLOWED_HOSTS:
         return False
     path = _strip_eselver_prefix((u.path or "/").lower())
-    if path.startswith("/ru/"):
-        return False
-    if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS):
-        return False
-    if any(kw in path for kw in NON_PRODUCT_KEYWORDS):
-        return False
-    # PDP forms: /p/<slug> or a hyphenated slug tail
-    if re.fullmatch(r"/p/[a-z0-9-]+/?", path):
-        return True
+    if path.startswith("/ru/"): return False
+    if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS): return False
+    if any(kw in path for kw in NON_PRODUCT_KEYWORDS): return False
+    if re.fullmatch(r"/p/[a-z0-9-]+/?", path): return True
     last = path.rstrip("/").rsplit("/", 1)[-1]
     return re.fullmatch(r"[a-z0-9-]+", last) and ("-" in last) and (
         any(ch.isdigit() for ch in last) or last.count("-") >= 2
@@ -171,22 +152,15 @@ def _is_selver_product_like(url: str) -> bool:
 
 def _is_category_like_path(path: str) -> bool:
     p = _strip_eselver_prefix((path or "/").lower())
-    if ALLOWLIST_ONLY and STRICT_ALLOWLIST and not _in_allowlist(p):
-        return False
-    if "/e-selver/" in p or p.startswith("/ru/"):
-        return False
-    if any(bad in p for bad in BANNED_KEYWORDS):
-        return False
-    if any(sn in p for sn in NON_PRODUCT_PATH_SNIPPETS):
-        return False
-    if _is_selver_product_like(urljoin(BASE, p)):
-        return False
+    if ALLOWLIST_ONLY and STRICT_ALLOWLIST and not _in_allowlist(p): return False
+    if "/e-selver/" in p or p.startswith("/ru/"): return False
+    if any(bad in p for bad in BANNED_KEYWORDS): return False
+    if any(sn in p for sn in NON_PRODUCT_PATH_SNIPPETS): return False
+    if _is_selver_product_like(urljoin(BASE, p)): return False
     segs = [s for s in p.strip("/").split("/") if s]
-    if len(segs) < 1:
-        return False
+    if len(segs) < 1: return False
     last = segs[-1]
-    if any(ch.isdigit() for ch in last):
-        return False
+    if any(ch.isdigit() for ch in last): return False
     return any("-" in s for s in segs)
 
 # ---------------------------------------------------------------------------
@@ -222,7 +196,6 @@ def safe_goto(page, url: str, timeout: int = 30000) -> bool:
         return False
 
 def _wait_listing_ready(page):
-    """Give the SPA a chance to draw product cards/links."""
     try:
         for _ in range(10):
             if (page.locator("button:has-text('OSTA')").count() > 0 or
@@ -233,10 +206,19 @@ def _wait_listing_ready(page):
     except Exception:
         pass
 
+def _wait_pdp_ready(page):
+    """Wait for PDP to be usable (name + either JSON-LD or attribute table)."""
+    for _ in range(20):
+        if page.locator("h1").count() > 0:
+            if (page.locator("script[type='application/ld+json']").count() > 0 or
+                page.locator("text=Ribakood").count() > 0):
+                return
+        time.sleep(0.25)
+
 # ---------------------------------------------------------------------------
 # Discovery
 
-def _extract_category_links(page) -> list[str]:
+def _extract_category_links(page) -> List[str]:
     _wait_listing_ready(page)
     try:
         hrefs = page.evaluate("""
@@ -248,8 +230,7 @@ def _extract_category_links(page) -> list[str]:
     out, seen = [], set()
     for h in hrefs:
         u = _clean_abs(h)
-        if not u:
-            continue
+        if not u: continue
         path = urlparse(u).path
         if ALLOWLIST_ONLY and STRICT_ALLOWLIST and not _in_allowlist(path):
             continue
@@ -257,28 +238,20 @@ def _extract_category_links(page) -> list[str]:
             seen.add(u); out.append(u)
     return out
 
-def discover_categories(page, start_urls: list[str]) -> list[str]:
+def discover_categories(page, start_urls: List[str]) -> List[str]:
     queue = list(dict.fromkeys(start_urls))
     seen_pages = set(queue)
-    cats: list[str] = []
-
+    cats: List[str] = []
     while queue:
         url = queue.pop(0)
-        if not safe_goto(page, url):
-            continue
+        if not safe_goto(page, url): continue
         time.sleep(REQ_DELAY)
-
         p = urlparse(url).path
-        if _is_category_like_path(p) and url not in cats:
-            cats.append(url)
-
+        if _is_category_like_path(p) and url not in cats: cats.append(url)
         for u in _extract_category_links(page):
             if u not in seen_pages:
                 seen_pages.add(u); queue.append(u)
-
-        if len(cats) > 2000:
-            break
-
+        if len(cats) > 2000: break
     out, seen = [], set()
     for u in cats:
         if u not in seen:
@@ -309,12 +282,11 @@ def _max_page_number(page) -> int:
     except Exception:
         return 1
 
-def _extract_product_hrefs(page) -> list[str]:
-    """Collect canonical PDP hrefs from current listing view."""
+def _extract_product_hrefs(page) -> List[str]:
     try:
         hrefs = page.evaluate("""
           [...document.querySelectorAll('a[href^="/"]')]
-            .map((a,i) => a.getAttribute('href'))
+            .map(a => a.getAttribute('href'))
             .filter(Boolean)
         """)
     except Exception:
@@ -326,8 +298,10 @@ def _extract_product_hrefs(page) -> list[str]:
             links.append(u)
     return list(dict.fromkeys(links))
 
-def collect_product_links_from_listing(page, seed_url: str) -> set[str]:
-    links: set[str] = set()
+def collect_product_links_from_listing(page, seed_url: str) -> Tuple[Set[str], Dict[str, str]]:
+    """Returns (unique PDP links, mapping link->this listing page URL)."""
+    links: Set[str] = set()
+    link2listing: Dict[str, str] = {}
 
     _wait_listing_ready(page)
     max_pages = _max_page_number(page)
@@ -336,39 +310,26 @@ def collect_product_links_from_listing(page, seed_url: str) -> set[str]:
 
     for n in range(1, max_pages + 1):
         url = seed_url if n == 1 else _with_page(seed_url, n)
-        if not safe_goto(page, url):
-            continue
+        if not safe_goto(page, url): continue
         _wait_listing_ready(page)
         time.sleep(REQ_DELAY)
 
         page_links = _extract_product_hrefs(page)
-        if not page_links and CLICK_PRODUCTS:
-            # Fallback: physically click first-page products to coerce SPA to build canonical URLs
-            anchors = page.locator("a[href^='/']")
-            count = min(anchors.count(), 48)  # safety
-            for i in range(count):
-                try:
-                    href = anchors.nth(i).get_attribute("href") or ""
-                except Exception:
-                    href = ""
-                can = _clean_abs(href)
-                if can and _is_selver_product_like(can):
-                    page_links.append(can)
-
         for u in page_links:
-            links.add(u)
+            if u not in links:
+                links.add(u); link2listing[u] = url
 
     if links:
         sample = list(sorted(links))[:5]
         print(f"[selver]   harvested {len(links)} PDP links; sample: {sample}")
     else:
         print("[selver]   no PDP links found on listing.")
-    return links
+    return links, link2listing
 
 # ---------------------------------------------------------------------------
 # Page extraction helpers
 
-def breadcrumbs(page) -> list[str]:
+def breadcrumbs(page) -> List[str]:
     for sel in ["nav ol li a","nav.breadcrumbs a","ol.breadcrumbs a"]:
         try:
             items = page.locator(sel)
@@ -392,29 +353,42 @@ def extract_price(page) -> tuple[float, str]:
             pass
     return 0.0, "EUR"
 
-def extract_ean(page) -> str:
-    labels = ["Ribakood","EAN","EAN-kood","EAN kood","GTIN","Ribakood:"]
-    for lab in labels:
-        try:
-            el = page.locator(f"xpath=//*[normalize-space()='{lab}']").first
-            if el.count() > 0:
-                nxt = el.locator("xpath=following::*[self::div or self::span or self::p][1]")
-                if nxt.count() > 0:
-                    txt = normspace(nxt.inner_text())
-                    if re.fullmatch(r"\d{8,14}", txt): return txt
-        except Exception:
-            pass
+def extract_ean_and_sku(page) -> tuple[str, str]:
+    """Return (ean_raw, sku_raw) from PDP content."""
+    # JSON-LD first
+    try:
+        scripts = page.locator("script[type='application/ld+json']")
+        for i in range(min(6, scripts.count())):
+            raw = scripts.nth(i).inner_text()
+            try:
+                obj = json.loads(raw)
+                if isinstance(obj, list):
+                    for b in obj:
+                        if isinstance(b, dict) and ("product" in str(b.get("@type","")).lower()):
+                            e = re.sub(r"\D+","", str(b.get("gtin13") or b.get("gtin") or "")) or ""
+                            s = normspace(str(b.get("sku") or ""))
+                            if e or s: return e, s
+                elif isinstance(obj, dict) and ("product" in str(obj.get("@type","")).lower()):
+                    e = re.sub(r"\D+","", str(obj.get("gtin13") or obj.get("gtin") or "")) or ""
+                    s = normspace(str(obj.get("sku") or ""))
+                    if e or s: return e, s
+            except Exception:
+                continue
+    except Exception:
+        pass
+
+    # Label scan
     try:
         html = page.content()
         m = re.search(r"(?:Ribakood|EAN(?:-kood)?)\D*?(\d{8,14})", html, re.I)
-        if m: return m.group(1)
+        ean = m.group(1) if m else ""
+        m2 = re.search(r"\bSKU\b\D*([A-Z0-9_-]{3,})", html, re.I)
+        sku = m2.group(1).strip() if m2 else ""
+        return ean, sku
     except Exception:
-        pass
-    return ""
+        return "", ""
 
-# -------------------- JSON-LD helpers --------------------
-
-def jsonld_all(page) -> list[dict]:
+def jsonld_all(page) -> List[dict]:
     out = []
     try:
         scripts = page.locator("script[type='application/ld+json']")
@@ -432,7 +406,7 @@ def jsonld_all(page) -> list[dict]:
         pass
     return out
 
-def jsonld_pick_product(blocks: list[dict]) -> dict:
+def jsonld_pick_product(blocks: List[dict]) -> dict:
     for b in blocks:
         t = (b.get("@type") or "")
         t_low = t.lower() if isinstance(t, str) else ""
@@ -440,7 +414,7 @@ def jsonld_pick_product(blocks: list[dict]) -> dict:
             return b
     return {}
 
-def jsonld_pick_breadcrumbs(blocks: list[dict]) -> list[str]:
+def jsonld_pick_breadcrumbs(blocks: List[dict]) -> List[str]:
     for b in blocks:
         t = (b.get("@type") or "").lower()
         if t == "breadcrumblist" and "itemListElement" in b:
@@ -453,7 +427,7 @@ def jsonld_pick_breadcrumbs(blocks: list[dict]) -> list[str]:
     return []
 
 # ---------------------------------------------------------------------------
-# Request router (tight, but safe for Selver). Off by default.
+# Request router (optional; OFF by default)
 
 def _router(route, request):
     try:
@@ -461,18 +435,14 @@ def _router(route, request):
         host = urlparse(url).netloc.lower()
         rtype = request.resource_type
 
-        # Always allow Selver first
         if host.endswith("selver.ee"):
             return route.continue_()
 
-        # Block by resource type for non-Selver origins
         if rtype in ("image", "font", "media", "stylesheet", "websocket"):
             return route.abort()
         if rtype in ("script", "xhr", "fetch"):
-            # Kill 3P XHR/script entirely
             return route.abort()
 
-        # Explicit domain blocklist (fallback)
         if any(host == d or host.endswith("." + d) for d in BLOCK_HOSTS):
             return route.abort()
 
@@ -481,18 +451,61 @@ def _router(route, request):
         return route.continue_()
 
 # ---------------------------------------------------------------------------
+# Click-through fallback
+
+def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
+    """
+    Go to listing_url, click the product anchor that points to product_url (or its /e-selver form).
+    Returns True if PDP seems ready.
+    """
+    if not listing_url:
+        return False
+    if not safe_goto(page, listing_url):
+        return False
+    _wait_listing_ready(page)
+    time.sleep(0.2)
+
+    # Build selectors that match both canonical and SPA routes
+    path = urlparse(product_url).path
+    eselver_path = "/e-selver" + path if not path.startswith("/e-selver/") else path
+    candidates = [
+        f"a[href$='{path}']",
+        f"a[href$='{path}/']",
+        f"a[href$='{eselver_path}']",
+        f"a[href$='{eselver_path}/']",
+    ]
+
+    for sel in candidates:
+        a = page.locator(sel).first
+        try:
+            if a.count() > 0 and a.is_visible():
+                a.click(timeout=5000)
+                # Wait for SPA PDP
+                for _ in range(20):
+                    up = urlparse(page.url).path.lower()
+                    if "/p/" in up or up.rstrip("/").endswith(path.rstrip("/").rsplit("/",1)[-1]):
+                        break
+                    if page.locator("h1").count() > 0:
+                        break
+                    time.sleep(0.25)
+                _wait_pdp_ready(page)
+                return True
+        except Exception:
+            continue
+    return False
+
+# ---------------------------------------------------------------------------
 # Main crawl
 
 def crawl():
     os.makedirs(os.path.dirname(OUTPUT) or ".", exist_ok=True)
-    dbg_dir = "data/selver_debug"
-    os.makedirs(dbg_dir, exist_ok=True)
+    dbg_dir = "data/selver_debug"; os.makedirs(dbg_dir, exist_ok=True)
 
     print(f"[selver] writing CSV -> {OUTPUT}")
     with open(OUTPUT, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(
             f,
-            fieldnames=["ext_id","name","ean_raw","size_text","price","currency","category_path","category_leaf"],
+            fieldnames=["ext_id","name","ean_raw","sku_raw","size_text","price","currency","category_path","category_leaf"],
         )
         w.writeheader()
 
@@ -530,38 +543,16 @@ def crawl():
                         print(f"[pw] {m.type}: {t}")
                 page.on("console", _warn_err_only)
 
-            # ---- seeds (canonical, no /e-selver/)
+            # ---- seeds
             print("[selver] collecting seeds…")
-            seeds: list[str] = [urljoin(BASE, pth) for pth in STRICT_ALLOWLIST]
-
-            # Optional: merge extra seeds from file
+            seeds: List[str] = [urljoin(BASE, pth) for pth in STRICT_ALLOWLIST]
             if os.path.exists(CATEGORIES_FILE):
                 with open(CATEGORIES_FILE, "r", encoding="utf-8") as cf:
                     for ln in cf:
                         ln = ln.strip()
                         if ln and not ln.startswith("#"):
                             u = _clean_abs(ln)
-                            if u:
-                                seeds.append(u)
-
-            # Bootstrap if empty
-            if not seeds:
-                for su in [BASE, urljoin(BASE, "/")]:
-                    if safe_goto(page, su):
-                        time.sleep(REQ_DELAY)
-                        seeds.extend(_extract_category_links(page))
-                for probe in [
-                    "/maailma-kook-maitseained-puljongid",
-                    "/puu-ja-koogiviljad",
-                    "/liha-ja-kalatooted",
-                    "/piimatooted-munad-void",
-                    "/leivad-saiad-kondiitritooted",
-                ]:
-                    u = urljoin(BASE, probe)
-                    if safe_goto(page, u):
-                        time.sleep(REQ_DELAY)
-                        seeds.extend(_extract_category_links(page))
-
+                            if u: seeds.append(u)
             seeds = list(dict.fromkeys(seeds))
             cats = seeds if ALLOWLIST_ONLY else discover_categories(page, seeds)
 
@@ -571,8 +562,9 @@ def crawl():
             if len(cats) > 40:
                 print(f"[selver]   … (+{len(cats)-40} more)")
 
-            # ---- crawl categories -> collect product URLs
-            product_urls: set[str] = set()
+            # ---- crawl categories -> collect product URLs (+remember listing page)
+            product_urls: Set[str] = set()
+            prod2listing: Dict[str, str] = {}
             for ci, cu in enumerate(cats, 1):
                 if not safe_goto(page, cu):
                     try: page.screenshot(path=f"{dbg_dir}/cat_nav_fail_{ci}.png", full_page=True)
@@ -580,33 +572,36 @@ def crawl():
                     continue
                 time.sleep(REQ_DELAY)
 
-                links = collect_product_links_from_listing(page, cu)
+                links, mapping = collect_product_links_from_listing(page, cu)
                 if not links:
                     try: page.screenshot(path=f"{dbg_dir}/cat_empty_{ci}.png", full_page=True)
                     except Exception: pass
 
-                product_urls.update(links)
+                for u in links:
+                    if u not in product_urls:
+                        product_urls.add(u)
+                        prod2listing[u] = mapping.get(u, cu)
+
                 print(f"[selver] {cu} → +{len(links)} products (total so far: {len(product_urls)})")
 
-            # ---- visit product pages -> write rows
+            # ---- visit product pages -> write rows (with click-through fallback)
             rows_written = 0
             for i, pu in enumerate(sorted(product_urls), 1):
                 if not _is_selver_product_like(pu):
                     continue
 
-                if CLICK_PRODUCTS:
-                    # Simulate a click-flow by navigating back & forth
-                    # (opening directly after canonicalization is equivalent but faster)
-                    pass  # we still just goto; click adds no value when URL is known
-
-                if not safe_goto(page, pu):
-                    try: page.screenshot(path=f"{dbg_dir}/prod_nav_fail_{i}.png", full_page=True)
-                    except Exception: pass
-                    continue
+                got = safe_goto(page, pu)
+                if not got:
+                    # try click fallback immediately if nav failed
+                    got = open_product_via_click(page, prod2listing.get(pu, ""), pu)
+                    if not got:
+                        try: page.screenshot(path=f"{dbg_dir}/prod_nav_fail_{i}.png", full_page=True)
+                        except Exception: pass
+                        continue
 
                 time.sleep(REQ_DELAY)
+                _wait_pdp_ready(page)
 
-                # Prefer JSON-LD for robust data
                 blocks = jsonld_all(page)
                 prod_ld = jsonld_pick_product(blocks)
                 crumbs_ld = jsonld_pick_breadcrumbs(blocks)
@@ -618,13 +613,23 @@ def crawl():
                     except Exception:
                         name = ""
 
-                # EAN/GTIN
-                ean = ""
+                # EAN & SKU
+                ean, sku = "", ""
                 if prod_ld:
-                    ean = (prod_ld.get("gtin13") or prod_ld.get("gtin") or prod_ld.get("sku") or "")
-                ean = re.sub(r"\D+", "", ean or "")
-                if not ean:
-                    ean = extract_ean(page)
+                    ean = re.sub(r"\D+","", str(prod_ld.get("gtin13") or prod_ld.get("gtin") or "")) or ""
+                    sku = normspace(str(prod_ld.get("sku") or ""))
+                if not (ean and sku):
+                    ean2, sku2 = extract_ean_and_sku(page)
+                    ean = ean or ean2
+                    sku = sku or sku2
+
+                # If still missing EAN+SKU, force click-through from listing and re-extract
+                if not (ean or sku):
+                    if open_product_via_click(page, prod2listing.get(pu, ""), pu):
+                        time.sleep(0.3)
+                        ean2, sku2 = extract_ean_and_sku(page)
+                        ean = ean or ean2
+                        sku = sku or sku2
 
                 # Price & currency
                 price, currency = 0.0, "EUR"
@@ -650,7 +655,7 @@ def crawl():
                     continue
 
                 w.writerow({
-                    "ext_id": pu, "name": name, "ean_raw": ean, "size_text": size_text,
+                    "ext_id": pu, "name": name, "ean_raw": ean, "sku_raw": sku, "size_text": size_text,
                     "price": f"{price:.2f}", "currency": currency,
                     "category_path": cat_path, "category_leaf": cat_leaf,
                 })
