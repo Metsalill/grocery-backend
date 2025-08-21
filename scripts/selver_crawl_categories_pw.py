@@ -21,7 +21,7 @@ REQ_DELAY = float(os.getenv("REQ_DELAY", "0.8"))
 PAGE_LIMIT = int(os.getenv("PAGE_LIMIT", "0"))  # 0 = no limit
 CATEGORIES_FILE = os.getenv("CATEGORIES_FILE", "data/selver_categories.txt")
 
-# Ban obvious non-food areas
+# Ban obvious non-food areas (for category discovery)
 BANNED_KEYWORDS = {
     "sisustus","kodutekstiil","valgustus","kardin","jouluvalgustid",
     "vaikesed-sisustuskaubad","kuunlad","kirja-ja-kontoritarbed",
@@ -50,12 +50,19 @@ BLOCK_HOSTS = {
 # Hosts we consider valid for product pages
 ALLOWED_HOSTS = {"www.selver.ee", "selver.ee"}
 
-# Paths that are definitely not product detail pages
+# Definite non-PDP paths (substrings that must include a slash)
 NON_PRODUCT_PATH_SNIPPETS = {
     "/e-selver/","/ostukorv","/cart","/checkout","/search","/otsi",
     "/konto","/customer","/login","/logout","/registreeru","/uudised",
     "/tootajad","/kontakt","/tingimused","/privaatsus","/privacy",
     "/kampaania","/kampaaniad","/blogi","/app","/store-locator",
+}
+
+# Extra keywords that, if present anywhere in the path, mean "not a PDP"
+NON_PRODUCT_KEYWORDS = {
+    "login", "registreeru", "tingimused", "garantii", "pretens", "hinnasilt",
+    "jatkusuutlik", "b2b", "privaatsus", "privacy", "kontakt", "uudis",
+    "blog", "pood", "poed", "kaart", "arikliend", "karjaar", "karjäär",
 }
 
 # ---------------------------------------------------------------------------
@@ -84,12 +91,11 @@ def _should_block(url: str) -> bool:
 def _is_selver_product_like(url: str) -> bool:
     """
     Accept only real PDPs:
-      • https://www.selver.ee/<hyphenated-slug>
-      • https://www.selver.ee/p/<hyphenated-slug>
+      • https://www.selver.ee/<hyphenated-slug>           (root PDP)
+      • https://www.selver.ee/p/<slug>                    (explicit PDP prefix)
     Reject:
-      • category trees (/e-selver/..., /liha-ja-kalatooted/..., etc.)
-      • the homepage (/), simple single-word pages (/jook), RU locale (/ru/...)
-      • any other subdomains.
+      • categories (/e-selver/...), RU locale (/ru/...), any other subdomains
+      • generic site pages (login, terms, guarantee, sustainability, etc.)
     """
     u = urlparse(url)
     host = (u.netloc or urlparse(BASE).netloc).lower()
@@ -97,15 +103,28 @@ def _is_selver_product_like(url: str) -> bool:
         return False
 
     path = (u.path or "/").lower()
+
+    # obvious non-PDPs
     if path.startswith("/ru/"):
         return False
     if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS):
         return False
-    # PDPs are single segment hyphenated slugs or /p/<slug>
-    if re.fullmatch(r"/[a-z0-9-]+/?", path):
-        return "-" in path and path != "/"  # avoid root & simple one-word pages like /jook
+    if any(kw in path for kw in NON_PRODUCT_KEYWORDS):
+        return False
+
+    last = path.rstrip("/").rsplit("/", 1)[-1]
+
+    # explicit PDP prefix
     if re.fullmatch(r"/p/[a-z0-9-]+/?", path):
         return True
+
+    # root PDP: single segment with hyphens (avoid generic one-word pages)
+    if re.fullmatch(r"/[a-z0-9-]+/?", path):
+        # require at least one hyphen AND (either a digit OR >= 2 hyphens)
+        # This prunes pages like /b2b-login (digit but also keyword filtered),
+        # and generic info pages like /karjaar.
+        return ("-" in last) and (any(ch.isdigit() for ch in last) or last.count("-") >= 2)
+
     return False
 
 # ---------------------------------------------------------------------------
@@ -196,22 +215,34 @@ def discover_categories(page, start_urls: list[str]) -> list[str]:
 # ---------------------------------------------------------------------------
 # Listing helpers (infinite-scroll + pagination)
 
-def _harvest_via_js(page) -> set[str]:
-    """Fast DOM-wide href sweep; then filter to product-like."""
+def _candidate_hrefs_js(page) -> list[str]:
+    """
+    Prefer anchors inside main/product containers and outside header/footer/nav/aside.
+    """
     try:
-        hrefs = page.evaluate("""
-            Array.from(new Set(
-              Array.from(document.querySelectorAll('a[href]:not(.Store-locale__language)'))
-                   .map(a => a.getAttribute('href') || '')
-                   .filter(Boolean)
-            ))
+        return page.evaluate("""
+          (function(){
+            const inContent = Array.from(document.querySelectorAll(
+              'main a[href], .Category a[href], .Products a[href], .product-list a[href], ' +
+              '.productgrid a[href], [class*="Product"] a[href]'
+            ));
+            const good = inContent.length ? inContent : Array.from(document.querySelectorAll('a[href]'));
+            return Array.from(new Set(
+              good
+                .filter(a => !a.closest('header,footer,nav,aside,[role="navigation"]'))
+                .map(a => a.getAttribute('href') || '')
+                .filter(Boolean)
+            ));
+          })()
         """)
     except Exception:
-        hrefs = []
+        return []
 
+def _harvest_via_js(page) -> set[str]:
+    """Fast DOM-wide href sweep; then filter to product-like."""
+    hrefs = _candidate_hrefs_js(page)
     out: set[str] = set()
     for href in hrefs:
-        # ignore anchors and javascript: links quickly
         if href.startswith("#") or href.lower().startswith("javascript:"):
             continue
         u = urljoin(BASE, href)
@@ -282,13 +313,7 @@ def collect_product_links(page, page_limit: int = 0) -> set[str]:
         print(f"[selver]   harvested {len(links)} product-like links; sample: {sample}")
     else:
         try:
-            any_hrefs = page.evaluate("""
-                Array.from(new Set(
-                  Array.from(document.querySelectorAll('a[href]'))
-                       .slice(0, 12)
-                       .map(a => a.getAttribute('href'))
-                ))
-            """)
+            any_hrefs = _candidate_hrefs_js(page)[:12]
             print(f"[selver]   no product-like links; first anchors on page: {any_hrefs}")
         except Exception:
             print("[selver]   no product-like links; (JS href probe failed)")
