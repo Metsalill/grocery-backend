@@ -361,8 +361,19 @@ def crawl():
                 user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36")
             )
-            context.route("**/*", lambda route, req:
-                route.abort() if _should_block(req.url) else route.continue_())
+def _router(route, request):
+    try:
+        url = request.url
+        host = urlparse(url).netloc.lower()
+        # Only consider blocking known 3rd-party hosts; always let selver.ee through
+        if _should_block(url) and not host.endswith("selver.ee"):
+            return route.abort()
+        return route.continue_()
+    except Exception:
+        # On any unexpected error, fail open so we don't break navigation
+        return route.continue_()
+
+context.route("**/*", _router)
 
             page = context.new_page()
             page.set_default_navigation_timeout(15000)
