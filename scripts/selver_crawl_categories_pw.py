@@ -186,6 +186,39 @@ def _is_category_like_path(path: str) -> bool:
     if any(ch.isdigit() for ch in last): return False
     return any("-" in s for s in segs)
 
+# Extra helpers for EAN/SKU parsing
+DIGITS_RE = re.compile(r"\D+")
+
+def _digits(s: str) -> str:
+    return DIGITS_RE.sub("", s or "")
+
+def _valid_ean13(code: str) -> bool:
+    if not re.fullmatch(r"\d{13}", code): return False
+    s_odd  = sum(int(code[i]) for i in range(0, 12, 2))
+    s_even = sum(int(code[i]) * 3 for i in range(1, 12, 2))
+    chk = (10 - ((s_odd + s_even) % 10)) % 10
+    return chk == int(code[-1])
+
+def _pick_ean_from_html(html: str) -> str:
+    if not html: return ""
+    # Prefer numbers next to clear labels
+    label_pat = re.compile(
+        r"(?:\b(?:ean|gtin|ribakood|triipkood|barcode)\b)[^0-9]{0,40}(\d{8,14})",
+        re.I | re.S,
+    )
+    cand = [m.group(1) for m in label_pat.finditer(html)]
+    cand = list(dict.fromkeys(cand))
+    if not cand:
+        cand = list(dict.fromkeys(re.findall(r"\b(\d{13})\b", html)))
+    for c in cand:
+        d = _digits(c)
+        if _valid_ean13(d): return d
+    for c in cand:
+        d = _digits(c)
+        if re.fullmatch(r"\d{13}", d): return d
+    m8 = re.search(r"\b(\d{8})\b", html)
+    return m8.group(1) if m8 else ""
+
 # ---------------------------------------------------------------------------
 # Cookies / navigation
 
@@ -236,6 +269,25 @@ def _wait_pdp_ready(page):
                 page.locator("text=Ribakood").count() > 0):
                 return
         time.sleep(0.25)
+
+# Expand hidden PDP sections (tabs/accordions) — often holds EAN
+def _expand_pdp_details(page):
+    selectors = [
+        "button:has-text('Lisainfo')",
+        "button:has-text('Toote info')",
+        "[role='tab']:has-text('Lisainfo')",
+        "[role='tab']:has-text('Toote info')",
+        "[data-toggle='collapse']",
+        "[aria-controls*='detail']",
+    ]
+    for sel in selectors:
+        try:
+            el = page.locator(sel).first
+            if el and el.count() > 0 and el.is_enabled():
+                el.click(timeout=1200)
+                time.sleep(0.15)
+        except Exception:
+            pass
 
 # ---------------------------------------------------------------------------
 # Discovery
@@ -406,28 +458,63 @@ def extract_price(page) -> tuple[float, str]:
     return 0.0, "EUR"
 
 def extract_ean_and_sku(page) -> tuple[str, str]:
-    # JSON-LD first
+    ean, sku = "", ""
+
+    # A) JSON-LD
     try:
         blocks = jsonld_all(page)
         prod = jsonld_pick_product(blocks)
         if prod:
-            e = re.sub(r"\D+","", str(prod.get("gtin13") or prod.get("gtin") or "")) or ""
-            s = normspace(str(prod.get("sku") or ""))
-            if e or s:
-                return e, s
+            ean = _digits(str(prod.get("gtin13") or prod.get("gtin") or ""))
+            sku = normspace(str(prod.get("sku") or ""))
+            if _valid_ean13(ean):
+                return ean, sku
     except Exception:
         pass
 
-    # Page HTML fallbacks
+    # B) Microdata/meta
+    try:
+        got = page.evaluate("""
+        () => {
+          const pick = (sel) => {
+            const el = document.querySelector(sel);
+            if (!el) return null;
+            return el.getAttribute('content') || el.textContent || null;
+          };
+          return {
+            gtin13: pick('[itemprop="gtin13"], meta[itemprop="gtin13"]'),
+            gtin:   pick('[itemprop="gtin"], meta[itemprop="gtin"]'),
+            sku:    pick('[itemprop="sku"], meta[itemprop="sku"], meta[property="product:retailer_item_id"]')
+          };
+        }
+        """)
+        if got:
+            ean = ean or _digits(got.get("gtin13") or got.get("gtin") or "")
+            sku = sku or normspace(got.get("sku") or "")
+            if _valid_ean13(ean):
+                return ean, sku
+    except Exception:
+        pass
+
+    # C) Expand possible hidden details and scan HTML
+    _expand_pdp_details(page)
+    time.sleep(0.05)
     try:
         html = page.content()
-        m = re.search(r"(?:Ribakood|EAN(?:-kood)?)\D*?(\d{8,14})", html, re.I)
-        ean = m.group(1) if m else ""
-        m2 = re.search(r"\bSKU\b\D*([A-Z0-9_-]{3,})", html, re.I)
-        sku = m2.group(1).strip() if m2 else ""
-        return ean, sku
+        e_dom = _pick_ean_from_html(html)
+        if e_dom: ean = ean or e_dom
+        if not sku:
+            m2 = re.search(r"\bSKU\b\D*([A-Z0-9_-]{3,})", html, re.I)
+            if m2: sku = m2.group(1).strip()
     except Exception:
-        return "", ""
+        pass
+
+    # Clean/validate final EAN
+    if not _valid_ean13(ean):
+        e13 = _digits(ean or "")
+        ean = e13 if _valid_ean13(e13) else ""
+
+    return ean, sku
 
 def breadcrumbs_dom(page) -> List[str]:
     for sel in ["nav ol li a","nav.breadcrumbs a","ol.breadcrumbs a"]:
@@ -444,6 +531,7 @@ def breadcrumbs_dom(page) -> List[str]:
 def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optional[dict]:
     """Build a single CSV row from the currently open PDP."""
     _wait_pdp_ready(page)
+    _expand_pdp_details(page)  # open accordions/tabs that may hold EAN
 
     # Canonical/ext_id
     ext_id = canonical_from_page(page) or product_url_hint
@@ -467,7 +555,7 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
     # EAN & SKU
     ean, sku = "", ""
     if prod_ld:
-        ean = re.sub(r"\D+","", str(prod_ld.get("gtin13") or prod_ld.get("gtin") or "")) or ""
+        ean = _digits(str(prod_ld.get("gtin13") or prod_ld.get("gtin") or "")) or ""
         sku = normspace(str(prod_ld.get("sku") or ""))
     if not (ean and sku):
         e2, s2 = extract_ean_and_sku(page)
