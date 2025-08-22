@@ -174,10 +174,12 @@ jobs:
           SELECT 'Selver e-pood', 'Selver'
           WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE name='Selver e-pood');
 
-          -- Candidates table for unlinked EANs
+          -- Candidates table for unlinked EANs (now stores raw EAN + SKU)
           CREATE TABLE IF NOT EXISTS public.selver_candidates (
             ext_id        text PRIMARY KEY,
             ean_norm      text,
+            ean_raw       text,  -- NEW
+            sku_raw       text,  -- NEW
             name          text,
             size_text     text,
             price         numeric(12,2),
@@ -186,6 +188,11 @@ jobs:
             category_leaf text,
             last_seen     timestamptz DEFAULT now()
           );
+          -- Upgrade existing table if needed
+          ALTER TABLE public.selver_candidates
+            ADD COLUMN IF NOT EXISTS ean_raw text,
+            ADD COLUMN IF NOT EXISTS sku_raw text;
+
           COMMIT;
 
           -- Ensure unique (store_id, product_id) in prices so upsert works
@@ -282,6 +289,7 @@ jobs:
             END IF;
           END$$;
 
+          -- Store unmatched rows (keep raw identifiers for debugging/triage)
           WITH banned(kw) AS ( VALUES
             ('sisustus'),('kodutekstiil'),('valgustus'),('kardin'),('jouluvalgustid'),
             ('vaikesed-sisustuskaubad'),('kuunlad'),('kook-ja-lauakatmine'),
@@ -304,8 +312,10 @@ jobs:
                           COALESCE(st.name,'')) LIKE '%' || banned.kw || '%'
             )
           )
-          INSERT INTO public.selver_candidates (ext_id, ean_norm, name, size_text, price, currency, category_path, category_leaf)
-          SELECT f.ext_id, f.ean_norm, f.name, f.size_text, f.price, f.currency, f.category_path, f.category_leaf
+          INSERT INTO public.selver_candidates
+            (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, price, currency, category_path, category_leaf)
+          SELECT
+            f.ext_id, f.ean_norm, f.ean_raw, f.sku_raw, f.name, f.size_text, f.price, f.currency, f.category_path, f.category_leaf
           FROM filtered f
           LEFT JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm
           WHERE pe.product_id IS NULL
@@ -315,6 +325,8 @@ jobs:
                 size_text     = COALESCE(EXCLUDED.size_text, public.selver_candidates.size_text),
                 category_path = COALESCE(EXCLUDED.category_path, public.selver_candidates.category_path),
                 category_leaf = COALESCE(EXCLUDED.category_leaf, public.selver_candidates.category_leaf),
+                ean_raw       = COALESCE(EXCLUDED.ean_raw, public.selver_candidates.ean_raw),
+                sku_raw       = COALESCE(EXCLUDED.sku_raw, public.selver_candidates.sku_raw),
                 last_seen     = now();
 
           SELECT
