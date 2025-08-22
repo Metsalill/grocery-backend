@@ -29,7 +29,7 @@ concurrency:
 jobs:
   crawl-and-upsert:
     runs-on: ubuntu-latest
-    timeout-minutes: 60   # give headroom for a long crawl + DB work
+    timeout-minutes: 60
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
@@ -61,13 +61,12 @@ jobs:
       - name: Crawl Selver categories (Playwright)
         shell: bash
         env:
-          PYTHONUNBUFFERED: "1"                     # live python stdout/stderr
-          # (intentionally NOT setting DEBUG=pw:api to keep logs quiet)
+          PYTHONUNBUFFERED: "1"
           OUTPUT_CSV: data/selver.csv
           REQ_DELAY: ${{ github.event_name == 'workflow_dispatch' && inputs.req_delay || '0.6' }}
           PAGE_LIMIT: ${{ github.event_name == 'workflow_dispatch' && inputs.page_limit || '0' }}   # 0 = all
           CATEGORIES_FILE: data/selver_categories.txt
-          ALLOWLIST_ONLY: "1"                       # strict allowlist in script
+          ALLOWLIST_ONLY: "1"
           USE_ROUTER: "1"
           CLICK_PRODUCTS: ${{ github.event_name == 'workflow_dispatch' && inputs.click_products || '0' }}
           LOG_CONSOLE: ${{ github.event_name == 'workflow_dispatch' && inputs.log_console || '0' }}
@@ -79,7 +78,7 @@ jobs:
           echo "Start (UTC): $(date -u)"
           echo "::endgroup::"
 
-          # Soft-run: allow partial results on timeout (exit 124) and still continue the job.
+          # Soft-run: allow partial results on timeout (exit 124)
           set +e
           set +o pipefail
           stdbuf -oL -eL timeout -k 60s 40m python -u scripts/selver_crawl_categories_pw.py \
@@ -162,24 +161,22 @@ jobs:
             category_leaf text,
             collected_at  timestamptz DEFAULT now()
           );
-          -- Backfill column if table existed before
           ALTER TABLE public.staging_selver_products
             ADD COLUMN IF NOT EXISTS sku_raw text;
 
           CREATE INDEX IF NOT EXISTS ix_selver_ean       ON public.staging_selver_products (ean_norm);
           CREATE INDEX IF NOT EXISTS ix_selver_name_trgm ON public.staging_selver_products USING gin (name gin_trgm_ops);
 
-          -- Ensure store exists
           INSERT INTO public.stores (name, chain)
           SELECT 'Selver e-pood', 'Selver'
           WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE name='Selver e-pood');
 
-          -- Candidates table for unlinked EANs (now stores raw EAN + SKU)
+          -- Candidates table for unlinked EANs (store raw EAN + SKU too)
           CREATE TABLE IF NOT EXISTS public.selver_candidates (
             ext_id        text PRIMARY KEY,
             ean_norm      text,
-            ean_raw       text,  -- NEW
-            sku_raw       text,  -- NEW
+            ean_raw       text,
+            sku_raw       text,
             name          text,
             size_text     text,
             price         numeric(12,2),
@@ -188,11 +185,9 @@ jobs:
             category_leaf text,
             last_seen     timestamptz DEFAULT now()
           );
-          -- Upgrade existing table if needed
           ALTER TABLE public.selver_candidates
             ADD COLUMN IF NOT EXISTS ean_raw text,
             ADD COLUMN IF NOT EXISTS sku_raw text;
-
           COMMIT;
 
           -- Ensure unique (store_id, product_id) in prices so upsert works
@@ -207,7 +202,6 @@ jobs:
                    AND t.relname = 'prices'
                )
             THEN
-              -- Remove duplicates, keep newest by collected_at/id
               WITH ranked AS (
                 SELECT id,
                        ROW_NUMBER() OVER (
