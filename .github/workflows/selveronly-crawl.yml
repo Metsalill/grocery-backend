@@ -188,33 +188,37 @@ jobs:
             ADD COLUMN IF NOT EXISTS sku_raw text;
           COMMIT;
 
-          -- Ensure unique key on (store_id, product_id)
+          -- Ensure a single row per (store_id, product_id), add UNIQUE if missing
           DO $$
           BEGIN
-            IF to_regclass('public.prices') IS NOT NULL
-               AND NOT EXISTS (
-                 SELECT 1
-                 FROM pg_indexes
-                 WHERE schemaname='public'
-                   AND tablename='prices'
-                   AND indexdef ILIKE '%UNIQUE%("store_id","product_id"%'
-               )
-            THEN
-              -- De-dup then add a unique constraint
+            IF to_regclass('public.prices') IS NOT NULL THEN
+              -- De-dup safely (id/collected_at keeps latest)
               WITH ranked AS (
                 SELECT id,
                        ROW_NUMBER() OVER (
                          PARTITION BY store_id, product_id
                          ORDER BY collected_at DESC, id DESC
-                       ) rn
+                       ) AS rn
                 FROM public.prices
               )
               DELETE FROM public.prices p
               USING ranked r
               WHERE p.id = r.id AND r.rn > 1;
 
-              ALTER TABLE public.prices
-                ADD CONSTRAINT uq_prices_store_product UNIQUE (store_id, product_id);
+              -- Add the named unique constraint only if it doesn't exist for this table
+              IF NOT EXISTS (
+                SELECT 1
+                FROM pg_constraint
+                WHERE conname = 'uq_prices_store_product'
+                  AND conrelid = 'public.prices'::regclass
+              ) THEN
+                BEGIN
+                  ALTER TABLE public.prices
+                    ADD CONSTRAINT uq_prices_store_product UNIQUE (store_id, product_id);
+                EXCEPTION WHEN duplicate_object THEN
+                  RAISE NOTICE 'uq_prices_store_product already exists, skipping';
+                END;
+              END IF;
             END IF;
           END$$;
 
