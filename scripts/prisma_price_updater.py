@@ -3,7 +3,9 @@
 """
 Fetch current prices for Prisma products and write:
   - price_history(product_id, amount, currency, captured_at, store_id, price_type, source_url)
-  - prices(product_id UNIQUE, store_id, price, currency, collected_at, source_url)
+  - prices(product_id, store_id UNIQUE as a pair, price, currency, collected_at, source_url)
+
+NOTE: Multi-store aware. Canonical `prices` keeps one row PER (product_id, store_id).
 """
 
 import os, re, sys, time, random, argparse
@@ -30,7 +32,7 @@ def get_db() -> psycopg2.extensions.connection:
 
 # --- Make sure tables/columns/indexes exist (idempotent) ----------------------
 def ensure_schema(conn):
-    with conn.cursor() as cur:
+    with conn, conn.cursor() as cur:
         # price_history (append-only)
         cur.execute("""
             CREATE TABLE IF NOT EXISTS price_history (
@@ -44,11 +46,12 @@ def ensure_schema(conn):
               source_url  TEXT
             );
         """)
-        # prices (canonical: one row per product)
+
+        # prices (canonical): one row per (product_id, store_id)
         cur.execute("""
             CREATE TABLE IF NOT EXISTS prices (
               id           SERIAL PRIMARY KEY,
-              product_id   INT NOT NULL UNIQUE REFERENCES products(id) ON DELETE CASCADE,
+              product_id   INT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
               store_id     INT NOT NULL REFERENCES stores(id),
               price        NUMERIC(10,2) NOT NULL,
               currency     TEXT DEFAULT 'EUR',
@@ -56,15 +59,72 @@ def ensure_schema(conn):
               source_url   TEXT
             );
         """)
+
         # Columns that might be missing in older DBs
         cur.execute("ALTER TABLE prices ADD COLUMN IF NOT EXISTS collected_at TIMESTAMPTZ;")
         cur.execute("ALTER TABLE prices ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'EUR';")
         cur.execute("ALTER TABLE prices ADD COLUMN IF NOT EXISTS source_url TEXT;")
-        # Indexes
-        cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS uq_prices_product ON prices(product_id);")
+
+        # ---- Clean legacy single-column unique and enforce composite unique ----
+        # Drop old unique index/constraint on (product_id) if any.
+        cur.execute("DROP INDEX IF EXISTS uq_prices_product;")
+        cur.execute("""
+            DO $$
+            BEGIN
+              IF EXISTS (
+                SELECT 1 FROM pg_constraint
+                WHERE conrelid = 'public.prices'::regclass
+                  AND conname  = 'uq_prices_product'
+              ) THEN
+                EXECUTE 'ALTER TABLE public.prices DROP CONSTRAINT uq_prices_product';
+              END IF;
+            END$$;
+        """)
+
+        # De-dup by (product_id, store_id) keeping newest before adding unique
+        cur.execute("""
+            WITH r AS (
+              SELECT id,
+                     ROW_NUMBER() OVER (
+                       PARTITION BY product_id, store_id
+                       ORDER BY collected_at DESC, id DESC
+                     ) rn
+              FROM prices
+            )
+            DELETE FROM prices p
+            USING r
+            WHERE p.id = r.id AND r.rn > 1;
+        """)
+
+        # Ensure composite unique exists (regardless of previous name/order)
+        cur.execute("""
+            DO $$
+            BEGIN
+              IF NOT EXISTS (
+                SELECT 1
+                FROM pg_constraint c
+                WHERE c.conrelid = 'public.prices'::regclass
+                  AND c.contype  = 'u'
+                  AND (
+                    c.conkey = ARRAY[
+                      (SELECT attnum FROM pg_attribute WHERE attrelid='public.prices'::regclass AND attname='product_id'),
+                      (SELECT attnum FROM pg_attribute WHERE attrelid='public.prices'::regclass AND attname='store_id')
+                    ]
+                    OR
+                    c.conkey = ARRAY[
+                      (SELECT attnum FROM pg_attribute WHERE attrelid='public.prices'::regclass AND attname='store_id'),
+                      (SELECT attnum FROM pg_attribute WHERE attrelid='public.prices'::regclass AND attname='product_id')
+                    ]
+                  )
+              ) THEN
+                EXECUTE 'ALTER TABLE public.prices ADD CONSTRAINT uq_prices_per_store UNIQUE (product_id, store_id)';
+              END IF;
+            END$$;
+        """)
+
+        # Helpful indexes
         cur.execute("CREATE INDEX IF NOT EXISTS idx_prices_store ON prices(store_id);")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_prices_time ON prices(collected_at DESC);")
-    conn.commit()
 
 def pick_price_text(page) -> str:
     sels = [
@@ -129,7 +189,7 @@ def write_price(conn, *, product_id: int, price: float, source_url: str):
     """
     In ONE transaction:
       1) Append to price_history
-      2) Upsert into prices (unique on product_id)
+      2) Upsert into prices (unique on (product_id, store_id))
          Rule: update only if the incoming row is newer OR
                same timestamp but cheaper.
     """
@@ -145,14 +205,13 @@ def write_price(conn, *, product_id: int, price: float, source_url: str):
             (product_id, price, CURRENCY, ts, STORE_ID, PRICE_TYPE, source_url)
         )
 
-        # 2) canonical upsert (note: collected_at, not seen_at)
+        # 2) canonical upsert per (product_id, store_id)
         cur.execute(
             """
             INSERT INTO prices (product_id, store_id, price, currency, collected_at, source_url)
             VALUES (%s, %s, %s, %s, %s, %s)
-            ON CONFLICT (product_id) DO UPDATE
-            SET store_id     = EXCLUDED.store_id,
-                price        = EXCLUDED.price,
+            ON CONFLICT (product_id, store_id) DO UPDATE
+            SET price        = EXCLUDED.price,
                 currency     = EXCLUDED.currency,
                 collected_at = EXCLUDED.collected_at,
                 source_url   = EXCLUDED.source_url
@@ -162,7 +221,6 @@ def write_price(conn, *, product_id: int, price: float, source_url: str):
             """,
             (product_id, STORE_ID, price, CURRENCY, ts, source_url)
         )
-    conn.commit()
 
 def main():
     ap = argparse.ArgumentParser(description="Prisma price updater")
@@ -225,6 +283,7 @@ def main():
 
             try:
                 write_price(conn, product_id=pid, price=price, source_url=url)
+                conn.commit()
                 wrote += 1
             except Exception as e:
                 conn.rollback()
