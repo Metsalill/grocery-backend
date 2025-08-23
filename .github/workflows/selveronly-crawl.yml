@@ -188,37 +188,69 @@ jobs:
             ADD COLUMN IF NOT EXISTS sku_raw text;
           COMMIT;
 
-          -- Ensure a single row per (store_id, product_id), add UNIQUE if missing
+          -- Migrate legacy unique constraints and ensure (store_id, product_id) uniqueness
           DO $$
+          DECLARE
+            prod_only_con text;
           BEGIN
-            IF to_regclass('public.prices') IS NOT NULL THEN
-              -- De-dup safely (id/collected_at keeps latest)
+            -- Find a UNIQUE constraint that enforces ONLY (product_id)
+            SELECT c.conname
+              INTO prod_only_con
+            FROM pg_constraint c
+            WHERE c.conrelid = 'public.prices'::regclass
+              AND c.contype  = 'u'
+              AND c.conkey   = ARRAY[
+                  (SELECT attnum FROM pg_attribute
+                   WHERE attrelid='public.prices'::regclass
+                     AND attname='product_id')
+              ]
+            LIMIT 1;
+
+            IF prod_only_con IS NOT NULL THEN
+              RAISE NOTICE 'Dropping legacy unique constraint % on prices(product_id)', prod_only_con;
+
+              -- Deduplicate by product_id (keep newest)
               WITH ranked AS (
                 SELECT id,
                        ROW_NUMBER() OVER (
-                         PARTITION BY store_id, product_id
+                         PARTITION BY product_id
                          ORDER BY collected_at DESC, id DESC
-                       ) AS rn
+                       ) rn
                 FROM public.prices
               )
               DELETE FROM public.prices p
               USING ranked r
               WHERE p.id = r.id AND r.rn > 1;
 
-              -- Add the named unique constraint only if it doesn't exist for this table
-              IF NOT EXISTS (
-                SELECT 1
-                FROM pg_constraint
-                WHERE conname = 'uq_prices_store_product'
-                  AND conrelid = 'public.prices'::regclass
-              ) THEN
-                BEGIN
-                  ALTER TABLE public.prices
-                    ADD CONSTRAINT uq_prices_store_product UNIQUE (store_id, product_id);
-                EXCEPTION WHEN duplicate_object THEN
-                  RAISE NOTICE 'uq_prices_store_product already exists, skipping';
-                END;
-              END IF;
+              EXECUTE format('ALTER TABLE public.prices DROP CONSTRAINT %I', prod_only_con);
+            END IF;
+
+            -- Deduplicate by (store_id, product_id) before adding the composite unique
+            WITH ranked2 AS (
+              SELECT id,
+                     ROW_NUMBER() OVER (
+                       PARTITION BY store_id, product_id
+                       ORDER BY collected_at DESC, id DESC
+                     ) rn
+              FROM public.prices
+            )
+            DELETE FROM public.prices p
+            USING ranked2 r
+            WHERE p.id = r.id AND r.rn > 1;
+
+            -- Add the composite unique if missing
+            IF NOT EXISTS (
+              SELECT 1
+              FROM pg_constraint
+              WHERE conrelid = 'public.prices'::regclass
+                AND conname  = 'uq_prices_store_product'
+            ) THEN
+              BEGIN
+                ALTER TABLE public.prices
+                  ADD CONSTRAINT uq_prices_store_product UNIQUE (store_id, product_id);
+              EXCEPTION WHEN duplicate_object THEN
+                RAISE NOTICE 'uq_prices_store_product already exists (race), skipping';
+              END;
             END IF;
           END$$;
 
@@ -238,6 +270,7 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c \
             "\copy public.staging_selver_products (ext_id,name,ean_raw,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER"
 
+          # Upsert prices using the named composite unique constraint
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           WITH banned(kw) AS ( VALUES
             ('sisustus'),('kodutekstiil'),('valgustus'),('kardin'),('jouluvalgustid'),
@@ -268,12 +301,13 @@ jobs:
             f.price, f.currency, now()
           FROM filtered f
           JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm
-          ON CONFLICT (store_id, product_id) DO UPDATE
+          ON CONFLICT ON CONSTRAINT uq_prices_store_product DO UPDATE
             SET price = EXCLUDED.price,
                 currency = EXCLUDED.currency,
                 collected_at = EXCLUDED.collected_at;
           SQL
 
+          # Store unmatched rows for triage
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           WITH banned(kw) AS ( VALUES
             ('sisustus'),('kodutekstiil'),('valgustus'),('kardin'),('jouluvalgustid'),
