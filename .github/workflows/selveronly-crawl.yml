@@ -189,12 +189,55 @@ jobs:
             ADD COLUMN IF NOT EXISTS sku_raw text;
           COMMIT;
 
-          -- Drop legacy single-store unique; it breaks multi-store upserts
-          ALTER TABLE public.prices DROP CONSTRAINT IF EXISTS uq_prices_product;
-
-          -- Ensure composite unique (store_id, product_id); dedupe first
+          -- Remove ANY single-column unique on prices(product_id), then enforce composite (store_id,product_id)
           DO $$
+          DECLARE
+            con_name text;
+            idx_name text;
           BEGIN
+            -- 1) Drop explicit legacy constraint if present
+            PERFORM 1
+            FROM pg_constraint
+            WHERE conrelid='public.prices'::regclass AND conname='uq_prices_product';
+            IF FOUND THEN
+              RAISE NOTICE 'Dropping legacy unique constraint uq_prices_product';
+              ALTER TABLE public.prices DROP CONSTRAINT uq_prices_product;
+            END IF;
+
+            -- 2) Drop any other UNIQUE constraint that enforces only (product_id)
+            FOR con_name IN
+              SELECT c.conname
+              FROM pg_constraint c
+              WHERE c.conrelid = 'public.prices'::regclass
+                AND c.contype  = 'u'
+                AND c.conkey   = ARRAY[
+                  (SELECT attnum FROM pg_attribute
+                   WHERE attrelid='public.prices'::regclass AND attname='product_id')
+                ]
+            LOOP
+              RAISE NOTICE 'Dropping unique constraint % on prices(product_id)', con_name;
+              EXECUTE format('ALTER TABLE public.prices DROP CONSTRAINT %I', con_name);
+            END LOOP;
+
+            -- 3) Drop any UNIQUE index that covers only (product_id)
+            FOR idx_name IN
+              SELECT ic.relname
+              FROM pg_index i
+              JOIN pg_class t  ON t.oid = i.indrelid AND t.relname = 'prices'
+              JOIN pg_namespace n ON n.oid = t.relnamespace AND n.nspname='public'
+              JOIN pg_class ic ON ic.oid = i.indexrelid
+              WHERE i.indisunique
+                AND i.indnatts = 1
+                AND i.indkey[1] = (
+                  SELECT attnum FROM pg_attribute
+                  WHERE attrelid=t.oid AND attname='product_id'
+                )
+            LOOP
+              RAISE NOTICE 'Dropping unique index % on prices(product_id)', idx_name;
+              EXECUTE format('DROP INDEX IF EXISTS %I', idx_name);
+            END LOOP;
+
+            -- 4) De-dup by (store_id, product_id) before adding composite unique
             WITH ranked AS (
               SELECT id,
                      ROW_NUMBER() OVER (
@@ -207,8 +250,10 @@ jobs:
             USING ranked r
             WHERE p.id = r.id AND r.rn > 1;
 
+            -- 5) Ensure composite unique exists
             IF NOT EXISTS (
-              SELECT 1 FROM pg_constraint
+              SELECT 1
+              FROM pg_constraint
               WHERE conrelid = 'public.prices'::regclass
                 AND conname  = 'uq_prices_store_product'
             ) THEN
