@@ -1,14 +1,18 @@
-name: Prisma → Price Update (daily)
+name: Prisma → Price Update (every 2 hours)
 
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "0 3 * * *"   # run once a day at 03:00 UTC
+    - cron: "0 */2 * * *"   # every 2 hours (UTC)
+
+concurrency:
+  group: prisma-price-update
+  cancel-in-progress: true
 
 jobs:
   update-prices:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
       PRISMA_STORE_ID: "14"
@@ -36,9 +40,9 @@ jobs:
       - name: Install Chromium + deps
         run: python -m playwright install --with-deps chromium
 
-      # optional warm-up on 5 items (keeps failures small if site changes)
+      # optional warm-up on 5 items (quick sanity before the big run)
       - name: Smoke test (5)
         run: python scripts/prisma_price_updater.py --max-products 5 --headless 1
 
-      - name: Update Prisma prices (batch 500)
-        run: python scripts/prisma_price_updater.py --max-products 500 --headless 1
+      - name: Update Prisma prices (batch 1000)
+        run: python scripts/prisma_price_updater.py --max-products 1000 --headless 1
