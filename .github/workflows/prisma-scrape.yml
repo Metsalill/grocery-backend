@@ -2,9 +2,13 @@ name: Prisma DB Scrape + CSV Artifact
 
 on:
   workflow_dispatch: {}
-  # Nightly schedule (disabled for now; re-enable later for ~02:00 Tallinn)
-  # schedule:
-  #   - cron: "0 23 * * *"   # ~02:00 Tallinn
+  schedule:
+    # Every 5 hours (UTC)
+    - cron: "0 */5 * * *"
+
+concurrency:
+  group: prisma-db-scrape
+  cancel-in-progress: true
 
 jobs:
   scrape:
@@ -59,7 +63,6 @@ jobs:
       - name: Run Prisma → DB (UPSERT by EAN)
         run: python scripts/prisma_food_scrape_to_db.py --max-products 6000 --headless 1
 
-      # Export fresh Prisma products to CSV from the DB using your script
       - name: Produce CSV export (DB → CSV)
         run: |
           python scripts/db_export_csv.py prisma_foods.csv
