@@ -291,14 +291,35 @@ jobs:
                           COALESCE(st.category_leaf,'') || ' ' ||
                           COALESCE(st.name,'')) LIKE '%' || banned.kw || '%'
             )
+          ),
+          joined AS (
+            SELECT
+              pe.product_id,
+              f.price,
+              f.currency,
+              f.collected_at,
+              f.ext_id
+            FROM filtered f
+            JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm
+          ),
+          -- choose ONE row per product_id to avoid ON CONFLICT affecting same row twice
+          pick_one AS (
+            SELECT DISTINCT ON (product_id)
+                   product_id, price, currency
+            FROM joined
+            ORDER BY product_id,
+                     collected_at DESC NULLS LAST,
+                     price ASC,
+                     ext_id DESC
           )
           INSERT INTO public.prices (store_id, product_id, price, currency, collected_at)
           SELECT
             (SELECT id FROM public.stores WHERE name='Selver e-pood' AND chain='Selver'),
-            pe.product_id,
-            f.price, f.currency, now()
-          FROM filtered f
-          JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm
+            p.product_id,
+            p.price,
+            p.currency,
+            NOW()
+          FROM pick_one p
           ON CONFLICT (product_id, store_id) DO UPDATE
             SET price        = EXCLUDED.price,
                 currency     = EXCLUDED.currency,
