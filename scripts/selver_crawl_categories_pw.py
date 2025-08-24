@@ -10,6 +10,7 @@ Changes in this patch:
 - Removed the canonical '/e/' guard in PDP extraction.
 - Click-through success check no longer requires '/e/' in the URL.
 - Still filters obvious non-product pages and drops zero-price rows.
+- **Shard fix:** if a sharded CATEGORIES_FILE exists and has URLs, use ONLY those seeds (no static allowlist).
 
 CSV columns: ext_id, name, ean_raw, sku_raw, size_text, price, currency, category_path, category_leaf
 """
@@ -670,7 +671,7 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
         # Collect unique HREFs but still click (stability)
         try:
             hrefs = page.evaluate("""
-              [...document.querySelectorAll('a.href^="/"]:not([href*="#"])')]
+              [...document.querySelectorAll('a[href^="/"]:not([href*="#"])')]
                 .filter(a => a.closest('article, .product, .product-card, .product-item, li'))
                 .map(a => a.getAttribute('href'))
             """)
@@ -771,17 +772,25 @@ def crawl():
                         print(f"[pw] {m.type}: {t}")
                 page.on("console", _warn_err_only)
 
-            # ---- seeds
+            # ---- seeds (file-first: respect sharded list if present)
             print("[selver] collecting seeds…")
-            seeds: List[str] = [urljoin(BASE, pth) for pth in STRICT_ALLOWLIST]
+            file_seeds: List[str] = []
             if os.path.exists(CATEGORIES_FILE):
                 with open(CATEGORIES_FILE, "r", encoding="utf-8") as cf:
                     for ln in cf:
-                        ln = ln.strip()
+                        ln = (ln or "").strip()
                         if ln and not ln.startswith("#"):
                             u = _clean_abs(ln)
-                            if u: seeds.append(u)
-            seeds = list(dict.fromkeys(seeds))
+                            if u:
+                                file_seeds.append(u)
+
+            if file_seeds:
+                seeds: List[str] = list(dict.fromkeys(file_seeds))
+                print(f"[selver] using {len(seeds)} file-driven seeds from {CATEGORIES_FILE}")
+            else:
+                seeds = [urljoin(BASE, pth) for pth in STRICT_ALLOWLIST]
+                print(f"[selver] no file seeds found → falling back to STRICT_ALLOWLIST ({len(seeds)})")
+
             cats = seeds if ALLOWLIST_ONLY else discover_categories(page, seeds)
 
             print(f"[selver] Categories to crawl: {len(cats)}")
