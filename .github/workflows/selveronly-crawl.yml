@@ -1,44 +1,29 @@
-name: "Selver Category Crawl"
+name: "Selver EAN Probe (from Prisma EANs)"
 
 on:
   workflow_dispatch:
     inputs:
-      click_products:
-        description: "Click into PDPs (1) vs direct links (0)"
+      batch_limit:
+        description: "How many EANs to probe this run"
         required: false
-        default: "0"
-      page_limit:
-        description: "Max pages per category (0 = all)"
+        default: "300"
+      delay_seconds:
+        description: "Delay between page hits (seconds)"
         required: false
-        default: "0"
-      log_console:
-        description: "Page console logging (0 | warn | all)"
-        required: false
-        default: "0"
-      req_delay:
-        description: "Seconds between steps"
-        required: false
-        default: "0.6"
+        default: "0.4"
   schedule:
-    - cron: "0 */3 * * *"
-    - cron: "30 1-23/3 * * *"
+    - cron: "15 2 * * *"   # daily 02:15 UTC (adjust/disable as needed)
 
 concurrency:
-  group: ${{ github.event_name == 'workflow_dispatch' && format('selver-category-crawl-{0}', github.run_id) || 'selver-category-crawl' }}
+  group: selver-ean-probe
   cancel-in-progress: true
 
 jobs:
-  crawl-and-upsert:
-    name: crawl-and-upsert (shard ${{ matrix.shard }})
+  probe-and-upsert:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [0, 1]
+    timeout-minutes: 40
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-      SHARD: ${{ matrix.shard }}
 
     steps:
       - name: Checkout
@@ -49,308 +34,203 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-scraper.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install deps (crawler + Playwright)
+      - name: Install deps (Playwright)
+        shell: bash
         run: |
-          pip install -r requirements-scraper.txt || pip install aiohttp beautifulsoup4 lxml asyncpg playwright
+          set -euo pipefail
+          pip install playwright
           python -m playwright install --with-deps chromium
 
-      - name: Prepare workspace
-        run: mkdir -p data
-
-      - name: Build shard slice (cover all categories this run; shard ${{ matrix.shard }})
-        shell: bash
-        env:
-          SHARDS: 2
-        run: |
-          set -euo pipefail
-          cp -f data/selver_categories.txt data/selver_categories_all.txt
-          TOTAL=$(wc -l < data/selver_categories_all.txt)
-          : "${SHARD:?SHARD env is required}"
-          awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
-            data/selver_categories_all.txt > data/selver_categories.txt
-          echo "TOTAL categories: $TOTAL"
-          echo "Sharding: SHARD=$SHARD / SHARDS=$SHARDS"
-          echo "Slice count: $(wc -l < data/selver_categories.txt)"
-          head -n 8 data/selver_categories.txt || true
-
-      - name: Crawl Selver categories (Playwright)
-        shell: bash
-        env:
-          PYTHONUNBUFFERED: "1"
-          OUTPUT_CSV: data/selver.csv
-          REQ_DELAY: ${{ github.event_name == 'workflow_dispatch' && inputs.req_delay || '0.6' }}
-          PAGE_LIMIT: ${{ github.event_name == 'workflow_dispatch' && inputs.page_limit || '0' }}
-          CATEGORIES_FILE: data/selver_categories.txt
-          ALLOWLIST_ONLY: "1"
-          USE_ROUTER: "1"
-          CLICK_PRODUCTS: ${{ github.event_name == 'workflow_dispatch' && inputs.click_products || '0' }}
-          LOG_CONSOLE: ${{ github.event_name == 'workflow_dispatch' && inputs.log_console || '0' }}
-        run: |
-          set -euo pipefail
-          set -x
-          echo "::group::Runtime info"
-          python --version
-          echo "Start (UTC): $(date -u)"
-          echo "::endgroup::"
-          set +e
-          set +o pipefail
-          stdbuf -oL -eL timeout -k 60s 50m python -u scripts/selver_crawl_categories_pw.py \
-            > >(tee data/selver_run.log) 2>data/selver_run.err
-          status=${PIPESTATUS[0]}
-          set -o pipefail
-          set -e
-          echo "End (UTC): $(date -u) — crawler exit code: ${status}"
-          echo "::group::Crawler outputs"
-          ls -lah data || true
-          [ -f data/selver.csv ] && { echo "CSV size:"; wc -l data/selver.csv; du -h data/selver.csv; } || echo "CSV not found"
-          [ -f data/selver_run.log ] && { echo "Log size:"; du -h data/selver_run.log; } || echo "Log not found"
-          [ -s data/selver_run.err ] && { echo "---- stderr tail ----"; tail -n 120 data/selver_run.err; } || true
-          echo "::endgroup::"
-          if [ "${status}" -eq 124 ]; then
-            echo "::warning::Crawler hit the time budget (timeout 50m). Continuing with partial results."
-          elif [ "${status}" -ne 0 ]; then
-            echo "::warning::Crawler exited non-zero (${status}); continuing"
-          fi
-
-      - name: Dump crawler log (tail)
-        if: always()
-        run: |
-          echo "----- last 300 lines of data/selver_run.log -----"
-          if [ -f data/selver_run.log ]; then
-            tail -n 300 data/selver_run.log
-          else
-            echo "(no log found)"
-          fi
-
       - name: Install psql client
+        shell: bash
         run: |
+          set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-      - name: DB sanity (connection + prices shape)
+      - name: Prepare workspace
         shell: bash
         run: |
           set -euo pipefail
-          psql "$DATABASE_URL" -c "\conninfo"
-          psql "$DATABASE_URL" -c "SELECT current_database(), current_user, inet_server_addr(), inet_server_port();"
-          psql "$DATABASE_URL" -c "\d prices" || true
+          mkdir -p data
 
-      - name: Show CSV head (debug)
-        if: always()
+      - name: Verify probe script present
+        shell: bash
         run: |
           set -euo pipefail
-          ls -l data || true
-          echo "---- line count ----"
-          wc -l data/selver.csv || true
-          echo "---- first 10 lines ----"
-          head -n 10 data/selver.csv || true
-          if [ ! -s data/selver.csv ] && [ -s data/selver-sample.csv ]; then
-            echo "Crawl produced no rows; using data/selver-sample.csv as fallback."
-            cp -f data/selver-sample.csv data/selver.csv
+          test -f scripts/selver_probe_ean_pw.py || { echo "Missing scripts/selver_probe_ean_pw.py"; exit 1; }
+
+      # Build Prisma EAN backlog (use COPY TO STDOUT; inject LIMIT via shell)
+      - name: Build list of Prisma EANs to probe on Selver
+        shell: bash
+        run: |
+          set -euo pipefail
+          LIM="${{ github.event.inputs.batch_limit || '300' }}"
+
+          SQL="
+            COPY (
+              WITH prisma AS (
+                SELECT ean
+                FROM products
+                WHERE ean ~ '^[0-9]+$'
+                  AND source_url ILIKE '%prismamarket.ee%'
+              ),
+              selver_seen AS (
+                SELECT DISTINCT regexp_replace(ean_raw::text,'\\D','','g') AS ean
+                FROM selver_candidates
+                UNION
+                SELECT DISTINCT p.ean
+                FROM prices pr
+                JOIN stores s ON s.id = pr.store_id AND s.chain ILIKE 'Selver'
+                JOIN products p ON p.id = pr.product_id
+              )
+              SELECT p.ean
+              FROM prisma p
+              LEFT JOIN selver_seen s ON s.ean = p.ean
+              WHERE s.ean IS NULL
+              ORDER BY p.ean
+              LIMIT ${LIM}
+            ) TO STDOUT WITH (FORMAT CSV, HEADER TRUE)
+          "
+
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "$SQL" > data/prisma_eans_to_probe.csv
+
+          if [ ! -s data/prisma_eans_to_probe.csv ]; then
+            echo "::notice::No new Prisma EANs to probe this run."
           fi
 
-      - name: Upload crawl artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: selver-crawl-shard-${{ matrix.shard }}-${{ github.run_id }}
-          path: |
-            data/selver.csv
-            data/selver_run.log
-            data/selver_run.err
-            data/selver_debug/**/*.png
-          if-no-files-found: warn
-          retention-days: 7
+      - name: Check probe input exists
+        id: has_probe
+        shell: bash
+        run: |
+          if [ -s data/prisma_eans_to_probe.csv ]; then
+            echo "has=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has=false" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Prepare DB (staging & helper tables)
+      - name: Probe EANs on Selver (Playwright)
+        if: steps.has_probe.outputs.has == 'true'
+        env:
+          PYTHONUNBUFFERED: "1"
         shell: bash
         run: |
           set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          BEGIN;
+          DELAY="${{ github.event.inputs.delay_seconds || '0.4' }}"
+          python scripts/selver_probe_ean_pw.py \
+            data/prisma_eans_to_probe.csv \
+            data/selver_probe.csv \
+            "$DELAY"
 
-          -- keep shared table for compatibility, but we won't use it in the load step
-          CREATE TABLE IF NOT EXISTS public.staging_selver_products (
-            ext_id        text PRIMARY KEY,
-            name          text NOT NULL,
-            ean_raw       text,
-            sku_raw       text,
-            ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '\D','','g')) STORED,
-            size_text     text,
-            price         numeric(12,2) NOT NULL,
-            currency      text DEFAULT 'EUR',
-            category_path text,
-            category_leaf text,
-            collected_at  timestamptz DEFAULT now()
-          );
-
-          CREATE EXTENSION IF NOT EXISTS pg_trgm;
-          CREATE INDEX IF NOT EXISTS ix_selver_ean       ON public.staging_selver_products (ean_norm);
-          CREATE INDEX IF NOT EXISTS ix_selver_name_trgm ON public.staging_selver_products USING gin (name gin_trgm_ops);
-
-          -- Ensure exactly one ONLINE Selver store exists
-          INSERT INTO public.stores (name, chain, is_online)
-          SELECT 'Selver e-Selver', 'Selver', TRUE
-          WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE chain='Selver' AND is_online=TRUE);
-
-          -- Candidates table (unmatched)
-          CREATE TABLE IF NOT EXISTS public.selver_candidates (
-            ext_id        text PRIMARY KEY,
-            ean_norm      text,
-            ean_raw       text,
-            sku_raw       text,
-            name          text,
-            size_text     text,
-            price         numeric(12,2),
-            currency      text,
-            category_path text,
-            category_leaf text,
-            last_seen     timestamptz DEFAULT now()
-          );
-
-          COMMIT;
-
-          -- prices unique (product_id, store_id) and dedupe legacy
-          DO $$
-          BEGIN
-            WITH ranked AS (
-              SELECT id,
-                     ROW_NUMBER() OVER (PARTITION BY store_id, product_id
-                                        ORDER BY collected_at DESC, id DESC) rn
-              FROM public.prices
-            )
-            DELETE FROM public.prices p
-            USING ranked r
-            WHERE p.id = r.id AND r.rn > 1;
-
-            IF NOT EXISTS (
-              SELECT 1 FROM pg_constraint c
-              WHERE c.conrelid='public.prices'::regclass
-                AND c.contype='u'
-                AND c.conkey = ARRAY[
-                  (SELECT attnum FROM pg_attribute WHERE attrelid='public.prices'::regclass AND attname='product_id'),
-                  (SELECT attnum FROM pg_attribute WHERE attrelid='public.prices'::regclass AND attname='store_id')
-                ]
-            ) THEN
-              ALTER TABLE public.prices
-                ADD CONSTRAINT uq_prices_per_store UNIQUE (product_id, store_id);
-            END IF;
-          END$$;
-          SQL
-
-      # Shard-safe load: TEMP table + single psql session (no YAML heredoc)
-      - name: Load CSV, upsert (TEMP staging, shard-safe)
+      # Single-session psql: TEMP table + copy + parsed + prices + candidates + aliases (conflict-safe)
+      - name: Upsert probe results (candidates + prices + aliases)
+        if: steps.has_probe.outputs.has == 'true'
         shell: bash
         run: |
           set -euo pipefail
-
-          if [ ! -s data/selver.csv ]; then
-            echo "No rows in data/selver.csv — skipping."
+          if [ ! -s data/selver_probe.csv ]; then
+            echo "No probe output — skipping upsert."
             exit 0
           fi
 
-          ROW_CT=$( (wc -l < data/selver.csv) 2>/dev/null || echo 0 )
-          if [ "$ROW_CT" -le 6 ]; then
-            echo "::warning::Too few rows in CSV ($ROW_CT). Skipping DB load this run."
-            exit 0
-          fi
-
-          # Build the SQL file via printf (YAML-safe; no heredocs)
           printf '%s\n' \
             '\set ON_ERROR_STOP on' \
             'BEGIN;' \
             '' \
-            '-- TEMP staging per-connection' \
-            'CREATE TEMP TABLE tmp_staging_selver_products (' \
-            '  ext_id        text PRIMARY KEY,' \
-            '  name          text NOT NULL,' \
-            '  ean_raw       text,' \
-            '  sku_raw       text,' \
-            "  ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '\'"\\\D"\'', '\'''\'' ,'\''g'\'')) STORED," \
-            '  size_text     text,' \
-            '  price         numeric(12,2) NOT NULL,' \
-            "  currency      text DEFAULT 'EUR'," \
-            '  category_path text,' \
-            '  category_leaf text,' \
-            '  collected_at  timestamptz DEFAULT now()' \
+            '-- Temp table is session-scoped; keep everything in this psql session' \
+            'CREATE TEMP TABLE staging_selver_probe(' \
+            '  ext_id    text,' \
+            '  url       text,' \
+            '  ean       text,' \
+            '  name      text,' \
+            '  price_raw text,' \
+            '  size_text text' \
             ');' \
             '' \
-            '\copy tmp_staging_selver_products (ext_id,name,ean_raw,sku_raw,size_text,price,currency,category_path,category_leaf) FROM '\''data/selver.csv'\'' CSV HEADER' \
+            "\copy staging_selver_probe FROM 'data/selver_probe.csv' CSV HEADER" \
             '' \
-            '-- Upsert latest prices for the single online Selver store' \
-            'WITH filtered AS (' \
-            '  SELECT st.* FROM tmp_staging_selver_products st' \
+            '-- parse once into a temp table (so we can reuse for prices + candidates)' \
+            'CREATE TEMP TABLE parsed_probe AS' \
+            'SELECT' \
+            '  COALESCE(url, ext_id) AS ext_id,' \
+            "  regexp_replace(ean,'\\D','','g') AS ean_norm," \
+            '  ean AS ean_raw,' \
+            '  CASE WHEN length(btrim(name))=0 THEN NULL ELSE name END AS name,' \
+            '  CASE WHEN length(btrim(size_text))=0 THEN NULL ELSE size_text END AS size_text,' \
+            "  NULLIF(replace(regexp_replace(price_raw, '[^0-9,.-]', '', 'g'), ',', '.'), '')::numeric AS price_num" \
+            'FROM staging_selver_probe;' \
+            '' \
+            '-- ensure exactly one online Selver store exists' \
+            "INSERT INTO stores (name, chain, is_online) SELECT 'Selver e-Selver', 'Selver', TRUE WHERE NOT EXISTS (SELECT 1 FROM stores WHERE chain='Selver' AND is_online=TRUE);" \
+            '' \
+            '-- prices (only numeric), pick 1 per product' \
+            'WITH joined AS (' \
+            '  SELECT pe.product_id, pp.price_num, pp.ext_id AS source_url' \
+            '  FROM parsed_probe pp' \
+            '  JOIN product_eans pe ON pe.ean_norm = pp.ean_norm' \
+            '  WHERE pp.price_num IS NOT NULL' \
             '),' \
-            'joined AS (' \
-            '  SELECT' \
-            '    pe.product_id,' \
-            '    f.price,' \
-            '    f.currency,' \
-            '    f.collected_at,' \
-            '    f.ext_id' \
-            '  FROM filtered f' \
-            '  JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm' \
-            '),' \
-            'pick_one AS (' \
-            '  SELECT DISTINCT ON (product_id)' \
-            '         product_id, price, currency, ext_id' \
+            'dedup AS (' \
+            '  SELECT DISTINCT ON (product_id) product_id, price_num, source_url' \
             '  FROM joined' \
-            '  ORDER BY product_id,' \
-            '           collected_at DESC NULLS LAST,' \
-            '           price ASC,' \
-            '           ext_id DESC' \
+            '  ORDER BY product_id, price_num' \
             ')' \
-            'INSERT INTO public.prices (store_id, product_id, price, currency, collected_at, source_url)' \
-            'SELECT' \
-            "  (SELECT id FROM public.stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1)," \
-            '  p.product_id,' \
-            '  p.price,' \
-            '  p.currency,' \
-            '  now(),' \
-            '  p.ext_id' \
-            'FROM pick_one p' \
-            'ON CONFLICT (product_id, store_id) DO UPDATE' \
-            '  SET price        = EXCLUDED.price,' \
-            '      currency     = EXCLUDED.currency,' \
-            '      collected_at = EXCLUDED.collected_at,' \
-            '      source_url   = EXCLUDED.source_url;' \
+            'INSERT INTO prices (store_id, product_id, price, currency, collected_at, source_url)' \
+            "SELECT (SELECT id FROM stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1)," \
+            "       d.product_id, d.price_num, 'EUR', now(), d.source_url" \
+            'FROM dedup d' \
+            'ON CONFLICT (product_id, store_id) DO UPDATE SET' \
+            '  price        = EXCLUDED.price,' \
+            '  currency     = EXCLUDED.currency,' \
+            '  collected_at = EXCLUDED.collected_at,' \
+            '  source_url   = EXCLUDED.source_url;' \
             '' \
-            '-- Store unmatched rows for triage' \
-            'WITH filtered AS (' \
-            '  SELECT st.* FROM tmp_staging_selver_products st' \
+            '-- candidates: always provide a NOT-NULL price (default 0.00)' \
+            'INSERT INTO selver_candidates (ext_id, ean_norm, ean_raw, name, size_text, price, currency, last_seen)' \
+            "SELECT ext_id, ean_norm, ean_raw, name, size_text, COALESCE(price_num, 0.00), 'EUR', now()" \
+            'FROM parsed_probe' \
+            'ON CONFLICT (ext_id) DO UPDATE SET' \
+            '  price         = COALESCE(EXCLUDED.price, selver_candidates.price),' \
+            '  currency      = COALESCE(EXCLUDED.currency, selver_candidates.currency),' \
+            '  name          = COALESCE(EXCLUDED.name, selver_candidates.name),' \
+            '  size_text     = COALESCE(EXCLUDED.size_text, selver_candidates.size_text),' \
+            '  ean_raw       = COALESCE(EXCLUDED.ean_raw, selver_candidates.ean_raw),' \
+            '  last_seen     = now();' \
+            '' \
+            '-- 3) aliases: filter junk + dedup; avoid global unique (lower(alias)) conflicts' \
+            'WITH cand AS (' \
+            '  SELECT pe.product_id,' \
+            '         left(btrim(pp.name), 200) AS alias,' \
+            '         pp.ext_id' \
+            '  FROM parsed_probe pp' \
+            '  JOIN product_eans pe ON pe.ean_norm = pp.ean_norm' \
+            '  WHERE pp.name IS NOT NULL' \
+            "    AND length(btrim(pp.name)) >= 3" \
+            "    AND lower(btrim(pp.name)) NOT IN ('selver','e-selver','prisma','prismamarket','prismamarket.ee')" \
+            "    AND (pp.ext_id IS NULL OR position('/search' in lower(pp.ext_id)) = 0)" \
+            '),' \
+            'dedup AS (' \
+            '  SELECT DISTINCT product_id, alias FROM cand' \
             ')' \
-            'INSERT INTO public.selver_candidates' \
-            '  (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, price, currency, category_path, category_leaf)' \
-            'SELECT' \
-            '  f.ext_id, f.ean_norm, f.ean_raw, f.sku_raw, f.name, f.size_text, f.price, f.currency, f.category_path, f.category_leaf' \
-            'FROM filtered f' \
-            'LEFT JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm' \
-            'WHERE pe.product_id IS NULL' \
-            'ON CONFLICT (ext_id) DO UPDATE' \
-            '  SET price         = EXCLUDED.price,' \
-            '      currency      = EXCLUDED.currency,' \
-            '      size_text     = COALESCE(EXCLUDED.size_text, public.selver_candidates.size_text),' \
-            '      category_path = COALESCE(EXCLUDED.category_path, public.selver_candidates.category_path),' \
-            '      category_leaf = COALESCE(EXCLUDED.category_leaf, public.selver_candidates.category_leaf),' \
-            '      ean_raw       = COALESCE(EXCLUDED.ean_raw, public.selver_candidates.ean_raw),' \
-            '      sku_raw       = COALESCE(EXCLUDED.sku_raw, public.selver_candidates.sku_raw),' \
-            '      last_seen     = now();' \
+            'INSERT INTO product_aliases (product_id, alias)' \
+            'SELECT product_id, alias FROM dedup' \
+            'ON CONFLICT ON CONSTRAINT uq_product_alias_lower DO NOTHING;' \
             '' \
-            '-- Summary from the TEMP table' \
+            '-- summary' \
             'SELECT' \
-            '  (SELECT COUNT(*) FROM tmp_staging_selver_products) AS staged,' \
-            "  (SELECT COUNT(*) FROM public.prices WHERE store_id=(SELECT id FROM public.stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1)) AS price_rows," \
-            '  (SELECT COUNT(*) FROM public.selver_candidates) AS candidates;' \
+            '  (SELECT COUNT(*) FROM staging_selver_probe) AS probed,' \
+            "  (SELECT COUNT(*) FROM prices pr JOIN stores s ON s.id=pr.store_id WHERE s.chain='Selver' AND s.is_online=TRUE) AS selver_price_rows;" \
             '' \
             'COMMIT;' \
-            > /tmp/selver_load.sql
+          | psql "$DATABASE_URL"
 
-          psql "$DATABASE_URL" -f /tmp/selver_load.sql
+      - name: Upload probe artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selver-ean-probe-${{ github.run_id }}
+          path: |
+            data/prisma_eans_to_probe.csv
+            data/selver_probe.csv
+          if-no-files-found: warn
+          retention-days: 7
