@@ -1,12 +1,41 @@
-/e-selver/puu-ja-koogiviljad
-/e-selver/liha-ja-kalatooted
-/e-selver/piimatooted-ja-munad
-/e-selver/valmistoit
-/e-selver/kuivained
-/e-selver/maitseained-kastmed-ja-oliivid
-/e-selver/suupisted-ja-maiustused
-/e-selver/jook
-/e-selver/jook/karastusjoogid-ja-vesi
-/e-selver/jook/mahlad-ja-joogid
-/e-selver/kulmutatud-toit
-/e-selver/laste-toit
+# FOOD – core categories
+/puu-ja-koogiviljad
+/liha-ja-kalatooted
+/piimatooted-munad-void
+/juustud
+/leivad-saiad-kondiitritooted
+/valmistoidud
+/kuivained-hommikusoogid-hoidised
+
+# Spices, oils, sauces
+/maitseained-ja-puljongid
+/maitseained-ja-puljongid/kastmed
+/maitseained-ja-puljongid/olid-ja-aadikad
+
+# Snacks & sweets
+/suupisted-ja-maiustused
+
+# Drinks (non-alcohol)
+/joogid
+/joogid/karastus-ja-energiajoogid-toonikud
+/joogid/karastus-ja-energiajoogid-toonikud/karastusjoogid-toonikud
+/joogid/karastus-ja-energiajoogid-toonikud/energiajoogid
+/joogid/karastus-ja-energiajoogid-toonikud/limonaadid
+/joogid/karastus-ja-energiajoogid-toonikud/maitseveed
+
+# Frozen & bulk
+/kulmutatud-toidukaubad
+/suurpakendid
+
+# NEW – Kids & baby
+/lastekaubad
+/lastekaubad/lastetoidud
+/lastekaubad/mahkmed
+/lastekaubad/beebi-hooldusvahendid
+
+# NEW – Household
+/majapidamis-ja-kodukaubad
+/majapidamis-ja-kodukaubad/paberitooted
+/majapidamis-ja-kodukaubad/puhastus-ja-koristustarbed
+/majapidamis-ja-kodukaubad/roivaste-ja-jalatsite-hooldus
+/majapidamis-ja-kodukaubad/muud-majapidamise-kaubad
