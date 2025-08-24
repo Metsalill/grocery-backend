@@ -30,10 +30,16 @@ concurrency:
 
 jobs:
   crawl-and-upsert:
+    name: crawl-and-upsert (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1]   # run two slices in parallel each trigger
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      SHARD: ${{ matrix.shard }}
 
     steps:
       - name: Checkout
@@ -60,18 +66,17 @@ jobs:
       - name: Prepare workspace
         run: mkdir -p data
 
-      # NEW: rotate which categories are crawled each 90-minute slot (16 slices per day)
-      - name: Build rotating category slice (90-min slots)
+      # Rotate categories; shard 0 processes SLOT, shard 1 processes SLOT+1
+      - name: Build rotating category slice (90-min slots; shard ${{ matrix.shard }})
         shell: bash
         run: |
           set -euo pipefail
-          # Expect the repo to contain data/selver_categories.txt (full list).
-          # Keep a copy of the full list for reference.
           cp -f data/selver_categories.txt data/selver_categories_all.txt
 
           TOTAL=$(wc -l < data/selver_categories_all.txt)
           SLOTS=16  # 24h / 1.5h
-          SLOT=$(( ( $(date -u +%s) / 60 / 90 ) % SLOTS ))
+          BASE_SLOT=$(( ( $(date -u +%s) / 60 / 90 ) % SLOTS ))
+          SLOT=$(( (BASE_SLOT + ${SHARD}) % SLOTS ))
           CHUNK=$(( (TOTAL + SLOTS - 1) / SLOTS ))  # ceil
           START=$(( SLOT*CHUNK + 1 ))
           END=$(( START + CHUNK - 1 ))
@@ -80,9 +85,9 @@ jobs:
           sed -n "${START},${END}p" data/selver_categories_all.txt > data/selver_categories.txt
 
           echo "TOTAL categories: $TOTAL"
-          echo "SLOT: $SLOT / $SLOTS   lines ${START}..${END}"
-          echo "Slice line count: $(wc -l < data/selver_categories.txt)"
-          echo "Slice preview:"; head -n 5 data/selver_categories.txt || true
+          echo "BASE_SLOT: $BASE_SLOT ; SHARD: ${SHARD} ; EFFECTIVE SLOT: $SLOT / $SLOTS"
+          echo "Slice lines: ${START}..${END}  (count: $(wc -l < data/selver_categories.txt))"
+          head -n 5 data/selver_categories.txt || true
 
       - name: Crawl Selver categories (Playwright)
         shell: bash
@@ -106,7 +111,7 @@ jobs:
 
           set +e
           set +o pipefail
-          # give crawler up to ~50 minutes within the 60-minute job window
+          # Give crawler ~50 minutes of the 60-minute job window
           stdbuf -oL -eL timeout -k 60s 50m python -u scripts/selver_crawl_categories_pw.py \
             2>&1 | tee data/selver_run.log
           status=${PIPESTATUS[0]}
@@ -168,7 +173,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: selver-crawl-${{ github.run_id }}
+          name: selver-crawl-shard-${{ matrix.shard }}-${{ github.run_id }}
           path: |
             data/selver.csv
             data/selver_run.log
@@ -327,7 +332,6 @@ jobs:
             FROM filtered f
             JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm
           ),
-          -- choose ONE row per product_id to avoid ON CONFLICT affecting same row twice
           pick_one AS (
             SELECT DISTINCT ON (product_id)
                    product_id, price, currency
