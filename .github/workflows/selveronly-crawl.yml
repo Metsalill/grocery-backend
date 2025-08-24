@@ -178,7 +178,7 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           BEGIN;
 
-          -- Raw staging for selver CSV
+          -- (Legacy) shared staging table remains for compatibility, but we won't use it in load step
           CREATE TABLE IF NOT EXISTS public.staging_selver_products (
             ext_id        text PRIMARY KEY,
             name          text NOT NULL,
@@ -223,13 +223,7 @@ jobs:
           DO $$
           DECLARE con_name text;
           BEGIN
-            FOR con_name IN
-              SELECT c.conname FROM pg_constraint c
-              WHERE c.conrelid='public.prices'::regclass AND c.contype='u'
-            LOOP
-              -- keep any existing composite unique; we just ensure the right one exists
-            END LOOP;
-
+            -- dedupe any old duplicates
             WITH ranked AS (
               SELECT id,
                      ROW_NUMBER() OVER (PARTITION BY store_id, product_id
@@ -253,17 +247,16 @@ jobs:
                 ADD CONSTRAINT uq_prices_per_store UNIQUE (product_id, store_id);
             END IF;
           END$$;
-
-          TRUNCATE TABLE public.staging_selver_products;
           SQL
 
-      - name: Load CSV into staging & upsert
+      # ====== SHARD-SAFE LOAD: TEMP TABLE + SINGLE SESSION ======
+      - name: Load CSV, upsert (TEMP staging, shard-safe)
         shell: bash
         run: |
           set -euo pipefail
 
           if [ ! -s data/selver.csv ]; then
-            echo "No rows in data/selver.csv — skipping load."
+            echo "No rows in data/selver.csv — skipping."
             exit 0
           fi
 
@@ -273,74 +266,94 @@ jobs:
             exit 0
           fi
 
-          # Load to staging
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c \
-            "\copy public.staging_selver_products (ext_id,name,ean_raw,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER"
+          cat > /tmp/selver_load.sql <<'PSQL'
+\set ON_ERROR_STOP on
+BEGIN;
 
-          # Upsert prices -> **online Selver store only**; one row per product_id per run
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          WITH filtered AS (
-            SELECT st.* FROM public.staging_selver_products st
-          ),
-          joined AS (
-            SELECT
-              pe.product_id,
-              f.price,
-              f.currency,
-              f.collected_at,
-              f.ext_id
-            FROM filtered f
-            JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm
-          ),
-          pick_one AS (  -- dedupe: keep 1 best row per product this run
-            SELECT DISTINCT ON (product_id)
-                   product_id, price, currency, ext_id
-            FROM joined
-            ORDER BY product_id,
-                     collected_at DESC NULLS LAST,
-                     price ASC,
-                     ext_id DESC
-          )
-          INSERT INTO public.prices (store_id, product_id, price, currency, collected_at, source_url)
-          SELECT
-            (SELECT id FROM public.stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1),
-            p.product_id,
-            p.price,
-            p.currency,
-            NOW(),
-            p.ext_id
-          FROM pick_one p
-          ON CONFLICT (product_id, store_id) DO UPDATE
-            SET price        = EXCLUDED.price,
-                currency     = EXCLUDED.currency,
-                collected_at = EXCLUDED.collected_at,
-                source_url   = EXCLUDED.source_url;
-          SQL
+-- TEMP staging is per-connection (no cross-shard collisions)
+CREATE TEMP TABLE tmp_staging_selver_products (
+  ext_id        text PRIMARY KEY,
+  name          text NOT NULL,
+  ean_raw       text,
+  sku_raw       text,
+  ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '\D','','g')) STORED,
+  size_text     text,
+  price         numeric(12,2) NOT NULL,
+  currency      text DEFAULT 'EUR',
+  category_path text,
+  category_leaf text,
+  collected_at  timestamptz DEFAULT now()
+);
 
-          # Store unmatched rows for triage
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          WITH filtered AS (
-            SELECT st.* FROM public.staging_selver_products st
-          )
-          INSERT INTO public.selver_candidates
-            (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, price, currency, category_path, category_leaf)
-          SELECT
-            f.ext_id, f.ean_norm, f.ean_raw, f.sku_raw, f.name, f.size_text, f.price, f.currency, f.category_path, f.category_leaf
-          FROM filtered f
-          LEFT JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm
-          WHERE pe.product_id IS NULL
-          ON CONFLICT (ext_id) DO UPDATE
-            SET price         = EXCLUDED.price,
-                currency      = EXCLUDED.currency,
-                size_text     = COALESCE(EXCLUDED.size_text, public.selver_candidates.size_text),
-                category_path = COALESCE(EXCLUDED.category_path, public.selver_candidates.category_path),
-                category_leaf = COALESCE(EXCLUDED.category_leaf, public.selver_candidates.category_leaf),
-                ean_raw       = COALESCE(EXCLUDED.ean_raw, public.selver_candidates.ean_raw),
-                sku_raw       = COALESCE(EXCLUDED.sku_raw, public.selver_candidates.sku_raw),
-                last_seen     = now();
+\copy tmp_staging_selver_products (ext_id,name,ean_raw,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER
 
-          SELECT
-            (SELECT COUNT(*) FROM public.staging_selver_products) AS staged,
-            (SELECT COUNT(*) FROM public.prices WHERE store_id=(SELECT id FROM public.stores WHERE chain='Selver' AND is_online=TRUE LIMIT 1)) AS price_rows,
-            (SELECT COUNT(*) FROM public.selver_candidates) AS candidates;
-          SQL
+-- Upsert latest prices for the single online Selver store
+WITH filtered AS (
+  SELECT st.* FROM tmp_staging_selver_products st
+),
+joined AS (
+  SELECT
+    pe.product_id,
+    f.price,
+    f.currency,
+    f.collected_at,
+    f.ext_id
+  FROM filtered f
+  JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm
+),
+pick_one AS (  -- keep 1 best row per product this run
+  SELECT DISTINCT ON (product_id)
+         product_id, price, currency, ext_id
+  FROM joined
+  ORDER BY product_id,
+           collected_at DESC NULLS LAST,
+           price ASC,
+           ext_id DESC
+)
+INSERT INTO public.prices (store_id, product_id, price, currency, collected_at, source_url)
+SELECT
+  (SELECT id FROM public.stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1),
+  p.product_id,
+  p.price,
+  p.currency,
+  now(),
+  p.ext_id
+FROM pick_one p
+ON CONFLICT (product_id, store_id) DO UPDATE
+  SET price        = EXCLUDED.price,
+      currency     = EXCLUDED.currency,
+      collected_at = EXCLUDED.collected_at,
+      source_url   = EXCLUDED.source_url;
+
+-- Store unmatched rows for triage
+WITH filtered AS (
+  SELECT st.* FROM tmp_staging_selver_products st
+)
+INSERT INTO public.selver_candidates
+  (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, price, currency, category_path, category_leaf)
+SELECT
+  f.ext_id, f.ean_norm, f.ean_raw, f.sku_raw, f.name, f.size_text, f.price, f.currency, f.category_path, f.category_leaf
+FROM filtered f
+LEFT JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm
+WHERE pe.product_id IS NULL
+ON CONFLICT (ext_id) DO UPDATE
+  SET price         = EXCLUDED.price,
+      currency      = EXCLUDED.currency,
+      size_text     = COALESCE(EXCLUDED.size_text, public.selver_candidates.size_text),
+      category_path = COALESCE(EXCLUDED.category_path, public.selver_candidates.category_path),
+      category_leaf = COALESCE(EXCLUDED.category_leaf, public.selver_candidates.category_leaf),
+      ean_raw       = COALESCE(EXCLUDED.ean_raw, public.selver_candidates.ean_raw),
+      sku_raw       = COALESCE(EXCLUDED.sku_raw, public.selver_candidates.sku_raw),
+      last_seen     = now();
+
+-- Summary from the TEMP table (race-proof)
+SELECT
+  (SELECT COUNT(*) FROM tmp_staging_selver_products) AS staged,
+  (SELECT COUNT(*) FROM public.prices
+     WHERE store_id=(SELECT id FROM public.stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1)) AS price_rows,
+  (SELECT COUNT(*) FROM public.selver_candidates) AS candidates;
+
+COMMIT;
+PSQL
+
+          psql "$DATABASE_URL" -f /tmp/selver_load.sql
