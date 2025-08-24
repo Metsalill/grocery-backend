@@ -1,0 +1,101 @@
+name: Selver → Enrich EANs (backfill)
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Max PDPs to enrich"
+        required: false
+        default: "300"
+      headless:
+        description: "Headless browser (1/0)"
+        required: false
+        default: "1"
+      req_delay:
+        description: "Delay between PDPs (sec)"
+        required: false
+        default: "0.5"
+  schedule:
+    - cron: "7 */6 * * *"   # every 6 hours
+
+concurrency:
+  group: selver-enrich-eans
+  cancel-in-progress: true
+
+jobs:
+  enrich-and-promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install playwright psycopg2-binary
+          python -m playwright install --with-deps chromium
+
+      - name: Enrich selver_candidates missing EAN/SKU
+        run: |
+          python scripts/selver_enrich_candidates_pw.py \
+            --limit ${{ github.event_name == 'workflow_dispatch' && inputs.limit || 300 }} \
+            --headless ${{ github.event_name == 'workflow_dispatch' && inputs.headless || 1 }} \
+            --req-delay ${{ github.event_name == 'workflow_dispatch' && inputs.req_delay || 0.5 }}
+
+      - name: Promote enriched candidates → prices
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          -- Any candidate that now has EAN can feed prices directly
+          WITH joined AS (
+            SELECT
+              pe.product_id,
+              c.price,
+              COALESCE(c.currency,'EUR') AS currency,
+              c.last_seen,
+              c.ext_id
+            FROM selver_candidates c
+            JOIN product_eans pe ON pe.ean_norm = c.ean_norm
+            WHERE c.ean_norm IS NOT NULL
+          ),
+          pick_one AS (
+            -- pick newest/cheapest per product to avoid multiple updates in one statement
+            SELECT DISTINCT ON (product_id)
+                   product_id, price, currency, last_seen, ext_id
+            FROM joined
+            ORDER BY product_id,
+                     last_seen DESC NULLS LAST,
+                     price ASC,
+                     ext_id DESC
+          )
+          INSERT INTO prices (store_id, product_id, price, currency, collected_at, source_url)
+          SELECT
+            (SELECT id FROM stores WHERE name='Selver e-pood' AND chain='Selver'),
+            p.product_id,
+            p.price,
+            p.currency,
+            NOW(),
+            p.ext_id
+          FROM pick_one p
+          ON CONFLICT (product_id, store_id) DO UPDATE
+            SET price        = EXCLUDED.price,
+                currency     = EXCLUDED.currency,
+                collected_at = EXCLUDED.collected_at,
+                source_url   = EXCLUDED.source_url;
+
+          -- Optional: quick stats
+          SELECT
+            (SELECT COUNT(*) FROM selver_candidates WHERE ean_raw IS NULL) AS still_missing,
+            (SELECT COUNT(*) FROM selver_candidates WHERE ean_raw IS NOT NULL) AS enriched_total,
+            (SELECT COUNT(*) FROM prices WHERE store_id=(SELECT id FROM stores WHERE name='Selver e-pood' AND chain='Selver')) AS price_rows;
+          SQL
