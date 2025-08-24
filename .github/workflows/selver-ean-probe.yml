@@ -122,7 +122,7 @@ jobs:
             data/selver_probe.csv \
             "$DELAY"
 
-      # Single-session psql: TEMP table + \copy + upserts (no heredocs)
+      # Single-session psql: TEMP table + copy + parsed + prices + candidates (price default 0.00)
       - name: Upsert probe results (candidates + prices + aliases)
         if: steps.has_probe.outputs.has == 'true'
         shell: bash
@@ -149,42 +149,35 @@ jobs:
             '' \
             '\copy staging_selver_probe FROM '\''data/selver_probe.csv'\'' CSV HEADER' \
             '' \
+            '-- parse once into a temp table (so we can reuse for prices + candidates)' \
+            'CREATE TEMP TABLE parsed_probe AS' \
+            'SELECT' \
+            '  COALESCE(url, ext_id)                                         AS ext_id,' \
+            "  regexp_replace(ean,'\\D','','g')                               AS ean_norm," \
+            '  ean                                                           AS ean_raw,' \
+            '  NULLIF(name,'''')                                              AS name,' \
+            '  NULLIF(size_text,'''')                                         AS size_text,' \
+            "  NULLIF(replace(regexp_replace(price_raw, '[^0-9,.-]', '', 'g'), ',', '.'), '')::numeric AS price_num" \
+            'FROM staging_selver_probe;' \
+            '' \
             '-- ensure exactly one online Selver store exists' \
             "INSERT INTO stores (name, chain, is_online) SELECT 'Selver e-Selver', 'Selver', TRUE WHERE NOT EXISTS (SELECT 1 FROM stores WHERE chain='Selver' AND is_online=TRUE);" \
             '' \
-            '-- 1) candidates (idempotent)' \
-            'INSERT INTO selver_candidates (ext_id, ean_norm, ean_raw, name, size_text, last_seen)' \
-            'SELECT COALESCE(url, ext_id) AS ext_id,' \
-            "       regexp_replace(ean,'\\D','','g') AS ean_norm," \
-            '       ean AS ean_raw,' \
-            "       NULLIF(name,'') AS name," \
-            "       NULLIF(size_text,'') AS size_text," \
-            '       now()' \
-            'FROM staging_selver_probe' \
-            'ON CONFLICT (ext_id) DO UPDATE SET' \
-            '  last_seen = now(),' \
-            '  name      = COALESCE(EXCLUDED.name, selver_candidates.name),' \
-            '  ean_raw   = COALESCE(EXCLUDED.ean_raw, selver_candidates.ean_raw),' \
-            '  size_text = COALESCE(EXCLUDED.size_text, selver_candidates.size_text);' \
-            '' \
-            '-- 2) prices (only if numeric)' \
-            'WITH parsed AS (' \
-            '  SELECT pe.product_id,' \
-            "         NULLIF(replace(regexp_replace(price_raw, '[^0-9,.-]', '', 'g'), ',', '.'), '')::numeric AS price_num," \
-            '         COALESCE(url, ext_id) AS source_url' \
-            '  FROM staging_selver_probe sp' \
-            "  JOIN product_eans pe ON pe.ean_norm = regexp_replace(sp.ean,'\\D','','g')" \
+            '-- prices (only numeric), pick 1 per product' \
+            'WITH joined AS (' \
+            '  SELECT pe.product_id, pp.price_num, pp.ext_id AS source_url' \
+            '  FROM parsed_probe pp' \
+            "  JOIN product_eans pe ON pe.ean_norm = pp.ean_norm" \
+            '  WHERE pp.price_num IS NOT NULL' \
             '),' \
             'dedup AS (' \
             '  SELECT DISTINCT ON (product_id) product_id, price_num, source_url' \
-            '  FROM parsed' \
-            '  WHERE price_num IS NOT NULL' \
+            '  FROM joined' \
             '  ORDER BY product_id, price_num' \
             ')' \
             'INSERT INTO prices (store_id, product_id, price, currency, collected_at, source_url)' \
             "SELECT (SELECT id FROM stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1)," \
-            '       d.product_id,' \
-            "       d.price_num, 'EUR', now(), d.source_url" \
+            "       d.product_id, d.price_num, 'EUR', now(), d.source_url" \
             'FROM dedup d' \
             'ON CONFLICT (product_id, store_id) DO UPDATE SET' \
             '  price        = EXCLUDED.price,' \
@@ -192,12 +185,24 @@ jobs:
             '  collected_at = EXCLUDED.collected_at,' \
             '  source_url   = EXCLUDED.source_url;' \
             '' \
-            '-- 3) aliases' \
+            '-- candidates: always provide a NOT-NULL price (default 0.00)' \
+            'INSERT INTO selver_candidates (ext_id, ean_norm, ean_raw, name, size_text, price, currency, last_seen)' \
+            "SELECT ext_id, ean_norm, ean_raw, name, size_text, COALESCE(price_num, 0.00), 'EUR', now()" \
+            'FROM parsed_probe' \
+            'ON CONFLICT (ext_id) DO UPDATE SET' \
+            '  price         = COALESCE(EXCLUDED.price, selver_candidates.price),' \
+            '  currency      = COALESCE(EXCLUDED.currency, selver_candidates.currency),' \
+            '  name          = COALESCE(EXCLUDED.name, selver_candidates.name),' \
+            '  size_text     = COALESCE(EXCLUDED.size_text, selver_candidates.size_text),' \
+            '  ean_raw       = COALESCE(EXCLUDED.ean_raw, selver_candidates.ean_raw),' \
+            '  last_seen     = now();' \
+            '' \
+            '-- aliases (optional, when name present)' \
             'INSERT INTO product_aliases (product_id, alias)' \
-            'SELECT pe.product_id, left(btrim(sp.name), 200)' \
-            'FROM staging_selver_probe sp' \
-            "JOIN product_eans pe ON pe.ean_norm = regexp_replace(sp.ean,'\\D','','g')" \
-            "WHERE sp.name IS NOT NULL AND btrim(sp.name) <> ''" \
+            'SELECT pe.product_id, left(btrim(pp.name), 200)' \
+            'FROM parsed_probe pp' \
+            "JOIN product_eans pe ON pe.ean_norm = pp.ean_norm" \
+            "WHERE pp.name IS NOT NULL AND btrim(pp.name) <> ''" \
             'ON CONFLICT (product_id, alias) DO NOTHING;' \
             '' \
             '-- summary' \
