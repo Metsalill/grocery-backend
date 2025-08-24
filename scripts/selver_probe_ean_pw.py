@@ -1,83 +1,139 @@
 # scripts/selver_probe_ean_pw.py
 # Usage:
 #   python scripts/selver_probe_ean_pw.py data/prisma_eans_to_probe.csv data/selver_probe.csv 0.4
+# Input CSV must have a header with a column named "ean".
+# Output CSV columns: ext_id,url,ean,name,price_raw,size_text
+
 from __future__ import annotations
 import csv, json, re, sys, time
 from pathlib import Path
 from typing import Optional, Tuple
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 
-EAN_RE = re.compile(r"\b(\d{8,14})\b")
+EAN_DIGITS = re.compile(r"\d{8,14}")
+JSON_EAN = re.compile(r'"(?:gtin14|gtin13|gtin|ean|barcode|sku)"\s*:\s*"(?P<d>\d{8,14})"', re.I)
+LABEL_EAN = re.compile(r"\b(ribakood|ean|barcode)\b", re.I)
 
-def norm_ean(s: str | None) -> Optional[str]:
+def norm_ean(s: Optional[str]) -> Optional[str]:
     if not s:
         return None
-    digits = re.sub(r"\D", "", s)
-    return digits or None
+    d = re.sub(r"\D", "", s)
+    return d or None
 
-def _pick_one(x):
-    if isinstance(x, list) and x:
-        return x[0]
-    return x
+def _first_text(page, selectors: list[str], timeout_ms: int = 2000) -> Optional[str]:
+    for sel in selectors:
+        try:
+            t = page.locator(sel).first.inner_text(timeout=timeout_ms)
+            if t:
+                t = t.strip()
+                if t:
+                    return t
+        except Exception:
+            pass
+    return None
 
-def _find_gtin_anywhere(d: dict) -> Optional[str]:
-    # Try common places and then walk additionalProperty
-    for key in ("gtin14", "gtin13", "gtin", "sku", "mpn", "identifier"):
-        v = d.get(key)
-        v = (v if not isinstance(v, list) else (v[0] if v else None))
-        e = norm_ean(v if isinstance(v, str) else None)
-        if e:
-            return e
-    ap = d.get("additionalProperty") or d.get("additionalProperties")
-    if isinstance(ap, list):
-        for item in ap:
-            if not isinstance(item, dict): continue
-            name = (item.get("name") or "").lower()
-            val  = item.get("value") or item.get("propertyID")
-            if "ean" in name or "gtin" in name:
-                e = norm_ean(str(val))
-                if e:
-                    return e
+def _meta_content(page, selectors: list[str]) -> Optional[str]:
+    for sel in selectors:
+        try:
+            v = page.locator(sel).first.get_attribute("content", timeout=1000)
+            if v:
+                v = v.strip()
+                if v:
+                    return v
+        except Exception:
+            pass
     return None
 
 def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    """Return (name, price_raw, ean_found) from JSON-LD if present."""
     try:
         data = json.loads(text.strip())
     except Exception:
         return None, None, None
-    data = _pick_one(data)
+
+    def pick(d):
+        if isinstance(d, list) and d:
+            return d[0]
+        return d
+
+    data = pick(data)
     if not isinstance(data, dict):
         return None, None, None
-    # Find a Product object anywhere
-    node = None
-    stack = [data]
-    while stack:
-        cur = stack.pop()
-        if isinstance(cur, dict):
-            if (cur.get("@type") == "Product") or (isinstance(cur.get("@type"), list) and "Product" in cur.get("@type")):
-                node = cur; break
-            for v in cur.values():
-                if isinstance(v, (dict, list)): stack.append(v)
-        elif isinstance(cur, list):
-            stack.extend(cur)
-    if not node:
+
+    # Try to locate a Product object anywhere in the structure
+    if (data.get("@type") or "").lower() != "product":
+        for v in data.values():
+            p = pick(v)
+            if isinstance(p, dict) and (p.get("@type") or "").lower() == "product":
+                data = p
+                break
+
+    if (data.get("@type") or "").lower() != "product":
         return None, None, None
-    name = (node.get("name") or "").strip() or None
+
+    name = (data.get("name") or "").strip() or None
+    ean = norm_ean(
+        data.get("gtin14") or data.get("gtin13") or data.get("gtin") or data.get("ean") or data.get("sku")
+    )
     price = None
-    offers = node.get("offers")
-    offers = _pick_one(offers)
+    offers = data.get("offers")
+    if isinstance(offers, list) and offers:
+        offers = offers[0]
     if isinstance(offers, dict):
         price = offers.get("price") or (offers.get("priceSpecification") or {}).get("price")
-    gtin = _find_gtin_anywhere(node)
-    return name, (str(price).strip() if price is not None else None), gtin
 
-def _page_contains_ean_html(page, wanted: str) -> bool:
+    return name, (str(price).strip() if price is not None else None), ean
+
+def extract_ean_on_pdp(page) -> Optional[str]:
+    """Find an EAN on a Selver PDP using multiple strategies."""
+    # 1) JSON-LD
+    try:
+        scripts = page.locator("script[type='application/ld+json']")
+        count = scripts.count()
+        for i in range(count):
+            try:
+                n, p, g = parse_ld_product(scripts.nth(i).inner_text())
+                if g:
+                    return norm_ean(g)
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+    # 2) meta itemprop
+    meta_val = _meta_content(page, [
+        "meta[itemprop='gtin13']",
+        "meta[itemprop='gtin']",
+        "meta[itemprop='sku']",
+    ])
+    if meta_val:
+        d = norm_ean(meta_val)
+        if d:
+            return d
+
+    # 3) any script JSON blob containing gtin/ean/barcode
     try:
         html = page.content()
-        # look for exact digits anywhere in HTML (covers JSON-LD, dataLayer, hidden attrs)
-        return bool(re.search(rf"\b{re.escape(wanted)}\b", html))
+        m = JSON_EAN.search(html or "")
+        if m:
+            return m.group("d")
     except Exception:
-        return False
+        pass
+
+    # 4) visible text near label “Ribakood / EAN / Barcode”
+    try:
+        # grab a chunk of body text; cheap heuristic
+        body_text = page.locator("body").inner_text(timeout=2000)
+        if LABEL_EAN.search(body_text or ""):
+            nums = EAN_DIGITS.findall(body_text or "")
+            # prefer 13/14 digit hits
+            nums = sorted(nums, key=len, reverse=True)
+            if nums:
+                return nums[0]
+    except Exception:
+        pass
+
+    return None
 
 def probe_one(page, ean: str, delay: float) -> Optional[dict]:
     wanted = norm_ean(ean)
@@ -87,91 +143,56 @@ def probe_one(page, ean: str, delay: float) -> Optional[dict]:
     search_url = f"https://www.selver.ee/search?q={wanted}"
     try:
         page.goto(search_url, wait_until="domcontentloaded", timeout=30000)
+        page.wait_for_load_state("networkidle", timeout=10000)
     except PWTimeout:
         return None
 
-    # Click first product card if still on search
+    # If search didn’t land on PDP, click first product
     if "/toode/" not in page.url:
         try:
             link = page.locator("a[href*='/toode/']").first
-            if link and link.count() > 0:
+            if link and link.is_visible():
                 href = link.get_attribute("href")
                 if href:
                     if not href.startswith("http"):
                         href = "https://www.selver.ee" + href
                     page.goto(href, wait_until="domcontentloaded", timeout=30000)
+                    page.wait_for_load_state("networkidle", timeout=10000)
         except Exception:
             pass
 
     if "/toode/" not in page.url:
         return None
 
-    # Try JSON-LD
-    name = price_raw = found_ean = None
-    try:
-        scripts = page.locator("script[type='application/ld+json']")
-        n_scripts = scripts.count()
-        for i in range(n_scripts):
-            text = scripts.nth(i).inner_text()
-            n, p, g = parse_ld_product(text)
-            name = name or n
-            price_raw = price_raw or p
-            found_ean = found_ean or g
-    except Exception:
-        pass
+    # Extract name/price with robust fallbacks
+    name = _first_text(page, ["h1", "[data-testid='product-title']"]) \
+        or _first_text(page, ["meta[property='og:title']"], 1000)
+    if name:
+        name = name.strip()
 
-    # Meta/itemprop/data-* fallbacks for EAN
-    if not found_ean:
-        for sel in [
-            "meta[itemprop='gtin13']",
-            "[itemprop='gtin13']",
-            "[data-gtin]",
-            "[data-product-gtin]"
-        ]:
-            try:
-                el = page.locator(sel).first
-                if el and el.count() > 0:
-                    raw = el.get_attribute("content") or el.get_attribute("value") or el.inner_text()
-                    e = norm_ean(raw or "")
-                    if e:
-                        found_ean = e
-                        break
-            except Exception:
-                pass
+    price_raw = _first_text(page, [
+        "[data-testid='product-price']",
+        "[itemprop='price']",
+        ".price, .product-price, .product__price"
+    ]) or _meta_content(page, ["meta[itemprop='price']"])
 
-    # Visible fallbacks
-    if not name:
-        try:
-            name = (page.locator("h1").first.inner_text(timeout=2000) or "").strip() or None
-        except Exception:
-            pass
-    if not price_raw:
-        for sel in ["[data-testid='product-price']", ".price, .product-price, .product__price"]:
-            try:
-                txt = page.locator(sel).first.inner_text(timeout=1500)
-                if txt:
-                    price_raw = txt.strip()
-                    break
-            except Exception:
-                pass
+    found_ean = extract_ean_on_pdp(page)
 
-    # Last resort: if HTML contains the requested digits, accept as matched EAN
-    if not found_ean and _page_contains_ean_html(page, wanted):
-        found_ean = wanted
-
-    # Guards
-    if not name or name.strip().lower() in {"selver", "e-selver"} or len(name.strip()) < 3:
+    # Guards: real name (not 'Selver'), EAN must match search
+    if not name or name.lower() in {"selver", "e-selver"} or len(name) < 3:
         return None
     if norm_ean(found_ean) != wanted:
         return None
 
-    time.sleep(delay)  # be polite
+    # small pacing so we don’t hammer
+    if delay > 0:
+        time.sleep(delay)
 
     return {
         "ext_id": page.url,
         "url": page.url,
         "ean": wanted,
-        "name": name.strip(),
+        "name": name,
         "price_raw": price_raw or "",
         "size_text": "",
     }
@@ -179,15 +200,19 @@ def probe_one(page, ean: str, delay: float) -> Optional[dict]:
 def main(in_csv: str, out_csv: str, delay: float):
     in_path, out_path = Path(in_csv), Path(out_csv)
     out_path.parent.mkdir(parents=True, exist_ok=True)
+
     with in_path.open("r", newline="", encoding="utf-8") as fin, \
          out_path.open("w", newline="", encoding="utf-8") as fout, \
          sync_playwright() as p:
+
         reader = csv.DictReader(fin)
         writer = csv.DictWriter(fout, fieldnames=["ext_id","url","ean","name","price_raw","size_text"])
         writer.writeheader()
+
         browser = p.chromium.launch(headless=True)
         context = browser.new_context()
         page = context.new_page()
+
         for row in reader:
             ean = (row.get("ean") or "").strip()
             if not ean:
@@ -197,8 +222,9 @@ def main(in_csv: str, out_csv: str, delay: float):
                 if info:
                     writer.writerow(info)
             except Exception:
-                # skip transient issues
+                # be resilient – skip any transient errors
                 pass
+
         context.close()
         browser.close()
 
