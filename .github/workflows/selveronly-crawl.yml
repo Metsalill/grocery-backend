@@ -162,13 +162,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: selver-crawl-shard-${{ matrix.shard }}-${{ github.run_id }}
-          path: |
-            data/selver.csv
-            data/selver_run.log
-            data/selver_run.err
-            data/selver_debug/**/*.png
-          if-no-files-found: warn
-          retention-days: 7
+        path: |
+          data/selver.csv
+          data/selver_run.log
+          data/selver_run.err
+          data/selver_debug/**/*.png
+        if-no-files-found: warn
+        retention-days: 7
 
       - name: Prepare DB (staging & helper tables)
         shell: bash
@@ -183,7 +183,8 @@ jobs:
             name          text NOT NULL,
             ean_raw       text,
             sku_raw       text,
-            ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '\D','','g')) STORED,
+            -- SAFE: strip all non-digits (no backslashes)
+            ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '[^0-9]', '', 'g')) STORED,
             size_text     text,
             price         numeric(12,2) NOT NULL,
             currency      text DEFAULT 'EUR',
@@ -246,7 +247,7 @@ jobs:
           END$$;
           SQL
 
-      # Shard-safe load: TEMP table + single psql session (no YAML heredoc)
+      # Shard-safe load: TEMP table + single psql session (YAML-safe)
       - name: Load CSV, upsert (TEMP staging, shard-safe)
         shell: bash
         run: |
@@ -263,7 +264,7 @@ jobs:
             exit 0
           fi
 
-          # Build the SQL file via printf (YAML-safe; no heredocs)
+          # Build the SQL file via printf (no backslashes in regex to avoid psql meta-commands)
           printf '%s\n' \
             '\set ON_ERROR_STOP on' \
             'BEGIN;' \
@@ -274,7 +275,7 @@ jobs:
             '  name          text NOT NULL,' \
             '  ean_raw       text,' \
             '  sku_raw       text,' \
-            "  ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '\'"\\\D"\'', '\'''\'' ,'\''g'\'')) STORED," \
+            "  ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw, '"'"''"'"'), '"'"'[^0-9]'"'"', '"'"''"'"', '"'"'g'"'"')) STORED," \
             '  size_text     text,' \
             '  price         numeric(12,2) NOT NULL,' \
             "  currency      text DEFAULT 'EUR'," \
