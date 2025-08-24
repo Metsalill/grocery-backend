@@ -4,10 +4,12 @@
 """
 Selver category crawler → CSV (staging_selver_products)
 
-Key hardening in this patch:
-- Strict PDP domain/path: only accept https://www.selver.ee/e/...
-- Filter non-product pages early (both when harvesting links and before writing a row).
-- Skip rows with zero/invalid price.
+Changes in this patch:
+- Accept BOTH /e/... and non-/e/ product URLs like https://www.selver.ee/brokoli-harmavili-400-g
+- Product URL detector is slug-based (last path segment looks like a product slug).
+- Removed the canonical '/e/' guard in PDP extraction.
+- Click-through success check no longer requires '/e/' in the URL.
+- Still filters obvious non-product pages and drops zero-price rows.
 
 CSV columns: ext_id, name, ean_raw, sku_raw, size_text, price, currency, category_path, category_leaf
 """
@@ -136,24 +138,22 @@ def _in_allowlist(path: str) -> bool:
     p = (path or "/").rstrip("/")
     return any(p == root or p.startswith(root + "/") for root in STRICT_ALLOWLIST)
 
-# ---- STRICT product URL check: require /e/ path on selver.ee
+# ---- Product URL check: allow both /e/... and root slugs like /brokoli-harmavili-400-g
 def _is_selver_product_like(url: str) -> bool:
     u = urlparse(url)
     host = (u.netloc or urlparse(BASE).netloc).lower()
     if host not in ALLOWED_HOSTS:
         return False
     path = _strip_eselver_prefix((u.path or "/").lower())
-    if not path.startswith("/e/"):  # << hard rule: must be /e/… product
-        return False
     if path.startswith("/ru/"):
         return False
     if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS):
         return False
     if any(kw in path for kw in NON_PRODUCT_KEYWORDS):
         return False
-    # Accept typical product slugs like /e/<category>/.../<product-slug>
+    # Typical PDP slug at the end
     last = path.rstrip("/").rsplit("/", 1)[-1]
-    return bool(re.fullmatch(r"[a-z0-9-]{3,}", last))
+    return bool(re.fullmatch(r"[a-z0-9-]{3,}", last)) and "-" in last
 
 def _is_category_like_path(path: str) -> bool:
     p = _strip_eselver_prefix((path or "/").lower())
@@ -348,7 +348,6 @@ def _extract_product_hrefs(page) -> List[str]:
     links = []
     for h in hrefs:
         u = _clean_abs(h)
-        # STRICT: only PDPs under /e/...
         if u and _is_selver_product_like(u):
             links.append(u)
     return list(dict.fromkeys(links))
@@ -445,7 +444,7 @@ def extract_ean_and_sku(page) -> tuple[str, str]:
         blocks = jsonld_all(page)
         prod = jsonld_pick_product(blocks)
         if prod:
-            ean = re.sub(r"\D+", "", str(prod.get("gtin13") or prod.get("gtin") or ""))
+            ean = _digits(str(prod.get("gtin13") or prod.get("gtin") or ""))
             sku = normspace(str(prod.get("sku") or ""))
             if _valid_ean13(ean):
                 return ean, sku
@@ -469,7 +468,7 @@ def extract_ean_and_sku(page) -> tuple[str, str]:
         }
         """)
         if got:
-            ean = ean or re.sub(r"\D+", "", got.get("gtin13") or got.get("gtin") or "")
+            ean = ean or _digits(got.get("gtin13") or got.get("gtin") or "")
             sku = sku or normspace(got.get("sku") or "")
             if _valid_ean13(ean):
                 return ean, sku
@@ -491,7 +490,7 @@ def extract_ean_and_sku(page) -> tuple[str, str]:
 
     # Clean/validate final EAN
     if not _valid_ean13(ean):
-        e13 = re.sub(r"\D+", "", ean or "")
+        e13 = _digits(ean or "")
         ean = e13 if _valid_ean13(e13) else ""
 
     return ean, sku
@@ -518,10 +517,6 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
     if not ext_id:
         return None
 
-    # STRICT: keep only real product URLs under /e/ …
-    if not re.match(r"^https?://(?:www\.)?selver\.ee/e/.*", ext_id):
-        return None
-
     blocks = jsonld_all(page)
     prod_ld = jsonld_pick_product(blocks)
     crumbs_ld = jsonld_pick_breadcrumbs(blocks)
@@ -539,7 +534,7 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
     # EAN & SKU
     ean, sku = "", ""
     if prod_ld:
-        ean = re.sub(r"\D+", "", str(prod_ld.get("gtin13") or prod_ld.get("gtin") or "")) or ""
+        ean = _digits(str(prod_ld.get("gtin13") or prod_ld.get("gtin") or "")) or ""
         sku = normspace(str(prod_ld.get("sku") or ""))
     if not (ean and sku):
         e2, s2 = extract_ean_and_sku(page)
@@ -644,7 +639,8 @@ def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
                 a.click(timeout=5000)
                 for _ in range(24):
                     up = urlparse(page.url).path.lower()
-                    if "/e/" in up:
+                    # consider we landed if product-like path
+                    if _is_selver_product_like(urljoin(BASE, up)):
                         break
                     if page.locator("h1").count() > 0:
                         break
@@ -703,7 +699,6 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
                 _wait_pdp_ready(page)
                 row = _extract_row_from_pdp(page, href)
                 if row:
-                    # final guard: drop rows with zero/invalid price is already in _extract_row_from_pdp
                     ext_id = row["ext_id"]
                     if ext_id not in seen_ext_ids:
                         writer.writerow(row)
