@@ -66,7 +66,7 @@ jobs:
       - name: Prepare workspace
         run: mkdir -p data
 
-      # Rotate categories; shard 0 processes SLOT, shard 1 processes SLOT+1
+      # Rotate categories; shard 0 processes SLOT, shard 1 processes SLOT+1 (with fallback if tiny)
       - name: Build rotating category slice (90-min slots; shard ${{ matrix.shard }})
         shell: bash
         run: |
@@ -80,9 +80,19 @@ jobs:
           CHUNK=$(( (TOTAL + SLOTS - 1) / SLOTS ))  # ceil
           START=$(( SLOT*CHUNK + 1 ))
           END=$(( START + CHUNK - 1 ))
-          if [ "$END" -gt "$TOTAL" ]; then END=$TOTAL; fi
+          [ "$END" -gt "$TOTAL" ] && END=$TOTAL
 
           sed -n "${START},${END}p" data/selver_categories_all.txt > data/selver_categories.txt
+
+          # Fallback: if slice is too small, append the next chunk so we always have work
+          SLICE_CT=$(wc -l < data/selver_categories.txt)
+          if [ "$SLICE_CT" -lt 5 ]; then
+            NEXT_START=$(( END + 1 ))
+            NEXT_END=$(( NEXT_START + CHUNK - 1 ))
+            if [ "$NEXT_START" -le "$TOTAL" ]; then
+              sed -n "${NEXT_START},${NEXT_END}p" data/selver_categories_all.txt >> data/selver_categories.txt
+            fi
+          fi
 
           echo "TOTAL categories: $TOTAL"
           echo "BASE_SLOT: $BASE_SLOT ; SHARD: ${SHARD} ; EFFECTIVE SLOT: $SLOT / $SLOTS"
@@ -111,9 +121,9 @@ jobs:
 
           set +e
           set +o pipefail
-          # Give crawler ~50 minutes of the 60-minute job window
+          # Give crawler ~50 minutes of the 60-minute job window; split stderr to a separate file
           stdbuf -oL -eL timeout -k 60s 50m python -u scripts/selver_crawl_categories_pw.py \
-            2>&1 | tee data/selver_run.log
+            > >(tee data/selver_run.log) 2>data/selver_run.err
           status=${PIPESTATUS[0]}
           set -o pipefail
           set -e
@@ -124,6 +134,7 @@ jobs:
           ls -lah data || true
           [ -f data/selver.csv ] && { echo "CSV size:"; wc -l data/selver.csv; du -h data/selver.csv; } || echo "CSV not found"
           [ -f data/selver_run.log ] && { echo "Log size:"; du -h data/selver_run.log; } || echo "Log not found"
+          [ -s data/selver_run.err ] && { echo "---- stderr tail ----"; tail -n 120 data/selver_run.err; } || true
           echo "::endgroup::"
 
           if [ "${status}" -eq 124 ]; then
@@ -177,6 +188,7 @@ jobs:
           path: |
             data/selver.csv
             data/selver_run.log
+            data/selver_run.err
             data/selver_debug/**/*.png
           if-no-files-found: warn
           retention-days: 7
@@ -294,6 +306,13 @@ jobs:
             exit 0
           fi
 
+          # Guard: skip obviously bad/tiny runs (header + <=5 lines)
+          ROW_CT=$( (wc -l < data/selver.csv) 2>/dev/null || echo 0 )
+          if [ "$ROW_CT" -le 6 ]; then
+            echo "::warning::Too few rows in CSV ($ROW_CT). Skipping DB load this run."
+            exit 0
+          fi
+
           # Adjust columns here if your CSV changes
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c \
             "\copy public.staging_selver_products (ext_id,name,ean_raw,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER"
@@ -315,12 +334,13 @@ jobs:
           ),
           filtered AS (
             SELECT st.* FROM public.staging_selver_products st
-            WHERE NOT EXISTS (
-              SELECT 1 FROM banned
-              WHERE lower(COALESCE(st.category_path,'') || ' ' ||
-                          COALESCE(st.category_leaf,'') || ' ' ||
-                          COALESCE(st.name,'')) LIKE '%' || banned.kw || '%'
-            )
+            WHERE st.ext_id LIKE 'https://www.selver.ee/e/%'
+              AND NOT EXISTS (
+                SELECT 1 FROM banned
+                WHERE lower(COALESCE(st.category_path,'') || ' ' ||
+                            COALESCE(st.category_leaf,'') || ' ' ||
+                            COALESCE(st.name,'')) LIKE '%' || banned.kw || '%'
+              )
           ),
           joined AS (
             SELECT
@@ -341,18 +361,20 @@ jobs:
                      price ASC,
                      ext_id DESC
           )
-          INSERT INTO public.prices (store_id, product_id, price, currency, collected_at)
+          INSERT INTO public.prices (store_id, product_id, price, currency, collected_at, source_url)
           SELECT
             (SELECT id FROM public.stores WHERE name='Selver e-pood' AND chain='Selver'),
             p.product_id,
             p.price,
             p.currency,
-            NOW()
+            NOW(),
+            p.ext_id
           FROM pick_one p
           ON CONFLICT (product_id, store_id) DO UPDATE
             SET price        = EXCLUDED.price,
                 currency     = EXCLUDED.currency,
-                collected_at = EXCLUDED.collected_at;
+                collected_at = EXCLUDED.collected_at,
+                source_url   = EXCLUDED.source_url;
           SQL
 
           # Store unmatched rows for triage
@@ -372,12 +394,13 @@ jobs:
           ),
           filtered AS (
             SELECT st.* FROM public.staging_selver_products st
-            WHERE NOT EXISTS (
-              SELECT 1 FROM banned
-              WHERE lower(COALESCE(st.category_path,'') || ' ' ||
-                          COALESCE(st.category_leaf,'') || ' ' ||
-                          COALESCE(st.name,'')) LIKE '%' || banned.kw || '%'
-            )
+            WHERE st.ext_id LIKE 'https://www.selver.ee/e/%'
+              AND NOT EXISTS (
+                SELECT 1 FROM banned
+                WHERE lower(COALESCE(st.category_path,'') || ' ' ||
+                            COALESCE(st.category_leaf,'') || ' ' ||
+                            COALESCE(st.name,'')) LIKE '%' || banned.kw || '%'
+              )
           )
           INSERT INTO public.selver_candidates
             (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, price, currency, category_path, category_leaf)
