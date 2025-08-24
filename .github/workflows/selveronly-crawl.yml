@@ -60,6 +60,30 @@ jobs:
       - name: Prepare workspace
         run: mkdir -p data
 
+      # NEW: rotate which categories are crawled each 90-minute slot (16 slices per day)
+      - name: Build rotating category slice (90-min slots)
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Expect the repo to contain data/selver_categories.txt (full list).
+          # Keep a copy of the full list for reference.
+          cp -f data/selver_categories.txt data/selver_categories_all.txt
+
+          TOTAL=$(wc -l < data/selver_categories_all.txt)
+          SLOTS=16  # 24h / 1.5h
+          SLOT=$(( ( $(date -u +%s) / 60 / 90 ) % SLOTS ))
+          CHUNK=$(( (TOTAL + SLOTS - 1) / SLOTS ))  # ceil
+          START=$(( SLOT*CHUNK + 1 ))
+          END=$(( START + CHUNK - 1 ))
+          if [ "$END" -gt "$TOTAL" ]; then END=$TOTAL; fi
+
+          sed -n "${START},${END}p" data/selver_categories_all.txt > data/selver_categories.txt
+
+          echo "TOTAL categories: $TOTAL"
+          echo "SLOT: $SLOT / $SLOTS   lines ${START}..${END}"
+          echo "Slice line count: $(wc -l < data/selver_categories.txt)"
+          echo "Slice preview:"; head -n 5 data/selver_categories.txt || true
+
       - name: Crawl Selver categories (Playwright)
         shell: bash
         env:
@@ -82,7 +106,8 @@ jobs:
 
           set +e
           set +o pipefail
-          stdbuf -oL -eL timeout -k 60s 40m python -u scripts/selver_crawl_categories_pw.py \
+          # give crawler up to ~50 minutes within the 60-minute job window
+          stdbuf -oL -eL timeout -k 60s 50m python -u scripts/selver_crawl_categories_pw.py \
             2>&1 | tee data/selver_run.log
           status=${PIPESTATUS[0]}
           set -o pipefail
@@ -97,7 +122,7 @@ jobs:
           echo "::endgroup::"
 
           if [ "${status}" -eq 124 ]; then
-            echo "::warning::Crawler hit the time budget (timeout 40m). Continuing with partial results."
+            echo "::warning::Crawler hit the time budget (timeout 50m). Continuing with partial results."
           elif [ "${status}" -ne 0 ]; then
             echo "::warning::Crawler exited non-zero (${status}); continuing"
           fi
