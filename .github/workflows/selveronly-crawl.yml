@@ -66,38 +66,26 @@ jobs:
       - name: Prepare workspace
         run: mkdir -p data
 
-      # Rotate categories; shard 0 processes SLOT, shard 1 processes SLOT+1 (with fallback if tiny)
-      - name: Build rotating category slice (90-min slots; shard ${{ matrix.shard }})
+      # NEW: simple modulo sharding — each shard processes ~half of all categories every run
+      - name: Build shard slice (cover all categories this run; shard ${{ matrix.shard }})
         shell: bash
+        env:
+          SHARDS: 2
         run: |
           set -euo pipefail
           cp -f data/selver_categories.txt data/selver_categories_all.txt
 
           TOTAL=$(wc -l < data/selver_categories_all.txt)
-          SLOTS=16  # 24h / 1.5h
-          BASE_SLOT=$(( ( $(date -u +%s) / 60 / 90 ) % SLOTS ))
-          SLOT=$(( (BASE_SLOT + ${SHARD}) % SLOTS ))
-          CHUNK=$(( (TOTAL + SLOTS - 1) / SLOTS ))  # ceil
-          START=$(( SLOT*CHUNK + 1 ))
-          END=$(( START + CHUNK - 1 ))
-          [ "$END" -gt "$TOTAL" ] && END=$TOTAL
+          : "${SHARD:?SHARD env is required}"   # 0..SHARDS-1
 
-          sed -n "${START},${END}p" data/selver_categories_all.txt > data/selver_categories.txt
-
-          # Fallback: if slice is too small, append the next chunk so we always have work
-          SLICE_CT=$(wc -l < data/selver_categories.txt)
-          if [ "$SLICE_CT" -lt 5 ]; then
-            NEXT_START=$(( END + 1 ))
-            NEXT_END=$(( NEXT_START + CHUNK - 1 ))
-            if [ "$NEXT_START" -le "$TOTAL" ]; then
-              sed -n "${NEXT_START},${NEXT_END}p" data/selver_categories_all.txt >> data/selver_categories.txt
-            fi
-          fi
+          # Take lines where (NR-1) % SHARDS == SHARD
+          awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
+            data/selver_categories_all.txt > data/selver_categories.txt
 
           echo "TOTAL categories: $TOTAL"
-          echo "BASE_SLOT: $BASE_SLOT ; SHARD: ${SHARD} ; EFFECTIVE SLOT: $SLOT / $SLOTS"
-          echo "Slice lines: ${START}..${END}  (count: $(wc -l < data/selver_categories.txt))"
-          head -n 5 data/selver_categories.txt || true
+          echo "Sharding: SHARD=$SHARD / SHARDS=$SHARDS"
+          echo "Slice count: $(wc -l < data/selver_categories.txt)"
+          head -n 8 data/selver_categories.txt || true
 
       - name: Crawl Selver categories (Playwright)
         shell: bash
@@ -240,12 +228,11 @@ jobs:
 
           COMMIT;
 
-          -- Drop any single-column unique on prices(product_id) and any duplicate pair uniques
+          -- Fix/normalize unique constraints and deduplicate
           DO $$
           DECLARE
             con_name text;
           BEGIN
-            -- Drop unique constraints that are ONLY on (product_id)
             FOR con_name IN
               SELECT c.conname
               FROM pg_constraint c
@@ -259,7 +246,6 @@ jobs:
               EXECUTE format('ALTER TABLE public.prices DROP CONSTRAINT %I', con_name);
             END LOOP;
 
-            -- Deduplicate rows on (store_id, product_id) before enforcing unique
             WITH ranked AS (
               SELECT id,
                      ROW_NUMBER() OVER (PARTITION BY store_id, product_id
@@ -270,7 +256,6 @@ jobs:
             USING ranked r
             WHERE p.id = r.id AND r.rn > 1;
 
-            -- Ensure there is SOME unique on exactly (product_id, store_id), regardless of name or order.
             IF NOT EXISTS (
               SELECT 1
               FROM pg_constraint c
@@ -313,11 +298,11 @@ jobs:
             exit 0
           fi
 
-          # Adjust columns here if your CSV changes
+          # Load to staging
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c \
             "\copy public.staging_selver_products (ext_id,name,ean_raw,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER"
 
-          # Insert/Update prices using composite key (product_id, store_id)
+          # Upsert prices (no banned filter → all categories allowed)
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           WITH filtered AS (
             SELECT st.* FROM public.staging_selver_products st
