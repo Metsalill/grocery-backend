@@ -65,20 +65,46 @@ def ensure_schema(conn):
         cur.execute("ALTER TABLE prices ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'EUR';")
         cur.execute("ALTER TABLE prices ADD COLUMN IF NOT EXISTS source_url TEXT;")
 
-        # ---- Clean legacy single-column unique and enforce composite unique ----
-        # Drop old unique index/constraint on (product_id) if any.
-        cur.execute("DROP INDEX IF EXISTS uq_prices_product;")
+        # ---- Clean ANY legacy single-column unique and enforce composite unique ----
+        # (1) Drop any UNIQUE constraint that is only on product_id
+        # (2) Drop any UNIQUE index that is only on product_id (any name)
         cur.execute("""
-            DO $$
-            BEGIN
-              IF EXISTS (
-                SELECT 1 FROM pg_constraint
-                WHERE conrelid = 'public.prices'::regclass
-                  AND conname  = 'uq_prices_product'
-              ) THEN
-                EXECUTE 'ALTER TABLE public.prices DROP CONSTRAINT uq_prices_product';
-              END IF;
-            END$$;
+        DO $$
+        DECLARE
+          con_name text;
+          idx_name text;
+        BEGIN
+          -- 1) drop constraints only on (product_id)
+          FOR con_name IN
+            SELECT c.conname
+            FROM pg_constraint c
+            WHERE c.conrelid = 'public.prices'::regclass
+              AND c.contype  = 'u'
+              AND c.conkey   = ARRAY[
+                (SELECT attnum FROM pg_attribute
+                 WHERE attrelid='public.prices'::regclass AND attname='product_id')
+              ]
+          LOOP
+            EXECUTE format('ALTER TABLE public.prices DROP CONSTRAINT %I', con_name);
+          END LOOP;
+
+          -- 2) drop UNIQUE indexes that cover only (product_id)
+          FOR idx_name IN
+            SELECT ic.relname
+            FROM pg_index i
+            JOIN pg_class t  ON t.oid = i.indrelid AND t.relname = 'prices'
+            JOIN pg_namespace n ON n.oid = t.relnamespace AND n.nspname='public'
+            JOIN pg_class ic ON ic.oid = i.indexrelid
+            WHERE i.indisunique
+              AND i.indnatts = 1
+              AND i.indkey[1] = (
+                SELECT attnum FROM pg_attribute
+                WHERE attrelid=t.oid AND attname='product_id'
+              )
+          LOOP
+            EXECUTE format('DROP INDEX IF EXISTS %I', idx_name);
+          END LOOP;
+        END$$;
         """)
 
         # De-dup by (product_id, store_id) keeping newest before adding unique
@@ -277,7 +303,7 @@ def main():
 
             price_text = pick_price_text(page)
             price = parse_price(price_text)
-            if price is None:
+            if price is None or price <= 0:
                 skipped += 1
                 continue
 
