@@ -122,7 +122,7 @@ jobs:
             data/selver_probe.csv \
             "$DELAY"
 
-      # Single-session psql: TEMP table + copy + parsed + prices + candidates (price default 0.00)
+      # Single-session psql: TEMP table + copy + parsed + prices + candidates + aliases (conflict-safe)
       - name: Upsert probe results (candidates + prices + aliases)
         if: steps.has_probe.outputs.has == 'true'
         shell: bash
@@ -197,13 +197,24 @@ jobs:
             '  ean_raw       = COALESCE(EXCLUDED.ean_raw, selver_candidates.ean_raw),' \
             '  last_seen     = now();' \
             '' \
-            '-- aliases (optional, when name present)' \
+            '-- 3) aliases: filter junk + dedup; avoid global unique (lower(alias)) conflicts' \
+            'WITH cand AS (' \
+            '  SELECT pe.product_id,' \
+            '         left(btrim(pp.name), 200) AS alias,' \
+            '         pp.ext_id' \
+            '  FROM parsed_probe pp' \
+            '  JOIN product_eans pe ON pe.ean_norm = pp.ean_norm' \
+            '  WHERE pp.name IS NOT NULL' \
+            "    AND length(btrim(pp.name)) >= 3" \
+            "    AND lower(btrim(pp.name)) NOT IN ('selver','e-selver','prisma','prismamarket','prismamarket.ee')" \
+            "    AND (pp.ext_id IS NULL OR position('/search' in lower(pp.ext_id)) = 0)" \
+            '),' \
+            'dedup AS (' \
+            '  SELECT DISTINCT product_id, alias FROM cand' \
+            ')' \
             'INSERT INTO product_aliases (product_id, alias)' \
-            'SELECT pe.product_id, left(btrim(pp.name), 200)' \
-            'FROM parsed_probe pp' \
-            'JOIN product_eans pe ON pe.ean_norm = pp.ean_norm' \
-            "WHERE pp.name IS NOT NULL AND btrim(pp.name) <> ''" \
-            'ON CONFLICT (product_id, alias) DO NOTHING;' \
+            'SELECT product_id, alias FROM dedup' \
+            'ON CONFLICT ON CONSTRAINT uq_product_alias_lower DO NOTHING;' \
             '' \
             '-- summary' \
             'SELECT' \
