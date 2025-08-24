@@ -61,14 +61,14 @@ def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str], Optional[
         return None, None, None
 
     # Try to locate a Product object anywhere in the structure
-    if (data.get("@type") or "").lower() != "product":
+    if (str(data.get("@type") or "")).lower() != "product":
         for v in data.values():
             p = pick(v)
-            if isinstance(p, dict) and (p.get("@type") or "").lower() == "product":
+            if isinstance(p, dict) and (str(p.get("@type") or "")).lower() == "product":
                 data = p
                 break
 
-    if (data.get("@type") or "").lower() != "product":
+    if (str(data.get("@type") or "")).lower() != "product":
         return None, None, None
 
     name = (data.get("name") or "").strip() or None
@@ -122,18 +122,68 @@ def extract_ean_on_pdp(page) -> Optional[str]:
 
     # 4) visible text near label “Ribakood / EAN / Barcode”
     try:
-        # grab a chunk of body text; cheap heuristic
         body_text = page.locator("body").inner_text(timeout=2000)
         if LABEL_EAN.search(body_text or ""):
             nums = EAN_DIGITS.findall(body_text or "")
-            # prefer 13/14 digit hits
-            nums = sorted(nums, key=len, reverse=True)
+            nums = sorted(nums, key=len, reverse=True)  # prefer 13/14
             if nums:
                 return nums[0]
     except Exception:
         pass
 
     return None
+
+def open_first_result(page) -> bool:
+    """
+    On a Selver search results page, try hard to enter the first PDP.
+    Handles the floating results panel as well as grid view.
+    """
+    # Try direct anchors first
+    link_selectors = [
+        "a[href*='/toode/']",
+        "[data-testid='product-card'] a[href*='/toode/']",
+        ".product-card a[href*='/toode/']",
+        "a.product-card, a.product-title, a[href*='/en/toode/']",
+    ]
+    for sel in link_selectors:
+        try:
+            loc = page.locator(sel).first
+            if loc and loc.is_visible():
+                # Try to follow href (more reliable than click in overlays)
+                href = loc.get_attribute("href", timeout=1500)
+                if href:
+                    if not href.startswith("http"):
+                        href = "https://www.selver.ee" + href
+                    page.goto(href, wait_until="domcontentloaded", timeout=30000)
+                    page.wait_for_load_state("networkidle", timeout=8000)
+                    return "/toode/" in page.url
+                # Fallback: click
+                loc.click(timeout=3000, force=True)
+                page.wait_for_load_state("domcontentloaded", timeout=15000)
+                page.wait_for_load_state("networkidle", timeout=8000)
+                if "/toode/" in page.url:
+                    return True
+        except Exception:
+            continue
+
+    # Try clicking the card container (some cards aren’t linked directly)
+    card_selectors = [
+        "[data-testid='product-card']",
+        ".product-card",
+    ]
+    for sel in card_selectors:
+        try:
+            card = page.locator(sel).first
+            if card and card.is_visible():
+                card.click(timeout=3000, force=True)
+                page.wait_for_load_state("domcontentloaded", timeout=15000)
+                page.wait_for_load_state("networkidle", timeout=8000)
+                if "/toode/" in page.url:
+                    return True
+        except Exception:
+            continue
+
+    return "/toode/" in page.url
 
 def probe_one(page, ean: str, delay: float) -> Optional[dict]:
     wanted = norm_ean(ean)
@@ -147,26 +197,14 @@ def probe_one(page, ean: str, delay: float) -> Optional[dict]:
     except PWTimeout:
         return None
 
-    # If search didn’t land on PDP, click first product
+    # If search didn’t land on PDP, try to open the first product row
     if "/toode/" not in page.url:
-        try:
-            link = page.locator("a[href*='/toode/']").first
-            if link and link.is_visible():
-                href = link.get_attribute("href")
-                if href:
-                    if not href.startswith("http"):
-                        href = "https://www.selver.ee" + href
-                    page.goto(href, wait_until="domcontentloaded", timeout=30000)
-                    page.wait_for_load_state("networkidle", timeout=10000)
-        except Exception:
-            pass
-
-    if "/toode/" not in page.url:
-        return None
+        if not open_first_result(page):
+            return None
 
     # Extract name/price with robust fallbacks
     name = _first_text(page, ["h1", "[data-testid='product-title']"]) \
-        or _first_text(page, ["meta[property='og:title']"], 1000)
+        or _meta_content(page, ["meta[property='og:title']", "meta[name='og:title']"])
     if name:
         name = name.strip()
 
