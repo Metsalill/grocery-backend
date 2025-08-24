@@ -247,7 +247,7 @@ jobs:
           END$$;
           SQL
 
-      # Shard-safe load: TEMP table + single psql session (YAML-safe)
+      # Shard-safe load: TEMP table + single psql session (heredoc to avoid regex/quote issues)
       - name: Load CSV, upsert (TEMP staging, shard-safe)
         shell: bash
         run: |
@@ -264,94 +264,98 @@ jobs:
             exit 0
           fi
 
-          # Build the SQL file via printf (no backslashes in regex to avoid psql meta-commands)
-          printf '%s\n' \
-            '\set ON_ERROR_STOP on' \
-            'BEGIN;' \
-            '' \
-            '-- TEMP staging per-connection' \
-            'CREATE TEMP TABLE tmp_staging_selver_products (' \
-            '  ext_id        text PRIMARY KEY,' \
-            '  name          text NOT NULL,' \
-            '  ean_raw       text,' \
-            '  sku_raw       text,' \
-            "  ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw, '"'"''"'"'), '"'"'[^0-9]'"'"', '"'"''"'"', '"'"'g'"'"')) STORED," \
-            '  size_text     text,' \
-            '  price         numeric(12,2) NOT NULL,' \
-            "  currency      text DEFAULT 'EUR'," \
-            '  category_path text,' \
-            '  category_leaf text,' \
-            '  collected_at  timestamptz DEFAULT now()' \
-            ');' \
-            '' \
-            '\copy tmp_staging_selver_products (ext_id,name,ean_raw,sku_raw,size_text,price,currency,category_path,category_leaf) FROM '\''data/selver.csv'\'' CSV HEADER' \
-            '' \
-            '-- Upsert latest prices for the single online Selver store' \
-            'WITH filtered AS (' \
-            '  SELECT st.* FROM tmp_staging_selver_products st' \
-            '),' \
-            'joined AS (' \
-            '  SELECT' \
-            '    pe.product_id,' \
-            '    f.price,' \
-            '    f.currency,' \
-            '    f.collected_at,' \
-            '    f.ext_id' \
-            '  FROM filtered f' \
-            '  JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm' \
-            '),' \
-            'pick_one AS (' \
-            '  SELECT DISTINCT ON (product_id)' \
-            '         product_id, price, currency, ext_id' \
-            '  FROM joined' \
-            '  ORDER BY product_id,' \
-            '           collected_at DESC NULLS LAST,' \
-            '           price ASC,' \
-            '           ext_id DESC' \
-            ')' \
-            'INSERT INTO public.prices (store_id, product_id, price, currency, collected_at, source_url)' \
-            'SELECT' \
-            "  (SELECT id FROM public.stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1)," \
-            '  p.product_id,' \
-            '  p.price,' \
-            '  p.currency,' \
-            '  now(),' \
-            '  p.ext_id' \
-            'FROM pick_one p' \
-            'ON CONFLICT (product_id, store_id) DO UPDATE' \
-            '  SET price        = EXCLUDED.price,' \
-            '      currency     = EXCLUDED.currency,' \
-            '      collected_at = EXCLUDED.collected_at,' \
-            '      source_url   = EXCLUDED.source_url;' \
-            '' \
-            '-- Store unmatched rows for triage' \
-            'WITH filtered AS (' \
-            '  SELECT st.* FROM tmp_staging_selver_products st' \
-            ')' \
-            'INSERT INTO public.selver_candidates' \
-            '  (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, price, currency, category_path, category_leaf)' \
-            'SELECT' \
-            '  f.ext_id, f.ean_norm, f.ean_raw, f.sku_raw, f.name, f.size_text, f.price, f.currency, f.category_path, f.category_leaf' \
-            'FROM filtered f' \
-            'LEFT JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm' \
-            'WHERE pe.product_id IS NULL' \
-            'ON CONFLICT (ext_id) DO UPDATE' \
-            '  SET price         = EXCLUDED.price,' \
-            '      currency      = EXCLUDED.currency,' \
-            '      size_text     = COALESCE(EXCLUDED.size_text, public.selver_candidates.size_text),' \
-            '      category_path = COALESCE(EXCLUDED.category_path, public.selver_candidates.category_path),' \
-            '      category_leaf = COALESCE(EXCLUDED.category_leaf, public.selver_candidates.category_leaf),' \
-            '      ean_raw       = COALESCE(EXCLUDED.ean_raw, public.selver_candidates.ean_raw),' \
-            '      sku_raw       = COALESCE(EXCLUDED.sku_raw, public.selver_candidates.sku_raw),' \
-            '      last_seen     = now();' \
-            '' \
-            '-- Summary from the TEMP table' \
-            'SELECT' \
-            '  (SELECT COUNT(*) FROM tmp_staging_selver_products) AS staged,' \
-            "  (SELECT COUNT(*) FROM public.prices WHERE store_id=(SELECT id FROM public.stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1)) AS price_rows," \
-            '  (SELECT COUNT(*) FROM public.selver_candidates) AS candidates;' \
-            '' \
-            'COMMIT;' \
-            > /tmp/selver_load.sql
+          # Build the SQL file with a heredoc to keep quoting and regex flags intact
+          cat > /tmp/selver_load.sql <<'SQL'
+          \set ON_ERROR_STOP on
+          BEGIN;
+
+          -- TEMP staging per-connection
+          CREATE TEMP TABLE tmp_staging_selver_products (
+            ext_id        text PRIMARY KEY,
+            name          text NOT NULL,
+            ean_raw       text,
+            sku_raw       text,
+            -- strip all non-digits; note the clean 'g' flag
+            ean_norm      text GENERATED ALWAYS AS (
+              regexp_replace(COALESCE(ean_raw,''), '[^0-9]+', '', 'g')
+            ) STORED,
+            size_text     text,
+            price         numeric(12,2) NOT NULL,
+            currency      text DEFAULT 'EUR',
+            category_path text,
+            category_leaf text,
+            collected_at  timestamptz DEFAULT now()
+          );
+
+          \copy tmp_staging_selver_products (ext_id,name,ean_raw,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER
+
+          -- Upsert latest prices for the single online Selver store
+          WITH filtered AS (
+            SELECT st.* FROM tmp_staging_selver_products st
+          ),
+          joined AS (
+            SELECT
+              pe.product_id,
+              f.price,
+              f.currency,
+              f.collected_at,
+              f.ext_id
+            FROM filtered f
+            JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm
+          ),
+          pick_one AS (
+            SELECT DISTINCT ON (product_id)
+                   product_id, price, currency, ext_id
+            FROM joined
+            ORDER BY product_id,
+                     collected_at DESC NULLS LAST,
+                     price ASC,
+                     ext_id DESC
+          )
+          INSERT INTO public.prices (store_id, product_id, price, currency, collected_at, source_url)
+          SELECT
+            (SELECT id FROM public.stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1),
+            p.product_id,
+            p.price,
+            p.currency,
+            now(),
+            p.ext_id
+          FROM pick_one p
+          ON CONFLICT (product_id, store_id) DO UPDATE
+            SET price        = EXCLUDED.price,
+                currency     = EXCLUDED.currency,
+                collected_at = EXCLUDED.collected_at,
+                source_url   = EXCLUDED.source_url;
+
+          -- Store unmatched rows for triage
+          WITH filtered AS (
+            SELECT st.* FROM tmp_staging_selver_products st
+          )
+          INSERT INTO public.selver_candidates
+            (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, price, currency, category_path, category_leaf, last_seen)
+          SELECT
+            f.ext_id, f.ean_norm, f.ean_raw, f.sku_raw, f.name, f.size_text, f.price, f.currency, f.category_path, f.category_leaf, now()
+          FROM filtered f
+          LEFT JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm
+          WHERE pe.product_id IS NULL
+          ON CONFLICT (ext_id) DO UPDATE
+            SET price         = EXCLUDED.price,
+                currency      = EXCLUDED.currency,
+                size_text     = COALESCE(EXCLUDED.size_text, public.selver_candidates.size_text),
+                category_path = COALESCE(EXCLUDED.category_path, public.selver_candidates.category_path),
+                category_leaf = COALESCE(EXCLUDED.category_leaf, public.selver_candidates.category_leaf),
+                ean_raw       = COALESCE(EXCLUDED.ean_raw, public.selver_candidates.ean_raw),
+                sku_raw       = COALESCE(EXCLUDED.sku_raw, public.selver_candidates.sku_raw),
+                last_seen     = now();
+
+          -- Summary from the TEMP table
+          SELECT
+            (SELECT COUNT(*) FROM tmp_staging_selver_products) AS staged,
+            (SELECT COUNT(*) FROM public.prices
+              WHERE store_id=(SELECT id FROM public.stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1)) AS price_rows,
+            (SELECT COUNT(*) FROM public.selver_candidates) AS candidates;
+
+          COMMIT;
+          SQL
 
           psql "$DATABASE_URL" -f /tmp/selver_load.sql
