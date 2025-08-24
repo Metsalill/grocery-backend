@@ -4,33 +4,12 @@
 """
 Selver category crawler → CSV (staging_selver_products)
 
-Features:
-- Collect PDP links from listings and remember which listing page each link came from.
-- Two modes:
-  1) Direct mode (default): open PDPs directly, with click-through fallback if needed.
-  2) CLICK mode (CLICK_PRODUCTS=1): literally click each product card on listings,
-     open PDP, extract, then go back (no URL harvesting required).
-- CSV columns (downstream-safe): ext_id, name, ean_raw, sku_raw, size_text,
-  price, currency, category_path, category_leaf.
+Key hardening in this patch:
+- Strict PDP domain/path: only accept https://www.selver.ee/e/...
+- Filter non-product pages early (both when harvesting links and before writing a row).
+- Skip rows with zero/invalid price.
 
-Noise & speed fixes:
-- Canonical URLs (no /e-selver/) and pagination via ?page=N.
-- Tight router (default ON): aborts non-Selver scripts/xhr/fetch/fonts/stylesheet/websocket/manifest/eventsource.
-- No 'Upgrade-Insecure-Requests' header.
-- Block service workers (context + router kill known SW iframes).
-- Wider 3P blocklist.
-- Console is quiet by default (opt-in with LOG_CONSOLE).
-
-Run:
-  OUTPUT_CSV=data/selver.csv python scripts/selver_crawl_categories_pw.py
-
-Env toggles:
-  CLICK_PRODUCTS=0 (default) | 1
-  ALLOWLIST_ONLY=1 (default) | 0
-  PAGE_LIMIT=0 (no cap)
-  USE_ROUTER=1 (default) | 0
-  LOG_CONSOLE=0 (default) | warn | all
-  REQ_DELAY=0.6 (seconds between steps)
+CSV columns: ext_id, name, ean_raw, sku_raw, size_text, price, currency, category_path, category_leaf
 """
 
 from __future__ import annotations
@@ -89,7 +68,6 @@ SIZE_RE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
 
 # ---------- Third-party noise to block ----------
 BLOCK_HOSTS = {
-    # common 3P seen on Selver
     "adobe.com","assets.adobedtm.com","adobedtm.com","demdex.net","omtrdc.net",
     "googletagmanager.com","google-analytics.com","doubleclick.net","facebook.net",
     "cookiebot.com","consent.cookiebot.com","imgct.cookiebot.com","consentcdn.cookiebot.com",
@@ -158,20 +136,24 @@ def _in_allowlist(path: str) -> bool:
     p = (path or "/").rstrip("/")
     return any(p == root or p.startswith(root + "/") for root in STRICT_ALLOWLIST)
 
+# ---- STRICT product URL check: require /e/ path on selver.ee
 def _is_selver_product_like(url: str) -> bool:
     u = urlparse(url)
     host = (u.netloc or urlparse(BASE).netloc).lower()
     if host not in ALLOWED_HOSTS:
         return False
     path = _strip_eselver_prefix((u.path or "/").lower())
-    if path.startswith("/ru/"): return False
-    if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS): return False
-    if any(kw in path for kw in NON_PRODUCT_KEYWORDS): return False
-    if re.fullmatch(r"/p/[a-z0-9-]+/?", path): return True
+    if not path.startswith("/e/"):  # << hard rule: must be /e/… product
+        return False
+    if path.startswith("/ru/"):
+        return False
+    if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS):
+        return False
+    if any(kw in path for kw in NON_PRODUCT_KEYWORDS):
+        return False
+    # Accept typical product slugs like /e/<category>/.../<product-slug>
     last = path.rstrip("/").rsplit("/", 1)[-1]
-    return re.fullmatch(r"[a-z0-9-]+", last) and ("-" in last) and (
-        any(ch.isdigit() for ch in last) or last.count("-") >= 2
-    )
+    return bool(re.fullmatch(r"[a-z0-9-]{3,}", last))
 
 def _is_category_like_path(path: str) -> bool:
     p = _strip_eselver_prefix((path or "/").lower())
@@ -188,9 +170,7 @@ def _is_category_like_path(path: str) -> bool:
 
 # Extra helpers for EAN/SKU parsing
 DIGITS_RE = re.compile(r"\D+")
-
-def _digits(s: str) -> str:
-    return DIGITS_RE.sub("", s or "")
+def _digits(s: str) -> str: return DIGITS_RE.sub("", s or "")
 
 def _valid_ean13(code: str) -> bool:
     if not re.fullmatch(r"\d{13}", code): return False
@@ -201,7 +181,6 @@ def _valid_ean13(code: str) -> bool:
 
 def _pick_ean_from_html(html: str) -> str:
     if not html: return ""
-    # Prefer numbers next to clear labels
     label_pat = re.compile(
         r"(?:\b(?:ean|gtin|ribakood|triipkood|barcode)\b)[^0-9]{0,40}(\d{8,14})",
         re.I | re.S,
@@ -369,6 +348,7 @@ def _extract_product_hrefs(page) -> List[str]:
     links = []
     for h in hrefs:
         u = _clean_abs(h)
+        # STRICT: only PDPs under /e/...
         if u and _is_selver_product_like(u):
             links.append(u)
     return list(dict.fromkeys(links))
@@ -465,7 +445,7 @@ def extract_ean_and_sku(page) -> tuple[str, str]:
         blocks = jsonld_all(page)
         prod = jsonld_pick_product(blocks)
         if prod:
-            ean = _digits(str(prod.get("gtin13") or prod.get("gtin") or ""))
+            ean = re.sub(r"\D+", "", str(prod.get("gtin13") or prod.get("gtin") or ""))
             sku = normspace(str(prod.get("sku") or ""))
             if _valid_ean13(ean):
                 return ean, sku
@@ -489,7 +469,7 @@ def extract_ean_and_sku(page) -> tuple[str, str]:
         }
         """)
         if got:
-            ean = ean or _digits(got.get("gtin13") or got.get("gtin") or "")
+            ean = ean or re.sub(r"\D+", "", got.get("gtin13") or got.get("gtin") or "")
             sku = sku or normspace(got.get("sku") or "")
             if _valid_ean13(ean):
                 return ean, sku
@@ -511,7 +491,7 @@ def extract_ean_and_sku(page) -> tuple[str, str]:
 
     # Clean/validate final EAN
     if not _valid_ean13(ean):
-        e13 = _digits(ean or "")
+        e13 = re.sub(r"\D+", "", ean or "")
         ean = e13 if _valid_ean13(e13) else ""
 
     return ean, sku
@@ -538,6 +518,10 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
     if not ext_id:
         return None
 
+    # STRICT: keep only real product URLs under /e/ …
+    if not re.match(r"^https?://(?:www\.)?selver\.ee/e/.*", ext_id):
+        return None
+
     blocks = jsonld_all(page)
     prod_ld = jsonld_pick_product(blocks)
     crumbs_ld = jsonld_pick_breadcrumbs(blocks)
@@ -555,14 +539,14 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
     # EAN & SKU
     ean, sku = "", ""
     if prod_ld:
-        ean = _digits(str(prod_ld.get("gtin13") or prod_ld.get("gtin") or "")) or ""
+        ean = re.sub(r"\D+", "", str(prod_ld.get("gtin13") or prod_ld.get("gtin") or "")) or ""
         sku = normspace(str(prod_ld.get("sku") or ""))
     if not (ean and sku):
         e2, s2 = extract_ean_and_sku(page)
         ean = ean or e2
         sku = sku or s2
 
-    # Price & currency
+    # Price & currency (must be > 0)
     price, currency = 0.0, "EUR"
     if prod_ld and "offers" in prod_ld:
         offers = prod_ld["offers"]
@@ -575,6 +559,8 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
             pass
     if price == 0.0:
         price, currency = extract_price(page)
+    if not price or price <= 0:
+        return None
 
     # Breadcrumbs
     crumbs = crumbs_ld or breadcrumbs_dom(page)
@@ -658,7 +644,7 @@ def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
                 a.click(timeout=5000)
                 for _ in range(24):
                     up = urlparse(page.url).path.lower()
-                    if "/p/" in up or up.rstrip("/").endswith(path.rstrip("/").rsplit("/",1)[-1]):
+                    if "/e/" in up:
                         break
                     if page.locator("h1").count() > 0:
                         break
@@ -717,6 +703,7 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
                 _wait_pdp_ready(page)
                 row = _extract_row_from_pdp(page, href)
                 if row:
+                    # final guard: drop rows with zero/invalid price is already in _extract_row_from_pdp
                     ext_id = row["ext_id"]
                     if ext_id not in seen_ext_ids:
                         writer.writerow(row)
@@ -768,10 +755,9 @@ def crawl():
                             "Chrome/124.0.0.0 Safari/537.36"),
                 extra_http_headers={
                     "Accept-Language": "et-EE,et;q=0.9,en-US;q=0.8,en;q=0.7",
-                    # DO NOT send 'Upgrade-Insecure-Requests'
                 },
                 ignore_https_errors=True,
-                service_workers="block",  # avoid GTM SW iframes / registrations
+                service_workers="block",
             )
             if USE_ROUTER:
                 context.route("**/*", _router)
