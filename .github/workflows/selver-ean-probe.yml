@@ -60,7 +60,7 @@ jobs:
           set -euo pipefail
           test -f scripts/selver_probe_ean_pw.py || { echo "Missing scripts/selver_probe_ean_pw.py"; exit 1; }
 
-      # Build Prisma EAN backlog (use COPY TO STDOUT; inject LIMIT via shell)
+      # Build Prisma EAN backlog (use COPY TO STDOUT; skip problematic 0000-prefix EANs)
       - name: Build list of Prisma EANs to probe on Selver
         shell: bash
         run: |
@@ -88,6 +88,7 @@ jobs:
               FROM prisma p
               LEFT JOIN selver_seen s ON s.ean = p.ean
               WHERE s.ean IS NULL
+                AND p.ean NOT LIKE '0000%'   -- ← exclude those that tend to be duds
               ORDER BY p.ean
               LIMIT ${LIM}
             ) TO STDOUT WITH (FORMAT CSV, HEADER TRUE)
