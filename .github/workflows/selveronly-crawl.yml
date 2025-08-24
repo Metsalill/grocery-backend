@@ -1,4 +1,4 @@
-name: "Selver Category Crawl (food)"
+name: "Selver Category Crawl"
 
 on:
   workflow_dispatch:
@@ -334,13 +334,12 @@ jobs:
           ),
           filtered AS (
             SELECT st.* FROM public.staging_selver_products st
-            WHERE st.ext_id LIKE 'https://www.selver.ee/e/%'
-              AND NOT EXISTS (
-                SELECT 1 FROM banned
-                WHERE lower(COALESCE(st.category_path,'') || ' ' ||
-                            COALESCE(st.category_leaf,'') || ' ' ||
-                            COALESCE(st.name,'')) LIKE '%' || banned.kw || '%'
-              )
+            WHERE NOT EXISTS (
+              SELECT 1 FROM banned
+              WHERE lower(COALESCE(st.category_path,'') || ' ' ||
+                          COALESCE(st.category_leaf,'') || ' ' ||
+                          COALESCE(st.name,'')) LIKE '%' || banned.kw || '%'
+            )
           ),
           joined AS (
             SELECT
@@ -354,7 +353,7 @@ jobs:
           ),
           pick_one AS (
             SELECT DISTINCT ON (product_id)
-                   product_id, price, currency
+                   product_id, price, currency, ext_id
             FROM joined
             ORDER BY product_id,
                      collected_at DESC NULLS LAST,
@@ -394,13 +393,12 @@ jobs:
           ),
           filtered AS (
             SELECT st.* FROM public.staging_selver_products st
-            WHERE st.ext_id LIKE 'https://www.selver.ee/e/%'
-              AND NOT EXISTS (
-                SELECT 1 FROM banned
-                WHERE lower(COALESCE(st.category_path,'') || ' ' ||
-                            COALESCE(st.category_leaf,'') || ' ' ||
-                            COALESCE(st.name,'')) LIKE '%' || banned.kw || '%'
-              )
+            WHERE NOT EXISTS (
+              SELECT 1 FROM banned
+              WHERE lower(COALESCE(st.category_path,'') || ' ' ||
+                          COALESCE(st.category_leaf,'') || ' ' ||
+                          COALESCE(st.name,'')) LIKE '%' || banned.kw || '%'
+            )
           )
           INSERT INTO public.selver_candidates
             (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, price, currency, category_path, category_leaf)
