@@ -60,13 +60,14 @@ jobs:
           set -euo pipefail
           test -f scripts/selver_probe_ean_pw.py || { echo "Missing scripts/selver_probe_ean_pw.py"; exit 1; }
 
-      # Build Prisma EAN backlog (FIXED: use COPY TO STDOUT and psql var :lim)
+      # Build Prisma EAN backlog (use COPY TO STDOUT; inject LIMIT via shell)
       - name: Build list of Prisma EANs to probe on Selver
         shell: bash
         run: |
           set -euo pipefail
           LIM="${{ github.event.inputs.batch_limit || '300' }}"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -v lim="$LIM" -c "
+
+          SQL="
             COPY (
               WITH prisma AS (
                 SELECT ean
@@ -88,9 +89,11 @@ jobs:
               LEFT JOIN selver_seen s ON s.ean = p.ean
               WHERE s.ean IS NULL
               ORDER BY p.ean
-              LIMIT :lim
+              LIMIT ${LIM}
             ) TO STDOUT WITH (FORMAT CSV, HEADER TRUE)
-          " > data/prisma_eans_to_probe.csv
+          "
+
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "$SQL" > data/prisma_eans_to_probe.csv
 
           if [ ! -s data/prisma_eans_to_probe.csv ]; then
             echo "::notice::No new Prisma EANs to probe this run."
