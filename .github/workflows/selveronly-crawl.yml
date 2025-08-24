@@ -36,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1]   # run two slices in parallel each trigger
+        shard: [0, 1]
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       SHARD: ${{ matrix.shard }}
@@ -66,7 +66,6 @@ jobs:
       - name: Prepare workspace
         run: mkdir -p data
 
-      # NEW: simple modulo sharding — each shard processes ~half of all categories every run
       - name: Build shard slice (cover all categories this run; shard ${{ matrix.shard }})
         shell: bash
         env:
@@ -74,14 +73,10 @@ jobs:
         run: |
           set -euo pipefail
           cp -f data/selver_categories.txt data/selver_categories_all.txt
-
           TOTAL=$(wc -l < data/selver_categories_all.txt)
-          : "${SHARD:?SHARD env is required}"   # 0..SHARDS-1
-
-          # Take lines where (NR-1) % SHARDS == SHARD
+          : "${SHARD:?SHARD env is required}"
           awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
             data/selver_categories_all.txt > data/selver_categories.txt
-
           echo "TOTAL categories: $TOTAL"
           echo "Sharding: SHARD=$SHARD / SHARDS=$SHARDS"
           echo "Slice count: $(wc -l < data/selver_categories.txt)"
@@ -106,25 +101,20 @@ jobs:
           python --version
           echo "Start (UTC): $(date -u)"
           echo "::endgroup::"
-
           set +e
           set +o pipefail
-          # Give crawler ~50 minutes of the 60-minute job window; split stderr to a separate file
           stdbuf -oL -eL timeout -k 60s 50m python -u scripts/selver_crawl_categories_pw.py \
             > >(tee data/selver_run.log) 2>data/selver_run.err
           status=${PIPESTATUS[0]}
           set -o pipefail
           set -e
-
           echo "End (UTC): $(date -u) — crawler exit code: ${status}"
-
           echo "::group::Crawler outputs"
           ls -lah data || true
           [ -f data/selver.csv ] && { echo "CSV size:"; wc -l data/selver.csv; du -h data/selver.csv; } || echo "CSV not found"
           [ -f data/selver_run.log ] && { echo "Log size:"; du -h data/selver_run.log; } || echo "Log not found"
           [ -s data/selver_run.err ] && { echo "---- stderr tail ----"; tail -n 120 data/selver_run.err; } || true
           echo "::endgroup::"
-
           if [ "${status}" -eq 124 ]; then
             echo "::warning::Crawler hit the time budget (timeout 50m). Continuing with partial results."
           elif [ "${status}" -ne 0 ]; then
@@ -203,15 +193,16 @@ jobs:
             collected_at  timestamptz DEFAULT now()
           );
 
+          CREATE EXTENSION IF NOT EXISTS pg_trgm;
           CREATE INDEX IF NOT EXISTS ix_selver_ean       ON public.staging_selver_products (ean_norm);
           CREATE INDEX IF NOT EXISTS ix_selver_name_trgm ON public.staging_selver_products USING gin (name gin_trgm_ops);
 
-          -- Ensure one store row for Selver e-shop exists
-          INSERT INTO public.stores (name, chain)
-          SELECT 'Selver e-pood', 'Selver'
-          WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE name='Selver e-pood' AND chain='Selver');
+          -- Ensure exactly one ONLINE Selver store exists (idempotent)
+          INSERT INTO public.stores (name, chain, is_online)
+          SELECT 'Selver e-Selver', 'Selver', TRUE
+          WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE chain='Selver' AND is_online=TRUE);
 
-          -- Keep unmatched EANs for manual triage
+          -- Candidates table (unmatched EANs)
           CREATE TABLE IF NOT EXISTS public.selver_candidates (
             ext_id        text PRIMARY KEY,
             ean_norm      text,
@@ -228,22 +219,15 @@ jobs:
 
           COMMIT;
 
-          -- Fix/normalize unique constraints and deduplicate
+          -- Ensure (product_id, store_id) uniqueness on prices; dedupe legacy rows
           DO $$
-          DECLARE
-            con_name text;
+          DECLARE con_name text;
           BEGIN
             FOR con_name IN
-              SELECT c.conname
-              FROM pg_constraint c
-              WHERE c.conrelid = 'public.prices'::regclass
-                AND c.contype  = 'u'
-                AND c.conkey   = ARRAY[
-                  (SELECT attnum FROM pg_attribute
-                   WHERE attrelid='public.prices'::regclass AND attname='product_id')
-                ]
+              SELECT c.conname FROM pg_constraint c
+              WHERE c.conrelid='public.prices'::regclass AND c.contype='u'
             LOOP
-              EXECUTE format('ALTER TABLE public.prices DROP CONSTRAINT %I', con_name);
+              -- keep any existing composite unique; we just ensure the right one exists
             END LOOP;
 
             WITH ranked AS (
@@ -257,21 +241,13 @@ jobs:
             WHERE p.id = r.id AND r.rn > 1;
 
             IF NOT EXISTS (
-              SELECT 1
-              FROM pg_constraint c
-              WHERE c.conrelid = 'public.prices'::regclass
-                AND c.contype  = 'u'
-                AND (
-                  c.conkey = ARRAY[
-                    (SELECT attnum FROM pg_attribute WHERE attrelid='public.prices'::regclass AND attname='product_id'),
-                    (SELECT attnum FROM pg_attribute WHERE attrelid='public.prices'::regclass AND attname='store_id')
-                  ]
-                  OR
-                  c.conkey = ARRAY[
-                    (SELECT attnum FROM pg_attribute WHERE attrelid='public.prices'::regclass AND attname='store_id'),
-                    (SELECT attnum FROM pg_attribute WHERE attrelid='public.prices'::regclass AND attname='product_id')
-                  ]
-                )
+              SELECT 1 FROM pg_constraint c
+              WHERE c.conrelid='public.prices'::regclass
+                AND c.contype='u'
+                AND c.conkey = ARRAY[
+                  (SELECT attnum FROM pg_attribute WHERE attrelid='public.prices'::regclass AND attname='product_id'),
+                  (SELECT attnum FROM pg_attribute WHERE attrelid='public.prices'::regclass AND attname='store_id')
+                ]
             ) THEN
               ALTER TABLE public.prices
                 ADD CONSTRAINT uq_prices_per_store UNIQUE (product_id, store_id);
@@ -291,7 +267,6 @@ jobs:
             exit 0
           fi
 
-          # Guard: skip obviously bad/tiny runs (header + <=5 lines)
           ROW_CT=$( (wc -l < data/selver.csv) 2>/dev/null || echo 0 )
           if [ "$ROW_CT" -le 6 ]; then
             echo "::warning::Too few rows in CSV ($ROW_CT). Skipping DB load this run."
@@ -302,7 +277,7 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c \
             "\copy public.staging_selver_products (ext_id,name,ean_raw,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER"
 
-          # Upsert prices (no banned filter → all categories allowed)
+          # Upsert prices -> **online Selver store only**; one row per product_id per run
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           WITH filtered AS (
             SELECT st.* FROM public.staging_selver_products st
@@ -317,7 +292,7 @@ jobs:
             FROM filtered f
             JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm
           ),
-          pick_one AS (
+          pick_one AS (  -- dedupe: keep 1 best row per product this run
             SELECT DISTINCT ON (product_id)
                    product_id, price, currency, ext_id
             FROM joined
@@ -328,7 +303,7 @@ jobs:
           )
           INSERT INTO public.prices (store_id, product_id, price, currency, collected_at, source_url)
           SELECT
-            (SELECT id FROM public.stores WHERE name='Selver e-pood' AND chain='Selver'),
+            (SELECT id FROM public.stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1),
             p.product_id,
             p.price,
             p.currency,
@@ -366,6 +341,6 @@ jobs:
 
           SELECT
             (SELECT COUNT(*) FROM public.staging_selver_products) AS staged,
-            (SELECT COUNT(*) FROM public.prices WHERE store_id=(SELECT id FROM public.stores WHERE name='Selver e-pood' AND chain='Selver')) AS price_rows,
+            (SELECT COUNT(*) FROM public.prices WHERE store_id=(SELECT id FROM public.stores WHERE chain='Selver' AND is_online=TRUE LIMIT 1)) AS price_rows,
             (SELECT COUNT(*) FROM public.selver_candidates) AS candidates;
           SQL
