@@ -5,7 +5,7 @@
 # Output CSV columns: ext_id,url,ean,name,price_raw,size_text
 
 from __future__ import annotations
-import csv, json, re, sys, time
+import csv, json, os, re, sys, time
 from pathlib import Path
 from typing import Optional, Tuple
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
@@ -35,11 +35,13 @@ def _first_text(page, selectors: list[str], timeout_ms: int = 2000) -> Optional[
 def _meta_content(page, selectors: list[str]) -> Optional[str]:
     for sel in selectors:
         try:
-            v = page.locator(sel).first.get_attribute("content", timeout=1000)
-            if v:
-                v = v.strip()
+            el = page.locator(sel).first
+            if el.count() > 0:
+                v = el.get_attribute("content", timeout=1000)
                 if v:
-                    return v
+                    v = v.strip()
+                    if v:
+                        return v
         except Exception:
             pass
     return None
@@ -61,14 +63,18 @@ def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str], Optional[
         return None, None, None
 
     # Try to locate a Product object anywhere in the structure
-    if (str(data.get("@type") or "")).lower() != "product":
+    def is_product(d: dict) -> bool:
+        t = d.get("@type")
+        return isinstance(t, str) and t.lower() == "product"
+
+    if not is_product(data):
         for v in data.values():
             p = pick(v)
-            if isinstance(p, dict) and (str(p.get("@type") or "")).lower() == "product":
+            if isinstance(p, dict) and is_product(p):
                 data = p
                 break
 
-    if (str(data.get("@type") or "")).lower() != "product":
+    if not is_product(data):
         return None, None, None
 
     name = (data.get("name") or "").strip() or None
@@ -84,13 +90,61 @@ def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str], Optional[
 
     return name, (str(price).strip() if price is not None else None), ean
 
+def looks_like_pdp(page) -> bool:
+    """Heuristic: true if we're on a product page."""
+    try:
+        og_type = _meta_content(page, ["meta[property='og:type']"])
+        if (og_type or "").lower() == "product":
+            return True
+    except Exception:
+        pass
+    try:
+        if page.locator("text=Ribakood").count() > 0:
+            return True
+    except Exception:
+        pass
+    try:
+        if page.locator("meta[itemprop='sku'], meta[itemprop='gtin'], meta[itemprop='gtin13']").count() > 0:
+            return True
+    except Exception:
+        pass
+    return False
+
+def goto_first_result(page) -> None:
+    """
+    On a search results page, open the first product result.
+    Selver uses plain slugs (no /toode/), so we just find the first
+    product tile link that isn't another search link.
+    """
+    candidates = [
+        "article a[href^='/']:not([href*='/search'])",
+        ".product-list a[href^='/']:not([href*='/search'])",
+        "a[href^='/']:not([href*='/search'])",
+    ]
+    for sel in candidates:
+        try:
+            loc = page.locator(sel).first
+            if loc and loc.count() > 0:
+                href = loc.get_attribute("href")
+                if href:
+                    if not href.startswith("http"):
+                        href = "https://www.selver.ee" + href
+                    page.goto(href, wait_until="domcontentloaded", timeout=30000)
+                    try:
+                        page.wait_for_load_state("networkidle", timeout=10000)
+                    except Exception:
+                        pass
+                    return
+        except Exception:
+            pass
+
 def extract_ean_on_pdp(page) -> Optional[str]:
     """Find an EAN on a Selver PDP using multiple strategies."""
     # 1) JSON-LD
     try:
         scripts = page.locator("script[type='application/ld+json']")
-        count = scripts.count()
-        for i in range(count):
+        cnt = scripts.count()
+        for i in range(cnt):
             try:
                 n, p, g = parse_ld_product(scripts.nth(i).inner_text())
                 if g:
@@ -133,59 +187,7 @@ def extract_ean_on_pdp(page) -> Optional[str]:
 
     return None
 
-def open_first_result(page) -> bool:
-    """
-    On a Selver search results page, try hard to enter the first PDP.
-    Handles the floating results panel as well as grid view.
-    """
-    # Try direct anchors first
-    link_selectors = [
-        "a[href*='/toode/']",
-        "[data-testid='product-card'] a[href*='/toode/']",
-        ".product-card a[href*='/toode/']",
-        "a.product-card, a.product-title, a[href*='/en/toode/']",
-    ]
-    for sel in link_selectors:
-        try:
-            loc = page.locator(sel).first
-            if loc and loc.is_visible():
-                # Try to follow href (more reliable than click in overlays)
-                href = loc.get_attribute("href", timeout=1500)
-                if href:
-                    if not href.startswith("http"):
-                        href = "https://www.selver.ee" + href
-                    page.goto(href, wait_until="domcontentloaded", timeout=30000)
-                    page.wait_for_load_state("networkidle", timeout=8000)
-                    return "/toode/" in page.url
-                # Fallback: click
-                loc.click(timeout=3000, force=True)
-                page.wait_for_load_state("domcontentloaded", timeout=15000)
-                page.wait_for_load_state("networkidle", timeout=8000)
-                if "/toode/" in page.url:
-                    return True
-        except Exception:
-            continue
-
-    # Try clicking the card container (some cards aren’t linked directly)
-    card_selectors = [
-        "[data-testid='product-card']",
-        ".product-card",
-    ]
-    for sel in card_selectors:
-        try:
-            card = page.locator(sel).first
-            if card and card.is_visible():
-                card.click(timeout=3000, force=True)
-                page.wait_for_load_state("domcontentloaded", timeout=15000)
-                page.wait_for_load_state("networkidle", timeout=8000)
-                if "/toode/" in page.url:
-                    return True
-        except Exception:
-            continue
-
-    return "/toode/" in page.url
-
-def probe_one(page, ean: str, delay: float) -> Optional[dict]:
+def probe_one(page, ean: str, delay: float, dbg_rows: list) -> Optional[dict]:
     wanted = norm_ean(ean)
     if not wanted:
         return None
@@ -193,18 +195,26 @@ def probe_one(page, ean: str, delay: float) -> Optional[dict]:
     search_url = f"https://www.selver.ee/search?q={wanted}"
     try:
         page.goto(search_url, wait_until="domcontentloaded", timeout=30000)
-        page.wait_for_load_state("networkidle", timeout=10000)
+        try:
+            page.wait_for_load_state("networkidle", timeout=10000)
+        except Exception:
+            pass
     except PWTimeout:
+        dbg_rows.append({"ean": wanted, "stage": "goto_search_timeout", "url": search_url, "note": ""})
         return None
 
-    # If search didn’t land on PDP, try to open the first product row
-    if "/toode/" not in page.url:
-        if not open_first_result(page):
-            return None
+    # If not already on PDP, open the first result
+    if not looks_like_pdp(page):
+        goto_first_result(page)
+
+    if not looks_like_pdp(page):
+        dbg_rows.append({"ean": wanted, "stage": "no_pdp", "url": page.url, "note": ""})
+        return None
 
     # Extract name/price with robust fallbacks
-    name = _first_text(page, ["h1", "[data-testid='product-title']"]) \
-        or _meta_content(page, ["meta[property='og:title']", "meta[name='og:title']"])
+    name = _first_text(page, ["h1", "[data-testid='product-title']"])
+    if not name:
+        name = _meta_content(page, ["meta[property='og:title']"])
     if name:
         name = name.strip()
 
@@ -218,11 +228,13 @@ def probe_one(page, ean: str, delay: float) -> Optional[dict]:
 
     # Guards: real name (not 'Selver'), EAN must match search
     if not name or name.lower() in {"selver", "e-selver"} or len(name) < 3:
-        return None
-    if norm_ean(found_ean) != wanted:
+        dbg_rows.append({"ean": wanted, "stage": "bad_name", "url": page.url, "note": name or ""})
         return None
 
-    # small pacing so we don’t hammer
+    if norm_ean(found_ean) != wanted:
+        dbg_rows.append({"ean": wanted, "stage": "ean_mismatch", "url": page.url, "note": f"found={found_ean}"})
+        return None
+
     if delay > 0:
         time.sleep(delay)
 
@@ -238,6 +250,9 @@ def probe_one(page, ean: str, delay: float) -> Optional[dict]:
 def main(in_csv: str, out_csv: str, delay: float):
     in_path, out_path = Path(in_csv), Path(out_csv)
     out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    DEBUG = os.getenv("DEBUG_PROBE", "").lower() in ("1", "true", "yes")
+    dbg_rows: list[dict] = []
 
     with in_path.open("r", newline="", encoding="utf-8") as fin, \
          out_path.open("w", newline="", encoding="utf-8") as fout, \
@@ -256,15 +271,24 @@ def main(in_csv: str, out_csv: str, delay: float):
             if not ean:
                 continue
             try:
-                info = probe_one(page, ean, delay)
+                info = probe_one(page, ean, delay, dbg_rows)
                 if info:
                     writer.writerow(info)
-            except Exception:
-                # be resilient – skip any transient errors
-                pass
+            except Exception as ex:
+                dbg_rows.append({"ean": ean, "stage": "exception", "url": page.url if page else "", "note": str(ex)})
 
         context.close()
         browser.close()
+
+    if DEBUG:
+        # Save reasoned skips for inspection
+        dbg_path = out_path.parent / "selver_probe_debug.csv"
+        with dbg_path.open("w", newline="", encoding="utf-8") as fdbg:
+            fields = ["ean", "stage", "url", "note"]
+            w = csv.DictWriter(fdbg, fieldnames=fields)
+            w.writeheader()
+            for r in dbg_rows:
+                w.writerow(r)
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
