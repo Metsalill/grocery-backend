@@ -147,16 +147,16 @@ jobs:
             '  size_text text' \
             ');' \
             '' \
-            '\copy staging_selver_probe FROM '\''data/selver_probe.csv'\'' CSV HEADER' \
+            "\copy staging_selver_probe FROM 'data/selver_probe.csv' CSV HEADER" \
             '' \
             '-- parse once into a temp table (so we can reuse for prices + candidates)' \
             'CREATE TEMP TABLE parsed_probe AS' \
             'SELECT' \
-            '  COALESCE(url, ext_id)                                         AS ext_id,' \
-            "  regexp_replace(ean,'\\D','','g')                               AS ean_norm," \
-            '  ean                                                           AS ean_raw,' \
-            '  NULLIF(name,'''')                                              AS name,' \
-            '  NULLIF(size_text,'''')                                         AS size_text,' \
+            '  COALESCE(url, ext_id) AS ext_id,' \
+            "  regexp_replace(ean,'\\D','','g') AS ean_norm," \
+            '  ean AS ean_raw,' \
+            '  CASE WHEN length(btrim(name))=0 THEN NULL ELSE name END AS name,' \
+            '  CASE WHEN length(btrim(size_text))=0 THEN NULL ELSE size_text END AS size_text,' \
             "  NULLIF(replace(regexp_replace(price_raw, '[^0-9,.-]', '', 'g'), ',', '.'), '')::numeric AS price_num" \
             'FROM staging_selver_probe;' \
             '' \
@@ -167,7 +167,7 @@ jobs:
             'WITH joined AS (' \
             '  SELECT pe.product_id, pp.price_num, pp.ext_id AS source_url' \
             '  FROM parsed_probe pp' \
-            "  JOIN product_eans pe ON pe.ean_norm = pp.ean_norm" \
+            '  JOIN product_eans pe ON pe.ean_norm = pp.ean_norm' \
             '  WHERE pp.price_num IS NOT NULL' \
             '),' \
             'dedup AS (' \
@@ -201,7 +201,7 @@ jobs:
             'INSERT INTO product_aliases (product_id, alias)' \
             'SELECT pe.product_id, left(btrim(pp.name), 200)' \
             'FROM parsed_probe pp' \
-            "JOIN product_eans pe ON pe.ean_norm = pp.ean_norm" \
+            'JOIN product_eans pe ON pe.ean_norm = pp.ean_norm' \
             "WHERE pp.name IS NOT NULL AND btrim(pp.name) <> ''" \
             'ON CONFLICT (product_id, alias) DO NOTHING;' \
             '' \
