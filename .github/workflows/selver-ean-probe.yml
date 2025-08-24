@@ -51,44 +51,67 @@ jobs:
         run: |
           test -f scripts/selver_probe_ean_pw.py || (echo "Missing scripts/selver_probe_ean_pw.py" && exit 1)
 
+      # ---------- FIXED: pass limit as a psql variable & use LIMIT :lim ----------
       - name: Build list of Prisma EANs to probe on Selver
         shell: bash
         run: |
           set -euo pipefail
           LIM="${{ github.event.inputs.batch_limit || '300' }}"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\COPY (
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -v lim="$LIM" <<'SQL'
+          \COPY (
             WITH prisma AS (
               SELECT ean
               FROM products
-              WHERE ean ~ '^[0-9]+$' AND source_url ILIKE '%prismamarket.ee%'
+              WHERE ean ~ '^[0-9]+$'
+                AND source_url ILIKE '%prismamarket.ee%'
             ),
             selver_seen AS (
-              SELECT DISTINCT regexp_replace(ean_raw::text,'\\D','','g') AS ean FROM selver_candidates
+              SELECT DISTINCT regexp_replace(ean_raw::text,'\D','','g') AS ean FROM selver_candidates
               UNION
-              SELECT DISTINCT pe.ean_norm
-              FROM product_eans pe
-              JOIN prices pr ON pr.product_id = pe.product_id
-              JOIN stores s  ON s.id = pr.store_id AND s.chain ILIKE 'Selver'
+              SELECT DISTINCT p.ean
+              FROM prices pr
+              JOIN stores s ON s.id = pr.store_id AND s.chain ILIKE 'Selver'
+              JOIN products p ON p.id = pr.product_id
             )
             SELECT p.ean
             FROM prisma p
             LEFT JOIN selver_seen s ON s.ean = p.ean
             WHERE s.ean IS NULL
             ORDER BY p.ean
-            LIMIT " || LIM
-          ) TO 'data/prisma_eans_to_probe.csv' CSV HEADER"
+            LIMIT :lim
+          ) TO 'data/prisma_eans_to_probe.csv' CSV HEADER;
+          SQL
+
+          if [ ! -s data/prisma_eans_to_probe.csv ]; then
+            echo "::notice::No new Prisma EANs to probe this run."
+          fi
+
+      # Gate the following steps on probe input presence
+      - name: Check probe input exists
+        id: has_probe
+        shell: bash
+        run: |
+          if [ -s data/prisma_eans_to_probe.csv ]; then
+            echo "has=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Probe EANs on Selver (Playwright)
+        if: steps.has_probe.outputs.has == 'true'
         env:
           PYTHONUNBUFFERED: "1"
         run: |
           set -euo pipefail
           DELAY="${{ github.event.inputs.delay_seconds || '0.4' }}"
+          # pass delay as third arg if your script accepts it (safe if it ignores)
           python scripts/selver_probe_ean_pw.py \
             data/prisma_eans_to_probe.csv \
-            data/selver_probe.csv
+            data/selver_probe.csv \
+            "$DELAY"
 
       - name: Upsert probe results (candidates + prices + aliases)
+        if: steps.has_probe.outputs.has == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -169,8 +192,10 @@ jobs:
 
           -- summary
           SELECT
-            (SELECT COUNT(*) FROM staging_selver_probe)                                        AS probed,
-            (SELECT COUNT(*) FROM prices pr JOIN stores s ON s.id=pr.store_id AND s.chain='Selver' AND s.is_online=TRUE) AS selver_price_rows;
+            (SELECT COUNT(*) FROM staging_selver_probe) AS probed,
+            (SELECT COUNT(*) FROM prices pr
+               JOIN stores s ON s.id=pr.store_id
+              WHERE s.chain='Selver' AND s.is_online=TRUE) AS selver_price_rows;
           SQL
 
       - name: Upload probe artifacts
