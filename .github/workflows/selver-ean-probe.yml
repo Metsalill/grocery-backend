@@ -1,0 +1,185 @@
+name: "Selver EAN Probe (from Prisma EANs)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      batch_limit:
+        description: "How many EANs to probe this run"
+        required: false
+        default: "300"
+      delay_seconds:
+        description: "Delay between page hits (seconds)"
+        required: false
+        default: "0.4"
+  schedule:
+    - cron: "15 2 * * *"   # daily 02:15 UTC (adjust/disable as you like)
+
+concurrency:
+  group: selver-ean-probe
+  cancel-in-progress: true
+
+jobs:
+  probe-and-upsert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps (Playwright)
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Install psql client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Prepare workspace
+        run: mkdir -p data
+
+      - name: Verify probe script present
+        run: |
+          test -f scripts/selver_probe_ean_pw.py || (echo "Missing scripts/selver_probe_ean_pw.py" && exit 1)
+
+      - name: Build list of Prisma EANs to probe on Selver
+        shell: bash
+        run: |
+          set -euo pipefail
+          LIM="${{ github.event.inputs.batch_limit || '300' }}"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\COPY (
+            WITH prisma AS (
+              SELECT ean
+              FROM products
+              WHERE ean ~ '^[0-9]+$' AND source_url ILIKE '%prismamarket.ee%'
+            ),
+            selver_seen AS (
+              SELECT DISTINCT regexp_replace(ean_raw::text,'\\D','','g') AS ean FROM selver_candidates
+              UNION
+              SELECT DISTINCT pe.ean_norm
+              FROM product_eans pe
+              JOIN prices pr ON pr.product_id = pe.product_id
+              JOIN stores s  ON s.id = pr.store_id AND s.chain ILIKE 'Selver'
+            )
+            SELECT p.ean
+            FROM prisma p
+            LEFT JOIN selver_seen s ON s.ean = p.ean
+            WHERE s.ean IS NULL
+            ORDER BY p.ean
+            LIMIT " || LIM
+          ) TO 'data/prisma_eans_to_probe.csv' CSV HEADER"
+
+      - name: Probe EANs on Selver (Playwright)
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          set -euo pipefail
+          DELAY="${{ github.event.inputs.delay_seconds || '0.4' }}"
+          python scripts/selver_probe_ean_pw.py \
+            data/prisma_eans_to_probe.csv \
+            data/selver_probe.csv
+
+      - name: Upsert probe results (candidates + prices + aliases)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -s data/selver_probe.csv ]; then
+            echo "No probe output — skipping upsert."
+            exit 0
+          fi
+
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          -- temp staging for this session
+          CREATE TEMP TABLE staging_selver_probe(
+            ext_id    text,
+            url       text,
+            ean       text,
+            name      text,
+            price_raw text,
+            size_text text
+          );
+          \copy staging_selver_probe FROM 'data/selver_probe.csv' CSV HEADER
+
+          -- ensure exactly one online Selver store exists
+          INSERT INTO stores (name, chain, is_online)
+          SELECT 'Selver e-Selver', 'Selver', TRUE
+          WHERE NOT EXISTS (SELECT 1 FROM stores WHERE chain='Selver' AND is_online=TRUE);
+
+          -- 1) track as candidates (idempotent)
+          INSERT INTO selver_candidates
+            (ext_id, ean_norm, ean_raw, name, size_text, last_seen)
+          SELECT
+            COALESCE(url, ext_id) AS ext_id,
+            regexp_replace(ean,'\\D','','g') AS ean_norm,
+            ean AS ean_raw,
+            NULLIF(name,'') AS name,
+            NULLIF(size_text,'') AS size_text,
+            now()
+          FROM staging_selver_probe
+          ON CONFLICT (ext_id) DO UPDATE
+            SET last_seen = now(),
+                name      = COALESCE(EXCLUDED.name, selver_candidates.name),
+                ean_raw   = COALESCE(EXCLUDED.ean_raw, selver_candidates.ean_raw),
+                size_text = COALESCE(EXCLUDED.size_text, selver_candidates.size_text);
+
+          -- 2) upsert price for the single online Selver store (only if numeric price parsed)
+          WITH parsed AS (
+            SELECT
+              pe.product_id,
+              NULLIF(replace(regexp_replace(price_raw, '[^0-9,.-]', '', 'g'), ',', '.'), '')::numeric AS price_num,
+              COALESCE(url, ext_id) AS source_url
+            FROM staging_selver_probe sp
+            JOIN product_eans pe ON pe.ean_norm = regexp_replace(sp.ean,'\\D','','g')
+          ),
+          dedup AS (
+            SELECT DISTINCT ON (product_id)
+                   product_id, price_num, source_url
+            FROM parsed
+            WHERE price_num IS NOT NULL
+            ORDER BY product_id, price_num
+          )
+          INSERT INTO prices (store_id, product_id, price, currency, collected_at, source_url)
+          SELECT
+            (SELECT id FROM stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1),
+            d.product_id,
+            d.price_num, 'EUR', now(), d.source_url
+          FROM dedup d
+          ON CONFLICT (product_id, store_id) DO UPDATE
+            SET price        = EXCLUDED.price,
+                currency     = EXCLUDED.currency,
+                collected_at = EXCLUDED.collected_at,
+                source_url   = EXCLUDED.source_url;
+
+          -- 3) add name aliases to improve name resolution
+          INSERT INTO product_aliases (product_id, alias)
+          SELECT pe.product_id, left(btrim(sp.name), 200)
+          FROM staging_selver_probe sp
+          JOIN product_eans pe ON pe.ean_norm = regexp_replace(sp.ean,'\\D','','g')
+          WHERE sp.name IS NOT NULL AND btrim(sp.name) <> ''
+          ON CONFLICT (product_id, alias) DO NOTHING;
+
+          -- summary
+          SELECT
+            (SELECT COUNT(*) FROM staging_selver_probe)                                        AS probed,
+            (SELECT COUNT(*) FROM prices pr JOIN stores s ON s.id=pr.store_id AND s.chain='Selver' AND s.is_online=TRUE) AS selver_price_rows;
+          SQL
+
+      - name: Upload probe artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selver-ean-probe-${{ github.run_id }}
+          path: |
+            data/prisma_eans_to_probe.csv
+            data/selver_probe.csv
+          if-no-files-found: warn
+          retention-days: 7
