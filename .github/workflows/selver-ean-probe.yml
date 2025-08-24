@@ -76,7 +76,7 @@ jobs:
                   AND source_url ILIKE '%prismamarket.ee%'
               ),
               selver_seen AS (
-                SELECT DISTINCT regexp_replace(ean_raw::text,'\\D','','g') AS ean
+                SELECT DISTINCT regexp_replace(ean_raw::text,'[^0-9]','', 'g') AS ean
                 FROM selver_candidates
                 UNION
                 SELECT DISTINCT p.ean
@@ -153,7 +153,7 @@ jobs:
             'CREATE TEMP TABLE parsed_probe AS' \
             'SELECT' \
             '  COALESCE(url, ext_id) AS ext_id,' \
-            "  regexp_replace(ean,'\\D','','g') AS ean_norm," \
+            "  regexp_replace(ean,'[^0-9]','', 'g') AS ean_norm," \
             '  ean AS ean_raw,' \
             '  CASE WHEN length(btrim(name))=0 THEN NULL ELSE name END AS name,' \
             '  CASE WHEN length(btrim(size_text))=0 THEN NULL ELSE size_text END AS size_text,' \
@@ -197,7 +197,7 @@ jobs:
             '  ean_raw       = COALESCE(EXCLUDED.ean_raw, selver_candidates.ean_raw),' \
             '  last_seen     = now();' \
             '' \
-            '-- 3) aliases: filter junk + dedup; avoid global unique (lower(alias)) conflicts' \
+            '-- 3) aliases: filter junk + dedup by lower(alias); do not rely on a named constraint' \
             'WITH cand AS (' \
             '  SELECT pe.product_id,' \
             '         left(btrim(pp.name), 200) AS alias,' \
@@ -211,10 +211,16 @@ jobs:
             '),' \
             'dedup AS (' \
             '  SELECT DISTINCT product_id, alias FROM cand' \
+            '),' \
+            'to_ins AS (' \
+            '  SELECT d.product_id, d.alias' \
+            '  FROM dedup d' \
+            '  LEFT JOIN product_aliases pa ON lower(pa.alias) = lower(d.alias)' \
+            '  WHERE pa.alias IS NULL' \
             ')' \
             'INSERT INTO product_aliases (product_id, alias)' \
-            'SELECT product_id, alias FROM dedup' \
-            'ON CONFLICT ON CONSTRAINT uq_product_alias_lower DO NOTHING;' \
+            'SELECT product_id, alias FROM to_ins' \
+            'ON CONFLICT DO NOTHING;' \
             '' \
             '-- summary' \
             'SELECT' \
