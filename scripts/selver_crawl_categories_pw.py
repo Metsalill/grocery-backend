@@ -670,7 +670,7 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
         # Collect unique HREFs but still click (stability)
         try:
             hrefs = page.evaluate("""
-              [...document.querySelectorAll('a[href^="/"]:not([href*="#"])')]
+              [...document.querySelectorAll('a.href^="/"]:not([href*="#"])')]
                 .filter(a => a.closest('article, .product, .product-card, .product-item, li'))
                 .map(a => a.getAttribute('href'))
             """)
