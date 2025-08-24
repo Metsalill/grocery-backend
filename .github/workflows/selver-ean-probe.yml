@@ -12,7 +12,7 @@ on:
         required: false
         default: "0.4"
   schedule:
-    - cron: "15 2 * * *"   # daily 02:15 UTC (adjust/disable as you like)
+    - cron: "15 2 * * *"   # daily 02:15 UTC (adjust/disable as needed)
 
 concurrency:
   group: selver-ean-probe
@@ -35,23 +35,32 @@ jobs:
           python-version: "3.11"
 
       - name: Install deps (Playwright)
+        shell: bash
         run: |
+          set -euo pipefail
           pip install playwright
           python -m playwright install --with-deps chromium
 
       - name: Install psql client
+        shell: bash
         run: |
+          set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
       - name: Prepare workspace
-        run: mkdir -p data
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data
 
       - name: Verify probe script present
+        shell: bash
         run: |
-          test -f scripts/selver_probe_ean_pw.py || (echo "Missing scripts/selver_probe_ean_pw.py" && exit 1)
+          set -euo pipefail
+          test -f scripts/selver_probe_ean_pw.py || { echo "Missing scripts/selver_probe_ean_pw.py"; exit 1; }
 
-      # Build Prisma EAN backlog (FIX: pass :lim & use COPY TO STDOUT)
+      # Build Prisma EAN backlog (FIXED: use COPY TO STDOUT and psql var :lim)
       - name: Build list of Prisma EANs to probe on Selver
         shell: bash
         run: |
@@ -84,7 +93,7 @@ jobs:
           " > data/prisma_eans_to_probe.csv
 
           if [ ! -s data/prisma_eans_to_probe.csv ]; then
-            echo '::notice::No new Prisma EANs to probe this run.'
+            echo "::notice::No new Prisma EANs to probe this run."
           fi
 
       - name: Check probe input exists
@@ -101,6 +110,7 @@ jobs:
         if: steps.has_probe.outputs.has == 'true'
         env:
           PYTHONUNBUFFERED: "1"
+        shell: bash
         run: |
           set -euo pipefail
           DELAY="${{ github.event.inputs.delay_seconds || '0.4' }}"
@@ -109,7 +119,6 @@ jobs:
             data/selver_probe.csv \
             "$DELAY"
 
-      # Upsert results (FIX: do \copy via separate -c; heredoc contains only plain SQL)
       - name: Upsert probe results (candidates + prices + aliases)
         if: steps.has_probe.outputs.has == 'true'
         shell: bash
@@ -120,7 +129,7 @@ jobs:
             exit 0
           fi
 
-          # 1) temp table
+          # 1) create temp table
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
             CREATE TEMP TABLE staging_selver_probe(
               ext_id    text,
@@ -131,76 +140,78 @@ jobs:
               size_text text
             );"
 
-          # 2) load CSV (psql meta run via -c so no YAML/heredoc issues)
+          # 2) load CSV into temp table (use meta in separate -c)
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy staging_selver_probe FROM 'data/selver_probe.csv' CSV HEADER"
 
-          # 3) do the rest in one SQL batch
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-            -- ensure exactly one online Selver store exists
-            INSERT INTO stores (name, chain, is_online)
-            SELECT 'Selver e-Selver', 'Selver', TRUE
-            WHERE NOT EXISTS (SELECT 1 FROM stores WHERE chain='Selver' AND is_online=TRUE);
+          # 3) write SQL to a temp file to avoid YAML/heredoc pitfalls, then run it
+          cat >/tmp/upsert_probe.sql <<'SQL'
+          -- ensure exactly one online Selver store exists
+          INSERT INTO stores (name, chain, is_online)
+          SELECT 'Selver e-Selver', 'Selver', TRUE
+          WHERE NOT EXISTS (SELECT 1 FROM stores WHERE chain='Selver' AND is_online=TRUE);
 
-            -- candidates
-            INSERT INTO selver_candidates
-              (ext_id, ean_norm, ean_raw, name, size_text, last_seen)
+          -- 1) candidates (idempotent)
+          INSERT INTO selver_candidates
+            (ext_id, ean_norm, ean_raw, name, size_text, last_seen)
+          SELECT
+            COALESCE(url, ext_id) AS ext_id,
+            regexp_replace(ean,'\D','','g') AS ean_norm,
+            ean AS ean_raw,
+            NULLIF(name,'') AS name,
+            NULLIF(size_text,'') AS size_text,
+            now()
+          FROM staging_selver_probe
+          ON CONFLICT (ext_id) DO UPDATE
+            SET last_seen = now(),
+                name      = COALESCE(EXCLUDED.name, selver_candidates.name),
+                ean_raw   = COALESCE(EXCLUDED.ean_raw, selver_candidates.ean_raw),
+                size_text = COALESCE(EXCLUDED.size_text, selver_candidates.size_text);
+
+          -- 2) prices (only if numeric)
+          WITH parsed AS (
             SELECT
-              COALESCE(url, ext_id) AS ext_id,
-              regexp_replace(ean,'\D','','g') AS ean_norm,
-              ean AS ean_raw,
-              NULLIF(name,'') AS name,
-              NULLIF(size_text,'') AS size_text,
-              now()
-            FROM staging_selver_probe
-            ON CONFLICT (ext_id) DO UPDATE
-              SET last_seen = now(),
-                  name      = COALESCE(EXCLUDED.name, selver_candidates.name),
-                  ean_raw   = COALESCE(EXCLUDED.ean_raw, selver_candidates.ean_raw),
-                  size_text = COALESCE(EXCLUDED.size_text, selver_candidates.size_text);
-
-            -- prices (only numeric)
-            WITH parsed AS (
-              SELECT
-                pe.product_id,
-                NULLIF(replace(regexp_replace(price_raw, '[^0-9,.-]', '', 'g'), ',', '.'), '')::numeric AS price_num,
-                COALESCE(url, ext_id) AS source_url
-              FROM staging_selver_probe sp
-              JOIN product_eans pe ON pe.ean_norm = regexp_replace(sp.ean,'\D','','g')
-            ),
-            dedup AS (
-              SELECT DISTINCT ON (product_id)
-                     product_id, price_num, source_url
-              FROM parsed
-              WHERE price_num IS NOT NULL
-              ORDER BY product_id, price_num
-            )
-            INSERT INTO prices (store_id, product_id, price, currency, collected_at, source_url)
-            SELECT
-              (SELECT id FROM stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1),
-              d.product_id,
-              d.price_num, 'EUR', now(), d.source_url
-            FROM dedup d
-            ON CONFLICT (product_id, store_id) DO UPDATE
-              SET price        = EXCLUDED.price,
-                  currency     = EXCLUDED.currency,
-                  collected_at = EXCLUDED.collected_at,
-                  source_url   = EXCLUDED.source_url;
-
-            -- aliases
-            INSERT INTO product_aliases (product_id, alias)
-            SELECT pe.product_id, left(btrim(sp.name), 200)
+              pe.product_id,
+              NULLIF(replace(regexp_replace(price_raw, '[^0-9,.-]', '', 'g'), ',', '.'), '')::numeric AS price_num,
+              COALESCE(url, ext_id) AS source_url
             FROM staging_selver_probe sp
             JOIN product_eans pe ON pe.ean_norm = regexp_replace(sp.ean,'\D','','g')
-            WHERE sp.name IS NOT NULL AND btrim(sp.name) <> ''
-            ON CONFLICT (product_id, alias) DO NOTHING;
+          ),
+          dedup AS (
+            SELECT DISTINCT ON (product_id)
+                   product_id, price_num, source_url
+            FROM parsed
+            WHERE price_num IS NOT NULL
+            ORDER BY product_id, price_num
+          )
+          INSERT INTO prices (store_id, product_id, price, currency, collected_at, source_url)
+          SELECT
+            (SELECT id FROM stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1),
+            d.product_id,
+            d.price_num, 'EUR', now(), d.source_url
+          FROM dedup d
+          ON CONFLICT (product_id, store_id) DO UPDATE
+            SET price        = EXCLUDED.price,
+                currency     = EXCLUDED.currency,
+                collected_at = EXCLUDED.collected_at,
+                source_url   = EXCLUDED.source_url;
 
-            -- summary
-            SELECT
-              (SELECT COUNT(*) FROM staging_selver_probe) AS probed,
-              (SELECT COUNT(*) FROM prices pr
-                 JOIN stores s ON s.id=pr.store_id
-                WHERE s.chain='Selver' AND s.is_online=TRUE) AS selver_price_rows;
-SQL
+          -- 3) aliases
+          INSERT INTO product_aliases (product_id, alias)
+          SELECT pe.product_id, left(btrim(sp.name), 200)
+          FROM staging_selver_probe sp
+          JOIN product_eans pe ON pe.ean_norm = regexp_replace(sp.ean,'\D','','g')
+          WHERE sp.name IS NOT NULL AND btrim(sp.name) <> ''
+          ON CONFLICT (product_id, alias) DO NOTHING;
+
+          -- summary
+          SELECT
+            (SELECT COUNT(*) FROM staging_selver_probe) AS probed,
+            (SELECT COUNT(*) FROM prices pr
+               JOIN stores s ON s.id=pr.store_id
+              WHERE s.chain='Selver' AND s.is_online=TRUE) AS selver_price_rows;
+          SQL
+
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/upsert_probe.sql
 
       - name: Upload probe artifacts
         if: always()
