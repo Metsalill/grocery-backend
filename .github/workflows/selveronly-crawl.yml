@@ -162,13 +162,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: selver-crawl-shard-${{ matrix.shard }}-${{ github.run_id }}
-        path: |
-          data/selver.csv
-          data/selver_run.log
-          data/selver_run.err
-          data/selver_debug/**/*.png
-        if-no-files-found: warn
-        retention-days: 7
+          path: |
+            data/selver.csv
+            data/selver_run.log
+            data/selver_run.err
+            data/selver_debug/**/*.png
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Prepare DB (staging & helper tables)
         shell: bash
