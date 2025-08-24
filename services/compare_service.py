@@ -109,24 +109,18 @@ async def _resolve_products(conn: asyncpg.Connection, names: List[str]) -> Dict[
     Resolve products by exact, case-insensitive match against products.name OR product_aliases.alias.
 
     Returns mapping:
-        normalized_input_name -> product row (id, name, size_text, net_qty, net_unit, pack_count)
-
-    Why map by *input* name?
-        The rest of the pipeline looks up by_norm[_norm(original_name)].
-        If a user types an alias (e.g., "coke 1.5l"), we must key the map by that alias,
-        not by the canonical product name, otherwise it would look "missing".
-
-    Falls back to products-only if the aliases table/columns are missing.
+        normalized_input_name -> product row (id, ean, name, size_text, net_qty, net_unit, pack_count)
     """
     if not names:
         return {}
     keys = sorted({ _norm(n) for n in names if n and n.strip() })
 
+    # NEW: select p.ean as well
     sql_with_aliases = """
     WITH keys AS (SELECT unnest($1::text[]) AS k)
     SELECT DISTINCT ON (keys.k)
       keys.k AS match_key,
-      p.id, p.name, p.size_text, p.net_qty, p.net_unit, p.pack_count
+      p.id, p.ean, p.name, p.size_text, p.net_qty, p.net_unit, p.pack_count
     FROM products p
     LEFT JOIN product_aliases a ON a.product_id = p.id
     JOIN keys ON keys.k = lower(p.name) OR keys.k = lower(a.alias)
@@ -137,7 +131,7 @@ async def _resolve_products(conn: asyncpg.Connection, names: List[str]) -> Dict[
     WITH keys AS (SELECT unnest($1::text[]) AS k)
     SELECT DISTINCT ON (keys.k)
       keys.k AS match_key,
-      p.id, p.name, p.size_text, p.net_qty, p.net_unit, p.pack_count
+      p.id, p.ean, p.name, p.size_text, p.net_qty, p.net_unit, p.pack_count
     FROM products p
     JOIN keys ON keys.k = lower(p.name)
     ORDER BY keys.k, p.id
@@ -148,7 +142,6 @@ async def _resolve_products(conn: asyncpg.Connection, names: List[str]) -> Dict[
     except (pgerr.UndefinedTableError, pgerr.UndefinedColumnError):
         rows = await conn.fetch(sql_products_only, keys)
 
-    # Map by the *input* normalized key so alias lookups succeed.
     return { _rv(r, "match_key"): r for r in rows }
 
 async def _latest_prices(
@@ -190,8 +183,7 @@ async def compare_basket_service(
       1) pick candidate stores by geo
       2) resolve products
       3) fetch latest prices for (product, store)
-      4) compute totals per store
-    Returns dict consumed by compare.py endpoint.
+      4) compute totals per store (+ exclusives)
     """
     async with pool.acquire() as conn:
         # 1) candidate stores
@@ -251,10 +243,16 @@ async def compare_basket_service(
         # 3) latest prices
         latest = await _latest_prices(conn, product_ids_unique, store_ids)
         prices_by_store: Dict[int, Dict[int, float]] = {}
+        # NEW: track, for each product, how many candidate stores have a price
+        have_set_by_product: Dict[int, set] = {}
         for r in latest:
             sid = int(r["store_id"])
             pid = int(r["product_id"])
             prices_by_store.setdefault(sid, {})[pid] = float(r["price"])
+            have_set_by_product.setdefault(pid, set()).add(sid)
+
+    # precompute store counts per product (for exclusives)
+    have_count_by_product: Dict[int, int] = {pid: len(sids) for pid, sids in have_set_by_product.items()}
 
     # 4) compute totals per store
     results: List[Dict[str, Any]] = []
@@ -264,6 +262,9 @@ async def compare_basket_service(
         total = 0.0
         missing_for_store: List[str] = []
         lines: List[Dict[str, Any]] = []
+        items_available = 0  # NEW
+        items_missing = 0    # NEW
+        exclusive_eans: List[str] = []  # NEW
 
         for name in requested_names:
             n = _norm(name)
@@ -275,16 +276,26 @@ async def compare_basket_service(
 
             price_one = store_prices.get(pid)
             if price_one is None:
+                items_missing += 1
                 missing_for_store.append(prod["name"])
                 continue
 
+            # available here
+            items_available += 1
             line_total = float(price_one) * qty
             total += line_total
+
+            # exclusive? only this store among candidates
+            if have_count_by_product.get(pid, 0) == 1:
+                ean_val = _rv(prod, "ean")
+                if ean_val:
+                    exclusive_eans.append(str(ean_val))
 
             if include_lines:
                 unit_price = _unit_price_line(prod, float(price_one))
                 lines.append({
                     "product": prod["name"],
+                    "ean": _rv(prod, "ean"),  # NEW (useful for UI/tooltips)
                     "qty": qty,
                     "price_each": _round2(price_one),
                     "line_total": _round2(line_total),
@@ -302,6 +313,9 @@ async def compare_basket_service(
             "chain": s["chain"],
             "distance_km": _round2(float(s["distance_km"])) if s["distance_km"] is not None else None,
             "total_price": total_price,
+            "items_available": items_available,   # NEW
+            "items_missing": items_missing,       # NEW
+            "exclusive_eans": exclusive_eans,     # NEW
             "missing_items": missing_for_store,
             **({"lines": lines} if include_lines else {}),
         })
