@@ -4,18 +4,12 @@
 """
 Selver category crawler → CSV (staging_selver_products)
 
-What's new in this patch (Aug 2025):
-- **Stricter product URL detection**:
-  - Treat as PDP when path starts with `/toode/` (or `/e-selver/toode/`) OR
-    when it's a single-segment slug that contains at least one digit (e.g. `/likoor-jagermeister-70-cl`).
-  - Reject multi-segment cosmetics/utility paths (e.g. `/enesehooldustarbed/.../hugieenilised-salvratikud-vatid`).
-  - Still accept both `/e/...` and non-`/e/` product URLs.
-- **Click selectors tightened** so we only click real product cards (avoid header/footer links).
-- **Important**: In click mode we DO NOT filter listing anchors by URL shape before clicking
-  (many legit PDP links were being dropped). We dedupe and validate only after PDP extraction.
-- Kept: canonical guard removal, shard-first seeds, JSON-LD/EAN extraction, router, etc.
-
-CSV columns: ext_id, name, ean_raw, sku_raw, size_text, price, currency, category_path, category_leaf
+Aug 2025:
+- PDP detection: /toode/ OR single-segment slug with a digit (accept /e-selver too).
+- Cosmetics/utility trees excluded.
+- Click-mode fix: **navigate to collected HREFs** instead of trying to click DOM nodes.
+  (fall back to a click only if direct navigation fails)
+- Safer product-card selectors + per-page discovery debug.
 """
 
 from __future__ import annotations
@@ -24,21 +18,16 @@ from typing import Dict, Set, Tuple, List, Optional
 from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit, parse_qs, urlencode
 from playwright.sync_api import sync_playwright
 
-# ---------------------------------------------------------------------------
-# Config
 BASE = "https://www.selver.ee"
-
 OUTPUT = os.getenv("OUTPUT_CSV", "data/selver.csv")
 REQ_DELAY = float(os.getenv("REQ_DELAY", "0.6"))
-PAGE_LIMIT = int(os.getenv("PAGE_LIMIT", "0"))  # 0 = no limit
+PAGE_LIMIT = int(os.getenv("PAGE_LIMIT", "0"))
 CATEGORIES_FILE = os.getenv("CATEGORIES_FILE", "data/selver_categories.txt")
 
-USE_ROUTER = int(os.getenv("USE_ROUTER", "1")) == 1
+USE_ROUTER     = int(os.getenv("USE_ROUTER", "1")) == 1
 CLICK_PRODUCTS = int(os.getenv("CLICK_PRODUCTS", "0")) == 1
-LOG_CONSOLE = (os.getenv("LOG_CONSOLE", "0") or "0").lower()  # 0|off, warn, all
+LOG_CONSOLE    = (os.getenv("LOG_CONSOLE", "0") or "0").lower()  # 0|off, warn, all
 
-# Strict allowlist of FOOD roots/leaves (canonical, no /e-selver/)
-# Include both variants seen on-site for dry goods to be safe.
 STRICT_ALLOWLIST = [
     "/puu-ja-koogiviljad",
     "/liha-ja-kalatooted",
@@ -74,7 +63,6 @@ BANNED_KEYWORDS = {
 
 SIZE_RE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
 
-# ---------- Third-party noise to block ----------
 BLOCK_HOSTS = {
     "adobe.com","assets.adobedtm.com","adobedtm.com","demdex.net","omtrdc.net",
     "googletagmanager.com","google-analytics.com","doubleclick.net","facebook.net",
@@ -99,80 +87,56 @@ NON_PRODUCT_KEYWORDS = {
     "blog", "pood", "poed", "kaart", "arikliend", "karjaar", "karjäär",
 }
 
-# ---------------------------------------------------------------------------
-# Small utils
-
 def normspace(s: str) -> str:
     return re.sub(r"\s+", " ", s or "").strip()
 
 def guess_size_from_title(title: str) -> str:
     m = SIZE_RE.search(title or "")
-    if not m:
-        return ""
-    num, unit = m.groups()
-    return f"{num.replace(',', '.')} {unit.lower()}"
+    if not m: return ""
+    n,u = m.groups()
+    return f"{n.replace(',', '.')} {u.lower()}"
 
 def _strip_eselver_prefix(path: str) -> str:
     return path.replace("/e-selver", "", 1) if path.startswith("/e-selver/") else path
 
 def _clean_abs(href: str) -> Optional[str]:
-    if not href:
-        return None
+    if not href: return None
     url = urljoin(BASE, href)
     parts = urlsplit(url)
     host = (parts.netloc or urlparse(BASE).netloc).lower()
-    if host not in ALLOWED_HOSTS:
-        return None
+    if host not in ALLOWED_HOSTS: return None
     path = _strip_eselver_prefix(parts.path)
     return urlunsplit((parts.scheme, parts.netloc, path.rstrip("/"), "", ""))
 
 def canonical_from_page(page) -> Optional[str]:
     try:
         href = page.evaluate("""(d=>d.querySelector('link[rel="canonical"]')?.href||null)(document)""")
-        if href:
-            return _clean_abs(href)
-    except Exception:
-        pass
+        if href: return _clean_abs(href)
+    except Exception: pass
     try:
         return _clean_abs(page.url)
     except Exception:
         return None
 
 def _in_allowlist(path: str) -> bool:
-    if not STRICT_ALLOWLIST:
-        return True
+    if not STRICT_ALLOWLIST: return True
     p = (path or "/").rstrip("/")
     return any(p == root or p.startswith(root + "/") for root in STRICT_ALLOWLIST)
 
-# ---- Product URL check (tight) --------------------------------------------
-# PDP if:
-#  - path starts with /toode/ (or /e-selver/toode/), OR
-#  - single-segment slug containing at least one digit (typical for PDPs),
-# and NOT obviously utility/category paths.
 def _is_selver_product_like(url: str) -> bool:
     u = urlparse(url)
     host = (u.netloc or urlparse(BASE).netloc).lower()
-    if host not in ALLOWED_HOSTS:
-        return False
+    if host not in ALLOWED_HOSTS: return False
     path = _strip_eselver_prefix((u.path or "/").lower())
-    if path.startswith("/ru/"):
-        return False
-    if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS):
-        return False
-    if any(kw in path for kw in NON_PRODUCT_KEYWORDS):
-        return False
-
-    # explicit PDP pattern
-    if path.startswith("/toode/"):
-        return True
-
-    # single-segment slug with at least one digit (e.g. weights/volumes)
+    if path.startswith("/ru/"): return False
+    if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS): return False
+    if any(kw in path for kw in NON_PRODUCT_KEYWORDS): return False
+    if path.startswith("/toode/"): return True
     segs = [s for s in path.strip("/").split("/") if s]
     if len(segs) == 1:
         last = segs[0]
         if "-" in last and any(ch.isdigit() for ch in last):
             return True
-
     return False
 
 def _is_category_like_path(path: str) -> bool:
@@ -188,7 +152,6 @@ def _is_category_like_path(path: str) -> bool:
     if any(ch.isdigit() for ch in last): return False
     return any("-" in s for s in segs)
 
-# Extra helpers for EAN/SKU parsing
 DIGITS_RE = re.compile(r"\D+")
 def _digits(s: str) -> str: return DIGITS_RE.sub("", s or "")
 
@@ -201,10 +164,7 @@ def _valid_ean13(code: str) -> bool:
 
 def _pick_ean_from_html(html: str) -> str:
     if not html: return ""
-    label_pat = re.compile(
-        r"(?:\b(?:ean|gtin|ribakood|triipkood|barcode)\b)[^0-9]{0,40}(\d{8,14})",
-        re.I | re.S,
-    )
+    label_pat = re.compile(r"(?:\b(?:ean|gtin|ribakood|triipkood|barcode)\b)[^0-9]{0,40}(\d{8,14})", re.I | re.S)
     cand = [m.group(1) for m in label_pat.finditer(html)]
     cand = list(dict.fromkeys(cand))
     if not cand:
@@ -217,9 +177,6 @@ def _pick_ean_from_html(html: str) -> str:
         if re.fullmatch(r"\d{13}", d): return d
     m8 = re.search(r"\b(\d{8})\b", html)
     return m8.group(1) if m8 else ""
-
-# ---------------------------------------------------------------------------
-# Cookies / navigation
 
 def accept_cookies(page):
     for sel in [
@@ -269,17 +226,12 @@ def _wait_pdp_ready(page):
                 return
         time.sleep(0.25)
 
-# Expand hidden PDP sections (tabs/accordions) — often holds EAN
 def _expand_pdp_details(page):
-    selectors = [
-        "button:has-text('Lisainfo')",
-        "button:has-text('Toote info')",
-        "[role='tab']:has-text('Lisainfo')",
-        "[role='tab']:has-text('Toote info')",
-        "[data-toggle='collapse']",
-        "[aria-controls*='detail']",
-    ]
-    for sel in selectors:
+    for sel in [
+        "button:has-text('Lisainfo')","button:has-text('Toote info')",
+        "[role='tab']:has-text('Lisainfo')","[role='tab']:has-text('Toote info')",
+        "[data-toggle='collapse']","[aria-controls*='detail']",
+    ]:
         try:
             el = page.locator(sel).first
             if el and el.count() > 0 and el.is_enabled():
@@ -287,9 +239,6 @@ def _expand_pdp_details(page):
                 time.sleep(0.15)
         except Exception:
             pass
-
-# ---------------------------------------------------------------------------
-# Discovery
 
 def _extract_category_links(page) -> List[str]:
     _wait_listing_ready(page)
@@ -331,9 +280,6 @@ def discover_categories(page, start_urls: List[str]) -> List[str]:
             seen.add(u); out.append(u)
     return out
 
-# ---------------------------------------------------------------------------
-# Listing → product links (pagination with ?page=N)
-
 def _with_page(url: str, n: int) -> str:
     parts = urlsplit(url)
     qs = parse_qs(parts.query)
@@ -373,7 +319,6 @@ def _extract_product_hrefs(page) -> List[str]:
     return list(dict.fromkeys(links))
 
 def collect_product_links_from_listing(page, seed_url: str) -> Tuple[Set[str], Dict[str, str]]:
-    """Returns (unique PDP links, mapping link->this listing page URL)."""
     links: Set[str] = set()
     link2listing: Dict[str, str] = {}
 
@@ -400,9 +345,6 @@ def collect_product_links_from_listing(page, seed_url: str) -> Tuple[Set[str], D
         print("[selver]   no PDP links found on listing.")
     return links, link2listing
 
-# ---------------------------------------------------------------------------
-# JSON-LD helpers
-
 def jsonld_all(page) -> List[dict]:
     out = []
     try:
@@ -411,10 +353,8 @@ def jsonld_all(page) -> List[dict]:
             raw = scripts.nth(i).inner_text()
             try:
                 obj = json.loads(raw)
-                if isinstance(obj, list):
-                    out.extend([x for x in obj if isinstance(x, dict)])
-                elif isinstance(obj, dict):
-                    out.append(obj)
+                if isinstance(obj, list): out.extend([x for x in obj if isinstance(x, dict)])
+                elif isinstance(obj, dict): out.append(obj)
             except Exception:
                 continue
     except Exception:
@@ -441,16 +381,12 @@ def jsonld_pick_breadcrumbs(blocks: List[dict]) -> List[str]:
                 continue
     return []
 
-# ---------------------------------------------------------------------------
-# PDP extraction (single source of truth — returns a row dict)
-
 def extract_price(page) -> tuple[float, str]:
     for sel in ["text=/€/","span:has-text('€')","div:has-text('€')"]:
         try:
             node = page.locator(sel).first
             if node and node.count() > 0:
-                txt = node.inner_text()
-                m = re.search(r"(\d+(?:[.,]\d+)?)\s*€", txt)
+                m = re.search(r"(\d+(?:[.,]\d+)?)\s*€", node.inner_text())
                 if m: return float(m.group(1).replace(",", ".")), "EUR"
         except Exception:
             pass
@@ -458,20 +394,14 @@ def extract_price(page) -> tuple[float, str]:
 
 def extract_ean_and_sku(page) -> tuple[str, str]:
     ean, sku = "", ""
-
-    # A) JSON-LD
     try:
         blocks = jsonld_all(page)
         prod = jsonld_pick_product(blocks)
         if prod:
             ean = _digits(str(prod.get("gtin13") or prod.get("gtin") or ""))
             sku = normspace(str(prod.get("sku") or ""))
-            if _valid_ean13(ean):
-                return ean, sku
-    except Exception:
-        pass
-
-    # B) Microdata/meta
+            if _valid_ean13(ean): return ean, sku
+    except Exception: pass
     try:
         got = page.evaluate("""
         () => {
@@ -490,14 +420,9 @@ def extract_ean_and_sku(page) -> tuple[str, str]:
         if got:
             ean = ean or _digits(got.get("gtin13") or got.get("gtin") or "")
             sku = sku or normspace(got.get("sku") or "")
-            if _valid_ean13(ean):
-                return ean, sku
-    except Exception:
-        pass
-
-    # C) Expand possible hidden details and scan HTML
-    _expand_pdp_details(page)
-    time.sleep(0.05)
+            if _valid_ean13(ean): return ean, sku
+    except Exception: pass
+    _expand_pdp_details(page); time.sleep(0.05)
     try:
         html = page.content()
         e_dom = _pick_ean_from_html(html)
@@ -505,14 +430,10 @@ def extract_ean_and_sku(page) -> tuple[str, str]:
         if not sku:
             m2 = re.search(r"\bSKU\b\D*([A-Z0-9_-]{3,})", html, re.I)
             if m2: sku = m2.group(1).strip()
-    except Exception:
-        pass
-
-    # Clean/validate final EAN
+    except Exception: pass
     if not _valid_ean13(ean):
         e13 = _digits(ean or "")
         ean = e13 if _valid_ean13(e13) else ""
-
     return ean, sku
 
 def breadcrumbs_dom(page) -> List[str]:
@@ -528,75 +449,43 @@ def breadcrumbs_dom(page) -> List[str]:
     return []
 
 def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optional[dict]:
-    """Build a single CSV row from the currently open PDP."""
     _wait_pdp_ready(page)
-    _expand_pdp_details(page)  # open accordions/tabs that may hold EAN
-
-    # Canonical/ext_id
+    _expand_pdp_details(page)
     ext_id = canonical_from_page(page) or product_url_hint
-    if not ext_id:
-        return None
-
+    if not ext_id: return None
     blocks = jsonld_all(page)
     prod_ld = jsonld_pick_product(blocks)
     crumbs_ld = jsonld_pick_breadcrumbs(blocks)
-
-    # Name
     name = normspace(prod_ld.get("name") or "") if prod_ld else ""
     if not name:
-        try:
-            name = normspace(page.locator("h1").first.inner_text())
-        except Exception:
-            name = ""
-    if not name:
-        return None
-
-    # EAN & SKU
+        try: name = normspace(page.locator("h1").first.inner_text())
+        except Exception: name = ""
+    if not name: return None
     ean, sku = "", ""
     if prod_ld:
         ean = _digits(str(prod_ld.get("gtin13") or prod_ld.get("gtin") or "")) or ""
         sku = normspace(str(prod_ld.get("sku") or ""))
     if not (ean and sku):
         e2, s2 = extract_ean_and_sku(page)
-        ean = ean or e2
-        sku = sku or s2
-
-    # Price & currency (must be > 0)
+        ean = ean or e2; sku = sku or s2
     price, currency = 0.0, "EUR"
     if prod_ld and "offers" in prod_ld:
-        offers = prod_ld["offers"]
-        if isinstance(offers, list) and offers:
-            offers = offers[0]
+        offers = prod_ld["offers"]; 
+        if isinstance(offers, list) and offers: offers = offers[0]
         try:
-            price = float(str(offers.get("price")).replace(",", "."))
-            currency = offers.get("priceCurrency") or currency
-        except Exception:
-            pass
+            price = float(str(offers.get("price")).replace(",", ".")); currency = offers.get("priceCurrency") or currency
+        except Exception: pass
     if price == 0.0:
         price, currency = extract_price(page)
-    if not price or price <= 0:
-        return None
-
-    # Breadcrumbs
+    if not price or price <= 0: return None
     crumbs = crumbs_ld or breadcrumbs_dom(page)
     cat_path = " / ".join(crumbs); cat_leaf = crumbs[-1] if crumbs else ""
-
     size_text = guess_size_from_title(name)
-
     return {
-        "ext_id": ext_id,
-        "name": name,
-        "ean_raw": ean,
-        "sku_raw": sku,
-        "size_text": size_text,
-        "price": f"{price:.2f}",
-        "currency": currency,
-        "category_path": cat_path,
-        "category_leaf": cat_leaf,
+        "ext_id": ext_id, "name": name, "ean_raw": ean, "sku_raw": sku,
+        "size_text": size_text, "price": f"{price:.2f}", "currency": currency,
+        "category_path": cat_path, "category_leaf": cat_leaf,
     }
-
-# ---------------------------------------------------------------------------
-# Request router (ON by default) — stronger filters
 
 BLOCK_TYPES = {"image", "font", "media", "stylesheet", "websocket", "manifest"}
 BLOCK_ACTIVE_TYPES = {"script", "xhr", "fetch", "eventsource"}
@@ -607,87 +496,48 @@ def _router(route, request):
         host = urlparse(url).netloc.lower()
         rtype = request.resource_type
         method = (getattr(request, "method", None) or "GET").upper()
-
-        # Kill known GTM SW iframes anywhere
-        if "service_worker" in url or "sw_iframe" in url:
-            return route.abort()
-
-        # Always allow Selver origin navigations / same-origin assets
-        if host.endswith("selver.ee"):
-            return route.continue_()
-
-        # Kill OPTIONS preflights etc. from foreign origins
-        if method == "OPTIONS":
-            return route.abort()
-
-        # Block noisy resource types for non-Selver origins
-        if rtype in BLOCK_TYPES or rtype in BLOCK_ACTIVE_TYPES:
-            return route.abort()
-
-        # Explicit domain blocklist
-        if any(host == d or host.endswith("." + d) for d in BLOCK_HOSTS):
-            return route.abort()
-
+        if "service_worker" in url or "sw_iframe" in url: return route.abort()
+        if host.endswith("selver.ee"): return route.continue_()
+        if method == "OPTIONS": return route.abort()
+        if rtype in BLOCK_TYPES or rtype in BLOCK_ACTIVE_TYPES: return route.abort()
+        if any(host == d or host.endswith("." + d) for d in BLOCK_HOSTS): return route.abort()
         return route.continue_()
     except Exception:
         return route.continue_()
 
-# ---------------------------------------------------------------------------
-# Click-through helpers
-
 def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
-    if not listing_url:
-        return False
-    if not safe_goto(page, listing_url):
-        return False
-    _wait_listing_ready(page)
-    time.sleep(0.2)
-
+    if not listing_url or not safe_goto(page, listing_url): return False
+    _wait_listing_ready(page); time.sleep(0.2)
     path = urlparse(product_url).path
-    eselver_path = "/e-selver" + path if not path.startswith("/e-selver/") else path
-    candidates = [
-        f"a[href$='{path}']",
-        f"a[href$='{path}/']",
-        f"a[href$='{eselver_path}']",
-        f"a[href$='{eselver_path}/']",
-        "a[href*='/toode/']",
-    ]
-
-    for sel in candidates:
+    es = "/e-selver" + path if not path.startswith("/e-selver/") else path
+    sels = [f"a[href$='{path}']", f"a[href$='{path}/']", f"a[href$='{es}']", f"a[href$='{es}/']", "a[href*='/toode/']"]
+    for sel in sels:
         a = page.locator(sel).first
         try:
             if a.count() > 0 and a.is_visible():
                 a.click(timeout=5000)
                 for _ in range(24):
                     up = urlparse(page.url).path.lower()
-                    if _is_selver_product_like(urljoin(BASE, up)):
-                        break
-                    if page.locator("h1").count() > 0:
-                        break
+                    if _is_selver_product_like(urljoin(BASE, up)) or page.locator("h1").count() > 0: break
                     time.sleep(0.25)
-                _wait_pdp_ready(page)
-                return True
+                _wait_pdp_ready(page); return True
         except Exception:
             continue
     return False
 
 def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_ext_ids: Set[str]) -> int:
-    """Click every product card on every page of a category, write rows, return count."""
     wrote = 0
-    if not safe_goto(page, seed_url):
-        return 0
+    if not safe_goto(page, seed_url): return 0
     _wait_listing_ready(page)
     max_pages = _max_page_number(page)
-    if PAGE_LIMIT > 0:
-        max_pages = min(max_pages, PAGE_LIMIT)
+    if PAGE_LIMIT > 0: max_pages = min(max_pages, PAGE_LIMIT)
 
     for n in range(1, max_pages + 1):
         url = seed_url if n == 1 else _with_page(seed_url, n)
         if not safe_goto(page, url): continue
-        _wait_listing_ready(page)
-        time.sleep(REQ_DELAY)
+        _wait_listing_ready(page); time.sleep(REQ_DELAY)
 
-        # Collect HREFs only from product-card-like elements (NO URL SHAPE FILTER).
+        # Collect from recognizable product cards (no URL-shape filter)
         try:
             hrefs = page.evaluate("""
               (() => {
@@ -700,9 +550,7 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
                 ];
                 const set = new Set();
                 for (const sel of sels) {
-                  document.querySelectorAll(sel).forEach(a => {
-                    const h = a.getAttribute('href'); if (h) set.add(h);
-                  });
+                  document.querySelectorAll(sel).forEach(a => { const h=a.getAttribute('href'); if(h) set.add(h); });
                 }
                 return [...set];
               })()
@@ -710,68 +558,54 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
         except Exception:
             hrefs = []
 
+        if not hrefs:
+            # extra safety: any '/toode/' anchors
+            try:
+                hrefs = page.evaluate("""
+                  [...document.querySelectorAll('a[href*="/toode/"]')]
+                    .map(a => a.getAttribute('href')).filter(Boolean)
+                """)
+            except Exception:
+                hrefs = []
+
         cleaned, seen = [], set()
         for h in hrefs:
             u = _clean_abs(h)
-            if not u:
-                continue
-            if u not in seen:
+            if u and u not in seen:
                 seen.add(u); cleaned.append(u)
 
-        # Fallback: if nothing collected, try any '/toode/' links on the page
-        if not cleaned:
-            try:
-                extra = page.evaluate("""
-                  [...document.querySelectorAll('a[href*="/toode/"]')]
-                    .map(a => a.getAttribute('href'))
-                    .filter(Boolean)
-                """)
-            except Exception:
-                extra = []
-            for h in extra:
-                u = _clean_abs(h)
-                if u and u not in seen:
-                    seen.add(u); cleaned.append(u)
+        print(f"[selver]   page {n}: discovered {len(cleaned)} candidate links")
 
         for href in cleaned:
-            path = urlparse(href).path
-            eselver_path = "/e-selver" + path if not path.startswith("/e-selver/") else path
-            loc = page.locator(
-                f"a[href$='{path}'], a[href$='{path}/'], "
-                f"a[href$='{eselver_path}'], a[href$='{eselver_path}/'], "
-                f"a[href*='/toode/']"
-            ).first
-            try:
-                if loc.count() == 0:
+            # Prefer direct navigation (robust), then fallback to DOM click from listing.
+            navigated = safe_goto(page, href)
+            if not navigated:
+                navigated = open_product_via_click(page, url, href)
+                if not navigated:
                     continue
-                loc.scroll_into_view_if_needed(timeout=3000)
-                loc.click(timeout=5000)
-                _wait_pdp_ready(page)
 
-                row = _extract_row_from_pdp(page, href)
-                if row:
-                    ext_id = row["ext_id"]
-                    if ext_id not in seen_ext_ids:
-                        writer.writerow(row)
-                        seen_ext_ids.add(ext_id)
-                        wrote += 1
+            _wait_pdp_ready(page)
+            row = _extract_row_from_pdp(page, href)
+            if row:
+                ext_id = row["ext_id"]
+                if ext_id not in seen_ext_ids:
+                    writer.writerow(row)
+                    seen_ext_ids.add(ext_id)
+                    wrote += 1
 
+            # Return to listing for the next item
+            try:
                 page.go_back(wait_until="domcontentloaded", timeout=30000)
                 _wait_listing_ready(page)
-                time.sleep(0.2)
             except Exception:
-                # Try to recover to listing
-                try:
-                    page.go_back(wait_until="domcontentloaded", timeout=15000)
-                    _wait_listing_ready(page)
-                except Exception:
-                    pass
-                continue
+                # If history stack is odd, go back to the seed URL explicitly
+                safe_goto(page, url)
+                _wait_listing_ready(page)
+            time.sleep(0.2)
 
     return wrote
 
-# ---------------------------------------------------------------------------
-# Main crawl
+# ---------------------------- main -----------------------------------------
 
 def crawl():
     os.makedirs(os.path.dirname(OUTPUT) or ".", exist_ok=True)
@@ -779,30 +613,22 @@ def crawl():
 
     print(f"[selver] writing CSV -> {OUTPUT}")
     with open(OUTPUT, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(
-            f,
-            fieldnames=["ext_id","name","ean_raw","sku_raw","size_text","price","currency","category_path","category_leaf"],
-        )
+        w = csv.DictWriter(f, fieldnames=[
+            "ext_id","name","ean_raw","sku_raw","size_text","price","currency","category_path","category_leaf"
+        ])
         w.writeheader()
 
         with sync_playwright() as p:
             print("[selver] launching chromium (headless)")
-            browser = p.chromium.launch(
-                headless=True,
-                args=[
-                    "--disable-blink-features=AutomationControlled",
-                    "--no-sandbox",
-                    "--disable-dev-shm-usage",
-                ],
-            )
+            browser = p.chromium.launch(headless=True, args=[
+                "--disable-blink-features=AutomationControlled","--no-sandbox","--disable-dev-shm-usage",
+            ])
             context = browser.new_context(
                 locale="et-EE",
                 user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                             "AppleWebKit/537.36 (KHTML, like Gecko) "
                             "Chrome/124.0.0.0 Safari/537.36"),
-                extra_http_headers={
-                    "Accept-Language": "et-EE,et;q=0.9,en-US;q=0.8,en;q=0.7",
-                },
+                extra_http_headers={"Accept-Language": "et-EE,et;q=0.9,en-US;q=0.8,en;q=0.7"},
                 ignore_https_errors=True,
                 service_workers="block",
             )
@@ -813,7 +639,6 @@ def crawl():
             page.set_default_navigation_timeout(30000)
             page.set_default_timeout(10000)
 
-            # Console is quiet by default; opt in via LOG_CONSOLE
             if LOG_CONSOLE == "all":
                 page.on("console", lambda m: print(f"[pw] {m.type}: {m.text}"))
             elif LOG_CONSOLE == "warn":
@@ -823,7 +648,6 @@ def crawl():
                         print(f"[pw] {m.type}: {t}")
                 page.on("console", _warn_err_only)
 
-            # ---- seeds (file-first: respect sharded list if present)
             print("[selver] collecting seeds…")
             file_seeds: List[str] = []
             if os.path.exists(CATEGORIES_FILE):
@@ -832,8 +656,7 @@ def crawl():
                         ln = (ln or "").strip()
                         if ln and not ln.startswith("#"):
                             u = _clean_abs(ln)
-                            if u:
-                                file_seeds.append(u)
+                            if u: file_seeds.append(u)
 
             if file_seeds:
                 seeds: List[str] = list(dict.fromkeys(file_seeds))
@@ -845,30 +668,24 @@ def crawl():
             cats = seeds if ALLOWLIST_ONLY else discover_categories(page, seeds)
 
             print(f"[selver] Categories to crawl: {len(cats)}")
-            for cu in cats[:40]:
-                print(f"[selver]   {cu}")
-            if len(cats) > 40:
-                print(f"[selver]   … (+{len(cats)-40} more)")
+            for cu in cats[:40]: print(f"[selver]   {cu}")
+            if len(cats) > 40: print(f"[selver]   … (+{len(cats)-40} more)")
 
             rows_written = 0
             seen_ext_ids: Set[str] = set()
 
             if CLICK_PRODUCTS:
-                # --- Click mode: extract rows while clicking product cards
                 for ci, cu in enumerate(cats, 1):
                     try:
                         wrote = collect_write_by_clicking(page, cu, w, seen_ext_ids)
                         rows_written += wrote
                         print(f"[selver] {cu} → +{wrote} rows (click mode, total: {rows_written})")
-                        if (ci % 1) == 0:
-                            f.flush()
+                        if (ci % 1) == 0: f.flush()
                     except Exception:
                         try: page.screenshot(path=f"{dbg_dir}/click_mode_fail_{ci}.png", full_page=True)
                         except Exception: pass
                         continue
-
             else:
-                # --- Direct mode: collect PDP links first, then open PDPs (with click fallback)
                 product_urls: Set[str] = set()
                 prod2listing: Dict[str, str] = {}
                 for ci, cu in enumerate(cats, 1):
@@ -885,15 +702,12 @@ def crawl():
 
                     for u in links:
                         if u not in product_urls:
-                            product_urls.add(u)
-                            prod2listing[u] = mapping.get(u, cu)
+                            product_urls.add(u); prod2listing[u] = mapping.get(u, cu)
 
                     print(f"[selver] {cu} → +{len(links)} products (total so far: {len(product_urls)})")
 
                 for i, pu in enumerate(sorted(product_urls), 1):
-                    if not _is_selver_product_like(pu):
-                        continue
-
+                    if not _is_selver_product_like(pu): continue
                     got = safe_goto(page, pu)
                     if not got:
                         got = open_product_via_click(page, prod2listing.get(pu, ""), pu)
@@ -901,31 +715,22 @@ def crawl():
                             try: page.screenshot(path=f"{dbg_dir}/prod_nav_fail_{i}.png", full_page=True)
                             except Exception: pass
                             continue
-
                     time.sleep(REQ_DELAY)
 
                     row = _extract_row_from_pdp(page, pu)
                     if not row:
-                        # try click-through from its listing (SPA hydration)
                         if open_product_via_click(page, prod2listing.get(pu, ""), pu):
-                            time.sleep(0.3)
-                            row = _extract_row_from_pdp(page, pu)
+                            time.sleep(0.3); row = _extract_row_from_pdp(page, pu)
 
                     if row:
                         ext_id = row["ext_id"]
                         if ext_id not in seen_ext_ids:
-                            w.writerow(row)
-                            seen_ext_ids.add(ext_id)
-                            rows_written += 1
-
-                    if (i % 25) == 0:
-                        f.flush()
+                            w.writerow(row); seen_ext_ids.add(ext_id); rows_written += 1
+                    if (i % 25) == 0: f.flush()
 
             browser.close()
 
     print(f"[selver] wrote {rows_written} product rows.")
-
-# ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
     try:
