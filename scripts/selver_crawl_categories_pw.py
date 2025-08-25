@@ -5,11 +5,11 @@
 Selver category crawler → CSV (staging_selver_products)
 
 Aug 2025:
-- PDP detection: /toode/ OR single-segment slug with a digit **or unit suffix** (-kg/-g/-l/-ml/-cl/-dl/-tk/-pk/-pcs).
-  Accepts both root and /e-selver/ paths.
+- PDP detection: /toode/ OR single-segment slug with a digit **or unit suffix**
+  (-kg/-g/-l/-ml/-cl/-dl/-tk/-pk/-pcs). Accepts both root and /e-selver/ paths.
 - Cosmetics/utility trees excluded.
 - Click-mode fix: navigate to collected HREFs and only fall back to DOM click if needed.
-- Product-card focused selectors and per-page discovery debug.
+- Product-card focused selectors with absolute/relative HREF support + per-page discovery debug.
 """
 
 from __future__ import annotations
@@ -123,10 +123,9 @@ def _in_allowlist(path: str) -> bool:
     p = (path or "/").rstrip("/")
     return any(p == root or p.startswith(root + "/") for root in STRICT_ALLOWLIST)
 
-# ---- Product URL check (tight, but friendly to grocery slugs)
 # PDP if:
 #  - path starts with /toode/, OR
-#  - single-segment slug with (a) at least one digit OR (b) unit suffix -kg/-g/-l/-ml/-cl/-dl/-tk/-pk/-pcs.
+#  - single-segment slug with at least one digit OR unit suffix -kg/-g/-l/-ml/-cl/-dl/-tk/-pk/-pcs.
 def _is_selver_product_like(url: str) -> bool:
     u = urlparse(url)
     host = (u.netloc or urlparse(BASE).netloc).lower()
@@ -146,10 +145,8 @@ def _is_selver_product_like(url: str) -> bool:
             return False
         if any(ch.isdigit() for ch in last):
             return True
-        # unit suffixes common on groceries (weighed goods & packs)
         if re.search(r"(?:-|^)(?:kg|g|l|ml|cl|dl|tk|pk|pcs)$", last):
             return True
-
     return False
 
 def _is_category_like_path(path: str) -> bool:
@@ -224,7 +221,7 @@ def _wait_listing_ready(page):
     try:
         for _ in range(12):
             if (page.locator("button:has-text('OSTA')").count() > 0 or
-                page.locator("a[href^='/'][href*='-'] img").count() > 0 or
+                page.locator("a[href*='/toode/']").count() > 0 or
                 page.locator(".product, .product-list, .productgrid").count() > 0):
                 return
             time.sleep(0.35)
@@ -316,28 +313,30 @@ def _max_page_number(page) -> int:
         return 1
 
 def _extract_product_hrefs(page) -> List[str]:
-    """Collect anchors from visible product-card containers only."""
+    """Collect anchors from visible product-card containers (absolute or relative),
+       and fall back to all links if needed. Filter later in Python."""
     try:
         hrefs = page.evaluate("""
           (() => {
             const sels = [
-              'article a[href^="/"]:not([href*="#"])',
-              '.product a[href^="/"]:not([href*="#"])',
-              '.product-card a[href^="/"]:not([href*="#"])',
-              '.product-item a[href^="/"]:not([href*="#"])',
-              'li .product a[href^="/"]:not([href*="#"])'
+              'article a[href]:not([href*="#"])',
+              '.product a[href]:not([href*="#"])',
+              '.product-card a[href]:not([href*="#"])',
+              '.product-item a[href]:not([href*="#"])',
+              'li .product a[href]:not([href*="#"])'
             ];
             const set = new Set();
             for (const sel of sels) {
               document.querySelectorAll(sel).forEach(a => {
                 const h = a.getAttribute('href');
-                if (h) set.add(h);
+                if (h && !h.startsWith('javascript:')) set.add(h);
               });
             }
-            // Fallback: any '/toode/' anchors
             if (!set.size) {
-              document.querySelectorAll('a[href*="/toode/"]').forEach(a => {
-                const h = a.getAttribute('href'); if (h) set.add(h);
+              // Fallback: gather from whole page, then Python will filter
+              document.querySelectorAll('a[href]').forEach(a => {
+                const h = a.getAttribute('href');
+                if (h && !h.startsWith('javascript:')) set.add(h);
               });
             }
             return [...set];
@@ -345,6 +344,7 @@ def _extract_product_hrefs(page) -> List[str]:
         """)
     except Exception:
         hrefs = []
+
     links = []
     for h in hrefs:
         u = _clean_abs(h)
@@ -369,6 +369,8 @@ def collect_product_links_from_listing(page, seed_url: str) -> Tuple[Set[str], D
 
         page_links = _extract_product_hrefs(page)
         print(f"[selver]   page {n}: discovered {len(page_links)} candidate links")
+        if page_links[:5]:
+            print(f"[selver]     sample: {page_links[:5]}")
         for u in page_links:
             if u not in links:
                 links.add(u); link2listing[u] = url
@@ -505,7 +507,7 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
         ean = ean or e2; sku = sku or s2
     price, currency = 0.0, "EUR"
     if prod_ld and "offers" in prod_ld:
-        offers = prod_ld["offers"]; 
+        offers = prod_ld["offers"]
         if isinstance(offers, list) and offers: offers = offers[0]
         try:
             price = float(str(offers.get("price")).replace(",", ".")); currency = offers.get("priceCurrency") or currency
@@ -572,23 +574,24 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
         if not safe_goto(page, url): continue
         _wait_listing_ready(page); time.sleep(REQ_DELAY)
 
-        # Collect from recognizable product cards (no URL-shape filter here)
+        # Collect from recognizable product cards (absolute or relative; no URL-shape filter here)
         try:
             hrefs = page.evaluate("""
               (() => {
                 const sels = [
-                  'article a[href^="/"]:not([href*="#"])',
-                  '.product a[href^="/"]:not([href*="#"])',
-                  '.product-card a[href^="/"]:not([href*="#"])',
-                  '.product-item a[href^="/"]:not([href*="#"])',
-                  'li .product a[href^="/"]:not([href*="#"])'
+                  'article a[href]:not([href*="#"])',
+                  '.product a[href]:not([href*="#"])',
+                  '.product-card a[href]:not([href*="#"])',
+                  '.product-item a[href]:not([href*="#"])',
+                  'li .product a[href]:not([href*="#"])'
                 ];
                 const set = new Set();
                 for (const sel of sels) {
                   document.querySelectorAll(sel).forEach(a => { const h=a.getAttribute('href'); if(h) set.add(h); });
                 }
                 if (!set.size) {
-                  document.querySelectorAll('a[href*="/toode/"]').forEach(a => { const h=a.getAttribute('href'); if(h) set.add(h); });
+                  // Very broad fallback
+                  document.querySelectorAll('a[href]').forEach(a => { const h=a.getAttribute('href'); if(h) set.add(h); });
                 }
                 return [...set];
               })()
