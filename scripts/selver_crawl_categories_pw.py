@@ -4,13 +4,15 @@
 """
 Selver category crawler → CSV (staging_selver_products)
 
-Aug 2025:
+Aug 2025 (patch 2):
 - PDP detection: /toode/ OR single-segment slug with a digit **or unit suffix** (-kg/-g/-l/-ml/-cl/-dl/-tk/-pk/-pcs).
   Accepts both root and /e-selver/ paths.
 - Cosmetics/utility trees excluded.
-- Click-mode: navigate to collected HREFs; if none found, or nav fails, **click product cards** that have an “OSTA” button.
-- Product-card focused selectors and per-page discovery debug.
-- Resilient navigation (higher timeout, retries, no 'networkidle' wait).
+- Click-mode: **navigate to collected HREFs** and only fall back to DOM click.
+- Product discovery on listings:
+  1) All anchors (relative + absolute selver.ee)
+  2) Fallback: parse listing-page JSON-LD for Product.url entries.
+- Extra debug and longer navigation timeout in safe_goto.
 """
 
 from __future__ import annotations
@@ -18,9 +20,10 @@ import os, re, csv, time, json
 from typing import Dict, Set, Tuple, List, Optional
 from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit, parse_qs, urlencode
 from playwright.sync_api import sync_playwright
-from playwright.sync_api import TimeoutError as PWTimeoutError
 
+# ---------------------------------------------------------------------------
 BASE = "https://www.selver.ee"
+
 OUTPUT = os.getenv("OUTPUT_CSV", "data/selver.csv")
 REQ_DELAY = float(os.getenv("REQ_DELAY", "0.6"))
 PAGE_LIMIT = int(os.getenv("PAGE_LIMIT", "0"))
@@ -29,7 +32,7 @@ CATEGORIES_FILE = os.getenv("CATEGORIES_FILE", "data/selver_categories.txt")
 USE_ROUTER     = int(os.getenv("USE_ROUTER", "1")) == 1
 CLICK_PRODUCTS = int(os.getenv("CLICK_PRODUCTS", "0")) == 1
 LOG_CONSOLE    = (os.getenv("LOG_CONSOLE", "0") or "0").lower()  # 0|off, warn, all
-NAV_TIMEOUT    = int(os.getenv("NAV_TIMEOUT", "45000"))          # default 45s
+NAV_TIMEOUT_MS = int(os.getenv("NAV_TIMEOUT_MS", "45000"))
 
 STRICT_ALLOWLIST = [
     "/puu-ja-koogiviljad",
@@ -66,6 +69,7 @@ BANNED_KEYWORDS = {
 
 SIZE_RE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
 
+# ---------- Third-party noise to block ----------
 BLOCK_HOSTS = {
     "adobe.com","assets.adobedtm.com","adobedtm.com","demdex.net","omtrdc.net",
     "googletagmanager.com","google-analytics.com","doubleclick.net","facebook.net",
@@ -90,6 +94,7 @@ NON_PRODUCT_KEYWORDS = {
     "blog", "pood", "poed", "kaart", "arikliend", "karjaar", "karjäär",
 }
 
+# ---------------------------------------------------------------------------
 def normspace(s: str) -> str:
     return re.sub(r"\s+", " ", s or "").strip()
 
@@ -126,7 +131,7 @@ def _in_allowlist(path: str) -> bool:
     p = (path or "/").rstrip("/")
     return any(p == root or p.startswith(root + "/") for root in STRICT_ALLOWLIST)
 
-# PDP detector
+# ---- PDP detection ---------------------------------------------------------
 def _is_selver_product_like(url: str) -> bool:
     u = urlparse(url)
     host = (u.netloc or urlparse(BASE).netloc).lower()
@@ -135,13 +140,17 @@ def _is_selver_product_like(url: str) -> bool:
     if path.startswith("/ru/"): return False
     if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS): return False
     if any(kw in path for kw in NON_PRODUCT_KEYWORDS): return False
-    if path.startswith("/toode/"): return True
+
+    if path.startswith("/toode/"):
+        return True
+
     segs = [s for s in path.strip("/").split("/") if s]
     if len(segs) == 1:
         last = segs[0]
         if not re.fullmatch(r"[a-z0-9-]{3,}", last): return False
         if any(ch.isdigit() for ch in last): return True
         if re.search(r"(?:-|^)(?:kg|g|l|ml|cl|dl|tk|pk|pcs)$", last): return True
+
     return False
 
 def _is_category_like_path(path: str) -> bool:
@@ -157,6 +166,7 @@ def _is_category_like_path(path: str) -> bool:
     if any(ch.isdigit() for ch in last): return False
     return any("-" in s for s in segs)
 
+# ---------------------------------------------------------------------------
 DIGITS_RE = re.compile(r"\D+")
 def _digits(s: str) -> str: return DIGITS_RE.sub("", s or "")
 
@@ -183,8 +193,7 @@ def _pick_ean_from_html(html: str) -> str:
     m8 = re.search(r"\b(\d{8})\b", html)
     return m8.group(1) if m8 else ""
 
-# ------------------------ cookies & navigation ------------------------------
-
+# ---------------------------------------------------------------------------
 def accept_cookies(page):
     for sel in [
         "button:has-text('Nõustu')","button:has-text('Nõustun')",
@@ -200,57 +209,34 @@ def accept_cookies(page):
         except Exception:
             pass
 
-def _with_host_variant(url: str) -> str:
-    parts = urlsplit(url)
-    host = parts.netloc
-    host2 = host[4:] if host.startswith("www.") else ("www."+host if host else host)
-    return urlunsplit((parts.scheme, host2, parts.path, parts.query, ""))
-
-def _same_path(u1: str, u2: str) -> bool:
-    try: return urlsplit(u1).path.rstrip("/") == urlsplit(u2).path.rstrip("/")
-    except Exception: return False
-
-def safe_goto(page, url: str, timeout: int = NAV_TIMEOUT) -> bool:
+def safe_goto(page, url: str, timeout: Optional[int] = None) -> bool:
+    tmo = timeout or NAV_TIMEOUT_MS
     try:
-        cur = page.url
-        if cur and _same_path(cur, url):
-            return True
-    except Exception:
-        pass
-
-    attempts = [
-        ("domcontentloaded", url),
-        ("commit", url),
-        ("commit", _with_host_variant(url)),
-    ]
-    for i, (wait_until, target) in enumerate(attempts, 1):
+        page.goto(url, wait_until="domcontentloaded", timeout=tmo)
+        accept_cookies(page)
         try:
-            page.goto(target, wait_until=wait_until, timeout=timeout if i == 1 else timeout*2)
-            accept_cookies(page)
-            try: page.wait_for_load_state("load", timeout=min(6000, timeout//2))
-            except Exception: pass
-            time.sleep(0.4)
-            return True
-        except PWTimeoutError as e:
-            print(f"[selver] NAV TRY {i} TIMEOUT {target} ({wait_until}) -> {e}")
-        except Exception as e:
-            print(f"[selver] NAV TRY {i} FAIL {target} ({wait_until}) -> {type(e).__name__}: {e}")
-    print(f"[selver] NAV FAIL {url} (all retries)")
-    return False
+            page.wait_for_load_state("networkidle", timeout=max(5000, int(tmo/2)))
+        except Exception:
+            pass
+        time.sleep(0.6)
+        return True
+    except Exception as e:
+        print(f"[selver] NAV FAIL {url} -> {type(e).__name__}: {e}")
+        return False
 
 def _wait_listing_ready(page):
     try:
-        for _ in range(12):
+        for _ in range(14):
             if (page.locator("button:has-text('OSTA')").count() > 0 or
-                page.locator("a[href^='/'][href*='-'] img").count() > 0 or
-                page.locator(".product, .product-list, .productgrid").count() > 0):
+                page.locator("a[href*='/toode/']").count() > 0 or
+                page.locator("a[href^='/'][href*='-']").count() > 0):
                 return
             time.sleep(0.35)
     except Exception:
         pass
 
 def _wait_pdp_ready(page):
-    for _ in range(24):
+    for _ in range(26):
         if page.locator("h1").count() > 0:
             if (page.locator("script[type='application/ld+json']").count() > 0 or
                 page.locator("text=Ribakood").count() > 0):
@@ -271,8 +257,8 @@ def _expand_pdp_details(page):
         except Exception:
             pass
 
-# ----------------------------- discovery -----------------------------------
-
+# ---------------------------------------------------------------------------
+# Category discovery
 def _extract_category_links(page) -> List[str]:
     _wait_listing_ready(page)
     try:
@@ -313,8 +299,8 @@ def discover_categories(page, start_urls: List[str]) -> List[str]:
             seen.add(u); out.append(u)
     return out
 
-# ---------------------------- listings -> PDPs ------------------------------
-
+# ---------------------------------------------------------------------------
+# Listing → product links
 def _with_page(url: str, n: int) -> str:
     parts = urlsplit(url)
     qs = parse_qs(parts.query)
@@ -337,98 +323,64 @@ def _max_page_number(page) -> int:
     except Exception:
         return 1
 
-def _extract_product_hrefs(page) -> List[str]:
-    """Collect anchors from visible product-card containers only."""
+def _extract_product_hrefs_any_anchor(page) -> List[str]:
+    """Collect product links from any anchor (relative or absolute to selver.ee)."""
     try:
         hrefs = page.evaluate("""
           (() => {
-            const sels = [
-              'article a[href^="/"]:not([href*="#"])',
-              '.product a[href^="/"]:not([href*="#"])',
-              '.product-card a[href^="/"]:not([href*="#"])',
-              '.product-item a[href^="/"]:not([href*="#"])',
-              'li .product a[href^="/"]:not([href*="#"])'
-            ];
-            const set = new Set();
-            for (const sel of sels) {
-              document.querySelectorAll(sel).forEach(a => {
-                const h = a.getAttribute('href');
-                if (h) set.add(h);
-              });
-            }
-            if (!set.size) {
-              document.querySelectorAll('a[href*="/toode/"]').forEach(a => {
-                const h=a.getAttribute('href'); if (h) set.add(h);
-              });
-            }
+            const rel = [...document.querySelectorAll('a[href^="/"]')]
+              .map(a => a.getAttribute('href')).filter(Boolean);
+            const abs = [...document.querySelectorAll('a[href^="https://www.selver.ee/"],a[href^="http://www.selver.ee/"],a[href^="//www.selver.ee/"]')]
+              .map(a => a.getAttribute('href')).filter(Boolean);
+            const set = new Set([...rel, ...abs]);
+            // extra: common data-href on cards
+            document.querySelectorAll('[data-href^="/"]').forEach(el => set.add(el.getAttribute('data-href')));
             return [...set];
           })()
         """)
     except Exception:
         hrefs = []
-    links = []
+    out = []
     for h in hrefs:
         u = _clean_abs(h)
         if u and _is_selver_product_like(u):
-            links.append(u)
-    return list(dict.fromkeys(links))
+            out.append(u)
+    return list(dict.fromkeys(out))
 
-# --- Card click fallback on listings (when hrefs missing) -------------------
-
-CARD_SEL = (
-    "article:has(button:has-text('OSTA')), "
-    ".product:has(button:has-text('OSTA')), "
-    ".product-card:has(button:has-text('OSTA')), "
-    ".product-item:has(button:has-text('OSTA')), "
-    "li:has(button:has-text('OSTA'))"
-)
-
-def _crawl_by_clicking_cards(page, listing_url: str, writer: csv.DictWriter, seen_ext_ids: Set[str]) -> int:
-    """Fallback when no HREFs found: click product cards directly."""
-    wrote = 0
-    _wait_listing_ready(page)
-    # Limit to first 36 visible cards per page to avoid infinite grids
+def _extract_product_urls_from_listing_jsonld(page) -> List[str]:
+    """Fallback: parse listing JSON-LD and collect Product.url items."""
+    urls: List[str] = []
     try:
-        cnt = min(page.locator(CARD_SEL).count(), 36)
+        scripts = page.locator("script[type='application/ld+json']")
+        for i in range(min(20, scripts.count())):
+            raw = scripts.nth(i).inner_text()
+            try:
+                obj = json.loads(raw)
+            except Exception:
+                continue
+            items = obj if isinstance(obj, list) else [obj]
+            for b in items:
+                if not isinstance(b, dict): continue
+                t = (b.get("@type") or "")
+                t_low = t.lower() if isinstance(t, str) else ""
+                if "product" in t_low and b.get("url"):
+                    u = _clean_abs(b["url"])
+                    if u and _is_selver_product_like(u):
+                        urls.append(u)
     except Exception:
-        cnt = 0
-    print(f"[selver]   fallback: clicking {cnt} product cards")
-    for i in range(cnt):
-        card = page.locator(CARD_SEL).nth(i)
-        try:
-            if not card.is_visible(): continue
-            # Prefer a child link if present; else click the card
-            link = card.locator("a[href^='/']:not([href*='#'])").first
-            if link.count() > 0:
-                href = _clean_abs(link.get_attribute("href") or "")
-                if href and safe_goto(page, href):
-                    _wait_pdp_ready(page)
-                else:
-                    # try direct click
-                    link.click(timeout=5000)
-                    _wait_pdp_ready(page)
-            else:
-                card.scroll_into_view_if_needed(timeout=3000)
-                card.click(timeout=5000)
-                _wait_pdp_ready(page)
+        pass
+    return list(dict.fromkeys(urls))
 
-            row = _extract_row_from_pdp(page, None)
-            if row:
-                ext_id = row["ext_id"]
-                if ext_id not in seen_ext_ids:
-                    writer.writerow(row)
-                    seen_ext_ids.add(ext_id)
-                    wrote += 1
-        except Exception:
-            pass
-        # return to listing
-        try:
-            page.go_back(wait_until="domcontentloaded", timeout=max(20000, NAV_TIMEOUT))
-            _wait_listing_ready(page)
-        except Exception:
-            safe_goto(page, listing_url); _wait_listing_ready(page)
-        time.sleep(0.15)
-    return wrote
+def _extract_product_hrefs(page) -> List[str]:
+    links = _extract_product_hrefs_any_anchor(page)
+    if links:
+        return links
+    # fallback: JSON-LD on listing
+    jlinks = _extract_product_urls_from_listing_jsonld(page)
+    if jlinks:
+        print(f"[selver]     fallback JSON-LD yielded {len(jlinks)} links")
+        return jlinks
+    return []
 
 def collect_product_links_from_listing(page, seed_url: str) -> Tuple[Set[str], Dict[str, str]]:
     links: Set[str] = set()
@@ -458,8 +410,8 @@ def collect_product_links_from_listing(page, seed_url: str) -> Tuple[Set[str], D
         print("[selver]   no PDP links found on listing.")
     return links, link2listing
 
-# ------------------------------- JSON-LD ------------------------------------
-
+# ---------------------------------------------------------------------------
+# JSON-LD helpers for PDPs
 def jsonld_all(page) -> List[dict]:
     out = []
     try:
@@ -496,8 +448,8 @@ def jsonld_pick_breadcrumbs(blocks: List[dict]) -> List[str]:
                 continue
     return []
 
-# ------------------------------ PDP extract ---------------------------------
-
+# ---------------------------------------------------------------------------
+# PDP extraction
 def extract_price(page) -> tuple[float, str]:
     for sel in ["text=/€/","span:has-text('€')","div:has-text('€')"]:
         try:
@@ -590,7 +542,8 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
         offers = prod_ld["offers"]
         if isinstance(offers, list) and offers: offers = offers[0]
         try:
-            price = float(str(offers.get("price")).replace(",", ".")); currency = offers.get("priceCurrency") or currency
+            price = float(str(offers.get("price")).replace(",", "."))
+            currency = offers.get("priceCurrency") or currency
         except Exception: pass
     if price == 0.0:
         price, currency = extract_price(page)
@@ -604,8 +557,8 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
         "category_path": cat_path, "category_leaf": cat_leaf,
     }
 
-# ------------------------------ request router ------------------------------
-
+# ---------------------------------------------------------------------------
+# Request router
 BLOCK_TYPES = {"image", "font", "media", "stylesheet", "websocket", "manifest"}
 BLOCK_ACTIVE_TYPES = {"script", "xhr", "fetch", "eventsource"}
 
@@ -624,8 +577,8 @@ def _router(route, request):
     except Exception:
         return route.continue_()
 
-# --------------------------- click-mode helpers -----------------------------
-
+# ---------------------------------------------------------------------------
+# Click-through helpers
 def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
     if not listing_url or not safe_goto(page, listing_url): return False
     _wait_listing_ready(page); time.sleep(0.2)
@@ -646,6 +599,8 @@ def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
             continue
     return False
 
+# ---------------------------------------------------------------------------
+# Click mode (navigate to hrefs, click only as fallback)
 def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_ext_ids: Set[str]) -> int:
     wrote = 0
     if not safe_goto(page, seed_url): return 0
@@ -658,50 +613,14 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
         if not safe_goto(page, url): continue
         _wait_listing_ready(page); time.sleep(REQ_DELAY)
 
-        # First try: collect PDP hrefs
-        try:
-            hrefs = page.evaluate("""
-              (() => {
-                const sels = [
-                  'article a[href^="/"]:not([href*="#"])',
-                  '.product a[href^="/"]:not([href*="#"])',
-                  '.product-card a[href^="/"]:not([href*="#"])',
-                  '.product-item a[href^="/"]:not([href*="#"])',
-                  'li .product a[href^="/"]:not([href*="#"])'
-                ];
-                const set = new Set();
-                for (const sel of sels) {
-                  document.querySelectorAll(sel).forEach(a => { const h=a.getAttribute('href'); if(h) set.add(h); });
-                }
-                if (!set.size) {
-                  document.querySelectorAll('a[href*="/toode/"]').forEach(a => { const h=a.getAttribute('href'); if(h) set.add(h); });
-                }
-                return [...set];
-              })()
-            """)
-        except Exception:
-            hrefs = []
+        hrefs = _extract_product_hrefs(page)
+        print(f"[selver]   page {n}: discovered {len(hrefs)} candidate links")
 
-        cleaned, seen = [], set()
-        for h in hrefs:
-            u = _clean_abs(h)
-            if u and _is_selver_product_like(u) and u not in seen:
-                seen.add(u); cleaned.append(u)
-
-        print(f"[selver]   page {n}: discovered {len(cleaned)} candidate links")
-
-        # If no hrefs at all, click cards directly
-        if not cleaned:
-            wrote += _crawl_by_clicking_cards(page, url, writer, seen_ext_ids)
-            continue
-
-        # Use hrefs; if any nav fails, fallback to clicking that card
-        for href in cleaned:
+        for href in hrefs:
             navigated = safe_goto(page, href)
             if not navigated:
-                if not open_product_via_click(page, url, href):
-                    # last resort: ensure we are back on the listing before next href
-                    safe_goto(page, url); _wait_listing_ready(page)
+                navigated = open_product_via_click(page, url, href)
+                if not navigated:
                     continue
 
             _wait_pdp_ready(page)
@@ -715,7 +634,7 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
 
             # Return to listing
             try:
-                page.go_back(wait_until="domcontentloaded", timeout=max(20000, NAV_TIMEOUT))
+                page.go_back(wait_until="domcontentloaded", timeout=NAV_TIMEOUT_MS)
                 _wait_listing_ready(page)
             except Exception:
                 safe_goto(page, url); _wait_listing_ready(page)
@@ -724,7 +643,6 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
     return wrote
 
 # ---------------------------- main -----------------------------------------
-
 def crawl():
     os.makedirs(os.path.dirname(OUTPUT) or ".", exist_ok=True)
     dbg_dir = "data/selver_debug"; os.makedirs(dbg_dir, exist_ok=True)
@@ -754,8 +672,8 @@ def crawl():
                 context.route("**/*", _router)
 
             page = context.new_page()
-            page.set_default_navigation_timeout(NAV_TIMEOUT)
-            page.set_default_timeout(12000)
+            page.set_default_navigation_timeout(NAV_TIMEOUT_MS)
+            page.set_default_timeout(10000)
 
             if LOG_CONSOLE == "all":
                 page.on("console", lambda m: print(f"[pw] {m.type}: {m.text}"))
@@ -850,6 +768,7 @@ def crawl():
 
     print(f"[selver] wrote {rows_written} product rows.")
 
+# ---------------------------------------------------------------------------
 if __name__ == "__main__":
     try:
         crawl()
