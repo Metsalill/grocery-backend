@@ -16,7 +16,7 @@ on:
         required: false
         default: "0.5"
   schedule:
-    - cron: "7 */6 * * *"   # every 6 hours
+    - cron: "7 */6 * * *"   # every 6 hours, slightly offset from the crawler
 
 concurrency:
   group: selver-enrich-eans
@@ -28,6 +28,7 @@ jobs:
     timeout-minutes: 60
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      PGSSLMODE: require
 
     steps:
       - name: Checkout
@@ -47,8 +48,8 @@ jobs:
       - name: Enrich selver_candidates missing EAN/SKU
         run: |
           python scripts/selver_enrich_candidates_pw.py \
-            --limit ${{ github.event_name == 'workflow_dispatch' && inputs.limit || 300 }} \
-            --headless ${{ github.event_name == 'workflow_dispatch' && inputs.headless || 1 }} \
+            --limit     ${{ github.event_name == 'workflow_dispatch' && inputs.limit     || 300 }} \
+            --headless  ${{ github.event_name == 'workflow_dispatch' && inputs.headless  || 1   }} \
             --req-delay ${{ github.event_name == 'workflow_dispatch' && inputs.req_delay || 0.5 }}
 
       - name: Promote enriched candidates → prices
@@ -64,9 +65,9 @@ jobs:
               COALESCE(c.currency,'EUR') AS currency,
               c.last_seen,
               c.ext_id
-            FROM selver_candidates c
-            JOIN product_eans pe ON pe.ean_norm = c.ean_norm
-            WHERE c.ean_norm IS NOT NULL
+            FROM public.selver_candidates c
+            JOIN public.product_eans pe ON pe.ean_norm = c.ean_norm
+            WHERE NULLIF(c.ean_norm,'') IS NOT NULL
           ),
           pick_one AS (
             -- pick newest/cheapest per product to avoid multiple updates in one statement
@@ -78,9 +79,9 @@ jobs:
                      price ASC,
                      ext_id DESC
           )
-          INSERT INTO prices (store_id, product_id, price, currency, collected_at, source_url)
+          INSERT INTO public.prices (store_id, product_id, price, currency, collected_at, source_url)
           SELECT
-            (SELECT id FROM stores WHERE name='Selver e-pood' AND chain='Selver'),
+            (SELECT id FROM public.stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1),
             p.product_id,
             p.price,
             p.currency,
@@ -93,9 +94,10 @@ jobs:
                 collected_at = EXCLUDED.collected_at,
                 source_url   = EXCLUDED.source_url;
 
-          -- Optional: quick stats
+          -- Quick stats
           SELECT
-            (SELECT COUNT(*) FROM selver_candidates WHERE ean_raw IS NULL) AS still_missing,
-            (SELECT COUNT(*) FROM selver_candidates WHERE ean_raw IS NOT NULL) AS enriched_total,
-            (SELECT COUNT(*) FROM prices WHERE store_id=(SELECT id FROM stores WHERE name='Selver e-pood' AND chain='Selver')) AS price_rows;
+            (SELECT COUNT(*) FROM public.selver_candidates WHERE ean_norm IS NULL OR ean_norm='') AS still_missing,
+            (SELECT COUNT(*) FROM public.selver_candidates WHERE ean_norm IS NOT NULL AND ean_norm<>'') AS enriched_total,
+            (SELECT COUNT(*) FROM public.prices
+               WHERE store_id=(SELECT id FROM public.stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1)) AS price_rows;
           SQL
