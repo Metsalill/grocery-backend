@@ -1,44 +1,46 @@
 -- 2025-08-22-fix-prices-unique-key.sql
--- Keep prices PK = (product_id, store_id); remove any unique constraint that includes collected_at.
--- Make history unique by timestamp (collected_at/seen_at/last_seen_utc).
+-- Keep prices PK = (product_id, store_id); remove any UNIQUE that involves collected_at.
+-- Make history unique by timestamp (collected_at/seen_at/last_seen_utc). Idempotent.
 
 BEGIN;
 
 -- 0) Clean legacy per-product unique index if it ever existed
 DROP INDEX IF EXISTS uq_prices_product;
 
--- 1) If there is a UNIQUE constraint on prices that uses collected_at, drop it first.
---    (Your earlier runs named it uq_prices_store_product_at.)
+-- 1) If there is a UNIQUE constraint on prices that uses collected_at, drop it first
 ALTER TABLE public.prices
   DROP CONSTRAINT IF EXISTS uq_prices_store_product_at;
 
--- Also be robust if a differently-named UNIQUE(collected_at, ...) exists:
+-- Also drop ANY other UNIQUE constraint on prices that includes collected_at
 DO $$
-DECLARE c RECORD;
+DECLARE r RECORD;
 BEGIN
-  FOR c IN
-    SELECT conname
-    FROM pg_constraint c
-    WHERE c.conrelid = 'public.prices'::regclass
-      AND c.contype  = 'u'
-      AND (
-        SELECT bool_or(att.attname = 'collected_at')
-        FROM unnest(c.conkey) k
-        JOIN pg_attribute att ON att.attrelid=c.conrelid AND att.attnum=k
+  FOR r IN
+    SELECT pc.conname
+    FROM pg_constraint pc
+    WHERE pc.conrelid = 'public.prices'::regclass
+      AND pc.contype  = 'u'
+      AND EXISTS (
+        SELECT 1
+        FROM unnest(pc.conkey) AS k
+        JOIN pg_attribute att
+          ON att.attrelid = pc.conrelid
+         AND att.attnum   = k
+        WHERE att.attname = 'collected_at'
       )
   LOOP
-    EXECUTE format('ALTER TABLE public.prices DROP CONSTRAINT %I', c.conname);
+    EXECUTE format('ALTER TABLE public.prices DROP CONSTRAINT %I', r.conname);
   END LOOP;
 END $$;
 
--- 2) Now it is safe to drop any leftover index with that name (if it wasn't owned by a constraint)
+-- If an index with that old name exists independently, drop it
 DROP INDEX IF EXISTS uq_prices_store_product_at;
 
--- 3) Ensure collected_at column exists on prices (metadata only)
+-- 2) Ensure collected_at column exists on prices (metadata only)
 ALTER TABLE public.prices
   ADD COLUMN IF NOT EXISTS collected_at TIMESTAMPTZ;
 
--- 4) Ensure composite PK on prices(product_id, store_id)
+-- 3) Ensure composite PK on prices(product_id, store_id)
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -55,7 +57,7 @@ BEGIN
   END IF;
 END $$;
 
--- 5) History uniqueness: choose an existing timestamp column
+-- 4) History uniqueness: choose an existing timestamp column
 DO $$
 DECLARE tscol text;
 BEGIN
