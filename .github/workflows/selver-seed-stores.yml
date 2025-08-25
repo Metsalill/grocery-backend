@@ -96,21 +96,50 @@ jobs:
 
           def extract_all(text: str):
               names = set()
-              for raw in re.split(r'[\r\n]+', text):
-                  line = re.sub(r'\s+', ' ', raw).strip()
-                  if not line: continue
+              missed = set()
+
+              # consider only lines that mention "Selver" to debug any misses
+              lines = [re.sub(r'\s+', ' ', raw).strip() for raw in re.split(r'[\r\n]+', text)]
+              lines = [ln for ln in lines if ln and 'selver' in ln.lower()]
+
+              for line in lines:
+                  got = False
+
+                  # strict captures
                   for m in CAP_SELVER.finditer(line):
                       n = clean_one(m.group(1))
-                      if n: names.add(n)
+                      if n:
+                          names.add(n); got = True
                   for m in CAP_DELICE.finditer(line):
                       n = clean_one(m.group(1))
-                      if n: names.add(n)
+                      if n:
+                          names.add(n); got = True
+
+                  # fallback: allow tiny punctuation after "... Selver( ABC)"
+                  if not got:
+                      m = re.search(r'([A-ZÄÖÜÕ0-9][A-Za-zÄÖÜÕäöüõ0-9\'’\- ]{1,80}\sSelver(?:\sABC)?)(?:\W|$)', line)
+                      if m:
+                          n = clean_one(m.group(1))
+                          if n:
+                              names.add(n); got = True
+
+                  if not got:
+                      missed.add(line)
+
               # keep only strings that end with "Selver"/"Selver ABC" or start "Delice"
               final = []
               for n in names:
                   if re.search(r'(?:\bSelver(?:\sABC)?$)', n) or re.match(r'^Delice\b', n):
                       final.append(n)
-              return sorted(set(final))
+              final = sorted(set(final))
+
+              # debug output if we're below the expected 73
+              if len(final) < 73:
+                  print(f"::warning::Captured {len(final)}; showing up to 25 unmatched Selver-lines:")
+                  for s in list(missed)[:25]:
+                      print("UNMATCHED:", s)
+
+              return final
 
           def render_and_extract():
               with sync_playwright() as pw:
