@@ -37,3 +37,7 @@ kosmeetika
 meigitooted
 hugieen
 loodustooted-ja-toidulisandid
+/enesehooldustarbed/
+/dekoratiivkosmeetikatooted/
+/kosmeetika
+
