@@ -11,6 +11,8 @@ What's new in this patch (Aug 2025):
   - Reject multi-segment cosmetics/utility paths (e.g. `/enesehooldustarbed/.../hugieenilised-salvratikud-vatid`).
   - Still accept both `/e/...` and non-`/e/` product URLs.
 - **Click selectors tightened** so we only click real product cards (avoid header/footer links).
+- **Important**: In click mode we DO NOT filter listing anchors by URL shape before clicking
+  (many legit PDP links were being dropped). We dedupe and validate only after PDP extraction.
 - Kept: canonical guard removal, shard-first seeds, JSON-LD/EAN extraction, router, etc.
 
 CSV columns: ext_id, name, ean_raw, sku_raw, size_text, price, currency, category_path, category_leaf
@@ -36,6 +38,7 @@ CLICK_PRODUCTS = int(os.getenv("CLICK_PRODUCTS", "0")) == 1
 LOG_CONSOLE = (os.getenv("LOG_CONSOLE", "0") or "0").lower()  # 0|off, warn, all
 
 # Strict allowlist of FOOD roots/leaves (canonical, no /e-selver/)
+# Include both variants seen on-site for dry goods to be safe.
 STRICT_ALLOWLIST = [
     "/puu-ja-koogiviljad",
     "/liha-ja-kalatooted",
@@ -43,6 +46,7 @@ STRICT_ALLOWLIST = [
     "/juustud",
     "/leivad-saiad-kondiitritooted",
     "/valmistoidud",
+    "/kuivained-hoidised",
     "/kuivained-hommikusoogid-hoidised",
     "/maitseained-ja-puljongid",
     "/maitseained-ja-puljongid/kastmed",
@@ -683,33 +687,59 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
         _wait_listing_ready(page)
         time.sleep(REQ_DELAY)
 
-        # Collect HREFs only from product-card-like elements
+        # Collect HREFs only from product-card-like elements (NO URL SHAPE FILTER).
         try:
             hrefs = page.evaluate("""
-              [...document.querySelectorAll(
-                'article a[href^="/"]:not([href*="#"]), \
-                 .product a[href^="/"]:not([href*="#"]), \
-                 .product-card a[href^="/"]:not([href*="#"]), \
-                 .product-item a[href^="/"]:not([href*="#"])'
-              )].map(a => a.getAttribute('href'))
-               .filter(Boolean)
+              (() => {
+                const sels = [
+                  'article a[href^="/"]:not([href*="#"])',
+                  '.product a[href^="/"]:not([href*="#"])',
+                  '.product-card a[href^="/"]:not([href*="#"])',
+                  '.product-item a[href^="/"]:not([href*="#"])',
+                  'li .product a[href^="/"]:not([href*="#"])'
+                ];
+                const set = new Set();
+                for (const sel of sels) {
+                  document.querySelectorAll(sel).forEach(a => {
+                    const h = a.getAttribute('href'); if (h) set.add(h);
+                  });
+                }
+                return [...set];
+              })()
             """)
         except Exception:
             hrefs = []
 
-        cleaned = []
-        seen = set()
+        cleaned, seen = [], set()
         for h in hrefs:
             u = _clean_abs(h)
-            if not u or not _is_selver_product_like(u): continue
+            if not u:
+                continue
             if u not in seen:
                 seen.add(u); cleaned.append(u)
+
+        # Fallback: if nothing collected, try any '/toode/' links on the page
+        if not cleaned:
+            try:
+                extra = page.evaluate("""
+                  [...document.querySelectorAll('a[href*="/toode/"]')]
+                    .map(a => a.getAttribute('href'))
+                    .filter(Boolean)
+                """)
+            except Exception:
+                extra = []
+            for h in extra:
+                u = _clean_abs(h)
+                if u and u not in seen:
+                    seen.add(u); cleaned.append(u)
 
         for href in cleaned:
             path = urlparse(href).path
             eselver_path = "/e-selver" + path if not path.startswith("/e-selver/") else path
             loc = page.locator(
-                f"a[href$='{path}'], a[href$='{path}/'], a[href$='{eselver_path}'], a[href$='{eselver_path}/'], a[href*='/toode/']"
+                f"a[href$='{path}'], a[href$='{path}/'], "
+                f"a[href$='{eselver_path}'], a[href$='{eselver_path}/'], "
+                f"a[href*='/toode/']"
             ).first
             try:
                 if loc.count() == 0:
@@ -717,6 +747,7 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
                 loc.scroll_into_view_if_needed(timeout=3000)
                 loc.click(timeout=5000)
                 _wait_pdp_ready(page)
+
                 row = _extract_row_from_pdp(page, href)
                 if row:
                     ext_id = row["ext_id"]
@@ -724,6 +755,7 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
                         writer.writerow(row)
                         seen_ext_ids.add(ext_id)
                         wrote += 1
+
                 page.go_back(wait_until="domcontentloaded", timeout=30000)
                 _wait_listing_ready(page)
                 time.sleep(0.2)
@@ -874,6 +906,7 @@ def crawl():
 
                     row = _extract_row_from_pdp(page, pu)
                     if not row:
+                        # try click-through from its listing (SPA hydration)
                         if open_product_via_click(page, prod2listing.get(pu, ""), pu):
                             time.sleep(0.3)
                             row = _extract_row_from_pdp(page, pu)
