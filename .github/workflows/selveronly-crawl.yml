@@ -336,20 +336,22 @@ jobs:
                      price ASC,
                      ext_id DESC
           )
-          INSERT INTO public.prices (store_id, product_id, price, currency, collected_at, source_url)
+          INSERT INTO public.prices (store_id, product_id, price, currency, collected_at, source_url, source)
           SELECT
             (SELECT id FROM public.stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1),
             p.product_id,
             p.price,
             p.currency,
             now(),
-            p.ext_id
+            p.ext_id,
+            'online'
           FROM pick_one p
           ON CONFLICT (product_id, store_id) DO UPDATE
             SET price        = EXCLUDED.price,
                 currency     = EXCLUDED.currency,
                 collected_at = EXCLUDED.collected_at,
-                source_url   = EXCLUDED.source_url;
+                source_url   = EXCLUDED.source_url,
+                source       = EXCLUDED.source;
 
           -- Store unmatched rows for triage
           WITH filtered AS (
