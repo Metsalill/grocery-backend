@@ -95,7 +95,26 @@ jobs:
           LOG_CONSOLE: ${{ github.event_name == 'workflow_dispatch' && inputs.log_console || '0' }}
           # --- DB-backed preload of ext_id (dedupe) ---
           PRELOAD_DB: "1"
-          PRELOAD_DB_QUERY: "SELECT ext_id FROM public.staging_selver_products"
+          PRELOAD_DB_QUERY: |
+            SELECT DISTINCT ext_id
+            FROM (
+              -- anything we've already priced for Selver online
+              SELECT p.source_url AS ext_id
+              FROM public.prices p
+              JOIN public.stores s ON s.id = p.store_id
+              WHERE s.chain = 'Selver' AND s.is_online = TRUE
+
+              UNION
+              -- candidates we gathered on previous runs but haven't matched yet
+              SELECT c.ext_id
+              FROM public.selver_candidates c
+
+              UNION
+              -- legacy compatibility (if this table was used previously)
+              SELECT sp.ext_id
+              FROM public.staging_selver_products sp
+            ) u
+            WHERE ext_id IS NOT NULL AND ext_id <> ''
           # PRELOAD_DB_LIMIT: "0"     # optional cap; 0 or unset = no cap
           PGSSLMODE: "require"
         run: |
