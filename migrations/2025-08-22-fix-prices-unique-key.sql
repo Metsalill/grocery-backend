@@ -1,32 +1,43 @@
 -- 2025-08-22-fix-prices-unique-key.sql
+-- Make 'prices' consistent (PK on (product_id, store_id)) and avoid duplicate index errors.
+-- Also ensure a sane uniqueness on price_history by (product_id, store_id, collected_at).
+
 BEGIN;
 
--- Drop the old “one row per product” uniqueness (exists as either a constraint or index)
+-- 1) Cleanup: old/bad unique index on prices(product_id) if it ever existed
+DROP INDEX IF EXISTS uq_prices_product;
+
+-- 2) Ensure collected_at exists on prices (harmless if already present)
+ALTER TABLE public.prices
+  ADD COLUMN IF NOT EXISTS collected_at TIMESTAMPTZ;
+
+-- 3) Ensure composite PK on prices(product_id, store_id)
 DO $$
 BEGIN
-  IF EXISTS (
-    SELECT 1
-    FROM pg_constraint c
-    JOIN pg_class t ON t.oid = c.conrelid
-    WHERE t.relname = 'prices' AND c.conname = 'uq_prices_product'
+  -- If no primary key yet, create one via a unique index and promote
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid='public.prices'::regclass AND contype='p'
   ) THEN
-    ALTER TABLE public.prices DROP CONSTRAINT uq_prices_product;
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_indexes
+      WHERE schemaname='public' AND indexname='uq_prices_product_store'
+    ) THEN
+      EXECUTE 'CREATE UNIQUE INDEX uq_prices_product_store ON public.prices(product_id, store_id)';
+    END IF;
+    EXECUTE 'ALTER TABLE public.prices ADD CONSTRAINT prices_pkey PRIMARY KEY USING INDEX uq_prices_product_store';
   END IF;
-END$$;
+END $$;
 
-DROP INDEX IF EXISTS public.uq_prices_product;
+-- 4) History table uniqueness: at most one entry per product+store+timestamp
+-- (If you already have a stricter unique index on history, this is still safe.)
+CREATE UNIQUE INDEX IF NOT EXISTS uq_price_history_store_product_at
+  ON public.price_history (product_id, store_id, collected_at);
 
--- Ensure collected_at exists (safe if already present)
-ALTER TABLE public.prices
-  ADD COLUMN IF NOT EXISTS collected_at timestamptz;
-
--- Correct uniqueness: allow multiple stores, allow time-series per store
-ALTER TABLE public.prices
-  ADD CONSTRAINT uq_prices_store_product_at
-  UNIQUE (store_id, product_id, collected_at);
-
--- Helpful index for “latest per store/product”
-CREATE INDEX IF NOT EXISTS idx_prices_store_product_at_desc
-  ON public.prices (store_id, product_id, collected_at DESC);
+-- 5) If someone previously created a redundant unique index on prices with collected_at,
+--    don't recreate it; if it already exists, keep or drop as you prefer. We choose to KEEP.
+--    (But do NOT try to CREATE it again, which caused the error earlier.)
+--    If you want it gone, uncomment the next line:
+-- DROP INDEX IF EXISTS uq_prices_store_product_at;
 
 COMMIT;
