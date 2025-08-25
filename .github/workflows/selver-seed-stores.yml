@@ -67,31 +67,54 @@ jobs:
           CHAIN   = os.environ.get("SELVER_CHAIN","Selver")
           ONLINE  = os.environ.get("ONLINE_NAME","e-Selver")
 
-          # Regexes
+          # --- Regex helpers ---
+          # schedules like "E-P 08:00–23:00"
           SCHEDULE_SPLIT = re.compile(r'\s+(?:E[-–]?P|E[-–]?[A-Z](?:\s*\d)?)\b')
+          # city prefix (strip if followed by "... Selver")
           CITY_PREFIX_RE = re.compile(
               r'^(Tallinn|Tartu|Pärnu|Narva|Jõhvi|Kohtla[-\s]?Järve|Rakvere|Paide|Keila|Võru|Valga|Viljandi|Rapla|Põlva|Jõgeva|Kuressaare|Kärdla|Maardu|Saue|Laagri|Kurna|Peetri|Viimsi|Merimetsa|Astri)\s+(.*)$',
               re.I
           )
-          # Match “… Selver” or “… Selver ABC” with a reasonable prefix length
-          SELVER_RE = re.compile(r'([A-ZÄÖÜÕ][A-Za-zÄÖÜÕäöüõ0-9\'’\- ]{1,50}\sSelver(?:\sABC)?)')
-          # Match "Delice …" or "Delice Toidupood …"
-          DELICE_RE = re.compile(r'(Delice(?:\s+Toidupood)?\s[A-ZÄÖÜÕ][A-Za-zÄÖÜÕäöüõ0-9\'’\- ]{1,50})')
+          # capture "... Selver" or "... Selver ABC"
+          CAP_SELVER = re.compile(r'([A-ZÄÖÜÕ][A-Za-zÄÖÜÕäöüõ0-9\'’\- ]{1,60}\sSelver(?:\sABC)?)')
+          # capture "Delice ..." or "Delice Toidupood ..."
+          CAP_DELICE = re.compile(r'(Delice(?:\s+Toidupood)?\s[A-ZÄÖÜÕ][A-Za-zÄÖÜÕäöüõ0-9\'’\- ]{1,60})')
 
           def clean_one(name: str) -> str:
-              # trim hours and whitespace
+              # cut schedules and whitespace
               n = SCHEDULE_SPLIT.split(name)[0].strip()
-              # strip leading city if present and the rest still contains "Selver"
+              # drop leading city if remaining part contains "Selver"
               m = CITY_PREFIX_RE.match(n)
               if m:
                   rest = m.group(2).strip()
                   if re.search(r'\bSelver\b', rest, re.I):
                       n = rest
               n = re.sub(r'\s{2,}', ' ', n)
-              # drop e-Selver variants
+              # exclude any e-Selver mention
               if re.search(r'\be-?selver\b', n, re.I):
                   return ''
               return n
+
+          def extract_all(text: str):
+              names = set()
+              # go line by line; some containers hold multiple entries per block
+              for raw in re.split(r'[\r\n]+', text):
+                  line = re.sub(r'\s+', ' ', raw).strip()
+                  if not line: continue
+                  for m in CAP_SELVER.finditer(line):
+                      n = clean_one(m.group(1))
+                      if n:
+                          names.add(n)
+                  for m in CAP_DELICE.finditer(line):
+                      n = clean_one(m.group(1))
+                      if n:
+                          names.add(n)
+              # final filter: enforce that result ends with "Selver" / "Selver ABC" or starts "Delice"
+              final = []
+              for n in names:
+                  if re.search(r'(?:\bSelver(?:\sABC)?$)', n) or re.match(r'^Delice\b', n):
+                      final.append(n)
+              return sorted(set(final))
 
           def render_and_extract():
               with sync_playwright() as pw:
@@ -99,7 +122,7 @@ jobs:
                   p = b.new_page()
                   p.goto("https://www.selver.ee/kauplused", wait_until="domcontentloaded", timeout=60000)
 
-                  # Accept cookies (best-effort)
+                  # best-effort cookie accept
                   for txt in ["Nõustun", "Nõustu", "Accept", "Allow all", "OK"]:
                       try:
                           p.get_by_role("button", name=re.compile(txt, re.I)).click(timeout=1200)
@@ -109,32 +132,20 @@ jobs:
 
                   p.wait_for_timeout(2000)
 
-                  # Use full page text; regex find all store-like fragments
+                  # Use full visible page text to avoid missing items in columns
                   try:
                       body_text = p.evaluate("document.body.innerText") or ""
                   except Exception:
                       body_text = p.inner_text("body") if p.locator("body").count() else ""
 
-                  names = set()
-                  for m in SELVER_RE.finditer(body_text):
-                      n = clean_one(m.group(1))
-                      if n:
-                          names.add(n)
+                  names = extract_all(body_text)
 
-                  for m in DELICE_RE.finditer(body_text):
-                      n = clean_one(m.group(1))
-                      if n:
-                          names.add(n)
-
-                  # Final pass: keep only strings that actually end with "Selver" or "Selver ABC"
-                  # or start with "Delice"
-                  final = set()
-                  for n in names:
-                      if re.search(r'(?:\bSelver(?:\sABC)?$)', n) or re.match(r'^Delice\b', n):
-                          final.add(n)
+                  if not names:
+                      print("::warning::No names extracted; sample dump follows:")
+                      print(body_text[:2000])
 
                   b.close()
-                  return sorted(final)
+                  return names
 
           async def geocode_one(session, name):
               url = "https://nominatim.openstreetmap.org/search"
@@ -188,22 +199,26 @@ jobs:
                 END IF;
               END $$;""")
 
-              # Upsert online store
+              # Upsert online store (guarded w/o relying on unique index)
               cur.execute("""
                 INSERT INTO stores (name, chain, is_online)
-                VALUES (%s, %s, TRUE)
-                ON CONFLICT DO NOTHING;
-              """, (ONLINE, CHAIN))
+                SELECT %s, %s, TRUE
+                WHERE NOT EXISTS (
+                  SELECT 1 FROM stores WHERE chain=%s AND name=%s AND COALESCE(is_online,false)=true
+                );
+              """, (ONLINE, CHAIN, CHAIN, ONLINE))
 
-              # Upsert physical stores
+              # Upsert physical stores (guarded)
               sql = """
                 INSERT INTO stores (name, chain, is_online, lat, lon)
-                VALUES (%s, %s, FALSE, %s, %s)
-                ON CONFLICT DO NOTHING;
+                SELECT %s, %s, FALSE, %s, %s
+                WHERE NOT EXISTS (
+                  SELECT 1 FROM stores WHERE chain=%s AND name=%s AND COALESCE(is_online,false)=false
+                );
               """
               for n in names:
                 lat, lon = coords.get(n, (None, None))
-                cur.execute(sql, (n, CHAIN, lat, lon))
+                cur.execute(sql, (n, CHAIN, lat, lon, CHAIN, n))
 
               cur.close(); conn.close()
               print(f"Upsert complete: {len(names)} physical stores")
