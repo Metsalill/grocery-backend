@@ -8,9 +8,9 @@ Aug 2025:
 - PDP detection: /toode/ OR single-segment slug with a digit **or unit suffix** (-kg/-g/-l/-ml/-cl/-dl/-tk/-pk/-pcs).
   Accepts both root and /e-selver/ paths.
 - Cosmetics/utility trees excluded.
-- Click-mode fix: navigate to collected HREFs and only fall back to DOM click if needed.
+- Click-mode: navigate to collected HREFs; if none found, or nav fails, **click product cards** that have an “OSTA” button.
 - Product-card focused selectors and per-page discovery debug.
-- NEW: resilient navigation (higher timeout, multi-try, no 'networkidle' wait), fixes occasional category timeouts.
+- Resilient navigation (higher timeout, retries, no 'networkidle' wait).
 """
 
 from __future__ import annotations
@@ -18,7 +18,7 @@ import os, re, csv, time, json
 from typing import Dict, Set, Tuple, List, Optional
 from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit, parse_qs, urlencode
 from playwright.sync_api import sync_playwright
-from playwright.sync_api import TimeoutError as PWTimeoutError  # <- catch navigation timeouts explicitly
+from playwright.sync_api import TimeoutError as PWTimeoutError
 
 BASE = "https://www.selver.ee"
 OUTPUT = os.getenv("OUTPUT_CSV", "data/selver.csv")
@@ -29,7 +29,7 @@ CATEGORIES_FILE = os.getenv("CATEGORIES_FILE", "data/selver_categories.txt")
 USE_ROUTER     = int(os.getenv("USE_ROUTER", "1")) == 1
 CLICK_PRODUCTS = int(os.getenv("CLICK_PRODUCTS", "0")) == 1
 LOG_CONSOLE    = (os.getenv("LOG_CONSOLE", "0") or "0").lower()  # 0|off, warn, all
-NAV_TIMEOUT    = int(os.getenv("NAV_TIMEOUT", "45000"))          # <- new, default 45s
+NAV_TIMEOUT    = int(os.getenv("NAV_TIMEOUT", "45000"))          # default 45s
 
 STRICT_ALLOWLIST = [
     "/puu-ja-koogiviljad",
@@ -126,7 +126,7 @@ def _in_allowlist(path: str) -> bool:
     p = (path or "/").rstrip("/")
     return any(p == root or p.startswith(root + "/") for root in STRICT_ALLOWLIST)
 
-# ---- Product URL check (tight, but friendly to grocery slugs)
+# PDP detector
 def _is_selver_product_like(url: str) -> bool:
     u = urlparse(url)
     host = (u.netloc or urlparse(BASE).netloc).lower()
@@ -135,27 +135,20 @@ def _is_selver_product_like(url: str) -> bool:
     if path.startswith("/ru/"): return False
     if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS): return False
     if any(kw in path for kw in NON_PRODUCT_KEYWORDS): return False
-
-    if path.startswith("/toode/"):
-        return True
-
+    if path.startswith("/toode/"): return True
     segs = [s for s in path.strip("/").split("/") if s]
     if len(segs) == 1:
         last = segs[0]
-        if not re.fullmatch(r"[a-z0-9-]{3,}", last):
-            return False
-        if any(ch.isdigit() for ch in last):
-            return True
-        if re.search(r"(?:-|^)(?:kg|g|l|ml|cl|dl|tk|pk|pcs)$", last):
-            return True
-
+        if not re.fullmatch(r"[a-z0-9-]{3,}", last): return False
+        if any(ch.isdigit() for ch in last): return True
+        if re.search(r"(?:-|^)(?:kg|g|l|ml|cl|dl|tk|pk|pcs)$", last): return True
     return False
 
 def _is_category_like_path(path: str) -> bool:
     p = _strip_eselver_prefix((path or "/").lower())
     if ALLOWLIST_ONLY and STRICT_ALLOWLIST and not _in_allowlist(p): return False
     if "/e-selver/" in p or p.startswith("/ru/"): return False
-    if any(bad in p for b in BANNED_KEYWORDS): return False
+    if any(bad in p for bad in BANNED_KEYWORDS): return False
     if any(sn in p for sn in NON_PRODUCT_PATH_SNIPPETS): return False
     if _is_selver_product_like(urljoin(BASE, p)): return False
     segs = [s for s in p.strip("/").split("/") if s]
@@ -208,55 +201,40 @@ def accept_cookies(page):
             pass
 
 def _with_host_variant(url: str) -> str:
-    """Swap www <-> bare host to dodge rare host-specific throttles."""
     parts = urlsplit(url)
     host = parts.netloc
-    if host.startswith("www."):
-        host2 = host[4:]
-    else:
-        host2 = "www." + host if host else host
+    host2 = host[4:] if host.startswith("www.") else ("www."+host if host else host)
     return urlunsplit((parts.scheme, host2, parts.path, parts.query, ""))
 
 def _same_path(u1: str, u2: str) -> bool:
-    try:
-        return urlsplit(u1).path.rstrip("/") == urlsplit(u2).path.rstrip("/")
-    except Exception:
-        return False
+    try: return urlsplit(u1).path.rstrip("/") == urlsplit(u2).path.rstrip("/")
+    except Exception: return False
 
 def safe_goto(page, url: str, timeout: int = NAV_TIMEOUT) -> bool:
-    """Resilient navigation with retries and no 'networkidle' waits."""
     try:
         cur = page.url
         if cur and _same_path(cur, url):
-            # already there (helps when we just navigated successfully)
             return True
     except Exception:
         pass
 
     attempts = [
         ("domcontentloaded", url),
-        ("commit", url),                         # looser wait
-        ("commit", _with_host_variant(url)),     # host variant
+        ("commit", url),
+        ("commit", _with_host_variant(url)),
     ]
-
     for i, (wait_until, target) in enumerate(attempts, 1):
         try:
-            page.goto(target, wait_until=wait_until, timeout=timeout if i == 1 else timeout * 2)
+            page.goto(target, wait_until=wait_until, timeout=timeout if i == 1 else timeout*2)
             accept_cookies(page)
-            # a tiny settle; avoid networkidle which can hang on long-polling
-            try:
-                page.wait_for_load_state("load", timeout=min(6000, timeout // 2))
-            except Exception:
-                pass
+            try: page.wait_for_load_state("load", timeout=min(6000, timeout//2))
+            except Exception: pass
             time.sleep(0.4)
             return True
         except PWTimeoutError as e:
             print(f"[selver] NAV TRY {i} TIMEOUT {target} ({wait_until}) -> {e}")
-            continue
         except Exception as e:
             print(f"[selver] NAV TRY {i} FAIL {target} ({wait_until}) -> {type(e).__name__}: {e}")
-            continue
-
     print(f"[selver] NAV FAIL {url} (all retries)")
     return False
 
@@ -394,6 +372,63 @@ def _extract_product_hrefs(page) -> List[str]:
         if u and _is_selver_product_like(u):
             links.append(u)
     return list(dict.fromkeys(links))
+
+# --- Card click fallback on listings (when hrefs missing) -------------------
+
+CARD_SEL = (
+    "article:has(button:has-text('OSTA')), "
+    ".product:has(button:has-text('OSTA')), "
+    ".product-card:has(button:has-text('OSTA')), "
+    ".product-item:has(button:has-text('OSTA')), "
+    "li:has(button:has-text('OSTA'))"
+)
+
+def _crawl_by_clicking_cards(page, listing_url: str, writer: csv.DictWriter, seen_ext_ids: Set[str]) -> int:
+    """Fallback when no HREFs found: click product cards directly."""
+    wrote = 0
+    _wait_listing_ready(page)
+    # Limit to first 36 visible cards per page to avoid infinite grids
+    try:
+        cnt = min(page.locator(CARD_SEL).count(), 36)
+    except Exception:
+        cnt = 0
+    print(f"[selver]   fallback: clicking {cnt} product cards")
+    for i in range(cnt):
+        card = page.locator(CARD_SEL).nth(i)
+        try:
+            if not card.is_visible(): continue
+            # Prefer a child link if present; else click the card
+            link = card.locator("a[href^='/']:not([href*='#'])").first
+            if link.count() > 0:
+                href = _clean_abs(link.get_attribute("href") or "")
+                if href and safe_goto(page, href):
+                    _wait_pdp_ready(page)
+                else:
+                    # try direct click
+                    link.click(timeout=5000)
+                    _wait_pdp_ready(page)
+            else:
+                card.scroll_into_view_if_needed(timeout=3000)
+                card.click(timeout=5000)
+                _wait_pdp_ready(page)
+
+            row = _extract_row_from_pdp(page, None)
+            if row:
+                ext_id = row["ext_id"]
+                if ext_id not in seen_ext_ids:
+                    writer.writerow(row)
+                    seen_ext_ids.add(ext_id)
+                    wrote += 1
+        except Exception:
+            pass
+        # return to listing
+        try:
+            page.go_back(wait_until="domcontentloaded", timeout=max(20000, NAV_TIMEOUT))
+            _wait_listing_ready(page)
+        except Exception:
+            safe_goto(page, listing_url); _wait_listing_ready(page)
+        time.sleep(0.15)
+    return wrote
 
 def collect_product_links_from_listing(page, seed_url: str) -> Tuple[Set[str], Dict[str, str]]:
     links: Set[str] = set()
@@ -552,7 +587,7 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
         ean = ean or e2; sku = sku or s2
     price, currency = 0.0, "EUR"
     if prod_ld and "offers" in prod_ld:
-        offers = prod_ld["offers"]; 
+        offers = prod_ld["offers"]
         if isinstance(offers, list) and offers: offers = offers[0]
         try:
             price = float(str(offers.get("price")).replace(",", ".")); currency = offers.get("priceCurrency") or currency
@@ -623,6 +658,7 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
         if not safe_goto(page, url): continue
         _wait_listing_ready(page); time.sleep(REQ_DELAY)
 
+        # First try: collect PDP hrefs
         try:
             hrefs = page.evaluate("""
               (() => {
@@ -649,17 +685,22 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
         cleaned, seen = [], set()
         for h in hrefs:
             u = _clean_abs(h)
-            if u and u not in seen:
+            if u and _is_selver_product_like(u) and u not in seen:
                 seen.add(u); cleaned.append(u)
 
         print(f"[selver]   page {n}: discovered {len(cleaned)} candidate links")
 
+        # If no hrefs at all, click cards directly
+        if not cleaned:
+            wrote += _crawl_by_clicking_cards(page, url, writer, seen_ext_ids)
+            continue
+
+        # Use hrefs; if any nav fails, fallback to clicking that card
         for href in cleaned:
             navigated = safe_goto(page, href)
             if not navigated:
-                navigated = open_product_via_click(page, url, href)
-                if not navigated:
-                    # ensure we are back on the listing before next href
+                if not open_product_via_click(page, url, href):
+                    # last resort: ensure we are back on the listing before next href
                     safe_goto(page, url); _wait_listing_ready(page)
                     continue
 
@@ -713,7 +754,7 @@ def crawl():
                 context.route("**/*", _router)
 
             page = context.new_page()
-            page.set_default_navigation_timeout(NAV_TIMEOUT)  # <- honor env
+            page.set_default_navigation_timeout(NAV_TIMEOUT)
             page.set_default_timeout(12000)
 
             if LOG_CONSOLE == "all":
