@@ -49,9 +49,14 @@ CREATE TABLE IF NOT EXISTS public.staging_selver_products (
 CREATE INDEX IF NOT EXISTS ix_selver_ean       ON public.staging_selver_products(ean_norm);
 CREATE INDEX IF NOT EXISTS ix_selver_name_trgm ON public.staging_selver_products USING gin (name gin_trgm_ops);
 
--- 3) One canonical Selver store (we’ll use this single feed for all Selver stores initially)
-INSERT INTO public.stores(name, chain, is_online)
-SELECT 'Selver e-pood', 'Selver', TRUE
-WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE name='Selver e-pood');
+-- 3) Exactly one ONLINE Selver per chain (partial unique index)
+CREATE UNIQUE INDEX IF NOT EXISTS uniq_chain_online
+  ON public.stores (lower(chain))
+  WHERE COALESCE(is_online,false) = TRUE;
+
+-- Insert the canonical online Selver store iff none exists (conflict-safe)
+INSERT INTO public.stores (name, chain, is_online)
+VALUES ('Selver e-Selver', 'Selver', TRUE)
+ON CONFLICT DO NOTHING;
 
 COMMIT;
