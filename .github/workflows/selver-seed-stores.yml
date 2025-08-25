@@ -1,55 +1,3 @@
-name: "Selver → Seed stores (online + physical)"
-
-on:
-  workflow_dispatch:
-    inputs:
-      geocode:
-        description: "Geocode with Nominatim (0/1). If 1, adds lat/lon (slower)."
-        required: false
-        default: "0"
-      chain:
-        description: "Retail chain label"
-        required: false
-        default: "Selver"
-      online_name:
-        description: "Name of online store"
-        required: false
-        default: "e-Selver"
-      dry_run:
-        description: "Dry run (0/1) — parse only, no DB writes"
-        required: false
-        default: "0"
-
-concurrency:
-  group: seed-selver-stores
-  cancel-in-progress: true
-
-jobs:
-  seed:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    env:
-      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
-      GEOCODE: ${{ github.event.inputs.geocode }}
-      DRY_RUN: ${{ github.event.inputs.dry_run }}
-      SELVER_CHAIN: ${{ github.event.inputs.chain }}
-      ONLINE_NAME: ${{ github.event.inputs.online_name }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install deps (Playwright + DB + HTTP)
-        run: |
-          python -m pip install --upgrade pip
-          pip install playwright psycopg2-binary aiohttp
-          python -m playwright install --with-deps chromium
-
       - name: Create Playwright seeder script (inline)
         shell: bash
         run: |
@@ -67,52 +15,79 @@ jobs:
           CHAIN   = os.environ.get("SELVER_CHAIN","Selver")
           ONLINE  = os.environ.get("ONLINE_NAME","e-Selver")
 
-          def render_and_extract():
+          NAME_PAT = re.compile(r'\b(?:Delice(?:\s+Toidupood)?|[A-Za-zÄÖÜÕäöüõ0-9\'\-\s]+?Selver(?:\s+ABC)?)\b', re.I)
+          SCHEDULE_SPLIT = re.compile(r'\s+(?:E[-–]?[A-Z]|E[-–]?[A-Z]-[A-Z]|E[-–]?[A-Z]\s*\d|E[-–]P)\b')  # cut at schedule tokens like "E-P", "E–P", etc.
+
+          def extract_names_from_texts(texts):
             names = set()
+            for t in texts:
+              if not t: continue
+              t = re.sub(r'\s+', ' ', t).strip()
+              # Drop everything after schedule chunk (hours)
+              t = SCHEDULE_SPLIT.split(t)[0].strip()
+              # Find a store-like fragment containing "Selver" or "Delice"
+              m = NAME_PAT.search(t)
+              if not m: continue
+              name = m.group(0).strip()
+              if re.search(r'\be-?selver\b', name, re.I):  # exclude e-Selver
+                continue
+              # normalize spaces
+              name = re.sub(r'\s{2,}', ' ', name)
+              if len(name) >= 6:
+                names.add(name)
+            return sorted(names)
+
+          def render_and_extract():
             with sync_playwright() as pw:
               b = pw.chromium.launch(headless=True)
               p = b.new_page()
-              p.goto("https://www.selver.ee/kauplused", wait_until="load", timeout=60000)
-              # Try to accept cookies if banner appears (best-effort)
-              for txt in ["Nõustun", "Nõustu", "Accept", "Allow all"]:
+              p.goto("https://www.selver.ee/kauplused", wait_until="domcontentloaded", timeout=60000)
+
+              # Cookies (best-effort)
+              for txt in ["Nõustun", "Nõustu", "Accept", "Allow all", "OK"]:
                 try:
-                  p.get_by_role("button", name=re.compile(txt, re.I)).click(timeout=1500)
+                  p.get_by_role("button", name=re.compile(txt, re.I)).click(timeout=1200)
                   break
                 except Exception:
                   pass
 
-              # Give JS a moment to render
-              p.wait_for_timeout(1500)
+              # Wait a bit for JS-rendered lists
+              p.wait_for_timeout(2000)
 
-              # Collect candidate texts from anchors/headings/list items
               texts = []
-              for sel in ["a", "h1", "h2", "h3", "li", "span", "div"]:
+              # Try likely containers first
+              for sel in [
+                "section, div, ul, li, a, button, h1, h2, h3, span",
+              ]:
                 try:
                   texts += p.locator(sel).all_inner_texts()
                 except Exception:
                   pass
 
-              for t in texts:
-                t = re.sub(r"\s+", " ", t).strip()
-                # Match names that end with Selver (optionally ABC) or contain Delice
-                if re.search(r"(Selver(?:\s+ABC)?$)|(^Delice\b)", t, re.I):
-                  # Filter overly generic lines
-                  if len(t) >= 6 and "e-Selver" not in t:
-                    names.add(t)
-
-              # Also try links that navigate to store subpages
+              # Also try role-based selection (buttons often hold the store row)
               try:
-                hrefs = p.locator("a[href*='/kauplused']").evaluate_all("els => els.map(e => e.textContent)")
-                for t in hrefs:
-                  if t:
-                    t = re.sub(r"\s+", " ", t).strip()
-                    if re.search(r"(Selver(?:\s+ABC)?$)|(^Delice\b)", t, re.I) and "e-Selver" not in t:
-                      names.add(t)
+                texts += p.get_by_role("button", name=re.compile(r"Selver|Delice", re.I)).all_inner_texts()
               except Exception:
                 pass
 
+              # As a last resort, page text split (heavier)
+              try:
+                whole = p.content()
+                whole = re.sub(r'<[^>]+>', ' ', whole)
+                texts += [whole]
+              except Exception:
+                pass
+
+              names = extract_names_from_texts(texts)
+              # Debug snippet to help if 0 are found
+              if not names:
+                print("::warning::No names extracted; dumping a few sample texts for debugging:")
+                for s in texts[:20]:
+                  s = re.sub(r'\s+', ' ', s).strip()
+                  print("SAMPLE:", s[:160])
+
               b.close()
-            return sorted(names)
+              return names
 
           async def geocode_one(session, name):
             url = "https://nominatim.openstreetmap.org/search"
@@ -128,9 +103,9 @@ jobs:
               return None, None
 
           async def geocode_all(names):
-            out = {}
             if not GEOCODE:
               return {n: (None, None) for n in names}
+            out = {}
             async with aiohttp.ClientSession() as session:
               for n in names:
                 lat, lon = await geocode_one(session, n)
@@ -189,15 +164,6 @@ jobs:
           if __name__ == "__main__":
             names = render_and_extract()
             print(f"Found {len(names)} Selver/Delice physical names.")
-            if len(names) == 0:
-              print("::warning::No stores parsed; page likely blocked or structure changed.")
             coords = asyncio.run(geocode_all(names))
             upsert(names, coords)
           PY
-
-      - name: Run seeder
-        env:
-          PYTHONUNBUFFERED: "1"
-        run: |
-          echo "GEOCODE=${GEOCODE} DRY_RUN=${DRY_RUN} CHAIN=${SELVER_CHAIN} ONLINE_NAME=${ONLINE_NAME}"
-          python selver_seed_stores_pw.py
