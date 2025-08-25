@@ -67,49 +67,45 @@ jobs:
           CHAIN   = os.environ.get("SELVER_CHAIN","Selver")
           ONLINE  = os.environ.get("ONLINE_NAME","e-Selver")
 
-          # --- Regex helpers ---
           # schedules like "E-P 08:00–23:00"
           SCHEDULE_SPLIT = re.compile(r'\s+(?:E[-–]?P|E[-–]?[A-Z](?:\s*\d)?)\b')
-          # city prefix (strip if followed by "... Selver")
-          CITY_PREFIX_RE = re.compile(
-              r'^(Tallinn|Tartu|Pärnu|Narva|Jõhvi|Kohtla[-\s]?Järve|Rakvere|Paide|Keila|Võru|Valga|Viljandi|Rapla|Põlva|Jõgeva|Kuressaare|Kärdla|Maardu|Saue|Laagri|Kurna|Peetri|Viimsi|Merimetsa|Astri)\s+(.*)$',
-              re.I
-          )
+          # strip only noisy prefixes that create duplicates
+          CITY_PREFIX_RE = re.compile(r'^(Tallinn|Tartu)\s+(.*)$', re.I)
+
           # capture "... Selver" or "... Selver ABC"
           CAP_SELVER = re.compile(r'([A-ZÄÖÜÕ][A-Za-zÄÖÜÕäöüõ0-9\'’\- ]{1,60}\sSelver(?:\sABC)?)')
           # capture "Delice ..." or "Delice Toidupood ..."
           CAP_DELICE = re.compile(r'(Delice(?:\s+Toidupood)?\s[A-ZÄÖÜÕ][A-Za-zÄÖÜÕäöüõ0-9\'’\- ]{1,60})')
 
           def clean_one(name: str) -> str:
-              # cut schedules and whitespace
               n = SCHEDULE_SPLIT.split(name)[0].strip()
-              # drop leading city if remaining part contains "Selver"
+              # only strip Tallinn/Tartu prefix to avoid dup variants like "Tallinn Arsenali Selver"
               m = CITY_PREFIX_RE.match(n)
               if m:
                   rest = m.group(2).strip()
-                  if re.search(r'\bSelver\b', rest, re.I):
+                  # keep rest only if it's more than just "Selver"
+                  if re.search(r'\bSelver\b', rest, re.I) and rest.lower() != 'selver':
                       n = rest
               n = re.sub(r'\s{2,}', ' ', n)
-              # exclude any e-Selver mention
+              # exclude bogus matches
+              if n.lower() == 'selver' or re.fullmatch(r'osta selver', n, re.I):
+                  return ''
               if re.search(r'\be-?selver\b', n, re.I):
                   return ''
               return n
 
           def extract_all(text: str):
               names = set()
-              # go line by line; some containers hold multiple entries per block
               for raw in re.split(r'[\r\n]+', text):
                   line = re.sub(r'\s+', ' ', raw).strip()
                   if not line: continue
                   for m in CAP_SELVER.finditer(line):
                       n = clean_one(m.group(1))
-                      if n:
-                          names.add(n)
+                      if n: names.add(n)
                   for m in CAP_DELICE.finditer(line):
                       n = clean_one(m.group(1))
-                      if n:
-                          names.add(n)
-              # final filter: enforce that result ends with "Selver" / "Selver ABC" or starts "Delice"
+                      if n: names.add(n)
+              # keep only strings that end with "Selver"/"Selver ABC" or start "Delice"
               final = []
               for n in names:
                   if re.search(r'(?:\bSelver(?:\sABC)?$)', n) or re.match(r'^Delice\b', n):
@@ -121,29 +117,21 @@ jobs:
                   b = pw.chromium.launch(headless=True)
                   p = b.new_page()
                   p.goto("https://www.selver.ee/kauplused", wait_until="domcontentloaded", timeout=60000)
-
-                  # best-effort cookie accept
                   for txt in ["Nõustun", "Nõustu", "Accept", "Allow all", "OK"]:
                       try:
                           p.get_by_role("button", name=re.compile(txt, re.I)).click(timeout=1200)
                           break
                       except Exception:
                           pass
-
                   p.wait_for_timeout(2000)
-
-                  # Use full visible page text to avoid missing items in columns
                   try:
                       body_text = p.evaluate("document.body.innerText") or ""
                   except Exception:
                       body_text = p.inner_text("body") if p.locator("body").count() else ""
-
                   names = extract_all(body_text)
-
                   if not names:
                       print("::warning::No names extracted; sample dump follows:")
                       print(body_text[:2000])
-
                   b.close()
                   return names
 
@@ -168,7 +156,7 @@ jobs:
                   for n in names:
                       lat, lon = await geocode_one(session, n)
                       out[n] = (lat, lon)
-                      time.sleep(1)  # Nominatim fair use
+                      time.sleep(1)
               return out
 
           def upsert(names, coords):
@@ -176,15 +164,11 @@ jobs:
                   print(f"Dry run: {len(names)} stores parsed")
                   for n in names: print(" -", n)
                   return
-
-              conn = psycopg2.connect(DB_URL)
-              conn.autocommit = True
+              conn = psycopg2.connect(DB_URL); conn.autocommit = True
               cur = conn.cursor()
-
-              # Ensure columns exist (idempotent)
+              # ensure columns
               cur.execute("""
-              DO $$
-              BEGIN
+              DO $$ BEGIN
                 IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='chain') THEN
                   ALTER TABLE stores ADD COLUMN chain TEXT;
                 END IF;
@@ -198,8 +182,7 @@ jobs:
                   ALTER TABLE stores ADD COLUMN lon DOUBLE PRECISION;
                 END IF;
               END $$;""")
-
-              # Upsert online store (guarded w/o relying on unique index)
+              # online store
               cur.execute("""
                 INSERT INTO stores (name, chain, is_online)
                 SELECT %s, %s, TRUE
@@ -207,8 +190,7 @@ jobs:
                   SELECT 1 FROM stores WHERE chain=%s AND name=%s AND COALESCE(is_online,false)=true
                 );
               """, (ONLINE, CHAIN, CHAIN, ONLINE))
-
-              # Upsert physical stores (guarded)
+              # physical stores
               sql = """
                 INSERT INTO stores (name, chain, is_online, lat, lon)
                 SELECT %s, %s, FALSE, %s, %s
@@ -219,7 +201,6 @@ jobs:
               for n in names:
                 lat, lon = coords.get(n, (None, None))
                 cur.execute(sql, (n, CHAIN, lat, lon, CHAIN, n))
-
               cur.close(); conn.close()
               print(f"Upsert complete: {len(names)} physical stores")
 
