@@ -4,13 +4,14 @@
 """
 Selver category crawler → CSV (staging_selver_products)
 
-Changes in this patch:
-- Accept BOTH /e/... and non-/e/ product URLs like https://www.selver.ee/brokoli-harmavili-400-g
-- Product URL detector is slug-based (last path segment looks like a product slug).
-- Removed the canonical '/e/' guard in PDP extraction.
-- Click-through success check no longer requires '/e/' in the URL.
-- Still filters obvious non-product pages and drops zero-price rows.
-- **Shard fix:** if a sharded CATEGORIES_FILE exists and has URLs, use ONLY those seeds (no static allowlist).
+What's new in this patch (Aug 2025):
+- **Stricter product URL detection**:
+  - Treat as PDP when path starts with `/toode/` (or `/e-selver/toode/`) OR
+    when it's a single-segment slug that contains at least one digit (e.g. `/likoor-jagermeister-70-cl`).
+  - Reject multi-segment cosmetics/utility paths (e.g. `/enesehooldustarbed/.../hugieenilised-salvratikud-vatid`).
+  - Still accept both `/e/...` and non-`/e/` product URLs.
+- **Click selectors tightened** so we only click real product cards (avoid header/footer links).
+- Kept: canonical guard removal, shard-first seeds, JSON-LD/EAN extraction, router, etc.
 
 CSV columns: ext_id, name, ean_raw, sku_raw, size_text, price, currency, category_path, category_leaf
 """
@@ -139,7 +140,11 @@ def _in_allowlist(path: str) -> bool:
     p = (path or "/").rstrip("/")
     return any(p == root or p.startswith(root + "/") for root in STRICT_ALLOWLIST)
 
-# ---- Product URL check: allow both /e/... and root slugs like /brokoli-harmavili-400-g
+# ---- Product URL check (tight) --------------------------------------------
+# PDP if:
+#  - path starts with /toode/ (or /e-selver/toode/), OR
+#  - single-segment slug containing at least one digit (typical for PDPs),
+# and NOT obviously utility/category paths.
 def _is_selver_product_like(url: str) -> bool:
     u = urlparse(url)
     host = (u.netloc or urlparse(BASE).netloc).lower()
@@ -152,9 +157,19 @@ def _is_selver_product_like(url: str) -> bool:
         return False
     if any(kw in path for kw in NON_PRODUCT_KEYWORDS):
         return False
-    # Typical PDP slug at the end
-    last = path.rstrip("/").rsplit("/", 1)[-1]
-    return bool(re.fullmatch(r"[a-z0-9-]{3,}", last)) and "-" in last
+
+    # explicit PDP pattern
+    if path.startswith("/toode/"):
+        return True
+
+    # single-segment slug with at least one digit (e.g. weights/volumes)
+    segs = [s for s in path.strip("/").split("/") if s]
+    if len(segs) == 1:
+        last = segs[0]
+        if "-" in last and any(ch.isdigit() for ch in last):
+            return True
+
+    return False
 
 def _is_category_like_path(path: str) -> bool:
     p = _strip_eselver_prefix((path or "/").lower())
@@ -631,6 +646,7 @@ def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
         f"a[href$='{path}/']",
         f"a[href$='{eselver_path}']",
         f"a[href$='{eselver_path}/']",
+        "a[href*='/toode/']",
     ]
 
     for sel in candidates:
@@ -640,7 +656,6 @@ def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
                 a.click(timeout=5000)
                 for _ in range(24):
                     up = urlparse(page.url).path.lower()
-                    # consider we landed if product-like path
                     if _is_selver_product_like(urljoin(BASE, up)):
                         break
                     if page.locator("h1").count() > 0:
@@ -668,12 +683,16 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
         _wait_listing_ready(page)
         time.sleep(REQ_DELAY)
 
-        # Collect unique HREFs but still click (stability)
+        # Collect HREFs only from product-card-like elements
         try:
             hrefs = page.evaluate("""
-              [...document.querySelectorAll('a[href^="/"]:not([href*="#"])')]
-                .filter(a => a.closest('article, .product, .product-card, .product-item, li'))
-                .map(a => a.getAttribute('href'))
+              [...document.querySelectorAll(
+                'article a[href^="/"]:not([href*="#"]), \
+                 .product a[href^="/"]:not([href*="#"]), \
+                 .product-card a[href^="/"]:not([href*="#"]), \
+                 .product-item a[href^="/"]:not([href*="#"])'
+              )].map(a => a.getAttribute('href'))
+               .filter(Boolean)
             """)
         except Exception:
             hrefs = []
@@ -690,7 +709,7 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
             path = urlparse(href).path
             eselver_path = "/e-selver" + path if not path.startswith("/e-selver/") else path
             loc = page.locator(
-                f"a[href$='{path}'], a[href$='{path}/'], a[href$='{eselver_path}'], a[href$='{eselver_path}/']"
+                f"a[href$='{path}'], a[href$='{path}/'], a[href$='{eselver_path}'], a[href$='{eselver_path}/'], a[href*='/toode/']"
             ).first
             try:
                 if loc.count() == 0:
@@ -855,7 +874,6 @@ def crawl():
 
                     row = _extract_row_from_pdp(page, pu)
                     if not row:
-                        # try click-through from its listing (SPA hydration)
                         if open_product_via_click(page, prod2listing.get(pu, ""), pu):
                             time.sleep(0.3)
                             row = _extract_row_from_pdp(page, pu)
