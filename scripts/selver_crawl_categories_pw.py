@@ -5,11 +5,12 @@
 Selver category crawler → CSV (staging_selver_products)
 
 Aug 2025:
-- PDP detection: /toode/ OR single-segment slug with a digit **or unit suffix**
-  (-kg/-g/-l/-ml/-cl/-dl/-tk/-pk/-pcs). Accepts both root and /e-selver/ paths.
+- PDP detection: /toode/ OR single-segment slug with a digit **or unit suffix** (-kg/-g/-l/-ml/-cl/-dl/-tk/-pk/-pcs).
+  Accepts both root and /e-selver/ paths.
 - Cosmetics/utility trees excluded.
 - Click-mode fix: navigate to collected HREFs and only fall back to DOM click if needed.
-- Product-card focused selectors with absolute/relative HREF support + per-page discovery debug.
+- Product-card focused selectors and per-page discovery debug.
+- NEW: resilient navigation (higher timeout, multi-try, no 'networkidle' wait), fixes occasional category timeouts.
 """
 
 from __future__ import annotations
@@ -17,6 +18,7 @@ import os, re, csv, time, json
 from typing import Dict, Set, Tuple, List, Optional
 from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit, parse_qs, urlencode
 from playwright.sync_api import sync_playwright
+from playwright.sync_api import TimeoutError as PWTimeoutError  # <- catch navigation timeouts explicitly
 
 BASE = "https://www.selver.ee"
 OUTPUT = os.getenv("OUTPUT_CSV", "data/selver.csv")
@@ -27,6 +29,7 @@ CATEGORIES_FILE = os.getenv("CATEGORIES_FILE", "data/selver_categories.txt")
 USE_ROUTER     = int(os.getenv("USE_ROUTER", "1")) == 1
 CLICK_PRODUCTS = int(os.getenv("CLICK_PRODUCTS", "0")) == 1
 LOG_CONSOLE    = (os.getenv("LOG_CONSOLE", "0") or "0").lower()  # 0|off, warn, all
+NAV_TIMEOUT    = int(os.getenv("NAV_TIMEOUT", "45000"))          # <- new, default 45s
 
 STRICT_ALLOWLIST = [
     "/puu-ja-koogiviljad",
@@ -123,9 +126,7 @@ def _in_allowlist(path: str) -> bool:
     p = (path or "/").rstrip("/")
     return any(p == root or p.startswith(root + "/") for root in STRICT_ALLOWLIST)
 
-# PDP if:
-#  - path starts with /toode/, OR
-#  - single-segment slug with at least one digit OR unit suffix -kg/-g/-l/-ml/-cl/-dl/-tk/-pk/-pcs.
+# ---- Product URL check (tight, but friendly to grocery slugs)
 def _is_selver_product_like(url: str) -> bool:
     u = urlparse(url)
     host = (u.netloc or urlparse(BASE).netloc).lower()
@@ -147,13 +148,14 @@ def _is_selver_product_like(url: str) -> bool:
             return True
         if re.search(r"(?:-|^)(?:kg|g|l|ml|cl|dl|tk|pk|pcs)$", last):
             return True
+
     return False
 
 def _is_category_like_path(path: str) -> bool:
     p = _strip_eselver_prefix((path or "/").lower())
     if ALLOWLIST_ONLY and STRICT_ALLOWLIST and not _in_allowlist(p): return False
     if "/e-selver/" in p or p.startswith("/ru/"): return False
-    if any(bad in p for bad in BANNED_KEYWORDS): return False
+    if any(bad in p for b in BANNED_KEYWORDS): return False
     if any(sn in p for sn in NON_PRODUCT_PATH_SNIPPETS): return False
     if _is_selver_product_like(urljoin(BASE, p)): return False
     segs = [s for s in p.strip("/").split("/") if s]
@@ -188,6 +190,8 @@ def _pick_ean_from_html(html: str) -> str:
     m8 = re.search(r"\b(\d{8})\b", html)
     return m8.group(1) if m8 else ""
 
+# ------------------------ cookies & navigation ------------------------------
+
 def accept_cookies(page):
     for sel in [
         "button:has-text('Nõustu')","button:has-text('Nõustun')",
@@ -203,25 +207,64 @@ def accept_cookies(page):
         except Exception:
             pass
 
-def safe_goto(page, url: str, timeout: int = 30000) -> bool:
+def _with_host_variant(url: str) -> str:
+    """Swap www <-> bare host to dodge rare host-specific throttles."""
+    parts = urlsplit(url)
+    host = parts.netloc
+    if host.startswith("www."):
+        host2 = host[4:]
+    else:
+        host2 = "www." + host if host else host
+    return urlunsplit((parts.scheme, host2, parts.path, parts.query, ""))
+
+def _same_path(u1: str, u2: str) -> bool:
     try:
-        page.goto(url, wait_until="domcontentloaded", timeout=timeout)
-        accept_cookies(page)
-        try:
-            page.wait_for_load_state("networkidle", timeout=timeout)
-        except Exception:
-            pass
-        time.sleep(0.6)
-        return True
-    except Exception as e:
-        print(f"[selver] NAV FAIL {url} -> {type(e).__name__}: {e}")
+        return urlsplit(u1).path.rstrip("/") == urlsplit(u2).path.rstrip("/")
+    except Exception:
         return False
+
+def safe_goto(page, url: str, timeout: int = NAV_TIMEOUT) -> bool:
+    """Resilient navigation with retries and no 'networkidle' waits."""
+    try:
+        cur = page.url
+        if cur and _same_path(cur, url):
+            # already there (helps when we just navigated successfully)
+            return True
+    except Exception:
+        pass
+
+    attempts = [
+        ("domcontentloaded", url),
+        ("commit", url),                         # looser wait
+        ("commit", _with_host_variant(url)),     # host variant
+    ]
+
+    for i, (wait_until, target) in enumerate(attempts, 1):
+        try:
+            page.goto(target, wait_until=wait_until, timeout=timeout if i == 1 else timeout * 2)
+            accept_cookies(page)
+            # a tiny settle; avoid networkidle which can hang on long-polling
+            try:
+                page.wait_for_load_state("load", timeout=min(6000, timeout // 2))
+            except Exception:
+                pass
+            time.sleep(0.4)
+            return True
+        except PWTimeoutError as e:
+            print(f"[selver] NAV TRY {i} TIMEOUT {target} ({wait_until}) -> {e}")
+            continue
+        except Exception as e:
+            print(f"[selver] NAV TRY {i} FAIL {target} ({wait_until}) -> {type(e).__name__}: {e}")
+            continue
+
+    print(f"[selver] NAV FAIL {url} (all retries)")
+    return False
 
 def _wait_listing_ready(page):
     try:
         for _ in range(12):
             if (page.locator("button:has-text('OSTA')").count() > 0 or
-                page.locator("a[href*='/toode/']").count() > 0 or
+                page.locator("a[href^='/'][href*='-'] img").count() > 0 or
                 page.locator(".product, .product-list, .productgrid").count() > 0):
                 return
             time.sleep(0.35)
@@ -249,6 +292,8 @@ def _expand_pdp_details(page):
                 time.sleep(0.15)
         except Exception:
             pass
+
+# ----------------------------- discovery -----------------------------------
 
 def _extract_category_links(page) -> List[str]:
     _wait_listing_ready(page)
@@ -290,6 +335,8 @@ def discover_categories(page, start_urls: List[str]) -> List[str]:
             seen.add(u); out.append(u)
     return out
 
+# ---------------------------- listings -> PDPs ------------------------------
+
 def _with_page(url: str, n: int) -> str:
     parts = urlsplit(url)
     qs = parse_qs(parts.query)
@@ -313,30 +360,27 @@ def _max_page_number(page) -> int:
         return 1
 
 def _extract_product_hrefs(page) -> List[str]:
-    """Collect anchors from visible product-card containers (absolute or relative),
-       and fall back to all links if needed. Filter later in Python."""
+    """Collect anchors from visible product-card containers only."""
     try:
         hrefs = page.evaluate("""
           (() => {
             const sels = [
-              'article a[href]:not([href*="#"])',
-              '.product a[href]:not([href*="#"])',
-              '.product-card a[href]:not([href*="#"])',
-              '.product-item a[href]:not([href*="#"])',
-              'li .product a[href]:not([href*="#"])'
+              'article a[href^="/"]:not([href*="#"])',
+              '.product a[href^="/"]:not([href*="#"])',
+              '.product-card a[href^="/"]:not([href*="#"])',
+              '.product-item a[href^="/"]:not([href*="#"])',
+              'li .product a[href^="/"]:not([href*="#"])'
             ];
             const set = new Set();
             for (const sel of sels) {
               document.querySelectorAll(sel).forEach(a => {
                 const h = a.getAttribute('href');
-                if (h && !h.startsWith('javascript:')) set.add(h);
+                if (h) set.add(h);
               });
             }
             if (!set.size) {
-              // Fallback: gather from whole page, then Python will filter
-              document.querySelectorAll('a[href]').forEach(a => {
-                const h = a.getAttribute('href');
-                if (h && !h.startsWith('javascript:')) set.add(h);
+              document.querySelectorAll('a[href*="/toode/"]').forEach(a => {
+                const h=a.getAttribute('href'); if (h) set.add(h);
               });
             }
             return [...set];
@@ -344,7 +388,6 @@ def _extract_product_hrefs(page) -> List[str]:
         """)
     except Exception:
         hrefs = []
-
     links = []
     for h in hrefs:
         u = _clean_abs(h)
@@ -369,8 +412,6 @@ def collect_product_links_from_listing(page, seed_url: str) -> Tuple[Set[str], D
 
         page_links = _extract_product_hrefs(page)
         print(f"[selver]   page {n}: discovered {len(page_links)} candidate links")
-        if page_links[:5]:
-            print(f"[selver]     sample: {page_links[:5]}")
         for u in page_links:
             if u not in links:
                 links.add(u); link2listing[u] = url
@@ -381,6 +422,8 @@ def collect_product_links_from_listing(page, seed_url: str) -> Tuple[Set[str], D
     else:
         print("[selver]   no PDP links found on listing.")
     return links, link2listing
+
+# ------------------------------- JSON-LD ------------------------------------
 
 def jsonld_all(page) -> List[dict]:
     out = []
@@ -417,6 +460,8 @@ def jsonld_pick_breadcrumbs(blocks: List[dict]) -> List[str]:
             except Exception:
                 continue
     return []
+
+# ------------------------------ PDP extract ---------------------------------
 
 def extract_price(page) -> tuple[float, str]:
     for sel in ["text=/€/","span:has-text('€')","div:has-text('€')"]:
@@ -507,7 +552,7 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
         ean = ean or e2; sku = sku or s2
     price, currency = 0.0, "EUR"
     if prod_ld and "offers" in prod_ld:
-        offers = prod_ld["offers"]
+        offers = prod_ld["offers"]; 
         if isinstance(offers, list) and offers: offers = offers[0]
         try:
             price = float(str(offers.get("price")).replace(",", ".")); currency = offers.get("priceCurrency") or currency
@@ -523,6 +568,8 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
         "size_text": size_text, "price": f"{price:.2f}", "currency": currency,
         "category_path": cat_path, "category_leaf": cat_leaf,
     }
+
+# ------------------------------ request router ------------------------------
 
 BLOCK_TYPES = {"image", "font", "media", "stylesheet", "websocket", "manifest"}
 BLOCK_ACTIVE_TYPES = {"script", "xhr", "fetch", "eventsource"}
@@ -541,6 +588,8 @@ def _router(route, request):
         return route.continue_()
     except Exception:
         return route.continue_()
+
+# --------------------------- click-mode helpers -----------------------------
 
 def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
     if not listing_url or not safe_goto(page, listing_url): return False
@@ -574,24 +623,22 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
         if not safe_goto(page, url): continue
         _wait_listing_ready(page); time.sleep(REQ_DELAY)
 
-        # Collect from recognizable product cards (absolute or relative; no URL-shape filter here)
         try:
             hrefs = page.evaluate("""
               (() => {
                 const sels = [
-                  'article a[href]:not([href*="#"])',
-                  '.product a[href]:not([href*="#"])',
-                  '.product-card a[href]:not([href*="#"])',
-                  '.product-item a[href]:not([href*="#"])',
-                  'li .product a[href]:not([href*="#"])'
+                  'article a[href^="/"]:not([href*="#"])',
+                  '.product a[href^="/"]:not([href*="#"])',
+                  '.product-card a[href^="/"]:not([href*="#"])',
+                  '.product-item a[href^="/"]:not([href*="#"])',
+                  'li .product a[href^="/"]:not([href*="#"])'
                 ];
                 const set = new Set();
                 for (const sel of sels) {
                   document.querySelectorAll(sel).forEach(a => { const h=a.getAttribute('href'); if(h) set.add(h); });
                 }
                 if (!set.size) {
-                  // Very broad fallback
-                  document.querySelectorAll('a[href]').forEach(a => { const h=a.getAttribute('href'); if(h) set.add(h); });
+                  document.querySelectorAll('a[href*="/toode/"]').forEach(a => { const h=a.getAttribute('href'); if(h) set.add(h); });
                 }
                 return [...set];
               })()
@@ -612,6 +659,8 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
             if not navigated:
                 navigated = open_product_via_click(page, url, href)
                 if not navigated:
+                    # ensure we are back on the listing before next href
+                    safe_goto(page, url); _wait_listing_ready(page)
                     continue
 
             _wait_pdp_ready(page)
@@ -625,7 +674,7 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
 
             # Return to listing
             try:
-                page.go_back(wait_until="domcontentloaded", timeout=30000)
+                page.go_back(wait_until="domcontentloaded", timeout=max(20000, NAV_TIMEOUT))
                 _wait_listing_ready(page)
             except Exception:
                 safe_goto(page, url); _wait_listing_ready(page)
@@ -664,8 +713,8 @@ def crawl():
                 context.route("**/*", _router)
 
             page = context.new_page()
-            page.set_default_navigation_timeout(30000)
-            page.set_default_timeout(10000)
+            page.set_default_navigation_timeout(NAV_TIMEOUT)  # <- honor env
+            page.set_default_timeout(12000)
 
             if LOG_CONSOLE == "all":
                 page.on("console", lambda m: print(f"[pw] {m.type}: {m.text}"))
