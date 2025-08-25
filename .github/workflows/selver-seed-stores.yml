@@ -80,6 +80,12 @@ jobs:
           # Cut off schedules like "E-P 08:00–23:00"
           SCHEDULE_SPLIT = re.compile(r'\s+(?:E[-–]?P|E[-–]?[A-Z](?:\s*\d)?)\b')
 
+          # Strip city/region prefixes like "Tallinn Arsenali Selver" -> "Arsenali Selver"
+          CITY_PREFIX_RE = re.compile(
+              r'^(Tallinn|Tartu|Pärnu|Narva|Jõhvi|Kohtla[-\s]?Järve|Rakvere|Paide|Keila|Võru|Valga|Viljandi|Rapla|Põlva|Jõgeva|Kuressaare|Kärdla|Maardu|Saue|Laagri|Kurna|Peetri|Viimsi|Merimetsa|Astri)\s+(.*)$',
+              re.I
+          )
+
           def is_store_name(text: str) -> bool:
               t = re.sub(r'\s+', ' ', text).strip()
               if not t or BAD_TOKENS.search(t):
@@ -100,6 +106,14 @@ jobs:
               m = re.search(r'(Delice(?:\s+Toidupood)?|[A-ZÄÖÜÕ][A-Za-zÄÖÜÕäöüõ0-9\'’\-\s]+?Selver(?:\s+ABC)?)', t, re.I)
               if m:
                   t = m.group(1)
+
+              # Drop a leading city if the rest already contains "Selver"
+              m2 = CITY_PREFIX_RE.match(t)
+              if m2:
+                  rest = m2.group(2).strip()
+                  if re.search(r'\bSelver\b', rest, re.I):
+                      t = rest
+
               t = re.sub(r'\s{2,}', ' ', t)
               # Drop e-Selver if it slips through
               if re.search(r'\be-?selver\b', t, re.I):
