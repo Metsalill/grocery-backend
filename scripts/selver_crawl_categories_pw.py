@@ -5,11 +5,11 @@
 Selver category crawler → CSV (staging_selver_products)
 
 Aug 2025:
-- PDP detection: /toode/ OR single-segment slug with a digit (accept /e-selver too).
+- PDP detection: /toode/ OR single-segment slug with a digit **or unit suffix** (-kg/-g/-l/-ml/-cl/-dl/-tk/-pk/-pcs).
+  Accepts both root and /e-selver/ paths.
 - Cosmetics/utility trees excluded.
-- Click-mode fix: **navigate to collected HREFs** instead of trying to click DOM nodes.
-  (fall back to a click only if direct navigation fails)
-- Safer product-card selectors + per-page discovery debug.
+- Click-mode fix: navigate to collected HREFs and only fall back to DOM click if needed.
+- Product-card focused selectors and per-page discovery debug.
 """
 
 from __future__ import annotations
@@ -123,6 +123,10 @@ def _in_allowlist(path: str) -> bool:
     p = (path or "/").rstrip("/")
     return any(p == root or p.startswith(root + "/") for root in STRICT_ALLOWLIST)
 
+# ---- Product URL check (tight, but friendly to grocery slugs)
+# PDP if:
+#  - path starts with /toode/, OR
+#  - single-segment slug with (a) at least one digit OR (b) unit suffix -kg/-g/-l/-ml/-cl/-dl/-tk/-pk/-pcs.
 def _is_selver_product_like(url: str) -> bool:
     u = urlparse(url)
     host = (u.netloc or urlparse(BASE).netloc).lower()
@@ -131,12 +135,21 @@ def _is_selver_product_like(url: str) -> bool:
     if path.startswith("/ru/"): return False
     if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS): return False
     if any(kw in path for kw in NON_PRODUCT_KEYWORDS): return False
-    if path.startswith("/toode/"): return True
+
+    if path.startswith("/toode/"):
+        return True
+
     segs = [s for s in path.strip("/").split("/") if s]
     if len(segs) == 1:
         last = segs[0]
-        if "-" in last and any(ch.isdigit() for ch in last):
+        if not re.fullmatch(r"[a-z0-9-]{3,}", last):
+            return False
+        if any(ch.isdigit() for ch in last):
             return True
+        # unit suffixes common on groceries (weighed goods & packs)
+        if re.search(r"(?:-|^)(?:kg|g|l|ml|cl|dl|tk|pk|pcs)$", last):
+            return True
+
     return False
 
 def _is_category_like_path(path: str) -> bool:
@@ -303,11 +316,32 @@ def _max_page_number(page) -> int:
         return 1
 
 def _extract_product_hrefs(page) -> List[str]:
+    """Collect anchors from visible product-card containers only."""
     try:
         hrefs = page.evaluate("""
-          [...document.querySelectorAll('a[href^="/"]')]
-            .map(a => a.getAttribute('href'))
-            .filter(Boolean)
+          (() => {
+            const sels = [
+              'article a[href^="/"]:not([href*="#"])',
+              '.product a[href^="/"]:not([href*="#"])',
+              '.product-card a[href^="/"]:not([href*="#"])',
+              '.product-item a[href^="/"]:not([href*="#"])',
+              'li .product a[href^="/"]:not([href*="#"])'
+            ];
+            const set = new Set();
+            for (const sel of sels) {
+              document.querySelectorAll(sel).forEach(a => {
+                const h = a.getAttribute('href');
+                if (h) set.add(h);
+              });
+            }
+            // Fallback: any '/toode/' anchors
+            if (!set.size) {
+              document.querySelectorAll('a[href*="/toode/"]').forEach(a => {
+                const h = a.getAttribute('href'); if (h) set.add(h);
+              });
+            }
+            return [...set];
+          })()
         """)
     except Exception:
         hrefs = []
@@ -334,6 +368,7 @@ def collect_product_links_from_listing(page, seed_url: str) -> Tuple[Set[str], D
         time.sleep(REQ_DELAY)
 
         page_links = _extract_product_hrefs(page)
+        print(f"[selver]   page {n}: discovered {len(page_links)} candidate links")
         for u in page_links:
             if u not in links:
                 links.add(u); link2listing[u] = url
@@ -537,7 +572,7 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
         if not safe_goto(page, url): continue
         _wait_listing_ready(page); time.sleep(REQ_DELAY)
 
-        # Collect from recognizable product cards (no URL-shape filter)
+        # Collect from recognizable product cards (no URL-shape filter here)
         try:
             hrefs = page.evaluate("""
               (() => {
@@ -552,21 +587,14 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
                 for (const sel of sels) {
                   document.querySelectorAll(sel).forEach(a => { const h=a.getAttribute('href'); if(h) set.add(h); });
                 }
+                if (!set.size) {
+                  document.querySelectorAll('a[href*="/toode/"]').forEach(a => { const h=a.getAttribute('href'); if(h) set.add(h); });
+                }
                 return [...set];
               })()
             """)
         except Exception:
             hrefs = []
-
-        if not hrefs:
-            # extra safety: any '/toode/' anchors
-            try:
-                hrefs = page.evaluate("""
-                  [...document.querySelectorAll('a[href*="/toode/"]')]
-                    .map(a => a.getAttribute('href')).filter(Boolean)
-                """)
-            except Exception:
-                hrefs = []
 
         cleaned, seen = [], set()
         for h in hrefs:
@@ -577,7 +605,6 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
         print(f"[selver]   page {n}: discovered {len(cleaned)} candidate links")
 
         for href in cleaned:
-            # Prefer direct navigation (robust), then fallback to DOM click from listing.
             navigated = safe_goto(page, href)
             if not navigated:
                 navigated = open_product_via_click(page, url, href)
@@ -593,14 +620,12 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
                     seen_ext_ids.add(ext_id)
                     wrote += 1
 
-            # Return to listing for the next item
+            # Return to listing
             try:
                 page.go_back(wait_until="domcontentloaded", timeout=30000)
                 _wait_listing_ready(page)
             except Exception:
-                # If history stack is odd, go back to the seed URL explicitly
-                safe_goto(page, url)
-                _wait_listing_ready(page)
+                safe_goto(page, url); _wait_listing_ready(page)
             time.sleep(0.2)
 
     return wrote
