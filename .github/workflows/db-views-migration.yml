@@ -1,12 +1,22 @@
 name: DB Views Migration (latest & cheapest)
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      file:
+        description: "Optional: run a single migration file (e.g., migrations/20250825_prices_schema_rev3.sql)"
+        required: false
+        default: ""
   push:
     branches: [ main ]
     paths:
       - "migrations/*.sql"
+      - "migrations/**/*.sql"
       - ".github/workflows/db-views-migration.yml"
+
+concurrency:
+  group: db-migrations
+  cancel-in-progress: true
 
 jobs:
   migrate-views:
@@ -25,25 +35,42 @@ jobs:
           sudo apt-get install -y postgresql-client
           psql --version
 
-      - name: Apply migrations (all .sql, sorted)
+      - name: Apply migrations (sorted; supports single-file)
         shell: bash
         run: |
-          shopt -s nullglob
-          files=(migrations/*.sql)
-          if [ ${#files[@]} -eq 0 ]; then
-            echo "No migration files found in migrations/ — skipping."
+          set -euo pipefail
+          single="${{ github.event.inputs.file }}"
+          if [[ -n "${single}" ]]; then
+            if [[ ! -f "${single}" ]]; then
+              echo "::error file=${single},line=1,col=1::Specified file not found"
+              exit 1
+            fi
+            files=("${single}")
+          else
+            shopt -s nullglob
+            files=(migrations/*.sql migrations/**/*.sql)
+          fi
+
+          if (( ${#files[@]} == 0 )); then
+            echo "No migration files found — skipping."
             exit 0
           fi
-          # Sort filenames to ensure deterministic order
-          IFS=$'\n' files=($(sort <<<"${files[*]}")); unset IFS
+
+          IFS=$'\n' files=($(LC_ALL=C sort <<<"${files[*]}")); unset IFS
           for f in "${files[@]}"; do
             echo "Applying: $f"
             psql -X "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$f"
           done
 
       - name: Smoke test
+        shell: bash
         run: |
-          echo "List views:" && psql -X "$DATABASE_URL" -c '\dv' || true
+          set -e
+          echo "Tables:" && psql -X "$DATABASE_URL" -c "\dt+ public.*" || true
+          echo "Views:"  && psql -X "$DATABASE_URL" -c "\dv+ public.*" || true
+          psql -X "$DATABASE_URL" -Atc "SELECT to_regclass('public.products');" || true
+          psql -X "$DATABASE_URL" -Atc "SELECT to_regclass('public.price_history');" || true
+          psql -X "$DATABASE_URL" -Atc "SELECT to_regclass('public.prices');" || true
           echo "Sample latest-store prices:" && \
             psql -X "$DATABASE_URL" -c "SELECT * FROM public.v_latest_store_prices LIMIT 5;" || true
           echo "Sample cheapest-offer:" && \
