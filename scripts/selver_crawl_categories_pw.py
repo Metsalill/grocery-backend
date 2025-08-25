@@ -11,8 +11,8 @@ Aug 2025 (patch 2):
 - Click-mode: **navigate to collected HREFs** and only fall back to DOM click.
 - Product discovery on listings:
   1) All anchors (relative + absolute selver.ee)
-  2) Fallback: parse listing-page JSON-LD for Product.url entries.
-- Extra debug and longer navigation timeout in safe_goto.
+  2) Fallback: parse listing-page JSON-LD for Product.url entries (supports ItemList/ListItem too).
+- Extra debug and longer navigation timeout in safe_goto + optional retry.
 """
 
 from __future__ import annotations
@@ -33,6 +33,7 @@ USE_ROUTER     = int(os.getenv("USE_ROUTER", "1")) == 1
 CLICK_PRODUCTS = int(os.getenv("CLICK_PRODUCTS", "0")) == 1
 LOG_CONSOLE    = (os.getenv("LOG_CONSOLE", "0") or "0").lower()  # 0|off, warn, all
 NAV_TIMEOUT_MS = int(os.getenv("NAV_TIMEOUT_MS", "45000"))
+NAV_RETRIES    = int(os.getenv("NAV_RETRIES", "1"))  # one retry by default
 
 STRICT_ALLOWLIST = [
     "/puu-ja-koogiviljad",
@@ -211,18 +212,22 @@ def accept_cookies(page):
 
 def safe_goto(page, url: str, timeout: Optional[int] = None) -> bool:
     tmo = timeout or NAV_TIMEOUT_MS
-    try:
-        page.goto(url, wait_until="domcontentloaded", timeout=tmo)
-        accept_cookies(page)
+    attempts = NAV_RETRIES + 1
+    for i in range(attempts):
         try:
-            page.wait_for_load_state("networkidle", timeout=max(5000, int(tmo/2)))
-        except Exception:
-            pass
-        time.sleep(0.6)
-        return True
-    except Exception as e:
-        print(f"[selver] NAV FAIL {url} -> {type(e).__name__}: {e}")
-        return False
+            page.goto(url, wait_until="domcontentloaded", timeout=tmo)
+            accept_cookies(page)
+            try:
+                page.wait_for_load_state("networkidle", timeout=max(5000, int(tmo/2)))
+            except Exception:
+                pass
+            time.sleep(0.6)
+            return True
+        except Exception as e:
+            if i >= attempts - 1:
+                print(f"[selver] NAV FAIL {url} -> {type(e).__name__}: {e}")
+                return False
+            time.sleep(1.0)  # brief backoff before retry
 
 def _wait_listing_ready(page):
     try:
@@ -330,7 +335,7 @@ def _extract_product_hrefs_any_anchor(page) -> List[str]:
           (() => {
             const rel = [...document.querySelectorAll('a[href^="/"]')]
               .map(a => a.getAttribute('href')).filter(Boolean);
-            const abs = [...document.querySelectorAll('a[href^="https://www.selver.ee/"],a[href^="http://www.selver.ee/"],a[href^="//www.selver.ee/"]')]
+            const abs = [...document.querySelectorAll('a[href^="http"]')]
               .map(a => a.getAttribute('href')).filter(Boolean);
             const set = new Set([...rel, ...abs]);
             // extra: common data-href on cards
@@ -348,7 +353,7 @@ def _extract_product_hrefs_any_anchor(page) -> List[str]:
     return list(dict.fromkeys(out))
 
 def _extract_product_urls_from_listing_jsonld(page) -> List[str]:
-    """Fallback: parse listing JSON-LD and collect Product.url items."""
+    """Fallback: parse listing JSON-LD and collect Product.url items (supports ItemList/ListItem)."""
     urls: List[str] = []
     try:
         scripts = page.locator("script[type='application/ld+json']")
@@ -367,6 +372,16 @@ def _extract_product_urls_from_listing_jsonld(page) -> List[str]:
                     u = _clean_abs(b["url"])
                     if u and _is_selver_product_like(u):
                         urls.append(u)
+                # Also handle ItemList/ListItem → item.url
+                if t_low in ("itemlist",) and "itemlistelement" in b:
+                    for el in b.get("itemlistelement", []):
+                        if not isinstance(el, dict): continue
+                        itm = el.get("item") or {}
+                        if isinstance(itm, dict):
+                            url = itm.get("url")
+                            u = _clean_abs(url) if url else None
+                            if u and _is_selver_product_like(u):
+                                urls.append(u)
     except Exception:
         pass
     return list(dict.fromkeys(urls))
@@ -589,6 +604,7 @@ def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
         a = page.locator(sel).first
         try:
             if a.count() > 0 and a.is_visible():
+                a.scroll_into_view_if_needed(timeout=3000)
                 a.click(timeout=5000)
                 for _ in range(24):
                     up = urlparse(page.url).path.lower()
