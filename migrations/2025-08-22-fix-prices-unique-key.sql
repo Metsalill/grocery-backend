@@ -1,20 +1,20 @@
 -- 2025-08-22-fix-prices-unique-key.sql
--- Make 'prices' consistent (PK on (product_id, store_id)) and avoid duplicate index errors.
--- Also ensure a sane uniqueness on price_history by (product_id, store_id, collected_at).
+-- Make 'prices' PK solid; add history uniqueness using whichever timestamp column exists.
 
 BEGIN;
 
--- 1) Cleanup: old/bad unique index on prices(product_id) if it ever existed
+-- Clean old single-column uniqueness if it ever existed
 DROP INDEX IF EXISTS uq_prices_product;
+-- Also clean up a redundant unique index on prices including collected_at, if someone created it
+DROP INDEX IF EXISTS uq_prices_store_product_at;
 
--- 2) Ensure collected_at exists on prices (harmless if already present)
+-- Ensure collected_at exists on prices (harmless if already present)
 ALTER TABLE public.prices
   ADD COLUMN IF NOT EXISTS collected_at TIMESTAMPTZ;
 
--- 3) Ensure composite PK on prices(product_id, store_id)
+-- Ensure composite PK on prices(product_id, store_id)
 DO $$
 BEGIN
-  -- If no primary key yet, create one via a unique index and promote
   IF NOT EXISTS (
     SELECT 1 FROM pg_constraint
     WHERE conrelid='public.prices'::regclass AND contype='p'
@@ -29,15 +29,37 @@ BEGIN
   END IF;
 END $$;
 
--- 4) History table uniqueness: at most one entry per product+store+timestamp
--- (If you already have a stricter unique index on history, this is still safe.)
-CREATE UNIQUE INDEX IF NOT EXISTS uq_price_history_store_product_at
-  ON public.price_history (product_id, store_id, collected_at);
+-- History uniqueness: prefer collected_at, else seen_at, else last_seen_utc
+DO $$
+DECLARE tscol text;
+BEGIN
+  SELECT column_name
+  INTO tscol
+  FROM information_schema.columns
+  WHERE table_schema='public' AND table_name='price_history'
+    AND column_name IN ('collected_at','seen_at','last_seen_utc')
+  ORDER BY CASE column_name
+             WHEN 'collected_at'   THEN 1
+             WHEN 'seen_at'        THEN 2
+             WHEN 'last_seen_utc'  THEN 3
+             ELSE 99
+           END
+  LIMIT 1;
 
--- 5) If someone previously created a redundant unique index on prices with collected_at,
---    don't recreate it; if it already exists, keep or drop as you prefer. We choose to KEEP.
---    (But do NOT try to CREATE it again, which caused the error earlier.)
---    If you want it gone, uncomment the next line:
--- DROP INDEX IF EXISTS uq_prices_store_product_at;
+  IF tscol IS NULL THEN
+    RAISE NOTICE 'price_history has no known timestamp column; skipping unique index';
+  ELSE
+    -- Create a single canonical unique index on (product_id, store_id, tscol)
+    IF NOT EXISTS (
+      SELECT 1 FROM pg_indexes
+      WHERE schemaname='public' AND indexname='uq_price_history_store_product_ts'
+    ) THEN
+      EXECUTE format(
+        'CREATE UNIQUE INDEX uq_price_history_store_product_ts ON public.price_history (product_id, store_id, %I)',
+        tscol
+      );
+    END IF;
+  END IF;
+END $$;
 
 COMMIT;
