@@ -84,3 +84,129 @@ jobs:
               name = re.sub(r'\s{2,}', ' ', name)
               if len(name) >= 6:
                 names.add(name)
+            return sorted(names)
+
+          def render_and_extract():
+            with sync_playwright() as pw:
+              b = pw.chromium.launch(headless=True)
+              p = b.new_page()
+              p.goto("https://www.selver.ee/kauplused", wait_until="domcontentloaded", timeout=60000)
+
+              # Try to accept cookies (best-effort)
+              for txt in ["Nõustun", "Nõustu", "Accept", "Allow all", "OK"]:
+                try:
+                  p.get_by_role("button", name=re.compile(txt, re.I)).click(timeout=1200)
+                  break
+                except Exception:
+                  pass
+
+              p.wait_for_timeout(2000)  # allow JS to render
+
+              texts = []
+              for sel in ["section", "div", "ul", "li", "a", "button", "h1", "h2", "h3", "span"]:
+                try:
+                  texts += p.locator(sel).all_inner_texts()
+                except Exception:
+                  pass
+
+              try:
+                texts += p.get_by_role("button", name=re.compile(r"Selver|Delice", re.I)).all_inner_texts()
+              except Exception:
+                pass
+
+              names = extract_names_from_texts(texts)
+
+              if not names:
+                print("::warning::No names extracted; dumping a few sample texts for debugging:")
+                for s in texts[:20]:
+                  s = re.sub(r'\s+', ' ', s).strip()
+                  print("SAMPLE:", s[:160])
+
+              b.close()
+              return names
+
+          async def geocode_one(session, name):
+            url = "https://nominatim.openstreetmap.org/search"
+            params = {"q": f"{name}, Estonia", "format": "json", "limit": 1}
+            headers = {"User-Agent": "grocery-backend/seed-selver-stores (+gha)"}
+            try:
+              async with session.get(url, params=params, headers=headers, timeout=30) as r:
+                r.raise_for_status()
+                data = await r.json()
+                if not data: return None, None
+                return float(data[0]["lat"]), float(data[0]["lon"])
+            except Exception:
+              return None, None
+
+          async def geocode_all(names):
+            if not GEOCODE:
+              return {n: (None, None) for n in names}
+            out = {}
+            async with aiohttp.ClientSession() as session:
+              for n in names:
+                lat, lon = await geocode_one(session, n)
+                out[n] = (lat, lon)
+                time.sleep(1)  # fair use
+            return out
+
+          def upsert(names, coords):
+            if DRY_RUN:
+              print(f"Dry run: {len(names)} stores parsed")
+              for n in names: print(" -", n)
+              return
+
+            conn = psycopg2.connect(DB_URL)
+            conn.autocommit = True
+            cur = conn.cursor()
+
+            # Ensure columns exist (idempotent)
+            cur.execute("""
+            DO $$
+            BEGIN
+              IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='chain') THEN
+                ALTER TABLE stores ADD COLUMN chain TEXT;
+              END IF;
+              IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='is_online') THEN
+                ALTER TABLE stores ADD COLUMN is_online BOOLEAN NOT NULL DEFAULT FALSE;
+              END IF;
+              IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='lat') THEN
+                ALTER TABLE stores ADD COLUMN lat DOUBLE PRECISION;
+              END IF;
+              IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='lon') THEN
+                ALTER TABLE stores ADD COLUMN lon DOUBLE PRECISION;
+              END IF;
+            END $$;""")
+
+            # Upsert online store
+            cur.execute("""
+              INSERT INTO stores (name, chain, is_online)
+              VALUES (%s, %s, TRUE)
+              ON CONFLICT DO NOTHING;
+            """, (ONLINE, CHAIN))
+
+            # Upsert physical stores
+            sql = """
+              INSERT INTO stores (name, chain, is_online, lat, lon)
+              VALUES (%s, %s, FALSE, %s, %s)
+              ON CONFLICT DO NOTHING;
+            """
+            for n in names:
+              lat, lon = coords.get(n, (None, None))
+              cur.execute(sql, (n, CHAIN, lat, lon))
+
+            cur.close(); conn.close()
+            print(f"Upsert complete: {len(names)} physical stores")
+
+          if __name__ == "__main__":
+            names = render_and_extract()
+            print(f"Found {len(names)} Selver/Delice physical names.")
+            coords = asyncio.run(geocode_all(names))
+            upsert(names, coords)
+          PY
+
+      - name: Run seeder
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          echo "GEOCODE=${GEOCODE} DRY_RUN=${DRY_RUN} CHAIN=${SELVER_CHAIN} ONLINE_NAME=${ONLINE_NAME}"
+          python selver_seed_stores_pw.py
