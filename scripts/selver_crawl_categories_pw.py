@@ -4,15 +4,20 @@
 """
 Selver category crawler → CSV (staging_selver_products)
 
-Aug 2025 (patch 2):
-- PDP detection: /toode/ OR single-segment slug with a digit **or unit suffix** (-kg/-g/-l/-ml/-cl/-dl/-tk/-pk/-pcs).
+Aug 2025 (patch 3):
+- DB-backed preloading of known ext_id (skip already-seen products).
+- PDP detection: /toode/ OR single-segment slug with a digit or unit suffix (-kg/-g/-l/-ml/-cl/-dl/-tk/-pk/-pcs).
   Accepts both root and /e-selver/ paths.
 - Cosmetics/utility trees excluded.
-- Click-mode: **navigate to collected HREFs** and only fall back to DOM click.
-- Product discovery on listings:
-  1) All anchors (relative + absolute selver.ee)
-  2) Fallback: parse listing-page JSON-LD for Product.url entries (supports ItemList/ListItem too).
-- Extra debug and longer navigation timeout in safe_goto + optional retry.
+- Click-mode: navigate to collected HREFs and only fall back to DOM click.
+- Listing discovery: anchors (relative/absolute); fallback JSON-LD Product.url.
+- Longer navigation timeout + extra debug.
+
+Env (preload):
+  PRELOAD_DB=1
+  DATABASE_URL=postgres://user:pass@host:5432/dbname   (or PGHOST/PGPORT/PGUSER/PGPASSWORD/PGDATABASE)
+  PRELOAD_DB_QUERY="SELECT ext_id FROM staging_selver_products"
+  PRELOAD_DB_LIMIT=0   # 0=off
 """
 
 from __future__ import annotations
@@ -33,7 +38,11 @@ USE_ROUTER     = int(os.getenv("USE_ROUTER", "1")) == 1
 CLICK_PRODUCTS = int(os.getenv("CLICK_PRODUCTS", "0")) == 1
 LOG_CONSOLE    = (os.getenv("LOG_CONSOLE", "0") or "0").lower()  # 0|off, warn, all
 NAV_TIMEOUT_MS = int(os.getenv("NAV_TIMEOUT_MS", "45000"))
-NAV_RETRIES    = int(os.getenv("NAV_RETRIES", "1"))  # one retry by default
+
+# DB preload toggles / query
+PRELOAD_DB        = int(os.getenv("PRELOAD_DB", "1")) == 1
+PRELOAD_DB_QUERY  = os.getenv("PRELOAD_DB_QUERY", "SELECT ext_id FROM staging_selver_products")
+PRELOAD_DB_LIMIT  = int(os.getenv("PRELOAD_DB_LIMIT", "0"))
 
 STRICT_ALLOWLIST = [
     "/puu-ja-koogiviljad",
@@ -141,17 +150,13 @@ def _is_selver_product_like(url: str) -> bool:
     if path.startswith("/ru/"): return False
     if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS): return False
     if any(kw in path for kw in NON_PRODUCT_KEYWORDS): return False
-
-    if path.startswith("/toode/"):
-        return True
-
+    if path.startswith("/toode/"): return True
     segs = [s for s in path.strip("/").split("/") if s]
     if len(segs) == 1:
         last = segs[0]
         if not re.fullmatch(r"[a-z0-9-]{3,}", last): return False
         if any(ch.isdigit() for ch in last): return True
         if re.search(r"(?:-|^)(?:kg|g|l|ml|cl|dl|tk|pk|pcs)$", last): return True
-
     return False
 
 def _is_category_like_path(path: str) -> bool:
@@ -195,6 +200,77 @@ def _pick_ean_from_html(html: str) -> str:
     return m8.group(1) if m8 else ""
 
 # ---------------------------------------------------------------------------
+# DB preload
+def _db_connect():
+    """Return (driver_name, connection) using pg8000 (preferred) or psycopg2."""
+    # Parse from DATABASE_URL or PG* vars
+    dburl = os.getenv("DATABASE_URL")
+    if dburl:
+        u = urlparse(dburl)
+        user = u.username
+        password = u.password
+        host = u.hostname or "localhost"
+        port = int(u.port or 5432)
+        database = (u.path or "/postgres").lstrip("/")
+    else:
+        user = os.getenv("PGUSER")
+        password = os.getenv("PGPASSWORD")
+        host = os.getenv("PGHOST", "localhost")
+        port = int(os.getenv("PGPORT", "5432"))
+        database = os.getenv("PGDATABASE") or "postgres"
+
+    # Try pg8000 DB-API
+    try:
+        import pg8000.dbapi as pg8000
+        conn = pg8000.connect(user=user, password=password, host=host, port=port, database=database)
+        return "pg8000", conn
+    except Exception as e_pg:
+        # Try psycopg2
+        try:
+            import psycopg2
+            conn = psycopg2.connect(user=user, password=password, host=host, port=port, dbname=database, connect_timeout=10)
+            return "psycopg2", conn
+        except Exception as e_psy:
+            raise RuntimeError(f"DB connect failed (pg8000/psycopg2). pg8000: {e_pg}; psycopg2: {e_psy}")
+
+def preload_ext_ids_from_db() -> Set[str]:
+    known: Set[str] = set()
+    if not PRELOAD_DB:
+        return known
+    try:
+        driver, conn = _db_connect()
+    except Exception as e:
+        print(f"[selver] DB preload disabled (no driver/connection): {e}")
+        return known
+
+    q = PRELOAD_DB_QUERY.strip().rstrip(";")
+    if PRELOAD_DB_LIMIT and PRELOAD_DB_LIMIT > 0:
+        q = f"SELECT * FROM ({q}) q LIMIT {int(PRELOAD_DB_LIMIT)}"
+
+    try:
+        cur = conn.cursor()
+        cur.execute(q)
+        rows = cur.fetchall()
+        for r in rows:
+            if not r: continue
+            raw = str(r[0])
+            u = _clean_abs(raw)
+            if u: known.add(u)
+        try:
+            cur.close()
+            conn.close()
+        except Exception:
+            pass
+        print(f"[selver] preloaded {len(known)} known ext_ids from DB (driver={driver})")
+    except Exception as e:
+        print(f"[selver] DB preload query failed: {type(e).__name__}: {e}")
+        try:
+            conn.close()
+        except Exception:
+            pass
+    return known
+
+# ---------------------------------------------------------------------------
 def accept_cookies(page):
     for sel in [
         "button:has-text('Nõustu')","button:has-text('Nõustun')",
@@ -212,22 +288,18 @@ def accept_cookies(page):
 
 def safe_goto(page, url: str, timeout: Optional[int] = None) -> bool:
     tmo = timeout or NAV_TIMEOUT_MS
-    attempts = NAV_RETRIES + 1
-    for i in range(attempts):
+    try:
+        page.goto(url, wait_until="domcontentloaded", timeout=tmo)
+        accept_cookies(page)
         try:
-            page.goto(url, wait_until="domcontentloaded", timeout=tmo)
-            accept_cookies(page)
-            try:
-                page.wait_for_load_state("networkidle", timeout=max(5000, int(tmo/2)))
-            except Exception:
-                pass
-            time.sleep(0.6)
-            return True
-        except Exception as e:
-            if i >= attempts - 1:
-                print(f"[selver] NAV FAIL {url} -> {type(e).__name__}: {e}")
-                return False
-            time.sleep(1.0)  # brief backoff before retry
+            page.wait_for_load_state("networkidle", timeout=max(5000, int(tmo/2)))
+        except Exception:
+            pass
+        time.sleep(0.6)
+        return True
+    except Exception as e:
+        print(f"[selver] NAV FAIL {url} -> {type(e).__name__}: {e}")
+        return False
 
 def _wait_listing_ready(page):
     try:
@@ -335,10 +407,9 @@ def _extract_product_hrefs_any_anchor(page) -> List[str]:
           (() => {
             const rel = [...document.querySelectorAll('a[href^="/"]')]
               .map(a => a.getAttribute('href')).filter(Boolean);
-            const abs = [...document.querySelectorAll('a[href^="http"]')]
+            const abs = [...document.querySelectorAll('a[href^="https://www.selver.ee/"],a[href^="http://www.selver.ee/"],a[href^="//www.selver.ee/"]')]
               .map(a => a.getAttribute('href')).filter(Boolean);
             const set = new Set([...rel, ...abs]);
-            // extra: common data-href on cards
             document.querySelectorAll('[data-href^="/"]').forEach(el => set.add(el.getAttribute('data-href')));
             return [...set];
           })()
@@ -353,7 +424,7 @@ def _extract_product_hrefs_any_anchor(page) -> List[str]:
     return list(dict.fromkeys(out))
 
 def _extract_product_urls_from_listing_jsonld(page) -> List[str]:
-    """Fallback: parse listing JSON-LD and collect Product.url items (supports ItemList/ListItem)."""
+    """Fallback: parse listing JSON-LD and collect Product.url items."""
     urls: List[str] = []
     try:
         scripts = page.locator("script[type='application/ld+json']")
@@ -372,16 +443,6 @@ def _extract_product_urls_from_listing_jsonld(page) -> List[str]:
                     u = _clean_abs(b["url"])
                     if u and _is_selver_product_like(u):
                         urls.append(u)
-                # Also handle ItemList/ListItem → item.url
-                if t_low in ("itemlist",) and "itemlistelement" in b:
-                    for el in b.get("itemlistelement", []):
-                        if not isinstance(el, dict): continue
-                        itm = el.get("item") or {}
-                        if isinstance(itm, dict):
-                            url = itm.get("url")
-                            u = _clean_abs(url) if url else None
-                            if u and _is_selver_product_like(u):
-                                urls.append(u)
     except Exception:
         pass
     return list(dict.fromkeys(urls))
@@ -390,14 +451,13 @@ def _extract_product_hrefs(page) -> List[str]:
     links = _extract_product_hrefs_any_anchor(page)
     if links:
         return links
-    # fallback: JSON-LD on listing
     jlinks = _extract_product_urls_from_listing_jsonld(page)
     if jlinks:
         print(f"[selver]     fallback JSON-LD yielded {len(jlinks)} links")
         return jlinks
     return []
 
-def collect_product_links_from_listing(page, seed_url: str) -> Tuple[Set[str], Dict[str, str]]:
+def collect_product_links_from_listing(page, seed_url: str, seen_ext_ids: Set[str]) -> Tuple[Set[str], Dict[str, str]]:
     links: Set[str] = set()
     link2listing: Dict[str, str] = {}
 
@@ -413,10 +473,13 @@ def collect_product_links_from_listing(page, seed_url: str) -> Tuple[Set[str], D
         time.sleep(REQ_DELAY)
 
         page_links = _extract_product_hrefs(page)
+        # Early skip links we already know
+        page_links = [u for u in page_links if _clean_abs(u) not in seen_ext_ids]
         print(f"[selver]   page {n}: discovered {len(page_links)} candidate links")
         for u in page_links:
-            if u not in links:
-                links.add(u); link2listing[u] = url
+            cu = _clean_abs(u)
+            if cu and cu not in links and cu not in seen_ext_ids:
+                links.add(cu); link2listing[cu] = url
 
     if links:
         sample = list(sorted(links))[:5]
@@ -604,7 +667,6 @@ def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
         a = page.locator(sel).first
         try:
             if a.count() > 0 and a.is_visible():
-                a.scroll_into_view_if_needed(timeout=3000)
                 a.click(timeout=5000)
                 for _ in range(24):
                     up = urlparse(page.url).path.lower()
@@ -630,6 +692,8 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
         _wait_listing_ready(page); time.sleep(REQ_DELAY)
 
         hrefs = _extract_product_hrefs(page)
+        # Early skip: do not even navigate to known ones
+        hrefs = [h for h in hrefs if _clean_abs(h) not in seen_ext_ids]
         print(f"[selver]   page {n}: discovered {len(hrefs)} candidate links")
 
         for href in hrefs:
@@ -642,7 +706,7 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
             _wait_pdp_ready(page)
             row = _extract_row_from_pdp(page, href)
             if row:
-                ext_id = row["ext_id"]
+                ext_id = _clean_abs(row["ext_id"]) or row["ext_id"]
                 if ext_id not in seen_ext_ids:
                     writer.writerow(row)
                     seen_ext_ids.add(ext_id)
@@ -669,6 +733,9 @@ def crawl():
             "ext_id","name","ean_raw","sku_raw","size_text","price","currency","category_path","category_leaf"
         ])
         w.writeheader()
+
+        # Preload known ext_ids from DB
+        seen_ext_ids: Set[str] = preload_ext_ids_from_db() if PRELOAD_DB else set()
 
         with sync_playwright() as p:
             print("[selver] launching chromium (headless)")
@@ -724,7 +791,6 @@ def crawl():
             if len(cats) > 40: print(f"[selver]   … (+{len(cats)-40} more)")
 
             rows_written = 0
-            seen_ext_ids: Set[str] = set()
 
             if CLICK_PRODUCTS:
                 for ci, cu in enumerate(cats, 1):
@@ -747,19 +813,25 @@ def crawl():
                         continue
                     time.sleep(REQ_DELAY)
 
-                    links, mapping = collect_product_links_from_listing(page, cu)
+                    links, mapping = collect_product_links_from_listing(page, cu, seen_ext_ids)
                     if not links:
                         try: page.screenshot(path=f"{dbg_dir}/cat_empty_{ci}.png", full_page=True)
                         except Exception: pass
 
                     for u in links:
-                        if u not in product_urls:
-                            product_urls.add(u); prod2listing[u] = mapping.get(u, cu)
+                        cu_norm = _clean_abs(u)
+                        if cu_norm and (cu_norm not in product_urls) and (cu_norm not in seen_ext_ids):
+                            product_urls.add(cu_norm)
+                            prod2listing[cu_norm] = mapping.get(u, cu)
 
                     print(f"[selver] {cu} → +{len(links)} products (total so far: {len(product_urls)})")
 
                 for i, pu in enumerate(sorted(product_urls), 1):
-                    if not _is_selver_product_like(pu): continue
+                    if _clean_abs(pu) in seen_ext_ids:
+                        continue
+                    if not _is_selver_product_like(pu):
+                        continue
+
                     got = safe_goto(page, pu)
                     if not got:
                         got = open_product_via_click(page, prod2listing.get(pu, ""), pu)
@@ -775,10 +847,14 @@ def crawl():
                             time.sleep(0.3); row = _extract_row_from_pdp(page, pu)
 
                     if row:
-                        ext_id = row["ext_id"]
+                        ext_id = _clean_abs(row["ext_id"]) or row["ext_id"]
                         if ext_id not in seen_ext_ids:
-                            w.writerow(row); seen_ext_ids.add(ext_id); rows_written += 1
-                    if (i % 25) == 0: f.flush()
+                            w.writerow(row)
+                            seen_ext_ids.add(ext_id)
+                            rows_written += 1
+
+                    if (i % 25) == 0:
+                        f.flush()
 
             browser.close()
 
