@@ -37,7 +37,7 @@ jobs:
       matrix:
         shard: [0, 1]
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}   # used for preload + load steps
       SHARD: ${{ matrix.shard }}
 
     steps:
@@ -59,7 +59,7 @@ jobs:
 
       - name: Install deps (crawler + Playwright)
         run: |
-          pip install -r requirements-scraper.txt || pip install aiohttp beautifulsoup4 lxml asyncpg playwright
+          pip install -r requirements-scraper.txt || pip install aiohttp beautifulsoup4 lxml asyncpg pg8000 playwright
           python -m playwright install --with-deps chromium
 
       - name: Prepare workspace
@@ -93,6 +93,11 @@ jobs:
           USE_ROUTER: "1"
           CLICK_PRODUCTS: ${{ github.event_name == 'workflow_dispatch' && inputs.click_products || '0' }}
           LOG_CONSOLE: ${{ github.event_name == 'workflow_dispatch' && inputs.log_console || '0' }}
+          # --- DB-backed preload of ext_id (dedupe) ---
+          PRELOAD_DB: "1"
+          PRELOAD_DB_QUERY: "SELECT ext_id FROM public.staging_selver_products"
+          # PRELOAD_DB_LIMIT: "0"     # optional cap; 0 or unset = no cap
+          PGSSLMODE: "require"
         run: |
           set -euo pipefail
           set -x
