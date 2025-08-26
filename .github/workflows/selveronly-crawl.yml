@@ -115,7 +115,6 @@ jobs:
               FROM public.staging_selver_products sp
             ) u
             WHERE ext_id IS NOT NULL AND ext_id <> ''
-          # PRELOAD_DB_LIMIT: "0"     # optional cap; 0 or unset = no cap
           PGSSLMODE: "require"
         run: |
           set -euo pipefail
@@ -241,6 +240,12 @@ jobs:
             last_seen     timestamptz DEFAULT now()
           );
 
+          -- Manual override map for no-EAN or special cases
+          CREATE TABLE IF NOT EXISTS public.ext_product_map (
+            ext_id     text PRIMARY KEY,
+            product_id int NOT NULL REFERENCES public.products(id)
+          );
+
           COMMIT;
 
           -- prices unique (product_id, store_id) and dedupe legacy
@@ -319,13 +324,15 @@ jobs:
           ),
           joined AS (
             SELECT
-              pe.product_id,
+              COALESCE(m.product_id, pe.product_id) AS product_id,
               f.price,
               f.currency,
               f.collected_at,
               f.ext_id
             FROM filtered f
-            JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm
+            LEFT JOIN public.product_eans     pe ON pe.ean_norm = f.ean_norm
+            LEFT JOIN public.ext_product_map  m  ON m.ext_id   = f.ext_id
+            WHERE COALESCE(m.product_id, pe.product_id) IS NOT NULL
           ),
           pick_one AS (
             SELECT DISTINCT ON (product_id)
@@ -353,17 +360,17 @@ jobs:
                 source_url   = EXCLUDED.source_url,
                 source       = EXCLUDED.source;
 
-          -- Store unmatched rows for triage
+          -- Store only truly unmatched rows for triage (no EAN match and no ext map)
           WITH filtered AS (
             SELECT st.* FROM tmp_staging_selver_products st
+            WHERE NOT EXISTS (SELECT 1 FROM public.product_eans    pe WHERE pe.ean_norm = st.ean_norm)
+              AND NOT EXISTS (SELECT 1 FROM public.ext_product_map m  WHERE m.ext_id   = st.ext_id)
           )
           INSERT INTO public.selver_candidates
             (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, price, currency, category_path, category_leaf, last_seen)
           SELECT
             f.ext_id, f.ean_norm, f.ean_raw, f.sku_raw, f.name, f.size_text, f.price, f.currency, f.category_path, f.category_leaf, now()
           FROM filtered f
-          LEFT JOIN public.product_eans pe ON pe.ean_norm = f.ean_norm
-          WHERE pe.product_id IS NULL
           ON CONFLICT (ext_id) DO UPDATE
             SET price         = EXCLUDED.price,
                 currency      = EXCLUDED.currency,
@@ -385,3 +392,28 @@ jobs:
           SQL
 
           psql "$DATABASE_URL" -f /tmp/selver_load.sql
+
+      - name: Adopt Selver candidates with EANs (make products + prices)
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          DO $$
+          DECLARE r record;
+          BEGIN
+            -- Prefer wrapper if present
+            IF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_all_selver_candidates_with_ean') THEN
+              PERFORM public.adopt_all_selver_candidates_with_ean();
+            ELSIF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_candidate_with_ean') THEN
+              FOR r IN
+                SELECT ext_id FROM public.selver_candidates
+                WHERE COALESCE(ean_norm,'') <> ''
+              LOOP
+                PERFORM public.adopt_candidate_with_ean(r.ext_id);
+              END LOOP;
+            END IF;
+          END$$;
+
+          -- quick counters
+          psql "$DATABASE_URL" -c "SELECT COUNT(*) AS candidates_after FROM public.selver_candidates;"
+          psql "$DATABASE_URL" -c "SELECT COUNT(*) AS selver_online_prices FROM public.prices p JOIN public.stores s ON s.id=p.store_id WHERE s.chain='Selver' AND s.is_online=TRUE;"
