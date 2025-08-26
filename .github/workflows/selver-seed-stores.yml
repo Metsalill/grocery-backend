@@ -99,28 +99,25 @@ jobs:
               # Strategy:
               # 1) Find elements whose text includes a valid store name.
               # 2) In that element (or its parent), look for a Google Maps link OR an address-like line.
-              for tag in soup.find_all(text=re.compile(r'Selver|Delice', re.I)):
+              for tag in soup.find_all(string=re.compile(r'Selver|Delice', re.I)):
                   name = clean_name(str(tag))
                   if not name:
                       continue
                   # choose a container to search within
                   container = tag.parent
-                  for _ in range(3):  # bubble up a bit
+                  for _ in range(3):
                       if container and container.name not in ('body', 'html'):
                           break
                       container = container.parent
                   address = None
                   href = None
 
-                  # maps link in the same container?
                   if container:
                       a = container.find('a', href=re.compile(r'(google\.[^/]+/maps|goo\.gl/maps|maps\.app\.goo\.gl)', re.I))
                       if a and a.has_attr('href'):
                           href = a['href']
 
-                      # try to spot a likely address line within the container
                       txt = container.get_text(" ", strip=True)
-                      # pick a short-ish line that looks like an address (has token + a number)
                       candidates = [ln.strip() for ln in re.split(r' ?[•\u2022\u00B7\u25CF\|] ?|\n', txt) if ln.strip()]
                       scored = []
                       for ln in candidates:
@@ -129,17 +126,14 @@ jobs:
                       if scored:
                           address = sorted(scored, key=len)[0]
 
-                  # store results
                   if name not in results:
                       results[name] = {'address': address, 'href': href}
                   else:
-                      # prefer address/href if missing
                       if not results[name].get('address') and address:
                           results[name]['address'] = address
                       if not results[name].get('href') and href:
                           results[name]['href'] = href
 
-              # Filter out the bare "Selver" or e-Selver that might have slipped through
               final = {}
               for name, meta in results.items():
                   if not name or BAD_NAME.match(name):
@@ -151,7 +145,6 @@ jobs:
               if not href:
                   return (None, None, None)
               try:
-                  # Patterns like .../maps/@59.437,24.753,17z
                   m = re.search(r'/@([0-9\.\-]+),([0-9\.\-]+)', href)
                   if m:
                       return (float(m.group(1)), float(m.group(2)), None)
@@ -189,12 +182,10 @@ jobs:
                       addr = meta.get('address')
                       href = meta.get('href')
 
-                      # Try coords in the maps link first
                       lt, ln, q = parse_coords_or_query_from_maps(href)
                       if lt and ln:
                           lat, lon = lt, ln
                       else:
-                          # Prefer address (or 'q' from maps link), then fall back to name
                           query = addr or q or f"{name}, Estonia"
                           lat, lon = await geocode(session, query)
                       out[name] = (lat, lon)
