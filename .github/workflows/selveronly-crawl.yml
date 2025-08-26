@@ -31,7 +31,7 @@ jobs:
   crawl-and-upsert:
     name: crawl-and-upsert (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
@@ -125,7 +125,7 @@ jobs:
           echo "::endgroup::"
           set +e
           set +o pipefail
-          stdbuf -oL -eL timeout -k 60s 50m python -u scripts/selver_crawl_categories_pw.py \
+          stdbuf -oL -eL timeout -k 45s 40m python -u scripts/selver_crawl_categories_pw.py \
             > >(tee data/selver_run.log) 2>data/selver_run.err
           status=${PIPESTATUS[0]}
           set -o pipefail
@@ -138,7 +138,7 @@ jobs:
           [ -s data/selver_run.err ] && { echo "---- stderr tail ----"; tail -n 120 data/selver_run.err; } || true
           echo "::endgroup::"
           if [ "${status}" -eq 124 ]; then
-            echo "::warning::Crawler hit the time budget (timeout 50m). Continuing with partial results."
+            echo "::warning::Crawler hit the time budget (timeout 40m). Continuing with partial results."
           elif [ "${status}" -ne 0 ]; then
             echo "::warning::Crawler exited non-zero (${status}); continuing"
           fi
