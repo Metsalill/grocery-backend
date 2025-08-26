@@ -79,15 +79,12 @@ jobs:
 
           def clean_one(name: str) -> str:
               n = SCHEDULE_SPLIT.split(name)[0].strip()
-              # only strip Tallinn/Tartu prefix to avoid dup variants like "Tallinn Arsenali Selver"
               m = CITY_PREFIX_RE.match(n)
               if m:
                   rest = m.group(2).strip()
-                  # keep rest only if it's more than just "Selver"
                   if re.search(r'\bSelver\b', rest, re.I) and rest.lower() != 'selver':
                       n = rest
               n = re.sub(r'\s{2,}', ' ', n)
-              # exclude bogus matches
               if n.lower() == 'selver' or re.fullmatch(r'osta selver', n, re.I):
                   return ''
               if re.search(r'\be-?selver\b', n, re.I):
@@ -97,48 +94,32 @@ jobs:
           def extract_all(text: str):
               names = set()
               missed = set()
-
-              # consider only lines that mention "Selver" to debug any misses
               lines = [re.sub(r'\s+', ' ', raw).strip() for raw in re.split(r'[\r\n]+', text)]
               lines = [ln for ln in lines if ln and 'selver' in ln.lower()]
-
               for line in lines:
                   got = False
-
-                  # strict captures
                   for m in CAP_SELVER.finditer(line):
                       n = clean_one(m.group(1))
-                      if n:
-                          names.add(n); got = True
+                      if n: names.add(n); got = True
                   for m in CAP_DELICE.finditer(line):
                       n = clean_one(m.group(1))
-                      if n:
-                          names.add(n); got = True
-
-                  # fallback: allow tiny punctuation after "... Selver( ABC)"
+                      if n: names.add(n); got = True
                   if not got:
                       m = re.search(r'([A-ZÄÖÜÕ0-9][A-Za-zÄÖÜÕäöüõ0-9\'’\- ]{1,80}\sSelver(?:\sABC)?)(?:\W|$)', line)
                       if m:
                           n = clean_one(m.group(1))
-                          if n:
-                              names.add(n); got = True
-
+                          if n: names.add(n); got = True
                   if not got:
                       missed.add(line)
-
-              # keep only strings that end with "Selver"/"Selver ABC" or start "Delice"
               final = []
               for n in names:
                   if re.search(r'(?:\bSelver(?:\sABC)?$)', n) or re.match(r'^Delice\b', n):
                       final.append(n)
               final = sorted(set(final))
-
-              # debug output if we're below the expected 73
               if len(final) < 73:
                   print(f"::warning::Captured {len(final)}; showing up to 25 unmatched Selver-lines:")
                   for s in list(missed)[:25]:
                       print("UNMATCHED:", s)
-
               return final
 
           def render_and_extract():
@@ -195,7 +176,6 @@ jobs:
                   return
               conn = psycopg2.connect(DB_URL); conn.autocommit = True
               cur = conn.cursor()
-              # ensure columns
               cur.execute("""
               DO $$ BEGIN
                 IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='stores' AND column_name='chain') THEN
@@ -211,15 +191,21 @@ jobs:
                   ALTER TABLE stores ADD COLUMN lon DOUBLE PRECISION;
                 END IF;
               END $$;""")
-              # online store
+
+              # Online store (idempotent; respects uniq_chain_online on lower(chain) WHERE is_online)
               cur.execute("""
+                WITH existing AS (
+                  SELECT 1
+                  FROM stores
+                  WHERE lower(chain)=lower(%s) AND COALESCE(is_online,false)=true
+                  LIMIT 1
+                )
                 INSERT INTO stores (name, chain, is_online)
                 SELECT %s, %s, TRUE
-                WHERE NOT EXISTS (
-                  SELECT 1 FROM stores WHERE chain=%s AND name=%s AND COALESCE(is_online,false)=true
-                );
-              """, (ONLINE, CHAIN, CHAIN, ONLINE))
-              # physical stores
+                WHERE NOT EXISTS (SELECT 1 FROM existing);
+              """, (CHAIN, ONLINE, CHAIN))
+
+              # Physical stores
               sql = """
                 INSERT INTO stores (name, chain, is_online, lat, lon)
                 SELECT %s, %s, FALSE, %s, %s
