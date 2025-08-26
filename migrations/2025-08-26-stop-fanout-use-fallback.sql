@@ -32,8 +32,13 @@ CREATE INDEX IF NOT EXISTS ix_prices_product_store_seen
 CREATE INDEX IF NOT EXISTS ix_sps_store  ON public.store_price_source (store_id);
 CREATE INDEX IF NOT EXISTS ix_sps_source ON public.store_price_source (source_store_id);
 
--- 4) Effective latest price per store with fallback to mapped source (e.g., e-Selver)
-CREATE OR REPLACE VIEW public.v_latest_store_prices AS
+-- 4) Replace views cleanly (avoid column-mismatch error)
+-- Drop dependent view first, then base view
+DROP VIEW IF EXISTS public.v_cheapest_offer;
+DROP VIEW IF EXISTS public.v_latest_store_prices;
+
+-- Effective latest price per store with fallback to mapped source (e.g., e-Selver)
+CREATE VIEW public.v_latest_store_prices AS
 WITH latest AS (
   SELECT
     p.product_id, p.store_id, p.price, p.currency, p.collected_at, p.source,
@@ -66,13 +71,13 @@ SELECT product_id, store_id, price, currency, collected_at, source
 FROM eff
 WHERE product_id IS NOT NULL;
 
--- 5) Cheapest offer built on top of the effective prices
-CREATE OR REPLACE VIEW public.v_cheapest_offer AS
+-- Cheapest offer built on top of the effective prices
+CREATE VIEW public.v_cheapest_offer AS
 SELECT
   ep.product_id,
-  (ARRAY_AGG(ep.store_id    ORDER BY ep.price ASC, ep.collected_at DESC))[1] AS store_id,
+  (ARRAY_AGG(ep.store_id     ORDER BY ep.price ASC, ep.collected_at DESC))[1] AS store_id,
   MIN(ep.price)  AS price,
-  (ARRAY_AGG(ep.currency    ORDER BY ep.price ASC, ep.collected_at DESC))[1] AS currency,
+  (ARRAY_AGG(ep.currency     ORDER BY ep.price ASC, ep.collected_at DESC))[1] AS currency,
   (ARRAY_AGG(ep.collected_at ORDER BY ep.price ASC, ep.collected_at DESC))[1] AS collected_at
 FROM public.v_latest_store_prices ep
 GROUP BY ep.product_id;
