@@ -1,7 +1,7 @@
 -- 2025-08-26-adopt-selver-by-ean.sql
 BEGIN;
 
--- Function: adopt one selver_candidates row into a real product (when it has an EAN)
+-- Adopt a single Selver candidate (when it has an EAN)
 CREATE OR REPLACE FUNCTION public.adopt_candidate_with_ean(_ext_id text)
 RETURNS void
 LANGUAGE plpgsql AS $$
@@ -9,6 +9,7 @@ DECLARE
   c        public.selver_candidates%ROWTYPE;
   v_prod   int;
   v_store  int;
+  have_map boolean;
 BEGIN
   SELECT * INTO c FROM public.selver_candidates WHERE ext_id = _ext_id;
   IF NOT FOUND OR COALESCE(c.ean_norm,'') = '' THEN
@@ -20,13 +21,16 @@ BEGIN
   FROM public.stores
   WHERE chain='Selver' AND COALESCE(is_online,false)=true
   ORDER BY id LIMIT 1;
+  IF v_store IS NULL THEN
+    RETURN;
+  END IF;
 
   -- product by EAN?
   SELECT product_id INTO v_prod
   FROM public.product_eans
   WHERE ean_norm = c.ean_norm;
 
-  -- if not, create a minimal product; add columns here if your schema requires more
+  -- if not, create a minimal product and attach EAN
   IF v_prod IS NULL THEN
     INSERT INTO public.products (name)
     VALUES (NULLIF(c.name,'')) RETURNING id INTO v_prod;
@@ -36,16 +40,18 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- optional: remember ext_id -> product (if table exists)
-  DO $i$
-  BEGIN
-    IF EXISTS (SELECT 1 FROM pg_class WHERE relname='ext_product_map' AND relkind='r') THEN
-      INSERT INTO public.ext_product_map (ext_id, product_id)
-      VALUES (c.ext_id, v_prod)
-      ON CONFLICT (ext_id) DO UPDATE SET product_id = EXCLUDED.product_id;
-    END IF;
-  END
-  $i$;
+  -- if ext_product_map exists, remember ext_id -> product
+  SELECT EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema='public' AND table_name='ext_product_map'
+  ) INTO have_map;
+
+  IF have_map THEN
+    INSERT INTO public.ext_product_map (ext_id, product_id)
+    VALUES (c.ext_id, v_prod)
+    ON CONFLICT (ext_id) DO UPDATE SET product_id = EXCLUDED.product_id;
+  END IF;
 
   -- write/update the e-Selver price
   INSERT INTO public.prices (store_id, product_id, price, currency, collected_at, source_url, source)
@@ -57,20 +63,29 @@ BEGIN
         source_url   = EXCLUDED.source_url,
         source       = EXCLUDED.source;
 
-  -- remove from candidates once adopted
+  -- remove from candidates
   DELETE FROM public.selver_candidates WHERE ext_id = c.ext_id;
 END $$;
 
--- One-time backfill for anything already in candidates with an EAN
-DO $$
+-- Optional wrapper to adopt all candidates that already have an EAN
+CREATE OR REPLACE FUNCTION public.adopt_all_selver_candidates_with_ean()
+RETURNS void
+LANGUAGE plpgsql AS $$
 DECLARE r record;
 BEGIN
   FOR r IN
-    SELECT ext_id FROM public.selver_candidates
+    SELECT ext_id
+    FROM public.selver_candidates
     WHERE COALESCE(ean_norm,'') <> ''
   LOOP
     PERFORM public.adopt_candidate_with_ean(r.ext_id);
   END LOOP;
+END $$;
+
+-- One-time backfill now
+DO $$
+BEGIN
+  PERFORM public.adopt_all_selver_candidates_with_ean();
 END $$;
 
 COMMIT;
