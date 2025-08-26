@@ -1,7 +1,7 @@
--- 2025-08-26-adopt-selver-by-ean.sql (fixed)
+-- 2025-08-26-adopt-selver-by-ean.sql (patched)
 BEGIN;
 
--- Ensure ext_product_map exists and has a unique key on ext_id
+-- 1) Ensure mapping table exists; don't force a new PK if one already exists
 CREATE TABLE IF NOT EXISTS public.ext_product_map (
   ext_id     text PRIMARY KEY,
   product_id int  REFERENCES public.products(id) ON DELETE CASCADE,
@@ -9,43 +9,65 @@ CREATE TABLE IF NOT EXISTS public.ext_product_map (
   last_seen  timestamptz DEFAULT now()
 );
 
--- If table exists but ext_id isn’t unique/PK or product_id missing, patch it
+-- Ensure columns exist if table was older
 DO $$
 BEGIN
-  IF EXISTS (
+  IF NOT EXISTS (
     SELECT 1 FROM information_schema.columns
     WHERE table_schema='public' AND table_name='ext_product_map' AND column_name='product_id'
-  ) IS FALSE THEN
+  ) THEN
     ALTER TABLE public.ext_product_map ADD COLUMN product_id int;
   END IF;
-
-  -- Add a UNIQUE index on ext_id if there is no PK/UNIQUE yet
   IF NOT EXISTS (
-    SELECT 1
-    FROM pg_constraint
-    WHERE conrelid='public.ext_product_map'::regclass
-      AND contype IN ('p','u')
-      AND conkey = ARRAY[
-        (SELECT attnum FROM pg_attribute WHERE attrelid='public.ext_product_map'::regclass AND attname='ext_id')
-      ]
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='ext_product_map' AND column_name='source'
   ) THEN
-    -- try to promote ext_id as primary key if possible, otherwise add a unique index
+    ALTER TABLE public.ext_product_map ADD COLUMN source text;
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema='public' AND table_name='ext_product_map' AND column_name='last_seen'
+  ) THEN
+    ALTER TABLE public.ext_product_map ADD COLUMN last_seen timestamptz DEFAULT now();
+  END IF;
+END $$;
+
+-- Try to ensure ON CONFLICT can work: add UNIQUE on ext_id unless a PK/UNIQUE on ext_id already exists.
+DO $$
+DECLARE has_pkey bool; has_unique_on_ext bool;
+BEGIN
+  SELECT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid='public.ext_product_map'::regclass AND contype='p'
+  ) INTO has_pkey;
+
+  SELECT EXISTS (
+    SELECT 1
+    FROM pg_constraint c
+    JOIN unnest(c.conkey) k ON true
+    JOIN pg_attribute a ON a.attrelid=c.conrelid AND a.attnum=k
+    WHERE c.conrelid='public.ext_product_map'::regclass
+      AND c.contype IN ('p','u')
+      AND a.attname='ext_id'
+  ) INTO has_unique_on_ext;
+
+  IF NOT has_unique_on_ext THEN
     BEGIN
-      ALTER TABLE public.ext_product_map ADD CONSTRAINT ext_product_map_pkey PRIMARY KEY (ext_id);
-    EXCEPTION WHEN duplicate_object THEN
-      CREATE UNIQUE INDEX IF NOT EXISTS uq_ext_product_map_ext_id ON public.ext_product_map(ext_id);
+      CREATE UNIQUE INDEX IF NOT EXISTS uq_ext_product_map_ext_id
+      ON public.ext_product_map(ext_id);
+    EXCEPTION WHEN unique_violation THEN
+      RAISE NOTICE 'Duplicates exist in ext_product_map.ext_id; continuing without unique index (functions use UPDATE→INSERT fallback).';
     END;
   END IF;
 END $$;
 
--- Adopt a single Selver candidate when it has an EAN
+-- 2) Functions (robust: UPDATE then INSERT)
 CREATE OR REPLACE FUNCTION public.adopt_candidate_with_ean(_ext_id text)
-RETURNS void
-LANGUAGE plpgsql AS $$
+RETURNS void LANGUAGE plpgsql AS $$
 DECLARE
-  c        public.selver_candidates%ROWTYPE;
-  v_prod   int;
-  v_store  int;
+  c       public.selver_candidates%ROWTYPE;
+  v_prod  int;
+  v_store int;
   have_map boolean;
 BEGIN
   SELECT * INTO c FROM public.selver_candidates WHERE ext_id = _ext_id;
@@ -61,12 +83,12 @@ BEGIN
     RETURN;
   END IF;
 
-  -- Try to find an existing product by EAN
+  -- Try to find product by EAN
   SELECT product_id INTO v_prod
   FROM public.product_eans
   WHERE ean_norm = c.ean_norm;
 
-  -- If not found, create a minimal product and attach the EAN
+  -- If missing, create minimal product + attach EAN
   IF v_prod IS NULL THEN
     INSERT INTO public.products (name)
     VALUES (NULLIF(c.name,'')) RETURNING id INTO v_prod;
@@ -76,28 +98,30 @@ BEGIN
     ON CONFLICT DO NOTHING;
   END IF;
 
-  -- ext_id -> product map (make it robust even without UNIQUE)
+  -- ext_id → product map: UPDATE, then INSERT on miss
   SELECT EXISTS (
     SELECT 1 FROM information_schema.tables
     WHERE table_schema='public' AND table_name='ext_product_map'
   ) INTO have_map;
 
   IF have_map THEN
-    UPDATE public.ext_product_map SET product_id = v_prod, last_seen = now()
-    WHERE ext_id = c.ext_id;
+    UPDATE public.ext_product_map
+       SET product_id = v_prod, source='selver', last_seen=now()
+     WHERE ext_id = c.ext_id;
 
     IF NOT FOUND THEN
       BEGIN
         INSERT INTO public.ext_product_map (ext_id, product_id, source, last_seen)
         VALUES (c.ext_id, v_prod, 'selver', now());
       EXCEPTION WHEN unique_violation THEN
-        UPDATE public.ext_product_map SET product_id = v_prod, last_seen = now()
-        WHERE ext_id = c.ext_id;
+        UPDATE public.ext_product_map
+           SET product_id = v_prod, source='selver', last_seen=now()
+         WHERE ext_id = c.ext_id;
       END;
     END IF;
   END IF;
 
-  -- Upsert e-Selver price
+  -- Upsert price to the single Selver online store
   INSERT INTO public.prices (store_id, product_id, price, currency, collected_at, source_url, source)
   VALUES (v_store, v_prod, c.price, c.currency, now(), c.ext_id, 'selver:online')
   ON CONFLICT (product_id, store_id) DO UPDATE
@@ -107,26 +131,22 @@ BEGIN
         source_url   = EXCLUDED.source_url,
         source       = EXCLUDED.source;
 
-  -- Done with this candidate
+  -- Candidate adopted -> remove it
   DELETE FROM public.selver_candidates WHERE ext_id = c.ext_id;
 END $$;
 
--- Batch adopt all candidates that already have an EAN
 CREATE OR REPLACE FUNCTION public.adopt_all_selver_candidates_with_ean()
-RETURNS void
-LANGUAGE plpgsql AS $$
+RETURNS void LANGUAGE plpgsql AS $$
 DECLARE r record;
 BEGIN
   FOR r IN
-    SELECT ext_id
-    FROM public.selver_candidates
-    WHERE COALESCE(ean_norm,'') <> ''
+    SELECT ext_id FROM public.selver_candidates WHERE COALESCE(ean_norm,'') <> ''
   LOOP
     PERFORM public.adopt_candidate_with_ean(r.ext_id);
   END LOOP;
 END $$;
 
--- One-time backfill
+-- 3) One-time backfill
 DO $$
 BEGIN
   PERFORM public.adopt_all_selver_candidates_with_ean();
