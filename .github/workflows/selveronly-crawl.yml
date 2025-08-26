@@ -37,7 +37,7 @@ jobs:
       matrix:
         shard: [0, 1]
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}   # used for preload + load steps
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       SHARD: ${{ matrix.shard }}
 
     steps:
@@ -93,24 +93,18 @@ jobs:
           USE_ROUTER: "1"
           CLICK_PRODUCTS: ${{ github.event_name == 'workflow_dispatch' && inputs.click_products || '0' }}
           LOG_CONSOLE: ${{ github.event_name == 'workflow_dispatch' && inputs.log_console || '0' }}
-          # --- DB-backed preload of ext_id (dedupe) ---
           PRELOAD_DB: "1"
           PRELOAD_DB_QUERY: |
             SELECT DISTINCT ext_id
             FROM (
-              -- anything we've already priced for Selver online
               SELECT p.source_url AS ext_id
               FROM public.prices p
               JOIN public.stores s ON s.id = p.store_id
               WHERE s.chain = 'Selver' AND s.is_online = TRUE
-
               UNION
-              -- candidates we gathered on previous runs but haven't matched yet
               SELECT c.ext_id
               FROM public.selver_candidates c
-
               UNION
-              -- legacy compatibility (if this table was used previously)
               SELECT sp.ext_id
               FROM public.staging_selver_products sp
             ) u
@@ -200,13 +194,11 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           BEGIN;
 
-          -- keep shared table for compatibility, but we won't use it in the load step
           CREATE TABLE IF NOT EXISTS public.staging_selver_products (
             ext_id        text PRIMARY KEY,
             name          text NOT NULL,
             ean_raw       text,
             sku_raw       text,
-            -- SAFE: strip all non-digits (no backslashes)
             ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '[^0-9]', '', 'g')) STORED,
             size_text     text,
             price         numeric(12,2) NOT NULL,
@@ -220,12 +212,10 @@ jobs:
           CREATE INDEX IF NOT EXISTS ix_selver_ean       ON public.staging_selver_products (ean_norm);
           CREATE INDEX IF NOT EXISTS ix_selver_name_trgm ON public.staging_selver_products USING gin (name gin_trgm_ops);
 
-          -- Ensure exactly one ONLINE Selver store exists
           INSERT INTO public.stores (name, chain, is_online)
           SELECT 'Selver e-Selver', 'Selver', TRUE
           WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE chain='Selver' AND is_online=TRUE);
 
-          -- Candidates table (unmatched)
           CREATE TABLE IF NOT EXISTS public.selver_candidates (
             ext_id        text PRIMARY KEY,
             ean_norm      text,
@@ -240,7 +230,6 @@ jobs:
             last_seen     timestamptz DEFAULT now()
           );
 
-          -- Manual override map for no-EAN or special cases
           CREATE TABLE IF NOT EXISTS public.ext_product_map (
             ext_id     text PRIMARY KEY,
             product_id int NOT NULL REFERENCES public.products(id)
@@ -248,7 +237,6 @@ jobs:
 
           COMMIT;
 
-          -- prices unique (product_id, store_id) and dedupe legacy
           DO $$
           BEGIN
             WITH ranked AS (
@@ -276,7 +264,6 @@ jobs:
           END$$;
           SQL
 
-      # Shard-safe load: TEMP table + single psql session (heredoc to avoid regex/quote issues)
       - name: Load CSV, upsert (TEMP staging, shard-safe)
         shell: bash
         run: |
@@ -293,18 +280,15 @@ jobs:
             exit 0
           fi
 
-          # Build the SQL file with a heredoc to keep quoting and regex flags intact
           cat > /tmp/selver_load.sql <<'SQL'
           \set ON_ERROR_STOP on
           BEGIN;
 
-          -- TEMP staging per-connection
           CREATE TEMP TABLE tmp_staging_selver_products (
             ext_id        text PRIMARY KEY,
             name          text NOT NULL,
             ean_raw       text,
             sku_raw       text,
-            -- strip all non-digits; note the clean 'g' flag
             ean_norm      text GENERATED ALWAYS AS (
               regexp_replace(COALESCE(ean_raw,''), '[^0-9]+', '', 'g')
             ) STORED,
@@ -318,7 +302,6 @@ jobs:
 
           \copy tmp_staging_selver_products (ext_id,name,ean_raw,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER
 
-          -- Upsert latest prices for the single online Selver store
           WITH filtered AS (
             SELECT st.* FROM tmp_staging_selver_products st
           ),
@@ -360,7 +343,6 @@ jobs:
                 source_url   = EXCLUDED.source_url,
                 source       = EXCLUDED.source;
 
-          -- Store only truly unmatched rows for triage (no EAN match and no ext map)
           WITH filtered AS (
             SELECT st.* FROM tmp_staging_selver_products st
             WHERE NOT EXISTS (SELECT 1 FROM public.product_eans    pe WHERE pe.ean_norm = st.ean_norm)
@@ -381,7 +363,6 @@ jobs:
                 sku_raw       = COALESCE(EXCLUDED.sku_raw, public.selver_candidates.sku_raw),
                 last_seen     = now();
 
-          -- Summary from the TEMP table
           SELECT
             (SELECT COUNT(*) FROM tmp_staging_selver_products) AS staged,
             (SELECT COUNT(*) FROM public.prices
@@ -395,13 +376,20 @@ jobs:
 
       - name: Adopt Selver candidates with EANs (make products + prices)
         shell: bash
+        env:
+          PGSSLMODE: require
         run: |
           set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          DO $$
+
+          # Write SQL to file (correct heredoc usage)
+          cat > /tmp/adopt_selver.sql <<'SQL'
+          SET LOCAL statement_timeout = '25s';
+          SET LOCAL lock_timeout = '5s';
+          SET LOCAL idle_in_transaction_session_timeout = '30s';
+
+          DO $do$
           DECLARE r record;
           BEGIN
-            -- Prefer wrapper if present
             IF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_all_selver_candidates_with_ean') THEN
               PERFORM public.adopt_all_selver_candidates_with_ean();
             ELSIF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_candidate_with_ean') THEN
@@ -412,8 +400,16 @@ jobs:
                 PERFORM public.adopt_candidate_with_ean(r.ext_id);
               END LOOP;
             END IF;
-          END$$;
+          END
+          $do$;
 
-          -- quick counters
-          psql "$DATABASE_URL" -c "SELECT COUNT(*) AS candidates_after FROM public.selver_candidates;"
-          psql "$DATABASE_URL" -c "SELECT COUNT(*) AS selver_online_prices FROM public.prices p JOIN public.stores s ON s.id=p.store_id WHERE s.chain='Selver' AND s.is_online=TRUE;"
+          -- quick counters (single result set)
+          SELECT
+            (SELECT COUNT(*) FROM public.selver_candidates) AS candidates_after,
+            (SELECT COUNT(*) FROM public.prices p
+               JOIN public.stores s ON s.id = p.store_id
+              WHERE s.chain='Selver' AND s.is_online=TRUE) AS selver_online_prices;
+          SQL
+
+          # Execute once
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/adopt_selver.sql
