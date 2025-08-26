@@ -61,7 +61,7 @@ jobs:
       # ------------------------------------------------------------------------
 
       - name: Run Prisma → DB (UPSERT by EAN)
-        run: python scripts/prisma_food_scrape_to_db.py --max-products 6000 --headless 1
+        run: python scripts/prisma_food_scrape_to_db.py --max-products 12000 --headless 1
 
       - name: Produce CSV export (DB → CSV)
         run: |
