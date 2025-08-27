@@ -66,13 +66,25 @@ jobs:
 
       # Run the big scrape as bounded chunks so we always finish the workflow.
       # Each chunk is limited by a wall-clock timeout; non-zero exits won't fail the job.
-      # Tweak CHUNKS / PER_CHUNK_LIMIT / CHUNK_TIMEOUT to tune throughput vs. time.
+      # PRELOAD_DB* tells the scraper to fetch already-seen Prisma URLs and skip them.
       - name: Prisma → DB (UPSERT by EAN) in chunks
         shell: bash
         env:
           CHUNKS: "6"             # number of passes
-          PER_CHUNK_LIMIT: "2200" # products per pass (target; script enforces --max-products)
+          PER_CHUNK_LIMIT: "2200" # products per pass (script enforces --max-products)
           CHUNK_TIMEOUT: "25m"    # wall-clock per pass (keeps total under ~150m)
+          PRELOAD_DB: "1"
+          PRELOAD_DB_QUERY: |
+            SELECT DISTINCT p.source_url
+            FROM public.prices p
+            JOIN public.stores s ON s.id = p.store_id
+            WHERE s.chain = 'Prisma'
+              AND s.is_online = TRUE
+              AND p.source_url IS NOT NULL
+              AND p.source_url <> ''
+              AND p.collected_at > now() - interval '60 days';
+          PRELOAD_DB_LIMIT: "0"   # 0 = no cap
+          PGSSLMODE: "require"
         run: |
           set -euo pipefail
           echo "Running $CHUNKS chunks; limit=$PER_CHUNK_LIMIT; timeout=$CHUNK_TIMEOUT per chunk"
@@ -93,6 +105,8 @@ jobs:
               echo "Chunk $i completed."
             fi
             echo "::endgroup::"
+            # small pause between chunks to avoid bursty load on target
+            sleep 5
           done
 
       - name: Produce CSV export (DB → CSV)
