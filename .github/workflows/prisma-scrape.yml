@@ -13,7 +13,8 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    # Keep well below 4h; the chunk loop below totals ~150m of work
+    timeout-minutes: 200
     env:
       DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}   # Railway URL secret
       PRODUCTS_TABLE: products
@@ -31,9 +32,12 @@ jobs:
 
       - name: Install deps
         run: |
+          set -euo pipefail
           python -V
           pip install --upgrade pip
           pip install playwright psycopg2-binary
+          # If your repo has a requirements.txt, try it first (non-fatal if missing)
+          pip install -r requirements.txt || true
 
       - name: Install Chromium + deps
         run: python -m playwright install --with-deps chromium
@@ -60,11 +64,40 @@ jobs:
           print('DB identity:', cur.fetchone()); c.close()"
       # ------------------------------------------------------------------------
 
-      - name: Run Prisma → DB (UPSERT by EAN)
-        run: python scripts/prisma_food_scrape_to_db.py --max-products 12000 --headless 1
+      # Run the big scrape as bounded chunks so we always finish the workflow.
+      # Each chunk is limited by a wall-clock timeout; non-zero exits won't fail the job.
+      # Tweak CHUNKS / PER_CHUNK_LIMIT / CHUNK_TIMEOUT to tune throughput vs. time.
+      - name: Prisma → DB (UPSERT by EAN) in chunks
+        shell: bash
+        env:
+          CHUNKS: "6"             # number of passes
+          PER_CHUNK_LIMIT: "2200" # products per pass (target; script enforces --max-products)
+          CHUNK_TIMEOUT: "25m"    # wall-clock per pass (keeps total under ~150m)
+        run: |
+          set -euo pipefail
+          echo "Running $CHUNKS chunks; limit=$PER_CHUNK_LIMIT; timeout=$CHUNK_TIMEOUT per chunk"
+          for i in $(seq 1 "$CHUNKS"); do
+            echo "::group::Chunk $i/$CHUNKS"
+            set +e
+            timeout -k 30s "$CHUNK_TIMEOUT" \
+              python scripts/prisma_food_scrape_to_db.py \
+                --max-products "$PER_CHUNK_LIMIT" \
+                --headless 1
+            status=$?
+            set -e
+            if [ "$status" -eq 124 ]; then
+              echo "::warning::Chunk $i timed out (expected). Continuing."
+            elif [ "$status" -ne 0 ]; then
+              echo "::warning::Chunk $i failed with exit $status; continuing."
+            else
+              echo "Chunk $i completed."
+            fi
+            echo "::endgroup::"
+          done
 
       - name: Produce CSV export (DB → CSV)
         run: |
+          set -euo pipefail
           python scripts/db_export_csv.py prisma_foods.csv
           echo "CSV line count (incl header):"; wc -l prisma_foods.csv || true
           echo "Preview:"; head -n 5 prisma_foods.csv || true
