@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       categories_multiline:
-        description: "Rimi category URLs (one per line). Example: https://www.rimi.ee/epood/ee/tooted/leivad-saiad-kondiitritooted"
+        description: "Rimi category URLs (one per line). If omitted, we use the 15 SH-coded roots."
         required: false
         default: ""
       page_limit:
@@ -45,6 +45,7 @@ jobs:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/rimi_products.csv
       SHARD: ${{ matrix.shard }}
+      # Optional; DB steps run only if this is non-empty
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
     steps:
@@ -102,8 +103,24 @@ jobs:
             cp -f data/rimi_categories.txt data/rimi_categories_all.txt
             echo "Using repo file data/rimi_categories.txt"
           else
-            printf '%s\n' 'https://www.rimi.ee/epood/ee/tooted/leivad-saiad-kondiitritooted' > data/rimi_categories_all.txt
-            echo "Using built-in sample category."
+            # Built-in set: 15 SH-coded root categories
+            cat > data/rimi_categories_all.txt <<'LIST'
+https://www.rimi.ee/epood/ee/tooted/puuviljad-koogiviljad-lilled/c/SH-12
+https://www.rimi.ee/epood/ee/tooted/talu-toidab/c/SH-19
+https://www.rimi.ee/epood/ee/tooted/piimatooted-munad-juust/c/SH-11
+https://www.rimi.ee/epood/ee/tooted/liha--ja-kalatooted/c/SH-8
+https://www.rimi.ee/epood/ee/tooted/vegantooted/c/SH-17
+https://www.rimi.ee/epood/ee/tooted/leivad-saiad-kondiitritooted/c/SH-6
+https://www.rimi.ee/epood/ee/tooted/valmistoit/c/SH-16
+https://www.rimi.ee/epood/ee/tooted/kauasailivad-toidukaubad/c/SH-13
+https://www.rimi.ee/epood/ee/tooted/maiustused-ja-snakid/c/SH-9
+https://www.rimi.ee/epood/ee/tooted/kulmutatud-toidukaubad/c/SH-4
+https://www.rimi.ee/epood/ee/tooted/joogid/c/SH-3
+https://www.rimi.ee/epood/ee/tooted/puhastusvahendid/c/SH-14
+https://www.rimi.ee/epood/ee/tooted/lastekaubad/c/SH-5
+https://www.rimi.ee/epood/ee/tooted/alkohol/c/SH-1
+LIST
+            echo "Using built-in SH-coded category set."
           fi
 
           : "${SHARD:?SHARD env is required}"
@@ -113,7 +130,8 @@ jobs:
           echo "TOTAL categories: $(wc -l < data/rimi_categories_all.txt)"
           echo "Sharding: SHARD=$SHARD / SHARDS=$SHARDS"
           echo "Slice count: $(wc -l < data/rimi_categories.txt)"
-          nl -ba data/rimi_categories.txt | sed -n '1,10p' || true
+          echo "First 12 from slice:"
+          nl -ba data/rimi_categories.txt | sed -n '1,12p' || true
 
       - name: Crawl Rimi categories (Playwright)
         shell: bash
@@ -209,6 +227,7 @@ jobs:
           retention-days: 7
 
       # ---------- OPTIONAL DB PART (only runs if DATABASE_URL is set) ----------
+
       - name: Install psql client
         if: ${{ env.DATABASE_URL != '' }}
         run: |
@@ -230,8 +249,6 @@ jobs:
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           BEGIN;
-
-          -- Staging table (create if missing)
           CREATE TABLE IF NOT EXISTS public.staging_rimi_products (
             ext_id        text PRIMARY KEY,
             name          text NOT NULL,
@@ -246,27 +263,12 @@ jobs:
             category_leaf text,
             collected_at  timestamptz DEFAULT now()
           );
-
-          -- Backfill any columns that might be missing from older runs
-          ALTER TABLE public.staging_rimi_products
-            ADD COLUMN IF NOT EXISTS brand         text,
-            ADD COLUMN IF NOT EXISTS size_text     text,
-            ADD COLUMN IF NOT EXISTS category_path text,
-            ADD COLUMN IF NOT EXISTS category_leaf text,
-            ADD COLUMN IF NOT EXISTS price         numeric(12,2),
-            ADD COLUMN IF NOT EXISTS currency      text,
-            ADD COLUMN IF NOT EXISTS collected_at  timestamptz;
-
           CREATE EXTENSION IF NOT EXISTS pg_trgm;
           CREATE INDEX IF NOT EXISTS ix_rimi_ean       ON public.staging_rimi_products (ean_norm);
           CREATE INDEX IF NOT EXISTS ix_rimi_name_trgm ON public.staging_rimi_products USING gin (name gin_trgm_ops);
-
-          -- Store row
           INSERT INTO public.stores (name, chain, is_online)
           SELECT 'Rimi ePood', 'Rimi', TRUE
           WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE chain='Rimi' AND is_online=TRUE);
-
-          -- Candidates table (create if missing)
           CREATE TABLE IF NOT EXISTS public.rimi_candidates (
             ext_id        text PRIMARY KEY,
             ean_norm      text,
@@ -281,17 +283,6 @@ jobs:
             category_leaf text,
             last_seen     timestamptz DEFAULT now()
           );
-
-          -- Backfill any columns that might be missing from older schema
-          ALTER TABLE public.rimi_candidates
-            ADD COLUMN IF NOT EXISTS size_text     text,
-            ADD COLUMN IF NOT EXISTS brand         text,
-            ADD COLUMN IF NOT EXISTS price         numeric(12,2),
-            ADD COLUMN IF NOT EXISTS currency      text,
-            ADD COLUMN IF NOT EXISTS category_path text,
-            ADD COLUMN IF NOT EXISTS category_leaf text,
-            ADD COLUMN IF NOT EXISTS last_seen     timestamptz DEFAULT now();
-
           COMMIT;
           SQL
 
@@ -305,10 +296,12 @@ jobs:
             exit 0
           fi
 
+          # 1) Resolve absolute path and export for debug
           CSV_ABS="$(python -c 'import os; p=os.environ.get("OUTPUT_CSV","data/rimi_products.csv"); print(os.path.abspath(p))')"
           echo "CSV_ABS: $CSV_ABS"
           ls -l "$CSV_ABS" || true
 
+          # 2) Write SQL with a placeholder, then replace with the absolute path
           cat > /tmp/rimi_load.sql <<'SQL'
           \set ON_ERROR_STOP on
           BEGIN;
@@ -385,7 +378,7 @@ jobs:
             (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, price, currency, category_path, category_leaf, last_seen)
           SELECT
             s.ext_id, s.ean_norm, s.ean_raw, s.sku_raw, s.name, s.size_text, s.brand, s.price, s.currency, s.category_path, s.category_leaf, now()
-          FROM public.staging_rimi_products s
+          FROM tmp_staging_rimi_products s
           ON CONFLICT (ext_id) DO UPDATE
             SET price         = EXCLUDED.price,
                 currency      = EXCLUDED.currency,
@@ -400,7 +393,10 @@ jobs:
           COMMIT;
           SQL
 
+          # Replace placeholder with absolute path (safe for spaces)
           sed -i "s|__CSV__|$CSV_ABS|g" /tmp/rimi_load.sql
+
+          # 3) Execute
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/rimi_load.sql
 
       - name: Adopt Rimi candidates with EANs (optional helpers)
