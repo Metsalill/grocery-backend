@@ -133,47 +133,114 @@ def normalize_href(href: Optional[str]) -> Optional[str]:
     return href
   return urljoin(BASE, href)
 
+# -------------------------- NEW HELPERS -------------------------------------
+
+def auto_accept_overlays(page) -> None:
+  """
+  Close cookie/service/location overlays that block rendering.
+  Tries a handful of common Estonian/English button labels.
+  """
+  labels = [
+    r"Nõustun", r"Nõustu", r"Accept", r"Allow all", r"OK", r"Selge",
+    r"Jätka", r"Vali hiljem", r"Continue", r"Close", r"Sulge",
+    r"Vali pood", r"Vali teenus", r"Telli koju", r"Vali kauplus",
+  ]
+  for lab in labels:
+    try:
+      page.get_by_role("button", name=re.compile(lab, re.I)).click(timeout=700)
+      page.wait_for_timeout(150)
+    except Exception:
+      pass
+
+def collect_pdp_links(page) -> List[str]:
+  """
+  Collect PDP anchors from several selectors; return absolute, de-duplicated list.
+  """
+  selectors = [
+    "a[href*='/p/']",
+    "a[href^='/epood/ee/p/']",
+    "a[href^='/epood/ee/tooted/'][href*='/p/']",
+    "[data-test*='product'] a[href*='/p/']",
+    ".product-card a[href*='/p/']",
+  ]
+  hrefs: set[str] = set()
+  for sel in selectors:
+    for el in page.locator(sel).all():
+      h = el.get_attribute("href")
+      h = normalize_href(h)
+      if h and "/p/" in h:
+        hrefs.add(h)
+  return sorted(hrefs)
+
+# ---------------------------------------------------------------------------
+
 def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay: float) -> List[str]:
   urls: List[str] = []
   browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
-  ctx = browser.new_context(locale="et-EE", viewport={"width":1280, "height":900})
+  ctx = browser.new_context(
+    locale="et-EE",
+    viewport={"width":1440, "height":900},
+    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36",
+  )
   page = ctx.new_page()
   try:
-    page.goto(cat_url, timeout=30000, wait_until="domcontentloaded")
-    # cookie accept if present
-    for label in ("Nõustun","Nõustu","Accept","Allow all","OK","Selge"):
-      try:
-        page.get_by_role("button", name=re.compile(label, re.I)).click(timeout=1200); break
-      except Exception:
-        pass
+    page.goto(cat_url, timeout=45000, wait_until="domcontentloaded")
+    auto_accept_overlays(page)
+
+    # Wait for grid-ish content to appear, but don't block forever
+    try:
+      page.wait_for_selector("a[href*='/p/'], .product-card, [data-test*='product']", timeout=6000)
+    except Exception:
+      pass
 
     cur = 1
+    last_count = 0
     while True:
-      page.wait_for_timeout(int(req_delay*1000))
-      anchors = page.locator("a[href*='/p/']").all()
-      hrefs = []
-      for a in anchors:
-        h = a.get_attribute("href")
-        h = normalize_href(h)
-        if h and "/p/" in h:
-          hrefs.append(h)
-      # dedupe per page
-      hrefs = sorted(set(hrefs))
-      urls.extend(hrefs)
+      # collect visible links
+      urls.extend(collect_pdp_links(page))
 
-      if page_limit and cur >= page_limit:
+      # Try explicit next/load-more controls
+      next_sel = [
+        "a[rel='next']",
+        "button[aria-label*='Järgmine']",
+        "button:has-text('Järgmine')",
+        "button:has-text('Kuva rohkem')",
+        "button:has-text('Laadi rohkem')",
+        "a:has-text('Järgmine')",
+      ]
+      clicked = False
+      for sel in next_sel:
+        if page.locator(sel).count() > 0:
+          try:
+            page.locator(sel).first.click(timeout=3000)
+            clicked = True
+            break
+          except Exception:
+            pass
+
+      if not clicked:
+        # Infinite scroll fallback
+        before = len(collect_pdp_links(page))
+        # Scroll a few times to trigger lazy load
+        for _ in range(3):
+          page.mouse.wheel(0, 2200)
+          page.wait_for_timeout(int(max(req_delay, 0.2) * 1000))
+        after = len(collect_pdp_links(page))
+        if after <= before:
+          # No more items appeared; assume end
+          break
+
+      cur += 1
+      if page_limit and cur > page_limit:
         break
-      # pagination (try common selectors)
-      next_btn = page.locator("a[rel='next'], button[aria-label*='Järgmine'], a:has-text('Järgmine')")
-      if next_btn.count() == 0:
-        break
-      try:
-        next_btn.first.click(timeout=5000)
-        cur += 1
-      except Exception:
-        break
+      # guard against tight loops
+      if len(urls) == last_count:
+        page.wait_for_timeout(int(max(req_delay, 0.2) * 1000))
+      last_count = len(urls)
+
   finally:
     ctx.close(); browser.close()
+
   # dedupe global while preserving order
   seen, out = set(), []
   for u in urls:
@@ -183,17 +250,17 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
 
 def parse_pdp(pw, url: str, headless: bool, req_delay: float) -> Dict[str,str]:
   browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
-  ctx = browser.new_context(locale="et-EE", viewport={"width":1280,"height":900})
+  ctx = browser.new_context(
+    locale="et-EE",
+    viewport={"width":1440,"height":900},
+    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36",
+  )
   page = ctx.new_page()
   name = brand = size_text = image_url = category_path = ""
   ean = sku = price = currency = None
   try:
-    page.goto(url, timeout=30000, wait_until="domcontentloaded")
-    for label in ("Nõustun","Nõustu","Accept","Allow all","OK","Selge"):
-      try:
-        page.get_by_role("button", name=re.compile(label, re.I)).click(timeout=1200); break
-      except Exception:
-        pass
+    page.goto(url, timeout=45000, wait_until="domcontentloaded")
+    auto_accept_overlays(page)
     page.wait_for_timeout(int(req_delay*1000))
     html = page.content()
     soup = BeautifulSoup(html, "lxml")
@@ -208,10 +275,9 @@ def parse_pdp(pw, url: str, headless: bool, req_delay: float) -> Dict[str,str]:
     # breadcrumb (best-effort)
     crumbs = [a.get_text(strip=True) for a in soup.select("nav a, .breadcrumb a") if a.get_text(strip=True)]
     if crumbs:
-      category_path = " ".join(c for c in crumbs if c).strip()
       # keep last 5 to avoid overly long paths
-      parts = [c for c in category_path.split() if c]
-      category_path = " > ".join(parts[-5:])
+      crumbs = [c for c in crumbs if c]
+      category_path = " > ".join(crumbs[-5:])
 
     brand, size_text = parse_brand_and_size(soup, name)
 
