@@ -49,12 +49,21 @@ jobs:
           python-version: "3.11"
           cache: "pip"
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/requirements-scraper.txt', 'scripts/rimi_crawl_categories_pw.py') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
       - name: Install deps
         shell: bash
         run: |
           set -euo pipefail
           pip install --upgrade pip
-          pip install playwright beautifulsoup4 lxml psycopg2-binary
+          # Keep deps minimal; BeautifulSoup/lxml for PDP parsing, psycopg2 only if you use DB step
+          pip install playwright beautifulsoup4 lxml
           python -m playwright install --with-deps chromium
 
       # We avoid heredocs entirely to prevent YAML parse issues.
@@ -86,27 +95,108 @@ jobs:
           fi
           echo "First few categories:"
           nl -ba data/rimi_categories.txt | sed -n '1,10p'
+          # Optional: skip if slice ended up empty
+          if [[ ! -s data/rimi_categories.txt ]]; then
+            echo "::warning::No categories found; ending job early."
+            exit 0
+          fi
 
-      - name: Run scraper
+      - name: Run scraper (time-boxed, with logs)
         shell: bash
+        env:
+          # Where the script should write CSV (the script can still default to rimi_products.csv)
+          OUTPUT_CSV: rimi_products.csv
         run: |
           set -euo pipefail
-          python scripts/rimi_crawl_categories_pw.py \
+          echo "::group::Runtime info"
+          python --version
+          date -u +"Start (UTC): %Y-%m-%d %H:%M:%S"
+          echo "::endgroup::"
+          set +e
+          set +o pipefail
+          # Capture both streams; keep stderr separate for easier triage
+          stdbuf -oL -eL timeout -k 45s 40m python -u scripts/rimi_crawl_categories_pw.py \
             --cats-file data/rimi_categories.txt \
             --page-limit "${{ github.event.inputs.page_limit }}" \
             --max-products "${{ github.event.inputs.max_products }}" \
             --headless "${{ github.event.inputs.headless }}" \
-            --req-delay "${{ github.event.inputs.req_delay }}"
+            --req-delay "${{ github.event.inputs.req_delay }}" \
+            > >(tee data/rimi_run.log) 2>data/rimi_run.err
+          status=${PIPESTATUS[0]}
+          set -o pipefail
+          set -e
+          echo "Scraper exit code: ${status}"
+          echo "::group::Outputs"
+          ls -lah || true
+          ls -lah data || true
+          if [[ -f rimi_products.csv ]]; then
+            echo "CSV line count:"
+            wc -l rimi_products.csv || true
+            echo "CSV size:"
+            du -h rimi_products.csv || true
+          else
+            echo "::warning::CSV not found (rimi_products.csv)"
+          fi
+          if [[ -s data/rimi_run.err ]]; then
+            echo "---- stderr tail ----"
+            tail -n 120 data/rimi_run.err || true
+          fi
+          echo "::endgroup::"
+          if [[ "${status}" -eq 124 ]]; then
+            echo "::warning::Crawler hit the time budget (timeout 40m). Continuing with partial results."
+          elif [[ "${status}" -ne 0 ]]; then
+            echo "::warning::Crawler exited non-zero (${status}); continuing"
+          fi
 
       - name: Show CSV head
+        if: always()
         shell: bash
         run: |
-          head -n 20 rimi_products.csv || true
+          if [[ -f rimi_products.csv ]]; then
+            echo "---- first 20 lines ----"
+            head -n 20 rimi_products.csv
+          else
+            echo "(no CSV produced)"
+          fi
 
-      - name: Upload CSV artifact
+      - name: Upload artifacts (CSV + logs + debug)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: rimi_products.csv
-          path: rimi_products.csv
-          if-no-files-found: error
+          name: rimi-scrape-${{ github.run_id }}
+          path: |
+            rimi_products.csv
+            data/rimi_run.log
+            data/rimi_run.err
+            data/rimi_debug/**/*.png
+          if-no-files-found: warn
           retention-days: 7
+
+      # Optional DB step: runs only if DATABASE_URL is set in env/secrets.
+      - name: DB sanity (optional)
+        if: ${{ env.DATABASE_URL != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          psql "$DATABASE_URL" -c "\conninfo" || true
+          psql "$DATABASE_URL" -c "SELECT current_database(), current_user;" || true
+
+      - name: Load CSV to DB (optional)
+        if: ${{ env.DATABASE_URL != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! -s rimi_products.csv ]]; then
+            echo "::warning::No rows in rimi_products.csv — skipping DB load."
+            exit 0
+          fi
+          # Basic header sanity; skip if unexpected
+          if ! head -n1 rimi_products.csv | grep -q 'store_chain,store_name,store_channel,ext_id,ean_raw,sku_raw,name,size_text,brand,manufacturer,price,currency,image_url,category_path,category_leaf,source_url'; then
+            echo "::warning::Unexpected CSV header; skipping DB load."
+            exit 0
+          fi
+          # Your project-specific SQL goes here (staging + merge).
+          # Keeping this placeholder on purpose, as DB schema varies per repo.
+          echo "::notice::DB load step is a placeholder. Implement your merge here."
