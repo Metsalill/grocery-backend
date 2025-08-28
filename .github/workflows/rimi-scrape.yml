@@ -307,7 +307,7 @@ def parse_pdp(pw, url: str, headless: bool, req_delay: float) -> Dict[str,str]:
 
 def maybe_upsert_db(csv_path: str):
   dsn = os.getenv("DATABASE_URL","")
-  if not dsn):  # ←—— this is intentionally left as-is from your script
+  if not dsn:
     print("DATABASE_URL not set → skipping DB upsert."); 
     return
   import psycopg2, psycopg2.extras
