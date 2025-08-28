@@ -1,14 +1,14 @@
-name: "Rimi → Full scrape (categories → CSV/DB)"
+name: "Rimi → Category Crawl (sharded) + CSV/DB"
 
 on:
   workflow_dispatch:
     inputs:
       categories_multiline:
-        description: "Paste Rimi category URLs (one per line). Example: https://www.rimi.ee/epood/ee/tooted/leivad-saiad-kondiitritooted"
+        description: "Paste Rimi category URLs (one per line)."
         required: false
         default: ""
       page_limit:
-        description: "Max category pages per category (0 = all)"
+        description: "Max pages per category (0 = all)"
         required: false
         default: "0"
       max_products:
@@ -20,23 +20,35 @@ on:
         required: false
         default: "1"
       req_delay:
-        description: "Delay between page ops (sec, can be 0.0)"
+        description: "Seconds between steps"
         required: false
-        default: "0.4"
+        default: "0.5"
+      log_console:
+        description: "Page console logging (0 | warn | all)"
+        required: false
+        default: "0"
   schedule:
-    - cron: "17 2 * * *"   # nightly
+    # two staggered runs per day; tweak as you like
+    - cron: "17 2 * * *"
+    - cron: "47 11 * * *"
 
 concurrency:
-  group: rimi-scrape
+  group: ${{ github.event_name == 'workflow_dispatch' && format('rimi-crawl-{0}', github.run_id) || 'rimi-crawl' }}
   cancel-in-progress: true
 
 jobs:
-  scrape:
+  crawl-and-upsert:
+    name: crawl-and-upsert (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1]   # adjust shard count here AND in env SHARDS below
     env:
-      PYTHONUNBUFFERED: "1"
-      OUTPUT_CSV: rimi_products.csv   # <= force the filename your script should write
+      # Optional DB (enable by adding the secret in repo settings)
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      SHARD: ${{ matrix.shard }}
 
     steps:
       - name: Checkout
@@ -46,22 +58,18 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
 
-      - name: Cache Playwright browsers
+      - name: Cache pip
         uses: actions/cache@v4
         with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('scripts/rimi_crawl_categories_pw.py') }}
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-scraper.txt') }}
           restore-keys: |
-            ${{ runner.os }}-playwright-
+            ${{ runner.os }}-pip-
 
-      - name: Install deps
-        shell: bash
+      - name: Install deps (crawler + Playwright)
         run: |
-          set -euo pipefail
-          pip install --upgrade pip
-          pip install playwright beautifulsoup4 lxml
+          pip install -r requirements-scraper.txt || pip install playwright beautifulsoup4 lxml pg8000 psycopg2-binary
           python -m playwright install --with-deps chromium
 
       - name: Verify scraper file exists
@@ -72,57 +80,383 @@ jobs:
           python -m py_compile scripts/rimi_crawl_categories_pw.py
           chmod +x scripts/rimi_crawl_categories_pw.py
 
-      - name: Prepare category list
+      - name: Prepare category list (all → shard slice)
         shell: bash
+        env:
+          SHARDS: 2
         run: |
           set -euo pipefail
           mkdir -p data
+          # Build the "all" file
           if [[ -n "${{ github.event.inputs.categories_multiline }}" ]]; then
-            printf "%s\n" "${{ github.event.inputs.categories_multiline }}" | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/rimi_categories.txt
-            echo "Using categories from input."
+            printf "%s\n" "${{ github.event.inputs.categories_multiline }}" \
+              | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/rimi_categories_all.txt
+            echo "Using categories from workflow input."
           elif [[ -f data/rimi_categories.txt ]]; then
+            cp -f data/rimi_categories.txt data/rimi_categories_all.txt
             echo "Using repo file data/rimi_categories.txt"
           else
-            printf '%s\n' 'https://www.rimi.ee/epood/ee/tooted/leivad-saiad-kondiitritooted' > data/rimi_categories.txt
+            # minimal default
+            printf '%s\n' \
+              'https://www.rimi.ee/epood/ee/tooted/leivad-saiad-kondiitritooted' \
+              > data/rimi_categories_all.txt
             echo "Using built-in sample category."
           fi
-          echo "First few categories:"
-          nl -ba data/rimi_categories.txt | sed -n '1,10p'
-          if [[ ! -s data/rimi_categories.txt ]]; then
-            echo "::warning::No categories found; ending job early."
-            exit 0
-          fi
 
-      - name: Run scraper (time-boxed, capture logs)
+          TOTAL=$(wc -l < data/rimi_categories_all.txt || echo 0)
+          : "${SHARD:?SHARD env is required}"
+          awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
+            data/rimi_categories_all.txt > data/rimi_categories.txt
+          echo "TOTAL categories: $TOTAL"
+          echo "Sharding: SHARD=$SHARD / SHARDS=$SHARDS"
+          echo "Slice count: $(wc -l < data/rimi_categories.txt)"
+          nl -ba data/rimi_categories.txt | sed -n '1,12p' || true
+
+      - name: Crawl Rimi categories (Playwright)
         shell: bash
+        env:
+          PYTHONUNBUFFERED: "1"
+          # target CSV (the script should honor OUTPUT_CSV; we’ll normalize later if needed)
+          OUTPUT_CSV: data/rimi_products.csv
+          # runtime dials
+          REQ_DELAY: ${{ github.event_name == 'workflow_dispatch' && inputs.req_delay || '0.5' }}
+          PAGE_LIMIT: ${{ github.event_name == 'workflow_dispatch' && inputs.page_limit || '0' }}
+          MAX_PRODUCTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_products || '0' }}
+          HEADLESS: ${{ github.event_name == 'workflow_dispatch' && inputs.headless || '1' }}
+          LOG_CONSOLE: ${{ github.event_name == 'workflow_dispatch' && inputs.log_console || '0' }}
+          # (optional) router / preload toggles—your script may ignore these safely
+          USE_ROUTER: "1"
+          PRELOAD_DB: "1"
+          PRELOAD_DB_QUERY: |
+            SELECT DISTINCT ext_id
+            FROM (
+              SELECT p.source_url AS ext_id
+              FROM public.prices p
+              JOIN public.stores s ON s.id = p.store_id
+              WHERE s.chain = 'Rimi' AND s.is_online = TRUE
+              UNION
+              SELECT c.ext_id
+              FROM public.rimi_candidates c
+              UNION
+              SELECT sp.ext_id
+              FROM public.staging_rimi_products sp
+            ) u
+            WHERE ext_id IS NOT NULL AND ext_id <> ''
+          PGSSLMODE: "require"
         run: |
           set -euo pipefail
-          echo "::group::Runtime"
+          set -x
+          echo "::group::Runtime info"
           python --version
-          date -u +"Start (UTC): %Y-%m-%d %H:%M:%S"
+          echo "Start (UTC): $(date -u)"
           echo "::endgroup::"
           set +e
           set +o pipefail
+          # time-box to 40m hard
           stdbuf -oL -eL timeout -k 45s 40m python -u scripts/rimi_crawl_categories_pw.py \
             --cats-file data/rimi_categories.txt \
-            --page-limit "${{ github.event.inputs.page_limit }}" \
-            --max-products "${{ github.event.inputs.max_products }}" \
-            --headless "${{ github.event.inputs.headless }}" \
-            --req-delay "${{ github.event.inputs.req_delay }}" \
+            --page-limit "${PAGE_LIMIT}" \
+            --max-products "${MAX_PRODUCTS}" \
+            --headless "${HEADLESS}" \
+            --req-delay "${REQ_DELAY}" \
             > >(tee data/rimi_run.log) 2>data/rimi_run.err
           status=${PIPESTATUS[0]}
           set -o pipefail
           set -e
-          echo "Exit code: ${status}"
-          echo "::group::Outputs"
-          ls -lah || true
+          echo "End (UTC): $(date -u) — crawler exit code: ${status}"
+          echo "::group::Crawler outputs"
           ls -lah data || true
-          if [[ -f "${OUTPUT_CSV}" ]]; then
-            echo "CSV lines:"
-            wc -l "${OUTPUT_CSV}" || true
-            echo "CSV size:"
-            du -h "${OUTPUT_CSV}" || true
-          else
-            echo "::warning::CSV not found: ${OUTPUT_CSV}"
+          # normalize CSV name if the script wrote to a different path
+          if [ ! -s "${OUTPUT_CSV}" ]; then
+            if [ -s "rimi_products.csv" ]; then
+              mv -f rimi_products.csv "${OUTPUT_CSV}"
+            elif [ -s "data/rimi.csv" ]; then
+              mv -f data/rimi.csv "${OUTPUT_CSV}"
+            fi
           fi
-          if [[ -s data/rimi_run.err ]]; then
+          if [ -s "${OUTPUT_CSV}" ]; then
+            echo "CSV size:"; wc -l "${OUTPUT_CSV}"; du -h "${OUTPUT_CSV}"
+          else
+            echo "CSV not found"
+          fi
+          [ -f data/rimi_run.log ] && { echo "Log size:"; du -h data/rimi_run.log; } || echo "Log not found"
+          [ -s data/rimi_run.err ] && { echo "---- stderr tail ----"; tail -n 120 data/rimi_run.err; } || true
+          echo "::endgroup::"
+          if [ "${status}" -eq 124 ]; then
+            echo "::warning::Crawler hit the time budget (timeout 40m). Continuing with partial results."
+          elif [ "${status}" -ne 0 ]; then
+            echo "::warning::Crawler exited non-zero (${status}); continuing"
+          fi
+
+      - name: Dump crawler log (tail)
+        if: always()
+        run: |
+          echo "----- last 300 lines of data/rimi_run.log -----"
+          if [ -f data/rimi_run.log ]; then
+            tail -n 300 data/rimi_run.log
+          else
+            echo "(no log found)"
+          fi
+
+      - name: Show CSV head (debug)
+        if: always()
+        run: |
+          set -euo pipefail
+          ls -l data || true
+          echo "---- line count ----"
+          wc -l data/rimi_products.csv || true
+          echo "---- first 12 lines ----"
+          head -n 12 data/rimi_products.csv || true
+
+      - name: Upload crawl artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rimi-crawl-shard-${{ matrix.shard }}-${{ github.run_id }}
+          path: |
+            data/rimi_products.csv
+            data/rimi_run.log
+            data/rimi_run.err
+            data/rimi_debug/**/*.png
+          if-no-files-found: warn
+          retention-days: 7
+
+      # ---------- DB section (optional; runs only if DATABASE_URL is set) ----------
+      - name: Install psql client
+        if: env.DATABASE_URL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: DB sanity (connection + prices shape)
+        if: env.DATABASE_URL
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -c "\conninfo"
+          psql "$DATABASE_URL" -c "SELECT current_database(), current_user, inet_server_addr(), inet_server_port();"
+          psql "$DATABASE_URL" -c "\d prices" || true
+
+      - name: Prepare DB (staging & helper tables)
+        if: env.DATABASE_URL
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          BEGIN;
+
+          CREATE TABLE IF NOT EXISTS public.staging_rimi_products (
+            ext_id        text PRIMARY KEY,
+            name          text NOT NULL,
+            ean_raw       text,
+            sku_raw       text,
+            ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '[^0-9]', '', 'g')) STORED,
+            size_text     text,
+            price         numeric(12,2),
+            currency      text DEFAULT 'EUR',
+            category_path text,
+            category_leaf text,
+            collected_at  timestamptz DEFAULT now()
+          );
+
+          CREATE EXTENSION IF NOT EXISTS pg_trgm;
+          CREATE INDEX IF NOT EXISTS ix_rimi_ean       ON public.staging_rimi_products (ean_norm);
+          CREATE INDEX IF NOT EXISTS ix_rimi_name_trgm ON public.staging_rimi_products USING gin (name gin_trgm_ops);
+
+          INSERT INTO public.stores (name, chain, is_online)
+          SELECT 'Rimi ePood', 'Rimi', TRUE
+          WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE chain='Rimi' AND is_online=TRUE);
+
+          CREATE TABLE IF NOT EXISTS public.rimi_candidates (
+            ext_id        text PRIMARY KEY,
+            ean_norm      text,
+            ean_raw       text,
+            sku_raw       text,
+            name          text,
+            size_text     text,
+            price         numeric(12,2),
+            currency      text,
+            category_path text,
+            category_leaf text,
+            last_seen     timestamptz DEFAULT now()
+          );
+
+          CREATE TABLE IF NOT EXISTS public.ext_product_map (
+            ext_id     text PRIMARY KEY,
+            product_id int NOT NULL REFERENCES public.products(id)
+          );
+
+          COMMIT;
+
+          DO $$
+          BEGIN
+            WITH ranked AS (
+              SELECT id,
+                     ROW_NUMBER() OVER (PARTITION BY store_id, product_id
+                                        ORDER BY collected_at DESC, id DESC) rn
+              FROM public.prices
+            )
+            DELETE FROM public.prices p
+            USING ranked r
+            WHERE p.id = r.id AND r.rn > 1;
+
+            IF NOT EXISTS (
+              SELECT 1 FROM pg_constraint c
+              WHERE c.conrelid='public.prices'::regclass
+                AND c.contype='u'
+                AND c.conkey = ARRAY[
+                  (SELECT attnum FROM pg_attribute WHERE attrelid='public.prices'::regclass AND attname='product_id'),
+                  (SELECT attnum FROM pg_attribute WHERE attrelid='public.prices'::regclass AND attname='store_id')
+                ]
+            ) THEN
+              ALTER TABLE public.prices
+                ADD CONSTRAINT uq_prices_per_store UNIQUE (product_id, store_id);
+            END IF;
+          END$$;
+          SQL
+
+      - name: Load CSV, upsert (TEMP staging, shard-safe)
+        if: env.DATABASE_URL
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -s data/rimi_products.csv ]; then
+            echo "No rows in data/rimi_products.csv — skipping."
+            exit 0
+          fi
+          ROW_CT=$( (wc -l < data/rimi_products.csv) 2>/dev/null || echo 0 )
+          if [ "$ROW_CT" -le 6 ]; then
+            echo "::warning::Too few rows in CSV ($ROW_CT). Skipping DB load this run."
+            exit 0
+          fi
+
+          cat > /tmp/rimi_load.sql <<'SQL'
+          \set ON_ERROR_STOP on
+          BEGIN;
+
+          CREATE TEMP TABLE tmp_staging_rimi_products (
+            ext_id        text PRIMARY KEY,
+            name          text NOT NULL,
+            ean_raw       text,
+            sku_raw       text,
+            ean_norm      text GENERATED ALWAYS AS (
+              regexp_replace(COALESCE(ean_raw,''), '[^0-9]+', '', 'g')
+            ) STORED,
+            size_text     text,
+            price         numeric(12,2),
+            currency      text DEFAULT 'EUR',
+            category_path text,
+            category_leaf text,
+            collected_at  timestamptz DEFAULT now()
+          );
+
+          \copy tmp_staging_rimi_products (ext_id,name,ean_raw,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/rimi_products.csv' CSV HEADER
+
+          WITH filtered AS (
+            SELECT st.* FROM tmp_staging_rimi_products st
+          ),
+          joined AS (
+            SELECT
+              COALESCE(m.product_id, pe.product_id) AS product_id,
+              f.price,
+              f.currency,
+              f.collected_at,
+              f.ext_id
+            FROM filtered f
+            LEFT JOIN public.product_eans     pe ON pe.ean_norm = f.ean_norm
+            LEFT JOIN public.ext_product_map  m  ON m.ext_id   = f.ext_id
+            WHERE COALESCE(m.product_id, pe.product_id) IS NOT NULL
+          ),
+          pick_one AS (
+            SELECT DISTINCT ON (product_id)
+                   product_id, price, currency, ext_id
+            FROM joined
+            ORDER BY product_id,
+                     collected_at DESC NULLS LAST,
+                     price ASC,
+                     ext_id DESC
+          )
+          INSERT INTO public.prices (store_id, product_id, price, currency, collected_at, source_url, source)
+          SELECT
+            (SELECT id FROM public.stores WHERE chain='Rimi' AND is_online=TRUE ORDER BY id LIMIT 1),
+            p.product_id,
+            p.price,
+            p.currency,
+            now(),
+            p.ext_id,
+            'online'
+          FROM pick_one p
+          ON CONFLICT (product_id, store_id) DO UPDATE
+            SET price        = EXCLUDED.price,
+                currency     = EXCLUDED.currency,
+                collected_at = EXCLUDED.collected_at,
+                source_url   = EXCLUDED.source_url,
+                source       = EXCLUDED.source;
+
+          WITH filtered AS (
+            SELECT st.* FROM tmp_staging_rimi_products st
+            WHERE NOT EXISTS (SELECT 1 FROM public.product_eans    pe WHERE pe.ean_norm = st.ean_norm)
+              AND NOT EXISTS (SELECT 1 FROM public.ext_product_map m  WHERE m.ext_id   = st.ext_id)
+          )
+          INSERT INTO public.rimi_candidates
+            (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, price, currency, category_path, category_leaf, last_seen)
+          SELECT
+            f.ext_id, f.ean_norm, f.ean_raw, f.sku_raw, f.name, f.size_text, f.price, f.currency, f.category_path, f.category_leaf, now()
+          FROM filtered f
+          ON CONFLICT (ext_id) DO UPDATE
+            SET price         = EXCLUDED.price,
+                currency      = EXCLUDED.currency,
+                size_text     = COALESCE(EXCLUDED.size_text, public.rimi_candidates.size_text),
+                category_path = COALESCE(EXCLUDED.category_path, public.rimi_candidates.category_path),
+                category_leaf = COALESCE(EXCLUDED.category_leaf, public.rimi_candidates.category_leaf),
+                ean_raw       = COALESCE(EXCLUDED.ean_raw, public.rimi_candidates.ean_raw),
+                sku_raw       = COALESCE(EXCLUDED.sku_raw, public.rimi_candidates.sku_raw),
+                last_seen     = now();
+
+          SELECT
+            (SELECT COUNT(*) FROM tmp_staging_rimi_products) AS staged,
+            (SELECT COUNT(*) FROM public.prices
+              WHERE store_id=(SELECT id FROM public.stores WHERE chain='Rimi' AND is_online=TRUE ORDER BY id LIMIT 1)) AS price_rows,
+            (SELECT COUNT(*) FROM public.rimi_candidates) AS candidates;
+
+          COMMIT;
+          SQL
+
+          psql "$DATABASE_URL" -f /tmp/rimi_load.sql
+
+      - name: Adopt Rimi candidates with EANs (make products + prices)
+        if: env.DATABASE_URL
+        shell: bash
+        env:
+          PGSSLMODE: require
+        run: |
+          set -euo pipefail
+          cat > /tmp/adopt_rimi.sql <<'SQL'
+          SET LOCAL statement_timeout = '25s';
+          SET LOCAL lock_timeout = '5s';
+          SET LOCAL idle_in_transaction_session_timeout = '30s';
+
+          DO $do$
+          DECLARE r record;
+          BEGIN
+            IF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_all_rimi_candidates_with_ean') THEN
+              PERFORM public.adopt_all_rimi_candidates_with_ean();
+            ELSIF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_candidate_with_ean') THEN
+              FOR r IN
+                SELECT ext_id FROM public.rimi_candidates
+                WHERE COALESCE(ean_norm,'') <> ''
+              LOOP
+                PERFORM public.adopt_candidate_with_ean(r.ext_id);
+              END LOOP;
+            END IF;
+          END
+          $do$;
+
+          SELECT
+            (SELECT COUNT(*) FROM public.rimi_candidates) AS candidates_after,
+            (SELECT COUNT(*) FROM public.prices p
+               JOIN public.stores s ON s.id = p.store_id
+              WHERE s.chain='Rimi' AND s.is_online=TRUE) AS rimi_online_prices;
+          SQL
+
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/adopt_rimi.sql
