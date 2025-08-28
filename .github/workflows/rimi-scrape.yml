@@ -45,7 +45,7 @@ jobs:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/rimi_products.csv
       SHARD: ${{ matrix.shard }}
-      # secret is optional; DB steps are gated on this being non-empty
+      # Optional; DB steps run only if this is non-empty
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
     steps:
@@ -279,19 +279,14 @@ jobs:
             exit 0
           fi
 
-          # Resolve to absolute path & show for debug
-          CSV_ABS="$(python - <<'PY'
-import os
-p = os.environ.get("OUTPUT_CSV","data/rimi_products.csv")
-print(os.path.abspath(p))
-PY
-)"
+          # 1) Resolve absolute path and export for debug
+          CSV_ABS="$(python -c 'import os; p=os.environ.get("OUTPUT_CSV","data/rimi_products.csv"); print(os.path.abspath(p))')"
           echo "CSV_ABS: $CSV_ABS"
           ls -l "$CSV_ABS" || true
 
-          # Use non-quoted heredoc so $CSV_ABS expands in shell
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<SQL
-          \\set ON_ERROR_STOP on
+          # 2) Write SQL with a placeholder, then replace with the absolute path
+          cat > /tmp/rimi_load.sql <<'SQL'
+          \set ON_ERROR_STOP on
           BEGIN;
 
           CREATE TEMP TABLE tmp_rimi_csv_full (
@@ -313,7 +308,7 @@ PY
             source_url    text
           );
 
-          \\copy tmp_rimi_csv_full FROM '$CSV_ABS' CSV HEADER
+          \copy tmp_rimi_csv_full FROM '__CSV__' CSV HEADER
 
           CREATE TEMP TABLE tmp_staging_rimi_products (
             ext_id        text PRIMARY KEY,
@@ -380,6 +375,12 @@ PY
 
           COMMIT;
           SQL
+
+          # Replace placeholder with absolute path (safe for spaces)
+          sed -i "s|__CSV__|$CSV_ABS|g" /tmp/rimi_load.sql
+
+          # 3) Execute
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/rimi_load.sql
 
       - name: Adopt Rimi candidates with EANs (optional helpers)
         if: ${{ env.DATABASE_URL != '' }}
