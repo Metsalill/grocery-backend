@@ -45,6 +45,7 @@ jobs:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/rimi_products.csv
       SHARD: ${{ matrix.shard }}
+      # secret is optional; DB steps are gated on this being non-empty
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
     steps:
@@ -172,7 +173,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ ! -s "$OUTPUT_CSV" ]; then
-            python -c "import csv,os,sys; p=os.environ.get('OUTPUT_CSV','data/rimi_products.csv'); flds=['store_chain','store_name','store_channel','ext_id','ean_raw','sku_raw','name','size_text','brand','manufacturer','price','currency','image_url','category_path','category_leaf','source_url']; os.makedirs(os.path.dirname(p) or '.', exist_ok=True); f=open(p,'w',newline='',encoding='utf-8'); csv.DictWriter(f, fieldnames=flds).writeheader(); f.close(); print('Wrote header-only CSV ->', p)"
+            python -c "import csv,os; p=os.environ.get('OUTPUT_CSV','data/rimi_products.csv'); flds=['store_chain','store_name','store_channel','ext_id','ean_raw','sku_raw','name','size_text','brand','manufacturer','price','currency','image_url','category_path','category_leaf','source_url']; os.makedirs(os.path.dirname(p) or '.', exist_ok=True); f=open(p,'w',newline='',encoding='utf-8'); csv.DictWriter(f, fieldnames=flds).writeheader(); f.close(); print('Wrote header-only CSV ->', p)"
           fi
 
       - name: Dump crawler log (tail)
@@ -208,16 +209,16 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-      # ---------- OPTIONAL DB PART (only runs if secret is present) ----------
+      # ---------- OPTIONAL DB PART (only runs if DATABASE_URL is set) ----------
 
       - name: Install psql client
-        if: ${{ secrets.DATABASE_URL_PUBLIC }}
+        if: ${{ env.DATABASE_URL != '' }}
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
       - name: DB sanity (connection)
-        if: ${{ secrets.DATABASE_URL_PUBLIC }}
+        if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -225,7 +226,7 @@ jobs:
           psql "$DATABASE_URL" -c "SELECT current_database(), current_user;" || true
 
       - name: Prepare DB (staging and helper tables)
-        if: ${{ secrets.DATABASE_URL_PUBLIC }}
+        if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -269,7 +270,7 @@ jobs:
           SQL
 
       - name: Load CSV to DB (staging + candidates)
-        if: ${{ secrets.DATABASE_URL_PUBLIC }}
+        if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -372,7 +373,7 @@ jobs:
           psql "$DATABASE_URL" -v csv="'$OUTPUT_CSV'" -f /tmp/rimi_load.sql
 
       - name: Adopt Rimi candidates with EANs (optional helpers)
-        if: ${{ secrets.DATABASE_URL_PUBLIC }}
+        if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
           set -euo pipefail
