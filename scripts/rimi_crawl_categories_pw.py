@@ -2,13 +2,15 @@
 # -*- coding: utf-8 -*-
 """
 Rimi.ee (Rimi ePood) category crawler → PDP extractor → CSV
+
 - Resilient CLI for GitHub Actions (no argparse exit 2).
-- Category → subcategory discovery + product links.
+- Category → subcategory discovery + product links (pagination & infinite scroll).
 - PDP parser uses DOM, JSON-LD, microdata, and window globals.
+- Safe defaults; always produces a CSV (at least a header).
 """
 
 from __future__ import annotations
-import argparse, os, re, csv, json, sys, traceback
+import os, re, csv, json, sys, traceback, argparse
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
@@ -33,7 +35,7 @@ def deep_find_kv(obj: Any, keys: set) -> Dict[str,str]:
         if isinstance(x, dict):
             for k,v in x.items():
                 lk = str(k).lower()
-                if lk in keys and isinstance(v, (str,int,float)):
+                if lk in keys and isinstance(v, (str,int,float,str)):
                     out[lk] = str(v)
                 walk(v)
         elif isinstance(x, list):
@@ -60,7 +62,7 @@ def auto_accept_overlays(page) -> None:
         except Exception:
             pass
 
-def wait_for_hydration(page, timeout_ms: int = 8000) -> None:
+def wait_for_hydration(page, timeout_ms: int = 9000) -> None:
     try:
         page.wait_for_function(
             """() => {
@@ -90,7 +92,7 @@ def parse_brand_and_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
     brand = size_text = None
     for row in soup.select("table tr"):
         th, td = row.find("th"), row.find("td")
-        if not th or not td: 
+        if not th or not td:
             continue
         key = th.get_text(" ", strip=True).lower()
         val = td.get_text(" ", strip=True)
@@ -216,10 +218,12 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
             auto_accept_overlays(page)
             wait_for_hydration(page)
 
+            # discover subcategories
             for sc in collect_subcategory_links(page, cat):
                 if sc not in visited:
                     q.append(sc)
 
+            # collect PDP links with pager/scroll fallbacks
             pages_seen = 0
             last_total = -1
             while True:
@@ -234,5 +238,298 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
                     "button:has-text('Laadi rohkem')",
                     "a:has-text('Järgmine')",
                 ]:
-                    if page.locator(sel).count() > 0:
-                        try
+                    try:
+                        if page.locator(sel).count() > 0:
+                            page.locator(sel).first.click(timeout=2500)
+                            clicked = True
+                            page.wait_for_timeout(int(max(req_delay, 0.2) * 1000))
+                            break
+                    except Exception:
+                        pass
+
+                if not clicked:
+                    before = len(collect_pdp_links(page))
+                    for _ in range(3):
+                        page.mouse.wheel(0, 2200)
+                        page.wait_for_timeout(int(max(req_delay, 0.2) * 1000))
+                    after = len(collect_pdp_links(page))
+                    if after <= before:
+                        break
+
+                pages_seen += 1
+                if page_limit and pages_seen >= page_limit:
+                    break
+
+                if len(all_pdps) == last_total:
+                    page.wait_for_timeout(int(max(req_delay, 0.2) * 1000))
+                last_total = len(all_pdps)
+
+    finally:
+        ctx.close(); browser.close()
+
+    # dedupe preserving order
+    seen, out = set(), []
+    for u in all_pdps:
+        if u and u not in seen:
+            seen.add(u); out.append(u)
+    return out
+
+# --------------------------- PDP parser -------------------------------------
+
+def parse_pdp(pw, url: str, headless: bool, req_delay: float) -> Dict[str,str]:
+    browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
+    ctx = browser.new_context(
+        locale="et-EE",
+        viewport={"width":1440,"height":900},
+        user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"),
+    )
+    page = ctx.new_page()
+    name = brand = size_text = image_url = category_path = ""
+    ean = sku = price = currency = None
+    ext_id_from_attr = ""
+
+    try:
+        page.goto(url, timeout=45000, wait_until="domcontentloaded")
+        auto_accept_overlays(page)
+        wait_for_hydration(page)
+        page.wait_for_timeout(int(req_delay*1000))
+
+        # Quick data from product container (if present)
+        try:
+            card = page.locator(".js-product-container").first
+            if card.count() > 0:
+                raw = card.get_attribute("data-gtm-eec-product")
+                if raw:
+                    try:
+                        eec = json.loads(raw)
+                        if isinstance(eec, dict):
+                            price = str(eec.get("price")) if eec.get("price") is not None else price
+                            currency = eec.get("currency") or currency
+                            brand = eec.get("brand") or brand
+                            sku = sku or str(eec.get("id") or "")
+                    except Exception:
+                        pass
+                dp = card.get_attribute("data-product-code")
+                if dp:
+                    ext_id_from_attr = dp.strip()
+        except Exception:
+            pass
+
+        html = page.content()
+        soup = BeautifulSoup(html, "lxml")
+
+        # name, image
+        h1 = soup.find("h1")
+        if h1: name = h1.get_text(strip=True)
+        ogimg = soup.find("meta", {"property":"og:image"})
+        if ogimg and ogimg.get("content"):
+            image_url = ogimg.get("content")
+        else:
+            img = soup.find("img")
+            if img:
+                image_url = img.get("src") or img.get("data-src") or ""
+        if image_url:
+            image_url = normalize_href(image_url)
+
+        # breadcrumb
+        crumbs = [a.get_text(strip=True) for a in soup.select("nav a, .breadcrumb a") if a.get_text(strip=True)]
+        if crumbs:
+            crumbs = [c for c in crumbs if c]
+            category_path = " > ".join(crumbs[-5:])
+
+        # brand & size
+        b2, s2 = parse_brand_and_size(soup, name or "")
+        brand = brand or b2
+        size_text = size_text or s2
+
+        # ean/sku via ld+json/microdata and globals
+        e1, s1 = parse_jsonld_and_microdata(soup)
+        ean = ean or e1; sku = sku or s1
+
+        for glb in ["__NUXT__","__NEXT_DATA__","APP_STATE","dataLayer","Storefront","CART_CONFIG"]:
+            try:
+                data = page.evaluate(f"window['{glb}']")
+                if data:
+                    got = deep_find_kv(data, { *EAN_KEYS, *SKU_KEYS, "price","currency" })
+                    ean = ean or got.get("gtin13") or got.get("ean") or got.get("ean13") or got.get("barcode") or got.get("gtin")
+                    sku = sku or got.get("sku") or got.get("mpn") or got.get("code") or got.get("id")
+                    if not price and ("price" in got):
+                        price = got.get("price")
+                    if not currency and ("currency" in got):
+                        currency = got.get("currency")
+            except Exception:
+                pass
+
+        if not ean:
+            e2 = parse_visible_for_ean(soup)
+            if e2: ean = e2
+
+        if not price:
+            price, currency = parse_price_from_dom_or_meta(soup)
+
+    except PWTimeout:
+        name = name or ""
+    finally:
+        ctx.close(); browser.close()
+
+    # prefer URL /p/<id>, else data-product-code
+    ext_id = extract_ext_id(url) or ext_id_from_attr
+
+    return {
+        "store_chain": STORE_CHAIN,
+        "store_name": STORE_NAME,
+        "store_channel": STORE_CHANNEL,
+        "ext_id": ext_id,
+        "ean_raw": (ean or "").strip(),
+        "sku_raw": (sku or "").strip(),
+        "name": (name or "").strip(),
+        "size_text": (size_text or "").strip(),
+        "brand": (brand or "").strip(),
+        "manufacturer": "",
+        "price": (str(price) if price is not None else "").strip(),
+        "currency": (currency or "").strip(),
+        "image_url": (image_url or "").strip(),
+        "category_path": (category_path or "").strip(),
+        "category_leaf": category_path.split(" > ")[-1] if category_path else "",
+        "source_url": url.split("?")[0],
+    }
+
+# ------------------------------ main ----------------------------------------
+
+FIELDS = [
+    "store_chain","store_name","store_channel",
+    "ext_id","ean_raw","sku_raw","name","size_text","brand","manufacturer",
+    "price","currency","image_url","category_path","category_leaf","source_url",
+]
+
+def safe_parse_cli(argv: List[str]) -> dict:
+    """Parse CLI but never let argparse kill the process with exit 2."""
+    defaults = {
+        "cats_file": "data/rimi_categories.txt",
+        "page_limit": 0,
+        "max_products": 0,
+        "headless": 1,
+        "req_delay": 0.5,
+        "output_csv": "data/rimi_products.csv",
+    }
+    parser = argparse.ArgumentParser(add_help=True)
+    parser.add_argument("--cats-file", dest="cats_file", default=defaults["cats_file"])
+    parser.add_argument("--page-limit", dest="page_limit", default=str(defaults["page_limit"]))
+    parser.add_argument("--max-products", dest="max_products", default=str(defaults["max_products"]))
+    parser.add_argument("--headless", dest="headless", default=str(defaults["headless"]))
+    parser.add_argument("--req-delay", dest="req_delay", default=str(defaults["req_delay"]))
+    parser.add_argument("--output-csv", dest="output_csv", default=defaults["output_csv"])
+    try:
+        ns = parser.parse_args(argv)
+        out = {
+            "cats_file": str(ns.cats_file),
+            "page_limit": int(str(ns.page_limit) or "0"),
+            "max_products": int(str(ns.max_products) or "0"),
+            "headless": bool(int(str(ns.headless) or "1")),
+            "req_delay": float(str(ns.req_delay) or "0.5"),
+            "output_csv": str(ns.output_csv or defaults["output_csv"]),
+        }
+        return out
+    except SystemExit:
+        return defaults
+    except Exception:
+        print("[rimi] CLI parse failed; using defaults.", file=sys.stderr)
+        return defaults
+
+def read_categories(path: str) -> List[str]:
+    out: List[str] = []
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            for ln in f:
+                ln = (ln or "").strip()
+                if ln and not ln.startswith("#"):
+                    out.append(ln)
+    if not out:
+        out = [f"{BASE}/epood/ee/tooted/leivad-saiad-kondiitritooted"]
+    # unique, preserve order
+    seen, uniq = set(), []
+    for u in out:
+        if u not in seen:
+            seen.add(u); uniq.append(u)
+    return uniq
+
+def ensure_csv(path: str) -> None:
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+    if not os.path.exists(path) or os.path.getsize(path) == 0:
+        with open(path, "w", newline="", encoding="utf-8") as f:
+            csv.DictWriter(f, fieldnames=FIELDS).writeheader()
+
+def main(argv: List[str]) -> int:
+    cfg = safe_parse_cli(argv)
+    cats = read_categories(cfg["cats_file"])
+    os.makedirs("data", exist_ok=True)
+    dbg_dir = "data/rimi_debug"
+    os.makedirs(dbg_dir, exist_ok=True)
+    ensure_csv(cfg["output_csv"])
+
+    total_rows = 0
+    all_pdps: List[str] = []
+
+    try:
+        with sync_playwright() as pw:
+            # Discover product URLs from all categories
+            for ci, cat in enumerate(cats, 1):
+                try:
+                    pdps = crawl_category(
+                        pw,
+                        cat_url=cat,
+                        page_limit=cfg["page_limit"],
+                        headless=cfg["headless"],
+                        req_delay=cfg["req_delay"],
+                    )
+                    all_pdps.extend(pdps)
+                    print(f"[rimi] {cat} → +{len(pdps)} products (total so far: {len(all_pdps)})")
+                except Exception as e:
+                    print(f"[rimi] category fail {cat}: {type(e).__name__}: {e}")
+                    try:
+                        # best-effort page screenshot already closed in crawl; skip
+                        pass
+                    except Exception:
+                        pass
+
+            # Dedup pdps while preserving order
+            seen, pdp_list = set(), []
+            for u in all_pdps:
+                if u not in seen:
+                    seen.add(u); pdp_list.append(u)
+
+            # Hard cap
+            if cfg["max_products"] and len(pdp_list) > cfg["max_products"]:
+                pdp_list = pdp_list[: cfg["max_products"]]
+
+            # Open CSV for appending rows
+            with open(cfg["output_csv"], "a", newline="", encoding="utf-8") as f:
+                w = csv.DictWriter(f, fieldnames=FIELDS)
+
+                # Parse each PDP
+                for i, url in enumerate(pdp_list, 1):
+                    try:
+                        row = parse_pdp(pw, url, cfg["headless"], cfg["req_delay"])
+                        if row.get("ext_id") and row.get("name") and row.get("price"):
+                            w.writerow(row)
+                            total_rows += 1
+                        else:
+                            # keep a tiny breadcrumb for debug
+                            print(f"[rimi] skip (incomplete): {url}")
+                    except Exception as e:
+                        print(f"[rimi] PDP fail {i}/{len(pdp_list)}: {type(e).__name__}: {e}")
+                        # do not crash the whole run
+                        continue
+
+    except KeyboardInterrupt:
+        pass
+    except Exception as e:
+        print("[rimi] FATAL:", type(e).__name__, str(e))
+        traceback.print_exc()
+
+    print(f"[rimi] wrote {total_rows} product rows.")
+    # Always 0 to let the workflow carry on; debugging is done via logs/artifacts
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
