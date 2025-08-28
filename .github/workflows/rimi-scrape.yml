@@ -1,10 +1,10 @@
-name: "Rimi → Category Crawl (Playwright) + optional DB upsert"
+name: "Rimi - Category Crawl (Playwright) + optional DB upsert"
 
 on:
   workflow_dispatch:
     inputs:
       categories_multiline:
-        description: "Paste Rimi category URLs (one per line). Example: https://www.rimi.ee/epood/ee/tooted/leivad-saiad-kondiitritooted"
+        description: "Rimi category URLs (one per line). Example: https://www.rimi.ee/epood/ee/tooted/leivad-saiad-kondiitritooted"
         required: false
         default: ""
       page_limit:
@@ -20,11 +20,11 @@ on:
         required: false
         default: "1"
       req_delay:
-        description: "Delay between page ops (sec, can be 0.0)"
+        description: "Delay between page ops (sec)"
         required: false
         default: "0.5"
   schedule:
-    - cron: "19 2 * * *"
+    - cron: "17 2 * * *"
 
 concurrency:
   group: ${{ github.event_name == 'workflow_dispatch' && format('rimi-crawl-{0}', github.run_id) || 'rimi-crawl' }}
@@ -42,8 +42,8 @@ jobs:
     env:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/rimi_products.csv
-      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       SHARD: ${{ matrix.shard }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
     steps:
       - name: Checkout
@@ -65,11 +65,10 @@ jobs:
       - name: Install deps (Playwright + libs)
         run: |
           set -euo pipefail
-          pip install --upgrade pip
           pip install -r requirements-scraper.txt || pip install playwright beautifulsoup4 lxml pg8000 psycopg2-binary
           python -m playwright install --with-deps chromium
 
-      - name: Verify scraper file exists
+      - name: Verify scraper exists
         shell: bash
         run: |
           set -euo pipefail
@@ -77,23 +76,23 @@ jobs:
           python -m py_compile scripts/rimi_crawl_categories_pw.py
           chmod +x scripts/rimi_crawl_categories_pw.py
 
-      - name: Clean workspace (fresh data dir)
+      - name: Prepare workspace
         shell: bash
         run: |
           set -euo pipefail
           rm -rf data
           mkdir -p data
 
-      - name: Prepare category list (all → shard slice)
+      - name: Prepare category list (all -> shard slice)
         shell: bash
         env:
           SHARDS: 2
         run: |
           set -euo pipefail
-          if [[ -n "${{ github.event.inputs.categories_multiline }}" ]]; then
+          if [ -n "${{ github.event.inputs.categories_multiline }}" ]; then
             printf "%s\n" "${{ github.event.inputs.categories_multiline }}" | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/rimi_categories_all.txt
-            echo "Using categories from manual input."
-          elif [[ -f data/rimi_categories.txt ]]; then
+            echo "Using categories from input."
+          elif [ -f data/rimi_categories.txt ]; then
             cp -f data/rimi_categories.txt data/rimi_categories_all.txt
             echo "Using repo file data/rimi_categories.txt"
           else
@@ -102,8 +101,7 @@ jobs:
           fi
 
           : "${SHARD:?SHARD env is required}"
-          awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
-            data/rimi_categories_all.txt > data/rimi_categories.txt
+          awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' data/rimi_categories_all.txt > data/rimi_categories.txt
 
           echo "TOTAL categories: $(wc -l < data/rimi_categories_all.txt)"
           echo "Sharding: SHARD=$SHARD / SHARDS=$SHARDS"
@@ -139,12 +137,16 @@ jobs:
           set -o pipefail
           set -e
 
-          echo "End (UTC): $(date -u) — crawler exit code: ${status}"
+          echo "End (UTC): $(date -u) - crawler exit code: ${status}"
           echo "::group::Crawler outputs"
           ls -lah data || true
-          [[ -f "${OUTPUT_CSV}" ]] && { echo "CSV size:"; wc -l "${OUTPUT_CSV}"; du -h "${OUTPUT_CSV}"; } || echo "CSV not found"
-          [[ -f data/rimi_run.log ]] && { echo "Log size:"; du -h data/rimi_run.log; } || echo "Log not found"
-          [[ -s data/rimi_run.err ]] && { echo "---- stderr tail ----"; tail -n 120 data/rimi_run.err; } || true
+          if [ -f "${OUTPUT_CSV}" ]; then
+            echo "CSV size:"; wc -l "${OUTPUT_CSV}"; du -h "${OUTPUT_CSV}"
+          else
+            echo "CSV not found"
+          fi
+          [ -f data/rimi_run.log ] && { echo "Log size:"; du -h data/rimi_run.log; } || echo "Log not found"
+          [ -s data/rimi_run.err ] && { echo "---- stderr tail ----"; tail -n 120 data/rimi_run.err; } || true
           echo "::endgroup::"
 
           if [ "${status}" -eq 124 ]; then
@@ -153,12 +155,11 @@ jobs:
             echo "::warning::Crawler exited non-zero (${status}); continuing"
           fi
 
-      - name: Ensure CSV exists (write header if missing/empty)
+      - name: Ensure CSV exists (header if empty)
         shell: bash
         run: |
           set -euo pipefail
-          if [[ ! -s "${OUTPUT_CSV}" ]]; then
-            echo "::warning::${OUTPUT_CSV} missing or empty — creating header-only CSV."
+          if [ ! -s "${OUTPUT_CSV}" ]; then
             python - <<'PY'
 import csv, os
 path = os.environ.get("OUTPUT_CSV","data/rimi_products.csv")
@@ -207,7 +208,7 @@ PY
           if-no-files-found: warn
           retention-days: 7
 
-      # -------- OPTIONAL DB PART (runs only if DATABASE_URL is set) --------
+      # ------------------------ OPTIONAL DB PART ------------------------
       - name: Install psql client
         if: ${{ env.DATABASE_URL != '' }}
         run: |
@@ -222,7 +223,7 @@ PY
           psql "$DATABASE_URL" -c "\conninfo" || true
           psql "$DATABASE_URL" -c "SELECT current_database(), current_user;" || true
 
-      - name: Prepare DB (staging & helper tables)
+      - name: Prepare DB (staging and helper tables)
         if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
@@ -246,11 +247,9 @@ PY
           CREATE EXTENSION IF NOT EXISTS pg_trgm;
           CREATE INDEX IF NOT EXISTS ix_rimi_ean       ON public.staging_rimi_products (ean_norm);
           CREATE INDEX IF NOT EXISTS ix_rimi_name_trgm ON public.staging_rimi_products USING gin (name gin_trgm_ops);
-
           INSERT INTO public.stores (name, chain, is_online)
           SELECT 'Rimi ePood', 'Rimi', TRUE
           WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE chain='Rimi' AND is_online=TRUE);
-
           CREATE TABLE IF NOT EXISTS public.rimi_candidates (
             ext_id        text PRIMARY KEY,
             ean_norm      text,
@@ -268,12 +267,12 @@ PY
           COMMIT;
           SQL
 
-      - name: Load CSV → staging + candidates
+      - name: Load CSV to DB (staging + candidates)
         if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
           set -euo pipefail
-          if [[ ! -s "${OUTPUT_CSV}" ]]; then
+          if [ ! -s "${OUTPUT_CSV}" ]; then
             echo "No rows in ${OUTPUT_CSV} — skipping DB load."
             exit 0
           fi
@@ -282,7 +281,6 @@ PY
           \set ON_ERROR_STOP on
           BEGIN;
 
-          -- Full CSV mirror (matches file header)
           CREATE TEMP TABLE tmp_rimi_csv_full (
             store_chain   text,
             store_name    text,
@@ -304,7 +302,6 @@ PY
 
           \copy tmp_rimi_csv_full FROM :'csv' CSV HEADER
 
-          -- Narrow to staging shape + cast price
           CREATE TEMP TABLE tmp_staging_rimi_products (
             ext_id        text PRIMARY KEY,
             name          text NOT NULL,
@@ -336,7 +333,6 @@ PY
           FROM tmp_rimi_csv_full
           WHERE COALESCE(ext_id,'') <> '';
 
-          -- Upsert into persistent staging table
           INSERT INTO public.staging_rimi_products
             (ext_id,name,ean_raw,sku_raw,size_text,brand,price,currency,category_path,category_leaf,collected_at)
           SELECT ext_id,name,ean_raw,sku_raw,size_text,brand,price,currency,category_path,category_leaf,now()
@@ -353,7 +349,6 @@ PY
                 category_leaf = COALESCE(EXCLUDED.category_leaf, public.staging_rimi_products.category_leaf),
                 collected_at  = now();
 
-          -- Candidate pool (for later EAN adoption)
           INSERT INTO public.rimi_candidates
             (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, price, currency, category_path, category_leaf, last_seen)
           SELECT
@@ -374,3 +369,26 @@ PY
           SQL
 
           psql "$DATABASE_URL" -v csv="'${OUTPUT_CSV}'" -f /tmp/rimi_load.sql
+
+      - name: Adopt Rimi candidates with EANs (optional helpers)
+        if: ${{ env.DATABASE_URL != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/adopt_rimi.sql <<'SQL'
+          DO $$
+          DECLARE r record;
+          BEGIN
+            IF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_all_rimi_candidates_with_ean') THEN
+              PERFORM public.adopt_all_rimi_candidates_with_ean();
+            ELSIF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_candidate_with_ean') THEN
+              FOR r IN
+                SELECT ext_id FROM public.rimi_candidates WHERE COALESCE(ean_norm,'') <> ''
+              LOOP
+                PERFORM public.adopt_candidate_with_ean(r.ext_id);
+              END LOOP;
+            END IF;
+          END
+          $$;
+          SQL
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/adopt_rimi.sql
