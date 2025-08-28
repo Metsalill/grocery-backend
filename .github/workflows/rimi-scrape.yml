@@ -27,7 +27,7 @@ on:
     - cron: "17 2 * * *"
 
 concurrency:
-  group: ${{ github.event_name == 'workflow_dispatch' && format('rimi-crawl-{0}', github.run_id) || 'rimi-crawl' }}
+  group: rimi-category-crawl
   cancel-in-progress: true
 
 jobs:
@@ -39,10 +39,12 @@ jobs:
       fail-fast: false
       matrix:
         shard: [0, 1]
+
     env:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/rimi_products.csv
       SHARD: ${{ matrix.shard }}
+      # Set this secret in the repo to enable DB steps, otherwise they are skipped
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
     steps:
@@ -72,7 +74,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f scripts/rimi_crawl_categories_pw.py || { echo "::error::scripts/rimi_crawl_categories_pw.py missing"; exit 1; }
+          if [ ! -f scripts/rimi_crawl_categories_pw.py ]; then
+            echo "::error::scripts/rimi_crawl_categories_pw.py missing"
+            exit 1
+          fi
           python -m py_compile scripts/rimi_crawl_categories_pw.py
           chmod +x scripts/rimi_crawl_categories_pw.py
 
@@ -90,7 +95,8 @@ jobs:
         run: |
           set -euo pipefail
           if [ -n "${{ github.event.inputs.categories_multiline }}" ]; then
-            printf "%s\n" "${{ github.event.inputs.categories_multiline }}" | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/rimi_categories_all.txt
+            printf "%s\n" "${{ github.event.inputs.categories_multiline }}" \
+              | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/rimi_categories_all.txt
             echo "Using categories from input."
           elif [ -f data/rimi_categories.txt ]; then
             cp -f data/rimi_categories.txt data/rimi_categories_all.txt
@@ -101,7 +107,8 @@ jobs:
           fi
 
           : "${SHARD:?SHARD env is required}"
-          awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' data/rimi_categories_all.txt > data/rimi_categories.txt
+          awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
+            data/rimi_categories_all.txt > data/rimi_categories.txt
 
           echo "TOTAL categories: $(wc -l < data/rimi_categories_all.txt)"
           echo "Sharding: SHARD=$SHARD / SHARDS=$SHARDS"
@@ -111,10 +118,10 @@ jobs:
       - name: Crawl Rimi categories (Playwright)
         shell: bash
         env:
-          REQ_DELAY: ${{ github.event.inputs.req_delay || '0.5' }}
-          PAGE_LIMIT: ${{ github.event.inputs.page_limit || '0' }}
-          MAX_PRODUCTS: ${{ github.event.inputs.max_products || '0' }}
-          HEADLESS: ${{ github.event.inputs.headless || '1' }}
+          REQ_DELAY: ${{ github.event.inputs.req_delay }}
+          PAGE_LIMIT: ${{ github.event.inputs.page_limit }}
+          MAX_PRODUCTS: ${{ github.event.inputs.max_products }}
+          HEADLESS: ${{ github.event.inputs.headless }}
         run: |
           set -euo pipefail
           echo "::group::Runtime info"
@@ -122,16 +129,22 @@ jobs:
           echo "Start (UTC): $(date -u)"
           echo "::endgroup::"
 
+          # Fallbacks if inputs are empty
+          REQ_DELAY="${REQ_DELAY:-0.5}"
+          PAGE_LIMIT="${PAGE_LIMIT:-0}"
+          MAX_PRODUCTS="${MAX_PRODUCTS:-0}"
+          HEADLESS="${HEADLESS:-1}"
+
           set +e
           set +o pipefail
           stdbuf -oL -eL timeout -k 45s 40m \
             python -u scripts/rimi_crawl_categories_pw.py \
               --cats-file data/rimi_categories.txt \
-              --page-limit "${PAGE_LIMIT}" \
-              --max-products "${MAX_PRODUCTS}" \
-              --headless "${HEADLESS}" \
-              --req-delay "${REQ_DELAY}" \
-              --output-csv "${OUTPUT_CSV}" \
+              --page-limit "$PAGE_LIMIT" \
+              --max-products "$MAX_PRODUCTS" \
+              --headless "$HEADLESS" \
+              --req-delay "$REQ_DELAY" \
+              --output-csv "$OUTPUT_CSV" \
             > >(tee data/rimi_run.log) 2>data/rimi_run.err
           status=${PIPESTATUS[0]}
           set -o pipefail
@@ -140,8 +153,8 @@ jobs:
           echo "End (UTC): $(date -u) - crawler exit code: ${status}"
           echo "::group::Crawler outputs"
           ls -lah data || true
-          if [ -f "${OUTPUT_CSV}" ]; then
-            echo "CSV size:"; wc -l "${OUTPUT_CSV}"; du -h "${OUTPUT_CSV}"
+          if [ -f "$OUTPUT_CSV" ]; then
+            echo "CSV size:"; wc -l "$OUTPUT_CSV"; du -h "$OUTPUT_CSV"
           else
             echo "CSV not found"
           fi
@@ -149,17 +162,17 @@ jobs:
           [ -s data/rimi_run.err ] && { echo "---- stderr tail ----"; tail -n 120 data/rimi_run.err; } || true
           echo "::endgroup::"
 
-          if [ "${status}" -eq 124 ]; then
+          if [ "$status" -eq 124 ]; then
             echo "::warning::Crawler hit the time budget (timeout 40m). Continuing with partial results."
-          elif [ "${status}" -ne 0 ]; then
-            echo "::warning::Crawler exited non-zero (${status}); continuing"
+          elif [ "$status" -ne 0 ]; then
+            echo "::warning::Crawler exited non-zero ($status); continuing"
           fi
 
       - name: Ensure CSV exists (header if empty)
         shell: bash
         run: |
           set -euo pipefail
-          if [ ! -s "${OUTPUT_CSV}" ]; then
+          if [ ! -s "$OUTPUT_CSV" ]; then
             python - <<'PY'
 import csv, os
 path = os.environ.get("OUTPUT_CSV","data/rimi_products.csv")
@@ -191,9 +204,9 @@ PY
           set -euo pipefail
           ls -lah data || true
           echo "---- line count ----"
-          wc -l "${OUTPUT_CSV}" || true
+          wc -l "$OUTPUT_CSV" || true
           echo "---- first 12 lines ----"
-          head -n 12 "${OUTPUT_CSV}" || true
+          head -n 12 "$OUTPUT_CSV" || true
 
       - name: Upload crawl artifacts
         if: always()
@@ -272,8 +285,8 @@ PY
         shell: bash
         run: |
           set -euo pipefail
-          if [ ! -s "${OUTPUT_CSV}" ]; then
-            echo "No rows in ${OUTPUT_CSV} — skipping DB load."
+          if [ ! -s "$OUTPUT_CSV" ]; then
+            echo "No rows in $OUTPUT_CSV — skipping DB load."
             exit 0
           fi
 
@@ -368,7 +381,7 @@ PY
           COMMIT;
           SQL
 
-          psql "$DATABASE_URL" -v csv="'${OUTPUT_CSV}'" -f /tmp/rimi_load.sql
+          psql "$DATABASE_URL" -v csv="'$OUTPUT_CSV'" -f /tmp/rimi_load.sql
 
       - name: Adopt Rimi candidates with EANs (optional helpers)
         if: ${{ env.DATABASE_URL != '' }}
