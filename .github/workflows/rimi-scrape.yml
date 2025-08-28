@@ -210,7 +210,6 @@ jobs:
           retention-days: 7
 
       # ---------- OPTIONAL DB PART (only runs if DATABASE_URL is set) ----------
-
       - name: Install psql client
         if: ${{ env.DATABASE_URL != '' }}
         run: |
@@ -246,6 +245,16 @@ jobs:
             category_leaf text,
             collected_at  timestamptz DEFAULT now()
           );
+          -- Upgrade old schemas safely
+          ALTER TABLE public.staging_rimi_products
+            ADD COLUMN IF NOT EXISTS brand         text,
+            ADD COLUMN IF NOT EXISTS size_text     text,
+            ADD COLUMN IF NOT EXISTS category_path text,
+            ADD COLUMN IF NOT EXISTS category_leaf text,
+            ADD COLUMN IF NOT EXISTS currency      text DEFAULT 'EUR',
+            ADD COLUMN IF NOT EXISTS ean_raw       text,
+            ADD COLUMN IF NOT EXISTS sku_raw       text,
+            ADD COLUMN IF NOT EXISTS collected_at  timestamptz DEFAULT now();
           CREATE EXTENSION IF NOT EXISTS pg_trgm;
           CREATE INDEX IF NOT EXISTS ix_rimi_ean       ON public.staging_rimi_products (ean_norm);
           CREATE INDEX IF NOT EXISTS ix_rimi_name_trgm ON public.staging_rimi_products USING gin (name gin_trgm_ops);
@@ -279,12 +288,12 @@ jobs:
             exit 0
           fi
 
-          # 1) Resolve absolute path and export for debug
+          # Resolve absolute CSV path and show it
           CSV_ABS="$(python -c 'import os; p=os.environ.get("OUTPUT_CSV","data/rimi_products.csv"); print(os.path.abspath(p))')"
           echo "CSV_ABS: $CSV_ABS"
           ls -l "$CSV_ABS" || true
 
-          # 2) Write SQL with a placeholder, then replace with the absolute path
+          # Build SQL and inject absolute path (avoid psql \set variable pitfalls)
           cat > /tmp/rimi_load.sql <<'SQL'
           \set ON_ERROR_STOP on
           BEGIN;
@@ -376,10 +385,7 @@ jobs:
           COMMIT;
           SQL
 
-          # Replace placeholder with absolute path (safe for spaces)
           sed -i "s|__CSV__|$CSV_ABS|g" /tmp/rimi_load.sql
-
-          # 3) Execute
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/rimi_load.sql
 
       - name: Adopt Rimi candidates with EANs (optional helpers)
