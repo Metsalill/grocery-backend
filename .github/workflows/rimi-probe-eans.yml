@@ -62,7 +62,7 @@ jobs:
                   if isinstance(x, dict):
                       for k, v in x.items():
                           lk = str(k).lower()
-                          if lk in keys and isinstance(v, (str,int)):
+                          if lk in keys and isinstance(v, (str,int,str)):
                               found[lk] = str(v)
                           walk(v)
                   elif isinstance(x, list):
@@ -196,7 +196,6 @@ jobs:
               else:
                   print("No URL file provided.", file=sys.stderr); sys.exit(1)
               out_path = Path("rimi_probe_eans.csv")
-              import csv
               with open(out_path, "w", newline="", encoding="utf-8") as f:
                   wr = csv.DictWriter(f, fieldnames=["ext_id","url","name","ean_raw","sku_raw","source_flags"])
                   wr.writeheader()
@@ -216,14 +215,20 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p data
-          if [ -n "${{ github.event.inputs.urls_multiline }}" ]; then
-            cat > data/rimi_urls.txt <<'LIST'
-          ${{ github.event.inputs.urls_multiline }}
-          LIST
-          elif [ -f data/rimi_urls.txt ]; then
+          if [[ -n "${{ github.event.inputs.urls_multiline }}" ]]; then
+            printf "%s\n" "${{ github.event.inputs.urls_multiline }}" \
+              | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/rimi_urls.txt
+            echo "Using URLs from workflow input"
+          elif [[ -f data/rimi_urls.txt ]]; then
             echo "Using repo file data/rimi_urls.txt"
           else
-            echo "::error::No URLs provided and data/rimi_urls.txt not found."; exit 1
+            echo "::error::No URLs provided and data/rimi_urls.txt not found."
+            exit 1
+          fi
+          n=$(wc -l < data/rimi_urls.txt || echo 0)
+          if [[ "$n" -eq 0 ]]; then
+            echo "::error::URL list is empty after normalization."
+            exit 1
           fi
           echo "Probing these URLs (first 20 shown):"
           nl -ba data/rimi_urls.txt | sed -n '1,20p'
@@ -232,7 +237,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # Keep a strict wall clock so the job never drifts
           timeout -k 15s 10m python scripts/rimi_probe_ean.py data/rimi_urls.txt
 
       - name: Summarize results
