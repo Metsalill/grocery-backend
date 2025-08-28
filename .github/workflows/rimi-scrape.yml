@@ -35,6 +35,7 @@ jobs:
     name: crawl-and-upsert (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
     timeout-minutes: 90
+
     strategy:
       fail-fast: false
       matrix:
@@ -44,7 +45,7 @@ jobs:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/rimi_products.csv
       SHARD: ${{ matrix.shard }}
-      # Set this secret in the repo to enable DB steps, otherwise they are skipped
+      # Expose DB URL (steps will check it with `if:`)
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
     steps:
@@ -88,7 +89,7 @@ jobs:
           rm -rf data
           mkdir -p data
 
-      - name: Prepare category list (all -> shard slice)
+      - name: Prepare category list (all → shard slice)
         shell: bash
         env:
           SHARDS: 2
@@ -129,7 +130,6 @@ jobs:
           echo "Start (UTC): $(date -u)"
           echo "::endgroup::"
 
-          # Fallbacks if inputs are empty
           REQ_DELAY="${REQ_DELAY:-0.5}"
           PAGE_LIMIT="${PAGE_LIMIT:-0}"
           MAX_PRODUCTS="${MAX_PRODUCTS:-0}"
@@ -222,14 +222,15 @@ PY
           retention-days: 7
 
       # ------------------------ OPTIONAL DB PART ------------------------
+
       - name: Install psql client
-        if: ${{ env.DATABASE_URL != '' }}
+        if: ${{ secrets.DATABASE_URL_PUBLIC != '' }}
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
       - name: DB sanity (connection)
-        if: ${{ env.DATABASE_URL != '' }}
+        if: ${{ secrets.DATABASE_URL_PUBLIC != '' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -237,7 +238,7 @@ PY
           psql "$DATABASE_URL" -c "SELECT current_database(), current_user;" || true
 
       - name: Prepare DB (staging and helper tables)
-        if: ${{ env.DATABASE_URL != '' }}
+        if: ${{ secrets.DATABASE_URL_PUBLIC != '' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -281,7 +282,7 @@ PY
           SQL
 
       - name: Load CSV to DB (staging + candidates)
-        if: ${{ env.DATABASE_URL != '' }}
+        if: ${{ secrets.DATABASE_URL_PUBLIC != '' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -384,12 +385,12 @@ PY
           psql "$DATABASE_URL" -v csv="'$OUTPUT_CSV'" -f /tmp/rimi_load.sql
 
       - name: Adopt Rimi candidates with EANs (optional helpers)
-        if: ${{ env.DATABASE_URL != '' }}
+        if: ${{ secrets.DATABASE_URL_PUBLIC != '' }}
         shell: bash
         run: |
           set -euo pipefail
           cat > /tmp/adopt_rimi.sql <<'SQL'
-          DO $$
+          DO $do$
           DECLARE r record;
           BEGIN
             IF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_all_rimi_candidates_with_ean') THEN
@@ -402,6 +403,6 @@ PY
               END LOOP;
             END IF;
           END
-          $$;
+          $do$;
           SQL
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/adopt_rimi.sql
