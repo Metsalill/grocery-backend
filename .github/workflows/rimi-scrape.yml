@@ -45,7 +45,6 @@ jobs:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/rimi_products.csv
       SHARD: ${{ matrix.shard }}
-      # Set this secret if you want DB steps; steps are gated with `if: ${{ secrets.DATABASE_URL_PUBLIC }}`
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
     steps:
@@ -173,19 +172,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ ! -s "$OUTPUT_CSV" ]; then
-            python - <<'PY'
-import csv, os
-path = os.environ.get("OUTPUT_CSV","data/rimi_products.csv")
-fields = [
-  "store_chain","store_name","store_channel",
-  "ext_id","ean_raw","sku_raw","name","size_text","brand","manufacturer",
-  "price","currency","image_url","category_path","category_leaf","source_url",
-]
-os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
-with open(path, "w", newline="", encoding="utf-8") as f:
-    csv.DictWriter(f, fieldnames=fields).writeheader()
-print("Wrote header-only CSV ->", path)
-PY
+            python -c "import csv,os,sys; p=os.environ.get('OUTPUT_CSV','data/rimi_products.csv'); flds=['store_chain','store_name','store_channel','ext_id','ean_raw','sku_raw','name','size_text','brand','manufacturer','price','currency','image_url','category_path','category_leaf','source_url']; os.makedirs(os.path.dirname(p) or '.', exist_ok=True); f=open(p,'w',newline='',encoding='utf-8'); csv.DictWriter(f, fieldnames=flds).writeheader(); f.close(); print('Wrote header-only CSV ->', p)"
           fi
 
       - name: Dump crawler log (tail)
