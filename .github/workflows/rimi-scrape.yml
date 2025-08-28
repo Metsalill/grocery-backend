@@ -209,13 +209,13 @@ PY
 
       # -------- OPTIONAL DB PART (runs only if DATABASE_URL is set) --------
       - name: Install psql client
-        if: env.DATABASE_URL != ''
+        if: ${{ env.DATABASE_URL != '' }}
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
       - name: DB sanity (connection)
-        if: env.DATABASE_URL != ''
+        if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -223,7 +223,7 @@ PY
           psql "$DATABASE_URL" -c "SELECT current_database(), current_user;" || true
 
       - name: Prepare DB (staging & helper tables)
-        if: env.DATABASE_URL != ''
+        if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -269,10 +269,8 @@ PY
           SQL
 
       - name: Load CSV → staging + candidates
-        if: env.DATABASE_URL != ''
+        if: ${{ env.DATABASE_URL != '' }}
         shell: bash
-        env:
-          STORE_CHAIN: Rimi
         run: |
           set -euo pipefail
           if [[ ! -s "${OUTPUT_CSV}" ]]; then
@@ -284,6 +282,29 @@ PY
           \set ON_ERROR_STOP on
           BEGIN;
 
+          -- Full CSV mirror (matches file header)
+          CREATE TEMP TABLE tmp_rimi_csv_full (
+            store_chain   text,
+            store_name    text,
+            store_channel text,
+            ext_id        text,
+            ean_raw       text,
+            sku_raw       text,
+            name          text,
+            size_text     text,
+            brand         text,
+            manufacturer  text,
+            price         text,
+            currency      text,
+            image_url     text,
+            category_path text,
+            category_leaf text,
+            source_url    text
+          );
+
+          \copy tmp_rimi_csv_full FROM :'csv' CSV HEADER
+
+          -- Narrow to staging shape + cast price
           CREATE TEMP TABLE tmp_staging_rimi_products (
             ext_id        text PRIMARY KEY,
             name          text NOT NULL,
@@ -299,9 +320,25 @@ PY
             collected_at  timestamptz DEFAULT now()
           );
 
-          \copy tmp_staging_rimi_products (store_chain,store_name,store_channel,ext_id,ean_raw,sku_raw,name,size_text,brand,manufacturer,price,currency,image_url,category_path,category_leaf,source_url) FROM :'csv' CSV HEADER
+          INSERT INTO tmp_staging_rimi_products
+            (ext_id,name,ean_raw,sku_raw,size_text,brand,price,currency,category_path,category_leaf)
+          SELECT
+            ext_id,
+            name,
+            ean_raw,
+            sku_raw,
+            size_text,
+            brand,
+            NULLIF(price,'')::numeric,
+            currency,
+            category_path,
+            category_leaf
+          FROM tmp_rimi_csv_full
+          WHERE COALESCE(ext_id,'') <> '';
 
-          INSERT INTO public.staging_rimi_products (ext_id,name,ean_raw,sku_raw,size_text,brand,price,currency,category_path,category_leaf,collected_at)
+          -- Upsert into persistent staging table
+          INSERT INTO public.staging_rimi_products
+            (ext_id,name,ean_raw,sku_raw,size_text,brand,price,currency,category_path,category_leaf,collected_at)
           SELECT ext_id,name,ean_raw,sku_raw,size_text,brand,price,currency,category_path,category_leaf,now()
           FROM tmp_staging_rimi_products
           ON CONFLICT (ext_id) DO UPDATE
@@ -316,9 +353,12 @@ PY
                 category_leaf = COALESCE(EXCLUDED.category_leaf, public.staging_rimi_products.category_leaf),
                 collected_at  = now();
 
-          INSERT INTO public.rimi_candidates (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, price, currency, category_path, category_leaf, last_seen)
-          SELECT s.ext_id, s.ean_norm, s.ean_raw, s.sku_raw, s.name, s.size_text, s.brand, s.price, s.currency, s.category_path, s.category_leaf, now()
-          FROM public.staging_rimi_products s
+          -- Candidate pool (for later EAN adoption)
+          INSERT INTO public.rimi_candidates
+            (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, price, currency, category_path, category_leaf, last_seen)
+          SELECT
+            s.ext_id, s.ean_norm, s.ean_raw, s.sku_raw, s.name, s.size_text, s.brand, s.price, s.currency, s.category_path, s.category_leaf, now()
+          FROM tmp_staging_rimi_products s
           ON CONFLICT (ext_id) DO UPDATE
             SET price         = EXCLUDED.price,
                 currency      = EXCLUDED.currency,
