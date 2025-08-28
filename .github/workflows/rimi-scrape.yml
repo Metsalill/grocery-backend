@@ -57,11 +57,15 @@ jobs:
           pip install playwright beautifulsoup4 lxml psycopg2-binary
           python -m playwright install --with-deps chromium
 
+      # We avoid heredocs entirely to prevent YAML parse issues.
       - name: Verify scraper file exists
         shell: bash
         run: |
           set -euo pipefail
-          test -f scripts/rimi_crawl_categories_pw.py || { echo "::error file=scripts/rimi_crawl_categories_pw.py::Scraper file not found. Commit scripts/rimi_crawl_categories_pw.py to the repo."; exit 1; }
+          if [[ ! -f scripts/rimi_crawl_categories_pw.py ]]; then
+            echo "::error file=scripts/rimi_crawl_categories_pw.py::Scraper file not found. Commit scripts/rimi_crawl_categories_pw.py to the repo."
+            exit 1
+          fi
           python -m py_compile scripts/rimi_crawl_categories_pw.py
           chmod +x scripts/rimi_crawl_categories_pw.py
 
@@ -71,16 +75,13 @@ jobs:
           set -euo pipefail
           mkdir -p data
           if [[ -n "${{ github.event.inputs.categories_multiline }}" ]]; then
-            printf "%s\n" "${{ github.event.inputs.categories_multiline }}" \
-              | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/rimi_categories.txt
+            printf "%s\n" "${{ github.event.inputs.categories_multiline }}" | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/rimi_categories.txt
             echo "Using categories from input."
           elif [[ -f data/rimi_categories.txt ]]; then
             echo "Using repo file data/rimi_categories.txt"
           else
-            # minimal default: bread category as example
-            cat > data/rimi_categories.txt <<'LIST'
-https://www.rimi.ee/epood/ee/tooted/leivad-saiad-kondiitritooted
-LIST
+            # Minimal default without heredoc
+            printf '%s\n' 'https://www.rimi.ee/epood/ee/tooted/leivad-saiad-kondiitritooted' > data/rimi_categories.txt
             echo "Using built-in sample category."
           fi
           echo "First few categories:"
@@ -92,10 +93,10 @@ LIST
           set -euo pipefail
           python scripts/rimi_crawl_categories_pw.py \
             --cats-file data/rimi_categories.txt \
-            --page-limit ${{ github.event.inputs.page_limit }} \
-            --max-products ${{ github.event.inputs.max_products }} \
-            --headless ${{ github.event.inputs.headless }} \
-            --req-delay ${{ github.event.inputs.req_delay }}
+            --page-limit "${{ github.event.inputs.page_limit }}" \
+            --max-products "${{ github.event.inputs.max_products }}" \
+            --headless "${{ github.event.inputs.headless }}" \
+            --req-delay "${{ github.event.inputs.req_delay }}"
 
       - name: Show CSV head
         shell: bash
