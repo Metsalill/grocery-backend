@@ -45,7 +45,7 @@ jobs:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/rimi_products.csv
       SHARD: ${{ matrix.shard }}
-      # Expose DB URL (steps will check it with `if:`)
+      # Set this secret if you want DB steps; steps are gated with `if: ${{ secrets.DATABASE_URL_PUBLIC }}`
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
     steps:
@@ -89,7 +89,7 @@ jobs:
           rm -rf data
           mkdir -p data
 
-      - name: Prepare category list (all → shard slice)
+      - name: Prepare category list (all -> shard slice)
         shell: bash
         env:
           SHARDS: 2
@@ -221,16 +221,16 @@ PY
           if-no-files-found: warn
           retention-days: 7
 
-      # ------------------------ OPTIONAL DB PART ------------------------
+      # ---------- OPTIONAL DB PART (only runs if secret is present) ----------
 
       - name: Install psql client
-        if: ${{ secrets.DATABASE_URL_PUBLIC != '' }}
+        if: ${{ secrets.DATABASE_URL_PUBLIC }}
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
       - name: DB sanity (connection)
-        if: ${{ secrets.DATABASE_URL_PUBLIC != '' }}
+        if: ${{ secrets.DATABASE_URL_PUBLIC }}
         shell: bash
         run: |
           set -euo pipefail
@@ -238,7 +238,7 @@ PY
           psql "$DATABASE_URL" -c "SELECT current_database(), current_user;" || true
 
       - name: Prepare DB (staging and helper tables)
-        if: ${{ secrets.DATABASE_URL_PUBLIC != '' }}
+        if: ${{ secrets.DATABASE_URL_PUBLIC }}
         shell: bash
         run: |
           set -euo pipefail
@@ -282,7 +282,7 @@ PY
           SQL
 
       - name: Load CSV to DB (staging + candidates)
-        if: ${{ secrets.DATABASE_URL_PUBLIC != '' }}
+        if: ${{ secrets.DATABASE_URL_PUBLIC }}
         shell: bash
         run: |
           set -euo pipefail
@@ -385,7 +385,7 @@ PY
           psql "$DATABASE_URL" -v csv="'$OUTPUT_CSV'" -f /tmp/rimi_load.sql
 
       - name: Adopt Rimi candidates with EANs (optional helpers)
-        if: ${{ secrets.DATABASE_URL_PUBLIC != '' }}
+        if: ${{ secrets.DATABASE_URL_PUBLIC }}
         shell: bash
         run: |
           set -euo pipefail
