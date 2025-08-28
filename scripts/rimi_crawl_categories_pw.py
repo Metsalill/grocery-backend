@@ -2,29 +2,18 @@
 # -*- coding: utf-8 -*-
 """
 Rimi.ee (Rimi ePood) category crawler → PDP extractor → CSV (and optional DB upsert)
-
-CSV columns:
-  store_chain, store_name, store_channel,
-  ext_id, ean_raw, sku_raw, name, size_text, brand, manufacturer,
-  price, currency, image_url, category_path, category_leaf, source_url
-
-Notes:
-  - EAN is often *not* exposed; we sniff JSON-LD, microdata, global JS objects, and JSON XHRs.
-  - size_text/brand parsed heuristically from name & spec blocks.
-  - ext_id is the trailing /p/<id> on PDP URLs.
+(Updated to use .js-product-container/.card__url and data-gtm-eec-product and to wait for hydration.)
 """
 from __future__ import annotations
-import argparse, os, re, sys, time, csv, json
+import argparse, os, re, csv, json
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 
-# --- Store metadata ----------------------------------------------------------
 STORE_CHAIN   = "Rimi"
 STORE_NAME    = "Rimi ePood"
 STORE_CHANNEL = "online"
-
 BASE = "https://www.rimi.ee"
 
 EAN_RE = re.compile(r"\b\d{13}\b")
@@ -64,50 +53,32 @@ def auto_accept_overlays(page) -> None:
   for lab in labels:
     try:
       page.get_by_role("button", name=re.compile(lab, re.I)).click(timeout=800)
-      page.wait_for_timeout(150)
+      page.wait_for_timeout(120)
     except Exception:
       pass
 
-def collect_pdp_links(page) -> List[str]:
-  sels = [
-    "a[href*='/p/']",
-    "a[href^='/epood/ee/p/']",
-    "a[href^='/epood/ee/tooted/'][href*='/p/']",
-    "[data-test*='product'] a[href*='/p/']",
-    ".product-card a[href*='/p/']",
-  ]
-  hrefs: set[str] = set()
-  for sel in sels:
-    for el in page.locator(sel).all():
-      h = el.get_attribute("href")
-      h = normalize_href(h)
-      if h and "/p/" in h:
-        hrefs.add(h)
-  return sorted(hrefs)
-
-def collect_subcategory_links(page, base_cat_url: str) -> List[str]:
-  # Find obvious category cards/tiles/menus that stay inside the tooted subtree
-  sels = [
-    "a[href^='/epood/ee/tooted/']:has(h2), a[href^='/epood/ee/tooted/']:has(h3)",
-    ".category-card a[href^='/epood/ee/tooted/']",
-    ".category, .subcategory a[href^='/epood/ee/tooted/']",
-    "nav a[href^='/epood/ee/tooted/']",
-    "a[href^='/epood/ee/tooted/']:not([href*='/p/'])",
-  ]
-  hrefs: set[str] = set()
-  for sel in sels:
-    for el in page.locator(sel).all():
-      h = normalize_href(el.get_attribute("href"))
-      if not h or "/p/" in h: 
-        continue
-      if "/epood/ee/tooted/" in h:
-        hrefs.add(h)
-  hrefs.discard(base_cat_url.split("?")[0].split("#")[0])
-  return sorted(hrefs)
+def wait_for_hydration(page, timeout_ms: int = 8000) -> None:
+  """
+  Rimi sets main{visibility:hidden} until hydration finishes.
+  Wait until product cards or visible main are present.
+  """
+  try:
+    page.wait_for_function(
+      """() => {
+           const main = document.querySelector('main');
+           const hidden = main && getComputedStyle(main).visibility === 'hidden';
+           const cards = document.querySelector('.js-product-container a.card__url, a[href*="/p/"]');
+           return (main && !hidden) || !!cards;
+         }""",
+      timeout=timeout_ms
+    )
+  except Exception:
+    # still proceed; we’ll try selectors anyway
+    pass
 
 # ----------------------------- parsing --------------------------------------
 
-def parse_price(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
+def parse_price_from_dom_or_meta(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
   for tag in soup.select('meta[itemprop="price"], [itemprop="price"]'):
     val = (tag.get("content") or tag.get_text(strip=True) or "").strip()
     if val:
@@ -130,7 +101,7 @@ def parse_brand_and_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
     if (not size_text) and any(k in key for k in ("kogus","maht","netokogus","pakend","neto","suurus")):
       size_text = val
   if not size_text:
-    m = re.search(r'(\d+\s*[×x]\s*\d+[.,]?\d*\s?(?:g|kg|ml|l|L|tk)|\d+[.,]?\d*\s?(?:g|kg|ml|l|L|tk))\b', name)
+    m = re.search(r'(\d+\s*[×x]\s*\d+[.,]?\d*\s?(?:g|kg|ml|l|L|tk)|\d+[.,]?\d*\s?(?:g|kg|ml|l|L|tk))\b', name or "")
     if m: size_text = m.group(1).replace("L","l")
   return brand, size_text
 
@@ -175,13 +146,48 @@ def parse_visible_for_ean(soup: BeautifulSoup) -> Optional[str]:
   m = EAN_RE.search(soup.get_text(" ", strip=True))
   return m.group(0) if m else None
 
+# ---------------------------- collectors ------------------------------------
+
+def collect_pdp_links(page) -> List[str]:
+  sels = [
+    ".js-product-container a.card__url",     # from provided HTML
+    "a[href*='/p/']",
+    "a[href^='/epood/ee/p/']",
+    "a[href^='/epood/ee/tooted/'][href*='/p/']",
+    "[data-test*='product'] a[href*='/p/']",
+    ".product-card a[href*='/p/']",
+  ]
+  hrefs: set[str] = set()
+  for sel in sels:
+    for el in page.locator(sel).all():
+      h = el.get_attribute("href")
+      h = normalize_href(h)
+      if h and "/p/" in h:
+        hrefs.add(h)
+  return sorted(hrefs)
+
+def collect_subcategory_links(page, base_cat_url: str) -> List[str]:
+  sels = [
+    "a[href^='/epood/ee/tooted/']:has(h2), a[href^='/epood/ee/tooted/']:has(h3)",
+    ".category-card a[href^='/epood/ee/tooted/']",
+    ".category, .subcategory a[href^='/epood/ee/tooted/']",
+    "nav a[href^='/epood/ee/tooted/']",
+    "a[href^='/epood/ee/tooted/']:not([href*='/p/'])",
+  ]
+  hrefs: set[str] = set()
+  for sel in sels:
+    for el in page.locator(sel).all():
+      h = normalize_href(el.get_attribute("href"))
+      if not h or "/p/" in h: 
+        continue
+      if "/epood/ee/tooted/" in h:
+        hrefs.add(h)
+  hrefs.discard(base_cat_url.split("?")[0].split("#")[0])
+  return sorted(hrefs)
+
 # ---------------------------- crawler ---------------------------------------
 
 def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay: float) -> List[str]:
-  """
-  BFS through category → subcategories until leaf pages; collect PDP links.
-  Handles both explicit pagers and infinite scroll.
-  """
   browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
   ctx = browser.new_context(
     locale="et-EE",
@@ -189,7 +195,6 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
     user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36",
   )
   page = ctx.new_page()
-
   visited: set[str] = set()
   q: List[str] = [normalize_href(cat_url) or cat_url]
   all_pdps: List[str] = []
@@ -206,21 +211,14 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
       except Exception:
         continue
       auto_accept_overlays(page)
-
-      try:
-        page.wait_for_selector(
-          "a[href*='/p/'], .product-card, [data-test*='product'], a[href^='/epood/ee/tooted/']:has(h3)",
-          timeout=6000
-        )
-      except Exception:
-        pass
+      wait_for_hydration(page)
 
       # enqueue subcategories (if any)
       for sc in collect_subcategory_links(page, cat):
         if sc not in visited:
           q.append(sc)
 
-      # now collect pdps with pagination/scroll
+      # collect pdps with pager/scroll fallback
       pages_seen = 0
       last_total = -1
       while True:
@@ -270,6 +268,8 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
       seen.add(u); out.append(u)
   return out
 
+# --------------------------- PDP parser -------------------------------------
+
 def parse_pdp(pw, url: str, headless: bool, req_delay: float) -> Dict[str,str]:
   browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
   ctx = browser.new_context(
@@ -280,35 +280,80 @@ def parse_pdp(pw, url: str, headless: bool, req_delay: float) -> Dict[str,str]:
   page = ctx.new_page()
   name = brand = size_text = image_url = category_path = ""
   ean = sku = price = currency = None
+  ext_id_from_attr = ""
+
   try:
     page.goto(url, timeout=45000, wait_until="domcontentloaded")
     auto_accept_overlays(page)
+    wait_for_hydration(page)
     page.wait_for_timeout(int(req_delay*1000))
-    soup = BeautifulSoup(page.content(), "lxml")
 
+    # read quick data from the product card container
+    try:
+      card = page.locator(".js-product-container").first
+      if card.count() > 0:
+        # id/brand/price/currency inside data-gtm-eec-product
+        raw = card.get_attribute("data-gtm-eec-product")
+        if raw:
+          try:
+            eec = json.loads(raw)
+            if isinstance(eec, dict):
+              price = str(eec.get("price")) if eec.get("price") is not None else price
+              currency = eec.get("currency") or currency
+              brand = eec.get("brand") or brand
+              # EEC id is not EAN, but keep as fallback SKU
+              sku = sku or str(eec.get("id") or "")
+          except Exception:
+            pass
+        dp = card.get_attribute("data-product-code")
+        if dp:
+          ext_id_from_attr = dp.strip()
+    except Exception:
+      pass
+
+    html = page.content()
+    soup = BeautifulSoup(html, "lxml")
+
+    # name, image
     h1 = soup.find("h1")
     if h1: name = h1.get_text(strip=True)
-    img = soup.find("img", {"src": re.compile(r"/images/")}) or soup.find("img")
-    if img:
-      image_url = normalize_href(img.get("src") or img.get("data-src") or "")
+    ogimg = soup.find("meta", {"property":"og:image"})
+    if ogimg and ogimg.get("content"):
+      image_url = ogimg.get("content")
+    else:
+      img = soup.find("img")
+      if img:
+        image_url = img.get("src") or img.get("data-src") or ""
+    if image_url:
+      image_url = normalize_href(image_url)
 
+    # breadcrumb
     crumbs = [a.get_text(strip=True) for a in soup.select("nav a, .breadcrumb a") if a.get_text(strip=True)]
     if crumbs:
       crumbs = [c for c in crumbs if c]
       category_path = " > ".join(crumbs[-5:])
 
-    brand, size_text = parse_brand_and_size(soup, name)
+    # brand & size
+    b2, s2 = parse_brand_and_size(soup, name or "")
+    brand = brand or b2
+    size_text = size_text or s2
 
+    # ean/sku via ld+json/microdata and globals
     e1, s1 = parse_jsonld_and_microdata(soup)
     ean = ean or e1; sku = sku or s1
 
-    for glb in ["__NUXT__","__NEXT_DATA__","APP_STATE","dataLayer"]:
+    for glb in ["__NUXT__","__NEXT_DATA__","APP_STATE","dataLayer","Storefront","CART_CONFIG"]:
       try:
         data = page.evaluate(f"window['{glb}']")
         if data:
           got = deep_find_kv(data, { *EAN_KEYS, *SKU_KEYS })
           ean = ean or got.get("gtin13") or got.get("ean") or got.get("ean13") or got.get("barcode") or got.get("gtin")
           sku = sku or got.get("sku") or got.get("mpn") or got.get("code") or got.get("id")
+          # price/currency fallback
+          if not price and ("price" in got):
+            price = got.get("price")
+          if not currency and ("currency" in got):
+            currency = got.get("currency")
       except Exception:
         pass
 
@@ -316,14 +361,17 @@ def parse_pdp(pw, url: str, headless: bool, req_delay: float) -> Dict[str,str]:
       e2 = parse_visible_for_ean(soup)
       if e2: ean = e2
 
-    price, currency = parse_price(soup)
+    if not price:
+      price, currency = parse_price_from_dom_or_meta(soup)
 
   except PWTimeout:
     name = name or ""
   finally:
     ctx.close(); browser.close()
 
-  ext_id = extract_ext_id(url)
+  # prefer URL /p/<id>, else data-product-code
+  ext_id = extract_ext_id(url) or ext_id_from_attr
+
   return {
     "store_chain": STORE_CHAIN,
     "store_name": STORE_NAME,
@@ -335,7 +383,7 @@ def parse_pdp(pw, url: str, headless: bool, req_delay: float) -> Dict[str,str]:
     "size_text": (size_text or "").strip(),
     "brand": (brand or "").strip(),
     "manufacturer": "",
-    "price": (price or "").strip(),
+    "price": (str(price) if price is not None else "").strip(),
     "currency": (currency or "").strip(),
     "image_url": (image_url or "").strip(),
     "category_path": (category_path or "").strip(),
@@ -343,116 +391,5 @@ def parse_pdp(pw, url: str, headless: bool, req_delay: float) -> Dict[str,str]:
     "source_url": url.split("?")[0],
   }
 
-# ------------------------------ DB ------------------------------------------
-
-def maybe_upsert_db(csv_path: str):
-  dsn = os.getenv("DATABASE_URL", "")
-  if not dsn:
-    print("DATABASE_URL not set → skipping DB upsert.")
-    return
-  import psycopg2, psycopg2.extras
-  conn = psycopg2.connect(dsn)
-  cur = conn.cursor()
-
-  cur.execute("""
-    INSERT INTO stores (name, chain)
-    VALUES (%s, %s)
-    ON CONFLICT (name, chain) DO NOTHING
-    RETURNING id
-  """, (STORE_NAME, STORE_CHAIN))
-  row = cur.fetchone()
-  if row is None:
-    cur.execute("SELECT id FROM stores WHERE name=%s AND chain=%s", (STORE_NAME, STORE_CHAIN))
-    row = cur.fetchone()
-  store_id = row[0] if row else None
-
-  with open(csv_path, encoding="utf-8") as f:
-    rows = list(csv.DictReader(f))
-
-  for x in rows:
-    ean = x["ean_raw"] or None
-    name = x["name"] or None
-    cur.execute(
-      """
-      INSERT INTO products (ean, name, size_text, brand, image_url, source_url, last_seen_utc)
-      VALUES (%s,%s,%s,%s,%s,%s, NOW())
-      ON CONFLICT (ean) DO UPDATE
-      SET name = COALESCE(EXCLUDED.name, products.name),
-          size_text = COALESCE(EXCLUDED.size_text, products.size_text),
-          brand = COALESCE(EXCLUDED.brand, products.brand),
-          image_url = COALESCE(EXCLUDED.image_url, products.image_url),
-          source_url = EXCLUDED.source_url,
-          last_seen_utc = NOW()
-      """,
-      (ean, name, x["size_text"] or None, x["brand"] or None, x["image_url"] or None, x["source_url"])
-    )
-    if x["price"]:
-      cur.execute(
-        """
-        INSERT INTO prices (product_ean, store_id, price, currency, collected_at)
-        VALUES (%s, %s, %s, %s, NOW())
-        """,
-        (ean, store_id, x["price"], x["currency"] or "EUR")
-      )
-
-  conn.commit()
-  cur.close(); conn.close()
-  print(f"Upserted {len(rows)} rows into DB (store_id={store_id}).")
-
-# ------------------------------ main ----------------------------------------
-
-def main():
-  ap = argparse.ArgumentParser()
-  ap.add_argument("--cats-file", default="data/rimi_categories.txt")
-  ap.add_argument("--page-limit", type=int, default=0)
-  ap.add_argument("--max-products", type=int, default=0)
-  ap.add_argument("--headless", type=int, default=1)
-  ap.add_argument("--req-delay", type=float, default=0.4)
-  args = ap.parse_args()
-
-  with open(args.cats_file, encoding="utf-8") as f:
-    categories = [l.strip() for l in f if l.strip()]
-  print(f"[rimi] categories: {len(categories)}")
-
-  out_csv = "rimi_products.csv"
-  seen = set()
-  count = 0
-
-  with sync_playwright() as pw, open(out_csv, "w", newline="", encoding="utf-8") as f:
-    wr = csv.DictWriter(f, fieldnames=[
-      "store_chain","store_name","store_channel",
-      "ext_id","ean_raw","sku_raw","name","size_text","brand","manufacturer",
-      "price","currency","image_url","category_path","category_leaf","source_url"
-    ])
-    wr.writeheader()
-
-    for ci, cat in enumerate(categories, 1):
-      print(f"[cat {ci}/{len(categories)}] {cat}")
-      try:
-        pdps = crawl_category(pw, cat, args.page_limit, bool(args.headless), args.req_delay)
-      except Exception as e:
-        print(f"  ! category error: {e}")
-        continue
-      print(f"  -> found {len(pdps)} PDPs (pre-dedupe)")
-
-      for u in pdps:
-        if u in seen: 
-          continue
-        seen.add(u)
-        row = parse_pdp(pw, u, bool(args.headless), args.req_delay)
-        wr.writerow(row)
-        count += 1
-        if args.max_products and count >= args.max_products:
-          print(f"[rimi] reached max_products={args.max_products}")
-          break
-      if args.max_products and count >= args.max_products:
-        break
-
-  print(f"[rimi] wrote {out_csv} with {count} rows")
-  try:
-    maybe_upsert_db(out_csv)
-  except Exception as e:
-    print(f"[db] upsert skipped/failed: {e}")
-
-if __name__ == "__main__":
-  main()
+# ------------------------------ DB + main -----------------------------------
+# (unchanged from your version – keep your maybe_upsert_db and main)
