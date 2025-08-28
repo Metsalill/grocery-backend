@@ -279,8 +279,19 @@ jobs:
             exit 0
           fi
 
-          cat > /tmp/rimi_load.sql <<'SQL'
-          \set ON_ERROR_STOP on
+          # Resolve to absolute path & show for debug
+          CSV_ABS="$(python - <<'PY'
+import os
+p = os.environ.get("OUTPUT_CSV","data/rimi_products.csv")
+print(os.path.abspath(p))
+PY
+)"
+          echo "CSV_ABS: $CSV_ABS"
+          ls -l "$CSV_ABS" || true
+
+          # Use non-quoted heredoc so $CSV_ABS expands in shell
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<SQL
+          \\set ON_ERROR_STOP on
           BEGIN;
 
           CREATE TEMP TABLE tmp_rimi_csv_full (
@@ -302,7 +313,7 @@ jobs:
             source_url    text
           );
 
-          \copy tmp_rimi_csv_full FROM :'csv' CSV HEADER
+          \\copy tmp_rimi_csv_full FROM '$CSV_ABS' CSV HEADER
 
           CREATE TEMP TABLE tmp_staging_rimi_products (
             ext_id        text PRIMARY KEY,
@@ -369,8 +380,6 @@ jobs:
 
           COMMIT;
           SQL
-
-          psql "$DATABASE_URL" -v csv="'$OUTPUT_CSV'" -f /tmp/rimi_load.sql
 
       - name: Adopt Rimi candidates with EANs (optional helpers)
         if: ${{ env.DATABASE_URL != '' }}
