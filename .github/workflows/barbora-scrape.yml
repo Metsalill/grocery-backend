@@ -23,7 +23,7 @@ on:
         description: "Upsert into Postgres (1=yes, 0=just CSV)"
         default: "1"
   schedule:
-    - cron: "19 */3 * * *"  # every 3 hours
+    - cron: "19 */3 * * *"  # every 3 hours (UTC)
 
 concurrency:
   group: barbora-category-crawl
@@ -40,8 +40,17 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-scraper.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Install deps (Playwright + libs)
         run: |
@@ -66,17 +75,45 @@ jobs:
         run: |
           set -euo pipefail
           if [ -n "${{ github.event.inputs.categories_multiline }}" ]; then
-            printf "%s\n" "${{ github.event.inputs.categories_multiline }}" | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/barbora_categories.txt
-            echo "Using categories from input."
+            printf "%s\n" "${{ github.event.inputs.categories_multiline }}" \
+              | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/barbora_categories.txt
+            echo "Using categories from workflow input."
           elif [ -f data/barbora_categories.txt ]; then
-            cp -f data/barbora_categories.txt data/barbora_categories.txt
             echo "Using repo file data/barbora_categories.txt"
           else
-            # Add a minimal default set if you want auto-run without inputs
+            # Provide your default Barbora roots here if desired:
             printf "" > data/barbora_categories.txt
             echo "No default roots committed; provide categories via dispatch."
           fi
           echo "TOTAL categories: $(wc -l < data/barbora_categories.txt)"
+
+      # --- Optional: build SKIP list so we don't re-crawl already-priced items ---
+      - name: Build skip list from priced items (prices ∪ barbora_candidates)
+        if: ${{ env.DATABASE_URL != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > data/barbora_skip_ext_ids.txt
+          psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/barbora_skip_ext_ids.txt
+          WITH priced_from_prices AS (
+            SELECT DISTINCT (regexp_match(p.source_url, '/p/([0-9]+)'))[1] AS ext_id
+            FROM public.prices p
+            JOIN public.stores s ON s.id = p.store_id
+            WHERE s.chain='Maxima' AND s.name ILIKE '%Barbora%' AND s.is_online = TRUE
+              AND p.source_url ~ '/p/[0-9]+'
+          ),
+          priced_from_candidates AS (
+            SELECT DISTINCT ext_id::text
+            FROM public.barbora_candidates
+            WHERE COALESCE(price,0) > 0
+              AND COALESCE(ext_id,'') <> ''
+          )
+          SELECT ext_id FROM priced_from_prices
+          UNION
+          SELECT ext_id FROM priced_from_candidates
+          ORDER BY 1;
+          SQL
+          echo "Skip list rows (already priced): $(wc -l < data/barbora_skip_ext_ids.txt)" | tee data/_barbora_skip_count.txt
 
       - name: Crawl Barbora categories (Playwright)
         env:
@@ -84,17 +121,59 @@ jobs:
           PAGE_LIMIT: ${{ github.event.inputs.page_limit }}
           MAX_PRODUCTS: ${{ github.event.inputs.max_products }}
           HEADLESS: ${{ github.event.inputs.headless }}
+          SKIP_EXT_FILE: data/barbora_skip_ext_ids.txt
         run: |
           set -euo pipefail
+          echo "::group::Runtime info"
+          python --version
+          echo "Start (UTC): $(date -u)"
+          echo "::endgroup::"
+
+          REQ_DELAY="${REQ_DELAY:-0.25}"
+          PAGE_LIMIT="${PAGE_LIMIT:-0}"
+          MAX_PRODUCTS="${MAX_PRODUCTS:-0}"
+          HEADLESS="${HEADLESS:-1}"
+
+          if [ -f "$SKIP_EXT_FILE" ]; then
+            echo "SKIP_EXT_FILE present ($(wc -l < "$SKIP_EXT_FILE") rows)"
+            SKIP_FLAG=(--skip-ext-file "$SKIP_EXT_FILE")
+          else
+            SKIP_FLAG=()
+          fi
+
+          set +e
+          set +o pipefail
           stdbuf -oL -eL timeout -k 45s 80m \
             python -u scripts/barbora_crawl_categories_pw.py \
               --cats-file data/barbora_categories.txt \
-              --page-limit "${PAGE_LIMIT:-0}" \
-              --max-products "${MAX_PRODUCTS:-0}" \
-              --headless "${HEADLESS:-1}" \
-              --req-delay "${REQ_DELAY:-0.25}" \
+              --page-limit "$PAGE_LIMIT" \
+              --max-products "$MAX_PRODUCTS" \
+              --headless "$HEADLESS" \
+              --req-delay "$REQ_DELAY" \
               --output-csv "$OUTPUT_CSV" \
-            | tee data/barbora_run.log
+              "${SKIP_FLAG[@]}" \
+            > >(tee data/barbora_run.log) 2>data/barbora_run.err
+          status=${PIPESTATUS[0]}
+          set -o pipefail
+          set -e
+
+          echo "End (UTC): $(date -u) - crawler exit code: ${status}"
+          echo "::group::Crawler outputs"
+          ls -lah data || true
+          if [ -f "$OUTPUT_CSV" ]; then
+            echo "CSV size:"; wc -l "$OUTPUT_CSV"; du -h "$OUTPUT_CSV"
+          else
+            echo "CSV not found"
+          fi
+          [ -f data/barbora_run.log ] && { echo "Log size:"; du -h data/barbora_run.log; } || echo "Log not found"
+          [ -s data/barbora_run.err ] && { echo "---- stderr tail ----"; tail -n 120 data/barbora_run.err; } || true
+          echo "::endgroup::"
+
+          if [ "$status" -eq 124 ]; then
+            echo "::warning::Crawler hit the time budget (timeout 80m). Continuing with partial results."
+          elif [ "$status" -ne 0 ]; then
+            echo "::warning::Crawler exited non-zero ($status); continuing"
+          fi
 
       - name: Ensure CSV exists (header if empty)
         run: |
@@ -111,6 +190,25 @@ print('Wrote header-only CSV ->', p)
 PY
           fi
 
+      - name: Dump crawler log (tail)
+        if: always()
+        run: |
+          echo "----- last 200 lines of data/barbora_run.log -----"
+          if [ -f data/barbora_run.log ]; then
+            tail -n 200 data/barbora_run.log
+          else
+            echo "(no log found)"
+          fi
+
+      - name: Show CSV head (debug)
+        run: |
+          set -euo pipefail
+          ls -lah data || true
+          echo "---- line count ----"
+          wc -l "$OUTPUT_CSV" || true
+          echo "---- first 12 lines ----"
+          head -n 12 "$OUTPUT_CSV" || true
+
       - name: Upload crawl artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -120,13 +218,22 @@ PY
             data/barbora_products.csv
             data/barbora_run.log
             data/barbora_run.err
+            data/_barbora_skip_count.txt
           if-no-files-found: warn
           retention-days: 7
 
+      # ---------- OPTIONAL DB PART (only runs if DATABASE_URL is set) ----------
       - name: Install psql client
         if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
         run: |
           sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: DB sanity (connection)
+        if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -c "\conninfo" || true
+          psql "$DATABASE_URL" -c "SELECT current_database(), current_user;" || true
 
       - name: Prepare DB (store + staging)
         if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
@@ -253,3 +360,25 @@ PY
           SQL
           sed -i "s|__CSV__|$CSV_ABS|g" /tmp/barbora_load.sql
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/barbora_load.sql
+
+      - name: (Optional) Adopt Barbora candidates with EANs
+        if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
+        run: |
+          set -euo pipefail
+          cat > /tmp/adopt_barbora.sql <<'SQL'
+          DO $do$
+          DECLARE r record;
+          BEGIN
+            IF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_all_barbora_candidates_with_ean') THEN
+              PERFORM public.adopt_all_barbora_candidates_with_ean();
+            ELSIF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_candidate_with_ean') THEN
+              FOR r IN
+                SELECT ext_id FROM public.barbora_candidates WHERE COALESCE(ean_norm,'') <> ''
+              LOOP
+                PERFORM public.adopt_candidate_with_ean(r.ext_id);
+              END LOOP;
+            END IF;
+          END
+          $do$;
+          SQL
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/adopt_barbora.sql
