@@ -6,7 +6,7 @@ on:
       click_products:
         description: "Click into PDPs (1) vs direct links (0)"
         required: false
-        default: "0"
+        default: "1"        # default ON → render PDP details (Ribakood/EAN) reliably
       page_limit:
         description: "Max pages per category (0 = all)"
         required: false
@@ -14,7 +14,7 @@ on:
       log_console:
         description: "Page console logging (0 | warn | all)"
         required: false
-        default: "0"
+        default: "warn"
       req_delay:
         description: "Seconds between steps"
         required: false
@@ -59,7 +59,7 @@ jobs:
 
       - name: Install deps (crawler + Playwright)
         run: |
-          pip install -r requirements-scraper.txt || pip install aiohttp beautifulsoup4 lxml asyncpg pg8000 playwright
+          pip install -r requirements-scraper.txt || pip install aiohttp beautifulsoup4 lxml asyncpg pg8000 psycopg2-binary playwright
           python -m playwright install --with-deps chromium
 
       - name: Prepare workspace
@@ -91,8 +91,9 @@ jobs:
           CATEGORIES_FILE: data/selver_categories.txt
           ALLOWLIST_ONLY: "1"
           USE_ROUTER: "1"
-          CLICK_PRODUCTS: ${{ github.event_name == 'workflow_dispatch' && inputs.click_products || '0' }}
-          LOG_CONSOLE: ${{ github.event_name == 'workflow_dispatch' && inputs.log_console || '0' }}
+          CLICK_PRODUCTS: ${{ github.event_name == 'workflow_dispatch' && inputs.click_products || '1' }}
+          LOG_CONSOLE: ${{ github.event_name == 'workflow_dispatch' && inputs.log_console || 'warn' }}
+          NAV_TIMEOUT_MS: "60000"   # more time for PDP to render EAN/Ribakood
           PRELOAD_DB: "1"
           PRELOAD_DB_QUERY: |
             SELECT DISTINCT ext_id
