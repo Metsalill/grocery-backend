@@ -4,7 +4,7 @@
 Barbora.ee (Maxima EE) – Category crawler → CSV (for canonical pipeline)
 
 - Accepts a list of category URLs (file or via --cats-file).
-- Iterates category pages (multiple pagination strategies).
+- Iterates category pages (now capped by the real last page from the DOM).
 - Collects PDP links, then opens each PDP to extract structured data.
 - Writes a single CSV with the schema you already use in Rimi/Selver/Prisma flows.
 
@@ -22,7 +22,7 @@ import re
 import sys
 import time
 from dataclasses import dataclass
-from typing import Iterable, List, Optional, Set, Tuple, Dict, Any
+from typing import List, Optional, Set, Tuple, Dict, Any
 from urllib.parse import urljoin, urlparse, parse_qs, urlencode, urlunparse
 
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout, Page
@@ -330,9 +330,6 @@ def extract_breadcrumbs(page: Page) -> Tuple[str, str]:
 def accept_cookies_if_present(page: Page) -> None:
     """Best-effort Cookiebot accept in an iframe."""
     try:
-        # Try a few common patterns
-        for fr in page.context.pages[0].frames:
-            pass  # just to access .frames in some Playwright versions
         for fr in page.frames:
             for sel in (
                 '[data-testid="uc-accept-all-button"]',
@@ -358,11 +355,9 @@ def discover_pdp_links_on_category(page: Page) -> List[str]:
     """
     Wait for the product grid, scroll to trigger lazy load, then collect PDP anchors.
     """
-    # Make sure cards are attached; Barbora is a React app.
     try:
         page.wait_for_selector('a[href*="/toode/"], div[data-testid="product-card"], .b-product', timeout=12000)
     except Exception:
-        # small scroll poke and retry
         auto_scroll(page, total_px=1200, step=600, pause_ms=200)
         try:
             page.wait_for_selector('a[href*="/toode/"]', timeout=6000)
@@ -390,52 +385,52 @@ def discover_pdp_links_on_category(page: Page) -> List[str]:
     except Exception:
         pass
 
-    # Final filtering
     return sorted({u for u in links if is_pdp_url(u)})
 
-def next_category_page_url(current_url: str, page: Page, page_index: int) -> Optional[str]:
-    # 1) explicit ?page=
-    try:
-        u = urlparse(current_url)
-        qs = parse_qs(u.query)
-        cur = page_index if "page" not in qs else int(qs.get("page", ["1"])[0] or page_index)
-        nxt = cur + 1
-        nq = dict(qs)
-        nq["page"] = [str(nxt)]
-        new_q = urlencode({k: v[0] if isinstance(v, list) and len(v)==1 else v for k, v in nq.items()}, doseq=True)
-        return urlunparse((u.scheme, u.netloc, u.path, u.params, new_q, u.fragment))
-    except Exception:
-        pass
+# ---------- paging helpers (new) ----------
 
-    # 2) rel="next"
-    try:
-        next_el = page.locator('a[rel="next"], link[rel="next"]').first
-        if next_el and next_el.count() > 0:
-            href = next_el.get_attribute("href") or ""
-            if href:
-                return url_abs(href, current_url)
-    except Exception:
-        pass
+def _cat_base(url: str) -> str:
+    """Strip query/fragment so we can build ?page=N cleanly."""
+    u = urlparse(url)
+    return urlunparse((u.scheme, u.netloc, u.path, "", "", ""))
 
-    # 3) numbered paging (heuristic)
-    try:
-        pagers = page.locator('a[href*="page="], .pagination a').all()
-        active_index = None
-        items = []
-        for i, el in enumerate(pagers):
-            t = safe_text(el.inner_text())
-            h = el.get_attribute("href") or ""
-            items.append((t, h, el.get_attribute("class") or ""))
-            if "active" in (el.get_attribute("class") or ""):
-                active_index = i
-        if active_index is not None and active_index + 1 < len(items):
-            _, h, _ = items[active_index + 1]
-            if h:
-                return url_abs(h, current_url)
-    except Exception:
-        pass
+def _build_page_url(seed: str, n: int) -> str:
+    """For page 1 return the clean seed; for >1 return seed?page=n."""
+    base = _cat_base(seed)
+    if n <= 1:
+        return base
+    return f"{base}?page={n}"
 
-    return None
+def _max_pages_from_dom(page: Page) -> int:
+    """
+    Inspect pagination controls and return the highest page number.
+    Falls back to 1 when not found.
+    """
+    try:
+        nums = page.evaluate("""
+        (() => {
+          const getN = (a) => {
+            try {
+              const u = new URL(a.href, location.href);
+              const v = parseInt(u.searchParams.get('page') || '');
+              return Number.isNaN(v) ? null : v;
+            } catch { return null; }
+          };
+          const anchors = [...document.querySelectorAll('a[href*="page="]')];
+          const ns = anchors.map(getN).filter(n => n && n > 0);
+          // Sometimes there are plain numeric buttons without ?page=
+          [...document.querySelectorAll('a,button')].forEach(el => {
+            const t = (el.textContent || '').trim();
+            const m = t.match(/^\\d{1,3}$/);
+            if (m) ns.push(parseInt(m[0], 10));
+          });
+          if (!ns.length) return 1;
+          return Math.max(...ns);
+        })()
+        """)
+        return int(nums) if nums and nums > 0 else 1
+    except Exception:
+        return 1
 
 def read_categories(args) -> List[str]:
     cats: List[str] = []
@@ -535,15 +530,30 @@ def main():
         for cat in cats:
             try:
                 print(f"[barbora] Category: {cat}", file=sys.stderr)
-                current_url = cat
-                cat_pages = 0
+
+                # Load first page to determine how many pages exist
+                base = _cat_base(cat)
+                try:
+                    page.goto(base, timeout=45000, wait_until="domcontentloaded")
+                except PWTimeout:
+                    print(f"[barbora] timeout on {base}", file=sys.stderr)
+                    continue
+                except Exception as e:
+                    print(f"[barbora] nav error on {base}: {e}", file=sys.stderr)
+                    continue
+
+                accept_cookies_if_present(page)
+                auto_scroll(page, total_px=1200, step=600, pause_ms=200)
+
+                detected_max = _max_pages_from_dom(page)
+                last_page = min(detected_max, page_limit) if page_limit > 0 else detected_max
+                if last_page < 1:
+                    last_page = 1
+
                 prev_links: Set[str] = set()
 
-                while True:
-                    cat_pages += 1
-                    if page_limit and cat_pages > page_limit:
-                        break
-
+                for pnum in range(1, last_page + 1):
+                    current_url = _build_page_url(base, pnum)
                     try:
                         page.goto(current_url, timeout=45000, wait_until="domcontentloaded")
                     except PWTimeout:
@@ -553,16 +563,19 @@ def main():
                         print(f"[barbora] nav error on {current_url}: {e}", file=sys.stderr)
                         break
 
-                    # dynamic helpers
                     accept_cookies_if_present(page)
                     auto_scroll(page, total_px=2200, step=700, pause_ms=200)
 
-                    # discover PDP links
                     pdp_links = discover_pdp_links_on_category(page)
                     if not pdp_links:
                         print(f"[barbora] no PDP links on page: {current_url}", file=sys.stderr)
 
-                    # visit PDPs
+                    # Avoid loops: if identical to previous page, stop here
+                    cur_set = set(pdp_links)
+                    if cur_set and cur_set == prev_links:
+                        break
+                    prev_links = cur_set
+
                     for u in pdp_links:
                         if max_products and total_written >= max_products:
                             break
@@ -599,18 +612,6 @@ def main():
                     if max_products and total_written >= max_products:
                         break
 
-                    # pagination
-                    nxt = next_category_page_url(current_url, page, cat_pages)
-                    if not nxt or nxt == current_url:
-                        break
-
-                    # if this page yielded the same links as last page, stop to avoid loops
-                    cur_set = set(pdp_links)
-                    if cur_set and cur_set == prev_links:
-                        break
-                    prev_links = cur_set
-
-                    current_url = nxt
                     time.sleep(req_delay)
 
             except Exception as e:
