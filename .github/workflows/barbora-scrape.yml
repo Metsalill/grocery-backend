@@ -1,4 +1,4 @@
-name: "Barbora (Maxima EE) – Category Crawl + optional DB upsert"
+name: "Barbora (Maxima EE) - Category Crawl + optional DB upsert"
 
 on:
   workflow_dispatch:
@@ -9,18 +9,23 @@ on:
         default: ""
       page_limit:
         description: "Max pages per category (0 = all)"
+        required: false
         default: "0"
       max_products:
         description: "Cap total PDPs (0 = unlimited)"
+        required: false
         default: "0"
       headless:
         description: "Headless (1/0)"
+        required: false
         default: "1"
       req_delay:
         description: "Delay between steps (sec)"
+        required: false
         default: "0.25"
       upsert_db:
         description: "Upsert into Postgres (1=yes, 0=just CSV)"
+        required: false
         default: "1"
   schedule:
     - cron: "19 */3 * * *"
@@ -37,27 +42,9 @@ jobs:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/barbora_products.csv
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-      # Broad exclusions (prefix match)
-      EXCLUDE_SECTIONS: >-
-        https://barbora.ee/kodukaubad-ja-vaba-aeg
-        https://barbora.ee/enesehooldustooted
-        https://barbora.ee/puhastustarbed-ja-lemmikloomatooted
-        https://barbora.ee/lastekaubad
-      # Allow-list (prefix match) — included even if parent is excluded
-      INCLUDE_SECTIONS: >-
-        https://barbora.ee/enesehooldustooted/suuhugieen/hambapastad
-        https://barbora.ee/enesehooldustooted/raseerimisvahendid
-        https://barbora.ee/enesehooldustooted/intiimhugieeni-vahendid
-        https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/pesupesemisvahendid
-        https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/noudepesuvahendid
-        https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/kodukeemia
-        https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/majapidamis-ja-koristustarbed
-        https://barbora.ee/lastekaubad/piimasegud-ja-jatkupiimasegud
-        https://barbora.ee/lastekaubad/pudrud
-        https://barbora.ee/lastekaubad/mahkmed
-        https://barbora.ee/lastekaubad/puuviljapureed
-        https://barbora.ee/lastekaubad/laste-hugieenitarbed/niisked-salvratikud
-        https://barbora.ee/lastekaubad/liha-ja-koogiviljapureed
+      # Space-separated URL prefixes
+      EXCLUDE_SECTIONS: "https://barbora.ee/kodukaubad-ja-vaba-aeg https://barbora.ee/enesehooldustooted https://barbora.ee/puhastustarbed-ja-lemmikloomatooted https://barbora.ee/lastekaubad"
+      INCLUDE_SECTIONS: "https://barbora.ee/enesehooldustooted/suuhugieen/hambapastad https://barbora.ee/enesehooldustooted/raseerimisvahendid https://barbora.ee/enesehooldustooted/intiimhugieeni-vahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/pesupesemisvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/noudepesuvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/kodukeemia https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/majapidamis-ja-koristustarbed https://barbora.ee/lastekaubad/piimasegud-ja-jatkupiimasegud https://barbora.ee/lastekaubad/pudrud https://barbora.ee/lastekaubad/mahkmed https://barbora.ee/lastekaubad/puuviljapureed https://barbora.ee/lastekaubad/laste-hugieenitarbed/niisked-salvratikud https://barbora.ee/lastekaubad/liha-ja-koogiviljapureed"
 
     steps:
       - name: Checkout
@@ -101,7 +88,6 @@ jobs:
           rm -rf data
           mkdir -p data
 
-      # Auto-discover all category URLs from Barbora (minus excluded; plus allow-listed)
       - name: Auto-discover categories (unless provided via input)
         env:
           INPUT_CATS: ${{ github.event.inputs.categories_multiline }}
@@ -122,8 +108,8 @@ from urllib.parse import urljoin, urlparse
 from playwright.sync_api import sync_playwright
 
 BASE = "https://barbora.ee"
-excludes = tuple(filter(None, os.environ.get("EXCLUDES","").split()))
-includes = tuple(filter(None, os.environ.get("INCLUDES","").split()))
+excludes = tuple(os.environ.get("EXCLUDES","").split())
+includes = tuple(os.environ.get("INCLUDES","").split())
 discovered = set()
 
 def absu(href: str) -> str:
@@ -134,19 +120,15 @@ def is_category(url: str) -> bool:
     if not (p.scheme and p.netloc and p.netloc.endswith("barbora.ee")):
         return False
     segs = [s for s in p.path.split("/") if s]
-    # Heuristic: accept category-like paths (1–3 segments), skip obvious non-catalog
     if 1 <= len(segs) <= 3 and all(s not in ("retseptid","info","blogi") for s in segs):
         return True
     return False
 
 def allowed(url: str) -> bool:
-    # Allow-list overrides everything
     if any(url.startswith(pref) for pref in includes):
         return True
-    # Else, block if under excluded prefixes
     if any(url.startswith(pref) for pref in excludes):
         return False
-    # Else, rely on category heuristic
     return is_category(url)
 
 with sync_playwright() as pw:
@@ -176,9 +158,8 @@ PY
           echo "First 30 discovered:"
           head -n 30 data/barbora_categories.txt || true
 
-      # --- Optional: build SKIP list so we don't re-crawl already-priced items ---
-      - name: Build skip list from priced items (prices ∪ barbora_candidates)
-        if: ${{ env.DATABASE_URL != '' }}
+      - name: Build skip list from priced items (prices + candidates)
+        if: "${{ env.DATABASE_URL != '' }}"
         shell: bash
         run: |
           set -euo pipefail
@@ -281,27 +262,6 @@ print('Wrote header-only CSV ->', p)
 PY
           fi
 
-      - name: Dump crawler log (tail)
-        if: always()
-        shell: bash
-        run: |
-          echo "----- last 200 lines of data/barbora_run.log -----"
-          if [ -f data/barbora_run.log ]; then
-            tail -n 200 data/barbora_run.log
-          else
-            echo "(no log found)"
-          fi
-
-      - name: Show CSV head (debug)
-        shell: bash
-        run: |
-          set -euo pipefail
-          ls -lah data || true
-          echo "---- line count ----"
-          wc -l "$OUTPUT_CSV" || true
-          echo "---- first 12 lines ----"
-          head -n 12 "$OUTPUT_CSV" || true
-
       - name: Upload crawl artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -315,16 +275,16 @@ PY
           if-no-files-found: warn
           retention-days: 7
 
-      # ---------- OPTIONAL DB PART (only runs if DATABASE_URL is set) ----------
+      # ---------- OPTIONAL DB PART ----------
       - name: Install psql client
-        if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
+        if: "${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}"
         shell: bash
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
       - name: DB sanity (connection)
-        if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
+        if: "${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}"
         shell: bash
         run: |
           set -euo pipefail
@@ -332,7 +292,7 @@ PY
           psql "$DATABASE_URL" -c "SELECT current_database(), current_user;" || true
 
       - name: Prepare DB (store + staging)
-        if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
+        if: "${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}"
         shell: bash
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
@@ -376,8 +336,8 @@ PY
           COMMIT;
           SQL
 
-      - name: Load CSV → staging + candidates
-        if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
+      - name: Load CSV -> staging + candidates
+        if: "${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}"
         shell: bash
         run: |
           CSV_ABS="$(python -c 'import os;print(os.path.abspath("data/barbora_products.csv"))')"
@@ -460,7 +420,7 @@ PY
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/barbora_load.sql
 
       - name: (Optional) Adopt Barbora candidates with EANs
-        if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
+        if: "${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}"
         shell: bash
         run: |
           set -euo pipefail
