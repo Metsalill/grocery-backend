@@ -148,7 +148,6 @@ jobs:
                 AND COALESCE(p.source_url, '') <> '';
           SQL
           echo "Skip list rows (already priced): $(wc -l < data/rimi_skip_ext_ids.txt)"
-          # Also publish a count file for debugging
           echo "$(wc -l < data/rimi_skip_ext_ids.txt)" > data/_skip_count.txt
 
       - name: Crawl Rimi categories (Playwright)
@@ -172,7 +171,6 @@ jobs:
           MAX_PRODUCTS="${MAX_PRODUCTS:-0}"
           HEADLESS="${HEADLESS:-1}"
 
-          # Show skip list size (if exists)
           if [ -f "$SKIP_EXT_FILE" ]; then
             echo "SKIP_EXT_FILE present ($(wc -l < "$SKIP_EXT_FILE") rows)"
             SKIP_FLAG=(--skip-ext-file "$SKIP_EXT_FILE")
@@ -257,7 +255,6 @@ jobs:
           retention-days: 7
 
       # ---------- OPTIONAL DB PART (only runs if DATABASE_URL is set) ----------
-
       - name: Install psql client
         if: ${{ env.DATABASE_URL != '' }}
         run: |
