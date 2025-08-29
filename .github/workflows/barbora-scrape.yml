@@ -44,7 +44,7 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       # Space-separated URL prefixes to exclude/include
       EXCLUDE_SECTIONS: "https://barbora.ee/kodukaubad-ja-vaba-aeg https://barbora.ee/enesehooldustooted https://barbora.ee/puhastustarbed-ja-lemmikloomatooted https://barbora.ee/lastekaubad"
-      INCLUDE_SECTIONS: "https://barbora.ee/enesehooldustooted/suuhugieen/hambapastad https://barbora.ee/enesehooldustooted/raseerimisvahendid https://barbora.ee/enesehooldustooted/intiimhugieeni-vahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatootet/pesupesemisvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatootet/noudepesuvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatootet/kodukeemia https://barbora.ee/puhastustarbed-ja-lemmikloomatootet/majapidamis-ja-koristustarbed https://barbora.ee/lastekaubad/piimasegud-ja-jatkupiimasegud https://barbora.ee/lastekaubad/pudrud https://barbora.ee/lastekaubad/mahkmed https://barbora.ee/lastekaubad/puuviljapureed https://barbora.ee/lastekaubad/laste-hugieenitarbed/niisked-salvratikud https://barbora.ee/lastekaubad/liha-ja-koogiviljapureed"
+      INCLUDE_SECTIONS: "https://barbora.ee/enesehooldustooted/suuhugieen/hambapastad https://barbora.ee/enesehooldustooted/raseerimisvahendid https://barbora.ee/enesehooldustooted/intiimhugieeni-vahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/pesupesemisvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/noudepesuvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/kodukeemia https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/majapidamis-ja-koristustarbed https://barbora.ee/lastekaubad/piimasegud-ja-jatkupiimasegud https://barbora.ee/lastekaubad/pudrud https://barbora.ee/lastekaubad/mahkmed https://barbora.ee/lastekaubad/puuviljapureed https://barbora.ee/lastekaubad/laste-hugieenitarbed/niisked-salvratikud https://barbora.ee/lastekaubad/liha-ja-koogiviljapureed"
 
     steps:
       - name: Checkout
@@ -92,56 +92,56 @@ jobs:
             printf "%s\n" "${INPUT_CATS}" | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/barbora_categories.txt
             echo "Using categories from workflow input."
           else
-            cat > /tmp/discover_barbora.py <<EOF
-import os
-from urllib.parse import urljoin, urlparse
-from playwright.sync_api import sync_playwright
-
-BASE = "https://barbora.ee"
-excludes = tuple(os.environ.get("EXCLUDES","").split())
-includes = tuple(os.environ.get("INCLUDES","").split())
-discovered = set()
-
-def absu(href: str) -> str:
-    return urljoin(BASE, href)
-
-def is_category(url: str) -> bool:
-    p = urlparse(url)
-    if not (p.scheme and p.netloc and p.netloc.endswith("barbora.ee")):
-        return False
-    segs = [s for s in p.path.split("/") if s]
-    return (1 <= len(segs) <= 3) and all(s not in ("retseptid","info","blogi") for s in segs)
-
-def allowed(url: str) -> bool:
-    if any(url.startswith(pref) for pref in includes):
-        return True
-    if any(url.startswith(pref) for pref in excludes):
-        return False
-    return is_category(url)
-
-with sync_playwright() as pw:
-    browser = pw.chromium.launch(headless=True)
-    ctx = browser.new_context()
-    page = ctx.new_page()
-    page.goto(BASE, timeout=45000, wait_until="domcontentloaded")
-
-    for a in page.locator("a").all():
-        href = (a.get_attribute("href") or "").strip()
-        if not href:
-            continue
-        u = absu(href)
-        if allowed(u):
-            discovered.add(u)
-
-    os.makedirs("data", exist_ok=True)
-    with open("data/barbora_categories.txt","w",encoding="utf-8") as f:
-        for u in sorted(discovered):
-            f.write(u+"\n")
-
-    print(f"[discover] wrote {len(discovered)} categories -> data/barbora_categories.txt")
-    ctx.close()
-    browser.close()
-EOF
+            {
+              echo 'import os'
+              echo 'from urllib.parse import urljoin, urlparse'
+              echo 'from playwright.sync_api import sync_playwright'
+              echo ''
+              echo 'BASE = "https://barbora.ee"'
+              echo 'excludes = tuple(os.environ.get("EXCLUDES","").split())'
+              echo 'includes = tuple(os.environ.get("INCLUDES","").split())'
+              echo 'discovered = set()'
+              echo ''
+              echo 'def absu(href: str) -> str:'
+              echo '    return urljoin(BASE, href)'
+              echo ''
+              echo 'def is_category(url: str) -> bool:'
+              echo '    p = urlparse(url)'
+              echo '    if not (p.scheme and p.netloc and p.netloc.endswith("barbora.ee")):'
+              echo '        return False'
+              echo '    segs = [s for s in p.path.split("/") if s]'
+              echo '    return (1 <= len(segs) <= 3) and all(s not in ("retseptid","info","blogi") for s in segs)'
+              echo ''
+              echo 'def allowed(url: str) -> bool:'
+              echo '    if any(url.startswith(pref) for pref in includes):'
+              echo '        return True'
+              echo '    if any(url.startswith(pref) for pref in excludes):'
+              echo '        return False'
+              echo '    return is_category(url)'
+              echo ''
+              echo 'with sync_playwright() as pw:'
+              echo '    browser = pw.chromium.launch(headless=True)'
+              echo '    ctx = browser.new_context()'
+              echo '    page = ctx.new_page()'
+              echo '    page.goto(BASE, timeout=45000, wait_until="domcontentloaded")'
+              echo ''
+              echo '    for a in page.locator("a").all():'
+              echo '        href = (a.get_attribute("href") or "").strip()'
+              echo '        if not href:'
+              echo '            continue'
+              echo '        u = absu(href)'
+              echo '        if allowed(u):'
+              echo '            discovered.add(u)'
+              echo ''
+              echo '    os.makedirs("data", exist_ok=True)'
+              echo '    with open("data/barbora_categories.txt","w",encoding="utf-8") as f:'
+              echo '        for u in sorted(discovered):'
+              echo '            f.write(u + "\n")'
+              echo ''
+              echo '    print(f"[discover] wrote {len(discovered)} categories -> data/barbora_categories.txt")'
+              echo '    ctx.close()'
+              echo '    browser.close()'
+            } > /tmp/discover_barbora.py
             python /tmp/discover_barbora.py
           fi
           echo "TOTAL categories: $(wc -l < data/barbora_categories.txt || echo 0)"
@@ -211,16 +211,9 @@ EOF
         run: |
           set -euo pipefail
           if [ ! -s "$OUTPUT_CSV" ]; then
-            cat > /tmp/ensure_csv.py <<EOF
-import csv, os
-p = os.environ.get('OUTPUT_CSV', 'data/barbora_products.csv')
-os.makedirs(os.path.dirname(p) or '.', exist_ok=True)
-flds = ['store_chain','store_name','store_channel','ext_id','ean_raw','sku_raw','name','size_text','brand','manufacturer','price','currency','image_url','category_path','category_leaf','source_url']
-with open(p, 'w', newline='', encoding='utf-8') as f:
-    csv.DictWriter(f, fieldnames=flds).writeheader()
-print('Wrote header-only CSV ->', p)
-EOF
-            python /tmp/ensure_csv.py
+            mkdir -p "$(dirname "$OUTPUT_CSV")"
+            echo 'store_chain,store_name,store_channel,ext_id,ean_raw,sku_raw,name,size_text,brand,manufacturer,price,currency,image_url,category_path,category_leaf,source_url' > "$OUTPUT_CSV"
+            echo "Wrote header-only CSV -> $OUTPUT_CSV"
           fi
 
       - name: Upload crawl artifacts
