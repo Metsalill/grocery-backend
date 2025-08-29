@@ -19,6 +19,7 @@ jobs:
       PRICE_CURRENCY: "EUR"
       PRICE_TYPE: "regular"
       PYTHONUNBUFFERED: "1"
+      PGSSLMODE: "require"
 
     steps:
       - name: Checkout
@@ -36,9 +37,31 @@ jobs:
           pip install --upgrade pip
           pip install -r requirements.txt || true
           pip install playwright psycopg2-binary
-
       - name: Install Chromium + deps
         run: python -m playwright install --with-deps chromium
+
+      # ------------------------------------------------------------------
+      # SAFETY: Snapshot Rimi tables before running the Prisma updater.
+      # ------------------------------------------------------------------
+      - name: DB preflight (snapshot Rimi candidates)
+        run: |
+          cat > /tmp/preflight.sql <<'SQL'
+          SET search_path = public;
+
+          -- Snapshot (TEMP table is session-scoped)
+          DROP TABLE IF EXISTS tmp_rimi_candidates_snapshot;
+          CREATE TEMP TABLE tmp_rimi_candidates_snapshot AS
+            SELECT * FROM public.rimi_candidates;
+
+          -- Store baseline counts for a later sanity check
+          DO $$
+          BEGIN
+            PERFORM set_config('app.rimi_candidates_before',
+                               (SELECT COUNT(*)::text FROM public.rimi_candidates),
+                               true);
+          END$$;
+          SQL
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/preflight.sql
 
       # optional warm-up on 5 items (quick sanity before the big run)
       - name: Smoke test (5)
@@ -46,3 +69,65 @@ jobs:
 
       - name: Update Prisma prices (batch 1000)
         run: python scripts/prisma_price_updater.py --max-products 1000 --headless 1
+
+      # ------------------------------------------------------------------
+      # SAFETY: If Rimi candidates vanished or shrank catastrophically,
+      # restore from the snapshot automatically.
+      # ------------------------------------------------------------------
+      - name: DB postflight (sanity + auto-restore if needed)
+        if: always()
+        run: |
+          cat > /tmp/postflight.sql <<'SQL'
+          SET search_path = public;
+
+          -- Read baseline count saved in preflight:
+          DO $$
+          DECLARE
+            before_cnt bigint;
+            after_cnt  bigint;
+          BEGIN
+            SELECT current_setting('app.rimi_candidates_before', true)::bigint
+            INTO before_cnt;
+
+            SELECT COUNT(*) INTO after_cnt FROM public.rimi_candidates;
+
+            -- If table is empty or dropped sharply (>90% drop), restore
+            IF before_cnt IS NULL THEN
+              RAISE NOTICE 'No baseline count present (first run?)';
+              RETURN;
+            END IF;
+
+            IF after_cnt = 0 OR (before_cnt > 0 AND after_cnt < (before_cnt / 10)) THEN
+              RAISE WARNING 'rimi_candidates dropped from % to % — restoring from snapshot', before_cnt, after_cnt;
+
+              -- Restore (idempotent upsert on ext_id)
+              INSERT INTO public.rimi_candidates AS rc
+              SELECT * FROM tmp_rimi_candidates_snapshot
+              ON CONFLICT (ext_id) DO UPDATE
+                SET ean_norm      = EXCLUDED.ean_norm,
+                    ean_raw       = EXCLUDED.ean_raw,
+                    sku_raw       = EXCLUDED.sku_raw,
+                    name          = EXCLUDED.name,
+                    size_text     = EXCLUDED.size_text,
+                    brand         = EXCLUDED.brand,
+                    price         = EXCLUDED.price,
+                    currency      = EXCLUDED.currency,
+                    category_path = EXCLUDED.category_path,
+                    category_leaf = EXCLUDED.category_leaf,
+                    last_seen     = COALESCE(EXCLUDED.last_seen, now());
+            END IF;
+          END$$;
+          SQL
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/postflight.sql
+
+      # Artifact with the updater logs (optional but handy)
+      - name: Upload updater logs (if present)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prisma-price-updater-logs-${{ github.run_id }}
+          path: |
+            prisma_updater.log
+            logs/**/*.log
+          if-no-files-found: ignore
+          retention-days: 7
