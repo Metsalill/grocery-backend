@@ -4,20 +4,10 @@
 """
 Selver category crawler → CSV (staging_selver_products)
 
-Aug 2025 (patch 3):
-- DB-backed preloading of known ext_id (skip already-seen products).
-- PDP detection: /toode/ OR single-segment slug with a digit or unit suffix (-kg/-g/-l/-ml/-cl/-dl/-tk/-pk/-pcs).
-  Accepts both root and /e-selver/ paths.
-- Cosmetics/utility trees excluded.
-- Click-mode: navigate to collected HREFs and only fall back to DOM click.
-- Listing discovery: anchors (relative/absolute); fallback JSON-LD Product.url.
-- Longer navigation timeout + extra debug.
-
-Env (preload):
-  PRELOAD_DB=1
-  DATABASE_URL=postgres://user:pass@host:5432/dbname   (or PGHOST/PGPORT/PGUSER/PGPASSWORD/PGDATABASE)
-  PRELOAD_DB_QUERY="SELECT ext_id FROM staging_selver_products"
-  PRELOAD_DB_LIMIT=0   # 0=off
+Aug 2025 (patch 4):
+- Stronger EAN extraction: precise DOM probe near “Ribakood / EAN” label
+  before falling back to whole-page regex.
+- Small robustness tweaks in product-link discovery & PDP readiness.
 """
 
 from __future__ import annotations
@@ -199,11 +189,49 @@ def _pick_ean_from_html(html: str) -> str:
     m8 = re.search(r"\b(\d{8})\b", html)
     return m8.group(1) if m8 else ""
 
+# NEW: precise DOM probe near “Ribakood/EAN” label
+def _pick_ean_precise_dom(page) -> str:
+    try:
+        val = page.evaluate("""
+        () => {
+          const isNum = s => /\d{8,14}/.test((s||'').replace(/\\D+/g,''));
+          const grabNum = el => {
+            if (!el) return null;
+            const t = (el.getAttribute?.('content') || el.textContent || '').trim();
+            const m = t.match(/\d{8,14}/);
+            return m ? m[0] : null;
+          };
+          const labels = Array.from(document.querySelectorAll('*'))
+            .filter(n => /\\b(Ribakood|EAN|Gtin)\\b/i.test(n.textContent||''))
+            .slice(0, 8);
+          for (const lab of labels) {
+            // 1) next sibling
+            let cand = grabNum(lab.nextElementSibling);
+            if (isNum(cand)) return cand;
+            // 2) parent’s next sibling (dl/dt/dd or table tr/th/td)
+            cand = grabNum(lab.parentElement?.nextElementSibling);
+            if (isNum(cand)) return cand;
+            // 3) within same row: find any numeric text node nearby
+            const row = lab.closest('tr, li, div, dd, p');
+            if (row) {
+              const n = Array.from(row.querySelectorAll('td,dd,span,div,p')).map(grabNum).find(Boolean);
+              if (isNum(n)) return n;
+            }
+          }
+          return null;
+        }
+        """)
+        if val:
+            d = _digits(val)
+            if _valid_ean13(d) or re.fullmatch(r"\d{8,14}", d):
+                return d
+    except Exception:
+        pass
+    return ""
+
 # ---------------------------------------------------------------------------
 # DB preload
 def _db_connect():
-    """Return (driver_name, connection) using pg8000 (preferred) or psycopg2."""
-    # Parse from DATABASE_URL or PG* vars
     dburl = os.getenv("DATABASE_URL")
     if dburl:
         u = urlparse(dburl)
@@ -219,13 +247,11 @@ def _db_connect():
         port = int(os.getenv("PGPORT", "5432"))
         database = os.getenv("PGDATABASE") or "postgres"
 
-    # Try pg8000 DB-API
     try:
         import pg8000.dbapi as pg8000
         conn = pg8000.connect(user=user, password=password, host=host, port=port, database=database)
         return "pg8000", conn
     except Exception as e_pg:
-        # Try psycopg2
         try:
             import psycopg2
             conn = psycopg2.connect(user=user, password=password, host=host, port=port, dbname=database, connect_timeout=10)
@@ -303,7 +329,7 @@ def safe_goto(page, url: str, timeout: Optional[int] = None) -> bool:
 
 def _wait_listing_ready(page):
     try:
-        for _ in range(14):
+        for _ in range(18):
             if (page.locator("button:has-text('OSTA')").count() > 0 or
                 page.locator("a[href*='/toode/']").count() > 0 or
                 page.locator("a[href^='/'][href*='-']").count() > 0):
@@ -313,10 +339,11 @@ def _wait_listing_ready(page):
         pass
 
 def _wait_pdp_ready(page):
-    for _ in range(26):
+    for _ in range(30):
         if page.locator("h1").count() > 0:
             if (page.locator("script[type='application/ld+json']").count() > 0 or
-                page.locator("text=Ribakood").count() > 0):
+                page.locator("text=Ribakood").count() > 0 or
+                page.locator("[itemprop='gtin13']").count() > 0):
                 return
         time.sleep(0.25)
 
@@ -401,7 +428,6 @@ def _max_page_number(page) -> int:
         return 1
 
 def _extract_product_hrefs_any_anchor(page) -> List[str]:
-    """Collect product links from any anchor (relative or absolute to selver.ee)."""
     try:
         hrefs = page.evaluate("""
           (() => {
@@ -424,7 +450,6 @@ def _extract_product_hrefs_any_anchor(page) -> List[str]:
     return list(dict.fromkeys(out))
 
 def _extract_product_urls_from_listing_jsonld(page) -> List[str]:
-    """Fallback: parse listing JSON-LD and collect Product.url items."""
     urls: List[str] = []
     try:
         scripts = page.locator("script[type='application/ld+json']")
@@ -473,7 +498,6 @@ def collect_product_links_from_listing(page, seed_url: str, seen_ext_ids: Set[st
         time.sleep(REQ_DELAY)
 
         page_links = _extract_product_hrefs(page)
-        # Early skip links we already know
         page_links = [u for u in page_links if _clean_abs(u) not in seen_ext_ids]
         print(f"[selver]   page {n}: discovered {len(page_links)} candidate links")
         for u in page_links:
@@ -569,6 +593,15 @@ def extract_ean_and_sku(page) -> tuple[str, str]:
             sku = sku or normspace(got.get("sku") or "")
             if _valid_ean13(ean): return ean, sku
     except Exception: pass
+
+    # NEW: precise DOM probe near “Ribakood / EAN”
+    e_precise = _pick_ean_precise_dom(page)
+    if e_precise:
+        ean = ean or e_precise
+        if _valid_ean13(ean):
+            return ean, sku
+
+    # Fallback: full HTML regex sweep
     _expand_pdp_details(page); time.sleep(0.05)
     try:
         html = page.content()
@@ -578,6 +611,7 @@ def extract_ean_and_sku(page) -> tuple[str, str]:
             m2 = re.search(r"\bSKU\b\D*([A-Z0-9_-]{3,})", html, re.I)
             if m2: sku = m2.group(1).strip()
     except Exception: pass
+
     if not _valid_ean13(ean):
         e13 = _digits(ean or "")
         ean = e13 if _valid_ean13(e13) else ""
@@ -692,7 +726,6 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
         _wait_listing_ready(page); time.sleep(REQ_DELAY)
 
         hrefs = _extract_product_hrefs(page)
-        # Early skip: do not even navigate to known ones
         hrefs = [h for h in hrefs if _clean_abs(h) not in seen_ext_ids]
         print(f"[selver]   page {n}: discovered {len(hrefs)} candidate links")
 
