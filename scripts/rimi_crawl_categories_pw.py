@@ -5,6 +5,8 @@ Rimi.ee (Rimi ePood) category crawler → PDP extractor → CSV/DB friendly
 - Robust price extraction (JSON-LD, meta, globals, visible text; handles "3 99 €").
 - Strict breadcrumb parsing (real PDP breadcrumbs only).
 - Category → subcategory discovery and paging/scroll fallbacks.
+- Skips already-priced PDPs when --skip-ext-file is provided.
+- Single Chromium instance for all PDPs (big speedup).
 """
 
 from __future__ import annotations
@@ -22,11 +24,8 @@ BASE = "https://www.rimi.ee"
 
 # ------------------------------- regexes -------------------------------------
 
-# EANs
 EAN_RE = re.compile(r"\b\d{13}\b")
 EAN_LABEL_RE = re.compile(r"\b(ean|gtin|gtin13|barcode|triipkood|ribakood)\b", re.I)
-
-# money detection: "3,99 €", "3.99 €", and also "3 99 €" (superscript style rendered as space)
 MONEY_RE = re.compile(r"(\d{1,5}(?:[.,]\d{1,2}|\s?\d{2})?)\s*€")
 
 SKU_KEYS = {"sku","mpn","itemNumber","productCode","code","id","itemid"}
@@ -37,19 +36,15 @@ CURR_KEYS  = {"currency","pricecurrency","currencycode","curr"}
 # ------------------------------- utils ---------------------------------------
 
 def norm_price_str(s: str) -> str:
-    """Normalize '3,99', '3.99', '3 99' → '3.99' (string)."""
-    s = s.strip()
+    s = (s or "").strip()
     if not s:
         return s
-    # convert 3 99 → 3.99
     if " " in s and s.replace(" ", "").isdigit() and len(s.replace(" ", "")) >= 3:
         digits = s.replace(" ", "")
         s = f"{digits[:-2]}.{digits[-2:]}"
-    s = s.replace(",", ".")
-    return s
+    return s.replace(",", ".")
 
 def deep_find_kv(obj: Any, keys: set) -> Dict[str, str]:
-    """Collect matching key/values (stringified) from nested structures."""
     out: Dict[str, str] = {}
     def walk(x):
         if isinstance(x, dict):
@@ -101,7 +96,6 @@ def wait_for_hydration(page, timeout_ms: int = 8000) -> None:
 # ----------------------------- parsing helpers --------------------------------
 
 def parse_price_from_dom_or_meta(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
-    # common meta tags
     for sel in [
         'meta[itemprop="price"]',
         'meta[property="product:price:amount"]',
@@ -112,14 +106,12 @@ def parse_price_from_dom_or_meta(soup: BeautifulSoup) -> Tuple[Optional[str], Op
             if val:
                 return norm_price_str(val), "EUR"
 
-    # any element with itemprop=price
     tag = soup.find(attrs={"itemprop": "price"})
     if tag:
         val = (tag.get("content") or tag.get_text(strip=True) or "").strip()
         if val:
             return norm_price_str(val), "EUR"
 
-    # visible text fallback
     m = MONEY_RE.search(soup.get_text(" ", strip=True))
     if m:
         return norm_price_str(m.group(1)), "EUR"
@@ -152,7 +144,6 @@ def extract_ext_id(url: str) -> str:
     return ""
 
 def parse_jsonld_for_product_and_breadcrumbs(soup: BeautifulSoup) -> Tuple[Dict[str,Any], List[str]]:
-    """Return flat keys from JSON-LD Product and a breadcrumb list if present."""
     flat: Dict[str, Any] = {}
     crumbs: List[str] = []
     for tag in soup.find_all("script", {"type": "application/ld+json"}):
@@ -163,7 +154,6 @@ def parse_jsonld_for_product_and_breadcrumbs(soup: BeautifulSoup) -> Tuple[Dict[
         seq = data if isinstance(data, list) else [data]
         for d in seq:
             if isinstance(d, dict) and d.get("@type") in ("Product", ["Product"]):
-                # capture product offers info
                 offers = d.get("offers")
                 if isinstance(offers, dict):
                     if "price" in offers: flat["price"] = offers.get("price")
@@ -173,11 +163,9 @@ def parse_jsonld_for_product_and_breadcrumbs(soup: BeautifulSoup) -> Tuple[Dict[
                     if isinstance(of0, dict):
                         if "price" in of0: flat["price"] = of0.get("price")
                         if "priceCurrency" in of0: flat["currency"] = of0.get("priceCurrency")
-                # collect ean/sku if present
                 for k in ("gtin13","gtin","ean","ean13","barcode","sku","mpn"):
                     if k in d and d.get(k):
                         flat[k] = d.get(k)
-            # BreadcrumbList
             if isinstance(d, dict) and d.get("@type") in ("BreadcrumbList", ["BreadcrumbList"]):
                 try:
                     items = d.get("itemListElement") or []
@@ -328,37 +316,27 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
             seen.add(u); out.append(u)
     return out
 
-# --------------------------- PDP parser ---------------------------------------
+# --------------------------- PDP parser (reused page) --------------------------
 
-def parse_pdp(pw, url: str, headless: bool, req_delay: float) -> Dict[str,str]:
-    browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
-    ctx = browser.new_context(
-        locale="et-EE",
-        viewport={"width":1440,"height":900},
-        user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"),
-    )
-    page = ctx.new_page()
+def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
     name = brand = size_text = image_url = ""
     ean = sku = price = currency = None
     category_path = ""
     ext_id_from_attr = ""
 
     try:
-        page.goto(url, timeout=45000, wait_until="domcontentloaded")
+        page.goto(url, timeout=60000, wait_until="domcontentloaded")
         auto_accept_overlays(page)
         wait_for_hydration(page)
         page.wait_for_timeout(int(max(req_delay, 0.1)*1000))
 
-        # --- HTML parse
         html = page.content()
         soup = BeautifulSoup(html, "lxml")
 
-        # name
         h1 = soup.find("h1")
         if h1:
             name = h1.get_text(strip=True)
 
-        # image
         ogimg = soup.find("meta", {"property":"og:image"})
         if ogimg and ogimg.get("content"):
             image_url = ogimg.get("content") or ""
@@ -369,12 +347,10 @@ def parse_pdp(pw, url: str, headless: bool, req_delay: float) -> Dict[str,str]:
         if image_url:
             image_url = normalize_href(image_url) or ""
 
-        # JSON-LD product + breadcrumbs
         flat_ld, crumbs_ld = parse_jsonld_for_product_and_breadcrumbs(soup)
         if flat_ld.get("price") and not price:
             price = norm_price_str(str(flat_ld.get("price")))
             currency = currency or (flat_ld.get("currency") or "EUR")
-        # EAN/SKU from LD
         for k in ("gtin13","ean","ean13","barcode","gtin"):
             if not ean and flat_ld.get(k):
                 ean = str(flat_ld.get(k))
@@ -382,19 +358,16 @@ def parse_pdp(pw, url: str, headless: bool, req_delay: float) -> Dict[str,str]:
             if not sku and flat_ld.get(k):
                 sku = str(flat_ld.get(k))
 
-        # breadcrumbs (DOM first; fall back to LD)
         crumbs_dom = [a.get_text(strip=True) for a in soup.select("nav[aria-label='breadcrumb'] a, .breadcrumbs a, .breadcrumb a, ol.breadcrumb a") if a.get_text(strip=True)]
         crumbs = crumbs_dom or crumbs_ld
         if crumbs:
-            crumbs = [c for c in crumbs if c and c.lower() not in ("",)]
+            crumbs = [c for c in crumbs if c]
             category_path = " > ".join(crumbs[-5:])
 
-        # brand & size
         b2, s2 = parse_brand_and_size(soup, name or "")
         brand = brand or b2
         size_text = size_text or s2
 
-        # json-ld/microdata itemprops for fallback EAN/SKU
         if not ean or not sku:
             for it in ("gtin13","gtin","ean","ean13","barcode","sku","mpn"):
                 meta = soup.find(attrs={"itemprop": it})
@@ -406,12 +379,10 @@ def parse_pdp(pw, url: str, headless: bool, req_delay: float) -> Dict[str,str]:
                     if it in ("sku","mpn") and not sku:
                         sku = val
 
-        # price from meta/visible text
         if not price:
             p, c = parse_price_from_dom_or_meta(soup)
             price, currency = p or price, c or currency
 
-        # window globals (includes price/ean/sku in many stacks)
         for glb in [
             "__NUXT__", "__NEXT_DATA__", "APP_STATE", "dataLayer",
             "Storefront", "CART_CONFIG", "__APOLLO_STATE__", "APOLLO_STATE",
@@ -424,14 +395,12 @@ def parse_pdp(pw, url: str, headless: bool, req_delay: float) -> Dict[str,str]:
             if not data:
                 continue
             got = deep_find_kv(data, { *EAN_KEYS, *SKU_KEYS, *PRICE_KEYS, *CURR_KEYS })
-            # ean/sku
             if not ean:
                 for k in ("gtin13","ean","ean13","barcode","gtin"):
                     if got.get(k): ean = got.get(k); break
             if not sku:
                 for k in ("sku","mpn","code","id"):
                     if got.get(k): sku = got.get(k); break
-            # price/currency
             if not price:
                 for k in ("price","currentprice","priceamount","value","unitprice"):
                     if got.get(k):
@@ -441,19 +410,15 @@ def parse_pdp(pw, url: str, headless: bool, req_delay: float) -> Dict[str,str]:
                     if got.get(k):
                         currency = got.get(k); break
 
-        # final EAN fallback: visible text
         if not ean:
             e2 = parse_visible_for_ean(soup)
             if e2: ean = e2
 
-        # last resort defaults
         if not currency and price:
             currency = "EUR"
 
     except PWTimeout:
         name = name or ""
-    finally:
-        ctx.close(); browser.close()
 
     ext_id = extract_ext_id(url) or ext_id_from_attr
 
@@ -476,11 +441,34 @@ def parse_pdp(pw, url: str, headless: bool, req_delay: float) -> Dict[str,str]:
         "source_url": url.split("?")[0],
     }
 
-# ------------------------------- main -----------------------------------------
+# ------------------------------- IO -------------------------------------------
 
 def read_categories(path: str) -> List[str]:
     with open(path, "r", encoding="utf-8") as f:
         return [ln.strip() for ln in f if ln.strip() and not ln.strip().startswith("#")]
+
+def read_skip_file(path: Optional[str]) -> tuple[set[str], set[str]]:
+    """
+    Returns (skip_urls, skip_ext_ids)
+    File may contain full PDP URLs and/or bare ext_ids (one per line).
+    """
+    skip_urls: set[str] = set()
+    skip_ext: set[str] = set()
+    if not path or not os.path.exists(path):
+        return skip_urls, skip_ext
+    with open(path, "r", encoding="utf-8") as f:
+        for ln in f:
+            s = ln.strip()
+            if not s:
+                continue
+            if s.startswith("http"):
+                skip_urls.add(s.split("?")[0].split("#")[0])
+                xid = extract_ext_id(s)
+                if xid:
+                    skip_ext.add(xid)
+            else:
+                skip_ext.add(s)
+    return skip_urls, skip_ext
 
 def write_csv(rows: List[Dict[str,str]], out_path: str) -> None:
     fields = [
@@ -497,6 +485,8 @@ def write_csv(rows: List[Dict[str,str]], out_path: str) -> None:
         for r in rows:
             w.writerow({k: r.get(k,"") for k in fields})
 
+# -------------------------------- main ----------------------------------------
+
 def main():
     ap = argparse.ArgumentParser(add_help=True)
     ap.add_argument("--cats-file", required=True, help="File with category URLs (one per line)")
@@ -505,16 +495,19 @@ def main():
     ap.add_argument("--headless", default="1")
     ap.add_argument("--req-delay", default="0.5")
     ap.add_argument("--output-csv", default=os.environ.get("OUTPUT_CSV","data/rimi_products.csv"))
+    ap.add_argument("--skip-ext-file", default=os.environ.get("SKIP_EXT_FILE",""))
     args = ap.parse_args()
 
-    page_limit = int(args.page_limit or "0")
+    page_limit   = int(args.page_limit or "0")
     max_products = int(args.max_products or "0")
-    headless = (str(args.headless or "1") != "0")
-    req_delay = float(args.req_delay or "0.5")
-    cats = read_categories(args.cats_file)
+    headless     = (str(args.headless or "1") != "0")
+    req_delay    = float(args.req_delay or "0.5")
+    cats         = read_categories(args.cats_file)
+    skip_urls, skip_ext = read_skip_file(args.skip_ext_file)
 
     all_pdps: List[str] = []
     with sync_playwright() as pw:
+        # 1) collect PDP URLs from categories
         for cat in cats:
             try:
                 print(f"[rimi] {cat}")
@@ -531,20 +524,44 @@ def main():
             if u not in seen:
                 seen.add(u); q.append(u)
 
+        # 2) filter with skip list
+        if skip_urls or skip_ext:
+            q2 = []
+            skipped = 0
+            for url in q:
+                if (url in skip_urls) or (extract_ext_id(url) in skip_ext):
+                    skipped += 1
+                    continue
+                q2.append(url)
+            print(f"[rimi] skip filter: {skipped} URLs skipped (already priced).")
+            q = q2
+
+        # 3) single browser/context/page for all PDPs
+        browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
+        ctx = browser.new_context(
+            locale="et-EE",
+            viewport={"width":1440,"height":900},
+            user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"),
+        )
+        page = ctx.new_page()
+
         rows, total = [], 0
         for i, url in enumerate(q, 1):
             try:
-                row = parse_pdp(pw, url, headless, req_delay)
+                row = parse_pdp_with_page(page, url, req_delay)
                 rows.append(row); total += 1
-                if len(rows) >= 100:
+                if len(rows) >= 120:   # slightly bigger batch, fewer fsyncs
                     write_csv(rows, args.output_csv); rows = []
-            except Exception as e:
+            except Exception:
                 traceback.print_exc()
             if max_products and total >= max_products:
                 break
 
         if rows:
             write_csv(rows, args.output_csv)
+
+        ctx.close(); browser.close()
 
     print(f"[rimi] wrote {total} product rows.")
 
