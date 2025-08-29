@@ -134,18 +134,30 @@ jobs:
           nl -ba data/rimi_categories.txt | sed -n '1,12p' || true
 
       # --- Build SKIP list from already-priced Rimi PDPs (so we focus on new ones) ---
-      - name: Build skip list from prices (priced PDPs)
+      - name: Build skip list from priced items (prices ∪ rimi_candidates)
         if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
           set -euo pipefail
           : > data/rimi_skip_ext_ids.txt
           psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/rimi_skip_ext_ids.txt
-          SELECT DISTINCT p.source_url
-          FROM public.prices p
-          JOIN public.stores s ON s.id = p.store_id
-          WHERE s.chain='Rimi' AND s.is_online = TRUE
-                AND COALESCE(p.source_url, '') <> '';
+          WITH priced_from_prices AS (
+            SELECT DISTINCT (regexp_match(p.source_url, '/p/([0-9]+)'))[1] AS ext_id
+            FROM public.prices p
+            JOIN public.stores s ON s.id = p.store_id
+            WHERE s.chain='Rimi' AND s.is_online = TRUE
+              AND p.source_url ~ '/p/[0-9]+'
+          ),
+          priced_from_candidates AS (
+            SELECT DISTINCT ext_id::text
+            FROM public.rimi_candidates
+            WHERE COALESCE(price,0) > 0
+              AND COALESCE(ext_id,'') <> ''
+          )
+          SELECT ext_id FROM priced_from_prices
+          UNION
+          SELECT ext_id FROM priced_from_candidates
+          ORDER BY 1;
           SQL
           echo "Skip list rows (already priced): $(wc -l < data/rimi_skip_ext_ids.txt)"
           echo "$(wc -l < data/rimi_skip_ext_ids.txt)" > data/_skip_count.txt
