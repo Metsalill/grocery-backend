@@ -37,12 +37,27 @@ jobs:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/barbora_products.csv
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-      # >>> Exclusions you requested:
+      # Broad exclusions (prefix match)
       EXCLUDE_SECTIONS: >-
         https://barbora.ee/kodukaubad-ja-vaba-aeg
         https://barbora.ee/enesehooldustooted
         https://barbora.ee/puhastustarbed-ja-lemmikloomatooted
         https://barbora.ee/lastekaubad
+      # Allow-list (prefix match) — included even if parent is excluded
+      INCLUDE_SECTIONS: >-
+        https://barbora.ee/enesehooldustooted/suuhugieen/hambapastad
+        https://barbora.ee/enesehooldustooted/raseerimisvahendid
+        https://barbora.ee/enesehooldustooted/intiimhugieeni-vahendid
+        https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/pesupesemisvahendid
+        https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/noudepesuvahendid
+        https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/kodukeemia
+        https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/majapidamis-ja-koristustarbed
+        https://barbora.ee/lastekaubad/piimasegud-ja-jatkupiimasegud
+        https://barbora.ee/lastekaubad/pudrud
+        https://barbora.ee/lastekaubad/mahkmed
+        https://barbora.ee/lastekaubad/puuviljapureed
+        https://barbora.ee/lastekaubad/laste-hugieenitarbed/niisked-salvratikud
+        https://barbora.ee/lastekaubad/liha-ja-koogiviljapureed
 
     steps:
       - uses: actions/checkout@v4
@@ -77,11 +92,12 @@ jobs:
           rm -rf data
           mkdir -p data
 
-      # NEW: auto-discover all category URLs from Barbora (minus excluded sections)
+      # Auto-discover all category URLs from Barbora (minus excluded; plus allow-listed)
       - name: Auto-discover categories (unless provided via input)
         env:
           INPUT_CATS: ${{ github.event.inputs.categories_multiline }}
           EXCLUDES: ${{ env.EXCLUDE_SECTIONS }}
+          INCLUDES: ${{ env.INCLUDE_SECTIONS }}
         run: |
           set -euo pipefail
           if [ -n "${INPUT_CATS}" ]; then
@@ -91,26 +107,37 @@ jobs:
           fi
 
           python - <<'PY'
-import os, re, sys, time
+import os
 from urllib.parse import urljoin, urlparse
 from playwright.sync_api import sync_playwright
 
 BASE = "https://barbora.ee"
-excludes = set(filter(None, os.environ.get("EXCLUDES","").split()))
+excludes = tuple(filter(None, os.environ.get("EXCLUDES","").split()))
+includes = tuple(filter(None, os.environ.get("INCLUDES","").split()))
 discovered = set()
 
 def absu(href: str) -> str:
     return urljoin(BASE, href)
 
 def is_category(url: str) -> bool:
-    # Barbora uses many section paths; accept “root-like” category pages
     p = urlparse(url)
-    if p.netloc and p.netloc.endswith("barbora.ee"):
-      # simple heuristics: single or double path segment, no query
-      segs = [s for s in p.path.split("/") if s]
-      if len(segs) in (1,2) and ("retseptid" not in segs) and ("info" not in segs):
-          return True
+    if not (p.scheme and p.netloc and p.netloc.endswith("barbora.ee")):
+        return False
+    segs = [s for s in p.path.split("/") if s]
+    # Heuristic: accept category-like paths (1–3 segments), skip obvious non-catalog
+    if 1 <= len(segs) <= 3 and all(s not in ("retseptid","info","blogi") for s in segs):
+        return True
     return False
+
+def allowed(url: str) -> bool:
+    # Allow-list overrides everything
+    if any(url.startswith(pref) for pref in includes):
+        return True
+    # Else, block if under excluded prefixes
+    if any(url.startswith(pref) for pref in excludes):
+        return False
+    # Else, rely on category heuristic
+    return is_category(url)
 
 with sync_playwright() as pw:
     browser = pw.chromium.launch(headless=True)
@@ -118,20 +145,14 @@ with sync_playwright() as pw:
     page = ctx.new_page()
     page.goto(BASE, timeout=45000, wait_until="domcontentloaded")
 
-    # grab nav/menu links
     for a in page.locator("a").all():
         href = (a.get_attribute("href") or "").strip()
-        if not href: continue
-        u = absu(href)
-        if any(u.startswith(ex) for ex in excludes): 
+        if not href:
             continue
-        if is_category(u):
+        u = absu(href)
+        if allowed(u):
             discovered.add(u)
 
-    # also try a generic sitemap-like scan from footer and mega-menu if present
-    # (already covered by 'a' grab above)
-
-    # write result
     os.makedirs("data", exist_ok=True)
     with open("data/barbora_categories.txt","w",encoding="utf-8") as f:
         for u in sorted(discovered):
