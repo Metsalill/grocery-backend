@@ -88,64 +88,70 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          mkdir -p data
+
+          # 1) Explicit input wins
           if [ -n "${INPUT_CATS}" ]; then
             printf "%s\n" "${INPUT_CATS}" | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/barbora_categories.txt
             echo "Using categories from workflow input."
+          # 2) Repo file next (if already committed)
+          elif [ -s data/barbora_categories.txt ]; then
+            echo "Using repo file data/barbora_categories.txt"
           else
+            # 3) Try autodiscover from homepage
             {
               echo 'import os'
               echo 'from urllib.parse import urljoin, urlparse'
               echo 'from playwright.sync_api import sync_playwright'
-              echo ''
               echo 'BASE = "https://barbora.ee"'
               echo 'excludes = tuple(os.environ.get("EXCLUDES","").split())'
               echo 'includes = tuple(os.environ.get("INCLUDES","").split())'
               echo 'discovered = set()'
-              echo ''
-              echo 'def absu(href: str) -> str:'
-              echo '    return urljoin(BASE, href)'
-              echo ''
-              echo 'def is_category(url: str) -> bool:'
+              echo 'def absu(href): return urljoin(BASE, href)'
+              echo 'def is_category(url):'
               echo '    p = urlparse(url)'
-              echo '    if not (p.scheme and p.netloc and p.netloc.endswith("barbora.ee")):'
-              echo '        return False'
+              echo '    if not (p.scheme and p.netloc and p.netloc.endswith("barbora.ee")): return False'
               echo '    segs = [s for s in p.path.split("/") if s]'
               echo '    return (1 <= len(segs) <= 3) and all(s not in ("retseptid","info","blogi") for s in segs)'
-              echo ''
-              echo 'def allowed(url: str) -> bool:'
-              echo '    if any(url.startswith(pref) for pref in includes):'
-              echo '        return True'
-              echo '    if any(url.startswith(pref) for pref in excludes):'
-              echo '        return False'
+              echo 'def allowed(url):'
+              echo '    if any(url.startswith(pref) for pref in includes): return True'
+              echo '    if any(url.startswith(pref) for pref in excludes): return False'
               echo '    return is_category(url)'
-              echo ''
               echo 'with sync_playwright() as pw:'
-              echo '    browser = pw.chromium.launch(headless=True)'
-              echo '    ctx = browser.new_context()'
-              echo '    page = ctx.new_page()'
-              echo '    page.goto(BASE, timeout=45000, wait_until="domcontentloaded")'
-              echo ''
-              echo '    for a in page.locator("a").all():'
+              echo '    b = pw.chromium.launch(headless=True)'
+              echo '    ctx = b.new_context()'
+              echo '    p = ctx.new_page()'
+              echo '    p.goto(BASE, timeout=45000, wait_until="domcontentloaded")'
+              echo '    for a in p.locator("a").all():'
               echo '        href = (a.get_attribute("href") or "").strip()'
-              echo '        if not href:'
-              echo '            continue'
+              echo '        if not href: continue'
               echo '        u = absu(href)'
-              echo '        if allowed(u):'
-              echo '            discovered.add(u)'
-              echo ''
+              echo '        if allowed(u): discovered.add(u)'
               echo '    os.makedirs("data", exist_ok=True)'
               echo '    with open("data/barbora_categories.txt","w",encoding="utf-8") as f:'
-              echo '        for u in sorted(discovered):'
-              echo '            f.write(u + "\n")'
-              echo ''
-              echo '    print(f"[discover] wrote {len(discovered)} categories -> data/barbora_categories.txt")'
-              echo '    ctx.close()'
-              echo '    browser.close()'
+              echo '        for u in sorted(discovered): f.write(u + "\\n")'
+              echo '    print(f"[discover] wrote {len(discovered)} -> data/barbora_categories.txt")'
+              echo '    ctx.close(); b.close()'
             } > /tmp/discover_barbora.py
             python /tmp/discover_barbora.py
+
+            # 4) Fallback to INCLUDE_SECTIONS if autodiscover produced nothing
+            if [ ! -s data/barbora_categories.txt ]; then
+              if [ -n "${INCLUDES}" ]; then
+                echo "${INCLUDES}" | tr ' ' '\n' | sed '/^[[:space:]]*$/d' > data/barbora_categories.txt
+                echo "Autodiscover empty; wrote INCLUDE_SECTIONS to data/barbora_categories.txt"
+              else
+                echo "::error::No categories discovered; INCLUDE_SECTIONS is empty."
+                exit 2
+              fi
+            fi
           fi
+
           echo "TOTAL categories: $(wc -l < data/barbora_categories.txt || echo 0)"
+          echo "--- preview ---"
           head -n 30 data/barbora_categories.txt || true
+          echo "--------------"
+          test -s data/barbora_categories.txt
 
       # Ensure psql available for the skip-list step
       - name: Install psql client (for skip list)
