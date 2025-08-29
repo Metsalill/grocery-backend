@@ -54,19 +54,11 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-scraper.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
       - name: Install deps (Playwright + libs)
         shell: bash
         run: |
           set -euo pipefail
-          pip install -r requirements-scraper.txt || pip install playwright beautifulsoup4 lxml pg8000 psycopg2-binary
+          pip install playwright beautifulsoup4 lxml pg8000 psycopg2-binary
           python -m playwright install --with-deps chromium
 
       - name: Verify scraper exists
@@ -153,10 +145,9 @@ with sync_playwright() as pw:
 PY
           fi
           echo "TOTAL categories: $(wc -l < data/barbora_categories.txt || echo 0)"
-          echo "First 30 discovered (if any):"
           head -n 30 data/barbora_categories.txt || true
 
-      - name: Build skip list from priced items (prices + candidates)
+      - name: Build skip list from priced items
         if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
@@ -193,25 +184,17 @@ PY
         shell: bash
         run: |
           set -euo pipefail
-          echo "::group::Runtime info"
-          python --version
-          echo "Start (UTC): $(date -u)"
-          echo "::endgroup::"
-
           REQ_DELAY="${REQ_DELAY:-0.25}"
           PAGE_LIMIT="${PAGE_LIMIT:-0}"
           MAX_PRODUCTS="${MAX_PRODUCTS:-0}"
           HEADLESS="${HEADLESS:-1}"
 
           if [ -f "$SKIP_EXT_FILE" ]; then
-            echo "SKIP_EXT_FILE present ($(wc -l < "$SKIP_EXT_FILE") rows)"
             SKIP_FLAG=(--skip-ext-file "$SKIP_EXT_FILE")
           else
             SKIP_FLAG=()
           fi
 
-          set +e
-          set +o pipefail
           stdbuf -oL -eL timeout -k 45s 80m \
             python -u scripts/barbora_crawl_categories_pw.py \
               --cats-file data/barbora_categories.txt \
@@ -221,28 +204,7 @@ PY
               --req-delay "$REQ_DELAY" \
               --output-csv "$OUTPUT_CSV" \
               "${SKIP_FLAG[@]}" \
-            > >(tee data/barbora_run.log) 2>data/barbora_run.err
-          status=${PIPESTATUS[0]}
-          set -o pipefail
-          set -e
-
-          echo "End (UTC): $(date -u) - crawler exit code: ${status}"
-          echo "::group::Crawler outputs"
-          ls -lah data || true
-          if [ -f "$OUTPUT_CSV" ]; then
-            echo "CSV size:"; wc -l "$OUTPUT_CSV"; du -h "$OUTPUT_CSV"
-          else
-            echo "CSV not found"
-          fi
-          [ -f data/barbora_run.log ] && { echo "Log size:"; du -h data/barbora_run.log; } || echo "Log not found"
-          [ -s data/barbora_run.err ] && { echo "---- stderr tail ----"; tail -n 120 data/barbora_run.err; } || true
-          echo "::endgroup::"
-
-          if [ "$status" -eq 124 ]; then
-            echo "::warning::Crawler hit the time budget (timeout 80m). Continuing with partial results."
-          elif [ "$status" -ne 0 ]; then
-            echo "::warning::Crawler exited non-zero ($status); continuing"
-          fi
+            | tee data/barbora_run.log
 
       - name: Ensure CSV exists (header if empty)
         shell: bash
@@ -261,14 +223,13 @@ PY
           fi
 
       - name: Upload crawl artifacts
-        if: always()
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: barbora-crawl-${{ github.run_id }}
           path: |
             data/barbora_products.csv
             data/barbora_run.log
-            data/barbora_run.err
             data/_barbora_skip_count.txt
           if-no-files-found: warn
           retention-days: 7
@@ -333,7 +294,7 @@ PY
           COMMIT;
           SQL
 
-      - name: Load CSV -> staging + candidates
+      - name: Load CSV to DB
         if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
         shell: bash
         run: |
@@ -415,26 +376,3 @@ PY
           SQL
           sed -i "s|__CSV__|$CSV_ABS|g" /tmp/barbora_load.sql
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/barbora_load.sql
-
-      - name: (Optional) Adopt Barbora candidates with EANs
-        if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          cat > /tmp/adopt_barbora.sql <<'SQL'
-          DO $do$
-          DECLARE r record;
-          BEGIN
-            IF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_all_barbora_candidates_with_ean') THEN
-              PERFORM public.adopt_all_barbora_candidates_with_ean();
-            ELSIF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_candidate_with_ean') THEN
-              FOR r IN
-                SELECT ext_id FROM public.barbora_candidates WHERE COALESCE(ean_norm,'') <> ''
-              LOOP
-                PERFORM public.adopt_candidate_with_ean(r.ext_id);
-              END LOOP;
-            END IF;
-          END
-          $do$;
-          SQL
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/adopt_barbora.sql
