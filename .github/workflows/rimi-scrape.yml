@@ -103,7 +103,7 @@ jobs:
             cp -f data/rimi_categories.txt data/rimi_categories_all.txt
             echo "Using repo file data/rimi_categories.txt"
           else
-            # Built-in set: 15 SH-coded root categories (correct /c/SH-* paths)
+            # Built-in set: SH-coded root categories (correct /c/SH-* paths)
             printf '%s\n' \
               "https://www.rimi.ee/epood/ee/tooted/puuviljad-koogiviljad-lilled/c/SH-12" \
               "https://www.rimi.ee/epood/ee/tooted/talu-toidab/c/SH-19" \
@@ -140,6 +140,14 @@ jobs:
           PAGE_LIMIT: ${{ github.event.inputs.page_limit }}
           MAX_PRODUCTS: ${{ github.event.inputs.max_products }}
           HEADLESS: ${{ github.event.inputs.headless }}
+          # --- DB preload to SKIP already-priced ext_ids (keeps candidates) ---
+          PRELOAD_DB: "1"
+          PGSSLMODE: "require"
+          PRELOAD_DB_QUERY: |
+            SELECT DISTINCT p.source_url AS ext_id
+            FROM public.prices p
+            JOIN public.stores s ON s.id = p.store_id
+            WHERE s.chain = 'Rimi' AND s.is_online = TRUE
         run: |
           set -euo pipefail
           echo "::group::Runtime info"
