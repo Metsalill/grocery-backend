@@ -13,13 +13,16 @@ jobs:
   update-prices:
     runs-on: ubuntu-latest
     timeout-minutes: 90
+
     env:
+      # Write-capable DB URL (as you have it today)
       DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
+
+      # Script configuration
       PRISMA_STORE_ID: "14"
       PRICE_CURRENCY: "EUR"
       PRICE_TYPE: "regular"
       PYTHONUNBUFFERED: "1"
-      PGSSLMODE: "require"
 
     steps:
       - name: Checkout
@@ -33,101 +36,106 @@ jobs:
 
       - name: Install deps
         run: |
+          set -euo pipefail
           python -V
           pip install --upgrade pip
+          # main project reqs (best-effort)
           pip install -r requirements.txt || true
+          # what we need for this job
           pip install playwright psycopg2-binary
-      - name: Install Chromium + deps
-        run: python -m playwright install --with-deps chromium
+          python -m playwright install --with-deps chromium
 
-      # ------------------------------------------------------------------
-      # SAFETY: Snapshot Rimi tables before running the Prisma updater.
-      # ------------------------------------------------------------------
-      - name: DB preflight (snapshot Rimi candidates)
+      - name: Install psql client
         run: |
-          cat > /tmp/preflight.sql <<'SQL'
-          SET search_path = public;
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
 
-          -- Snapshot (TEMP table is session-scoped)
-          DROP TABLE IF EXISTS tmp_rimi_candidates_snapshot;
-          CREATE TEMP TABLE tmp_rimi_candidates_snapshot AS
-            SELECT * FROM public.rimi_candidates;
-
-          -- Store baseline counts for a later sanity check
-          DO $$
-          BEGIN
-            PERFORM set_config('app.rimi_candidates_before',
-                               (SELECT COUNT(*)::text FROM public.rimi_candidates),
-                               true);
-          END$$;
-          SQL
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/preflight.sql
-
-      # optional warm-up on 5 items (quick sanity before the big run)
-      - name: Smoke test (5)
-        run: python scripts/prisma_price_updater.py --max-products 5 --headless 1
-
-      - name: Update Prisma prices (batch 1000)
-        run: python scripts/prisma_price_updater.py --max-products 1000 --headless 1
-
-      # ------------------------------------------------------------------
-      # SAFETY: If Rimi candidates vanished or shrank catastrophically,
-      # restore from the snapshot automatically.
-      # ------------------------------------------------------------------
-      - name: DB postflight (sanity + auto-restore if needed)
-        if: always()
+      # --- Safety net: capture DB counts + CSV snapshots BEFORE we touch anything ---
+      - name: DB snapshot before (counts)
+        id: pre_counts
+        shell: bash
         run: |
-          cat > /tmp/postflight.sql <<'SQL'
-          SET search_path = public;
-
-          -- Read baseline count saved in preflight:
-          DO $$
-          DECLARE
-            before_cnt bigint;
-            after_cnt  bigint;
-          BEGIN
-            SELECT current_setting('app.rimi_candidates_before', true)::bigint
-            INTO before_cnt;
-
-            SELECT COUNT(*) INTO after_cnt FROM public.rimi_candidates;
-
-            -- If table is empty or dropped sharply (>90% drop), restore
-            IF before_cnt IS NULL THEN
-              RAISE NOTICE 'No baseline count present (first run?)';
-              RETURN;
-            END IF;
-
-            IF after_cnt = 0 OR (before_cnt > 0 AND after_cnt < (before_cnt / 10)) THEN
-              RAISE WARNING 'rimi_candidates dropped from % to % — restoring from snapshot', before_cnt, after_cnt;
-
-              -- Restore (idempotent upsert on ext_id)
-              INSERT INTO public.rimi_candidates AS rc
-              SELECT * FROM tmp_rimi_candidates_snapshot
-              ON CONFLICT (ext_id) DO UPDATE
-                SET ean_norm      = EXCLUDED.ean_norm,
-                    ean_raw       = EXCLUDED.ean_raw,
-                    sku_raw       = EXCLUDED.sku_raw,
-                    name          = EXCLUDED.name,
-                    size_text     = EXCLUDED.size_text,
-                    brand         = EXCLUDED.brand,
-                    price         = EXCLUDED.price,
-                    currency      = EXCLUDED.currency,
-                    category_path = EXCLUDED.category_path,
-                    category_leaf = EXCLUDED.category_leaf,
-                    last_seen     = COALESCE(EXCLUDED.last_seen, now());
-            END IF;
-          END$$;
+          set -euo pipefail
+          echo "::group::Pre-run DB counts"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          \t
+          SELECT 'rimi_candidates' AS table, COUNT(*)::bigint AS cnt FROM public.rimi_candidates
+          UNION ALL
+          SELECT 'staging_rimi_products', COUNT(*) FROM public.staging_rimi_products
+          UNION ALL
+          SELECT 'prices_prisma_only', COUNT(*) FROM public.prices p
+            WHERE p.store_id = (SELECT id FROM public.stores WHERE chain='Prisma' AND is_online=TRUE LIMIT 1);
           SQL
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/postflight.sql
+          echo "::endgroup::"
 
-      # Artifact with the updater logs (optional but handy)
-      - name: Upload updater logs (if present)
-        if: always()
+      - name: Backup Rimi staging/candidates to CSV (artifacts)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p data_backups
+          # If a table doesn't exist in your stack, \copy will error out; keep it best-effort.
+          { psql "$DATABASE_URL" -c "\copy (SELECT * FROM public.rimi_candidates) TO 'data_backups/rimi_candidates_before.csv' CSV HEADER"; } || true
+          { psql "$DATABASE_URL" -c "\copy (SELECT * FROM public.staging_rimi_products) TO 'data_backups/staging_rimi_products_before.csv' CSV HEADER"; } || true
+
+      - name: Upload DB CSV backups (before run)
         uses: actions/upload-artifact@v4
         with:
-          name: prisma-price-updater-logs-${{ github.run_id }}
-          path: |
-            prisma_updater.log
-            logs/**/*.log
-          if-no-files-found: ignore
+          name: prisma-pre-run-db-backup-${{ github.run_id }}
+          path: data_backups/*.csv
+          if-no-files-found: warn
           retention-days: 7
+
+      # --- Optional quick sanity (kept from your original workflow) ---
+      - name: Smoke test (5)
+        run: |
+          python scripts/prisma_price_updater.py --max-products 5 --headless 1
+
+      # --- Main price update batch ---
+      - name: Update Prisma prices (batch 1000)
+        run: |
+          python scripts/prisma_price_updater.py --max-products 1000 --headless 1
+
+      # --- Post-run checks to detect accidental truncates elsewhere ---
+      - name: DB snapshot after (counts)
+        id: post_counts
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "::group::Post-run DB counts"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          \t
+          SELECT 'rimi_candidates' AS table, COUNT(*)::bigint AS cnt FROM public.rimi_candidates
+          UNION ALL
+          SELECT 'staging_rimi_products', COUNT(*) FROM public.staging_rimi_products
+          UNION ALL
+          SELECT 'prices_prisma_only', COUNT(*) FROM public.prices p
+            WHERE p.store_id = (SELECT id FROM public.stores WHERE chain='Prisma' AND is_online=TRUE LIMIT 1);
+          SQL
+          echo "::endgroup::"
+
+      # Fail fast if we accidentally zeroed Rimi tables (we shouldn't)
+      - name: Guardrail: ensure Rimi tables not wiped
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Read the latest counts
+          RIMI_CAND_CNT=$(psql "$DATABASE_URL" -tA -c "SELECT COUNT(*) FROM public.rimi_candidates" 2>/dev/null || echo "NA")
+          RIMI_STAGING_CNT=$(psql "$DATABASE_URL" -tA -c "SELECT COUNT(*) FROM public.staging_rimi_products" 2>/dev/null || echo "NA")
+
+          echo "rimi_candidates count: $RIMI_CAND_CNT"
+          echo "staging_rimi_products count: $RIMI_STAGING_CNT"
+
+          # If either exists and dropped to zero, raise a big red flag.
+          bad=0
+          [[ "$RIMI_CAND_CNT" != "NA" && "$RIMI_CAND_CNT" -eq 0 ]] && bad=1
+          [[ "$RIMI_STAGING_CNT" != "NA" && "$RIMI_STAGING_CNT" -eq 0 ]] && bad=1
+
+          if [[ "$bad" -eq 1 ]]; then
+            echo "::error::One or more Rimi tables appear to be empty after Prisma price update. Check the job and restore from the CSV artifact if needed."
+            exit 1
+          fi
+
+      - name: Post-run log
+        run: |
+          echo "Prisma price update completed."
+          echo "See artifacts for pre-run CSV snapshots if you need to diff/restore."
