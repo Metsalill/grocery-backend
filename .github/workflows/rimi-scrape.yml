@@ -140,7 +140,7 @@ jobs:
           PAGE_LIMIT: ${{ github.event.inputs.page_limit }}
           MAX_PRODUCTS: ${{ github.event.inputs.max_products }}
           HEADLESS: ${{ github.event.inputs.headless }}
-          # --- DB preload to SKIP already-priced ext_ids (keeps candidates) ---
+          # Optional: if your scraper ever chooses to read these, they are here already
           PRELOAD_DB: "1"
           PGSSLMODE: "require"
           PRELOAD_DB_QUERY: |
@@ -388,12 +388,12 @@ jobs:
           ON CONFLICT (ext_id) DO UPDATE
             SET price         = EXCLUDED.price,
                 currency      = EXCLUDED.currency,
-                size_text     = COALESCE(EXCLUDED.size_text, public.rimi_candidates.size_text),
-                brand         = COALESCE(EXCLUDED.brand, public.rimi_candidates.brand),
-                category_path = COALESCE(EXCLUDED.category_path, public.rimi_candidates.category_path),
-                category_leaf = COALESCE(EXCLUDED.category_leaf, public.rimi_candidates.category_leaf),
-                ean_raw       = COALESCE(EXCLUDED.ean_raw, public.rimi_candidates.ean_raw),
-                sku_raw       = COALESCE(EXCLUDED.sku_raw, public.rimi_candidates.sku_raw),
+                size_text     = CASE WHEN COALESCE(EXCLUDED.size_text,'') <> '' THEN EXCLUDED.size_text ELSE public.rimi_candidates.size_text END,
+                brand         = CASE WHEN COALESCE(EXCLUDED.brand,'')     <> '' THEN EXCLUDED.brand     ELSE public.rimi_candidates.brand     END,
+                category_path = CASE WHEN COALESCE(EXCLUDED.category_path,'') <> '' THEN EXCLUDED.category_path ELSE public.rimi_candidates.category_path END,
+                category_leaf = CASE WHEN COALESCE(EXCLUDED.category_leaf,'') <> '' THEN EXCLUDED.category_leaf ELSE public.rimi_candidates.category_leaf END,
+                ean_raw       = CASE WHEN COALESCE(EXCLUDED.ean_raw,'')       <> '' THEN EXCLUDED.ean_raw       ELSE public.rimi_candidates.ean_raw       END,
+                sku_raw       = CASE WHEN COALESCE(EXCLUDED.sku_raw,'')       <> '' THEN EXCLUDED.sku_raw       ELSE public.rimi_candidates.sku_raw       END,
                 last_seen     = now();
 
           COMMIT;
@@ -401,6 +401,17 @@ jobs:
 
           sed -i "s|__CSV__|$CSV_ABS|g" /tmp/rimi_load.sql
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/rimi_load.sql
+
+      - name: Sanity check (rows & zero-price count)
+        if: ${{ env.DATABASE_URL != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          SELECT COUNT(*) AS candidates_total,
+                 SUM(CASE WHEN price IS NULL OR price = 0 THEN 1 ELSE 0 END) AS zero_price
+          FROM public.rimi_candidates;
+          SQL
 
       - name: Adopt Rimi candidates with EANs (optional helpers)
         if: ${{ env.DATABASE_URL != '' }}
