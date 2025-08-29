@@ -147,12 +147,40 @@ jobs:
           echo "TOTAL categories: $(wc -l < data/barbora_categories.txt || echo 0)"
           head -n 30 data/barbora_categories.txt || true
 
+      # Ensure psql available for the skip-list step
+      - name: Install psql client (for skip list)
+        if: ${{ env.DATABASE_URL != '' }}
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
       - name: Build skip list from priced items
         if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
           set -euo pipefail
           : > data/barbora_skip_ext_ids.txt
+
+          # Ensure candidates table exists to avoid relation errors
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          CREATE TABLE IF NOT EXISTS public.barbora_candidates (
+            ext_id        text PRIMARY KEY,
+            ean_norm      text,
+            ean_raw       text,
+            sku_raw       text,
+            name          text,
+            size_text     text,
+            brand         text,
+            price         numeric(12,2),
+            currency      text,
+            category_path text,
+            category_leaf text,
+            last_seen     timestamptz DEFAULT now()
+          );
+          SQL
+
+          # Build the skip list from prices ∪ candidates
           psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/barbora_skip_ext_ids.txt
           WITH priced_from_prices AS (
             SELECT DISTINCT (regexp_match(p.source_url, '/p/([0-9]+)'))[1] AS ext_id
@@ -172,6 +200,7 @@ jobs:
           SELECT ext_id FROM priced_from_candidates
           ORDER BY 1;
           SQL
+
           echo "Skip list rows (already priced): $(wc -l < data/barbora_skip_ext_ids.txt)" | tee data/_barbora_skip_count.txt
 
       - name: Crawl Barbora categories (Playwright)
