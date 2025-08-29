@@ -44,7 +44,7 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       # Space-separated URL prefixes to exclude/include
       EXCLUDE_SECTIONS: "https://barbora.ee/kodukaubad-ja-vaba-aeg https://barbora.ee/enesehooldustooted https://barbora.ee/puhastustarbed-ja-lemmikloomatooted https://barbora.ee/lastekaubad"
-      INCLUDE_SECTIONS: "https://barbora.ee/enesehooldustooted/suuhugieen/hambapastad https://barbora.ee/enesehooldustooted/raseerimisvahendid https://barbora.ee/enesehooldustooted/intiimhugieeni-vahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/pesupesemisvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/noudepesuvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/kodukeemia https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/majapidamis-ja-koristustarbed https://barbora.ee/lastekaubad/piimasegud-ja-jatkupiimasegud https://barbora.ee/lastekaubad/pudrud https://barbora.ee/lastekaubad/mahkmed https://barbora.ee/lastekaubad/puuviljapureed https://barbora.ee/lastekaubad/laste-hugieenitarbed/niisked-salvratikud https://barbora.ee/lastekaubad/liha-ja-koogiviljapureed"
+      INCLUDE_SECTIONS: "https://barbora.ee/enesehooldustooted/suuhugieen/hambapastad https://barbora.ee/enesehooldustooted/raseerimisvahendid https://barbora.ee/enesehooldustooted/intiimhugieeni-vahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatootet/pesupesemisvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatootet/noudepesuvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatootet/kodukeemia https://barbora.ee/puhastustarbed-ja-lemmikloomatootet/majapidamis-ja-koristustarbed https://barbora.ee/lastekaubad/piimasegud-ja-jatkupiimasegud https://barbora.ee/lastekaubad/pudrud https://barbora.ee/lastekaubad/mahkmed https://barbora.ee/lastekaubad/puuviljapureed https://barbora.ee/lastekaubad/laste-hugieenitarbed/niisked-salvratikud https://barbora.ee/lastekaubad/liha-ja-koogiviljapureed"
 
     steps:
       - name: Checkout
@@ -92,7 +92,7 @@ jobs:
             printf "%s\n" "${INPUT_CATS}" | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/barbora_categories.txt
             echo "Using categories from workflow input."
           else
-            cat > /tmp/discover_barbora.py <<'PY'
+            cat > /tmp/discover_barbora.py <<EOF
 import os
 from urllib.parse import urljoin, urlparse
 from playwright.sync_api import sync_playwright
@@ -141,7 +141,7 @@ with sync_playwright() as pw:
     print(f"[discover] wrote {len(discovered)} categories -> data/barbora_categories.txt")
     ctx.close()
     browser.close()
-PY
+EOF
             python /tmp/discover_barbora.py
           fi
           echo "TOTAL categories: $(wc -l < data/barbora_categories.txt || echo 0)"
@@ -211,7 +211,7 @@ PY
         run: |
           set -euo pipefail
           if [ ! -s "$OUTPUT_CSV" ]; then
-            cat > /tmp/ensure_csv.py <<'PY'
+            cat > /tmp/ensure_csv.py <<EOF
 import csv, os
 p = os.environ.get('OUTPUT_CSV', 'data/barbora_products.csv')
 os.makedirs(os.path.dirname(p) or '.', exist_ok=True)
@@ -219,7 +219,7 @@ flds = ['store_chain','store_name','store_channel','ext_id','ean_raw','sku_raw',
 with open(p, 'w', newline='', encoding='utf-8') as f:
     csv.DictWriter(f, fieldnames=flds).writeheader()
 print('Wrote header-only CSV ->', p)
-PY
+EOF
             python /tmp/ensure_csv.py
           fi
 
