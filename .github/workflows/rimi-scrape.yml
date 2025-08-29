@@ -24,7 +24,7 @@ on:
         required: false
         default: "0.5"
   schedule:
-    - cron: "17 2 * * *"
+    - cron: "17 */2 * * *"   # every 2 hours at :17 (UTC)
 
 concurrency:
   group: rimi-category-crawl
