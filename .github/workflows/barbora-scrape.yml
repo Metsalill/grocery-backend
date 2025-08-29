@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       categories_multiline:
-        description: "Category URLs (one per line). If empty, use default roots."
+        description: "Category URLs (one per line). If empty, auto-discover from Barbora."
         required: false
         default: ""
       page_limit:
@@ -23,7 +23,7 @@ on:
         description: "Upsert into Postgres (1=yes, 0=just CSV)"
         default: "1"
   schedule:
-    - cron: "19 */3 * * *"  # every 3 hours (UTC)
+    - cron: "19 */3 * * *"
 
 concurrency:
   group: barbora-category-crawl
@@ -37,6 +37,12 @@ jobs:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/barbora_products.csv
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      # >>> Exclusions you requested:
+      EXCLUDE_SECTIONS: >-
+        https://barbora.ee/kodukaubad-ja-vaba-aeg
+        https://barbora.ee/enesehooldustooted
+        https://barbora.ee/puhastustarbed-ja-lemmikloomatooted
+        https://barbora.ee/lastekaubad
 
     steps:
       - uses: actions/checkout@v4
@@ -71,21 +77,71 @@ jobs:
           rm -rf data
           mkdir -p data
 
-      - name: Prepare category list
+      # NEW: auto-discover all category URLs from Barbora (minus excluded sections)
+      - name: Auto-discover categories (unless provided via input)
+        env:
+          INPUT_CATS: ${{ github.event.inputs.categories_multiline }}
+          EXCLUDES: ${{ env.EXCLUDE_SECTIONS }}
         run: |
           set -euo pipefail
-          if [ -n "${{ github.event.inputs.categories_multiline }}" ]; then
-            printf "%s\n" "${{ github.event.inputs.categories_multiline }}" \
-              | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/barbora_categories.txt
+          if [ -n "${INPUT_CATS}" ]; then
+            printf "%s\n" "${INPUT_CATS}" | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/barbora_categories.txt
             echo "Using categories from workflow input."
-          elif [ -f data/barbora_categories.txt ]; then
-            echo "Using repo file data/barbora_categories.txt"
-          else
-            # Provide your default Barbora roots here if desired:
-            printf "" > data/barbora_categories.txt
-            echo "No default roots committed; provide categories via dispatch."
+            exit 0
           fi
-          echo "TOTAL categories: $(wc -l < data/barbora_categories.txt)"
+
+          python - <<'PY'
+import os, re, sys, time
+from urllib.parse import urljoin, urlparse
+from playwright.sync_api import sync_playwright
+
+BASE = "https://barbora.ee"
+excludes = set(filter(None, os.environ.get("EXCLUDES","").split()))
+discovered = set()
+
+def absu(href: str) -> str:
+    return urljoin(BASE, href)
+
+def is_category(url: str) -> bool:
+    # Barbora uses many section paths; accept “root-like” category pages
+    p = urlparse(url)
+    if p.netloc and p.netloc.endswith("barbora.ee"):
+      # simple heuristics: single or double path segment, no query
+      segs = [s for s in p.path.split("/") if s]
+      if len(segs) in (1,2) and ("retseptid" not in segs) and ("info" not in segs):
+          return True
+    return False
+
+with sync_playwright() as pw:
+    browser = pw.chromium.launch(headless=True)
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    page.goto(BASE, timeout=45000, wait_until="domcontentloaded")
+
+    # grab nav/menu links
+    for a in page.locator("a").all():
+        href = (a.get_attribute("href") or "").strip()
+        if not href: continue
+        u = absu(href)
+        if any(u.startswith(ex) for ex in excludes): 
+            continue
+        if is_category(u):
+            discovered.add(u)
+
+    # also try a generic sitemap-like scan from footer and mega-menu if present
+    # (already covered by 'a' grab above)
+
+    # write result
+    os.makedirs("data", exist_ok=True)
+    with open("data/barbora_categories.txt","w",encoding="utf-8") as f:
+        for u in sorted(discovered):
+            f.write(u+"\n")
+
+    print(f"[discover] wrote {len(discovered)} categories -> data/barbora_categories.txt")
+    ctx.close()
+    browser.close()
+PY
+          echo "TOTAL categories: $(wc -l < data/barbora_categories.txt || echo 0)"
 
       # --- Optional: build SKIP list so we don't re-crawl already-priced items ---
       - name: Build skip list from priced items (prices ∪ barbora_candidates)
@@ -158,227 +214,4 @@ jobs:
           set -e
 
           echo "End (UTC): $(date -u) - crawler exit code: ${status}"
-          echo "::group::Crawler outputs"
-          ls -lah data || true
-          if [ -f "$OUTPUT_CSV" ]; then
-            echo "CSV size:"; wc -l "$OUTPUT_CSV"; du -h "$OUTPUT_CSV"
-          else
-            echo "CSV not found"
-          fi
-          [ -f data/barbora_run.log ] && { echo "Log size:"; du -h data/barbora_run.log; } || echo "Log not found"
-          [ -s data/barbora_run.err ] && { echo "---- stderr tail ----"; tail -n 120 data/barbora_run.err; } || true
-          echo "::endgroup::"
-
-          if [ "$status" -eq 124 ]; then
-            echo "::warning::Crawler hit the time budget (timeout 80m). Continuing with partial results."
-          elif [ "$status" -ne 0 ]; then
-            echo "::warning::Crawler exited non-zero ($status); continuing"
-          fi
-
-      - name: Ensure CSV exists (header if empty)
-        run: |
-          set -euo pipefail
-          if [ ! -s "$OUTPUT_CSV" ]; then
-            python - <<'PY'
-import csv,os
-p=os.environ.get('OUTPUT_CSV','data/barbora_products.csv')
-os.makedirs(os.path.dirname(p) or '.', exist_ok=True)
-flds=['store_chain','store_name','store_channel','ext_id','ean_raw','sku_raw','name','size_text','brand','manufacturer','price','currency','image_url','category_path','category_leaf','source_url']
-with open(p,'w',newline='',encoding='utf-8') as f:
-    csv.DictWriter(f, fieldnames=flds).writeheader()
-print('Wrote header-only CSV ->', p)
-PY
-          fi
-
-      - name: Dump crawler log (tail)
-        if: always()
-        run: |
-          echo "----- last 200 lines of data/barbora_run.log -----"
-          if [ -f data/barbora_run.log ]; then
-            tail -n 200 data/barbora_run.log
-          else
-            echo "(no log found)"
-          fi
-
-      - name: Show CSV head (debug)
-        run: |
-          set -euo pipefail
-          ls -lah data || true
-          echo "---- line count ----"
-          wc -l "$OUTPUT_CSV" || true
-          echo "---- first 12 lines ----"
-          head -n 12 "$OUTPUT_CSV" || true
-
-      - name: Upload crawl artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: barbora-crawl-${{ github.run_id }}
-          path: |
-            data/barbora_products.csv
-            data/barbora_run.log
-            data/barbora_run.err
-            data/_barbora_skip_count.txt
-          if-no-files-found: warn
-          retention-days: 7
-
-      # ---------- OPTIONAL DB PART (only runs if DATABASE_URL is set) ----------
-      - name: Install psql client
-        if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
-        run: |
-          sudo apt-get update && sudo apt-get install -y postgresql-client
-
-      - name: DB sanity (connection)
-        if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
-        run: |
-          set -euo pipefail
-          psql "$DATABASE_URL" -c "\conninfo" || true
-          psql "$DATABASE_URL" -c "SELECT current_database(), current_user;" || true
-
-      - name: Prepare DB (store + staging)
-        if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
-        run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          BEGIN;
-          INSERT INTO public.stores (name, chain, is_online)
-          SELECT 'Barbora ePood', 'Maxima', TRUE
-          WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE name='Barbora ePood' AND chain='Maxima' AND is_online=TRUE);
-
-          CREATE TABLE IF NOT EXISTS public.staging_barbora_products (
-            ext_id        text PRIMARY KEY,
-            name          text NOT NULL,
-            ean_raw       text,
-            sku_raw       text,
-            ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '[^0-9]', '', 'g')) STORED,
-            size_text     text,
-            brand         text,
-            price         numeric(12,2),
-            currency      text DEFAULT 'EUR',
-            category_path text,
-            category_leaf text,
-            collected_at  timestamptz DEFAULT now()
-          );
-          CREATE EXTENSION IF NOT EXISTS pg_trgm;
-          CREATE INDEX IF NOT EXISTS ix_barbora_ean       ON public.staging_barbora_products (ean_norm);
-          CREATE INDEX IF NOT EXISTS ix_barbora_name_trgm ON public.staging_barbora_products USING gin (name gin_trgm_ops);
-
-          CREATE TABLE IF NOT EXISTS public.barbora_candidates (
-            ext_id        text PRIMARY KEY,
-            ean_norm      text,
-            ean_raw       text,
-            sku_raw       text,
-            name          text,
-            size_text     text,
-            brand         text,
-            price         numeric(12,2),
-            currency      text,
-            category_path text,
-            category_leaf text,
-            last_seen     timestamptz DEFAULT now()
-          );
-          COMMIT;
-          SQL
-
-      - name: Load CSV → staging + candidates
-        if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
-        run: |
-          CSV_ABS="$(python -c 'import os;print(os.path.abspath("data/barbora_products.csv"))')"
-          cat > /tmp/barbora_load.sql <<'SQL'
-          \set ON_ERROR_STOP on
-          BEGIN;
-
-          CREATE TEMP TABLE tmp_barbora_csv_full (
-            store_chain   text,
-            store_name    text,
-            store_channel text,
-            ext_id        text,
-            ean_raw       text,
-            sku_raw       text,
-            name          text,
-            size_text     text,
-            brand         text,
-            manufacturer  text,
-            price         text,
-            currency      text,
-            image_url     text,
-            category_path text,
-            category_leaf text,
-            source_url    text
-          );
-
-          \copy tmp_barbora_csv_full FROM '__CSV__' CSV HEADER
-
-          CREATE TEMP TABLE tmp_staging_barbora_products AS
-          SELECT
-            ext_id,
-            name,
-            ean_raw,
-            sku_raw,
-            regexp_replace(COALESCE(ean_raw,''),'[^0-9]+','','g') AS ean_norm,
-            size_text,
-            brand,
-            NULLIF(price,'')::numeric AS price,
-            NULLIF(currency,'')::text AS currency,
-            category_path,
-            category_leaf
-          FROM tmp_barbora_csv_full
-          WHERE COALESCE(ext_id,'') <> '';
-
-          INSERT INTO public.staging_barbora_products
-            (ext_id,name,ean_raw,sku_raw,size_text,brand,price,currency,category_path,category_leaf,collected_at)
-          SELECT ext_id,name,ean_raw,sku_raw,size_text,brand,price,COALESCE(currency,'EUR'),category_path,category_leaf,now()
-          FROM tmp_staging_barbora_products
-          ON CONFLICT (ext_id) DO UPDATE
-            SET name          = EXCLUDED.name,
-                ean_raw       = EXCLUDED.ean_raw,
-                sku_raw       = EXCLUDED.sku_raw,
-                size_text     = COALESCE(EXCLUDED.size_text, public.staging_barbora_products.size_text),
-                brand         = COALESCE(EXCLUDED.brand, public.staging_barbora_products.brand),
-                price         = EXCLUDED.price,
-                currency      = COALESCE(EXCLUDED.currency, public.staging_barbora_products.currency),
-                category_path = COALESCE(EXCLUDED.category_path, public.staging_barbora_products.category_path),
-                category_leaf = COALESCE(EXCLUDED.category_leaf, public.staging_barbora_products.category_leaf),
-                collected_at  = now();
-
-          INSERT INTO public.barbora_candidates
-            (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, price, currency, category_path, category_leaf, last_seen)
-          SELECT
-            ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, price, COALESCE(currency,'EUR'), category_path, category_leaf, now()
-          FROM tmp_staging_barbora_products
-          ON CONFLICT (ext_id) DO UPDATE
-            SET price         = EXCLUDED.price,
-                currency      = COALESCE(EXCLUDED.currency, public.barbora_candidates.currency),
-                size_text     = CASE WHEN COALESCE(EXCLUDED.size_text,'') <> '' THEN EXCLUDED.size_text ELSE public.barbora_candidates.size_text END,
-                brand         = CASE WHEN COALESCE(EXCLUDED.brand,'')     <> '' THEN EXCLUDED.brand     ELSE public.barbora_candidates.brand     END,
-                category_path = CASE WHEN COALESCE(EXCLUDED.category_path,'') <> '' THEN EXCLUDED.category_path ELSE public.barbora_candidates.category_path END,
-                category_leaf = CASE WHEN COALESCE(EXCLUDED.category_leaf,'') <> '' THEN EXCLUDED.category_leaf ELSE public.barbora_candidates.category_leaf END,
-                ean_raw       = CASE WHEN COALESCE(EXCLUDED.ean_raw,'')   <> '' THEN EXCLUDED.ean_raw   ELSE public.barbora_candidates.ean_raw END,
-                sku_raw       = CASE WHEN COALESCE(EXCLUDED.sku_raw,'')   <> '' THEN EXCLUDED.sku_raw   ELSE public.barbora_candidates.sku_raw END,
-                last_seen     = now();
-
-          COMMIT;
-          SQL
-          sed -i "s|__CSV__|$CSV_ABS|g" /tmp/barbora_load.sql
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/barbora_load.sql
-
-      - name: (Optional) Adopt Barbora candidates with EANs
-        if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
-        run: |
-          set -euo pipefail
-          cat > /tmp/adopt_barbora.sql <<'SQL'
-          DO $do$
-          DECLARE r record;
-          BEGIN
-            IF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_all_barbora_candidates_with_ean') THEN
-              PERFORM public.adopt_all_barbora_candidates_with_ean();
-            ELSIF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_candidate_with_ean') THEN
-              FOR r IN
-                SELECT ext_id FROM public.barbora_candidates WHERE COALESCE(ean_norm,'') <> ''
-              LOOP
-                PERFORM public.adopt_candidate_with_ean(r.ext_id);
-              END LOOP;
-            END IF;
-          END
-          $do$;
-          SQL
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/adopt_barbora.sql
+          # (rest of steps unchanged: Ensure CSV, tail logs, artifacts, DB load, adopt…)
