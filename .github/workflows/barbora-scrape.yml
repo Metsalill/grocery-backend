@@ -211,19 +211,20 @@ PY
         run: |
           set -euo pipefail
           if [ ! -s "$OUTPUT_CSV" ]; then
-            python - <<'PY'
-import csv,os
-p=os.environ.get('OUTPUT_CSV','data/barbora_products.csv')
+            cat > /tmp/ensure_csv.py <<'PY'
+import csv, os
+p = os.environ.get('OUTPUT_CSV', 'data/barbora_products.csv')
 os.makedirs(os.path.dirname(p) or '.', exist_ok=True)
-flds=['store_chain','store_name','store_channel','ext_id','ean_raw','sku_raw','name','size_text','brand','manufacturer','price','currency','image_url','category_path','category_leaf','source_url']
-with open(p,'w',newline='',encoding='utf-8') as f:
+flds = ['store_chain','store_name','store_channel','ext_id','ean_raw','sku_raw','name','size_text','brand','manufacturer','price','currency','image_url','category_path','category_leaf','source_url']
+with open(p, 'w', newline='', encoding='utf-8') as f:
     csv.DictWriter(f, fieldnames=flds).writeheader()
 print('Wrote header-only CSV ->', p)
 PY
+            python /tmp/ensure_csv.py
           fi
 
       - name: Upload crawl artifacts
-        if: always()
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: barbora-crawl-${{ github.run_id }}
@@ -299,6 +300,7 @@ PY
         if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
         shell: bash
         run: |
+          set -euo pipefail
           CSV_ABS="$(python -c 'import os;print(os.path.abspath("data/barbora_products.csv"))')"
           cat > /tmp/barbora_load.sql <<'SQL'
           \set ON_ERROR_STOP on
