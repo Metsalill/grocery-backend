@@ -42,6 +42,7 @@ jobs:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/barbora_products.csv
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      # Space-separated URL prefixes to exclude/include
       EXCLUDE_SECTIONS: "https://barbora.ee/kodukaubad-ja-vaba-aeg https://barbora.ee/enesehooldustooted https://barbora.ee/puhastustarbed-ja-lemmikloomatooted https://barbora.ee/lastekaubad"
       INCLUDE_SECTIONS: "https://barbora.ee/enesehooldustooted/suuhugieen/hambapastad https://barbora.ee/enesehooldustooted/raseerimisvahendid https://barbora.ee/enesehooldustooted/intiimhugieeni-vahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/pesupesemisvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/noudepesuvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/kodukeemia https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/majapidamis-ja-koristustarbed https://barbora.ee/lastekaubad/piimasegud-ja-jatkupiimasegud https://barbora.ee/lastekaubad/pudrud https://barbora.ee/lastekaubad/mahkmed https://barbora.ee/lastekaubad/puuviljapureed https://barbora.ee/lastekaubad/laste-hugieenitarbed/niisked-salvratikud https://barbora.ee/lastekaubad/liha-ja-koogiviljapureed"
 
@@ -91,7 +92,7 @@ jobs:
             printf "%s\n" "${INPUT_CATS}" | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/barbora_categories.txt
             echo "Using categories from workflow input."
           else
-            python - <<'PY'
+            cat > /tmp/discover_barbora.py <<'PY'
 import os
 from urllib.parse import urljoin, urlparse
 from playwright.sync_api import sync_playwright
@@ -109,9 +110,7 @@ def is_category(url: str) -> bool:
     if not (p.scheme and p.netloc and p.netloc.endswith("barbora.ee")):
         return False
     segs = [s for s in p.path.split("/") if s]
-    if 1 <= len(segs) <= 3 and all(s not in ("retseptid","info","blogi") for s in segs):
-        return True
-    return False
+    return (1 <= len(segs) <= 3) and all(s not in ("retseptid","info","blogi") for s in segs)
 
 def allowed(url: str) -> bool:
     if any(url.startswith(pref) for pref in includes):
@@ -143,6 +142,7 @@ with sync_playwright() as pw:
     ctx.close()
     browser.close()
 PY
+            python /tmp/discover_barbora.py
           fi
           echo "TOTAL categories: $(wc -l < data/barbora_categories.txt || echo 0)"
           head -n 30 data/barbora_categories.txt || true
@@ -223,7 +223,7 @@ PY
           fi
 
       - name: Upload crawl artifacts
-        if: ${{ always() }}
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: barbora-crawl-${{ github.run_id }}
@@ -234,6 +234,7 @@ PY
           if-no-files-found: warn
           retention-days: 7
 
+      # ---------- Optional DB part ----------
       - name: Install psql client
         if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
         shell: bash
