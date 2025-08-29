@@ -42,7 +42,6 @@ jobs:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/barbora_products.csv
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-      # Space-separated URL prefixes
       EXCLUDE_SECTIONS: "https://barbora.ee/kodukaubad-ja-vaba-aeg https://barbora.ee/enesehooldustooted https://barbora.ee/puhastustarbed-ja-lemmikloomatooted https://barbora.ee/lastekaubad"
       INCLUDE_SECTIONS: "https://barbora.ee/enesehooldustooted/suuhugieen/hambapastad https://barbora.ee/enesehooldustooted/raseerimisvahendid https://barbora.ee/enesehooldustooted/intiimhugieeni-vahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/pesupesemisvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/noudepesuvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/kodukeemia https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/majapidamis-ja-koristustarbed https://barbora.ee/lastekaubad/piimasegud-ja-jatkupiimasegud https://barbora.ee/lastekaubad/pudrud https://barbora.ee/lastekaubad/mahkmed https://barbora.ee/lastekaubad/puuviljapureed https://barbora.ee/lastekaubad/laste-hugieenitarbed/niisked-salvratikud https://barbora.ee/lastekaubad/liha-ja-koogiviljapureed"
 
@@ -99,10 +98,8 @@ jobs:
           if [ -n "${INPUT_CATS}" ]; then
             printf "%s\n" "${INPUT_CATS}" | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/barbora_categories.txt
             echo "Using categories from workflow input."
-            exit 0
-          fi
-
-          python - <<'PY'
+          else
+            python - <<'PY'
 import os
 from urllib.parse import urljoin, urlparse
 from playwright.sync_api import sync_playwright
@@ -154,12 +151,13 @@ with sync_playwright() as pw:
     ctx.close()
     browser.close()
 PY
+          fi
           echo "TOTAL categories: $(wc -l < data/barbora_categories.txt || echo 0)"
-          echo "First 30 discovered:"
+          echo "First 30 discovered (if any):"
           head -n 30 data/barbora_categories.txt || true
 
       - name: Build skip list from priced items (prices + candidates)
-        if: "${{ env.DATABASE_URL != '' }}"
+        if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -275,16 +273,15 @@ PY
           if-no-files-found: warn
           retention-days: 7
 
-      # ---------- OPTIONAL DB PART ----------
       - name: Install psql client
-        if: "${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}"
+        if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
         shell: bash
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
       - name: DB sanity (connection)
-        if: "${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}"
+        if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -292,7 +289,7 @@ PY
           psql "$DATABASE_URL" -c "SELECT current_database(), current_user;" || true
 
       - name: Prepare DB (store + staging)
-        if: "${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}"
+        if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
         shell: bash
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
@@ -337,7 +334,7 @@ PY
           SQL
 
       - name: Load CSV -> staging + candidates
-        if: "${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}"
+        if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
         shell: bash
         run: |
           CSV_ABS="$(python -c 'import os;print(os.path.abspath("data/barbora_products.csv"))')"
@@ -420,7 +417,7 @@ PY
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/barbora_load.sql
 
       - name: (Optional) Adopt Barbora candidates with EANs
-        if: "${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}"
+        if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
         shell: bash
         run: |
           set -euo pipefail
