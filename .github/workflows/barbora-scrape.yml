@@ -249,7 +249,7 @@ jobs:
             mkdir -p "$(dirname "$OUTPUT_CSV")"
             echo 'store_chain,store_name,store_channel,ext_id,ean_raw,sku_raw,name,size_text,brand,manufacturer,price,currency,image_url,category_path,category_leaf,source_url' > "$OUTPUT_CSV"
             echo "Wrote header-only CSV -> $OUTPUT_CSV"
-          fi
+          fi`
 
       - name: Upload crawl artifacts
         if: ${{ always() }}
@@ -324,7 +324,7 @@ jobs:
           COMMIT;
           SQL
 
-      - name: Load CSV to DB
+      - name: Load CSV to DB (staging + candidates)
         if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
         shell: bash
         run: |
@@ -407,3 +407,55 @@ jobs:
           SQL
           sed -i "s|__CSV__|$CSV_ABS|g" /tmp/barbora_load.sql
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/barbora_load.sql
+
+      - name: Upsert Barbora prices (from staging via EAN/map)
+        if: ${{ env.DATABASE_URL != '' && github.event.inputs.upsert_db == '1' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/barbora_prices.sql <<'SQL'
+          \set ON_ERROR_STOP on
+          BEGIN;
+
+          WITH src AS (
+            SELECT ext_id, ean_norm, price, COALESCE(NULLIF(currency,''),'EUR') AS currency
+            FROM public.staging_barbora_products
+            WHERE COALESCE(price,0) > 0
+          ),
+          mapped AS (
+            SELECT
+              COALESCE(m.product_id, pe.product_id) AS product_id,
+              s.price, s.currency, s.ext_id
+            FROM src s
+            LEFT JOIN public.ext_product_map m ON m.ext_id = s.ext_id
+            LEFT JOIN public.product_eans pe   ON pe.ean_norm = s.ean_norm
+            WHERE COALESCE(m.product_id, pe.product_id) IS NOT NULL
+          ),
+          pick_one AS (
+            SELECT DISTINCT ON (product_id)
+                   product_id, price, currency, ext_id
+            FROM mapped
+            ORDER BY product_id, price ASC, ext_id DESC
+          )
+          INSERT INTO public.prices (store_id, product_id, price, currency, collected_at, source_url, source)
+          SELECT
+            (SELECT id FROM public.stores WHERE name='Barbora ePood' AND chain='Maxima' AND is_online=TRUE LIMIT 1),
+            p.product_id, p.price, p.currency, now(), p.ext_id, 'online'
+          FROM pick_one p
+          ON CONFLICT (product_id, store_id) DO UPDATE
+            SET price        = EXCLUDED.price,
+                currency     = EXCLUDED.currency,
+                collected_at = EXCLUDED.collected_at,
+                source_url   = EXCLUDED.source_url,
+                source       = EXCLUDED.source;
+
+          COMMIT;
+
+          -- Quick summary
+          SELECT
+            (SELECT COUNT(*) FROM public.prices pr
+               JOIN public.stores s ON s.id=pr.store_id
+              WHERE s.chain='Maxima' AND s.name='Barbora ePood' AND s.is_online=TRUE) AS barbora_online_prices,
+            (SELECT COUNT(*) FROM public.barbora_candidates) AS barbora_candidates;
+          SQL
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/barbora_prices.sql
