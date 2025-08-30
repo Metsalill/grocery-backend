@@ -196,7 +196,6 @@ def _ean_sku_from_dom(page) -> tuple[str, str]:
                 return m ? m[1] : null;
               };
 
-              const labelMatches = (txt, rx) => rx.test((txt||'').trim());
               const nodes = Array.from(document.querySelectorAll(
                 'tr, .row, .product-attributes__row, .product-details__row, li, .attribute, .key-value, dl, dt, dd, .MuiGrid-root'
               ));
@@ -215,7 +214,6 @@ def _ean_sku_from_dom(page) -> tuple[str, str]:
 
                 // SKU / Tootekood
                 if (!sku && /(\\bSKU\\b|\\bTootekood\\b|\\bArtikkel\\b)/i.test(txt)) {
-                  // Try to pull a code-looking token
                   const m = txt.match(/([A-Z0-9_-]{6,})/i);
                   if (m) sku = m[1];
                 }
@@ -223,7 +221,6 @@ def _ean_sku_from_dom(page) -> tuple[str, str]:
                 if (ean && sku) break;
               }
 
-              // If still missing EAN, try scan any element that contains the word
               if (!ean) {
                 const any = Array.from(document.querySelectorAll('div,span,p,li,td,dd,th'));
                 for (const el of any) {
@@ -249,7 +246,7 @@ def _ean_sku_from_dom(page) -> tuple[str, str]:
     if not ean:
         try:
             html = page.content()
-            m = re.search(r"ribakood[\\s\\S]{0,400}?(\\d{8,14})", html, re.I)
+            m = re.search(r"ribakood[\s\S]{0,400}?(\d{8,14})", html, re.I)
             if m:
                 ean = m.group(1)
         except Exception:
@@ -260,8 +257,7 @@ def _ean_sku_from_dom(page) -> tuple[str, str]:
     if _valid_ean13(e13):
         ean = e13
     else:
-        # If it's 12/14 digits and could be GTIN, keep raw; otherwise blank
-        if not re.fullmatch(r"\\d{8,14}", e13 or ""):
+        if not re.fullmatch(r"\d{8,14}", e13 or ""):
             ean = ""
 
     return ean, (sku or "")
@@ -270,7 +266,7 @@ def _ean_sku_from_dom(page) -> tuple[str, str]:
 def _pick_ean_from_html(html: str) -> str:
     # (kept for completeness; new _ean_sku_from_dom supersedes this)
     if not html: return ""
-    label_pat = re.compile(r"(?:\\b(?:ean|gtin|ribakood|triipkood|barcode)\\b)[^0-9]{0,200}([0-9]{8,14})", re.I | re.S)
+    label_pat = re.compile(r"(?:\b(?:ean|gtin|ribakood|triipkood|barcode)\b)[^0-9]{0,200}([0-9]{8,14})", re.I | re.S)
     m = label_pat.search(html)
     return m.group(1) if m else ""
 
@@ -874,3 +870,79 @@ def crawl():
             rows_written = 0
 
             if CLICK_PRODUCTS:
+                for ci, cu in enumerate(cats, 1):
+                    try:
+                        wrote = collect_write_by_clicking(page, cu, w, seen_ext_ids)
+                        rows_written += wrote
+                        print(f"[selver] {cu} → +{wrote} rows (click mode, total: {rows_written})")
+                        if (ci % 1) == 0: f.flush()
+                    except Exception:
+                        try: page.screenshot(path=f"{dbg_dir}/click_mode_fail_{ci}.png", full_page=True)
+                        except Exception: pass
+                        continue
+            else:
+                product_urls: Set[str] = set()
+                prod2listing: Dict[str, str] = {}
+                for ci, cu in enumerate(cats, 1):
+                    if not safe_goto(page, cu):
+                        try: page.screenshot(path=f"{dbg_dir}/cat_nav_fail_{ci}.png", full_page=True)
+                        except Exception: pass
+                        continue
+                    time.sleep(REQ_DELAY)
+
+                    links, mapping = collect_product_links_from_listing(page, cu, seen_ext_ids)
+                    if not links:
+                        try: page.screenshot(path=f"{dbg_dir}/cat_empty_{ci}.png", full_page=True)
+                        except Exception: pass
+
+                    for u in links:
+                        cu_norm = _clean_abs(u)
+                        if cu_norm and (cu_norm not in product_urls) and (cu_norm not in seen_ext_ids):
+                            product_urls.add(cu_norm)
+                            prod2listing[cu_norm] = mapping.get(u, cu)
+
+                    print(f"[selver] {cu} → +{len(links)} products (total so far: {len(product_urls)})")
+
+                for i, pu in enumerate(sorted(product_urls), 1):
+                    if _clean_abs(pu) in seen_ext_ids:
+                        continue
+                    if not _is_selver_product_like(pu):
+                        continue
+
+                    got = safe_goto(page, pu)
+                    if not got:
+                        got = open_product_via_click(page, prod2listing.get(pu, ""), pu)
+                        if not got:
+                            try: page.screenshot(path=f"{dbg_dir}/prod_nav_fail_{i}.png", full_page=True)
+                            except Exception: pass
+                            continue
+                    time.sleep(REQ_DELAY)
+
+                    row = _extract_row_from_pdp(page, pu)
+                    if not row:
+                        if open_product_via_click(page, prod2listing.get(pu, ""), pu):
+                            time.sleep(0.3); row = _extract_row_from_pdp(page, pu)
+
+                    if row:
+                        ext_id = _clean_abs(row["ext_id"]) or row["ext_id"]
+                        if ext_id not in seen_ext_ids:
+                            w.writerow(row)
+                            seen_ext_ids.add(ext_id)
+                            rows_written += 1
+
+                    if (i % 25) == 0:
+                        f.flush()
+
+            try:
+                browser.close()
+            except Exception:
+                pass
+
+    print(f"[selver] wrote {rows_written} product rows.")
+
+# ---------------------------------------------------------------------------
+if __name__ == "__main__":
+    try:
+        crawl()
+    except KeyboardInterrupt:
+        pass
