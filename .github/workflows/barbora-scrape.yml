@@ -129,7 +129,7 @@ jobs:
               echo '        if allowed(u): discovered.add(u)'
               echo '    os.makedirs("data", exist_ok=True)'
               echo '    with open("data/barbora_categories.txt","w",encoding="utf-8") as f:'
-              echo '        for u in sorted(discovered): f.write(u + "\n")'
+              echo '        for u in sorted(discovered): f.write(u + "\\n")'
               echo '    print(f"[discover] wrote {len(discovered)} -> data/barbora_categories.txt")'
               echo '    ctx.close(); b.close()'
             } > /tmp/discover_barbora.py
@@ -247,7 +247,7 @@ jobs:
           set -euo pipefail
           if [ ! -s "$OUTPUT_CSV" ]; then
             mkdir -p "$(dirname "$OUTPUT_CSV")"
-            echo "store_chain,store_name,store_channel,ext_id,ean_raw,sku_raw,name,size_text,brand,manufacturer,price,currency,image_url,category_path,category_leaf,source_url" > "$OUTPUT_CSV"
+            echo 'store_chain,store_name,store_channel,ext_id,ean_raw,sku_raw,name,size_text,brand,manufacturer,price,currency,image_url,category_path,category_leaf,source_url' > "$OUTPUT_CSV"
             echo "Wrote header-only CSV -> $OUTPUT_CSV"
           fi
 
@@ -330,6 +330,7 @@ jobs:
         run: |
           set -euo pipefail
           CSV_ABS="$(python -c 'import os;print(os.path.abspath("data/barbora_products.csv"))')"
+
           cat > /tmp/barbora_load.sql <<'SQL'
           \set ON_ERROR_STOP on
           BEGIN;
@@ -405,5 +406,6 @@ jobs:
 
           COMMIT;
           SQL
+
           sed -i "s|__CSV__|$CSV_ABS|g" /tmp/barbora_load.sql
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/barbora_load.sql
