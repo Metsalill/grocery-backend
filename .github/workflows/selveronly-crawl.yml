@@ -98,16 +98,21 @@ jobs:
           PRELOAD_DB_QUERY: |
             SELECT DISTINCT ext_id
             FROM (
-              SELECT p.source_url AS ext_id
-              FROM public.prices p
-              JOIN public.stores s ON s.id = p.store_id
-              WHERE s.chain = 'Selver' AND s.is_online = TRUE
-              UNION
-              SELECT c.ext_id
-              FROM public.selver_candidates c
-              UNION
+              -- already have EAN in staging
               SELECT sp.ext_id
               FROM public.staging_selver_products sp
+              WHERE COALESCE(sp.ean_norm,'') <> ''
+
+              UNION
+              -- candidates seen with EAN
+              SELECT c.ext_id
+              FROM public.selver_candidates c
+              WHERE COALESCE(c.ean_norm,'') <> ''
+
+              UNION
+              -- URLs that are already mapped to a product
+              SELECT m.ext_id
+              FROM public.ext_product_map m
             ) u
             WHERE ext_id IS NOT NULL AND ext_id <> ''
           PGSSLMODE: "require"
