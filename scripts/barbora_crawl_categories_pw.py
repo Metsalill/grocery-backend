@@ -21,9 +21,10 @@ import os
 import re
 import sys
 import time
+import json
 from dataclasses import dataclass
 from typing import List, Optional, Set, Tuple, Dict, Any
-from urllib.parse import urljoin, urlparse, parse_qs, urlencode, urlunparse
+from urllib.parse import urljoin, urlparse, parse_qs, urlencode, urlunparse, urlunparse as _urlunparse
 
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout, Page
 
@@ -133,7 +134,6 @@ def ldjson_blocks(page: Page) -> List[Any]:
     return blocks
 
 def parse_json(txt: str) -> Optional[Any]:
-    import json
     try:
         return json.loads(txt)
     except Exception:
@@ -328,7 +328,22 @@ def extract_breadcrumbs(page: Page) -> Tuple[str, str]:
 # ---------- dynamic-page helpers ----------
 
 def accept_cookies_if_present(page: Page) -> None:
-    """Best-effort Cookiebot accept in an iframe."""
+    """Best-effort accept (handles iframe and in-page buttons)."""
+    # In-page buttons
+    for sel in (
+        'button:has-text("Nõustu")',
+        'button:has-text("Nõustu kõigiga")',
+        'button:has-text("Accept all")',
+        '[data-testid="uc-accept-all-button"]',
+    ):
+        try:
+            b = page.locator(sel).first
+            if b and b.is_visible():
+                b.click(timeout=1500)
+                return
+        except Exception:
+            pass
+    # Cookiebot iframe variants
     try:
         for fr in page.frames:
             for sel in (
@@ -354,9 +369,10 @@ def auto_scroll(page: Page, total_px: int = 2500, step: int = 600, pause_ms: int
 def discover_pdp_links_on_category(page: Page) -> List[str]:
     """
     Wait for the product grid, scroll to trigger lazy load, then collect PDP anchors.
+    Covers multiple desktop layouts (anchors and data-* attributes).
     """
     try:
-        page.wait_for_selector('a[href*="/toode/"], div[data-testid="product-card"], .b-product', timeout=12000)
+        page.wait_for_selector('a[href*="/toode/"], [data-testid*="product-card"], .b-product', timeout=12000)
     except Exception:
         auto_scroll(page, total_px=1200, step=600, pause_ms=200)
         try:
@@ -364,24 +380,49 @@ def discover_pdp_links_on_category(page: Page) -> List[str]:
         except Exception:
             pass
 
-    auto_scroll(page, total_px=1800, step=600, pause_ms=200)
+    # trigger lazy cards
+    auto_scroll(page, total_px=2200, step=700, pause_ms=200)
 
     links: Set[str] = set()
-    # Primary selector: anchors to PDPs
+
+    # 1) plain anchors
     try:
-        hrefs = page.eval_on_selector_all('a[href*="/toode/"]', "els => els.map(e => e.href)")
+        hrefs = page.eval_on_selector_all(
+            'a[href*="/toode/"], a[href^="/toode/"], a[href*="/product/"], a[href*="/p/"]',
+            "els => els.map(e => e.href).filter(Boolean)"
+        )
         for u in hrefs or []:
-            if u:
-                links.add(url_abs(u, BASE))
+            links.add(url_abs(u, BASE))
     except Exception:
         pass
 
-    # Fallback: any element carrying a /toode/ link in a data attribute
+    # 2) data-* attributes that carry URLs
+    for sel, attr in (
+        ('[data-link*="/toode/"]', "data-link"),
+        ('[data-product-url*="/toode/"]', "data-product-url"),
+        ('[data-href*="/toode/"]', "data-href"),
+    ):
+        try:
+            vals = page.eval_on_selector_all(sel, f"els => els.map(e => e.getAttribute('{attr}'))")
+            for v in vals or []:
+                if v:
+                    links.add(url_abs(v, BASE))
+        except Exception:
+            pass
+
+    # 3) data-gtm-product JSON sometimes includes the PDP URL
     try:
-        data_links = page.eval_on_selector_all('[data-link*="/toode/"]', "els => els.map(e => e.getAttribute('data-link'))")
-        for u in data_links or []:
-            if u:
-                links.add(url_abs(u, BASE))
+        blobs = page.eval_on_selector_all('[data-gtm-product]', "els => els.map(e => e.getAttribute('data-gtm-product'))")
+        for b in blobs or []:
+            if not b:
+                continue
+            try:
+                obj = json.loads(b)
+                u = obj.get("url") or obj.get("link") or ""
+                if u:
+                    links.add(url_abs(u, BASE))
+            except Exception:
+                continue
     except Exception:
         pass
 
@@ -392,7 +433,7 @@ def discover_pdp_links_on_category(page: Page) -> List[str]:
 def _cat_base(url: str) -> str:
     """Strip query/fragment so we can build ?page=N cleanly."""
     u = urlparse(url)
-    return urlunparse((u.scheme, u.netloc, u.path, "", "", ""))
+    return _urlunparse((u.scheme, u.netloc, u.path, "", "", ""))
 
 def _build_page_url(seed: str, n: int) -> str:
     """For page 1 return the clean seed; for >1 return seed?page=n."""
@@ -418,7 +459,7 @@ def _max_pages_from_dom(page: Page) -> int:
           };
           const anchors = [...document.querySelectorAll('a[href*="page="]')];
           const ns = anchors.map(getN).filter(n => n && n > 0);
-          // Sometimes there are plain numeric buttons without ?page=
+          // Also consider pure numeric pager buttons
           [...document.querySelectorAll('a,button')].forEach(el => {
             const t = (el.textContent || '').trim();
             const m = t.match(/^\\d{1,3}$/);
@@ -524,7 +565,17 @@ def main():
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=headless)
-        ctx = browser.new_context(base_url=BASE)
+        # Force DESKTOP layout to avoid mobile DOM differences
+        ctx = browser.new_context(
+            base_url=BASE,
+            locale="et-EE",
+            is_mobile=False,
+            viewport={"width": 1360, "height": 900},
+            device_scale_factor=1,
+            user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                        "AppleWebKit/537.36 (KHTML, like Gecko) "
+                        "Chrome/124.0.0.0 Safari/537.36"),
+        )
         page = ctx.new_page()
 
         for cat in cats:
