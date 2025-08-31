@@ -292,9 +292,31 @@ def kill_consents(page):
         except Exception:
             pass
 
+# --- NEW: PDP-href recognizer to avoid category/landing pages ---
+def looks_like_pdp_href(href: str) -> bool:
+    if not href or not href.startswith("/") or "?" in href or "#" in href:
+        return False
+    # PDPs are single-segment slugs: "/tonnikala-tomatis-eldorado-185-g"
+    if href.count("/") != 1:
+        return False
+    bad_prefixes = (
+        "/search", "/eritooted/", "/puu-ja-koogiviljad/", "/liha-ja-kalatooted/",
+        "/piimatooted", "/juustud", "/leivad", "/valmistoidud",
+        "/kauplused", "/kliendimangud", "/selveekspress", "/tule-toole",
+        "/uudised", "/kinkekaardid", "/selveri-kook", "/kampaania", "/retseptid",
+    )
+    return not any(href.startswith(p) for p in bad_prefixes)
+
 def is_search_page(page) -> bool:
     try:
-        if "/search?" in page.url:
+        url = page.url
+        if "/search?" in url:
+            return True
+        # treat category/landing as listings too
+        if any(seg in url for seg in (
+            "/eritooted/", "/puu-ja-koogiviljad/", "/liha-ja-kalatooted/",
+            "/piimatooted", "/juustud", "/leivad", "/valmistoidud"
+        )):
             return True
         if page.locator("text=Otsingu:").count() > 0:
             return True
@@ -303,17 +325,22 @@ def is_search_page(page) -> bool:
     return False
 
 def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
+    # look only inside actual product grids/cards and keep PDP-like hrefs
+    roots = [
+        "[data-testid='product-grid']",
+        "[data-testid='product-list']",
+        ".product-list",
+        ".product-grid",
+        ".product-card",
+    ]
     links = []
-    for css in [
-        "[data-testid='product-grid'] a[href]",
-        "[data-testid='product-list'] a[href]",
-        ".product-list a[href]",
-        ".product-card a[href]",
-        "article a[href]",
-        "a[href^='/toode/']",
-        "a[href^='/']",
-        "[data-href]",
-    ]:
+    for root in roots:
+        try:
+            links.extend(page.locator(f"{root} a[href]").all()[:60])
+        except Exception:
+            pass
+    # light fallback
+    for css in ["article a[href]", "[data-href]"]:
         try:
             links.extend(page.locator(css).all()[:40])
         except Exception:
@@ -323,40 +350,49 @@ def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
     for a in links:
         try:
             href = a.get_attribute("href") or a.get_attribute("data-href") or ""
-            if not href or "/search" in href:
+            if not looks_like_pdp_href(href):
                 continue
             txt = a.inner_text() or ""
             scored.append((href, score_hit(qname, brand, amount, txt)))
         except Exception:
             continue
 
-    if scored:
-        scored.sort(key=lambda x: x[1], reverse=True)
-        href = scored[0][0]
-        if href.startswith("/"):
-            href = SELVER_BASE + href
-        return href
-    return None
+    if not scored:
+        return None
+    scored.sort(key=lambda x: x[1], reverse=True)
+    href = scored[0][0]
+    return SELVER_BASE + href if href.startswith("/") else href
 
 def _click_first_search_tile(page) -> bool:
-    for sel in [
+    selectors = [
         "[data-testid='product-grid'] a[href]",
-        "[data-testid='product-card'] a[href]",
-        ".product-card a[href]",
+        "[data-testid='product-list'] a[href]",
         ".product-list a[href]",
+        ".product-grid a[href]",
+        ".product-card a[href]",
         "article a[href]",
         "[data-href]",
-        "a[href^='/toode/']",
-    ]:
+    ]
+    for sel in selectors:
         try:
-            a = page.locator(sel).first
-            if a and a.count() > 0 and a.is_visible():
-                a.click(timeout=4000)
-                try: page.wait_for_selector("h1", timeout=8000)
-                except Exception: pass
-                try: page.wait_for_load_state("networkidle", timeout=6000)
-                except Exception: pass
-                return looks_like_pdp(page) or page.locator("h1").count() > 0
+            links = page.locator(sel)
+            n = min(links.count(), 60)
+            for i in range(n):
+                a = links.nth(i)
+                try:
+                    href = a.get_attribute("href") or a.get_attribute("data-href") or ""
+                    if not looks_like_pdp_href(href):
+                        continue
+                    if not a.is_visible():
+                        continue
+                    a.click(timeout=4000)
+                    try: page.wait_for_selector("h1", timeout=8000)
+                    except Exception: pass
+                    try: page.wait_for_load_state("networkidle", timeout=6000)
+                    except Exception: pass
+                    return looks_like_pdp(page) or page.locator("h1").count() > 0
+                except Exception:
+                    continue
         except Exception:
             continue
     return False
@@ -651,7 +687,7 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
         except PWTimeout:
             continue
 
-        # if still on search page, try to open a PDP
+        # if still on search/listing page, try to open a PDP
         if is_search_page(page) or not looks_like_pdp(page):
             opened = open_best_or_first(page, name, brand, amount)
             if not opened:
