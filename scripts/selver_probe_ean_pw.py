@@ -1,43 +1,150 @@
 # scripts/selver_probe_ean_pw.py
+# Purpose: Backfill missing EANs for Selver products (no CSV required)
+#
 # Usage:
-#   python scripts/selver_probe_ean_pw.py data/prisma_eans_to_probe.csv data/selver_probe.csv 0.4
-# Input CSV must have a header with a column named "ean".
-# Output CSV columns: ext_id,url,ean,name,price_raw,size_text
+#   pip install playwright psycopg2-binary
+#   python -m playwright install chromium
+#   export DATABASE_URL=postgres://...
+#   [optional] export BATCH=150 HEADLESS=1 REQ_DELAY=0.6
+#   python scripts/selver_probe_ean_pw.py
+#
+# Env:
+#   DATABASE_URL / DATABASE_URL_PUBLIC  Postgres connection string
+#   BATCH         Rows per run (default 100)
+#   HEADLESS      1|0 (default 1)
+#   REQ_DELAY     Seconds between actions (default 0.6)
+#
+# Behavior:
+#   - Prefer rows from selver_ean_backfill_queue if the table exists.
+#   - Else, pull Selver products missing EAN directly from products/prices/stores.
+#   - For each row: search Selver by "<name> <brand> <amount>" → open best hit → parse EAN.
+#   - Update products.ean. Record attempts/errors to the optional queue.
 
 from __future__ import annotations
-import csv, json, os, re, sys, time
-from pathlib import Path
-from typing import Optional, Tuple
+import os, re, sys, time, json
+from typing import Optional, List, Tuple
+import psycopg2, psycopg2.extras
+from psycopg2.extensions import connection as PGConn
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 
-EAN_DIGITS = re.compile(r"\d{8,14}")
+SELVER_BASE = "https://www.selver.ee"
+SEARCH_URL = SELVER_BASE + "/search?q={q}"
+
+HEADLESS = os.getenv("HEADLESS", "1") == "1"
+BATCH = int(os.getenv("BATCH", "100"))
+REQ_DELAY = float(os.getenv("REQ_DELAY", "0.6"))
+DB_URL = os.getenv("DATABASE_URL") or os.getenv("DATABASE_URL_PUBLIC")
+
+EAN_RE = re.compile(r"\b(\d{13}|\d{8})\b")
 JSON_EAN = re.compile(r'"(?:gtin14|gtin13|gtin|ean|barcode|sku)"\s*:\s*"(?P<d>\d{8,14})"', re.I)
-LABEL_EAN = re.compile(r"\b(ribakood|ean|barcode)\b", re.I)
 
 def norm_ean(s: Optional[str]) -> Optional[str]:
     if not s:
         return None
-    d = re.sub(r"\D", "", s)
-    return d or None
+    digits = re.sub(r"\D", "", s)
+    if digits and len(digits) in (8, 13):
+        return digits
+    return None
 
-def _first_text(page, selectors: list[str], timeout_ms: int = 2000) -> Optional[str]:
+def connect() -> PGConn:
+    if not DB_URL:
+        print("ERROR: DATABASE_URL not set", file=sys.stderr)
+        sys.exit(2)
+    return psycopg2.connect(DB_URL)
+
+def table_exists(conn: PGConn, tbl: str) -> bool:
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT EXISTS (
+              SELECT 1 FROM information_schema.tables
+              WHERE table_name = %s
+            );
+        """, (tbl,))
+        return cur.fetchone()[0]
+
+def pick_batch(conn: PGConn, limit: int):
+    """Prefer queue if present; otherwise query products directly."""
+    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        if table_exists(conn, "selver_ean_backfill_queue"):
+            cur.execute("""
+              SELECT q.product_id, p.name,
+                     COALESCE(NULLIF(p.brand,''), '') AS brand,
+                     COALESCE(NULLIF(p.amount,''), '') AS amount
+              FROM selver_ean_backfill_queue q
+              JOIN products p ON p.id = q.product_id
+              JOIN prices pr ON pr.product_id = p.id
+              JOIN stores s  ON s.id = pr.store_id
+              WHERE (p.ean IS NULL OR p.ean = '')
+                AND s.chain = 'Selver'
+              GROUP BY q.product_id, p.name, p.brand, p.amount
+              ORDER BY q.attempts ASC, q.updated_at ASC
+              LIMIT %s;
+            """, (limit,))
+            rows = cur.fetchall()
+            if rows:
+                return rows
+
+        cur.execute("""
+          SELECT DISTINCT p.id AS product_id, p.name,
+                 COALESCE(NULLIF(p.brand,''), '') AS brand,
+                 COALESCE(NULLIF(p.amount,''), '') AS amount
+          FROM products p
+          JOIN prices pr ON pr.product_id = p.id
+          JOIN stores s  ON s.id = pr.store_id
+          WHERE s.chain = 'Selver'
+            AND (p.ean IS NULL OR p.ean = '')
+          ORDER BY p.id
+          LIMIT %s;
+        """, (limit,))
+        return cur.fetchall()
+
+def update_success(conn: PGConn, product_id: int, ean: str):
+    with conn.cursor() as cur:
+        cur.execute("UPDATE products SET ean = %s WHERE id = %s;", (ean, product_id))
+        # if queue exists, increment attempts & clear error
+        if table_exists(conn, "selver_ean_backfill_queue"):
+            cur.execute("""
+              UPDATE selver_ean_backfill_queue
+                 SET attempts = attempts + 1,
+                     last_error = NULL,
+                     updated_at = now()
+               WHERE product_id = %s;
+            """, (product_id,))
+    conn.commit()
+
+def update_failure(conn: PGConn, product_id: int, err: str):
+    if not table_exists(conn, "selver_ean_backfill_queue"):
+        return
+    with conn.cursor() as cur:
+        cur.execute("""
+          UPDATE selver_ean_backfill_queue
+             SET attempts = attempts + 1,
+                 last_error = LEFT(%s, 500),
+                 updated_at = now()
+           WHERE product_id = %s;
+        """, (err, product_id))
+    conn.commit()
+
+def _first_text(page, selectors: List[str], timeout_ms: int = 2000) -> Optional[str]:
     for sel in selectors:
         try:
-            t = page.locator(sel).first.inner_text(timeout=timeout_ms)
-            if t:
-                t = t.strip()
+            loc = page.locator(sel).first
+            if loc and loc.count() > 0:
+                t = loc.inner_text(timeout=timeout_ms)
                 if t:
-                    return t
+                    t = t.strip()
+                    if t:
+                        return t
         except Exception:
             pass
     return None
 
-def _meta_content(page, selectors: list[str]) -> Optional[str]:
+def _meta_content(page, selectors: List[str]) -> Optional[str]:
     for sel in selectors:
         try:
             el = page.locator(sel).first
-            if el.count() > 0:
-                v = el.get_attribute("content", timeout=1000)
+            if el and el.count() > 0:
+                v = el.get_attribute("content", timeout=800)
                 if v:
                     v = v.strip()
                     if v:
@@ -46,12 +153,62 @@ def _meta_content(page, selectors: list[str]) -> Optional[str]:
             pass
     return None
 
-def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
-    """Return (name, price_raw, ean_found) from JSON-LD if present."""
+def looks_like_pdp(page) -> bool:
+    try:
+        og_type = _meta_content(page, ["meta[property='og:type']"]) or ""
+        if og_type.lower() == "product":
+            return True
+    except Exception:
+        pass
+    try:
+        if page.locator("text=Ribakood").count() > 0:
+            return True
+    except Exception:
+        pass
+    try:
+        if page.locator("meta[itemprop='gtin13'], meta[itemprop='gtin'], meta[itemprop='sku']").count() > 0:
+            return True
+    except Exception:
+        pass
+    return False
+
+def score_hit(qname: str, brand: str, amount: str, text: str) -> float:
+    s = 0.0
+    t = (text or "").lower()
+    for tok in set(re.findall(r'\w+', (qname or "").lower())):
+        if len(tok) >= 3 and tok in t:
+            s += 1.0
+    if brand and brand.lower() in t:
+        s += 2.0
+    if amount and amount.lower() in t:
+        s += 1.0
+    return s
+
+def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
+    page.wait_for_selector('[data-testid="product-grid"]', timeout=10000)
+    items = page.locator('[data-testid="product-grid"] a[href]').all()[:24]
+    scored: List[Tuple[str, float]] = []
+    for a in items:
+        try:
+            href = a.get_attribute("href") or ""
+            txt = a.inner_text() or ""
+            scored.append((href, score_hit(qname, brand, amount, txt)))
+        except Exception:
+            pass
+    scored.sort(key=lambda x: x[1], reverse=True)
+    if not scored:
+        return None
+    href = scored[0][0]
+    if href.startswith("/"):
+        href = SELVER_BASE + href
+    return href
+
+def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str]]:
+    """Return (name, ean) from JSON-LD 'Product' if present."""
     try:
         data = json.loads(text.strip())
     except Exception:
-        return None, None, None
+        return None, None
 
     def pick(d):
         if isinstance(d, list) and d:
@@ -60,9 +217,8 @@ def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str], Optional[
 
     data = pick(data)
     if not isinstance(data, dict):
-        return None, None, None
+        return None, None
 
-    # Try to locate a Product object anywhere in the structure
     def is_product(d: dict) -> bool:
         t = d.get("@type")
         return isinstance(t, str) and t.lower() == "product"
@@ -75,224 +231,135 @@ def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str], Optional[
                 break
 
     if not is_product(data):
-        return None, None, None
+        return None, None
 
     name = (data.get("name") or "").strip() or None
     ean = norm_ean(
         data.get("gtin14") or data.get("gtin13") or data.get("gtin") or data.get("ean") or data.get("sku")
     )
-    price = None
-    offers = data.get("offers")
-    if isinstance(offers, list) and offers:
-        offers = offers[0]
-    if isinstance(offers, dict):
-        price = offers.get("price") or (offers.get("priceSpecification") or {}).get("price")
-
-    return name, (str(price).strip() if price is not None else None), ean
-
-def looks_like_pdp(page) -> bool:
-    """Heuristic: true if we're on a product page."""
-    try:
-        og_type = _meta_content(page, ["meta[property='og:type']"])
-        if (og_type or "").lower() == "product":
-            return True
-    except Exception:
-        pass
-    try:
-        if page.locator("text=Ribakood").count() > 0:
-            return True
-    except Exception:
-        pass
-    try:
-        if page.locator("meta[itemprop='sku'], meta[itemprop='gtin'], meta[itemprop='gtin13']").count() > 0:
-            return True
-    except Exception:
-        pass
-    return False
-
-def goto_first_result(page) -> None:
-    """
-    On a search results page, open the first product result.
-    Selver uses plain slugs (no /toode/), so we just find the first
-    product tile link that isn't another search link.
-    """
-    candidates = [
-        "article a[href^='/']:not([href*='/search'])",
-        ".product-list a[href^='/']:not([href*='/search'])",
-        "a[href^='/']:not([href*='/search'])",
-    ]
-    for sel in candidates:
-        try:
-            loc = page.locator(sel).first
-            if loc and loc.count() > 0:
-                href = loc.get_attribute("href")
-                if href:
-                    if not href.startswith("http"):
-                        href = "https://www.selver.ee" + href
-                    page.goto(href, wait_until="domcontentloaded", timeout=30000)
-                    try:
-                        page.wait_for_load_state("networkidle", timeout=10000)
-                    except Exception:
-                        pass
-                    return
-        except Exception:
-            pass
+    return name, ean
 
 def extract_ean_on_pdp(page) -> Optional[str]:
-    """Find an EAN on a Selver PDP using multiple strategies."""
-    # 1) JSON-LD
+    # 1) JSON-LD blocks
     try:
         scripts = page.locator("script[type='application/ld+json']")
-        cnt = scripts.count()
-        for i in range(cnt):
+        n = scripts.count()
+        for i in range(n):
             try:
-                n, p, g = parse_ld_product(scripts.nth(i).inner_text())
-                if g:
-                    return norm_ean(g)
+                name, ean = parse_ld_product(scripts.nth(i).inner_text())
+                if ean:
+                    return ean
             except Exception:
                 pass
     except Exception:
         pass
 
-    # 2) meta itemprop
+    # 2) meta itemprops
     meta_val = _meta_content(page, [
         "meta[itemprop='gtin13']",
         "meta[itemprop='gtin']",
         "meta[itemprop='sku']",
     ])
     if meta_val:
-        d = norm_ean(meta_val)
-        if d:
-            return d
+        e = norm_ean(meta_val)
+        if e:
+            return e
 
-    # 3) any script JSON blob containing gtin/ean/barcode
+    # 3) any script JSON with known keys
     try:
-        html = page.content()
-        m = JSON_EAN.search(html or "")
+        html = page.content() or ""
+        m = JSON_EAN.search(html)
         if m:
-            return m.group("d")
+            e = norm_ean(m.group("d"))
+            if e:
+                return e
     except Exception:
         pass
 
-    # 4) visible text near label “Ribakood / EAN / Barcode”
+    # 4) visible text search (labels like Ribakood / EAN / Triipkood)
     try:
-        body_text = page.locator("body").inner_text(timeout=2000)
-        if LABEL_EAN.search(body_text or ""):
-            nums = EAN_DIGITS.findall(body_text or "")
-            nums = sorted(nums, key=len, reverse=True)  # prefer 13/14
-            if nums:
-                return nums[0]
+        full = page.text_content("body") or ""
+        nums = EAN_RE.findall(full)
+        if nums:
+            # prefer 13-digit first
+            e13 = [x for x in nums if len(x) == 13]
+            return e13[0] if e13 else nums[0]
     except Exception:
         pass
 
     return None
 
-def probe_one(page, ean: str, delay: float, dbg_rows: list) -> Optional[dict]:
-    wanted = norm_ean(ean)
-    if not wanted:
-        return None
-
-    search_url = f"https://www.selver.ee/search?q={wanted}"
-    try:
-        page.goto(search_url, wait_until="domcontentloaded", timeout=30000)
+def ensure_specs_open(page):
+    # Try to expand spec sections if present
+    for sel in ["button:has-text('Tooteinfo')", "button:has-text('Lisainfo')"]:
         try:
-            page.wait_for_load_state("networkidle", timeout=10000)
+            if page.locator(sel).count():
+                page.click(sel, timeout=800)
+                time.sleep(0.2)
+        except Exception:
+            pass
+
+def process_one(page, name: str, brand: str, amount: str) -> Optional[str]:
+    q = " ".join(x for x in [name or "", brand or "", amount or ""] if x).strip()
+    if not q:
+        return None
+    try:
+        page.goto(SEARCH_URL.format(q=q.replace(" ", "+")), timeout=15000, wait_until="load")
+        try:
+            page.wait_for_load_state("networkidle", timeout=8000)
         except Exception:
             pass
     except PWTimeout:
-        dbg_rows.append({"ean": wanted, "stage": "goto_search_timeout", "url": search_url, "note": ""})
         return None
-
-    # If not already on PDP, open the first result
-    if not looks_like_pdp(page):
-        goto_first_result(page)
 
     if not looks_like_pdp(page):
-        dbg_rows.append({"ean": wanted, "stage": "no_pdp", "url": page.url, "note": ""})
-        return None
+        hit = best_search_hit(page, name, brand, amount)
+        if not hit:
+            return None
+        page.goto(hit, timeout=15000, wait_until="load")
+        try:
+            page.wait_for_load_state("networkidle", timeout=8000)
+        except Exception:
+            pass
 
-    # Extract name/price with robust fallbacks
-    name = _first_text(page, ["h1", "[data-testid='product-title']"])
-    if not name:
-        name = _meta_content(page, ["meta[property='og:title']"])
-    if name:
-        name = name.strip()
+    ensure_specs_open(page)
+    ean = extract_ean_on_pdp(page)
+    return norm_ean(ean)
 
-    price_raw = _first_text(page, [
-        "[data-testid='product-price']",
-        "[itemprop='price']",
-        ".price, .product-price, .product__price"
-    ]) or _meta_content(page, ["meta[itemprop='price']"])
+def main():
+    conn = connect()
+    batch = pick_batch(conn, BATCH)
+    if not batch:
+        print("No Selver products without EAN. Done.")
+        conn.close()
+        return
 
-    found_ean = extract_ean_on_pdp(page)
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch(headless=HEADLESS)
+        ctx = browser.new_context()
+        page = ctx.new_page()
 
-    # Guards: real name (not 'Selver'), EAN must match search
-    if not name or name.lower() in {"selver", "e-selver"} or len(name) < 3:
-        dbg_rows.append({"ean": wanted, "stage": "bad_name", "url": page.url, "note": name or ""})
-        return None
-
-    if norm_ean(found_ean) != wanted:
-        dbg_rows.append({"ean": wanted, "stage": "ean_mismatch", "url": page.url, "note": f"found={found_ean}"})
-        return None
-
-    if delay > 0:
-        time.sleep(delay)
-
-    return {
-        "ext_id": page.url,
-        "url": page.url,
-        "ean": wanted,
-        "name": name,
-        "price_raw": price_raw or "",
-        "size_text": "",
-    }
-
-def main(in_csv: str, out_csv: str, delay: float):
-    in_path, out_path = Path(in_csv), Path(out_csv)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-
-    DEBUG = os.getenv("DEBUG_PROBE", "").lower() in ("1", "true", "yes")
-    dbg_rows: list[dict] = []
-
-    with in_path.open("r", newline="", encoding="utf-8") as fin, \
-         out_path.open("w", newline="", encoding="utf-8") as fout, \
-         sync_playwright() as p:
-
-        reader = csv.DictReader(fin)
-        writer = csv.DictWriter(fout, fieldnames=["ext_id","url","ean","name","price_raw","size_text"])
-        writer.writeheader()
-
-        browser = p.chromium.launch(headless=True)
-        context = browser.new_context()
-        page = context.new_page()
-
-        for row in reader:
-            ean = (row.get("ean") or "").strip()
-            if not ean:
-                continue
+        for row in batch:
+            pid = row["product_id"]
+            name = row["name"] or ""
+            brand = row["brand"] or ""
+            amount = row["amount"] or ""
             try:
-                info = probe_one(page, ean, delay, dbg_rows)
-                if info:
-                    writer.writerow(info)
-            except Exception as ex:
-                dbg_rows.append({"ean": ean, "stage": "exception", "url": page.url if page else "", "note": str(ex)})
+                ean = process_one(page, name, brand, amount)
+                if ean:
+                    update_success(conn, pid, ean)
+                    print(f"[OK] id={pid} ← {ean}")
+                else:
+                    update_failure(conn, pid, "ean not found")
+                    print(f"[MISS] id={pid} name='{name}'")
+            except Exception as e:
+                update_failure(conn, pid, str(e))
+                print(f"[FAIL] id={pid} err={e}", file=sys.stderr)
+            finally:
+                time.sleep(REQ_DELAY)
 
-        context.close()
         browser.close()
-
-    if DEBUG:
-        # Save reasoned skips for inspection
-        dbg_path = out_path.parent / "selver_probe_debug.csv"
-        with dbg_path.open("w", newline="", encoding="utf-8") as fdbg:
-            fields = ["ean", "stage", "url", "note"]
-            w = csv.DictWriter(fdbg, fieldnames=fields)
-            w.writeheader()
-            for r in dbg_rows:
-                w.writerow(r)
+    conn.close()
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("Usage: python scripts/selver_probe_ean_pw.py <in.csv> <out.csv> [delay_seconds]")
-        sys.exit(2)
-    delay = float(sys.argv[3]) if len(sys.argv) >= 4 else 0.4
-    main(sys.argv[1], sys.argv[2], delay)
+    main()
