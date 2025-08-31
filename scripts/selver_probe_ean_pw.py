@@ -7,6 +7,7 @@ from typing import Optional, List, Tuple
 import psycopg2, psycopg2.extras
 from psycopg2.extensions import connection as PGConn
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
+from urllib.parse import urlparse
 
 SELVER_BASE = "https://www.selver.ee"
 SEARCH_URL  = SELVER_BASE + "/search?q={q}"
@@ -301,13 +302,57 @@ def kill_consents_and_overlays(page):
     except Exception:
         pass
 
+# --- Request router to reduce 3rd-party noise ---
+BLOCK_SUBSTR = (
+    "adobedtm", "googletagmanager", "google-analytics", "doubleclick",
+    "facebook.net", "newrelic", "pingdom", "cookiebot", "hotjar",
+)
+def _router(route, request):
+    try:
+        url = request.url.lower()
+        if any(s in url for s in BLOCK_SUBSTR):
+            return route.abort()
+        if "service_worker" in url or "sw_iframe" in url:
+            return route.abort()
+    except Exception:
+        pass
+    return route.continue_()
+
 # --- PDP-href recognizer to avoid category/landing pages ---
 def looks_like_pdp_href(href: str) -> bool:
-    if not href or not href.startswith("/") or "?" in href or "#" in href:
+    if not href:
         return False
-    # PDP slugs are typically single segment: "/maasika-banaani-..."
-    if href.count("/") != 1:
+    # strip query/fragment
+    if "?" in href: href = href.split("?",1)[0]
+    if "#" in href: href = href.split("#",1)[0]
+    # absolute → keep host check light
+    if href.startswith("http"):
+        try:
+            p = urlparse(href).path
+        except Exception:
+            return False
+        href = p or "/"
+    if not href.startswith("/"):
         return False
+
+    # Accept explicit PDP namespace as well
+    if href.startswith("/toode/") or href.startswith("/e-selver/toode/"):
+        return True
+
+    # Single-slug PDPs like "/padrone-pipar-pakitid-200-g"
+    # (one segment after optional "/e-selver")
+    segs = [s for s in href.split("/") if s]
+    if segs and segs[0] == "e-selver":
+        segs = segs[1:]
+    if len(segs) == 1 and re.fullmatch(r"[a-z0-9-]{3,}", segs[0]):
+        # require either a digit or a dash to avoid true category roots
+        if any(ch.isdigit() for ch in segs[0]) or "-" in segs[0]:
+            pass
+        else:
+            return False
+    elif not href.startswith("/toode/"):
+        return False
+
     bad_prefixes = (
         "/search", "/eritooted", "/puu-ja-koogiviljad", "/liha-ja-kalatooted",
         "/piimatooted", "/juustud", "/leivad", "/valmistoidud",
@@ -372,7 +417,6 @@ def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
     return SELVER_BASE + href if href.startswith("/") else href
 
 def _click_best_tile(page, name: str, brand: str, amount: str) -> bool:
-    # try to click best-matching anchor; if click fails, force JS navigation
     links = _candidate_anchors(page)
     best = None
     best_score = -1.0
@@ -389,7 +433,6 @@ def _click_best_tile(page, name: str, brand: str, amount: str) -> bool:
             continue
     if not best:
         return False
-    # click first
     try:
         best.click(timeout=4000)
         try: page.wait_for_selector("h1", timeout=8000)
@@ -400,7 +443,6 @@ def _click_best_tile(page, name: str, brand: str, amount: str) -> bool:
             return True
     except Exception:
         pass
-    # force navigation via JS
     try:
         href = best.get_attribute("href") or best.get_attribute("data-href") or ""
         if href:
@@ -416,7 +458,6 @@ def _click_best_tile(page, name: str, brand: str, amount: str) -> bool:
     return False
 
 def _click_first_search_tile(page) -> bool:
-    # kept as extra fallback
     for sel in [
         "[data-testid='product-grid'] a[href]:visible",
         "[data-testid='product-list'] a[href]:visible",
@@ -538,7 +579,6 @@ def _ean_sku_via_label_xpath(page) -> Tuple[Optional[str], Optional[str]]:
             m = re.search(r"(\d{13}|\d{8})", s)
             return m.group(1) if m else None
 
-        # CSS pairs
         for k_sel, v_sel in css_pairs:
             try:
                 k = page.locator(k_sel).first
@@ -564,7 +604,6 @@ def _ean_sku_via_label_xpath(page) -> Tuple[Optional[str], Optional[str]]:
             except Exception:
                 pass
 
-        # XPath sweep
         for xp in xpaths:
             try:
                 lab = page.locator(f"xpath={xp}").first
@@ -602,8 +641,8 @@ def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
     try:
         got = page.evaluate("""
         () => {
-          const txt = n => (n && n.textContent || '').replace(/\s+/g,' ').trim();
-          const pickDigits = s => { const m = s && s.match(/(\d{13}|\d{8})/); return m ? m[1] : null; };
+          const txt = n => (n && n.textContent || '').replace(/\\s+/g,' ').trim();
+          const pickDigits = s => { const m = s && s.match(/(\\d{13}|\\d{8})/); return m ? m[1] : null; };
           const pickSKU = s => { const m = s && s.match(/([A-Z0-9_-]{6,})/i); return m ? m[1] : null; };
 
           let ean = null, sku = null;
@@ -753,7 +792,10 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
             if not opened:
                 continue
 
-        if not _pdp_matches_target(page, name, brand, amount):
+        # Loosened PDP/title gate: accept if PDP-like OR facts present
+        if not (_pdp_matches_target(page, name, brand, amount) or
+                looks_like_pdp(page) or
+                page.locator(":text-matches('Ribakood|Штрихкод|Barcode','i')").count() > 0):
             want = (name or "")[:60]
             got  = (_pdp_title(page) or "")[:120]
             print(f"[WRONG_PDP] want='{want}' got='{got}' url={page.url}")
@@ -784,6 +826,9 @@ def main():
             extra_http_headers={"Accept-Language":"et-EE,et;q=0.9,en;q=0.8,ru;q=0.7"},
             viewport={"width": 1360, "height": 900},
         )
+        # light router for stability
+        ctx.route("**/*", _router)
+
         page = ctx.new_page()
 
         for row in batch:
