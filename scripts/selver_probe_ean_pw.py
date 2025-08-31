@@ -275,7 +275,8 @@ def score_hit(qname: str, brand: str, amount: str, text: str) -> float:
         s += 1.0
     return s
 
-def kill_consents(page):
+def kill_consents_and_overlays(page):
+    # Cookie/consent
     for sel in [
         "button:has-text('Nõustun')",
         "button:has-text('Luba kõik')",
@@ -291,17 +292,20 @@ def kill_consents(page):
                 time.sleep(0.2)
         except Exception:
             pass
+    # Close search suggestion overlay if open
+    try:
+        page.keyboard.press("Escape")
+    except Exception:
+        pass
 
-# --- PDP/link helpers ---
-
+# --- PDP-href recognizer to avoid category/landing pages ---
 def looks_like_pdp_href(href: str) -> bool:
     if not href or not href.startswith("/") or "?" in href or "#" in href:
         return False
-    # PDPs are single-segment slugs: "/tonnikala-tomatis-eldorado-185-g"
-    if href.count("/") != 1:
+    if href.count("/") != 1:  # PDP slugs are single-segment
         return False
     bad_prefixes = (
-        "/search", "/eritooted/", "/puu-ja-koogiviljad/", "/liha-ja-kalatooted/",
+        "/search", "/eritooted", "/puu-ja-koogiviljad", "/liha-ja-kalatooted",
         "/piimatooted", "/juustud", "/leivad", "/valmistoidud",
         "/kauplused", "/kliendimangud", "/selveekspress", "/tule-toole",
         "/uudised", "/kinkekaardid", "/selveri-kook", "/kampaania", "/retseptid",
@@ -324,8 +328,7 @@ def is_search_page(page) -> bool:
         pass
     return False
 
-def _gather_tile_candidates(page) -> List[Tuple[object, str, str]]:
-    """Return [(locator, href, text), ...] for visible product-tile anchors."""
+def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
     roots = [
         "[data-testid='product-grid']",
         "[data-testid='product-list']",
@@ -333,75 +336,46 @@ def _gather_tile_candidates(page) -> List[Tuple[object, str, str]]:
         ".product-grid",
         ".product-card",
     ]
-    anchors = []
+    links = []
     for root in roots:
         try:
-            anchors.extend(page.locator(f"{root} a[href], {root} [data-href]").all()[:80])
+            links.extend(page.locator(f"{root} a[href]").all()[:60])
         except Exception:
             pass
-    # light fallback
     for css in ["article a[href]", "[data-href]"]:
         try:
-            anchors.extend(page.locator(css).all()[:40])
+            links.extend(page.locator(css).all()[:40])
         except Exception:
             pass
 
-    seen = set()
-    out: List[Tuple[object, str, str]] = []
-    for a in anchors:
+    scored: List[Tuple[str, float]] = []
+    for a in links:
         try:
             href = a.get_attribute("href") or a.get_attribute("data-href") or ""
             if not looks_like_pdp_href(href):
                 continue
-            if href in seen:
-                continue
-            seen.add(href)
-            txt = (a.inner_text() or "").strip()
-            out.append((a, href, txt))
+            txt = a.inner_text() or ""
+            scored.append((href, score_hit(qname, brand, amount, txt)))
         except Exception:
             continue
-    return out
 
-def _click_best_tile(page, name: str, brand: str, amount: str) -> bool:
-    cands = _gather_tile_candidates(page)
-    if not cands:
-        return False
-    scored = []
-    for loc, href, txt in cands:
-        try:
-            sc = score_hit(name, brand, amount, txt)
-        except Exception:
-            sc = 0.0
-        scored.append((sc, loc))
-    scored.sort(key=lambda x: x[0], reverse=True)
-
-    for sc, loc in scored[:12]:  # try top dozen
-        try:
-            if not loc.is_visible():
-                continue
-            with page.expect_navigation(timeout=15000):
-                loc.click(timeout=4000)
-            try:
-                page.wait_for_load_state("networkidle", timeout=8000)
-            except Exception:
-                pass
-            if looks_like_pdp(page) or page.locator("h1").count() > 0:
-                return True
-        except Exception:
-            continue
-    return False
+    if not scored:
+        return None
+    scored.sort(key=lambda x: x[1], reverse=True)
+    href = scored[0][0]
+    return SELVER_BASE + href if href.startswith("/") else href
 
 def _click_first_search_tile(page) -> bool:
-    # legacy fallback: first visible PDP-like tile
-    for sel in [
-        "[data-testid='product-grid'] a[href]",
-        "[data-testid='product-list'] a[href]",
-        ".product-list a[href]",
-        ".product-grid a[href]",
-        ".product-card a[href]",
-        "article a[href]",
-        "[data-href]",
-    ]:
+    selectors = [
+        "[data-testid='product-grid'] a[href]:visible",
+        "[data-testid='product-list'] a[href]:visible",
+        ".product-list a[href]:visible",
+        ".product-grid a[href]:visible",
+        ".product-card a[href]:visible",
+        "article a[href]:visible",
+        "[data-href]:visible",
+    ]
+    for sel in selectors:
         try:
             links = page.locator(sel)
             n = min(links.count(), 60)
@@ -413,12 +387,11 @@ def _click_first_search_tile(page) -> bool:
                         continue
                     if not a.is_visible():
                         continue
-                    with page.expect_navigation(timeout=15000):
-                        a.click(timeout=4000)
-                    try:
-                        page.wait_for_load_state("networkidle", timeout=8000)
-                    except Exception:
-                        pass
+                    a.click(timeout=4000)
+                    try: page.wait_for_selector("h1", timeout=8000)
+                    except Exception: pass
+                    try: page.wait_for_load_state("networkidle", timeout=6000)
+                    except Exception: pass
                     return looks_like_pdp(page) or page.locator("h1").count() > 0
                 except Exception:
                     continue
@@ -431,18 +404,38 @@ def _click_first_search_tile(page) -> bool:
 def _pdp_title(page) -> str:
     return (_first_text(page, ["h1", "h1.product-title", "h1[itemprop='name']"]) or "").strip()
 
+_STOP = {"kg","tk","g","ml","l","dl","cl","kõik","ja","või","with","ilma","bio","mahe"}
+
 def _tokens(s: str) -> set:
-    return set(t for t in re.findall(r"[0-9a-zäöõü]+", (s or "").lower()) if len(t) >= 3)
+    # Unicode-aware tokenization, includes š/ž etc.
+    raw = re.findall(r"[\w]+", (s or "").casefold(), flags=re.UNICODE)
+    toks = set()
+    for t in raw:
+        if t.isdigit():
+            continue
+        if len(t) < 3:
+            continue
+        if t in _STOP:
+            continue
+        toks.add(t)
+    return toks
 
 def _pdp_matches_target(page, name: str, brand: str, amount: str) -> bool:
     title = _pdp_title(page)
     tset = _tokens(title)
-    want = _tokens(name)
-    if brand:  want |= _tokens(brand)
-    if amount: want |= _tokens(amount)
+    want = _tokens(name) | _tokens(brand) | _tokens(amount)
     name_overlap  = len(_tokens(name) & tset)
     total_overlap = len(want & tset)
-    return total_overlap >= 2 and name_overlap >= 1
+    # Looser rule: at least 1 token from name must match; overall >=2 preferred
+    if name_overlap >= 1 and total_overlap >= 2:
+        return True
+    # If brand is distinctive and present, allow with any overlap
+    if brand and (_tokens(brand) & tset):
+        return True
+    # If page clearly looks like PDP (has Ribakood), accept
+    if looks_like_pdp(page):
+        return True
+    return False
 
 # ----- EAN/SKU extraction -----
 
@@ -495,7 +488,7 @@ def _ean_sku_via_label_xpath(page) -> Tuple[Optional[str], Optional[str]]:
     try:
         labels = ["ribakood", "ean", "triipkood"]
         xpaths = [
-            "//*[contains(translate(normalize-space(.),'RIBAKOODEANTRIIPKOODÄÖÜÕ','ribakoodeantriipkoodäöüõ') , '{lbl}')]"
+            "//*[contains(translate(normalize-space(.),'RIBAKOODEANTRIIPKOODÄÖÜÕŠŽ','ribakoodeantriipkoodäöüõšž') , '{lbl}')]"
             for lbl in labels
         ]
         css_pairs = [
@@ -662,31 +655,45 @@ def ensure_specs_open(page):
         except Exception:
             pass
 
-# --------- unified search→open helper (CLICK-ONLY) ---------
+# --------- unified search→open helper ---------
 
 def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
-    """On a search/listing page, always CLICK a product tile to reach PDP."""
-    # allow grid to render
+    """On a search page, **click** a PDP tile first; if that fails, try URL; then click again."""
     try:
-        page.wait_for_selector("[data-testid='product-grid'], .product-list, .product-grid, .product-card, article a[href]", timeout=6000)
+        page.wait_for_selector("[data-testid='product-grid'], .product-list, article a[href]", timeout=6000)
     except Exception:
         pass
 
-    # try ranked click
-    if _click_best_tile(page, name, brand, amount):
-        return True
+    # make sure results are visible and overlays closed
+    kill_consents_and_overlays(page)
+    try:
+        page.evaluate("window.scrollBy(0, 300)")
+    except Exception:
+        pass
 
-    # try simple first-tile click
+    # 1) Click a tile (preferred – reliably lands on PDP)
     if _click_first_search_tile(page):
         return True
 
-    # force lazy load and retry once
+    # 2) Navigate via best href
+    hit = best_search_hit(page, name, brand, amount)
+    if hit:
+        try:
+            page.goto(hit, timeout=25000, wait_until="domcontentloaded")
+            try: page.wait_for_load_state("networkidle", timeout=9000)
+            except Exception: pass
+            if looks_like_pdp(page) or page.locator("h1").count() > 0:
+                return True
+        except Exception:
+            pass
+
+    # 3) Force lazy load + click again
     try:
         page.keyboard.press("End"); time.sleep(0.4)
         page.keyboard.press("Home"); time.sleep(0.2)
     except Exception:
         pass
-    return _click_best_tile(page, name, brand, amount) or _click_first_search_tile(page)
+    return _click_first_search_tile(page)
 
 # ----------------- main probe flow -----------------
 
@@ -698,25 +705,22 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
     if brand and name: q_variants.append(f"{name} {brand}")
 
     for q in q_variants:
-        # open search
         try:
             url = SEARCH_URL.format(q=q.replace(" ", "+"))
             page.goto(url, timeout=25000, wait_until="domcontentloaded")
             try: page.wait_for_load_state("networkidle", timeout=9000)
             except Exception: pass
-            kill_consents(page)
+            kill_consents_and_overlays(page)
         except PWTimeout:
             continue
 
-        # listing → PDP: ALWAYS CLICK
         if is_search_page(page) or not looks_like_pdp(page):
             opened = open_best_or_first(page, name, brand, amount)
             if not opened:
                 continue
 
-        # PDP/title verification gate
-        title_ok = _pdp_matches_target(page, name, brand, amount)
-        if not title_ok:
+        # PDP/title verification gate (now Unicode-aware and looser)
+        if not _pdp_matches_target(page, name, brand, amount):
             want = (name or "")[:60]
             got  = (_pdp_title(page) or "")[:120]
             print(f"[WRONG_PDP] want='{want}' got='{got}' url={page.url}")
