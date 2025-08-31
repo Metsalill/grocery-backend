@@ -392,7 +392,8 @@ def _click_first_search_tile(page) -> bool:
                     except Exception: pass
                     try: page.wait_for_load_state("networkidle", timeout=6000)
                     except Exception: pass
-                    return looks_like_pdp(page) or page.locator("h1").count() > 0
+                    # PDP ONLY (no plain h1 fallback)
+                    return looks_like_pdp(page)
                 except Exception:
                     continue
         except Exception:
@@ -421,6 +422,10 @@ def _tokens(s: str) -> set:
     return toks
 
 def _pdp_matches_target(page, name: str, brand: str, amount: str) -> bool:
+    # Hard gate: refuse search/listing pages entirely
+    if is_search_page(page) or not looks_like_pdp(page):
+        return False
+
     title = _pdp_title(page)
     tset = _tokens(title)
     want = _tokens(name) | _tokens(brand) | _tokens(amount)
@@ -431,9 +436,6 @@ def _pdp_matches_target(page, name: str, brand: str, amount: str) -> bool:
         return True
     # If brand is distinctive and present, allow with any overlap
     if brand and (_tokens(brand) & tset):
-        return True
-    # If page clearly looks like PDP (has Ribakood), accept
-    if looks_like_pdp(page):
         return True
     return False
 
@@ -682,7 +684,8 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
             page.goto(hit, timeout=25000, wait_until="domcontentloaded")
             try: page.wait_for_load_state("networkidle", timeout=9000)
             except Exception: pass
-            if looks_like_pdp(page) or page.locator("h1").count() > 0:
+            # PDP ONLY (no plain h1 fallback)
+            if looks_like_pdp(page):
                 return True
         except Exception:
             pass
@@ -719,7 +722,7 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
             if not opened:
                 continue
 
-        # PDP/title verification gate (now Unicode-aware and looser)
+        # PDP/title verification gate (Unicode-aware + refuses search pages)
         if not _pdp_matches_target(page, name, brand, amount):
             want = (name or "")[:60]
             got  = (_pdp_title(page) or "")[:120]
