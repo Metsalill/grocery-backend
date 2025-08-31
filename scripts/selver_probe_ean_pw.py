@@ -16,8 +16,8 @@
 #   OVERWRITE_BAD_EANS  1|0 (default 0). If 1, also fix obviously-bad EANs.
 
 from __future__ import annotations
-import os, re, sys, time, json
-from typing import Optional, List, Tuple
+import os, re, sys, time, json, unicodedata
+from typing import Optional, List, Tuple, Dict, Set
 import psycopg2, psycopg2.extras
 from psycopg2.extensions import connection as PGConn
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
@@ -33,6 +33,23 @@ DB_URL = os.getenv("DATABASE_URL") or os.getenv("DATABASE_URL_PUBLIC")
 
 EAN_RE = re.compile(r"\b(\d{13}|\d{8})\b")
 JSON_EAN = re.compile(r'"(?:gtin14|gtin13|gtin|ean|barcode|sku)"\s*:\s*"(?P<d>\d{8,14})"', re.I)
+
+# ---------------- text helpers & per-run guards ----------------
+ET_TRANSLIT = str.maketrans({'ä':'a','ö':'o','õ':'o','ü':'u','š':'s','ž':'z'})
+def _normtxt(s: str) -> str:
+    s = (s or "").lower().translate(ET_TRANSLIT)
+    s = unicodedata.normalize("NFKD", s)
+    s = "".join(ch for ch in s if not unicodedata.combining(ch))
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+def _tokens(s: str) -> List[str]:
+    return re.findall(r"[a-z0-9]{3,}", _normtxt(s))
+
+# PDP URLs we rejected (weak/incorrect match) and URL→product mapping during this run
+SEEN_BAD_URLS: Set[str] = set()
+USED_URL_FOR: Dict[str, int] = {}
+
+# ----------------------------------------------------------------
 
 def norm_ean(s: Optional[str]) -> Optional[str]:
     if not s:
@@ -323,52 +340,73 @@ def kill_consents(page):
             pass
 
 def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
-    # Robust: tolerate different result grids; treat current page as PDP if so
-    t0 = time.time()
-    while time.time() - t0 < 12:
-        kill_consents(page)
-        if looks_like_pdp(page):
-            return page.url
+    """
+    Stricter picker: collect many candidates but require a minimum score.
+    """
+    page.wait_for_selector('body', timeout=10000)
 
-        # Collect both anchors and data-href tiles
-        links = []
-        for css in [
-            "[data-testid='product-grid'] a[href]",
-            "[data-testid='product-list'] a[href]",
-            ".product-list a[href]",
-            "article a[href]",
-            "a[href^='/toode/']",
-            "a[href^='/']",
-        ]:
-            try:
-                links.extend(page.locator(css).all()[:24])
-            except Exception:
-                pass
-        # data-href tiles
+    # Collect both anchors and data-href tiles
+    links = []
+    for css in [
+        "[data-testid='product-grid'] a[href]",
+        "[data-testid='product-list'] a[href]",
+        ".product-list a[href]",
+        "article a[href]",
+        "a[href^='/toode/']",
+        "a[href^='/']",
+    ]:
         try:
-            links.extend(page.locator("[data-href]").all()[:24])
+            links.extend(page.locator(css).all()[:32])
         except Exception:
             pass
+    try:
+        links.extend(page.locator("[data-href]").all()[:32])
+    except Exception:
+        pass
 
-        scored: List[Tuple[str, float]] = []
-        for a in links:
-            try:
-                href = a.get_attribute("href") or a.get_attribute("data-href") or ""
-                if not href or "/search" in href:
-                    continue
-                txt = a.inner_text() or ""
-                scored.append((href, score_hit(qname, brand, amount, txt)))
-            except Exception:
+    # Score
+    def _score(text: str) -> float:
+        s = 0.0
+        t = _normtxt(text)
+        for tok in set(_tokens(qname)):
+            if tok in t:
+                s += 1.0
+        b = _normtxt(brand)
+        if b and b in t:
+            s += 2.0
+        if amount:
+            m = re.search(r"(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", amount, re.I)
+            if m:
+                amt1 = _normtxt(f"{m.group(1)} {m.group(2)}")
+                amt2 = _normtxt(f"{m.group(1)}{m.group(2)}")
+                if amt1 in t or amt2 in t:
+                    s += 1.0
+        return s
+
+    scored: List[Tuple[str, float]] = []
+    for a in links:
+        try:
+            href = a.get_attribute("href") or a.get_attribute("data-href") or ""
+            if not href or "/search" in href:
                 continue
+            txt = a.inner_text() or ""
+            scored.append((href, _score(txt)))
+        except Exception:
+            continue
 
-        if scored:
-            scored.sort(key=lambda x: x[1], reverse=True)
-            href = scored[0][0]
-            if href.startswith("/"):
-                href = SELVER_BASE + href
-            return href
-        time.sleep(0.25)
-    return None
+    if not scored:
+        return None
+    scored.sort(key=lambda x: x[1], reverse=True)
+    href, top_score = scored[0]
+
+    # Minimum score: stricter when brand present
+    threshold = 2.0 if brand else 1.5
+    if top_score < threshold:
+        return None
+
+    if href.startswith("/"):
+        href = SELVER_BASE + href
+    return href
 
 def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """Return (name, ean, sku) from JSON-LD 'Product' if present."""
@@ -534,7 +572,23 @@ def ensure_specs_open(page):
         except Exception:
             pass
 
-def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str], Optional[str]]:
+def _title_ok(page, name: str, brand: str, amount: str) -> bool:
+    """Validate we are on the intended PDP by checking title vs. name/brand/amount."""
+    title = (_first_text(page, ["h1", "meta[property='og:title']"]) or "").strip()
+    t = _normtxt(title)
+    if not t:
+        return False
+    b = _normtxt(brand)
+    if b and b not in t:
+        return False
+    want = [tok for tok in _tokens(name) if tok and tok != b][:8]
+    hits = sum(1 for tok in want if tok in t)
+    if hits < max(2, int(round(len(want) * 0.5))):
+        return False
+    # amount: soft signal only (don’t fail hard)
+    return True
+
+def process_one(page, name: str, brand: str, amount: str, pid: Optional[int] = None) -> Tuple[Optional[str], Optional[str]]:
     q_variants = []
     q_full = " ".join(x for x in [name or "", brand or "", amount or ""] if x).strip()
     if q_full:
@@ -558,13 +612,28 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
 
         if not looks_like_pdp(page):
             hit = best_search_hit(page, name, brand, amount)
-            if not hit:
+            if not hit or hit in SEEN_BAD_URLS:
                 continue
+
+            # avoid reusing a PDP URL for a different product in the same run
+            if pid is not None and USED_URL_FOR.get(hit) not in (None, pid):
+                continue
+
             page.goto(hit, timeout=20000, wait_until="load")
             try:
                 page.wait_for_load_state("networkidle", timeout=8000)
             except Exception:
                 pass
+        else:
+            hit = page.url
+
+        # Validate PDP title before extracting IDs
+        if not _title_ok(page, name, brand, amount):
+            SEEN_BAD_URLS.add(hit)
+            continue
+
+        if pid is not None:
+            USED_URL_FOR[hit] = pid
 
         ensure_specs_open(page)
         ean, sku = extract_ids_on_pdp(page)
@@ -594,7 +663,7 @@ def main():
             brand = row["brand"] or ""
             amount = row["amount"] or ""
             try:
-                ean, sku = process_one(page, name, brand, amount)
+                ean, sku = process_one(page, name, brand, amount, pid=pid)
                 if ean:
                     status = update_success(conn, pid, ean, sku)
                     tag = "OK" if status == "OK" else status
