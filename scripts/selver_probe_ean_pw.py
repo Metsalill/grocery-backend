@@ -5,7 +5,7 @@
 #   pip install playwright psycopg2-binary
 #   python -m playwright install chromium
 #   export DATABASE_URL=postgres://...
-#   [optional] export BATCH=150 HEADLESS=1 REQ_DELAY=0.6
+#   [optional] export BATCH=150 HEADLESS=1 REQ_DELAY=0.6 OVERWRITE_BAD_EANS=1
 #   python scripts/selver_probe_ean_pw.py
 #
 # Env:
@@ -13,12 +13,7 @@
 #   BATCH         Rows per run (default 100)
 #   HEADLESS      1|0 (default 1)
 #   REQ_DELAY     Seconds between actions (default 0.6)
-#
-# Behavior:
-#   - Prefer rows from selver_ean_backfill_queue if the table exists.
-#   - Else, pull Selver products missing EAN directly from products/prices/stores.
-#   - For each row: search Selver by "<name> <brand> <amount>" → open best hit → parse EAN+SKU.
-#   - Update products.ean and products.sku (if column exists). Record attempts/errors to the optional queue.
+#   OVERWRITE_BAD_EANS  1|0 (default 0). If 1, also fix obviously-bad EANs.
 
 from __future__ import annotations
 import os, re, sys, time, json
@@ -33,6 +28,7 @@ SEARCH_URL = SELVER_BASE + "/search?q={q}"
 HEADLESS = os.getenv("HEADLESS", "1") == "1"
 BATCH = int(os.getenv("BATCH", "100"))
 REQ_DELAY = float(os.getenv("REQ_DELAY", "0.6"))
+OVERWRITE_BAD = os.getenv("OVERWRITE_BAD_EANS", "0").lower() in ("1", "true", "yes")
 DB_URL = os.getenv("DATABASE_URL") or os.getenv("DATABASE_URL_PUBLIC")
 
 EAN_RE = re.compile(r"\b(\d{13}|\d{8})\b")
@@ -41,10 +37,23 @@ JSON_EAN = re.compile(r'"(?:gtin14|gtin13|gtin|ean|barcode|sku)"\s*:\s*"(?P<d>\d
 def norm_ean(s: Optional[str]) -> Optional[str]:
     if not s:
         return None
-    digits = re.sub(r"\D", "", s)
-    if digits and len(digits) in (8, 13):
-        return digits
-    return None
+    d = re.sub(r"\D", "", s)
+    return d if d and len(d) in (8, 13) else None
+
+def looks_bogus_ean(e: Optional[str]) -> bool:
+    if not e:
+        return False
+    # 8 identical digits (e.g., 33333333) or all zeros for 8/13
+    return bool(re.fullmatch(r'(\d)\1{7}', e)) or e in {"00000000", "0000000000000"}
+
+def is_bad_ean_python(e: Optional[str]) -> bool:
+    if e is None or e == "":
+        return True
+    if not e.isdigit() or len(e) not in (8, 13):
+        return True
+    if looks_bogus_ean(e):
+        return True
+    return False
 
 def connect() -> PGConn:
     if not DB_URL:
@@ -75,9 +84,16 @@ def column_exists(conn: PGConn, tbl: str, col: str) -> bool:
 
 def pick_batch(conn: PGConn, limit: int):
     """Prefer queue if present; otherwise query products directly."""
+    bad_sql = """
+        (p.ean !~ '^[0-9]+$' OR length(p.ean) NOT IN (8,13)
+         OR p.ean ~ '^([0-9])\\1{7}$'
+         OR p.ean IN ('00000000','0000000000000'))
+    """
+    where_target = "(p.ean IS NULL OR p.ean = '')" if not OVERWRITE_BAD else f"(p.ean IS NULL OR p.ean = '' OR {bad_sql})"
+
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
         if table_exists(conn, "selver_ean_backfill_queue"):
-            cur.execute("""
+            cur.execute(f"""
               SELECT q.product_id, p.name,
                      COALESCE(NULLIF(p.brand,''), '') AS brand,
                      COALESCE(NULLIF(p.amount,''), '') AS amount
@@ -85,7 +101,7 @@ def pick_batch(conn: PGConn, limit: int):
               JOIN products p ON p.id = q.product_id
               JOIN prices pr ON pr.product_id = p.id
               JOIN stores s  ON s.id = pr.store_id
-              WHERE (p.ean IS NULL OR p.ean = '')
+              WHERE {where_target}
                 AND s.chain = 'Selver'
               GROUP BY q.product_id, p.name, p.brand, p.amount
               ORDER BY q.attempts ASC, q.updated_at ASC
@@ -95,7 +111,7 @@ def pick_batch(conn: PGConn, limit: int):
             if rows:
                 return rows
 
-        cur.execute("""
+        cur.execute(f"""
           SELECT DISTINCT p.id AS product_id, p.name,
                  COALESCE(NULLIF(p.brand,''), '') AS brand,
                  COALESCE(NULLIF(p.amount,''), '') AS amount
@@ -103,40 +119,132 @@ def pick_batch(conn: PGConn, limit: int):
           JOIN prices pr ON pr.product_id = p.id
           JOIN stores s  ON s.id = pr.store_id
           WHERE s.chain = 'Selver'
-            AND (p.ean IS NULL OR p.ean = '')
+            AND {where_target}
           ORDER BY p.id
           LIMIT %s;
         """, (limit,))
         return cur.fetchall()
 
-def update_success(conn: PGConn, product_id: int, ean: str, sku: Optional[str] = None):
-    with conn.cursor() as cur:
-        if sku and column_exists(conn, "products", "sku"):
-            cur.execute("UPDATE products SET ean = %s, sku = %s WHERE id = %s;", (ean, sku, product_id))
-        else:
-            cur.execute("UPDATE products SET ean = %s WHERE id = %s;", (ean, product_id))
-        if table_exists(conn, "selver_ean_backfill_queue"):
-            cur.execute("""
-              UPDATE selver_ean_backfill_queue
-                 SET attempts = attempts + 1,
-                     last_error = NULL,
-                     updated_at = now()
-               WHERE product_id = %s;
-            """, (product_id,))
-    conn.commit()
+# -------- duplicate-aware, rollback-safe updates ----------
+
+def update_success(conn: PGConn, product_id: int, ean: str, sku: Optional[str] = None) -> str:
+    """
+    Update EAN (and SKU if present).
+    Returns a status: 'OK', 'OVERWRITE', 'EXISTS', 'SKIP_PRESENT', 'SKIP_NOT_BAD', 'DUP_FOUND', 'BOGUS_CANDIDATE'
+    """
+    try:
+        with conn.cursor() as cur:
+            # candidate sanity
+            if looks_bogus_ean(ean):
+                if table_exists(conn, "selver_ean_backfill_queue"):
+                    cur.execute("""
+                      UPDATE selver_ean_backfill_queue
+                         SET attempts = attempts + 1,
+                             last_error = %s,
+                             updated_at = now()
+                       WHERE product_id = %s;
+                    """, (f"bogus EAN {ean}", product_id))
+                conn.commit()
+                return "BOGUS_CANDIDATE"
+
+            # what is currently on the product?
+            cur.execute("SELECT ean FROM products WHERE id = %s;", (product_id,))
+            prev = (cur.fetchone() or [None])[0]
+
+            if prev:
+                if prev == ean:
+                    # Nothing to do
+                    if table_exists(conn, "selver_ean_backfill_queue"):
+                        cur.execute("""
+                          UPDATE selver_ean_backfill_queue
+                             SET attempts = attempts + 1,
+                                 last_error = NULL,
+                                 updated_at = now()
+                           WHERE product_id = %s;
+                        """, (product_id,))
+                    conn.commit()
+                    return "EXISTS"
+
+                if not OVERWRITE_BAD:
+                    if table_exists(conn, "selver_ean_backfill_queue"):
+                        cur.execute("""
+                          UPDATE selver_ean_backfill_queue
+                             SET attempts = attempts + 1,
+                                 last_error = %s,
+                                 updated_at = now()
+                           WHERE product_id = %s;
+                        """, (f"has existing EAN {prev}, overwrite disabled", product_id))
+                    conn.commit()
+                    return "SKIP_PRESENT"
+
+                # overwrite mode: only if current EAN is actually bad
+                if not is_bad_ean_python(prev):
+                    if table_exists(conn, "selver_ean_backfill_queue"):
+                        cur.execute("""
+                          UPDATE selver_ean_backfill_queue
+                             SET attempts = attempts + 1,
+                                 last_error = %s,
+                                 updated_at = now()
+                           WHERE product_id = %s;
+                        """, (f"existing EAN {prev} not considered bad", product_id))
+                    conn.commit()
+                    return "SKIP_NOT_BAD"
+
+            # Avoid creating a duplicate EAN on another product
+            cur.execute("SELECT id FROM products WHERE ean = %s AND id <> %s LIMIT 1;", (ean, product_id))
+            row = cur.fetchone()
+            if row:
+                if table_exists(conn, "selver_ean_backfill_queue"):
+                    cur.execute("""
+                      UPDATE selver_ean_backfill_queue
+                         SET attempts = attempts + 1,
+                             last_error = %s,
+                             updated_at = now()
+                       WHERE product_id = %s;
+                    """, (f"duplicate EAN {ean} already on product {row[0]}", product_id))
+                conn.commit()
+                return "DUP_FOUND"
+
+            # perform update
+            if sku and column_exists(conn, "products", "sku"):
+                cur.execute(
+                    "UPDATE products SET ean = %s, sku = COALESCE(%s, sku) WHERE id = %s;",
+                    (ean, sku, product_id)
+                )
+            else:
+                cur.execute("UPDATE products SET ean = %s WHERE id = %s;", (ean, product_id))
+
+            if table_exists(conn, "selver_ean_backfill_queue"):
+                cur.execute("""
+                  UPDATE selver_ean_backfill_queue
+                     SET attempts = attempts + 1,
+                         last_error = NULL,
+                         updated_at = now()
+                   WHERE product_id = %s;
+                """, (product_id,))
+        conn.commit()
+        return "OVERWRITE" if prev else "OK"
+    except Exception:
+        conn.rollback()
+        raise
 
 def update_failure(conn: PGConn, product_id: int, err: str):
-    if not table_exists(conn, "selver_ean_backfill_queue"):
-        return
-    with conn.cursor() as cur:
-        cur.execute("""
-          UPDATE selver_ean_backfill_queue
-             SET attempts = attempts + 1,
-                 last_error = LEFT(%s, 500),
-                 updated_at = now()
-           WHERE product_id = %s;
-        """, (err, product_id))
-    conn.commit()
+    """Record a failure and keep the connection usable."""
+    try:
+        if table_exists(conn, "selver_ean_backfill_queue"):
+            with conn.cursor() as cur:
+                cur.execute("""
+                  UPDATE selver_ean_backfill_queue
+                     SET attempts = attempts + 1,
+                         last_error = LEFT(%s, 500),
+                         updated_at = now()
+                   WHERE product_id = %s;
+                """, (err, product_id))
+        conn.commit()
+    except Exception:
+        conn.rollback()
+
+# ------------- page helpers -------------
 
 def _first_text(page, selectors: List[str], timeout_ms: int = 2000) -> Optional[str]:
     for sel in selectors:
@@ -294,7 +402,6 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
     """Return (ean, sku) from PDP using several strategies."""
     sku_found: Optional[str] = None
 
-    # small settle
     try:
         page.wait_for_timeout(300)
     except Exception:
@@ -326,7 +433,7 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
         if e:
             return e, sku_found
 
-    # C) explicit label-based lookup (Ribakood/EAN/Triipkood + SKU/Tootekood)
+    # C) labels: Ribakood/EAN/Triipkood + SKU/Tootekood
     label_xpaths = [
         "//*[contains(translate(normalize-space(text()), 'EANRIBAKOODTRIIPKOOD', 'eanribakoodtriipkood'), 'ribakood')]",
         "//*[contains(translate(normalize-space(text()), 'EANRIBAKOODTRIIPKOOD', 'eanribakoodtriipkood'), 'ean')]",
@@ -337,7 +444,6 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
         "//*[contains(translate(normalize-space(text()), 'SKUTOOTEKOOD', 'skutootekood'), 'tootekood')]",
     ]
 
-    # capture SKU near labels
     for xp in sku_xpaths:
         try:
             el = page.locator(f"xpath={xp}").first
@@ -355,7 +461,6 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
         except Exception:
             pass
 
-    # capture EAN near labels
     for xp in label_xpaths:
         try:
             el = page.locator(f"xpath={xp}").first
@@ -409,7 +514,6 @@ def ensure_specs_open(page):
             pass
 
 def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str], Optional[str]]:
-    # Try multiple query variants to improve hit rate
     q_variants = []
     q_full = " ".join(x for x in [name or "", brand or "", amount or ""] if x).strip()
     if q_full:
@@ -444,7 +548,9 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
         ensure_specs_open(page)
         ean, sku = extract_ids_on_pdp(page)
         if ean:
-            return norm_ean(ean), (sku or None)
+            ean = norm_ean(ean)
+            if not looks_bogus_ean(ean):
+                return ean, (sku or None)
 
     return None, None
 
@@ -469,12 +575,14 @@ def main():
             try:
                 ean, sku = process_one(page, name, brand, amount)
                 if ean:
-                    update_success(conn, pid, ean, sku)
-                    print(f"[OK] id={pid} ← EAN {ean}{(' | SKU ' + sku) if sku else ''}")
+                    status = update_success(conn, pid, ean, sku)
+                    tag = "OK" if status == "OK" else status
+                    print(f"[{tag}] id={pid} ← EAN {ean}{(' | SKU ' + sku) if sku else ''}")
                 else:
-                    update_failure(conn, pid, "ean not found")
-                    print(f"[MISS] id={pid} name='{name}'{(' (SKU seen: ' + sku + ')') if sku else ''}")
+                    update_failure(conn, pid, "ean not found or bogus")
+                    print(f"[MISS] id={pid} name='{name}'")
             except Exception as e:
+                conn.rollback()
                 update_failure(conn, pid, str(e))
                 print(f"[FAIL] id={pid} err={e}", file=sys.stderr)
             finally:
