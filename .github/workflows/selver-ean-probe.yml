@@ -1,29 +1,36 @@
-name: "Selver EAN Probe (from Prisma EANs)"
+name: "Selver → Backfill EANs (DB-driven)"
 
 on:
   workflow_dispatch:
     inputs:
-      batch_limit:
-        description: "How many EANs to probe this run"
+      batch:
+        description: "Rows per run"
         required: false
-        default: "300"
-      delay_seconds:
-        description: "Delay between page hits (seconds)"
+        default: "200"
+      headless:
+        description: "Headless (1/0)"
         required: false
-        default: "0.4"
+        default: "1"
+      req_delay:
+        description: "Delay seconds"
+        required: false
+        default: "0.6"
   schedule:
-    - cron: "15 2 * * *"   # daily 02:15 UTC (adjust/disable as needed)
+    - cron: "15 2 * * *"   # daily 02:15 UTC (optional)
 
 concurrency:
-  group: selver-ean-probe
+  group: selver-backfill-eans
   cancel-in-progress: true
 
 jobs:
-  probe-and-upsert:
+  backfill:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 45
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      BATCH: ${{ github.event.inputs.batch || '200' }}
+      HEADLESS: ${{ github.event.inputs.headless || '1' }}
+      REQ_DELAY: ${{ github.event.inputs.req_delay || '0.6' }}
 
     steps:
       - name: Checkout
@@ -34,210 +41,46 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install deps (Playwright)
-        shell: bash
+      - name: Install Playwright
         run: |
-          set -euo pipefail
-          pip install playwright
+          pip install playwright psycopg2-binary
           python -m playwright install --with-deps chromium
 
-      - name: Install psql client
-        shell: bash
+      - name: Sanity check script
         run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client
-
-      - name: Prepare workspace
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p data
-
-      - name: Verify probe script present
-        shell: bash
-        run: |
-          set -euo pipefail
           test -f scripts/selver_probe_ean_pw.py || { echo "Missing scripts/selver_probe_ean_pw.py"; exit 1; }
 
-      # Build Prisma EAN backlog (use COPY TO STDOUT; skip problematic 0000-prefix EANs)
-      - name: Build list of Prisma EANs to probe on Selver
-        shell: bash
-        run: |
-          set -euo pipefail
-          LIM="${{ github.event.inputs.batch_limit || '300' }}"
-
-          SQL="
-            COPY (
-              WITH prisma AS (
-                SELECT ean
-                FROM products
-                WHERE ean ~ '^[0-9]+$'
-                  AND source_url ILIKE '%prismamarket.ee%'
-              ),
-              selver_seen AS (
-                SELECT DISTINCT regexp_replace(ean_raw::text,'[^0-9]','', 'g') AS ean
-                FROM selver_candidates
-                UNION
-                SELECT DISTINCT p.ean
-                FROM prices pr
-                JOIN stores s ON s.id = pr.store_id AND s.chain ILIKE 'Selver'
-                JOIN products p ON p.id = pr.product_id
-              )
-              SELECT p.ean
-              FROM prisma p
-              LEFT JOIN selver_seen s ON s.ean = p.ean
-              WHERE s.ean IS NULL
-                AND p.ean NOT LIKE '0000%'   -- ← exclude those that tend to be duds
-              ORDER BY p.ean
-              LIMIT ${LIM}
-            ) TO STDOUT WITH (FORMAT CSV, HEADER TRUE)
-          "
-
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "$SQL" > data/prisma_eans_to_probe.csv
-
-          if [ ! -s data/prisma_eans_to_probe.csv ]; then
-            echo "::notice::No new Prisma EANs to probe this run."
-          fi
-
-      - name: Check probe input exists
-        id: has_probe
-        shell: bash
-        run: |
-          if [ -s data/prisma_eans_to_probe.csv ]; then
-            echo "has=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "has=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Probe EANs on Selver (Playwright)
-        if: steps.has_probe.outputs.has == 'true'
+      - name: Run Selver EAN backfill (DB-driven)
         env:
           PYTHONUNBUFFERED: "1"
-        shell: bash
         run: |
-          set -euo pipefail
-          DELAY="${{ github.event.inputs.delay_seconds || '0.4' }}"
-          python scripts/selver_probe_ean_pw.py \
-            data/prisma_eans_to_probe.csv \
-            data/selver_probe.csv \
-            "$DELAY"
+          python scripts/selver_probe_ean_pw.py
 
-      # Single-session psql: TEMP table + copy + parsed + prices + candidates + aliases (conflict-safe)
-      - name: Upsert probe results (candidates + prices + aliases)
-        if: steps.has_probe.outputs.has == 'true'
-        shell: bash
+      - name: Post-run stats
         run: |
-          set -euo pipefail
-          if [ ! -s data/selver_probe.csv ]; then
-            echo "No probe output — skipping upsert."
-            exit 0
-          fi
-
-          printf '%s\n' \
-            '\set ON_ERROR_STOP on' \
-            'BEGIN;' \
-            '' \
-            '-- Temp table is session-scoped; keep everything in this psql session' \
-            'CREATE TEMP TABLE staging_selver_probe(' \
-            '  ext_id    text,' \
-            '  url       text,' \
-            '  ean       text,' \
-            '  name      text,' \
-            '  price_raw text,' \
-            '  size_text text' \
-            ');' \
-            '' \
-            "\copy staging_selver_probe FROM 'data/selver_probe.csv' CSV HEADER" \
-            '' \
-            '-- parse once into a temp table (so we can reuse for prices + candidates)' \
-            'CREATE TEMP TABLE parsed_probe AS' \
-            'SELECT' \
-            '  COALESCE(url, ext_id) AS ext_id,' \
-            "  regexp_replace(ean,'[^0-9]','', 'g') AS ean_norm," \
-            '  ean AS ean_raw,' \
-            '  CASE WHEN length(btrim(name))=0 THEN NULL ELSE name END AS name,' \
-            '  CASE WHEN length(btrim(size_text))=0 THEN NULL ELSE size_text END AS size_text,' \
-            "  NULLIF(replace(regexp_replace(price_raw, '[^0-9,.-]', '', 'g'), ',', '.'), '')::numeric AS price_num" \
-            'FROM staging_selver_probe;' \
-            '' \
-            '-- ensure exactly one online Selver store exists' \
-            "INSERT INTO stores (name, chain, is_online) SELECT 'Selver e-Selver', 'Selver', TRUE WHERE NOT EXISTS (SELECT 1 FROM stores WHERE chain='Selver' AND is_online=TRUE);" \
-            '' \
-            '-- prices (only numeric), pick 1 per product' \
-            'WITH joined AS (' \
-            '  SELECT pe.product_id, pp.price_num, pp.ext_id AS source_url' \
-            '  FROM parsed_probe pp' \
-            '  JOIN product_eans pe ON pe.ean_norm = pp.ean_norm' \
-            '  WHERE pp.price_num IS NOT NULL' \
-            '),' \
-            'dedup AS (' \
-            '  SELECT DISTINCT ON (product_id) product_id, price_num, source_url' \
-            '  FROM joined' \
-            '  ORDER BY product_id, price_num' \
-            ')' \
-            'INSERT INTO prices (store_id, product_id, price, currency, collected_at, source_url)' \
-            "SELECT (SELECT id FROM stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1)," \
-            "       d.product_id, d.price_num, 'EUR', now(), d.source_url" \
-            'FROM dedup d' \
-            'ON CONFLICT (product_id, store_id) DO UPDATE SET' \
-            '  price        = EXCLUDED.price,' \
-            '  currency     = EXCLUDED.currency,' \
-            '  collected_at = EXCLUDED.collected_at,' \
-            '  source_url   = EXCLUDED.source_url;' \
-            '' \
-            '-- candidates: always provide a NOT-NULL price (default 0.00)' \
-            'INSERT INTO selver_candidates (ext_id, ean_norm, ean_raw, name, size_text, price, currency, last_seen)' \
-            "SELECT ext_id, ean_norm, ean_raw, name, size_text, COALESCE(price_num, 0.00), 'EUR', now()" \
-            'FROM parsed_probe' \
-            'ON CONFLICT (ext_id) DO UPDATE SET' \
-            '  price         = COALESCE(EXCLUDED.price, selver_candidates.price),' \
-            '  currency      = COALESCE(EXCLUDED.currency, selver_candidates.currency),' \
-            '  name          = COALESCE(EXCLUDED.name, selver_candidates.name),' \
-            '  size_text     = COALESCE(EXCLUDED.size_text, selver_candidates.size_text),' \
-            '  ean_raw       = COALESCE(EXCLUDED.ean_raw, selver_candidates.ean_raw),' \
-            '  last_seen     = now();' \
-            '' \
-            '-- 3) aliases: filter junk + dedup by lower(alias); do not rely on a named constraint' \
-            'WITH cand AS (' \
-            '  SELECT pe.product_id,' \
-            '         left(btrim(pp.name), 200) AS alias,' \
-            '         pp.ext_id' \
-            '  FROM parsed_probe pp' \
-            '  JOIN product_eans pe ON pe.ean_norm = pp.ean_norm' \
-            '  WHERE pp.name IS NOT NULL' \
-            "    AND length(btrim(pp.name)) >= 3" \
-            "    AND lower(btrim(pp.name)) NOT IN ('selver','e-selver','prisma','prismamarket','prismamarket.ee')" \
-            "    AND (pp.ext_id IS NULL OR position('/search' in lower(pp.ext_id)) = 0)" \
-            '),' \
-            'dedup AS (' \
-            '  SELECT DISTINCT product_id, alias FROM cand' \
-            '),' \
-            'to_ins AS (' \
-            '  SELECT d.product_id, d.alias' \
-            '  FROM dedup d' \
-            '  LEFT JOIN product_aliases pa ON lower(pa.alias) = lower(d.alias)' \
-            '  WHERE pa.alias IS NULL' \
-            ')' \
-            'INSERT INTO product_aliases (product_id, alias)' \
-            'SELECT product_id, alias FROM to_ins' \
-            'ON CONFLICT DO NOTHING;' \
-            '' \
-            '-- summary' \
-            'SELECT' \
-            '  (SELECT COUNT(*) FROM staging_selver_probe) AS probed,' \
-            "  (SELECT COUNT(*) FROM prices pr JOIN stores s ON s.id=pr.store_id WHERE s.chain='Selver' AND s.is_online=TRUE) AS selver_price_rows;" \
-            '' \
-            'COMMIT;' \
-          | psql "$DATABASE_URL"
-
-      - name: Upload probe artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: selver-ean-probe-${{ github.run_id }}
-          path: |
-            data/prisma_eans_to_probe.csv
-            data/selver_probe.csv
-          if-no-files-found: warn
-          retention-days: 7
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
+          SELECT COUNT(*) AS still_missing
+          FROM products
+          WHERE COALESCE(NULLIF(TRIM(ean),''), NULL) IS NULL;
+          "
+          # If queue exists, show attempts/errors
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
+          DO $$
+          BEGIN
+            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='selver_ean_backfill_queue') THEN
+              RAISE NOTICE 'Queue attempts:';
+            END IF;
+          END $$;
+          "
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
+          SELECT attempts, COUNT(*) 
+          FROM selver_ean_backfill_queue
+          GROUP BY attempts
+          ORDER BY attempts;
+          " || true
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
+          SELECT COUNT(*) AS failures
+          FROM selver_ean_backfill_queue
+          WHERE last_error IS NOT NULL;
+          " || true
