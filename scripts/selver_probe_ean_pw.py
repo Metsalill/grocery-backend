@@ -18,7 +18,8 @@ OVERWRITE_BAD = os.getenv("OVERWRITE_BAD_EANS", "0").lower() in ("1", "true", "y
 DB_URL = os.getenv("DATABASE_URL") or os.getenv("DATABASE_URL_PUBLIC")
 
 EAN_RE = re.compile(r"\b(\d{8}|\d{13})\b")
-JSON_EAN = re.compile(r'"(?:gtin14|gtin13|gtin|ean|barcode|sku)"\s*:\s*"(?P<d>\d{8,14})"', re.I)
+# SAFETY PATCH: do NOT match "sku" keys here to avoid pulling unrelated numbers
+JSON_EAN = re.compile(r'"(?:gtin14|gtin13|gtin|ean|barcode)"\s*:\s*"(?P<d>\d{8,14})"', re.I)
 
 def norm_ean(s: Optional[str]) -> Optional[str]:
     if not s:
@@ -383,6 +384,14 @@ def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str], Optional[
     sku  = (data.get("sku") or "").strip() or None
     return name, ean, sku
 
+def _visible_ribakood_has(page, digits: str) -> bool:
+    """Return True if the page visibly shows 'Ribakood … <digits>' on the PDP."""
+    try:
+        body = (page.text_content("body") or "").replace("\xa0", " ")
+        return re.search(r"\bribakood\b", body, re.I) and re.search(rf"\b{re.escape(digits)}\b", body)
+    except Exception:
+        return False
+
 def _ean_sku_from_specs(page) -> Tuple[Optional[str], Optional[str]]:
     """Find a 'Ribakood' style row and extract digits from the same row / siblings."""
     try:
@@ -394,17 +403,14 @@ def _ean_sku_from_specs(page) -> Tuple[Optional[str], Optional[str]]:
 
           let ean=null, sku=null;
 
-          // find elements that look like key cells
           const candidates = Array.from(document.querySelectorAll('tr, li, .row, .product-attributes__row, .product-details__row, dl, dt, dd, div'));
 
           for (const row of candidates) {
             const t = getTxt(row);
             if (!t) continue;
             if (/(^|\\b)(ribakood|ean|triipkood)(\\b|:)/i.test(t)) {
-              // prefer text inside row first
               ean = digit(t) || ean;
 
-              // then check immediate cells / siblings
               const near = [row, row.parentElement, row.nextElementSibling, row.previousElementSibling];
               for (const n of near) {
                 const tn = getTxt(n);
@@ -425,12 +431,16 @@ def _ean_sku_from_specs(page) -> Tuple[Optional[str], Optional[str]]:
     return None, None
 
 def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
+    """
+    DOM-only fallback near visible labels.
+    SAFETY PATCH: no full-body scraping; only values near 'Ribakood/EAN/Triipkood'.
+    """
     try:
         got = page.evaluate("""
         () => {
           const txt = n => (n && n.textContent || '').replace(/\\s+/g,' ').trim();
-          const pickDigits = s => { const m = s && s.match(/(\\d{13}|\\d{8})/); return m ? m[1] : null; };
-          const pickSKU = s => { const m = s && s.match(/([A-Z0-9_-]{6,})/i); return m ? m[1] : null; };
+          const digits = s => { const m = s && s.match(/(\\d{13}|\\d{8})/); return m ? m[1] : null; };
+          const skuRx = /([A-Z0-9_-]{6,})/i;
 
           let ean = null, sku = null;
           const nodes = Array.from(document.querySelectorAll('div,span,p,li,td,th,dd,dt'));
@@ -441,17 +451,11 @@ def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
               const zone = [el, el.parentElement, el.nextElementSibling, el.previousElementSibling];
               for (const z of zone) {
                 const tt = txt(z);
-                if (!ean) ean = pickDigits(tt);
-                if (!sku) sku = pickSKU(tt);
-                if (ean && sku) break;
+                if (!ean) ean = digits(tt);
+                if (!sku) { const m = tt && tt.match(skuRx); if (m) sku = m[1]; }
               }
+              if (ean) break;
             }
-            if (ean && sku) break;
-          }
-          if (!ean) {
-            const body = txt(document.body);
-            const m = body && body.match(/(\\d{13}|\\d{8})/);
-            if (m) ean = m[1];
           }
           return { ean, sku };
         }
@@ -463,13 +467,14 @@ def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
     return None, None
 
 def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
+    """Return (ean, sku) from PDP using only trusted sources."""
     sku_found: Optional[str] = None
     try:
         page.wait_for_timeout(350)
     except Exception:
         pass
 
-    # A) JSON-LD
+    # A) JSON-LD Product (accept only if also visible as 'Ribakood …' or itemprop present)
     try:
         scripts = page.locator("script[type='application/ld+json']")
         n = scripts.count()
@@ -479,7 +484,8 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
                 if sku and not sku_found:
                     sku_found = sku
                 if ean:
-                    return ean, sku_found
+                    if _visible_ribakood_has(page, ean) or page.locator("meta[itemprop='gtin13']").count() > 0:
+                        return ean, sku_found
             except Exception:
                 pass
     except Exception:
@@ -500,32 +506,13 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
     if e_spec:
         return norm_ean(e_spec), s_spec or sku_found
 
-    # D) robust DOM brute force
+    # D) DOM fallback near labels only
     e_dom, s_dom = _extract_ids_dom_bruteforce(page)
     if e_dom:
         return norm_ean(e_dom), s_dom or sku_found
 
-    # E) JSON blob anywhere
-    try:
-        html = page.content() or ""
-        m = JSON_EAN.search(html)
-        if m:
-            e = norm_ean(m.group("d"))
-            if e:
-                return e, sku_found or s_dom
-    except Exception:
-        pass
-
-    # F) HTML regex (label … digits)
-    try:
-        html = page.content() or ""
-        m = re.search(r"(ribakood|ean|triipkood)[\s\S]{0,800}?(\d{8,14})", html, re.I)
-        if m:
-            return norm_ean(m.group(2)), sku_found or s_dom
-    except Exception:
-        pass
-
-    return None, sku_found or s_dom
+    # SAFETY PATCH: removed risky global JSON/HTML scans
+    return None, sku_found
 
 def ensure_specs_open(page):
     for sel in ["button:has-text('Tooteinfo')", "button:has-text('Lisainfo')", "button:has-text('Tootekirjeldus')"]:
@@ -563,7 +550,6 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
                 except Exception:
                     pass
 
-        # if navigation by URL didn't get us to a PDP, click the first tile
         if not looks_like_pdp(page):
             _click_first_search_tile(page)
 
