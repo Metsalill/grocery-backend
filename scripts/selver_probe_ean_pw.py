@@ -214,16 +214,28 @@ def update_failure(conn: PGConn, product_id: int, err: str):
 
 # ------------- page helpers -------------
 
+def _first_text(page, selectors: List[str], timeout_ms: int = 2000) -> Optional[str]:
+    for sel in selectors:
+        try:
+            loc = page.locator(sel).first
+            if loc and loc.count() > 0:
+                t = loc.inner_text(timeout=timeout_ms)
+                t = (t or "").strip()
+                if t:
+                    return t
+        except Exception:
+            pass
+    return None
+
 def _meta_content(page, selectors: List[str]) -> Optional[str]:
     for sel in selectors:
         try:
             el = page.locator(sel).first
             if el and el.count() > 0:
                 v = el.get_attribute("content", timeout=800)
+                v = (v or "").strip()
                 if v:
-                    v = v.strip()
-                    if v:
-                        return v
+                    return v
         except Exception:
             pass
     return None
@@ -348,6 +360,26 @@ def _click_first_search_tile(page) -> bool:
             continue
     return False
 
+# ----- PDP match gate -----
+
+def _pdp_title(page) -> str:
+    return (_first_text(page, ["h1", "h1.product-title", "h1[itemprop='name']"]) or "").strip()
+
+def _tokens(s: str) -> set:
+    return set(t for t in re.findall(r"[0-9a-zäöõü]+", (s or "").lower()) if len(t) >= 3)
+
+def _pdp_matches_target(page, name: str, brand: str, amount: str) -> bool:
+    title = _pdp_title(page)
+    tset = _tokens(title)
+    want = _tokens(name)
+    if brand:  want |= _tokens(brand)
+    if amount: want |= _tokens(amount)
+    name_overlap = len(_tokens(name) & tset)
+    total_overlap = len(want & tset)
+    return total_overlap >= 2 and name_overlap >= 1
+
+# ----- EAN/SKU extraction -----
+
 def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     try:
         data = json.loads(text.strip())
@@ -398,15 +430,11 @@ def _wait_pdp_facts(page):
 def _ean_sku_via_label_xpath(page) -> Tuple[Optional[str], Optional[str]]:
     """Target Selver-like rows (Ribakood/EAN/Triipkood) robustly."""
     try:
-        # lowercasing with translate (includes Estonian diacritics)
-        labels = [
-            "ribakood", "ean", "triipkood"
-        ]
+        labels = ["ribakood", "ean", "triipkood"]
         xpaths = [
             "//*[contains(translate(normalize-space(.),'RIBAKOODEANTRIIPKOODÄÖÜÕ','ribakoodeantriipkoodäöüõ') , '{lbl}')]"
             for lbl in labels
         ]
-        # also support dt/dd and table rows specifically
         css_pairs = [
             ("dt:has-text('Ribakood')", "dd"),
             ("tr:has(td:has-text('Ribakood'))", "td"),
@@ -419,19 +447,16 @@ def _ean_sku_via_label_xpath(page) -> Tuple[Optional[str], Optional[str]]:
             m = re.search(r"(\d{13}|\d{8})", s)
             return m.group(1) if m else None
 
-        # CSS pairs first
         for k_sel, v_sel in css_pairs:
             try:
                 k = page.locator(k_sel).first
                 if k and k.count() > 0:
-                    # search same element, next siblings and children
                     zones = [k, k.locator(v_sel)]
                     for z in zones:
                         try:
                             t = (z.inner_text(timeout=800) or "").strip()
                             e = pick_digits(t)
                             if e:
-                                # try SKU from vicinity
                                 sku = None
                                 for near in [k, k.locator("xpath=.."), k.locator("xpath=following-sibling::*[1]")]:
                                     try:
@@ -447,13 +472,11 @@ def _ean_sku_via_label_xpath(page) -> Tuple[Optional[str], Optional[str]]:
             except Exception:
                 pass
 
-        # XPath label sweep
         for xp in xpaths:
             try:
                 lab = page.locator(f"xpath={xp}").first
                 if not lab or lab.count() == 0:
                     continue
-                # zones around the label
                 zones = [
                     lab,
                     lab.locator("xpath=.."),
@@ -621,6 +644,18 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
 
         if not looks_like_pdp(page):
             _click_first_search_tile(page)
+
+        # ---- PDP/title verification gate ----
+        title_ok = False
+        if page.locator("h1").count() > 0 or looks_like_pdp(page):
+            title_ok = _pdp_matches_target(page, name, brand, amount)
+        if not title_ok:
+            # wrong product — try next query variant
+            want = (name or "")[:60]
+            got = (_pdp_title(page) or "")[:120]
+            print(f"[WRONG_PDP] want='{want}' got='{got}'")
+            continue
+        # -------------------------------------
 
         ensure_specs_open(page)
         ean, sku = extract_ids_on_pdp(page)
