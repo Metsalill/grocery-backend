@@ -9,7 +9,7 @@ from psycopg2.extensions import connection as PGConn
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 
 SELVER_BASE = "https://www.selver.ee"
-SEARCH_URL = SELVER_BASE + "/search?q={q}"
+SEARCH_URL  = SELVER_BASE + "/search?q={q}"
 
 HEADLESS = os.getenv("HEADLESS", "1") == "1"
 BATCH = int(os.getenv("BATCH", "100"))
@@ -17,8 +17,10 @@ REQ_DELAY = float(os.getenv("REQ_DELAY", "0.6"))
 OVERWRITE_BAD = os.getenv("OVERWRITE_BAD_EANS", "0").lower() in ("1", "true", "yes")
 DB_URL = os.getenv("DATABASE_URL") or os.getenv("DATABASE_URL_PUBLIC")
 
-EAN_RE = re.compile(r"\b(\d{8}|\d{13})\b")
+EAN_RE   = re.compile(r"\b(\d{8}|\d{13})\b")
 JSON_EAN = re.compile(r'"(?:gtin14|gtin13|gtin|ean|barcode|sku)"\s*:\s*"(?P<d>\d{8,14})"', re.I)
+
+# ----------------- small utils -----------------
 
 def norm_ean(s: Optional[str]) -> Optional[str]:
     if not s:
@@ -67,6 +69,8 @@ def column_exists(conn: PGConn, tbl: str, col: str) -> bool:
         """, (tbl, col))
         return cur.fetchone()[0]
 
+# ----------------- batch pick -----------------
+
 def pick_batch(conn: PGConn, limit: int):
     bad_sql = """
         (p.ean !~ '^[0-9]+$' OR length(p.ean) NOT IN (8,13)
@@ -109,7 +113,7 @@ def pick_batch(conn: PGConn, limit: int):
         """, (limit,))
         return cur.fetchall()
 
-# ---------- DB updates ----------
+# ----------------- DB writes -----------------
 
 def update_success(conn: PGConn, product_id: int, ean: str, sku: Optional[str] = None) -> str:
     try:
@@ -165,8 +169,8 @@ def update_success(conn: PGConn, product_id: int, ean: str, sku: Optional[str] =
                     return "SKIP_NOT_BAD"
 
             cur.execute("SELECT id FROM products WHERE ean = %s AND id <> %s LIMIT 1;", (ean, product_id))
-            row = cur.fetchone()
-            if row:
+            dup = cur.fetchone()
+            if dup:
                 if table_exists(conn, "selver_ean_backfill_queue"):
                     cur.execute("""
                       UPDATE selver_ean_backfill_queue
@@ -174,7 +178,7 @@ def update_success(conn: PGConn, product_id: int, ean: str, sku: Optional[str] =
                              last_error = %s,
                              updated_at = now()
                        WHERE product_id = %s;
-                    """, (f"duplicate EAN {ean} already on product {row[0]}", product_id))
+                    """, (f"duplicate EAN {ean} already on product {dup[0]}", product_id))
                 conn.commit()
                 return "DUP_FOUND"
 
@@ -212,7 +216,7 @@ def update_failure(conn: PGConn, product_id: int, err: str):
     except Exception:
         conn.rollback()
 
-# ------------- page helpers -------------
+# ----------------- page helpers -----------------
 
 def _first_text(page, selectors: List[str], timeout_ms: int = 2000) -> Optional[str]:
     for sel in selectors:
@@ -272,7 +276,7 @@ def score_hit(qname: str, brand: str, amount: str, text: str) -> float:
     return s
 
 def kill_consents(page):
-    buttons = [
+    for sel in [
         "button:has-text('Nõustun')",
         "button:has-text('Luba kõik')",
         "button:has-text('Accept all')",
@@ -280,8 +284,7 @@ def kill_consents(page):
         "button:has-text('OK')",
         "[data-testid='uc-accept-all-button']",
         "[aria-label='Accept all']",
-    ]
-    for sel in buttons:
+    ]:
         try:
             if page.locator(sel).count():
                 page.click(sel, timeout=800)
@@ -289,78 +292,76 @@ def kill_consents(page):
         except Exception:
             pass
 
-def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
-    t0 = time.time()
-    while time.time() - t0 < 12:
-        kill_consents(page)
-        if looks_like_pdp(page):
-            return page.url
+def is_search_page(page) -> bool:
+    try:
+        if "/search?" in page.url:
+            return True
+        if page.locator("text=Otsingu:").count() > 0:
+            return True
+    except Exception:
+        pass
+    return False
 
-        links = []
-        for css in [
-            "[data-testid='product-grid'] a[href]",
-            "[data-testid='product-list'] a[href]",
-            ".product-list a[href]",
-            "article a[href]",
-            "a[href^='/toode/']",
-            "a[href^='/']",
-        ]:
-            try:
-                links.extend(page.locator(css).all()[:24])
-            except Exception:
-                pass
+def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
+    links = []
+    for css in [
+        "[data-testid='product-grid'] a[href]",
+        "[data-testid='product-list'] a[href]",
+        ".product-list a[href]",
+        ".product-card a[href]",
+        "article a[href]",
+        "a[href^='/toode/']",
+        "a[href^='/']",
+        "[data-href]",
+    ]:
         try:
-            links.extend(page.locator("[data-href]").all()[:24])
+            links.extend(page.locator(css).all()[:40])
         except Exception:
             pass
 
-        scored: List[Tuple[str, float]] = []
-        for a in links:
-            try:
-                href = a.get_attribute("href") or a.get_attribute("data-href") or ""
-                if not href or "/search" in href:
-                    continue
-                txt = a.inner_text() or ""
-                scored.append((href, score_hit(qname, brand, amount, txt)))
-            except Exception:
+    scored: List[Tuple[str, float]] = []
+    for a in links:
+        try:
+            href = a.get_attribute("href") or a.get_attribute("data-href") or ""
+            if not href or "/search" in href:
                 continue
+            txt = a.inner_text() or ""
+            scored.append((href, score_hit(qname, brand, amount, txt)))
+        except Exception:
+            continue
 
-        if scored:
-            scored.sort(key=lambda x: x[1], reverse=True)
-            href = scored[0][0]
-            if href.startswith("/"):
-                href = SELVER_BASE + href
-            return href
-        time.sleep(0.25)
+    if scored:
+        scored.sort(key=lambda x: x[1], reverse=True)
+        href = scored[0][0]
+        if href.startswith("/"):
+            href = SELVER_BASE + href
+        return href
     return None
 
 def _click_first_search_tile(page) -> bool:
-    selectors = [
+    for sel in [
         "[data-testid='product-grid'] a[href]",
+        "[data-testid='product-card'] a[href]",
+        ".product-card a[href]",
         ".product-list a[href]",
         "article a[href]",
         "[data-href]",
         "a[href^='/toode/']",
-    ]
-    for sel in selectors:
+    ]:
         try:
             a = page.locator(sel).first
             if a and a.count() > 0 and a.is_visible():
                 a.click(timeout=4000)
-                try:
-                    page.wait_for_selector("h1", timeout=8000)
-                except Exception:
-                    pass
-                try:
-                    page.wait_for_load_state("networkidle", timeout=6000)
-                except Exception:
-                    pass
+                try: page.wait_for_selector("h1", timeout=8000)
+                except Exception: pass
+                try: page.wait_for_load_state("networkidle", timeout=6000)
+                except Exception: pass
                 return looks_like_pdp(page) or page.locator("h1").count() > 0
         except Exception:
             continue
     return False
 
-# ----- PDP match gate -----
+# ----- PDP/title verification gate -----
 
 def _pdp_title(page) -> str:
     return (_first_text(page, ["h1", "h1.product-title", "h1[itemprop='name']"]) or "").strip()
@@ -374,7 +375,7 @@ def _pdp_matches_target(page, name: str, brand: str, amount: str) -> bool:
     want = _tokens(name)
     if brand:  want |= _tokens(brand)
     if amount: want |= _tokens(amount)
-    name_overlap = len(_tokens(name) & tset)
+    name_overlap  = len(_tokens(name) & tset)
     total_overlap = len(want & tset)
     return total_overlap >= 2 and name_overlap >= 1
 
@@ -410,25 +411,22 @@ def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str], Optional[
         return None, None, None
 
     name = (data.get("name") or "").strip() or None
-    ean = norm_ean(data.get("gtin14") or data.get("gtin13") or data.get("gtin") or data.get("ean"))
+    ean  = norm_ean(data.get("gtin14") or data.get("gtin13") or data.get("gtin") or data.get("ean"))
     sku  = (data.get("sku") or "").strip() or None
     return name, ean, sku
 
 def _wait_pdp_facts(page):
-    """Wait for facts block; scroll to trigger lazy render."""
     try:
-        page.wait_for_selector("text=Ribakood", timeout=3000)
-        return
+        page.wait_for_selector("text=Ribakood", timeout=3000); return
     except Exception:
         pass
     try:
-        page.evaluate("window.scrollBy(0, 600)")
+        page.evaluate("window.scrollBy(0, 800)")
         page.wait_for_selector("text=Ribakood", timeout=3000)
     except Exception:
         pass
 
 def _ean_sku_via_label_xpath(page) -> Tuple[Optional[str], Optional[str]]:
-    """Target Selver-like rows (Ribakood/EAN/Triipkood) robustly."""
     try:
         labels = ["ribakood", "ean", "triipkood"]
         xpaths = [
@@ -506,7 +504,6 @@ def _ean_sku_via_label_xpath(page) -> Tuple[Optional[str], Optional[str]]:
     return None, None
 
 def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
-    """Generic DOM sweep near labels (no 'grab-any-13-digits' fallback)."""
     try:
         got = page.evaluate("""
         () => {
@@ -541,66 +538,51 @@ def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
 
 def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
     sku_found: Optional[str] = None
+    try: page.wait_for_timeout(350)
+    except Exception: pass
 
-    try:
-        page.wait_for_timeout(350)
-    except Exception:
-        pass
-
-    # A) JSON-LD
+    # JSON-LD
     try:
         scripts = page.locator("script[type='application/ld+json']")
         n = scripts.count()
         for i in range(n):
             try:
                 _, ean, sku = parse_ld_product(scripts.nth(i).inner_text())
-                if sku and not sku_found:
-                    sku_found = sku
-                if ean:
-                    return ean, sku_found
-            except Exception:
-                pass
-    except Exception:
-        pass
+                if sku and not sku_found: sku_found = sku
+                if ean: return ean, sku_found
+            except Exception: pass
+    except Exception: pass
 
-    # B) meta itemprops
+    # meta itemprops
     meta_sku = _meta_content(page, ["meta[itemprop='sku']"])
-    if meta_sku and not sku_found:
-        sku_found = (meta_sku or "").strip() or None
+    if meta_sku and not sku_found: sku_found = (meta_sku or "").strip() or None
     meta_ean = _meta_content(page, ["meta[itemprop='gtin13']", "meta[itemprop='gtin']"])
     if meta_ean:
         e = norm_ean(meta_ean)
-        if e:
-            return e, sku_found
+        if e: return e, sku_found
 
-    # C) wait and attempt Selver-specific label extraction
+    # facts/labels
     _wait_pdp_facts(page)
     e_spec, s_spec = _ean_sku_via_label_xpath(page)
-    if e_spec:
-        return norm_ean(e_spec), s_spec or sku_found
+    if e_spec: return norm_ean(e_spec), s_spec or sku_found
 
-    # D) generic DOM brute force near labels
+    # DOM brute
     e_dom, s_dom = _extract_ids_dom_bruteforce(page)
-    if e_dom:
-        return norm_ean(e_dom), s_dom or sku_found
+    if e_dom: return norm_ean(e_dom), s_dom or sku_found
 
-    # E) JSON blob anywhere
+    # JSON blobs / regex (label … digits)
     try:
         html = page.content() or ""
         m = JSON_EAN.search(html)
         if m:
             e = norm_ean(m.group("d"))
-            if e:
-                return e, sku_found or s_dom
+            if e: return e, sku_found or s_dom
     except Exception:
         pass
-
-    # F) HTML regex (label … digits)
     try:
         html = page.content() or ""
         m = re.search(r"(ribakood|ean|triipkood)[\s\S]{0,800}?(\d{8,14})", html, re.I)
-        if m:
-            return norm_ean(m.group(2)), sku_found or s_dom
+        if m: return norm_ean(m.group(2)), sku_found or s_dom
     except Exception:
         pass
 
@@ -615,14 +597,51 @@ def ensure_specs_open(page):
         except Exception:
             pass
 
+# --------- unified search→open helper ---------
+
+def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
+    """On a search page, try to open a PDP (best-scored link, then first tile), with waits/scrolls."""
+    # give the grid a chance to render
+    try:
+        page.wait_for_selector("[data-testid='product-grid'], .product-list, article a[href]", timeout=6000)
+    except Exception:
+        pass
+
+    # try best-scored URL
+    hit = best_search_hit(page, name, brand, amount)
+    if hit:
+        try:
+            page.goto(hit, timeout=25000, wait_until="domcontentloaded")
+            try: page.wait_for_load_state("networkidle", timeout=9000)
+            except Exception: pass
+            if looks_like_pdp(page) or page.locator("h1").count() > 0:
+                return True
+        except Exception:
+            pass
+
+    # try clicking a tile
+    if _click_first_search_tile(page):
+        return True
+
+    # force lazy load and try again
+    try:
+        page.keyboard.press("End"); time.sleep(0.4)
+        page.keyboard.press("Home"); time.sleep(0.2)
+    except Exception:
+        pass
+    return _click_first_search_tile(page)
+
+# ----------------- main probe flow -----------------
+
 def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str], Optional[str]]:
     q_variants = []
     q_full = " ".join(x for x in [name or "", brand or "", amount or ""] if x).strip()
     if q_full: q_variants.append(q_full)
-    if name: q_variants.append(name.strip())
+    if name:   q_variants.append(name.strip())
     if brand and name: q_variants.append(f"{name} {brand}")
 
     for q in q_variants:
+        # open search
         try:
             url = SEARCH_URL.format(q=q.replace(" ", "+"))
             page.goto(url, timeout=25000, wait_until="domcontentloaded")
@@ -632,30 +651,19 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
         except PWTimeout:
             continue
 
-        if not looks_like_pdp(page):
-            hit = best_search_hit(page, name, brand, amount)
-            if hit:
-                try:
-                    page.goto(hit, timeout=25000, wait_until="domcontentloaded")
-                    try: page.wait_for_load_state("networkidle", timeout=9000)
-                    except Exception: pass
-                except Exception:
-                    pass
+        # if still on search page, try to open a PDP
+        if is_search_page(page) or not looks_like_pdp(page):
+            opened = open_best_or_first(page, name, brand, amount)
+            if not opened:
+                continue
 
-        if not looks_like_pdp(page):
-            _click_first_search_tile(page)
-
-        # ---- PDP/title verification gate ----
-        title_ok = False
-        if page.locator("h1").count() > 0 or looks_like_pdp(page):
-            title_ok = _pdp_matches_target(page, name, brand, amount)
+        # PDP/title verification gate
+        title_ok = _pdp_matches_target(page, name, brand, amount)
         if not title_ok:
-            # wrong product — try next query variant
             want = (name or "")[:60]
-            got = (_pdp_title(page) or "")[:120]
-            print(f"[WRONG_PDP] want='{want}' got='{got}'")
+            got  = (_pdp_title(page) or "")[:120]
+            print(f"[WRONG_PDP] want='{want}' got='{got}' url={page.url}")
             continue
-        # -------------------------------------
 
         ensure_specs_open(page)
         ean, sku = extract_ids_on_pdp(page)
@@ -676,13 +684,14 @@ def main():
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=HEADLESS)
-        ctx = browser.new_context()
+        # locale helps the site render Estonian labels ("Ribakood" etc.)
+        ctx = browser.new_context(locale="et-EE", viewport={"width": 1360, "height": 900})
         page = ctx.new_page()
 
         for row in batch:
-            pid = row["product_id"]
-            name = row["name"] or ""
-            brand = row["brand"] or ""
+            pid    = row["product_id"]
+            name   = row["name"]   or ""
+            brand  = row["brand"]  or ""
             amount = row["amount"] or ""
             try:
                 ean, sku = process_one(page, name, brand, amount)
