@@ -17,7 +17,7 @@
 
 from __future__ import annotations
 import os, re, sys, time, json, unicodedata
-from typing import Optional, List, Tuple, Dict, Set
+from typing import Optional, List, Tuple
 import psycopg2, psycopg2.extras
 from psycopg2.extensions import connection as PGConn
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
@@ -31,30 +31,38 @@ REQ_DELAY = float(os.getenv("REQ_DELAY", "0.6"))
 OVERWRITE_BAD = os.getenv("OVERWRITE_BAD_EANS", "0").lower() in ("1", "true", "yes")
 DB_URL = os.getenv("DATABASE_URL") or os.getenv("DATABASE_URL_PUBLIC")
 
+# How strict should the PDP name check be (0..1). 0.35 works well in practice.
+NAME_MATCH_THRESHOLD = float(os.getenv("NAME_MATCH_THRESHOLD", "0.35"))
+
 EAN_RE = re.compile(r"\b(\d{13}|\d{8})\b")
 JSON_EAN = re.compile(r'"(?:gtin14|gtin13|gtin|ean|barcode|sku)"\s*:\s*"(?P<d>\d{8,14})"', re.I)
 
-# ---------------- text helpers & per-run guards ----------------
-ET_TRANSLIT = str.maketrans({'ä':'a','ö':'o','õ':'o','ü':'u','š':'s','ž':'z'})
-def _normtxt(s: str) -> str:
-    s = (s or "").lower().translate(ET_TRANSLIT)
-    s = unicodedata.normalize("NFKD", s)
-    s = "".join(ch for ch in s if not unicodedata.combining(ch))
-    s = re.sub(r"\s+", " ", s).strip()
-    return s
-def _tokens(s: str) -> List[str]:
-    return re.findall(r"[a-z0-9]{3,}", _normtxt(s))
+def _digits(s: Optional[str]) -> str:
+    return re.sub(r"\D", "", s or "")
 
-# PDP URLs we rejected (weak/incorrect match) and URL→product mapping during this run
-SEEN_BAD_URLS: Set[str] = set()
-USED_URL_FOR: Dict[str, int] = {}
+def ean13_valid(code: str) -> bool:
+    if not re.fullmatch(r"\d{13}", code):
+        return False
+    s_odd  = sum(int(code[i]) for i in range(0, 12, 2))
+    s_even = sum(int(code[i]) * 3 for i in range(1, 12, 2))
+    chk = (10 - ((s_odd + s_even) % 10)) % 10
+    return chk == int(code[-1])
 
-# ----------------------------------------------------------------
+def ean8_valid(code: str) -> bool:
+    if not re.fullmatch(r"\d{8}", code):
+        return False
+    s = sum(int(code[i]) * (3 if i % 2 == 0 else 1) for i in range(0, 7))
+    chk = (10 - (s % 10)) % 10
+    return chk == int(code[-1])
+
+def valid_ean(code: Optional[str]) -> bool:
+    if not code: return False
+    if len(code) == 13: return ean13_valid(code)
+    if len(code) == 8:  return ean8_valid(code)
+    return False
 
 def norm_ean(s: Optional[str]) -> Optional[str]:
-    if not s:
-        return None
-    d = re.sub(r"\D", "", s)
+    d = _digits(s)
     return d if d and len(d) in (8, 13) else None
 
 def looks_bogus_ean(e: Optional[str]) -> bool:
@@ -64,13 +72,12 @@ def looks_bogus_ean(e: Optional[str]) -> bool:
     return bool(re.fullmatch(r'(\d)\1{7}', e)) or e in {"00000000", "0000000000000"}
 
 def is_bad_ean_python(e: Optional[str]) -> bool:
-    if e is None or e == "":
-        return True
-    if not e.isdigit() or len(e) not in (8, 13):
+    if not e or not e.isdigit() or len(e) not in (8, 13):
         return True
     if looks_bogus_ean(e):
         return True
-    return False
+    # require checksum to pass
+    return not valid_ean(e)
 
 def connect() -> PGConn:
     if not DB_URL:
@@ -152,7 +159,7 @@ def update_success(conn: PGConn, product_id: int, ean: str, sku: Optional[str] =
     try:
         with conn.cursor() as cur:
             # candidate sanity
-            if looks_bogus_ean(ean):
+            if is_bad_ean_python(ean):
                 if table_exists(conn, "selver_ean_backfill_queue"):
                     cur.execute("""
                       UPDATE selver_ean_backfill_queue
@@ -160,7 +167,7 @@ def update_success(conn: PGConn, product_id: int, ean: str, sku: Optional[str] =
                              last_error = %s,
                              updated_at = now()
                        WHERE product_id = %s;
-                    """, (f"bogus EAN {ean}", product_id))
+                    """, (f"bogus/invalid EAN {ean}", product_id))
                 conn.commit()
                 return "BOGUS_CANDIDATE"
 
@@ -262,6 +269,23 @@ def update_failure(conn: PGConn, product_id: int, err: str):
 
 # ------------- page helpers -------------
 
+def _normalize_text(s: str) -> str:
+    s = unicodedata.normalize("NFKD", s or "")
+    s = "".join(ch for ch in s if not unicodedata.combining(ch))
+    s = re.sub(r"[^a-z0-9 ]+", " ", s.lower())
+    return re.sub(r"\s+", " ", s).strip()
+
+def _name_similarity(qname: str, brand: str, amount: str, pdp_name: str) -> float:
+    q = _normalize_text(" ".join(x for x in [qname or "", brand or "", amount or ""] if x))
+    p = _normalize_text(pdp_name or "")
+    if not q or not p:
+        return 0.0
+    qset = set(q.split())
+    pset = set(p.split())
+    inter = len(qset & pset)
+    uni = max(1, len(qset | pset))
+    return inter / uni
+
 def _first_text(page, selectors: List[str], timeout_ms: int = 2000) -> Optional[str]:
     for sel in selectors:
         try:
@@ -292,18 +316,25 @@ def _meta_content(page, selectors: List[str]) -> Optional[str]:
 
 def looks_like_pdp(page) -> bool:
     try:
+        can = _meta_content(page, ["link[rel='canonical']"])
+        if can and "/toode/" in can:
+            return True
+    except Exception:
+        pass
+    try:
+        url_path = page.url.split("://",1)[-1]
+        if "/toode/" in url_path:
+            return True
+    except Exception:
+        pass
+    try:
         og_type = _meta_content(page, ["meta[property='og:type']"]) or ""
-        if og_type.lower() == "product":
+        if og_type.lower() == "product" and page.locator("h1").count() > 0:
             return True
     except Exception:
         pass
     try:
-        if page.locator("text=Ribakood").count() > 0:
-            return True
-    except Exception:
-        pass
-    try:
-        if page.locator("meta[itemprop='gtin13'], meta[itemprop='gtin'], meta[itemprop='sku']").count() > 0:
+        if page.locator("text=Ribakood").count() > 0 and page.locator("h1").count() > 0:
             return True
     except Exception:
         pass
@@ -319,6 +350,9 @@ def score_hit(qname: str, brand: str, amount: str, text: str) -> float:
         s += 2.0
     if amount and amount.lower() in t:
         s += 1.0
+    # slight bonus if number-unit appears (e.g., "250 g", "1 kg", "500 ml")
+    if re.search(r"\b\d+\s?(?:g|kg|ml|l|cl|dl)\b", t):
+        s += 0.5
     return s
 
 def kill_consents(page):
@@ -340,73 +374,51 @@ def kill_consents(page):
             pass
 
 def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
-    """
-    Stricter picker: collect many candidates but require a minimum score.
-    """
-    page.wait_for_selector('body', timeout=10000)
+    # Robust: tolerate different result grids; treat current page as PDP if so
+    t0 = time.time()
+    while time.time() - t0 < 12:
+        kill_consents(page)
+        if looks_like_pdp(page):
+            return page.url
 
-    # Collect both anchors and data-href tiles
-    links = []
-    for css in [
-        "[data-testid='product-grid'] a[href]",
-        "[data-testid='product-list'] a[href]",
-        ".product-list a[href]",
-        "article a[href]",
-        "a[href^='/toode/']",
-        "a[href^='/']",
-    ]:
+        # Collect both anchors and data-href tiles
+        links = []
+        for css in [
+            "[data-testid='product-grid'] a[href]",
+            "[data-testid='product-list'] a[href]",
+            ".product-list a[href]",
+            "article a[href]",
+            "a[href^='/toode/']",
+            "a[href^='/']",
+        ]:
+            try:
+                links.extend(page.locator(css).all()[:24])
+            except Exception:
+                pass
         try:
-            links.extend(page.locator(css).all()[:32])
+            links.extend(page.locator("[data-href]").all()[:24])
         except Exception:
             pass
-    try:
-        links.extend(page.locator("[data-href]").all()[:32])
-    except Exception:
-        pass
 
-    # Score
-    def _score(text: str) -> float:
-        s = 0.0
-        t = _normtxt(text)
-        for tok in set(_tokens(qname)):
-            if tok in t:
-                s += 1.0
-        b = _normtxt(brand)
-        if b and b in t:
-            s += 2.0
-        if amount:
-            m = re.search(r"(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", amount, re.I)
-            if m:
-                amt1 = _normtxt(f"{m.group(1)} {m.group(2)}")
-                amt2 = _normtxt(f"{m.group(1)}{m.group(2)}")
-                if amt1 in t or amt2 in t:
-                    s += 1.0
-        return s
-
-    scored: List[Tuple[str, float]] = []
-    for a in links:
-        try:
-            href = a.get_attribute("href") or a.get_attribute("data-href") or ""
-            if not href or "/search" in href:
+        scored: List[Tuple[str, float]] = []
+        for a in links:
+            try:
+                href = a.get_attribute("href") or a.get_attribute("data-href") or ""
+                if not href or "/search" in href:
+                    continue
+                txt = a.inner_text() or ""
+                scored.append((href, score_hit(qname, brand, amount, txt)))
+            except Exception:
                 continue
-            txt = a.inner_text() or ""
-            scored.append((href, _score(txt)))
-        except Exception:
-            continue
 
-    if not scored:
-        return None
-    scored.sort(key=lambda x: x[1], reverse=True)
-    href, top_score = scored[0]
-
-    # Minimum score: stricter when brand present
-    threshold = 2.0 if brand else 1.5
-    if top_score < threshold:
-        return None
-
-    if href.startswith("/"):
-        href = SELVER_BASE + href
-    return href
+        if scored:
+            scored.sort(key=lambda x: x[1], reverse=True)
+            href = scored[0][0]
+            if href.startswith("/"):
+                href = SELVER_BASE + href
+            return href
+        time.sleep(0.25)
+    return None
 
 def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """Return (name, ean, sku) from JSON-LD 'Product' if present."""
@@ -452,10 +464,10 @@ def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
     try:
         got = page.evaluate("""
         () => {
-          const txt = n => (n && n.textContent || '').replace(/\\s+/g,' ').trim();
+          const txt = n => (n && n.textContent || '').replace(/\s+/g,' ').trim();
           const pickDigits = s => {
             if (!s) return null;
-            const m = s.match(/(\\d{13}|\\d{8})/);
+            const m = s.match(/(\d{13}|\d{8})/);
             return m ? m[1] : null;
           };
           const pickSKU = s => {
@@ -471,8 +483,7 @@ def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
             const t = txt(el);
             if (!t) continue;
 
-            if (/\\b(ribakood|ean|triipkood)\\b/i.test(t)) {
-              // nearby zones: self, parent, next/prev siblings
+            if (/\b(ribakood|ean|triipkood)\b/i.test(t)) {
               const zone = [el, el.parentElement, el.nextElementSibling, el.previousElementSibling];
               for (const z of zone) {
                 const tt = txt(z);
@@ -484,12 +495,7 @@ def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
             if (ean && sku) break;
           }
 
-          // last resort: any 13/8 digits in the whole body
-          if (!ean) {
-            const body = txt(document.body);
-            const m = body.match(/(\\d{13}|\\d{8})/);
-            if (m) ean = m[1];
-          }
+          // No label seen? don't guess a random 13 digits from the whole page.
           return { ean, sku };
         }
         """)
@@ -500,6 +506,30 @@ def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
         return e, s
     except Exception:
         return None, None
+
+def _pdp_name(page) -> str:
+    # prefer JSON-LD name, else H1
+    try:
+        scripts = page.locator("script[type='application/ld+json']")
+        n = scripts.count()
+        for i in range(n):
+            try:
+                name, _, _ = parse_ld_product(scripts.nth(i).inner_text())
+                if name:
+                    return name
+            except Exception:
+                pass
+    except Exception:
+        pass
+    try:
+        h = page.locator("h1").first
+        if h and h.count() > 0:
+            t = (h.inner_text() or "").strip()
+            if t:
+                return t
+    except Exception:
+        pass
+    return ""
 
 def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
     """Return (ean, sku) from PDP using several strategies."""
@@ -520,7 +550,9 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
                 if sku and not sku_found:
                     sku_found = sku
                 if ean:
-                    return ean, sku_found
+                    e = norm_ean(ean)
+                    if e and valid_ean(e) and not looks_bogus_ean(e):
+                        return e, sku_found
             except Exception:
                 pass
     except Exception:
@@ -533,31 +565,35 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
     meta_ean = _meta_content(page, ["meta[itemprop='gtin13']", "meta[itemprop='gtin']"])
     if meta_ean:
         e = norm_ean(meta_ean)
-        if e:
+        if e and valid_ean(e) and not looks_bogus_ean(e):
             return e, sku_found
 
     # C) DOM brute-force near labels (Ribakood/EAN/Triipkood + SKU/Tootekood)
     e_dom, s_dom = _extract_ids_dom_bruteforce(page)
     if e_dom:
-        return norm_ean(e_dom), s_dom or sku_found
+        e = norm_ean(e_dom)
+        if e and valid_ean(e) and not looks_bogus_ean(e):
+            return e, s_dom or sku_found
 
-    # D) JSON blob anywhere
+    # D) JSON blob anywhere (still require validation)
     try:
         html = page.content() or ""
         m = JSON_EAN.search(html)
         if m:
             e = norm_ean(m.group("d"))
-            if e:
+            if e and valid_ean(e) and not looks_bogus_ean(e):
                 return e, sku_found or s_dom
     except Exception:
         pass
 
-    # E) HTML regex tolerant of arbitrary markup between label and digits
+    # E) HTML regex tolerant of arbitrary markup between label and digits (still requires label)
     try:
         html = page.content() or ""
         m = re.search(r"(ribakood|ean|triipkood)[\s\S]{0,600}?(\d{8,14})", html, re.I)
         if m:
-            return norm_ean(m.group(2)), sku_found or s_dom
+            e = norm_ean(m.group(2))
+            if e and valid_ean(e) and not looks_bogus_ean(e):
+                return e, sku_found or s_dom
     except Exception:
         pass
 
@@ -572,23 +608,8 @@ def ensure_specs_open(page):
         except Exception:
             pass
 
-def _title_ok(page, name: str, brand: str, amount: str) -> bool:
-    """Validate we are on the intended PDP by checking title vs. name/brand/amount."""
-    title = (_first_text(page, ["h1", "meta[property='og:title']"]) or "").strip()
-    t = _normtxt(title)
-    if not t:
-        return False
-    b = _normtxt(brand)
-    if b and b not in t:
-        return False
-    want = [tok for tok in _tokens(name) if tok and tok != b][:8]
-    hits = sum(1 for tok in want if tok in t)
-    if hits < max(2, int(round(len(want) * 0.5))):
-        return False
-    # amount: soft signal only (don’t fail hard)
-    return True
-
-def process_one(page, name: str, brand: str, amount: str, pid: Optional[int] = None) -> Tuple[Optional[str], Optional[str]]:
+def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str], Optional[str]]:
+    # build several query variants
     q_variants = []
     q_full = " ".join(x for x in [name or "", brand or "", amount or ""] if x).strip()
     if q_full:
@@ -612,34 +633,32 @@ def process_one(page, name: str, brand: str, amount: str, pid: Optional[int] = N
 
         if not looks_like_pdp(page):
             hit = best_search_hit(page, name, brand, amount)
-            if not hit or hit in SEEN_BAD_URLS:
+            if not hit:
                 continue
-
-            # avoid reusing a PDP URL for a different product in the same run
-            if pid is not None and USED_URL_FOR.get(hit) not in (None, pid):
-                continue
-
             page.goto(hit, timeout=20000, wait_until="load")
             try:
                 page.wait_for_load_state("networkidle", timeout=8000)
             except Exception:
                 pass
-        else:
-            hit = page.url
 
-        # Validate PDP title before extracting IDs
-        if not _title_ok(page, name, brand, amount):
-            SEEN_BAD_URLS.add(hit)
+        if not looks_like_pdp(page):
+            # not a product page, try next query variant
             continue
 
-        if pid is not None:
-            USED_URL_FOR[hit] = pid
-
         ensure_specs_open(page)
+
+        # sanity: PDP name should roughly match our query, otherwise skip
+        pdp_name = _pdp_name(page)
+        if pdp_name:
+            sim = _name_similarity(name or "", brand or "", amount or "", pdp_name)
+            if sim < NAME_MATCH_THRESHOLD:
+                # low confidence match → skip this hit
+                continue
+
         ean, sku = extract_ids_on_pdp(page)
         if ean:
             ean = norm_ean(ean)
-            if not looks_bogus_ean(ean):
+            if ean and valid_ean(ean) and not looks_bogus_ean(ean):
                 return ean, (sku or None)
 
     return None, None
@@ -654,7 +673,14 @@ def main():
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=HEADLESS)
-        ctx = browser.new_context()
+        ctx = browser.new_context(
+            locale="et-EE",
+            user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                        "AppleWebKit/537.36 (KHTML, like Gecko) "
+                        "Chrome/124.0.0.0 Safari/537.36"),
+            extra_http_headers={"Accept-Language": "et-EE,et;q=0.9,en-US;q=0.8,en;q=0.7"},
+            ignore_https_errors=True,
+        )
         page = ctx.new_page()
 
         for row in batch:
@@ -663,13 +689,13 @@ def main():
             brand = row["brand"] or ""
             amount = row["amount"] or ""
             try:
-                ean, sku = process_one(page, name, brand, amount, pid=pid)
+                ean, sku = process_one(page, name, brand, amount)
                 if ean:
                     status = update_success(conn, pid, ean, sku)
                     tag = "OK" if status == "OK" else status
                     print(f"[{tag}] id={pid} ← EAN {ean}{(' | SKU ' + sku) if sku else ''}")
                 else:
-                    update_failure(conn, pid, "ean not found or bogus")
+                    update_failure(conn, pid, "ean not found or low-confidence match")
                     print(f"[MISS] id={pid} name='{name}'")
             except Exception as e:
                 conn.rollback()
