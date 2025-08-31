@@ -1,5 +1,5 @@
 # scripts/selver_probe_ean_pw.py
-# Purpose: Backfill missing EANs for Selver products (no CSV required)
+# Purpose: Backfill missing EANs (and SKU if present) for Selver products (no CSV required)
 #
 # Usage:
 #   pip install playwright psycopg2-binary
@@ -17,8 +17,8 @@
 # Behavior:
 #   - Prefer rows from selver_ean_backfill_queue if the table exists.
 #   - Else, pull Selver products missing EAN directly from products/prices/stores.
-#   - For each row: search Selver by "<name> <brand> <amount>" → open best hit → parse EAN.
-#   - Update products.ean. Record attempts/errors to the optional queue.
+#   - For each row: search Selver by "<name> <brand> <amount>" → open best hit → parse EAN+SKU.
+#   - Update products.ean and products.sku (if column exists). Record attempts/errors to the optional queue.
 
 from __future__ import annotations
 import os, re, sys, time, json
@@ -62,6 +62,17 @@ def table_exists(conn: PGConn, tbl: str) -> bool:
         """, (tbl,))
         return cur.fetchone()[0]
 
+def column_exists(conn: PGConn, tbl: str, col: str) -> bool:
+    with conn.cursor() as cur:
+        cur.execute("""
+          SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.columns
+            WHERE table_name=%s AND column_name=%s
+          );
+        """, (tbl, col))
+        return cur.fetchone()[0]
+
 def pick_batch(conn: PGConn, limit: int):
     """Prefer queue if present; otherwise query products directly."""
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
@@ -98,9 +109,12 @@ def pick_batch(conn: PGConn, limit: int):
         """, (limit,))
         return cur.fetchall()
 
-def update_success(conn: PGConn, product_id: int, ean: str):
+def update_success(conn: PGConn, product_id: int, ean: str, sku: Optional[str] = None):
     with conn.cursor() as cur:
-        cur.execute("UPDATE products SET ean = %s WHERE id = %s;", (ean, product_id))
+        if sku and column_exists(conn, "products", "sku"):
+            cur.execute("UPDATE products SET ean = %s, sku = %s WHERE id = %s;", (ean, sku, product_id))
+        else:
+            cur.execute("UPDATE products SET ean = %s WHERE id = %s;", (ean, product_id))
         if table_exists(conn, "selver_ean_backfill_queue"):
             cur.execute("""
               UPDATE selver_ean_backfill_queue
@@ -241,12 +255,12 @@ def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
         time.sleep(0.25)
     return None
 
-def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str]]:
-    """Return (name, ean) from JSON-LD 'Product' if present."""
+def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    """Return (name, ean, sku) from JSON-LD 'Product' if present."""
     try:
         data = json.loads(text.strip())
     except Exception:
-        return None, None
+        return None, None, None
 
     def pick(d):
         if isinstance(d, list) and d:
@@ -255,7 +269,7 @@ def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str]]:
 
     data = pick(data)
     if not isinstance(data, dict):
-        return None, None
+        return None, None, None
 
     def is_product(d: dict) -> bool:
         t = d.get("@type")
@@ -269,62 +283,121 @@ def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str]]:
                 break
 
     if not is_product(data):
-        return None, None
+        return None, None, None
 
     name = (data.get("name") or "").strip() or None
-    ean = norm_ean(
-        data.get("gtin14") or data.get("gtin13") or data.get("gtin") or data.get("ean") or data.get("sku")
-    )
-    return name, ean
+    ean = norm_ean(data.get("gtin14") or data.get("gtin13") or data.get("gtin") or data.get("ean"))
+    sku  = (data.get("sku") or "").strip() or None
+    return name, ean, sku
 
-def extract_ean_on_pdp(page) -> Optional[str]:
-    # 1) JSON-LD blocks
+def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
+    """Return (ean, sku) from PDP using several strategies."""
+    sku_found: Optional[str] = None
+
+    # small settle
+    try:
+        page.wait_for_timeout(300)
+    except Exception:
+        pass
+
+    # A) JSON-LD
     try:
         scripts = page.locator("script[type='application/ld+json']")
         n = scripts.count()
         for i in range(n):
             try:
-                name, ean = parse_ld_product(scripts.nth(i).inner_text())
+                _, ean, sku = parse_ld_product(scripts.nth(i).inner_text())
+                if sku and not sku_found:
+                    sku_found = sku
                 if ean:
-                    return ean
+                    return ean, sku_found
             except Exception:
                 pass
     except Exception:
         pass
 
-    # 2) meta itemprops
-    meta_val = _meta_content(page, [
-        "meta[itemprop='gtin13']",
-        "meta[itemprop='gtin']",
-        "meta[itemprop='sku']",
-    ])
-    if meta_val:
-        e = norm_ean(meta_val)
+    # B) meta itemprops
+    meta_sku = _meta_content(page, ["meta[itemprop='sku']"])
+    if meta_sku and not sku_found:
+        sku_found = (meta_sku or "").strip() or None
+    meta_ean = _meta_content(page, ["meta[itemprop='gtin13']", "meta[itemprop='gtin']"])
+    if meta_ean:
+        e = norm_ean(meta_ean)
         if e:
-            return e
+            return e, sku_found
 
-    # 3) any script JSON with known keys
+    # C) explicit label-based lookup (Ribakood/EAN/Triipkood + SKU/Tootekood)
+    label_xpaths = [
+        "//*[contains(translate(normalize-space(text()), 'EANRIBAKOODTRIIPKOOD', 'eanribakoodtriipkood'), 'ribakood')]",
+        "//*[contains(translate(normalize-space(text()), 'EANRIBAKOODTRIIPKOOD', 'eanribakoodtriipkood'), 'ean')]",
+        "//*[contains(translate(normalize-space(text()), 'EANRIBAKOODTRIIPKOOD', 'eanribakoodtriipkood'), 'triipkood')]",
+    ]
+    sku_xpaths = [
+        "//*[contains(translate(normalize-space(text()), 'SKUTOOTEKOOD', 'skutootekood'), 'sku')]",
+        "//*[contains(translate(normalize-space(text()), 'SKUTOOTEKOOD', 'skutootekood'), 'tootekood')]",
+    ]
+
+    # capture SKU near labels
+    for xp in sku_xpaths:
+        try:
+            el = page.locator(f"xpath={xp}").first
+            if el.count() > 0 and not sku_found:
+                for c in [el, el.locator("xpath=.."), el.locator("xpath=following-sibling::*[1]")]:
+                    try:
+                        txt = (c.inner_text(timeout=800) or "").strip()
+                        if txt:
+                            m = re.search(r'([A-Z0-9\-]{6,})', txt, re.I)
+                            if m:
+                                sku_found = m.group(1)
+                                break
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
+    # capture EAN near labels
+    for xp in label_xpaths:
+        try:
+            el = page.locator(f"xpath={xp}").first
+            if el.count() > 0:
+                for c in [
+                    el, el.locator("xpath=.."), el.locator("xpath=../.."),
+                    el.locator("xpath=following-sibling::*[1]"),
+                    el.locator("xpath=following-sibling::*[2]"),
+                    el.locator("xpath=preceding-sibling::*[1]")
+                ]:
+                    try:
+                        txt = c.inner_text(timeout=800) or ""
+                        m = EAN_RE.search(txt)
+                        if m:
+                            return m.group(1), sku_found
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
+    # D) structured JSON anywhere
     try:
         html = page.content() or ""
         m = JSON_EAN.search(html)
         if m:
             e = norm_ean(m.group("d"))
             if e:
-                return e
+                return e, sku_found
     except Exception:
         pass
 
-    # 4) visible text search (labels like Ribakood / EAN / Triipkood)
+    # E) full-page fallback
     try:
         full = page.text_content("body") or ""
         nums = EAN_RE.findall(full)
         if nums:
             e13 = [x for x in nums if len(x) == 13]
-            return e13[0] if e13 else nums[0]
+            return (e13[0] if e13 else nums[0]), sku_found
     except Exception:
         pass
 
-    return None
+    return None, sku_found
 
 def ensure_specs_open(page):
     for sel in ["button:has-text('Tooteinfo')", "button:has-text('Lisainfo')"]:
@@ -335,7 +408,7 @@ def ensure_specs_open(page):
         except Exception:
             pass
 
-def process_one(page, name: str, brand: str, amount: str) -> Optional[str]:
+def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str], Optional[str]]:
     # Try multiple query variants to improve hit rate
     q_variants = []
     q_full = " ".join(x for x in [name or "", brand or "", amount or ""] if x).strip()
@@ -369,11 +442,11 @@ def process_one(page, name: str, brand: str, amount: str) -> Optional[str]:
                 pass
 
         ensure_specs_open(page)
-        ean = extract_ean_on_pdp(page)
+        ean, sku = extract_ids_on_pdp(page)
         if ean:
-            return norm_ean(ean)
+            return norm_ean(ean), (sku or None)
 
-    return None
+    return None, None
 
 def main():
     conn = connect()
@@ -394,13 +467,13 @@ def main():
             brand = row["brand"] or ""
             amount = row["amount"] or ""
             try:
-                ean = process_one(page, name, brand, amount)
+                ean, sku = process_one(page, name, brand, amount)
                 if ean:
-                    update_success(conn, pid, ean)
-                    print(f"[OK] id={pid} ← {ean}")
+                    update_success(conn, pid, ean, sku)
+                    print(f"[OK] id={pid} ← EAN {ean}{(' | SKU ' + sku) if sku else ''}")
                 else:
                     update_failure(conn, pid, "ean not found")
-                    print(f"[MISS] id={pid} name='{name}'")
+                    print(f"[MISS] id={pid} name='{name}'{(' (SKU seen: ' + sku + ')') if sku else ''}")
             except Exception as e:
                 update_failure(conn, pid, str(e))
                 print(f"[FAIL] id={pid} err={e}", file=sys.stderr)
