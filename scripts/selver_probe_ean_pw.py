@@ -153,7 +153,6 @@ def update_success(conn: PGConn, product_id: int, ean: str, sku: Optional[str] =
 
             if prev:
                 if prev == ean:
-                    # Nothing to do
                     if table_exists(conn, "selver_ean_backfill_queue"):
                         cur.execute("""
                           UPDATE selver_ean_backfill_queue
