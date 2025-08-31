@@ -147,7 +147,7 @@ def update_success(conn: PGConn, product_id: int, ean: str, sku: Optional[str] =
                 conn.commit()
                 return "BOGUS_CANDIDATE"
 
-            # what is currently on the product?
+            # current value?
             cur.execute("SELECT ean FROM products WHERE id = %s;", (product_id,))
             prev = (cur.fetchone() or [None])[0]
 
@@ -189,7 +189,7 @@ def update_success(conn: PGConn, product_id: int, ean: str, sku: Optional[str] =
                     conn.commit()
                     return "SKIP_NOT_BAD"
 
-            # Avoid creating a duplicate EAN on another product
+            # Avoid duplicates on another product
             cur.execute("SELECT id FROM products WHERE ean = %s AND id <> %s LIMIT 1;", (ean, product_id))
             row = cur.fetchone()
             if row:
@@ -329,30 +329,38 @@ def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
         kill_consents(page)
         if looks_like_pdp(page):
             return page.url
-        candidate_sets = [
+
+        # Collect both anchors and data-href tiles
+        links = []
+        for css in [
             "[data-testid='product-grid'] a[href]",
             "[data-testid='product-list'] a[href]",
             ".product-list a[href]",
             "article a[href]",
             "a[href^='/toode/']",
             "a[href^='/']",
-        ]
-        links = []
-        for css in candidate_sets:
+        ]:
             try:
                 links.extend(page.locator(css).all()[:24])
             except Exception:
                 pass
+        # data-href tiles
+        try:
+            links.extend(page.locator("[data-href]").all()[:24])
+        except Exception:
+            pass
+
         scored: List[Tuple[str, float]] = []
         for a in links:
             try:
-                href = a.get_attribute("href") or ""
+                href = a.get_attribute("href") or a.get_attribute("data-href") or ""
                 if not href or "/search" in href:
                     continue
                 txt = a.inner_text() or ""
                 scored.append((href, score_hit(qname, brand, amount, txt)))
             except Exception:
                 continue
+
         if scored:
             scored.sort(key=lambda x: x[1], reverse=True)
             href = scored[0][0]
@@ -397,12 +405,70 @@ def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str], Optional[
     sku  = (data.get("sku") or "").strip() or None
     return name, ean, sku
 
+def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
+    """
+    Very robust DOM pass:
+    - find any node mentioning ribakood/ean/triipkood and grab closest 8/13 digits
+    - try to pick SKU/Tootekood nearby as well
+    """
+    try:
+        got = page.evaluate("""
+        () => {
+          const txt = n => (n && n.textContent || '').replace(/\\s+/g,' ').trim();
+          const pickDigits = s => {
+            if (!s) return null;
+            const m = s.match(/(\\d{13}|\\d{8})/);
+            return m ? m[1] : null;
+          };
+          const pickSKU = s => {
+            if (!s) return null;
+            const m = s.match(/([A-Z0-9_-]{6,})/i);
+            return m ? m[1] : null;
+          };
+
+          let ean = null, sku = null;
+
+          const nodes = Array.from(document.querySelectorAll('div,span,p,li,td,th,dd,dt'));
+          for (const el of nodes) {
+            const t = txt(el);
+            if (!t) continue;
+
+            if (/\\b(ribakood|ean|triipkood)\\b/i.test(t)) {
+              // nearby zones: self, parent, next/prev siblings
+              const zone = [el, el.parentElement, el.nextElementSibling, el.previousElementSibling];
+              for (const z of zone) {
+                const tt = txt(z);
+                if (!ean) ean = pickDigits(tt);
+                if (!sku) sku = pickSKU(tt);
+                if (ean && sku) break;
+              }
+            }
+            if (ean && sku) break;
+          }
+
+          // last resort: any 13/8 digits in the whole body
+          if (!ean) {
+            const body = txt(document.body);
+            const m = body.match(/(\\d{13}|\\d{8})/);
+            if (m) ean = m[1];
+          }
+          return { ean, sku };
+        }
+        """)
+        if not got:
+            return None, None
+        e = got.get("ean") or None
+        s = got.get("sku") or None
+        return e, s
+    except Exception:
+        return None, None
+
 def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
     """Return (ean, sku) from PDP using several strategies."""
     sku_found: Optional[str] = None
 
     try:
-        page.wait_for_timeout(300)
+        page.wait_for_timeout(250)
     except Exception:
         pass
 
@@ -432,76 +498,32 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
         if e:
             return e, sku_found
 
-    # C) labels: Ribakood/EAN/Triipkood + SKU/Tootekood
-    label_xpaths = [
-        "//*[contains(translate(normalize-space(text()), 'EANRIBAKOODTRIIPKOOD', 'eanribakoodtriipkood'), 'ribakood')]",
-        "//*[contains(translate(normalize-space(text()), 'EANRIBAKOODTRIIPKOOD', 'eanribakoodtriipkood'), 'ean')]",
-        "//*[contains(translate(normalize-space(text()), 'EANRIBAKOODTRIIPKOOD', 'eanribakoodtriipkood'), 'triipkood')]",
-    ]
-    sku_xpaths = [
-        "//*[contains(translate(normalize-space(text()), 'SKUTOOTEKOOD', 'skutootekood'), 'sku')]",
-        "//*[contains(translate(normalize-space(text()), 'SKUTOOTEKOOD', 'skutootekood'), 'tootekood')]",
-    ]
+    # C) DOM brute-force near labels (Ribakood/EAN/Triipkood + SKU/Tootekood)
+    e_dom, s_dom = _extract_ids_dom_bruteforce(page)
+    if e_dom:
+        return norm_ean(e_dom), s_dom or sku_found
 
-    for xp in sku_xpaths:
-        try:
-            el = page.locator(f"xpath={xp}").first
-            if el.count() > 0 and not sku_found:
-                for c in [el, el.locator("xpath=.."), el.locator("xpath=following-sibling::*[1]")]:
-                    try:
-                        txt = (c.inner_text(timeout=800) or "").strip()
-                        if txt:
-                            m = re.search(r'([A-Z0-9\-]{6,})', txt, re.I)
-                            if m:
-                                sku_found = m.group(1)
-                                break
-                    except Exception:
-                        pass
-        except Exception:
-            pass
-
-    for xp in label_xpaths:
-        try:
-            el = page.locator(f"xpath={xp}").first
-            if el.count() > 0:
-                for c in [
-                    el, el.locator("xpath=.."), el.locator("xpath=../.."),
-                    el.locator("xpath=following-sibling::*[1]"),
-                    el.locator("xpath=following-sibling::*[2]"),
-                    el.locator("xpath=preceding-sibling::*[1]")
-                ]:
-                    try:
-                        txt = c.inner_text(timeout=800) or ""
-                        m = EAN_RE.search(txt)
-                        if m:
-                            return m.group(1), sku_found
-                    except Exception:
-                        pass
-        except Exception:
-            pass
-
-    # D) structured JSON anywhere
+    # D) JSON blob anywhere
     try:
         html = page.content() or ""
         m = JSON_EAN.search(html)
         if m:
             e = norm_ean(m.group("d"))
             if e:
-                return e, sku_found
+                return e, sku_found or s_dom
     except Exception:
         pass
 
-    # E) full-page fallback
+    # E) HTML regex tolerant of arbitrary markup between label and digits
     try:
-        full = page.text_content("body") or ""
-        nums = EAN_RE.findall(full)
-        if nums:
-            e13 = [x for x in nums if len(x) == 13]
-            return (e13[0] if e13 else nums[0]), sku_found
+        html = page.content() or ""
+        m = re.search(r"(ribakood|ean|triipkood)[\s\S]{0,600}?(\d{8,14})", html, re.I)
+        if m:
+            return norm_ean(m.group(2)), sku_found or s_dom
     except Exception:
         pass
 
-    return None, sku_found
+    return None, sku_found or s_dom
 
 def ensure_specs_open(page):
     for sel in ["button:has-text('Tooteinfo')", "button:has-text('Lisainfo')"]:
