@@ -17,9 +17,9 @@ REQ_DELAY = float(os.getenv("REQ_DELAY", "0.6"))
 OVERWRITE_BAD = os.getenv("OVERWRITE_BAD_EANS", "0").lower() in ("1", "true", "yes")
 DB_URL = os.getenv("DATABASE_URL") or os.getenv("DATABASE_URL_PUBLIC")
 
-EAN_RE = re.compile(r"\b(\d{8}|\d{13})\b")
-# SAFETY PATCH: do NOT match "sku" keys here to avoid pulling unrelated numbers
-JSON_EAN = re.compile(r'"(?:gtin14|gtin13|gtin|ean|barcode)"\s*:\s*"(?P<d>\d{8,14})"', re.I)
+# --- patterns ---
+EAN_RE   = re.compile(r"\b(\d{13}|\d{8})\b")
+JSON_EAN = re.compile(r'"(?:gtin14|gtin13|gtin|ean|barcode|sku)"\s*:\s*"(?P<d>\d{8,14})"', re.I)
 
 def norm_ean(s: Optional[str]) -> Optional[str]:
     if not s:
@@ -30,6 +30,7 @@ def norm_ean(s: Optional[str]) -> Optional[str]:
 def looks_bogus_ean(e: Optional[str]) -> bool:
     if not e:
         return False
+    # 8 identical digits or all zeros
     return bool(re.fullmatch(r'(\d)\1{7}', e)) or e in {"00000000", "0000000000000"}
 
 def is_bad_ean_python(e: Optional[str]) -> bool:
@@ -40,6 +41,8 @@ def is_bad_ean_python(e: Optional[str]) -> bool:
     if looks_bogus_ean(e):
         return True
     return False
+
+# ----------------- DB helpers -----------------
 
 def connect() -> PGConn:
     if not DB_URL:
@@ -69,6 +72,7 @@ def column_exists(conn: PGConn, tbl: str, col: str) -> bool:
         return cur.fetchone()[0]
 
 def pick_batch(conn: PGConn, limit: int):
+    """Prefer queue if present; otherwise query products directly."""
     bad_sql = """
         (p.ean !~ '^[0-9]+$' OR length(p.ean) NOT IN (8,13)
          OR p.ean ~ '^([0-9])\\1{7}$'
@@ -110,11 +114,12 @@ def pick_batch(conn: PGConn, limit: int):
         """, (limit,))
         return cur.fetchall()
 
-# ---------- DB updates ----------
+# -------- duplicate-aware, rollback-safe updates ----------
 
 def update_success(conn: PGConn, product_id: int, ean: str, sku: Optional[str] = None) -> str:
     try:
         with conn.cursor() as cur:
+            # sanity
             if looks_bogus_ean(ean):
                 if table_exists(conn, "selver_ean_backfill_queue"):
                     cur.execute("""
@@ -127,6 +132,7 @@ def update_success(conn: PGConn, product_id: int, ean: str, sku: Optional[str] =
                 conn.commit()
                 return "BOGUS_CANDIDATE"
 
+            # current value?
             cur.execute("SELECT ean FROM products WHERE id = %s;", (product_id,))
             prev = (cur.fetchone() or [None])[0]
 
@@ -142,6 +148,7 @@ def update_success(conn: PGConn, product_id: int, ean: str, sku: Optional[str] =
                         """, (product_id,))
                     conn.commit()
                     return "EXISTS"
+
                 if not OVERWRITE_BAD:
                     if table_exists(conn, "selver_ean_backfill_queue"):
                         cur.execute("""
@@ -153,6 +160,8 @@ def update_success(conn: PGConn, product_id: int, ean: str, sku: Optional[str] =
                         """, (f"has existing EAN {prev}, overwrite disabled", product_id))
                     conn.commit()
                     return "SKIP_PRESENT"
+
+                # only overwrite if the existing really looks bad
                 if not is_bad_ean_python(prev):
                     if table_exists(conn, "selver_ean_backfill_queue"):
                         cur.execute("""
@@ -165,6 +174,7 @@ def update_success(conn: PGConn, product_id: int, ean: str, sku: Optional[str] =
                     conn.commit()
                     return "SKIP_NOT_BAD"
 
+            # avoid duplicates
             cur.execute("SELECT id FROM products WHERE ean = %s AND id <> %s LIMIT 1;", (ean, product_id))
             row = cur.fetchone()
             if row:
@@ -179,8 +189,12 @@ def update_success(conn: PGConn, product_id: int, ean: str, sku: Optional[str] =
                 conn.commit()
                 return "DUP_FOUND"
 
+            # perform update
             if sku and column_exists(conn, "products", "sku"):
-                cur.execute("UPDATE products SET ean = %s, sku = COALESCE(%s, sku) WHERE id = %s;", (ean, sku, product_id))
+                cur.execute(
+                    "UPDATE products SET ean = %s, sku = COALESCE(%s, sku) WHERE id = %s;",
+                    (ean, sku, product_id)
+                )
             else:
                 cur.execute("UPDATE products SET ean = %s WHERE id = %s;", (ean, product_id))
 
@@ -237,7 +251,7 @@ def looks_like_pdp(page) -> bool:
     except Exception:
         pass
     try:
-        if page.locator("text=Ribakood").count() > 0:
+        if page.locator("text=/\\bRibakood\\b/i").count() > 0:
             return True
     except Exception:
         pass
@@ -278,7 +292,17 @@ def kill_consents(page):
         except Exception:
             pass
 
+def _scroll(page):
+    try:
+        page.evaluate("window.scrollTo(0,0)")
+        page.wait_for_timeout(150)
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        page.wait_for_timeout(350)
+    except Exception:
+        pass
+
 def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
+    # Try to pick the most likely PDP link
     t0 = time.time()
     while time.time() - t0 < 12:
         kill_consents(page)
@@ -295,11 +319,11 @@ def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
             "a[href^='/']",
         ]:
             try:
-                links.extend(page.locator(css).all()[:24])
+                links.extend(page.locator(css).all()[:32])
             except Exception:
                 pass
         try:
-            links.extend(page.locator("[data-href]").all()[:24])
+            links.extend(page.locator("[data-href]").all()[:32])
         except Exception:
             pass
 
@@ -324,7 +348,7 @@ def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
     return None
 
 def _click_first_search_tile(page) -> bool:
-    """As a fallback, physically click the top tile and wait for PDP bits."""
+    """If still on search page, click the first visible result tile."""
     selectors = [
         "[data-testid='product-grid'] a[href]",
         ".product-list a[href]",
@@ -384,16 +408,50 @@ def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str], Optional[
     sku  = (data.get("sku") or "").strip() or None
     return name, ean, sku
 
-def _visible_ribakood_has(page, digits: str) -> bool:
-    """Return True if the page visibly shows 'Ribakood … <digits>' on the PDP."""
+def _ean_sku_by_label_locators(page) -> Tuple[Optional[str], Optional[str]]:
+    """
+    Directly find 'Ribakood/EAN/Triipkood' labels and read digits from the same row/sibling.
+    """
     try:
-        body = (page.text_content("body") or "").replace("\xa0", " ")
-        return re.search(r"\bribakood\b", body, re.I) and re.search(rf"\b{re.escape(digits)}\b", body)
+        # try to ensure details are in DOM
+        _scroll(page)
+        page.wait_for_timeout(150)
+        for lab in ["Ribakood", "EAN", "Triipkood"]:
+            loc = page.locator(f"text=/{lab}/i").first
+            if loc and loc.count() > 0:
+                # combine several close containers
+                candidates = [
+                    loc,
+                    loc.locator("xpath=.."),
+                    loc.locator("xpath=../.."),
+                    loc.locator("xpath=following-sibling::*[1]"),
+                    loc.locator("xpath=following-sibling::*[2]"),
+                ]
+                for c in candidates:
+                    try:
+                        if c.count() == 0:
+                            continue
+                        txt = (c.inner_text(timeout=800) or "").strip()
+                        m = EAN_RE.search(txt)
+                        if m:
+                            ean = m.group(1)
+                            # try SKU near by
+                            sku = None
+                            try:
+                                txt2 = (loc.locator("xpath=../..").inner_text(timeout=400) or "") + " " + txt
+                                m2 = re.search(r"([A-Z0-9_-]{6,})", txt2, re.I)
+                                sku = m2.group(1) if m2 else None
+                            except Exception:
+                                pass
+                            return ean, sku
+                    except Exception:
+                        continue
     except Exception:
-        return False
+        pass
+    return None, None
 
 def _ean_sku_from_specs(page) -> Tuple[Optional[str], Optional[str]]:
-    """Find a 'Ribakood' style row and extract digits from the same row / siblings."""
+    """Generic spec-row search."""
     try:
         got = page.evaluate("""
         () => {
@@ -410,7 +468,6 @@ def _ean_sku_from_specs(page) -> Tuple[Optional[str], Optional[str]]:
             if (!t) continue;
             if (/(^|\\b)(ribakood|ean|triipkood)(\\b|:)/i.test(t)) {
               ean = digit(t) || ean;
-
               const near = [row, row.parentElement, row.nextElementSibling, row.previousElementSibling];
               for (const n of near) {
                 const tn = getTxt(n);
@@ -420,7 +477,6 @@ def _ean_sku_from_specs(page) -> Tuple[Optional[str], Optional[str]]:
               if (ean) break;
             }
           }
-
           return { ean, sku };
         }
         """)
@@ -431,16 +487,12 @@ def _ean_sku_from_specs(page) -> Tuple[Optional[str], Optional[str]]:
     return None, None
 
 def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
-    """
-    DOM-only fallback near visible labels.
-    SAFETY PATCH: no full-body scraping; only values near 'Ribakood/EAN/Triipkood'.
-    """
     try:
         got = page.evaluate("""
         () => {
           const txt = n => (n && n.textContent || '').replace(/\\s+/g,' ').trim();
-          const digits = s => { const m = s && s.match(/(\\d{13}|\\d{8})/); return m ? m[1] : null; };
-          const skuRx = /([A-Z0-9_-]{6,})/i;
+          const pickDigits = s => { const m = s && s.match(/(\\d{13}|\\d{8})/); return m ? m[1] : null; };
+          const pickSKU = s => { const m = s && s.match(/([A-Z0-9_-]{6,})/i); return m ? m[1] : null; };
 
           let ean = null, sku = null;
           const nodes = Array.from(document.querySelectorAll('div,span,p,li,td,th,dd,dt'));
@@ -451,11 +503,17 @@ def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
               const zone = [el, el.parentElement, el.nextElementSibling, el.previousElementSibling];
               for (const z of zone) {
                 const tt = txt(z);
-                if (!ean) ean = digits(tt);
-                if (!sku) { const m = tt && tt.match(skuRx); if (m) sku = m[1]; }
+                if (!ean) ean = pickDigits(tt);
+                if (!sku) sku = pickSKU(tt);
+                if (ean && sku) break;
               }
-              if (ean) break;
             }
+            if (ean && sku) break;
+          }
+          if (!ean) {
+            const body = txt(document.body);
+            const m = body && body.match(/(\\d{13}|\\d{8})/);
+            if (m) ean = m[1];
           }
           return { ean, sku };
         }
@@ -467,14 +525,19 @@ def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
     return None, None
 
 def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
-    """Return (ean, sku) from PDP using only trusted sources."""
+    """Return (ean, sku) from PDP using several strategies. Only runs on a real PDP."""
     sku_found: Optional[str] = None
+
+    # never extract on non-PDP (prevents “one EAN for many” accidents)
+    if not looks_like_pdp(page):
+        return None, None
+
     try:
         page.wait_for_timeout(350)
     except Exception:
         pass
 
-    # A) JSON-LD Product (accept only if also visible as 'Ribakood …' or itemprop present)
+    # A) JSON-LD
     try:
         scripts = page.locator("script[type='application/ld+json']")
         n = scripts.count()
@@ -484,8 +547,7 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
                 if sku and not sku_found:
                     sku_found = sku
                 if ean:
-                    if _visible_ribakood_has(page, ean) or page.locator("meta[itemprop='gtin13']").count() > 0:
-                        return ean, sku_found
+                    return ean, sku_found
             except Exception:
                 pass
     except Exception:
@@ -501,18 +563,42 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
         if e:
             return e, sku_found
 
-    # C) explicit spec-row parser (Ribakood/EAN/Triipkood + SKU/Tootekood)
+    # C) direct label locators
+    e_lbl, s_lbl = _ean_sku_by_label_locators(page)
+    if e_lbl:
+        return norm_ean(e_lbl), s_lbl or sku_found
+
+    # D) structured spec rows
     e_spec, s_spec = _ean_sku_from_specs(page)
     if e_spec:
         return norm_ean(e_spec), s_spec or sku_found
 
-    # D) DOM fallback near labels only
+    # E) robust DOM brute force
     e_dom, s_dom = _extract_ids_dom_bruteforce(page)
     if e_dom:
         return norm_ean(e_dom), s_dom or sku_found
 
-    # SAFETY PATCH: removed risky global JSON/HTML scans
-    return None, sku_found
+    # F) JSON blob anywhere (only on PDP)
+    try:
+        html = page.content() or ""
+        m = JSON_EAN.search(html)
+        if m:
+            e = norm_ean(m.group("d"))
+            if e:
+                return e, sku_found or s_dom or s_spec
+    except Exception:
+        pass
+
+    # G) last resort regex
+    try:
+        html = page.content() or ""
+        m = re.search(r"(ribakood|ean|triipkood)[\s\S]{0,800}?(\d{8,14})", html, re.I)
+        if m:
+            return norm_ean(m.group(2)), sku_found or s_dom or s_spec
+    except Exception:
+        pass
+
+    return None, sku_found or s_dom or s_spec
 
 def ensure_specs_open(page):
     for sel in ["button:has-text('Tooteinfo')", "button:has-text('Lisainfo')", "button:has-text('Tootekirjeldus')"]:
@@ -522,12 +608,13 @@ def ensure_specs_open(page):
                 time.sleep(0.2)
         except Exception:
             pass
+    _scroll(page)
 
 def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str], Optional[str]]:
     q_variants = []
     q_full = " ".join(x for x in [name or "", brand or "", amount or ""] if x).strip()
     if q_full: q_variants.append(q_full)
-    if name: q_variants.append(name.strip())
+    if name:   q_variants.append(name.strip())
     if brand and name: q_variants.append(f"{name} {brand}")
 
     for q in q_variants:
@@ -540,6 +627,7 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
         except PWTimeout:
             continue
 
+        # navigate to PDP
         if not looks_like_pdp(page):
             hit = best_search_hit(page, name, brand, amount)
             if hit:
@@ -552,6 +640,10 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
 
         if not looks_like_pdp(page):
             _click_first_search_tile(page)
+
+        if not looks_like_pdp(page):
+            # not a PDP; try next query variant
+            continue
 
         ensure_specs_open(page)
         ean, sku = extract_ids_on_pdp(page)
