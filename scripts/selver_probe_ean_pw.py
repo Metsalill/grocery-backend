@@ -101,7 +101,6 @@ def pick_batch(conn: PGConn, limit: int):
 def update_success(conn: PGConn, product_id: int, ean: str):
     with conn.cursor() as cur:
         cur.execute("UPDATE products SET ean = %s WHERE id = %s;", (ean, product_id))
-        # if queue exists, increment attempts & clear error
         if table_exists(conn, "selver_ean_backfill_queue"):
             cur.execute("""
               UPDATE selver_ean_backfill_queue
@@ -184,24 +183,63 @@ def score_hit(qname: str, brand: str, amount: str, text: str) -> float:
         s += 1.0
     return s
 
-def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
-    page.wait_for_selector('[data-testid="product-grid"]', timeout=10000)
-    items = page.locator('[data-testid="product-grid"] a[href]').all()[:24]
-    scored: List[Tuple[str, float]] = []
-    for a in items:
+def kill_consents(page):
+    buttons = [
+        "button:has-text('Nõustun')",
+        "button:has-text('Luba kõik')",
+        "button:has-text('Accept all')",
+        "button:has-text('Accept')",
+        "button:has-text('OK')",
+        "[data-testid='uc-accept-all-button']",
+        "[aria-label='Accept all']",
+    ]
+    for sel in buttons:
         try:
-            href = a.get_attribute("href") or ""
-            txt = a.inner_text() or ""
-            scored.append((href, score_hit(qname, brand, amount, txt)))
+            if page.locator(sel).count():
+                page.click(sel, timeout=800)
+                time.sleep(0.2)
         except Exception:
             pass
-    scored.sort(key=lambda x: x[1], reverse=True)
-    if not scored:
-        return None
-    href = scored[0][0]
-    if href.startswith("/"):
-        href = SELVER_BASE + href
-    return href
+
+def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
+    # Robust: tolerate different result grids; treat current page as PDP if so
+    t0 = time.time()
+    while time.time() - t0 < 12:
+        kill_consents(page)
+        if looks_like_pdp(page):
+            return page.url
+        candidate_sets = [
+            "[data-testid='product-grid'] a[href]",
+            "[data-testid='product-list'] a[href]",
+            ".product-list a[href]",
+            "article a[href]",
+            "a[href^='/toode/']",
+            "a[href^='/']",
+        ]
+        links = []
+        for css in candidate_sets:
+            try:
+                links.extend(page.locator(css).all()[:24])
+            except Exception:
+                pass
+        scored: List[Tuple[str, float]] = []
+        for a in links:
+            try:
+                href = a.get_attribute("href") or ""
+                if not href or "/search" in href:
+                    continue
+                txt = a.inner_text() or ""
+                scored.append((href, score_hit(qname, brand, amount, txt)))
+            except Exception:
+                continue
+        if scored:
+            scored.sort(key=lambda x: x[1], reverse=True)
+            href = scored[0][0]
+            if href.startswith("/"):
+                href = SELVER_BASE + href
+            return href
+        time.sleep(0.25)
+    return None
 
 def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str]]:
     """Return (name, ean) from JSON-LD 'Product' if present."""
@@ -281,7 +319,6 @@ def extract_ean_on_pdp(page) -> Optional[str]:
         full = page.text_content("body") or ""
         nums = EAN_RE.findall(full)
         if nums:
-            # prefer 13-digit first
             e13 = [x for x in nums if len(x) == 13]
             return e13[0] if e13 else nums[0]
     except Exception:
@@ -290,7 +327,6 @@ def extract_ean_on_pdp(page) -> Optional[str]:
     return None
 
 def ensure_specs_open(page):
-    # Try to expand spec sections if present
     for sel in ["button:has-text('Tooteinfo')", "button:has-text('Lisainfo')"]:
         try:
             if page.locator(sel).count():
@@ -300,31 +336,44 @@ def ensure_specs_open(page):
             pass
 
 def process_one(page, name: str, brand: str, amount: str) -> Optional[str]:
-    q = " ".join(x for x in [name or "", brand or "", amount or ""] if x).strip()
-    if not q:
-        return None
-    try:
-        page.goto(SEARCH_URL.format(q=q.replace(" ", "+")), timeout=15000, wait_until="load")
-        try:
-            page.wait_for_load_state("networkidle", timeout=8000)
-        except Exception:
-            pass
-    except PWTimeout:
-        return None
+    # Try multiple query variants to improve hit rate
+    q_variants = []
+    q_full = " ".join(x for x in [name or "", brand or "", amount or ""] if x).strip()
+    if q_full:
+        q_variants.append(q_full)
+    if name:
+        q_variants.append(name.strip())
+    if brand and name:
+        q_variants.append(f"{name} {brand}")
 
-    if not looks_like_pdp(page):
-        hit = best_search_hit(page, name, brand, amount)
-        if not hit:
-            return None
-        page.goto(hit, timeout=15000, wait_until="load")
+    for q in q_variants:
         try:
-            page.wait_for_load_state("networkidle", timeout=8000)
-        except Exception:
-            pass
+            url = SEARCH_URL.format(q=q.replace(" ", "+"))
+            page.goto(url, timeout=20000, wait_until="domcontentloaded")
+            try:
+                page.wait_for_load_state("networkidle", timeout=8000)
+            except Exception:
+                pass
+            kill_consents(page)
+        except PWTimeout:
+            continue
 
-    ensure_specs_open(page)
-    ean = extract_ean_on_pdp(page)
-    return norm_ean(ean)
+        if not looks_like_pdp(page):
+            hit = best_search_hit(page, name, brand, amount)
+            if not hit:
+                continue
+            page.goto(hit, timeout=20000, wait_until="load")
+            try:
+                page.wait_for_load_state("networkidle", timeout=8000)
+            except Exception:
+                pass
+
+        ensure_specs_open(page)
+        ean = extract_ean_on_pdp(page)
+        if ean:
+            return norm_ean(ean)
+
+    return None
 
 def main():
     conn = connect()
