@@ -292,12 +292,22 @@ def kill_consents(page):
         except Exception:
             pass
 
-# --- NEW: PDP-href recognizer to avoid category/landing pages ---
+# NEW: simplify search name to a core chunk (helps long names)
+def simplify_name(n: str) -> str:
+    n = re.sub(r"\s+", " ", (n or "")).strip()
+    # prefer the part before the first comma
+    return n.split(",")[0].strip()
+
+# --- PDP-href recognizer to avoid category/landing pages ---
 def looks_like_pdp_href(href: str) -> bool:
-    if not href or not href.startswith("/") or "?" in href or "#" in href:
+    if not href or "?" in href or "#" in href:
         return False
-    # PDPs are single-segment slugs: "/tonnikala-tomatis-eldorado-185-g"
-    if href.count("/") != 1:
+    # Valid PDP patterns: root-level slug OR '/toode/<slug>'
+    if href.startswith("/toode/"):
+        return True
+    if not href.startswith("/"):
+        return False
+    if href.count("/") != 1:  # single-segment like "/tuunikala-tomatis-eldorado-185-g"
         return False
     bad_prefixes = (
         "/search", "/eritooted/", "/puu-ja-koogiviljad/", "/liha-ja-kalatooted/",
@@ -312,7 +322,6 @@ def is_search_page(page) -> bool:
         url = page.url
         if "/search?" in url:
             return True
-        # treat category/landing as listings too
         if any(seg in url for seg in (
             "/eritooted/", "/puu-ja-koogiviljad/", "/liha-ja-kalatooted/",
             "/piimatooted", "/juustud", "/leivad", "/valmistoidud"
@@ -413,7 +422,9 @@ def _pdp_matches_target(page, name: str, brand: str, amount: str) -> bool:
     if amount: want |= _tokens(amount)
     name_overlap  = len(_tokens(name) & tset)
     total_overlap = len(want & tset)
-    return total_overlap >= 2 and name_overlap >= 1
+    # Be lenient for ultra-short names (e.g., "Tomat, kg")
+    min_total = 1 if len(_tokens(name)) <= 2 else 2
+    return total_overlap >= min_total and name_overlap >= 1
 
 # ----- EAN/SKU extraction -----
 
@@ -453,12 +464,19 @@ def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str], Optional[
 
 def _wait_pdp_facts(page):
     try:
-        page.wait_for_selector("text=Ribakood", timeout=3000); return
+        page.wait_for_selector("text=Ribakood", timeout=5000); return
     except Exception:
         pass
     try:
         page.evaluate("window.scrollBy(0, 800)")
-        page.wait_for_selector("text=Ribakood", timeout=3000)
+        # also try opening collapsible panels
+        for sel in ["button:has-text('Tooteinfo')", "button:has-text('Lisainfo')", "button:has-text('Tootekirjeldus')"]:
+            try:
+                if page.locator(sel).count():
+                    page.click(sel, timeout=800)
+            except Exception:
+                pass
+        page.wait_for_selector("text=Ribakood", timeout=5000)
     except Exception:
         pass
 
@@ -577,7 +595,7 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
     try: page.wait_for_timeout(350)
     except Exception: pass
 
-    # JSON-LD
+    # A) JSON-LD
     try:
         scripts = page.locator("script[type='application/ld+json']")
         n = scripts.count()
@@ -589,7 +607,7 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
             except Exception: pass
     except Exception: pass
 
-    # meta itemprops
+    # B) meta itemprops
     meta_sku = _meta_content(page, ["meta[itemprop='sku']"])
     if meta_sku and not sku_found: sku_found = (meta_sku or "").strip() or None
     meta_ean = _meta_content(page, ["meta[itemprop='gtin13']", "meta[itemprop='gtin']"])
@@ -597,32 +615,43 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
         e = norm_ean(meta_ean)
         if e: return e, sku_found
 
-    # facts/labels
-    _wait_pdp_facts(page)
-    e_spec, s_spec = _ean_sku_via_label_xpath(page)
-    if e_spec: return norm_ean(e_spec), s_spec or sku_found
+    # C/D) Up to three passes: open/scroll/expand then parse rows & DOM
+    for _ in range(3):
+        kill_consents(page)
+        _wait_pdp_facts(page)
+        e_spec, s_spec = _ean_sku_via_label_xpath(page)
+        if e_spec:
+            return norm_ean(e_spec), s_spec or sku_found
 
-    # DOM brute
-    e_dom, s_dom = _extract_ids_dom_bruteforce(page)
-    if e_dom: return norm_ean(e_dom), s_dom or sku_found
+        e_dom, s_dom = _extract_ids_dom_bruteforce(page)
+        if e_dom:
+            return norm_ean(e_dom), s_dom or sku_found
 
-    # JSON blobs / regex (label … digits)
+        try:
+            page.evaluate("window.scrollBy(0, 600)")
+            page.wait_for_timeout(200)
+        except Exception:
+            pass
+
+    # E) JSON blobs anywhere
     try:
         html = page.content() or ""
         m = JSON_EAN.search(html)
         if m:
             e = norm_ean(m.group("d"))
-            if e: return e, sku_found or s_dom
-    except Exception:
-        pass
-    try:
-        html = page.content() or ""
-        m = re.search(r"(ribakood|ean|triipkood)[\s\S]{0,800}?(\d{8,14})", html, re.I)
-        if m: return norm_ean(m.group(2)), sku_found or s_dom
+            if e: return e, sku_found
     except Exception:
         pass
 
-    return None, sku_found or s_dom
+    # F) Regex around labels in raw HTML
+    try:
+        html = page.content() or ""
+        m = re.search(r"(ribakood|ean|triipkood)[\s\S]{0,800}?(\d{8,14})", html, re.I)
+        if m: return norm_ean(m.group(2)), sku_found
+    except Exception:
+        pass
+
+    return None, sku_found
 
 def ensure_specs_open(page):
     for sel in ["button:has-text('Tooteinfo')", "button:has-text('Lisainfo')", "button:has-text('Tootekirjeldus')"]:
@@ -637,35 +666,36 @@ def ensure_specs_open(page):
 
 def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
     """On a search page, try to open a PDP (best-scored link, then first tile), with waits/scrolls."""
-    # give the grid a chance to render
     try:
         page.wait_for_selector("[data-testid='product-grid'], .product-list, article a[href]", timeout=6000)
     except Exception:
         pass
 
-    # try best-scored URL
     hit = best_search_hit(page, name, brand, amount)
     if hit:
         try:
             page.goto(hit, timeout=25000, wait_until="domcontentloaded")
             try: page.wait_for_load_state("networkidle", timeout=9000)
             except Exception: pass
+            kill_consents(page)
             if looks_like_pdp(page) or page.locator("h1").count() > 0:
                 return True
         except Exception:
             pass
 
-    # try clicking a tile
     if _click_first_search_tile(page):
+        kill_consents(page)
         return True
 
-    # force lazy load and try again
     try:
         page.keyboard.press("End"); time.sleep(0.4)
         page.keyboard.press("Home"); time.sleep(0.2)
     except Exception:
         pass
-    return _click_first_search_tile(page)
+    opened = _click_first_search_tile(page)
+    if opened:
+        kill_consents(page)
+    return opened
 
 # ----------------- main probe flow -----------------
 
@@ -674,7 +704,10 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
     q_full = " ".join(x for x in [name or "", brand or "", amount or ""] if x).strip()
     if q_full: q_variants.append(q_full)
     if name:   q_variants.append(name.strip())
-    if brand and name: q_variants.append(f"{name} {brand}")
+    # extra simplified queries help find the right tile (e.g., drop ", kg" etc.)
+    base = simplify_name(name or "")
+    if base and base != (name or ""): q_variants.append(base)
+    if base and brand: q_variants.append(f"{base} {brand}")
 
     for q in q_variants:
         # open search
