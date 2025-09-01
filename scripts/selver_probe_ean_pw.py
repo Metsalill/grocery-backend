@@ -24,10 +24,20 @@ JSON_EAN = re.compile(r'"(?:gtin14|gtin13|gtin|ean|barcode|sku)"\s*:\s*"(?P<d>\d
 # ----------------- small utils -----------------
 
 def norm_ean(s: Optional[str]) -> Optional[str]:
+    """Normalize varied GTINs to EAN-13/EAN-8.
+    - Accepts GTIN-14 (drops leading 0/1 commonly used as logistic indicator)
+    - Accepts UPC-A (12) and pads to EAN-13 with leading zero
+    """
     if not s:
         return None
     d = re.sub(r"\D", "", s)
-    return d if d and len(d) in (8, 13) else None
+    if not d:
+        return None
+    if len(d) == 14 and d[0] in "01":
+        d = d[1:]
+    if len(d) == 12:
+        d = "0" + d
+    return d if len(d) in (8, 13) else None
 
 def looks_bogus_ean(e: Optional[str]) -> bool:
     if not e:
@@ -349,43 +359,39 @@ def looks_like_pdp_href(href: str) -> bool:
     if not href:
         return False
     # strip query/fragment
-    if "?" in href: href = href.split("?",1)[0]
-    if "#" in href: href = href.split("#",1)[0]
+    href = href.split("?", 1)[0].split("#", 1)[0]
     # absolute → keep host check light
     if href.startswith("http"):
         try:
-            p = urlparse(href).path
+            href = (urlparse(href).path) or "/"
         except Exception:
             return False
-        href = p or "/"
     if not href.startswith("/"):
         return False
 
-    # Accept explicit PDP namespace as well
+    bad_prefixes = (
+        "/search", "/konto", "/login", "/registreeru", "/logout",
+        "/kliendimangud", "/kauplused", "/selveekspress", "/tule-toole",
+        "/uudised", "/kinkekaardid", "/selveri-kook", "/kampaania", "/retseptid",
+        "/app",
+    )
+    if any(href.startswith(p) for p in bad_prefixes):
+        return False
+
+    # Explicit product namespace always ok
     if href.startswith("/toode/") or href.startswith("/e-selver/toode/"):
         return True
 
-    # Single-slug PDPs like "/padrone-pipar-pakitid-200-g"
-    # (one segment after optional "/e-selver")
+    # Multi-segment PDPs: accept if the last segment is a slug with dashes
+    # and looks like a product slug (contains a digit or ends in a size-ish token).
     segs = [s for s in href.split("/") if s]
-    if segs and segs[0] == "e-selver":
-        segs = segs[1:]
-    if len(segs) == 1 and re.fullmatch(r"[a-z0-9-]{3,}", segs[0]):
-        if any(ch.isdigit() for ch in segs[0]) or "-" in segs[0]:
-            pass
-        else:
-            return False
-    elif not href.startswith("/toode/"):
+    if not segs:
         return False
+    last = segs[-1]
+    if "-" in last and (any(ch.isdigit() for ch in last) or re.search(r"(?:^|[-_])(kg|g|l|ml|cl|dl|tk)$", last)):
+        return True
 
-    bad_prefixes = (
-        "/search", "/eritooted", "/puu-ja-koogiviljad", "/liha-ja-kalatooted",
-        "/piimatooted", "/juustud", "/leivad", "/valmistoidud",
-        "/kauplused", "/kliendimangud", "/selveekspress", "/tule-toole",
-        "/uudised", "/kinkekaardid", "/selveri-kook", "/kampaania", "/retseptid",
-        "/joogid", "/magusad-ja-snackid", "/maitseained", "/kodukeemia",
-    )
-    return not any(href.startswith(p) for p in bad_prefixes)
+    return False
 
 def is_search_page(page) -> bool:
     try:
@@ -414,6 +420,8 @@ def _candidate_anchors(page):
         ".product-card a[href]:visible",
         "article a[href]:visible",
         "[data-href]:visible",
+        # broad safety net:
+        "a[href^='/']:visible",
     ]
     nodes = []
     for sel in selectors:
@@ -421,7 +429,7 @@ def _candidate_anchors(page):
             nodes.extend(page.locator(sel).all())
         except Exception:
             pass
-    return nodes[:120]
+    return nodes[:200]
 
 def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
     links = _candidate_anchors(page)
@@ -491,6 +499,7 @@ def _click_first_search_tile(page) -> bool:
         ".product-card a[href]:visible",
         "article a[href]:visible",
         "[data-href]:visible",
+        "a[href^='/']:visible",
     ]:
         try:
             a = page.locator(sel).first
@@ -765,7 +774,7 @@ def ensure_specs_open(page):
 def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
     """From a search/listing, click into a PDP (best tile, with JS fallback)."""
     try:
-        page.wait_for_selector("[data-testid='product-grid'], .product-list, article a[href]", timeout=6000)
+        page.wait_for_selector("[data-testid='product-grid'], .product-list, a[href^='/']", timeout=7000)
     except Exception:
         pass
 
@@ -795,10 +804,14 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
 
     # 3) Force lazy load + click again
     try:
-        page.keyboard.press("End"); time.sleep(0.4)
-        page.keyboard.press("Home"); time.sleep(0.2)
+        for _ in range(2):
+            page.keyboard.press("End"); time.sleep(0.35)
+            page.keyboard.press("Home"); time.sleep(0.2)
+            if _click_best_tile(page, name, brand, amount):
+                return True
     except Exception:
         pass
+
     return _click_first_search_tile(page)
 
 # ----------------- main probe flow -----------------
