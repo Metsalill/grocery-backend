@@ -81,7 +81,7 @@ def pick_batch(conn: PGConn, limit: int):
     where_target = "(p.ean IS NULL OR p.ean = '')" if not OVERWRITE_BAD else f"(p.ean IS NULL OR p.ean = '' OR {bad_sql})"
 
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-        # Prefer explicit queue
+        # Prefer explicit queue if present
         if table_exists(conn, "selver_ean_backfill_queue"):
             cur.execute(f"""
               SELECT q.product_id, p.name,
@@ -385,7 +385,7 @@ def is_search_page(page) -> bool:
         pass
     return False
 
-# ---- robust extraction of top-N product hrefs from search/listing ----
+# ---- extract top-N product hrefs from search/listing ----
 def list_pdp_hrefs_on_search(page, limit: int = 8) -> List[str]:
     """Return up to `limit` PDP-like hrefs in DOM order from a search/listing."""
     try:
@@ -417,7 +417,6 @@ def list_pdp_hrefs_on_search(page, limit: int = 8) -> List[str]:
         if looks_like_pdp_href(h):
             if h.startswith("/"): h = SELVER_BASE + h
             out.append(h)
-    # de-dup, keep order, trim
     seen, uniq = set(), []
     for u in out:
         if u not in seen:
@@ -462,6 +461,31 @@ def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
     href = scored[0][0]
     return SELVER_BASE + href if href.startswith("/") else href
 
+def _try_click_node(page, locator) -> bool:
+    try:
+        locator.scroll_into_view_if_needed(timeout=1500)
+    except Exception:
+        pass
+    try:
+        locator.click(timeout=3000)
+    except Exception:
+        try:
+            el = locator.element_handle(timeout=600)
+            if el:
+                page.evaluate("(n)=>{try{n.click && n.click()}catch(e){}}", el)
+        except Exception:
+            pass
+    try:
+        page.wait_for_selector("h1", timeout=7000)
+    except Exception:
+        pass
+    try:
+        page.wait_for_load_state("networkidle", timeout=6000)
+    except Exception:
+        pass
+    handle_age_gate(page)
+    return looks_like_pdp(page) or page.locator("h1").count() > 0
+
 def _click_best_tile(page, name: str, brand: str, amount: str) -> bool:
     links = _candidate_anchors(page)
     best = None
@@ -479,25 +503,14 @@ def _click_best_tile(page, name: str, brand: str, amount: str) -> bool:
             continue
     if not best:
         return False
-    try:
-        best.click(timeout=4000)
-        try: page.wait_for_selector("h1", timeout=8000)
-        except Exception: pass
-        try: page.wait_for_load_state("networkidle", timeout=6000)
-        except Exception: pass
-        handle_age_gate(page)
-        if looks_like_pdp(page) or page.locator("h1").count() > 0:
-            return True
-    except Exception:
-        pass
+    if _try_click_node(page, best):
+        return True
     try:
         href = best.get_attribute("href") or best.get_attribute("data-href") or ""
         if href:
             if href.startswith("/"): href = SELVER_BASE + href
-            page.evaluate("url => window.location.assign(url)", href)
-            try: page.wait_for_selector("h1", timeout=8000)
-            except Exception: pass
-            try: page.wait_for_load_state("networkidle", timeout=6000)
+            page.goto(href, timeout=25000, wait_until="domcontentloaded")
+            try: page.wait_for_load_state("networkidle", timeout=8000)
             except Exception: pass
             handle_age_gate(page)
             return looks_like_pdp(page) or page.locator("h1").count() > 0
@@ -522,13 +535,8 @@ def _click_first_search_tile(page) -> bool:
                 href = a.get_attribute("href") or a.get_attribute("data-href") or ""
                 if not looks_like_pdp_href(href):
                     continue
-                a.click(timeout=4000)
-                try: page.wait_for_selector("h1", timeout=8000)
-                except Exception: pass
-                try: page.wait_for_load_state("networkidle", timeout=6000)
-                except Exception: pass
-                handle_age_gate(page)
-                return looks_like_pdp(page) or page.locator("h1").count() > 0
+                if _try_click_node(page, a):
+                    return True
         except Exception:
             continue
     return False
@@ -539,11 +547,6 @@ def _pdp_title(page) -> str:
     return (_first_text(page, ["h1", "h1.product-title", "h1[itemprop='name']"]) or "").strip()
 
 _STOP = {"kg","tk","g","ml","l","dl","cl","ja","või","with","ilma","bio","mahe"}
-_VARIETALS = {
-    "chardonnay","merlot","cabernet","sauvignon","pinot","riesling","tempranillo",
-    "shiraz","syrah","malbec","grenache","chenin","viognier","zinfandel",
-    "nebbiolo","sangiovese","cava","prosecco","moscato","semillon","semillion",
-}
 _SIZE_RX = re.compile(r'(?:\b|^)(?:\d{2,3}\s*cl|\d{3,4}\s*ml|0[.,]?\d+\s*l)\b', re.I)
 
 def _tokens(s: str) -> set:
@@ -556,6 +559,7 @@ def _tokens(s: str) -> set:
     return toks
 
 def _pdp_matches_target(page, name: str, brand: str, amount: str) -> bool:
+    # NOTE: this is the version *before* the Chardonnay/varietal fallback
     title = (_pdp_title(page) or "").casefold()
     tset = _tokens(title)
     want = _tokens(name) | _tokens(brand) | _tokens(amount)
@@ -565,15 +569,11 @@ def _pdp_matches_target(page, name: str, brand: str, amount: str) -> bool:
         return True
     if brand and (_tokens(brand) & tset):
         return True
-    # varietal+size rule for brandless wine-like names
-    if not brand and any(v in _tokens(name) for v in _VARIETALS):
-        if any(v in tset for v in _VARIETALS) and _SIZE_RX.search(title):
-            return True
     if looks_like_pdp(page):
         return True
     return False
 
-# ----- EAN/SKU extraction helpers -----
+# ----- EAN/SKU extraction -----
 
 def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     try:
@@ -701,8 +701,8 @@ def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
     try:
         got = page.evaluate("""
         () => {
-          const txt = n => (n && n.textContent || '').replace(/\s+/g,' ').trim();
-          const pickDigits = s => { const m = s && s.match(/(\d{13}|\d{8})/); return m ? m[1] : null; };
+          const txt = n => (n && n.textContent || '').replace(/\\s+/g,' ').trim();
+          const pickDigits = s => { const m = s && s.match(/(\\d{13}|\\d{8})/); return m ? m[1] : null; };
           const pickSKU = s => { const m = s && s.match(/([A-Z0-9_-]{6,})/i); return m ? m[1] : null; };
 
           let ean = null, sku = null;
