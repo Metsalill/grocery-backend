@@ -18,6 +18,9 @@ REQ_DELAY = float(os.getenv("REQ_DELAY", "0.6"))
 OVERWRITE_BAD = os.getenv("OVERWRITE_BAD_EANS", "0").lower() in ("1", "true", "yes")
 DB_URL = os.getenv("DATABASE_URL") or os.getenv("DATABASE_URL_PUBLIC")
 
+# --- Chardonnay/varietal fallback toggle (DISABLED) ---
+ENABLE_VARIETAL_SIZE_FALLBACK = False
+
 EAN_RE   = re.compile(r"\b(\d{8}|\d{13})\b")
 JSON_EAN = re.compile(r'"(?:gtin14|gtin13|gtin|ean|barcode|sku)"\s*:\s*"(?P<d>\d{8,14})"', re.I)
 
@@ -81,7 +84,7 @@ def pick_batch(conn: PGConn, limit: int):
     where_target = "(p.ean IS NULL OR p.ean = '')" if not OVERWRITE_BAD else f"(p.ean IS NULL OR p.ean = '' OR {bad_sql})"
 
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-        # Prefer explicit queue if present
+        # Prefer an explicit queue if it exists
         if table_exists(conn, "selver_ean_backfill_queue"):
             cur.execute(f"""
               SELECT q.product_id, p.name,
@@ -323,7 +326,7 @@ def kill_consents_and_overlays(page):
     except Exception:
         pass
 
-# --- Request router ---
+# --- Request router (keep minimal; avoids blocking product resources) ---
 BLOCK_SUBSTR = (
     "adobedtm","googletagmanager","google-analytics","doubleclick",
     "facebook.net","newrelic","pingdom","cookiebot","hotjar",
@@ -338,6 +341,49 @@ def _router(route, request):
     except Exception:
         pass
     return route.continue_()
+
+# -------- clicking helpers --------
+def _elem_href(locator) -> Optional[str]:
+    try:
+        h = locator.get_attribute("href") or locator.get_attribute("data-href")
+        if h:
+            return h
+        a = locator.locator("xpath=ancestor-or-self::a[@href]").first
+        if a and a.count() > 0:
+            return a.get_attribute("href")
+    except Exception:
+        pass
+    return None
+
+def _try_click_node(page, locator) -> bool:
+    try:
+        locator.scroll_into_view_if_needed(timeout=1500)
+    except Exception:
+        pass
+    clicked = False
+    try:
+        locator.click(timeout=3000)
+        clicked = True
+    except Exception:
+        try:
+            el = locator.element_handle(timeout=600)
+            if el:
+                page.evaluate("(n)=>{try{n.click && n.click()}catch(e){}}", el)
+                clicked = True
+        except Exception:
+            pass
+    if not clicked:
+        return False
+    try:
+        page.wait_for_selector("h1", timeout=7000)
+    except Exception:
+        pass
+    try:
+        page.wait_for_load_state("networkidle", timeout=6000)
+    except Exception:
+        pass
+    handle_age_gate(page)
+    return looks_like_pdp(page) or page.locator("h1").count() > 0
 
 # --- PDP-href recognizer ---
 def looks_like_pdp_href(href: str) -> bool:
@@ -359,9 +405,7 @@ def looks_like_pdp_href(href: str) -> bool:
     if segs and segs[0] == "e-selver":
         segs = segs[1:]
     if len(segs) == 1 and re.fullmatch(r"[a-z0-9-]{3,}", segs[0]):
-        if any(ch.isdigit() for ch in segs[0]) or "-" in segs[0]:
-            pass
-        else:
+        if not any(ch.isdigit() for ch in segs[0]) and "-" not in segs[0]:
             return False
     elif not href.startswith("/toode/"):
         return False
@@ -385,9 +429,24 @@ def is_search_page(page) -> bool:
         pass
     return False
 
-# ---- extract top-N product hrefs from search/listing ----
+# --- results rendering nudge ---
+def ensure_results_loaded(page):
+    try:
+        page.wait_for_selector(
+            "[data-testid='product-grid'], .product-grid, .product-list, article img",
+            timeout=7000
+        )
+    except Exception:
+        pass
+    try:
+        page.evaluate("window.scrollBy(0, 600)")
+        page.wait_for_timeout(250)
+        page.evaluate("window.scrollBy(0, -400)")
+    except Exception:
+        pass
+
+# ---- extract top-N product hrefs from a listing ----
 def list_pdp_hrefs_on_search(page, limit: int = 8) -> List[str]:
-    """Return up to `limit` PDP-like hrefs in DOM order from a search/listing."""
     try:
         hrefs = page.evaluate("""
         () => {
@@ -448,53 +507,24 @@ def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
     scored: List[Tuple[str, float]] = []
     for a in links:
         try:
-            href = a.get_attribute("href") or a.get_attribute("data-href") or ""
-            if not looks_like_pdp_href(href):
+            href = _elem_href(a) or ""
+            if href and not looks_like_pdp_href(href):
                 continue
             txt = a.inner_text() or ""
-            scored.append((href, score_hit(qname, brand, amount, txt)))
+            scored.append((href or "", score_hit(qname, brand, amount, txt)))
         except Exception:
             continue
     if not scored:
         return None
     scored.sort(key=lambda x: x[1], reverse=True)
     href = scored[0][0]
-    return SELVER_BASE + href if href.startswith("/") else href
-
-def _try_click_node(page, locator) -> bool:
-    try:
-        locator.scroll_into_view_if_needed(timeout=1500)
-    except Exception:
-        pass
-    try:
-        locator.click(timeout=3000)
-    except Exception:
-        try:
-            el = locator.element_handle(timeout=600)
-            if el:
-                page.evaluate("(n)=>{try{n.click && n.click()}catch(e){}}", el)
-        except Exception:
-            pass
-    try:
-        page.wait_for_selector("h1", timeout=7000)
-    except Exception:
-        pass
-    try:
-        page.wait_for_load_state("networkidle", timeout=6000)
-    except Exception:
-        pass
-    handle_age_gate(page)
-    return looks_like_pdp(page) or page.locator("h1").count() > 0
+    return (SELVER_BASE + href) if href and href.startswith("/") else (href or None)
 
 def _click_best_tile(page, name: str, brand: str, amount: str) -> bool:
     links = _candidate_anchors(page)
-    best = None
-    best_score = -1.0
+    best, best_score = None, -1.0
     for a in links:
         try:
-            href = a.get_attribute("href") or a.get_attribute("data-href") or ""
-            if not looks_like_pdp_href(href):
-                continue
             txt = a.inner_text() or ""
             sc = score_hit(name, brand, amount, txt)
             if sc > best_score:
@@ -503,20 +533,18 @@ def _click_best_tile(page, name: str, brand: str, amount: str) -> bool:
             continue
     if not best:
         return False
-    if _try_click_node(page, best):
-        return True
-    try:
-        href = best.get_attribute("href") or best.get_attribute("data-href") or ""
-        if href:
-            if href.startswith("/"): href = SELVER_BASE + href
+    href = _elem_href(best)
+    if href and looks_like_pdp_href(href):
+        if href.startswith("/"): href = SELVER_BASE + href
+        try:
             page.goto(href, timeout=25000, wait_until="domcontentloaded")
             try: page.wait_for_load_state("networkidle", timeout=8000)
             except Exception: pass
             handle_age_gate(page)
             return looks_like_pdp(page) or page.locator("h1").count() > 0
-    except Exception:
-        pass
-    return False
+        except Exception:
+            pass
+    return _try_click_node(page, best)
 
 def _click_first_search_tile(page) -> bool:
     for sel in [
@@ -532,9 +560,17 @@ def _click_first_search_tile(page) -> bool:
         try:
             a = page.locator(sel).first
             if a and a.count() > 0:
-                href = a.get_attribute("href") or a.get_attribute("data-href") or ""
-                if not looks_like_pdp_href(href):
-                    continue
+                href = _elem_href(a) or ""
+                if href and looks_like_pdp_href(href):
+                    if href.startswith("/"): href = SELVER_BASE + href
+                    try:
+                        page.goto(href, timeout=25000, wait_until="domcontentloaded")
+                        try: page.wait_for_load_state("networkidle", timeout=8000)
+                        except Exception: pass
+                        handle_age_gate(page)
+                        return looks_like_pdp(page) or page.locator("h1").count() > 0
+                    except Exception:
+                        pass
                 if _try_click_node(page, a):
                     return True
         except Exception:
@@ -547,6 +583,11 @@ def _pdp_title(page) -> str:
     return (_first_text(page, ["h1", "h1.product-title", "h1[itemprop='name']"]) or "").strip()
 
 _STOP = {"kg","tk","g","ml","l","dl","cl","ja","või","with","ilma","bio","mahe"}
+_VARIETALS = {
+    "chardonnay","merlot","cabernet","sauvignon","pinot","riesling","tempranillo",
+    "shiraz","syrah","malbec","grenache","chenin","viognier","zinfandel",
+    "nebbiolo","sangiovese","cava","prosecco","moscato","semillon","semillion",
+}
 _SIZE_RX = re.compile(r'(?:\b|^)(?:\d{2,3}\s*cl|\d{3,4}\s*ml|0[.,]?\d+\s*l)\b', re.I)
 
 def _tokens(s: str) -> set:
@@ -559,7 +600,6 @@ def _tokens(s: str) -> set:
     return toks
 
 def _pdp_matches_target(page, name: str, brand: str, amount: str) -> bool:
-    # NOTE: this is the version *before* the Chardonnay/varietal fallback
     title = (_pdp_title(page) or "").casefold()
     tset = _tokens(title)
     want = _tokens(name) | _tokens(brand) | _tokens(amount)
@@ -569,6 +609,11 @@ def _pdp_matches_target(page, name: str, brand: str, amount: str) -> bool:
         return True
     if brand and (_tokens(brand) & tset):
         return True
+    # Varietal+size fallback is DISABLED unless explicitly enabled
+    if ENABLE_VARIETAL_SIZE_FALLBACK:
+        if not brand and any(v in _tokens(name) for v in _VARIETALS):
+            if any(v in tset for v in _VARIETALS) and _SIZE_RX.search(title):
+                return True
     if looks_like_pdp(page):
         return True
     return False
@@ -701,8 +746,8 @@ def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
     try:
         got = page.evaluate("""
         () => {
-          const txt = n => (n && n.textContent || '').replace(/\\s+/g,' ').trim();
-          const pickDigits = s => { const m = s && s.match(/(\\d{13}|\\d{8})/); return m ? m[1] : null; };
+          const txt = n => (n && n.textContent || '').replace(/\s+/g,' ').trim();
+          const pickDigits = s => { const m = s && s.match(/(\d{13}|\d{8})/); return m ? m[1] : null; };
           const pickSKU = s => { const m = s && s.match(/([A-Z0-9_-]{6,})/i); return m ? m[1] : null; };
 
           let ean = null, sku = null;
@@ -767,7 +812,7 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
     e_dom, s_dom = _extract_ids_dom_bruteforce(page)
     if e_dom: return norm_ean(e_dom), s_dom or sku_found
 
-    # JSON blobs / regex
+    # JSON regex backup
     try:
         html = page.content() or ""
         m = JSON_EAN.search(html)
@@ -804,6 +849,8 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
 
     kill_consents_and_overlays(page)
     handle_age_gate(page)
+    ensure_results_loaded(page)
+
     try: page.evaluate("window.scrollBy(0, 300)")
     except Exception: pass
 
@@ -824,9 +871,8 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
         except Exception:
             pass
 
-    # 3) Walk through the first few PDP links on the page, one by one
-    hrefs = list_pdp_hrefs_on_search(page, limit=8)
-    for h in hrefs:
+    # 3) Try a handful of PDP links discovered inside recognised grids
+    for h in list_pdp_hrefs_on_search(page, limit=8):
         try:
             page.goto(h, timeout=25000, wait_until="domcontentloaded")
             try: page.wait_for_load_state("networkidle", timeout=9000)
