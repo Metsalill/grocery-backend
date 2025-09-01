@@ -304,6 +304,7 @@ def kill_consents_and_overlays(page):
     for sel in [
         "button:has-text('Nõustun')",
         "button:has-text('Luba kõik')",
+        "button:has-text('Nõustu')",
         "button:has-text('Accept all')",
         "button:has-text('Accept')",
         "button:has-text('OK')",
@@ -432,14 +433,14 @@ def ensure_results_loaded(page):
     try:
         page.wait_for_selector(
             "[data-testid='product-grid'], .product-grid, .product-list, article img",
-            timeout=7000
+            timeout=10000
         )
     except Exception:
         pass
     try:
-        page.evaluate("window.scrollBy(0, 600)")
-        page.wait_for_timeout(250)
-        page.evaluate("window.scrollBy(0, -400)")
+        page.evaluate("window.scrollBy(0, 800)")
+        page.wait_for_timeout(350)
+        page.evaluate("window.scrollBy(0, -500)")
     except Exception:
         pass
 
@@ -480,7 +481,7 @@ def list_pdp_hrefs_on_search(page, limit: int = 8) -> List[str]:
             seen.add(u); uniq.append(u)
     return uniq[:limit]
 
-# ---- NEW: harvest PDP links from *any* attribute or inline JSON ----
+# ---- harvest PDP links from *any* attribute or inline JSON ----
 def harvest_pdp_links_from_attrs_and_json(page, limit: int = 12) -> List[str]:
     urls: List[str] = []
     try:
@@ -489,7 +490,7 @@ def harvest_pdp_links_from_attrs_and_json(page, limit: int = 12) -> List[str]:
           const abs = (u) => u.startsWith('http') ? u : '{SELVER_BASE}'+u;
           const keep = new Set();
 
-          // 1) Any element attribute containing "/toode/" (very generic)
+          // 1) Any element attribute containing "/toode/"
           const all = document.querySelectorAll('*');
           for (const el of all) {{
             if (!el.getAttributeNames) continue;
@@ -529,7 +530,7 @@ def harvest_pdp_links_from_attrs_and_json(page, limit: int = 12) -> List[str]:
             break
     return out
 
-# ---- Also scrape anchors from anywhere quickly ----
+# ---- scrape anchors from anywhere quickly ----
 def harvest_pdp_hrefs_anywhere(page, limit: int = 10) -> List[str]:
     urls: List[str] = []
     try:
@@ -566,6 +567,50 @@ def harvest_pdp_hrefs_anywhere(page, limit: int = 10) -> List[str]:
         if len(out) >= limit:
             break
     return out
+
+# ---- emergency: JS jump to first PDP-like link (bypass clicks) ----
+def js_jump_first_pdp(page) -> bool:
+    try:
+        href = page.evaluate("""
+        () => {
+          const isPDP = (u) => !!u && /\\/(?:e-selver\\/)?toode\\//.test(u) || (
+            (u||'').split('?')[0].split('#')[0].split('/').filter(Boolean).length === 1 &&
+            /[a-z0-9-]{3,}/.test((u||''))
+          );
+          // prefer visible anchors
+          const as = Array.from(document.querySelectorAll('a[href]'));
+          for (const a of as) {
+            const u = a.getAttribute('href') || '';
+            if (isPDP(u)) return u;
+          }
+          // fallback: any attribute on any node
+          const all = Array.from(document.querySelectorAll('*'));
+          for (const el of all) {
+            for (const n of el.getAttributeNames ? el.getAttributeNames() : []) {
+              const v = el.getAttribute(n) || '';
+              if (isPDP(v)) return v;
+            }
+          }
+          return null;
+        }
+        """)
+        if not href:
+            return False
+        if href.startswith("/"):
+            href = SELVER_BASE + href
+        page.evaluate("u => window.location.assign(u)", href)
+        try:
+            page.wait_for_selector("h1", timeout=12000)
+        except Exception:
+            pass
+        try:
+            page.wait_for_load_state("networkidle", timeout=8000)
+        except Exception:
+            pass
+        handle_age_gate(page)
+        return looks_like_pdp(page) or page.locator("h1").count() > 0
+    except Exception:
+        return False
 
 def _candidate_anchors(page):
     selectors = [
@@ -835,8 +880,8 @@ def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
     try:
         got = page.evaluate("""
         () => {
-          const txt = n => (n && n.textContent || '').replace(/\\s+/g,' ').trim();
-          const pickDigits = s => { const m = s && s.match(/(\\d{13}|\\d{8})/); return m ? m[1] : null; };
+          const txt = n => (n && n.textContent || '').replace(/\s+/g,' ').trim();
+          const pickDigits = s => { const m = s && s.match(/(\d{13}|\d{8})/); return m ? m[1] : null; };
           const pickSKU = s => { const m = s && s.match(/([A-Z0-9_-]{6,})/i); return m ? m[1] : null; };
 
           let ean = null, sku = null;
@@ -932,7 +977,7 @@ def ensure_specs_open(page):
 
 def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
     try:
-        page.wait_for_selector("[data-testid='product-grid'], .product-list, article", timeout=6000)
+        page.wait_for_selector("[data-testid='product-grid'], .product-list, article", timeout=8000)
     except Exception:
         pass
 
@@ -972,7 +1017,7 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
         except Exception:
             continue
 
-    # 4) NEW: harvest PDP links anywhere (anchors / raw HTML)
+    # 4) Harvest PDP links anywhere (anchors / raw HTML)
     for h in harvest_pdp_hrefs_anywhere(page, limit=10):
         try:
             page.goto(h, timeout=25000, wait_until="domcontentloaded")
@@ -984,7 +1029,7 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
         except Exception:
             continue
 
-    # 5) NEW: extremely robust — pull PDP URLs from *any attribute* or inline JSON
+    # 5) Pull PDP URLs from any attribute or inline JSON
     for h in harvest_pdp_links_from_attrs_and_json(page, limit=12):
         try:
             page.goto(h, timeout=25000, wait_until="domcontentloaded")
@@ -996,7 +1041,11 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
         except Exception:
             continue
 
-    # 6) Last resort: click the very first tile heuristically
+    # 6) Absolute last resort: JS force-jump to first PDP-ish link
+    if js_jump_first_pdp(page):
+        return True
+
+    # 7) Last click heuristic
     try:
         page.keyboard.press("End"); time.sleep(0.4)
         page.keyboard.press("Home"); time.sleep(0.2)
@@ -1074,8 +1123,10 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
         if is_search_page(page) or not looks_like_pdp(page):
             opened = open_best_or_first(page, name, brand, amount)
             if not opened:
+                # still on search page; try next query
                 continue
 
+        # We only extract on PDP (or when the barcode block is visible)
         if not (_pdp_matches_target(page, name, brand, amount) or
                 looks_like_pdp(page) or
                 page.locator(":text-matches('Ribakood|Штрихкод|Barcode','i')").count() > 0):
@@ -1092,6 +1143,9 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
             if not looks_bogus_ean(ean):
                 return ean, (sku or None), last_src, page.url
 
+    # If we end here, either no PDP opened or no EAN found there
+    if is_search_page(page) and last_src:
+        print(f"[NO_PDP_OPEN] src={last_src} url_now={page.url}")
     return None, None, last_src, page.url if looks_like_pdp(page) else None
 
 def main():
