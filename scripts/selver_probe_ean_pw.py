@@ -21,6 +21,10 @@ DB_URL = os.getenv("DATABASE_URL") or os.getenv("DATABASE_URL_PUBLIC")
 EAN_RE   = re.compile(r"\b(\d{8}|\d{13})\b")
 JSON_EAN = re.compile(r'"(?:gtin14|gtin13|gtin|ean|barcode|sku)"\s*:\s*"(?P<d>\d{8,14})"', re.I)
 
+# --- NEW: strict SKU patterns & labels ---
+SKU_RX = re.compile(r"\b(?:T\d{8,12}|[A-Z]{1,3}\d{6,12}|[A-Z0-9]{3,}-[A-Z0-9]{3,})\b")
+SKU_LABEL_RX = r"(?:SKU|Tootekood|Toote\s*kood|Artikkel|Артикул|Код\s*товара|Код)"
+
 # ----------------- small utils -----------------
 
 def norm_ean(s: Optional[str]) -> Optional[str]:
@@ -595,91 +599,88 @@ def _wait_pdp_facts(page):
         pass
 
 def _ean_sku_via_label_xpath(page) -> Tuple[Optional[str], Optional[str]]:
-    try:
-        labels = ["ribakood", "ean", "triipkood", "штрихкод", "barcode"]
-        xpaths = [
-            "//*[contains(translate(normalize-space(.),'RIBAKOODEANTRIIPKOODÄÖÜÕŠŽШТРИХКОДBARCODE','ribakoodeantriipkoodäöüõšžштрихкодbarcode') , '{lbl}')]"
-            for lbl in labels
-        ]
-        css_pairs = [
-            ("dt:has(:text-matches('Ribakood|Штрихкод|Barcode','i'))", "dd"),
-            ("tr:has(td:has(:text-matches('Ribakood|Штрихкод|Barcode','i')))", "td"),
-            ("tr:has(th:has(:text-matches('Ribakood|Штрихкод|Barcode','i')))", "td"),
-        ]
+    """
+    Read EAN and SKU from labelled spec tables. SKU is only accepted from
+    explicit SKU/Tootekood/Артикул/... labels to avoid false positives.
+    """
+    def pick_ean(s: str) -> Optional[str]:
+        if not s: return None
+        m = re.search(r"(\b\d{13}\b|\b\d{8}\b)", s)
+        return m.group(1) if m else None
 
-        def pick_digits(s: str) -> Optional[str]:
-            if not s:
-                return None
-            m = re.search(r"(\d{13}|\d{8})", s)
-            return m.group(1) if m else None
+    def pick_sku(s: str) -> Optional[str]:
+        if not s: return None
+        m = SKU_RX.search(s.upper())
+        return m.group(0) if m else None
 
-        for k_sel, v_sel in css_pairs:
-            try:
-                k = page.locator(k_sel).first
-                if k and k.count() > 0:
-                    zones = [k, k.locator(v_sel)]
-                    for z in zones:
-                        try:
-                            t = (z.inner_text(timeout=800) or "").strip()
-                            e = pick_digits(t)
-                            if e:
-                                sku = None
-                                for near in [k, k.locator("xpath=.."), k.locator("xpath=following-sibling::*[1]")]:
-                                    try:
-                                        tt = (near.inner_text(timeout=800) or "").strip()
-                                        m2 = re.search(r"([A-Z0-9_-]{6,})", tt, re.I)
-                                        if m2:
-                                            sku = sku or m2.group(1)
-                                    except Exception:
-                                        pass
-                                return e, sku
-                        except Exception:
-                            pass
-            except Exception:
-                pass
+    # EAN rows
+    ean_label_rx = r"Ribakood|Штрихкод|Barcode|EAN|Triipkood"
+    ean_css_pairs = [
+        ("dt:has(:text-matches('" + ean_label_rx + "','i'))", "dd"),
+        ("tr:has(td:has(:text-matches('" + ean_label_rx + "','i')))", "td"),
+        ("tr:has(th:has(:text-matches('" + ean_label_rx + "','i')))", "td"),
+    ]
 
-        for xp in xpaths:
-            try:
-                lab = page.locator(f"xpath={xp}").first
-                if not lab or lab.count() == 0:
-                    continue
-                zones = [
-                    lab,
-                    lab.locator("xpath=.."),
-                    lab.locator("xpath=following-sibling::*[1]"),
-                    lab.locator("xpath=following-sibling::*[2]"),
-                    lab.locator("xpath=../following-sibling::*[1]"),
-                ]
-                sku_found = None
+    ean_found: Optional[str] = None
+    for k_sel, v_sel in ean_css_pairs:
+        try:
+            k = page.locator(k_sel).first
+            if k and k.count() > 0:
+                zones = [k, k.locator(v_sel)]
                 for z in zones:
                     try:
-                        t = (z.inner_text(timeout=800) or "").strip()
-                        if not t:
-                            continue
-                        e = pick_digits(t)
-                        if not sku_found:
-                            msku = re.search(r"([A-Z0-9_-]{6,})", t, re.I)
-                            if msku:
-                                sku_found = msku.group(1)
+                        t = (z.inner_text(timeout=900) or "").strip()
+                        e = pick_ean(t)
                         if e:
-                            return e, sku_found
+                            ean_found = e
+                            break
                     except Exception:
                         pass
-            except Exception:
-                pass
-    except Exception:
-        pass
-    return None, None
+            if ean_found:
+                break
+        except Exception:
+            pass
+
+    # SKU rows — only from labels that actually say SKU / Tootekood / etc.
+    sku_css_pairs = [
+        ("dt:has(:text-matches('" + SKU_LABEL_RX + "','i'))", "dd"),
+        ("tr:has(td:has(:text-matches('" + SKU_LABEL_RX + "','i')))", "td"),
+        ("tr:has(th:has(:text-matches('" + SKU_LABEL_RX + "','i')))", "td"),
+    ]
+    sku_found: Optional[str] = None
+    for k_sel, v_sel in sku_css_pairs:
+        try:
+            k = page.locator(k_sel).first
+            if not k or k.count() == 0:
+                continue
+            zones = [k, k.locator(v_sel), k.locator("xpath=following-sibling::*[1]")]
+            for z in zones:
+                try:
+                    t = (z.inner_text(timeout=900) or "").strip()
+                    s = pick_sku(t)
+                    if s:
+                        sku_found = s
+                        break
+                except Exception:
+                    pass
+            if sku_found:
+                break
+        except Exception:
+            pass
+
+    return ean_found, sku_found
 
 def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
+    """
+    Last-ditch EAN grab by scanning around barcode labels. We do NOT attempt
+    to infer SKU here to avoid false positives.
+    """
     try:
         got = page.evaluate("""
         () => {
           const txt = n => (n && n.textContent || '').replace(/\\s+/g,' ').trim();
-          const pickDigits = s => { const m = s && s.match(/(\\d{13}|\\d{8})/); return m ? m[1] : null; };
-          const pickSKU = s => { const m = s && s.match(/([A-Z0-9_-]{6,})/i); return m ? m[1] : null; };
-
-          let ean = null, sku = null;
+          const pickDigits = s => { const m = s && s.match(/(\\b\\d{13}\\b|\\b\\d{8}\\b)/); return m ? m[1] : null; };
+          let ean = null;
           const nodes = Array.from(document.querySelectorAll('div,section,span,p,li,td,th,dd,dt,strong,em'));
           for (const el of nodes) {
             const t = txt(el);
@@ -689,17 +690,16 @@ def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
               for (const z of zone) {
                 const tt = txt(z);
                 if (!ean) ean = pickDigits(tt);
-                if (!sku) sku = pickSKU(tt);
                 if (ean) break;
               }
             }
             if (ean) break;
           }
-          return { ean, sku };
+          return { ean };
         }
         """)
         if got:
-            return got.get("ean") or None, got.get("sku") or None
+            return got.get("ean") or None, None
     except Exception:
         pass
     return None, None
@@ -720,14 +720,21 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
         for i in range(n):
             try:
                 _, ean, sku = parse_ld_product(scripts.nth(i).inner_text())
-                if sku and not sku_found: sku_found = sku
-                if ean: return ean, sku_found
+                if sku and not sku_found:
+                    m = SKU_RX.search((sku or "").upper())
+                    if m:
+                        sku_found = m.group(0)
+                if ean:
+                    return ean, sku_found
             except Exception: pass
     except Exception: pass
 
     # meta itemprops
-    meta_sku = _meta_content(page, ["meta[itemprop='sku']"])
-    if meta_sku and not sku_found: sku_found = (meta_sku or "").strip() or None
+    meta_sku = _meta_content(page, ["meta[itemprop='sku']"]) or ""
+    m = SKU_RX.search(meta_sku.upper())
+    if m and not sku_found:
+        sku_found = m.group(0)
+
     meta_ean = _meta_content(page, ["meta[itemprop='gtin13']", "meta[itemprop='gtin']"])
     if meta_ean:
         e = norm_ean(meta_ean)
@@ -736,11 +743,13 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
     # facts/labels
     _wait_pdp_facts(page)
     e_spec, s_spec = _ean_sku_via_label_xpath(page)
-    if e_spec: return norm_ean(e_spec), s_spec or sku_found
+    if s_spec and not sku_found:
+        sku_found = s_spec
+    if e_spec: return norm_ean(e_spec), sku_found
 
-    # DOM brute
-    e_dom, s_dom = _extract_ids_dom_bruteforce(page)
-    if e_dom: return norm_ean(e_dom), s_dom or sku_found
+    # DOM brute (EAN only)
+    e_dom, _ = _extract_ids_dom_bruteforce(page)
+    if e_dom: return norm_ean(e_dom), sku_found
 
     # JSON blobs / regex (label … digits)
     try:
@@ -748,17 +757,17 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
         m = JSON_EAN.search(html)
         if m:
             e = norm_ean(m.group("d"))
-            if e: return e, sku_found or s_dom
+            if e: return e, sku_found
     except Exception:
         pass
     try:
         html = page.content() or ""
         m = re.search(r"(ribakood|ean|triipkood|штрихкод|barcode)[\s\S]{0,800}?(\d{8,14})", html, re.I)
-        if m: return norm_ean(m.group(2)), sku_found or s_dom
+        if m: return norm_ean(m.group(2)), sku_found
     except Exception:
         pass
 
-    return None, sku_found or s_dom
+    return None, sku_found
 
 def ensure_specs_open(page):
     for sel in ["button:has-text('Tooteinfo')", "button:has-text('Lisainfo')", "button:has-text('Tootekirjeldus')"]:
