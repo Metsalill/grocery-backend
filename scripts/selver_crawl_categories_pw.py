@@ -9,8 +9,10 @@ Patch: robust EAN (Ribakood) + SKU extraction from PDP DOM
 - Falls back through several DOM strategies before giving up.
 - Keeps previous logic (JSON-LD, itemprops) as first attempts.
 
-Everything else (routing, listing discovery, pagination, preload, etc.) is unchanged
-from your latest working version.
+Additional hardening in this version:
+- Silences SPA pageerrors (e.g. parentSku exceptions) so they don't interrupt the run.
+- Keeps console noise minimal; honors LOG_CONSOLE=0|warn|all.
+- Retries navigation once in safe_goto() on transient failures.
 """
 
 from __future__ import annotations
@@ -242,7 +244,7 @@ def _ean_sku_from_dom(page) -> tuple[str, str]:
     except Exception:
         pass
 
-    # 2) Last resort: regex over full HTML (unlimited gap between label and digits)
+    # 2) Last resort: regex over full HTML
     if not ean:
         try:
             html = page.content()
@@ -354,19 +356,24 @@ def accept_cookies(page):
             pass
 
 def safe_goto(page, url: str, timeout: Optional[int] = None) -> bool:
+    """Navigate with one retry; let SPA settle."""
     tmo = timeout or NAV_TIMEOUT_MS
-    try:
-        page.goto(url, wait_until="domcontentloaded", timeout=tmo)
-        accept_cookies(page)
+    for attempt in (1, 2):
         try:
-            page.wait_for_load_state("networkidle", timeout=max(5000, int(tmo/2)))
-        except Exception:
-            pass
-        time.sleep(0.6)
-        return True
-    except Exception as e:
-        print(f"[selver] NAV FAIL {url} -> {type(e).__name__}: {e}")
-        return False
+            page.goto(url, wait_until="domcontentloaded", timeout=tmo)
+            accept_cookies(page)
+            try:
+                page.wait_for_load_state("networkidle", timeout=max(5000, int(tmo/2)))
+            except Exception:
+                pass
+            page.wait_for_timeout(300)
+            return True
+        except Exception as e:
+            if attempt == 1:
+                time.sleep(0.6)  # small backoff
+                continue
+            print(f"[selver] NAV FAIL {url} -> {type(e).__name__}: {e}")
+            return False
 
 def _wait_listing_ready(page):
     try:
@@ -821,6 +828,7 @@ def crawl():
             ])
             context = browser.new_context(
                 locale="et-EE",
+                viewport={"width": 1366, "height": 900},
                 user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                             "AppleWebKit/537.36 (KHTML, like Gecko) "
                             "Chrome/124.0.0.0 Safari/537.36"),
@@ -835,6 +843,10 @@ def crawl():
             page.set_default_navigation_timeout(NAV_TIMEOUT_MS)
             page.set_default_timeout(10000)
 
+            # Silence SPA page errors (e.g., parentSku) and requestfailed noise
+            page.on("pageerror", lambda e: None)
+            page.on("requestfailed", lambda r: None)
+
             if LOG_CONSOLE == "all":
                 page.on("console", lambda m: print(f"[pw] {m.type}: {m.text}"))
             elif LOG_CONSOLE == "warn":
@@ -843,6 +855,7 @@ def crawl():
                         t = (m.text or "").replace("\n"," ")[:800]
                         print(f"[pw] {m.type}: {t}")
                 page.on("console", _warn_err_only)
+            # LOG_CONSOLE == "0" → no console handler
 
             print("[selver] collecting seeds…")
             file_seeds: List[str] = []
