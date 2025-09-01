@@ -81,6 +81,7 @@ def pick_batch(conn: PGConn, limit: int):
     where_target = "(p.ean IS NULL OR p.ean = '')" if not OVERWRITE_BAD else f"(p.ean IS NULL OR p.ean = '' OR {bad_sql})"
 
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        # Prefer explicit queue
         if table_exists(conn, "selver_ean_backfill_queue"):
             cur.execute(f"""
               SELECT q.product_id, p.name,
@@ -100,6 +101,7 @@ def pick_batch(conn: PGConn, limit: int):
             if rows:
                 return rows
 
+        # Fallback: any Selver product missing/bad EAN with any price row
         cur.execute(f"""
           SELECT DISTINCT p.id AS product_id, p.name,
                  COALESCE(NULLIF(p.brand,''), '') AS brand,
@@ -276,7 +278,6 @@ def is_search_page(page) -> bool:
     return False
 
 def on_pdp(page) -> bool:
-    """True only if we’re confidently on a product page (and not the search grid)."""
     try:
         if not looks_like_pdp(page):
             return False
@@ -299,6 +300,7 @@ def score_hit(qname: str, brand: str, amount: str, text: str) -> float:
     return s
 
 def handle_age_gate(page):
+    """Accept 18+ modal (ET/EN/RU) if it appears."""
     try:
         if page.locator(":text-matches('vähemalt\\s*18|at\\s*least\\s*18|18\\+|18\\s*years|18\\s*лет', 'i')").count():
             for sel in [
@@ -343,14 +345,17 @@ def kill_consents_and_overlays(page):
         pass
 
 # --- Request router ---
+# Be conservative: blocking too much breaks the SPA search grid.
 BLOCK_SUBSTR = (
-    "adobedtm","googletagmanager","google-analytics","doubleclick",
-    "facebook.net","newrelic","pingdom","cookiebot","hotjar",
-    "sentry","intercom","optanon","tealium","qualtrics",
+    "doubleclick", "facebook.net", "googletagmanager", "google-analytics",
+    "hotjar"
 )
 def _router(route, request):
     try:
         url = request.url.lower()
+        # never block selver assets or first-party CDNs
+        if "selver.ee" in url:
+            return route.continue_()
         if any(s in url for s in BLOCK_SUBSTR):
             return route.abort()
         if "service_worker" in url or "sw_iframe" in url:
@@ -529,7 +534,7 @@ def harvest_pdp_links_from_attrs_and_json(page, limit: int = 12) -> List[str]:
             break
     return out
 
-# ---- scrape anchors from anywhere quickly ----
+# ---- Also scrape anchors from anywhere quickly ----
 def harvest_pdp_hrefs_anywhere(page, limit: int = 10) -> List[str]:
     urls: List[str] = []
     try:
@@ -546,6 +551,7 @@ def harvest_pdp_hrefs_anywhere(page, limit: int = 10) -> List[str]:
                 urls.append(clean)
     except Exception:
         pass
+    # raw HTML scan
     if len(urls) < limit:
         try:
             html = page.content() or ""
@@ -605,6 +611,62 @@ def js_jump_first_pdp(page) -> bool:
             pass
         handle_age_gate(page)
         return on_pdp(page)
+    except Exception:
+        return False
+
+# ---- NEW: type the query into Selver's search UI if ?q= gets dropped ----
+def perform_ui_search(page, q: str) -> bool:
+    try:
+        kill_consents_and_overlays(page)
+        # common selectors for the site's search input
+        sels = [
+            "input[name='q']",
+            "input[type='search']",
+            "input[placeholder*='Otsi' i]",
+            "[role='search'] input",
+            "form[action*='/search'] input"
+        ]
+        inp = None
+        for s in sels:
+            try:
+                if page.locator(s).count():
+                    inp = page.locator(s).first
+                    break
+            except Exception:
+                continue
+        if not inp:
+            return False
+        try:
+            inp.fill("")  # clear
+            inp.type(q, delay=20)
+        except Exception:
+            # fallback: dispatch events directly
+            try:
+                el = inp.element_handle(timeout=800)
+                if el:
+                    page.evaluate("(e, val)=>{e.value=val; e.dispatchEvent(new Event('input',{bubbles:true}));}", el, q)
+            except Exception:
+                pass
+        # hit Enter or click a nearby button
+        try:
+            inp.press("Enter")
+        except Exception:
+            pass
+        time.sleep(0.4)
+        # possible search button
+        for bsel in ["button[type='submit']", "button:has-text('Otsi')", "[aria-label='Otsi']"]:
+            try:
+                if page.locator(bsel).count():
+                    page.click(bsel, timeout=800)
+                    break
+            except Exception:
+                pass
+        try:
+            page.wait_for_load_state("networkidle", timeout=8000)
+        except Exception:
+            pass
+        ensure_results_loaded(page)
+        return True
     except Exception:
         return False
 
@@ -912,6 +974,7 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
     try: handle_age_gate(page)
     except Exception: pass
 
+    # JSON-LD
     try:
         scripts = page.locator("script[type='application/ld+json']")
         n = scripts.count()
@@ -923,6 +986,7 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
             except Exception: pass
     except Exception: pass
 
+    # meta itemprops
     meta_sku = _meta_content(page, ["meta[itemprop='sku']"])
     if meta_sku and not sku_found: sku_found = (meta_sku or "").strip() or None
     meta_ean = _meta_content(page, ["meta[itemprop='gtin13']", "meta[itemprop='gtin']"])
@@ -930,13 +994,16 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
         e = norm_ean(meta_ean)
         if e: return e, sku_found
 
+    # facts/labels
     _wait_pdp_facts(page)
     e_spec, s_spec = _ean_sku_via_label_xpath(page)
     if e_spec: return norm_ean(e_spec), s_spec or sku_found
 
+    # DOM brute
     e_dom, s_dom = _extract_ids_dom_bruteforce(page)
     if e_dom: return norm_ean(e_dom), s_dom or sku_found
 
+    # JSON blobs / regex
     try:
         html = page.content() or ""
         m = JSON_EAN.search(html)
@@ -978,9 +1045,11 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
     try: page.evaluate("window.scrollBy(0, 300)")
     except Exception: pass
 
+    # Try clicking the best-matching tile
     if _click_best_tile(page, name, brand, amount):
         return True
 
+    # Try navigating to the best href we can score
     hit = best_search_hit(page, name, brand, amount)
     if hit:
         try:
@@ -993,6 +1062,7 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
         except Exception:
             pass
 
+    # Try PDP links discovered inside recognised grids
     for h in list_pdp_hrefs_on_search(page, limit=8):
         try:
             page.goto(h, timeout=25000, wait_until="domcontentloaded")
@@ -1004,6 +1074,7 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
         except Exception:
             continue
 
+    # Harvest PDP links anywhere (anchors / raw HTML)
     for h in harvest_pdp_hrefs_anywhere(page, limit=10):
         try:
             page.goto(h, timeout=25000, wait_until="domcontentloaded")
@@ -1015,6 +1086,7 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
         except Exception:
             continue
 
+    # Extremely robust — pull PDP URLs from *any attribute* or inline JSON
     for h in harvest_pdp_links_from_attrs_and_json(page, limit=12):
         try:
             page.goto(h, timeout=25000, wait_until="domcontentloaded")
@@ -1026,9 +1098,11 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
         except Exception:
             continue
 
+    # Last resort: JS jump
     if js_jump_first_pdp(page):
         return True
 
+    # Last-last resort: click the first thing that looks like a tile
     try:
         page.keyboard.press("End"); time.sleep(0.4)
         page.keyboard.press("Home"); time.sleep(0.2)
@@ -1102,6 +1176,12 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
             handle_age_gate(page)
         except PWTimeout:
             continue
+
+        # If SPA drops ?q= and we are on bare /search, trigger a UI search
+        if is_search_page(page) and ("?q=" not in (page.url or "")):
+            if perform_ui_search(page, q):
+                try: page.wait_for_load_state("networkidle", timeout=9000)
+                except Exception: pass
 
         if is_search_page(page) or not on_pdp(page):
             opened = open_best_or_first(page, name, brand, amount)
