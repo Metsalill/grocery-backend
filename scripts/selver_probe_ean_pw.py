@@ -444,7 +444,7 @@ def ensure_results_loaded(page):
         pass
 
 # ---- collect top-N PDP links from a listing ----
-def list_pdp_hrefs_on_search(page, limit: int = 8) -> List[str]:
+def list_pdp_hrefs_on_search(page, limit: int = 12) -> List[str]:
     try:
         hrefs = page.evaluate("""
         () => {
@@ -481,11 +481,11 @@ def list_pdp_hrefs_on_search(page, limit: int = 8) -> List[str]:
     return uniq[:limit]
 
 # ---- NEW: harvest PDP hrefs from anywhere on the page (not just grids) ----
-def harvest_pdp_hrefs_anywhere(page, limit: int = 10) -> List[str]:
+def harvest_pdp_hrefs_anywhere(page, limit: int = 30) -> List[str]:
     urls: List[str] = []
     # 1) Any anchors in DOM
     try:
-        for a in page.locator("a[href]").all()[:800]:
+        for a in page.locator("a[href]").all()[:1200]:
             try:
                 href = a.get_attribute("href") or ""
             except Exception:
@@ -524,10 +524,12 @@ def _candidate_anchors(page):
     selectors = [
         "[data-testid='product-grid'] [role='link']",
         "[data-testid='product-list'] [role='link']",
+        "[data-testid='product-card'] [role='link']",
         ".product-grid [role='link']",
         ".product-list [role='link']",
         "[data-testid='product-grid'] a[href]:visible",
         "[data-testid='product-list'] a[href]:visible",
+        "[data-testid='product-card'] a[href]:visible",
         ".product-grid a[href]:visible",
         ".product-list a[href]:visible",
         ".product-card a[href]:visible",
@@ -540,7 +542,7 @@ def _candidate_anchors(page):
             nodes.extend(page.locator(sel).all())
         except Exception:
             pass
-    return nodes[:200]
+    return nodes[:300]
 
 def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
     links = _candidate_anchors(page)
@@ -590,10 +592,12 @@ def _click_first_search_tile(page) -> bool:
     for sel in [
         "[data-testid='product-grid'] [role='link']",
         "[data-testid='product-list'] [role='link']",
+        "[data-testid='product-card'] [role='link']",
         ".product-grid [role='link']",
         ".product-list [role='link']",
         "[data-testid='product-grid'] a[href]:visible",
         "[data-testid='product-list'] a[href]:visible",
+        "[data-testid='product-card'] a[href]:visible",
         ".product-grid a[href]:visible",
         ".product-list a[href]:visible",
         ".product-card a[href]:visible",
@@ -788,8 +792,8 @@ def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
     try:
         got = page.evaluate("""
         () => {
-          const txt = n => (n && n.textContent || '').replace(/\s+/g,' ').trim();
-          const pickDigits = s => { const m = s && s.match(/(\d{13}|\d{8})/); return m ? m[1] : null; };
+          const txt = n => (n && n.textContent || '').replace(/\\s+/g,' ').trim();
+          const pickDigits = s => { const m = s && s.match(/(\\d{13}|\\d{8})/); return m ? m[1] : null; };
           const pickSKU = s => { const m = s && s.match(/([A-Z0-9_-]{6,})/i); return m ? m[1] : null; };
 
           let ean = null, sku = null;
@@ -914,7 +918,7 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
             pass
 
     # 3) Try a handful of PDP links discovered inside recognised grids
-    for h in list_pdp_hrefs_on_search(page, limit=8):
+    for h in list_pdp_hrefs_on_search(page, limit=12):
         try:
             page.goto(h, timeout=25000, wait_until="domcontentloaded")
             try: page.wait_for_load_state("networkidle", timeout=9000)
@@ -926,7 +930,7 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
             continue
 
     # 4) NEW: harvest PDP links anywhere on the page (prefetch/hidden anchors)
-    for h in harvest_pdp_hrefs_anywhere(page, limit=10):
+    for h in harvest_pdp_hrefs_anywhere(page, limit=30):
         try:
             page.goto(h, timeout=25000, wait_until="domcontentloaded")
             try: page.wait_for_load_state("networkidle", timeout=9000)
@@ -952,6 +956,7 @@ MULTI_RX = re.compile(r'\b\d+\s*[x×]\s*\d+\s*(g|ml|l)\b', re.I)
 TK_RX    = re.compile(r'\b\d+\s*(tk|pk)\b', re.I)
 PCT_RX   = re.compile(r'\b[\d.,]+(?:\s*-\s*[\d.,]+)?\s*%')
 ETT_RX   = re.compile(r'\bettetellimisel\b', re.I)
+UNIT_RX  = re.compile(r'\b\d+[.,]?\d*\s*(?:g|kg|ml|l)\b', re.I)  # NEW: strip single weights like "93g", "1 kg"
 
 def _clean_name_for_search(name: str) -> str:
     s = HULGI_RX.sub('', name or '')
@@ -959,6 +964,8 @@ def _clean_name_for_search(name: str) -> str:
     s = MULTI_RX.sub('', s)
     s = TK_RX.sub('', s)
     s = PCT_RX.sub('', s)
+    s = UNIT_RX.sub('', s)                 # NEW
+    s = re.sub(r'[-–—]', ' ', s)          # normalize hyphens to spaces
     # squeeze punctuation around commas/spaces
     s = re.sub(r'\s*,\s*', ', ', s)
     s = re.sub(r'[,:;]\s*$', '', s)
@@ -972,8 +979,11 @@ def _key_tokens(s: str) -> List[str]:
     toks = [t for t in re.findall(r'\w+', (s or ''), flags=re.UNICODE) if len(t) >= 3 and not t.isdigit()]
     # prefer earlier / longer tokens
     uniq = []
+    seen_lower = set()
     for t in toks:
-        if t.lower() not in [u.lower() for u in uniq]:
+        tl = t.lower()
+        if tl not in seen_lower:
+            seen_lower.add(tl)
             uniq.append(t)
     return uniq[:3]
 
@@ -987,6 +997,7 @@ def _generate_queries(name: str, brand: str, amount: str) -> List[str]:
         q = re.sub(r'\s+', ' ', q).strip(' ,')
         if q and q not in out:
             out.append(q)
+    # main variants
     if base and brand: add(f"{base} {brand}")
     if base: add(base)
     if base_core and brand: add(f"{base_core} {brand}")
@@ -996,6 +1007,8 @@ def _generate_queries(name: str, brand: str, amount: str) -> List[str]:
     # minimal brand + key tokens (helps when trailing commas killed the grid)
     kt = _key_tokens(base_core or base_nocomma)
     if brand and kt: add(f"{brand} {' '.join(kt)}")
+    # NEW: brand-only last resort
+    if brand: add(brand)
     return out
 
 def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
