@@ -70,8 +70,154 @@ def column_exists(conn: PGConn, tbl: str, col: str) -> bool:
         """, (tbl, col))
         return cur.fetchone()[0]
 
-# ----------------- batch pick (unchanged) -----------------
-# ... keep your current pick_batch(), update_success(), update_failure() ...
+# ----------------- batch pick -----------------
+
+def pick_batch(conn: PGConn, limit: int):
+    bad_sql = """
+        (p.ean !~ '^[0-9]+$' OR length(p.ean) NOT IN (8,13)
+         OR p.ean ~ '^([0-9])\\1{7}$'
+         OR p.ean IN ('00000000','0000000000000'))
+    """
+    where_target = "(p.ean IS NULL OR p.ean = '')" if not OVERWRITE_BAD else f"(p.ean IS NULL OR p.ean = '' OR {bad_sql})"
+
+    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        # Prefer an explicit queue if it exists
+        if table_exists(conn, "selver_ean_backfill_queue"):
+            cur.execute(f"""
+              SELECT q.product_id, p.name,
+                     COALESCE(NULLIF(p.brand,''), '') AS brand,
+                     COALESCE(NULLIF(p.amount,''), '') AS amount
+              FROM selver_ean_backfill_queue q
+              JOIN products p ON p.id = q.product_id
+              JOIN prices pr ON pr.product_id = p.id
+              JOIN stores s  ON s.id = pr.store_id
+              WHERE {where_target}
+                AND s.chain = 'Selver'
+              GROUP BY q.product_id, p.name, p.brand, p.amount
+              ORDER BY q.attempts ASC, q.updated_at ASC
+              LIMIT %s;
+            """, (limit,))
+            rows = cur.fetchall()
+            if rows:
+                return rows
+
+        # Fallback: any Selver product missing/bad EAN with any price row
+        cur.execute(f"""
+          SELECT DISTINCT p.id AS product_id, p.name,
+                 COALESCE(NULLIF(p.brand,''), '') AS brand,
+                 COALESCE(NULLIF(p.amount,''), '') AS amount
+          FROM products p
+          JOIN prices pr ON pr.product_id = p.id
+          JOIN stores s  ON s.id = pr.store_id
+          WHERE s.chain = 'Selver'
+            AND {where_target}
+          ORDER BY p.id
+          LIMIT %s;
+        """, (limit,))
+        return cur.fetchall()
+
+# ----------------- DB writes -----------------
+
+def update_success(conn: PGConn, product_id: int, ean: str, sku: Optional[str] = None) -> str:
+    try:
+        with conn.cursor() as cur:
+            if looks_bogus_ean(ean):
+                if table_exists(conn, "selver_ean_backfill_queue"):
+                    cur.execute("""
+                      UPDATE selver_ean_backfill_queue
+                         SET attempts = attempts + 1,
+                             last_error = %s,
+                             updated_at = now()
+                       WHERE product_id = %s;
+                    """, (f"bogus EAN {ean}", product_id))
+                conn.commit()
+                return "BOGUS_CANDIDATE"
+
+            cur.execute("SELECT ean FROM products WHERE id = %s;", (product_id,))
+            prev = (cur.fetchone() or [None])[0]
+
+            if prev:
+                if prev == ean:
+                    if table_exists(conn, "selver_ean_backfill_queue"):
+                        cur.execute("""
+                          UPDATE selver_ean_backfill_queue
+                             SET attempts = attempts + 1,
+                                 last_error = NULL,
+                                 updated_at = now()
+                           WHERE product_id = %s;
+                        """, (product_id,))
+                    conn.commit()
+                    return "EXISTS"
+                if not OVERWRITE_BAD:
+                    if table_exists(conn, "selver_ean_backfill_queue"):
+                        cur.execute("""
+                          UPDATE selver_ean_backfill_queue
+                             SET attempts = attempts + 1,
+                                 last_error = %s,
+                                 updated_at = now()
+                           WHERE product_id = %s;
+                        """, (f"has existing EAN {prev}, overwrite disabled", product_id))
+                    conn.commit()
+                    return "SKIP_PRESENT"
+                if not is_bad_ean_python(prev):
+                    if table_exists(conn, "selver_ean_backfill_queue"):
+                        cur.execute("""
+                          UPDATE selver_ean_backfill_queue
+                             SET attempts = attempts + 1,
+                                 last_error = %s,
+                                 updated_at = now()
+                           WHERE product_id = %s;
+                        """, (f"existing EAN {prev} not considered bad", product_id))
+                    conn.commit()
+                    return "SKIP_NOT_BAD"
+
+            cur.execute("SELECT id FROM products WHERE ean = %s AND id <> %s LIMIT 1;", (ean, product_id))
+            dup = cur.fetchone()
+            if dup:
+                if table_exists(conn, "selver_ean_backfill_queue"):
+                    cur.execute("""
+                      UPDATE selver_ean_backfill_queue
+                         SET attempts = attempts + 1,
+                             last_error = %s,
+                             updated_at = now()
+                       WHERE product_id = %s;
+                    """, (f"duplicate EAN {ean} already on product {dup[0]}", product_id))
+                conn.commit()
+                return "DUP_FOUND"
+
+            if sku and column_exists(conn, "products", "sku"):
+                cur.execute("UPDATE products SET ean = %s, sku = COALESCE(%s, sku) WHERE id = %s;", (ean, sku, product_id))
+            else:
+                cur.execute("UPDATE products SET ean = %s WHERE id = %s;", (ean, product_id))
+
+            if table_exists(conn, "selver_ean_backfill_queue"):
+                cur.execute("""
+                  UPDATE selver_ean_backfill_queue
+                     SET attempts = attempts + 1,
+                         last_error = NULL,
+                         updated_at = now()
+                   WHERE product_id = %s;
+                """, (product_id,))
+        conn.commit()
+        return "OVERWRITE" if prev else "OK"
+    except Exception:
+        conn.rollback()
+        raise
+
+def update_failure(conn: PGConn, product_id: int, err: str):
+    try:
+        if table_exists(conn, "selver_ean_backfill_queue"):
+            with conn.cursor() as cur:
+                cur.execute("""
+                  UPDATE selver_ean_backfill_queue
+                     SET attempts = attempts + 1,
+                         last_error = LEFT(%s, 500),
+                         updated_at = now()
+                   WHERE product_id = %s;
+                """, (err, product_id))
+        conn.commit()
+    except Exception:
+        conn.rollback()
 
 # ----------------- page helpers -----------------
 
@@ -135,7 +281,6 @@ def score_hit(qname: str, brand: str, amount: str, text: str) -> float:
 def handle_age_gate(page):
     """Accept 18+ modal (ET/EN/RU) if it appears."""
     try:
-        # a lightweight, text-based sniff + obvious buttons
         if page.locator(":text-matches('vähemalt\\s*18|at\\s*least\\s*18|18\\+|18\\s*years|18\\s*лет', 'i')").count():
             for sel in [
                 "button:has-text('Olen vähemalt 18')",
@@ -178,7 +323,7 @@ def kill_consents_and_overlays(page):
     except Exception:
         pass
 
-# --- Request router (unchanged) ---
+# --- Request router ---
 BLOCK_SUBSTR = (
     "adobedtm","googletagmanager","google-analytics","doubleclick",
     "facebook.net","newrelic","pingdom","cookiebot","hotjar",
@@ -194,7 +339,7 @@ def _router(route, request):
         pass
     return route.continue_()
 
-# --- PDP-href recognizer (unchanged) ---
+# --- PDP-href recognizer ---
 def looks_like_pdp_href(href: str) -> bool:
     if not href:
         return False
@@ -240,9 +385,8 @@ def is_search_page(page) -> bool:
         pass
     return False
 
-# ---- NEW: robust extraction of top-N product hrefs from search/listing ----
+# ---- collect top-N PDP links from a listing ----
 def list_pdp_hrefs_on_search(page, limit: int = 8) -> List[str]:
-    """Return up to `limit` PDP-like hrefs in DOM order from a search/listing."""
     try:
         hrefs = page.evaluate("""
         () => {
@@ -254,7 +398,7 @@ def list_pdp_hrefs_on_search(page, limit: int = 8) -> List[str]:
             '.product-grid','.product-list',
             '.product-card','article','.MuiGrid-root'
           ];
-          const sel = roots.map(r => r+' a[href],'+r+' [data-href],'+r+' [role="link"]').join(',');
+          const sel = roots.map(r => r+' a[href],'+r+' [data-href],'+r+' [role=\"link\"]').join(',');
           const nodes = Array.from(document.querySelectorAll(sel)).slice(0, 400);
           for (const n of nodes) {
             let h = get(n);
@@ -272,14 +416,12 @@ def list_pdp_hrefs_on_search(page, limit: int = 8) -> List[str]:
         if looks_like_pdp_href(h):
             if h.startswith("/"): h = SELVER_BASE + h
             out.append(h)
-    # de-dup, keep order, trim
     seen, uniq = set(), []
     for u in out:
         if u not in seen:
             seen.add(u); uniq.append(u)
     return uniq[:limit]
 
-# ---- existing click helpers kept, but we’ll also try the top-N plan ----
 def _candidate_anchors(page):
     selectors = [
         "[data-testid='product-grid'] a[href]:visible",
@@ -289,7 +431,7 @@ def _candidate_anchors(page):
         ".product-card a[href]:visible",
         "article a[href]:visible",
         "[data-href]:visible",
-        "[role='link']"
+        "[role='link']",
     ]
     nodes = []
     for sel in selectors:
@@ -399,7 +541,6 @@ _VARIETALS = {
     "shiraz","syrah","malbec","grenache","chenin","viognier","zinfandel",
     "nebbiolo","sangiovese","cava","prosecco","moscato","semillon","semillion",
 }
-
 _SIZE_RX = re.compile(r'(?:\b|^)(?:\d{2,3}\s*cl|\d{3,4}\s*ml|0[.,]?\d+\s*l)\b', re.I)
 
 def _tokens(s: str) -> set:
@@ -421,7 +562,7 @@ def _pdp_matches_target(page, name: str, brand: str, amount: str) -> bool:
         return True
     if brand and (_tokens(brand) & tset):
         return True
-    # NEW: varietal+size loosened rule for brandless names like "Chardonnay 75 cl"
+    # varietal+size fallback for brandless names like "Chardonnay 75 cl"
     if not brand and any(v in _tokens(name) for v in _VARIETALS):
         if any(v in tset for v in _VARIETALS) and _SIZE_RX.search(title):
             return True
@@ -429,7 +570,8 @@ def _pdp_matches_target(page, name: str, brand: str, amount: str) -> bool:
         return True
     return False
 
-# ----- EAN/SKU extraction (unchanged below) ----
+# ----- EAN/SKU extraction -----
+
 def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     try:
         data = json.loads(text.strip())
@@ -622,7 +764,7 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
     e_dom, s_dom = _extract_ids_dom_bruteforce(page)
     if e_dom: return norm_ean(e_dom), s_dom or sku_found
 
-    # JSON blobs / regex (label … digits)
+    # JSON blobs / regex
     try:
         html = page.content() or ""
         m = JSON_EAN.search(html)
@@ -662,11 +804,9 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
     try: page.evaluate("window.scrollBy(0, 300)")
     except Exception: pass
 
-    # 1) Try clicking the best-matching tile
     if _click_best_tile(page, name, brand, amount):
         return True
 
-    # 2) Try navigating to the best href we can score
     hit = best_search_hit(page, name, brand, amount)
     if hit:
         try:
@@ -679,7 +819,6 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
         except Exception:
             pass
 
-    # 3) NEW: Walk through the first few PDP links on the page, one by one
     hrefs = list_pdp_hrefs_on_search(page, limit=8)
     for h in hrefs:
         try:
@@ -692,7 +831,6 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
         except Exception:
             continue
 
-    # 4) Last resort: click the very first tile
     try:
         page.keyboard.press("End"); time.sleep(0.4)
         page.keyboard.press("Home"); time.sleep(0.2)
@@ -702,24 +840,20 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
 
 # ----------------- main probe flow -----------------
 
-def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
-    """
-    Returns (ean, sku, url). `url` is the last page we were on
-    (a PDP when successful, or the last search/listing otherwise).
-    """
-    last_url: Optional[str] = None
-
+def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
+    """Return ean, sku, src_search_url, pdp_url (if reached)."""
     q_variants = []
     q_full = " ".join(x for x in [name or "", brand or "", amount or ""] if x).strip()
     if q_full: q_variants.append(q_full)
     if name:   q_variants.append(name.strip())
     if brand and name: q_variants.append(f"{name} {brand}")
 
+    last_src = None
     for q in q_variants:
         try:
             url = SEARCH_URL.format(q=quote_plus(q))
+            last_src = url
             page.goto(url, timeout=25000, wait_until="domcontentloaded")
-            last_url = url
             try: page.wait_for_load_state("networkidle", timeout=9000)
             except Exception: pass
             kill_consents_and_overlays(page)
@@ -729,10 +863,7 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
 
         if is_search_page(page) or not looks_like_pdp(page):
             opened = open_best_or_first(page, name, brand, amount)
-            try: last_url = page.url
-            except Exception: pass
             if not opened:
-                # We'll allow trying the next q-variant
                 continue
 
         if not (_pdp_matches_target(page, name, brand, amount) or
@@ -741,8 +872,6 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
             want = (name or "")[:60]
             got  = (_pdp_title(page) or "")[:120]
             print(f"[WRONG_PDP] want='{want}' got='{got}' url={page.url}")
-            try: last_url = page.url
-            except Exception: pass
             continue
 
         ensure_specs_open(page)
@@ -751,11 +880,9 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
         if ean:
             ean = norm_ean(ean)
             if not looks_bogus_ean(ean):
-                try: last_url = page.url
-                except Exception: pass
-                return ean, (sku or None), last_url
+                return ean, (sku or None), last_src, page.url
 
-    return None, None, last_url
+    return None, None, last_src, page.url if looks_like_pdp(page) else None
 
 def main():
     conn = connect()
@@ -781,14 +908,16 @@ def main():
             brand  = row["brand"]  or ""
             amount = row["amount"] or ""
             try:
-                ean, sku, url = process_one(page, name, brand, amount)
+                ean, sku, src_url, pdp_url = process_one(page, name, brand, amount)
                 if ean:
                     status = update_success(conn, pid, ean, sku)
                     tag = "OK" if status == "OK" else status
-                    print(f"[{tag}] id={pid} ← EAN {ean}{(' | SKU ' + sku) if sku else ''} | url={url or 'n/a'}")
+                    src = src_url or "-"
+                    pdp = pdp_url or "-"
+                    print(f"[{tag}] id={pid} ← EAN {ean}{(' | SKU ' + sku) if sku else ''} | SRC {src} | PDP {pdp}")
                 else:
                     update_failure(conn, pid, "ean not found or bogus")
-                    print(f"[MISS] id={pid} name='{name}' | url={url or 'n/a'}")
+                    print(f"[MISS] id={pid} name='{name}' | SRC {src_url or '-'} | PDP {pdp_url or '-'}")
             except Exception as e:
                 conn.rollback()
                 update_failure(conn, pid, str(e))
