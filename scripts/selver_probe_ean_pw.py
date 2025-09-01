@@ -18,19 +18,26 @@ REQ_DELAY = float(os.getenv("REQ_DELAY", "0.6"))
 OVERWRITE_BAD = os.getenv("OVERWRITE_BAD_EANS", "0").lower() in ("1", "true", "yes")
 DB_URL = os.getenv("DATABASE_URL") or os.getenv("DATABASE_URL_PUBLIC")
 
-# --- Chardonnay/varietal fallback toggle (DISABLED) ---
-ENABLE_VARIETAL_SIZE_FALLBACK = False
-
 EAN_RE   = re.compile(r"\b(\d{8}|\d{13})\b")
 JSON_EAN = re.compile(r'"(?:gtin14|gtin13|gtin|ean|barcode|sku)"\s*:\s*"(?P<d>\d{8,14})"', re.I)
 
 # ----------------- small utils -----------------
 
 def norm_ean(s: Optional[str]) -> Optional[str]:
+    """Normalize varied GTINs to EAN-13/EAN-8.
+    - Accepts GTIN-14 (drops leading 0/1 commonly used as logistic indicator)
+    - Accepts UPC-A (12) and pads to EAN-13 with leading zero
+    """
     if not s:
         return None
     d = re.sub(r"\D", "", s)
-    return d if d and len(d) in (8, 13) else None
+    if not d:
+        return None
+    if len(d) == 14 and d[0] in "01":
+        d = d[1:]
+    if len(d) == 12:
+        d = "0" + d
+    return d if len(d) in (8, 13) else None
 
 def looks_bogus_ean(e: Optional[str]) -> bool:
     if not e:
@@ -84,7 +91,6 @@ def pick_batch(conn: PGConn, limit: int):
     where_target = "(p.ean IS NULL OR p.ean = '')" if not OVERWRITE_BAD else f"(p.ean IS NULL OR p.ean = '' OR {bad_sql})"
 
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-        # Prefer an explicit queue if it exists
         if table_exists(conn, "selver_ean_backfill_queue"):
             cur.execute(f"""
               SELECT q.product_id, p.name,
@@ -104,7 +110,6 @@ def pick_batch(conn: PGConn, limit: int):
             if rows:
                 return rows
 
-        # Fallback: any Selver product missing/bad EAN with any price row
         cur.execute(f"""
           SELECT DISTINCT p.id AS product_id, p.name,
                  COALESCE(NULLIF(p.brand,''), '') AS brand,
@@ -251,17 +256,20 @@ def _meta_content(page, selectors: List[str]) -> Optional[str]:
     return None
 
 def looks_like_pdp(page) -> bool:
+    # meta og:type
     try:
         og_type = _meta_content(page, ["meta[property='og:type']"]) or ""
         if og_type.lower() == "product":
             return True
     except Exception:
         pass
+    # labels or itemprops
     try:
         if page.locator("meta[itemprop='gtin13'], meta[itemprop='gtin'], meta[itemprop='sku']").count() > 0:
             return True
     except Exception:
         pass
+    # facts block in ET / RU / EN
     try:
         if page.locator(":text-matches('Ribakood|Штрихкод|Barcode', 'i')").count() > 0:
             return True
@@ -284,26 +292,28 @@ def score_hit(qname: str, brand: str, amount: str, text: str) -> float:
 def handle_age_gate(page):
     """Accept 18+ modal (ET/EN/RU) if it appears."""
     try:
-        if page.locator(":text-matches('vähemalt\\s*18|at\\s*least\\s*18|18\\+|18\\s*years|18\\s*лет', 'i')").count():
-            for sel in [
-                "button:has-text('Olen vähemalt 18')",
-                "button:has-text('Jah')", "a:has-text('Jah')",
-                "button:has-text('ENTER')",
-                "button:has-text('Yes')",
-                "button:has-text('Да')",
-            ]:
-                try:
-                    btn = page.locator(sel).first
-                    if btn and btn.count() > 0 and btn.is_visible():
-                        btn.click(timeout=1500)
-                        time.sleep(0.2)
-                        break
-                except Exception:
-                    pass
+        if page.locator(":text-matches('vähemalt\\s*18|at\\s*least\\s*18|18\\+|18\\s*years|18\\s*лет', 'i')").count() == 0:
+            return
+        for sel in [
+            "button:has-text('Olen vähemalt 18')",
+            "button:has-text('Jah')", "a:has-text('Jah')",
+            "button:has-text('ENTER')",
+            "button:has-text('Yes')",
+            "button:has-text('Да')",
+        ]:
+            try:
+                btn = page.locator(sel).first
+                if btn and btn.count() > 0 and btn.is_visible():
+                    btn.click(timeout=1500)
+                    time.sleep(0.2)
+                    break
+            except Exception:
+                pass
     except Exception:
         pass
 
 def kill_consents_and_overlays(page):
+    # Cookie/consent
     for sel in [
         "button:has-text('Nõustun')",
         "button:has-text('Luba kõik')",
@@ -319,17 +329,19 @@ def kill_consents_and_overlays(page):
                 time.sleep(0.2)
         except Exception:
             pass
+    # Alcohol age-gate if present
     try: handle_age_gate(page)
     except Exception: pass
+    # Close search suggestion overlay if open
     try:
         page.keyboard.press("Escape")
     except Exception:
         pass
 
-# --- Request router (keep minimal; avoids blocking product resources) ---
+# --- Request router to reduce 3rd-party noise ---
 BLOCK_SUBSTR = (
-    "adobedtm","googletagmanager","google-analytics","doubleclick",
-    "facebook.net","newrelic","pingdom","cookiebot","hotjar",
+    "adobedtm", "googletagmanager", "google-analytics", "doubleclick",
+    "facebook.net", "newrelic", "pingdom", "cookiebot", "hotjar",
 )
 def _router(route, request):
     try:
@@ -342,86 +354,55 @@ def _router(route, request):
         pass
     return route.continue_()
 
-# -------- clicking helpers --------
-def _elem_href(locator) -> Optional[str]:
-    try:
-        h = locator.get_attribute("href") or locator.get_attribute("data-href")
-        if h:
-            return h
-        a = locator.locator("xpath=ancestor-or-self::a[@href]").first
-        if a and a.count() > 0:
-            return a.get_attribute("href")
-    except Exception:
-        pass
-    return None
-
-def _try_click_node(page, locator) -> bool:
-    try:
-        locator.scroll_into_view_if_needed(timeout=1500)
-    except Exception:
-        pass
-    clicked = False
-    try:
-        locator.click(timeout=3000)
-        clicked = True
-    except Exception:
-        try:
-            el = locator.element_handle(timeout=600)
-            if el:
-                page.evaluate("(n)=>{try{n.click && n.click()}catch(e){}}", el)
-                clicked = True
-        except Exception:
-            pass
-    if not clicked:
-        return False
-    try:
-        page.wait_for_selector("h1", timeout=7000)
-    except Exception:
-        pass
-    try:
-        page.wait_for_load_state("networkidle", timeout=6000)
-    except Exception:
-        pass
-    handle_age_gate(page)
-    return looks_like_pdp(page) or page.locator("h1").count() > 0
-
-# --- PDP-href recognizer ---
+# --- PDP-href recognizer to avoid category/landing pages ---
 def looks_like_pdp_href(href: str) -> bool:
     if not href:
         return False
-    if "?" in href: href = href.split("?",1)[0]
-    if "#" in href: href = href.split("#",1)[0]
+    # strip query/fragment
+    href = href.split("?", 1)[0].split("#", 1)[0]
+    # absolute → keep host check light
     if href.startswith("http"):
         try:
-            p = urlparse(href).path
+            href = (urlparse(href).path) or "/"
         except Exception:
             return False
-        href = p or "/"
     if not href.startswith("/"):
         return False
+
+    bad_prefixes = (
+        "/search", "/konto", "/login", "/registreeru", "/logout",
+        "/kliendimangud", "/kauplused", "/selveekspress", "/tule-toole",
+        "/uudised", "/kinkekaardid", "/selveri-kook", "/kampaania", "/retseptid",
+        "/app",
+    )
+    if any(href.startswith(p) for p in bad_prefixes):
+        return False
+
+    # Explicit product namespace always ok
     if href.startswith("/toode/") or href.startswith("/e-selver/toode/"):
         return True
+
+    # Multi-segment PDPs: accept if the last segment is a slug with dashes
+    # and looks like a product slug (contains a digit or ends in a size-ish token).
     segs = [s for s in href.split("/") if s]
-    if segs and segs[0] == "e-selver":
-        segs = segs[1:]
-    if len(segs) == 1 and re.fullmatch(r"[a-z0-9-]{3,}", segs[0]):
-        if not any(ch.isdigit() for ch in segs[0]) and "-" not in segs[0]:
-            return False
-    elif not href.startswith("/toode/"):
+    if not segs:
         return False
-    bad_prefixes = (
-        "/search","/eritooted","/puu-ja-koogiviljad","/liha-ja-kalatooted",
-        "/piimatooted","/juustud","/leivad","/valmistoidud",
-        "/kauplused","/kliendimangud","/selveekspress","/tule-toole",
-        "/uudised","/kinkekaardid","/selveri-kook","/kampaania","/retseptid",
-        "/joogid","/magusad-ja-snackid","/maitseained","/kodukeemia",
-    )
-    return not any(href.startswith(p) for p in bad_prefixes)
+    last = segs[-1]
+    if "-" in last and (any(ch.isdigit() for ch in last) or re.search(r"(?:^|[-_])(kg|g|l|ml|cl|dl|tk)$", last)):
+        return True
+
+    return False
 
 def is_search_page(page) -> bool:
     try:
         url = page.url
         if "/search?" in url:
+            return True
+        if any(seg in url for seg in (
+            "/eritooted/", "/puu-ja-koogiviljad/", "/liha-ja-kalatooted/",
+            "/piimatooted", "/juustud", "/leivad", "/valmistoidud",
+            "/joogid", "/magusad-ja-snackid", "/maitseained", "/kodukeemia",
+        )):
             return True
         if page.locator("text=Otsingu:").count() > 0:
             return True
@@ -429,61 +410,8 @@ def is_search_page(page) -> bool:
         pass
     return False
 
-# --- results rendering nudge ---
-def ensure_results_loaded(page):
-    try:
-        page.wait_for_selector(
-            "[data-testid='product-grid'], .product-grid, .product-list, article img",
-            timeout=7000
-        )
-    except Exception:
-        pass
-    try:
-        page.evaluate("window.scrollBy(0, 600)")
-        page.wait_for_timeout(250)
-        page.evaluate("window.scrollBy(0, -400)")
-    except Exception:
-        pass
-
-# ---- extract top-N product hrefs from a listing ----
-def list_pdp_hrefs_on_search(page, limit: int = 8) -> List[str]:
-    try:
-        hrefs = page.evaluate("""
-        () => {
-          const get = el => el?.getAttribute?.('href') || el?.getAttribute?.('data-href') || null;
-          const keep = new Set();
-          const roots = [
-            '[data-testid="product-grid"]',
-            '[data-testid="product-list"]',
-            '.product-grid','.product-list',
-            '.product-card','article','.MuiGrid-root'
-          ];
-          const sel = roots.map(r => r+' a[href],'+r+' [data-href],'+r+' [role="link"]').join(',');
-          const nodes = Array.from(document.querySelectorAll(sel)).slice(0, 400);
-          for (const n of nodes) {
-            let h = get(n);
-            if (!h && n.closest('a[href]')) h = get(n.closest('a[href]'));
-            if (!h && n.querySelector('a[href]')) h = get(n.querySelector('a[href]'));
-            if (h) keep.add(h);
-          }
-          return Array.from(keep);
-        }
-        """)
-    except Exception:
-        hrefs = []
-    out = []
-    for h in hrefs:
-        if looks_like_pdp_href(h):
-            if h.startswith("/"): h = SELVER_BASE + h
-            out.append(h)
-    seen, uniq = set(), []
-    for u in out:
-        if u not in seen:
-            seen.add(u); uniq.append(u)
-    return uniq[:limit]
-
-# ---- search tile helpers ----
 def _candidate_anchors(page):
+    # prefer anchors inside visible product cards/grids
     selectors = [
         "[data-testid='product-grid'] a[href]:visible",
         "[data-testid='product-list'] a[href]:visible",
@@ -492,7 +420,8 @@ def _candidate_anchors(page):
         ".product-card a[href]:visible",
         "article a[href]:visible",
         "[data-href]:visible",
-        "[role='link']"
+        # broad safety net:
+        "a[href^='/']:visible",
     ]
     nodes = []
     for sel in selectors:
@@ -507,24 +436,28 @@ def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
     scored: List[Tuple[str, float]] = []
     for a in links:
         try:
-            href = _elem_href(a) or ""
-            if href and not looks_like_pdp_href(href):
+            href = a.get_attribute("href") or a.get_attribute("data-href") or ""
+            if not looks_like_pdp_href(href):
                 continue
             txt = a.inner_text() or ""
-            scored.append((href or "", score_hit(qname, brand, amount, txt)))
+            scored.append((href, score_hit(qname, brand, amount, txt)))
         except Exception:
             continue
     if not scored:
         return None
     scored.sort(key=lambda x: x[1], reverse=True)
     href = scored[0][0]
-    return (SELVER_BASE + href) if href and href.startswith("/") else (href or None)
+    return SELVER_BASE + href if href.startswith("/") else href
 
 def _click_best_tile(page, name: str, brand: str, amount: str) -> bool:
     links = _candidate_anchors(page)
-    best, best_score = None, -1.0
+    best = None
+    best_score = -1.0
     for a in links:
         try:
+            href = a.get_attribute("href") or a.get_attribute("data-href") or ""
+            if not looks_like_pdp_href(href):
+                continue
             txt = a.inner_text() or ""
             sc = score_hit(name, brand, amount, txt)
             if sc > best_score:
@@ -533,18 +466,29 @@ def _click_best_tile(page, name: str, brand: str, amount: str) -> bool:
             continue
     if not best:
         return False
-    href = _elem_href(best)
-    if href and looks_like_pdp_href(href):
-        if href.startswith("/"): href = SELVER_BASE + href
-        try:
-            page.goto(href, timeout=25000, wait_until="domcontentloaded")
-            try: page.wait_for_load_state("networkidle", timeout=8000)
+    try:
+        best.click(timeout=4000)
+        try: page.wait_for_selector("h1", timeout=8000)
+        except Exception: pass
+        try: page.wait_for_load_state("networkidle", timeout=6000)
+        except Exception: pass
+        if looks_like_pdp(page) or page.locator("h1").count() > 0:
+            return True
+    except Exception:
+        pass
+    try:
+        href = best.get_attribute("href") or best.get_attribute("data-href") or ""
+        if href:
+            if href.startswith("/"): href = SELVER_BASE + href
+            page.evaluate("url => window.location.assign(url)", href)
+            try: page.wait_for_selector("h1", timeout=8000)
             except Exception: pass
-            handle_age_gate(page)
+            try: page.wait_for_load_state("networkidle", timeout=6000)
+            except Exception: pass
             return looks_like_pdp(page) or page.locator("h1").count() > 0
-        except Exception:
-            pass
-    return _try_click_node(page, best)
+    except Exception:
+        pass
+    return False
 
 def _click_first_search_tile(page) -> bool:
     for sel in [
@@ -555,24 +499,20 @@ def _click_first_search_tile(page) -> bool:
         ".product-card a[href]:visible",
         "article a[href]:visible",
         "[data-href]:visible",
-        "[role='link']",
+        "a[href^='/']:visible",
     ]:
         try:
             a = page.locator(sel).first
             if a and a.count() > 0:
-                href = _elem_href(a) or ""
-                if href and looks_like_pdp_href(href):
-                    if href.startswith("/"): href = SELVER_BASE + href
-                    try:
-                        page.goto(href, timeout=25000, wait_until="domcontentloaded")
-                        try: page.wait_for_load_state("networkidle", timeout=8000)
-                        except Exception: pass
-                        handle_age_gate(page)
-                        return looks_like_pdp(page) or page.locator("h1").count() > 0
-                    except Exception:
-                        pass
-                if _try_click_node(page, a):
-                    return True
+                href = a.get_attribute("href") or a.get_attribute("data-href") or ""
+                if not looks_like_pdp_href(href):
+                    continue
+                a.click(timeout=4000)
+                try: page.wait_for_selector("h1", timeout=8000)
+                except Exception: pass
+                try: page.wait_for_load_state("networkidle", timeout=6000)
+                except Exception: pass
+                return looks_like_pdp(page) or page.locator("h1").count() > 0
         except Exception:
             continue
     return False
@@ -583,12 +523,6 @@ def _pdp_title(page) -> str:
     return (_first_text(page, ["h1", "h1.product-title", "h1[itemprop='name']"]) or "").strip()
 
 _STOP = {"kg","tk","g","ml","l","dl","cl","ja","või","with","ilma","bio","mahe"}
-_VARIETALS = {
-    "chardonnay","merlot","cabernet","sauvignon","pinot","riesling","tempranillo",
-    "shiraz","syrah","malbec","grenache","chenin","viognier","zinfandel",
-    "nebbiolo","sangiovese","cava","prosecco","moscato","semillon","semillion",
-}
-_SIZE_RX = re.compile(r'(?:\b|^)(?:\d{2,3}\s*cl|\d{3,4}\s*ml|0[.,]?\d+\s*l)\b', re.I)
 
 def _tokens(s: str) -> set:
     raw = re.findall(r"[\w]+", (s or "").casefold(), flags=re.UNICODE)
@@ -600,7 +534,7 @@ def _tokens(s: str) -> set:
     return toks
 
 def _pdp_matches_target(page, name: str, brand: str, amount: str) -> bool:
-    title = (_pdp_title(page) or "").casefold()
+    title = _pdp_title(page)
     tset = _tokens(title)
     want = _tokens(name) | _tokens(brand) | _tokens(amount)
     name_overlap  = len(_tokens(name) & tset)
@@ -609,11 +543,6 @@ def _pdp_matches_target(page, name: str, brand: str, amount: str) -> bool:
         return True
     if brand and (_tokens(brand) & tset):
         return True
-    # Varietal+size fallback is DISABLED unless explicitly enabled
-    if ENABLE_VARIETAL_SIZE_FALLBACK:
-        if not brand and any(v in _tokens(name) for v in _VARIETALS):
-            if any(v in tset for v in _VARIETALS) and _SIZE_RX.search(title):
-                return True
     if looks_like_pdp(page):
         return True
     return False
@@ -746,8 +675,8 @@ def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
     try:
         got = page.evaluate("""
         () => {
-          const txt = n => (n && n.textContent || '').replace(/\s+/g,' ').trim();
-          const pickDigits = s => { const m = s && s.match(/(\d{13}|\d{8})/); return m ? m[1] : null; };
+          const txt = n => (n && n.textContent || '').replace(/\\s+/g,' ').trim();
+          const pickDigits = s => { const m = s && s.match(/(\\d{13}|\\d{8})/); return m ? m[1] : null; };
           const pickSKU = s => { const m = s && s.match(/([A-Z0-9_-]{6,})/i); return m ? m[1] : null; };
 
           let ean = null, sku = null;
@@ -780,6 +709,7 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
     try: page.wait_for_timeout(350)
     except Exception: pass
 
+    # Make sure any age modal is handled
     try: handle_age_gate(page)
     except Exception: pass
 
@@ -812,7 +742,7 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
     e_dom, s_dom = _extract_ids_dom_bruteforce(page)
     if e_dom: return norm_ean(e_dom), s_dom or sku_found
 
-    # JSON regex backup
+    # JSON blobs / regex (label … digits)
     try:
         html = page.content() or ""
         m = JSON_EAN.search(html)
@@ -842,53 +772,46 @@ def ensure_specs_open(page):
 # --------- unified search→open helper ---------
 
 def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
+    """From a search/listing, click into a PDP (best tile, with JS fallback)."""
     try:
-        page.wait_for_selector("[data-testid='product-grid'], .product-list, article", timeout=6000)
+        page.wait_for_selector("[data-testid='product-grid'], .product-list, a[href^='/']", timeout=7000)
     except Exception:
         pass
 
     kill_consents_and_overlays(page)
-    handle_age_gate(page)
-    ensure_results_loaded(page)
-
+    try: handle_age_gate(page)
+    except Exception: pass
     try: page.evaluate("window.scrollBy(0, 300)")
     except Exception: pass
 
-    # 1) Try clicking the best-matching tile
+    # 1) Click best-matching tile (preferred)
     if _click_best_tile(page, name, brand, amount):
         return True
 
-    # 2) Try navigating to the best href we can score
+    # 2) Navigate via best href
     hit = best_search_hit(page, name, brand, amount)
     if hit:
         try:
             page.goto(hit, timeout=25000, wait_until="domcontentloaded")
             try: page.wait_for_load_state("networkidle", timeout=9000)
             except Exception: pass
-            handle_age_gate(page)
+            try: handle_age_gate(page)
+            except Exception: pass
             if looks_like_pdp(page) or page.locator("h1").count() > 0:
                 return True
         except Exception:
             pass
 
-    # 3) Try a handful of PDP links discovered inside recognised grids
-    for h in list_pdp_hrefs_on_search(page, limit=8):
-        try:
-            page.goto(h, timeout=25000, wait_until="domcontentloaded")
-            try: page.wait_for_load_state("networkidle", timeout=9000)
-            except Exception: pass
-            handle_age_gate(page)
-            if looks_like_pdp(page) or page.locator("h1").count() > 0:
-                return True
-        except Exception:
-            continue
-
-    # 4) Last resort: click the very first tile
+    # 3) Force lazy load + click again
     try:
-        page.keyboard.press("End"); time.sleep(0.4)
-        page.keyboard.press("Home"); time.sleep(0.2)
+        for _ in range(2):
+            page.keyboard.press("End"); time.sleep(0.35)
+            page.keyboard.press("Home"); time.sleep(0.2)
+            if _click_best_tile(page, name, brand, amount):
+                return True
     except Exception:
         pass
+
     return _click_first_search_tile(page)
 
 # ----------------- main probe flow -----------------
@@ -907,7 +830,8 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
             try: page.wait_for_load_state("networkidle", timeout=9000)
             except Exception: pass
             kill_consents_and_overlays(page)
-            handle_age_gate(page)
+            try: handle_age_gate(page)
+            except Exception: pass
         except PWTimeout:
             continue
 
@@ -916,6 +840,7 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
             if not opened:
                 continue
 
+        # Loosened PDP/title gate: accept if PDP-like OR facts present
         if not (_pdp_matches_target(page, name, brand, amount) or
                 looks_like_pdp(page) or
                 page.locator(":text-matches('Ribakood|Штрихкод|Barcode','i')").count() > 0):
@@ -925,7 +850,8 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
             continue
 
         ensure_specs_open(page)
-        handle_age_gate(page)
+        try: handle_age_gate(page)
+        except Exception: pass
         ean, sku = extract_ids_on_pdp(page)
         if ean:
             ean = norm_ean(ean)
@@ -944,12 +870,15 @@ def main():
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=HEADLESS)
+        # Force Estonian UI, but handle RU/EN labels too.
         ctx = browser.new_context(
             locale="et-EE",
             extra_http_headers={"Accept-Language":"et-EE,et;q=0.9,en;q=0.8,ru;q=0.7"},
             viewport={"width": 1360, "height": 900},
         )
+        # light router for stability
         ctx.route("**/*", _router)
+
         page = ctx.new_page()
 
         for row in batch:
