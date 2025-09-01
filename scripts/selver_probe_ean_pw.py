@@ -81,7 +81,6 @@ def pick_batch(conn: PGConn, limit: int):
     where_target = "(p.ean IS NULL OR p.ean = '')" if not OVERWRITE_BAD else f"(p.ean IS NULL OR p.ean = '' OR {bad_sql})"
 
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-        # Prefer an explicit queue if it exists
         if table_exists(conn, "selver_ean_backfill_queue"):
             cur.execute(f"""
               SELECT q.product_id, p.name,
@@ -101,7 +100,6 @@ def pick_batch(conn: PGConn, limit: int):
             if rows:
                 return rows
 
-        # Fallback: any Selver product missing/bad EAN with any price row
         cur.execute(f"""
           SELECT DISTINCT p.id AS product_id, p.name,
                  COALESCE(NULLIF(p.brand,''), '') AS brand,
@@ -279,7 +277,6 @@ def score_hit(qname: str, brand: str, amount: str, text: str) -> float:
     return s
 
 def handle_age_gate(page):
-    """Accept 18+ modal (ET/EN/RU) if it appears."""
     try:
         if page.locator(":text-matches('vähemalt\\s*18|at\\s*least\\s*18|18\\+|18\\s*years|18\\s*лет', 'i')").count():
             for sel in [
@@ -402,9 +399,7 @@ def looks_like_pdp_href(href: str) -> bool:
     if segs and segs[0] == "e-selver":
         segs = segs[1:]
     if len(segs) == 1 and re.fullmatch(r"[a-z0-9-]{3,}", segs[0]):
-        if any(ch.isdigit() for ch in segs[0]) or "-" in segs[0]:
-            pass
-        else:
+        if not any(ch.isdigit() for ch in segs[0]) and not "-" in segs[0]:
             return False
     elif not href.startswith("/toode/"):
         return False
@@ -425,7 +420,7 @@ def is_search_page(page) -> bool:
         if page.locator("text=Otsingu:").count() > 0:
             return True
     except Exception:
-        pass    # fall through
+        pass
     return False
 
 # ---- collect top-N PDP links from a listing ----
@@ -466,7 +461,6 @@ def list_pdp_hrefs_on_search(page, limit: int = 8) -> List[str]:
     return uniq[:limit]
 
 def _candidate_anchors(page):
-    # Include role=link first (JS-only tiles), then anchors
     selectors = [
         "[data-testid='product-grid'] [role='link']",
         "[data-testid='product-list'] [role='link']",
@@ -519,7 +513,6 @@ def _click_best_tile(page, name: str, brand: str, amount: str) -> bool:
             continue
     if not best:
         return False
-    # If we have a PDP-ish href, navigate; otherwise JS-click the tile
     href = _elem_href(best)
     if href and looks_like_pdp_href(href):
         if href.startswith("/"): href = SELVER_BASE + href
@@ -561,7 +554,6 @@ def _click_first_search_tile(page) -> bool:
                         return looks_like_pdp(page) or page.locator("h1").count() > 0
                     except Exception:
                         pass
-                # No suitable href → click the node itself
                 if _try_click_node(page, a):
                     return True
         except Exception:
@@ -600,7 +592,6 @@ def _pdp_matches_target(page, name: str, brand: str, amount: str) -> bool:
         return True
     if brand and (_tokens(brand) & tset):
         return True
-    # varietal+size fallback for brandless names like "Chardonnay 75 cl"
     if not brand and any(v in _tokens(name) for v in _VARIETALS):
         if any(v in tset for v in _VARIETALS) and _SIZE_RX.search(title):
             return True
@@ -773,7 +764,6 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
     try: handle_age_gate(page)
     except Exception: pass
 
-    # JSON-LD
     try:
         scripts = page.locator("script[type='application/ld+json']")
         n = scripts.count()
@@ -785,7 +775,6 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
             except Exception: pass
     except Exception: pass
 
-    # meta itemprops
     meta_sku = _meta_content(page, ["meta[itemprop='sku']"])
     if meta_sku and not sku_found: sku_found = (meta_sku or "").strip() or None
     meta_ean = _meta_content(page, ["meta[itemprop='gtin13']", "meta[itemprop='gtin']"])
@@ -793,16 +782,13 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
         e = norm_ean(meta_ean)
         if e: return e, sku_found
 
-    # facts/labels
     _wait_pdp_facts(page)
     e_spec, s_spec = _ean_sku_via_label_xpath(page)
     if e_spec: return norm_ean(e_spec), s_spec or sku_found
 
-    # DOM brute
     e_dom, s_dom = _extract_ids_dom_bruteforce(page)
     if e_dom: return norm_ean(e_dom), s_dom or sku_found
 
-    # JSON blobs / regex
     try:
         html = page.content() or ""
         m = JSON_EAN.search(html)
@@ -880,20 +866,58 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
 
 HULGI_RX = re.compile(r'^\s*HULGI\s+', re.I)
 MULTI_RX = re.compile(r'\b\d+\s*[x×]\s*\d+\s*(g|ml|l)\b', re.I)
+TK_RX    = re.compile(r'\b\d+\s*(tk|pk)\b', re.I)
+PCT_RX   = re.compile(r'\b[\d.,]+(?:\s*-\s*[\d.,]+)?\s*%')
+ETT_RX   = re.compile(r'\bettetellimisel\b', re.I)
+
 def _clean_name_for_search(name: str) -> str:
     s = HULGI_RX.sub('', name or '')
+    s = ETT_RX.sub('', s)
     s = MULTI_RX.sub('', s)
-    return re.sub(r'\s+', ' ', s).strip()
+    s = TK_RX.sub('', s)
+    s = PCT_RX.sub('', s)
+    # squeeze punctuation around commas/spaces
+    s = re.sub(r'\s*,\s*', ', ', s)
+    s = re.sub(r'[,:;]\s*$', '', s)
+    s = re.sub(r'\s+', ' ', s).strip(' ,')
+    return s
+
+def _brand_clean(brand: str) -> str:
+    return re.sub(r'[^0-9A-Za-zÄÖÜÕŠŽäöüõšž&\-\s]', '', brand or '').strip()
+
+def _key_tokens(s: str) -> List[str]:
+    toks = [t for t in re.findall(r'\w+', (s or ''), flags=re.UNICODE) if len(t) >= 3 and not t.isdigit()]
+    # prefer earlier / longer tokens
+    uniq = []
+    for t in toks:
+        if t.lower() not in [u.lower() for u in uniq]:
+            uniq.append(t)
+    return uniq[:3]
+
+def _generate_queries(name: str, brand: str, amount: str) -> List[str]:
+    base = _clean_name_for_search(name or '')
+    brand = _brand_clean(brand or '')
+    base_core = base.split(',')[0].strip()
+    base_nocomma = base.replace(',', ' ')
+    out = []
+    def add(q):
+        q = re.sub(r'\s+', ' ', q).strip(' ,')
+        if q and q not in out:
+            out.append(q)
+    if base and brand: add(f"{base} {brand}")
+    if base: add(base)
+    if base_core and brand: add(f"{base_core} {brand}")
+    if base_core: add(base_core)
+    if base_nocomma and brand: add(f"{base_nocomma} {brand}")
+    if base_nocomma: add(base_nocomma)
+    # minimal brand + key tokens (helps when trailing commas killed the grid)
+    kt = _key_tokens(base_core or base_nocomma)
+    if brand and kt: add(f"{brand} {' '.join(kt)}")
+    return out
 
 def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
     """Return ean, sku, src_search_url, pdp_url (if reached)."""
-    base = _clean_name_for_search(name or "")
-
-    q_variants = []
-    q_full = " ".join(x for x in [base or "", brand or "", amount or ""] if x).strip()
-    if q_full: q_variants.append(q_full)
-    if base:   q_variants.append(base.strip())
-    if brand and base: q_variants.append(f"{base} {brand}")
+    q_variants = _generate_queries(name, brand, amount)
 
     last_src = None
     for q in q_variants:
