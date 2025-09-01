@@ -81,6 +81,7 @@ def pick_batch(conn: PGConn, limit: int):
     where_target = "(p.ean IS NULL OR p.ean = '')" if not OVERWRITE_BAD else f"(p.ean IS NULL OR p.ean = '' OR {bad_sql})"
 
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        # Prefer an explicit queue if it exists
         if table_exists(conn, "selver_ean_backfill_queue"):
             cur.execute(f"""
               SELECT q.product_id, p.name,
@@ -100,6 +101,7 @@ def pick_batch(conn: PGConn, limit: int):
             if rows:
                 return rows
 
+        # Fallback: any Selver product missing/bad EAN with any price row
         cur.execute(f"""
           SELECT DISTINCT p.id AS product_id, p.name,
                  COALESCE(NULLIF(p.brand,''), '') AS brand,
@@ -277,6 +279,7 @@ def score_hit(qname: str, brand: str, amount: str, text: str) -> float:
     return s
 
 def handle_age_gate(page):
+    """Accept 18+ modal (ET/EN/RU) if it appears."""
     try:
         if page.locator(":text-matches('vähemalt\\s*18|at\\s*least\\s*18|18\\+|18\\s*years|18\\s*лет', 'i')").count():
             for sel in [
@@ -324,6 +327,7 @@ def kill_consents_and_overlays(page):
 BLOCK_SUBSTR = (
     "adobedtm","googletagmanager","google-analytics","doubleclick",
     "facebook.net","newrelic","pingdom","cookiebot","hotjar",
+    "sentry","intercom","optanon","tealium","qualtrics"
 )
 def _router(route, request):
     try:
@@ -399,7 +403,7 @@ def looks_like_pdp_href(href: str) -> bool:
     if segs and segs[0] == "e-selver":
         segs = segs[1:]
     if len(segs) == 1 and re.fullmatch(r"[a-z0-9-]{3,}", segs[0]):
-        if not any(ch.isdigit() for ch in segs[0]) and not "-" in segs[0]:
+        if not any(ch.isdigit() for ch in segs[0]) and "-" not in segs[0]:
             return False
     elif not href.startswith("/toode/"):
         return False
@@ -422,6 +426,22 @@ def is_search_page(page) -> bool:
     except Exception:
         pass
     return False
+
+# --- make sure results rendered (for SPA grids) ---
+def ensure_results_loaded(page):
+    try:
+        page.wait_for_selector(
+            "[data-testid='product-grid'], .product-grid, .product-list, article img",
+            timeout=7000
+        )
+    except Exception:
+        pass
+    try:
+        page.evaluate("window.scrollBy(0, 600)")
+        page.wait_for_timeout(250)
+        page.evaluate("window.scrollBy(0, -400)")
+    except Exception:
+        pass
 
 # ---- collect top-N PDP links from a listing ----
 def list_pdp_hrefs_on_search(page, limit: int = 8) -> List[str]:
@@ -459,6 +479,46 @@ def list_pdp_hrefs_on_search(page, limit: int = 8) -> List[str]:
         if u not in seen:
             seen.add(u); uniq.append(u)
     return uniq[:limit]
+
+# ---- NEW: harvest PDP hrefs from anywhere on the page (not just grids) ----
+def harvest_pdp_hrefs_anywhere(page, limit: int = 10) -> List[str]:
+    urls: List[str] = []
+    # 1) Any anchors in DOM
+    try:
+        for a in page.locator("a[href]").all()[:800]:
+            try:
+                href = a.get_attribute("href") or ""
+            except Exception:
+                continue
+            if not href:
+                continue
+            if href.startswith("/"): href = SELVER_BASE + href
+            if "/toode/" in href or "/e-selver/toode/" in href:
+                clean = href.split("#",1)[0].split("?",1)[0]
+                urls.append(clean)
+    except Exception:
+        pass
+    # 2) Raw HTML scan (catches router-prefetch links that aren't visible)
+    if len(urls) < limit:
+        try:
+            html = page.content() or ""
+            for m in re.finditer(r'href="([^"]+/toode/[^"]+)"', html):
+                u = m.group(1)
+                if u.startswith("/"): u = SELVER_BASE + u
+                clean = u.split("#",1)[0].split("?",1)[0]
+                urls.append(clean)
+                if len(urls) >= limit:
+                    break
+        except Exception:
+            pass
+    # de-dup preserve order
+    seen, out = set(), []
+    for u in urls:
+        if u not in seen:
+            seen.add(u); out.append(u)
+        if len(out) >= limit:
+            break
+    return out
 
 def _candidate_anchors(page):
     selectors = [
@@ -592,6 +652,7 @@ def _pdp_matches_target(page, name: str, brand: str, amount: str) -> bool:
         return True
     if brand and (_tokens(brand) & tset):
         return True
+    # varietal+size fallback for brandless names like "Chardonnay 75 cl"
     if not brand and any(v in _tokens(name) for v in _VARIETALS):
         if any(v in tset for v in _VARIETALS) and _SIZE_RX.search(title):
             return True
@@ -727,8 +788,8 @@ def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
     try:
         got = page.evaluate("""
         () => {
-          const txt = n => (n && n.textContent || '').replace(/\\s+/g,' ').trim();
-          const pickDigits = s => { const m = s && s.match(/(\\d{13}|\\d{8})/); return m ? m[1] : null; };
+          const txt = n => (n && n.textContent || '').replace(/\s+/g,' ').trim();
+          const pickDigits = s => { const m = s && s.match(/(\d{13}|\d{8})/); return m ? m[1] : null; };
           const pickSKU = s => { const m = s && s.match(/([A-Z0-9_-]{6,})/i); return m ? m[1] : null; };
 
           let ean = null, sku = null;
@@ -764,6 +825,7 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
     try: handle_age_gate(page)
     except Exception: pass
 
+    # JSON-LD
     try:
         scripts = page.locator("script[type='application/ld+json']")
         n = scripts.count()
@@ -775,6 +837,7 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
             except Exception: pass
     except Exception: pass
 
+    # meta itemprops
     meta_sku = _meta_content(page, ["meta[itemprop='sku']"])
     if meta_sku and not sku_found: sku_found = (meta_sku or "").strip() or None
     meta_ean = _meta_content(page, ["meta[itemprop='gtin13']", "meta[itemprop='gtin']"])
@@ -782,13 +845,16 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
         e = norm_ean(meta_ean)
         if e: return e, sku_found
 
+    # facts/labels
     _wait_pdp_facts(page)
     e_spec, s_spec = _ean_sku_via_label_xpath(page)
     if e_spec: return norm_ean(e_spec), s_spec or sku_found
 
+    # DOM brute
     e_dom, s_dom = _extract_ids_dom_bruteforce(page)
     if e_dom: return norm_ean(e_dom), s_dom or sku_found
 
+    # JSON blobs / regex
     try:
         html = page.content() or ""
         m = JSON_EAN.search(html)
@@ -825,12 +891,16 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
 
     kill_consents_and_overlays(page)
     handle_age_gate(page)
+    ensure_results_loaded(page)
+
     try: page.evaluate("window.scrollBy(0, 300)")
     except Exception: pass
 
+    # 1) Try clicking the best-matching tile
     if _click_best_tile(page, name, brand, amount):
         return True
 
+    # 2) Try navigating to the best href we can score
     hit = best_search_hit(page, name, brand, amount)
     if hit:
         try:
@@ -843,8 +913,8 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
         except Exception:
             pass
 
-    hrefs = list_pdp_hrefs_on_search(page, limit=8)
-    for h in hrefs:
+    # 3) Try a handful of PDP links discovered inside recognised grids
+    for h in list_pdp_hrefs_on_search(page, limit=8):
         try:
             page.goto(h, timeout=25000, wait_until="domcontentloaded")
             try: page.wait_for_load_state("networkidle", timeout=9000)
@@ -855,6 +925,19 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
         except Exception:
             continue
 
+    # 4) NEW: harvest PDP links anywhere on the page (prefetch/hidden anchors)
+    for h in harvest_pdp_hrefs_anywhere(page, limit=10):
+        try:
+            page.goto(h, timeout=25000, wait_until="domcontentloaded")
+            try: page.wait_for_load_state("networkidle", timeout=9000)
+            except Exception: pass
+            handle_age_gate(page)
+            if looks_like_pdp(page) or page.locator("h1").count() > 0:
+                return True
+        except Exception:
+            continue
+
+    # 5) Last resort: click the very first tile
     try:
         page.keyboard.press("End"); time.sleep(0.4)
         page.keyboard.press("Home"); time.sleep(0.2)
@@ -899,7 +982,7 @@ def _generate_queries(name: str, brand: str, amount: str) -> List[str]:
     brand = _brand_clean(brand or '')
     base_core = base.split(',')[0].strip()
     base_nocomma = base.replace(',', ' ')
-    out = []
+    out: List[str] = []
     def add(q):
         q = re.sub(r'\s+', ' ', q).strip(' ,')
         if q and q not in out:
