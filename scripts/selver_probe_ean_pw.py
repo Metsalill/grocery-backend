@@ -430,8 +430,224 @@ def _pdp_matches_target(page, name: str, brand: str, amount: str) -> bool:
     return False
 
 # ----- EAN/SKU extraction (unchanged below) ----
-# parse_ld_product, _wait_pdp_facts, _ean_sku_via_label_xpath, _extract_ids_dom_bruteforce,
-# extract_ids_on_pdp, ensure_specs_open remain the same as your current version.
+def parse_ld_product(text: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    try:
+        data = json.loads(text.strip())
+    except Exception:
+        return None, None, None
+
+    def pick(d):
+        if isinstance(d, list) and d:
+            return d[0]
+        return d
+
+    data = pick(data)
+    if not isinstance(data, dict):
+        return None, None, None
+
+    def is_product(d: dict) -> bool:
+        t = d.get("@type")
+        return isinstance(t, str) and t.lower() == "product"
+
+    if not is_product(data):
+        for v in data.values():
+            p = pick(v)
+            if isinstance(p, dict) and is_product(p):
+                data = p
+                break
+
+    if not is_product(data):
+        return None, None, None
+
+    name = (data.get("name") or "").strip() or None
+    ean  = norm_ean(data.get("gtin14") or data.get("gtin13") or data.get("gtin") or data.get("ean"))
+    sku  = (data.get("sku") or "").strip() or None
+    return name, ean, sku
+
+def _wait_pdp_facts(page):
+    try:
+        page.wait_for_selector(":text-matches('Ribakood|Штрихкод|Barcode', 'i')", timeout=3000); return
+    except Exception:
+        pass
+    try:
+        page.evaluate("window.scrollBy(0, 800)")
+        page.wait_for_selector(":text-matches('Ribakood|Штрихкод|Barcode', 'i')", timeout=3000)
+    except Exception:
+        pass
+
+def _ean_sku_via_label_xpath(page) -> Tuple[Optional[str], Optional[str]]:
+    try:
+        labels = ["ribakood", "ean", "triipkood", "штрихкод", "barcode"]
+        xpaths = [
+            "//*[contains(translate(normalize-space(.),'RIBAKOODEANTRIIPKOODÄÖÜÕŠŽШТРИХКОДBARCODE','ribakoodeantriipkoodäöüõšžштрихкодbarcode') , '{lbl}')]"
+            for lbl in labels
+        ]
+        css_pairs = [
+            ("dt:has(:text-matches('Ribakood|Штрихкод|Barcode','i'))", "dd"),
+            ("tr:has(td:has(:text-matches('Ribakood|Штрихкод|Barcode','i')))", "td"),
+            ("tr:has(th:has(:text-matches('Ribakood|Штрихкод|Barcode','i')))", "td"),
+        ]
+
+        def pick_digits(s: str) -> Optional[str]:
+            if not s:
+                return None
+            m = re.search(r"(\d{13}|\d{8})", s)
+            return m.group(1) if m else None
+
+        for k_sel, v_sel in css_pairs:
+            try:
+                k = page.locator(k_sel).first
+                if k and k.count() > 0:
+                    zones = [k, k.locator(v_sel)]
+                    for z in zones:
+                        try:
+                            t = (z.inner_text(timeout=800) or "").strip()
+                            e = pick_digits(t)
+                            if e:
+                                sku = None
+                                for near in [k, k.locator("xpath=.."), k.locator("xpath=following-sibling::*[1]")]:
+                                    try:
+                                        tt = (near.inner_text(timeout=800) or "").strip()
+                                        m2 = re.search(r"([A-Z0-9_-]{6,})", tt, re.I)
+                                        if m2:
+                                            sku = sku or m2.group(1)
+                                    except Exception:
+                                        pass
+                                return e, sku
+                        except Exception:
+                            pass
+            except Exception:
+                pass
+
+        for xp in xpaths:
+            try:
+                lab = page.locator(f"xpath={xp}").first
+                if not lab or lab.count() == 0:
+                    continue
+                zones = [
+                    lab,
+                    lab.locator("xpath=.."),
+                    lab.locator("xpath=following-sibling::*[1]"),
+                    lab.locator("xpath=following-sibling::*[2]"),
+                    lab.locator("xpath=../following-sibling::*[1]"),
+                ]
+                sku_found = None
+                for z in zones:
+                    try:
+                        t = (z.inner_text(timeout=800) or "").strip()
+                        if not t:
+                            continue
+                        e = pick_digits(t)
+                        if not sku_found:
+                            msku = re.search(r"([A-Z0-9_-]{6,})", t, re.I)
+                            if msku:
+                                sku_found = msku.group(1)
+                        if e:
+                            return e, sku_found
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+    except Exception:
+        pass
+    return None, None
+
+def _extract_ids_dom_bruteforce(page) -> Tuple[Optional[str], Optional[str]]:
+    try:
+        got = page.evaluate("""
+        () => {
+          const txt = n => (n && n.textContent || '').replace(/\\s+/g,' ').trim();
+          const pickDigits = s => { const m = s && s.match(/(\\d{13}|\\d{8})/); return m ? m[1] : null; };
+          const pickSKU = s => { const m = s && s.match(/([A-Z0-9_-]{6,})/i); return m ? m[1] : null; };
+
+          let ean = null, sku = null;
+          const nodes = Array.from(document.querySelectorAll('div,section,span,p,li,td,th,dd,dt,strong,em'));
+          for (const el of nodes) {
+            const t = txt(el);
+            if (!t) continue;
+            if (/(^|\\b)(ribakood|ean|triipkood|штрихкод|barcode)(\\b|:)/i.test(t)) {
+              const zone = [el, el.parentElement, el.nextElementSibling, el.previousElementSibling, el.parentElement && el.parentElement.nextElementSibling];
+              for (const z of zone) {
+                const tt = txt(z);
+                if (!ean) ean = pickDigits(tt);
+                if (!sku) sku = pickSKU(tt);
+                if (ean) break;
+              }
+            }
+            if (ean) break;
+          }
+          return { ean, sku };
+        }
+        """)
+        if got:
+            return got.get("ean") or None, got.get("sku") or None
+    except Exception:
+        pass
+    return None, None
+
+def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
+    sku_found: Optional[str] = None
+    try: page.wait_for_timeout(350)
+    except Exception: pass
+
+    try: handle_age_gate(page)
+    except Exception: pass
+
+    # JSON-LD
+    try:
+        scripts = page.locator("script[type='application/ld+json']")
+        n = scripts.count()
+        for i in range(n):
+            try:
+                _, ean, sku = parse_ld_product(scripts.nth(i).inner_text())
+                if sku and not sku_found: sku_found = sku
+                if ean: return ean, sku_found
+            except Exception: pass
+    except Exception: pass
+
+    # meta itemprops
+    meta_sku = _meta_content(page, ["meta[itemprop='sku']"])
+    if meta_sku and not sku_found: sku_found = (meta_sku or "").strip() or None
+    meta_ean = _meta_content(page, ["meta[itemprop='gtin13']", "meta[itemprop='gtin']"])
+    if meta_ean:
+        e = norm_ean(meta_ean)
+        if e: return e, sku_found
+
+    # facts/labels
+    _wait_pdp_facts(page)
+    e_spec, s_spec = _ean_sku_via_label_xpath(page)
+    if e_spec: return norm_ean(e_spec), s_spec or sku_found
+
+    # DOM brute
+    e_dom, s_dom = _extract_ids_dom_bruteforce(page)
+    if e_dom: return norm_ean(e_dom), s_dom or sku_found
+
+    # JSON blobs / regex (label … digits)
+    try:
+        html = page.content() or ""
+        m = JSON_EAN.search(html)
+        if m:
+            e = norm_ean(m.group("d"))
+            if e: return e, sku_found or s_dom
+    except Exception:
+        pass
+    try:
+        html = page.content() or ""
+        m = re.search(r"(ribakood|ean|triipkood|штрихкод|barcode)[\s\S]{0,800}?(\d{8,14})", html, re.I)
+        if m: return norm_ean(m.group(2)), sku_found or s_dom
+    except Exception:
+        pass
+
+    return None, sku_found or s_dom
+
+def ensure_specs_open(page):
+    for sel in ["button:has-text('Tooteinfo')", "button:has-text('Lisainfo')", "button:has-text('Tootekirjeldus')"]:
+        try:
+            if page.locator(sel).count():
+                page.click(sel, timeout=1000)
+                time.sleep(0.2)
+        except Exception:
+            pass
 
 # --------- unified search→open helper ---------
 
@@ -486,7 +702,13 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
 
 # ----------------- main probe flow -----------------
 
-def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str], Optional[str]]:
+def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    """
+    Returns (ean, sku, url). `url` is the last page we were on
+    (a PDP when successful, or the last search/listing otherwise).
+    """
+    last_url: Optional[str] = None
+
     q_variants = []
     q_full = " ".join(x for x in [name or "", brand or "", amount or ""] if x).strip()
     if q_full: q_variants.append(q_full)
@@ -497,6 +719,7 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
         try:
             url = SEARCH_URL.format(q=quote_plus(q))
             page.goto(url, timeout=25000, wait_until="domcontentloaded")
+            last_url = url
             try: page.wait_for_load_state("networkidle", timeout=9000)
             except Exception: pass
             kill_consents_and_overlays(page)
@@ -506,6 +729,8 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
 
         if is_search_page(page) or not looks_like_pdp(page):
             opened = open_best_or_first(page, name, brand, amount)
+            try: last_url = page.url
+            except Exception: pass
             if not opened:
                 # We'll allow trying the next q-variant
                 continue
@@ -516,6 +741,8 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
             want = (name or "")[:60]
             got  = (_pdp_title(page) or "")[:120]
             print(f"[WRONG_PDP] want='{want}' got='{got}' url={page.url}")
+            try: last_url = page.url
+            except Exception: pass
             continue
 
         ensure_specs_open(page)
@@ -524,9 +751,11 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
         if ean:
             ean = norm_ean(ean)
             if not looks_bogus_ean(ean):
-                return ean, (sku or None)
+                try: last_url = page.url
+                except Exception: pass
+                return ean, (sku or None), last_url
 
-    return None, None
+    return None, None, last_url
 
 def main():
     conn = connect()
@@ -552,14 +781,14 @@ def main():
             brand  = row["brand"]  or ""
             amount = row["amount"] or ""
             try:
-                ean, sku = process_one(page, name, brand, amount)
+                ean, sku, url = process_one(page, name, brand, amount)
                 if ean:
                     status = update_success(conn, pid, ean, sku)
                     tag = "OK" if status == "OK" else status
-                    print(f"[{tag}] id={pid} ← EAN {ean}{(' | SKU ' + sku) if sku else ''}")
+                    print(f"[{tag}] id={pid} ← EAN {ean}{(' | SKU ' + sku) if sku else ''} | url={url or 'n/a'}")
                 else:
                     update_failure(conn, pid, "ean not found or bogus")
-                    print(f"[MISS] id={pid} name='{name}'")
+                    print(f"[MISS] id={pid} name='{name}' | url={url or 'n/a'}")
             except Exception as e:
                 conn.rollback()
                 update_failure(conn, pid, str(e))
