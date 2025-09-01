@@ -6,7 +6,7 @@ on:
       limit:
         description: "Max PDPs to enrich"
         required: false
-        default: "300"
+        default: "5000"
       headless:
         description: "Headless browser (1/0)"
         required: false
@@ -48,7 +48,7 @@ jobs:
       - name: Enrich selver_candidates missing EAN/SKU
         run: |
           python scripts/selver_enrich_candidates_pw.py \
-            --limit     ${{ github.event_name == 'workflow_dispatch' && inputs.limit     || 300 }} \
+            --limit     ${{ github.event_name == 'workflow_dispatch' && inputs.limit     || 5000 }} \
             --headless  ${{ github.event_name == 'workflow_dispatch' && inputs.headless  || 1   }} \
             --req-delay ${{ github.event_name == 'workflow_dispatch' && inputs.req_delay || 0.5 }}
 
