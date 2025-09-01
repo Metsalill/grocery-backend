@@ -81,7 +81,7 @@ def pick_batch(conn: PGConn, limit: int):
     where_target = "(p.ean IS NULL OR p.ean = '')" if not OVERWRITE_BAD else f"(p.ean IS NULL OR p.ean = '' OR {bad_sql})"
 
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-        # Prefer an explicit queue if it exists
+        # Prefer explicit queue
         if table_exists(conn, "selver_ean_backfill_queue"):
             cur.execute(f"""
               SELECT q.product_id, p.name,
@@ -327,7 +327,7 @@ def kill_consents_and_overlays(page):
 BLOCK_SUBSTR = (
     "adobedtm","googletagmanager","google-analytics","doubleclick",
     "facebook.net","newrelic","pingdom","cookiebot","hotjar",
-    "sentry","intercom","optanon","tealium","qualtrics"
+    "sentry","intercom","optanon","tealium","qualtrics",
 )
 def _router(route, request):
     try:
@@ -424,7 +424,7 @@ def is_search_page(page) -> bool:
         if page.locator("text=Otsingu:").count() > 0:
             return True
     except Exception:
-        pass
+        pass    # pragma: no cover
     return False
 
 # --- make sure results rendered (for SPA grids) ---
@@ -443,8 +443,8 @@ def ensure_results_loaded(page):
     except Exception:
         pass
 
-# ---- collect top-N PDP links from a listing ----
-def list_pdp_hrefs_on_search(page, limit: int = 12) -> List[str]:
+# ---- collect top-N PDP links from known grids ----
+def list_pdp_hrefs_on_search(page, limit: int = 8) -> List[str]:
     try:
         hrefs = page.evaluate("""
         () => {
@@ -480,12 +480,60 @@ def list_pdp_hrefs_on_search(page, limit: int = 12) -> List[str]:
             seen.add(u); uniq.append(u)
     return uniq[:limit]
 
-# ---- NEW: harvest PDP hrefs from anywhere on the page (not just grids) ----
-def harvest_pdp_hrefs_anywhere(page, limit: int = 30) -> List[str]:
+# ---- NEW: harvest PDP links from *any* attribute or inline JSON ----
+def harvest_pdp_links_from_attrs_and_json(page, limit: int = 12) -> List[str]:
     urls: List[str] = []
-    # 1) Any anchors in DOM
     try:
-        for a in page.locator("a[href]").all()[:1200]:
+        found = page.evaluate(f"""
+        () => {{
+          const abs = (u) => u.startsWith('http') ? u : '{SELVER_BASE}'+u;
+          const keep = new Set();
+
+          // 1) Any element attribute containing "/toode/" (very generic)
+          const all = document.querySelectorAll('*');
+          for (const el of all) {{
+            if (!el.getAttributeNames) continue;
+            for (const name of el.getAttributeNames()) {{
+              const v = el.getAttribute(name);
+              if (typeof v === 'string' && v.includes('/toode/')) {{
+                let u = v.split('#')[0].split('?')[0];
+                if (u) keep.add(abs(u));
+              }}
+            }}
+          }}
+
+          // 2) Any inline <script> containing "/toode/"
+          const re = /["'](\\/(?:e-selver\\/)?toode\\/[^"']+)["']/g;
+          for (const s of document.querySelectorAll('script')) {{
+            const txt = s.textContent || '';
+            let m; while ((m = re.exec(txt))) {{
+              const u = m[1].split('#')[0].split('?')[0];
+              keep.add(abs(u));
+            }}
+          }}
+
+          return Array.from(keep);
+        }}
+        """)
+        urls.extend(found or [])
+    except Exception:
+        pass
+
+    # De-dup & trim
+    seen, out = set(), []
+    for u in urls:
+        if looks_like_pdp_href(u):
+            if u not in seen:
+                seen.add(u); out.append(u)
+        if len(out) >= limit:
+            break
+    return out
+
+# ---- Also scrape anchors from anywhere quickly ----
+def harvest_pdp_hrefs_anywhere(page, limit: int = 10) -> List[str]:
+    urls: List[str] = []
+    try:
+        for a in page.locator("a[href]").all()[:800]:
             try:
                 href = a.get_attribute("href") or ""
             except Exception:
@@ -498,7 +546,7 @@ def harvest_pdp_hrefs_anywhere(page, limit: int = 30) -> List[str]:
                 urls.append(clean)
     except Exception:
         pass
-    # 2) Raw HTML scan (catches router-prefetch links that aren't visible)
+    # raw HTML scan
     if len(urls) < limit:
         try:
             html = page.content() or ""
@@ -511,7 +559,6 @@ def harvest_pdp_hrefs_anywhere(page, limit: int = 30) -> List[str]:
                     break
         except Exception:
             pass
-    # de-dup preserve order
     seen, out = set(), []
     for u in urls:
         if u not in seen:
@@ -524,12 +571,10 @@ def _candidate_anchors(page):
     selectors = [
         "[data-testid='product-grid'] [role='link']",
         "[data-testid='product-list'] [role='link']",
-        "[data-testid='product-card'] [role='link']",
         ".product-grid [role='link']",
         ".product-list [role='link']",
         "[data-testid='product-grid'] a[href]:visible",
         "[data-testid='product-list'] a[href]:visible",
-        "[data-testid='product-card'] a[href]:visible",
         ".product-grid a[href]:visible",
         ".product-list a[href]:visible",
         ".product-card a[href]:visible",
@@ -542,7 +587,7 @@ def _candidate_anchors(page):
             nodes.extend(page.locator(sel).all())
         except Exception:
             pass
-    return nodes[:300]
+    return nodes[:200]
 
 def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
     links = _candidate_anchors(page)
@@ -592,12 +637,10 @@ def _click_first_search_tile(page) -> bool:
     for sel in [
         "[data-testid='product-grid'] [role='link']",
         "[data-testid='product-list'] [role='link']",
-        "[data-testid='product-card'] [role='link']",
         ".product-grid [role='link']",
         ".product-list [role='link']",
         "[data-testid='product-grid'] a[href]:visible",
         "[data-testid='product-list'] a[href]:visible",
-        "[data-testid='product-card'] a[href]:visible",
         ".product-grid a[href]:visible",
         ".product-list a[href]:visible",
         ".product-card a[href]:visible",
@@ -918,7 +961,7 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
             pass
 
     # 3) Try a handful of PDP links discovered inside recognised grids
-    for h in list_pdp_hrefs_on_search(page, limit=12):
+    for h in list_pdp_hrefs_on_search(page, limit=8):
         try:
             page.goto(h, timeout=25000, wait_until="domcontentloaded")
             try: page.wait_for_load_state("networkidle", timeout=9000)
@@ -929,8 +972,8 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
         except Exception:
             continue
 
-    # 4) NEW: harvest PDP links anywhere on the page (prefetch/hidden anchors)
-    for h in harvest_pdp_hrefs_anywhere(page, limit=30):
+    # 4) NEW: harvest PDP links anywhere (anchors / raw HTML)
+    for h in harvest_pdp_hrefs_anywhere(page, limit=10):
         try:
             page.goto(h, timeout=25000, wait_until="domcontentloaded")
             try: page.wait_for_load_state("networkidle", timeout=9000)
@@ -941,7 +984,19 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
         except Exception:
             continue
 
-    # 5) Last resort: click the very first tile
+    # 5) NEW: extremely robust — pull PDP URLs from *any attribute* or inline JSON
+    for h in harvest_pdp_links_from_attrs_and_json(page, limit=12):
+        try:
+            page.goto(h, timeout=25000, wait_until="domcontentloaded")
+            try: page.wait_for_load_state("networkidle", timeout=9000)
+            except Exception: pass
+            handle_age_gate(page)
+            if looks_like_pdp(page) or page.locator("h1").count() > 0:
+                return True
+        except Exception:
+            continue
+
+    # 6) Last resort: click the very first tile heuristically
     try:
         page.keyboard.press("End"); time.sleep(0.4)
         page.keyboard.press("Home"); time.sleep(0.2)
@@ -956,7 +1011,6 @@ MULTI_RX = re.compile(r'\b\d+\s*[x×]\s*\d+\s*(g|ml|l)\b', re.I)
 TK_RX    = re.compile(r'\b\d+\s*(tk|pk)\b', re.I)
 PCT_RX   = re.compile(r'\b[\d.,]+(?:\s*-\s*[\d.,]+)?\s*%')
 ETT_RX   = re.compile(r'\bettetellimisel\b', re.I)
-UNIT_RX  = re.compile(r'\b\d+[.,]?\d*\s*(?:g|kg|ml|l)\b', re.I)  # NEW: strip single weights like "93g", "1 kg"
 
 def _clean_name_for_search(name: str) -> str:
     s = HULGI_RX.sub('', name or '')
@@ -964,9 +1018,6 @@ def _clean_name_for_search(name: str) -> str:
     s = MULTI_RX.sub('', s)
     s = TK_RX.sub('', s)
     s = PCT_RX.sub('', s)
-    s = UNIT_RX.sub('', s)                 # NEW
-    s = re.sub(r'[-–—]', ' ', s)          # normalize hyphens to spaces
-    # squeeze punctuation around commas/spaces
     s = re.sub(r'\s*,\s*', ', ', s)
     s = re.sub(r'[,:;]\s*$', '', s)
     s = re.sub(r'\s+', ' ', s).strip(' ,')
@@ -977,13 +1028,9 @@ def _brand_clean(brand: str) -> str:
 
 def _key_tokens(s: str) -> List[str]:
     toks = [t for t in re.findall(r'\w+', (s or ''), flags=re.UNICODE) if len(t) >= 3 and not t.isdigit()]
-    # prefer earlier / longer tokens
     uniq = []
-    seen_lower = set()
     for t in toks:
-        tl = t.lower()
-        if tl not in seen_lower:
-            seen_lower.add(tl)
+        if t.lower() not in [u.lower() for u in uniq]:
             uniq.append(t)
     return uniq[:3]
 
@@ -997,18 +1044,14 @@ def _generate_queries(name: str, brand: str, amount: str) -> List[str]:
         q = re.sub(r'\s+', ' ', q).strip(' ,')
         if q and q not in out:
             out.append(q)
-    # main variants
     if base and brand: add(f"{base} {brand}")
     if base: add(base)
     if base_core and brand: add(f"{base_core} {brand}")
     if base_core: add(base_core)
     if base_nocomma and brand: add(f"{base_nocomma} {brand}")
     if base_nocomma: add(base_nocomma)
-    # minimal brand + key tokens (helps when trailing commas killed the grid)
     kt = _key_tokens(base_core or base_nocomma)
     if brand and kt: add(f"{brand} {' '.join(kt)}")
-    # NEW: brand-only last resort
-    if brand: add(brand)
     return out
 
 def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
