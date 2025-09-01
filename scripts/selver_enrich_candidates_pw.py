@@ -4,7 +4,7 @@
 Enrich selver_candidates rows that are missing EAN/SKU by visiting PDPs.
 
 Usage:
-  python scripts/selver_enrich_candidates_pw.py --limit 300 --headless 1 --req-delay 0.5
+  python scripts/selver_enrich_candidates_pw.py --limit 5000 --headless 1 --req-delay 0.5
 Env:
   DATABASE_URL (required)
 """
