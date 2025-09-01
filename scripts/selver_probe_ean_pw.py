@@ -7,7 +7,7 @@ from typing import Optional, List, Tuple
 import psycopg2, psycopg2.extras
 from psycopg2.extensions import connection as PGConn
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
-from urllib.parse import urlparse
+from urllib.parse import urlparse, quote_plus
 
 SELVER_BASE = "https://www.selver.ee"
 SEARCH_URL  = SELVER_BASE + "/search?q={q}"
@@ -279,6 +279,29 @@ def score_hit(qname: str, brand: str, amount: str, text: str) -> float:
         s += 1.0
     return s
 
+def handle_age_gate(page):
+    """Accept 18+ modal (ET/EN/RU) if it appears."""
+    try:
+        if page.locator(":text-matches('vähemalt\\s*18|at\\s*least\\s*18|18\\+|18\\s*years|18\\s*лет', 'i')").count() == 0:
+            return
+        for sel in [
+            "button:has-text('Olen vähemalt 18')",
+            "button:has-text('Jah')", "a:has-text('Jah')",
+            "button:has-text('ENTER')",
+            "button:has-text('Yes')",
+            "button:has-text('Да')",
+        ]:
+            try:
+                btn = page.locator(sel).first
+                if btn and btn.count() > 0 and btn.is_visible():
+                    btn.click(timeout=1500)
+                    time.sleep(0.2)
+                    break
+            except Exception:
+                pass
+    except Exception:
+        pass
+
 def kill_consents_and_overlays(page):
     # Cookie/consent
     for sel in [
@@ -296,6 +319,9 @@ def kill_consents_and_overlays(page):
                 time.sleep(0.2)
         except Exception:
             pass
+    # Alcohol age-gate if present
+    try: handle_age_gate(page)
+    except Exception: pass
     # Close search suggestion overlay if open
     try:
         page.keyboard.press("Escape")
@@ -345,7 +371,6 @@ def looks_like_pdp_href(href: str) -> bool:
     if segs and segs[0] == "e-selver":
         segs = segs[1:]
     if len(segs) == 1 and re.fullmatch(r"[a-z0-9-]{3,}", segs[0]):
-        # require either a digit or a dash to avoid true category roots
         if any(ch.isdigit() for ch in segs[0]) or "-" in segs[0]:
             pass
         else:
@@ -675,6 +700,10 @@ def extract_ids_on_pdp(page) -> Tuple[Optional[str], Optional[str]]:
     try: page.wait_for_timeout(350)
     except Exception: pass
 
+    # Make sure any age modal is handled
+    try: handle_age_gate(page)
+    except Exception: pass
+
     # JSON-LD
     try:
         scripts = page.locator("script[type='application/ld+json']")
@@ -741,6 +770,8 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
         pass
 
     kill_consents_and_overlays(page)
+    try: handle_age_gate(page)
+    except Exception: pass
     try: page.evaluate("window.scrollBy(0, 300)")
     except Exception: pass
 
@@ -754,6 +785,8 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
         try:
             page.goto(hit, timeout=25000, wait_until="domcontentloaded")
             try: page.wait_for_load_state("networkidle", timeout=9000)
+            except Exception: pass
+            try: handle_age_gate(page)
             except Exception: pass
             if looks_like_pdp(page) or page.locator("h1").count() > 0:
                 return True
@@ -779,11 +812,13 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
 
     for q in q_variants:
         try:
-            url = SEARCH_URL.format(q=q.replace(" ", "+"))
+            url = SEARCH_URL.format(q=quote_plus(q))
             page.goto(url, timeout=25000, wait_until="domcontentloaded")
             try: page.wait_for_load_state("networkidle", timeout=9000)
             except Exception: pass
             kill_consents_and_overlays(page)
+            try: handle_age_gate(page)
+            except Exception: pass
         except PWTimeout:
             continue
 
@@ -802,6 +837,8 @@ def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str]
             continue
 
         ensure_specs_open(page)
+        try: handle_age_gate(page)
+        except Exception: pass
         ean, sku = extract_ids_on_pdp(page)
         if ean:
             ean = norm_ean(ean)
