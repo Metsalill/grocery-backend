@@ -339,6 +339,49 @@ def _router(route, request):
         pass
     return route.continue_()
 
+# -------- clicking helpers for JS-only tiles --------
+def _elem_href(locator) -> Optional[str]:
+    try:
+        h = locator.get_attribute("href") or locator.get_attribute("data-href")
+        if h:
+            return h
+        a = locator.locator("xpath=ancestor-or-self::a[@href]").first
+        if a and a.count() > 0:
+            return a.get_attribute("href")
+    except Exception:
+        pass
+    return None
+
+def _try_click_node(page, locator) -> bool:
+    try:
+        locator.scroll_into_view_if_needed(timeout=1500)
+    except Exception:
+        pass
+    clicked = False
+    try:
+        locator.click(timeout=3000)
+        clicked = True
+    except Exception:
+        try:
+            el = locator.element_handle(timeout=600)
+            if el:
+                page.evaluate("(n)=>{try{n.click && n.click()}catch(e){}}", el)
+                clicked = True
+        except Exception:
+            pass
+    if not clicked:
+        return False
+    try:
+        page.wait_for_selector("h1", timeout=7000)
+    except Exception:
+        pass
+    try:
+        page.wait_for_load_state("networkidle", timeout=6000)
+    except Exception:
+        pass
+    handle_age_gate(page)
+    return looks_like_pdp(page) or page.locator("h1").count() > 0
+
 # --- PDP-href recognizer ---
 def looks_like_pdp_href(href: str) -> bool:
     if not href:
@@ -382,7 +425,7 @@ def is_search_page(page) -> bool:
         if page.locator("text=Otsingu:").count() > 0:
             return True
     except Exception:
-        pass
+        pass    # fall through
     return False
 
 # ---- collect top-N PDP links from a listing ----
@@ -398,7 +441,7 @@ def list_pdp_hrefs_on_search(page, limit: int = 8) -> List[str]:
             '.product-grid','.product-list',
             '.product-card','article','.MuiGrid-root'
           ];
-          const sel = roots.map(r => r+' a[href],'+r+' [data-href],'+r+' [role=\"link\"]').join(',');
+          const sel = roots.map(r => r+' a[href],'+r+' [data-href],'+r+' [role="link"]').join(',');
           const nodes = Array.from(document.querySelectorAll(sel)).slice(0, 400);
           for (const n of nodes) {
             let h = get(n);
@@ -423,15 +466,19 @@ def list_pdp_hrefs_on_search(page, limit: int = 8) -> List[str]:
     return uniq[:limit]
 
 def _candidate_anchors(page):
+    # Include role=link first (JS-only tiles), then anchors
     selectors = [
+        "[data-testid='product-grid'] [role='link']",
+        "[data-testid='product-list'] [role='link']",
+        ".product-grid [role='link']",
+        ".product-list [role='link']",
         "[data-testid='product-grid'] a[href]:visible",
         "[data-testid='product-list'] a[href]:visible",
-        ".product-list a[href]:visible",
         ".product-grid a[href]:visible",
+        ".product-list a[href]:visible",
         ".product-card a[href]:visible",
         "article a[href]:visible",
         "[data-href]:visible",
-        "[role='link']",
     ]
     nodes = []
     for sel in selectors:
@@ -446,28 +493,24 @@ def best_search_hit(page, qname: str, brand: str, amount: str) -> Optional[str]:
     scored: List[Tuple[str, float]] = []
     for a in links:
         try:
-            href = a.get_attribute("href") or a.get_attribute("data-href") or ""
-            if not looks_like_pdp_href(href):
+            href = _elem_href(a) or ""
+            if href and not looks_like_pdp_href(href):
                 continue
             txt = a.inner_text() or ""
-            scored.append((href, score_hit(qname, brand, amount, txt)))
+            scored.append((href or "", score_hit(qname, brand, amount, txt)))
         except Exception:
             continue
     if not scored:
         return None
     scored.sort(key=lambda x: x[1], reverse=True)
     href = scored[0][0]
-    return SELVER_BASE + href if href.startswith("/") else href
+    return (SELVER_BASE + href) if href and href.startswith("/") else (href or None)
 
 def _click_best_tile(page, name: str, brand: str, amount: str) -> bool:
     links = _candidate_anchors(page)
-    best = None
-    best_score = -1.0
+    best, best_score = None, -1.0
     for a in links:
         try:
-            href = a.get_attribute("href") or a.get_attribute("data-href") or ""
-            if not looks_like_pdp_href(href):
-                continue
             txt = a.inner_text() or ""
             sc = score_hit(name, brand, amount, txt)
             if sc > best_score:
@@ -476,56 +519,51 @@ def _click_best_tile(page, name: str, brand: str, amount: str) -> bool:
             continue
     if not best:
         return False
-    try:
-        best.click(timeout=4000)
-        try: page.wait_for_selector("h1", timeout=8000)
-        except Exception: pass
-        try: page.wait_for_load_state("networkidle", timeout=6000)
-        except Exception: pass
-        handle_age_gate(page)
-        if looks_like_pdp(page) or page.locator("h1").count() > 0:
-            return True
-    except Exception:
-        pass
-    try:
-        href = best.get_attribute("href") or best.get_attribute("data-href") or ""
-        if href:
-            if href.startswith("/"): href = SELVER_BASE + href
-            page.evaluate("url => window.location.assign(url)", href)
-            try: page.wait_for_selector("h1", timeout=8000)
-            except Exception: pass
-            try: page.wait_for_load_state("networkidle", timeout=6000)
+    # If we have a PDP-ish href, navigate; otherwise JS-click the tile
+    href = _elem_href(best)
+    if href and looks_like_pdp_href(href):
+        if href.startswith("/"): href = SELVER_BASE + href
+        try:
+            page.goto(href, timeout=25000, wait_until="domcontentloaded")
+            try: page.wait_for_load_state("networkidle", timeout=8000)
             except Exception: pass
             handle_age_gate(page)
             return looks_like_pdp(page) or page.locator("h1").count() > 0
-    except Exception:
-        pass
-    return False
+        except Exception:
+            pass
+    return _try_click_node(page, best)
 
 def _click_first_search_tile(page) -> bool:
     for sel in [
+        "[data-testid='product-grid'] [role='link']",
+        "[data-testid='product-list'] [role='link']",
+        ".product-grid [role='link']",
+        ".product-list [role='link']",
         "[data-testid='product-grid'] a[href]:visible",
         "[data-testid='product-list'] a[href]:visible",
-        ".product-list a[href]:visible",
         ".product-grid a[href]:visible",
+        ".product-list a[href]:visible",
         ".product-card a[href]:visible",
         "article a[href]:visible",
         "[data-href]:visible",
-        "[role='link']",
     ]:
         try:
             a = page.locator(sel).first
             if a and a.count() > 0:
-                href = a.get_attribute("href") or a.get_attribute("data-href") or ""
-                if not looks_like_pdp_href(href):
-                    continue
-                a.click(timeout=4000)
-                try: page.wait_for_selector("h1", timeout=8000)
-                except Exception: pass
-                try: page.wait_for_load_state("networkidle", timeout=6000)
-                except Exception: pass
-                handle_age_gate(page)
-                return looks_like_pdp(page) or page.locator("h1").count() > 0
+                href = _elem_href(a)
+                if href and looks_like_pdp_href(href):
+                    if href.startswith("/"): href = SELVER_BASE + href
+                    try:
+                        page.goto(href, timeout=25000, wait_until="domcontentloaded")
+                        try: page.wait_for_load_state("networkidle", timeout=8000)
+                        except Exception: pass
+                        handle_age_gate(page)
+                        return looks_like_pdp(page) or page.locator("h1").count() > 0
+                    except Exception:
+                        pass
+                # No suitable href → click the node itself
+                if _try_click_node(page, a):
+                    return True
         except Exception:
             continue
     return False
@@ -840,13 +878,22 @@ def open_best_or_first(page, name: str, brand: str, amount: str) -> bool:
 
 # ----------------- main probe flow -----------------
 
+HULGI_RX = re.compile(r'^\s*HULGI\s+', re.I)
+MULTI_RX = re.compile(r'\b\d+\s*[x×]\s*\d+\s*(g|ml|l)\b', re.I)
+def _clean_name_for_search(name: str) -> str:
+    s = HULGI_RX.sub('', name or '')
+    s = MULTI_RX.sub('', s)
+    return re.sub(r'\s+', ' ', s).strip()
+
 def process_one(page, name: str, brand: str, amount: str) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
     """Return ean, sku, src_search_url, pdp_url (if reached)."""
+    base = _clean_name_for_search(name or "")
+
     q_variants = []
-    q_full = " ".join(x for x in [name or "", brand or "", amount or ""] if x).strip()
+    q_full = " ".join(x for x in [base or "", brand or "", amount or ""] if x).strip()
     if q_full: q_variants.append(q_full)
-    if name:   q_variants.append(name.strip())
-    if brand and name: q_variants.append(f"{name} {brand}")
+    if base:   q_variants.append(base.strip())
+    if brand and base: q_variants.append(f"{base} {brand}")
 
     last_src = None
     for q in q_variants:
