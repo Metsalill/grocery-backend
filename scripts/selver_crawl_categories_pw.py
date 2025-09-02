@@ -16,6 +16,9 @@ Additional hardening in this version:
 - NEW: add_init_script() stubs analytics and swallows unhandled SPA exceptions.
 - NEW: more resilient _wait_pdp_ready() so we proceed when any product signal appears.
 - NEW: keep row even if price widget fails (price=0.00); price can backfill later.
+
+CSV columns written:
+  ext_id, source_url, name, ean_raw, ean_norm, sku_raw, size_text, price, currency, category_path, category_leaf
 """
 
 from __future__ import annotations
@@ -97,7 +100,7 @@ NON_PRODUCT_PATH_SNIPPETS = {
     "/kampaania","/kampaaniad","/blogi","/app","/store-locator",
 }
 NON_PRODUCT_KEYWORDS = {
-    "login", "registreeru", "tingimused", "garantii", "pretens", "hinnasilt",
+    "login", "registreeru", "tingimused", "garantii", "hinnasilt",
     "jatkusuutlik", "b2b", "privaatsus", "privacy", "kontakt", "uudis",
     "blog", "pood", "poed", "kaart", "arikliend", "karjaar", "karjäär",
 }
@@ -180,6 +183,19 @@ def _valid_ean13(code: str) -> bool:
     s_even = sum(int(code[i]) * 3 for i in range(1, 12, 2))
     chk = (10 - ((s_odd + s_even) % 10)) % 10
     return chk == int(code[-1])
+
+# NEW: normalize to 8 or 13 digits when possible
+def normalize_ean_digits(e: str) -> str:
+    d = _digits(e)
+    if len(d) in (8, 13):
+        return d
+    # occasional 14-digit forms like "0"+EAN13
+    if len(d) == 14 and d[0] in ("0", "1"):
+        return d[1:]
+    # occasional 12-digit UPC; if it validates as EAN13 with leading 0, keep it
+    if len(d) == 12 and _valid_ean13("0" + d):
+        return "0" + d
+    return ""
 
 # --- NEW: very robust DOM search for "Ribakood" / EAN and SKU ----------------
 def _ean_sku_from_dom(page) -> tuple[str, str]:
@@ -730,10 +746,22 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
     cat_path = " / ".join(crumbs); cat_leaf = crumbs[-1] if crumbs else ""
     size_text = guess_size_from_title(name)
 
+    # NEW: provide normalized digits EAN and explicit source_url for SQL mapping
+    ean_norm = normalize_ean_digits(ean)
+    src_url  = ext_id  # canonical PDP URL
+
     return {
-        "ext_id": ext_id, "name": name, "ean_raw": ean, "sku_raw": sku,
-        "size_text": size_text, "price": f"{price:.2f}", "currency": currency or "EUR",
-        "category_path": cat_path, "category_leaf": cat_leaf,
+        "ext_id": ext_id,
+        "source_url": src_url,
+        "name": name,
+        "ean_raw": ean,
+        "ean_norm": ean_norm,
+        "sku_raw": sku,
+        "size_text": size_text,
+        "price": f"{price:.2f}",
+        "currency": currency or "EUR",
+        "category_path": cat_path,
+        "category_leaf": cat_leaf,
     }
 
 # ---------------------------------------------------------------------------
@@ -829,7 +857,8 @@ def crawl():
     print(f"[selver] writing CSV -> {OUTPUT}")
     with open(OUTPUT, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=[
-            "ext_id","name","ean_raw","sku_raw","size_text","price","currency","category_path","category_leaf"
+            "ext_id","source_url","name","ean_raw","ean_norm","sku_raw",
+            "size_text","price","currency","category_path","category_leaf"
         ])
         w.writeheader()
 
