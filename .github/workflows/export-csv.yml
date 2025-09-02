@@ -21,40 +21,68 @@ jobs:
             echo "::error::No database URL found in secrets (DATABASE_URL_PUBLIC / DATABASE_URL / RW_DATABASE_URL)."
             exit 1
           fi
-
-          # Hard fail if it's the private hostname
           if echo "$DB_URL" | grep -q 'postgres\.railway\.internal'; then
             echo "::error::DATABASE_URL points to private host (postgres.railway.internal). Use the public connection string from Railway (host ends with railway.app or a public IP)."
             exit 1
           fi
-
-          # Ensure sslmode=require is present
-          case "$DB_URL" in
-            *\?*) SEP="&" ;;
-            *)    SEP="?" ;;
-          esac
+          case "$DB_URL" in *\?*) SEP="&";; *) SEP="?";; esac
           if ! echo "$DB_URL" | grep -qi 'sslmode='; then
             DB_URL="${DB_URL}${SEP}sslmode=require"
           fi
-
           echo "DB_URL=$DB_URL" >> "$GITHUB_ENV"
 
       - name: Test DB connection
         run: |
-          psql "$DB_URL" -v ON_ERROR_STOP=1 -c "SELECT version(), current_database(), now();"
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -q -c "SELECT version(), current_database(), now();"
 
-      - name: Export CSVs
+      - name: Write SQL files
         shell: bash
         run: |
-          # 1) All products with Rimi/Selver/Prisma names (requires the view you created earlier)
-          psql "$DB_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          \copy (SELECT * FROM v_all_products_rimi_selver_prisma_names)
-                TO 'all_products__rimi_selver_prisma_names.csv' WITH CSV HEADER
+          # 1) All products with Rimi/Selver/Prisma names (inline; no view needed)
+          cat > export_all.sql <<'SQL'
+          COPY (
+            WITH rimi_one AS (
+              SELECT m.product_id,
+                     rc.name AS rimi_name,
+                     ROW_NUMBER() OVER (PARTITION BY m.product_id ORDER BY m.confidence DESC) AS rn
+              FROM ext_product_map m
+              LEFT JOIN rimi_candidates rc ON rc.ext_id = m.ext_id
+              WHERE m.source = 'rimi' AND m.confidence >= 1
+            ),
+            selver_one AS (
+              SELECT m.product_id,
+                     p.name AS selver_name,
+                     ROW_NUMBER() OVER (PARTITION BY m.product_id ORDER BY 1) AS rn
+              FROM ext_product_map m
+              JOIN products p ON p.id = m.product_id
+              WHERE m.source = 'selver'
+            ),
+            prisma_one AS (
+              SELECT m.product_id,
+                     p.name AS prisma_name,
+                     ROW_NUMBER() OVER (PARTITION BY m.product_id ORDER BY 1) AS rn
+              FROM ext_product_map m
+              JOIN products p ON p.id = m.product_id
+              WHERE m.source = 'prisma'
+            )
+            SELECT
+              p.id   AS product_id,
+              p.ean,
+              p.name AS canonical_name,
+              r.rimi_name,
+              s.selver_name,
+              q.prisma_name
+            FROM products p
+            LEFT JOIN rimi_one   r ON r.product_id = p.id AND r.rn = 1
+            LEFT JOIN selver_one s ON s.product_id = p.id AND s.rn = 1
+            LEFT JOIN prisma_one q ON q.product_id = p.id AND q.rn = 1
+            ORDER BY p.id
+          ) TO STDOUT WITH CSV HEADER;
           SQL
 
-          # 2) Rimi review bucket 0.72–0.82 (inline query; no view needed)
-          psql "$DB_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          \copy (
+          # 2) Rimi review bucket 0.72–0.82 (inline)
+          cat > export_review.sql <<'SQL'
+          COPY (
             WITH sp AS (
               SELECT product_id,
                      BOOL_OR(source='selver') AS has_selver,
@@ -79,12 +107,12 @@ jobs:
             LEFT JOIN sp ON sp.product_id = b.product_id
             WHERE b.score >= 0.72 AND b.score < 0.82
             ORDER BY b.score DESC
-          ) TO 'rimi_review_072_082.csv' WITH CSV HEADER
+          ) TO STDOUT WITH CSV HEADER;
           SQL
 
-          # 3) Rimi weak bucket 0.55–0.72 (inline query; no view needed)
-          psql "$DB_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          \copy (
+          # 3) Rimi weak bucket 0.55–0.72 (inline)
+          cat > export_weak.sql <<'SQL'
+          COPY (
             WITH sp AS (
               SELECT product_id,
                      BOOL_OR(source='selver') AS has_selver,
@@ -109,8 +137,16 @@ jobs:
             LEFT JOIN sp ON sp.product_id = b.product_id
             WHERE b.score >= 0.55 AND b.score < 0.72
             ORDER BY b.score DESC
-          ) TO 'rimi_weak_055_072.csv' WITH CSV HEADER
+          ) TO STDOUT WITH CSV HEADER;
           SQL
+
+      - name: Export CSVs (COPY TO STDOUT)
+        shell: bash
+        run: |
+          # Each COPY writes CSV to STDOUT; redirect to files
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -q -f export_all.sql   > all_products__rimi_selver_prisma_names.csv
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -q -f export_review.sql > rimi_review_072_082.csv
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -q -f export_weak.sql   > rimi_weak_055_072.csv
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
