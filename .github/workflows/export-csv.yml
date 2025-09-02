@@ -1,37 +1,116 @@
 name: Export CSV from Postgres
-on: { workflow_dispatch: {} }
+on:
+  workflow_dispatch: {}
 
 jobs:
   export:
     runs-on: ubuntu-latest
+
     steps:
       - name: Install psql
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-      - name: Test DB connection
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: Resolve DB URL (prefer public)
         run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT version(), now();"
+          DB_URL="${{ secrets.DATABASE_URL_PUBLIC }}"
+          if [ -z "$DB_URL" ]; then DB_URL="${{ secrets.DATABASE_URL }}"; fi
+          if [ -z "$DB_URL" ]; then DB_URL="${{ secrets.RW_DATABASE_URL }}"; fi
+          if [ -z "$DB_URL" ]; then
+            echo "::error::No database URL found in secrets (DATABASE_URL_PUBLIC / DATABASE_URL / RW_DATABASE_URL)."
+            exit 1
+          fi
+
+          # Hard fail if it's the private hostname
+          if echo "$DB_URL" | grep -q 'postgres\.railway\.internal'; then
+            echo "::error::DATABASE_URL points to private host (postgres.railway.internal). Use the public connection string from Railway (host ends with railway.app or a public IP)."
+            exit 1
+          fi
+
+          # Ensure sslmode=require is present
+          case "$DB_URL" in
+            *\?*) SEP="&" ;;
+            *)    SEP="?" ;;
+          esac
+          if ! echo "$DB_URL" | grep -qi 'sslmode='; then
+            DB_URL="${DB_URL}${SEP}sslmode=require"
+          fi
+
+          echo "DB_URL=$DB_URL" >> "$GITHUB_ENV"
+
+      - name: Test DB connection
+        run: |
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -c "SELECT version(), current_database(), now();"
 
       - name: Export CSVs
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        shell: bash
         run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
-            -c "\copy (SELECT * FROM v_all_products_rimi_selver_prisma_names) \
-                TO 'all_products__rimi_selver_prisma_names.csv' WITH CSV HEADER"
+          # 1) All products with Rimi/Selver/Prisma names (requires the view you created earlier)
+          psql "$DB_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          \copy (SELECT * FROM v_all_products_rimi_selver_prisma_names)
+                TO 'all_products__rimi_selver_prisma_names.csv' WITH CSV HEADER
+          SQL
 
-          # Optional: if you created these earlier
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
-            -c "\copy (WITH sp AS (SELECT product_id, BOOL_OR(source='selver') AS has_selver, BOOL_OR(source='prisma') AS has_prisma FROM ext_product_map WHERE source IN ('selver','prisma') GROUP BY product_id) SELECT b.ext_id, COALESCE(b.rimi_name, rc.name) AS rimi_name, COALESCE(b.rimi_brand, rc.brand) AS rimi_brand, COALESCE(b.rimi_size_text, rc.size_text) AS rimi_size_text, p.id AS product_id, p.ean, p.name AS canonical_name, p.brand AS canonical_brand, p.size_text AS canonical_size_text, s.sim_name, s.brand_bonus, s.size_bonus, b.score, sp.has_selver, sp.has_prisma FROM rimi_best_match b JOIN products p ON p.id=b.product_id LEFT JOIN rimi_candidates rc ON rc.ext_id=b.ext_id LEFT JOIN rimi_match_suggestions s ON s.ext_id=b.ext_id AND s.product_id=b.product_id LEFT JOIN sp ON sp.product_id=b.product_id WHERE b.score>=0.72 AND b.score<0.82 ORDER BY b.score DESC) \
-                TO 'rimi_review_072_082.csv' WITH CSV HEADER"
+          # 2) Rimi review bucket 0.72–0.82 (inline query; no view needed)
+          psql "$DB_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          \copy (
+            WITH sp AS (
+              SELECT product_id,
+                     BOOL_OR(source='selver') AS has_selver,
+                     BOOL_OR(source='prisma') AS has_prisma
+              FROM ext_product_map
+              WHERE source IN ('selver','prisma')
+              GROUP BY product_id
+            )
+            SELECT
+              b.ext_id,
+              COALESCE(b.rimi_name, rc.name)            AS rimi_name,
+              COALESCE(b.rimi_brand, rc.brand)          AS rimi_brand,
+              COALESCE(b.rimi_size_text, rc.size_text)  AS rimi_size_text,
+              p.id AS product_id, p.ean, p.name AS canonical_name, p.brand AS canonical_brand, p.size_text AS canonical_size_text,
+              s.sim_name, s.brand_bonus, s.size_bonus, b.score,
+              sp.has_selver, sp.has_prisma
+            FROM rimi_best_match b
+            JOIN products p              ON p.id = b.product_id
+            LEFT JOIN rimi_candidates rc ON rc.ext_id = b.ext_id
+            LEFT JOIN rimi_match_suggestions s
+                   ON s.ext_id=b.ext_id AND s.product_id=b.product_id
+            LEFT JOIN sp ON sp.product_id = b.product_id
+            WHERE b.score >= 0.72 AND b.score < 0.82
+            ORDER BY b.score DESC
+          ) TO 'rimi_review_072_082.csv' WITH CSV HEADER
+          SQL
 
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
-            -c "\copy (WITH sp AS (SELECT product_id, BOOL_OR(source='selver') AS has_selver, BOOL_OR(source='prisma') AS has_prisma FROM ext_product_map WHERE source IN ('selver','prisma') GROUP BY product_id) SELECT b.ext_id, COALESCE(b.rimi_name, rc.name) AS rimi_name, COALESCE(b.rimi_brand, rc.brand) AS rimi_brand, COALESCE(b.rimi_size_text, rc.size_text) AS rimi_size_text, p.id AS product_id, p.ean, p.name AS canonical_name, p.brand AS canonical_brand, p.size_text AS canonical_size_text, s.sim_name, s.brand_bonus, s.size_bonus, b.score, sp.has_selver, sp.has_prisma FROM rimi_best_match b JOIN products p ON p.id=b.product_id LEFT JOIN rimi_candidates rc ON rc.ext_id=b.ext_id LEFT JOIN rimi_match_suggestions s ON s.ext_id=b.ext_id AND s.product_id=b.product_id LEFT JOIN sp ON sp.product_id=b.product_id WHERE b.score>=0.55 AND b.score<0.72 ORDER BY b.score DESC) \
-                TO 'rimi_weak_055_072.csv' WITH CSV HEADER"
+          # 3) Rimi weak bucket 0.55–0.72 (inline query; no view needed)
+          psql "$DB_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          \copy (
+            WITH sp AS (
+              SELECT product_id,
+                     BOOL_OR(source='selver') AS has_selver,
+                     BOOL_OR(source='prisma') AS has_prisma
+              FROM ext_product_map
+              WHERE source IN ('selver','prisma')
+              GROUP BY product_id
+            )
+            SELECT
+              b.ext_id,
+              COALESCE(b.rimi_name, rc.name)            AS rimi_name,
+              COALESCE(b.rimi_brand, rc.brand)          AS rimi_brand,
+              COALESCE(b.rimi_size_text, rc.size_text)  AS rimi_size_text,
+              p.id AS product_id, p.ean, p.name AS canonical_name, p.brand AS canonical_brand, p.size_text AS canonical_size_text,
+              s.sim_name, s.brand_bonus, s.size_bonus, b.score,
+              sp.has_selver, sp.has_prisma
+            FROM rimi_best_match b
+            JOIN products p              ON p.id = b.product_id
+            LEFT JOIN rimi_candidates rc ON rc.ext_id = b.ext_id
+            LEFT JOIN rimi_match_suggestions s
+                   ON s.ext_id=b.ext_id AND s.product_id=b.product_id
+            LEFT JOIN sp ON sp.product_id = b.product_id
+            WHERE b.score >= 0.55 AND b.score < 0.72
+            ORDER BY b.score DESC
+          ) TO 'rimi_weak_055_072.csv' WITH CSV HEADER
+          SQL
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
