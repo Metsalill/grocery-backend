@@ -1,26 +1,34 @@
-name: "Selver → Backfill EANs (DB-driven)"
+name: "Selver → Backfill EANs (DB-driven, concurrent)"
 
 on:
   workflow_dispatch:
     inputs:
       batch:
-        description: "Rows per run"
+        description: "Rows to attempt this run"
         required: false
-        default: "200"
+        default: "1200"
+      concurrency:
+        description: "Parallel browser workers"
+        required: false
+        default: "8"
       headless:
         description: "Headless (1/0)"
         required: false
         default: "1"
       req_delay:
-        description: "Delay seconds"
+        description: "Per-item delay seconds"
         required: false
-        default: "0.6"
+        default: "0.30"
       overwrite_bad_eans:
-        description: "Overwrite bad EANs (1/0)"
+        description: "Overwrite bad-looking existing EANs (1/0)"
         required: false
         default: "0"
+      timebox_minutes:
+        description: "Soft time limit for the probe (minutes)"
+        required: false
+        default: "45"
   schedule:
-    - cron: "15 2 * * *"   # daily 02:15 UTC (optional)
+    - cron: "15 2 * * *"   # daily 02:15 UTC
 
 concurrency:
   group: selver-backfill-eans
@@ -29,13 +37,18 @@ concurrency:
 jobs:
   backfill:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # Allow the job to run longer than the timebox if you choose to extend it;
+    # the script itself is timeboxed with `timeout` below.
+    timeout-minutes: 75
+
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-      BATCH: ${{ github.event.inputs.batch || '200' }}
+      BATCH: ${{ github.event.inputs.batch || '1200' }}
+      CONCURRENCY: ${{ github.event.inputs.concurrency || '8' }}
       HEADLESS: ${{ github.event.inputs.headless || '1' }}
-      REQ_DELAY: ${{ github.event.inputs.req_delay || '0.6' }}
+      REQ_DELAY: ${{ github.event.inputs.req_delay || '0.30' }}
       OVERWRITE_BAD_EANS: ${{ github.event.inputs.overwrite_bad_eans || '0' }}
+      TIMEBOX_MINUTES: ${{ github.event.inputs.timebox_minutes || '45' }}
 
     steps:
       - name: Checkout
@@ -48,6 +61,7 @@ jobs:
 
       - name: Install Playwright
         run: |
+          python -m pip install --upgrade pip
           pip install playwright psycopg2-binary
           python -m playwright install --with-deps chromium
 
@@ -55,36 +69,75 @@ jobs:
         run: |
           test -f scripts/selver_probe_ean_pw.py || { echo "Missing scripts/selver_probe_ean_pw.py"; exit 1; }
 
-      - name: Run Selver EAN backfill (DB-driven)
+      - name: Show config
+        run: |
+          echo "BATCH=$BATCH"
+          echo "CONCURRENCY=$CONCURRENCY"
+          echo "HEADLESS=$HEADLESS"
+          echo "REQ_DELAY=$REQ_DELAY"
+          echo "OVERWRITE_BAD_EANS=$OVERWRITE_BAD_EANS"
+          echo "TIMEBOX_MINUTES=$TIMEBOX_MINUTES"
+
+      - name: Run Selver EAN backfill (concurrent, timeboxed)
         env:
           PYTHONUNBUFFERED: "1"
         run: |
-          echo "BATCH=$BATCH HEADLESS=$HEADLESS REQ_DELAY=$REQ_DELAY OVERWRITE_BAD_EANS=$OVERWRITE_BAD_EANS"
-          python scripts/selver_probe_ean_pw.py
+          # Soft-limit the run; send SIGINT so Playwright/psycopg2 can clean up.
+          timeout --signal=SIGINT ${TIMEBOX_MINUTES}m \
+            python scripts/selver_probe_ean_pw.py
 
       - name: Post-run stats
         run: |
           sudo apt-get update && sudo apt-get install -y postgresql-client
+          echo "Missing canonical EANs overall:"
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
           SELECT COUNT(*) AS still_missing
           FROM products
           WHERE COALESCE(NULLIF(TRIM(ean),''), NULL) IS NULL;
           "
+
+          echo "Selver vs Prisma EAN overlap:"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
+          WITH selver AS (
+            SELECT DISTINCT p.ean
+            FROM ext_product_map m
+            JOIN products p ON p.id = m.product_id
+            WHERE m.source='selver' AND p.ean IS NOT NULL AND p.ean <> ''
+          ),
+          prisma AS (
+            SELECT DISTINCT p.ean
+            FROM ext_product_map m
+            JOIN products p ON p.id = m.product_id
+            WHERE m.source='prisma' AND p.ean IS NOT NULL AND p.ean <> ''
+          ),
+          overlap AS (
+            SELECT ean FROM selver INTERSECT SELECT ean FROM prisma
+          )
+          SELECT
+            (SELECT COUNT(*) FROM selver)  AS selver_eans,
+            (SELECT COUNT(*) FROM prisma)  AS prisma_eans,
+            (SELECT COUNT(*) FROM overlap) AS overlap_eans;
+          "
+
           # If queue exists, show attempts/errors
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
           DO $$
           BEGIN
-            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='selver_ean_backfill_queue') THEN
-              RAISE NOTICE 'Queue attempts:';
+            IF EXISTS (
+              SELECT 1 FROM information_schema.tables WHERE table_name='selver_ean_backfill_queue'
+            ) THEN
+              RAISE NOTICE 'Queue attempts distribution:';
             END IF;
           END $$;
-          "
+          " || true
+
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
           SELECT attempts, COUNT(*) 
           FROM selver_ean_backfill_queue
           GROUP BY attempts
           ORDER BY attempts;
           " || true
+
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
           SELECT COUNT(*) AS failures
           FROM selver_ean_backfill_queue
