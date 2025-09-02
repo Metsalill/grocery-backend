@@ -1,7 +1,5 @@
 name: Export CSV from Postgres
-
-on:
-  workflow_dispatch: {}   # run manually from the Actions tab
+on: { workflow_dispatch: {} }
 
 jobs:
   export:
@@ -12,23 +10,28 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-      - name: Export CSV files
+      - name: Test DB connection
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          # All products with Rimi/Selver/Prisma names (requires the view you created)
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT version(), now();"
+
+      - name: Export CSVs
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
             -c "\copy (SELECT * FROM v_all_products_rimi_selver_prisma_names) \
                 TO 'all_products__rimi_selver_prisma_names.csv' WITH CSV HEADER"
 
-          # If you created these views earlier, export review + weak sets too:
+          # Optional: if you created these earlier
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
-            -c "\copy (SELECT * FROM v_rimi_review_072_082) \
-                TO 'rimi_review_072_082.csv' WITH CSV HEADER" || true
+            -c "\copy (WITH sp AS (SELECT product_id, BOOL_OR(source='selver') AS has_selver, BOOL_OR(source='prisma') AS has_prisma FROM ext_product_map WHERE source IN ('selver','prisma') GROUP BY product_id) SELECT b.ext_id, COALESCE(b.rimi_name, rc.name) AS rimi_name, COALESCE(b.rimi_brand, rc.brand) AS rimi_brand, COALESCE(b.rimi_size_text, rc.size_text) AS rimi_size_text, p.id AS product_id, p.ean, p.name AS canonical_name, p.brand AS canonical_brand, p.size_text AS canonical_size_text, s.sim_name, s.brand_bonus, s.size_bonus, b.score, sp.has_selver, sp.has_prisma FROM rimi_best_match b JOIN products p ON p.id=b.product_id LEFT JOIN rimi_candidates rc ON rc.ext_id=b.ext_id LEFT JOIN rimi_match_suggestions s ON s.ext_id=b.ext_id AND s.product_id=b.product_id LEFT JOIN sp ON sp.product_id=b.product_id WHERE b.score>=0.72 AND b.score<0.82 ORDER BY b.score DESC) \
+                TO 'rimi_review_072_082.csv' WITH CSV HEADER"
 
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
-            -c "\copy (SELECT * FROM v_rimi_weak_055_072) \
-                TO 'rimi_weak_055_072.csv' WITH CSV HEADER" || true
+            -c "\copy (WITH sp AS (SELECT product_id, BOOL_OR(source='selver') AS has_selver, BOOL_OR(source='prisma') AS has_prisma FROM ext_product_map WHERE source IN ('selver','prisma') GROUP BY product_id) SELECT b.ext_id, COALESCE(b.rimi_name, rc.name) AS rimi_name, COALESCE(b.rimi_brand, rc.brand) AS rimi_brand, COALESCE(b.rimi_size_text, rc.size_text) AS rimi_size_text, p.id AS product_id, p.ean, p.name AS canonical_name, p.brand AS canonical_brand, p.size_text AS canonical_size_text, s.sim_name, s.brand_bonus, s.size_bonus, b.score, sp.has_selver, sp.has_prisma FROM rimi_best_match b JOIN products p ON p.id=b.product_id LEFT JOIN rimi_candidates rc ON rc.ext_id=b.ext_id LEFT JOIN rimi_match_suggestions s ON s.ext_id=b.ext_id AND s.product_id=b.product_id LEFT JOIN sp ON sp.product_id=b.product_id WHERE b.score>=0.55 AND b.score<0.72 ORDER BY b.score DESC) \
+                TO 'rimi_weak_055_072.csv' WITH CSV HEADER"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
