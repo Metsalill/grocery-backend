@@ -4,15 +4,22 @@
 """
 Selver category crawler → CSV (staging_selver_products)
 
-Patch: robust EAN (Ribakood) + SKU extraction from PDP DOM
-- Finds "Ribakood" value even when it's rendered in a spec row (not in JSON-LD).
-- Falls back through several DOM strategies before giving up.
-- Keeps previous logic (JSON-LD, itemprops) as first attempts.
-
-Additional hardening in this version:
-- Silences SPA pageerrors (e.g. parentSku exceptions) so they don't interrupt the run.
-- Keeps console noise minimal; honors LOG_CONSOLE=0|warn|all.
+- Robust EAN (Ribakood) + SKU extraction from PDP DOM.
+- Silences SPA pageerrors so they don't interrupt the run.
+- Minimal console noise; honors LOG_CONSOLE=0|warn|all.
 - Retries navigation once in safe_goto() on transient failures.
+
+NEW IN THIS PATCH
+- Adds `source_url` to every row (the canonical PDP URL we visited).
+- Optional direct DB upsert to `staging_selver_products` (UPSERT_DB=1).
+- Optional promotion of NEW valid EANs to canonical `products` and mapping
+  into `ext_product_map` (PROMOTE_NEW=1).
+
+Environment toggles (sane defaults):
+  OUTPUT=data/selver.csv
+  UPSERT_DB=1            # write to DB staging while also writing CSV
+  PROMOTE_NEW=0          # 1 = insert missing EANs into products + mapping
+  PRELOAD_DB=1           # skip already-known ext_ids from staging
 """
 
 from __future__ import annotations
@@ -34,10 +41,13 @@ CLICK_PRODUCTS = int(os.getenv("CLICK_PRODUCTS", "0")) == 1
 LOG_CONSOLE    = (os.getenv("LOG_CONSOLE", "0") or "0").lower()  # 0|off, warn, all
 NAV_TIMEOUT_MS = int(os.getenv("NAV_TIMEOUT_MS", "45000"))
 
-# DB preload toggles / query
+# DB toggles
 PRELOAD_DB        = int(os.getenv("PRELOAD_DB", "1")) == 1
 PRELOAD_DB_QUERY  = os.getenv("PRELOAD_DB_QUERY", "SELECT ext_id FROM staging_selver_products")
 PRELOAD_DB_LIMIT  = int(os.getenv("PRELOAD_DB_LIMIT", "0"))
+
+UPSERT_DB   = int(os.getenv("UPSERT_DB", "1")) == 1
+PROMOTE_NEW = int(os.getenv("PROMOTE_NEW", "0")) == 1
 
 STRICT_ALLOWLIST = [
     "/puu-ja-koogiviljad",
@@ -178,16 +188,10 @@ def _valid_ean13(code: str) -> bool:
     chk = (10 - ((s_odd + s_even) % 10)) % 10
     return chk == int(code[-1])
 
-# --- NEW: very robust DOM search for "Ribakood" / EAN and SKU ----------------
+# --- DOM search for EAN/SKU -------------------------------------------------
 def _ean_sku_from_dom(page) -> tuple[str, str]:
-    """
-    Heuristically locate 'Ribakood' value (EAN) and SKU shown in PDP specs,
-    regardless of exact HTML structure.
-    """
     ean = ""
     sku = ""
-
-    # 1) Target typical key-value rows (tr/td, dl/dt/dd, generic rows)
     try:
         got = page.evaluate(
             """
@@ -208,18 +212,14 @@ def _ean_sku_from_dom(page) -> tuple[str, str]:
                 const txt = (row.textContent||'').replace(/\\s+/g,' ').trim();
                 if (!txt) continue;
 
-                // EAN (Ribakood)
                 if (!ean && /\\bribakood\\b/i.test(txt)) {
                   const d = pickDigits(txt);
                   if (d) ean = d;
                 }
-
-                // SKU / Tootekood
                 if (!sku && /(\\bSKU\\b|\\bTootekood\\b|\\bArtikkel\\b)/i.test(txt)) {
                   const m = txt.match(/([A-Z0-9_-]{6,})/i);
                   if (m) sku = m[1];
                 }
-
                 if (ean && sku) break;
               }
 
@@ -233,7 +233,6 @@ def _ean_sku_from_dom(page) -> tuple[str, str]:
                   }
                 }
               }
-
               return { ean, sku };
             }
             """
@@ -244,36 +243,30 @@ def _ean_sku_from_dom(page) -> tuple[str, str]:
     except Exception:
         pass
 
-    # 2) Last resort: regex over full HTML
     if not ean:
         try:
             html = page.content()
             m = re.search(r"ribakood[\s\S]{0,400}?(\d{8,14})", html, re.I)
-            if m:
-                ean = m.group(1)
+            if m: ean = m.group(1)
         except Exception:
             pass
 
-    # Normalize & validate
     e13 = _digits(ean)
     if _valid_ean13(e13):
         ean = e13
     else:
         if not re.fullmatch(r"\d{8,14}", e13 or ""):
             ean = ""
-
     return ean, (sku or "")
-# ---------------------------------------------------------------------------
 
 def _pick_ean_from_html(html: str) -> str:
-    # (kept for completeness; new _ean_sku_from_dom supersedes this)
     if not html: return ""
     label_pat = re.compile(r"(?:\b(?:ean|gtin|ribakood|triipkood|barcode)\b)[^0-9]{0,200}([0-9]{8,14})", re.I | re.S)
     m = label_pat.search(html)
     return m.group(1) if m else ""
 
 # ---------------------------------------------------------------------------
-# DB preload
+# DB helpers (pg8000 -> psycopg2 fallback)
 def _db_connect():
     dburl = os.getenv("DATABASE_URL")
     if dburl:
@@ -301,6 +294,87 @@ def _db_connect():
             return "psycopg2", conn
         except Exception as e_psy:
             raise RuntimeError(f"DB connect failed (pg8000/psycopg2). pg8000: {e_pg}; psycopg2: {e_psy}")
+
+def ensure_schema(conn) -> None:
+    cur = conn.cursor()
+    # staging table + source_url column
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS staging_selver_products (
+          ext_id        text PRIMARY KEY,
+          name          text,
+          ean_raw       text,
+          sku_raw       text,
+          size_text     text,
+          price         numeric(10,2),
+          currency      text,
+          category_path text,
+          category_leaf text,
+          source_url    text
+        );
+    """)
+    # mapping uniqueness (nice to have)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS ext_product_map (
+          id bigserial PRIMARY KEY,
+          source text NOT NULL,
+          ext_id text NOT NULL,
+          product_id bigint,
+          source_url text,
+          UNIQUE(source, ext_id)
+        );
+    """)
+    conn.commit()
+    try: cur.close()
+    except Exception: pass
+
+def upsert_staging(conn, row: dict) -> None:
+    cur = conn.cursor()
+    cur.execute("""
+      INSERT INTO staging_selver_products
+        (ext_id, name, ean_raw, sku_raw, size_text, price, currency, category_path, category_leaf, source_url)
+      VALUES
+        (%(ext_id)s, %(name)s, %(ean_raw)s, %(sku_raw)s, %(size_text)s, %(price)s, %(currency)s, %(category_path)s, %(category_leaf)s, %(source_url)s)
+      ON CONFLICT (ext_id) DO UPDATE SET
+        name=EXCLUDED.name,
+        ean_raw=EXCLUDED.ean_raw,
+        sku_raw=EXCLUDED.sku_raw,
+        size_text=EXCLUDED.size_text,
+        price=EXCLUDED.price,
+        currency=EXCLUDED.currency,
+        category_path=EXCLUDED.category_path,
+        category_leaf=EXCLUDED.category_leaf,
+        source_url=EXCLUDED.source_url;
+    """, row)
+    conn.commit()
+    try: cur.close()
+    except Exception: pass
+
+def promote_and_map(conn, row: dict) -> None:
+    """If row has a valid EAN, ensure canonical product + mapping exist."""
+    ean = (row.get("ean_raw") or "").strip()
+    if not ean or not re.fullmatch(r"\d{8,14}", ean):  # accept EAN8..EAN14 (we validate 13 earlier)
+        return
+    cur = conn.cursor()
+    # upsert into products (use minimal cols; preserve Prisma rows)
+    cur.execute("""
+      INSERT INTO products (ean, name, size_text, source_url, last_seen_utc)
+      VALUES (%s, %s, %s, %s, NOW())
+      ON CONFLICT (ean) DO UPDATE
+        SET last_seen_utc = NOW();
+    """, (ean, row.get("name") or "", row.get("size_text") or "", row.get("source_url") or row.get("ext_id")))
+    # map Selver ext_id → product
+    cur.execute("""
+      INSERT INTO ext_product_map (source, ext_id, product_id, source_url)
+      SELECT 'selver', %s, p.id, %s
+      FROM products p
+      WHERE p.ean = %s
+      ON CONFLICT (source, ext_id) DO UPDATE
+        SET product_id = EXCLUDED.product_id,
+            source_url = COALESCE(EXCLUDED.source_url, ext_product_map.source_url);
+    """, (row.get("ext_id"), row.get("source_url") or row.get("ext_id"), ean))
+    conn.commit()
+    try: cur.close()
+    except Exception: pass
 
 def preload_ext_ids_from_db() -> Set[str]:
     known: Set[str] = set()
@@ -356,7 +430,6 @@ def accept_cookies(page):
             pass
 
 def safe_goto(page, url: str, timeout: Optional[int] = None) -> bool:
-    """Navigate with one retry; let SPA settle."""
     tmo = timeout or NAV_TIMEOUT_MS
     for attempt in (1, 2):
         try:
@@ -370,7 +443,7 @@ def safe_goto(page, url: str, timeout: Optional[int] = None) -> bool:
             return True
         except Exception as e:
             if attempt == 1:
-                time.sleep(0.6)  # small backoff
+                time.sleep(0.6)
                 continue
             print(f"[selver] NAV FAIL {url} -> {type(e).__name__}: {e}")
             return False
@@ -611,7 +684,6 @@ def extract_price(page) -> tuple[float, str]:
     return 0.0, "EUR"
 
 def extract_ean_and_sku(page) -> tuple[str, str]:
-    # 1) JSON-LD quick win
     try:
         blocks = jsonld_all(page)
         prod = jsonld_pick_product(blocks)
@@ -623,7 +695,6 @@ def extract_ean_and_sku(page) -> tuple[str, str]:
     except Exception:
         pass
 
-    # 2) itemprop-based hints
     try:
         got = page.evaluate("""
         () => {
@@ -647,12 +718,10 @@ def extract_ean_and_sku(page) -> tuple[str, str]:
     except Exception:
         pass
 
-    # 3) NEW: strong DOM heuristic for 'Ribakood' + SKU
     e_dom, s_dom = _ean_sku_from_dom(page)
     if e_dom or s_dom:
         return e_dom, s_dom
 
-    # 4) Final HTML regex scan
     try:
         html = page.content()
         e_html = _pick_ean_from_html(html)
@@ -691,7 +760,6 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
         except Exception: name = ""
     if not name: return None
 
-    # EAN & SKU (with strong DOM fallback)
     ean, sku = "", ""
     if prod_ld:
         ean = _digits(str(prod_ld.get("gtin13") or prod_ld.get("gtin") or "")) or ""
@@ -717,9 +785,16 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
     size_text = guess_size_from_title(name)
 
     return {
-        "ext_id": ext_id, "name": name, "ean_raw": ean, "sku_raw": sku,
-        "size_text": size_text, "price": f"{price:.2f}", "currency": currency,
-        "category_path": cat_path, "category_leaf": cat_leaf,
+        "ext_id": ext_id,
+        "source_url": ext_id,            # <— NEW: store the PDP URL explicitly
+        "name": name,
+        "ean_raw": ean,
+        "sku_raw": sku,
+        "size_text": size_text,
+        "price": f"{price:.2f}",
+        "currency": currency,
+        "category_path": cat_path,
+        "category_leaf": cat_leaf,
     }
 
 # ---------------------------------------------------------------------------
@@ -765,8 +840,7 @@ def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
     return False
 
 # ---------------------------------------------------------------------------
-# Click mode (navigate to hrefs, click only as fallback)
-def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_ext_ids: Set[str]) -> int:
+def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_ext_ids: Set[str], dbconn) -> int:
     wrote = 0
     if not safe_goto(page, seed_url): return 0
     _wait_listing_ready(page)
@@ -795,6 +869,10 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
                 ext_id = _clean_abs(row["ext_id"]) or row["ext_id"]
                 if ext_id not in seen_ext_ids:
                     writer.writerow(row)
+                    if UPSERT_DB and dbconn:
+                        upsert_staging(dbconn, row)
+                        if PROMOTE_NEW:
+                            promote_and_map(dbconn, row)
                     seen_ext_ids.add(ext_id)
                     wrote += 1
 
@@ -812,10 +890,19 @@ def crawl():
     os.makedirs(os.path.dirname(OUTPUT) or ".", exist_ok=True)
     dbg_dir = "data/selver_debug"; os.makedirs(dbg_dir, exist_ok=True)
 
+    dbconn = None
+    if UPSERT_DB:
+        try:
+            _, dbconn = _db_connect()
+            ensure_schema(dbconn)
+        except Exception as e:
+            print(f"[selver] DB upsert disabled (connect failed): {e}")
+            dbconn = None
+
     print(f"[selver] writing CSV -> {OUTPUT}")
     with open(OUTPUT, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=[
-            "ext_id","name","ean_raw","sku_raw","size_text","price","currency","category_path","category_leaf"
+            "ext_id","source_url","name","ean_raw","sku_raw","size_text","price","currency","category_path","category_leaf"
         ])
         w.writeheader()
 
@@ -843,7 +930,6 @@ def crawl():
             page.set_default_navigation_timeout(NAV_TIMEOUT_MS)
             page.set_default_timeout(10000)
 
-            # Silence SPA page errors (e.g., parentSku) and requestfailed noise
             page.on("pageerror", lambda e: None)
             page.on("requestfailed", lambda r: None)
 
@@ -855,7 +941,6 @@ def crawl():
                         t = (m.text or "").replace("\n"," ")[:800]
                         print(f"[pw] {m.type}: {t}")
                 page.on("console", _warn_err_only)
-            # LOG_CONSOLE == "0" → no console handler
 
             print("[selver] collecting seeds…")
             file_seeds: List[str] = []
@@ -885,7 +970,7 @@ def crawl():
             if CLICK_PRODUCTS:
                 for ci, cu in enumerate(cats, 1):
                     try:
-                        wrote = collect_write_by_clicking(page, cu, w, seen_ext_ids)
+                        wrote = collect_write_by_clicking(page, cu, w, seen_ext_ids, dbconn)
                         rows_written += wrote
                         print(f"[selver] {cu} → +{wrote} rows (click mode, total: {rows_written})")
                         if (ci % 1) == 0: f.flush()
@@ -917,10 +1002,8 @@ def crawl():
                     print(f"[selver] {cu} → +{len(links)} products (total so far: {len(product_urls)})")
 
                 for i, pu in enumerate(sorted(product_urls), 1):
-                    if _clean_abs(pu) in seen_ext_ids:
-                        continue
-                    if not _is_selver_product_like(pu):
-                        continue
+                    if _clean_abs(pu) in seen_ext_ids: continue
+                    if not _is_selver_product_like(pu): continue
 
                     got = safe_goto(page, pu)
                     if not got:
@@ -940,16 +1023,18 @@ def crawl():
                         ext_id = _clean_abs(row["ext_id"]) or row["ext_id"]
                         if ext_id not in seen_ext_ids:
                             w.writerow(row)
+                            if UPSERT_DB and dbconn:
+                                upsert_staging(dbconn, row)
+                                if PROMOTE_NEW:
+                                    promote_and_map(dbconn, row)
                             seen_ext_ids.add(ext_id)
                             rows_written += 1
 
                     if (i % 25) == 0:
                         f.flush()
 
-            try:
-                browser.close()
-            except Exception:
-                pass
+            try: browser.close()
+            except Exception: pass
 
     print(f"[selver] wrote {rows_written} product rows.")
 
