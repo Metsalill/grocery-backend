@@ -308,11 +308,11 @@ jobs:
             category_leaf text
           );
 
-          -- Strip possible BOM and COPY with header
-          COPY tmp_staging_selver_products (
+          -- Client-side import; Postgres ignores the header row
+          \copy tmp_staging_selver_products (
             ext_id, source_url, name, ean_raw, ean_norm, sku_raw, size_text, price, currency, category_path, category_leaf
           )
-          FROM PROGRAM $$sed '1s/^\xEF\xBB\xBF//' data/selver.csv$$
+          FROM 'data/selver.csv'
           WITH (FORMAT csv, HEADER true);
 
           -- Drop obvious non-product noise if present
