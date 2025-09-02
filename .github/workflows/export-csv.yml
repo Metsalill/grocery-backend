@@ -1,0 +1,41 @@
+name: Export CSV from Postgres
+
+on:
+  workflow_dispatch: {}   # run manually from the Actions tab
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install psql
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Export CSV files
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          # All products with Rimi/Selver/Prisma names (requires the view you created)
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+            -c "\copy (SELECT * FROM v_all_products_rimi_selver_prisma_names) \
+                TO 'all_products__rimi_selver_prisma_names.csv' WITH CSV HEADER"
+
+          # If you created these views earlier, export review + weak sets too:
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+            -c "\copy (SELECT * FROM v_rimi_review_072_082) \
+                TO 'rimi_review_072_082.csv' WITH CSV HEADER" || true
+
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+            -c "\copy (SELECT * FROM v_rimi_weak_055_072) \
+                TO 'rimi_weak_055_072.csv' WITH CSV HEADER" || true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: exports
+          path: |
+            all_products__rimi_selver_prisma_names.csv
+            rimi_review_072_082.csv
+            rimi_weak_055_072.csv
+          if-no-files-found: warn
