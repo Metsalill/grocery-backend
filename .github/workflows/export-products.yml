@@ -17,7 +17,7 @@ jobs:
           RW_URL:     ${{ secrets.RW_DATABASE_URL }}
         run: |
           db="${URL_PUBLIC:-${URL_STD:-${RW_URL}}}"
-          [ -z "$db" ] && { echo "No DB URL" >&2; exit 1; }
+          [ -z "$db" ] && { echo "No DB URL secret set"; exit 1; }
           if [[ "$db" == postgres://* || "$db" == postgresql://* ]]; then
             if [[ "$db" != *"sslmode="* ]]; then
               sep="?" ; [[ "$db" == *"?"* ]] && sep="&"
@@ -29,14 +29,30 @@ jobs:
       - name: Connection test
         run: psql -X -v ON_ERROR_STOP=1 "$DB_URL" -c "SELECT version(), now();"
 
-      - name: Write bootstrap SQL to file
+      - name: Write bootstrap SQL
         run: |
           cat > bootstrap.sql <<'SQL'
-          -- Extensions
+          -- ---------- Extensions
           CREATE EXTENSION IF NOT EXISTS unaccent;
           CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
-          -- Canonical normalization
+          -- ---------- Drop old views first (avoid 'cannot drop columns from view')
+          DROP VIEW IF EXISTS
+            v_sr_review_072_082,
+            v_sr_weak_055_072,
+            v_pr_review_072_082,
+            v_pr_weak_055_072,
+            v_sp_review_072_082,
+            v_sp_weak_055_072,
+            v_match_selver_rimi,
+            v_match_prisma_rimi,
+            v_match_selver_prisma,
+            selver_side_norm,
+            prisma_side_norm,
+            v_all_products_rimi_selver_prisma_names
+          CASCADE;
+
+          -- ---------- Canonical normalization
           CREATE MATERIALIZED VIEW IF NOT EXISTS products_norm AS
           SELECT
             id AS product_id, ean, name, brand, size_text,
@@ -53,7 +69,7 @@ jobs:
             size_to_gml(size_text) AS size_gml
           FROM products;
 
-          -- Rimi candidates normalization
+          -- ---------- Rimi candidates normalization
           CREATE MATERIALIZED VIEW IF NOT EXISTS rimi_candidates_norm AS
           SELECT
             ext_id, name, brand, size_text,
@@ -70,35 +86,33 @@ jobs:
             size_to_gml(size_text) AS size_gml
           FROM rimi_candidates;
 
-          -- GIN indexes
+          -- ---------- Indexes + refresh
           CREATE INDEX IF NOT EXISTS prod_core_trgm ON products_norm        USING gin (name_core_norm gin_trgm_ops);
           CREATE INDEX IF NOT EXISTS rimi_core_trgm  ON rimi_candidates_norm USING gin (name_core_norm gin_trgm_ops);
-
-          -- Refresh
           REFRESH MATERIALIZED VIEW products_norm;
           REFRESH MATERIALIZED VIEW rimi_candidates_norm;
 
-          -- Canonical subsets that actually have price in each store
-          CREATE OR REPLACE VIEW selver_side_norm AS
+          -- ---------- Canonical subsets that have prices per store
+          CREATE VIEW selver_side_norm AS
           WITH sid AS (SELECT id FROM stores WHERE name='Selver e-Selver' LIMIT 1)
           SELECT DISTINCT pr.product_id, p.ean, p.name, p.brand, p.size_text,
                  pn.brand_norm, pn.name_core_norm, pn.size_gml
           FROM prices pr
           JOIN sid ON pr.store_id = sid.id
-          JOIN products p      ON p.id = pr.product_id
+          JOIN products p       ON p.id = pr.product_id
           JOIN products_norm pn ON pn.product_id = p.id;
 
-          CREATE OR REPLACE VIEW prisma_side_norm AS
+          CREATE VIEW prisma_side_norm AS
           WITH sid AS (SELECT id FROM stores WHERE name='Prisma Online (Tallinn)' LIMIT 1)
           SELECT DISTINCT pr.product_id, p.ean, p.name, p.brand, p.size_text,
                  pn.brand_norm, pn.name_core_norm, pn.size_gml
           FROM prices pr
           JOIN sid ON pr.store_id = sid.id
-          JOIN products p      ON p.id = pr.product_id
+          JOIN products p       ON p.id = pr.product_id
           JOIN products_norm pn ON pn.product_id = p.id;
 
           -- ---------- Matcher: Selver <-> Rimi
-          CREATE OR REPLACE VIEW v_match_selver_rimi AS
+          CREATE VIEW v_match_selver_rimi AS
           SELECT
             r.ext_id, r.name AS left_name, r.brand AS left_brand, r.size_text AS left_size_text,
             s.product_id, s.ean, s.name AS right_name, s.brand AS right_brand, s.size_text AS right_size_text,
@@ -133,7 +147,7 @@ jobs:
                );
 
           -- ---------- Matcher: Prisma <-> Rimi
-          CREATE OR REPLACE VIEW v_match_prisma_rimi AS
+          CREATE VIEW v_match_prisma_rimi AS
           SELECT
             r.ext_id, r.name AS left_name, r.brand AS left_brand, r.size_text AS left_size_text,
             s.product_id, s.ean, s.name AS right_name, s.brand AS right_brand, s.size_text AS right_size_text,
@@ -167,8 +181,8 @@ jobs:
                  OR abs(r.size_gml - s.size_gml) <= GREATEST(20, (GREATEST(r.size_gml, s.size_gml) * 0.05)::int)
                );
 
-          -- ---------- Matcher: Selver <-> Prisma (canonical-to-canonical)
-          CREATE OR REPLACE VIEW v_match_selver_prisma AS
+          -- ---------- Matcher: Selver <-> Prisma (canonical to canonical)
+          CREATE VIEW v_match_selver_prisma AS
           SELECT
             a.product_id AS left_product_id,  a.ean AS left_ean,  a.name AS left_name,  a.brand AS left_brand,  a.size_text AS left_size_text,
             b.product_id AS right_product_id, b.ean AS right_ean, b.name AS right_name, b.brand AS right_brand, b.size_text AS right_size_text,
@@ -202,16 +216,16 @@ jobs:
                  OR abs(a.size_gml - b.size_gml) <= GREATEST(20, (GREATEST(a.size_gml, b.size_gml) * 0.05)::int)
                );
 
-          -- Buckets
-          CREATE OR REPLACE VIEW v_sr_review_072_082 AS SELECT * FROM v_match_selver_rimi   WHERE score >= 0.72 AND score < 0.82;
-          CREATE OR REPLACE VIEW v_sr_weak_055_072   AS SELECT * FROM v_match_selver_rimi   WHERE score >= 0.55 AND score < 0.72;
-          CREATE OR REPLACE VIEW v_pr_review_072_082 AS SELECT * FROM v_match_prisma_rimi   WHERE score >= 0.72 AND score < 0.82;
-          CREATE OR REPLACE VIEW v_pr_weak_055_072   AS SELECT * FROM v_match_prisma_rimi   WHERE score >= 0.55 AND score < 0.72;
-          CREATE OR REPLACE VIEW v_sp_review_072_082 AS SELECT * FROM v_match_selver_prisma WHERE score >= 0.72 AND score < 0.82;
-          CREATE OR REPLACE VIEW v_sp_weak_055_072   AS SELECT * FROM v_match_selver_prisma WHERE score >= 0.55 AND score < 0.72;
+          -- ---------- Buckets
+          CREATE VIEW v_sr_review_072_082 AS SELECT * FROM v_match_selver_rimi   WHERE score >= 0.72 AND score < 0.82;
+          CREATE VIEW v_sr_weak_055_072   AS SELECT * FROM v_match_selver_rimi   WHERE score >= 0.55 AND score < 0.72;
+          CREATE VIEW v_pr_review_072_082 AS SELECT * FROM v_match_prisma_rimi   WHERE score >= 0.72 AND score < 0.82;
+          CREATE VIEW v_pr_weak_055_072   AS SELECT * FROM v_match_prisma_rimi   WHERE score >= 0.55 AND score < 0.72;
+          CREATE VIEW v_sp_review_072_082 AS SELECT * FROM v_match_selver_prisma WHERE score >= 0.72 AND score < 0.82;
+          CREATE VIEW v_sp_weak_055_072   AS SELECT * FROM v_match_selver_prisma WHERE score >= 0.55 AND score < 0.72;
 
-          -- All products with one picked name per source
-          CREATE OR REPLACE VIEW v_all_products_rimi_selver_prisma_names AS
+          -- ---------- All products with one name per source
+          CREATE VIEW v_all_products_rimi_selver_prisma_names AS
           WITH
           rimi_one AS (
             SELECT m.product_id, rc.name AS rimi_name,
