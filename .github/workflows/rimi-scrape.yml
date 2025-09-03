@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       categories_multiline:
-        description: "Rimi category URLs (one per line). If omitted, we use the 15 SH-coded roots."
+        description: "Rimi category URLs (one per line). If omitted, we use the SH-coded roots."
         required: false
         default: ""
       page_limit:
@@ -24,8 +24,8 @@ on:
         required: false
         default: "0.25"
   schedule:
-    - cron: "0 2 * * *"       # nightly at 02:00 UTC
-    - cron: "17 */2 * * *"    # every 2 hours at :17 (UTC)
+    - cron: "17 */2 * * *"     # every 2 hours at :17 (UTC)
+    - cron: "0 23 * * *"       # ~02:00 Europe/Tallinn (UTC+3 in summer)
 
 concurrency:
   group: rimi-category-crawl
@@ -46,7 +46,7 @@ jobs:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/rimi_products.csv
       SHARD: ${{ matrix.shard }}
-      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}  # optional: DB steps run only if set
 
     steps:
       - name: Checkout
@@ -66,6 +66,7 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: Install deps (Playwright + libs)
+        shell: bash
         run: |
           set -euo pipefail
           pip install -r requirements-scraper.txt || pip install playwright beautifulsoup4 lxml pg8000 psycopg2-binary
@@ -75,10 +76,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [ ! -f scripts/rimi_crawl_categories_pw.py ]; then
-            echo "::error::scripts/rimi_crawl_categories_pw.py missing"
-            exit 1
-          end
+          test -f scripts/rimi_crawl_categories_pw.py || { echo "::error::scripts/rimi_crawl_categories_pw.py missing"; exit 1; }
           python -m py_compile scripts/rimi_crawl_categories_pw.py
           chmod +x scripts/rimi_crawl_categories_pw.py
 
@@ -103,22 +101,22 @@ jobs:
             cp -f data/rimi_categories.txt data/rimi_categories_all.txt
             echo "Using repo file data/rimi_categories.txt"
           else
-            printf '%s\n' \
-              "https://www.rimi.ee/epood/ee/tooted/puuviljad-koogiviljad-lilled/c/SH-12" \
-              "https://www.rimi.ee/epood/ee/tooted/talu-toidab/c/SH-19" \
-              "https://www.rimi.ee/epood/ee/tooted/piimatooted-munad-juust/c/SH-11" \
-              "https://www.rimi.ee/epood/ee/tooted/liha--ja-kalatooted/c/SH-8" \
-              "https://www.rimi.ee/epood/ee/tooted/vegantooted/c/SH-17" \
-              "https://www.rimi.ee/epood/ee/tooted/leivad-saiad-kondiitritooted/c/SH-6" \
-              "https://www.rimi.ee/epood/ee/tooted/valmistoit/c/SH-16" \
-              "https://www.rimi.ee/epood/ee/tooted/kauasailivad-toidukaubad/c/SH-13" \
-              "https://www.rimi.ee/epood/ee/tooted/maiustused-ja-snakid/c/SH-9" \
-              "https://www.rimi.ee/epood/ee/tooted/kulmutatud-toidukaubad/c/SH-4" \
-              "https://www.rimi.ee/epood/ee/tooted/joogid/c/SH-3" \
-              "https://www.rimi.ee/epood/ee/tooted/puhastusvahendid/c/SH-14" \
-              "https://www.rimi.ee/epood/ee/tooted/lastekaubad/c/SH-5" \
-              "https://www.rimi.ee/epood/ee/tooted/alkohol/c/SH-1" \
-              > data/rimi_categories_all.txt
+            cat > data/rimi_categories_all.txt <<'EOF'
+https://www.rimi.ee/epood/ee/tooted/puuviljad-koogiviljad-lilled/c/SH-12
+https://www.rimi.ee/epood/ee/tooted/talu-toidab/c/SH-19
+https://www.rimi.ee/epood/ee/tooted/piimatooted-munad-juust/c/SH-11
+https://www.rimi.ee/epood/ee/tooted/liha--ja-kalatooted/c/SH-8
+https://www.rimi.ee/epood/ee/tooted/vegantooted/c/SH-17
+https://www.rimi.ee/epood/ee/tooted/leivad-saiad-kondiitritooted/c/SH-6
+https://www.rimi.ee/epood/ee/tooted/valmistoit/c/SH-16
+https://www.rimi.ee/epood/ee/tooted/kauasailivad-toidukaubad/c/SH-13
+https://www.rimi.ee/epood/ee/tooted/maiustused-ja-snakid/c/SH-9
+https://www.rimi.ee/epood/ee/tooted/kulmutatud-toidukaubad/c/SH-4
+https://www.rimi.ee/epood/ee/tooted/joogid/c/SH-3
+https://www.rimi.ee/epood/ee/tooted/puhastusvahendid/c/SH-14
+https://www.rimi.ee/epood/ee/tooted/lastekaubad/c/SH-5
+https://www.rimi.ee/epood/ee/tooted/alkohol/c/SH-1
+EOF
             echo "Using built-in SH-coded category set."
           fi
 
@@ -156,9 +154,8 @@ jobs:
           UNION
           SELECT ext_id FROM priced_from_candidates
           ORDER BY 1;
-          SQL
-          echo "Skip list rows (already priced): $(wc -l < data/rimi_skip_ext_ids.txt)"
-          echo "$(wc -l < data/rimi_skip_ext_ids.txt)" > data/_skip_count.txt
+SQL
+          echo "Skip list rows (already priced): $(wc -l < data/rimi_skip_ext_ids.txt)" | tee data/_skip_count.txt
 
       - name: Crawl Rimi categories (Playwright)
         shell: bash
@@ -226,11 +223,20 @@ jobs:
         run: |
           set -euo pipefail
           if [ ! -s "$OUTPUT_CSV" ]; then
-            python -c "import csv,os; p=os.environ.get('OUTPUT_CSV','data/rimi_products.csv'); flds=['store_chain','store_name','store_channel','ext_id','ean_raw','sku_raw','name','size_text','brand','manufacturer','price','currency','image_url','category_path','category_leaf','source_url']; os.makedirs(os.path.dirname(p) or '.', exist_ok=True); f=open(p,'w',newline='',encoding='utf-8'); csv.DictWriter(f, fieldnames=flds).writeheader(); f.close(); print('Wrote header-only CSV ->', p)"
+            python - <<'PY'
+import csv, os
+p = os.environ.get('OUTPUT_CSV','data/rimi_products.csv')
+flds = ['store_chain','store_name','store_channel','ext_id','ean_raw','sku_raw','name','size_text','brand','manufacturer','price','currency','image_url','category_path','category_leaf','source_url']
+os.makedirs(os.path.dirname(p) or '.', exist_ok=True)
+with open(p, 'w', newline='', encoding='utf-8') as f:
+    csv.DictWriter(f, fieldnames=flds).writeheader()
+print('Wrote header-only CSV ->', p)
+PY
           fi
 
       - name: Dump crawler log (tail)
         if: always()
+        shell: bash
         run: |
           echo "----- last 200 lines of data/rimi_run.log -----"
           if [ -f data/rimi_run.log ]; then
@@ -263,6 +269,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
+      # ---------- OPTIONAL DB PART (only if DATABASE_URL is set) ----------
       - name: Install psql client
         if: ${{ env.DATABASE_URL != '' }}
         run: |
@@ -319,7 +326,7 @@ jobs:
             last_seen     timestamptz DEFAULT now()
           );
           COMMIT;
-          SQL
+SQL
 
       - name: Load CSV to DB (staging + candidates)
         if: ${{ env.DATABASE_URL != '' }}
@@ -331,7 +338,12 @@ jobs:
             exit 0
           fi
 
-          CSV_ABS="$(python -c 'import os; p=os.environ.get("OUTPUT_CSV","data/rimi_products.csv"); print(os.path.abspath(p))')"
+          CSV_ABS="$(python - <<'PY'
+import os
+p = os.environ.get("OUTPUT_CSV","data/rimi_products.csv")
+print(os.path.abspath(p))
+PY
+)"
           echo "CSV_ABS: $CSV_ABS"
           ls -l "$CSV_ABS" || true
 
@@ -424,7 +436,7 @@ jobs:
                 last_seen     = now();
 
           COMMIT;
-          SQL
+SQL
 
           sed -i "s|__CSV__|$CSV_ABS|g" /tmp/rimi_load.sql
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/rimi_load.sql
@@ -438,7 +450,7 @@ jobs:
           SELECT COUNT(*) AS candidates_total,
                  SUM(CASE WHEN price IS NULL OR price = 0 THEN 1 ELSE 0 END) AS zero_price
           FROM public.rimi_candidates;
-          SQL
+SQL
 
       - name: Adopt Rimi candidates with EANs (optional helpers)
         if: ${{ env.DATABASE_URL != '' }}
@@ -460,5 +472,5 @@ jobs:
             END IF;
           END
           $do$;
-          SQL
+SQL
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/adopt_rimi.sql
