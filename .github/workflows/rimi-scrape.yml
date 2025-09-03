@@ -101,22 +101,23 @@ jobs:
             cp -f data/rimi_categories.txt data/rimi_categories_all.txt
             echo "Using repo file data/rimi_categories.txt"
           else
-            cat > data/rimi_categories_all.txt <<'EOF'
-https://www.rimi.ee/epood/ee/tooted/puuviljad-koogiviljad-lilled/c/SH-12
-https://www.rimi.ee/epood/ee/tooted/talu-toidab/c/SH-19
-https://www.rimi.ee/epood/ee/tooted/piimatooted-munad-juust/c/SH-11
-https://www.rimi.ee/epood/ee/tooted/liha--ja-kalatooted/c/SH-8
-https://www.rimi.ee/epood/ee/tooted/vegantooted/c/SH-17
-https://www.rimi.ee/epood/ee/tooted/leivad-saiad-kondiitritooted/c/SH-6
-https://www.rimi.ee/epood/ee/tooted/valmistoit/c/SH-16
-https://www.rimi.ee/epood/ee/tooted/kauasailivad-toidukaubad/c/SH-13
-https://www.rimi.ee/epood/ee/tooted/maiustused-ja-snakid/c/SH-9
-https://www.rimi.ee/epood/ee/tooted/kulmutatud-toidukaubad/c/SH-4
-https://www.rimi.ee/epood/ee/tooted/joogid/c/SH-3
-https://www.rimi.ee/epood/ee/tooted/puhastusvahendid/c/SH-14
-https://www.rimi.ee/epood/ee/tooted/lastekaubad/c/SH-5
-https://www.rimi.ee/epood/ee/tooted/alkohol/c/SH-1
-EOF
+            # Built-in set: SH-coded root categories (safe without heredoc)
+            printf '%s\n' \
+              "https://www.rimi.ee/epood/ee/tooted/puuviljad-koogiviljad-lilled/c/SH-12" \
+              "https://www.rimi.ee/epood/ee/tooted/talu-toidab/c/SH-19" \
+              "https://www.rimi.ee/epood/ee/tooted/piimatooted-munad-juust/c/SH-11" \
+              "https://www.rimi.ee/epood/ee/tooted/liha--ja-kalatooted/c/SH-8" \
+              "https://www.rimi.ee/epood/ee/tooted/vegantooted/c/SH-17" \
+              "https://www.rimi.ee/epood/ee/tooted/leivad-saiad-kondiitritooted/c/SH-6" \
+              "https://www.rimi.ee/epood/ee/tooted/valmistoit/c/SH-16" \
+              "https://www.rimi.ee/epood/ee/tooted/kauasailivad-toidukaubad/c/SH-13" \
+              "https://www.rimi.ee/epood/ee/tooted/maiustused-ja-snakid/c/SH-9" \
+              "https://www.rimi.ee/epood/ee/tooted/kulmutatud-toidukaubad/c/SH-4" \
+              "https://www.rimi.ee/epood/ee/tooted/joogid/c/SH-3" \
+              "https://www.rimi.ee/epood/ee/tooted/puhastusvahendid/c/SH-14" \
+              "https://www.rimi.ee/epood/ee/tooted/lastekaubad/c/SH-5" \
+              "https://www.rimi.ee/epood/ee/tooted/alkohol/c/SH-1" \
+              > data/rimi_categories_all.txt
             echo "Using built-in SH-coded category set."
           fi
 
@@ -159,11 +160,11 @@ SQL
       - name: Crawl Rimi categories (Playwright)
         shell: bash
         env:
-            REQ_DELAY: ${{ github.event.inputs.req_delay }}
-            PAGE_LIMIT: ${{ github.event.inputs.page_limit }}
-            MAX_PRODUCTS: ${{ github.event.inputs.max_products }}
-            HEADLESS: ${{ github.event.inputs.headless }}
-            SKIP_EXT_FILE: data/rimi_skip_ext_ids.txt
+          REQ_DELAY: ${{ github.event.inputs.req_delay }}
+          PAGE_LIMIT: ${{ github.event.inputs.page_limit }}
+          MAX_PRODUCTS: ${{ github.event.inputs.max_products }}
+          HEADLESS: ${{ github.event.inputs.headless }}
+          SKIP_EXT_FILE: data/rimi_skip_ext_ids.txt
         run: |
           set -euo pipefail
           echo "::group::Runtime info"
