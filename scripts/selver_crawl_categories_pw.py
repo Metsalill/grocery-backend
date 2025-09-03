@@ -4,21 +4,20 @@
 """
 Selver category crawler → CSV (staging_selver_products)
 
-Patch: robust EAN (Ribakood) + SKU extraction from PDP DOM
-- Finds "Ribakood" value even when it's rendered in a spec row (not in JSON-LD).
-- Falls back through several DOM strategies before giving up.
-- Keeps previous logic (JSON-LD, itemprops) as first attempts.
+Adds robust **brand** extraction in addition to the EAN/SKU hardening:
+- JSON-LD: product.brand / manufacturer (string or object)
+- itemprop/meta: brand/manufacturer
+- DOM spec rows: "Bränd", "Tootja", "Kaubamärk", "Brand"
+- Fallback: first capitalized token from H1 if all else fails
 
-Additional hardening in this version:
-- Silences SPA pageerrors (e.g. parentSku exceptions) so they don't interrupt the run.
-- Keeps console noise minimal; honors LOG_CONSOLE=0|warn|all.
-- Retries navigation once in safe_goto() on transient failures.
-- NEW: add_init_script() stubs analytics and swallows unhandled SPA exceptions.
-- NEW: more resilient _wait_pdp_ready() so we proceed when any product signal appears.
-- NEW: keep row even if price widget fails (price=0.00); price can backfill later.
+Also includes:
+- resilient EAN (Ribakood) + SKU extraction
+- SPA noise suppression, request routing and small navigation retries
+- proceeds even if price widget fails (price=0.00)
 
 CSV columns written:
-  ext_id, source_url, name, ean_raw, ean_norm, sku_raw, size_text, price, currency, category_path, category_leaf
+  ext_id, source_url, name, brand, ean_raw, ean_norm, sku_raw,
+  size_text, price, currency, category_path, category_leaf
 """
 
 from __future__ import annotations
@@ -184,29 +183,21 @@ def _valid_ean13(code: str) -> bool:
     chk = (10 - ((s_odd + s_even) % 10)) % 10
     return chk == int(code[-1])
 
-# NEW: normalize to 8 or 13 digits when possible
+# normalize to 8/13 when possible
 def normalize_ean_digits(e: str) -> str:
     d = _digits(e)
     if len(d) in (8, 13):
         return d
-    # occasional 14-digit forms like "0"+EAN13
     if len(d) == 14 and d[0] in ("0", "1"):
         return d[1:]
-    # occasional 12-digit UPC; if it validates as EAN13 with leading 0, keep it
     if len(d) == 12 and _valid_ean13("0" + d):
         return "0" + d
     return ""
 
-# --- NEW: very robust DOM search for "Ribakood" / EAN and SKU ----------------
+# --- Very robust DOM search for "Ribakood" / EAN and SKU ----------------
 def _ean_sku_from_dom(page) -> tuple[str, str]:
-    """
-    Heuristically locate 'Ribakood' value (EAN) and SKU shown in PDP specs,
-    regardless of exact HTML structure.
-    """
     ean = ""
     sku = ""
-
-    # 1) Target typical key-value rows (tr/td, dl/dt/dd, generic rows)
     try:
         got = page.evaluate(
             """
@@ -218,7 +209,7 @@ def _ean_sku_from_dom(page) -> tuple[str, str]:
               };
 
               const nodes = Array.from(document.querySelectorAll(
-                'tr, .row, .product-attributes__row, .product-details__row, li, .attribute, .key-value, dl, dt, dd, .MuiGrid-root'
+                'tr, .row, .product-attributes__row, .product-details__row, li, .attribute, .key-value, dl, dt, dd, .MuiGrid-root, div, span, p, th, td'
               ));
 
               let ean=null, sku=null;
@@ -227,13 +218,11 @@ def _ean_sku_from_dom(page) -> tuple[str, str]:
                 const txt = (row.textContent||'').replace(/\\s+/g,' ').trim();
                 if (!txt) continue;
 
-                // EAN (Ribakood)
                 if (!ean && /\\bribakood\\b/i.test(txt)) {
                   const d = pickDigits(txt);
                   if (d) ean = d;
                 }
 
-                // SKU / Tootekood
                 if (!sku && /(\\bSKU\\b|\\bTootekood\\b|\\bArtikkel\\b)/i.test(txt)) {
                   const m = txt.match(/([A-Z0-9_-]{6,})/i);
                   if (m) sku = m[1];
@@ -263,7 +252,6 @@ def _ean_sku_from_dom(page) -> tuple[str, str]:
     except Exception:
         pass
 
-    # 2) Last resort: regex over full HTML
     if not ean:
         try:
             html = page.content()
@@ -273,7 +261,6 @@ def _ean_sku_from_dom(page) -> tuple[str, str]:
         except Exception:
             pass
 
-    # Normalize & validate
     e13 = _digits(ean)
     if _valid_ean13(e13):
         ean = e13
@@ -282,14 +269,99 @@ def _ean_sku_from_dom(page) -> tuple[str, str]:
             ean = ""
 
     return ean, (sku or "")
-# ---------------------------------------------------------------------------
 
 def _pick_ean_from_html(html: str) -> str:
-    # (kept for completeness; new _ean_sku_from_dom supersedes this)
     if not html: return ""
     label_pat = re.compile(r"(?:\b(?:ean|gtin|ribakood|triipkood|barcode)\b)[^0-9]{0,200}([0-9]{8,14})", re.I | re.S)
     m = label_pat.search(html)
     return m.group(1) if m else ""
+
+# ---------------------------------------------------------------------------
+# Brand helpers
+_BRAND_KEY_RE = re.compile(r"\b(bränd|brand|tootja|kaubamärk)\b", re.I)
+
+def _extract_brand_from_dom_texts(texts: List[str]) -> str:
+    for t in texts:
+        if not t or len(t) < 3:
+            continue
+        if _BRAND_KEY_RE.search(t):
+            # Try to pull the value after the key
+            m = re.split(_BRAND_KEY_RE, t, maxsplit=1, flags=re.I)
+            # If split failed, still try colon split
+            if isinstance(m, list) and len(m) >= 3:
+                tail = t[m[0].__len__():].split(":")[-1]
+            else:
+                parts = re.split(r":|-", t, maxsplit=1)
+                tail = parts[1] if len(parts) == 2 else ""
+            cand = normspace(tail)
+            if cand:
+                # Cut off if other keys appear in the same line
+                cand = re.split(r"\b(Ribakood|SKU|Tootekood|Artikkel)\b", cand, maxsplit=1, flags=re.I)[0].strip()
+                if 2 <= len(cand) <= 80:
+                    return cand
+    return ""
+
+def extract_brand(page, prod_ld: dict) -> str:
+    # 1) JSON-LD brand/manufacturer
+    if prod_ld:
+        b = prod_ld.get("brand") or prod_ld.get("manufacturer")
+        if isinstance(b, dict):
+            name = normspace(str(b.get("name") or ""))
+            if name:
+                return name
+        elif isinstance(b, str):
+            name = normspace(b)
+            if name:
+                return name
+
+    # 2) itemprop/meta brand/manufacturer
+    try:
+        got = page.evaluate("""
+        () => {
+          const sel = [
+            '[itemprop="brand"]','meta[itemprop="brand"]',
+            '[itemprop="manufacturer"]','meta[itemprop="manufacturer"]'
+          ];
+          for (const s of sel) {
+            const el = document.querySelector(s);
+            if (!el) continue;
+            const v = el.getAttribute('content') || el.textContent || '';
+            if (v && v.trim().length > 1) return v.trim();
+          }
+          return null;
+        }
+        """)
+        if got:
+            name = normspace(str(got))
+            if name:
+                return name
+    except Exception:
+        pass
+
+    # 3) Generic spec rows: look for "Bränd|Tootja|Kaubamärk|Brand"
+    try:
+        texts: List[str] = page.evaluate("""
+          () => [...document.querySelectorAll('tr, .row, li, .attribute, .product-attributes__row, .MuiGrid-root, dd, dt, div, span, p, th, td')]
+                .map(n => (n.textContent || '').replace(/\\s+/g,' ').trim())
+                .filter(Boolean)
+        """)
+    except Exception:
+        texts = []
+    brand = _extract_brand_from_dom_texts(texts)
+    if brand:
+        return brand
+
+    # 4) Fallback: first word from H1 (best-effort)
+    try:
+        title = normspace(page.locator("h1").first.inner_text())
+    except Exception:
+        title = ""
+    if title:
+        tok = title.split()[0]
+        if tok and tok.isalpha() and 2 <= len(tok) <= 20:
+            return tok
+
+    return ""
 
 # ---------------------------------------------------------------------------
 # DB preload
@@ -345,17 +417,14 @@ def preload_ext_ids_from_db() -> Set[str]:
             u = _clean_abs(raw)
             if u: known.add(u)
         try:
-            cur.close()
-            conn.close()
+            cur.close(); conn.close()
         except Exception:
             pass
         print(f"[selver] preloaded {len(known)} known ext_ids from DB (driver={driver})")
     except Exception as e:
         print(f"[selver] DB preload query failed: {type(e).__name__}: {e}")
-        try:
-            conn.close()
-        except Exception:
-            pass
+        try: conn.close()
+        except Exception: pass
     return known
 
 # ---------------------------------------------------------------------------
@@ -375,7 +444,6 @@ def accept_cookies(page):
             pass
 
 def safe_goto(page, url: str, timeout: Optional[int] = None) -> bool:
-    """Navigate with one retry; let SPA settle."""
     tmo = timeout or NAV_TIMEOUT_MS
     for attempt in (1, 2):
         try:
@@ -389,7 +457,7 @@ def safe_goto(page, url: str, timeout: Optional[int] = None) -> bool:
             return True
         except Exception as e:
             if attempt == 1:
-                time.sleep(0.6)  # small backoff
+                time.sleep(0.6)
                 continue
             print(f"[selver] NAV FAIL {url} -> {type(e).__name__}: {e}")
             return False
@@ -405,7 +473,6 @@ def _wait_listing_ready(page):
     except Exception:
         pass
 
-# NEW: more resilient PDP readiness (accept any strong product signal)
 def _wait_pdp_ready(page):
     for _ in range(36):
         try:
@@ -436,7 +503,6 @@ def _expand_pdp_details(page):
             pass
 
 # ---------------------------------------------------------------------------
-# Category discovery
 def _extract_category_links(page) -> List[str]:
     _wait_listing_ready(page)
     try:
@@ -478,7 +544,6 @@ def discover_categories(page, start_urls: List[str]) -> List[str]:
     return out
 
 # ---------------------------------------------------------------------------
-# Listing → product links
 def _with_page(url: str, n: int) -> str:
     parts = urlsplit(url)
     qs = parse_qs(parts.query)
@@ -587,7 +652,6 @@ def collect_product_links_from_listing(page, seed_url: str, seen_ext_ids: Set[st
     return links, link2listing
 
 # ---------------------------------------------------------------------------
-# JSON-LD helpers for PDPs
 def jsonld_all(page) -> List[dict]:
     out = []
     try:
@@ -608,7 +672,7 @@ def jsonld_pick_product(blocks: List[dict]) -> dict:
     for b in blocks:
         t = (b.get("@type") or "")
         t_low = t.lower() if isinstance(t, str) else ""
-        if "product" in t_low or any(k in b for k in ("gtin13","gtin","sku")):
+        if "product" in t_low or any(k in b for k in ("gtin13","gtin","sku","brand")):
             return b
     return {}
 
@@ -625,7 +689,6 @@ def jsonld_pick_breadcrumbs(blocks: List[dict]) -> List[str]:
     return []
 
 # ---------------------------------------------------------------------------
-# PDP extraction
 def extract_price(page) -> tuple[float, str]:
     for sel in ["text=/€/","span:has-text('€')","div:has-text('€')"]:
         try:
@@ -638,7 +701,7 @@ def extract_price(page) -> tuple[float, str]:
     return 0.0, "EUR"
 
 def extract_ean_and_sku(page) -> tuple[str, str]:
-    # 1) JSON-LD quick win
+    # 1) JSON-LD
     try:
         blocks = jsonld_all(page)
         prod = jsonld_pick_product(blocks)
@@ -650,7 +713,7 @@ def extract_ean_and_sku(page) -> tuple[str, str]:
     except Exception:
         pass
 
-    # 2) itemprop-based hints
+    # 2) itemprop
     try:
         got = page.evaluate("""
         () => {
@@ -674,12 +737,12 @@ def extract_ean_and_sku(page) -> tuple[str, str]:
     except Exception:
         pass
 
-    # 3) NEW: strong DOM heuristic for 'Ribakood' + SKU
+    # 3) DOM heuristic
     e_dom, s_dom = _ean_sku_from_dom(page)
     if e_dom or s_dom:
         return e_dom, s_dom
 
-    # 4) Final HTML regex scan
+    # 4) HTML regex
     try:
         html = page.content()
         e_html = _pick_ean_from_html(html)
@@ -718,7 +781,10 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
         except Exception: name = ""
     if not name: return None
 
-    # EAN & SKU (with strong DOM fallback)
+    # Brand
+    brand = extract_brand(page, prod_ld)
+
+    # EAN & SKU
     ean, sku = "", ""
     if prod_ld:
         ean = _digits(str(prod_ld.get("gtin13") or prod_ld.get("gtin") or "")) or ""
@@ -738,7 +804,6 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
     if price == 0.0:
         price, currency = extract_price(page)
 
-    # NEW: keep the row even if price didn’t render yet (will backfill later)
     if not price or price <= 0:
         price, currency = 0.0, currency or "EUR"
 
@@ -746,14 +811,14 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
     cat_path = " / ".join(crumbs); cat_leaf = crumbs[-1] if crumbs else ""
     size_text = guess_size_from_title(name)
 
-    # NEW: provide normalized digits EAN and explicit source_url for SQL mapping
     ean_norm = normalize_ean_digits(ean)
-    src_url  = ext_id  # canonical PDP URL
+    src_url  = ext_id
 
     return {
         "ext_id": ext_id,
         "source_url": src_url,
         "name": name,
+        "brand": brand,
         "ean_raw": ean,
         "ean_norm": ean_norm,
         "sku_raw": sku,
@@ -765,7 +830,6 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
     }
 
 # ---------------------------------------------------------------------------
-# Request router
 BLOCK_TYPES = {"image", "font", "media", "stylesheet", "websocket", "manifest"}
 BLOCK_ACTIVE_TYPES = {"script", "xhr", "fetch", "eventsource"}
 
@@ -785,7 +849,6 @@ def _router(route, request):
         return route.continue_()
 
 # ---------------------------------------------------------------------------
-# Click-through helpers
 def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
     if not listing_url or not safe_goto(page, listing_url): return False
     _wait_listing_ready(page); time.sleep(0.2)
@@ -807,7 +870,6 @@ def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
     return False
 
 # ---------------------------------------------------------------------------
-# Click mode (navigate to hrefs, click only as fallback)
 def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_ext_ids: Set[str]) -> int:
     wrote = 0
     if not safe_goto(page, seed_url): return 0
@@ -857,7 +919,7 @@ def crawl():
     print(f"[selver] writing CSV -> {OUTPUT}")
     with open(OUTPUT, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=[
-            "ext_id","source_url","name","ean_raw","ean_norm","sku_raw",
+            "ext_id","source_url","name","brand","ean_raw","ean_norm","sku_raw",
             "size_text","price","currency","category_path","category_leaf"
         ])
         w.writeheader()
@@ -880,12 +942,10 @@ def crawl():
                 service_workers="block",
             )
 
-            # NEW: neutralize site JS flakiness & swallow unhandled SPA exceptions early
             context.add_init_script("""
               (function(){
                 try { window.fbq = window.fbq || function(){}; } catch(e){}
                 try { window.dataLayer = window.dataLayer || []; } catch(e){}
-                // Prevent site errors from breaking render/flow
                 window.addEventListener('error',  function(e){ try{ e.stopImmediatePropagation&&e.stopImmediatePropagation(); }catch(_){} }, true);
                 window.addEventListener('unhandledrejection', function(e){ try{ e.preventDefault&&e.preventDefault(); }catch(_){} }, true);
               })();
@@ -898,7 +958,6 @@ def crawl():
             page.set_default_navigation_timeout(NAV_TIMEOUT_MS)
             page.set_default_timeout(10000)
 
-            # Silence SPA page errors and requestfailed noise
             page.on("pageerror", lambda e: None)
             page.on("requestfailed", lambda r: None)
 
@@ -910,7 +969,6 @@ def crawl():
                         t = (m.text or "").replace("\n"," ")[:800]
                         print(f"[pw] {m.type}: {t}")
                 page.on("console", _warn_err_only)
-            # LOG_CONSOLE == "0" → no console handler
 
             print("[selver] collecting seeds…")
             file_seeds: List[str] = []
