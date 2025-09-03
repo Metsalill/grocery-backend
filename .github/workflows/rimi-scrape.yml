@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       categories_multiline:
-        description: "Rimi category URLs (one per line). If omitted, SH-coded roots are used."
+        description: "Rimi category URLs (one per line). If omitted, we use the SH-coded roots."
         required: false
         default: ""
       page_limit:
@@ -24,8 +24,8 @@ on:
         required: false
         default: "0.25"
   schedule:
-    - cron: "17 */2 * * *"   # every 2 hours at :17 (UTC)
-    - cron: "0 23 * * *"     # ~02:00 Europe/Tallinn
+    - cron: "17 */2 * * *"  # every 2 hours at :17 (UTC)
+    - cron: "0 2 * * *"     # nightly at 02:00 UTC
 
 concurrency:
   group: rimi-category-crawl
@@ -40,7 +40,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3]
+        shard: [0, 1, 2, 3]   # 4-way sharding
 
     env:
       PYTHONUNBUFFERED: "1"
@@ -66,7 +66,6 @@ jobs:
             ${{ runner.os }}-pip-
 
       - name: Install deps (Playwright + libs)
-        shell: bash
         run: |
           set -euo pipefail
           pip install -r requirements-scraper.txt || pip install playwright beautifulsoup4 lxml pg8000 psycopg2-binary
@@ -76,7 +75,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f scripts/rimi_crawl_categories_pw.py || { echo "::error::scripts/rimi_crawl_categories_pw.py missing"; exit 1; }
+          if [ ! -f scripts/rimi_crawl_categories_pw.py ]; then
+            echo "::error::scripts/rimi_crawl_categories_pw.py missing"
+            exit 1
+          fi
           python -m py_compile scripts/rimi_crawl_categories_pw.py
           chmod +x scripts/rimi_crawl_categories_pw.py
 
@@ -96,12 +98,11 @@ jobs:
           if [ -n "${{ github.event.inputs.categories_multiline }}" ]; then
             printf "%s\n" "${{ github.event.inputs.categories_multiline }}" \
               | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/rimi_categories_all.txt
-            echo "Using categories from workflow input."
+            echo "Using categories from input."
           elif [ -f data/rimi_categories.txt ]; then
             cp -f data/rimi_categories.txt data/rimi_categories_all.txt
             echo "Using repo file data/rimi_categories.txt"
           else
-            # Built-in set: SH-coded root categories (safe without heredoc)
             printf '%s\n' \
               "https://www.rimi.ee/epood/ee/tooted/puuviljad-koogiviljad-lilled/c/SH-12" \
               "https://www.rimi.ee/epood/ee/tooted/talu-toidab/c/SH-19" \
@@ -128,34 +129,36 @@ jobs:
           echo "TOTAL categories: $(wc -l < data/rimi_categories_all.txt)"
           echo "Sharding: SHARD=$SHARD / SHARDS=$SHARDS"
           echo "Slice count: $(wc -l < data/rimi_categories.txt)"
+          echo "First 12 from slice:"
           nl -ba data/rimi_categories.txt | sed -n '1,12p' || true
 
-      - name: Build skip list from priced items
+      - name: Build skip list from priced items (prices ∪ rimi_candidates)
         if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
           set -euo pipefail
           : > data/rimi_skip_ext_ids.txt
           psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/rimi_skip_ext_ids.txt
-WITH priced_from_prices AS (
-  SELECT DISTINCT (regexp_match(p.source_url, '/p/([0-9]+)'))[1] AS ext_id
-  FROM public.prices p
-  JOIN public.stores s ON s.id = p.store_id
-  WHERE s.chain='Rimi' AND s.is_online = TRUE
-    AND p.source_url ~ '/p/[0-9]+'
-),
-priced_from_candidates AS (
-  SELECT DISTINCT ext_id::text
-  FROM public.rimi_candidates
-  WHERE COALESCE(price,0) > 0
-    AND COALESCE(ext_id,'') <> ''
-)
-SELECT ext_id FROM priced_from_prices
-UNION
-SELECT ext_id FROM priced_from_candidates
-ORDER BY 1;
-SQL
-          echo "Skip list rows (already priced): $(wc -l < data/rimi_skip_ext_ids.txt)" | tee data/_skip_count.txt
+          WITH priced_from_prices AS (
+            SELECT DISTINCT (regexp_match(p.source_url, '/p/([0-9]+)'))[1] AS ext_id
+            FROM public.prices p
+            JOIN public.stores s ON s.id = p.store_id
+            WHERE s.chain='Rimi' AND s.is_online = TRUE
+              AND p.source_url ~ '/p/[0-9]+'
+          ),
+          priced_from_candidates AS (
+            SELECT DISTINCT ext_id::text
+            FROM public.rimi_candidates
+            WHERE COALESCE(price,0) > 0
+              AND COALESCE(ext_id,'') <> ''
+          )
+          SELECT ext_id FROM priced_from_prices
+          UNION
+          SELECT ext_id FROM priced_from_candidates
+          ORDER BY 1;
+          SQL
+          echo "Skip list rows (already priced): $(wc -l < data/rimi_skip_ext_ids.txt)"
+          echo "$(wc -l < data/rimi_skip_ext_ids.txt)" > data/_skip_count.txt
 
       - name: Crawl Rimi categories (Playwright)
         shell: bash
@@ -204,8 +207,7 @@ SQL
           echo "::group::Crawler outputs"
           ls -lah data || true
           if [ -f "$OUTPUT_CSV" ]; then
-            echo "CSV lines:"; wc -l "$OUTPUT_CSV"
-            du -h "$OUTPUT_CSV"
+            echo "CSV size:"; wc -l "$OUTPUT_CSV"; du -h "$OUTPUT_CSV"
           else
             echo "CSV not found"
           fi
@@ -224,20 +226,11 @@ SQL
         run: |
           set -euo pipefail
           if [ ! -s "$OUTPUT_CSV" ]; then
-            python - <<'PY'
-import csv, os
-p = os.environ.get('OUTPUT_CSV','data/rimi_products.csv')
-flds = ['store_chain','store_name','store_channel','ext_id','ean_raw','sku_raw','name','size_text','brand','manufacturer','price','currency','image_url','category_path','category_leaf','source_url']
-os.makedirs(os.path.dirname(p) or '.', exist_ok=True)
-with open(p, 'w', newline='', encoding='utf-8') as f:
-    csv.DictWriter(f, fieldnames=flds).writeheader()
-print('Wrote header-only CSV ->', p)
-PY
+            python -c "import csv,os; p=os.environ.get('OUTPUT_CSV','data/rimi_products.csv'); flds=['store_chain','store_name','store_channel','ext_id','ean_raw','sku_raw','name','size_text','brand','manufacturer','price','currency','image_url','category_path','category_leaf','source_url']; os.makedirs(os.path.dirname(p) or '.', exist_ok=True); f=open(p,'w',newline='',encoding='utf-8'); csv.DictWriter(f, fieldnames=flds).writeheader(); f.close(); print('Wrote header-only CSV ->', p)"
           fi
 
       - name: Dump crawler log (tail)
         if: always()
-        shell: bash
         run: |
           echo "----- last 200 lines of data/rimi_run.log -----"
           if [ -f data/rimi_run.log ]; then
@@ -290,43 +283,43 @@ PY
         run: |
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-BEGIN;
-CREATE TABLE IF NOT EXISTS public.staging_rimi_products (
-  ext_id        text PRIMARY KEY,
-  name          text NOT NULL,
-  ean_raw       text,
-  sku_raw       text,
-  ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '[^0-9]', '', 'g')) STORED,
-  size_text     text,
-  brand         text,
-  price         numeric(12,2),
-  currency      text DEFAULT 'EUR',
-  category_path text,
-  category_leaf text,
-  collected_at  timestamptz DEFAULT now()
-);
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
-CREATE INDEX IF NOT EXISTS ix_rimi_ean       ON public.staging_rimi_products (ean_norm);
-CREATE INDEX IF NOT EXISTS ix_rimi_name_trgm ON public.staging_rimi_products USING gin (name gin_trgm_ops);
-INSERT INTO public.stores (name, chain, is_online)
-SELECT 'Rimi ePood', 'Rimi', TRUE
-WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE chain='Rimi' AND is_online=TRUE);
-CREATE TABLE IF NOT EXISTS public.rimi_candidates (
-  ext_id        text PRIMARY KEY,
-  ean_norm      text,
-  ean_raw       text,
-  sku_raw       text,
-  name          text,
-  size_text     text,
-  brand         text,
-  price         numeric(12,2),
-  currency      text,
-  category_path text,
-  category_leaf text,
-  last_seen     timestamptz DEFAULT now()
-);
-COMMIT;
-SQL
+          BEGIN;
+          CREATE TABLE IF NOT EXISTS public.staging_rimi_products (
+            ext_id        text PRIMARY KEY,
+            name          text NOT NULL,
+            ean_raw       text,
+            sku_raw       text,
+            ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '[^0-9]', '', 'g')) STORED,
+            size_text     text,
+            brand         text,
+            price         numeric(12,2),
+            currency      text DEFAULT 'EUR',
+            category_path text,
+            category_leaf text,
+            collected_at  timestamptz DEFAULT now()
+          );
+          CREATE EXTENSION IF NOT EXISTS pg_trgm;
+          CREATE INDEX IF NOT EXISTS ix_rimi_ean       ON public.staging_rimi_products (ean_norm);
+          CREATE INDEX IF NOT EXISTS ix_rimi_name_trgm ON public.staging_rimi_products USING gin (name gin_trgm_ops);
+          INSERT INTO public.stores (name, chain, is_online)
+          SELECT 'Rimi ePood', 'Rimi', TRUE
+          WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE chain='Rimi' AND is_online=TRUE);
+          CREATE TABLE IF NOT EXISTS public.rimi_candidates (
+            ext_id        text PRIMARY KEY,
+            ean_norm      text,
+            ean_raw       text,
+            sku_raw       text,
+            name          text,
+            size_text     text,
+            brand         text,
+            price         numeric(12,2),
+            currency      text,
+            category_path text,
+            category_leaf text,
+            last_seen     timestamptz DEFAULT now()
+          );
+          COMMIT;
+          SQL
 
       - name: Load CSV to DB (staging + candidates)
         if: ${{ env.DATABASE_URL != '' }}
@@ -338,105 +331,100 @@ SQL
             exit 0
           fi
 
-          CSV_ABS="$(python - <<'PY'
-import os
-p = os.environ.get("OUTPUT_CSV","data/rimi_products.csv")
-print(os.path.abspath(p))
-PY
-)"
+          CSV_ABS="$(python -c 'import os; p=os.environ.get("OUTPUT_CSV","data/rimi_products.csv"); print(os.path.abspath(p))')"
           echo "CSV_ABS: $CSV_ABS"
           ls -l "$CSV_ABS" || true
 
           cat > /tmp/rimi_load.sql <<'SQL'
-\set ON_ERROR_STOP on
-BEGIN;
+          \set ON_ERROR_STOP on
+          BEGIN;
 
-CREATE TEMP TABLE tmp_rimi_csv_full (
-  store_chain   text,
-  store_name    text,
-  store_channel text,
-  ext_id        text,
-  ean_raw       text,
-  sku_raw       text,
-  name          text,
-  size_text     text,
-  brand         text,
-  manufacturer  text,
-  price         text,
-  currency      text,
-  image_url     text,
-  category_path text,
-  category_leaf text,
-  source_url    text
-);
+          CREATE TEMP TABLE tmp_rimi_csv_full (
+            store_chain   text,
+            store_name    text,
+            store_channel text,
+            ext_id        text,
+            ean_raw       text,
+            sku_raw       text,
+            name          text,
+            size_text     text,
+            brand         text,
+            manufacturer  text,
+            price         text,
+            currency      text,
+            image_url     text,
+            category_path text,
+            category_leaf text,
+            source_url    text
+          );
 
-\copy tmp_rimi_csv_full FROM '__CSV__' CSV HEADER
+          \copy tmp_rimi_csv_full FROM '__CSV__' CSV HEADER
 
-CREATE TEMP TABLE tmp_staging_rimi_products (
-  ext_id        text PRIMARY KEY,
-  name          text NOT NULL,
-  ean_raw       text,
-  sku_raw       text,
-  ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '[^0-9]+', '', 'g')) STORED,
-  size_text     text,
-  brand         text,
-  price         numeric(12,2),
-  currency      text DEFAULT 'EUR',
-  category_path text,
-  category_leaf text,
-  collected_at  timestamptz DEFAULT now()
-);
+          CREATE TEMP TABLE tmp_staging_rimi_products (
+            ext_id        text PRIMARY KEY,
+            name          text NOT NULL,
+            ean_raw       text,
+            sku_raw       text,
+            ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '[^0-9]+', '', 'g')) STORED,
+            size_text     text,
+            brand         text,
+            price         numeric(12,2),
+            currency      text DEFAULT 'EUR',
+            category_path text,
+            category_leaf text,
+            collected_at  timestamptz DEFAULT now()
+          );
 
-INSERT INTO tmp_staging_rimi_products
-  (ext_id,name,ean_raw,sku_raw,size_text,brand,price,currency,category_path,category_leaf)
-SELECT
-  ext_id,
-  name,
-  ean_raw,
-  sku_raw,
-  size_text,
-  brand,
-  NULLIF(price,'')::numeric,
-  currency,
-  category_path,
-  category_leaf
-FROM tmp_rimi_csv_full
-WHERE COALESCE(ext_id,'') <> '';
+          INSERT INTO tmp_staging_rimi_products
+            (ext_id,name,ean_raw,sku_raw,size_text,brand,price,currency,category_path,category_leaf)
+          SELECT
+            ext_id,
+            name,
+            ean_raw,
+            sku_raw,
+            size_text,
+            brand,
+            NULLIF(price,'')::numeric,
+            currency,
+            category_path,
+            category_leaf
+          FROM tmp_rimi_csv_full
+          WHERE COALESCE(ext_id,'') <> '';
 
-INSERT INTO public.staging_rimi_products
-  (ext_id,name,ean_raw,sku_raw,size_text,brand,price,currency,category_path,category_leaf,collected_at)
-SELECT ext_id,name,ean_raw,sku_raw,size_text,brand,price,currency,category_path,category_leaf,now()
-FROM tmp_staging_rimi_products
-ON CONFLICT (ext_id) DO UPDATE
-  SET name          = EXCLUDED.name,
-      ean_raw       = EXCLUDED.ean_raw,
-      sku_raw       = EXCLUDED.sku_raw,
-      size_text     = COALESCE(EXCLUDED.size_text, public.staging_rimi_products.size_text),
-      brand         = COALESCE(EXCLUDED.brand, public.staging_rimi_products.brand),
-      price         = EXCLUDED.price,
-      currency      = EXCLUDED.currency,
-      category_path = COALESCE(EXCLUDED.category_path, public.staging_rimi_products.category_path),
-      category_leaf = COALESCE(EXCLUDED.category_leaf, public.staging_rimi_products.category_leaf),
-      collected_at  = now();
+          INSERT INTO public.staging_rimi_products
+            (ext_id,name,ean_raw,sku_raw,size_text,brand,price,currency,category_path,category_leaf,collected_at)
+          SELECT ext_id,name,ean_raw,sku_raw,size_text,brand,price,currency,category_path,category_leaf,now()
+          FROM tmp_staging_rimi_products
+          ON CONFLICT (ext_id) DO UPDATE
+            SET name          = EXCLUDED.name,
+                ean_raw       = EXCLUDED.ean_raw,
+                sku_raw       = EXCLUDED.sku_raw,
+                size_text     = COALESCE(EXCLUDED.size_text, public.staging_rimi_products.size_text),
+                brand         = COALESCE(EXCLUDED.brand, public.staging_rimi_products.brand),
+                price         = EXCLUDED.price,
+                currency      = EXCLUDED.currency,
+                category_path = COALESCE(EXCLUDED.category_path, public.staging_rimi_products.category_path),
+                category_leaf = COALESCE(EXCLUDED.category_leaf, public.staging_rimi_products.category_leaf),
+                collected_at  = now();
 
-INSERT INTO public.rimi_candidates
-  (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, price, currency, category_path, category_leaf, last_seen)
-SELECT
-  s.ext_id, s.ean_norm, s.ean_raw, s.sku_raw, s.name, s.size_text, s.brand, s.price, s.currency, s.category_path, s.category_leaf, now()
-FROM tmp_staging_rimi_products s
-ON CONFLICT (ext_id) DO UPDATE
-  SET price         = EXCLUDED.price,
-      currency      = EXCLUDED.currency,
-      size_text     = CASE WHEN COALESCE(EXCLUDED.size_text,'') <> '' THEN EXCLUDED.size_text ELSE public.rimi_candidates.size_text END,
-      brand         = CASE WHEN COALESCE(EXCLUDED.brand,'')     <> '' THEN EXCLUDED.brand     ELSE public.rimi_candidates.brand     END,
-      category_path = CASE WHEN COALESCE(EXCLUDED.category_path,'') <> '' THEN EXCLUDED.category_path ELSE public.rimi_candidates.category_path END,
-      category_leaf = CASE WHEN COALESCE(EXCLUDED.category_leaf,'') <> '' THEN EXCLUDED.category_leaf ELSE public.rimi_candidates.category_leaf END,
-      ean_raw       = CASE WHEN COALESCE(EXCLUDED.ean_raw,'')       <> '' THEN EXCLUDED.ean_raw       ELSE public.rimi_candidates.ean_raw       END,
-      sku_raw       = CASE WHEN COALESCE(EXCLUDED.sku_raw,'')       <> '' THEN EXCLUDED.sku_raw       ELSE public.rimi_candidates.sku_raw       END,
-      last_seen     = now();
+          INSERT INTO public.rimi_candidates
+            (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, price, currency, category_path, category_leaf, last_seen)
+          SELECT
+            s.ext_id, s.ean_norm, s.ean_raw, s.sku_raw, s.name, s.size_text, s.brand, s.price, s.currency, s.category_path, s.category_leaf, now()
+          FROM tmp_staging_rimi_products s
+          ON CONFLICT (ext_id) DO UPDATE
+            SET price         = EXCLUDED.price,
+                currency      = EXCLUDED.currency,
+                size_text     = CASE WHEN COALESCE(EXCLUDED.size_text,'') <> '' THEN EXCLUDED.size_text ELSE public.rimi_candidates.size_text END,
+                brand         = CASE WHEN COALESCE(EXCLUDED.brand,'')     <> '' THEN EXCLUDED.brand     ELSE public.rimi_candidates.brand     END,
+                category_path = CASE WHEN COALESCE(EXCLUDED.category_path,'') <> '' THEN EXCLUDED.category_path ELSE public.rimi_candidates.category_path END,
+                category_leaf = CASE WHEN COALESCE(EXCLUDED.category_leaf,'') <> '' THEN EXCLUDED.category_leaf ELSE public.rimi_candidates.category_leaf END,
+                ean_raw       = CASE WHEN COALESCE(EXCLUDED.ean_raw,'')       <> '' THEN EXCLUDED.ean_raw       ELSE public.rimi_candidates.ean_raw       END,
+                sku_raw       = CASE WHEN COALESCE(EXCLUDED.sku_raw,'')       <> '' THEN EXCLUDED.sku_raw       ELSE public.rimi_candidates.sku_raw       END,
+                last_seen     = now();
 
-COMMIT;
-SQL
+          COMMIT;
+          SQL
 
           sed -i "s|__CSV__|$CSV_ABS|g" /tmp/rimi_load.sql
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/rimi_load.sql
@@ -447,30 +435,30 @@ SQL
         run: |
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-SELECT COUNT(*) AS candidates_total,
-       SUM(CASE WHEN price IS NULL OR price = 0 THEN 1 ELSE 0 END) AS zero_price
-FROM public.rimi_candidates;
-SQL
+          SELECT COUNT(*) AS candidates_total,
+                 SUM(CASE WHEN price IS NULL OR price = 0 THEN 1 ELSE 0 END) AS zero_price
+          FROM public.rimi_candidates;
+          SQL
 
-      - name: Adopt Rimi candidates with EANs
+      - name: Adopt Rimi candidates with EANs (optional helpers)
         if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
           set -euo pipefail
           cat > /tmp/adopt_rimi.sql <<'SQL'
-DO $do$
-DECLARE r record;
-BEGIN
-  IF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_all_rimi_candidates_with_ean') THEN
-    PERFORM public.adopt_all_rimi_candidates_with_ean();
-  ELSIF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_candidate_with_ean') THEN
-    FOR r IN
-      SELECT ext_id FROM public.rimi_candidates WHERE COALESCE(ean_norm,'') <> ''
-    LOOP
-      PERFORM public.adopt_candidate_with_ean(r.ext_id);
-    END LOOP;
-  END IF;
-END
-$do$;
-SQL
+          DO $do$
+          DECLARE r record;
+          BEGIN
+            IF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_all_rimi_candidates_with_ean') THEN
+              PERFORM public.adopt_all_rimi_candidates_with_ean();
+            ELSIF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_candidate_with_ean') THEN
+              FOR r IN
+                SELECT ext_id FROM public.rimi_candidates WHERE COALESCE(ean_norm,'') <> ''
+              LOOP
+                PERFORM public.adopt_candidate_with_ean(r.ext_id);
+              END LOOP;
+            END IF;
+          END
+          $do$;
+          SQL
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/adopt_rimi.sql
