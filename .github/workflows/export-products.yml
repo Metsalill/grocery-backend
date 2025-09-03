@@ -1,0 +1,131 @@
+name: Export product CSVs for matching
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (for workspace)
+        uses: actions/checkout@v4
+
+      - name: Install psql client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Resolve DB URL (prefer public)
+        id: db
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="${{ secrets.DATABASE_URL_PUBLIC }}"
+          if [[ -z "${url}" ]]; then url="${{ secrets.DATABASE_URL }}"; fi
+          if [[ -z "${url}" ]]; then url="${{ secrets.RW_DATABASE_URL }}"; fi
+          if [[ -z "${url}" ]]; then
+            echo "::error::No database URL found. Set one of: DATABASE_URL_PUBLIC, DATABASE_URL, RW_DATABASE_URL"
+            exit 1
+          fi
+          # mask it in logs and expose as output
+          echo "::add-mask::${url}"
+          echo "url=${url}" >> "$GITHUB_OUTPUT"
+
+      - name: Test DB connection
+        env:
+          DB_URL: ${{ steps.db.outputs.url }}
+        run: |
+          psql -X -v ON_ERROR_STOP=1 "$DB_URL" -c "SELECT current_database() AS db, current_user AS user, version() AS pg, now() AS ts;"
+
+      # ------------------  EXPORTS  ------------------
+
+      - name: Export canonical products
+        env:
+          DB_URL: ${{ steps.db.outputs.url }}
+        run: |
+          psql -X -v ON_ERROR_STOP=1 "$DB_URL" \
+            -c "\copy (SELECT id AS product_id, ean, name, brand, size_text FROM products ORDER BY id) TO STDOUT WITH CSV HEADER" \
+            > canonical_products.csv
+          wc -l canonical_products.csv || true
+
+      - name: Export Rimi candidates (raw feed)
+        env:
+          DB_URL: ${{ steps.db.outputs.url }}
+        run: |
+          psql -X -v ON_ERROR_STOP=1 "$DB_URL" \
+            -c "\copy (SELECT ext_id, name, brand, size_text FROM rimi_candidates ORDER BY ext_id) TO STDOUT WITH CSV HEADER" \
+            > rimi_candidates.csv
+          wc -l rimi_candidates.csv || true
+
+      - name: Export Selver-priced canonicals
+        env:
+          DB_URL: ${{ steps.db.outputs.url }}
+        run: |
+          psql -X -v ON_ERROR_STOP=1 "$DB_URL" \
+            -c "\copy (
+                  WITH sid AS (SELECT id FROM stores WHERE name='Selver e-Selver' LIMIT 1)
+                  SELECT DISTINCT pr.product_id, p.ean, p.name, p.brand, p.size_text
+                  FROM prices pr
+                  JOIN sid          ON pr.store_id = sid.id
+                  JOIN products p   ON p.id = pr.product_id
+                  ORDER BY pr.product_id
+                ) TO STDOUT WITH CSV HEADER" \
+            > selver_products.csv
+          wc -l selver_products.csv || true
+
+      - name: Export Prisma-priced canonicals
+        env:
+          DB_URL: ${{ steps.db.outputs.url }}
+        run: |
+          psql -X -v ON_ERROR_STOP=1 "$DB_URL" \
+            -c "\copy (
+                  WITH pid AS (SELECT id FROM stores WHERE name='Prisma Online (Tallinn)' LIMIT 1)
+                  SELECT DISTINCT pr.product_id, p.ean, p.name, p.brand, p.size_text
+                  FROM prices pr
+                  JOIN pid          ON pr.store_id = pid.id
+                  JOIN products p   ON p.id = pr.product_id
+                  ORDER BY pr.product_id
+                ) TO STDOUT WITH CSV HEADER" \
+            > prisma_products.csv
+          wc -l prisma_products.csv || true
+
+      # (Optional) quick coverage snapshot printed in logs
+      - name: Print Selver/Prisma price coverage summary
+        env:
+          DB_URL: ${{ steps.db.outputs.url }}
+        run: |
+          psql -X -v ON_ERROR_STOP=1 "$DB_URL" <<'SQL'
+          WITH ids AS (
+            SELECT
+              MAX(id) FILTER (WHERE name='Selver e-Selver')         AS selver_id,
+              MAX(id) FILTER (WHERE name='Prisma Online (Tallinn)') AS prisma_id
+            FROM stores
+          ),
+          flags AS (
+            SELECT pr.product_id,
+                   MAX( (pr.store_id=(SELECT selver_id FROM ids))::int )  AS has_selver_price,
+                   MAX( (pr.store_id=(SELECT prisma_id FROM ids))::int )  AS has_prisma_price
+            FROM prices pr
+            GROUP BY pr.product_id
+          )
+          SELECT
+            SUM(has_selver_price)::int                                        AS selver_with_price,
+            SUM(has_prisma_price)::int                                        AS prisma_with_price,
+            SUM((has_selver_price=1 AND has_prisma_price=1)::int)             AS overlap_both_with_price,
+            SUM((has_selver_price=1 AND has_prisma_price=0)::int)             AS selver_only_with_price,
+            SUM((has_prisma_price=1 AND has_selver_price=0)::int)             AS prisma_only_with_price,
+            SUM(GREATEST(has_selver_price, has_prisma_price))::int            AS union_with_price,
+            (SELECT COUNT(*) FROM products)                                   AS all_canonical_products;
+          SQL
+
+      - name: Upload CSV artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: product-csvs
+          path: |
+            canonical_products.csv
+            rimi_candidates.csv
+            selver_products.csv
+            prisma_products.csv
+          if-no-files-found: error
