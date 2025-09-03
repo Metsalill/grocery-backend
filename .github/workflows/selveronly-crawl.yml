@@ -19,9 +19,8 @@ on:
         description: "Seconds between steps"
         required: false
         default: "0.6"
-  # Nightly at 02:00 UTC
   schedule:
-    - cron: "0 2 * * *"
+    - cron: "0 2 * * *"   # nightly at 02:00 UTC
 
 concurrency:
   group: ${{ github.event_name == 'workflow_dispatch' && format('selver-category-crawl-{0}', github.run_id) || 'selver-category-crawl' }}
@@ -95,22 +94,14 @@ jobs:
           LOG_CONSOLE: ${{ github.event_name == 'workflow_dispatch' && inputs.log_console || 'warn' }}
           NAV_TIMEOUT_MS: "60000"
           PRELOAD_DB: "1"
-          PRELOAD_DB_QUERY: |
-            SELECT DISTINCT ext_id
-            FROM (
-              SELECT sp.ext_id
-                FROM public.staging_selver_products sp
-               WHERE COALESCE(sp.ean_norm,'') <> ''
-              UNION
-              SELECT c.ext_id
-                FROM public.selver_candidates c
-               WHERE COALESCE(c.ean_norm,'') <> ''
-              UNION
-              SELECT m.ext_id
-                FROM public.ext_product_map m
-            ) u
-            WHERE ext_id IS NOT NULL AND ext_id <> ''
           PGSSLMODE: "require"
+          # YAML-safe folded (single-line) SQL:
+          PRELOAD_DB_QUERY: >-
+            SELECT DISTINCT ext_id FROM (
+              SELECT sp.ext_id FROM public.staging_selver_products sp WHERE COALESCE(sp.ean_norm,'') <> ''
+              UNION SELECT c.ext_id FROM public.selver_candidates c WHERE COALESCE(c.ean_norm,'') <> ''
+              UNION SELECT m.ext_id FROM public.ext_product_map m
+            ) u WHERE ext_id IS NOT NULL AND ext_id <> ''
         run: |
           set -euo pipefail
           set -x
@@ -195,7 +186,6 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           BEGIN;
 
-          -- Staging with brand support
           CREATE TABLE IF NOT EXISTS public.staging_selver_products (
             ext_id        text PRIMARY KEY,
             name          text NOT NULL,
@@ -217,12 +207,10 @@ jobs:
           CREATE INDEX IF NOT EXISTS ix_selver_ean       ON public.staging_selver_products (ean_norm);
           CREATE INDEX IF NOT EXISTS ix_selver_name_trgm ON public.staging_selver_products USING gin (name gin_trgm_ops);
 
-          -- Store
           INSERT INTO public.stores (name, chain, is_online)
           SELECT 'Selver e-Selver', 'Selver', TRUE
           WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE chain='Selver' AND is_online=TRUE);
 
-          -- Candidates with brand
           CREATE TABLE IF NOT EXISTS public.selver_candidates (
             ext_id        text PRIMARY KEY,
             ean_norm      text,
@@ -240,7 +228,6 @@ jobs:
           ALTER TABLE public.selver_candidates
             ADD COLUMN IF NOT EXISTS brand text;
 
-          -- Explicit mapping table (ext_id → product_id)
           CREATE TABLE IF NOT EXISTS public.ext_product_map (
             ext_id     text PRIMARY KEY,
             product_id int NOT NULL REFERENCES public.products(id)
@@ -248,7 +235,6 @@ jobs:
 
           COMMIT;
 
-          -- Keep only most recent price per (product, store)
           DO $$
           BEGIN
             WITH ranked AS (
@@ -292,155 +278,146 @@ jobs:
             exit 0
           fi
 
-          # Absolute path for psql \copy (meta-commands can't span lines)
-          CSV_ABS="$(python - <<'PY'
-import os
-print(os.path.abspath('data/selver.csv'))
-PY
-)"
-          echo "CSV_ABS: $CSV_ABS"
-
-          # CSV header includes BRAND:
-          # ext_id,source_url,name,brand,ean_raw,ean_norm,sku_raw,size_text,price,currency,category_path,category_leaf
           cat > /tmp/selver_load.sql <<'SQL'
-\set ON_ERROR_STOP on
-BEGIN;
+          \set ON_ERROR_STOP on
+          BEGIN;
 
-CREATE TEMP TABLE tmp_staging_selver_products (
-  ext_id        text,
-  source_url    text,
-  name          text,
-  brand         text,
-  ean_raw       text,
-  ean_norm      text,
-  sku_raw       text,
-  size_text     text,
-  price         numeric,
-  currency      text,
-  category_path text,
-  category_leaf text
-);
+          CREATE TEMP TABLE tmp_staging_selver_products (
+            ext_id        text,
+            source_url    text,
+            name          text,
+            brand         text,
+            ean_raw       text,
+            ean_norm      text,
+            sku_raw       text,
+            size_text     text,
+            price         numeric,
+            currency      text,
+            category_path text,
+            category_leaf text
+          );
 
--- SINGLE-LINE \copy with absolute path
-\copy tmp_staging_selver_products (ext_id,source_url,name,brand,ean_raw,ean_norm,sku_raw,size_text,price,currency,category_path,category_leaf) FROM '__CSV__' WITH (FORMAT csv, HEADER true)
+          \copy tmp_staging_selver_products (
+            ext_id, source_url, name, brand, ean_raw, ean_norm, sku_raw, size_text, price, currency, category_path, category_leaf
+          )
+          FROM 'data/selver.csv'
+          WITH (FORMAT csv, HEADER true);
 
-DELETE FROM tmp_staging_selver_products
-WHERE name ILIKE '%vabad ametikohad%';
+          DELETE FROM tmp_staging_selver_products
+          WHERE name ILIKE '%vabad ametikohad%';
 
-WITH filtered AS (
-  SELECT
-    ext_id,
-    source_url,
-    name,
-    NULLIF(brand,'') AS brand,
-    ean_raw,
-    NULLIF(regexp_replace(COALESCE(ean_norm, ean_raw, ''), '[^0-9]', '', 'g'),'') AS ean_norm,
-    sku_raw,
-    NULLIF(size_text,'') AS size_text,
-    NULLIF(NULLIF(price::text,''),'0')::numeric AS price,
-    COALESCE(NULLIF(currency,''),'EUR') AS currency,
-    NULLIF(category_path,'') AS category_path,
-    NULLIF(category_leaf,'') AS category_leaf
-  FROM tmp_staging_selver_products
-),
+          WITH filtered AS (
+            SELECT
+              ext_id,
+              source_url,
+              name,
+              NULLIF(brand,'') AS brand,
+              ean_raw,
+              NULLIF(regexp_replace(COALESCE(ean_norm, ean_raw, ''), '[^0-9]', '', 'g'),'') AS ean_norm,
+              sku_raw,
+              NULLIF(size_text,'') AS size_text,
+              NULLIF(NULLIF(price::text,''),'0')::numeric AS price,
+              COALESCE(NULLIF(currency,''),'EUR') AS currency,
+              NULLIF(category_path,'') AS category_path,
+              NULLIF(category_leaf,'') AS category_leaf
+            FROM tmp_staging_selver_products
+          ),
 
-upsert_staging AS (
-  INSERT INTO public.staging_selver_products (
-    ext_id, name, brand, ean_raw, sku_raw, size_text, price, currency, category_path, category_leaf
-  )
-  SELECT f.ext_id, f.name, f.brand, COALESCE(NULLIF(f.ean_raw,''), f.ean_norm),
-         f.sku_raw, f.size_text, f.price, f.currency, f.category_path, f.category_leaf
-  FROM filtered f
-  ON CONFLICT (ext_id) DO UPDATE SET
-    name          = EXCLUDED.name,
-    brand         = COALESCE(EXCLUDED.brand, public.staging_selver_products.brand),
-    ean_raw       = EXCLUDED.ean_raw,
-    sku_raw       = EXCLUDED.sku_raw,
-    size_text     = EXCLUDED.size_text,
-    price         = EXCLUDED.price,
-    currency      = EXCLUDED.currency,
-    category_path = EXCLUDED.category_path,
-    category_leaf = EXCLUDED.category_leaf,
-    collected_at  = now()
-  RETURNING ext_id
-),
+          upsert_staging AS (
+            INSERT INTO public.staging_selver_products (
+              ext_id, name, brand, ean_raw, sku_raw, size_text, price, currency, category_path, category_leaf
+            )
+            SELECT f.ext_id, f.name, f.brand, COALESCE(NULLIF(f.ean_raw,''), f.ean_norm),
+                   f.sku_raw, f.size_text, f.price, f.currency, f.category_path, f.category_leaf
+            FROM filtered f
+            ON CONFLICT (ext_id) DO UPDATE SET
+              name          = EXCLUDED.name,
+              brand         = COALESCE(EXCLUDED.brand, public.staging_selver_products.brand),
+              ean_raw       = EXCLUDED.ean_raw,
+              sku_raw       = EXCLUDED.sku_raw,
+              size_text     = EXCLUDED.size_text,
+              price         = EXCLUDED.price,
+              currency      = EXCLUDED.currency,
+              category_path = EXCLUDED.category_path,
+              category_leaf = EXCLUDED.category_leaf,
+              collected_at  = now()
+            RETURNING ext_id
+          ),
 
-joined AS (
-  SELECT
-    COALESCE(m.product_id, pe.product_id) AS product_id,
-    f.price,
-    f.currency,
-    f.ext_id
-  FROM filtered f
-  LEFT JOIN public.product_eans    pe ON pe.ean_norm = f.ean_norm AND f.ean_norm <> ''
-  LEFT JOIN public.ext_product_map m  ON m.ext_id   = f.ext_id
-  WHERE COALESCE(m.product_id, pe.product_id) IS NOT NULL
-),
-pick_one AS (
-  SELECT DISTINCT ON (product_id)
-         product_id, price, currency, ext_id
-  FROM joined
-  ORDER BY product_id, price ASC, ext_id DESC
-)
-INSERT INTO public.prices (store_id, product_id, price, currency, collected_at, source_url, source)
-SELECT
-  (SELECT id FROM public.stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1),
-  p.product_id,
-  p.price,
-  p.currency,
-  now(),
-  p.ext_id,
-  'online'
-FROM pick_one p
-ON CONFLICT (product_id, store_id) DO UPDATE
-  SET price        = EXCLUDED.price,
-      currency     = EXCLUDED.currency,
-      collected_at = EXCLUDED.collected_at,
-      source_url   = EXCLUDED.source_url,
-      source       = EXCLUDED.source;
+          joined AS (
+            SELECT
+              COALESCE(m.product_id, pe.product_id) AS product_id,
+              f.price,
+              f.currency,
+              f.ext_id
+            FROM filtered f
+            LEFT JOIN public.product_eans    pe ON pe.ean_norm = f.ean_norm AND f.ean_norm <> ''
+            LEFT JOIN public.ext_product_map m  ON m.ext_id   = f.ext_id
+            WHERE COALESCE(m.product_id, pe.product_id) IS NOT NULL
+          ),
+          pick_one AS (
+            SELECT DISTINCT ON (product_id)
+                   product_id, price, currency, ext_id
+            FROM joined
+            ORDER BY product_id, price ASC, ext_id DESC
+          )
+          INSERT INTO public.prices (store_id, product_id, price, currency, collected_at, source_url, source)
+          SELECT
+            (SELECT id FROM public.stores WHERE chain='Selver' AND is_online=TRUE ORDER BY id LIMIT 1),
+            p.product_id,
+            p.price,
+            p.currency,
+            now(),
+            p.ext_id,
+            'online'
+          FROM pick_one p
+          ON CONFLICT (product_id, store_id) DO UPDATE
+            SET price        = EXCLUDED.price,
+                currency     = EXCLUDED.currency,
+                collected_at = EXCLUDED.collected_at,
+                source_url   = EXCLUDED.source_url,
+                source       = EXCLUDED.source;
 
-WITH filtered AS (
-  SELECT * FROM (
-    SELECT
-      ext_id, source_url, name, brand, ean_raw,
-      NULLIF(regexp_replace(COALESCE(ean_norm, ean_raw, ''), '[^0-9]', '', 'g'),'') AS ean_norm,
-      sku_raw, size_text, price, currency, category_path, category_leaf
-    FROM tmp_staging_selver_products
-  ) q
-),
-missing AS (
-  SELECT f.*
-  FROM filtered f
-  LEFT JOIN public.product_eans    pe ON pe.ean_norm = f.ean_norm AND f.ean_norm <> ''
-  LEFT JOIN public.ext_product_map m  ON m.ext_id   = f.ext_id
-  WHERE pe.product_id IS NULL AND m.product_id IS NULL
-)
-INSERT INTO public.selver_candidates
-  (ext_id, ean_norm, ean_raw, sku_raw, name, brand, size_text, price, currency, category_path, category_leaf, last_seen)
-SELECT
-  ext_id, NULLIF(ean_norm,''), ean_raw, sku_raw, name, brand, size_text, price, currency, category_path, category_leaf, now()
-FROM missing
-ON CONFLICT (ext_id) DO UPDATE
-  SET price         = EXCLUDED.price,
-      currency      = EXCLUDED.currency,
-      size_text     = COALESCE(EXCLUDED.size_text, public.selver_candidates.size_text),
-      category_path = COALESCE(EXCLUDED.category_path, public.selver_candidates.category_path),
-      category_leaf = COALESCE(EXCLUDED.category_leaf, public.selver_candidates.category_leaf),
-      ean_raw       = COALESCE(EXCLUDED.ean_raw, public.selver_candidates.ean_raw),
-      ean_norm      = COALESCE(EXCLUDED.ean_norm, public.selver_candidates.ean_norm),
-      sku_raw       = COALESCE(EXCLUDED.sku_raw, public.selver_candidates.sku_raw),
-      brand         = COALESCE(EXCLUDED.brand, public.selver_candidates.brand),
-      last_seen     = now();
+          WITH filtered AS (
+            SELECT * FROM (
+              SELECT
+                ext_id, source_url, name, brand, ean_raw,
+                NULLIF(regexp_replace(COALESCE(ean_norm, ean_raw, ''), '[^0-9]', '', 'g'),'') AS ean_norm,
+                sku_raw, size_text, price, currency, category_path, category_leaf
+              FROM tmp_staging_selver_products
+            ) q
+          ),
+          missing AS (
+            SELECT f.*
+            FROM filtered f
+            LEFT JOIN public.product_eans    pe ON pe.ean_norm = f.ean_norm AND f.ean_norm <> ''
+            LEFT JOIN public.ext_product_map m  ON m.ext_id   = f.ext_id
+            WHERE pe.product_id IS NULL AND m.product_id IS NULL
+          )
+          INSERT INTO public.selver_candidates
+            (ext_id, ean_norm, ean_raw, sku_raw, name, brand, size_text, price, currency, category_path, category_leaf, last_seen)
+          SELECT
+            ext_id, NULLIF(ean_norm,''), ean_raw, sku_raw, name, brand, size_text, price, currency, category_path, category_leaf, now()
+          FROM missing
+          ON CONFLICT (ext_id) DO UPDATE
+            SET price         = EXCLUDED.price,
+                currency      = EXCLUDED.currency,
+                size_text     = COALESCE(EXCLUDED.size_text, public.selver_candidates.size_text),
+                category_path = COALESCE(EXCLUDED.category_path, public.selver_candidates.category_path),
+                category_leaf = COALESCE(EXCLUDED.category_leaf, public.selver_candidates.category_leaf),
+                ean_raw       = COALESCE(EXCLUDED.ean_raw, public.selver_candidates.ean_raw),
+                ean_norm      = COALESCE(EXCLUDED.ean_norm, public.selver_candidates.ean_norm),
+                sku_raw       = COALESCE(EXCLUDED.sku_raw, public.selver_candidates.sku_raw),
+                brand         = COALESCE(EXCLUDED.brand, public.selver_candidates.brand),
+                last_seen     = now();
 
-SELECT
-  (SELECT COUNT(*) FROM tmp_staging_selver_products) AS staged_rows,
-  (SELECT COUNT(*) FROM public.selver_candidates)    AS candidates_total;
+          SELECT
+            (SELECT COUNT(*) FROM tmp_staging_selver_products) AS staged_rows,
+            (SELECT COUNT(*) FROM public.selver_candidates)    AS candidates_total;
 
-COMMIT;
-SQL
+          COMMIT;
+          SQL
 
-          # inject CSV absolute path & run
-          sed -i "s|__CSV__|$CSV_ABS|g" /tmp/selver_load.sql
           psql "$DATABASE_URL" -f /tmp/selver_load.sql
 
       - name: Adopt Selver candidates with EANs (make products + prices)
