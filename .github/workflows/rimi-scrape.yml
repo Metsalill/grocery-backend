@@ -24,7 +24,8 @@ on:
         required: false
         default: "0.25"
   schedule:
-    - cron: "17 */2 * * *"   # every 2 hours at :17 (UTC)
+    - cron: "0 2 * * *"       # nightly at 02:00 UTC
+    - cron: "17 */2 * * *"    # every 2 hours at :17 (UTC)
 
 concurrency:
   group: rimi-category-crawl
@@ -45,7 +46,6 @@ jobs:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/rimi_products.csv
       SHARD: ${{ matrix.shard }}
-      # Optional; DB steps run only if this is non-empty
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
     steps:
@@ -78,7 +78,7 @@ jobs:
           if [ ! -f scripts/rimi_crawl_categories_pw.py ]; then
             echo "::error::scripts/rimi_crawl_categories_pw.py missing"
             exit 1
-          fi
+          end
           python -m py_compile scripts/rimi_crawl_categories_pw.py
           chmod +x scripts/rimi_crawl_categories_pw.py
 
@@ -103,7 +103,6 @@ jobs:
             cp -f data/rimi_categories.txt data/rimi_categories_all.txt
             echo "Using repo file data/rimi_categories.txt"
           else
-            # Built-in set: SH-coded root categories (correct /c/SH-* paths)
             printf '%s\n' \
               "https://www.rimi.ee/epood/ee/tooted/puuviljad-koogiviljad-lilled/c/SH-12" \
               "https://www.rimi.ee/epood/ee/tooted/talu-toidab/c/SH-19" \
@@ -133,7 +132,6 @@ jobs:
           echo "First 12 from slice:"
           nl -ba data/rimi_categories.txt | sed -n '1,12p' || true
 
-      # --- Build SKIP list from already-priced Rimi PDPs (so we focus on new ones) ---
       - name: Build skip list from priced items (prices ∪ rimi_candidates)
         if: ${{ env.DATABASE_URL != '' }}
         shell: bash
@@ -169,7 +167,6 @@ jobs:
           PAGE_LIMIT: ${{ github.event.inputs.page_limit }}
           MAX_PRODUCTS: ${{ github.event.inputs.max_products }}
           HEADLESS: ${{ github.event.inputs.headless }}
-          # If present, the crawler should skip ext_ids listed here
           SKIP_EXT_FILE: data/rimi_skip_ext_ids.txt
         run: |
           set -euo pipefail
@@ -266,7 +263,6 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-      # ---------- OPTIONAL DB PART (only runs if DATABASE_URL is set) ----------
       - name: Install psql client
         if: ${{ env.DATABASE_URL != '' }}
         run: |
