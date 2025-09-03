@@ -1,14 +1,11 @@
 name: Export product CSVs for matching
-
-on:
-  workflow_dispatch: {}
+on: { workflow_dispatch: {} }
 
 jobs:
   export:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Install psql client
+      - name: Install psql
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client
@@ -20,27 +17,21 @@ jobs:
           RW_URL:     ${{ secrets.RW_DATABASE_URL }}
         run: |
           db="${URL_PUBLIC:-${URL_STD:-${RW_URL}}}"
-          if [ -z "$db" ]; then
-            echo "No database URL found in DATABASE_URL_PUBLIC / DATABASE_URL / RW_DATABASE_URL" >&2
-            exit 1
-          fi
-          # ensure sslmode=require if not present
+          [ -z "$db" ] && { echo "No DB URL" >&2; exit 1; }
           if [[ "$db" == postgres://* || "$db" == postgresql://* ]]; then
             if [[ "$db" != *"sslmode="* ]]; then
-              sep="?"
-              [[ "$db" == *"?"* ]] && sep="&"
+              sep="?" ; [[ "$db" == *"?"* ]] && sep="&"
               db="${db}${sep}sslmode=require"
             fi
           fi
-          echo "DB_URL=$db" >> "$GITHUB_ENV"
+          echo "DB_URL=$db" >> $GITHUB_ENV
 
-      - name: Test DB connection
-        run: |
-          psql -X -v ON_ERROR_STOP=1 "$DB_URL" -c "SELECT version(), now();"
+      - name: Connection test
+        run: psql -X -v ON_ERROR_STOP=1 "$DB_URL" -c "SELECT version(), now();"
 
-      - name: Bootstrap/refresh SQL (MVs, indexes, matchers, buckets)
+      - name: Write bootstrap SQL to file
         run: |
-          psql -X -v ON_ERROR_STOP=1 "$DB_URL" <<'SQL'
+          cat > bootstrap.sql <<'SQL'
           -- Extensions
           CREATE EXTENSION IF NOT EXISTS unaccent;
           CREATE EXTENSION IF NOT EXISTS pg_trgm;
@@ -48,20 +39,17 @@ jobs:
           -- Canonical normalization
           CREATE MATERIALIZED VIEW IF NOT EXISTS products_norm AS
           SELECT
-            id AS product_id,
-            ean, name, brand, size_text,
+            id AS product_id, ean, name, brand, size_text,
             regexp_replace(lower(unaccent(coalesce(brand,''))), '\s+', ' ', 'g') AS brand_norm,
             trim(regexp_replace(lower(unaccent(coalesce(name,''))), '[^0-9a-z]+', ' ', 'g')) AS name_norm,
-            trim(
-              regexp_replace(
-                replace(
-                  trim(regexp_replace(lower(unaccent(coalesce(name,''))), '[^0-9a-z]+', ' ', 'g')),
-                  regexp_replace(lower(unaccent(coalesce(brand,''))), '\s+', ' ', 'g'),
-                  ''
-                ),
-                '\s+', ' ', 'g'
-              )
-            ) AS name_core_norm,
+            trim(regexp_replace(
+              replace(
+                trim(regexp_replace(lower(unaccent(coalesce(name,''))), '[^0-9a-z]+', ' ', 'g')),
+                regexp_replace(lower(unaccent(coalesce(brand,''))), '\s+', ' ', 'g'),
+                ''
+              ),
+              '\s+', ' ', 'g'
+            )) AS name_core_norm,
             size_to_gml(size_text) AS size_gml
           FROM products;
 
@@ -71,83 +59,224 @@ jobs:
             ext_id, name, brand, size_text,
             regexp_replace(lower(unaccent(coalesce(brand,''))), '\s+', ' ', 'g') AS brand_norm,
             trim(regexp_replace(lower(unaccent(coalesce(name,''))), '[^0-9a-z]+', ' ', 'g')) AS name_norm,
-            trim(
-              regexp_replace(
-                replace(
-                  trim(regexp_replace(lower(unaccent(coalesce(name,''))), '[^0-9a-z]+', ' ', 'g')),
-                  regexp_replace(lower(unaccent(coalesce(brand,''))), '\s+', ' ', 'g'),
-                  ''
-                ),
-                '\s+', ' ', 'g'
-              )
-            ) AS name_core_norm,
+            trim(regexp_replace(
+              replace(
+                trim(regexp_replace(lower(unaccent(coalesce(name,''))), '[^0-9a-z]+', ' ', 'g')),
+                regexp_replace(lower(unaccent(coalesce(brand,''))), '\s+', ' ', 'g'),
+                ''
+              ),
+              '\s+', ' ', 'g'
+            )) AS name_core_norm,
             size_to_gml(size_text) AS size_gml
           FROM rimi_candidates;
 
-          -- Indexes for speed
+          -- GIN indexes
           CREATE INDEX IF NOT EXISTS prod_core_trgm ON products_norm        USING gin (name_core_norm gin_trgm_ops);
           CREATE INDEX IF NOT EXISTS rimi_core_trgm  ON rimi_candidates_norm USING gin (name_core_norm gin_trgm_ops);
 
-          -- Refresh MVs (safe even if already fresh)
+          -- Refresh
           REFRESH MATERIALIZED VIEW products_norm;
           REFRESH MATERIALIZED VIEW rimi_candidates_norm;
 
-          -- Store-side canonical subsets (have price in that store)
+          -- Canonical subsets that actually have price in each store
           CREATE OR REPLACE VIEW selver_side_norm AS
           WITH sid AS (SELECT id FROM stores WHERE name='Selver e-Selver' LIMIT 1)
-          SELECT DISTINCT
-            pr.product_id,
-            p.ean, p.name, p.brand, p.size_text,
-            pn.brand_norm, pn.name_core_norm, pn.size_gml
+          SELECT DISTINCT pr.product_id, p.ean, p.name, p.brand, p.size_text,
+                 pn.brand_norm, pn.name_core_norm, pn.size_gml
           FROM prices pr
           JOIN sid ON pr.store_id = sid.id
-          JOIN products      p  ON p.id = pr.product_id
+          JOIN products p      ON p.id = pr.product_id
           JOIN products_norm pn ON pn.product_id = p.id;
 
           CREATE OR REPLACE VIEW prisma_side_norm AS
           WITH sid AS (SELECT id FROM stores WHERE name='Prisma Online (Tallinn)' LIMIT 1)
-          SELECT DISTINCT
-            pr.product_id,
-            p.ean, p.name, p.brand, p.size_text,
-            pn.brand_norm, pn.name_core_norm, pn.size_gml
+          SELECT DISTINCT pr.product_id, p.ean, p.name, p.brand, p.size_text,
+                 pn.brand_norm, pn.name_core_norm, pn.size_gml
           FROM prices pr
           JOIN sid ON pr.store_id = sid.id
-          JOIN products      p  ON p.id = pr.product_id
+          JOIN products p      ON p.id = pr.product_id
           JOIN products_norm pn ON pn.product_id = p.id;
 
-          -- ---------- Generic score pieces
-          -- Helper expression is repeated in the three matchers for clarity.
-
-          -- SELVER <-> RIMI
+          -- ---------- Matcher: Selver <-> Rimi
           CREATE OR REPLACE VIEW v_match_selver_rimi AS
           SELECT
-            r.ext_id               AS left_ext_id,
-            r.name                 AS left_name,
-            r.brand                AS left_brand,
-            r.size_text            AS left_size_text,
-
-            s.product_id           AS right_product_id,
-            s.ean                  AS right_ean,
-            s.name                 AS right_name,
-            s.brand                AS right_brand,
-            s.size_text            AS right_size_text,
-
+            r.ext_id, r.name AS left_name, r.brand AS left_brand, r.size_text AS left_size_text,
+            s.product_id, s.ean, s.name AS right_name, s.brand AS right_brand, s.size_text AS right_size_text,
             similarity(r.name_core_norm, s.name_core_norm) AS sim_name,
-
-            CASE WHEN r.brand_norm <> '' AND r.brand_norm = s.brand_norm
-                 THEN 0.15 ELSE 0 END AS brand_bonus,
-
+            CASE WHEN r.brand_norm <> '' AND r.brand_norm = s.brand_norm THEN 0.15 ELSE 0 END AS brand_bonus,
             CASE
-              WHEN r.size_gml IS NOT NULL AND s.size_gml IS NOT NULL
-                   AND r.size_gml > 0 AND s.size_gml > 0
+              WHEN r.size_gml IS NOT NULL AND s.size_gml IS NOT NULL AND r.size_gml > 0 AND s.size_gml > 0
                    AND abs(r.size_gml - s.size_gml) <= GREATEST(20, (GREATEST(r.size_gml, s.size_gml) * 0.05)::int)
               THEN (1 - (abs(r.size_gml - s.size_gml)::float / GREATEST(r.size_gml, s.size_gml))) * 0.15
               ELSE 0
             END AS size_bonus,
+            (
+              similarity(r.name_core_norm, s.name_core_norm)
+              + CASE WHEN r.brand_norm <> '' AND r.brand_norm = s.brand_norm THEN 0.15 ELSE 0 END
+              + CASE
+                  WHEN r.size_gml IS NOT NULL AND s.size_gml IS NOT NULL AND r.size_gml > 0 AND s.size_gml > 0
+                       AND abs(r.size_gml - s.size_gml) <= GREATEST(20, (GREATEST(r.size_gml, s.size_gml) * 0.05)::int)
+                  THEN (1 - (abs(r.size_gml - s.size_gml)::float / GREATEST(r.size_gml, s.size_gml))) * 0.15
+                  ELSE 0
+                END
+            ) AS score
+          FROM rimi_candidates_norm r
+          JOIN selver_side_norm s
+            ON (
+                 (r.brand_norm = s.brand_norm AND r.brand_norm <> '')
+                 OR (r.brand_norm = '' OR s.brand_norm = '')
+               )
+           AND similarity(r.name_core_norm, s.name_core_norm) > 0.55
+           AND (
+                 r.size_gml IS NULL OR s.size_gml IS NULL
+                 OR abs(r.size_gml - s.size_gml) <= GREATEST(20, (GREATEST(r.size_gml, s.size_gml) * 0.05)::int)
+               );
 
-            (r.brand_norm <> '' AND r.brand_norm = s.brand_norm) AS brand_eq,
-            (r.size_gml IS NULL OR s.size_gml IS NULL
-               OR abs(r.size_gml - s.size_gml) <= GREATEST(20, (GREATEST(r.size_gml, s.size_gml) * 0.05)::int)
-            ) AS size_ok,
+          -- ---------- Matcher: Prisma <-> Rimi
+          CREATE OR REPLACE VIEW v_match_prisma_rimi AS
+          SELECT
+            r.ext_id, r.name AS left_name, r.brand AS left_brand, r.size_text AS left_size_text,
+            s.product_id, s.ean, s.name AS right_name, s.brand AS right_brand, s.size_text AS right_size_text,
+            similarity(r.name_core_norm, s.name_core_norm) AS sim_name,
+            CASE WHEN r.brand_norm <> '' AND r.brand_norm = s.brand_norm THEN 0.15 ELSE 0 END AS brand_bonus,
+            CASE
+              WHEN r.size_gml IS NOT NULL AND s.size_gml IS NOT NULL AND r.size_gml > 0 AND s.size_gml > 0
+                   AND abs(r.size_gml - s.size_gml) <= GREATEST(20, (GREATEST(r.size_gml, s.size_gml) * 0.05)::int)
+              THEN (1 - (abs(r.size_gml - s.size_gml)::float / GREATEST(r.size_gml, s.size_gml))) * 0.15
+              ELSE 0
+            END AS size_bonus,
+            (
+              similarity(r.name_core_norm, s.name_core_norm)
+              + CASE WHEN r.brand_norm <> '' AND r.brand_norm = s.brand_norm THEN 0.15 ELSE 0 END
+              + CASE
+                  WHEN r.size_gml IS NOT NULL AND s.size_gml IS NOT NULL AND r.size_gml > 0 AND s.size_gml > 0
+                       AND abs(r.size_gml - s.size_gml) <= GREATEST(20, (GREATEST(r.size_gml, s.size_gml) * 0.05)::int)
+                  THEN (1 - (abs(r.size_gml - s.size_gml)::float / GREATEST(r.size_gml, s.size_gml))) * 0.15
+                  ELSE 0
+                END
+            ) AS score
+          FROM rimi_candidates_norm r
+          JOIN prisma_side_norm s
+            ON (
+                 (r.brand_norm = s.brand_norm AND r.brand_norm <> '')
+                 OR (r.brand_norm = '' OR s.brand_norm = '')
+               )
+           AND similarity(r.name_core_norm, s.name_core_norm) > 0.55
+           AND (
+                 r.size_gml IS NULL OR s.size_gml IS NULL
+                 OR abs(r.size_gml - s.size_gml) <= GREATEST(20, (GREATEST(r.size_gml, s.size_gml) * 0.05)::int)
+               );
 
-            ( similarity(r.name_core_norm, s.name
+          -- ---------- Matcher: Selver <-> Prisma (canonical-to-canonical)
+          CREATE OR REPLACE VIEW v_match_selver_prisma AS
+          SELECT
+            a.product_id AS left_product_id,  a.ean AS left_ean,  a.name AS left_name,  a.brand AS left_brand,  a.size_text AS left_size_text,
+            b.product_id AS right_product_id, b.ean AS right_ean, b.name AS right_name, b.brand AS right_brand, b.size_text AS right_size_text,
+            similarity(a.name_core_norm, b.name_core_norm) AS sim_name,
+            CASE WHEN a.brand_norm <> '' AND a.brand_norm = b.brand_norm THEN 0.15 ELSE 0 END AS brand_bonus,
+            CASE
+              WHEN a.size_gml IS NOT NULL AND b.size_gml IS NOT NULL AND a.size_gml > 0 AND b.size_gml > 0
+                   AND abs(a.size_gml - b.size_gml) <= GREATEST(20, (GREATEST(a.size_gml, b.size_gml) * 0.05)::int)
+              THEN (1 - (abs(a.size_gml - b.size_gml)::float / GREATEST(a.size_gml, b.size_gml))) * 0.15
+              ELSE 0
+            END AS size_bonus,
+            (
+              similarity(a.name_core_norm, b.name_core_norm)
+              + CASE WHEN a.brand_norm <> '' AND a.brand_norm = b.brand_norm THEN 0.15 ELSE 0 END
+              + CASE
+                  WHEN a.size_gml IS NOT NULL AND b.size_gml IS NOT NULL AND a.size_gml > 0 AND b.size_gml > 0
+                       AND abs(a.size_gml - b.size_gml) <= GREATEST(20, (GREATEST(a.size_gml, b.size_gml) * 0.05)::int)
+                  THEN (1 - (abs(a.size_gml - b.size_gml)::float / GREATEST(a.size_gml, b.size_gml))) * 0.15
+                  ELSE 0
+                END
+            ) AS score
+          FROM selver_side_norm a
+          JOIN prisma_side_norm b
+            ON (
+                 (a.brand_norm = b.brand_norm AND a.brand_norm <> '')
+                 OR (a.brand_norm = '' OR b.brand_norm = '')
+               )
+           AND similarity(a.name_core_norm, b.name_core_norm) > 0.55
+           AND (
+                 a.size_gml IS NULL OR b.size_gml IS NULL
+                 OR abs(a.size_gml - b.size_gml) <= GREATEST(20, (GREATEST(a.size_gml, b.size_gml) * 0.05)::int)
+               );
+
+          -- Buckets
+          CREATE OR REPLACE VIEW v_sr_review_072_082 AS SELECT * FROM v_match_selver_rimi   WHERE score >= 0.72 AND score < 0.82;
+          CREATE OR REPLACE VIEW v_sr_weak_055_072   AS SELECT * FROM v_match_selver_rimi   WHERE score >= 0.55 AND score < 0.72;
+          CREATE OR REPLACE VIEW v_pr_review_072_082 AS SELECT * FROM v_match_prisma_rimi   WHERE score >= 0.72 AND score < 0.82;
+          CREATE OR REPLACE VIEW v_pr_weak_055_072   AS SELECT * FROM v_match_prisma_rimi   WHERE score >= 0.55 AND score < 0.72;
+          CREATE OR REPLACE VIEW v_sp_review_072_082 AS SELECT * FROM v_match_selver_prisma WHERE score >= 0.72 AND score < 0.82;
+          CREATE OR REPLACE VIEW v_sp_weak_055_072   AS SELECT * FROM v_match_selver_prisma WHERE score >= 0.55 AND score < 0.72;
+
+          -- All products with one picked name per source
+          CREATE OR REPLACE VIEW v_all_products_rimi_selver_prisma_names AS
+          WITH
+          rimi_one AS (
+            SELECT m.product_id, rc.name AS rimi_name,
+                   ROW_NUMBER() OVER (PARTITION BY m.product_id ORDER BY m.confidence DESC, m.updated_at DESC) AS rn
+            FROM ext_product_map m
+            LEFT JOIN rimi_candidates rc ON rc.ext_id = m.ext_id
+            WHERE m.source='rimi'
+          ),
+          selver_one AS (
+            SELECT m.product_id, p.name AS selver_name,
+                   ROW_NUMBER() OVER (PARTITION BY m.product_id ORDER BY m.updated_at DESC) AS rn
+            FROM ext_product_map m
+            JOIN products p ON p.id = m.product_id
+            WHERE m.source='selver'
+          ),
+          prisma_one AS (
+            SELECT m.product_id, p.name AS prisma_name,
+                   ROW_NUMBER() OVER (PARTITION BY m.product_id ORDER BY m.updated_at DESC) AS rn
+            FROM ext_product_map m
+            JOIN products p ON p.id = m.product_id
+            WHERE m.source='prisma'
+          )
+          SELECT
+            p.id AS product_id, p.ean, p.name AS canonical_name,
+            (SELECT rimi_name   FROM rimi_one   r WHERE r.product_id = p.id AND r.rn = 1) AS rimi_name,
+            (SELECT selver_name FROM selver_one s WHERE s.product_id = p.id AND s.rn = 1) AS selver_name,
+            (SELECT prisma_name FROM prisma_one q WHERE q.product_id = p.id AND q.rn = 1) AS prisma_name
+          FROM products p
+          ORDER BY p.id;
+          SQL
+
+      - name: Run bootstrap SQL
+        run: psql -X -v ON_ERROR_STOP=1 "$DB_URL" -f bootstrap.sql
+
+      - name: Export CSVs
+        run: |
+          psql -X -v ON_ERROR_STOP=1 "$DB_URL" \
+            -c "COPY (SELECT * FROM v_all_products_rimi_selver_prisma_names) TO STDOUT WITH CSV HEADER" \
+            > all_products__rimi_selver_prisma_names.csv
+
+          psql -X -v ON_ERROR_STOP=1 "$DB_URL" \
+            -c "COPY (SELECT * FROM v_sr_review_072_082 ORDER BY score DESC) TO STDOUT WITH CSV HEADER" > sr_review_072_082.csv
+          psql -X -v ON_ERROR_STOP=1 "$DB_URL" \
+            -c "COPY (SELECT * FROM v_sr_weak_055_072   ORDER BY score DESC) TO STDOUT WITH CSV HEADER" > sr_weak_055_072.csv
+
+          psql -X -v ON_ERROR_STOP=1 "$DB_URL" \
+            -c "COPY (SELECT * FROM v_pr_review_072_082 ORDER BY score DESC) TO STDOUT WITH CSV HEADER" > pr_review_072_082.csv
+          psql -X -v ON_ERROR_STOP=1 "$DB_URL" \
+            -c "COPY (SELECT * FROM v_pr_weak_055_072   ORDER BY score DESC) TO STDOUT WITH CSV HEADER" > pr_weak_055_072.csv
+
+          psql -X -v ON_ERROR_STOP=1 "$DB_URL" \
+            -c "COPY (SELECT * FROM v_sp_review_072_082 ORDER BY score DESC) TO STDOUT WITH CSV HEADER" > sp_review_072_082.csv
+          psql -X -v ON_ERROR_STOP=1 "$DB_URL" \
+            -c "COPY (SELECT * FROM v_sp_weak_055_072   ORDER BY score DESC) TO STDOUT WITH CSV HEADER" > sp_weak_055_072.csv
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: product-matching-exports
+          path: |
+            all_products__rimi_selver_prisma_names.csv
+            sr_review_072_082.csv
+            sr_weak_055_072.csv
+            pr_review_072_082.csv
+            pr_weak_055_072.csv
+            sp_review_072_082.csv
+            sp_weak_055_072.csv
+          if-no-files-found: error
