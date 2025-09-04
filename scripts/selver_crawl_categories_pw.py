@@ -14,6 +14,8 @@ Also includes:
 - resilient EAN (Ribakood) + SKU extraction
 - SPA noise suppression, request routing and small navigation retries
 - proceeds even if price widget fails (price=0.00)
+- NEW: skip/only lists via CLI flags (--skip-ext-file / --only-ext-file)
+       (values may be full URLs, paths like /e/123 or /toode/slug, or numeric ids)
 
 CSV columns written:
   ext_id, source_url, name, brand, ean_raw, ean_norm, sku_raw,
@@ -21,7 +23,7 @@ CSV columns written:
 """
 
 from __future__ import annotations
-import os, re, csv, time, json
+import os, re, csv, time, json, argparse, sys
 from typing import Dict, Set, Tuple, List, Optional
 from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit, parse_qs, urlencode
 from playwright.sync_api import sync_playwright
@@ -415,17 +417,78 @@ def preload_ext_ids_from_db() -> Set[str]:
             if not r: continue
             raw = str(r[0])
             u = _clean_abs(raw)
-            if u: known.add(u)
+            if u:
+                known.add(u)
+                known.add(urlparse(u).path)
         try:
             cur.close(); conn.close()
         except Exception:
             pass
-        print(f"[selver] preloaded {len(known)} known ext_ids from DB (driver={driver})")
+        print(f"[selver] preloaded {len(known)} known ext_ids (abs+path) from DB (driver={driver})")
     except Exception as e:
         print(f"[selver] DB preload query failed: {type(e).__name__}: {e}")
         try: conn.close()
         except Exception: pass
     return known
+
+# ------------------------ Skip / Only file handling -------------------------
+SKIP_EXTS: Set[str] = set()
+ONLY_EXTS: Set[str] = set()
+
+_ID_ONLY_RE = re.compile(r"^\s*(\d{3,})\s*$")  # plain numeric id like 123456
+
+def _normalize_ext_line(line: str) -> List[str]:
+    """Return a list of equivalent keys for matching: absolute URL and path."""
+    vals: List[str] = []
+    if not line: return vals
+    s = line.strip()
+    if not s: return vals
+
+    # If it's just digits, treat as /e/<id>
+    m = _ID_ONLY_RE.match(s)
+    if m:
+        s = f"/e/{m.group(1)}"
+
+    # Absolute + path forms
+    absu = _clean_abs(s)
+    if absu:
+        vals.append(absu)
+        vals.append(urlparse(absu).path)
+    else:
+        # Try forcing into BASE if it's a bare path
+        if s.startswith("/"):
+            absu = _clean_abs(urljoin(BASE, s))
+            if absu:
+                vals.append(absu)
+                vals.append(urlparse(absu).path)
+    return [v for v in dict.fromkeys(vals)]  # unique, preserve order
+
+def _load_ext_file(path: str) -> Set[str]:
+    out: Set[str] = set()
+    if not path: return out
+    if not os.path.exists(path):
+        print(f"[selver] skip/only file not found: {path}")
+        return out
+    with open(path, "r", encoding="utf-8") as fh:
+        for ln in fh:
+            for v in _normalize_ext_line(ln):
+                out.add(v)
+    return out
+
+def _should_process_url(u: str, seen: Set[str]) -> bool:
+    cu = _clean_abs(u)
+    if not cu:
+        return False
+    key = urlparse(cu).path
+    # ONLY list takes priority if provided
+    if ONLY_EXTS and (cu not in ONLY_EXTS) and (key not in ONLY_EXTS):
+        return False
+    # Skip list OR already-seen
+    if (cu in SKIP_EXTS) or (key in SKIP_EXTS):
+        return False
+    if (cu in seen) or (key in seen):
+        return False
+    return True
 
 # ---------------------------------------------------------------------------
 def accept_cookies(page):
@@ -637,11 +700,11 @@ def collect_product_links_from_listing(page, seed_url: str, seen_ext_ids: Set[st
         time.sleep(REQ_DELAY)
 
         page_links = _extract_product_hrefs(page)
-        page_links = [u for u in page_links if _clean_abs(u) not in seen_ext_ids]
-        print(f"[selver]   page {n}: discovered {len(page_links)} candidate links")
+        page_links = [u for u in page_links if _should_process_url(u, seen_ext_ids)]
+        print(f"[selver]   page {n}: discovered {len(page_links)} candidate links (after filters)")
         for u in page_links:
             cu = _clean_abs(u)
-            if cu and cu not in links and cu not in seen_ext_ids:
+            if cu and cu not in links:
                 links.add(cu); link2listing[cu] = url
 
     if links:
@@ -883,10 +946,14 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
         _wait_listing_ready(page); time.sleep(REQ_DELAY)
 
         hrefs = _extract_product_hrefs(page)
-        hrefs = [h for h in hrefs if _clean_abs(h) not in seen_ext_ids]
-        print(f"[selver]   page {n}: discovered {len(hrefs)} candidate links")
+        hrefs = [h for h in hrefs if _should_process_url(h, seen_ext_ids)]
+        print(f"[selver]   page {n}: discovered {len(hrefs)} candidate links (after filters)")
 
         for href in hrefs:
+            # Secondary filter in case of race
+            if not _should_process_url(href, seen_ext_ids):
+                continue
+
             navigated = safe_goto(page, href)
             if not navigated:
                 navigated = open_product_via_click(page, url, href)
@@ -897,9 +964,10 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
             row = _extract_row_from_pdp(page, href)
             if row:
                 ext_id = _clean_abs(row["ext_id"]) or row["ext_id"]
-                if ext_id not in seen_ext_ids:
+                key = urlparse(ext_id).path
+                if ext_id not in seen_ext_ids and key not in seen_ext_ids:
                     writer.writerow(row)
-                    seen_ext_ids.add(ext_id)
+                    seen_ext_ids.add(ext_id); seen_ext_ids.add(key)
                     wrote += 1
 
             try:
@@ -911,7 +979,19 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
 
     return wrote
 
-# ---------------------------- main -----------------------------------------
+# ---------------------------- CLI & main ------------------------------------
+def _parse_cli():
+    p = argparse.ArgumentParser(description="Selver category crawler (Playwright)")
+    p.add_argument("--skip-ext-file", dest="skip_file", help="File with ext_ids/URLs to skip", default=None)
+    p.add_argument("--skip-ids-file", dest="skip_file_alias", help="Alias of --skip-ext-file", default=None)
+    p.add_argument("--only-ext-file", dest="only_file", help="File with ext_ids/URLs to process exclusively", default=None)
+    p.add_argument("--cats-file", dest="cats_file", help="Categories file (overrides CATEGORIES_FILE env)", default=None)
+    p.add_argument("--page-limit", dest="page_limit", type=int, default=None)
+    p.add_argument("--req-delay", dest="req_delay", type=float, default=None)
+    p.add_argument("--output-csv", dest="output_csv", default=None)
+    # We intentionally do NOT expose headless here (controlled by Playwright context)
+    return p.parse_args()
+
 def crawl():
     os.makedirs(os.path.dirname(OUTPUT) or ".", exist_ok=True)
     dbg_dir = "data/selver_debug"; os.makedirs(dbg_dir, exist_ok=True)
@@ -1023,16 +1103,14 @@ def crawl():
 
                     for u in links:
                         cu_norm = _clean_abs(u)
-                        if cu_norm and (cu_norm not in product_urls) and (cu_norm not in seen_ext_ids):
+                        if cu_norm and (cu_norm not in product_urls):
                             product_urls.add(cu_norm)
                             prod2listing[cu_norm] = mapping.get(u, cu)
 
                     print(f"[selver] {cu} → +{len(links)} products (total so far: {len(product_urls)})")
 
                 for i, pu in enumerate(sorted(product_urls), 1):
-                    if _clean_abs(pu) in seen_ext_ids:
-                        continue
-                    if not _is_selver_product_like(pu):
+                    if not _should_process_url(pu, seen_ext_ids):
                         continue
 
                     got = safe_goto(page, pu)
@@ -1051,9 +1129,10 @@ def crawl():
 
                     if row:
                         ext_id = _clean_abs(row["ext_id"]) or row["ext_id"]
-                        if ext_id not in seen_ext_ids:
+                        key = urlparse(ext_id).path
+                        if ext_id not in seen_ext_ids and key not in seen_ext_ids:
                             w.writerow(row)
-                            seen_ext_ids.add(ext_id)
+                            seen_ext_ids.add(ext_id); seen_ext_ids.add(key)
                             rows_written += 1
 
                     if (i % 25) == 0:
@@ -1068,6 +1147,33 @@ def crawl():
 
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
+    # CLI overrides & list loading
+    args = _parse_cli()
+
+    # Apply overrides to globals
+    if args.output_csv:
+        OUTPUT = args.output_csv
+    if args.page_limit is not None:
+        PAGE_LIMIT = int(args.page_limit)
+    if args.req_delay is not None:
+        REQ_DELAY = float(args.req_delay)
+    if args.cats_file:
+        CATEGORIES_FILE = args.cats_file
+
+    # Load skip/only files
+    skip_path = args.skip_file or args.skip_file_alias
+    if skip_path:
+        SKIP_EXTS = _load_ext_file(skip_path)
+        print(f"[selver] loaded {len(SKIP_EXTS)} skip keys (abs+path) from {skip_path}")
+    else:
+        SKIP_EXTS = set()
+
+    if args.only_file:
+        ONLY_EXTS = _load_ext_file(args.only_file)
+        print(f"[selver] loaded {len(ONLY_EXTS)} ONLY keys (abs+path) from {args.only_file}")
+    else:
+        ONLY_EXTS = set()
+
     try:
         crawl()
     except KeyboardInterrupt:
