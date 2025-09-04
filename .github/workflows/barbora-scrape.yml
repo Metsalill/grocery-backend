@@ -170,7 +170,7 @@ jobs:
           set -euo pipefail
           : > data/barbora_skip_ext_ids.txt
 
-          -- Ensure candidates table exists to avoid relation errors
+          # Ensure candidates table exists to avoid relation errors
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           CREATE TABLE IF NOT EXISTS public.barbora_candidates (
             ext_id        text PRIMARY KEY,
@@ -227,22 +227,19 @@ jobs:
           MAX_PRODUCTS="${MAX_PRODUCTS:-0}"
           HEADLESS="${HEADLESS:-1}"
 
+          cmd=( python -u scripts/barbora_crawl_categories_pw.py
+                --cats-file data/barbora_categories.txt
+                --page-limit "$PAGE_LIMIT"
+                --max-products "$MAX_PRODUCTS"
+                --headless "$HEADLESS"
+                --req-delay "$REQ_DELAY"
+                --output-csv "$OUTPUT_CSV" )
+
           if [ -f "$SKIP_EXT_FILE" ]; then
-            SKIP_FLAG=(--skip-ext-file "$SKIP_EXT_FILE")
-          else
-            SKIP_FLAG=()
+            cmd+=( --skip-ext-file "$SKIP_EXT_FILE" )
           fi
 
-          stdbuf -oL -eL timeout -k 45s 80m \
-            python -u scripts/barbora_crawl_categories_pw.py \
-              --cats-file data/barbora_categories.txt \
-              --page-limit "$PAGE_LIMIT" \
-              --max-products "$MAX_PRODUCTS" \
-              --headless "$HEADLESS" \
-              --req-delay "$REQ_DELAY" \
-              --output-csv "$OUTPUT_CSV" \
-              "${SKIP_FLAG[@]}" \
-            | tee data/barbora_run.log
+          stdbuf -oL -eL timeout -k 45s 80m "${cmd[@]}" | tee data/barbora_run.log
 
       - name: Ensure CSV exists (header if empty)
         shell: bash
@@ -367,7 +364,7 @@ jobs:
                      initcap(replace(regexp_replace(COALESCE(ext_id,''), '^.*/', ''), '-', ' '))) AS name,
             NULLIF(btrim(ean_raw), '') AS ean_raw,
             NULLIF(btrim(sku_raw), '') AS sku_raw,
-            NULLIF(regexp_replace(COALESCE(NULLIF(ean_norm,''), ean_raw, ''), '[^0-9]', '', 'g'), '') AS ean_norm,
+            NULLIF(regexp_replace(COALESCE(ean_raw,''), '[^0-9]', '', 'g'), '') AS ean_norm,
             NULLIF(btrim(size_text), '') AS size_text,
             NULLIF(btrim(brand), '') AS brand,
             NULLIF(price, '')::numeric AS price,
