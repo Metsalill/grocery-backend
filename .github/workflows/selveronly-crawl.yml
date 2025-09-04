@@ -19,8 +19,9 @@ on:
         description: "Seconds between steps"
         required: false
         default: "0.6"
+  # Nightly at 02:00 UTC
   schedule:
-    - cron: "0 2 * * *"   # nightly at 02:00 UTC
+    - cron: "0 2 * * *"
 
 concurrency:
   group: ${{ github.event_name == 'workflow_dispatch' && format('selver-category-crawl-{0}', github.run_id) || 'selver-category-crawl' }}
@@ -94,14 +95,22 @@ jobs:
           LOG_CONSOLE: ${{ github.event_name == 'workflow_dispatch' && inputs.log_console || 'warn' }}
           NAV_TIMEOUT_MS: "60000"
           PRELOAD_DB: "1"
+          PRELOAD_DB_QUERY: |
+            SELECT DISTINCT ext_id
+            FROM (
+              SELECT sp.ext_id
+                FROM public.staging_selver_products sp
+               WHERE COALESCE(sp.ean_norm,'') <> ''
+              UNION
+              SELECT c.ext_id
+                FROM public.selver_candidates c
+               WHERE COALESCE(c.ean_norm,'') <> ''
+              UNION
+              SELECT m.ext_id
+                FROM public.ext_product_map m
+            ) u
+            WHERE ext_id IS NOT NULL AND ext_id <> ''
           PGSSLMODE: "require"
-          # YAML-safe folded (single-line) SQL:
-          PRELOAD_DB_QUERY: >-
-            SELECT DISTINCT ext_id FROM (
-              SELECT sp.ext_id FROM public.staging_selver_products sp WHERE COALESCE(sp.ean_norm,'') <> ''
-              UNION SELECT c.ext_id FROM public.selver_candidates c WHERE COALESCE(c.ean_norm,'') <> ''
-              UNION SELECT m.ext_id FROM public.ext_product_map m
-            ) u WHERE ext_id IS NOT NULL AND ext_id <> ''
         run: |
           set -euo pipefail
           set -x
@@ -186,6 +195,7 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           BEGIN;
 
+          -- Add/ensure schema with BRAND support
           CREATE TABLE IF NOT EXISTS public.staging_selver_products (
             ext_id        text PRIMARY KEY,
             name          text NOT NULL,
@@ -235,6 +245,7 @@ jobs:
 
           COMMIT;
 
+          -- Keep only the most recent price per (product,store)
           DO $$
           BEGIN
             WITH ranked AS (
@@ -278,7 +289,15 @@ jobs:
             exit 0
           fi
 
-          cat > /tmp/selver_load.sql <<'SQL'
+          # Detect whether CSV has a 'brand' column
+          HAS_BRAND=0
+          if head -n1 data/selver.csv | grep -qiE '^ext_id,source_url,name,brand,'; then
+            HAS_BRAND=1
+          fi
+          echo "HAS_BRAND=$HAS_BRAND"
+
+          # Build the psql script in three parts so we can inject a single-line \copy
+          cat > /tmp/selver_load.sql <<'SQL_A'
           \set ON_ERROR_STOP on
           BEGIN;
 
@@ -296,16 +315,22 @@ jobs:
             category_path text,
             category_leaf text
           );
+          SQL_A
 
-          \copy tmp_staging_selver_products (
-            ext_id, source_url, name, brand, ean_raw, ean_norm, sku_raw, size_text, price, currency, category_path, category_leaf
-          )
-          FROM 'data/selver.csv'
-          WITH (FORMAT csv, HEADER true);
+          if [ "$HAS_BRAND" -eq 1 ]; then
+            echo "\copy tmp_staging_selver_products (ext_id,source_url,name,brand,ean_raw,ean_norm,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER" >> /tmp/selver_load.sql
+          else
+            echo "\copy tmp_staging_selver_products (ext_id,source_url,name,ean_raw,ean_norm,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER" >> /tmp/selver_load.sql
+          fi
+          echo "" >> /tmp/selver_load.sql
 
+          cat >> /tmp/selver_load.sql <<'SQL_B'
+
+          -- Drop obvious non-product noise if present
           DELETE FROM tmp_staging_selver_products
           WHERE name ILIKE '%vabad ametikohad%';
 
+          -- Normalize view (prefer CSV ean_norm; fallback to ean_raw)
           WITH filtered AS (
             SELECT
               ext_id,
@@ -323,6 +348,7 @@ jobs:
             FROM tmp_staging_selver_products
           ),
 
+          -- Insert/update into our staging table (note: staging has GENERATED ALWAYS ean_norm)
           upsert_staging AS (
             INSERT INTO public.staging_selver_products (
               ext_id, name, brand, ean_raw, sku_raw, size_text, price, currency, category_path, category_leaf
@@ -344,6 +370,7 @@ jobs:
             RETURNING ext_id
           ),
 
+          -- Build price rows by matching either ext_id mapping or EANs
           joined AS (
             SELECT
               COALESCE(m.product_id, pe.product_id) AS product_id,
@@ -378,6 +405,7 @@ jobs:
                 source_url   = EXCLUDED.source_url,
                 source       = EXCLUDED.source;
 
+          -- Anything we couldn't map becomes/updates a candidate
           WITH filtered AS (
             SELECT * FROM (
               SELECT
@@ -411,12 +439,13 @@ jobs:
                 brand         = COALESCE(EXCLUDED.brand, public.selver_candidates.brand),
                 last_seen     = now();
 
+          -- Quick counters
           SELECT
             (SELECT COUNT(*) FROM tmp_staging_selver_products) AS staged_rows,
             (SELECT COUNT(*) FROM public.selver_candidates)    AS candidates_total;
 
           COMMIT;
-          SQL
+          SQL_B
 
           psql "$DATABASE_URL" -f /tmp/selver_load.sql
 
