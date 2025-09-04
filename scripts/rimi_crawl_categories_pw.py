@@ -7,15 +7,12 @@ Improvements in this version
 - Much stronger BRAND extraction:
   * JSON-LD: product.brand (string or {name}), manufacturer.{name}, offers.seller.name
   * Meta tags: product:brand
-  * Spec table rows (Tootja/Brand/Bränd/Valmistaja)
-  * Storefront globals / dataLayer keys (brand/manufacturer)
-- Better SIZE extraction from spec table + name fallback
+  * Spec rows: “Kaubamärk”, “Bränd/Brand”, “Tootja/Manufacturer/Valmistaja”
+  * Also reads <dl><dt>Key</dt><dd>Val</dd></dl> and generic “Key: Value” rows
+- Better SIZE extraction from spec + name fallback
 - EAN normalization (accepts 8/12/13/14 → normalized 13 when possible)
 - Price parsing handles “3 99 €”, JSON-LD offers, meta, visible text
-- Faster & more stable:
-  * blocks 3rd-party analytics and heavy resources
-  * auto-accepts overlays / cookie banners
-  * canonical source_url capture
+- Faster & more stable (blocks heavy 3rd-party, cookie overlays, canonical capture)
 - Single Chromium instance reused for all PDPs
 
 CSV columns written (unchanged):
@@ -158,6 +155,95 @@ def normalize_ean_digits(e: str) -> str:
 
 # ----------------------------- parsing helpers --------------------------------
 
+SIZE_IN_NAME_RE = re.compile(
+    r'(\d+\s*[×x]\s*\d+[.,]?\d*\s?(?:g|kg|ml|l|tk)|\d+[.,]?\d*\s?(?:g|kg|ml|l|tk))\b',
+    re.I
+)
+
+def _norm_key(s: str) -> str:
+    """Lowercase + simple de-diacritization for et/fi keys."""
+    s = (s or "").strip().lower()
+    # basic transliteration needed for matches: ä->a, ö/õ->o, ü->u, š->s, ž->z
+    s = (s
+         .replace("ä", "a").replace("ö", "o").replace("õ", "o").replace("ü", "u")
+         .replace("š", "s").replace("ž", "z"))
+    return s
+
+def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    """
+    Returns (brand, manufacturer, size_text) by scanning tables, dl/dt/dd and generic 'Key: Value' rows.
+    """
+    brand = mfr = size_text = None
+
+    def set_brand(v: str):
+        nonlocal brand
+        v = (v or "").strip()
+        if v and not brand:
+            brand = v
+
+    def set_mfr(v: str):
+        nonlocal mfr
+        v = (v or "").strip()
+        if v and not mfr:
+            mfr = v
+
+    def set_size(v: str):
+        nonlocal size_text
+        v = (v or "").strip()
+        if v and not size_text:
+            size_text = v
+
+    # 1) table rows (th/td)
+    for row in soup.select("table tr"):
+        th, td = row.find("th"), row.find("td")
+        if not th or not td:
+            continue
+        key = _norm_key(th.get_text(" ", strip=True))
+        val = td.get_text(" ", strip=True)
+        if key in ("kaubamark", "brand", "brand:", "brand name", "brandname", "brand/kaubamark", "braend", "braend:", "braend name", "brand/kaubamärk", "bränd", "braend/kaubamark"):
+            set_brand(val)
+        elif key in ("tootja", "manufacturer", "valmistaja", "producer"):
+            set_mfr(val)
+        elif any(k in key for k in ("kogus", "netokogus", "maht", "pakend", "neto", "suurus", "mahtuvus")):
+            set_size(val)
+
+    # 2) dl/dt/dd pairs
+    for dl in soup.select("dl"):
+        dts = dl.find_all("dt")
+        dds = dl.find_all("dd")
+        for i in range(min(len(dts), len(dds))):
+            key = _norm_key(dts[i].get_text(" ", strip=True))
+            val = dds[i].get_text(" ", strip=True)
+            if key in ("kaubamark", "brand", "bränd"):
+                set_brand(val)
+            elif key in ("tootja", "manufacturer", "valmistaja", "producer"):
+                set_mfr(val)
+            elif any(k in key for k in ("kogus", "netokogus", "maht", "pakend", "neto", "suurus", "mahtuvus")):
+                set_size(val)
+
+    # 3) generic “Key: Value” rows in cards/divs
+    for el in soup.select(".product-attributes__row, .product-details__row, .key-value, .MuiGrid-root, li, div"):
+        t = (el.get_text(" ", strip=True) or "")
+        if ":" not in t or len(t) > 200:
+            continue
+        k, v = t.split(":", 1)
+        key = _norm_key(k)
+        val = v.strip()
+        if key in ("kaubamark", "brand", "bränd"):
+            set_brand(val)
+        elif key in ("tootja", "manufacturer", "valmistaja", "producer"):
+            set_mfr(val)
+        elif any(k in key for k in ("kogus", "netokogus", "maht", "pakend", "neto", "suurus", "mahtuvus")):
+            set_size(val)
+
+    # 4) size fallback from name
+    if not size_text and name:
+        m = SIZE_IN_NAME_RE.search(name)
+        if m:
+            size_text = m.group(1).replace("L", "l")
+
+    return brand, mfr, size_text
+
 def parse_price_from_dom_or_meta(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
     for sel in [
         'meta[itemprop="price"]',
@@ -179,33 +265,6 @@ def parse_price_from_dom_or_meta(soup: BeautifulSoup) -> Tuple[Optional[str], Op
     if m:
         return norm_price_str(m.group(1)), "EUR"
     return None, None
-
-SIZE_IN_NAME_RE = re.compile(
-    r'(\d+\s*[×x]\s*\d+[.,]?\d*\s?(?:g|kg|ml|l|tk)|\d+[.,]?\d*\s?(?:g|kg|ml|l|tk))\b',
-    re.I
-)
-
-def parse_brand_and_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str], Optional[str]]:
-    brand = size_text = None
-
-    # spec table rows
-    for row in soup.select("table tr"):
-        th, td = row.find("th"), row.find("td")
-        if not th or not td:
-            continue
-        key = th.get_text(" ", strip=True).lower()
-        val = td.get_text(" ", strip=True)
-        if (not brand) and any(k in key for k in ("tootja","brand","bränd","valmistaja","manufacturer")):
-            brand = val
-        if (not size_text) and any(k in key for k in ("kogus","maht","netokogus","pakend","neto","suurus","mahtuvus")):
-            size_text = val
-
-    if not size_text and name:
-        m = SIZE_IN_NAME_RE.search(name)
-        if m:
-            size_text = m.group(1).replace("L","l")
-
-    return brand, size_text
 
 def extract_ext_id(url: str) -> str:
     try:
@@ -230,13 +289,14 @@ def parse_jsonld_for_product_and_breadcrumbs_and_brand(soup: BeautifulSoup) -> T
             continue
         seq = data if isinstance(data, list) else [data]
         for d in seq:
-            if isinstance(d, dict) and ("Product" in (d.get("@type") or [] if isinstance(d.get("@type"), list) else [d.get("@type")])):
+            at = d.get("@type")
+            at_list = at if isinstance(at, list) else [at]
+            if isinstance(d, dict) and ("Product" in at_list):
                 offers = d.get("offers")
                 if isinstance(offers, dict):
                     if "price" in offers: flat["price"] = offers.get("price")
                     if "priceCurrency" in offers: flat["currency"] = offers.get("priceCurrency")
                     if not brand:
-                        # sometimes nested seller brand shows up
                         bobj = offers.get("seller") or {}
                         if isinstance(bobj, dict) and bobj.get("name"):
                             brand = str(bobj["name"]).strip()
@@ -261,7 +321,7 @@ def parse_jsonld_for_product_and_breadcrumbs_and_brand(soup: BeautifulSoup) -> T
                         manufacturer = str(v["name"])
                     elif isinstance(v, str):
                         manufacturer = v
-            if isinstance(d, dict) and ("BreadcrumbList" in (d.get("@type") or [] if isinstance(d.get("@type"), list) else [d.get("@type")])):
+            if isinstance(d, dict) and ("BreadcrumbList" in at_list):
                 try:
                     items = d.get("itemListElement") or []
                     names = []
@@ -479,9 +539,10 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
             crumbs = [c for c in crumbs if c]
             category_path = " > ".join(crumbs[-5:])
 
-        # spec table brand & size
-        b2, s2 = parse_brand_and_size(soup, name or "")
+        # spec: brand + manufacturer + size
+        b2, m2, s2 = parse_brand_mfr_size(soup, name or "")
         brand = brand or (b2 or "")
+        manufacturer = manufacturer or (m2 or "")
         size_text = size_text or (s2 or "")
 
         # microdata hints
