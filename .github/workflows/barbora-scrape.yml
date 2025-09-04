@@ -3,6 +3,10 @@ name: "Barbora (Maxima EE) - Category Crawl + optional DB upsert"
 on:
   workflow_dispatch:
     inputs:
+      mode:
+        description: "prices (default) or metadata (crawl only items missing brand/name)"
+        required: false
+        default: "prices"
       categories_multiline:
         description: "Category URLs (one per line). If empty, auto-discover from Barbora."
         required: false
@@ -42,6 +46,7 @@ jobs:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/barbora_products.csv
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      MODE: ${{ github.event.inputs.mode || 'prices' }}
       # Space-separated URL prefixes to exclude/include
       EXCLUDE_SECTIONS: "https://barbora.ee/kodukaubad-ja-vaba-aeg https://barbora.ee/enesehooldustooted https://barbora.ee/puhastustarbed-ja-lemmikloomatooted https://barbora.ee/lastekaubad"
       INCLUDE_SECTIONS: "https://barbora.ee/enesehooldustooted/suuhugieen/hambapastad https://barbora.ee/enesehooldustooted/raseerimisvahendid https://barbora.ee/enesehooldustooted/intiimhugieeni-vahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/pesupesemisvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/noudepesuvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/kodukeemia https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/majapidamis-ja-koristustarbed https://barbora.ee/lastekaubad/piimasegud-ja-jatkupiimasegud https://barbora.ee/lastekaubad/pudrud https://barbora.ee/lastekaubad/mahkmed https://barbora.ee/lastekaubad/puuviljapureed https://barbora.ee/lastekaubad/laste-hugieenitarbed/niisked-salvratikud https://barbora.ee/lastekaubad/liha-ja-koogiviljapureed"
@@ -114,7 +119,9 @@ jobs:
               echo '    p = urlparse(url)'
               echo '    if not (p.scheme and p.netloc and p.netloc.endswith("barbora.ee")): return False'
               echo '    segs = [s for s in p.path.split("/") if s]'
-              echo '    return (1 <= len(segs) <= 3) and all(s not in ("retseptid","info","blogi") for s in segs)'
+              echo '    # allow 1..4 segments; avoid obvious non-catalog roots'
+              echo '    if any(s in ("retseptid","info","blogi","kampaania") for s in segs): return False'
+              echo '    return 1 <= len(segs) <= 4'
               echo 'def allowed(url):'
               echo '    if any(url.startswith(pref) for pref in includes): return True'
               echo '    if any(url.startswith(pref) for pref in excludes): return False'
@@ -137,15 +144,21 @@ jobs:
             } > /tmp/discover_barbora.py
             python /tmp/discover_barbora.py
 
-            # 4) Fallback to INCLUDE_SECTIONS if autodiscover produced nothing
-            if [ ! -s data/barbora_categories.txt ]; then
-              if [ -n "${INCLUDES}" ]; then
-                echo "${INCLUDES}" | tr ' ' '\n' | sed '/^[[:space:]]*$/d' > data/barbora_categories.txt
-                echo "Autodiscover empty; wrote INCLUDE_SECTIONS to data/barbora_categories.txt"
-              else
-                echo "::error::No categories discovered; INCLUDE_SECTIONS is empty."
-                exit 2
-              fi
+            # 4) Fallback to a curated FOOD roots list if autodiscover empty/too small
+            if [ ! -s data/barbora_categories.txt ] || [ "$(wc -l < data/barbora_categories.txt)" -lt 10 ]; then
+              cat > data/barbora_categories.txt <<'TXT'
+https://barbora.ee/koogiviljad-puuviljad
+https://barbora.ee/piimatooted-munad-void
+https://barbora.ee/juustud
+https://barbora.ee/leib-sai-kondiitritooted
+https://barbora.ee/valmistoidud
+https://barbora.ee/kuivained-ja-hoidised
+https://barbora.ee/maitseained-ja-kastmed
+https://barbora.ee/suupisted-maiustused
+https://barbora.ee/joogid
+https://barbora.ee/kulmutatud-tooted
+TXT
+              echo "Autodiscover small → wrote curated FOOD roots to data/barbora_categories.txt"
             fi
           fi
 
@@ -155,41 +168,22 @@ jobs:
           echo "--------------"
           test -s data/barbora_categories.txt
 
-      # Ensure psql available for the skip-list step
-      - name: Install psql client (for skip list)
+      # Ensure psql available for the skip/only steps
+      - name: Install psql client (for skip/only lists)
         if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-      - name: Build skip list from priced items
-        if: ${{ env.DATABASE_URL != '' }}
+      # MODE=prices → skip only items that are priced AND already have a brand
+      - name: Build skip list (priced & have brand)
+        if: ${{ env.DATABASE_URL != '' && env.MODE == 'prices' }}
         shell: bash
         run: |
           set -euo pipefail
           : > data/barbora_skip_ext_ids.txt
 
-          # Ensure candidates table exists to avoid relation errors
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          CREATE TABLE IF NOT EXISTS public.barbora_candidates (
-            ext_id        text PRIMARY KEY,
-            ean_norm      text,
-            ean_raw       text,
-            sku_raw       text,
-            name          text,
-            size_text     text,
-            brand         text,
-            price         numeric(12,2),
-            currency      text,
-            category_path text,
-            category_leaf text,
-            last_seen     timestamptz DEFAULT now()
-          );
-          SQL
-
-          # Build the skip list from prices ∪ candidates.
-          # For Barbora, ext_id is the PDP URL/slug itself, so we use source_url directly.
           psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/barbora_skip_ext_ids.txt
           WITH priced_from_prices AS (
             SELECT DISTINCT p.source_url AS ext_id
@@ -201,16 +195,47 @@ jobs:
           priced_from_candidates AS (
             SELECT DISTINCT ext_id::text
             FROM public.barbora_candidates
-            WHERE COALESCE(price,0) > 0
-              AND COALESCE(ext_id,'') <> ''
+            WHERE COALESCE(price,0) > 0 AND COALESCE(ext_id,'') <> ''
+          ),
+          priced AS (
+            SELECT ext_id FROM priced_from_prices
+            UNION
+            SELECT ext_id FROM priced_from_candidates
           )
-          SELECT ext_id FROM priced_from_prices
-          UNION
-          SELECT ext_id FROM priced_from_candidates
+          SELECT pr.ext_id
+          FROM priced pr
+          LEFT JOIN public.barbora_candidates bc ON bc.ext_id = pr.ext_id
+          LEFT JOIN public.staging_barbora_products sp ON sp.ext_id = pr.ext_id
+          WHERE COALESCE(NULLIF(btrim(COALESCE(bc.brand, sp.brand, '')), ''), NULL) IS NOT NULL
+            AND COALESCE(NULLIF(btrim(COALESCE(bc.name, sp.name, '')), ''), NULL) IS NOT NULL
           ORDER BY 1;
           SQL
 
-          echo "Skip list rows (already priced): $(wc -l < data/barbora_skip_ext_ids.txt)" | tee data/_barbora_skip_count.txt
+          echo "Skip list rows (priced & have brand+name): $(wc -l < data/barbora_skip_ext_ids.txt)" | tee data/_barbora_skip_count.txt
+
+      # MODE=metadata → crawl only items missing brand or name
+      - name: Build ONLY list (missing brand/name)
+        if: ${{ env.DATABASE_URL != '' && env.MODE == 'metadata' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > data/barbora_only_ext_ids.txt
+          psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/barbora_only_ext_ids.txt
+          WITH all_ids AS (
+            SELECT ext_id FROM public.barbora_candidates
+            UNION
+            SELECT ext_id FROM public.staging_barbora_products
+          )
+          SELECT a.ext_id
+          FROM all_ids a
+          LEFT JOIN public.barbora_candidates bc ON bc.ext_id = a.ext_id
+          LEFT JOIN public.staging_barbora_products sp ON sp.ext_id = a.ext_id
+          WHERE
+            COALESCE(NULLIF(btrim(COALESCE(bc.brand, sp.brand, '')), ''), NULL) IS NULL
+            OR COALESCE(NULLIF(btrim(COALESCE(bc.name,  sp.name,  '')), ''), NULL) IS NULL
+          ORDER BY 1;
+          SQL
+          echo "ONLY list rows (missing brand/name): $(wc -l < data/barbora_only_ext_ids.txt)"
 
       - name: Crawl Barbora categories (Playwright)
         env:
@@ -218,7 +243,6 @@ jobs:
           PAGE_LIMIT: ${{ github.event.inputs.page_limit }}
           MAX_PRODUCTS: ${{ github.event.inputs.max_products }}
           HEADLESS: ${{ github.event.inputs.headless }}
-          SKIP_EXT_FILE: data/barbora_skip_ext_ids.txt
         shell: bash
         run: |
           set -euo pipefail
@@ -227,17 +251,24 @@ jobs:
           MAX_PRODUCTS="${MAX_PRODUCTS:-0}"
           HEADLESS="${HEADLESS:-1}"
 
+          SKIP_FLAG=()
+          ONLY_FLAG=()
+          if [ "${MODE}" = "prices" ] && [ -s data/barbora_skip_ext_ids.txt ]; then
+            SKIP_FLAG=( --skip-ext-file data/barbora_skip_ext_ids.txt )
+          fi
+          if [ "${MODE}" = "metadata" ] && [ -s data/barbora_only_ext_ids.txt ]; then
+            ONLY_FLAG=( --only-ext-file data/barbora_only_ext_ids.txt )
+          fi
+
           cmd=( python -u scripts/barbora_crawl_categories_pw.py
                 --cats-file data/barbora_categories.txt
                 --page-limit "$PAGE_LIMIT"
                 --max-products "$MAX_PRODUCTS"
                 --headless "$HEADLESS"
                 --req-delay "$REQ_DELAY"
-                --output-csv "$OUTPUT_CSV" )
-
-          if [ -f "$SKIP_EXT_FILE" ]; then
-            cmd+=( --skip-ext-file "$SKIP_EXT_FILE" )
-          fi
+                --output-csv "$OUTPUT_CSV"
+                "${SKIP_FLAG[@]}"
+                "${ONLY_FLAG[@]}" )
 
           stdbuf -oL -eL timeout -k 45s 80m "${cmd[@]}" | tee data/barbora_run.log
 
@@ -255,11 +286,13 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: barbora-crawl-${{ github.run_id }}
+          name: barbora-crawl-${{ env.MODE }}-${{ github.run_id }}
           path: |
             data/barbora_products.csv
             data/barbora_run.log
             data/_barbora_skip_count.txt
+            data/barbora_skip_ext_ids.txt
+            data/barbora_only_ext_ids.txt
           if-no-files-found: warn
           retention-days: 7
 
@@ -359,7 +392,7 @@ jobs:
           CREATE TEMP TABLE tmp_staging_barbora_products AS
           SELECT
             ext_id,
-            -- Fill missing/blank name from slug: take last path fragment, replace dashes with spaces, Title Case
+            -- Fill missing/blank name from slug
             COALESCE(NULLIF(btrim(name), ''),
                      initcap(replace(regexp_replace(COALESCE(ext_id,''), '^.*/', ''), '-', ' '))) AS name,
             NULLIF(btrim(ean_raw), '') AS ean_raw,
@@ -374,7 +407,7 @@ jobs:
           FROM tmp_barbora_csv_full
           WHERE COALESCE(ext_id,'') <> '';
 
-          -- Drop any rows that still lack a name after fallback (satisfy NOT NULL)
+          -- Drop any rows that still lack a name after fallback
           DELETE FROM tmp_staging_barbora_products
           WHERE COALESCE(name,'') = '';
 
