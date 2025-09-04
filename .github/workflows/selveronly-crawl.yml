@@ -195,7 +195,7 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           BEGIN;
 
-          -- Add/ensure schema with BRAND support
+          -- Staging with generated ean_norm (do NOT insert into ean_norm directly)
           CREATE TABLE IF NOT EXISTS public.staging_selver_products (
             ext_id        text PRIMARY KEY,
             name          text NOT NULL,
@@ -221,6 +221,7 @@ jobs:
           SELECT 'Selver e-Selver', 'Selver', TRUE
           WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE chain='Selver' AND is_online=TRUE);
 
+          -- Candidates (ean_norm may or may not be generated, we will handle both cases later)
           CREATE TABLE IF NOT EXISTS public.selver_candidates (
             ext_id        text PRIMARY KEY,
             ean_norm      text,
@@ -245,7 +246,7 @@ jobs:
 
           COMMIT;
 
-          -- Keep only the most recent price per (product,store)
+          -- Keep only most recent price per (product,store)
           DO $$
           BEGIN
             WITH ranked AS (
@@ -296,7 +297,7 @@ jobs:
           fi
           echo "HAS_BRAND=$HAS_BRAND"
 
-          # Build the psql script in three parts so we can inject a single-line \copy
+          # Build the psql script in parts to keep a single-line \copy and avoid parser issues
           cat > /tmp/selver_load.sql <<'SQL_A'
           \set ON_ERROR_STOP on
           BEGIN;
@@ -348,7 +349,7 @@ jobs:
             FROM tmp_staging_selver_products
           ),
 
-          -- Insert/update into our staging table (note: staging has GENERATED ALWAYS ean_norm)
+          -- Upsert staging (note: ean_norm is GENERATED in staging)
           upsert_staging AS (
             INSERT INTO public.staging_selver_products (
               ext_id, name, brand, ean_raw, sku_raw, size_text, price, currency, category_path, category_leaf
@@ -370,7 +371,7 @@ jobs:
             RETURNING ext_id
           ),
 
-          -- Build price rows by matching either ext_id mapping or EANs
+          -- Prices from mapped products (either by ext_id map or EAN)
           joined AS (
             SELECT
               COALESCE(m.product_id, pe.product_id) AS product_id,
@@ -405,15 +406,14 @@ jobs:
                 source_url   = EXCLUDED.source_url,
                 source       = EXCLUDED.source;
 
-          -- Anything we couldn't map becomes/updates a candidate
+          -- Build 'missing' into a temp table so we can branch depending on ean_norm being generated
+          CREATE TEMP TABLE tmp_missing_candidates AS
           WITH filtered AS (
-            SELECT * FROM (
-              SELECT
-                ext_id, source_url, name, brand, ean_raw,
-                NULLIF(regexp_replace(COALESCE(ean_norm, ean_raw, ''), '[^0-9]', '', 'g'),'') AS ean_norm,
-                sku_raw, size_text, price, currency, category_path, category_leaf
-              FROM tmp_staging_selver_products
-            ) q
+            SELECT
+              ext_id, source_url, name, NULLIF(brand,'') AS brand, ean_raw,
+              NULLIF(regexp_replace(COALESCE(ean_norm, ean_raw, ''), '[^0-9]', '', 'g'),'') AS ean_norm,
+              sku_raw, size_text, price, currency, category_path, category_leaf
+            FROM tmp_staging_selver_products
           ),
           missing AS (
             SELECT f.*
@@ -422,22 +422,54 @@ jobs:
             LEFT JOIN public.ext_product_map m  ON m.ext_id   = f.ext_id
             WHERE pe.product_id IS NULL AND m.product_id IS NULL
           )
-          INSERT INTO public.selver_candidates
-            (ext_id, ean_norm, ean_raw, sku_raw, name, brand, size_text, price, currency, category_path, category_leaf, last_seen)
-          SELECT
-            ext_id, NULLIF(ean_norm,''), ean_raw, sku_raw, name, brand, size_text, price, currency, category_path, category_leaf, now()
-          FROM missing
-          ON CONFLICT (ext_id) DO UPDATE
-            SET price         = EXCLUDED.price,
-                currency      = EXCLUDED.currency,
-                size_text     = COALESCE(EXCLUDED.size_text, public.selver_candidates.size_text),
-                category_path = COALESCE(EXCLUDED.category_path, public.selver_candidates.category_path),
-                category_leaf = COALESCE(EXCLUDED.category_leaf, public.selver_candidates.category_leaf),
-                ean_raw       = COALESCE(EXCLUDED.ean_raw, public.selver_candidates.ean_raw),
-                ean_norm      = COALESCE(EXCLUDED.ean_norm, public.selver_candidates.ean_norm),
-                sku_raw       = COALESCE(EXCLUDED.sku_raw, public.selver_candidates.sku_raw),
-                brand         = COALESCE(EXCLUDED.brand, public.selver_candidates.brand),
-                last_seen     = now();
+          SELECT * FROM missing;
+
+          -- Insert candidates; tolerate ean_norm being GENERATED in some DBs
+          DO $do$
+          DECLARE is_gen boolean;
+          BEGIN
+            SELECT EXISTS (
+              SELECT 1
+              FROM pg_attribute
+              WHERE attrelid = 'public.selver_candidates'::regclass
+                AND attname  = 'ean_norm'
+                AND attgenerated IN ('s','d')
+            ) INTO is_gen;
+
+            IF is_gen THEN
+              INSERT INTO public.selver_candidates
+                (ext_id, ean_raw, sku_raw, name, brand, size_text, price, currency, category_path, category_leaf, last_seen)
+              SELECT ext_id, ean_raw, sku_raw, name, brand, size_text, price, currency, category_path, category_leaf, now()
+              FROM tmp_missing_candidates
+              ON CONFLICT (ext_id) DO UPDATE
+                SET price         = EXCLUDED.price,
+                    currency      = EXCLUDED.currency,
+                    size_text     = COALESCE(EXCLUDED.size_text, public.selver_candidates.size_text),
+                    category_path = COALESCE(EXCLUDED.category_path, public.selver_candidates.category_path),
+                    category_leaf = COALESCE(EXCLUDED.category_leaf, public.selver_candidates.category_leaf),
+                    ean_raw       = COALESCE(EXCLUDED.ean_raw, public.selver_candidates.ean_raw),
+                    sku_raw       = COALESCE(EXCLUDED.sku_raw, public.selver_candidates.sku_raw),
+                    brand         = COALESCE(EXCLUDED.brand, public.selver_candidates.brand),
+                    last_seen     = now();
+            ELSE
+              INSERT INTO public.selver_candidates
+                (ext_id, ean_norm, ean_raw, sku_raw, name, brand, size_text, price, currency, category_path, category_leaf, last_seen)
+              SELECT ext_id, NULLIF(ean_norm,''), ean_raw, sku_raw, name, brand, size_text, price, currency, category_path, category_leaf, now()
+              FROM tmp_missing_candidates
+              ON CONFLICT (ext_id) DO UPDATE
+                SET price         = EXCLUDED.price,
+                    currency      = EXCLUDED.currency,
+                    size_text     = COALESCE(EXCLUDED.size_text, public.selver_candidates.size_text),
+                    category_path = COALESCE(EXCLUDED.category_path, public.selver_candidates.category_path),
+                    category_leaf = COALESCE(EXCLUDED.category_leaf, public.selver_candidates.category_leaf),
+                    ean_raw       = COALESCE(EXCLUDED.ean_raw, public.selver_candidates.ean_raw),
+                    ean_norm      = COALESCE(EXCLUDED.ean_norm, public.selver_candidates.ean_norm),
+                    sku_raw       = COALESCE(EXCLUDED.sku_raw, public.selver_candidates.sku_raw),
+                    brand         = COALESCE(EXCLUDED.brand, public.selver_candidates.brand),
+                    last_seen     = now();
+            END IF;
+          END
+          $do$;
 
           -- Quick counters
           SELECT
