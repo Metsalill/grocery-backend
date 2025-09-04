@@ -94,48 +94,37 @@ jobs:
           CLICK_PRODUCTS: ${{ github.event_name == 'workflow_dispatch' && inputs.click_products || '1' }}
           LOG_CONSOLE: ${{ github.event_name == 'workflow_dispatch' && inputs.log_console || 'warn' }}
           NAV_TIMEOUT_MS: "60000"
-          PRELOAD_DB: "1"
-          PRELOAD_DB_QUERY: |
-            SELECT DISTINCT ext_id
-            FROM (
-              SELECT sp.ext_id
-                FROM public.staging_selver_products sp
-               WHERE COALESCE(sp.ean_norm,'') <> ''
-              UNION
-              SELECT c.ext_id
-                FROM public.selver_candidates c
-               WHERE COALESCE(c.ean_norm,'') <> ''
-              UNION
-              SELECT m.ext_id
-                FROM public.ext_product_map m
-            ) u
-            WHERE ext_id IS NOT NULL AND ext_id <> ''
+          # Make crawling independent of DB availability
+          PRELOAD_DB: "0"
           PGSSLMODE: "require"
         run: |
           set -euo pipefail
-          set -x
           echo "::group::Runtime info"
           python --version
           echo "Start (UTC): $(date -u)"
           echo "::endgroup::"
+
+          # Run crawler and capture BOTH stdout and stderr
           set +e
-          set +o pipefail
-          stdbuf -oL -eL timeout -k 60s 55m python -u scripts/selver_crawl_categories_pw.py \
-            > >(tee data/selver_run.log) 2>data/selver_run.err
-          status=${PIPESTATUS[0]}
-          set -o pipefail
+          stdbuf -oL -eL timeout -k 60s 55m \
+            python -u scripts/selver_crawl_categories_pw.py \
+            1> >(tee data/selver_run.log) \
+            2> >(tee data/selver_run.err >&2)
+          status=$?
           set -e
+
           echo "End (UTC): $(date -u) — crawler exit code: ${status}"
           echo "::group::Crawler outputs"
           ls -lah data || true
           [ -f data/selver.csv ] && { echo "CSV size:"; wc -l data/selver.csv; du -h data/selver.csv; } || echo "CSV not found"
           [ -f data/selver_run.log ] && { echo "Log size:"; du -h data/selver_run.log; } || echo "Log not found"
-          [ -s data/selver_run.err ] && { echo "---- stderr tail ----"; tail -n 120 data/selver_run.err; } || true
+          [ -s data/selver_run.err ] && { echo "---- stderr tail ----"; tail -n 150 data/selver_run.err; } || true
           echo "::endgroup::"
-          if [ "${status}" -eq 124 ]; then
-            echo "::warning::Crawler hit the time budget (timeout). Continuing with partial results."
-          elif [ "${status}" -ne 0 ]; then
-            echo "::warning::Crawler exited non-zero (${status}); continuing"
+
+          # Hard fail unless it was a timeout (124) – avoids header-only CSV flowing through
+          if [ "${status}" -ne 0 ] && [ "${status}" -ne 124 ]; then
+            echo "::error::Crawler exited non-zero (${status}). Aborting workflow."
+            exit "${status}"
           fi
 
       - name: Dump crawler log (tail)
@@ -458,7 +447,7 @@ jobs:
               FROM tmp_missing_candidates
               ON CONFLICT (ext_id) DO UPDATE
                 SET price         = EXCLUDED.price,
-                    currency      = EXCLUDED.currency,
+                    currency      = COALESCE(EXCLUDED.currency, public.selver_candidates.currency),
                     size_text     = COALESCE(EXCLUDED.size_text, public.selver_candidates.size_text),
                     category_path = COALESCE(EXCLUDED.category_path, public.selver_candidates.category_path),
                     category_leaf = COALESCE(EXCLUDED.category_leaf, public.selver_candidates.category_leaf),
