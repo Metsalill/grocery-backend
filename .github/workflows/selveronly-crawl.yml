@@ -3,6 +3,10 @@ name: "Selver Category Crawl"
 on:
   workflow_dispatch:
     inputs:
+      mode:
+        description: "prices (default) or metadata (only items missing brand/EAN/manufacturer)"
+        required: false
+        default: "prices"
       click_products:
         description: "Click into PDPs (1) vs direct links (0)"
         required: false
@@ -39,6 +43,7 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       SHARD: ${{ matrix.shard }}
+      MODE: ${{ github.event.inputs.mode || 'prices' }}
 
     steps:
       - name: Checkout
@@ -81,6 +86,80 @@ jobs:
           echo "Slice count: $(wc -l < data/selver_categories.txt)"
           head -n 8 data/selver_categories.txt || true
 
+      # ---------- DB prep BEFORE crawling so we can build skip / only lists -----
+      - name: Install psql client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: DB sanity (connection + prices shape)
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -c "\conninfo"
+          psql "$DATABASE_URL" -c "SELECT current_database(), current_user, inet_server_addr(), inet_server_port();"
+          psql "$DATABASE_URL" -c "\d prices" || true
+
+      # MODE=prices → skip only if (priced) AND (brand already present)
+      - name: Build skip list (priced & have brand)
+        if: ${{ env.MODE == 'prices' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > data/selver_skip_ext_ids.txt
+          psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/selver_skip_ext_ids.txt
+          WITH priced_from_prices AS (
+            SELECT DISTINCT (regexp_match(p.source_url, '/e/([0-9]+)'))[1] AS ext_id
+            FROM public.prices p
+            JOIN public.stores s ON s.id = p.store_id
+            WHERE s.chain='Selver' AND s.is_online = TRUE
+              AND p.source_url ~ '/e/[0-9]+'
+          ),
+          priced_from_candidates AS (
+            SELECT DISTINCT ext_id::text
+            FROM public.selver_candidates
+            WHERE COALESCE(price,0) > 0
+              AND COALESCE(ext_id,'') <> ''
+          ),
+          priced AS (
+            SELECT ext_id FROM priced_from_prices
+            UNION
+            SELECT ext_id FROM priced_from_candidates
+          )
+          SELECT pr.ext_id
+          FROM priced pr
+          LEFT JOIN public.selver_candidates sc ON sc.ext_id = pr.ext_id
+          LEFT JOIN public.staging_selver_products sp ON sp.ext_id = pr.ext_id
+          WHERE COALESCE(NULLIF(btrim(COALESCE(sc.brand, sp.brand, '')), ''), NULL) IS NOT NULL
+          ORDER BY 1;
+          SQL
+          echo "Skip list rows (priced & have brand): $(wc -l < data/selver_skip_ext_ids.txt)"
+
+      # MODE=metadata → crawl only items missing brand/EAN/manufacturer
+      - name: Build target list (missing brand/EAN/manufacturer)
+        if: ${{ env.MODE == 'metadata' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > data/selver_only_ext_ids.txt
+          psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/selver_only_ext_ids.txt
+          WITH all_ids AS (
+            SELECT ext_id FROM public.selver_candidates
+            UNION
+            SELECT ext_id FROM public.staging_selver_products
+          )
+          SELECT a.ext_id
+          FROM all_ids a
+          LEFT JOIN public.selver_candidates sc ON sc.ext_id = a.ext_id
+          LEFT JOIN public.staging_selver_products sp ON sp.ext_id = a.ext_id
+          WHERE
+            COALESCE(NULLIF(btrim(COALESCE(sc.brand, sp.brand, '')), ''), NULL) IS NULL
+            OR COALESCE(NULLIF(regexp_replace(COALESCE(sc.ean_raw, sp.ean_raw, ''), '[^0-9]', '', 'g'), ''), NULL) IS NULL
+            OR COALESCE(NULLIF(btrim(COALESCE(sc.manufacturer, sp.manufacturer, '')), ''), NULL) IS NULL
+          ORDER BY 1;
+          SQL
+          echo "ONLY list rows (missing metadata): $(wc -l < data/selver_only_ext_ids.txt)"
+
       - name: Crawl Selver categories (Playwright)
         shell: bash
         env:
@@ -94,7 +173,6 @@ jobs:
           CLICK_PRODUCTS: ${{ github.event_name == 'workflow_dispatch' && inputs.click_products || '1' }}
           LOG_CONSOLE: ${{ github.event_name == 'workflow_dispatch' && inputs.log_console || 'warn' }}
           NAV_TIMEOUT_MS: "60000"
-          # Make crawling independent of DB availability
           PRELOAD_DB: "0"
           PGSSLMODE: "require"
         run: |
@@ -102,12 +180,25 @@ jobs:
           echo "::group::Runtime info"
           python --version
           echo "Start (UTC): $(date -u)"
+          echo "MODE=${MODE}"
           echo "::endgroup::"
 
-          # Run crawler and capture BOTH stdout and stderr
+          SKIP_FLAG=()
+          ONLY_FLAG=()
+          if [ "${MODE}" = "prices" ] && [ -s data/selver_skip_ext_ids.txt ]; then
+            echo "Using skip list: $(wc -l < data/selver_skip_ext_ids.txt) ext_ids"
+            SKIP_FLAG=(--skip-ext-file data/selver_skip_ext_ids.txt)
+          fi
+          if [ "${MODE}" = "metadata" ] && [ -s data/selver_only_ext_ids.txt ]; then
+            echo "Using ONLY list: $(wc -l < data/selver_only_ext_ids.txt) ext_ids"
+            ONLY_FLAG=(--only-ext-file data/selver_only_ext_ids.txt)
+          fi
+
           set +e
           stdbuf -oL -eL timeout -k 60s 55m \
             python -u scripts/selver_crawl_categories_pw.py \
+              "${SKIP_FLAG[@]}" \
+              "${ONLY_FLAG[@]}" \
             1> >(tee data/selver_run.log) \
             2> >(tee data/selver_run.err >&2)
           status=$?
@@ -137,19 +228,6 @@ jobs:
             echo "(no log found)"
           fi
 
-      - name: Install psql client
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client
-
-      - name: DB sanity (connection + prices shape)
-        shell: bash
-        run: |
-          set -euo pipefail
-          psql "$DATABASE_URL" -c "\conninfo"
-          psql "$DATABASE_URL" -c "SELECT current_database(), current_user, inet_server_addr(), inet_server_port();"
-          psql "$DATABASE_URL" -c "\d prices" || true
-
       - name: Show CSV head (debug)
         if: always()
         run: |
@@ -168,15 +246,18 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: selver-crawl-shard-${{ matrix.shard }}-${{ github.run_id }}
+          name: selver-crawl-${{ env.MODE }}-shard-${{ matrix.shard }}-${{ github.run_id }}
           path: |
             data/selver.csv
             data/selver_run.log
             data/selver_run.err
             data/selver_debug/**/*.png
+            data/selver_skip_ext_ids.txt
+            data/selver_only_ext_ids.txt
           if-no-files-found: warn
           retention-days: 7
 
+      # ---------------------- DB LOAD & ADOPT (unchanged) ---------------------
       - name: Prepare DB (staging & helper tables)
         shell: bash
         run: |
@@ -210,7 +291,7 @@ jobs:
           SELECT 'Selver e-Selver', 'Selver', TRUE
           WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE chain='Selver' AND is_online=TRUE);
 
-          -- Candidates (ean_norm may or may not be generated, we will handle both cases later)
+          -- Candidates
           CREATE TABLE IF NOT EXISTS public.selver_candidates (
             ext_id        text PRIMARY KEY,
             ean_norm      text,
@@ -286,7 +367,6 @@ jobs:
           fi
           echo "HAS_BRAND=$HAS_BRAND"
 
-          # Build the psql script in parts to keep a single-line \copy and avoid parser issues
           cat > /tmp/selver_load.sql <<'SQL_A'
           \set ON_ERROR_STOP on
           BEGIN;
@@ -316,11 +396,9 @@ jobs:
 
           cat >> /tmp/selver_load.sql <<'SQL_B'
 
-          -- Drop obvious non-product noise if present
           DELETE FROM tmp_staging_selver_products
           WHERE name ILIKE '%vabad ametikohad%';
 
-          -- Normalize view (prefer CSV ean_norm; fallback to ean_raw)
           WITH filtered AS (
             SELECT
               ext_id,
@@ -338,7 +416,6 @@ jobs:
             FROM tmp_staging_selver_products
           ),
 
-          -- Upsert staging (note: ean_norm is GENERATED in staging)
           upsert_staging AS (
             INSERT INTO public.staging_selver_products (
               ext_id, name, brand, ean_raw, sku_raw, size_text, price, currency, category_path, category_leaf
@@ -360,7 +437,6 @@ jobs:
             RETURNING ext_id
           ),
 
-          -- Prices from mapped products (either by ext_id map or EAN)
           joined AS (
             SELECT
               COALESCE(m.product_id, pe.product_id) AS product_id,
@@ -395,7 +471,6 @@ jobs:
                 source_url   = EXCLUDED.source_url,
                 source       = EXCLUDED.source;
 
-          -- Build 'missing' into a temp table so we can branch depending on ean_norm being generated
           CREATE TEMP TABLE tmp_missing_candidates AS
           WITH filtered AS (
             SELECT
@@ -413,7 +488,6 @@ jobs:
           )
           SELECT * FROM missing;
 
-          -- Insert candidates; tolerate ean_norm being GENERATED in some DBs
           DO $do$
           DECLARE is_gen boolean;
           BEGIN
@@ -460,7 +534,6 @@ jobs:
           END
           $do$;
 
-          -- Quick counters
           SELECT
             (SELECT COUNT(*) FROM tmp_staging_selver_products) AS staged_rows,
             (SELECT COUNT(*) FROM public.selver_candidates)    AS candidates_total;
