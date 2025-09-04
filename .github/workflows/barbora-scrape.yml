@@ -45,7 +45,7 @@ jobs:
       # Space-separated URL prefixes to exclude/include
       EXCLUDE_SECTIONS: "https://barbora.ee/kodukaubad-ja-vaba-aeg https://barbora.ee/enesehooldustooted https://barbora.ee/puhastustarbed-ja-lemmikloomatooted https://barbora.ee/lastekaubad"
       INCLUDE_SECTIONS: "https://barbora.ee/enesehooldustooted/suuhugieen/hambapastad https://barbora.ee/enesehooldustooted/raseerimisvahendid https://barbora.ee/enesehooldustooted/intiimhugieeni-vahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/pesupesemisvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/noudepesuvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/kodukeemia https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/majapidamis-ja-koristustarbed https://barbora.ee/lastekaubad/piimasegud-ja-jatkupiimasegud https://barbora.ee/lastekaubad/pudrud https://barbora.ee/lastekaubad/mahkmed https://barbora.ee/lastekaubad/puuviljapureed https://barbora.ee/lastekaubad/laste-hugieenitarbed/niisked-salvratikud https://barbora.ee/lastekaubad/liha-ja-koogiviljapureed"
-      # NEW: normalize the flag so scheduled runs get upserts too
+      # Ensure scheduled runs also upsert by default
       UPSERT_DB: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.upsert_db || '1' }}
 
     steps:
@@ -170,7 +170,7 @@ jobs:
           set -euo pipefail
           : > data/barbora_skip_ext_ids.txt
 
-          # Ensure candidates table exists to avoid relation errors
+          -- Ensure candidates table exists to avoid relation errors
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           CREATE TABLE IF NOT EXISTS public.barbora_candidates (
             ext_id        text PRIMARY KEY,
@@ -188,14 +188,15 @@ jobs:
           );
           SQL
 
-          # Build the skip list from prices ∪ candidates
+          # Build the skip list from prices ∪ candidates.
+          # For Barbora, ext_id is the PDP URL/slug itself, so we use source_url directly.
           psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/barbora_skip_ext_ids.txt
           WITH priced_from_prices AS (
-            SELECT DISTINCT (regexp_match(p.source_url, '/p/([0-9]+)'))[1] AS ext_id
+            SELECT DISTINCT p.source_url AS ext_id
             FROM public.prices p
             JOIN public.stores s ON s.id = p.store_id
             WHERE s.chain='Maxima' AND s.name ILIKE '%Barbora%' AND s.is_online = TRUE
-              AND p.source_url ~ '/p/[0-9]+'
+              AND p.source_url ILIKE 'https://barbora.ee%'
           ),
           priced_from_candidates AS (
             SELECT DISTINCT ext_id::text
@@ -357,25 +358,32 @@ jobs:
 
           \copy tmp_barbora_csv_full FROM '__CSV__' CSV HEADER
 
+          -- Normalize and fill blanks; build a clean staging temp table.
           CREATE TEMP TABLE tmp_staging_barbora_products AS
           SELECT
             ext_id,
-            name,
-            ean_raw,
-            sku_raw,
-            regexp_replace(COALESCE(ean_raw,''),'[^0-9]+','','g') AS ean_norm,
-            size_text,
-            brand,
-            NULLIF(price,'')::numeric AS price,
-            NULLIF(currency,'')::text AS currency,
-            category_path,
-            category_leaf
+            -- Fill missing/blank name from slug: take last path fragment, replace dashes with spaces, Title Case
+            COALESCE(NULLIF(btrim(name), ''),
+                     initcap(replace(regexp_replace(COALESCE(ext_id,''), '^.*/', ''), '-', ' '))) AS name,
+            NULLIF(btrim(ean_raw), '') AS ean_raw,
+            NULLIF(btrim(sku_raw), '') AS sku_raw,
+            NULLIF(regexp_replace(COALESCE(NULLIF(ean_norm,''), ean_raw, ''), '[^0-9]', '', 'g'), '') AS ean_norm,
+            NULLIF(btrim(size_text), '') AS size_text,
+            NULLIF(btrim(brand), '') AS brand,
+            NULLIF(price, '')::numeric AS price,
+            COALESCE(NULLIF(currency,''), 'EUR') AS currency,
+            NULLIF(btrim(category_path), '') AS category_path,
+            NULLIF(btrim(category_leaf), '') AS category_leaf
           FROM tmp_barbora_csv_full
           WHERE COALESCE(ext_id,'') <> '';
 
+          -- Drop any rows that still lack a name after fallback (satisfy NOT NULL)
+          DELETE FROM tmp_staging_barbora_products
+          WHERE COALESCE(name,'') = '';
+
           INSERT INTO public.staging_barbora_products
             (ext_id,name,ean_raw,sku_raw,size_text,brand,price,currency,category_path,category_leaf,collected_at)
-          SELECT ext_id,name,ean_raw,sku_raw,size_text,brand,price,COALESCE(currency,'EUR'),category_path,category_leaf,now()
+          SELECT ext_id,name,ean_raw,sku_raw,size_text,brand,price,currency,category_path,category_leaf,now()
           FROM tmp_staging_barbora_products
           ON CONFLICT (ext_id) DO UPDATE
             SET name          = EXCLUDED.name,
@@ -392,7 +400,7 @@ jobs:
           INSERT INTO public.barbora_candidates
             (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, price, currency, category_path, category_leaf, last_seen)
           SELECT
-            ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, price, COALESCE(currency,'EUR'), category_path, category_leaf, now()
+            ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, price, currency, category_path, category_leaf, now()
           FROM tmp_staging_barbora_products
           ON CONFLICT (ext_id) DO UPDATE
             SET price         = EXCLUDED.price,
