@@ -146,18 +146,18 @@ jobs:
 
             # 4) Fallback to a curated FOOD roots list if autodiscover empty/too small
             if [ ! -s data/barbora_categories.txt ] || [ "$(wc -l < data/barbora_categories.txt)" -lt 10 ]; then
-              cat > data/barbora_categories.txt <<'EOF'
-https://barbora.ee/koogiviljad-puuviljad
-https://barbora.ee/piimatooted-munad-void
-https://barbora.ee/juustud
-https://barbora.ee/leib-sai-kondiitritooted
-https://barbora.ee/valmistoidud
-https://barbora.ee/kuivained-ja-hoidised
-https://barbora.ee/maitseained-ja-kastmed
-https://barbora.ee/suupisted-maiustused
-https://barbora.ee/joogid
-https://barbora.ee/kulmutatud-tooted
-EOF
+              printf '%s\n' \
+                'https://barbora.ee/koogiviljad-puuviljad' \
+                'https://barbora.ee/piimatooted-munad-void' \
+                'https://barbora.ee/juustud' \
+                'https://barbora.ee/leib-sai-kondiitritooted' \
+                'https://barbora.ee/valmistoidud' \
+                'https://barbora.ee/kuivained-ja-hoidised' \
+                'https://barbora.ee/maitseained-ja-kastmed' \
+                'https://barbora.ee/suupisted-maiustused' \
+                'https://barbora.ee/joogid' \
+                'https://barbora.ee/kulmutatud-tooted' \
+                > data/barbora_categories.txt
               echo "Autodiscover small → wrote curated FOOD roots to data/barbora_categories.txt"
             fi
           fi
