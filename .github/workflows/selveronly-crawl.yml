@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "prices (default) or metadata (only items missing brand/EAN)"
+        description: "metadata (only items missing brand/EAN) or prices"
         required: false
-        default: "prices"
+        default: "metadata"
       click_products:
         description: "Click into PDPs (1) vs direct links (0)"
         required: false
@@ -40,9 +40,10 @@ jobs:
       matrix:
         shard: [0, 1]
     env:
+      TZ: Europe/Tallinn
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       SHARD: ${{ matrix.shard }}
-      MODE: ${{ inputs.mode || 'prices' }}
+      MODE: ${{ inputs.mode || 'metadata' }}
 
     steps:
       - name: Checkout
@@ -60,6 +61,14 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-scraper.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-ms-playwright-chromium-1
+          restore-keys: |
+            ${{ runner.os }}-ms-playwright-
 
       - name: Install deps (crawler + Playwright)
         run: |
@@ -192,7 +201,7 @@ jobs:
           fi
 
           set +e
-          stdbuf -oL -eL timeout -k 60s 55m \
+          stdbuf -oL -eL timeout -k 90s 75m \
             python -u scripts/selver_crawl_categories_pw.py \
               "${SKIP_FLAG[@]}" \
               "${ONLY_FLAG[@]}" \
@@ -231,6 +240,8 @@ jobs:
           ls -l data || true
           echo "---- line count ----"
           wc -l data/selver.csv || true
+          echo "---- header ----"
+          head -n 1 data/selver.csv || true
           echo "---- first 10 lines ----"
           head -n 10 data/selver.csv || true
           if [ ! -s data/selver.csv ] && [ -s data/selver-sample.csv ]; then
@@ -254,7 +265,6 @@ jobs:
           retention-days: 7
 
       # (DB load & adopt steps unchanged)
-
 
       # ---------------------- DB LOAD & ADOPT (unchanged) ---------------------
       - name: Prepare DB (staging & helper tables)
