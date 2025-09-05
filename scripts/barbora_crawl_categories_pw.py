@@ -18,7 +18,7 @@ from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout, Page
 
 BASE = "https://barbora.ee"
 STORE_CHAIN = "Maxima"
-STORE_NAME = "Barbora ePood"
+STORE_NAME  = "Barbora ePood"
 STORE_CHANNEL = "online"
 
 DIGITS_RE = re.compile(r"\d+")
@@ -107,6 +107,43 @@ def keyset_for_url(u: str) -> Set[str]:
     if slug: keys.add(slug)
     return keys
 
+# ----------------------- name validation + DOM title fallback -----------------------
+_BAD_NAME_TOKENS = {"inst-badge", "badge", "widget", "component", "modal", "breadcrumb", "product"}
+def looks_like_product_name(s: str) -> bool:
+    s = safe_text(s)
+    if not s: return False
+    low = s.lower()
+    if low in _BAD_NAME_TOKENS: return False
+    if len(s) < 6: return False
+    if not re.search(r"[A-Za-zÄÖÜÕäöüõ]", s): return False
+    # avoid pure techy tokens
+    if re.fullmatch(r"[a-z0-9\-_]+", low): return False
+    return True
+
+def dom_title_fallback(page: Page) -> str:
+    # 1) H1-ish
+    try:
+        h1 = page.locator("h1, .b-product h1, [data-testid='product-name']").first
+        if h1 and h1.count() > 0:
+            t = safe_text(h1.inner_text())
+            if looks_like_product_name(t): return t
+    except Exception: pass
+    # 2) og:title
+    try:
+        og = page.eval_on_selector("meta[property='og:title']", "el => el?.getAttribute('content') || null")
+        og = safe_text(og)
+        if looks_like_product_name(og): return og
+    except Exception: pass
+    # 3) common classes
+    for sel in [".product-title", ".b-product__info h1", ".pdp-title", "[itemprop='name']"]:
+        try:
+            el = page.locator(sel).first
+            if el and el.count() > 0:
+                t = safe_text(el.inner_text())
+                if looks_like_product_name(t): return t
+        except Exception: pass
+    return ""
+
 # ----------------------- JSON/DOM extraction -----------------------
 def ldjson_blocks(page: Page) -> List[Any]:
     blocks = []
@@ -123,14 +160,26 @@ def parse_json(txt: str) -> Optional[Any]:
     except Exception: return None
 
 def walk_find(o: Any) -> Tuple[str,str,str,str,str]:
+    """
+    Extract name/brand/size/gtin/sku from arbitrary JSON.
+    We ignore obvious UI junk names (e.g., 'inst-badge').
+    """
     name = brand = size_text = gtin = sku = ""
+    def maybe_set_name(v: Any):
+        nonlocal name
+        if isinstance(v, (str, int, float)):
+            cand = str(v).strip()
+            if looks_like_product_name(cand):
+                # only accept names that look like products
+                if not name:
+                    name = cand
     def walk(x: Any):
-        nonlocal name, brand, size_text, gtin, sku
+        nonlocal brand, size_text, gtin, sku
         if isinstance(x, dict):
             if not name:
                 for k in ("name","productName","title"):
-                    v = x.get(k)
-                    if isinstance(v, (str,int,float)): name = str(v).strip(); break
+                    if k in x: maybe_set_name(x.get(k))
+                    if name: break
             if not brand:
                 b = x.get("brand")
                 if isinstance(b, dict):
@@ -451,6 +500,11 @@ def extract_pdp(page: Page, source_url: str, category_hint: str) -> Row:
         size_text = size_text or _s
         ean_raw = ean_raw or _g
         sku_raw = sku_raw or _sku
+
+    # If JSON name is junk, prefer DOM title
+    if not looks_like_product_name(name):
+        dom_name = dom_title_fallback(page)
+        if dom_name: name = dom_name
 
     # DOM spec fallback to fill brand/manufacturer/size when missing
     manufacturer = ""
