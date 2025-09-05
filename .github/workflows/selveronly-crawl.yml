@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "prices (default) or metadata (only items missing brand/EAN/manufacturer)"
+        description: "prices (default) or metadata (only items missing brand/EAN)"
         required: false
         default: "prices"
       click_products:
@@ -135,8 +135,8 @@ jobs:
           SQL
           echo "Skip list rows (priced & have brand): $(wc -l < data/selver_skip_ext_ids.txt)"
 
-      # MODE=metadata → crawl only items missing brand/EAN/manufacturer
-      - name: Build target list (missing brand/EAN/manufacturer)
+      # MODE=metadata → crawl only items missing brand/EAN
+      - name: Build target list (missing brand/EAN)
         if: ${{ env.MODE == 'metadata' }}
         shell: bash
         run: |
@@ -155,7 +155,6 @@ jobs:
           WHERE
             COALESCE(NULLIF(btrim(COALESCE(sc.brand, sp.brand, '')), ''), NULL) IS NULL
             OR COALESCE(NULLIF(regexp_replace(COALESCE(sc.ean_raw, sp.ean_raw, ''), '[^0-9]', '', 'g'), ''), NULL) IS NULL
-            OR COALESCE(NULLIF(btrim(COALESCE(sc.manufacturer, sp.manufacturer, '')), ''), NULL) IS NULL
           ORDER BY 1;
           SQL
           echo "ONLY list rows (missing metadata): $(wc -l < data/selver_only_ext_ids.txt)"
