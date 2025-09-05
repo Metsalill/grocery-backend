@@ -51,7 +51,11 @@ jobs:
       OUTPUT_CSV: data/rimi_products.csv
       SHARD: ${{ matrix.shard }}
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      # Raw mode from dispatch; defaults to "prices"
       MODE: ${{ github.event.inputs.mode || 'prices' }}
+      # Robust flags for if: gates (strings "true"/"false")
+      MODE_IS_PRICES: ${{ (github.event.inputs.mode || 'prices') == 'prices' }}
+      MODE_IS_METADATA: ${{ (github.event.inputs.mode || 'prices') == 'metadata' }}
 
     steps:
       - name: Checkout
@@ -93,6 +97,12 @@ jobs:
           set -euo pipefail
           rm -rf data
           mkdir -p data
+
+      - name: Show selected mode
+        run: |
+          echo "MODE=${MODE}"
+          echo "MODE_IS_PRICES=${MODE_IS_PRICES}"
+          echo "MODE_IS_METADATA=${MODE_IS_METADATA}"
 
       - name: Prepare category list (all -> shard slice)
         shell: bash
@@ -141,7 +151,7 @@ jobs:
 
       # MODE=prices → skip if we already have a price AND metadata complete (brand+name+manufacturer)
       - name: Build skip list (priced + brand+name+manufacturer present)
-        if: ${{ env.DATABASE_URL != '' && env.MODE == 'prices' }}
+        if: ${{ env.DATABASE_URL != '' && env.MODE_IS_PRICES == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -180,7 +190,7 @@ jobs:
 
       # MODE=metadata → crawl only items missing brand/EAN/manufacturer/name
       - name: Build target list (missing metadata)
-        if: ${{ env.DATABASE_URL != '' && env.MODE == 'metadata' }}
+        if: ${{ env.DATABASE_URL != '' && env.MODE_IS_METADATA == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
