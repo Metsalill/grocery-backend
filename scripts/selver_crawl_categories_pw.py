@@ -427,7 +427,7 @@ def extract_brand(page, prod_ld: dict) -> str:
     try:
         texts: List[str] = page.evaluate("""
           () => [...document.querySelectorAll('tr, .row, li, .attribute, .product-attributes__row, .product-details__row, .MuiGrid-root, dd, dt, div, span, p, th, td')]
-                .map(n => (n.textContent || '').replace(/\s+/g,' ').trim())
+                .map(n => (n.textContent || '').replace(/\\s+/g,' ').trim())
                 .filter(Boolean)
         """)
     except Exception:
@@ -442,9 +442,9 @@ def extract_brand(page, prod_ld: dict) -> str:
         () => {
           const rows = Array.from(document.querySelectorAll('tr, .row, li, .attribute, .product-attributes__row, .product-details__row, dl, dt, dd, div, span, p, th, td'));
           for (const n of rows) {
-            const t = (n.textContent || '').replace(/\s+/g,' ').trim();
+            const t = (n.textContent || '').replace(/\\s+/g,' ').trim();
             if (!t) continue;
-            if (/\b(käitleja|kaitleja|handler)\b/i.test(t)) {
+            if (/(\\b(käitleja|kaitleja|handler)\\b)/i.test(t)) {
               const m = t.split(/[:–—-]/).slice(1).join(':').trim();
               if (m && m.length <= 80) return m;
             }
@@ -934,6 +934,9 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
     _expand_pdp_details(page)
     ext_id = canonical_from_page(page) or product_url_hint
     if not ext_id: return None
+    # Guard: never ingest careers pages etc.
+    if "vabad-ametikohad" in (ext_id or ""):
+        return None
 
     blocks = jsonld_all(page)
     prod_ld = jsonld_pick_product(blocks)
@@ -1089,6 +1092,37 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
 
     return wrote
 
+# NEW: process ONLY list PDPs directly (skips categories entirely)
+def _process_only_list(page, writer: csv.DictWriter, seen_ext_ids: Set[str]) -> int:
+    wrote = 0
+    pdps = [u for u in ONLY_EXTS if _is_selver_product_like(u)]
+    print(f"[selver] ONLY list present → processing {len(pdps)} PDPs directly")
+    for i, pu in enumerate(sorted(pdps), 1):
+        if not _should_process_url(pu, seen_ext_ids):
+            continue
+        got = safe_goto(page, pu)
+        if not got:
+            # best-effort fallback (rarely needed)
+            got = open_product_via_click(page, "", pu)
+            if not got:
+                continue
+        time.sleep(REQ_DELAY)
+        row = _extract_row_from_pdp(page, pu)
+        if row:
+            ext_id = _clean_abs(row["ext_id"]) or row["ext_id"]
+            key = urlparse(ext_id).path
+            if ext_id not in seen_ext_ids and key not in seen_ext_ids:
+                writer.writerow(row)
+                seen_ext_ids.add(ext_id); seen_ext_ids.add(key)
+                wrote += 1
+        if (i % 25) == 0:
+            try:
+                # no-op placeholder, kept for symmetry with flushing elsewhere
+                writer.fieldnames
+            except Exception:
+                pass
+    return wrote
+
 # ---------------------------- CLI & main ------------------------------------
 def _parse_cli():
     p = argparse.ArgumentParser(description="Selver category crawler (Playwright)")
@@ -1159,6 +1193,19 @@ def crawl():
                         print(f"[pw] {m.type}: {t}")
                 page.on("console", _warn_err_only)
 
+            rows_written = 0
+
+            # --- NEW: short-circuit when ONLY list is provided ---
+            if ONLY_EXTS:
+                print(f"[selver] ONLY_EXTS loaded: {len(ONLY_EXTS)} entries")
+                try:
+                    rows_written = _process_only_list(page, w, seen_ext_ids)
+                finally:
+                    try: browser.close()
+                    except Exception: pass
+                print(f"[selver] wrote {rows_written} product rows (ONLY mode).")
+                return
+
             print("[selver] collecting seeds…")
             file_seeds: List[str] = []
             if os.path.exists(CATEGORIES_FILE):
@@ -1181,8 +1228,6 @@ def crawl():
             print(f"[selver] Categories to crawl: {len(cats)}")
             for cu in cats[:40]: print(f"[selver]   {cu}")
             if len(cats) > 40: print(f"[selver]   … (+{len(cats)-40} more)")
-
-            rows_written = 0
 
             if CLICK_PRODUCTS:
                 for ci, cu in enumerate(cats, 1):
