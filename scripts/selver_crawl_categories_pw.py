@@ -16,6 +16,9 @@ Also includes:
 - proceeds even if price widget fails (price=0.00)
 - skip/only lists via CLI flags (--skip-ext-file / --only-ext-file)
 
+Hardening:
+- Strips any accidental DevTools stack-trace suffixes like ":6:13801" from paths.
+
 CSV columns written:
   ext_id, source_url, name, brand, ean_raw, ean_norm, sku_raw,
   size_text, price, currency, category_path, category_leaf
@@ -128,13 +131,20 @@ def guess_size_from_title(title: str) -> str:
 def _strip_eselver_prefix(path: str) -> str:
     return path.replace("/e-selver", "", 1) if path.startswith("/e-selver/") else path
 
+# NEW: strip any trailing :line or :line:col debug suffixes
+LINECOL_RE = re.compile(r":\d+(?::\d+)?$")
+
+def _strip_linecol(path: str) -> str:
+    return LINECOL_RE.sub("", path or "")
+
 def _clean_abs(href: str) -> Optional[str]:
     if not href: return None
     url = urljoin(BASE, href)
     parts = urlsplit(url)
     host = (parts.netloc or urlparse(BASE).netloc).lower()
     if host not in ALLOWED_HOSTS: return None
-    path = _strip_eselver_prefix(parts.path)
+    # sanitize path
+    path = _strip_linecol(_strip_eselver_prefix(parts.path))
     return urlunsplit((parts.scheme, parts.netloc, path.rstrip("/"), "", ""))
 
 def canonical_from_page(page) -> Optional[str]:
@@ -143,7 +153,10 @@ def canonical_from_page(page) -> Optional[str]:
         if href: return _clean_abs(href)
     except Exception: pass
     try:
-        return _clean_abs(page.url)
+        # also sanitize page.url (in case a debug suffix sneaks in)
+        parts = urlsplit(page.url)
+        path = _strip_linecol(parts.path)
+        return _clean_abs(urlunsplit((parts.scheme, parts.netloc, path, "", "")))
     except Exception:
         return None
 
@@ -166,7 +179,7 @@ def _is_selver_product_like(url: str) -> bool:
     if host not in ALLOWED_HOSTS:
         return False
 
-    path = _strip_eselver_prefix((u.path or "/").lower())
+    path = _strip_eselver_prefix((_strip_linecol(u.path) or "/").lower())
 
     # Drop obvious non-product paths/keywords
     if path.startswith("/ru/"):
@@ -185,7 +198,6 @@ def _is_selver_product_like(url: str) -> bool:
         return True
 
     # NEW: current Selver PDPs are *single-segment* hyphenated slugs
-    # e.g. /porgandimahl-kadarbiku-koogivili-500-ml
     segs = [s for s in path.strip("/").split("/") if s]
     if len(segs) == 1:
         seg = segs[0]
@@ -195,7 +207,7 @@ def _is_selver_product_like(url: str) -> bool:
     return False
 
 def _is_category_like_path(path: str) -> bool:
-    p = _strip_eselver_prefix((path or "/").lower())
+    p = _strip_eselver_prefix((_strip_linecol(path) or "/").lower())
     if ALLOWLIST_ONLY and STRICT_ALLOWLIST and not _in_allowlist(p): return False
     if "/e-selver/" in p or p.startswith("/ru/"): return False
     if any(bad in p for bad in BANNED_KEYWORDS): return False
@@ -239,7 +251,7 @@ def _ean_sku_from_dom(page) -> tuple[str, str]:
             () => {
               const pickDigits = (txt) => {
                 if (!txt) return null;
-                const m = txt.replace(/\\s+/g,' ').match(/(\\d{8,14})/);
+                const m = txt.replace(/\s+/g,' ').match(/(\d{8,14})/);
                 return m ? m[1] : null;
               };
 
@@ -250,15 +262,15 @@ def _ean_sku_from_dom(page) -> tuple[str, str]:
               let ean=null, sku=null;
 
               for (const row of nodes) {
-                const txt = (row.textContent||'').replace(/\\s+/g,' ').trim();
+                const txt = (row.textContent||'').replace(/\s+/g,' ').trim();
                 if (!txt) continue;
 
-                if (!ean && /\\bribakood\\b/i.test(txt)) {
+                if (!ean && /\bribakood\b/i.test(txt)) {
                   const d = pickDigits(txt);
                   if (d) ean = d;
                 }
 
-                if (!sku && /(\\bSKU\\b|\\bTootekood\\b|\\bArtikkel\\b)/i.test(txt)) {
+                if (!sku && /(\bSKU\b|\bTootekood\b|\bArtikkel\b)/i.test(txt)) {
                   const m = txt.match(/([A-Z0-9_-]{6,})/i);
                   if (m) sku = m[1];
                 }
@@ -269,8 +281,8 @@ def _ean_sku_from_dom(page) -> tuple[str, str]:
               if (!ean) {
                 const any = Array.from(document.querySelectorAll('div,span,p,li,td,dd,th'));
                 for (const el of any) {
-                  const t = (el.textContent||'').replace(/\\s+/g,' ');
-                  if (/\\bribakood\\b/i.test(t)) {
+                  const t = (el.textContent||'').replace(/\s+/g,' ');
+                  if (/\bribakood\b/i.test(t)) {
                     const d = pickDigits(t);
                     if (d) { ean = d; break; }
                   }
@@ -415,7 +427,7 @@ def extract_brand(page, prod_ld: dict) -> str:
     try:
         texts: List[str] = page.evaluate("""
           () => [...document.querySelectorAll('tr, .row, li, .attribute, .product-attributes__row, .product-details__row, .MuiGrid-root, dd, dt, div, span, p, th, td')]
-                .map(n => (n.textContent || '').replace(/\\s+/g,' ').trim())
+                .map(n => (n.textContent || '').replace(/\s+/g,' ').trim())
                 .filter(Boolean)
         """)
     except Exception:
@@ -430,9 +442,9 @@ def extract_brand(page, prod_ld: dict) -> str:
         () => {
           const rows = Array.from(document.querySelectorAll('tr, .row, li, .attribute, .product-attributes__row, .product-details__row, dl, dt, dd, div, span, p, th, td'));
           for (const n of rows) {
-            const t = (n.textContent || '').replace(/\\s+/g,' ').trim();
+            const t = (n.textContent || '').replace(/\s+/g,' ').trim();
             if (!t) continue;
-            if (/\\b(käitleja|kaitleja|handler)\\b/i.test(t)) {
+            if (/\b(käitleja|kaitleja|handler)\b/i.test(t)) {
               const m = t.split(/[:–—-]/).slice(1).join(':').trim();
               if (m && m.length <= 80) return m;
             }
@@ -1005,7 +1017,7 @@ def _router(route, request):
 def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
     if not listing_url or not safe_goto(page, listing_url): return False
     _wait_listing_ready(page); time.sleep(0.2)
-    path = urlparse(product_url).path
+    path = _strip_linecol(urlparse(product_url).path)
     es = "/e-selver" + path if not path.startswith("/e-selver/") else path
     # broaden selector set to catch single-segment slugs inside product cards
     sels = [
