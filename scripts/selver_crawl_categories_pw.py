@@ -146,20 +146,35 @@ def _in_allowlist(path: str) -> bool:
 
 # ---- PDP detection ---------------------------------------------------------
 def _is_selver_product_like(url: str) -> bool:
+    """
+    Stricter product URL detection:
+    - Allow /toode/<...> (Selver PDPs)
+    - Allow /e/<slug>-<digits>
+    - Allow /p/<digits>
+    Everything else is treated as NOT a product (prevents e.g. /vabad-ametikohad-0).
+    """
     u = urlparse(url)
     host = (u.netloc or urlparse(BASE).netloc).lower()
-    if host not in ALLOWED_HOSTS: return False
+    if host not in ALLOWED_HOSTS:
+        return False
+
     path = _strip_eselver_prefix((u.path or "/").lower())
-    if path.startswith("/ru/"): return False
-    if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS): return False
-    if any(kw in path for kw in NON_PRODUCT_KEYWORDS): return False
-    if path.startswith("/toode/"): return True
-    segs = [s for s in path.strip("/").split("/") if s]
-    if len(segs) == 1:
-        last = segs[0]
-        if not re.fullmatch(r"[a-z0-9-]{3,}", last): return False
-        if any(ch.isdigit() for ch in last): return True
-        if re.search(r"(?:-|^)(?:kg|g|l|ml|cl|dl|tk|pk|pcs)$", last): return True
+
+    # Drop obvious non-product paths/keywords
+    if path.startswith("/ru/"):
+        return False
+    if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS):
+        return False
+    if any(kw in path for kw in NON_PRODUCT_KEYWORDS):
+        return False
+
+    if path.startswith("/toode/"):
+        return True
+    if re.search(r"^/e/.+-(\d+)(/)?$", path):
+        return True
+    if re.search(r"^/p/\d+(/)?$", path):
+        return True
+
     return False
 
 def _is_category_like_path(path: str) -> bool:
