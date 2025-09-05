@@ -252,6 +252,112 @@ def extract_breadcrumbs(page: Page) -> Tuple[str,str]:
         pass
     return "",""
 
+# --------- DOM spec fallback (brand/manufacturer/size) ---------
+_SPEC_BRAND_KEYS = {
+    "kaubamärk", "kaubamark", "bränd", "brand", "bränd/brand"
+}
+_SPEC_MFR_KEYS = {
+    "tarnija kontaktid", "tarnija kontakt", "tarnija",
+    "tootja", "manufacturer", "valmistaja", "supplier"
+}
+_SPEC_SIZE_KEYS = {
+    "kogus", "netokogus", "maht", "neto", "pakendi suurus", "pakend", "suurus", "kaal"
+}
+
+def _norm_key_et(s: str) -> str:
+    s = (s or "").strip().lower()
+    return (s.replace("ä","a").replace("ö","o").replace("õ","o")
+             .replace("ü","u").replace("š","s").replace("ž","z"))
+
+def extract_specs_from_dom(page: Page) -> Tuple[str, str, str]:
+    """
+    Returns (brand, manufacturer, size_text) from visible spec blocks.
+    Scans tables (th/td), dl/dt/dd, and generic 'Key: Value' rows.
+    """
+    brand = ""
+    mfr = ""
+    size_text = ""
+
+    def set_brand(v: str):
+        nonlocal brand
+        v = (v or "").strip()
+        if v and not brand:
+            brand = v
+
+    def set_mfr(v: str):
+        nonlocal mfr
+        v = (v or "").strip()
+        if v and not mfr:
+            mfr = v
+
+    def set_size(v: str):
+        nonlocal size_text
+        v = (v or "").strip()
+        if v and not size_text:
+            size_text = v
+
+    # 1) Table rows
+    try:
+        rows = page.locator("table tr")
+        for i in range(min(200, rows.count())):
+            tr = rows.nth(i)
+            try:
+                k = _norm_key_et(tr.locator("th,td").first.inner_text())
+                v = tr.locator("td,th").nth(1).inner_text().strip()
+            except Exception:
+                continue
+            if k in _SPEC_BRAND_KEYS:
+                set_brand(v)
+            elif k in _SPEC_MFR_KEYS:
+                set_mfr(v)
+            elif any(t in k for t in _SPEC_SIZE_KEYS):
+                set_size(v)
+    except Exception:
+        pass
+
+    # 2) <dl> lists
+    try:
+        dls = page.locator("dl")
+        for di in range(min(50, dls.count())):
+            dl = dls.nth(di)
+            dts = dl.locator("dt")
+            dds = dl.locator("dd")
+            for j in range(min(dts.count(), dds.count())):
+                try:
+                    k = _norm_key_et(dts.nth(j).inner_text())
+                    v = dds.nth(j).inner_text().strip()
+                except Exception:
+                    continue
+                if k in _SPEC_BRAND_KEYS:
+                    set_brand(v)
+                elif k in _SPEC_MFR_KEYS:
+                    set_mfr(v)
+                elif any(t in k for t in _SPEC_SIZE_KEYS):
+                    set_size(v)
+    except Exception:
+        pass
+
+    # 3) Generic rows “Key: Value”
+    try:
+        nodes = page.locator("li, .row, .key-value, .product-attributes__row, .product-details__row, div, span, p")
+        for i in range(min(800, nodes.count())):
+            t = (nodes.nth(i).inner_text() or "").strip()
+            if ":" not in t or len(t) > 240:
+                continue
+            k, v = t.split(":", 1)
+            k = _norm_key_et(k)
+            v = v.strip()
+            if k in _SPEC_BRAND_KEYS:
+                set_brand(v)
+            elif k in _SPEC_MFR_KEYS:
+                set_mfr(v)
+            elif any(tk in k for tk in _SPEC_SIZE_KEYS):
+                set_size(v)
+    except Exception:
+        pass
+
+    return brand, mfr, size_text
+
 # ---------- dynamic-page helpers ----------
 def accept_cookies_if_present(page: Page) -> None:
     for sel in ('button:has-text("Nõustu")','button:has-text("Nõustu kõigiga")',
@@ -340,15 +446,39 @@ def extract_pdp(page: Page, source_url: str, category_hint: str) -> Row:
     name, brand, size_text, ean_raw, sku_raw = extract_from_jsonld(page)
     if not any([name, brand, size_text, ean_raw, sku_raw]):
         _n,_b,_s,_g,_sku = extract_from_other_scripts(page)
-        name = name or _n; brand = brand or _b; size_text = size_text or _s; ean_raw = ean_raw or _g; sku_raw = sku_raw or _sku
+        name = name or _n
+        brand = brand or _b
+        size_text = size_text or _s
+        ean_raw = ean_raw or _g
+        sku_raw = sku_raw or _sku
+
+    # DOM spec fallback to fill brand/manufacturer/size when missing
+    manufacturer = ""
+    try:
+        b_dom, mfr_dom, size_dom = extract_specs_from_dom(page)
+        if b_dom and not brand:
+            brand = b_dom
+        if mfr_dom:
+            manufacturer = mfr_dom
+        if size_dom and not size_text:
+            size_text = size_dom
+    except Exception:
+        pass
+
     price, currency = extract_price_currency(page)
     image_url = extract_image_url(page)
     cat_path, cat_leaf = extract_breadcrumbs(page)
     if not cat_path and category_hint:
-        cat_path = category_hint; cat_leaf = category_hint.split("/")[-1] if "/" in category_hint else category_hint
+        cat_path = category_hint
+        cat_leaf = category_hint.split("/")[-1] if "/" in category_hint else category_hint
     ext_id = ext_id_from_url(source_url)
-    return Row(STORE_CHAIN, STORE_NAME, STORE_CHANNEL, ext_id, ean_raw, sku_raw, name, size_text,
-               brand, "", price, (currency or "EUR"), image_url, cat_path, cat_leaf, source_url)
+
+    return Row(
+        STORE_CHAIN, STORE_NAME, STORE_CHANNEL,
+        ext_id, ean_raw, sku_raw, name, size_text,
+        brand, manufacturer, price, (currency or "EUR"),
+        image_url, cat_path, cat_leaf, source_url
+    )
 
 # ----------------------- Main crawl -----------------------
 def main():
