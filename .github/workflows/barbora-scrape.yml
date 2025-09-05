@@ -47,10 +47,8 @@ jobs:
       OUTPUT_CSV: data/barbora_products.csv
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       MODE: ${{ github.event.inputs.mode || 'prices' }}
-      # Space-separated URL prefixes to exclude/include
       EXCLUDE_SECTIONS: "https://barbora.ee/kodukaubad-ja-vaba-aeg https://barbora.ee/enesehooldustooted https://barbora.ee/puhastustarbed-ja-lemmikloomatooted https://barbora.ee/lastekaubad"
       INCLUDE_SECTIONS: "https://barbora.ee/enesehooldustooted/suuhugieen/hambapastad https://barbora.ee/enesehooldustooted/raseerimisvahendid https://barbora.ee/enesehooldustooted/intiimhugieeni-vahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/pesupesemisvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/noudepesuvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/kodukeemia https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/majapidamis-ja-koristustarbed https://barbora.ee/lastekaubad/piimasegud-ja-jatkupiimasegud https://barbora.ee/lastekaubad/pudrud https://barbora.ee/lastekaubad/mahkmed https://barbora.ee/lastekaubad/puuviljapureed https://barbora.ee/lastekaubad/laste-hugieenitarbed/niisked-salvratikud https://barbora.ee/lastekaubad/liha-ja-koogiviljapureed"
-      # Ensure scheduled runs also upsert by default
       UPSERT_DB: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.upsert_db || '1' }}
 
     steps:
@@ -97,15 +95,12 @@ jobs:
           set -euo pipefail
           mkdir -p data
 
-          # 1) Explicit input wins
           if [ -n "${INPUT_CATS}" ]; then
             printf "%s\n" "${INPUT_CATS}" | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/barbora_categories.txt
             echo "Using categories from workflow input."
-          # 2) Repo file next (if already committed)
           elif [ -s data/barbora_categories.txt ]; then
             echo "Using repo file data/barbora_categories.txt"
           else
-            # 3) Try autodiscover from homepage
             {
               echo 'import os'
               echo 'from urllib.parse import urljoin, urlparse'
@@ -119,7 +114,6 @@ jobs:
               echo '    p = urlparse(url)'
               echo '    if not (p.scheme and p.netloc and p.netloc.endswith("barbora.ee")): return False'
               echo '    segs = [s for s in p.path.split("/") if s]'
-              echo '    # allow 1..4 segments; avoid obvious non-catalog roots'
               echo '    if any(s in ("retseptid","info","blogi","kampaania") for s in segs): return False'
               echo '    return 1 <= len(segs) <= 4'
               echo 'def allowed(url):'
@@ -144,7 +138,6 @@ jobs:
             } > /tmp/discover_barbora.py
             python /tmp/discover_barbora.py
 
-            # 4) Fallback to a curated FOOD roots list if autodiscover empty/too small
             if [ ! -s data/barbora_categories.txt ] || [ "$(wc -l < data/barbora_categories.txt)" -lt 10 ]; then
               printf '%s\n' \
                 'https://barbora.ee/koogiviljad-puuviljad' \
@@ -168,7 +161,6 @@ jobs:
           echo "--------------"
           test -s data/barbora_categories.txt
 
-      # Ensure psql available for the skip/only steps
       - name: Install psql client (for skip/only lists)
         if: ${{ env.DATABASE_URL != '' }}
         shell: bash
@@ -176,7 +168,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-      # MODE=prices → skip only items that are priced AND already have a brand + name
       - name: Build skip list (priced & have brand+name)
         if: ${{ env.DATABASE_URL != '' && env.MODE == 'prices' }}
         shell: bash
@@ -213,7 +204,7 @@ jobs:
 
           echo "Skip list rows (priced & have brand+name): $(wc -l < data/barbora_skip_ext_ids.txt)" | tee data/_barbora_skip_count.txt
 
-      # MODE=metadata → crawl only items missing brand/EAN/manufacturer (fallback to brand/EAN/name if manufacturer column doesn't exist)
+      # ---------- FIXED STEP (no YAML-heredoc traps) ----------
       - name: Build ONLY list (missing brand/EAN/manufacturer; fallback-safe)
         if: ${{ env.DATABASE_URL != '' && env.MODE == 'metadata' }}
         shell: bash
@@ -221,9 +212,8 @@ jobs:
           set -euo pipefail
           : > data/barbora_only_ext_ids.txt
 
-          # Detect presence of "manufacturer" column on BOTH tables first (no failing query)
-          HAS_MANU=$(
-            psql "$DATABASE_URL" -At <<'SQL'
+          # Detect manufacturer column on BOTH tables (compact, no heredoc-in-subst)
+          HAS_MANU="$(psql "$DATABASE_URL" -Atc "
             WITH cols AS (
               SELECT table_name
               FROM information_schema.columns
@@ -232,45 +222,44 @@ jobs:
                 AND table_name IN ('barbora_candidates','staging_barbora_products')
             )
             SELECT CASE WHEN COUNT(*)=2 THEN '1' ELSE '0' END FROM cols;
-SQL
-          )
+          ")"
           echo "HAS_MANUFACTURER_COLS=${HAS_MANU}"
 
-          if [ "$HAS_MANU" = "1" ]; then
-            psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/barbora_only_ext_ids.txt
-            WITH all_ids AS (
-              SELECT ext_id FROM public.barbora_candidates
-              UNION
-              SELECT ext_id FROM public.staging_barbora_products
-            )
-            SELECT a.ext_id
-            FROM all_ids a
-            LEFT JOIN public.barbora_candidates bc ON bc.ext_id = a.ext_id
-            LEFT JOIN public.staging_barbora_products sp ON sp.ext_id = a.ext_id
-            WHERE
-              COALESCE(NULLIF(btrim(COALESCE(bc.brand, sp.brand, '')), ''), NULL) IS NULL
-              OR COALESCE(NULLIF(regexp_replace(COALESCE(bc.ean_raw, sp.ean_raw, ''), '[^0-9]', '', 'g'), ''), NULL) IS NULL
-              OR COALESCE(NULLIF(btrim(COALESCE(bc.manufacturer, sp.manufacturer, '')), ''), NULL) IS NULL
-            ORDER BY 1;
-            SQL
+          if [ "${HAS_MANU}" = "1" ]; then
+            psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 -c "
+              WITH all_ids AS (
+                SELECT ext_id FROM public.barbora_candidates
+                UNION
+                SELECT ext_id FROM public.staging_barbora_products
+              )
+              SELECT a.ext_id
+              FROM all_ids a
+              LEFT JOIN public.barbora_candidates bc ON bc.ext_id = a.ext_id
+              LEFT JOIN public.staging_barbora_products sp ON sp.ext_id = a.ext_id
+              WHERE
+                COALESCE(NULLIF(btrim(COALESCE(bc.brand, sp.brand, '')), ''), NULL) IS NULL
+                OR COALESCE(NULLIF(regexp_replace(COALESCE(bc.ean_raw, sp.ean_raw, ''), '[^0-9]', '', 'g'), ''), NULL) IS NULL
+                OR COALESCE(NULLIF(btrim(COALESCE(bc.manufacturer, sp.manufacturer, '')), ''), NULL) IS NULL
+              ORDER BY 1;
+            " > data/barbora_only_ext_ids.txt
           else
             echo "::warning::manufacturer column missing -> falling back to (brand/EAN/name)"
-            psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/barbora_only_ext_ids.txt
-            WITH all_ids AS (
-              SELECT ext_id FROM public.barbora_candidates
-              UNION
-              SELECT ext_id FROM public.staging_barbora_products
-            )
-            SELECT a.ext_id
-            FROM all_ids a
-            LEFT JOIN public.barbora_candidates bc ON bc.ext_id = a.ext_id
-            LEFT JOIN public.staging_barbora_products sp ON sp.ext_id = a.ext_id
-            WHERE
-              COALESCE(NULLIF(btrim(COALESCE(bc.brand, sp.brand, '')), ''), NULL) IS NULL
-              OR COALESCE(NULLIF(regexp_replace(COALESCE(bc.ean_raw, sp.ean_raw, ''), '[^0-9]', '', 'g'), ''), NULL) IS NULL
-              OR COALESCE(NULLIF(btrim(COALESCE(bc.name,  sp.name,  '')), ''), NULL) IS NULL
-            ORDER BY 1;
-            SQL
+            psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 -c "
+              WITH all_ids AS (
+                SELECT ext_id FROM public.barbora_candidates
+                UNION
+                SELECT ext_id FROM public.staging_barbora_products
+              )
+              SELECT a.ext_id
+              FROM all_ids a
+              LEFT JOIN public.barbora_candidates bc ON bc.ext_id = a.ext_id
+              LEFT JOIN public.staging_barbora_products sp ON sp.ext_id = a.ext_id
+              WHERE
+                COALESCE(NULLIF(btrim(COALESCE(bc.brand, sp.brand, '')), ''), NULL) IS NULL
+                OR COALESCE(NULLIF(regexp_replace(COALESCE(bc.ean_raw, sp.ean_raw, ''), '[^0-9]', '', 'g'), ''), NULL) IS NULL
+                OR COALESCE(NULLIF(btrim(COALESCE(bc.name,  sp.name,  '')), ''), NULL) IS NULL
+              ORDER BY 1;
+            " > data/barbora_only_ext_ids.txt
           fi
 
           echo "ONLY list rows: $(wc -l < data/barbora_only_ext_ids.txt)"
@@ -334,7 +323,6 @@ SQL
           if-no-files-found: warn
           retention-days: 7
 
-      # ---------- Optional DB part ----------
       - name: Install psql client
         if: ${{ env.DATABASE_URL != '' && env.UPSERT_DB == '1' }}
         shell: bash
@@ -426,11 +414,9 @@ SQL
 
           \copy tmp_barbora_csv_full FROM '__CSV__' CSV HEADER
 
-          -- Normalize and fill blanks; build a clean staging temp table.
           CREATE TEMP TABLE tmp_staging_barbora_products AS
           SELECT
             ext_id,
-            -- Fill missing/blank name from slug
             COALESCE(NULLIF(btrim(name), ''), initcap(replace(regexp_replace(COALESCE(ext_id,''), '^.*/', ''), '-', ' '))) AS name,
             NULLIF(btrim(ean_raw), '') AS ean_raw,
             NULLIF(btrim(sku_raw), '') AS sku_raw,
@@ -444,7 +430,6 @@ SQL
           FROM tmp_barbora_csv_full
           WHERE COALESCE(ext_id,'') <> '';
 
-          -- Drop any rows that still lack a name after fallback
           DELETE FROM tmp_staging_barbora_products
           WHERE COALESCE(name,'') = '';
 
