@@ -155,7 +155,11 @@ def _in_allowlist(path: str) -> bool:
 # ---- PDP detection ---------------------------------------------------------
 def _is_selver_product_like(url: str) -> bool:
     """
-    Stricter product URL detection
+    Product URL detection for Selver:
+    - /toode/<...>                (legacy PDPs)
+    - /e/<slug>-<digits>          (numeric PDPs)
+    - /p/<digits>                 (numeric PDPs)
+    - /<product-slug>             (single segment, hyphenated — current Selver PDPs)
     """
     u = urlparse(url)
     host = (u.netloc or urlparse(BASE).netloc).lower()
@@ -164,6 +168,7 @@ def _is_selver_product_like(url: str) -> bool:
 
     path = _strip_eselver_prefix((u.path or "/").lower())
 
+    # Drop obvious non-product paths/keywords
     if path.startswith("/ru/"):
         return False
     if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS):
@@ -171,12 +176,21 @@ def _is_selver_product_like(url: str) -> bool:
     if any(kw in path for kw in NON_PRODUCT_KEYWORDS):
         return False
 
+    # Known PDP patterns
     if path.startswith("/toode/"):
         return True
     if re.search(r"^/e/.+-(\d+)(/)?$", path):
         return True
     if re.search(r"^/p/\d+(/)?$", path):
         return True
+
+    # NEW: current Selver PDPs are *single-segment* hyphenated slugs
+    # e.g. /porgandimahl-kadarbiku-koogivili-500-ml
+    segs = [s for s in path.strip("/").split("/") if s]
+    if len(segs) == 1:
+        seg = segs[0]
+        if "-" in seg and re.fullmatch(r"[a-z0-9-]{6,}", seg):
+            return True
 
     return False
 
@@ -993,7 +1007,16 @@ def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
     _wait_listing_ready(page); time.sleep(0.2)
     path = urlparse(product_url).path
     es = "/e-selver" + path if not path.startswith("/e-selver/") else path
-    sels = [f"a[href$='{path}']", f"a[href$='{path}/']", f"a[href$='{es}']", f"a[href$='{es}/']", "a[href*='/toode/']"]
+    # broaden selector set to catch single-segment slugs inside product cards
+    sels = [
+        f"a[href$='{path}']",
+        f"a[href$='{path}/']",
+        f"a[href$='{es}']",
+        f"a[href$='{es}/']",
+        "a[href*='/toode/']",
+        "div[class*='product'] a[href^='/']",
+        "a[href^='/'][href*='-']"
+    ]
     for sel in sels:
         a = page.locator(sel).first
         try:
