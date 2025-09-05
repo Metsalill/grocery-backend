@@ -180,9 +180,10 @@ jobs:
           CATEGORIES_FILE: data/selver_categories.txt
           ALLOWLIST_ONLY: "1"
           USE_ROUTER: "1"
-          CLICK_PRODUCTS: ${{ github.event_name == 'workflow_dispatch' && inputs.click_products || '1' }}
+          # if MODE=metadata -> 0, else honor input (default 1)
+          CLICK_PRODUCTS: ${{ env.MODE == 'metadata' && '0' || (github.event_name == 'workflow_dispatch' && inputs.click_products || '1') }}
           LOG_CONSOLE: ${{ github.event_name == 'workflow_dispatch' && inputs.log_console || 'warn' }}
-          NAV_TIMEOUT_MS: "60000"
+          NAV_TIMEOUT_MS: "90000"
           PRELOAD_DB: "0"
           PGSSLMODE: "require"
         run: |
