@@ -38,12 +38,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1]
+        shard: [0, 1, 2, 3]   # increased parallelism
     env:
       TZ: Europe/Tallinn
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       SHARD: ${{ matrix.shard }}
       MODE: ${{ inputs.mode || 'metadata' }}
+      SHARDS: ${{ strategy.job-total }}   # keep shard slicing in sync
 
     steps:
       - name: Checkout
@@ -80,13 +81,12 @@ jobs:
 
       - name: Build shard slice (cover all categories this run; shard ${{ matrix.shard }})
         shell: bash
-        env:
-          SHARDS: 2
         run: |
           set -euo pipefail
           cp -f data/selver_categories.txt data/selver_categories_all.txt
           TOTAL=$(wc -l < data/selver_categories_all.txt)
           : "${SHARD:?SHARD env is required}"
+          : "${SHARDS:?SHARDS env is required}"
           awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
             data/selver_categories_all.txt > data/selver_categories.txt
           echo "TOTAL categories: $TOTAL"
@@ -123,7 +123,7 @@ jobs:
               AND p.source_url ~ '/e/[0-9]+'
           ),
           priced_from_candidates AS (
-            SELECT DISTINCT ext_id::text
+            SELECT DISTINCT regexp_replace(ext_id::text, ':[0-9]+(?::[0-9]+)?$', '') AS ext_id
             FROM public.selver_candidates
             WHERE COALESCE(price,0) > 0
               AND COALESCE(ext_id,'') <> ''
@@ -133,13 +133,15 @@ jobs:
             UNION
             SELECT ext_id FROM priced_from_candidates
           )
-          SELECT pr.ext_id
+          SELECT regexp_replace(pr.ext_id, ':[0-9]+(?::[0-9]+)?$', '')
           FROM priced pr
           LEFT JOIN public.selver_candidates sc ON sc.ext_id = pr.ext_id
           LEFT JOIN public.staging_selver_products sp ON sp.ext_id = pr.ext_id
           WHERE COALESCE(NULLIF(btrim(COALESCE(sc.brand, sp.brand, '')), ''), NULL) IS NOT NULL
           ORDER BY 1;
           SQL
+          # Extra hardening if any stray line:col sneaks through
+          sed -E -i 's/:[0-9]+(:[0-9]+)?$//' data/selver_skip_ext_ids.txt || true
           echo "Skip list rows (priced & have brand): $(wc -l < data/selver_skip_ext_ids.txt)"
 
       # MODE=metadata → crawl only items missing brand/EAN
@@ -151,9 +153,9 @@ jobs:
           : > data/selver_only_ext_ids.txt
           psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/selver_only_ext_ids.txt
           WITH all_ids AS (
-            SELECT ext_id FROM public.selver_candidates
+            SELECT regexp_replace(ext_id, ':[0-9]+(?::[0-9]+)?$', '') AS ext_id FROM public.selver_candidates
             UNION
-            SELECT ext_id FROM public.staging_selver_products
+            SELECT regexp_replace(ext_id, ':[0-9]+(?::[0-9]+)?$', '') AS ext_id FROM public.staging_selver_products
           )
           SELECT a.ext_id
           FROM all_ids a
@@ -164,6 +166,8 @@ jobs:
             OR COALESCE(NULLIF(regexp_replace(COALESCE(sc.ean_raw, sp.ean_raw, ''), '[^0-9]', '', 'g'), ''), NULL) IS NULL
           ORDER BY 1;
           SQL
+          # Extra hardening: strip any trailing :line:col if present
+          sed -E -i 's/:[0-9]+(:[0-9]+)?$//' data/selver_only_ext_ids.txt || true
           echo "ONLY list rows (missing metadata): $(wc -l < data/selver_only_ext_ids.txt)"
 
       - name: Crawl Selver categories (Playwright)
@@ -263,8 +267,6 @@ jobs:
             data/selver_only_ext_ids.txt
           if-no-files-found: warn
           retention-days: 7
-
-      # (DB load & adopt steps unchanged)
 
       # ---------------------- DB LOAD & ADOPT (unchanged) ---------------------
       - name: Prepare DB (staging & helper tables)
@@ -410,8 +412,8 @@ jobs:
 
           WITH filtered AS (
             SELECT
-              ext_id,
-              source_url,
+              regexp_replace(ext_id, ':[0-9]+(?::[0-9]+)?$', '') AS ext_id,
+              regexp_replace(source_url, ':[0-9]+(?::[0-9]+)?$', '') AS source_url,
               name,
               NULLIF(brand,'') AS brand,
               ean_raw,
@@ -483,7 +485,9 @@ jobs:
           CREATE TEMP TABLE tmp_missing_candidates AS
           WITH filtered AS (
             SELECT
-              ext_id, source_url, name, NULLIF(brand,'') AS brand, ean_raw,
+              regexp_replace(ext_id, ':[0-9]+(?::[0-9]+)?$', '') AS ext_id,
+              regexp_replace(source_url, ':[0-9]+(?::[0-9]+)?$', '') AS source_url,
+              name, NULLIF(brand,'') AS brand, ean_raw,
               NULLIF(regexp_replace(COALESCE(ean_norm, ean_raw, ''), '[^0-9]', '', 'g'),'') AS ean_norm,
               sku_raw, size_text, price, currency, category_path, category_leaf
             FROM tmp_staging_selver_products
