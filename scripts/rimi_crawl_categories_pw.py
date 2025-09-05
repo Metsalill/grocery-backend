@@ -3,19 +3,15 @@
 """
 Rimi.ee (Rimi ePood) category crawler → PDP extractor → CSV/DB friendly
 
-Improvements in this version
-- Much stronger BRAND extraction:
-  * JSON-LD: product.brand (string or {name}), manufacturer.{name}, offers.seller.name
-  * Meta tags: product:brand
-  * Spec rows: “Kaubamärk”, “Bränd/Brand”, “Tootja/Manufacturer/Valmistaja”
-  * Also reads <dl><dt>Key</dt><dd>Val</dd></dl> and generic “Key: Value” rows
-- Better SIZE extraction from spec + name fallback
-- EAN normalization (accepts 8/12/13/14 → normalized 13 when possible)
-- Price parsing handles “3 99 €”, JSON-LD offers, meta, visible text
-- Faster & more stable (blocks heavy 3rd-party, cookie overlays, canonical capture)
-- Single Chromium instance reused for all PDPs
+Key bits:
+- Strong brand/manufacturer/size extraction (JSON-LD, meta, spec tables, dl/dt/dd, generic "Key: Value")
+- EAN normalization (accepts 8/12/13/14 → normalizes to 13 when possible)
+- Robust price parsing (JSON-LD, meta, visible text)
+- Stable/fast (blocks heavy 3rd-party, auto-accepts overlays)
+- Reuses a single Chromium page for all PDPs
+- NEW: supports --only-ext-file to crawl *only* the ext_ids you feed in
 
-CSV columns written (unchanged):
+CSV columns written:
   store_chain, store_name, store_channel,
   ext_id, ean_raw, sku_raw, name, size_text, brand, manufacturer,
   price, currency, image_url, category_path, category_leaf, source_url
@@ -66,7 +62,7 @@ def deep_find_kv(obj: Any, keys: set) -> Dict[str, str]:
                 lk = str(k).lower()
                 if lk in keys and isinstance(v, (str, int, float)):
                     out[lk] = str(v)
-                # brand commonly nested as { "brand": { "name": "…" } }
+                # nested brand/manufacturer with {name}
                 if lk == "brand":
                     if isinstance(v, dict) and "name" in v:
                         out["brand"] = str(v.get("name") or "")
@@ -161,86 +157,65 @@ SIZE_IN_NAME_RE = re.compile(
 )
 
 def _norm_key(s: str) -> str:
-    """Lowercase + simple de-diacritization for et/fi keys."""
     s = (s or "").strip().lower()
-    # basic transliteration needed for matches: ä->a, ö/õ->o, ü->u, š->s, ž->z
-    s = (s
-         .replace("ä", "a").replace("ö", "o").replace("õ", "o").replace("ü", "u")
-         .replace("š", "s").replace("ž", "z"))
-    return s
+    return (s
+            .replace("ä", "a").replace("ö", "o").replace("õ", "o").replace("ü", "u")
+            .replace("š", "s").replace("ž", "z"))
 
 def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
-    """
-    Returns (brand, manufacturer, size_text) by scanning tables, dl/dt/dd and generic 'Key: Value' rows.
-    """
     brand = mfr = size_text = None
 
     def set_brand(v: str):
-        nonlocal brand
-        v = (v or "").strip()
-        if v and not brand:
-            brand = v
+        nonlocal brand; v = (v or "").strip()
+        if v and not brand: brand = v
 
     def set_mfr(v: str):
-        nonlocal mfr
-        v = (v or "").strip()
-        if v and not mfr:
-            mfr = v
+        nonlocal mfr; v = (v or "").strip()
+        if v and not mfr: mfr = v
 
     def set_size(v: str):
-        nonlocal size_text
-        v = (v or "").strip()
-        if v and not size_text:
-            size_text = v
+        nonlocal size_text; v = (v or "").strip()
+        if v and not size_text: size_text = v
 
-    # 1) table rows (th/td)
+    # 1) table rows
     for row in soup.select("table tr"):
         th, td = row.find("th"), row.find("td")
         if not th or not td:
             continue
         key = _norm_key(th.get_text(" ", strip=True))
         val = td.get_text(" ", strip=True)
-        if key in ("kaubamark", "brand", "brand:", "brand name", "brandname", "brand/kaubamark", "braend", "braend:", "braend name", "brand/kaubamärk", "bränd", "braend/kaubamark"):
+        if key in ("kaubamark","brand","brand:","brand name","brandname","brand/kaubamark","bränd","brand/kaubamärk"):
             set_brand(val)
-        elif key in ("tootja", "manufacturer", "valmistaja", "producer"):
+        elif key in ("tootja","manufacturer","valmistaja","producer"):
             set_mfr(val)
-        elif any(k in key for k in ("kogus", "netokogus", "maht", "pakend", "neto", "suurus", "mahtuvus")):
+        elif any(k in key for k in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus")):
             set_size(val)
 
     # 2) dl/dt/dd pairs
     for dl in soup.select("dl"):
-        dts = dl.find_all("dt")
-        dds = dl.find_all("dd")
+        dts, dds = dl.find_all("dt"), dl.find_all("dd")
         for i in range(min(len(dts), len(dds))):
             key = _norm_key(dts[i].get_text(" ", strip=True))
             val = dds[i].get_text(" ", strip=True)
-            if key in ("kaubamark", "brand", "bränd"):
-                set_brand(val)
-            elif key in ("tootja", "manufacturer", "valmistaja", "producer"):
-                set_mfr(val)
-            elif any(k in key for k in ("kogus", "netokogus", "maht", "pakend", "neto", "suurus", "mahtuvus")):
-                set_size(val)
+            if key in ("kaubamark","brand","bränd"): set_brand(val)
+            elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
+            elif any(k in key for k in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus")): set_size(val)
 
-    # 3) generic “Key: Value” rows in cards/divs
+    # 3) generic “Key: Value” rows
     for el in soup.select(".product-attributes__row, .product-details__row, .key-value, .MuiGrid-root, li, div"):
         t = (el.get_text(" ", strip=True) or "")
         if ":" not in t or len(t) > 200:
             continue
         k, v = t.split(":", 1)
-        key = _norm_key(k)
-        val = v.strip()
-        if key in ("kaubamark", "brand", "bränd"):
-            set_brand(val)
-        elif key in ("tootja", "manufacturer", "valmistaja", "producer"):
-            set_mfr(val)
-        elif any(k in key for k in ("kogus", "netokogus", "maht", "pakend", "neto", "suurus", "mahtuvus")):
-            set_size(val)
+        key = _norm_key(k); val = v.strip()
+        if key in ("kaubamark","brand","bränd"): set_brand(val)
+        elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
+        elif any(k in key for k in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus")): set_size(val)
 
-    # 4) size fallback from name
+    # 4) size from name
     if not size_text and name:
         m = SIZE_IN_NAME_RE.search(name)
-        if m:
-            size_text = m.group(1).replace("L", "l")
+        if m: size_text = m.group(1).replace("L", "l")
 
     return brand, mfr, size_text
 
@@ -487,7 +462,7 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
             seen.add(u); out.append(u)
     return out
 
-# --------------------------- PDP parser (reused page) --------------------------
+# --------------------------- PDP parser (reused page) -------------------------
 
 def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
     name = brand = manufacturer = size_text = image_url = ""
@@ -648,28 +623,35 @@ def read_categories(path: str) -> List[str]:
     with open(path, "r", encoding="utf-8") as f:
         return [ln.strip() for ln in f if ln.strip() and not ln.strip().startswith("#")]
 
-def read_skip_file(path: Optional[str]) -> tuple[set[str], set[str]]:
+def _read_id_file(path: Optional[str]) -> tuple[set[str], set[str]]:
     """
-    Returns (skip_urls, skip_ext_ids)
-    File may contain full PDP URLs and/or bare ext_ids (one per line).
+    Generic helper: read a file that may contain full URLs and/or ext_ids.
+    Returns (urls, ext_ids).
     """
-    skip_urls: set[str] = set()
-    skip_ext: set[str] = set()
+    urls: set[str] = set()
+    ids: set[str] = set()
     if not path or not os.path.exists(path):
-        return skip_urls, skip_ext
+        return urls, ids
     with open(path, "r", encoding="utf-8") as f:
         for ln in f:
             s = ln.strip()
             if not s:
                 continue
             if s.startswith("http"):
-                skip_urls.add(s.split("?")[0].split("#")[0])
-                xid = extract_ext_id(s)
+                u = s.split("?")[0].split("#")[0]
+                urls.add(u)
+                xid = extract_ext_id(u)
                 if xid:
-                    skip_ext.add(xid)
+                    ids.add(xid)
             else:
-                skip_ext.add(s)
-    return skip_urls, skip_ext
+                ids.add(s)
+    return urls, ids
+
+def read_skip_file(path: Optional[str]) -> tuple[set[str], set[str]]:
+    return _read_id_file(path)
+
+def read_only_file(path: Optional[str]) -> tuple[set[str], set[str]]:
+    return _read_id_file(path)
 
 def write_csv(rows: List[Dict[str,str]], out_path: str) -> None:
     fields = [
@@ -697,6 +679,7 @@ def main():
     ap.add_argument("--req-delay", default="0.5")
     ap.add_argument("--output-csv", default=os.environ.get("OUTPUT_CSV","data/rimi_products.csv"))
     ap.add_argument("--skip-ext-file", default=os.environ.get("SKIP_EXT_FILE",""))
+    ap.add_argument("--only-ext-file", default=os.environ.get("ONLY_EXT_FILE",""))  # NEW
     args = ap.parse_args()
 
     page_limit   = int(args.page_limit or "0")
@@ -704,7 +687,9 @@ def main():
     headless     = (str(args.headless or "1") != "0")
     req_delay    = float(args.req_delay or "0.5")
     cats         = read_categories(args.cats_file)
+
     skip_urls, skip_ext = read_skip_file(args.skip_ext_file)
+    only_urls, only_ext = read_only_file(args.only_ext_file)
 
     all_pdps: List[str] = []
     with sync_playwright() as pw:
@@ -725,7 +710,17 @@ def main():
             if u not in seen:
                 seen.add(u); q.append(u)
 
-        # 2) filter with skip list
+        # 2a) ONLY filter (if provided)
+        if only_urls or only_ext:
+            q_only = []
+            for u in q:
+                xid = extract_ext_id(u)
+                if (u in only_urls) or (xid and xid in only_ext):
+                    q_only.append(u)
+            print(f"[rimi] ONLY filter active: {len(q_only)} URLs retained (of {len(q)})")
+            q = q_only
+
+        # 2b) SKIP filter
         if skip_urls or skip_ext:
             q2 = []
             skipped = 0
@@ -734,7 +729,7 @@ def main():
                     skipped += 1
                     continue
                 q2.append(u)
-            print(f"[rimi] skip filter: {skipped} URLs skipped (already priced).")
+            print(f"[rimi] skip filter: {skipped} URLs skipped (already priced/complete).")
             q = q2
 
         # 3) single browser/context/page for all PDPs
