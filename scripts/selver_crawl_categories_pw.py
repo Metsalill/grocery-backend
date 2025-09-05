@@ -371,10 +371,11 @@ def _extract_brand_from_dom_texts(texts: List[str]) -> str:
         if not t or len(t) < 3:
             continue
         if _BRAND_KEY_RE.search(t):
-            # Try to pull the value after the key
-            m = re.split(_BRAND_KEY_RE, t, maxsplit=1, flags=re.I)
-            if isinstance(m, list) and len(m) >= 3:
-                rest = t[len(m[0]):]
+            # Use compiled pattern's split (compiled patterns cannot accept flags=)
+            parts_after_key = _BRAND_KEY_RE.split(t, maxsplit=1)
+            if isinstance(parts_after_key, list) and len(parts_after_key) >= 3:
+                # parts_after_key = [before, matched_key, after]
+                rest = parts_after_key[2]
                 parts = re.split(r"[:–—-]\s*", rest, maxsplit=1)
                 tail = parts[1] if len(parts) == 2 else ""
             else:
@@ -382,7 +383,9 @@ def _extract_brand_from_dom_texts(texts: List[str]) -> str:
                 tail = parts[1] if len(parts) == 2 else ""
             cand = normspace(tail)
             if cand:
-                cand = re.split(r"\b(Ribakood|SKU|Tootekood|Artikkel)\b", cand, maxsplit=1, flags=re.I)[0].strip()
+                # This is a string pattern, so case-insensitive flags are OK
+                cand = re.split(r"\b(Ribakood|SKU|Tootekood|Artikkel)\b",
+                                cand, maxsplit=1, flags=re.I)[0].strip()
                 if 2 <= len(cand) <= 80:
                     return cand
     return ""
@@ -427,7 +430,7 @@ def extract_brand(page, prod_ld: dict) -> str:
     try:
         texts: List[str] = page.evaluate("""
           () => [...document.querySelectorAll('tr, .row, li, .attribute, .product-attributes__row, .product-details__row, .MuiGrid-root, dd, dt, div, span, p, th, td')]
-                .map(n => (n.textContent || '').replace(/\s+/g,' ').trim())
+                .map(n => (n.textContent || '').replace(/\\s+/g,' ').trim())
                 .filter(Boolean)
         """)
     except Exception:
@@ -442,7 +445,7 @@ def extract_brand(page, prod_ld: dict) -> str:
         () => {
           const rows = Array.from(document.querySelectorAll('tr, .row, li, .attribute, .product-attributes__row, .product-details__row, dl, dt, dd, div, span, p, th, td'));
           for (const n of rows) {
-            const t = (n.textContent || '').replace(/\s+/g,' ').trim();
+            const t = (n.textContent || '').replace(/\\s+/g,' ').trim();
             if (!t) continue;
             if (/(\\b(käitleja|kaitleja|handler)\\b)/i.test(t)) {
               const m = t.split(/[:–—-]/).slice(1).join(':').trim();
