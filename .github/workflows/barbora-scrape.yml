@@ -221,30 +221,41 @@ jobs:
           set -euo pipefail
           : > data/barbora_only_ext_ids.txt
 
-          # Try query including manufacturer columns if they exist
-          set +e
-          psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL1' > data/barbora_only_ext_ids.txt
-          WITH all_ids AS (
-            SELECT ext_id FROM public.barbora_candidates
-            UNION
-            SELECT ext_id FROM public.staging_barbora_products
+          # Detect presence of "manufacturer" column on BOTH tables first (no failing query)
+          HAS_MANU=$(
+            psql "$DATABASE_URL" -At <<'SQL'
+            WITH cols AS (
+              SELECT table_name
+              FROM information_schema.columns
+              WHERE table_schema='public'
+                AND column_name='manufacturer'
+                AND table_name IN ('barbora_candidates','staging_barbora_products')
+            )
+            SELECT CASE WHEN COUNT(*)=2 THEN '1' ELSE '0' END FROM cols;
+SQL
           )
-          SELECT a.ext_id
-          FROM all_ids a
-          LEFT JOIN public.barbora_candidates bc ON bc.ext_id = a.ext_id
-          LEFT JOIN public.staging_barbora_products sp ON sp.ext_id = a.ext_id
-          WHERE
-            COALESCE(NULLIF(btrim(COALESCE(bc.brand, sp.brand, '')), ''), NULL) IS NULL
-            OR COALESCE(NULLIF(regexp_replace(COALESCE(bc.ean_raw, sp.ean_raw, ''), '[^0-9]', '', 'g'), ''), NULL) IS NULL
-            OR COALESCE(NULLIF(btrim(COALESCE(bc.manufacturer, sp.manufacturer, '')), ''), NULL) IS NULL
-          ORDER BY 1;
-          SQL1
-          status=$?
-          set -e
+          echo "HAS_MANUFACTURER_COLS=${HAS_MANU}"
 
-          if [ "$status" -ne 0 ]; then
-            echo "::warning::Manufacturer column not present; falling back to brand/EAN/name filter."
-            psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL2' > data/barbora_only_ext_ids.txt
+          if [ "$HAS_MANU" = "1" ]; then
+            psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/barbora_only_ext_ids.txt
+            WITH all_ids AS (
+              SELECT ext_id FROM public.barbora_candidates
+              UNION
+              SELECT ext_id FROM public.staging_barbora_products
+            )
+            SELECT a.ext_id
+            FROM all_ids a
+            LEFT JOIN public.barbora_candidates bc ON bc.ext_id = a.ext_id
+            LEFT JOIN public.staging_barbora_products sp ON sp.ext_id = a.ext_id
+            WHERE
+              COALESCE(NULLIF(btrim(COALESCE(bc.brand, sp.brand, '')), ''), NULL) IS NULL
+              OR COALESCE(NULLIF(regexp_replace(COALESCE(bc.ean_raw, sp.ean_raw, ''), '[^0-9]', '', 'g'), ''), NULL) IS NULL
+              OR COALESCE(NULLIF(btrim(COALESCE(bc.manufacturer, sp.manufacturer, '')), ''), NULL) IS NULL
+            ORDER BY 1;
+            SQL
+          else
+            echo "::warning::manufacturer column missing -> falling back to (brand/EAN/name)"
+            psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/barbora_only_ext_ids.txt
             WITH all_ids AS (
               SELECT ext_id FROM public.barbora_candidates
               UNION
@@ -259,7 +270,7 @@ jobs:
               OR COALESCE(NULLIF(regexp_replace(COALESCE(bc.ean_raw, sp.ean_raw, ''), '[^0-9]', '', 'g'), ''), NULL) IS NULL
               OR COALESCE(NULLIF(btrim(COALESCE(bc.name,  sp.name,  '')), ''), NULL) IS NULL
             ORDER BY 1;
-            SQL2
+            SQL
           fi
 
           echo "ONLY list rows: $(wc -l < data/barbora_only_ext_ids.txt)"
