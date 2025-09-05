@@ -32,7 +32,8 @@ on:
     - cron: "0 2 * * *"     # nightly at 02:00 UTC
 
 concurrency:
-  group: rimi-category-crawl
+  # separate queues per mode so prices/metadata don't cancel each other
+  group: rimi-category-crawl-${{ github.event.inputs.mode || 'prices' }}
   cancel-in-progress: true
 
 jobs:
