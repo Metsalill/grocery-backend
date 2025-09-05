@@ -7,16 +7,14 @@ Selver category crawler → CSV (staging_selver_products)
 Adds robust **brand** extraction in addition to the EAN/SKU hardening:
 - JSON-LD: product.brand / manufacturer (string or object)
 - itemprop/meta: brand/manufacturer
-- DOM spec rows: "Bränd", "Tootja", "Kaubamärk", "Brand"
-- Fallback: first capitalized token from H1 if all else fails
-- NEW: Treats “Käitleja / Kaitleja / Handler” as brand-like (Selver-specific)
+- DOM spec rows: "Bränd", "Tootja", "Kaubamärk", "Käitleja", "Handler", "Brand"
+- Fallbacks from H1/NAME (picks brand-like token, e.g., "... , TERE, 400 ml")
 
 Also includes:
 - resilient EAN (Ribakood) + SKU extraction
 - SPA noise suppression, request routing and small navigation retries
 - proceeds even if price widget fails (price=0.00)
 - skip/only lists via CLI flags (--skip-ext-file / --only-ext-file)
-  (values may be full URLs, paths like /e/123 or /toode/slug, or numeric ids)
 
 CSV columns written:
   ext_id, source_url, name, brand, ean_raw, ean_norm, sku_raw,
@@ -80,7 +78,9 @@ BANNED_KEYWORDS = {
     "loodustooted-ja-toidulisandid",
 }
 
-SIZE_RE = re.compile(r"(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
+# --- amounts / size_text extracted from NAME ---
+PACK_RE   = re.compile(r'(\d+)\s*[x×]\s*(\d+[.,]?\d*)\s*(ml|l|g|kg|cl|dl|tk|pcs)\b', re.I)
+SIMPLE_RE = re.compile(r'(\d+[.,]?\d*)\s*(ml|l|g|kg|cl|dl|tk|pcs)\b', re.I)
 
 # ---------- Third-party noise to block ----------
 BLOCK_HOSTS = {
@@ -112,10 +112,18 @@ def normspace(s: str) -> str:
     return re.sub(r"\s+", " ", s or "").strip()
 
 def guess_size_from_title(title: str) -> str:
-    m = SIZE_RE.search(title or "")
-    if not m: return ""
-    n,u = m.groups()
-    return f"{n.replace(',', '.')} {u.lower()}"
+    t = normspace(title or "")
+    if not t:
+        return ""
+    m = PACK_RE.search(t)
+    if m:
+        count, qty, unit = m.groups()
+        return f"{count}×{qty.replace(',', '.')} {unit.lower()}".replace(" pcs", " tk")
+    m = SIMPLE_RE.search(t)
+    if m:
+        qty, unit = m.groups()
+        return f"{qty.replace(',', '.')} {unit.lower()}".replace(" pcs", " tk")
+    return ""
 
 def _strip_eselver_prefix(path: str) -> str:
     return path.replace("/e-selver", "", 1) if path.startswith("/e-selver/") else path
@@ -147,11 +155,7 @@ def _in_allowlist(path: str) -> bool:
 # ---- PDP detection ---------------------------------------------------------
 def _is_selver_product_like(url: str) -> bool:
     """
-    Stricter product URL detection:
-    - Allow /toode/<...> (Selver PDPs)
-    - Allow /e/<slug>-<digits>
-    - Allow /p/<digits>
-    Everything else is treated as NOT a product (prevents e.g. /vabad-ametikohad-0).
+    Stricter product URL detection
     """
     u = urlparse(url)
     host = (u.netloc or urlparse(BASE).netloc).lower()
@@ -160,7 +164,6 @@ def _is_selver_product_like(url: str) -> bool:
 
     path = _strip_eselver_prefix((u.path or "/").lower())
 
-    # Drop obvious non-product paths/keywords
     if path.startswith("/ru/"):
         return False
     if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS):
@@ -297,7 +300,45 @@ def _pick_ean_from_html(html: str) -> str:
 # ---------------------------------------------------------------------------
 # Brand helpers
 # NOTE: include Käitleja/Kaitleja/Handler as brand-like keys (Selver-specific)
-_BRAND_KEY_RE = re.compile(r"\b(käitleja|kaitleja|handler|bränd|brand|tootja|kaubamärk)\b", re.I)
+_BRAND_KEY_RE = re.compile(
+    r"\b(käitleja|kaitleja|handler|br[äa]nd|brand|tootja|kaubamärk|valmistaja|manufacturer|producer)\b",
+    re.I
+)
+
+LEGAL_SUFFIX_RE = re.compile(r'\b(?:AS|OÜ|OU|UAB|LLC|JSC|AG|GmbH|Sp\.?\s*z\.?\s*o\.?\s*o\.?)\b\.?', re.I)
+BRAND_SPLIT_RE  = re.compile(r'[,\-–—]|(?:\s\|\s)')
+
+def strip_legal_suffixes(s: str) -> str:
+    if not s: return s
+    s = LEGAL_SUFFIX_RE.sub('', s)
+    s = re.sub(r'\s{2,}', ' ', s).strip(' ,.-')
+    return s.strip()
+
+def normalize_brand_case(b: str) -> str:
+    if not b: return b
+    if b.isupper() and len(b) <= 4:
+        return b  # short acronyms kept as upper
+    if b.isupper():
+        return b.title()
+    return b
+
+def brand_from_name(title: str) -> str:
+    """
+    Heuristic: pick the token that looks like a brand from NAME/H1.
+    Works for '..., TERE, 400 ml' or '..., Tere - 400 ml'.
+    """
+    t = normspace(title or "")
+    if not t: return ""
+    parts = [p.strip() for p in BRAND_SPLIT_RE.split(t) if p and len(p.strip()) > 1]
+    parts = [p for p in parts if not SIMPLE_RE.search(p) and '%' not in p]
+    if not parts: return ""
+    for p in parts:
+        if p.isupper() and p.isalpha() and 2 <= len(p) <= 20:
+            return p
+    for p in parts:
+        if re.match(r'^[A-ZÄÖÕÜ][a-zäöõü]+(?:\s+[A-ZÄÖÕÜ][a-zäöõü]+)*$', p):
+            return p
+    return ""
 
 def _extract_brand_from_dom_texts(texts: List[str]) -> str:
     for t in texts:
@@ -306,9 +347,7 @@ def _extract_brand_from_dom_texts(texts: List[str]) -> str:
         if _BRAND_KEY_RE.search(t):
             # Try to pull the value after the key
             m = re.split(_BRAND_KEY_RE, t, maxsplit=1, flags=re.I)
-            # If split failed, still try colon split
             if isinstance(m, list) and len(m) >= 3:
-                # take substring after the matched key and split on common separators
                 rest = t[len(m[0]):]
                 parts = re.split(r"[:–—-]\s*", rest, maxsplit=1)
                 tail = parts[1] if len(parts) == 2 else ""
@@ -317,7 +356,6 @@ def _extract_brand_from_dom_texts(texts: List[str]) -> str:
                 tail = parts[1] if len(parts) == 2 else ""
             cand = normspace(tail)
             if cand:
-                # Cut off if other keys appear in the same line
                 cand = re.split(r"\b(Ribakood|SKU|Tootekood|Artikkel)\b", cand, maxsplit=1, flags=re.I)[0].strip()
                 if 2 <= len(cand) <= 80:
                     return cand
@@ -327,14 +365,13 @@ def extract_brand(page, prod_ld: dict) -> str:
     # 1) JSON-LD brand/manufacturer
     if prod_ld:
         b = prod_ld.get("brand") or prod_ld.get("manufacturer")
+        name = ""
         if isinstance(b, dict):
             name = normspace(str(b.get("name") or ""))
-            if name:
-                return name
         elif isinstance(b, str):
             name = normspace(b)
-            if name:
-                return name
+        if name:
+            return normalize_brand_case(strip_legal_suffixes(name))
 
     # 2) itemprop/meta brand/manufacturer
     try:
@@ -356,14 +393,14 @@ def extract_brand(page, prod_ld: dict) -> str:
         if got:
             name = normspace(str(got))
             if name:
-                return name
+                return normalize_brand_case(strip_legal_suffixes(name))
     except Exception:
         pass
 
     # 3) Generic spec rows (includes Käitleja/Handler via _BRAND_KEY_RE)
     try:
         texts: List[str] = page.evaluate("""
-          () => [...document.querySelectorAll('tr, .row, li, .attribute, .product-attributes__row, .MuiGrid-root, dd, dt, div, span, p, th, td')]
+          () => [...document.querySelectorAll('tr, .row, li, .attribute, .product-attributes__row, .product-details__row, .MuiGrid-root, dd, dt, div, span, p, th, td')]
                 .map(n => (n.textContent || '').replace(/\\s+/g,' ').trim())
                 .filter(Boolean)
         """)
@@ -371,7 +408,7 @@ def extract_brand(page, prod_ld: dict) -> str:
         texts = []
     brand = _extract_brand_from_dom_texts(texts)
     if brand:
-        return brand
+        return normalize_brand_case(strip_legal_suffixes(brand))
 
     # 3b) Explicit Käitleja/Kaitleja/Handler fallback if the generic pass missed it
     try:
@@ -382,7 +419,6 @@ def extract_brand(page, prod_ld: dict) -> str:
             const t = (n.textContent || '').replace(/\\s+/g,' ').trim();
             if (!t) continue;
             if (/\\b(käitleja|kaitleja|handler)\\b/i.test(t)) {
-              // prefer text after a separator
               const m = t.split(/[:–—-]/).slice(1).join(':').trim();
               if (m && m.length <= 80) return m;
             }
@@ -393,19 +429,18 @@ def extract_brand(page, prod_ld: dict) -> str:
         if handler:
             name = normspace(str(handler))
             if name:
-                return name
+                return normalize_brand_case(strip_legal_suffixes(name))
     except Exception:
         pass
 
-    # 4) Fallback: first word from H1 (best-effort)
+    # 4) Fallback: infer from NAME/H1
     try:
         title = normspace(page.locator("h1").first.inner_text())
     except Exception:
         title = ""
-    if title:
-        tok = title.split()[0]
-        if tok and tok.isalpha() and 2 <= len(tok) <= 20:
-            return tok
+    bname = brand_from_name(title)
+    if bname:
+        return normalize_brand_case(strip_legal_suffixes(bname))
 
     return ""
 
@@ -493,13 +528,11 @@ def _normalize_ext_line(line: str) -> List[str]:
     if m:
         s = f"/e/{m.group(1)}"
 
-    # Absolute + path forms
     absu = _clean_abs(s)
     if absu:
         vals.append(absu)
         vals.append(urlparse(absu).path)
     else:
-        # Try forcing into BASE if it's a bare path
         if s.startswith("/"):
             absu = _clean_abs(urljoin(BASE, s))
             if absu:
@@ -524,10 +557,8 @@ def _should_process_url(u: str, seen: Set[str]) -> bool:
     if not cu:
         return False
     key = urlparse(cu).path
-    # ONLY list takes priority if provided
     if ONLY_EXTS and (cu not in ONLY_EXTS) and (key not in ONLY_EXTS):
         return False
-    # Skip list OR already-seen
     if (cu in SKIP_EXTS) or (key in SKIP_EXTS):
         return False
     if (cu in seen) or (key in seen):
@@ -585,7 +616,7 @@ def _wait_pdp_ready(page):
         try:
             if (page.locator("h1").count() > 0 or
                 page.locator("script[type='application/ld+json']").count() > 0 or
-                page.locator(":text-matches('Ribakood|Barcode|Штрихкод','i')").count() > 0):
+                page.locator(":text-matches('Ribakood|Barcode|Штрихkod|Штрихкод','i')").count() > 0):
                 return
             try:
                 page.wait_for_load_state("networkidle", timeout=1500)
@@ -890,6 +921,7 @@ def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optio
 
     # Brand
     brand = extract_brand(page, prod_ld)
+    brand = normalize_brand_case(strip_legal_suffixes(brand)) if brand else ""
 
     # EAN & SKU
     ean, sku = "", ""
@@ -994,7 +1026,6 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
         print(f"[selver]   page {n}: discovered {len(hrefs)} candidate links (after filters)")
 
         for href in hrefs:
-            # Secondary filter in case of race
             if not _should_process_url(href, seen_ext_ids):
                 continue
 
@@ -1033,7 +1064,6 @@ def _parse_cli():
     p.add_argument("--page-limit", dest="page_limit", type=int, default=None)
     p.add_argument("--req-delay", dest="req_delay", type=float, default=None)
     p.add_argument("--output-csv", dest="output_csv", default=None)
-    # We intentionally do NOT expose headless here (controlled by Playwright context)
     return p.parse_args()
 
 def crawl():
@@ -1191,10 +1221,8 @@ def crawl():
 
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    # CLI overrides & list loading
     args = _parse_cli()
 
-    # Apply overrides to globals
     if args.output_csv:
         OUTPUT = args.output_csv
     if args.page_limit is not None:
@@ -1204,7 +1232,6 @@ if __name__ == "__main__":
     if args.cats_file:
         CATEGORIES_FILE = args.cats_file
 
-    # Load skip/only files
     skip_path = args.skip_file or args.skip_file_alias
     if skip_path:
         SKIP_EXTS = _load_ext_file(skip_path)
