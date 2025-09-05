@@ -43,7 +43,8 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       SHARD: ${{ matrix.shard }}
-      MODE: ${{ github.event.inputs.mode || 'prices' }}
+      # Use the workflow_dispatch inputs context; default to prices for schedules/re-runs
+      MODE: ${{ inputs.mode || 'prices' }}
 
     steps:
       - name: Checkout
@@ -102,7 +103,7 @@ jobs:
 
       # MODE=prices → skip only if (priced) AND (brand already present)
       - name: Build skip list (priced & have brand)
-        if: ${{ env.MODE == 'prices' }}
+        if: ${{ startsWith(toLower(env.MODE), 'price') }}
         shell: bash
         run: |
           set -euo pipefail
@@ -137,7 +138,7 @@ jobs:
 
       # MODE=metadata → crawl only items missing brand/EAN
       - name: Build target list (missing brand/EAN)
-        if: ${{ env.MODE == 'metadata' }}
+        if: ${{ startsWith(toLower(env.MODE), 'meta') }}
         shell: bash
         run: |
           set -euo pipefail
@@ -184,11 +185,11 @@ jobs:
 
           SKIP_FLAG=()
           ONLY_FLAG=()
-          if [ "${MODE}" = "prices" ] && [ -s data/selver_skip_ext_ids.txt ]; then
+          if [ "${MODE,,}" = "prices" ] && [ -s data/selver_skip_ext_ids.txt ]; then
             echo "Using skip list: $(wc -l < data/selver_skip_ext_ids.txt) ext_ids"
             SKIP_FLAG=(--skip-ext-file data/selver_skip_ext_ids.txt)
           fi
-          if [ "${MODE}" = "metadata" ] && [ -s data/selver_only_ext_ids.txt ]; then
+          if [[ "${MODE,,}" = meta* ]] && [ -s data/selver_only_ext_ids.txt ]; then
             echo "Using ONLY list: $(wc -l < data/selver_only_ext_ids.txt) ext_ids"
             ONLY_FLAG=(--only-ext-file data/selver_only_ext_ids.txt)
           fi
