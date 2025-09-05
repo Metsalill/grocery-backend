@@ -9,13 +9,14 @@ Adds robust **brand** extraction in addition to the EAN/SKU hardening:
 - itemprop/meta: brand/manufacturer
 - DOM spec rows: "Bränd", "Tootja", "Kaubamärk", "Brand"
 - Fallback: first capitalized token from H1 if all else fails
+- NEW: Treats “Käitleja / Kaitleja / Handler” as brand-like (Selver-specific)
 
 Also includes:
 - resilient EAN (Ribakood) + SKU extraction
 - SPA noise suppression, request routing and small navigation retries
 - proceeds even if price widget fails (price=0.00)
-- NEW: skip/only lists via CLI flags (--skip-ext-file / --only-ext-file)
-       (values may be full URLs, paths like /e/123 or /toode/slug, or numeric ids)
+- skip/only lists via CLI flags (--skip-ext-file / --only-ext-file)
+  (values may be full URLs, paths like /e/123 or /toode/slug, or numeric ids)
 
 CSV columns written:
   ext_id, source_url, name, brand, ean_raw, ean_norm, sku_raw,
@@ -280,7 +281,8 @@ def _pick_ean_from_html(html: str) -> str:
 
 # ---------------------------------------------------------------------------
 # Brand helpers
-_BRAND_KEY_RE = re.compile(r"\b(bränd|brand|tootja|kaubamärk)\b", re.I)
+# NOTE: include Käitleja/Kaitleja/Handler as brand-like keys (Selver-specific)
+_BRAND_KEY_RE = re.compile(r"\b(käitleja|kaitleja|handler|bränd|brand|tootja|kaubamärk)\b", re.I)
 
 def _extract_brand_from_dom_texts(texts: List[str]) -> str:
     for t in texts:
@@ -291,9 +293,12 @@ def _extract_brand_from_dom_texts(texts: List[str]) -> str:
             m = re.split(_BRAND_KEY_RE, t, maxsplit=1, flags=re.I)
             # If split failed, still try colon split
             if isinstance(m, list) and len(m) >= 3:
-                tail = t[m[0].__len__():].split(":")[-1]
+                # take substring after the matched key and split on common separators
+                rest = t[len(m[0]):]
+                parts = re.split(r"[:–—-]\s*", rest, maxsplit=1)
+                tail = parts[1] if len(parts) == 2 else ""
             else:
-                parts = re.split(r":|-", t, maxsplit=1)
+                parts = re.split(r"[:–—-]\s*", t, maxsplit=1)
                 tail = parts[1] if len(parts) == 2 else ""
             cand = normspace(tail)
             if cand:
@@ -340,7 +345,7 @@ def extract_brand(page, prod_ld: dict) -> str:
     except Exception:
         pass
 
-    # 3) Generic spec rows: look for "Bränd|Tootja|Kaubamärk|Brand"
+    # 3) Generic spec rows (includes Käitleja/Handler via _BRAND_KEY_RE)
     try:
         texts: List[str] = page.evaluate("""
           () => [...document.querySelectorAll('tr, .row, li, .attribute, .product-attributes__row, .MuiGrid-root, dd, dt, div, span, p, th, td')]
@@ -352,6 +357,30 @@ def extract_brand(page, prod_ld: dict) -> str:
     brand = _extract_brand_from_dom_texts(texts)
     if brand:
         return brand
+
+    # 3b) Explicit Käitleja/Kaitleja/Handler fallback if the generic pass missed it
+    try:
+        handler = page.evaluate("""
+        () => {
+          const rows = Array.from(document.querySelectorAll('tr, .row, li, .attribute, .product-attributes__row, .product-details__row, dl, dt, dd, div, span, p, th, td'));
+          for (const n of rows) {
+            const t = (n.textContent || '').replace(/\\s+/g,' ').trim();
+            if (!t) continue;
+            if (/\\b(käitleja|kaitleja|handler)\\b/i.test(t)) {
+              // prefer text after a separator
+              const m = t.split(/[:–—-]/).slice(1).join(':').trim();
+              if (m && m.length <= 80) return m;
+            }
+          }
+          return null;
+        }
+        """)
+        if handler:
+            name = normspace(str(handler))
+            if name:
+                return name
+    except Exception:
+        pass
 
     # 4) Fallback: first word from H1 (best-effort)
     try:
