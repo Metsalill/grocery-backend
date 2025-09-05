@@ -40,16 +40,27 @@ concurrency:
 
 jobs:
   crawl-and-upsert:
+    name: crawl-and-upsert (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
     timeout-minutes: 110
+
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1]
+
     env:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/barbora_products.csv
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       MODE: ${{ github.event.inputs.mode || 'prices' }}
+      # Space-separated URL prefixes to exclude/include
       EXCLUDE_SECTIONS: "https://barbora.ee/kodukaubad-ja-vaba-aeg https://barbora.ee/enesehooldustooted https://barbora.ee/puhastustarbed-ja-lemmikloomatooted https://barbora.ee/lastekaubad"
       INCLUDE_SECTIONS: "https://barbora.ee/enesehooldustooted/suuhugieen/hambapastad https://barbora.ee/enesehooldustooted/raseerimisvahendid https://barbora.ee/enesehooldustooted/intiimhugieeni-vahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/pesupesemisvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/noudepesuvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/kodukeemia https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/majapidamis-ja-koristustarbed https://barbora.ee/lastekaubad/piimasegud-ja-jatkupiimasegud https://barbora.ee/lastekaubad/pudrud https://barbora.ee/lastekaubad/mahkmed https://barbora.ee/lastekaubad/puuviljapureed https://barbora.ee/lastekaubad/laste-hugieenitarbed/niisked-salvratikud https://barbora.ee/lastekaubad/liha-ja-koogiviljapureed"
+      # Ensure scheduled runs also upsert by default
       UPSERT_DB: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.upsert_db || '1' }}
+      # Shard index from matrix
+      SHARD: ${{ matrix.shard }}
 
     steps:
       - name: Checkout
@@ -95,12 +106,15 @@ jobs:
           set -euo pipefail
           mkdir -p data
 
+          # 1) Explicit input wins
           if [ -n "${INPUT_CATS}" ]; then
             printf "%s\n" "${INPUT_CATS}" | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/barbora_categories.txt
             echo "Using categories from workflow input."
+          # 2) Repo file next (if already committed)
           elif [ -s data/barbora_categories.txt ]; then
             echo "Using repo file data/barbora_categories.txt"
           else
+            # 3) Try autodiscover from homepage
             {
               echo 'import os'
               echo 'from urllib.parse import urljoin, urlparse'
@@ -114,6 +128,7 @@ jobs:
               echo '    p = urlparse(url)'
               echo '    if not (p.scheme and p.netloc and p.netloc.endswith("barbora.ee")): return False'
               echo '    segs = [s for s in p.path.split("/") if s]'
+              echo '    # allow 1..4 segments; avoid obvious non-catalog roots'
               echo '    if any(s in ("retseptid","info","blogi","kampaania") for s in segs): return False'
               echo '    return 1 <= len(segs) <= 4'
               echo 'def allowed(url):'
@@ -138,6 +153,7 @@ jobs:
             } > /tmp/discover_barbora.py
             python /tmp/discover_barbora.py
 
+            # 4) Fallback to a curated FOOD roots list if autodiscover empty/too small
             if [ ! -s data/barbora_categories.txt ] || [ "$(wc -l < data/barbora_categories.txt)" -lt 10 ]; then
               printf '%s\n' \
                 'https://barbora.ee/koogiviljad-puuviljad' \
@@ -161,6 +177,23 @@ jobs:
           echo "--------------"
           test -s data/barbora_categories.txt
 
+      - name: Shard category list (2-way)
+        shell: bash
+        env:
+          SHARDS: 2
+        run: |
+          set -euo pipefail
+          cp -f data/barbora_categories.txt data/barbora_categories_all.txt
+          TOTAL=$(wc -l < data/barbora_categories_all.txt)
+          : "${SHARD:?SHARD env is required}"
+          awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
+            data/barbora_categories_all.txt > data/barbora_categories.txt
+          echo "TOTAL categories: $TOTAL"
+          echo "Shard: $SHARD / $SHARDS"
+          echo "Slice count: $(wc -l < data/barbora_categories.txt)"
+          head -n 12 data/barbora_categories.txt || true
+
+      # Ensure psql available for the skip/only steps
       - name: Install psql client (for skip/only lists)
         if: ${{ env.DATABASE_URL != '' }}
         shell: bash
@@ -168,6 +201,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
+      # MODE=prices → skip only items that are priced AND already have a brand + name
       - name: Build skip list (priced & have brand+name)
         if: ${{ env.DATABASE_URL != '' && env.MODE == 'prices' }}
         shell: bash
@@ -204,7 +238,7 @@ jobs:
 
           echo "Skip list rows (priced & have brand+name): $(wc -l < data/barbora_skip_ext_ids.txt)" | tee data/_barbora_skip_count.txt
 
-      # ---------- FIXED STEP (no YAML-heredoc traps) ----------
+      # MODE=metadata → crawl only items missing brand/EAN/manufacturer (fallback-safe)
       - name: Build ONLY list (missing brand/EAN/manufacturer; fallback-safe)
         if: ${{ env.DATABASE_URL != '' && env.MODE == 'metadata' }}
         shell: bash
@@ -297,7 +331,8 @@ jobs:
                 "${SKIP_FLAG[@]}"
                 "${ONLY_FLAG[@]}" )
 
-          stdbuf -oL -eL timeout -k 45s 80m "${cmd[@]}" | tee data/barbora_run.log
+          # Increased timeout to use the job window better
+          stdbuf -oL -eL timeout -k 60s 107m "${cmd[@]}" | tee data/barbora_run.log
 
       - name: Ensure CSV exists (header if empty)
         shell: bash
@@ -313,7 +348,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: barbora-crawl-${{ env.MODE }}-${{ github.run_id }}
+          name: barbora-crawl-${{ env.MODE }}-shard-${{ matrix.shard }}-${{ github.run_id }}
           path: |
             data/barbora_products.csv
             data/barbora_run.log
@@ -323,6 +358,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
+      # ---------- Optional DB part ----------
       - name: Install psql client
         if: ${{ env.DATABASE_URL != '' && env.UPSERT_DB == '1' }}
         shell: bash
@@ -414,9 +450,11 @@ jobs:
 
           \copy tmp_barbora_csv_full FROM '__CSV__' CSV HEADER
 
+          -- Normalize and fill blanks; build a clean staging temp table.
           CREATE TEMP TABLE tmp_staging_barbora_products AS
           SELECT
             ext_id,
+            -- Fill missing/blank name from slug
             COALESCE(NULLIF(btrim(name), ''), initcap(replace(regexp_replace(COALESCE(ext_id,''), '^.*/', ''), '-', ' '))) AS name,
             NULLIF(btrim(ean_raw), '') AS ean_raw,
             NULLIF(btrim(sku_raw), '') AS sku_raw,
@@ -430,6 +468,7 @@ jobs:
           FROM tmp_barbora_csv_full
           WHERE COALESCE(ext_id,'') <> '';
 
+          -- Drop any rows that still lack a name after fallback
           DELETE FROM tmp_staging_barbora_products
           WHERE COALESCE(name,'') = '';
 
