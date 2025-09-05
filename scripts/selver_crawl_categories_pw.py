@@ -427,7 +427,7 @@ def extract_brand(page, prod_ld: dict) -> str:
     try:
         texts: List[str] = page.evaluate("""
           () => [...document.querySelectorAll('tr, .row, li, .attribute, .product-attributes__row, .product-details__row, .MuiGrid-root, dd, dt, div, span, p, th, td')]
-                .map(n => (n.textContent || '').replace(/\\s+/g,' ').trim())
+                .map(n => (n.textContent || '').replace(/\s+/g,' ').trim())
                 .filter(Boolean)
         """)
     except Exception:
@@ -442,7 +442,7 @@ def extract_brand(page, prod_ld: dict) -> str:
         () => {
           const rows = Array.from(document.querySelectorAll('tr, .row, li, .attribute, .product-attributes__row, .product-details__row, dl, dt, dd, div, span, p, th, td'));
           for (const n of rows) {
-            const t = (n.textContent || '').replace(/\\s+/g,' ').trim();
+            const t = (n.textContent || '').replace(/\s+/g,' ').trim();
             if (!t) continue;
             if (/(\\b(käitleja|kaitleja|handler)\\b)/i.test(t)) {
               const m = t.split(/[:–—-]/).slice(1).join(':').trim();
@@ -1095,9 +1095,23 @@ def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_
 # NEW: process ONLY list PDPs directly (skips categories entirely)
 def _process_only_list(page, writer: csv.DictWriter, seen_ext_ids: Set[str]) -> int:
     wrote = 0
-    pdps = [u for u in ONLY_EXTS if _is_selver_product_like(u)]
-    print(f"[selver] ONLY list present → processing {len(pdps)} PDPs directly")
-    for i, pu in enumerate(sorted(pdps), 1):
+    # Normalize every entry to an absolute, dedup (prevents invalid URL nav like "/ananass-kg")
+    pdps_abs: List[str] = []
+    seen_abs: Set[str] = set()
+    for u in ONLY_EXTS:
+        if not _is_selver_product_like(u):
+            continue
+        cu = _clean_abs(u)
+        if not cu:
+            continue
+        if cu in seen_abs:
+            continue
+        seen_abs.add(cu)
+        pdps_abs.append(cu)
+
+    print(f"[selver] ONLY list present → processing {len(pdps_abs)} PDPs directly")
+
+    for i, pu in enumerate(sorted(pdps_abs), 1):
         if not _should_process_url(pu, seen_ext_ids):
             continue
         got = safe_goto(page, pu)
@@ -1117,7 +1131,7 @@ def _process_only_list(page, writer: csv.DictWriter, seen_ext_ids: Set[str]) -> 
                 wrote += 1
         if (i % 25) == 0:
             try:
-                # no-op placeholder, kept for symmetry with flushing elsewhere
+                # placeholder to keep symmetry with flush points elsewhere
                 writer.fieldnames
             except Exception:
                 pass
