@@ -139,8 +139,8 @@ jobs:
 
       # ------------------------- SKIP/TARGET LISTS ----------------------------
 
-      # MODE=prices → skip if we already have a price AND brand (metadata complete)
-      - name: Build skip list (priced + brand present)
+      # MODE=prices → skip if we already have a price AND metadata complete (brand+name+manufacturer)
+      - name: Build skip list (priced + brand+name+manufacturer present)
         if: ${{ env.DATABASE_URL != '' && env.MODE == 'prices' }}
         shell: bash
         run: |
@@ -169,13 +169,16 @@ jobs:
           FROM priced pr
           LEFT JOIN public.rimi_candidates rc ON rc.ext_id = pr.ext_id
           LEFT JOIN public.staging_rimi_products sp ON sp.ext_id = pr.ext_id
-          WHERE COALESCE(NULLIF(btrim(COALESCE(rc.brand, sp.brand, '')), ''), NULL) IS NOT NULL
+          WHERE
+            COALESCE(NULLIF(btrim(COALESCE(rc.brand,        sp.brand,        '')),''),NULL) IS NOT NULL
+            AND COALESCE(NULLIF(btrim(COALESCE(rc.name,         sp.name,     '')),''),NULL) IS NOT NULL
+            AND COALESCE(NULLIF(btrim(COALESCE(rc.manufacturer, sp.manufacturer,'')) ,''),NULL) IS NOT NULL
           ORDER BY 1;
           SQL
-          echo "Skip list rows (priced & have brand): $(wc -l < data/rimi_skip_ext_ids.txt)"
+          echo "Skip list rows (priced & have brand+name+manufacturer): $(wc -l < data/rimi_skip_ext_ids.txt)"
           echo "$(wc -l < data/rimi_skip_ext_ids.txt)" > data/_skip_count.txt
 
-      # MODE=metadata → crawl only items missing brand/EAN/manufacturer
+      # MODE=metadata → crawl only items missing brand/EAN/manufacturer/name
       - name: Build target list (missing metadata)
         if: ${{ env.DATABASE_URL != '' && env.MODE == 'metadata' }}
         shell: bash
@@ -193,12 +196,13 @@ jobs:
           LEFT JOIN public.rimi_candidates rc ON rc.ext_id = a.ext_id
           LEFT JOIN public.staging_rimi_products sp ON sp.ext_id = a.ext_id
           WHERE
-            COALESCE(NULLIF(btrim(COALESCE(rc.brand, sp.brand, '')), ''), NULL) IS NULL
-            OR COALESCE(NULLIF(regexp_replace(COALESCE(rc.ean_raw, sp.ean_raw, ''),'[^0-9]','','g'),''),NULL) IS NULL
-            OR COALESCE(NULLIF(btrim(COALESCE(rc.manufacturer, '')), ''), NULL) IS NULL
+            COALESCE(NULLIF(btrim(COALESCE(rc.brand,        sp.brand,        '')),''),NULL) IS NULL
+            OR COALESCE(NULLIF(btrim(COALESCE(rc.name,         sp.name,     '')),''),NULL) IS NULL
+            OR COALESCE(NULLIF(btrim(COALESCE(rc.manufacturer, sp.manufacturer,'')) ,''),NULL) IS NULL
+            OR COALESCE(NULLIF(btrim(COALESCE(rc.ean_norm,     sp.ean_norm,  '')),''),NULL) IS NULL
           ORDER BY 1;
           SQL
-          echo "Target list rows (missing brand/EAN/manufacturer): $(wc -l < data/rimi_only_ext_ids.txt)"
+          echo "Target list rows (missing brand/name/EAN/manufacturer): $(wc -l < data/rimi_only_ext_ids.txt)"
 
       - name: Crawl Rimi categories (Playwright)
         shell: bash
@@ -339,18 +343,23 @@ jobs:
             ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '[^0-9]', '', 'g')) STORED,
             size_text     text,
             brand         text,
+            manufacturer  text,
             price         numeric(12,2),
             currency      text DEFAULT 'EUR',
             category_path text,
             category_leaf text,
             collected_at  timestamptz DEFAULT now()
           );
+          ALTER TABLE public.staging_rimi_products
+            ADD COLUMN IF NOT EXISTS manufacturer text;
           CREATE EXTENSION IF NOT EXISTS pg_trgm;
           CREATE INDEX IF NOT EXISTS ix_rimi_ean       ON public.staging_rimi_products (ean_norm);
           CREATE INDEX IF NOT EXISTS ix_rimi_name_trgm ON public.staging_rimi_products USING gin (name gin_trgm_ops);
+
           INSERT INTO public.stores (name, chain, is_online)
           SELECT 'Rimi ePood', 'Rimi', TRUE
           WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE chain='Rimi' AND is_online=TRUE);
+
           CREATE TABLE IF NOT EXISTS public.rimi_candidates (
             ext_id        text PRIMARY KEY,
             ean_norm      text,
@@ -359,12 +368,15 @@ jobs:
             name          text,
             size_text     text,
             brand         text,
+            manufacturer  text,
             price         numeric(12,2),
             currency      text,
             category_path text,
             category_leaf text,
             last_seen     timestamptz DEFAULT now()
           );
+          ALTER TABLE public.rimi_candidates
+            ADD COLUMN IF NOT EXISTS manufacturer text;
           COMMIT;
           SQL
 
@@ -415,6 +427,7 @@ jobs:
             ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '[^0-9]+', '', 'g')) STORED,
             size_text     text,
             brand         text,
+            manufacturer  text,
             price         numeric(12,2),
             currency      text DEFAULT 'EUR',
             category_path text,
@@ -423,24 +436,28 @@ jobs:
           );
 
           INSERT INTO tmp_staging_rimi_products
-            (ext_id,name,ean_raw,sku_raw,size_text,brand,price,currency,category_path,category_leaf)
+            (ext_id,name,ean_raw,sku_raw,size_text,brand,manufacturer,price,currency,category_path,category_leaf)
           SELECT
             ext_id,
-            name,
-            ean_raw,
-            sku_raw,
-            size_text,
-            brand,
-            NULLIF(price,'')::numeric,
-            currency,
-            category_path,
-            category_leaf
+            COALESCE(NULLIF(btrim(name),''), initcap(replace(regexp_replace(COALESCE(ext_id,''),'^.*/',''),'-',' '))) AS name,
+            NULLIF(btrim(ean_raw),'') AS ean_raw,
+            NULLIF(btrim(sku_raw),'') AS sku_raw,
+            NULLIF(btrim(size_text),'') AS size_text,
+            NULLIF(btrim(brand),'') AS brand,
+            NULLIF(btrim(manufacturer),'') AS manufacturer,
+            NULLIF(price,'')::numeric AS price,
+            COALESCE(NULLIF(currency,''),'EUR') AS currency,
+            NULLIF(btrim(category_path),'') AS category_path,
+            NULLIF(btrim(category_leaf),'') AS category_leaf
           FROM tmp_rimi_csv_full
           WHERE COALESCE(ext_id,'') <> '';
 
+          -- Drop rows that still lack a name (NOT NULL)
+          DELETE FROM tmp_staging_rimi_products WHERE COALESCE(name,'')='';
+
           INSERT INTO public.staging_rimi_products
-            (ext_id,name,ean_raw,sku_raw,size_text,brand,price,currency,category_path,category_leaf,collected_at)
-          SELECT ext_id,name,ean_raw,sku_raw,size_text,brand,price,currency,category_path,category_leaf,now()
+            (ext_id,name,ean_raw,sku_raw,size_text,brand,manufacturer,price,currency,category_path,category_leaf,collected_at)
+          SELECT ext_id,name,ean_raw,sku_raw,size_text,brand,manufacturer,price,currency,category_path,category_leaf,now()
           FROM tmp_staging_rimi_products
           ON CONFLICT (ext_id) DO UPDATE
             SET name          = EXCLUDED.name,
@@ -448,26 +465,29 @@ jobs:
                 sku_raw       = EXCLUDED.sku_raw,
                 size_text     = COALESCE(EXCLUDED.size_text, public.staging_rimi_products.size_text),
                 brand         = COALESCE(EXCLUDED.brand, public.staging_rimi_products.brand),
+                manufacturer  = COALESCE(EXCLUDED.manufacturer, public.staging_rimi_products.manufacturer),
                 price         = EXCLUDED.price,
-                currency      = EXCLUDED.currency,
+                currency      = COALESCE(EXCLUDED.currency, public.staging_rimi_products.currency),
                 category_path = COALESCE(EXCLUDED.category_path, public.staging_rimi_products.category_path),
                 category_leaf = COALESCE(EXCLUDED.category_leaf, public.staging_rimi_products.category_leaf),
                 collected_at  = now();
 
           INSERT INTO public.rimi_candidates
-            (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, price, currency, category_path, category_leaf, last_seen)
+            (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, manufacturer, price, currency, category_path, category_leaf, last_seen)
           SELECT
-            s.ext_id, s.ean_norm, s.ean_raw, s.sku_raw, s.name, s.size_text, s.brand, s.price, s.currency, s.category_path, s.category_leaf, now()
+            s.ext_id, s.ean_norm, s.ean_raw, s.sku_raw, s.name, s.size_text, s.brand, s.manufacturer,
+            s.price, s.currency, s.category_path, s.category_leaf, now()
           FROM tmp_staging_rimi_products s
           ON CONFLICT (ext_id) DO UPDATE
             SET price         = EXCLUDED.price,
                 currency      = EXCLUDED.currency,
-                size_text     = CASE WHEN COALESCE(EXCLUDED.size_text,'') <> '' THEN EXCLUDED.size_text ELSE public.rimi_candidates.size_text END,
-                brand         = CASE WHEN COALESCE(EXCLUDED.brand,'')     <> '' THEN EXCLUDED.brand     ELSE public.rimi_candidates.brand     END,
-                category_path = CASE WHEN COALESCE(EXCLUDED.category_path,'') <> '' THEN EXCLUDED.category_path ELSE public.rimi_candidates.category_path END,
-                category_leaf = CASE WHEN COALESCE(EXCLUDED.category_leaf,'') <> '' THEN EXCLUDED.category_leaf ELSE public.rimi_candidates.category_leaf END,
-                ean_raw       = CASE WHEN COALESCE(EXCLUDED.ean_raw,'')       <> '' THEN EXCLUDED.ean_raw       ELSE public.rimi_candidates.ean_raw       END,
-                sku_raw       = CASE WHEN COALESCE(EXCLUDED.sku_raw,'')       <> '' THEN EXCLUDED.sku_raw       ELSE public.rimi_candidates.sku_raw       END,
+                size_text     = COALESCE(EXCLUDED.size_text, public.rimi_candidates.size_text),
+                brand         = COALESCE(EXCLUDED.brand, public.rimi_candidates.brand),
+                manufacturer  = COALESCE(EXCLUDED.manufacturer, public.rimi_candidates.manufacturer),
+                category_path = COALESCE(EXCLUDED.category_path, public.rimi_candidates.category_path),
+                category_leaf = COALESCE(EXCLUDED.category_leaf, public.rimi_candidates.category_leaf),
+                ean_raw       = COALESCE(EXCLUDED.ean_raw, public.rimi_candidates.ean_raw),
+                sku_raw       = COALESCE(EXCLUDED.sku_raw, public.rimi_candidates.sku_raw),
                 last_seen     = now();
 
           COMMIT;
