@@ -23,7 +23,6 @@ on:
         description: "Seconds between steps"
         required: false
         default: "0.6"
-  # Nightly at 02:00 UTC
   schedule:
     - cron: "0 2 * * *"
 
@@ -43,7 +42,6 @@ jobs:
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       SHARD: ${{ matrix.shard }}
-      # Use the workflow_dispatch inputs context; default to prices for schedules/re-runs
       MODE: ${{ inputs.mode || 'prices' }}
 
     steps:
@@ -87,7 +85,6 @@ jobs:
           echo "Slice count: $(wc -l < data/selver_categories.txt)"
           head -n 8 data/selver_categories.txt || true
 
-      # ---------- DB prep BEFORE crawling so we can build skip / only lists -----
       - name: Install psql client
         run: |
           sudo apt-get update
@@ -103,7 +100,7 @@ jobs:
 
       # MODE=prices → skip only if (priced) AND (brand already present)
       - name: Build skip list (priced & have brand)
-        if: ${{ startsWith(toLower(env.MODE), 'price') }}
+        if: ${{ env.MODE == 'prices' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -138,7 +135,7 @@ jobs:
 
       # MODE=metadata → crawl only items missing brand/EAN
       - name: Build target list (missing brand/EAN)
-        if: ${{ startsWith(toLower(env.MODE), 'meta') }}
+        if: ${{ env.MODE == 'metadata' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -185,11 +182,11 @@ jobs:
 
           SKIP_FLAG=()
           ONLY_FLAG=()
-          if [ "${MODE,,}" = "prices" ] && [ -s data/selver_skip_ext_ids.txt ]; then
+          if [ "${MODE}" = "prices" ] && [ -s data/selver_skip_ext_ids.txt ]; then
             echo "Using skip list: $(wc -l < data/selver_skip_ext_ids.txt) ext_ids"
             SKIP_FLAG=(--skip-ext-file data/selver_skip_ext_ids.txt)
           fi
-          if [[ "${MODE,,}" = meta* ]] && [ -s data/selver_only_ext_ids.txt ]; then
+          if [ "${MODE}" = "metadata" ] && [ -s data/selver_only_ext_ids.txt ]; then
             echo "Using ONLY list: $(wc -l < data/selver_only_ext_ids.txt) ext_ids"
             ONLY_FLAG=(--only-ext-file data/selver_only_ext_ids.txt)
           fi
@@ -212,7 +209,6 @@ jobs:
           [ -s data/selver_run.err ] && { echo "---- stderr tail ----"; tail -n 150 data/selver_run.err; } || true
           echo "::endgroup::"
 
-          # Hard fail unless it was a timeout (124) – avoids header-only CSV flowing through
           if [ "${status}" -ne 0 ] && [ "${status}" -ne 124 ]; then
             echo "::error::Crawler exited non-zero (${status}). Aborting workflow."
             exit "${status}"
@@ -256,6 +252,9 @@ jobs:
             data/selver_only_ext_ids.txt
           if-no-files-found: warn
           retention-days: 7
+
+      # (DB load & adopt steps unchanged)
+
 
       # ---------------------- DB LOAD & ADOPT (unchanged) ---------------------
       - name: Prepare DB (staging & helper tables)
