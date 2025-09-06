@@ -5,7 +5,7 @@ Rimi.ee (Rimi ePood) category crawler → PDP extractor → CSV/DB friendly
 
 Key bits:
 - Strong brand/manufacturer/size extraction (JSON-LD, meta, spec tables, dl/dt/dd, generic "Key: Value")
-- DOM-side brand/manufacturer extractor (post-hydration; catches "Kaubamärk" and "Veel tooted kaubamärgilt …")
+- DOM-side brand/manufacturer extractor (post-hydration; catches "Kaubamärk" / "Brand" and "Tootja" / "Producer")
 - EAN normalization (accepts 8/12/13/14 → normalizes to 13 when possible)
 - Robust price parsing (JSON-LD, meta, visible text)
 - Stable/fast (blocks heavy 3rd-party, auto-accepts overlays)
@@ -123,6 +123,44 @@ def wait_for_hydration(page, timeout_ms: int = 12000) -> None:
         )
     except Exception:
         pass
+
+# ---------- Brand/manufacturer sanitization ----------
+
+_BAD_BRAND_TOKENS = [
+    "vali", "tarne", "tarneviis", "ostukorv", "add to cart", "lisa ostukorvi",
+    "book delivery", "delivery time", "accept", "cookie", "kampaania", "campaign",
+    "logi", "login", "registreeru", "close", "sulge", "continue"
+]
+
+def _has_letter(s: str) -> bool:
+    return bool(re.search(r"[A-Za-zÄÖÜÕäöüõ]", s or ""))
+
+def clean_brand(s: str) -> str:
+    s = (s or "").strip()
+    if not s:
+        return ""
+    low = s.lower()
+    if ":" in s or "\n" in s or len(s) > 50 or len(s) < 2:
+        return ""
+    if not _has_letter(s):
+        return ""
+    if any(tok in low for tok in _BAD_BRAND_TOKENS):
+        return ""
+    return s
+
+def clean_manufacturer(s: str) -> str:
+    # Same gate as brand, but allow longer legal names
+    s = (s or "").strip()
+    if not s:
+        return ""
+    low = s.lower()
+    if ":" in s or "\n" in s or len(s) > 80 or len(s) < 2:
+        return ""
+    if not _has_letter(s):
+        return ""
+    if any(tok in low for tok in _BAD_BRAND_TOKENS):
+        return ""
+    return s
 
 # ---------- EAN helpers ----------
 
@@ -328,8 +366,7 @@ def parse_visible_for_ean(soup: BeautifulSoup) -> Optional[str]:
 def extract_brand_mfr_dom(page) -> Tuple[str, str]:
     """
     Runs inside the live DOM (after hydration). Looks for:
-      • <table><tr><th>Kaubamärk/Tootja</th><td>…</td></tr>
-      • <dl><dt>Kaubamärk/Tootja</dt><dd>…</dd>
+      • table/dl spec rows: Kaubamärk/Brand, Tootja/Manufacturer/Producer
       • generic "Key: Value"
       • helper line '… kaubamärgilt <a>Rimi</a>'
     Returns (brand, manufacturer) — either may be "".
@@ -633,42 +670,46 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
             p, c = parse_price_from_dom_or_meta(soup)
             price, currency = p or price, c or currency
 
-        # JS globals
-        for glb in [
-            "__NUXT__", "__NEXT_DATA__", "APP_STATE", "dataLayer",
-            "Storefront", "__APOLLO_STATE__", "APOLLO_STATE",
-            "apolloState", "__INITIAL_STATE__", "__PRELOADED_STATE__", "__STATE__"
-        ]:
-            try:
-                data = page.evaluate(f"window['{glb}']")
-            except Exception:
-                data = None
-            if not data:
-                continue
-            got = deep_find_kv(data, { *EAN_KEYS, *SKU_KEYS, *PRICE_KEYS, *CURR_KEYS, *BRAND_KEYS })
-            if not ean:
-                for k in ("gtin13","ean","ean13","barcode","gtin"):
-                    if got.get(k):
-                        ean = got.get(k); break
-            if not sku:
-                for k in ("sku","mpn","code","id"):
-                    if got.get(k):
-                        sku = got.get(k); break
-            if not price:
-                for k in ("price","currentprice","priceamount","value","unitprice"):
-                    if got.get(k):
-                        price = norm_price_str(got.get(k)); break
-            if not currency:
-                for k in ("currency","pricecurrency","currencycode","curr"):
-                    if got.get(k):
-                        currency = got.get(k); break
-            if not brand:
-                if got.get("brand"):
-                    brand = got.get("brand")
-                elif got.get("manufacturer"):
-                    brand = brand or got.get("manufacturer")
-            if not manufacturer and got.get("manufacturer"):
-                manufacturer = got.get("manufacturer")
+        # JS globals (only as a last resort; sanitized)
+        if not (brand and manufacturer):
+            for glb in [
+                "__NUXT__", "__NEXT_DATA__", "APP_STATE", "dataLayer",
+                "Storefront", "__APOLLO_STATE__", "APOLLO_STATE",
+                "apolloState", "__INITIAL_STATE__", "__PRELOADED_STATE__", "__STATE__"
+            ]:
+                try:
+                    data = page.evaluate(f"window['{glb}']")
+                except Exception:
+                    data = None
+                if not data:
+                    continue
+                got = deep_find_kv(data, { *EAN_KEYS, *SKU_KEYS, *PRICE_KEYS, *CURR_KEYS, *BRAND_KEYS })
+                # Keep price/currency/ids if useful
+                if not ean:
+                    for k in ("gtin13","ean","ean13","barcode","gtin"):
+                        if got.get(k):
+                            ean = got.get(k); break
+                if not sku:
+                    for k in ("sku","mpn","code","id"):
+                        if got.get(k):
+                            sku = got.get(k); break
+                if not price:
+                    for k in ("price","currentprice","priceamount","value","unitprice"):
+                        if got.get(k):
+                            price = norm_price_str(got.get(k)); break
+                if not currency:
+                    for k in ("currency","pricecurrency","currencycode","curr"):
+                        if got.get(k):
+                            currency = got.get(k); break
+                # Brand/manufacturer only if they pass sanitization
+                if not brand and got.get("brand"):
+                    cb = clean_brand(got.get("brand"))
+                    if cb:
+                        brand = cb
+                if not manufacturer and got.get("manufacturer"):
+                    cm = clean_manufacturer(got.get("manufacturer"))
+                    if cm:
+                        manufacturer = cm
 
         # visible EAN last resort
         if not ean:
@@ -681,9 +722,11 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
     except PWTimeout:
         name = name or ""
 
-    # normalize EAN to readable digits form
+    # Final cleanup / normalization
     if ean:
         ean = normalize_ean_digits(ean)
+    brand = clean_brand(brand)
+    manufacturer = clean_manufacturer(manufacturer)
 
     ext_id = extract_ext_id(url)
     src_url = canonical_url(page) or url.split("?")[0]
@@ -749,8 +792,7 @@ def write_csv(rows: List[Dict[str,str]], out_path: str) -> None:
         "ext_id","ean_raw","sku_raw","name","size_text","brand","manufacturer",
         "price","currency","image_url","category_path","category_leaf","source_url",
     ]
-    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True
-    )
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     new_file = not os.path.exists(out_path)
     with open(out_path, "a", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
