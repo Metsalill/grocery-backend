@@ -118,7 +118,7 @@ def keyset_for_url(u: str) -> Set[str]:
     return keys
 
 # ----------------------- name validation + DOM title fallback -----------------------
-_BAD_NAME_TOKENS = {"inst-badge", "badge", "widget", "component", "modal", "breadcrumb", "product"}
+_BAD_NAME_TOKENS = {"inst-badge", "badge", "widget", "component", "modal", "breadcrumb", "product", "barbora.ee"}
 def looks_like_product_name(s: str) -> bool:
     s = safe_text(s)
     if not s: return False
@@ -128,30 +128,36 @@ def looks_like_product_name(s: str) -> bool:
     if not re.search(r"[A-Za-zÄÖÜÕäöüõ]", s): return False
     # avoid pure techy tokens
     if re.fullmatch(r"[a-z0-9\-_]+", low): return False
+    # avoid obvious domain placeholders
+    if ".ee" in low and " " not in s:
+        return False
     return True
 
 def dom_title_fallback(page: Page) -> str:
-    # 1) H1-ish
-    try:
-        h1 = page.locator("h1, .b-product h1, [data-testid='product-name']").first
-        if h1 and h1.count() > 0:
-            t = safe_text(h1.inner_text())
-            if looks_like_product_name(t): return t
-    except Exception: pass
-    # 2) og:title
-    try:
-        og = page.eval_on_selector("meta[property='og:title']", "el => el?.getAttribute('content') || null")
-        og = safe_text(og)
-        if looks_like_product_name(og): return og
-    except Exception: pass
-    # 3) common classes
-    for sel in [".product-title", ".b-product__info h1", ".pdp-title", "[itemprop='name']"]:
+    # Stronger selector pack tailored to Barbora PDP
+    sels = [
+        "h1[itemprop='name']",
+        "h1.b-product__title",
+        ".b-product h1",
+        "h1.product-title",
+        ".pdp-title",
+        "[data-testid='product-name']",
+        "h1",
+        "meta[property='og:title']::attr(content)"
+    ]
+    for sel in sels:
         try:
-            el = page.locator(sel).first
-            if el and el.count() > 0:
+            if sel.endswith("::attr(content)"):
+                base_sel = sel.split("::", 1)[0]
+                t = safe_text(page.eval_on_selector(base_sel, "el => el?.getAttribute('content') || null"))
+            else:
+                el = page.locator(sel).first
+                if not el or el.count() == 0: continue
                 t = safe_text(el.inner_text())
-                if looks_like_product_name(t): return t
-        except Exception: pass
+            if looks_like_product_name(t):
+                return t
+        except Exception:
+            continue
     return ""
 
 # ----------------------- JSON/DOM extraction -----------------------
@@ -345,7 +351,7 @@ def extract_breadcrumbs(page: Page) -> Tuple[str,str]:
         pass
     return "",""
 
-# --------- DOM spec fallback (brand/manufacturer/size) ---------
+# --------- DOM spec fallback (brand/manufacturer/size/EAN) ---------
 _SPEC_BRAND_KEYS = {
     "kaubamärk", "kaubamark", "bränd", "brand", "bränd/brand"
 }
@@ -356,6 +362,7 @@ _SPEC_MFR_KEYS = {
 _SPEC_SIZE_KEYS = {
     "kogus", "netokogus", "maht", "neto", "pakendi suurus", "pakend", "suurus", "kaal"
 }
+_SPEC_EAN_KEYS = {"ribakood","triipkood","ean","gtin"}
 
 def _norm_key_et(s: str) -> str:
     s = (s or "").strip().lower()
@@ -410,7 +417,7 @@ def extract_specs_from_dom(page: Page) -> Tuple[str, str, str, str]:
             set_mfr(v)
         elif any(t in k for t in _SPEC_SIZE_KEYS):
             set_size(v)
-        elif any(t in k for t in ("ribakood","triipkood","ean","gtin")):
+        elif any(t in k for t in _SPEC_EAN_KEYS):
             set_ean(v)
 
     # 2) <dl> lists
@@ -424,7 +431,7 @@ def extract_specs_from_dom(page: Page) -> Tuple[str, str, str, str]:
                 set_mfr(v)
             elif any(t in k for t in _SPEC_SIZE_KEYS):
                 set_size(v)
-            elif any(t in k for t in ("ribakood","triipkood","ean","gtin")):
+            elif any(t in k for t in _SPEC_EAN_KEYS):
                 set_ean(v)
 
     # 3) Generic rows “Key: Value”
@@ -439,7 +446,7 @@ def extract_specs_from_dom(page: Page) -> Tuple[str, str, str, str]:
             set_mfr(v)
         elif any(tk in k for tk in _SPEC_SIZE_KEYS):
             set_size(v)
-        elif any(tk in k for tk in ("ribakood","triipkood","ean","gtin")):
+        elif any(tk in k for tk in _SPEC_EAN_KEYS):
             set_ean(v)
 
     return brand, mfr, size_text, ean_raw
