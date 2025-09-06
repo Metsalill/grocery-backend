@@ -9,11 +9,12 @@ CSV columns (exact order):
   image_url,category_path,category_leaf,source_url
 """
 from __future__ import annotations
-import argparse, csv, os, re, sys, time, json
+import argparse, csv, os, re, sys, json
 from dataclasses import dataclass
 from typing import List, Optional, Set, Tuple, Dict, Any
 from urllib.parse import urljoin, urlparse, urlunparse
 
+from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout, Page
 
 BASE = "https://barbora.ee"
@@ -30,8 +31,11 @@ EXT_ID_PATTERNS = [
     re.compile(r"/(\d+)(?:-[a-z0-9\-]+)?/?$"),
 ]
 
-GTIN_KEYS = {"gtin13","gtin","gtin12","gtin14","productID","productId","product_id"}
-SKU_KEYS  = {"sku","SKU","Sku"}
+GTIN_KEYS = {"gtin13","gtin","gtin12","gtin14","productid","product_id","barcode","ean","ean13"}
+SKU_KEYS  = {"sku","mpn","code","id","productcode","itemnumber"}
+PRICE_KEYS= {"price","currentprice","priceamount","unitprice","value","amount"}
+CURR_KEYS = {"currency","pricecurrency","currencycode","curr"}
+BRAND_KEYS= {"brand","manufacturer","producer","tootja"}
 
 @dataclass
 class Row:
@@ -64,6 +68,12 @@ CSV_FIELDS = ["store_chain","store_name","store_channel","ext_id","ean_raw","sku
 # ----------------------- tiny helpers -----------------------
 def safe_text(s: Optional[str]) -> str: return (s or "").strip()
 def norm_digits(s: Optional[str]) -> str: return "".join(DIGITS_RE.findall(str(s or "")))
+def norm_price_str(s: Optional[str]) -> str:
+    s = safe_text(s)
+    if not s: return s
+    s = s.replace("\xa0", " ").replace(",", ".")
+    m = re.search(r"\d+(?:\.\d{1,2})?", s)
+    return m.group(0) if m else s
 def is_pdp_url(u: str) -> bool:
     try:
         p = urlparse(u)
@@ -159,6 +169,25 @@ def parse_json(txt: str) -> Optional[Any]:
     try: return json.loads(txt)
     except Exception: return None
 
+def deep_find_kv(obj: Any, keys: Set[str]) -> Dict[str, str]:
+    out: Dict[str,str] = {}
+    def walk(x):
+        if isinstance(x, dict):
+            for k, v in x.items():
+                lk = str(k).lower()
+                if lk in keys and isinstance(v, (str, int, float)):
+                    out[lk] = str(v)
+                # nested brand/manufacturer objects
+                if lk == "brand" and isinstance(v, dict) and v.get("name"):
+                    out["brand"] = str(v["name"])
+                if lk == "manufacturer" and isinstance(v, dict) and v.get("name"):
+                    out["manufacturer"] = str(v["name"])
+                walk(v)
+        elif isinstance(x, list):
+            for i in x: walk(i)
+    walk(obj)
+    return out
+
 def walk_find(o: Any) -> Tuple[str,str,str,str,str]:
     """
     Extract name/brand/size/gtin/sku from arbitrary JSON.
@@ -169,10 +198,8 @@ def walk_find(o: Any) -> Tuple[str,str,str,str,str]:
         nonlocal name
         if isinstance(v, (str, int, float)):
             cand = str(v).strip()
-            if looks_like_product_name(cand):
-                # only accept names that look like products
-                if not name:
-                    name = cand
+            if looks_like_product_name(cand) and not name:
+                name = cand
     def walk(x: Any):
         nonlocal brand, size_text, gtin, sku
         if isinstance(x, dict):
@@ -193,11 +220,11 @@ def walk_find(o: Any) -> Tuple[str,str,str,str,str]:
                     if isinstance(v, (str,int,float)): size_text = str(v).strip(); break
             if not gtin:
                 for k in GTIN_KEYS:
-                    v = x.get(k)
+                    v = x.get(k) or x.get(k.upper())
                     if isinstance(v, (str,int,float)): gtin = str(v).strip(); break
             if not sku:
                 for k in SKU_KEYS:
-                    v = x.get(k)
+                    v = x.get(k) or x.get(k.upper())
                     if isinstance(v, (str,int,float)): sku = str(v).strip(); break
             for v in x.values():
                 if isinstance(v, (dict,list)): walk(v)
@@ -220,7 +247,8 @@ def extract_from_other_scripts(page: Page) -> Tuple[str,str,str,str,str]:
         try: txt = s.inner_text().strip()
         except Exception: continue
         if not txt or ("{" not in txt and "[" not in txt): continue
-        for m in re.finditer(r"(\{.*?\}|\[.*?\])", txt, re.DOTALL):
+        # fast and tolerant JSON block finder
+        for m in re.finditer(r"(\{(?:.|\n)*?\}|\[(?:.|\n)*?\])", txt):
             obj = parse_json(m.group(1))
             if obj is None: continue
             n,b,sz,g,sku = walk_find(obj)
@@ -228,7 +256,20 @@ def extract_from_other_scripts(page: Page) -> Tuple[str,str,str,str,str]:
                 return safe_text(n), safe_text(b), safe_text(sz), safe_text(g), safe_text(sku)
     return "","","","",""
 
+def extract_from_js_globals(page: Page) -> Dict[str,str]:
+    out: Dict[str,str] = {}
+    for glb in ["__NUXT__","__NEXT_DATA__","APP_STATE","__INITIAL_STATE__","dataLayer","apolloState","APOLLO_STATE"]:
+        try:
+            data = page.evaluate(f"window['{glb}']")
+        except Exception:
+            data = None
+        if not data: continue
+        got = deep_find_kv(data, GTIN_KEYS | SKU_KEYS | PRICE_KEYS | CURR_KEYS | BRAND_KEYS)
+        out.update({k: v for k, v in got.items() if v})
+    return out
+
 def extract_price_currency(page: Page) -> Tuple[str,str]:
+    # JSON-LD first
     for raw in ldjson_blocks(page):
         data = parse_json(raw)
         if not data: continue
@@ -236,27 +277,29 @@ def extract_price_currency(page: Page) -> Tuple[str,str]:
             if not isinstance(o, dict): return "",""
             p = o.get("price") or o.get("priceSpecification",{}).get("price")
             c = o.get("priceCurrency") or o.get("priceSpecification",{}).get("priceCurrency")
-            return (str(p) if isinstance(p,(str,int,float)) else ""), (str(c) if isinstance(c,(str,int,float)) else "")
+            return (norm_price_str(p), safe_text(c))
         if isinstance(data, dict) and "offers" in data:
             off = data["offers"]
             if isinstance(off, list):
                 for it in off:
                     pr,cur = get_offer(it)
-                    if pr: return pr, cur or "EUR"
+                    if pr: return pr, (cur or "EUR")
             else:
                 pr,cur = get_offer(off)
-                if pr: return pr, cur or "EUR"
+                if pr: return pr, (cur or "EUR")
+    # visible DOM fallback
     try:
         el = page.locator('[data-testid*="price"], [itemprop="price"], .price, .product-price').first
         if el and el.count() > 0:
             txt = el.inner_text().strip()
-            nums = re.findall(r"\d+(?:[.,]\d+)?", re.sub(r"[^\d,\.]", "", txt))
-            if nums: return nums[0].replace(",", "."), "EUR"
+            pr = norm_price_str(txt)
+            if pr: return pr, "EUR"
     except Exception:
         pass
     return "",""
 
 def extract_image_url(page: Page) -> str:
+    # JSON-LD
     for raw in ldjson_blocks(page):
         data = parse_json(raw)
         if not data: continue
@@ -276,6 +319,7 @@ def extract_image_url(page: Page) -> str:
             return None
         r = pull(data)
         if r: return r
+    # DOM
     try:
         img = page.locator('img').first
         if img and img.count() > 0:
@@ -318,14 +362,15 @@ def _norm_key_et(s: str) -> str:
     return (s.replace("ä","a").replace("ö","o").replace("õ","o")
              .replace("ü","u").replace("š","s").replace("ž","z"))
 
-def extract_specs_from_dom(page: Page) -> Tuple[str, str, str]:
+def extract_specs_from_dom(page: Page) -> Tuple[str, str, str, str]:
     """
-    Returns (brand, manufacturer, size_text) from visible spec blocks.
+    Returns (brand, manufacturer, size_text, ean_raw) from visible spec blocks.
     Scans tables (th/td), dl/dt/dd, and generic 'Key: Value' rows.
     """
     brand = ""
     mfr = ""
     size_text = ""
+    ean_raw = ""
 
     def set_brand(v: str):
         nonlocal brand
@@ -345,67 +390,59 @@ def extract_specs_from_dom(page: Page) -> Tuple[str, str, str]:
         if v and not size_text:
             size_text = v
 
+    def set_ean(v: str):
+        nonlocal ean_raw
+        v = norm_digits(v)
+        if v and not ean_raw:
+            ean_raw = v
+
+    soup = BeautifulSoup(page.content(), "lxml")
+
     # 1) Table rows
-    try:
-        rows = page.locator("table tr")
-        for i in range(min(200, rows.count())):
-            tr = rows.nth(i)
-            try:
-                k = _norm_key_et(tr.locator("th,td").first.inner_text())
-                v = tr.locator("td,th").nth(1).inner_text().strip()
-            except Exception:
-                continue
+    for row in soup.select("table tr"):
+        th, td = row.find("th"), row.find("td")
+        if not th or not td: continue
+        k = _norm_key_et(th.get_text(" ", strip=True))
+        v = td.get_text(" ", strip=True)
+        if k in _SPEC_BRAND_KEYS:
+            set_brand(v)
+        elif k in _SPEC_MFR_KEYS:
+            set_mfr(v)
+        elif any(t in k for t in _SPEC_SIZE_KEYS):
+            set_size(v)
+        elif any(t in k for t in ("ribakood","triipkood","ean","gtin")):
+            set_ean(v)
+
+    # 2) <dl> lists
+    for dl in soup.select("dl"):
+        for dt, dd in zip(dl.find_all("dt"), dl.find_all("dd")):
+            k = _norm_key_et(dt.get_text(" ", strip=True))
+            v = dd.get_text(" ", strip=True)
             if k in _SPEC_BRAND_KEYS:
                 set_brand(v)
             elif k in _SPEC_MFR_KEYS:
                 set_mfr(v)
             elif any(t in k for t in _SPEC_SIZE_KEYS):
                 set_size(v)
-    except Exception:
-        pass
-
-    # 2) <dl> lists
-    try:
-        dls = page.locator("dl")
-        for di in range(min(50, dls.count())):
-            dl = dls.nth(di)
-            dts = dl.locator("dt")
-            dds = dl.locator("dd")
-            for j in range(min(dts.count(), dds.count())):
-                try:
-                    k = _norm_key_et(dts.nth(j).inner_text())
-                    v = dds.nth(j).inner_text().strip()
-                except Exception:
-                    continue
-                if k in _SPEC_BRAND_KEYS:
-                    set_brand(v)
-                elif k in _SPEC_MFR_KEYS:
-                    set_mfr(v)
-                elif any(t in k for t in _SPEC_SIZE_KEYS):
-                    set_size(v)
-    except Exception:
-        pass
+            elif any(t in k for t in ("ribakood","triipkood","ean","gtin")):
+                set_ean(v)
 
     # 3) Generic rows “Key: Value”
-    try:
-        nodes = page.locator("li, .row, .key-value, .product-attributes__row, .product-details__row, div, span, p")
-        for i in range(min(800, nodes.count())):
-            t = (nodes.nth(i).inner_text() or "").strip()
-            if ":" not in t or len(t) > 240:
-                continue
-            k, v = t.split(":", 1)
-            k = _norm_key_et(k)
-            v = v.strip()
-            if k in _SPEC_BRAND_KEYS:
-                set_brand(v)
-            elif k in _SPEC_MFR_KEYS:
-                set_mfr(v)
-            elif any(tk in k for tk in _SPEC_SIZE_KEYS):
-                set_size(v)
-    except Exception:
-        pass
+    for el in soup.select("li, .row, .key-value, .product-attributes__row, .product-details__row, div, span, p"):
+        t = (el.get_text(" ", strip=True) or "")
+        if ":" not in t or len(t) > 240: continue
+        k, v = t.split(":", 1)
+        k = _norm_key_et(k); v = v.strip()
+        if k in _SPEC_BRAND_KEYS:
+            set_brand(v)
+        elif k in _SPEC_MFR_KEYS:
+            set_mfr(v)
+        elif any(tk in k for tk in _SPEC_SIZE_KEYS):
+            set_size(v)
+        elif any(tk in k for tk in ("ribakood","triipkood","ean","gtin")):
+            set_ean(v)
 
-    return brand, mfr, size_text
+    return brand, mfr, size_text, ean_raw
 
 # ---------- dynamic-page helpers ----------
 def accept_cookies_if_present(page: Page) -> None:
@@ -413,15 +450,25 @@ def accept_cookies_if_present(page: Page) -> None:
                 'button:has-text("Accept all")','[data-testid="uc-accept-all-button"]'):
         try:
             b = page.locator(sel).first
-            if b and b.is_visible(): b.click(timeout=1500); return
+            if b and b.is_visible(): b.click(timeout=1500); page.wait_for_timeout(150); return
         except Exception: pass
     try:
         for fr in page.frames:
             for sel in ('[data-testid="uc-accept-all-button"]','button:has-text("Accept all")',
                         'button:has-text("Nõustu kõigiga")','button:has-text("OK")'):
                 loc = fr.locator(sel).first
-                if loc and loc.is_visible(timeout=1000): loc.click(); return
-    except Exception: return
+                if loc and loc.is_visible(timeout=1000): loc.click(); page.wait_for_timeout(150); return
+    except Exception:
+        return
+
+def wait_for_hydration(page: Page, timeout_ms: int = 9000) -> None:
+    try:
+        page.wait_for_function(
+            """() => !!(document.querySelector('h1') || document.querySelector('[itemprop="price"], .price, .product-price'))""",
+            timeout=timeout_ms
+        )
+    except Exception:
+        pass
 
 def auto_scroll(page: Page, total_px: int = 2500, step: int = 600, pause_ms: int = 250) -> None:
     climbed = 0
@@ -492,6 +539,9 @@ def read_categories(args) -> List[str]:
 
 # ----------------------- PDP extraction -----------------------
 def extract_pdp(page: Page, source_url: str, category_hint: str) -> Row:
+    # make sure the page is ready
+    accept_cookies_if_present(page); wait_for_hydration(page)
+
     name, brand, size_text, ean_raw, sku_raw = extract_from_jsonld(page)
     if not any([name, brand, size_text, ean_raw, sku_raw]):
         _n,_b,_s,_g,_sku = extract_from_other_scripts(page)
@@ -501,37 +551,56 @@ def extract_pdp(page: Page, source_url: str, category_hint: str) -> Row:
         ean_raw = ean_raw or _g
         sku_raw = sku_raw or _sku
 
+    # JS globals (Nuxt/Redux, etc.)
+    js = extract_from_js_globals(page)
+    if not ean_raw:
+        for k in ("gtin13","ean","ean13","gtin","barcode"):
+            if k in js: ean_raw = js[k]; break
+    if not sku_raw:
+        for k in ("sku","mpn","code","id"):
+            if k in js: sku_raw = js[k]; break
+    if not brand:
+        brand = js.get("brand","") or js.get("manufacturer","")
+    manufacturer = js.get("manufacturer","")
+
     # If JSON name is junk, prefer DOM title
     if not looks_like_product_name(name):
         dom_name = dom_title_fallback(page)
         if dom_name: name = dom_name
 
-    # DOM spec fallback to fill brand/manufacturer/size when missing
-    manufacturer = ""
+    # DOM spec fallback to fill brand/manufacturer/size/EAN when missing
     try:
-        b_dom, mfr_dom, size_dom = extract_specs_from_dom(page)
-        if b_dom and not brand:
-            brand = b_dom
-        if mfr_dom:
-            manufacturer = mfr_dom
-        if size_dom and not size_text:
-            size_text = size_dom
+        b_dom, mfr_dom, size_dom, ean_dom = extract_specs_from_dom(page)
+        if b_dom and not brand: brand = b_dom
+        if mfr_dom and not manufacturer: manufacturer = mfr_dom
+        if size_dom and not size_text: size_text = size_dom
+        if ean_dom and not ean_raw: ean_raw = ean_dom
     except Exception:
         pass
 
     price, currency = extract_price_currency(page)
+    if not price and "price" in js:
+        price = norm_price_str(js["price"])
+    if not currency:
+        currency = js.get("currency") or js.get("pricecurrency") or "EUR"
+
     image_url = extract_image_url(page)
     cat_path, cat_leaf = extract_breadcrumbs(page)
     if not cat_path and category_hint:
         cat_path = category_hint
         cat_leaf = category_hint.split("/")[-1] if "/" in category_hint else category_hint
+
+    # normalize digits
+    ean_raw = norm_digits(ean_raw)
+    sku_raw = safe_text(sku_raw)
+    price = norm_price_str(price)
     ext_id = ext_id_from_url(source_url)
 
     return Row(
         STORE_CHAIN, STORE_NAME, STORE_CHANNEL,
-        ext_id, ean_raw, sku_raw, name, size_text,
-        brand, manufacturer, price, (currency or "EUR"),
-        image_url, cat_path, cat_leaf, source_url
+        ext_id, ean_raw, sku_raw, (name or ""), (size_text or ""),
+        (brand or ""), (manufacturer or ""), (price or ""), (currency or "EUR"),
+        (image_url or ""), (cat_path or ""), (cat_leaf or ""), source_url
     )
 
 # ----------------------- Main crawl -----------------------
@@ -577,7 +646,7 @@ def main():
     total_written = 0; seen_pdp: Set[str] = set()
 
     with sync_playwright() as pw:
-        browser = pw.chromium.launch(headless=headless)
+        browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
         ctx = browser.new_context(
             base_url=BASE, locale="et-EE", is_mobile=False,
             viewport={"width": 1360, "height": 900},
@@ -593,7 +662,7 @@ def main():
                     page.goto(base, timeout=45000, wait_until="domcontentloaded")
                 except (PWTimeout, Exception) as e:
                     print(f"[barbora] nav error on {base}: {e}", file=sys.stderr); continue
-                accept_cookies_if_present(page); page.wait_for_timeout(200); auto_scroll(page, 1200, 600, 200)
+                accept_cookies_if_present(page); wait_for_hydration(page); auto_scroll(page, 1200, 600, 200)
 
                 detected_max = _max_pages_from_dom(page)
                 last_page = min(detected_max, page_limit) if page_limit > 0 else detected_max
@@ -606,7 +675,7 @@ def main():
                         page.goto(cur, timeout=45000, wait_until="domcontentloaded")
                     except (PWTimeout, Exception) as e:
                         print(f"[barbora] nav error on {cur}: {e}", file=sys.stderr); break
-                    accept_cookies_if_present(page); auto_scroll(page, 2200, 700, 200)
+                    accept_cookies_if_present(page); wait_for_hydration(page); auto_scroll(page, 2200, 700, 200)
 
                     links = discover_pdp_links_on_category(page)
                     cur_set = set(links)
@@ -628,7 +697,7 @@ def main():
                         p = ctx.new_page()
                         try:
                             p.goto(u, timeout=45000, wait_until="domcontentloaded")
-                            accept_cookies_if_present(p)
+                            accept_cookies_if_present(p); wait_for_hydration(p)
                             row = extract_pdp(p, u, category_hint=cat)
                             writer.writerow(row.as_list()); total_written += 1
                         except PWTimeout:
