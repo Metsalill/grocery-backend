@@ -10,6 +10,7 @@ Key bits:
 - Stable/fast (blocks heavy 3rd-party, auto-accepts overlays)
 - Reuses a single Chromium page for all PDPs
 - NEW: supports --only-ext-file to crawl *only* the ext_ids you feed in
+- NEW: explicitly expands "Toote andmed / Tooteinfo" tab and reads Kaubamärk/Tootja from DOM
 
 CSV columns written:
   store_chain, store_name, store_channel,
@@ -121,6 +122,26 @@ def wait_for_hydration(page, timeout_ms: int = 8000) -> None:
         )
     except Exception:
         pass
+
+def expand_rimi_spec_tabs(page) -> None:
+    """Open 'Toote andmed' / 'Tooteinfo' so spec rows (Kaubamärk/Tootja) are present in DOM."""
+    sels = [
+        "button:has-text('Toote andmed')",
+        "button:has-text('Tooteinfo')",
+        "[role='tab']:has-text('Toote andmed')",
+        "[role='tab']:has-text('Tooteinfo')",
+        "a:has-text('Toote andmed')",
+        "a:has-text('Tooteinfo')",
+    ]
+    for sel in sels:
+        try:
+            el = page.locator(sel).first
+            if el and el.count() > 0 and el.is_enabled():
+                el.click(timeout=1500)
+                page.wait_for_timeout(200)
+                break
+        except Exception:
+            pass
 
 # ---------- EAN helpers ----------
 
@@ -383,6 +404,9 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
     ]
     def router(route, request):
         host = urlparse(request.url).netloc.lower()
+        # always allow rimi.ee assets/xhr
+        if host.endswith("rimi.ee"):
+            return route.continue_()
         if any(host.endswith(d) for d in BLOCK):
             return route.abort()
         if request.resource_type in {"image","font","media","stylesheet","websocket","manifest"}:
@@ -472,7 +496,51 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
         page.goto(url, timeout=60000, wait_until="domcontentloaded")
         auto_accept_overlays(page)
         wait_for_hydration(page)
+        expand_rimi_spec_tabs(page)  # <<< important for Kaubamärk/Tootja
         page.wait_for_timeout(int(max(req_delay, 0.1)*1000))
+
+        # --- DOM-first extraction for brand/manufacturer (handles SPA content)
+        try:
+            kv = page.evaluate("""
+            () => {
+              const out = {};
+              const rows = [];
+
+              // tables
+              document.querySelectorAll('table tr').forEach(tr => {
+                const th = tr.querySelector('th, td:first-child');
+                const td = tr.querySelector('td:last-child');
+                if (th && td) rows.push([th.textContent.trim(), td.textContent.trim()]);
+              });
+
+              // dl/dt/dd
+              document.querySelectorAll('dl').forEach(dl => {
+                const dts = dl.querySelectorAll('dt');
+                const dds = dl.querySelectorAll('dd');
+                const n = Math.min(dts.length, dds.length);
+                for (let i=0;i<n;i++) {
+                  rows.push([dts[i].textContent.trim(), dds[i].textContent.trim()]);
+                }
+              });
+
+              const norm = s => s.toLowerCase()
+                  .replaceAll('ä','a').replaceAll('ö','o').replaceAll('õ','o').replaceAll('ü','u')
+                  .replaceAll('š','s').replaceAll('ž','z');
+
+              for (const [k,v] of rows) {
+                const nk = norm(k);
+                if (!out.brand && (/(kaubam[aä]rk|br[äa]nd|brand)/i.test(k) || nk.includes('kaubamark'))) out.brand = v;
+                if (!out.manufacturer && (/(tootja|manufacturer|valmistaja|producer)/i.test(k))) out.manufacturer = v;
+              }
+              return out;
+            }
+            """)
+        except Exception:
+            kv = {}
+
+        if isinstance(kv, dict):
+            brand = (kv.get("brand") or brand or "").strip()
+            manufacturer = (kv.get("manufacturer") or manufacturer or "").strip()
 
         html = page.content()
         soup = BeautifulSoup(html, "lxml")
@@ -502,8 +570,8 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
         for k in ("sku","mpn"):
             if not sku and flat_ld.get(k):
                 sku = str(flat_ld.get(k))
-        brand = brand or brand_ld or ""
-        manufacturer = manufacturer or manufacturer_ld or ""
+        brand = brand or (brand_ld or "")
+        manufacturer = manufacturer or (manufacturer_ld or "")
 
         # breadcrumbs
         crumbs_dom = [a.get_text(strip=True) for a in soup.select(
@@ -514,7 +582,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
             crumbs = [c for c in crumbs if c]
             category_path = " > ".join(crumbs[-5:])
 
-        # spec: brand + manufacturer + size
+        # spec: brand + manufacturer + size (soup pass; keeps size logic)
         b2, m2, s2 = parse_brand_mfr_size(soup, name or "")
         brand = brand or (b2 or "")
         manufacturer = manufacturer or (m2 or "")
@@ -588,6 +656,15 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
         if not currency and price:
             currency = "EUR"
 
+        # Inline helper: "Veel tooteid kaubamärgilt X"
+        if not brand:
+            try:
+                txt = page.locator(":text-matches('kaubamärgilt','i')").first.inner_text()
+                m = re.search(r"kaubamärgilt\s+(.+)$", txt or "", re.I)
+                if m: brand = m.group(1).strip()
+            except Exception:
+                pass
+
     except PWTimeout:
         name = name or ""
 
@@ -659,7 +736,8 @@ def write_csv(rows: List[Dict[str,str]], out_path: str) -> None:
         "ext_id","ean_raw","sku_raw","name","size_text","brand","manufacturer",
         "price","currency","image_url","category_path","category_leaf","source_url",
     ]
-    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True
+    )
     new_file = not os.path.exists(out_path)
     with open(out_path, "a", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
