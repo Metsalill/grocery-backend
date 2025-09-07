@@ -10,7 +10,7 @@ Key bits:
 - Robust price parsing (JSON-LD, meta, visible text)
 - Stable/fast (blocks heavy 3rd-party, auto-accepts overlays)
 - Reuses a single Chromium page for all PDPs
-- Supports --only-ext-file to crawl *only* the ext_ids you feed in
+- Supports --only-ext-file to crawl *only* the ext_ids you feed in (direct PDP mode)
 
 CSV columns written:
   store_chain, store_name, store_channel,
@@ -96,11 +96,12 @@ def canonical_url(page) -> Optional[str]:
         return None
 
 def auto_accept_overlays(page) -> None:
+    # NOTE: removed "Vali aeg" per request.
     labels = [
         r"Nõustun", r"Nõustu", r"Accept", r"Allow all", r"OK", r"Selge",
         r"Jätka", r"Vali hiljem", r"Continue", r"Close", r"Sulge",
         r"Vali pood", r"Vali teenus", r"Telli koju", r"Vali kauplus",
-        r"Vali aeg", r"Näita kõiki tooteid", r"Kuva tooted", r"Kuva kõik tooted",
+        r"Näita kõiki tooteid", r"Kuva tooted", r"Kuva kõik tooted",
     ]
     for lab in labels:
         try:
@@ -772,6 +773,10 @@ def read_categories(path: str) -> List[str]:
         return [ln.strip() for ln in f if ln.strip() and not ln.strip().startswith("#")]
 
 def _read_id_file(path: Optional[str]) -> tuple[set[str], set[str]]:
+    """
+    Reads a file that may contain full URLs and/or ext_ids.
+    Returns (urls, ext_ids).
+    """
     urls: set[str] = set()
     ids: set[str] = set()
     if not path or not os.path.exists(path):
@@ -823,7 +828,7 @@ def main():
     ap.add_argument("--req-delay", default="0.5")
     ap.add_argument("--output-csv", default=os.environ.get("OUTPUT_CSV","data/rimi_products.csv"))
     ap.add_argument("--skip-ext-file", default=os.environ.get("SKIP_EXT_FILE",""))
-    ap.add_argument("--only-ext-file", default=os.environ.get("ONLY_EXT_FILE",""))  # NEW
+    ap.add_argument("--only-ext-file", default=os.environ.get("ONLY_EXT_FILE",""))  # direct PDP mode if present
     args = ap.parse_args()
 
     page_limit   = int(args.page_limit or "0")
@@ -836,17 +841,32 @@ def main():
     only_urls, only_ext = read_only_file(args.only_ext_file)
 
     all_pdps: List[str] = []
+
     with sync_playwright() as pw:
-        # 1) collect PDP URLs from categories
-        for cat in cats:
-            try:
-                print(f"[rimi] {cat}")
-                pdps = crawl_category(pw, cat, page_limit, headless, req_delay)
-                all_pdps.extend(pdps)
-                if max_products and len(all_pdps) >= max_products:
-                    break
-            except Exception as e:
-                print(f"[rimi] category error: {cat} → {e}", file=sys.stderr)
+        # --------- DIRECT PDP MODE (when ONLY list present) ----------
+        if only_urls or only_ext:
+            # Build a PDP queue directly from ONLY inputs (URLs + ext_ids)
+            print(f"[rimi] ONLY mode: building direct PDP list from ONLY file")
+            # Start with any full URLs from the ONLY file
+            for u in sorted(only_urls):
+                u2 = normalize_href(u)
+                if u2 and "/p/" in u2:
+                    all_pdps.append(u2)
+            # Add PDPs from ext_ids
+            for xid in sorted(only_ext):
+                if xid:
+                    all_pdps.append(f"{BASE}/epood/ee/p/{xid}")
+        else:
+            # --------- CATEGORY DISCOVERY MODE ----------
+            for cat in cats:
+                try:
+                    print(f"[rimi] {cat}")
+                    pdps = crawl_category(pw, cat, page_limit, headless, req_delay)
+                    all_pdps.extend(pdps)
+                    if max_products and len(all_pdps) >= max_products:
+                        break
+                except Exception as e:
+                    print(f"[rimi] category error: {cat} → {e}", file=sys.stderr)
 
         # dedupe keep order
         seen, q = set(), []
@@ -854,17 +874,7 @@ def main():
             if u not in seen:
                 seen.add(u); q.append(u)
 
-        # 2a) ONLY filter (if provided)
-        if only_urls or only_ext:
-            q_only = []
-            for u in q:
-                xid = extract_ext_id(u)
-                if (u in only_urls) or (xid and xid in only_ext):
-                    q_only.append(u)
-            print(f"[rimi] ONLY filter active: {len(q_only)} URLs retained (of {len(q)})")
-            q = q_only
-
-        # 2b) SKIP filter
+        # 2a) SKIP filter (applies to both modes)
         if skip_urls or skip_ext:
             q2 = []
             skipped = 0
@@ -875,6 +885,10 @@ def main():
                 q2.append(u)
             print(f"[rimi] skip filter: {skipped} URLs skipped (already priced/complete).")
             q = q2
+
+        # 2b) If ONLY list present, log how many were retained vs total
+        if only_urls or only_ext:
+            print(f"[rimi] ONLY filter active: {len(q)} PDP URLs queued")
 
         # 3) single browser/context/page for all PDPs
         browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
