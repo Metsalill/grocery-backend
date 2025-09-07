@@ -70,14 +70,27 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-scraper.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements-scraper.txt', 'requirements.txt', 'scripts/rimi_crawl_categories_pw.py') }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
       - name: Install deps (Playwright + libs)
+        shell: bash
         run: |
           set -euo pipefail
-          pip install -r requirements-scraper.txt || pip install playwright beautifulsoup4 lxml pg8000 psycopg2-binary
+          python -m pip install --upgrade pip
+          if [ -f requirements-scraper.txt ]; then
+            echo "Installing from requirements-scraper.txt"
+            pip install -r requirements-scraper.txt
+          elif [ -f requirements.txt ]; then
+            echo "Installing from requirements.txt"
+            pip install -r requirements.txt
+          else
+            echo "No requirements file found; installing minimal deps inline"
+            # Only what's needed by the crawler + lxml parser
+            pip install playwright beautifulsoup4 lxml
+          fi
+          # Install browser and OS deps needed for Chromium
           python -m playwright install --with-deps chromium
 
       - name: Verify scraper exists
