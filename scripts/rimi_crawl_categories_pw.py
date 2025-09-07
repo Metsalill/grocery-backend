@@ -697,7 +697,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
         if not (brand and manufacturer):
             for glb in [
                 "__NUXT__", "__NEXT_DATA__", "APP_STATE", "dataLayer",
-                "Storefront", "__APOLLO_STATE__", "APOLLO_STATE__,
+                "Storefront", "__APOLLO_STATE__", "APOLLO_STATE",
                 "apolloState", "__INITIAL_STATE__", "__PRELOADED_STATE__", "__STATE__"
             ]:
                 try:
@@ -915,7 +915,7 @@ def main():
                     rows.append(row); total += 1
                     if len(rows) >= 120:
                         write_csv(rows, args.output_csv); rows = []
-                except Exception as e:
+                except Exception:
                     traceback.print_exc()
             if rows:
                 write_csv(rows, args.output_csv)
