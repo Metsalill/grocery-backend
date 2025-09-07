@@ -32,7 +32,7 @@ on:
         required: false
         default: "1"
   schedule:
-    - cron: "19 */3 * * *"
+    - cron: "19 3 * * 0"   # Sun at 03:19 UTC
 
 concurrency:
   group: barbora-category-crawl
