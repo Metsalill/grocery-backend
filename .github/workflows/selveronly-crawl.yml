@@ -24,7 +24,7 @@ on:
         required: false
         default: "0.6"
   schedule:
-    - cron: "0 2 * * *"
+    - cron: "19 3 * * 0"   # Sun at 03:19 UTC
 
 concurrency:
   group: ${{ github.event_name == 'workflow_dispatch' && format('selver-category-crawl-{0}', github.run_id) || 'selver-category-crawl' }}
