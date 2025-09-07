@@ -10,7 +10,7 @@ Key bits:
 - Robust price parsing (JSON-LD, meta, visible text)
 - Stable/fast (blocks heavy 3rd-party, auto-accepts overlays)
 - Reuses a single Chromium page for all PDPs
-- Supports --only-ext-file to crawl *only* the ext_ids you feed in (DIRECT PDP MODE)
+- Supports --only-ext-file to crawl *only* the ext_ids you feed in (direct PDP mode)
 
 CSV columns written:
   store_chain, store_name, store_channel,
@@ -292,12 +292,6 @@ def extract_ext_id(url: str) -> str:
         pass
     return ""
 
-def build_pdp_url_from_ext_id(ext_id: str) -> str:
-    ext_id = (ext_id or "").strip()
-    if not ext_id:
-        return ""
-    return f"{BASE}/epood/ee/p/{ext_id}"
-
 def parse_jsonld_for_product_and_breadcrumbs_and_brand(soup: BeautifulSoup) -> Tuple[Dict[str,Any], List[str], Optional[str], Optional[str]]:
     """returns (flat_product, breadcrumbs, brand, manufacturer)"""
     flat: Dict[str, Any] = {}
@@ -499,6 +493,18 @@ def collect_subcategory_links(page, base_cat_url: str) -> List[str]:
     hrefs.discard(base_cat_url.split("?")[0].split("#")[0])
     return sorted(hrefs)
 
+# ------------- direct PDP URL helpers (ONLY mode & retries) -------------------
+
+def build_pdp_url_short(xid: str) -> str:
+    return f"{BASE}/epood/ee/p/{xid.strip()}"
+
+def is_pdp_url(u: str) -> bool:
+    try:
+        p = urlparse(u).path
+        return "/p/" in p
+    except Exception:
+        return False
+
 # ---------------------------- crawler -----------------------------------------
 
 def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay: float) -> List[str]:
@@ -605,7 +611,22 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
     ean = sku = price = currency = None
     category_path = ""
     try:
-        page.goto(url, timeout=60000, wait_until="domcontentloaded")
+        # Try target URL; if it fails quickly, and it's a PDP id we know, retry short path.
+        nav_ok = False
+        try:
+            page.goto(url, timeout=60000, wait_until="domcontentloaded")
+            nav_ok = True
+        except Exception:
+            xid = extract_ext_id(url)
+            if xid:
+                try:
+                    page.goto(build_pdp_url_short(xid), timeout=60000, wait_until="domcontentloaded")
+                    nav_ok = True
+                except Exception:
+                    nav_ok = False
+        if not nav_ok:
+            raise PWTimeout("Navigation failed for both primary and short PDP URL")
+
         auto_accept_overlays(page)
         wait_for_hydration(page)
         # Open the spec tab explicitly and give SPA time to render rows
@@ -697,7 +718,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
         if not (brand and manufacturer):
             for glb in [
                 "__NUXT__", "__NEXT_DATA__", "APP_STATE", "dataLayer",
-                "Storefront", "__APOLLO_STATE__", "APOLLO_STATE",
+                "Storefront", "__APOLLO_STATE__", "__APOLLO_STATE__",
                 "apolloState", "__INITIAL_STATE__", "__PRELOADED_STATE__", "__STATE__"
             ]:
                 try:
@@ -779,7 +800,7 @@ def read_categories(path: str) -> List[str]:
 
 def _read_id_file(path: Optional[str]) -> tuple[set[str], set[str]]:
     """
-    Read a file that may contain full URLs and/or ext_ids.
+    Generic helper: read a file that may contain full URLs and/or ext_ids.
     Returns (urls, ext_ids).
     """
     urls: set[str] = set()
@@ -798,7 +819,6 @@ def _read_id_file(path: Optional[str]) -> tuple[set[str], set[str]]:
                 if xid:
                     ids.add(xid)
             else:
-                # accept raw ext_id
                 ids.add(s)
     return urls, ids
 
@@ -834,135 +854,74 @@ def main():
     ap.add_argument("--req-delay", default="0.5")
     ap.add_argument("--output-csv", default=os.environ.get("OUTPUT_CSV","data/rimi_products.csv"))
     ap.add_argument("--skip-ext-file", default=os.environ.get("SKIP_EXT_FILE",""))
-    ap.add_argument("--only-ext-file", default=os.environ.get("ONLY_EXT_FILE",""))  # DIRECT PDP MODE
+    ap.add_argument("--only-ext-file", default=os.environ.get("ONLY_EXT_FILE",""))  # NEW
     args = ap.parse_args()
 
     page_limit   = int(args.page_limit or "0")
     max_products = int(args.max_products or "0")
     headless     = (str(args.headless or "1") != "0")
     req_delay    = float(args.req_delay or "0.5")
+    cats         = read_categories(args.cats_file)
 
-    # Read lists
-    cats: List[str] = read_categories(args.cats_file)
     skip_urls, skip_ext = read_skip_file(args.skip_ext_file)
     only_urls, only_ext = read_only_file(args.only_ext_file)
 
-    # ---------------- DIRECT PDP MODE ----------------
-    # If ONLY list is present, build PDP URL queue directly from that list and skip category discovery.
-    if only_urls or only_ext:
-        print(f"[rimi] ONLY mode active. Seeds: urls={len(only_urls)} ext_ids={len(only_ext)}")
-        q: List[str] = []
-        # use provided URLs as-is
-        for u in sorted(only_urls):
-            u = normalize_href(u)
-            if u and "/p/" in u:
-                q.append(u)
-            elif u:
-                # if it was a non-PDP URL, try to extract id
-                xid = extract_ext_id(u)
-                if xid:
-                    q.append(build_pdp_url_from_ext_id(xid))
-        # add URLs from ext_ids
-        for xid in sorted(only_ext):
-            url = build_pdp_url_from_ext_id(xid)
-            if url:
-                q.append(url)
-
-        # Deduplicate while preserving order
-        seen, q2 = set(), []
-        for u in q:
-            if u not in seen:
-                seen.add(u); q2.append(u)
-        q = q2
-
-        # Apply SKIP filter (if provided)
-        if skip_urls or skip_ext:
-            q2 = []
-            skipped = 0
-            for u in q:
-                xid = extract_ext_id(u)
-                if (u in skip_urls) or (xid in skip_ext):
-                    skipped += 1
-                    continue
-                q2.append(u)
-            print(f"[rimi] skip filter in ONLY mode: {skipped} URLs skipped of {len(q)}")
-            q = q2
-
-        if max_products and len(q) > max_products:
-            q = q[:max_products]
-        print(f"[rimi] ONLY queue size after filters: {len(q)}")
-
-        if not q:
-            print("[rimi] ONLY list resulted in empty queue — nothing to do.")
-            print("[rimi] Did your shard receive any items? Or do they all fall under other shards?")
-            return
-
-        # 3) single browser/context/page for all PDPs
-        with sync_playwright() as pw:
-            browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
-            ctx = browser.new_context(
-                locale="et-EE",
-                viewport={"width":1440,"height":900},
-                user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"),
-            )
-            page = ctx.new_page()
-
-            rows, total = [], 0
-            for i, url in enumerate(q, 1):
-                try:
-                    row = parse_pdp_with_page(page, url, req_delay)
-                    rows.append(row); total += 1
-                    if len(rows) >= 120:
-                        write_csv(rows, args.output_csv); rows = []
-                except Exception:
-                    traceback.print_exc()
-            if rows:
-                write_csv(rows, args.output_csv)
-
-            ctx.close(); browser.close()
-
-        print(f"[rimi] wrote {total} product rows (ONLY mode).")
-        return
-    # -------------- END DIRECT PDP MODE --------------
-
-    # Category discovery mode (prices/general)
     all_pdps: List[str] = []
     with sync_playwright() as pw:
-        # 1) collect PDP URLs from categories
-        try:
-            for cat in cats:
-                try:
-                    print(f"[rimi] {cat}")
-                    pdps = crawl_category(pw, cat, page_limit, headless, req_delay)
-                    all_pdps.extend(pdps)
-                    if max_products and len(all_pdps) >= max_products:
-                        break
-                except Exception as e:
-                    print(f"[rimi] category error: {cat} → {e}", file=sys.stderr)
-        except KeyboardInterrupt:
-            print("[rimi] interrupted during category discovery", file=sys.stderr)
+        # --------- DIRECT PDP MODE (ONLY list present) ----------
+        if only_urls or only_ext:
+            q: List[str] = []
 
-        # dedupe keep order
-        seen, q = set(), []
-        for u in all_pdps:
-            if u not in seen:
-                seen.add(u); q.append(u)
+            # Keep any provided PDP URLs as-is
+            for u in only_urls:
+                if is_pdp_url(u):
+                    u = normalize_href(u) or u
+                    q.append(u)
 
-        # 2b) SKIP filter
-        if skip_urls or skip_ext:
-            q2 = []
-            skipped = 0
-            for u in q:
-                if (u in skip_urls) or (extract_ext_id(u) in skip_ext):
-                    skipped += 1
+            # For plain IDs, build short PDP URLs
+            for xid in only_ext:
+                if not xid:
                     continue
-                q2.append(u)
-            print(f"[rimi] skip filter: {skipped} URLs skipped (already priced/complete).")
+                q.append(build_pdp_url_short(xid))
+
+            # de-dupe preserve order
+            seen = set(); q2 = []
+            for u in q:
+                if u and u not in seen:
+                    seen.add(u); q2.append(u)
             q = q2
 
-        if max_products and len(q) > max_products:
-            q = q[:max_products]
+        else:
+            # --------- CATEGORY MODE ----------
+            with sync_playwright() as pw2:
+                # 1) collect PDP URLs from categories
+                for cat in cats:
+                    try:
+                        print(f"[rimi] {cat}")
+                        pdps = crawl_category(pw2, cat, page_limit, headless, req_delay)
+                        all_pdps.extend(pdps)
+                        if max_products and len(all_pdps) >= max_products:
+                            break
+                    except Exception as e:
+                        print(f"[rimi] category error: {cat} → {e}", file=sys.stderr)
+
+            # dedupe keep order
+            seen, q = set(), []
+            for u in all_pdps:
+                if u not in seen:
+                    seen.add(u); q.append(u)
+
+            # SKIP filter
+            if skip_urls or skip_ext:
+                q2 = []
+                skipped = 0
+                for u in q:
+                    if (u in skip_urls) or (extract_ext_id(u) in skip_ext):
+                        skipped += 1
+                        continue
+                    q2.append(u)
+                print(f"[rimi] skip filter: {skipped} URLs skipped (already priced/complete).")
+                q = q2
 
         # 3) single browser/context/page for all PDPs
         browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
@@ -983,6 +942,9 @@ def main():
                     write_csv(rows, args.output_csv); rows = []
             except Exception:
                 traceback.print_exc()
+            if max_products and total >= max_products:
+                break
+
         if rows:
             write_csv(rows, args.output_csv)
 
@@ -991,10 +953,4 @@ def main():
     print(f"[rimi] wrote {total} product rows.")
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        # Ensure non-empty stderr for GH Actions debugging
-        print(f"[rimi] FATAL: {e}", file=sys.stderr)
-        traceback.print_exc()
-        sys.exit(1)
+    main()
