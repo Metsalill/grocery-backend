@@ -792,7 +792,8 @@ def write_csv(rows: List[Dict[str,str]], out_path: str) -> None:
         "ext_id","ean_raw","sku_raw","name","size_text","brand","manufacturer",
         "price","currency","image_url","category_path","category_leaf","source_url",
     ]
-    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True
+               )
     new_file = not os.path.exists(out_path)
     with open(out_path, "a", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
