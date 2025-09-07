@@ -100,7 +100,7 @@ def auto_accept_overlays(page) -> None:
         r"Nõustun", r"Nõustu", r"Accept", r"Allow all", r"OK", r"Selge",
         r"Jätka", r"Vali hiljem", r"Continue", r"Close", r"Sulge",
         r"Vali pood", r"Vali teenus", r"Telli koju", r"Vali kauplus",
-        r"Näita kõiki tooteid", r"Kuva tooted", r"Kuva kõik tooted",
+        r"Vali aeg", r"Näita kõiki tooteid", r"Kuva tooted", r"Kuva kõik tooted",
     ]
     for lab in labels:
         try:
@@ -109,15 +109,17 @@ def auto_accept_overlays(page) -> None:
         except Exception:
             pass
 
-def wait_for_hydration(page, timeout_ms: int = 12000) -> None:
-    # Slightly longer: Rimi often fills spec rows after a few extra ticks.
+def wait_for_hydration(page, timeout_ms: int = 15000) -> None:
+    # Wait for price OR spec rows to appear; Rimi fills spec after a few ticks.
     try:
         page.wait_for_function(
             """() => {
-                const h1 = document.querySelector('h1');
-                const price = document.querySelector('[itemprop="price"], [data-test*="price"]');
-                const spec = document.querySelector('table, dl, .product-attributes__row, .product-details__row');
-                return !!(h1) && (!!price || !!spec);
+                const hasH1 = !!document.querySelector('h1');
+                const hasPrice = !!document.querySelector('[itemprop="price"], [data-test*="price"]');
+                const hasSpec = !!document.querySelector('table, dl, .product-attributes__row, .product-details__row');
+                const hasBrandCell = [...document.querySelectorAll('th,dt')].some(e => /kaubam[aä]rk|br[äa]nd/i.test(e.textContent||''));
+                const hasMfrCell = [...document.querySelectorAll('th,dt')].some(e => /tootja|manufacturer|producer/i.test(e.textContent||''));
+                return hasH1 && (hasPrice || hasSpec || hasBrandCell || hasMfrCell);
             }""",
             timeout=timeout_ms
         )
@@ -133,7 +135,7 @@ _BAD_BRAND_TOKENS = [
 ]
 
 def _has_letter(s: str) -> bool:
-    return bool(re.search(r"[A-Za-zÄÖÜÕäöüõ]", s or ""))
+    return bool(re.search(r"[A-Za-zÄÖÜÕäöüõŠšŽž]", s or ""))
 
 def clean_brand(s: str) -> str:
     s = (s or "").strip()
@@ -372,58 +374,66 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
     Returns (brand, manufacturer) — either may be "".
     """
     try:
+        # Ensure the spec tab is open/visible.
+        for label in ("Toote andmed", "Tooteinfo", "Tooteinfo", "Toote andmed"):
+            try:
+                page.get_by_role("tab", name=re.compile(label, re.I)).click(timeout=400)
+            except Exception:
+                try:
+                    page.get_by_role("button", name=re.compile(label, re.I)).click(timeout=400)
+                except Exception:
+                    pass
+        page.mouse.wheel(0, 1200)
+        page.wait_for_timeout(200)
+
         got = page.evaluate("""
         () => {
           const pick = (s) => (s || '').replace(/\\s+/g,' ').trim();
           const norm = (s) => pick(s)
             .toLowerCase()
+            .normalize('NFD').replace(/[\\u0300-\\u036f]/g,'')
             .replaceAll('ä','a').replaceAll('ö','o').replaceAll('õ','o').replaceAll('ü','u')
             .replaceAll('š','s').replaceAll('ž','z');
 
           let brand = '', manufacturer = '';
 
-          // 1) table th/td
-          document.querySelectorAll('table tr').forEach(tr => {
-            const th = tr.querySelector('th'); const td = tr.querySelector('td');
-            if (!th || !td) return;
-            const k = norm(th.textContent);
-            const v = pick(td.textContent);
-            if (!v) return;
-            if (!brand && ['kaubamark','brand','bränd','brand/kaubamärk'].includes(k)) brand = v;
-            if (!manufacturer && ['tootja','manufacturer','valmistaja','producer'].includes(k)) manufacturer = v;
-          });
-
-          // 2) dl/dt/dd
-          document.querySelectorAll('dl').forEach(dl => {
-            const dts = dl.querySelectorAll('dt'); const dds = dl.querySelectorAll('dd');
-            const n = Math.min(dts.length, dds.length);
-            for (let i=0; i<n; i++){
-              const k = norm(dts[i].textContent);
-              const v = pick(dds[i].textContent);
-              if (!v) continue;
-              if (!brand && ['kaubamark','brand','bränd'].includes(k)) brand = v;
-              if (!manufacturer && ['tootja','manufacturer','valmistaja','producer'].includes(k)) manufacturer = v;
+          // Helper to read the cell right of a TH/DT
+          const readSibling = (n) => {
+            if (!n) return '';
+            let sib = n.nextElementSibling;
+            if (sib) return pick(sib.textContent);
+            // table layout variant
+            if (n.parentElement) {
+              const tds = n.parentElement.querySelectorAll('td');
+              if (tds && tds.length) return pick(tds[0].textContent);
             }
+            return '';
+          };
+
+          // 1) exact 'Kaubamärk' / 'Tootja' in th/dt
+          document.querySelectorAll('th, dt').forEach(n => {
+            const k = norm(n.textContent);
+            if (!brand && /(kaubamark|brand|br[aä]nd)/.test(k))  brand = readSibling(n);
+            if (!manufacturer && /(tootja|manufacturer|producer|valmistaja)/.test(k)) manufacturer = readSibling(n);
           });
 
-          // 3) generic "Key: Value"
+          // 2) generic 'Key: Value'
           if (!brand || !manufacturer) {
             const nodes = Array.from(document.querySelectorAll('.product-attributes__row, .product-details__row, .key-value, .MuiGrid-root, li, div, p, span'))
-              .slice(0, 1200);
+              .slice(0, 1500);
             for (const n of nodes){
               const t = pick(n.textContent);
               if (!t || t.length > 250 || !t.includes(':')) continue;
               const idx = t.indexOf(':');
               const k = norm(t.slice(0, idx));
               const v = pick(t.slice(idx+1));
-              if (!v) continue;
-              if (!brand && ['kaubamark','brand','bränd'].includes(k)) { brand = v; }
-              if (!manufacturer && ['tootja','manufacturer','valmistaja','producer'].includes(k)) { manufacturer = v; }
+              if (!brand && /(kaubamark|brand|br[aä]nd)/.test(k)) brand = v;
+              if (!manufacturer && /(tootja|manufacturer|producer|valmistaja)/.test(k)) manufacturer = v;
               if (brand && manufacturer) break;
             }
           }
 
-          // 4) header helper: "... kaubamärgilt <a>Rimi</a>"
+          // 3) header helper: "... kaubamärgilt <a>Rimi</a>"
           if (!brand) {
             const host = Array.from(document.querySelectorAll('div, p, section')).find(
               el => /kaubam[aä]rgilt/i.test(el.textContent || '')
@@ -434,7 +444,7 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             }
           }
 
-          return { brand, manufacturer };
+          return { brand: pick(brand), manufacturer: pick(manufacturer) };
         }
         """)
         return (got.get("brand") or "").strip(), (got.get("manufacturer") or "").strip()
@@ -592,8 +602,15 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
         page.goto(url, timeout=60000, wait_until="domcontentloaded")
         auto_accept_overlays(page)
         wait_for_hydration(page)
-        # give SPA a breath to fill spec table
-        page.wait_for_timeout(int(max(req_delay, 0.2)*1000))
+        # Open the spec tab explicitly and give SPA time to render rows
+        try:
+            page.get_by_role("tab", name=re.compile(r"Toote (andmed|info)", re.I)).click(timeout=700)
+        except Exception:
+            try:
+                page.get_by_role("button", name=re.compile(r"Toote (andmed|info)", re.I)).click(timeout=700)
+            except Exception:
+                pass
+        page.wait_for_timeout(int(max(req_delay, 0.4)*1000))
 
         html = page.content()
         soup = BeautifulSoup(html, "lxml")
@@ -670,7 +687,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
             p, c = parse_price_from_dom_or_meta(soup)
             price, currency = p or price, c or currency
 
-        # JS globals (only as a last resort; sanitized)
+        # JS globals (last resort)
         if not (brand and manufacturer):
             for glb in [
                 "__NUXT__", "__NEXT_DATA__", "APP_STATE", "dataLayer",
@@ -684,7 +701,6 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
                 if not data:
                     continue
                 got = deep_find_kv(data, { *EAN_KEYS, *SKU_KEYS, *PRICE_KEYS, *CURR_KEYS, *BRAND_KEYS })
-                # Keep price/currency/ids if useful
                 if not ean:
                     for k in ("gtin13","ean","ean13","barcode","gtin"):
                         if got.get(k):
@@ -701,7 +717,6 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
                     for k in ("currency","pricecurrency","currencycode","curr"):
                         if got.get(k):
                             currency = got.get(k); break
-                # Brand/manufacturer only if they pass sanitization
                 if not brand and got.get("brand"):
                     cb = clean_brand(got.get("brand"))
                     if cb:
@@ -757,10 +772,6 @@ def read_categories(path: str) -> List[str]:
         return [ln.strip() for ln in f if ln.strip() and not ln.strip().startswith("#")]
 
 def _read_id_file(path: Optional[str]) -> tuple[set[str], set[str]]:
-    """
-    Generic helper: read a file that may contain full URLs and/or ext_ids.
-    Returns (urls, ext_ids).
-    """
     urls: set[str] = set()
     ids: set[str] = set()
     if not path or not os.path.exists(path):
