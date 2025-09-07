@@ -10,8 +10,7 @@ Key bits:
 - Robust price parsing (JSON-LD, meta, visible text)
 - Stable/fast (blocks heavy 3rd-party, auto-accepts overlays)
 - Reuses a single Chromium page for all PDPs
-- Supports --only-ext-file to crawl *only* the ext_ids/URLs you feed in
-  (NEW: when ONLY* is provided we SKIP category discovery and hit PDPs directly)
+- Supports --only-ext-file to crawl *only* the ext_ids you feed in (DIRECT PDP MODE)
 
 CSV columns written:
   store_chain, store_name, store_channel,
@@ -297,7 +296,6 @@ def build_pdp_url_from_ext_id(ext_id: str) -> str:
     ext_id = (ext_id or "").strip()
     if not ext_id:
         return ""
-    # Canonical PDP path that works across locales
     return f"{BASE}/epood/ee/p/{ext_id}"
 
 def parse_jsonld_for_product_and_breadcrumbs_and_brand(soup: BeautifulSoup) -> Tuple[Dict[str,Any], List[str], Optional[str], Optional[str]]:
@@ -405,10 +403,12 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
 
           let brand = '', manufacturer = '';
 
+          // Helper to read the cell right of a TH/DT
           const readSibling = (n) => {
             if (!n) return '';
             let sib = n.nextElementSibling;
             if (sib) return pick(sib.textContent);
+            // table layout variant
             if (n.parentElement) {
               const tds = n.parentElement.querySelectorAll('td');
               if (tds && tds.length) return pick(tds[0].textContent);
@@ -416,12 +416,14 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             return '';
           };
 
+          // 1) exact 'Kaubamärk' / 'Tootja' in th/dt
           document.querySelectorAll('th, dt').forEach(n => {
             const k = norm(n.textContent);
             if (!brand && /(kaubamark|brand|br[aä]nd)/.test(k))  brand = readSibling(n);
             if (!manufacturer && /(tootja|manufacturer|producer|valmistaja)/.test(k)) manufacturer = readSibling(n);
           });
 
+          // 2) generic 'Key: Value'
           if (!brand || !manufacturer) {
             const nodes = Array.from(document.querySelectorAll('.product-attributes__row, .product-details__row, .key-value, .MuiGrid-root, li, div, p, span'))
               .slice(0, 1500);
@@ -437,6 +439,7 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             }
           }
 
+          // 3) header helper: "... kaubamärgilt <a>Rimi</a>"
           if (!brand) {
             const host = Array.from(document.querySelectorAll('div, p, section')).find(
               el => /kaubam[aä]rgilt/i.test(el.textContent || '')
@@ -661,7 +664,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
         manufacturer = manufacturer or (m2 or "")
         size_text = size_text or (s2 or "")
 
-        # DOM-hydrated brand/manufacturer
+        # DOM-hydrated brand/manufacturer (Rimi-specific; runs after SPA loads)
         if not brand or not manufacturer:
             b_dom, m_dom = extract_brand_mfr_dom(page)
             if not brand and b_dom: brand = b_dom
@@ -694,7 +697,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
         if not (brand and manufacturer):
             for glb in [
                 "__NUXT__", "__NEXT_DATA__", "APP_STATE", "dataLayer",
-                "Storefront", "__APOLLO_STATE__", "APOLLO_STATE",
+                "Storefront", "__APOLLO_STATE__", "APOLLO_STATE__,
                 "apolloState", "__INITIAL_STATE__", "__PRELOADED_STATE__", "__STATE__"
             ]:
                 try:
@@ -776,7 +779,7 @@ def read_categories(path: str) -> List[str]:
 
 def _read_id_file(path: Optional[str]) -> tuple[set[str], set[str]]:
     """
-    Generic helper: read a file that may contain full URLs and/or ext_ids.
+    Read a file that may contain full URLs and/or ext_ids.
     Returns (urls, ext_ids).
     """
     urls: set[str] = set()
@@ -795,6 +798,7 @@ def _read_id_file(path: Optional[str]) -> tuple[set[str], set[str]]:
                 if xid:
                     ids.add(xid)
             else:
+                # accept raw ext_id
                 ids.add(s)
     return urls, ids
 
@@ -830,35 +834,70 @@ def main():
     ap.add_argument("--req-delay", default="0.5")
     ap.add_argument("--output-csv", default=os.environ.get("OUTPUT_CSV","data/rimi_products.csv"))
     ap.add_argument("--skip-ext-file", default=os.environ.get("SKIP_EXT_FILE",""))
-    ap.add_argument("--only-ext-file", default=os.environ.get("ONLY_EXT_FILE",""))  # if present, skip discovery & crawl these
+    ap.add_argument("--only-ext-file", default=os.environ.get("ONLY_EXT_FILE",""))  # DIRECT PDP MODE
     args = ap.parse_args()
 
     page_limit   = int(args.page_limit or "0")
     max_products = int(args.max_products or "0")
     headless     = (str(args.headless or "1") != "0")
     req_delay    = float(args.req_delay or "0.5")
-    cats         = read_categories(args.cats_file)
 
+    # Read lists
+    cats: List[str] = read_categories(args.cats_file)
     skip_urls, skip_ext = read_skip_file(args.skip_ext_file)
     only_urls, only_ext = read_only_file(args.only_ext_file)
 
-    # ---------------- DIRECT PDP MODE when ONLY list provided -----------------
+    # ---------------- DIRECT PDP MODE ----------------
+    # If ONLY list is present, build PDP URL queue directly from that list and skip category discovery.
     if only_urls or only_ext:
-        # Build a queue of PDP URLs from ONLY lists directly
+        print(f"[rimi] ONLY mode active. Seeds: urls={len(only_urls)} ext_ids={len(only_ext)}")
         q: List[str] = []
-        # Include any full URLs as-is
+        # use provided URLs as-is
         for u in sorted(only_urls):
-            if u:
-                q.append(normalize_href(u) or u)
-        # And synthesize URLs from bare ext_ids
+            u = normalize_href(u)
+            if u and "/p/" in u:
+                q.append(u)
+            elif u:
+                # if it was a non-PDP URL, try to extract id
+                xid = extract_ext_id(u)
+                if xid:
+                    q.append(build_pdp_url_from_ext_id(xid))
+        # add URLs from ext_ids
         for xid in sorted(only_ext):
-            if xid:
-                q.append(build_pdp_url_from_ext_id(xid))
-        # Deduplicate, preserve order
-        seen = set()
-        q = [u for u in q if (u not in seen and not seen.add(u))]
-        print(f"[rimi] ONLY mode: {len(q)} PDP URLs queued (skipping category discovery).")
+            url = build_pdp_url_from_ext_id(xid)
+            if url:
+                q.append(url)
 
+        # Deduplicate while preserving order
+        seen, q2 = set(), []
+        for u in q:
+            if u not in seen:
+                seen.add(u); q2.append(u)
+        q = q2
+
+        # Apply SKIP filter (if provided)
+        if skip_urls or skip_ext:
+            q2 = []
+            skipped = 0
+            for u in q:
+                xid = extract_ext_id(u)
+                if (u in skip_urls) or (xid in skip_ext):
+                    skipped += 1
+                    continue
+                q2.append(u)
+            print(f"[rimi] skip filter in ONLY mode: {skipped} URLs skipped of {len(q)}")
+            q = q2
+
+        if max_products and len(q) > max_products:
+            q = q[:max_products]
+        print(f"[rimi] ONLY queue size after filters: {len(q)}")
+
+        if not q:
+            print("[rimi] ONLY list resulted in empty queue — nothing to do.")
+            print("[rimi] Did your shard receive any items? Or do they all fall under other shards?")
+            return
+
+        # 3) single browser/context/page for all PDPs
         with sync_playwright() as pw:
             browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
             ctx = browser.new_context(
@@ -874,33 +913,35 @@ def main():
                 try:
                     row = parse_pdp_with_page(page, url, req_delay)
                     rows.append(row); total += 1
-                    if len(rows) >= 120:   # batch flush
+                    if len(rows) >= 120:
                         write_csv(rows, args.output_csv); rows = []
                 except Exception as e:
-                    print(f"[rimi] ERROR parsing PDP #{i}: {url} → {e}", file=sys.stderr)
                     traceback.print_exc()
-                if max_products and total >= max_products:
-                    break
-
             if rows:
                 write_csv(rows, args.output_csv)
-            ctx.close(); browser.close()
-        print(f"[rimi] wrote {total} product rows (ONLY mode).")
-        return  # finish cleanly
 
-    # ---------------- NORMAL (category discovery) MODE ------------------------
+            ctx.close(); browser.close()
+
+        print(f"[rimi] wrote {total} product rows (ONLY mode).")
+        return
+    # -------------- END DIRECT PDP MODE --------------
+
+    # Category discovery mode (prices/general)
     all_pdps: List[str] = []
     with sync_playwright() as pw:
         # 1) collect PDP URLs from categories
-        for cat in cats:
-            try:
-                print(f"[rimi] {cat}")
-                pdps = crawl_category(pw, cat, page_limit, headless, req_delay)
-                all_pdps.extend(pdps)
-                if max_products and len(all_pdps) >= max_products:
-                    break
-            except Exception as e:
-                print(f"[rimi] category error: {cat} → {e}", file=sys.stderr)
+        try:
+            for cat in cats:
+                try:
+                    print(f"[rimi] {cat}")
+                    pdps = crawl_category(pw, cat, page_limit, headless, req_delay)
+                    all_pdps.extend(pdps)
+                    if max_products and len(all_pdps) >= max_products:
+                        break
+                except Exception as e:
+                    print(f"[rimi] category error: {cat} → {e}", file=sys.stderr)
+        except KeyboardInterrupt:
+            print("[rimi] interrupted during category discovery", file=sys.stderr)
 
         # dedupe keep order
         seen, q = set(), []
@@ -920,6 +961,9 @@ def main():
             print(f"[rimi] skip filter: {skipped} URLs skipped (already priced/complete).")
             q = q2
 
+        if max_products and len(q) > max_products:
+            q = q[:max_products]
+
         # 3) single browser/context/page for all PDPs
         browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
         ctx = browser.new_context(
@@ -937,12 +981,8 @@ def main():
                 rows.append(row); total += 1
                 if len(rows) >= 120:   # batch flush
                     write_csv(rows, args.output_csv); rows = []
-            except Exception as e:
-                print(f"[rimi] ERROR parsing PDP #{i}: {url} → {e}", file=sys.stderr)
+            except Exception:
                 traceback.print_exc()
-            if max_products and total >= max_products:
-                break
-
         if rows:
             write_csv(rows, args.output_csv)
 
@@ -951,4 +991,10 @@ def main():
     print(f"[rimi] wrote {total} product rows.")
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        # Ensure non-empty stderr for GH Actions debugging
+        print(f"[rimi] FATAL: {e}", file=sys.stderr)
+        traceback.print_exc()
+        sys.exit(1)
