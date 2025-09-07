@@ -28,8 +28,7 @@ on:
         required: false
         default: "0.25"
   schedule:
-    - cron: "17 */2 * * *"  # every 2 hours at :17 (UTC)
-    - cron: "0 2 * * *"     # nightly at 02:00 UTC
+    - cron: "19 3 * * 0"   # Sun at 03:19 UTC
 
 concurrency:
   # separate queues per mode so prices/metadata don't cancel each other
