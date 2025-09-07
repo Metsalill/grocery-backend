@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "prices (default) or metadata (only items missing brand/manufacturer/name; EAN optional)"
+        description: "prices (default) or metadata (only items missing brand/EAN/manufacturer)"
         required: false
         default: "prices"
       categories_multiline:
@@ -87,18 +87,9 @@ jobs:
             pip install -r requirements.txt
           else
             echo "No requirements file found; installing minimal deps inline"
-            # Only what's needed by the crawler + lxml parser
             pip install playwright beautifulsoup4 lxml
           fi
-          # Install browser and OS deps needed for Chromium
           python -m playwright install --with-deps chromium
-          # Preflight import to fail fast with a clear error
-          python - <<'PY'
-import sys
-import bs4, lxml, playwright
-from playwright.sync_api import sync_playwright
-print("OK: imports -> bs4", bs4.__version__, " lxml", lxml.etree.LXML_VERSION, " playwright", playwright.__version__)
-PY
 
       - name: Verify scraper exists
         shell: bash
@@ -158,6 +149,7 @@ PY
           fi
 
           : "${SHARD:?SHARD env is required}"
+          SHARDS=4
           awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
             data/rimi_categories_all.txt > data/rimi_categories.txt
 
@@ -208,8 +200,8 @@ PY
           echo "Skip list rows (priced & have brand+name+manufacturer): $(wc -l < data/rimi_skip_ext_ids.txt)"
           echo "$(wc -l < data/rimi_skip_ext_ids.txt)" > data/_skip_count.txt
 
-      # MODE=metadata → crawl only items missing brand/manufacturer/name (EAN optional)
-      - name: Build target list (missing metadata; EAN optional)
+      # MODE=metadata → crawl only items missing brand/EAN/manufacturer/name
+      - name: Build target list (missing metadata) and SHARD it
         if: ${{ env.DATABASE_URL != '' && env.MODE_IS_METADATA == 'true' }}
         shell: bash
         env:
@@ -231,16 +223,18 @@ PY
             COALESCE(NULLIF(btrim(COALESCE(rc.brand,        sp.brand,        '')),''),NULL) IS NULL
             OR COALESCE(NULLIF(btrim(COALESCE(rc.name,         sp.name,     '')),''),NULL) IS NULL
             OR COALESCE(NULLIF(btrim(COALESCE(rc.manufacturer, sp.manufacturer,'')) ,''),NULL) IS NULL
+            OR COALESCE(NULLIF(btrim(COALESCE(rc.ean_norm,     sp.ean_norm,  '')),''),NULL) IS NULL
           ORDER BY 1;
           SQL
-          echo "Target list rows (missing brand/name/manufacturer): $(wc -l < data/rimi_only_ext_ids.txt)"
+          echo "Target list rows (missing brand/name/EAN/manufacturer): $(wc -l < data/rimi_only_ext_ids.txt)"
 
-          # Shard the ONLY list across the matrix to avoid each shard trying to do all
-          awk -v s="${SHARD}" -v n="${SHARDS}" 'NR>0 { if ((NR-1)%n==s) print }' \
+          # SHARD the ONLY list so each matrix shard gets its slice
+          : "${SHARD:?SHARD env is required}"
+          awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
             data/rimi_only_ext_ids.txt > data/rimi_only_ext_ids.sharded.txt
           echo "Sharded ONLY list size (this runner): $(wc -l < data/rimi_only_ext_ids.sharded.txt)"
 
-      - name: Crawl Rimi categories (Playwright)
+      - name: Crawl Rimi (Playwright) — direct PDPs in metadata mode, categories in prices mode
         shell: bash
         env:
           REQ_DELAY: ${{ github.event.inputs.req_delay }}
@@ -249,8 +243,8 @@ PY
           HEADLESS: ${{ github.event.inputs.headless }}
         run: |
           set -euo pipefail
-          echo "::group::Runtime info"
           set -x
+          echo "::group::Runtime info"
           python --version
           echo "Start (UTC): $(date -u)"
           echo "MODE=${MODE}"
@@ -264,23 +258,29 @@ PY
           SKIP_FLAG=()
           ONLY_FLAG=()
 
-          # Prices mode: skip already-complete items
           if [ "${MODE}" = "prices" ] && [ -s data/rimi_skip_ext_ids.txt ]; then
             echo "Using skip list: $(wc -l < data/rimi_skip_ext_ids.txt) ext_ids"
             SKIP_FLAG=(--skip-ext-file data/rimi_skip_ext_ids.txt)
           fi
 
-          # Metadata mode: direct PDP mode using ONLY list (sharded)
-          if [ "${MODE}" = "metadata" ] && [ -s data/rimi_only_ext_ids.sharded.txt ]; then
+          if [ "${MODE}" = "metadata" ]; then
             ONLY_SRC="data/rimi_only_ext_ids.sharded.txt"
-            echo "Using ONLY list (direct PDP mode): $(wc -l < "${ONLY_SRC}") ext_ids"
-            ONLY_FLAG=(--only-ext-file "${ONLY_SRC}")
+            if [ ! -s "$ONLY_SRC" ] && [ -s data/rimi_only_ext_ids.txt ]; then
+              # Fallback (shouldn't happen, but be safe)
+              ONLY_SRC="data/rimi_only_ext_ids.txt"
+            fi
+            if [ -s "$ONLY_SRC" ]; then
+              echo "Using ONLY list (direct PDP mode): $(wc -l < "$ONLY_SRC") ext_ids"
+              ONLY_FLAG=(--only-ext-file "$ONLY_SRC")
+            else
+              echo "::warning::No ONLY list present; metadata mode has nothing to crawl."
+            fi
           fi
 
           set +e
           set +o pipefail
           stdbuf -oL -eL timeout -k 60s 80m \
-            python -u -X faulthandler scripts/rimi_crawl_categories_pw.py \
+            python -u scripts/rimi_crawl_categories_pw.py \
               --cats-file data/rimi_categories.txt \
               --page-limit "$PAGE_LIMIT" \
               --max-products "$MAX_PRODUCTS" \
@@ -293,6 +293,7 @@ PY
           status=${PIPESTATUS[0]}
           set -o pipefail
           set -e
+          set +x
 
           echo "End (UTC): $(date -u) - crawler exit code: ${status}"
           echo "::group::Crawler outputs"
@@ -302,18 +303,8 @@ PY
           else
             echo "CSV not found"
           fi
-          echo "---- python stderr (full) ----"
-          if [ -f data/rimi_run.err ]; then
-            sed -n '1,200p' data/rimi_run.err
-          else
-            echo "(no stderr file)"
-          fi
-          echo "---- python stdout tail (200) ----"
-          if [ -f data/rimi_run.log ]; then
-            tail -n 200 data/rimi_run.log
-          else
-            echo "(no stdout log found)"
-          fi
+          [ -f data/rimi_run.log ] && { echo "Log size:"; du -h data/rimi_run.log; } || echo "Log not found"
+          [ -s data/rimi_run.err ] && { echo "---- stderr tail ----"; tail -n 200 data/rimi_run.err; } || true
           echo "::endgroup::"
 
           if [ "$status" -eq 124 ]; then
@@ -505,7 +496,6 @@ PY
           FROM tmp_rimi_csv_full
           WHERE COALESCE(ext_id,'') <> '';
 
-          -- Drop rows that still lack a name (NOT NULL)
           DELETE FROM tmp_staging_rimi_products WHERE COALESCE(name,'')='';
 
           INSERT INTO public.staging_rimi_products
