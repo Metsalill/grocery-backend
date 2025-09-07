@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "prices (default) or metadata (only items missing brand/EAN/manufacturer)"
+        description: "prices (default) or metadata (only items missing brand/name/manufacturer)"
         required: false
         default: "prices"
       categories_multiline:
@@ -201,8 +201,8 @@ jobs:
           echo "Skip list rows (priced & have brand+name+manufacturer): $(wc -l < data/rimi_skip_ext_ids.txt)"
           echo "$(wc -l < data/rimi_skip_ext_ids.txt)" > data/_skip_count.txt
 
-      # MODE=metadata → crawl only items missing brand/EAN/manufacturer/name
-      - name: Build target list (missing metadata)
+      # MODE=metadata → crawl only items missing brand/manufacturer/name (EAN no longer required)
+      - name: Build target list (missing brand/name/manufacturer)
         if: ${{ env.DATABASE_URL != '' && env.MODE_IS_METADATA == 'true' }}
         shell: bash
         run: |
@@ -222,10 +222,9 @@ jobs:
             COALESCE(NULLIF(btrim(COALESCE(rc.brand,        sp.brand,        '')),''),NULL) IS NULL
             OR COALESCE(NULLIF(btrim(COALESCE(rc.name,         sp.name,     '')),''),NULL) IS NULL
             OR COALESCE(NULLIF(btrim(COALESCE(rc.manufacturer, sp.manufacturer,'')) ,''),NULL) IS NULL
-            OR COALESCE(NULLIF(btrim(COALESCE(rc.ean_norm,     sp.ean_norm,  '')),''),NULL) IS NULL
           ORDER BY 1;
           SQL
-          echo "Target list rows (missing brand/name/EAN/manufacturer): $(wc -l < data/rimi_only_ext_ids.txt)"
+          echo "Target list rows (missing brand/name/manufacturer): $(wc -l < data/rimi_only_ext_ids.txt)"
 
       - name: Crawl Rimi categories (Playwright)
         shell: bash
