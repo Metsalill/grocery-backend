@@ -1,6 +1,9 @@
 name: "Selver → Backfill EANs (DB-driven, concurrent)"
 
 on:
+  # Weekly (Sunday 03:19 UTC) + manual runs
+  schedule:
+    - cron: "19 3 * * 0"
   workflow_dispatch:
     inputs:
       batch:
@@ -27,8 +30,6 @@ on:
         description: "Soft time limit for the probe (minutes)"
         required: false
         default: "45"
-  schedule:
-    - cron: "15 2 * * *"   # daily 02:15 UTC
 
 concurrency:
   group: selver-backfill-eans
@@ -78,6 +79,43 @@ jobs:
           echo "OVERWRITE_BAD_EANS=$OVERWRITE_BAD_EANS"
           echo "TIMEBOX_MINUTES=$TIMEBOX_MINUTES"
 
+      # Keep the queue tidy before each run
+      - name: Queue reconcile (prune solved + upsert currently-missing)
+        run: |
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          -- Remove solved items (those that now have an EAN)
+          DELETE FROM public.selver_ean_backfill_queue q
+          USING public.selver_side_norm s
+          WHERE s.product_id = q.product_id
+            AND COALESCE(s.ean,'') <> '';
+
+          -- Upsert newly-missing (idempotent)
+          INSERT INTO public.selver_ean_backfill_queue (product_id, name, brand, amount)
+          SELECT
+            ssn.product_id,
+            ssn.name,
+            COALESCE(ssn.brand,''),
+            ssn.size_gml
+          FROM public.selver_side_norm ssn
+          WHERE COALESCE(ssn.ean,'') = '' OR regexp_replace(ssn.ean,'[^0-9]','','g') = ''
+          ON CONFLICT (product_id) DO UPDATE
+          SET name = EXCLUDED.name,
+              brand = EXCLUDED.brand,
+              amount = EXCLUDED.amount,
+              attempts = 0,
+              last_error = NULL,
+              updated_at = now();
+
+          -- Quick report
+          SELECT
+            COUNT(*)                               AS total,
+            COUNT(*) FILTER (WHERE attempts=0)     AS new,
+            COUNT(*) FILTER (WHERE attempts>0)     AS tried,
+            COUNT(*) FILTER (WHERE last_error IS NOT NULL) AS had_errors
+          FROM public.selver_ean_backfill_queue;
+          SQL
+
       - name: Run Selver EAN backfill (concurrent, timeboxed)
         env:
           PYTHONUNBUFFERED: "1"
@@ -88,7 +126,6 @@ jobs:
 
       - name: Post-run stats
         run: |
-          sudo apt-get update && sudo apt-get install -y postgresql-client
           echo "Missing canonical EANs overall:"
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
           SELECT COUNT(*) AS still_missing
@@ -119,18 +156,7 @@ jobs:
             (SELECT COUNT(*) FROM overlap) AS overlap_eans;
           "
 
-          # If queue exists, show attempts/errors
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
-          DO $$
-          BEGIN
-            IF EXISTS (
-              SELECT 1 FROM information_schema.tables WHERE table_name='selver_ean_backfill_queue'
-            ) THEN
-              RAISE NOTICE 'Queue attempts distribution:';
-            END IF;
-          END $$;
-          " || true
-
+          echo "Queue attempts distribution:"
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
           SELECT attempts, COUNT(*) 
           FROM selver_ean_backfill_queue
@@ -138,6 +164,7 @@ jobs:
           ORDER BY attempts;
           " || true
 
+          echo "Queue failures:"
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
           SELECT COUNT(*) AS failures
           FROM selver_ean_backfill_queue
