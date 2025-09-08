@@ -89,16 +89,8 @@ jobs:
           pip install --upgrade playwright beautifulsoup4 lxml
           # Install Chromium and OS deps for Playwright
           python -m playwright install --with-deps chromium
-          # Sanity: verify imports
-          python - <<'PY'
-import sys
-try:
-    import bs4, lxml, playwright.sync_api
-    print("Deps OK: bs4, lxml, playwright")
-except Exception as e:
-    print("Dependency check failed:", e, file=sys.stderr)
-    sys.exit(1)
-PY
+          # Sanity: verify imports (one-liner to avoid YAML heredoc parsing issues)
+          python -c "import bs4, lxml; from playwright import sync_api; print('Deps OK: bs4, lxml, playwright')"
 
       - name: Verify scraper exists
         shell: bash
