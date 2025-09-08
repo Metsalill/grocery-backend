@@ -212,6 +212,14 @@ SIZE_IN_NAME_RE = re.compile(
     re.I
 )
 
+# Private-label hints used as *last resort* if all DOM paths fail
+BRAND_HINTS = [
+    "Rimi Free From",
+    "Rimi Planet",
+    "Rimi Smart",
+    "Rimi",
+]
+
 def _norm_key(s: str) -> str:
     s = (s or "").strip().lower()
     return (s
@@ -220,8 +228,11 @@ def _norm_key(s: str) -> str:
 
 def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """
-    Read brand/manufacturer/size from the 'Tooteinfo/Toote andmed' table(s) or dl blocks.
-    Handles both th/td and td/td layouts found on Rimi PDPs.
+    Read brand/manufacturer/size from the 'Tooteinfo/Toote andmed' block.
+    Supports:
+      - table th/td or td/td
+      - dl/dt/dd
+      - mobile/card layouts where label and value are separate stacked blocks
     """
     brand = mfr = size_text = None
 
@@ -237,7 +248,7 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
         nonlocal size_text; v = (v or "").strip()
         if v and not size_text: size_text = v
 
-    # Strict table reader (Rimi "Tooteinfo" with header/value in first/second cell)
+    # 1) Strict table reader (header/value in first/second cell)
     for row in soup.select("table tr"):
         cells = row.find_all(["th", "td"])
         if not cells:
@@ -253,7 +264,7 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
         elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"):
             set_size(val)
 
-    # dl/dt/dd layout (seen on some pages)
+    # 2) dl/dt/dd layout
     for dl in soup.select("dl"):
         dts, dds = dl.find_all("dt"), dl.find_all("dd")
         for i in range(min(len(dts), len(dds))):
@@ -263,7 +274,7 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
             elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
             elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"): set_size(val)
 
-    # Guarded generic "Key: Value" scan for odd structures
+    # 3) “Key: Value” blocks
     for el in soup.select(".product-attributes__row, .product-details__row, .key-value, .MuiGrid-root, li, div, p, span"):
         t = (el.get_text(" ", strip=True) or "")
         if ":" not in t or len(t) > 220:
@@ -277,14 +288,50 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
         elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
         elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"): set_size(val)
 
-    # Sometimes "Veel tooteid kaubamärgilt <A>" is the only brand hint
+    # 4) Mobile/card layout: label node followed by value node (no colon)
+    for lab in soup.find_all(text=re.compile(r"^\s*(Kaubamärk|Brand)\s*$", re.I)):
+        val = ""
+        n = lab.parent
+        # try sibling text blocks
+        if n and n.parent:
+            sibs = list(n.parent.children)
+            try:
+                i = sibs.index(n)
+                # collect text from the next non-empty element
+                for j in range(i+1, min(i+4, len(sibs))):
+                    val = BeautifulSoup(str(sibs[j]), "lxml").get_text(" ", strip=True)
+                    if val: break
+            except Exception:
+                pass
+        if val:
+            set_brand(val)
+
+    for lab in soup.find_all(text=re.compile(r"^\s*(Tootja|Manufacturer|Valmistaja)\s*$", re.I)):
+        val = ""
+        n = lab.parent
+        if n and n.parent:
+            sibs = list(n.parent.children)
+            try:
+                i = sibs.index(n)
+                for j in range(i+1, min(i+4, len(sibs))):
+                    val = BeautifulSoup(str(sibs[j]), "lxml").get_text(" ", strip=True)
+                    if val: break
+            except Exception:
+                pass
+        if val:
+            set_mfr(val)
+
+    # 5) “Veel tooteid kaubamärgilt <A>”
     if not brand:
         node = soup.find(string=re.compile(r"kaubam[aä]rgilt", re.I))
-        if node and node.parent:
-            a = node.parent.find("a")
-            if a and a.get_text(strip=True):
-                set_brand(a.get_text(strip=True))
+        if node:
+            host = node.parent if hasattr(node, "parent") else None
+            a = host.find("a") if host else None
+            txt = a.get_text(strip=True) if a else ""
+            if txt:
+                set_brand(txt)
 
+    # Size from name if missing
     if not size_text and name:
         m = SIZE_IN_NAME_RE.search(name)
         if m: size_text = m.group(1).replace("L", "l")
@@ -412,20 +459,9 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
 
           let brand = '', manufacturer = '';
 
-          const readSibling = (n) => {
-            if (!n) return '';
-            let sib = n.nextElementSibling;
-            if (sib) return pick(sib.textContent);
-            if (n.parentElement) {
-              const tds = n.parentElement.querySelectorAll('td');
-              if (tds && tds.length > 1) return pick(tds[1].textContent);
-            }
-            return '';
-          };
-
           const isNoiseKey = (k) => /(kogus|netokogus|maht|pakend|neto|suurus|mahtuvus|koostisosad|paritolumaa|päritolumaa|lisainfo|sailitustemperatuur|toitumisalane)/i.test(k);
 
-          // th/td and td/td tables
+          // tables (th/td or td/td)
           document.querySelectorAll('tr').forEach(tr => {
             const cells = tr.querySelectorAll('th,td');
             if (!cells || !cells.length) return;
@@ -436,6 +472,7 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             if (/(tootja|manufacturer|producer|valmistaja)/.test(k)) manufacturer = v;
           });
 
+          // "Key: Value" cards
           if (!brand || !manufacturer) {
             const nodes = Array.from(document.querySelectorAll('.product-attributes__row, .product-details__row, .key-value, .MuiGrid-root, li, div, p, span'))
               .slice(0, 2000);
@@ -452,6 +489,33 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             }
           }
 
+          // stacked label/value (mobile)
+          if (!brand) {
+            const label = Array.from(document.querySelectorAll('*'))
+              .find(e => /^\\s*(Kaubamärk|Brand)\\s*$/.test(pick(e.textContent)));
+            if (label && label.parentElement) {
+              const sibs = Array.from(label.parentElement.children);
+              const i = sibs.indexOf(label);
+              for (let j = i+1; j < Math.min(i+4, sibs.length); j++){
+                const v = pick(sibs[j].textContent);
+                if (v) { brand = v; break; }
+              }
+            }
+          }
+          if (!manufacturer) {
+            const label = Array.from(document.querySelectorAll('*'))
+              .find(e => /^\\s*(Tootja|Manufacturer|Valmistaja)\\s*$/.test(pick(e.textContent)));
+            if (label && label.parentElement) {
+              const sibs = Array.from(label.parentElement.children);
+              const i = sibs.indexOf(label);
+              for (let j = i+1; j < Math.min(i+4, sibs.length); j++){
+                const v = pick(sibs[j].textContent);
+                if (v) { manufacturer = v; break; }
+              }
+            }
+          }
+
+          // "Veel tooteid kaubamärgilt <a>"
           if (!brand) {
             const host = Array.from(document.querySelectorAll('div, p, section')).find(
               el => /kaubam[aä]rgilt/i.test(el.textContent || '')
@@ -753,6 +817,13 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
 
         if not currency and price:
             currency = "EUR"
+
+        # FINAL – safe brand fallback from H1 for private labels
+        if not brand and name:
+            for hint in BRAND_HINTS:
+                if hint.lower() in name.lower():
+                    brand = clean_brand(hint)
+                    break
 
     except PWTimeout:
         name = name or ""
