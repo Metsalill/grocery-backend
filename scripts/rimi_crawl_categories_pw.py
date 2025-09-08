@@ -472,6 +472,22 @@ def _is_full_pdp(u: Optional[str]) -> bool:
     except Exception:
         return False
 
+def _iter_href_from_locator(page, sel: str) -> List[str]:
+    hrefs: List[str] = []
+    try:
+        for el in page.locator(sel).element_handles():
+            try:
+                h = el.get_attribute("href")
+            except Exception:
+                h = None
+            if h:
+                h = normalize_href(h)
+                if _is_full_pdp(h):
+                    hrefs.append(h)
+    except Exception:
+        pass
+    return hrefs
+
 def collect_pdp_links(page) -> List[str]:
     sels = [
         ".js-product-container a.card__url",
@@ -482,18 +498,13 @@ def collect_pdp_links(page) -> List[str]:
     ]
     hrefs: set[str] = set()
     for sel in sels:
-        try:
-            for el in page.locator(sel).all():
-                h = normalize_href(el.get_attribute("href"))
-                if _is_full_pdp(h):
-                    hrefs.add(h)
-        except Exception:
-            pass
+        for h in _iter_href_from_locator(page, sel):
+            hrefs.add(h)
     return sorted(hrefs)
 
 def collect_subcategory_links(page, base_cat_url: str) -> List[str]:
     sels = [
-        "nav[aria-label='categories'] a[href^='/epood/ee/tooted/']",
+        "nav[aria-label='categories'] a_href^='/epood/ee/tooted/'",
         "a[href^='/epood/ee/tooted/']:has(h2), a[href^='/epood/ee/tooted/']:has(h3)",
         ".category-card a[href^='/epood/ee/tooted/']",
         ".category, .subcategory a[href^='/epood/ee/tooted/']",
@@ -502,7 +513,7 @@ def collect_subcategory_links(page, base_cat_url: str) -> List[str]:
     hrefs: set[str] = set()
     for sel in sels:
         try:
-            for el in page.locator(sel).all():
+            for el in page.locator(sel).element_handles():
                 h = normalize_href(el.get_attribute("href"))
                 if h and "/epood/ee/tooted/" in h and "/p/" not in h:
                     hrefs.add(h)
@@ -876,7 +887,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
 
 def read_categories(path: str) -> List[str]:
     with open(path, "r", encoding="utf-8") as f:
-        return [ln.strip() for ln in f if ln.strip() and not ln.strip().startswith("#")]
+        return [ln.strip() for ln in f if ln.strip() and not ln.strip().startsWith("#")]
 
 def _read_id_file(path: Optional[str]) -> tuple[set[str], set[str]]:
     urls: set[str] = set()
