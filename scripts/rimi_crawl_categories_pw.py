@@ -10,7 +10,7 @@ Key bits:
 - Robust price parsing (JSON-LD, meta, visible text)
 - Stable/fast (blocks heavy 3rd-party, auto-accepts overlays)
 - Reuses a single Chromium page for all PDPs
-- Supports --only-ext-file to crawl *only* the ext_ids you feed in (direct PDP mode)
+- Supports --only-ext-file to crawl *only* the ext_ids you feed in
 
 CSV columns written:
   store_chain, store_name, store_channel,
@@ -49,7 +49,6 @@ def norm_price_str(s: str) -> str:
     s = (s or "").strip()
     if not s:
         return s
-    # "3 99" → "3.99"
     if " " in s and s.replace(" ", "").isdigit() and len(s.replace(" ", "")) >= 3:
         digits = s.replace(" ", "")
         s = f"{digits[:-2]}.{digits[-2:]}"
@@ -63,7 +62,6 @@ def deep_find_kv(obj: Any, keys: set) -> Dict[str, str]:
                 lk = str(k).lower()
                 if lk in keys and isinstance(v, (str, int, float)):
                     out[lk] = str(v)
-                # nested brand/manufacturer with {name}
                 if lk == "brand":
                     if isinstance(v, dict) and "name" in v:
                         out["brand"] = str(v.get("name") or "")
@@ -110,7 +108,6 @@ def auto_accept_overlays(page) -> None:
             pass
 
 def wait_for_hydration(page, timeout_ms: int = 15000) -> None:
-    # Wait for price OR spec rows to appear; Rimi fills spec after a few ticks.
     try:
         page.wait_for_function(
             """() => {
@@ -125,8 +122,6 @@ def wait_for_hydration(page, timeout_ms: int = 15000) -> None:
         )
     except Exception:
         pass
-
-# ---------- Brand/manufacturer sanitization ----------
 
 _BAD_BRAND_TOKENS = [
     "vali", "tarne", "tarneviis", "ostukorv", "add to cart", "lisa ostukorvi",
@@ -151,11 +146,10 @@ def clean_brand(s: str) -> str:
     return s
 
 def clean_manufacturer(s: str) -> str:
-    # Same gate as brand, but allow longer legal names
     s = (s or "").strip()
+    low = s.lower()
     if not s:
         return ""
-    low = s.lower()
     if ":" in s or "\n" in s or len(s) > 80 or len(s) < 2:
         return ""
     if not _has_letter(s):
@@ -163,8 +157,6 @@ def clean_manufacturer(s: str) -> str:
     if any(tok in low for tok in _BAD_BRAND_TOKENS):
         return ""
     return s
-
-# ---------- EAN helpers ----------
 
 DIGITS_ONLY = re.compile(r"\D+")
 
@@ -188,10 +180,8 @@ def normalize_ean_digits(e: str) -> str:
     if len(d) == 12 and _valid_ean13("0" + d):
         return "0" + d
     if len(d) == 8:
-        return d  # keep as-is; downstream may map EAN-8
-    return d  # keep raw digits for visibility
-
-# ----------------------------- parsing helpers --------------------------------
+        return d
+    return d
 
 SIZE_IN_NAME_RE = re.compile(
     r'(\d+\s*[×x]\s*\d+[.,]?\d*\s?(?:g|kg|ml|l|tk)|\d+[.,]?\d*\s?(?:g|kg|ml|l|tk))\b',
@@ -219,7 +209,6 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
         nonlocal size_text; v = (v or "").strip()
         if v and not size_text: size_text = v
 
-    # 1) table rows
     for row in soup.select("table tr"):
         th, td = row.find("th"), row.find("td")
         if not th or not td:
@@ -233,7 +222,6 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
         elif any(k in key for k in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus")):
             set_size(val)
 
-    # 2) dl/dt/dd pairs
     for dl in soup.select("dl"):
         dts, dds = dl.find_all("dt"), dl.find_all("dd")
         for i in range(min(len(dts), len(dds))):
@@ -243,7 +231,6 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
             elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
             elif any(k in key for k in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus")): set_size(val)
 
-    # 3) generic “Key: Value” rows
     for el in soup.select(".product-attributes__row, .product-details__row, .key-value, .MuiGrid-root, li, div"):
         t = (el.get_text(" ", strip=True) or "")
         if ":" not in t or len(t) > 200:
@@ -254,7 +241,6 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
         elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
         elif any(k in key for k in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus")): set_size(val)
 
-    # 4) size from name
     if not size_text and name:
         m = SIZE_IN_NAME_RE.search(name)
         if m: size_text = m.group(1).replace("L", "l")
@@ -293,7 +279,6 @@ def extract_ext_id(url: str) -> str:
     return ""
 
 def parse_jsonld_for_product_and_breadcrumbs_and_brand(soup: BeautifulSoup) -> Tuple[Dict[str,Any], List[str], Optional[str], Optional[str]]:
-    """returns (flat_product, breadcrumbs, brand, manufacturer)"""
     flat: Dict[str, Any] = {}
     crumbs: List[str] = []
     brand = None
@@ -325,7 +310,6 @@ def parse_jsonld_for_product_and_breadcrumbs_and_brand(soup: BeautifulSoup) -> T
                 for k in ("gtin13","gtin","ean","ean13","barcode","sku","mpn"):
                     if k in d and d.get(k):
                         flat[k] = d.get(k)
-                # brand / manufacturer in jsonld
                 if "brand" in d and not brand:
                     v = d.get("brand")
                     if isinstance(v, dict) and v.get("name"):
@@ -363,18 +347,8 @@ def parse_visible_for_ean(soup: BeautifulSoup) -> Optional[str]:
     m = EAN13_RE.search(soup.get_text(" ", strip=True))
     return m.group(0) if m else None
 
-# --------- DOM (hydrated) brand/manufacturer extractor (Rimi-specific) --------
-
 def extract_brand_mfr_dom(page) -> Tuple[str, str]:
-    """
-    Runs inside the live DOM (after hydration). Looks for:
-      • table/dl spec rows: Kaubamärk/Brand, Tootja/Manufacturer/Producer
-      • generic "Key: Value"
-      • helper line '… kaubamärgilt <a>Rimi</a>'
-    Returns (brand, manufacturer) — either may be "".
-    """
     try:
-        # Ensure the spec tab is open/visible.
         for label in ("Toote andmed", "Tooteinfo", "Tooteinfo", "Toote andmed"):
             try:
                 page.get_by_role("tab", name=re.compile(label, re.I)).click(timeout=400)
@@ -397,12 +371,10 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
 
           let brand = '', manufacturer = '';
 
-          // Helper to read the cell right of a TH/DT
           const readSibling = (n) => {
             if (!n) return '';
             let sib = n.nextElementSibling;
             if (sib) return pick(sib.textContent);
-            // table layout variant
             if (n.parentElement) {
               const tds = n.parentElement.querySelectorAll('td');
               if (tds && tds.length) return pick(tds[0].textContent);
@@ -410,14 +382,12 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             return '';
           };
 
-          // 1) exact 'Kaubamärk' / 'Tootja' in th/dt
           document.querySelectorAll('th, dt').forEach(n => {
             const k = norm(n.textContent);
             if (!brand && /(kaubamark|brand|br[aä]nd)/.test(k))  brand = readSibling(n);
             if (!manufacturer && /(tootja|manufacturer|producer|valmistaja)/.test(k)) manufacturer = readSibling(n);
           });
 
-          // 2) generic 'Key: Value'
           if (!brand || !manufacturer) {
             const nodes = Array.from(document.querySelectorAll('.product-attributes__row, .product-details__row, .key-value, .MuiGrid-root, li, div, p, span'))
               .slice(0, 1500);
@@ -433,7 +403,6 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             }
           }
 
-          // 3) header helper: "... kaubamärgilt <a>Rimi</a>"
           if (!brand) {
             const host = Array.from(document.querySelectorAll('div, p, section')).find(
               el => /kaubam[aä]rgilt/i.test(el.textContent || '')
@@ -453,11 +422,21 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
 
 # ---------------------------- collectors --------------------------------------
 
+def _is_full_pdp(u: Optional[str]) -> bool:
+    """Accept only full PDP URLs with '/tooted/.../p/<id>' path."""
+    if not u:
+        return False
+    try:
+        p = urlparse(u).path
+        return "/tooted/" in p and "/p/" in p
+    except Exception:
+        return False
+
 def collect_pdp_links(page) -> List[str]:
     sels = [
         ".js-product-container a.card__url",
+        # keep generic, but we'll filter to only full PDPs:
         "a[href*='/p/']",
-        "a[href^='/epood/ee/p/']",
         "a[href^='/epood/ee/tooted/'][href*='/p/']",
         "[data-test*='product'] a[href*='/p/']",
         ".product-card a[href*='/p/']",
@@ -467,7 +446,8 @@ def collect_pdp_links(page) -> List[str]:
         try:
             for el in page.locator(sel).all():
                 h = normalize_href(el.get_attribute("href"))
-                if h and "/p/" in h:
+                # hard filter: only accept full PDP URLs; drop '/epood/ee/p/<id>'
+                if _is_full_pdp(h):
                     hrefs.add(h)
         except Exception:
             pass
@@ -493,18 +473,6 @@ def collect_subcategory_links(page, base_cat_url: str) -> List[str]:
     hrefs.discard(base_cat_url.split("?")[0].split("#")[0])
     return sorted(hrefs)
 
-# ------------- direct PDP URL helpers (ONLY mode & retries) -------------------
-
-def build_pdp_url_short(xid: str) -> str:
-    return f"{BASE}/epood/ee/p/{xid.strip()}"
-
-def is_pdp_url(u: str) -> bool:
-    try:
-        p = urlparse(u).path
-        return "/p/" in p
-    except Exception:
-        return False
-
 # ---------------------------- crawler -----------------------------------------
 
 def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay: float) -> List[str]:
@@ -517,7 +485,6 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
                     "Chrome/124 Safari/537.36"),
     )
 
-    # Block heavy 3rd-party stuff to speed up
     BLOCK = [
         "googletagmanager.com","google-analytics.com","doubleclick.net",
         "facebook.net","hotjar.com","newrelic.com","cookiebot.com","demdex.net","adobedtm.com",
@@ -597,10 +564,9 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
     finally:
         ctx.close(); browser.close()
 
-    # dedupe preserving order
     seen, out = set(), []
     for u in all_pdps:
-        if u and u not in seen:
+        if u and u not in seen and _is_full_pdp(u):
             seen.add(u); out.append(u)
     return out
 
@@ -611,25 +577,9 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
     ean = sku = price = currency = None
     category_path = ""
     try:
-        # Try target URL; if it fails quickly, and it's a PDP id we know, retry short path.
-        nav_ok = False
-        try:
-            page.goto(url, timeout=60000, wait_until="domcontentloaded")
-            nav_ok = True
-        except Exception:
-            xid = extract_ext_id(url)
-            if xid:
-                try:
-                    page.goto(build_pdp_url_short(xid), timeout=60000, wait_until="domcontentloaded")
-                    nav_ok = True
-                except Exception:
-                    nav_ok = False
-        if not nav_ok:
-            raise PWTimeout("Navigation failed for both primary and short PDP URL")
-
+        page.goto(url, timeout=60000, wait_until="domcontentloaded")
         auto_accept_overlays(page)
         wait_for_hydration(page)
-        # Open the spec tab explicitly and give SPA time to render rows
         try:
             page.get_by_role("tab", name=re.compile(r"Toote (andmed|info)", re.I)).click(timeout=700)
         except Exception:
@@ -642,12 +592,10 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
         html = page.content()
         soup = BeautifulSoup(html, "lxml")
 
-        # title
         h1 = soup.find("h1")
         if h1:
             name = h1.get_text(strip=True)
 
-        # image
         ogimg = soup.find("meta", {"property":"og:image"})
         if ogimg and ogimg.get("content"):
             image_url = normalize_href(ogimg.get("content")) or ""
@@ -656,7 +604,6 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
             if img:
                 image_url = normalize_href(img.get("src") or img.get("data-src") or "") or ""
 
-        # JSON-LD
         flat_ld, crumbs_ld, brand_ld, manufacturer_ld = parse_jsonld_for_product_and_breadcrumbs_and_brand(soup)
         if flat_ld.get("price") and not price:
             price = norm_price_str(str(flat_ld.get("price")))
@@ -670,7 +617,6 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
         brand = brand or brand_ld or ""
         manufacturer = manufacturer or manufacturer_ld or ""
 
-        # breadcrumbs
         crumbs_dom = [a.get_text(strip=True) for a in soup.select(
             "nav[aria-label='breadcrumb'] a, .breadcrumbs a, .breadcrumb a, ol.breadcrumb a, nav.breadcrumbs a"
         ) if a.get_text(strip=True)]
@@ -679,19 +625,16 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
             crumbs = [c for c in crumbs if c]
             category_path = " > ".join(crumbs[-5:])
 
-        # spec: brand + manufacturer + size (HTML snapshot)
         b2, m2, s2 = parse_brand_mfr_size(soup, name or "")
         brand = brand or (b2 or "")
         manufacturer = manufacturer or (m2 or "")
         size_text = size_text or (s2 or "")
 
-        # DOM-hydrated brand/manufacturer (Rimi-specific; runs after SPA loads)
         if not brand or not manufacturer:
             b_dom, m_dom = extract_brand_mfr_dom(page)
             if not brand and b_dom: brand = b_dom
             if not manufacturer and m_dom: manufacturer = m_dom
 
-        # microdata hints
         if not ean or not sku:
             for it in ("gtin13","gtin","ean","ean13","barcode","sku","mpn"):
                 meta = soup.find(attrs={"itemprop": it})
@@ -703,22 +646,19 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
                     if it in ("sku","mpn") and not sku:
                         sku = val
 
-        # meta brand
         if not brand:
             mbrand = soup.find("meta", {"property":"product:brand"})
             if mbrand and mbrand.get("content"):
                 brand = mbrand["content"].strip()
 
-        # price fallback
         if not price:
             p, c = parse_price_from_dom_or_meta(soup)
             price, currency = p or price, c or currency
 
-        # JS globals (last resort)
         if not (brand and manufacturer):
             for glb in [
                 "__NUXT__", "__NEXT_DATA__", "APP_STATE", "dataLayer",
-                "Storefront", "__APOLLO_STATE__", "__APOLLO_STATE__",
+                "Storefront", "__APOLLO_STATE__", "APOLLO_STATE",
                 "apolloState", "__INITIAL_STATE__", "__PRELOADED_STATE__", "__STATE__"
             ]:
                 try:
@@ -753,7 +693,6 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
                     if cm:
                         manufacturer = cm
 
-        # visible EAN last resort
         if not ean:
             e2 = parse_visible_for_ean(soup)
             if e2: ean = e2
@@ -764,7 +703,6 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
     except PWTimeout:
         name = name or ""
 
-    # Final cleanup / normalization
     if ean:
         ean = normalize_ean_digits(ean)
     brand = clean_brand(brand)
@@ -799,10 +737,6 @@ def read_categories(path: str) -> List[str]:
         return [ln.strip() for ln in f if ln.strip() and not ln.strip().startswith("#")]
 
 def _read_id_file(path: Optional[str]) -> tuple[set[str], set[str]]:
-    """
-    Generic helper: read a file that may contain full URLs and/or ext_ids.
-    Returns (urls, ext_ids).
-    """
     urls: set[str] = set()
     ids: set[str] = set()
     if not path or not os.path.exists(path):
@@ -854,7 +788,7 @@ def main():
     ap.add_argument("--req-delay", default="0.5")
     ap.add_argument("--output-csv", default=os.environ.get("OUTPUT_CSV","data/rimi_products.csv"))
     ap.add_argument("--skip-ext-file", default=os.environ.get("SKIP_EXT_FILE",""))
-    ap.add_argument("--only-ext-file", default=os.environ.get("ONLY_EXT_FILE",""))  # NEW
+    ap.add_argument("--only-ext-file", default=os.environ.get("ONLY_EXT_FILE",""))
     args = ap.parse_args()
 
     page_limit   = int(args.page_limit or "0")
@@ -868,60 +802,44 @@ def main():
 
     all_pdps: List[str] = []
     with sync_playwright() as pw:
-        # --------- DIRECT PDP MODE (ONLY list present) ----------
+        # 1) collect PDP URLs from categories
+        for cat in cats:
+            try:
+                print(f"[rimi] {cat}")
+                pdps = crawl_category(pw, cat, page_limit, headless, req_delay)
+                all_pdps.extend(pdps)
+                if max_products and len(all_pdps) >= max_products:
+                    break
+            except Exception as e:
+                print(f"[rimi] category error: {cat} → {e}", file=sys.stderr)
+
+        # dedupe keep order and ensure full PDP paths only
+        seen, q = set(), []
+        for u in all_pdps:
+            if u not in seen and _is_full_pdp(u):
+                seen.add(u); q.append(u)
+
+        # 2a) ONLY filter (if provided)
         if only_urls or only_ext:
-            q: List[str] = []
-
-            # Keep any provided PDP URLs as-is
-            for u in only_urls:
-                if is_pdp_url(u):
-                    u = normalize_href(u) or u
-                    q.append(u)
-
-            # For plain IDs, build short PDP URLs
-            for xid in only_ext:
-                if not xid:
-                    continue
-                q.append(build_pdp_url_short(xid))
-
-            # de-dupe preserve order
-            seen = set(); q2 = []
+            q_only = []
             for u in q:
-                if u and u not in seen:
-                    seen.add(u); q2.append(u)
+                xid = extract_ext_id(u)
+                if (u in only_urls) or (xid and xid in only_ext):
+                    q_only.append(u)
+            print(f"[rimi] ONLY filter active: {len(q_only)} URLs retained (of {len(q)})")
+            q = q_only
+
+        # 2b) SKIP filter
+        if skip_urls or skip_ext:
+            q2 = []
+            skipped = 0
+            for u in q:
+                if (u in skip_urls) or (extract_ext_id(u) in skip_ext):
+                    skipped += 1
+                    continue
+                q2.append(u)
+            print(f"[rimi] skip filter: {skipped} URLs skipped (already priced/complete).")
             q = q2
-
-        else:
-            # --------- CATEGORY MODE ----------
-            with sync_playwright() as pw2:
-                # 1) collect PDP URLs from categories
-                for cat in cats:
-                    try:
-                        print(f"[rimi] {cat}")
-                        pdps = crawl_category(pw2, cat, page_limit, headless, req_delay)
-                        all_pdps.extend(pdps)
-                        if max_products and len(all_pdps) >= max_products:
-                            break
-                    except Exception as e:
-                        print(f"[rimi] category error: {cat} → {e}", file=sys.stderr)
-
-            # dedupe keep order
-            seen, q = set(), []
-            for u in all_pdps:
-                if u not in seen:
-                    seen.add(u); q.append(u)
-
-            # SKIP filter
-            if skip_urls or skip_ext:
-                q2 = []
-                skipped = 0
-                for u in q:
-                    if (u in skip_urls) or (extract_ext_id(u) in skip_ext):
-                        skipped += 1
-                        continue
-                    q2.append(u)
-                print(f"[rimi] skip filter: {skipped} URLs skipped (already priced/complete).")
-                q = q2
 
         # 3) single browser/context/page for all PDPs
         browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
@@ -938,7 +856,7 @@ def main():
             try:
                 row = parse_pdp_with_page(page, url, req_delay)
                 rows.append(row); total += 1
-                if len(rows) >= 120:   # batch flush
+                if len(rows) >= 120:
                     write_csv(rows, args.output_csv); rows = []
             except Exception:
                 traceback.print_exc()
