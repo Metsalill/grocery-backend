@@ -348,15 +348,25 @@ def parse_visible_for_ean(soup: BeautifulSoup) -> Optional[str]:
     return m.group(0) if m else None
 
 def extract_brand_mfr_dom(page) -> Tuple[str, str]:
+    """
+    Runs inside the live DOM (after hydration). Works for:
+      • two-column DIV grids (no <table>/<dl>)
+      • classic <table>/<dl> layouts
+      • generic '... kaubamärgilt <a>…</a>' helper lines
+
+    Returns (brand, manufacturer) — either may be "".
+    """
     try:
-        for label in ("Toote andmed", "Tooteinfo", "Tooteinfo", "Toote andmed"):
+        # Ensure spec/info tab is opened if it exists
+        for label in ("Toote andmed", "Tooteinfo", "Toote info", "Toote andmed"):
             try:
-                page.get_by_role("tab", name=re.compile(label, re.I)).click(timeout=400)
+                page.get_by_role("tab", name=re.compile(label, re.I)).click(timeout=500)
             except Exception:
                 try:
-                    page.get_by_role("button", name=re.compile(label, re.I)).click(timeout=400)
+                    page.get_by_role("button", name=re.compile(label, re.I)).click(timeout=500)
                 except Exception:
                     pass
+
         page.mouse.wheel(0, 1200)
         page.wait_for_timeout(200)
 
@@ -369,47 +379,91 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             .replaceAll('ä','a').replaceAll('ö','o').replaceAll('õ','o').replaceAll('ü','u')
             .replaceAll('š','s').replaceAll('ž','z');
 
-          let brand = '', manufacturer = '';
+          const isBrandKey = (k) => /(\\bkaubamark\\b|\\bbrand\\b|br[aä]nd)/.test(k);
+          const isMfrKey   = (k) => /(\\btootja\\b|\\bmanufacturer\\b|\\bproducer\\b|\\bvalmistaja\\b)/.test(k);
 
-          const readSibling = (n) => {
+          // Try to read a "value" cell that belongs to a label cell in a grid row.
+          const readValueForLabelNode = (n) => {
             if (!n) return '';
-            let sib = n.nextElementSibling;
-            if (sib) return pick(sib.textContent);
+            // 1) nextElementSibling (common two-column grid)
+            if (n.nextElementSibling) {
+              const v = pick(n.nextElementSibling.textContent);
+              if (v) return v;
+            }
+            // 2) any later siblings in the same parent
             if (n.parentElement) {
-              const tds = n.parentElement.querySelectorAll('td');
-              if (tds && tds.length) return pick(tds[0].textContent);
+              const kids = Array.from(n.parentElement.children);
+              const idx = kids.indexOf(n);
+              for (let i = idx + 1; i < kids.length; i++) {
+                const v = pick(kids[i].textContent);
+                if (v) return v;
+              }
+              // 3) common "value" hooks inside the same row
+              const valNode = n.parentElement.querySelector(
+                ":scope > [class*='value'], :scope > [class*='cell']:not(:first-child), :scope > div:last-child, :scope > span:last-child"
+              );
+              if (valNode) {
+                const v = pick(valNode.textContent);
+                if (v) return v;
+              }
             }
             return '';
           };
 
+          let brand = '', manufacturer = '';
+
+          // A) Strict table/dl variants (fast)
           document.querySelectorAll('th, dt').forEach(n => {
             const k = norm(n.textContent);
-            if (!brand && /(kaubamark|brand|br[aä]nd)/.test(k))  brand = readSibling(n);
-            if (!manufacturer && /(tootja|manufacturer|producer|valmistaja)/.test(k)) manufacturer = readSibling(n);
+            if (!brand && isBrandKey(k))  brand = readValueForLabelNode(n);
+            if (!manufacturer && isMfrKey(k)) manufacturer = readValueForLabelNode(n);
           });
 
+          // B) Generic *grid* rows (no ":" and no th/dt)
+          if (!brand || !manufacturer) {
+            const nodes = Array.from(document.querySelectorAll('div, p, li, span, section')).slice(0, 3000);
+            for (const n of nodes) {
+              const k = norm(n.textContent);
+              if (!k || k.length > 50) continue; // label cells are short
+              if (!brand && isBrandKey(k)) {
+                const v = readValueForLabelNode(n);
+                if (v) brand = v;
+              }
+              if (!manufacturer && isMfrKey(k)) {
+                const v = readValueForLabelNode(n);
+                if (v) manufacturer = v;
+              }
+              if (brand && manufacturer) break;
+            }
+          }
+
+          // C) Generic "Key: Value" text
           if (!brand || !manufacturer) {
             const nodes = Array.from(document.querySelectorAll('.product-attributes__row, .product-details__row, .key-value, .MuiGrid-root, li, div, p, span'))
-              .slice(0, 1500);
+              .slice(0, 2000);
             for (const n of nodes){
               const t = pick(n.textContent);
               if (!t || t.length > 250 || !t.includes(':')) continue;
               const idx = t.indexOf(':');
               const k = norm(t.slice(0, idx));
               const v = pick(t.slice(idx+1));
-              if (!brand && /(kaubamark|brand|br[aä]nd)/.test(k)) brand = v;
-              if (!manufacturer && /(tootja|manufacturer|producer|valmistaja)/.test(k)) manufacturer = v;
+              if (!brand && isBrandKey(k)) brand = v;
+              if (!manufacturer && isMfrKey(k)) manufacturer = v;
               if (brand && manufacturer) break;
             }
           }
 
+          // D) Header/helper like: "... kaubamärgilt <a>Rimi</a>"
           if (!brand) {
             const host = Array.from(document.querySelectorAll('div, p, section')).find(
               el => /kaubam[aä]rgilt/i.test(el.textContent || '')
             );
             if (host) {
               const a = host.querySelector('a');
-              if (a && pick(a.textContent).length > 1) brand = pick(a.textContent);
+              if (a) {
+                const v = pick(a.textContent);
+                if (v && v.length > 1) brand = v;
+              }
             }
           }
 
