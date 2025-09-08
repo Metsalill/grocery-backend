@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "prices (default) or metadata (only items missing brand/manufacturer/name)"
+        description: "prices (default) or metadata (only items missing brand/EAN/manufacturer)"
         required: false
         default: "prices"
       categories_multiline:
@@ -28,9 +28,10 @@ on:
         required: false
         default: "0.25"
   schedule:
-    - cron: "19 3 * * 0" # Sun at 03:19 UTC
+    - cron: "19 3 * * 0"   # Sun at 03:19 UTC
 
 concurrency:
+  # separate queues per mode so prices/metadata don't cancel each other
   group: rimi-category-crawl-${{ github.event.inputs.mode || 'prices' }}
   cancel-in-progress: true
 
@@ -43,15 +44,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3] # 4-way sharding
+        shard: [0, 1, 2, 3]   # 4-way sharding
 
     env:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/rimi_products.csv
       SHARD: ${{ matrix.shard }}
-      SHARDS: 4
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      # Raw mode from dispatch; defaults to "prices"
       MODE: ${{ github.event.inputs.mode || 'prices' }}
+      # Robust flags for if: gates (strings "true"/"false")
       MODE_IS_PRICES: ${{ (github.event.inputs.mode || 'prices') == 'prices' }}
       MODE_IS_METADATA: ${{ (github.event.inputs.mode || 'prices') == 'metadata' }}
 
@@ -68,7 +70,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements-scraper.txt') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements-scraper.txt', 'requirements.txt', 'scripts/rimi_crawl_categories_pw.py') }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
@@ -78,12 +80,17 @@ jobs:
           set -euo pipefail
           python -m pip install --upgrade pip
           if [ -f requirements-scraper.txt ]; then
+            echo "Installing from requirements-scraper.txt"
             pip install -r requirements-scraper.txt
           elif [ -f requirements.txt ]; then
+            echo "Installing from requirements.txt"
             pip install -r requirements.txt
           else
+            echo "No requirements file found; installing minimal deps inline"
+            # Only what's needed by the crawler + lxml parser
             pip install playwright beautifulsoup4 lxml
           fi
+          # Install browser and OS deps needed for Chromium
           python -m playwright install --with-deps chromium
 
       - name: Verify scraper exists
@@ -112,6 +119,8 @@ jobs:
 
       - name: Prepare category list (all -> shard slice)
         shell: bash
+        env:
+          SHARDS: 4
         run: |
           set -euo pipefail
           if [ -n "${{ github.event.inputs.categories_multiline }}" ]; then
@@ -141,18 +150,19 @@ jobs:
             echo "Using built-in SH-coded category set."
           fi
 
-          awk -v s="${SHARD}" -v n="${SHARDS}" 'NR>0 { if ((NR-1)%n==s) print }' \
+          : "${SHARD:?SHARD env is required}"
+          awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
             data/rimi_categories_all.txt > data/rimi_categories.txt
 
           echo "TOTAL categories: $(wc -l < data/rimi_categories_all.txt)"
-          echo "Sharding: SHARD=${SHARD} / SHARDS=${SHARDS}"
+          echo "Sharding: SHARD=$SHARD / SHARDS=$SHARDS"
           echo "Slice count: $(wc -l < data/rimi_categories.txt)"
           echo "First 12 from slice:"
           nl -ba data/rimi_categories.txt | sed -n '1,12p' || true
 
       # ------------------------- SKIP/TARGET LISTS ----------------------------
 
-      # MODE=prices → skip if we already have price AND brand+name+manufacturer
+      # MODE=prices → skip if we already have a price AND metadata complete (brand+name+manufacturer)
       - name: Build skip list (priced + brand+name+manufacturer present)
         if: ${{ env.DATABASE_URL != '' && env.MODE_IS_PRICES == 'true' }}
         shell: bash
@@ -191,7 +201,7 @@ jobs:
           echo "Skip list rows (priced & have brand+name+manufacturer): $(wc -l < data/rimi_skip_ext_ids.txt)"
           echo "$(wc -l < data/rimi_skip_ext_ids.txt)" > data/_skip_count.txt
 
-      # MODE=metadata → crawl only items missing brand/manufacturer/name (EAN optional for Rimi)
+      # MODE=metadata → crawl only items missing brand/EAN/manufacturer/name
       - name: Build target list (missing metadata)
         if: ${{ env.DATABASE_URL != '' && env.MODE_IS_METADATA == 'true' }}
         shell: bash
@@ -209,25 +219,29 @@ jobs:
           LEFT JOIN public.rimi_candidates rc ON rc.ext_id = a.ext_id
           LEFT JOIN public.staging_rimi_products sp ON sp.ext_id = a.ext_id
           WHERE
-              COALESCE(NULLIF(btrim(COALESCE(rc.brand,        sp.brand,        '')),''),NULL) IS NULL
-           OR COALESCE(NULLIF(btrim(COALESCE(rc.name,         sp.name,         '')),''),NULL) IS NULL
-           OR COALESCE(NULLIF(btrim(COALESCE(rc.manufacturer, sp.manufacturer, '')),''),NULL) IS NULL
+            COALESCE(NULLIF(btrim(COALESCE(rc.brand,        sp.brand,        '')),''),NULL) IS NULL
+            OR COALESCE(NULLIF(btrim(COALESCE(rc.name,         sp.name,     '')),''),NULL) IS NULL
+            OR COALESCE(NULLIF(btrim(COALESCE(rc.manufacturer, sp.manufacturer,'')) ,''),NULL) IS NULL
+            OR COALESCE(NULLIF(btrim(COALESCE(rc.ean_norm,     sp.ean_norm,  '')),''),NULL) IS NULL
           ORDER BY 1;
           SQL
-          echo "Target list rows (missing brand/name/manufacturer): $(wc -l < data/rimi_only_ext_ids.txt)"
+          echo "Target list rows (missing brand/name/EAN/manufacturer): $(wc -l < data/rimi_only_ext_ids.txt)"
 
       - name: Shard ONLY list for this runner
         if: ${{ env.MODE_IS_METADATA == 'true' }}
         shell: bash
+        env:
+          SHARDS: 4
         run: |
           set -euo pipefail
-          if [ ! -s data/rimi_only_ext_ids.txt ]; then
-            : > data/rimi_only_ext_ids.sharded.txt
-          else
-            awk -v s="${SHARD}" -v n="${SHARDS}" 'NR>0 { if ((NR-1)%n==s) print }' \
+          if [ -s data/rimi_only_ext_ids.txt ]; then
+            awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
               data/rimi_only_ext_ids.txt > data/rimi_only_ext_ids.sharded.txt
+            echo "Sharded ONLY list size (this runner): $(wc -l < data/rimi_only_ext_ids.sharded.txt)"
+          else
+            : > data/rimi_only_ext_ids.sharded.txt
+            echo "Sharded ONLY list empty."
           fi
-          echo "Sharded ONLY list size (this runner): $(wc -l < data/rimi_only_ext_ids.sharded.txt)"
 
       - name: Crawl Rimi categories (Playwright)
         shell: bash
@@ -251,19 +265,18 @@ jobs:
 
           SKIP_FLAG=()
           ONLY_FLAG=()
-
           if [ "${MODE}" = "prices" ] && [ -s data/rimi_skip_ext_ids.txt ]; then
             echo "Using skip list: $(wc -l < data/rimi_skip_ext_ids.txt) ext_ids"
             SKIP_FLAG=(--skip-ext-file data/rimi_skip_ext_ids.txt)
           fi
-
           if [ "${MODE}" = "metadata" ]; then
             ONLY_SRC="data/rimi_only_ext_ids.sharded.txt"
-            if [ -s "${ONLY_SRC}" ]; then
-              echo "Using ONLY list (direct PDP mode): $(wc -l < "${ONLY_SRC}") ext_ids"
-              ONLY_FLAG=(--only-ext-file "${ONLY_SRC}")
-            else
-              echo "ONLY list empty; will fall back to category crawl."
+            if [ ! -s "$ONLY_SRC" ]; then
+              ONLY_SRC="data/rimi_only_ext_ids.txt"
+            fi
+            if [ -s "$ONLY_SRC" ]; then
+              echo "Using ONLY list (direct PDP mode): $(wc -l < "$ONLY_SRC") ext_ids"
+              ONLY_FLAG=(--only-ext-file "$ONLY_SRC")
             fi
           fi
 
@@ -300,6 +313,17 @@ jobs:
             echo "::warning::Crawler hit the time budget (timeout 80m). Continuing with partial results."
           elif [ "$status" -ne 0 ]; then
             echo "::warning::Crawler exited non-zero ($status); continuing"
+          fi
+
+      # NEW: always print stderr tail to top-level logs (easy debugging from UI)
+      - name: Dump crawler stderr (tail)
+        if: always()
+        run: |
+          echo "----- last 200 lines of data/rimi_run.err -----"
+          if [ -f data/rimi_run.err ]; then
+            tail -n 200 data/rimi_run.err
+          else
+            echo "(no stderr found)"
           fi
 
       - name: Ensure CSV exists (header if empty)
@@ -339,6 +363,7 @@ jobs:
             data/rimi_products.csv
             data/rimi_run.log
             data/rimi_run.err
+            data/rimi_debug/**/*.png
             data/_skip_count.txt
             data/rimi_skip_ext_ids.txt
             data/rimi_only_ext_ids.txt
@@ -484,6 +509,7 @@ jobs:
           FROM tmp_rimi_csv_full
           WHERE COALESCE(ext_id,'') <> '';
 
+          -- Drop rows that still lack a name (NOT NULL)
           DELETE FROM tmp_staging_rimi_products WHERE COALESCE(name,'')='';
 
           INSERT INTO public.staging_rimi_products
