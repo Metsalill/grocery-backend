@@ -193,7 +193,7 @@ def _valid_ean13(code: str) -> bool:
     s_odd  = sum(int(code[i]) for i in range(0, 12, 2))
     s_even = sum(int(code[i]) * 3 for i in range(1, 12, 2))
     chk = (10 - ((s_odd + s_even) % 10)) % 10
-    return chk == int(code[-1]]
+    return chk == int(code[-1])
 
 def normalize_ean_digits(e: str) -> str:
     d = _digits(e)
