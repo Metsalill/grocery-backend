@@ -31,7 +31,6 @@ on:
     - cron: "19 3 * * 0"   # Sun at 03:19 UTC
 
 concurrency:
-  # separate queues per mode so prices/metadata don't cancel each other
   group: rimi-category-crawl-${{ github.event.inputs.mode || 'prices' }}
   cancel-in-progress: true
 
@@ -44,16 +43,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3]   # 4-way sharding
+        shard: [0, 1, 2, 3]
 
     env:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/rimi_products.csv
       SHARD: ${{ matrix.shard }}
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-      # Raw mode from dispatch; defaults to "prices"
       MODE: ${{ github.event.inputs.mode || 'prices' }}
-      # Robust flags for if: gates (strings "true"/"false")
       MODE_IS_PRICES: ${{ (github.event.inputs.mode || 'prices') == 'prices' }}
       MODE_IS_METADATA: ${{ (github.event.inputs.mode || 'prices') == 'metadata' }}
 
@@ -74,7 +71,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
 
-      - name: Install deps (Playwright + libs)
+      - name: Install deps (Playwright + libs) — always ensure bs4/lxml present
         shell: bash
         run: |
           set -euo pipefail
@@ -86,12 +83,22 @@ jobs:
             echo "Installing from requirements.txt"
             pip install -r requirements.txt
           else
-            echo "No requirements file found; installing minimal deps inline"
-            # Only what's needed by the crawler + lxml parser
-            pip install playwright beautifulsoup4 lxml
+            echo "No requirements file found; continuing with minimal deps"
           fi
-          # Install browser and OS deps needed for Chromium
+          # Always ensure our hard requirements are installed
+          pip install --upgrade playwright beautifulsoup4 lxml
+          # Install Chromium and OS deps for Playwright
           python -m playwright install --with-deps chromium
+          # Sanity: verify imports
+          python - <<'PY'
+import sys
+try:
+    import bs4, lxml, playwright.sync_api
+    print("Deps OK: bs4, lxml, playwright")
+except Exception as e:
+    print("Dependency check failed:", e, file=sys.stderr)
+    sys.exit(1)
+PY
 
       - name: Verify scraper exists
         shell: bash
@@ -160,9 +167,6 @@ jobs:
           echo "First 12 from slice:"
           nl -ba data/rimi_categories.txt | sed -n '1,12p' || true
 
-      # ------------------------- SKIP/TARGET LISTS ----------------------------
-
-      # MODE=prices → skip if we already have a price AND metadata complete (brand+name+manufacturer)
       - name: Build skip list (priced + brand+name+manufacturer present)
         if: ${{ env.DATABASE_URL != '' && env.MODE_IS_PRICES == 'true' }}
         shell: bash
@@ -201,7 +205,6 @@ jobs:
           echo "Skip list rows (priced & have brand+name+manufacturer): $(wc -l < data/rimi_skip_ext_ids.txt)"
           echo "$(wc -l < data/rimi_skip_ext_ids.txt)" > data/_skip_count.txt
 
-      # MODE=metadata → crawl only items missing brand/EAN/manufacturer/name
       - name: Build target list (missing metadata)
         if: ${{ env.DATABASE_URL != '' && env.MODE_IS_METADATA == 'true' }}
         shell: bash
@@ -315,7 +318,6 @@ jobs:
             echo "::warning::Crawler exited non-zero ($status); continuing"
           fi
 
-      # NEW: always print stderr tail to top-level logs (easy debugging from UI)
       - name: Dump crawler stderr (tail)
         if: always()
         run: |
@@ -509,7 +511,6 @@ jobs:
           FROM tmp_rimi_csv_full
           WHERE COALESCE(ext_id,'') <> '';
 
-          -- Drop rows that still lack a name (NOT NULL)
           DELETE FROM tmp_staging_rimi_products WHERE COALESCE(name,'')='';
 
           INSERT INTO public.staging_rimi_products
