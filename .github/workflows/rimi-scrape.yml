@@ -75,7 +75,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python -m pip install --upgrade pip
+          python -m pip install --upgrade pip setuptools wheel
           if [ -f requirements-scraper.txt ]; then
             echo "Installing from requirements-scraper.txt"
             pip install -r requirements-scraper.txt
@@ -83,14 +83,14 @@ jobs:
             echo "Installing from requirements.txt"
             pip install -r requirements.txt
           else
-            echo "No requirements file found; continuing with minimal deps"
+            echo "No requirements file found; proceeding with minimal deps"
           fi
-          # Always ensure our hard requirements are installed
+          # Hard requirements for the crawler:
           pip install --upgrade playwright beautifulsoup4 lxml
           # Install Chromium and OS deps for Playwright
           python -m playwright install --with-deps chromium
-          # Sanity: verify imports (one-liner to avoid YAML heredoc parsing issues)
-          python -c "import bs4, lxml; from playwright import sync_api; print('Deps OK: bs4, lxml, playwright')"
+          # Sanity: verify imports (keep it to a single line)
+          python -c "import bs4, lxml; from playwright import sync_api as _; print('Deps OK: bs4, lxml, playwright')"
 
       - name: Verify scraper exists
         shell: bash
