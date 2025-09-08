@@ -1,883 +1,1348 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Rimi.ee (Rimi ePood) category crawler → PDP extractor → CSV/DB friendly
 
-Key bits:
-- Brand/manufacturer/size extraction from JSON-LD + DOM (dt/dd, th/td) + brand box near title
-- EAN normalization (accepts 8/12/13/14 → normalizes to 13 when possible)
-- Robust price parsing (JSON-LD, meta, visible text)
-- Blocks heavy 3rd-party, auto-accepts overlays
-- Reuses a single Chromium page for all PDPs
-- Supports --only-ext-file to crawl *only* the ext_ids you feed in
+"""
+Selver category crawler → CSV (staging_selver_products)
+
+Adds robust **brand** extraction in addition to the EAN/SKU hardening:
+- JSON-LD: product.brand / manufacturer (string or object)
+- itemprop/meta: brand/manufacturer
+- DOM spec rows: "Bränd", "Tootja", "Kaubamärk", "Käitleja", "Handler", "Brand"
+- Fallbacks from H1/NAME (picks brand-like token, e.g., "... , TERE, 400 ml")
+
+Also includes:
+- resilient EAN (Ribakood) + SKU extraction
+- SPA noise suppression, request routing and small navigation retries
+- proceeds even if price widget fails (price=0.00)
+- skip/only lists via CLI flags (--skip-ext-file / --only-ext-file)
+
+Hardening:
+- Strips any accidental DevTools stack-trace suffixes like ":6:13801" from paths.
 
 CSV columns written:
-  store_chain, store_name, store_channel,
-  ext_id, ean_raw, sku_raw, name, size_text, brand, manufacturer,
-  price, currency, image_url, category_path, category_leaf, source_url
+  ext_id, source_url, name, brand, ean_raw, ean_norm, sku_raw,
+  size_text, price, currency, category_path, category_leaf
 """
 
 from __future__ import annotations
-import argparse, os, re, csv, json, sys, traceback
-from typing import Any, Dict, List, Optional, Tuple
-from urllib.parse import urlparse, urljoin
+import os, re, csv, time, json, argparse, sys
+from typing import Dict, Set, Tuple, List, Optional
+from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit, parse_qs, urlencode
+from playwright.sync_api import sync_playwright
 
-from bs4 import BeautifulSoup
-from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
+# ---------------------------------------------------------------------------
+BASE = "https://www.selver.ee"
 
-STORE_CHAIN   = "Rimi"
-STORE_NAME    = "Rimi ePood"
-STORE_CHANNEL = "online"
-BASE = "https://www.rimi.ee"
+OUTPUT = os.getenv("OUTPUT_CSV", "data/selver.csv")
+REQ_DELAY = float(os.getenv("REQ_DELAY", "0.6"))
+PAGE_LIMIT = int(os.getenv("PAGE_LIMIT", "0"))
+CATEGORIES_FILE = os.getenv("CATEGORIES_FILE", "data/selver_categories.txt")
 
-# ------------------------------- regexes -------------------------------------
+USE_ROUTER     = int(os.getenv("USE_ROUTER", "1")) == 1
+CLICK_PRODUCTS = int(os.getenv("CLICK_PRODUCTS", "0")) == 1
+LOG_CONSOLE    = (os.getenv("LOG_CONSOLE", "0") or "0").lower()  # 0|off, warn, all
+NAV_TIMEOUT_MS = int(os.getenv("NAV_TIMEOUT_MS", "45000"))
 
-EAN13_RE = re.compile(r"\b\d{13}\b")
-EAN_LABEL_RE = re.compile(r"\b(ean|gtin|gtin13|barcode|triipkood|ribakood)\b", re.I)
-MONEY_RE = re.compile(r"(\d{1,5}(?:[.,]\d{1,2}|\s?\d{2})?)\s*€")
+# DB preload toggles / query
+PRELOAD_DB        = int(os.getenv("PRELOAD_DB", "1")) == 1
+PRELOAD_DB_QUERY  = os.getenv("PRELOAD_DB_QUERY", "SELECT ext_id FROM staging_selver_products")
+PRELOAD_DB_LIMIT  = int(os.getenv("PRELOAD_DB_LIMIT", "0"))
 
-SKU_KEYS  = {"sku","mpn","itemNumber","productCode","code","id","itemid"}
-EAN_KEYS  = {"ean","ean13","gtin","gtin13","barcode"}
-BRAND_KEYS = {"brand","manufacturer","producer","tootja"}
-PRICE_KEYS = {"price","currentprice","priceamount","unitprice","value"}
-CURR_KEYS  = {"currency","pricecurrency","currencycode","curr"}
-
-# ------------------------------- utils ---------------------------------------
-
-def norm_price_str(s: str) -> str:
-    s = (s or "").strip()
-    if not s:
-        return s
-    if " " in s and s.replace(" ", "").isdigit() and len(s.replace(" ", "")) >= 3:
-        digits = s.replace(" ", "")
-        s = f"{digits[:-2]}.{digits[-2:]}"
-    return s.replace(",", ".")
-
-def deep_find_kv(obj: Any, keys: set) -> Dict[str, str]:
-    out: Dict[str, str] = {}
-    def walk(x):
-        if isinstance(x, dict):
-            for k, v in x.items():
-                lk = str(k).lower()
-                if lk in keys and isinstance(v, (str, int, float)):
-                    out[lk] = str(v)
-                if lk == "brand":
-                    if isinstance(v, dict) and "name" in v:
-                        out["brand"] = str(v.get("name") or "")
-                if lk == "manufacturer":
-                    if isinstance(v, dict) and "name" in v:
-                        out["manufacturer"] = str(v.get("name") or "")
-                walk(v)
-        elif isinstance(x, list):
-            for i in x:
-                walk(i)
-    walk(obj)
-    return out
-
-def normalize_href(href: Optional[str]) -> Optional[str]:
-    if not href:
-        return None
-    href = href.split("?")[0].split("#")[0]
-    return href if href.startswith("http") else urljoin(BASE, href)
-
-def canonical_url(page) -> Optional[str]:
-    try:
-        href = page.evaluate("() => document.querySelector('link[rel=canonical]')?.href || null")
-        if href:
-            return normalize_href(href)
-    except Exception:
-        pass
-    try:
-        return normalize_href(page.url)
-    except Exception:
-        return None
-
-def auto_accept_overlays(page) -> None:
-    labels = [
-        r"Nõustun", r"Nõustu", r"Accept", r"Allow all", r"OK", r"Selge",
-        r"Jätka", r"Vali hiljem", r"Continue", r"Close", r"Sulge",
-        r"Vali pood", r"Vali teenus", r"Telli koju", r"Vali kauplus",
-        r"Vali aeg", r"Näita kõiki tooteid", r"Kuva tooted", r"Kuva kõik tooted",
-    ]
-    for lab in labels:
-        try:
-            page.get_by_role("button", name=re.compile(lab, re.I)).click(timeout=800)
-            page.wait_for_timeout(120)
-        except Exception:
-            pass
-
-def wait_for_hydration(page, timeout_ms: int = 15000) -> None:
-    try:
-        page.wait_for_function(
-            """() => {
-                const hasH1 = !!document.querySelector('h1');
-                const hasPrice = !!document.querySelector('[itemprop="price"], [data-test*="price"]');
-                const hasSpec = !!document.querySelector('table, dl, .product-attributes__row, .product-details__row');
-                return hasH1 && (hasPrice || hasSpec);
-            }""",
-            timeout=timeout_ms
-        )
-    except Exception:
-        pass
-
-# values we never want to accept as brand/manufacturer
-_BAD_BRAND_TOKENS = [
-    "vali", "tarne", "tarneviis", "ostukorv", "add to cart", "lisa ostukorvi",
-    "book delivery", "delivery time", "accept", "cookie", "kampaania", "campaign",
-    "logi", "login", "registreeru", "close", "sulge", "continue",
-    "koostisosad", "kogus", "päritolumaa", "paritolumaa", "lisainfo",
-    "tooteinfo", "toote andmed", "soovitatud tooted"
+STRICT_ALLOWLIST = [
+    "/puu-ja-koogiviljad",
+    "/liha-ja-kalatooted",
+    "/piimatooted-munad-void",
+    "/juustud",
+    "/leivad-saiad-kondiitritooted",
+    "/valmistoidud",
+    "/kuivained-hoidised",
+    "/kuivained-hommikusoogid-hoidised",
+    "/maitseained-ja-puljongid",
+    "/maitseained-ja-puljongid/kastmed",
+    "/maitseained-ja-puljongid/olid-ja-aadikad",
+    "/suupisted-ja-maiustused",
+    "/joogid",
+    "/sugavkylm",
+    "/kulmutatud-toidukaubad",
+    "/suurpakendid",
 ]
+ALLOWLIST_ONLY = int(os.getenv("ALLOWLIST_ONLY", "1")) == 1
 
-def _has_letter(s: str) -> bool:
-    return bool(re.search(r"[A-Za-zÄÖÜÕäöüõŠšŽž]", s or ""))
+BANNED_KEYWORDS = {
+    "sisustus","kodutekstiil","valgustus","kardin","jouluvalgustid",
+    "vaikesed-sisustuskaubad","kuunlad","kirja-ja-kontoritarbed",
+    "remondi-ja-turvatooted","omblus-ja-kasitootarbed","meisterdamine",
+    "ajakirjad","autojuhtimine","kotid","aed-ja-lilled","lemmikloom",
+    "sport","pallimangud","jalgrattasoit","ujumine","matkamine",
+    "tervisesport","manguasjad","lutid","lapsehooldus","ideed-ja-hooajad",
+    "kodumasinad","elektroonika","meelelahutuselektroonika",
+    "vaikesed-kodumasinad","lambid-patareid-ja-taskulambid",
+    "ilu-ja-tervis","kosmeetika","meigitooted","hugieen",
+    "loodustooted-ja-toidulisandid",
+}
 
-def _norm_key(s: str) -> str:
-    s = (s or "").strip().lower()
-    return (s
-            .replace("ä", "a").replace("ö", "o").replace("õ", "o").replace("ü", "u")
-            .replace("š", "s").replace("ž", "z"))
+# --- amounts / size_text extracted from NAME ---
+PACK_RE   = re.compile(r'(\d+)\s*[x×]\s*(\d+[.,]?\d*)\s*(ml|l|g|kg|cl|dl|tk|pcs)\b', re.I)
+SIMPLE_RE = re.compile(r'(\d+[.,]?\d*)\s*(ml|l|g|kg|cl|dl|tk|pcs)\b', re.I)
 
-def _strip_label_prefixes(s: str) -> str:
-    if not s: return ""
-    val = s.strip()
-    low = _norm_key(val)
-    # remove common label prefixes if they leaked into values
-    for lab in ("tootja", "manufacturer", "producer", "kaubamark", "brand", "kogus",
-                "koostisosad", "paritolumaa", "päritolumaa"):
-        if low.startswith(lab + " "):
-            val = val[len(lab):].strip(" :.-\u00A0")
-            break
-    return val
+# ---------- Third-party noise to block ----------
+BLOCK_HOSTS = {
+    "adobe.com","assets.adobedtm.com","adobedtm.com","demdex.net","omtrdc.net",
+    "googletagmanager.com","google-analytics.com","doubleclick.net","facebook.net",
+    "cookiebot.com","consent.cookiebot.com","imgct.cookiebot.com","consentcdn.cookiebot.com",
+    "use.typekit.net","typekit.net","p.typekit.net",
+    "nr-data.net","newrelic.com","js-agent.newrelic.com",
+    "pingdom.net","rum-collector.pingdom.net","rum-collector-2.pingdom.net",
+    "gstatic.com","cdn.jsdelivr.net","googleadservices.com",
+    "hotjar.com","static.hotjar.com",
+}
+ALLOWED_HOSTS = {"www.selver.ee", "selver.ee"}
 
-def clean_brand(s: str) -> str:
-    s = _strip_label_prefixes(s)
-    s = (s or "").strip()
-    if not s:
-        return ""
-    low = _norm_key(s)
-    if ":" in s or "\n" in s or len(s) > 50 or len(s) < 2:
-        return ""
-    if not _has_letter(s):
-        return ""
-    if any(tok in low for tok in _BAD_BRAND_TOKENS):
-        return ""
-    return s
+NON_PRODUCT_PATH_SNIPPETS = {
+    "/e-selver/","/ostukorv","/cart","/checkout","/search","/otsi",
+    "/konto","/customer","/login","/logout","/registreeru","/uudised",
+    "/tootajad","/kontakt","/tingimused","/privaatsus","/privacy",
+    "/kampaania","/kampaaniad","/blogi","/app","/store-locator",
+}
+NON_PRODUCT_KEYWORDS = {
+    "login", "registreeru", "tingimused", "garantii", "hinnasilt",
+    "jatkusuutlik", "b2b", "privaatsus", "privacy", "kontakt", "uudis",
+    "blog", "pood", "poed", "kaart", "arikliend", "karjaar", "karjäär",
+}
 
-def clean_manufacturer(s: str) -> str:
-    s = _strip_label_prefixes(s)
-    s = (s or "").strip()
-    low = _norm_key(s)
-    if not s:
-        return ""
-    if ":" in s or "\n" in s or len(s) > 80 or len(s) < 2:
-        return ""
-    if not _has_letter(s):
-        return ""
-    if any(tok in low for tok in _BAD_BRAND_TOKENS):
-        return ""
-    return s
+# ---------------------------------------------------------------------------
+def normspace(s: str) -> str:
+    return re.sub(r"\s+", " ", s or "").strip()
 
+def guess_size_from_title(title: str) -> str:
+    t = normspace(title or "")
+    if not t:
+        return ""
+    m = PACK_RE.search(t)
+    if m:
+        count, qty, unit = m.groups()
+        return f"{count}×{qty.replace(',', '.')} {unit.lower()}".replace(" pcs", " tk")
+    m = SIMPLE_RE.search(t)
+    if m:
+        qty, unit = m.groups()
+        return f"{qty.replace(',', '.')} {unit.lower()}".replace(" pcs", " tk")
+    return ""
+
+def _strip_eselver_prefix(path: str) -> str:
+    return path.replace("/e-selver", "", 1) if path.startswith("/e-selver/") else path
+
+# NEW: strip any trailing :line or :line:col debug suffixes
+LINECOL_RE = re.compile(r":\d+(?::\d+)?$")
+
+def _strip_linecol(path: str) -> str:
+    return LINECOL_RE.sub("", path or "")
+
+def _clean_abs(href: str) -> Optional[str]:
+    if not href: return None
+    url = urljoin(BASE, href)
+    parts = urlsplit(url)
+    host = (parts.netloc or urlparse(BASE).netloc).lower()
+    if host not in ALLOWED_HOSTS: return None
+    # sanitize path
+    path = _strip_linecol(_strip_eselver_prefix(parts.path))
+    return urlunsplit((parts.scheme, parts.netloc, path.rstrip("/"), "", ""))
+
+def canonical_from_page(page) -> Optional[str]:
+    try:
+        href = page.evaluate("""(d=>d.querySelector('link[rel="canonical"]')?.href||null)(document)""")
+        if href: return _clean_abs(href)
+    except Exception: pass
+    try:
+        # also sanitize page.url (in case a debug suffix sneaks in)
+        parts = urlsplit(page.url)
+        path = _strip_linecol(parts.path)
+        return _clean_abs(urlunsplit((parts.scheme, parts.netloc, path, "", "")))
+    except Exception:
+        return None
+
+def _in_allowlist(path: str) -> bool:
+    if not STRICT_ALLOWLIST: return True
+    p = (path or "/").rstrip("/")
+    return any(p == root or p.startswith(root + "/") for root in STRICT_ALLOWLIST)
+
+# ---- PDP detection ---------------------------------------------------------
+def _is_selver_product_like(url: str) -> bool:
+    """
+    Product URL detection for Selver:
+    - /toode/<...>                (legacy PDPs)
+    - /e/<slug>-<digits>          (numeric PDPs)
+    - /p/<digits>                 (numeric PDPs)
+    - /<product-slug>             (single segment, hyphenated — current Selver PDPs)
+    """
+    u = urlparse(url)
+    host = (u.netloc or urlparse(BASE).netloc).lower()
+    if host not in ALLOWED_HOSTS:
+        return False
+
+    path = _strip_eselver_prefix((_strip_linecol(u.path) or "/").lower())
+
+    # Drop obvious non-product paths/keywords
+    if path.startswith("/ru/"):
+        return False
+    if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS):
+        return False
+    if any(kw in path for kw in NON_PRODUCT_KEYWORDS):
+        return False
+
+    # Known PDP patterns
+    if path.startswith("/toode/"):
+        return True
+    if re.search(r"^/e/.+-(\d+)(/)?$", path):
+        return True
+    if re.search(r"^/p/\d+(/)?$", path):
+        return True
+
+    # NEW: current Selver PDPs are *single-segment* hyphenated slugs
+    segs = [s for s in path.strip("/").split("/") if s]
+    if len(segs) == 1:
+        seg = segs[0]
+        if "-" in seg and re.fullmatch(r"[a-z0-9-]{6,}", seg):
+            return True
+
+    return False
+
+def _is_category_like_path(path: str) -> bool:
+    p = _strip_eselver_prefix((_strip_linecol(path) or "/").lower())
+    if ALLOWLIST_ONLY and STRICT_ALLOWLIST and not _in_allowlist(p): return False
+    if "/e-selver/" in p or p.startswith("/ru/"): return False
+    if any(bad in p for bad in BANNED_KEYWORDS): return False
+    if any(sn in p for sn in NON_PRODUCT_PATH_SNIPPETS): return False
+    if _is_selver_product_like(urljoin(BASE, p)): return False
+    segs = [s for s in p.strip("/").split("/") if s]
+    if len(segs) < 1: return False
+    last = segs[-1]
+    if any(ch.isdigit() for ch in last): return False
+    return any("-" in s for s in segs)
+
+# ---------------------------------------------------------------------------
 DIGITS_ONLY = re.compile(r"\D+")
-
-def _digits(s: str) -> str:
-    return DIGITS_ONLY.sub("", s or "")
+def _digits(s: str) -> str: return DIGITS_ONLY.sub("", s or "")
 
 def _valid_ean13(code: str) -> bool:
-    if not re.fullmatch(r"\d{13}", code or ""):
-        return False
+    if not re.fullmatch(r"\d{13}", code): return False
     s_odd  = sum(int(code[i]) for i in range(0, 12, 2))
     s_even = sum(int(code[i]) * 3 for i in range(1, 12, 2))
     chk = (10 - ((s_odd + s_even) % 10)) % 10
     return chk == int(code[-1])
 
+# normalize to 8/13 when possible
 def normalize_ean_digits(e: str) -> str:
     d = _digits(e)
-    if len(d) == 13 and _valid_ean13(d):
+    if len(d) in (8, 13):
         return d
-    if len(d) == 14 and d[0] in ("0","1") and _valid_ean13(d[1:]):
+    if len(d) == 14 and d[0] in ("0", "1"):
         return d[1:]
     if len(d) == 12 and _valid_ean13("0" + d):
         return "0" + d
-    if len(d) == 8:
-        return d
-    return d
+    return ""
 
-SIZE_IN_NAME_RE = re.compile(
-    r'(\d+\s*[×x]\s*\d+[.,]?\d*\s?(?:g|kg|ml|l|tk)|\d+[.,]?\d*\s?(?:g|kg|ml|l|tk))\b',
+# --- Very robust DOM search for "Ribakood" / EAN and SKU ----------------
+def _ean_sku_from_dom(page) -> tuple[str, str]:
+    ean = ""
+    sku = ""
+    try:
+        got = page.evaluate(
+            """
+            () => {
+              const pickDigits = (txt) => {
+                if (!txt) return null;
+                const m = txt.replace(/\s+/g,' ').match(/(\d{8,14})/);
+                return m ? m[1] : null;
+              };
+
+              const nodes = Array.from(document.querySelectorAll(
+                'tr, .row, .product-attributes__row, .product-details__row, li, .attribute, .key-value, dl, dt, dd, .MuiGrid-root, div, span, p, th, td'
+              ));
+
+              let ean=null, sku=null;
+
+              for (const row of nodes) {
+                const txt = (row.textContent||'').replace(/\s+/g,' ').trim();
+                if (!txt) continue;
+
+                if (!ean && /\bribakood\b/i.test(txt)) {
+                  const d = pickDigits(txt);
+                  if (d) ean = d;
+                }
+
+                if (!sku && /(\bSKU\b|\bTootekood\b|\bArtikkel\b)/i.test(txt)) {
+                  const m = txt.match(/([A-Z0-9_-]{6,})/i);
+                  if (m) sku = m[1];
+                }
+
+                if (ean && sku) break;
+              }
+
+              if (!ean) {
+                const any = Array.from(document.querySelectorAll('div,span,p,li,td,dd,th'));
+                for (const el of any) {
+                  const t = (el.textContent||'').replace(/\s+/g,' ');
+                  if (/\bribakood\b/i.test(t)) {
+                    const d = pickDigits(t);
+                    if (d) { ean = d; break; }
+                  }
+                }
+              }
+
+              return { ean, sku };
+            }
+            """
+        )
+        if got:
+            ean = got.get("ean") or ""
+            sku = got.get("sku") or ""
+    except Exception:
+        pass
+
+    if not ean:
+        try:
+            html = page.content()
+            m = re.search(r"ribakood[\s\S]{0,400}?(\d{8,14})", html, re.I)
+            if m:
+                ean = m.group(1)
+        except Exception:
+            pass
+
+    e13 = _digits(ean)
+    if _valid_ean13(e13):
+        ean = e13
+    else:
+        if not re.fullmatch(r"\d{8,14}", e13 or ""):
+            ean = ""
+
+    return ean, (sku or "")
+
+def _pick_ean_from_html(html: str) -> str:
+    if not html: return ""
+    label_pat = re.compile(r"(?:\b(?:ean|gtin|ribakood|triipkood|barcode)\b)[^0-9]{0,200}([0-9]{8,14})", re.I | re.S)
+    m = label_pat.search(html)
+    return m.group(1) if m else ""
+
+# ---------------------------------------------------------------------------
+# Brand helpers
+# NOTE: include Käitleja/Kaitleja/Handler as brand-like keys (Selver-specific)
+_BRAND_KEY_RE = re.compile(
+    r"\b(käitleja|kaitleja|handler|br[äa]nd|brand|tootja|kaubamärk|valmistaja|manufacturer|producer)\b",
     re.I
 )
 
-# ---------------------- HTML (soup) helpers for PDP ---------------------------
+LEGAL_SUFFIX_RE = re.compile(r'\b(?:AS|OÜ|OU|UAB|LLC|JSC|AG|GmbH|Sp\.?\s*z\.?\s*o\.?\s*o\.?)\b\.?', re.I)
+BRAND_SPLIT_RE  = re.compile(r'[,\-–—]|(?:\s\|\s)')
 
-def parse_brand_mfr_size_from_tables(soup: BeautifulSoup, name: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
-    """Extract brand/manufacturer/size from proper spec tables (th/td, dt/dd)."""
-    brand = mfr = size_text = None
+def strip_legal_suffixes(s: str) -> str:
+    if not s: return s
+    s = LEGAL_SUFFIX_RE.sub('', s)
+    s = re.sub(r'\s{2,}', ' ', s).strip(' ,.-')
+    return s.strip()
 
-    def set_brand(v: str):
-        nonlocal brand
-        v = clean_brand(v)
-        if v and not brand:
-            brand = v
+def normalize_brand_case(b: str) -> str:
+    if not b: return b
+    if b.isupper() and len(b) <= 4:
+        return b  # short acronyms kept as upper
+    if b.isupper():
+        return b.title()
+    return b
 
-    def set_mfr(v: str):
-        nonlocal mfr
-        v = clean_manufacturer(v)
-        if v and not mfr:
-            mfr = v
-
-    def set_size(v: str):
-        nonlocal size_text
-        v = (v or "").strip()
-        if v and not size_text:
-            size_text = v
-
-    # th/td tables
-    for row in soup.select("table tr"):
-        th, td = row.find("th"), row.find("td")
-        if not th or not td:
-            continue
-        key = _norm_key(th.get_text(" ", strip=True))
-        val = td.get_text(" ", strip=True)
-        if key in ("kaubamark","brand","brand:","brand name","brandname","brand/kaubamark","bränd","brand/kaubamärk"):
-            set_brand(val)
-        elif key in ("tootja","manufacturer","valmistaja","producer"):
-            set_mfr(val)
-        elif any(k in key for k in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus")):
-            set_size(val)
-
-    # dl/dt/dd blocks
-    for dl in soup.select("dl"):
-        dts, dds = dl.find_all("dt"), dl.find_all("dd")
-        for i in range(min(len(dts), len(dds))):
-            key = _norm_key(dts[i].get_text(" ", strip=True))
-            val = dds[i].get_text(" ", strip=True)
-            if key in ("kaubamark","brand","bränd"):
-                set_brand(val)
-            elif key in ("tootja","manufacturer","valmistaja","producer"):
-                set_mfr(val)
-            elif any(k in key for k in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus")):
-                set_size(val)
-
-    if not size_text and name:
-        m = SIZE_IN_NAME_RE.search(name)
-        if m:
-            size_text = m.group(1).replace("L", "l")
-
-    return brand, mfr, size_text
-
-def parse_price_from_dom_or_meta(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
-    for sel in [
-        'meta[itemprop="price"]',
-        'meta[property="product:price:amount"]',
-        'meta[property="og:price:amount"]',
-    ]:
-        for tag in soup.select(sel):
-            val = (tag.get("content") or tag.get_text(strip=True) or "").strip()
-            if val:
-                return norm_price_str(val), "EUR"
-
-    tag = soup.find(attrs={"itemprop": "price"})
-    if tag:
-        val = (tag.get("content") or tag.get_text(strip=True) or "").strip()
-        if val:
-            return norm_price_str(val), "EUR"
-
-    m = MONEY_RE.search(soup.get_text(" ", strip=True))
-    if m:
-        return norm_price_str(m.group(1)), "EUR"
-    return None, None
-
-def extract_ext_id(url: str) -> str:
-    try:
-        parts = urlparse(url).path.rstrip("/").split("/")
-        if "p" in parts:
-            i = parts.index("p"); return parts[i+1]
-    except Exception:
-        pass
+def brand_from_name(title: str) -> str:
+    """
+    Heuristic: pick the token that looks like a brand from NAME/H1.
+    Works for '..., TERE, 400 ml' or '..., Tere - 400 ml'.
+    """
+    t = normspace(title or "")
+    if not t: return ""
+    parts = [p.strip() for p in BRAND_SPLIT_RE.split(t) if p and len(p.strip()) > 1]
+    parts = [p for p in parts if not SIMPLE_RE.search(p) and '%' not in p]
+    if not parts: return ""
+    for p in parts:
+        if p.isupper() and p.isalpha() and 2 <= len(p) <= 20:
+            return p
+    for p in parts:
+        if re.match(r'^[A-ZÄÖÕÜ][a-zäöõü]+(?:\s+[A-ZÄÖÕÜ][a-zäöõü]+)*$', p):
+            return p
     return ""
 
-def parse_jsonld_for_product_and_breadcrumbs_and_brand(soup: BeautifulSoup) -> Tuple[Dict[str,Any], List[str], Optional[str], Optional[str]]:
-    flat: Dict[str, Any] = {}
-    crumbs: List[str] = []
-    brand = None
-    manufacturer = None
-
-    for tag in soup.find_all("script", {"type": "application/ld+json"}):
-        try:
-            data = json.loads(tag.text)
-        except Exception:
+def _extract_brand_from_dom_texts(texts: List[str]) -> str:
+    for t in texts:
+        if not t or len(t) < 3:
             continue
-        seq = data if isinstance(data, list) else [data]
-        for d in seq:
-            at = d.get("@type")
-            at_list = at if isinstance(at, list) else [at]
-            if isinstance(d, dict) and ("Product" in at_list):
-                offers = d.get("offers")
-                if isinstance(offers, dict):
-                    if "price" in offers: flat["price"] = offers.get("price")
-                    if "priceCurrency" in offers: flat["currency"] = offers.get("priceCurrency")
-                elif isinstance(offers, list) and offers:
-                    of0 = offers[0]
-                    if isinstance(of0, dict):
-                        if "price" in of0: flat["price"] = of0.get("price")
-                        if "priceCurrency" in of0: flat["currency"] = of0.get("priceCurrency")
-                for k in ("gtin13","gtin","ean","ean13","barcode","sku","mpn"):
-                    if k in d and d.get(k):
-                        flat[k] = d.get(k)
-                if "brand" in d and not brand:
-                    v = d.get("brand")
-                    if isinstance(v, dict) and v.get("name"):
-                        brand = str(v["name"])
-                    elif isinstance(v, str):
-                        brand = v
-                if "manufacturer" in d and not manufacturer:
-                    v = d.get("manufacturer")
-                    if isinstance(v, dict) and v.get("name"):
-                        manufacturer = str(v["name"])
-                    elif isinstance(v, str):
-                        manufacturer = v
-            if isinstance(d, dict) and ("BreadcrumbList" in at_list):
-                try:
-                    items = d.get("itemListElement") or []
-                    names = []
-                    for it in items:
-                        if isinstance(it, dict):
-                            t = it.get("name") or (it.get("item") or {}).get("name")
-                            if not t and isinstance(it.get("item"), str):
-                                t = it.get("item").split("/")[-1]
-                            if t:
-                                names.append(str(t).strip())
-                    if names:
-                        crumbs = names
-                except Exception:
-                    pass
-    return flat, crumbs, (brand.strip() if brand else None), (manufacturer.strip() if manufacturer else None)
+        if _BRAND_KEY_RE.search(t):
+            # Use compiled pattern's split (compiled patterns cannot accept flags=)
+            parts_after_key = _BRAND_KEY_RE.split(t, maxsplit=1)
+            if isinstance(parts_after_key, list) and len(parts_after_key) >= 3:
+                # parts_after_key = [before, matched_key, after]
+                rest = parts_after_key[2]
+                parts = re.split(r"[:–—-]\s*", rest, maxsplit=1)
+                tail = parts[1] if len(parts) == 2 else ""
+            else:
+                parts = re.split(r"[:–—-]\s*", t, maxsplit=1)
+                tail = parts[1] if len(parts) == 2 else ""
+            cand = normspace(tail)
+            if cand:
+                # This is a string pattern, so case-insensitive flags are OK
+                cand = re.split(r"\b(Ribakood|SKU|Tootekood|Artikkel)\b",
+                                cand, maxsplit=1, flags=re.I)[0].strip()
+                if 2 <= len(cand) <= 80:
+                    return cand
+    return ""
 
-def parse_visible_for_ean(soup: BeautifulSoup) -> Optional[str]:
-    for el in soup.find_all(string=EAN_LABEL_RE):
-        seg = el.parent.get_text(" ", strip=True) if el and el.parent else str(el)
-        m = EAN13_RE.search(seg)
-        if m: return m.group(0)
-    m = EAN13_RE.search(soup.get_text(" ", strip=True))
-    return m.group(0) if m else None
+def extract_brand(page, prod_ld: dict) -> str:
+    # 1) JSON-LD brand/manufacturer
+    if prod_ld:
+        b = prod_ld.get("brand") or prod_ld.get("manufacturer")
+        name = ""
+        if isinstance(b, dict):
+            name = normspace(str(b.get("name") or ""))
+        elif isinstance(b, str):
+            name = normspace(b)
+        if name:
+            return normalize_brand_case(strip_legal_suffixes(name))
 
-def extract_brand_mfr_dom(page) -> Tuple[str, str]:
-    """
-    Read 'Kaubamärk' and 'Tootja' directly from hydrated DOM (dt/dd or th/td),
-    or the 'Veel tooted kaubamärgilt <Brand>' helper near the title.
-    This function is *strict* (no generic div scanning) to avoid false positives.
-    """
+    # 2) itemprop/meta brand/manufacturer
     try:
-        # Make sure "Tooteinfo" tab (if any) is visible so dt/dd exist
-        for label in ("Toote andmed", "Tooteinfo"):
-            try:
-                page.get_by_role("tab", name=re.compile(label, re.I)).click(timeout=400)
-            except Exception:
-                try:
-                    page.get_by_role("button", name=re.compile(label, re.I)).click(timeout=400)
-                except Exception:
-                    pass
-        page.mouse.wheel(0, 1200)
-        page.wait_for_timeout(200)
-
         got = page.evaluate("""
         () => {
-          const pick = (s) => (s || '').replace(/\\s+/g,' ').trim();
-          const norm = (s) => pick(s)
-            .toLowerCase()
-            .normalize('NFD').replace(/[\\u0300-\\u036f]/g,'')
-            .replaceAll('ä','a').replaceAll('ö','o').replaceAll('õ','o').replaceAll('ü','u')
-            .replaceAll('š','s').replaceAll('ž','z');
-
-          let brand = '', manufacturer = '';
-
-          const readSibling = (n) => {
-            if (!n) return '';
-            let sib = n.nextElementSibling;
-            if (sib) return pick(sib.textContent);
-            if (n.parentElement) {
-              const tds = n.parentElement.querySelectorAll('td');
-              if (tds && tds.length) return pick(tds[0].textContent);
-            }
-            return '';
-          };
-
-          // Strictly read from spec rows (th/td, dt/dd)
-          document.querySelectorAll('th, dt').forEach(n => {
-            const k = norm(n.textContent);
-            if (!brand && /(kaubamark|brand|br[aä]nd)/.test(k))  brand = readSibling(n);
-            if (!manufacturer && /(tootja|manufacturer|producer|valmistaja)/.test(k)) manufacturer = readSibling(n);
-          });
-
-          // Brand helper: "Veel tooted kaubamärgilt <a>Brand</a>"
-          if (!brand) {
-            const host = Array.from(document.querySelectorAll('div, p, section')).find(
-              el => /kaubam[aä]rgilt/i.test(el.textContent || '')
-            );
-            if (host) {
-              const a = host.querySelector('a');
-              if (a && pick(a.textContent).length > 1) brand = pick(a.textContent);
-            }
+          const sel = [
+            '[itemprop="brand"]','meta[itemprop="brand"]',
+            '[itemprop="manufacturer"]','meta[itemprop="manufacturer"]'
+          ];
+          for (const s of sel) {
+            const el = document.querySelector(s);
+            if (!el) continue;
+            const v = el.getAttribute('content') || el.textContent || '';
+            if (v && v.trim().length > 1) return v.trim();
           }
-
-          return { brand: pick(brand), manufacturer: pick(manufacturer) };
+          return null;
         }
         """)
-        return (got.get("brand") or "").strip(), (got.get("manufacturer") or "").strip()
+        if got:
+            name = normspace(str(got))
+            if name:
+                return normalize_brand_case(strip_legal_suffixes(name))
     except Exception:
-        return "", ""
+        pass
 
-# ---------------------------- collectors --------------------------------------
-
-def _is_full_pdp(u: Optional[str]) -> bool:
-    """Accept only full PDP URLs with '/tooted/.../p/<id>' path."""
-    if not u:
-        return False
+    # 3) Generic spec rows (includes Käitleja/Handler via _BRAND_KEY_RE)
     try:
-        p = urlparse(u).path
-        return "/tooted/" in p and "/p/" in p
+        texts: List[str] = page.evaluate("""
+          () => [...document.querySelectorAll('tr, .row, li, .attribute, .product-attributes__row, .product-details__row, .MuiGrid-root, dd, dt, div, span, p, th, td')]
+                .map(n => (n.textContent || '').replace(/\\s+/g,' ').trim())
+                .filter(Boolean)
+        """)
     except Exception:
-        return False
+        texts = []
+    brand = _extract_brand_from_dom_texts(texts)
+    if brand:
+        return normalize_brand_case(strip_legal_suffixes(brand))
 
-def collect_pdp_links(page) -> List[str]:
-    sels = [
-        ".js-product-container a.card__url",
-        "a[href*='/p/']",
-        "a[href^='/epood/ee/tooted/'][href*='/p/']",
-        "[data-test*='product'] a[href*='/p/']",
-        ".product-card a[href*='/p/']",
-    ]
-    hrefs: set[str] = set()
-    for sel in sels:
-        try:
-            for el in page.locator(sel).all():
-                h = normalize_href(el.get_attribute("href"))
-                if _is_full_pdp(h):  # only proper PDPs
-                    hrefs.add(h)
-        except Exception:
-            pass
-    return sorted(hrefs)
+    # 3b) Explicit Käitleja/Kaitleja/Handler fallback if the generic pass missed it
+    try:
+        handler = page.evaluate("""
+        () => {
+          const rows = Array.from(document.querySelectorAll('tr, .row, li, .attribute, .product-attributes__row, .product-details__row, dl, dt, dd, div, span, p, th, td'));
+          for (const n of rows) {
+            const t = (n.textContent || '').replace(/\\s+/g,' ').trim();
+            if (!t) continue;
+            if (/(\\b(käitleja|kaitleja|handler)\\b)/i.test(t)) {
+              const m = t.split(/[:–—-]/).slice(1).join(':').trim();
+              if (m && m.length <= 80) return m;
+            }
+          }
+          return null;
+        }
+        """)
+        if handler:
+            name = normspace(str(handler))
+            if name:
+                return normalize_brand_case(strip_legal_suffixes(name))
+    except Exception:
+        pass
 
-def collect_subcategory_links(page, base_cat_url: str) -> List[str]:
-    sels = [
-        "nav[aria-label='categories'] a[href^='/epood/ee/tooted/']",
-        "a[href^='/epood/ee/tooted/']:has(h2), a[href^='/epood/ee/tooted/']:has(h3)",
-        ".category-card a[href^='/epood/ee/tooted/']",
-        ".category, .subcategory a[href^='/epood/ee/tooted/']",
-        "a[href^='/epood/ee/tooted/']:not([href*='/p/'])",
-    ]
-    hrefs: set[str] = set()
-    for sel in sels:
-        try:
-            for el in page.locator(sel).all():
-                h = normalize_href(el.get_attribute("href"))
-                if h and "/epood/ee/tooted/" in h and "/p/" not in h:
-                    hrefs.add(h)
-        except Exception:
-            pass
-    hrefs.discard(base_cat_url.split("?")[0].split("#")[0])
-    return sorted(hrefs)
+    # 4) Fallback: infer from NAME/H1
+    try:
+        title = normspace(page.locator("h1").first.inner_text())
+    except Exception:
+        title = ""
+    bname = brand_from_name(title)
+    if bname:
+        return normalize_brand_case(strip_legal_suffixes(bname))
 
-# ---------------------------- crawler -----------------------------------------
+    return ""
 
-def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay: float) -> List[str]:
-    browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
-    ctx = browser.new_context(
-        locale="et-EE",
-        viewport={"width":1440, "height":900},
-        user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 (KHTML, like Gecko) "
-                    "Chrome/124 Safari/537.36"),
-    )
-
-    BLOCK = [
-        "googletagmanager.com","google-analytics.com","doubleclick.net",
-        "facebook.net","hotjar.com","newrelic.com","cookiebot.com","demdex.net","adobedtm.com",
-        "nr-data.net","js-agent.newrelic.com","typekit.net","use.typekit.net"
-    ]
-    def router(route, request):
-        host = urlparse(request.url).netloc.lower()
-        if any(host.endswith(d) for d in BLOCK):
-            return route.abort()
-        if request.resource_type in {"image","font","media","stylesheet","websocket","manifest"}:
-            return route.abort()
-        return route.continue_()
-    ctx.route("**/*", router)
-
-    page = ctx.new_page()
-    visited: set[str] = set()
-    q: List[str] = [normalize_href(cat_url) or cat_url]
-    all_pdps: List[str] = []
+# ---------------------------------------------------------------------------
+# DB preload
+def _db_connect():
+    dburl = os.getenv("DATABASE_URL")
+    if dburl:
+        u = urlparse(dburl)
+        user = u.username
+        password = u.password
+        host = u.hostname or "localhost"
+        port = int(u.port or 5432)
+        database = (u.path or "/postgres").lstrip("/")
+    else:
+        user = os.getenv("PGUSER")
+        password = os.getenv("PGPASSWORD")
+        host = os.getenv("PGHOST", "localhost")
+        port = int(os.getenv("PGPORT", "5432"))
+        database = os.getenv("PGDATABASE") or "postgres"
 
     try:
-        while q:
-            cat = q.pop(0)
-            if not cat or cat in visited:
-                continue
-            visited.add(cat)
+        import pg8000.dbapi as pg8000
+        conn = pg8000.connect(user=user, password=password, host=host, port=port, database=database)
+        return "pg8000", conn
+    except Exception as e_pg:
+        try:
+            import psycopg2
+            conn = psycopg2.connect(user=user, password=password, host=host, port=port, dbname=database, connect_timeout=10)
+            return "psycopg2", conn
+        except Exception as e_psy:
+            raise RuntimeError(f"DB connect failed (pg8000/psycopg2). pg8000: {e_pg}; psycopg2: {e_psy}")
 
+def preload_ext_ids_from_db() -> Set[str]:
+    known: Set[str] = set()
+    if not PRELOAD_DB:
+        return known
+    try:
+        driver, conn = _db_connect()
+    except Exception as e:
+        print(f"[selver] DB preload disabled (no driver/connection): {e}")
+        return known
+
+    q = PRELOAD_DB_QUERY.strip().rstrip(";")
+    if PRELOAD_DB_LIMIT and PRELOAD_DB_LIMIT > 0:
+        q = f"SELECT * FROM ({q}) q LIMIT {int(PRELOAD_DB_LIMIT)}"
+
+    try:
+        cur = conn.cursor()
+        cur.execute(q)
+        rows = cur.fetchall()
+        for r in rows:
+            if not r: continue
+            raw = str(r[0])
+            u = _clean_abs(raw)
+            if u:
+                known.add(u)
+                known.add(urlparse(u).path)
+        try:
+            cur.close(); conn.close()
+        except Exception:
+            pass
+        print(f"[selver] preloaded {len(known)} known ext_ids (abs+path) from DB (driver={driver})")
+    except Exception as e:
+        print(f"[selver] DB preload query failed: {type(e).__name__}: {e}")
+        try: conn.close()
+        except Exception: pass
+    return known
+
+# ------------------------ Skip / Only file handling -------------------------
+SKIP_EXTS: Set[str] = set()
+ONLY_EXTS: Set[str] = set()
+
+_ID_ONLY_RE = re.compile(r"^\s*(\d{3,})\s*$")  # plain numeric id like 123456
+
+def _normalize_ext_line(line: str) -> List[str]:
+    """Return a list of equivalent keys for matching: absolute URL and path."""
+    vals: List[str] = []
+    if not line: return vals
+    s = line.strip()
+    if not s: return vals
+
+    # If it's just digits, treat as /e/<id>
+    m = _ID_ONLY_RE.match(s)
+    if m:
+        s = f"/e/{m.group(1)}"
+
+    absu = _clean_abs(s)
+    if absu:
+        vals.append(absu)
+        vals.append(urlparse(absu).path)
+    else:
+        if s.startswith("/"):
+            absu = _clean_abs(urljoin(BASE, s))
+            if absu:
+                vals.append(absu)
+                vals.append(urlparse(absu).path)
+    return [v for v in dict.fromkeys(vals)]  # unique, preserve order
+
+def _load_ext_file(path: str) -> Set[str]:
+    out: Set[str] = set()
+    if not path: return out
+    if not os.path.exists(path):
+        print(f"[selver] skip/only file not found: {path}")
+        return out
+    with open(path, "r", encoding="utf-8") as fh:
+        for ln in fh:
+            for v in _normalize_ext_line(ln):
+                out.add(v)
+    return out
+
+def _should_process_url(u: str, seen: Set[str]) -> bool:
+    cu = _clean_abs(u)
+    if not cu:
+        return False
+    key = urlparse(cu).path
+    if ONLY_EXTS and (cu not in ONLY_EXTS) and (key not in ONLY_EXTS):
+        return False
+    if (cu in SKIP_EXTS) or (key in SKIP_EXTS):
+        return False
+    if (cu in seen) or (key in seen):
+        return False
+    return True
+
+# ---------------------------------------------------------------------------
+def accept_cookies(page):
+    for sel in [
+        "button:has-text('Nõustu')","button:has-text('Nõustun')",
+        "button:has-text('Accept')","button[aria-label*='accept']",
+        "button:has-text('Luba kõik')",
+    ]:
+        try:
+            btn = page.locator(sel)
+            if btn.count() > 0 and btn.first.is_enabled():
+                btn.first.click(timeout=2500)
+                time.sleep(0.2)
+                return
+        except Exception:
+            pass
+
+def safe_goto(page, url: str, timeout: Optional[int] = None) -> bool:
+    tmo = timeout or NAV_TIMEOUT_MS
+    for attempt in (1, 2):
+        try:
+            page.goto(url, wait_until="domcontentloaded", timeout=tmo)
+            accept_cookies(page)
             try:
-                page.goto(cat, timeout=45000, wait_until="domcontentloaded")
+                page.wait_for_load_state("networkidle", timeout=max(5000, int(tmo/2)))
             except Exception:
+                pass
+            page.wait_for_timeout(300)
+            return True
+        except Exception as e:
+            if attempt == 1:
+                time.sleep(0.6)
                 continue
-            auto_accept_overlays(page)
-            wait_for_hydration(page)
+            print(f"[selver] NAV FAIL {url} -> {type(e).__name__}: {e}")
+            return False
 
-            for sc in collect_subcategory_links(page, cat):
-                if sc not in visited:
-                    q.append(sc)
+def _wait_listing_ready(page):
+    try:
+        for _ in range(14):
+            if (page.locator("button:has-text('OSTA')").count() > 0 or
+                page.locator("a[href*='/toode/']").count() > 0 or
+                page.locator("a[href^='/'][href*='-']").count() > 0):
+                return
+            time.sleep(0.35)
+    except Exception:
+        pass
 
-            pages_seen = 0
-            last_total = -1
-            while True:
-                all_pdps.extend(collect_pdp_links(page))
+def _wait_pdp_ready(page):
+    for _ in range(36):
+        try:
+            if (page.locator("h1").count() > 0 or
+                page.locator("script[type='application/ld+json']").count() > 0 or
+                page.locator(":text-matches('Ribakood|Barcode|Штрихkod|Штрихкод','i')").count() > 0):
+                return
+            try:
+                page.wait_for_load_state("networkidle", timeout=1500)
+            except Exception:
+                pass
+            time.sleep(0.25)
+        except Exception:
+            time.sleep(0.25)
 
-                clicked = False
-                for sel in [
-                    "a[rel='next']",
-                    "button[aria-label*='Järgmine']",
-                    "button:has-text('Järgmine')",
-                    "button:has-text('Kuva rohkem')",
-                    "button:has-text('Laadi rohkem')",
-                    "a:has-text('Järgmine')",
-                ]:
-                    if page.locator(sel).count() > 0:
-                        try:
-                            page.locator(sel).first.click(timeout=3000)
-                            clicked = True
-                            page.wait_for_timeout(int(max(req_delay, 0.2) * 1000))
-                            break
-                        except Exception:
-                            pass
+def _expand_pdp_details(page):
+    for sel in [
+        "button:has-text('Lisainfo')","button:has-text('Toote info')",
+        "[role='tab']:has-text('Lisainfo')","[role='tab']:has-text('Toote info')",
+        "[data-toggle='collapse']","[aria-controls*='detail']",
+    ]:
+        try:
+            el = page.locator(sel).first
+            if el and el.count() > 0 and el.is_enabled():
+                el.click(timeout=1200)
+                time.sleep(0.15)
+        except Exception:
+            pass
 
-                if not clicked:
-                    before = len(collect_pdp_links(page))
-                    for _ in range(3):
-                        page.mouse.wheel(0, 2400)
-                        page.wait_for_timeout(int(max(req_delay, 0.2) * 1000))
-                    after = len(collect_pdp_links(page))
-                    if after <= before:
-                        break
-
-                pages_seen += 1
-                if page_limit and pages_seen >= page_limit:
-                    break
-                if len(all_pdps) == last_total:
-                    page.wait_for_timeout(int(max(req_delay, 0.2) * 1000))
-                last_total = len(all_pdps)
-
-    finally:
-        ctx.close(); browser.close()
-
-    seen, out = set(), []
-    for u in all_pdps:
-        if u and u not in seen and _is_full_pdp(u):
+# ---------------------------------------------------------------------------
+def _extract_category_links(page) -> List[str]:
+    _wait_listing_ready(page)
+    try:
+        hrefs = page.evaluate("""
+          [...document.querySelectorAll('a[href^="/"]')]
+            .map(a => a.getAttribute('href')).filter(Boolean)
+        """)
+    except Exception:
+        hrefs = []
+    out, seen = [], set()
+    for h in hrefs:
+        u = _clean_abs(h)
+        if not u: continue
+        path = urlparse(u).path
+        if ALLOWLIST_ONLY and STRICT_ALLOWLIST and not _in_allowlist(path):
+            continue
+        if _is_category_like_path(path) and u not in seen:
             seen.add(u); out.append(u)
     return out
 
-# --------------------------- PDP parser (reused page) -------------------------
+def discover_categories(page, start_urls: List[str]) -> List[str]:
+    queue = list(dict.fromkeys(start_urls))
+    seen_pages = set(queue)
+    cats: List[str] = []
+    while queue:
+        url = queue.pop(0)
+        if not safe_goto(page, url): continue
+        time.sleep(REQ_DELAY)
+        p = urlparse(url).path
+        if _is_category_like_path(p) and url not in cats: cats.append(url)
+        for u in _extract_category_links(page):
+            if u not in seen_pages:
+                seen_pages.add(u); queue.append(u)
+        if len(cats) > 2000: break
+    out, seen = [], set()
+    for u in cats:
+        if u not in seen:
+            seen.add(u); out.append(u)
+    return out
 
-def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
-    name = brand = manufacturer = size_text = image_url = ""
-    ean = sku = price = currency = None
-    category_path = ""
+# ---------------------------------------------------------------------------
+def _with_page(url: str, n: int) -> str:
+    parts = urlsplit(url)
+    qs = parse_qs(parts.query)
+    qs["page"] = [str(n)]
+    query = urlencode({k: v[0] for k, v in qs.items()}, doseq=False)
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, query, ""))
+
+def _max_page_number(page) -> int:
     try:
-        page.goto(url, timeout=60000, wait_until="domcontentloaded")
-        auto_accept_overlays(page)
-        wait_for_hydration(page)
-        try:
-            page.get_by_role("tab", name=re.compile(r"Toote (andmed|info)", re.I)).click(timeout=700)
-        except Exception:
+        maxn = page.evaluate("""
+          (() => {
+            const ns = [...document.querySelectorAll('a[href*="?page="]')].map(a => {
+              try { return parseInt(new URL(a.href).searchParams.get('page')||''); }
+              catch { return NaN; }
+            }).filter(n => !Number.isNaN(n));
+            return ns.length ? Math.max(...ns) : 1;
+          })()
+        """)
+        return int(maxn) if maxn and maxn > 0 else 1
+    except Exception:
+        return 1
+
+def _extract_product_hrefs_any_anchor(page) -> List[str]:
+    try:
+        hrefs = page.evaluate("""
+          (() => {
+            const rel = [...document.querySelectorAll('a[href^="/"]')]
+              .map(a => a.getAttribute('href')).filter(Boolean);
+            const abs = [...document.querySelectorAll('a[href^="https://www.selver.ee/"],a[href^="http://www.selver.ee/"],a[href^="//www.selver.ee/"]')]
+              .map(a => a.getAttribute('href')).filter(Boolean);
+            const set = new Set([...rel, ...abs]);
+            document.querySelectorAll('[data-href^="/"]').forEach(el => set.add(el.getAttribute('data-href')));
+            return [...set];
+          })()
+        """)
+    except Exception:
+        hrefs = []
+    out = []
+    for h in hrefs:
+        u = _clean_abs(h)
+        if u and _is_selver_product_like(u):
+            out.append(u)
+    return list(dict.fromkeys(out))
+
+def _extract_product_urls_from_listing_jsonld(page) -> List[str]:
+    urls: List[str] = []
+    try:
+        scripts = page.locator("script[type='application/ld+json']")
+        for i in range(min(20, scripts.count())):
+            raw = scripts.nth(i).inner_text()
             try:
-                page.get_by_role("button", name=re.compile(r"Toote (andmed|info)", re.I)).click(timeout=700)
+                obj = json.loads(raw)
             except Exception:
-                pass
-        page.wait_for_timeout(int(max(req_delay, 0.4)*1000))
+                continue
+            items = obj if isinstance(obj, list) else [obj]
+            for b in items:
+                if not isinstance(b, dict): continue
+                t = (b.get("@type") or "")
+                t_low = t.lower() if isinstance(t, str) else ""
+                if "product" in t_low and b.get("url"):
+                    u = _clean_abs(b["url"])
+                    if u and _is_selver_product_like(u):
+                        urls.append(u)
+    except Exception:
+        pass
+    return list(dict.fromkeys(urls))
 
-        # First try DOM (strict) for brand/manufacturer to avoid pollution
-        b_dom, m_dom = extract_brand_mfr_dom(page)
+def _extract_product_hrefs(page) -> List[str]:
+    links = _extract_product_hrefs_any_anchor(page)
+    if links:
+        return links
+    jlinks = _extract_product_urls_from_listing_jsonld(page)
+    if jlinks:
+        print(f"[selver]     fallback JSON-LD yielded {len(jlinks)} links")
+        return jlinks
+    return []
 
+def collect_product_links_from_listing(page, seed_url: str, seen_ext_ids: Set[str]) -> Tuple[Set[str], Dict[str, str]]:
+    links: Set[str] = set()
+    link2listing: Dict[str, str] = {}
+
+    _wait_listing_ready(page)
+    max_pages = _max_page_number(page)
+    if PAGE_LIMIT > 0:
+        max_pages = min(max_pages, PAGE_LIMIT)
+
+    for n in range(1, max_pages + 1):
+        url = seed_url if n == 1 else _with_page(seed_url, n)
+        if not safe_goto(page, url): continue
+        _wait_listing_ready(page)
+        time.sleep(REQ_DELAY)
+
+        page_links = _extract_product_hrefs(page)
+        page_links = [u for u in page_links if _should_process_url(u, seen_ext_ids)]
+        print(f"[selver]   page {n}: discovered {len(page_links)} candidate links (after filters)")
+        for u in page_links:
+            cu = _clean_abs(u)
+            if cu and cu not in links:
+                links.add(cu); link2listing[cu] = url
+
+    if links:
+        sample = list(sorted(links))[:5]
+        print(f"[selver]   harvested {len(links)} PDP links; sample: {sample}")
+    else:
+        print("[selver]   no PDP links found on listing.")
+    return links, link2listing
+
+# ---------------------------------------------------------------------------
+def jsonld_all(page) -> List[dict]:
+    out = []
+    try:
+        scripts = page.locator("script[type='application/ld+json']")
+        for i in range(min(12, scripts.count())):
+            raw = scripts.nth(i).inner_text()
+            try:
+                obj = json.loads(raw)
+                if isinstance(obj, list): out.extend([x for x in obj if isinstance(x, dict)])
+                elif isinstance(obj, dict): out.append(obj)
+            except Exception:
+                continue
+    except Exception:
+        pass
+    return out
+
+def jsonld_pick_product(blocks: List[dict]) -> dict:
+    for b in blocks:
+        t = (b.get("@type") or "")
+        t_low = t.lower() if isinstance(t, str) else ""
+        if "product" in t_low or any(k in b for k in ("gtin13","gtin","sku","brand")):
+            return b
+    return {}
+
+def jsonld_pick_breadcrumbs(blocks: List[dict]) -> List[str]:
+    for b in blocks:
+        t = (b.get("@type") or "").lower()
+        if t == "breadcrumblist" and "itemListElement" in b:
+            try:
+                return [el["item"]["name"].strip()
+                        for el in b["itemListElement"]
+                        if isinstance(el, dict) and "item" in el and "name" in el["item"]]
+            except Exception:
+                continue
+    return []
+
+# ---------------------------------------------------------------------------
+def extract_price(page) -> tuple[float, str]:
+    for sel in ["text=/€/","span:has-text('€')","div:has-text('€')"]:
+        try:
+            node = page.locator(sel).first
+            if node and node.count() > 0:
+                m = re.search(r"(\d+(?:[.,]\d+)?)\s*€", node.inner_text())
+                if m: return float(m.group(1).replace(",", ".")), "EUR"
+        except Exception:
+            pass
+    return 0.0, "EUR"
+
+def extract_ean_and_sku(page) -> tuple[str, str]:
+    # 1) JSON-LD
+    try:
+        blocks = jsonld_all(page)
+        prod = jsonld_pick_product(blocks)
+        if prod:
+            e = _digits(str(prod.get("gtin13") or prod.get("gtin") or ""))
+            s = normspace(str(prod.get("sku") or ""))
+            if _valid_ean13(e):
+                return e, s
+    except Exception:
+        pass
+
+    # 2) itemprop
+    try:
+        got = page.evaluate("""
+        () => {
+          const pick = (sel) => {
+            const el = document.querySelector(sel);
+            if (!el) return null;
+            return el.getAttribute('content') || el.textContent || null;
+          };
+          return {
+            gtin13: pick('[itemprop="gtin13"], meta[itemprop="gtin13"]'),
+            gtin:   pick('[itemprop="gtin"], meta[itemprop="gtin"]'),
+            sku:    pick('[itemprop="sku"], meta[itemprop="sku"], meta[property="product:retailer_item_id"]')
+          };
+        }
+        """)
+        if got:
+            e = _digits(got.get("gtin13") or got.get("gtin") or "")
+            s = normspace(got.get("sku") or "")
+            if _valid_ean13(e):
+                return e, s
+    except Exception:
+        pass
+
+    # 3) DOM heuristic
+    e_dom, s_dom = _ean_sku_from_dom(page)
+    if e_dom or s_dom:
+        return e_dom, s_dom
+
+    # 4) HTML regex
+    try:
         html = page.content()
-        soup = BeautifulSoup(html, "lxml")
+        e_html = _pick_ean_from_html(html)
+        if _valid_ean13(_digits(e_html)):
+            return _digits(e_html), s_dom or ""
+    except Exception:
+        pass
 
-        h1 = soup.find("h1")
-        if h1:
-            name = h1.get_text(strip=True)
+    return "", s_dom or ""
 
-        ogimg = soup.find("meta", {"property":"og:image"})
-        if ogimg and ogimg.get("content"):
-            image_url = normalize_href(ogimg.get("content")) or ""
-        else:
-            img = soup.find("img")
-            if img:
-                image_url = normalize_href(img.get("src") or img.get("data-src") or "") or ""
+def breadcrumbs_dom(page) -> List[str]:
+    for sel in ["nav ol li a","nav.breadcrumbs a","ol.breadcrumbs a"]:
+        try:
+            items = page.locator(sel)
+            if items.count() > 0:
+                vals = [normspace(items.nth(i).inner_text()) for i in range(items.count())]
+                vals = [v for v in vals if v and v.lower() != "e-selver"]
+                if vals: return vals
+        except Exception:
+            pass
+    return []
 
-        flat_ld, crumbs_ld, brand_ld, manufacturer_ld = parse_jsonld_for_product_and_breadcrumbs_and_brand(soup)
-        if flat_ld.get("price") and not price:
-            price = norm_price_str(str(flat_ld.get("price")))
-            currency = currency or (flat_ld.get("currency") or "EUR")
-        for k in ("gtin13","ean","ean13","barcode","gtin"):
-            if not ean and flat_ld.get(k):
-                ean = str(flat_ld.get(k))
-        for k in ("sku","mpn"):
-            if not sku and flat_ld.get(k):
-                sku = str(flat_ld.get(k))
-        brand = clean_brand(brand_ld or b_dom or "")
-        manufacturer = clean_manufacturer(manufacturer_ld or m_dom or "")
+def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optional[dict]:
+    _wait_pdp_ready(page)
+    _expand_pdp_details(page)
+    ext_id = canonical_from_page(page) or product_url_hint
+    if not ext_id: return None
+    # Guard: never ingest careers pages etc.
+    if "vabad-ametikohad" in (ext_id or ""):
+        return None
 
-        # breadcrumbs
-        crumbs_dom = [a.get_text(strip=True) for a in soup.select(
-            "nav[aria-label='breadcrumb'] a, .breadcrumbs a, .breadcrumb a, ol.breadcrumb a, nav.breadcrumbs a"
-        ) if a.get_text(strip=True)]
-        crumbs = crumbs_dom or crumbs_ld
-        if crumbs:
-            crumbs = [c for c in crumbs if c]
-            category_path = " > ".join(crumbs[-5:])
+    blocks = jsonld_all(page)
+    prod_ld = jsonld_pick_product(blocks)
+    crumbs_ld = jsonld_pick_breadcrumbs(blocks)
 
-        # spec table fallback (soup)
-        if not brand or not manufacturer or not size_text:
-            b2, m2, s2 = parse_brand_mfr_size_from_tables(soup, name or "")
-            brand = brand or clean_brand(b2 or "")
-            manufacturer = manufacturer or clean_manufacturer(m2 or "")
-            size_text = size_text or (s2 or "")
+    name = normspace(prod_ld.get("name") or "") if prod_ld else ""
+    if not name:
+        try: name = normspace(page.locator("h1").first.inner_text())
+        except Exception: name = ""
+    if not name: return None
 
-        if not ean or not sku:
-            for it in ("gtin13","gtin","ean","ean13","barcode","sku","mpn"):
-                meta = soup.find(attrs={"itemprop": it})
-                if meta:
-                    val = (meta.get("content") or meta.get_text(strip=True))
-                    if not val: continue
-                    if it in ("gtin13","gtin","ean","ean13","barcode") and not ean:
-                        ean = val
-                    if it in ("sku","mpn") and not sku:
-                        sku = val
+    # Brand
+    brand = extract_brand(page, prod_ld)
+    brand = normalize_brand_case(strip_legal_suffixes(brand)) if brand else ""
 
-        if not brand:
-            mbrand = soup.find("meta", {"property":"product:brand"})
-            if mbrand and mbrand.get("content"):
-                brand = clean_brand(mbrand["content"].strip())
+    # EAN & SKU
+    ean, sku = "", ""
+    if prod_ld:
+        ean = _digits(str(prod_ld.get("gtin13") or prod_ld.get("gtin") or "")) or ""
+        sku = normspace(str(prod_ld.get("sku") or ""))
+    e2, s2 = extract_ean_and_sku(page)
+    ean = ean or e2
+    sku = sku or s2
 
-        if not price:
-            p, c = parse_price_from_dom_or_meta(soup)
-            price, currency = p or price, c or currency
+    price, currency = 0.0, "EUR"
+    if prod_ld and "offers" in prod_ld:
+        offers = prod_ld["offers"]
+        if isinstance(offers, list) and offers: offers = offers[0]
+        try:
+            price = float(str(offers.get("price")).replace(",", "."))
+            currency = offers.get("priceCurrency") or currency
+        except Exception: pass
+    if price == 0.0:
+        price, currency = extract_price(page)
 
-        # Global JS state fallback for anything missing
-        if not (brand and manufacturer):
-            for glb in [
-                "__NUXT__", "__NEXT_DATA__", "APP_STATE", "dataLayer",
-                "Storefront", "__APOLLO_STATE__", "APOLLO_STATE",
-                "apolloState", "__INITIAL_STATE__", "__PRELOADED_STATE__", "__STATE__"
-            ]:
-                try:
-                    data = page.evaluate(f"window['{glb}']")
-                except Exception:
-                    data = None
-                if not data:
-                    continue
-                got = deep_find_kv(data, { *EAN_KEYS, *SKU_KEYS, *PRICE_KEYS, *CURR_KEYS, *BRAND_KEYS })
-                if not ean:
-                    for k in ("gtin13","ean","ean13","barcode","gtin"):
-                        if got.get(k):
-                            ean = got.get(k); break
-                if not sku:
-                    for k in ("sku","mpn","code","id"):
-                        if got.get(k):
-                            sku = got.get(k); break
-                if not price:
-                    for k in ("price","currentprice","priceamount","value","unitprice"):
-                        if got.get(k):
-                            price = norm_price_str(got.get(k)); break
-                if not currency:
-                    for k in ("currency","pricecurrency","currencycode","curr"):
-                        if got.get(k):
-                            currency = got.get(k); break
-                if not brand and got.get("brand"):
-                    cb = clean_brand(got.get("brand"))
-                    if cb:
-                        brand = cb
-                if not manufacturer and got.get("manufacturer"):
-                    cm = clean_manufacturer(got.get("manufacturer"))
-                    if cm:
-                        manufacturer = cm
+    if not price or price <= 0:
+        price, currency = 0.0, currency or "EUR"
 
-        if not ean:
-            e2 = parse_visible_for_ean(soup)
-            if e2: ean = e2
+    crumbs = crumbs_ld or breadcrumbs_dom(page)
+    cat_path = " / ".join(crumbs); cat_leaf = crumbs[-1] if crumbs else ""
+    size_text = guess_size_from_title(name)
 
-        if not currency and price:
-            currency = "EUR"
-
-    except PWTimeout:
-        name = name or ""
-
-    if ean:
-        ean = normalize_ean_digits(ean)
-    brand = clean_brand(brand)
-    manufacturer = clean_manufacturer(manufacturer)
-
-    ext_id = extract_ext_id(url)
-    src_url = canonical_url(page) or url.split("?")[0]
+    ean_norm = normalize_ean_digits(ean)
+    src_url  = ext_id
 
     return {
-        "store_chain": STORE_CHAIN,
-        "store_name": STORE_NAME,
-        "store_channel": STORE_CHANNEL,
         "ext_id": ext_id,
-        "ean_raw": (ean or "").strip(),
-        "sku_raw": (sku or "").strip(),
-        "name": (name or "").strip(),
-        "size_text": (size_text or "").strip(),
-        "brand": (brand or "").strip(),
-        "manufacturer": (manufacturer or "").strip(),
-        "price": (str(price) if price is not None else "").strip(),
-        "currency": (currency or "").strip(),
-        "image_url": (image_url or "").strip(),
-        "category_path": (category_path or "").strip(),
-        "category_leaf": category_path.split(" > ")[-1] if category_path else "",
         "source_url": src_url,
+        "name": name,
+        "brand": brand,
+        "ean_raw": ean,
+        "ean_norm": ean_norm,
+        "sku_raw": sku,
+        "size_text": size_text,
+        "price": f"{price:.2f}",
+        "currency": currency or "EUR",
+        "category_path": cat_path,
+        "category_leaf": cat_leaf,
     }
 
-# ------------------------------- IO -------------------------------------------
+# ---------------------------------------------------------------------------
+BLOCK_TYPES = {"image", "font", "media", "stylesheet", "websocket", "manifest"}
+BLOCK_ACTIVE_TYPES = {"script", "xhr", "fetch", "eventsource"}
 
-def read_categories(path: str) -> List[str]:
-    with open(path, "r", encoding="utf-8") as f:
-        return [ln.strip() for ln in f if ln.strip() and not ln.strip().startswith("#")]
+def _router(route, request):
+    try:
+        url = request.url
+        host = urlparse(url).netloc.lower()
+        rtype = request.resource_type
+        method = (getattr(request, "method", None) or "GET").upper()
+        if "service_worker" in url or "sw_iframe" in url: return route.abort()
+        if host.endswith("selver.ee"): return route.continue_()
+        if method == "OPTIONS": return route.abort()
+        if rtype in BLOCK_TYPES or rtype in BLOCK_ACTIVE_TYPES: return route.abort()
+        if any(host == d or host.endswith("." + d) for d in BLOCK_HOSTS): return route.abort()
+        return route.continue_()
+    except Exception:
+        return route.continue_()
 
-def _read_id_file(path: Optional[str]) -> tuple[set[str], set[str]]:
-    urls: set[str] = set()
-    ids: set[str] = set()
-    if not path or not os.path.exists(path):
-        return urls, ids
-    with open(path, "r", encoding="utf-8") as f:
-        for ln in f:
-            s = ln.strip()
-            if not s:
-                continue
-            if s.startswith("http"):
-                u = s.split("?")[0].split("#")[0]
-                urls.add(u)
-                xid = extract_ext_id(u)
-                if xid:
-                    ids.add(xid)
-            else:
-                ids.add(s)
-    return urls, ids
-
-def read_skip_file(path: Optional[str]) -> tuple[set[str], set[str]]:
-    return _read_id_file(path)
-
-def read_only_file(path: Optional[str]) -> tuple[set[str], set[str]]:
-    return _read_id_file(path)
-
-def write_csv(rows: List[Dict[str,str]], out_path: str) -> None:
-    fields = [
-        "store_chain","store_name","store_channel",
-        "ext_id","ean_raw","sku_raw","name","size_text","brand","manufacturer",
-        "price","currency","image_url","category_path","category_leaf","source_url",
+# ---------------------------------------------------------------------------
+def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
+    if not listing_url or not safe_goto(page, listing_url): return False
+    _wait_listing_ready(page); time.sleep(0.2)
+    path = _strip_linecol(urlparse(product_url).path)
+    es = "/e-selver" + path if not path.startswith("/e-selver/") else path
+    # broaden selector set to catch single-segment slugs inside product cards
+    sels = [
+        f"a[href$='{path}']",
+        f"a[href$='{path}/']",
+        f"a[href$='{es}']",
+        f"a[href$='{es}/']",
+        "a[href*='/toode/']",
+        "div[class*='product'] a[href^='/']",
+        "a[href^='/'][href*='-']"
     ]
-    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True
-    )
-    new_file = not os.path.exists(out_path)
-    with open(out_path, "a", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=fields)
-        if new_file:
-            w.writeheader()
-        for r in rows:
-            w.writerow({k: r.get(k,"") for k in fields})
+    for sel in sels:
+        a = page.locator(sel).first
+        try:
+            if a.count() > 0 and a.is_visible():
+                a.click(timeout=5000)
+                for _ in range(24):
+                    up = urlparse(page.url).path.lower()
+                    if _is_selver_product_like(urljoin(BASE, up)) or page.locator("h1").count() > 0: break
+                    time.sleep(0.25)
+                _wait_pdp_ready(page); return True
+        except Exception:
+            continue
+    return False
 
-# -------------------------------- main ----------------------------------------
+# ---------------------------------------------------------------------------
+def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_ext_ids: Set[str]) -> int:
+    wrote = 0
+    if not safe_goto(page, seed_url): return 0
+    _wait_listing_ready(page)
+    max_pages = _max_page_number(page)
+    if PAGE_LIMIT > 0: max_pages = min(max_pages, PAGE_LIMIT)
 
-def main():
-    ap = argparse.ArgumentParser(add_help=True)
-    ap.add_argument("--cats-file", required=True, help="File with category URLs (one per line)")
-    ap.add_argument("--page-limit", default="0")
-    ap.add_argument("--max-products", default="0")
-    ap.add_argument("--headless", default="1")
-    ap.add_argument("--req-delay", default="0.5")
-    ap.add_argument("--output-csv", default=os.environ.get("OUTPUT_CSV","data/rimi_products.csv"))
-    ap.add_argument("--skip-ext-file", default=os.environ.get("SKIP_EXT_FILE",""))
-    ap.add_argument("--only-ext-file", default=os.environ.get("ONLY_EXT_FILE",""))
-    args = ap.parse_args()
+    for n in range(1, max_pages + 1):
+        url = seed_url if n == 1 else _with_page(seed_url, n)
+        if not safe_goto(page, url): continue
+        _wait_listing_ready(page); time.sleep(REQ_DELAY)
 
-    page_limit   = int(args.page_limit or "0")
-    max_products = int(args.max_products or "0")
-    headless     = (str(args.headless or "1") != "0")
-    req_delay    = float(args.req_delay or "0.5")
-    cats         = read_categories(args.cats_file)
+        hrefs = _extract_product_hrefs(page)
+        hrefs = [h for h in hrefs if _should_process_url(h, seen_ext_ids)]
+        print(f"[selver]   page {n}: discovered {len(hrefs)} candidate links (after filters)")
 
-    skip_urls, skip_ext = read_skip_file(args.skip_ext_file)
-    only_urls, only_ext = read_only_file(args.only_ext_file)
+        for href in hrefs:
+            if not _should_process_url(href, seen_ext_ids):
+                continue
 
-    all_pdps: List[str] = []
-    with sync_playwright() as pw:
-        # 1) collect PDP URLs from categories
-        for cat in cats:
-            try:
-                print(f"[rimi] {cat}")
-                pdps = crawl_category(pw, cat, page_limit, headless, req_delay)
-                all_pdps.extend(pdps)
-                if max_products and len(all_pdps) >= max_products:
-                    break
-            except Exception as e:
-                print(f"[rimi] category error: {cat} → {e}", file=sys.stderr)
-
-        # dedupe keep order and ensure full PDP paths only
-        seen, q = set(), []
-        for u in all_pdps:
-            if u not in seen and _is_full_pdp(u):
-                seen.add(u); q.append(u)
-
-        # 2a) ONLY filter (if provided)
-        if only_urls or only_ext:
-            q_only = []
-            for u in q:
-                xid = extract_ext_id(u)
-                if (u in only_urls) or (xid and xid in only_ext):
-                    q_only.append(u)
-            print(f"[rimi] ONLY filter active: {len(q_only)} URLs retained (of {len}(q))")
-            q = q_only
-
-        # 2b) SKIP filter
-        if skip_urls or skip_ext:
-            q2 = []
-            skipped = 0
-            for u in q:
-                if (u in skip_urls) or (extract_ext_id(u) in skip_ext):
-                    skipped += 1
+            navigated = safe_goto(page, href)
+            if not navigated:
+                navigated = open_product_via_click(page, url, href)
+                if not navigated:
                     continue
-                q2.append(u)
-            print(f"[rimi] skip filter: {skipped} URLs skipped (already priced/complete).")
-            q = q2
 
-        # 3) single browser/context/page for all PDPs
-        browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
-        ctx = browser.new_context(
-            locale="et-EE",
-            viewport={"width":1440,"height":900},
-            user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"),
-        )
-        page = ctx.new_page()
+            _wait_pdp_ready(page)
+            row = _extract_row_from_pdp(page, href)
+            if row:
+                ext_id = _clean_abs(row["ext_id"]) or row["ext_id"]
+                key = urlparse(ext_id).path
+                if ext_id not in seen_ext_ids and key not in seen_ext_ids:
+                    writer.writerow(row)
+                    seen_ext_ids.add(ext_id); seen_ext_ids.add(key)
+                    wrote += 1
 
-        rows, total = [], 0
-        for i, url in enumerate(q, 1):
             try:
-                row = parse_pdp_with_page(page, url, req_delay)
-                rows.append(row); total += 1
-                if len(rows) >= 120:
-                    write_csv(rows, args.output_csv); rows = []
+                page.go_back(wait_until="domcontentloaded", timeout=NAV_TIMEOUT_MS)
+                _wait_listing_ready(page)
             except Exception:
-                traceback.print_exc()
-            if max_products and total >= max_products:
-                break
+                safe_goto(page, url); _wait_listing_ready(page)
+            time.sleep(0.2)
 
-        if rows:
-            write_csv(rows, args.output_csv)
+    return wrote
 
-        ctx.close(); browser.close()
+# NEW: process ONLY list PDPs directly (skips categories entirely)
+def _process_only_list(page, writer: csv.DictWriter, seen_ext_ids: Set[str]) -> int:
+    wrote = 0
+    # Normalize every entry to an absolute, dedup (prevents invalid URL nav like "/ananass-kg")
+    pdps_abs: List[str] = []
+    seen_abs: Set[str] = set()
+    for u in ONLY_EXTS:
+        if not _is_selver_product_like(u):
+            continue
+        cu = _clean_abs(u)
+        if not cu:
+            continue
+        if cu in seen_abs:
+            continue
+        seen_abs.add(cu)
+        pdps_abs.append(cu)
 
-    print(f"[rimi] wrote {total} product rows.")
+    print(f"[selver] ONLY list present → processing {len(pdps_abs)} PDPs directly")
 
+    for i, pu in enumerate(sorted(pdps_abs), 1):
+        if not _should_process_url(pu, seen_ext_ids):
+            continue
+        got = safe_goto(page, pu)
+        if not got:
+            # best-effort fallback (rarely needed)
+            got = open_product_via_click(page, "", pu)
+            if not got:
+                continue
+        time.sleep(REQ_DELAY)
+        row = _extract_row_from_pdp(page, pu)
+        if row:
+            ext_id = _clean_abs(row["ext_id"]) or row["ext_id"]
+            key = urlparse(ext_id).path
+            if ext_id not in seen_ext_ids and key not in seen_ext_ids:
+                writer.writerow(row)
+                seen_ext_ids.add(ext_id); seen_ext_ids.add(key)
+                wrote += 1
+        if (i % 25) == 0:
+            try:
+                # placeholder to keep symmetry with flush points elsewhere
+                writer.fieldnames
+            except Exception:
+                pass
+    return wrote
+
+# ---------------------------- CLI & main ------------------------------------
+def _parse_cli():
+    p = argparse.ArgumentParser(description="Selver category crawler (Playwright)")
+    p.add_argument("--skip-ext-file", dest="skip_file", help="File with ext_ids/URLs to skip", default=None)
+    p.add_argument("--skip-ids-file", dest="skip_file_alias", help="Alias of --skip-ext-file", default=None)
+    p.add_argument("--only-ext-file", dest="only_file", help="File with ext_ids/URLs to process exclusively", default=None)
+    p.add_argument("--cats-file", dest="cats_file", help="Categories file (overrides CATEGORIES_FILE env)", default=None)
+    p.add_argument("--page-limit", dest="page_limit", type=int, default=None)
+    p.add_argument("--req-delay", dest="req_delay", type=float, default=None)
+    p.add_argument("--output-csv", dest="output_csv", default=None)
+    return p.parse_args()
+
+def crawl():
+    os.makedirs(os.path.dirname(OUTPUT) or ".", exist_ok=True)
+    dbg_dir = "data/selver_debug"; os.makedirs(dbg_dir, exist_ok=True)
+
+    print(f"[selver] writing CSV -> {OUTPUT}")
+    with open(OUTPUT, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=[
+            "ext_id","source_url","name","brand","ean_raw","ean_norm","sku_raw",
+            "size_text","price","currency","category_path","category_leaf"
+        ])
+        w.writeheader()
+
+        seen_ext_ids: Set[str] = preload_ext_ids_from_db() if PRELOAD_DB else set()
+
+        with sync_playwright() as p:
+            print("[selver] launching chromium (headless)")
+            browser = p.chromium.launch(headless=True, args=[
+                "--disable-blink-features=AutomationControlled","--no-sandbox","--disable-dev-shm-usage",
+            ])
+            context = browser.new_context(
+                locale="et-EE",
+                viewport={"width": 1366, "height": 900},
+                user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                            "AppleWebKit/537.36 (KHTML, like Gecko) "
+                            "Chrome/124.0.0.0 Safari/537.36"),
+                extra_http_headers={"Accept-Language": "et-EE,et;q=0.9,en-US;q=0.8,en;q=0.7"},
+                ignore_https_errors=True,
+                service_workers="block",
+            )
+
+            context.add_init_script("""
+              (function(){
+                try { window.fbq = window.fbq || function(){}; } catch(e){}
+                try { window.dataLayer = window.dataLayer || []; } catch(e){}
+                window.addEventListener('error',  function(e){ try{ e.stopImmediatePropagation&&e.stopImmediatePropagation(); }catch(_){} }, true);
+                window.addEventListener('unhandledrejection', function(e){ try{ e.preventDefault&&e.preventDefault(); }catch(_){} }, true);
+              })();
+            """)
+
+            if USE_ROUTER:
+                context.route("**/*", _router)
+
+            page = context.new_page()
+            page.set_default_navigation_timeout(NAV_TIMEOUT_MS)
+            page.set_default_timeout(10000)
+
+            page.on("pageerror", lambda e: None)
+            page.on("requestfailed", lambda r: None)
+
+            if LOG_CONSOLE == "all":
+                page.on("console", lambda m: print(f"[pw] {m.type}: {m.text}"))
+            elif LOG_CONSOLE == "warn":
+                def _warn_err_only(m):
+                    if m.type in ("warning","error"):
+                        t = (m.text or "").replace("\n"," ")[:800]
+                        print(f"[pw] {m.type}: {t}")
+                page.on("console", _warn_err_only)
+
+            rows_written = 0
+
+            # --- NEW: short-circuit when ONLY list is provided ---
+            if ONLY_EXTS:
+                print(f"[selver] ONLY_EXTS loaded: {len(ONLY_EXTS)} entries")
+                try:
+                    rows_written = _process_only_list(page, w, seen_ext_ids)
+                finally:
+                    try: browser.close()
+                    except Exception: pass
+                print(f"[selver] wrote {rows_written} product rows (ONLY mode).")
+                return
+
+            print("[selver] collecting seeds…")
+            file_seeds: List[str] = []
+            if os.path.exists(CATEGORIES_FILE):
+                with open(CATEGORIES_FILE, "r", encoding="utf-8") as cf:
+                    for ln in cf:
+                        ln = (ln or "").strip()
+                        if ln and not ln.startswith("#"):
+                            u = _clean_abs(ln)
+                            if u: file_seeds.append(u)
+
+            if file_seeds:
+                seeds: List[str] = list(dict.fromkeys(file_seeds))
+                print(f"[selver] using {len(seeds)} file-driven seeds from {CATEGORIES_FILE}")
+            else:
+                seeds = [urljoin(BASE, pth) for pth in STRICT_ALLOWLIST]
+                print(f"[selver] no file seeds found → falling back to STRICT_ALLOWLIST ({len(seeds)})")
+
+            cats = seeds if ALLOWLIST_ONLY else discover_categories(page, seeds)
+
+            print(f"[selver] Categories to crawl: {len(cats)}")
+            for cu in cats[:40]: print(f"[selver]   {cu}")
+            if len(cats) > 40: print(f"[selver]   … (+{len(cats)-40} more)")
+
+            if CLICK_PRODUCTS:
+                for ci, cu in enumerate(cats, 1):
+                    try:
+                        wrote = collect_write_by_clicking(page, cu, w, seen_ext_ids)
+                        rows_written += wrote
+                        print(f"[selver] {cu} → +{wrote} rows (click mode, total: {rows_written})")
+                        if (ci % 1) == 0: f.flush()
+                    except Exception:
+                        try: page.screenshot(path=f"{dbg_dir}/click_mode_fail_{ci}.png", full_page=True)
+                        except Exception: pass
+                        continue
+            else:
+                product_urls: Set[str] = set()
+                prod2listing: Dict[str, str] = {}
+                for ci, cu in enumerate(cats, 1):
+                    if not safe_goto(page, cu):
+                        try: page.screenshot(path=f"{dbg_dir}/cat_nav_fail_{ci}.png", full_page=True)
+                        except Exception: pass
+                        continue
+                    time.sleep(REQ_DELAY)
+
+                    links, mapping = collect_product_links_from_listing(page, cu, seen_ext_ids)
+                    if not links:
+                        try: page.screenshot(path=f"{dbg_dir}/cat_empty_{ci}.png", full_page=True)
+                        except Exception: pass
+
+                    for u in links:
+                        cu_norm = _clean_abs(u)
+                        if cu_norm and (cu_norm not in product_urls):
+                            product_urls.add(cu_norm)
+                            prod2listing[cu_norm] = mapping.get(u, cu)
+
+                    print(f"[selver] {cu} → +{len(links)} products (total so far: {len(product_urls)})")
+
+                for i, pu in enumerate(sorted(product_urls), 1):
+                    if not _should_process_url(pu, seen_ext_ids):
+                        continue
+
+                    got = safe_goto(page, pu)
+                    if not got:
+                        got = open_product_via_click(page, prod2listing.get(pu, ""), pu)
+                        if not got:
+                            try: page.screenshot(path=f"{dbg_dir}/prod_nav_fail_{i}.png", full_page=True)
+                            except Exception: pass
+                            continue
+                    time.sleep(REQ_DELAY)
+
+                    row = _extract_row_from_pdp(page, pu)
+                    if not row:
+                        if open_product_via_click(page, prod2listing.get(pu, ""), pu):
+                            time.sleep(0.3); row = _extract_row_from_pdp(page, pu)
+
+                    if row:
+                        ext_id = _clean_abs(row["ext_id"]) or row["ext_id"]
+                        key = urlparse(ext_id).path
+                        if ext_id not in seen_ext_ids and key not in seen_ext_ids:
+                            w.writerow(row)
+                            seen_ext_ids.add(ext_id); seen_ext_ids.add(key)
+                            rows_written += 1
+
+                    if (i % 25) == 0:
+                        f.flush()
+
+            try:
+                browser.close()
+            except Exception:
+                pass
+
+    print(f"[selver] wrote {rows_written} product rows.")
+
+# ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    main()
+    args = _parse_cli()
+
+    if args.output_csv:
+        OUTPUT = args.output_csv
+    if args.page_limit is not None:
+        PAGE_LIMIT = int(args.page_limit)
+    if args.req_delay is not None:
+        REQ_DELAY = float(args.req_delay)
+    if args.cats_file:
+        CATEGORIES_FILE = args.cats_file
+
+    skip_path = args.skip_file or args.skip_file_alias
+    if skip_path:
+        SKIP_EXTS = _load_ext_file(skip_path)
+        print(f"[selver] loaded {len(SKIP_EXTS)} skip keys (abs+path) from {skip_path}")
+    else:
+        SKIP_EXTS = set()
+
+    if args.only_file:
+        ONLY_EXTS = _load_ext_file(args.only_file)
+        print(f"[selver] loaded {len(ONLY_EXTS)} ONLY keys (abs+path) from {args.only_file}")
+    else:
+        ONLY_EXTS = set()
+
+    try:
+        crawl()
+    except KeyboardInterrupt:
+        pass
