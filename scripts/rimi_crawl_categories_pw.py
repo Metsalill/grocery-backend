@@ -131,69 +131,47 @@ _BAD_BRAND_TOKENS = [
     "logi", "login", "registreeru", "close", "sulge", "continue"
 ]
 
-# words/phrases that mean "unset" for brand/manufacturer on Rimi
-_UNSET_WORDS = {
-    "määramata", "maaramata", "maaramata kaubamark", "maaramata tootja",
-    "määramata kaubamärk", "määramata tootja"
-}
+_UNSET_WORDS = {"määramata","maaramata","maaramata kaubamark","maaramata tootja",
+                "määramata kaubamärk","määramata tootja"}
 
-# keys that must NEVER be promoted to brand/manufacturer
-_NOISE_KEYS = {
-    "kogus","netokogus","maht","pakend","neto","suurus","mahtuvus",
-    "koostisosad","päritolumaa","paritolumaa","lisainfo","säilitustemperatuur",
-    "sailitustemperatuur","toitumisalane teave","toitumisalane","energia","allergia"
-}
+_NOISE_KEYS = {"kogus","netokogus","maht","pakend","neto","suurus","mahtuvus",
+               "koostisosad","päritolumaa","paritolumaa","lisainfo","säilitustemperatuur",
+               "sailitustemperatuur","toitumisalane teave","toitumisalane","energia","allergia"}
 
 def _has_letter(s: str) -> bool:
     return bool(re.search(r"[A-Za-zÄÖÜÕäöüõŠšŽž]", s or ""))
 
 def _strip_label_prefix(s: str) -> str:
-    """Remove accidental prefixes like 'Tootja ' or 'Kaubamärk '."""
     s = (s or "").strip()
     s = re.sub(r"^\s*(tootja|manufacturer|producer|valmistaja)\s*[:\-]?\s*", "", s, flags=re.I)
     s = re.sub(r"^\s*(kaubam[aä]rk|brand|br[äa]nd)\s*[:\-]?\s*", "", s, flags=re.I)
     return s.strip()
 
 def clean_brand(s: str) -> str:
-    s = _strip_label_prefix(s)
-    s = (s or "").strip()
-    if not s:
-        return ""
+    s = _strip_label_prefix(s).strip()
+    if not s: return ""
     low = s.lower()
-    if ":" in s or "\n" in s or len(s) > 50 or len(s) < 2:
-        return ""
-    if not _has_letter(s):
-        return ""
-    if any(tok in low for tok in _BAD_BRAND_TOKENS):
-        return ""
-    if any(word in low for word in _UNSET_WORDS):
-        return ""
+    if ":" in s or "\n" in s or len(s) > 50 or len(s) < 2: return ""
+    if not _has_letter(s): return ""
+    if any(tok in low for tok in _BAD_BRAND_TOKENS): return ""
+    if any(word in low for word in _UNSET_WORDS): return ""
     return s
 
 def clean_manufacturer(s: str) -> str:
-    s = _strip_label_prefix(s)
-    s = (s or "").strip()
+    s = _strip_label_prefix(s).strip()
     low = s.lower()
-    if not s:
-        return ""
-    if ":" in s or "\n" in s or len(s) > 80 or len(s) < 2:
-        return ""
-    if not _has_letter(s):
-        return ""
-    if any(tok in low for tok in _BAD_BRAND_TOKENS):
-        return ""
-    if any(word in low for word in _UNSET_WORDS):
-        return ""
+    if not s: return ""
+    if ":" in s or "\n" in s or len(s) > 80 or len(s) < 2: return ""
+    if not _has_letter(s): return ""
+    if any(tok in low for tok in _BAD_BRAND_TOKENS): return ""
+    if any(word in low for word in _UNSET_WORDS): return ""
     return s
 
 DIGITS_ONLY = re.compile(r"\D+")
-
-def _digits(s: str) -> str:
-    return DIGITS_ONLY.sub("", s or "")
+def _digits(s: str) -> str: return DIGITS_ONLY.sub("", s or "")
 
 def _valid_ean13(code: str) -> bool:
-    if not re.fullmatch(r"\d{13}", code or ""):
-        return False
+    if not re.fullmatch(r"\d{13}", code or ""): return False
     s_odd  = sum(int(code[i]) for i in range(0, 12, 2))
     s_even = sum(int(code[i]) * 3 for i in range(1, 12, 2))
     chk = (10 - ((s_odd + s_even) % 10)) % 10
@@ -201,14 +179,10 @@ def _valid_ean13(code: str) -> bool:
 
 def normalize_ean_digits(e: str) -> str:
     d = _digits(e)
-    if len(d) == 13 and _valid_ean13(d):
-        return d
-    if len(d) == 14 and d[0] in ("0","1") and _valid_ean13(d[1:]):
-        return d[1:]
-    if len(d) == 12 and _valid_ean13("0" + d):
-        return "0" + d
-    if len(d) == 8:
-        return d
+    if len(d) == 13 and _valid_ean13(d): return d
+    if len(d) == 14 and d[0] in ("0","1") and _valid_ean13(d[1:]): return d[1:]
+    if len(d) == 12 and _valid_ean13("0" + d): return "0" + d
+    if len(d) == 8: return d
     return d
 
 SIZE_IN_NAME_RE = re.compile(
@@ -218,15 +192,10 @@ SIZE_IN_NAME_RE = re.compile(
 
 def _norm_key(s: str) -> str:
     s = (s or "").strip().lower()
-    return (s
-            .replace("ä", "a").replace("ö", "o").replace("õ", "o").replace("ü", "u")
-            .replace("š", "s").replace("ž", "z"))
+    return (s.replace("ä","a").replace("ö","o").replace("õ","o").replace("ü","u")
+             .replace("š","s").replace("ž","z"))
 
 def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
-    """
-    Read brand/manufacturer/size from the 'Tooteinfo/Toote andmed' table(s) or dl blocks.
-    Handles both th/td and td/td layouts found on Rimi PDPs.
-    """
     brand = mfr = size_text = None
 
     def set_brand(v: str):
@@ -241,23 +210,17 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
         nonlocal size_text; v = (v or "").strip()
         if v and not size_text: size_text = v
 
-    # Strict table reader (Rimi "Tooteinfo" with header/value in either th/td or td/td)
     for row in soup.select("table tr"):
-        cells = row.find_all(["th", "td"])
-        if not cells:
-            continue
+        cells = row.find_all(["th","td"])
+        if not cells: continue
         key_cell = cells[0]
         val_cell = cells[1] if len(cells) > 1 else None
         key = _norm_key(key_cell.get_text(" ", strip=True))
         val = val_cell.get_text(" ", strip=True) if val_cell else ""
-        if key in ("kaubamark","brand","brand name","brandname","bränd","kaubamärk"):
-            set_brand(val)
-        elif key in ("tootja","manufacturer","valmistaja","producer"):
-            set_mfr(val)
-        elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"):
-            set_size(val)
+        if key in ("kaubamark","brand","brand name","brandname","bränd","kaubamärk"): set_brand(val)
+        elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
+        elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"): set_size(val)
 
-    # dl/dt/dd layout (seen on some pages)
     for dl in soup.select("dl"):
         dts, dds = dl.find_all("dt"), dl.find_all("dd")
         for i in range(min(len(dts), len(dds))):
@@ -267,54 +230,44 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
             elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
             elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"): set_size(val)
 
-    # Guarded generic "Key: Value" scan for odd structures
     for el in soup.select(".product-attributes__row, .product-details__row, .key-value, .MuiGrid-root, li, div, p, span"):
         t = (el.get_text(" ", strip=True) or "")
-        if ":" not in t or len(t) > 220:
-            continue
+        if ":" not in t or len(t) > 220: continue
         k, v = t.split(":", 1)
         key = _norm_key(k)
-        if key in _NOISE_KEYS:
-            continue
+        if key in _NOISE_KEYS: continue
         val = v.strip()
         if key in ("kaubamark","kaubamärk","brand","bränd"): set_brand(val)
         elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
         elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"): set_size(val)
 
-    # Sometimes "Veel tooteid kaubamärgilt <A>" is the only brand hint
     if not brand:
         node = soup.find(string=re.compile(r"kaubam[aä]rgilt", re.I))
         if node and getattr(node, "parent", None):
             a = node.parent.find("a")
-            if a and a.get_text(strip=True):
-                set_brand(a.get_text(strip=True))
+            if a and a.get_text(strip=True): set_brand(a.get_text(strip=True))
 
     if not size_text and name:
         m = SIZE_IN_NAME_RE.search(name)
-        if m: size_text = m.group(1).replace("L", "l")
+        if m: size_text = m.group(1).replace("L","l")
 
     return brand, mfr, size_text
 
 def parse_price_from_dom_or_meta(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
-    for sel in [
-        'meta[itemprop="price"]',
-        'meta[property="product:price:amount"]',
-        'meta[property="og:price:amount"]',
-    ]:
+    for sel in ['meta[itemprop="price"]',
+                'meta[property="product:price:amount"]',
+                'meta[property="og:price:amount"]']:
         for tag in soup.select(sel):
             val = (tag.get("content") or tag.get_text(strip=True) or "").strip()
-            if val:
-                return norm_price_str(val), "EUR"
+            if val: return norm_price_str(val), "EUR"
 
-    tag = soup.find(attrs={"itemprop": "price"})
+    tag = soup.find(attrs={"itemprop":"price"})
     if tag:
         val = (tag.get("content") or tag.get_text(strip=True) or "").strip()
-        if val:
-            return norm_price_str(val), "EUR"
+        if val: return norm_price_str(val), "EUR"
 
     m = MONEY_RE.search(soup.get_text(" ", strip=True))
-    if m:
-        return norm_price_str(m.group(1)), "EUR"
+    if m: return norm_price_str(m.group(1)), "EUR"
     return None, None
 
 def extract_ext_id(url: str) -> str:
@@ -332,7 +285,7 @@ def parse_jsonld_for_product_and_breadcrumbs_and_brand(soup: BeautifulSoup) -> T
     brand = None
     manufacturer = None
 
-    for tag in soup.find_all("script", {"type": "application/ld+json"}):
+    for tag in soup.find_all("script", {"type":"application/ld+json"}):
         try:
             data = json.loads(tag.text)
         except Exception:
@@ -352,20 +305,15 @@ def parse_jsonld_for_product_and_breadcrumbs_and_brand(soup: BeautifulSoup) -> T
                         if "price" in of0: flat["price"] = of0.get("price")
                         if "priceCurrency" in of0: flat["currency"] = of0.get("priceCurrency")
                 for k in ("gtin13","gtin","ean","ean13","barcode","sku","mpn"):
-                    if k in d and d.get(k):
-                        flat[k] = d.get(k)
+                    if k in d and d.get(k): flat[k] = d.get(k)
                 if "brand" in d and not brand:
                     v = d.get("brand")
-                    if isinstance(v, dict) and v.get("name"):
-                        brand = str(v["name"])
-                    elif isinstance(v, str):
-                        brand = v
+                    if isinstance(v, dict) and v.get("name"): brand = str(v["name"])
+                    elif isinstance(v, str): brand = v
                 if "manufacturer" in d and not manufacturer:
                     v = d.get("manufacturer")
-                    if isinstance(v, dict) and v.get("name"):
-                        manufacturer = str(v["name"])
-                    elif isinstance(v, str):
-                        manufacturer = v
+                    if isinstance(v, dict) and v.get("name"): manufacturer = str(v["name"])
+                    elif isinstance(v, str): manufacturer = v
             if isinstance(d, dict) and ("BreadcrumbList" in at_list):
                 try:
                     items = d.get("itemListElement") or []
@@ -375,10 +323,8 @@ def parse_jsonld_for_product_and_breadcrumbs_and_brand(soup: BeautifulSoup) -> T
                             t = it.get("name") or (it.get("item") or {}).get("name")
                             if not t and isinstance(it.get("item"), str):
                                 t = it.get("item").split("/")[-1]
-                            if t:
-                                names.append(str(t).strip())
-                    if names:
-                        crumbs = names
+                            if t: names.append(str(t).strip())
+                    if names: crumbs = names
                 except Exception:
                     pass
     return flat, crumbs, (brand.strip() if brand else None), (manufacturer.strip() if manufacturer else None)
@@ -392,7 +338,6 @@ def parse_visible_for_ean(soup: BeautifulSoup) -> Optional[str]:
     return m.group(0) if m else None
 
 def extract_brand_mfr_dom(page) -> Tuple[str, str]:
-    """DOM-side extractor with strict key checks and noise guards."""
     try:
         for label in ("Toote andmed", "Tooteinfo"):
             try:
@@ -416,7 +361,6 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
 
           let brand = '', manufacturer = '';
 
-          // th/td and td/td tables
           document.querySelectorAll('tr').forEach(tr => {
             const cells = tr.querySelectorAll('th,td');
             if (!cells || !cells.length) return;
@@ -427,8 +371,7 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
           });
 
           if (!brand || !manufacturer) {
-            const nodes = Array.from(document.querySelectorAll('.product-attributes__row, .product-details__row, .key-value, .MuiGrid-root, li, div, p, span'))
-              .slice(0, 2000);
+            const nodes = Array.from(document.querySelectorAll('.product-attributes__row, .product-details__row, .key-value, .MuiGrid-root, li, div, p, span')).slice(0, 2000);
             for (const n of nodes){
               const t = pick(n.textContent);
               if (!t || t.length > 250 || !t.includes(':')) continue;
@@ -463,9 +406,7 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
 # ---------------------------- collectors --------------------------------------
 
 def _is_full_pdp(u: Optional[str]) -> bool:
-    """Accept only full PDP URLs with '/tooted/.../p/<id>' path."""
-    if not u:
-        return False
+    if not u: return False
     try:
         p = urlparse(u).path
         return "/tooted/" in p and "/p/" in p
@@ -476,14 +417,10 @@ def _iter_href_from_locator(page, sel: str) -> List[str]:
     hrefs: List[str] = []
     try:
         for el in page.locator(sel).element_handles():
-            try:
-                h = el.get_attribute("href")
-            except Exception:
-                h = None
+            h = el.get_attribute("href") if el else None
             if h:
                 h = normalize_href(h)
-                if _is_full_pdp(h):
-                    hrefs.append(h)
+                if _is_full_pdp(h): hrefs.append(h)
     except Exception:
         pass
     return hrefs
@@ -504,7 +441,7 @@ def collect_pdp_links(page) -> List[str]:
 
 def collect_subcategory_links(page, base_cat_url: str) -> List[str]:
     sels = [
-        "nav[aria-label='categories'] a_href^='/epood/ee/tooted/'",
+        "nav[aria-label='categories'] a[href^='/epood/ee/tooted/']",
         "a[href^='/epood/ee/tooted/']:has(h2), a[href^='/epood/ee/tooted/']:has(h3)",
         ".category-card a[href^='/epood/ee/tooted/']",
         ".category, .subcategory a[href^='/epood/ee/tooted/']",
@@ -529,9 +466,7 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
     ctx = browser.new_context(
         locale="et-EE",
         viewport={"width":1440, "height":900},
-        user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 (KHTML, like Gecko) "
-                    "Chrome/124 Safari/537.36"),
+        user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"),
     )
 
     BLOCK = [
@@ -541,10 +476,8 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
     ]
     def router(route, request):
         host = urlparse(request.url).netloc.lower()
-        if any(host.endswith(d) for d in BLOCK):
-            return route.abort()
-        if request.resource_type in {"image","font","media","stylesheet","websocket","manifest"}:
-            return route.abort()
+        if any(host.endswith(d) for d in BLOCK): return route.abort()
+        if request.resource_type in {"image","font","media","stylesheet","websocket","manifest"}: return route.abort()
         return route.continue_()
     ctx.route("**/*", router)
 
@@ -556,8 +489,7 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
     try:
         while q:
             cat = q.pop(0)
-            if not cat or cat in visited:
-                continue
+            if not cat or cat in visited: continue
             visited.add(cat)
 
             try:
@@ -625,21 +557,15 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
     name = brand = manufacturer = size_text = image_url = ""
     ean = sku = price = currency = None
     category_path = ""
-
-    # response sniffer storage
     sniff: Dict[str, str] = {}
 
     def response_handler(resp):
         try:
             ct = (resp.headers or {}).get("content-type", "")
-            if "application/json" not in ct:
-                return
-            # only sniff PDP-origin JSON to keep CPU low
-            if "/epood/" not in resp.url and "/tooted/" not in resp.url:
-                return
+            if "application/json" not in ct: return
+            if "/epood/" not in resp.url and "/tooted/" not in resp.url: return
             data = resp.json()
             found = deep_find_kv(data, { *EAN_KEYS, *SKU_KEYS, *PRICE_KEYS, *CURR_KEYS, *BRAND_KEYS })
-            # merge only meaningful bits
             for k, v in found.items():
                 if v and len(str(v)) < 200:
                     sniff[k] = str(v)
@@ -665,31 +591,26 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
         soup = BeautifulSoup(html, "lxml")
 
         h1 = soup.find("h1")
-        if h1:
-            name = h1.get_text(strip=True)
+        if h1: name = h1.get_text(strip=True)
 
         ogimg = soup.find("meta", {"property":"og:image"})
         if ogimg and ogimg.get("content"):
             image_url = normalize_href(ogimg.get("content")) or ""
         else:
             img = soup.find("img")
-            if img:
-                image_url = normalize_href(img.get("src") or img.get("data-src") or "") or ""
+            if img: image_url = normalize_href(img.get("src") or img.get("data-src") or "") or ""
 
         flat_ld, crumbs_ld, brand_ld, manufacturer_ld = parse_jsonld_for_product_and_breadcrumbs_and_brand(soup)
         if flat_ld.get("price") and not price:
             price = norm_price_str(str(flat_ld.get("price")))
             currency = currency or (flat_ld.get("currency") or "EUR")
         for k in ("gtin13","ean","ean13","barcode","gtin"):
-            if not ean and flat_ld.get(k):
-                ean = str(flat_ld.get(k))
+            if not ean and flat_ld.get(k): ean = str(flat_ld.get(k))
         for k in ("sku","mpn"):
-            if not sku and flat_ld.get(k):
-                sku = str(flat_ld.get(k))
+            if not sku and flat_ld.get(k): sku = str(flat_ld.get(k))
         brand = clean_brand(brand or brand_ld or "")
         manufacturer = clean_manufacturer(manufacturer or manufacturer_ld or "")
 
-        # Breadcrumbs
         crumbs_dom = [a.get_text(strip=True) for a in soup.select(
             "nav[aria-label='breadcrumb'] a, .breadcrumbs a, .breadcrumb a, ol.breadcrumb a, nav.breadcrumbs a"
         ) if a.get_text(strip=True)]
@@ -698,13 +619,11 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
             crumbs = [c for c in crumbs if c]
             category_path = " > ".join(crumbs[-5:])
 
-        # Strong table/dl scan
         b2, m2, s2 = parse_brand_mfr_size(soup, name or "")
         if not brand and b2: brand = b2
         if not manufacturer and m2: manufacturer = m2
         if not size_text and s2: size_text = s2
 
-        # DOM-side (post-hydration) with guards
         if not brand or not manufacturer:
             b_dom, m_dom = extract_brand_mfr_dom(page)
             b_dom = clean_brand(b_dom)
@@ -712,7 +631,6 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
             if not brand and b_dom: brand = b_dom
             if not manufacturer and m_dom: manufacturer = m_dom
 
-        # Retry once if still empty: nudge hydration + click tab again
         if not brand and not manufacturer:
             try:
                 page.mouse.wheel(0, 1500)
@@ -731,102 +649,78 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
             except Exception:
                 pass
 
-        # EAN/SKU fallbacks from DOM meta
         if not ean or not sku:
             for it in ("gtin13","gtin","ean","ean13","barcode","sku","mpn"):
                 meta = soup.find(attrs={"itemprop": it})
                 if meta:
                     val = (meta.get("content") or meta.get_text(strip=True))
                     if not val: continue
-                    if it in ("gtin13","gtin","ean","ean13","barcode") and not ean:
-                        ean = val
-                    if it in ("sku","mpn") and not sku:
-                        sku = val
+                    if it in ("gtin13","gtin","ean","ean13","barcode") and not ean: ean = val
+                    if it in ("sku","mpn") and not sku: sku = val
 
-        # Meta brand
         if not brand:
             mbrand = soup.find("meta", {"property":"product:brand"})
             if mbrand and mbrand.get("content"):
                 brand = clean_brand(mbrand["content"].strip())
 
-        # Price from meta/visible
         if not price:
             p, c = parse_price_from_dom_or_meta(soup)
             price, currency = p or price, c or currency
 
-        # Global JS stores
         if not (brand and manufacturer) or not (ean and sku and price):
-            for glb in [
-                "__NUXT__", "__NEXT_DATA__", "APP_STATE", "dataLayer",
-                "Storefront", "__APOLLO_STATE__", "APOLLO_STATE",
-                "apolloState", "__INITIAL_STATE__", "__PRELOADED_STATE__", "__STATE__"
-            ]:
+            for glb in ["__NUXT__","__NEXT_DATA__","APP_STATE","dataLayer",
+                        "Storefront","__APOLLO_STATE__","APOLLO_STATE",
+                        "apolloState","__INITIAL_STATE__","__PRELOADED_STATE__","__STATE__"]:
                 try:
                     data = page.evaluate(f"window['{glb}']")
                 except Exception:
                     data = None
-                if not data:
-                    continue
+                if not data: continue
                 got = deep_find_kv(data, { *EAN_KEYS, *SKU_KEYS, *PRICE_KEYS, *CURR_KEYS, *BRAND_KEYS })
                 if not ean:
                     for k in ("gtin13","gtin","ean","ean13","barcode","gtin"):
-                        if got.get(k):
-                            ean = got.get(k); break
+                        if got.get(k): ean = got.get(k); break
                 if not sku:
                     for k in ("sku","mpn","code","id"):
-                        if got.get(k):
-                            sku = got.get(k); break
+                        if got.get(k): sku = got.get(k); break
                 if not price:
                     for k in ("price","currentprice","priceamount","value","unitprice"):
-                        if got.get(k):
-                            price = norm_price_str(got.get(k)); break
+                        if got.get(k): price = norm_price_str(got.get(k)); break
                 if not currency:
                     for k in ("currency","pricecurrency","currencycode","curr"):
-                        if got.get(k):
-                            currency = got.get(k); break
+                        if got.get(k): currency = got.get(k); break
                 if not brand and got.get("brand"):
                     cb = clean_brand(got.get("brand"))
                     if cb: brand = cb
-                # many backends put manufacturer under "producer"/"tootja"
                 for kk in ("manufacturer","producer","tootja"):
                     if not manufacturer and got.get(kk):
                         cm = clean_manufacturer(got.get(kk))
-                        if cm:
-                            manufacturer = cm
-                            break
+                        if cm: manufacturer = cm; break
 
-        # Sniffed JSON (responses) – last chance before heuristics
         if sniff:
             if not brand:
                 for kk in ("brand","brandname","kaubamark","bränd"):
                     if sniff.get(kk):
                         cb = clean_brand(sniff.get(kk))
-                        if cb:
-                            brand = cb; break
+                        if cb: brand = cb; break
             if not manufacturer:
                 for kk in ("manufacturer","producer","tootja","valmistaja"):
                     if sniff.get(kk):
                         cm = clean_manufacturer(sniff.get(kk))
-                        if cm:
-                            manufacturer = cm; break
+                        if cm: manufacturer = cm; break
             if not ean:
                 for kk in ("gtin13","ean13","ean","barcode","gtin"):
-                    if sniff.get(kk):
-                        ean = sniff.get(kk); break
+                    if sniff.get(kk): ean = sniff.get(kk); break
             if not sku:
                 for kk in ("sku","mpn","code","id"):
-                    if sniff.get(kk):
-                        sku = sniff.get(kk); break
+                    if sniff.get(kk): sku = sniff.get(kk); break
             if not price:
                 for kk in ("price","currentprice","priceamount","value","unitprice"):
-                    if sniff.get(kk):
-                        price = norm_price_str(sniff.get(kk)); break
+                    if sniff.get(kk): price = norm_price_str(sniff.get(kk)); break
             if not currency:
                 for kk in ("currency","pricecurrency","currencycode","curr"):
-                    if sniff.get(kk):
-                        currency = sniff.get(kk); break
+                    if sniff.get(kk): currency = sniff.get(kk); break
 
-        # Rimi private-label heuristic: if name clearly signals Rimi and brand empty
         if (not brand) and name:
             if re.search(r"\brimi\b", name, re.I) or re.search(r"\brimi\s+free\s+from\b", name, re.I):
                 brand = "Rimi"
@@ -841,9 +735,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
     except PWTimeout:
         name = name or ""
 
-    # Normalize & final clean
-    if ean:
-        ean = normalize_ean_digits(ean)
+    if ean: ean = normalize_ean_digits(ean)
     brand = clean_brand(brand)
     manufacturer = clean_manufacturer(manufacturer)
 
@@ -869,14 +761,11 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
         "source_url": src_url,
     }
 
-    # On-fail artifacts if both brand & manufacturer missing – helps debugging specific PDPs
     if not row["brand"] and not row["manufacturer"]:
         try:
             os.makedirs("artifacts", exist_ok=True)
-            # HTML
             with open(os.path.join("artifacts", f"{ext_id or 'unknown'}.html"), "w", encoding="utf-8") as fh:
                 fh.write(page.content())
-            # Screenshot
             page.screenshot(path=os.path.join("artifacts", f"{ext_id or 'unknown'}.png"), full_page=True)
         except Exception:
             pass
@@ -887,7 +776,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
 
 def read_categories(path: str) -> List[str]:
     with open(path, "r", encoding="utf-8") as f:
-        return [ln.strip() for ln in f if ln.strip() and not ln.strip().startsWith("#")]
+        return [ln.strip() for ln in f if ln.strip() and not ln.strip().startswith("#")]
 
 def _read_id_file(path: Optional[str]) -> tuple[set[str], set[str]]:
     urls: set[str] = set()
@@ -897,14 +786,12 @@ def _read_id_file(path: Optional[str]) -> tuple[set[str], set[str]]:
     with open(path, "r", encoding="utf-8") as f:
         for ln in f:
             s = ln.strip()
-            if not s:
-                continue
+            if not s: continue
             if s.startswith("http"):
                 u = s.split("?")[0].split("#")[0]
                 urls.add(u)
                 xid = extract_ext_id(u)
-                if xid:
-                    ids.add(xid)
+                if xid: ids.add(xid)
             else:
                 ids.add(s)
     return urls, ids
@@ -925,8 +812,7 @@ def write_csv(rows: List[Dict[str,str]], out_path: str) -> None:
     new_file = not os.path.exists(out_path)
     with open(out_path, "a", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
-        if new_file:
-            w.writeheader()
+        if new_file: w.writeheader()
         for r in rows:
             w.writerow({k: r.get(k,"") for k in fields})
 
@@ -955,7 +841,6 @@ def main():
 
     all_pdps: List[str] = []
     with sync_playwright() as pw:
-        # 1) collect PDP URLs from categories
         for cat in cats:
             try:
                 print(f"[rimi] {cat}")
@@ -966,13 +851,11 @@ def main():
             except Exception as e:
                 print(f"[rimi] category error: {cat} → {e}", file=sys.stderr)
 
-        # dedupe keep order and ensure full PDP paths only
         seen, q = set(), []
         for u in all_pdps:
             if u not in seen and _is_full_pdp(u):
                 seen.add(u); q.append(u)
 
-        # 2a) ONLY filter (if provided)
         if only_urls or only_ext:
             q_only = []
             for u in q:
@@ -982,25 +865,20 @@ def main():
             print(f"[rimi] ONLY filter active: {len(q_only)} URLs retained (of {len(q)})")
             q = q_only
 
-        # 2b) SKIP filter
         if skip_urls or skip_ext:
-            q2 = []
-            skipped = 0
+            q2, skipped = [], 0
             for u in q:
                 if (u in skip_urls) or (extract_ext_id(u) in skip_ext):
-                    skipped += 1
-                    continue
+                    skipped += 1; continue
                 q2.append(u)
             print(f"[rimi] skip filter: {skipped} URLs skipped (already priced/complete).")
             q = q2
 
-        # 3) single browser/context/page for all PDPs
         browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
         ctx = browser.new_context(
             locale="et-EE",
             viewport={"width":1440,"height":900},
-            user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"),
+            user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"),
         )
         page = ctx.new_page()
 
