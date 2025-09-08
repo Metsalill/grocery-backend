@@ -4,17 +4,18 @@
 Rimi.ee (Rimi ePood) category crawler → PDP extractor → CSV/DB friendly
 
 Key bits:
-- Strong brand/manufacturer/size extraction (JSON-LD, th/td, dt/dd, brand helper link)
-- Strict guards to prevent picking 'Kogus …', 'Koostisosad …', or labelled strings (e.g. 'Tootja …') as brand
+- Strong brand/manufacturer/size extraction (JSON-LD, meta, spec tables, dl/dt/dd, DOM "Kaubamärk"/"Tootja")
+- Strict guards so "Koostisosad"/"Kogus"/"Päritolumaa" never end up as brand/manufacturer
 - EAN normalization (accepts 8/12/13/14 → normalizes to 13 when possible)
 - Robust price parsing (JSON-LD, meta, visible text)
-- Blocks heavy 3rd-party, auto-accepts overlays
+- Stable/fast (blocks heavy 3rd-party, auto-accepts overlays)
 - Reuses a single Chromium page for all PDPs
 - Supports --only-ext-file to crawl *only* the ext_ids you feed in
 
-CSV columns:
-store_chain, store_name, store_channel, ext_id, ean_raw, sku_raw, name, size_text,
-brand, manufacturer, price, currency, image_url, category_path, category_leaf, source_url
+CSV columns written:
+  store_chain, store_name, store_channel,
+  ext_id, ean_raw, sku_raw, name, size_text, brand, manufacturer,
+  price, currency, image_url, category_path, category_leaf, source_url
 """
 
 from __future__ import annotations
@@ -113,80 +114,65 @@ def wait_for_hydration(page, timeout_ms: int = 15000) -> None:
                 const hasH1 = !!document.querySelector('h1');
                 const hasPrice = !!document.querySelector('[itemprop="price"], [data-test*="price"]');
                 const hasSpec = !!document.querySelector('table, dl, .product-attributes__row, .product-details__row');
-                return hasH1 && (hasPrice || hasSpec);
+                const hasBrandCell = [...document.querySelectorAll('th,dt')].some(e => /kaubam[aä]rk|br[äa]nd/i.test(e.textContent||''));
+                const hasMfrCell = [...document.querySelectorAll('th,dt')].some(e => /tootja|manufacturer|producer|valmistaja/i.test(e.textContent||''));
+                return hasH1 && (hasPrice || hasSpec || hasBrandCell || hasMfrCell);
             }""",
             timeout=timeout_ms
         )
     except Exception:
         pass
 
-# --------------------- brand/manufacturer cleaning helpers --------------------
-
 _BAD_BRAND_TOKENS = [
-    # generic page/UI words
-    "vali","tarne","tarneviis","ostukorv","add to cart","lisa ostukorvi",
-    "book delivery","delivery time","accept","cookie","kampaania","campaign",
-    "logi","login","registreeru","close","sulge","continue","tooteinfo",
-    "toote andmed","soovitatud tooted",
-    # spec labels or unrelated fields that often leak
-    "koostisosad","kogus","paritolumaa","päritolumaa","lisainfo",
-    "tootja","manufacturer","producer","brand","kaubamark"
+    "vali", "tarne", "tarneviis", "ostukorv", "add to cart", "lisa ostukorvi",
+    "book delivery", "delivery time", "accept", "cookie", "kampaania", "campaign",
+    "logi", "login", "registreeru", "close", "sulge", "continue"
 ]
 
-UNIT_RE = re.compile(r"\b(\d+[.,]?\d*)\s*(kg|g|l|ml|tk)\b", re.I)
+# keys that must NEVER be promoted to brand/manufacturer
+_NOISE_KEYS = {
+    "kogus","netokogus","maht","pakend","neto","suurus","mahtuvus",
+    "koostisosad","päritolumaa","paritolumaa","lisainfo","säilitustemperatuur",
+    "sailitustemperatuur","toitumisalane teave","toitumisalane","energia","allergia"
+}
 
 def _has_letter(s: str) -> bool:
     return bool(re.search(r"[A-Za-zÄÖÜÕäöüõŠšŽž]", s or ""))
 
-def _norm_key(s: str) -> str:
-    s = (s or "").strip().lower()
-    return (s
-            .replace("ä", "a").replace("ö", "o").replace("õ", "o").replace("ü", "u")
-            .replace("š", "s").replace("ž", "z"))
-
-def _strip_label_prefixes(s: str) -> str:
-    if not s: return ""
-    val = (s or "").strip()
-    low = _norm_key(val)
-    for lab in ("tootja","manufacturer","producer","kaubamark","brand","kogus","koostisosad","paritolumaa","päritolumaa"):
-        if low.startswith(lab):
-            # trim label + any following punctuation/space
-            return val[len(val[:len(lab)]) :].lstrip(" :.-\u00A0").strip()
-    return val
-
-def _looks_like_qty_or_ingredients(s: str) -> bool:
-    if not s: return False
-    low = _norm_key(s)
-    if low.startswith(("kogus","koostisosad","paritolumaa","päritolumaa")):
-        return True
-    if UNIT_RE.search(s):
-        # quantities like "0.37 kg", "1 l", "10 tk" should not be a brand
-        return True
-    return False
+def _strip_label_prefix(s: str) -> str:
+    """Remove accidental prefixes like 'Tootja ' or 'Kaubamärk '."""
+    s = (s or "").strip()
+    s = re.sub(r"^\s*(tootja|manufacturer|producer|valmistaja)\s*[:\-]?\s*", "", s, flags=re.I)
+    s = re.sub(r"^\s*(kaubam[aä]rk|brand|br[äa]nd)\s*[:\-]?\s*", "", s, flags=re.I)
+    return s.strip()
 
 def clean_brand(s: str) -> str:
-    s = _strip_label_prefixes(s)
+    s = _strip_label_prefix(s)
     s = (s or "").strip()
-    if not s: return ""
-    low = _norm_key(s)
-    if ":" in s or "\n" in s or len(s) > 50 or len(s) < 2: return ""
-    if not _has_letter(s): return ""
-    if _looks_like_qty_or_ingredients(s): return ""
-    if any(tok in low for tok in _BAD_BRAND_TOKENS): return ""
+    if not s:
+        return ""
+    low = s.lower()
+    if ":" in s or "\n" in s or len(s) > 50 or len(s) < 2:
+        return ""
+    if not _has_letter(s):
+        return ""
+    if any(tok in low for tok in _BAD_BRAND_TOKENS):
+        return ""
     return s
 
 def clean_manufacturer(s: str) -> str:
-    s = _strip_label_prefixes(s)
+    s = _strip_label_prefix(s)
     s = (s or "").strip()
-    if not s: return ""
-    low = _norm_key(s)
-    if ":" in s or "\n" in s or len(s) > 80 or len(s) < 2: return ""
-    if not _has_letter(s): return ""
-    if _looks_like_qty_or_ingredients(s): return ""
-    if any(tok in low for tok in _BAD_BRAND_TOKENS): return ""
+    low = s.lower()
+    if not s:
+        return ""
+    if ":" in s or "\n" in s or len(s) > 80 or len(s) < 2:
+        return ""
+    if not _has_letter(s):
+        return ""
+    if any(tok in low for tok in _BAD_BRAND_TOKENS):
+        return ""
     return s
-
-# ------------------------------- EAN utils ------------------------------------
 
 DIGITS_ONLY = re.compile(r"\D+")
 
@@ -203,10 +189,14 @@ def _valid_ean13(code: str) -> bool:
 
 def normalize_ean_digits(e: str) -> str:
     d = _digits(e)
-    if len(d) == 13 and _valid_ean13(d): return d
-    if len(d) == 14 and d[0] in ("0","1") and _valid_ean13(d[1:]): return d[1:]
-    if len(d) == 12 and _valid_ean13("0" + d): return "0" + d
-    if len(d) == 8: return d
+    if len(d) == 13 and _valid_ean13(d):
+        return d
+    if len(d) == 14 and d[0] in ("0","1") and _valid_ean13(d[1:]):
+        return d[1:]
+    if len(d) == 12 and _valid_ean13("0" + d):
+        return "0" + d
+    if len(d) == 8:
+        return d
     return d
 
 SIZE_IN_NAME_RE = re.compile(
@@ -214,44 +204,42 @@ SIZE_IN_NAME_RE = re.compile(
     re.I
 )
 
-# ---------------------- HTML (soup) helpers for PDP ---------------------------
+def _norm_key(s: str) -> str:
+    s = (s or "").strip().lower()
+    return (s
+            .replace("ä", "a").replace("ö", "o").replace("õ", "o").replace("ü", "u")
+            .replace("š", "s").replace("ž", "z"))
 
-def parse_brand_mfr_size_from_tables(soup: BeautifulSoup, name: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
-    """Extract brand/manufacturer/size from proper spec tables (th/td, dt/dd)."""
+def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     brand = mfr = size_text = None
 
     def set_brand(v: str):
-        nonlocal brand
-        v = clean_brand(v)
-        if v and not brand:
-            brand = v
+        nonlocal brand; v = clean_brand(v)
+        if v and not brand: brand = v
 
     def set_mfr(v: str):
-        nonlocal mfr
-        v = clean_manufacturer(v)
-        if v and not mfr:
-            mfr = v
+        nonlocal mfr; v = clean_manufacturer(v)
+        if v and not mfr: mfr = v
 
     def set_size(v: str):
-        nonlocal size_text
-        v = (v or "").strip()
-        if v and not size_text:
-            size_text = v
+        nonlocal size_text; v = (v or "").strip()
+        if v and not size_text: size_text = v
 
-    # th/td tables
+    # Strict table reader (Rimi's "Tooteinfo" table with th/td)
     for row in soup.select("table tr"):
         th, td = row.find("th"), row.find("td")
-        if not th or not td: continue
+        if not th or not td:
+            continue
         key = _norm_key(th.get_text(" ", strip=True))
         val = td.get_text(" ", strip=True)
-        if key in ("kaubamark","brand","bränd","brand/kaubamärk","brand/kaubamark"):
+        if key in ("kaubamark","brand","brand name","brandname","bränd"):
             set_brand(val)
         elif key in ("tootja","manufacturer","valmistaja","producer"):
             set_mfr(val)
-        elif any(k in key for k in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus")):
+        elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"):
             set_size(val)
 
-    # dl/dt/dd blocks
+    # dl/dt/dd layout (seen on some pages)
     for dl in soup.select("dl"):
         dts, dds = dl.find_all("dt"), dl.find_all("dd")
         for i in range(min(len(dts), len(dds))):
@@ -259,12 +247,33 @@ def parse_brand_mfr_size_from_tables(soup: BeautifulSoup, name: str) -> Tuple[Op
             val = dds[i].get_text(" ", strip=True)
             if key in ("kaubamark","brand","bränd"): set_brand(val)
             elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
-            elif any(k in key for k in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus")): set_size(val)
+            elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"): set_size(val)
+
+    # Guarded generic "Key: Value" scan for odd structures
+    for el in soup.select(".product-attributes__row, .product-details__row, .key-value, .MuiGrid-root, li, div, p, span"):
+        t = (el.get_text(" ", strip=True) or "")
+        if ":" not in t or len(t) > 220:
+            continue
+        k, v = t.split(":", 1)
+        key = _norm_key(k)
+        if key in _NOISE_KEYS:
+            continue
+        val = v.strip()
+        if key in ("kaubamark","brand","bränd"): set_brand(val)
+        elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
+        elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"): set_size(val)
+
+    # Sometimes "Veel tooteid kaubamärgilt <A>" is the only brand hint
+    if not brand:
+        node = soup.find(string=re.compile(r"kaubam[aä]rgilt", re.I))
+        if node and node.parent:
+            a = node.parent.find("a")
+            if a and a.get_text(strip=True):
+                set_brand(a.get_text(strip=True))
 
     if not size_text and name:
         m = SIZE_IN_NAME_RE.search(name)
-        if m:
-            size_text = m.group(1).replace("L", "l")
+        if m: size_text = m.group(1).replace("L", "l")
 
     return brand, mfr, size_text
 
@@ -276,12 +285,14 @@ def parse_price_from_dom_or_meta(soup: BeautifulSoup) -> Tuple[Optional[str], Op
     ]:
         for tag in soup.select(sel):
             val = (tag.get("content") or tag.get_text(strip=True) or "").strip()
-            if val: return norm_price_str(val), "EUR"
+            if val:
+                return norm_price_str(val), "EUR"
 
     tag = soup.find(attrs={"itemprop": "price"})
     if tag:
         val = (tag.get("content") or tag.get_text(strip=True) or "").strip()
-        if val: return norm_price_str(val), "EUR"
+        if val:
+            return norm_price_str(val), "EUR"
 
     m = MONEY_RE.search(soup.get_text(" ", strip=True))
     if m:
@@ -363,13 +374,9 @@ def parse_visible_for_ean(soup: BeautifulSoup) -> Optional[str]:
     return m.group(0) if m else None
 
 def extract_brand_mfr_dom(page) -> Tuple[str, str]:
-    """
-    Read 'Kaubamärk' and 'Tootja' directly from hydrated DOM (dt/dd or th/td),
-    or the 'Veel tooted kaubamärgilt <Brand>' helper near the title.
-    Strict: no free scanning; post-clean both values.
-    """
+    """DOM-side extractor with strict key checks and noise guards."""
     try:
-        for label in ("Toote andmed", "Tooteinfo"):
+        for label in ("Toote andmed", "Tooteinfo", "Tooteinfo", "Toote andmed"):
             try:
                 page.get_by_role("tab", name=re.compile(label, re.I)).click(timeout=400)
             except Exception:
@@ -402,11 +409,31 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             return '';
           };
 
-          document.querySelectorAll('th, dt').forEach(n => {
-            const k = norm(n.textContent);
-            if (!brand && /(\\bkaubamark\\b|\\bbrand\\b|br[aä]nd)/.test(k))  brand = readSibling(n);
-            if (!manufacturer && /(\\btootja\\b|\\bmanufacturer\\b|\\bproducer\\b|valmistaja)/.test(k)) manufacturer = readSibling(n);
+          const isNoiseKey = (k) => /(kogus|netokogus|maht|pakend|neto|suurus|mahtuvus|koostisosad|paritolumaa|päritolumaa|lisainfo|sailitustemperatuur|toitumisalane)/i.test(k);
+
+          document.querySelectorAll('tr').forEach(tr => {
+            const th = tr.querySelector('th');
+            if (!th) return;
+            const k = norm(th.textContent);
+            if (/(kaubamark|brand|br[aä]nd)/.test(k))  brand = pick(readSibling(th));
+            if (/(tootja|manufacturer|producer|valmistaja)/.test(k)) manufacturer = pick(readSibling(th));
           });
+
+          if (!brand || !manufacturer) {
+            const nodes = Array.from(document.querySelectorAll('.product-attributes__row, .product-details__row, .key-value, .MuiGrid-root, li, div, p, span'))
+              .slice(0, 2000);
+            for (const n of nodes){
+              const t = pick(n.textContent);
+              if (!t || t.length > 250 || !t.includes(':')) continue;
+              const idx = t.indexOf(':');
+              const k = norm(t.slice(0, idx));
+              if (isNoiseKey(k)) continue;
+              const v = pick(t.slice(idx+1));
+              if (!brand && /(kaubamark|brand|br[aä]nd)/.test(k)) brand = v;
+              if (!manufacturer && /(tootja|manufacturer|producer|valmistaja)/.test(k)) manufacturer = v;
+              if (brand && manufacturer) break;
+            }
+          }
 
           if (!brand) {
             const host = Array.from(document.querySelectorAll('div, p, section')).find(
@@ -421,16 +448,16 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
           return { brand: pick(brand), manufacturer: pick(manufacturer) };
         }
         """)
-        # Post clean here to avoid leaking "Kogus ..." or labels
         b = (got.get("brand") or "").strip()
         m = (got.get("manufacturer") or "").strip()
-        return clean_brand(b), clean_manufacturer(m)
+        return b, m
     except Exception:
         return "", ""
 
 # ---------------------------- collectors --------------------------------------
 
 def _is_full_pdp(u: Optional[str]) -> bool:
+    """Accept only full PDP URLs with '/tooted/.../p/<id>' path."""
     if not u:
         return False
     try:
@@ -594,9 +621,6 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
                 pass
         page.wait_for_timeout(int(max(req_delay, 0.4)*1000))
 
-        # DOM-first for brand/manufacturer (strict), with post-cleaning inside
-        b_dom, m_dom = extract_brand_mfr_dom(page)
-
         html = page.content()
         soup = BeautifulSoup(html, "lxml")
 
@@ -622,11 +646,10 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
         for k in ("sku","mpn"):
             if not sku and flat_ld.get(k):
                 sku = str(flat_ld.get(k))
+        brand = clean_brand(brand or brand_ld or "")
+        manufacturer = clean_manufacturer(manufacturer or manufacturer_ld or "")
 
-        brand = clean_brand(brand_ld or b_dom or "")
-        manufacturer = clean_manufacturer(manufacturer_ld or m_dom or "")
-
-        # breadcrumbs
+        # Breadcrumbs
         crumbs_dom = [a.get_text(strip=True) for a in soup.select(
             "nav[aria-label='breadcrumb'] a, .breadcrumbs a, .breadcrumb a, ol.breadcrumb a, nav.breadcrumbs a"
         ) if a.get_text(strip=True)]
@@ -635,15 +658,21 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
             crumbs = [c for c in crumbs if c]
             category_path = " > ".join(crumbs[-5:])
 
-        # spec-table (soup) fallback for brand/mfr/size
-        if (not brand or not manufacturer) or not size_text:
-            b2, m2, s2 = parse_brand_mfr_size_from_tables(soup, name or "")
-            if not brand:
-                brand = clean_brand(b2 or "")
-            if not manufacturer:
-                manufacturer = clean_manufacturer(m2 or "")
-            size_text = size_text or (s2 or "")
+        # Strong table/dl scan
+        b2, m2, s2 = parse_brand_mfr_size(soup, name or "")
+        if not brand and b2: brand = b2
+        if not manufacturer and m2: manufacturer = m2
+        if not size_text and s2: size_text = s2
 
+        # DOM-side (post-hydration) with guards
+        if not brand or not manufacturer:
+            b_dom, m_dom = extract_brand_mfr_dom(page)
+            b_dom = clean_brand(b_dom)
+            m_dom = clean_manufacturer(m_dom)
+            if not brand and b_dom: brand = b_dom
+            if not manufacturer and m_dom: manufacturer = m_dom
+
+        # EAN/SKU fallbacks
         if not ean or not sku:
             for it in ("gtin13","gtin","ean","ean13","barcode","sku","mpn"):
                 meta = soup.find(attrs={"itemprop": it})
@@ -664,7 +693,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
             p, c = parse_price_from_dom_or_meta(soup)
             price, currency = p or price, c or currency
 
-        # Global JS state fallback
+        # Global JS stores
         if not (brand and manufacturer):
             for glb in [
                 "__NUXT__", "__NEXT_DATA__", "APP_STATE", "dataLayer",
@@ -696,16 +725,10 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
                             currency = got.get(k); break
                 if not brand and got.get("brand"):
                     cb = clean_brand(got.get("brand"))
-                    if cb:
-                        brand = cb
+                    if cb: brand = cb
                 if not manufacturer and got.get("manufacturer"):
                     cm = clean_manufacturer(got.get("manufacturer"))
-                    if cm:
-                        manufacturer = cm
-
-        # final sanity: never let qty/ingredients/labels slip into brand/mfr
-        if _looks_like_qty_or_ingredients(brand): brand = ""
-        if _looks_like_qty_or_ingredients(manufacturer): manufacturer = ""
+                    if cm: manufacturer = cm
 
         if not ean:
             e2 = parse_visible_for_ean(soup)
@@ -827,23 +850,23 @@ def main():
             except Exception as e:
                 print(f"[rimi] category error: {cat} → {e}", file=sys.stderr)
 
-        # dedupe + keep order + ensure full PDP
+        # dedupe keep order and ensure full PDP paths only
         seen, q = set(), []
         for u in all_pdps:
             if u not in seen and _is_full_pdp(u):
                 seen.add(u); q.append(u)
 
-        # ONLY filter (if provided)
+        # 2a) ONLY filter (if provided)
         if only_urls or only_ext:
             q_only = []
             for u in q:
                 xid = extract_ext_id(u)
                 if (u in only_urls) or (xid and xid in only_ext):
                     q_only.append(u)
-            print(f"[rimi] ONLY filter active: {len(q_only)} URLs retained (of {len(q)})")
+            print(f"[rimi] ONLY filter active: {len(q_only)} URLs retained (of {len}(q))")
             q = q_only
 
-        # SKIP filter
+        # 2b) SKIP filter
         if skip_urls or skip_ext:
             q2 = []
             skipped = 0
