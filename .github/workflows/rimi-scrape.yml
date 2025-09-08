@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "prices (default) or metadata (only items missing brand/EAN/manufacturer)"
+        description: "prices (default) or metadata (only items missing brand/manufacturer/name)"
         required: false
         default: "prices"
       categories_multiline:
@@ -28,10 +28,9 @@ on:
         required: false
         default: "0.25"
   schedule:
-    - cron: "19 3 * * 0"   # Sun at 03:19 UTC
+    - cron: "19 3 * * 0" # Sun at 03:19 UTC
 
 concurrency:
-  # separate queues per mode so prices/metadata don't cancel each other
   group: rimi-category-crawl-${{ github.event.inputs.mode || 'prices' }}
   cancel-in-progress: true
 
@@ -44,16 +43,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3]   # 4-way sharding
+        shard: [0, 1, 2, 3] # 4-way sharding
 
     env:
       PYTHONUNBUFFERED: "1"
       OUTPUT_CSV: data/rimi_products.csv
       SHARD: ${{ matrix.shard }}
+      SHARDS: 4
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-      # Raw mode from dispatch; defaults to "prices"
       MODE: ${{ github.event.inputs.mode || 'prices' }}
-      # Robust flags for if: gates (strings "true"/"false")
       MODE_IS_PRICES: ${{ (github.event.inputs.mode || 'prices') == 'prices' }}
       MODE_IS_METADATA: ${{ (github.event.inputs.mode || 'prices') == 'metadata' }}
 
@@ -70,7 +68,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements-scraper.txt', 'requirements.txt', 'scripts/rimi_crawl_categories_pw.py') }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements-scraper.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
 
@@ -80,13 +78,10 @@ jobs:
           set -euo pipefail
           python -m pip install --upgrade pip
           if [ -f requirements-scraper.txt ]; then
-            echo "Installing from requirements-scraper.txt"
             pip install -r requirements-scraper.txt
           elif [ -f requirements.txt ]; then
-            echo "Installing from requirements.txt"
             pip install -r requirements.txt
           else
-            echo "No requirements file found; installing minimal deps inline"
             pip install playwright beautifulsoup4 lxml
           fi
           python -m playwright install --with-deps chromium
@@ -117,8 +112,6 @@ jobs:
 
       - name: Prepare category list (all -> shard slice)
         shell: bash
-        env:
-          SHARDS: 4
         run: |
           set -euo pipefail
           if [ -n "${{ github.event.inputs.categories_multiline }}" ]; then
@@ -148,20 +141,18 @@ jobs:
             echo "Using built-in SH-coded category set."
           fi
 
-          : "${SHARD:?SHARD env is required}"
-          SHARDS=4
-          awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
+          awk -v s="${SHARD}" -v n="${SHARDS}" 'NR>0 { if ((NR-1)%n==s) print }' \
             data/rimi_categories_all.txt > data/rimi_categories.txt
 
           echo "TOTAL categories: $(wc -l < data/rimi_categories_all.txt)"
-          echo "Sharding: SHARD=$SHARD / SHARDS=$SHARDS"
+          echo "Sharding: SHARD=${SHARD} / SHARDS=${SHARDS}"
           echo "Slice count: $(wc -l < data/rimi_categories.txt)"
           echo "First 12 from slice:"
           nl -ba data/rimi_categories.txt | sed -n '1,12p' || true
 
       # ------------------------- SKIP/TARGET LISTS ----------------------------
 
-      # MODE=prices → skip if we already have a price AND metadata complete (brand+name+manufacturer)
+      # MODE=prices → skip if we already have price AND brand+name+manufacturer
       - name: Build skip list (priced + brand+name+manufacturer present)
         if: ${{ env.DATABASE_URL != '' && env.MODE_IS_PRICES == 'true' }}
         shell: bash
@@ -200,12 +191,10 @@ jobs:
           echo "Skip list rows (priced & have brand+name+manufacturer): $(wc -l < data/rimi_skip_ext_ids.txt)"
           echo "$(wc -l < data/rimi_skip_ext_ids.txt)" > data/_skip_count.txt
 
-      # MODE=metadata → crawl only items missing brand/EAN/manufacturer/name
-      - name: Build target list (missing metadata) and SHARD it
+      # MODE=metadata → crawl only items missing brand/manufacturer/name (EAN optional for Rimi)
+      - name: Build target list (missing metadata)
         if: ${{ env.DATABASE_URL != '' && env.MODE_IS_METADATA == 'true' }}
         shell: bash
-        env:
-          SHARDS: 4
         run: |
           set -euo pipefail
           : > data/rimi_only_ext_ids.txt
@@ -220,21 +209,27 @@ jobs:
           LEFT JOIN public.rimi_candidates rc ON rc.ext_id = a.ext_id
           LEFT JOIN public.staging_rimi_products sp ON sp.ext_id = a.ext_id
           WHERE
-            COALESCE(NULLIF(btrim(COALESCE(rc.brand,        sp.brand,        '')),''),NULL) IS NULL
-            OR COALESCE(NULLIF(btrim(COALESCE(rc.name,         sp.name,     '')),''),NULL) IS NULL
-            OR COALESCE(NULLIF(btrim(COALESCE(rc.manufacturer, sp.manufacturer,'')) ,''),NULL) IS NULL
-            OR COALESCE(NULLIF(btrim(COALESCE(rc.ean_norm,     sp.ean_norm,  '')),''),NULL) IS NULL
+              COALESCE(NULLIF(btrim(COALESCE(rc.brand,        sp.brand,        '')),''),NULL) IS NULL
+           OR COALESCE(NULLIF(btrim(COALESCE(rc.name,         sp.name,         '')),''),NULL) IS NULL
+           OR COALESCE(NULLIF(btrim(COALESCE(rc.manufacturer, sp.manufacturer, '')),''),NULL) IS NULL
           ORDER BY 1;
           SQL
-          echo "Target list rows (missing brand/name/EAN/manufacturer): $(wc -l < data/rimi_only_ext_ids.txt)"
+          echo "Target list rows (missing brand/name/manufacturer): $(wc -l < data/rimi_only_ext_ids.txt)"
 
-          # SHARD the ONLY list so each matrix shard gets its slice
-          : "${SHARD:?SHARD env is required}"
-          awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
-            data/rimi_only_ext_ids.txt > data/rimi_only_ext_ids.sharded.txt
+      - name: Shard ONLY list for this runner
+        if: ${{ env.MODE_IS_METADATA == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -s data/rimi_only_ext_ids.txt ]; then
+            : > data/rimi_only_ext_ids.sharded.txt
+          else
+            awk -v s="${SHARD}" -v n="${SHARDS}" 'NR>0 { if ((NR-1)%n==s) print }' \
+              data/rimi_only_ext_ids.txt > data/rimi_only_ext_ids.sharded.txt
+          fi
           echo "Sharded ONLY list size (this runner): $(wc -l < data/rimi_only_ext_ids.sharded.txt)"
 
-      - name: Crawl Rimi (Playwright) — direct PDPs in metadata mode, categories in prices mode
+      - name: Crawl Rimi categories (Playwright)
         shell: bash
         env:
           REQ_DELAY: ${{ github.event.inputs.req_delay }}
@@ -243,7 +238,6 @@ jobs:
           HEADLESS: ${{ github.event.inputs.headless }}
         run: |
           set -euo pipefail
-          set -x
           echo "::group::Runtime info"
           python --version
           echo "Start (UTC): $(date -u)"
@@ -265,15 +259,11 @@ jobs:
 
           if [ "${MODE}" = "metadata" ]; then
             ONLY_SRC="data/rimi_only_ext_ids.sharded.txt"
-            if [ ! -s "$ONLY_SRC" ] && [ -s data/rimi_only_ext_ids.txt ]; then
-              # Fallback (shouldn't happen, but be safe)
-              ONLY_SRC="data/rimi_only_ext_ids.txt"
-            fi
-            if [ -s "$ONLY_SRC" ]; then
-              echo "Using ONLY list (direct PDP mode): $(wc -l < "$ONLY_SRC") ext_ids"
-              ONLY_FLAG=(--only-ext-file "$ONLY_SRC")
+            if [ -s "${ONLY_SRC}" ]; then
+              echo "Using ONLY list (direct PDP mode): $(wc -l < "${ONLY_SRC}") ext_ids"
+              ONLY_FLAG=(--only-ext-file "${ONLY_SRC}")
             else
-              echo "::warning::No ONLY list present; metadata mode has nothing to crawl."
+              echo "ONLY list empty; will fall back to category crawl."
             fi
           fi
 
@@ -293,7 +283,6 @@ jobs:
           status=${PIPESTATUS[0]}
           set -o pipefail
           set -e
-          set +x
 
           echo "End (UTC): $(date -u) - crawler exit code: ${status}"
           echo "::group::Crawler outputs"
@@ -304,7 +293,7 @@ jobs:
             echo "CSV not found"
           fi
           [ -f data/rimi_run.log ] && { echo "Log size:"; du -h data/rimi_run.log; } || echo "Log not found"
-          [ -s data/rimi_run.err ] && { echo "---- stderr tail ----"; tail -n 200 data/rimi_run.err; } || true
+          [ -s data/rimi_run.err ] && { echo "---- stderr tail ----"; tail -n 120 data/rimi_run.err; } || true
           echo "::endgroup::"
 
           if [ "$status" -eq 124 ]; then
@@ -350,7 +339,6 @@ jobs:
             data/rimi_products.csv
             data/rimi_run.log
             data/rimi_run.err
-            data/rimi_debug/**/*.png
             data/_skip_count.txt
             data/rimi_skip_ext_ids.txt
             data/rimi_only_ext_ids.txt
