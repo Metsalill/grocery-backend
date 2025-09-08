@@ -11,6 +11,8 @@ Key bits:
 - Stable/fast (blocks heavy 3rd-party, auto-accepts overlays)
 - Reuses a single Chromium page for all PDPs
 - Supports --only-ext-file to crawl *only* the ext_ids you feed in
+- Response sniffer: scans PDP JSON/XHR for brand/manufacturer too
+- On-fail artifacts: dump HTML + screenshot when brand+manufacturer missing
 
 CSV columns written:
   store_chain, store_name, store_channel,
@@ -39,7 +41,7 @@ MONEY_RE = re.compile(r"(\d{1,5}(?:[.,]\d{1,2}|\s?\d{2})?)\s*€")
 
 SKU_KEYS  = {"sku","mpn","itemNumber","productCode","code","id","itemid"}
 EAN_KEYS  = {"ean","ean13","gtin","gtin13","barcode"}
-BRAND_KEYS = {"brand","manufacturer","producer","tootja"}
+BRAND_KEYS = {"brand","manufacturer","producer","tootja","kaubamark","bränd","brandname"}
 PRICE_KEYS = {"price","currentprice","priceamount","unitprice","value"}
 CURR_KEYS  = {"currency","pricecurrency","currencycode","curr"}
 
@@ -130,7 +132,10 @@ _BAD_BRAND_TOKENS = [
 ]
 
 # words/phrases that mean "unset" for brand/manufacturer on Rimi
-_UNSET_WORDS = {"määramata", "maaramata", "maaramata kaubamark", "maaramata tootja", "määramata kaubamärk", "määramata tootja"}
+_UNSET_WORDS = {
+    "määramata", "maaramata", "maaramata kaubamark", "maaramata tootja",
+    "määramata kaubamärk", "määramata tootja"
+}
 
 # keys that must NEVER be promoted to brand/manufacturer
 _NOISE_KEYS = {
@@ -161,7 +166,6 @@ def clean_brand(s: str) -> str:
         return ""
     if any(tok in low for tok in _BAD_BRAND_TOKENS):
         return ""
-    # treat "Määramata" and variants as unset
     if any(word in low for word in _UNSET_WORDS):
         return ""
     return s
@@ -237,7 +241,7 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
         nonlocal size_text; v = (v or "").strip()
         if v and not size_text: size_text = v
 
-    # Strict table reader (Rimi "Tooteinfo" with header/value in first/second cell)
+    # Strict table reader (Rimi "Tooteinfo" with header/value in either th/td or td/td)
     for row in soup.select("table tr"):
         cells = row.find_all(["th", "td"])
         if not cells:
@@ -246,7 +250,7 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
         val_cell = cells[1] if len(cells) > 1 else None
         key = _norm_key(key_cell.get_text(" ", strip=True))
         val = val_cell.get_text(" ", strip=True) if val_cell else ""
-        if key in ("kaubamark","brand","brand name","brandname","bränd"):
+        if key in ("kaubamark","brand","brand name","brandname","bränd","kaubamärk"):
             set_brand(val)
         elif key in ("tootja","manufacturer","valmistaja","producer"):
             set_mfr(val)
@@ -259,7 +263,7 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
         for i in range(min(len(dts), len(dds))):
             key = _norm_key(dts[i].get_text(" ", strip=True))
             val = dds[i].get_text(" ", strip=True)
-            if key in ("kaubamark","brand","bränd"): set_brand(val)
+            if key in ("kaubamark","kaubamärk","brand","bränd"): set_brand(val)
             elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
             elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"): set_size(val)
 
@@ -273,14 +277,14 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
         if key in _NOISE_KEYS:
             continue
         val = v.strip()
-        if key in ("kaubamark","brand","bränd"): set_brand(val)
+        if key in ("kaubamark","kaubamärk","brand","bränd"): set_brand(val)
         elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
         elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"): set_size(val)
 
     # Sometimes "Veel tooteid kaubamärgilt <A>" is the only brand hint
     if not brand:
         node = soup.find(string=re.compile(r"kaubam[aä]rgilt", re.I))
-        if node and node.parent:
+        if node and getattr(node, "parent", None):
             a = node.parent.find("a")
             if a and a.get_text(strip=True):
                 set_brand(a.get_text(strip=True))
@@ -381,7 +385,7 @@ def parse_jsonld_for_product_and_breadcrumbs_and_brand(soup: BeautifulSoup) -> T
 
 def parse_visible_for_ean(soup: BeautifulSoup) -> Optional[str]:
     for el in soup.find_all(string=EAN_LABEL_RE):
-        seg = el.parent.get_text(" ", strip=True) if el and el.parent else str(el)
+        seg = el.parent.get_text(" ", strip=True) if el and getattr(el, "parent", None) else str(el)
         m = EAN13_RE.search(seg)
         if m: return m.group(0)
     m = EAN13_RE.search(soup.get_text(" ", strip=True))
@@ -390,7 +394,7 @@ def parse_visible_for_ean(soup: BeautifulSoup) -> Optional[str]:
 def extract_brand_mfr_dom(page) -> Tuple[str, str]:
     """DOM-side extractor with strict key checks and noise guards."""
     try:
-        for label in ("Toote andmed", "Tooteinfo", "Tooteinfo", "Toote andmed"):
+        for label in ("Toote andmed", "Tooteinfo"):
             try:
                 page.get_by_role("tab", name=re.compile(label, re.I)).click(timeout=400)
             except Exception:
@@ -412,27 +416,13 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
 
           let brand = '', manufacturer = '';
 
-          const readSibling = (n) => {
-            if (!n) return '';
-            let sib = n.nextElementSibling;
-            if (sib) return pick(sib.textContent);
-            if (n.parentElement) {
-              const tds = n.parentElement.querySelectorAll('td');
-              if (tds && tds.length > 1) return pick(tds[1].textContent);
-            }
-            return '';
-          };
-
-          const isNoiseKey = (k) => /(kogus|netokogus|maht|pakend|neto|suurus|mahtuvus|koostisosad|paritolumaa|päritolumaa|lisainfo|sailitustemperatuur|toitumisalane)/i.test(k);
-
           // th/td and td/td tables
           document.querySelectorAll('tr').forEach(tr => {
             const cells = tr.querySelectorAll('th,td');
             if (!cells || !cells.length) return;
-            const keyNode = cells[0];
-            const k = norm(keyNode.textContent);
-            const v = cells.length > 1 ? pick(cells[1].textContent) : '';
-            if (/(kaubamark|brand|br[aä]nd)/.test(k))  brand = v;
+            const k = norm(cells[0].textContent);
+            const v = pick(cells.length > 1 ? cells[1].textContent : '');
+            if (/(kaubamark|kaubamärk|brand|br[aä]nd)/.test(k))  brand = v;
             if (/(tootja|manufacturer|producer|valmistaja)/.test(k)) manufacturer = v;
           });
 
@@ -444,9 +434,8 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
               if (!t || t.length > 250 || !t.includes(':')) continue;
               const idx = t.indexOf(':');
               const k = norm(t.slice(0, idx));
-              if (isNoiseKey(k)) continue;
               const v = pick(t.slice(idx+1));
-              if (!brand && /(kaubamark|brand|br[aä]nd)/.test(k)) brand = v;
+              if (!brand && /(kaubamark|kaubamärk|brand|br[aä]nd)/.test(k)) brand = v;
               if (!manufacturer && /(tootja|manufacturer|producer|valmistaja)/.test(k)) manufacturer = v;
               if (brand && manufacturer) break;
             }
@@ -625,6 +614,29 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
     name = brand = manufacturer = size_text = image_url = ""
     ean = sku = price = currency = None
     category_path = ""
+
+    # response sniffer storage
+    sniff: Dict[str, str] = {}
+
+    def response_handler(resp):
+        try:
+            ct = (resp.headers or {}).get("content-type", "")
+            if "application/json" not in ct:
+                return
+            # only sniff PDP-origin JSON to keep CPU low
+            if "/epood/" not in resp.url and "/tooted/" not in resp.url:
+                return
+            data = resp.json()
+            found = deep_find_kv(data, { *EAN_KEYS, *SKU_KEYS, *PRICE_KEYS, *CURR_KEYS, *BRAND_KEYS })
+            # merge only meaningful bits
+            for k, v in found.items():
+                if v and len(str(v)) < 200:
+                    sniff[k] = str(v)
+        except Exception:
+            pass
+
+    page.on("response", response_handler)
+
     try:
         page.goto(url, timeout=60000, wait_until="domcontentloaded")
         auto_accept_overlays(page)
@@ -689,7 +701,26 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
             if not brand and b_dom: brand = b_dom
             if not manufacturer and m_dom: manufacturer = m_dom
 
-        # EAN/SKU fallbacks
+        # Retry once if still empty: nudge hydration + click tab again
+        if not brand and not manufacturer:
+            try:
+                page.mouse.wheel(0, 1500)
+                page.wait_for_timeout(300)
+                for label in ("Toote andmed", "Tooteinfo"):
+                    try:
+                        page.get_by_role("tab", name=re.compile(label, re.I)).click(timeout=400)
+                    except Exception:
+                        pass
+                page.wait_for_timeout(300)
+                b_dom2, m_dom2 = extract_brand_mfr_dom(page)
+                b_dom2 = clean_brand(b_dom2)
+                m_dom2 = clean_manufacturer(m_dom2)
+                if not brand and b_dom2: brand = b_dom2
+                if not manufacturer and m_dom2: manufacturer = m_dom2
+            except Exception:
+                pass
+
+        # EAN/SKU fallbacks from DOM meta
         if not ean or not sku:
             for it in ("gtin13","gtin","ean","ean13","barcode","sku","mpn"):
                 meta = soup.find(attrs={"itemprop": it})
@@ -701,11 +732,13 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
                     if it in ("sku","mpn") and not sku:
                         sku = val
 
+        # Meta brand
         if not brand:
             mbrand = soup.find("meta", {"property":"product:brand"})
             if mbrand and mbrand.get("content"):
                 brand = clean_brand(mbrand["content"].strip())
 
+        # Price from meta/visible
         if not price:
             p, c = parse_price_from_dom_or_meta(soup)
             price, currency = p or price, c or currency
@@ -743,9 +776,49 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
                 if not brand and got.get("brand"):
                     cb = clean_brand(got.get("brand"))
                     if cb: brand = cb
-                if not manufacturer and got.get("manufacturer"):
-                    cm = clean_manufacturer(got.get("manufacturer"))
-                    if cm: manufacturer = cm
+                # many backends put manufacturer under "producer"/"tootja"
+                for kk in ("manufacturer","producer","tootja"):
+                    if not manufacturer and got.get(kk):
+                        cm = clean_manufacturer(got.get(kk))
+                        if cm:
+                            manufacturer = cm
+                            break
+
+        # Sniffed JSON (responses) – last chance before heuristics
+        if sniff:
+            if not brand:
+                for kk in ("brand","brandname","kaubamark","bränd"):
+                    if sniff.get(kk):
+                        cb = clean_brand(sniff.get(kk))
+                        if cb:
+                            brand = cb; break
+            if not manufacturer:
+                for kk in ("manufacturer","producer","tootja","valmistaja"):
+                    if sniff.get(kk):
+                        cm = clean_manufacturer(sniff.get(kk))
+                        if cm:
+                            manufacturer = cm; break
+            if not ean:
+                for kk in ("gtin13","ean13","ean","barcode","gtin"):
+                    if sniff.get(kk):
+                        ean = sniff.get(kk); break
+            if not sku:
+                for kk in ("sku","mpn","code","id"):
+                    if sniff.get(kk):
+                        sku = sniff.get(kk); break
+            if not price:
+                for kk in ("price","currentprice","priceamount","value","unitprice"):
+                    if sniff.get(kk):
+                        price = norm_price_str(sniff.get(kk)); break
+            if not currency:
+                for kk in ("currency","pricecurrency","currencycode","curr"):
+                    if sniff.get(kk):
+                        currency = sniff.get(kk); break
+
+        # Rimi private-label heuristic: if name clearly signals Rimi and brand empty
+        if (not brand) and name:
+            if re.search(r"\brimi\b", name, re.I) or re.search(r"\brimi\s+free\s+from\b", name, re.I):
+                brand = "Rimi"
 
         if not ean:
             e2 = parse_visible_for_ean(soup)
@@ -757,6 +830,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
     except PWTimeout:
         name = name or ""
 
+    # Normalize & final clean
     if ean:
         ean = normalize_ean_digits(ean)
     brand = clean_brand(brand)
@@ -765,7 +839,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
     ext_id = extract_ext_id(url)
     src_url = canonical_url(page) or url.split("?")[0]
 
-    return {
+    row = {
         "store_chain": STORE_CHAIN,
         "store_name": STORE_NAME,
         "store_channel": STORE_CHANNEL,
@@ -783,6 +857,20 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
         "category_leaf": category_path.split(" > ")[-1] if category_path else "",
         "source_url": src_url,
     }
+
+    # On-fail artifacts if both brand & manufacturer missing – helps debugging specific PDPs
+    if not row["brand"] and not row["manufacturer"]:
+        try:
+            os.makedirs("artifacts", exist_ok=True)
+            # HTML
+            with open(os.path.join("artifacts", f"{ext_id or 'unknown'}.html"), "w", encoding="utf-8") as fh:
+                fh.write(page.content())
+            # Screenshot
+            page.screenshot(path=os.path.join("artifacts", f"{ext_id or 'unknown'}.png"), full_page=True)
+        except Exception:
+            pass
+
+    return row
 
 # ------------------------------- IO -------------------------------------------
 
