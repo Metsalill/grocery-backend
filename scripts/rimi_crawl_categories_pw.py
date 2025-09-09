@@ -360,7 +360,7 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
           const pick = (s) => (s || '').replace(/\s+/g,' ').trim();
           const norm = (s) => pick(s)
             .toLowerCase()
-            .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+            .normalize('NFD').replace(/[\\u0300-\\u036f]/g,'')
             .replaceAll('ä','a').replaceAll('ö','o').replaceAll('õ','o').replaceAll('ü','u')
             .replaceAll('š','s').replaceAll('ž','z');
 
@@ -561,7 +561,7 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
 
 # --------------------------- PDP parser (reused page) -------------------------
 
-def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
+def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,str]]:
     name = brand = manufacturer = size_text = image_url = ""
     ean = sku = price = currency = None
     category_path = ""
@@ -586,6 +586,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
         page.goto(url, timeout=60000, wait_until="domcontentloaded")
         auto_accept_overlays(page)
         wait_for_hydration(page)
+        # Open details early to encourage hydration of spec table
         try:
             page.get_by_role("tab", name=re.compile(r"Toote (andmed|info)", re.I)).click(timeout=700)
         except Exception:
@@ -594,6 +595,9 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
             except Exception:
                 pass
         page.wait_for_timeout(int(max(req_delay, 0.4)*1000))
+
+        # Do an early DOM scrape for brand/mfr before we snapshot HTML
+        b_pre, m_pre = extract_brand_mfr_dom(page)
 
         html = page.content()
         soup = BeautifulSoup(html, "lxml")
@@ -616,8 +620,10 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
             if not ean and flat_ld.get(k): ean = str(flat_ld.get(k))
         for k in ("sku","mpn"):
             if not sku and flat_ld.get(k): sku = str(flat_ld.get(k))
-        brand = clean_brand(brand or brand_ld or "")
-        manufacturer = clean_manufacturer(manufacturer or manufacturer_ld or "")
+
+        # Prefer DOM-derived brand/mfr if present
+        brand = clean_brand(b_pre or brand_ld or "")
+        manufacturer = clean_manufacturer(m_pre or manufacturer_ld or "")
 
         crumbs_dom = [a.get_text(strip=True) for a in soup.select(
             "nav[aria-label='breadcrumb'] a, .breadcrumbs a, .breadcrumb a, ol.breadcrumb a, nav.breadcrumbs a"
@@ -735,9 +741,9 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
             try:
                 got = page.evaluate("""
                 () => {
-                  const pick = (s) => (s||'').replace(/\s+/g,' ').trim();
+                  const pick = (s) => (s||'').replace(/\\s+/g,' ').trim();
                   const host = Array.from(document.querySelectorAll('section,div,p,span'))
-                    .find(el => /veel\s+tooteid\s+kaubam[aä]rgilt/i.test(el.textContent||''));
+                    .find(el => /veel\\s+tooteid\\s+kaubam[aä]rgilt/i.test(el.textContent||''));
                   if (!host) return '';
                   let a = host.querySelector('a');
                   if (!a) {
@@ -806,14 +812,18 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
         "source_url": src_url,
     }
 
-    if not row["brand"] and not row["manufacturer"]:
+    # Require name + brand; manufacturer optional
+    if not row["name"] or not row["brand"]:
+        # Capture a small artifact to debug why we missed the brand
         try:
             os.makedirs("artifacts", exist_ok=True)
-            with open(os.path.join("artifacts", f"{ext_id or 'unknown'}.html"), "w", encoding="utf-8") as fh:
+            with open(os.path.join("artifacts", f"{ext_id or 'unknown'}-nobrand.html"), "w", encoding="utf-8") as fh:
                 fh.write(page.content())
-            page.screenshot(path=os.path.join("artifacts", f"{ext_id or 'unknown'}.png"), full_page=True)
+            page.screenshot(path=os.path.join("artifacts", f"{ext_id or 'unknown'}-nobrand.png"), full_page=True)
         except Exception:
             pass
+        print(f"[rimi] skip (no brand) ext_id={ext_id} url={src_url}")
+        return None
 
     return row
 
@@ -931,9 +941,10 @@ def main():
         for i, url in enumerate(q, 1):
             try:
                 row = parse_pdp_with_page(page, url, req_delay)
-                rows.append(row); total += 1
-                if len(rows) >= 120:
-                    write_csv(rows, args.output_csv); rows = []
+                if row:  # enforce name+brand here
+                    rows.append(row); total += 1
+                    if len(rows) >= 120:
+                        write_csv(rows, args.output_csv); rows = []
             except Exception:
                 traceback.print_exc()
             if max_products and total >= max_products:
