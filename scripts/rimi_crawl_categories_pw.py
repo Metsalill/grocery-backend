@@ -126,10 +126,13 @@ def wait_for_hydration(page, timeout_ms: int = 15000) -> None:
     except Exception:
         pass
 
+# Brand noise guard: drop UI phrases but don't kill real brands (e.g., "Valio")
 _BAD_BRAND_TOKENS = [
-    "vali","tarne","tarneviis","ostukorv","add to cart","lisa ostukorvi",
-    "book delivery","delivery time","accept","cookie","kampaania","campaign",
-    "logi","login","registreeru","close","sulge","continue"
+    "tarneviis", "vali aeg",  # delivery widget noise
+    "ostukorv", "add to cart", "lisa ostukorvi",
+    "book delivery", "delivery time", "accept", "cookie",
+    "kampaania", "campaign", "logi", "login", "registreeru",
+    "close", "sulge", "continue"
 ]
 
 _UNSET_WORDS = {"määramata","maaramata","maaramata kaubamark","maaramata tootja",
@@ -144,8 +147,9 @@ def _has_letter(s: str) -> bool:
 
 def _strip_label_prefix(s: str) -> str:
     s = (s or "").strip()
-    s = re.sub(r"^\s*(tootja|manufacturer|producer|valmistaja)\s*[:\-]?\s*", "", s, flags=re.I)
-    s = re.sub(r"^\s*(kaubam[aä]rk|brand|br[äa]nd)\s*[:\-]?\s*", "", s, flags=re.I)
+    # Use word boundary so both "Tootja: X" and "Tootja X" are stripped safely
+    s = re.sub(r"^\s*(tootja|manufacturer|producer|valmistaja)\b\s*[:\-]?\s*", "", s, flags=re.I)
+    s = re.sub(r"^\s*(kaubam[aä]rk|brand|br[äa]nd)\b\s*[:\-]?\s*", "", s, flags=re.I)
     return s.strip()
 
 def clean_brand(s: str) -> str:
@@ -353,10 +357,10 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
 
         got = page.evaluate("""
         () => {
-          const pick = (s) => (s || '').replace(/\\s+/g,' ').trim();
+          const pick = (s) => (s || '').replace(/\s+/g,' ').trim();
           const norm = (s) => pick(s)
             .toLowerCase()
-            .normalize('NFD').replace(/[\\u0300-\\u036f]/g,'')
+            .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
             .replaceAll('ä','a').replaceAll('ö','o').replaceAll('õ','o').replaceAll('ü','u')
             .replaceAll('š','s').replaceAll('ž','z');
 
@@ -731,9 +735,9 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Dict[str,str]:
             try:
                 got = page.evaluate("""
                 () => {
-                  const pick = (s) => (s||'').replace(/\\s+/g,' ').trim();
+                  const pick = (s) => (s||'').replace(/\s+/g,' ').trim();
                   const host = Array.from(document.querySelectorAll('section,div,p,span'))
-                    .find(el => /veel\\s+tooteid\\s+kaubam[aä]rgilt/i.test(el.textContent||''));
+                    .find(el => /veel\s+tooteid\s+kaubam[aä]rgilt/i.test(el.textContent||''));
                   if (!host) return '';
                   let a = host.querySelector('a');
                   if (!a) {
