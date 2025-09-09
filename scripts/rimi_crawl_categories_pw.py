@@ -126,7 +126,7 @@ def wait_for_hydration(page, timeout_ms: int = 15000) -> None:
     except Exception:
         pass
 
-# Brand noise guard: drop UI phrases but don't kill real brands (e.g., "Valio")
+# Brand noise guard: drop UI phrases but don't kill real brands
 _BAD_BRAND_TOKENS = [
     "tarneviis", "vali aeg",
     "ostukorv", "add to cart", "lisa ostukorvi",
@@ -214,7 +214,6 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
         nonlocal size_text; v = (v or "").strip()
         if v and not size_text: size_text = v
 
-    # Tables with th/td
     for row in soup.select("table tr"):
         cells = row.find_all(["th","td"])
         if not cells: continue
@@ -226,7 +225,6 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
         elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
         elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"): set_size(val)
 
-    # dl/dt/dd
     for dl in soup.select("dl"):
         dts, dds = dl.find_all("dt"), dl.find_all("dd")
         for i in range(min(len(dts), len(dds))):
@@ -236,8 +234,7 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
             elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
             elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"): set_size(val)
 
-    # Generic key:value pairs often used on Rimi
-    for el in soup.select(".product-attributes__row, .product-details__row, .key-value, [data-testid*='attribute'], .MuiGrid-root, li, div, p, span"):
+    for el in soup.select(".product-attributes__row, .product-details__row, .key-value, .MuiGrid-root, li, div, p, span"):
         t = (el.get_text(" ", strip=True) or "")
         if ":" not in t or len(t) > 220: continue
         k, v = t.split(":", 1)
@@ -248,7 +245,6 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
         elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
         elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"): set_size(val)
 
-    # "Veel tooteid kaubamärgilt X"
     if not brand:
         node = soup.find(string=re.compile(r"kaubam[aä]rgilt", re.I))
         if node and getattr(node, "parent", None):
@@ -345,95 +341,90 @@ def parse_visible_for_ean(soup: BeautifulSoup) -> Optional[str]:
     m = EAN13_RE.search(soup.get_text(" ", strip=True))
     return m.group(0) if m else None
 
-def _force_open_spec_and_wait(page, req_delay: float) -> None:
-    """Open the 'Tooteinfo/Toote andmed' tab and wait until brand/mfr labels appear."""
-    try:
-        # Click either of the common labels
-        for label in (r"Toote\s*(andmed|info)",):
-            try:
-                page.get_by_role("tab", name=re.compile(label, re.I)).click(timeout=800)
-                break
-            except Exception:
-                try:
-                    page.get_by_role("button", name=re.compile(label, re.I)).click(timeout=800)
-                    break
-                except Exception:
-                    pass
-        # Scroll a bit to trigger lazy hydration
-        page.mouse.wheel(0, 1400)
-        page.wait_for_timeout(int(max(req_delay, 0.4) * 1000))
-        # Hard wait for brand/manufacturer labels to exist
-        try:
-            page.wait_for_selector("text=/Kaubamärk|Kaubamark|Tootja|Manufacturer|Producer/i", timeout=3500)
-        except Exception:
-            # Try scrolling more and waiting again
-            for _ in range(3):
-                page.mouse.wheel(0, 1600)
-                page.wait_for_timeout(int(max(req_delay, 0.4) * 1000))
-            page.wait_for_selector("text=/Kaubamärk|Kaubamark|Tootja|Manufacturer|Producer/i", timeout=1500)
-    except Exception:
-        pass
+# -------------------- UPDATED: aggressive DOM extractor -----------------------
 
 def extract_brand_mfr_dom(page) -> Tuple[str, str]:
+    """Aggressively pull Kaubamärk/Tootja from the live DOM (handles lazy render)."""
     try:
+        # Open details tab if present
+        for label in ("Toote andmed", "Tooteinfo"):
+            try:
+                page.get_by_role("tab", name=re.compile(label, re.I)).click(timeout=700)
+            except Exception:
+                try:
+                    page.get_by_role("button", name=re.compile(label, re.I)).click(timeout=700)
+                except Exception:
+                    pass
+
+        # Force deep lazy render
+        for _ in range(4):
+            page.mouse.wheel(0, 2000)
+            page.wait_for_timeout(300)
+
+        # Wait up to ~4s for either Kaubamärk or Tootja to appear
+        try:
+            page.wait_for_function(
+                """() => {
+                  const txt = (e)=> (e.textContent||'').replace(/\\s+/g,' ').trim().toLowerCase();
+                  const nodes = Array.from(document.querySelectorAll('tr, .product-attributes__row, .product-details__row, .key-value, dl'));
+                  return nodes.some(n=>{
+                    const t = txt(n);
+                    return /kaubam[aä]rk|br[aä]nd|tootja|manufacturer|producer/.test(t) && t.includes(':');
+                  });
+                }""",
+                timeout=4000
+            )
+        except Exception:
+            pass
+
         got = page.evaluate("""
         () => {
-          const pick = (s) => (s || '').replace(/\\s+/g,' ').trim();
-          const norm = (s) => pick(s)
-            .toLowerCase()
-            .normalize('NFD').replace(/[\\u0300-\\u036f]/g,'')
-            .replaceAll('ä','a').replaceAll('ö','o').replaceAll('õ','o').replaceAll('ü','u')
-            .replaceAll('š','s').replaceAll('ž','z');
+          const pick=(s)=>(s||'').replace(/\\s+/g,' ').trim();
+          const norm=(s)=>pick(s)
+             .toLowerCase()
+             .normalize('NFD').replace(/[\\u0300-\\u036f]/g,'')
+             .replaceAll('ä','a').replaceAll('ö','o').replaceAll('õ','o').replaceAll('ü','u')
+             .replaceAll('š','s').replaceAll('ž','z');
 
-          let brand = '', manufacturer = '';
+          let brand='', manufacturer='';
 
-          // Tables
-          document.querySelectorAll('tr').forEach(tr => {
-            const cells = tr.querySelectorAll('th,td');
-            if (!cells || !cells.length) return;
-            const k = norm(cells[0].textContent);
-            const v = pick(cells.length > 1 ? cells[1].textContent : '');
-            if (/(kaubamark|kaubamärk|brand|br[aä]nd)/.test(k))  brand = v || brand;
-            if (/(tootja|manufacturer|producer|valmistaja)/.test(k)) manufacturer = v || manufacturer;
+          // 1) tables
+          document.querySelectorAll('tr').forEach(tr=>{
+            const c=tr.querySelectorAll('th,td');
+            if(!c.length) return;
+            const k=norm(c[0].textContent);
+            const v=pick(c.length>1?c[1].textContent:'');
+            if(/(kaubamark|kaubamärk|brand|br[aä]nd)/.test(k) && !brand) brand=v;
+            if(/(tootja|manufacturer|producer|valmistaja)/.test(k) && !manufacturer) manufacturer=v;
           });
 
-          // dl/dt/dd and generic key:value components
-          const nodes = Array.from(document.querySelectorAll(
-            'dl dt, .product-attributes__row, .product-details__row, .key-value, [data-testid*=\"attribute\"], .MuiGrid-root, li, div, p, span'
-          )).slice(0, 3000);
-
-          for (const n of nodes){
-            const t = pick(n.textContent);
-            if (!t || t.length > 250) continue;
-            let k='', v='';
-            if (t.includes(':')) {
-              const idx = t.indexOf(':'); k = norm(t.slice(0, idx)); v = pick(t.slice(idx+1));
-            } else if (n.tagName === 'DT') {
-              k = norm(t);
-              const dd = n.nextElementSibling && n.nextElementSibling.tagName === 'DD' ? n.nextElementSibling : null;
-              v = pick(dd ? dd.textContent : '');
+          // 2) generic "key: value" rows
+          if(!brand || !manufacturer){
+            const nodes=Array.from(document.querySelectorAll('.product-attributes__row, .product-details__row, .key-value, dl, li, div, p, span')).slice(0,3000);
+            for(const n of nodes){
+              const t=pick(n.textContent);
+              if(!t || t.length>300 || !t.includes(':')) continue;
+              const i=t.indexOf(':'); const k=norm(t.slice(0,i)); const v=pick(t.slice(i+1));
+              if(!brand && /(kaubamark|kaubamärk|brand|br[aä]nd)/.test(k)) brand=v;
+              if(!manufacturer && /(tootja|manufacturer|producer|valmistaja)/.test(k)) manufacturer=v;
+              if(brand && manufacturer) break;
             }
-            if (!k) continue;
-            if (!brand && /(kaubamark|kaubamärk|brand|br[aä]nd)/.test(k)) brand = v;
-            if (!manufacturer && /(tootja|manufacturer|producer|valmistaja)/.test(k)) manufacturer = v;
-            if (brand && manufacturer) break;
           }
 
-          // Fallback anchor near "kaubamärgilt"
-          if (!brand) {
+          // 3) "Veel tooteid kaubamärgilt <A>"
+          if(!brand){
             const host = Array.from(document.querySelectorAll('section,div,p,span'))
-              .find(el => /kaubam[aä]rgilt/i.test(el.textContent || ''));
-            if (host) {
+              .find(el => /veel\\s+tooteid\\s+kaubam[aä]rgilt/i.test(el.textContent||''));
+            if(host){
               const a = host.querySelector('a');
-              if (a && pick(a.textContent).length > 1) brand = pick(a.textContent);
+              if(a) brand = pick(a.textContent);
             }
           }
-          return { brand: pick(brand), manufacturer: pick(manufacturer) };
-        }
-        """)
-        b = (got.get("brand") or "").strip()
-        m = (got.get("manufacturer") or "").strip()
-        return b, m
+
+          return {brand: pick(brand), manufacturer: pick(manufacturer)};
+        }""")
+
+        return (got.get("brand","").strip(), got.get("manufacturer","").strip())
     except Exception:
         return "", ""
 
@@ -616,10 +607,16 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
         auto_accept_overlays(page)
         wait_for_hydration(page)
 
-        # Ensure the details/spec tab is open, then wait for brand/mfr labels
-        _force_open_spec_and_wait(page, req_delay)
+        # Encourage the spec table to render before we inspect it
+        try:
+            page.get_by_role("tab", name=re.compile(r"Toote (andmed|info)", re.I)).click(timeout=700)
+        except Exception:
+            pass
+        for _ in range(3):
+            page.mouse.wheel(0, 1600)
+            page.wait_for_timeout(250)
 
-        # First DOM pass (after explicit wait)
+        # Do an early DOM scrape for brand/mfr before we snapshot HTML
         b_pre, m_pre = extract_brand_mfr_dom(page)
 
         html = page.content()
@@ -644,6 +641,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
         for k in ("sku","mpn"):
             if not sku and flat_ld.get(k): sku = str(flat_ld.get(k))
 
+        # Prefer DOM-derived brand/mfr if present
         brand = clean_brand(b_pre or brand_ld or "")
         manufacturer = clean_manufacturer(m_pre or manufacturer_ld or "")
 
@@ -660,9 +658,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
         if not manufacturer and m2: manufacturer = m2
         if not size_text and s2: size_text = s2
 
-        # If still no brand/mfr, do a second, slower forced pass
         if not brand or not manufacturer:
-            _force_open_spec_and_wait(page, max(req_delay, 0.6))
             b_dom, m_dom = extract_brand_mfr_dom(page)
             b_dom = clean_brand(b_dom)
             m_dom = clean_manufacturer(m_dom)
@@ -741,7 +737,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
                 for kk in ("currency","pricecurrency","currencycode","curr"):
                     if sniff.get(kk): currency = sniff.get(kk); break
 
-        # --- Extra brand fallbacks ---
+        # 1) "Veel tooteid kaubamärgilt <A>" robust scan (DOM)
         if not brand:
             try:
                 got = page.evaluate("""
@@ -763,6 +759,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
             except Exception:
                 pass
 
+        # 2) Last-resort brand guess from product name via allow-list
         if not brand and name:
             nkey = _norm_key(name)
             BRAND_GUESSES = [
@@ -943,7 +940,7 @@ def main():
         for i, url in enumerate(q, 1):
             try:
                 row = parse_pdp_with_page(page, url, req_delay)
-                if row:
+                if row:  # enforce name+brand here
                     rows.append(row); total += 1
                     if len(rows) >= 120:
                         write_csv(rows, args.output_csv); rows = []
