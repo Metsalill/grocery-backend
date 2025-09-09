@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "prices (default) or metadata (only items missing NAME/BRAND)"
+        description: "prices (default) or metadata (crawl to improve NAME/BRAND)"
         required: false
         default: "prices"
       categories_multiline:
@@ -219,7 +219,7 @@ jobs:
           SQL
           echo "Target list rows (missing NAME/BRAND): $(wc -l < data/rimi_only_ext_ids.txt)"
 
-      - name: Shard ONLY list for this runner
+      - name: Shard ONLY list for this runner (report only)
         if: ${{ env.MODE_IS_METADATA == 'true' }}
         shell: bash
         env:
@@ -256,21 +256,14 @@ jobs:
           HEADLESS="${HEADLESS:-1}"
 
           SKIP_FLAG=()
-          ONLY_FLAG=()
+          # In PRICES mode, skip items that already have NAME+BRAND.
           if [ "${MODE}" = "prices" ] && [ -s data/rimi_skip_ext_ids.txt ]; then
             echo "Using skip list: $(wc -l < data/rimi_skip_ext_ids.txt) ext_ids"
             SKIP_FLAG=(--skip-ext-file data/rimi_skip_ext_ids.txt)
           fi
-          if [ "${MODE}" = "metadata" ]; then
-            ONLY_SRC="data/rimi_only_ext_ids.sharded.txt"
-            if [ ! -s "$ONLY_SRC" ]; then
-              ONLY_SRC="data/rimi_only_ext_ids.txt"
-            fi
-            if [ -s "$ONLY_SRC" ]; then
-              echo "Using ONLY list (direct PDP mode): $(wc -l < "$ONLY_SRC") ext_ids"
-              ONLY_FLAG=(--only-ext-file "$ONLY_SRC")
-            fi
-          fi
+
+          # In METADATA mode, DO NOT pre-filter with ONLY list — crawl the slice normally.
+          # This avoids 'ONLY filter active: 0 URLs retained' when the slice doesn't intersect.
 
           set +e
           set +o pipefail
@@ -283,7 +276,6 @@ jobs:
               --req-delay "$REQ_DELAY" \
               --output-csv "$OUTPUT_CSV" \
               "${SKIP_FLAG[@]}" \
-              "${ONLY_FLAG[@]}" \
             > >(tee data/rimi_run.log) 2>data/rimi_run.err
           status=${PIPESTATUS[0]}
           set -o pipefail
