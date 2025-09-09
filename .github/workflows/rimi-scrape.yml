@@ -27,6 +27,10 @@ on:
         description: "Delay between page ops (sec)"
         required: false
         default: "0.25"
+      pdp_workers:
+        description: "Number of Playwright pages to reuse for PDPs (>=1)"
+        required: false
+        default: "2"
   schedule:
     - cron: "19 3 * * 0"   # Sun at 03:19 UTC
 
@@ -107,8 +111,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf data
-          mkdir -p data
+          rm -rf data artifacts
+          mkdir -p data artifacts
 
       - name: Show selected mode
         run: |
@@ -242,6 +246,7 @@ jobs:
           PAGE_LIMIT: ${{ github.event.inputs.page_limit }}
           MAX_PRODUCTS: ${{ github.event.inputs.max_products }}
           HEADLESS: ${{ github.event.inputs.headless }}
+          PDP_WORKERS: ${{ github.event.inputs.pdp_workers }}
         run: |
           set -euo pipefail
           echo "::group::Runtime info"
@@ -254,6 +259,7 @@ jobs:
           PAGE_LIMIT="${PAGE_LIMIT:-0}"
           MAX_PRODUCTS="${MAX_PRODUCTS:-0}"
           HEADLESS="${HEADLESS:-1}"
+          PDP_WORKERS="${PDP_WORKERS:-2}"
 
           SKIP_FLAG=()
           # In PRICES mode, skip items that already have NAME+BRAND.
@@ -274,6 +280,7 @@ jobs:
               --max-products "$MAX_PRODUCTS" \
               --headless "$HEADLESS" \
               --req-delay "$REQ_DELAY" \
+              --pdp-workers "$PDP_WORKERS" \
               --output-csv "$OUTPUT_CSV" \
               "${SKIP_FLAG[@]}" \
             > >(tee data/rimi_run.log) 2>data/rimi_run.err
@@ -346,7 +353,8 @@ jobs:
             data/rimi_products.csv
             data/rimi_run.log
             data/rimi_run.err
-            data/rimi_debug/**/*.png
+            artifacts/*.png
+            artifacts/*.html
             data/_skip_count.txt
             data/rimi_skip_ext_ids.txt
             data/rimi_only_ext_ids.txt
