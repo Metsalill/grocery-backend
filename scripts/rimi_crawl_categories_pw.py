@@ -128,7 +128,7 @@ def wait_for_hydration(page, timeout_ms: int = 15000) -> None:
 
 # Brand noise guard: drop UI phrases but don't kill real brands (e.g., "Valio")
 _BAD_BRAND_TOKENS = [
-    "tarneviis", "vali aeg",  # delivery widget noise
+    "tarneviis", "vali aeg",
     "ostukorv", "add to cart", "lisa ostukorvi",
     "book delivery", "delivery time", "accept", "cookie",
     "kampaania", "campaign", "logi", "login", "registreeru",
@@ -147,7 +147,6 @@ def _has_letter(s: str) -> bool:
 
 def _strip_label_prefix(s: str) -> str:
     s = (s or "").strip()
-    # Use word boundary so both "Tootja: X" and "Tootja X" are stripped safely
     s = re.sub(r"^\s*(tootja|manufacturer|producer|valmistaja)\b\s*[:\-]?\s*", "", s, flags=re.I)
     s = re.sub(r"^\s*(kaubam[aä]rk|brand|br[äa]nd)\b\s*[:\-]?\s*", "", s, flags=re.I)
     return s.strip()
@@ -357,7 +356,7 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
 
         got = page.evaluate("""
         () => {
-          const pick = (s) => (s || '').replace(/\s+/g,' ').trim();
+          const pick = (s) => (s || '').replace(/\\s+/g,' ').trim();
           const norm = (s) => pick(s)
             .toLowerCase()
             .normalize('NFD').replace(/[\\u0300-\\u036f]/g,'')
@@ -586,7 +585,6 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
         page.goto(url, timeout=60000, wait_until="domcontentloaded")
         auto_accept_overlays(page)
         wait_for_hydration(page)
-        # Open details early to encourage hydration of spec table
         try:
             page.get_by_role("tab", name=re.compile(r"Toote (andmed|info)", re.I)).click(timeout=700)
         except Exception:
@@ -596,7 +594,6 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
                 pass
         page.wait_for_timeout(int(max(req_delay, 0.4)*1000))
 
-        # Do an early DOM scrape for brand/mfr before we snapshot HTML
         b_pre, m_pre = extract_brand_mfr_dom(page)
 
         html = page.content()
@@ -621,7 +618,6 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
         for k in ("sku","mpn"):
             if not sku and flat_ld.get(k): sku = str(flat_ld.get(k))
 
-        # Prefer DOM-derived brand/mfr if present
         brand = clean_brand(b_pre or brand_ld or "")
         manufacturer = clean_manufacturer(m_pre or manufacturer_ld or "")
 
@@ -735,8 +731,6 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
                 for kk in ("currency","pricecurrency","currencycode","curr"):
                     if sniff.get(kk): currency = sniff.get(kk); break
 
-        # --- Extra brand fallbacks ---
-        # 1) "Veel tooteid kaubamärgilt <A>" robust scan
         if not brand:
             try:
                 got = page.evaluate("""
@@ -758,7 +752,6 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
             except Exception:
                 pass
 
-        # 2) Last-resort brand guess from product name via allow-list (diacritic-robust)
         if not brand and name:
             nkey = _norm_key(name)
             BRAND_GUESSES = [
@@ -770,7 +763,6 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
                 if re.search(r"\b" + re.escape(_norm_key(b)) + r"\b", nkey):
                     brand = clean_brand(b)
                     break
-        # --------------------------------
 
         if (not brand) and name:
             if re.search(r"\brimi\b", name, re.I) or re.search(r"\brimi\s+free\s+from\b", name, re.I):
@@ -812,9 +804,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
         "source_url": src_url,
     }
 
-    # Require name + brand; manufacturer optional
     if not row["name"] or not row["brand"]:
-        # Capture a small artifact to debug why we missed the brand
         try:
             os.makedirs("artifacts", exist_ok=True)
             with open(os.path.join("artifacts", f"{ext_id or 'unknown'}-nobrand.html"), "w", encoding="utf-8") as fh:
@@ -941,7 +931,7 @@ def main():
         for i, url in enumerate(q, 1):
             try:
                 row = parse_pdp_with_page(page, url, req_delay)
-                if row:  # enforce name+brand here
+                if row:
                     rows.append(row); total += 1
                     if len(rows) >= 120:
                         write_csv(rows, args.output_csv); rows = []
