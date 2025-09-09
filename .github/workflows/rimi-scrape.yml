@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "prices (default) or metadata (only items missing brand/EAN/manufacturer)"
+        description: "prices (default) or metadata (only items missing NAME/BRAND)"
         required: false
         default: "prices"
       categories_multiline:
@@ -159,30 +159,44 @@ jobs:
           echo "First 12 from slice:"
           nl -ba data/rimi_categories.txt | sed -n '1,12p' || true
 
-      - name: Build skip list (already have a BRAND)
+      - name: Build skip list (have NAME+BRAND)
         if: ${{ env.DATABASE_URL != '' && env.MODE_IS_PRICES == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
           : > data/rimi_skip_ext_ids.txt
           psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/rimi_skip_ext_ids.txt
-          WITH branded AS (
+          WITH priced_from_prices AS (
+            SELECT DISTINCT (regexp_match(p.source_url, '/p/([0-9]+)'))[1] AS ext_id
+            FROM public.prices p
+            JOIN public.stores s ON s.id = p.store_id
+            WHERE s.chain='Rimi' AND s.is_online = TRUE
+              AND p.source_url ~ '/p/[0-9]+'
+          ),
+          priced_from_candidates AS (
             SELECT DISTINCT ext_id::text
             FROM public.rimi_candidates
-            WHERE COALESCE(NULLIF(btrim(brand),''),NULL) IS NOT NULL
+            WHERE COALESCE(price,0) > 0
+              AND COALESCE(ext_id,'') <> ''
+          ),
+          priced AS (
+            SELECT ext_id FROM priced_from_prices
             UNION
-            SELECT DISTINCT ext_id::text
-            FROM public.staging_rimi_products
-            WHERE COALESCE(NULLIF(btrim(brand),''),NULL) IS NOT NULL
+            SELECT ext_id FROM priced_from_candidates
           )
-          SELECT ext_id
-          FROM branded
+          SELECT pr.ext_id
+          FROM priced pr
+          LEFT JOIN public.rimi_candidates rc ON rc.ext_id = pr.ext_id
+          LEFT JOIN public.staging_rimi_products sp ON sp.ext_id = pr.ext_id
+          WHERE
+            COALESCE(NULLIF(btrim(COALESCE(rc.name,  sp.name,  '')),''), NULL) IS NOT NULL
+            AND COALESCE(NULLIF(btrim(COALESCE(rc.brand, sp.brand, '')),''), NULL) IS NOT NULL
           ORDER BY 1;
           SQL
-          echo "Skip list rows (already have BRAND): $(wc -l < data/rimi_skip_ext_ids.txt)"
+          echo "Skip list rows (priced & have NAME+BRAND): $(wc -l < data/rimi_skip_ext_ids.txt)"
           echo "$(wc -l < data/rimi_skip_ext_ids.txt)" > data/_skip_count.txt
 
-      - name: Build target list (missing metadata)
+      - name: Build target list (missing NAME or BRAND)
         if: ${{ env.DATABASE_URL != '' && env.MODE_IS_METADATA == 'true' }}
         shell: bash
         run: |
@@ -199,13 +213,11 @@ jobs:
           LEFT JOIN public.rimi_candidates rc ON rc.ext_id = a.ext_id
           LEFT JOIN public.staging_rimi_products sp ON sp.ext_id = a.ext_id
           WHERE
-            COALESCE(NULLIF(btrim(COALESCE(rc.brand,        sp.brand,        '')),''),NULL) IS NULL
-            OR COALESCE(NULLIF(btrim(COALESCE(rc.name,         sp.name,     '')),''),NULL) IS NULL
-            OR COALESCE(NULLIF(btrim(COALESCE(rc.manufacturer, sp.manufacturer,'')) ,''),NULL) IS NULL
-            OR COALESCE(NULLIF(btrim(COALESCE(rc.ean_norm,     sp.ean_norm,  '')),''),NULL) IS NULL
+            COALESCE(NULLIF(btrim(COALESCE(rc.brand, sp.brand, '')),''), NULL) IS NULL
+            OR COALESCE(NULLIF(btrim(COALESCE(rc.name,  sp.name,  '')),''), NULL) IS NULL
           ORDER BY 1;
           SQL
-          echo "Target list rows (missing brand/name/EAN/manufacturer): $(wc -l < data/rimi_only_ext_ids.txt)"
+          echo "Target list rows (missing NAME/BRAND): $(wc -l < data/rimi_only_ext_ids.txt)"
 
       - name: Shard ONLY list for this runner
         if: ${{ env.MODE_IS_METADATA == 'true' }}
