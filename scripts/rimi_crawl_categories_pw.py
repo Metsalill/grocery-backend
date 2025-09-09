@@ -9,10 +9,10 @@ Key bits:
 - EAN normalization (accepts 8/12/13/14 → normalizes to 13 when possible)
 - Robust price parsing (JSON-LD, meta, visible text)
 - Stable/fast (blocks heavy 3rd-party, auto-accepts overlays)
-- Reuses a single Chromium page for all PDPs
+- Reuses Chromium pages across PDPs (supports simple round-robin multi-page with --pdp-workers)
 - Supports --only-ext-file to crawl *only* the ext_ids you feed in
 - Response sniffer: scans PDP JSON/XHR for brand/manufacturer too
-- On-fail artifacts: dump HTML + screenshot when brand+manufacturer missing
+- On-fail artifacts: dump HTML + screenshot when brand missing
 
 CSV columns written:
   store_chain, store_name, store_channel,
@@ -753,15 +753,13 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
                 for kk in ("currency","pricecurrency","currencycode","curr"):
                     if sniff.get(kk): currency = sniff.get(kk); break
 
-        # Last-resort: brand guess from product name
+        # Last-resort: brand guess from name (allow-list)
         if not brand and name:
             nkey = _norm_key(name)
             BRAND_GUESSES = [
                 "Rimi","Rimi Free From","Proceli","Tallegg","Tartu Mill","Oskar","ICA","Alpro","Yook",
                 "Alma","Farmi","Leibur","Nopri","Andri-Peedo","Jäämari","BabyCool","Äntu Gurmee",
                 "Tõrvaaugu","Jahu-Jaan","Viinamärdi","Kodutalu","Pik-Nik","Saaremaa",
-
-                # NEW: dairy & pantry brands that showed up in your skips
                 "Valio","Gefilus","Actimel","Danone","Kārums","Karums","Formagia","Merevaik",
                 "Rakvere","Tallegg","Santa Maria","Nestlé","Nestle","Nutella","Zewa","Grite"
             ]
@@ -879,12 +877,14 @@ def main():
     ap.add_argument("--output-csv", default=os.environ.get("OUTPUT_CSV","data/rimi_products.csv"))
     ap.add_argument("--skip-ext-file", default=os.environ.get("SKIP_EXT_FILE",""))
     ap.add_argument("--only-ext-file", default=os.environ.get("ONLY_EXT_FILE",""))
+    ap.add_argument("--pdp-workers", default="1", help="How many Playwright pages to reuse in round-robin for PDPs")
     args = ap.parse_args()
 
     page_limit   = int(args.page_limit or "0")
     max_products = int(args.max_products or "0")
     headless     = (str(args.headless or "1") != "0")
     req_delay    = float(args.req_delay or "0.5")
+    pdp_workers  = max(1, int(args.pdp_workers or "1"))
     cats         = read_categories(args.cats_file)
 
     skip_urls, skip_ext = read_skip_file(args.skip_ext_file)
@@ -892,6 +892,7 @@ def main():
 
     all_pdps: List[str] = []
     with sync_playwright() as pw:
+        # 1) Collect PDP URLs from categories
         for cat in cats:
             try:
                 print(f"[rimi] {cat}")
@@ -902,9 +903,10 @@ def main():
             except Exception as e:
                 print(f"[rimi] category error: {cat} → {e}", file=sys.stderr)
 
+        # 2) Dedup & filters
         seen, q = set(), []
         for u in all_pdps:
-            if u not in seen and _is_full_pdp(u):
+            if u and (u not in seen) and _is_full_pdp(u):
                 seen.add(u); q.append(u)
 
         if only_urls or only_ext:
@@ -925,20 +927,23 @@ def main():
             print(f"[rimi] skip filter: {skipped} URLs skipped (already priced/complete).")
             q = q2
 
+        # 3) PDP parsing with round-robin multi-page reuse
         browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
         ctx = browser.new_context(
             locale="et-EE",
             viewport={"width":1440,"height":900},
             user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"),
         )
-        page = ctx.new_page()
+        pages = [ctx.new_page() for _ in range(max(1, pdp_workers))]
 
         rows, total = [], 0
         for i, url in enumerate(q, 1):
+            page = pages[(i-1) % len(pages)]
             try:
                 row = parse_pdp_with_page(page, url, req_delay)
                 if row:
                     rows.append(row); total += 1
+                    print(f"[rimi] ok ext_id={row['ext_id']} brand={row['brand'][:40]}")
                     if len(rows) >= 120:
                         write_csv(rows, args.output_csv); rows = []
             except Exception:
