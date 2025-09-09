@@ -341,10 +341,10 @@ def parse_visible_for_ean(soup: BeautifulSoup) -> Optional[str]:
     m = EAN13_RE.search(soup.get_text(" ", strip=True))
     return m.group(0) if m else None
 
-# -------------------- UPDATED: aggressive live-DOM extractor ------------------
+# -------------------- aggressive live-DOM extractor ---------------------------
 
 def extract_brand_mfr_dom(page) -> Tuple[str, str]:
-    """Pull Kaubamärk/Tootja from the *live* DOM, including <dl><dt>/<dd>."""
+    """Pull Kaubamärk/Tootja from the live DOM, covering tables, dl/dt/dd and brand pills."""
     try:
         # Open details tab if present
         for label in ("Toote andmed", "Tooteinfo"):
@@ -383,6 +383,12 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             .replaceAll('š','s').replaceAll('ž','z');
 
           let brand = '', manufacturer = '';
+
+          // 0) Direct brand widgets/pills
+          const pill = document.querySelector(
+            ".product-page__brand a, [data-test*='brand'] a, a[href*='kaubam']"
+          );
+          if (pill && pick(pill.textContent).length > 1) brand = pick(pill.textContent);
 
           // 1) Parse tables
           document.querySelectorAll('tr').forEach(tr => {
@@ -747,33 +753,17 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
                 for kk in ("currency","pricecurrency","currencycode","curr"):
                     if sniff.get(kk): currency = sniff.get(kk); break
 
-        if not brand:
-            try:
-                got = page.evaluate("""
-                () => {
-                  const pick = (s) => (s||'').replace(/\\s+/g,' ').trim();
-                  const host = Array.from(document.querySelectorAll('section,div,p,span'))
-                    .find(el => /veel\\s+tooteid\\s+kaubam[aä]rgilt/i.test(el.textContent||''));
-                  if (!host) return '';
-                  let a = host.querySelector('a');
-                  if (!a) {
-                    const sib = host.nextElementSibling;
-                    if (sib && sib.tagName === 'A') a = sib;
-                  }
-                  return a ? pick(a.textContent) : '';
-                }
-                """)
-                cb = clean_brand(got or "")
-                if cb: brand = cb
-            except Exception:
-                pass
-
+        # Last-resort: brand guess from product name
         if not brand and name:
             nkey = _norm_key(name)
             BRAND_GUESSES = [
                 "Rimi","Rimi Free From","Proceli","Tallegg","Tartu Mill","Oskar","ICA","Alpro","Yook",
                 "Alma","Farmi","Leibur","Nopri","Andri-Peedo","Jäämari","BabyCool","Äntu Gurmee",
-                "Tõrvaaugu","Jahu-Jaan","Viinamärdi","Kodutalu","Pik-Nik","Saaremaa"
+                "Tõrvaaugu","Jahu-Jaan","Viinamärdi","Kodutalu","Pik-Nik","Saaremaa",
+
+                # NEW: dairy & pantry brands that showed up in your skips
+                "Valio","Gefilus","Actimel","Danone","Kārums","Karums","Formagia","Merevaik",
+                "Rakvere","Tallegg","Santa Maria","Nestlé","Nestle","Nutella","Zewa","Grite"
             ]
             for b in BRAND_GUESSES:
                 if re.search(r"\b" + re.escape(_norm_key(b)) + r"\b", nkey):
