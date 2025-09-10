@@ -135,9 +135,6 @@ _BAD_BRAND_TOKENS = [
     "close", "sulge", "continue"
 ]
 
-_UNSET_WORDS = {"määramata","maaramata","maaramata kaubamark","maaramata tootja",
-                "määramata kaubamärk","määramata tootja"}
-
 _NOISE_KEYS = {"kogus","netokogus","maht","pakend","neto","suurus","mahtuvus",
                "koostisosad","päritolumaa","paritolumaa","lisainfo","säilitustemperatuur",
                "sailitustemperatuur","toitumisalane teave","toitumisalane","energia","allergia"}
@@ -151,24 +148,60 @@ def _strip_label_prefix(s: str) -> str:
     s = re.sub(r"^\s*(kaubam[aä]rk|brand|br[äa]nd)\b\s*[:\-]?\s*", "", s, flags=re.I)
     return s.strip()
 
+# --- key normalizer + "Määramata" handling -----------------------------------
+
+def _norm_key(s: str) -> str:
+    s = (s or "").strip().lower()
+    return (s.replace("ä","a").replace("ö","o").replace("õ","o").replace("ü","u")
+             .replace("š","s").replace("ž","z"))
+
+# normalized tokens that mean "unspecified"
+_UNSET_TOKENS = {
+    _norm_key("Määramata"),
+    _norm_key("maaramata"),
+    _norm_key("Määramata kaubamärk"),
+    _norm_key("maaramata kaubamark"),
+    _norm_key("Määramata tootja"),
+    _norm_key("maaramata tootja"),
+    _norm_key("Määramata kaubamark"),
+}
+
+def _normalize_unset_token(s: str) -> Optional[str]:
+    """Return canonical text if `s` is an 'unspecified' value, else None."""
+    if _norm_key(s) in _UNSET_TOKENS:
+        return "Määramata"
+    return None
+
 def clean_brand(s: str) -> str:
     s = _strip_label_prefix(s).strip()
-    if not s: return ""
+    if not s:
+        return ""
+    norm_unset = _normalize_unset_token(s)
+    if norm_unset is not None:
+        return norm_unset  # treat as a valid brand
     low = s.lower()
-    if ":" in s or "\n" in s or len(s) > 50 or len(s) < 2: return ""
-    if not _has_letter(s): return ""
-    if any(tok in low for tok in _BAD_BRAND_TOKENS): return ""
-    if any(word in low for word in _UNSET_WORDS): return ""
+    if ":" in s or "\n" in s or len(s) > 50 or len(s) < 2:
+        return ""
+    if not _has_letter(s):
+        return ""
+    if any(tok in low for tok in _BAD_BRAND_TOKENS):
+        return ""
     return s
 
 def clean_manufacturer(s: str) -> str:
     s = _strip_label_prefix(s).strip()
+    if not s:
+        return ""
+    norm_unset = _normalize_unset_token(s)
+    if norm_unset is not None:
+        return norm_unset  # also allow "Määramata" as manufacturer
     low = s.lower()
-    if not s: return ""
-    if ":" in s or "\n" in s or len(s) > 80 or len(s) < 2: return ""
-    if not _has_letter(s): return ""
-    if any(tok in low for tok in _BAD_BRAND_TOKENS): return ""
-    if any(word in low for word in _UNSET_WORDS): return ""
+    if ":" in s or "\n" in s or len(s) > 80 or len(s) < 2:
+        return ""
+    if not _has_letter(s):
+        return ""
+    if any(tok in low for tok in _BAD_BRAND_TOKENS):
+        return ""
     return s
 
 DIGITS_ONLY = re.compile(r"\D+")
@@ -193,11 +226,6 @@ SIZE_IN_NAME_RE = re.compile(
     r'(\d+\s*[×x]\s*\d+[.,]?\d*\s?(?:g|kg|ml|l|tk)|\d+[.,]?\d*\s?(?:g|kg|ml|l|tk))\b',
     re.I
 )
-
-def _norm_key(s: str) -> str:
-    s = (s or "").strip().lower()
-    return (s.replace("ä","a").replace("ö","o").replace("õ","o").replace("ü","u")
-             .replace("š","s").replace("ž","z"))
 
 def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     brand = mfr = size_text = None
@@ -808,6 +836,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
         "source_url": src_url,
     }
 
+    # We accept brand "Määramata" as a valid (non-empty) brand.
     if not row["name"] or not row["brand"]:
         try:
             os.makedirs("artifacts", exist_ok=True)
