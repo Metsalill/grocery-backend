@@ -522,7 +522,9 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
     def router(route, request):
         host = urlparse(request.url).netloc.lower()
         if any(host.endswith(d) for d in BLOCK): return route.abort()
-        if request.resource_type in {"image","font","media","stylesheet","websocket","manifest"}: return route.abort()
+        # IMPORTANT: allow stylesheet and websocket so the grid renders
+        if request.resource_type in {"image","font","media","manifest"}: 
+            return route.abort()
         return route.continue_()
     ctx.route("**/*", router)
 
@@ -543,6 +545,12 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
                 continue
             auto_accept_overlays(page)
             wait_for_hydration(page)
+
+            # NEW: wait explicitly for product anchors to show up
+            try:
+                page.wait_for_selector("a[href*='/p/']", timeout=12000)
+            except Exception:
+                pass
 
             for sc in collect_subcategory_links(page, cat):
                 if sc not in visited:
