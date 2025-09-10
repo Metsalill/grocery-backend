@@ -836,16 +836,17 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
         "source_url": src_url,
     }
 
-    # We accept brand "Määramata" as a valid (non-empty) brand.
-    if not row["name"] or not row["brand"]:
+    # Accept empty brand (we will allow "Määramata" as valid and otherwise upsert logic will handle).
+    # Only skip if NAME is missing.
+    if not row["name"]:
         try:
             os.makedirs("artifacts", exist_ok=True)
-            with open(os.path.join("artifacts", f"{ext_id or 'unknown'}-nobrand.html"), "w", encoding="utf-8") as fh:
+            with open(os.path.join("artifacts", f"{ext_id or 'unknown'}-noname.html"), "w", encoding="utf-8") as fh:
                 fh.write(page.content())
-            page.screenshot(path=os.path.join("artifacts", f"{ext_id or 'unknown'}-nobrand.png"), full_page=True)
+            page.screenshot(path=os.path.join("artifacts", f"{ext_id or 'unknown'}-noname.png"), full_page=True)
         except Exception:
             pass
-        print(f"[rimi] skip (no brand) ext_id={ext_id} url={src_url}")
+        print(f"[rimi] skip (no name) ext_id={ext_id} url={src_url}")
         return None
 
     return row
