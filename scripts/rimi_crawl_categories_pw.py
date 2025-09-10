@@ -51,6 +51,7 @@ def norm_price_str(s: str) -> str:
     s = (s or "").strip()
     if not s:
         return s
+    # convert "1 99" → "1.99"
     if " " in s and s.replace(" ", "").isdigit() and len(s.replace(" ", "")) >= 3:
         digits = s.replace(" ", "")
         s = f"{digits[:-2]}.{digits[-2:]}"
@@ -125,6 +126,7 @@ def wait_for_hydration(page, timeout_ms: int = 15000) -> None:
     except Exception:
         pass
 
+# Brand noise guard
 _BAD_BRAND_TOKENS = [
     "tarneviis", "vali aeg",
     "ostukorv", "add to cart", "lisa ostukorvi",
@@ -342,7 +344,9 @@ def parse_visible_for_ean(soup: BeautifulSoup) -> Optional[str]:
 # -------------------- aggressive live-DOM extractor ---------------------------
 
 def extract_brand_mfr_dom(page) -> Tuple[str, str]:
+    """Pull Kaubamärk/Tootja from the live DOM, covering tables, dl/dt/dd and brand pills."""
     try:
+        # Open details tab if present
         for label in ("Toote andmed", "Tooteinfo"):
             try:
                 page.get_by_role("tab", name=re.compile(label, re.I)).click(timeout=700)
@@ -352,10 +356,12 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
                 except Exception:
                     pass
 
+        # Force lazy sections to render
         for _ in range(4):
             page.mouse.wheel(0, 1800)
             page.wait_for_timeout(250)
 
+        # Wait briefly for spec nodes
         try:
             page.wait_for_function(
                 """() => {
@@ -378,11 +384,13 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
 
           let brand = '', manufacturer = '';
 
+          // 0) Direct brand widgets/pills
           const pill = document.querySelector(
             ".product-page__brand a, [data-test*='brand'] a, a[href*='kaubam']"
           );
           if (pill && pick(pill.textContent).length > 1) brand = pick(pill.textContent);
 
+          // 1) Parse tables
           document.querySelectorAll('tr').forEach(tr => {
             const c = tr.querySelectorAll('th,td');
             if (!c.length) return;
@@ -392,6 +400,7 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             if (!manufacturer && /(tootja|manufacturer|producer|valmistaja)/.test(k)) manufacturer = v;
           });
 
+          // 2) Parse definition lists <dl>
           document.querySelectorAll('dl').forEach(dl => {
             const dts = dl.querySelectorAll('dt');
             const dds = dl.querySelectorAll('dd');
@@ -403,6 +412,7 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             }
           });
 
+          // 3) Generic "key: value" blobs
           if (!brand || !manufacturer) {
             const nodes = Array.from(document.querySelectorAll('.product-attributes__row, .product-details__row, .key-value, li, div, p, span')).slice(0, 3000);
             for (const n of nodes) {
@@ -417,6 +427,7 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             }
           }
 
+          // 4) "Veel tooteid kaubamärgilt <A>"
           if (!brand) {
             const host = Array.from(document.querySelectorAll('section,div,p,span'))
               .find(el => /veel\\s+tooteid\\s+kaubam[aä]rgilt/i.test(el.textContent||''));
@@ -742,6 +753,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
                 for kk in ("currency","pricecurrency","currencycode","curr"):
                     if sniff.get(kk): currency = sniff.get(kk); break
 
+        # Last-resort: brand guess from name (allow-list)
         if not brand and name:
             nkey = _norm_key(name)
             BRAND_GUESSES = [
@@ -796,7 +808,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
         "source_url": src_url,
     }
 
-    if not row["name"] or not row["brand"]):
+    if not row["name"] or not row["brand"]:
         try:
             os.makedirs("artifacts", exist_ok=True)
             with open(os.path.join("artifacts", f"{ext_id or 'unknown'}-nobrand.html"), "w", encoding="utf-8") as fh:
