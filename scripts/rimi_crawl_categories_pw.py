@@ -227,7 +227,7 @@ SIZE_IN_NAME_RE = re.compile(
     re.I
 )
 
-def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:  # noqa: E501
     brand = mfr = size_text = None
 
     def set_brand(v: str):
@@ -273,6 +273,12 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
         elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
         elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"): set_size(val)
 
+    # Explicit block: "Veel tooteid kaubamärgilt <a>Brand</a>"
+    if not brand:
+        a = soup.select_one(".other-from-brand a")
+        if a and a.get_text(strip=True):
+            set_brand(a.get_text(strip=True))
+
     if not brand:
         node = soup.find(string=re.compile(r"kaubam[aä]rgilt", re.I))
         if node and getattr(node, "parent", None):
@@ -311,7 +317,7 @@ def extract_ext_id(url: str) -> str:
         pass
     return ""
 
-def parse_jsonld_for_product_and_breadcrumbs_and_brand(soup: BeautifulSoup) -> Tuple[Dict[str,Any], List[str], Optional[str], Optional[str]]:
+def parse_jsonld_for_product_and_breadcrumbs_and_brand(soup: BeautifulSoup) -> Tuple[Dict[str,Any], List[str], Optional[str], Optional[str]]:  # noqa: E501
     flat: Dict[str, Any] = {}
     crumbs: List[str] = []
     brand = None
@@ -369,6 +375,42 @@ def parse_visible_for_ean(soup: BeautifulSoup) -> Optional[str]:
     m = EAN13_RE.search(soup.get_text(" ", strip=True))
     return m.group(0) if m else None
 
+# ---- cookie-blocked dataLayer parser (brand under <script type="text/plain">) ----
+
+DATA_LAYER_PUSH_RE = re.compile(r'dataLayer\.push\s*\(\s*(\{.*?\})\s*\)', re.DOTALL)
+
+def extract_brand_from_cookieblocked_datalayer_html(html: str) -> Optional[str]:
+    """
+    Some PDPs render GA dataLayer as a non-executed script:
+      <script type="text/plain" data-cookieconsent="statistics"> dataLayer.push({...}) </script>
+    We scan the HTML and pull impressions[0].brand (or any "brand": "...").
+    """
+    if not html:
+        return None
+    for m in DATA_LAYER_PUSH_RE.finditer(html):
+        blob = m.group(1)
+        # Try JSON first
+        try:
+            obj = json.loads(blob)
+            if isinstance(obj, dict):
+                ecom = obj.get("ecommerce") or {}
+                imps = ecom.get("impressions") or []
+                if imps and isinstance(imps, list) and isinstance(imps[0], dict):
+                    b = imps[0].get("brand")
+                    if b:
+                        b2 = clean_brand(str(b))
+                        if b2:
+                            return b2
+        except Exception:
+            pass
+        # Fallback regex
+        m2 = re.search(r'"brand"\s*:\s*"([^"]+)"', blob)
+        if m2:
+            b2 = clean_brand(m2.group(1))
+            if b2:
+                return b2
+    return None
+
 # -------------------- aggressive live-DOM extractor ---------------------------
 
 def extract_brand_mfr_dom(page) -> Tuple[str, str]:
@@ -412,9 +454,9 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
 
           let brand = '', manufacturer = '';
 
-          // 0) Direct brand widgets/pills
+          // 0) Direct brand widgets/pills (incl. "Veel tooteid kaubamärgilt" block)
           const pill = document.querySelector(
-            ".product-page__brand a, [data-test*='brand'] a, a[href*='kaubam']"
+            ".product-page__brand a, [data-test*='brand'] a, .other-from-brand a, a[href*='kaubam']"
           );
           if (pill && pick(pill.textContent).length > 1) brand = pick(pill.textContent);
 
@@ -455,7 +497,7 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             }
           }
 
-          // 4) "Veel tooteid kaubamärgilt <A>"
+          // 4) "Veel tooteid kaubamärgilt <A>" by text
           if (!brand) {
             const host = Array.from(document.querySelectorAll('section,div,p,span'))
               .find(el => /veel\\s+tooteid\\s+kaubam[aä]rgilt/i.test(el.textContent||''));
@@ -676,6 +718,12 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
         else:
             img = soup.find("img")
             if img: image_url = normalize_href(img.get("src") or img.get("data-src") or "") or ""
+
+        # Cookie-blocked dataLayer (brand in impressions[0].brand)
+        if not b_pre:
+            b_cookie = extract_brand_from_cookieblocked_datalayer_html(html)
+            if b_cookie:
+                b_pre = b_cookie
 
         flat_ld, crumbs_ld, brand_ld, manufacturer_ld = parse_jsonld_for_product_and_breadcrumbs_and_brand(soup)
         if flat_ld.get("price") and not price:
