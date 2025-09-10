@@ -21,7 +21,7 @@ CSV columns written:
 """
 
 from __future__ import annotations
-import argparse, os, re, csv, json, sys, traceback
+import argparse, os, re, csv, json, sys, traceback, atexit, time
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse, urljoin
 
@@ -51,7 +51,6 @@ def norm_price_str(s: str) -> str:
     s = (s or "").strip()
     if not s:
         return s
-    # convert "1 99" → "1.99"
     if " " in s and s.replace(" ", "").isdigit() and len(s.replace(" ", "")) >= 3:
         digits = s.replace(" ", "")
         s = f"{digits[:-2]}.{digits[-2:]}"
@@ -126,7 +125,6 @@ def wait_for_hydration(page, timeout_ms: int = 15000) -> None:
     except Exception:
         pass
 
-# Brand noise guard
 _BAD_BRAND_TOKENS = [
     "tarneviis", "vali aeg",
     "ostukorv", "add to cart", "lisa ostukorvi",
@@ -344,9 +342,7 @@ def parse_visible_for_ean(soup: BeautifulSoup) -> Optional[str]:
 # -------------------- aggressive live-DOM extractor ---------------------------
 
 def extract_brand_mfr_dom(page) -> Tuple[str, str]:
-    """Pull Kaubamärk/Tootja from the live DOM, covering tables, dl/dt/dd and brand pills."""
     try:
-        # Open details tab if present
         for label in ("Toote andmed", "Tooteinfo"):
             try:
                 page.get_by_role("tab", name=re.compile(label, re.I)).click(timeout=700)
@@ -356,12 +352,10 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
                 except Exception:
                     pass
 
-        # Force lazy sections to render
         for _ in range(4):
             page.mouse.wheel(0, 1800)
             page.wait_for_timeout(250)
 
-        # Wait briefly for spec nodes
         try:
             page.wait_for_function(
                 """() => {
@@ -384,13 +378,11 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
 
           let brand = '', manufacturer = '';
 
-          // 0) Direct brand widgets/pills
           const pill = document.querySelector(
             ".product-page__brand a, [data-test*='brand'] a, a[href*='kaubam']"
           );
           if (pill && pick(pill.textContent).length > 1) brand = pick(pill.textContent);
 
-          // 1) Parse tables
           document.querySelectorAll('tr').forEach(tr => {
             const c = tr.querySelectorAll('th,td');
             if (!c.length) return;
@@ -400,7 +392,6 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             if (!manufacturer && /(tootja|manufacturer|producer|valmistaja)/.test(k)) manufacturer = v;
           });
 
-          // 2) Parse definition lists <dl>
           document.querySelectorAll('dl').forEach(dl => {
             const dts = dl.querySelectorAll('dt');
             const dds = dl.querySelectorAll('dd');
@@ -412,7 +403,6 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             }
           });
 
-          // 3) Generic "key: value" blobs
           if (!brand || !manufacturer) {
             const nodes = Array.from(document.querySelectorAll('.product-attributes__row, .product-details__row, .key-value, li, div, p, span')).slice(0, 3000);
             for (const n of nodes) {
@@ -427,7 +417,6 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             }
           }
 
-          // 4) "Veel tooteid kaubamärgilt <A>"
           if (!brand) {
             const host = Array.from(document.querySelectorAll('section,div,p,span'))
               .find(el => /veel\\s+tooteid\\s+kaubam[aä]rgilt/i.test(el.textContent||''));
@@ -522,9 +511,7 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
     def router(route, request):
         host = urlparse(request.url).netloc.lower()
         if any(host.endswith(d) for d in BLOCK): return route.abort()
-        # IMPORTANT: allow stylesheet and websocket so the grid renders
-        if request.resource_type in {"image","font","media","manifest"}: 
-            return route.abort()
+        if request.resource_type in {"image","font","media","stylesheet","websocket","manifest"}: return route.abort()
         return route.continue_()
     ctx.route("**/*", router)
 
@@ -545,12 +532,6 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
                 continue
             auto_accept_overlays(page)
             wait_for_hydration(page)
-
-            # NEW: wait explicitly for product anchors to show up
-            try:
-                page.wait_for_selector("a[href*='/p/']", timeout=12000)
-            except Exception:
-                pass
 
             for sc in collect_subcategory_links(page, cat):
                 if sc not in visited:
@@ -761,7 +742,6 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
                 for kk in ("currency","pricecurrency","currencycode","curr"):
                     if sniff.get(kk): currency = sniff.get(kk); break
 
-        # Last-resort: brand guess from name (allow-list)
         if not brand and name:
             nkey = _norm_key(name)
             BRAND_GUESSES = [
@@ -816,7 +796,7 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
         "source_url": src_url,
     }
 
-    if not row["name"] or not row["brand"]:
+    if not row["name"] or not row["brand"]):
         try:
             os.makedirs("artifacts", exist_ok=True)
             with open(os.path.join("artifacts", f"{ext_id or 'unknown'}-nobrand.html"), "w", encoding="utf-8") as fh:
@@ -885,18 +865,31 @@ def main():
     ap.add_argument("--output-csv", default=os.environ.get("OUTPUT_CSV","data/rimi_products.csv"))
     ap.add_argument("--skip-ext-file", default=os.environ.get("SKIP_EXT_FILE",""))
     ap.add_argument("--only-ext-file", default=os.environ.get("ONLY_EXT_FILE",""))
-    ap.add_argument("--pdp-workers", default="1", help="How many Playwright pages to reuse in round-robin for PDPs")
+    ap.add_argument("--pdp-workers", default="2", help="How many Playwright pages to reuse in round-robin for PDPs")
     args = ap.parse_args()
 
     page_limit   = int(args.page_limit or "0")
     max_products = int(args.max_products or "0")
     headless     = (str(args.headless or "1") != "0")
     req_delay    = float(args.req_delay or "0.5")
-    pdp_workers  = max(1, int(args.pdp_workers or "1"))
+    pdp_workers  = max(1, int(args.pdp_workers or "2"))
     cats         = read_categories(args.cats_file)
 
     skip_urls, skip_ext = read_skip_file(args.skip_ext_file)
     only_urls, only_ext = read_only_file(args.only_ext_file)
+
+    # Buffered writer with periodic flush (row-count or time)
+    rows: List[Dict[str,str]] = []
+    last_flush = time.monotonic()
+
+    def flush():
+        nonlocal rows, last_flush
+        if rows:
+            write_csv(rows, args.output_csv)
+            rows = []
+        last_flush = time.monotonic()
+
+    atexit.register(flush)
 
     all_pdps: List[str] = []
     with sync_playwright() as pw:
@@ -944,7 +937,7 @@ def main():
         )
         pages = [ctx.new_page() for _ in range(max(1, pdp_workers))]
 
-        rows, total = [], 0
+        total = 0
         for i, url in enumerate(q, 1):
             page = pages[(i-1) % len(pages)]
             try:
@@ -952,16 +945,16 @@ def main():
                 if row:
                     rows.append(row); total += 1
                     print(f"[rimi] ok ext_id={row['ext_id']} brand={row['brand'][:40]}")
-                    if len(rows) >= 120:
-                        write_csv(rows, args.output_csv); rows = []
+                    # Flush triggers: every 25 rows or every 60s
+                    if len(rows) >= 25 or (time.monotonic() - last_flush) > 60:
+                        flush()
             except Exception:
                 traceback.print_exc()
             if max_products and total >= max_products:
                 break
 
-        if rows:
-            write_csv(rows, args.output_csv)
-
+        # Final flush happens via atexit as well, but do it explicitly:
+        flush()
         ctx.close(); browser.close()
 
     print(f"[rimi] wrote {total} product rows.")
