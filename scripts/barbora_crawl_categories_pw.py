@@ -3,7 +3,7 @@
 """
 Barbora.ee (Maxima EE) – Category → PDP crawler → CSV (no EAN parsing)
 
-CSV columns (exact order; ean_raw left blank intentionally to keep loaders stable):
+CSV columns (order fixed; ean_raw left blank intentionally):
   store_chain,store_name,store_channel,ext_id,ean_raw,sku_raw,
   name,size_text,brand,manufacturer,price,currency,
   image_url,category_path,category_leaf,source_url
@@ -70,14 +70,7 @@ def get_ext_id(url: str) -> str:
 
 
 def from_json_ld(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
-    out = {
-        "name": None,
-        "brand": None,
-        "manufacturer": None,
-        "image": None,
-        "price": None,
-        "currency": None,
-    }
+    out = {"name": None, "brand": None, "manufacturer": None, "image": None, "price": None, "currency": None}
     for tag in soup.find_all("script", {"type": "application/ld+json"}):
         try:
             data = json.loads(tag.string or "")
@@ -122,7 +115,6 @@ def from_json_ld(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
 
 def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
     out = {"brand": None, "manufacturer": None, "size": None, "sku": None}
-    # Inspect definition lists/tables: dt/th headers; dd/td values
     for head in soup.select("dt, th"):
         k = norm(text_of(head))
         val_el = head.find_next_sibling(["dd", "td"])
@@ -305,6 +297,10 @@ def crawl(args) -> None:
     skip_ext: set[str] = set(read_lines(args.skip_ext_file)) if args.skip_ext_file and os.path.exists(args.skip_ext_file) else set()
     only_ext: set[str] = set(read_lines(args.only_ext_file)) if args.only_ext_file and os.path.exists(args.only_ext_file) else set()
 
+    only_urls: List[str] = []
+    if args.only_url_file and os.path.exists(args.only_url_file):
+        only_urls = read_lines(args.only_url_file)
+
     out_rows: List[List[str]] = []
     total = 0
 
@@ -316,47 +312,32 @@ def crawl(args) -> None:
         ctx = browser.new_context(locale="et-EE")
         page = ctx.new_page()
 
-        for idx, cat in enumerate(cats, start=1):
-            if int(args.page_limit) and idx > int(args.page_limit):
-                break
-
-            leaf_seg = cat.strip("/").split("/")[-1]
-            category_leaf = leaf_seg.replace("-", " ").title()
-            category_path = ""  # optional
-
-            prods = list_products_from_category(page, cat, req_delay)
-            if not prods:
-                continue
-
-            for url, listing_title in prods:
+        if only_urls:
+            # -------- URL-driven mode (metadata fast path) --------
+            for url in only_urls:
                 if int(args.max_products) and total >= int(args.max_products):
                     break
-
                 ext_id = get_ext_id(url)
-
                 if skip_ext and ext_id in skip_ext:
                     continue
-                if only_ext and ext_id not in only_ext:
-                    continue
+                # Derive a light-weight leaf from URL path (best effort)
+                path_parts = [p for p in urlparse(url).path.strip("/").split("/") if p]
+                category_leaf = (path_parts[-2] if len(path_parts) >= 2 else (path_parts[-1] if path_parts else "")).replace("-", " ").title()
 
                 try:
-                    data = extract_from_pdp(page, url, listing_title, category_leaf, req_delay)
+                    data = extract_from_pdp(page, url, listing_title=None, category_leaf=category_leaf, req_delay=req_delay)
                 except PWTimeout:
                     continue
                 except Exception as e:
                     print(f"[warn] PDP parse failed for {ext_id}: {e}", file=sys.stderr)
                     continue
 
+                # Guard against accidental category-as-name equality (rare on PDPs)
                 if norm(data["name"]) == norm(category_leaf):
-                    # avoid category-as-name leakage
-                    continue
-
+                    pass  # keep anyway in URL mode (category_leaf is heuristic)
                 row = [
-                    STORE_CHAIN,
-                    STORE_NAME,
-                    STORE_CHANNEL,
-                    ext_id,
-                    "",  # ean_raw intentionally blank (Barbora does not expose)
+                    STORE_CHAIN, STORE_NAME, STORE_CHANNEL, ext_id,
+                    "",  # ean_raw intentionally blank
                     data.get("sku_raw") or "",
                     data.get("name") or "",
                     data.get("size_text") or "",
@@ -365,7 +346,7 @@ def crawl(args) -> None:
                     data.get("price") or "",
                     data.get("currency") or "EUR",
                     data.get("image_url") or "",
-                    category_path,
+                    "",  # category_path not built
                     category_leaf,
                     url,
                 ]
@@ -373,6 +354,64 @@ def crawl(args) -> None:
                 total += 1
                 if req_delay:
                     time.sleep(req_delay)
+
+        else:
+            # -------- Category-driven mode --------
+            for idx, cat in enumerate(cats, start=1):
+                if int(args.page_limit) and idx > int(args.page_limit):
+                    break
+
+                leaf_seg = cat.strip("/").split("/")[-1]
+                category_leaf = leaf_seg.replace("-", " ").title()
+                category_path = ""  # optional
+
+                prods = list_products_from_category(page, cat, req_delay)
+                if not prods:
+                    continue
+
+                for url, listing_title in prods:
+                    if int(args.max_products) and total >= int(args.max_products):
+                        break
+
+                    ext_id = get_ext_id(url)
+                    if skip_ext and ext_id in skip_ext:
+                        continue
+                    if only_ext and ext_id not in only_ext:
+                        continue
+
+                    try:
+                        data = extract_from_pdp(page, url, listing_title, category_leaf, req_delay)
+                    except PWTimeout:
+                        continue
+                    except Exception as e:
+                        print(f"[warn] PDP parse failed for {ext_id}: {e}", file=sys.stderr)
+                        continue
+
+                    if norm(data["name"]) == norm(category_leaf):
+                        continue  # avoid category-as-name leakage
+
+                    row = [
+                        STORE_CHAIN,
+                        STORE_NAME,
+                        STORE_CHANNEL,
+                        ext_id,
+                        "",  # ean_raw intentionally blank
+                        data.get("sku_raw") or "",
+                        data.get("name") or "",
+                        data.get("size_text") or "",
+                        data.get("brand") or "",
+                        data.get("manufacturer") or "",
+                        data.get("price") or "",
+                        data.get("currency") or "EUR",
+                        data.get("image_url") or "",
+                        category_path,
+                        category_leaf,
+                        url,
+                    ]
+                    out_rows.append(row)
+                    total += 1
+                    if req_delay:
+                        time.sleep(req_delay)
 
         write_csv(out_rows, args.output_csv)
 
@@ -387,6 +426,7 @@ def build_argparser() -> argparse.ArgumentParser:
     p.add_argument("--output-csv", default="data/barbora_products.csv", help="Output CSV path")
     p.add_argument("--skip-ext-file", default="", help="Optional file with ext_ids to skip (one per line)")
     p.add_argument("--only-ext-file", default="", help="Optional file with ext_ids to include exclusively")
+    p.add_argument("--only-url-file", default="", help="Optional file with PDP URLs to visit exclusively")
     return p
 
 
