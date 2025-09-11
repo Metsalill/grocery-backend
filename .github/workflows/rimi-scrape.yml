@@ -41,6 +41,8 @@ concurrency:
 jobs:
   crawl-and-upsert:
     name: crawl-and-upsert (shard ${{ matrix.shard }})
+    # Run all shards for prices; only shard 0 for metadata
+    if: ${{ (github.event.inputs.mode || 'prices') != 'metadata' || matrix.shard == 0 }}
     runs-on: ubuntu-latest
     timeout-minutes: 110
 
@@ -123,7 +125,8 @@ jobs:
       - name: Prepare category list (all -> shard slice)
         shell: bash
         env:
-          SHARDS: 4
+          # Use SHARDS=1 in metadata (single runner covers all categories), else 4
+          SHARDS: ${{ ((github.event.inputs.mode || 'prices') == 'metadata') && '1' || '4' }}
         run: |
           set -euo pipefail
           if [ -n "${{ github.event.inputs.categories_multiline }}" ]; then
@@ -221,7 +224,8 @@ jobs:
         if: ${{ env.MODE_IS_METADATA == 'true' }}
         shell: bash
         env:
-          SHARDS: 4
+          # SHARDS=1 ensures all targets belong to shard 0 in metadata mode
+          SHARDS: ${{ ((github.event.inputs.mode || 'prices') == 'metadata') && '1' || '4' }}
         run: |
           set -euo pipefail
           if [ -s data/rimi_only_ext_ids.txt ]; then
