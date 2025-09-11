@@ -206,21 +206,15 @@ jobs:
         run: |
           set -euo pipefail
           : > data/rimi_only_ext_ids.txt
-          psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/rimi_only_ext_ids.txt
-          WITH all_ids AS (
-            SELECT ext_id FROM public.rimi_candidates
-            UNION
-            SELECT ext_id FROM public.staging_rimi_products
-          )
-          SELECT a.ext_id
-          FROM all_ids a
-          LEFT JOIN public.rimi_candidates rc ON rc.ext_id = a.ext_id
-          LEFT JOIN public.staging_rimi_products sp ON sp.ext_id = a.ext_id
-          WHERE
-            COALESCE(NULLIF(btrim(COALESCE(rc.brand, sp.brand, '')),''), NULL) IS NULL
-            OR COALESCE(NULLIF(btrim(COALESCE(rc.name,  sp.name,  '')),''), NULL) IS NULL
+          Q="
+          SELECT ext_id
+          FROM public.rimi_side_norm
+          WHERE COALESCE(BTRIM(name),'') = '' OR COALESCE(BTRIM(brand),'') = ''
           ORDER BY 1;
-          SQL
+          "
+          echo "Using target SQL:"
+          echo "$Q"
+          psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 -c "$Q" > data/rimi_only_ext_ids.txt
           echo "Target list rows (missing NAME/BRAND): $(wc -l < data/rimi_only_ext_ids.txt)"
 
       - name: Shard ONLY list for this runner (report only)
