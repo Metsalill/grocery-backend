@@ -42,12 +42,15 @@ jobs:
   crawl-and-upsert:
     name: crawl-and-upsert (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
-    timeout-minutes: 150   # allow up to 120m crawler timeout + overhead
+    # was 150; extend so shards + DB steps can complete
+    timeout-minutes: 330
 
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3]   # re-enable 4 shards for metadata, too
+        # increase sharding to shorten each slice
+        shard: [0, 1, 2, 3, 4, 5]
+      max-parallel: 6
 
     env:
       PYTHONUNBUFFERED: "1"
@@ -57,6 +60,8 @@ jobs:
       MODE: ${{ github.event.inputs.mode || 'prices' }}
       MODE_IS_PRICES: ${{ (github.event.inputs.mode || 'prices') == 'prices' }}
       MODE_IS_METADATA: ${{ (github.event.inputs.mode || 'prices') == 'metadata' }}
+      # Soft per-shard time budget so later steps still execute
+      SOFT_TIME_BUDGET_MIN: "140"
 
     steps:
       - name: Checkout
@@ -123,7 +128,7 @@ jobs:
       - name: Prepare category list (all -> shard slice)
         shell: bash
         env:
-          SHARDS: 4
+          SHARDS: 6
         run: |
           set -euo pipefail
           if [ -n "${{ github.event.inputs.categories_multiline }}" ]; then
@@ -221,7 +226,7 @@ jobs:
         if: ${{ env.MODE_IS_METADATA == 'true' }}
         shell: bash
         env:
-          SHARDS: 4
+          SHARDS: 6
         run: |
           set -euo pipefail
           if [ -s data/rimi_only_ext_ids.txt ]; then
@@ -241,6 +246,7 @@ jobs:
           MAX_PRODUCTS: ${{ github.event.inputs.max_products }}
           HEADLESS: ${{ github.event.inputs.headless }}
           PDP_WORKERS: ${{ github.event.inputs.pdp_workers }}
+          TIME_BUDGET: ${{ env.SOFT_TIME_BUDGET_MIN }}
         run: |
           set -euo pipefail
           echo "::group::Runtime info"
@@ -249,11 +255,12 @@ jobs:
           echo "MODE=${MODE}"
           echo "::endgroup::"
 
-          REQ_DELAY="${REQ_DELAY:-0.15}"   # new default
+          REQ_DELAY="${REQ_DELAY:-0.15}"
           PAGE_LIMIT="${PAGE_LIMIT:-0}"
           MAX_PRODUCTS="${MAX_PRODUCTS:-0}"
           HEADLESS="${HEADLESS:-1}"
-          PDP_WORKERS="${PDP_WORKERS:-4}"  # new default
+          PDP_WORKERS="${PDP_WORKERS:-4}"
+          TIME_BUDGET="${TIME_BUDGET:-140}"
 
           SKIP_FLAG=()
           if [ "${MODE}" = "prices" ] && [ -s data/rimi_skip_ext_ids.txt ]; then
@@ -275,7 +282,8 @@ jobs:
 
           set +e
           set +o pipefail
-          stdbuf -oL -eL timeout -k 60s 120m \   # raised to 120m
+          # soft kill a bit before the job's global timeout so later steps run
+          stdbuf -oL -eL timeout -k 90s "${TIME_BUDGET}m" \
             python -u scripts/rimi_crawl_categories_pw.py \
               --cats-file data/rimi_categories.txt \
               --page-limit "$PAGE_LIMIT" \
@@ -304,7 +312,7 @@ jobs:
           echo "::endgroup::"
 
           if [ "$status" -eq 124 ]; then
-            echo "::warning::Crawler hit the time budget (timeout 120m). Continuing with partial results."
+            echo "::warning::Crawler hit the time budget (timeout ${TIME_BUDGET}m). Continuing with partial results."
           elif [ "$status" -ne 0 ]; then
             echo "::warning::Crawler exited non-zero ($status); continuing"
           fi
