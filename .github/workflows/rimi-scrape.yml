@@ -1,575 +1,575 @@
 name: "Rimi - Category Crawl (Playwright) + optional DB upsert"
 
 on:
-workflow_dispatch:
-inputs:
-mode:
-description: "prices (default) or metadata (crawl to improve NAME/BRAND)"
-required: false
-default: "prices"
-categories_multiline:
-description: "Rimi category URLs (one per line). If omitted, we use the SH-coded roots."
-required: false
-default: ""
-page_limit:
-description: "Max pages per category (0 = all)"
-required: false
-default: "0"
-max_products:
-description: "Hard cap on total PDPs (0 = unlimited)"
-required: false
-default: "0"
-headless:
-description: "Headless browser (1/0)"
-required: false
-default: "1"
-req_delay:
-description: "Delay between page ops (sec)"
-required: false
-default: "0.25"
-pdp_workers:
-description: "Number of Playwright pages to reuse for PDPs (>=1)"
-required: false
-default: "2"
-schedule:
-- cron: "19 3 * * 0" # Sun at 03:19 UTC
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "prices (default) or metadata (crawl to improve NAME/BRAND)"
+        required: false
+        default: "prices"
+      categories_multiline:
+        description: "Rimi category URLs (one per line). If omitted, we use the SH-coded roots."
+        required: false
+        default: ""
+      page_limit:
+        description: "Max pages per category (0 = all)"
+        required: false
+        default: "0"
+      max_products:
+        description: "Hard cap on total PDPs (0 = unlimited)"
+        required: false
+        default: "0"
+      headless:
+        description: "Headless browser (1/0)"
+        required: false
+        default: "1"
+      req_delay:
+        description: "Delay between page ops (sec)"
+        required: false
+        default: "0.25"
+      pdp_workers:
+        description: "Number of Playwright pages to reuse for PDPs (>=1)"
+        required: false
+        default: "2"
+  schedule:
+    - cron: "19 3 * * 0"   # Sun at 03:19 UTC
 
 concurrency:
-group: rimi-category-crawl-${{ github.event.inputs.mode || 'prices' }}
-cancel-in-progress: true
+  group: rimi-category-crawl-${{ github.event.inputs.mode || 'prices' }}
+  cancel-in-progress: true
 
 jobs:
-crawl-and-upsert:
-name: crawl-and-upsert (shard ${{ matrix.shard }})
-runs-on: ubuntu-latest
-timeout-minutes: 110
+  crawl-and-upsert:
+    name: crawl-and-upsert (shard ${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
 
-strategy:
-  fail-fast: false
-  matrix:
-    shard: [0, 1, 2, 3]
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
 
-env:
-  PYTHONUNBUFFERED: "1"
-  OUTPUT_CSV: data/rimi_products.csv
-  SHARD: ${{ matrix.shard }}
-  DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-  MODE: ${{ github.event.inputs.mode || 'prices' }}
-  MODE_IS_PRICES: ${{ (github.event.inputs.mode || 'prices') == 'prices' }}
-  MODE_IS_METADATA: ${{ (github.event.inputs.mode || 'prices') == 'metadata' }}
-
-steps:
-  - name: Checkout
-    uses: actions/checkout@v4
-
-  - name: Setup Python
-    uses: actions/setup-python@v5
-    with:
-      python-version: "3.11"
-
-  - name: Cache pip
-    uses: actions/cache@v4
-    with:
-      path: ~/.cache/pip
-      key: ${{ runner.os }}-pip-${{ hashFiles('requirements-scraper.txt', 'requirements.txt', 'scripts/rimi_crawl_categories_pw.py') }}
-      restore-keys: |
-        ${{ runner.os }}-pip-
-
-  - name: Install deps (Playwright + libs) — always ensure bs4/lxml present
-    shell: bash
-    run: |
-      set -euo pipefail
-      python -m pip install --upgrade pip setuptools wheel
-      if [ -f requirements-scraper.txt ]; then
-        echo "Installing from requirements-scraper.txt"
-        pip install -r requirements-scraper.txt
-      elif [ -f requirements.txt ]; then
-        echo "Installing from requirements.txt"
-        pip install -r requirements.txt
-      else
-        echo "No requirements file found; proceeding with minimal deps"
-      fi
-      # Hard requirements for the crawler:
-      pip install --upgrade playwright beautifulsoup4 lxml
-      # Install Chromium and OS deps for Playwright
-      python -m playwright install --with-deps chromium
-      # Sanity: verify imports (keep it to a single line)
-      python -c "import bs4, lxml; from playwright import sync_api as _; print('Deps OK: bs4, lxml, playwright')"
-
-  - name: Verify scraper exists
-    shell: bash
-    run: |
-      set -euo pipefail
-      if [ ! -f scripts/rimi_crawl_categories_pw.py ]; then
-        echo "::error::scripts/rimi_crawl_categories_pw.py missing"
-        exit 1
-      fi
-      python -m py_compile scripts/rimi_crawl_categories_pw.py
-      chmod +x scripts/rimi_crawl_categories_pw.py
-
-  - name: Prepare workspace
-    shell: bash
-    run: |
-      set -euo pipefail
-      rm -rf data artifacts
-      mkdir -p data artifacts
-
-  - name: Show selected mode
-    run: |
-      echo "MODE=${MODE}"
-      echo "MODE_IS_PRICES=${MODE_IS_PRICES}"
-      echo "MODE_IS_METADATA=${MODE_IS_METADATA}"
-
-  - name: Prepare category list (all -> shard slice)
-    shell: bash
     env:
-      SHARDS: 4
-    run: |
-      set -euo pipefail
-      if [ -n "${{ github.event.inputs.categories_multiline }}" ]; then
-        printf "%s\n" "${{ github.event.inputs.categories_multiline }}" \
-          | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/rimi_categories_all.txt
-        echo "Using categories from input."
-      elif [ -f data/rimi_categories.txt ]; then
-        cp -f data/rimi_categories.txt data/rimi_categories_all.txt
-        echo "Using repo file data/rimi_categories.txt"
-      else
-        printf '%s\n' \
-          "https://www.rimi.ee/epood/ee/tooted/puuviljad-koogiviljad-lilled/c/SH-12" \
-          "https://www.rimi.ee/epood/ee/tooted/talu-toidab/c/SH-19" \
-          "https://www.rimi.ee/epood/ee/tooted/piimatooted-munad-juust/c/SH-11" \
-          "https://www.rimi.ee/epood/ee/tooted/liha--ja-kalatooted/c/SH-8" \
-          "https://www.rimi.ee/epood/ee/tooted/vegantooted/c/SH-17" \
-          "https://www.rimi.ee/epood/ee/tooted/leivad-saiad-kondiitritooted/c/SH-6" \
-          "https://www.rimi.ee/epood/ee/tooted/valmistoit/c/SH-16" \
-          "https://www.rimi.ee/epood/ee/tooted/kauasailivad-toidukaubad/c/SH-13" \
-          "https://www.rimi.ee/epood/ee/tooted/maiustused-ja-snakid/c/SH-9" \
-          "https://www.rimi.ee/epood/ee/tooted/kulmutatud-toidukaubad/c/SH-4" \
-          "https://www.rimi.ee/epood/ee/tooted/joogid/c/SH-3" \
-          "https://www.rimi.ee/epood/ee/tooted/puhastusvahendid/c/SH-14" \
-          "https://www.rimi.ee/epood/ee/tooted/lastekaubad/c/SH-5" \
-          "https://www.rimi.ee/epood/ee/tooted/alkohol/c/SH-1" \
-          > data/rimi_categories_all.txt
-        echo "Using built-in SH-coded category set."
-      fi
+      PYTHONUNBUFFERED: "1"
+      OUTPUT_CSV: data/rimi_products.csv
+      SHARD: ${{ matrix.shard }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      MODE: ${{ github.event.inputs.mode || 'prices' }}
+      MODE_IS_PRICES: ${{ (github.event.inputs.mode || 'prices') == 'prices' }}
+      MODE_IS_METADATA: ${{ (github.event.inputs.mode || 'prices') == 'metadata' }}
 
-      : "${SHARD:?SHARD env is required}"
-      awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
-        data/rimi_categories_all.txt > data/rimi_categories.txt
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      echo "TOTAL categories: $(wc -l < data/rimi_categories_all.txt)"
-      echo "Sharding: SHARD=$SHARD / SHARDS=$SHARDS"
-      echo "Slice count: $(wc -l < data/rimi_categories.txt)"
-      echo "First 12 from slice:"
-      nl -ba data/rimi_categories.txt | sed -n '1,12p' || true
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-  - name: Build skip list (have NAME+BRAND)
-    if: ${{ env.DATABASE_URL != '' && env.MODE_IS_PRICES == 'true' }}
-    shell: bash
-    run: |
-      set -euo pipefail
-      : > data/rimi_skip_ext_ids.txt
-      psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/rimi_skip_ext_ids.txt
-      WITH priced_from_prices AS (
-        SELECT DISTINCT (regexp_match(p.source_url, '/p/([0-9]+)'))[1] AS ext_id
-        FROM public.prices p
-        JOIN public.stores s ON s.id = p.store_id
-        WHERE s.chain='Rimi' AND s.is_online = TRUE
-          AND p.source_url ~ '/p/[0-9]+'
-      ),
-      priced_from_candidates AS (
-        SELECT DISTINCT ext_id::text
-        FROM public.rimi_candidates
-        WHERE COALESCE(price,0) > 0
-          AND COALESCE(ext_id,'') <> ''
-      ),
-      priced AS (
-        SELECT ext_id FROM priced_from_prices
-        UNION
-        SELECT ext_id FROM priced_from_candidates
-      )
-      SELECT pr.ext_id
-      FROM priced pr
-      LEFT JOIN public.rimi_candidates rc ON rc.ext_id = pr.ext_id
-      LEFT JOIN public.staging_rimi_products sp ON sp.ext_id = pr.ext_id
-      WHERE
-        COALESCE(NULLIF(btrim(COALESCE(rc.name,  sp.name,  '')),''), NULL) IS NOT NULL
-        AND COALESCE(NULLIF(btrim(COALESCE(rc.brand, sp.brand, '')),''), NULL) IS NOT NULL
-      ORDER BY 1;
-      SQL
-      echo "Skip list rows (priced & have NAME+BRAND): $(wc -l < data/rimi_skip_ext_ids.txt)"
-      echo "$(wc -l < data/rimi_skip_ext_ids.txt)" > data/_skip_count.txt
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements-scraper.txt', 'requirements.txt', 'scripts/rimi_crawl_categories_pw.py') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-  - name: Build target list (missing NAME or BRAND)
-    if: ${{ env.DATABASE_URL != '' && env.MODE_IS_METADATA == 'true' }}
-    shell: bash
-    run: |
-      set -euo pipefail
-      : > data/rimi_only_ext_ids.txt
-      psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/rimi_only_ext_ids.txt
-      SELECT ext_id
-      FROM public.rimi_side_norm
-      WHERE COALESCE(BTRIM(name),  '') = ''
-         OR COALESCE(BTRIM(brand), '') = ''
-      ORDER BY 1;
-      SQL
-      echo "Target list rows (missing NAME/BRAND): $(wc -l < data/rimi_only_ext_ids.txt)"
+      - name: Install deps (Playwright + libs) — always ensure bs4/lxml present
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip setuptools wheel
+          if [ -f requirements-scraper.txt ]; then
+            echo "Installing from requirements-scraper.txt"
+            pip install -r requirements-scraper.txt
+          elif [ -f requirements.txt ]; then
+            echo "Installing from requirements.txt"
+            pip install -r requirements.txt
+          else
+            echo "No requirements file found; proceeding with minimal deps"
+          fi
+          # Hard requirements for the crawler:
+          pip install --upgrade playwright beautifulsoup4 lxml
+          # Install Chromium and OS deps for Playwright
+          python -m playwright install --with-deps chromium
+          # Sanity: verify imports (keep it to a single line)
+          python -c "import bs4, lxml; from playwright import sync_api as _; print('Deps OK: bs4, lxml, playwright')"
 
-  - name: Shard ONLY list for this runner (report only)
-    if: ${{ env.MODE_IS_METADATA == 'true' }}
-    shell: bash
-    env:
-      SHARDS: 4
-    run: |
-      set -euo pipefail
-      if [ -s data/rimi_only_ext_ids.txt ]; then
-        awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
-          data/rimi_only_ext_ids.txt > data/rimi_only_ext_ids.sharded.txt
-        echo "Sharded ONLY list size (this runner): $(wc -l < data/rimi_only_ext_ids.sharded.txt)"
-      else
-        : > data/rimi_only_ext_ids.sharded.txt
-        echo "Sharded ONLY list empty."
-      fi
+      - name: Verify scraper exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f scripts/rimi_crawl_categories_pw.py ]; then
+            echo "::error::scripts/rimi_crawl_categories_pw.py missing"
+            exit 1
+          fi
+          python -m py_compile scripts/rimi_crawl_categories_pw.py
+          chmod +x scripts/rimi_crawl_categories_pw.py
 
-  - name: Crawl Rimi categories (Playwright)
-    shell: bash
-    env:
-      REQ_DELAY: ${{ github.event.inputs.req_delay }}
-      PAGE_LIMIT: ${{ github.event.inputs.page_limit }}
-      MAX_PRODUCTS: ${{ github.event.inputs.max_products }}
-      HEADLESS: ${{ github.event.inputs.headless }}
-      PDP_WORKERS: ${{ github.event.inputs.pdp_workers }}
-    run: |
-      set -euo pipefail
-      echo "::group::Runtime info"
-      python --version
-      echo "Start (UTC): $(date -u)"
-      echo "MODE=${MODE}"
-      echo "::endgroup::"
+      - name: Prepare workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf data artifacts
+          mkdir -p data artifacts
 
-      REQ_DELAY="${REQ_DELAY:-0.25}"
-      PAGE_LIMIT="${PAGE_LIMIT:-0}"
-      MAX_PRODUCTS="${MAX_PRODUCTS:-0}"
-      HEADLESS="${HEADLESS:-1}"
-      PDP_WORKERS="${PDP_WORKERS:-2}"
+      - name: Show selected mode
+        run: |
+          echo "MODE=${MODE}"
+          echo "MODE_IS_PRICES=${MODE_IS_PRICES}"
+          echo "MODE_IS_METADATA=${MODE_IS_METADATA}"
 
-      SKIP_FLAG=()
-      if [ "${MODE}" = "prices" ] && [ -s data/rimi_skip_ext_ids.txt ]; then
-        echo "Using skip list: $(wc -l < data/rimi_skip_ext_ids.txt) ext_ids"
-        SKIP_FLAG=(--skip-ext-file data/rimi_skip_ext_ids.txt)
-      fi
+      - name: Prepare category list (all -> shard slice)
+        shell: bash
+        env:
+          SHARDS: 4
+        run: |
+          set -euo pipefail
+          if [ -n "${{ github.event.inputs.categories_multiline }}" ]; then
+            printf "%s\n" "${{ github.event.inputs.categories_multiline }}" \
+              | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/rimi_categories_all.txt
+            echo "Using categories from input."
+          elif [ -f data/rimi_categories.txt ]; then
+            cp -f data/rimi_categories.txt data/rimi_categories_all.txt
+            echo "Using repo file data/rimi_categories.txt"
+          else
+            printf '%s\n' \
+              "https://www.rimi.ee/epood/ee/tooted/puuviljad-koogiviljad-lilled/c/SH-12" \
+              "https://www.rimi.ee/epood/ee/tooted/talu-toidab/c/SH-19" \
+              "https://www.rimi.ee/epood/ee/tooted/piimatooted-munad-juust/c/SH-11" \
+              "https://www.rimi.ee/epood/ee/tooted/liha--ja-kalatooted/c/SH-8" \
+              "https://www.rimi.ee/epood/ee/tooted/vegantooted/c/SH-17" \
+              "https://www.rimi.ee/epood/ee/tooted/leivad-saiad-kondiitritooted/c/SH-6" \
+              "https://www.rimi.ee/epood/ee/tooted/valmistoit/c/SH-16" \
+              "https://www.rimi.ee/epood/ee/tooted/kauasailivad-toidukaubad/c/SH-13" \
+              "https://www.rimi.ee/epood/ee/tooted/maiustused-ja-snakid/c/SH-9" \
+              "https://www.rimi.ee/epood/ee/tooted/kulmutatud-toidukaubad/c/SH-4" \
+              "https://www.rimi.ee/epood/ee/tooted/joogid/c/SH-3" \
+              "https://www.rimi.ee/epood/ee/tooted/puhastusvahendid/c/SH-14" \
+              "https://www.rimi.ee/epood/ee/tooted/lastekaubad/c/SH-5" \
+              "https://www.rimi.ee/epood/ee/tooted/alkohol/c/SH-1" \
+              > data/rimi_categories_all.txt
+            echo "Using built-in SH-coded category set."
+          fi
 
-      set +e
-      set +o pipefail
-      stdbuf -oL -eL timeout -k 60s 80m \
-        python -u scripts/rimi_crawl_categories_pw.py \
-          --cats-file data/rimi_categories.txt \
-          --page-limit "$PAGE_LIMIT" \
-          --max-products "$MAX_PRODUCTS" \
-          --headless "$HEADLESS" \
-          --req-delay "$REQ_DELAY" \
-          --pdp-workers "$PDP_WORKERS" \
-          --output-csv "$OUTPUT_CSV" \
-          "${SKIP_FLAG[@]}" \
-        > >(tee data/rimi_run.log) 2>data/rimi_run.err
-      status=${PIPESTATUS[0]}
-      set -o pipefail
-      set -e
+          : "${SHARD:?SHARD env is required}"
+          awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
+            data/rimi_categories_all.txt > data/rimi_categories.txt
 
-      echo "End (UTC): $(date -u) - crawler exit code: ${status}"
-      echo "::group::Crawler outputs"
-      ls -lah data || true
-      if [ -f "$OUTPUT_CSV" ]; then
-        echo "CSV size:"; wc -l "$OUTPUT_CSV"; du -h "$OUTPUT_CSV"
-      else
-        echo "CSV not found"
-      fi
-      [ -f data/rimi_run.log ] && { echo "Log size:"; du -h data/rimi_run.log; } || echo "Log not found"
-      [ -s data/rimi_run.err ] && { echo "---- stderr tail ----"; tail -n 120 data/rimi_run.err; } || true
-      echo "::endgroup::"
+          echo "TOTAL categories: $(wc -l < data/rimi_categories_all.txt)"
+          echo "Sharding: SHARD=$SHARD / SHARDS=$SHARDS"
+          echo "Slice count: $(wc -l < data/rimi_categories.txt)"
+          echo "First 12 from slice:"
+          nl -ba data/rimi_categories.txt | sed -n '1,12p' || true
 
-      if [ "$status" -eq 124 ]; then
-        echo "::warning::Crawler hit the time budget (timeout 80m). Continuing with partial results."
-      elif [ "$status" -ne 0 ]; then
-        echo "::warning::Crawler exited non-zero ($status); continuing"
-      fi
+      - name: Build skip list (have NAME+BRAND)
+        if: ${{ env.DATABASE_URL != '' && env.MODE_IS_PRICES == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > data/rimi_skip_ext_ids.txt
+          psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/rimi_skip_ext_ids.txt
+          WITH priced_from_prices AS (
+            SELECT DISTINCT (regexp_match(p.source_url, '/p/([0-9]+)'))[1] AS ext_id
+            FROM public.prices p
+            JOIN public.stores s ON s.id = p.store_id
+            WHERE s.chain='Rimi' AND s.is_online = TRUE
+              AND p.source_url ~ '/p/[0-9]+'
+          ),
+          priced_from_candidates AS (
+            SELECT DISTINCT ext_id::text
+            FROM public.rimi_candidates
+            WHERE COALESCE(price,0) > 0
+              AND COALESCE(ext_id,'') <> ''
+          ),
+          priced AS (
+            SELECT ext_id FROM priced_from_prices
+            UNION
+            SELECT ext_id FROM priced_from_candidates
+          )
+          SELECT pr.ext_id
+          FROM priced pr
+          LEFT JOIN public.rimi_candidates rc ON rc.ext_id = pr.ext_id
+          LEFT JOIN public.staging_rimi_products sp ON sp.ext_id = pr.ext_id
+          WHERE
+            COALESCE(NULLIF(btrim(COALESCE(rc.name,  sp.name,  '')),''), NULL) IS NOT NULL
+            AND COALESCE(NULLIF(btrim(COALESCE(rc.brand, sp.brand, '')),''), NULL) IS NOT NULL
+          ORDER BY 1;
+          SQL
+          echo "Skip list rows (priced & have NAME+BRAND): $(wc -l < data/rimi_skip_ext_ids.txt)"
+          echo "$(wc -l < data/rimi_skip_ext_ids.txt)" > data/_skip_count.txt
 
-  - name: Dump crawler stderr (tail)
-    if: always()
-    run: |
-      echo "----- last 200 lines of data/rimi_run.err -----"
-      if [ -f data/rimi_run.err ]; then
-        tail -n 200 data/rimi_run.err
-      else
-        echo "(no stderr found)"
-      fi
+      - name: Build target list (missing NAME or BRAND)
+        if: ${{ env.DATABASE_URL != '' && env.MODE_IS_METADATA == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > data/rimi_only_ext_ids.txt
+          psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/rimi_only_ext_ids.txt
+          SELECT ext_id
+          FROM public.rimi_side_norm
+          WHERE COALESCE(BTRIM(name),  '') = ''
+             OR COALESCE(BTRIM(brand), '') = ''
+          ORDER BY 1;
+          SQL
+          echo "Target list rows (missing NAME/BRAND): $(wc -l < data/rimi_only_ext_ids.txt)"
 
-  - name: Ensure CSV exists (header if empty)
-    shell: bash
-    run: |
-      set -euo pipefail
-      if [ ! -s "$OUTPUT_CSV" ]; then
-        python -c "import csv,os; p=os.environ.get('OUTPUT_CSV','data/rimi_products.csv'); flds=['store_chain','store_name','store_channel','ext_id','ean_raw','sku_raw','name','size_text','brand','manufacturer','price','currency','image_url','category_path','category_leaf','source_url']; os.makedirs(os.path.dirname(p) or '.', exist_ok=True); f=open(p,'w',newline='',encoding='utf-8'); csv.DictWriter(f, fieldnames=flds).writeheader(); f.close(); print('Wrote header-only CSV ->', p)"
-      fi
+      - name: Shard ONLY list for this runner (report only)
+        if: ${{ env.MODE_IS_METADATA == 'true' }}
+        shell: bash
+        env:
+          SHARDS: 4
+        run: |
+          set -euo pipefail
+          if [ -s data/rimi_only_ext_ids.txt ]; then
+            awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
+              data/rimi_only_ext_ids.txt > data/rimi_only_ext_ids.sharded.txt
+            echo "Sharded ONLY list size (this runner): $(wc -l < data/rimi_only_ext_ids.sharded.txt)"
+          else
+            : > data/rimi_only_ext_ids.sharded.txt
+            echo "Sharded ONLY list empty."
+          fi
 
-  - name: Dump crawler log (tail)
-    if: always()
-    run: |
-      echo "----- last 200 lines of data/rimi_run.log -----"
-      if [ -f data/rimi_run.log ]; then
-        tail -n 200 data/rimi_run.log
-      else
-        echo "(no log found)"
-      fi
+      - name: Crawl Rimi categories (Playwright)
+        shell: bash
+        env:
+          REQ_DELAY: ${{ github.event.inputs.req_delay }}
+          PAGE_LIMIT: ${{ github.event.inputs.page_limit }}
+          MAX_PRODUCTS: ${{ github.event.inputs.max_products }}
+          HEADLESS: ${{ github.event.inputs.headless }}
+          PDP_WORKERS: ${{ github.event.inputs.pdp_workers }}
+        run: |
+          set -euo pipefail
+          echo "::group::Runtime info"
+          python --version
+          echo "Start (UTC): $(date -u)"
+          echo "MODE=${MODE}"
+          echo "::endgroup::"
 
-  - name: Show CSV head (debug)
-    shell: bash
-    run: |
-      set -euo pipefail
-      ls -lah data || true
-      echo "---- line count ----"
-      wc -l "$OUTPUT_CSV" || true
-      echo "---- first 12 lines ----"
-      head -n 12 "$OUTPUT_CSV" || true
+          REQ_DELAY="${REQ_DELAY:-0.25}"
+          PAGE_LIMIT="${PAGE_LIMIT:-0}"
+          MAX_PRODUCTS="${MAX_PRODUCTS:-0}"
+          HEADLESS="${HEADLESS:-1}"
+          PDP_WORKERS="${PDP_WORKERS:-2}"
 
-  - name: Upload crawl artifacts
-    if: always()
-    uses: actions/upload-artifact@v4
-    with:
-      name: rimi-crawl-${{ env.MODE }}-shard-${{ matrix.shard }}-${{ github.run_id }}
-      path: |
-        data/rimi_products.csv
-        data/rimi_run.log
-        data/rimi_run.err
-        artifacts/*.png
-        artifacts/*.html
-        data/_skip_count.txt
-        data/rimi_skip_ext_ids.txt
-        data/rimi_only_ext_ids.txt
-        data/rimi_only_ext_ids.sharded.txt
-      if-no-files-found: warn
-      retention-days: 7
+          SKIP_FLAG=()
+          if [ "${MODE}" = "prices" ] && [ -s data/rimi_skip_ext_ids.txt ]; then
+            echo "Using skip list: $(wc -l < data/rimi_skip_ext_ids.txt) ext_ids"
+            SKIP_FLAG=(--skip-ext-file data/rimi_skip_ext_ids.txt)
+          fi
 
-  - name: Install psql client
-    if: ${{ env.DATABASE_URL != '' }}
-    run: |
-      sudo apt-get update
-      sudo apt-get install -y postgresql-client
+          set +e
+          set +o pipefail
+          stdbuf -oL -eL timeout -k 60s 80m \
+            python -u scripts/rimi_crawl_categories_pw.py \
+              --cats-file data/rimi_categories.txt \
+              --page-limit "$PAGE_LIMIT" \
+              --max-products "$MAX_PRODUCTS" \
+              --headless "$HEADLESS" \
+              --req-delay "$REQ_DELAY" \
+              --pdp-workers "$PDP_WORKERS" \
+              --output-csv "$OUTPUT_CSV" \
+              "${SKIP_FLAG[@]}" \
+            > >(tee data/rimi_run.log) 2>data/rimi_run.err
+          status=${PIPESTATUS[0]}
+          set -o pipefail
+          set -e
 
-  - name: DB sanity (connection)
-    if: ${{ env.DATABASE_URL != '' }}
-    shell: bash
-    run: |
-      set -euo pipefail
-      psql "$DATABASE_URL" -c "\conninfo" || true
-      psql "$DATABASE_URL" -c "SELECT current_database(), current_user;" || true
+          echo "End (UTC): $(date -u) - crawler exit code: ${status}"
+          echo "::group::Crawler outputs"
+          ls -lah data || true
+          if [ -f "$OUTPUT_CSV" ]; then
+            echo "CSV size:"; wc -l "$OUTPUT_CSV"; du -h "$OUTPUT_CSV"
+          else
+            echo "CSV not found"
+          fi
+          [ -f data/rimi_run.log ] && { echo "Log size:"; du -h data/rimi_run.log; } || echo "Log not found"
+          [ -s data/rimi_run.err ] && { echo "---- stderr tail ----"; tail -n 120 data/rimi_run.err; } || true
+          echo "::endgroup::"
 
-  - name: Prepare DB (staging and helper tables)
-    if: ${{ env.DATABASE_URL != '' }}
-    shell: bash
-    run: |
-      set -euo pipefail
-      psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-      BEGIN;
-      CREATE TABLE IF NOT EXISTS public.staging_rimi_products (
-        ext_id        text PRIMARY KEY,
-        name          text NOT NULL,
-        ean_raw       text,
-        sku_raw       text,
-        ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '[^0-9]', '', 'g')) STORED,
-        size_text     text,
-        brand         text,
-        manufacturer  text,
-        price         numeric(12,2),
-        currency      text DEFAULT 'EUR',
-        category_path text,
-        category_leaf text,
-        collected_at  timestamptz DEFAULT now()
-      );
-      CREATE EXTENSION IF NOT EXISTS pg_trgm;
-      CREATE INDEX IF NOT EXISTS ix_rimi_ean       ON public.staging_rimi_products (ean_norm);
-      CREATE INDEX IF NOT EXISTS ix_rimi_name_trgm ON public.staging_rimi_products USING gin (name gin_trgm_ops);
+          if [ "$status" -eq 124 ]; then
+            echo "::warning::Crawler hit the time budget (timeout 80m). Continuing with partial results."
+          elif [ "$status" -ne 0 ]; then
+            echo "::warning::Crawler exited non-zero ($status); continuing"
+          fi
 
-      INSERT INTO public.stores (name, chain, is_online)
-      SELECT 'Rimi ePood', 'Rimi', TRUE
-      WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE chain='Rimi' AND is_online=TRUE);
+      - name: Dump crawler stderr (tail)
+        if: always()
+        run: |
+          echo "----- last 200 lines of data/rimi_run.err -----"
+          if [ -f data/rimi_run.err ]; then
+            tail -n 200 data/rimi_run.err
+          else
+            echo "(no stderr found)"
+          fi
 
-      CREATE TABLE IF NOT EXISTS public.rimi_candidates (
-        ext_id        text PRIMARY KEY,
-        ean_norm      text,
-        ean_raw       text,
-        sku_raw       text,
-        name          text,
-        size_text     text,
-        brand         text,
-        manufacturer  text,
-        price         numeric(12,2),
-        currency      text,
-        category_path text,
-        category_leaf text,
-        last_seen     timestamptz DEFAULT now()
-      );
-      COMMIT;
-      SQL
+      - name: Ensure CSV exists (header if empty)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -s "$OUTPUT_CSV" ]; then
+            python -c "import csv,os; p=os.environ.get('OUTPUT_CSV','data/rimi_products.csv'); flds=['store_chain','store_name','store_channel','ext_id','ean_raw','sku_raw','name','size_text','brand','manufacturer','price','currency','image_url','category_path','category_leaf','source_url']; os.makedirs(os.path.dirname(p) or '.', exist_ok=True); f=open(p,'w',newline='',encoding='utf-8'); csv.DictWriter(f, fieldnames=flds).writeheader(); f.close(); print('Wrote header-only CSV ->', p)"
+          fi
 
-  - name: Load CSV to DB (staging only)
-    if: ${{ env.DATABASE_URL != '' }}
-    shell: bash
-    run: |
-      set -euo pipefail
-      if [ ! -s "$OUTPUT_CSV" ]; then
-        echo "No rows in $OUTPUT_CSV — skipping DB load."
-        exit 0
-      fi
+      - name: Dump crawler log (tail)
+        if: always()
+        run: |
+          echo "----- last 200 lines of data/rimi_run.log -----"
+          if [ -f data/rimi_run.log ]; then
+            tail -n 200 data/rimi_run.log
+          else
+            echo "(no log found)"
+          fi
 
-      CSV_ABS="$(python -c 'import os; p=os.environ.get("OUTPUT_CSV","data/rimi_products.csv"); print(os.path.abspath(p))')"
-      echo "CSV_ABS: $CSV_ABS"
-      ls -l "$CSV_ABS" || true
+      - name: Show CSV head (debug)
+        shell: bash
+        run: |
+          set -euo pipefail
+          ls -lah data || true
+          echo "---- line count ----"
+          wc -l "$OUTPUT_CSV" || true
+          echo "---- first 12 lines ----"
+          head -n 12 "$OUTPUT_CSV" || true
 
-      cat > /tmp/rimi_load_staging.sql <<'SQL'
-      \set ON_ERROR_STOP on
-      BEGIN;
+      - name: Upload crawl artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rimi-crawl-${{ env.MODE }}-shard-${{ matrix.shard }}-${{ github.run_id }}
+          path: |
+            data/rimi_products.csv
+            data/rimi_run.log
+            data/rimi_run.err
+            artifacts/*.png
+            artifacts/*.html
+            data/_skip_count.txt
+            data/rimi_skip_ext_ids.txt
+            data/rimi_only_ext_ids.txt
+            data/rimi_only_ext_ids.sharded.txt
+          if-no-files-found: warn
+          retention-days: 7
 
-      CREATE TEMP TABLE tmp_rimi_csv_full (
-        store_chain   text,
-        store_name    text,
-        store_channel text,
-        ext_id        text,
-        ean_raw       text,
-        sku_raw       text,
-        name          text,
-        size_text     text,
-        brand         text,
-        manufacturer  text,
-        price         text,
-        currency      text,
-        image_url     text,
-        category_path text,
-        category_leaf text,
-        source_url    text
-      );
+      - name: Install psql client
+        if: ${{ env.DATABASE_URL != '' }}
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
 
-      \copy tmp_rimi_csv_full FROM '__CSV__' CSV HEADER
+      - name: DB sanity (connection)
+        if: ${{ env.DATABASE_URL != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -c "\conninfo" || true
+          psql "$DATABASE_URL" -c "SELECT current_database(), current_user;" || true
 
-      INSERT INTO public.staging_rimi_products
-        (ext_id,name,ean_raw,sku_raw,size_text,brand,manufacturer,price,currency,category_path,category_leaf,collected_at)
-      SELECT
-        COALESCE(NULLIF(btrim(ext_id),''), md5(coalesce(source_url,''))) AS ext_id,
-        NULLIF(btrim(name),'') AS name,
-        NULLIF(btrim(ean_raw),''),
-        NULLIF(btrim(sku_raw),''),
-        NULLIF(btrim(size_text),''),
-        NULLIF(btrim(brand),''),
-        NULLIF(btrim(manufacturer),''),
-        NULLIF(price,'')::numeric,
-        COALESCE(NULLIF(currency,''),'EUR'),
-        NULLIF(btrim(category_path),''),
-        NULLIF(btrim(category_leaf),''),
-        now()
-      FROM tmp_rimi_csv_full
-      WHERE COALESCE(ext_id,'') <> '' AND COALESCE(name,'') <> '';
+      - name: Prepare DB (staging and helper tables)
+        if: ${{ env.DATABASE_URL != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          BEGIN;
+          CREATE TABLE IF NOT EXISTS public.staging_rimi_products (
+            ext_id        text PRIMARY KEY,
+            name          text NOT NULL,
+            ean_raw       text,
+            sku_raw       text,
+            ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '[^0-9]', '', 'g')) STORED,
+            size_text     text,
+            brand         text,
+            manufacturer  text,
+            price         numeric(12,2),
+            currency      text DEFAULT 'EUR',
+            category_path text,
+            category_leaf text,
+            collected_at  timestamptz DEFAULT now()
+          );
+          CREATE EXTENSION IF NOT EXISTS pg_trgm;
+          CREATE INDEX IF NOT EXISTS ix_rimi_ean       ON public.staging_rimi_products (ean_norm);
+          CREATE INDEX IF NOT EXISTS ix_rimi_name_trgm ON public.staging_rimi_products USING gin (name gin_trgm_ops);
 
-      COMMIT;
-      SQL
-      sed -i "s|__CSV__|$CSV_ABS|g" /tmp/rimi_load_staging.sql
-      psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/rimi_load_staging.sql
+          INSERT INTO public.stores (name, chain, is_online)
+          SELECT 'Rimi ePood', 'Rimi', TRUE
+          WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE chain='Rimi' AND is_online=TRUE);
 
-  - name: Upsert to candidates (ext_id, EAN-agnostic) + refresh
-    if: ${{ env.DATABASE_URL != '' }}
-    shell: bash
-    run: |
-      set -euo pipefail
-      psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-      -- show how many rows in staging
-      SELECT COUNT(*) AS staging_rows FROM staging_rimi_products;
+          CREATE TABLE IF NOT EXISTS public.rimi_candidates (
+            ext_id        text PRIMARY KEY,
+            ean_norm      text,
+            ean_raw       text,
+            sku_raw       text,
+            name          text,
+            size_text     text,
+            brand         text,
+            manufacturer  text,
+            price         numeric(12,2),
+            currency      text,
+            category_path text,
+            category_leaf text,
+            last_seen     timestamptz DEFAULT now()
+          );
+          COMMIT;
+          SQL
 
-      -- ensure conflict target
-      CREATE UNIQUE INDEX IF NOT EXISTS uq_rimi_candidates_ext
-        ON rimi_candidates(ext_id);
+      - name: Load CSV to DB (staging only)
+        if: ${{ env.DATABASE_URL != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -s "$OUTPUT_CSV" ]; then
+            echo "No rows in $OUTPUT_CSV — skipping DB load."
+            exit 0
+          fi
 
-      -- upsert (returns how many rows were touched)
-      WITH up AS (
-        INSERT INTO rimi_candidates AS c (
-          ext_id, ean_raw, sku_raw, name, size_text,
-          brand, manufacturer, price, currency,
-          category_path, category_leaf, last_seen, created_at
-        )
-        SELECT
-          s.ext_id,
-          NULLIF(BTRIM(s.ean_raw),''),  NULLIF(BTRIM(s.sku_raw),''),
-          NULLIF(BTRIM(s.name),''),     NULLIF(BTRIM(s.size_text),''),
-          NULLIF(BTRIM(s.brand),''),    NULLIF(BTRIM(s.manufacturer),''),
-          s.price,                      NULLIF(BTRIM(s.currency),''),
-          NULLIF(BTRIM(s.category_path),''), NULLIF(BTRIM(s.category_leaf),''),
-          now(), now()
-        FROM staging_rimi_products s
-        ON CONFLICT (ext_id) DO UPDATE
-        SET
-          name          = COALESCE(EXCLUDED.name,          c.name),
-          size_text     = COALESCE(EXCLUDED.size_text,     c.size_text),
-          brand         = COALESCE(EXCLUDED.brand,         c.brand),
-          manufacturer  = COALESCE(EXCLUDED.manufacturer,  c.manufacturer),
-          price         = COALESCE(EXCLUDED.price,         c.price),
-          currency      = COALESCE(EXCLUDED.currency,      c.currency),
-          category_path = COALESCE(EXCLUDED.category_path, c.category_path),
-          category_leaf = COALESCE(EXCLUDED.category_leaf, c.category_leaf),
-          ean_raw       = COALESCE(EXCLUDED.ean_raw,       c.ean_raw),
-          sku_raw       = COALESCE(EXCLUDED.sku_raw,       c.sku_raw),
-          last_seen     = GREATEST(c.last_seen, now())
-        RETURNING 1
-      )
-      SELECT COUNT(*) AS upsert_rows FROM up;
+          CSV_ABS="$(python -c 'import os; p=os.environ.get("OUTPUT_CSV","data/rimi_products.csv"); print(os.path.abspath(p))')"
+          echo "CSV_ABS: $CSV_ABS"
+          ls -l "$CSV_ABS" || true
 
-      -- housekeeping + refresh the view the target builder reads
-      TRUNCATE staging_rimi_products;
-      ANALYZE rimi_candidates;
-      -- refresh if you use the mat view; ignore if it doesn't exist
-      DO $$
-      BEGIN
-        IF EXISTS (SELECT 1 FROM pg_matviews WHERE matviewname = 'rimi_candidates_norm') THEN
-          EXECUTE 'REFRESH MATERIALIZED VIEW rimi_candidates_norm';
-        END IF;
-      END$$;
+          cat > /tmp/rimi_load_staging.sql <<'SQL'
+          \set ON_ERROR_STOP on
+          BEGIN;
 
-      -- optional target snapshot for logs (name or brand missing)
-      DROP TABLE IF EXISTS tmp_rimi_target_missing;
-      CREATE TEMP TABLE tmp_rimi_target_missing AS
-      SELECT ext_id
-      FROM   rimi_side_norm
-      WHERE  COALESCE(BTRIM(name),'') = '' OR COALESCE(BTRIM(brand),'') = '';
-      SELECT COUNT(*) AS target_missing_after FROM tmp_rimi_target_missing;
-      SQL
+          CREATE TEMP TABLE tmp_rimi_csv_full (
+            store_chain   text,
+            store_name    text,
+            store_channel text,
+            ext_id        text,
+            ean_raw       text,
+            sku_raw       text,
+            name          text,
+            size_text     text,
+            brand         text,
+            manufacturer  text,
+            price         text,
+            currency      text,
+            image_url     text,
+            category_path text,
+            category_leaf text,
+            source_url    text
+          );
 
-  - name: Sanity check (rows & zero-price count)
-    if: ${{ env.DATABASE_URL != '' }}
-    shell: bash
-    run: |
-      set -euo pipefail
-      psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-      SELECT COUNT(*) AS candidates_total,
-             SUM(CASE WHEN price IS NULL OR price = 0 THEN 1 ELSE 0 END) AS zero_price
-      FROM public.rimi_candidates;
-      SQL
+          \copy tmp_rimi_csv_full FROM '__CSV__' CSV HEADER
 
-  - name: Adopt Rimi candidates with EANs (optional helpers)
-    if: ${{ env.DATABASE_URL != '' }}
-    shell: bash
-    run: |
-      set -euo pipefail
-      cat > /tmp/adopt_rimi.sql <<'SQL'
-      DO $do$
-      DECLARE r record;
-      BEGIN
-        IF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_all_rimi_candidates_with_ean') THEN
-          PERFORM public.adopt_all_rimi_candidates_with_ean();
-        ELSIF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_candidate_with_ean') THEN
-          FOR r IN
-            SELECT ext_id FROM public.rimi_candidates WHERE COALESCE(ean_norm,'') <> ''
-          LOOP
-            PERFORM public.adopt_candidate_with_ean(r.ext_id);
-          END LOOP;
-        END IF;
-      END
-      $do$;
-      SQL
-      psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/adopt_rimi.sql
+          INSERT INTO public.staging_rimi_products
+            (ext_id,name,ean_raw,sku_raw,size_text,brand,manufacturer,price,currency,category_path,category_leaf,collected_at)
+          SELECT
+            COALESCE(NULLIF(btrim(ext_id),''), md5(coalesce(source_url,''))) AS ext_id,
+            NULLIF(btrim(name),'') AS name,
+            NULLIF(btrim(ean_raw),''),
+            NULLIF(btrim(sku_raw),''),
+            NULLIF(btrim(size_text),''),
+            NULLIF(btrim(brand),''),
+            NULLIF(btrim(manufacturer),''),
+            NULLIF(price,'')::numeric,
+            COALESCE(NULLIF(currency,''),'EUR'),
+            NULLIF(btrim(category_path),''),
+            NULLIF(btrim(category_leaf),''),
+            now()
+          FROM tmp_rimi_csv_full
+          WHERE COALESCE(ext_id,'') <> '' AND COALESCE(name,'') <> '';
+
+          COMMIT;
+          SQL
+          sed -i "s|__CSV__|$CSV_ABS|g" /tmp/rimi_load_staging.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/rimi_load_staging.sql
+
+      - name: Upsert to candidates (ext_id, EAN-agnostic) + refresh
+        if: ${{ env.DATABASE_URL != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          -- show how many rows in staging
+          SELECT COUNT(*) AS staging_rows FROM staging_rimi_products;
+
+          -- ensure conflict target
+          CREATE UNIQUE INDEX IF NOT EXISTS uq_rimi_candidates_ext
+            ON rimi_candidates(ext_id);
+
+          -- upsert (returns how many rows were touched)
+          WITH up AS (
+            INSERT INTO rimi_candidates AS c (
+              ext_id, ean_raw, sku_raw, name, size_text,
+              brand, manufacturer, price, currency,
+              category_path, category_leaf, last_seen, created_at
+            )
+            SELECT
+              s.ext_id,
+              NULLIF(BTRIM(s.ean_raw),''),  NULLIF(BTRIM(s.sku_raw),''),
+              NULLIF(BTRIM(s.name),''),     NULLIF(BTRIM(s.size_text),''),
+              NULLIF(BTRIM(s.brand),''),    NULLIF(BTRIM(s.manufacturer),''),
+              s.price,                      NULLIF(BTRIM(s.currency),''),
+              NULLIF(BTRIM(s.category_path),''), NULLIF(BTRIM(s.category_leaf),''),
+              now(), now()
+            FROM staging_rimi_products s
+            ON CONFLICT (ext_id) DO UPDATE
+            SET
+              name          = COALESCE(EXCLUDED.name,          c.name),
+              size_text     = COALESCE(EXCLUDED.size_text,     c.size_text),
+              brand         = COALESCE(EXCLUDED.brand,         c.brand),
+              manufacturer  = COALESCE(EXCLUDED.manufacturer,  c.manufacturer),
+              price         = COALESCE(EXCLUDED.price,         c.price),
+              currency      = COALESCE(EXCLUDED.currency,      c.currency),
+              category_path = COALESCE(EXCLUDED.category_path, c.category_path),
+              category_leaf = COALESCE(EXCLUDED.category_leaf, c.category_leaf),
+              ean_raw       = COALESCE(EXCLUDED.ean_raw,       c.ean_raw),
+              sku_raw       = COALESCE(EXCLUDED.sku_raw,       c.sku_raw),
+              last_seen     = GREATEST(c.last_seen, now())
+            RETURNING 1
+          )
+          SELECT COUNT(*) AS upsert_rows FROM up;
+
+          -- housekeeping + refresh the view the target builder reads
+          TRUNCATE staging_rimi_products;
+          ANALYZE rimi_candidates;
+          -- refresh if you use the mat view; ignore if it doesn't exist
+          DO $$
+          BEGIN
+            IF EXISTS (SELECT 1 FROM pg_matviews WHERE matviewname = 'rimi_candidates_norm') THEN
+              EXECUTE 'REFRESH MATERIALIZED VIEW rimi_candidates_norm';
+            END IF;
+          END$$;
+
+          -- optional target snapshot for logs (name or brand missing)
+          DROP TABLE IF EXISTS tmp_rimi_target_missing;
+          CREATE TEMP TABLE tmp_rimi_target_missing AS
+          SELECT ext_id
+          FROM   rimi_side_norm
+          WHERE  COALESCE(BTRIM(name),'') = '' OR COALESCE(BTRIM(brand),'') = '';
+          SELECT COUNT(*) AS target_missing_after FROM tmp_rimi_target_missing;
+          SQL
+
+      - name: Sanity check (rows & zero-price count)
+        if: ${{ env.DATABASE_URL != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          SELECT COUNT(*) AS candidates_total,
+                 SUM(CASE WHEN price IS NULL OR price = 0 THEN 1 ELSE 0 END) AS zero_price
+          FROM public.rimi_candidates;
+          SQL
+
+      - name: Adopt Rimi candidates with EANs (optional helpers)
+        if: ${{ env.DATABASE_URL != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/adopt_rimi.sql <<'SQL'
+          DO $do$
+          DECLARE r record;
+          BEGIN
+            IF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_all_rimi_candidates_with_ean') THEN
+              PERFORM public.adopt_all_rimi_candidates_with_ean();
+            ELSIF EXISTS (SELECT 1 FROM pg_proc WHERE proname='adopt_candidate_with_ean') THEN
+              FOR r IN
+                SELECT ext_id FROM public.rimi_candidates WHERE COALESCE(ean_norm,'') <> ''
+              LOOP
+                PERFORM public.adopt_candidate_with_ean(r.ext_id);
+              END LOOP;
+            END IF;
+          END
+          $do$;
+          SQL
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/adopt_rimi.sql
