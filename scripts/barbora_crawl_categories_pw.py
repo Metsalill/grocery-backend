@@ -1,308 +1,401 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Barbora.ee (Maxima EE) – Category crawler → PDP extractor → CSV/DB-friendly
+Barbora.ee (Maxima EE) – Category → PDP crawler → CSV (no EAN fields parsed)
 
-CSV columns (exact order):
+CSV columns (exact order, EAN left blank intentionally):
   store_chain,store_name,store_channel,ext_id,ean_raw,sku_raw,
   name,size_text,brand,manufacturer,price,currency,
   image_url,category_path,category_leaf,source_url
+
+Design:
+- Always opens PDPs for reliable brand/manufacturer/name/price (Barbora listing cards are inconsistent).
+- Strong brand/manufacturer extraction from JSON-LD, spec tables, and inline state.
+- Safe name fallback avoids category leaf leaks (e.g., "Liköörid" as product name).
+- Supports sharding and gating via --skip-ext-file / --only-ext-file.
 """
+
 from __future__ import annotations
-import os, re, csv, json, time, html
-from typing import List, Dict, Optional, Tuple
+import argparse
+import csv
+import os
+import re
+import sys
+import time
+import json
+from typing import List, Tuple, Dict, Optional
 from urllib.parse import urljoin, urlparse
+
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout, Page
 
+# --------------------------------------------------------------------------- #
+# Constants
+# --------------------------------------------------------------------------- #
 BASE = "https://barbora.ee"
 STORE_CHAIN = "Maxima"
 STORE_NAME = "Barbora ePood"
 STORE_CHANNEL = "online"
 
-OUTPUT_CSV = os.getenv("OUTPUT_CSV", "data/barbora.csv")
-MODE = os.getenv("MODE", "metadata").strip().lower()     # metadata | prices
-CLICK_PRODUCTS = int(os.getenv("CLICK_PRODUCTS", "1"))    # 1 = open PDPs
-PAGE_LIMIT = int(os.getenv("PAGE_LIMIT", "0"))
-MAX_PRODUCTS = int(os.getenv("MAX_PRODUCTS", "0"))
-REQ_DELAY = float(os.getenv("REQ_DELAY", "0.4"))
-LOG_CONSOLE = os.getenv("LOG_CONSOLE", "warn")            # 0 | warn | all
+DEFAULT_REQ_DELAY = 0.25
+DEFAULT_HEADLESS = 1
 
-DIGITS_RE = re.compile(r"\d+")
-SIZE_RE = re.compile(r"(?i)\b(\d+\s?(?:x\s?\d+)?\s?(?:ml|l|g|kg|cl|pcs|tk))\b|(\d+\s?x\s?\d+)")
+SIZE_RE = re.compile(
+    r"(?ix)"
+    r"(\d+\s?(?:x\s?\d+)?\s?(?:ml|l|cl|g|kg|m?g|tk|pcs))"
+    r"|"
+    r"(\d+\s?x\s?\d+)"
+)
 
-SPEC_KEYS_BRAND = [ "kaubamärk", "bränd", "brand" ]
-SPEC_KEYS_MFR   = [ "tootja", "valmistaja", "manufacturer" ]
-SPEC_KEYS_SIZE  = [ "kogus", "netokogus", "maht", "neto" ]
+SPEC_KEYS_BRAND = {"kaubamärk", "bränd", "brand"}
+SPEC_KEYS_MFR   = {"tootja", "valmistaja", "manufacturer"}
+SPEC_KEYS_SIZE  = {"kogus", "netokogus", "maht", "neto"}
 
+# --------------------------------------------------------------------------- #
+# Helpers
+# --------------------------------------------------------------------------- #
 def norm(s: Optional[str]) -> str:
-    if not s: return ""
+    if not s:
+        return ""
     return re.sub(r"\s+", " ", s).strip().lower()
 
 def text_of(el) -> str:
     return re.sub(r"\s+", " ", el.get_text(" ", strip=True)) if el else ""
 
+def get_ext_id(url: str) -> str:
+    # Prefer trailing numeric id (…/p/123456 or …-123456)
+    m = re.search(r"/p/(\d+)", url) or re.search(r"-(\d+)$", url)
+    if m:
+        return m.group(1)
+    # Fallback to slug
+    return re.sub(r"[^a-zA-Z0-9]+", "-", url).strip("-")[-80:]
+
 def from_json_ld(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
-    out = {"name": None, "brand": None, "manufacturer": None, "ean": None, "image": None, "price": None, "currency": None}
+    out = {"name": None, "brand": None, "manufacturer": None, "image": None, "price": None, "currency": None}
     for tag in soup.find_all("script", {"type": "application/ld+json"}):
         try:
             data = json.loads(tag.string or "")
         except Exception:
             continue
-        # sometimes it's a list
         items = data if isinstance(data, list) else [data]
         for it in items:
-            if not isinstance(it, dict): continue
-            if it.get("@type") and "Product" in (it["@type"] if isinstance(it["@type"], list) else [it["@type"]]):
-                if not out["name"]: out["name"] = it.get("name")
-                brand = it.get("brand")
-                if isinstance(brand, dict):
-                    brand = brand.get("name")
-                if brand and not out["brand"]:
-                    out["brand"] = brand
-                mfr = it.get("manufacturer")
-                if isinstance(mfr, dict):
-                    mfr = mfr.get("name")
-                if mfr and not out["manufacturer"]:
-                    out["manufacturer"] = mfr
-                gtin = it.get("gtin13") or it.get("gtin") or it.get("sku")
-                if gtin and not out["ean"]:
-                    out["ean"] = re.sub(r"[^0-9]", "", str(gtin))
-                img = it.get("image")
-                if isinstance(img, list): img = img[0]
-                if img and not out["image"]:
-                    out["image"] = img
-                offers = it.get("offers") or {}
-                if isinstance(offers, dict):
-                    if not out["price"] and offers.get("price") is not None:
-                        out["price"] = str(offers.get("price"))
-                    if not out["currency"] and offers.get("priceCurrency"):
-                        out["currency"] = offers.get("priceCurrency")
+            if not isinstance(it, dict):
+                continue
+            t = it.get("@type")
+            types = t if isinstance(t, list) else [t]
+            if not types or "Product" not in types:
+                continue
+            if not out["name"]:
+                out["name"] = it.get("name")
+            brand = it.get("brand")
+            if isinstance(brand, dict):
+                brand = brand.get("name")
+            if brand and not out["brand"]:
+                out["brand"] = brand
+            manufacturer = it.get("manufacturer")
+            if isinstance(manufacturer, dict):
+                manufacturer = manufacturer.get("name")
+            if manufacturer and not out["manufacturer"]:
+                out["manufacturer"] = manufacturer
+            img = it.get("image")
+            if isinstance(img, list):
+                img = img[0]
+            if img and not out["image"]:
+                out["image"] = img
+            offers = it.get("offers") or {}
+            if isinstance(offers, dict):
+                if out["price"] is None and offers.get("price") is not None:
+                    out["price"] = str(offers.get("price"))
+                if out["currency"] is None and offers.get("priceCurrency"):
+                    out["currency"] = offers.get("priceCurrency")
     return out
 
 def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
-    out = {"brand": None, "manufacturer": None, "size": None, "ean": None}
-    # generic dl/dt/dd pairs
-    for row in soup.select("dl, table"):
-        text = text_of(row)
-        # iterate dt/dd when possible
-    for dt in soup.select("dt, th"):
-        key = norm(text_of(dt))
-        dd = dt.find_next_sibling(["dd","td"])
-        val = norm(text_of(dd)) if dd else ""
-        if not val: continue
-        if key in SPEC_KEYS_BRAND and not out["brand"]:
-            out["brand"] = val
-        elif key in SPEC_KEYS_MFR and not out["manufacturer"]:
-            out["manufacturer"] = val
-        elif key in SPEC_KEYS_SIZE and not out["size"]:
-            out["size"] = val
-        elif "ribakood" in key or "ean" in key:
-            out["ean"] = re.sub(r"[^0-9]", "", val)
+    out = {"brand": None, "manufacturer": None, "size": None, "sku": None}
+    # Look at typical spec areas (dl/dt/dd or tables)
+    # We inspect headers (dt/th) and their value (dd/td).
+    for head in soup.select("dt, th"):
+        k = norm(text_of(head))
+        val_el = head.find_next_sibling(["dd", "td"])
+        v = norm(text_of(val_el)) if val_el else ""
+        if not v:
+            continue
+        if k in SPEC_KEYS_BRAND and not out["brand"]:
+            out["brand"] = v
+        elif k in SPEC_KEYS_MFR and not out["manufacturer"]:
+            out["manufacturer"] = v
+        elif k in SPEC_KEYS_SIZE and not out["size"]:
+            out["size"] = v
+        elif "sku" in k and not out["sku"]:
+            out["sku"] = v
     return out
 
 def parse_app_state_for_brand(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
-    # scan inline scripts for "brand" / "manufacturer" keys
+    # Scan inline scripts for "brand" / "manufacturer" keys
     for s in soup.find_all("script"):
         txt = s.string or ""
-        if not txt or ("brand" not in txt and "manufacturer" not in txt): 
+        if not txt or ("brand" not in txt and "manufacturer" not in txt):
             continue
-        # very forgiving extraction
-        m = re.search(r'"brand"\s*:\s*"([^"]+)"', txt)
-        b = m.group(1).strip() if m else None
-        m2 = re.search(r'"manufacturer"\s*:\s*"([^"]+)"', txt)
-        mf = m2.group(1).strip() if m2 else None
-        if b or mf:
-            return b, mf
+        mb = re.search(r'"brand"\s*:\s*"([^"]+)"', txt)
+        mm = re.search(r'"manufacturer"\s*:\s*"([^"]+)"', txt)
+        b = mb.group(1).strip() if mb else None
+        m = mm.group(1).strip() if mm else None
+        if b or m:
+            return b, m
     return None, None
 
 def safe_product_name(soup: BeautifulSoup, category_leaf: str, listing_title: Optional[str]) -> str:
-    # Primary: PDP h1 or og:title
+    # Primary: PDP H1 / itemprop=name
     h1 = soup.select_one("h1,[itemprop=name]")
     title = text_of(h1)
     if not title:
         og = soup.find("meta", {"property": "og:title"})
-        title = og["content"] if og and og.has_attr("content") else ""
-    # Fallback to listing card title
+        title = (og.get("content") or "").strip() if og else ""
     if not title and listing_title:
         title = listing_title
-    # Guard: avoid category name
+    # Guard: avoid names that equal the category leaf
     if norm(title) == norm(category_leaf):
-        # try next best: breadcrumb last-1 (often product name is not in breadcrumb, but try)
-        bc = [text_of(x) for x in soup.select("nav.breadcrumb a, .breadcrumb a, .breadcrumbs a")]
+        bc = [text_of(x) for x in soup.select("nav.breadcrumb a, .breadcrumbs a, .breadcrumb a")]
         if bc:
-            title2 = bc[-1]
-            if norm(title2) != norm(category_leaf):
-                title = title2
+            alt = bc[-1]
+            if norm(alt) != norm(category_leaf):
+                title = alt
     return title
 
 def extract_size_from_name(name: str) -> Optional[str]:
-    if not name: return None
+    if not name:
+        return None
     m = SIZE_RE.search(name)
-    if not m: return None
-    return m.group(0)
+    return m.group(0) if m else None
 
 def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
-    # Barbora shows price in PDP in a few spots; be tolerant
-    p = soup.select_one("[data-testid=product-price], .price, .product-price")
-    price = None
-    if p:
-        price = re.sub(r"[^\d,\.]", "", text_of(p)).replace(",", ".")
-    cur = "EUR"  # Barbora EE
-    return price, cur
+    # Be tolerant; prices are rendered differently across templates
+    cur = "EUR"
+    price_el = soup.select_one("[data-testid=product-price], .price, .product-price, .e-price__main")
+    if not price_el:
+        return None, cur
+    val = re.sub(r"[^\d,\.]", "", text_of(price_el)).replace(",", ".")
+    return (val if val else None), cur
 
-def get_ext_id(url: str) -> str:
-    # usually last numeric segment
-    m = re.search(r"/p/(\d+)", url) or re.search(r"-(\d+)$", url)
-    return m.group(1) if m else re.sub(r"\W+", "", url)
+def ensure_dir(path: str) -> None:
+    d = os.path.dirname(path)
+    if d and not os.path.exists(d):
+        os.makedirs(d, exist_ok=True)
 
-def discover_category_urls() -> List[str]:
-    # If data/barbora_categories.txt exists, use it; else use curated FOOD roots
-    path = "data/barbora_categories.txt"
-    if os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
-            urls = [ln.strip() for ln in f if ln.strip()]
-            return urls
-    return [
-        f"{BASE}/koogiviljad-puuviljad",
-        f"{BASE}/piimatooted-munad-void",
-        f"{BASE}/juustud",
-        f"{BASE}/leib-sai-kondiitritooted",
-        f"{BASE}/valmistoidud",
-        f"{BASE}/kuivained-ja-hoidised",
-        f"{BASE}/maitseained-ja-kastmed",
-        f"{BASE}/suupisted-maiustused",
-        f"{BASE}/joogid",
-        f"{BASE}/kulmutatud-tooted",
-    ]
+# --------------------------------------------------------------------------- #
+# Category listing
+# --------------------------------------------------------------------------- #
+def list_products_from_category(page: Page, cat_url: str, req_delay: float) -> List[Tuple[str, str]]:
+    """
+    Returns list of (pdp_url, listing_title)
+    """
+    page.goto(cat_url, timeout=60000, wait_until="domcontentloaded")
+    time.sleep(req_delay)
 
-def list_products_from_category(page: Page, cat_url: str) -> List[Tuple[str,str]]:
-    """Return list of (pdp_url, listing_title)."""
-    page.goto(cat_url, timeout=60000)
-    time.sleep(REQ_DELAY)
-    # pagination: scroll/load more
-    for _ in range(60):
-        before = page.content()
-        page.mouse.wheel(0, 30000)
-        time.sleep(0.4)
-        after = page.content()
-        if len(after) == len(before):
+    # Try to fully load the grid by scrolling
+    stagnant_rounds = 0
+    last_len = 0
+    for _ in range(80):
+        page.mouse.wheel(0, 24000)
+        time.sleep(0.35)
+        html0 = page.content()
+        cur_len = len(html0)
+        if cur_len == last_len:
+            stagnant_rounds += 1
+        else:
+            stagnant_rounds = 0
+        last_len = cur_len
+        if stagnant_rounds >= 3:
             break
+
     soup = BeautifulSoup(page.content(), "html.parser")
-    out: List[Tuple[str,str]] = []
+    out: List[Tuple[str, str]] = []
     for a in soup.select("a[href*='/toode/'], a[href*='/p/']"):
         href = a.get("href")
-        if not href: continue
-        title = text_of(a)
+        if not href:
+            continue
         url = urljoin(BASE, href)
+        # Cheap URL sanity
+        parsed = urlparse(url)
+        if not parsed.scheme or not parsed.netloc.endswith("barbora.ee"):
+            continue
+        title = text_of(a)
         out.append((url, title))
-    # de-dup while preserving order
+
+    # De-duplicate preserving order
     seen = set()
-    uniq = []
-    for u,t in out:
-        if u in seen: continue
+    uniq: List[Tuple[str, str]] = []
+    for u, t in out:
+        if u in seen:
+            continue
         seen.add(u)
-        uniq.append((u,t))
+        uniq.append((u, t))
     return uniq
 
-def write_csv(rows: List[List[str]]):
-    os.makedirs(os.path.dirname(OUTPUT_CSV), exist_ok=True)
+# --------------------------------------------------------------------------- #
+# PDP extraction
+# --------------------------------------------------------------------------- #
+def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], category_leaf: str, req_delay: float) -> Dict[str, Optional[str]]:
+    page.goto(url, timeout=60000, wait_until="domcontentloaded")
+    time.sleep(req_delay)
+    soup = BeautifulSoup(page.content(), "html.parser")
+
+    # JSON-LD primary
+    jl = from_json_ld(soup)
+
+    # Spec table
+    spec = parse_spec_table(soup)
+
+    # Inline app state fallback for brand/mfr
+    b2, m2 = parse_app_state_for_brand(soup)
+
+    # Name with guard
+    name = safe_product_name(soup, category_leaf, listing_title) or jl["name"] or listing_title or ""
+
+    # Price
+    price = jl["price"]
+    currency = jl["currency"] or "EUR"
+    if not price:
+        price, currency = parse_price_from_dom(soup)
+
+    # Size
+    size_text = spec["size"] or extract_size_from_name(name)
+
+    # Image (optional, not loaded to DB in this workflow but we keep the CSV field)
+    image_url = jl["image"]
+
+    # Brand / Manufacturer
+    brand = jl["brand"] or spec["brand"] or b2
+    manufacturer = jl["manufacturer"] or spec["manufacturer"] or m2
+
+    # SKU (not always present)
+    sku_raw = spec["sku"]
+
+    return {
+        "name": name,
+        "size_text": size_text,
+        "brand": brand,
+        "manufacturer": manufacturer,
+        "price": price,
+        "currency": currency or "EUR",
+        "image_url": image_url,
+        "sku_raw": sku_raw,
+    }
+
+# --------------------------------------------------------------------------- #
+# Main logic
+# --------------------------------------------------------------------------- #
+def read_lines(path: str) -> List[str]:
+    with open(path, "r", encoding="utf-8") as f:
+        return [ln.strip() for ln in f if ln.strip()]
+
+def write_csv(rows: List[List[str]], out_path: str) -> None:
+    ensure_dir(out_path)
     header = [
         "store_chain","store_name","store_channel","ext_id","ean_raw","sku_raw",
         "name","size_text","brand","manufacturer","price","currency",
         "image_url","category_path","category_leaf","source_url"
     ]
-    newfile = not os.path.exists(OUTPUT_CSV)
-    with open(OUTPUT_CSV, "a", encoding="utf-8", newline="") as f:
+    newfile = not os.path.exists(out_path)
+    with open(out_path, "a", encoding="utf-8", newline="") as f:
         w = csv.writer(f)
         if newfile:
             w.writerow(header)
-        for r in rows:
-            w.writerow(r)
+        w.writerows(rows)
 
-def crawl():
-    cats = discover_category_urls()
-    total_rows: List[List[str]] = []
-    count = 0
+def crawl(args) -> None:
+    cats = read_lines(args.cats_file)
+    skip_ext: set[str] = set(read_lines(args.skip_ext_file)) if args.skip_ext_file and os.path.exists(args.skip_ext_file) else set()
+    only_ext: set[str] = set(read_lines(args.only_ext_file)) if args.only_ext_file and os.path.exists(args.only_ext_file) else set()
+
+    out_rows: List[List[str]] = []
+    total = 0
+
+    headless = bool(int(args.headless))
+    req_delay = float(args.req_delay)
 
     with sync_playwright() as pw:
-        browser = pw.firefox.launch(headless=True)
+        browser = pw.chromium.launch(headless=headless)
         ctx = browser.new_context(locale="et-EE")
         page = ctx.new_page()
-        if LOG_CONSOLE in ("warn","all"):
-            page.on("console", lambda msg: print(f"[console:{msg.type()}] {msg.text()}") if (LOG_CONSOLE=="all" or msg.type()!="log") else None)
 
         for idx, cat in enumerate(cats, start=1):
-            if PAGE_LIMIT and idx > PAGE_LIMIT: break
-            # category leaf from breadcrumb last segment
-            category_leaf = cat.strip("/").split("/")[-1].replace("-", " ").title()
-            category_path = ""  # optional: could build from breadcrumb later
+            if args.page_limit and idx > int(args.page_limit):
+                break
 
-            products = list_products_from_category(page, cat)
-            if not products:
+            # Derive a readable leaf from the last path segment
+            leaf_seg = cat.strip("/").split("/")[-1]
+            category_leaf = leaf_seg.replace("-", " ").title()
+            category_path = ""  # optional; not building full breadcrumbs here
+
+            prods = list_products_from_category(page, cat, req_delay)
+            if not prods:
                 continue
 
-            for url, listing_title in products:
-                if MAX_PRODUCTS and count >= MAX_PRODUCTS: break
-
+            for url, listing_title in prods:
+                if args.max_products and total >= int(args.max_products):
+                    break
                 ext_id = get_ext_id(url)
-                name = listing_title
-                size_text = None
-                brand = None
-                manufacturer = None
-                ean_raw = None
-                price = None
-                currency = "EUR"
-                image_url = None
 
-                if MODE == "metadata" and CLICK_PRODUCTS:
-                    try:
-                        page.goto(url, timeout=60000)
-                        time.sleep(REQ_DELAY)
-                    except PWTimeout:
-                        continue
-                    soup = BeautifulSoup(page.content(), "html.parser")
+                # Shaping by skip/only lists
+                if skip_ext and ext_id in skip_ext:
+                    continue
+                if only_ext and ext_id not in only_ext:
+                    continue
 
-                    # JSON-LD first
-                    jl = from_json_ld(soup)
-                    image_url = jl["image"] or image_url
-                    price = jl["price"] or price
-                    currency = jl["currency"] or currency
-                    brand = jl["brand"] or brand
-                    manufacturer = jl["manufacturer"] or manufacturer
-                    ean_raw = jl["ean"] or ean_raw
-                    # Name with guards
-                    name = safe_product_name(soup, category_leaf, listing_title) or name
+                try:
+                    data = extract_from_pdp(page, url, listing_title, category_leaf, req_delay)
+                except PWTimeout:
+                    continue
+                except Exception as e:
+                    # Keep going on parse errors
+                    print(f"[warn] PDP parse failed for {ext_id}: {e}", file=sys.stderr)
+                    continue
 
-                    # spec table
-                    spec = parse_spec_table(soup)
-                    brand = brand or spec["brand"]
-                    manufacturer = manufacturer or spec["manufacturer"]
-                    ean_raw = ean_raw or spec["ean"]
-                    size_text = spec["size"] or extract_size_from_name(name)
-
-                    # DOM price fallback
-                    if not price:
-                        price, currency = parse_price_from_dom(soup)
-
-                    # As a last resort, avoid category-as-name
-                    if norm(name) == norm(category_leaf):
-                        # don’t write this row; it’s very likely a category leak
-                        continue
-                else:
-                    # listing-only (prices mode)
-                    size_text = extract_size_from_name(name)
+                # Guard: avoid obvious category-as-name rows
+                if norm(data["name"]) == norm(category_leaf):
+                    continue
 
                 row = [
-                    STORE_CHAIN, STORE_NAME, STORE_CHANNEL, ext_id, ean_raw or "", "",
-                    name or "", size_text or "", brand or "", manufacturer or "", price or "", currency or "EUR",
-                    image_url or "", category_path, category_leaf, url
+                    STORE_CHAIN,
+                    STORE_NAME,
+                    STORE_CHANNEL,
+                    ext_id,
+                    "",                                     # ean_raw intentionally blank (Barbora doesn't expose)
+                    data.get("sku_raw") or "",
+                    data.get("name") or "",
+                    data.get("size_text") or "",
+                    data.get("brand") or "",
+                    data.get("manufacturer") or "",
+                    data.get("price") or "",
+                    data.get("currency") or "EUR",
+                    data.get("image_url") or "",
+                    category_path,
+                    category_leaf,
+                    url,
                 ]
-                total_rows.append(row)
-                count += 1
-                if REQ_DELAY: time.sleep(REQ_DELAY)
+                out_rows.append(row)
+                total += 1
+                if req_delay:
+                    time.sleep(req_delay)
 
-        write_csv(total_rows)
+        write_csv(out_rows, args.output_csv)
+
+# --------------------------------------------------------------------------- #
+# CLI
+# --------------------------------------------------------------------------- #
+def build_argparser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(description="Barbora.ee category→PDP crawler (no EAN).")
+    p.add_argument("--cats-file", required=True, help="Text file with category URLs (one per line)")
+    p.add_argument("--page-limit", default="0", help="Max categories to process (0=all)")
+    p.add_argument("--max-products", default="0", help="Cap total PDPs visited (0=unlimited)")
+    p.add_argument("--headless", default=str(DEFAULT_HEADLESS), help="1/0")
+    p.add_argument("--req-delay", default=str(DEFAULT_REQ_DELAY), help="Delay between steps in seconds")
+    p.add_argument("--output-csv", default="data/barbora_products.csv", help="Output CSV path")
+    p.add_argument("--skip-ext-file", default="", help="Optional file with ext_ids to skip (one per line)")
+    p.add_argument("--only-ext-file", default="", help="Optional file with ext_ids to include exclusively")
+    return p
 
 if __name__ == "__main__":
-    crawl()
+    parser = build_argparser()
+    crawl(parser.parse_args())
