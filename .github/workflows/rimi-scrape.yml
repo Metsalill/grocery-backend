@@ -26,11 +26,11 @@ on:
       req_delay:
         description: "Delay between page ops (sec)"
         required: false
-        default: "0.25"
+        default: "0.15"        # bumped default
       pdp_workers:
         description: "Number of Playwright pages to reuse for PDPs (>=1)"
         required: false
-        default: "2"
+        default: "4"           # bumped default
   schedule:
     - cron: "19 3 * * 0"   # Sun at 03:19 UTC
 
@@ -42,13 +42,12 @@ jobs:
   crawl-and-upsert:
     name: crawl-and-upsert (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
-    timeout-minutes: 110
+    timeout-minutes: 150   # allow up to 120m crawler timeout + overhead
 
     strategy:
       fail-fast: false
       matrix:
-        # Only shard 0 for metadata; shards 0..3 for prices
-        shard: ${{ fromJSON( ((github.event.inputs.mode || 'prices') == 'metadata') && '["0"]' || '["0","1","2","3"]' ) }}
+        shard: [0, 1, 2, 3]   # re-enable 4 shards for metadata, too
 
     env:
       PYTHONUNBUFFERED: "1"
@@ -124,8 +123,7 @@ jobs:
       - name: Prepare category list (all -> shard slice)
         shell: bash
         env:
-          # SHARDS=1 in metadata mode, 4 in prices mode
-          SHARDS: ${{ ((github.event.inputs.mode || 'prices') == 'metadata') && '1' || '4' }}
+          SHARDS: 4
         run: |
           set -euo pipefail
           if [ -n "${{ github.event.inputs.categories_multiline }}" ]; then
@@ -223,7 +221,7 @@ jobs:
         if: ${{ env.MODE_IS_METADATA == 'true' }}
         shell: bash
         env:
-          SHARDS: ${{ ((github.event.inputs.mode || 'prices') == 'metadata') && '1' || '4' }}
+          SHARDS: 4
         run: |
           set -euo pipefail
           if [ -s data/rimi_only_ext_ids.txt ]; then
@@ -251,11 +249,11 @@ jobs:
           echo "MODE=${MODE}"
           echo "::endgroup::"
 
-          REQ_DELAY="${REQ_DELAY:-0.25}"
+          REQ_DELAY="${REQ_DELAY:-0.15}"   # new default
           PAGE_LIMIT="${PAGE_LIMIT:-0}"
           MAX_PRODUCTS="${MAX_PRODUCTS:-0}"
           HEADLESS="${HEADLESS:-1}"
-          PDP_WORKERS="${PDP_WORKERS:-2}"
+          PDP_WORKERS="${PDP_WORKERS:-4}"  # new default
 
           SKIP_FLAG=()
           if [ "${MODE}" = "prices" ] && [ -s data/rimi_skip_ext_ids.txt ]; then
@@ -277,7 +275,7 @@ jobs:
 
           set +e
           set +o pipefail
-          stdbuf -oL -eL timeout -k 60s 80m \
+          stdbuf -oL -eL timeout -k 60s 120m \   # raised to 120m
             python -u scripts/rimi_crawl_categories_pw.py \
               --cats-file data/rimi_categories.txt \
               --page-limit "$PAGE_LIMIT" \
@@ -306,7 +304,7 @@ jobs:
           echo "::endgroup::"
 
           if [ "$status" -eq 124 ]; then
-            echo "::warning::Crawler hit the time budget (timeout 80m). Continuing with partial results."
+            echo "::warning::Crawler hit the time budget (timeout 120m). Continuing with partial results."
           elif [ "$status" -ne 0 ]; then
             echo "::warning::Crawler exited non-zero ($status); continuing"
           fi
@@ -540,6 +538,7 @@ jobs:
           -- housekeeping + refresh the view the target builder reads
           TRUNCATE staging_rimi_products;
           ANALYZE rimi_candidates;
+          -- refresh if you use the mat view; ignore if it doesn't exist
           DO $$
           BEGIN
             IF EXISTS (SELECT 1 FROM pg_matviews WHERE matviewname = 'rimi_candidates_norm') THEN
