@@ -31,11 +31,14 @@ EXT_ID_PATTERNS = [
     re.compile(r"/(\d+)(?:-[a-z0-9\-]+)?/?$"),
 ]
 
+# --- keys we scan inside JSON / JS blobs ---
 GTIN_KEYS = {"gtin13","gtin","gtin12","gtin14","productid","product_id","barcode","ean","ean13"}
 SKU_KEYS  = {"sku","mpn","code","id","productcode","itemnumber"}
 PRICE_KEYS= {"price","currentprice","priceamount","unitprice","value","amount"}
 CURR_KEYS = {"currency","pricecurrency","currencycode","curr"}
 BRAND_KEYS= {"brand","manufacturer","producer","tootja"}
+
+DATA_LAYER_PUSH_RE = re.compile(r'dataLayer\.push\s*\(\s*(\{.*?\})\s*\)', re.DOTALL)
 
 @dataclass
 class Row:
@@ -253,7 +256,15 @@ def extract_from_other_scripts(page: Page) -> Tuple[str,str,str,str,str]:
         try: txt = s.inner_text().strip()
         except Exception: continue
         if not txt or ("{" not in txt and "[" not in txt): continue
-        # fast and tolerant JSON block finder
+        # Pull dataLayer.push(...) blocks first (cookie-blocked brand/id show up here)
+        for m in DATA_LAYER_PUSH_RE.finditer(txt):
+            blob = m.group(1)
+            obj = parse_json(blob)
+            if obj is None: continue
+            n,b,sz,g,sku = walk_find(obj)
+            if any([n,b,sz,g,sku]):
+                return safe_text(n), safe_text(b), safe_text(sz), safe_text(g), safe_text(sku)
+        # generic tolerant JSON finder
         for m in re.finditer(r"(\{(?:.|\n)*?\}|\[(?:.|\n)*?\])", txt):
             obj = parse_json(m.group(1))
             if obj is None: continue
@@ -449,7 +460,22 @@ def extract_specs_from_dom(page: Page) -> Tuple[str, str, str, str]:
         elif any(tk in k for tk in _SPEC_EAN_KEYS):
             set_ean(v)
 
+    # brand pills / links
+    pill = soup.select_one("a[href*='/brandid/'], a[href*='/brand/'], .product-brand a, .b-product__brand a")
+    if pill and pill.get_text(strip=True):
+        set_brand(pill.get_text(strip=True))
+
     return brand, mfr, size_text, ean_raw
+
+# --- brand cleaning (very light) ---
+_BAD_BRAND = {"cookie","accept","lisa ostukorvi","add to cart","kampaania","campaign"}
+def clean_brand(s: str) -> str:
+    s = (s or "").strip()
+    if not s: return ""
+    low = s.lower()
+    if len(s) > 60 or ":" in s or "\n" in s: return ""
+    if any(t in low for t in _BAD_BRAND): return ""
+    return s
 
 # ---------- dynamic-page helpers ----------
 def accept_cookies_if_present(page: Page) -> None:
@@ -544,6 +570,51 @@ def read_categories(args) -> List[str]:
                 if u: cats.append(url_abs(u, BASE))
     return cats
 
+# --------- best-effort ext_id picker (prefer numeric ids) ----------
+def best_ext_id(page: Page, source_url: str, js: Dict[str,str]) -> str:
+    # 1) From JS/global/dataLayer values (prefer numeric-looking)
+    for k in ("productid","product_id","id","code","sku","mpn"):
+        v = js.get(k)
+        if v and re.fullmatch(r"\d{5,}", v):
+            return v
+
+    # 2) dataLayer.push blocks embedded as text
+    try:
+        for el in page.locator("script").all():
+            try:
+                txt = el.inner_text().strip()
+            except Exception:
+                continue
+            for m in DATA_LAYER_PUSH_RE.finditer(txt):
+                obj = parse_json(m.group(1))
+                if not isinstance(obj, dict): continue
+                # common GA4 ecommerce shape: ecommerce.detail.products[0].id
+                ec = obj.get("ecommerce") or {}
+                for key in ("detail","impressions","items","products"):
+                    arr = ec.get(key)
+                    if isinstance(arr, list) and arr:
+                        pid = str(arr[0].get("id") or arr[0].get("product_id") or "").strip()
+                        if re.fullmatch(r"\d{5,}", pid):
+                            return pid
+                # flat id
+                pid = str(obj.get("id") or obj.get("product_id") or "").strip()
+                if re.fullmatch(r"\d{5,}", pid):
+                    return pid
+    except Exception:
+        pass
+
+    # 3) Visible DOM attributes
+    for sel in ('[data-product-id]','[data-productid]','[data-product_code]','[data-id]'):
+        try:
+            v = page.eval_on_selector(sel, "el => el?.getAttribute && el.getAttribute(arguments[0])", sel.strip("[]"))
+        except Exception:
+            v = None
+        if isinstance(v, str) and re.fullmatch(r"\d{5,}", v.strip()):
+            return v.strip()
+
+    # 4) Fallback to whatever is in URL (numeric or slug)
+    return ext_id_from_url(source_url)
+
 # ----------------------- PDP extraction -----------------------
 def extract_pdp(page: Page, source_url: str, category_hint: str) -> Row:
     # make sure the page is ready
@@ -585,6 +656,9 @@ def extract_pdp(page: Page, source_url: str, category_hint: str) -> Row:
     except Exception:
         pass
 
+    # Light brand clean
+    brand = clean_brand(brand)
+
     price, currency = extract_price_currency(page)
     if not price and "price" in js:
         price = norm_price_str(js["price"])
@@ -601,7 +675,9 @@ def extract_pdp(page: Page, source_url: str, category_hint: str) -> Row:
     ean_raw = norm_digits(ean_raw)
     sku_raw = safe_text(sku_raw)
     price = norm_price_str(price)
-    ext_id = ext_id_from_url(source_url)
+
+    # >>> improved ext_id selection <<<
+    ext_id = best_ext_id(page, source_url, js)
 
     return Row(
         STORE_CHAIN, STORE_NAME, STORE_CHANNEL,
