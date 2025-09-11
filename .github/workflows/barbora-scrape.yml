@@ -76,7 +76,7 @@ jobs:
         run: |
           set -euo pipefail
           pip install playwright beautifulsoup4 lxml pg8000 psycopg2-binary
-          python -m playwright install --with-deps chromium firefox
+          python -m playwright install --with-deps chromium
 
       - name: Verify scraper exists
         shell: bash
@@ -238,13 +238,16 @@ jobs:
 
           echo "Skip list rows (priced & have brand+name): $(wc -l < data/barbora_skip_ext_ids.txt)" | tee data/_barbora_skip_count.txt
 
-      # MODE=metadata → crawl only items missing brand/manufacturer (EAN ignored for Barbora)
-      - name: Build ONLY list (missing brand/manufacturer; Barbora has no EAN)
+      # MODE=metadata → produce BOTH ext_ids and URLs, and shard URLs
+      - name: Build ONLY lists (missing brand/manufacturer; produce URLs too)
         if: ${{ env.DATABASE_URL != '' && env.MODE == 'metadata' }}
         shell: bash
+        env:
+          SHARDS: 2
         run: |
           set -euo pipefail
           : > data/barbora_only_ext_ids.txt
+          : > data/barbora_only_urls_all.txt
 
           HAS_MANU="$(psql "$DATABASE_URL" -Atc "
             WITH cols AS (
@@ -260,42 +263,54 @@ jobs:
 
           if [ "${HAS_MANU}" = "1" ]; then
             psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 -c "
-              WITH all_ids AS (
-                SELECT ext_id FROM public.barbora_candidates
+              WITH all_rows AS (
+                SELECT ext_id, source_url FROM public.barbora_candidates
                 UNION
-                SELECT ext_id FROM public.staging_barbora_products
+                SELECT ext_id, source_url FROM public.staging_barbora_products
               )
-              SELECT a.ext_id
-              FROM all_ids a
+              SELECT a.ext_id || ' ' || a.source_url
+              FROM all_rows a
               LEFT JOIN public.barbora_candidates bc ON bc.ext_id = a.ext_id
               LEFT JOIN public.staging_barbora_products sp ON sp.ext_id = a.ext_id
               WHERE
-                COALESCE(NULLIF(btrim(COALESCE(bc.brand,        sp.brand,        '')), ''), NULL) IS NULL
-                OR COALESCE(NULLIF(btrim(COALESCE(bc.manufacturer, sp.manufacturer, '')), ''), NULL) IS NULL
+                (COALESCE(NULLIF(btrim(COALESCE(bc.brand,        sp.brand,        '')), ''), NULL) IS NULL
+                 OR COALESCE(NULLIF(btrim(COALESCE(bc.manufacturer, sp.manufacturer, '')), ''), NULL) IS NULL)
+                AND COALESCE(a.source_url,'') ILIKE 'https://barbora.ee%'
               ORDER BY 1;
-            " > data/barbora_only_ext_ids.txt
+            " > data/_barbora_only_pairs.txt
           else
             echo "::warning::manufacturer column missing -> falling back to (brand/name)"
             psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 -c "
-              WITH all_ids AS (
-                SELECT ext_id FROM public.barbora_candidates
+              WITH all_rows AS (
+                SELECT ext_id, source_url FROM public.barbora_candidates
                 UNION
-                SELECT ext_id FROM public.staging_barbora_products
+                SELECT ext_id, source_url FROM public.staging_barbora_products
               )
-              SELECT a.ext_id
-              FROM all_ids a
+              SELECT a.ext_id || ' ' || a.source_url
+              FROM all_rows a
               LEFT JOIN public.barbora_candidates bc ON bc.ext_id = a.ext_id
               LEFT JOIN public.staging_barbora_products sp ON sp.ext_id = a.ext_id
               WHERE
-                COALESCE(NULLIF(btrim(COALESCE(bc.brand, sp.brand, '')), ''), NULL) IS NULL
-                OR COALESCE(NULLIF(btrim(COALESCE(bc.name,  sp.name,  '')), ''), NULL) IS NULL
+                (COALESCE(NULLIF(btrim(COALESCE(bc.brand, sp.brand, '')), ''), NULL) IS NULL
+                 OR COALESCE(NULLIF(btrim(COALESCE(bc.name,  sp.name,  '')), ''), NULL) IS NULL)
+                AND COALESCE(a.source_url,'') ILIKE 'https://barbora.ee%'
               ORDER BY 1;
-            " > data/barbora_only_ext_ids.txt
+            " > data/_barbora_only_pairs.txt
           fi
+
+          # Split the "ext_id URL" pairs into two files
+          awk '{print $1}' data/_barbora_only_pairs.txt | sed '/^$/d' > data/barbora_only_ext_ids.txt
+          awk '{print $2}' data/_barbora_only_pairs.txt | sed '/^$/d' > data/barbora_only_urls_all.txt
 
           echo "ONLY list rows: $(wc -l < data/barbora_only_ext_ids.txt)"
 
-      - name: Crawl Barbora categories (Playwright)
+          # Shard the URL list to avoid double-work across matrix shards
+          : "${SHARD:?SHARD env is required}"
+          awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
+            data/barbora_only_urls_all.txt > data/barbora_only_urls.txt
+          echo "Shard URL slice count: $(wc -l < data/barbora_only_urls.txt)"
+
+      - name: Crawl Barbora (categories or ONLY URLs)
         env:
           REQ_DELAY: ${{ github.event.inputs.req_delay }}
           PAGE_LIMIT: ${{ github.event.inputs.page_limit }}
@@ -310,12 +325,18 @@ jobs:
           HEADLESS="${HEADLESS:-1}"
 
           SKIP_FLAG=()
-          ONLY_FLAG=()
+          ONLY_EXT_FLAG=()
+          ONLY_URL_FLAG=()
+
           if [ "${MODE}" = "prices" ] && [ -s data/barbora_skip_ext_ids.txt ]; then
             SKIP_FLAG=( --skip-ext-file data/barbora_skip_ext_ids.txt )
           fi
-          if [ "${MODE}" = "metadata" ] && [ -s data/barbora_only_ext_ids.txt ]; then
-            ONLY_FLAG=( --only-ext-file data/barbora_only_ext_ids.txt )
+
+          # Prefer URL-driven crawl in metadata mode
+          if [ "${MODE}" = "metadata" ] && [ -s data/barbora_only_urls.txt ]; then
+            ONLY_URL_FLAG=( --only-url-file data/barbora_only_urls.txt )
+          elif [ "${MODE}" = "metadata" ] && [ -s data/barbora_only_ext_ids.txt ]; then
+            ONLY_EXT_FLAG=( --only-ext-file data/barbora_only_ext_ids.txt )
           fi
 
           cmd=( python -u scripts/barbora_crawl_categories_pw.py
@@ -326,9 +347,9 @@ jobs:
                 --req-delay "$REQ_DELAY"
                 --output-csv "$OUTPUT_CSV"
                 "${SKIP_FLAG[@]}"
-                "${ONLY_FLAG[@]}" )
+                "${ONLY_EXT_FLAG[@]}"
+                "${ONLY_URL_FLAG[@]}" )
 
-          # Increased timeout to use the job window better
           stdbuf -oL -eL timeout -k 60s 107m "${cmd[@]}" | tee data/barbora_run.log
 
       - name: Ensure CSV exists (header if empty)
@@ -352,6 +373,8 @@ jobs:
             data/_barbora_skip_count.txt
             data/barbora_skip_ext_ids.txt
             data/barbora_only_ext_ids.txt
+            data/barbora_only_urls_all.txt
+            data/barbora_only_urls.txt
           if-no-files-found: warn
           retention-days: 7
 
