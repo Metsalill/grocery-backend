@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "prices (default) or metadata (crawl only items missing brand/EAN/manufacturer)"
+        description: "prices (default) or metadata (crawl only items missing brand/manufacturer)"
         required: false
         default: "prices"
       categories_multiline:
@@ -238,8 +238,8 @@ jobs:
 
           echo "Skip list rows (priced & have brand+name): $(wc -l < data/barbora_skip_ext_ids.txt)" | tee data/_barbora_skip_count.txt
 
-      # MODE=metadata → crawl only items missing brand/EAN/manufacturer (fallback-safe)
-      - name: Build ONLY list (missing brand/EAN/manufacturer; fallback-safe)
+      # MODE=metadata → crawl only items missing brand/manufacturer (EAN ignored for Barbora)
+      - name: Build ONLY list (missing brand/manufacturer; Barbora has no EAN)
         if: ${{ env.DATABASE_URL != '' && env.MODE == 'metadata' }}
         shell: bash
         run: |
@@ -270,13 +270,12 @@ jobs:
               LEFT JOIN public.barbora_candidates bc ON bc.ext_id = a.ext_id
               LEFT JOIN public.staging_barbora_products sp ON sp.ext_id = a.ext_id
               WHERE
-                COALESCE(NULLIF(btrim(COALESCE(bc.brand, sp.brand, '')), ''), NULL) IS NULL
-                OR COALESCE(NULLIF(regexp_replace(COALESCE(bc.ean_raw, sp.ean_raw, ''), '[^0-9]', '', 'g'), ''), NULL) IS NULL
+                COALESCE(NULLIF(btrim(COALESCE(bc.brand,        sp.brand,        '')), ''), NULL) IS NULL
                 OR COALESCE(NULLIF(btrim(COALESCE(bc.manufacturer, sp.manufacturer, '')), ''), NULL) IS NULL
               ORDER BY 1;
             " > data/barbora_only_ext_ids.txt
           else
-            echo "::warning::manufacturer column missing -> falling back to (brand/EAN/name)"
+            echo "::warning::manufacturer column missing -> falling back to (brand/name)"
             psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 -c "
               WITH all_ids AS (
                 SELECT ext_id FROM public.barbora_candidates
@@ -289,7 +288,6 @@ jobs:
               LEFT JOIN public.staging_barbora_products sp ON sp.ext_id = a.ext_id
               WHERE
                 COALESCE(NULLIF(btrim(COALESCE(bc.brand, sp.brand, '')), ''), NULL) IS NULL
-                OR COALESCE(NULLIF(regexp_replace(COALESCE(bc.ean_raw, sp.ean_raw, ''), '[^0-9]', '', 'g'), ''), NULL) IS NULL
                 OR COALESCE(NULLIF(btrim(COALESCE(bc.name,  sp.name,  '')), ''), NULL) IS NULL
               ORDER BY 1;
             " > data/barbora_only_ext_ids.txt
