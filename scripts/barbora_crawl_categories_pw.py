@@ -9,7 +9,7 @@ CSV columns (exact order):
   image_url,category_path,category_leaf,source_url
 """
 from __future__ import annotations
-import argparse, csv, os, re, sys, json
+import argparse, csv, os, re, sys, json, html
 from dataclasses import dataclass
 from typing import List, Optional, Set, Tuple, Dict, Any
 from urllib.parse import urljoin, urlparse, urlunparse
@@ -39,6 +39,10 @@ CURR_KEYS = {"currency","pricecurrency","currencycode","curr"}
 BRAND_KEYS= {"brand","manufacturer","producer","tootja"}
 
 DATA_LAYER_PUSH_RE = re.compile(r'dataLayer\.push\s*\(\s*(\{.*?\})\s*\)', re.DOTALL)
+GA4_CALL_RE = re.compile(
+    r'window\.reportUserActionToGa4\s*\([^,]+,\s*\{\s*items\s*:\s*\[(\{.*?\})\]\s*\}\s*\)',
+    re.DOTALL
+)
 
 @dataclass
 class Row:
@@ -256,7 +260,7 @@ def extract_from_other_scripts(page: Page) -> Tuple[str,str,str,str,str]:
         try: txt = s.inner_text().strip()
         except Exception: continue
         if not txt or ("{" not in txt and "[" not in txt): continue
-        # Pull dataLayer.push(...) blocks first (cookie-blocked brand/id show up here)
+        # Pull dataLayer.push(...) blocks first
         for m in DATA_LAYER_PUSH_RE.finditer(txt):
             blob = m.group(1)
             obj = parse_json(blob)
@@ -572,6 +576,14 @@ def read_categories(args) -> List[str]:
 
 # --------- best-effort ext_id picker (prefer numeric ids) ----------
 def best_ext_id(page: Page, source_url: str, js: Dict[str,str]) -> str:
+    # 0) Barbora DOM: data-b-item-id on PDP root
+    try:
+        v = page.eval_on_selector('.b-product-info[data-b-item-id]', "el => el?.getAttribute('data-b-item-id') || null")
+        if isinstance(v, str) and re.fullmatch(r"\d{5,}", v.strip()):
+            return v.strip()
+    except Exception:
+        pass
+
     # 1) From JS/global/dataLayer values (prefer numeric-looking)
     for k in ("productid","product_id","id","code","sku","mpn"):
         v = js.get(k)
@@ -588,7 +600,7 @@ def best_ext_id(page: Page, source_url: str, js: Dict[str,str]) -> str:
             for m in DATA_LAYER_PUSH_RE.finditer(txt):
                 obj = parse_json(m.group(1))
                 if not isinstance(obj, dict): continue
-                # common GA4 ecommerce shape: ecommerce.detail.products[0].id
+                # common GA4 ecommerce shape
                 ec = obj.get("ecommerce") or {}
                 for key in ("detail","impressions","items","products"):
                     arr = ec.get(key)
@@ -596,7 +608,6 @@ def best_ext_id(page: Page, source_url: str, js: Dict[str,str]) -> str:
                         pid = str(arr[0].get("id") or arr[0].get("product_id") or "").strip()
                         if re.fullmatch(r"\d{5,}", pid):
                             return pid
-                # flat id
                 pid = str(obj.get("id") or obj.get("product_id") or "").strip()
                 if re.fullmatch(r"\d{5,}", pid):
                     return pid
@@ -615,19 +626,84 @@ def best_ext_id(page: Page, source_url: str, js: Dict[str,str]) -> str:
     # 4) Fallback to whatever is in URL (numeric or slug)
     return ext_id_from_url(source_url)
 
+# --------- GA4 + data-* helpers ----------
+def extract_ga4_item(page: Page) -> dict:
+    """Parse inline GA4 viewItem call → first item dict."""
+    for el in page.locator("script").all():
+        try:
+            txt = el.inner_text().strip()
+        except Exception:
+            continue
+        m = GA4_CALL_RE.search(txt)
+        if not m:
+            continue
+        try:
+            item = json.loads(m.group(1))
+            if isinstance(item, dict):
+                return item
+        except Exception:
+            continue
+    return {}
+
+def extract_cart_blob(page: Page) -> dict:
+    """Read data-b-for-cart JSON + data-b-item-id."""
+    try:
+        root = page.locator(".b-product-info[data-b-for-cart]").first
+        if root and root.count() > 0:
+            raw = root.get_attribute("data-b-for-cart") or ""
+            blob = json.loads(html.unescape(raw)) if raw else {}
+            pid = (root.get_attribute("data-b-item-id") or "").strip()
+            if pid and isinstance(blob, dict) and not blob.get("id"):
+                blob["id"] = pid
+            return blob if isinstance(blob, dict) else {}
+    except Exception:
+        pass
+    return {}
+
 # ----------------------- PDP extraction -----------------------
 def extract_pdp(page: Page, source_url: str, category_hint: str) -> Row:
     # make sure the page is ready
     accept_cookies_if_present(page); wait_for_hydration(page)
 
-    name, brand, size_text, ean_raw, sku_raw = extract_from_jsonld(page)
-    if not any([name, brand, size_text, ean_raw, sku_raw]):
-        _n,_b,_s,_g,_sku = extract_from_other_scripts(page)
-        name = name or _n
-        brand = brand or _b
-        size_text = size_text or _s
-        ean_raw = ean_raw or _g
-        sku_raw = sku_raw or _sku
+    # 0) Super-strong PDP sources (GA4 + data-*), use them first
+    ga4 = extract_ga4_item(page)
+    cart = extract_cart_blob(page)
+
+    # ext_id (prefer numeric 15+)
+    ext_id = ""
+    for cand in [cart.get("id"), ga4.get("item_id")]:
+        if isinstance(cand, str) and re.fullmatch(r"\d{6,}", cand.strip()):
+            ext_id = cand.strip(); break
+
+    # name / brand
+    name = safe_text(cart.get("title")) or safe_text(ga4.get("item_name")) or ""
+    brand = safe_text(cart.get("brand_name")) or safe_text(ga4.get("item_brand")) or ""
+    price = norm_price_str(cart.get("price") or ga4.get("price"))
+    currency = "EUR"
+    image_url = safe_text(cart.get("image") or "")
+
+    # category path (cart has full path, GA4 has split categories)
+    category_path = ""
+    category_leaf = ""
+    cp = safe_text(cart.get("category_name_full_path") or "")
+    if cp:
+        category_path = cp
+        category_leaf = cp.split("/")[-1]
+    else:
+        cats = [safe_text(ga4.get(k)) for k in ("item_category","item_category2","item_category3","item_category4") if safe_text(ga4.get(k))]
+        if cats:
+            category_path = "/".join(cats)
+            category_leaf = cats[-1]
+
+    # 1) JSON-LD / other scripts to enrich missing fields
+    n2, b2, size_text, ean_raw, sku_raw = extract_from_jsonld(page)
+    if not any([n2,b2,size_text,ean_raw,sku_raw]):
+        n3,b3,sz3,g3,sku3 = extract_from_other_scripts(page)
+        n2 = n2 or n3; b2 = b2 or b3; size_text = size_text or sz3; ean_raw = ean_raw or g3; sku_raw = sku_raw or sku3
+
+    # Merge precedence: GA4/cart first, then JSON, then DOM title/specs
+    if not looks_like_product_name(name): name = n2
+    if not brand: brand = b2
 
     # JS globals (Nuxt/Redux, etc.)
     js = extract_from_js_globals(page)
@@ -641,7 +717,7 @@ def extract_pdp(page: Page, source_url: str, category_hint: str) -> Row:
         brand = js.get("brand","") or js.get("manufacturer","")
     manufacturer = js.get("manufacturer","")
 
-    # If JSON name is junk, prefer DOM title
+    # If JSON/GA name is junk, prefer DOM title
     if not looks_like_product_name(name):
         dom_name = dom_title_fallback(page)
         if dom_name: name = dom_name
@@ -659,31 +735,36 @@ def extract_pdp(page: Page, source_url: str, category_hint: str) -> Row:
     # Light brand clean
     brand = clean_brand(brand)
 
-    price, currency = extract_price_currency(page)
-    if not price and "price" in js:
-        price = norm_price_str(js["price"])
-    if not currency:
-        currency = js.get("currency") or js.get("pricecurrency") or "EUR"
+    # Price/currency fallback
+    if not price:
+        pr, cur = extract_price_currency(page)
+        price = price or pr
+        currency = currency or cur or "EUR"
 
-    image_url = extract_image_url(page)
-    cat_path, cat_leaf = extract_breadcrumbs(page)
-    if not cat_path and category_hint:
-        cat_path = category_hint
-        cat_leaf = category_hint.split("/")[-1] if "/" in category_hint else category_hint
+    # Image fallback
+    if not image_url:
+        image_url = extract_image_url(page)
+
+    # Breadcrumb fallback
+    if not category_path:
+        cat_path2, cat_leaf2 = extract_breadcrumbs(page)
+        category_path = cat_path2 or category_hint or ""
+        category_leaf = cat_leaf2 or (category_hint.split("/")[-1] if category_hint else "")
 
     # normalize digits
     ean_raw = norm_digits(ean_raw)
     sku_raw = safe_text(sku_raw)
     price = norm_price_str(price)
 
-    # >>> improved ext_id selection <<<
-    ext_id = best_ext_id(page, source_url, js)
+    # improved ext_id selection (final)
+    if not ext_id:
+        ext_id = best_ext_id(page, source_url, js)
 
     return Row(
         STORE_CHAIN, STORE_NAME, STORE_CHANNEL,
         ext_id, ean_raw, sku_raw, (name or ""), (size_text or ""),
         (brand or ""), (manufacturer or ""), (price or ""), (currency or "EUR"),
-        (image_url or ""), (cat_path or ""), (cat_leaf or ""), source_url
+        (image_url or ""), (category_path or ""), (category_leaf or ""), source_url
     )
 
 # ----------------------- Main crawl -----------------------
