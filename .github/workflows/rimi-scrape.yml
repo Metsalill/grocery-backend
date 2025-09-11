@@ -262,14 +262,10 @@ jobs:
           PDP_WORKERS="${PDP_WORKERS:-2}"
 
           SKIP_FLAG=()
-          # In PRICES mode, skip items that already have NAME+BRAND.
           if [ "${MODE}" = "prices" ] && [ -s data/rimi_skip_ext_ids.txt ]; then
             echo "Using skip list: $(wc -l < data/rimi_skip_ext_ids.txt) ext_ids"
             SKIP_FLAG=(--skip-ext-file data/rimi_skip_ext_ids.txt)
           fi
-
-          # In METADATA mode, DO NOT pre-filter with ONLY list — crawl the slice normally.
-          # This avoids 'ONLY filter active: 0 URLs retained' when the slice doesn't intersect.
 
           set +e
           set +o pipefail
@@ -398,8 +394,6 @@ jobs:
             category_leaf text,
             collected_at  timestamptz DEFAULT now()
           );
-          ALTER TABLE public.staging_rimi_products
-            ADD COLUMN IF NOT EXISTS manufacturer text;
           CREATE EXTENSION IF NOT EXISTS pg_trgm;
           CREATE INDEX IF NOT EXISTS ix_rimi_ean       ON public.staging_rimi_products (ean_norm);
           CREATE INDEX IF NOT EXISTS ix_rimi_name_trgm ON public.staging_rimi_products USING gin (name gin_trgm_ops);
@@ -423,12 +417,10 @@ jobs:
             category_leaf text,
             last_seen     timestamptz DEFAULT now()
           );
-          ALTER TABLE public.rimi_candidates
-            ADD COLUMN IF NOT EXISTS manufacturer text;
           COMMIT;
           SQL
 
-      - name: Load CSV to DB (staging + candidates)
+      - name: Load CSV to DB (staging only)
         if: ${{ env.DATABASE_URL != '' }}
         shell: bash
         run: |
@@ -442,7 +434,7 @@ jobs:
           echo "CSV_ABS: $CSV_ABS"
           ls -l "$CSV_ABS" || true
 
-          cat > /tmp/rimi_load.sql <<'SQL'
+          cat > /tmp/rimi_load_staging.sql <<'SQL'
           \set ON_ERROR_STOP on
           BEGIN;
 
@@ -467,81 +459,94 @@ jobs:
 
           \copy tmp_rimi_csv_full FROM '__CSV__' CSV HEADER
 
-          CREATE TEMP TABLE tmp_staging_rimi_products (
-            ext_id        text PRIMARY KEY,
-            name          text NOT NULL,
-            ean_raw       text,
-            sku_raw       text,
-            ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '[^0-9]+', '', 'g')) STORED,
-            size_text     text,
-            brand         text,
-            manufacturer  text,
-            price         numeric(12,2),
-            currency      text DEFAULT 'EUR',
-            category_path text,
-            category_leaf text,
-            collected_at  timestamptz DEFAULT now()
-          );
-
-          INSERT INTO tmp_staging_rimi_products
-            (ext_id,name,ean_raw,sku_raw,size_text,brand,manufacturer,price,currency,category_path,category_leaf)
-          SELECT
-            ext_id,
-            COALESCE(NULLIF(btrim(name),''), initcap(replace(regexp_replace(COALESCE(ext_id,''),'^.*/',''),'-',' '))) AS name,
-            NULLIF(btrim(ean_raw),'') AS ean_raw,
-            NULLIF(btrim(sku_raw),'') AS sku_raw,
-            NULLIF(btrim(size_text),'') AS size_text,
-            NULLIF(btrim(brand),'') AS brand,
-            NULLIF(btrim(manufacturer),'') AS manufacturer,
-            NULLIF(price,'')::numeric AS price,
-            COALESCE(NULLIF(currency,''),'EUR') AS currency,
-            NULLIF(btrim(category_path),'') AS category_path,
-            NULLIF(btrim(category_leaf),'') AS category_leaf
-          FROM tmp_rimi_csv_full
-          WHERE COALESCE(ext_id,'') <> '';
-
-          DELETE FROM tmp_staging_rimi_products WHERE COALESCE(name,'')='';
-
           INSERT INTO public.staging_rimi_products
             (ext_id,name,ean_raw,sku_raw,size_text,brand,manufacturer,price,currency,category_path,category_leaf,collected_at)
-          SELECT ext_id,name,ean_raw,sku_raw,size_text,brand,manufacturer,price,currency,category_path,category_leaf,now()
-          FROM tmp_staging_rimi_products
-          ON CONFLICT (ext_id) DO UPDATE
-            SET name          = EXCLUDED.name,
-                ean_raw       = EXCLUDED.ean_raw,
-                sku_raw       = EXCLUDED.sku_raw,
-                size_text     = COALESCE(EXCLUDED.size_text, public.staging_rimi_products.size_text),
-                brand         = COALESCE(EXCLUDED.brand, public.staging_rimi_products.brand),
-                manufacturer  = COALESCE(EXCLUDED.manufacturer, public.staging_rimi_products.manufacturer),
-                price         = EXCLUDED.price,
-                currency      = COALESCE(EXCLUDED.currency, public.staging_rimi_products.currency),
-                category_path = COALESCE(EXCLUDED.category_path, public.staging_rimi_products.category_path),
-                category_leaf = COALESCE(EXCLUDED.category_leaf, public.staging_rimi_products.category_leaf),
-                collected_at  = now();
-
-          INSERT INTO public.rimi_candidates
-            (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, manufacturer, price, currency, category_path, category_leaf, last_seen)
           SELECT
-            s.ext_id, s.ean_norm, s.ean_raw, s.sku_raw, s.name, s.size_text, s.brand, s.manufacturer,
-            s.price, s.currency, s.category_path, s.category_leaf, now()
-          FROM tmp_staging_rimi_products s
-          ON CONFLICT (ext_id) DO UPDATE
-            SET price         = EXCLUDED.price,
-                currency      = EXCLUDED.currency,
-                size_text     = COALESCE(EXCLUDED.size_text, public.rimi_candidates.size_text),
-                brand         = COALESCE(EXCLUDED.brand, public.rimi_candidates.brand),
-                manufacturer  = COALESCE(EXCLUDED.manufacturer, public.rimi_candidates.manufacturer),
-                category_path = COALESCE(EXCLUDED.category_path, public.rimi_candidates.category_path),
-                category_leaf = COALESCE(EXCLUDED.category_leaf, public.rimi_candidates.category_leaf),
-                ean_raw       = COALESCE(EXCLUDED.ean_raw, public.rimi_candidates.ean_raw),
-                sku_raw       = COALESCE(EXCLUDED.sku_raw, public.rimi_candidates.sku_raw),
-                last_seen     = now();
+            COALESCE(NULLIF(btrim(ext_id),''), md5(coalesce(source_url,''))) AS ext_id,
+            NULLIF(btrim(name),'') AS name,
+            NULLIF(btrim(ean_raw),''),
+            NULLIF(btrim(sku_raw),''),
+            NULLIF(btrim(size_text),''),
+            NULLIF(btrim(brand),''),
+            NULLIF(btrim(manufacturer),''),
+            NULLIF(price,'')::numeric,
+            COALESCE(NULLIF(currency,''),'EUR'),
+            NULLIF(btrim(category_path),''),
+            NULLIF(btrim(category_leaf),''),
+            now()
+          FROM tmp_rimi_csv_full
+          WHERE COALESCE(ext_id,'') <> '' AND COALESCE(name,'') <> '';
 
           COMMIT;
           SQL
+          sed -i "s|__CSV__|$CSV_ABS|g" /tmp/rimi_load_staging.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/rimi_load_staging.sql
 
-          sed -i "s|__CSV__|$CSV_ABS|g" /tmp/rimi_load.sql
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/rimi_load.sql
+      - name: Upsert to candidates (ext_id, EAN-agnostic) + refresh
+        if: ${{ env.DATABASE_URL != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          -- show how many rows in staging
+          SELECT COUNT(*) AS staging_rows FROM staging_rimi_products;
+
+          -- ensure conflict target
+          CREATE UNIQUE INDEX IF NOT EXISTS uq_rimi_candidates_ext
+            ON rimi_candidates(ext_id);
+
+          -- upsert (returns how many rows were touched)
+          WITH up AS (
+            INSERT INTO rimi_candidates AS c (
+              ext_id, ean_raw, sku_raw, name, size_text,
+              brand, manufacturer, price, currency,
+              category_path, category_leaf, last_seen, created_at
+            )
+            SELECT
+              s.ext_id,
+              NULLIF(BTRIM(s.ean_raw),''),  NULLIF(BTRIM(s.sku_raw),''),
+              NULLIF(BTRIM(s.name),''),     NULLIF(BTRIM(s.size_text),''),
+              NULLIF(BTRIM(s.brand),''),    NULLIF(BTRIM(s.manufacturer),''),
+              s.price,                      NULLIF(BTRIM(s.currency),''),
+              NULLIF(BTRIM(s.category_path),''), NULLIF(BTRIM(s.category_leaf),''),
+              now(), now()
+            FROM staging_rimi_products s
+            ON CONFLICT (ext_id) DO UPDATE
+            SET
+              name          = COALESCE(EXCLUDED.name,          c.name),
+              size_text     = COALESCE(EXCLUDED.size_text,     c.size_text),
+              brand         = COALESCE(EXCLUDED.brand,         c.brand),
+              manufacturer  = COALESCE(EXCLUDED.manufacturer,  c.manufacturer),
+              price         = COALESCE(EXCLUDED.price,         c.price),
+              currency      = COALESCE(EXCLUDED.currency,      c.currency),
+              category_path = COALESCE(EXCLUDED.category_path, c.category_path),
+              category_leaf = COALESCE(EXCLUDED.category_leaf, c.category_leaf),
+              ean_raw       = COALESCE(EXCLUDED.ean_raw,       c.ean_raw),
+              sku_raw       = COALESCE(EXCLUDED.sku_raw,       c.sku_raw),
+              last_seen     = GREATEST(c.last_seen, now())
+            RETURNING 1
+          )
+          SELECT COUNT(*) AS upsert_rows FROM up;
+
+          -- housekeeping + refresh the view the target builder reads
+          TRUNCATE staging_rimi_products;
+          ANALYZE rimi_candidates;
+          -- refresh if you use the mat view; ignore if it doesn't exist
+          DO $$
+          BEGIN
+            IF EXISTS (SELECT 1 FROM pg_matviews WHERE matviewname = 'rimi_candidates_norm') THEN
+              EXECUTE 'REFRESH MATERIALIZED VIEW rimi_candidates_norm';
+            END IF;
+          END$$;
+
+          -- optional target snapshot for logs (name or brand missing)
+          DROP TABLE IF EXISTS tmp_rimi_target_missing;
+          CREATE TEMP TABLE tmp_rimi_target_missing AS
+          SELECT ext_id
+          FROM   rimi_side_norm
+          WHERE  COALESCE(BTRIM(name),'') = '' OR COALESCE(BTRIM(brand),'') = '';
+          SELECT COUNT(*) AS target_missing_after FROM tmp_rimi_target_missing;
+          SQL
 
       - name: Sanity check (rows & zero-price count)
         if: ${{ env.DATABASE_URL != '' }}
