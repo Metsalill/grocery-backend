@@ -76,7 +76,7 @@ jobs:
         run: |
           set -euo pipefail
           pip install playwright beautifulsoup4 lxml pg8000 psycopg2-binary
-          python -m playwright install --with-deps chromium
+          python -m playwright install --with-deps chromium firefox
 
       - name: Verify scraper exists
         shell: bash
