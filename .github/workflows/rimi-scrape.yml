@@ -261,6 +261,18 @@ jobs:
             SKIP_FLAG=(--skip-ext-file data/rimi_skip_ext_ids.txt)
           fi
 
+          ONLY_FLAG=()
+          if [ "${MODE}" = "metadata" ]; then
+            if [ -s data/rimi_only_ext_ids.sharded.txt ]; then
+              echo "Restricting crawl to ONLY ${SHARD} shard targets:"
+              head -n 5 data/rimi_only_ext_ids.sharded.txt || true
+              ONLY_FLAG=(--only-ext-file data/rimi_only_ext_ids.sharded.txt)
+            else
+              echo "::notice::No ONLY targets for this shard in metadata mode — skipping crawl step."
+              exit 0
+            fi
+          fi
+
           set +e
           set +o pipefail
           stdbuf -oL -eL timeout -k 60s 80m \
@@ -273,6 +285,7 @@ jobs:
               --pdp-workers "$PDP_WORKERS" \
               --output-csv "$OUTPUT_CSV" \
               "${SKIP_FLAG[@]}" \
+              "${ONLY_FLAG[@]}" \
             > >(tee data/rimi_run.log) 2>data/rimi_run.err
           status=${PIPESTATUS[0]}
           set -o pipefail
