@@ -956,6 +956,11 @@ def main():
     ap.add_argument("--skip-ext-file", default=os.environ.get("SKIP_EXT_FILE",""))
     ap.add_argument("--only-ext-file", default=os.environ.get("ONLY_EXT_FILE",""))
     ap.add_argument("--pdp-workers", default="2", help="How many Playwright pages to reuse in round-robin for PDPs")
+    ap.add_argument(
+        "--direct-only",
+        default="auto",
+        help="auto|0|1 — if ONLY list present, go straight to PDPs and skip category discovery",
+    )
     args = ap.parse_args()
 
     page_limit   = int(args.page_limit or "0")
@@ -967,6 +972,38 @@ def main():
 
     skip_urls, skip_ext = read_skip_file(args.skip_ext_file)
     only_urls, only_ext = read_only_file(args.only_ext_file)
+
+    # decide direct-only behavior
+    direct_only_flag = str(args.direct_only).strip().lower()
+    if direct_only_flag in ("1","true","yes","y"):
+        direct_only = True
+    elif direct_only_flag in ("0","false","no","n"):
+        direct_only = False
+    else:
+        # auto: if an ONLY list exists, go direct
+        direct_only = bool(only_urls or only_ext)
+
+    def pdps_from_only_lists() -> list[str]:
+        urls: set[str] = set()
+        # from URLs
+        for u in only_urls:
+            if not u:
+                continue
+            u2 = normalize_href(u)
+            if not u2:
+                continue
+            if "/p/" in u2 and _is_full_pdp(u2):
+                urls.add(u2)
+            else:
+                xid = extract_ext_id(u2)
+                if xid:
+                    urls.add(f"{BASE}/epood/ee/tooted/p/{xid}")
+        # from ext_ids
+        for xid in only_ext:
+            xid = (xid or "").strip()
+            if xid:
+                urls.add(f"{BASE}/epood/ee/tooted/p/{xid}")
+        return sorted(urls)
 
     # Buffered writer with periodic flush (row-count or time)
     rows: List[Dict[str,str]] = []
@@ -983,16 +1020,20 @@ def main():
 
     all_pdps: List[str] = []
     with sync_playwright() as pw:
-        # 1) Collect PDP URLs from categories
-        for cat in cats:
-            try:
-                print(f"[rimi] {cat}")
-                pdps = crawl_category(pw, cat, page_limit, headless, req_delay)
-                all_pdps.extend(pdps)
-                if max_products and len(all_pdps) >= max_products:
-                    break
-            except Exception as e:
-                print(f"[rimi] category error: {cat} → {e}", file=sys.stderr)
+        # 1) Pick discovery mode
+        if direct_only:
+            print(f"[rimi] DIRECT-ONLY: using ONLY list; skipping category discovery")
+            all_pdps = pdps_from_only_lists()
+        else:
+            for cat in cats:
+                try:
+                    print(f"[rimi] {cat}")
+                    pdps = crawl_category(pw, cat, page_limit, headless, req_delay)
+                    all_pdps.extend(pdps)
+                    if max_products and len(all_pdps) >= max_products:
+                        break
+                except Exception as e:
+                    print(f"[rimi] category error: {cat} → {e}", file=sys.stderr)
 
         # 2) Dedup & filters
         seen, q = set(), []
