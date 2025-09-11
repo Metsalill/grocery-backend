@@ -41,15 +41,14 @@ concurrency:
 jobs:
   crawl-and-upsert:
     name: crawl-and-upsert (shard ${{ matrix.shard }})
-    # Run all shards for prices; only shard 0 for metadata
-    if: ${{ (github.event.inputs.mode || 'prices') != 'metadata' || matrix.shard == 0 }}
     runs-on: ubuntu-latest
     timeout-minutes: 110
 
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3]
+        # Only shard 0 for metadata; shards 0..3 for prices
+        shard: ${{ fromJSON( ((github.event.inputs.mode || 'prices') == 'metadata') && '["0"]' || '["0","1","2","3"]' ) }}
 
     env:
       PYTHONUNBUFFERED: "1"
@@ -125,7 +124,7 @@ jobs:
       - name: Prepare category list (all -> shard slice)
         shell: bash
         env:
-          # Use SHARDS=1 in metadata (single runner covers all categories), else 4
+          # SHARDS=1 in metadata mode, 4 in prices mode
           SHARDS: ${{ ((github.event.inputs.mode || 'prices') == 'metadata') && '1' || '4' }}
         run: |
           set -euo pipefail
@@ -224,7 +223,6 @@ jobs:
         if: ${{ env.MODE_IS_METADATA == 'true' }}
         shell: bash
         env:
-          # SHARDS=1 ensures all targets belong to shard 0 in metadata mode
           SHARDS: ${{ ((github.event.inputs.mode || 'prices') == 'metadata') && '1' || '4' }}
         run: |
           set -euo pipefail
@@ -542,7 +540,6 @@ jobs:
           -- housekeeping + refresh the view the target builder reads
           TRUNCATE staging_rimi_products;
           ANALYZE rimi_candidates;
-          -- refresh if you use the mat view; ignore if it doesn't exist
           DO $$
           BEGIN
             IF EXISTS (SELECT 1 FROM pg_matviews WHERE matviewname = 'rimi_candidates_norm') THEN
