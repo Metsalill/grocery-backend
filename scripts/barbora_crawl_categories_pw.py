@@ -73,20 +73,50 @@ CSV_FIELDS = ["store_chain","store_name","store_channel","ext_id","ean_raw","sku
               "image_url","category_path","category_leaf","source_url"]
 
 # ----------------------- tiny helpers -----------------------
-def safe_text(s: Optional[str]) -> str: return (s or "").strip()
-def norm_digits(s: Optional[str]) -> str: return "".join(DIGITS_RE.findall(str(s or "")))
-def norm_price_str(s: Optional[str]) -> str:
-    s = safe_text(s)
-    if not s: return s
+def safe_text(x: Optional[Any]) -> str:
+    """
+    Robust string normalizer:
+    - None  -> ""
+    - numbers -> string
+    - other -> str(x), HTML-unescaped, stripped
+    Never raises for floats/ints.
+    """
+    if x is None:
+        return ""
+    if isinstance(x, (int, float)):
+        return str(x)
+    try:
+        return html.unescape(str(x)).strip()
+    except Exception:
+        return ""
+
+def norm_digits(s: Optional[str]) -> str:
+    return "".join(DIGITS_RE.findall(str(s or "")))
+
+def norm_price_str(x: Optional[Any]) -> str:
+    """
+    Accepts str/float/int. Normalizes decimal separator to '.' and returns
+    up to 2 decimals captured. Returns "" if cannot parse.
+    """
+    if x is None:
+        return ""
+    if isinstance(x, (int, float)):
+        # format but keep raw str for money-like values
+        return f"{x}".replace(",", ".")
+    s = safe_text(x)
+    if not s:
+        return ""
     s = s.replace("\xa0", " ").replace(",", ".")
     m = re.search(r"\d+(?:\.\d{1,2})?", s)
     return m.group(0) if m else s
+
 def is_pdp_url(u: str) -> bool:
     try:
         p = urlparse(u)
         return bool(p.netloc) and any(rx.search(p.path) for rx in PDP_PATTERNS)
     except Exception:
         return False
+
 def url_abs(href: str, base: str = BASE) -> str:
     try: return urljoin(base, href)
     except Exception: return href
@@ -112,7 +142,7 @@ def keyset_for_url(u: str) -> Set[str]:
         full = urlunparse((uu.scheme, uu.netloc, uu.path.rstrip("/"), "", "", ""))
         path = uu.path.rstrip("/")
     except Exception:
-        full = u.strip().rstrip("/")
+        full = str(u).strip().rstrip("/")
         path = full
 
     keys = {full, path}
@@ -210,7 +240,7 @@ def walk_find(o: Any) -> Tuple[str,str,str,str,str]:
     def maybe_set_name(v: Any):
         nonlocal name
         if isinstance(v, (str, int, float)):
-            cand = str(v).strip()
+            cand = safe_text(v)
             if looks_like_product_name(cand) and not name:
                 name = cand
     def walk(x: Any):
@@ -224,21 +254,21 @@ def walk_find(o: Any) -> Tuple[str,str,str,str,str]:
                 b = x.get("brand")
                 if isinstance(b, dict):
                     v = b.get("name")
-                    if isinstance(v, (str,int,float)): brand = str(v).strip()
+                    if isinstance(v, (str,int,float)): brand = safe_text(v)
                 elif isinstance(b, (str,int,float)):
-                    brand = str(b).strip()
+                    brand = safe_text(b)
             if not size_text:
                 for k in ("size","sizeText","weight","netWeight","packageSize","size_text"):
                     v = x.get(k)
-                    if isinstance(v, (str,int,float)): size_text = str(v).strip(); break
+                    if isinstance(v, (str,int,float)): size_text = safe_text(v); break
             if not gtin:
                 for k in GTIN_KEYS:
                     v = x.get(k) or x.get(k.upper())
-                    if isinstance(v, (str,int,float)): gtin = str(v).strip(); break
+                    if isinstance(v, (str,int,float)): gtin = safe_text(v); break
             if not sku:
                 for k in SKU_KEYS:
                     v = x.get(k) or x.get(k.upper())
-                    if isinstance(v, (str,int,float)): sku = str(v).strip(); break
+                    if isinstance(v, (str,int,float)): sku = safe_text(v); break
             for v in x.values():
                 if isinstance(v, (dict,list)): walk(v)
         elif isinstance(x, list):
