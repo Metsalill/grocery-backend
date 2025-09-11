@@ -499,6 +499,31 @@ jobs:
           DELETE FROM tmp_staging_barbora_products
           WHERE COALESCE(name,'') = '';
 
+          -- De-duplicate: keep the "richest" row per ext_id to avoid ON CONFLICT twice
+          CREATE TEMP TABLE tmp_staging_barbora_products_dedup AS
+          SELECT t.*
+          FROM (
+            SELECT
+              t.*,
+              ROW_NUMBER() OVER (
+                PARTITION BY ext_id
+                ORDER BY
+                  CASE WHEN COALESCE(brand,'') <> '' THEN 1 ELSE 0 END DESC,
+                  CASE WHEN COALESCE(manufacturer,'') <> '' THEN 1 ELSE 0 END DESC,
+                  CASE WHEN price IS NOT NULL THEN 1 ELSE 0 END DESC,
+                  CASE WHEN COALESCE(size_text,'') <> '' THEN 1 ELSE 0 END DESC,
+                  LENGTH(COALESCE(name,'')) DESC
+              ) AS rn
+            FROM tmp_staging_barbora_products t
+          ) t
+          WHERE rn = 1;
+
+          DROP TABLE tmp_staging_barbora_products;
+          ALTER TABLE tmp_staging_barbora_products_dedup RENAME TO tmp_staging_barbora_products;
+
+          -- Belt-and-suspenders: prevent accidental dupes hereafter
+          CREATE UNIQUE INDEX ON tmp_staging_barbora_products (ext_id);
+
           INSERT INTO public.staging_barbora_products
             (ext_id,name,ean_raw,sku_raw,size_text,brand,manufacturer,price,currency,category_path,category_leaf,source_url,collected_at)
           SELECT ext_id,name,ean_raw,sku_raw,size_text,brand,manufacturer,price,currency,category_path,category_leaf,source_url,now()
@@ -544,7 +569,6 @@ jobs:
             COUNT(*) AS candidates_total,
             SUM((price IS NULL OR price = 0)::int) AS zero_price
           FROM public.barbora_candidates;
-
           SQL
           sed -i "s|__CSV__|$CSV_ABS|g" /tmp/barbora_load.sql
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/barbora_load.sql
