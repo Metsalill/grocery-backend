@@ -1,527 +1,395 @@
-name: "Barbora (Maxima EE) - Category Crawl + optional DB upsert"
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Barbora.ee (Maxima EE) – Category → PDP crawler → CSV (no EAN parsing)
 
-on:
-  workflow_dispatch:
-    inputs:
-      mode:
-        description: "prices (default) or metadata (crawl only items missing brand/manufacturer)"
-        required: false
-        default: "prices"
-      categories_multiline:
-        description: "Category URLs (one per line). If empty, auto-discover from Barbora."
-        required: false
-        default: ""
-      page_limit:
-        description: "Max pages per category (0 = all)"
-        required: false
-        default: "0"
-      max_products:
-        description: "Cap total PDPs (0 = unlimited)"
-        required: false
-        default: "0"
-      headless:
-        description: "Headless (1/0)"
-        required: false
-        default: "1"
-      req_delay:
-        description: "Delay between steps (sec)"
-        required: false
-        default: "0.25"
-      upsert_db:
-        description: "Upsert into Postgres (1=yes, 0=just CSV)"
-        required: false
-        default: "1"
-  schedule:
-    - cron: "19 3 * * 0"   # Sun at 03:19 UTC
+CSV columns (exact order; ean_raw left blank intentionally to keep loaders stable):
+  store_chain,store_name,store_channel,ext_id,ean_raw,sku_raw,
+  name,size_text,brand,manufacturer,price,currency,
+  image_url,category_path,category_leaf,source_url
+"""
+from __future__ import annotations
 
-concurrency:
-  group: barbora-category-crawl
-  cancel-in-progress: true
+import argparse
+import csv
+import json
+import os
+import re
+import sys
+import time
+from typing import Dict, List, Optional, Tuple
+from urllib.parse import urljoin, urlparse
 
-jobs:
-  crawl-and-upsert:
-    name: crawl-and-upsert (shard ${{ matrix.shard }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 110
+from bs4 import BeautifulSoup
+from playwright.sync_api import TimeoutError as PWTimeout
+from playwright.sync_api import Page, sync_playwright
 
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [0, 1]
+# --------------------------------------------------------------------------- #
+# Constants
+# --------------------------------------------------------------------------- #
+BASE = "https://barbora.ee"
+STORE_CHAIN = "Maxima"
+STORE_NAME = "Barbora ePood"
+STORE_CHANNEL = "online"
 
-    env:
-      PYTHONUNBUFFERED: "1"
-      OUTPUT_CSV: data/barbora_products.csv
-      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-      MODE: ${{ github.event.inputs.mode || 'prices' }}
-      # Space-separated URL prefixes to exclude/include
-      EXCLUDE_SECTIONS: "https://barbora.ee/kodukaubad-ja-vaba-aeg https://barbora.ee/enesehooldustooted https://barbora.ee/puhastustarbed-ja-lemmikloomatooted https://barbora.ee/lastekaubad"
-      INCLUDE_SECTIONS: "https://barbora.ee/enesehooldustooted/suuhugieen/hambapastad https://barbora.ee/enesehooldustooted/raseerimisvahendid https://barbora.ee/enesehooldustooted/intiimhugieeni-vahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/pesupesemisvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/noudepesuvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/kodukeemia https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/majapidamis-ja-koristustarbed https://barbora.ee/lastekaubad/piimasegud-ja-jatkupiimasegud https://barbora.ee/lastekaubad/pudrud https://barbora.ee/lastekaubad/mahkmed https://barbora.ee/lastekaubad/puuviljapureed https://barbora.ee/lastekaubad/laste-hugieenitarbed/niisked-salvratikud https://barbora.ee/lastekaubad/liha-ja-koogiviljapureed"
-      # Ensure scheduled & manual runs upsert by default (unless user overrides)
-      UPSERT_DB: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.upsert_db || '1' }}
-      # Shard index from matrix
-      SHARD: ${{ matrix.shard }}
+DEFAULT_REQ_DELAY = 0.25
+DEFAULT_HEADLESS = 1
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+SIZE_RE = re.compile(
+    r"(?ix)"
+    r"(\d+\s?(?:x\s?\d+)?\s?(?:ml|l|cl|g|kg|mg|tk|pcs))"
+    r"|"
+    r"(\d+\s?x\s?\d+)"
+)
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+SPEC_KEYS_BRAND = {"kaubamärk", "bränd", "brand"}
+SPEC_KEYS_MFR = {"tootja", "valmistaja", "manufacturer"}
+SPEC_KEYS_SIZE = {"kogus", "netokogus", "maht", "neto"}
 
-      - name: Install deps (Playwright + libs)
-        shell: bash
-        run: |
-          set -euo pipefail
-          pip install playwright beautifulsoup4 lxml pg8000 psycopg2-binary
-          python -m playwright install --with-deps chromium
+# --------------------------------------------------------------------------- #
+# Helpers
+# --------------------------------------------------------------------------- #
+def norm(s: Optional[str]) -> str:
+    if not s:
+        return ""
+    return re.sub(r"\s+", " ", s).strip().lower()
 
-      - name: Verify scraper exists
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ ! -f scripts/barbora_crawl_categories_pw.py ]; then
-            echo "::error::scripts/barbora_crawl_categories_pw.py missing"
-            exit 1
-          fi
-          python -m py_compile scripts/barbora_crawl_categories_pw.py
-          chmod +x scripts/barbora_crawl_categories_pw.py
 
-      - name: Prepare workspace
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf data
-          mkdir -p data
+def text_of(el) -> str:
+    return re.sub(r"\s+", " ", el.get_text(" ", strip=True)) if el else ""
 
-      - name: Auto-discover categories (unless provided via input)
-        env:
-          INPUT_CATS: ${{ github.event.inputs.categories_multiline }}
-          EXCLUDES: ${{ env.EXCLUDE_SECTIONS }}
-          INCLUDES: ${{ env.INCLUDE_SECTIONS }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p data
 
-          # 1) Explicit input wins
-          if [ -n "${INPUT_CATS}" ]; then
-            printf "%s\n" "${INPUT_CATS}" | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/barbora_categories.txt
-            echo "Using categories from workflow input."
-          # 2) Repo file next (if already committed)
-          elif [ -s data/barbora_categories.txt ]; then
-            echo "Using repo file data/barbora_categories.txt"
-          else
-            # 3) Try autodiscover from homepage
-            {
-              echo 'import os'
-              echo 'from urllib.parse import urljoin, urlparse'
-              echo 'from playwright.sync_api import sync_playwright'
-              echo 'BASE = "https://barbora.ee"'
-              echo 'excludes = tuple(os.environ.get("EXCLUDES","").split())'
-              echo 'includes = tuple(os.environ.get("INCLUDES","").split())'
-              echo 'discovered = set()'
-              echo 'def absu(href): return urljoin(BASE, href)'
-              echo 'def is_category(url):'
-              echo '    p = urlparse(url)'
-              echo '    if not (p.scheme and p.netloc and p.netloc.endswith("barbora.ee")): return False'
-              echo '    segs = [s for s in p.path.split("/") if s]'
-              echo '    # allow 1..4 segments; avoid obvious non-catalog roots'
-              echo '    if any(s in ("retseptid","info","blogi","kampaania") for s in segs): return False'
-              echo '    return 1 <= len(segs) <= 4'
-              echo 'def allowed(url):'
-              echo '    if any(url.startswith(pref) for pref in includes): return True'
-              echo '    if any(url.startswith(pref) for pref in excludes): return False'
-              echo '    return is_category(url)'
-              echo 'with sync_playwright() as pw:'
-              echo '    b = pw.chromium.launch(headless=True)'
-              echo '    ctx = b.new_context()'
-              echo '    p = ctx.new_page()'
-              echo '    p.goto(BASE, timeout=45000, wait_until="domcontentloaded")'
-              echo '    for a in p.locator("a").all():'
-              echo '        href = (a.get_attribute("href") or "").strip()'
-              echo '        if not href: continue'
-              echo '        u = absu(href)'
-              echo '        if allowed(u): discovered.add(u)'
-              echo '    os.makedirs("data", exist_ok=True)'
-              echo '    with open("data/barbora_categories.txt","w",encoding="utf-8") as f:'
-              echo '        for u in sorted(discovered): f.write(u + "\n")'
-              echo '    print(f"[discover] wrote {len(discovered)} -> data/barbora_categories.txt")'
-              echo '    ctx.close(); b.close()'
-            } > /tmp/discover_barbora.py
-            python /tmp/discover_barbora.py
+def get_ext_id(url: str) -> str:
+    # Prefer trailing numeric id (…/p/123456 or …-123456)
+    m = re.search(r"/p/(\d+)", url) or re.search(r"-(\d+)$", url)
+    if m:
+        return m.group(1)
+    # Fallback to slug tail
+    slug = re.sub(r"[^a-zA-Z0-9]+", "-", url).strip("-")
+    return slug[-80:]
 
-            # 4) Fallback to a curated FOOD roots list if autodiscover empty/too small
-            if [ ! -s data/barbora_categories.txt ] || [ "$(wc -l < data/barbora_categories.txt)" -lt 10 ]; then
-              printf '%s\n' \
-                'https://barbora.ee/koogiviljad-puuviljad' \
-                'https://barbora.ee/piimatooted-munad-void' \
-                'https://barbora.ee/juustud' \
-                'https://barbora.ee/leib-sai-kondiitritooted' \
-                'https://barbora.ee/valmistoidud' \
-                'https://barbora.ee/kuivained-ja-hoidised' \
-                'https://barbora.ee/maitseained-ja-kastmed' \
-                'https://barbora.ee/suupisted-maiustused' \
-                'https://barbora.ee/joogid' \
-                'https://barbora.ee/kulmutatud-tooted' \
-                > data/barbora_categories.txt
-              echo "Autodiscover small → wrote curated FOOD roots to data/barbora_categories.txt"
-            fi
-          fi
 
-          echo "TOTAL categories: $(wc -l < data/barbora_categories.txt || echo 0)"
-          echo "--- preview ---"
-          head -n 30 data/barbora_categories.txt || true
-          echo "--------------"
-          test -s data/barbora_categories.txt
+def from_json_ld(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
+    out = {
+        "name": None,
+        "brand": None,
+        "manufacturer": None,
+        "image": None,
+        "price": None,
+        "currency": None,
+    }
+    for tag in soup.find_all("script", {"type": "application/ld+json"}):
+        try:
+            data = json.loads(tag.string or "")
+        except Exception:
+            continue
+        items = data if isinstance(data, list) else [data]
+        for it in items:
+            if not isinstance(it, dict):
+                continue
+            t = it.get("@type")
+            types = t if isinstance(t, list) else [t]
+            if not types or "Product" not in types:
+                continue
+            out["name"] = out["name"] or it.get("name")
 
-      - name: Shard category list (2-way)
-        shell: bash
-        env:
-          SHARDS: 2
-        run: |
-          set -euo pipefail
-          cp -f data/barbora_categories.txt data/barbora_categories_all.txt
-          TOTAL=$(wc -l < data/barbora_categories_all.txt)
-          : "${SHARD:?SHARD env is required}"
-          awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
-            data/barbora_categories_all.txt > data/barbora_categories.txt
-          echo "TOTAL categories: $TOTAL"
-          echo "Shard: $SHARD / $SHARDS"
-          echo "Slice count: $(wc -l < data/barbora_categories.txt)"
-          head -n 12 data/barbora_categories.txt || true
+            brand = it.get("brand")
+            if isinstance(brand, dict):
+                brand = brand.get("name")
+            if brand and not out["brand"]:
+                out["brand"] = brand
 
-      # Ensure psql available for the skip/only steps
-      - name: Install psql client (for skip/only lists)
-        if: ${{ env.DATABASE_URL != '' }}
-        shell: bash
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client
+            manufacturer = it.get("manufacturer")
+            if isinstance(manufacturer, dict):
+                manufacturer = manufacturer.get("name")
+            if manufacturer and not out["manufacturer"]:
+                out["manufacturer"] = manufacturer
 
-      # MODE=prices → skip only items that are priced AND already have a brand + name
-      - name: Build skip list (priced & have brand+name)
-        if: ${{ env.DATABASE_URL != '' && env.MODE == 'prices' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          : > data/barbora_skip_ext_ids.txt
+            img = it.get("image")
+            if isinstance(img, list):
+                img = img[0]
+            if img and not out["image"]:
+                out["image"] = img
 
-          psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/barbora_skip_ext_ids.txt
-          WITH priced_from_prices AS (
-            SELECT DISTINCT p.source_url AS ext_id
-            FROM public.prices p
-            JOIN public.stores s ON s.id = p.store_id
-            WHERE s.chain='Maxima' AND s.name ILIKE '%Barbora%' AND s.is_online = TRUE
-              AND p.source_url ILIKE 'https://barbora.ee%'
-          ),
-          priced_from_candidates AS (
-            SELECT DISTINCT ext_id::text
-            FROM public.barbora_candidates
-            WHERE COALESCE(price,0) > 0 AND COALESCE(ext_id,'') <> ''
-          ),
-          priced AS (
-            SELECT ext_id FROM priced_from_prices
-            UNION
-            SELECT ext_id FROM priced_from_candidates
-          )
-          SELECT pr.ext_id
-          FROM priced pr
-          LEFT JOIN public.barbora_candidates bc ON bc.ext_id = pr.ext_id
-          LEFT JOIN public.staging_barbora_products sp ON sp.ext_id = pr.ext_id
-          WHERE COALESCE(NULLIF(btrim(COALESCE(bc.brand, sp.brand, '')), ''), NULL) IS NOT NULL
-            AND COALESCE(NULLIF(btrim(COALESCE(bc.name, sp.name, '')), ''), NULL) IS NOT NULL
-          ORDER BY 1;
-          SQL
+            offers = it.get("offers") or {}
+            if isinstance(offers, dict):
+                if out["price"] is None and offers.get("price") is not None:
+                    out["price"] = str(offers.get("price"))
+                if out["currency"] is None and offers.get("priceCurrency"):
+                    out["currency"] = offers.get("priceCurrency")
+    return out
 
-          echo "Skip list rows (priced & have brand+name): $(wc -l < data/barbora_skip_ext_ids.txt)" | tee data/_barbora_skip_count.txt
 
-      # MODE=metadata → crawl only items missing brand/manufacturer (EAN not used for Barbora)
-      - name: Build ONLY list (missing brand/manufacturer; Barbora ignores EAN)
-        if: ${{ env.DATABASE_URL != '' && env.MODE == 'metadata' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          : > data/barbora_only_ext_ids.txt
+def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
+    out = {"brand": None, "manufacturer": None, "size": None, "sku": None}
+    # Inspect definition lists/tables: dt/th headers; dd/td values
+    for head in soup.select("dt, th"):
+        k = norm(text_of(head))
+        val_el = head.find_next_sibling(["dd", "td"])
+        v = norm(text_of(val_el)) if val_el else ""
+        if not v:
+            continue
+        if k in SPEC_KEYS_BRAND and not out["brand"]:
+            out["brand"] = v
+        elif k in SPEC_KEYS_MFR and not out["manufacturer"]:
+            out["manufacturer"] = v
+        elif k in SPEC_KEYS_SIZE and not out["size"]:
+            out["size"] = v
+        elif "sku" in k and not out["sku"]:
+            out["sku"] = v
+    return out
 
-          HAS_MANU="$(psql "$DATABASE_URL" -Atc "
-            WITH cols AS (
-              SELECT table_name
-              FROM information_schema.columns
-              WHERE table_schema='public'
-                AND column_name='manufacturer'
-                AND table_name IN ('barbora_candidates','staging_barbora_products')
-            )
-            SELECT CASE WHEN COUNT(*)=2 THEN '1' ELSE '0' END FROM cols;
-          ")"
-          echo "HAS_MANUFACTURER_COLS=${HAS_MANU}"
 
-          if [ "${HAS_MANU}" = "1" ]; then
-            psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 -c "
-              WITH all_ids AS (
-                SELECT ext_id FROM public.barbora_candidates
-                UNION
-                SELECT ext_id FROM public.staging_barbora_products
-              )
-              SELECT a.ext_id
-              FROM all_ids a
-              LEFT JOIN public.barbora_candidates bc ON bc.ext_id = a.ext_id
-              LEFT JOIN public.staging_barbora_products sp ON sp.ext_id = a.ext_id
-              WHERE
-                COALESCE(NULLIF(btrim(COALESCE(bc.brand,        sp.brand,        '')), ''), NULL) IS NULL
-                OR COALESCE(NULLIF(btrim(COALESCE(bc.manufacturer, sp.manufacturer, '')), ''), NULL) IS NULL
-              ORDER BY 1;
-            " > data/barbora_only_ext_ids.txt
-          else
-            echo "::warning::manufacturer column missing -> falling back to (brand/name)"
-            psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 -c "
-              WITH all_ids AS (
-                SELECT ext_id FROM public.barbora_candidates
-                UNION
-                SELECT ext_id FROM public.staging_barbora_products
-              )
-              SELECT a.ext_id
-              FROM all_ids a
-              LEFT JOIN public.barbora_candidates bc ON bc.ext_id = a.ext_id
-              LEFT JOIN public.staging_barbora_products sp ON sp.ext_id = a.ext_id
-              WHERE
-                COALESCE(NULLIF(btrim(COALESCE(bc.brand, sp.brand, '')), ''), NULL) IS NULL
-                OR COALESCE(NULLIF(btrim(COALESCE(bc.name,  sp.name,  '')), ''), NULL) IS NULL
-              ORDER BY 1;
-            " > data/barbora_only_ext_ids.txt
-          fi
+def parse_app_state_for_brand(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
+    # Scan inline scripts for "brand" / "manufacturer"
+    for s in soup.find_all("script"):
+        txt = s.string or ""
+        if not txt or ("brand" not in txt and "manufacturer" not in txt):
+            continue
+        mb = re.search(r'"brand"\s*:\s*"([^"]+)"', txt)
+        mm = re.search(r'"manufacturer"\s*:\s*"([^"]+)"', txt)
+        b = mb.group(1).strip() if mb else None
+        m = mm.group(1).strip() if mm else None
+        if b or m:
+            return b, m
+    return None, None
 
-          echo "ONLY list rows: $(wc -l < data/barbora_only_ext_ids.txt)"
 
-      - name: Crawl Barbora categories (Playwright)
-        env:
-          REQ_DELAY: ${{ github.event.inputs.req_delay }}
-          PAGE_LIMIT: ${{ github.event.inputs.page_limit }}
-          MAX_PRODUCTS: ${{ github.event.inputs.max_products }}
-          HEADLESS: ${{ github.event.inputs.headless }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          REQ_DELAY="${REQ_DELAY:-0.25}"
-          PAGE_LIMIT="${PAGE_LIMIT:-0}"
-          MAX_PRODUCTS="${MAX_PRODUCTS:-0}"
-          HEADLESS="${HEADLESS:-1}"
+def safe_product_name(soup: BeautifulSoup, category_leaf: str, listing_title: Optional[str]) -> str:
+    # Primary: PDP H1 / itemprop=name
+    h1 = soup.select_one("h1,[itemprop=name]")
+    title = text_of(h1)
+    if not title:
+        og = soup.find("meta", {"property": "og:title"})
+        title = (og.get("content") or "").strip() if og else ""
+    if not title and listing_title:
+        title = listing_title
+    # Guard: avoid names equal to category leaf
+    if norm(title) == norm(category_leaf):
+        bc = [text_of(x) for x in soup.select("nav.breadcrumb a, .breadcrumbs a, .breadcrumb a")]
+        if bc:
+            alt = bc[-1]
+            if norm(alt) != norm(category_leaf):
+                title = alt
+    return title
 
-          SKIP_FLAG=()
-          ONLY_FLAG=()
-          if [ "${MODE}" = "prices" ] && [ -s data/barbora_skip_ext_ids.txt ]; then
-            SKIP_FLAG=( --skip-ext-file data/barbora_skip_ext_ids.txt )
-          fi
-          if [ "${MODE}" = "metadata" ] && [ -s data/barbora_only_ext_ids.txt ]; then
-            ONLY_FLAG=( --only-ext-file data/barbora_only_ext_ids.txt )
-          fi
 
-          cmd=( python -u scripts/barbora_crawl_categories_pw.py
-                --cats-file data/barbora_categories.txt
-                --page-limit "$PAGE_LIMIT"
-                --max-products "$MAX_PRODUCTS"
-                --headless "$HEADLESS"
-                --req-delay "$REQ_DELAY"
-                --output-csv "$OUTPUT_CSV"
-                "${SKIP_FLAG[@]}"
-                "${ONLY_FLAG[@]}" )
+def extract_size_from_name(name: str) -> Optional[str]:
+    if not name:
+        return None
+    m = SIZE_RE.search(name)
+    return m.group(0) if m else None
 
-          # Increased timeout to use the job window better
-          stdbuf -oL -eL timeout -k 60s 107m "${cmd[@]}" | tee data/barbora_run.log
 
-      - name: Ensure CSV exists (header if empty)
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ ! -s "$OUTPUT_CSV" ]; then
-            mkdir -p "$(dirname "$OUTPUT_CSV")"
-            echo 'store_chain,store_name,store_channel,ext_id,ean_raw,sku_raw,name,size_text,brand,manufacturer,price,currency,image_url,category_path,category_leaf,source_url' > "$OUTPUT_CSV"
-            echo "Wrote header-only CSV -> $OUTPUT_CSV"
-          fi
+def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
+    cur = "EUR"
+    price_el = soup.select_one("[data-testid=product-price], .price, .product-price, .e-price__main")
+    if not price_el:
+        return None, cur
+    val = re.sub(r"[^\d,\.]", "", text_of(price_el)).replace(",", ".")
+    return (val if val else None), cur
 
-      - name: Upload crawl artifacts
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: barbora-crawl-${{ env.MODE }}-shard-${{ matrix.shard }}-${{ github.run_id }}
-          path: |
-            data/barbora_products.csv
-            data/barbora_run.log
-            data/_barbora_skip_count.txt
-            data/barbora_skip_ext_ids.txt
-            data/barbora_only_ext_ids.txt
-          if-no-files-found: warn
-          retention-days: 7
 
-      # ---------- Optional DB part ----------
-      - name: Install psql client
-        if: ${{ env.DATABASE_URL != '' && env.UPSERT_DB == '1' }}
-        shell: bash
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client
+def ensure_dir(path: str) -> None:
+    d = os.path.dirname(path)
+    if d and not os.path.exists(d):
+        os.makedirs(d, exist_ok=True)
 
-      - name: DB sanity (connection)
-        if: ${{ env.DATABASE_URL != '' && env.UPSERT_DB == '1' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          psql "$DATABASE_URL" -c "\conninfo" || true
-          psql "$DATABASE_URL" -c "SELECT current_database(), current_user;" || true
+# --------------------------------------------------------------------------- #
+# Category listing
+# --------------------------------------------------------------------------- #
+def list_products_from_category(page: Page, cat_url: str, req_delay: float) -> List[Tuple[str, str]]:
+    """Return list of (pdp_url, listing_title)."""
+    page.goto(cat_url, timeout=60000, wait_until="domcontentloaded")
+    time.sleep(req_delay)
 
-      - name: Prepare DB (store + staging)
-        if: ${{ env.DATABASE_URL != '' && env.UPSERT_DB == '1' }}
-        shell: bash
-        run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          BEGIN;
-          INSERT INTO public.stores (name, chain, is_online)
-          SELECT 'Barbora ePood', 'Maxima', TRUE
-          WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE name='Barbora ePood' AND chain='Maxima' AND is_online=TRUE);
+    # Try to load full grid via scrolling
+    stagnant_rounds = 0
+    last_len = 0
+    for _ in range(80):
+        page.mouse.wheel(0, 24000)
+        time.sleep(0.35)
+        html0 = page.content()
+        cur_len = len(html0)
+        if cur_len == last_len:
+            stagnant_rounds += 1
+        else:
+            stagnant_rounds = 0
+        last_len = cur_len
+        if stagnant_rounds >= 3:
+            break
 
-          CREATE TABLE IF NOT EXISTS public.staging_barbora_products (
-            ext_id        text PRIMARY KEY,
-            name          text NOT NULL,
-            ean_raw       text,
-            sku_raw       text,
-            ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '[^0-9]', '', 'g')) STORED,
-            size_text     text,
-            brand         text,
-            manufacturer  text,
-            price         numeric(12,2),
-            currency      text DEFAULT 'EUR',
-            category_path text,
-            category_leaf text,
-            source_url    text,
-            collected_at  timestamptz DEFAULT now()
-          );
-          CREATE EXTENSION IF NOT EXISTS pg_trgm;
-          CREATE INDEX IF NOT EXISTS ix_barbora_ean       ON public.staging_barbora_products (ean_norm);
-          CREATE INDEX IF NOT EXISTS ix_barbora_name_trgm ON public.staging_barbora_products USING gin (name gin_trgm_ops);
+    soup = BeautifulSoup(page.content(), "html.parser")
+    out: List[Tuple[str, str]] = []
+    for a in soup.select("a[href*='/toode/'], a[href*='/p/']"):
+        href = a.get("href")
+        if not href:
+            continue
+        url = urljoin(BASE, href)
+        parsed = urlparse(url)
+        if not parsed.scheme or not parsed.netloc.endswith("barbora.ee"):
+            continue
+        title = text_of(a)
+        out.append((url, title))
 
-          CREATE TABLE IF NOT EXISTS public.barbora_candidates (
-            ext_id        text PRIMARY KEY,
-            ean_norm      text,
-            ean_raw       text,
-            sku_raw       text,
-            name          text,
-            size_text     text,
-            brand         text,
-            manufacturer  text,
-            price         numeric(12,2),
-            currency      text,
-            category_path text,
-            category_leaf text,
-            source_url    text,
-            last_seen     timestamptz DEFAULT now()
-          );
-          COMMIT;
-          SQL
+    # Deduplicate while preserving order
+    seen = set()
+    uniq: List[Tuple[str, str]] = []
+    for u, t in out:
+        if u in seen:
+            continue
+        seen.add(u)
+        uniq.append((u, t))
+    return uniq
 
-      - name: Load CSV to DB
-        if: ${{ env.DATABASE_URL != '' && env.UPSERT_DB == '1' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          CSV_ABS="$(python -c 'import os;print(os.path.abspath("data/barbora_products.csv"))')"
-          cat > /tmp/barbora_load.sql <<'SQL'
-          \set ON_ERROR_STOP on
-          BEGIN;
+# --------------------------------------------------------------------------- #
+# PDP extraction
+# --------------------------------------------------------------------------- #
+def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], category_leaf: str, req_delay: float) -> Dict[str, Optional[str]]:
+    page.goto(url, timeout=60000, wait_until="domcontentloaded")
+    time.sleep(req_delay)
+    soup = BeautifulSoup(page.content(), "html.parser")
 
-          CREATE TEMP TABLE tmp_barbora_csv_full (
-            store_chain   text,
-            store_name    text,
-            store_channel text,
-            ext_id        text,
-            ean_raw       text,
-            sku_raw       text,
-            name          text,
-            size_text     text,
-            brand         text,
-            manufacturer  text,
-            price         text,
-            currency      text,
-            image_url     text,
-            category_path text,
-            category_leaf text,
-            source_url    text
-          );
+    jl = from_json_ld(soup)
+    spec = parse_spec_table(soup)
+    b2, m2 = parse_app_state_for_brand(soup)
 
-          \copy tmp_barbora_csv_full FROM '__CSV__' CSV HEADER
+    name = safe_product_name(soup, category_leaf, listing_title) or jl["name"] or listing_title or ""
+    price = jl["price"]
+    currency = jl["currency"] or "EUR"
+    if not price:
+        price, currency = parse_price_from_dom(soup)
 
-          -- Normalize and fill blanks; build a clean staging temp table.
-          CREATE TEMP TABLE tmp_staging_barbora_products AS
-          SELECT
-            ext_id,
-            -- Fill missing/blank name from slug
-            COALESCE(NULLIF(btrim(name), ''), initcap(replace(regexp_replace(COALESCE(ext_id,''), '^.*/', ''), '-', ' '))) AS name,
-            NULLIF(btrim(ean_raw), '') AS ean_raw,
-            NULLIF(btrim(sku_raw), '') AS sku_raw,
-            NULLIF(regexp_replace(COALESCE(ean_raw,''), '[^0-9]', '', 'g'), '') AS ean_norm,
-            NULLIF(btrim(size_text), '') AS size_text,
-            NULLIF(btrim(brand), '') AS brand,
-            NULLIF(btrim(manufacturer), '') AS manufacturer,
-            -- normalize price "3,99" → 3.99
-            NULLIF(regexp_replace(price, ',', '.', 'g'), '')::numeric AS price,
-            UPPER(COALESCE(NULLIF(currency,''), 'EUR')) AS currency,
-            NULLIF(btrim(category_path), '') AS category_path,
-            NULLIF(btrim(category_leaf), '') AS category_leaf,
-            NULLIF(btrim(source_url), '') AS source_url
-          FROM tmp_barbora_csv_full
-          WHERE COALESCE(ext_id,'') <> '';
+    size_text = spec["size"] or extract_size_from_name(name)
+    image_url = jl["image"]
+    brand = jl["brand"] or spec["brand"] or b2
+    manufacturer = jl["manufacturer"] or spec["manufacturer"] or m2
+    sku_raw = spec["sku"]
 
-          -- Drop any rows that still lack a name after fallback
-          DELETE FROM tmp_staging_barbora_products
-          WHERE COALESCE(name,'') = '';
+    return {
+        "name": name,
+        "size_text": size_text,
+        "brand": brand,
+        "manufacturer": manufacturer,
+        "price": price,
+        "currency": currency or "EUR",
+        "image_url": image_url,
+        "sku_raw": sku_raw,
+    }
 
-          INSERT INTO public.staging_barbora_products
-            (ext_id,name,ean_raw,sku_raw,size_text,brand,manufacturer,price,currency,category_path,category_leaf,source_url,collected_at)
-          SELECT ext_id,name,ean_raw,sku_raw,size_text,brand,manufacturer,price,currency,category_path,category_leaf,source_url,now()
-          FROM tmp_staging_barbora_products
-          ON CONFLICT (ext_id) DO UPDATE
-            SET name          = EXCLUDED.name,
-                ean_raw       = EXCLUDED.ean_raw,
-                sku_raw       = EXCLUDED.sku_raw,
-                size_text     = COALESCE(EXCLUDED.size_text, public.staging_barbora_products.size_text),
-                brand         = COALESCE(EXCLUDED.brand, public.staging_barbora_products.brand),
-                manufacturer  = COALESCE(EXCLUDED.manufacturer, public.staging_barbora_products.manufacturer),
-                price         = EXCLUDED.price,
-                currency      = COALESCE(EXCLUDED.currency, public.staging_barbora_products.currency),
-                category_path = COALESCE(EXCLUDED.category_path, public.staging_barbora_products.category_path),
-                category_leaf = COALESCE(EXCLUDED.category_leaf, public.staging_barbora_products.category_leaf),
-                source_url    = COALESCE(EXCLUDED.source_url, public.staging_barbora_products.source_url),
-                collected_at  = now();
+# --------------------------------------------------------------------------- #
+# Main
+# --------------------------------------------------------------------------- #
+def read_lines(path: str) -> List[str]:
+    with open(path, "r", encoding="utf-8") as f:
+        return [ln.strip() for ln in f if ln.strip()]
 
-          INSERT INTO public.barbora_candidates
-            (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, manufacturer, price, currency, category_path, category_leaf, source_url, last_seen)
-          SELECT
-            ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, manufacturer, price, currency, category_path, category_leaf, source_url, now()
-          FROM tmp_staging_barbora_products
-          ON CONFLICT (ext_id) DO UPDATE
-            SET price         = EXCLUDED.price,
-                currency      = COALESCE(EXCLUDED.currency, public.barbora_candidates.currency),
-                size_text     = CASE WHEN COALESCE(EXCLUDED.size_text,'')     <> '' THEN EXCLUDED.size_text     ELSE public.barbora_candidates.size_text END,
-                brand         = CASE WHEN COALESCE(EXCLUDED.brand,'')         <> '' THEN EXCLUDED.brand         ELSE public.barbora_candidates.brand     END,
-                manufacturer  = CASE WHEN COALESCE(EXCLUDED.manufacturer,'')  <> '' THEN EXCLUDED.manufacturer  ELSE public.barbora_candidates.manufacturer END,
-                category_path = CASE WHEN COALESCE(EXCLUDED.category_path,'') <> '' THEN EXCLUDED.category_path ELSE public.barbora_candidates.category_path END,
-                category_leaf = CASE WHEN COALESCE(EXCLUDED.category_leaf,'') <> '' THEN EXCLUDED.category_leaf ELSE public.barbora_candidates.category_leaf END,
-                ean_raw       = CASE WHEN COALESCE(EXCLUDED.ean_raw,'')       <> '' THEN EXCLUDED.ean_raw       ELSE public.barbora_candidates.ean_raw END,
-                sku_raw       = CASE WHEN COALESCE(EXCLUDED.sku_raw,'')       <> '' THEN EXCLUDED.sku_raw       ELSE public.barbora_candidates.sku_raw END,
-                source_url    = COALESCE(EXCLUDED.source_url, public.barbora_candidates.source_url),
-                last_seen     = now();
 
-          COMMIT;
+def write_csv(rows: List[List[str]], out_path: str) -> None:
+    ensure_dir(out_path)
+    header = [
+        "store_chain","store_name","store_channel","ext_id","ean_raw","sku_raw",
+        "name","size_text","brand","manufacturer","price","currency",
+        "image_url","category_path","category_leaf","source_url"
+    ]
+    newfile = not os.path.exists(out_path)
+    with open(out_path, "a", encoding="utf-8", newline="") as f:
+        w = csv.writer(f)
+        if newfile:
+            w.writerow(header)
+        w.writerows(rows)
 
-          -- Quick feedback
-          \echo ''
-          \echo '=== Load summary ==='
-          SELECT
-            COUNT(*) AS candidates_total,
-            SUM((price IS NULL OR price = 0)::int) AS zero_price
-          FROM public.barbora_candidates;
 
-          SQL
-          sed -i "s|__CSV__|$CSV_ABS|g" /tmp/barbora_load.sql
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/barbora_load.sql
+def crawl(args) -> None:
+    cats = read_lines(args.cats_file)
+    skip_ext: set[str] = set(read_lines(args.skip_ext_file)) if args.skip_ext_file and os.path.exists(args.skip_ext_file) else set()
+    only_ext: set[str] = set(read_lines(args.only_ext_file)) if args.only_ext_file and os.path.exists(args.only_ext_file) else set()
+
+    out_rows: List[List[str]] = []
+    total = 0
+
+    headless = bool(int(args.headless))
+    req_delay = float(args.req_delay)
+
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch(headless=headless)
+        ctx = browser.new_context(locale="et-EE")
+        page = ctx.new_page()
+
+        for idx, cat in enumerate(cats, start=1):
+            if int(args.page_limit) and idx > int(args.page_limit):
+                break
+
+            leaf_seg = cat.strip("/").split("/")[-1]
+            category_leaf = leaf_seg.replace("-", " ").title()
+            category_path = ""  # optional
+
+            prods = list_products_from_category(page, cat, req_delay)
+            if not prods:
+                continue
+
+            for url, listing_title in prods:
+                if int(args.max_products) and total >= int(args.max_products):
+                    break
+
+                ext_id = get_ext_id(url)
+
+                if skip_ext and ext_id in skip_ext:
+                    continue
+                if only_ext and ext_id not in only_ext:
+                    continue
+
+                try:
+                    data = extract_from_pdp(page, url, listing_title, category_leaf, req_delay)
+                except PWTimeout:
+                    continue
+                except Exception as e:
+                    print(f"[warn] PDP parse failed for {ext_id}: {e}", file=sys.stderr)
+                    continue
+
+                if norm(data["name"]) == norm(category_leaf):
+                    # avoid category-as-name leakage
+                    continue
+
+                row = [
+                    STORE_CHAIN,
+                    STORE_NAME,
+                    STORE_CHANNEL,
+                    ext_id,
+                    "",  # ean_raw intentionally blank (Barbora does not expose)
+                    data.get("sku_raw") or "",
+                    data.get("name") or "",
+                    data.get("size_text") or "",
+                    data.get("brand") or "",
+                    data.get("manufacturer") or "",
+                    data.get("price") or "",
+                    data.get("currency") or "EUR",
+                    data.get("image_url") or "",
+                    category_path,
+                    category_leaf,
+                    url,
+                ]
+                out_rows.append(row)
+                total += 1
+                if req_delay:
+                    time.sleep(req_delay)
+
+        write_csv(out_rows, args.output_csv)
+
+
+def build_argparser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser(description="Barbora.ee category→PDP crawler (no EAN).")
+    p.add_argument("--cats-file", required=True, help="Text file with category URLs (one per line)")
+    p.add_argument("--page-limit", default="0", help="Max categories to process (0=all)")
+    p.add_argument("--max-products", default="0", help="Cap total PDPs visited (0=unlimited)")
+    p.add_argument("--headless", default=str(DEFAULT_HEADLESS), help="1/0")
+    p.add_argument("--req-delay", default=str(DEFAULT_REQ_DELAY), help="Delay between steps in seconds")
+    p.add_argument("--output-csv", default="data/barbora_products.csv", help="Output CSV path")
+    p.add_argument("--skip-ext-file", default="", help="Optional file with ext_ids to skip (one per line)")
+    p.add_argument("--only-ext-file", default="", help="Optional file with ext_ids to include exclusively")
+    return p
+
+
+if __name__ == "__main__":
+    parser = build_argparser()
+    crawl(parser.parse_args())
