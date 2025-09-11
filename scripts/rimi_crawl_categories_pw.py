@@ -13,11 +13,7 @@ Key bits:
 - Supports --only-ext-file to crawl *only* the ext_ids you feed in
 - Response sniffer: scans PDP JSON/XHR for brand/manufacturer too
 - On-fail artifacts: dump HTML + screenshot when brand missing
-
-CSV columns written:
-  store_chain, store_name, store_channel,
-  ext_id, ean_raw, sku_raw, name, size_text, brand, manufacturer,
-  price, currency, image_url, category_path, category_leaf, source_url
+- NEW: Soft timeout via --soft-timeout-min (or env SOFT_TIME_BUDGET_MIN) for clean early exit
 """
 
 from __future__ import annotations
@@ -574,9 +570,15 @@ def collect_subcategory_links(page, base_cat_url: str) -> List[str]:
     hrefs.discard(base_cat_url.split("?")[0].split("#")[0])
     return sorted(hrefs)
 
-# ---------------------------- crawler -----------------------------------------
+# ---------------------------- crawler (soft timeout aware) --------------------
 
-def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay: float) -> List[str]:
+def _deadline_passed(deadline_ts: Optional[float]) -> bool:
+    return bool(deadline_ts and time.monotonic() >= deadline_ts)
+
+def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay: float,
+                   deadline_ts: Optional[float] = None) -> List[str]:
+    """Return a list of PDP URLs discovered from a category (and its subcategories).
+       Respects `deadline_ts` (monotonic seconds); exits early when exceeded."""
     browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
     ctx = browser.new_context(
         locale="et-EE",
@@ -603,6 +605,10 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
 
     try:
         while q:
+            if _deadline_passed(deadline_ts):
+                print("[rimi] soft-timeout reached during category discovery; returning partial results.")
+                break
+
             cat = q.pop(0)
             if not cat or cat in visited: continue
             visited.add(cat)
@@ -621,6 +627,10 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
             pages_seen = 0
             last_total = -1
             while True:
+                if _deadline_passed(deadline_ts):
+                    print("[rimi] soft-timeout reached on category page; stopping pagination.")
+                    break
+
                 all_pdps.extend(collect_pdp_links(page))
 
                 clicked = False
@@ -935,7 +945,8 @@ def write_csv(rows: List[Dict[str,str]], out_path: str) -> None:
         "ext_id","ean_raw","sku_raw","name","size_text","brand","manufacturer",
         "price","currency","image_url","category_path","category_leaf","source_url",
     ]
-    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True
+    )
     new_file = not os.path.exists(out_path)
     with open(out_path, "a", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
@@ -961,6 +972,12 @@ def main():
         default="auto",
         help="auto|0|1 — if ONLY list present, go straight to PDPs and skip category discovery",
     )
+    # ---- NEW: soft timeout in minutes ----
+    ap.add_argument(
+        "--soft-timeout-min",
+        default=os.environ.get("SOFT_TIME_BUDGET_MIN", "0"),
+        help="Soft timeout in minutes; if exceeded, exit cleanly with partial results (0 = no limit).",
+    )
     args = ap.parse_args()
 
     page_limit   = int(args.page_limit or "0")
@@ -969,6 +986,14 @@ def main():
     req_delay    = float(args.req_delay or "0.5")
     pdp_workers  = max(1, int(args.pdp_workers or "2"))
     cats         = read_categories(args.cats_file)
+
+    # deadline in monotonic seconds (or None)
+    try:
+        soft_minutes = float(args.soft_timeout_min or 0)
+    except Exception:
+        soft_minutes = 0.0
+    start_ts = time.monotonic()
+    deadline_ts: Optional[float] = (start_ts + soft_minutes * 60.0) if soft_minutes > 0 else None
 
     skip_urls, skip_ext = read_skip_file(args.skip_ext_file)
     only_urls, only_ext = read_only_file(args.only_ext_file)
@@ -1026,9 +1051,12 @@ def main():
             all_pdps = pdps_from_only_lists()
         else:
             for cat in cats:
+                if _deadline_passed(deadline_ts):
+                    print("[rimi] soft-timeout reached before finishing category list; moving to PDP phase.")
+                    break
                 try:
                     print(f"[rimi] {cat}")
-                    pdps = crawl_category(pw, cat, page_limit, headless, req_delay)
+                    pdps = crawl_category(pw, cat, page_limit, headless, req_delay, deadline_ts=deadline_ts)
                     all_pdps.extend(pdps)
                     if max_products and len(all_pdps) >= max_products:
                         break
@@ -1059,6 +1087,13 @@ def main():
             print(f"[rimi] skip filter: {skipped} URLs skipped (already priced/complete).")
             q = q2
 
+        # If time is already up, bail before opening the browser to parse PDPs
+        if _deadline_passed(deadline_ts):
+            print("[rimi] soft-timeout reached before PDP parsing; writing any buffered rows and exiting.")
+            flush()
+            print(f"[rimi] wrote 0 product rows (PDP phase skipped due to timeout).")
+            return
+
         # 3) PDP parsing with round-robin multi-page reuse
         browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
         ctx = browser.new_context(
@@ -1070,6 +1105,9 @@ def main():
 
         total = 0
         for i, url in enumerate(q, 1):
+            if _deadline_passed(deadline_ts):
+                print("[rimi] soft-timeout reached during PDP parsing; finishing with partial results.")
+                break
             page = pages[(i-1) % len(pages)]
             try:
                 row = parse_pdp_with_page(page, url, req_delay)
