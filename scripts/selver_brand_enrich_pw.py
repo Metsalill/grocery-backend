@@ -28,7 +28,7 @@ from playwright.sync_api import sync_playwright
 BASE_HOST = "https://www.selver.ee"
 PDP_NUMERIC_PREFIX = BASE_HOST + "/p/"
 
-# We treat ONLY these labels as brand (company/owner).
+# Prefer the company/owner fields as the brand
 FAVOR_LABELS = re.compile(r'(käitleja|tootja|valmistaja|manufacturer)', re.I)
 
 def build_url(ext: str) -> str:
@@ -188,12 +188,15 @@ def main():
     # Worklist: Selver products with empty/garbage brand
     with closing(psycopg2.connect(dsn)) as conn, conn.cursor() as cur:
         cur.execute(f"""
-            SELECT DISTINCT m.ext_id::text, p.ean
+            SELECT DISTINCT ON (m.ext_id, p.ean)
+                   m.ext_id::text, p.ean
               FROM products p
-              JOIN ext_product_map m ON m.product_id = p.id AND m.source = 'selver'
+              JOIN ext_product_map m
+                ON m.product_id = p.id
+               AND m.source = 'selver'
              WHERE p.ean IS NOT NULL
                AND {BAD_BRAND_CLAUSE}
-             ORDER BY p.id
+             ORDER BY m.ext_id, p.ean, p.id
              LIMIT %s
         """, (max_items,))
         rows = cur.fetchall()
