@@ -114,51 +114,67 @@ jobs:
           elif [ -s data/barbora_categories.txt ]; then
             echo "Using repo file data/barbora_categories.txt"
           else
-            # 3) Try autodiscover from homepage
-            {
-              echo 'import os, re'
-              echo 'from urllib.parse import urljoin, urlparse'
-              echo 'from playwright.sync_api import sync_playwright'
-              echo 'BASE = "https://barbora.ee"'
-              echo 'excludes = tuple(os.environ.get("EXCLUDES","").split())'
-              echo 'includes = tuple(os.environ.get("INCLUDES","").split())'
-              echo 'discovered = set()'
-              echo 'def absu(href): return urljoin(BASE, href)'
-              echo 'def is_category(url):'
-              echo '    p = urlparse(url)'
-              echo '    if not (p.scheme and p.netloc and p.netloc.endswith("barbora.ee")): return False'
-              echo '    segs = [s for s in p.path.split("/") if s]'
-              echo '    if any(s in ("retseptid","info","blogi","kampaania") for s in segs): return False'
-              echo '    return 1 <= len(segs) <= 4'
-              echo 'def allowed(url):'
-              echo '    if any(url.startswith(pref) for pref in includes): return True'
-              echo '    if any(url.startswith(pref) for pref in excludes): return False'
-              echo '    return is_category(url)'
-              echo 'with sync_playwright() as pw:'
-              echo '    b = pw.chromium.launch(headless=True)'
-              echo '    ctx = b.new_context(locale="et-EE")'
-              echo '    p = ctx.new_page()'
-              echo '    p.goto(BASE, timeout=45000, wait_until="domcontentloaded")'
-              echo '    # best-effort cookie accept'
-              echo '    for sel in ["#onetrust-accept-btn-handler","button:has-text(\\"Nõustun\\")","button:has-text(\\"Accept\\")"]:' 
-              echo '        try:'
-              echo '            btn = p.locator(sel)'
-              echo '            if btn.count() and btn.first.is_visible(): btn.first.click(timeout=1000)'
-              echo '        except Exception: pass'
-              echo '    for a in p.locator("a").all():'
-              echo '        href = (a.get_attribute("href") or "").strip()'
-              echo '        if not href: continue'
-              echo '        u = absu(href)'
-              echo '        if allowed(u): discovered.add(u)'
-              echo '    os.makedirs("data", exist_ok=True)'
-              echo '    with open("data/barbora_categories.txt","w",encoding="utf-8") as f:'
-              echo '        for u in sorted(discovered): f.write(u + "\\n")'
-              echo '    print(f"[discover] wrote {len(discovered)} -> data/barbora_categories.txt")'
-              echo '    ctx.close(); b.close()'
-            } > /tmp/discover_barbora.py
+            # 3) Try autodiscover from homepage (heredoc to avoid quoting bugs)
+            cat > /tmp/discover_barbora.py <<'PY'
+import os
+from urllib.parse import urljoin, urlparse
+from playwright.sync_api import sync_playwright
+
+BASE = "https://barbora.ee"
+excludes = tuple(os.environ.get("EXCLUDES","").split())
+includes = tuple(os.environ.get("INCLUDES","").split())
+discovered = set()
+
+def absu(href): 
+    return urljoin(BASE, href)
+
+def is_category(url):
+    p = urlparse(url)
+    if not (p.scheme and p.netloc and p.netloc.endswith("barbora.ee")):
+        return False
+    segs = [s for s in p.path.split("/") if s]
+    # avoid non-catalog roots
+    if any(s in ("retseptid","info","blogi","kampaania") for s in segs):
+        return False
+    return 1 <= len(segs) <= 4
+
+def allowed(url):
+    if any(url.startswith(pref) for pref in includes): 
+        return True
+    if any(url.startswith(pref) for pref in excludes): 
+        return False
+    return is_category(url)
+
+with sync_playwright() as pw:
+    b = pw.chromium.launch(headless=True)
+    ctx = b.new_context(locale="et-EE")
+    p = ctx.new_page()
+    p.goto(BASE, timeout=45000, wait_until="domcontentloaded")
+    # Try to accept cookies if banner shows
+    for sel in ['#onetrust-accept-btn-handler', 'button:has-text("Nõustun")', 'button:has-text("Accept")']:
+        try:
+            loc = p.locator(sel)
+            if loc.count() and loc.first.is_visible():
+                loc.first.click(timeout=1000)
+        except Exception:
+            pass
+    for a in p.locator("a").all():
+        href = (a.get_attribute("href") or "").strip()
+        if not href:
+            continue
+        u = absu(href)
+        if allowed(u):
+            discovered.add(u)
+    os.makedirs("data", exist_ok=True)
+    with open("data/barbora_categories.txt","w",encoding="utf-8") as f:
+        for u in sorted(discovered):
+            f.write(u + "\n")
+    print(f"[discover] wrote {len(discovered)} -> data/barbora_categories.txt")
+    ctx.close(); b.close()
+PY
             python /tmp/discover_barbora.py
 
-            # 4) Fallback to a curated FOOD roots list if autodiscover empty/too small
+            # 4) Fallback to curated FOOD roots if autodiscover empty/too small
             if [ ! -s data/barbora_categories.txt ] || [ "$(wc -l < data/barbora_categories.txt)" -lt 10 ]; then
               printf '%s\n' \
                 'https://barbora.ee/koogiviljad-puuviljad' \
@@ -176,33 +192,34 @@ jobs:
             fi
           fi
 
-          # Fix up any old slugs if present (compat)
+          # Fix any stale slugs if present (compat)
           sed -i 's#https://barbora.ee/piimatooted-munad-void#https://barbora.ee/piimatooted-ja-munad#g' data/barbora_categories.txt
           sed -i 's#https://barbora.ee/leib-sai-kondiitritooted#https://barbora.ee/leivad-saiad-kondiitritooted#g' data/barbora_categories.txt
 
-          # Validate category URLs with Playwright to drop 404 pages
-          {
-            echo 'from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout'
-            echo 'import sys, pathlib'
-            echo 'infile = pathlib.Path("data/barbora_categories.txt")'
-            echo 'cats = [l.strip() for l in infile.read_text("utf-8").splitlines() if l.strip()]'
-            echo 'valid = []'
-            echo 'with sync_playwright() as pw:'
-            echo '    b = pw.chromium.launch(headless=True)'
-            echo '    p = b.new_page()'
-            echo '    for u in cats:'
-            echo '        try:'
-            echo '            r = p.goto(u, timeout=30000, wait_until="domcontentloaded")'
-            echo '            txt = (p.content() or "")'
-            echo '            code = r.status if r else 200'
-            echo '            bad = (code == 404) or ("Palume vabandust" in txt and "404" in txt)'
-            echo '            if not bad: valid.append(u)'
-            echo '        except PWTimeout:'
-            echo '            pass'
-            echo '    b.close()'
-            echo 'open("data/barbora_categories.txt","w",encoding="utf-8").write("\\n".join(dict.fromkeys(valid)) + ("\\n" if valid else ""))'
-            echo 'print(f"Validated categories kept: {len(valid)}")'
-          } > /tmp/validate_cats.py
+          # Validate category URLs (drop 404 / "Palume vabandust" pages)
+          cat > /tmp/validate_cats.py <<'PY'
+from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
+import pathlib
+infile = pathlib.Path("data/barbora_categories.txt")
+cats = [l.strip() for l in infile.read_text("utf-8").splitlines() if l.strip()]
+valid = []
+with sync_playwright() as pw:
+    b = pw.chromium.launch(headless=True)
+    p = b.new_page()
+    for u in cats:
+        try:
+            r = p.goto(u, timeout=30000, wait_until="domcontentloaded")
+            html = (p.content() or "")
+            code = r.status if r else 200
+            bad = (code == 404) or ("Palume vabandust" in html and "404" in html)
+            if not bad:
+                valid.append(u)
+        except PWTimeout:
+            pass
+    b.close()
+pathlib.Path("data/barbora_categories.txt").write_text("\n".join(dict.fromkeys(valid)) + ("\n" if valid else ""), encoding="utf-8")
+print(f"Validated categories kept: {len(valid)}")
+PY
           python /tmp/validate_cats.py || true
 
           echo "TOTAL categories: $(wc -l < data/barbora_categories.txt || echo 0)"
@@ -495,6 +512,7 @@ jobs:
           FROM tmp_barbora_csv_full
           WHERE COALESCE(ext_id,'') <> '';
 
+          -- Drop any rows that still lack a name after fallback
           DELETE FROM tmp_staging_barbora_products
           WHERE COALESCE(name,'') = '';
 
