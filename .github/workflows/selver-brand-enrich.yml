@@ -22,6 +22,10 @@ on:
         description: "Soft time limit for the enrichment (minutes)"
         required: false
         default: "30"
+      overwrite_products:
+        description: "Overwrite existing brand in products table? (1/0)"
+        required: false
+        default: "0"
 
 concurrency:
   group: selver-brand-enrich
@@ -39,6 +43,7 @@ jobs:
       HEADLESS: ${{ github.event.inputs.headless || '1' }}
       REQ_DELAY: ${{ github.event.inputs.req_delay || '0.25' }}
       TIMEBOX_MINUTES: ${{ github.event.inputs.timebox_minutes || '30' }}
+      OVERWRITE_PRODUCTS: ${{ github.event.inputs.overwrite_products || '0' }}
 
     steps:
       - name: Checkout
@@ -65,6 +70,7 @@ jobs:
           echo "HEADLESS=$HEADLESS"
           echo "REQ_DELAY=$REQ_DELAY"
           echo "TIMEBOX_MINUTES=$TIMEBOX_MINUTES"
+          echo "OVERWRITE_PRODUCTS=$OVERWRITE_PRODUCTS"
 
       - name: Run Selver Brand Enrichment (timeboxed)
         env:
