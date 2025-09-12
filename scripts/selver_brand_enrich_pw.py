@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import os, re, json, time, signal, sys
 from contextlib import closing
-from urllib.parse import quote
+from urllib.parse import quote, urlparse
 
 import psycopg2
 from playwright.sync_api import sync_playwright
@@ -105,10 +105,28 @@ def build_target(ext: str) -> tuple[str, str]:
         return ("url", PDP_NUMERIC_PREFIX + s)
     return ("url", f"{BASE_HOST}/{s}")
 
+def _is_selver_url(u: str) -> bool:
+    if not u:
+        return False
+    if u.startswith("/"):
+        return True
+    if u.startswith("http"):
+        try:
+            host = urlparse(u).hostname or ""
+        except Exception:
+            return False
+        return host.endswith("selver.ee")
+    return False
+
 def accept_overlays(page):
+    # OneTrust + Cookiebot common accept buttons
     for sel in [
         'button#onetrust-accept-btn-handler',
+        '#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll',
+        '#CybotCookiebotDialogBodyButtonAccept',
         'button:has-text("Nõustun")',
+        'button:has-text("Allow all")',
+        'button:has-text("Accept all")',
         'button:has-text("Accept")',
     ]:
         try:
@@ -130,7 +148,6 @@ def wait_for_pdp_ready(page):
 
 def _first_product_link_on_results(page) -> str:
     try:
-        # ensure search results had a chance to render
         try:
             page.wait_for_selector(
                 'a[href*="/p/"], .ProductCard a[href], a.ProductCard__link[href], main a[href*="-"]',
@@ -144,7 +161,9 @@ def _first_product_link_on_results(page) -> str:
         ) or []
 
         def looks_like_product(h: str) -> bool:
-            if not h or h.startswith("#") or "javascript:" in h:
+            if not h or not _is_selver_url(h):
+                return False
+            if h.startswith("#") or "javascript:" in h:
                 return False
             h_path = h.split('#', 1)[0].split('?', 1)[0]
             if "/p/" in h_path:
@@ -160,13 +179,13 @@ def _first_product_link_on_results(page) -> str:
                 if base.startswith("http"):
                     return base
 
-        # more targeted fallbacks
+        # explicit fallbacks within selver domain
         for sel in ['a[href*="/p/"]', '.ProductCard a[href]', 'a.ProductCard__link[href]']:
             try:
                 el = page.locator(sel).first
                 if el and el.count() > 0 and el.is_visible():
                     href = el.get_attribute("href") or ""
-                    if href:
+                    if _is_selver_url(href):
                         base = href.split('#', 1)[0].split('?', 1)[0]
                         if base.startswith("/"):
                             return BASE_HOST + base
@@ -205,9 +224,7 @@ def _search_url_from_form(page, query: str) -> str | None:
         return None
 
 def _visit_search_and_open_first(page, query: str) -> bool:
-    # inspect form, then try two common fallbacks if needed
     tried = []
-
     url = _search_url_from_form(page, query)
     if url:
         tried.append(url)
@@ -218,7 +235,6 @@ def _visit_search_and_open_first(page, query: str) -> bool:
         try:
             page.goto(u, timeout=30000, wait_until="domcontentloaded")
             accept_overlays(page)
-            # give client-side render some time
             try:
                 page.wait_for_load_state("networkidle", timeout=5000)
             except Exception:
@@ -235,7 +251,6 @@ def navigate_via_search(page, query: str) -> bool:
     try:
         page.goto(BASE_HOST, timeout=30000, wait_until="domcontentloaded")
         accept_overlays(page)
-        # try building/visiting a real search URL and opening the first product
         return _visit_search_and_open_first(page, query)
     except Exception:
         return False
