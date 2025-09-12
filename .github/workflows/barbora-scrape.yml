@@ -54,12 +54,9 @@ jobs:
       OUTPUT_CSV: data/barbora_products.csv
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       MODE: ${{ github.event.inputs.mode || 'prices' }}
-      # Space-separated URL prefixes to exclude/include
       EXCLUDE_SECTIONS: "https://barbora.ee/kodukaubad-ja-vaba-aeg https://barbora.ee/enesehooldustooted https://barbora.ee/puhastustarbed-ja-lemmikloomatooted https://barbora.ee/lastekaubad"
       INCLUDE_SECTIONS: "https://barbora.ee/enesehooldustooted/suuhugieen/hambapastad https://barbora.ee/enesehooldustooted/raseerimisvahendid https://barbora.ee/enesehooldustooted/intiimhugieeni-vahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/pesupesemisvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/noudepesuvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/kodukeemia https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/majapidamis-ja-koristustarbed https://barbora.ee/lastekaubad/piimasegud-ja-jatkupiimasegud https://barbora.ee/lastekaubad/pudrud https://barbora.ee/lastekaubad/mahkmed https://barbora.ee/lastekaubad/puuviljapureed https://barbora.ee/lastekaubad/laste-hugieenitarbed/niisked-salvratikud https://barbora.ee/lastekaubad/liha-ja-koogiviljapureed"
-      # Ensure scheduled & manual runs upsert by default (unless user overrides)
       UPSERT_DB: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.upsert_db || '1' }}
-      # Shard index from matrix
       SHARD: ${{ matrix.shard }}
 
     steps:
@@ -116,115 +113,109 @@ jobs:
           else
             # 3) Try autodiscover from homepage (YAML-safe heredoc; Python code dedented at runtime)
             python - <<'PY'
-import textwrap, sys
-code = """
-import os
-from urllib.parse import urljoin, urlparse
-from playwright.sync_api import sync_playwright
+            import textwrap
+            code = """
+            import os
+            from urllib.parse import urljoin, urlparse
+            from playwright.sync_api import sync_playwright
 
-BASE = "https://barbora.ee"
-excludes = tuple(os.environ.get("EXCLUDES","").split())
-includes = tuple(os.environ.get("INCLUDES","").split())
-discovered = set()
+            BASE = "https://barbora.ee"
+            excludes = tuple(os.environ.get("EXCLUDES","").split())
+            includes = tuple(os.environ.get("INCLUDES","").split())
+            discovered = set()
 
-def absu(href):
-    return urljoin(BASE, href)
+            def absu(href): return urljoin(BASE, href)
 
-def is_category(url):
-    p = urlparse(url)
-    if not (p.scheme and p.netloc and p.netloc.endswith("barbora.ee")):
-        return False
-    segs = [s for s in p.path.split("/") if s]
-    if any(s in ("retseptid","info","blogi","kampaania") for s in segs):
-        return False
-    return 1 <= len(segs) <= 4
+            def is_category(url):
+                p = urlparse(url)
+                if not (p.scheme and p.netloc and p.netloc.endswith("barbora.ee")): return False
+                segs = [s for s in p.path.split("/") if s]
+                if any(s in ("retseptid","info","blogi","kampaania") for s in segs): return False
+                return 1 <= len(segs) <= 4
 
-def allowed(url):
-    if any(url.startswith(pref) for pref in includes):
-        return True
-    if any(url.startswith(pref) for pref in excludes):
-        return False
-    return is_category(url)
+            def allowed(url):
+                if any(url.startswith(pref) for pref in includes): return True
+                if any(url.startswith(pref) for pref in excludes): return False
+                return is_category(url)
 
-with sync_playwright() as pw:
-    b = pw.chromium.launch(headless=True)
-    ctx = b.new_context(locale="et-EE")
-    p = ctx.new_page()
-    p.goto(BASE, timeout=45000, wait_until="domcontentloaded")
-    for sel in ['#onetrust-accept-btn-handler', 'button:has-text("Nõustun")', 'button:has-text("Accept")']:
-        try:
-            loc = p.locator(sel)
-            if loc.count() and loc.first.is_visible():
-                loc.first.click(timeout=1000)
-        except Exception:
-            pass
-    for a in p.locator("a").all():
-        href = (a.get_attribute("href") or "").strip()
-        if not href:
-            continue
-        u = absu(href)
-        if allowed(u):
-            discovered.add(u)
-    os.makedirs("data", exist_ok=True)
-    with open("data/barbora_categories.txt","w",encoding="utf-8") as f:
-        for u in sorted(discovered):
-            f.write(u + "\\n")
-    print(f"[discover] wrote {len(discovered)} -> data/barbora_categories.txt")
-    ctx.close(); b.close()
-"""
-exec(textwrap.dedent(code))
-PY
+            with sync_playwright() as pw:
+                b = pw.chromium.launch(headless=True)
+                ctx = b.new_context(locale="et-EE")
+                p = ctx.new_page()
+                p.goto(BASE, timeout=45000, wait_until="domcontentloaded")
+                for sel in ['#onetrust-accept-btn-handler','button:has-text("Nõustun")','button:has-text("Accept")']:
+                    try:
+                        loc = p.locator(sel)
+                        if loc.count() and loc.first.is_visible():
+                            loc.first.click(timeout=1000)
+                    except Exception:
+                        pass
+                for a in p.locator("a").all():
+                    href = (a.get_attribute("href") or "").strip()
+                    if not href: continue
+                    u = absu(href)
+                    if allowed(u): discovered.add(u)
+                os.makedirs("data", exist_ok=True)
+                with open("data/barbora_categories.txt","w",encoding="utf-8") as f:
+                    for u in sorted(discovered): f.write(u + "\\n")
+                print(f"[discover] wrote {len(discovered)} -> data/barbora_categories.txt")
+                ctx.close(); b.close()
+            """
+            import textwrap as _tw
+            exec(_tw.dedent(code))
+            PY
+          fi
 
-            # 4) Fallback to curated FOOD roots if autodiscover empty/too small
-            if [ ! -s data/barbora_categories.txt ] || [ "$(wc -l < data/barbora_categories.txt)" -lt 10 ]; then
-              printf '%s\n' \
-                'https://barbora.ee/koogiviljad-puuviljad' \
-                'https://barbora.ee/piimatooted-ja-munad' \
-                'https://barbora.ee/juustud' \
-                'https://barbora.ee/leivad-saiad-kondiitritooted' \
-                'https://barbora.ee/liha-kala-valmistoit' \
-                'https://barbora.ee/kuivained-ja-hoidised' \
-                'https://barbora.ee/maitseained-ja-kastmed' \
-                'https://barbora.ee/suupisted-maiustused' \
-                'https://barbora.ee/joogid' \
-                'https://barbora.ee/kulmutatud-tooted' \
-                > data/barbora_categories.txt
-              echo "Autodiscover small → wrote curated FOOD roots to data/barbora_categories.txt"
-            fi
+          # 4) Fallback to curated FOOD roots if autodiscover empty/too small
+          if [ ! -s data/barbora_categories.txt ] || [ "$(wc -l < data/barbora_categories.txt)" -lt 10 ]; then
+            printf '%s\n' \
+              'https://barbora.ee/koogiviljad-puuviljad' \
+              'https://barbora.ee/piimatooted-ja-munad' \
+              'https://barbora.ee/juustud' \
+              'https://barbora.ee/leivad-saiad-kondiitritooted' \
+              'https://barbora.ee/liha-kala-valmistoit' \
+              'https://barbora.ee/kuivained-ja-hoidised' \
+              'https://barbora.ee/maitseained-ja-kastmed' \
+              'https://barbora.ee/suupisted-maiustused' \
+              'https://barbora.ee/joogid' \
+              'https://barbora.ee/kulmutatud-tooted' \
+              > data/barbora_categories.txt
+            echo "Autodiscover small → wrote curated FOOD roots to data/barbora_categories.txt"
           fi
 
           # Fix stale slugs if present (compat)
           sed -i 's#https://barbora.ee/piimatooted-munad-void#https://barbora.ee/piimatooted-ja-munad#g' data/barbora_categories.txt
           sed -i 's#https://barbora.ee/leib-sai-kondiitritooted#https://barbora.ee/leivad-saiad-kondiitritooted#g' data/barbora_categories.txt
 
-          # Validate category URLs (drop 404 / "Palume vabandust")
+          # Validate category URLs (drop 404 / “Palume vabandust”)
           python - <<'PY'
-import textwrap
-code = """
-from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
-import pathlib
-infile = pathlib.Path("data/barbora_categories.txt")
-cats = [l.strip() for l in infile.read_text("utf-8").splitlines() if l.strip()]
-valid = []
-with sync_playwright() as pw:
-    b = pw.chromium.launch(headless=True)
-    p = b.new_page()
-    for u in cats:
-        try:
-            r = p.goto(u, timeout=30000, wait_until="domcontentloaded")
-            html = (p.content() or "")
-            code = r.status if r else 200
-            bad = (code == 404) or ("Palume vabandust" in html and "404" in html)
-            if not bad:
-                valid.append(u)
-        except PWTimeout:
-            pass
-    b.close()
-pathlib.Path("data/barbora_categories.txt").write_text("\\n".join(dict.fromkeys(valid)) + ("\\n" if valid else ""), encoding="utf-8")
-print(f"Validated categories kept: {len(valid)}")
-"""
-exec(textwrap.dedent(code))
-PY
+          import textwrap
+          code = """
+          from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
+          import pathlib
+          infile = pathlib.Path("data/barbora_categories.txt")
+          cats = [l.strip() for l in infile.read_text("utf-8").splitlines() if l.strip()]
+          valid = []
+          with sync_playwright() as pw:
+              b = pw.chromium.launch(headless=True)
+              p = b.new_page()
+              for u in cats:
+                  try:
+                      r = p.goto(u, timeout=30000, wait_until="domcontentloaded")
+                      html = (p.content() or "")
+                      code = r.status if r else 200
+                      bad = (code == 404) or ("Palume vabandust" in html and "404" in html)
+                      if not bad:
+                          valid.append(u)
+                  except PWTimeout:
+                      pass
+              b.close()
+          pathlib.Path("data/barbora_categories.txt").write_text("\\n".join(dict.fromkeys(valid)) + ("\\n" if valid else ""), encoding="utf-8")
+          print(f"Validated categories kept: {len(valid)}")
+          """
+          import textwrap as _tw
+          exec(_tw.dedent(code))
+          PY
 
           echo "TOTAL categories: $(wc -l < data/barbora_categories.txt || echo 0)"
           echo "--- preview ---"
@@ -248,7 +239,6 @@ PY
           echo "Slice count: $(wc -l < data/barbora_categories.txt)"
           head -n 12 data/barbora_categories.txt || true
 
-      # Ensure psql available for the skip/only steps
       - name: Install psql client (for skip/only lists)
         if: ${{ env.DATABASE_URL != '' }}
         shell: bash
@@ -326,13 +316,11 @@ PY
             " > data/_barbora_only_pairs.txt
           fi
 
-          # Split the "ext_id URL" pairs into two files
           awk '{print $1}' data/_barbora_only_pairs.txt | sed '/^$/d' > data/barbora_only_ext_ids.txt
           awk '{print $2}' data/_barbora_only_pairs.txt | sed '/^$/d' > data/barbora_only_urls_all.txt
 
           echo "ONLY list rows: $(wc -l < data/barbora_only_ext_ids.txt)"
 
-          # Shard the URL list to avoid double-work across matrix shards
           : "${SHARD:?SHARD env is required}"
           awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
             data/barbora_only_urls_all.txt > data/barbora_only_urls.txt
@@ -399,7 +387,6 @@ PY
           if-no-files-found: warn
           retention-days: 7
 
-      # ---------- Optional DB part ----------
       - name: Install psql client
         if: ${{ env.DATABASE_URL != '' && env.UPSERT_DB == '1' }}
         shell: bash
@@ -495,7 +482,6 @@ PY
 
           \copy tmp_barbora_csv_full FROM '__CSV__' CSV HEADER
 
-          -- Normalize and fill blanks; build a clean staging temp table.
           CREATE TEMP TABLE tmp_staging_barbora_products AS
           SELECT
             ext_id,
@@ -514,11 +500,9 @@ PY
           FROM tmp_barbora_csv_full
           WHERE COALESCE(ext_id,'') <> '';
 
-          -- Drop any rows that still lack a name after fallback
           DELETE FROM tmp_staging_barbora_products
           WHERE COALESCE(name,'') = '';
 
-          -- De-duplicate: keep the "richest" row per ext_id
           CREATE TEMP TABLE tmp_staging_barbora_products_dedup AS
           SELECT t.*
           FROM (
