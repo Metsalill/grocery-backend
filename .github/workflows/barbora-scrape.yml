@@ -201,42 +201,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-      # MODE=prices → skip only items that are priced AND already have a brand + name
-      - name: Build skip list (priced & have brand+name)
+      # MODE=prices → DO NOT SKIP ANY ITEMS (we want fresh prices)
+      - name: Build skip list (disabled in prices mode)
         if: ${{ env.DATABASE_URL != '' && env.MODE == 'prices' }}
         shell: bash
         run: |
           set -euo pipefail
           : > data/barbora_skip_ext_ids.txt
-
-          psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/barbora_skip_ext_ids.txt
-          WITH priced_from_prices AS (
-            SELECT DISTINCT p.source_url AS ext_id
-            FROM public.prices p
-            JOIN public.stores s ON s.id = p.store_id
-            WHERE s.chain='Maxima' AND s.name ILIKE '%Barbora%' AND s.is_online = TRUE
-              AND p.source_url ILIKE 'https://barbora.ee%'
-          ),
-          priced_from_candidates AS (
-            SELECT DISTINCT ext_id::text
-            FROM public.barbora_candidates
-            WHERE COALESCE(price,0) > 0 AND COALESCE(ext_id,'') <> ''
-          ),
-          priced AS (
-            SELECT ext_id FROM priced_from_prices
-            UNION
-            SELECT ext_id FROM priced_from_candidates
-          )
-          SELECT pr.ext_id
-          FROM priced pr
-          LEFT JOIN public.barbora_candidates bc ON bc.ext_id = pr.ext_id
-          LEFT JOIN public.staging_barbora_products sp ON sp.ext_id = pr.ext_id
-          WHERE COALESCE(NULLIF(btrim(COALESCE(bc.brand, sp.brand, '')), ''), NULL) IS NOT NULL
-            AND COALESCE(NULLIF(btrim(COALESCE(bc.name, sp.name, '')), ''), NULL) IS NOT NULL
-          ORDER BY 1;
-          SQL
-
-          echo "Skip list rows (priced & have brand+name): $(wc -l < data/barbora_skip_ext_ids.txt)" | tee data/_barbora_skip_count.txt
+          echo "0" > data/_barbora_skip_count.txt
+          echo "Skip list disabled for prices → crawl all items."
 
       # MODE=metadata → produce BOTH ext_ids and URLs, and shard URLs
       - name: Build ONLY lists (missing brand/manufacturer; produce URLs too)
@@ -328,11 +301,7 @@ jobs:
           ONLY_EXT_FLAG=()
           ONLY_URL_FLAG=()
 
-          if [ "${MODE}" = "prices" ] && [ -s data/barbora_skip_ext_ids.txt ]; then
-            SKIP_FLAG=( --skip-ext-file data/barbora_skip_ext_ids.txt )
-          fi
-
-          # Prefer URL-driven crawl in metadata mode
+          # In prices mode we intentionally don't use a skip list.
           if [ "${MODE}" = "metadata" ] && [ -s data/barbora_only_urls.txt ]; then
             ONLY_URL_FLAG=( --only-url-file data/barbora_only_urls.txt )
           elif [ "${MODE}" = "metadata" ] && [ -s data/barbora_only_ext_ids.txt ]; then
