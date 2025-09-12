@@ -156,3 +156,77 @@ def main():
             FROM selver_candidates
             WHERE (brand IS NULL OR brand = '')
               AND COALESCE(ean_norm, ean_raw) IS NOT NULL
+            ORDER BY ext_id
+            LIMIT %s
+        """, (max_items,))
+        rows = cur.fetchall()
+
+    if not rows:
+        print("Nothing to do.")
+        return
+
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch(headless=headless)
+        context = browser.new_context()
+        # speed up a bit by blocking heavy third-party requests
+        context.route("**/*", lambda route: (
+            route.abort() if any(d in route.request().url for d in
+                ["googletagmanager","google-analytics","doubleclick","facebook","fonts.googleapis.com","use.typekit.net"])
+            else route.continue_()
+        ))
+        page = context.new_page()
+
+        processed = 0
+        found = 0
+        for ext_id, ean in rows:
+            if time.time() > deadline:
+                print("Timebox reached, stopping.")
+                break
+
+            url = build_url(str(ext_id))
+            if not url:
+                print(f"[MISS_BRAND] ext_id={ext_id} url=<empty>")
+                continue
+
+            try:
+                page.goto(url, timeout=30000, wait_until="domcontentloaded")
+                accept_overlays(page)
+            except Exception as e:
+                print(f"[MISS_NAV] ext_id={ext_id} url={url} err={e}")
+                continue
+
+            b = extract_brand(page)
+            processed += 1
+            if not b:
+                print(f"[MISS_BRAND] ext_id={ext_id} url={url}")
+                time.sleep(req_delay)
+                continue
+
+            with closing(psycopg2.connect(dsn)) as conn2, conn2.cursor() as cur2:
+                try:
+                    cur2.execute(
+                        "UPDATE selver_candidates SET brand = %s WHERE ext_id = %s AND (brand IS NULL OR brand = '')",
+                        (b, ext_id)
+                    )
+                    if ean:
+                        cur2.execute("""
+                            UPDATE products p
+                               SET brand = %s
+                             WHERE p.ean = %s
+                               AND (p.brand IS NULL OR p.brand = '')
+                        """, (b, ean))
+                    conn2.commit()
+                    found += 1
+                    print(f"[BRAND] ext_id={ext_id} brand=\"{b}\"")
+                except Exception as e:
+                    conn2.rollback()
+                    print(f"[DB_ERR] ext_id={ext_id} err={e}")
+
+            time.sleep(req_delay)
+
+        browser.close()
+        print(f"Done. processed={processed} brand_found={found}")
+
+if __name__ == "__main__":
+    signal.signal(signal.SIGINT, lambda *_: sys.exit(130))
+    main()
