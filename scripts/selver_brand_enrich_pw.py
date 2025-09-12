@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Selver brand enrichment (structured fields only).
+Selver brand enrichment (structured sources only).
 
-- Accepts ext_id as: slug path, absolute URL, "/slug", "/p/<numeric>", raw numeric,
-  or an EAN (8/13 digits).  EANs are handled via on-site search.
+- Worklist comes from products joined with ext_product_map (source='selver').
+- ext_id can be a slug, absolute URL, "/slug", "/p/<numeric>", raw numeric id,
+  or an EAN (8/13 digits). EANs are handled via on-site search.
 - Extracts brand from Käitleja/Tootja/Valmistaja/Kaubamärk/Brand rows,
   JSON-LD (brand/manufacturer) and meta product:brand. No title/name guessing.
 
@@ -14,72 +15,115 @@ Env:
   HEADLESS            (1|0, default 1)
   REQ_DELAY           (seconds, default 0.25)
   TIMEBOX_SECONDS     (default 1200)
-  OVERWRITE_PRODUCTS  (1|0, default 0)  # 1 = overwrite Selver product brands
+  OVERWRITE_PRODUCTS  (1|0, default 0) — when 1, overwrite even non-empty brands
 """
 
 from __future__ import annotations
+
 import os, re, json, time, signal, sys
-import psycopg2
 from contextlib import closing
+from urllib.parse import quote
+
+import psycopg2
 from playwright.sync_api import sync_playwright
 
 BASE_HOST = "https://www.selver.ee"
 PDP_NUMERIC_PREFIX = BASE_HOST + "/p/"
 
-# include Käitleja and common variants
+# labels we accept in spec tables
 BRAND_LABELS = re.compile(r'(kaubam[aä]rk|tootja|valmistaja|käitleja|brand)', re.I)
-IS_EAN = re.compile(r'^\d{8}(\d{5})?$')   # 8 or 13 digits
 
-# "Määramata" (unknown) should not be used as a brand
-IS_UNKNOWN_BRAND = re.compile(r'^\s*m[äa]äramata\s*$', re.I)
+# EAN: 8 or 13 digits
+IS_EAN = re.compile(r'^\d{8}(\d{5})?$')
+
+# Things that are definitely NOT a brand
+URL_OR_EMAIL = re.compile(r'(https?://|www\.)|@', re.I)
+
+# Keep generic placeholders, but DO NOT include "määramata" (we accept it).
+PLACEHOLDER_BRANDS = {
+    "täpsustamata",
+    "puudub",
+    "unknown",
+    "n/a",
+    "na",
+    "none",
+    "-", "—", "–",
+}
 
 def _clean(s: str | None) -> str:
     if not s:
         return ""
-    s = re.sub(r'[\u2122\u00AE]', '', s)     # ™ ®
+    # strip ™ and ® then collapse whitespace
+    s = re.sub(r'[\u2122\u00AE]', '', s)
     s = re.sub(r'\s+', ' ', s).strip()
-    # reject obvious size/unit strings
+    # reject obvious size/unit strings like "500 ml"
     if re.search(r'\b(\d+(\s)?(ml|l|g|kg|tk|pcs))\b', s, re.I):
-        return ""
-    # skip unknown placeholder
-    if IS_UNKNOWN_BRAND.match(s):
         return ""
     return s
 
+def _normalize_maaramata(b: str) -> str:
+    """
+    Normalize common variants/typos of 'Määramata' to exactly 'Määramata'.
+    (We accept this as a valid brand per business rules.)
+    """
+    t = (b or "").strip()
+    if not t:
+        return ""
+    low = t.lower()
+    low_no_diac = low.replace('ä', 'a')
+    # direct matches
+    if low in {"määramata", "määrmata"}:
+        return "Määramata"
+    # crude but effective typo coverage without external libs
+    if low_no_diac in {"maaramata", "maarmata", "maarama"}:
+        return "Määramata"
+    # also catch cases missing one character around 'mata'
+    if re.fullmatch(r"m[äa]ära?m?ata", low):
+        return "Määramata"
+    return t
+
+def _canonicalize(b: str) -> str:
+    return _normalize_maaramata(_clean(b))
+
+def _is_bad_brand(b: str) -> bool:
+    """
+    Reject only real junk. 'Määramata' must PASS and be stored.
+    """
+    if not b:
+        return True
+    if len(b) > 120:
+        return True
+    if URL_OR_EMAIL.search(b):
+        return True
+    bl = b.strip().lower()
+    if bl in PLACEHOLDER_BRANDS:
+        return True
+    # also treat just punctuation/dashes as empty
+    if re.fullmatch(r'[-–—\s]+', b):
+        return True
+    return False
+
 def build_target(ext: str) -> tuple[str, str]:
     """
-    Returns a tuple (mode, value):
-      - ("url", absolute_url)
-      - ("search", query)    # use on-site search (e.g., EAN)
+    Returns (mode, value):
+      ("url", absolute_url)  or  ("search", query) for EAN or general fallback.
     """
     s = (ext or "").strip()
     if not s:
         return ("url", "")
 
-    # absolute URL
-    if s.startswith("http://") or s.startswith("https://"):
+    if s.startswith(("http://","https://")):
         return ("url", s)
-
-    # canonical Selver PDP id forced by caller (/p/12345)
     if s.startswith("/p/") and re.fullmatch(r"/p/\d+", s):
         return ("url", BASE_HOST + s)
-
-    # generic site-relative slug
     if s.startswith("/"):
         return ("url", BASE_HOST + s)
-
-    # slug without leading slash (contains letters)
-    if re.search(r"[a-zA-Z]", s) and not s.startswith("http"):
+    if re.search(r"[A-Za-z]", s) and not s.startswith(("http://","https://")):
         return ("url", f"{BASE_HOST}/{s}")
-
-    # all digits: likely an EAN (8 or 13)
     if IS_EAN.fullmatch(s):
         return ("search", s)
-
-    # fallback: try numeric PDP (rare)
     if re.fullmatch(r"\d+", s):
         return ("url", PDP_NUMERIC_PREFIX + s)
-
     return ("url", f"{BASE_HOST}/{s}")
 
 def accept_overlays(page):
@@ -90,14 +134,14 @@ def accept_overlays(page):
     ]:
         try:
             loc = page.locator(sel).first
-            if loc.is_visible():
+            if loc and loc.is_visible():
                 loc.click(timeout=2000)
                 break
         except Exception:
             pass
 
 def wait_for_pdp_ready(page):
-    """Wait until the product attributes table or JSON-LD is present."""
+    """Wait until product attributes or JSON-LD appears."""
     try:
         page.wait_for_selector(
             'table.ProductAttributes__table, script[type="application/ld+json"]',
@@ -106,116 +150,120 @@ def wait_for_pdp_ready(page):
     except Exception:
         pass
 
-def try_open_first_search_result(page, max_retries: int = 3, sleep_s: float = 0.8) -> bool:
-    """
-    On a search results page, open the first plausible product link.
-    Prefer stable testids, then fall back to sluggy links.
-    Retry a few times to give the SPA time to render results.
-    """
-    for _ in range(max_retries):
-        try:
-            # Preferred: explicit product link test-id Selver uses
-            loc = page.locator('a[data-testid="productName"]').first
-            if loc.count() > 0 and loc.is_visible():
-                href = loc.get_attribute("href") or ""
-                if href:
-                    if href.startswith("/"):
-                        href = BASE_HOST + href
-                    page.goto(href, timeout=30000, wait_until="domcontentloaded")
-                    return True
+def _first_product_link_on_results(page) -> str:
+    """Return the first plausible product href on a search results page (or "")."""
+    try:
+        hrefs = page.eval_on_selector_all(
+            "main a[href]",
+            "els => els.map(e => e.getAttribute('href'))"
+        ) or []
+        for href in hrefs:
+            if not href:
+                continue
+            if href.startswith("#") or "javascript:" in href or "?" in href:
+                continue
+            # prefer sluggy product URL
+            if re.search(r"/[-a-z0-9]+(?:-[a-z0-9]+)+/?$", href, re.I):
+                return href
+    except Exception:
+        pass
+    return ""
 
-            # Fallback: collect candidate hrefs and pick the first sluggy link
-            hrefs = page.eval_on_selector_all(
-                "main a[href]",
-                "els => els.map(e => e.getAttribute('href'))"
-            ) or []
-            for href in hrefs:
-                if not href:
-                    continue
-                if href.startswith("#") or "javascript:" in href:
-                    continue
-                # Prefer product detail-like URLs: /something-words... OR explicit /p/<id>
-                if re.search(r"/p/\d+$", href):
-                    page.goto(href if href.startswith("http") else BASE_HOST + href,
-                              timeout=30000, wait_until="domcontentloaded")
-                    return True
-                if re.search(r"/[-a-z0-9õäöü]+(?:-[a-z0-9õäöü]+)+/?$", href, re.I):
-                    page.goto(href if href.startswith("http") else BASE_HOST + href,
-                              timeout=30000, wait_until="domcontentloaded")
-                    return True
-        except Exception:
-            pass
-        time.sleep(sleep_s)
-    return False
+def _search_url_from_form(page, query: str) -> str | None:
+    """
+    Inspect the search form (action + input name) and construct the actual search URL.
+    """
+    try:
+        data = page.evaluate("""
+        () => {
+          const form = document.querySelector('form[role="search"], form[action*="otsing"], header form, form');
+          if (!form) return null;
+          const input = form.querySelector('input[name]') || form.querySelector('input[type="search"]') || form.querySelector('input[type="text"]');
+          let action = (form.getAttribute('action') || '/otsing').trim();
+          let param  = input ? (input.getAttribute('name') || 'q') : 'q';
+          return { action, param };
+        }
+        """)
+        if not data:
+            return None
+        action = data.get("action") or "/otsing"
+        param  = data.get("param") or "q"
+        if action.startswith("http"):
+            base = action
+        elif action.startswith("/"):
+            base = BASE_HOST + action
+        else:
+            base = BASE_HOST + "/" + action
+        return f"{base}?{param}={quote(query)}"
+    except Exception:
+        return None
 
-def run_search(page, query: str) -> bool:
-    """Go to homepage, run a search with the given query, try to open first PDP."""
+def navigate_via_search(page, query: str) -> bool:
+    """Go to home, construct real search URL, open it, and click the first product."""
     try:
         page.goto(BASE_HOST, timeout=30000, wait_until="domcontentloaded")
         accept_overlays(page)
-        # Be resilient: try a couple of ways to find the search input
-        search_box = page.locator('input[placeholder*="Otsi toodet"]').first
-        if not search_box or search_box.count() == 0 or not search_box.is_visible():
-            search_box = page.locator('header input[type="text"]').first
-        if search_box and search_box.count() > 0:
-            search_box.fill(query)
-            search_box.press("Enter")
+
+        url = _search_url_from_form(page, query)
+        if url:
+            page.goto(url, timeout=30000, wait_until="domcontentloaded")
+        else:
+            box = page.locator('input[placeholder*="Otsi toodet"]').first
+            if not box or not box.is_visible():
+                box = page.locator('header input[type="text"]').first
+            box.fill(query)
+            box.press("Enter")
             page.wait_for_load_state("domcontentloaded")
-            if try_open_first_search_result(page):
-                return True
-    except Exception:
-        pass
-    return False
 
-def navigate_to_candidate(page, ext_id: str, ean: str | None) -> bool:
-    """
-    Navigate to a PDP either directly or via search.
-    Strategy:
-      1) Try the ext_id as URL/slug/PDP if it looks like one.
-      2) If that fails or 404s, and we have a valid EAN -> search by EAN.
-      3) Otherwise, if ext_id already looked like a search term -> search by ext_id; if that fails and EAN exists -> search by EAN.
-    """
-    mode, value = build_target(ext_id)
-
-    # 1) Try direct URL first
-    if mode == "url":
-        try:
-            page.goto(value, timeout=30000, wait_until="domcontentloaded")
-            accept_overlays(page)
-            # 404 fallback (text "Lehekülge ei leitud")
-            if page.locator('text=Lehekülge ei leitud').first.is_visible():
-                # Prefer EAN search if available
-                if ean and IS_EAN.fullmatch(str(ean)):
-                    if run_search(page, str(ean)):
-                        return True
-                # else try searching by ext_id as last resort
-                if run_search(page, ext_id):
-                    return True
+        href = _first_product_link_on_results(page)
+        if href:
+            if href.startswith("/"):
+                page.goto(BASE_HOST + href, timeout=30000, wait_until="domcontentloaded")
             else:
-                return True
-        except Exception:
-            # Navigation failed — try EAN search first
-            if ean and IS_EAN.fullmatch(str(ean)):
-                if run_search(page, str(ean)):
-                    return True
-            # then try ext_id search
-            if run_search(page, ext_id):
-                return True
-        return False
-
-    # 2) ext_id already asked for search: try it, then EAN as fallback
-    if mode == "search":
-        if run_search(page, value):
+                page.goto(href, timeout=30000, wait_until="domcontentloaded")
             return True
-        if ean and IS_EAN.fullmatch(str(ean)):
-            if run_search(page, str(ean)):
-                return True
+    except Exception:
         return False
+    return False
+
+def navigate_to_candidate(page, ext_id: str | None, ean: str | None) -> bool:
+    """
+    Navigate to a PDP using ext_id; if that 404s or fails, search by EAN.
+    """
+    if ext_id:
+        mode, value = build_target(str(ext_id))
+        if mode == "url":
+            try:
+                page.goto(value, timeout=30000, wait_until="domcontentloaded")
+                accept_overlays(page)
+                if page.locator('text=Lehekülge ei leitud').first.is_visible():
+                    pass  # will try EAN
+                else:
+                    return True
+            except Exception:
+                pass
+        else:
+            if navigate_via_search(page, value):
+                return True
+
+    if ean:
+        if navigate_via_search(page, ean):
+            return True
 
     return False
+
+def _accept_or_none(raw: str) -> str:
+    """Clean, normalize 'Määramata' variants, and reject actual junk."""
+    b = _canonicalize(raw)
+    # Allow 'Määramata' explicitly (it will pass _is_bad_brand anyway, but be explicit).
+    if b.lower() in {"määramata"}:
+        return "Määramata"
+    if _is_bad_brand(b):
+        return ""
+    return b
 
 def extract_brand(page) -> str:
-    # 0) Direct selectors: table with label/value pairs (fast, robust)
+    # 0) Direct spec table/definition list selectors
     sel_pairs = [
         'th:has-text("Käitleja") + td',
         'th:has-text("Tootja") + td',
@@ -233,7 +281,7 @@ def extract_brand(page) -> str:
             loc = page.locator(sel).first
             if loc and loc.count() > 0:
                 txt = loc.text_content() or ''
-                b = _clean(txt)
+                b = _accept_or_none(txt)
                 if b:
                     return b
     except Exception:
@@ -254,29 +302,29 @@ def extract_brand(page) -> str:
                 b = n.get('brand')
                 if isinstance(b, dict):
                     b = b.get('name')
-                b = _clean(b)
+                b = _accept_or_none(b or "")
                 if b:
                     return b
                 m = n.get('manufacturer')
                 if isinstance(m, dict):
                     m = m.get('name')
-                m = _clean(m)
+                m = _accept_or_none(m or "")
                 if m:
                     return m
     except Exception:
         pass
 
-    # 2) Spec rows (regex over HTML) and generic sibling scan
+    # 2) Regex over HTML + generic sibling probing
     try:
         html = page.content()
         for k, v in re.findall(r'(?is)<dt[^>]*>(.*?)</dt>\s*<dd[^>]*>(.*?)</dd>', html):
             if BRAND_LABELS.search(re.sub(r'<.*?>', ' ', k)):
-                b = _clean(re.sub(r'<.*?>', ' ', v))
+                b = _accept_or_none(re.sub(r'<.*?>', ' ', v))
                 if b:
                     return b
         for k, v in re.findall(r'(?is)<th[^>]*>(.*?)</th>\s*<td[^>]*>(.*?)</td>', html):
             if BRAND_LABELS.search(re.sub(r'<.*?>', ' ', k)):
-                b = _clean(re.sub(r'<.*?>', ' ', v))
+                b = _accept_or_none(re.sub(r'<.*?>', ' ', v))
                 if b:
                     return b
 
@@ -302,19 +350,19 @@ def extract_brand(page) -> str:
         }
         """
         v = page.evaluate(js)
-        v = _clean(v)
+        v = _accept_or_none(v)
         if v:
             return v
     except Exception:
         pass
 
-    # 3) Meta: product:brand
+    # 3) Meta tag: product:brand
     try:
         val = page.eval_on_selector(
             'meta[property="product:brand"]',
             'el => el ? el.content || el.getAttribute("content") : null'
         )
-        b = _clean(val or '')
+        b = _accept_or_none(val or '')
         if b:
             return b
     except Exception:
@@ -335,35 +383,30 @@ def main():
     overwrite = os.environ.get("OVERWRITE_PRODUCTS", "0") == "1"
     deadline = time.time() + timebox
 
-    # ——— Pick work from Selver products (not selver_candidates) ———
-    if overwrite:
-        where_extra = ""  # process any Selver product with an EAN
-    else:
-        # only fill empties/obviously-bad values
-        where_extra = """
-            AND (
-                 p.brand IS NULL OR p.brand = ''
-              OR p.brand ILIKE 'e-selveri info%%'
-              OR length(p.brand) > 100
-              OR p.brand ~* '(http|www\\.)'
-              OR p.brand ~* '@'
-            )
-        """
-
+    # Build worklist from products + ext_product_map(source='selver')
     with closing(psycopg2.connect(dsn)) as conn, conn.cursor() as cur:
-        cur.execute(f"""
-            SELECT p.id                         AS product_id,
-                   COALESCE(m.ext_id::text, p.ean::text) AS ext_id,
-                   p.ean                        AS ean
+        cur.execute("""
+            SELECT p.id,
+                   p.ean::text AS ean,
+                   COALESCE(m.ext_id::text, '') AS ext_id
               FROM products p
               JOIN ext_product_map m
                 ON m.product_id = p.id
                AND m.source = 'selver'
-             WHERE p.ean IS NOT NULL
-               {where_extra}
+             WHERE COALESCE(p.ean::text,'') <> ''
+               AND (
+                     %s = TRUE
+                     OR  -- overwrite disabled -> only rows that look missing/bad
+                     p.brand IS NULL
+                     OR p.brand = ''
+                     OR p.brand ILIKE 'e-selveri info%%'
+                     OR length(p.brand) > 100
+                     OR p.brand ~* '(http|www\\.)'
+                     OR p.brand ~* '@'
+                   )
              ORDER BY p.id
              LIMIT %s
-        """, (max_items,))
+        """, (overwrite, max_items))
         rows = cur.fetchall()
 
     if not rows:
@@ -374,7 +417,7 @@ def main():
         browser = pw.chromium.launch(headless=headless)
         context = browser.new_context()
 
-        # Block heavy 3rd-parties
+        # Block heavy 3rd-party requests
         block_domains = [
             "googletagmanager", "google-analytics", "doubleclick",
             "facebook", "fonts.googleapis.com", "use.typekit.net",
@@ -390,74 +433,61 @@ def main():
         page = context.new_page()
 
         processed = 0
-        found = 0
-        for product_id, ext_id, ean in rows:
-            if time.time() > deadline:
-                print("Timebox reached, stopping.")
-                break
+        updated = 0
 
-            if not ext_id:
-                print(f"[MISS_BRAND] product_id={product_id} nav failed (ext_id=<empty>, ean={ean})")
-                continue
+        with closing(psycopg2.connect(dsn)) as uconn:
+            uconn.autocommit = False
+            with uconn.cursor() as ucur:
+                for product_id, ean, ext_id in rows:
+                    if time.time() > deadline:
+                        print("Timebox reached, stopping.")
+                        break
 
-            ok = navigate_to_candidate(page, str(ext_id), str(ean) if ean else None)
-            if not ok:
-                print(f"[MISS_BRAND] product_id={product_id} nav failed (ext_id={ext_id}, ean={ean})")
-                time.sleep(req_delay)
-                continue
+                    ok = navigate_to_candidate(page, ext_id, ean)
+                    if not ok:
+                        print(f"[MISS_BRAND] product_id={product_id} nav failed (ext_id={ext_id}, ean={ean})")
+                        time.sleep(req_delay)
+                        continue
 
-            wait_for_pdp_ready(page)
-            b = extract_brand(page)
-            processed += 1
-            if not b:
-                curr_url = ""
-                try:
-                    curr_url = page.url
-                except Exception:
-                    pass
-                print(f"[MISS_BRAND] product_id={product_id} url={curr_url}")
-                time.sleep(req_delay)
-                continue
+                    wait_for_pdp_ready(page)
+                    brand = extract_brand(page)
+                    processed += 1
 
-            # Persist back (Selver products only)
-            with closing(psycopg2.connect(dsn)) as conn2, conn2.cursor() as cur2:
-                try:
-                    if overwrite:
-                        cur2.execute("""
-                            UPDATE products p
-                               SET brand = %s
-                              FROM ext_product_map m
-                             WHERE m.product_id = p.id
-                               AND m.source = 'selver'
-                               AND p.id = %s
-                        """, (b, product_id))
-                    else:
-                        cur2.execute("""
-                            UPDATE products p
-                               SET brand = %s
-                              FROM ext_product_map m
-                             WHERE m.product_id = p.id
-                               AND m.source = 'selver'
-                               AND p.id = %s
-                               AND (
-                                    p.brand IS NULL OR p.brand = ''
-                                 OR p.brand ILIKE 'e-selveri info%%'
-                                 OR length(p.brand) > 100
-                                 OR p.brand ~* '(http|www\\.)'
-                                 OR p.brand ~* '@'
-                                   )
-                        """, (b, product_id))
-                    conn2.commit()
-                    found += 1
-                    print(f"[BRAND] product_id={product_id} ean={ean} brand=\"{b}\"")
-                except Exception as e:
-                    conn2.rollback()
-                    print(f"[DB_ERR] product_id={product_id} err={e}")
+                    if not brand:
+                        cur_url = ""
+                        try:
+                            cur_url = page.url
+                        except Exception:
+                            pass
+                        print(f"[MISS_BRAND_EMPTY] product_id={product_id} url={cur_url}")
+                        time.sleep(req_delay)
+                        continue
 
-            time.sleep(req_delay)
+                    try:
+                        if overwrite:
+                            ucur.execute("UPDATE products SET brand = %s WHERE id = %s", (brand, product_id))
+                        else:
+                            ucur.execute(
+                                "UPDATE products SET brand = %s "
+                                "WHERE id = %s AND (brand IS NULL OR brand = '' "
+                                "OR brand ILIKE 'e-selveri info%%' OR length(brand) > 100 "
+                                "OR brand ~* '(http|www\\.)' OR brand ~* '@')",
+                                (brand, product_id)
+                            )
+                        if ucur.rowcount > 0:
+                            updated += 1
+                            print(f"[OK] id={product_id} ← brand “{brand}”")
+                        else:
+                            print(f"[SKIP] id={product_id} brand already OK")
+                        uconn.commit()
+                    except Exception as e:
+                        uconn.rollback()
+                        print(f"[DB_ERR] id={product_id} err={e}")
+
+                    time.sleep(req_delay)
 
         browser.close()
-        print(f"Done. processed={processed} brand_found={found}")
+        print(f"Done. processed={processed} updated={updated}")
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, lambda *_: sys.exit(130))
