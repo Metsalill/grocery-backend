@@ -18,7 +18,14 @@ import re
 import sys
 import time
 from typing import Dict, List, Optional, Tuple
-from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit, parse_qsl, urlencode
+from urllib.parse import (
+    urljoin,
+    urlparse,
+    urlsplit,
+    urlunsplit,
+    parse_qsl,
+    urlencode,
+)
 
 from bs4 import BeautifulSoup
 from playwright.sync_api import TimeoutError as PWTimeout
@@ -405,11 +412,18 @@ def next_page_if_any(page: Page) -> bool:
         return False
 
 
-def collect_category_products(page: Page, cat_url: str, req_delay: float, max_pages: int = 60) -> List[Tuple[str, str]]:
+def collect_category_products(
+    page: Page,
+    cat_url: str,
+    req_delay: float,
+    max_pages: int = 60,
+    stop_after_products: Optional[int] = None,
+) -> List[Tuple[str, str]]:
     """
     Iterate through paginated listing. Returns [(pdp_url, listing_title), ...]
     The site only shows a window of page numbers at once; we keep clicking the
     'next' arrow (»/›) and fall back to building ?page=N when needed.
+    Will also stop early if stop_after_products is reached.
     """
     go_to_category(page, cat_url, req_delay)
 
@@ -426,6 +440,11 @@ def collect_category_products(page: Page, cat_url: str, req_delay: float, max_pa
         # collect product links from current page
         links = harvest_product_links(page)
         all_links.extend(links)
+
+        # Early stop if we've collected enough for this run
+        if stop_after_products and len(all_links) >= stop_after_products:
+            pages_done += 1
+            break
 
         pages_done += 1
         if pages_done >= max_pages:
@@ -551,14 +570,28 @@ def crawl(args) -> None:
             for idx, cat in enumerate(cats, start=1):
                 if int(args.page_limit) and idx > int(args.page_limit):
                     break
+
+                # Remaining budget for this whole run
+                remaining = int(args.max_products) - total if int(args.max_products) else None
+
                 leaf_seg = cat.strip("/").split("/")[-1]
                 category_leaf = leaf_seg.replace("-", " ").title()
                 category_path = ""  # filled on PDP
 
-                prods = collect_category_products(page, cat, req_delay, max_pages=120)
+                prods = collect_category_products(
+                    page,
+                    cat,
+                    req_delay,
+                    max_pages=int(args.cat_page_cap),
+                    stop_after_products=remaining if remaining else None,
+                )
                 if not prods:
                     print(f"[cat] {cat} → 0 items (check if category requires login or geo).")
                     continue
+
+                # If we still gathered more than we can process, trim here
+                if remaining and len(prods) > remaining:
+                    prods = prods[:remaining]
 
                 for url, listing_title in prods:
                     if int(args.max_products) and total >= int(args.max_products):
@@ -608,6 +641,7 @@ def build_argparser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Barbora.ee category→PDP crawler (no EAN).")
     p.add_argument("--cats-file", required=True, help="Text file with category URLs (one per line)")
     p.add_argument("--page-limit", default="0", help="Max categories to process (0=all)")
+    p.add_argument("--cat-page-cap", default="60", help="Max paginated pages per category")
     p.add_argument("--max-products", default="0", help="Cap total PDPs visited (0=unlimited)")
     p.add_argument("--headless", default=str(DEFAULT_HEADLESS), help="1/0")
     p.add_argument("--req-delay", default=str(DEFAULT_REQ_DELAY), help="Delay between steps in seconds")
