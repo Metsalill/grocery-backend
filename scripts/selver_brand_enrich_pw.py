@@ -71,13 +71,10 @@ def _normalize_maaramata(b: str) -> str:
         return ""
     low = t.lower()
     low_no_diac = low.replace('ä', 'a')
-    # direct matches
     if low in {"määramata", "määrmata"}:
         return "Määramata"
-    # crude but effective typo coverage without external libs
     if low_no_diac in {"maaramata", "maarmata", "maarama"}:
         return "Määramata"
-    # also catch cases missing one character around 'mata'
     if re.fullmatch(r"m[äa]ära?m?ata", low):
         return "Määramata"
     return t
@@ -98,7 +95,6 @@ def _is_bad_brand(b: str) -> bool:
     bl = b.strip().lower()
     if bl in PLACEHOLDER_BRANDS:
         return True
-    # also treat just punctuation/dashes as empty
     if re.fullmatch(r'[-–—\s]+', b):
         return True
     return False
@@ -151,20 +147,56 @@ def wait_for_pdp_ready(page):
         pass
 
 def _first_product_link_on_results(page) -> str:
-    """Return the first plausible product href on a search results page (or "")."""
+    """
+    Return the first plausible product href on a search results page (or "").
+    Be liberal: allow query strings and strip them off.
+    """
     try:
         hrefs = page.eval_on_selector_all(
-            "main a[href]",
+            "main a[href], .content a[href], a[href]",
             "els => els.map(e => e.getAttribute('href'))"
         ) or []
+
+        def _looks_like_product(h: str) -> bool:
+            if not h or h.startswith("#") or "javascript:" in h:
+                return False
+            # keep query/fragments but remove for pattern checks
+            h_path = h.split('#', 1)[0]
+            h_path = h_path.split('?', 1)[0]
+            # PDP numeric or a slug with hyphens in leaf
+            if "/p/" in h_path:
+                return True
+            leaf = h_path.rstrip("/").split("/")[-1]
+            if "-" in leaf and len(leaf) > 3:
+                return True
+            return False
+
         for href in hrefs:
-            if not href:
-                continue
-            if href.startswith("#") or "javascript:" in href or "?" in href:
-                continue
-            # prefer sluggy product URL
-            if re.search(r"/[-a-z0-9]+(?:-[a-z0-9]+)+/?$", href, re.I):
-                return href
+            if _looks_like_product(href):
+                # rebuild absolute
+                base = href.split('#', 1)[0].split('?', 1)[0]
+                if base.startswith("/"):
+                    return BASE_HOST + base
+                if base.startswith("http"):
+                    return base
+        # second pass: try explicit product-card style anchors if present
+        for sel in [
+            'a[href*="/p/"]',
+            '.ProductCard a[href]',
+            'a.ProductCard__link[href]',
+        ]:
+            try:
+                el = page.locator(sel).first
+                if el and el.count() > 0 and el.is_visible():
+                    href = el.get_attribute("href") or ""
+                    if href:
+                        base = href.split('#', 1)[0].split('?', 1)[0]
+                        if base.startswith("/"):
+                            return BASE_HOST + base
+                        if base.startswith("http"):
+                            return base
+            except Exception:
+                pass
     except Exception:
         pass
     return ""
@@ -217,10 +249,7 @@ def navigate_via_search(page, query: str) -> bool:
 
         href = _first_product_link_on_results(page)
         if href:
-            if href.startswith("/"):
-                page.goto(BASE_HOST + href, timeout=30000, wait_until="domcontentloaded")
-            else:
-                page.goto(href, timeout=30000, wait_until="domcontentloaded")
+            page.goto(href, timeout=30000, wait_until="domcontentloaded")
             return True
     except Exception:
         return False
@@ -255,7 +284,6 @@ def navigate_to_candidate(page, ext_id: str | None, ean: str | None) -> bool:
 def _accept_or_none(raw: str) -> str:
     """Clean, normalize 'Määramata' variants, and reject actual junk."""
     b = _canonicalize(raw)
-    # Allow 'Määramata' explicitly (it will pass _is_bad_brand anyway, but be explicit).
     if b.lower() in {"määramata"}:
         return "Määramata"
     if _is_bad_brand(b):
