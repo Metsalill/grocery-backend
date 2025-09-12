@@ -18,7 +18,7 @@ import re
 import sys
 import time
 from typing import Dict, List, Optional, Tuple
-from urllib.parse import urljoin, urlparse, parse_qs, urlencode, urlunparse
+from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit, parse_qsl, urlencode
 
 from bs4 import BeautifulSoup
 from playwright.sync_api import TimeoutError as PWTimeout
@@ -288,13 +288,10 @@ def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], categor
     }
 
 
-# -------------------- Category listing (new: robust numeric pagination) --------------------
+# -------------------- Category listing (robust link harvest + robust pagination) --------------------
 
 def harvest_product_links(page: Page) -> List[Tuple[str, str]]:
-    """
-    Pull PDP links from *all anchors* on the page and filter by pathname.
-    Works even if product cards are wrapped in unexpected markup.
-    """
+    """Pull PDP links from all anchors on the page and filter by pathname."""
     hrefs = page.eval_on_selector_all(
         "a",
         "els => els.map(e => ({href: e.href || e.getAttribute('href') || '', text: (e.textContent||'').trim()}))",
@@ -329,63 +326,121 @@ def go_to_category(page: Page, url: str, req_delay: float) -> None:
     page.wait_for_timeout(int(req_delay * 1000))
 
 
-def url_with_page(url: str, n: int) -> str:
-    """Return URL with ?page=n (adding or replacing the query param)."""
-    p = urlparse(url)
-    qs = parse_qs(p.query)
-    qs["page"] = [str(n)]
-    new_q = urlencode({k: v if isinstance(v, list) else [v] for k, v in qs.items()}, doseq=True)
-    return urlunparse(p._replace(query=new_q))
+def _set_query_param(u: str, key: str, value: str) -> str:
+    parts = urlsplit(u)
+    q = dict(parse_qsl(parts.query, keep_blank_values=True))
+    q[key] = value
+    return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(q), parts.fragment))
 
 
-def detect_max_page(page: Page) -> int:
-    """Look at all anchors for '?page=N' and return the highest N. Fallback 1."""
-    anchors = page.eval_on_selector_all(
-        "a[href*='?page=']",
-        "els => els.map(e => e.href || e.getAttribute('href') || '')",
-    )
-    max_n = 1
-    for href in anchors or []:
+def _current_page_from_url(u: str) -> int:
+    try:
+        q = dict(parse_qsl(urlsplit(u).query, keep_blank_values=True))
+        return int(q.get("page", "1"))
+    except Exception:
+        return 1
+
+
+def next_page_if_any(page: Page) -> bool:
+    """
+    Click 'next' if pagination exists. Returns True if navigation happened.
+    Handles both arrow '›' and '»', and falls back to constructing ?page=N URL.
+    """
+    # Scroll a bit to make pagination visible
+    try:
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        page.wait_for_timeout(200)
+    except Exception:
+        pass
+
+    selectors = [
+        "a[rel='next']",
+        "a:has-text('Järgmine')",        # Estonian
+        "a:has-text('Edasi')",
+        "a:has-text('Next')",
+        "a.pagination__link[aria-label*='Next']",
+        "li.pagination-next a",
+        "a[aria-label='›'], a:has-text('›')",   # single arrow
+        "a[aria-label='»'], a:has-text('»')",   # double arrow (observed on Barbora)
+        "button[aria-label='»'], button:has-text('»')",
+    ]
+
+    for sel in selectors:
+        loc = page.locator(sel)
         try:
-            n = int(re.search(r"[?&]page=(\d+)", href).group(1))
-            if n > max_n:
-                max_n = n
+            if loc.count() and loc.first.is_visible():
+                before = page.url
+                loc.first.click(timeout=2000)
+                page.wait_for_load_state("domcontentloaded", timeout=15000)
+                page.wait_for_timeout(700)
+                if page.url != before:
+                    return True
         except Exception:
             continue
-    return max_n
+
+    # Fallback: derive next page from URL (?page=N) and navigate programmatically
+    cur = _current_page_from_url(page.url)
+    # Look for any explicit numeric page links to guess an upper bound; if none, still try +1 once.
+    try:
+        nums = page.eval_on_selector_all(
+            "a, button",
+            "els => els.map(e => (e.textContent||'').trim()).filter(t => /^\\d+$/.test(t)).map(t => parseInt(t,10))",
+        )
+        max_num = max(nums) if nums else None
+    except Exception:
+        max_num = None
+
+    next_num = cur + 1
+    if max_num is not None and next_num > max_num:
+        return False
+
+    next_url = _set_query_param(page.url, "page", str(next_num))
+    if next_url == page.url:
+        return False
+    try:
+        page.goto(next_url, timeout=15000, wait_until="domcontentloaded")
+        page.wait_for_timeout(500)
+        return True
+    except Exception:
+        return False
 
 
-def collect_category_products(page: Page, cat_url: str, req_delay: float, max_pages: int = 200) -> List[Tuple[str, str]]:
+def collect_category_products(page: Page, cat_url: str, req_delay: float, max_pages: int = 60) -> List[Tuple[str, str]]:
     """
     Iterate through paginated listing. Returns [(pdp_url, listing_title), ...]
-    Uses numeric pagination via '?page=N' for robustness.
+    The site only shows a window of page numbers at once; we keep clicking the
+    'next' arrow (»/›) and fall back to building ?page=N when needed.
     """
     go_to_category(page, cat_url, req_delay)
 
-    site_max = detect_max_page(page)
-    total_pages = min(max_pages, site_max if site_max >= 1 else 1)
-
     all_links: List[Tuple[str, str]] = []
     seen_pages = set()
+    pages_done = 0
 
-    # Always start from page 1 explicitly to avoid "no ?page=" first page.
-    for pn in range(1, total_pages + 1):
-        page_url = url_with_page(cat_url, pn)
-        if page_url in seen_pages:
-            continue
-        seen_pages.add(page_url)
+    while True:
+        # stop if looping on the same page
+        if page.url in seen_pages:
+            break
+        seen_pages.add(page.url)
 
-        try:
-            page.goto(page_url, timeout=60000, wait_until="domcontentloaded")
-            ensure_ready(page)
-            page.wait_for_timeout(int(req_delay * 1000))
-        except Exception:
-            continue
-
+        # collect product links from current page
         links = harvest_product_links(page)
         all_links.extend(links)
 
-    # Final pass: unique
+        pages_done += 1
+        if pages_done >= max_pages:
+            break
+
+        # try to go to next page
+        moved = next_page_if_any(page)
+        if not moved:
+            break
+
+        # be polite
+        if req_delay:
+            time.sleep(min(req_delay, 1.0))
+
+    # unique at the very end
     seen = set()
     uniq: List[Tuple[str, str]] = []
     for u, t in all_links:
@@ -394,7 +449,7 @@ def collect_category_products(page: Page, cat_url: str, req_delay: float, max_pa
         seen.add(u)
         uniq.append((u, t))
 
-    print(f"[cat] {cat_url} → products found: {len(uniq)} across {len(seen_pages)} page(s)")
+    print(f"[cat] {cat_url} → products found: {len(uniq)} across {pages_done} page(s)")
     return uniq
 
 
@@ -449,7 +504,6 @@ def crawl(args) -> None:
     total = 0
     headless = bool(int(args.headless))
     req_delay = float(args.req_delay)
-    max_products = int(args.max_products)
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=headless)
@@ -458,7 +512,7 @@ def crawl(args) -> None:
 
         if only_urls:
             for url in only_urls:
-                if max_products and total >= max_products:
+                if int(args.max_products) and total >= int(args.max_products):
                     break
                 ext_id = get_ext_id(url)
                 if skip_ext and ext_id in skip_ext:
@@ -501,13 +555,13 @@ def crawl(args) -> None:
                 category_leaf = leaf_seg.replace("-", " ").title()
                 category_path = ""  # filled on PDP
 
-                prods = collect_category_products(page, cat, req_delay, max_pages=200)
+                prods = collect_category_products(page, cat, req_delay, max_pages=120)
                 if not prods:
                     print(f"[cat] {cat} → 0 items (check if category requires login or geo).")
                     continue
 
                 for url, listing_title in prods:
-                    if max_products and total >= max_products:
+                    if int(args.max_products) and total >= int(args.max_products):
                         break
                     ext_id = get_ext_id(url)
                     if skip_ext and ext_id in skip_ext:
