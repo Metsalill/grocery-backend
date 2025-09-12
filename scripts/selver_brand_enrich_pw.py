@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 """
 Selver brand enrichment (structured fields only).
-- Works with ext_id being: numeric id, slug path, absolute URL, or "/slug".
+- Reads rows from selver_candidates (ext_id, ean, name).
+- Tries ext_id URL first; if not a PDP, searches selver.ee by EAN, then by name.
 - Extracts brand from JSON-LD, the PDP attributes table (Käitleja/Tootja/Valmistaja/Kaubamärk/Brand),
-  and meta product:brand. No title/name guessing.
+  or meta product:brand. No title/name guessing.
 
 Env:
   DATABASE_URL     (required)
@@ -15,10 +16,10 @@ Env:
 """
 
 from __future__ import annotations
-import os, re, json, time, signal, sys
+import os, re, json, time, signal, sys, urllib.parse
 import psycopg2
 from contextlib import closing
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, Page
 
 BASE_HOST = "https://www.selver.ee"
 PDP_NUMERIC_PREFIX = BASE_HOST + "/p/"
@@ -51,7 +52,7 @@ def _clean(s: str | None) -> str:
 
 def _valid_brand(s: str) -> bool:
     """Heuristics to reject footer/garbage text."""
-    if not s: 
+    if not s:
         return False
     if len(s) > 80:
         return False
@@ -60,7 +61,7 @@ def _valid_brand(s: str) -> bool:
         return False
     return True
 
-def accept_overlays(page):
+def accept_overlays(page: Page):
     for sel in [
         'button#onetrust-accept-btn-handler',
         'button:has-text("Nõustun")',
@@ -74,7 +75,7 @@ def accept_overlays(page):
         except Exception:
             pass
 
-def wait_for_pdp_ready(page) -> bool:
+def wait_for_pdp_ready(page: Page) -> bool:
     """Return True if this looks like a product page and the PDP has rendered."""
     try:
         page.wait_for_selector(
@@ -88,7 +89,7 @@ def wait_for_pdp_ready(page) -> bool:
     # Some PDPs may miss the data-testid, so accept either signal
     return has_name or has_attrs
 
-def extract_brand(page) -> str:
+def extract_brand(page: Page) -> str:
     # 1) JSON-LD (often has brand/manufacturer)
     try:
         for el in page.locator('script[type="application/ld+json"]').all():
@@ -132,7 +133,6 @@ def extract_brand(page) -> str:
                 'dt:has-text("Brand") + dd',
             ]
             for sel in sel_pairs:
-                # Accept both table-based and dt/dd-based implementations within the attributes container
                 loc = page.locator(f'table.ProductAttributes__table {sel}, .ProductAttributes__table {sel}').first
                 if loc and loc.count() > 0:
                     txt = _clean(loc.text_content() or '')
@@ -155,6 +155,81 @@ def extract_brand(page) -> str:
 
     return ''
 
+def search_and_pick_pdp(page: Page, query: str) -> str:
+    """Open the search page and return a PDP href (absolute) if we can find one."""
+    if not query:
+        return ""
+    search_url = f"{BASE_HOST}/search?q={urllib.parse.quote_plus(query)}"
+    try:
+        page.goto(search_url, timeout=30000, wait_until="domcontentloaded")
+        accept_overlays(page)
+        # Give it a moment to render results
+        page.wait_for_timeout(800)
+
+        # Try to grab the first obvious product link.
+        # Prefer numeric PDP if present, otherwise any product-card link.
+        selectors = [
+            'a[href^="/p/"]',
+            '[data-testid="productCard"] a[href^="/"]',
+            'a.ProductCard__image[href^="/"]',
+            'a.ProductCard__title[href^="/"]',
+            'main a[href^="/"]:has(h3)',
+        ]
+        for sel in selectors:
+            links = page.locator(sel)
+            if links.count() > 0:
+                href = links.first.get_attribute("href") or ""
+                if href.startswith("/"):
+                    return BASE_HOST + href
+                if href.startswith("http"):
+                    return href
+    except Exception:
+        pass
+    return ""
+
+def resolve_pdp_url(page: Page, ext_id: str, ean: str, name: str) -> str:
+    """Try ext_id; if not PDP, search by EAN then by name; return an absolute PDP URL or ''."""
+    # 1) ext_id direct
+    url = build_url(ext_id)
+    if url:
+        try:
+            page.goto(url, timeout=30000, wait_until="domcontentloaded")
+            accept_overlays(page)
+            if wait_for_pdp_ready(page):
+                return url
+        except Exception:
+            pass
+
+    # 2) search by EAN
+    url = search_and_pick_pdp(page, (ean or "").strip())
+    if url:
+        try:
+            page.goto(url, timeout=30000, wait_until="domcontentloaded")
+            accept_overlays(page)
+            if wait_for_pdp_ready(page):
+                return url
+        except Exception:
+            pass
+
+    # 3) search by name (trimmed)
+    qname = (name or "").strip()
+    if qname:
+        # keep query modest to avoid over-specific sizes
+        qname = re.sub(r'\b(\d+(\s)?(ml|l|g|kg|tk))\b', '', qname, flags=re.I)
+        qname = re.sub(r'\s+', ' ', qname).strip()
+        if qname:
+            url = search_and_pick_pdp(page, qname[:80])
+            if url:
+                try:
+                    page.goto(url, timeout=30000, wait_until="domcontentloaded")
+                    accept_overlays(page)
+                    if wait_for_pdp_ready(page):
+                        return url
+                except Exception:
+                    pass
+
+    return ""
+
 def main():
     dsn = os.environ.get("DATABASE_URL")
     if not dsn:
@@ -169,7 +244,7 @@ def main():
 
     with closing(psycopg2.connect(dsn)) as conn, conn.cursor() as cur:
         cur.execute("""
-            SELECT ext_id::text, COALESCE(ean_norm, ean_raw) AS ean
+            SELECT ext_id::text, COALESCE(ean_norm, ean_raw) AS ean, COALESCE(name,'') AS name
             FROM selver_candidates
             WHERE (brand IS NULL OR brand = '')
               AND COALESCE(ean_norm, ean_raw) IS NOT NULL
@@ -184,61 +259,64 @@ def main():
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=headless)
-
-        # Create context and (optionally) block heavy third-party requests
         context = browser.new_context()
 
+        # Block heavy third-party noise
         block_domains = [
             "googletagmanager", "google-analytics", "doubleclick",
             "facebook", "fonts.googleapis.com", "use.typekit.net",
         ]
-
         def _route_blocker(route, request):
-            url = request.url  # Request is an object, not a function
+            url = request.url
             if any(d in url for d in block_domains):
                 route.abort()
             else:
                 route.continue_()
-
         context.route("**/*", _route_blocker)
 
         page = context.new_page()
 
         processed = 0
         found = 0
-        for ext_id, ean in rows:
+        for ext_id, ean, name in rows:
             if time.time() > deadline:
                 print("Timebox reached, stopping.")
                 break
 
-            url = build_url(str(ext_id))
-            if not url:
-                print(f"[MISS_BRAND] ext_id={ext_id} url=<empty>")
-                continue
-
-            try:
-                page.goto(url, timeout=30000, wait_until="domcontentloaded")
-                accept_overlays(page)
-                if not wait_for_pdp_ready(page):
-                    print(f"[SKIP_NOT_PDP] ext_id={ext_id} url={url}")
-                    time.sleep(req_delay)
-                    continue
-            except Exception as e:
-                print(f"[MISS_NAV] ext_id={ext_id} url={url} err={e}")
+            # Resolve a real PDP URL first
+            pdp_url = resolve_pdp_url(page, str(ext_id), str(ean or ''), name)
+            if not pdp_url:
+                print(f"[SKIP_NOT_PDP] ext_id={ext_id} url={build_url(str(ext_id))}")
+                time.sleep(req_delay)
                 continue
 
             b = extract_brand(page)
             processed += 1
             if not b:
-                print(f"[MISS_BRAND] ext_id={ext_id} url={url}")
+                print(f"[MISS_BRAND] ext_id={ext_id} url={pdp_url}")
                 time.sleep(req_delay)
                 continue
 
             with closing(psycopg2.connect(dsn)) as conn2, conn2.cursor() as cur2:
                 try:
+                    # Update selver_candidates for either the original ext_id or the resolved PDP path
                     cur2.execute(
-                        "UPDATE selver_candidates SET brand = %s WHERE ext_id = %s AND (brand IS NULL OR brand = '')",
-                        (b, ext_id)
+                        """
+                        UPDATE selver_candidates
+                           SET brand = %s
+                         WHERE (brand IS NULL OR brand = '')
+                           AND (
+                             ext_id::text = %s
+                             OR ext_id::text = %s
+                             OR ext_id::text = %s
+                           )
+                        """,
+                        (
+                            b,
+                            str(ext_id),
+                            urllib.parse.urlparse(pdp_url).path,  # '/slug' or '/p/123456'
+                            pdp_url,                              # absolute, in case candidates stored that
+                        )
                     )
                     if ean:
                         cur2.execute("""
