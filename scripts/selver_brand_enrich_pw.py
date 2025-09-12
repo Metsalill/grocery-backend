@@ -148,43 +148,69 @@ def try_open_first_search_result(page, max_retries: int = 3, sleep_s: float = 0.
         time.sleep(sleep_s)
     return False
 
-def navigate_to_candidate(page, ext_id: str) -> bool:
+def run_search(page, query: str) -> bool:
+    """Go to homepage, run a search with the given query, try to open first PDP."""
+    try:
+        page.goto(BASE_HOST, timeout=30000, wait_until="domcontentloaded")
+        accept_overlays(page)
+        # Be resilient: try a couple of ways to find the search input
+        search_box = page.locator('input[placeholder*="Otsi toodet"]').first
+        if not search_box or search_box.count() == 0 or not search_box.is_visible():
+            search_box = page.locator('header input[type="text"]').first
+        if search_box and search_box.count() > 0:
+            search_box.fill(query)
+            search_box.press("Enter")
+            page.wait_for_load_state("domcontentloaded")
+            if try_open_first_search_result(page):
+                return True
+    except Exception:
+        pass
+    return False
+
+def navigate_to_candidate(page, ext_id: str, ean: str | None) -> bool:
     """
-    Navigate to a PDP either directly or via search (EAN fallback or 404).
-    Returns True if we believe we're on a product page.
+    Navigate to a PDP either directly or via search.
+    Strategy:
+      1) Try the ext_id as URL/slug/PDP if it looks like one.
+      2) If that fails or 404s, and we have a valid EAN -> search by EAN.
+      3) Otherwise, if ext_id already looked like a search term -> search by ext_id; if that fails and EAN exists -> search by EAN.
     """
     mode, value = build_target(ext_id)
 
-    # direct URL first
+    # 1) Try direct URL first
     if mode == "url":
         try:
             page.goto(value, timeout=30000, wait_until="domcontentloaded")
             accept_overlays(page)
             # 404 fallback (text "Lehekülge ei leitud")
             if page.locator('text=Lehekülge ei leitud').first.is_visible():
-                mode, value = ("search", ext_id)
+                # Prefer EAN search if available
+                if ean and IS_EAN.fullmatch(str(ean)):
+                    if run_search(page, str(ean)):
+                        return True
+                # else try searching by ext_id as last resort
+                if run_search(page, ext_id):
+                    return True
             else:
                 return True
         except Exception:
-            mode, value = ("search", ext_id)
-
-    if mode == "search":
-        # go to home then use the search box
-        try:
-            page.goto(BASE_HOST, timeout=30000, wait_until="domcontentloaded")
-            accept_overlays(page)
-            # Be resilient: try a couple of ways to find the search input
-            search_box = page.locator('input[placeholder*="Otsi toodet"]').first
-            if not search_box or search_box.count() == 0 or not search_box.is_visible():
-                search_box = page.locator('header input[type="text"]').first
-            if search_box and search_box.count() > 0:
-                search_box.fill(value)
-                search_box.press("Enter")
-                page.wait_for_load_state("domcontentloaded")
-                if try_open_first_search_result(page):
+            # Navigation failed — try EAN search first
+            if ean and IS_EAN.fullmatch(str(ean)):
+                if run_search(page, str(ean)):
                     return True
-        except Exception:
-            return False
+            # then try ext_id search
+            if run_search(page, ext_id):
+                return True
+        return False
+
+    # 2) ext_id already asked for search: try it, then EAN as fallback
+    if mode == "search":
+        if run_search(page, value):
+            return True
+        if ean and IS_EAN.fullmatch(str(ean)):
+            if run_search(page, str(ean)):
+                return True
+        return False
 
     return False
 
@@ -374,7 +400,7 @@ def main():
                 print(f"[MISS_BRAND] product_id={product_id} nav failed (ext_id=<empty>, ean={ean})")
                 continue
 
-            ok = navigate_to_candidate(page, str(ext_id))
+            ok = navigate_to_candidate(page, str(ext_id), str(ean) if ean else None)
             if not ok:
                 print(f"[MISS_BRAND] product_id={product_id} nav failed (ext_id={ext_id}, ean={ean})")
                 time.sleep(req_delay)
