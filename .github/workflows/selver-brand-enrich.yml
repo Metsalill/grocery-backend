@@ -1,36 +1,103 @@
-name: "Selver – Brand Enrichment (PDP, structured only)"
+name: "Selver → Brand Enrichment (PDP, structured only)"
 
 on:
+  # Weekly (Sunday 03:29 UTC) + manual runs
+  schedule:
+    - cron: "29 3 * * 0"
   workflow_dispatch:
     inputs:
       max_items:
-        description: "How many rows to process (missing brand)"
+        description: "Rows to attempt this run (missing brand)"
+        required: false
         default: "600"
       headless:
-        description: "Headless Chromium (1/0)"
+        description: "Headless (1/0)"
+        required: false
         default: "1"
       req_delay:
-        description: "Delay between PDPs (sec)"
+        description: "Per-item delay seconds"
+        required: false
         default: "0.25"
+      timebox_minutes:
+        description: "Soft time limit for the enrichment (minutes)"
+        required: false
+        default: "30"
+
+concurrency:
+  group: selver-brand-enrich
+  cancel-in-progress: true
 
 jobs:
   brand:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 60
+
+    env:
+      # Use the public/external DB URL from GitHub secrets (Railway internal host won't resolve on GitHub runners)
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      MAX_ITEMS: ${{ github.event.inputs.max_items || '600' }}
+      HEADLESS: ${{ github.event.inputs.headless || '1' }}
+      REQ_DELAY: ${{ github.event.inputs.req_delay || '0.25' }}
+      TIMEBOX_MINUTES: ${{ github.event.inputs.timebox_minutes || '30' }}
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Install Playwright
         run: |
+          python -m pip install --upgrade pip
           pip install playwright psycopg2-binary
           python -m playwright install --with-deps chromium
-      - name: Run brand enrichment
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          MAX_ITEMS: ${{ github.event.inputs.max_items }}
-          HEADLESS: ${{ github.event.inputs.headless }}
-          REQ_DELAY: ${{ github.event.inputs.req_delay }}
-          TIMEBOX_SECONDS: "1800"
+
+      - name: Sanity check script
         run: |
-          python scripts/selver_brand_enrich_pw.py
+          test -f scripts/selver_brand_enrich_pw.py || { echo "Missing scripts/selver_brand_enrich_pw.py"; exit 1; }
+
+      - name: Show config
+        run: |
+          echo "MAX_ITEMS=$MAX_ITEMS"
+          echo "HEADLESS=$HEADLESS"
+          echo "REQ_DELAY=$REQ_DELAY"
+          echo "TIMEBOX_MINUTES=$TIMEBOX_MINUTES"
+
+      - name: Run Selver Brand Enrichment (timeboxed)
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          # Convert minutes→seconds for the script and soft-limit the whole step
+          export TIMEBOX_SECONDS=$(( ${TIMEBOX_MINUTES} * 60 ))
+          timeout --signal=SIGINT ${TIMEBOX_MINUTES}m \
+            python scripts/selver_brand_enrich_pw.py
+
+      - name: Post-run stats
+        run: |
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          echo "Missing Selver candidate brands overall:"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
+          SELECT COUNT(*) AS missing_brand
+          FROM selver_candidates
+          WHERE COALESCE(brand,'') = '';
+          "
+
+          echo "Products with brand set (any source):"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
+          SELECT COUNT(*) AS products_with_brand
+          FROM products
+          WHERE COALESCE(brand,'') <> '';
+          "
+
+          echo "Top 15 brands (from selver_candidates) now present:"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
+          SELECT brand, COUNT(*) AS cnt
+          FROM selver_candidates
+          WHERE COALESCE(brand,'') <> ''
+          GROUP BY brand
+          ORDER BY cnt DESC, brand
+          LIMIT 15;
+          "
