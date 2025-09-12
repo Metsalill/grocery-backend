@@ -167,13 +167,24 @@ def main():
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=headless)
+
+        # Create context and (optionally) block heavy third-party requests
         context = browser.new_context()
-        # speed up a bit by blocking heavy third-party requests
-        context.route("**/*", lambda route: (
-            route.abort() if any(d in route.request().url for d in
-                ["googletagmanager","google-analytics","doubleclick","facebook","fonts.googleapis.com","use.typekit.net"])
-            else route.continue_()
-        ))
+
+        block_domains = [
+            "googletagmanager", "google-analytics", "doubleclick",
+            "facebook", "fonts.googleapis.com", "use.typekit.net",
+        ]
+
+        def _route_blocker(route, request):
+            url = request.url  # Request is an object, not a function
+            if any(d in url for d in block_domains):
+                route.abort()
+            else:
+                route.continue_()
+
+        context.route("**/*", _route_blocker)
+
         page = context.new_page()
 
         processed = 0
