@@ -53,11 +53,44 @@ def text_of(el) -> str:
     return re.sub(r"\s+", " ", el.get_text(" ", strip=True)) if el else ""
 
 def get_ext_id(url: str) -> str:
+    # Stable ID derived from URL (no numeric id available on Barbora).
     m = re.search(r"/p/(\d+)", url) or re.search(r"-(\d+)$", url)
     if m:
         return m.group(1)
     slug = re.sub(r"[^a-zA-Z0-9]+", "-", url).strip("-")
     return slug[-120:]
+
+# -------------------- Cookie banner / helpers --------------------
+
+def accept_cookies(page: Page) -> None:
+    """Try hard to accept cookie banner so products render & clicks work."""
+    selectors = [
+        "[data-testid='cookie-banner-accept-all']",
+        "button#onetrust-accept-btn-handler",
+        "button:has-text('Nõustun')",
+        "button:has-text('Sain aru')",
+        "button:has-text('Accept')",
+        "button:has-text('OK')",
+    ]
+    for sel in selectors:
+        try:
+            btn = page.locator(sel)
+            if btn.count() and btn.first.is_visible():
+                btn.first.click(timeout=1500)
+                page.wait_for_timeout(500)
+                return
+        except Exception:
+            pass
+    # Some banners use links
+    try:
+        page.get_by_role("button", name=re.compile("Nõus|Accept|OK", re.I)).click(timeout=1000)
+    except Exception:
+        pass
+
+def ensure_ready(page: Page) -> None:
+    accept_cookies(page)
+
+# -------------------- PDP parsing --------------------
 
 def from_json_ld(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
     out = {"name": None, "brand": None, "manufacturer": None, "image": None, "price": None, "currency": None}
@@ -74,7 +107,6 @@ def from_json_ld(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
             types = t if isinstance(t, list) else [t]
             if not types or "Product" not in types:
                 continue
-            # Prefer JSON-LD name (reliable on Barbora)
             if it.get("name"):
                 out["name"] = it["name"]
             brand = it.get("brand")
@@ -102,25 +134,23 @@ def from_json_ld(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
 
 def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
     out = {"brand": None, "manufacturer": None, "size": None, "sku": None}
-    # 1) dl/dt/dd or table th/td
+    # Generic dl/table patterns
     for head in soup.select("dt, th"):
         k = norm(text_of(head))
         val_el = head.find_next_sibling(["dd", "td"])
         v = text_of(val_el).strip() if val_el else ""
         if not v:
             continue
-        kn = norm(k)
-        vn = v.strip()
-        if kn in SPEC_KEYS_BRAND and not out["brand"]:
-            out["brand"] = vn
-        elif kn in SPEC_KEYS_MFR and not out["manufacturer"]:
-            out["manufacturer"] = vn
-        elif kn in SPEC_KEYS_SIZE and not out["size"]:
-            out["size"] = vn
-        elif "sku" in kn and not out["sku"]:
-            out["sku"] = vn
+        if k in SPEC_KEYS_BRAND and not out["brand"]:
+            out["brand"] = v
+        elif k in SPEC_KEYS_MFR and not out["manufacturer"]:
+            out["manufacturer"] = v
+        elif k in SPEC_KEYS_SIZE and not out["size"]:
+            out["size"] = v
+        elif "sku" in k and not out["sku"]:
+            out["sku"] = v
 
-    # 2) Barbora "Muu info": label/value pairs
+    # Barbora "Muu info" blocks
     labels = soup.select(".e-attribute__label, .product-attribute__label")
     for lab in labels:
         k = norm(text_of(lab))
@@ -152,6 +182,25 @@ def parse_app_state_for_brand(soup: BeautifulSoup) -> Tuple[Optional[str], Optio
             return b, m
     return None, None
 
+def extract_product_title_from_dom(soup: BeautifulSoup) -> str:
+    sel = (
+        ".e-product__name, [data-testid=product-title], [data-testid=product-name], "
+        ".product__title, .product-title, .pdp__title, .product-view__title, "
+        "h1[itemprop=name]"
+    )
+    el = soup.select_one(sel)
+    return text_of(el)
+
+def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
+    cur = "EUR"
+    price_el = soup.select_one(
+        "[data-testid=product-price], .e-price__main, .product-price, .price"
+    )
+    if not price_el:
+        return None, cur
+    val = re.sub(r"[^\d,\.]", "", text_of(price_el)).replace(",", ".")
+    return (val if val else None), cur
+
 def prefer_valid_name(candidates: List[str], category_leaf: str) -> str:
     for cand in candidates:
         c = (cand or "").strip()
@@ -164,15 +213,25 @@ def prefer_valid_name(candidates: List[str], category_leaf: str) -> str:
         return c
     return candidates[0] if candidates else ""
 
-def extract_product_title_from_dom(soup: BeautifulSoup) -> str:
-    # Try several common PDP title selectors on Barbora
-    sel = (
-        ".e-product__name, [data-testid=product-title], [data-testid=product-name], "
-        ".product__title, .product-title, .pdp__title, .product-view__title, "
-        "h1[itemprop=name]"
-    )
-    el = soup.select_one(sel)
-    return text_of(el)
+def extract_breadcrumbs(soup: BeautifulSoup) -> Tuple[str, str]:
+    """Return (category_path, category_leaf) from breadcrumbs if found."""
+    path = []
+    # Try a few common breadcrumb containers
+    for bc in soup.select("nav[aria-label*=breadcrumb] a, .breadcrumb a, .breadcrumbs a"):
+        t = text_of(bc)
+        if not t:
+            continue
+        path.append(t)
+    if not path:
+        return "", ""
+    # De-dup consecutive repeats like 'Pealeht'
+    cleaned = []
+    for p in path:
+        if cleaned and norm(cleaned[-1]) == norm(p):
+            continue
+        cleaned.append(p)
+    leaf = cleaned[-1] if cleaned else ""
+    return " / ".join(cleaned), leaf
 
 def extract_size_from_name(name: str) -> Optional[str]:
     if not name:
@@ -180,69 +239,19 @@ def extract_size_from_name(name: str) -> Optional[str]:
     m = SIZE_RE.search(name)
     return m.group(0) if m else None
 
-def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
-    cur = "EUR"
-    price_el = soup.select_one(
-        "[data-testid=product-price], .e-price__main, .product-price, .price"
-    )
-    if not price_el:
-        return None, cur
-    val = re.sub(r"[^\d,\.]", "", text_of(price_el)).replace(",", ".")
-    return (val if val else None), cur
-
-def list_products_from_category(page: Page, cat_url: str, req_delay: float) -> List[Tuple[str, str]]:
-    """Return list of (pdp_url, listing_title)."""
-    page.goto(cat_url, timeout=60000, wait_until="domcontentloaded")
-    time.sleep(req_delay)
-
-    stagnant_rounds = 0
-    last_len = 0
-    for _ in range(80):
-        page.mouse.wheel(0, 24000)
-        time.sleep(0.35)
-        cur_len = len(page.content())
-        if cur_len == last_len:
-            stagnant_rounds += 1
-        else:
-            stagnant_rounds = 0
-        last_len = cur_len
-        if stagnant_rounds >= 3:
-            break
-
-    soup = BeautifulSoup(page.content(), "html.parser")
-    out: List[Tuple[str, str]] = []
-    for a in soup.select("a[href*='/toode/'], a[href*='/p/']"):
-        href = a.get("href")
-        if not href:
-            continue
-        url = urljoin(BASE, href)
-        parsed = urlparse(url)
-        if not parsed.scheme or not parsed.netloc.endswith("barbora.ee"):
-            continue
-        title = text_of(a)
-        out.append((url, title))
-    # Deduplicate while preserving order
-    seen = set()
-    uniq: List[Tuple[str, str]] = []
-    for u, t in out:
-        if u in seen:
-            continue
-        seen.add(u)
-        uniq.append((u, t))
-    return uniq
-
-def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], category_leaf: str, req_delay: float) -> Dict[str, Optional[str]]:
+def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], category_leaf_hint: str, req_delay: float) -> Dict[str, Optional[str]]:
     page.goto(url, timeout=60000, wait_until="domcontentloaded")
+    ensure_ready(page)
     # Wait briefly for either JSON-LD or a product title to render
     try:
         page.wait_for_selector("script[type='application/ld+json']", timeout=6000)
     except PWTimeout:
         pass
     try:
-        page.wait_for_selector(".e-product__name, [data-testid=product-title], [data-testid=product-name]", timeout=4000)
+        page.wait_for_selector(".e-product__name, [data-testid=product-title], [data-testid=product-name]", timeout=5000)
     except PWTimeout:
         pass
-    time.sleep(req_delay)
+    page.wait_for_timeout(int(req_delay * 1000))
 
     soup = BeautifulSoup(page.content(), "html.parser")
 
@@ -250,27 +259,38 @@ def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], categor
     spec = parse_spec_table(soup)
     b2, m2 = parse_app_state_for_brand(soup)
 
-    # Build name preference list: JSON-LD first, then strong PDP selectors, then listing title, then any h1.
+    # Name preference: JSON-LD > PDP title > listing title > any h1
     h1_any = text_of(soup.select_one("h1"))
     dom_title = extract_product_title_from_dom(soup)
     candidates = [
-        jl["name"] or "",
+        jl.get("name") or "",
         dom_title,
         listing_title or "",
-        h1_any,  # often the category like "Viskid" → filtered below
+        h1_any,
     ]
+    # If breadcrumb present, use it to filter "category-as-title" cases
+    cat_path, cat_leaf_bc = extract_breadcrumbs(soup)
+    category_leaf = cat_leaf_bc or category_leaf_hint
     name = prefer_valid_name(candidates, category_leaf)
 
-    price = jl["price"]
-    currency = jl["currency"] or "EUR"
+    price = jl.get("price")
+    currency = jl.get("currency") or "EUR"
     if not price:
         price, currency = parse_price_from_dom(soup)
 
     size_text = spec["size"] or extract_size_from_name(name)
-    image_url = jl["image"]
-    brand = jl["brand"] or spec["brand"] or b2
-    manufacturer = jl["manufacturer"] or spec["manufacturer"] or m2
+    image_url = jl.get("image")
+    brand = jl.get("brand") or spec["brand"] or b2
+    manufacturer = jl.get("manufacturer") or spec["manufacturer"] or m2
     sku_raw = spec["sku"]
+
+    # Final category info
+    if not cat_path:
+        # Best-effort from URL
+        parts = [p for p in urlparse(url).path.strip("/").split("/") if p]
+        cat_path = " / ".join(p.replace("-", " ").title() for p in parts[:-1]) if parts else ""
+        if not category_leaf:
+            category_leaf = (parts[-2] if len(parts) >= 2 else (parts[-1] if parts else "")).replace("-", " ").title()
 
     return {
         "name": name,
@@ -281,7 +301,102 @@ def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], categor
         "currency": currency or "EUR",
         "image_url": image_url,
         "sku_raw": sku_raw,
+        "category_path": cat_path,
+        "category_leaf": category_leaf,
     }
+
+# -------------------- Category listing --------------------
+
+def wait_for_products(page: Page) -> None:
+    try:
+        page.wait_for_selector("a[href*='/toode/'], a[href*='/p/'], [data-testid*='product']", timeout=15000)
+    except PWTimeout:
+        # Try accepting cookies once more and wait briefly
+        accept_cookies(page)
+        page.wait_for_timeout(1000)
+
+def click_load_more(page: Page) -> int:
+    """Click 'load more' buttons until exhausted. Returns how many clicks made."""
+    clicks = 0
+    candidates = [
+        "button:has-text('Laadi veel')",
+        "button:has-text('Lae rohkem')",
+        "button:has-text('Load more')",
+        "[data-testid='load-more']",
+    ]
+    while True:
+        btn = None
+        for sel in candidates:
+            loc = page.locator(sel)
+            try:
+                if loc.count() and loc.first.is_visible() and loc.first.is_enabled():
+                    btn = loc.first
+                    break
+            except Exception:
+                continue
+        if not btn:
+            break
+        try:
+            btn.click(timeout=2000)
+            page.wait_for_timeout(900)
+            clicks += 1
+        except Exception:
+            break
+    return clicks
+
+def infinite_scroll(page: Page, rounds: int = 50) -> None:
+    stagnant = 0
+    last_count = 0
+    for _ in range(rounds):
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        page.wait_for_timeout(800)
+        count = page.locator("a[href*='/toode/'], a[href*='/p/']").count()
+        if count <= last_count:
+            stagnant += 1
+        else:
+            stagnant = 0
+        last_count = count
+        if stagnant >= 3:
+            break
+
+def list_products_from_category(page: Page, cat_url: str, req_delay: float) -> List[Tuple[str, str]]:
+    """Return list of (pdp_url, listing_title)."""
+    page.goto(cat_url, timeout=60000, wait_until="domcontentloaded")
+    ensure_ready(page)
+    page.wait_for_timeout(int(req_delay * 1000))
+
+    wait_for_products(page)
+    clicked = click_load_more(page)
+    if clicked == 0:
+        infinite_scroll(page)
+
+    # After loading, parse the current DOM
+    soup = BeautifulSoup(page.content(), "html.parser")
+    out: List[Tuple[str, str]] = []
+    for a in soup.select("a[href*='/toode/'], a[href*='/p/']"):
+        href = (a.get("href") or "").strip()
+        if not href:
+            continue
+        url = urljoin(BASE, href)
+        parsed = urlparse(url)
+        if not parsed.scheme or not parsed.netloc.endswith("barbora.ee"):
+            continue
+        title = text_of(a)
+        out.append((url, title))
+
+    # Deduplicate while preserving order
+    seen = set()
+    uniq: List[Tuple[str, str]] = []
+    for u, t in out:
+        if u in seen:
+            continue
+        seen.add(u)
+        uniq.append((u, t))
+
+    print(f"[cat] {cat_url} → products found: {len(uniq)}")
+    return uniq
+
+# -------------------- CSV / Runner --------------------
 
 def read_lines(path: str) -> List[str]:
     with open(path, "r", encoding="utf-8") as f:
@@ -331,9 +446,9 @@ def crawl(args) -> None:
                     continue
                 # Heuristic category leaf from URL path
                 parts = [p for p in urlparse(url).path.strip("/").split("/") if p]
-                category_leaf = (parts[-2] if len(parts) >= 2 else (parts[-1] if parts else "")).replace("-", " ").title()
+                cat_leaf = (parts[-2] if len(parts) >= 2 else (parts[-1] if parts else "")).replace("-", " ").title()
                 try:
-                    data = extract_from_pdp(page, url, listing_title=None, category_leaf=category_leaf, req_delay=req_delay)
+                    data = extract_from_pdp(page, url, listing_title=None, category_leaf_hint=cat_leaf, req_delay=req_delay)
                 except Exception as e:
                     print(f"[warn] PDP parse failed for {ext_id}: {e}", file=sys.stderr)
                     continue
@@ -349,8 +464,8 @@ def crawl(args) -> None:
                     data.get("price") or "",
                     data.get("currency") or "EUR",
                     data.get("image_url") or "",
-                    "",  # category_path not built in URL mode
-                    category_leaf,
+                    data.get("category_path") or "",
+                    data.get("category_leaf") or cat_leaf,
                     url,
                 ]
                 out_rows.append(row)
@@ -363,10 +478,11 @@ def crawl(args) -> None:
                     break
                 leaf_seg = cat.strip("/").split("/")[-1]
                 category_leaf = leaf_seg.replace("-", " ").title()
-                category_path = ""  # not building full breadcrumb for now
+                category_path = ""  # filled on PDP
 
                 prods = list_products_from_category(page, cat, req_delay)
                 if not prods:
+                    print(f"[cat] {cat} → 0 items (check if category requires login or geo).")
                     continue
 
                 for url, listing_title in prods:
@@ -383,8 +499,8 @@ def crawl(args) -> None:
                         print(f"[warn] PDP parse failed for {ext_id}: {e}", file=sys.stderr)
                         continue
 
-                    # If name still equals category leaf (rare now), skip to avoid garbage
-                    if norm(data["name"]) in BAD_NAMES or norm(data["name"]) == norm(category_leaf):
+                    # Guard against garbage titles
+                    if norm(data["name"]) in BAD_NAMES or norm(data["name"]) == norm(data.get("category_leaf") or category_leaf):
                         continue
 
                     row = [
@@ -398,8 +514,8 @@ def crawl(args) -> None:
                         data.get("price") or "",
                         data.get("currency") or "EUR",
                         data.get("image_url") or "",
-                        category_path,
-                        category_leaf,
+                        data.get("category_path") or category_path,
+                        data.get("category_leaf") or category_leaf,
                         url,
                     ]
                     out_rows.append(row)
@@ -408,6 +524,7 @@ def crawl(args) -> None:
                         time.sleep(req_delay)
 
         write_csv(out_rows, args.output_csv)
+        print(f"[done] wrote {len(out_rows)} rows to {args.output_csv}")
 
 def build_argparser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Barbora.ee category→PDP crawler (no EAN).")
