@@ -38,13 +38,16 @@ SPEC_KEYS_MFR = {"tootja", "valmistaja", "manufacturer"}
 SPEC_KEYS_SIZE = {"kogus", "netokogus", "maht", "neto"}
 BAD_NAMES = {"pealeht"}  # "Home" in Estonian
 
+
 def norm(s: Optional[str]) -> str:
     if not s:
         return ""
     return re.sub(r"\s+", " ", s).strip().lower()
 
+
 def text_of(el) -> str:
     return re.sub(r"\s+", " ", el.get_text(" ", strip=True)) if el else ""
+
 
 def get_ext_id(url: str) -> str:
     m = re.search(r"/p/(\d+)", url) or re.search(r"-(\d+)$", url)
@@ -52,6 +55,7 @@ def get_ext_id(url: str) -> str:
         return m.group(1)
     slug = re.sub(r"[^a-zA-Z0-9]+", "-", url).strip("-")
     return slug[-120:]
+
 
 # -------------------- Cookie banner / helpers --------------------
 
@@ -77,8 +81,10 @@ def accept_cookies(page: Page) -> None:
     except Exception:
         pass
 
+
 def ensure_ready(page: Page) -> None:
     accept_cookies(page)
+
 
 # -------------------- PDP parsing --------------------
 
@@ -97,21 +103,31 @@ def from_json_ld(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
             types = t if isinstance(t, list) else [t]
             if not types or "Product" not in types:
                 continue
-            if it.get("name"): out["name"] = it["name"]
+            if it.get("name"):
+                out["name"] = it["name"]
             brand = it.get("brand")
-            if isinstance(brand, dict): brand = brand.get("name")
-            if brand: out["brand"] = brand
+            if isinstance(brand, dict):
+                brand = brand.get("name")
+            if brand:
+                out["brand"] = brand
             manufacturer = it.get("manufacturer")
-            if isinstance(manufacturer, dict): manufacturer = manufacturer.get("name")
-            if manufacturer: out["manufacturer"] = manufacturer
+            if isinstance(manufacturer, dict):
+                manufacturer = manufacturer.get("name")
+            if manufacturer:
+                out["manufacturer"] = manufacturer
             img = it.get("image")
-            if isinstance(img, list): img = img[0]
-            if img: out["image"] = img
+            if isinstance(img, list):
+                img = img[0]
+            if img:
+                out["image"] = img
             offers = it.get("offers") or {}
             if isinstance(offers, dict):
-                if offers.get("price") is not None: out["price"] = str(offers.get("price"))
-                if offers.get("priceCurrency"): out["currency"] = offers.get("priceCurrency")
+                if offers.get("price") is not None:
+                    out["price"] = str(offers.get("price"))
+                if offers.get("priceCurrency"):
+                    out["currency"] = offers.get("priceCurrency")
     return out
+
 
 def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
     out = {"brand": None, "manufacturer": None, "size": None, "sku": None}
@@ -119,24 +135,35 @@ def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
         k = norm(text_of(head))
         val_el = head.find_next_sibling(["dd", "td"])
         v = text_of(val_el).strip() if val_el else ""
-        if not v: continue
-        if k in SPEC_KEYS_BRAND and not out["brand"]: out["brand"] = v
-        elif k in SPEC_KEYS_MFR and not out["manufacturer"]: out["manufacturer"] = v
-        elif k in SPEC_KEYS_SIZE and not out["size"]: out["size"] = v
-        elif "sku" in k and not out["sku"]: out["sku"] = v
+        if not v:
+            continue
+        if k in SPEC_KEYS_BRAND and not out["brand"]:
+            out["brand"] = v
+        elif k in SPEC_KEYS_MFR and not out["manufacturer"]:
+            out["manufacturer"] = v
+        elif k in SPEC_KEYS_SIZE and not out["size"]:
+            out["size"] = v
+        elif "sku" in k and not out["sku"]:
+            out["sku"] = v
 
     labels = soup.select(".e-attribute__label, .product-attribute__label")
     for lab in labels:
         k = norm(text_of(lab))
         val_el = lab.find_next_sibling(class_="e-attribute__value") or lab.find_next_sibling(class_="product-attribute__value")
         v = text_of(val_el)
-        if not v: continue
-        if k in SPEC_KEYS_BRAND and not out["brand"]: out["brand"] = v
-        elif k in SPEC_KEYS_MFR and not out["manufacturer"]: out["manufacturer"] = v
-        elif k in SPEC_KEYS_SIZE and not out["size"]: out["size"] = v
-        elif "sku" in k and not out["sku"]: out["sku"] = v
+        if not v:
+            continue
+        if k in SPEC_KEYS_BRAND and not out["brand"]:
+            out["brand"] = v
+        elif k in SPEC_KEYS_MFR and not out["manufacturer"]:
+            out["manufacturer"] = v
+        elif k in SPEC_KEYS_SIZE and not out["size"]:
+            out["size"] = v
+        elif "sku" in k and not out["sku"]:
+            out["sku"] = v
 
     return out
+
 
 def parse_app_state_for_brand(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
     for s in soup.find_all("script"):
@@ -148,6 +175,7 @@ def parse_app_state_for_brand(soup: BeautifulSoup) -> Tuple[Optional[str], Optio
         return (mb.group(1).strip() if mb else None, mm.group(1).strip() if mm else None)
     return None, None
 
+
 def extract_product_title_from_dom(soup: BeautifulSoup) -> str:
     sel = (
         ".e-product__name, [data-testid=product-title], [data-testid=product-name], "
@@ -156,47 +184,64 @@ def extract_product_title_from_dom(soup: BeautifulSoup) -> str:
     el = soup.select_one(sel)
     return text_of(el)
 
+
 def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
     cur = "EUR"
     price_el = soup.select_one("[data-testid=product-price], .e-price__main, .product-price, .price")
-    if not price_el: return None, cur
+    if not price_el:
+        return None, cur
     val = re.sub(r"[^\d,\.]", "", text_of(price_el)).replace(",", ".")
     return (val if val else None), cur
+
 
 def prefer_valid_name(candidates: List[str], category_leaf: str) -> str:
     for cand in candidates:
         c = (cand or "").strip()
-        if not c: continue
-        if norm(c) in BAD_NAMES: continue
-        if norm(c) == norm(category_leaf): continue
+        if not c:
+            continue
+        if norm(c) in BAD_NAMES:
+            continue
+        if norm(c) == norm(category_leaf):
+            continue
         return c
     return candidates[0] if candidates else ""
+
 
 def extract_breadcrumbs(soup: BeautifulSoup) -> Tuple[str, str]:
     path = []
     for bc in soup.select("nav[aria-label*=breadcrumb] a, .breadcrumb a, .breadcrumbs a"):
         t = text_of(bc)
-        if t: path.append(t)
-    if not path: return "", ""
+        if t:
+            path.append(t)
+    if not path:
+        return "", ""
     cleaned = []
     for p in path:
-        if cleaned and norm(cleaned[-1]) == norm(p): continue
+        if cleaned and norm(cleaned[-1]) == norm(p):
+            continue
         cleaned.append(p)
     leaf = cleaned[-1] if cleaned else ""
     return " / ".join(cleaned), leaf
 
+
 def extract_size_from_name(name: str) -> Optional[str]:
-    if not name: return None
+    if not name:
+        return None
     m = SIZE_RE.search(name)
     return m.group(0) if m else None
+
 
 def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], category_leaf_hint: str, req_delay: float) -> Dict[str, Optional[str]]:
     page.goto(url, timeout=60000, wait_until="domcontentloaded")
     ensure_ready(page)
-    try: page.wait_for_selector("script[type='application/ld+json']", timeout=6000)
-    except PWTimeout: pass
-    try: page.wait_for_selector(".e-product__name, [data-testid=product-title], [data-testid=product-name]", timeout=5000)
-    except PWTimeout: pass
+    try:
+        page.wait_for_selector("script[type='application/ld+json']", timeout=6000)
+    except PWTimeout:
+        pass
+    try:
+        page.wait_for_selector(".e-product__name, [data-testid=product-title], [data-testid=product-name]", timeout=5000)
+    except PWTimeout:
+        pass
     page.wait_for_timeout(int(req_delay * 1000))
 
     soup = BeautifulSoup(page.content(), "html.parser")
@@ -230,12 +275,20 @@ def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], categor
             category_leaf = (parts[-2] if len(parts) >= 2 else (parts[-1] if parts else "")).replace("-", " ").title()
 
     return {
-        "name": name, "size_text": size_text, "brand": brand, "manufacturer": manufacturer,
-        "price": price, "currency": currency or "EUR", "image_url": image_url, "sku_raw": sku_raw,
-        "category_path": cat_path, "category_leaf": category_leaf,
+        "name": name,
+        "size_text": size_text,
+        "brand": brand,
+        "manufacturer": manufacturer,
+        "price": price,
+        "currency": currency or "EUR",
+        "image_url": image_url,
+        "sku_raw": sku_raw,
+        "category_path": cat_path,
+        "category_leaf": category_leaf,
     }
 
-# -------------------- Category listing (new: pagination + robust link harvest) --------------------
+
+# -------------------- Category listing (robust pagination + link harvest) --------------------
 
 def harvest_product_links(page: Page) -> List[Tuple[str, str]]:
     """
@@ -244,7 +297,7 @@ def harvest_product_links(page: Page) -> List[Tuple[str, str]]:
     """
     hrefs = page.eval_on_selector_all(
         "a",
-        "els => els.map(e => ({href: e.href || e.getAttribute('href') || '', text: (e.textContent||'').trim()}))"
+        "els => els.map(e => ({href: e.href || e.getAttribute('href') || '', text: (e.textContent||'').trim()}))",
     )
     out = []
     for item in hrefs:
@@ -259,9 +312,12 @@ def harvest_product_links(page: Page) -> List[Tuple[str, str]]:
     seen = set()
     uniq = []
     for u, t in out:
-        if u in seen: continue
-        seen.add(u); uniq.append((u, t))
+        if u in seen:
+            continue
+        seen.add(u)
+        uniq.append((u, t))
     return uniq
+
 
 def go_to_category(page: Page, url: str, req_delay: float) -> None:
     page.goto(url, timeout=60000, wait_until="domcontentloaded")
@@ -272,64 +328,94 @@ def go_to_category(page: Page, url: str, req_delay: float) -> None:
         pass
     page.wait_for_timeout(int(req_delay * 1000))
 
-def next_page_if_any(page: Page) -> bool:
-    """
-    Click 'next' if pagination exists. Returns True if navigation happened.
-    """
-    selectors = [
-        "a[rel='next']",
-        "a:has-text('Järgmine')",  # Estonian
-        "a:has-text('Edasi')",
-        "a:has-text('Next')",
-        "a.pagination__link[aria-label*='Next']",
-        "li.pagination-next a",
-        "a[aria-label='›'], a:has-text('›')",
-    ]
-    for sel in selectors:
-        loc = page.locator(sel)
-        try:
-            if loc.count() and loc.first.is_visible():
-                before = page.url
-                loc.first.click(timeout=2000)
-                page.wait_for_load_state("domcontentloaded", timeout=15000)
-                page.wait_for_timeout(700)
-                return page.url != before
-        except Exception:
-            continue
-    return False
 
-def collect_category_products(page: Page, cat_url: str, req_delay: float, max_pages: int = 50) -> List[Tuple[str, str]]:
+def _page_num(u: str) -> int:
+    m = re.search(r"[?&]page=(\d+)", u)
+    if m:
+        return int(m.group(1))
+    m = re.search(r"/page/(\d+)", u)
+    if m:
+        return int(m.group(1))
+    return 1
+
+
+def enumerate_category_pages(pw_page: Page, cat_url: str, page_limit: Optional[int]) -> List[str]:
+    """
+    Discover pagination by scanning anchors for ?page= or /page/ links.
+    If none found, try to infer from numeric labels and synthesize ?page=n.
+    Always includes cat_url as page 1. Returns ordered list capped by page_limit.
+    """
+    base = cat_url.split("?")[0]
+    seen: Dict[str, int] = {}
+
+    # land on page 1
+    pw_page.goto(cat_url, timeout=45000, wait_until="domcontentloaded")
+    ensure_ready(pw_page)
+
+    # collect anchors with numeric paging
+    anchors = pw_page.eval_on_selector_all(
+        "a",
+        "els => els.map(e => ({href: e.href || e.getAttribute('href') || '', "
+        "text: (e.textContent||'').trim()}))",
+    )
+    for a in anchors:
+        href = (a.get("href") or "").strip()
+        text = (a.get("text") or "").strip()
+        if href:
+            full = urljoin(cat_url, href)
+            if urlparse(full).path.startswith(urlparse(base).path) and (
+                "?page=" in full or "/page/" in full
+            ):
+                seen[full] = _page_num(full)
+        # Some sites render page numbers as anchors with JS-only handlers
+        if not href and text.isdigit():
+            n = int(text)
+            if n > 1:
+                seen[f"{base}?page={n}"] = n
+
+    # always include page 1
+    seen[cat_url] = 1
+
+    ordered = [u for u, _n in sorted(seen.items(), key=lambda kv: kv[1])]
+    if page_limit and page_limit > 0:
+        ordered = ordered[:page_limit]
+    return ordered
+
+
+def collect_category_products(page: Page, cat_url: str, req_delay: float, page_limit: int = 0) -> List[Tuple[str, str]]:
     """
     Iterate through paginated listing. Returns [(pdp_url, listing_title), ...]
+    page_limit = maximum number of pages to visit in this category (0 = all found).
     """
-    go_to_category(page, cat_url, req_delay)
+    page_urls = enumerate_category_pages(page, cat_url, page_limit if page_limit > 0 else None)
     all_links: List[Tuple[str, str]] = []
-    seen_pages = set()
-    pages_done = 0
 
-    while True:
-        if page.url in seen_pages:
-            break
-        seen_pages.add(page.url)
-
+    pages_crawled = 0
+    for u in page_urls:
+        page.goto(u, timeout=60000, wait_until="domcontentloaded")
+        ensure_ready(page)
+        # small scroll helps lazy grids
+        try:
+            page.mouse.wheel(0, 2500)
+        except Exception:
+            pass
+        page.wait_for_timeout(int(req_delay * 1000))
         links = harvest_product_links(page)
         all_links.extend(links)
-
-        pages_done += 1
-        if pages_done >= max_pages:
-            break
-        if not next_page_if_any(page):
-            break
+        pages_crawled += 1
 
     # Final pass: unique
     seen = set()
     uniq: List[Tuple[str, str]] = []
     for u, t in all_links:
-        if u in seen: continue
-        seen.add(u); uniq.append((u, t))
+        if u in seen:
+            continue
+        seen.add(u)
+        uniq.append((u, t))
 
-    print(f"[cat] {cat_url} → products found: {len(uniq)} across {pages_done} page(s)")
+    print(f"[cat] {cat_url} → products found: {len(uniq)} across {pages_crawled} page(s)")
     return uniq
+
 
 # -------------------- CSV / Runner --------------------
 
@@ -337,17 +423,32 @@ def read_lines(path: str) -> List[str]:
     with open(path, "r", encoding="utf-8") as f:
         return [ln.strip() for ln in f if ln.strip()]
 
+
 def ensure_dir(path: str) -> None:
     d = os.path.dirname(path)
     if d and not os.path.exists(d):
         os.makedirs(d, exist_ok=True)
 
+
 def write_csv(rows: List[List[str]], out_path: str) -> None:
     ensure_dir(out_path)
     header = [
-        "store_chain","store_name","store_channel","ext_id","ean_raw","sku_raw",
-        "name","size_text","brand","manufacturer","price","currency",
-        "image_url","category_path","category_leaf","source_url"
+        "store_chain",
+        "store_name",
+        "store_channel",
+        "ext_id",
+        "ean_raw",
+        "sku_raw",
+        "name",
+        "size_text",
+        "brand",
+        "manufacturer",
+        "price",
+        "currency",
+        "image_url",
+        "category_path",
+        "category_leaf",
+        "source_url",
     ]
     newfile = not os.path.exists(out_path)
     with open(out_path, "a", encoding="utf-8", newline="") as f:
@@ -355,6 +456,7 @@ def write_csv(rows: List[List[str]], out_path: str) -> None:
         if newfile:
             w.writerow(header)
         w.writerows(rows)
+
 
 def crawl(args) -> None:
     cats = read_lines(args.cats_file)
@@ -366,6 +468,7 @@ def crawl(args) -> None:
     total = 0
     headless = bool(int(args.headless))
     req_delay = float(args.req_delay)
+    pages_per_cat = int(args.page_limit) if str(args.page_limit).strip() else 0  # 0 = all found
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=headless)
@@ -377,7 +480,8 @@ def crawl(args) -> None:
                 if int(args.max_products) and total >= int(args.max_products):
                     break
                 ext_id = get_ext_id(url)
-                if skip_ext and ext_id in skip_ext: continue
+                if skip_ext and ext_id in skip_ext:
+                    continue
                 parts = [p for p in urlparse(url).path.strip("/").split("/") if p]
                 cat_leaf = (parts[-2] if len(parts) >= 2 else (parts[-1] if parts else "")).replace("-", " ").title()
                 try:
@@ -387,7 +491,10 @@ def crawl(args) -> None:
                     continue
 
                 row = [
-                    STORE_CHAIN, STORE_NAME, STORE_CHANNEL, ext_id,
+                    STORE_CHAIN,
+                    STORE_NAME,
+                    STORE_CHANNEL,
+                    ext_id,
                     "",  # ean_raw intentionally blank
                     data.get("sku_raw") or "",
                     data.get("name") or "",
@@ -403,16 +510,16 @@ def crawl(args) -> None:
                 ]
                 out_rows.append(row)
                 total += 1
-                if req_delay: time.sleep(req_delay)
+                if req_delay:
+                    time.sleep(req_delay)
         else:
-            for idx, cat in enumerate(cats, start=1):
-                if int(args.page_limit) and idx > int(args.page_limit):
-                    break
+            for cat in cats:
+                # category_leaf used as a hint when PDP lacks breadcrumbs
                 leaf_seg = cat.strip("/").split("/")[-1]
                 category_leaf = leaf_seg.replace("-", " ").title()
-                category_path = ""  # filled on PDP
+                category_path = ""  # will fill on PDP if available
 
-                prods = collect_category_products(page, cat, req_delay, max_pages=60)
+                prods = collect_category_products(page, cat, req_delay, page_limit=pages_per_cat)
                 if not prods:
                     print(f"[cat] {cat} → 0 items (check if category requires login or geo).")
                     continue
@@ -421,8 +528,10 @@ def crawl(args) -> None:
                     if int(args.max_products) and total >= int(args.max_products):
                         break
                     ext_id = get_ext_id(url)
-                    if skip_ext and ext_id in skip_ext: continue
-                    if only_ext and ext_id not in only_ext: continue
+                    if skip_ext and ext_id in skip_ext:
+                        continue
+                    if only_ext and ext_id not in only_ext:
+                        continue
                     try:
                         data = extract_from_pdp(page, url, listing_title, category_leaf, req_delay)
                     except Exception as e:
@@ -433,7 +542,10 @@ def crawl(args) -> None:
                         continue
 
                     row = [
-                        STORE_CHAIN, STORE_NAME, STORE_CHANNEL, ext_id,
+                        STORE_CHAIN,
+                        STORE_NAME,
+                        STORE_CHANNEL,
+                        ext_id,
                         "",  # ean_raw intentionally blank
                         data.get("sku_raw") or "",
                         data.get("name") or "",
@@ -449,15 +561,17 @@ def crawl(args) -> None:
                     ]
                     out_rows.append(row)
                     total += 1
-                    if req_delay: time.sleep(req_delay)
+                    if req_delay:
+                        time.sleep(req_delay)
 
         write_csv(out_rows, args.output_csv)
         print(f"[done] wrote {len(out_rows)} rows to {args.output_csv}")
 
+
 def build_argparser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Barbora.ee category→PDP crawler (no EAN).")
     p.add_argument("--cats-file", required=True, help="Text file with category URLs (one per line)")
-    p.add_argument("--page-limit", default="0", help="Max categories to process (0=all)")
+    p.add_argument("--page-limit", default="0", help="Max pages per category (0=all)")
     p.add_argument("--max-products", default="0", help="Cap total PDPs visited (0=unlimited)")
     p.add_argument("--headless", default=str(DEFAULT_HEADLESS), help="1/0")
     p.add_argument("--req-delay", default=str(DEFAULT_REQ_DELAY), help="Delay between steps in seconds")
@@ -466,6 +580,7 @@ def build_argparser() -> argparse.ArgumentParser:
     p.add_argument("--only-ext-file", default="", help="Optional file with ext_ids to include exclusively")
     p.add_argument("--only-url-file", default="", help="Optional file with PDP URLs to visit exclusively")
     return p
+
 
 if __name__ == "__main__":
     parser = build_argparser()
