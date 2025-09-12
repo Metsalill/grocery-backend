@@ -96,7 +96,7 @@ jobs:
           rm -rf data
           mkdir -p data
 
-      - name: Auto-discover categories (unless provided via input)
+      - name: Auto-discover categories (unless provided via input) + validate
         env:
           INPUT_CATS: ${{ github.event.inputs.categories_multiline }}
           EXCLUDES: ${{ env.EXCLUDE_SECTIONS }}
@@ -116,7 +116,7 @@ jobs:
           else
             # 3) Try autodiscover from homepage
             {
-              echo 'import os'
+              echo 'import os, re'
               echo 'from urllib.parse import urljoin, urlparse'
               echo 'from playwright.sync_api import sync_playwright'
               echo 'BASE = "https://barbora.ee"'
@@ -128,7 +128,6 @@ jobs:
               echo '    p = urlparse(url)'
               echo '    if not (p.scheme and p.netloc and p.netloc.endswith("barbora.ee")): return False'
               echo '    segs = [s for s in p.path.split("/") if s]'
-              echo '    # allow 1..4 segments; avoid obvious non-catalog roots'
               echo '    if any(s in ("retseptid","info","blogi","kampaania") for s in segs): return False'
               echo '    return 1 <= len(segs) <= 4'
               echo 'def allowed(url):'
@@ -137,9 +136,15 @@ jobs:
               echo '    return is_category(url)'
               echo 'with sync_playwright() as pw:'
               echo '    b = pw.chromium.launch(headless=True)'
-              echo '    ctx = b.new_context()'
+              echo '    ctx = b.new_context(locale="et-EE")'
               echo '    p = ctx.new_page()'
               echo '    p.goto(BASE, timeout=45000, wait_until="domcontentloaded")'
+              echo '    # best-effort cookie accept'
+              echo '    for sel in ["#onetrust-accept-btn-handler","button:has-text(\\"Nõustun\\")","button:has-text(\\"Accept\\")"]:' 
+              echo '        try:'
+              echo '            btn = p.locator(sel)'
+              echo '            if btn.count() and btn.first.is_visible(): btn.first.click(timeout=1000)'
+              echo '        except Exception: pass'
               echo '    for a in p.locator("a").all():'
               echo '        href = (a.get_attribute("href") or "").strip()'
               echo '        if not href: continue'
@@ -147,7 +152,7 @@ jobs:
               echo '        if allowed(u): discovered.add(u)'
               echo '    os.makedirs("data", exist_ok=True)'
               echo '    with open("data/barbora_categories.txt","w",encoding="utf-8") as f:'
-              echo '        for u in sorted(discovered): f.write(u + "\n")'
+              echo '        for u in sorted(discovered): f.write(u + "\\n")'
               echo '    print(f"[discover] wrote {len(discovered)} -> data/barbora_categories.txt")'
               echo '    ctx.close(); b.close()'
             } > /tmp/discover_barbora.py
@@ -157,10 +162,10 @@ jobs:
             if [ ! -s data/barbora_categories.txt ] || [ "$(wc -l < data/barbora_categories.txt)" -lt 10 ]; then
               printf '%s\n' \
                 'https://barbora.ee/koogiviljad-puuviljad' \
-                'https://barbora.ee/piimatooted-munad-void' \
+                'https://barbora.ee/piimatooted-ja-munad' \
                 'https://barbora.ee/juustud' \
-                'https://barbora.ee/leib-sai-kondiitritooted' \
-                'https://barbora.ee/valmistoidud' \
+                'https://barbora.ee/leivad-saiad-kondiitritooted' \
+                'https://barbora.ee/liha-kala-valmistoit' \
                 'https://barbora.ee/kuivained-ja-hoidised' \
                 'https://barbora.ee/maitseained-ja-kastmed' \
                 'https://barbora.ee/suupisted-maiustused' \
@@ -170,6 +175,35 @@ jobs:
               echo "Autodiscover small → wrote curated FOOD roots to data/barbora_categories.txt"
             fi
           fi
+
+          # Fix up any old slugs if present (compat)
+          sed -i 's#https://barbora.ee/piimatooted-munad-void#https://barbora.ee/piimatooted-ja-munad#g' data/barbora_categories.txt
+          sed -i 's#https://barbora.ee/leib-sai-kondiitritooted#https://barbora.ee/leivad-saiad-kondiitritooted#g' data/barbora_categories.txt
+
+          # Validate category URLs with Playwright to drop 404 pages
+          {
+            echo 'from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout'
+            echo 'import sys, pathlib'
+            echo 'infile = pathlib.Path("data/barbora_categories.txt")'
+            echo 'cats = [l.strip() for l in infile.read_text("utf-8").splitlines() if l.strip()]'
+            echo 'valid = []'
+            echo 'with sync_playwright() as pw:'
+            echo '    b = pw.chromium.launch(headless=True)'
+            echo '    p = b.new_page()'
+            echo '    for u in cats:'
+            echo '        try:'
+            echo '            r = p.goto(u, timeout=30000, wait_until="domcontentloaded")'
+            echo '            txt = (p.content() or "")'
+            echo '            code = r.status if r else 200'
+            echo '            bad = (code == 404) or ("Palume vabandust" in txt and "404" in txt)'
+            echo '            if not bad: valid.append(u)'
+            echo '        except PWTimeout:'
+            echo '            pass'
+            echo '    b.close()'
+            echo 'open("data/barbora_categories.txt","w",encoding="utf-8").write("\\n".join(dict.fromkeys(valid)) + ("\\n" if valid else ""))'
+            echo 'print(f"Validated categories kept: {len(valid)}")'
+          } > /tmp/validate_cats.py
+          python /tmp/validate_cats.py || true
 
           echo "TOTAL categories: $(wc -l < data/barbora_categories.txt || echo 0)"
           echo "--- preview ---"
@@ -315,7 +349,6 @@ jobs:
                 --headless "$HEADLESS"
                 --req-delay "$REQ_DELAY"
                 --output-csv "$OUTPUT_CSV"
-                "${SKIP_FLAG[@]}"
                 "${ONLY_EXT_FLAG[@]}"
                 "${ONLY_URL_FLAG[@]}" )
 
@@ -447,7 +480,6 @@ jobs:
           CREATE TEMP TABLE tmp_staging_barbora_products AS
           SELECT
             ext_id,
-            -- Fill missing/blank name from slug
             COALESCE(NULLIF(btrim(name), ''), initcap(replace(regexp_replace(COALESCE(ext_id,''), '^.*/', ''), '-', ' '))) AS name,
             NULLIF(btrim(ean_raw), '') AS ean_raw,
             NULLIF(btrim(sku_raw), '') AS sku_raw,
@@ -455,7 +487,6 @@ jobs:
             NULLIF(btrim(size_text), '') AS size_text,
             NULLIF(btrim(brand), '') AS brand,
             NULLIF(btrim(manufacturer), '') AS manufacturer,
-            -- normalize price "3,99" → 3.99
             NULLIF(regexp_replace(price, ',', '.', 'g'), '')::numeric AS price,
             UPPER(COALESCE(NULLIF(currency,''), 'EUR')) AS currency,
             NULLIF(btrim(category_path), '') AS category_path,
@@ -464,11 +495,10 @@ jobs:
           FROM tmp_barbora_csv_full
           WHERE COALESCE(ext_id,'') <> '';
 
-          -- Drop any rows that still lack a name after fallback
           DELETE FROM tmp_staging_barbora_products
           WHERE COALESCE(name,'') = '';
 
-          -- De-duplicate: keep the "richest" row per ext_id to avoid ON CONFLICT twice
+          -- De-duplicate: keep the "richest" row per ext_id
           CREATE TEMP TABLE tmp_staging_barbora_products_dedup AS
           SELECT t.*
           FROM (
@@ -489,8 +519,6 @@ jobs:
 
           DROP TABLE tmp_staging_barbora_products;
           ALTER TABLE tmp_staging_barbora_products_dedup RENAME TO tmp_staging_barbora_products;
-
-          -- Belt-and-suspenders: prevent accidental dupes hereafter
           CREATE UNIQUE INDEX ON tmp_staging_barbora_products (ext_id);
 
           INSERT INTO public.staging_barbora_products
@@ -517,15 +545,7 @@ jobs:
             ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, manufacturer, price, currency, category_path, category_leaf, source_url, now()
           FROM tmp_staging_barbora_products
           ON CONFLICT (ext_id) DO UPDATE
-            SET name = CASE
-                         WHEN COALESCE(EXCLUDED.name,'') <> ''
-                              AND lower(EXCLUDED.name) <> 'pealeht'
-                              AND (EXCLUDED.category_leaf IS NULL
-                                   OR lower(EXCLUDED.name) <> lower(EXCLUDED.category_leaf))
-                         THEN EXCLUDED.name
-                         ELSE public.barbora_candidates.name
-                       END,
-                price         = EXCLUDED.price,
+            SET price         = EXCLUDED.price,
                 currency      = COALESCE(EXCLUDED.currency, public.barbora_candidates.currency),
                 size_text     = CASE WHEN COALESCE(EXCLUDED.size_text,'')     <> '' THEN EXCLUDED.size_text     ELSE public.barbora_candidates.size_text END,
                 brand         = CASE WHEN COALESCE(EXCLUDED.brand,'')         <> '' THEN EXCLUDED.brand         ELSE public.barbora_candidates.brand     END,
@@ -539,7 +559,6 @@ jobs:
 
           COMMIT;
 
-          -- Quick feedback
           \echo ''
           \echo '=== Load summary ==='
           SELECT
