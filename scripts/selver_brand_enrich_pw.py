@@ -3,7 +3,7 @@
 """
 Selver brand enrichment (structured fields only).
 - Works with ext_id being: numeric id, slug path, absolute URL, or "/slug".
-- Extracts brand from JSON-LD, spec rows (Käitleja/Tootja/Valmistaja/Kaubamärk/Brand),
+- Extracts brand from JSON-LD, the PDP attributes table (Käitleja/Tootja/Valmistaja/Kaubamärk/Brand),
   and meta product:brand. No title/name guessing.
 
 Env:
@@ -49,6 +49,17 @@ def _clean(s: str | None) -> str:
         return ""
     return s
 
+def _valid_brand(s: str) -> bool:
+    """Heuristics to reject footer/garbage text."""
+    if not s: 
+        return False
+    if len(s) > 80:
+        return False
+    low = s.lower()
+    if "www.selver.ee" in low or "kuidas osta" in low or "partnerkaart" in low:
+        return False
+    return True
+
 def accept_overlays(page):
     for sel in [
         'button#onetrust-accept-btn-handler',
@@ -63,46 +74,27 @@ def accept_overlays(page):
         except Exception:
             pass
 
-def wait_for_pdp_ready(page):
-    """Wait until the product attributes table or JSON-LD is present."""
+def wait_for_pdp_ready(page) -> bool:
+    """Return True if this looks like a product page and the PDP has rendered."""
     try:
         page.wait_for_selector(
-            'table.ProductAttributes__table, script[type="application/ld+json"]',
-            timeout=15000
+            '[data-testid="productName"], table.ProductAttributes__table, script[type="application/ld+json"]',
+            timeout=15000,
         )
     except Exception:
-        # best-effort; some pages might still be fine
-        pass
+        return False
+    has_name = page.locator('[data-testid="productName"]').count() > 0
+    has_attrs = page.locator('table.ProductAttributes__table').count() > 0
+    # Some PDPs may miss the data-testid, so accept either signal
+    return has_name or has_attrs
 
 def extract_brand(page) -> str:
-    # 0) Direct selectors: table with label/value pairs (fast, robust)
-    sel_pairs = [
-        'th:has-text("Käitleja") + td',
-        'th:has-text("Tootja") + td',
-        'th:has-text("Valmistaja") + td',
-        'th:has-text("Kaubamärk") + td',
-        'th:has-text("Brand") + td',
-        'dt:has-text("Käitleja") + dd',
-        'dt:has-text("Tootja") + dd',
-        'dt:has-text("Valmistaja") + dd',
-        'dt:has-text("Kaubamärk") + dd',
-        'dt:has-text("Brand") + dd',
-    ]
-    try:
-        for sel in sel_pairs:
-            loc = page.locator(sel).first
-            if loc and loc.count() > 0:
-                txt = loc.text_content() or ''
-                b = _clean(txt)
-                if b: return b
-    except Exception:
-        pass
-
-    # 1) JSON-LD
+    # 1) JSON-LD (often has brand/manufacturer)
     try:
         for el in page.locator('script[type="application/ld+json"]').all():
             txt = el.text_content() or ''
-            if not txt.strip(): continue
+            if not txt.strip():
+                continue
             try:
                 data = json.loads(txt)
             except Exception:
@@ -110,61 +102,54 @@ def extract_brand(page) -> str:
             nodes = data if isinstance(data, list) else [data]
             for n in nodes:
                 b = n.get('brand')
-                if isinstance(b, dict): b = b.get('name')
+                if isinstance(b, dict):
+                    b = b.get('name')
                 b = _clean(b)
-                if b: return b
+                if _valid_brand(b):
+                    return b
                 m = n.get('manufacturer')
-                if isinstance(m, dict): m = m.get('name')
+                if isinstance(m, dict):
+                    m = m.get('name')
                 m = _clean(m)
-                if m: return m
+                if _valid_brand(m):
+                    return m
     except Exception:
         pass
 
-    # 2) Spec rows (regex over HTML) and generic sibling scan
+    # 2) Strictly inside the PDP attributes table (avoid page-wide scans)
     try:
-        html = page.content()
-        for k, v in re.findall(r'(?is)<dt[^>]*>(.*?)</dt>\s*<dd[^>]*>(.*?)</dd>', html):
-            if BRAND_LABELS.search(re.sub(r'<.*?>', ' ', k)):
-                b = _clean(re.sub(r'<.*?>', ' ', v))
-                if b: return b
-        for k, v in re.findall(r'(?is)<th[^>]*>(.*?)</th>\s*<td[^>]*>(.*?)</td>', html):
-            if BRAND_LABELS.search(re.sub(r'<.*?>', ' ', k)):
-                b = _clean(re.sub(r'<.*?>', ' ', v))
-                if b: return b
-
-        js = """
-        () => {
-          const keys = /(kaubam[aä]rk|tootja|valmistaja|käitleja|brand)/i;
-          const clean = (t) => (t||'').replace(/[\\u2122\\u00AE]/g,'').replace(/\\s+/g,' ').trim();
-          const els = Array.from(document.querySelectorAll('dt,th,td,li,span,div,p,strong,b'));
-          for (const el of els) {
-            const k = clean(el.textContent || '');
-            if (!keys.test(k)) continue;
-            let v = '';
-            if (el.nextElementSibling) v = el.nextElementSibling.textContent;
-            if (!v && el.parentElement) {
-              const sibs = Array.from(el.parentElement.children);
-              const i = sibs.indexOf(el);
-              if (i >= 0 && i+1 < sibs.length) v = sibs[i+1].textContent;
-            }
-            v = clean(v);
-            if (v) return v;
-          }
-          return '';
-        }
-        """
-        v = page.evaluate(js)
-        v = _clean(v)
-        if v: return v
+        if page.locator('table.ProductAttributes__table').count() > 0:
+            sel_pairs = [
+                'th:has-text("Käitleja") + td',
+                'th:has-text("Tootja") + td',
+                'th:has-text("Valmistaja") + td',
+                'th:has-text("Kaubamärk") + td',
+                'th:has-text("Brand") + td',
+                'dt:has-text("Käitleja") + dd',
+                'dt:has-text("Tootja") + dd',
+                'dt:has-text("Valmistaja") + dd',
+                'dt:has-text("Kaubamärk") + dd',
+                'dt:has-text("Brand") + dd',
+            ]
+            for sel in sel_pairs:
+                # Accept both table-based and dt/dd-based implementations within the attributes container
+                loc = page.locator(f'table.ProductAttributes__table {sel}, .ProductAttributes__table {sel}').first
+                if loc and loc.count() > 0:
+                    txt = _clean(loc.text_content() or '')
+                    if _valid_brand(txt):
+                        return txt
     except Exception:
         pass
 
-    # 3) Meta: product:brand
+    # 3) Meta: product:brand (rare, but cheap)
     try:
-        val = page.eval_on_selector('meta[property="product:brand"]',
-                                    'el => el ? el.content || el.getAttribute("content") : null')
+        val = page.eval_on_selector(
+            'meta[property="product:brand"]',
+            'el => el ? el.content || el.getAttribute("content") : null'
+        )
         b = _clean(val or '')
-        if b: return b
+        if _valid_brand(b):
+            return b
     except Exception:
         pass
 
@@ -234,7 +219,10 @@ def main():
             try:
                 page.goto(url, timeout=30000, wait_until="domcontentloaded")
                 accept_overlays(page)
-                wait_for_pdp_ready(page)  # <-- wait for attributes/JSON-LD to be present
+                if not wait_for_pdp_ready(page):
+                    print(f"[SKIP_NOT_PDP] ext_id={ext_id} url={url}")
+                    time.sleep(req_delay)
+                    continue
             except Exception as e:
                 print(f"[MISS_NAV] ext_id={ext_id} url={url} err={e}")
                 continue
