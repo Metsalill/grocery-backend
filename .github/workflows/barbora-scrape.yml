@@ -12,13 +12,17 @@ on:
         required: false
         default: ""
       page_limit:
-        description: "Max pages per category (0 = all)"
+        description: "Max categories to process (0 = all)"
         required: false
         default: "0"
+      per_cat_pages:
+        description: "Max paginated pages to visit per category"
+        required: false
+        default: "12"
       max_products:
         description: "Cap total PDPs (0 = unlimited)"
         required: false
-        default: "0"
+        default: "1200"
       headless:
         description: "Headless (1/0)"
         required: false
@@ -324,14 +328,16 @@ jobs:
         env:
           REQ_DELAY: ${{ github.event.inputs.req_delay }}
           PAGE_LIMIT: ${{ github.event.inputs.page_limit }}
-          MAX_PRODUCTS: ${{ github.event.inputs.max_products }}  # fixed: event.inputs (dot)
+          PER_CAT_PAGES: ${{ github.event.inputs.per_cat_pages || '12' }}
+          MAX_PRODUCTS: ${{ github.event.inputs.max_products || '1200' }}
           HEADLESS: ${{ github.event.inputs.headless }}
         shell: bash
         run: |
           set -euo pipefail
           REQ_DELAY="${REQ_DELAY:-0.25}"
           PAGE_LIMIT="${PAGE_LIMIT:-0}"
-          MAX_PRODUCTS="${MAX_PRODUCTS:-0}"
+          PER_CAT_PAGES="${PER_CAT_PAGES:-12}"
+          MAX_PRODUCTS="${MAX_PRODUCTS:-1200}"
           HEADLESS="${HEADLESS:-1}"
 
           ONLY_EXT_FLAG=()
@@ -346,6 +352,7 @@ jobs:
           cmd=( python -u scripts/barbora_crawl_categories_pw.py
                 --cats-file data/barbora_categories.txt
                 --page-limit "$PAGE_LIMIT"
+                --cat-page-cap "$PER_CAT_PAGES"
                 --max-products "$MAX_PRODUCTS"
                 --headless "$HEADLESS"
                 --req-delay "$REQ_DELAY"
@@ -353,8 +360,8 @@ jobs:
                 "${ONLY_EXT_FLAG[@]}"
                 "${ONLY_URL_FLAG[@]}" )
 
-          # Removed outer GNU timeout wrapper to avoid EPIPE when the process is killed.
-          stdbuf -oL -eL "${cmd[@]}" | tee data/barbora_run.log
+          # Hard cap step runtime to avoid 4h job limit
+          stdbuf -oL -eL timeout -k 60s 115m "${cmd[@]}" | tee data/barbora_run.log
 
       - name: Ensure CSV exists (header if empty)
         shell: bash
