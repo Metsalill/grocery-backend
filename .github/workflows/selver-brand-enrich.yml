@@ -1,0 +1,36 @@
+name: "Selver – Brand Enrichment (PDP, structured only)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_items:
+        description: "How many rows to process (missing brand)"
+        default: "600"
+      headless:
+        description: "Headless Chromium (1/0)"
+        default: "1"
+      req_delay:
+        description: "Delay between PDPs (sec)"
+        default: "0.25"
+
+jobs:
+  brand:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Install Playwright
+        run: |
+          pip install playwright psycopg2-binary
+          python -m playwright install --with-deps chromium
+      - name: Run brand enrichment
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          MAX_ITEMS: ${{ github.event.inputs.max_items }}
+          HEADLESS: ${{ github.event.inputs.headless }}
+          REQ_DELAY: ${{ github.event.inputs.req_delay }}
+          TIMEBOX_SECONDS: "1800"
+        run: |
+          python scripts/selver_brand_enrich_pw.py
