@@ -9,11 +9,14 @@ Selver brand enrichment (structured fields only).
   JSON-LD (brand/manufacturer) and meta product:brand. No title/name guessing.
 
 Env:
-  DATABASE_URL     (required)
-  MAX_ITEMS        (default 500)
-  HEADLESS         (1|0, default 1)
-  REQ_DELAY        (seconds, default 0.25)
-  TIMEBOX_SECONDS  (default 1200)
+  DATABASE_URL          (required)
+  MAX_ITEMS             (default 500)
+  HEADLESS              (1|0, default 1)
+  REQ_DELAY             (seconds, default 0.25)
+  TIMEBOX_SECONDS       (default 1200)
+  OVERWRITE_PRODUCTS    (1|0, default 0)   -> if 1, overwrite existing product brand
+  TARGET_SOURCE         (default "selver") -> limits product updates to rows mapped
+                                             via ext_product_map.source
 """
 
 from __future__ import annotations
@@ -29,6 +32,7 @@ PDP_NUMERIC_PREFIX = BASE_HOST + "/p/"
 BRAND_LABELS = re.compile(r'(kaubam[aä]rk|tootja|valmistaja|käitleja|brand)', re.I)
 IS_EAN = re.compile(r'^\d{8}(\d{5})?$')   # 8 or 13 digits
 
+
 def _clean(s: str | None) -> str:
     if not s:
         return ""
@@ -38,6 +42,7 @@ def _clean(s: str | None) -> str:
     if re.search(r'\b(\d+(\s)?(ml|l|g|kg|tk|pcs))\b', s, re.I):
         return ""
     return s
+
 
 def build_target(ext: str) -> tuple[str, str]:
     """
@@ -75,6 +80,7 @@ def build_target(ext: str) -> tuple[str, str]:
 
     return ("url", f"{BASE_HOST}/{s}")
 
+
 def accept_overlays(page):
     for sel in [
         'button#onetrust-accept-btn-handler',
@@ -89,6 +95,7 @@ def accept_overlays(page):
         except Exception:
             pass
 
+
 def wait_for_pdp_ready(page):
     """Wait until the product attributes table or JSON-LD is present."""
     try:
@@ -97,7 +104,9 @@ def wait_for_pdp_ready(page):
             timeout=15000
         )
     except Exception:
+        # best-effort; some pages might still be fine
         pass
+
 
 def try_open_first_search_result(page) -> bool:
     """
@@ -125,6 +134,7 @@ def try_open_first_search_result(page) -> bool:
     except Exception:
         pass
     return False
+
 
 def navigate_to_candidate(page, ext_id: str) -> bool:
     """
@@ -164,6 +174,7 @@ def navigate_to_candidate(page, ext_id: str) -> bool:
             return False
 
     return False
+
 
 def extract_brand(page) -> str:
     # 0) Direct selectors: table with label/value pairs (fast, robust)
@@ -273,6 +284,7 @@ def extract_brand(page) -> str:
 
     return ''
 
+
 def main():
     dsn = os.environ.get("DATABASE_URL")
     if not dsn:
@@ -283,12 +295,13 @@ def main():
     headless = os.environ.get("HEADLESS", "1") == "1"
     req_delay = float(os.environ.get("REQ_DELAY", "0.25"))
     timebox = int(os.environ.get("TIMEBOX_SECONDS", "1200"))
+    overwrite_products = os.environ.get("OVERWRITE_PRODUCTS", "0") == "1"
+    target_source = os.environ.get("TARGET_SOURCE", "selver")
     deadline = time.time() + timebox
 
     # ———————————————————————————  Pick work  ———————————————————————————
     with closing(psycopg2.connect(dsn)) as conn, conn.cursor() as cur:
         # Only candidates that still lack brand, and have an EAN for tying back to products.
-        # (Join ext_product_map if you want to restrict to products that exist in `products` and source='selver')
         cur.execute("""
             SELECT c.ext_id::text,
                    COALESCE(c.ean_norm, c.ean_raw) AS ean
@@ -313,12 +326,14 @@ def main():
             "googletagmanager", "google-analytics", "doubleclick",
             "facebook", "fonts.googleapis.com", "use.typekit.net",
         ]
+
         def _route_blocker(route, request):
             url = request.url
             if any(d in url for d in block_domains):
                 route.abort()
             else:
                 route.continue_()
+
         context.route("**/*", _route_blocker)
 
         page = context.new_page()
@@ -344,7 +359,6 @@ def main():
             b = extract_brand(page)
             processed += 1
             if not b:
-                # Best-effort: some PDPs are extremely light; report miss
                 curr_url = ""
                 try:
                     curr_url = page.url
@@ -357,18 +371,42 @@ def main():
             # Persist back
             with closing(psycopg2.connect(dsn)) as conn2, conn2.cursor() as cur2:
                 try:
+                    # always store on candidates if empty
                     cur2.execute(
                         "UPDATE selver_candidates SET brand = %s "
                         " WHERE ext_id = %s AND (brand IS NULL OR brand = '')",
                         (b, ext_id)
                     )
+
                     if ean:
-                        cur2.execute("""
-                            UPDATE products p
-                               SET brand = %s
-                             WHERE p.ean = %s
-                               AND (p.brand IS NULL OR p.brand = '')
-                        """, (b, ean))
+                        if overwrite_products:
+                            # Overwrite brand for products that are mapped to TARGET_SOURCE
+                            cur2.execute("""
+                                UPDATE products AS p
+                                   SET brand = %s
+                                  FROM ext_product_map AS m
+                                 WHERE m.product_id = p.id
+                                   AND m.source = %s
+                                   AND p.ean = %s
+                            """, (b, target_source, ean))
+                        else:
+                            # Fill only empties or obvious junk (footer blob / URL / email / overlong)
+                            cur2.execute("""
+                                UPDATE products AS p
+                                   SET brand = %s
+                                  FROM ext_product_map AS m
+                                 WHERE m.product_id = p.id
+                                   AND m.source = %s
+                                   AND p.ean = %s
+                                   AND (
+                                        p.brand IS NULL OR p.brand = '' OR
+                                        p.brand ILIKE 'e-Selveri info%%' OR
+                                        length(p.brand) > 100 OR
+                                        p.brand ~* '(http|www\\.)' OR
+                                        p.brand ~* '@'
+                                   )
+                            """, (b, target_source, ean))
+
                     conn2.commit()
                     found += 1
                     print(f"[BRAND] ext_id={ext_id} brand=\"{b}\"")
@@ -380,6 +418,7 @@ def main():
 
         browser.close()
         print(f"Done. processed={processed} brand_found={found}")
+
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, lambda *_: sys.exit(130))
