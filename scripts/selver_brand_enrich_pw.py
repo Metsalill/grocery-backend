@@ -30,42 +30,24 @@ from playwright.sync_api import sync_playwright
 BASE_HOST = "https://www.selver.ee"
 PDP_NUMERIC_PREFIX = BASE_HOST + "/p/"
 
-# labels we accept in spec tables
 BRAND_LABELS = re.compile(r'(kaubam[aä]rk|tootja|valmistaja|käitleja|brand)', re.I)
-
-# EAN: 8 or 13 digits
 IS_EAN = re.compile(r'^\d{8}(\d{5})?$')
-
-# Things that are definitely NOT a brand
 URL_OR_EMAIL = re.compile(r'(https?://|www\.)|@', re.I)
 
-# Keep generic placeholders, but DO NOT include "määramata" (we accept it).
 PLACEHOLDER_BRANDS = {
-    "täpsustamata",
-    "puudub",
-    "unknown",
-    "n/a",
-    "na",
-    "none",
-    "-", "—", "–",
+    "täpsustamata", "puudub", "unknown", "n/a", "na", "none", "-", "—", "–",
 }
 
 def _clean(s: str | None) -> str:
     if not s:
         return ""
-    # strip ™ and ® then collapse whitespace
-    s = re.sub(r'[\u2122\u00AE]', '', s)
+    s = re.sub(r'[\u2122\u00AE]', '', s)     # ™ ®
     s = re.sub(r'\s+', ' ', s).strip()
-    # reject obvious size/unit strings like "500 ml"
     if re.search(r'\b(\d+(\s)?(ml|l|g|kg|tk|pcs))\b', s, re.I):
         return ""
     return s
 
 def _normalize_maaramata(b: str) -> str:
-    """
-    Normalize common variants/typos of 'Määramata' to exactly 'Määramata'.
-    (We accept this as a valid brand per business rules.)
-    """
     t = (b or "").strip()
     if not t:
         return ""
@@ -83,9 +65,6 @@ def _canonicalize(b: str) -> str:
     return _normalize_maaramata(_clean(b))
 
 def _is_bad_brand(b: str) -> bool:
-    """
-    Reject only real junk. 'Määramata' must PASS and be stored.
-    """
     if not b:
         return True
     if len(b) > 120:
@@ -99,11 +78,15 @@ def _is_bad_brand(b: str) -> bool:
         return True
     return False
 
+def _accept_or_none(raw: str) -> str:
+    b = _canonicalize(raw)
+    if b.lower() == "määramata":
+        return "Määramata"
+    if _is_bad_brand(b):
+        return ""
+    return b
+
 def build_target(ext: str) -> tuple[str, str]:
-    """
-    Returns (mode, value):
-      ("url", absolute_url)  or  ("search", query) for EAN or general fallback.
-    """
     s = (ext or "").strip()
     if not s:
         return ("url", "")
@@ -137,7 +120,6 @@ def accept_overlays(page):
             pass
 
 def wait_for_pdp_ready(page):
-    """Wait until product attributes or JSON-LD appears."""
     try:
         page.wait_for_selector(
             'table.ProductAttributes__table, script[type="application/ld+json"]',
@@ -147,44 +129,39 @@ def wait_for_pdp_ready(page):
         pass
 
 def _first_product_link_on_results(page) -> str:
-    """
-    Return the first plausible product href on a search results page (or "").
-    Be liberal: allow query strings and strip them off.
-    """
     try:
+        # ensure search results had a chance to render
+        try:
+            page.wait_for_selector(
+                'a[href*="/p/"], .ProductCard a[href], a.ProductCard__link[href], main a[href*="-"]',
+                timeout=8000
+            )
+        except Exception:
+            pass
         hrefs = page.eval_on_selector_all(
             "main a[href], .content a[href], a[href]",
             "els => els.map(e => e.getAttribute('href'))"
         ) or []
 
-        def _looks_like_product(h: str) -> bool:
+        def looks_like_product(h: str) -> bool:
             if not h or h.startswith("#") or "javascript:" in h:
                 return False
-            # keep query/fragments but remove for pattern checks
-            h_path = h.split('#', 1)[0]
-            h_path = h_path.split('?', 1)[0]
-            # PDP numeric or a slug with hyphens in leaf
+            h_path = h.split('#', 1)[0].split('?', 1)[0]
             if "/p/" in h_path:
                 return True
             leaf = h_path.rstrip("/").split("/")[-1]
-            if "-" in leaf and len(leaf) > 3:
-                return True
-            return False
+            return ("-" in leaf and len(leaf) > 3)
 
         for href in hrefs:
-            if _looks_like_product(href):
-                # rebuild absolute
+            if looks_like_product(href):
                 base = href.split('#', 1)[0].split('?', 1)[0]
                 if base.startswith("/"):
                     return BASE_HOST + base
                 if base.startswith("http"):
                     return base
-        # second pass: try explicit product-card style anchors if present
-        for sel in [
-            'a[href*="/p/"]',
-            '.ProductCard a[href]',
-            'a.ProductCard__link[href]',
-        ]:
+
+        # more targeted fallbacks
+        for sel in ['a[href*="/p/"]', '.ProductCard a[href]', 'a.ProductCard__link[href]']:
             try:
                 el = page.locator(sel).first
                 if el and el.count() > 0 and el.is_visible():
@@ -202,9 +179,6 @@ def _first_product_link_on_results(page) -> str:
     return ""
 
 def _search_url_from_form(page, query: str) -> str | None:
-    """
-    Inspect the search form (action + input name) and construct the actual search URL.
-    """
     try:
         data = page.evaluate("""
         () => {
@@ -230,68 +204,63 @@ def _search_url_from_form(page, query: str) -> str | None:
     except Exception:
         return None
 
+def _visit_search_and_open_first(page, query: str) -> bool:
+    # inspect form, then try two common fallbacks if needed
+    tried = []
+
+    url = _search_url_from_form(page, query)
+    if url:
+        tried.append(url)
+    tried.append(f"{BASE_HOST}/otsing?query={quote(query)}")
+    tried.append(f"{BASE_HOST}/otsing?q={quote(query)}")
+
+    for u in tried:
+        try:
+            page.goto(u, timeout=30000, wait_until="domcontentloaded")
+            accept_overlays(page)
+            # give client-side render some time
+            try:
+                page.wait_for_load_state("networkidle", timeout=5000)
+            except Exception:
+                pass
+            href = _first_product_link_on_results(page)
+            if href:
+                page.goto(href, timeout=30000, wait_until="domcontentloaded")
+                return True
+        except Exception:
+            continue
+    return False
+
 def navigate_via_search(page, query: str) -> bool:
-    """Go to home, construct real search URL, open it, and click the first product."""
     try:
         page.goto(BASE_HOST, timeout=30000, wait_until="domcontentloaded")
         accept_overlays(page)
-
-        url = _search_url_from_form(page, query)
-        if url:
-            page.goto(url, timeout=30000, wait_until="domcontentloaded")
-        else:
-            box = page.locator('input[placeholder*="Otsi toodet"]').first
-            if not box or not box.is_visible():
-                box = page.locator('header input[type="text"]').first
-            box.fill(query)
-            box.press("Enter")
-            page.wait_for_load_state("domcontentloaded")
-
-        href = _first_product_link_on_results(page)
-        if href:
-            page.goto(href, timeout=30000, wait_until="domcontentloaded")
-            return True
+        # try building/visiting a real search URL and opening the first product
+        return _visit_search_and_open_first(page, query)
     except Exception:
         return False
-    return False
 
 def navigate_to_candidate(page, ext_id: str | None, ean: str | None) -> bool:
-    """
-    Navigate to a PDP using ext_id; if that 404s or fails, search by EAN.
-    """
     if ext_id:
         mode, value = build_target(str(ext_id))
         if mode == "url":
             try:
                 page.goto(value, timeout=30000, wait_until="domcontentloaded")
                 accept_overlays(page)
-                if page.locator('text=Lehekülge ei leitud').first.is_visible():
-                    pass  # will try EAN
-                else:
+                if not page.locator('text=Lehekülge ei leitud').first.is_visible():
                     return True
             except Exception:
                 pass
         else:
             if navigate_via_search(page, value):
                 return True
-
     if ean:
         if navigate_via_search(page, ean):
             return True
-
     return False
 
-def _accept_or_none(raw: str) -> str:
-    """Clean, normalize 'Määramata' variants, and reject actual junk."""
-    b = _canonicalize(raw)
-    if b.lower() in {"määramata"}:
-        return "Määramata"
-    if _is_bad_brand(b):
-        return ""
-    return b
-
 def extract_brand(page) -> str:
-    # 0) Direct spec table/definition list selectors
+    # 0) direct table/dl selectors
     sel_pairs = [
         'th:has-text("Käitleja") + td',
         'th:has-text("Tootja") + td',
@@ -342,7 +311,7 @@ def extract_brand(page) -> str:
     except Exception:
         pass
 
-    # 2) Regex over HTML + generic sibling probing
+    # 2) HTML regex + sibling probing
     try:
         html = page.content()
         for k, v in re.findall(r'(?is)<dt[^>]*>(.*?)</dt>\s*<dd[^>]*>(.*?)</dd>', html):
@@ -384,7 +353,7 @@ def extract_brand(page) -> str:
     except Exception:
         pass
 
-    # 3) Meta tag: product:brand
+    # 3) meta tag
     try:
         val = page.eval_on_selector(
             'meta[property="product:brand"]',
@@ -401,32 +370,25 @@ def extract_brand(page) -> str:
 def main():
     dsn = os.environ.get("DATABASE_URL")
     if not dsn:
-        print("Missing DATABASE_URL", file=sys.stderr)
-        sys.exit(2)
+        print("Missing DATABASE_URL", file=sys.stderr); sys.exit(2)
 
     max_items = int(os.environ.get("MAX_ITEMS", "500"))
-    headless = os.environ.get("HEADLESS", "1") == "1"
-    req_delay = float(os.environ.get("REQ_DELAY", "0.25"))
-    timebox = int(os.environ.get("TIMEBOX_SECONDS", "1200"))
-    overwrite = os.environ.get("OVERWRITE_PRODUCTS", "0") == "1"
-    deadline = time.time() + timebox
+    headless   = os.environ.get("HEADLESS", "1") == "1"
+    req_delay  = float(os.environ.get("REQ_DELAY", "0.25"))
+    timebox    = int(os.environ.get("TIMEBOX_SECONDS", "1200"))
+    overwrite  = os.environ.get("OVERWRITE_PRODUCTS", "0") == "1"
+    deadline   = time.time() + timebox
 
-    # Build worklist from products + ext_product_map(source='selver')
+    # Worklist: only Selver-mapped products; restrict when overwrite=0
     with closing(psycopg2.connect(dsn)) as conn, conn.cursor() as cur:
         cur.execute("""
-            SELECT p.id,
-                   p.ean::text AS ean,
-                   COALESCE(m.ext_id::text, '') AS ext_id
+            SELECT p.id, p.ean::text AS ean, COALESCE(m.ext_id::text, '') AS ext_id
               FROM products p
-              JOIN ext_product_map m
-                ON m.product_id = p.id
-               AND m.source = 'selver'
+              JOIN ext_product_map m ON m.product_id = p.id AND m.source = 'selver'
              WHERE COALESCE(p.ean::text,'') <> ''
                AND (
                      %s = TRUE
-                     OR  -- overwrite disabled -> only rows that look missing/bad
-                     p.brand IS NULL
-                     OR p.brand = ''
+                     OR p.brand IS NULL OR p.brand = ''
                      OR p.brand ILIKE 'e-selveri info%%'
                      OR length(p.brand) > 100
                      OR p.brand ~* '(http|www\\.)'
@@ -438,17 +400,15 @@ def main():
         rows = cur.fetchall()
 
     if not rows:
-        print("Nothing to do.")
-        return
+        print("Nothing to do."); return
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=headless)
         context = browser.new_context()
 
-        # Block heavy 3rd-party requests
         block_domains = [
-            "googletagmanager", "google-analytics", "doubleclick",
-            "facebook", "fonts.googleapis.com", "use.typekit.net",
+            "googletagmanager","google-analytics","doubleclick",
+            "facebook","fonts.googleapis.com","use.typekit.net",
         ]
         def _route_blocker(route, request):
             url = request.url
@@ -461,21 +421,19 @@ def main():
         page = context.new_page()
 
         processed = 0
-        updated = 0
+        updated   = 0
 
         with closing(psycopg2.connect(dsn)) as uconn:
             uconn.autocommit = False
             with uconn.cursor() as ucur:
                 for product_id, ean, ext_id in rows:
                     if time.time() > deadline:
-                        print("Timebox reached, stopping.")
-                        break
+                        print("Timebox reached, stopping."); break
 
                     ok = navigate_to_candidate(page, ext_id, ean)
                     if not ok:
                         print(f"[MISS_BRAND] product_id={product_id} nav failed (ext_id={ext_id}, ean={ean})")
-                        time.sleep(req_delay)
-                        continue
+                        time.sleep(req_delay); continue
 
                     wait_for_pdp_ready(page)
                     brand = extract_brand(page)
@@ -483,13 +441,10 @@ def main():
 
                     if not brand:
                         cur_url = ""
-                        try:
-                            cur_url = page.url
-                        except Exception:
-                            pass
+                        try: cur_url = page.url
+                        except Exception: pass
                         print(f"[MISS_BRAND_EMPTY] product_id={product_id} url={cur_url}")
-                        time.sleep(req_delay)
-                        continue
+                        time.sleep(req_delay); continue
 
                     try:
                         if overwrite:
