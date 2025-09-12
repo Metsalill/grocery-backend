@@ -49,7 +49,55 @@ def _clean(s: str | None) -> str:
         return ""
     return s
 
+def accept_overlays(page):
+    for sel in [
+        'button#onetrust-accept-btn-handler',
+        'button:has-text("Nõustun")',
+        'button:has-text("Accept")',
+    ]:
+        try:
+            loc = page.locator(sel).first
+            if loc.is_visible():
+                loc.click(timeout=2000)
+                break
+        except Exception:
+            pass
+
+def wait_for_pdp_ready(page):
+    """Wait until the product attributes table or JSON-LD is present."""
+    try:
+        page.wait_for_selector(
+            'table.ProductAttributes__table, script[type="application/ld+json"]',
+            timeout=15000
+        )
+    except Exception:
+        # best-effort; some pages might still be fine
+        pass
+
 def extract_brand(page) -> str:
+    # 0) Direct selectors: table with label/value pairs (fast, robust)
+    sel_pairs = [
+        'th:has-text("Käitleja") + td',
+        'th:has-text("Tootja") + td',
+        'th:has-text("Valmistaja") + td',
+        'th:has-text("Kaubamärk") + td',
+        'th:has-text("Brand") + td',
+        'dt:has-text("Käitleja") + dd',
+        'dt:has-text("Tootja") + dd',
+        'dt:has-text("Valmistaja") + dd',
+        'dt:has-text("Kaubamärk") + dd',
+        'dt:has-text("Brand") + dd',
+    ]
+    try:
+        for sel in sel_pairs:
+            loc = page.locator(sel).first
+            if loc and loc.count() > 0:
+                txt = loc.text_content() or ''
+                b = _clean(txt)
+                if b: return b
+    except Exception:
+        pass
+
     # 1) JSON-LD
     try:
         for el in page.locator('script[type="application/ld+json"]').all():
@@ -72,9 +120,8 @@ def extract_brand(page) -> str:
     except Exception:
         pass
 
-    # 2) Spec rows (dt/dd, th/td) and generic sibling scan
+    # 2) Spec rows (regex over HTML) and generic sibling scan
     try:
-        # quick dt/dd and th/td regex over the whole HTML
         html = page.content()
         for k, v in re.findall(r'(?is)<dt[^>]*>(.*?)</dt>\s*<dd[^>]*>(.*?)</dd>', html):
             if BRAND_LABELS.search(re.sub(r'<.*?>', ' ', k)):
@@ -85,7 +132,6 @@ def extract_brand(page) -> str:
                 b = _clean(re.sub(r'<.*?>', ' ', v))
                 if b: return b
 
-        # DOM-based sibling scan for labels like "Käitleja"
         js = """
         () => {
           const keys = /(kaubam[aä]rk|tootja|valmistaja|käitleja|brand)/i;
@@ -123,20 +169,6 @@ def extract_brand(page) -> str:
         pass
 
     return ''
-
-def accept_overlays(page):
-    for sel in [
-        'button#onetrust-accept-btn-handler',
-        'button:has-text("Nõustun")',
-        'button:has-text("Accept")',
-    ]:
-        try:
-            loc = page.locator(sel).first
-            if loc.is_visible():
-                loc.click(timeout=2000)
-                break
-        except Exception:
-            pass
 
 def main():
     dsn = os.environ.get("DATABASE_URL")
@@ -202,6 +234,7 @@ def main():
             try:
                 page.goto(url, timeout=30000, wait_until="domcontentloaded")
                 accept_overlays(page)
+                wait_for_pdp_ready(page)  # <-- wait for attributes/JSON-LD to be present
             except Exception as e:
                 print(f"[MISS_NAV] ext_id={ext_id} url={url} err={e}")
                 continue
