@@ -517,7 +517,15 @@ jobs:
             ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, manufacturer, price, currency, category_path, category_leaf, source_url, now()
           FROM tmp_staging_barbora_products
           ON CONFLICT (ext_id) DO UPDATE
-            SET price         = EXCLUDED.price,
+            SET name = CASE
+                         WHEN COALESCE(EXCLUDED.name,'') <> ''
+                              AND lower(EXCLUDED.name) <> 'pealeht'
+                              AND (EXCLUDED.category_leaf IS NULL
+                                   OR lower(EXCLUDED.name) <> lower(EXCLUDED.category_leaf))
+                         THEN EXCLUDED.name
+                         ELSE public.barbora_candidates.name
+                       END,
+                price         = EXCLUDED.price,
                 currency      = COALESCE(EXCLUDED.currency, public.barbora_candidates.currency),
                 size_text     = CASE WHEN COALESCE(EXCLUDED.size_text,'')     <> '' THEN EXCLUDED.size_text     ELSE public.barbora_candidates.size_text END,
                 brand         = CASE WHEN COALESCE(EXCLUDED.brand,'')         <> '' THEN EXCLUDED.brand         ELSE public.barbora_candidates.brand     END,
