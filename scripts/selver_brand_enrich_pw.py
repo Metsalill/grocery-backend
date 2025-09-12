@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Selver brand enrichment, using *Käitleja* (not Kaubamärk).
-- ext_id can be numeric id, slug path, absolute URL, or "/slug".
-- Extracts brand from the PDP attributes table label "Käitleja"
-  (and close variants: Tootja / Valmistaja / Manufacturer).
-  Falls back to JSON-LD manufacturer (then brand) if needed.
+Selver brand enrichment (Käitleja-based) — drives from products/ext_product_map.
+
+What it does
+------------
+- Builds a worklist of Selver-sourced products whose current brand is empty or junk.
+- For each PDP, extracts *Käitleja* (preferred; also accepts Tootja/Valmistaja/Manufacturer).
+  Falls back to JSON-LD `manufacturer` (then `brand`) if needed.
+- Writes the result to `products.brand` (only if brand is empty/junk).
+- If a matching row exists in `selver_candidates`, it also fills that brand (best-effort).
 
 Env:
   DATABASE_URL     (required)
@@ -24,7 +28,7 @@ from playwright.sync_api import sync_playwright
 BASE_HOST = "https://www.selver.ee"
 PDP_NUMERIC_PREFIX = BASE_HOST + "/p/"
 
-# We *only* consider these labels as the brand (company/owner).
+# We treat ONLY these labels as brand (company/owner).
 FAVOR_LABELS = re.compile(r'(käitleja|tootja|valmistaja|manufacturer)', re.I)
 
 def build_url(ext: str) -> str:
@@ -161,6 +165,14 @@ def extract_brand(page) -> str:
 
     return ''
 
+BAD_BRAND_CLAUSE = """
+(p.brand IS NULL OR p.brand = '' OR
+ p.brand ILIKE 'e-selveri info%%' OR
+ length(p.brand) > 100 OR
+ p.brand ~* '(http|www\\.)' OR
+ p.brand ~* '@')
+"""
+
 def main():
     dsn = os.environ.get("DATABASE_URL")
     if not dsn:
@@ -173,25 +185,28 @@ def main():
     timebox = int(os.environ.get("TIMEBOX_SECONDS", "1200"))
     deadline = time.time() + timebox
 
+    # Worklist: Selver products with empty/garbage brand
     with closing(psycopg2.connect(dsn)) as conn, conn.cursor() as cur:
-        cur.execute("""
-            SELECT ext_id::text, COALESCE(ean_norm, ean_raw) AS ean
-            FROM selver_candidates
-            WHERE (brand IS NULL OR brand = '')
-              AND COALESCE(ean_norm, ean_raw) IS NOT NULL
-            ORDER BY ext_id
-            LIMIT %s
+        cur.execute(f"""
+            SELECT DISTINCT m.ext_id::text, p.ean
+              FROM products p
+              JOIN ext_product_map m ON m.product_id = p.id AND m.source = 'selver'
+             WHERE p.ean IS NOT NULL
+               AND {BAD_BRAND_CLAUSE}
+             ORDER BY p.id
+             LIMIT %s
         """, (max_items,))
         rows = cur.fetchall()
 
     if not rows:
-        print("Nothing to do.")
+        print("Nothing to do (no Selver products with bad/empty brand).")
         return
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=headless)
         context = browser.new_context()
 
+        # Block heavy third-party noise
         block_domains = [
             "googletagmanager", "google-analytics", "doubleclick",
             "facebook", "fonts.googleapis.com", "use.typekit.net",
@@ -207,7 +222,7 @@ def main():
         page = context.new_page()
 
         processed = 0
-        found = 0
+        updated = 0
         for ext_id, ean in rows:
             if time.time() > deadline:
                 print("Timebox reached, stopping.")
@@ -235,30 +250,25 @@ def main():
 
             with closing(psycopg2.connect(dsn)) as conn2, conn2.cursor() as cur2:
                 try:
-                    # 1) Save to selver_candidates
-                    cur2.execute(
-                        "UPDATE selver_candidates SET brand = %s WHERE ext_id = %s AND (brand IS NULL OR brand = '')",
-                        (b, ext_id)
-                    )
-                    # 2) Update *only Selver-sourced* products (via ext_product_map)
-                    #    and only if brand is empty/garbage.
-                    cur2.execute("""
+                    # Update products (guarded by BAD_BRAND_CLAUSE again)
+                    cur2.execute(f"""
                         UPDATE products p
                            SET brand = %s
                           FROM ext_product_map m
                          WHERE m.product_id = p.id
                            AND m.source = 'selver'
                            AND p.ean = %s
-                           AND (
-                                 p.brand IS NULL OR p.brand = '' OR
-                                 p.brand ILIKE 'e-selveri info%%' OR
-                                 length(p.brand) > 100 OR
-                                 p.brand ~* '(http|www\\.)' OR
-                                 p.brand ~* '@'
-                               )
+                           AND {BAD_BRAND_CLAUSE}
                     """, (b, ean))
+                    # Best-effort: cache into selver_candidates if row exists
+                    cur2.execute("""
+                        UPDATE selver_candidates
+                           SET brand = %s
+                         WHERE ext_id::text = %s
+                           AND (brand IS NULL OR brand = '')
+                    """, (b, ext_id))
                     conn2.commit()
-                    found += 1
+                    updated += 1
                     print(f"[BRAND] ext_id={ext_id} brand=\"{b}\"")
                 except Exception as e:
                     conn2.rollback()
@@ -267,7 +277,7 @@ def main():
             time.sleep(req_delay)
 
         browser.close()
-        print(f"Done. processed={processed} brand_found={found}")
+        print(f"Done. processed={processed} products_updated={updated}")
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, lambda *_: sys.exit(130))
