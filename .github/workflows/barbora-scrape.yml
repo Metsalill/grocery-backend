@@ -324,7 +324,7 @@ jobs:
         env:
           REQ_DELAY: ${{ github.event.inputs.req_delay }}
           PAGE_LIMIT: ${{ github.event.inputs.page_limit }}
-          MAX_PRODUCTS: ${{ github.event.inputs.max_products }}
+          MAX_PRODUCTS: ${{ github.event.inputs.max_products }}  # <-- fixed: event.inputs (dot), not event_inputs
           HEADLESS: ${{ github.event.inputs.headless }}
         shell: bash
         run: |
