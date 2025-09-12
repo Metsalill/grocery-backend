@@ -114,8 +114,10 @@ jobs:
           elif [ -s data/barbora_categories.txt ]; then
             echo "Using repo file data/barbora_categories.txt"
           else
-            # 3) Try autodiscover from homepage (heredoc to avoid quoting bugs)
-            cat > /tmp/discover_barbora.py <<'PY'
+            # 3) Try autodiscover from homepage (YAML-safe heredoc; Python code dedented at runtime)
+            python - <<'PY'
+import textwrap, sys
+code = """
 import os
 from urllib.parse import urljoin, urlparse
 from playwright.sync_api import sync_playwright
@@ -125,7 +127,7 @@ excludes = tuple(os.environ.get("EXCLUDES","").split())
 includes = tuple(os.environ.get("INCLUDES","").split())
 discovered = set()
 
-def absu(href): 
+def absu(href):
     return urljoin(BASE, href)
 
 def is_category(url):
@@ -133,15 +135,14 @@ def is_category(url):
     if not (p.scheme and p.netloc and p.netloc.endswith("barbora.ee")):
         return False
     segs = [s for s in p.path.split("/") if s]
-    # avoid non-catalog roots
     if any(s in ("retseptid","info","blogi","kampaania") for s in segs):
         return False
     return 1 <= len(segs) <= 4
 
 def allowed(url):
-    if any(url.startswith(pref) for pref in includes): 
+    if any(url.startswith(pref) for pref in includes):
         return True
-    if any(url.startswith(pref) for pref in excludes): 
+    if any(url.startswith(pref) for pref in excludes):
         return False
     return is_category(url)
 
@@ -150,7 +151,6 @@ with sync_playwright() as pw:
     ctx = b.new_context(locale="et-EE")
     p = ctx.new_page()
     p.goto(BASE, timeout=45000, wait_until="domcontentloaded")
-    # Try to accept cookies if banner shows
     for sel in ['#onetrust-accept-btn-handler', 'button:has-text("Nõustun")', 'button:has-text("Accept")']:
         try:
             loc = p.locator(sel)
@@ -168,11 +168,12 @@ with sync_playwright() as pw:
     os.makedirs("data", exist_ok=True)
     with open("data/barbora_categories.txt","w",encoding="utf-8") as f:
         for u in sorted(discovered):
-            f.write(u + "\n")
+            f.write(u + "\\n")
     print(f"[discover] wrote {len(discovered)} -> data/barbora_categories.txt")
     ctx.close(); b.close()
+"""
+exec(textwrap.dedent(code))
 PY
-            python /tmp/discover_barbora.py
 
             # 4) Fallback to curated FOOD roots if autodiscover empty/too small
             if [ ! -s data/barbora_categories.txt ] || [ "$(wc -l < data/barbora_categories.txt)" -lt 10 ]; then
@@ -192,12 +193,14 @@ PY
             fi
           fi
 
-          # Fix any stale slugs if present (compat)
+          # Fix stale slugs if present (compat)
           sed -i 's#https://barbora.ee/piimatooted-munad-void#https://barbora.ee/piimatooted-ja-munad#g' data/barbora_categories.txt
           sed -i 's#https://barbora.ee/leib-sai-kondiitritooted#https://barbora.ee/leivad-saiad-kondiitritooted#g' data/barbora_categories.txt
 
-          # Validate category URLs (drop 404 / "Palume vabandust" pages)
-          cat > /tmp/validate_cats.py <<'PY'
+          # Validate category URLs (drop 404 / "Palume vabandust")
+          python - <<'PY'
+import textwrap
+code = """
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 import pathlib
 infile = pathlib.Path("data/barbora_categories.txt")
@@ -217,10 +220,11 @@ with sync_playwright() as pw:
         except PWTimeout:
             pass
     b.close()
-pathlib.Path("data/barbora_categories.txt").write_text("\n".join(dict.fromkeys(valid)) + ("\n" if valid else ""), encoding="utf-8")
+pathlib.Path("data/barbora_categories.txt").write_text("\\n".join(dict.fromkeys(valid)) + ("\\n" if valid else ""), encoding="utf-8")
 print(f"Validated categories kept: {len(valid)}")
+"""
+exec(textwrap.dedent(code))
 PY
-          python /tmp/validate_cats.py || true
 
           echo "TOTAL categories: $(wc -l < data/barbora_categories.txt || echo 0)"
           echo "--- preview ---"
@@ -348,11 +352,9 @@ PY
           MAX_PRODUCTS="${MAX_PRODUCTS:-0}"
           HEADLESS="${HEADLESS:-1}"
 
-          SKIP_FLAG=()
           ONLY_EXT_FLAG=()
           ONLY_URL_FLAG=()
 
-          # In prices mode we intentionally don't use a skip list.
           if [ "${MODE}" = "metadata" ] && [ -s data/barbora_only_urls.txt ]; then
             ONLY_URL_FLAG=( --only-url-file data/barbora_only_urls.txt )
           elif [ "${MODE}" = "metadata" ] && [ -s data/barbora_only_ext_ids.txt ]; then
