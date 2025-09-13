@@ -38,6 +38,18 @@ SEARCH_URL = BASE_HOST + "/search?q={q}"
 IS_EAN = re.compile(r"^\d{8}(\d{5})?$")  # 8 or 13 digits
 BRAND_LABELS = re.compile(r"(kaubam[aä]rk|tootja|valmistaja|käitleja|brand)", re.I)
 
+# ---- graceful stop flag (set by SIGINT) ----
+_STOP = False
+def _on_sigint(signum, frame):
+    # Don’t raise SystemExit here; just ask the main loop to stop.
+    global _STOP
+    _STOP = True
+    # Print once; avoid flooding logs during repeated signals.
+    try:
+        print("SIGINT received → finishing current item and shutting down gracefully…")
+    except Exception:
+        pass
+
 
 def _clean(s: str | None) -> str:
     if not s:
@@ -445,8 +457,9 @@ def main():
         page.set_default_navigation_timeout(20000)
 
         for r in rows:
-            if time.time() > deadline:
-                print("Timebox reached, stopping.")
+            # honor timebox and external stop
+            if time.time() > deadline or _STOP:
+                print("Timebox/stop reached, stopping.")
                 break
 
             pid = r["product_id"]
@@ -488,5 +501,10 @@ def main():
 
 
 if __name__ == "__main__":
-    signal.signal(signal.SIGINT, lambda *_: sys.exit(130))
-    main()
+    # graceful SIGINT (from the workflow timeout) → no tracebacks / pipe errors
+    signal.signal(signal.SIGINT, _on_sigint)
+    try:
+        main()
+    except KeyboardInterrupt:
+        # Just in case (rare), also exit quietly on Ctrl-C.
+        pass
