@@ -9,7 +9,7 @@ Selver brand enrichment (PDP, structured-only; navigates search → PDP).
     • Käitleja / Tootja / Valmistaja / Kaubamärk / Brand rows (th/dt → td/dd)
     • JSON-LD (brand/manufacturer) and <meta property="product:brand">
 - Never guesses from product title.
-- Normalizes "Määramata", "Määrmata" → "Määramata".
+- Normalizes "Määramata" / "Määrmata" → "Määramata".
 
 ENV
   DATABASE_URL         required
@@ -32,14 +32,15 @@ from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 BASE = "https://www.selver.ee"
 SEARCH_URL = BASE + "/search?q={q}"
 
-HEADLESS = os.getenv("HEADLESS", "1") == "1"
-MAX_ITEMS = int(os.getenv("MAX_ITEMS", "500"))
-REQ_DELAY = float(os.getenv("REQ_DELAY", "0.25"))
-TIMEBOX = int(os.getenv("TIMEBOX_SECONDS", "1800"))
-OVERWRITE = os.getenv("OVERWRITE_PRODUCTS", "0") in ("1", "true", "True", "YES", "yes")
+HEADLESS   = os.getenv("HEADLESS", "1") == "1"
+MAX_ITEMS  = int(os.getenv("MAX_ITEMS", "500"))
+REQ_DELAY  = float(os.getenv("REQ_DELAY", "0.25"))
+TIMEBOX    = int(os.getenv("TIMEBOX_SECONDS", "1800"))
+OVERWRITE  = os.getenv("OVERWRITE_PRODUCTS", "0").lower() in ("1", "true", "yes")
 
 # --- brand labels / helpers ---------------------------------------------------
 LABEL_RX = re.compile(r'(kaubam[aä]rk|tootja|valmistaja|käitleja|brand)', re.I)
+IS_EAN    = re.compile(r'^\d{8}(\d{5})?$')  # 8 or 13 digits
 
 def _clean(s: Optional[str]) -> str:
     if not s:
@@ -52,8 +53,7 @@ def _normalize_brand(b: str) -> str:
     if not b:
         return ""
     t = b.strip()
-    # common misspelling seen on site occasionally
-    if re.fullmatch(r'mää?ramata', t, re.I):
+    if re.fullmatch(r'mää?ramata', t, re.I):  # "Määrmata" → "Määramata"
         return "Määramata"
     return t
 
@@ -67,7 +67,7 @@ def _is_bad_brand(b: Optional[str]) -> bool:
     if b.lower().startswith("e-selveri info"): return True
     return False
 
-# --- navigation helpers (ported from EAN probe) --------------------------------
+# --- request router / overlays ------------------------------------------------
 BLOCK_SUBSTR = (
     "adobedtm", "typekit", "use.typekit.net", "googletagmanager", "google-analytics",
     "doubleclick", "facebook.net", "newrelic", "pingdom", "cookiebot", "hotjar",
@@ -97,6 +97,16 @@ def kill_overlays(page):
     try: page.keyboard.press("Escape")
     except Exception: pass
 
+def ensure_specs_open(page):
+    for sel in ["button:has-text('Tooteinfo')", "button:has-text('Lisainfo')", "button:has-text('Tootekirjeldus')"]:
+        try:
+            if page.locator(sel).count():
+                page.click(sel, timeout=500)
+                time.sleep(0.12)
+        except Exception:
+            pass
+
+# --- search → open PDP (ported from fast EAN probe) ---------------------------
 def looks_like_pdp_href(href: str) -> bool:
     if not href: return False
     href = href.split("?", 1)[0].split("#", 1)[0]
@@ -104,15 +114,12 @@ def looks_like_pdp_href(href: str) -> bool:
         try: href = (urlparse(href).path) or "/"
         except Exception: return False
     if not href.startswith("/"): return False
-
     bad = ("/search", "/konto", "/login", "/registreeru", "/logout", "/kliendimangud",
            "/kauplused", "/selveekspress", "/tule-toole", "/uudised", "/kinkekaardid",
            "/selveri-kook", "/kampaania", "/retseptid", "/app")
     if any(href.startswith(p) for p in bad): return False
-
     if href.startswith("/toode/") or href.startswith("/e-selver/toode/"):
         return True
-
     segs = [s for s in href.split("/") if s]
     if not segs: return False
     last = segs[-1]
@@ -162,27 +169,19 @@ def open_first_search_tile(page) -> bool:
             continue
     return False
 
-def search_and_open(page, query: str) -> bool:
+def search_and_open(page, query: str) -> Tuple[bool, str]:
+    """Return (opened, url_tried)."""
+    url = SEARCH_URL.format(q=quote_plus(query))
     try:
-        page.goto(SEARCH_URL.format(q=quote_plus(query)), timeout=15000, wait_until="domcontentloaded")
+        page.goto(url, timeout=15000, wait_until="domcontentloaded")
         kill_overlays(page)
-        # wait for product grid/list to mount a little
         try: page.wait_for_selector("[data-testid='product-grid'], .product-list, a[href^='/']", timeout=4000)
         except Exception: pass
         if open_first_search_tile(page):
-            return True
+            return True, url
     except Exception:
         pass
-    return False
-
-def ensure_specs_open(page):
-    for sel in ["button:has-text('Tooteinfo')", "button:has-text('Lisainfo')", "button:has-text('Tootekirjeldus')"]:
-        try:
-            if page.locator(sel).count():
-                page.click(sel, timeout=500)
-                time.sleep(0.12)
-        except Exception:
-            pass
+    return False, url
 
 # --- brand extraction ----------------------------------------------------------
 def extract_brand(page) -> str:
@@ -259,7 +258,6 @@ def pick_rows(conn, limit: int):
     """Prefer products that have a Selver URL mapping; fallback to Selver-priced ones."""
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
         where = "TRUE" if OVERWRITE else "(p.brand IS NULL OR p.brand = '' OR length(p.brand)>100 OR p.brand ~ '(http|www\\.)' OR p.brand ~ '@' OR p.brand ILIKE 'e-selveri info%')"
-
         cur.execute(
             f"""
             SELECT DISTINCT ON (p.id)
@@ -277,15 +275,13 @@ def pick_rows(conn, limit: int):
         rows = cur.fetchall()
         if rows:
             return rows
-
-        # fallback if mapping missing
         cur.execute(
             f"""
             SELECT DISTINCT p.id, p.name, p.ean,
                    COALESCE(NULLIF(p.brand,''),'') AS brand,
                    NULL::text AS selver_url
             FROM products p
-            JOIN prices pr ON pr.product_id=p.id
+            JOIN prices pr ON pr.product_id = p.id
             JOIN stores s  ON s.id = pr.store_id AND s.chain='Selver'
             WHERE {where}
             ORDER BY p.id
@@ -312,38 +308,62 @@ def save_brand(conn, product_id: int, brand: str):
             )
     conn.commit()
 
-# --- main ----------------------------------------------------------------------
-def process_one(page, row) -> Tuple[bool, str]:
-    """Returns (ok, url_tried)"""
-    pid = row["id"]
-    url = (row.get("selver_url") or "").strip()
-    tried = url
+# --- ext_id classifier ---------------------------------------------------------
+def classify_ext(ext_id: str) -> Tuple[str, str]:
+    """
+    Return ("url"|"search"|"none", value).
+    - url: absolute/relative PDP-ish link or slug → open directly
+    - search: digits/EAN → use site search
+    """
+    s = (ext_id or "").strip()
+    if not s:
+        return ("none", "")
+    if s.startswith("http://") or s.startswith("https://"):
+        return ("url", s)
+    if s.startswith("/"):
+        return ("url", BASE + s)
+    if IS_EAN.fullmatch(s) or s.isdigit():
+        return ("search", s)
+    # treat as slug-ish path
+    return ("url", f"{BASE}/{s}")
 
-    try:
-        if url:
-            page.goto(url, timeout=15000, wait_until="domcontentloaded")
+# --- main per-row flow ---------------------------------------------------------
+def process_one(page, row) -> Tuple[bool, str]:
+    """Returns (ok, url_we_tried_or_current)."""
+    pid = row["id"]
+    ext = (row.get("selver_url") or "").strip()
+    mode, value = classify_ext(ext)
+    tried_url = ""
+
+    # 1) direct PDP if we truly have a URL/slug
+    if mode == "url" and value:
+        tried_url = value
+        try:
+            page.goto(value, timeout=15000, wait_until="domcontentloaded")
             kill_overlays(page)
             ensure_specs_open(page)
             b = extract_brand(page)
             if b:
                 return True, page.url
-        # fallback by search (EAN is perfect, otherwise name)
-        q = (row.get("ean") or "").strip() or (row.get("name") or "").strip()
-        if not q:
-            return False, tried or "<no url>"
-        if search_and_open(page, q):
+        except Exception:
+            pass  # fall through to search
+
+    # 2) search by the best string (prefer: ext as digits, else EAN, else name)
+    q = value if mode == "search" else ((row.get("ean") or "").strip() or (row.get("name") or "").strip())
+    if q:
+        opened, s_url = search_and_open(page, q)
+        tried_url = s_url or tried_url
+        if opened:
             kill_overlays(page)
             ensure_specs_open(page)
             b = extract_brand(page)
             if b:
                 return True, page.url
             return False, page.url
-    except PWTimeout:
-        pass
-    except Exception:
-        pass
-    return False, tried or (SEARCH_URL.format(q=quote_plus((row.get("ean") or row.get("name") or ""))))
 
+    return False, tried_url or "<no-url>"
+
+# --- main ----------------------------------------------------------------------
 def main():
     dsn = os.getenv("DATABASE_URL") or os.getenv("DATABASE_URL_PUBLIC")
     if not dsn:
@@ -372,10 +392,9 @@ def main():
             for r in rows:
                 if time.time() > deadline:
                     print("Timebox reached, stopping."); break
-                ok, tried_url = process_one(page, r)
+                ok, tried = process_one(page, r)
                 processed += 1
                 if ok:
-                    # re-extract on current PDP after process_one
                     b = extract_brand(page)
                     if b and not _is_bad_brand(b):
                         try:
@@ -388,7 +407,7 @@ def main():
                     else:
                         print(f'[MISS_BRAND_EMPTY] product_id={r["id"]} url={page.url}')
                 else:
-                    print(f'[MISS_BRAND_EMPTY] product_id={r["id"]} url={tried_url}')
+                    print(f'[MISS_BRAND_EMPTY] product_id={r["id"]} url={tried}')
                 time.sleep(max(0.05, REQ_DELAY + random.uniform(-0.08, 0.08)))
 
         try: browser.close()
