@@ -38,6 +38,7 @@ SEARCH_URL = BASE_HOST + "/search?q={q}"
 IS_EAN = re.compile(r"^\d{8}(\d{5})?$")  # 8 or 13 digits
 BRAND_LABELS = re.compile(r"(kaubam[aä]rk|tootja|valmistaja|käitleja|brand)", re.I)
 
+
 def _clean(s: str | None) -> str:
     if not s:
         return ""
@@ -45,14 +46,18 @@ def _clean(s: str | None) -> str:
     s = re.sub(r"\s+", " ", s).strip()
     return s
 
+
 def _norm_maarmata(b: str) -> str:
     return "Määramata" if b.lower() == "määrmata" else b
+
 
 def _looks_url(s: str) -> bool:
     return s.startswith("http://") or s.startswith("https://")
 
+
 def _looks_searchable_digits(s: str) -> bool:
     return bool(IS_EAN.fullmatch(s))
+
 
 def _accept_overlays(page):
     for sel in [
@@ -70,18 +75,28 @@ def _accept_overlays(page):
         except Exception:
             pass
 
+
 # Trimmed list; don’t block cookiebot (it sometimes influences layout timing)
 BLOCK_SUBSTR = (
-    "adobedtm", "use.typekit.net", "typekit",
-    "googletagmanager", "google-analytics", "doubleclick",
-    "facebook.net", "newrelic", "pingdom", "hotjar",
+    "adobedtm",
+    "use.typekit.net",
+    "typekit",
+    "googletagmanager",
+    "google-analytics",
+    "doubleclick",
+    "facebook.net",
+    "newrelic",
+    "pingdom",
+    "hotjar",
 )
+
 
 def _router(route, request):
     url = (request.url or "").lower()
     if any(s in url for s in BLOCK_SUBSTR):
         return route.abort()
     return route.continue_()
+
 
 def _looks_like_pdp(page) -> bool:
     try:
@@ -95,6 +110,7 @@ def _looks_like_pdp(page) -> bool:
     except Exception:
         pass
     return False
+
 
 # ---------- robust PDP-href recognition ----------
 def _looks_like_pdp_href(href: str) -> bool:
@@ -117,10 +133,22 @@ def _looks_like_pdp_href(href: str) -> bool:
 
     # obvious non-PDP paths
     bad_prefixes = (
-        "/search", "/konto", "/login", "/registreeru", "/logout",
-        "/kliendimangud", "/kauplused", "/selveekspress", "/tule-toole",
-        "/uudised", "/kinkekaardid", "/selveri-kook", "/kampaania",
-        "/retseptid", "/app", "/vabad-"
+        "/search",
+        "/konto",
+        "/login",
+        "/registreeru",
+        "/logout",
+        "/kliendimangud",
+        "/kauplused",
+        "/selveekspress",
+        "/tule-toole",
+        "/uudised",
+        "/kinkekaardid",
+        "/selveri-kook",
+        "/kampaania",
+        "/retseptid",
+        "/app",
+        "/vabad-",  # jobs
     )
     if any(path.startswith(p) for p in bad_prefixes):
         return False
@@ -132,10 +160,11 @@ def _looks_like_pdp_href(href: str) -> bool:
     if not segs:
         return False
     last = segs[-1]
-    # slug with at least one hyphen and often size token → good signal
+    # slug with at least one hyphen (most PDPs)
     if "-" in last:
         return True
     return False
+
 
 def _candidate_anchors(page):
     sels = [
@@ -152,6 +181,7 @@ def _candidate_anchors(page):
         except Exception:
             pass
     return nodes[:300]
+
 
 def _open_first_pdp_from_search(page) -> bool:
     # Wait briefly for grid/list to render
@@ -187,6 +217,7 @@ def _open_first_pdp_from_search(page) -> bool:
     except Exception:
         return False
 
+
 def _navigate(page, ext_id: str) -> tuple[bool, str]:
     """(ok, current_url). ext_id is absolute URL or searchable digits (EAN)."""
     try:
@@ -221,6 +252,7 @@ def _navigate(page, ext_id: str) -> tuple[bool, str]:
         return False, ""
     except Exception:
         return False, ""
+
 
 def _extract_brand(page) -> str:
     # 0) tables / definition lists
@@ -303,14 +335,15 @@ def _extract_brand(page) -> str:
 
     return ""
 
-# ----------------- DB helpers -----------------
 
+# ----------------- DB helpers -----------------
 def _conn():
     dsn = os.getenv("DATABASE_URL") or os.getenv("DATABASE_URL_PUBLIC")
     if not dsn:
         print("Missing DATABASE_URL / DATABASE_URL_PUBLIC", file=sys.stderr)
         sys.exit(2)
     return psycopg2.connect(dsn)
+
 
 GARBAGE_BRAND_SQL = """
 (p.brand IS NULL OR p.brand = ''
@@ -319,6 +352,7 @@ GARBAGE_BRAND_SQL = """
  OR p.brand ~* '(http|www\\.)'
  OR p.brand ~* '@')
 """
+
 
 def pick_rows(conn, limit: int):
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
@@ -361,6 +395,7 @@ def pick_rows(conn, limit: int):
         )
         return cur.fetchall()
 
+
 def persist_brand(conn, product_id: int, brand: str, overwrite: bool) -> bool:
     brand = _norm_maarmata(_clean(brand))
     if not brand:
@@ -376,8 +411,8 @@ def persist_brand(conn, product_id: int, brand: str, overwrite: bool) -> bool:
     conn.commit()
     return True
 
-# ----------------- main -----------------
 
+# ----------------- main -----------------
 def main():
     MAX_ITEMS = int(os.getenv("MAX_ITEMS", "500"))
     HEADLESS = os.getenv("HEADLESS", "1") == "1"
@@ -450,6 +485,7 @@ def main():
             pass
 
     print(f"Done. processed={processed} brand_found={found}")
+
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, lambda *_: sys.exit(130))
