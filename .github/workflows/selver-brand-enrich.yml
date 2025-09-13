@@ -76,10 +76,19 @@ jobs:
         env:
           PYTHONUNBUFFERED: "1"
         run: |
-          # Convert minutes→seconds for the script and soft-limit the whole step
-          export TIMEBOX_SECONDS=$(( ${TIMEBOX_MINUTES} * 60 ))
+          set +e
+          # Convert minutes→seconds for the script (script reads TIMEBOX_SECONDS)
+          export TIMEBOX_SECONDS=$(( TIMEBOX_MINUTES * 60 ))
           timeout --signal=SIGINT ${TIMEBOX_MINUTES}m \
             python scripts/selver_brand_enrich_pw.py
+          ec=$?
+          # Treat soft time limit as success:
+          # 124 = timeout reached, 130 = exited from SIGINT handler, 137 = SIGKILL (rare)
+          if [ "$ec" = "124" ] || [ "$ec" = "130" ] || [ "$ec" = "137" ]; then
+            echo "Soft time limit hit (exit $ec) — treating as success."
+            exit 0
+          fi
+          exit $ec
 
       - name: Post-run stats
         run: |
