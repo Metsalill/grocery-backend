@@ -1,417 +1,392 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Selver brand enrichment (PDP, structured-only; navigates search → PDP).
+Selver brand enrichment (structured fields only).
 
-- Accepts rows directly from products (+ ext_product_map for Selver).
-- For each item, opens the PDP (direct URL if mapped; otherwise searches),
-  then extracts brand from:
-    • Käitleja / Tootja / Valmistaja / Kaubamärk / Brand rows (th/dt → td/dd)
-    • JSON-LD (brand/manufacturer) and <meta property="product:brand">
-- Never guesses from product title.
-- Normalizes "Määramata" / "Määrmata" → "Määramata".
+- Takes Selver mapping from ext_product_map (source='selver').
+  If ext_id is an absolute Selver URL, we go direct.
+  If ext_id is 8/13 digits (EAN), we open Selver search and click the first/best tile.
+- Extracts brand from Käitleja/Tootja/Valmistaja/Kaubamärk/Brand rows,
+  JSON-LD (brand/manufacturer) and meta product:brand. No title/name guessing.
 
-ENV
-  DATABASE_URL         required
-  MAX_ITEMS            default 500
-  HEADLESS             1/0, default 1
-  REQ_DELAY            seconds between items (default 0.25)
-  TIMEBOX_SECONDS      soft wall time for whole run (default 1800)
-  OVERWRITE_PRODUCTS   1=overwrite existing product.brand (else only fill empties/garbage)
+Env:
+  DATABASE_URL / DATABASE_URL_PUBLIC  (required)
+  MAX_ITEMS        (default 500)
+  HEADLESS         (1|0, default 1)
+  REQ_DELAY        (seconds, default 0.25)
+  TIMEBOX_SECONDS  (default 1200)
+  OVERWRITE_PRODUCTS (1|0, default 0)  # if 1, overwrite any existing brand
 """
 
 from __future__ import annotations
-import os, re, json, time, signal, sys, random
+import json
+import os
+import re
+import sys
+import time
+import signal
+from contextlib import closing
+
 import psycopg2
 import psycopg2.extras
-from contextlib import closing
-from typing import Optional, Tuple, List
-from urllib.parse import quote_plus, urlparse
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 
-BASE = "https://www.selver.ee"
-SEARCH_URL = BASE + "/search?q={q}"
+BASE_HOST = "https://www.selver.ee"
+SEARCH_URL = BASE_HOST + "/search?q={q}"
 
-HEADLESS   = os.getenv("HEADLESS", "1") == "1"
-MAX_ITEMS  = int(os.getenv("MAX_ITEMS", "500"))
-REQ_DELAY  = float(os.getenv("REQ_DELAY", "0.25"))
-TIMEBOX    = int(os.getenv("TIMEBOX_SECONDS", "1800"))
-OVERWRITE  = os.getenv("OVERWRITE_PRODUCTS", "0").lower() in ("1", "true", "yes")
+IS_EAN = re.compile(r"^\d{8}(\d{5})?$")  # 8 or 13 digits
+BRAND_LABELS = re.compile(r"(kaubam[aä]rk|tootja|valmistaja|käitleja|brand)", re.I)
 
-# --- brand labels / helpers ---------------------------------------------------
-LABEL_RX = re.compile(r'(kaubam[aä]rk|tootja|valmistaja|käitleja|brand)', re.I)
-IS_EAN    = re.compile(r'^\d{8}(\d{5})?$')  # 8 or 13 digits
-
-def _clean(s: Optional[str]) -> str:
+def _clean(s: str | None) -> str:
     if not s:
         return ""
-    s = re.sub(r'[\u2122\u00AE]', '', s)          # ™ ®
-    s = re.sub(r'\s+', ' ', s).strip()
+    s = re.sub(r"[\u2122\u00AE]", "", s)  # ™ ®
+    s = re.sub(r"\s+", " ", s).strip()
     return s
 
-def _normalize_brand(b: str) -> str:
-    if not b:
-        return ""
-    t = b.strip()
-    if re.fullmatch(r'mää?ramata', t, re.I):  # "Määrmata" → "Määramata"
-        return "Määramata"
-    return t
+def _norm_maarmata(b: str) -> str:
+    # Normalize Määrmata → Määramata
+    return "Määramata" if b.lower() == "määrmata" else b
 
-def _is_bad_brand(b: Optional[str]) -> bool:
-    if not b: return True
-    b = b.strip()
-    if not b: return True
-    if len(b) > 100: return True
-    if re.search(r'(http|www\.)', b, re.I): return True
-    if '@' in b: return True
-    if b.lower().startswith("e-selveri info"): return True
-    return False
+def _looks_url(s: str) -> bool:
+    return s.startswith("http://") or s.startswith("https://")
 
-# --- request router / overlays ------------------------------------------------
-BLOCK_SUBSTR = (
-    "adobedtm", "typekit", "use.typekit.net", "googletagmanager", "google-analytics",
-    "doubleclick", "facebook.net", "newrelic", "pingdom", "cookiebot", "hotjar",
-)
+def _looks_searchable_digits(s: str) -> bool:
+    return bool(IS_EAN.fullmatch(s))
 
-def _router(route, request):
-    try:
-        url = request.url.lower()
-        if any(s in url for s in BLOCK_SUBSTR):
-            return route.abort()
-    except Exception:
-        pass
-    return route.continue_()
-
-def kill_overlays(page):
+def _accept_overlays(page):
     for sel in [
-        "button:has-text('Nõustun')", "button:has-text('Luba kõik')",
-        "button:has-text('Accept all')", "button:has-text('Accept')",
+        "button#onetrust-accept-btn-handler",
+        "button:has-text('Nõustun')",
+        "button:has-text('Accept')",
         "[data-testid='uc-accept-all-button']",
+        "[aria-label='Accept all']",
     ]:
         try:
-            if page.locator(sel).count():
-                page.click(sel, timeout=500)
-                time.sleep(0.1)
-        except Exception:
-            pass
-    try: page.keyboard.press("Escape")
-    except Exception: pass
-
-def ensure_specs_open(page):
-    for sel in ["button:has-text('Tooteinfo')", "button:has-text('Lisainfo')", "button:has-text('Tootekirjeldus')"]:
-        try:
-            if page.locator(sel).count():
-                page.click(sel, timeout=500)
-                time.sleep(0.12)
+            loc = page.locator(sel).first
+            if loc and loc.count() > 0 and loc.is_visible():
+                loc.click(timeout=800)
+                time.sleep(0.15)
         except Exception:
             pass
 
-# --- search → open PDP (ported from fast EAN probe) ---------------------------
-def looks_like_pdp_href(href: str) -> bool:
-    if not href: return False
-    href = href.split("?", 1)[0].split("#", 1)[0]
-    if href.startswith("http"):
-        try: href = (urlparse(href).path) or "/"
-        except Exception: return False
-    if not href.startswith("/"): return False
-    bad = ("/search", "/konto", "/login", "/registreeru", "/logout", "/kliendimangud",
-           "/kauplused", "/selveekspress", "/tule-toole", "/uudised", "/kinkekaardid",
-           "/selveri-kook", "/kampaania", "/retseptid", "/app")
-    if any(href.startswith(p) for p in bad): return False
-    if href.startswith("/toode/") or href.startswith("/e-selver/toode/"):
-        return True
-    segs = [s for s in href.split("/") if s]
-    if not segs: return False
-    last = segs[-1]
-    if "-" in last and (any(ch.isdigit() for ch in last) or re.search(r"(?:^|[-_])(kg|g|l|ml|tk)$", last)):
-        return True
+def _kill_noise_router(route, request):
+    url = (request.url or "").lower()
+    for bad in ["googletagmanager", "google-analytics", "doubleclick",
+                "facebook", "cookiebot", "hotjar", "pingdom",
+                "use.typekit.net", "typekit", "newrelic"]:
+        if bad in url:
+            return route.abort()
+    return route.continue_()
+
+def _looks_like_pdp(page) -> bool:
+    try:
+        if page.locator("meta[property='og:type'][content='product']").count() > 0:
+            return True
+    except Exception:
+        pass
+    try:
+        if page.locator(":text-matches('Ribakood|Barcode|Штрихкод','i')").count() > 0:
+            return True
+    except Exception:
+        pass
     return False
 
-def _candidate_anchors(page):
-    sels = [
+def _open_first_search_tile(page) -> bool:
+    for sel in [
         "[data-testid='product-grid'] a[href]:visible",
         "[data-testid='product-list'] a[href]:visible",
         ".product-list a[href]:visible",
         ".product-grid a[href]:visible",
         ".product-card a[href]:visible",
         "article a[href]:visible",
-        "[data-href]:visible",
         "a[href^='/']:visible",
-    ]
-    out = []
-    for s in sels:
-        try: out.extend(page.locator(s).all())
-        except Exception: pass
-    return out[:200]
-
-def open_first_search_tile(page) -> bool:
-    links = _candidate_anchors(page)
-    for a in links:
+    ]:
         try:
-            href = a.get_attribute("href") or a.get_attribute("data-href") or ""
-            if not looks_like_pdp_href(href): continue
-            a.click(timeout=1200)
-            try: page.wait_for_selector("h1", timeout=2500)
-            except Exception: pass
-            try: page.wait_for_load_state("networkidle", timeout=2500)
-            except Exception: pass
-            return True
-        except Exception:
-            continue
-    # fallback: navigate by href
-    for a in links:
-        try:
-            href = a.get_attribute("href") or a.get_attribute("data-href") or ""
-            if not looks_like_pdp_href(href): continue
-            page.goto(href if href.startswith("http") else BASE + href, timeout=15000, wait_until="domcontentloaded")
-            return True
+            a = page.locator(sel).first
+            if a and a.count() > 0:
+                href = a.get_attribute("href") or ""
+                if not href:
+                    continue
+                if href.startswith("/"):
+                    href = BASE_HOST + href
+                page.goto(href, timeout=15000, wait_until="domcontentloaded")
+                try:
+                    page.wait_for_load_state("networkidle", timeout=2500)
+                except Exception:
+                    pass
+                return _looks_like_pdp(page) or page.locator("h1").count() > 0
         except Exception:
             continue
     return False
 
-def search_and_open(page, query: str) -> Tuple[bool, str]:
-    """Return (opened, url_tried)."""
-    url = SEARCH_URL.format(q=quote_plus(query))
+def _navigate(page, ext_id: str) -> tuple[bool, str]:
+    """Return (ok, current_url). ext_id is absolute URL or EAN."""
     try:
-        page.goto(url, timeout=15000, wait_until="domcontentloaded")
-        kill_overlays(page)
-        try: page.wait_for_selector("[data-testid='product-grid'], .product-list, a[href^='/']", timeout=4000)
-        except Exception: pass
-        if open_first_search_tile(page):
-            return True, url
+        if _looks_url(ext_id):
+            page.goto(ext_id, timeout=20000, wait_until="domcontentloaded")
+            _accept_overlays(page)
+            try:
+                page.wait_for_load_state("networkidle", timeout=2500)
+            except Exception:
+                pass
+            return True, page.url
+        # digits: search flow
+        if _looks_searchable_digits(ext_id):
+            page.goto(SEARCH_URL.format(q=ext_id), timeout=20000, wait_until="domcontentloaded")
+            _accept_overlays(page)
+            try:
+                page.wait_for_load_state("networkidle", timeout=1500)
+            except Exception:
+                pass
+            if _open_first_search_tile(page):
+                return True, page.url
+            return False, page.url
+        # fallback: try site-relative or slug
+        if ext_id.startswith("/"):
+            page.goto(BASE_HOST + ext_id, timeout=20000, wait_until="domcontentloaded")
+            _accept_overlays(page)
+            return True, page.url
+        page.goto(f"{BASE_HOST}/{ext_id}", timeout=20000, wait_until="domcontentloaded")
+        _accept_overlays(page)
+        return True, page.url
+    except PWTimeout:
+        return False, ""
     except Exception:
-        pass
-    return False, url
+        return False, ""
 
-# --- brand extraction ----------------------------------------------------------
-def extract_brand(page) -> str:
-    # direct th/dt → td/dd pairs
+def _extract_brand(page) -> str:
+    # 0) direct table/selectors
     sel_pairs = [
-        'th:has(:text-matches("Käitleja","i")) + td',
-        'th:has(:text-matches("Tootja","i")) + td',
-        'th:has(:text-matches("Valmistaja","i")) + td',
-        'th:has(:text-matches("Kaubamärk","i")) + td',
-        'th:has(:text-matches("Brand","i")) + td',
-        'dt:has(:text-matches("Käitleja","i")) + dd',
-        'dt:has(:text-matches("Tootja","i")) + dd',
-        'dt:has(:text-matches("Valmistaja","i")) + dd',
-        'dt:has(:text-matches("Kaubamärk","i")) + dd',
-        'dt:has(:text-matches("Brand","i")) + dd',
+        'th:has-text("Käitleja") + td',
+        'th:has-text("Tootja") + td',
+        'th:has-text("Valmistaja") + td',
+        'th:has-text("Kaubamärk") + td',
+        'th:has-text("Brand") + td',
+        'dt:has-text("Käitleja") + dd',
+        'dt:has-text("Tootja") + dd',
+        'dt:has-text("Valmistaja") + dd',
+        'dt:has-text("Kaubamärk") + dd',
+        'dt:has-text("Brand") + dd',
     ]
     try:
         for sel in sel_pairs:
             loc = page.locator(sel).first
             if loc and loc.count() > 0:
-                txt = _clean(loc.inner_text(timeout=800))
+                txt = _clean(loc.inner_text(timeout=600) or "")
                 if txt:
-                    return _normalize_brand(txt)
+                    return _norm_maarmata(txt)
     except Exception:
         pass
 
-    # JSON-LD
+    # 1) JSON-LD
     try:
-        for el in page.locator('script[type="application/ld+json"]').all():
-            txt = el.inner_text(timeout=400) or ''
-            if not txt.strip(): continue
-            try: data = json.loads(txt)
-            except Exception: continue
+        scripts = page.locator('script[type="application/ld+json"]')
+        for i in range(scripts.count()):
+            try:
+                raw = scripts.nth(i).inner_text(timeout=600) or ""
+                data = json.loads(raw)
+            except Exception:
+                continue
             nodes = data if isinstance(data, list) else [data]
             for n in nodes:
-                b = n.get('brand')
-                if isinstance(b, dict): b = b.get('name')
-                b = _clean(b)
-                if b: return _normalize_brand(b)
-                m = n.get('manufacturer')
-                if isinstance(m, dict): m = m.get('name')
-                m = _clean(m)
-                if m: return _normalize_brand(m)
+                if not isinstance(n, dict):
+                    continue
+                b = n.get("brand")
+                if isinstance(b, dict):
+                    b = b.get("name")
+                b = _clean(b or "")
+                if b:
+                    return _norm_maarmata(b)
+                m = n.get("manufacturer")
+                if isinstance(m, dict):
+                    m = m.get("name")
+                m = _clean(m or "")
+                if m:
+                    return _norm_maarmata(m)
     except Exception:
         pass
 
-    # meta product:brand
-    try:
-        val = page.locator('meta[property="product:brand"]').first.get_attribute("content", timeout=300) or ""
-        val = _clean(val)
-        if val:
-            return _normalize_brand(val)
-    except Exception:
-        pass
-
-    # brute force HTML pairs
+    # 2) regex over table rows
     try:
         html = page.content()
-        for k, v in re.findall(r'(?is)<dt[^>]*>(.*?)</dt>\s*<dd[^>]*>(.*?)</dd>', html):
-            if LABEL_RX.search(re.sub(r'<.*?>', ' ', k)):
-                b = _clean(re.sub(r'<.*?>', ' ', v))
-                if b: return _normalize_brand(b)
-        for k, v in re.findall(r'(?is)<th[^>]*>(.*?)</th>\s*<td[^>]*>(.*?)</td>', html):
-            if LABEL_RX.search(re.sub(r'<.*?>', ' ', k)):
-                b = _clean(re.sub(r'<.*?>', ' ', v))
-                if b: return _normalize_brand(b)
+        for k, v in re.findall(r"(?is)<dt[^>]*>(.*?)</dt>\s*<dd[^>]*>(.*?)</dd>", html):
+            if BRAND_LABELS.search(re.sub(r"<.*?>", " ", k)):
+                b = _clean(re.sub(r"<.*?>", " ", v))
+                if b:
+                    return _norm_maarmata(b)
+        for k, v in re.findall(r"(?is)<th[^>]*>(.*?)</th>\s*<td[^>]*>(.*?)</td>", html):
+            if BRAND_LABELS.search(re.sub(r"<.*?>", " ", k)):
+                b = _clean(re.sub(r"<.*?>", " ", v))
+                if b:
+                    return _norm_maarmata(b)
+    except Exception:
+        pass
+
+    # 3) meta: product:brand
+    try:
+        el = page.locator('meta[property="product:brand"]').first
+        if el and el.count() > 0:
+            val = el.get_attribute("content", timeout=400) or ""
+            b = _clean(val)
+            if b:
+                return _norm_maarmata(b)
     except Exception:
         pass
 
     return ""
 
-# --- DB helpers ----------------------------------------------------------------
+# ----------------- DB helpers -----------------
+
+def _conn():
+    dsn = os.getenv("DATABASE_URL") or os.getenv("DATABASE_URL_PUBLIC")
+    if not dsn:
+        print("Missing DATABASE_URL / DATABASE_URL_PUBLIC", file=sys.stderr)
+        sys.exit(2)
+    return psycopg2.connect(dsn)
+
+GARBAGE_BRAND_SQL = """
+(p.brand IS NULL OR p.brand = ''
+ OR p.brand ILIKE 'e-selveri info%%'
+ OR length(p.brand) > 100
+ OR p.brand ~* '(http|www\\.)'
+ OR p.brand ~* '@')
+"""
+
 def pick_rows(conn, limit: int):
-    """Prefer products that have a Selver URL mapping; fallback to Selver-priced ones."""
+    """Pick Selver-mapped products whose brand is empty/garbage (first choice),
+       else (if none) just any Selver-mapped products, up to limit.
+    """
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-        where = "TRUE" if OVERWRITE else "(p.brand IS NULL OR p.brand = '' OR length(p.brand)>100 OR p.brand ~ '(http|www\\.)' OR p.brand ~ '@' OR p.brand ILIKE 'e-selveri info%')"
+        # Primary: need enrichment
         cur.execute(
             f"""
             SELECT DISTINCT ON (p.id)
-                   p.id, p.name, p.ean,
-                   COALESCE(NULLIF(p.brand,''),'') AS brand,
-                   m.ext_id AS selver_url
-            FROM products p
-            JOIN ext_product_map m ON m.product_id = p.id AND m.source='selver'
-            WHERE {where}
-            ORDER BY p.id
-            LIMIT %s;
+                   p.id AS product_id,
+                   p.name,
+                   COALESCE(NULLIF(p.brand,''), '')  AS old_brand,
+                   COALESCE(NULLIF(p.amount,''), '') AS amount,
+                   m.ext_id
+              FROM products p
+              JOIN ext_product_map m ON m.product_id = p.id
+             WHERE m.source = 'selver'
+               AND {GARBAGE_BRAND_SQL}
+             ORDER BY p.id
+             LIMIT %s;
             """,
             (limit,),
         )
         rows = cur.fetchall()
         if rows:
             return rows
+
+        # Fallback: anything Selver-mapped
         cur.execute(
-            f"""
-            SELECT DISTINCT p.id, p.name, p.ean,
-                   COALESCE(NULLIF(p.brand,''),'') AS brand,
-                   NULL::text AS selver_url
-            FROM products p
-            JOIN prices pr ON pr.product_id = p.id
-            JOIN stores s  ON s.id = pr.store_id AND s.chain='Selver'
-            WHERE {where}
-            ORDER BY p.id
-            LIMIT %s;
+            """
+            SELECT DISTINCT ON (p.id)
+                   p.id AS product_id,
+                   p.name,
+                   COALESCE(NULLIF(p.brand,''), '')  AS old_brand,
+                   COALESCE(NULLIF(p.amount,''), '') AS amount,
+                   m.ext_id
+              FROM products p
+              JOIN ext_product_map m ON m.product_id = p.id
+             WHERE m.source = 'selver'
+             ORDER BY p.id
+             LIMIT %s;
             """,
             (limit,),
         )
         return cur.fetchall()
 
-def save_brand(conn, product_id: int, brand: str):
-    brand = _normalize_brand(brand)
+def persist_brand(conn, product_id: int, brand: str, overwrite: bool) -> bool:
+    brand = _norm_maarmata(_clean(brand))
+    if not brand:
+        return False
     with conn.cursor() as cur:
-        if OVERWRITE:
-            cur.execute("UPDATE products SET brand = %s WHERE id = %s;", (brand, product_id))
+        if overwrite:
+            cur.execute("UPDATE products p SET brand = %s WHERE p.id = %s;", (brand, product_id))
         else:
             cur.execute(
-                """
-                UPDATE products
-                   SET brand = %s
-                 WHERE id = %s
-                   AND (brand IS NULL OR brand = '' OR length(brand)>100 OR brand ~ '(http|www\\.)' OR brand ~ '@' OR brand ILIKE 'e-selveri info%');
-                """,
+                f"UPDATE products p SET brand = %s WHERE p.id = %s AND {GARBAGE_BRAND_SQL};",
                 (brand, product_id),
             )
     conn.commit()
+    return True
 
-# --- ext_id classifier ---------------------------------------------------------
-def classify_ext(ext_id: str) -> Tuple[str, str]:
-    """
-    Return ("url"|"search"|"none", value).
-    - url: absolute/relative PDP-ish link or slug → open directly
-    - search: digits/EAN → use site search
-    """
-    s = (ext_id or "").strip()
-    if not s:
-        return ("none", "")
-    if s.startswith("http://") or s.startswith("https://"):
-        return ("url", s)
-    if s.startswith("/"):
-        return ("url", BASE + s)
-    if IS_EAN.fullmatch(s) or s.isdigit():
-        return ("search", s)
-    # treat as slug-ish path
-    return ("url", f"{BASE}/{s}")
+# ----------------- main -----------------
 
-# --- main per-row flow ---------------------------------------------------------
-def process_one(page, row) -> Tuple[bool, str]:
-    """Returns (ok, url_we_tried_or_current)."""
-    pid = row["id"]
-    ext = (row.get("selver_url") or "").strip()
-    mode, value = classify_ext(ext)
-    tried_url = ""
-
-    # 1) direct PDP if we truly have a URL/slug
-    if mode == "url" and value:
-        tried_url = value
-        try:
-            page.goto(value, timeout=15000, wait_until="domcontentloaded")
-            kill_overlays(page)
-            ensure_specs_open(page)
-            b = extract_brand(page)
-            if b:
-                return True, page.url
-        except Exception:
-            pass  # fall through to search
-
-    # 2) search by the best string (prefer: ext as digits, else EAN, else name)
-    q = value if mode == "search" else ((row.get("ean") or "").strip() or (row.get("name") or "").strip())
-    if q:
-        opened, s_url = search_and_open(page, q)
-        tried_url = s_url or tried_url
-        if opened:
-            kill_overlays(page)
-            ensure_specs_open(page)
-            b = extract_brand(page)
-            if b:
-                return True, page.url
-            return False, page.url
-
-    return False, tried_url or "<no-url>"
-
-# --- main ----------------------------------------------------------------------
 def main():
-    dsn = os.getenv("DATABASE_URL") or os.getenv("DATABASE_URL_PUBLIC")
-    if not dsn:
-        print("Missing DATABASE_URL", file=sys.stderr); sys.exit(2)
+    MAX_ITEMS = int(os.getenv("MAX_ITEMS", "500"))
+    HEADLESS = os.getenv("HEADLESS", "1") == "1"
+    REQ_DELAY = float(os.getenv("REQ_DELAY", "0.25"))
+    TIMEBOX = int(os.getenv("TIMEBOX_SECONDS", "1200"))
+    OVERWRITE = os.getenv("OVERWRITE_PRODUCTS", "0") in ("1", "true", "yes")
 
     deadline = time.time() + TIMEBOX
-    with closing(psycopg2.connect(dsn)) as conn:
-        rows = pick_rows(conn, MAX_ITEMS)
-        if not rows:
-            print("Nothing to do."); return
 
-    found = 0; processed = 0
+    with closing(_conn()) as conn:
+        rows = pick_rows(conn, MAX_ITEMS)
+
+    if not rows:
+        print("Nothing to do.")
+        return
+
+    processed = 0
+    found = 0
+
     with sync_playwright() as pw:
-        browser = pw.chromium.launch(headless=HEADLESS, args=["--no-sandbox","--disable-dev-shm-usage"])
+        browser = pw.chromium.launch(headless=HEADLESS, args=["--no-sandbox", "--disable-dev-shm-usage"])
         ctx = browser.new_context(
             locale="et-EE",
-            extra_http_headers={"Accept-Language":"et-EE,et;q=0.9,en;q=0.8,ru;q=0.7"},
-            viewport={"width":1280,"height":900},
+            extra_http_headers={"Accept-Language": "et-EE,et;q=0.9,en;q=0.8,ru;q=0.7"},
+            viewport={"width": 1280, "height": 900},
         )
-        ctx.route("**/*", _router)
+        ctx.route("**/*", _kill_noise_router)
         page = ctx.new_page()
         page.set_default_timeout(8000)
         page.set_default_navigation_timeout(20000)
 
-        with closing(psycopg2.connect(dsn)) as conn2:
-            for r in rows:
-                if time.time() > deadline:
-                    print("Timebox reached, stopping."); break
-                ok, tried = process_one(page, r)
-                processed += 1
-                if ok:
-                    b = extract_brand(page)
-                    if b and not _is_bad_brand(b):
-                        try:
-                            save_brand(conn2, r["id"], b)
-                            found += 1
-                            print(f'[BRAND] product_id={r["id"]} brand="{b}" url={page.url}')
-                        except Exception as e:
-                            conn2.rollback()
-                            print(f'[DB_ERR] product_id={r["id"]} err={e}')
-                    else:
-                        print(f'[MISS_BRAND_EMPTY] product_id={r["id"]} url={page.url}')
-                else:
-                    print(f'[MISS_BRAND_EMPTY] product_id={r["id"]} url={tried}')
-                time.sleep(max(0.05, REQ_DELAY + random.uniform(-0.08, 0.08)))
+        for r in rows:
+            if time.time() > deadline:
+                print("Timebox reached, stopping.")
+                break
 
-        try: browser.close()
-        except Exception: pass
+            pid = r["product_id"]
+            ext_id = str(r.get("ext_id") or "")
+            if not ext_id:
+                print(f"[MISS_BRAND] product_id={pid} ext_id=<empty>")
+                continue
+
+            ok, at = _navigate(page, ext_id)
+            if not ok:
+                print(f"[MISS_BRAND] product_id={pid} nav failed (ext_id={ext_id})")
+                time.sleep(REQ_DELAY)
+                continue
+
+            b = _extract_brand(page)
+            processed += 1
+            if not b:
+                print(f"[MISS_BRAND_EMPTY] product_id={pid} url={at or ext_id}")
+                time.sleep(REQ_DELAY)
+                continue
+
+            # persist
+            with closing(_conn()) as conn2:
+                try:
+                    if persist_brand(conn2, pid, b, OVERWRITE):
+                        found += 1
+                        print(f"[BRAND] product_id={pid} brand=\"{b}\"")
+                except Exception as e:
+                    print(f"[DB_ERR] product_id={pid} err={e}")
+
+            time.sleep(REQ_DELAY)
+
+        try:
+            browser.close()
+        except Exception:
+            pass
+
     print(f"Done. processed={processed} brand_found={found}")
 
 if __name__ == "__main__":
