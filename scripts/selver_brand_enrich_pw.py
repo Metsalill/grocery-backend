@@ -3,19 +3,20 @@
 """
 Selver brand enrichment (structured fields only).
 
-- Takes Selver mapping from ext_product_map (source='selver').
-  If ext_id is an absolute Selver URL, we go direct.
-  If ext_id is 8/13 digits (EAN), we open Selver search and click the first/best tile.
+- Uses ext_product_map (source='selver'):
+  • If ext_id is an absolute Selver URL → go direct.
+  • If ext_id is 8/13 digits (EAN) → open search and click the first/best tile.
 - Extracts brand from Käitleja/Tootja/Valmistaja/Kaubamärk/Brand rows,
-  JSON-LD (brand/manufacturer) and meta product:brand. No title/name guessing.
+  JSON-LD (brand/manufacturer) and meta product:brand. No title guessing.
+- “Määrmata” is normalized to “Määramata”.
 
 Env:
   DATABASE_URL / DATABASE_URL_PUBLIC  (required)
-  MAX_ITEMS        (default 500)
-  HEADLESS         (1|0, default 1)
-  REQ_DELAY        (seconds, default 0.25)
-  TIMEBOX_SECONDS  (default 1200)
-  OVERWRITE_PRODUCTS (1|0, default 0)  # if 1, overwrite any existing brand
+  MAX_ITEMS          default 500
+  HEADLESS           1|0 (default 1)
+  REQ_DELAY          seconds (default 0.25)
+  TIMEBOX_SECONDS    default 1200
+  OVERWRITE_PRODUCTS 1|0 (default 0)  # if 1, overwrite any existing brand
 """
 
 from __future__ import annotations
@@ -45,7 +46,6 @@ def _clean(s: str | None) -> str:
     return s
 
 def _norm_maarmata(b: str) -> str:
-    # Normalize Määrmata → Määramata
     return "Määramata" if b.lower() == "määrmata" else b
 
 def _looks_url(s: str) -> bool:
@@ -66,17 +66,21 @@ def _accept_overlays(page):
             loc = page.locator(sel).first
             if loc and loc.count() > 0 and loc.is_visible():
                 loc.click(timeout=800)
-                time.sleep(0.15)
+                time.sleep(0.12)
         except Exception:
             pass
 
-def _kill_noise_router(route, request):
+# Trimmed list; don’t block cookiebot (it sometimes influences layout timing)
+BLOCK_SUBSTR = (
+    "adobedtm", "use.typekit.net", "typekit",
+    "googletagmanager", "google-analytics", "doubleclick",
+    "facebook.net", "newrelic", "pingdom", "hotjar",
+)
+
+def _router(route, request):
     url = (request.url or "").lower()
-    for bad in ["googletagmanager", "google-analytics", "doubleclick",
-                "facebook", "cookiebot", "hotjar", "pingdom",
-                "use.typekit.net", "typekit", "newrelic"]:
-        if bad in url:
-            return route.abort()
+    if any(s in url for s in BLOCK_SUBSTR):
+        return route.abort()
     return route.continue_()
 
 def _looks_like_pdp(page) -> bool:
@@ -92,46 +96,109 @@ def _looks_like_pdp(page) -> bool:
         pass
     return False
 
-def _open_first_search_tile(page) -> bool:
-    for sel in [
-        "[data-testid='product-grid'] a[href]:visible",
-        "[data-testid='product-list'] a[href]:visible",
-        ".product-list a[href]:visible",
-        ".product-grid a[href]:visible",
-        ".product-card a[href]:visible",
-        "article a[href]:visible",
-        "a[href^='/']:visible",
-    ]:
+# ---------- robust PDP-href recognition ----------
+def _looks_like_pdp_href(href: str) -> bool:
+    if not href:
+        return False
+    href = href.split("?", 1)[0].split("#", 1)[0]
+    if href.startswith("http"):
+        # Only allow selver.ee links
+        if "selver.ee" not in href:
+            return False
+    path = href
+    if href.startswith("http"):
+        # crude path strip
         try:
-            a = page.locator(sel).first
-            if a and a.count() > 0:
-                href = a.get_attribute("href") or ""
-                if not href:
-                    continue
-                if href.startswith("/"):
-                    href = BASE_HOST + href
-                page.goto(href, timeout=15000, wait_until="domcontentloaded")
-                try:
-                    page.wait_for_load_state("networkidle", timeout=2500)
-                except Exception:
-                    pass
-                return _looks_like_pdp(page) or page.locator("h1").count() > 0
+            path = "/" + href.split("selver.ee", 1)[1].split("/", 1)[1]
         except Exception:
-            continue
+            path = "/"
+    if not path.startswith("/"):
+        return False
+
+    # obvious non-PDP paths
+    bad_prefixes = (
+        "/search", "/konto", "/login", "/registreeru", "/logout",
+        "/kliendimangud", "/kauplused", "/selveekspress", "/tule-toole",
+        "/uudised", "/kinkekaardid", "/selveri-kook", "/kampaania",
+        "/retseptid", "/app", "/vabad-"
+    )
+    if any(path.startswith(p) for p in bad_prefixes):
+        return False
+
+    if path.startswith("/toode/") or path.startswith("/e-selver/toode/"):
+        return True
+
+    segs = [s for s in path.split("/") if s]
+    if not segs:
+        return False
+    last = segs[-1]
+    # slug with at least one hyphen and often size token → good signal
+    if "-" in last:
+        return True
     return False
 
+def _candidate_anchors(page):
+    sels = [
+        "[data-testid='product-grid'] a[href]:visible",
+        "[data-testid='product-list'] a[href]:visible",
+        ".product-card a[href]:visible",
+        "article a[href]:visible",
+        "main a[href]:visible",
+    ]
+    nodes = []
+    for s in sels:
+        try:
+            nodes.extend(page.locator(s).all())
+        except Exception:
+            pass
+    return nodes[:300]
+
+def _open_first_pdp_from_search(page) -> bool:
+    # Wait briefly for grid/list to render
+    try:
+        page.wait_for_selector("[data-testid='product-grid'], .product-list, article a[href]", timeout=5000)
+    except Exception:
+        pass
+    _accept_overlays(page)
+
+    # Prefer anchors that look like PDP links
+    hrefs = []
+    for a in _candidate_anchors(page):
+        try:
+            h = a.get_attribute("href") or a.get_attribute("data-href") or ""
+            if _looks_like_pdp_href(h):
+                hrefs.append(h)
+        except Exception:
+            continue
+
+    if not hrefs:
+        return False
+
+    href = hrefs[0]
+    if href.startswith("/"):
+        href = BASE_HOST + href
+    try:
+        page.goto(href, timeout=15000, wait_until="domcontentloaded")
+        try:
+            page.wait_for_load_state("networkidle", timeout=2000)
+        except Exception:
+            pass
+        return _looks_like_pdp(page) or page.locator("h1").count() > 0
+    except Exception:
+        return False
+
 def _navigate(page, ext_id: str) -> tuple[bool, str]:
-    """Return (ok, current_url). ext_id is absolute URL or EAN."""
+    """(ok, current_url). ext_id is absolute URL or searchable digits (EAN)."""
     try:
         if _looks_url(ext_id):
             page.goto(ext_id, timeout=20000, wait_until="domcontentloaded")
             _accept_overlays(page)
             try:
-                page.wait_for_load_state("networkidle", timeout=2500)
+                page.wait_for_load_state("networkidle", timeout=2000)
             except Exception:
                 pass
             return True, page.url
-        # digits: search flow
+
         if _looks_searchable_digits(ext_id):
             page.goto(SEARCH_URL.format(q=ext_id), timeout=20000, wait_until="domcontentloaded")
             _accept_overlays(page)
@@ -139,15 +206,15 @@ def _navigate(page, ext_id: str) -> tuple[bool, str]:
                 page.wait_for_load_state("networkidle", timeout=1500)
             except Exception:
                 pass
-            if _open_first_search_tile(page):
+            if _open_first_pdp_from_search(page):
                 return True, page.url
             return False, page.url
-        # fallback: try site-relative or slug
+
+        # fallback (site-relative or slug)
         if ext_id.startswith("/"):
             page.goto(BASE_HOST + ext_id, timeout=20000, wait_until="domcontentloaded")
-            _accept_overlays(page)
-            return True, page.url
-        page.goto(f"{BASE_HOST}/{ext_id}", timeout=20000, wait_until="domcontentloaded")
+        else:
+            page.goto(f"{BASE_HOST}/{ext_id}", timeout=20000, wait_until="domcontentloaded")
         _accept_overlays(page)
         return True, page.url
     except PWTimeout:
@@ -156,7 +223,7 @@ def _navigate(page, ext_id: str) -> tuple[bool, str]:
         return False, ""
 
 def _extract_brand(page) -> str:
-    # 0) direct table/selectors
+    # 0) tables / definition lists
     sel_pairs = [
         'th:has-text("Käitleja") + td',
         'th:has-text("Tootja") + td',
@@ -173,7 +240,7 @@ def _extract_brand(page) -> str:
         for sel in sel_pairs:
             loc = page.locator(sel).first
             if loc and loc.count() > 0:
-                txt = _clean(loc.inner_text(timeout=600) or "")
+                txt = _clean(loc.inner_text(timeout=700) or "")
                 if txt:
                     return _norm_maarmata(txt)
     except Exception:
@@ -207,7 +274,7 @@ def _extract_brand(page) -> str:
     except Exception:
         pass
 
-    # 2) regex over table rows
+    # 2) regex over HTML pairs
     try:
         html = page.content()
         for k, v in re.findall(r"(?is)<dt[^>]*>(.*?)</dt>\s*<dd[^>]*>(.*?)</dd>", html):
@@ -223,7 +290,7 @@ def _extract_brand(page) -> str:
     except Exception:
         pass
 
-    # 3) meta: product:brand
+    # 3) meta
     try:
         el = page.locator('meta[property="product:brand"]').first
         if el and el.count() > 0:
@@ -254,11 +321,7 @@ GARBAGE_BRAND_SQL = """
 """
 
 def pick_rows(conn, limit: int):
-    """Pick Selver-mapped products whose brand is empty/garbage (first choice),
-       else (if none) just any Selver-mapped products, up to limit.
-    """
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-        # Primary: need enrichment
         cur.execute(
             f"""
             SELECT DISTINCT ON (p.id)
@@ -280,7 +343,6 @@ def pick_rows(conn, limit: int):
         if rows:
             return rows
 
-        # Fallback: anything Selver-mapped
         cur.execute(
             """
             SELECT DISTINCT ON (p.id)
@@ -305,10 +367,10 @@ def persist_brand(conn, product_id: int, brand: str, overwrite: bool) -> bool:
         return False
     with conn.cursor() as cur:
         if overwrite:
-            cur.execute("UPDATE products p SET brand = %s WHERE p.id = %s;", (brand, product_id))
+            cur.execute("UPDATE products SET brand = %s WHERE id = %s;", (brand, product_id))
         else:
             cur.execute(
-                f"UPDATE products p SET brand = %s WHERE p.id = %s AND {GARBAGE_BRAND_SQL};",
+                f"UPDATE products SET brand = %s WHERE id = %s AND {GARBAGE_BRAND_SQL};",
                 (brand, product_id),
             )
     conn.commit()
@@ -342,7 +404,7 @@ def main():
             extra_http_headers={"Accept-Language": "et-EE,et;q=0.9,en;q=0.8,ru;q=0.7"},
             viewport={"width": 1280, "height": 900},
         )
-        ctx.route("**/*", _kill_noise_router)
+        ctx.route("**/*", _router)
         page = ctx.new_page()
         page.set_default_timeout(8000)
         page.set_default_navigation_timeout(20000)
