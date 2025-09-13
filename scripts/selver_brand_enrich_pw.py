@@ -10,6 +10,11 @@ Selver brand enrichment (structured fields only).
   JSON-LD (brand/manufacturer) and meta product:brand. No title guessing.
 - “Määrmata” is normalized to “Määramata”.
 
+Idempotence rules:
+- Default: only rows with missing/garbage brand are picked; once fixed they won’t be picked again.
+- OVERWRITE_PRODUCTS=1: allow updating any Selver-mapped product, but we still skip no-op rewrites
+  (uses `IS DISTINCT FROM` so identical values are not re-written).
+
 Env:
   DATABASE_URL / DATABASE_URL_PUBLIC  (required)
   MAX_ITEMS          default 500
@@ -44,7 +49,6 @@ def _on_sigint(signum, frame):
     # Don’t raise SystemExit here; just ask the main loop to stop.
     global _STOP
     _STOP = True
-    # Print once; avoid flooding logs during repeated signals.
     try:
         print("SIGINT received → finishing current item and shutting down gracefully…")
     except Exception:
@@ -86,6 +90,29 @@ def _accept_overlays(page):
                 time.sleep(0.12)
         except Exception:
             pass
+
+
+def _ensure_products_tab(page):
+    """If search page shows tabs, make sure the 'Tooted'/'Products' tab is active."""
+    candidates = [
+        "button:has-text('Tooted')",
+        "a:has-text('Tooted')",
+        "button:has-text('Products')",
+        "a:has-text('Products')",
+        "[role='tab']:has-text('Tooted')",
+        "[role='tab']:has-text('Products')",
+        "a[href*='type=product']",
+        "button[data-testid='products-tab']",
+    ]
+    for sel in candidates:
+        try:
+            el = page.locator(sel).first
+            if el and el.count() > 0 and el.is_visible():
+                el.click(timeout=800)
+                time.sleep(0.15)
+                return
+        except Exception:
+            continue
 
 
 # Trimmed list; don’t block cookiebot (it sometimes influences layout timing)
@@ -202,6 +229,7 @@ def _open_first_pdp_from_search(page) -> bool:
     except Exception:
         pass
     _accept_overlays(page)
+    _ensure_products_tab(page)
 
     # Prefer anchors that look like PDP links
     hrefs = []
@@ -366,8 +394,9 @@ GARBAGE_BRAND_SQL = """
 """
 
 
-def pick_rows(conn, limit: int):
+def pick_rows(conn, limit: int, overwrite: bool):
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        # 1) Only missing/garbage brands (normal runs)
         cur.execute(
             f"""
             SELECT DISTINCT ON (p.id)
@@ -386,9 +415,10 @@ def pick_rows(conn, limit: int):
             (limit,),
         )
         rows = cur.fetchall()
-        if rows:
+        if rows or not overwrite:
             return rows
 
+        # 2) Only when overwrite=True: allow refreshing any Selver-mapped product
         cur.execute(
             """
             SELECT DISTINCT ON (p.id)
@@ -414,14 +444,29 @@ def persist_brand(conn, product_id: int, brand: str, overwrite: bool) -> bool:
         return False
     with conn.cursor() as cur:
         if overwrite:
-            cur.execute("UPDATE products SET brand = %s WHERE id = %s;", (brand, product_id))
+            cur.execute(
+                """
+                UPDATE products p
+                   SET brand = %s
+                 WHERE p.id = %s
+                   AND p.brand IS DISTINCT FROM %s;
+                """,
+                (brand, product_id, brand),
+            )
         else:
             cur.execute(
-                f"UPDATE products SET brand = %s WHERE id = %s AND {GARBAGE_BRAND_SQL};",
-                (brand, product_id),
+                f"""
+                UPDATE products p
+                   SET brand = %s
+                 WHERE p.id = %s
+                   AND {GARBAGE_BRAND_SQL}
+                   AND p.brand IS DISTINCT FROM %s;
+                """,
+                (brand, product_id, brand),
             )
+        changed = cur.rowcount > 0
     conn.commit()
-    return True
+    return changed
 
 
 # ----------------- main -----------------
@@ -435,7 +480,7 @@ def main():
     deadline = time.time() + TIMEBOX
 
     with closing(_conn()) as conn:
-        rows = pick_rows(conn, MAX_ITEMS)
+        rows = pick_rows(conn, MAX_ITEMS, OVERWRITE)
 
     if not rows:
         print("Nothing to do.")
@@ -487,6 +532,8 @@ def main():
                     if persist_brand(conn2, pid, b, OVERWRITE):
                         found += 1
                         print(f"[BRAND] product_id={pid} brand=\"{b}\"")
+                    else:
+                        print(f"[BRAND_NOOP] product_id={pid} brand already up-to-date")
                 except Exception as e:
                     print(f"[DB_ERR] product_id={pid} err={e}")
 
