@@ -19,9 +19,9 @@ on:
         required: false
         default: "0.25"
       timebox_minutes:
-        description: "Soft time limit for the enrichment (minutes)"
+        description: "Soft time limit for the enrichment (minutes) — keep < job timeout"
         required: false
-        default: "30"
+        default: "55"
       overwrite_products:
         description: "Overwrite existing brand in products table? (1/0)"
         required: false
@@ -34,7 +34,8 @@ concurrency:
 jobs:
   brand:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # Give the job more headroom than the script's own timebox.
+    timeout-minutes: 120
 
     env:
       # Use the public/external DB URL from GitHub secrets (Railway internal host won't resolve on GitHub runners)
@@ -42,7 +43,7 @@ jobs:
       MAX_ITEMS: ${{ github.event.inputs.max_items || '600' }}
       HEADLESS: ${{ github.event.inputs.headless || '1' }}
       REQ_DELAY: ${{ github.event.inputs.req_delay || '0.25' }}
-      TIMEBOX_MINUTES: ${{ github.event.inputs.timebox_minutes || '30' }}
+      TIMEBOX_MINUTES: ${{ github.event.inputs.timebox_minutes || '55' }}
       OVERWRITE_PRODUCTS: ${{ github.event.inputs.overwrite_products || '0' }}
 
     steps:
@@ -76,19 +77,12 @@ jobs:
         env:
           PYTHONUNBUFFERED: "1"
         run: |
-          set +e
-          # Convert minutes→seconds for the script (script reads TIMEBOX_SECONDS)
-          export TIMEBOX_SECONDS=$(( TIMEBOX_MINUTES * 60 ))
-          timeout --signal=SIGINT ${TIMEBOX_MINUTES}m \
+          # Convert minutes→seconds for the script and soft-limit the whole step
+          export TIMEBOX_SECONDS=$(( ${TIMEBOX_MINUTES} * 60 ))
+          # Send SIGINT at the soft limit so the script can finish the current item,
+          # then allow up to 45s for cleanup before SIGKILL.
+          timeout --signal=SIGINT --kill-after=45s ${TIMEBOX_MINUTES}m \
             python scripts/selver_brand_enrich_pw.py
-          ec=$?
-          # Treat soft time limit as success:
-          # 124 = timeout reached, 130 = exited from SIGINT handler, 137 = SIGKILL (rare)
-          if [ "$ec" = "124" ] || [ "$ec" = "130" ] || [ "$ec" = "137" ]; then
-            echo "Soft time limit hit (exit $ec) — treating as success."
-            exit 0
-          fi
-          exit $ec
 
       - name: Post-run stats
         run: |
