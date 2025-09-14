@@ -34,11 +34,10 @@ concurrency:
 jobs:
   brand:
     runs-on: ubuntu-latest
-    # Give the job more headroom than the script's own timebox.
+    # More headroom than the script timebox
     timeout-minutes: 120
 
     env:
-      # Use the public/external DB URL from GitHub secrets (Railway internal host won't resolve on GitHub runners)
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       MAX_ITEMS: ${{ github.event.inputs.max_items || '600' }}
       HEADLESS: ${{ github.event.inputs.headless || '1' }}
@@ -78,11 +77,21 @@ jobs:
           PYTHONUNBUFFERED: "1"
         run: |
           # Convert minutes→seconds for the script and soft-limit the whole step
-          export TIMEBOX_SECONDS=$(( ${TIMEBOX_MINUTES} * 60 ))
-          # Send SIGINT at the soft limit so the script can finish the current item,
-          # then allow up to 45s for cleanup before SIGKILL.
-          timeout --signal=SIGINT --kill-after=45s ${TIMEBOX_MINUTES}m \
+          export TIMEBOX_SECONDS=$(( TIMEBOX_MINUTES * 60 ))
+
+          # Run with a soft SIGINT at the timebox and give 120s to wrap up.
+          # Then normalize expected timeout exit codes to success so later steps run.
+          set +e
+          timeout --signal=SIGINT --kill-after=120s ${TIMEBOX_MINUTES}m \
             python scripts/selver_brand_enrich_pw.py
+          rc=$?
+          if [ $rc -eq 0 ] || [ $rc -eq 124 ] || [ $rc -eq 130 ] || [ $rc -eq 137 ]; then
+            echo "Script finished with code $rc (treated as success)."
+            exit 0
+          else
+            echo "Script failed with code $rc (real error)."
+            exit $rc
+          fi
 
       - name: Post-run stats
         run: |
