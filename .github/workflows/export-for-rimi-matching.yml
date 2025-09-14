@@ -7,14 +7,37 @@ jobs:
   export:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # Use the EXTERNAL/Public connection string from Railway (no trailing '?')
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Install psql
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
+      - name: Add sslmode=require to URL
+        id: fixurl
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="${DATABASE_URL}"
+          if [[ "$URL" == *"?"* ]]; then
+            [[ "$URL" == *"sslmode="* ]] || URL="${URL}&sslmode=require"
+          else
+            URL="${URL}?sslmode=require"
+          fi
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Test DB connection
+        env:
+          DATABASE_URL: ${{ steps.fixurl.outputs.url }}
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SHOW server_version;"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT now(), current_user;"
+
       - name: Export Selver (canonical with EAN)
+        env:
+          DATABASE_URL: ${{ steps.fixurl.outputs.url }}
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
             SELECT DISTINCT
@@ -32,6 +55,8 @@ jobs:
           ) TO STDOUT WITH CSV HEADER" > selver_products.csv
 
       - name: Export Prisma (canonical with EAN)
+        env:
+          DATABASE_URL: ${{ steps.fixurl.outputs.url }}
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
             SELECT DISTINCT
@@ -49,13 +74,19 @@ jobs:
           ) TO STDOUT WITH CSV HEADER" > prisma_products.csv
 
       - name: Export Rimi (raw candidates, full table)
+        env:
+          DATABASE_URL: ${{ steps.fixurl.outputs.url }}
+        shell: bash
         run: |
-          # If rimi_candidates_norm exists and has rows, dump it; else fallback to rimi_candidates.
-          set -e
-          ROWS=$(psql "$DATABASE_URL" -Atc "SELECT COALESCE((SELECT n_live_tup FROM pg_stat_user_tables WHERE relname='rimi_candidates_norm'),0)")
-          if [ "${ROWS:-0}" -gt 0 ]; then
+          set -euo pipefail
+          # Prefer normalized candidates table if present and non-empty; else fallback.
+          ROWS_NORM=$(psql "$DATABASE_URL" -Atc "SELECT COALESCE(SUM(n_live_tup),0) FROM pg_stat_user_tables WHERE relname='rimi_candidates_norm'")
+          if [[ "${ROWS_NORM:-0}" -gt 0 ]]; then
+            echo "Exporting from rimi_candidates_norm (${ROWS_NORM} est. rows)…"
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (SELECT * FROM rimi_candidates_norm) TO STDOUT WITH CSV HEADER" > rimi_products.csv
           else
+            ROWS_RAW=$(psql "$DATABASE_URL" -Atc "SELECT COALESCE(SUM(n_live_tup),0) FROM pg_stat_user_tables WHERE relname='rimi_candidates'")
+            echo "Exporting from rimi_candidates (${ROWS_RAW} est. rows)…"
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (SELECT * FROM rimi_candidates) TO STDOUT WITH CSV HEADER" > rimi_products.csv
           fi
 
