@@ -16,7 +16,7 @@ on:
         required: false
         default: "0"
       cat_page_cap:
-        description: "Max paginated pages per category (crawler fallback; 0 uses script default)"
+        description: "Max paginated pages per category (0 uses script default)"
         required: false
         default: "0"
       cat_max_products:
@@ -42,9 +42,10 @@ on:
   schedule:
     - cron: "19 3 * * 0"   # Sun at 03:19 UTC
 
+# Do not cancel older runs; just queue new ones.
 concurrency:
-  group: barbora-category-crawl
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.inputs.mode || 'prices' }}
+  cancel-in-progress: false
 
 jobs:
   crawl-and-upsert:
