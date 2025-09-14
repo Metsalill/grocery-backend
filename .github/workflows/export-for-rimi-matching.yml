@@ -1,0 +1,69 @@
+name: "Export for Rimi matching"
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install psql
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Export Selver (canonical with EAN)
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+            SELECT DISTINCT
+              p.id,
+              p.name,
+              lower(p.brand)                                         AS brand,
+              NULLIF(regexp_replace(coalesce(p.ean,''),'[^0-9]','','g'),'') AS ean,
+              NULLIF(p.amount,'')                                    AS amount,
+              p.price
+            FROM prices pr
+            JOIN products p ON p.id = pr.product_id
+            JOIN stores   s ON s.id = pr.store_id
+            WHERE s.chain ILIKE 'selver%'
+              AND NULLIF(regexp_replace(coalesce(p.ean,''),'[^0-9]','','g'),'') IS NOT NULL
+          ) TO STDOUT WITH CSV HEADER" > selver_products.csv
+
+      - name: Export Prisma (canonical with EAN)
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+            SELECT DISTINCT
+              p.id,
+              p.name,
+              lower(p.brand)                                         AS brand,
+              NULLIF(regexp_replace(coalesce(p.ean,''),'[^0-9]','','g'),'') AS ean,
+              NULLIF(p.amount,'')                                    AS amount,
+              p.price
+            FROM prices pr
+            JOIN products p ON p.id = pr.product_id
+            JOIN stores   s ON s.id = pr.store_id
+            WHERE s.chain ILIKE 'prisma%'
+              AND NULLIF(regexp_replace(coalesce(p.ean,''),'[^0-9]','','g'),'') IS NOT NULL
+          ) TO STDOUT WITH CSV HEADER" > prisma_products.csv
+
+      - name: Export Rimi (raw candidates, full table)
+        run: |
+          # If rimi_candidates_norm exists and has rows, dump it; else fallback to rimi_candidates.
+          set -e
+          ROWS=$(psql "$DATABASE_URL" -Atc "SELECT COALESCE((SELECT n_live_tup FROM pg_stat_user_tables WHERE relname='rimi_candidates_norm'),0)")
+          if [ "${ROWS:-0}" -gt 0 ]; then
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (SELECT * FROM rimi_candidates_norm) TO STDOUT WITH CSV HEADER" > rimi_products.csv
+          else
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (SELECT * FROM rimi_candidates) TO STDOUT WITH CSV HEADER" > rimi_products.csv
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: exports-for-rimi-matching
+          path: |
+            selver_products.csv
+            prisma_products.csv
+            rimi_products.csv
