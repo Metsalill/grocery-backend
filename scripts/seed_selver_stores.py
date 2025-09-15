@@ -37,7 +37,7 @@ DRY_RUN       = os.environ.get("DRY_RUN", "0") == "1"
 CHAIN         = os.environ.get("CHAIN", "Selver")
 ONLINE_NAME   = os.environ.get("ONLINE_NAME", "e-Selver")
 
-UA = "grocery-backend/seed-selver-stores (+github-actions)"
+UA = "grocery-backend/seed-selver-stores (+gha)"
 
 # schedules like "E-P 08:00–23:00"
 SCHEDULE_SPLIT = re.compile(r'\s+(?:E[-–]?P|E[-–]?[A-Z](?:\s*\d)?)\b')
@@ -48,7 +48,7 @@ BAD_NAME = re.compile(r'^(?:e-?Selver|Selver)$', re.I)
 
 ADDR_TOKEN = re.compile(r'\b(mnt|tee|tn|pst|puiestee|maantee|tänav|keskus|turg|väljak)\b', re.I)
 
-# ------------ small utils ------------
+DETAIL_HREF_RE = re.compile(r"^https?://[^/]*selver\.ee/kauplused/[^/?#]+$")
 
 def clean_name(s: str) -> str:
     n = SCHEDULE_SPLIT.split(s or "")[0].strip()
@@ -67,9 +67,7 @@ def clean_name(s: str) -> str:
         return ''
     return n.strip()
 
-
 def parse_coords_or_query_from_maps(href: str):
-    """Try to get exact coords from a Google Maps link; else return the 'q=' query."""
     if not href:
         return (None, None, None)
     try:
@@ -83,7 +81,6 @@ def parse_coords_or_query_from_maps(href: str):
     except Exception:
         pass
     return (None, None, None)
-
 
 def geocode(addr: str):
     if not addr or not GEOCODE:
@@ -101,57 +98,45 @@ def geocode(addr: str):
     except Exception:
         return (None, None)
 
-# ------------ scraping (detail pages!) ------------
+# ------------ scraping (detail pages) ------------
 
-DETAIL_HREF_RE = re.compile(r"^https?://[^/]*selver\.ee/kauplused/[^/?#]+$")
+def _accept_cookies(page):
+    for txt in ["Nõustun", "Nõustu", "Accept", "Allow all", "OK"]:
+        try:
+            page.get_by_role("button", name=re.compile(txt, re.I)).click(timeout=1000)
+            return
+        except Exception:
+            pass
 
-def extract_address_like(text: str) -> str | None:
+def _address_from_textblob(text: str) -> str | None:
     parts = [x.strip() for x in re.split(r' ?[•\u2022\u00B7\u25CF\|;/] ?|\n', text) if x.strip()]
     candidates = []
     for ln in parts:
-        if ADDR_TOKEN.search(ln) and re.search(r'\d', ln) and 8 <= len(ln) <= 120 and 'selver' not in ln.lower():
+        if ADDR_TOKEN.search(ln) and re.search(r'\d', ln) and 6 <= len(ln) <= 160 and 'selver' not in ln.lower():
             candidates.append(ln)
     if candidates:
         return sorted(candidates, key=len)[0]
     return None
 
-
 def scrape_all_detail_pages() -> dict[str, dict]:
     """
-    Visit the index once to collect *detail page URLs*, then visit each detail page
-    and extract: name, address text, and Google Maps link ("Leia kaardilt").
-    Returns {name: {"address": str|None, "href": str|None}}.
+    Collect detail links from /kauplused and then visit each detail page to fetch:
+      name, address text, and Google Maps link ('Leia kaardilt').
+    Returns {name: {"address": str|None, "href": str|None}}
     """
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"])
-        ctx = pw.chromium.launch_persistent_context(
-            user_data_dir="/tmp/selver-seed",
-            headless=True,
-            args=["--no-sandbox", "--disable-dev-shm-usage"],
-            locale="et-EE",
-            accept_downloads=False
-        )
-        # Fallback if persistent context is not allowed in runner
-        if not ctx.pages:
-            ctx.close()
-            browser = pw.chromium.launch(headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"])
-            ctx = browser.new_context(user_agent=UA, locale="et-EE", viewport={"width": 1280, "height": 900})
-
+        ctx = browser.new_context(user_agent=UA, locale="et-EE", viewport={"width": 1280, "height": 900})
         page = ctx.new_page()
-        page.goto("https://www.selver.ee/kauplused", wait_until="domcontentloaded", timeout=60000)
-        for txt in ["Nõustun", "Nõustu", "Accept", "Allow all", "OK"]:
-            try:
-                page.get_by_role("button", name=re.compile(txt, re.I)).click(timeout=1200)
-                break
-            except Exception:
-                pass
-        page.wait_for_timeout(1200)
 
-        # All anchors; keep clean detail links only
-        hrefs = set(page.eval_on_selector_all(
-            "a[href]",
-            "els => els.map(e => e.href)"
-        ))
+        page.goto("https://www.selver.ee/kauplused", wait_until="domcontentloaded", timeout=60000)
+        _accept_cookies(page)
+        try:
+            page.wait_for_load_state("networkidle", timeout=4000)
+        except Exception:
+            pass
+
+        hrefs = set(page.eval_on_selector_all("a[href]", "els => els.map(e => e.href)"))
         detail_urls = sorted(h for h in hrefs if DETAIL_HREF_RE.match(h))
 
         entries: dict[str, dict] = {}
@@ -159,10 +144,15 @@ def scrape_all_detail_pages() -> dict[str, dict]:
         for url in detail_urls:
             try:
                 page.goto(url, wait_until="domcontentloaded", timeout=45000)
+                _accept_cookies(page)
+                try:
+                    page.wait_for_load_state("networkidle", timeout=4000)
+                except Exception:
+                    pass
             except Exception:
                 continue
 
-            # name
+            # name from h1/crumb
             name = ""
             for sel in ["h1", "main h1", "article h1", "h2"]:
                 try:
@@ -171,18 +161,17 @@ def scrape_all_detail_pages() -> dict[str, dict]:
                         break
                 except Exception:
                     pass
-            name = clean_name(name)
+            name = clean_name(name) or clean_name(url.rstrip("/").split("/")[-1].replace("-", " ").title())
             if not name:
-                # derive from slug as last resort
-                name = clean_name(url.rstrip("/").split("/")[-1].replace("-", " ").title())
+                continue
 
-            # maps link
+            # maps link (“Leia kaardilt”) or any Google Maps href
             href = None
             for sel in [
+                "a:has-text('Leia kaardilt')",
                 "a[href*='google.com/maps']",
                 "a[href*='goo.gl/maps']",
                 "a[href*='maps.app.goo.gl']",
-                "a:has-text('Leia kaardilt')"
             ]:
                 try:
                     if page.locator(sel).count() > 0:
@@ -192,22 +181,34 @@ def scrape_all_detail_pages() -> dict[str, dict]:
                 except Exception:
                     pass
 
-            # address (heuristic from page text)
+            # address: first try the container around the maps link
             address = None
             try:
-                text_scope = "main" if page.locator("main").count() > 0 else "body"
-                text_blob = page.locator(text_scope).inner_text(timeout=2000)
-                address = extract_address_like(text_blob)
+                if page.locator("a:has-text('Leia kaardilt')").count() > 0:
+                    link = page.locator("a:has-text('Leia kaardilt')").first
+                    # step up a few parents and read the block text
+                    container = link
+                    for _ in range(5):
+                        container = container.locator("xpath=..")
+                    text_blob = container.inner_text(timeout=1500)
+                    address = _address_from_textblob(text_blob)
             except Exception:
                 pass
 
-            # register
-            if name:
-                prev = entries.get(name, {})
-                entries[name] = {
-                    "address": prev.get("address") or address,
-                    "href": prev.get("href") or href,
-                }
+            # fallback: search entire main/body text for address-like lines
+            if not address:
+                try:
+                    scope = "main" if page.locator("main").count() > 0 else "body"
+                    blob = page.locator(scope).inner_text(timeout=2000)
+                    address = _address_from_textblob(blob)
+                except Exception:
+                    pass
+
+            prev = entries.get(name, {})
+            entries[name] = {
+                "address": prev.get("address") or address,
+                "href": prev.get("href") or href,
+            }
 
         try:
             ctx.close()
@@ -347,7 +348,6 @@ def full_seed_flow(web_entries):
 # ------------ main ------------
 
 def main():
-    # NEW: scrape from *store detail* pages, not only the index
     web_entries = scrape_all_detail_pages()
     print(f"Scraped {len(web_entries)} physical store detail pages from Selver.")
     if BACKFILL_ONLY:
