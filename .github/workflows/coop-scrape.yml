@@ -114,7 +114,7 @@ jobs:
           CATS_ALL="coop_categories.txt"
           if [ ! -f "$CATS_ALL" ]; then : > "$CATS_ALL"; fi
 
-          # 1) Highest priority: UI multiline input
+          # 1) Highest priority: UI multiline input (if no URL file)
           if [ -s "$CATS_ALL" ]; then
             echo ">> categories file already present (from URL)."
           elif [ -n "$CATS_MULTILINE" ]; then
