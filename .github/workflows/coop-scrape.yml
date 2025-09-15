@@ -58,33 +58,38 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.mk.outputs.matrix }}
+      count: ${{ steps.mk.outputs.count }}
       region_url: ${{ steps.vars.outputs.region_url }}
       upsert_flag: ${{ steps.vars.outputs.upsert_flag }}
     steps:
       - id: vars
         run: |
-          # Inputs are strings; normalize here and expose as outputs for the next job
           REGION_URL="${{ inputs.region }}"
+          # Scheduled runs always upsert; manual uses the toggle
           UP="${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}"
           echo "region_url=$REGION_URL" >> "$GITHUB_OUTPUT"
           echo "upsert_flag=$UP" >> "$GITHUB_OUTPUT"
       - id: mk
+        shell: bash
         env:
+          # Manual = inputs.shards, Scheduled = 1
           REQ_SHARDS: ${{ github.event_name == 'workflow_dispatch' && inputs.shards || '1' }}
         run: |
+          set -euo pipefail
           n="$REQ_SHARDS"
-          # Clamp between 1 and 8
+          # Clamp to [1,8]
           if [ "$n" -lt 1 ]; then n=1; fi
           if [ "$n" -gt 8 ]; then n=8; fi
-          python - <<'PY' > matrix.json
+
+          # Generate matrix JSON with shard_index: [0..n-1]
+          N="$n" python - <<'PY' > matrix.json
 import json, os
 n = int(os.environ["N"])
 print(json.dumps({"shard_index": list(range(n))}))
 PY
+
           echo "matrix=$(cat matrix.json)" >> "$GITHUB_OUTPUT"
-        shell: bash
-        env:
-          N: ${{ env.REQ_SHARDS }}
+          echo "count=$n" >> "$GITHUB_OUTPUT"
 
   crawl:
     needs: prepare-matrix
@@ -100,7 +105,7 @@ PY
       CATS_FILE_URL: ${{ inputs.categories_file_url }}
       COOP_UPSERT_DB: ${{ needs.prepare-matrix.outputs.upsert_flag }}
       DATABASE_URL: ${{ (needs.prepare-matrix.outputs.upsert_flag == '1') && secrets.DATABASE_URL || '' }}
-      SHARD_COUNT: ${{ (fromJSON(needs.prepare-matrix.outputs.matrix)).shard_index | length }}
+      SHARD_COUNT: ${{ needs.prepare-matrix.outputs.count }}
       SHARD_INDEX: ${{ matrix.shard_index }}
 
     steps:
