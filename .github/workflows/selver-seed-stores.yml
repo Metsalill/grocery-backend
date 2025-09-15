@@ -101,4 +101,271 @@ jobs:
 
           def extract_from_html(html: str):
               soup = BeautifulSoup(html, 'html.parser')
-              results =
+              results = {}  # name -> {'address': str|None, 'href': str|None}
+
+              # Strategy:
+              # 1) Find elements whose text includes a valid store name.
+              # 2) Search up to several ancestor levels for a Google Maps link or address-like line.
+              for tag in soup.find_all(string=re.compile(r'(Selver|Delice)', re.I)):
+                  raw = str(tag)
+                  candidates_in_line = re.findall(r'(?:[A-ZÄÖÜÕ][\wÄÖÜÕäöüõ\'’\- ]{1,60}\sSelver(?:\sABC)?)|Delice(?:\s+Toidupood)?', raw)
+                  possible = candidates_in_line or [raw]
+                  for cand in possible:
+                      name = clean_name(cand)
+                      if not name:
+                          continue
+
+                      # climb up to 6 ancestors to find the "card"
+                      container = tag.parent
+                      for _ in range(6):
+                          if not container or container.name in ('body', 'html'):
+                              break
+                          # if container contains multiple store names, keep climbing
+                          txt_here = container.get_text(" ", strip=True)
+                          if len(re.findall(r'Selver|Delice', txt_here, re.I)) > 3:
+                              container = container.parent
+                          else:
+                              break
+
+                      address = None
+                      href = None
+
+                      # any google maps-ish link anywhere inside the container
+                      if container:
+                          a = container.find('a', href=re.compile(r'(google\.[^/]+/maps|goo\.gl/maps|maps\.app\.goo\.gl)', re.I))
+                          if a and a.has_attr('href'):
+                              href = a['href']
+
+                          # scan text fragments split by separators for an address-looking piece
+                          txt = container.get_text(" ", strip=True)
+                          parts = [ln.strip() for ln in re.split(r' ?[•\u2022\u00B7\u25CF\|;/] ?|\n', txt) if ln.strip()]
+                          scored = []
+                          for ln in parts:
+                              if ADDR_TOKEN.search(ln) and re.search(r'\d', ln) and 8 <= len(ln) <= 120 and 'selver' not in ln.lower():
+                                  scored.append(ln)
+                          if scored:
+                              # prefer shortest plausible address (often "Street 12, City")
+                              address = sorted(scored, key=len)[0]
+
+                      prev = results.get(name, {})
+                      results[name] = {
+                          'address': prev.get('address') or address,
+                          'href': prev.get('href') or href
+                      }
+
+              final = {}
+              for name, meta in results.items():
+                  if not name or BAD_NAME.match(name):
+                      continue
+                  final[name] = meta
+              return final
+
+          def parse_coords_or_query_from_maps(href: str):
+              if not href:
+                  return (None, None, None)
+              try:
+                  m = re.search(r'/@([0-9\.\-]+),([0-9\.\-]+)', href)
+                  if m:
+                      return (float(m.group(1)), float(m.group(2)), None)
+                  u = urlparse(href)
+                  qs = parse_qs(u.query)
+                  if 'q' in qs and qs['q']:
+                      return (None, None, unquote(qs['q'][0]))
+              except Exception:
+                  pass
+              return (None, None, None)
+
+          async def geocode(session, q):
+              if not q or not GEOCODE:
+                  return (None, None)
+              url = "https://nominatim.openstreetmap.org/search"
+              params = {"q": q, "format": "json", "limit": 1, "addressdetails": 0}
+              headers = {"User-Agent": "grocery-backend/seed-selver-stores (+gha)"}
+              try:
+                  async with session.get(url, params=params, headers=headers, timeout=30) as r:
+                      r.raise_for_status()
+                      data = await r.json()
+                      if not data:
+                          return (None, None)
+                      return (float(data[0]["lat"]), float(data[0]["lon"]))
+              except Exception:
+                  return (None, None)
+
+          def scrape_kauplused():
+              with sync_playwright() as pw:
+                  b = pw.chromium.launch(headless=True)
+                  p = b.new_page()
+                  p.goto("https://www.selver.ee/kauplused", wait_until="domcontentloaded", timeout=60000)
+                  for txt in ["Nõustun", "Nõustu", "Accept", "Allow all", "OK"]:
+                      try:
+                          p.get_by_role("button", name=re.compile(txt, re.I)).click(timeout=1200)
+                          break
+                      except Exception:
+                          pass
+                  p.wait_for_timeout(2000)
+                  html = p.content()
+                  b.close()
+              return extract_from_html(html)
+
+          def db_conn():
+              return psycopg2.connect(DB_URL)
+
+          def load_missing_from_db():
+              with db_conn() as conn:
+                  cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+                  cur.execute("""
+                    SELECT id, name, address, is_online
+                    FROM stores
+                    WHERE chain=%s
+                      AND COALESCE(is_online,false)=false
+                      AND (
+                           lat IS NULL OR lon IS NULL
+                           OR COALESCE(lat,0)=0 OR COALESCE(lon,0)=0
+                          )
+                    ORDER BY name;
+                  """, (CHAIN,))
+                  rows = cur.fetchall()
+                  return rows
+
+          async def backfill_missing(entries_from_web: dict):
+              missing = load_missing_from_db()
+              if not missing:
+                  print("Nothing to backfill — all stores have coords.")
+                  return
+
+              print(f"Backfilling {len(missing)} store(s) with missing/zero coords…")
+              if DRY_RUN:
+                  for r in missing:
+                      print(" -", r["name"], "| current address:", r["address"])
+                  # still proceed to simulate geocoding
+              updates = 0
+              async with aiohttp.ClientSession() as session, db_conn() as conn:
+                  cur = conn.cursor()
+                  for r in missing:
+                      name = r["name"]
+                      if name.lower() == ONLINE.lower():
+                          continue
+                      web_meta = entries_from_web.get(name, {})
+                      href = web_meta.get("href")
+                      addr_web = web_meta.get("address")
+                      addr_db  = r.get("address")
+
+                      lat = lon = None
+
+                      # Prefer exact coords encoded in Google Maps link
+                      lt, ln, q = parse_coords_or_query_from_maps(href)
+                      if lt and ln:
+                          lat, lon = lt, ln
+
+                      # Otherwise try address from DB, then scraped, then a generic query
+                      if lat is None or lon is None:
+                          query = addr_db or addr_web or f"{name}, Estonia"
+                          g_lat, g_lon = await geocode(session, query)
+                          if g_lat and g_lon:
+                              lat, lon = g_lat, g_lon
+
+                      if DRY_RUN:
+                          print(f"[DRY] {name}: href? {bool(href)} | addr_db='{addr_db}' | addr_web='{addr_web}' | latlon={lat,lon}")
+                          continue
+
+                      if lat is not None and lon is not None:
+                          cur.execute("""
+                            UPDATE stores
+                               SET address = COALESCE(address, %s),
+                                   lat     = COALESCE(lat, %s),
+                                   lon     = COALESCE(lon, %s)
+                             WHERE chain=%s AND name=%s AND COALESCE(is_online,false)=false;
+                          """, (addr_web, lat, lon, CHAIN, name))
+                          updates += 1
+                          print(f"[OK] {name} ← ({lat:.6f},{lon:.6f})")
+                      else:
+                          # leave a breadcrumb in logs
+                          print(f"[MISS] {name} — still no coordinates")
+
+                  conn.commit()
+              print(f"Backfill done. Updated {updates}/{len(missing)}.")
+
+          def full_seed_flow():
+              entries = scrape_kauplused()          # {name: {address, href}}
+              print(f"Found {len(entries)} Selver/Delice physical names from kauplused.")
+
+              # Optionally add the online store row if missing (no coords)
+              if not DRY_RUN:
+                  with db_conn() as conn:
+                      cur = conn.cursor()
+                      cur.execute("""
+                        WITH existing AS (
+                          SELECT 1 FROM stores
+                           WHERE lower(chain)=lower(%s)
+                             AND COALESCE(is_online,false)=true
+                           LIMIT 1
+                        )
+                        INSERT INTO stores (name, chain, is_online)
+                        SELECT %s, %s, TRUE
+                        WHERE NOT EXISTS (SELECT 1 FROM existing);
+                      """, (CHAIN, ONLINE, CHAIN))
+                      conn.commit()
+
+              # Geocode + upsert all physical names (non-destructive updates)
+              async def run_all():
+                  async with aiohttp.ClientSession() as session:
+                      updates = 0
+                      with db_conn() as conn:
+                          cur = conn.cursor()
+                          for n, meta in entries.items():
+                              if n.lower() == ONLINE.lower():
+                                  continue
+                              href = meta.get('href')
+                              addr = meta.get('address')
+
+                              lat = lon = None
+                              lt, ln, q = parse_coords_or_query_from_maps(href)
+                              if lt and ln:
+                                  lat, lon = lt, ln
+                              else:
+                                  query = addr or q or f"{n}, Estonia"
+                                  g_lat, g_lon = await geocode(session, query)
+                                  if g_lat and g_lon:
+                                      lat, lon = g_lat, g_lon
+
+                              if DRY_RUN:
+                                  print(f"[DRY] {n}: addr='{addr}' | latlon={lat,lon}")
+                                  continue
+
+                              # insert if missing
+                              cur.execute("""
+                                INSERT INTO stores (name, chain, is_online, address, lat, lon)
+                                SELECT %s, %s, FALSE, %s, %s, %s
+                                WHERE NOT EXISTS (
+                                  SELECT 1 FROM stores WHERE chain=%s AND name=%s AND COALESCE(is_online,false)=false
+                                );
+                              """, (n, CHAIN, addr, lat, lon, CHAIN, n))
+
+                              # non-destructive update
+                              cur.execute("""
+                                UPDATE stores
+                                   SET address = COALESCE(address, %s),
+                                       lat     = COALESCE(lat, %s),
+                                       lon     = COALESCE(lon, %s)
+                                 WHERE chain=%s AND name=%s AND COALESCE(is_online,false)=false;
+                              """, (addr, lat, lon, CHAIN, n))
+                              updates += 1
+
+                          conn.commit()
+                      print(f"Seed/refresh complete for {updates} stores.")
+              asyncio.run(run_all())
+
+          if __name__ == "__main__":
+              web_entries = scrape_kauplused()
+              if BACKFILL_ONLY:
+                  asyncio.run(backfill_missing(web_entries))
+              else:
+                  full_seed_flow()
+          PY
+
+      - name: Run seeder/backfiller
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          echo "BACKFILL_ONLY=${BACKFILL_ONLY} GEOCODE=${GEOCODE} DRY_RUN=${DRY_RUN} CHAIN=${SELVER_CHAIN} ONLINE_NAME=${ONLINE_NAME}"
+          python selver_seed_stores_pw.py
