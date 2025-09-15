@@ -6,7 +6,7 @@ Coop eCoop (multi-region) category crawler → PDP extractor → CSV/DB-friendly
 What this does
 - Crawls category pages with Playwright (handles JS/lazy-load).
 - Extracts title, brand, manufacturer, image, price, EAN/GTIN (from JSON-LD,
-  spec tables, legacy “Tootekood”, or by clicking “Toote info” modal on new UI).
+  spec tables, legacy labels, or free-text with context words).
 - Writes CSV (always) and optionally upserts to Postgres if COOP_UPSERT_DB=1.
 
 DB alignment (Railway)
@@ -18,7 +18,7 @@ DB alignment (Railway)
 Notes
 - store_host is derived from --region (e.g. https://coophaapsalu.ee → coophaapsalu.ee).
 - Supports **category sharding** via --cat-shards / --cat-index for parallel runs.
-- Blocks heavy trackers and images/fonts to speed up.
+- Blocks trackers + images/fonts to speed up, and awaits route registration.
 """
 
 import argparse
@@ -29,6 +29,7 @@ import json
 import os
 import re
 import sys
+import ssl
 from pathlib import Path
 from typing import Dict, List, Optional
 from urllib.parse import urlparse
@@ -58,7 +59,7 @@ def normalize_ean(e: Optional[str]) -> Optional[str]:
     d = clean_digits(e)
     if len(d) in (8, 12, 13, 14):
         if len(d) == 14 and d.startswith("0"):
-            d = d[1:]               # strip logistics 0
+            d = d[1:]               # strip 0 logistics prefix
         if len(d) == 12:
             d = "0" + d            # UPC-A → EAN-13
         return d
@@ -140,52 +141,6 @@ async def parse_json_ld(page: Page) -> Dict:
         pass
     return data
 
-async def detect_variant(page: Page) -> str:
-    """
-    Best-effort PDP variant detector:
-    - 'ecoop-legacy' (e.g., Haapsalu) shows 'Tootekood' inline.
-    - 'ecoop-new' often has 'Toote info' which reveals GTIN in a modal.
-    - 'generic' fallback.
-    """
-    host = (await page.evaluate("location.host")) or ""
-    html = (await page.content()) or ""
-    if "coophaapsalu.ee" in host or "Tootekood" in html:
-        return "ecoop-legacy"
-    if "Toote info" in html or "GTIN" in html:
-        return "ecoop-new"
-    return "generic"
-
-async def extract_from_modal_gtin(page: Page) -> Optional[str]:
-    """Click 'Toote info' and try to read GTIN from the opened sheet/modal."""
-    try:
-        btn = page.locator("text=Toote info")
-        if await btn.count() == 0:
-            return None
-        await btn.first.click()
-        await page.wait_for_timeout(400)
-
-        # Try structured siblings (td/dd/div)
-        val = await page.locator(
-            "xpath=(//*[self::td or self::dd or self::div][contains(normalize-space(.), 'GTIN')]/following-sibling::*[1])[1]"
-        ).first.text_content()
-        if val:
-            return val.strip()
-
-        # Fallback: regex scan after opening
-        txt = await page.content()
-        m = CTX_EAN.search(txt)
-        return m.group(1) if m else None
-    except Exception:
-        return None
-    finally:
-        # best-effort close
-        try:
-            close_btn = page.locator("button:has-text('✕'), button[aria-label='Close'], [data-testid='close']")
-            if await close_btn.count() > 0:
-                await close_btn.first.click()
-        except Exception:
-            pass
-
 # ---------- PDP extraction ----------
 
 async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -> Dict:
@@ -257,14 +212,7 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
             ean_raw = str(ld[key])
             break
 
-    # Detect variant and apply UI-specific strategies
-    variant = await detect_variant(page)
-
-    # 2) New ecoop: click "Toote info" → GTIN
-    if not ean_raw and variant == "ecoop-new":
-        ean_raw = await extract_from_modal_gtin(page)
-
-    # 3) Spec tables (dt/dd or tr/th/td)
+    # 2) Spec tables (dt/dd or tr/th/td)
     if not ean_raw:
         try:
             spec_xpath = (
@@ -281,18 +229,7 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
         except Exception:
             pass
 
-    # 4) Legacy: 'Tootekood' label blob → next sibling
-    if not ean_raw and variant == "ecoop-legacy":
-        try:
-            val = await page.locator(
-                "xpath=(//*[contains(normalize-space(.), 'Tootekood')]/following-sibling::*[1])[1]"
-            ).first.text_content()
-            if val:
-                ean_raw = val.strip()
-        except Exception:
-            pass
-
-    # 5) Fallback: regex scan
+    # 3) Fallback: regex scan
     if not ean_raw:
         try:
             txt = await page.content()
@@ -393,8 +330,14 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
         print("[warn] asyncpg not installed; skipping DB upsert")
         return
 
+    from urllib.parse import urlparse
+    u = urlparse(dsn)
+    print(f"[db] host={u.hostname} port={u.port} db={u.path.lstrip('/')}")
+
     table = "staging_coop_products"
-    conn = await asyncpg.connect(dsn)
+    ssl_ctx = ssl.create_default_context()
+
+    conn = await asyncpg.connect(dsn, ssl=ssl_ctx)
     try:
         exists = await conn.fetchval(
             "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name=$1)",
@@ -468,10 +411,6 @@ async def _route_filter(route):
         except Exception:
             return
 
-# wrapper handler for Playwright (so we can await registration)
-async def _route_handler(route):
-    await _route_filter(route)
-
 # ---------- main ----------
 
 async def run(args):
@@ -515,7 +454,7 @@ async def run(args):
             java_script_enabled=True,
         )
         # IMPORTANT: await the route registration
-        await context.route("**/*", _route_handler)
+        await context.route("**/*", _route_filter)
 
         all_rows: List[Dict] = []
         try:
