@@ -108,9 +108,10 @@ def scrape_kauplused():
       {name: {"address": str|None, "href": google_maps_link|None}}
     """
     with sync_playwright() as pw:
-        b = pw.chromium.launch(headless=True)
-        p = b.new_page()
-        p.set_user_agent(UA)
+        browser = pw.chromium.launch(headless=True)
+        # 👇 user agent must be set on the context
+        ctx = browser.new_context(user_agent=UA, locale="et-EE", viewport={"width": 1280, "height": 900})
+        p = ctx.new_page()
         p.goto("https://www.selver.ee/kauplused", wait_until="domcontentloaded", timeout=60000)
         # handle cookies if present
         for txt in ["Nõustun", "Nõustu", "Accept", "Allow all", "OK"]:
@@ -121,7 +122,8 @@ def scrape_kauplused():
                 pass
         p.wait_for_timeout(1500)
         html = p.content()
-        b.close()
+        ctx.close()
+        browser.close()
 
     soup = BeautifulSoup(html, "html.parser")
     out = {}  # name -> {"address": ..., "href": ...}
@@ -129,8 +131,10 @@ def scrape_kauplused():
     # Look for anything that looks like a store name, then search locally for address / gmaps link
     for node in soup.find_all(string=re.compile(r'(Selver|Delice)', re.I)):
         raw = str(node)
-        # try to clip the name within the text first
-        candidates = re.findall(r'(?:[A-ZÄÖÜÕ][\wÄÖÜÕäöüõ\'’\- ]{1,60}\sSelver(?:\sABC)?)|Delice(?:\s+Toidupood)?', raw) or [raw]
+        candidates = re.findall(
+            r'(?:[A-ZÄÖÜÕ][\wÄÖÜÕäöüõ\'’\- ]{1,60}\sSelver(?:\sABC)?)|Delice(?:\s+Toidupood)?',
+            raw
+        ) or [raw]
         for cand in candidates:
             name = clean_name(cand)
             if not name:
@@ -142,7 +146,6 @@ def scrape_kauplused():
                 if not container or container.name in ("html", "body"):
                     break
                 txt_here = container.get_text(" ", strip=True)
-                # If very dense with many store names, climb a bit more
                 if len(re.findall(r'(Selver|Delice)', txt_here, re.I)) > 3:
                     container = container.parent
                 else:
@@ -162,7 +165,6 @@ def scrape_kauplused():
                     if ADDR_TOKEN.search(ln) and re.search(r'\d', ln) and 8 <= len(ln) <= 120 and 'selver' not in ln.lower():
                         addr_like.append(ln)
                 if addr_like:
-                    # choose shortest plausible
                     address = sorted(addr_like, key=len)[0]
 
             prev = out.get(name, {})
@@ -171,9 +173,7 @@ def scrape_kauplused():
                 "href": prev.get("href") or href
             }
 
-    # filter out "Selver"/"e-Selver" generic names
     return {k: v for k, v in out.items() if k and not BAD_NAME.match(k)}
-
 
 # ------------ DB helpers ------------
 
