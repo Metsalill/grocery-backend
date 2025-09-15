@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Scrape https://www.selver.ee/kauplused → store list, and either:
+Scrape https://www.selver.ee/kauplused → store detail pages and either:
   - FULL SEED: insert physical stores and set address/coords non-destructively.
   - BACKFILL: only update rows in DB that are missing/zero lat/lon.
 
@@ -16,10 +16,11 @@ Env:
   ONLINE_NAME           default "e-Selver"
 """
 
-import os, re, time, sys, json, unicodedata
+from __future__ import annotations
+import os, re, time, sys
 import psycopg2, psycopg2.extras
 import requests
-from urllib.parse import urlparse, parse_qs, unquote, urljoin
+from urllib.parse import urlparse, parse_qs, unquote
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
 
@@ -45,15 +46,9 @@ CITY_PREFIX_RE = re.compile(r'^(Tallinn|Tartu)\s+(.*)$', re.I)
 CAP_NAME = re.compile(r'(Delice(?:\s+Toidupood)?|[A-ZÄÖÜÕ][A-Za-zÄÖÜÕäöüõ0-9\'’\- ]{1,60}\sSelver(?:\sABC)?)')
 BAD_NAME = re.compile(r'^(?:e-?Selver|Selver)$', re.I)
 
-# tokens that make a line look like an Estonian street address
 ADDR_TOKEN = re.compile(r'\b(mnt|tee|tn|pst|puiestee|maantee|tänav|keskus|turg|väljak)\b', re.I)
 
-def norm_key(s: str) -> str:
-    """Normalize store name for case/space/nb-space insensitive matching."""
-    s = unicodedata.normalize("NFKC", s or "")
-    s = s.replace("\u00A0", " ")
-    s = re.sub(r"\s+", " ", s).strip().lower()
-    return s
+# ------------ small utils ------------
 
 def clean_name(s: str) -> str:
     n = SCHEDULE_SPLIT.split(s or "")[0].strip()
@@ -72,6 +67,7 @@ def clean_name(s: str) -> str:
         return ''
     return n.strip()
 
+
 def parse_coords_or_query_from_maps(href: str):
     """Try to get exact coords from a Google Maps link; else return the 'q=' query."""
     if not href:
@@ -87,6 +83,7 @@ def parse_coords_or_query_from_maps(href: str):
     except Exception:
         pass
     return (None, None, None)
+
 
 def geocode(addr: str):
     if not addr or not GEOCODE:
@@ -104,90 +101,124 @@ def geocode(addr: str):
     except Exception:
         return (None, None)
 
-# ------------ scraping ------------
+# ------------ scraping (detail pages!) ------------
 
-DETAIL_HREF_RE = re.compile(r"/[a-z0-9\-]+-selver(?:-abc)?/?$", re.I)
+DETAIL_HREF_RE = re.compile(r"^https?://[^/]*selver\.ee/kauplused/[^/?#]+$")
 
-def fetch_detail_meta(detail_url: str):
-    """Fetch a store detail page and try to extract (name, address, maps_link)."""
-    if not detail_url:
-        return (None, None, None)
-    try:
-        hdrs = {"User-Agent": UA}
-        r = requests.get(detail_url, headers=hdrs, timeout=25)
-        r.raise_for_status()
-        soup = BeautifulSoup(r.text, "html.parser")
+def extract_address_like(text: str) -> str | None:
+    parts = [x.strip() for x in re.split(r' ?[•\u2022\u00B7\u25CF\|;/] ?|\n', text) if x.strip()]
+    candidates = []
+    for ln in parts:
+        if ADDR_TOKEN.search(ln) and re.search(r'\d', ln) and 8 <= len(ln) <= 120 and 'selver' not in ln.lower():
+            candidates.append(ln)
+    if candidates:
+        return sorted(candidates, key=len)[0]
+    return None
 
-        # Name
-        name_tag = soup.find(["h1", "h2"])
-        name = clean_name(name_tag.get_text(" ", strip=True)) if name_tag else None
 
-        # Google maps link
-        a = soup.find("a", href=re.compile(r"(google\.[^/]+/maps|goo\.gl/maps|maps\.app\.goo\.gl)", re.I))
-        href = a["href"] if a and a.has_attr("href") else None
-
-        # Address-like text
-        text = soup.get_text(" ", strip=True)
-        parts = [x.strip() for x in re.split(r" ?[•\u2022\u00B7\u25CF\|;/] ?|\n", text) if x.strip()]
-        candidates = [
-            ln for ln in parts
-            if ADDR_TOKEN.search(ln) and re.search(r"\d", ln) and 8 <= len(ln) <= 120 and "selver" not in ln.lower()
-        ]
-        address = sorted(candidates, key=len)[0] if candidates else None
-
-        return (name, address, href)
-    except Exception:
-        return (None, None, None)
-
-def scrape_kauplused():
+def scrape_all_detail_pages() -> dict[str, dict]:
     """
-    Render the list page once with Playwright and extract store detail links.
-    Then fetch each detail page to get name + address + gmaps link.
-    Return: dict { norm_key(name): {"name": name, "address": str|None, "href": str|None} }
+    Visit the index once to collect *detail page URLs*, then visit each detail page
+    and extract: name, address text, and Google Maps link ("Leia kaardilt").
+    Returns {name: {"address": str|None, "href": str|None}}.
     """
     with sync_playwright() as pw:
-        browser = pw.chromium.launch(headless=True)
-        ctx = browser.new_context(user_agent=UA, locale="et-EE", viewport={"width": 1280, "height": 900})
-        p = ctx.new_page()
-        p.goto("https://www.selver.ee/kauplused", wait_until="domcontentloaded", timeout=60000)
+        browser = pw.chromium.launch(headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"])
+        ctx = pw.chromium.launch_persistent_context(
+            user_data_dir="/tmp/selver-seed",
+            headless=True,
+            args=["--no-sandbox", "--disable-dev-shm-usage"],
+            locale="et-EE",
+            accept_downloads=False
+        )
+        # Fallback if persistent context is not allowed in runner
+        if not ctx.pages:
+            ctx.close()
+            browser = pw.chromium.launch(headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"])
+            ctx = browser.new_context(user_agent=UA, locale="et-EE", viewport={"width": 1280, "height": 900})
+
+        page = ctx.new_page()
+        page.goto("https://www.selver.ee/kauplused", wait_until="domcontentloaded", timeout=60000)
         for txt in ["Nõustun", "Nõustu", "Accept", "Allow all", "OK"]:
             try:
-                p.get_by_role("button", name=re.compile(txt, re.I)).click(timeout=1200)
+                page.get_by_role("button", name=re.compile(txt, re.I)).click(timeout=1200)
                 break
             except Exception:
                 pass
-        p.wait_for_timeout(1500)
-        html = p.content()
-        ctx.close()
-        browser.close()
+        page.wait_for_timeout(1200)
 
-    soup = BeautifulSoup(html, "html.parser")
+        # All anchors; keep clean detail links only
+        hrefs = set(page.eval_on_selector_all(
+            "a[href]",
+            "els => els.map(e => e.href)"
+        ))
+        detail_urls = sorted(h for h in hrefs if DETAIL_HREF_RE.match(h))
 
-    # collect plausible detail links
-    detail_urls = set()
-    for a in soup.find_all("a", href=True):
-        href = a["href"]
-        if "selver.ee" in href and "/kauplused" in href and a.get_text(strip=True):
-            # ignore section anchors
+        entries: dict[str, dict] = {}
+
+        for url in detail_urls:
+            try:
+                page.goto(url, wait_until="domcontentloaded", timeout=45000)
+            except Exception:
+                continue
+
+            # name
+            name = ""
+            for sel in ["h1", "main h1", "article h1", "h2"]:
+                try:
+                    if page.locator(sel).count() > 0:
+                        name = page.locator(sel).first.inner_text(timeout=1500).strip()
+                        break
+                except Exception:
+                    pass
+            name = clean_name(name)
+            if not name:
+                # derive from slug as last resort
+                name = clean_name(url.rstrip("/").split("/")[-1].replace("-", " ").title())
+
+            # maps link
+            href = None
+            for sel in [
+                "a[href*='google.com/maps']",
+                "a[href*='goo.gl/maps']",
+                "a[href*='maps.app.goo.gl']",
+                "a:has-text('Leia kaardilt')"
+            ]:
+                try:
+                    if page.locator(sel).count() > 0:
+                        href = page.locator(sel).first.get_attribute("href")
+                        if href:
+                            break
+                except Exception:
+                    pass
+
+            # address (heuristic from page text)
+            address = None
+            try:
+                text_scope = "main" if page.locator("main").count() > 0 else "body"
+                text_blob = page.locator(text_scope).inner_text(timeout=2000)
+                address = extract_address_like(text_blob)
+            except Exception:
+                pass
+
+            # register
+            if name:
+                prev = entries.get(name, {})
+                entries[name] = {
+                    "address": prev.get("address") or address,
+                    "href": prev.get("href") or href,
+                }
+
+        try:
+            ctx.close()
+        except Exception:
             pass
-        if DETAIL_HREF_RE.search(href) or (a.string and re.search(r"Rohkem infot", a.string, re.I)):
-            url = href if href.startswith("http") else urljoin("https://www.selver.ee/", href.lstrip("/"))
-            if "selver.ee" in url:
-                detail_urls.add(url)
+        try:
+            browser.close()
+        except Exception:
+            pass
 
-    entries = {}
-    for url in sorted(detail_urls):
-        name, address, href = fetch_detail_meta(url)
-        if not name:
-            # try to derive from URL if h1 missing
-            slug = url.rstrip("/").split("/")[-1]
-            slug_name = clean_name(slug.replace("-", " ").title())
-            name = slug_name or None
-        if not name or BAD_NAME.match(name):
-            continue
-        entries[norm_key(name)] = {"name": name, "address": address, "href": href}
-
-    return entries
+    return {k: v for k, v in entries.items() if k and not BAD_NAME.match(k)}
 
 # ------------ DB helpers ------------
 
@@ -260,14 +291,12 @@ def backfill_only_flow(web_entries):
         name = r["name"]
         if name.lower() == ONLINE_NAME.lower():
             continue
-
-        meta = web_entries.get(norm_key(name), {})
+        meta = web_entries.get(name, {})
         href = meta.get("href")
         addr_web = meta.get("address")
         addr_db  = r.get("address")
 
         lat = lon = None
-
         lt, ln, q = parse_coords_or_query_from_maps(href)
         if lt and ln:
             lat, lon = lt, ln
@@ -279,21 +308,20 @@ def backfill_only_flow(web_entries):
             print(f"[DRY] {name}: addr_db='{addr_db}' | addr_web='{addr_web}' | latlon={lat,lon}")
         else:
             if lat is not None and lon is not None:
-                upsert_physical(name, addr_web or addr_db, lat, lon)
+                upsert_physical(name, addr_web, lat, lon)
                 updated += 1
                 print(f"[OK] {name} ← ({lat:.6f},{lon:.6f})")
             else:
                 print(f"[MISS] {name} — still no coordinates")
 
-        time.sleep(1)  # polite geocoding
+        time.sleep(0.8)  # polite geocoding
     print(f"Backfill done. Updated {updated}/{len(rows)}.")
 
 def full_seed_flow(web_entries):
     ensure_online_store()
     print(f"Seeding {len(web_entries)} Selver/Delice physical names…")
 
-    for key, meta in web_entries.items():
-        name = meta["name"]
+    for name, meta in web_entries.items():
         if name.lower() == ONLINE_NAME.lower():
             continue
         href = meta.get("href")
@@ -312,15 +340,16 @@ def full_seed_flow(web_entries):
         else:
             upsert_physical(name, addr, lat, lon)
 
-        time.sleep(1)  # polite geocoding
+        time.sleep(0.8)  # polite geocoding
 
     print("Seed/refresh complete.")
 
 # ------------ main ------------
 
 def main():
-    web_entries = scrape_kauplused()
-    print(f"Scraped {len(web_entries)} physical store names from Selver Kauplused.")
+    # NEW: scrape from *store detail* pages, not only the index
+    web_entries = scrape_all_detail_pages()
+    print(f"Scraped {len(web_entries)} physical store detail pages from Selver.")
     if BACKFILL_ONLY:
         backfill_only_flow(web_entries)
     else:
