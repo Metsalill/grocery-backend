@@ -15,14 +15,6 @@ on:
         description: "Max categories to process (0 = all)"
         required: false
         default: "0"
-      cat_page_cap:
-        description: "Max paginated pages per category (0 uses script default)"
-        required: false
-        default: "0"
-      cat_max_products:
-        description: "Max PDPs to take per category (0 = unlimited)"
-        required: false
-        default: "0"
       max_products:
         description: "Cap total PDPs (0 = unlimited)"
         required: false
@@ -35,6 +27,10 @@ on:
         description: "Delay between steps (sec)"
         required: false
         default: "0.25"
+      max_pages_per_category:
+        description: "Cap pages per category (0 = unlimited)"
+        required: false
+        default: "35"
       upsert_db:
         description: "Upsert into Postgres (1=yes, 0=just CSV)"
         required: false
@@ -42,10 +38,9 @@ on:
   schedule:
     - cron: "19 3 * * 0"   # Sun at 03:19 UTC
 
-# Do not cancel older runs; just queue new ones.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.inputs.mode || 'prices' }}
-  cancel-in-progress: false
+  group: barbora-category-crawl
+  cancel-in-progress: true
 
 jobs:
   crawl-and-upsert:
@@ -70,6 +65,9 @@ jobs:
       UPSERT_DB: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.upsert_db || '1' }}
       # Shard index from matrix
       SHARD: ${{ matrix.shard }}
+      # Crawl caps / soft timeout so DB steps can run
+      MAX_PAGES_PER_CAT: ${{ github.event.inputs.max_pages_per_category || '35' }}
+      SOFT_TIMEOUT_MIN: "220"
 
     steps:
       - name: Checkout
@@ -333,31 +331,22 @@ jobs:
         env:
           REQ_DELAY: ${{ github.event.inputs.req_delay }}
           PAGE_LIMIT: ${{ github.event.inputs.page_limit }}
-          CAT_PAGE_CAP: ${{ github.event.inputs.cat_page_cap }}
-          CAT_MAX_PRODUCTS: ${{ github.event.inputs.cat_max_products }}
           MAX_PRODUCTS: ${{ github.event.inputs.max_products }}
+          MAX_PAGES_PER_CAT: ${{ env.MAX_PAGES_PER_CAT }}
           HEADLESS: ${{ github.event.inputs.headless }}
         shell: bash
+        continue-on-error: true
         run: |
           set -euo pipefail
           REQ_DELAY="${REQ_DELAY:-0.25}"
           PAGE_LIMIT="${PAGE_LIMIT:-0}"
-          CAT_PAGE_CAP="${CAT_PAGE_CAP:-0}"
-          CAT_MAX_PRODUCTS="${CAT_MAX_PRODUCTS:-0}"
           MAX_PRODUCTS="${MAX_PRODUCTS:-0}"
           HEADLESS="${HEADLESS:-1}"
+          MAX_PAGES_PER_CAT="${MAX_PAGES_PER_CAT:-35}"
+          SOFT_TIMEOUT_MIN="${SOFT_TIMEOUT_MIN:-220}"
 
           ONLY_EXT_FLAG=()
           ONLY_URL_FLAG=()
-          CAT_PAGE_FLAG=()
-          CAT_MAX_FLAG=()
-
-          if [ "$CAT_PAGE_CAP" != "0" ]; then
-            CAT_PAGE_FLAG=( --cat-page-cap "$CAT_PAGE_CAP" )
-          fi
-          if [ "$CAT_MAX_PRODUCTS" != "0" ]; then
-            CAT_MAX_FLAG=( --cat-max-products "$CAT_MAX_PRODUCTS" )
-          fi
 
           if [ "${MODE}" = "metadata" ] && [ -s data/barbora_only_urls.txt ]; then
             ONLY_URL_FLAG=( --only-url-file data/barbora_only_urls.txt )
@@ -369,16 +358,15 @@ jobs:
                 --cats-file data/barbora_categories.txt
                 --page-limit "$PAGE_LIMIT"
                 --max-products "$MAX_PRODUCTS"
+                --max-pages-per-category "$MAX_PAGES_PER_CAT"
                 --headless "$HEADLESS"
                 --req-delay "$REQ_DELAY"
                 --output-csv "$OUTPUT_CSV"
-                "${CAT_PAGE_FLAG[@]}"
-                "${CAT_MAX_FLAG[@]}"
                 "${ONLY_EXT_FLAG[@]}"
                 "${ONLY_URL_FLAG[@]}" )
 
-          # No step-level timeout: rely on job timeout-minutes
-          stdbuf -oL -eL "${cmd[@]}" | tee data/barbora_run.log
+          echo "[info] soft timeout: ${SOFT_TIMEOUT_MIN} minutes"
+          stdbuf -oL -eL timeout -k 60s "${SOFT_TIMEOUT_MIN}m" "${cmd[@]}" | tee data/barbora_run.log
 
       - name: Ensure CSV exists (header if empty)
         shell: bash
@@ -403,7 +391,6 @@ jobs:
             data/barbora_only_ext_ids.txt
             data/barbora_only_urls_all.txt
             data/barbora_only_urls.txt
-            data/barbora_categories.txt
           if-no-files-found: warn
           retention-days: 7
 
@@ -507,7 +494,6 @@ jobs:
           CREATE TEMP TABLE tmp_staging_barbora_products AS
           SELECT
             ext_id,
-            -- Fill missing/blank name from slug
             COALESCE(NULLIF(btrim(name), ''), initcap(replace(regexp_replace(COALESCE(ext_id,''), '^.*/', ''), '-', ' '))) AS name,
             NULLIF(btrim(ean_raw), '') AS ean_raw,
             NULLIF(btrim(sku_raw), '') AS sku_raw,
@@ -515,7 +501,6 @@ jobs:
             NULLIF(btrim(size_text), '') AS size_text,
             NULLIF(btrim(brand), '') AS brand,
             NULLIF(btrim(manufacturer), '') AS manufacturer,
-            -- normalize price "3,99" → 3.99
             NULLIF(regexp_replace(price, ',', '.', 'g'), '')::numeric AS price,
             UPPER(COALESCE(NULLIF(currency,''), 'EUR')) AS currency,
             NULLIF(btrim(category_path), '') AS category_path,
@@ -524,11 +509,9 @@ jobs:
           FROM tmp_barbora_csv_full
           WHERE COALESCE(ext_id,'') <> '';
 
-          -- Drop any rows that still lack a name after fallback
           DELETE FROM tmp_staging_barbora_products
           WHERE COALESCE(name,'') = '';
 
-          -- De-duplicate: keep the "richest" row per ext_id to avoid ON CONFLICT twice
           CREATE TEMP TABLE tmp_staging_barbora_products_dedup AS
           SELECT t.*
           FROM (
@@ -549,8 +532,6 @@ jobs:
 
           DROP TABLE tmp_staging_barbora_products;
           ALTER TABLE tmp_staging_barbora_products_dedup RENAME TO tmp_staging_barbora_products;
-
-          -- Belt-and-suspenders: prevent accidental dupes hereafter
           CREATE UNIQUE INDEX ON tmp_staging_barbora_products (ext_id);
 
           INSERT INTO public.staging_barbora_products
@@ -591,7 +572,6 @@ jobs:
 
           COMMIT;
 
-          -- Quick feedback
           \echo ''
           \echo '=== Load summary ==='
           SELECT
