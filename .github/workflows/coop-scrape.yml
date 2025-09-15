@@ -1,0 +1,105 @@
+name: "Coop – Category Crawl (Playwright) + optional DB upsert"
+
+on:
+  workflow_dispatch:
+    inputs:
+      region:
+        description: "Base region URL (e.g., https://coophaapsalu.ee or https://vandra.ecoop.ee)"
+        required: false
+        default: "https://vandra.ecoop.ee"
+      categories_multiline:
+        description: "Category URLs or paths (one per line). e.g. /et/tooted/53-joogid"
+        required: false
+        default: ""
+      categories_file_url:
+        description: "Optional raw URL to a .txt file with categories (one per line)"
+        required: false
+        default: ""
+      page_limit:
+        description: "Discovery cap per category (0 = all)"
+        required: false
+        default: "0"
+      max_products:
+        description: "Post-discovery cap per category (0 = all)"
+        required: false
+        default: "0"
+      headless:
+        description: "Chromium headless (1/0)"
+        required: false
+        default: "1"
+      req_delay:
+        description: "Delay between actions (seconds)"
+        required: false
+        default: "0.5"
+      pdp_workers:
+        description: "Concurrent PDP tabs per category"
+        required: false
+        default: "4"
+      upsert_db:
+        description: "Set to 1 to upsert into public.staging_coop_products"
+        required: false
+        default: "0"
+
+  # 05:30 Tallinn daily (02:30 UTC; GH cron runs in UTC)
+  schedule:
+    - cron: "30 2 * * *"
+
+concurrency:
+  group: coop-scrape-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: false
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python deps & Playwright
+        run: |
+          python -m pip install --upgrade pip
+          pip install playwright==1.46.0 asyncpg
+          python -m playwright install --with-deps chromium
+
+      - name: (Optional) Download categories file
+        if: ${{ inputs.categories_file_url != '' }}
+        run: |
+          curl -fsSL "${{ inputs.categories_file_url }}" -o coop_categories.txt
+
+      - name: Run Coop crawler
+        env:
+          # Only needed when upsert_db == 1
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          COOP_UPSERT_DB: ${{ inputs.upsert_db }}
+        shell: bash
+        run: |
+          mkdir -p out
+          EXTRA_FILE_ARG=""
+          if [ -n "${{ inputs.categories_file_url }}" ]; then
+            EXTRA_FILE_ARG="--categories-file coop_categories.txt"
+          fi
+
+          python scripts/coop_crawl_categories_pw.py \
+            --region "${{ inputs.region }}" \
+            --categories-multiline "${{ inputs.categories_multiline }}" \
+            ${EXTRA_FILE_ARG} \
+            --page-limit "${{ inputs.page_limit }}" \
+            --max-products "${{ inputs.max_products }}" \
+            --headless "${{ inputs.headless }}" \
+            --req-delay "${{ inputs.req_delay }}" \
+            --pdp-workers "${{ inputs.pdp_workers }}" \
+            --out "out/coop_products_${{ github.run_id }}.csv"
+
+      - name: Upload CSV artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coop-products-${{ github.run_id }}
+          path: out/*.csv
+          if-no-files-found: warn
+          retention-days: 7
