@@ -3,16 +3,17 @@
 """
 Coop eCoop (multi-region) category crawler → PDP extractor → CSV/DB-friendly
 
+What this does
 - Crawls category pages with Playwright (handles JS/lazy-load).
-- Extracts title, brand, manufacturer, image, price, EAN/GTIN (JSON-LD +
-  spec tables + context regex; also tries the “Toote info” modal on newer UIs).
-- Writes CSV always; optionally upserts to Postgres if COOP_UPSERT_DB=1.
+- Extracts title, brand, manufacturer, image, price, EAN/GTIN (from JSON-LD,
+  spec tables, legacy “Tootekood”, or by clicking “Toote info” modal on new UI).
+- Writes CSV (always) and optionally upserts to Postgres if COOP_UPSERT_DB=1.
 
 DB alignment (Railway)
 - Target table: public.staging_coop_products
 - PRIMARY KEY (store_host, ext_id)
 - Columns: store_host, ext_id, name, brand, manufacturer, ean_raw, ean_norm,
-           size_text, price, currency, image_url, url, scraped_at (DEFAULT now()).
+           size_text, price, currency, image_url, url, scraped_at (default now()).
 
 Notes
 - store_host is derived from --region (e.g. https://coophaapsalu.ee → coophaapsalu.ee).
@@ -56,8 +57,6 @@ def normalize_ean(e: Optional[str]) -> Optional[str]:
             d = "0" + d
         return d
     return None
-
-# ---------------- UI helpers ----------------
 
 async def wait_cookie_banner(page: Page):
     try:
@@ -159,8 +158,6 @@ async def extract_from_modal_gtin(page: Page) -> Optional[str]:
     except Exception:
         return None
 
-# ---------------- PDP extraction ----------------
-
 async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -> Dict:
     await page.goto(url, wait_until="domcontentloaded")
     await wait_cookie_banner(page)
@@ -226,6 +223,7 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
     variant = await detect_variant(page)
     if not ean_raw and variant == "ecoop-new":
         ean_raw = await extract_from_modal_gtin(page)
+
     if not ean_raw:
         try:
             spec_xpath = (
@@ -241,6 +239,7 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
                         break
         except Exception:
             pass
+
     if not ean_raw and variant == "ecoop-legacy":
         try:
             val = await page.locator(
@@ -250,6 +249,7 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
                 ean_raw = val.strip()
         except Exception:
             pass
+
     if not ean_raw:
         try:
             txt = await page.content()
@@ -287,8 +287,6 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
         "url": url,
     }
 
-# ---------------- category runner ----------------
-
 async def process_category(ctx: BrowserContext, category_url: str, page_limit: int, req_delay: float,
                            pdp_workers: int, max_products: int, store_host: str) -> List[Dict]:
     page = await ctx.new_page()
@@ -318,8 +316,6 @@ async def process_category(ctx: BrowserContext, category_url: str, page_limit: i
         if r:
             items.append(r)
     return items
-
-# ---------------- outputs ----------------
 
 def write_csv(rows: List[Dict], out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -401,8 +397,6 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
     finally:
         await conn.close()
 
-# ---------------- request filter ----------------
-
 async def _route_filter(route):
     try:
         req = route.request
@@ -424,8 +418,6 @@ async def _route_filter(route):
 
 async def _route_handler(route):
     await _route_filter(route)
-
-# ---------------- main ----------------
 
 async def run(args):
     categories: List[str] = []
@@ -456,7 +448,7 @@ async def run(args):
             viewport={"width": 1366, "height": 900},
             java_script_enabled=True,
         )
-        # IMPORTANT: await route registration in async API
+        # Await the route registration (prevents the RuntimeWarning)
         await context.route("**/*", _route_handler)
 
         all_rows: List[Dict] = []
