@@ -33,8 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      # Write-capable DB URL
-      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
+      DATABASE_URL:  ${{ secrets.RW_DATABASE_URL }}
       BACKFILL_ONLY: ${{ github.event.inputs.backfill_only || '1' }}
       GEOCODE:       ${{ github.event.inputs.geocode       || '1' }}
       DRY_RUN:       ${{ github.event.inputs.dry_run       || '0' }}
@@ -58,7 +57,7 @@ jobs:
 
       - name: Sanity check script
         run: |
-          test -f seed_selver_stores.py || { echo "Missing seed_selver_stores.py"; exit 1; }
+          test -f scripts/seed_selver_stores.py || { echo "Missing scripts/seed_selver_stores.py"; exit 1; }
 
       - name: Show config
         run: |
@@ -68,7 +67,7 @@ jobs:
         env:
           PYTHONUNBUFFERED: "1"
         run: |
-          python seed_selver_stores.py
+          python scripts/seed_selver_stores.py
 
       - name: Post-run report
         run: |
