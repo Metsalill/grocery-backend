@@ -8,11 +8,11 @@ on:
         required: false
         default: "https://vandra.ecoop.ee"
       categories_multiline:
-        description: "Category URLs or paths (one per line). e.g. /et/tooted/53-joogid"
+        description: "Category URLs/paths (one per line). e.g. /et/tooted/53-joogid"
         required: false
         default: ""
       categories_file_url:
-        description: "Optional raw URL to a .txt file with categories (one per line)"
+        description: "Optional raw URL to a .txt with categories (one per line)"
         required: false
         default: ""
       page_limit:
@@ -36,7 +36,7 @@ on:
         required: false
         default: "4"
       shards:
-        description: "Parallel shards for categories (1–8)"
+        description: "Parallel shards for categories (1–8)."
         required: false
         default: "1"
       upsert_db:
@@ -53,22 +53,68 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  crawl:
+  # Build a matrix with exactly N shards
+  prepare-matrix:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.mk.outputs.matrix }}
+      region_url: ${{ steps.vars.outputs.region_url }}
+      cats_multiline: ${{ steps.vars.outputs.cats_multiline }}
+      cats_file_url: ${{ steps.vars.outputs.cats_file_url }}
+      page_limit: ${{ steps.vars.outputs.page_limit }}
+      max_products: ${{ steps.vars.outputs.max_products }}
+      headless: ${{ steps.vars.outputs.headless }}
+      req_delay: ${{ steps.vars.outputs.req_delay }}
+      pdp_workers: ${{ steps.vars.outputs.pdp_workers }}
+      upsert_flag: ${{ steps.vars.outputs.upsert_flag }}
+      shards: ${{ steps.vars.outputs.shards }}
+    steps:
+      - id: vars
+        run: |
+          echo "region_url=${{ inputs.region }}" >> "$GITHUB_OUTPUT"
+          echo "cats_multiline=${{ inputs.categories_multiline }}" >> "$GITHUB_OUTPUT"
+          echo "cats_file_url=${{ inputs.categories_file_url }}" >> "$GITHUB_OUTPUT"
+          echo "page_limit=${{ inputs.page_limit }}" >> "$GITHUB_OUTPUT"
+          echo "max_products=${{ inputs.max_products }}" >> "$GITHUB_OUTPUT"
+          echo "headless=${{ inputs.headless }}" >> "$GITHUB_OUTPUT"
+          echo "req_delay=${{ inputs.req_delay }}" >> "$GITHUB_OUTPUT"
+          echo "pdp_workers=${{ inputs.pdp_workers }}" >> "$GITHUB_OUTPUT"
+          echo "upsert_flag=${{ inputs.upsert_db }}" >> "$GITHUB_OUTPUT"
+          # clamp shards to [1,8]
+          N="${{ inputs.shards }}"
+          if [ -z "$N" ] || [ "$N" -lt 1 ]; then N=1; fi
+          if [ "$N" -gt 8 ]; then N=8; fi
+          echo "shards=$N" >> "$GITHUB_OUTPUT"
+      - id: mk
+        env:
+          N: ${{ steps.vars.outputs.shards }}
+        run: |
+          arr='['
+          for ((i=0;i<${N};i++)); do
+            arr="${arr}${i},"
+          done
+          arr="${arr%,}]"
+          echo "matrix={\"shard\":${arr}}" >> "$GITHUB_OUTPUT"
 
+  crawl:
+    needs: prepare-matrix
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      # Always spawn up to 8; each job exits fast if its index >= requested shard count.
-      matrix:
-        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+      matrix: ${{ fromJSON(needs.prepare-matrix.outputs.matrix) }}
 
     env:
-      REGION_URL:     ${{ inputs.region }}
-      CATS_MULTILINE: ${{ inputs.categories_multiline }}
-      CATS_FILE_URL:  ${{ inputs.categories_file_url }}
-      SHARD_COUNT:    ${{ inputs.shards }}
+      REGION_URL:     ${{ needs.prepare-matrix.outputs.region_url }}
+      CATS_MULTILINE: ${{ needs.prepare-matrix.outputs.cats_multiline }}
+      CATS_FILE_URL:  ${{ needs.prepare-matrix.outputs.cats_file_url }}
+      PAGE_LIMIT:     ${{ needs.prepare-matrix.outputs.page_limit }}
+      MAX_PRODUCTS:   ${{ needs.prepare-matrix.outputs.max_products }}
+      HEADLESS:       ${{ needs.prepare-matrix.outputs.headless }}
+      REQ_DELAY:      ${{ needs.prepare-matrix.outputs.req_delay }}
+      PDP_WORKERS:    ${{ needs.prepare-matrix.outputs.pdp_workers }}
+      COOP_UPSERT_DB: ${{ needs.prepare-matrix.outputs.upsert_flag }}
+      SHARD_COUNT:    ${{ needs.prepare-matrix.outputs.shards }}
       SHARD_INDEX:    ${{ matrix.shard }}
-      COOP_UPSERT_DB: ${{ inputs.upsert_db }}
 
     steps:
       - name: Checkout
@@ -90,9 +136,8 @@ jobs:
         run: |
           curl -fsSL "$CATS_FILE_URL" -o coop_categories.txt
 
-      - name: Select DB URL (PUBLIC preferred)
+      - name: Choose DB URL (prefer PUBLIC)
         if: ${{ env.COOP_UPSERT_DB == '1' }}
-        shell: bash
         run: |
           if [ -n "${{ secrets.DATABASE_URL_PUBLIC }}" ]; then
             echo "DATABASE_URL=${{ secrets.DATABASE_URL_PUBLIC }}" >> "$GITHUB_ENV"
@@ -101,37 +146,23 @@ jobs:
             echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> "$GITHUB_ENV"
             echo "[db] Using DATABASE_URL"
           else
-            echo "[db] No DB URL secrets present; upsert will be skipped by script."
+            echo "[db] Warning: No DB URL provided; script will skip upsert."
           fi
 
-      - name: Run Coop crawler (with repo fallback + sharding)
+      - name: Run Coop crawler (shard ${{ env.SHARD_INDEX }} of ${{ env.SHARD_COUNT }})
         shell: bash
-        env:
-          PAGE_LIMIT:   ${{ inputs.page_limit }}
-          MAX_PRODUCTS: ${{ inputs.max_products }}
-          HEADLESS:     ${{ inputs.headless }}
-          REQ_DELAY:    ${{ inputs.req_delay }}
-          PDP_WORKERS:  ${{ inputs.pdp_workers }}
         run: |
           set -euo pipefail
           mkdir -p out
 
-          # Skip unused matrix jobs quickly
-          if [ "${SHARD_INDEX}" -ge "${SHARD_COUNT}" ]; then
-            echo "[shard] Skipping shard ${SHARD_INDEX} (only ${SHARD_COUNT} requested)."
-            exit 0
-          fi
-
+          # Build categories master file (UI URL > multiline > repo defaults > tiny fallback)
           CATS_ALL="coop_categories.txt"
           : > "$CATS_ALL"
 
-          # 1) Highest priority: downloaded file (if categories_file_url is set)
           if [ -s "coop_categories.txt" ]; then
-            echo ">> using categories from URL"
-          # 2) UI multiline input
+            echo ">> using categories downloaded from URL"
           elif [ -n "$CATS_MULTILINE" ]; then
             printf '%s\n' "$CATS_MULTILINE" > "$CATS_ALL"
-          # 3) Repo defaults by region
           else
             if echo "$REGION_URL" | grep -qi 'vandra\.ecoop\.ee'; then
               REPO_FILE="data/coop_vandra_categories.txt"
@@ -146,7 +177,6 @@ jobs:
             fi
           fi
 
-          # 4) Last-resort tiny default so the job never fails
           if [ ! -s "$CATS_ALL" ]; then
             if echo "$REGION_URL" | grep -qi 'coophaapsalu\.ee'; then
               echo "/tootekategooria/joogid/" > "$CATS_ALL"
@@ -155,21 +185,17 @@ jobs:
             fi
           fi
 
-          # Normalize CRLF if pasted from Windows
+          # CRLF → LF
           sed -e 's/\r$//' -i "$CATS_ALL"
 
-          # Slice categories for this shard (0-based)
+          # Slice for this shard
           CATS_SHARD="coop_categories_shard.txt"
           awk -v n="${SHARD_COUNT}" -v i="${SHARD_INDEX}" 'NF{ if ((NR-1)%n==i) print }' "$CATS_ALL" > "$CATS_SHARD"
-          if [ ! -s "$CATS_SHARD" ]; then
-            echo "[shard] No categories assigned to this shard (${SHARD_INDEX}); exiting."
-            exit 0
-          fi
-
           echo "=== Categories for shard ${SHARD_INDEX}/${SHARD_COUNT} ==="
-          cat "$CATS_SHARD"
+          cat "$CATS_SHARD" || true
           echo "==============================================="
 
+          # Run crawler
           python scripts/coop_crawl_categories_pw.py \
             --region "$REGION_URL" \
             --categories-multiline "" \
@@ -186,5 +212,5 @@ jobs:
         with:
           name: coop-products-${{ github.run_id }}
           path: out/*.csv
-          if-no-files-found: warn
+          if-no-files-found: ignore
           retention-days: 7
