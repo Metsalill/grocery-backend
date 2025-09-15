@@ -53,15 +53,15 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Build a JSON matrix with just the shards we need
+  # Build a JSON matrix for the exact shard count requested
   prepare-matrix:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.mk.outputs.matrix }}
-      count:  ${{ steps.mk.outputs.count }}
-      region_url:  ${{ steps.vars.outputs.region_url }}
-      upsert_flag: ${{ steps.vars.outputs.upsert_flag }}
-      cats_multiline: ${{ steps.vars.outputs.cats_multiline }}
+      matrix:        ${{ steps.mk.outputs.matrix }}
+      count:         ${{ steps.mk.outputs.count }}
+      region_url:    ${{ steps.vars.outputs.region_url }}
+      upsert_flag:   ${{ steps.vars.outputs.upsert_flag }}
+      cats_multiline:${{ steps.vars.outputs.cats_multiline }}
       cats_file_url: ${{ steps.vars.outputs.cats_file_url }}
       page_limit:    ${{ steps.vars.outputs.page_limit }}
       max_products:  ${{ steps.vars.outputs.max_products }}
@@ -85,20 +85,20 @@ jobs:
           REQ_SHARDS: ${{ github.event_name == 'workflow_dispatch' && inputs.shards || '1' }}
         shell: bash
         run: |
-          n="$REQ_SHARDS"
-          # clamp 1..8
+          n="${REQ_SHARDS:-1}"
+          # clamp to 1..8
           if [ -z "$n" ] || [ "$n" -lt 1 ]; then n=1; fi
           if [ "$n" -gt 8 ]; then n=8; fi
-          # build matrix JSON: {"shard_index":[0..n-1]}
-          python - <<'PY' > matrix.json
-import json, os
-n = int(os.environ["N"])
-print(json.dumps({"shard_index": list(range(n))}))
-PY
-          echo "matrix=$(cat matrix.json)" >> "$GITHUB_OUTPUT"
+
+          json='{"shard_index":['
+          for ((i=0; i<n; i++)); do
+            if [ "$i" -gt 0 ]; then json="$json, "; fi
+            json="$json$i"
+          done
+          json="$json]}"
+
+          echo "matrix=$json" >> "$GITHUB_OUTPUT"
           echo "count=$n" >> "$GITHUB_OUTPUT"
-        env:
-          N: ${{ env.REQ_SHARDS }}
 
   crawl:
     needs: prepare-matrix
@@ -144,7 +144,7 @@ PY
         run: |
           curl -fsSL "$CATS_FILE_URL" -o coop_categories.txt || true
 
-      - name: Run Coop crawler (with repo fallback)
+      - name: Run Coop crawler (sharded)
         shell: bash
         env:
           PAGE_LIMIT:   ${{ needs.prepare-matrix.outputs.page_limit }}
@@ -190,12 +190,13 @@ PY
           fi
 
           echo "== Categories to crawl =="
-          cat "$CATS_ALL" | sed 's/^/  /'
+          sed 's/^/  /' "$CATS_ALL" || true
           echo "========================="
 
           # Normalize CRLF if any
           sed -e 's/\r$//' -i "$CATS_ALL"
 
+          echo ">> running shard $SHARD_INDEX of $SHARD_COUNT"
           python scripts/coop_crawl_categories_pw.py \
             --region "$REGION_URL" \
             --categories-multiline "" \
