@@ -18,14 +18,7 @@ import re
 import sys
 import time
 from typing import Dict, List, Optional, Tuple
-from urllib.parse import (
-    urljoin,
-    urlparse,
-    urlsplit,
-    urlunsplit,
-    parse_qsl,
-    urlencode,
-)
+from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit, parse_qsl, urlencode
 
 from bs4 import BeautifulSoup
 from playwright.sync_api import TimeoutError as PWTimeout
@@ -174,7 +167,7 @@ def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
 
 def parse_app_state_for_brand(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
     for s in soup.find_all("script"):
-        txt = s.string or ""
+        txt = (s.string or "").strip()
         if not txt or ("brand" not in txt and "manufacturer" not in txt):
             continue
         mb = re.search(r'"brand"\s*:\s*"([^"]+)"', txt)
@@ -362,13 +355,13 @@ def next_page_if_any(page: Page) -> bool:
 
     selectors = [
         "a[rel='next']",
-        "a:has-text('Järgmine')",        # Estonian
+        "a:has-text('Järgmine')",
         "a:has-text('Edasi')",
         "a:has-text('Next')",
         "a.pagination__link[aria-label*='Next']",
         "li.pagination-next a",
-        "a[aria-label='›'], a:has-text('›')",   # single arrow
-        "a[aria-label='»'], a:has-text('»')",   # double arrow (observed on Barbora)
+        "a[aria-label='›'], a:has-text('›')",
+        "a[aria-label='»'], a:has-text('»')",
         "button[aria-label='»'], button:has-text('»')",
     ]
 
@@ -387,7 +380,6 @@ def next_page_if_any(page: Page) -> bool:
 
     # Fallback: derive next page from URL (?page=N) and navigate programmatically
     cur = _current_page_from_url(page.url)
-    # Look for numeric page links to guess an upper bound; if none, still try +1 once.
     try:
         nums = page.eval_on_selector_all(
             "a, button",
@@ -412,22 +404,20 @@ def next_page_if_any(page: Page) -> bool:
         return False
 
 
-def collect_category_products(
-    page: Page,
-    cat_url: str,
-    req_delay: float,
-    max_pages: int = 60,
-    stop_after_products: Optional[int] = None,
-) -> List[Tuple[str, str]]:
+def collect_category_products(page: Page, cat_url: str, req_delay: float, max_pages: int = 60) -> List[Tuple[str, str]]:
     """
     Iterate through paginated listing. Returns [(pdp_url, listing_title), ...]
-    Will also stop early if stop_after_products is reached.
+    The site only shows a window of page numbers at once; we keep clicking the
+    'next' arrow (»/›) and fall back to building ?page=N when needed.
     """
     go_to_category(page, cat_url, req_delay)
 
     all_links: List[Tuple[str, str]] = []
     seen_pages = set()
     pages_done = 0
+
+    # interpret 0 as "unlimited"
+    limit = max_pages if max_pages and max_pages > 0 else 10_000
 
     while True:
         if page.url in seen_pages:
@@ -437,21 +427,18 @@ def collect_category_products(
         links = harvest_product_links(page)
         all_links.extend(links)
 
-        if stop_after_products and len(all_links) >= stop_after_products:
-            pages_done += 1
-            break
-
         pages_done += 1
-        if pages_done >= max_pages:
+        if pages_done >= limit:
             break
 
-        if not next_page_if_any(page):
+        moved = next_page_if_any(page)
+        if not moved:
             break
 
         if req_delay:
             time.sleep(min(req_delay, 1.0))
 
-    # unique
+    # unique at the very end
     seen = set()
     uniq: List[Tuple[str, str]] = []
     for u, t in all_links:
@@ -464,37 +451,39 @@ def collect_category_products(
     return uniq
 
 
-# -------------------- CSV / Runner --------------------
+# -------------------- CSV helpers --------------------
 
-def read_lines(path: str) -> List[str]:
-    with open(path, "r", encoding="utf-8") as f:
-        return [ln.strip() for ln in f if ln.strip()]
-
+CSV_HEADER = [
+    "store_chain","store_name","store_channel","ext_id","ean_raw","sku_raw",
+    "name","size_text","brand","manufacturer","price","currency",
+    "image_url","category_path","category_leaf","source_url"
+]
 
 def ensure_dir(path: str) -> None:
     d = os.path.dirname(path)
     if d and not os.path.exists(d):
         os.makedirs(d, exist_ok=True)
 
+def ensure_csv_header(path: str) -> None:
+    ensure_dir(path)
+    if not os.path.exists(path) or os.path.getsize(path) == 0:
+        with open(path, "w", encoding="utf-8", newline="") as f:
+            csv.writer(f).writerow(CSV_HEADER)
 
-def write_csv(rows: List[List[str]], out_path: str) -> None:
-    ensure_dir(out_path)
-    header = [
-        "store_chain","store_name","store_channel","ext_id","ean_raw","sku_raw",
-        "name","size_text","brand","manufacturer","price","currency",
-        "image_url","category_path","category_leaf","source_url",
-    ]
-    newfile = not os.path.exists(out_path)
-    with open(out_path, "a", encoding="utf-8", newline="") as f:
+def append_rows(path: str, rows: List[List[str]]) -> None:
+    if not rows:
+        return
+    ensure_csv_header(path)
+    with open(path, "a", encoding="utf-8", newline="") as f:
         w = csv.writer(f)
-        if newfile:
-            w.writerow(header)
         w.writerows(rows)
 
 
-def _is_transport_error(err: Exception) -> bool:
-    s = str(err)
-    return any(x in s for x in ("Target closed", "Connection closed", "EPIPE", "ECONNRESET", "browser has disconnected"))
+# -------------------- Runner --------------------
+
+def read_lines(path: str) -> List[str]:
+    with open(path, "r", encoding="utf-8") as f:
+        return [ln.strip() for ln in f if ln.strip()]
 
 
 def crawl(args) -> None:
@@ -503,54 +492,24 @@ def crawl(args) -> None:
     only_ext: set[str] = set(read_lines(args.only_ext_file)) if args.only_ext_file and os.path.exists(args.only_ext_file) else set()
     only_urls: List[str] = read_lines(args.only_url_file) if args.only_url_file and os.path.exists(args.only_url_file) else []
 
-    out_rows: List[List[str]] = []
     total = 0
     headless = bool(int(args.headless))
     req_delay = float(args.req_delay)
+    per_cat_page_limit = int(args.max_pages_per_category or "0")
 
-    def launch_browser():
-        # these flags make Chromium stable on GitHub runners
-        return pw.chromium.launch(
-            headless=headless,
-            args=["--disable-dev-shm-usage", "--no-sandbox"],
-        )
+    ensure_csv_header(args.output_csv)
 
     with sync_playwright() as pw:
-        browser = launch_browser()
-        ctx = browser.new_context(locale="et-EE")
-        page = ctx.new_page()
+        def new_browser():
+            b = pw.chromium.launch(headless=headless)
+            ctx = b.new_context(locale="et-EE")
+            return b, ctx, ctx.new_page()
 
-        def restart(reason: str = ""):
-            nonlocal browser, ctx, page
-            try:
-                page.close()
-            except Exception:
-                pass
-            try:
-                ctx.close()
-            except Exception:
-                pass
-            try:
-                browser.close()
-            except Exception:
-                pass
-            browser = launch_browser()
-            ctx = browser.new_context(locale="et-EE")
-            page = ctx.new_page()
-            if reason:
-                print(f"[info] restarted browser ({reason})")
-
-        def extract_with_retry(url: str, listing_title: Optional[str], category_leaf: str):
-            try:
-                return extract_from_pdp(page, url, listing_title, category_leaf, req_delay)
-            except Exception as e:
-                if _is_transport_error(e):
-                    restart("transport error during PDP")
-                    return extract_from_pdp(page, url, listing_title, category_leaf, req_delay)
-                raise
+        browser, ctx, page = new_browser()
 
         try:
             if only_urls:
+                batch: List[List[str]] = []
                 for url in only_urls:
                     if int(args.max_products) and total >= int(args.max_products):
                         break
@@ -560,7 +519,7 @@ def crawl(args) -> None:
                     parts = [p for p in urlparse(url).path.strip("/").split("/") if p]
                     cat_leaf = (parts[-2] if len(parts) >= 2 else (parts[-1] if parts else "")).replace("-", " ").title()
                     try:
-                        data = extract_with_retry(url, listing_title=None, category_leaf=cat_leaf)
+                        data = extract_from_pdp(page, url, listing_title=None, category_leaf_hint=cat_leaf, req_delay=req_delay)
                     except Exception as e:
                         print(f"[warn] PDP parse failed for {ext_id}: {e}", file=sys.stderr)
                         continue
@@ -580,58 +539,41 @@ def crawl(args) -> None:
                         data.get("category_leaf") or cat_leaf,
                         url,
                     ]
-                    out_rows.append(row)
+                    batch.append(row)
                     total += 1
+
+                    # periodic flush
+                    if len(batch) >= 50:
+                        append_rows(args.output_csv, batch)
+                        batch.clear()
+
                     if req_delay:
                         time.sleep(req_delay)
 
+                append_rows(args.output_csv, batch)
             else:
                 for idx, cat in enumerate(cats, start=1):
                     if int(args.page_limit) and idx > int(args.page_limit):
                         break
-
-                    remaining = int(args.max_products) - total if int(args.max_products) else None
-                    per_cat_budget = int(args.cat_max_products) if int(args.cat_max_products) > 0 else None
-                    stop_after = None
-                    if remaining and per_cat_budget:
-                        stop_after = min(remaining, per_cat_budget)
-                    elif remaining:
-                        stop_after = remaining
-                    elif per_cat_budget:
-                        stop_after = per_cat_budget
-
                     leaf_seg = cat.strip("/").split("/")[-1]
                     category_leaf = leaf_seg.replace("-", " ").title()
                     category_path = ""  # filled on PDP
 
-                    try:
-                        prods = collect_category_products(
-                            page,
-                            cat,
-                            req_delay,
-                            max_pages=int(args.cat_page_cap),
-                            stop_after_products=stop_after,
-                        )
-                    except Exception as e:
-                        if _is_transport_error(e):
-                            restart("transport error during category listing")
-                            prods = collect_category_products(
-                                page, cat, req_delay,
-                                max_pages=int(args.cat_page_cap),
-                                stop_after_products=stop_after,
-                            )
-                        else:
-                            raise
-
+                    prods = collect_category_products(page, cat, req_delay,
+                                                     max_pages=per_cat_page_limit if per_cat_page_limit > 0 else 120)
                     if not prods:
                         print(f"[cat] {cat} → 0 items (check if category requires login or geo).")
-                        # restart anyway between categories to keep memory fresh
-                        restart("post-empty-category")
+                        # restart browser even on empty, to be safe
+                        try:
+                            page.close(); ctx.close(); browser.close()
+                        except Exception:
+                            pass
+                        time.sleep(0.5)
+                        browser, ctx, page = new_browser()
+                        print("[info] restarted browser (post-category)")
                         continue
 
-                    if stop_after and len(prods) > stop_after:
-                        prods = prods[:stop_after]
-
+                    batch: List[List[str]] = []
                     for url, listing_title in prods:
                         if int(args.max_products) and total >= int(args.max_products):
                             break
@@ -641,7 +583,7 @@ def crawl(args) -> None:
                         if only_ext and ext_id not in only_ext:
                             continue
                         try:
-                            data = extract_with_retry(url, listing_title, category_leaf)
+                            data = extract_from_pdp(page, url, listing_title, category_leaf, req_delay)
                         except Exception as e:
                             print(f"[warn] PDP parse failed for {ext_id}: {e}", file=sys.stderr)
                             continue
@@ -664,40 +606,48 @@ def crawl(args) -> None:
                             data.get("category_leaf") or category_leaf,
                             url,
                         ]
-                        out_rows.append(row)
+                        batch.append(row)
                         total += 1
+
+                        # periodic flush
+                        if len(batch) >= 50:
+                            append_rows(args.output_csv, batch)
+                            batch.clear()
+
                         if req_delay:
                             time.sleep(req_delay)
 
-                    # hard restart between categories to prevent OOM / driver death
-                    restart("post-category")
+                    # flush per-category remainder
+                    append_rows(args.output_csv, batch)
 
+                    # harden: restart browser after each category to avoid EPIPE
+                    try:
+                        page.close(); ctx.close(); browser.close()
+                    except Exception:
+                        pass
+                    time.sleep(0.5)
+                    browser, ctx, page = new_browser()
+                    print("[info] restarted browser (post-category)")
         finally:
-            # close cleanly
             try:
-                page.close()
-            except Exception:
-                pass
-            try:
-                ctx.close()
-            except Exception:
-                pass
-            try:
-                browser.close()
+                page.close(); ctx.close(); browser.close()
             except Exception:
                 pass
 
-        write_csv(out_rows, args.output_csv)
-        print(f"[done] wrote {len(out_rows)} rows to {args.output_csv}")
+    # print a summary based on file growth (best effort)
+    try:
+        lines = sum(1 for _ in open(args.output_csv, "r", encoding="utf-8"))
+        print(f"[done] wrote ~{max(0, lines-1)} rows to {args.output_csv}")
+    except Exception:
+        print(f"[done] wrote rows to {args.output_csv}")
 
 
 def build_argparser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Barbora.ee category→PDP crawler (no EAN).")
     p.add_argument("--cats-file", required=True, help="Text file with category URLs (one per line)")
     p.add_argument("--page-limit", default="0", help="Max categories to process (0=all)")
-    p.add_argument("--cat-page-cap", default="60", help="Max paginated pages per category")
-    p.add_argument("--cat-max-products", default="0", help="Max PDPs to take per category (0=unlimited)")
     p.add_argument("--max-products", default="0", help="Cap total PDPs visited (0=unlimited)")
+    p.add_argument("--max-pages-per-category", default="0", help="Cap pages per category (0=unlimited)")
     p.add_argument("--headless", default=str(DEFAULT_HEADLESS), help="1/0")
     p.add_argument("--req-delay", default=str(DEFAULT_REQ_DELAY), help="Delay between steps in seconds")
     p.add_argument("--output-csv", default="data/barbora_products.csv", help="Output CSV path")
