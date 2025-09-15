@@ -72,9 +72,9 @@ jobs:
           # Auto-upsert on schedule; manual runs use the input toggle
           COOP_UPSERT_DB: ${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}
           DATABASE_URL: ${{ (github.event_name == 'schedule' || inputs.upsert_db == '1') && secrets.DATABASE_URL || '' }}
+          REGION_URL: ${{ inputs.region }}
           CATS_MULTILINE: ${{ inputs.categories_multiline }}
           CATS_FILE_URL: ${{ inputs.categories_file_url }}
-          REGION_URL: ${{ inputs.region }}
         shell: bash
         run: |
           set -euo pipefail
@@ -83,80 +83,46 @@ jobs:
           CATS_ALL="coop_categories.txt"
           : > "$CATS_ALL"
 
-          # 1) If a categories file URL is provided, download & append
+          # 1) Highest priority: download a categories file if URL provided
           if [ -n "$CATS_FILE_URL" ]; then
-            echo ">> downloading categories file: $CATS_FILE_URL"
-            curl -fsSL "$CATS_FILE_URL" >> "$CATS_ALL" || true
-            echo >> "$CATS_ALL"
+            echo ">> downloading categories from: $CATS_FILE_URL"
+            curl -fsSL "$CATS_FILE_URL" -o "$CATS_ALL" || true
           fi
 
-          # 2) If multiline categories were provided, append them safely
-          if [ -n "$CATS_MULTILINE" ]; then
-            printf '%s\n' "$CATS_MULTILINE" >> "$CATS_ALL"
-            echo >> "$CATS_ALL"
+          # 2) Next: UI multiline input
+          if [ ! -s "$CATS_ALL" ] && [ -n "$CATS_MULTILINE" ]; then
+            printf '%s\n' "$CATS_MULTILINE" > "$CATS_ALL"
           fi
 
-          # 3) If still empty, supply sensible defaults by region
+          # 3) Next: repo defaults based on region
           if [ ! -s "$CATS_ALL" ]; then
-            echo ">> no categories provided; applying defaults for region: $REGION_URL"
             if echo "$REGION_URL" | grep -qi 'vandra\.ecoop\.ee'; then
-              cat >> "$CATS_ALL" <<'__DEF_VANDRA__'
-/et/tooted/1-puu-ja-koogiviljad
-/et/tooted/6-liha-ja-kalatooted
-/et/tooted/20-piimatooted-munad-voi
-/et/tooted/30-kuivained-kastmed
-/et/tooted/39-valmistoit
-/et/tooted/47-pagaritooted
-/et/tooted/53-joogid
-/et/tooted/69-snakid-ja-maiustused
-/et/tooted/214937-sugavkulmutatud-toidud
-/et/tooted/78-beebitooted
-/et/tooted/81-ilu-ja-hugieenitooted/214978-intiimhugieen
-/et/tooted/93-kodutarbed/94-pesupesemis-ja-hooldustooted
-/et/tooted/93-kodutarbed/95-puhastusvahendid-ja-varskendajad
-/et/tooted/93-kodutarbed/97-koristustarbed
-/et/tooted/93-kodutarbed/98-pehme-paber
-/et/tooted/93-kodutarbed/99-kupsetamine-sailitamine-filtrid
-/et/tooted/109-lemmikloomakaubad/76053-kassitoidud
-/et/tooted/109-lemmikloomakaubad/76054-koeratoidud
-/et/tooted/113-coop-omamargi-tooted
-__DEF_VANDRA__
+              REPO_FILE="data/coop_vandra_categories.txt"
             elif echo "$REGION_URL" | grep -qi 'coophaapsalu\.ee'; then
-              cat >> "$CATS_ALL" <<'__DEF_HAAPSALU__'
-/tootekategooria/kulmutatud-toidukaubad/
-/tootekategooria/puu-ja-koogivili/
-/tootekategooria/liha-ja-kalatooted/
-/tootekategooria/piimatooted-munad-void/
-/tootekategooria/valmistoit/
-/tootekategooria/pagaritooted/
-/tootekategooria/purgitoit/
-/tootekategooria/kuivained-kastmed/
-/tootekategooria/maiustused-snakid/
-/tootekategooria/eritooted/
-/tootekategooria/joogid/
-/tootekategooria/alkohoolsed-joogid/
-/tootekategooria/beebitooted/
-/tootekategooria/hugieenitarbed/suuhugieenikaubad/
-/tootekategooria/hugieenitarbed/raseerimisvahendid/
-/tootekategooria/hugieenitarbed/intiimhugieen-plaastrid/
-/tootekategooria/kodutarbed/pesupesemise-ja-hooldustooted/
-/tootekategooria/kodutarbed/puhastusvahendid-ohuvarskendajad/
-/tootekategooria/kodutarbed/koristusvahendid/
-/tootekategooria/kodutarbed/pehme-paber/
-/tootekategooria/kodutarbed/kupsetus-sailitustooted-kohvifiltrid/
-/tootekategooria/kodutarbed/noudepesuks/
-/tootekategooria/lemmikloomakaubad/lemmikloomatoit/
-/tootekategooria/lemmikloomakaubad/kassitoit/
-__DEF_HAAPSALU__
+              REPO_FILE="data/coop_haapsalu_categories.txt"
             else
-              echo "/et/tooted/53-joogid" >> "$CATS_ALL"
+              REPO_FILE=""
+            fi
+
+            if [ -n "$REPO_FILE" ] && [ -f "$REPO_FILE" ]; then
+              echo ">> using repo categories file: $REPO_FILE"
+              cp "$REPO_FILE" "$CATS_ALL"
             fi
           fi
 
-          # Normalize CRLF just in case
+          # 4) Last-resort tiny default so the job never fails
+          if [ ! -s "$CATS_ALL" ]; then
+            if echo "$REGION_URL" | grep -qi 'coophaapsalu\.ee'; then
+              echo "/tootekategooria/joogid/" > "$CATS_ALL"
+            else
+              echo "/et/tooted/53-joogid" > "$CATS_ALL"
+            fi
+          fi
+
+          # Normalize CRLF if any
           sed -e 's/\r$//' -i "$CATS_ALL"
 
-          # 4) Run crawler using the combined file
+          # Run crawler with the combined file
           python scripts/coop_crawl_categories_pw.py \
             --region "$REGION_URL" \
             --categories-multiline "" \
