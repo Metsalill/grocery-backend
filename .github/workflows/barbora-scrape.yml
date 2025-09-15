@@ -51,7 +51,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1]
+        shard: [0, 1, 2, 3]   # ↑ 4 shards in parallel
 
     env:
       PYTHONUNBUFFERED: "1"
@@ -221,21 +221,32 @@ jobs:
           echo "--------------"
           test -s data/barbora_categories.txt
 
-      - name: Shard category list (2-way)
+      - name: Shard category list (rotate + 4-way)
         shell: bash
         env:
-          SHARDS: 2
+          SHARDS: 4
+          ROTATE_SEED: ${{ github.run_number }}
         run: |
           set -euo pipefail
           cp -f data/barbora_categories.txt data/barbora_categories_all.txt
           TOTAL=$(wc -l < data/barbora_categories_all.txt)
           : "${SHARD:?SHARD env is required}"
-          awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
-            data/barbora_categories_all.txt > data/barbora_categories.txt
+
+          # Rotate the list so we don't always start from the same categories.
+          ROTATE=$(( (ROTATE_SEED + SHARD) % (TOTAL>0?TOTAL:1) ))
           echo "TOTAL categories: $TOTAL"
+          echo "Rotate offset (seed=${ROTATE_SEED}, shard=${SHARD}): $ROTATE"
+
+          awk 'NR>0{a[NR]=$0} END{ if(NR==0){exit}; r='"$ROTATE"'; for(i=r+1;i<=NR;i++)print a[i]; for(i=1;i<=r;i++)print a[i] }' \
+            data/barbora_categories_all.txt > data/barbora_categories_rot.txt
+
+          # Now shard the rotated list
+          awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
+            data/barbora_categories_rot.txt > data/barbora_categories.txt
+
           echo "Shard: $SHARD / $SHARDS"
           echo "Slice count: $(wc -l < data/barbora_categories.txt)"
-          head -n 12 data/barbora_categories.txt || true
+          head -n 20 data/barbora_categories.txt || true
 
       # Ensure psql available for the skip/only steps
       - name: Install psql client (for skip/only lists)
@@ -260,7 +271,7 @@ jobs:
         if: ${{ env.DATABASE_URL != '' && env.MODE == 'metadata' }}
         shell: bash
         env:
-          SHARDS: 2
+          SHARDS: 4
         run: |
           set -euo pipefail
           : > data/barbora_only_ext_ids.txt
