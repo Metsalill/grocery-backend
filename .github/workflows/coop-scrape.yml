@@ -35,6 +35,10 @@ on:
         description: "Concurrent PDP tabs per category"
         required: false
         default: "4"
+      shards:
+        description: "Parallel shards for categories (1–8). Scheduled runs force 1."
+        required: false
+        default: "1"
       upsert_db:
         description: "Set to 1 to upsert into public.staging_coop_products"
         required: false
@@ -52,6 +56,16 @@ jobs:
   crawl:
     runs-on: ubuntu-latest
 
+    # Spawn up to 8 shard jobs, skip extras if not needed.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard_index: [0, 1, 2, 3, 4, 5, 6, 7]
+
+    # Only run shards that are < desired count.
+    # For manual runs use inputs.shards; for schedule force 1.
+    if: ${{ matrix.shard_index < (github.event_name == 'workflow_dispatch' && fromJSON(inputs.shards) || 1) }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -67,7 +81,7 @@ jobs:
           pip install playwright==1.46.0 asyncpg
           python -m playwright install --with-deps chromium
 
-      - name: Run Coop crawler
+      - name: Run Coop crawler (sharded)
         env:
           # Auto-upsert on schedule; manual runs use the input toggle
           COOP_UPSERT_DB: ${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}
@@ -75,6 +89,9 @@ jobs:
           REGION_URL: ${{ inputs.region }}
           CATS_MULTILINE: ${{ inputs.categories_multiline }}
           CATS_FILE_URL: ${{ inputs.categories_file_url }}
+          # Pass shard count to the script; scheduled runs are single-shard.
+          SHARD_COUNT: ${{ github.event_name == 'workflow_dispatch' && inputs.shards || '1' }}
+          SHARD_INDEX: ${{ matrix.shard_index }}
         shell: bash
         run: |
           set -euo pipefail
@@ -122,7 +139,8 @@ jobs:
           # Normalize CRLF if any
           sed -e 's/\r$//' -i "$CATS_ALL"
 
-          # Run crawler with the combined file
+          echo ">> shard ${SHARD_INDEX}/${SHARD_COUNT}"
+
           python scripts/coop_crawl_categories_pw.py \
             --region "$REGION_URL" \
             --categories-multiline "" \
@@ -132,7 +150,9 @@ jobs:
             --headless "${{ inputs.headless }}" \
             --req-delay "${{ inputs.req_delay }}" \
             --pdp-workers "${{ inputs.pdp_workers }}" \
-            --out "out/coop_products_${{ github.run_id }}.csv"
+            --cat-shards "$SHARD_COUNT" \
+            --cat-index "$SHARD_INDEX" \
+            --out "out/coop_products_${{ github.run_id }}_shard${SHARD_INDEX}.csv"
 
       - name: Upload CSV artifact
         uses: actions/upload-artifact@v4
