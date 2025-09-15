@@ -57,17 +57,17 @@ jobs:
   prepare-matrix:
     runs-on: ubuntu-latest
     outputs:
-      matrix:        ${{ steps.mk.outputs.matrix }}
-      count:         ${{ steps.mk.outputs.count }}
-      region_url:    ${{ steps.vars.outputs.region_url }}
-      upsert_flag:   ${{ steps.vars.outputs.upsert_flag }}
-      cats_multiline:${{ steps.vars.outputs.cats_multiline }}
-      cats_file_url: ${{ steps.vars.outputs.cats_file_url }}
-      page_limit:    ${{ steps.vars.outputs.page_limit }}
-      max_products:  ${{ steps.vars.outputs.max_products }}
-      headless:      ${{ steps.vars.outputs.headless }}
-      req_delay:     ${{ steps.vars.outputs.req_delay }}
-      pdp_workers:   ${{ steps.vars.outputs.pdp_workers }}
+      matrix:         ${{ steps.mk.outputs.matrix }}
+      count:          ${{ steps.mk.outputs.count }}
+      region_url:     ${{ steps.vars.outputs.region_url }}
+      upsert_flag:    ${{ steps.vars.outputs.upsert_flag }}
+      cats_multiline: ${{ steps.vars.outputs.cats_multiline }}
+      cats_file_url:  ${{ steps.vars.outputs.cats_file_url }}
+      page_limit:     ${{ steps.vars.outputs.page_limit }}
+      max_products:   ${{ steps.vars.outputs.max_products }}
+      headless:       ${{ steps.vars.outputs.headless }}
+      req_delay:      ${{ steps.vars.outputs.req_delay }}
+      pdp_workers:    ${{ steps.vars.outputs.pdp_workers }}
     steps:
       - id: vars
         run: |
