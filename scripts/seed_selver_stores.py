@@ -19,7 +19,7 @@ Env:
 import os, re, time, sys, json
 import psycopg2, psycopg2.extras
 import requests
-from urllib.parse import urlparse, parse_qs, unquote
+from urllib.parse import urlparse, parse_qs, unquote, urljoin
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
 
@@ -45,6 +45,7 @@ CITY_PREFIX_RE = re.compile(r'^(Tallinn|Tartu)\s+(.*)$', re.I)
 CAP_NAME = re.compile(r'(Delice(?:\s+Toidupood)?|[A-ZÄÖÜÕ][A-Za-zÄÖÜÕäöüõ0-9\'’\- ]{1,60}\sSelver(?:\sABC)?)')
 BAD_NAME = re.compile(r'^(?:e-?Selver|Selver)$', re.I)
 
+# tokens that make a line look like an Estonian street address
 ADDR_TOKEN = re.compile(r'\b(mnt|tee|tn|pst|puiestee|maantee|tänav|keskus|turg|väljak)\b', re.I)
 
 
@@ -102,14 +103,41 @@ def geocode(addr: str):
 
 # ------------ scraping ------------
 
+def fetch_detail_meta(detail_url: str):
+    """Fetch a store detail page and try to extract an address and maps link."""
+    if not detail_url:
+        return (None, None)
+    try:
+        hdrs = {"User-Agent": UA}
+        r = requests.get(detail_url, headers=hdrs, timeout=25)
+        r.raise_for_status()
+        soup = BeautifulSoup(r.text, "html.parser")
+
+        # any google maps link on detail page?
+        a = soup.find("a", href=re.compile(r"(google\.[^/]+/maps|goo\.gl/maps|maps\.app\.goo\.gl)", re.I))
+        href = a["href"] if a and a.has_attr("href") else None
+
+        # pick a plausible address line from visible text
+        text = soup.get_text(" ", strip=True)
+        parts = [x.strip() for x in re.split(r" ?[•\u2022\u00B7\u25CF\|;/] ?|\n", text) if x.strip()]
+        candidates = [ln for ln in parts
+                      if ADDR_TOKEN.search(ln) and re.search(r"\d", ln)
+                      and 8 <= len(ln) <= 120 and "selver" not in ln.lower()]
+        address = sorted(candidates, key=len)[0] if candidates else None
+
+        return (address, href)
+    except Exception:
+        return (None, None)
+
+
 def scrape_kauplused():
     """
-    Render the page once with Playwright and extract:
+    Render the list page once with Playwright and extract:
       {name: {"address": str|None, "href": google_maps_link|None}}
+    If address/href missing on the list, fetch the detail page and try again.
     """
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=True)
-        # 👇 user agent must be set on the context
         ctx = browser.new_context(user_agent=UA, locale="et-EE", viewport={"width": 1280, "height": 900})
         p = ctx.new_page()
         p.goto("https://www.selver.ee/kauplused", wait_until="domcontentloaded", timeout=60000)
@@ -126,9 +154,9 @@ def scrape_kauplused():
         browser.close()
 
     soup = BeautifulSoup(html, "html.parser")
-    out = {}  # name -> {"address": ..., "href": ...}
+    out = {}  # name -> {"address": ..., "href": ..., "detail": ...}
 
-    # Look for anything that looks like a store name, then search locally for address / gmaps link
+    # Look for anything that looks like a store name, then search locally for address / gmaps link / detail link
     for node in soup.find_all(string=re.compile(r'(Selver|Delice)', re.I)):
         raw = str(node)
         candidates = re.findall(
@@ -142,7 +170,7 @@ def scrape_kauplused():
 
             # Climb up to find a "card"-ish container
             container = node.parent
-            for _ in range(5):
+            for _ in range(6):
                 if not container or container.name in ("html", "body"):
                     break
                 txt_here = container.get_text(" ", strip=True)
@@ -153,11 +181,23 @@ def scrape_kauplused():
 
             address = None
             href = None
+            detail = None
             if container:
+                # any google maps-ish link
                 a = container.find("a", href=re.compile(r'(google\.[^/]+/maps|goo\.gl/maps|maps\.app\.goo\.gl)', re.I))
                 if a and a.has_attr("href"):
                     href = a["href"]
 
+                # “Rohkem infot” link → detail page (or fall back to a sluggy selver link)
+                a_more = container.find("a", string=re.compile(r"Rohkem infot", re.I))
+                if not a_more:
+                    a_more = container.find("a", href=re.compile(r"/[a-z0-9\-]+-selver(?:-abc)?/?$", re.I))
+                if a_more and a_more.has_attr("href"):
+                    detail = a_more["href"]
+                    if not detail.startswith("http"):
+                        detail = urljoin("https://www.selver.ee/", detail.lstrip("/"))
+
+                # scan text fragments for an address-looking piece
                 text = container.get_text(" ", strip=True)
                 parts = [x.strip() for x in re.split(r' ?[•\u2022\u00B7\u25CF\|;/] ?|\n', text) if x.strip()]
                 addr_like = []
@@ -170,10 +210,26 @@ def scrape_kauplused():
             prev = out.get(name, {})
             out[name] = {
                 "address": prev.get("address") or address,
-                "href": prev.get("href") or href
+                "href":    prev.get("href")    or href,
+                "detail":  prev.get("detail")  or detail,
             }
 
-    return {k: v for k, v in out.items() if k and not BAD_NAME.match(k)}
+    # Second pass: augment from detail pages when list card didn't have address/href
+    for name, meta in list(out.items()):
+        if (not meta.get("address")) or (not meta.get("href")):
+            detail = meta.get("detail")
+            addr2, href2 = fetch_detail_meta(detail) if detail else (None, None)
+            if addr2 and not meta.get("address"):
+                meta["address"] = addr2
+            if href2 and not meta.get("href"):
+                meta["href"] = href2
+
+    # Return without the internal "detail" key
+    cleaned = {k: {"address": v.get("address"), "href": v.get("href")}
+               for k, v in out.items()
+               if k and not BAD_NAME.match(k)}
+    return cleaned
+
 
 # ------------ DB helpers ------------
 
