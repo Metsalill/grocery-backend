@@ -53,23 +53,55 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Build a JSON matrix so we only spawn the shards we actually need
+  prepare-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.mk.outputs.matrix }}
+      region_url: ${{ steps.vars.outputs.region_url }}
+      upsert_flag: ${{ steps.vars.outputs.upsert_flag }}
+    steps:
+      - id: vars
+        run: |
+          # Inputs are strings; normalize here and expose as outputs for the next job
+          REGION_URL="${{ inputs.region }}"
+          UP="${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}"
+          echo "region_url=$REGION_URL" >> "$GITHUB_OUTPUT"
+          echo "upsert_flag=$UP" >> "$GITHUB_OUTPUT"
+      - id: mk
+        env:
+          REQ_SHARDS: ${{ github.event_name == 'workflow_dispatch' && inputs.shards || '1' }}
+        run: |
+          n="$REQ_SHARDS"
+          # Clamp between 1 and 8
+          if [ "$n" -lt 1 ]; then n=1; fi
+          if [ "$n" -gt 8 ]; then n=8; fi
+          python - <<'PY' > matrix.json
+import json, os
+n = int(os.environ["N"])
+print(json.dumps({"shard_index": list(range(n))}))
+PY
+          echo "matrix=$(cat matrix.json)" >> "$GITHUB_OUTPUT"
+        shell: bash
+        env:
+          N: ${{ env.REQ_SHARDS }}
+
   crawl:
+    needs: prepare-matrix
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
-      matrix:
-        shard_index: [0, 1, 2, 3, 4, 5, 6, 7]
+      matrix: ${{ fromJSON(needs.prepare-matrix.outputs.matrix) }}
 
-    # Common env usable in all steps (and in step-level if:)
     env:
-      REGION_URL: ${{ inputs.region }}
+      REGION_URL: ${{ needs.prepare-matrix.outputs.region_url }}
       CATS_MULTILINE: ${{ inputs.categories_multiline }}
       CATS_FILE_URL: ${{ inputs.categories_file_url }}
-      SHARD_COUNT: ${{ github.event_name == 'workflow_dispatch' && inputs.shards || '1' }}
+      COOP_UPSERT_DB: ${{ needs.prepare-matrix.outputs.upsert_flag }}
+      DATABASE_URL: ${{ (needs.prepare-matrix.outputs.upsert_flag == '1') && secrets.DATABASE_URL || '' }}
+      SHARD_COUNT: ${{ (fromJSON(needs.prepare-matrix.outputs.matrix)).shard_index | length }}
       SHARD_INDEX: ${{ matrix.shard_index }}
-      COOP_UPSERT_DB: ${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}
-      DATABASE_URL: ${{ (github.event_name == 'schedule' || inputs.upsert_db == '1') && secrets.DATABASE_URL || '' }}
 
     steps:
       - name: Checkout
@@ -79,27 +111,26 @@ jobs:
         run: |
           echo "Shard index: $SHARD_INDEX"
           echo "Shard count: $SHARD_COUNT"
+          echo "Region: $REGION_URL"
+          echo "Upsert: $COOP_UPSERT_DB"
 
       - name: Set up Python
-        if: ${{ matrix.shard_index < fromJSON(env.SHARD_COUNT) }}
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
       - name: Install Python deps & Playwright
-        if: ${{ matrix.shard_index < fromJSON(env.SHARD_COUNT) }}
         run: |
           python -m pip install --upgrade pip
           pip install playwright==1.46.0 asyncpg
           python -m playwright install --with-deps chromium
 
       - name: (Optional) Download categories file
-        if: ${{ matrix.shard_index < fromJSON(env.SHARD_COUNT) && env.CATS_FILE_URL != '' }}
+        if: ${{ env.CATS_FILE_URL != '' }}
         run: |
           curl -fsSL "$CATS_FILE_URL" -o coop_categories.txt
 
-      - name: Run Coop crawler (sharded)
-        if: ${{ matrix.shard_index < fromJSON(env.SHARD_COUNT) }}
+      - name: Run Coop crawler (shard)
         shell: bash
         env:
           PAGE_LIMIT: ${{ inputs.page_limit }}
@@ -110,13 +141,12 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p out
-
           CATS_ALL="coop_categories.txt"
           if [ ! -f "$CATS_ALL" ]; then : > "$CATS_ALL"; fi
 
-          # 1) Highest priority: UI multiline input (if no URL file)
+          # 1) File from URL (if any) already downloaded above
           if [ -s "$CATS_ALL" ]; then
-            echo ">> categories file already present (from URL)."
+            echo ">> categories file from URL present."
           elif [ -n "$CATS_MULTILINE" ]; then
             printf '%s\n' "$CATS_MULTILINE" > "$CATS_ALL"
           fi
@@ -145,17 +175,14 @@ jobs:
             fi
           fi
 
-          # Normalize CRLF if any
+          # Normalize CRLF if pasted from Windows
           sed -e 's/\r$//' -i "$CATS_ALL"
 
-          # Optional file arg
-          EXTRA_FILE_ARG="--categories-file $CATS_ALL"
-
-          echo ">> running shard $SHARD_INDEX / $SHARD_COUNT"
+          echo ">> running shard $SHARD_INDEX of $SHARD_COUNT"
           python scripts/coop_crawl_categories_pw.py \
             --region "$REGION_URL" \
             --categories-multiline "" \
-            ${EXTRA_FILE_ARG} \
+            --categories-file "$CATS_ALL" \
             --page-limit "$PAGE_LIMIT" \
             --max-products "$MAX_PRODUCTS" \
             --headless "$HEADLESS" \
@@ -166,7 +193,6 @@ jobs:
             --out "out/coop_products_${{ github.run_id }}_shard${SHARD_INDEX}.csv"
 
       - name: Upload CSV artifact
-        if: ${{ matrix.shard_index < fromJSON(env.SHARD_COUNT) }}
         uses: actions/upload-artifact@v4
         with:
           name: coop-products-${{ github.run_id }}
