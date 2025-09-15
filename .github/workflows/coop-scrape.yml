@@ -70,11 +70,11 @@ jobs:
       - name: (Optional) Download categories file
         if: ${{ inputs.categories_file_url != '' }}
         run: |
-          curl -fsSL "${{ inputs.categories_file_url }}" -o coop_categories.txt
+          echo ">> downloading categories from: ${{ inputs.categories_file_url }}"
+          curl -fsSL "${{ inputs.categories_file_url }}" -o coop_categories.txt || true
 
-      - name: Run Coop crawler
+      - name: Run Coop crawler (with repo fallback)
         env:
-          # Auto-upsert on schedule; manual runs use the input toggle
           COOP_UPSERT_DB: ${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}
           DATABASE_URL: ${{ (github.event_name == 'schedule' || inputs.upsert_db == '1') && secrets.DATABASE_URL || '' }}
         shell: bash
@@ -82,15 +82,55 @@ jobs:
           set -euo pipefail
           mkdir -p out
 
-          EXTRA_FILE_ARG=""
-          if [ -f coop_categories.txt ]; then
-            EXTRA_FILE_ARG="--categories-file coop_categories.txt"
+          REGION_URL="${{ inputs.region }}"
+          CATS_MULTILINE="${{ inputs.categories_multiline }}"
+          CATS_ALL="coop_categories.txt"
+
+          # Start with an empty file if none was downloaded
+          if [ ! -f "$CATS_ALL" ]; then : > "$CATS_ALL"; fi
+
+          # 1) Use multiline UI input if present
+          if [ -z "$(sed -n '1p' "$CATS_ALL" 2>/dev/null)" ] && [ -n "$CATS_MULTILINE" ]; then
+            printf '%s\n' "$CATS_MULTILINE" > "$CATS_ALL"
+            echo ">> using categories from UI multiline input"
           fi
 
+          # 2) Repo defaults by region
+          if [ ! -s "$CATS_ALL" ]; then
+            if echo "$REGION_URL" | grep -qi 'vandra\.ecoop\.ee'; then
+              REPO_FILE="data/coop_vandra_categories.txt"
+            elif echo "$REGION_URL" | grep -qi 'coophaapsalu\.ee'; then
+              REPO_FILE="data/coop_haapsalu_categories.txt"
+            else
+              REPO_FILE=""
+            fi
+            if [ -n "$REPO_FILE" ] && [ -f "$REPO_FILE" ]; then
+              echo ">> using repo categories file: $REPO_FILE"
+              cp "$REPO_FILE" "$CATS_ALL"
+            fi
+          fi
+
+          # 3) Last-resort single category so the run never fails
+          if [ ! -s "$CATS_ALL" ]; then
+            if echo "$REGION_URL" | grep -qi 'coophaapsalu\.ee'; then
+              echo "/tootekategooria/joogid/" > "$CATS_ALL"
+            else
+              echo "/et/tooted/53-joogid" > "$CATS_ALL"
+            fi
+            echo ">> using single-category fallback"
+          fi
+
+          # Normalize CRLF if pasted from Windows
+          sed -e 's/\r$//' -i "$CATS_ALL"
+
+          echo "=== Categories to crawl ==="
+          cat "$CATS_ALL" || true
+          echo "==========================="
+
           python scripts/coop_crawl_categories_pw.py \
-            --region "${{ inputs.region }}" \
-            --categories-multiline "${{ inputs.categories_multiline }}" \
-            ${EXTRA_FILE_ARG} \
+            --region "$REGION_URL" \
+            --categories-multiline "" \
+            --categories-file "$CATS_ALL" \
             --page-limit "${{ inputs.page_limit }}" \
             --max-products "${{ inputs.max_products }}" \
             --headless "${{ inputs.headless }}" \
