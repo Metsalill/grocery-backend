@@ -1,0 +1,251 @@
+name: Build Rimi match matrix
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}  # set this in repo secrets
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install psql
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Create SQL script
+        run: |
+          mkdir -p sql
+          cat > sql/build_rimi_match_matrix.sql <<'SQL'
+          -- One-time
+          CREATE EXTENSION IF NOT EXISTS pg_trgm;
+          CREATE EXTENSION IF NOT EXISTS unaccent;
+
+          -- ===== non-private matrix =====
+          DROP MATERIALIZED VIEW IF EXISTS rimi_match_matrix_nonprivate CASCADE;
+          CREATE MATERIALIZED VIEW rimi_match_matrix_nonprivate AS
+          WITH
+          rimi_src AS (
+            SELECT
+              ext_id::text AS rimi_id,
+              name         AS rimi_name,
+              brand        AS rimi_brand,
+              lower(unaccent(coalesce(brand,''))) AS rimi_brand_norm,
+              lower(unaccent(coalesce(name ,''))) AS rimi_name_norm,
+              coalesce(size_text,'')             AS rimi_size_text
+            FROM rimi_candidates
+          ),
+          rimi_split AS (
+            SELECT *,
+              (rimi_brand_norm IN ('rimi','rimi smart','selection by rimi','i love eco','ica')) AS is_private_label
+            FROM rimi_src
+          ),
+          selver_src AS (
+            SELECT DISTINCT
+              p.id::bigint AS selver_id, p.name AS selver_name, p.brand AS selver_brand,
+              lower(unaccent(coalesce(p.brand,''))) AS selver_brand_norm,
+              lower(unaccent(coalesce(p.name ,''))) AS selver_name_norm,
+              p.amount AS selver_amount, p.ean AS selver_ean
+            FROM prices pr
+            JOIN products p ON p.id = pr.product_id
+            JOIN stores   s ON s.id = pr.store_id
+            WHERE s.chain ILIKE 'selver%'
+          ),
+          prisma_src AS (
+            SELECT DISTINCT
+              p.id::bigint AS prisma_id, p.name AS prisma_name, p.brand AS prisma_brand,
+              lower(unaccent(coalesce(p.brand,''))) AS prisma_brand_norm,
+              lower(unaccent(coalesce(p.name ,''))) AS prisma_name_norm,
+              p.amount AS prisma_amount, p.ean AS prisma_ean
+            FROM prices pr
+            JOIN products p ON p.id = pr.product_id
+            JOIN stores   s ON s.id = pr.store_id
+            WHERE s.chain ILIKE 'prisma%'
+          ),
+          rimi_sized AS (
+            SELECT r.*,
+              (
+                COALESCE(
+                  (SELECT (m[1])::numeric * replace(m[2],',','.')::numeric
+                     FROM regexp_matches(r.rimi_size_text||' '||r.rimi_name,'(\d+)\s*[x×]\s*(\d+(?:[.,]\d+)?)\s*(g|ml)','i') m LIMIT 1),
+                  (SELECT MIN(CASE lower(m[2])
+                                WHEN 'kg' THEN replace(m[1],',','.')::numeric*1000
+                                WHEN 'g'  THEN replace(m[1],',','.')::numeric
+                                WHEN 'l'  THEN replace(m[1],',','.')::numeric*1000
+                                WHEN 'ml' THEN replace(m[1],',','.')::numeric
+                              END)
+                     FROM regexp_matches(r.rimi_size_text||' '||r.rimi_name,'(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml)','gi') m)
+                )
+              )::numeric AS rimi_size_gml
+            FROM rimi_split r
+          ),
+          selver_sized AS (
+            SELECT s.*,
+              (
+                COALESCE(
+                  (SELECT (m[1])::numeric * replace(m[2],',','.')::numeric
+                     FROM regexp_matches(coalesce(s.selver_amount,'')||' '||s.selver_name,'(\d+)\s*[x×]\s*(\d+(?:[.,]\d+)?)\s*(g|ml)','i') m LIMIT 1),
+                  (SELECT MIN(CASE lower(m[2])
+                                WHEN 'kg' THEN replace(m[1],',','.')::numeric*1000
+                                WHEN 'g'  THEN replace(m[1],',','.')::numeric
+                                WHEN 'l'  THEN replace(m[1],',','.')::numeric*1000
+                                WHEN 'ml' THEN replace(m[1],',','.')::numeric
+                              END)
+                     FROM regexp_matches(coalesce(s.selver_amount,'')||' '||s.selver_name,'(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml)','gi') m)
+                )
+              )::numeric AS selver_size_gml
+            FROM selver_src s
+          ),
+          prisma_sized AS (
+            SELECT p.*,
+              (
+                COALESCE(
+                  (SELECT (m[1])::numeric * replace(m[2],',','.')::numeric
+                     FROM regexp_matches(coalesce(p.prisma_amount,'')||' '||p.prisma_name,'(\d+)\s*[x×]\s*(\d+(?:[.,]\d+)?)\s*(g|ml)','i') m LIMIT 1),
+                  (SELECT MIN(CASE lower(m[2])
+                                WHEN 'kg' THEN replace(m[1],',','.')::numeric*1000
+                                WHEN 'g'  THEN replace(m[1],',','.')::numeric
+                                WHEN 'l'  THEN replace(m[1],',','.')::numeric*1000
+                                WHEN 'ml' THEN replace(m[1],',','.')::numeric
+                              END)
+                     FROM regexp_matches(coalesce(p.prisma_amount,'')||' '||p.prisma_name,'(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml)','gi') m)
+                )
+              )::numeric AS prisma_size_gml
+            FROM prisma_src p
+          ),
+          brand_lex AS (
+            SELECT DISTINCT rimi_brand_norm AS brand_norm
+            FROM rimi_sized WHERE rimi_brand_norm <> ''
+          ),
+          selver_candidates AS (
+            SELECT r.rimi_id, r.rimi_name, r.rimi_brand, r.rimi_size_gml,
+                   s.selver_id, s.selver_name, s.selver_brand, s.selver_ean, s.selver_size_gml,
+                   GREATEST(similarity(r.rimi_name_norm,s.selver_name_norm),
+                            word_similarity(r.rimi_name_norm,s.selver_name_norm)) AS name_sim,
+                   CASE WHEN r.rimi_size_gml IS NOT NULL AND s.selver_size_gml IS NOT NULL
+                        THEN 1 - abs(r.rimi_size_gml-s.selver_size_gml)/GREATEST(r.rimi_size_gml,s.selver_size_gml)
+                        ELSE NULL END AS size_score,
+                   CASE WHEN r.rimi_brand_norm<>'' AND r.rimi_brand_norm=s.selver_brand_norm THEN 0.10 ELSE 0.0 END AS brand_bonus
+            FROM rimi_sized r
+            JOIN selver_sized s
+              ON s.selver_brand_norm = r.rimi_brand_norm
+              OR EXISTS (SELECT 1 FROM brand_lex bl WHERE bl.brand_norm=r.rimi_brand_norm AND s.selver_name_norm LIKE '%'||bl.brand_norm||'%')
+            WHERE NOT r.is_private_label
+          ),
+          prisma_candidates AS (
+            SELECT r.rimi_id, r.rimi_name, r.rimi_brand, r.rimi_size_gml,
+                   p.prisma_id, p.prisma_name, p.prisma_brand, p.prisma_ean, p.prisma_size_gml,
+                   GREATEST(similarity(r.rimi_name_norm,p.prisma_name_norm),
+                            word_similarity(r.rimi_name_norm,p.prisma_name_norm)) AS name_sim,
+                   CASE WHEN r.rimi_size_gml IS NOT NULL AND p.prisma_size_gml IS NOT NULL
+                        THEN 1 - abs(r.rimi_size_gml-p.prisma_size_gml)/GREATEST(r.rimi_size_gml,p.prisma_size_gml)
+                        ELSE NULL END AS size_score,
+                   CASE WHEN r.rimi_brand_norm<>'' AND r.rimi_brand_norm=p.prisma_brand_norm THEN 0.10 ELSE 0.0 END AS brand_bonus
+            FROM rimi_sized r
+            JOIN prisma_sized p
+              ON p.prisma_brand_norm = r.rimi_brand_norm
+              OR EXISTS (SELECT 1 FROM brand_lex bl WHERE bl.brand_norm=r.rimi_brand_norm AND p.prisma_name_norm LIKE '%'||bl.brand_norm||'%')
+            WHERE NOT r.is_private_label
+          ),
+          scored_selver AS (
+            SELECT c.*, (0.7*name_sim + 0.3*COALESCE(size_score, name_sim*0.3) + brand_bonus) AS total_score
+            FROM selver_candidates c
+          ),
+          scored_prisma AS (
+            SELECT c.*, (0.7*name_sim + 0.3*COALESCE(size_score, name_sim*0.3) + brand_bonus) AS total_score
+            FROM prisma_candidates c
+          ),
+          best_selver AS (
+            SELECT * FROM (
+              SELECT s.*, ROW_NUMBER() OVER (PARTITION BY rimi_id ORDER BY total_score DESC NULLS LAST) rn
+              FROM scored_selver s
+            ) z WHERE rn=1
+          ),
+          best_prisma AS (
+            SELECT * FROM (
+              SELECT s.*, ROW_NUMBER() OVER (PARTITION BY rimi_id ORDER BY total_score DESC NULLS LAST) rn
+              FROM scored_prisma s
+            ) z WHERE rn=1
+          ),
+          selver_buckets AS (
+            SELECT *, CASE
+              WHEN total_score>=0.98 THEN 'A+ (≈100%)'
+              WHEN total_score>=0.95 THEN 'A (95–98%)'
+              WHEN total_score>=0.90 THEN 'A- (90–95%)'
+              WHEN total_score>=0.80 THEN 'B (80–90%)'
+              WHEN total_score>=0.65 THEN 'C (65–80%)'
+              WHEN total_score>=0.50 THEN 'D (50–65%)'
+              ELSE '0 (no good)' END AS selver_bucket
+            FROM best_selver
+          ),
+          prisma_buckets AS (
+            SELECT *, CASE
+              WHEN total_score>=0.98 THEN 'A+ (≈100%)'
+              WHEN total_score>=0.95 THEN 'A (95–98%)'
+              WHEN total_score>=0.90 THEN 'A- (90–95%)'
+              WHEN total_score>=0.80 THEN 'B (80–90%)'
+              WHEN total_score>=0.65 THEN 'C (65–80%)'
+              WHEN total_score>=0.50 THEN 'D (50–65%)'
+              ELSE '0 (no good)' END AS prisma_bucket
+            FROM best_prisma
+          )
+          SELECT
+            r.rimi_id, r.rimi_name, r.rimi_brand, r.rimi_size_text, r.rimi_size_gml,
+            s.selver_id, s.selver_name, s.selver_brand, s.selver_ean, s.selver_size_gml, s.total_score AS selver_score, s.selver_bucket,
+            p.prisma_id, p.prisma_name, p.prisma_brand, p.prisma_ean, p.prisma_size_gml, p.total_score AS prisma_score, p.prisma_bucket
+          FROM rimi_sized r
+          LEFT JOIN selver_buckets s USING (rimi_id)
+          LEFT JOIN prisma_buckets p USING (rimi_id)
+          WHERE NOT r.is_private_label;
+
+          -- ===== private label (kept separate) =====
+          DROP MATERIALIZED VIEW IF EXISTS rimi_match_matrix_private CASCADE;
+          CREATE MATERIALIZED VIEW rimi_match_matrix_private AS
+          WITH
+          rimi_src AS (
+            SELECT ext_id::text AS rimi_id, name AS rimi_name, brand AS rimi_brand,
+                   lower(unaccent(coalesce(brand,''))) AS rimi_brand_norm,
+                   lower(unaccent(coalesce(name ,''))) AS rimi_name_norm,
+                   coalesce(size_text,'') AS rimi_size_text
+            FROM rimi_candidates
+          ),
+          rimi_split AS (
+            SELECT *, (rimi_brand_norm IN ('rimi','rimi smart','selection by rimi','i love eco','ica')) AS is_private_label
+            FROM rimi_src
+          ),
+          rimi_sized AS (
+            SELECT r.*,
+              (
+                COALESCE(
+                  (SELECT (m[1])::numeric * replace(m[2],',','.')::numeric
+                     FROM regexp_matches(r.rimi_size_text||' '||r.rimi_name,'(\d+)\s*[x×]\s*(\d+(?:[.,]\d+)?)\s*(g|ml)','i') m LIMIT 1),
+                  (SELECT MIN(CASE lower(m[2])
+                                WHEN 'kg' THEN replace(m[1],',','.')::numeric*1000
+                                WHEN 'g'  THEN replace(m[1],',','.')::numeric
+                                WHEN 'l'  THEN replace(m[1],',','.')::numeric*1000
+                                WHEN 'ml' THEN replace(m[1],',','.')::numeric
+                              END)
+                     FROM regexp_matches(r.rimi_size_text||' '||r.rimi_name,'(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml)','gi') m)
+                )
+              )::numeric AS rimi_size_gml
+            FROM rimi_split r
+          )
+          SELECT * FROM rimi_sized WHERE is_private_label;
+          SQL
+
+      - name: Build materialized views
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f sql/build_rimi_match_matrix.sql
+
+      - name: Export CSVs
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (SELECT * FROM rimi_match_matrix_nonprivate ORDER BY rimi_brand, rimi_name) TO STDOUT WITH CSV HEADER" > rimi_match_matrix_nonprivate.csv
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (SELECT * FROM rimi_match_matrix_private   ORDER BY rimi_brand, rimi_name) TO STDOUT WITH CSV HEADER" > rimi_match_matrix_private.csv
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rimi-match-matrices
+          path: |
+            rimi_match_matrix_nonprivate.csv
+            rimi_match_matrix_private.csv
