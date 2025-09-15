@@ -67,28 +67,99 @@ jobs:
           pip install playwright==1.46.0 asyncpg
           python -m playwright install --with-deps chromium
 
-      - name: (Optional) Download categories file
-        if: ${{ inputs.categories_file_url != '' }}
-        run: |
-          curl -fsSL "${{ inputs.categories_file_url }}" -o coop_categories.txt
-
       - name: Run Coop crawler
         env:
-          # Only needed when upsert_db == 1
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          COOP_UPSERT_DB: ${{ inputs.upsert_db }}
+          # Auto-upsert on schedule; manual runs use the input toggle
+          COOP_UPSERT_DB: ${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}
+          DATABASE_URL: ${{ (github.event_name == 'schedule' || inputs.upsert_db == '1') && secrets.DATABASE_URL || '' }}
         shell: bash
         run: |
+          set -euo pipefail
           mkdir -p out
-          EXTRA_FILE_ARG=""
+
+          REGION="${{ inputs.region }}"
+          CATS_ALL="coop_categories.txt"
+          : > "$CATS_ALL"
+
+          # 1) If a categories file URL is provided, append its contents
           if [ -n "${{ inputs.categories_file_url }}" ]; then
-            EXTRA_FILE_ARG="--categories-file coop_categories.txt"
+            echo ">> downloading categories file: ${{ inputs.categories_file_url }}"
+            curl -fsSL "${{ inputs.categories_file_url }}" >> "$CATS_ALL" || true
+            echo >> "$CATS_ALL"
           fi
 
+          # 2) If multiline categories were provided, write them verbatim
+          if [ -n "${{ inputs.categories_multiline }}" ]; then
+            cat > coop_categories_manual.txt <<__CATS__
+${{ inputs.categories_multiline }}
+__CATS__
+            # normalize CRLF
+            sed -e 's/\r$//' coop_categories_manual.txt >> "$CATS_ALL"
+            echo >> "$CATS_ALL"
+          fi
+
+          # 3) If still empty, supply sensible defaults based on REGION
+          if [ ! -s "$CATS_ALL" ]; then
+            echo ">> no categories provided; applying defaults for region: $REGION"
+            if echo "$REGION" | grep -qi 'vandra\.ecoop\.ee'; then
+              cat >> "$CATS_ALL" <<'__DEF_VANDRA__'
+/et/tooted/1-puu-ja-koogiviljad
+/et/tooted/6-liha-ja-kalatooted
+/et/tooted/20-piimatooted-munad-voi
+/et/tooted/30-kuivained-kastmed
+/et/tooted/39-valmistoit
+/et/tooted/47-pagaritooted
+/et/tooted/53-joogid
+/et/tooted/69-snakid-ja-maiustused
+/et/tooted/214937-sugavkulmutatud-toidud
+/et/tooted/78-beebitooted
+/et/tooted/81-ilu-ja-hugieenitooted/214978-intiimhugieen
+/et/tooted/93-kodutarbed/94-pesupesemis-ja-hooldustooted
+/et/tooted/93-kodutarbed/95-puhastusvahendid-ja-varskendajad
+/et/tooted/93-kodutarbed/97-koristustarbed
+/et/tooted/93-kodutarbed/98-pehme-paber
+/et/tooted/93-kodutarbed/99-kupsetamine-sailitamine-filtrid
+/et/tooted/109-lemmikloomakaubad/76053-kassitoidud
+/et/tooted/109-lemmikloomakaubad/76054-koeratoidud
+/et/tooted/113-coop-omamargi-tooted
+__DEF_VANDRA__
+            elif echo "$REGION" | grep -qi 'coophaapsalu\.ee'; then
+              cat >> "$CATS_ALL" <<'__DEF_HAAPSALU__'
+/tootekategooria/kulmutatud-toidukaubad/
+/tootekategooria/puu-ja-koogivili/
+/tootekategooria/liha-ja-kalatooted/
+/tootekategooria/piimatooted-munad-void/
+/tootekategooria/valmistoit/
+/tootekategooria/pagaritooted/
+/tootekategooria/purgitoit/
+/tootekategooria/kuivained-kastmed/
+/tootekategooria/maiustused-snakid/
+/tootekategooria/eritooted/
+/tootekategooria/joogid/
+/tootekategooria/alkohoolsed-joogid/
+/tootekategooria/beebitooted/
+/tootekategooria/hugieenitarbed/suuhugieenikaubad/
+/tootekategooria/hugieenitarbed/raseerimisvahendid/
+/tootekategooria/hugieenitarbed/intiimhugieen-plaastrid/
+/tootekategooria/kodutarbed/pesupesemise-ja-hooldustooted/
+/tootekategooria/kodutarbed/puhastusvahendid-ohuvarskendajad/
+/tootekategooria/kodutarbed/koristusvahendid/
+/tootekategooria/kodutarbed/pehme-paber/
+/tootekategooria/kodutarbed/kupsetus-sailitustooted-kohvifiltrid/
+/tootekategooria/kodutarbed/noudepesuks/
+/tootekategooria/lemmikloomakaubad/lemmikloomatoit/
+/tootekategooria/lemmikloomakaubad/kassitoit/
+__DEF_HAAPSALU__
+            else
+              echo "/et/tooted/53-joogid" >> "$CATS_ALL"
+            fi
+          fi
+
+          # 4) Run crawler using the combined file
           python scripts/coop_crawl_categories_pw.py \
-            --region "${{ inputs.region }}" \
-            --categories-multiline "${{ inputs.categories_multiline }}" \
-            ${EXTRA_FILE_ARG} \
+            --region "$REGION" \
+            --categories-multiline "" \
+            --categories-file "$CATS_ALL" \
             --page-limit "${{ inputs.page_limit }}" \
             --max-products "${{ inputs.max_products }}" \
             --headless "${{ inputs.headless }}" \
