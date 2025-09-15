@@ -35,12 +35,16 @@ on:
         description: "Concurrent PDP tabs per category"
         required: false
         default: "4"
+      shards:
+        description: "Parallel shards for categories (1–8). Scheduled runs force 1."
+        required: false
+        default: "1"
       upsert_db:
         description: "Set to 1 to upsert into public.staging_coop_products"
         required: false
         default: "0"
 
-  # 05:30 Tallinn daily (02:30 UTC)
+  # 05:30 Tallinn daily (02:30 UTC; GH cron runs in UTC)
   schedule:
     - cron: "30 2 * * *"
 
@@ -49,12 +53,80 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  crawl:
+  # Build a JSON matrix with just the shards we need
+  prepare-matrix:
     runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.mk.outputs.matrix }}
+      count:  ${{ steps.mk.outputs.count }}
+      region_url:  ${{ steps.vars.outputs.region_url }}
+      upsert_flag: ${{ steps.vars.outputs.upsert_flag }}
+      cats_multiline: ${{ steps.vars.outputs.cats_multiline }}
+      cats_file_url: ${{ steps.vars.outputs.cats_file_url }}
+      page_limit:    ${{ steps.vars.outputs.page_limit }}
+      max_products:  ${{ steps.vars.outputs.max_products }}
+      headless:      ${{ steps.vars.outputs.headless }}
+      req_delay:     ${{ steps.vars.outputs.req_delay }}
+      pdp_workers:   ${{ steps.vars.outputs.pdp_workers }}
+    steps:
+      - id: vars
+        run: |
+          echo "region_url=${{ inputs.region }}" >> "$GITHUB_OUTPUT"
+          echo "upsert_flag=${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}" >> "$GITHUB_OUTPUT"
+          echo "cats_multiline=${{ inputs.categories_multiline }}" >> "$GITHUB_OUTPUT"
+          echo "cats_file_url=${{ inputs.categories_file_url }}" >> "$GITHUB_OUTPUT"
+          echo "page_limit=${{ inputs.page_limit }}" >> "$GITHUB_OUTPUT"
+          echo "max_products=${{ inputs.max_products }}" >> "$GITHUB_OUTPUT"
+          echo "headless=${{ inputs.headless }}" >> "$GITHUB_OUTPUT"
+          echo "req_delay=${{ inputs.req_delay }}" >> "$GITHUB_OUTPUT"
+          echo "pdp_workers=${{ inputs.pdp_workers }}" >> "$GITHUB_OUTPUT"
+      - id: mk
+        env:
+          REQ_SHARDS: ${{ github.event_name == 'workflow_dispatch' && inputs.shards || '1' }}
+        shell: bash
+        run: |
+          n="$REQ_SHARDS"
+          # clamp 1..8
+          if [ -z "$n" ] || [ "$n" -lt 1 ]; then n=1; fi
+          if [ "$n" -gt 8 ]; then n=8; fi
+          # build matrix JSON: {"shard_index":[0..n-1]}
+          python - <<'PY' > matrix.json
+import json, os
+n = int(os.environ["N"])
+print(json.dumps({"shard_index": list(range(n))}))
+PY
+          echo "matrix=$(cat matrix.json)" >> "$GITHUB_OUTPUT"
+          echo "count=$n" >> "$GITHUB_OUTPUT"
+        env:
+          N: ${{ env.REQ_SHARDS }}
+
+  crawl:
+    needs: prepare-matrix
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare-matrix.outputs.matrix) }}
+
+    env:
+      REGION_URL:     ${{ needs.prepare-matrix.outputs.region_url }}
+      CATS_MULTILINE: ${{ needs.prepare-matrix.outputs.cats_multiline }}
+      CATS_FILE_URL:  ${{ needs.prepare-matrix.outputs.cats_file_url }}
+      COOP_UPSERT_DB: ${{ needs.prepare-matrix.outputs.upsert_flag }}
+      DATABASE_URL:   ${{ (needs.prepare-matrix.outputs.upsert_flag == '1') && secrets.DATABASE_URL || '' }}
+      SHARD_COUNT:    ${{ needs.prepare-matrix.outputs.count }}
+      SHARD_INDEX:    ${{ matrix.shard_index }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Debug shard selection
+        run: |
+          echo "Shard index: $SHARD_INDEX"
+          echo "Shard count: $SHARD_COUNT"
+          echo "Region: $REGION_URL"
+          echo "Upsert: $COOP_UPSERT_DB"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -68,35 +140,33 @@ jobs:
           python -m playwright install --with-deps chromium
 
       - name: (Optional) Download categories file
-        if: ${{ inputs.categories_file_url != '' }}
+        if: ${{ env.CATS_FILE_URL != '' }}
         run: |
-          echo ">> downloading categories from: ${{ inputs.categories_file_url }}"
-          curl -fsSL "${{ inputs.categories_file_url }}" -o coop_categories.txt || true
+          curl -fsSL "$CATS_FILE_URL" -o coop_categories.txt || true
 
       - name: Run Coop crawler (with repo fallback)
-        env:
-          COOP_UPSERT_DB: ${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}
-          DATABASE_URL: ${{ (github.event_name == 'schedule' || inputs.upsert_db == '1') && secrets.DATABASE_URL || '' }}
         shell: bash
+        env:
+          PAGE_LIMIT:   ${{ needs.prepare-matrix.outputs.page_limit }}
+          MAX_PRODUCTS: ${{ needs.prepare-matrix.outputs.max_products }}
+          HEADLESS:     ${{ needs.prepare-matrix.outputs.headless }}
+          REQ_DELAY:    ${{ needs.prepare-matrix.outputs.req_delay }}
+          PDP_WORKERS:  ${{ needs.prepare-matrix.outputs.pdp_workers }}
         run: |
           set -euo pipefail
           mkdir -p out
 
-          REGION_URL="${{ inputs.region }}"
-          CATS_MULTILINE="${{ inputs.categories_multiline }}"
           CATS_ALL="coop_categories.txt"
+          : > "$CATS_ALL"
 
-          # Start with an empty file if none was downloaded
-          if [ ! -f "$CATS_ALL" ]; then : > "$CATS_ALL"; fi
-
-          # 1) Use multiline UI input if present
-          if [ -z "$(sed -n '1p' "$CATS_ALL" 2>/dev/null)" ] && [ -n "$CATS_MULTILINE" ]; then
+          # 1) Highest priority: downloaded file (if URL input given)
+          if [ -f "coop_categories.txt" ] && [ -s "coop_categories.txt" ]; then
+            echo ">> categories from URL downloaded."
+          # 2) Multiline UI input
+          elif [ -n "$CATS_MULTILINE" ]; then
             printf '%s\n' "$CATS_MULTILINE" > "$CATS_ALL"
-            echo ">> using categories from UI multiline input"
-          fi
-
-          # 2) Repo defaults by region
-          if [ ! -s "$CATS_ALL" ]; then
+          # 3) Repo defaults by region
+          else
             if echo "$REGION_URL" | grep -qi 'vandra\.ecoop\.ee'; then
               REPO_FILE="data/coop_vandra_categories.txt"
             elif echo "$REGION_URL" | grep -qi 'coophaapsalu\.ee'; then
@@ -110,33 +180,34 @@ jobs:
             fi
           fi
 
-          # 3) Last-resort single category so the run never fails
+          # 4) Last-resort tiny default so the job never fails
           if [ ! -s "$CATS_ALL" ]; then
             if echo "$REGION_URL" | grep -qi 'coophaapsalu\.ee'; then
               echo "/tootekategooria/joogid/" > "$CATS_ALL"
             else
               echo "/et/tooted/53-joogid" > "$CATS_ALL"
             fi
-            echo ">> using single-category fallback"
           fi
 
-          # Normalize CRLF if pasted from Windows
-          sed -e 's/\r$//' -i "$CATS_ALL"
+          echo "== Categories to crawl =="
+          cat "$CATS_ALL" | sed 's/^/  /'
+          echo "========================="
 
-          echo "=== Categories to crawl ==="
-          cat "$CATS_ALL" || true
-          echo "==========================="
+          # Normalize CRLF if any
+          sed -e 's/\r$//' -i "$CATS_ALL"
 
           python scripts/coop_crawl_categories_pw.py \
             --region "$REGION_URL" \
             --categories-multiline "" \
             --categories-file "$CATS_ALL" \
-            --page-limit "${{ inputs.page_limit }}" \
-            --max-products "${{ inputs.max_products }}" \
-            --headless "${{ inputs.headless }}" \
-            --req-delay "${{ inputs.req_delay }}" \
-            --pdp-workers "${{ inputs.pdp_workers }}" \
-            --out "out/coop_products_${{ github.run_id }}.csv"
+            --page-limit "$PAGE_LIMIT" \
+            --max-products "$MAX_PRODUCTS" \
+            --headless "$HEADLESS" \
+            --req-delay "$REQ_DELAY" \
+            --pdp-workers "$PDP_WORKERS" \
+            --cat-shards "$SHARD_COUNT" \
+            --cat-index "$SHARD_INDEX" \
+            --out "out/coop_products_${{ github.run_id }}_shard${SHARD_INDEX}.csv"
 
       - name: Upload CSV artifact
         uses: actions/upload-artifact@v4
