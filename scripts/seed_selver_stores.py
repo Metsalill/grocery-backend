@@ -9,14 +9,14 @@ Also ensures a single online row (e-Selver) exists with is_online=TRUE.
 
 Env:
   DATABASE_URL / RW_DATABASE_URL   (required)
-  BACKFILL_ONLY   1|0  default 1   (1 = only update rows missing coords)
-  GEOCODE         1|0  default 1   (use Nominatim; still parses coords from gmaps links)
+  BACKFILL_ONLY   1|0  default 1
+  GEOCODE         1|0  default 1
   DRY_RUN         1|0  default 0
   CHAIN                 default "Selver"
   ONLINE_NAME           default "e-Selver"
 """
 
-import os, re, time, sys
+import os, re, time, sys, json
 import psycopg2, psycopg2.extras
 import requests
 from urllib.parse import urlparse, parse_qs, unquote, urljoin
@@ -70,14 +70,11 @@ def parse_coords_or_query_from_maps(href: str):
     if not href:
         return (None, None, None)
     try:
-        # /@59.40,24.71 or ...!3d59.40!4d24.71 etc.
         m = re.search(r'/@([0-9\.\-]+),([0-9\.\-]+)', href)
         if m:
             return (float(m.group(1)), float(m.group(2)), None)
-        # q=59.40%2C24.71 OR q=addr
         u = urlparse(href)
         qs = parse_qs(u.query)
-        q = None
         if 'q' in qs and qs['q']:
             q = unquote(qs['q'][0])
             mm = re.match(r'\s*([0-9\.\-]+)\s*,\s*([0-9\.\-]+)\s*$', q)
@@ -93,27 +90,21 @@ def nominatim(query: str):
     if not query or not GEOCODE:
         return (None, None)
     url = "https://nominatim.openstreetmap.org/search"
+    q = f"{query}, Estonia" if "estonia" not in query.lower() else query
     params = {
-        "q": f"{query}, Estonia" if "estonia" not in query.lower() else query,
-        "format": "json",
-        "limit": 1,
-        "countrycodes": "ee",
-        "addressdetails": 0,
-        "accept-language": "et"
+        "q": q, "format": "json", "limit": 1,
+        "countrycodes": "ee", "addressdetails": 0, "accept-language": "et"
     }
     headers = {"User-Agent": UA}
     for attempt in range(3):
         try:
             r = requests.get(url, params=params, headers=headers, timeout=25)
             if r.status_code == 429:
-                # polite backoff
-                time.sleep(2 + attempt)
-                continue
+                time.sleep(2 + attempt); continue
             r.raise_for_status()
             arr = r.json()
             if arr:
                 return float(arr[0]["lat"]), float(arr[0]["lon"])
-            # small tweak: drop postal code if present and retry once
             if attempt == 0:
                 params["q"] = re.sub(r'\b\d{4,6}\b', '', params["q"]).strip(', ')
         except Exception:
@@ -123,7 +114,7 @@ def nominatim(query: str):
 # ------------ scraping (detail pages) ------------
 
 def collect_store_detail_urls(page) -> list[str]:
-    """From /kauplused collect unique links to store detail pages."""
+    """From /kauplused collect unique links to store detail pages (collapsed items included)."""
     page.goto(f"{BASE}/kauplused", wait_until="domcontentloaded", timeout=60000)
     # cookie
     for txt in ["Nõustun", "Nõustu", "Accept", "Allow all", "OK"]:
@@ -132,21 +123,34 @@ def collect_store_detail_urls(page) -> list[str]:
             break
         except Exception:
             pass
-    page.wait_for_timeout(1200)
-    anchors = page.locator("a[href*='/kauplused/']:visible")
-    hrefs = set()
+    # light scroll to trigger any lazy DOM
     try:
-        raw = anchors.evaluate_all("els => els.map(e => e.getAttribute('href'))")
+        for y in range(0, 5000, 800):
+            page.evaluate("window.scrollTo(0, arguments[0])", y)
+            page.wait_for_timeout(150)
+        page.wait_for_load_state("networkidle", timeout=2000)
     except Exception:
-        raw = []
-    for h in raw:
-        if not h:
-            continue
-        if "/kauplused/" in h:
-            hrefs.add(urljoin(BASE, h))
-    # Filter obvious non-store links (breadcrumbs, map etc.)
-    hrefs = {h.split("#", 1)[0] for h in hrefs}
+        pass
+
+    html = page.content()
+    soup = BeautifulSoup(html, "html.parser")
+    hrefs = set()
+    for a in soup.find_all("a", href=True):
+        h = a["href"]
+        if "/kauplused/" in h and not h.rstrip("/").endswith("/kauplused"):
+            hrefs.add(urljoin(BASE, h.split("#", 1)[0]))
     return sorted(hrefs)
+
+def best_addr_from(container):
+    if not container:
+        return None
+    txt = container.get_text(" ", strip=True)
+    parts = [x.strip() for x in re.split(r' ?[•\u2022\u00B7\u25CF\|;/] ?|\n', txt) if x.strip()]
+    cands = []
+    for ln in parts:
+        if ADDR_TOKEN.search(ln) and re.search(r'\d', ln) and 6 <= len(ln) <= 140 and 'selver' not in ln.lower():
+            cands.append(ln)
+    return (sorted(cands, key=len)[0] if cands else None)
 
 def extract_from_detail_html(html: str):
     """Return (name, address, maps_href) from a detail page's HTML."""
@@ -156,32 +160,35 @@ def extract_from_detail_html(html: str):
     if h1:
         name = clean_name(h1.get_text(" ", strip=True))
 
-    # any google maps-ish link
+    # JSON-LD address fallback
+    address_jsonld = None
+    for s in soup.find_all("script", attrs={"type": "application/ld+json"}):
+        try:
+            data = json.loads(s.string or "{}")
+        except Exception:
+            continue
+        nodes = data if isinstance(data, list) else [data]
+        for n in nodes:
+            if not isinstance(n, dict): continue
+            addr = n.get("address")
+            if isinstance(addr, dict):
+                line = " ".join(str(addr.get(k) or "") for k in ["streetAddress","postalCode","addressLocality"]).strip()
+                if line:
+                    address_jsonld = line
+                    break
+        if address_jsonld:
+            break
+
     a_maps = soup.find("a", href=re.compile(r'(google\.[^/]+/maps|goo\.gl/maps|maps\.app\.goo\.gl)', re.I))
     maps_href = a_maps["href"] if a_maps and a_maps.has_attr("href") else None
 
-    # find address-like text near the link or under the schedule block
     address = None
-
-    def best_addr_from(container):
-        if not container:
-            return None
-        txt = container.get_text(" ", strip=True)
-        parts = [x.strip() for x in re.split(r' ?[•\u2022\u00B7\u25CF\|;/] ?|\n', txt) if x.strip()]
-        cands = []
-        for ln in parts:
-            if ADDR_TOKEN.search(ln) and re.search(r'\d', ln) and 6 <= len(ln) <= 140 and 'selver' not in ln.lower():
-                cands.append(ln)
-        return (sorted(cands, key=len)[0] if cands else None)
-
     if a_maps:
-        # search siblings/parent for the short address line
         address = best_addr_from(a_maps.parent) or best_addr_from(a_maps.parent.parent)
 
     if not address:
-        # broader scan — the right column with opening times usually contains it
         main = soup.find("main") or soup
-        address = best_addr_from(main)
+        address = best_addr_from(main) or address_jsonld
 
     return name, address, maps_href
 
@@ -197,7 +204,7 @@ def scrape_detail_pages() -> dict[str, dict]:
         p = ctx.new_page()
 
         links = collect_store_detail_urls(p)
-        # de-duplicate by last slug to reduce unlikely dupes
+        # de-duplicate by last slug
         seen_slugs = set()
         detail_links = []
         for h in links:
@@ -209,7 +216,7 @@ def scrape_detail_pages() -> dict[str, dict]:
         for url in detail_links:
             try:
                 p.goto(url, wait_until="domcontentloaded", timeout=60000)
-                p.wait_for_timeout(400)
+                p.wait_for_timeout(350)
                 html = p.content()
             except PWTimeout:
                 continue
@@ -314,7 +321,6 @@ def backfill_only_flow(web_entries):
         if lt and ln:
             lat, lon = lt, ln
         else:
-            # Prefer DB addr → scraped addr → 'q' from gmaps → generic
             query = addr_db or addr_web or q or f"{name}, Estonia"
             lat, lon = nominatim(query)
 
@@ -361,7 +367,6 @@ def full_seed_flow(web_entries):
 # ------------ main ------------
 
 def main():
-    # crawl detail pages for best-quality address + gmaps href
     web_entries = scrape_detail_pages()
     print(f"Scraped {len(web_entries)} physical store detail pages from Selver.")
     if BACKFILL_ONLY:
