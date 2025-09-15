@@ -8,7 +8,7 @@ on:
         required: false
         default: "https://vandra.ecoop.ee"
       categories_multiline:
-        description: "Category URLs or paths (one per line), e.g. /et/tooted/53-joogid"
+        description: "Category URLs or paths (one per line). e.g. /et/tooted/53-joogid"
         required: false
         default: ""
       categories_file_url:
@@ -36,7 +36,7 @@ on:
         required: false
         default: "4"
       shards:
-        description: "Parallel shards for categories (1–8)."
+        description: "Parallel shards for categories (1–8)"
         required: false
         default: "1"
       upsert_db:
@@ -58,17 +58,17 @@ jobs:
 
     strategy:
       fail-fast: false
-      # We always spawn up to 8 workers; each shard checks its index and exits fast if unused.
+      # Always spawn up to 8; each job exits fast if its index >= requested shard count.
       matrix:
         shard: [0, 1, 2, 3, 4, 5, 6, 7]
 
     env:
-      REGION_URL:      ${{ inputs.region }}
-      CATS_MULTILINE:  ${{ inputs.categories_multiline }}
-      CATS_FILE_URL:   ${{ inputs.categories_file_url }}
-      SHARD_COUNT:     ${{ inputs.shards }}
-      SHARD_INDEX:     ${{ matrix.shard }}
-      COOP_UPSERT_DB:  ${{ inputs.upsert_db }}
+      REGION_URL:     ${{ inputs.region }}
+      CATS_MULTILINE: ${{ inputs.categories_multiline }}
+      CATS_FILE_URL:  ${{ inputs.categories_file_url }}
+      SHARD_COUNT:    ${{ inputs.shards }}
+      SHARD_INDEX:    ${{ matrix.shard }}
+      COOP_UPSERT_DB: ${{ inputs.upsert_db }}
 
     steps:
       - name: Checkout
@@ -90,7 +90,6 @@ jobs:
         run: |
           curl -fsSL "$CATS_FILE_URL" -o coop_categories.txt
 
-      # Prefer PUBLIC DSN so runners can reach the DB; fall back to DATABASE_URL if needed.
       - name: Select DB URL (PUBLIC preferred)
         if: ${{ env.COOP_UPSERT_DB == '1' }}
         shell: bash
@@ -100,34 +99,10 @@ jobs:
             echo "[db] Using DATABASE_URL_PUBLIC"
           elif [ -n "${{ secrets.DATABASE_URL }}" ]; then
             echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> "$GITHUB_ENV"
-            echo "[db] Using DATABASE_URL fallback"
+            echo "[db] Using DATABASE_URL"
           else
-            echo "[db] No DB secret set; upsert will be skipped by the script."
+            echo "[db] No DB URL secrets present; upsert will be skipped by script."
           fi
-
-      # Tiny DNS sanity check so it's obvious if the host is unreachable from Actions.
-      - name: DB DNS debug
-        if: ${{ env.COOP_UPSERT_DB == '1' && env.DATABASE_URL != '' }}
-        shell: bash
-        run: |
-          set -e
-          # Extract host/port from PostgreSQL URL
-          H="$(printf '%s' "$DATABASE_URL" | sed -E 's|.*@([^:/?]+)(:([0-9]+))?.*|\1|')"
-          P="$(printf '%s' "$DATABASE_URL" | sed -nE 's|.*@[^:/?]+:([0-9]+).*|\1|p')"
-          P="${P:-5432}"
-          echo "[db] host=$H port=$P"
-          python - <<'PY'
-import os, socket
-h=os.environ["H"]; p=int(os.environ["P"])
-try:
-  gi=socket.getaddrinfo(h,p)
-  print("[db] getaddrinfo OK entries:", len(gi))
-except Exception as e:
-  print("[db] getaddrinfo FAILED:", e)
-PY
-        env:
-          H: ${{ env.DATABASE_URL && '' || '' }} # keep env block valid even if DATABASE_URL unset
-          P: "5432"
 
       - name: Run Coop crawler (with repo fallback + sharding)
         shell: bash
@@ -150,14 +125,13 @@ PY
           CATS_ALL="coop_categories.txt"
           : > "$CATS_ALL"
 
-          # Order of precedence:
-          # 1) downloaded file (if categories_file_url was provided)
+          # 1) Highest priority: downloaded file (if categories_file_url is set)
           if [ -s "coop_categories.txt" ]; then
             echo ">> using categories from URL"
-          # 2) multiline UI input
+          # 2) UI multiline input
           elif [ -n "$CATS_MULTILINE" ]; then
             printf '%s\n' "$CATS_MULTILINE" > "$CATS_ALL"
-          # 3) repo defaults by region
+          # 3) Repo defaults by region
           else
             if echo "$REGION_URL" | grep -qi 'vandra\.ecoop\.ee'; then
               REPO_FILE="data/coop_vandra_categories.txt"
@@ -172,7 +146,7 @@ PY
             fi
           fi
 
-          # 4) last-resort tiny default so the job never fails
+          # 4) Last-resort tiny default so the job never fails
           if [ ! -s "$CATS_ALL" ]; then
             if echo "$REGION_URL" | grep -qi 'coophaapsalu\.ee'; then
               echo "/tootekategooria/joogid/" > "$CATS_ALL"
@@ -184,13 +158,14 @@ PY
           # Normalize CRLF if pasted from Windows
           sed -e 's/\r$//' -i "$CATS_ALL"
 
-          # Slice the categories per shard (0-based)
+          # Slice categories for this shard (0-based)
           CATS_SHARD="coop_categories_shard.txt"
           awk -v n="${SHARD_COUNT}" -v i="${SHARD_INDEX}" 'NF{ if ((NR-1)%n==i) print }' "$CATS_ALL" > "$CATS_SHARD"
           if [ ! -s "$CATS_SHARD" ]; then
             echo "[shard] No categories assigned to this shard (${SHARD_INDEX}); exiting."
             exit 0
           fi
+
           echo "=== Categories for shard ${SHARD_INDEX}/${SHARD_COUNT} ==="
           cat "$CATS_SHARD"
           echo "==============================================="
