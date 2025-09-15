@@ -72,36 +72,34 @@ jobs:
           # Auto-upsert on schedule; manual runs use the input toggle
           COOP_UPSERT_DB: ${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}
           DATABASE_URL: ${{ (github.event_name == 'schedule' || inputs.upsert_db == '1') && secrets.DATABASE_URL || '' }}
+          CATS_MULTILINE: ${{ inputs.categories_multiline }}
+          CATS_FILE_URL: ${{ inputs.categories_file_url }}
+          REGION_URL: ${{ inputs.region }}
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p out
 
-          REGION="${{ inputs.region }}"
           CATS_ALL="coop_categories.txt"
           : > "$CATS_ALL"
 
-          # 1) If a categories file URL is provided, append its contents
-          if [ -n "${{ inputs.categories_file_url }}" ]; then
-            echo ">> downloading categories file: ${{ inputs.categories_file_url }}"
-            curl -fsSL "${{ inputs.categories_file_url }}" >> "$CATS_ALL" || true
+          # 1) If a categories file URL is provided, download & append
+          if [ -n "$CATS_FILE_URL" ]; then
+            echo ">> downloading categories file: $CATS_FILE_URL"
+            curl -fsSL "$CATS_FILE_URL" >> "$CATS_ALL" || true
             echo >> "$CATS_ALL"
           fi
 
-          # 2) If multiline categories were provided, write them verbatim
-          if [ -n "${{ inputs.categories_multiline }}" ]; then
-            cat > coop_categories_manual.txt <<__CATS__
-${{ inputs.categories_multiline }}
-__CATS__
-            # normalize CRLF
-            sed -e 's/\r$//' coop_categories_manual.txt >> "$CATS_ALL"
+          # 2) If multiline categories were provided, append them safely
+          if [ -n "$CATS_MULTILINE" ]; then
+            printf '%s\n' "$CATS_MULTILINE" >> "$CATS_ALL"
             echo >> "$CATS_ALL"
           fi
 
-          # 3) If still empty, supply sensible defaults based on REGION
+          # 3) If still empty, supply sensible defaults by region
           if [ ! -s "$CATS_ALL" ]; then
-            echo ">> no categories provided; applying defaults for region: $REGION"
-            if echo "$REGION" | grep -qi 'vandra\.ecoop\.ee'; then
+            echo ">> no categories provided; applying defaults for region: $REGION_URL"
+            if echo "$REGION_URL" | grep -qi 'vandra\.ecoop\.ee'; then
               cat >> "$CATS_ALL" <<'__DEF_VANDRA__'
 /et/tooted/1-puu-ja-koogiviljad
 /et/tooted/6-liha-ja-kalatooted
@@ -123,7 +121,7 @@ __CATS__
 /et/tooted/109-lemmikloomakaubad/76054-koeratoidud
 /et/tooted/113-coop-omamargi-tooted
 __DEF_VANDRA__
-            elif echo "$REGION" | grep -qi 'coophaapsalu\.ee'; then
+            elif echo "$REGION_URL" | grep -qi 'coophaapsalu\.ee'; then
               cat >> "$CATS_ALL" <<'__DEF_HAAPSALU__'
 /tootekategooria/kulmutatud-toidukaubad/
 /tootekategooria/puu-ja-koogivili/
@@ -155,9 +153,12 @@ __DEF_HAAPSALU__
             fi
           fi
 
+          # Normalize CRLF just in case
+          sed -e 's/\r$//' -i "$CATS_ALL"
+
           # 4) Run crawler using the combined file
           python scripts/coop_crawl_categories_pw.py \
-            --region "$REGION" \
+            --region "$REGION_URL" \
             --categories-multiline "" \
             --categories-file "$CATS_ALL" \
             --page-limit "${{ inputs.page_limit }}" \
