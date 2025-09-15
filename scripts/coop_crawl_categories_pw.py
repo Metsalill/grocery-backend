@@ -9,16 +9,16 @@ What this does
   spec tables, legacy “Tootekood”, or by clicking “Toote info” modal on new UI).
 - Writes CSV (always) and optionally upserts to Postgres if COOP_UPSERT_DB=1.
 
-Important DB alignment (your Railway schema)
-- Upsert target: public.staging_coop_products with PRIMARY KEY (store_host, ext_id)
-  and columns:
-    store_host, ext_id, name, brand, manufacturer, ean_raw, ean_norm,
-    size_text, price, currency, image_url, url, scraped_at (default now()).
-- We derive store_host from --region (e.g., https://coophaapsalu.ee → 'coophaapsalu.ee').
+DB alignment (Railway)
+- Target table: public.staging_coop_products
+- PRIMARY KEY (store_host, ext_id)
+- Columns: store_host, ext_id, name, brand, manufacturer, ean_raw, ean_norm,
+           size_text, price, currency, image_url, url, scraped_at (default now()).
 
 Notes
-- Region base is configurable via --region (e.g., https://coophaapsalu.ee or https://vandra.ecoop.ee).
-- Some regions do not expose EAN/GTIN; we still record price by ext_id/url.
+- store_host is derived from --region (e.g. https://coophaapsalu.ee → coophaapsalu.ee).
+- Supports **category sharding** via --cat-shards / --cat-index for parallel runs.
+- Blocks heavy trackers and images/fonts to speed up.
 """
 
 import argparse
@@ -315,29 +315,6 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
     if m:
         ext_id = m.group(1)
 
-    # Enrich brand/manufacturer from spec if missing
-    try:
-        if not brand:
-            loc = page.locator(
-                "xpath=//dt[normalize-space()[contains(., 'Kaubamärk') or contains(., 'Bränd') or contains(., 'Brand')]]/following-sibling::dd[1]"
-                " | //tr[th[normalize-space()[contains(., 'Kaubamärk') or contains(., 'Bränd') or contains(., 'Brand')]]]/td[1]"
-            )
-            if await loc.count() > 0:
-                txt = await loc.first.text_content()
-                if txt:
-                    brand = txt.strip()
-        if not manufacturer:
-            locm = page.locator(
-                "xpath=//dt[normalize-space()[contains(., 'Tootja') or contains(., 'Valmistaja')]]/following-sibling::dd[1]"
-                " | //tr[th[normalize-space()[contains(., 'Tootja') or contains(., 'Valmistaja')]]]/td[1]"
-            )
-            if await locm.count() > 0:
-                txtm = await locm.first.text_content()
-                if txtm:
-                    manufacturer = txtm.strip()
-    except Exception:
-        pass
-
     return {
         "chain": "Coop",
         "store_host": store_host,
@@ -473,7 +450,11 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
 
 async def _route_filter(route):
     try:
-        url = route.request.url
+        req = route.request
+        # Trim heavy resource types
+        if req.resource_type in ("image", "media", "font"):
+            return await route.abort()
+        url = req.url
         if any(h in url for h in [
             "googletagmanager.com", "google-analytics.com", "doubleclick.net",
             "facebook.net", "connect.facebook.net", "hotjar", "fullstory",
@@ -486,6 +467,10 @@ async def _route_filter(route):
             return await route.continue_()
         except Exception:
             return
+
+# wrapper handler for Playwright (so we can await registration)
+async def _route_handler(route):
+    await _route_filter(route)
 
 # ---------- main ----------
 
@@ -510,6 +495,15 @@ async def run(args):
         return base + u
 
     categories = [norm_url(u) for u in categories]
+
+    # optional sharding
+    if args.cat_shards > 1:
+        if args.cat_index < 0 or args.cat_index >= args.cat_shards:
+            print(f"[error] --cat-index must be in [0, {args.cat_shards-1}]")
+            sys.exit(2)
+        categories = [u for i, u in enumerate(categories) if i % args.cat_shards == args.cat_index]
+        print(f"[shard] Using {len(categories)} categories for shard {args.cat_index}/{args.cat_shards}")
+
     store_host = urlparse(args.region).netloc.lower()
 
     async with async_playwright() as pw:
@@ -520,7 +514,8 @@ async def run(args):
             viewport={"width": 1366, "height": 900},
             java_script_enabled=True,
         )
-        context.route("**/*", lambda route: asyncio.create_task(_route_filter(route)))
+        # IMPORTANT: await the route registration
+        await context.route("**/*", _route_handler)
 
         all_rows: List[Dict] = []
         try:
@@ -551,6 +546,9 @@ def parse_args():
     p.add_argument("--headless", default="1", help="1/0 headless")
     p.add_argument("--req-delay", type=float, default=0.5, help="Seconds between ops")
     p.add_argument("--pdp-workers", type=int, default=4, help="Concurrent PDP tabs per category")
+    # sharding
+    p.add_argument("--cat-shards", type=int, default=1, help="Total number of category shards")
+    p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
     p.add_argument("--out", default="out/coop_products.csv", help="CSV file or output directory")
     return p.parse_args()
 
