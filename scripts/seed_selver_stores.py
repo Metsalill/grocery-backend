@@ -36,7 +36,9 @@ CAP_NAME = re.compile(r'(Delice(?:\s+Toidupood)?|[A-ZÄÖÜÕ][A-Za-zÄÖÜÕä�
 BAD_NAME = re.compile(r'^(?:e-?Selver|Selver)$', re.I)
 
 ADDR_TOKEN = re.compile(r'\b(mnt|tee|tn|pst|puiestee|maantee|tänav|keskus|turg|väljak)\b', re.I)
-MAPS_HREF  = re.compile(r'(google\.[^/]+/maps|goo\.gl/maps|maps\.app\.goo\.gl)', re.I)
+MAPS_HREF  = re.compile(r'(google\.[^/]+/maps|goo\.gl/maps|maps\.app\.goo\.gl|maps\.google\.)', re.I)
+
+CITY_FROM_ADDR = re.compile(r',\s*([A-ZÄÖÜÕ][A-Za-zÄÖÜÕäöüõ\- ]+)\s*(?:,\s*\d{4,6})?$')
 
 # ---------------- helpers ----------------
 
@@ -61,20 +63,29 @@ def parse_coords_or_query_from_maps(href: Optional[str]) -> Tuple[Optional[float
     if not href:
         return (None, None, None)
     try:
+        # /@59.4,24.7
         m = re.search(r'/@([0-9\.\-]+),([0-9\.\-]+)', href)
         if m:
             return (float(m.group(1)), float(m.group(2)), None)
         u = urlparse(href)
         qs = parse_qs(u.query)
-        if 'q' in qs and qs['q']:
-            return (None, None, unquote(qs['q'][0]))
+        # new-style dir links: destination=lat,lon or q=...
+        for key in ("destination", "q"):
+            if key in qs and qs[key]:
+                q = unquote(qs[key][0])
+                m2 = re.match(r'\s*([\-0-9\.]+)\s*,\s*([\-0-9\.]+)\s*$', q)
+                if m2:
+                    return (float(m2.group(1)), float(m2.group(2)), None)
+                else:
+                    return (None, None, q)
     except Exception:
         pass
     return (None, None, None)
 
-def geocode(addr: Optional[str]) -> Tuple[Optional[float], Optional[float]]:
+def geocode(addr: Optional[str], *, name_for_fallback: Optional[str]=None) -> Tuple[Optional[float], Optional[float]]:
     if not addr or not GEOCODE:
         return (None, None)
+
     headers = {"User-Agent": UA}
     url = "https://nominatim.openstreetmap.org/search"
 
@@ -90,13 +101,32 @@ def geocode(addr: Optional[str]) -> Tuple[Optional[float], Optional[float]]:
             return (None, None)
         return (None, None)
 
-    # try with explicit country hint first (improves hit-rate)
+    # 1) address + country hint
     q1 = addr if re.search(r'\b(Eesti|Estonia)\b', addr, re.I) else f"{addr}, Estonia"
     lat, lon = _req(q1)
     if lat is not None and lon is not None:
         return lat, lon
-    # second attempt: raw address (sometimes already full)
-    return _req(addr)
+
+    # 2) raw address (sometimes already full form)
+    lat, lon = _req(addr)
+    if lat is not None and lon is not None:
+        return lat, lon
+
+    # 3) "StoreName Selver, Estonia"
+    if name_for_fallback:
+        lat, lon = _req(f"{name_for_fallback} Selver, Estonia")
+        if lat is not None and lon is not None:
+            return lat, lon
+
+    # 4) city-only hint
+    m = CITY_FROM_ADDR.search(addr)
+    if m:
+        city = m.group(1)
+        lat, lon = _req(f"{city}, Estonia")
+        if lat is not None and lon is not None:
+            return lat, lon
+
+    return (None, None)
 
 # ---------------- rendering ----------------
 
@@ -106,13 +136,19 @@ def render_html(url: str) -> str:
         ctx = browser.new_context(user_agent=UA, locale="et-EE",
                                   viewport={"width":1280, "height":900})
         p = ctx.new_page()
-        p.goto(url, wait_until="domcontentloaded", timeout=60000)
+        # be patient: many bits are hydrated after domcontentloaded
+        p.goto(url, wait_until="networkidle", timeout=70000)
         for txt in ["Nõustun", "Nõustu", "Accept", "Allow all", "OK"]:
             try:
-                p.get_by_role("button", name=re.compile(txt, re.I)).click(timeout=1200)
+                p.get_by_role("button", name=re.compile(txt, re.I)).click(timeout=1500)
                 break
             except Exception:
                 pass
+        # small scroll to trigger lazy areas
+        try:
+            p.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        except Exception:
+            pass
         p.wait_for_timeout(800)
         html = p.content()
         ctx.close(); browser.close()
@@ -135,12 +171,14 @@ def scrape_list_detail_urls() -> List[str]:
     return out
 
 def _extract_maps_href(soup: BeautifulSoup) -> Optional[str]:
-    # Prefer explicit text “Leia kaardilt”, even if split across spans
+    # Prefer explicit “Leia kaardilt”, but accept any google-maps-looking link
     for a in soup.find_all("a", href=True):
-        txt = a.get_text(" ", strip=True)
         href = a["href"]
-        if re.search(r'leia\s+kaardilt', txt, re.I) or MAPS_HREF.search(href):
-            # keep absolute URLs as-is; otherwise join with site
+        txt  = a.get_text(" ", strip=True)
+        aria = (a.get("aria-label") or "")
+        if (re.search(r'leia\s+kaardilt', txt, re.I) or
+            re.search(r'leia\s+kaardilt', aria, re.I) or
+            MAPS_HREF.search(href)):
             return href if href.startswith("http") else urljoin(BASE, href)
     return None
 
@@ -148,8 +186,6 @@ def _looks_like_address(ln: str) -> bool:
     if not ln or "@" in ln:
         return False
     if re.fullmatch(r'[0-9\s]+', ln):
-        return False
-    if "Leia kaardilt" in ln:
         return False
     if len(ln) < 8 or len(ln) > 140:
         return False
@@ -173,7 +209,7 @@ def scrape_detail(detail_url: str) -> Tuple[Optional[str], Optional[str], Option
     maps_href = _extract_maps_href(soup)
 
     address = None
-    # prefer the info/column blocks; fall back to whole page if needed
+    # Prefer info/column blocks; fallback to whole page scan
     blocks = soup.find_all(True, class_=re.compile(r"(Store__details|details|info|column|Store__info)", re.I)) or [soup]
     for blk in blocks:
         for ln in [t.strip() for t in blk.find_all(string=True) if t and t.strip()]:
@@ -194,7 +230,7 @@ def build_web_entries() -> Dict[str, Dict[str, Optional[str]]]:
                 entries[nm] = {"address": addr, "href": href}
         except Exception:
             pass
-        time.sleep(0.5)
+        time.sleep(0.4)
     return entries
 
 # ---------------- DB ----------------
@@ -272,13 +308,12 @@ def backfill_only_flow(web_entries: Dict[str, Dict[str, Optional[str]]]):
         addr_db  = r.get("address")
 
         lat = lon = None
-
         lt, ln, q = parse_coords_or_query_from_maps(href)
         if lt and ln:
             lat, lon = lt, ln
         else:
             query = addr_db or addr_web or f"{name}, Estonia"
-            lat, lon = geocode(query)
+            lat, lon = geocode(query, name_for_fallback=name)
 
         if DRY_RUN:
             print(f"[DRY] {name}: addr_db='{addr_db}' | addr_web='{addr_web}' | latlon={lat, lon}")
@@ -289,7 +324,7 @@ def backfill_only_flow(web_entries: Dict[str, Dict[str, Optional[str]]]):
                 print(f"[OK] {name} ← ({lat:.6f},{lon:.6f})")
             else:
                 print(f"[MISS] {name} — still no coordinates")
-        time.sleep(0.6)
+        time.sleep(0.5)
 
     print(f"Backfill done. Updated {updated}/{len(rows)}.")
 
@@ -308,13 +343,13 @@ def full_seed_flow(web_entries: Dict[str, Dict[str, Optional[str]]]):
             lat, lon = lt, ln
         else:
             query = addr or q or f"{name}, Estonia"
-            lat, lon = geocode(query)
+            lat, lon = geocode(query, name_for_fallback=name)
 
         if DRY_RUN:
             print(f"[DRY] {name}: addr='{addr}' | latlon={lat, lon}")
         else:
             upsert_physical(name, addr, lat, lon)
-        time.sleep(0.6)
+        time.sleep(0.5)
     print("Seed/refresh complete.")
 
 # ---------------- main ----------------
