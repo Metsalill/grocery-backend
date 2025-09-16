@@ -65,11 +65,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Quietly skip extra matrix jobs (keeps logs obvious & saves minutes)
+      # Skip extra matrix jobs beyond requested shard count
       - name: Skip extra shards
         if: ${{ matrix.shard_index >= (github.event_name == 'workflow_dispatch' && fromJSON(inputs.shards) || 1) }}
-        run: |
-          echo "Skipping shard ${{ matrix.shard_index }} (only ${{ github.event_name == 'workflow_dispatch' && inputs.shards || '1' }} requested)."
+        run: echo "Skipping shard ${{ matrix.shard_index }}."
 
       - name: Set up Python
         if: ${{ matrix.shard_index < (github.event_name == 'workflow_dispatch' && fromJSON(inputs.shards) || 1) }}
@@ -87,7 +86,7 @@ jobs:
       - name: Choose DB URL (prefer PUBLIC)
         if: ${{ matrix.shard_index < (github.event_name == 'workflow_dispatch' && fromJSON(inputs.shards) || 1) }}
         env:
-          DATABASE_URL_PUBLIC: ${{ secrets.DATABASE_URL_PUBLIC }}
+          DATABASE_URL_PUBLIC:  ${{ secrets.DATABASE_URL_PUBLIC }}
           DATABASE_URL_PRIVATE: ${{ secrets.DATABASE_URL }}
         run: |
           if [ -n "${DATABASE_URL_PUBLIC:-}" ]; then
@@ -150,22 +149,23 @@ jobs:
           sed -e 's/\r$//' -i "$CATS_ALL"
 
           echo "=== Categories file ==="
-          cat "$CATS_ALL"
+          cat "$CATS_ALL" || true
           echo "======================="
 
       - name: Run Coop crawler (sharded)
         if: ${{ matrix.shard_index < (github.event_name == 'workflow_dispatch' && fromJSON(inputs.shards) || 1) }}
         env:
           REGION_URL:  ${{ inputs.region }}
-          PAGE_LIMIT:  ${{ github.event_name == 'workflow_dispatch' && inputs.page_limit  || '0' }}
-          MAX_PRODUCTS:${{ github.event_name == 'workflow_dispatch' && inputs.max_products || '0' }}
-          HEADLESS:    ${{ github.event_name == 'workflow_dispatch' && inputs.headless    || '1' }}
-          REQ_DELAY:   ${{ github.event_name == 'workflow_dispatch' && inputs.req_delay   || '0.5' }}
-          PDP_WORKERS: ${{ github.event_name == 'workflow_dispatch' && inputs.pdp_workers || '4' }}
-          SHARD_COUNT: ${{ github.event_name == 'workflow_dispatch' && inputs.shards      || '1' }}
+          PAGE_LIMIT:  ${{ github.event_name == 'workflow_dispatch' && inputs.page_limit   || '0' }}
+          MAX_PRODUCTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_products || '0' }}
+          HEADLESS:    ${{ github.event_name == 'workflow_dispatch' && inputs.headless     || '1' }}
+          REQ_DELAY:   ${{ github.event_name == 'workflow_dispatch' && inputs.req_delay    || '0.5' }}
+          PDP_WORKERS: ${{ github.event_name == 'workflow_dispatch' && inputs.pdp_workers  || '4' }}
+          SHARD_COUNT: ${{ github.event_name == 'workflow_dispatch' && inputs.shards       || '1' }}
           COOP_UPSERT_DB: ${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}
         run: |
           set -euo pipefail
+          echo ">> running shard ${{ matrix.shard_index }} of $SHARD_COUNT"
           python scripts/coop_crawl_categories_pw.py \
             --region "$REGION_URL" \
             --categories-file "coop_categories.txt" \
