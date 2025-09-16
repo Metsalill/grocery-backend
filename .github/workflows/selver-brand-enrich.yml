@@ -1,14 +1,6 @@
 name: "Selver → Brand Enrichment (PDP, structured only)"
 
 on:
-  # Every ~90 minutes using two crons (GitHub doesn't support */90):
-  # - 00 at 0,3,6,9,12,15,18,21
-  # - 30 at 1,4,7,10,13,16,19,22
-  schedule:
-    - cron: "0 0-23/3 * * *"
-    - cron: "30 1-23/3 * * *"
-    # Plus a weekly Sunday sanity run at 03:29 UTC
-    - cron: "29 3 * * 0"
   workflow_dispatch:
     inputs:
       max_items:
@@ -84,7 +76,8 @@ jobs:
           # Convert minutes→seconds for the script and soft-limit the whole step
           export TIMEBOX_SECONDS=$(( TIMEBOX_MINUTES * 60 ))
 
-          # Soft stop at timebox, allow 120s to wrap up; treat common timeout codes as success
+          # Run with a soft SIGINT at the timebox and give 120s to wrap up.
+          # Then normalize expected timeout exit codes to success so later steps run.
           set +e
           timeout --signal=SIGINT --kill-after=120s ${TIMEBOX_MINUTES}m \
             python scripts/selver_brand_enrich_pw.py
@@ -100,7 +93,6 @@ jobs:
       - name: Post-run stats
         run: |
           sudo apt-get update && sudo apt-get install -y postgresql-client
-
           echo "Missing Selver candidate brands overall:"
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
           SELECT COUNT(*) AS missing_brand
