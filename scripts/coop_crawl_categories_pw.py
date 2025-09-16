@@ -3,22 +3,19 @@
 """
 Coop eCoop (multi-region) category crawler → PDP extractor → CSV/DB-friendly
 
-What this does
-- Crawls category pages with Playwright (handles JS/lazy-load).
-- Extracts title, brand, manufacturer, image, price, EAN/GTIN (from JSON-LD,
-  spec tables, legacy “Tootekood”, or by clicking “Toote info” modal on new UI).
-- Writes CSV (always) and optionally upserts to Postgres if COOP_UPSERT_DB=1.
+- Playwright crawl of category pages (handles JS/lazy-load)
+- PDP extraction: name, brand, manufacturer, image, price (ignores €/kg/€/l/€/tk),
+  EAN/GTIN (JSON-LD, spec tables, legacy “Tootekood”, modal “Toote info”)
+- CSV always; optional Postgres upsert if COOP_UPSERT_DB=1
 
-Important DB alignment (your Railway schema)
-- Upsert target: public.staging_coop_products with PRIMARY KEY (store_host, ext_id)
-  and columns:
-    store_host, ext_id, name, brand, manufacturer, ean_raw, ean_norm,
-    size_text, price, currency, image_url, url, scraped_at (default now()).
-- We derive store_host from --region (e.g., https://coophaapsalu.ee → 'coophaapsalu.ee').
+DB shape expected (Railway):
+  public.staging_coop_products with PRIMARY KEY (store_host, ext_id)
+  columns: store_host, ext_id, name, brand, manufacturer, ean_raw, ean_norm,
+           size_text, price, currency, image_url, url, scraped_at default now().
 
-Notes
-- Region base is configurable via --region (e.g., https://coophaapsalu.ee or https://vandra.ecoop.ee).
-- Some regions do not expose EAN/GTIN; we still record price by ext_id/url.
+Sharding:
+  --cat-shards N  (total shards)
+  --cat-index  i  (0-based index of this shard)
 """
 
 import argparse
@@ -59,34 +56,26 @@ def normalize_ean(e: Optional[str]) -> Optional[str]:
     d = clean_digits(e)
     if len(d) in (8, 12, 13, 14):
         if len(d) == 14 and d.startswith("0"):
-            d = d[1:]               # strip logistics 0
+            d = d[1:]
         if len(d) == 12:
-            d = "0" + d            # UPC-A → EAN-13
+            d = "0" + d
         return d
     return None
 
-def build_ext_id(url: str, ld: Dict, ean_norm: Optional[str]) -> str:
-    """
-    Always return a stable ext_id.
-    Order: numeric id in URL → slug in URL → JSON-LD sku/productID/mpn →
-           normalized EAN (prefixed) → short sha1 of URL.
-    """
+def stable_ext_id(url: str, ld: Dict, ean_norm: Optional[str]) -> str:
+    """Return a stable ext_id (never empty)."""
     m = re.search(r"/toode/(\d+)(?:[/?#]|$)", url)
     if m:
         return m.group(1)
-
     m = re.search(r"/toode/([^/?#]+)", url)
     if m:
         return m.group(1).lower()
-
     for k in ("sku", "productID", "mpn"):
         v = ld.get(k)
         if v:
             return str(v)
-
     if ean_norm:
         return f"ean-{ean_norm}"
-
     return "u" + hashlib.sha1(url.encode("utf-8")).hexdigest()[:12]
 
 # ---------- page utilities ----------
@@ -114,13 +103,13 @@ async def collect_category_product_links(page: Page, category_url: str, page_lim
     stable_rounds = 0
     max_stable = 3
 
-    for _ in range(1000):  # safety
+    for _ in range(1000):
         links = await page.eval_on_selector_all('a[href*="/toode/"]', "els => els.map(e => e.href)")
         for u in links:
             seen.add(u.split('#')[0])
 
         clicked = False
-        for sel in ['button:has-text("Lae veel")', 'button:has-text("Näita rohkem")', '[data-testid="load-more"]']:
+        for sel in ['button:has-text("Lae veel")','button:has-text("Näita rohkem")','[data-testid="load-more"]']:
             try:
                 btn = page.locator(sel)
                 if await btn.count() > 0:
@@ -159,7 +148,7 @@ async def parse_json_ld(page: Page) -> Dict:
                 continue
             items = obj if isinstance(obj, list) else [obj]
             for it in items:
-                if isinstance(it, dict) and (it.get("@type") in ("Product", "Schema:Product", "schema:Product") or "offers" in it):
+                if isinstance(it, dict) and (it.get("@type") in ("Product","Schema:Product","schema:Product") or "offers" in it):
                     data.update(it)
     except Exception:
         pass
@@ -171,41 +160,25 @@ PRICE_TOKEN = re.compile(r"(\d+(?:[.,]\d{1,2})?)\s*€", re.U)
 
 def looks_like_unit_price(text: str) -> bool:
     t = (text or "").strip().lower()
-    # exclude explicit per-unit strings
-    if "/" in t:
-        return True
-    for token in ("€/kg", "€/l", "€/tk", "€ / kg", "€ / l", "€ / tk"):
-        if token in t:
-            return True
-    return False
+    return "/" in t or any(x in t for x in ("€/kg","€/l","€/tk","€ / kg","€ / l","€ / tk"))
 
 async def extract_visible_price(page: Page) -> Optional[float]:
-    """Pick the main price: ignore any node whose text contains '/' (€/kg, €/l, €/tk)."""
+    """Pick main price; ignore unit-prices like 0,02 €/tk."""
     candidates: List[Tuple[float, str]] = []
-    selectors = [
-        '[data-testid="product-price"]',
-        '.product-price', '.price', '.current-price', '[class*="price"]'
-    ]
+    selectors = ['[data-testid="product-price"]','.product-price','.price','.current-price','[class*="price"]']
     for sel in selectors:
         try:
             locs = page.locator(sel)
             n = await locs.count()
             for i in range(min(n, 10)):
-                try:
-                    txt = await locs.nth(i).inner_text()
-                except Exception:
-                    continue
+                txt = await locs.nth(i).inner_text()
                 if not txt or looks_like_unit_price(txt):
                     continue
                 m = PRICE_TOKEN.search(txt.replace("\xa0", " "))
                 if m:
-                    try:
-                        candidates.append((float(m.group(1).replace(",", ".")), txt))
-                    except Exception:
-                        pass
+                    candidates.append((float(m.group(1).replace(",", ".")), txt))
         except Exception:
             pass
-
     if not candidates:
         try:
             all_txt = await page.locator("xpath=//*[contains(., '€')]").all_inner_texts()
@@ -214,27 +187,16 @@ async def extract_visible_price(page: Page) -> Optional[float]:
                     continue
                 m = PRICE_TOKEN.search(txt.replace("\xa0", " "))
                 if m:
-                    try:
-                        candidates.append((float(m.group(1).replace(",", ".")), txt))
-                    except Exception:
-                        pass
+                    candidates.append((float(m.group(1).replace(",", ".")), txt))
         except Exception:
             pass
-
     if not candidates:
         return None
-    # choose the highest non-unit price (main price is typically larger than per-unit price)
     return max(candidates, key=lambda x: x[0])[0]
 
 # ---------- PDP extraction ----------
 
 async def detect_variant(page: Page) -> str:
-    """
-    Best-effort PDP variant detector:
-    - 'ecoop-legacy' (e.g., Haapsalu) shows 'Tootekood' inline.
-    - 'ecoop-new' often has 'Toote info' which reveals GTIN in a modal.
-    - 'generic' fallback.
-    """
     host = (await page.evaluate("location.host")) or ""
     html = (await page.content()) or ""
     if "coophaapsalu.ee" in host or "Tootekood" in html:
@@ -244,7 +206,6 @@ async def detect_variant(page: Page) -> str:
     return "generic"
 
 async def extract_from_modal_gtin(page: Page) -> Optional[str]:
-    """Click 'Toote info' and try to read GTIN from the opened sheet/modal."""
     try:
         btn = page.locator("text=Toote info")
         if await btn.count() == 0:
@@ -291,7 +252,7 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
 
     ld = await parse_json_ld(page)
 
-    # Brand / Manufacturer from JSON-LD if present
+    # Brand / Manufacturer
     brand = None
     manufacturer = None
     if isinstance(ld.get("brand"), dict):
@@ -308,7 +269,6 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
     if isinstance(offers, dict):
         price = offers.get("price") or offers.get("priceSpecification", {}).get("price")
         currency = offers.get("priceCurrency") or offers.get("priceSpecification", {}).get("priceCurrency")
-
     if price is None:
         price = await extract_visible_price(page)
     if not currency:
@@ -379,7 +339,7 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
 
     # ext_id (never empty)
     ean_norm = normalize_ean(ean_raw)
-    ext_id = build_ext_id(url, ld, ean_norm)
+    ext_id = stable_ext_id(url, ld, ean_norm)
 
     return {
         "chain": "Coop",
@@ -456,7 +416,7 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
     try:
         import asyncpg  # type: ignore
     except Exception:
-        print("[warn] asyncpg not installed; skipping DB upsert")
+        print("[warn] asyncpg not installed; skipping DB upsert]")
         return
 
     table = "staging_coop_products"
@@ -488,11 +448,7 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
               scraped_at = now();
         """
         payload = []
-        skipped = 0
         for r in rows:
-            if not r.get("ext_id"):
-                skipped += 1
-                continue
             payload.append((
                 r.get("store_host"),
                 r.get("ext_id"),
@@ -507,30 +463,23 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
                 r.get("image_url"),
                 r.get("url"),
             ))
-        if not payload:
-            print("[warn] No rows with ext_id — skipped DB upsert")
-            return
         await conn.executemany(stmt, payload)
-        msg = f"[ok] Upserted {len(payload)} rows into {table}"
-        if skipped:
-            msg += f" (skipped {skipped} without ext_id)"
-        print(msg)
+        print(f"[ok] Upserted {len(payload)} rows into {table}")
     finally:
         await conn.close()
 
-# ---------- router (blocking heavy 3rd parties) ----------
+# ---------- router ----------
 
 async def _route_filter(route):
     try:
         req = route.request
-        # Trim heavy resource types as well
         if req.resource_type in ("image", "media", "font"):
             return await route.abort()
         url = req.url
         if any(h in url for h in [
-            "googletagmanager.com", "google-analytics.com", "doubleclick.net",
-            "facebook.net", "connect.facebook.net", "hotjar", "fullstory",
-            "cdn.segment.com", "intercom",
+            "googletagmanager.com","google-analytics.com","doubleclick.net",
+            "facebook.net","connect.facebook.net","hotjar","fullstory",
+            "cdn.segment.com","intercom",
         ]):
             return await route.abort()
         return await route.continue_()
@@ -540,7 +489,6 @@ async def _route_filter(route):
         except Exception:
             return
 
-# wrapper handler so we can await registration
 async def _route_handler(route):
     await _route_filter(route)
 
@@ -567,6 +515,15 @@ async def run(args):
         return base + u
 
     categories = [norm_url(u) for u in categories]
+
+    # sharding slice (if requested)
+    if args.cat_shards > 1:
+        if args.cat_index < 0 or args.cat_index >= args.cat_shards:
+            print(f"[error] --cat-index must be in [0, {args.cat_shards-1}]")
+            sys.exit(2)
+        categories = [u for i, u in enumerate(categories) if i % args.cat_shards == args.cat_index]
+        print(f"[shard] Using {len(categories)} categories for shard {args.cat_index}/{args.cat_shards}")
+
     store_host = urlparse(args.region).netloc.lower()
 
     async with async_playwright() as pw:
@@ -608,6 +565,9 @@ def parse_args():
     p.add_argument("--headless", default="1", help="1/0 headless")
     p.add_argument("--req-delay", type=float, default=0.5, help="Seconds between ops")
     p.add_argument("--pdp-workers", type=int, default=4, help="Concurrent PDP tabs per category")
+    # sharding
+    p.add_argument("--cat-shards", type=int, default=1, help="Total number of category shards")
+    p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
     p.add_argument("--out", default="out/coop_products.csv", help="CSV file or output directory")
     return p.parse_args()
 
