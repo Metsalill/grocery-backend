@@ -468,22 +468,23 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
             print(f"[info] Table {table} does not exist → skipping DB upsert. (Create it manually.)")
             return
 
+        # IMPORTANT: do not overwrite existing good values with NULLs
         stmt = f"""
             INSERT INTO {table}
               (store_host, ext_id, name, brand, manufacturer, ean_raw, ean_norm, size_text, price, currency, image_url, url)
             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
             ON CONFLICT (store_host, ext_id) DO UPDATE SET
-              name = EXCLUDED.name,
-              brand = EXCLUDED.brand,
-              manufacturer = EXCLUDED.manufacturer,
-              ean_raw = EXCLUDED.ean_raw,
-              ean_norm = EXCLUDED.ean_norm,
-              size_text = EXCLUDED.size_text,
-              price = EXCLUDED.price,
-              currency = EXCLUDED.currency,
-              image_url = EXCLUDED.image_url,
-              url = EXCLUDED.url,
-              scraped_at = now();
+              name         = COALESCE(EXCLUDED.name,         {table}.name),
+              brand        = COALESCE(EXCLUDED.brand,        {table}.brand),
+              manufacturer = COALESCE(EXCLUDED.manufacturer, {table}.manufacturer),
+              ean_raw      = COALESCE(EXCLUDED.ean_raw,      {table}.ean_raw),
+              ean_norm     = COALESCE(EXCLUDED.ean_norm,     {table}.ean_norm),
+              size_text    = COALESCE(EXCLUDED.size_text,    {table}.size_text),
+              price        = COALESCE(EXCLUDED.price,        {table}.price),
+              currency     = COALESCE(EXCLUDED.currency,     {table}.currency),
+              image_url    = COALESCE(EXCLUDED.image_url,    {table}.image_url),
+              url          = COALESCE(EXCLUDED.url,          {table}.url),
+              scraped_at   = now();
         """
 
         payload = []
