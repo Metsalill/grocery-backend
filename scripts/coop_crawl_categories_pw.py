@@ -9,16 +9,16 @@ What this does
   spec tables, legacy “Tootekood”, or by clicking “Toote info” modal on new UI).
 - Writes CSV (always) and optionally upserts to Postgres if COOP_UPSERT_DB=1.
 
-DB alignment (Railway)
-- Target table: public.staging_coop_products
-- PRIMARY KEY (store_host, ext_id)
-- Columns: store_host, ext_id, name, brand, manufacturer, ean_raw, ean_norm,
-           size_text, price, currency, image_url, url, scraped_at (default now()).
+Important DB alignment (your Railway schema)
+- Upsert target: public.staging_coop_products with PRIMARY KEY (store_host, ext_id)
+  and columns:
+    store_host, ext_id, name, brand, manufacturer, ean_raw, ean_norm,
+    size_text, price, currency, image_url, url, scraped_at (default now()).
+- We derive store_host from --region (e.g., https://coophaapsalu.ee → 'coophaapsalu.ee').
 
 Notes
-- store_host is derived from --region (e.g. https://coophaapsalu.ee → coophaapsalu.ee).
-- Supports category sharding via --cat-shards / --cat-index.
-- Blocks heavy trackers (and images/fonts) to speed up.
+- Region base is configurable via --region (e.g., https://coophaapsalu.ee or https://vandra.ecoop.ee).
+- Some regions do not expose EAN/GTIN; we still record price by ext_id/url.
 """
 
 import argparse
@@ -30,10 +30,12 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
 from playwright.async_api import async_playwright, Browser, Page
+
+# ---------- regexes & helpers ----------
 
 SIZE_RE = re.compile(r"(\b\d+[\,\.]?\d*\s?(?:kg|g|l|ml|tk|pcs|x|×)\s?\d*\b)", re.IGNORECASE)
 DIGITS_ONLY = re.compile(r"[^0-9]")
@@ -62,6 +64,8 @@ def normalize_ean(e: Optional[str]) -> Optional[str]:
         return d
     return None
 
+# ---------- page utilities ----------
+
 async def wait_cookie_banner(page: Page):
     try:
         for sel in [
@@ -85,7 +89,7 @@ async def collect_category_product_links(page: Page, category_url: str, page_lim
     stable_rounds = 0
     max_stable = 3
 
-    for _ in range(1000):
+    for _ in range(1000):  # safety
         links = await page.eval_on_selector_all('a[href*="/toode/"]', "els => els.map(e => e.href)")
         for u in links:
             seen.add(u.split('#')[0])
@@ -136,6 +140,62 @@ async def parse_json_ld(page: Page) -> Dict:
         pass
     return data
 
+# ---------- price helpers ----------
+
+PRICE_TOKEN = re.compile(r"(\d+[.,]\d{2})\s*€", re.U)
+
+def looks_like_unit_price(text: str) -> bool:
+    t = text.strip().lower()
+    return "/" in t or " /" in t or "€/kg" in t or "€/l" in t or "€/tk" in t or "€ / kg" in t or "€ / l" in t or "€ / tk" in t
+
+async def extract_visible_price(page: Page) -> Optional[float]:
+    """Pick the main price: ignore any node whose text contains '/' (€/kg, €/l, €/tk)."""
+    candidates: List[Tuple[float, str]] = []
+    # Try some likely selectors first
+    selectors = [
+        '[data-testid="product-price"]',
+        '.product-price', '.price', '.current-price', '[class*="price"]'
+    ]
+    for sel in selectors:
+        try:
+            locs = page.locator(sel)
+            n = await locs.count()
+            for i in range(min(n, 8)):
+                txt = await locs.nth(i).inner_text()
+                if not txt or looks_like_unit_price(txt):
+                    continue
+                m = PRICE_TOKEN.search(txt.replace("\xa0", ""))
+                if m:
+                    try:
+                        candidates.append((float(m.group(1).replace(",", ".")), txt))
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
+    # Broad fallback: scan all text nodes that contain €
+    if not candidates:
+        try:
+            all_txt = await page.locator("xpath=//*[contains(., '€')]").all_inner_texts()
+            for txt in all_txt[:50]:
+                if not txt or looks_like_unit_price(txt):
+                    continue
+                m = PRICE_TOKEN.search(txt.replace("\xa0", ""))
+                if m:
+                    try:
+                        candidates.append((float(m.group(1).replace(",", ".")), txt))
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
+    if not candidates:
+        return None
+    # Pick the highest value among non-unit candidates (usually the main price > unit price like 0.02 €/tk)
+    return max(candidates, key=lambda x: x[0])[0]
+
+# ---------- PDP extraction ----------
+
 async def detect_variant(page: Page) -> str:
     host = (await page.evaluate("location.host")) or ""
     html = (await page.content()) or ""
@@ -175,6 +235,7 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
     await wait_cookie_banner(page)
     await page.wait_for_timeout(int(req_delay * 1000))
 
+    # Name
     name = None
     for sel in ["h1", '[data-testid="product-title"]', "article h1"]:
         try:
@@ -189,6 +250,7 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
 
     ld = await parse_json_ld(page)
 
+    # Brand / Manufacturer from JSON-LD if present
     brand = None
     manufacturer = None
     if isinstance(ld.get("brand"), dict):
@@ -198,6 +260,7 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
     if isinstance(ld.get("manufacturer"), dict):
         manufacturer = ld["manufacturer"].get("name")
 
+    # Price & currency
     price = None
     currency = None
     offers = ld.get("offers")
@@ -206,17 +269,11 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
         currency = offers.get("priceCurrency") or offers.get("priceSpecification", {}).get("priceCurrency")
 
     if price is None:
-        try:
-            ptxt = await page.locator("xpath=(//*[contains(., '€') or contains(., ' EUR')])[1]").first.text_content()
-            if ptxt:
-                pnum = re.findall(r"[\d\.,]+", ptxt.replace("\xa0", ""))
-                if pnum:
-                    price = float(pnum[0].replace(",", "."))
-        except Exception:
-            pass
+        price = await extract_visible_price(page)
     if not currency:
         currency = "EUR"
 
+    # Image
     image_url = None
     try:
         if ld.get("image"):
@@ -226,6 +283,7 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
     except Exception:
         pass
 
+    # EAN/GTIN
     ean_raw = None
     for key in ["gtin13", "gtin", "gtin8", "gtin12"]:
         if ld.get(key):
@@ -271,38 +329,30 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
         except Exception:
             pass
 
+    # Size from name
     size_text = None
     if name:
         m = SIZE_RE.search(name)
         if m:
             size_text = m.group(1)
 
+    # ext_id: numeric id → else slug after /toode/  → else json-ld sku/productID/mpn → else EAN
     ext_id = None
     m = re.search(r"/toode/(\d+)", url)
     if m:
         ext_id = m.group(1)
-
-    try:
-        if not brand:
-            loc = page.locator(
-                "xpath=//dt[normalize-space()[contains(., 'Kaubamärk') or contains(., 'Bränd') or contains(., 'Brand')]]/following-sibling::dd[1]"
-                " | //tr[th[normalize-space()[contains(., 'Kaubamärk') or contains(., 'Bränd') or contains(., 'Brand')]]]/td[1]"
-            )
-            if await loc.count() > 0:
-                txt = await loc.first.text_content()
-                if txt:
-                    brand = txt.strip()
-        if not manufacturer:
-            locm = page.locator(
-                "xpath=//dt[normalize-space()[contains(., 'Tootja') or contains(., 'Valmistaja')]]/following-sibling::dd[1]"
-                " | //tr[th[normalize-space()[contains(., 'Tootja') or contains(., 'Valmistaja')]]]/td[1]"
-            )
-            if await locm.count() > 0:
-                txtm = await locm.first.text_content()
-                if txtm:
-                    manufacturer = txtm.strip()
-    except Exception:
-        pass
+    if not ext_id:
+        m2 = re.search(r"/toode/([^/?#]+)/?", url)
+        if m2:
+            ext_id = m2.group(1)
+    if not ext_id:
+        for k in ("sku", "productID", "mpn"):
+            v = ld.get(k)
+            if v:
+                ext_id = str(v)
+                break
+    if not ext_id and ean_raw:
+        ext_id = normalize_ean(ean_raw)
 
     return {
         "chain": "Coop",
@@ -320,6 +370,8 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
         "image_url": image_url,
         "url": url,
     }
+
+# ---------- category runner ----------
 
 async def process_category(browser: Browser, category_url: str, page_limit: int, req_delay: float, pdp_workers: int, max_products: int, store_host: str) -> List[Dict]:
     page = await browser.new_page()
@@ -349,6 +401,8 @@ async def process_category(browser: Browser, category_url: str, page_limit: int,
         if r:
             items.append(r)
     return items
+
+# ---------- outputs ----------
 
 def write_csv(rows: List[Dict], out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -389,6 +443,7 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
             print(f"[info] Table {table} does not exist → skipping DB upsert. (Create it manually.)")
             return
 
+        # composite PK (store_host, ext_id)
         stmt = f"""
             INSERT INTO {table}
               (store_host, ext_id, name, brand, manufacturer, ean_raw, ean_norm, size_text, price, currency, image_url, url)
@@ -406,33 +461,39 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
               url = EXCLUDED.url,
               scraped_at = now();
         """
-        await conn.executemany(
-            stmt,
-            [
-                (
-                    r.get("store_host"),
-                    r.get("ext_id"),
-                    r.get("name"),
-                    r.get("brand"),
-                    r.get("manufacturer"),
-                    r.get("ean_raw"),
-                    r.get("ean_norm"),
-                    r.get("size_text"),
-                    r.get("price"),
-                    r.get("currency"),
-                    r.get("image_url"),
-                    r.get("url"),
-                )
-                for r in rows
-            ],
-        )
-        print(f"[ok] Upserted {len(rows)} rows into {table}")
+        payload = []
+        for r in rows:
+            if not r.get("ext_id"):
+                # don’t try to write broken rows
+                continue
+            payload.append((
+                r.get("store_host"),
+                r.get("ext_id"),
+                r.get("name"),
+                r.get("brand"),
+                r.get("manufacturer"),
+                r.get("ean_raw"),
+                r.get("ean_norm"),
+                r.get("size_text"),
+                r.get("price"),
+                r.get("currency"),
+                r.get("image_url"),
+                r.get("url"),
+            ))
+        if not payload:
+            print("[warn] No rows with ext_id — skipped DB upsert")
+            return
+        await conn.executemany(stmt, payload)
+        print(f"[ok] Upserted {len(payload)} rows into {table}")
     finally:
         await conn.close()
+
+# ---------- router (blocking heavy 3rd parties) ----------
 
 async def _route_filter(route):
     try:
         req = route.request
+        # Trim heavy resource types as well
         if req.resource_type in ("image", "media", "font"):
             return await route.abort()
         url = req.url
@@ -449,7 +510,14 @@ async def _route_filter(route):
         except Exception:
             return
 
+# wrapper handler so we can await registration
+async def _route_handler(route):
+    await _route_filter(route)
+
+# ---------- main ----------
+
 async def run(args):
+    # categories
     categories: List[str] = []
     if args.categories_multiline:
         categories.extend([ln.strip() for ln in args.categories_multiline.splitlines() if ln.strip()])
@@ -459,6 +527,7 @@ async def run(args):
         print("[error] No category URLs provided. Pass --categories-multiline or --categories-file.")
         sys.exit(2)
 
+    # normalize to region
     def norm_url(u: str) -> str:
         if u.startswith("http"):
             return u
@@ -468,14 +537,6 @@ async def run(args):
         return base + u
 
     categories = [norm_url(u) for u in categories]
-
-    if args.cat_shards > 1:
-        if args.cat_index < 0 or args.cat_index >= args.cat_shards:
-            print(f"[error] --cat-index must be in [0, {args.cat_shards-1}]")
-            sys.exit(2)
-        categories = [u for i, u in enumerate(categories) if i % args.cat_shards == args.cat_index]
-        print(f"[shard] Using {len(categories)} categories for shard {args.cat_index}/{args.cat_shards}")
-
     store_host = urlparse(args.region).netloc.lower()
 
     async with async_playwright() as pw:
@@ -486,8 +547,7 @@ async def run(args):
             viewport={"width": 1366, "height": 900},
             java_script_enabled=True,
         )
-        # await registration
-        await context.route("**/*", _route_filter)
+        await context.route("**/*", _route_handler)
 
         all_rows: List[Dict] = []
         try:
@@ -518,8 +578,6 @@ def parse_args():
     p.add_argument("--headless", default="1", help="1/0 headless")
     p.add_argument("--req-delay", type=float, default=0.5, help="Seconds between ops")
     p.add_argument("--pdp-workers", type=int, default=4, help="Concurrent PDP tabs per category")
-    p.add_argument("--cat-shards", type=int, default=1, help="Total number of category shards")
-    p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
     p.add_argument("--out", default="out/coop_products.csv", help="CSV file or output directory")
     return p.parse_args()
 
