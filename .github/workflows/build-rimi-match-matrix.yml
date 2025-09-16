@@ -7,8 +7,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # Use the PUBLIC/EXTERNAL connection string here
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}  # <-- public Railway URL
+      PGSSLMODE: require                                # enforce SSL
     steps:
       - uses: actions/checkout@v4
 
