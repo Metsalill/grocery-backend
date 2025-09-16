@@ -65,17 +65,25 @@ jobs:
       REGION_URL: ${{ inputs.region }}
       CATS_MULTILINE: ${{ inputs.categories_multiline }}
       CATS_FILE_URL: ${{ inputs.categories_file_url }}
-      # when scheduled, force 1 shard + enable upsert
+      # Manual: use requested shards; Scheduled: force 1
       SHARD_COUNT: ${{ github.event_name == 'workflow_dispatch' && inputs.shards || '1' }}
       SHARD_INDEX: ${{ matrix.shard_index }}
-      # choose DB URL (prefer PUBLIC if you have it)
+      # Upsert toggle (auto-on for schedule)
+      COOP_UPSERT_DB: ${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}
+      # DB URLs
       DATABASE_URL_PUBLIC: ${{ secrets.DATABASE_URL_PUBLIC }}
       DATABASE_URL_PRIVATE: ${{ secrets.DATABASE_URL }}
-      COOP_UPSERT_DB: ${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Debug shard selection
+        run: |
+          echo "Shard index: $SHARD_INDEX"
+          echo "Shard count: $SHARD_COUNT"
+          echo "Region: $REGION_URL"
+          echo "Upsert: $COOP_UPSERT_DB"
 
       - name: Set up Python
         if: ${{ matrix.shard_index < fromJSON(env.SHARD_COUNT) }}
@@ -95,7 +103,7 @@ jobs:
         run: |
           curl -fsSL "$CATS_FILE_URL" -o coop_categories.txt
 
-      - name: Choose DB URL (prefer PUBLIC)
+      - name: Select DB URL (PUBLIC preferred)
         if: ${{ matrix.shard_index < fromJSON(env.SHARD_COUNT) }}
         run: |
           if [ -n "$DATABASE_URL_PUBLIC" ]; then
@@ -110,11 +118,11 @@ jobs:
         if: ${{ matrix.shard_index < fromJSON(env.SHARD_COUNT) }}
         shell: bash
         env:
-          PAGE_LIMIT:  ${{ github.event_name == 'schedule' && '0' || inputs.page_limit }}
-          MAX_PRODUCTS:${{ github.event_name == 'schedule' && '0' || inputs.max_products }}
-          HEADLESS:    ${{ github.event_name == 'schedule' && '1' || inputs.headless }}
-          REQ_DELAY:   ${{ github.event_name == 'schedule' && '0.5' || inputs.req_delay }}
-          PDP_WORKERS: ${{ github.event_name == 'schedule' && '4' || inputs.pdp_workers }}
+          PAGE_LIMIT:  ${{ inputs.page_limit }}
+          MAX_PRODUCTS:${{ inputs.max_products }}
+          HEADLESS:    ${{ inputs.headless }}
+          REQ_DELAY:   ${{ inputs.req_delay }}
+          PDP_WORKERS: ${{ inputs.pdp_workers }}
         run: |
           set -euo pipefail
           mkdir -p out
@@ -157,10 +165,9 @@ jobs:
           sed -e 's/\r$//' -i "$CATS_ALL"
 
           echo "=== Categories for shard $SHARD_INDEX / $SHARD_COUNT ==="
-          cat "$CATS_ALL" | nl
+          nl -ba "$CATS_ALL" | sed -n '1,200p'
           echo "======================================================="
 
-          # pass DB & upsert flags via env
           export COOP_UPSERT_DB="${COOP_UPSERT_DB}"
 
           python scripts/coop_crawl_categories_pw.py \
