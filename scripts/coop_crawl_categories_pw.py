@@ -3,13 +3,9 @@
 """
 Coop eCoop (multi-region) category crawler → PDP extractor → CSV/DB-friendly
 
-What this does
 - Crawls category pages with Playwright (handles JS/lazy-load).
-- If a category page is a hub (only subcategory tiles), it will *auto-drill*
-  into subcategories up to --subcat-depth levels and collect products there.
-- Extracts title, brand, manufacturer, image, price, EAN/GTIN (from JSON-LD,
-  spec tables, legacy “Tootekood”, or by clicking “Toote info” modal on new UI).
-- Writes CSV (always) and optionally upserts to Postgres if COOP_UPSERT_DB=1.
+- PDP extraction: title, brand, manufacturer (Tootja), image, price, EAN/GTIN,
+  Tootekood, etc. Writes CSV; optional Postgres upsert.
 
 DB alignment
 - Target table: public.staging_coop_products
@@ -20,7 +16,6 @@ DB alignment
 Notes
 - store_host is derived from --region (e.g. https://coophaapsalu.ee → coophaapsalu.ee).
 - Supports category sharding via --cat-shards / --cat-index for parallel runs.
-- Blocks heavy trackers and images/fonts to speed up.
 """
 
 import argparse
@@ -32,7 +27,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Set
+from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
 from playwright.async_api import async_playwright, Browser, Page
@@ -42,11 +37,12 @@ from playwright.async_api import async_playwright, Browser, Page
 SIZE_RE = re.compile(r"(\b\d+[\,\.]?\d*\s?(?:kg|g|l|ml|tk|pcs|x|×)\s?\d*\b)", re.IGNORECASE)
 DIGITS_ONLY = re.compile(r"[^0-9]")
 
-BRAND_KEYS_ET = ["Kaubamärk", "Bränd", "Brand", "Tootja", "Valmistaja"]
+BRAND_KEYS_ET = ["Kaubamärk", "Bränd", "Brand"]
+MANUF_KEYS_ET = ["Tootja", "Valmistaja"]
 EAN_KEYS_ET = ["Ribakood", "EAN", "Tootekood", "GTIN"]
 
-CTX_EAN = re.compile(r"(?:EAN|Ribakood|Tootekood|GTIN)[^0-9]{0,12}(\d{8,14})", re.IGNORECASE)
-ANY_EAN = re.compile(r"(?<!\d)(\d{8}|\d{12,14})(?!\d)")
+CTX_TA_CODE = re.compile(r"(?:Tootekood)\s*[:\-]?\s*(\d{8,14})", re.IGNORECASE)
+CTX_MANUF   = re.compile(r"(?:Tootja|Valmistaja)\s*[:\-]?\s*([^\n<]{2,120})", re.IGNORECASE)
 
 PRICE_TOKEN = re.compile(r"(\d+[.,]\d{2})\s*€", re.U)
 
@@ -61,19 +57,29 @@ def normalize_ean(e: Optional[str]) -> Optional[str]:
         return None
     d = clean_digits(e)
     if len(d) in (8, 12, 13, 14):
+        # Logistics prefix sometimes makes 14; prefer 13
         if len(d) == 14 and d.startswith("0"):
-            d = d[1:]               # strip logistics 0
+            d = d[1:]
         if len(d) == 12:
-            d = "0" + d            # UPC-A → EAN-13
+            d = "0" + d  # UPC-A → EAN-13
         return d
     return None
 
+def likely_brand_from_name(name: Optional[str]) -> Optional[str]:
+    if not name:
+        return None
+    token = (name or "").strip().split()[0]
+    token = re.sub(r"[^\w\-’'`]+", "", token)
+    if 2 <= len(token) <= 24:
+        return token
+    return None
+
 def looks_like_unit_price(text: str) -> bool:
-    t = text.strip().lower()
+    t = (text or "").strip().lower()
     return (
         "/" in t
         or "€/kg" in t or "€ / kg" in t
-        or "€/l" in t or "€ / l" in t
+        or "€/l"  in t or "€ / l"  in t
         or "€/tk" in t or "€ / tk" in t
     )
 
@@ -94,9 +100,11 @@ async def wait_cookie_banner(page: Page):
     except Exception:
         pass
 
-async def _scroll_and_collect_products(page: Page, page_limit: int, req_delay: float) -> List[str]:
-    """Scroll a category page and collect /toode/ links."""
-    seen: Set[str] = set()
+async def collect_category_product_links(page: Page, category_url: str, page_limit: int, req_delay: float) -> List[str]:
+    await page.goto(category_url, wait_until="domcontentloaded")
+    await wait_cookie_banner(page)
+
+    seen = set()
     stable_rounds = 0
     max_stable = 3
 
@@ -132,62 +140,7 @@ async def _scroll_and_collect_products(page: Page, page_limit: int, req_delay: f
         if page_limit > 0 and after >= page_limit:
             break
 
-    out = list(seen)
-    if page_limit > 0:
-        out = out[:page_limit]
-    return out
-
-async def collect_category_product_links(
-    page: Page,
-    category_url: str,
-    page_limit: int,
-    req_delay: float,
-    subcat_depth: int,
-    seen_cats: Optional[Set[str]] = None,
-) -> List[str]:
-    """
-    Collect `/toode/` links from a category page. If none are found and
-    `subcat_depth > 0`, follow `/tootekategooria/` subcategories (once per level).
-    """
-    if seen_cats is None:
-        seen_cats = set()
-    if category_url in seen_cats:
-        return []
-    seen_cats.add(category_url)
-
-    await page.goto(category_url, wait_until="domcontentloaded")
-    await wait_cookie_banner(page)
-
-    # First, try to collect products on this page.
-    product_urls = set(await _scroll_and_collect_products(page, page_limit, req_delay))
-    if product_urls or subcat_depth <= 0:
-        return list(product_urls)[: page_limit or None]
-
-    # No products → this looks like a hub page. Follow subcategories.
-    subcats = await page.eval_on_selector_all(
-        'a[href*="/tootekategooria/"]',
-        "els => els.map(e => e.href.split('#')[0])"
-    )
-    # Deduplicate while preserving order
-    subcats = list(dict.fromkeys(subcats))
-
-    out: List[str] = []
-    for sc in subcats:
-        if sc in seen_cats:
-            continue
-        p2 = await page.context.new_page()
-        try:
-            links = await collect_category_product_links(
-                p2, sc, page_limit if page_limit > 0 else 0, req_delay, subcat_depth - 1, seen_cats
-            )
-            out.extend(links)
-        finally:
-            await p2.close()
-        if page_limit > 0 and len(out) >= page_limit:
-            out = out[:page_limit]
-            break
-
-    return out
+    return list(seen)
 
 async def parse_json_ld(page: Page) -> Dict:
     data: Dict = {}
@@ -201,7 +154,10 @@ async def parse_json_ld(page: Page) -> Dict:
             items = obj if isinstance(obj, list) else [obj]
             for it in items:
                 if isinstance(it, dict) and (it.get("@type") in ("Product", "Schema:Product", "schema:Product") or "offers" in it):
-                    data.update(it)
+                    # Merge but don't overwrite meaningful keys if already set
+                    for k, v in it.items():
+                        if k not in data and v:
+                            data[k] = v
     except Exception:
         pass
     return data
@@ -219,7 +175,7 @@ async def extract_visible_price(page: Page) -> Optional[float]:
         try:
             locs = page.locator(sel)
             n = await locs.count()
-            for i in range(min(n, 8)):
+            for i in range(min(n, 10)):
                 txt = await locs.nth(i).inner_text()
                 if not txt or looks_like_unit_price(txt):
                     continue
@@ -232,10 +188,11 @@ async def extract_visible_price(page: Page) -> Optional[float]:
         except Exception:
             pass
 
+    # Broad fallback across the page but still skip unit price lines
     if not candidates:
         try:
             all_txt = await page.locator("xpath=//*[contains(., '€')]").all_inner_texts()
-            for txt in all_txt[:50]:
+            for txt in all_txt[:100]:
                 if not txt or looks_like_unit_price(txt):
                     continue
                 m = PRICE_TOKEN.search(txt.replace("\xa0", ""))
@@ -249,50 +206,39 @@ async def extract_visible_price(page: Page) -> Optional[float]:
 
     if not candidates:
         return None
-    # choose the highest non-unit price (main price usually > unit price like 0,02 €/tk)
+    # Pick the highest among non-unit candidates (main price usually > unit price like 0.02 €/tk)
     return max(candidates, key=lambda x: x[0])[0]
 
 # ---------- PDP extraction ----------
 
-async def detect_variant(page: Page) -> str:
-    """
-    Best-effort PDP variant detector:
-    - 'ecoop-legacy' (e.g., Haapsalu) shows 'Tootekood' inline.
-    - 'ecoop-new' often has 'Toote info' which reveals GTIN in a modal.
-    - 'generic' fallback.
-    """
-    host = (await page.evaluate("location.host")) or ""
-    html = (await page.content()) or ""
-    if "coophaapsalu.ee" in host or "Tootekood" in html:
-        return "ecoop-legacy"
-    if "Toote info" in html or "GTIN" in html:
-        return "ecoop-new"
-    return "generic"
-
-async def extract_from_modal_gtin(page: Page) -> Optional[str]:
+async def extract_text_after_label(page: Page, label: str) -> Optional[str]:
+    """Find text following a visible label like 'Tootekood:' or 'Tootja:'."""
     try:
-        btn = page.locator("text=Toote info")
-        if await btn.count() == 0:
-            return None
-        await btn.first.click()
-        await page.wait_for_timeout(400)
-        val = await page.locator(
-            "xpath=(//*[self::td or self::dd or self::div][contains(normalize-space(.), 'GTIN')]/following-sibling::*[1])[1]"
-        ).first.text_content()
-        if val:
-            return val.strip()
-        txt = await page.content()
-        m = CTX_EAN.search(txt)
-        return m.group(1) if m else None
+        # Try simple "label : value" pattern in a single node
+        nodes = page.locator(f"xpath=//*[contains(normalize-space(.), '{label}')]")
+        n = await nodes.count()
+        for i in range(min(n, 8)):
+            html = await nodes.nth(i).inner_html()
+            txt  = await nodes.nth(i).inner_text()
+            # 1) direct "Label: value"
+            m = re.search(rf"{re.escape(label)}\s*[:\-]?\s*([^\n<]{{2,120}})", txt, flags=re.I)
+            if m:
+                return m.group(1).strip()
+            # 2) label node followed by sibling with value
+            sib = await nodes.nth(i).evaluate_handle("el => el.nextElementSibling && el.nextElementSibling.textContent")
+            try:
+                sval = await sib.json_value()
+                if sval and isinstance(sval, str) and sval.strip():
+                    return sval.strip()
+            except Exception:
+                pass
+            # 3) look for first text node after the label within HTML
+            m2 = re.search(rf"{re.escape(label)}\s*[:\-]?\s*</[^>]+>\s*([^<]{{2,120}})", html or "", flags=re.I)
+            if m2:
+                return m2.group(1).strip()
     except Exception:
-        return None
-    finally:
-        try:
-            close_btn = page.locator("button:has-text('✕'), button[aria-label='Close'], [data-testid='close']")
-            if await close_btn.count() > 0:
-                await close_btn.first.click()
-        except Exception:
-            pass
+        pass
+    return None
 
 async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -> Dict:
     await page.goto(url, wait_until="domcontentloaded")
@@ -314,15 +260,35 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
 
     ld = await parse_json_ld(page)
 
-    # Brand / Manufacturer from JSON-LD if present
+    # Brand / Manufacturer
     brand = None
     manufacturer = None
     if isinstance(ld.get("brand"), dict):
         brand = ld["brand"].get("name")
     elif isinstance(ld.get("brand"), (str, int)):
-        brand = str(ld["brand"])
+        brand = str(ld["brand"]).strip() or None
     if isinstance(ld.get("manufacturer"), dict):
         manufacturer = ld["manufacturer"].get("name")
+
+    # Manufacturer from page (Tootja / Valmistaja)
+    if not manufacturer:
+        # 1) dedicated helper using DOM relations
+        manufacturer = await extract_text_after_label(page, "Tootja")
+        if not manufacturer:
+            manufacturer = await extract_text_after_label(page, "Valmistaja")
+        # 2) text-wide regex fallback
+        if not manufacturer:
+            try:
+                full = await page.inner_text("body")
+                m = CTX_MANUF.search(full or "")
+                if m:
+                    manufacturer = m.group(1).strip()
+            except Exception:
+                pass
+
+    # Brand heuristic fallback
+    if not brand:
+        brand = likely_brand_from_name(name) or manufacturer
 
     # Price & currency
     price = None
@@ -331,7 +297,6 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
     if isinstance(offers, dict):
         price = offers.get("price") or offers.get("priceSpecification", {}).get("price")
         currency = offers.get("priceCurrency") or offers.get("priceSpecification", {}).get("priceCurrency")
-
     if price is None:
         price = await extract_visible_price(page)
     if not currency:
@@ -347,17 +312,29 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
     except Exception:
         pass
 
-    # EAN/GTIN
+    # EAN/GTIN / Tootekood
     ean_raw = None
-    for key in ["gtin13", "gtin", "gtin8", "gtin12"]:
-        if ld.get(key):
-            ean_raw = str(ld[key])
-            break
+    # 1) Prefer Tootekood in any form
+    val = await extract_text_after_label(page, "Tootekood")
+    if not val:
+        try:
+            body_txt = await page.inner_text("body")
+            m = CTX_TA_CODE.search(body_txt or "")
+            if m:
+                val = m.group(1)
+        except Exception:
+            pass
+    if val:
+        ean_raw = val.strip()
 
-    variant = await detect_variant(page)
-    if not ean_raw and variant == "ecoop-new":
-        ean_raw = await extract_from_modal_gtin(page)
+    # 2) JSON-LD gtin*
+    if not ean_raw:
+        for key in ["gtin13", "gtin", "gtin8", "gtin12"]:
+            if ld.get(key):
+                ean_raw = str(ld[key])
+                break
 
+    # 3) Spec table keys
     if not ean_raw:
         try:
             spec_xpath = (
@@ -374,25 +351,6 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
         except Exception:
             pass
 
-    if not ean_raw and variant == "ecoop-legacy":
-        try:
-            val = await page.locator(
-                "xpath=(//*[contains(normalize-space(.), 'Tootekood')]/following-sibling::*[1])[1]"
-            ).first.text_content()
-            if val:
-                ean_raw = val.strip()
-        except Exception:
-            pass
-
-    if not ean_raw:
-        try:
-            txt = await page.content()
-            m = CTX_EAN.search(txt) or ANY_EAN.search(txt)
-            if m:
-                ean_raw = m.group(1)
-        except Exception:
-            pass
-
     # Size from name
     size_text = None
     if name:
@@ -400,11 +358,14 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
         if m:
             size_text = m.group(1)
 
-    # ext_id: numeric id → slug after /toode/  → json-ld sku/productID/mpn → EAN → last path chunk
+    # ext_id: prefer Tootekood/EAN → numeric id in URL → slug → json-ld sku/productID/mpn → last URL segment
     ext_id = None
-    m = re.search(r"/toode/(\d+)", url)
-    if m:
-        ext_id = m.group(1)
+    if ean_raw and normalize_ean(ean_raw):
+        ext_id = normalize_ean(ean_raw)
+    if not ext_id:
+        m = re.search(r"/toode/(\d+)", url)
+        if m:
+            ext_id = m.group(1)
     if not ext_id:
         m2 = re.search(r"/toode/([^/?#]+)/?", url)
         if m2:
@@ -415,12 +376,8 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
             if v:
                 ext_id = str(v)
                 break
-    if not ext_id and ean_raw:
-        ext_id = normalize_ean(ean_raw)
     if not ext_id:
-        # last URL chunk as ultimate fallback
-        last = url.rstrip("/").split("/")[-1]
-        ext_id = last or None
+        ext_id = url.rstrip("/").split("/")[-1]
 
     return {
         "chain": "Coop",
@@ -441,20 +398,11 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
 
 # ---------- category runner ----------
 
-async def process_category(
-    browser: Browser,
-    category_url: str,
-    page_limit: int,
-    req_delay: float,
-    pdp_workers: int,
-    max_products: int,
-    store_host: str,
-    subcat_depth: int,
-) -> List[Dict]:
+async def process_category(browser: Browser, category_url: str, page_limit: int, req_delay: float, pdp_workers: int, max_products: int, store_host: str) -> List[Dict]:
     page = await browser.new_page()
     items: List[Dict] = []
     try:
-        links = await collect_category_product_links(page, category_url, page_limit, req_delay, subcat_depth)
+        links = await collect_category_product_links(page, category_url, page_limit, req_delay)
         if max_products > 0:
             links = links[:max_products]
     finally:
@@ -589,7 +537,6 @@ async def _route_filter(route):
         except Exception:
             return
 
-# wrapper handler so we can await registration
 async def _route_handler(route):
     await _route_filter(route)
 
@@ -641,11 +588,7 @@ async def run(args):
         try:
             for cat in categories:
                 print(f"[cat] {cat}")
-                rows = await process_category(
-                    context, cat, args.page_limit, args.req_delay,
-                    args.pdp_workers, args.max_products, store_host,
-                    subcat_depth=args.subcat_depth,
-                )
+                rows = await process_category(context, cat, args.page_limit, args.req_delay, args.pdp_workers, args.max_products, store_host)
                 print(f"[info] category rows: {len(rows)}")
                 all_rows.extend(rows)
         finally:
@@ -670,8 +613,6 @@ def parse_args():
     p.add_argument("--headless", default="1", help="1/0 headless")
     p.add_argument("--req-delay", type=float, default=0.5, help="Seconds between ops")
     p.add_argument("--pdp-workers", type=int, default=4, help="Concurrent PDP tabs per category")
-    # NEW: auto-drill depth for hub categories
-    p.add_argument("--subcat-depth", type=int, default=1, help="Follow subcategories if a category has no products (levels)")
     # sharding
     p.add_argument("--cat-shards", type=int, default=1, help="Total number of category shards")
     p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
