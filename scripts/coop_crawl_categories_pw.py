@@ -28,8 +28,7 @@ import re
 import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-from urllib.parse import urlparse
-from decimal import Decimal, ROUND_HALF_UP
+from urllib.parse import urlparse, urljoin
 
 from playwright.async_api import async_playwright, Browser, Page
 
@@ -66,16 +65,6 @@ def normalize_ean(e: Optional[str]) -> Optional[str]:
         return d
     return None
 
-def money2(v) -> Optional[float]:
-    """Round any numeric-ish value to 2 decimals with HALF_UP (retail style)."""
-    if v is None:
-        return None
-    try:
-        d = Decimal(str(v)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-        return float(d)
-    except Exception:
-        return None
-
 def likely_brand_from_name(name: Optional[str]) -> Optional[str]:
     if not name:
         return None
@@ -111,21 +100,26 @@ async def wait_cookie_banner(page: Page):
     except Exception:
         pass
 
-async def collect_category_product_links(page: Page, category_url: str, page_limit: int, req_delay: float) -> List[str]:
-    await page.goto(category_url, wait_until="domcontentloaded")
-    await wait_cookie_banner(page)
-
+async def _scroll_and_collect_products(page: Page, req_delay: float, page_limit: int) -> List[str]:
+    """On the *current* category page, scroll/click load-more and return product PDP links."""
     seen = set()
     stable_rounds = 0
     max_stable = 3
 
     for _ in range(1000):  # safety
-        links = await page.eval_on_selector_all('a[href*="/toode/"]', "els => els.map(e => e.href)")
+        links = await page.eval_on_selector_all(
+            'a[href*="/toode/"]',
+            "els => els.map(e => e.href)"
+        )
         for u in links:
             seen.add(u.split('#')[0])
 
         clicked = False
-        for sel in ['button:has-text("Lae veel")', 'button:has-text("Näita rohkem")', '[data-testid="load-more"]']:
+        for sel in [
+            'button:has-text("Lae veel")',
+            'button:has-text("Näita rohkem")',
+            '[data-testid="load-more"]',
+        ]:
             try:
                 btn = page.locator(sel)
                 if await btn.count() > 0:
@@ -139,7 +133,10 @@ async def collect_category_product_links(page: Page, category_url: str, page_lim
         await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
         await page.wait_for_timeout(int(req_delay * 1000))
 
-        more = await page.eval_on_selector_all('a[href*="/toode/"]', "els => els.map(e => e.href)")
+        more = await page.eval_on_selector_all(
+            'a[href*="/toode/"]',
+            "els => els.map(e => e.href)"
+        )
         before = len(seen)
         for u in more:
             seen.add(u.split('#')[0])
@@ -152,6 +149,67 @@ async def collect_category_product_links(page: Page, category_url: str, page_lim
             break
 
     return list(seen)
+
+async def _find_subcategory_links(page: Page, base_url: str) -> List[str]:
+    """Find deeper category links when a page is a ‘hub’ with sub-tiles."""
+    try:
+        hrefs = await page.eval_on_selector_all(
+            'a[href*="/tootekategooria/"]',
+            "els => els.map(e => e.href)"
+        )
+        # Normalize & keep under same host
+        norm = []
+        for h in hrefs:
+            u = h.split('#')[0]
+            if not u.startswith("http"):
+                u = urljoin(base_url, u)
+            norm.append(u)
+        return list(dict.fromkeys(norm))  # dedup
+    except Exception:
+        return []
+
+async def collect_category_product_links(browser_like, category_url: str, page_limit: int, req_delay: float, max_depth: int = 2) -> List[str]:
+    """
+    BFS: visit the given category. If no /toode/ links found, descend into sub-categories.
+    """
+    total: List[str] = []
+    queue: List[Tuple[str, int]] = [(category_url, 0)]
+    visited = set()
+
+    while queue:
+        url, depth = queue.pop(0)
+        if url in visited:
+            continue
+        visited.add(url)
+
+        p = await browser_like.new_page()
+        try:
+            await p.goto(url, wait_until="domcontentloaded")
+            await wait_cookie_banner(p)
+            await p.wait_for_timeout(int(req_delay * 1000))
+
+            # First, try to collect products on this page
+            pdps = await _scroll_and_collect_products(p, req_delay, 0 if page_limit == 0 else (page_limit - len(total)))
+            if pdps:
+                total.extend(pdps)
+            else:
+                # No product cards → try sub-categories
+                if depth < max_depth:
+                    subs = await _find_subcategory_links(p, url)
+                    for s in subs:
+                        if s not in visited:
+                            queue.append((s, depth + 1))
+
+        finally:
+            await p.close()
+
+        if page_limit > 0 and len(total) >= page_limit:
+            break
+
+    # Hard cap if needed
+    if page_limit > 0:
+        total = total[:page_limit]
+    return total
 
 async def parse_json_ld(page: Page) -> Dict:
     data: Dict = {}
@@ -225,7 +283,6 @@ async def extract_visible_price(page: Page) -> Optional[float]:
 async def extract_text_after_label(page: Page, label: str) -> Optional[str]:
     """Find text following a visible label like 'Tootekood:' or 'Tootja:'."""
     try:
-        # Try simple "label : value" pattern in a single node
         nodes = page.locator(f"xpath=//*[contains(normalize-space(.), '{label}')]")
         n = await nodes.count()
         for i in range(min(n, 8)):
@@ -235,10 +292,9 @@ async def extract_text_after_label(page: Page, label: str) -> Optional[str]:
             m = re.search(rf"{re.escape(label)}\s*[:\-]?\s*([^\n<]{{2,120}})", txt, flags=re.I)
             if m:
                 return m.group(1).strip()
-            # 2) label node followed by sibling with value
-            sib = await nodes.nth(i).evaluate_handle("el => el.nextElementSibling && el.nextElementSibling.textContent")
+            # 2) next sibling
             try:
-                sval = await sib.json_value()
+                sval = await nodes.nth(i).evaluate("(el) => el.nextElementSibling && el.nextElementSibling.textContent")
                 if sval and isinstance(sval, str) and sval.strip():
                     return sval.strip()
             except Exception:
@@ -283,11 +339,7 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
 
     # Manufacturer from page (Tootja / Valmistaja)
     if not manufacturer:
-        # 1) dedicated helper using DOM relations
-        manufacturer = await extract_text_after_label(page, "Tootja")
-        if not manufacturer:
-            manufacturer = await extract_text_after_label(page, "Valmistaja")
-        # 2) text-wide regex fallback
+        manufacturer = await extract_text_after_label(page, "Tootja") or await extract_text_after_label(page, "Valmistaja")
         if not manufacturer:
             try:
                 full = await page.inner_text("body")
@@ -310,7 +362,6 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
         currency = offers.get("priceCurrency") or offers.get("priceSpecification", {}).get("priceCurrency")
     if price is None:
         price = await extract_visible_price(page)
-    price = money2(price)  # ensure 2 decimals with retail rounding
     if not currency:
         currency = "EUR"
 
@@ -402,7 +453,7 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
         "size_text": size_text,
         "brand": brand,
         "manufacturer": manufacturer,
-        "price": price,
+        "price": float(price) if price is not None else None,
         "currency": currency,
         "image_url": image_url,
         "url": url,
@@ -411,15 +462,12 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
 # ---------- category runner ----------
 
 async def process_category(browser: Browser, category_url: str, page_limit: int, req_delay: float, pdp_workers: int, max_products: int, store_host: str) -> List[Dict]:
-    page = await browser.new_page()
-    items: List[Dict] = []
-    try:
-        links = await collect_category_product_links(page, category_url, page_limit, req_delay)
-        if max_products > 0:
-            links = links[:max_products]
-    finally:
-        await page.close()
+    # Discover product PDP links (BFS into sub-categories when needed)
+    links = await collect_category_product_links(browser, category_url, page_limit, req_delay, max_depth=2)
+    if max_products > 0:
+        links = links[:max_products]
 
+    items: List[Dict] = []
     sem = asyncio.Semaphore(pdp_workers)
 
     async def worker(url: str) -> Optional[Dict]:
@@ -451,11 +499,7 @@ def write_csv(rows: List[Dict], out_path: Path) -> None:
         w = csv.DictWriter(f, fieldnames=cols)
         w.writeheader()
         for r in rows:
-            row = {k: r.get(k) for k in cols}
-            p = row.get("price")
-            # ensure CSV shows 2 decimals; keep empty string if None
-            row["price"] = f"{p:.2f}" if isinstance(p, (int, float)) and p is not None else (p if p is not None else "")
-            w.writerow(row)
+            w.writerow({k: r.get(k) for k in cols})
 
 async def maybe_upsert_db(rows: List[Dict]) -> None:
     if not rows:
@@ -488,7 +532,7 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
         stmt = f"""
             INSERT INTO {table}
               (store_host, ext_id, name, brand, manufacturer, ean_raw, ean_norm, size_text, price, currency, image_url, url)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8, CAST($9 AS numeric(10,2)) ,$10,$11,$12)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
             ON CONFLICT (store_host, ext_id) DO UPDATE SET
               name         = COALESCE(EXCLUDED.name,         {table}.name),
               brand        = COALESCE(EXCLUDED.brand,        {table}.brand),
@@ -518,7 +562,7 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
                 r.get("ean_raw"),
                 r.get("ean_norm"),
                 r.get("size_text"),
-                money2(r.get("price")),  # double-safety rounding
+                r.get("price"),
                 r.get("currency"),
                 r.get("image_url"),
                 r.get("url"),
