@@ -29,6 +29,7 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse
+from decimal import Decimal, ROUND_HALF_UP
 
 from playwright.async_api import async_playwright, Browser, Page
 
@@ -64,6 +65,16 @@ def normalize_ean(e: Optional[str]) -> Optional[str]:
             d = "0" + d  # UPC-A → EAN-13
         return d
     return None
+
+def money2(v) -> Optional[float]:
+    """Round any numeric-ish value to 2 decimals with HALF_UP (retail style)."""
+    if v is None:
+        return None
+    try:
+        d = Decimal(str(v)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        return float(d)
+    except Exception:
+        return None
 
 def likely_brand_from_name(name: Optional[str]) -> Optional[str]:
     if not name:
@@ -299,6 +310,7 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
         currency = offers.get("priceCurrency") or offers.get("priceSpecification", {}).get("priceCurrency")
     if price is None:
         price = await extract_visible_price(page)
+    price = money2(price)  # ensure 2 decimals with retail rounding
     if not currency:
         currency = "EUR"
 
@@ -390,7 +402,7 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
         "size_text": size_text,
         "brand": brand,
         "manufacturer": manufacturer,
-        "price": float(price) if price is not None else None,
+        "price": price,
         "currency": currency,
         "image_url": image_url,
         "url": url,
@@ -439,7 +451,11 @@ def write_csv(rows: List[Dict], out_path: Path) -> None:
         w = csv.DictWriter(f, fieldnames=cols)
         w.writeheader()
         for r in rows:
-            w.writerow({k: r.get(k) for k in cols})
+            row = {k: r.get(k) for k in cols}
+            p = row.get("price")
+            # ensure CSV shows 2 decimals; keep empty string if None
+            row["price"] = f"{p:.2f}" if isinstance(p, (int, float)) and p is not None else (p if p is not None else "")
+            w.writerow(row)
 
 async def maybe_upsert_db(rows: List[Dict]) -> None:
     if not rows:
@@ -472,7 +488,7 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
         stmt = f"""
             INSERT INTO {table}
               (store_host, ext_id, name, brand, manufacturer, ean_raw, ean_norm, size_text, price, currency, image_url, url)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8, CAST($9 AS numeric(10,2)) ,$10,$11,$12)
             ON CONFLICT (store_host, ext_id) DO UPDATE SET
               name         = COALESCE(EXCLUDED.name,         {table}.name),
               brand        = COALESCE(EXCLUDED.brand,        {table}.brand),
@@ -502,7 +518,7 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
                 r.get("ean_raw"),
                 r.get("ean_norm"),
                 r.get("size_text"),
-                r.get("price"),
+                money2(r.get("price")),  # double-safety rounding
                 r.get("currency"),
                 r.get("image_url"),
                 r.get("url"),
