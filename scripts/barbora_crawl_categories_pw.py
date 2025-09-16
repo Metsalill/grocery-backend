@@ -88,6 +88,50 @@ def ensure_ready(page: Page) -> None:
 
 # -------------------- PDP parsing --------------------
 
+def _wait_for_price_and_specs(page: Page) -> None:
+    """Wait for client hydration and expand product-info sections."""
+    # Let SPA settle a bit
+    try:
+        page.wait_for_load_state("networkidle", timeout=10000)
+    except PWTimeout:
+        pass
+
+    # Try to ensure price exists in DOM
+    price_sels = [
+        "[data-testid='product-price']",
+        ".e-price__main",
+        ".product-price",
+        ".price .e-price__main",
+        ".price",
+    ]
+    for sel in price_sels:
+        try:
+            page.wait_for_selector(sel, state="attached", timeout=4000)
+            break
+        except PWTimeout:
+            continue
+
+    # Expand specs / product info accordions so brand/manufacturer become visible
+    expanders = [
+        "button:has-text('Tooteinfo')",
+        "button:has-text('Tooteandmed')",
+        "button:has-text('Lisainfo')",
+        "button[aria-controls*='spec']",
+        "button[aria-expanded='false']",
+        "[data-testid*='accordion'] button",
+    ]
+    for sel in expanders:
+        try:
+            el = page.locator(sel)
+            if el.count() and el.first.is_visible():
+                # click if collapsed
+                if el.first.get_attribute("aria-expanded") in (None, "false"):
+                    el.first.click(timeout=1000)
+                    page.wait_for_timeout(300)
+        except Exception:
+            pass
+
+
 def from_json_ld(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
     out = {"name": None, "brand": None, "manufacturer": None, "image": None, "price": None, "currency": None}
     for tag in soup.find_all("script", {"type": "application/ld+json"}):
@@ -166,14 +210,35 @@ def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
 
 
 def parse_app_state_for_brand(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
+    """Try several shapes of brand/manufacturer inside inline scripts."""
+    brand, manu = None, None
+    brand_pat = [
+        r'"brand"\s*:\s*"([^"]+)"',
+        r'"brand"\s*:\s*{\s*"name"\s*:\s*"([^"]+)"',
+    ]
+    manu_pat = [
+        r'"manufacturer"\s*:\s*"([^"]+)"',
+        r'"manufacturer"\s*:\s*{\s*"name"\s*:\s*"([^"]+)"',
+    ]
     for s in soup.find_all("script"):
-        txt = (s.string or "").strip()
-        if not txt or ("brand" not in txt and "manufacturer" not in txt):
+        txt = (s.string or "")[:200000]  # guard
+        if not txt:
             continue
-        mb = re.search(r'"brand"\s*:\s*"([^"]+)"', txt)
-        mm = re.search(r'"manufacturer"\s*:\s*"([^"]+)"', txt)
-        return (mb.group(1).strip() if mb else None, mm.group(1).strip() if mm else None)
-    return None, None
+        if brand is None:
+            for p in brand_pat:
+                m = re.search(p, txt)
+                if m:
+                    brand = m.group(1).strip()
+                    break
+        if manu is None:
+            for p in manu_pat:
+                m = re.search(p, txt)
+                if m:
+                    manu = m.group(1).strip()
+                    break
+        if brand and manu:
+            break
+    return brand, manu
 
 
 def extract_product_title_from_dom(soup: BeautifulSoup) -> str:
@@ -187,11 +252,35 @@ def extract_product_title_from_dom(soup: BeautifulSoup) -> str:
 
 def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
     cur = "EUR"
-    price_el = soup.select_one("[data-testid=product-price], .e-price__main, .product-price, .price")
-    if not price_el:
-        return None, cur
-    val = re.sub(r"[^\d,\.]", "", text_of(price_el)).replace(",", ".")
-    return (val if val else None), cur
+
+    # 1) Visible nodes
+    node_selectors = [
+        "[data-testid=product-price]",
+        ".e-price__main",
+        ".product-price",
+        ".price",
+        "[class*='price'] span",
+        "[class*='price'] div",
+    ]
+    for sel in node_selectors:
+        el = soup.select_one(sel)
+        if el:
+            val = re.sub(r"[^\d,\.]", "", text_of(el)).replace(",", ".")
+            if val:
+                return val, cur
+
+    # 2) Script fallbacks
+    for tag in soup.find_all("script"):
+        txt = tag.string or ""
+        m = re.search(r'"price"\s*:\s*"?(?P<p>\d+(?:[.,]\d{1,2})?)"?', txt)
+        if not m:
+            m = re.search(r'"priceValue"\s*:\s*"?(?P<p>\d+(?:[.,]\d{1,2})?)"?', txt)
+        if not m:
+            m = re.search(r'"currentPrice"\s*:\s*"?(?P<p>\d+(?:[.,]\d{1,2})?)"?', txt)
+        if m:
+            return m.group("p").replace(",", "."), cur
+
+    return None, cur
 
 
 def prefer_valid_name(candidates: List[str], category_leaf: str) -> str:
@@ -234,6 +323,10 @@ def extract_size_from_name(name: str) -> Optional[str]:
 def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], category_leaf_hint: str, req_delay: float) -> Dict[str, Optional[str]]:
     page.goto(url, timeout=60000, wait_until="domcontentloaded")
     ensure_ready(page)
+
+    # NEW: wait for SPA hydration + expand specs so brand/manufacturer appear
+    _wait_for_price_and_specs(page)
+
     try:
         page.wait_for_selector("script[type='application/ld+json']", timeout=6000)
     except PWTimeout:
@@ -242,9 +335,12 @@ def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], categor
         page.wait_for_selector(".e-product__name, [data-testid=product-title], [data-testid=product-name]", timeout=5000)
     except PWTimeout:
         pass
+
+    # honor requested delay after hydration/expansion
     page.wait_for_timeout(int(req_delay * 1000))
 
-    soup = BeautifulSoup(page.content(), "html.parser")
+    html = page.content()
+    soup = BeautifulSoup(html, "html.parser")
     jl = from_json_ld(soup)
     spec = parse_spec_table(soup)
     b2, m2 = parse_app_state_for_brand(soup)
@@ -588,7 +684,8 @@ def crawl(args) -> None:
                             print(f"[warn] PDP parse failed for {ext_id}: {e}", file=sys.stderr)
                             continue
 
-                        if norm(data["name"]) in BAD_NAMES or norm(data["name"]) == norm(data.get("category_leaf") or category_leaf):
+                        # filter bogus names like "Pealeht"
+                        if norm(data.get("name") or "") in BAD_NAMES or norm(data.get("name") or "") == norm(data.get("category_leaf") or category_leaf):
                             continue
 
                         row = [
