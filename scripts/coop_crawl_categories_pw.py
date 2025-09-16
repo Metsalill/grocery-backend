@@ -5,6 +5,8 @@ Coop eCoop (multi-region) category crawler → PDP extractor → CSV/DB-friendly
 
 What this does
 - Crawls category pages with Playwright (handles JS/lazy-load).
+- If a category page is a hub (only subcategory tiles), it will *auto-drill*
+  into subcategories up to --subcat-depth levels and collect products there.
 - Extracts title, brand, manufacturer, image, price, EAN/GTIN (from JSON-LD,
   spec tables, legacy “Tootekood”, or by clicking “Toote info” modal on new UI).
 - Writes CSV (always) and optionally upserts to Postgres if COOP_UPSERT_DB=1.
@@ -30,7 +32,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Set
 from urllib.parse import urlparse
 
 from playwright.async_api import async_playwright, Browser, Page
@@ -92,11 +94,9 @@ async def wait_cookie_banner(page: Page):
     except Exception:
         pass
 
-async def collect_category_product_links(page: Page, category_url: str, page_limit: int, req_delay: float) -> List[str]:
-    await page.goto(category_url, wait_until="domcontentloaded")
-    await wait_cookie_banner(page)
-
-    seen = set()
+async def _scroll_and_collect_products(page: Page, page_limit: int, req_delay: float) -> List[str]:
+    """Scroll a category page and collect /toode/ links."""
+    seen: Set[str] = set()
     stable_rounds = 0
     max_stable = 3
 
@@ -132,7 +132,62 @@ async def collect_category_product_links(page: Page, category_url: str, page_lim
         if page_limit > 0 and after >= page_limit:
             break
 
-    return list(seen)
+    out = list(seen)
+    if page_limit > 0:
+        out = out[:page_limit]
+    return out
+
+async def collect_category_product_links(
+    page: Page,
+    category_url: str,
+    page_limit: int,
+    req_delay: float,
+    subcat_depth: int,
+    seen_cats: Optional[Set[str]] = None,
+) -> List[str]:
+    """
+    Collect `/toode/` links from a category page. If none are found and
+    `subcat_depth > 0`, follow `/tootekategooria/` subcategories (once per level).
+    """
+    if seen_cats is None:
+        seen_cats = set()
+    if category_url in seen_cats:
+        return []
+    seen_cats.add(category_url)
+
+    await page.goto(category_url, wait_until="domcontentloaded")
+    await wait_cookie_banner(page)
+
+    # First, try to collect products on this page.
+    product_urls = set(await _scroll_and_collect_products(page, page_limit, req_delay))
+    if product_urls or subcat_depth <= 0:
+        return list(product_urls)[: page_limit or None]
+
+    # No products → this looks like a hub page. Follow subcategories.
+    subcats = await page.eval_on_selector_all(
+        'a[href*="/tootekategooria/"]',
+        "els => els.map(e => e.href.split('#')[0])"
+    )
+    # Deduplicate while preserving order
+    subcats = list(dict.fromkeys(subcats))
+
+    out: List[str] = []
+    for sc in subcats:
+        if sc in seen_cats:
+            continue
+        p2 = await page.context.new_page()
+        try:
+            links = await collect_category_product_links(
+                p2, sc, page_limit if page_limit > 0 else 0, req_delay, subcat_depth - 1, seen_cats
+            )
+            out.extend(links)
+        finally:
+            await p2.close()
+        if page_limit > 0 and len(out) >= page_limit:
+            out = out[:page_limit]
+            break
+
+    return out
 
 async def parse_json_ld(page: Page) -> Dict:
     data: Dict = {}
@@ -363,7 +418,7 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
     if not ext_id and ean_raw:
         ext_id = normalize_ean(ean_raw)
     if not ext_id:
-        # last URL chunk as ultimate fallback (keeps everything covered)
+        # last URL chunk as ultimate fallback
         last = url.rstrip("/").split("/")[-1]
         ext_id = last or None
 
@@ -386,11 +441,20 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
 
 # ---------- category runner ----------
 
-async def process_category(browser: Browser, category_url: str, page_limit: int, req_delay: float, pdp_workers: int, max_products: int, store_host: str) -> List[Dict]:
+async def process_category(
+    browser: Browser,
+    category_url: str,
+    page_limit: int,
+    req_delay: float,
+    pdp_workers: int,
+    max_products: int,
+    store_host: str,
+    subcat_depth: int,
+) -> List[Dict]:
     page = await browser.new_page()
     items: List[Dict] = []
     try:
-        links = await collect_category_product_links(page, category_url, page_limit, req_delay)
+        links = await collect_category_product_links(page, category_url, page_limit, req_delay, subcat_depth)
         if max_products > 0:
             links = links[:max_products]
     finally:
@@ -577,7 +641,11 @@ async def run(args):
         try:
             for cat in categories:
                 print(f"[cat] {cat}")
-                rows = await process_category(context, cat, args.page_limit, args.req_delay, args.pdp_workers, args.max_products, store_host)
+                rows = await process_category(
+                    context, cat, args.page_limit, args.req_delay,
+                    args.pdp_workers, args.max_products, store_host,
+                    subcat_depth=args.subcat_depth,
+                )
                 print(f"[info] category rows: {len(rows)}")
                 all_rows.extend(rows)
         finally:
@@ -602,6 +670,8 @@ def parse_args():
     p.add_argument("--headless", default="1", help="1/0 headless")
     p.add_argument("--req-delay", type=float, default=0.5, help="Seconds between ops")
     p.add_argument("--pdp-workers", type=int, default=4, help="Concurrent PDP tabs per category")
+    # NEW: auto-drill depth for hub categories
+    p.add_argument("--subcat-depth", type=int, default=1, help="Follow subcategories if a category has no products (levels)")
     # sharding
     p.add_argument("--cat-shards", type=int, default=1, help="Total number of category shards")
     p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
