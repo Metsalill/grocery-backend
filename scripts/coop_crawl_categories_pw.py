@@ -25,6 +25,7 @@ import argparse
 import asyncio
 import csv
 import datetime as dt
+import hashlib
 import json
 import os
 import re
@@ -63,6 +64,30 @@ def normalize_ean(e: Optional[str]) -> Optional[str]:
             d = "0" + d            # UPC-A → EAN-13
         return d
     return None
+
+def build_ext_id(url: str, ld: Dict, ean_norm: Optional[str]) -> str:
+    """
+    Always return a stable ext_id.
+    Order: numeric id in URL → slug in URL → JSON-LD sku/productID/mpn →
+           normalized EAN (prefixed) → short sha1 of URL.
+    """
+    m = re.search(r"/toode/(\d+)(?:[/?#]|$)", url)
+    if m:
+        return m.group(1)
+
+    m = re.search(r"/toode/([^/?#]+)", url)
+    if m:
+        return m.group(1).lower()
+
+    for k in ("sku", "productID", "mpn"):
+        v = ld.get(k)
+        if v:
+            return str(v)
+
+    if ean_norm:
+        return f"ean-{ean_norm}"
+
+    return "u" + hashlib.sha1(url.encode("utf-8")).hexdigest()[:12]
 
 # ---------- page utilities ----------
 
@@ -142,16 +167,21 @@ async def parse_json_ld(page: Page) -> Dict:
 
 # ---------- price helpers ----------
 
-PRICE_TOKEN = re.compile(r"(\d+[.,]\d{2})\s*€", re.U)
+PRICE_TOKEN = re.compile(r"(\d+(?:[.,]\d{1,2})?)\s*€", re.U)
 
 def looks_like_unit_price(text: str) -> bool:
-    t = text.strip().lower()
-    return "/" in t or " /" in t or "€/kg" in t or "€/l" in t or "€/tk" in t or "€ / kg" in t or "€ / l" in t or "€ / tk" in t
+    t = (text or "").strip().lower()
+    # exclude explicit per-unit strings
+    if "/" in t:
+        return True
+    for token in ("€/kg", "€/l", "€/tk", "€ / kg", "€ / l", "€ / tk"):
+        if token in t:
+            return True
+    return False
 
 async def extract_visible_price(page: Page) -> Optional[float]:
     """Pick the main price: ignore any node whose text contains '/' (€/kg, €/l, €/tk)."""
     candidates: List[Tuple[float, str]] = []
-    # Try some likely selectors first
     selectors = [
         '[data-testid="product-price"]',
         '.product-price', '.price', '.current-price', '[class*="price"]'
@@ -160,11 +190,14 @@ async def extract_visible_price(page: Page) -> Optional[float]:
         try:
             locs = page.locator(sel)
             n = await locs.count()
-            for i in range(min(n, 8)):
-                txt = await locs.nth(i).inner_text()
+            for i in range(min(n, 10)):
+                try:
+                    txt = await locs.nth(i).inner_text()
+                except Exception:
+                    continue
                 if not txt or looks_like_unit_price(txt):
                     continue
-                m = PRICE_TOKEN.search(txt.replace("\xa0", ""))
+                m = PRICE_TOKEN.search(txt.replace("\xa0", " "))
                 if m:
                     try:
                         candidates.append((float(m.group(1).replace(",", ".")), txt))
@@ -173,14 +206,13 @@ async def extract_visible_price(page: Page) -> Optional[float]:
         except Exception:
             pass
 
-    # Broad fallback: scan all text nodes that contain €
     if not candidates:
         try:
             all_txt = await page.locator("xpath=//*[contains(., '€')]").all_inner_texts()
-            for txt in all_txt[:50]:
+            for txt in all_txt[:80]:
                 if not txt or looks_like_unit_price(txt):
                     continue
-                m = PRICE_TOKEN.search(txt.replace("\xa0", ""))
+                m = PRICE_TOKEN.search(txt.replace("\xa0", " "))
                 if m:
                     try:
                         candidates.append((float(m.group(1).replace(",", ".")), txt))
@@ -191,12 +223,18 @@ async def extract_visible_price(page: Page) -> Optional[float]:
 
     if not candidates:
         return None
-    # Pick the highest value among non-unit candidates (usually the main price > unit price like 0.02 €/tk)
+    # choose the highest non-unit price (main price is typically larger than per-unit price)
     return max(candidates, key=lambda x: x[0])[0]
 
 # ---------- PDP extraction ----------
 
 async def detect_variant(page: Page) -> str:
+    """
+    Best-effort PDP variant detector:
+    - 'ecoop-legacy' (e.g., Haapsalu) shows 'Tootekood' inline.
+    - 'ecoop-new' often has 'Toote info' which reveals GTIN in a modal.
+    - 'generic' fallback.
+    """
     host = (await page.evaluate("location.host")) or ""
     html = (await page.content()) or ""
     if "coophaapsalu.ee" in host or "Tootekood" in html:
@@ -206,17 +244,20 @@ async def detect_variant(page: Page) -> str:
     return "generic"
 
 async def extract_from_modal_gtin(page: Page) -> Optional[str]:
+    """Click 'Toote info' and try to read GTIN from the opened sheet/modal."""
     try:
         btn = page.locator("text=Toote info")
         if await btn.count() == 0:
             return None
         await btn.first.click()
         await page.wait_for_timeout(400)
+
         val = await page.locator(
             "xpath=(//*[self::td or self::dd or self::div][contains(normalize-space(.), 'GTIN')]/following-sibling::*[1])[1]"
         ).first.text_content()
         if val:
             return val.strip()
+
         txt = await page.content()
         m = CTX_EAN.search(txt)
         return m.group(1) if m else None
@@ -336,23 +377,9 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
         if m:
             size_text = m.group(1)
 
-    # ext_id: numeric id → else slug after /toode/  → else json-ld sku/productID/mpn → else EAN
-    ext_id = None
-    m = re.search(r"/toode/(\d+)", url)
-    if m:
-        ext_id = m.group(1)
-    if not ext_id:
-        m2 = re.search(r"/toode/([^/?#]+)/?", url)
-        if m2:
-            ext_id = m2.group(1)
-    if not ext_id:
-        for k in ("sku", "productID", "mpn"):
-            v = ld.get(k)
-            if v:
-                ext_id = str(v)
-                break
-    if not ext_id and ean_raw:
-        ext_id = normalize_ean(ean_raw)
+    # ext_id (never empty)
+    ean_norm = normalize_ean(ean_raw)
+    ext_id = build_ext_id(url, ld, ean_norm)
 
     return {
         "chain": "Coop",
@@ -360,7 +387,7 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
         "channel": "online",
         "ext_id": ext_id,
         "ean_raw": ean_raw,
-        "ean_norm": normalize_ean(ean_raw),
+        "ean_norm": ean_norm,
         "name": name,
         "size_text": size_text,
         "brand": brand,
@@ -443,7 +470,6 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
             print(f"[info] Table {table} does not exist → skipping DB upsert. (Create it manually.)")
             return
 
-        # composite PK (store_host, ext_id)
         stmt = f"""
             INSERT INTO {table}
               (store_host, ext_id, name, brand, manufacturer, ean_raw, ean_norm, size_text, price, currency, image_url, url)
@@ -462,9 +488,10 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
               scraped_at = now();
         """
         payload = []
+        skipped = 0
         for r in rows:
             if not r.get("ext_id"):
-                # don’t try to write broken rows
+                skipped += 1
                 continue
             payload.append((
                 r.get("store_host"),
@@ -484,7 +511,10 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
             print("[warn] No rows with ext_id — skipped DB upsert")
             return
         await conn.executemany(stmt, payload)
-        print(f"[ok] Upserted {len(payload)} rows into {table}")
+        msg = f"[ok] Upserted {len(payload)} rows into {table}"
+        if skipped:
+            msg += f" (skipped {skipped} without ext_id)"
+        print(msg)
     finally:
         await conn.close()
 
