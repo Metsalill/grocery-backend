@@ -7,7 +7,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}   # <-- Railway PUBLIC URL
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}   # Public Railway URL
       PGSSLMODE: require
     steps:
       - uses: actions/checkout@v4
@@ -18,20 +18,20 @@ jobs:
       - name: Seed brand synonyms file (edit/extend later in repo)
         run: |
           mkdir -p data
-          cat > data/brand_synonyms.csv <<'CSV'
-alias,canonical
-"sanitex ou",""             # distributor -> treat as no brand (fallback to name/size)
-"mobec as",""               # distributor
-"nutricia sia","alpro"
-"pepsico eesti as","lays"
-"galina blanca","gallina blanca"
-"a le coq","a. le coq"
-"milka","milka"
-"nestle","nestlé"
-"wrigley","orbit"
-"mondelez","milka"
-"coca cola hbc","coca-cola"
-CSV
+          printf '%s\n' \
+            'alias,canonical' \
+            '"sanitex ou",""' \
+            '"mobec as",""' \
+            '"nutricia sia","alpro"' \
+            '"pepsico eesti as","lays"' \
+            '"galina blanca","gallina blanca"' \
+            '"a le coq","a. le coq"' \
+            '"milka","milka"' \
+            '"nestle","nestlé"' \
+            '"wrigley","orbit"' \
+            '"mondelez","milka"' \
+            '"coca cola hbc","coca-cola"' \
+          > data/brand_synonyms.csv
 
       - name: Create SQL script
         run: |
@@ -89,7 +89,7 @@ CSV
             JOIN stores   s ON s.id = pr.store_id
             WHERE s.chain ILIKE 'prisma%'
           ),
-          -- parse sizes (incl. NxY packs)
+          -- parse sizes (incl. NxY packs; prefer drained weight)
           rimi_sized AS (
             SELECT r.*,
               (
@@ -232,20 +232,20 @@ CSV
           scored_prisma AS (
             SELECT c.*, (0.7*name_sim + 0.3*COALESCE(size_score, name_sim*0.3) + brand_bonus) AS total_score
             FROM prisma_candidates c
-          ),
-          best_selver AS (
+          )
+          , best_selver AS (
             SELECT * FROM (
               SELECT s.*, ROW_NUMBER() OVER (PARTITION BY rimi_id ORDER BY total_score DESC NULLS LAST) rn
               FROM scored_selver s
             ) z WHERE rn=1
-          ),
-          best_prisma AS (
+          )
+          , best_prisma AS (
             SELECT * FROM (
               SELECT s.*, ROW_NUMBER() OVER (PARTITION BY rimi_id ORDER BY total_score DESC NULLS LAST) rn
               FROM scored_prisma s
             ) z WHERE rn=1
-          ),
-          selver_buckets AS (
+          )
+          , selver_buckets AS (
             SELECT *, CASE
               WHEN total_score>=0.98 THEN 'A+ (~100%)'
               WHEN total_score>=0.95 THEN 'A (95-98%)'
@@ -255,8 +255,8 @@ CSV
               WHEN total_score>=0.50 THEN 'D (50-65%)'
               ELSE '0 (no good)' END AS selver_bucket
             FROM best_selver
-          ),
-          prisma_buckets AS (
+          )
+          , prisma_buckets AS (
             SELECT *, CASE
               WHEN total_score>=0.98 THEN 'A+ (~100%)'
               WHEN total_score>=0.95 THEN 'A (95-98%)'
@@ -266,12 +266,14 @@ CSV
               WHEN total_score>=0.50 THEN 'D (50-65%)'
               ELSE '0 (no good)' END AS prisma_bucket
             FROM best_prisma
-          )
+          );
+
+          -- Finally create the materialized view
+          CREATE MATERIALIZED VIEW rimi_match_matrix_nonprivate AS
           SELECT
             r.rimi_id, r.rimi_name, r.rimi_brand, r.rimi_size_text, r.rimi_size_gml,
             s.selver_id, s.selver_name, s.selver_brand, s.selver_ean, s.selver_size_gml, s.total_score AS selver_score, s.selver_bucket,
             p.prisma_id, p.prisma_name, p.prisma_brand, p.prisma_ean, p.prisma_size_gml, p.total_score AS prisma_score, p.prisma_bucket
-          INTO MATERIALIZED VIEW rimi_match_matrix_nonprivate
           FROM rimi_normed r
           LEFT JOIN selver_buckets s USING (rimi_id)
           LEFT JOIN prisma_buckets p USING (rimi_id)
@@ -311,8 +313,8 @@ CSV
               )::numeric AS rimi_size_gml
             FROM rimi_split r
           )
-          SELECT * INTO MATERIALIZED VIEW rimi_match_matrix_private
-          FROM rimi_sized WHERE is_private_label;
+          CREATE MATERIALIZED VIEW rimi_match_matrix_private AS
+          SELECT * FROM rimi_sized WHERE is_private_label;
           SQL
 
       - name: Build materialized views
