@@ -34,10 +34,12 @@ DEFAULT_HEADLESS = 1
 
 SIZE_RE = re.compile(r"(?ix)(\d+\s?(?:x\s?\d+)?\s?(?:ml|l|cl|g|kg|mg|tk|pcs))|(\d+\s?x\s?\d+)")
 SPEC_KEYS_BRAND = {"kaubamärk", "bränd", "brand"}
-SPEC_KEYS_MFR = {"tootja", "valmistaja", "manufacturer"}
+# include 'tarnija' (supplier) as an additional fallback for manufacturer
+SPEC_KEYS_MFR = {"tootja", "valmistaja", "manufacturer", "tarnija"}
 SPEC_KEYS_SIZE = {"kogus", "netokogus", "maht", "neto"}
 BAD_NAMES = {"pealeht"}  # "Home" in Estonian
 
+# -------------------- small helpers --------------------
 
 def norm(s: Optional[str]) -> str:
     if not s:
@@ -55,7 +57,6 @@ def get_ext_id(url: str) -> str:
         return m.group(1)
     slug = re.sub(r"[^a-zA-Z0-9]+", "-", url).strip("-")
     return slug[-120:]
-
 
 # -------------------- Cookie banner / helpers --------------------
 
@@ -78,6 +79,7 @@ def accept_cookies(page: Page) -> None:
             pass
     try:
         page.get_by_role("button", name=re.compile("Nõus|Accept|OK", re.I)).click(timeout=800)
+        page.wait_for_timeout(200)
     except Exception:
         pass
 
@@ -85,54 +87,89 @@ def accept_cookies(page: Page) -> None:
 def ensure_ready(page: Page) -> None:
     accept_cookies(page)
 
+# -------------------- Robust price parsing --------------------
+
+def _first_str(*vals) -> Optional[str]:
+    for v in vals:
+        if isinstance(v, str) and v.strip():
+            return v.strip()
+    return None
+
+
+def _clean_decimal(s: str) -> Optional[str]:
+    """
+    Normalize various price texts to a decimal string "X.YY".
+    Handles:
+      - "3,49", "3.49", "3 49"
+      - "3^49" (superscript cents flattened to space by BeautifulSoup)
+      - strips currency/unit and ignores percentages.
+    """
+    if not s:
+        return None
+    raw = s.strip()
+
+    # Ignore obvious percent-only strings
+    if re.fullmatch(r"\d+\s*%+", raw):
+        return None
+
+    # Try content attribute like 3.49 directly
+    m = re.search(r"(\d+[.,]\d{2})", raw)
+    if m:
+        return m.group(1).replace(",", ".")
+
+    # Handle "3 49" (euros space cents) or "3 49" (nbsp)
+    m = re.search(r"(\d+)[\s\u00A0](\d{2})", raw)
+    if m:
+        return f"{m.group(1)}.{m.group(2)}"
+
+    # Last resort: only digits -> treat as euros if reasonable (>= 100 unlikely)
+    digits = re.sub(r"[^\d]", "", raw)
+    if digits and len(digits) > 2:
+        # Heuristic: treat last two as cents (e.g., "349" -> "3.49")
+        return f"{digits[:-2]}.{digits[-2:]}"
+    if digits:
+        # single/two digit alone -> probably wrong (like "1" from "1%")
+        return None
+    return None
+
+
+def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
+    # 1) meta itemprop=price is often present
+    meta = soup.select_one("[itemprop=price][content]")
+    if meta and meta.get("content"):
+        val = _clean_decimal(meta.get("content"))
+        if val:
+            cur = (soup.select_one("[itemprop=priceCurrency][content]") or {}).get("content") or "EUR"
+            return val, cur
+
+    # 2) common visible price containers
+    price_selectors = [
+        "[data-testid=product-price]",
+        "[data-testid=buy-button-price]",
+        ".e-price__main",
+        ".product-price",
+        ".product__price",
+        ".price",
+    ]
+    texts: List[str] = []
+    for sel in price_selectors:
+        for el in soup.select(sel):
+            t = text_of(el)
+            if t:
+                texts.append(t)
+    # 3) try to find a good-looking decimal
+    for t in texts:
+        val = _clean_decimal(t)
+        if val:
+            return val, "EUR"
+    return None, "EUR"
 
 # -------------------- PDP parsing --------------------
 
-def _wait_for_price_and_specs(page: Page) -> None:
-    """Wait for client hydration and expand product-info sections."""
-    # Let SPA settle a bit
-    try:
-        page.wait_for_load_state("networkidle", timeout=10000)
-    except PWTimeout:
-        pass
-
-    # Try to ensure price exists in DOM
-    price_sels = [
-        "[data-testid='product-price']",
-        ".e-price__main",
-        ".product-price",
-        ".price .e-price__main",
-        ".price",
-    ]
-    for sel in price_sels:
-        try:
-            page.wait_for_selector(sel, state="attached", timeout=4000)
-            break
-        except PWTimeout:
-            continue
-
-    # Expand specs / product info accordions so brand/manufacturer become visible
-    expanders = [
-        "button:has-text('Tooteinfo')",
-        "button:has-text('Tooteandmed')",
-        "button:has-text('Lisainfo')",
-        "button[aria-controls*='spec']",
-        "button[aria-expanded='false']",
-        "[data-testid*='accordion'] button",
-    ]
-    for sel in expanders:
-        try:
-            el = page.locator(sel)
-            if el.count() and el.first.is_visible():
-                # click if collapsed
-                if el.first.get_attribute("aria-expanded") in (None, "false"):
-                    el.first.click(timeout=1000)
-                    page.wait_for_timeout(300)
-        except Exception:
-            pass
-
-
 def from_json_ld(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
+    """
+    Parse JSON-LD blocks robustly; supports offers as dict or list and nested priceSpecification.
+    """
     out = {"name": None, "brand": None, "manufacturer": None, "image": None, "price": None, "currency": None}
     for tag in soup.find_all("script", {"type": "application/ld+json"}):
         try:
@@ -143,38 +180,94 @@ def from_json_ld(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
         for it in items:
             if not isinstance(it, dict):
                 continue
-            t = it.get("@type")
-            types = t if isinstance(t, list) else [t]
+            types = it.get("@type")
+            types = types if isinstance(types, list) else [types]
             if not types or "Product" not in types:
                 continue
-            if it.get("name"):
-                out["name"] = it["name"]
-            brand = it.get("brand")
-            if isinstance(brand, dict):
-                brand = brand.get("name")
-            if brand:
-                out["brand"] = brand
-            manufacturer = it.get("manufacturer")
-            if isinstance(manufacturer, dict):
-                manufacturer = manufacturer.get("name")
-            if manufacturer:
-                out["manufacturer"] = manufacturer
+
+            out["name"] = _first_str(it.get("name"), out["name"])
+
+            # brand may be string or object
+            brand_val = it.get("brand")
+            if isinstance(brand_val, dict):
+                brand_val = brand_val.get("name")
+            out["brand"] = _first_str(brand_val, out["brand"])
+
+            # manufacturer may be string or object
+            manuf_val = it.get("manufacturer")
+            if isinstance(manuf_val, dict):
+                manuf_val = manuf_val.get("name")
+            out["manufacturer"] = _first_str(manuf_val, out["manufacturer"])
+
+            # image may be list
             img = it.get("image")
             if isinstance(img, list):
                 img = img[0]
-            if img:
-                out["image"] = img
-            offers = it.get("offers") or {}
+            out["image"] = _first_str(img, out["image"])
+
+            # offers can be dict or list
+            offers = it.get("offers")
+            offer_list = []
             if isinstance(offers, dict):
-                if offers.get("price") is not None:
-                    out["price"] = str(offers.get("price"))
-                if offers.get("priceCurrency"):
-                    out["currency"] = offers.get("priceCurrency")
+                offer_list = [offers]
+            elif isinstance(offers, list):
+                offer_list = [o for o in offers if isinstance(o, dict)]
+
+            for off in offer_list:
+                price = off.get("price")
+                if not price and isinstance(off.get("priceSpecification"), dict):
+                    price = off["priceSpecification"].get("price")
+                currency = _first_str(off.get("priceCurrency"),
+                                      (off.get("priceSpecification") or {}).get("priceCurrency"))
+                price = _clean_decimal(str(price) if price is not None else "")
+                if price:
+                    out["price"] = price
+                if currency and not out["currency"]:
+                    out["currency"] = currency
     return out
+
+
+def _scan_label_value_pairs(soup: BeautifulSoup) -> Dict[str, str]:
+    """
+    Many PDPs render spec as plain text lines "Label: Value".
+    Look for brand/manufacturer lines anywhere in details section.
+    """
+    capture: Dict[str, str] = {}
+
+    # Regions likely to contain the info
+    containers = []
+    # blocks near headings like "Muu info", "Tooteinfo", etc.
+    for head in soup.find_all(["h2", "h3", "h4"]):
+        ht = norm(text_of(head))
+        if any(k in ht for k in ("muu info", "tooteinfo", "lisainfo", "info")):
+            sib = head.find_next_sibling()
+            if sib:
+                containers.append(sib)
+
+    # Fallback: global search but limited to simple elements
+    containers.extend(soup.select("li, p, div"))
+
+    label_re = re.compile(r"^\s*([^:]+):\s*(.+)\s*$")
+    for el in containers:
+        t = text_of(el)
+        m = label_re.match(t)
+        if not m:
+            continue
+        label = norm(m.group(1))
+        value = m.group(2).strip()
+        if not value:
+            continue
+        if any(k == label for k in SPEC_KEYS_BRAND) and "brand" not in capture:
+            capture["brand"] = value
+        elif any(k == label for k in SPEC_KEYS_MFR) and "manufacturer" not in capture:
+            capture["manufacturer"] = value
+    return capture
 
 
 def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
     out = {"brand": None, "manufacturer": None, "size": None, "sku": None}
+
+    # dt/dd or table style
     for head in soup.select("dt, th"):
         k = norm(text_of(head))
         val_el = head.find_next_sibling(["dd", "td"])
@@ -190,6 +283,7 @@ def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
         elif "sku" in k and not out["sku"]:
             out["sku"] = v
 
+    # explicit label/value classes
     labels = soup.select(".e-attribute__label, .product-attribute__label")
     for lab in labels:
         k = norm(text_of(lab))
@@ -206,39 +300,46 @@ def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
         elif "sku" in k and not out["sku"]:
             out["sku"] = v
 
+    # label: value style lines
+    pairs = _scan_label_value_pairs(soup)
+    out["brand"] = out["brand"] or pairs.get("brand")
+    out["manufacturer"] = out["manufacturer"] or pairs.get("manufacturer")
+
     return out
 
 
-def parse_app_state_for_brand(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
-    """Try several shapes of brand/manufacturer inside inline scripts."""
-    brand, manu = None, None
-    brand_pat = [
-        r'"brand"\s*:\s*"([^"]+)"',
-        r'"brand"\s*:\s*{\s*"name"\s*:\s*"([^"]+)"',
-    ]
-    manu_pat = [
-        r'"manufacturer"\s*:\s*"([^"]+)"',
-        r'"manufacturer"\s*:\s*{\s*"name"\s*:\s*"([^"]+)"',
-    ]
+def parse_app_state_for_brand_or_price(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
+    """
+    Light-weight scraper for embedded JSON (not JSON-LD) that may contain
+    brand/manufacturer/price.
+    Returns (brand, manufacturer, price, currency).
+    """
+    brand = manufacturer = price = currency = None
     for s in soup.find_all("script"):
-        txt = (s.string or "")[:200000]  # guard
+        txt = (s.string or "").strip()
         if not txt:
             continue
+
         if brand is None:
-            for p in brand_pat:
-                m = re.search(p, txt)
-                if m:
-                    brand = m.group(1).strip()
-                    break
-        if manu is None:
-            for p in manu_pat:
-                m = re.search(p, txt)
-                if m:
-                    manu = m.group(1).strip()
-                    break
-        if brand and manu:
-            break
-    return brand, manu
+            mb = re.search(r'"brand"\s*:\s*"([^"]+)"', txt)
+            if mb:
+                brand = mb.group(1).strip()
+
+        if manufacturer is None:
+            mm = re.search(r'"manufacturer"\s*:\s*"([^"]+)"', txt)
+            if mm:
+                manufacturer = mm.group(1).strip()
+
+        if price is None:
+            # try to catch a reasonable price field (avoid percentages)
+            mp = re.search(r'"price"\s*:\s*"?(?!\s*0\s*%)(\d+[.,]?\d*)"?', txt)
+            if mp:
+                price = _clean_decimal(mp.group(1))
+        if currency is None:
+            mc = re.search(r'"priceCurrency"\s*:\s*"([A-Z]{3})"', txt)
+            if mc:
+                currency = mc.group(1)
+    return brand, manufacturer, price, currency
 
 
 def extract_product_title_from_dom(soup: BeautifulSoup) -> str:
@@ -248,39 +349,6 @@ def extract_product_title_from_dom(soup: BeautifulSoup) -> str:
     )
     el = soup.select_one(sel)
     return text_of(el)
-
-
-def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
-    cur = "EUR"
-
-    # 1) Visible nodes
-    node_selectors = [
-        "[data-testid=product-price]",
-        ".e-price__main",
-        ".product-price",
-        ".price",
-        "[class*='price'] span",
-        "[class*='price'] div",
-    ]
-    for sel in node_selectors:
-        el = soup.select_one(sel)
-        if el:
-            val = re.sub(r"[^\d,\.]", "", text_of(el)).replace(",", ".")
-            if val:
-                return val, cur
-
-    # 2) Script fallbacks
-    for tag in soup.find_all("script"):
-        txt = tag.string or ""
-        m = re.search(r'"price"\s*:\s*"?(?P<p>\d+(?:[.,]\d{1,2})?)"?', txt)
-        if not m:
-            m = re.search(r'"priceValue"\s*:\s*"?(?P<p>\d+(?:[.,]\d{1,2})?)"?', txt)
-        if not m:
-            m = re.search(r'"currentPrice"\s*:\s*"?(?P<p>\d+(?:[.,]\d{1,2})?)"?', txt)
-        if m:
-            return m.group("p").replace(",", "."), cur
-
-    return None, cur
 
 
 def prefer_valid_name(candidates: List[str], category_leaf: str) -> str:
@@ -323,10 +391,6 @@ def extract_size_from_name(name: str) -> Optional[str]:
 def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], category_leaf_hint: str, req_delay: float) -> Dict[str, Optional[str]]:
     page.goto(url, timeout=60000, wait_until="domcontentloaded")
     ensure_ready(page)
-
-    # NEW: wait for SPA hydration + expand specs so brand/manufacturer appear
-    _wait_for_price_and_specs(page)
-
     try:
         page.wait_for_selector("script[type='application/ld+json']", timeout=6000)
     except PWTimeout:
@@ -335,15 +399,13 @@ def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], categor
         page.wait_for_selector(".e-product__name, [data-testid=product-title], [data-testid=product-name]", timeout=5000)
     except PWTimeout:
         pass
-
-    # honor requested delay after hydration/expansion
     page.wait_for_timeout(int(req_delay * 1000))
 
-    html = page.content()
-    soup = BeautifulSoup(html, "html.parser")
+    soup = BeautifulSoup(page.content(), "html.parser")
+
     jl = from_json_ld(soup)
     spec = parse_spec_table(soup)
-    b2, m2 = parse_app_state_for_brand(soup)
+    b3, m3, p3, c3 = parse_app_state_for_brand_or_price(soup)
 
     h1_any = text_of(soup.select_one("h1"))
     dom_title = extract_product_title_from_dom(soup)
@@ -353,15 +415,21 @@ def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], categor
     category_leaf = cat_leaf_bc or category_leaf_hint
     name = prefer_valid_name(candidates, category_leaf)
 
+    # price (priority: JSON-LD → DOM/meta → app state)
     price = jl.get("price")
     currency = jl.get("currency") or "EUR"
     if not price:
-        price, currency = parse_price_from_dom(soup)
+        price, cur2 = parse_price_from_dom(soup)
+        currency = currency or cur2 or "EUR"
+    if not price and p3:
+        price = p3
+    if not currency and c3:
+        currency = c3
 
     size_text = spec["size"] or extract_size_from_name(name)
     image_url = jl.get("image")
-    brand = jl.get("brand") or spec["brand"] or b2
-    manufacturer = jl.get("manufacturer") or spec["manufacturer"] or m2
+    brand = jl.get("brand") or spec["brand"] or b3
+    manufacturer = jl.get("manufacturer") or spec["manufacturer"] or m3
     sku_raw = spec["sku"]
 
     if not cat_path:
@@ -382,7 +450,6 @@ def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], categor
         "category_path": cat_path,
         "category_leaf": category_leaf,
     }
-
 
 # -------------------- Category listing (robust link harvest + robust pagination) --------------------
 
@@ -442,7 +509,6 @@ def next_page_if_any(page: Page) -> bool:
     Click 'next' if pagination exists. Returns True if navigation happened.
     Handles both arrow '›' and '»', and falls back to constructing ?page=N URL.
     """
-    # Scroll a bit to make pagination visible
     try:
         page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
         page.wait_for_timeout(200)
@@ -512,7 +578,6 @@ def collect_category_products(page: Page, cat_url: str, req_delay: float, max_pa
     seen_pages = set()
     pages_done = 0
 
-    # interpret 0 as "unlimited"
     limit = max_pages if max_pages and max_pages > 0 else 10_000
 
     while True:
@@ -546,7 +611,6 @@ def collect_category_products(page: Page, cat_url: str, req_delay: float, max_pa
     print(f"[cat] {cat_url} → products found: {len(uniq)} across {pages_done} page(s)")
     return uniq
 
-
 # -------------------- CSV helpers --------------------
 
 CSV_HEADER = [
@@ -573,7 +637,6 @@ def append_rows(path: str, rows: List[List[str]]) -> None:
     with open(path, "a", encoding="utf-8", newline="") as f:
         w = csv.writer(f)
         w.writerows(rows)
-
 
 # -------------------- Runner --------------------
 
@@ -638,7 +701,6 @@ def crawl(args) -> None:
                     batch.append(row)
                     total += 1
 
-                    # periodic flush
                     if len(batch) >= 50:
                         append_rows(args.output_csv, batch)
                         batch.clear()
@@ -655,11 +717,12 @@ def crawl(args) -> None:
                     category_leaf = leaf_seg.replace("-", " ").title()
                     category_path = ""  # filled on PDP
 
-                    prods = collect_category_products(page, cat, req_delay,
-                                                     max_pages=per_cat_page_limit if per_cat_page_limit > 0 else 120)
+                    prods = collect_category_products(
+                        page, cat, req_delay,
+                        max_pages=per_cat_page_limit if per_cat_page_limit > 0 else 120
+                    )
                     if not prods:
                         print(f"[cat] {cat} → 0 items (check if category requires login or geo).")
-                        # restart browser even on empty, to be safe
                         try:
                             page.close(); ctx.close(); browser.close()
                         except Exception:
@@ -684,8 +747,8 @@ def crawl(args) -> None:
                             print(f"[warn] PDP parse failed for {ext_id}: {e}", file=sys.stderr)
                             continue
 
-                        # filter bogus names like "Pealeht"
-                        if norm(data.get("name") or "") in BAD_NAMES or norm(data.get("name") or "") == norm(data.get("category_leaf") or category_leaf):
+                        # Drop bad names like "Pealeht"
+                        if norm(data["name"]) in BAD_NAMES or norm(data["name"]) == norm(data.get("category_leaf") or category_leaf):
                             continue
 
                         row = [
@@ -706,7 +769,6 @@ def crawl(args) -> None:
                         batch.append(row)
                         total += 1
 
-                        # periodic flush
                         if len(batch) >= 50:
                             append_rows(args.output_csv, batch)
                             batch.clear()
@@ -714,10 +776,9 @@ def crawl(args) -> None:
                         if req_delay:
                             time.sleep(req_delay)
 
-                    # flush per-category remainder
                     append_rows(args.output_csv, batch)
 
-                    # harden: restart browser after each category to avoid EPIPE
+                    # restart browser per category (avoid EPIPE)
                     try:
                         page.close(); ctx.close(); browser.close()
                     except Exception:
@@ -731,7 +792,7 @@ def crawl(args) -> None:
             except Exception:
                 pass
 
-    # print a summary based on file growth (best effort)
+    # quick file-based summary
     try:
         lines = sum(1 for _ in open(args.output_csv, "r", encoding="utf-8"))
         print(f"[done] wrote ~{max(0, lines-1)} rows to {args.output_csv}")
