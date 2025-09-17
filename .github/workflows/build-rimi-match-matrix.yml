@@ -51,6 +51,7 @@ jobs:
           -- =========================
           DROP MATERIALIZED VIEW IF EXISTS rimi_match_matrix_nonprivate CASCADE;
 
+          CREATE MATERIALIZED VIEW rimi_match_matrix_nonprivate AS
           WITH
           rimi_src AS (
             SELECT
@@ -89,7 +90,7 @@ jobs:
             JOIN stores   s ON s.id = pr.store_id
             WHERE s.chain ILIKE 'prisma%'
           ),
-          -- parse sizes (incl. NxY packs; prefer drained weight)
+          -- parse sizes (incl. NxY packs; prefer drained/min unit)
           rimi_sized AS (
             SELECT r.*,
               (
@@ -232,20 +233,20 @@ jobs:
           scored_prisma AS (
             SELECT c.*, (0.7*name_sim + 0.3*COALESCE(size_score, name_sim*0.3) + brand_bonus) AS total_score
             FROM prisma_candidates c
-          )
-          , best_selver AS (
+          ),
+          best_selver AS (
             SELECT * FROM (
               SELECT s.*, ROW_NUMBER() OVER (PARTITION BY rimi_id ORDER BY total_score DESC NULLS LAST) rn
               FROM scored_selver s
             ) z WHERE rn=1
-          )
-          , best_prisma AS (
+          ),
+          best_prisma AS (
             SELECT * FROM (
               SELECT s.*, ROW_NUMBER() OVER (PARTITION BY rimi_id ORDER BY total_score DESC NULLS LAST) rn
               FROM scored_prisma s
             ) z WHERE rn=1
-          )
-          , selver_buckets AS (
+          ),
+          selver_buckets AS (
             SELECT *, CASE
               WHEN total_score>=0.98 THEN 'A+ (~100%)'
               WHEN total_score>=0.95 THEN 'A (95-98%)'
@@ -255,8 +256,8 @@ jobs:
               WHEN total_score>=0.50 THEN 'D (50-65%)'
               ELSE '0 (no good)' END AS selver_bucket
             FROM best_selver
-          )
-          , prisma_buckets AS (
+          ),
+          prisma_buckets AS (
             SELECT *, CASE
               WHEN total_score>=0.98 THEN 'A+ (~100%)'
               WHEN total_score>=0.95 THEN 'A (95-98%)'
@@ -266,10 +267,7 @@ jobs:
               WHEN total_score>=0.50 THEN 'D (50-65%)'
               ELSE '0 (no good)' END AS prisma_bucket
             FROM best_prisma
-          );
-
-          -- Finally create the materialized view
-          CREATE MATERIALIZED VIEW rimi_match_matrix_nonprivate AS
+          )
           SELECT
             r.rimi_id, r.rimi_name, r.rimi_brand, r.rimi_size_text, r.rimi_size_gml,
             s.selver_id, s.selver_name, s.selver_brand, s.selver_ean, s.selver_size_gml, s.total_score AS selver_score, s.selver_bucket,
@@ -284,6 +282,7 @@ jobs:
           -- =====================
           DROP MATERIALIZED VIEW IF EXISTS rimi_match_matrix_private CASCADE;
 
+          CREATE MATERIALIZED VIEW rimi_match_matrix_private AS
           WITH
           rimi_src AS (
             SELECT ext_id::text AS rimi_id, name AS rimi_name, brand AS rimi_brand,
@@ -313,7 +312,6 @@ jobs:
               )::numeric AS rimi_size_gml
             FROM rimi_split r
           )
-          CREATE MATERIALIZED VIEW rimi_match_matrix_private AS
           SELECT * FROM rimi_sized WHERE is_private_label;
           SQL
 
