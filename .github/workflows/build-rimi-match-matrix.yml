@@ -41,10 +41,13 @@ jobs:
           CREATE EXTENSION IF NOT EXISTS pg_trgm;
           CREATE EXTENSION IF NOT EXISTS unaccent;
 
-          -- Temp table for brand synonyms (loaded from repo CSV)
-          DROP TABLE IF EXISTS _brand_syn;
-          CREATE TEMP TABLE _brand_syn(alias text, canonical text);
-          \copy _brand_syn FROM 'data/brand_synonyms.csv' CSV HEADER;
+          -- Permanent synonym table (allowed for MVs)
+          CREATE TABLE IF NOT EXISTS brand_synonyms (
+            alias     text,
+            canonical text
+          );
+          TRUNCATE brand_synonyms;
+          \copy brand_synonyms FROM 'data/brand_synonyms.csv' CSV HEADER;
 
           -- =========================
           -- NON-PRIVATE MATCH MATRIX
@@ -90,7 +93,7 @@ jobs:
             JOIN stores   s ON s.id = pr.store_id
             WHERE s.chain ILIKE 'prisma%'
           ),
-          -- parse sizes (incl. NxY packs; prefer drained/min unit)
+          -- parse sizes (incl. NxY)
           rimi_sized AS (
             SELECT r.*,
               (
@@ -142,11 +145,11 @@ jobs:
               )::numeric AS prisma_size_gml
             FROM prisma_src p
           ),
-          -- normalize brands using synonyms
+          -- normalize brands using permanent table
           brand_syn AS (
             SELECT lower(unaccent(alias)) AS alias_norm,
                    NULLIF(lower(unaccent(canonical)),'') AS canonical_norm
-            FROM _brand_syn
+            FROM brand_synonyms
           ),
           rimi_normed AS (
             SELECT r.*,
