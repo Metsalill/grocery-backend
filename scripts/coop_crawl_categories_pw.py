@@ -26,6 +26,7 @@ import json
 import os
 import re
 import sys
+from decimal import Decimal, ROUND_HALF_UP
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse, urljoin
@@ -83,6 +84,22 @@ def looks_like_unit_price(text: str) -> bool:
         or "€/tk" in t or "€ / tk" in t
     )
 
+def money2(v: Optional[float]) -> Optional[float]:
+    """Round a price to 2 decimals (banker's rounding avoidance)."""
+    if v is None:
+        return None
+    try:
+        return float(Decimal(str(v)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+    except Exception:
+        return None
+
+def _base_url(u: str) -> str:
+    p = urlparse(u)
+    return f"{p.scheme}://{p.netloc}/" if p.scheme and p.netloc else u
+
+def _abs_url(base: str, u: str) -> str:
+    return urljoin(base, u)
+
 # ---------- page utilities ----------
 
 async def wait_cookie_banner(page: Page):
@@ -100,116 +117,101 @@ async def wait_cookie_banner(page: Page):
     except Exception:
         pass
 
-async def _scroll_and_collect_products(page: Page, req_delay: float, page_limit: int) -> List[str]:
-    """On the *current* category page, scroll/click load-more and return product PDP links."""
-    seen = set()
-    stable_rounds = 0
-    max_stable = 3
+async def collect_category_product_links(
+    browser: Browser,
+    category_url: str,
+    base: str,
+    page_limit: int,
+    req_delay: float,
+    max_depth: int = 0,
+    _seen_cats: Optional[set] = None,
+) -> List[str]:
+    """
+    Collect PDP links from a category page. Follows subcategories up to max_depth.
+    Ensures every link we visit or return is absolute using `base`.
+    """
+    _seen_cats = _seen_cats or set()
+    target = _abs_url(base, category_url)
 
-    for _ in range(1000):  # safety
-        links = await page.eval_on_selector_all(
-            'a[href*="/toode/"]',
-            "els => els.map(e => e.href)"
-        )
-        for u in links:
-            seen.add(u.split('#')[0])
-
-        clicked = False
-        for sel in [
-            'button:has-text("Lae veel")',
-            'button:has-text("Näita rohkem")',
-            '[data-testid="load-more"]',
-        ]:
-            try:
-                btn = page.locator(sel)
-                if await btn.count() > 0:
-                    await btn.first.click()
-                    await page.wait_for_timeout(int(req_delay * 1000))
-                    clicked = True
-                    break
-            except Exception:
-                pass
-
-        await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-        await page.wait_for_timeout(int(req_delay * 1000))
-
-        more = await page.eval_on_selector_all(
-            'a[href*="/toode/"]',
-            "els => els.map(e => e.href)"
-        )
-        before = len(seen)
-        for u in more:
-            seen.add(u.split('#')[0])
-        after = len(seen)
-
-        stable_rounds = stable_rounds + 1 if (after == before and not clicked) else 0
-        if stable_rounds >= max_stable:
-            break
-        if page_limit > 0 and after >= page_limit:
-            break
-
-    return list(seen)
-
-async def _find_subcategory_links(page: Page, base_url: str) -> List[str]:
-    """Find deeper category links when a page is a ‘hub’ with sub-tiles."""
+    p = await browser.new_page()
+    seen: set[str] = set()
     try:
-        hrefs = await page.eval_on_selector_all(
-            'a[href*="/tootekategooria/"]',
-            "els => els.map(e => e.href)"
+        await p.goto(target, wait_until="domcontentloaded")
+        await wait_cookie_banner(p)
+
+        # Gather product anchors (absoluteize every href)
+        hrefs = await p.eval_on_selector_all(
+            'a[href*="/toode/"]',
+            "els => els.map(e => e.href || e.getAttribute('href'))"
         )
-        # Normalize & keep under same host
-        norm = []
-        for h in hrefs:
-            u = h.split('#')[0]
-            if not u.startswith("http"):
-                u = urljoin(base_url, u)
-            norm.append(u)
-        return list(dict.fromkeys(norm))  # dedup
-    except Exception:
-        return []
+        for u in hrefs:
+            if not u:
+                continue
+            seen.add(_abs_url(base, u).split('#')[0])
 
-async def collect_category_product_links(browser_like, category_url: str, page_limit: int, req_delay: float, max_depth: int = 2) -> List[str]:
-    """
-    BFS: visit the given category. If no /toode/ links found, descend into sub-categories.
-    """
-    total: List[str] = []
-    queue: List[Tuple[str, int]] = [(category_url, 0)]
-    visited = set()
+        # Optional "load more" + lazy scroll loop
+        stable_rounds = 0
+        max_stable = 3
+        while True:
+            clicked = False
+            for sel in ['button:has-text("Lae veel")', 'button:has-text("Näita rohkem")', '[data-testid="load-more"]']:
+                try:
+                    btn = p.locator(sel)
+                    if await btn.count() > 0:
+                        await btn.first.click()
+                        await p.wait_for_timeout(int(req_delay * 1000))
+                        clicked = True
+                        break
+                except Exception:
+                    pass
 
-    while queue:
-        url, depth = queue.pop(0)
-        if url in visited:
-            continue
-        visited.add(url)
-
-        p = await browser_like.new_page()
-        try:
-            await p.goto(url, wait_until="domcontentloaded")
-            await wait_cookie_banner(p)
+            await p.evaluate("window.scrollTo(0, document.body.scrollHeight)")
             await p.wait_for_timeout(int(req_delay * 1000))
 
-            # First, try to collect products on this page
-            pdps = await _scroll_and_collect_products(p, req_delay, 0 if page_limit == 0 else (page_limit - len(total)))
-            if pdps:
-                total.extend(pdps)
+            more = await p.eval_on_selector_all(
+                'a[href*="/toode/"]',
+                "els => els.map(e => e.href || e.getAttribute('href'))"
+            )
+            before = len(seen)
+            for u in more:
+                if not u:
+                    continue
+                seen.add(_abs_url(base, u).split('#')[0])
+            after = len(seen)
+
+            if page_limit > 0 and after >= page_limit:
+                break
+
+            if after == before and not clicked:
+                stable_rounds += 1
             else:
-                # No product cards → try sub-categories
-                if depth < max_depth:
-                    subs = await _find_subcategory_links(p, url)
-                    for s in subs:
-                        if s not in visited:
-                            queue.append((s, depth + 1))
+                stable_rounds = 0
+            if stable_rounds >= max_stable:
+                break
 
-        finally:
-            await p.close()
+        # Recurse into subcategories when asked
+        if max_depth > 0:
+            cat_hrefs = await p.eval_on_selector_all(
+                'a[href*="/tootekategooria/"], a[href*="/et/tooted/"]',
+                "els => els.map(e => e.href || e.getAttribute('href'))"
+            )
+            for c in cat_hrefs:
+                if not c:
+                    continue
+                sub = _abs_url(base, c)
+                if sub in _seen_cats:
+                    continue
+                _seen_cats.add(sub)
+                more_links = await collect_category_product_links(
+                    browser, sub, base, page_limit, req_delay, max_depth - 1, _seen_cats
+                )
+                for u in more_links:
+                    seen.add(u.split('#')[0])
 
-        if page_limit > 0 and len(total) >= page_limit:
-            break
+    finally:
+        await p.close()
 
-    # Hard cap if needed
-    if page_limit > 0:
-        total = total[:page_limit]
-    return total
+    return list(seen)
 
 async def parse_json_ld(page: Page) -> Dict:
     data: Dict = {}
@@ -283,6 +285,7 @@ async def extract_visible_price(page: Page) -> Optional[float]:
 async def extract_text_after_label(page: Page, label: str) -> Optional[str]:
     """Find text following a visible label like 'Tootekood:' or 'Tootja:'."""
     try:
+        # Try simple "label : value" pattern in a single node
         nodes = page.locator(f"xpath=//*[contains(normalize-space(.), '{label}')]")
         n = await nodes.count()
         for i in range(min(n, 8)):
@@ -292,9 +295,10 @@ async def extract_text_after_label(page: Page, label: str) -> Optional[str]:
             m = re.search(rf"{re.escape(label)}\s*[:\-]?\s*([^\n<]{{2,120}})", txt, flags=re.I)
             if m:
                 return m.group(1).strip()
-            # 2) next sibling
+            # 2) label node followed by sibling with value
+            sib = await nodes.nth(i).evaluate_handle("el => el.nextElementSibling && el.nextElementSibling.textContent")
             try:
-                sval = await nodes.nth(i).evaluate("(el) => el.nextElementSibling && el.nextElementSibling.textContent")
+                sval = await sib.json_value()
                 if sval and isinstance(sval, str) and sval.strip():
                     return sval.strip()
             except Exception:
@@ -308,6 +312,10 @@ async def extract_text_after_label(page: Page, label: str) -> Optional[str]:
     return None
 
 async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -> Dict:
+    # Safety: absolutize PDP URL in case a relative sneaks in
+    base = f"https://{store_host}/" if "://" not in store_host else _base_url(store_host)
+    url = _abs_url(base, url)
+
     await page.goto(url, wait_until="domcontentloaded")
     await wait_cookie_banner(page)
     await page.wait_for_timeout(int(req_delay * 1000))
@@ -339,7 +347,11 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
 
     # Manufacturer from page (Tootja / Valmistaja)
     if not manufacturer:
-        manufacturer = await extract_text_after_label(page, "Tootja") or await extract_text_after_label(page, "Valmistaja")
+        # 1) dedicated helper using DOM relations
+        manufacturer = await extract_text_after_label(page, "Tootja")
+        if not manufacturer:
+            manufacturer = await extract_text_after_label(page, "Valmistaja")
+        # 2) text-wide regex fallback
         if not manufacturer:
             try:
                 full = await page.inner_text("body")
@@ -453,7 +465,7 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
         "size_text": size_text,
         "brand": brand,
         "manufacturer": manufacturer,
-        "price": float(price) if price is not None else None,
+        "price": money2(price) if price is not None else None,
         "currency": currency,
         "image_url": image_url,
         "url": url,
@@ -461,13 +473,22 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
 
 # ---------- category runner ----------
 
-async def process_category(browser: Browser, category_url: str, page_limit: int, req_delay: float, pdp_workers: int, max_products: int, store_host: str) -> List[Dict]:
-    # Discover product PDP links (BFS into sub-categories when needed)
-    links = await collect_category_product_links(browser, category_url, page_limit, req_delay, max_depth=2)
+async def process_category(browser: Browser, category_url: str, page_limit: int, req_delay: float,
+                           pdp_workers: int, max_products: int, store_host: str) -> List[Dict]:
+    items: List[Dict] = []
+
+    # Compute a base URL for absolutization (from the category itself if absolute, else from store_host)
+    if category_url.startswith("http"):
+        region_base = _base_url(category_url)
+    else:
+        region_base = f"https://{store_host}/"
+
+    links = await collect_category_product_links(
+        browser, category_url, region_base, page_limit, req_delay, max_depth=2
+    )
     if max_products > 0:
         links = links[:max_products]
 
-    items: List[Dict] = []
     sem = asyncio.Semaphore(pdp_workers)
 
     async def worker(url: str) -> Optional[Dict]:
@@ -499,7 +520,11 @@ def write_csv(rows: List[Dict], out_path: Path) -> None:
         w = csv.DictWriter(f, fieldnames=cols)
         w.writeheader()
         for r in rows:
-            w.writerow({k: r.get(k) for k in cols})
+            # ensure price is 2 decimals in CSV as well
+            row = dict(r)
+            if row.get("price") is not None:
+                row["price"] = money2(row["price"])
+            w.writerow({k: row.get(k) for k in cols})
 
 async def maybe_upsert_db(rows: List[Dict]) -> None:
     if not rows:
@@ -562,7 +587,7 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
                 r.get("ean_raw"),
                 r.get("ean_norm"),
                 r.get("size_text"),
-                r.get("price"),
+                money2(r.get("price")),
                 r.get("currency"),
                 r.get("image_url"),
                 r.get("url"),
