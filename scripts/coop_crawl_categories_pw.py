@@ -3,7 +3,7 @@
 """
 Coop eCoop (multi-region) category crawler → PDP extractor → CSV/DB-friendly
 
-- Crawls category pages with Playwright (handles JS/lazy-load).
+- Crawls category pages with Playwright (handles JS/lazy-load + pagination).
 - PDP extraction: title, brand, manufacturer (Tootja), image, price, EAN/GTIN,
   Tootekood, etc. Writes CSV; optional Postgres upsert.
 
@@ -28,7 +28,7 @@ import re
 import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-from urllib.parse import urlparse, urljoin
+from urllib.parse import urlparse, urljoin, urlsplit, urlunsplit, parse_qsl, urlencode
 
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page
 
@@ -82,13 +82,20 @@ def looks_like_unit_price(text: str) -> bool:
         or "€/tk" in t or "€ / tk" in t
     )
 
-def strip_query_and_fragment(u: str) -> str:
-    """Drop ?query and #fragment from URL path to avoid add-to-cart etc."""
+# --- URL cleaning: keep pagination, drop junk ---
+_ALLOWED_QUERY_KEYS = {"page"}  # allow ?page=2 etc., drop everything else
+
+def clean_url_keep_allowed_query(u: str) -> str:
+    """Keep only whitelisted query keys (e.g., page). Drop fragments and junk like add-to-cart."""
     if not u:
         return u
-    u = u.split("#", 1)[0]
-    u = u.split("?", 1)[0]
-    return u
+    s = urlsplit(u)
+    if "add-to-cart" in (s.query or ""):
+        q = ""
+    else:
+        keep = [(k, v) for (k, v) in parse_qsl(s.query or "", keep_blank_values=False) if k.lower() in _ALLOWED_QUERY_KEYS]
+        q = urlencode(keep)
+    return urlunsplit((s.scheme, s.netloc, s.path, q, ""))
 
 def same_host(u: str, host: str) -> bool:
     try:
@@ -115,9 +122,11 @@ async def wait_cookie_banner(page: Page):
 
 async def collect_category_product_links(page: Page, category_url: str, page_limit: int, req_delay: float, max_depth: int = 2) -> List[str]:
     """
-    Collect PDP links from a category. Handles "hub" pages by descending into
-    subcategories (up to max_depth). Critical fix: strip query/fragment so we never
-    navigate to links like '?add-to-cart=...'.
+    Collect PDP links from a category. Handles:
+      - lazy-load/scroll
+      - "Load more" buttons
+      - classic pagination (?page=N)
+      - hub pages with subcategories (BFS up to max_depth)
     """
     base = urlparse(category_url)
     base_host = base.netloc
@@ -125,12 +134,9 @@ async def collect_category_product_links(page: Page, category_url: str, page_lim
     def norm_abs(u: str) -> str:
         if not u:
             return u
-        # Join relative to the current category root
-        if not u.startswith("http"):
-            u = urljoin(f"{base.scheme}://{base.netloc}/", u)
-        # Always drop query/fragment junk (add-to-cart, sorting, etc.)
-        u = strip_query_and_fragment(u)
-        return u
+        # urljoin with the current path so bare "?page=2" resolves correctly
+        u = urljoin(f"{base.scheme}://{base.netloc}{base.path}", u)
+        return clean_url_keep_allowed_query(u)
 
     def is_product(u: str) -> bool:
         return "/toode/" in u
@@ -139,15 +145,14 @@ async def collect_category_product_links(page: Page, category_url: str, page_lim
         return "/tootekategooria/" in u
 
     seen_products: set[str] = set()
-    seen_cats: set[str] = set()
-    queue: List[Tuple[str, int]] = [(category_url, 0)]
+    seen_pages: set[str] = set()
+    queue: List[Tuple[str, int]] = [(clean_url_keep_allowed_query(category_url), 0)]
 
     while queue:
         url, depth = queue.pop(0)
-        url = norm_abs(url)
-        if not url or url in seen_cats or not same_host(url, base_host):
+        if not url or url in seen_pages or not same_host(url, base_host):
             continue
-        seen_cats.add(url)
+        seen_pages.add(url)
 
         try:
             await page.goto(url, wait_until="domcontentloaded")
@@ -163,10 +168,7 @@ async def collect_category_product_links(page: Page, category_url: str, page_lim
         for _ in range(1000):
             # Gather product anchors
             try:
-                hrefs = await page.eval_on_selector_all(
-                    'a[href*="/toode/"]',
-                    "els => els.map(e => e.href)"
-                )
+                hrefs = await page.eval_on_selector_all('a[href*="/toode/"]', "els => els.map(e => e.href)")
             except Exception:
                 hrefs = []
 
@@ -177,11 +179,7 @@ async def collect_category_product_links(page: Page, category_url: str, page_lim
 
             # Try generic load-more controls
             clicked = False
-            for sel in [
-                'button:has-text("Lae veel")',
-                'button:has-text("Näita rohkem")',
-                '[data-testid="load-more"]',
-            ]:
+            for sel in ['button:has-text("Lae veel")', 'button:has-text("Näita rohkem")', '[data-testid="load-more"]']:
                 try:
                     btn = page.locator(sel)
                     if await btn.count() > 0:
@@ -202,16 +200,14 @@ async def collect_category_product_links(page: Page, category_url: str, page_lim
             # Check if new products appeared
             before = len(seen_products)
             try:
-                hrefs2 = await page.eval_on_selector_all(
-                    'a[href*="/toode/"]',
-                    "els => els.map(e => e.href)"
-                )
+                hrefs2 = await page.eval_on_selector_all('a[href*="/toode/"]', "els => els.map(e => e.href)")
             except Exception:
                 hrefs2 = []
             for h in hrefs2:
                 h = norm_abs(h)
                 if h and is_product(h):
                     seen_products.add(h)
+
             if len(seen_products) == before and not clicked:
                 stable_rounds += 1
             else:
@@ -221,6 +217,19 @@ async def collect_category_product_links(page: Page, category_url: str, page_lim
                 break
             if page_limit > 0 and len(seen_products) >= page_limit:
                 break
+
+        # Queue pagination pages on the same category
+        try:
+            next_links = await page.eval_on_selector_all(
+                'a[rel="next"], a[href*="?page="]',
+                'els => els.map(e => e.getAttribute("href"))'
+            )
+        except Exception:
+            next_links = []
+        for nl in next_links:
+            nl = norm_abs(nl or "")
+            if nl and same_host(nl, base_host) and nl not in seen_pages:
+                queue.append((nl, depth))
 
         # If this page was a hub of subcategories, traverse deeper
         if depth < max_depth:
@@ -233,9 +242,7 @@ async def collect_category_product_links(page: Page, category_url: str, page_lim
                 subcats = []
             for sc in subcats:
                 sc = norm_abs(sc or "")
-                if not sc:
-                    continue
-                if is_category(sc) and same_host(sc, base_host):
+                if sc and is_category(sc) and same_host(sc, base_host) and sc not in seen_pages:
                     queue.append((sc, depth + 1))
 
         if page_limit > 0 and len(seen_products) >= page_limit:
@@ -579,7 +586,6 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
             if not r.get("ext_id"):
                 skipped += 1
                 continue
-            # Round price to 2 decimals before upsert (display-friendly)
             pr = r.get("price")
             pr = round(float(pr), 2) if isinstance(pr, (float, int)) else None
             payload.append((
@@ -651,7 +657,7 @@ async def run(args):
 
     def norm_url(u: str) -> str:
         absu = urljoin(base_region, u)  # handles both absolute and relative inputs
-        return strip_query_and_fragment(absu)
+        return clean_url_keep_allowed_query(absu)
 
     categories = [norm_url(u) for u in categories]
 
@@ -678,7 +684,6 @@ async def run(args):
         all_rows: List[Dict] = []
         try:
             for cat in categories:
-                # Ensure absolute once more (belt & suspenders)
                 full_cat = cat if cat.startswith("http") else norm_url(cat)
                 print(f"[cat] {full_cat}")
                 rows = await process_category(context, full_cat, args.page_limit, args.req_delay, args.pdp_workers, args.max_products, store_host)
