@@ -3,8 +3,12 @@ name: "Coop – Category Crawl (Playwright) + optional DB upsert"
 on:
   workflow_dispatch:
     inputs:
+      mode:
+        description: "Crawler mode: ecoop or wolt"
+        required: false
+        default: "ecoop"
       region:
-        description: "Base region URL (https://coophaapsalu.ee or https://vandra.ecoop.ee)"
+        description: "Base region URL (https://coophaapsalu.ee or https://vandra.ecoop.ee or Wolt venue URL)"
         required: false
         default: "https://vandra.ecoop.ee"
       categories_multiline:
@@ -24,15 +28,15 @@ on:
         required: false
         default: "0"
       headless:
-        description: "Chromium headless (1/0)"
+        description: "Chromium headless (1/0) — ignored for wolt mode"
         required: false
         default: "1"
       req_delay:
-        description: "Delay between actions (seconds)"
+        description: "Delay between actions (seconds) — used for ecoop mode"
         required: false
         default: "0.5"
       pdp_workers:
-        description: "Concurrent PDP tabs per category"
+        description: "Concurrent PDP tabs per category — used for ecoop mode"
         required: false
         default: "4"
       shards:
@@ -55,6 +59,7 @@ concurrency:
 jobs:
   crawl:
     runs-on: ubuntu-latest
+    timeout-minutes: 75
 
     strategy:
       fail-fast: false
@@ -76,12 +81,17 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Python deps & Playwright
+      - name: Install Python deps (& Playwright when needed)
         if: ${{ matrix.shard_index < (github.event_name == 'workflow_dispatch' && fromJSON(inputs.shards) || 1) }}
+        env:
+          MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'ecoop' }}
         run: |
           python -m pip install --upgrade pip
-          pip install playwright==1.46.0 asyncpg
-          python -m playwright install --with-deps chromium
+          pip install asyncpg
+          if [ "$MODE" = "ecoop" ]; then
+            pip install playwright==1.46.0
+            python -m playwright install --with-deps chromium
+          fi
 
       - name: Choose DB URL (prefer PUBLIC)
         if: ${{ matrix.shard_index < (github.event_name == 'workflow_dispatch' && fromJSON(inputs.shards) || 1) }}
@@ -98,10 +108,12 @@ jobs:
           else
             echo "[db] No DB secret provided; upsert (if enabled) will be skipped."
           fi
+          echo "COOP_UPSERT_DB=${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}" >> "$GITHUB_ENV"
 
       - name: Build categories file
         if: ${{ matrix.shard_index < (github.event_name == 'workflow_dispatch' && fromJSON(inputs.shards) || 1) }}
         env:
+          MODE:              ${{ github.event_name == 'workflow_dispatch' && inputs.mode || 'ecoop' }}
           REGION_URL:        ${{ inputs.region }}
           CATS_MULTILINE:    ${{ inputs.categories_multiline }}
           CATS_FILE_URL:     ${{ inputs.categories_file_url }}
@@ -123,12 +135,16 @@ jobs:
             printf '%s\n' "$CATS_MULTILINE" > "$CATS_ALL"
           fi
 
-          # 3) Repo defaults by region
+          # 3) Repo defaults by target (region/mode)
           if [ ! -s "$CATS_ALL" ]; then
-            if echo "$REGION_URL" | grep -qi 'coophaapsalu\.ee'; then
-              REPO_FILE="data/coop_haapsalu_categories.txt"
+            if [ "$MODE" = "wolt" ] || echo "$REGION_URL" | grep -qi 'wolt\.com'; then
+              REPO_FILE="data/wolt_coop_lasname_categories.txt"
             else
-              REPO_FILE="data/coop_vandra_categories.txt"
+              if echo "$REGION_URL" | grep -qi 'coophaapsalu\.ee'; then
+                REPO_FILE="data/coop_haapsalu_categories.txt"
+              else
+                REPO_FILE="data/coop_vandra_categories.txt"
+              fi
             fi
             if [ -f "$REPO_FILE" ]; then
               echo ">> using repo categories file: $REPO_FILE"
@@ -138,10 +154,14 @@ jobs:
 
           # 4) Last-resort tiny default
           if [ ! -s "$CATS_ALL" ]; then
-            if echo "$REGION_URL" | grep -qi 'coophaapsalu\.ee'; then
-              echo "/tootekategooria/joogid/" > "$CATS_ALL"
+            if [ "$MODE" = "wolt" ] || echo "$REGION_URL" | grep -qi 'wolt\.com'; then
+              echo "https://wolt.com/et/est/tallinn/venue/coop-lasname/items/puu-ja-koogiviljad-4" > "$CATS_ALL"
             else
-              echo "/et/tooted/53-joogid" > "$CATS_ALL"
+              if echo "$REGION_URL" | grep -qi 'coophaapsalu\.ee'; then
+                echo "/tootekategooria/joogid/" > "$CATS_ALL"
+              else
+                echo "/et/tooted/53-joogid" > "$CATS_ALL"
+              fi
             fi
           fi
 
@@ -154,19 +174,21 @@ jobs:
 
       - name: Run Coop crawler (sharded)
         if: ${{ matrix.shard_index < (github.event_name == 'workflow_dispatch' && fromJSON(inputs.shards) || 1) }}
+        timeout-minutes: 60
         env:
-          REGION_URL:  ${{ inputs.region }}
-          PAGE_LIMIT:  ${{ github.event_name == 'workflow_dispatch' && inputs.page_limit   || '0' }}
+          MODE:         ${{ github.event_name == 'workflow_dispatch' && inputs.mode        || 'ecoop' }}
+          REGION_URL:   ${{ inputs.region }}
+          PAGE_LIMIT:   ${{ github.event_name == 'workflow_dispatch' && inputs.page_limit   || '0' }}
           MAX_PRODUCTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_products || '0' }}
-          HEADLESS:    ${{ github.event_name == 'workflow_dispatch' && inputs.headless     || '1' }}
-          REQ_DELAY:   ${{ github.event_name == 'workflow_dispatch' && inputs.req_delay    || '0.5' }}
-          PDP_WORKERS: ${{ github.event_name == 'workflow_dispatch' && inputs.pdp_workers  || '4' }}
-          SHARD_COUNT: ${{ github.event_name == 'workflow_dispatch' && inputs.shards       || '1' }}
-          COOP_UPSERT_DB: ${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}
+          HEADLESS:     ${{ github.event_name == 'workflow_dispatch' && inputs.headless     || '1' }}
+          REQ_DELAY:    ${{ github.event_name == 'workflow_dispatch' && inputs.req_delay    || '0.5' }}
+          PDP_WORKERS:  ${{ github.event_name == 'workflow_dispatch' && inputs.pdp_workers  || '4' }}
+          SHARD_COUNT:  ${{ github.event_name == 'workflow_dispatch' && inputs.shards       || '1' }}
         run: |
           set -euo pipefail
-          echo ">> running shard ${{ matrix.shard_index }} of $SHARD_COUNT"
+          echo ">> running shard ${{ matrix.shard_index }} of $SHARD_COUNT (mode=$MODE)"
           python scripts/coop_crawl_categories_pw.py \
+            --mode "$MODE" \
             --region "$REGION_URL" \
             --categories-file "coop_categories.txt" \
             --page-limit "$PAGE_LIMIT" \
