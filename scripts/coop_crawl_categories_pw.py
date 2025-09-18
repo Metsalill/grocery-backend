@@ -127,7 +127,7 @@ async def collect_category_product_links(page: Page, category_url: str, page_lim
             return u
         # Join relative to the current category root
         if not u.startswith("http"):
-            u = urljoin(f"{base.scheme}://{base.netloc}", u)
+            u = urljoin(f"{base.scheme}://{base.netloc}/", u)
         # Always drop query/fragment junk (add-to-cart, sorting, etc.)
         u = strip_query_and_fragment(u)
         return u
@@ -200,7 +200,7 @@ async def collect_category_product_links(page: Page, category_url: str, page_lim
             await page.wait_for_timeout(int(req_delay * 1000))
 
             # Check if new products appeared
-            after_count = len(seen_products)
+            before = len(seen_products)
             try:
                 hrefs2 = await page.eval_on_selector_all(
                     'a[href*="/toode/"]',
@@ -212,7 +212,7 @@ async def collect_category_product_links(page: Page, category_url: str, page_lim
                 h = norm_abs(h)
                 if h and is_product(h):
                     seen_products.add(h)
-            if len(seen_products) == after_count and not clicked:
+            if len(seen_products) == before and not clicked:
                 stable_rounds += 1
             else:
                 stable_rounds = 0
@@ -235,7 +235,6 @@ async def collect_category_product_links(page: Page, category_url: str, page_lim
                 sc = norm_abs(sc or "")
                 if not sc:
                     continue
-                # be strict: only clean category paths, same host; skip any add-to-cart junk by construction
                 if is_category(sc) and same_host(sc, base_host):
                     queue.append((sc, depth + 1))
 
@@ -633,7 +632,7 @@ async def _route_handler(route):
 # ---------- main ----------
 
 async def run(args):
-    # categories
+    # Read categories
     categories: List[str] = []
     if args.categories_multiline:
         categories.extend([ln.strip() for ln in args.categories_multiline.splitlines() if ln.strip()])
@@ -643,14 +642,16 @@ async def run(args):
         print("[error] No category URLs provided. Pass --categories-multiline or --categories-file.")
         sys.exit(2)
 
-    # normalize to region
+    # Normalise base region and categories to ABSOLUTE URLs with urljoin.
+    base_region = args.region.strip()
+    if not re.match(r"^https?://", base_region, flags=re.I):
+        base_region = "https://" + base_region
+    if not base_region.endswith("/"):
+        base_region += "/"
+
     def norm_url(u: str) -> str:
-        if u.startswith("http"):
-            return strip_query_and_fragment(u)
-        base = args.region.rstrip("/")
-        if not u.startswith("/"):
-            u = "/" + u
-        return strip_query_and_fragment(base + u)
+        absu = urljoin(base_region, u)  # handles both absolute and relative inputs
+        return strip_query_and_fragment(absu)
 
     categories = [norm_url(u) for u in categories]
 
@@ -662,7 +663,7 @@ async def run(args):
         categories = [u for i, u in enumerate(categories) if i % args.cat_shards == args.cat_index]
         print(f"[shard] Using {len(categories)} categories for shard {args.cat_index}/{args.cat_shards}")
 
-    store_host = urlparse(args.region).netloc.lower()
+    store_host = urlparse(base_region).netloc.lower()
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=bool(int(args.headless)))
@@ -677,8 +678,10 @@ async def run(args):
         all_rows: List[Dict] = []
         try:
             for cat in categories:
-                print(f"[cat] {cat}")
-                rows = await process_category(context, cat, args.page_limit, args.req_delay, args.pdp_workers, args.max_products, store_host)
+                # Ensure absolute once more (belt & suspenders)
+                full_cat = cat if cat.startswith("http") else norm_url(cat)
+                print(f"[cat] {full_cat}")
+                rows = await process_category(context, full_cat, args.page_limit, args.req_delay, args.pdp_workers, args.max_products, store_host)
                 print(f"[info] category rows: {len(rows)}")
                 all_rows.extend(rows)
         finally:
