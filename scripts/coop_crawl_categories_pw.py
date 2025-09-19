@@ -21,6 +21,7 @@ Notes
 - store_host for ecoop is derived from --region (e.g. https://coophaapsalu.ee → coophaapsalu.ee).
 - store_host for wolt is "wolt:<venue-slug>" (e.g., "wolt:coop-lasname").
 - Supports category sharding via --cat-shards / --cat-index for parallel runs.
+- NEW: streams rows to CSV incrementally so you still get data if the job is cancelled.
 """
 
 import argparse
@@ -30,6 +31,7 @@ import datetime as dt
 import json
 import os
 import re
+import signal
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -385,6 +387,40 @@ async def extract_visible_price(page: Any) -> Optional[float]:
 
 # ---------- PDP extraction (ecoop) ----------
 
+async def extract_text_after_label(page: Any, label: str) -> Optional[str]:
+    """Find text following a visible label like 'Tootekood:' or 'Tootja:'."""
+    try:
+        nodes = page.locator(f"xpath=//*[contains(normalize-space(.), '{label}')]")
+        n = await nodes.count()
+        for i in range(min(n, 8)):
+            html = await nodes.nth(i).inner_html()
+            txt = await nodes.nth(i).inner_text()
+            m = re.search(
+                rf"{re.escape(label)}\s*[:\-]?\s*([^\n<]{{2,120}})", txt, flags=re.I
+            )
+            if m:
+                return m.group(1).strip()
+            sib = await nodes.nth(i).evaluate_handle(
+                "el => el.nextElementSibling && el.nextElementSibling.textContent"
+            )
+            try:
+                sval = await sib.json_value()
+                if sval and isinstance(sval, str) and sval.strip():
+                    return sval.strip()
+            except Exception:
+                pass
+            m2 = re.search(
+                rf"{re.escape(label)}\s*[:\-]?\s*</[^>]+>\s*([^<]{{2,120}})",
+                html or "",
+                flags=re.I,
+            )
+            if m2:
+                return m2.group(1).strip()
+    except Exception:
+        pass
+    return None
+
+
 async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) -> Dict:
     await page.goto(url, wait_until="domcontentloaded")
     await wait_cookie_banner(page)
@@ -521,12 +557,14 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
         if m:
             size_text = m.group(1)
 
-    # ext_id selection
+    # ext_id selection (bugfix: actually assign from regex)
     ext_id = None
     if ean_raw and normalize_ean(ean_raw):
         ext_id = normalize_ean(ean_raw)
     if not ext_id:
         m = re.search(r"/toode/(\d+)", url)
+        if m:
+            ext_id = m.group(1)
     if not ext_id:
         m2 = re.search(r"/toode/([^/?#]+)/?", url)
         if m2:
@@ -558,42 +596,6 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
     }
 
 
-# ---------- PDP label helper (ecoop) ----------
-
-async def extract_text_after_label(page: Any, label: str) -> Optional[str]:
-    """Find text following a visible label like 'Tootekood:' or 'Tootja:'."""
-    try:
-        nodes = page.locator(f"xpath=//*[contains(normalize-space(.), '{label}')]")
-        n = await nodes.count()
-        for i in range(min(n, 8)):
-            html = await nodes.nth(i).inner_html()
-            txt = await nodes.nth(i).inner_text()
-            m = re.search(
-                rf"{re.escape(label)}\s*[:\-]?\s*([^\n<]{{2,120}})", txt, flags=re.I
-            )
-            if m:
-                return m.group(1).strip()
-            sib = await nodes.nth(i).evaluate_handle(
-                "el => el.nextElementSibling && el.nextElementSibling.textContent"
-            )
-            try:
-                sval = await sib.json_value()
-                if sval and isinstance(sval, str) and sval.strip():
-                    return sval.strip()
-            except Exception:
-                pass
-            m2 = re.search(
-                rf"{re.escape(label)}\s*[:\-]?\s*</[^>]+>\s*([^<]{{2,120}})",
-                html or "",
-                flags=re.I,
-            )
-            if m2:
-                return m2.group(1).strip()
-    except Exception:
-        pass
-    return None
-
-
 # ---------- WOLT parsing ----------
 
 def _html_get_next_data(html: str) -> Optional[Dict]:
@@ -609,7 +611,6 @@ def _html_get_next_data(html: str) -> Optional[Dict]:
 def _walk_collect_items(obj: Any, found: Dict[str, Dict]) -> None:
     """Collect dicts that look like Wolt menu items (best-effort)."""
     if isinstance(obj, dict):
-        # heuristic: must have a name; and some price-ish field or category item flags
         has_name = isinstance(obj.get("name"), str) and obj.get("name").strip()
         price_keys = ("price", "baseprice", "base_price", "unit_price", "total_price", "current_price")
         has_priceish = any(k in obj for k in price_keys)
@@ -735,19 +736,37 @@ def _format_price_for_csv(v):
         return v
 
 
-# ---------- outputs ----------
+# ---------- outputs (streaming-friendly) ----------
 
+CSV_COLS = [
+    "chain", "store_host", "channel", "ext_id", "ean_raw", "ean_norm", "name",
+    "size_text", "brand", "manufacturer", "price", "currency", "image_url", "url",
+]
+
+def append_csv(rows: List[Dict], out_path: Path) -> None:
+    """Append rows to CSV, writing header if the file is new/empty."""
+    if not rows:
+        return
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    write_header = (not out_path.exists()) or out_path.stat().st_size == 0
+    with out_path.open("a", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=CSV_COLS)
+        if write_header:
+            w.writeheader()
+        for r in rows:
+            row = {k: r.get(k) for k in CSV_COLS}
+            row["price"] = _format_price_for_csv(row.get("price"))
+            w.writerow(row)
+
+
+# (kept for completeness; unused by streaming path)
 def write_csv(rows: List[Dict], out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    cols = [
-        "chain", "store_host", "channel", "ext_id", "ean_raw", "ean_norm", "name",
-        "size_text", "brand", "manufacturer", "price", "currency", "image_url", "url",
-    ]
     with out_path.open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=cols)
+        w = csv.DictWriter(f, fieldnames=CSV_COLS)
         w.writeheader()
         for r in rows:
-            row = {k: r.get(k) for k in cols}
+            row = {k: r.get(k) for k in CSV_COLS}
             row["price"] = _format_price_for_csv(row.get("price"))
             w.writerow(row)
 
@@ -858,9 +877,9 @@ async def _route_handler(route):
     await _route_filter(route)
 
 
-# ---------- runners ----------
+# ---------- runners (now streaming) ----------
 
-async def run_ecoop(args, categories: List[str], base_region: str) -> List[Dict]:
+async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> None:
     if async_playwright is None:
         raise RuntimeError("Playwright is not installed but mode=ecoop was requested.")
     store_host = urlparse(base_region).netloc.lower()
@@ -875,14 +894,12 @@ async def run_ecoop(args, categories: List[str], base_region: str) -> List[Dict]
         )
         await context.route("**/*", _route_handler)
 
-        all_rows: List[Dict] = []
         try:
             for cat in categories:
                 full_cat = cat
                 print(f"[cat] {full_cat}")
                 # category runner
                 page = await context.new_page()
-                items: List[Dict] = []
                 try:
                     links = await collect_category_product_links(page, full_cat, args.page_limit, args.req_delay, max_depth=2)
                 finally:
@@ -904,18 +921,21 @@ async def run_ecoop(args, categories: List[str], base_region: str) -> List[Dict]
                         finally:
                             await p.close()
 
-                results = await asyncio.gather(*(worker(u) for u in links))
-                for r in results:
+                # Stream results as they complete to reduce data-at-risk window
+                pending_batch: List[Dict] = []
+                tasks = [asyncio.create_task(worker(u)) for u in links]
+                for coro in asyncio.as_completed(tasks):
+                    r = await coro
                     if r:
-                        items.append(r)
-
-                print(f"[info] category rows: {len(items)}")
-                all_rows.extend(items)
+                        pending_batch.append(r)
+                        if len(pending_batch) >= 25:
+                            on_rows(pending_batch)
+                            pending_batch = []
+                if pending_batch:
+                    on_rows(pending_batch)
         finally:
             await context.close()
             await browser.close()
-
-    return all_rows
 
 
 async def _fetch_html(url: str) -> str:
@@ -933,9 +953,8 @@ def _wolt_store_host(sample_url: str) -> str:
     return urlparse(sample_url).netloc.lower()
 
 
-async def run_wolt(args, categories: List[str]) -> List[Dict]:
+async def run_wolt(args, categories: List[str], on_rows) -> None:
     store_host = _wolt_store_host(categories[0] if categories else args.region)
-    all_rows: List[Dict] = []
 
     for cat in categories:
         print(f"[cat-wolt] {cat}")
@@ -949,19 +968,15 @@ async def run_wolt(args, categories: List[str]) -> List[Dict]:
             _walk_collect_items(nd, found)
             rows: List[Dict] = []
             for _, item in found.items():
-                row = _extract_wolt_row(item, cat, store_host)
-                rows.append(row)
+                rows.append(_extract_wolt_row(item, cat, store_host))
 
-            # optional cap per category
             if args.max_products and args.max_products > 0:
                 rows = rows[: args.max_products]
 
             print(f"[info] category rows: {len(rows)}")
-            all_rows.extend(rows)
+            on_rows(rows)
         except Exception as e:
             print(f"[warn] Wolt category failed {cat}: {e}")
-
-    return all_rows
 
 
 # ---------- main ----------
@@ -999,19 +1014,40 @@ async def run(args):
         categories = [u for i, u in enumerate(categories) if i % args.cat_shards == args.cat_index]
         print(f"[shard] Using {len(categories)} categories for shard {args.cat_index}/{args.cat_shards}")
 
+    # Prepare streaming CSV path up front
+    out_path = Path(args.out)
+    if out_path.is_dir() or str(out_path).endswith("/"):
+        out_path = out_path / f"coop_products_{now_stamp()}.csv"
+    print(f"[out] streaming CSV → {out_path}")
+
+    all_rows: List[Dict] = []
+
+    def on_rows(batch: List[Dict]):
+        nonlocal all_rows
+        if not batch:
+            return
+        append_csv(batch, out_path)
+        all_rows.extend(batch)
+        print(f"[stream] +{len(batch)} rows (total {len(all_rows)})")
+
+    # Ensure we attempt a final flush on SIGTERM/SIGINT (CSV already streamed per batch)
+    def _sig_handler(signum, frame):
+        print(f"[warn] received signal {signum}; CSV already streamed. Exiting 130.")
+        os._exit(130)
+
+    signal.signal(signal.SIGTERM, _sig_handler)
+    signal.signal(signal.SIGINT, _sig_handler)
+
     # Route by mode
     if args.mode.lower() == "wolt" or "wolt.com" in base_region:
-        rows = await run_wolt(args, categories)
+        await run_wolt(args, categories, on_rows)
     else:
-        rows = await run_ecoop(args, categories, base_region)
+        await run_ecoop(args, categories, base_region, on_rows)
 
-    out_path = Path(args.out)
-    if out_path.is_dir():
-        out_path = out_path / f"coop_products_{now_stamp()}.csv"
-    write_csv(rows, out_path)
-    print(f"[ok] CSV written: {out_path}")
+    print(f"[ok] CSV ready: {out_path}")
 
-    await maybe_upsert_db(rows)
+    # Optional DB upsert at the end (uses in-memory rows we accumulated)
+    await maybe_upsert_db(all_rows)
 
 
 def parse_args():
