@@ -100,36 +100,39 @@ def _clean_decimal(s: str) -> Optional[str]:
     """
     Normalize various price texts to a decimal string "X.YY".
     Handles:
-      - "3,49", "3.49", "3 49"
-      - "3^49" (superscript cents flattened to space by BeautifulSoup)
+      - "3,49", "3.49", "3 49", "3€49"
       - strips currency/unit and ignores percentages.
     """
     if not s:
         return None
-    raw = s.strip()
+    raw = s.replace("\xa0", " ").strip()
 
     # Ignore obvious percent-only strings
     if re.fullmatch(r"\d+\s*%+", raw):
         return None
 
-    # Try content attribute like 3.49 directly
-    m = re.search(r"(\d+[.,]\d{2})", raw)
+    # 3€49
+    m = re.search(r"(\d[\d\s]*)\s*€\s*(\d{1,2})", raw)
     if m:
-        return m.group(1).replace(",", ".")
+        whole = re.sub(r"\D", "", m.group(1))
+        cents = m.group(2)
+        if whole:
+            return f"{int(whole)}.{cents[:2]:0<2}"
 
-    # Handle "3 49" (euros space cents) or "3 49" (nbsp)
-    m = re.search(r"(\d+)[\s\u00A0](\d{2})", raw)
+    # 3,49 or 3.49
+    m = re.search(r"(\d+)[,\.](\d{1,2})", raw)
+    if m:
+        return f"{m.group(1)}.{m.group(2):0<2}"
+
+    # 3 49 (space)
+    m = re.search(r"(\d+)\s+(\d{2})", raw)
     if m:
         return f"{m.group(1)}.{m.group(2)}"
 
-    # Last resort: only digits -> treat as euros if reasonable (>= 100 unlikely)
+    # last resort: pure digits like "349" -> "3.49"
     digits = re.sub(r"[^\d]", "", raw)
     if digits and len(digits) > 2:
-        # Heuristic: treat last two as cents (e.g., "349" -> "3.49")
         return f"{digits[:-2]}.{digits[-2:]}"
-    if digits:
-        # single/two digit alone -> probably wrong (like "1" from "1%")
-        return None
     return None
 
 
@@ -142,7 +145,17 @@ def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[s
             cur = (soup.select_one("[itemprop=priceCurrency][content]") or {}).get("content") or "EUR"
             return val, cur
 
-    # 2) common visible price containers
+    # 2) look for structured sub-spans (whole + cents)
+    for box in soup.select("[data-testid*=price], .e-price, .e-price__main, .product-price, .price, .pdp-price"):
+        whole = box.select_one(".e-price__whole, .price__whole, .whole, .int")
+        cents = box.select_one(".e-price__cents, .price__cents, .cents, .fract, .fraction, .decimal")
+        if whole:
+            w = re.sub(r"\D", "", text_of(whole))
+            c = re.sub(r"\D", "", text_of(cents)) if cents else ""
+            if w:
+                return (f"{int(w)}.{c[:2]:0<2}" if c else str(int(w))), "EUR"
+
+    # 3) common visible price containers as plain text
     price_selectors = [
         "[data-testid=product-price]",
         "[data-testid=buy-button-price]",
@@ -150,6 +163,7 @@ def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[s
         ".product-price",
         ".product__price",
         ".price",
+        ".pdp-price",
     ]
     texts: List[str] = []
     for sel in price_selectors:
@@ -157,11 +171,17 @@ def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[s
             t = text_of(el)
             if t:
                 texts.append(t)
-    # 3) try to find a good-looking decimal
     for t in texts:
         val = _clean_decimal(t)
         if val:
             return val, "EUR"
+
+    # 4) very last resort: any node containing €
+    for node in soup.find_all(string=re.compile("€")):
+        val = _clean_decimal(str(node))
+        if val:
+            return val, "EUR"
+
     return None, "EUR"
 
 # -------------------- PDP parsing --------------------
@@ -236,7 +256,6 @@ def _scan_label_value_pairs(soup: BeautifulSoup) -> Dict[str, str]:
 
     # Regions likely to contain the info
     containers = []
-    # blocks near headings like "Muu info", "Tooteinfo", etc.
     for head in soup.find_all(["h2", "h3", "h4"]):
         ht = norm(text_of(head))
         if any(k in ht for k in ("muu info", "tooteinfo", "lisainfo", "info")):
@@ -331,7 +350,6 @@ def parse_app_state_for_brand_or_price(soup: BeautifulSoup) -> Tuple[Optional[st
                 manufacturer = mm.group(1).strip()
 
         if price is None:
-            # try to catch a reasonable price field (avoid percentages)
             mp = re.search(r'"price"\s*:\s*"?(?!\s*0\s*%)(\d+[.,]?\d*)"?', txt)
             if mp:
                 price = _clean_decimal(mp.group(1))
@@ -399,6 +417,15 @@ def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], categor
         page.wait_for_selector(".e-product__name, [data-testid=product-title], [data-testid=product-name]", timeout=5000)
     except PWTimeout:
         pass
+    # brief wait for price blocks too
+    try:
+        page.wait_for_selector(
+            "[data-testid*=price], .e-price, .e-price__main, .product-price, .price, .pdp-price",
+            timeout=2000
+        )
+    except PWTimeout:
+        pass
+
     page.wait_for_timeout(int(req_delay * 1000))
 
     soup = BeautifulSoup(page.content(), "html.parser")
@@ -666,9 +693,23 @@ def crawl(args) -> None:
 
         browser, ctx, page = new_browser()
 
+        def restart_browser(reason: str = ""):
+            nonlocal browser, ctx, page
+            try:
+                page.close(); ctx.close(); browser.close()
+            except Exception:
+                pass
+            time.sleep(0.5)
+            browser, ctx, page = new_browser()
+            if reason:
+                print(f"[info] restarted browser ({reason})")
+
         try:
             if only_urls:
                 batch: List[List[str]] = []
+                processed_since_restart = 0
+                RESTART_EVERY = 250  # PDPs per browser session in ONLY-URLs mode
+
                 for url in only_urls:
                     if int(args.max_products) and total >= int(args.max_products):
                         break
@@ -677,10 +718,17 @@ def crawl(args) -> None:
                         continue
                     parts = [p for p in urlparse(url).path.strip("/").split("/") if p]
                     cat_leaf = (parts[-2] if len(parts) >= 2 else (parts[-1] if parts else "")).replace("-", " ").title()
-                    try:
-                        data = extract_from_pdp(page, url, listing_title=None, category_leaf_hint=cat_leaf, req_delay=req_delay)
-                    except Exception as e:
-                        print(f"[warn] PDP parse failed for {ext_id}: {e}", file=sys.stderr)
+
+                    # retry once with a fresh browser on failure
+                    data: Optional[Dict[str, Optional[str]]] = None
+                    for attempt in (1, 2):
+                        try:
+                            data = extract_from_pdp(page, url, listing_title=None, category_leaf_hint=cat_leaf, req_delay=req_delay)
+                            break
+                        except Exception as e:
+                            print(f"[warn] PDP parse failed for {ext_id} (attempt {attempt}): {e}", file=sys.stderr)
+                            restart_browser("only-urls retry")
+                    if not data:
                         continue
 
                     row = [
@@ -700,10 +748,17 @@ def crawl(args) -> None:
                     ]
                     batch.append(row)
                     total += 1
+                    processed_since_restart += 1
 
                     if len(batch) >= 50:
                         append_rows(args.output_csv, batch)
                         batch.clear()
+
+                    if processed_since_restart >= RESTART_EVERY:
+                        append_rows(args.output_csv, batch)
+                        batch.clear()
+                        processed_since_restart = 0
+                        restart_browser("periodic")
 
                     if req_delay:
                         time.sleep(req_delay)
@@ -723,13 +778,7 @@ def crawl(args) -> None:
                     )
                     if not prods:
                         print(f"[cat] {cat} → 0 items (check if category requires login or geo).")
-                        try:
-                            page.close(); ctx.close(); browser.close()
-                        except Exception:
-                            pass
-                        time.sleep(0.5)
-                        browser, ctx, page = new_browser()
-                        print("[info] restarted browser (post-category)")
+                        restart_browser("post-category")
                         continue
 
                     batch: List[List[str]] = []
@@ -741,10 +790,16 @@ def crawl(args) -> None:
                             continue
                         if only_ext and ext_id not in only_ext:
                             continue
-                        try:
-                            data = extract_from_pdp(page, url, listing_title, category_leaf, req_delay)
-                        except Exception as e:
-                            print(f"[warn] PDP parse failed for {ext_id}: {e}", file=sys.stderr)
+
+                        data: Optional[Dict[str, Optional[str]]] = None
+                        for attempt in (1, 2):
+                            try:
+                                data = extract_from_pdp(page, url, listing_title, category_leaf, req_delay)
+                                break
+                            except Exception as e:
+                                print(f"[warn] PDP parse failed for {ext_id} (attempt {attempt}): {e}", file=sys.stderr)
+                                restart_browser("pdp retry")
+                        if not data:
                             continue
 
                         # Drop bad names like "Pealeht"
@@ -779,13 +834,7 @@ def crawl(args) -> None:
                     append_rows(args.output_csv, batch)
 
                     # restart browser per category (avoid EPIPE)
-                    try:
-                        page.close(); ctx.close(); browser.close()
-                    except Exception:
-                        pass
-                    time.sleep(0.5)
-                    browser, ctx, page = new_browser()
-                    print("[info] restarted browser (post-category)")
+                    restart_browser("post-category")
         finally:
             try:
                 page.close(); ctx.close(); browser.close()
