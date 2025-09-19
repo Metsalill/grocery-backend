@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Coop eCoop (multi-region) category crawler → PDP extractor → CSV/DB-friendly
+Coop eCoop (multi-region) & Wolt venue crawler → CSV/DB-friendly
 
-- Crawls category pages with Playwright (handles JS/lazy-load + pagination).
-- PDP extraction: title, brand, manufacturer (Tootja), image, price, EAN/GTIN,
-  Tootekood, etc. Writes CSV; optional Postgres upsert.
+Modes
+- ecoop: Crawls eCoop category pages with Playwright (handles JS/lazy-load + pagination).
+         PDP extraction: title, brand, manufacturer (Tootja), image, price, EAN/GTIN,
+         Tootekood, etc. Writes CSV; optional Postgres upsert.
+- wolt : Opens each Wolt category URL, parses __NEXT_DATA__ JSON (no clicking),
+         extracts: name, price (EUR), image, GTIN/EAN, supplier ("Tarnija info") as
+         manufacturer, and size. Uses GTIN as ext_id when present, else item id/slug.
 
 DB alignment
 - Target table: public.staging_coop_products
@@ -14,7 +18,8 @@ DB alignment
            size_text, price, currency, image_url, url, scraped_at (default now()).
 
 Notes
-- store_host is derived from --region (e.g. https://coophaapsalu.ee → coophaapsalu.ee).
+- store_host for ecoop is derived from --region (e.g. https://coophaapsalu.ee → coophaapsalu.ee).
+- store_host for wolt is "wolt:<venue-slug>" (e.g., "wolt:coop-lasname").
 - Supports category sharding via --cat-shards / --cat-index for parallel runs.
 """
 
@@ -27,7 +32,7 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import (
     urlparse,
     urljoin,
@@ -37,7 +42,11 @@ from urllib.parse import (
     urlencode,
 )
 
-from playwright.async_api import async_playwright, Browser, BrowserContext, Page
+# Playwright is optional (only needed in ecoop mode)
+try:
+    from playwright.async_api import async_playwright  # type: ignore
+except Exception:  # pragma: no cover
+    async_playwright = None  # loaded only when ecoop mode is used
 
 # ---------- regexes & helpers ----------
 
@@ -89,12 +98,9 @@ def looks_like_unit_price(text: str) -> bool:
     t = (text or "").strip().lower()
     return (
         "/" in t
-        or "€/kg" in t
-        or "€ / kg" in t
-        or "€/l" in t
-        or "€ / l" in t
-        or "€/tk" in t
-        or "€ / tk" in t
+        or "€/kg" in t or "€ / kg" in t
+        or "€/l"  in t or "€ / l"  in t
+        or "€/tk" in t or "€ / tk" in t
     )
 
 
@@ -126,10 +132,9 @@ def same_host(u: str, host: str) -> bool:
         return False
 
 
-# ---------- page utilities ----------
+# ---------- ecoop (Playwright) utilities ----------
 
-
-async def wait_cookie_banner(page: Page):
+async def wait_cookie_banner(page: Any):
     try:
         for sel in [
             'button:has-text("Nõustun")',
@@ -146,7 +151,7 @@ async def wait_cookie_banner(page: Page):
 
 
 async def collect_category_product_links(
-    page: Page, category_url: str, page_limit: int, req_delay: float, max_depth: int = 2
+    page: Any, category_url: str, page_limit: int, req_delay: float, max_depth: int = 2
 ) -> List[str]:
     """
     Collect PDP links from a category. Handles:
@@ -286,7 +291,7 @@ async def collect_category_product_links(
     return list(seen_products)
 
 
-async def parse_json_ld(page: Page) -> Dict:
+async def parse_json_ld(page: Any) -> Dict:
     data: Dict = {}
     try:
         scripts = await page.eval_on_selector_all(
@@ -313,8 +318,25 @@ async def parse_json_ld(page: Page) -> Dict:
 
 # ---------- price helpers ----------
 
+def _parse_wolt_price(value: Any) -> Optional[float]:
+    """Best-effort: Wolt often stores price in cents as int; handle common shapes."""
+    try:
+        if isinstance(value, (int, float)):
+            # Heuristic: if >= 50 it's probably cents
+            return round(float(value) / (100.0 if float(value) >= 50 else 1.0), 2)
+        if isinstance(value, str):
+            s = value.replace(",", ".").strip()
+            return round(float(s), 2)
+        if isinstance(value, dict):
+            for k in ("value", "amount", "price", "current", "total", "unit"):
+                if k in value:
+                    return _parse_wolt_price(value[k])
+    except Exception:
+        return None
+    return None
 
-async def extract_visible_price(page: Page) -> Optional[float]:
+
+async def extract_visible_price(page: Any) -> Optional[float]:
     """Pick the main price: ignore unit-price snippets like '0,02 €/tk'."""
     candidates: List[Tuple[float, str]] = []
     selectors = [
@@ -361,44 +383,9 @@ async def extract_visible_price(page: Page) -> Optional[float]:
     return max(candidates, key=lambda x: x[0])[0]
 
 
-# ---------- PDP extraction ----------
+# ---------- PDP extraction (ecoop) ----------
 
-
-async def extract_text_after_label(page: Page, label: str) -> Optional[str]:
-    """Find text following a visible label like 'Tootekood:' or 'Tootja:'."""
-    try:
-        nodes = page.locator(f"xpath=//*[contains(normalize-space(.), '{label}')]")
-        n = await nodes.count()
-        for i in range(min(n, 8)):
-            html = await nodes.nth(i).inner_html()
-            txt = await nodes.nth(i).inner_text()
-            m = re.search(
-                rf"{re.escape(label)}\s*[:\-]?\s*([^\n<]{{2,120}})", txt, flags=re.I
-            )
-            if m:
-                return m.group(1).strip()
-            sib = await nodes.nth(i).evaluate_handle(
-                "el => el.nextElementSibling && el.nextElementSibling.textContent"
-            )
-            try:
-                sval = await sib.json_value()
-                if sval and isinstance(sval, str) and sval.strip():
-                    return sval.strip()
-            except Exception:
-                pass
-            m2 = re.search(
-                rf"{re.escape(label)}\s*[:\-]?\s*</[^>]+>\s*([^<]{{2,120}})",
-                html or "",
-                flags=re.I,
-            )
-            if m2:
-                return m2.group(1).strip()
-    except Exception:
-        pass
-    return None
-
-
-async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -> Dict:
+async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) -> Dict:
     await page.goto(url, wait_until="domcontentloaded")
     await wait_cookie_banner(page)
     await page.wait_for_timeout(int(req_delay * 1000))
@@ -540,8 +527,6 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
         ext_id = normalize_ean(ean_raw)
     if not ext_id:
         m = re.search(r"/toode/(\d+)", url)
-        if m:
-            ext_id = m.group(1)
     if not ext_id:
         m2 = re.search(r"/toode/([^/?#]+)/?", url)
         if m2:
@@ -573,75 +558,190 @@ async def extract_pdp(page: Page, url: str, req_delay: float, store_host: str) -
     }
 
 
-# ---------- category runner ----------
+# ---------- PDP label helper (ecoop) ----------
 
-
-async def process_category(
-    browser_like: BrowserContext | Browser,
-    category_url: str,
-    page_limit: int,
-    req_delay: float,
-    pdp_workers: int,
-    max_products: int,
-    store_host: str,
-) -> List[Dict]:
-    page = await browser_like.new_page()
-    items: List[Dict] = []
+async def extract_text_after_label(page: Any, label: str) -> Optional[str]:
+    """Find text following a visible label like 'Tootekood:' or 'Tootja:'."""
     try:
-        links = await collect_category_product_links(
-            page, category_url, page_limit, req_delay, max_depth=2
-        )
-        if max_products > 0:
-            links = links[:max_products]
-    finally:
-        await page.close()
-
-    sem = asyncio.Semaphore(pdp_workers)
-
-    async def worker(url: str) -> Optional[Dict]:
-        async with sem:
-            p = await browser_like.new_page()
+        nodes = page.locator(f"xpath=//*[contains(normalize-space(.), '{label}')]")
+        n = await nodes.count()
+        for i in range(min(n, 8)):
+            html = await nodes.nth(i).inner_html()
+            txt = await nodes.nth(i).inner_text()
+            m = re.search(
+                rf"{re.escape(label)}\s*[:\-]?\s*([^\n<]{{2,120}})", txt, flags=re.I
+            )
+            if m:
+                return m.group(1).strip()
+            sib = await nodes.nth(i).evaluate_handle(
+                "el => el.nextElementSibling && el.nextElementSibling.textContent"
+            )
             try:
-                return await extract_pdp(p, url, req_delay, store_host)
-            except Exception as e:
-                print(f"[warn] PDP fail {url}: {e}")
-                return None
-            finally:
-                await p.close()
+                sval = await sib.json_value()
+                if sval and isinstance(sval, str) and sval.strip():
+                    return sval.strip()
+            except Exception:
+                pass
+            m2 = re.search(
+                rf"{re.escape(label)}\s*[:\-]?\s*</[^>]+>\s*([^<]{{2,120}})",
+                html or "",
+                flags=re.I,
+            )
+            if m2:
+                return m2.group(1).strip()
+    except Exception:
+        pass
+    return None
 
-    results = await asyncio.gather(*(worker(u) for u in links))
-    for r in results:
-        if r:
-            items.append(r)
-    return items
+
+# ---------- WOLT parsing ----------
+
+def _html_get_next_data(html: str) -> Optional[Dict]:
+    m = re.search(r'<script[^>]+id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S | re.I)
+    if not m:
+        return None
+    try:
+        return json.loads(m.group(1))
+    except Exception:
+        return None
 
 
-# ---------- outputs ----------
+def _walk_collect_items(obj: Any, found: Dict[str, Dict]) -> None:
+    """Collect dicts that look like Wolt menu items (best-effort)."""
+    if isinstance(obj, dict):
+        # heuristic: must have a name; and some price-ish field or category item flags
+        has_name = isinstance(obj.get("name"), str) and obj.get("name").strip()
+        price_keys = ("price", "baseprice", "base_price", "unit_price", "total_price", "current_price")
+        has_priceish = any(k in obj for k in price_keys)
+        if has_name and has_priceish:
+            key = str(obj.get("id") or obj.get("slug") or obj.get("name"))
+            found.setdefault(key, obj)
+        for v in obj.values():
+            _walk_collect_items(v, found)
+    elif isinstance(obj, list):
+        for v in obj:
+            _walk_collect_items(v, found)
+
+
+def _search_info_label(value: Any, *labels: str) -> Optional[str]:
+    """Find 'GTIN', 'Tarnija info', etc. in common Wolt info arrays."""
+    lbls = {l.lower() for l in labels}
+    try:
+        if isinstance(value, list):
+            for it in value:
+                if isinstance(it, dict):
+                    lab = str(it.get("label") or it.get("title") or "").strip().lower()
+                    val = it.get("value") or it.get("text") or it.get("content")
+                    if lab in lbls and isinstance(val, str) and val.strip():
+                        return val.strip()
+        if isinstance(value, dict):
+            for v in value.values():
+                out = _search_info_label(v, *labels)
+                if out:
+                    return out
+    except Exception:
+        return None
+    return None
+
+
+def _first_str(obj: Dict, *keys: str) -> Optional[str]:
+    for k in keys:
+        if k in obj and isinstance(obj[k], str) and obj[k].strip():
+            return obj[k].strip()
+    return None
+
+
+def _first_urlish(obj: Dict, *keys: str) -> Optional[str]:
+    for k in keys:
+        v = obj.get(k)
+        if isinstance(v, str) and v.strip():
+            return v.strip()
+        if isinstance(v, dict):
+            for kk in ("url", "src"):
+                if isinstance(v.get(kk), str) and v.get(kk).strip():
+                    return v.get(kk).strip()
+    return None
+
+
+def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Dict:
+    name = str(item.get("name") or "").strip() or None
+
+    # price
+    price = None
+    for k in ("price", "baseprice", "base_price", "current_price", "total_price", "unit_price"):
+        if k in item:
+            price = _parse_wolt_price(item[k])
+            if price is not None:
+                break
+
+    # image
+    image_url = _first_urlish(item, "image", "image_url", "imageUrl", "media")
+
+    # manufacturer (Tarnija info / Tootja / Valmistaja)
+    manufacturer = (
+        _search_info_label(item, "Tarnija info", "Tarnija", "Tootja", "Valmistaja", "Supplier", "Manufacturer")
+        or _first_str(item, "supplier", "brand")
+    )
+
+    # EAN/GTIN
+    ean_raw = (
+        _search_info_label(item, "GTIN", "EAN", "Ribakood")
+        or _first_str(item, "gtin", "ean", "barcode")
+    )
+    ean_norm = normalize_ean(ean_raw)
+
+    # brand (if present)
+    brand = _first_str(item, "brand")
+
+    # size
+    size_text = _search_info_label(item, "Size", "Kogus", "Maht", "Kaal")  # best-effort
+    if not size_text and name:
+        m = SIZE_RE.search(name)
+        if m:
+            size_text = m.group(1)
+
+    # ext_id
+    ext_id = ean_norm or str(item.get("id") or item.get("slug") or name or "")
+
+    # url (anchor to item id if available)
+    url = category_url
+    if item.get("id"):
+        url = f"{category_url}#item-{item.get('id')}"
+
+    return {
+        "chain": "Coop",
+        "store_host": store_host,
+        "channel": "wolt",
+        "ext_id": ext_id,
+        "ean_raw": ean_raw,
+        "ean_norm": ean_norm,
+        "name": name,
+        "size_text": size_text,
+        "brand": brand,
+        "manufacturer": manufacturer,
+        "price": price if price is not None else None,
+        "currency": "EUR",
+        "image_url": image_url,
+        "url": url,
+    }
 
 
 def _format_price_for_csv(v):
     if isinstance(v, (int, float)):
         return f"{float(v):.2f}"
-    return v
+    try:
+        return f"{float(str(v).replace(',', '.')):.2f}"
+    except Exception:
+        return v
 
+
+# ---------- outputs ----------
 
 def write_csv(rows: List[Dict], out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     cols = [
-        "chain",
-        "store_host",
-        "channel",
-        "ext_id",
-        "ean_raw",
-        "ean_norm",
-        "name",
-        "size_text",
-        "brand",
-        "manufacturer",
-        "price",
-        "currency",
-        "image_url",
-        "url",
+        "chain", "store_host", "channel", "ext_id", "ean_raw", "ean_norm", "name",
+        "size_text", "brand", "manufacturer", "price", "currency", "image_url", "url",
     ]
     with out_path.open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=cols)
@@ -676,9 +776,7 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
             table,
         )
         if not exists:
-            print(
-                f"[info] Table {table} does not exist → skipping DB upsert. (Create it manually.)"
-            )
+            print(f"[info] Table {table} does not exist → skipping DB upsert. (Create it manually.)")
             return
 
         stmt = f"""
@@ -706,37 +804,35 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
                 skipped += 1
                 continue
             pr = r.get("price")
-            pr = round(float(pr), 2) if isinstance(pr, (float, int)) else None
-            payload.append(
-                (
-                    r.get("store_host"),
-                    r.get("ext_id"),
-                    r.get("name"),
-                    r.get("brand"),
-                    r.get("manufacturer"),
-                    r.get("ean_raw"),
-                    r.get("ean_norm"),
-                    r.get("size_text"),
-                    pr,
-                    r.get("currency"),
-                    r.get("image_url"),
-                    r.get("url"),
-                )
-            )
+            try:
+                pr = round(float(pr), 2) if pr is not None else None
+            except Exception:
+                pr = None
+            payload.append((
+                r.get("store_host"),
+                r.get("ext_id"),
+                r.get("name"),
+                r.get("brand"),
+                r.get("manufacturer"),
+                r.get("ean_raw"),
+                r.get("ean_norm"),
+                r.get("size_text"),
+                pr,
+                r.get("currency") or "EUR",
+                r.get("image_url"),
+                r.get("url"),
+            ))
         if not payload:
             print("[warn] No rows with ext_id — skipped DB upsert")
             return
 
         await conn.executemany(stmt, payload)
-        print(
-            f"[ok] Upserted {len(payload)} rows into {table} (skipped {skipped} without ext_id)"
-        )
+        print(f"[ok] Upserted {len(payload)} rows into {table} (skipped {skipped} without ext_id)")
     finally:
         await conn.close()
 
 
 # ---------- router (blocking heavy 3rd parties) ----------
-
 
 async def _route_filter(route):
     try:
@@ -744,20 +840,11 @@ async def _route_filter(route):
         if req.resource_type in ("image", "media", "font"):
             return await route.abort()
         url = req.url
-        if any(
-            h in url
-            for h in [
-                "googletagmanager.com",
-                "google-analytics.com",
-                "doubleclick.net",
-                "facebook.net",
-                "connect.facebook.net",
-                "hotjar",
-                "fullstory",
-                "cdn.segment.com",
-                "intercom",
-            ]
-        ):
+        if any(h in url for h in [
+            "googletagmanager.com", "google-analytics.com", "doubleclick.net",
+            "facebook.net", "connect.facebook.net", "hotjar", "fullstory",
+            "cdn.segment.com", "intercom",
+        ]):
             return await route.abort()
         return await route.continue_()
     except Exception:
@@ -771,33 +858,126 @@ async def _route_handler(route):
     await _route_filter(route)
 
 
-# ---------- main ----------
+# ---------- runners ----------
 
+async def run_ecoop(args, categories: List[str], base_region: str) -> List[Dict]:
+    if async_playwright is None:
+        raise RuntimeError("Playwright is not installed but mode=ecoop was requested.")
+    store_host = urlparse(base_region).netloc.lower()
+
+    async with async_playwright() as pw:
+        browser = await pw.chromium.launch(headless=bool(int(args.headless)))
+        context = await browser.new_context(
+            user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                        "(KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"),
+            viewport={"width": 1366, "height": 900},
+            java_script_enabled=True,
+        )
+        await context.route("**/*", _route_handler)
+
+        all_rows: List[Dict] = []
+        try:
+            for cat in categories:
+                full_cat = cat
+                print(f"[cat] {full_cat}")
+                # category runner
+                page = await context.new_page()
+                items: List[Dict] = []
+                try:
+                    links = await collect_category_product_links(page, full_cat, args.page_limit, args.req_delay, max_depth=2)
+                finally:
+                    await page.close()
+
+                if args.max_products > 0:
+                    links = links[:args.max_products]
+
+                sem = asyncio.Semaphore(args.pdp_workers)
+
+                async def worker(url: str) -> Optional[Dict]:
+                    async with sem:
+                        p = await context.new_page()
+                        try:
+                            return await extract_pdp(p, url, args.req_delay, store_host)
+                        except Exception as e:
+                            print(f"[warn] PDP fail {url}: {e}")
+                            return None
+                        finally:
+                            await p.close()
+
+                results = await asyncio.gather(*(worker(u) for u in links))
+                for r in results:
+                    if r:
+                        items.append(r)
+
+                print(f"[info] category rows: {len(items)}")
+                all_rows.extend(items)
+        finally:
+            await context.close()
+            await browser.close()
+
+    return all_rows
+
+
+async def _fetch_html(url: str) -> str:
+    # stdlib fetch to avoid extra deps
+    import urllib.request
+    with urllib.request.urlopen(url) as resp:  # nosec - public pages
+        return resp.read().decode("utf-8", errors="replace")
+
+
+def _wolt_store_host(sample_url: str) -> str:
+    """Return 'wolt:<venue-slug>' if present, else the netloc."""
+    m = re.search(r"/venue/([^/]+)", sample_url)
+    if m:
+        return f"wolt:{m.group(1)}"
+    return urlparse(sample_url).netloc.lower()
+
+
+async def run_wolt(args, categories: List[str]) -> List[Dict]:
+    store_host = _wolt_store_host(categories[0] if categories else args.region)
+    all_rows: List[Dict] = []
+
+    for cat in categories:
+        print(f"[cat-wolt] {cat}")
+        try:
+            html = await _fetch_html(cat)
+            nd = _html_get_next_data(html)
+            if not nd:
+                print(f"[warn] __NEXT_DATA__ not found for {cat}")
+                continue
+            found: Dict[str, Dict] = {}
+            _walk_collect_items(nd, found)
+            rows: List[Dict] = []
+            for _, item in found.items():
+                row = _extract_wolt_row(item, cat, store_host)
+                rows.append(row)
+
+            # optional cap per category
+            if args.max_products and args.max_products > 0:
+                rows = rows[: args.max_products]
+
+            print(f"[info] category rows: {len(rows)}")
+            all_rows.extend(rows)
+        except Exception as e:
+            print(f"[warn] Wolt category failed {cat}: {e}")
+
+    return all_rows
+
+
+# ---------- main ----------
 
 async def run(args):
     # Read categories
     categories: List[str] = []
     if args.categories_multiline:
-        categories.extend(
-            [ln.strip() for ln in args.categories_multiline.splitlines() if ln.strip()]
-        )
+        categories.extend([ln.strip() for ln in args.categories_multiline.splitlines() if ln.strip()])
     if args.categories_file and Path(args.categories_file).exists():
-        categories.extend(
-            [
-                ln.strip()
-                for ln in Path(args.categories_file)
-                .read_text(encoding="utf-8")
-                .splitlines()
-                if ln.strip()
-            ]
-        )
+        categories.extend([ln.strip() for ln in Path(args.categories_file).read_text(encoding="utf-8").splitlines() if ln.strip()])
     if not categories:
-        print(
-            "[error] No category URLs provided. Pass --categories-multiline or --categories-file."
-        )
+        print("[error] No category URLs provided. Pass --categories-multiline or --categories-file.")
         sys.exit(2)
 
-    # Normalise base region and categories to ABSOLUTE URLs with urljoin.
+    # Base region normalization
     base_region = args.region.strip()
     if not re.match(r"^https?://", base_region, flags=re.I):
         base_region = "https://" + base_region
@@ -805,7 +985,8 @@ async def run(args):
         base_region += "/"
 
     def norm_url(u: str) -> str:
-        absu = urljoin(base_region, u)  # handles both absolute and relative inputs
+        # handles both absolute and relative inputs
+        absu = urljoin(base_region, u)
         return clean_url_keep_allowed_query(absu)
 
     categories = [norm_url(u) for u in categories]
@@ -815,104 +996,44 @@ async def run(args):
         if args.cat_index < 0 or args.cat_index >= args.cat_shards:
             print(f"[error] --cat-index must be in [0, {args.cat_shards-1}]")
             sys.exit(2)
-        categories = [
-            u for i, u in enumerate(categories) if i % args.cat_shards == args.cat_index
-        ]
-        print(
-            f"[shard] Using {len(categories)} categories for shard {args.cat_index}/{args.cat_shards}"
-        )
+        categories = [u for i, u in enumerate(categories) if i % args.cat_shards == args.cat_index]
+        print(f"[shard] Using {len(categories)} categories for shard {args.cat_index}/{args.cat_shards}")
 
-    store_host = urlparse(base_region).netloc.lower()
-
-    async with async_playwright() as pw:
-        browser = await pw.chromium.launch(headless=bool(int(args.headless)))
-        context = await browser.new_context(
-            user_agent=(
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
-            ),
-            viewport={"width": 1366, "height": 900},
-            java_script_enabled=True,
-        )
-        await context.route("**/*", _route_handler)
-
-        all_rows: List[Dict] = []
-        try:
-            for cat in categories:
-                full_cat = cat if cat.startswith("http") else norm_url(cat)
-                print(f"[cat] {full_cat}")
-                rows = await process_category(
-                    context,
-                    full_cat,
-                    args.page_limit,
-                    args.req_delay,
-                    args.pdp_workers,
-                    args.max_products,
-                    store_host,
-                )
-                print(f"[info] category rows: {len(rows)}")
-                all_rows.extend(rows)
-        finally:
-            await context.close()
-            await browser.close()
+    # Route by mode
+    if args.mode.lower() == "wolt" or "wolt.com" in base_region:
+        rows = await run_wolt(args, categories)
+    else:
+        rows = await run_ecoop(args, categories, base_region)
 
     out_path = Path(args.out)
     if out_path.is_dir():
         out_path = out_path / f"coop_products_{now_stamp()}.csv"
-    write_csv(all_rows, out_path)
+    write_csv(rows, out_path)
     print(f"[ok] CSV written: {out_path}")
 
-    await maybe_upsert_db(all_rows)
+    await maybe_upsert_db(rows)
 
 
 def parse_args():
-    p = argparse.ArgumentParser(
-        description="Coop eCoop category crawler → PDP extractor"
-    )
-    p.add_argument(
-        "--region",
-        default="https://vandra.ecoop.ee",
-        help="Base region, e.g., https://vandra.ecoop.ee or https://coophaapsalu.ee",
-    )
-    p.add_argument(
-        "--categories-multiline",
-        dest="categories_multiline",
-        default="",
-        help="Newline-separated category URLs or paths",
-    )
-    p.add_argument(
-        "--categories-file",
-        dest="categories_file",
-        default="",
-        help="Path to txt file with category URLs",
-    )
-    p.add_argument(
-        "--page-limit",
-        type=int,
-        default=0,
-        help="Hard cap of product links per category (0=all)",
-    )
-    p.add_argument(
-        "--max-products",
-        type=int,
-        default=0,
-        help="Global cap per category after discovery (0=all)",
-    )
-    p.add_argument("--headless", default="1", help="1/0 headless")
-    p.add_argument("--req-delay", type=float, default=0.5, help="Seconds between ops")
-    p.add_argument(
-        "--pdp-workers", type=int, default=4, help="Concurrent PDP tabs per category"
-    )
+    p = argparse.ArgumentParser(description="Coop eCoop/Wolt category crawler → PDP extractor")
+    p.add_argument("--mode", default="ecoop", help="Crawler mode: ecoop or wolt")
+    p.add_argument("--region", default="https://vandra.ecoop.ee",
+                   help="Base region (ecoop) or venue root (wolt).")
+    p.add_argument("--categories-multiline", dest="categories_multiline", default="",
+                   help="Newline-separated category URLs or paths")
+    p.add_argument("--categories-file", dest="categories_file", default="",
+                   help="Path to txt file with category URLs")
+    p.add_argument("--page-limit", type=int, default=0,
+                   help="(ecoop) Hard cap of product links per category (0=all)")
+    p.add_argument("--max-products", type=int, default=0,
+                   help="Global cap per category after discovery (0=all)")
+    p.add_argument("--headless", default="1", help="(ecoop) 1/0 headless")
+    p.add_argument("--req-delay", type=float, default=0.5, help="(ecoop) Seconds between ops")
+    p.add_argument("--pdp-workers", type=int, default=4, help="(ecoop) Concurrent PDP tabs per category")
     # sharding
-    p.add_argument(
-        "--cat-shards", type=int, default=1, help="Total number of category shards"
-    )
-    p.add_argument(
-        "--cat-index", type=int, default=0, help="This shard index (0-based)"
-    )
-    p.add_argument(
-        "--out", default="out/coop_products.csv", help="CSV file or output directory"
-    )
+    p.add_argument("--cat-shards", type=int, default=1, help="Total number of category shards")
+    p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
+    p.add_argument("--out", default="out/coop_products.csv", help="CSV file or output directory")
     return p.parse_args()
 
 
