@@ -55,7 +55,7 @@ concurrency:
 jobs:
   crawl:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 120
 
     strategy:
       fail-fast: false
@@ -194,10 +194,11 @@ jobs:
             --pdp-workers "$PDP_WORKERS" \
             --cat-shards "$SHARD_COUNT" \
             --cat-index "${{ matrix.shard_index }}" \
+            --cat-timeout-minutes "12" \
             --out "out/coop_products_${{ github.run_id }}_shard${{ matrix.shard_index }}.csv"
 
       - name: Upload CSV artifact
-        if: ${{ matrix.shard_index < (github.event_name == 'workflow_dispatch' && fromJSON(inputs.shards) || 1) }}
+        if: ${{ matrix.shard_index < (github.event_name == 'workflow_dispatch' && fromJSON(inputs.shards) || 1) && always() }}
         uses: actions/upload-artifact@v4
         with:
           name: coop-products-${{ github.run_id }}-part-${{ matrix.shard_index }}
