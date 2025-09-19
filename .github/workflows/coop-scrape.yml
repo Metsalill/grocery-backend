@@ -55,7 +55,7 @@ concurrency:
 jobs:
   crawl:
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 360
 
     strategy:
       fail-fast: false
@@ -179,6 +179,7 @@ jobs:
           REQ_DELAY:    ${{ github.event_name == 'workflow_dispatch' && inputs.req_delay    || '0.5' }}
           PDP_WORKERS:  ${{ github.event_name == 'workflow_dispatch' && inputs.pdp_workers  || '4' }}
           SHARD_COUNT:  ${{ github.event_name == 'workflow_dispatch' && inputs.shards       || '1' }}
+          PYTHONUNBUFFERED: "1"
         run: |
           set -euo pipefail
           echo ">> running shard ${{ matrix.shard_index }} of $SHARD_COUNT (mode=$MODE)"
