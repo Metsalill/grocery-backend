@@ -27,10 +27,6 @@ on:
         description: "Post-discovery cap per category (0 = all)"
         required: false
         default: "0"
-      headless:
-        description: "Chromium headless (1/0) — ignored for wolt mode"
-        required: false
-        default: "1"
       req_delay:
         description: "Delay between actions (seconds) — used for ecoop mode"
         required: false
@@ -174,13 +170,12 @@ jobs:
 
       - name: Run Coop crawler (sharded)
         if: ${{ matrix.shard_index < (github.event_name == 'workflow_dispatch' && fromJSON(inputs.shards) || 1) }}
-        timeout-minutes: 60
         env:
           MODE:         ${{ github.event_name == 'workflow_dispatch' && inputs.mode        || 'ecoop' }}
           REGION_URL:   ${{ inputs.region }}
           PAGE_LIMIT:   ${{ github.event_name == 'workflow_dispatch' && inputs.page_limit   || '0' }}
           MAX_PRODUCTS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_products || '0' }}
-          HEADLESS:     ${{ github.event_name == 'workflow_dispatch' && inputs.headless     || '1' }}
+          HEADLESS:     "1"
           REQ_DELAY:    ${{ github.event_name == 'workflow_dispatch' && inputs.req_delay    || '0.5' }}
           PDP_WORKERS:  ${{ github.event_name == 'workflow_dispatch' && inputs.pdp_workers  || '4' }}
           SHARD_COUNT:  ${{ github.event_name == 'workflow_dispatch' && inputs.shards       || '1' }}
