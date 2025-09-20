@@ -11,6 +11,7 @@ Modes
          1) __NEXT_DATA__ inline JSON if present
          2) Next.js _next/data/{buildId}/*.json fallback
          3) window.__APOLLO_STATE__ fallback
+         If those are blocked, falls back to a Playwright page load to read the same.
          Extracts: name, price (EUR), image, GTIN/EAN, supplier ("Tarnija info") as
          manufacturer, and size. Uses GTIN as ext_id when present, else item id/slug.
 
@@ -47,11 +48,11 @@ from urllib.parse import (
     urlencode,
 )
 
-# Playwright is optional (only needed in ecoop mode)
+# Playwright is optional (used for ecoop and as Wolt fallback)
 try:
     from playwright.async_api import async_playwright  # type: ignore
 except Exception:  # pragma: no cover
-    async_playwright = None  # loaded only when ecoop mode is used
+    async_playwright = None  # loaded only when needed
 
 # ---------- regexes & helpers ----------
 
@@ -986,7 +987,6 @@ async def _load_wolt_payload(url: str) -> Optional[Dict]:
     build_id = _html_get_build_id(html)
     if build_id:
         u = urlparse(url)
-        # Next.js wants the path exactly as in the URL (no trailing slash), then ".json"
         path = u.path if not u.path.endswith("/") else u.path[:-1]
         api = f"{u.scheme}://{u.netloc}/_next/data/{build_id}{path}.json"
         jd = await _fetch_json(api)
@@ -995,10 +995,76 @@ async def _load_wolt_payload(url: str) -> Optional[Dict]:
 
     apollo = _html_get_apollo_state(html)
     if apollo:
-        # Wrap it in a shape the walker understands
         return {"apollo": apollo}
 
     return None
+
+
+# --- Playwright fallback (no clicking; just read server data) ---
+
+async def _load_wolt_payload_playwright(url: str) -> Optional[Dict]:
+    if async_playwright is None:
+        return None
+    async with async_playwright() as pw:
+        browser = await pw.chromium.launch(headless=True)
+        context = await browser.new_context(
+            user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                        "AppleWebKit/537.36 (KHTML, like Gecko) "
+                        "Chrome/122.0.0.0 Safari/537.36"),
+            viewport={"width": 1366, "height": 900},
+            java_script_enabled=True,
+        )
+        await context.route("**/*", _route_handler)
+        page = await context.new_page()
+        payload: Optional[Dict] = None
+
+        try:
+            await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+
+            # 1) window.__NEXT_DATA__
+            try:
+                nd = await page.evaluate("() => window.__NEXT_DATA__")
+                if nd:
+                    payload = nd
+            except Exception:
+                pass
+
+            # 2) <script id="__NEXT_DATA__">...</script>
+            if payload is None:
+                try:
+                    txt = await page.locator('#__NEXT_DATA__').text_content(timeout=2500)
+                    if txt:
+                        payload = json.loads(txt)
+                except Exception:
+                    pass
+
+            # 3) Next.js client-side data JSON
+            if payload is None:
+                try:
+                    resp = await page.wait_for_response(
+                        lambda r: ("/_next/data/" in r.url) and r.url.endswith(".json"),
+                        timeout=5000,
+                    )
+                    try:
+                        payload = await resp.json()
+                    except Exception:
+                        pass
+                except Exception:
+                    pass
+
+            # 4) Apollo state
+            if payload is None:
+                try:
+                    ap = await page.evaluate("() => window.__APOLLO_STATE__ || null")
+                    if ap:
+                        payload = {"apollo": ap}
+                except Exception:
+                    pass
+        finally:
+            await context.close()
+            await browser.close()
+
+        return payload
 
 
 async def run_wolt(args, categories: List[str], on_rows) -> None:
@@ -1009,8 +1075,13 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
         try:
             payload = await _load_wolt_payload(cat)
             if not payload:
+                # Playwright fallback if static fetch didn't work
+                payload = await _load_wolt_payload_playwright(cat)
+
+            if not payload:
                 print(f"[warn] could not obtain server data for {cat}")
                 continue
+
             found: Dict[str, Dict] = {}
             _walk_collect_items(payload, found)
             rows: List[Dict] = [_extract_wolt_row(item, cat, store_host) for item in found.values()]
@@ -1100,8 +1171,8 @@ def parse_args():
     p.add_argument("--headless", default="1", help="(ecoop) 1/0 headless")
     p.add_argument("--req-delay", type=float, default=0.5, help="(ecoop) Seconds between ops")
     p.add_argument("--pdp-workers", type=int, default=4, help="(ecoop) Concurrent PDP tabs per category")
-    p.add_argument("--cat-shards", type=int, default=1, help="Total number of category shards")
-    p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
+    p.add_argument("--cat-shards", type:int, default=1, help="Total number of category shards")
+    p.add_argument("--cat-index", type:int, default=0, help="This shard index (0-based)")
     p.add_argument("--out", default="out/coop_products.csv", help="CSV file or output directory")
     return p.parse_args()
 
@@ -1112,3 +1183,4 @@ if __name__ == "__main__":
         asyncio.run(run(args))
     except KeyboardInterrupt:
         print("[info] aborted by user")
+```0
