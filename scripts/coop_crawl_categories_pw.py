@@ -10,9 +10,12 @@ Modes
 - wolt : Opens each Wolt category URL and tries to parse structured data:
          1) __NEXT_DATA__ inline JSON (static HTML) if present
          2) Next.js /_next/data/{buildId}/*.json fallback
-         3) window.__APOLLO_STATE__ from a **Playwright runtime snapshot** (fallback)
+         3) window.__APOLLO_STATE__ from a Playwright runtime snapshot (fallback)
          Extracts: name, price (EUR), image, GTIN/EAN, supplier ("Tarnija info") as
          manufacturer, and size. Uses GTIN as ext_id when present, else item id/slug.
+
+Extras
+- --wolt-force-playwright : Force using Playwright runtime extraction in Wolt mode.
 
 DB alignment
 - Target table: public.staging_coop_products
@@ -1010,7 +1013,6 @@ async def _load_wolt_payload(url: str) -> Optional[Dict]:
     build_id = _html_get_build_id(html)
     if build_id:
         u = urlparse(url)
-        # Next.js wants the path exactly as in the URL (no trailing slash), then ".json"
         path = u.path if not u.path.endswith("/") else u.path[:-1]
         api = f"{u.scheme}://{u.netloc}/_next/data/{build_id}{path}.json"
         jd = await _fetch_json(api)
@@ -1026,7 +1028,7 @@ async def _load_wolt_payload(url: str) -> Optional[Dict]:
 
 # --- Wolt Playwright fallback: read window.__APOLLO_STATE__ at runtime ---
 
-async def _wolt_runtime_payload_with_pw(category_url: str, headless: bool, req_delay: float) -> Optional[Dict]:
+async def _wolt_runtime_payload_with_pw(category_url: str, headless: str, req_delay: float) -> Optional[Dict]:
     if async_playwright is None:
         return None
     try:
@@ -1044,14 +1046,12 @@ async def _wolt_runtime_payload_with_pw(category_url: str, headless: bool, req_d
                 await page.goto(category_url, wait_until="domcontentloaded")
                 await wait_cookie_banner(page)
 
-                # let the app hydrate & load items
                 try:
                     await page.wait_for_function(
                         "window.__APOLLO_STATE__ && Object.keys(window.__APOLLO_STATE__).length > 0",
                         timeout=10000,
                     )
                 except Exception:
-                    # try a gentle scroll to trigger data
                     for _ in range(10):
                         try:
                             await page.mouse.wheel(0, 2000)
@@ -1076,7 +1076,6 @@ async def _wolt_runtime_payload_with_pw(category_url: str, headless: bool, req_d
                 if apollo and isinstance(apollo, dict):
                     return {"apollo": apollo}
 
-                # final fallback: window.__NEXT_DATA__ at runtime if exposed
                 try:
                     nextd = await page.evaluate("window.__NEXT_DATA__ || null")
                     if nextd:
@@ -1100,10 +1099,17 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
     for cat in categories:
         print(f"[cat-wolt] {cat}")
         try:
-            payload = await _load_wolt_payload(cat)
+            payload = None
             used_fallback = False
-            if not payload:
-                print(f"[info] server data not exposed for {cat} -> using Playwright fallback")
+
+            if not args.wolt_force_playwright:
+                payload = await _load_wolt_payload(cat)
+
+            if args.wolt_force_playwright or not payload:
+                if not args.wolt_force_playwright and not payload:
+                    print(f"[info] server data not exposed for {cat} -> using Playwright fallback")
+                elif args.wolt_force_playwright:
+                    print(f"[info] forcing Playwright fallback for {cat}")
                 payload = await _wolt_runtime_payload_with_pw(cat, args.headless, args.req_delay)
                 used_fallback = True
 
@@ -1207,6 +1213,9 @@ def parse_args():
     p.add_argument("--cat-shards", type=int, default=1, help="Total number of category shards")
     p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
     p.add_argument("--out", default="out/coop_products.csv", help="CSV file or output directory")
+    # NEW: Wolt force-runtime flag
+    p.add_argument("--wolt-force-playwright", dest="wolt_force_playwright", action="store_true",
+                   help="Force Playwright runtime extraction for Wolt pages.")
     return p.parse_args()
 
 
