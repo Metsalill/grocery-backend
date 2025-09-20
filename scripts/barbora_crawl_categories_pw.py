@@ -17,6 +17,7 @@ import os
 import re
 import sys
 import time
+import signal
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit, parse_qsl, urlencode
 
@@ -683,6 +684,26 @@ def crawl(args) -> None:
     req_delay = float(args.req_delay)
     per_cat_page_limit = int(args.max_pages_per_category or "0")
 
+    # ---- soft time budget (to avoid external timeout killing Playwright) ----
+    stop_flag = {"v": False}
+    def _sig_handler(signum, frame):
+        stop_flag["v"] = True
+    for _sig in (signal.SIGTERM, signal.SIGINT):
+        try:
+            signal.signal(_sig, _sig_handler)
+        except Exception:
+            pass
+
+    soft_minutes = float(os.environ.get("SOFT_TIMEOUT_MIN", "0") or "0")
+    deadline_ts = time.time() + soft_minutes * 60 if soft_minutes > 0 else None
+
+    def time_left() -> float:
+        return (deadline_ts - time.time()) if deadline_ts else 9e9
+
+    def budget_low() -> bool:
+        # leave ~90s margin for flush & teardown
+        return stop_flag["v"] or (deadline_ts is not None and time_left() <= 90)
+
     ensure_csv_header(args.output_csv)
 
     with sync_playwright() as pw:
@@ -711,6 +732,9 @@ def crawl(args) -> None:
                 RESTART_EVERY = 250  # PDPs per browser session in ONLY-URLs mode
 
                 for url in only_urls:
+                    if budget_low():
+                        print("[info] soft budget reached during ONLY-URLs; flushing and exiting.")
+                        break
                     if int(args.max_products) and total >= int(args.max_products):
                         break
                     ext_id = get_ext_id(url)
@@ -766,6 +790,9 @@ def crawl(args) -> None:
                 append_rows(args.output_csv, batch)
             else:
                 for idx, cat in enumerate(cats, start=1):
+                    if budget_low():
+                        print("[info] soft budget reached before next category; exiting.")
+                        break
                     if int(args.page_limit) and idx > int(args.page_limit):
                         break
                     leaf_seg = cat.strip("/").split("/")[-1]
@@ -783,6 +810,9 @@ def crawl(args) -> None:
 
                     batch: List[List[str]] = []
                     for url, listing_title in prods:
+                        if budget_low():
+                            print("[info] soft budget reached mid-category; flushing and exiting.")
+                            break
                         if int(args.max_products) and total >= int(args.max_products):
                             break
                         ext_id = get_ext_id(url)
