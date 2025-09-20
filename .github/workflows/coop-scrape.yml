@@ -28,15 +28,15 @@ on:
         required: false
         default: "0"
       req_delay:
-        description: "Delay between actions (seconds) — used for ecoop mode"
+        description: "Delay between actions (seconds) - used for ecoop mode"
         required: false
         default: "0.5"
       pdp_workers:
-        description: "Concurrent PDP tabs per category — used for ecoop mode"
+        description: "Concurrent PDP tabs per category - used for ecoop mode"
         required: false
         default: "4"
       shards:
-        description: "Parallel shards for categories (1–8)"
+        description: "Parallel shards for categories (1-8)"
         required: false
         default: "4"
       upsert_db:
@@ -66,7 +66,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Skip extra matrix jobs beyond requested shard count
       - name: Skip extra shards
         if: ${{ matrix.shard_index >= (github.event_name == 'workflow_dispatch' && fromJSON(inputs.shards) || 1) }}
         run: echo "Skipping shard ${{ matrix.shard_index }}."
@@ -77,7 +76,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: "Install Python deps (& Playwright for both modes)"
+      - name: Install Python deps (and Playwright)
         if: ${{ matrix.shard_index < (github.event_name == 'workflow_dispatch' && fromJSON(inputs.shards) || 1) }}
         run: |
           python -m pip install --upgrade pip
@@ -200,4 +199,3 @@ jobs:
           path: out/*.csv
           if-no-files-found: warn
           retention-days: 7
-```0
