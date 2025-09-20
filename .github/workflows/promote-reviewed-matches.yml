@@ -1,13 +1,13 @@
-name: Promote reviewed matches
+name: Apply approved Rimi C/D matches
 
 on:
   workflow_dispatch: {}
 
 jobs:
-  promote:
+  apply:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}  # external Railway URL
       PGSSLMODE: require
       PGCLIENTENCODING: UTF8
 
@@ -17,113 +17,88 @@ jobs:
       - name: Install psql
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-      - name: Prepare staging tables
+      - name: Sanity check DB
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "select current_database(), now();"
+
+      - name: Create staging & load CSVs (if present)
         run: |
+          set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          CREATE UNIQUE INDEX IF NOT EXISTS uq_pm_src ON product_matches(source, source_product_id);
-          CREATE UNIQUE INDEX IF NOT EXISTS uq_ext_map_src ON ext_product_map(source, ext_id);
-
-          DROP TABLE IF EXISTS staging_approved_selver;
-          DROP TABLE IF EXISTS staging_approved_prisma;
-
-          CREATE TABLE staging_approved_selver(
+          CREATE TABLE IF NOT EXISTS staging_approved_selver (
             rimi_id   bigint,
             selver_id bigint
           );
-
-          CREATE TABLE staging_approved_prisma(
+          CREATE TABLE IF NOT EXISTS staging_approved_prisma (
             rimi_id   bigint,
             prisma_id bigint
           );
+          TRUNCATE staging_approved_selver;
+          TRUNCATE staging_approved_prisma;
           SQL
 
-      - name: Load approved CSVs
-        run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy staging_approved_selver(rimi_id,selver_id) FROM 'data/approved_selver.csv' CSV HEADER"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy staging_approved_prisma(rimi_id,prisma_id) FROM 'data/approved_prisma.csv' CSV HEADER"
+          if [ -f data/approved_selver.csv ]; then
+            echo "Loading data/approved_selver.csv"
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+              -c "\copy staging_approved_selver (rimi_id, selver_id) FROM 'data/approved_selver.csv' WITH (FORMAT csv, HEADER true)"
+          else
+            echo "No data/approved_selver.csv – skipping Selver."
+          fi
 
-      - name: Promote approvals + create Rimi-only for remaining
+          if [ -f data/approved_prisma.csv ]; then
+            echo "Loading data/approved_prisma.csv"
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+              -c "\copy staging_approved_prisma (rimi_id, prisma_id) FROM 'data/approved_prisma.csv' WITH (FORMAT csv, HEADER true)"
+          else
+            echo "No data/approved_prisma.csv – skipping Prisma."
+          fi
+
+      - name: Upsert into product_matches and ext_product_map
         run: |
+          set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          -- 1) Confirm Selver approvals into product_matches
+          -- Uniques for conflicts
+          CREATE UNIQUE INDEX IF NOT EXISTS uq_product_matches_src
+            ON product_matches(source, source_product_id);
+          CREATE UNIQUE INDEX IF NOT EXISTS uq_ext_product_map_src
+            ON ext_product_map(source, ext_id);
+
+          -- Approved Selver
           INSERT INTO product_matches (source, source_product_id, product_id, confidence, reason, confirmed, created_at)
-          SELECT 'rimi', s.rimi_id, s.selver_id, 1.0, 'manual approve selver', TRUE, now()
+          SELECT 'rimi', s.rimi_id, s.selver_id, 0.80, 'approved C/D (Selver)', TRUE, now()
           FROM staging_approved_selver s
+          WHERE s.rimi_id IS NOT NULL AND s.selver_id IS NOT NULL
           ON CONFLICT (source, source_product_id) DO UPDATE
-          SET product_id = EXCLUDED.product_id,
-              confidence = 1.0,
-              reason     = EXCLUDED.reason,
-              confirmed  = TRUE;
+            SET product_id = EXCLUDED.product_id,
+                confidence = EXCLUDED.confidence,
+                reason     = EXCLUDED.reason,
+                confirmed  = TRUE;
 
-          -- 2) Confirm Prisma approvals
+          -- Approved Prisma
           INSERT INTO product_matches (source, source_product_id, product_id, confidence, reason, confirmed, created_at)
-          SELECT 'rimi', p.rimi_id, p.prisma_id, 1.0, 'manual approve prisma', TRUE, now()
+          SELECT 'rimi', p.rimi_id, p.prisma_id, 0.80, 'approved C/D (Prisma)', TRUE, now()
           FROM staging_approved_prisma p
+          WHERE p.rimi_id IS NOT NULL AND p.prisma_id IS NOT NULL
           ON CONFLICT (source, source_product_id) DO UPDATE
-          SET product_id = EXCLUDED.product_id,
-              confidence = 1.0,
-              reason     = EXCLUDED.reason,
-              confirmed  = TRUE;
+            SET product_id = EXCLUDED.product_id,
+                confidence = EXCLUDED.confidence,
+                reason     = EXCLUDED.reason,
+                confirmed  = TRUE;
 
-          -- 3) Push all confirmed Rimi matches to operational map
+          -- Keep ext_product_map in sync for confirmed rows
           INSERT INTO ext_product_map (source, ext_id, product_id)
           SELECT 'rimi', pm.source_product_id::text, pm.product_id
           FROM product_matches pm
-          WHERE pm.source='rimi' AND pm.confirmed = TRUE
+          WHERE pm.source = 'rimi' AND pm.confirmed = TRUE
           ON CONFLICT (source, ext_id) DO UPDATE
-          SET product_id = EXCLUDED.product_id;
+            SET product_id = EXCLUDED.product_id;
+          SQL
 
-          -- 4) Create canonical products for any remaining unmapped Rimi items (store-only)
-          DROP TABLE IF EXISTS _rimi_unmapped;
-          CREATE TEMP TABLE _rimi_unmapped AS
-          SELECT rc.ext_id::text AS ext_id, rc.name, rc.brand, rc.size_text
-          FROM rimi_candidates rc
-          LEFT JOIN ext_product_map m
-            ON m.source='rimi' AND m.ext_id = rc.ext_id::text
-          WHERE m.ext_id IS NULL;
-
-          WITH ins AS (
-            INSERT INTO products (name, brand, amount, ean)
-            SELECT u.name, u.brand, u.size_text, NULL
-            FROM _rimi_unmapped u
-            RETURNING id, name, brand, amount
-          )
-          INSERT INTO ext_product_map (source, ext_id, product_id)
-          SELECT 'rimi', u.ext_id, p.id
-          FROM _rimi_unmapped u
-          JOIN products p
-            ON p.name=u.name AND p.brand=u.brand AND COALESCE(p.amount,'')=COALESCE(u.size_text,'')
-          LEFT JOIN ext_product_map m
-            ON m.source='rimi' AND m.ext_id=u.ext_id
-          WHERE m.ext_id IS NULL
-          ON CONFLICT (source, ext_id) DO NOTHING;
-
-          -- 5) (Optional) Upsert Rimi prices for any newly mapped items (store_id=440) if staging exists
-          DO $$
-          BEGIN
-            IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='staging_rimi_prices') THEN
-              WITH src AS (
-                SELECT m.product_id, 440 AS store_id, s.price,
-                       ROW_NUMBER() OVER (PARTITION BY m.product_id ORDER BY s.seen_at DESC NULLS LAST, s.price ASC) rn
-                FROM staging_rimi_prices s
-                JOIN ext_product_map m ON m.source='rimi' AND m.ext_id = s.ext_id
-                WHERE s.price > 0
-              )
-              INSERT INTO prices (product_id, store_id, price)
-              SELECT product_id, store_id, price
-              FROM src WHERE rn=1
-              ON CONFLICT (product_id, store_id) DO UPDATE
-              SET price = EXCLUDED.price;
-            END IF;
-          END$$;
-
-          -- 6) Report
-          \echo '=== COUNTS ==='
-          SELECT 'approved_selver' AS metric, COUNT(*) FROM staging_approved_selver
+      - name: Summary
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          SELECT 'selver_loaded' AS what, COUNT(*) FROM staging_approved_selver
           UNION ALL
-          SELECT 'approved_prisma' AS metric, COUNT(*) FROM staging_approved_prisma
+          SELECT 'prisma_loaded', COUNT(*) FROM staging_approved_prisma
           UNION ALL
-          SELECT 'rimi_mapped_total' AS metric, COUNT(*) FROM ext_product_map WHERE source='rimi'
-          UNION ALL
-          SELECT 'product_matches_rimi_confirmed' AS metric, COUNT(*) FROM product_matches WHERE source='rimi' AND confirmed = TRUE;
+          SELECT 'rimi_confirmed_total', COUNT(*) FROM product_matches WHERE source='rimi' AND confirmed;
           SQL
