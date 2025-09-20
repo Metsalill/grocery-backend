@@ -7,24 +7,13 @@ Modes
 - ecoop: Crawls eCoop category pages with Playwright (handles JS/lazy-load + pagination).
          PDP extraction: title, brand, manufacturer (Tootja), image, price, EAN/GTIN,
          Tootekood, etc. Writes CSV; optional Postgres upsert.
-- wolt : Opens each Wolt category URL, parses server data (no clicking):
-         1) __NEXT_DATA__ inline JSON if present
-         2) Next.js _next/data/{buildId}/*.json fallback
-         3) window.__APOLLO_STATE__ fallback
-         Extracts: name, price (EUR), image, GTIN/EAN, supplier ("Tarnija info") as
+- wolt : Tries server data first, then falls back to Playwright-rendered page:
+         1) __NEXT_DATA__ inline JSON (legacy)
+         2) Next.js _next/data/{buildId}/*.json fallback (legacy)
+         3) window.__APOLLO_STATE__ from the running app (newer Wolt stack)
+         4) Heuristic DOM scrape as a last resort
+         Extracts: name, price (EUR), image, GTIN/EAN (when available), supplier as
          manufacturer, and size. Uses GTIN as ext_id when present, else item id/slug.
-
-DB alignment
-- Target table: public.staging_coop_products
-- PRIMARY KEY (store_host, ext_id)
-- Columns: store_host, ext_id, name, brand, manufacturer, ean_raw, ean_norm,
-           size_text, price, currency, image_url, url, scraped_at (default now()).
-
-Notes
-- store_host for ecoop is derived from --region (e.g. https://coophaapsalu.ee → coophaapsalu.ee).
-- store_host for wolt is "wolt:<venue-slug>" (e.g., "wolt:coop-lasname").
-- Supports category sharding via --cat-shards / --cat-index for parallel runs.
-- Streams rows to CSV incrementally so artifacts survive cancellation.
 """
 
 import argparse
@@ -47,11 +36,11 @@ from urllib.parse import (
     urlencode,
 )
 
-# Playwright is optional (only needed in ecoop mode)
+# Playwright is optional (only needed for ecoop and for Wolt fallback)
 try:
     from playwright.async_api import async_playwright  # type: ignore
 except Exception:  # pragma: no cover
-    async_playwright = None  # loaded only when ecoop mode is used
+    async_playwright = None  # loaded only when needed
 
 # ---------- regexes & helpers ----------
 
@@ -331,7 +320,7 @@ async def extract_visible_price(page: Any) -> Optional[float]:
         ".product-price",
         ".price",
         ".current-price",
-        '[class*="price"]',
+        '[class*=\"price\"]',
     ]
     for sel in selectors:
         try:
@@ -568,17 +557,15 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
     }
 
 
-# ---------- WOLT parsing ----------
+# ---------- WOLT parsing (server-first, then render) ----------
 
 def _html_get_next_data(html: str) -> Optional[Dict]:
-    # 1) canonical __NEXT_DATA__
     m = re.search(r'<script[^>]+id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S | re.I)
     if m:
         try:
             return json.loads(m.group(1))
         except Exception:
             pass
-    # 2) sometimes inlined as window.__NEXT_DATA__=
     m2 = re.search(r'__NEXT_DATA__\s*=\s*({.*?})\s*<\/script>', html, re.S | re.I)
     if m2:
         try:
@@ -604,7 +591,6 @@ def _html_get_apollo_state(html: str) -> Optional[Dict]:
 
 
 def _walk_collect_items(obj: Any, found: Dict[str, Dict]) -> None:
-    """Collect dicts that look like Wolt menu items (best-effort)."""
     if isinstance(obj, dict):
         has_name = isinstance(obj.get("name"), str) and obj.get("name").strip()
         price_keys = ("price", "baseprice", "base_price", "unit_price", "total_price", "current_price")
@@ -738,17 +724,6 @@ def append_csv(rows: List[Dict], out_path: Path) -> None:
         w = csv.DictWriter(f, fieldnames=CSV_COLS)
         if write_header:
             w.writeheader()
-        for r in rows:
-            row = {k: r.get(k) for k in CSV_COLS}
-            row["price"] = _format_price_for_csv(row.get("price"))
-            w.writerow(row)
-
-
-def write_csv(rows: List[Dict], out_path: Path) -> None:
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    with out_path.open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=CSV_COLS)
-        w.writeheader()
         for r in rows:
             row = {k: r.get(k) for k in CSV_COLS}
             row["price"] = _format_price_for_csv(row.get("price"))
@@ -954,8 +929,7 @@ async def _fetch_json(url: str) -> Optional[Dict]:
     with urllib.request.urlopen(req) as resp:  # nosec
         data = resp.read()
         if resp.headers.get("Content-Encoding", "").lower() == "gzip":
-            import io as _io
-            data = gzip.GzipFile(fileobj=_io.BytesIO(data)).read()
+            data = gzip.GzipFile(fileobj=io.BytesIO(data)).read()
         try:
             return json.loads(data.decode("utf-8", errors="replace"))
         except Exception:
@@ -974,7 +948,7 @@ async def _load_wolt_payload(url: str) -> Optional[Dict]:
     Try 3 ways to get structured data for a Wolt page:
       1) __NEXT_DATA__ from HTML
       2) _next/data/{buildId}{path}.json
-      3) window.__APOLLO_STATE__
+      3) window.__APOLLO_STATE__ in a rendered browser (handled separately in fallback)
     """
     html = await _fetch_html(url)
 
@@ -985,19 +959,146 @@ async def _load_wolt_payload(url: str) -> Optional[Dict]:
     build_id = _html_get_build_id(html)
     if build_id:
         u = urlparse(url)
-        # Next.js wants the path exactly as in the URL (no trailing slash), then ".json"
         path = u.path if not u.path.endswith("/") else u.path[:-1]
-        api = f"{u.scheme}://{u.netloc}/_next/data/{build_id}{path}.json"
-        jd = await _fetch_json(api)
+        jd = await _fetch_json(f"{u.scheme}://{u.netloc}/_next/data/{build_id}{path}.json")
         if jd:
             return jd
 
     apollo = _html_get_apollo_state(html)
     if apollo:
-        # Wrap it in a shape the walker understands
         return {"apollo": apollo}
 
     return None
+
+
+async def _wolt_render_fallback(
+    cat_url: str,
+    store_host: str,
+    headless: bool,
+    req_delay: float,
+) -> List[Dict]:
+    """Open the category with Playwright and try to pull data from window.__APOLLO_STATE__.
+    If not present, scrape product cards heuristically."""
+    if async_playwright is None:
+        print("[warn] Playwright not available for Wolt fallback; skipping.")
+        return []
+
+    async with async_playwright() as pw:
+        browser = await pw.chromium.launch(headless=headless)
+        context = await browser.new_context(
+            user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                        "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"),
+            viewport={"width": 1366, "height": 900},
+            java_script_enabled=True,
+        )
+        await context.route("**/*", _route_handler)
+        page = await context.new_page()
+        rows: List[Dict] = []
+        try:
+            await page.goto(cat_url, wait_until="domcontentloaded")
+            await page.wait_for_timeout(int(req_delay * 1000))
+
+            # try to accept cookie/address popups if present
+            await wait_cookie_banner(page)
+            try:
+                close_btn = page.locator('button[aria-label="Sulge"], button:has-text("×")')
+                if await close_btn.count() > 0:
+                    await close_btn.first.click()
+            except Exception:
+                pass
+
+            # give the app a moment to populate globals
+            await page.wait_for_timeout(1500)
+
+            # 3a) window.__APOLLO_STATE__ from the running app
+            try:
+                apollo = await page.evaluate("window.__APOLLO_STATE__ || null")
+            except Exception:
+                apollo = None
+            if apollo and isinstance(apollo, dict):
+                found: Dict[str, Dict] = {}
+                _walk_collect_items(apollo, found)
+                rows = [_extract_wolt_row(item, cat_url, store_host) for item in found.values()]
+                if rows:
+                    return rows
+
+            # 3b) Heuristic DOM scrape (name, price, image)
+            # Scroll a bit to load lazy content
+            for _ in range(6):
+                try:
+                    await page.evaluate("window.scrollBy(0, document.body.scrollHeight/3)")
+                except Exception:
+                    pass
+                await page.wait_for_timeout(int(req_delay * 1000))
+
+            items = await page.evaluate(
+                """
+                () => {
+                  const cards = [];
+                  const grid = document.querySelector('main') || document.body;
+                  if (!grid) return cards;
+                  const els = grid.querySelectorAll('article, div, li');
+                  function findPrice(el){
+                    const t = el.innerText || '';
+                    const m = t.replace('\\xa0',' ').match(/(\\d+[,.]\\d{2})\\s*€/);
+                    return m ? m[1] : null;
+                  }
+                  const seen = new Set();
+                  els.forEach(el => {
+                    const price = findPrice(el);
+                    if (!price) return;
+                    // try to locate a title-ish element near price
+                    let nameEl = el.querySelector('h3, h4, h5, [class*="title"], [class*="name"]');
+                    if (!nameEl) {
+                      // walk up and look for a sibling text heading
+                      let p = el;
+                      for (let i = 0; i < 2 && p; i++) { p = p.parentElement; }
+                      if (p) nameEl = p.querySelector('h3, h4, h5, [class*="title"], [class*="name"]');
+                    }
+                    const name = nameEl ? nameEl.textContent.trim() : null;
+                    if (!name) return;
+                    const imgEl = el.querySelector('img');
+                    const img = imgEl ? (imgEl.currentSrc || imgEl.src || null) : null;
+                    const key = name + '|' + price;
+                    if (seen.has(key)) return;
+                    seen.add(key);
+                    cards.push({name, price, image: img});
+                  });
+                  return cards;
+                }
+                """
+            )
+
+            for it in items or []:
+                name = (it.get("name") or "").strip() or None
+                pr = _parse_wolt_price(it.get("price"))
+                img = it.get("image")
+                if not name or pr is None:
+                    continue
+                # ext_id fallback from name
+                slug = re.sub(r"[^a-z0-9]+", "-", (name or "").lower()).strip("-")
+                rows.append({
+                    "chain": "Coop",
+                    "store_host": store_host,
+                    "channel": "wolt",
+                    "ext_id": slug or name,
+                    "ean_raw": None,
+                    "ean_norm": None,
+                    "name": name,
+                    "size_text": (SIZE_RE.search(name).group(1) if name and SIZE_RE.search(name) else None),
+                    "brand": None,
+                    "manufacturer": None,
+                    "price": pr,
+                    "currency": "EUR",
+                    "image_url": img,
+                    "url": cat_url,
+                })
+
+            return rows
+        finally:
+            await page.close()
+            await context.close()
+            await browser.close()
 
 
 async def run_wolt(args, categories: List[str], on_rows) -> None:
@@ -1007,15 +1108,27 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
         print(f"[cat-wolt] {cat}")
         try:
             payload = await _load_wolt_payload(cat)
-            if not payload:
-                print(f"[warn] could not obtain server data for {cat}")
+            if payload:
+                found: Dict[str, Dict] = {}
+                _walk_collect_items(payload, found)
+                rows: List[Dict] = [_extract_wolt_row(item, cat, store_host) for item in found.values()]
+                if args.max_products and args.max_products > 0:
+                    rows = rows[: args.max_products]
+                print(f"[info] category rows: {len(rows)}")
+                on_rows(rows)
                 continue
-            found: Dict[str, Dict] = {}
-            _walk_collect_items(payload, found)
-            rows: List[Dict] = [_extract_wolt_row(item, cat, store_host) for item in found.values()]
+
+            # If server data missing, render with Playwright fallback
+            print(f"[info] server data not exposed for {cat} → using Playwright fallback")
+            rows = await _wolt_render_fallback(
+                cat_url=cat,
+                store_host=store_host,
+                headless=bool(int(args.headless)),
+                req_delay=args.req_delay,
+            )
             if args.max_products and args.max_products > 0:
                 rows = rows[: args.max_products]
-            print(f"[info] category rows: {len(rows)}")
+            print(f"[info] category rows (rendered): {len(rows)}")
             on_rows(rows)
         except Exception as e:
             print(f"[warn] Wolt category failed {cat}: {e}")
@@ -1096,8 +1209,8 @@ def parse_args():
                    help="(ecoop) Hard cap of product links per category (0=all)")
     p.add_argument("--max-products", type=int, default=0,
                    help="Global cap per category after discovery (0=all)")
-    p.add_argument("--headless", default="1", help="(ecoop) 1/0 headless")
-    p.add_argument("--req-delay", type=float, default=0.5, help="(ecoop) Seconds between ops")
+    p.add_argument("--headless", default="1", help="(ecoop & wolt-fallback) 1/0 headless")
+    p.add_argument("--req-delay", type=float, default=0.5, help="(ecoop & wolt-fallback) Seconds between ops")
     p.add_argument("--pdp-workers", type=int, default=4, help="(ecoop) Concurrent PDP tabs per category")
     p.add_argument("--cat-shards", type=int, default=1, help="Total number of category shards")
     p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
