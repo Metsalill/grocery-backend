@@ -10,7 +10,9 @@ Modes
 - wolt : Opens each Wolt category URL and tries to parse structured data:
          1) __NEXT_DATA__ inline JSON (static HTML) if present
          2) Next.js /_next/data/{buildId}/*.json fallback
-         3) window.__APOLLO_STATE__ from a Playwright runtime snapshot (fallback)
+         3) Playwright runtime fallback:
+              3a) window.__APOLLO_STATE__ or window.__NEXT_DATA__
+              3b) JSON network sniff (GraphQL/XHR) while rendering + scrolling
          Extracts: name, price (EUR), image, GTIN/EAN, supplier ("Tarnija info") as
          manufacturer, and size. Uses GTIN as ext_id when present, else item id/slug.
 
@@ -39,6 +41,7 @@ import os
 import re
 import signal
 import sys
+import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import (
@@ -142,7 +145,6 @@ def same_host(u: str, host: str) -> bool:
 # ---------- Playwright utilities ----------
 
 async def wait_cookie_banner(page: Any):
-    # best-effort
     try:
         for sel in [
             'button:has-text("Nõustun")',
@@ -196,7 +198,7 @@ async def collect_category_product_links(
 
         await wait_cookie_banner(page)
 
-        # Scroll/Load more to reveal items
+        # Continuous scroll + load-more
         stable_rounds = 0
         max_stable = 3
         for _ in range(1000):
@@ -256,7 +258,7 @@ async def collect_category_product_links(
             if page_limit > 0 and len(seen_products) >= page_limit:
                 break
 
-        # Paginate
+        # Pagination
         try:
             next_links = await page.eval_on_selector_all(
                 'a[rel="next"], a[href*="?page="]',
@@ -269,7 +271,7 @@ async def collect_category_product_links(
             if nl and same_host(nl, base_host) and nl not in seen_pages:
                 queue.append((nl, depth))
 
-        # Subcategory BFS
+        # Subcategories
         if depth < max_depth:
             try:
                 subcats = await page.eval_on_selector_all(
@@ -420,7 +422,6 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
     await wait_cookie_banner(page)
     await page.wait_for_timeout(int(req_delay * 1000))
 
-    # Name
     name = None
     for sel in ["h1", '[data-testid="product-title"]', "article h1"]:
         try:
@@ -435,7 +436,6 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
 
     ld = await parse_json_ld(page)
 
-    # Brand / Manufacturer
     brand = None
     manufacturer = None
     if isinstance(ld.get("brand"), dict):
@@ -445,7 +445,6 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
     if isinstance(ld.get("manufacturer"), dict):
         manufacturer = ld["manufacturer"].get("name")
 
-    # Manufacturer from page (Tootja / Valmistaja)
     if not manufacturer:
         manufacturer = await extract_text_after_label(page, "Tootja") or await extract_text_after_label(
             page, "Valmistaja"
@@ -459,7 +458,6 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
             except Exception:
                 pass
 
-    # Brand from spec table if present
     if not brand:
         try:
             spec_xpath = (
@@ -476,11 +474,9 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
         except Exception:
             pass
 
-    # Brand heuristic fallback
     if not brand:
         brand = likely_brand_from_name(name) or manufacturer
 
-    # Price & currency
     price = None
     currency = None
     offers = ld.get("offers")
@@ -492,7 +488,6 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
     if not currency:
         currency = "EUR"
 
-    # Image
     image_url = None
     try:
         if ld.get("image"):
@@ -506,7 +501,6 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
     except Exception:
         pass
 
-    # EAN/GTIN / Tootekood
     ean_raw = None
     val = await extract_text_after_label(page, "Tootekood")
     if not val:
@@ -542,14 +536,12 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
         except Exception:
             pass
 
-    # Size from name
     size_text = None
     if name:
         m = SIZE_RE.search(name)
         if m:
             size_text = m.group(1)
 
-    # ext_id selection
     ext_id = None
     if ean_raw and normalize_ean(ean_raw):
         ext_id = normalize_ean(ean_raw)
@@ -591,14 +583,12 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
 # ---------- WOLT parsing ----------
 
 def _html_get_next_data(html: str) -> Optional[Dict]:
-    # 1) canonical __NEXT_DATA__
     m = re.search(r'<script[^>]+id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S | re.I)
     if m:
         try:
             return json.loads(m.group(1))
         except Exception:
             pass
-    # 2) sometimes assigned to window
     m2 = re.search(r'__NEXT_DATA__\s*=\s*({.*?})\s*</script>', html, re.S | re.I)
     if m2:
         try:
@@ -681,7 +671,6 @@ def _first_urlish(obj: Dict, *keys: str) -> Optional[str]:
 def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Dict:
     name = str(item.get("name") or "").strip() or None
 
-    # price
     price = None
     for k in ("price", "baseprice", "base_price", "current_price", "total_price", "unit_price"):
         if k in item:
@@ -689,36 +678,29 @@ def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Dict:
             if price is not None:
                 break
 
-    # image
     image_url = _first_urlish(item, "image", "image_url", "imageUrl", "media")
 
-    # manufacturer (Tarnija info / Tootja / Valmistaja)
     manufacturer = (
         _search_info_label(item, "Tarnija info", "Tarnija", "Tootja", "Valmistaja", "Supplier", "Manufacturer")
         or _first_str(item, "supplier", "brand")
     )
 
-    # EAN/GTIN
     ean_raw = (
         _search_info_label(item, "GTIN", "EAN", "Ribakood")
         or _first_str(item, "gtin", "ean", "barcode")
     )
     ean_norm = normalize_ean(ean_raw)
 
-    # brand (if present)
     brand = _first_str(item, "brand")
 
-    # size
-    size_text = _search_info_label(item, "Size", "Kogus", "Maht", "Kaal")  # best-effort
+    size_text = _search_info_label(item, "Size", "Kogus", "Maht", "Kaal")
     if not size_text and name:
         m = SIZE_RE.search(name)
         if m:
             size_text = m.group(1)
 
-    # ext_id
     ext_id = ean_norm or str(item.get("id") or item.get("slug") or name or "")
 
-    # url (anchor to item id if available)
     url = category_url
     if item.get("id"):
         url = f"{category_url}#item-{item.get('id')}"
@@ -889,6 +871,111 @@ async def _route_handler(route):
     await _route_filter(route)
 
 
+# ---------- Wolt runtime helpers (Playwright) ----------
+
+async def _wolt_runtime_network_collect(page) -> Dict[str, Dict]:
+    """
+    Sniff JSON responses while the Wolt page renders and mine them for menu items.
+    """
+    found: Dict[str, Dict] = {}
+    seen_urls: set[str] = set()
+
+    async def handle_response(resp):
+        try:
+            if resp.url in seen_urls:
+                return
+            seen_urls.add(resp.url)
+            ct = (await resp.header_value("content-type")) or ""
+            if "application/json" not in ct.lower():
+                return
+            txt = await resp.text()
+            if '"name"' not in txt:
+                return
+            # Heuristic: likely contains items (presence of price-ish tokens)
+            if any(k in txt for k in ['"price"', '"baseprice"', '"unit_price"', '"total_price"']):
+                try:
+                    js = json.loads(txt)
+                    _walk_collect_items(js, found)
+                except Exception:
+                    pass
+        except Exception:
+            pass
+
+    # attach async listener
+    page.on("response", lambda r: asyncio.create_task(handle_response(r)))
+
+    # give some time for lazy loads (caller scrolls too)
+    start = time.time()
+    while time.time() - start < 8.0:
+        try:
+            await page.wait_for_timeout(250)
+        except Exception:
+            break
+
+    return found
+
+
+async def _wolt_runtime_payload_with_pw(category_url: str, headless: str, req_delay: float) -> Optional[Dict]:
+    if async_playwright is None:
+        return None
+    try:
+        async with async_playwright() as pw:
+            browser = await pw.chromium.launch(headless=bool(int(headless)))
+            context = await browser.new_context(
+                user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                            "(KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"),
+                viewport={"width": 1366, "height": 900},
+                java_script_enabled=True,
+            )
+            await context.route("**/*", _route_handler)
+            page = await context.new_page()
+            try:
+                await page.goto(category_url, wait_until="domcontentloaded")
+                await wait_cookie_banner(page)
+
+                # Try direct globals quickly
+                for _ in range(2):
+                    try:
+                        nd = await page.evaluate("window.__NEXT_DATA__ || null")
+                        if nd:
+                            return nd
+                    except Exception:
+                        pass
+                    try:
+                        ap = await page.evaluate("window.__APOLLO_STATE__ || null")
+                        if ap and isinstance(ap, dict) and ap:
+                            return {"apollo": ap}
+                    except Exception:
+                        pass
+                    await page.wait_for_timeout(500)
+
+                # Scroll & network-sniff for JSON
+                async def gentle_scroll():
+                    for _ in range(12):
+                        try:
+                            await page.mouse.wheel(0, 1800)
+                        except Exception:
+                            pass
+                        await page.wait_for_timeout(int(req_delay * 1000))
+
+                collect_task = asyncio.create_task(_wolt_runtime_network_collect(page))
+                await gentle_scroll()
+                found = await collect_task
+
+                if found:
+                    # Return in a special envelope the caller understands
+                    return {"__items__": found}
+
+                return None
+            finally:
+                await page.close()
+                await context.close()
+                await browser.close()
+    except Exception as e:
+        print(f"[warn] Playwright fallback failed for {category_url}: {e}")
+        return None
+
+
 # ---------- runners (streaming) ----------
 
 async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> None:
@@ -999,10 +1086,9 @@ def _wolt_store_host(sample_url: str) -> str:
 
 async def _load_wolt_payload(url: str) -> Optional[Dict]:
     """
-    Try 3 ways to get structured data for a Wolt page:
+    Try 2 ways from static HTML:
       1) __NEXT_DATA__ from HTML
       2) _next/data/{buildId}{path}.json
-      3) window.__APOLLO_STATE__ (runtime) via Playwright (handled outside)
     """
     html = await _fetch_html(url)
 
@@ -1019,78 +1105,8 @@ async def _load_wolt_payload(url: str) -> Optional[Dict]:
         if jd:
             return jd
 
-    apollo = _html_get_apollo_state(html)
-    if apollo:
-        return {"apollo": apollo}
-
+    # Do not try __APOLLO_STATE__ from static HTML; it’s usually runtime-only.
     return None
-
-
-# --- Wolt Playwright fallback: read window.__APOLLO_STATE__ at runtime ---
-
-async def _wolt_runtime_payload_with_pw(category_url: str, headless: str, req_delay: float) -> Optional[Dict]:
-    if async_playwright is None:
-        return None
-    try:
-        async with async_playwright() as pw:
-            browser = await pw.chromium.launch(headless=bool(int(headless)))
-            context = await browser.new_context(
-                user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                            "(KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"),
-                viewport={"width": 1366, "height": 900},
-                java_script_enabled=True,
-            )
-            await context.route("**/*", _route_handler)
-            page = await context.new_page()
-            try:
-                await page.goto(category_url, wait_until="domcontentloaded")
-                await wait_cookie_banner(page)
-
-                try:
-                    await page.wait_for_function(
-                        "window.__APOLLO_STATE__ && Object.keys(window.__APOLLO_STATE__).length > 0",
-                        timeout=10000,
-                    )
-                except Exception:
-                    for _ in range(10):
-                        try:
-                            await page.mouse.wheel(0, 2000)
-                        except Exception:
-                            pass
-                        await page.wait_for_timeout(int(req_delay * 1000))
-                        try:
-                            ok = await page.evaluate(
-                                "Boolean(window.__APOLLO_STATE__ && Object.keys(window.__APOLLO_STATE__).length)"
-                            )
-                            if ok:
-                                break
-                        except Exception:
-                            pass
-
-                apollo = None
-                try:
-                    apollo = await page.evaluate("window.__APOLLO_STATE__ || null")
-                except Exception:
-                    apollo = None
-
-                if apollo and isinstance(apollo, dict):
-                    return {"apollo": apollo}
-
-                try:
-                    nextd = await page.evaluate("window.__NEXT_DATA__ || null")
-                    if nextd:
-                        return nextd
-                except Exception:
-                    pass
-
-                return None
-            finally:
-                await page.close()
-                await context.close()
-                await browser.close()
-    except Exception as e:
-        print(f"[warn] Playwright fallback failed for {category_url}: {e}")
-        return None
 
 
 async def run_wolt(args, categories: List[str], on_rows) -> None:
@@ -1118,12 +1134,17 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                 continue
 
             found: Dict[str, Dict] = {}
-            _walk_collect_items(payload, found)
+            if "__items__" in payload and isinstance(payload["__items__"], dict):
+                # network-sniff path already collected items
+                found = payload["__items__"]
+            else:
+                _walk_collect_items(payload, found)
+
             rows: List[Dict] = [_extract_wolt_row(item, cat, store_host) for item in found.values()]
             if args.max_products and args.max_products > 0:
                 rows = rows[: args.max_products]
 
-            print(f"[info] category rows (rendered): {len(rows)}{' (pw-fallback)' if used_fallback else ''}")
+            print(f"[info] category rows: {len(rows)}{' (pw-fallback)' if used_fallback else ''}")
             on_rows(rows)
         except Exception as e:
             print(f"[warn] Wolt category failed {cat}: {e}")
@@ -1132,7 +1153,6 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
 # ---------- main ----------
 
 async def run(args):
-    # Read categories
     categories: List[str] = []
     if args.categories_multiline:
         categories.extend([ln.strip() for ln in args.categories_multiline.splitlines() if ln.strip()])
@@ -1142,7 +1162,6 @@ async def run(args):
         print("[error] No category URLs provided. Pass --categories-multiline or --categories-file.")
         sys.exit(2)
 
-    # Base region normalization
     base_region = args.region.strip()
     if not re.match(r"^https?://", base_region, flags=re.I):
         base_region = "https://" + base_region
@@ -1155,7 +1174,6 @@ async def run(args):
 
     categories = [norm_url(u) for u in categories]
 
-    # optional sharding
     if args.cat_shards > 1:
         if args.cat_index < 0 or args.cat_index >= args.cat_shards:
             print(f"[error] --cat-index must be in [0, {args.cat_shards-1}]")
