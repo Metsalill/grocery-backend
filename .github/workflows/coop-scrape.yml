@@ -1,4 +1,4 @@
-name: "Coop - Category Crawl (Playwright) + optional DB upsert"
+name: "Coop – Category Crawl (Playwright) + optional DB upsert"
 
 on:
   workflow_dispatch:
@@ -28,17 +28,17 @@ on:
         required: false
         default: "0"
       req_delay:
-        description: "Delay between actions (seconds) - used for ecoop mode"
+        description: "Delay between actions (seconds) — used for ecoop mode"
         required: false
         default: "0.5"
       pdp_workers:
-        description: "Concurrent PDP tabs per category - used for ecoop mode"
+        description: "Concurrent PDP tabs per category — used for ecoop mode"
         required: false
         default: "4"
       shards:
-        description: "Parallel shards for categories (1-8)"
+        description: "Parallel shards for categories (1–8)"
         required: false
-        default: "4"
+        default: "8"
       upsert_db:
         description: "Set to 1 to upsert into public.staging_coop_products"
         required: false
@@ -66,6 +66,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Skip extra matrix jobs beyond requested shard count
       - name: Skip extra shards
         if: ${{ matrix.shard_index >= (github.event_name == 'workflow_dispatch' && fromJSON(inputs.shards) || 1) }}
         run: echo "Skipping shard ${{ matrix.shard_index }}."
@@ -76,12 +77,12 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install Python deps (and Playwright)
+      # Always install Playwright so Wolt fallback can render pages when needed
+      - name: Install Python deps (& Playwright)
         if: ${{ matrix.shard_index < (github.event_name == 'workflow_dispatch' && fromJSON(inputs.shards) || 1) }}
         run: |
           python -m pip install --upgrade pip
-          pip install asyncpg
-          pip install playwright==1.46.0
+          pip install asyncpg playwright==1.46.0
           python -m playwright install --with-deps chromium
 
       - name: Choose DB URL (prefer PUBLIC)
@@ -175,9 +176,14 @@ jobs:
           PDP_WORKERS:  ${{ github.event_name == 'workflow_dispatch' && inputs.pdp_workers  || '4' }}
           SHARD_COUNT:  ${{ github.event_name == 'workflow_dispatch' && inputs.shards       || '1' }}
           PYTHONUNBUFFERED: "1"
+        shell: bash
         run: |
           set -euo pipefail
           echo ">> running shard ${{ matrix.shard_index }} of $SHARD_COUNT (mode=$MODE)"
+          EXTRA=""
+          if [ "$MODE" = "wolt" ]; then
+            EXTRA=" --wolt-force-playwright"
+          fi
           python scripts/coop_crawl_categories_pw.py \
             --mode "$MODE" \
             --region "$REGION_URL" \
@@ -189,10 +195,11 @@ jobs:
             --pdp-workers "$PDP_WORKERS" \
             --cat-shards "$SHARD_COUNT" \
             --cat-index "${{ matrix.shard_index }}" \
-            --out "out/coop_products_${{ github.run_id }}_shard${{ matrix.shard_index }}.csv"
+            --out "out/coop_products_${{ github.run_id }}_shard${{ matrix.shard_index }}.csv" \
+            $EXTRA
 
       - name: Upload CSV artifact
-        if: ${{ always() }}
+        if: ${{ always() && matrix.shard_index < (github.event_name == 'workflow_dispatch' && fromJSON(inputs.shards) || 1) }}
         uses: actions/upload-artifact@v4
         with:
           name: coop-products-${{ github.run_id }}-part-${{ matrix.shard_index }}
