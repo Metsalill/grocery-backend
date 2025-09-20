@@ -7,8 +7,11 @@ Modes
 - ecoop: Crawls eCoop category pages with Playwright (handles JS/lazy-load + pagination).
          PDP extraction: title, brand, manufacturer (Tootja), image, price, EAN/GTIN,
          Tootekood, etc. Writes CSV; optional Postgres upsert.
-- wolt : Opens each Wolt category URL, parses __NEXT_DATA__ JSON (no clicking),
-         extracts: name, price (EUR), image, GTIN/EAN, supplier ("Tarnija info") as
+- wolt : Opens each Wolt category URL, parses server data (no clicking):
+         1) __NEXT_DATA__ inline JSON if present
+         2) Next.js _next/data/{buildId}/*.json fallback
+         3) window.__APOLLO_STATE__ fallback
+         Extracts: name, price (EUR), image, GTIN/EAN, supplier ("Tarnija info") as
          manufacturer, and size. Uses GTIN as ext_id when present, else item id/slug.
 
 DB alignment
@@ -21,7 +24,7 @@ Notes
 - store_host for ecoop is derived from --region (e.g. https://coophaapsalu.ee → coophaapsalu.ee).
 - store_host for wolt is "wolt:<venue-slug>" (e.g., "wolt:coop-lasname").
 - Supports category sharding via --cat-shards / --cat-index for parallel runs.
-- NEW: streams rows to CSV incrementally so you still get data if the job is cancelled.
+- Streams rows to CSV incrementally so artifacts survive cancellation.
 """
 
 import argparse
@@ -155,20 +158,12 @@ async def wait_cookie_banner(page: Any):
 async def collect_category_product_links(
     page: Any, category_url: str, page_limit: int, req_delay: float, max_depth: int = 2
 ) -> List[str]:
-    """
-    Collect PDP links from a category. Handles:
-      - lazy-load/scroll
-      - "Load more" buttons
-      - classic pagination (?page=N)
-      - hub pages with subcategories (BFS up to max_depth)
-    """
     base = urlparse(category_url)
     base_host = base.netloc
 
     def norm_abs(u: str) -> str:
         if not u:
             return u
-        # urljoin with the current path so bare "?page=2" resolves correctly
         u = urljoin(f"{base.scheme}://{base.netloc}{base.path}", u)
         return clean_url_keep_allowed_query(u)
 
@@ -196,11 +191,9 @@ async def collect_category_product_links(
 
         await wait_cookie_banner(page)
 
-        # Continuous scroll + "Load more" taps to populate products on listing pages
         stable_rounds = 0
         max_stable = 3
         for _ in range(1000):
-            # Gather product anchors
             try:
                 hrefs = await page.eval_on_selector_all(
                     'a[href*="/toode/"]', "els => els.map(e => e.href)"
@@ -213,7 +206,6 @@ async def collect_category_product_links(
                 if h and is_product(h):
                     seen_products.add(h)
 
-            # Try generic load-more controls
             clicked = False
             for sel in [
                 'button:has-text("Lae veel")',
@@ -230,14 +222,12 @@ async def collect_category_product_links(
                 except Exception:
                     pass
 
-            # Scroll to trigger lazy load
             try:
                 await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
             except Exception:
                 pass
             await page.wait_for_timeout(int(req_delay * 1000))
 
-            # Check if new products appeared
             before = len(seen_products)
             try:
                 hrefs2 = await page.eval_on_selector_all(
@@ -260,7 +250,6 @@ async def collect_category_product_links(
             if page_limit > 0 and len(seen_products) >= page_limit:
                 break
 
-        # Queue pagination pages on the same category
         try:
             next_links = await page.eval_on_selector_all(
                 'a[rel="next"], a[href*="?page="]',
@@ -273,7 +262,6 @@ async def collect_category_product_links(
             if nl and same_host(nl, base_host) and nl not in seen_pages:
                 queue.append((nl, depth))
 
-        # If this page was a hub of subcategories, traverse deeper
         if depth < max_depth:
             try:
                 subcats = await page.eval_on_selector_all(
@@ -321,10 +309,8 @@ async def parse_json_ld(page: Any) -> Dict:
 # ---------- price helpers ----------
 
 def _parse_wolt_price(value: Any) -> Optional[float]:
-    """Best-effort: Wolt often stores price in cents as int; handle common shapes."""
     try:
         if isinstance(value, (int, float)):
-            # Heuristic: if >= 50 it's probably cents
             return round(float(value) / (100.0 if float(value) >= 50 else 1.0), 2)
         if isinstance(value, str):
             s = value.replace(",", ".").strip()
@@ -339,7 +325,6 @@ def _parse_wolt_price(value: Any) -> Optional[float]:
 
 
 async def extract_visible_price(page: Any) -> Optional[float]:
-    """Pick the main price: ignore unit-price snippets like '0,02 €/tk'."""
     candidates: List[Tuple[float, str]] = []
     selectors = [
         '[data-testid="product-price"]',
@@ -388,7 +373,6 @@ async def extract_visible_price(page: Any) -> Optional[float]:
 # ---------- PDP extraction (ecoop) ----------
 
 async def extract_text_after_label(page: Any, label: str) -> Optional[str]:
-    """Find text following a visible label like 'Tootekood:' or 'Tootja:'."""
     try:
         nodes = page.locator(f"xpath=//*[contains(normalize-space(.), '{label}')]")
         n = await nodes.count()
@@ -426,7 +410,6 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
     await wait_cookie_banner(page)
     await page.wait_for_timeout(int(req_delay * 1000))
 
-    # Name
     name = None
     for sel in ["h1", '[data-testid="product-title"]', "article h1"]:
         try:
@@ -441,7 +424,6 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
 
     ld = await parse_json_ld(page)
 
-    # Brand / Manufacturer
     brand = None
     manufacturer = None
     if isinstance(ld.get("brand"), dict):
@@ -451,7 +433,6 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
     if isinstance(ld.get("manufacturer"), dict):
         manufacturer = ld["manufacturer"].get("name")
 
-    # Manufacturer from page (Tootja / Valmistaja)
     if not manufacturer:
         manufacturer = await extract_text_after_label(page, "Tootja") or await extract_text_after_label(
             page, "Valmistaja"
@@ -465,7 +446,6 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
             except Exception:
                 pass
 
-    # Brand from spec table if present
     if not brand:
         try:
             spec_xpath = (
@@ -482,25 +462,20 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
         except Exception:
             pass
 
-    # Brand heuristic fallback
     if not brand:
         brand = likely_brand_from_name(name) or manufacturer
 
-    # Price & currency
     price = None
     currency = None
     offers = ld.get("offers")
     if isinstance(offers, dict):
         price = offers.get("price") or offers.get("priceSpecification", {}).get("price")
-        currency = offers.get("priceCurrency") or offers.get("priceSpecification", {}).get(
-            "priceCurrency"
-        )
+        currency = offers.get("priceCurrency") or offers.get("priceSpecification", {}).get("priceCurrency")
     if price is None:
         price = await extract_visible_price(page)
     if not currency:
         currency = "EUR"
 
-    # Image
     image_url = None
     try:
         if ld.get("image"):
@@ -514,7 +489,6 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
     except Exception:
         pass
 
-    # EAN/GTIN / Tootekood
     ean_raw = None
     val = await extract_text_after_label(page, "Tootekood")
     if not val:
@@ -550,14 +524,12 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
         except Exception:
             pass
 
-    # Size from name
     size_text = None
     if name:
         m = SIZE_RE.search(name)
         if m:
             size_text = m.group(1)
 
-    # ext_id selection (bugfix: actually assign from regex)
     ext_id = None
     if ean_raw and normalize_ean(ean_raw):
         ext_id = normalize_ean(ean_raw)
@@ -599,7 +571,31 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
 # ---------- WOLT parsing ----------
 
 def _html_get_next_data(html: str) -> Optional[Dict]:
+    # 1) canonical __NEXT_DATA__
     m = re.search(r'<script[^>]+id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S | re.I)
+    if m:
+        try:
+            return json.loads(m.group(1))
+        except Exception:
+            pass
+    # 2) sometimes inlined as window.__NEXT_DATA__=
+    m2 = re.search(r'__NEXT_DATA__\s*=\s*({.*?})\s*<\/script>', html, re.S | re.I)
+    if m2:
+        try:
+            return json.loads(m2.group(1))
+        except Exception:
+            pass
+    return None
+
+
+def _html_get_build_id(html: str) -> Optional[str]:
+    # Next.js pages include "buildId":"<id>" somewhere in the HTML/inline JSON
+    m = re.search(r'"buildId"\s*:\s*"([^"]+)"', html)
+    return m.group(1) if m else None
+
+
+def _html_get_apollo_state(html: str) -> Optional[Dict]:
+    m = re.search(r'__APOLLO_STATE__\s*=\s*({.*?})\s*;', html, re.S | re.I)
     if not m:
         return None
     try:
@@ -625,7 +621,6 @@ def _walk_collect_items(obj: Any, found: Dict[str, Dict]) -> None:
 
 
 def _search_info_label(value: Any, *labels: str) -> Optional[str]:
-    """Find 'GTIN', 'Tarnija info', etc. in common Wolt info arrays."""
     lbls = {l.lower() for l in labels}
     try:
         if isinstance(value, list):
@@ -667,7 +662,6 @@ def _first_urlish(obj: Dict, *keys: str) -> Optional[str]:
 def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Dict:
     name = str(item.get("name") or "").strip() or None
 
-    # price
     price = None
     for k in ("price", "baseprice", "base_price", "current_price", "total_price", "unit_price"):
         if k in item:
@@ -675,36 +669,29 @@ def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Dict:
             if price is not None:
                 break
 
-    # image
     image_url = _first_urlish(item, "image", "image_url", "imageUrl", "media")
 
-    # manufacturer (Tarnija info / Tootja / Valmistaja)
     manufacturer = (
         _search_info_label(item, "Tarnija info", "Tarnija", "Tootja", "Valmistaja", "Supplier", "Manufacturer")
         or _first_str(item, "supplier", "brand")
     )
 
-    # EAN/GTIN
     ean_raw = (
         _search_info_label(item, "GTIN", "EAN", "Ribakood")
         or _first_str(item, "gtin", "ean", "barcode")
     )
     ean_norm = normalize_ean(ean_raw)
 
-    # brand (if present)
     brand = _first_str(item, "brand")
 
-    # size
-    size_text = _search_info_label(item, "Size", "Kogus", "Maht", "Kaal")  # best-effort
+    size_text = _search_info_label(item, "Size", "Kogus", "Maht", "Kaal")
     if not size_text and name:
         m = SIZE_RE.search(name)
         if m:
             size_text = m.group(1)
 
-    # ext_id
     ext_id = ean_norm or str(item.get("id") or item.get("slug") or name or "")
 
-    # url (anchor to item id if available)
     url = category_url
     if item.get("id"):
         url = f"{category_url}#item-{item.get('id')}"
@@ -744,7 +731,6 @@ CSV_COLS = [
 ]
 
 def append_csv(rows: List[Dict], out_path: Path) -> None:
-    """Append rows to CSV, writing header if the file is new/empty."""
     if not rows:
         return
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -759,7 +745,6 @@ def append_csv(rows: List[Dict], out_path: Path) -> None:
             w.writerow(row)
 
 
-# (kept for completeness; unused by streaming path)
 def write_csv(rows: List[Dict], out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with out_path.open("w", newline="", encoding="utf-8") as f:
@@ -877,7 +862,7 @@ async def _route_handler(route):
     await _route_filter(route)
 
 
-# ---------- runners (now streaming) ----------
+# ---------- runners (streaming) ----------
 
 async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> None:
     if async_playwright is None:
@@ -896,12 +881,10 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
 
         try:
             for cat in categories:
-                full_cat = cat
-                print(f"[cat] {full_cat}")
-                # category runner
+                print(f"[cat] {cat}")
                 page = await context.new_page()
                 try:
-                    links = await collect_category_product_links(page, full_cat, args.page_limit, args.req_delay, max_depth=2)
+                    links = await collect_category_product_links(page, cat, args.page_limit, args.req_delay, max_depth=2)
                 finally:
                     await page.close()
 
@@ -921,7 +904,6 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
                         finally:
                             await p.close()
 
-                # Stream results as they complete to reduce data-at-risk window
                 pending_batch: List[Dict] = []
                 tasks = [asyncio.create_task(worker(u)) for u in links]
                 for coro in asyncio.as_completed(tasks):
@@ -938,19 +920,85 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
             await browser.close()
 
 
+# --- robust HTTP helpers for Wolt (headers + gzip) ---
+
+def _browser_headers(referer: Optional[str] = None) -> Dict[str, str]:
+    h = {
+        "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                       "AppleWebKit/537.36 (KHTML, like Gecko) "
+                       "Chrome/122.0.0.0 Safari/537.36"),
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "et-EE,et;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Connection": "keep-alive",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+        "Accept-Encoding": "gzip",
+    }
+    if referer:
+        h["Referer"] = referer
+    return h
+
+
 async def _fetch_html(url: str) -> str:
-    # stdlib fetch to avoid extra deps
-    import urllib.request
-    with urllib.request.urlopen(url) as resp:  # nosec - public pages
-        return resp.read().decode("utf-8", errors="replace")
+    import urllib.request, gzip, io
+    req = urllib.request.Request(url, headers=_browser_headers())
+    with urllib.request.urlopen(req) as resp:  # nosec - public pages
+        data = resp.read()
+        if resp.headers.get("Content-Encoding", "").lower() == "gzip":
+            data = gzip.GzipFile(fileobj=io.BytesIO(data)).read()
+        return data.decode("utf-8", errors="replace")
+
+
+async def _fetch_json(url: str) -> Optional[Dict]:
+    import urllib.request, gzip, io
+    req = urllib.request.Request(url, headers=_browser_headers())
+    with urllib.request.urlopen(req) as resp:  # nosec
+        data = resp.read()
+        if resp.headers.get("Content-Encoding", "").lower() == "gzip":
+            import io as _io
+            data = gzip.GzipFile(fileobj=_io.BytesIO(data)).read()
+        try:
+            return json.loads(data.decode("utf-8", errors="replace"))
+        except Exception:
+            return None
 
 
 def _wolt_store_host(sample_url: str) -> str:
-    """Return 'wolt:<venue-slug>' if present, else the netloc."""
     m = re.search(r"/venue/([^/]+)", sample_url)
     if m:
         return f"wolt:{m.group(1)}"
     return urlparse(sample_url).netloc.lower()
+
+
+async def _load_wolt_payload(url: str) -> Optional[Dict]:
+    """
+    Try 3 ways to get structured data for a Wolt page:
+      1) __NEXT_DATA__ from HTML
+      2) _next/data/{buildId}{path}.json
+      3) window.__APOLLO_STATE__
+    """
+    html = await _fetch_html(url)
+
+    nd = _html_get_next_data(html)
+    if nd:
+        return nd
+
+    build_id = _html_get_build_id(html)
+    if build_id:
+        u = urlparse(url)
+        # Next.js wants the path exactly as in the URL (no trailing slash), then ".json"
+        path = u.path if not u.path.endswith("/") else u.path[:-1]
+        api = f"{u.scheme}://{u.netloc}/_next/data/{build_id}{path}.json"
+        jd = await _fetch_json(api)
+        if jd:
+            return jd
+
+    apollo = _html_get_apollo_state(html)
+    if apollo:
+        # Wrap it in a shape the walker understands
+        return {"apollo": apollo}
+
+    return None
 
 
 async def run_wolt(args, categories: List[str], on_rows) -> None:
@@ -959,20 +1007,15 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
     for cat in categories:
         print(f"[cat-wolt] {cat}")
         try:
-            html = await _fetch_html(cat)
-            nd = _html_get_next_data(html)
-            if not nd:
-                print(f"[warn] __NEXT_DATA__ not found for {cat}")
+            payload = await _load_wolt_payload(cat)
+            if not payload:
+                print(f"[warn] could not obtain server data for {cat}")
                 continue
             found: Dict[str, Dict] = {}
-            _walk_collect_items(nd, found)
-            rows: List[Dict] = []
-            for _, item in found.items():
-                rows.append(_extract_wolt_row(item, cat, store_host))
-
+            _walk_collect_items(payload, found)
+            rows: List[Dict] = [_extract_wolt_row(item, cat, store_host) for item in found.values()]
             if args.max_products and args.max_products > 0:
                 rows = rows[: args.max_products]
-
             print(f"[info] category rows: {len(rows)}")
             on_rows(rows)
         except Exception as e:
@@ -982,7 +1025,6 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
 # ---------- main ----------
 
 async def run(args):
-    # Read categories
     categories: List[str] = []
     if args.categories_multiline:
         categories.extend([ln.strip() for ln in args.categories_multiline.splitlines() if ln.strip()])
@@ -992,7 +1034,6 @@ async def run(args):
         print("[error] No category URLs provided. Pass --categories-multiline or --categories-file.")
         sys.exit(2)
 
-    # Base region normalization
     base_region = args.region.strip()
     if not re.match(r"^https?://", base_region, flags=re.I):
         base_region = "https://" + base_region
@@ -1000,13 +1041,11 @@ async def run(args):
         base_region += "/"
 
     def norm_url(u: str) -> str:
-        # handles both absolute and relative inputs
         absu = urljoin(base_region, u)
         return clean_url_keep_allowed_query(absu)
 
     categories = [norm_url(u) for u in categories]
 
-    # optional sharding
     if args.cat_shards > 1:
         if args.cat_index < 0 or args.cat_index >= args.cat_shards:
             print(f"[error] --cat-index must be in [0, {args.cat_shards-1}]")
@@ -1014,7 +1053,6 @@ async def run(args):
         categories = [u for i, u in enumerate(categories) if i % args.cat_shards == args.cat_index]
         print(f"[shard] Using {len(categories)} categories for shard {args.cat_index}/{args.cat_shards}")
 
-    # Prepare streaming CSV path up front
     out_path = Path(args.out)
     if out_path.is_dir() or str(out_path).endswith("/"):
         out_path = out_path / f"coop_products_{now_stamp()}.csv"
@@ -1030,7 +1068,6 @@ async def run(args):
         all_rows.extend(batch)
         print(f"[stream] +{len(batch)} rows (total {len(all_rows)})")
 
-    # Ensure we attempt a final flush on SIGTERM/SIGINT (CSV already streamed per batch)
     def _sig_handler(signum, frame):
         print(f"[warn] received signal {signum}; CSV already streamed. Exiting 130.")
         os._exit(130)
@@ -1038,15 +1075,12 @@ async def run(args):
     signal.signal(signal.SIGTERM, _sig_handler)
     signal.signal(signal.SIGINT, _sig_handler)
 
-    # Route by mode
     if args.mode.lower() == "wolt" or "wolt.com" in base_region:
         await run_wolt(args, categories, on_rows)
     else:
         await run_ecoop(args, categories, base_region, on_rows)
 
     print(f"[ok] CSV ready: {out_path}")
-
-    # Optional DB upsert at the end (uses in-memory rows we accumulated)
     await maybe_upsert_db(all_rows)
 
 
@@ -1066,7 +1100,6 @@ def parse_args():
     p.add_argument("--headless", default="1", help="(ecoop) 1/0 headless")
     p.add_argument("--req-delay", type=float, default=0.5, help="(ecoop) Seconds between ops")
     p.add_argument("--pdp-workers", type=int, default=4, help="(ecoop) Concurrent PDP tabs per category")
-    # sharding
     p.add_argument("--cat-shards", type=int, default=1, help="Total number of category shards")
     p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
     p.add_argument("--out", default="out/coop_products.csv", help="CSV file or output directory")
