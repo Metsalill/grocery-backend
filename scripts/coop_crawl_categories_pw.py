@@ -875,7 +875,8 @@ async def _route_handler(route):
 
 async def _wolt_runtime_network_collect(page) -> Dict[str, Dict]:
     """
-    Sniff JSON responses while the Wolt page renders and mine them for menu items.
+    Sniff JSON-like responses while the Wolt page renders and mine them for menu items.
+    Looser checks: try-parse JSON regardless of Content-Type (some endpoints use text/plain).
     """
     found: Dict[str, Dict] = {}
     seen_urls: set[str] = set()
@@ -885,28 +886,34 @@ async def _wolt_runtime_network_collect(page) -> Dict[str, Dict]:
             if resp.url in seen_urls:
                 return
             seen_urls.add(resp.url)
-            ct = (await resp.header_value("content-type")) or ""
-            if "application/json" not in ct.lower():
+
+            # read body (limit size)
+            try:
+                txt = await resp.text()
+            except Exception:
                 return
-            txt = await resp.text()
-            if '"name"' not in txt:
+            if not txt:
                 return
-            # Heuristic: likely contains items (presence of price-ish tokens)
-            if any(k in txt for k in ['"price"', '"baseprice"', '"unit_price"', '"total_price"']):
-                try:
-                    js = json.loads(txt)
-                    _walk_collect_items(js, found)
-                except Exception:
-                    pass
+            s = txt.strip()
+            # quick gate to avoid binary/svg/etc
+            if not (s.startswith("{") or s.startswith("[")):
+                return
+
+            # try parse
+            try:
+                js = json.loads(s)
+            except Exception:
+                return
+
+            _walk_collect_items(js, found)
         except Exception:
             pass
 
-    # attach async listener
     page.on("response", lambda r: asyncio.create_task(handle_response(r)))
 
-    # give some time for lazy loads (caller scrolls too)
+    # let responses flow for a bit; caller also scrolls
     start = time.time()
-    while time.time() - start < 8.0:
+    while time.time() - start < 12.0:
         try:
             await page.wait_for_timeout(250)
         except Exception:
@@ -951,7 +958,7 @@ async def _wolt_runtime_payload_with_pw(category_url: str, headless: str, req_de
 
                 # Scroll & network-sniff for JSON
                 async def gentle_scroll():
-                    for _ in range(12):
+                    for _ in range(20):
                         try:
                             await page.mouse.wheel(0, 1800)
                         except Exception:
@@ -963,7 +970,6 @@ async def _wolt_runtime_payload_with_pw(category_url: str, headless: str, req_de
                 found = await collect_task
 
                 if found:
-                    # Return in a special envelope the caller understands
                     return {"__items__": found}
 
                 return None
@@ -1105,7 +1111,6 @@ async def _load_wolt_payload(url: str) -> Optional[Dict]:
         if jd:
             return jd
 
-    # Do not try __APOLLO_STATE__ from static HTML; it’s usually runtime-only.
     return None
 
 
@@ -1231,7 +1236,6 @@ def parse_args():
     p.add_argument("--cat-shards", type=int, default=1, help="Total number of category shards")
     p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
     p.add_argument("--out", default="out/coop_products.csv", help="CSV file or output directory")
-    # NEW: Wolt force-runtime flag
     p.add_argument("--wolt-force-playwright", dest="wolt_force_playwright", action="store_true",
                    help="Force Playwright runtime extraction for Wolt pages.")
     return p.parse_args()
