@@ -11,7 +11,7 @@ Modes
          1) __NEXT_DATA__ inline JSON if present
          2) Next.js _next/data/{buildId}/*.json fallback
          3) window.__APOLLO_STATE__ fallback
-         If none are available (or --wolt-force-playwright=1), it opens the page
+         If none are available (or --wolt-force-playwright), it opens the page
          with Playwright, captures the network JSON used by Wolt’s app, and walks
          it to extract name, price (EUR), image, GTIN/EAN, supplier ("Tarnija info")
          as manufacturer, and size. Uses GTIN as ext_id when present, else item id/slug.
@@ -27,6 +27,10 @@ Notes
 - store_host for wolt is "wolt:<venue-slug>" (e.g., "wolt:coop-lasname").
 - Supports category sharding via --cat-shards / --cat-index for parallel runs.
 - Streams rows to CSV incrementally so artifacts survive cancellation.
+
+Flag note
+- New boolean flag: `--wolt-force-playwright` (presence = True).
+- Legacy compatibility: `--wolt-force-playwright-val=true|false` or env `WOLT_FORCE_PLAYWRIGHT=1/true`.
 """
 
 import argparse
@@ -68,6 +72,12 @@ CTX_TA_CODE = re.compile(r"(?:Tootekood)\s*[:\-]?\s*(\d{8,14})", re.IGNORECASE)
 CTX_MANUF = re.compile(r"(?:Tootja|Valmistaja)\s*[:\-]?\s*([^\n<]{2,120})", re.IGNORECASE)
 
 PRICE_TOKEN = re.compile(r"(\d+[.,]\d{2})\s*€", re.U)
+
+
+def str2bool(v: Optional[str]) -> bool:
+    if v is None:
+        return False
+    return str(v).strip().lower() in {"1", "true", "t", "yes", "y", "on"}
 
 
 def now_stamp() -> str:
@@ -313,6 +323,7 @@ async def parse_json_ld(page: Any) -> Dict:
 def _parse_wolt_price(value: Any) -> Optional[float]:
     try:
         if isinstance(value, (int, float)):
+            # try cents → € heuristic; if too small, assume already €
             return round(float(value) / (100.0 if float(value) >= 50 else 1.0), 2)
         if isinstance(value, str):
             s = value.replace(",", ".").strip()
@@ -333,7 +344,7 @@ async def extract_visible_price(page: Any) -> Optional[float]:
         ".product-price",
         ".price",
         ".current-price",
-        '[class*=\"price\"]',
+        '[class*="price"]',
     ]
     for sel in selectors:
         try:
@@ -413,7 +424,7 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
     await page.wait_for_timeout(int(req_delay * 1000))
 
     name = None
-    for sel in ["h1", '[data-testid=\"product-title\"]', "article h1"]:
+    for sel in ["h1", '[data-testid="product-title"]', "article h1"]:
         try:
             loc = page.locator(sel)
             if await loc.count() > 0:
@@ -487,7 +498,7 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
                 else (ld["image"][0] if isinstance(ld["image"], list) and ld["image"] else None)
             )
         if not image_url:
-            image_url = await page.get_attribute('meta[property=\"og:image\"]', "content")
+            image_url = await page.get_attribute('meta[property="og:image"]', "content")
     except Exception:
         pass
 
@@ -768,7 +779,7 @@ def write_csv(rows: List[Dict], out_path: Path) -> None:
 async def maybe_upsert_db(rows: List[Dict]) -> None:
     if not rows:
         return
-    if os.environ.get("COOP_UPSERT_DB", "0") not in ("1", "true", "True"):
+    if os.environ.get("COOP_UPSERT_DB", "0").lower() not in ("1", "true"):
         print("[info] DB upsert disabled (COOP_UPSERT_DB != 1)")
         return
     dsn = os.environ.get("DATABASE_URL")
@@ -1181,7 +1192,8 @@ async def run(args):
     signal.signal(signal.SIGTERM, _sig_handler)
     signal.signal(signal.SIGINT, _sig_handler)
 
-    if args.mode.lower() == "wolt" or "wolt.com" in base_region:
+    # Decide runner
+    if args.mode.lower() == "wolt" or ("wolt.com" in base_region.lower()):
         await run_wolt(args, categories, on_rows)
     else:
         await run_ecoop(args, categories, base_region, on_rows)
@@ -1209,10 +1221,25 @@ def parse_args():
     p.add_argument("--cat-shards", type=int, default=1, help="Total number of category shards")
     p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
     p.add_argument("--out", default="out/coop_products.csv", help="CSV file or output directory")
-    # Wolt PW override
-    p.add_argument("--wolt-force-playwright", dest="wolt_force_playwright", type=int, default=0,
-                   help="1 = force Playwright network fallback for Wolt categories")
-    return p.parse_args()
+
+    # Wolt Playwright override: NEW boolean flag (presence = True)
+    p.add_argument("--wolt-force-playwright", action="store_true",
+                   help="Force Playwright network fallback for Wolt categories (no value needed).")
+    # Legacy compatibility: explicit value
+    p.add_argument("--wolt-force-playwright-val", default=None,
+                   help="(Legacy) true/false/1/0 to override --wolt-force-playwright.")
+
+    args = p.parse_args()
+
+    # Apply legacy and env overrides
+    if args.wolt_force_playwright_val is not None:
+        args.wolt_force_playwright = str2bool(args.wolt_force_playwright_val)
+    else:
+        env_override = os.getenv("WOLT_FORCE_PLAYWRIGHT")
+        if env_override is not None:
+            args.wolt_force_playwright = str2bool(env_override)
+
+    return args
 
 
 if __name__ == "__main__":
