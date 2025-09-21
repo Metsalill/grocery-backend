@@ -7,17 +7,14 @@ Modes
 - ecoop: Crawls eCoop category pages with Playwright (handles JS/lazy-load + pagination).
          PDP extraction: title, brand, manufacturer (Tootja), image, price, EAN/GTIN,
          Tootekood, etc. Writes CSV; optional Postgres upsert.
-- wolt : Opens each Wolt category URL and tries to parse structured data:
-         1) __NEXT_DATA__ inline JSON (static HTML) if present
-         2) Next.js /_next/data/{buildId}/*.json fallback
-         3) Playwright runtime fallback:
-              3a) window.__APOLLO_STATE__ or window.__NEXT_DATA__
-              3b) JSON network sniff (GraphQL/XHR) while rendering + scrolling
-         Extracts: name, price (EUR), image, GTIN/EAN, supplier ("Tarnija info") as
-         manufacturer, and size. Uses GTIN as ext_id when present, else item id/slug.
-
-Extras
-- --wolt-force-playwright : Force using Playwright runtime extraction in Wolt mode.
+- wolt : Tries server data first:
+         1) __NEXT_DATA__ inline JSON if present
+         2) Next.js _next/data/{buildId}/*.json fallback
+         3) window.__APOLLO_STATE__ fallback
+         If none are available (or --wolt-force-playwright=1), it opens the page
+         with Playwright, captures the network JSON used by Wolt’s app, and walks
+         it to extract name, price (EUR), image, GTIN/EAN, supplier ("Tarnija info")
+         as manufacturer, and size. Uses GTIN as ext_id when present, else item id/slug.
 
 DB alignment
 - Target table: public.staging_coop_products
@@ -41,7 +38,6 @@ import os
 import re
 import signal
 import sys
-import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import (
@@ -53,7 +49,7 @@ from urllib.parse import (
     urlencode,
 )
 
-# Playwright is optional (only needed in ecoop mode & wolt fallback)
+# Playwright is optional (only needed in ecoop mode and Wolt PW fallback)
 try:
     from playwright.async_api import async_playwright  # type: ignore
 except Exception:  # pragma: no cover
@@ -65,6 +61,7 @@ SIZE_RE = re.compile(r"(\b\d+[\,\.]?\d*\s?(?:kg|g|l|ml|tk|pcs|x|×)\s?\d*\b)", r
 DIGITS_ONLY = re.compile(r"[^0-9]")
 
 BRAND_KEYS_ET = ["Kaubamärk", "Bränd", "Brand"]
+MANUF_KEYS_ET = ["Tootja", "Valmistaja"]
 EAN_KEYS_ET = ["Ribakood", "EAN", "Tootekood", "GTIN"]
 
 CTX_TA_CODE = re.compile(r"(?:Tootekood)\s*[:\-]?\s*(\d{8,14})", re.IGNORECASE)
@@ -142,7 +139,7 @@ def same_host(u: str, host: str) -> bool:
         return False
 
 
-# ---------- Playwright utilities ----------
+# ---------- ecoop (Playwright) utilities ----------
 
 async def wait_cookie_banner(page: Any):
     try:
@@ -159,8 +156,6 @@ async def wait_cookie_banner(page: Any):
     except Exception:
         pass
 
-
-# ---------- eCoop listing discovery (Playwright) ----------
 
 async def collect_category_product_links(
     page: Any, category_url: str, page_limit: int, req_delay: float, max_depth: int = 2
@@ -198,7 +193,6 @@ async def collect_category_product_links(
 
         await wait_cookie_banner(page)
 
-        # Continuous scroll + load-more
         stable_rounds = 0
         max_stable = 3
         for _ in range(1000):
@@ -258,7 +252,6 @@ async def collect_category_product_links(
             if page_limit > 0 and len(seen_products) >= page_limit:
                 break
 
-        # Pagination
         try:
             next_links = await page.eval_on_selector_all(
                 'a[rel="next"], a[href*="?page="]',
@@ -271,7 +264,6 @@ async def collect_category_product_links(
             if nl and same_host(nl, base_host) and nl not in seen_pages:
                 queue.append((nl, depth))
 
-        # Subcategories
         if depth < max_depth:
             try:
                 subcats = await page.eval_on_selector_all(
@@ -341,7 +333,7 @@ async def extract_visible_price(page: Any) -> Optional[float]:
         ".product-price",
         ".price",
         ".current-price",
-        '[class*="price"]',
+        '[class*=\"price\"]',
     ]
     for sel in selectors:
         try:
@@ -380,7 +372,7 @@ async def extract_visible_price(page: Any) -> Optional[float]:
     return max(candidates, key=lambda x: x[0])[0]
 
 
-# ---------- PDP label helper (ecoop) ----------
+# ---------- PDP extraction (ecoop) ----------
 
 async def extract_text_after_label(page: Any, label: str) -> Optional[str]:
     try:
@@ -415,15 +407,13 @@ async def extract_text_after_label(page: Any, label: str) -> Optional[str]:
     return None
 
 
-# ---------- PDP extraction (ecoop) ----------
-
 async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) -> Dict:
     await page.goto(url, wait_until="domcontentloaded")
     await wait_cookie_banner(page)
     await page.wait_for_timeout(int(req_delay * 1000))
 
     name = None
-    for sel in ["h1", '[data-testid="product-title"]', "article h1"]:
+    for sel in ["h1", '[data-testid=\"product-title\"]', "article h1"]:
         try:
             loc = page.locator(sel)
             if await loc.count() > 0:
@@ -497,7 +487,7 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
                 else (ld["image"][0] if isinstance(ld["image"], list) and ld["image"] else None)
             )
         if not image_url:
-            image_url = await page.get_attribute('meta[property="og:image"]', "content")
+            image_url = await page.get_attribute('meta[property=\"og:image\"]', "content")
     except Exception:
         pass
 
@@ -583,13 +573,15 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
 # ---------- WOLT parsing ----------
 
 def _html_get_next_data(html: str) -> Optional[Dict]:
+    # 1) canonical __NEXT_DATA__
     m = re.search(r'<script[^>]+id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S | re.I)
     if m:
         try:
             return json.loads(m.group(1))
         except Exception:
             pass
-    m2 = re.search(r'__NEXT_DATA__\s*=\s*({.*?})\s*</script>', html, re.S | re.I)
+    # 2) sometimes inlined as window.__NEXT_DATA__=
+    m2 = re.search(r'__NEXT_DATA__\s*=\s*({.*?})\s*<\/script>', html, re.S | re.I)
     if m2:
         try:
             return json.loads(m2.group(1))
@@ -671,6 +663,7 @@ def _first_urlish(obj: Dict, *keys: str) -> Optional[str]:
 def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Dict:
     name = str(item.get("name") or "").strip() or None
 
+    # price
     price = None
     for k in ("price", "baseprice", "base_price", "current_price", "total_price", "unit_price"):
         if k in item:
@@ -678,29 +671,36 @@ def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Dict:
             if price is not None:
                 break
 
+    # image
     image_url = _first_urlish(item, "image", "image_url", "imageUrl", "media")
 
+    # manufacturer / supplier
     manufacturer = (
         _search_info_label(item, "Tarnija info", "Tarnija", "Tootja", "Valmistaja", "Supplier", "Manufacturer")
-        or _first_str(item, "supplier", "brand")
+        or _first_str(item, "supplier", "manufacturer", "producer")
     )
 
+    # EAN/GTIN
     ean_raw = (
         _search_info_label(item, "GTIN", "EAN", "Ribakood")
         or _first_str(item, "gtin", "ean", "barcode")
     )
     ean_norm = normalize_ean(ean_raw)
 
-    brand = _first_str(item, "brand")
+    # brand
+    brand = _first_str(item, "brand") or likely_brand_from_name(name)
 
+    # size
     size_text = _search_info_label(item, "Size", "Kogus", "Maht", "Kaal")
     if not size_text and name:
         m = SIZE_RE.search(name)
         if m:
             size_text = m.group(1)
 
+    # ext_id
     ext_id = ean_norm or str(item.get("id") or item.get("slug") or name or "")
 
+    # url (anchor to item id if available)
     url = category_url
     if item.get("id"):
         url = f"{category_url}#item-{item.get('id')}"
@@ -871,115 +871,174 @@ async def _route_handler(route):
     await _route_filter(route)
 
 
-# ---------- Wolt runtime helpers (Playwright) ----------
+# ---------- Wolt PW-network fallback ----------
 
-async def _wolt_runtime_network_collect(page) -> Dict[str, Dict]:
-    """
-    Sniff JSON-like responses while the Wolt page renders and mine them for menu items.
-    Looser checks: try-parse JSON regardless of Content-Type (some endpoints use text/plain).
-    """
-    found: Dict[str, Dict] = {}
-    seen_urls: set[str] = set()
+def _browser_headers(referer: Optional[str] = None) -> Dict[str, str]:
+    h = {
+        "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                       "AppleWebKit/537.36 (KHTML, like Gecko) "
+                       "Chrome/122.0.0.0 Safari/537.36"),
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "et-EE,et;q=0.9,en-US;q=0.8,en;q=0.7",
+        "Connection": "keep-alive",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+        "Accept-Encoding": "gzip",
+    }
+    if referer:
+        h["Referer"] = referer
+    return h
 
-    async def handle_response(resp):
+
+async def _fetch_html(url: str) -> str:
+    import urllib.request, gzip, io
+    req = urllib.request.Request(url, headers=_browser_headers())
+    with urllib.request.urlopen(req) as resp:  # nosec - public pages
+        data = resp.read()
+        if resp.headers.get("Content-Encoding", "").lower() == "gzip":
+            data = gzip.GzipFile(fileobj=io.BytesIO(data)).read()
+        return data.decode("utf-8", errors="replace")
+
+
+async def _fetch_json(url: str) -> Optional[Dict]:
+    import urllib.request, gzip, io
+    req = urllib.request.Request(url, headers=_browser_headers())
+    with urllib.request.urlopen(req) as resp:  # nosec
+        data = resp.read()
+        if resp.headers.get("Content-Encoding", "").lower() == "gzip":
+            import io as _io
+            data = gzip.GzipFile(fileobj=_io.BytesIO(data)).read()
         try:
-            if resp.url in seen_urls:
-                return
-            seen_urls.add(resp.url)
+            return json.loads(data.decode("utf-8", errors="replace"))
+        except Exception:
+            return None
 
-            # read body (limit size)
+
+def _wolt_store_host(sample_url: str) -> str:
+    m = re.search(r"/venue/([^/]+)", sample_url)
+    if m:
+        return f"wolt:{m.group(1)}"
+    return urlparse(sample_url).netloc.lower()
+
+
+async def _load_wolt_payload(url: str) -> Optional[Dict]:
+    """Try server-side sources without a browser."""
+    html = await _fetch_html(url)
+
+    nd = _html_get_next_data(html)
+    if nd:
+        return nd
+
+    build_id = _html_get_build_id(html)
+    if build_id:
+        u = urlparse(url)
+        path = u.path if not u.path.endswith("/") else u.path[:-1]
+        jd = await _fetch_json(f"{u.scheme}://{u.netloc}/_next/data/{build_id}{path}.json")
+        if jd:
+            return jd
+
+    apollo = _html_get_apollo_state(html)
+    if apollo:
+        return {"apollo": apollo}
+
+    return None
+
+
+async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
+    """Open a Wolt category with Playwright, capture JSON responses, walk them."""
+    if async_playwright is None:
+        raise RuntimeError("Playwright is required for Wolt fallback but is not installed.")
+
+    found: Dict[str, Dict] = {}
+
+    async with async_playwright() as pw:
+        browser = await pw.chromium.launch(headless=True)
+        context = await browser.new_context(
+            user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                        "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"),
+            viewport={"width": 1366, "height": 900},
+            java_script_enabled=True,
+        )
+
+        # Do NOT block Wolt APIs here; only heavy trackers.
+        async def route_filter(route):
             try:
-                txt = await resp.text()
+                url = route.request.url
+                if any(h in url for h in [
+                    "googletagmanager.com", "google-analytics.com", "doubleclick.net",
+                    "facebook.net", "connect.facebook.net", "hotjar", "fullstory",
+                    "cdn.segment.com", "intercom",
+                ]):
+                    return await route.abort()
+                return await route.continue_()
             except Exception:
-                return
-            if not txt:
-                return
-            s = txt.strip()
-            # quick gate to avoid binary/svg/etc
-            if not (s.startswith("{") or s.startswith("[")):
-                return
+                try:
+                    return await route.continue_()
+                except Exception:
+                    return
 
-            # try parse
-            try:
-                js = json.loads(s)
-            except Exception:
-                return
+        await context.route("**/*", route_filter)
 
-            _walk_collect_items(js, found)
+        page = await context.new_page()
+        json_blobs: List[Any] = []
+
+        # capture JSON/XHR that the SPA loads
+        page.on(
+            "response",
+            lambda resp: asyncio.create_task(_maybe_collect_json(resp, json_blobs))
+        )
+
+        try:
+            await page.goto(cat_url, wait_until="networkidle")
+            await wait_cookie_banner(page)
+            # small scroll to let lazy parts load
+            for _ in range(5):
+                await page.mouse.wheel(0, 1500)
+                await page.wait_for_timeout(300)
+
+            # also try to read window states that frameworks sometimes expose
+            for varname in [
+                "__APOLLO_STATE__", "__NEXT_DATA__", "__NUXT__", "__INITIAL_STATE__",
+                "__REACT_QUERY_STATE__", "__REDUX_STATE__", "__WOLT_STATE__"
+            ]:
+                try:
+                    data = await page.evaluate(f"window.{varname} || null")
+                    if data:
+                        json_blobs.append(data)
+                except Exception:
+                    pass
+        finally:
+            await context.close()
+            await browser.close()
+
+    # Walk all collected blobs
+    for blob in json_blobs:
+        try:
+            _walk_collect_items(blob, found)
         except Exception:
             pass
 
-    page.on("response", lambda r: asyncio.create_task(handle_response(r)))
-
-    # let responses flow for a bit; caller also scrolls
-    start = time.time()
-    while time.time() - start < 12.0:
-        try:
-            await page.wait_for_timeout(250)
-        except Exception:
-            break
-
-    return found
+    return list(found.values())
 
 
-async def _wolt_runtime_payload_with_pw(category_url: str, headless: str, req_delay: float) -> Optional[Dict]:
-    if async_playwright is None:
-        return None
+async def _maybe_collect_json(resp, out_list: List[Any]):
     try:
-        async with async_playwright() as pw:
-            browser = await pw.chromium.launch(headless=bool(int(headless)))
-            context = await browser.new_context(
-                user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                            "(KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"),
-                viewport={"width": 1366, "height": 900},
-                java_script_enabled=True,
-            )
-            await context.route("**/*", _route_handler)
-            page = await context.new_page()
+        ct = (resp.headers.get("content-type") or "").lower()
+        if "application/json" not in ct:
+            return
+        url = resp.url
+        # focus on Wolt/restaurant APIs but be permissive
+        if any(x in url for x in ["wolt.com", "wolt-static-assets", "restaurant-api.wolt", "graphql"]):
+            txt = await resp.text()
+            if not txt:
+                return
             try:
-                await page.goto(category_url, wait_until="domcontentloaded")
-                await wait_cookie_banner(page)
-
-                # Try direct globals quickly
-                for _ in range(2):
-                    try:
-                        nd = await page.evaluate("window.__NEXT_DATA__ || null")
-                        if nd:
-                            return nd
-                    except Exception:
-                        pass
-                    try:
-                        ap = await page.evaluate("window.__APOLLO_STATE__ || null")
-                        if ap and isinstance(ap, dict) and ap:
-                            return {"apollo": ap}
-                    except Exception:
-                        pass
-                    await page.wait_for_timeout(500)
-
-                # Scroll & network-sniff for JSON
-                async def gentle_scroll():
-                    for _ in range(20):
-                        try:
-                            await page.mouse.wheel(0, 1800)
-                        except Exception:
-                            pass
-                        await page.wait_for_timeout(int(req_delay * 1000))
-
-                collect_task = asyncio.create_task(_wolt_runtime_network_collect(page))
-                await gentle_scroll()
-                found = await collect_task
-
-                if found:
-                    return {"__items__": found}
-
-                return None
-            finally:
-                await page.close()
-                await context.close()
-                await browser.close()
-    except Exception as e:
-        print(f"[warn] Playwright fallback failed for {category_url}: {e}")
-        return None
+                obj = json.loads(txt)
+                out_list.append(obj)
+            except Exception:
+                pass
+    except Exception:
+        pass
 
 
 # ---------- runners (streaming) ----------
@@ -1040,116 +1099,30 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
             await browser.close()
 
 
-# --- robust HTTP helpers for Wolt (headers + gzip) ---
-
-def _browser_headers(referer: Optional[str] = None) -> Dict[str, str]:
-    h = {
-        "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                       "AppleWebKit/537.36 (KHTML, like Gecko) "
-                       "Chrome/122.0.0.0 Safari/537.36"),
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "et-EE,et;q=0.9,en-US;q=0.8,en;q=0.7",
-        "Connection": "keep-alive",
-        "Cache-Control": "no-cache",
-        "Pragma": "no-cache",
-        "Accept-Encoding": "gzip",
-    }
-    if referer:
-        h["Referer"] = referer
-    return h
-
-
-async def _fetch_html(url: str) -> str:
-    import urllib.request, gzip, io
-    req = urllib.request.Request(url, headers=_browser_headers())
-    with urllib.request.urlopen(req) as resp:  # nosec - public pages
-        data = resp.read()
-        if resp.headers.get("Content-Encoding", "").lower() == "gzip":
-            data = gzip.GzipFile(fileobj=io.BytesIO(data)).read()
-        return data.decode("utf-8", errors="replace")
-
-
-async def _fetch_json(url: str) -> Optional[Dict]:
-    import urllib.request, gzip, io
-    req = urllib.request.Request(url, headers=_browser_headers())
-    with urllib.request.urlopen(req) as resp:  # nosec
-        data = resp.read()
-        if resp.headers.get("Content-Encoding", "").lower() == "gzip":
-            import io as _io
-            data = gzip.GzipFile(fileobj=_io.BytesIO(data)).read()
-        try:
-            return json.loads(data.decode("utf-8", errors="replace"))
-        except Exception:
-            return None
-
-
-def _wolt_store_host(sample_url: str) -> str:
-    m = re.search(r"/venue/([^/]+)", sample_url)
-    if m:
-        return f"wolt:{m.group(1)}"
-    return urlparse(sample_url).netloc.lower()
-
-
-async def _load_wolt_payload(url: str) -> Optional[Dict]:
-    """
-    Try 2 ways from static HTML:
-      1) __NEXT_DATA__ from HTML
-      2) _next/data/{buildId}{path}.json
-    """
-    html = await _fetch_html(url)
-
-    nd = _html_get_next_data(html)
-    if nd:
-        return nd
-
-    build_id = _html_get_build_id(html)
-    if build_id:
-        u = urlparse(url)
-        path = u.path if not u.path.endswith("/") else u.path[:-1]
-        api = f"{u.scheme}://{u.netloc}/_next/data/{build_id}{path}.json"
-        jd = await _fetch_json(api)
-        if jd:
-            return jd
-
-    return None
-
-
 async def run_wolt(args, categories: List[str], on_rows) -> None:
     store_host = _wolt_store_host(categories[0] if categories else args.region)
 
     for cat in categories:
         print(f"[cat-wolt] {cat}")
         try:
-            payload = None
-            used_fallback = False
-
-            if not args.wolt_force_playwright:
-                payload = await _load_wolt_payload(cat)
-
-            if args.wolt_force_playwright or not payload:
-                if not args.wolt_force_playwright and not payload:
-                    print(f"[info] server data not exposed for {cat} -> using Playwright fallback")
-                elif args.wolt_force_playwright:
-                    print(f"[info] forcing Playwright fallback for {cat}")
-                payload = await _wolt_runtime_payload_with_pw(cat, args.headless, args.req_delay)
-                used_fallback = True
+            payload = None if args.wolt_force_playwright else await _load_wolt_payload(cat)
 
             if not payload:
-                print(f"[warn] could not obtain server data for {cat}")
+                print(f"[info] forcing Playwright fallback for {cat}")
+                items = await _wolt_capture_category_with_playwright(cat)
+                rows = [_extract_wolt_row(item, cat, store_host) for item in items]
+                if args.max_products and args.max_products > 0:
+                    rows = rows[: args.max_products]
+                print(f"[info] category rows: {len(rows)} (pw-fallback)")
+                on_rows(rows)
                 continue
 
             found: Dict[str, Dict] = {}
-            if "__items__" in payload and isinstance(payload["__items__"], dict):
-                # network-sniff path already collected items
-                found = payload["__items__"]
-            else:
-                _walk_collect_items(payload, found)
-
+            _walk_collect_items(payload, found)
             rows: List[Dict] = [_extract_wolt_row(item, cat, store_host) for item in found.values()]
             if args.max_products and args.max_products > 0:
                 rows = rows[: args.max_products]
-
-            print(f"[info] category rows: {len(rows)}{' (pw-fallback)' if used_fallback else ''}")
+            print(f"[info] category rows: {len(rows)}")
             on_rows(rows)
         except Exception as e:
             print(f"[warn] Wolt category failed {cat}: {e}")
@@ -1230,14 +1203,15 @@ def parse_args():
                    help="(ecoop) Hard cap of product links per category (0=all)")
     p.add_argument("--max-products", type=int, default=0,
                    help="Global cap per category after discovery (0=all)")
-    p.add_argument("--headless", default="1", help="1/0 headless for Playwright (both modes)")
-    p.add_argument("--req-delay", type=float, default=0.5, help="(ecoop & wolt-fallback) Seconds between ops")
+    p.add_argument("--headless", default="1", help="(ecoop) 1/0 headless")
+    p.add_argument("--req-delay", type=float, default=0.5, help="(ecoop) Seconds between ops")
     p.add_argument("--pdp-workers", type=int, default=4, help="(ecoop) Concurrent PDP tabs per category")
     p.add_argument("--cat-shards", type=int, default=1, help="Total number of category shards")
     p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
     p.add_argument("--out", default="out/coop_products.csv", help="CSV file or output directory")
-    p.add_argument("--wolt-force-playwright", dest="wolt_force_playwright", action="store_true",
-                   help="Force Playwright runtime extraction for Wolt pages.")
+    # Wolt PW override
+    p.add_argument("--wolt-force-playwright", dest="wolt_force_playwright", type=int, default=0,
+                   help="1 = force Playwright network fallback for Wolt categories")
     return p.parse_args()
 
 
