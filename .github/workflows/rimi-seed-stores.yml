@@ -1,0 +1,234 @@
+name: Seed Rimi physical stores
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Scrape to CSV ------------------------------------------------------
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install scrape deps
+        run: |
+          pip install playwright bs4 lxml
+          python -m playwright install --with-deps chromium
+
+      - name: Scrape Rimi stores → data/rimi_stores.csv
+        run: |
+          mkdir -p data scripts
+          cat > scripts/scrape_rimi_stores.py <<'PY'
+          import re, csv, json, sys, time
+          from pathlib import Path
+          from bs4 import BeautifulSoup
+          from playwright.sync_api import sync_playwright
+
+          OUT = Path("data/rimi_stores.csv")
+          OUT.parent.mkdir(parents=True, exist_ok=True)
+
+          def extract_latlon_from_href(href: str):
+            if not href:
+              return None, None
+            # common Google Maps patterns
+            m = re.search(r'@(-?\d+\.\d+),(-?\d+\.\d+)', href)
+            if m:
+              return float(m.group(1)), float(m.group(2))
+            m = re.search(r'query=(-?\d+\.\d+),(-?\d+\.\d+)', href)
+            if m:
+              return float(m.group(1)), float(m.group(2))
+            return None, None
+
+          def main():
+            url = "https://www.rimi.ee/kauplused"
+            rows = []
+
+            with sync_playwright() as p:
+              browser = p.chromium.launch(headless=True)
+              ctx = browser.new_context(locale="et-EE")
+              page = ctx.new_page()
+
+              # collect any XHR/JSON with store data (best case)
+              json_payloads = []
+              def capture(resp):
+                try:
+                  if "json" in resp.headers.get("content-type",""):
+                    u = resp.url.lower()
+                    if any(k in u for k in ["kauplu", "store", "shop"]):
+                      data = resp.json()
+                      json_payloads.append(data)
+                except Exception:
+                  pass
+              page.on("response", capture)
+
+              page.goto(url, wait_until="networkidle")
+
+              # try to load more items if lazy loaded
+              for _ in range(15):
+                page.mouse.wheel(0, 3000)
+                time.sleep(0.3)
+
+              html = page.content()
+              soup = BeautifulSoup(html, "lxml")
+
+              # Strategy A: use JSON payloads if we find a plausible list
+              stores_from_json = []
+              for payload in json_payloads:
+                def flatten(x):
+                  if isinstance(x, list):
+                    for i in x:
+                      yield from flatten(i)
+                  elif isinstance(x, dict):
+                    yield x
+                    for v in x.values():
+                      yield from flatten(v)
+                for node in flatten(payload):
+                  if not isinstance(node, dict):
+                    continue
+                  name = node.get("name") or node.get("title")
+                  address = node.get("address") or node.get("location")
+                  lat = node.get("lat") or node.get("latitude")
+                  lon = node.get("lon") or node.get("lng") or node.get("longitude")
+                  if name and address:
+                    try:
+                      lat = float(lat) if lat is not None else None
+                      lon = float(lon) if lon is not None else None
+                    except Exception:
+                      lat = lon = None
+                    stores_from_json.append((name.strip(), address.strip(), lat, lon, None))
+
+              # Strategy B: parse the DOM cards (fallback)
+              cards = soup.select("a[href*='google'], div, li, article")
+              dom_rows = []
+              seen = set()
+              for card in cards:
+                # Only pick cards that look like a single store card—very heuristic
+                # Grab a candidate name (biggest bold text in the element)
+                name = None
+                # strong/h* are common for store name
+                for tag in card.select("strong, h1, h2, h3"):
+                  t = tag.get_text(" ", strip=True)
+                  if t and "rimi" in t.lower():
+                    name = t
+                    break
+                if not name:
+                  continue
+
+                # address: look for a line with a street/number or a "Vaata kaardilt" group
+                text = card.get_text("\n", strip=True)
+                address = None
+                for line in text.splitlines():
+                  # very loose: a line with a number likely is an address (e.g. "Võru 170, Tartu")
+                  if any(ch.isdigit() for ch in line) and len(line) < 100 and "@" not in line:
+                    address = line
+                    break
+
+                href = None
+                a = card.select_one("a[href*='google']")
+                if a:
+                  href = a.get("href")
+                lat, lon = extract_latlon_from_href(href)
+                if not name or not address:
+                  continue
+                key = (name, address)
+                if key in seen:
+                  continue
+                seen.add(key)
+                dom_rows.append((name, address, lat, lon, None))
+
+              rows = stores_from_json if stores_from_json else dom_rows
+
+              browser.close()
+
+            # Deduplicate
+            dedup = {}
+            for name, addr, lat, lon, ext in rows:
+              key = (name.strip(), addr.strip())
+              if key not in dedup:
+                dedup[key] = (name.strip(), addr.strip(), lat, lon, ext)
+
+            # Write CSV
+            with OUT.open("w", newline="", encoding="utf-8") as f:
+              w = csv.writer(f)
+              w.writerow(["name","address","lat","lon","external_key"])
+              for name, addr, lat, lon, ext in sorted(dedup.values()):
+                w.writerow([name, addr, "" if lat is None else lat, "" if lon is None else lon, ext or ""])
+
+            print(f"Wrote {len(dedup)} rows → {OUT}")
+
+          if __name__ == "__main__":
+            main()
+          PY
+          python scripts/scrape_rimi_stores.py
+          echo "--- preview ---"
+          head -n 10 data/rimi_stores.csv || true
+
+      # --- Load into Postgres --------------------------------------------------
+      - name: Install psql
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Upsert stores + alias to Rimi ePood
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          -- 0) staging table (treat empty fields as NULL in \copy)
+          DROP TABLE IF EXISTS staging_rimi_stores;
+          CREATE TABLE staging_rimi_stores(
+            name         text,
+            address      text,
+            lat          double precision,
+            lon          double precision,
+            external_key text
+          );
+
+          -- 1) load CSV
+          \copy staging_rimi_stores(name,address,lat,lon,external_key)
+          FROM 'data/rimi_stores.csv'
+          WITH (FORMAT csv, HEADER true, NULL '');
+
+          -- 2) upsert into stores (chain='Rimi', physical locations)
+          INSERT INTO stores (name, chain, address, lat, lon, latitude, longitude, is_online, external_key)
+          SELECT
+            s.name, 'Rimi',
+            NULLIF(s.address,''),
+            s.lat, s.lon, s.lat, s.lon,
+            false,
+            NULLIF(s.external_key,'')
+          FROM staging_rimi_stores s
+          WHERE COALESCE(s.name,'') <> ''
+          ON CONFLICT ON CONSTRAINT uq_stores_chain_name
+          DO UPDATE SET
+            address     = EXCLUDED.address,
+            lat         = EXCLUDED.lat,
+            lon         = EXCLUDED.lon,
+            latitude    = EXCLUDED.latitude,
+            longitude   = EXCLUDED.longitude,
+            is_online   = false,
+            external_key= COALESCE(EXCLUDED.external_key, stores.external_key);
+
+          -- 3) alias all physical Rimi stores to use Rimi ePood prices (id 440)
+          INSERT INTO store_price_source (store_id, source_store_id)
+          SELECT st.id, 440
+          FROM stores st
+          WHERE st.chain='Rimi' AND COALESCE(st.is_online,false)=false
+          ON CONFLICT (store_id) DO UPDATE
+            SET source_store_id = EXCLUDED.source_store_id;
+
+          -- 4) summary
+          \t on
+          SELECT 'staging_rows' AS what, COUNT(*) AS count FROM staging_rimi_stores
+          UNION ALL
+          SELECT 'physical_rimi_in_stores', COUNT(*) FROM stores WHERE chain='Rimi' AND COALESCE(is_online,false)=false
+          UNION ALL
+          SELECT 'aliased_to_440', COUNT(*) FROM store_price_source sps JOIN stores st ON st.id=sps.store_id
+                 WHERE st.chain='Rimi' AND COALESCE(st.is_online,false)=false AND sps.source_store_id=440;
+          \t off
+          SQL
