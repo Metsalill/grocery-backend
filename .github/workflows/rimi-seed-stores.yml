@@ -110,10 +110,7 @@ jobs:
               dom_rows = []
               seen = set()
               for card in cards:
-                # Only pick cards that look like a single store card—very heuristic
-                # Grab a candidate name (biggest bold text in the element)
                 name = None
-                # strong/h* are common for store name
                 for tag in card.select("strong, h1, h2, h3"):
                   t = tag.get_text(" ", strip=True)
                   if t and "rimi" in t.lower():
@@ -122,11 +119,9 @@ jobs:
                 if not name:
                   continue
 
-                # address: look for a line with a street/number or a "Vaata kaardilt" group
                 text = card.get_text("\n", strip=True)
                 address = None
                 for line in text.splitlines():
-                  # very loose: a line with a number likely is an address (e.g. "Võru 170, Tartu")
                   if any(ch.isdigit() for ch in line) and len(line) < 100 and "@" not in line:
                     address = line
                     break
@@ -145,7 +140,6 @@ jobs:
                 dom_rows.append((name, address, lat, lon, None))
 
               rows = stores_from_json if stores_from_json else dom_rows
-
               browser.close()
 
             # Deduplicate
@@ -178,8 +172,50 @@ jobs:
       - name: Upsert stores + alias to Rimi ePood
         run: |
           set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          -- 0) staging table (treat empty fields as NULL in \copy)
+          psql "$DATABASE_URL" <<'SQL'
+          \set ON_ERROR_STOP on
+
+          -- A) Ensure columns exist (idempotent)
+          DO $$
+          BEGIN
+            IF NOT EXISTS (
+              SELECT 1 FROM information_schema.columns
+              WHERE table_name='stores' AND column_name='latitude'
+            ) THEN
+              ALTER TABLE stores ADD COLUMN latitude double precision;
+            END IF;
+            IF NOT EXISTS (
+              SELECT 1 FROM information_schema.columns
+              WHERE table_name='stores' AND column_name='longitude'
+            ) THEN
+              ALTER TABLE stores ADD COLUMN longitude double precision;
+            END IF;
+            IF NOT EXISTS (
+              SELECT 1 FROM information_schema.columns
+              WHERE table_name='stores' AND column_name='is_online'
+            ) THEN
+              ALTER TABLE stores ADD COLUMN is_online boolean DEFAULT false;
+            END IF;
+            IF NOT EXISTS (
+              SELECT 1 FROM information_schema.columns
+              WHERE table_name='stores' AND column_name='external_key'
+            ) THEN
+              ALTER TABLE stores ADD COLUMN external_key text;
+            END IF;
+          END $$;
+
+          -- B) Ensure unique constraint on (chain, name) for conflict handling
+          DO $$
+          BEGIN
+            IF NOT EXISTS (
+              SELECT 1 FROM pg_constraint WHERE conname = 'uq_stores_chain_name'
+            ) THEN
+              ALTER TABLE stores
+              ADD CONSTRAINT uq_stores_chain_name UNIQUE (chain, name);
+            END IF;
+          END $$;
+
+          -- C) staging table
           DROP TABLE IF EXISTS staging_rimi_stores;
           CREATE TABLE staging_rimi_stores(
             name         text,
@@ -189,12 +225,12 @@ jobs:
             external_key text
           );
 
-          -- 1) load CSV
+          -- D) load CSV (treat empty strings as NULL)
           \copy staging_rimi_stores(name,address,lat,lon,external_key)
-          FROM 'data/rimi_stores.csv'
-          WITH (FORMAT csv, HEADER true, NULL '');
+            FROM 'data/rimi_stores.csv'
+            WITH (FORMAT csv, HEADER true, NULL '');
 
-          -- 2) upsert into stores (chain='Rimi', physical locations)
+          -- E) upsert into stores (chain='Rimi', physical locations)
           INSERT INTO stores (name, chain, address, lat, lon, latitude, longitude, is_online, external_key)
           SELECT
             s.name, 'Rimi',
@@ -206,15 +242,21 @@ jobs:
           WHERE COALESCE(s.name,'') <> ''
           ON CONFLICT ON CONSTRAINT uq_stores_chain_name
           DO UPDATE SET
-            address     = EXCLUDED.address,
-            lat         = EXCLUDED.lat,
-            lon         = EXCLUDED.lon,
-            latitude    = EXCLUDED.latitude,
-            longitude   = EXCLUDED.longitude,
-            is_online   = false,
-            external_key= COALESCE(EXCLUDED.external_key, stores.external_key);
+            address      = EXCLUDED.address,
+            lat          = EXCLUDED.lat,
+            lon          = EXCLUDED.lon,
+            latitude     = EXCLUDED.latitude,
+            longitude    = EXCLUDED.longitude,
+            is_online    = false,
+            external_key = COALESCE(EXCLUDED.external_key, stores.external_key);
 
-          -- 3) alias all physical Rimi stores to use Rimi ePood prices (id 440)
+          -- F) price source mapping table (idempotent)
+          CREATE TABLE IF NOT EXISTS store_price_source (
+            store_id        bigint PRIMARY KEY,
+            source_store_id bigint NOT NULL
+          );
+
+          -- G) alias all physical Rimi stores to use Rimi ePood prices (id 440)
           INSERT INTO store_price_source (store_id, source_store_id)
           SELECT st.id, 440
           FROM stores st
@@ -222,7 +264,7 @@ jobs:
           ON CONFLICT (store_id) DO UPDATE
             SET source_store_id = EXCLUDED.source_store_id;
 
-          -- 4) summary
+          -- H) summary
           \t on
           SELECT 'staging_rows' AS what, COUNT(*) AS count FROM staging_rimi_stores
           UNION ALL
