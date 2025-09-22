@@ -33,7 +33,10 @@ STORE_CHANNEL = "online"
 DEFAULT_REQ_DELAY = 0.25
 DEFAULT_HEADLESS = 1
 
+# Common size tokens seen on EE grocery sites
 SIZE_RE = re.compile(r"(?ix)(\d+\s?(?:x\s?\d+)?\s?(?:ml|l|cl|g|kg|mg|tk|pcs))|(\d+\s?x\s?\d+)")
+
+# Labels for brand/manufacturer seen on Barbora PDPs (Estonian + generic)
 SPEC_KEYS_BRAND = {"kaubamärk", "bränd", "brand"}
 # include 'tarnija' (supplier) as an additional fallback for manufacturer
 SPEC_KEYS_MFR = {"tootja", "valmistaja", "manufacturer", "tarnija"}
@@ -53,6 +56,7 @@ def text_of(el) -> str:
 
 
 def get_ext_id(url: str) -> str:
+    # Prefer numeric id if present; otherwise use a stable slug tail
     m = re.search(r"/p/(\d+)", url) or re.search(r"-(\d+)$", url)
     if m:
         return m.group(1)
@@ -87,6 +91,13 @@ def accept_cookies(page: Page) -> None:
 
 def ensure_ready(page: Page) -> None:
     accept_cookies(page)
+    # Nudge lazy content
+    try:
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        page.wait_for_timeout(150)
+        page.evaluate("window.scrollTo(0, 0)")
+    except Exception:
+        pass
 
 # -------------------- Robust price parsing --------------------
 
@@ -125,7 +136,7 @@ def _clean_decimal(s: str) -> Optional[str]:
     if m:
         return f"{m.group(1)}.{m.group(2):0<2}"
 
-    # 3 49 (space)
+    # 3 49 (space separated)
     m = re.search(r"(\d+)\s+(\d{2})", raw)
     if m:
         return f"{m.group(1)}.{m.group(2)}"
@@ -138,6 +149,10 @@ def _clean_decimal(s: str) -> Optional[str]:
 
 
 def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
+    """
+    Multiple strategies to recover a price visible on the PDP.
+    Returns (price_decimal_str, currency_code)
+    """
     # 1) meta itemprop=price is often present
     meta = soup.select_one("[itemprop=price][content]")
     if meta and meta.get("content"):
@@ -147,7 +162,9 @@ def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[s
             return val, cur
 
     # 2) look for structured sub-spans (whole + cents)
-    for box in soup.select("[data-testid*=price], .e-price, .e-price__main, .product-price, .price, .pdp-price"):
+    for box in soup.select(
+        "[data-testid*=price], .e-price, .e-price__main, .product-price, .price, .pdp-price"
+    ):
         whole = box.select_one(".e-price__whole, .price__whole, .whole, .int")
         cents = box.select_one(".e-price__cents, .price__cents, .cents, .fract, .fraction, .decimal")
         if whole:
@@ -156,7 +173,22 @@ def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[s
             if w:
                 return (f"{int(w)}.{c[:2]:0<2}" if c else str(int(w))), "EUR"
 
-    # 3) common visible price containers as plain text
+    # 3) data attributes used by buy buttons / widgets
+    data_attrs = [
+        "[data-testid=buy-button-price]",
+        "[data-price]",
+        "[data-product-price]",
+        "[data-price-value]",
+    ]
+    for sel in data_attrs:
+        for el in soup.select(sel):
+            for attr in ("data-price", "data-product-price", "data-price-value"):
+                v = el.get(attr)
+                val = _clean_decimal(v or "")
+                if val:
+                    return val, "EUR"
+
+    # 4) common visible price containers as plain text
     price_selectors = [
         "[data-testid=product-price]",
         "[data-testid=buy-button-price]",
@@ -165,6 +197,7 @@ def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[s
         ".product__price",
         ".price",
         ".pdp-price",
+        "strong",
     ]
     texts: List[str] = []
     for sel in price_selectors:
@@ -177,7 +210,7 @@ def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[s
         if val:
             return val, "EUR"
 
-    # 4) very last resort: any node containing €
+    # 5) very last resort: any node containing €
     for node in soup.find_all(string=re.compile("€")):
         val = _clean_decimal(str(node))
         if val:
@@ -287,9 +320,11 @@ def _scan_label_value_pairs(soup: BeautifulSoup) -> Dict[str, str]:
 def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
     out = {"brand": None, "manufacturer": None, "size": None, "sku": None}
 
-    # dt/dd or table style
+    # dl/dt/dd and table th/td variants
     for head in soup.select("dt, th"):
         k = norm(text_of(head))
+        # tolerate trailing colon/whitespace
+        k = k.rstrip(":")
         val_el = head.find_next_sibling(["dd", "td"])
         v = text_of(val_el).strip() if val_el else ""
         if not v:
@@ -306,7 +341,7 @@ def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
     # explicit label/value classes
     labels = soup.select(".e-attribute__label, .product-attribute__label")
     for lab in labels:
-        k = norm(text_of(lab))
+        k = norm(text_of(lab)).rstrip(":")
         val_el = lab.find_next_sibling(class_="e-attribute__value") or lab.find_next_sibling(class_="product-attribute__value")
         v = text_of(val_el)
         if not v:
@@ -320,10 +355,14 @@ def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
         elif "sku" in k and not out["sku"]:
             out["sku"] = v
 
-    # label: value style lines
+    # "label: value" lines
     pairs = _scan_label_value_pairs(soup)
     out["brand"] = out["brand"] or pairs.get("brand")
     out["manufacturer"] = out["manufacturer"] or pairs.get("manufacturer")
+
+    # Filter obvious non-brands
+    if out["brand"] and norm(out["brand"]) in {"-", "puudub"}:
+        out["brand"] = None
 
     return out
 
@@ -351,6 +390,7 @@ def parse_app_state_for_brand_or_price(soup: BeautifulSoup) -> Tuple[Optional[st
                 manufacturer = mm.group(1).strip()
 
         if price is None:
+            # avoid percentage discounts; capture numeric price-like values
             mp = re.search(r'"price"\s*:\s*"?(?!\s*0\s*%)(\d+[.,]?\d*)"?', txt)
             if mp:
                 price = _clean_decimal(mp.group(1))
@@ -410,6 +450,11 @@ def extract_size_from_name(name: str) -> Optional[str]:
 def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], category_leaf_hint: str, req_delay: float) -> Dict[str, Optional[str]]:
     page.goto(url, timeout=60000, wait_until="domcontentloaded")
     ensure_ready(page)
+    # wait a bit for dynamic content to hydrate
+    try:
+        page.wait_for_load_state("networkidle", timeout=4000)
+    except PWTimeout:
+        pass
     try:
         page.wait_for_selector("script[type='application/ld+json']", timeout=6000)
     except PWTimeout:
@@ -429,6 +474,16 @@ def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], categor
 
     page.wait_for_timeout(int(req_delay * 1000))
 
+    # Attempt to reveal “more info”/spec sections (some pages hide in accordions)
+    try:
+        for sel in ["button[aria-expanded='false']", ".accordion__toggle", ".expand", "button:has-text('Rohkem')"]:
+            loc = page.locator(sel)
+            if loc.count() and loc.first.is_visible():
+                loc.first.click(timeout=800)
+                page.wait_for_timeout(150)
+    except Exception:
+        pass
+
     soup = BeautifulSoup(page.content(), "html.parser")
 
     jl = from_json_ld(soup)
@@ -443,7 +498,7 @@ def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], categor
     category_leaf = cat_leaf_bc or category_leaf_hint
     name = prefer_valid_name(candidates, category_leaf)
 
-    # price (priority: JSON-LD → DOM/meta → app state)
+    # price (priority: JSON-LD → DOM/meta/attrs → app state)
     price = jl.get("price")
     currency = jl.get("currency") or "EUR"
     if not price:
@@ -460,6 +515,7 @@ def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], categor
     manufacturer = jl.get("manufacturer") or spec["manufacturer"] or m3
     sku_raw = spec["sku"]
 
+    # if breadcrumbs missing, do a URL-based guess to avoid empty paths
     if not cat_path:
         parts = [p for p in urlparse(url).path.strip("/").split("/") if p]
         cat_path = " / ".join(p.replace("-", " ").title() for p in parts[:-1]) if parts else ""
@@ -512,6 +568,11 @@ def go_to_category(page: Page, url: str, req_delay: float) -> None:
     ensure_ready(page)
     try:
         page.wait_for_selector("a, [role='link']", timeout=8000)
+    except PWTimeout:
+        pass
+    # small nudge to help lazy product grids
+    try:
+        page.wait_for_load_state("networkidle", timeout=3000)
     except PWTimeout:
         pass
     page.wait_for_timeout(int(req_delay * 1000))
