@@ -11,10 +11,22 @@ Modes
          1) __NEXT_DATA__ inline JSON if present
          2) Next.js _next/data/{buildId}/*.json fallback
          3) window.__APOLLO_STATE__ fallback
-         If none are available (or --wolt-force-playwright), it opens the page
-         with Playwright, captures the network JSON used by Wolt’s app, and
-         also opens each product modal → “Toote info”, enters the iframe,
-         and scrapes GTIN + Tarnija info (supplier). Uses GTIN as ext_id.
+         If none are available (or --wolt-force-playwright is set), it opens the page
+         with Playwright, captures the network JSON used by Wolt’s app, and **opens
+         each product modal → “Toote info” → product-info-iframe**, scraping GTIN + Tarnija info.
+         Uses GTIN as ext_id when present, else item id/slug.
+
+DB alignment
+- Target table: public.staging_coop_products
+- PRIMARY KEY (store_host, ext_id)
+- Columns: store_host, ext_id, name, brand, manufacturer, ean_raw, ean_norm,
+           size_text, price, currency, image_url, url, scraped_at (default now()).
+
+Notes
+- store_host for ecoop is derived from --region (e.g. https://coophaapsalu.ee → coophaapsalu.ee).
+- store_host for wolt is "wolt:<venue-slug>" (e.g., "wolt:coop-lasname").
+- Supports category sharding via --cat-shards / --cat-index for parallel runs.
+- Streams rows to CSV incrementally so artifacts survive cancellation.
 """
 
 import argparse
@@ -28,7 +40,14 @@ import signal
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit, parse_qsl, urlencode
+from urllib.parse import (
+    urlparse,
+    urljoin,
+    urlsplit,
+    urlunsplit,
+    parse_qsl,
+    urlencode,
+)
 
 # Playwright is optional (only needed in ecoop mode and Wolt PW fallback)
 try:
@@ -50,13 +69,11 @@ CTX_MANUF = re.compile(r"(?:Tootja|Valmistaja)\s*[:\-]?\s*([^\n<]{2,120})", re.I
 
 PRICE_TOKEN = re.compile(r"(\d+[.,]\d{2})\s*€", re.U)
 
+# Wolt "Toote info" modal (inside iframe) markers
 GTIN_IN_MODAL = re.compile(r"\bGTIN\b[\s:\n]*([0-9]{8,14})", re.I)
-TARNIJA_IN_MODAL = re.compile(r"Tarnija info[\s:\n]*([^\n]+)", re.I)
-
-def str2bool(v: Optional[str]) -> bool:
-    if v is None:
-        return False
-    return str(v).strip().lower() in {"1", "true", "t", "yes", "y", "on"}
+TARNIJA_LABEL = re.compile(r"\bTarnija info\b", re.I)
+TOOTJA_LABEL = re.compile(r"\bTootja info\b", re.I)
+INFO_VALUE_LINE = re.compile(r"^\s*([^\n]+?)\s*$")
 
 def now_stamp() -> str:
     return dt.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -98,6 +115,7 @@ def looks_like_unit_price(text: str) -> bool:
 _ALLOWED_QUERY_KEYS = {"page"}  # allow ?page=2 etc., drop everything else
 
 def clean_url_keep_allowed_query(u: str) -> str:
+    """Keep only whitelisted query keys (e.g., page). Drop fragments and junk like add-to-cart."""
     if not u:
         return u
     s = urlsplit(u)
@@ -289,6 +307,7 @@ async def parse_json_ld(page: Any) -> Dict:
 def _parse_wolt_price(value: Any) -> Optional[float]:
     try:
         if isinstance(value, (int, float)):
+            # try cents → € heuristic; if too small, assume already €
             return round(float(value) / (100.0 if float(value) >= 50 else 1.0), 2)
         if isinstance(value, str):
             s = value.replace(",", ".").strip()
@@ -639,7 +658,7 @@ def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Dict:
 
     # manufacturer / supplier
     manufacturer = (
-        item.get("supplier")
+        item.get("supplier")  # from modal scrape if available
         or _search_info_label(item, "Tarnija info", "Tarnija", "Tootja", "Valmistaja", "Supplier", "Manufacturer")
         or _first_str(item, "supplier", "manufacturer", "producer")
     )
@@ -717,10 +736,20 @@ def append_csv(rows: List[Dict], out_path: Path) -> None:
             row["price"] = _format_price_for_csv(row.get("price"))
             w.writerow(row)
 
+def write_csv(rows: List[Dict], out_path: Path) -> None:
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=CSV_COLS)
+        w.writeheader()
+        for r in rows:
+            row = {k: r.get(k) for k in CSV_COLS}
+            row["price"] = _format_price_for_csv(row.get("price"))
+            w.writerow(row)
+
 async def maybe_upsert_db(rows: List[Dict]) -> None:
     if not rows:
         return
-    if os.environ.get("COOP_UPSERT_DB", "0").lower() not in ("1", "true"):
+    if os.environ.get("COOP_UPSERT_DB", "0") not in ("1", "true", "True"):
         print("[info] DB upsert disabled (COOP_UPSERT_DB != 1)")
         return
     dsn = os.environ.get("DATABASE_URL")
@@ -763,8 +792,10 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
         """
 
         payload = []
+        skipped = 0
         for r in rows:
             if not r.get("ext_id"):
+                skipped += 1
                 continue
             pr = r.get("price")
             try:
@@ -790,11 +821,11 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
             return
 
         await conn.executemany(stmt, payload)
-        print(f"[ok] Upserted {len(payload)} rows into {table}")
+        print(f"[ok] Upserted {len(payload)} rows into {table} (skipped {skipped} without ext_id)")
     finally:
         await conn.close()
 
-# ---------- router (block heavy 3rd parties) ----------
+# ---------- router (blocking heavy 3rd parties) ----------
 
 async def _route_filter(route):
     try:
@@ -865,6 +896,7 @@ def _wolt_store_host(sample_url: str) -> str:
     return urlparse(sample_url).netloc.lower()
 
 async def _load_wolt_payload(url: str) -> Optional[Dict]:
+    """Try server-side sources without a browser."""
     html = await _fetch_html(url)
 
     nd = _html_get_next_data(html)
@@ -903,162 +935,117 @@ async def _maybe_collect_json(resp, out_list: List[Any]):
     except Exception:
         pass
 
-async def _read_product_info_from_iframe(page) -> Tuple[Optional[str], Optional[str]]:
-    """Inside the opened product modal, click 'Toote info', enter iframe and read GTIN + Supplier."""
-    # click Toote info (link or button)
-    try:
-        info_btn = page.locator('a:has-text("Toote info"), button:has-text("Toote info")')
-        if await info_btn.count() > 0:
-            await info_btn.first.click(timeout=1500)
-            await page.wait_for_timeout(250)
-    except Exception:
-        pass
+# ---- NEW: drill into Wolt "Toote info" iframe & scrape GTIN + Tarnija ----
 
-    gtin = None
-    supplier = None
-
-    # Try the iframe variant first (most Wolt UIs use this)
-    try:
-        iframe_loc = page.frame_locator('iframe[data-test-id="product-info-iframe"]')
-        # Wait a tick for the iframe to load
-        await page.wait_for_timeout(250)
-        # If visible, try structured extraction
-        try:
-            gtin_el = iframe_loc.locator('xpath=//h3[contains(normalize-space(),"GTIN")]/following-sibling::p[1]')
-            if await gtin_el.count() > 0:
-                v = (await gtin_el.first.inner_text() or "").strip()
-                if v:
-                    gtin = v
-        except Exception:
-            pass
-        try:
-            supplier_el = iframe_loc.locator('xpath=//h3[contains(translate(.,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"tarnija info")]/following-sibling::p[1]')
-            if await supplier_el.count() > 0:
-                supplier = (await supplier_el.first.inner_text() or "").strip()
-        except Exception:
-            pass
-
-        # Fallback: grab whole iframe text and regex
-        if not gtin or not supplier:
-            try:
-                btxt = await iframe_loc.locator("body").inner_text()
-                if btxt and not gtin:
-                    m1 = GTIN_IN_MODAL.search(btxt)
-                    if m1:
-                        gtin = m1.group(1)
-                if btxt and not supplier:
-                    m2 = TARNIJA_IN_MODAL.search(btxt)
-                    if m2:
-                        supplier = m2.group(1).strip()
-            except Exception:
-                pass
-    except Exception:
-        pass
-
-    # Final fallback – sometimes content is inline (no iframe)
-    if not gtin or not supplier:
-        try:
-            dlg = page.locator('role=dialog')
-            txt = await dlg.first.inner_text()
-            if txt:
-                if not gtin:
-                    m1 = GTIN_IN_MODAL.search(txt)
-                    if m1:
-                        gtin = m1.group(1)
-                if not supplier:
-                    m2 = TARNIJA_IN_MODAL.search(txt)
-                    if m2:
-                        supplier = m2.group(1).strip()
-        except Exception:
-            pass
-
-    return gtin, supplier
-
-async def _wolt_enrich_with_modal(page, found_items_by_name: Dict[str, Dict], max_to_probe: int = 120) -> List[Dict]:
+async def _wolt_enrich_with_modal(page, items: List[Dict], max_to_probe: int = 120) -> None:
     """
-    Scroll the category grid, open each item card (up to max_to_probe),
-    then read GTIN + Supplier from the Toote info sheet.
-    Returns a list of enriched dicts (either from network payload merged by name,
-    or minimal items created from the modal).
+    For each item (by name heuristic), open its modal, click "Toote info",
+    then scrape GTIN and Tarnija info from the iframe dialog, and write back to item.
     """
-    enriched: Dict[str, Dict] = {}
-    # Load a large chunk of the grid (lazy list)
-    for _ in range(18):
-        await page.mouse.wheel(0, 1800)
-        await page.wait_for_timeout(200)
-
-    # Select likely product cards
-    cards = page.locator('[data-test-id="menu-item-card"], [data-test-id="vendor-item"], [role="article"]')
-    try:
-        total = await cards.count()
-    except Exception:
-        total = 0
-
-    total = min(total, max_to_probe)
-    for i in range(total):
-        try:
-            await cards.nth(i).click(timeout=2000)
-        except Exception:
-            # try clicking title link inside card
-            try:
-                t = cards.nth(i).locator('a, button, h3, h4')
-                if await t.count() > 0:
-                    await t.first.click(timeout=1500)
-                else:
-                    continue
-            except Exception:
-                continue
-
-        # Read modal header (product name)
-        name = None
-        try:
-            hsel = page.locator('role=dialog h2, role=dialog h1, [data-test-id="sheet"] h2')
-            if await hsel.count() > 0:
-                name = (await hsel.first.inner_text() or "").strip()
-        except Exception:
-            pass
-
-        gtin, supplier = await _read_product_info_from_iframe(page)
-
-        # Close modal
-        try:
-            close_btn = page.locator('button[aria-label*="Close"], button[aria-label*="Sulge"], button:has-text("×")')
-            if await close_btn.count() > 0:
-                await close_btn.first.click()
-            else:
-                await page.keyboard.press("Escape")
-        except Exception:
-            pass
-
+    probed = 0
+    for item in items:
+        if probed >= max_to_probe:
+            break
+        name = (item.get("name") or "").strip()
         if not name:
-            # if no name, skip save but continue loop
-            await page.wait_for_timeout(120)
             continue
 
-        base = found_items_by_name.get(name) or {"name": name}
-        if gtin:
-            base["gtin"] = gtin
-        if supplier:
-            base["supplier"] = supplier
-            base.setdefault("brand", supplier)
+        opened = False
+        try:
+            # open product modal by clicking on card/title text
+            btn = page.locator(f"text={name}").first
+            if await btn.count() > 0:
+                await btn.click(timeout=1500)
+                opened = True
+            else:
+                # fallback: click nearest card with role=button and matching text
+                card = page.locator(f"[role='button']:has-text('{name[:24]}')").first
+                if await card.count() > 0:
+                    await card.click(timeout=1500)
+                    opened = True
+        except Exception:
+            opened = False
 
-        enriched[name] = base
+        if not opened:
+            continue
+
+        try:
+            # Click "Toote info" if present
+            info = page.locator('a:has-text("Toote info"), button:has-text("Toote info")')
+            if await info.count() > 0:
+                await info.first.click(timeout=1500)
+            else:
+                # In some locales/items it might be already open
+                await page.wait_for_timeout(200)
+
+            # Wait for iframe that holds the details page
+            # Wolt uses data-test-id="product-info-iframe"
+            iframe_el = page.frame_locator('iframe[data-test-id="product-info-iframe"]').first
+            # Give it a short time to appear
+            try:
+                await page.wait_for_selector('iframe[data-test-id="product-info-iframe"]', timeout=2500)
+            except Exception:
+                pass
+
+            # Try to pull all text inside iframe (robust against structure changes)
+            iframe_txt = ""
+            try:
+                if await page.locator('iframe[data-test-id="product-info-iframe"]').count() > 0:
+                    iframe_txt = await iframe_el.locator("body").inner_text(timeout=2500)
+            except Exception:
+                # fallback: try to query specific blocks inside iframe
+                try:
+                    blocks = await iframe_el.locator("body *").all_inner_texts()
+                    iframe_txt = "\n".join(blocks or [])
+                except Exception:
+                    iframe_txt = ""
+
+            # Extract GTIN
+            gtin = None
+            m1 = GTIN_IN_MODAL.search(iframe_txt or "")
+            if m1:
+                gtin = m1.group(1).strip()
+
+            # Extract Tarnija info (or Tootja info). Look for heading, then next non-empty line
+            supplier = None
+            try:
+                lines = (iframe_txt or "").splitlines()
+                for idx, ln in enumerate(lines):
+                    if TARNIJA_LABEL.search(ln) or TOOTJA_LABEL.search(ln):
+                        # seek next non-empty line as the value
+                        for j in range(idx + 1, min(idx + 6, len(lines))):
+                            cand = lines[j].strip()
+                            if cand and not cand.lower().startswith("gtin"):
+                                supplier = INFO_VALUE_LINE.match(cand).group(1) if INFO_VALUE_LINE.match(cand) else cand
+                                break
+                        if supplier:
+                            break
+            except Exception:
+                pass
+
+            if gtin:
+                item["gtin"] = gtin
+            if supplier:
+                item["supplier"] = supplier
+                if not item.get("brand"):
+                    item["brand"] = supplier
+
+        finally:
+            # Close the product modal/sheet
+            try:
+                close_btn = page.locator('button[aria-label*="Close"], button:has-text("×"), button[aria-label="Sulge"], button[aria-label="Close dialog"]')
+                if await close_btn.count() > 0:
+                    await close_btn.first.click()
+                else:
+                    await page.keyboard.press("Escape")
+            except Exception:
+                pass
+
+        probed += 1
         await page.wait_for_timeout(120)
 
-    # Produce list (include originals that were not opened as-is)
-    out: List[Dict] = []
-    used = set()
-    for nm, v in enriched.items():
-        out.append(v)
-        used.add(nm)
-    for v in found_items_by_name.values():
-        nm = str(v.get("name") or "")
-        if nm and nm not in used:
-            out.append(v)
-    return out
-
 async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
-    """Open a Wolt category with Playwright, capture JSON responses, and enrich via modal/iframe."""
+    """Open a Wolt category with Playwright, capture JSON responses, walk them, and enrich via modal."""
     if async_playwright is None:
         raise RuntimeError("Playwright is required for Wolt fallback but is not installed.")
 
@@ -1073,7 +1060,7 @@ async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
             java_script_enabled=True,
         )
 
-        # Allow Wolt APIs, block trackers only
+        # Do NOT block Wolt APIs here; only heavy trackers.
         async def route_filter(route):
             try:
                 url = route.request.url
@@ -1095,6 +1082,7 @@ async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
         page = await context.new_page()
         json_blobs: List[Any] = []
 
+        # capture JSON/XHR that the SPA loads
         page.on(
             "response",
             lambda resp: asyncio.create_task(_maybe_collect_json(resp, json_blobs))
@@ -1103,11 +1091,12 @@ async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
         try:
             await page.goto(cat_url, wait_until="networkidle")
             await wait_cookie_banner(page)
+            # small scroll to let lazy parts load
             for _ in range(5):
                 await page.mouse.wheel(0, 1500)
                 await page.wait_for_timeout(300)
 
-            # Window-attached states
+            # also try to read window states that frameworks sometimes expose
             for varname in [
                 "__APOLLO_STATE__", "__NEXT_DATA__", "__NUXT__", "__INITIAL_STATE__",
                 "__REACT_QUERY_STATE__", "__REDUX_STATE__", "__WOLT_STATE__"
@@ -1126,15 +1115,12 @@ async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
                 except Exception:
                     pass
 
-            # Enrich by opening modals + iframe scrape
-            by_name = {}
-            for it in found.values():
-                nm = str(it.get("name") or "").strip()
-                if nm:
-                    by_name[nm] = it
+            items = list(found.values())
 
-            enriched_items = await _wolt_enrich_with_modal(page, by_name, max_to_probe=120)
-            return enriched_items
+            # Enrich by opening product modals → "Toote info" (scrape GTIN + supplier)
+            await _wolt_enrich_with_modal(page, items, max_to_probe=120)
+
+            return items
 
         finally:
             await context.close()
@@ -1278,7 +1264,7 @@ async def run(args):
     signal.signal(signal.SIGTERM, _sig_handler)
     signal.signal(signal.SIGINT, _sig_handler)
 
-    if args.mode.lower() == "wolt" or ("wolt.com" in base_region.lower()):
+    if args.mode.lower() == "wolt" or "wolt.com" in base_region.lower():
         await run_wolt(args, categories, on_rows)
     else:
         await run_ecoop(args, categories, base_region, on_rows)
@@ -1305,10 +1291,9 @@ def parse_args():
     p.add_argument("--cat-shards", type=int, default=1, help="Total number of category shards")
     p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
     p.add_argument("--out", default="out/coop_products.csv", help="CSV file or output directory")
-
-    # Wolt Playwright override: boolean flag (presence = True)
-    p.add_argument("--wolt-force-playwright", action="store_true",
-                   help="Force Playwright network+modal fallback for Wolt categories (no value needed).")
+    # Wolt PW override (boolean flag)
+    p.add_argument("--wolt-force-playwright", dest="wolt_force_playwright", action="store_true",
+                   help="Force Playwright network fallback for Wolt categories (no value needed).")
     return p.parse_args()
 
 if __name__ == "__main__":
