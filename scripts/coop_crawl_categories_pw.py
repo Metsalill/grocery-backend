@@ -834,6 +834,66 @@ async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
             await browser.close()
 
 
+def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Dict:
+    """
+    Convert a Wolt item dict into a CSV-row dict.
+    Uses enriched fields (gtin/supplier/manufacturer/brand) when present.
+    """
+    name = (str(item.get("name") or "").strip() or None)
+
+    # price
+    price = None
+    for k in ("price", "baseprice", "base_price", "current_price", "total_price", "unit_price"):
+        if k in item:
+            price = _parse_wolt_price(item[k])
+            if price is not None:
+                break
+
+    # image
+    image_url = _first_urlish(item, "image", "image_url", "imageUrl", "media", "photo")
+
+    # manufacturer/supplier/brand
+    supplier = item.get("supplier") or _first_str(item, "supplier", "Supplier")
+    manufacturer = item.get("manufacturer") or item.get("producer") or _first_str(item, "manufacturer", "producer")
+    brand = (item.get("brand") or likely_brand_from_name(name) or manufacturer or supplier)
+
+    # EAN / GTIN
+    ean_raw = item.get("gtin") or _first_str(item, "ean", "barcode", "gtin8", "gtin12", "gtin13")
+    ean_norm = normalize_ean(ean_raw)
+
+    # size
+    size_text = _search_info_label(item, "Size", "Kogus", "Maht", "Kaal")
+    if not size_text and name:
+        m = SIZE_RE.search(name)
+        if m:
+            size_text = m.group(1)
+
+    # ext_id
+    ext_id = ean_norm or str(item.get("id") or item.get("slug") or name or "")
+
+    # url anchor with id when available
+    url = category_url
+    if item.get("id"):
+        url = f"{category_url}#item-{item.get('id')}"
+
+    return {
+        "chain": "Coop",
+        "store_host": store_host,
+        "channel": "wolt",
+        "ext_id": ext_id,
+        "ean_raw": ean_raw,
+        "ean_norm": ean_norm,
+        "name": name,
+        "size_text": size_text,
+        "brand": brand,
+        "manufacturer": manufacturer or supplier,
+        "price": price if price is not None else None,
+        "currency": "EUR",
+        "image_url": image_url,
+        "url": url,
+    }
+
+
 # ---------- runners (streaming) ----------
 
 CSV_COLS = [
@@ -853,7 +913,6 @@ def append_csv(rows: List[Dict], out_path: Path) -> None:
             w.writeheader()
         for r in rows:
             row = {k: r.get(k) for k in CSV_COLS}
-            # normalize price
             v = row.get("price")
             if isinstance(v, (int, float)):
                 row["price"] = f"{float(v):.2f}"
