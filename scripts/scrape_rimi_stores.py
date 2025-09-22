@@ -1,128 +1,195 @@
-#!/usr/bin/env python3
-import csv, json, re, time
-from pathlib import Path
-from urllib.parse import urlparse, parse_qs, unquote
+name: Seed Rimi physical stores
 
-import requests
+on:
+  workflow_dispatch: {}
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Scrape to CSV ------------------------------------------------------
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install scrape deps
+        run: |
+          set -euo pipefail
+          pip install playwright bs4 lxml
+          python -m playwright install --with-deps chromium
+
+      - name: Scrape Rimi stores to CSV
+        run: |
+          set -euo pipefail
+          mkdir -p data scripts
+          cat <<'PY' > scripts/scrape_rimi_stores.py
+import re, csv, time
+from pathlib import Path
+from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright
 
 OUT = Path("data/rimi_stores.csv")
 OUT.parent.mkdir(parents=True, exist_ok=True)
 
-def latlon_from_gmaps(href: str):
+def extract_latlon_from_href(href: str):
     if not href:
         return None, None
-    try:
-        u = urlparse(href)
-        q = parse_qs(u.query)
-        if "q" in q:
-            m = re.search(r"(-?\d+\.\d+),\s*(-?\d+\.\d+)", q["q"][0])
-            if m:
-                return float(m.group(1)), float(m.group(2))
-        m = re.search(r"@(-?\d+\.\d+),(-?\d+\.\d+)", href)
-        if m:
-            return float(m.group(1)), float(m.group(2))
-    except Exception:
-        pass
+    m = re.search(r'@(-?\d+\.\d+),(-?\d+\.\d+)', href)
+    if m:
+        return float(m.group(1)), float(m.group(2))
+    m = re.search(r'query=(-?\d+\.\d+),(-?\d+\.\d+)', href)
+    if m:
+        return float(m.group(1)), float(m.group(2))
     return None, None
 
-def nominatim_geocode(addr: str):
-    try:
-        r = requests.get(
-            "https://nominatim.openstreetmap.org/search",
-            params={"format":"jsonv2","q":addr,"countrycodes":"ee"},
-            headers={"User-Agent":"basket-compare/1.0"},
-            timeout=20
-        )
-        r.raise_for_status()
-        j = r.json()
-        if j:
-            return float(j[0]["lat"]), float(j[0]["lon"])
-    except Exception:
-        return None, None
-    return None, None
-
-def scrape():
+def main():
+    url = "https://www.rimi.ee/kauplused"
     rows = []
+
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
-        page.goto("https://www.rimi.ee/kauplused", timeout=90_000)
+        ctx = browser.new_context(locale="et-EE")
+        page = ctx.new_page()
+        page.goto(url, wait_until="networkidle")
 
-        # Infinite-scroll until no new height appears
-        last_h = 0
-        stall = 0
-        while stall < 5:
-            page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-            time.sleep(1.2)
-            h = page.evaluate("document.body.scrollHeight")
-            if h <= last_h:
-                stall += 1
-            else:
-                stall = 0
-            last_h = h
+        for _ in range(15):
+            page.mouse.wheel(0, 3000)
+            time.sleep(0.3)
 
-        # Each card: name, address, Google Maps "Juhised" link
-        cards = page.locator("section >> css=div:has(h3), article:has(h3)")
-        n = cards.count()
-        for i in range(n):
-            card = cards.nth(i)
-            name = card.locator("h3, h2").first.text_content() or ""
-            name = name.strip()
+        html = page.content()
+        soup = BeautifulSoup(html, "lxml")
 
-            # address line is typically the first small text block
-            address = ""
-            for sel in ["p", "div", "span"]:
-                t = card.locator(sel).first.text_content()
-                if t:
-                    t = t.strip()
-                    if "," in t or re.search(r"\d", t):
-                        address = t
-                        break
-
-            href = ""
-            # try explicit “Juhised” (Directions) button
-            for s in ['a:has-text("Juhised")', 'a:has-text("Directions")', 'a[href*="google.com/maps"]']:
-                if card.locator(s).count():
-                    href = card.locator(s).first.get_attribute("href") or ""
+        cards = soup.select("a[href*='google'], div, li, article")
+        seen = set()
+        for card in cards:
+            name = None
+            for tag in card.select("strong, h1, h2, h3"):
+                t = tag.get_text(" ", strip=True)
+                if t and "rimi" in t.lower():
+                    name = t
                     break
-
-            lat, lon = latlon_from_gmaps(href)
-            # fallback geocode if needed
-            if (lat is None or lon is None) and address:
-                lat, lon = nominatim_geocode(address)
-                time.sleep(1.1)  # be polite to Nominatim
-
             if not name:
                 continue
 
-            rows.append({
-                "name": name,
-                "address": address,
-                "lat": f"{lat:.6f}" if lat is not None else "",
-                "lon": f"{lon:.6f}" if lon is not None else "",
-                "external_key": re.sub(r"[^a-z0-9\-]+", "-", name.lower()).strip("-")
-            })
+            text = card.get_text("\n", strip=True)
+            address = None
+            for line in text.splitlines():
+                if any(ch.isdigit() for ch in line) and len(line) < 100 and "@" not in line:
+                    address = line
+                    break
+
+            href = None
+            a = card.select_one("a[href*='google']")
+            if a:
+                href = a.get("href")
+            lat, lon = extract_latlon_from_href(href)
+            if not name or not address:
+                continue
+            key = (name.strip(), address.strip())
+            if key in seen:
+                continue
+            seen.add(key)
+            rows.append((name.strip(), address.strip(), lat, lon, None))
 
         browser.close()
 
-    # de-dup by name (keep first)
-    seen = set()
-    dedup = []
-    for r in rows:
-        k = (r["name"], r["address"])
-        if k in seen: 
-            continue
-        seen.add(k)
-        dedup.append(r)
+    dedup = {}
+    for name, addr, lat, lon, ext in rows:
+        key = (name, addr)
+        if key not in dedup:
+            dedup[key] = (name, addr, lat, lon, ext)
 
     with OUT.open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=["name","address","lat","lon","external_key"])
-        w.writeheader()
-        for r in dedup:
-            w.writerow(r)
+        w = csv.writer(f)
+        w.writerow(["name","address","lat","lon","external_key"])
+        for name, addr, lat, lon, ext in sorted(dedup.values()):
+            w.writerow([name, addr, "" if lat is None else lat, "" if lon is None else lon, ext or ""])
 
-    print(f"wrote {len(dedup)} rows -> {OUT}")
+    print(f"Wrote {len(dedup)} rows -> {OUT}")
 
 if __name__ == "__main__":
-    scrape()
+    main()
+PY
+          python scripts/scrape_rimi_stores.py
+          echo "--- preview ---"
+          head -n 10 data/rimi_stores.csv || true
+
+      # --- Load into Postgres --------------------------------------------------
+      - name: Install psql
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Upsert stores and alias to ePood
+        run: |
+          set -euo pipefail
+          cat <<'SQL' > /tmp/rimi_seed.sql
+\set ON_ERROR_STOP on
+
+-- staging table
+DROP TABLE IF EXISTS staging_rimi_stores;
+CREATE TABLE staging_rimi_stores(
+  name         text,
+  address      text,
+  lat          double precision,
+  lon          double precision,
+  external_key text
+);
+
+-- load CSV
+\copy staging_rimi_stores(name,address,lat,lon,external_key)
+  FROM 'data/rimi_stores.csv'
+  WITH (FORMAT csv, HEADER true, NULL '');
+
+-- upsert into stores (assumes unique on (chain,name) exists)
+INSERT INTO stores (name, chain, address, lat, lon, latitude, longitude, is_online, external_key)
+SELECT
+  s.name, 'Rimi',
+  NULLIF(s.address,''),
+  s.lat, s.lon, s.lat, s.lon,
+  false,
+  NULLIF(s.external_key,'')
+FROM staging_rimi_stores s
+WHERE COALESCE(s.name,'') <> ''
+ON CONFLICT (chain, name)
+DO UPDATE SET
+  address      = EXCLUDED.address,
+  lat          = EXCLUDED.lat,
+  lon          = EXCLUDED.lon,
+  latitude     = EXCLUDED.latitude,
+  longitude    = EXCLUDED.longitude,
+  is_online    = false,
+  external_key = COALESCE(EXCLUDED.external_key, stores.external_key);
+
+-- alias physical Rimi stores to ePood id=440
+CREATE TABLE IF NOT EXISTS store_price_source (
+  store_id        bigint PRIMARY KEY,
+  source_store_id bigint NOT NULL
+);
+
+INSERT INTO store_price_source (store_id, source_store_id)
+SELECT st.id, 440
+FROM stores st
+WHERE st.chain='Rimi' AND COALESCE(st.is_online,false)=false
+ON CONFLICT (store_id) DO UPDATE
+SET source_store_id = EXCLUDED.source_store_id;
+
+-- summary
+\t on
+SELECT 'staging_rows' AS what, COUNT(*) AS count FROM staging_rimi_stores
+UNION ALL
+SELECT 'physical_rimi_in_stores', COUNT(*) FROM stores WHERE chain='Rimi' AND COALESCE(is_online,false)=false
+UNION ALL
+SELECT 'aliased_to_440', COUNT(*) FROM store_price_source sps JOIN stores st ON st.id=sps.store_id
+       WHERE st.chain='Rimi' AND COALESCE(st.is_online,false)=false AND sps.source_store_id=440;
+\t off
+SQL
+
+          psql "$DATABASE_URL" -f /tmp/rimi_seed.sql
