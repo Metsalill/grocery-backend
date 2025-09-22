@@ -876,7 +876,7 @@ async def _fetch_json(url: str) -> Optional[Dict]:
     req = urllib.request.Request(url, headers=_browser_headers())
     with urllib.request.urlopen(req) as resp:  # nosec
         data = resp.read()
-        if resp.headers.get("Content-Encoding", "").lower() == "gzip":
+        if resp.headers.get("Content-Encoding", "").lower" == "gzip":
             import io as _io
             data = gzip.GzipFile(fileobj=_io.BytesIO(data)).read()
         try:
