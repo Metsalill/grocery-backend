@@ -12,9 +12,9 @@ Modes
          2) Next.js _next/data/{buildId}/*.json fallback
          3) window.__APOLLO_STATE__ fallback
          If none are available (or --wolt-force-playwright), it opens the page
-         with Playwright, captures the network JSON used by Wolt’s app, and walks
-         it to extract name, price (EUR), image, GTIN/EAN, supplier ("Tarnija info")
-         as manufacturer, and size. Uses GTIN as ext_id when present, else item id/slug.
+         with Playwright, captures the network JSON used by Wolt’s app, **opens
+         each product modal → “Toote info”** and scrapes GTIN + Tarnija info.
+         Uses GTIN as ext_id when present, else item id/slug.
 
 DB alignment
 - Target table: public.staging_coop_products
@@ -29,8 +29,8 @@ Notes
 - Streams rows to CSV incrementally so artifacts survive cancellation.
 
 Flag note
-- New boolean flag: `--wolt-force-playwright` (presence = True).
-- Legacy compatibility: `--wolt-force-playwright-val=true|false` or env `WOLT_FORCE_PLAYWRIGHT=1/true`.
+- Boolean flag: `--wolt-force-playwright` (presence = True).
+- Legacy/env: `--wolt-force-playwright-val=true|false` or `WOLT_FORCE_PLAYWRIGHT=1/true`.
 """
 
 import argparse
@@ -72,6 +72,9 @@ CTX_TA_CODE = re.compile(r"(?:Tootekood)\s*[:\-]?\s*(\d{8,14})", re.IGNORECASE)
 CTX_MANUF = re.compile(r"(?:Tootja|Valmistaja)\s*[:\-]?\s*([^\n<]{2,120})", re.IGNORECASE)
 
 PRICE_TOKEN = re.compile(r"(\d+[.,]\d{2})\s*€", re.U)
+
+GTIN_IN_MODAL = re.compile(r"\bGTIN\b[\s:\n]*([0-9]{8,14})", re.I)
+TARNIJA_IN_MODAL = re.compile(r"Tarnija info[\s:\n]*([^\n]+)", re.I)
 
 
 def str2bool(v: Optional[str]) -> bool:
@@ -344,7 +347,7 @@ async def extract_visible_price(page: Any) -> Optional[float]:
         ".product-price",
         ".price",
         ".current-price",
-        '[class*="price"]',
+        '[class*=\"price\"]',
     ]
     for sel in selectors:
         try:
@@ -424,7 +427,7 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
     await page.wait_for_timeout(int(req_delay * 1000))
 
     name = None
-    for sel in ["h1", '[data-testid="product-title"]', "article h1"]:
+    for sel in ["h1", '[data-testid=\"product-title\"]', "article h1"]:
         try:
             loc = page.locator(sel)
             if await loc.count() > 0:
@@ -498,7 +501,7 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
                 else (ld["image"][0] if isinstance(ld["image"], list) and ld["image"] else None)
             )
         if not image_url:
-            image_url = await page.get_attribute('meta[property="og:image"]', "content")
+            image_url = await page.get_attribute('meta[property=\"og:image\"]', "content")
     except Exception:
         pass
 
@@ -584,14 +587,12 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
 # ---------- WOLT parsing ----------
 
 def _html_get_next_data(html: str) -> Optional[Dict]:
-    # 1) canonical __NEXT_DATA__
     m = re.search(r'<script[^>]+id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S | re.I)
     if m:
         try:
             return json.loads(m.group(1))
         except Exception:
             pass
-    # 2) sometimes inlined as window.__NEXT_DATA__=
     m2 = re.search(r'__NEXT_DATA__\s*=\s*({.*?})\s*<\/script>', html, re.S | re.I)
     if m2:
         try:
@@ -687,12 +688,13 @@ def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Dict:
 
     # manufacturer / supplier
     manufacturer = (
-        _search_info_label(item, "Tarnija info", "Tarnija", "Tootja", "Valmistaja", "Supplier", "Manufacturer")
+        item.get("supplier")  # from modal scrape if available
+        or _search_info_label(item, "Tarnija info", "Tarnija", "Tootja", "Valmistaja", "Supplier", "Manufacturer")
         or _first_str(item, "supplier", "manufacturer", "producer")
     )
 
     # EAN/GTIN
-    ean_raw = (
+    ean_raw = item.get("gtin") or (
         _search_info_label(item, "GTIN", "EAN", "Ribakood")
         or _first_str(item, "gtin", "ean", "barcode")
     )
@@ -700,6 +702,9 @@ def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Dict:
 
     # brand
     brand = _first_str(item, "brand") or likely_brand_from_name(name)
+    # As you requested: if brand is still missing but we have supplier, set brand=supplier
+    if not brand and manufacturer:
+        brand = manufacturer
 
     # size
     size_text = _search_info_label(item, "Size", "Kogus", "Maht", "Kaal")
@@ -955,8 +960,110 @@ async def _load_wolt_payload(url: str) -> Optional[Dict]:
     return None
 
 
+async def _maybe_collect_json(resp, out_list: List[Any]):
+    try:
+        ct = (resp.headers.get("content-type") or "").lower()
+        if "application/json" not in ct:
+            return
+        url = resp.url
+        if any(x in url for x in ["wolt.com", "wolt-static-assets", "restaurant-api.wolt", "graphql"]):
+            txt = await resp.text()
+            if not txt:
+                return
+            try:
+                obj = json.loads(txt)
+                out_list.append(obj)
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+
+async def _wolt_enrich_with_modal(page, items: List[Dict], max_to_probe: int = 80) -> None:
+    """
+    For each item (by name heuristic), open its modal, click "Toote info",
+    then scrape GTIN and Tarnija info from the dialog, and write back to item.
+    """
+    probed = 0
+    for item in items:
+        if probed >= max_to_probe:
+            break
+        name = str(item.get("name") or "").strip()
+        if not name:
+            continue
+
+        # Try to open modal by clicking the product title text
+        opened = False
+        try:
+            # Find a visible element with the exact name (prefer first)
+            loc = page.locator(f"text={name}").first
+            if await loc.count() > 0:
+                await loc.click(timeout=1500)
+                opened = True
+        except Exception:
+            opened = False
+
+        if not opened:
+            continue
+
+        try:
+            # Click "Toote info"
+            info = page.locator('a:has-text("Toote info"), button:has-text("Toote info")')
+            if await info.count() > 0:
+                await info.first.click(timeout=1500)
+
+            # Wait the details sheet/dialog
+            dialog = page.locator('role=dialog')
+            if await dialog.count() == 0:
+                dialog = page.locator('[data-testid="sheet"], [data-testid="dialog"]')
+            await page.wait_for_timeout(400)  # small settle
+
+            txt = ""
+            try:
+                txt = await dialog.first.inner_text()
+            except Exception:
+                # fallback to body snapshot
+                try:
+                    txt = await page.inner_text("body")
+                except Exception:
+                    txt = ""
+
+            gtin = None
+            supplier = None
+
+            m1 = GTIN_IN_MODAL.search(txt or "")
+            if m1:
+                gtin = m1.group(1).strip()
+            m2 = TARNIJA_IN_MODAL.search(txt or "")
+            if m2:
+                supplier = m2.group(1).strip()
+
+            if gtin:
+                item["gtin"] = gtin
+            if supplier:
+                item["supplier"] = supplier
+                # Also provide brand fallback if missing
+                if not item.get("brand"):
+                    item["brand"] = supplier
+
+        finally:
+            # Close the product modal/sheet
+            try:
+                close_btn = page.locator('button[aria-label*="Close"], button:has-text("×")')
+                if await close_btn.count() > 0:
+                    await close_btn.first.click()
+                else:
+                    await page.keyboard.press("Escape")
+            except Exception:
+                pass
+
+        probed += 1
+        # small delay to keep UI stable
+        await page.wait_for_timeout(200)
+
+
 async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
-    """Open a Wolt category with Playwright, capture JSON responses, walk them."""
+    """Open a Wolt category with Playwright, capture JSON responses, walk them, and enrich via modal."""
     if async_playwright is None:
         raise RuntimeError("Playwright is required for Wolt fallback but is not installed.")
 
@@ -1018,38 +1125,24 @@ async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
                         json_blobs.append(data)
                 except Exception:
                     pass
+
+            # Build base items from captured payloads
+            for blob in json_blobs:
+                try:
+                    _walk_collect_items(blob, found)
+                except Exception:
+                    pass
+
+            items = list(found.values())
+
+            # Enrich by opening product modals → "Toote info" (scrape GTIN + supplier)
+            await _wolt_enrich_with_modal(page, items, max_to_probe=80)
+
+            return items
+
         finally:
             await context.close()
             await browser.close()
-
-    # Walk all collected blobs
-    for blob in json_blobs:
-        try:
-            _walk_collect_items(blob, found)
-        except Exception:
-            pass
-
-    return list(found.values())
-
-
-async def _maybe_collect_json(resp, out_list: List[Any]):
-    try:
-        ct = (resp.headers.get("content-type") or "").lower()
-        if "application/json" not in ct:
-            return
-        url = resp.url
-        # focus on Wolt/restaurant APIs but be permissive
-        if any(x in url for x in ["wolt.com", "wolt-static-assets", "restaurant-api.wolt", "graphql"]):
-            txt = await resp.text()
-            if not txt:
-                return
-            try:
-                obj = json.loads(txt)
-                out_list.append(obj)
-            except Exception:
-                pass
-    except Exception:
-        pass
 
 
 # ---------- runners (streaming) ----------
@@ -1222,7 +1315,7 @@ def parse_args():
     p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
     p.add_argument("--out", default="out/coop_products.csv", help="CSV file or output directory")
 
-    # Wolt Playwright override: NEW boolean flag (presence = True)
+    # Wolt Playwright override: boolean flag (presence = True)
     p.add_argument("--wolt-force-playwright", action="store_true",
                    help="Force Playwright network fallback for Wolt categories (no value needed).")
     # Legacy compatibility: explicit value
