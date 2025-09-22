@@ -27,95 +27,7 @@ jobs:
       - name: Scrape Rimi stores to CSV
         run: |
           set -euo pipefail
-          mkdir -p data scripts
-          cat <<'PY' > scripts/scrape_rimi_stores.py
-import re, csv, time
-from pathlib import Path
-from bs4 import BeautifulSoup
-from playwright.sync_api import sync_playwright
-
-OUT = Path("data/rimi_stores.csv")
-OUT.parent.mkdir(parents=True, exist_ok=True)
-
-def extract_latlon_from_href(href: str):
-    if not href:
-        return None, None
-    m = re.search(r'@(-?\d+\.\d+),(-?\d+\.\d+)', href)
-    if m:
-        return float(m.group(1)), float(m.group(2))
-    m = re.search(r'query=(-?\d+\.\d+),(-?\d+\.\d+)', href)
-    if m:
-        return float(m.group(1)), float(m.group(2))
-    return None, None
-
-def main():
-    url = "https://www.rimi.ee/kauplused"
-    rows = []
-
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        ctx = browser.new_context(locale="et-EE")
-        page = ctx.new_page()
-        page.goto(url, wait_until="networkidle")
-
-        for _ in range(15):
-            page.mouse.wheel(0, 3000)
-            time.sleep(0.3)
-
-        html = page.content()
-        soup = BeautifulSoup(html, "lxml")
-
-        cards = soup.select("a[href*='google'], div, li, article")
-        seen = set()
-        for card in cards:
-            name = None
-            for tag in card.select("strong, h1, h2, h3"):
-                t = tag.get_text(" ", strip=True)
-                if t and "rimi" in t.lower():
-                    name = t
-                    break
-            if not name:
-                continue
-
-            text = card.get_text("\n", strip=True)
-            address = None
-            for line in text.splitlines():
-                if any(ch.isdigit() for ch in line) and len(line) < 100 and "@" not in line:
-                    address = line
-                    break
-
-            href = None
-            a = card.select_one("a[href*='google']")
-            if a:
-                href = a.get("href")
-            lat, lon = extract_latlon_from_href(href)
-            if not name or not address:
-                continue
-            key = (name.strip(), address.strip())
-            if key in seen:
-                continue
-            seen.add(key)
-            rows.append((name.strip(), address.strip(), lat, lon, None))
-
-        browser.close()
-
-    dedup = {}
-    for name, addr, lat, lon, ext in rows:
-        key = (name, addr)
-        if key not in dedup:
-            dedup[key] = (name, addr, lat, lon, ext)
-
-    with OUT.open("w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
-        w.writerow(["name","address","lat","lon","external_key"])
-        for name, addr, lat, lon, ext in sorted(dedup.values()):
-            w.writerow([name, addr, "" if lat is None else lat, "" if lon is None else lon, ext or ""])
-
-    print(f"Wrote {len(dedup)} rows -> {OUT}")
-
-if __name__ == "__main__":
-    main()
-PY
+          mkdir -p data
           python scripts/scrape_rimi_stores.py
           echo "--- preview ---"
           head -n 10 data/rimi_stores.csv || true
@@ -130,6 +42,7 @@ PY
       - name: Upsert stores and alias to ePood
         run: |
           set -euo pipefail
+          # write SQL to a file so psql meta-commands start at column 0
           cat <<'SQL' > /tmp/rimi_seed.sql
 \set ON_ERROR_STOP on
 
