@@ -183,9 +183,9 @@ jobs:
 
           EXTRA=""
           if [ "$MODE" = "wolt" ]; then
-            # Force PW fallback for Wolt mode (env + both flags for compatibility)
+            # Force PW fallback for Wolt mode
             echo "WOLT_FORCE_PLAYWRIGHT=1" >> "$GITHUB_ENV"
-            EXTRA="$EXTRA --wolt-force-playwright --wolt-force-playwright-val true"
+            EXTRA="$EXTRA --wolt-force-playwright"
           fi
 
           # shellcheck disable=SC2086
