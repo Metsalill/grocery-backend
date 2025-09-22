@@ -27,7 +27,7 @@ jobs:
         run: |
           mkdir -p data scripts
           cat > scripts/scrape_rimi_stores.py <<'PY'
-          import re, csv, json, sys, time
+          import re, csv, time
           from pathlib import Path
           from bs4 import BeautifulSoup
           from playwright.sync_api import sync_playwright
@@ -36,123 +36,84 @@ jobs:
           OUT.parent.mkdir(parents=True, exist_ok=True)
 
           def extract_latlon_from_href(href: str):
-            if not href:
+              if not href:
+                  return None, None
+              m = re.search(r'@(-?\d+\.\d+),(-?\d+\.\d+)', href)
+              if m:
+                  return float(m.group(1)), float(m.group(2))
+              m = re.search(r'query=(-?\d+\.\d+),(-?\d+\.\d+)', href)
+              if m:
+                  return float(m.group(1)), float(m.group(2))
               return None, None
-            m = re.search(r'@(-?\d+\.\d+),(-?\d+\.\d+)', href)
-            if m:
-              return float(m.group(1)), float(m.group(2))
-            m = re.search(r'query=(-?\d+\.\d+),(-?\d+\.\d+)', href)
-            if m:
-              return float(m.group(1)), float(m.group(2))
-            return None, None
 
           def main():
-            url = "https://www.rimi.ee/kauplused"
-            rows = []
+              url = "https://www.rimi.ee/kauplused"
+              rows = []
 
-            with sync_playwright() as p:
-              browser = p.chromium.launch(headless=True)
-              ctx = browser.new_context(locale="et-EE")
-              page = ctx.new_page()
+              with sync_playwright() as p:
+                  browser = p.chromium.launch(headless=True)
+                  ctx = browser.new_context(locale="et-EE")
+                  page = ctx.new_page()
+                  page.goto(url, wait_until="networkidle")
 
-              json_payloads = []
-              def capture(resp):
-                try:
-                  if "json" in resp.headers.get("content-type",""):
-                    u = resp.url.lower()
-                    if any(k in u for k in ["kauplu", "store", "shop"]):
-                      data = resp.json()
-                      json_payloads.append(data)
-                except Exception:
-                  pass
-              page.on("response", capture)
+                  for _ in range(15):
+                      page.mouse.wheel(0, 3000)
+                      time.sleep(0.3)
 
-              page.goto(url, wait_until="networkidle")
+                  html = page.content()
+                  soup = BeautifulSoup(html, "lxml")
 
-              for _ in range(15):
-                page.mouse.wheel(0, 3000)
-                time.sleep(0.3)
+                  cards = soup.select("a[href*='google'], div, li, article")
+                  seen = set()
+                  for card in cards:
+                      name = None
+                      for tag in card.select("strong, h1, h2, h3"):
+                          t = tag.get_text(" ", strip=True)
+                          if t and "rimi" in t.lower():
+                              name = t
+                              break
+                      if not name:
+                          continue
 
-              html = page.content()
-              soup = BeautifulSoup(html, "lxml")
+                      text = card.get_text("\n", strip=True)
+                      address = None
+                      for line in text.splitlines():
+                          if any(ch.isdigit() for ch in line) and len(line) < 100 and "@" not in line:
+                              address = line
+                              break
 
-              stores_from_json = []
-              for payload in json_payloads:
-                def flatten(x):
-                  if isinstance(x, list):
-                    for i in x:
-                      yield from flatten(i)
-                  elif isinstance(x, dict):
-                    yield x
-                    for v in x.values():
-                      yield from flatten(v)
-                for node in flatten(payload):
-                  if not isinstance(node, dict):
-                    continue
-                  name = node.get("name") or node.get("title")
-                  address = node.get("address") or node.get("location")
-                  lat = node.get("lat") or node.get("latitude")
-                  lon = node.get("lon") or node.get("lng") or node.get("longitude")
-                  if name and address:
-                    try:
-                      lat = float(lat) if lat is not None else None
-                      lon = float(lon) if lon is not None else None
-                    except Exception:
-                      lat = lon = None
-                    stores_from_json.append((name.strip(), address.strip(), lat, lon, None))
+                      href = None
+                      a = card.select_one("a[href*='google']")
+                      if a:
+                          href = a.get("href")
+                      lat, lon = extract_latlon_from_href(href)
+                      if not name or not address:
+                          continue
+                      key = (name.strip(), address.strip())
+                      if key in seen:
+                          continue
+                      seen.add(key)
+                      rows.append((name.strip(), address.strip(), lat, lon, None))
 
-              cards = soup.select("a[href*='google'], div, li, article")
-              dom_rows = []
-              seen = set()
-              for card in cards:
-                name = None
-                for tag in card.select("strong, h1, h2, h3"):
-                  t = tag.get_text(" ", strip=True)
-                  if t and "rimi" in t.lower():
-                    name = t
-                    break
-                if not name:
-                  continue
+                  browser.close()
 
-                text = card.get_text("\n", strip=True)
-                address = None
-                for line in text.splitlines():
-                  if any(ch.isdigit() for ch in line) and len(line) < 100 and "@" not in line:
-                    address = line
-                    break
+              # Dedup and write CSV
+              dedup = {}
+              for name, addr, lat, lon, ext in rows:
+                  key = (name, addr)
+                  if key not in dedup:
+                      dedup[key] = (name, addr, lat, lon, ext)
 
-                href = None
-                a = card.select_one("a[href*='google']")
-                if a:
-                  href = a.get("href")
-                lat, lon = extract_latlon_from_href(href)
-                if not name or not address:
-                  continue
-                key = (name, address)
-                if key in seen:
-                  continue
-                seen.add(key)
-                dom_rows.append((name, address, lat, lon, None))
+              with OUT.open("w", newline="", encoding="utf-8") as f:
+                  w = csv.writer(f)
+                  w.writerow(["name","address","lat","lon","external_key"])
+                  for name, addr, lat, lon, ext in sorted(dedup.values()):
+                      w.writerow([name, addr, "" if lat is None else lat, "" if lon is None else lon, ext or ""])
 
-              rows = stores_from_json if stores_from_json else dom_rows
-              browser.close()
-
-            dedup = {}
-            for name, addr, lat, lon, ext in rows:
-              key = (name.strip(), addr.strip())
-              if key not in dedup:
-                dedup[key] = (name.strip(), addr.strip(), lat, lon, ext)
-
-            with OUT.open("w", newline="", encoding="utf-8") as f:
-              w = csv.writer(f)
-              w.writerow(["name","address","lat","lon","external_key"])
-              for name, addr, lat, lon, ext in sorted(dedup.values()):
-                w.writerow([name, addr, "" if lat is None else lat, "" if lon is None else lon, ext or ""])
-
-            print(f"Wrote {len(dedup)} rows → {OUT}")
+              print(f"Wrote {len(dedup)} rows → {OUT}")
 
           if __name__ == "__main__":
-            main()
+              main()
           PY
           python scripts/scrape_rimi_stores.py
           echo "--- preview ---"
@@ -168,36 +129,7 @@ jobs:
           psql "$DATABASE_URL" <<'SQL'
           \set ON_ERROR_STOP on
 
-          -- A) Ensure columns exist (idempotent)
-          DO $$
-          BEGIN
-            IF NOT EXISTS (
-              SELECT 1 FROM information_schema.columns
-              WHERE table_name='stores' AND column_name='latitude'
-            ) THEN
-              ALTER TABLE stores ADD COLUMN latitude double precision;
-            END IF;
-            IF NOT EXISTS (
-              SELECT 1 FROM information_schema.columns
-              WHERE table_name='stores' AND column_name='longitude'
-            ) THEN
-              ALTER TABLE stores ADD COLUMN longitude double precision;
-            END IF;
-            IF NOT EXISTS (
-              SELECT 1 FROM information_schema.columns
-              WHERE table_name='stores' AND column_name='is_online'
-            ) THEN
-              ALTER TABLE stores ADD COLUMN is_online boolean DEFAULT false;
-            END IF;
-            IF NOT EXISTS (
-              SELECT 1 FROM information_schema.columns
-              WHERE table_name='stores' AND column_name='external_key'
-            ) THEN
-              ALTER TABLE stores ADD COLUMN external_key text;
-            END IF;
-          END $$;
-
-          -- B) staging table
+          -- staging table
           DROP TABLE IF EXISTS staging_rimi_stores;
           CREATE TABLE staging_rimi_stores(
             name         text,
@@ -207,12 +139,12 @@ jobs:
             external_key text
           );
 
-          -- C) load CSV
+          -- load CSV
           \copy staging_rimi_stores(name,address,lat,lon,external_key)
             FROM 'data/rimi_stores.csv'
             WITH (FORMAT csv, HEADER true, NULL '');
 
-          -- D) upsert into stores (chain='Rimi', physical locations)
+          -- upsert into stores (assumes uq_stores_chain_name exists)
           INSERT INTO stores (name, chain, address, lat, lon, latitude, longitude, is_online, external_key)
           SELECT
             s.name, 'Rimi',
@@ -222,7 +154,7 @@ jobs:
             NULLIF(s.external_key,'')
           FROM staging_rimi_stores s
           WHERE COALESCE(s.name,'') <> ''
-          ON CONFLICT ON CONSTRAINT uq_stores_chain_name
+          ON CONFLICT (chain, name)
           DO UPDATE SET
             address      = EXCLUDED.address,
             lat          = EXCLUDED.lat,
@@ -232,13 +164,12 @@ jobs:
             is_online    = false,
             external_key = COALESCE(EXCLUDED.external_key, stores.external_key);
 
-          -- E) price source mapping table (idempotent)
+          -- alias physical Rimi stores to ePood id=440
           CREATE TABLE IF NOT EXISTS store_price_source (
             store_id        bigint PRIMARY KEY,
             source_store_id bigint NOT NULL
           );
 
-          -- F) alias all physical Rimi stores to use Rimi ePood prices (id 440)
           INSERT INTO store_price_source (store_id, source_store_id)
           SELECT st.id, 440
           FROM stores st
@@ -246,7 +177,7 @@ jobs:
           ON CONFLICT (store_id) DO UPDATE
             SET source_store_id = EXCLUDED.source_store_id;
 
-          -- G) summary
+          -- summary
           \t on
           SELECT 'staging_rows' AS what, COUNT(*) AS count FROM staging_rimi_stores
           UNION ALL
