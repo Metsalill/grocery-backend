@@ -127,7 +127,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          # 1) Write SQL to a temp file (backslashes at column 0 inside the file)
+          # Write SQL to a temp file (backslash commands at column 0)
           cat >/tmp/rimi_seed.sql <<'SQL'
 \set ON_ERROR_STOP on
 
@@ -190,5 +190,5 @@ SELECT 'aliased_to_440', COUNT(*) FROM store_price_source sps JOIN stores st ON 
 \t off
 SQL
 
-          # 2) Execute it
+          # Execute
           psql "$DATABASE_URL" -f /tmp/rimi_seed.sql
