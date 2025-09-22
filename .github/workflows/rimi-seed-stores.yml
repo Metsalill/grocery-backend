@@ -38,7 +38,6 @@ jobs:
           def extract_latlon_from_href(href: str):
             if not href:
               return None, None
-            # common Google Maps patterns
             m = re.search(r'@(-?\d+\.\d+),(-?\d+\.\d+)', href)
             if m:
               return float(m.group(1)), float(m.group(2))
@@ -56,7 +55,6 @@ jobs:
               ctx = browser.new_context(locale="et-EE")
               page = ctx.new_page()
 
-              # collect any XHR/JSON with store data (best case)
               json_payloads = []
               def capture(resp):
                 try:
@@ -71,7 +69,6 @@ jobs:
 
               page.goto(url, wait_until="networkidle")
 
-              # try to load more items if lazy loaded
               for _ in range(15):
                 page.mouse.wheel(0, 3000)
                 time.sleep(0.3)
@@ -79,7 +76,6 @@ jobs:
               html = page.content()
               soup = BeautifulSoup(html, "lxml")
 
-              # Strategy A: use JSON payloads if we find a plausible list
               stores_from_json = []
               for payload in json_payloads:
                 def flatten(x):
@@ -105,7 +101,6 @@ jobs:
                       lat = lon = None
                     stores_from_json.append((name.strip(), address.strip(), lat, lon, None))
 
-              # Strategy B: parse the DOM cards (fallback)
               cards = soup.select("a[href*='google'], div, li, article")
               dom_rows = []
               seen = set()
@@ -142,14 +137,12 @@ jobs:
               rows = stores_from_json if stores_from_json else dom_rows
               browser.close()
 
-            # Deduplicate
             dedup = {}
             for name, addr, lat, lon, ext in rows:
               key = (name.strip(), addr.strip())
               if key not in dedup:
                 dedup[key] = (name.strip(), addr.strip(), lat, lon, ext)
 
-            # Write CSV
             with OUT.open("w", newline="", encoding="utf-8") as f:
               w = csv.writer(f)
               w.writerow(["name","address","lat","lon","external_key"])
@@ -204,27 +197,7 @@ jobs:
             END IF;
           END $$;
 
-          -- B) Ensure unique constraint on (chain, name) for conflict handling (safe if already exists)
-          DO $$
-          BEGIN
-            IF NOT EXISTS (
-              SELECT 1
-              FROM pg_constraint
-              WHERE conname = 'uq_stores_chain_name'
-                AND conrelid = 'stores'::regclass
-            ) THEN
-              BEGIN
-                ALTER TABLE stores
-                  ADD CONSTRAINT uq_stores_chain_name UNIQUE (chain, name);
-              EXCEPTION
-                WHEN duplicate_object THEN
-                  -- constraint (or supporting index) already exists; ignore
-                  NULL;
-              END;
-            END IF;
-          END $$;
-
-          -- C) staging table
+          -- B) staging table
           DROP TABLE IF EXISTS staging_rimi_stores;
           CREATE TABLE staging_rimi_stores(
             name         text,
@@ -234,12 +207,12 @@ jobs:
             external_key text
           );
 
-          -- D) load CSV (treat empty strings as NULL)
+          -- C) load CSV
           \copy staging_rimi_stores(name,address,lat,lon,external_key)
             FROM 'data/rimi_stores.csv'
             WITH (FORMAT csv, HEADER true, NULL '');
 
-          -- E) upsert into stores (chain='Rimi', physical locations)
+          -- D) upsert into stores (chain='Rimi', physical locations)
           INSERT INTO stores (name, chain, address, lat, lon, latitude, longitude, is_online, external_key)
           SELECT
             s.name, 'Rimi',
@@ -259,13 +232,13 @@ jobs:
             is_online    = false,
             external_key = COALESCE(EXCLUDED.external_key, stores.external_key);
 
-          -- F) price source mapping table (idempotent)
+          -- E) price source mapping table (idempotent)
           CREATE TABLE IF NOT EXISTS store_price_source (
             store_id        bigint PRIMARY KEY,
             source_store_id bigint NOT NULL
           );
 
-          -- G) alias all physical Rimi stores to use Rimi ePood prices (id 440)
+          -- F) alias all physical Rimi stores to use Rimi ePood prices (id 440)
           INSERT INTO store_price_source (store_id, source_store_id)
           SELECT st.id, 440
           FROM stores st
@@ -273,7 +246,7 @@ jobs:
           ON CONFLICT (store_id) DO UPDATE
             SET source_store_id = EXCLUDED.source_store_id;
 
-          -- H) summary
+          -- G) summary
           \t on
           SELECT 'staging_rows' AS what, COUNT(*) AS count FROM staging_rimi_stores
           UNION ALL
