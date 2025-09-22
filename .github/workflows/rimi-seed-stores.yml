@@ -204,14 +204,23 @@ jobs:
             END IF;
           END $$;
 
-          -- B) Ensure unique constraint on (chain, name) for conflict handling
+          -- B) Ensure unique constraint on (chain, name) for conflict handling (safe if already exists)
           DO $$
           BEGIN
             IF NOT EXISTS (
-              SELECT 1 FROM pg_constraint WHERE conname = 'uq_stores_chain_name'
+              SELECT 1
+              FROM pg_constraint
+              WHERE conname = 'uq_stores_chain_name'
+                AND conrelid = 'stores'::regclass
             ) THEN
-              ALTER TABLE stores
-              ADD CONSTRAINT uq_stores_chain_name UNIQUE (chain, name);
+              BEGIN
+                ALTER TABLE stores
+                  ADD CONSTRAINT uq_stores_chain_name UNIQUE (chain, name);
+              EXCEPTION
+                WHEN duplicate_object THEN
+                  -- constraint (or supporting index) already exists; ignore
+                  NULL;
+              END;
             END IF;
           END $$;
 
