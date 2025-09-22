@@ -43,10 +43,6 @@ on:
         description: "Set to 1 to upsert into public.staging_coop_products"
         required: false
         default: "0"
-      wolt_force_pw:
-        description: "Force Playwright fallback for Wolt (true/false/1/0)"
-        required: false
-        default: "true"
 
   # 05:30 Tallinn daily (02:30 UTC)
   schedule:
@@ -179,29 +175,17 @@ jobs:
           REQ_DELAY:    ${{ github.event_name == 'workflow_dispatch' && inputs.req_delay    || '0.5' }}
           PDP_WORKERS:  ${{ github.event_name == 'workflow_dispatch' && inputs.pdp_workers  || '4' }}
           SHARD_COUNT:  ${{ github.event_name == 'workflow_dispatch' && inputs.shards       || '1' }}
-          # Expose the toggle as env for the script's env override path, too.
-          WOLT_FORCE_PW_INPUT: ${{ github.event_name == 'workflow_dispatch' && inputs.wolt_force_pw || 'true' }}
           PYTHONUNBUFFERED: "1"
         shell: bash
         run: |
           set -euo pipefail
           echo ">> running shard ${{ matrix.shard_index }} of $SHARD_COUNT (mode=$MODE)"
-          # Normalize the toggle to lowercase for simple checks
-          WPW="$(echo "${WOLT_FORCE_PW_INPUT}" | tr '[:upper:]' '[:lower:]')"
-          FORCE_PW="false"
-          case "$WPW" in
-            1|true|yes|on) FORCE_PW="true" ;;
-          esac
 
-          # Always pass legacy value flag; add boolean flag when true.
           EXTRA=""
           if [ "$MODE" = "wolt" ]; then
-            # Also set env var path used by the script
-            echo "WOLT_FORCE_PLAYWRIGHT=$WPW" >> "$GITHUB_ENV"
-            EXTRA="$EXTRA --wolt-force-playwright-val \"$WPW\""
-            if [ "$FORCE_PW" = "true" ]; then
-              EXTRA="$EXTRA --wolt-force-playwright"
-            fi
+            # Force PW fallback for Wolt mode (env + both flags for compatibility)
+            echo "WOLT_FORCE_PLAYWRIGHT=1" >> "$GITHUB_ENV"
+            EXTRA="$EXTRA --wolt-force-playwright --wolt-force-playwright-val true"
           fi
 
           # shellcheck disable=SC2086
