@@ -2,11 +2,18 @@
 # -*- coding: utf-8 -*-
 """
 Coop eCoop (multi-region) & Wolt venue crawler → CSV/DB-friendly
-(Playwright for ecoop; JSON-first with Playwright fallback for Wolt)
 
-Key Wolt change:
-- We now iterate visible item cards, open the product modal, click "Toote info",
-  scrape GTIN + Tootja info + Tarnija info, and merge back to items by title.
+Modes
+- ecoop: Playwright category → PDP extractor (handles JS/lazy-load + pagination).
+- wolt : JSON-first; if needed (or forced), Playwright opens the page,
+         iterates product cards, opens modal → clicks “Toote info”,
+         extracts GTIN/EAN + Tootja info + Tarnija info,
+         and merges the data back by stable item id (from modal URL).
+
+DB target: public.staging_coop_products
+PRIMARY KEY: (store_host, ext_id)
+Columns: store_host, ext_id, name, brand, manufacturer, ean_raw, ean_norm,
+         size_text, price, currency, image_url, url, scraped_at (default now()).
 """
 
 import argparse
@@ -22,7 +29,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse, urljoin, urlsplit, urlunsplit, parse_qsl, urlencode
 
-# Optional Playwright
+# Playwright is optional (needed for ecoop and Wolt fallback/enrichment)
 try:
     from playwright.async_api import async_playwright  # type: ignore
 except Exception:  # pragma: no cover
@@ -41,7 +48,7 @@ CTX_MANUF = re.compile(r"(?:Tootja|Valmistaja|Tootja info)\s*[:\-]?\s*([^\n<]{2,
 
 PRICE_TOKEN = re.compile(r"(\d+[.,]\d{2})\s*€", re.U)
 
-# Modal-specific leniency
+# Wolt modal-specific helpers
 GTIN_IN_MODAL = re.compile(r"\b(?:GTIN|EAN|Ribakood)\b[\s:\n]*([0-9 \t]{8,18})", re.I)
 TARNIJA_IN_MODAL = re.compile(r"(?:Tarnija info|Tarnija|Supplier)\b[\s:\n]*([^\n]+)", re.I)
 TOOTJA_IN_MODAL = re.compile(r"(?:Tootja info|Tootja|Valmistaja)\b[\s:\n]*([^\n]+)", re.I)
@@ -500,7 +507,7 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
     }
 
 
-# ---------- WOLT parsing ----------
+# ---------- WOLT parsing & enrichment ----------
 
 def _html_get_next_data(html: str) -> Optional[Dict]:
     m = re.search(r'<script[^>]+id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S | re.I)
@@ -587,56 +594,6 @@ def _first_urlish(obj: Dict, *keys: str) -> Optional[str]:
     return None
 
 
-def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Dict:
-    name = str(item.get("name") or "").strip() or None
-
-    # price
-    price = None
-    for k in ("price", "baseprice", "base_price", "current_price", "total_price", "unit_price"):
-        if k in item:
-            price = _parse_wolt_price(item[k])
-            if price is not None:
-                break
-
-    image_url = _first_urlish(item, "image", "image_url", "imageUrl", "media")
-
-    # prefer modal-enriched fields if present
-    manufacturer = item.get("manufacturer") or item.get("supplier") or _first_str(item, "manufacturer", "supplier", "producer")
-
-    ean_raw = item.get("gtin") or _search_info_label(item, "GTIN", "EAN", "Ribakood") or _first_str(item, "gtin", "ean", "barcode")
-    ean_norm = normalize_ean(ean_raw)
-
-    brand = _first_str(item, "brand") or likely_brand_from_name(name)
-    if not brand and manufacturer:
-        brand = manufacturer
-
-    size_text = _search_info_label(item, "Size", "Kogus", "Maht", "Kaal")
-    if not size_text and name:
-        m = SIZE_RE.search(name)
-        if m:
-            size_text = m.group(1)
-
-    ext_id = ean_norm or str(item.get("id") or item.get("slug") or name or "")
-    url = f"{category_url}#item-{item.get('id')}" if item.get("id") else category_url
-
-    return {
-        "chain": "Coop",
-        "store_host": store_host,
-        "channel": "wolt",
-        "ext_id": ext_id,
-        "ean_raw": ean_raw,
-        "ean_norm": ean_norm,
-        "name": name,
-        "size_text": size_text,
-        "brand": brand,
-        "manufacturer": manufacturer,
-        "price": price if price is not None else None,
-        "currency": "EUR",
-        "image_url": image_url,
-        "url": url,
-    }
-
-
 def _format_price_for_csv(v):
     if isinstance(v, (int, float)):
         return f"{float(v):.2f}"
@@ -646,10 +603,243 @@ def _format_price_for_csv(v):
         return v
 
 
-# ---------- outputs (streaming-friendly) ----------
+def _wolt_store_host(sample_url: str) -> str:
+    m = re.search(r"/venue/([^/]+)", sample_url)
+    if m:
+        return f"wolt:{m.group(1)}"
+    return urlparse(sample_url).netloc.lower()
 
-CSV_COLS = ["chain", "store_host", "channel", "ext_id", "ean_raw", "ean_norm", "name",
-            "size_text", "brand", "manufacturer", "price", "currency", "image_url", "url"]
+
+def _id_from_url(u: str) -> Optional[str]:
+    m = re.search(r"itemid-([a-f0-9]+)", u, re.I)
+    return m.group(1).lower() if m else None
+
+
+async def _maybe_collect_json(resp, out_list: List[Any]):
+    try:
+        ct = (resp.headers.get("content-type") or "").lower()
+        if "application/json" not in ct:
+            return
+        url = resp.url
+        if any(x in url for x in ["wolt.com", "wolt-static-assets", "restaurant-api.wolt", "graphql"]):
+            txt = await resp.text()
+            if not txt:
+                return
+            try:
+                out_list.append(json.loads(txt))
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+
+async def _wolt_enrich_with_modal_by_cards(page, max_cards: int = 220) -> Dict[str, Dict]:
+    """
+    Iterate visible product cards, open modal, click 'Toote info',
+    read GTIN + Tootja info + Tarnija info, return map: item_id -> fields.
+    """
+    card_sel = (
+        '[data-testid*="item-card"], [data-test-id*="item-card"], '
+        '[data-testid*="menu-item"], [data-test-id*="menu-item"], article:has(button)'
+    )
+    cards = page.locator(card_sel)
+    n = await cards.count()
+
+    enriched: Dict[str, Dict] = {}
+    seen = 0
+    idx = 0
+
+    while idx < n and seen < max_cards:
+        try:
+            card = cards.nth(idx)
+            if not await card.is_visible():
+                idx += 1
+                continue
+            await card.click(timeout=1500)
+        except Exception:
+            idx += 1
+            continue
+
+        try:
+            await page.wait_for_timeout(150)
+            item_id = _id_from_url(page.url)  # modal URL contains "itemid-<hex>"
+
+            # Click "Toote info"
+            info = page.locator('a:has-text("Toote info"), button:has-text("Toote info")')
+            if await info.count() > 0:
+                await info.first.click(timeout=1500)
+                await page.wait_for_timeout(150)
+
+            dialog = page.locator('div[role="dialog"]')
+            if await dialog.count() == 0:
+                dialog = page.locator('[data-testid="sheet"], [data-testid="dialog"]')
+
+            txt_full = ""
+            try:
+                txt_full = await dialog.first.inner_text()
+            except Exception:
+                pass
+
+            async def _block(hdrs: List[str]) -> Optional[str]:
+                for hdr in hdrs:
+                    xp = f"xpath=.//*[self::h1 or self::h2 or self::h3 or self::h4 or self::strong or self::div][normalize-space()='{hdr}']/following-sibling::*[1]"
+                    try:
+                        loc = dialog.locator(xp)
+                        if await loc.count() > 0:
+                            t = await loc.first.inner_text()
+                            if t and t.strip():
+                                return t.strip()
+                    except Exception:
+                        pass
+                return None
+
+            gtin_block = await _block(["GTIN", "EAN", "Ribakood"]) or ""
+            supplier_block = await _block(["Tarnija info", "Tarnija", "Supplier"]) or ""
+            manufacturer_block = await _block(["Tootja info", "Tootja", "Valmistaja"]) or ""
+
+            # Regex fallbacks
+            if not gtin_block:
+                m = GTIN_IN_MODAL.search(txt_full or "")
+                gtin_block = m.group(1) if m else ""
+
+            if not supplier_block:
+                m = TARNIJA_IN_MODAL.search(txt_full or "")
+                supplier_block = m.group(1) if m else ""
+
+            if not manufacturer_block:
+                m = TOOTJA_IN_MODAL.search(txt_full or "")
+                manufacturer_block = m.group(1) if m else ""
+
+            gtin_val = normalize_ean(gtin_block)
+            supplier_val = (supplier_block or "").strip() or None
+            manufacturer_val = (manufacturer_block or "").strip() or None
+
+            if item_id:
+                enriched.setdefault(item_id, {})
+                if gtin_val:
+                    enriched[item_id]["gtin"] = gtin_val
+                if supplier_val:
+                    enriched[item_id]["supplier"] = supplier_val
+                    enriched[item_id].setdefault("brand", supplier_val)
+                if manufacturer_val:
+                    enriched[item_id]["manufacturer"] = manufacturer_val
+                    enriched[item_id].setdefault("brand", manufacturer_val)
+
+        finally:
+            # Close modal
+            try:
+                close_btn = page.locator('button[aria-label*="Close"], button[aria-label*="Sulge"], button:has-text("×")')
+                if await close_btn.count() > 0:
+                    await close_btn.first.click()
+                else:
+                    await page.keyboard.press("Escape")
+            except Exception:
+                pass
+
+        seen += 1
+        idx += 1
+        if seen % 8 == 0:
+            try:
+                await page.mouse.wheel(0, 1600)
+            except Exception:
+                pass
+        await page.wait_for_timeout(110)
+
+    return enriched
+
+
+async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
+    """
+    Capture Wolt JSON & enrich by opening product modals and reading 'Toote info'.
+    Merge enrichment by stable item id from modal URL.
+    """
+    if async_playwright is None:
+        raise RuntimeError("Playwright is required for Wolt fallback but is not installed.")
+
+    found_flat: Dict[str, Dict] = {}
+
+    async with async_playwright() as pw:
+        browser = await pw.chromium.launch(headless=True)
+        context = await pw.chromium.launch_persistent_context(
+            user_data_dir="",  # stateless
+            headless=True,
+            user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                        "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"),
+            viewport={"width": 1366, "height": 900},
+            java_script_enabled=True,
+        )
+
+        async def route_filter(route):
+            try:
+                url = route.request.url
+                if any(h in url for h in [
+                    "googletagmanager.com", "google-analytics.com", "doubleclick.net",
+                    "facebook.net", "connect.facebook.net", "hotjar", "fullstory",
+                    "cdn.segment.com", "intercom",
+                ]):
+                    return await route.abort()
+                return await route.continue_()
+            except Exception:
+                try:
+                    return await route.continue_()
+                except Exception:
+                    return
+
+        await context.route("**/*", route_filter)
+
+        page = await context.new_page()
+        json_blobs: List[Any] = []
+        page.on("response", lambda resp: asyncio.create_task(_maybe_collect_json(resp, json_blobs)))
+
+        try:
+            await page.goto(cat_url, wait_until="networkidle")
+            await wait_cookie_banner(page)
+            for _ in range(6):
+                await page.mouse.wheel(0, 1600)
+                await page.wait_for_timeout(220)
+
+            # framework globals if exposed
+            for varname in ["__APOLLO_STATE__", "__NEXT_DATA__", "__NUXT__", "__INITIAL_STATE__",
+                            "__REACT_QUERY_STATE__", "__REDUX_STATE__", "__WOLT_STATE__"]:
+                try:
+                    data = await page.evaluate(f"window.{varname} || null")
+                    if data:
+                        json_blobs.append(data)
+                except Exception:
+                    pass
+
+            # flatten items from blobs
+            for blob in json_blobs:
+                try:
+                    _walk_collect_items(blob, found_flat)
+                except Exception:
+                    pass
+
+            # build id → item map
+            items_by_id: Dict[str, Dict] = {}
+            for it in list(found_flat.values()):
+                iid = str(it.get("id") or "").lower()
+                if iid:
+                    items_by_id[iid] = it
+
+            # modal enrichment by id
+            modal_enrich = await _wolt_enrich_with_modal_by_cards(page, max_cards=220)
+            for iid, add in modal_enrich.items():
+                if iid in items_by_id:
+                    items_by_id[iid].update({k: v for k, v in add.items() if v})
+
+            return list(items_by_id.values())
+        finally:
+            await context.close()
+            await browser.close()
+
+
+# ---------- runners (streaming) ----------
+
+CSV_COLS = [
+    "chain", "store_host", "channel", "ext_id", "ean_raw", "ean_norm", "name",
+    "size_text", "brand", "manufacturer", "price", "currency", "image_url", "url",
+]
 
 
 def append_csv(rows: List[Dict], out_path: Path) -> None:
@@ -663,11 +853,17 @@ def append_csv(rows: List[Dict], out_path: Path) -> None:
             w.writeheader()
         for r in rows:
             row = {k: r.get(k) for k in CSV_COLS}
-            row["price"] = _format_price_for_csv(row.get("price"))
+            # normalize price
+            v = row.get("price")
+            if isinstance(v, (int, float)):
+                row["price"] = f"{float(v):.2f}"
+            else:
+                try:
+                    row["price"] = f"{float(str(v).replace(',', '.')):.2f}" if v is not None else None
+                except Exception:
+                    pass
             w.writerow(row)
 
-
-# ---------- DB upsert ----------
 
 async def maybe_upsert_db(rows: List[Dict]) -> None:
     if not rows:
@@ -724,10 +920,18 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
             except Exception:
                 pr = None
             payload.append((
-                r.get("store_host"), r.get("ext_id"), r.get("name"), r.get("brand"),
-                r.get("manufacturer"), r.get("ean_raw"), r.get("ean_norm"),
-                r.get("size_text"), pr, r.get("currency") or "EUR",
-                r.get("image_url"), r.get("url"),
+                r.get("store_host"),
+                r.get("ext_id"),
+                r.get("name"),
+                r.get("brand"),
+                r.get("manufacturer"),
+                r.get("ean_raw"),
+                r.get("ean_norm"),
+                r.get("size_text"),
+                pr,
+                r.get("currency") or "EUR",
+                r.get("image_url"),
+                r.get("url"),
             ))
         if not payload:
             print("[warn] No rows with ext_id — skipped DB upsert")
@@ -737,291 +941,6 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
         print(f"[ok] Upserted {len(payload)} rows into {table}")
     finally:
         await conn.close()
-
-
-# ---------- Wolt PW fallback: modal scraping ----------
-
-async def _maybe_collect_json(resp, out_list: List[Any]):
-    try:
-        ct = (resp.headers.get("content-type") or "").lower()
-        if "application/json" not in ct:
-            return
-        url = resp.url
-        if any(x in url for x in ["wolt.com", "wolt-static-assets", "restaurant-api.wolt", "graphql"]):
-            txt = await resp.text()
-            if not txt:
-                return
-            try:
-                out_list.append(json.loads(txt))
-            except Exception:
-                pass
-    except Exception:
-        pass
-
-
-def _wolt_store_host(sample_url: str) -> str:
-    m = re.search(r"/venue/([^/]+)", sample_url)
-    if m:
-        return f"wolt:{m.group(1)}"
-    return urlparse(sample_url).netloc.lower()
-
-
-async def _extract_block_after_header(dialog, headers: List[str]) -> Optional[str]:
-    for hdr in headers:
-        xp_list = [
-            f"xpath=.//*[self::h1 or self::h2 or self::h3 or self::h4 or self::strong or self::div][normalize-space()='{hdr}']/following-sibling::*[1]",
-            f"xpath=.//*[contains(normalize-space(.), '{hdr}')]/following-sibling::*[1]",
-        ]
-        for xp in xp_list:
-            try:
-                loc = dialog.locator(xp)
-                if await loc.count() > 0:
-                    txt = await loc.first.inner_text()
-                    if txt and txt.strip():
-                        return txt.strip()
-            except Exception:
-                pass
-    return None
-
-
-def _norm_name_key(s: str) -> str:
-    return re.sub(r"\s+", " ", s or "").strip().lower()
-
-
-async def _wolt_enrich_with_modal_by_cards(page, items: Dict[str, Dict], max_cards: int = 180) -> None:
-    """
-    Iterate actual visible cards, open modal, click "Toote info",
-    read GTIN + Tootja info + Tarnija info, map back by modal title.
-    """
-    # Candidate card selectors
-    card_sel = (
-        '[data-testid*="item-card"], [data-test-id*="item-card"], '
-        '[data-testid*="menu-item"], [data-test-id*="menu-item"], article:has(button)'
-    )
-    cards = page.locator(card_sel)
-    n = await cards.count()
-    seen = 0
-    idx = 0
-
-    while idx < n and seen < max_cards:
-        try:
-            card = cards.nth(idx)
-            if await card.is_visible():
-                await card.click(timeout=1500)
-            else:
-                idx += 1
-                continue
-        except Exception:
-            idx += 1
-            continue
-
-        try:
-            # Grab modal title
-            title_loc = page.locator('div[role="dialog"] h2, div[role="dialog"] h1')
-            if await title_loc.count() == 0:
-                title_loc = page.locator('[data-testid="sheet"] h2, [data-testid="dialog"] h2')
-            await page.wait_for_timeout(150)
-            modal_name = None
-            if await title_loc.count() > 0:
-                modal_name = (await title_loc.first.inner_text() or "").strip()
-            key = _norm_name_key(modal_name or "")
-
-            # Click "Toote info"
-            info = page.locator('a:has-text("Toote info"), button:has-text("Toote info")')
-            if await info.count() > 0:
-                await info.first.click(timeout=1200)
-                await page.wait_for_timeout(120)
-
-            dialog = page.locator('div[role="dialog"]')
-            if await dialog.count() == 0:
-                dialog = page.locator('[data-testid="sheet"], [data-testid="dialog"]')
-
-            txt_full = ""
-            try:
-                txt_full = await dialog.first.inner_text()
-            except Exception:
-                pass
-
-            # Header→block extraction
-            gtin_block = await _extract_block_after_header(dialog, ["GTIN", "EAN", "Ribakood"])
-            supplier_block = await _extract_block_after_header(dialog, ["Tarnija info", "Tarnija", "Supplier"])
-            manufacturer_block = await _extract_block_after_header(dialog, ["Tootja info", "Tootja", "Valmistaja"])
-
-            # Regex fallbacks
-            gtin_val = clean_digits(gtin_block or "") or (GTIN_IN_MODAL.search(txt_full or "") or [None, None])[1]
-            if isinstance(gtin_val, str):
-                gtin_val = clean_digits(gtin_val)
-            if gtin_val in ("", "-"):
-                gtin_val = None
-
-            supplier_val = supplier_block or (TARNIJA_IN_MODAL.search(txt_full or "") or [None, None])[1]
-            if supplier_val:
-                supplier_val = supplier_val.strip()
-
-            manufacturer_val = (manufacturer_block or "").strip()
-            if not manufacturer_val:
-                m = TOOTJA_IN_MODAL.search(txt_full or "")
-                if m:
-                    manufacturer_val = m.group(1).strip()
-
-            # Merge into item by normalized name key
-            if key and key in items:
-                if gtin_val:
-                    items[key]["gtin"] = gtin_val
-                if supplier_val:
-                    items[key]["supplier"] = supplier_val
-                    items[key].setdefault("brand", supplier_val)
-                if manufacturer_val:
-                    items[key]["manufacturer"] = manufacturer_val
-                    items[key].setdefault("brand", manufacturer_val)
-
-        finally:
-            # Close modal
-            try:
-                close_btn = page.locator('button[aria-label*="Close"], button[aria-label*="Sulge"], button:has-text("×")')
-                if await close_btn.count() > 0:
-                    await close_btn.first.click()
-                else:
-                    await page.keyboard.press("Escape")
-            except Exception:
-                pass
-
-        seen += 1
-        idx += 1
-
-        # Scroll a bit every few items to load more
-        if seen % 8 == 0:
-            try:
-                await page.mouse.wheel(0, 1600)
-            except Exception:
-                pass
-        await page.wait_for_timeout(120)
-
-
-async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
-    """Capture Wolt JSON & enrich by opening product modals and reading 'Toote info'."""
-    if async_playwright is None:
-        raise RuntimeError("Playwright is required for Wolt fallback but is not installed.")
-
-    found_flat: Dict[str, Dict] = {}  # id/slug/name → obj
-
-    async with async_playwright() as pw:
-        browser = await pw.chromium.launch(headless=True)
-        context = await browser.new_context(
-            user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                        "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"),
-            viewport={"width": 1366, "height": 900},
-            java_script_enabled=True,
-        )
-
-        async def route_filter(route):
-            try:
-                url = route.request.url
-                if any(h in url for h in [
-                    "googletagmanager.com", "google-analytics.com", "doubleclick.net",
-                    "facebook.net", "connect.facebook.net", "hotjar", "fullstory",
-                    "cdn.segment.com", "intercom",
-                ]):
-                    return await route.abort()
-                return await route.continue_()
-            except Exception:
-                try:
-                    return await route.continue_()
-                except Exception:
-                    return
-
-        await context.route("**/*", route_filter)
-
-        page = await context.new_page()
-        json_blobs: List[Any] = []
-        page.on("response", lambda resp: asyncio.create_task(_maybe_collect_json(resp, json_blobs)))
-
-        try:
-            await page.goto(cat_url, wait_until="networkidle")
-            await wait_cookie_banner(page)
-            for _ in range(6):
-                await page.mouse.wheel(0, 1600)
-                await page.wait_for_timeout(250)
-
-            # Collect client-side states if exposed
-            for varname in ["__APOLLO_STATE__", "__NEXT_DATA__", "__NUXT__", "__INITIAL_STATE__",
-                            "__REACT_QUERY_STATE__", "__REDUX_STATE__", "__WOLT_STATE__"]:
-                try:
-                    data = await page.evaluate(f"window.{varname} || null")
-                    if data:
-                        json_blobs.append(data)
-                except Exception:
-                    pass
-
-            # Flatten items from blobs
-            for blob in json_blobs:
-                try:
-                    _walk_collect_items(blob, found_flat)
-                except Exception:
-                    pass
-
-            # Build a name→item map for modal merge
-            items_by_name: Dict[str, Dict] = {}
-            for it in list(found_flat.values()):
-                nm = str(it.get("name") or "").strip()
-                if nm:
-                    items_by_name[_norm_name_key(nm)] = it
-
-            # Enrich via modal scraping
-            await _wolt_enrich_with_modal_by_cards(page, items_by_name, max_cards=180)
-
-            # Return the enriched items list
-            return list(items_by_name.values())
-        finally:
-            await context.close()
-            await browser.close()
-
-
-# ---------- runners (streaming) ----------
-
-async def run_wolt(args, categories: List[str], on_rows) -> None:
-    store_host = _wolt_store_host(categories[0] if categories else args.region)
-
-    for cat in categories:
-        print(f"[cat-wolt] {cat}")
-        try:
-            payload = None if args.wolt_force_playwright else await _load_wolt_payload(cat)
-
-            if not payload:
-                print(f"[info] Playwright fallback with modal scraping for {cat}")
-                items = await _wolt_capture_category_with_playwright(cat)
-                rows = [_extract_wolt_row(item, cat, store_host) for item in items]
-                if args.max_products and args.max_products > 0:
-                    rows = rows[: args.max_products]
-                print(f"[info] category rows: {len(rows)} (pw-fallback)")
-                on_rows(rows)
-                continue
-
-            found: Dict[str, Dict] = {}
-            _walk_collect_items(payload, found)
-            # If we did get JSON, we still want modal data → open page shortly and enrich
-            if async_playwright is not None:
-                print("[info] JSON found; enriching with modal scraping")
-                items_by_name: Dict[str, Dict] = {}
-                for it in list(found.values()):
-                    nm = str(it.get("name") or "").strip()
-                    if nm:
-                        items_by_name[_norm_name_key(nm)] = it
-                enriched = await _wolt_capture_category_with_playwright(cat)
-                for it in enriched:
-                    nm = _norm_name_key(str(it.get("name") or ""))
-                    if nm in items_by_name:
-                        items_by_name[nm].update({k: v for k, v in it.items() if v})
-                rows = [_extract_wolt_row(it, cat, store_host) for it in items_by_name.values()]
-            else:
-                rows = [_extract_wolt_row(item, cat, store_host) for item in found.values()]
-
-            if args.max_products and args.max_products > 0:
-                rows = rows[: args.max_products]
-            print(f"[info] category rows: {len(rows)}")
-            on_rows(rows)
-        except Exception as e:
-            print(f"[warn] Wolt category failed {cat}: {e}")
 
 
 async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> None:
@@ -1037,7 +956,7 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
             viewport={"width": 1366, "height": 900},
             java_script_enabled=True,
         )
-        await context.route("**/*", _route_handler)
+        await context.route("**/*", lambda route: asyncio.create_task(route.continue_()))
 
         try:
             for cat in categories:
@@ -1078,6 +997,104 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
         finally:
             await context.close()
             await browser.close()
+
+
+async def _load_wolt_payload(url: str) -> Optional[Dict]:
+    """Try server-side sources without a browser."""
+    import urllib.request, gzip, io
+    def _headers(ref: Optional[str] = None) -> Dict[str, str]:
+        h = {
+            "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                           "KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"),
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "et-EE,et;q=0.9,en-US;q=0.8,en;q=0.7",
+            "Accept-Encoding": "gzip",
+        }
+        if ref:
+            h["Referer"] = ref
+        return h
+
+    def _get_html(u: str) -> str:
+        req = urllib.request.Request(u, headers=_headers())
+        with urllib.request.urlopen(req) as resp:  # nosec
+            data = resp.read()
+            if resp.headers.get("Content-Encoding", "").lower() == "gzip":
+                data = gzip.GzipFile(fileobj=io.BytesIO(data)).read()
+            return data.decode("utf-8", errors="replace")
+
+    def _get_json(u: str) -> Optional[Dict]:
+        req = urllib.request.Request(u, headers=_headers())
+        with urllib.request.urlopen(req) as resp:  # nosec
+            data = resp.read()
+            if resp.headers.get("Content-Encoding", "").lower() == "gzip":
+                data = gzip.GzipFile(fileobj=io.BytesIO(data)).read()
+            try:
+                return json.loads(data.decode("utf-8", errors="replace"))
+            except Exception:
+                return None
+
+    html = _get_html(url)
+    nd = _html_get_next_data(html)
+    if nd:
+        return nd
+
+    build_id = _html_get_build_id(html)
+    if build_id:
+        u = urlparse(url)
+        path = u.path if not u.path.endswith("/") else u.path[:-1]
+        jd = _get_json(f"{u.scheme}://{u.netloc}/_next/data/{build_id}{path}.json")
+        if jd:
+            return jd
+
+    apollo = _html_get_apollo_state(html)
+    if apollo:
+        return {"apollo": apollo}
+    return None
+
+
+async def run_wolt(args, categories: List[str], on_rows) -> None:
+    store_host = _wolt_store_host(categories[0] if categories else args.region)
+
+    for cat in categories:
+        print(f"[cat-wolt] {cat}")
+        try:
+            payload = None if args.wolt_force_playwright else await _load_wolt_payload(cat)
+
+            if not payload:
+                print(f"[info] Playwright fallback with modal scraping for {cat}")
+                items = await _wolt_capture_category_with_playwright(cat)
+                rows = [_extract_wolt_row(item, cat, store_host) for item in items]
+                if args.max_products and args.max_products > 0:
+                    rows = rows[: args.max_products]
+                print(f"[info] category rows: {len(rows)} (pw-fallback)")
+                on_rows(rows)
+                continue
+
+            # JSON found → enrich via modal and merge by id
+            found: Dict[str, Dict] = {}
+            _walk_collect_items(payload, found)
+
+            items_by_id: Dict[str, Dict] = {}
+            for it in list(found.values()):
+                iid = str(it.get("id") or "").lower()
+                if iid:
+                    items_by_id[iid] = it
+
+            if async_playwright is not None:
+                print("[info] JSON found; enriching with modal scraping")
+                enriched = await _wolt_capture_category_with_playwright(cat)
+                for it in enriched:
+                    iid = str(it.get("id") or "").lower()
+                    if iid and iid in items_by_id:
+                        items_by_id[iid].update({k: v for k, v in it.items() if v})
+
+            rows = [_extract_wolt_row(it, cat, store_host) for it in items_by_id.values()]
+            if args.max_products and args.max_products > 0:
+                rows = rows[: args.max_products]
+            print(f"[info] category rows: {len(rows)}")
+            on_rows(rows)
+        except Exception as e:
+            print(f"[warn] Wolt category failed {cat}: {e}")
 
 
 # ---------- main ----------
@@ -1146,7 +1163,7 @@ def parse_args():
     p = argparse.ArgumentParser(description="Coop eCoop/Wolt category crawler → PDP extractor")
     p.add_argument("--mode", default="ecoop", help="Crawler mode: ecoop or wolt")
     p.add_argument("--region", default="https://vandra.ecoop.ee",
-                   help="Base region (ecoop) or venue root (wolt).")
+                   help="Base region (ecoop) or Wolt venue root.")
     p.add_argument("--categories-multiline", dest="categories_multiline", default="",
                    help="Newline-separated category URLs or paths")
     p.add_argument("--categories-file", dest="categories_file", default="",
@@ -1161,15 +1178,16 @@ def parse_args():
     p.add_argument("--cat-shards", type=int, default=1, help="Total number of category shards")
     p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
     p.add_argument("--out", default="out/coop_products.csv", help="CSV file or output directory")
-    # Wolt Playwright override
+
+    # Wolt Playwright override: boolean flag
     p.add_argument("--wolt-force-playwright", action="store_true",
-                   help="Force Playwright network fallback for Wolt categories.")
+                   help="Force Playwright network fallback/enrichment for Wolt categories.")
+    # Legacy value-based override and ENV support
     p.add_argument("--wolt-force-playwright-val", default=None,
                    help="(Legacy) true/false/1/0 to override --wolt-force-playwright.")
 
     args = p.parse_args()
 
-    # Legacy/env overrides
     if args.wolt_force_playwright_val is not None:
         args.wolt_force_playwright = str2bool(args.wolt_force_playwright_val)
     else:
