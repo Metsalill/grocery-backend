@@ -99,7 +99,6 @@ def flatten(obj: Any) -> Iterable[Any]:
 def _dismiss_cookies(page: Page) -> None:
     """Best-effort cookie popup dismissal (selectors may change; safe no-op if absent)."""
     try:
-        # Common buttons/texts
         candidates = [
             "button:has-text('Nõustu')",
             "button:has-text('Nõustun')",
@@ -133,10 +132,13 @@ def collect_with_playwright(timeout_ms: int = 30000, max_scrolls: int = 18) -> T
         )
 
         # Lightweight request blocking for speed
-        ctx.route("**/*", lambda route: route.abort()
-                  if any(host in route.request.url for host in
-                         ["googletagmanager.com", "google-analytics.com", "facebook.net", "hotjar.com"])
-                  else route.continue_())
+        ctx.route(
+            "**/*",
+            lambda route: route.abort()
+            if any(host in route.request.url for host in
+                   ["googletagmanager.com", "google-analytics.com", "facebook.net", "hotjar.com"])
+            else route.continue_(),
+        )
 
         page = ctx.new_page()
 
@@ -145,7 +147,6 @@ def collect_with_playwright(timeout_ms: int = 30000, max_scrolls: int = 18) -> T
                 ctype = resp.headers.get("content-type", "")
                 if "json" in ctype.lower():
                     u = resp.url.lower()
-                    # Broad allowlist for store/location endpoints
                     if any(k in u for k in ("kaupl", "store", "shop", "location", "map")):
                         data = resp.json()
                         json_payloads.append(data)
@@ -158,9 +159,9 @@ def collect_with_playwright(timeout_ms: int = 30000, max_scrolls: int = 18) -> T
         page.goto(URL, wait_until="networkidle", timeout=timeout_ms)
         _dismiss_cookies(page)
 
-        # Some pages lazy-load while scrolling. Stop if content height stops growing.
+        # Lazy-load scrolling; stop when height stops changing
         last_h = 0
-        for i in range(max_scrolls):
+        for _ in range(max_scrolls):
             page.mouse.wheel(0, 2600)
             time.sleep(0.25)
             h = page.evaluate("document.body.scrollHeight")
@@ -203,13 +204,12 @@ def parse_from_json_payloads(payloads: List[Dict[str, Any]]) -> List[StoreRow]:
 def parse_from_dom(html: str) -> List[StoreRow]:
     soup = BeautifulSoup(html, "lxml")
 
-    # Heuristic: look for blocks that likely represent a store card
     candidates = soup.select("article, li, div, section, a")
     rows: List[StoreRow] = []
     seen: set[Tuple[str, str]] = set()
 
     for el in candidates:
-        # 1) Find a plausible store name (Rimi …)
+        # 1) Store name
         name = None
         for tag in el.select("strong, h1, h2, h3, .title, .store__title, .shop__title"):
             t = normalize_ws(tag.get_text(" ", strip=True))
@@ -219,18 +219,17 @@ def parse_from_dom(html: str) -> List[StoreRow]:
         if not name:
             continue
 
-        # 2) Find a plausible address line within the same block
+        # 2) Address line
         addr = None
         text = el.get_text("\n", strip=True)
         for line in (normalize_ws(x) for x in text.splitlines()):
-            # very loose heuristic: contains a digit and looks like a street address
             if any(ch.isdigit() for ch in line) and 3 <= len(line) <= 120 and "@" not in line:
                 addr = line
                 break
         if not addr:
             continue
 
-        # 3) Optional map link for lat/lon
+        # 3) Optional map link → lat/lon
         href = None
         a = el.select_one("a[href*='google.com/maps'], a[href*='goo.gl/maps'], a[href*='maps.app.goo.gl']")
         if a and a.has_attr("href"):
@@ -258,7 +257,6 @@ def dedup_rows(rows: List[StoreRow]) -> List[StoreRow]:
                 external_key=r.external_key,
             )
         else:
-            # prefer row that has lat/lon
             existing = by_key[key]
             if (existing.lat is None or existing.lon is None) and (r.lat is not None and r.lon is not None):
                 by_key[key] = StoreRow(
@@ -307,7 +305,6 @@ def main(argv: Optional[List[str]] = None) -> int:
     write_csv(out_path, rows)
 
     print(f"Wrote {len(rows)} rows → {out_path}")
-    # Preview the first few lines
     try:
         preview = out_path.read_text(encoding="utf-8").splitlines()[:10]
         for ln in preview:
