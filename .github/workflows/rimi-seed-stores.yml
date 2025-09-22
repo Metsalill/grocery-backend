@@ -48,19 +48,57 @@ jobs:
       - name: Load CSV into staging (psql \copy)
         run: |
           set -euo pipefail
-          # \copy is a psql meta-command; passing it via -c is OK
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy staging_rimi_stores(name,address,lat,lon,external_key) FROM 'data/rimi_stores.csv' WITH (FORMAT csv, HEADER true, NULL '')"
 
-      - name: Upsert into stores
+      # --- Constraint-free upsert (UPDATE then INSERT) ------------------------
+      - name: Update existing Rimi rows
         run: |
           set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "INSERT INTO stores (name, chain, address, lat, lon, latitude, longitude, is_online, external_key) SELECT s.name, 'Rimi', NULLIF(s.address,''), s.lat, s.lon, s.lat, s.lon, false, NULLIF(s.external_key,'') FROM staging_rimi_stores s WHERE COALESCE(s.name,'') <> '' ON CONFLICT (chain, name) DO UPDATE SET address = EXCLUDED.address, lat = EXCLUDED.lat, lon = EXCLUDED.lon, latitude = EXCLUDED.latitude, longitude = EXCLUDED.longitude, is_online = false, external_key = COALESCE(EXCLUDED.external_key, stores.external_key);"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
+          UPDATE stores s
+          SET
+            address      = NULLIF(st.address,''),
+            lat          = st.lat,
+            lon          = st.lon,
+            latitude     = st.lat,
+            longitude    = st.lon,
+            is_online    = false,
+            external_key = COALESCE(NULLIF(st.external_key,''), s.external_key)
+          FROM staging_rimi_stores st
+          WHERE s.chain = 'Rimi'
+            AND s.name  = st.name;
+          "
+
+      - name: Insert missing Rimi rows
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
+          INSERT INTO stores (name, chain, address, lat, lon, latitude, longitude, is_online, external_key)
+          SELECT
+            st.name, 'Rimi',
+            NULLIF(st.address,''),
+            st.lat, st.lon, st.lat, st.lon,
+            false,
+            NULLIF(st.external_key,'')
+          FROM staging_rimi_stores st
+          WHERE COALESCE(st.name,'') <> ''
+            AND NOT EXISTS (
+              SELECT 1 FROM stores s
+              WHERE s.chain = 'Rimi' AND s.name = st.name
+            );
+          "
 
       - name: Ensure alias table and alias to ePood (440)
         run: |
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE TABLE IF NOT EXISTS store_price_source (store_id bigint PRIMARY KEY, source_store_id bigint NOT NULL);"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "INSERT INTO store_price_source (store_id, source_store_id) SELECT st.id, 440 FROM stores st WHERE st.chain='Rimi' AND COALESCE(st.is_online,false)=false ON CONFLICT (store_id) DO UPDATE SET source_store_id = EXCLUDED.source_store_id;"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
+          INSERT INTO store_price_source (store_id, source_store_id)
+          SELECT st.id, 440
+          FROM stores st
+          WHERE st.chain='Rimi' AND COALESCE(st.is_online,false)=false
+          ON CONFLICT (store_id) DO UPDATE SET source_store_id = EXCLUDED.source_store_id;
+          "
 
       - name: Summary
         run: |
