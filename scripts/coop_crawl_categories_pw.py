@@ -29,7 +29,8 @@ Notes
 - Streams rows to CSV incrementally so artifacts survive cancellation.
 
 Flag note
-- Boolean flag: `--wolt-force-playwright` (presence = True). Also reads env WOLT_FORCE_PLAYWRIGHT=1/true.
+- Boolean flag: `--wolt-force-playwright` (presence = True).
+- Legacy compatibility: `--wolt-force-playwright-val=1/true/0/false`, and env WOLT_FORCE_PLAYWRIGHT.
 """
 
 import argparse
@@ -1294,7 +1295,6 @@ async def run(args):
     signal.signal(signal.SIGTERM, _sig_handler)
     signal.signal(signal.SIGINT, _sig_handler)
 
-    # Decide runner
     if args.mode.lower() == "wolt" or ("wolt.com" in base_region.lower()):
         await run_wolt(args, categories, on_rows)
     else:
@@ -1327,14 +1327,21 @@ def parse_args():
     # Wolt Playwright override: boolean flag (presence = True)
     p.add_argument("--wolt-force-playwright", action="store_true",
                    help="Force Playwright network fallback for Wolt categories (no value needed).")
+    # Legacy compatibility: explicit value mapping
+    p.add_argument("--wolt-force-playwright-val", default=None,
+                   help="LEGACY: 'true/false/1/0' – maps to --wolt-force-playwright")
 
     args = p.parse_args()
 
+    # Map legacy flag if provided
+    if args.wolt_force_playwright_val is not None:
+        if str2bool(args.wolt_force_playwright_val):
+            args.wolt_force_playwright = True
+
     # Env override for convenience
     env_override = os.getenv("WOLT_FORCE_PLAYWRIGHT")
-    if env_override is not None:
-        if str2bool(env_override):
-            args.wolt_force_playwright = True
+    if env_override is not None and str2bool(env_override):
+        args.wolt_force_playwright = True
 
     return args
 
