@@ -5,17 +5,6 @@ Scrape Rimi Estonia physical stores from https://www.rimi.ee/kauplused → CSV.
 
 Output CSV columns:
   name,address,lat,lon,external_key
-
-Notes
-- Attempts to capture any JSON/XHR payloads with store data first.
-- Falls back to parsing visible DOM cards.
-- Extracts lat/lon from Google Maps href if present.
-- Deduplicates by (name,address).
-- Safe to run in CI (no repo changes; writes under ./data).
-
-Requires:
-  pip install playwright bs4 lxml
-  python -m playwright install --with-deps chromium
 """
 
 from __future__ import annotations
@@ -35,8 +24,6 @@ from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout, Page
 URL = "https://www.rimi.ee/kauplused"
 DEFAULT_OUT = Path("data/rimi_stores.csv")
 
-
-# ------------------------------ Helpers ---------------------------------- #
 
 @dataclass(frozen=True)
 class StoreRow:
@@ -61,14 +48,46 @@ def log(msg: str) -> None:
 
 
 def normalize_ws(s: Optional[Any]) -> str:
-    """Coerce to string and collapse whitespace; None -> ''."""
     if s is None:
         return ""
     return re.sub(r"\s+", " ", str(s)).strip()
 
 
+ASSET_LIKE = re.compile(r"\.(gif|png|jpg|jpeg|svg|webp|js|css)$", re.I)
+BAD_IN_NAME = re.compile(r"(?:©|token|ga_|__secure|cookie|policy|hotjar|google|analytics)", re.I)
+BAD_CONTAINER = re.compile(r"(footer|cookie|consent|policy|gdpr|header|nav)", re.I)
+
+
+def looks_like_store_name(s: str) -> bool:
+    s = normalize_ws(s)
+    if not s:
+        return False
+    if ASSET_LIKE.search(s):
+        return False
+    if BAD_IN_NAME.search(s):
+        return False
+    return "rimi" in s.lower()
+
+
+def looks_like_address(s: str) -> bool:
+    """Require a digit (house no.) and a comma (street, city)."""
+    s = normalize_ws(s)
+    if not s or "@" in s:
+        return False
+    if not any(ch.isdigit() for ch in s):
+        return False
+    if "," not in s:
+        return False
+    # avoid obvious non-addresses
+    if s.lower().startswith(("tel", "telefon", "e-post", "email", "ava", "avatud")):
+        return False
+    return True
+
+
 def extract_latlon_from_href(href: Optional[str]) -> Tuple[Optional[float], Optional[float]]:
     if not href:
+        return None, None
+    if not ("google.com/maps" in href or "goo.gl/maps" in href or "maps.app.goo.gl" in href):
         return None, None
     m = re.search(r"@(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)(?:[,/]|$)", href)
     if m:
@@ -145,6 +164,7 @@ def collect_with_playwright(timeout_ms: int = 45000, max_scrolls: int = 24) -> T
         page.wait_for_load_state("domcontentloaded", timeout=timeout_ms)
         page.wait_for_timeout(1000)
 
+        # Scroll until height stabilizes
         last_h = 0
         for _ in range(max_scrolls):
             page.mouse.wheel(0, 2600)
@@ -154,29 +174,26 @@ def collect_with_playwright(timeout_ms: int = 45000, max_scrolls: int = 24) -> T
                 break
             last_h = h
 
-        # Try any visible "load more" buttons
-        for text in ["Näita", "Laadi", "Load", "Show"]:
-            try:
-                btn = page.locator(f"button:has-text('{text}')")
-                if btn.count() and btn.first.is_visible():
-                    btn.first.click(timeout=1500)
-                    page.wait_for_timeout(800)
-            except Exception:
-                pass
-
         html = page.content()
         browser.close()
         return html, json_payloads
 
 
-# ---------- DOM parsing (improved heuristics around 'Juhised' link) ---------- #
+# ------------------------------ DOM parsing ------------------------------ #
 
-def _nearest_card(node: Tag) -> Tag:
+def _nearest_card(node: Tag) -> Optional[Tag]:
     for parent in node.parents:
-        if isinstance(parent, Tag) and parent.name in ("article", "li", "section", "div"):
+        if not isinstance(parent, Tag):
+            continue
+        # avoid non-content containers
+        if parent.has_attr("class") and BAD_CONTAINER.search(" ".join(parent.get("class", []))):
+            return None
+        if parent.has_attr("id") and BAD_CONTAINER.search(parent["id"]):
+            return None
+        if parent.name in ("article", "li", "section", "div"):
             if len(parent.find_all(["a", "h1", "h2", "h3", "strong"])) >= 2:
                 return parent
-    return node
+    return None
 
 
 def _extract_name(card: Tag) -> Optional[str]:
@@ -184,14 +201,13 @@ def _extract_name(card: Tag) -> Optional[str]:
         el = card.select_one(sel)
         if el:
             t = normalize_ws(el.get_text(" ", strip=True))
-            if t:
+            if looks_like_store_name(t):
                 return t
+    # Fallback: any line with 'rimi'
     text = card.get_text("\n", strip=True)
     for line in text.splitlines():
-        if "@" in line.lower():
-            continue
         l = normalize_ws(line)
-        if l and "rimi" in l.lower():
+        if looks_like_store_name(l):
             return l
     return None
 
@@ -200,11 +216,7 @@ def _extract_address(card: Tag) -> Optional[str]:
     text = card.get_text("\n", strip=True)
     for line in text.splitlines():
         l = normalize_ws(line)
-        if not l:
-            continue
-        if "@" in l or l.lower().startswith(("tel", "telefon", "e-post", "email", "ava", "avatud")):
-            continue
-        if any(ch.isdigit() for ch in l) and 3 <= len(l) <= 120:
+        if looks_like_address(l):
             return l
     return None
 
@@ -212,41 +224,46 @@ def _extract_address(card: Tag) -> Optional[str]:
 def parse_from_dom(html: str) -> List[StoreRow]:
     soup = BeautifulSoup(html, "lxml")
 
-    hint_nodes = soup.find_all(string=re.compile(r"^\s*Juhised\s*$", re.I))
-    log(f"found {len(hint_nodes)} 'Juhised' hints in DOM")
+    # Find visible “Juhised” anchors that link to Google Maps
+    hint_links = soup.select(
+        "a:-soup-contains('Juhised')[href*='google.com/maps'], "
+        "a:-soup-contains('Juhised')[href*='goo.gl/maps'], "
+        "a:-soup-contains('Juhised')[href*='maps.app.goo.gl']"
+    )
 
     rows: List[StoreRow] = []
     seen: set[Tuple[str, str]] = set()
 
-    def add_from_card(card: Tag):
-        href = None
-        a = card.select_one("a[href*='google.com/maps'], a[href*='goo.gl/maps'], a[href*='maps.app.goo.gl'], a:contains('Juhised')")
-        if a and a.has_attr("href"):
-            href = a["href"]
+    def add_card(card: Optional[Tag], href: Optional[str]):
+        if not card:
+            return
+        # skip if container is clearly non-content
+        if (card.has_attr("class") and BAD_CONTAINER.search(" ".join(card.get("class", [])))) or \
+           (card.has_attr("id") and BAD_CONTAINER.search(card["id"])):
+            return
+        lat, lon = extract_latlon_from_href(href)
+        if lat is None or lon is None:
+            return
         name = _extract_name(card)
         addr = _extract_address(card)
         if not name or not addr:
             return
-        name, addr = normalize_ws(name), normalize_ws(addr)
-        lat, lon = extract_latlon_from_href(href)
-        key = (name, addr)
+        key = (normalize_ws(name), normalize_ws(addr))
         if key in seen:
             return
         seen.add(key)
-        rows.append(StoreRow(name=name, address=addr, lat=lat, lon=lon, external_key=None))
+        rows.append(StoreRow(name=key[0], address=key[1], lat=lat, lon=lon, external_key=None))
 
-    for n in hint_nodes:
-        card = _nearest_card(n.parent if isinstance(n, Tag) else n)
-        add_from_card(card)
+    # 1) Around “Juhised” links
+    for a in hint_links:
+        card = _nearest_card(a)
+        add_card(card, a.get("href"))
 
+    # 2) If nothing, fall back to any Google Maps anchor
     if not rows:
         for a in soup.select("a[href*='google.com/maps'], a[href*='goo.gl/maps'], a[href*='maps.app.goo.gl']"):
             card = _nearest_card(a)
-            add_from_card(card)
-
-    if not rows:
-        for card in soup.select("article, li, div, section"):
-            add_from_card(card)
+            add_card(card, a.get("href"))
 
     return rows
 
@@ -264,13 +281,17 @@ def parse_from_json_payloads(payloads: List[Dict[str, Any]]) -> List[StoreRow]:
             lat = node.get("lat") or node.get("latitude")
             lon = node.get("lon") or node.get("lng") or node.get("longitude")
             ext = normalize_ws(node.get("id") or node.get("slug") or node.get("key"))
-            if name and address:
-                try:
-                    latf = float(str(lat).replace(",", ".")) if lat is not None else None
-                    lonf = float(str(lon).replace(",", ".")) if lon is not None else None
-                except ValueError:
-                    latf = lonf = None
-                rows.append(StoreRow(name=name, address=address, lat=latf, lon=lonf, external_key=ext or None))
+            if not (name and address):
+                continue
+            if not looks_like_store_name(name) or not looks_like_address(address):
+                continue
+            try:
+                latf = float(str(lat).replace(",", ".")) if lat is not None else None
+                lonf = float(str(lon).replace(",", ".")) if lon is not None else None
+            except ValueError:
+                latf = lonf = None
+            # Prefer only rows that include lat/lon from JSON; otherwise DOM step will supply
+            rows.append(StoreRow(name=name, address=address, lat=latf, lon=lonf, external_key=ext or None))
     return rows
 
 
@@ -313,12 +334,13 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     rows_json = parse_from_json_payloads(payloads) if payloads else []
     if rows_json:
-        log(f"json payload rows: {len(rows_json)}")
+        log(f"json payload rows (pre-filter): {len(rows_json)}")
     rows_dom = parse_from_dom(html)
-    log(f"dom rows: {len(rows_dom)}")
+    log(f"dom rows (pre-dedup): {len(rows_dom)}")
 
-    rows_all = rows_json + rows_dom if rows_json else rows_dom
-    rows = dedup_rows(rows_all)
+    # Merge (DOM has stricter validity checks incl. lat/lon)
+    rows_all = (rows_json + rows_dom) if rows_json else rows_dom
+    rows = dedup_rows([r for r in rows_all if looks_like_store_name(r.name) and looks_like_address(r.address)])
     out_path = Path(args.out)
     write_csv(out_path, rows)
 
