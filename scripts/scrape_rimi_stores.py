@@ -5,17 +5,6 @@ Scrape Rimi Estonia physical stores from https://www.rimi.ee/kauplused → CSV.
 
 Output CSV columns:
   name,address,lat,lon,external_key
-
-Notes
-- Attempts to capture any JSON/XHR payloads with store data first.
-- Falls back to parsing visible DOM cards.
-- Extracts lat/lon from Google Maps href if present.
-- Deduplicates by (name,address).
-- Safe to run in CI (no repo changes; writes under ./data).
-
-Requires:
-  pip install playwright bs4 lxml
-  python -m playwright install --with-deps chromium
 """
 
 from __future__ import annotations
@@ -29,14 +18,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, List, Optional, Tuple, Dict, Any
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout, Page
 
 URL = "https://www.rimi.ee/kauplused"
 DEFAULT_OUT = Path("data/rimi_stores.csv")
 
-
-# ------------------------------ Helpers ---------------------------------- #
 
 @dataclass(frozen=True)
 class StoreRow:
@@ -67,14 +54,12 @@ def normalize_ws(s: Optional[str]) -> str:
 def extract_latlon_from_href(href: Optional[str]) -> Tuple[Optional[float], Optional[float]]:
     if not href:
         return None, None
-    # @59.437123,24.740987 (optionally followed by ,15z etc)
     m = re.search(r"@(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)(?:[,/]|$)", href)
     if m:
         try:
             return float(m.group(1)), float(m.group(2))
         except ValueError:
             pass
-    # query=59.437123,24.740987
     m = re.search(r"[?&]query=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)", href)
     if m:
         try:
@@ -94,18 +79,14 @@ def flatten(obj: Any) -> Iterable[Any]:
             yield from flatten(i)
 
 
-# ------------------------------ Scraping --------------------------------- #
-
 def _dismiss_cookies(page: Page) -> None:
-    """Best-effort cookie popup dismissal (selectors may change; safe no-op if absent)."""
     try:
-        candidates = [
+        for sel in [
             "button:has-text('Nõustu')",
             "button:has-text('Nõustun')",
             "button:has-text('Accept')",
             "[data-testid='cookie-accept']",
-        ]
-        for sel in candidates:
+        ]:
             btn = page.locator(sel)
             if btn.count() and btn.first.is_visible():
                 btn.first.click(timeout=1500)
@@ -115,29 +96,14 @@ def _dismiss_cookies(page: Page) -> None:
         pass
 
 
-def collect_with_playwright(timeout_ms: int = 30000, max_scrolls: int = 18) -> Tuple[str, List[Dict[str, Any]]]:
-    """
-    Returns (page_html, captured_json_payloads)
-    """
+def collect_with_playwright(timeout_ms: int = 45000, max_scrolls: int = 24) -> Tuple[str, List[Dict[str, Any]]]:
     json_payloads: List[Dict[str, Any]] = []
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         ctx = browser.new_context(
             locale="et-EE",
-            user_agent=(
-                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/120.0 Safari/537.36"
-            ),
-        )
-
-        # Lightweight request blocking for speed
-        ctx.route(
-            "**/*",
-            lambda route: route.abort()
-            if any(host in route.request.url for host in
-                   ["googletagmanager.com", "google-analytics.com", "facebook.net", "hotjar.com"])
-            else route.continue_(),
+            user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122 Safari/537.36",
         )
 
         page = ctx.new_page()
@@ -148,8 +114,7 @@ def collect_with_playwright(timeout_ms: int = 30000, max_scrolls: int = 18) -> T
                 if "json" in ctype.lower():
                     u = resp.url.lower()
                     if any(k in u for k in ("kaupl", "store", "shop", "location", "map")):
-                        data = resp.json()
-                        json_payloads.append(data)
+                        json_payloads.append(resp.json())
             except Exception:
                 pass
 
@@ -159,20 +124,127 @@ def collect_with_playwright(timeout_ms: int = 30000, max_scrolls: int = 18) -> T
         page.goto(URL, wait_until="networkidle", timeout=timeout_ms)
         _dismiss_cookies(page)
 
-        # Lazy-load scrolling; stop when height stops changing
+        # Give the list time to render
+        page.wait_for_load_state("domcontentloaded", timeout=timeout_ms)
+        page.wait_for_timeout(1000)
+
+        # Scroll until height stops changing
         last_h = 0
-        for _ in range(max_scrolls):
+        for i in range(max_scrolls):
             page.mouse.wheel(0, 2600)
-            time.sleep(0.25)
+            page.wait_for_timeout(250)
             h = page.evaluate("document.body.scrollHeight")
             if h == last_h:
                 break
             last_h = h
 
+        # As a final nudge, try expanding any “show more” buttons if they exist
+        for text in ["Näita", "Laadi", "Load", "Show"]:
+            try:
+                btn = page.locator(f"button:has-text('{text}')")
+                if btn.count() and btn.first.is_visible():
+                    btn.first.click(timeout=1500)
+                    page.wait_for_timeout(800)
+            except Exception:
+                pass
+
         html = page.content()
         browser.close()
         return html, json_payloads
 
+
+# ---------- DOM parsing (improved heuristics around 'Juhised' link) ---------- #
+
+def _nearest_card(node: Tag) -> Tag:
+    """Walk up to a plausible 'card' container."""
+    for parent in node.parents:
+        if isinstance(parent, Tag) and parent.name in ("article", "li", "section", "div"):
+            # Stop climbing once the container is reasonably sized
+            if len(parent.find_all(["a", "h1", "h2", "h3", "strong"])) >= 2:
+                return parent
+    return node
+
+
+def _extract_name(card: Tag) -> Optional[str]:
+    # Try common heading locations
+    for sel in ["h1", "h2", "h3", "strong", ".title", ".store__title", ".shop__title"]:
+        el = card.select_one(sel)
+        if el:
+            t = normalize_ws(el.get_text(" ", strip=True))
+            if t:
+                return t
+    # Fallback: first non-empty, non-meta line that contains 'rimi'
+    text = card.get_text("\n", strip=True)
+    for line in text.splitlines():
+        if "@" in line.lower():
+            continue
+        l = normalize_ws(line)
+        if l and "rimi" in l.lower():
+            return l
+    return None
+
+
+def _extract_address(card: Tag) -> Optional[str]:
+    # Look for line with a digit (street number), short-ish, not an email/phone
+    text = card.get_text("\n", strip=True)
+    for line in text.splitlines():
+        l = normalize_ws(line)
+        if not l:
+            continue
+        if "@" in l or l.lower().startswith(("tel", "telefon", "e-post", "email", "ava", "avatud")):
+            continue
+        if any(ch.isdigit() for ch in l) and 3 <= len(l) <= 120:
+            return l
+    return None
+
+
+def parse_from_dom(html: str) -> List[StoreRow]:
+    soup = BeautifulSoup(html, "lxml")
+
+    # Prefer elements that contain the 'Juhised' (Directions) link text
+    hint_nodes = soup.find_all(string=re.compile(r"^\s*Juhised\s*$", re.I))
+    log(f"found {len(hint_nodes)} 'Juhised' hints in DOM")
+
+    rows: List[StoreRow] = []
+    seen: set[Tuple[str, str]] = set()
+
+    def add_from_card(card: Tag):
+        href = None
+        a = card.select_one("a[href*='google.com/maps'], a[href*='goo.gl/maps'], a[href*='maps.app.goo.gl'], a:contains('Juhised')")
+        if a and a.has_attr("href"):
+            href = a["href"]
+        name = _extract_name(card)
+        addr = _extract_address(card)
+        if not name or not addr:
+            return
+        name, addr = normalize_ws(name), normalize_ws(addr)
+        lat, lon = extract_latlon_from_href(href)
+        key = (name, addr)
+        if key in seen:
+            return
+        seen.add(key)
+        rows.append(StoreRow(name=name, address=addr, lat=lat, lon=lon, external_key=None))
+
+    # 1) Cards around 'Juhised'
+    for n in hint_nodes:
+        card = _nearest_card(n.parent if isinstance(n, Tag) else n)
+        add_from_card(card)
+
+    # 2) Fallback: any anchors to Google Maps (if hint didn’t exist)
+    if not rows:
+        for a in soup.select("a[href*='google.com/maps'], a[href*='goo.gl/maps'], a[href*='maps.app.goo.gl']"):
+            card = _nearest_card(a)
+            add_from_card(card)
+
+    # 3) Last resort: previous heuristic on generic containers
+    if not rows:
+        for card in soup.select("article, li, div, section"):
+            add_from_card(card)
+
+    return rows
+
+
+# ------------------------------ JSON parsing ------------------------------ #
 
 def parse_from_json_payloads(payloads: List[Dict[str, Any]]) -> List[StoreRow]:
     rows: List[StoreRow] = []
@@ -180,67 +252,18 @@ def parse_from_json_payloads(payloads: List[Dict[str, Any]]) -> List[StoreRow]:
         for node in flatten(payload):
             if not isinstance(node, dict):
                 continue
-            name = node.get("name") or node.get("title") or node.get("label")
-            address = node.get("address") or node.get("location") or node.get("addressLine")
+            name = normalize_ws(node.get("name") or node.get("title") or node.get("label"))
+            address = normalize_ws(node.get("address") or node.get("location") or node.get("addressLine"))
             lat = node.get("lat") or node.get("latitude")
             lon = node.get("lon") or node.get("lng") or node.get("longitude")
-            ext = node.get("id") or node.get("slug") or node.get("key")
-            name = normalize_ws(name)
-            address = normalize_ws(address)
+            ext = normalize_ws(node.get("id") or node.get("slug") or node.get("key"))
             if name and address:
-                latf = None
-                lonf = None
                 try:
-                    if lat is not None:
-                        latf = float(str(lat).replace(",", "."))
-                    if lon is not None:
-                        lonf = float(str(lon).replace(",", "."))
+                    latf = float(str(lat).replace(",", ".")) if lat is not None else None
+                    lonf = float(str(lon).replace(",", ".")) if lon is not None else None
                 except ValueError:
                     latf = lonf = None
-                rows.append(StoreRow(name=name, address=address, lat=latf, lon=lonf, external_key=normalize_ws(ext)))
-    return rows
-
-
-def parse_from_dom(html: str) -> List[StoreRow]:
-    soup = BeautifulSoup(html, "lxml")
-
-    candidates = soup.select("article, li, div, section, a")
-    rows: List[StoreRow] = []
-    seen: set[Tuple[str, str]] = set()
-
-    for el in candidates:
-        # 1) Store name
-        name = None
-        for tag in el.select("strong, h1, h2, h3, .title, .store__title, .shop__title"):
-            t = normalize_ws(tag.get_text(" ", strip=True))
-            if t and "rimi" in t.lower():
-                name = t
-                break
-        if not name:
-            continue
-
-        # 2) Address line
-        addr = None
-        text = el.get_text("\n", strip=True)
-        for line in (normalize_ws(x) for x in text.splitlines()):
-            if any(ch.isdigit() for ch in line) and 3 <= len(line) <= 120 and "@" not in line:
-                addr = line
-                break
-        if not addr:
-            continue
-
-        # 3) Optional map link → lat/lon
-        href = None
-        a = el.select_one("a[href*='google.com/maps'], a[href*='goo.gl/maps'], a[href*='maps.app.goo.gl']")
-        if a and a.has_attr("href"):
-            href = a["href"]
-        lat, lon = extract_latlon_from_href(href)
-
-        key = (name, addr)
-        if key in seen:
-            continue
-        seen.add(key)
-        rows.append(StoreRow(name=name, address=addr, lat=lat, lon=lon, external_key=None))
+                rows.append(StoreRow(name=name, address=address, lat=latf, lon=lonf, external_key=ext or None))
     return rows
 
 
@@ -249,23 +272,11 @@ def dedup_rows(rows: List[StoreRow]) -> List[StoreRow]:
     for r in rows:
         key = (normalize_ws(r.name), normalize_ws(r.address))
         if key not in by_key:
-            by_key[key] = StoreRow(
-                name=key[0],
-                address=key[1],
-                lat=r.lat,
-                lon=r.lon,
-                external_key=r.external_key,
-            )
+            by_key[key] = r
         else:
-            existing = by_key[key]
-            if (existing.lat is None or existing.lon is None) and (r.lat is not None and r.lon is not None):
-                by_key[key] = StoreRow(
-                    name=key[0],
-                    address=key[1],
-                    lat=r.lat,
-                    lon=r.lon,
-                    external_key=existing.external_key or r.external_key,
-                )
+            ex = by_key[key]
+            if (ex.lat is None or ex.lon is None) and (r.lat is not None and r.lon is not None):
+                by_key[key] = StoreRow(r.name, r.address, r.lat, r.lon, ex.external_key or r.external_key)
     return sorted(by_key.values(), key=lambda x: (x.name.lower(), x.address.lower()))
 
 
@@ -283,15 +294,15 @@ def write_csv(path: Path, rows: List[StoreRow]) -> None:
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Scrape Rimi Estonia stores → CSV")
     ap.add_argument("--out", default=str(DEFAULT_OUT), help="Output CSV path (default: data/rimi_stores.csv)")
-    ap.add_argument("--timeout-ms", type=int, default=30000, help="Playwright navigation timeout (ms)")
-    ap.add_argument("--max-scrolls", type=int, default=18, help="How many scroll steps to trigger lazy-load")
+    ap.add_argument("--timeout-ms", type=int, default=45000, help="Playwright navigation timeout (ms)")
+    ap.add_argument("--max-scrolls", type=int, default=24, help="How many scroll steps to trigger lazy-load")
     args = ap.parse_args(argv)
 
     try:
         html, payloads = collect_with_playwright(timeout_ms=args.timeout_ms, max_scrolls=args.max_scrolls)
     except PWTimeout:
         log("navigation timed out; retry once with longer timeout…")
-        html, payloads = collect_with_playwright(timeout_ms=max(args.timeout_ms, 60000), max_scrolls=args.max_scrolls)
+        html, payloads = collect_with_playwright(timeout_ms=max(args.timeout_ms, 70000), max_scrolls=args.max_scrolls)
 
     rows_json = parse_from_json_payloads(payloads) if payloads else []
     if rows_json:
