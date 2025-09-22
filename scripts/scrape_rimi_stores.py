@@ -30,8 +30,7 @@ from pathlib import Path
 from typing import Iterable, List, Optional, Tuple, Dict, Any
 
 from bs4 import BeautifulSoup
-from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
-
+from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout, Page
 
 URL = "https://www.rimi.ee/kauplused"
 DEFAULT_OUT = Path("data/rimi_stores.csv")
@@ -57,6 +56,10 @@ class StoreRow:
         ]
 
 
+def log(msg: str) -> None:
+    print(f"[rimi-stores] {msg}", file=sys.stderr)
+
+
 def normalize_ws(s: Optional[str]) -> str:
     return re.sub(r"\s+", " ", s or "").strip()
 
@@ -64,7 +67,7 @@ def normalize_ws(s: Optional[str]) -> str:
 def extract_latlon_from_href(href: Optional[str]) -> Tuple[Optional[float], Optional[float]]:
     if not href:
         return None, None
-    # @59.437123,24.740987 or @59.437123,24.740987,15z
+    # @59.437123,24.740987 (optionally followed by ,15z etc)
     m = re.search(r"@(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)(?:[,/]|$)", href)
     if m:
         try:
@@ -93,6 +96,26 @@ def flatten(obj: Any) -> Iterable[Any]:
 
 # ------------------------------ Scraping --------------------------------- #
 
+def _dismiss_cookies(page: Page) -> None:
+    """Best-effort cookie popup dismissal (selectors may change; safe no-op if absent)."""
+    try:
+        # Common buttons/texts
+        candidates = [
+            "button:has-text('Nõustu')",
+            "button:has-text('Nõustun')",
+            "button:has-text('Accept')",
+            "[data-testid='cookie-accept']",
+        ]
+        for sel in candidates:
+            btn = page.locator(sel)
+            if btn.count() and btn.first.is_visible():
+                btn.first.click(timeout=1500)
+                time.sleep(0.25)
+                break
+    except Exception:
+        pass
+
+
 def collect_with_playwright(timeout_ms: int = 30000, max_scrolls: int = 18) -> Tuple[str, List[Dict[str, Any]]]:
     """
     Returns (page_html, captured_json_payloads)
@@ -101,7 +124,20 @@ def collect_with_playwright(timeout_ms: int = 30000, max_scrolls: int = 18) -> T
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        ctx = browser.new_context(locale="et-EE")
+        ctx = browser.new_context(
+            locale="et-EE",
+            user_agent=(
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/120.0 Safari/537.36"
+            ),
+        )
+
+        # Lightweight request blocking for speed
+        ctx.route("**/*", lambda route: route.abort()
+                  if any(host in route.request.url for host in
+                         ["googletagmanager.com", "google-analytics.com", "facebook.net", "hotjar.com"])
+                  else route.continue_())
+
         page = ctx.new_page()
 
         def on_response(resp):
@@ -109,7 +145,7 @@ def collect_with_playwright(timeout_ms: int = 30000, max_scrolls: int = 18) -> T
                 ctype = resp.headers.get("content-type", "")
                 if "json" in ctype.lower():
                     u = resp.url.lower()
-                    # very broad allowlist for endpoints likely containing store data
+                    # Broad allowlist for store/location endpoints
                     if any(k in u for k in ("kaupl", "store", "shop", "location", "map")):
                         data = resp.json()
                         json_payloads.append(data)
@@ -118,12 +154,19 @@ def collect_with_playwright(timeout_ms: int = 30000, max_scrolls: int = 18) -> T
 
         page.on("response", on_response)
 
+        log("navigate to kauplused…")
         page.goto(URL, wait_until="networkidle", timeout=timeout_ms)
+        _dismiss_cookies(page)
 
-        # Some pages lazy-load more content while scrolling
-        for _ in range(max_scrolls):
-            page.mouse.wheel(0, 2800)
+        # Some pages lazy-load while scrolling. Stop if content height stops growing.
+        last_h = 0
+        for i in range(max_scrolls):
+            page.mouse.wheel(0, 2600)
             time.sleep(0.25)
+            h = page.evaluate("document.body.scrollHeight")
+            if h == last_h:
+                break
+            last_h = h
 
         html = page.content()
         browser.close()
@@ -249,13 +292,16 @@ def main(argv: Optional[List[str]] = None) -> int:
     try:
         html, payloads = collect_with_playwright(timeout_ms=args.timeout_ms, max_scrolls=args.max_scrolls)
     except PWTimeout:
-        print("Navigation timed out; retrying with a longer timeout...", file=sys.stderr)
+        log("navigation timed out; retry once with longer timeout…")
         html, payloads = collect_with_playwright(timeout_ms=max(args.timeout_ms, 60000), max_scrolls=args.max_scrolls)
 
     rows_json = parse_from_json_payloads(payloads) if payloads else []
+    if rows_json:
+        log(f"json payload rows: {len(rows_json)}")
     rows_dom = parse_from_dom(html)
-    rows_all = rows_json + rows_dom if rows_json else rows_dom
+    log(f"dom rows: {len(rows_dom)}")
 
+    rows_all = rows_json + rows_dom if rows_json else rows_dom
     rows = dedup_rows(rows_all)
     out_path = Path(args.out)
     write_csv(out_path, rows)
