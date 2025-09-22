@@ -21,14 +21,16 @@ jobs:
       - name: Install scrape deps
         run: |
           set -euo pipefail
-          pip install playwright bs4 lxml
+          pip install playwright bs4 lxml requests
           python -m playwright install --with-deps chromium
 
       - name: Scrape Rimi stores to CSV
         run: |
           set -euo pipefail
-          mkdir -p data
-          python scripts/scrape_rimi_stores.py
+          python scripts/scrape_rimi_stores.py \
+            --geocode-missing \
+            --nominatim-email "marko@minetech.ee" \
+            --per-click-wait-ms 1200
           echo "--- preview ---"
           head -n 10 data/rimi_stores.csv || true
 
@@ -39,68 +41,69 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-      - name: Create staging table
+      - name: Upsert stores and alias to ePood
         run: |
           set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "DROP TABLE IF EXISTS staging_rimi_stores;"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE TABLE staging_rimi_stores (name text, address text, lat double precision, lon double precision, external_key text);"
+          # write SQL to a file so psql meta-commands start at column 0
+          cat <<'SQL' > /tmp/rimi_seed.sql
+\set ON_ERROR_STOP on
 
-      - name: Load CSV into staging (psql \copy)
-        run: |
-          set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy staging_rimi_stores(name,address,lat,lon,external_key) FROM 'data/rimi_stores.csv' WITH (FORMAT csv, HEADER true, NULL '')"
+-- staging table
+DROP TABLE IF EXISTS staging_rimi_stores;
+CREATE TABLE staging_rimi_stores(
+  name         text,
+  address      text,
+  lat          double precision,
+  lon          double precision,
+  external_key text
+);
 
-      # --- Constraint-free upsert (UPDATE then INSERT) ------------------------
-      - name: Update existing Rimi rows
-        run: |
-          set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
-          UPDATE stores s
-          SET
-            address      = NULLIF(st.address,''),
-            lat          = st.lat,
-            lon          = st.lon,
-            latitude     = st.lat,
-            longitude    = st.lon,
-            is_online    = false,
-            external_key = COALESCE(NULLIF(st.external_key,''), s.external_key)
-          FROM staging_rimi_stores st
-          WHERE s.chain = 'Rimi'
-            AND s.name  = st.name;
-          "
+-- load CSV
+\copy staging_rimi_stores(name,address,lat,lon,external_key)
+  FROM 'data/rimi_stores.csv'
+  WITH (FORMAT csv, HEADER true, NULL '');
 
-      - name: Insert missing Rimi rows
-        run: |
-          set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
-          INSERT INTO stores (name, chain, address, lat, lon, latitude, longitude, is_online, external_key)
-          SELECT
-            st.name, 'Rimi',
-            NULLIF(st.address,''),
-            st.lat, st.lon, st.lat, st.lon,
-            false,
-            NULLIF(st.external_key,'')
-          FROM staging_rimi_stores st
-          WHERE COALESCE(st.name,'') <> ''
-            AND NOT EXISTS (
-              SELECT 1 FROM stores s
-              WHERE s.chain = 'Rimi' AND s.name = st.name
-            );
-          "
+-- upsert into stores (assumes unique on (chain,name) exists)
+INSERT INTO stores (name, chain, address, lat, lon, latitude, longitude, is_online, external_key)
+SELECT
+  s.name, 'Rimi',
+  NULLIF(s.address,''),
+  s.lat, s.lon, s.lat, s.lon,
+  false,
+  NULLIF(s.external_key,'')
+FROM staging_rimi_stores s
+WHERE COALESCE(s.name,'') <> ''
+ON CONFLICT (chain, name)
+DO UPDATE SET
+  address      = EXCLUDED.address,
+  lat          = EXCLUDED.lat,
+  lon          = EXCLUDED.lon,
+  latitude     = EXCLUDED.latitude,
+  longitude    = EXCLUDED.longitude,
+  is_online    = false,
+  external_key = COALESCE(EXCLUDED.external_key, stores.external_key);
 
-      - name: Ensure alias table and alias to ePood (440)
-        run: |
-          set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE TABLE IF NOT EXISTS store_price_source (store_id bigint PRIMARY KEY, source_store_id bigint NOT NULL);"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
-          INSERT INTO store_price_source (store_id, source_store_id)
-          SELECT st.id, 440
-          FROM stores st
-          WHERE st.chain='Rimi' AND COALESCE(st.is_online,false)=false
-          ON CONFLICT (store_id) DO UPDATE SET source_store_id = EXCLUDED.source_store_id;
-          "
+-- alias physical Rimi stores to ePood id=440
+CREATE TABLE IF NOT EXISTS store_price_source (
+  store_id        bigint PRIMARY KEY,
+  source_store_id bigint NOT NULL
+);
 
-      - name: Summary
-        run: |
-          set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\t on; SELECT 'staging_rows' AS what, COUNT(*) AS count FROM staging_rimi_stores UNION ALL SELECT 'physical_rimi_in_stores', COUNT(*) FROM stores WHERE chain='Rimi' AND COALESCE(is_online,false)=false UNION ALL SELECT 'aliased_to_440', COUNT(*) FROM store_price_source sps JOIN stores st ON st.id=sps.store_id WHERE st.chain='Rimi' AND COALESCE(st.is_online,false)=false AND sps.source_store_id=440; \t off;"
+INSERT INTO store_price_source (store_id, source_store_id)
+SELECT st.id, 440
+FROM stores st
+WHERE st.chain='Rimi' AND COALESCE(st.is_online,false)=false
+ON CONFLICT (store_id) DO UPDATE
+SET source_store_id = EXCLUDED.source_store_id;
+
+-- summary
+\pset tuples_only on
+SELECT 'staging_rows' AS what, COUNT(*) AS count FROM staging_rimi_stores
+UNION ALL
+SELECT 'physical_rimi_in_stores', COUNT(*) FROM stores WHERE chain='Rimi' AND COALESCE(is_online,false)=false
+UNION ALL
+SELECT 'aliased_to_440', COUNT(*) FROM store_price_source sps JOIN stores st ON st.id=sps.store_id
+       WHERE st.chain='Rimi' AND COALESCE(st.is_online,false)=false AND sps.source_store_id=440;
+SQL
+
+          psql "$DATABASE_URL" -f /tmp/rimi_seed.sql
