@@ -73,8 +73,9 @@ CTX_MANUF = re.compile(r"(?:Tootja|Valmistaja)\s*[:\-]?\s*([^\n<]{2,120})", re.I
 
 PRICE_TOKEN = re.compile(r"(\d+[.,]\d{2})\s*€", re.U)
 
-GTIN_IN_MODAL = re.compile(r"\bGTIN\b[\s:\n]*([0-9]{8,14})", re.I)
-TARNIJA_IN_MODAL = re.compile(r"Tarnija info[\s:\n]*([^\n]+)", re.I)
+# More forgiving (accepts spaces); we strip to digits later.
+GTIN_IN_MODAL = re.compile(r"\b(?:GTIN|EAN|Ribakood)\b[\s:\n]*([0-9 \t]{8,18})", re.I)
+TARNIJA_IN_MODAL = re.compile(r"(?:Tarnija info|Tarnija|Supplier)\b[\s:\n]*([^\n]+)", re.I)
 
 
 def str2bool(v: Optional[str]) -> bool:
@@ -326,7 +327,6 @@ async def parse_json_ld(page: Any) -> Dict:
 def _parse_wolt_price(value: Any) -> Optional[float]:
     try:
         if isinstance(value, (int, float)):
-            # try cents → € heuristic; if too small, assume already €
             return round(float(value) / (100.0 if float(value) >= 50 else 1.0), 2)
         if isinstance(value, str):
             s = value.replace(",", ".").strip()
@@ -702,7 +702,6 @@ def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Dict:
 
     # brand
     brand = _first_str(item, "brand") or likely_brand_from_name(name)
-    # As you requested: if brand is still missing but we have supplier, set brand=supplier
     if not brand and manufacturer:
         brand = manufacturer
 
@@ -979,10 +978,35 @@ async def _maybe_collect_json(resp, out_list: List[Any]):
         pass
 
 
+async def _wolt_click_any_card(page) -> bool:
+    """
+    Try several selectors to open a product modal from a category grid.
+    Returns True if a modal likely opened.
+    """
+    selectors = [
+        '[data-testid*="item-card"]',
+        '[data-test-id*="item-card"]',
+        '[data-testid*="menu-item"]',
+        '[data-test-id*="menu-item"]',
+        'article:has(button)',
+        'a[href*="/items/"]',
+    ]
+    for sel in selectors:
+        loc = page.locator(sel)
+        n = await loc.count()
+        if n == 0:
+            continue
+        try:
+            await loc.first.click(timeout=1500)
+            return True
+        except Exception:
+            pass
+    return False
+
+
 async def _wolt_enrich_with_modal(page, items: List[Dict], max_to_probe: int = 80) -> None:
     """
-    For each item (by name heuristic), open its modal, click "Toote info",
-    then scrape GTIN and Tarnija info from the dialog, and write back to item.
+    For each item, open its modal, click "Toote info", then scrape GTIN and Tarnija info.
     """
     probed = 0
     for item in items:
@@ -992,10 +1016,9 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], max_to_probe: int = 8
         if not name:
             continue
 
-        # Try to open modal by clicking the product title text
         opened = False
+        # 1) Try clicking by exact text (title inside the card)
         try:
-            # Find a visible element with the exact name (prefer first)
             loc = page.locator(f"text={name}").first
             if await loc.count() > 0:
                 await loc.click(timeout=1500)
@@ -1003,53 +1026,71 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], max_to_probe: int = 8
         except Exception:
             opened = False
 
+        # 2) Fallback: click any card to open a modal
+        if not opened:
+            opened = await _wolt_click_any_card(page)
+
         if not opened:
             continue
 
         try:
-            # Click "Toote info"
+            # Click "Toote info" if present
             info = page.locator('a:has-text("Toote info"), button:has-text("Toote info")')
             if await info.count() > 0:
                 await info.first.click(timeout=1500)
 
             # Wait the details sheet/dialog
-            dialog = page.locator('role=dialog')
+            dialog = page.locator('div[role="dialog"]')
             if await dialog.count() == 0:
                 dialog = page.locator('[data-testid="sheet"], [data-testid="dialog"]')
-            await page.wait_for_timeout(400)  # small settle
+            await page.wait_for_timeout(300)
 
-            txt = ""
-            try:
-                txt = await dialog.first.inner_text()
-            except Exception:
-                # fallback to body snapshot
+            # Prefer DOM label→value lookups
+            async def get_value_by_label(label_texts: List[str]) -> Optional[str]:
+                # dt/dd
+                for lbl in label_texts:
+                    for xp in [
+                        f"xpath=//dt[normalize-space()='{lbl}']/following-sibling::dd[1]",
+                        f"xpath=//*[normalize-space()='{lbl}']/following-sibling::*[1]",
+                    ]:
+                        loc = dialog.locator(xp)
+                        if await loc.count() > 0:
+                            val = await loc.first.text_content()
+                            if val and val.strip():
+                                return val.strip()
+                return None
+
+            gtin_val = await get_value_by_label(["GTIN", "EAN", "Ribakood"])  # DOM first
+            supplier_val = await get_value_by_label(["Tarnija info", "Tarnija", "Supplier"])
+
+            # Fallback to regex over full dialog text
+            if not (gtin_val and gtin_val.strip()) or not (supplier_val and supplier_val.strip()):
                 try:
-                    txt = await page.inner_text("body")
+                    txt = await dialog.first.inner_text()
                 except Exception:
                     txt = ""
+                if not (gtin_val and gtin_val.strip()):
+                    m1 = GTIN_IN_MODAL.search(txt or "")
+                    if m1:
+                        gtin_val = m1.group(1)
+                if not (supplier_val and supplier_val.strip()):
+                    m2 = TARNIJA_IN_MODAL.search(txt or "")
+                    if m2:
+                        supplier_val = m2.group(1)
 
-            gtin = None
-            supplier = None
-
-            m1 = GTIN_IN_MODAL.search(txt or "")
-            if m1:
-                gtin = m1.group(1).strip()
-            m2 = TARNIJA_IN_MODAL.search(txt or "")
-            if m2:
-                supplier = m2.group(1).strip()
-
-            if gtin:
-                item["gtin"] = gtin
-            if supplier:
-                item["supplier"] = supplier
-                # Also provide brand fallback if missing
+            # Normalize and write back
+            if gtin_val:
+                item["gtin"] = clean_digits(gtin_val)
+            if supplier_val:
+                supplier_val = supplier_val.strip()
+                item["supplier"] = supplier_val
                 if not item.get("brand"):
-                    item["brand"] = supplier
+                    item["brand"] = supplier_val
 
         finally:
-            # Close the product modal/sheet
+            # Close modal/sheet
             try:
-                close_btn = page.locator('button[aria-label*="Close"], button:has-text("×")')
+                close_btn = page.locator('button[aria-label*="Close"], button[aria-label*="Sulge"], button:has-text("×")')
                 if await close_btn.count() > 0:
                     await close_btn.first.click()
                 else:
@@ -1058,8 +1099,7 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], max_to_probe: int = 8
                 pass
 
         probed += 1
-        # small delay to keep UI stable
-        await page.wait_for_timeout(200)
+        await page.wait_for_timeout(150)
 
 
 async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
@@ -1078,7 +1118,7 @@ async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
             java_script_enabled=True,
         )
 
-        # Do NOT block Wolt APIs here; only heavy trackers.
+        # Block trackers, not APIs
         async def route_filter(route):
             try:
                 url = route.request.url
@@ -1096,25 +1136,19 @@ async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
                     return
 
         await context.route("**/*", route_filter)
-
         page = await context.new_page()
         json_blobs: List[Any] = []
-
-        # capture JSON/XHR that the SPA loads
-        page.on(
-            "response",
-            lambda resp: asyncio.create_task(_maybe_collect_json(resp, json_blobs))
-        )
+        page.on("response", lambda resp: asyncio.create_task(_maybe_collect_json(resp, json_blobs)))
 
         try:
             await page.goto(cat_url, wait_until="networkidle")
             await wait_cookie_banner(page)
-            # small scroll to let lazy parts load
-            for _ in range(5):
-                await page.mouse.wheel(0, 1500)
-                await page.wait_for_timeout(300)
+            # Scroll a bit to ensure grid mounts fully
+            for _ in range(6):
+                await page.mouse.wheel(0, 1600)
+                await page.wait_for_timeout(250)
 
-            # also try to read window states that frameworks sometimes expose
+            # Read window states if exposed
             for varname in [
                 "__APOLLO_STATE__", "__NEXT_DATA__", "__NUXT__", "__INITIAL_STATE__",
                 "__REACT_QUERY_STATE__", "__REDUX_STATE__", "__WOLT_STATE__"
@@ -1126,20 +1160,18 @@ async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
                 except Exception:
                     pass
 
-            # Build base items from captured payloads
+            # Walk captured blobs → seed items
             for blob in json_blobs:
                 try:
                     _walk_collect_items(blob, found)
                 except Exception:
                     pass
-
             items = list(found.values())
 
-            # Enrich by opening product modals → "Toote info" (scrape GTIN + supplier)
-            await _wolt_enrich_with_modal(page, items, max_to_probe=80)
+            # Enrich by opening modals → scrape GTIN + supplier
+            await _wolt_enrich_with_modal(page, items, max_to_probe=120)
 
             return items
-
         finally:
             await context.close()
             await browser.close()
