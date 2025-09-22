@@ -1,5 +1,4 @@
 name: Seed Rimi physical stores
-
 on:
   workflow_dispatch: {}
 
@@ -10,9 +9,9 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      # --- Scrape to CSV ------------------------------------------------------
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -24,10 +23,11 @@ jobs:
           pip install playwright bs4 lxml
           python -m playwright install --with-deps chromium
 
-      - name: Scrape Rimi stores → data/rimi_stores.csv
+      - name: Scrape Rimi stores to CSV
         run: |
           set -euo pipefail
           mkdir -p data scripts
+          # Write scraper
           cat > scripts/scrape_rimi_stores.py <<'PY'
 import re, csv, time
 from pathlib import Path
@@ -51,20 +51,16 @@ def extract_latlon_from_href(href: str):
 def main():
     url = "https://www.rimi.ee/kauplused"
     rows = []
-
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         ctx = browser.new_context(locale="et-EE")
         page = ctx.new_page()
         page.goto(url, wait_until="networkidle")
-
         for _ in range(15):
             page.mouse.wheel(0, 3000)
             time.sleep(0.3)
-
         html = page.content()
         soup = BeautifulSoup(html, "lxml")
-
         cards = soup.select("a[href*='google'], div, li, article")
         seen = set()
         for card in cards:
@@ -76,14 +72,12 @@ def main():
                     break
             if not name:
                 continue
-
             text = card.get_text("\n", strip=True)
             address = None
             for line in text.splitlines():
                 if any(ch.isdigit() for ch in line) and len(line) < 100 and "@" not in line:
                     address = line
                     break
-
             href = None
             a = card.select_one("a[href*='google']")
             if a:
@@ -96,23 +90,18 @@ def main():
                 continue
             seen.add(key)
             rows.append((name.strip(), address.strip(), lat, lon, None))
-
         browser.close()
-
-    # Dedup and write CSV
     dedup = {}
     for name, addr, lat, lon, ext in rows:
         key = (name, addr)
         if key not in dedup:
             dedup[key] = (name, addr, lat, lon, ext)
-
     with OUT.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(["name","address","lat","lon","external_key"])
         for name, addr, lat, lon, ext in sorted(dedup.values()):
             w.writerow([name, addr, "" if lat is None else lat, "" if lon is None else lon, ext or ""])
-
-    print(f"Wrote {len(dedup)} rows → {OUT}")
+    print(f"Wrote {len(dedup)} rows -> {OUT}")
 
 if __name__ == "__main__":
     main()
@@ -121,18 +110,16 @@ PY
           echo "--- preview ---"
           head -n 10 data/rimi_stores.csv || true
 
-      # --- Load into Postgres --------------------------------------------------
       - name: Install psql
         run: |
           set -euo pipefail
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-      - name: Upsert stores + alias to Rimi ePood
+      - name: Upsert stores and alias to Rimi ePood
         run: |
           set -euo pipefail
-
-          # Write SQL to a temp file (backslash commands at column 0)
+          # Write SQL to a temp file; backslash commands must be at column 0
           cat >/tmp/rimi_seed.sql <<'SQL'
 \set ON_ERROR_STOP on
 
@@ -195,5 +182,5 @@ SELECT 'aliased_to_440', COUNT(*) FROM store_price_source sps JOIN stores st ON 
 \t off
 SQL
 
-          # Execute
+          # Execute the SQL
           psql "$DATABASE_URL" -f /tmp/rimi_seed.sql
