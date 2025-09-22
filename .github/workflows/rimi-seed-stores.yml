@@ -24,11 +24,11 @@ jobs:
           pip install playwright bs4 lxml
           python -m playwright install --with-deps chromium
 
-      - name: Scrape Rimi stores → data/rimi_stores.csv
+      - name: Scrape Rimi stores to CSV
         run: |
           set -euo pipefail
           mkdir -p data scripts
-          cat > scripts/scrape_rimi_stores.py <<'PY'
+          cat <<'PY' > scripts/scrape_rimi_stores.py
 import re, csv, time
 from pathlib import Path
 from bs4 import BeautifulSoup
@@ -99,7 +99,6 @@ def main():
 
         browser.close()
 
-    # Dedup and write CSV
     dedup = {}
     for name, addr, lat, lon, ext in rows:
         key = (name, addr)
@@ -112,7 +111,7 @@ def main():
         for name, addr, lat, lon, ext in sorted(dedup.values()):
             w.writerow([name, addr, "" if lat is None else lat, "" if lon is None else lon, ext or ""])
 
-    print(f"Wrote {len(dedup)} rows → {OUT}")
+    print(f"Wrote {len(dedup)} rows -> {OUT}")
 
 if __name__ == "__main__":
     main()
@@ -128,11 +127,10 @@ PY
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-      - name: Upsert stores + alias to Rimi ePood
+      - name: Upsert stores and alias to ePood
         run: |
           set -euo pipefail
-          # Write SQL to a file so psql meta-commands start at column 0
-          cat > /tmp/rimi_seed.sql <<'SQL'
+          cat <<'SQL' > /tmp/rimi_seed.sql
 \set ON_ERROR_STOP on
 
 -- staging table
