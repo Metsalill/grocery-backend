@@ -5,6 +5,17 @@ Scrape Rimi Estonia physical stores from https://www.rimi.ee/kauplused → CSV.
 
 Output CSV columns:
   name,address,lat,lon,external_key
+
+Notes
+- Attempts to capture any JSON/XHR payloads with store data first.
+- Falls back to parsing visible DOM cards.
+- Extracts lat/lon from Google Maps href if present.
+- Deduplicates by (name,address).
+- Safe to run in CI (no repo changes; writes under ./data).
+
+Requires:
+  pip install playwright bs4 lxml
+  python -m playwright install --with-deps chromium
 """
 
 from __future__ import annotations
@@ -24,6 +35,8 @@ from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout, Page
 URL = "https://www.rimi.ee/kauplused"
 DEFAULT_OUT = Path("data/rimi_stores.csv")
 
+
+# ------------------------------ Helpers ---------------------------------- #
 
 @dataclass(frozen=True)
 class StoreRow:
@@ -47,8 +60,11 @@ def log(msg: str) -> None:
     print(f"[rimi-stores] {msg}", file=sys.stderr)
 
 
-def normalize_ws(s: Optional[str]) -> str:
-    return re.sub(r"\s+", " ", s or "").strip()
+def normalize_ws(s: Optional[Any]) -> str:
+    """Coerce to string and collapse whitespace; None -> ''."""
+    if s is None:
+        return ""
+    return re.sub(r"\s+", " ", str(s)).strip()
 
 
 def extract_latlon_from_href(href: Optional[str]) -> Tuple[Optional[float], Optional[float]]:
@@ -78,6 +94,8 @@ def flatten(obj: Any) -> Iterable[Any]:
         for i in obj:
             yield from flatten(i)
 
+
+# ------------------------------ Scraping --------------------------------- #
 
 def _dismiss_cookies(page: Page) -> None:
     try:
@@ -124,13 +142,11 @@ def collect_with_playwright(timeout_ms: int = 45000, max_scrolls: int = 24) -> T
         page.goto(URL, wait_until="networkidle", timeout=timeout_ms)
         _dismiss_cookies(page)
 
-        # Give the list time to render
         page.wait_for_load_state("domcontentloaded", timeout=timeout_ms)
         page.wait_for_timeout(1000)
 
-        # Scroll until height stops changing
         last_h = 0
-        for i in range(max_scrolls):
+        for _ in range(max_scrolls):
             page.mouse.wheel(0, 2600)
             page.wait_for_timeout(250)
             h = page.evaluate("document.body.scrollHeight")
@@ -138,7 +154,7 @@ def collect_with_playwright(timeout_ms: int = 45000, max_scrolls: int = 24) -> T
                 break
             last_h = h
 
-        # As a final nudge, try expanding any “show more” buttons if they exist
+        # Try any visible "load more" buttons
         for text in ["Näita", "Laadi", "Load", "Show"]:
             try:
                 btn = page.locator(f"button:has-text('{text}')")
@@ -156,24 +172,20 @@ def collect_with_playwright(timeout_ms: int = 45000, max_scrolls: int = 24) -> T
 # ---------- DOM parsing (improved heuristics around 'Juhised' link) ---------- #
 
 def _nearest_card(node: Tag) -> Tag:
-    """Walk up to a plausible 'card' container."""
     for parent in node.parents:
         if isinstance(parent, Tag) and parent.name in ("article", "li", "section", "div"):
-            # Stop climbing once the container is reasonably sized
             if len(parent.find_all(["a", "h1", "h2", "h3", "strong"])) >= 2:
                 return parent
     return node
 
 
 def _extract_name(card: Tag) -> Optional[str]:
-    # Try common heading locations
     for sel in ["h1", "h2", "h3", "strong", ".title", ".store__title", ".shop__title"]:
         el = card.select_one(sel)
         if el:
             t = normalize_ws(el.get_text(" ", strip=True))
             if t:
                 return t
-    # Fallback: first non-empty, non-meta line that contains 'rimi'
     text = card.get_text("\n", strip=True)
     for line in text.splitlines():
         if "@" in line.lower():
@@ -185,7 +197,6 @@ def _extract_name(card: Tag) -> Optional[str]:
 
 
 def _extract_address(card: Tag) -> Optional[str]:
-    # Look for line with a digit (street number), short-ish, not an email/phone
     text = card.get_text("\n", strip=True)
     for line in text.splitlines():
         l = normalize_ws(line)
@@ -201,7 +212,6 @@ def _extract_address(card: Tag) -> Optional[str]:
 def parse_from_dom(html: str) -> List[StoreRow]:
     soup = BeautifulSoup(html, "lxml")
 
-    # Prefer elements that contain the 'Juhised' (Directions) link text
     hint_nodes = soup.find_all(string=re.compile(r"^\s*Juhised\s*$", re.I))
     log(f"found {len(hint_nodes)} 'Juhised' hints in DOM")
 
@@ -225,18 +235,15 @@ def parse_from_dom(html: str) -> List[StoreRow]:
         seen.add(key)
         rows.append(StoreRow(name=name, address=addr, lat=lat, lon=lon, external_key=None))
 
-    # 1) Cards around 'Juhised'
     for n in hint_nodes:
         card = _nearest_card(n.parent if isinstance(n, Tag) else n)
         add_from_card(card)
 
-    # 2) Fallback: any anchors to Google Maps (if hint didn’t exist)
     if not rows:
         for a in soup.select("a[href*='google.com/maps'], a[href*='goo.gl/maps'], a[href*='maps.app.goo.gl']"):
             card = _nearest_card(a)
             add_from_card(card)
 
-    # 3) Last resort: previous heuristic on generic containers
     if not rows:
         for card in soup.select("article, li, div, section"):
             add_from_card(card)
