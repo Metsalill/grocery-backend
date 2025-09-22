@@ -126,7 +126,9 @@ jobs:
       - name: Upsert stores + alias to Rimi ePood
         run: |
           set -euo pipefail
-          psql "$DATABASE_URL" <<'SQL'
+
+          # 1) Write SQL to a temp file (backslashes at column 0 inside the file)
+          cat >/tmp/rimi_seed.sql <<'SQL'
 \set ON_ERROR_STOP on
 
 -- staging table
@@ -139,7 +141,7 @@ CREATE TABLE staging_rimi_stores(
   external_key text
 );
 
--- load CSV (note: backslash commands must start at column 0)
+-- load CSV
 \copy staging_rimi_stores(name,address,lat,lon,external_key)
   FROM 'data/rimi_stores.csv'
   WITH (FORMAT csv, HEADER true, NULL '');
@@ -187,3 +189,6 @@ SELECT 'aliased_to_440', COUNT(*) FROM store_price_source sps JOIN stores st ON 
        WHERE st.chain='Rimi' AND COALESCE(st.is_online,false)=false AND sps.source_store_id=440;
 \t off
 SQL
+
+          # 2) Execute it
+          psql "$DATABASE_URL" -f /tmp/rimi_seed.sql
