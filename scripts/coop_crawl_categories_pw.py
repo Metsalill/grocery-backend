@@ -836,97 +836,101 @@ async def _read_iframe_text_strict(page) -> str:
     except PWTimeout:
         raise RuntimeError("Timed out reading iframe body")
 
-# --- name normalization for fuzzy matching ---
+# --- name normalization & tokenization ---
 
-def _norm_name(s: str) -> str:
+def _norm(s: str) -> str:
     if not s:
         return ""
     s = s.replace("\xa0", " ").replace("\u2009", " ").replace("\u202f", " ")
+    s = re.sub(r"[^\w\s%-]", " ", s, flags=re.U)
     s = re.sub(r"\s+", " ", s).strip().lower()
     return s
+
+def _tokens(s: str) -> List[str]:
+    s = _norm(s)
+    toks = [t for t in s.split() if len(t) >= 3]
+    return toks
 
 # --- robust modal opener ---
 
 async def _open_product_modal_for_name(page, target_name: str) -> None:
     """
-    Open product modal using multiple strategies (role/name, alt text, anchors, generic
-    containers). We normalize whitespace & scan while scrolling. If normal click fails,
-    fall back to JS-dispatched click on the closest clickable element.
+    Open product modal using many strategies:
+      - role/name (exact/partial)
+      - img alt matches
+      - anchors/buttons with text
+      - Wolt product tiles: [data-test-id*=menu-item]
+      - JS-dispatched click on closest clickable if standard click fails
+    Includes deep scrolling to account for virtualization.
     """
     if not target_name:
         raise RuntimeError("Empty product name")
-    wanted = _norm_name(target_name)
-    if not wanted:
-        raise RuntimeError("Empty product name")
+    name_part = target_name.split(",")[0].strip()
+    wanted_norm = _norm(target_name)
+    wanted_tokens = _tokens(target_name)
 
     async def _try(locator) -> bool:
         try:
             if await locator.count() == 0:
                 return False
             el = locator.first
-            await el.scroll_into_view_if_needed(timeout=2000)
+            await el.scroll_into_view_if_needed(timeout=2500)
             try:
-                await el.click(timeout=2000)
+                await el.click(timeout=2500)
             except Exception:
-                # JS click fallback
-                try:
-                    handle = await el.element_handle()
-                    if handle:
+                # JS fallback click on the node
+                handle = await el.element_handle()
+                if handle:
+                    try:
                         await handle.evaluate("(n)=>{n.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}))}")
-                except Exception:
-                    return False
-            # wait for dialog
-            await page.get_by_role("dialog").wait_for(timeout=2500)
+                    except Exception:
+                        return False
+            await page.get_by_role("dialog").wait_for(timeout=3000)
             return True
         except Exception:
             return False
 
-    # on-scroll scanning with text normalization in the DOM
-    for _ in range(18):  # 18 * ~1200px ≈ deep scroll
-        # exact ARIA
+    # scanning loop (more passes for long categories/virtualized lists)
+    for _ in range(30):
+        # ARIA exact/partial
         if await _try(page.get_by_role("link", name=target_name, exact=True)): return
         if await _try(page.get_by_role("button", name=target_name, exact=True)): return
-
-        # name-part (before comma) heuristic
-        name_part = target_name.split(",")[0].strip()
         if await _try(page.get_by_role("link", name=name_part)): return
         if await _try(page.get_by_role("button", name=name_part)): return
 
-        # image alt
+        # image alts
         if await _try(page.locator(f'img[alt="{target_name}"]')): return
         if await _try(page.locator(f'img[alt*="{name_part}"]')): return
 
-        # text contains (anchors preferred)
+        # anchors/buttons with text
         if await _try(page.locator("a").filter(has_text=target_name)): return
         if await _try(page.locator("a").filter(has_text=name_part)): return
         if await _try(page.locator("button").filter(has_text=name_part)): return
 
-        # Generic card containers with text
-        if await _try(page.locator("article,div[role='button'],div").filter(has_text=name_part)): return
-
-        # JS query: find closest clickable inside nodes with normalized text match
+        # Wolt product tiles — fuzzy token containment
         try:
-            ok = await page.evaluate(
+            clicked = await page.evaluate(
                 """
-                (wanted) => {
-                  const norm = s => (s||'').replace(/\\u00A0|\\u2009|\\u202f/g,' ')
-                                           .replace(/\\s+/g,' ')
-                                           .trim().toLowerCase();
-                  const isClickable = el => {
-                    if (!el) return null;
-                    if (el.tagName === 'A' || el.tagName === 'BUTTON') return el;
-                    const role = (el.getAttribute('role')||'').toLowerCase();
-                    if (role === 'button' || role === 'link') return el;
-                    return null;
+                (wantedNorm, wantedTokens) => {
+                  const norm = s => (s||'')
+                    .replace(/\\u00A0|\\u2009|\\u202f/g,' ')
+                    .replace(/[^\w\\s%-]/g,' ')
+                    .replace(/\\s+/g,' ')
+                    .trim().toLowerCase();
+                  const tokens = s => norm(s).split(' ').filter(t => t.length >= 3);
+                  const hasTokenHit = (txtTokens, wanted) => {
+                    let hits = 0;
+                    for (const w of wanted) if (txtTokens.includes(w)) hits++;
+                    return hits >= Math.min(3, wanted.length) || (wanted.length <= 2 && hits >= 1);
                   };
-                  const all = Array.from(document.querySelectorAll("a,button,article,div"));
-                  for (const el of all) {
-                    const txt = norm(el.textContent || el.innerText || '');
+                  const tiles = Array.from(document.querySelectorAll('[data-test-id*="menu-item"], article, div'));
+                  for (const tile of tiles) {
+                    const txt = norm(tile.innerText || tile.textContent || '');
                     if (!txt) continue;
-                    if (txt.includes(wanted)) {
-                      // prefer clickable child
-                      let click = el.querySelector('a,button,[role=button],[role=link]') || el;
-                      click = isClickable(click) || click.closest('a,button,[role=button],[role=link]') || click;
+                    const tks = tokens(txt);
+                    if (!tks.length) continue;
+                    if (txt.includes(wantedNorm) || hasTokenHit(tks, wantedTokens)) {
+                      let click = tile.querySelector('a,button,[role=button],[role=link]') || tile;
                       click.dispatchEvent(new MouseEvent('click', {bubbles:true,cancelable:true}));
                       return true;
                     }
@@ -934,20 +938,24 @@ async def _open_product_modal_for_name(page, target_name: str) -> None:
                   return false;
                 }
                 """,
-                wanted
+                wanted_norm,
+                wanted_tokens,
             )
-            if ok:
+            if clicked:
                 try:
-                    await page.get_by_role("dialog").wait_for(timeout=2500)
+                    await page.get_by_role("dialog").wait_for(timeout=3000)
                     return
                 except Exception:
                     pass
         except Exception:
             pass
 
-        # scroll and retry
-        await page.mouse.wheel(0, 1200)
-        await page.wait_for_timeout(220)
+        # generic container with text
+        if await _try(page.locator("article,div[role='button'],div").filter(has_text=name_part)): return
+
+        # scroll further
+        await page.mouse.wheel(0, 1400)
+        await page.wait_for_timeout(250)
 
     raise RuntimeError(f'Could not open modal for product: "{target_name}"')
 
@@ -968,19 +976,18 @@ async def _open_product_modal(page, item: Dict) -> None:
             try:
                 loc = page.locator(sel)
                 if await loc.count() > 0:
-                    await loc.first.scroll_into_view_if_needed(timeout=2000)
+                    await loc.first.scroll_into_view_if_needed(timeout=2500)
                     try:
-                        await loc.first.click(timeout=2000)
+                        await loc.first.click(timeout=2500)
                     except Exception:
                         handle = await loc.first.element_handle()
                         if handle:
                             await handle.evaluate("(n)=>{n.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}))}")
-                    await page.get_by_role("dialog").wait_for(timeout=2500)
+                    await page.get_by_role("dialog").wait_for(timeout=3000)
                     return
             except Exception:
                 pass
 
-    # fallback: open by name
     await _open_product_modal_for_name(page, str(item.get("name") or "").strip())
 
 # --- modal enrichment (mandatory Toote info) ---
@@ -1100,7 +1107,7 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
             await wait_cookie_banner(page)
 
             # load a bunch of items into the DOM
-            for _ in range(8):
+            for _ in range(10):
                 await page.mouse.wheel(0, 1600)
                 await page.wait_for_timeout(250)
 
