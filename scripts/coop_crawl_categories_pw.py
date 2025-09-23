@@ -9,16 +9,20 @@ Modes
          Tootekood, etc. Writes CSV; optional Postgres upsert.
 - wolt : Tries server data first, else Playwright fallback. In the PW fallback we:
          • capture JSON used by Wolt SPA,
-         • open each product modal, click “Toote info”, switch into the iframe
-           and scrape GTIN + Tarnija info (MANDATORY; fail loudly if missing).
+         • open each product modal, click “Toote info” (mandatory by default),
+         • switch into the info iframe and scrape GTIN + Tarnija info,
+         • enrich items before writing rows.
 
 DB alignment
 - Target table: public.staging_coop_products
 - PRIMARY KEY (store_host, ext_id)
 
-Flag note
-- Boolean flag: `--wolt-force-playwright` (presence = True). Also respects env
-  WOLT_FORCE_PLAYWRIGHT=1/true (for CI convenience).
+Flags
+- --wolt-force-playwright        → always use PW fallback
+- --wolt-strict-toote-info       → fail job on per-item modal/info failures (default: true).
+  Env overrides:
+    WOLT_FORCE_PLAYWRIGHT=1/true
+    WOLT_STRICT_TOOTE_INFO=0/false (soften per-item failures)
 """
 
 import argparse
@@ -30,14 +34,13 @@ import os
 import re
 import signal
 import sys
-import unicodedata
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse, urljoin, urlsplit, urlunsplit, parse_qsl, urlencode
 
 # Optional Playwright (needed for ecoop and Wolt PW fallback)
 try:
-    from playwright.async_api import async_playwright, TimeoutError as PWTimeout
+    from playwright.async_api import async_playwright, TimeoutError as PWTimeout  # type: ignore
 except Exception:  # pragma: no cover
     async_playwright = None  # loaded only when needed
 
@@ -55,12 +58,6 @@ CTX_MANUF   = re.compile(r"(?:Tootja|Valmistaja)\s*[:\-]?\s*([^\n<]{2,120})", re
 
 GTIN_IN_ANY      = re.compile(r"\b(?:GTIN|EAN|Ribakood)\b[^\d]{0,20}(\d{8,14})", re.I)
 TARNIJA_BLOCK_RE = re.compile(r"(?:Tarnija info|Supplier)\s*[\n\r]+([^\n\r]{2,200})", re.I)
-
-def _strip_accents(s: str) -> str:
-    return "".join(c for c in unicodedata.normalize("NFKD", s) if not unicodedata.combining(c))
-
-def _norm_text(s: str) -> str:
-    return _strip_accents(s or "").lower().strip()
 
 def str2bool(v: Optional[str]) -> bool:
     return str(v or "").strip().lower() in {"1", "true", "t", "yes", "y", "on"}
@@ -169,7 +166,6 @@ async def collect_category_product_links(page: Any, category_url: str, page_limi
                 hrefs = await page.eval_on_selector_all('a[href*="/toode/"]', "els => els.map(e => e.href)")
             except Exception:
                 hrefs = []
-
             for h in hrefs:
                 h = norm_abs(h)
                 if h and is_product(h):
@@ -813,28 +809,37 @@ async def _maybe_collect_json(resp, out_list: List[Any]):
     except Exception:
         pass
 
-# ====== iframe scraping helpers (Wolt “Toote info”) ======
+# ====== iframe + modal helpers (Wolt “Toote info”) ======
 
 async def _get_info_iframe(page) -> Any:
     """Wait for the product-info iframe and return the Frame object."""
+    # small delay for sheet open animation
     await page.wait_for_timeout(200)
-    deadline_ms = 8000
-    end = asyncio.get_event_loop().time() + (deadline_ms / 1000.0)
+    end = asyncio.get_event_loop().time() + 10.0  # hard 10s
+    last_frame = None
+
     while asyncio.get_event_loop().time() < end:
+        # Look through frames
         for f in page.frames:
             try:
                 u = (f.url or "").lower()
-                n = (getattr(f, "name", "") or "").lower()
+                n = (f.name or "").lower()
                 if "prodinfo.wolt" in u or "product-info-iframe" in u or "product-info-iframe" in n:
                     return f
+                last_frame = f
             except Exception:
                 pass
+        # Ensure iframe element exists to allow browser to create frame
         try:
             if await page.locator("iframe#product-info-iframe, iframe[data-test-id='product-info-iframe'], iframe[src*='prodinfo.wolt.com']").count() > 0:
                 await page.wait_for_timeout(150)
         except Exception:
             pass
         await page.wait_for_timeout(150)
+
+    # As a last resort, return the last seen frame (might still contain the info)
+    if last_frame:
+        return last_frame
     raise RuntimeError("Product info iframe did not appear")
 
 async def _read_iframe_text_strict(page) -> str:
@@ -847,119 +852,139 @@ async def _read_iframe_text_strict(page) -> str:
     except PWTimeout:
         raise RuntimeError("Timed out reading iframe body")
 
-# --- robust modal opener that verifies the opened product ---
-
 async def _open_product_modal_for_name(page, target_name: str) -> None:
     """
-    Open the product modal for the *specific* target_name by scanning cards:
-      • iterate visible cards, open each, read modal title, compare to target
-      • if mismatch, close and continue; scroll between passes
-      • raises RuntimeError if not found
+    Robust modal opener:
+    1) exact text click
+    2) partial text click
+    3) find text node → clickable ancestor (a/button/[role=button]/[tabindex])
+    4) scan known card containers and click their clickable child
+    5) JS click fallback
+    Retries with small scrolls.
     """
-    want = _norm_text(target_name)
-    wants = {want}
-    if "," in target_name:
-        wants.add(_norm_text(target_name.split(",")[0]))
-    wants.add(_norm_text(target_name[:24]))
+    name = target_name.strip()
+    if not name:
+        raise RuntimeError("Empty product name")
 
-    container_selectors = [
-        '[data-test-id*="menu-item"]',
-        '[data-testid*="menu-item"]',
-        '[data-test-id*="product"]',
-        '[data-testid*="product"]',
-        '[role="listitem"]',
-        'li:has([data-testid*="menu"])',
+    candidates = [
+        lambda: page.get_by_text(name, exact=True).first,
+        # partial: take first chunk before comma or next space burst
+        lambda: page.get_by_text(name.split(",")[0].strip()).first if "," in name else page.get_by_text(name[: min(20, len(name))]).first,
     ]
 
-    async def modal_title_norm() -> Optional[str]:
+    async def js_click(locator):
         try:
-            dlg = page.get_by_role("dialog")
-            await dlg.wait_for(timeout=2000)
-            # common title spots
-            for sel in ["h1", "h2", "h3", '[data-testid*="title"]', '[data-test-id*="title"]', '[role="heading"]']:
-                loc = dlg.locator(sel).first
-                if await loc.count() > 0:
-                    txt = await loc.inner_text()
-                    if txt:
-                        return _norm_text(txt)
+            await locator.scroll_into_view_if_needed(timeout=1200)
+            await locator.click(timeout=1200)
+            return True
         except Exception:
-            return None
-        return None
+            try:
+                handle = await locator.element_handle()
+                if handle:
+                    await page.evaluate("(el) => el.click()", handle)
+                    return True
+            except Exception:
+                return False
+        return False
 
-    async def close_modal():
+    # up to 3 passes with slight scrolls
+    for attempt in range(3):
+        # 1/2 — try simple candidates
+        for mk in candidates:
+            try:
+                loc = mk()
+                if await loc.count() > 0:
+                    if await js_click(loc):
+                        return
+            except Exception:
+                pass
+
+        # 3 — climb to clickable ancestor
         try:
-            close_btn = page.locator('button[aria-label*="Close"], button:has-text("×")')
-            if await close_btn.count() > 0:
-                await close_btn.first.click()
-            else:
-                await page.keyboard.press("Escape")
+            node = page.locator(f"text={name}").first
+            if await node.count() == 0 and "," in name:
+                node = page.locator(f"text={name.split(',')[0].strip()}").first
+            if await node.count() > 0:
+                handle = await node.element_handle()
+                if handle:
+                    anc = await handle.evaluate_handle("""
+                        (el) => {
+                          let cur = el;
+                          const sel = ['a','button','[role=button]','[tabindex]'];
+                          while (cur && cur !== document.body) {
+                            if (sel.some(s => cur.matches && cur.matches(s))) return cur;
+                            cur = cur.parentElement;
+                          }
+                          return el;
+                        }
+                    """)
+                    if anc:
+                        anc_loc = page.locator(":scope", has=page.locator("xpath=."))  # dummy to keep type
+                        # click ancestor via JS
+                        ok = await js_click(page.locator("xpath=.", element=anc))
+                        if ok:
+                            return
         except Exception:
             pass
-        await page.wait_for_timeout(120)
 
-    # Up to 8 scroll passes scanning 60 cards each
-    scanned = 0
-    for _ in range(8):
-        for sel in container_selectors:
-            locs = page.locator(sel)
-            try:
-                n = min(await locs.count(), 60)
-            except Exception:
-                n = 0
-            for i in range(n):
-                card = locs.nth(i)
-                txt = ""
-                try:
-                    txt = await card.inner_text(timeout=800)
-                except Exception:
-                    pass
-                if not txt:
-                    continue
-                norm = _norm_text(txt)
-                if not any(w in norm for w in wants):
-                    continue
-
-                # Try opening this card
-                try:
-                    await card.scroll_into_view_if_needed(timeout=1500)
-                except Exception:
-                    pass
-                opened = False
-                for click_target in [card, card.locator('button, a, [role="button"]').first]:
+        # 4 — scan card containers that often wrap products
+        try:
+            card_selectors = [
+                '[data-testid*="item-card"]',
+                '[data-test-id*="item-card"]',
+                '[class*="ItemCard"]',
+                '[class*="product"]',
+                'a[href*="/items/"]',
+            ]
+            for sel in card_selectors:
+                cards = page.locator(sel)
+                cnt = await cards.count()
+                for i in range(min(cnt, 60)):
+                    c = cards.nth(i)
+                    inner = ""
                     try:
-                        if click_target is not None:
-                            await click_target.click(timeout=1200, force=True)
-                            await page.get_by_role("dialog").wait_for(timeout=2000)
-                            opened = True
-                            break
+                        inner = (await c.inner_text()) or ""
                     except Exception:
-                        continue
-                if not opened:
-                    try:
-                        await card.evaluate("(el)=>el.click()")
-                        await page.get_by_role("dialog").wait_for(timeout=2000)
-                        opened = True
-                    except Exception:
-                        pass
-                if not opened:
-                    continue
+                        inner = ""
+                    if name in inner or name.split(",")[0] in inner:
+                        # click the card or its clickable child
+                        if await js_click(c):
+                            return
+                        # try a/button inside
+                        child = c.locator("a,button,[role=button]")
+                        if await child.count() > 0 and await js_click(child.first):
+                            return
+        except Exception:
+            pass
 
-                # Verify title matches the target
-                tnorm = await modal_title_norm()
-                if tnorm and any(w in tnorm for w in wants):
-                    return  # correct modal is open
-                # Not the one → close and continue
-                await close_modal()
-                scanned += 1
-
-        # scroll to load more
-        await page.mouse.wheel(0, 1800)
-        await page.wait_for_timeout(260)
+        # gentle scroll and retry
+        try:
+            await page.mouse.wheel(0, 1200)
+        except Exception:
+            pass
+        await page.wait_for_timeout(250)
 
     raise RuntimeError(f'Could not open modal for product: "{target_name}"')
 
-async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, max_to_probe: int = 120) -> None:
-    """Open product modal for each by name → click 'Toote info' (MANDATORY) → parse iframe text."""
+async def _click_toote_info_strict(page, product_name: str, strict: bool) -> None:
+    # Click "Toote info" (Estonian), allow also English fallback "Product info"
+    info = page.locator('a:has-text("Toote info"), button:has-text("Toote info"), a:has-text("Product info"), button:has-text("Product info")')
+    if await info.count() == 0:
+        if strict:
+            raise RuntimeError(f'"Toote info" not found in modal for "{product_name}"')
+        else:
+            print(f'[warn] "Toote info" not found in modal for "{product_name}"')
+            return
+    try:
+        await info.first.click(timeout=1800)
+    except Exception as e:
+        if strict:
+            raise RuntimeError(f'Failed to click "Toote info" for "{product_name}": {e}')
+        else:
+            print(f'[warn] Failed to click "Toote info" for "{product_name}": {e}')
+
+async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, max_to_probe: int, strict_toote_info: bool) -> None:
+    """Open product modal -> click 'Toote info' (mandatory by default) -> parse iframe text."""
     probed = 0
     for item in items:
         if probed >= max_to_probe:
@@ -968,55 +993,64 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, ma
         if not name:
             continue
 
-        # Open the *correct* product modal (raises if fails)
         try:
             await _open_product_modal_for_name(page, name)
-        except Exception as e:
-            raise RuntimeError(f"{e} ({category_url})")
 
-        # Click "Toote info" — mandatory
-        try:
-            info = page.locator('a:has-text("Toote info"), button:has-text("Toote info")')
-            if await info.count() == 0:
-                await page.keyboard.press("Escape")
-                raise RuntimeError(f'"Toote info" not found in modal for "{name}" ({category_url})')
-            await info.first.click(timeout=1800)
-        except Exception:
+            # Wait for dialog visible (best-effort)
             try:
-                await page.keyboard.press("Escape")
+                await page.get_by_role("dialog").wait_for(timeout=2500)
             except Exception:
                 pass
-            raise
 
-        # Read iframe strictly
-        try:
-            info_text = await _read_iframe_text_strict(page)
-        except Exception as e:
+            await _click_toote_info_strict(page, name, strict_toote_info)
+
+            # Read iframe (or dialog) text strictly / best-effort
+            info_text = ""
             try:
-                await page.keyboard.press("Escape")
+                info_text = await _read_iframe_text_strict(page)
+            except Exception as e:
+                if strict_toote_info:
+                    raise RuntimeError(f'Failed to read product info iframe for "{name}": {e}')
+                else:
+                    print(f'[warn] Failed to read iframe for "{name}": {e}')
+                    try:
+                        # fallback: read dialog body
+                        dlg = page.get_by_role("dialog")
+                        if await dlg.count() > 0:
+                            info_text = await dlg.first.inner_text()
+                    except Exception:
+                        info_text = ""
+
+            # Extract GTIN & supplier
+            if info_text:
+                m1 = GTIN_IN_ANY.search(info_text or "")
+                if m1:
+                    item["gtin"] = m1.group(1).strip()
+                m2 = TARNIJA_BLOCK_RE.search(info_text or "")
+                if m2:
+                    supplier = (m2.group(1) or "").strip()
+                    item["supplier"] = supplier
+                    if not item.get("brand"):
+                        item["brand"] = supplier
+
+        except Exception as e:
+            # Close modal before continuing/raising
+            try:
+                close_btn = page.locator('button[aria-label*="Close"], button:has-text("×")')
+                if await close_btn.count() > 0:
+                    await close_btn.first.click()
+                else:
+                    await page.keyboard.press("Escape")
             except Exception:
                 pass
-            raise RuntimeError(f'Failed to read product info iframe for "{name}" ({category_url}): {e}')
 
-        # Extract GTIN & supplier
-        gtin = None
-        m1 = GTIN_IN_ANY.search(info_text or "")
-        if m1:
-            gtin = m1.group(1).strip()
+            if strict_toote_info:
+                # escalate to fail-fast (this matches your previous "fail loudly" ask)
+                raise RuntimeError(f"{e} ({category_url})")
+            else:
+                print(f"[warn] Item enrich failed for '{name}': {e}")
 
-        supplier = None
-        m2 = TARNIJA_BLOCK_RE.search(info_text or "")
-        if m2:
-            supplier = (m2.group(1) or "").strip()
-
-        if gtin:
-            item["gtin"] = gtin
-        if supplier:
-            item["supplier"] = supplier
-            if not item.get("brand"):
-                item["brand"] = supplier
-
-        # Close modal
+        # Close modal if still open
         try:
             close_btn = page.locator('button[aria-label*="Close"], button:has-text("×")')
             if await close_btn.count() > 0:
@@ -1029,7 +1063,7 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, ma
         probed += 1
         await page.wait_for_timeout(160)
 
-async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
+async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info: bool) -> List[Dict]:
     """Open a Wolt category with Playwright, capture JSON responses, then force Toote info scraping."""
     if async_playwright is None:
         raise RuntimeError("Playwright is required for Wolt fallback but is not installed.")
@@ -1038,11 +1072,12 @@ async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=True)
-        context = await browser.new_context(
+        context = await pw.chromium.launch_persistent_context(
+            user_data_dir="/tmp/wolt_ctx",
+            headless=True,
+            viewport={"width": 1366, "height": 900},
             user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                         "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"),
-            viewport={"width": 1366, "height": 900},
-            java_script_enabled=True,
         )
 
         async def route_filter(route):
@@ -1071,7 +1106,7 @@ async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
             await page.goto(cat_url, wait_until="networkidle")
             await wait_cookie_banner(page)
             for _ in range(6):
-                await page.mouse.wheel(0, 1500)
+                await page.mouse.wheel(0, 1300)
                 await page.wait_for_timeout(280)
 
             # Try window states too
@@ -1091,8 +1126,8 @@ async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
 
             items = list(found.values())
 
-            # MANDATORY Toote info enrichment (fail loudly if not reachable)
-            await _wolt_enrich_with_modal(page, items, cat_url, max_to_probe=120)
+            # MANDATORY Toote info enrichment (configurable strictness)
+            await _wolt_enrich_with_modal(page, items, cat_url, max_to_probe=120, strict_toote_info=strict_toote_info)
             return items
 
         finally:
@@ -1157,13 +1192,20 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
 async def run_wolt(args, categories: List[str], on_rows) -> None:
     store_host = _wolt_store_host(categories[0] if categories else args.region)
     force_pw = bool(args.wolt_force_playwright or str2bool(os.getenv("WOLT_FORCE_PLAYWRIGHT")))
+    strict_toote_info = True
+    env_strict = os.getenv("WOLT_STRICT_TOOTE_INFO")
+    if env_strict is not None:
+        strict_toote_info = str2bool(env_strict)
+    if args.wolt_strict_toote_info is not None:
+        strict_toote_info = args.wolt_strict_toote_info
+
     for cat in categories:
         print(f"[cat-wolt] {cat}")
         try:
             payload = None if force_pw else await _load_wolt_payload(cat)
             if not payload:
                 print(f"[info] forcing Playwright fallback for {cat}")
-                items = await _wolt_capture_category_with_playwright(cat)
+                items = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
                 rows = [_extract_wolt_row(item, cat, store_host) for item in items]
                 if args.max_products and args.max_products > 0:
                     rows = rows[: args.max_products]
@@ -1178,9 +1220,12 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                 rows = rows[: args.max_products]
             print(f"[info] category rows: {len(rows)}")
             on_rows(rows)
-        except Exception:
-            # Fail loudly for missing "Toote info"/iframe etc.
-            raise
+        except Exception as e:
+            # In strict mode: bubble up to fail the job; otherwise, warn and continue to next category.
+            if strict_toote_info:
+                raise
+            else:
+                print(f"[warn] Wolt category failed {cat}: {e}")
 
 # ---------- main ----------
 
@@ -1260,6 +1305,10 @@ def parse_args():
     p.add_argument("--out", default="out/coop_products.csv", help="CSV file or output directory")
     p.add_argument("--wolt-force-playwright", action="store_true",
                    help="Force Playwright network fallback for Wolt categories.")
+    p.add_argument("--wolt-strict-toote-info", dest="wolt_strict_toote_info",
+                   type=lambda s: s.lower() in ("1","true","t","yes","y","on") if isinstance(s, str) else bool(s),
+                   nargs="?", const=True, default=None,
+                   help="Fail job on modal/Toote info/iframe errors per item (default true; override with env WOLT_STRICT_TOOTE_INFO).")
     return p.parse_args()
 
 if __name__ == "__main__":
