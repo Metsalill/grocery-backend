@@ -9,6 +9,8 @@ Modes
          Tootekood, etc. Writes CSV; optional Postgres upsert.
 - wolt : Tries server data first, else Playwright fallback. In the PW fallback we:
          • capture JSON used by Wolt SPA,
+         • try fetching product info directly from prodinfo.wolt.com using (venueId, itemId),
+           and only if that fails,
          • open each product modal, click “Toote info”, switch into the iframe
            and scrape GTIN + Tarnija info.
 
@@ -806,6 +808,98 @@ async def _maybe_collect_json(resp, out_list: List[Any]):
     except Exception:
         pass
 
+# ====== prodinfo.wolt.com helpers (no-modal product info) ======
+
+PRODINFO_HOST = "https://prodinfo.wolt.com"
+
+def _locale_from_url(u: str) -> str:
+    """Best-effort locale from the category URL path (default 'et')."""
+    try:
+        path = urlparse(u).path.strip("/")
+        # Wolt URLs often start with /et/est/...
+        first = (path.split("/") or ["et"])[0].lower()
+        if re.fullmatch(r"[a-z]{2,3}", first):
+            return first
+    except Exception:
+        pass
+    return "et"
+
+def _extract_venue_id_from_next(next_data: dict) -> Optional[str]:
+    """Dig a plausible 24-hex venue/restaurant id out of __NEXT_DATA__ payload."""
+    try:
+        props = (next_data.get("props") or {}).get("pageProps") or {}
+
+        def find_hex_id(obj):
+            if isinstance(obj, dict):
+                for k, v in obj.items():
+                    if isinstance(v, str) and re.fullmatch(r"[0-9a-f]{24}", v or ""):
+                        if any(t in k.lower() for t in ("venue", "restaurant", "store")):
+                            return v
+                    out = find_hex_id(v)
+                    if out:
+                        return out
+            elif isinstance(obj, list):
+                for it in obj:
+                    out = find_hex_id(it)
+                    if out:
+                        return out
+            return None
+
+        vid = find_hex_id(props)
+        if vid:
+            return vid
+    except Exception:
+        pass
+    return None
+
+async def _get_venue_id_from_page(page) -> Optional[str]:
+    """Try to find venue/store id from globals on the page."""
+    for varname in ["__NEXT_DATA__", "__APOLLO_STATE__"]:
+        try:
+            data = await page.evaluate(f"window.{varname} || null")
+            if not data:
+                continue
+            if varname == "__NEXT_DATA__":
+                vid = _extract_venue_id_from_next(data)
+                if vid:
+                    return vid
+
+            # As a fallback, search for any 24-hex field on keys that hint at venue/store
+            def pick_hex(d):
+                if isinstance(d, dict):
+                    for k, v in d.items():
+                        if isinstance(v, str) and re.fullmatch(r"[0-9a-f]{24}", v or ""):
+                            if any(t in k.lower() for t in ("venue", "restaurant", "store")):
+                                return v
+                        out = pick_hex(v)
+                        if out: return out
+                elif isinstance(d, list):
+                    for it in d:
+                        out = pick_hex(it)
+                        if out: return out
+                return None
+
+            vid = pick_hex(data)
+            if vid:
+                return vid
+        except Exception:
+            pass
+    return None
+
+async def _try_fetch_prodinfo_text(locale: str, venue_id: str, item_id: str) -> Optional[str]:
+    """Fetch product info sheet directly (no modal) and return visible text."""
+    if not (venue_id and item_id):
+        return None
+    url = f"{PRODINFO_HOST}/{locale}/{venue_id}/{item_id}"
+    try:
+        html = await _fetch_html(url)
+        # strip tags → plaintext
+        txt = re.sub(r"<[^>]+>", " ", html)
+        txt = re.sub(r"\s+", " ", txt).strip()
+        return txt or None
+    except Exception:
+        return None
+
 # ====== iframe scraping helpers (Wolt “Toote info”) ======
 
 async def _get_info_iframe(page) -> Any:
@@ -933,11 +1027,19 @@ async def _open_product_modal(page, item: Dict) -> bool:
             pass
     return await _open_product_modal_for_name(page, str(item.get("name") or "").strip())
 
-# --- modal enrichment (click Toote info; warn & skip on issues) ------------
+# --- modal enrichment + prodinfo direct (warn & skip on issues) ------------
 
 async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, max_to_probe: int = 120, strict_toote_info: bool = True) -> None:
-    """Open product modal → click 'Toote info' → parse iframe text. Warn & skip on failures."""
+    """
+    For each item:
+      1) Try to fetch prodinfo.wolt.com/{locale}/{venueId}/{itemId} directly (no modal).
+      2) If that fails, open modal -> "Toote info" -> read iframe.
+    Warn & skip on failures; never raise to kill shard.
+    """
     probed = 0
+    venue_id = await _get_venue_id_from_page(page)
+    locale = _locale_from_url(category_url)
+
     for item in items:
         if probed >= max_to_probe:
             break
@@ -945,6 +1047,30 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, ma
         if not name:
             continue
 
+        # --- (1) Direct prodinfo fetch (best effort, no UI flakiness)
+        if venue_id and item.get("id"):
+            try:
+                info_text = await _try_fetch_prodinfo_text(locale, venue_id, str(item["id"]))
+            except Exception:
+                info_text = None
+            if info_text:
+                m1 = GTIN_IN_ANY.search(info_text or "")
+                if m1:
+                    item["gtin"] = m1.group(1).strip()
+                m2 = TARNIJA_BLOCK_RE.search(info_text or "")
+                if m2:
+                    supplier = (m2.group(1) or "").strip()
+                    if supplier:
+                        item["supplier"] = supplier
+                        if not item.get("brand"):
+                            item["brand"] = supplier
+                # If we already got something useful, skip opening the modal
+                if item.get("gtin") or item.get("supplier"):
+                    probed += 1
+                    await page.wait_for_timeout(120)
+                    continue
+
+        # --- (2) Fallback to UI modal + iframe path
         opened = await _open_product_modal(page, item)
         if not opened:
             print(f'[warn] Skipping "{name}" — could not open modal ({category_url})')
@@ -957,7 +1083,6 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, ma
             if await info.count() == 0:
                 if strict_toote_info:
                     print(f'[warn] Skipping "{name}" — "Toote info" not found ({category_url})')
-                    # close sheet if possible
                     try:
                         await page.keyboard.press("Escape")
                     except Exception:
@@ -978,7 +1103,7 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, ma
             await page.wait_for_timeout(120)
             continue
 
-        # Read iframe text (if we got into info view)
+        # Read iframe text
         info_text = ""
         if info_clicked:
             try:
@@ -1020,7 +1145,7 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, ma
         await page.wait_for_timeout(160)
 
 async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info: bool = True) -> List[Dict]:
-    """Open a Wolt category with Playwright, capture JSON responses, then force Toote info scraping."""
+    """Open a Wolt category with Playwright, capture JSON responses, then enrich via prodinfo (or modal fallback)."""
     if async_playwright is None:
         raise RuntimeError("Playwright is required for Wolt fallback but is not installed.")
 
@@ -1081,7 +1206,7 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
 
             items = list(found.values())
 
-            # Toote info enrichment (warn & skip on failures)
+            # Enrich using prodinfo direct fetch first; modal as a fallback
             await _wolt_enrich_with_modal(page, items, cat_url, max_to_probe=120, strict_toote_info=strict_toote_info)
             return items
 
