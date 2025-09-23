@@ -7,12 +7,12 @@ Modes
 - ecoop: Crawls eCoop category pages with Playwright (handles JS/lazy-load + pagination).
          PDP extraction: title, brand, manufacturer (Tootja), image, price, EAN/GTIN,
          Tootekood, etc. Writes CSV; optional Postgres upsert.
-- wolt : Tries server data first, else Playwright fallback. In the PW fallback we:
-         • capture JSON used by Wolt SPA,
-         • open each product modal, click “Toote info”, switch into the iframe
-           and scrape GTIN + Tarnija info.
-         • NEW: if the modal cannot be opened, navigate to the item's deep link
-           (…/-itemid-<id>) and parse the item page (LD+JSON + visible blocks).
+- wolt : Tries server data first, else Playwright fallback. In the Wolt path we now:
+         • collect server payload (__NEXT_DATA__/Apollo/etc),
+         • derive venueId and item ids,
+         • call prodinfo.wolt.com/<lang>/<venueId>/<itemId> directly to read GTIN & Supplier,
+           avoiding modal clicks entirely,
+         • keep the old Playwright modal/iframe path as a fallback.
 
 DB alignment
 - Target table: public.staging_coop_products
@@ -55,7 +55,17 @@ CTX_TA_CODE = re.compile(r"(?:Tootekood)\s*[:\-]?\s*(\d{8,14})", re.IGNORECASE)
 CTX_MANUF   = re.compile(r"(?:Tootja|Valmistaja)\s*[:\-]?\s*([^\n<]{2,120})", re.IGNORECASE)
 
 GTIN_IN_ANY      = re.compile(r"\b(?:GTIN|EAN|Ribakood)\b[^\d]{0,20}(\d{8,14})", re.I)
-TARNIJA_BLOCK_RE = re.compile(r"(?:Tarnija info|Supplier)\s*[\n\r]+([^\n\r]{2,200})", re.I)
+TARNIJA_BLOCK_RE = re.compile(r"(?:Tarnija info|Supplier|Tootja info)\s*[\n\r]+([^\n\r]{2,200})", re.I)
+
+# prodinfo HTML patterns (server-rendered; fast & stable)
+PRODINFO_GTIN_RE = re.compile(r"<h3[^>]*>\s*GTIN\s*</h3>\s*<p[^>]*>(\d{8,14})</p>", re.I)
+PRODINFO_SUPPLIER_RE = re.compile(
+    r"<h3[^>]*>\s*(?:Tarnija info|Tootja info|Supplier)\s*</h3>\s*<p[^>]*>([^<]{2,200})</p>",
+    re.I
+)
+PRODINFO_JSONLD_GTIN_RE = re.compile(r'"gtin(?:8|12|13|14)"\s*:\s*"(\d{8,14})"', re.I)
+
+HEX24_RE = re.compile(r"\b[a-f0-9]{24}\b", re.I)
 
 def str2bool(v: Optional[str]) -> bool:
     return str(v or "").strip().lower() in {"1", "true", "t", "yes", "y", "on"}
@@ -728,7 +738,7 @@ async def _route_handler(route):
         except Exception:
             return
 
-# ---------- Wolt PW-network fallback ----------
+# ---------- Wolt PW-network fallback & prodinfo fetch ----------
 
 def _browser_headers(referer: Optional[str] = None) -> Dict[str, str]:
     h = {
@@ -808,6 +818,106 @@ async def _maybe_collect_json(resp, out_list: List[Any]):
     except Exception:
         pass
 
+# ====== venueId extraction & prodinfo helpers ===============================
+
+def _maybe_venue_id_from_obj(obj: Any) -> Optional[str]:
+    """
+    Heuristics to pull a 24-hex venueId from nested payloads.
+    Looks for keys like 'venueId', 'venue', '_id', 'id' near 'venue*'.
+    """
+    try:
+        if isinstance(obj, dict):
+            # direct keys
+            for k in ("venueId", "venue_id", "venueID"):
+                if k in obj and isinstance(obj[k], str) and HEX24_RE.fullmatch(obj[k] or ""):
+                    return obj[k]
+            # nested venue objects
+            for key, val in obj.items():
+                lk = str(key).lower()
+                if "venue" in lk and isinstance(val, (dict, list, str)):
+                    # common forms: {"venue":{"_id":"<24hex>"}} or {"venueId":"<24hex>"}
+                    if isinstance(val, dict):
+                        for cand in ("_id", "id"):
+                            v = val.get(cand)
+                            if isinstance(v, str) and HEX24_RE.fullmatch(v):
+                                return v
+                    if isinstance(val, str) and HEX24_RE.fullmatch(val):
+                        return val
+                # generic id fields that look like 24hex
+                if str(key).lower().endswith("id") and isinstance(val, str) and HEX24_RE.fullmatch(val):
+                    # but only if some sibling hints 'venue'
+                    if any("venue" in str(sib).lower() for sib in obj.keys()):
+                        return val
+            # recurse
+            for v in obj.values():
+                out = _maybe_venue_id_from_obj(v)
+                if out:
+                    return out
+        elif isinstance(obj, list):
+            for it in obj:
+                out = _maybe_venue_id_from_obj(it)
+                if out:
+                    return out
+    except Exception:
+        return None
+    return None
+
+def _extract_venue_id_from_blobs(blobs: List[Any]) -> Optional[str]:
+    for b in blobs:
+        vid = _maybe_venue_id_from_obj(b)
+        if vid:
+            return vid
+    return None
+
+async def _fetch_prodinfo_fields(lang: str, venue_id: str, item_id: str) -> Dict[str, Optional[str]]:
+    """
+    GET prodinfo.wolt.com/<lang>/<venue_id>/<item_id> (query params optional)
+    Return dict with gtin (normalized) and supplier/brand when found.
+    """
+    url = f"https://prodinfo.wolt.com/{lang}/{venue_id}/{item_id}"
+    try:
+        html = await _fetch_html(url)
+    except Exception as e:
+        return {"gtin": None, "supplier": None}
+
+    gtin = None
+    m = PRODINFO_GTIN_RE.search(html or "")
+    if m:
+        gtin = normalize_ean(m.group(1))
+    if not gtin:
+        m2 = PRODINFO_JSONLD_GTIN_RE.search(html or "")
+        if m2:
+            gtin = normalize_ean(m2.group(1))
+
+    supplier = None
+    m3 = PRODINFO_SUPPLIER_RE.search(html or "")
+    if m3:
+        supplier = (m3.group(1) or "").strip()
+
+    return {"gtin": gtin, "supplier": supplier}
+
+async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str, max_to_probe: int = 180) -> None:
+    probed = 0
+    for it in items:
+        if probed >= max_to_probe:
+            break
+        iid = str(it.get("id") or "")
+        if not iid or not HEX24_RE.fullmatch(iid):
+            continue
+        try:
+            info = await _fetch_prodinfo_fields(lang, venue_id, iid)
+            if info.get("gtin"):
+                it["gtin"] = info["gtin"]
+            if info.get("supplier"):
+                it["supplier"] = info["supplier"]
+                if not it.get("brand"):
+                    it["brand"] = info["supplier"]
+        except Exception:
+            pass
+        probed += 1
+        # be nice
+        await asyncio.sleep(0.05)
+
 # ====== iframe scraping helpers (Wolt “Toote info”) ======
 
 async def _get_info_iframe(page) -> Any:
@@ -836,129 +946,6 @@ async def _read_iframe_text_strict(page) -> str:
         return txt
     except PWTimeout:
         raise RuntimeError("Timed out reading iframe body")
-
-# --- NEW: direct item-page scraping helpers --------------------------------
-
-async def _find_product_href_by_name(page, target_name: str) -> Optional[str]:
-    """
-    Try to locate the card/anchor for a product (by name) and return its deep-link href.
-    Wolt cards usually contain an <a href="/...-itemid-<id>"> that opens a modal via JS.
-    """
-    name = target_name.strip()
-    # 1) exact role matches
-    for loc in [page.get_by_role("link", name=name, exact=True),
-                page.get_by_role("button", name=name, exact=True)]:
-        try:
-            if await loc.count() > 0:
-                href = await loc.first.get_attribute("href")
-                if href:
-                    return href
-        except Exception:
-            pass
-    # 2) regex-ish search in anchors that contain name
-    try:
-        anchors = page.locator("a").filter(has_text=name)
-        if await anchors.count() > 0:
-            href = await anchors.first.get_attribute("href")
-            if href:
-                return href
-    except Exception:
-        pass
-    # 3) card container → inside anchor
-    try:
-        card = page.locator("article, div").filter(has_text=name).first
-        if await card.count() > 0:
-            a = card.locator("a[href*='itemid-']").first
-            if await a.count() > 0:
-                href = await a.get_attribute("href")
-                if href:
-                    return href
-    except Exception:
-        pass
-    # 4) heuristic: any anchor with itemid that is near a node with the name
-    try:
-        a = page.locator("a[href*='itemid-']").first
-        if await a.count() > 0:
-            href = await a.get_attribute("href")
-            if href:
-                return href
-    except Exception:
-        pass
-    return None
-
-async def _parse_item_page_ld(page) -> Dict[str, Any]:
-    """Parse product LD+JSON on the individual Wolt item page."""
-    out: Dict[str, Any] = {}
-    try:
-        scripts = await page.eval_on_selector_all('script[type="application/ld+json"]', "els => els.map(e => e.textContent)")
-        for s in scripts:
-            try:
-                obj = json.loads(s)
-            except Exception:
-                continue
-            if isinstance(obj, dict) and obj.get("@type") == "Product":
-                out.update(obj)
-    except Exception:
-        pass
-    return out
-
-async def _read_item_page_labels(page) -> Dict[str, str]:
-    """Read visible 'GTIN', 'Tootja info', 'Tarnija info' labels from the item page."""
-    result: Dict[str, str] = {}
-    async def _get_after(h3_text: str) -> Optional[str]:
-        try:
-            loc = page.locator(f"xpath=//h3[normalize-space()='{h3_text}']/following-sibling::*[1]")
-            if await loc.count() > 0:
-                txt = await loc.first.inner_text()
-                if txt and txt.strip():
-                    return txt.strip()
-        except Exception:
-            return None
-        return None
-    for key, label in [("gtin", "GTIN"), ("manufacturer", "Tootja info"), ("supplier", "Tarnija info")]:
-        v = await _get_after(label)
-        if v:
-            result[key] = v
-    return result
-
-async def _enrich_from_item_deeplink(page, category_url: str, item: Dict, href: str) -> bool:
-    """
-    Navigate to the item's deep link and try to extract GTIN & supplier.
-    Returns True if we enriched anything.
-    """
-    enriched = False
-    # Make href absolute if needed
-    if href.startswith("/"):
-        parsed = urlparse(category_url)
-        href = f"{parsed.scheme}://{parsed.netloc}{href}"
-    try:
-        await page.goto(href, wait_until="domcontentloaded")
-        await wait_cookie_banner(page)
-        # 1) Try LD+JSON
-        ld = await _parse_item_page_ld(page)
-        for k in ("gtin14", "gtin13", "gtin", "gtin8", "gtin12"):
-            if ld.get(k):
-                item["gtin"] = clean_digits(str(ld[k]))
-                enriched = True
-                break
-        # 2) Visible labels (GTIN / Tootja info / Tarnija info)
-        labels = await _read_item_page_labels(page)
-        if labels.get("gtin"):
-            item["gtin"] = clean_digits(labels["gtin"])
-            enriched = True
-        if labels.get("supplier"):
-            item["supplier"] = labels["supplier"]
-            if not item.get("brand"):
-                item["brand"] = labels["supplier"]
-            enriched = True
-        if labels.get("manufacturer"):
-            # keep if we did not already have manufacturer
-            item.setdefault("manufacturer", labels["manufacturer"])
-            enriched = True or enriched
-    except Exception as e:
-        print(f"[warn] Deep-link parse failed: {href} → {e}")
-        return False
-    return enriched
 
 # --- modal-open helpers (mobile & desktop) ---------------------------------
 
@@ -1058,10 +1045,10 @@ async def _open_product_modal(page, item: Dict) -> bool:
             pass
     return await _open_product_modal_for_name(page, str(item.get("name") or "").strip())
 
-# --- modal enrichment (click Toote info; or deep-link if modal fails) ------
+# --- modal enrichment (kept as fallback) -----------------------------------
 
 async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, max_to_probe: int = 120, strict_toote_info: bool = True) -> None:
-    """Open product modal → click 'Toote info' → parse iframe text. If modal fails, follow deep-link item page."""
+    """Open product modal → click 'Toote info' → parse iframe text. Warn & skip on failures."""
     probed = 0
     for item in items:
         if probed >= max_to_probe:
@@ -1072,29 +1059,8 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, ma
 
         opened = await _open_product_modal(page, item)
         if not opened:
-            # NEW: try to fetch the deep-link and parse the product page directly
-            href = await _find_product_href_by_name(page, name)
-            if href:
-                ok = await _enrich_from_item_deeplink(page, category_url, item, href)
-                if not ok:
-                    print(f'[warn] Skipping "{name}" — deep-link parse failed ({category_url})')
-                else:
-                    # navigate back to category to continue
-                    try:
-                        await page.go_back()
-                    except Exception:
-                        try:
-                            await page.goto(category_url, wait_until="domcontentloaded")
-                        except Exception:
-                            pass
-                probed += 1
-                await page.wait_for_timeout(120)
-                continue
-            else:
-                print(f'[warn] Skipping "{name}" — could not open modal and no item href found ({category_url})')
-                probed += 1
-                await page.wait_for_timeout(120)
-                continue
+            print(f'[warn] Skipping "{name}" — could not open modal ({category_url})')
+            continue
 
         # Click "Toote info"
         info_clicked = False
@@ -1138,7 +1104,6 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, ma
                 await page.wait_for_timeout(120)
                 continue
 
-        # Extract GTIN & supplier
         if info_text:
             m1 = GTIN_IN_ANY.search(info_text or "")
             if m1:
@@ -1151,7 +1116,7 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, ma
                     if not item.get("brand"):
                         item["brand"] = supplier
 
-        # Close modal
+        # Close
         try:
             close_btn = page.locator('button[aria-label*="Close"], button:has-text("×")')
             if await close_btn.count() > 0:
@@ -1164,12 +1129,16 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, ma
         probed += 1
         await page.wait_for_timeout(160)
 
-async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info: bool = True) -> List[Dict]:
-    """Open a Wolt category with Playwright, capture JSON responses, then force Toote info scraping / deep-link parsing."""
+async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info: bool = True) -> Tuple[List[Dict], List[Any]]:
+    """
+    Open a Wolt category with Playwright, capture JSON responses.
+    Returns (items, blobs) where blobs include window vars for venueId sniffing.
+    """
     if async_playwright is None:
         raise RuntimeError("Playwright is required for Wolt fallback but is not installed.")
 
     found: Dict[str, Dict] = {}
+    blobs: List[Any] = []
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=True)
@@ -1199,36 +1168,32 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
         await context.route("**/*", route_filter)
 
         page = await context.new_page()
-        json_blobs: List[Any] = []
-        page.on("response", lambda resp: asyncio.create_task(_maybe_collect_json(resp, json_blobs)))
+        page.on("response", lambda resp: asyncio.create_task(_maybe_collect_json(resp, blobs)))
 
         try:
             await page.goto(cat_url, wait_until="networkidle")
             await wait_cookie_banner(page)
-            for _ in range(5):
+            for _ in range(4):
                 await page.mouse.wheel(0, 1500)
-                await page.wait_for_timeout(300)
+                await page.wait_for_timeout(250)
 
-            # Try window states too
+            # window state
             for varname in ["__APOLLO_STATE__", "__NEXT_DATA__", "__NUXT__", "__INITIAL_STATE__", "__REACT_QUERY_STATE__", "__REDUX_STATE__"]:
                 try:
                     data = await page.evaluate(f"window.{varname} || null")
                     if data:
-                        json_blobs.append(data)
+                        blobs.append(data)
                 except Exception:
                     pass
 
-            for blob in json_blobs:
+            # collect items from blobs into 'found'
+            for blob in blobs:
                 try:
                     _walk_collect_items(blob, found)
                 except Exception:
                     pass
 
-            items = list(found.values())
-
-            # Toote info / deep-link enrichment (warn & skip on failures)
-            await _wolt_enrich_with_modal(page, items, cat_url, max_to_probe=120, strict_toote_info=strict_toote_info)
-            return items
+            return list(found.values()), blobs
 
         finally:
             await context.close()
@@ -1292,29 +1257,53 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
 async def run_wolt(args, categories: List[str], on_rows) -> None:
     store_host = _wolt_store_host(categories[0] if categories else args.region)
     force_pw = bool(args.wolt_force_playwright or str2bool(os.getenv("WOLT_FORCE_PLAYWRIGHT")))
-    strict_toote_info = True  # but we warn & skip instead of raising
+    strict_toote_info = True  # still warn & skip instead of raising
+
+    # language from URL path (defaults to et)
+    def _lang_from_url(u: str) -> str:
+        m = re.search(r"https?://[^/]+/([a-z]{2})(?:/|$)", u, re.I)
+        return (m.group(1).lower() if m else "et")
 
     for cat in categories:
         print(f"[cat-wolt] {cat}")
         try:
             payload = None if force_pw else await _load_wolt_payload(cat)
-            if not payload:
-                print(f"[info] forcing Playwright fallback for {cat}")
-                items = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
-                rows = [_extract_wolt_row(item, cat, store_host) for item in items]
-                if args.max_products and args.max_products > 0:
-                    rows = rows[: args.max_products]
-                print(f"[info] category rows: {len(rows)} (pw-fallback)")
-                on_rows(rows)
-                continue
 
-            found: Dict[str, Dict] = {}
-            _walk_collect_items(payload, found)
-            rows: List[Dict] = [_extract_wolt_row(item, cat, store_host) for item in found.values()]
+            if payload:
+                # server payload path
+                found: Dict[str, Dict] = {}
+                _walk_collect_items(payload, found)
+                items = list(found.values())
+                blobs = [payload]
+            else:
+                print(f"[info] forcing Playwright fallback for {cat}")
+                items, blobs = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
+
+            # NEW: prodinfo enrichment (preferred)
+            venue_id = _extract_venue_id_from_blobs(blobs) or ""
+            if venue_id:
+                lang = _lang_from_url(cat)
+                await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=180)
+            else:
+                print("[warn] venueId not found in payload — skipping direct prodinfo enrichment")
+
+            # If venueId missing, keep the old modal flow to try to salvage some GTINs
+            if not venue_id and not payload:
+                try:
+                    # use PW page enrichment only when we were already in PW branch
+                    print("[info] trying modal/iframe enrichment fallback")
+                    # Re-open the category and do modal enrichment (lightweight)
+                    _items_pw, _ = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
+                    items = _items_pw  # enriched in-place inside the helper
+                except Exception as e:
+                    print(f"[warn] modal/iframe enrichment failed: {e}")
+
+            rows = [_extract_wolt_row(item, cat, store_host) for item in items]
             if args.max_products and args.max_products > 0:
                 rows = rows[: args.max_products]
-            print(f"[info] category rows: {len(rows)}")
+            print(f"[info] category rows: {len(rows)}" + (" (pw-fallback)" if not payload else ""))
             on_rows(rows)
+
         except Exception as e:
             # Prefer not to kill the whole shard; log and continue
             print(f"[warn] Wolt category failed {cat}: {e}")
