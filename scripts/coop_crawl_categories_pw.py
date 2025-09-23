@@ -10,10 +10,9 @@ Modes
 - wolt : Tries server data first, else Playwright fallback. In the Wolt path we now:
          • collect server payload (__NEXT_DATA__/Apollo/etc),
          • derive venueId and item ids,
-         • call prodinfo.wolt.com/<lang>/<venueId>/<itemId> directly to read GTIN & Supplier,
+         • call prodinfo.wolt.com/<lang>/<venueId>/<itemId> directly to read GTIN, Supplier & Name,
            avoiding modal clicks entirely,
-         • keep the old Playwright modal/iframe path as a fallback,
-         • and include a DOM fallback if JSON sniff finds 0 items.
+         • keep the old Playwright modal/iframe path as a fallback.
 
 DB alignment
 - Target table: public.staging_coop_products
@@ -65,6 +64,7 @@ PRODINFO_SUPPLIER_RE = re.compile(
     re.I
 )
 PRODINFO_JSONLD_GTIN_RE = re.compile(r'"gtin(?:8|12|13|14)"\s*:\s*"(\d{8,14})"', re.I)
+PRODINFO_TITLE_RE = re.compile(r"<h2[^>]*>([^<]{2,200})</h2>", re.I)
 
 HEX24_RE = re.compile(r"\b[a-f0-9]{24}\b", re.I)
 
@@ -532,9 +532,11 @@ def _html_get_apollo_state(html: str) -> Optional[Dict]:
 def _walk_collect_items(obj: Any, found: Dict[str, Dict]) -> None:
     if isinstance(obj, dict):
         has_name = isinstance(obj.get("name"), str) and obj.get("name").strip()
-        price_keys = ("price", "baseprice", "base_price", "unit_price", "total_price", "current_price")
-        has_priceish = any(k in obj for k in price_keys)
-        if has_name and has_priceish:
+        # Allow “item-like” objects even if price is missing (some feeds drop it)
+        priceish_keys = ("price", "baseprice", "base_price", "unit_price", "total_price", "current_price", "priceCurrency")
+        has_priceish = any(k in obj for k in priceish_keys)
+        has_idish = any(k in obj for k in ("id", "itemId", "itemID", "_id", "slug"))
+        if has_name and (has_priceish or has_idish):
             key = str(obj.get("id") or obj.get("slug") or obj.get("name"))
             found.setdefault(key, obj)
         for v in obj.values():
@@ -819,13 +821,9 @@ async def _maybe_collect_json(resp, out_list: List[Any]):
     except Exception:
         pass
 
-# ====== venueId extraction & prodinfo helpers ===============================
+# ====== venueId & prodinfo helpers =========================================
 
 def _maybe_venue_id_from_obj(obj: Any) -> Optional[str]:
-    """
-    Heuristics to pull a 24-hex venueId from nested payloads.
-    Looks for keys like 'venueId', 'venue', '_id', 'id' near 'venue*'.
-    """
     try:
         if isinstance(obj, dict):
             for k in ("venueId", "venue_id", "venueID"):
@@ -857,6 +855,23 @@ def _maybe_venue_id_from_obj(obj: Any) -> Optional[str]:
         return None
     return None
 
+def _extract_venue_id_from_html(html: str) -> Optional[str]:
+    # e.g., https://imageproxy.wolt.com/menu/menu-images/<venueId>/...
+    m = re.search(r"/menu-images/([a-f0-9]{24})/", html, re.I)
+    if m:
+        return m.group(1)
+    # fallback: first 24-hex anywhere
+    m2 = HEX24_RE.search(html or "")
+    return m2.group(0) if m2 else None
+
+def _extract_venue_id_from_blobs_or_html(blobs: List[Any], html: Optional[str]) -> Optional[str]:
+    vid = _extract_venue_id_from_blobs(blobs)
+    if vid:
+        return vid
+    if html:
+        return _extract_venue_id_from_html(html)
+    return None
+
 def _extract_venue_id_from_blobs(blobs: List[Any]) -> Optional[str]:
     for b in blobs:
         vid = _maybe_venue_id_from_obj(b)
@@ -866,14 +881,14 @@ def _extract_venue_id_from_blobs(blobs: List[Any]) -> Optional[str]:
 
 async def _fetch_prodinfo_fields(lang: str, venue_id: str, item_id: str) -> Dict[str, Optional[str]]:
     """
-    GET prodinfo.wolt.com/<lang>/<venue_id>/<item_id> (query params optional)
-    Return dict with gtin (normalized) and supplier/brand when found.
+    GET prodinfo.wolt.com/<lang>/<venue_id>/<item_id>
+    Return dict with gtin, supplier, and name.
     """
     url = f"https://prodinfo.wolt.com/{lang}/{venue_id}/{item_id}"
     try:
         html = await _fetch_html(url)
     except Exception:
-        return {"gtin": None, "supplier": None}
+        return {"gtin": None, "supplier": None, "name": None}
 
     gtin = None
     m = PRODINFO_GTIN_RE.search(html or "")
@@ -889,9 +904,14 @@ async def _fetch_prodinfo_fields(lang: str, venue_id: str, item_id: str) -> Dict
     if m3:
         supplier = (m3.group(1) or "").strip()
 
-    return {"gtin": gtin, "supplier": supplier}
+    name = None
+    m4 = PRODINFO_TITLE_RE.search(html or "")
+    if m4:
+        name = (m4.group(1) or "").strip()
 
-async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str, max_to_probe: int = 180) -> None:
+    return {"gtin": gtin, "supplier": supplier, "name": name}
+
+async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str, max_to_probe: int = 240) -> None:
     probed = 0
     for it in items:
         if probed >= max_to_probe:
@@ -907,15 +927,16 @@ async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str
                 it["supplier"] = info["supplier"]
                 if not it.get("brand"):
                     it["brand"] = info["supplier"]
+            if info.get("name") and not it.get("name"):
+                it["name"] = info["name"]
         except Exception:
             pass
         probed += 1
-        await asyncio.sleep(0.05)
+        await asyncio.sleep(0.04)
 
-# ====== iframe scraping helpers (Wolt “Toote info”) ======
+# ====== iframe scraping helpers (old fallback) ==============================
 
 async def _get_info_iframe(page) -> Any:
-    """Wait for the product-info iframe and return the Frame object."""
     await page.wait_for_timeout(200)
     for _ in range(25):  # up to ~5s
         for f in page.frames:
@@ -941,10 +962,9 @@ async def _read_iframe_text_strict(page) -> str:
     except PWTimeout:
         raise RuntimeError("Timed out reading iframe body")
 
-# --- modal-open helpers (mobile & desktop) ---------------------------------
+# --- modal helpers (kept for completeness) ---------------------------------
 
 async def _modal_opened(page) -> bool:
-    """Heuristic: modal/bottom sheet visible on mobile OR desktop."""
     checks = [
         page.get_by_role("dialog"),
         page.locator('a:has-text("Toote info"), button:has-text("Toote info"), a:has-text("Product info"), button:has-text("Product info")'),
@@ -960,10 +980,6 @@ async def _modal_opened(page) -> bool:
     return False
 
 async def _open_product_modal_for_name(page, target_name: str) -> bool:
-    """
-    Try to open product modal by multiple strategies (desktop & mobile).
-    Returns True if opened, False otherwise.
-    """
     norm = re.sub(r"\s+", " ", target_name).strip()
     short = re.sub(r"[^\w\s]", " ", norm).split(" ")[0:3]
     rx = ".*".join(map(re.escape, short)) if short else re.escape(norm)
@@ -1022,7 +1038,6 @@ async def _open_product_modal_for_name(page, target_name: str) -> bool:
     return False
 
 async def _open_product_modal(page, item: Dict) -> bool:
-    """Try by ID first, then fallback to name. Returns True/False."""
     iid = item.get("id")
     if iid:
         sel = f'a[href*="itemid-{iid}"], a[href*="item-{iid}"], a[href*="itemid={iid}"]'
@@ -1039,10 +1054,7 @@ async def _open_product_modal(page, item: Dict) -> bool:
             pass
     return await _open_product_modal_for_name(page, str(item.get("name") or "").strip())
 
-# --- modal enrichment (kept as fallback) -----------------------------------
-
 async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, max_to_probe: int = 120, strict_toote_info: bool = True) -> None:
-    """Open product modal → click 'Toote info' → parse iframe text. Warn & skip on failures."""
     probed = 0
     for item in items:
         if probed >= max_to_probe:
@@ -1056,7 +1068,6 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, ma
             print(f'[warn] Skipping "{name}" — could not open modal ({category_url})')
             continue
 
-        # Click "Toote info"
         info_clicked = False
         try:
             info = page.locator('a:has-text("Toote info"), button:has-text("Toote info"), a:has-text("Product info"), button:has-text("Product info")')
@@ -1083,7 +1094,6 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, ma
             await page.wait_for_timeout(120)
             continue
 
-        # Read iframe text (if we got into info view)
         info_text = ""
         if info_clicked:
             try:
@@ -1110,7 +1120,6 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, ma
                     if not item.get("brand"):
                         item["brand"] = supplier
 
-        # Close
         try:
             close_btn = page.locator('button[aria-label*="Close"], button:has-text("×")')
             if await close_btn.count() > 0:
@@ -1123,11 +1132,10 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, ma
         probed += 1
         await page.wait_for_timeout(160)
 
-async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info: bool = True) -> Tuple[List[Dict], List[Any]]:
+async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info: bool = True) -> Tuple[List[Dict], List[Any], str]:
     """
-    Open a Wolt category with Playwright, capture JSON responses. If JSON yields
-    no items, fall back to scraping product cards from the DOM.
-    Returns (items, blobs) where blobs include window vars for venueId sniffing.
+    Open a Wolt category with Playwright, capture JSON responses, and return page HTML too.
+    Returns (items, blobs, html).
     """
     if async_playwright is None:
         raise RuntimeError("Playwright is required for Wolt fallback but is not installed.")
@@ -1165,13 +1173,13 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
         page = await context.new_page()
         page.on("response", lambda resp: asyncio.create_task(_maybe_collect_json(resp, blobs)))
 
+        html = ""
         try:
             await page.goto(cat_url, wait_until="networkidle")
             await wait_cookie_banner(page)
-
-            # Make sure content mounts and lazy sections load
+            # More scrolling to trigger lazy-loaders
             for _ in range(10):
-                await page.mouse.wheel(0, 1600)
+                await page.mouse.wheel(0, 1500)
                 await page.wait_for_timeout(250)
 
             # window state
@@ -1183,6 +1191,8 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
                 except Exception:
                     pass
 
+            html = await page.content()
+
             # collect items from blobs into 'found'
             for blob in blobs:
                 try:
@@ -1190,41 +1200,13 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
                 except Exception:
                     pass
 
-            items = list(found.values())
+            # EXTRA: if still empty, extract item ids from HTML anchors
+            if not found:
+                ids = set(re.findall(r"(?:itemid-|item-)([a-f0-9]{24})", html or "", re.I))
+                for iid in ids:
+                    found[iid] = {"id": iid}  # prodinfo will fill name/brand/gtin later
 
-            # --- DOM fallback when JSON found 0 items ---
-            if not items:
-                # Get product names
-                try:
-                    names = await page.eval_on_selector_all(
-                        ('[data-test-id="menu-item-card"] h3, [data-testid="menu-item-card"] h3, '
-                         '[role="listitem"] h3, [data-test-id="catalog-item"] h3, '
-                         'h3:has(+ div [data-test-id*="price"])'),
-                        "els => els.map(e => (e.textContent||'').trim()).filter(Boolean)"
-                    )
-                except Exception:
-                    names = []
-                # Try to pair names with item ids from hrefs
-                try:
-                    hrefs = await page.eval_on_selector_all(
-                        'a[href*="itemid-"], a[href*="item-"], a[href*="itemId="], a[href*="#item-"]',
-                        "els => els.map(e => ({href: e.getAttribute('href'), text: (e.textContent||'').trim()}))"
-                    )
-                except Exception:
-                    hrefs = []
-
-                id_map: Dict[str, str] = {}
-                for h in hrefs:
-                    href = (h.get("href") or "")
-                    m = re.search(r"(?:itemid-|item-|itemId=|#item-)([A-Za-z0-9]+)", href)
-                    if m:
-                        id_map[h.get("text") or ""] = m.group(1)
-
-                # Build minimal items for enrichment
-                uniq_names = list(dict.fromkeys(names))
-                items = [{"id": id_map.get(nm), "name": nm} for nm in uniq_names]
-
-            return items, blobs
+            return list(found.values()), blobs, html
 
         finally:
             await context.close()
@@ -1288,7 +1270,7 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
 async def run_wolt(args, categories: List[str], on_rows) -> None:
     store_host = _wolt_store_host(categories[0] if categories else args.region)
     force_pw = bool(args.wolt_force_playwright or str2bool(os.getenv("WOLT_FORCE_PLAYWRIGHT")))
-    strict_toote_info = True  # still warn & skip instead of raising
+    strict_toote_info = True  # warn & skip instead of raising
 
     # language from URL path (defaults to et)
     def _lang_from_url(u: str) -> str:
@@ -1300,35 +1282,36 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
         try:
             payload = None if force_pw else await _load_wolt_payload(cat)
 
-            items: List[Dict] = []
-            blobs: List[Any] = []
-
             if payload:
                 found: Dict[str, Dict] = {}
                 _walk_collect_items(payload, found)
                 items = list(found.values())
                 blobs = [payload]
-                if not items:
-                    print("[info] server payload had 0 items — switching to Playwright+DOM fallback")
-                    items, blobs = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
+                html = ""
             else:
                 print(f"[info] forcing Playwright fallback for {cat}")
-                items, blobs = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
+                items, blobs, html = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
 
-            # Preferred: prodinfo enrichment
-            venue_id = _extract_venue_id_from_blobs(blobs) or ""
+            # venueId from blobs OR page HTML
+            venue_id = _extract_venue_id_from_blobs_or_html(blobs, html)
             if venue_id:
                 lang = _lang_from_url(cat)
-                await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=180)
+                await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=240)
             else:
-                print("[warn] venueId not found in payload — skipping direct prodinfo enrichment")
+                print("[warn] venueId not found — skipping direct prodinfo enrichment")
 
-            # If we had to use PW and still have weak items, try modal/iframe last
-            if not venue_id and (not payload):
+            # If still nothing enriched and we were already in PW, try (old) modal flow
+            if not venue_id and not payload and items:
                 try:
                     print("[info] trying modal/iframe enrichment fallback")
-                    _ = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
-                    # (items are already enriched in-place when modal path succeeds)
+                    # Re-open the category and do modal enrichment (lightweight)
+                    _items_pw, _, _ = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
+                    # Enrichment happens inside the modal helper; merge GTIN/supplier by id
+                    id2 = {str(i.get("id")): i for i in _items_pw if i.get("id")}
+                    for it in items:
+                        iid = str(it.get("id") or "")
+                        if iid and iid in id2:
+                            it.update({k: v for k, v in id2[iid].items() if k in ("gtin","supplier","brand") and v})
                 except Exception as e:
                     print(f"[warn] modal/iframe enrichment failed: {e}")
 
