@@ -12,7 +12,8 @@ Modes
          • derive venueId and item ids,
          • call prodinfo.wolt.com/<lang>/<venueId>/<itemId> directly to read GTIN & Supplier,
            avoiding modal clicks entirely,
-         • keep the old Playwright modal/iframe path as a fallback.
+         • keep the old Playwright modal/iframe path as a fallback,
+         • and include a DOM fallback if JSON sniff finds 0 items.
 
 DB alignment
 - Target table: public.staging_coop_products
@@ -827,15 +828,12 @@ def _maybe_venue_id_from_obj(obj: Any) -> Optional[str]:
     """
     try:
         if isinstance(obj, dict):
-            # direct keys
             for k in ("venueId", "venue_id", "venueID"):
                 if k in obj and isinstance(obj[k], str) and HEX24_RE.fullmatch(obj[k] or ""):
                     return obj[k]
-            # nested venue objects
             for key, val in obj.items():
                 lk = str(key).lower()
                 if "venue" in lk and isinstance(val, (dict, list, str)):
-                    # common forms: {"venue":{"_id":"<24hex>"}} or {"venueId":"<24hex>"}
                     if isinstance(val, dict):
                         for cand in ("_id", "id"):
                             v = val.get(cand)
@@ -843,12 +841,9 @@ def _maybe_venue_id_from_obj(obj: Any) -> Optional[str]:
                                 return v
                     if isinstance(val, str) and HEX24_RE.fullmatch(val):
                         return val
-                # generic id fields that look like 24hex
                 if str(key).lower().endswith("id") and isinstance(val, str) and HEX24_RE.fullmatch(val):
-                    # but only if some sibling hints 'venue'
                     if any("venue" in str(sib).lower() for sib in obj.keys()):
                         return val
-            # recurse
             for v in obj.values():
                 out = _maybe_venue_id_from_obj(v)
                 if out:
@@ -877,7 +872,7 @@ async def _fetch_prodinfo_fields(lang: str, venue_id: str, item_id: str) -> Dict
     url = f"https://prodinfo.wolt.com/{lang}/{venue_id}/{item_id}"
     try:
         html = await _fetch_html(url)
-    except Exception as e:
+    except Exception:
         return {"gtin": None, "supplier": None}
 
     gtin = None
@@ -915,7 +910,6 @@ async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str
         except Exception:
             pass
         probed += 1
-        # be nice
         await asyncio.sleep(0.05)
 
 # ====== iframe scraping helpers (Wolt “Toote info”) ======
@@ -1131,7 +1125,8 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, ma
 
 async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info: bool = True) -> Tuple[List[Dict], List[Any]]:
     """
-    Open a Wolt category with Playwright, capture JSON responses.
+    Open a Wolt category with Playwright, capture JSON responses. If JSON yields
+    no items, fall back to scraping product cards from the DOM.
     Returns (items, blobs) where blobs include window vars for venueId sniffing.
     """
     if async_playwright is None:
@@ -1173,8 +1168,10 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
         try:
             await page.goto(cat_url, wait_until="networkidle")
             await wait_cookie_banner(page)
-            for _ in range(4):
-                await page.mouse.wheel(0, 1500)
+
+            # Make sure content mounts and lazy sections load
+            for _ in range(10):
+                await page.mouse.wheel(0, 1600)
                 await page.wait_for_timeout(250)
 
             # window state
@@ -1193,7 +1190,41 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
                 except Exception:
                     pass
 
-            return list(found.values()), blobs
+            items = list(found.values())
+
+            # --- DOM fallback when JSON found 0 items ---
+            if not items:
+                # Get product names
+                try:
+                    names = await page.eval_on_selector_all(
+                        ('[data-test-id="menu-item-card"] h3, [data-testid="menu-item-card"] h3, '
+                         '[role="listitem"] h3, [data-test-id="catalog-item"] h3, '
+                         'h3:has(+ div [data-test-id*="price"])'),
+                        "els => els.map(e => (e.textContent||'').trim()).filter(Boolean)"
+                    )
+                except Exception:
+                    names = []
+                # Try to pair names with item ids from hrefs
+                try:
+                    hrefs = await page.eval_on_selector_all(
+                        'a[href*="itemid-"], a[href*="item-"], a[href*="itemId="], a[href*="#item-"]',
+                        "els => els.map(e => ({href: e.getAttribute('href'), text: (e.textContent||'').trim()}))"
+                    )
+                except Exception:
+                    hrefs = []
+
+                id_map: Dict[str, str] = {}
+                for h in hrefs:
+                    href = (h.get("href") or "")
+                    m = re.search(r"(?:itemid-|item-|itemId=|#item-)([A-Za-z0-9]+)", href)
+                    if m:
+                        id_map[h.get("text") or ""] = m.group(1)
+
+                # Build minimal items for enrichment
+                uniq_names = list(dict.fromkeys(names))
+                items = [{"id": id_map.get(nm), "name": nm} for nm in uniq_names]
+
+            return items, blobs
 
         finally:
             await context.close()
@@ -1269,17 +1300,22 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
         try:
             payload = None if force_pw else await _load_wolt_payload(cat)
 
+            items: List[Dict] = []
+            blobs: List[Any] = []
+
             if payload:
-                # server payload path
                 found: Dict[str, Dict] = {}
                 _walk_collect_items(payload, found)
                 items = list(found.values())
                 blobs = [payload]
+                if not items:
+                    print("[info] server payload had 0 items — switching to Playwright+DOM fallback")
+                    items, blobs = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
             else:
                 print(f"[info] forcing Playwright fallback for {cat}")
                 items, blobs = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
 
-            # NEW: prodinfo enrichment (preferred)
+            # Preferred: prodinfo enrichment
             venue_id = _extract_venue_id_from_blobs(blobs) or ""
             if venue_id:
                 lang = _lang_from_url(cat)
@@ -1287,14 +1323,12 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
             else:
                 print("[warn] venueId not found in payload — skipping direct prodinfo enrichment")
 
-            # If venueId missing, keep the old modal flow to try to salvage some GTINs
-            if not venue_id and not payload:
+            # If we had to use PW and still have weak items, try modal/iframe last
+            if not venue_id and (not payload):
                 try:
-                    # use PW page enrichment only when we were already in PW branch
                     print("[info] trying modal/iframe enrichment fallback")
-                    # Re-open the category and do modal enrichment (lightweight)
-                    _items_pw, _ = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
-                    items = _items_pw  # enriched in-place inside the helper
+                    _ = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
+                    # (items are already enriched in-place when modal path succeeds)
                 except Exception as e:
                     print(f"[warn] modal/iframe enrichment failed: {e}")
 
@@ -1305,7 +1339,6 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
             on_rows(rows)
 
         except Exception as e:
-            # Prefer not to kill the whole shard; log and continue
             print(f"[warn] Wolt category failed {cat}: {e}")
 
 # ---------- main ----------
