@@ -30,6 +30,7 @@ import os
 import re
 import signal
 import sys
+import unicodedata
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse, urljoin, urlsplit, urlunsplit, parse_qsl, urlencode
@@ -54,6 +55,12 @@ CTX_MANUF   = re.compile(r"(?:Tootja|Valmistaja)\s*[:\-]?\s*([^\n<]{2,120})", re
 
 GTIN_IN_ANY      = re.compile(r"\b(?:GTIN|EAN|Ribakood)\b[^\d]{0,20}(\d{8,14})", re.I)
 TARNIJA_BLOCK_RE = re.compile(r"(?:Tarnija info|Supplier)\s*[\n\r]+([^\n\r]{2,200})", re.I)
+
+def _strip_accents(s: str) -> str:
+    return "".join(c for c in unicodedata.normalize("NFKD", s) if not unicodedata.combining(c))
+
+def _norm_text(s: str) -> str:
+    return _strip_accents(s or "").lower().strip()
 
 def str2bool(v: Optional[str]) -> bool:
     return str(v or "").strip().lower() in {"1", "true", "t", "yes", "y", "on"}
@@ -811,8 +818,7 @@ async def _maybe_collect_json(resp, out_list: List[Any]):
 async def _get_info_iframe(page) -> Any:
     """Wait for the product-info iframe and return the Frame object."""
     await page.wait_for_timeout(200)
-    # loop briefly until a frame with expected url/name appears
-    deadline_ms = 6000
+    deadline_ms = 8000
     end = asyncio.get_event_loop().time() + (deadline_ms / 1000.0)
     while asyncio.get_event_loop().time() < end:
         for f in page.frames:
@@ -825,16 +831,16 @@ async def _get_info_iframe(page) -> Any:
                 pass
         try:
             if await page.locator("iframe#product-info-iframe, iframe[data-test-id='product-info-iframe'], iframe[src*='prodinfo.wolt.com']").count() > 0:
-                await page.wait_for_timeout(120)
+                await page.wait_for_timeout(150)
         except Exception:
             pass
-        await page.wait_for_timeout(120)
+        await page.wait_for_timeout(150)
     raise RuntimeError("Product info iframe did not appear")
 
 async def _read_iframe_text_strict(page) -> str:
     frame = await _get_info_iframe(page)
     try:
-        txt = await frame.locator("body").inner_text(timeout=2000)
+        txt = await frame.locator("body").inner_text(timeout=2500)
         if not txt or not txt.strip():
             raise RuntimeError("Empty iframe body")
         return txt
@@ -846,43 +852,84 @@ async def _read_iframe_text_strict(page) -> str:
 async def _open_product_modal(page, name: str) -> None:
     """
     Open the product modal for an item by name.
-    Tries multiple selectors, scrolls, and retries. Raises RuntimeError if it cannot open.
+    Tries multiple selectors, fuzzy/diacritics-insensitive matching,
+    clicks the card or a clickable descendant, scrolls & retries.
+    Raises RuntimeError if it cannot open.
     """
-    for attempt in range(4):
-        await page.mouse.wheel(0, 1200)
-        await page.wait_for_timeout(250)
+    want = _norm_text(name)
+    wants = {want}
+    # also accept prefix (before comma) and first ~20 chars
+    if "," in name:
+        wants.add(_norm_text(name.split(",")[0]))
+    wants.add(_norm_text(name[:20]))
 
-        selectors = [
-            f'[data-test-id="menu-item"]:has-text("{name}")',
-            f'[data-testid="menu-item"]:has-text("{name}")',
-            f'[data-test-id="product-card"]:has-text("{name}")',
-            f'[data-testid="product-card"]:has-text("{name}")',
-            f'button:has-text("{name}")',
-            f'a:has-text("{name}")',
-            f'div:has-text("{name}")',
-            f'span:has-text("{name}")',
-        ]
+    container_selectors = [
+        '[data-test-id*="menu-item"]',
+        '[data-testid*="menu-item"]',
+        '[data-test-id*="product"]',
+        '[data-testid*="product"]',
+        '[role="listitem"]',
+        'li:has([data-testid*="menu"])',
+        'div:has(img):has-text("{0}")'.format(name),
+    ]
 
-        for sel in selectors:
+    async def matches_card_text(loc) -> bool:
+        try:
+            txt = await loc.inner_text(timeout=800)
+            norm = _norm_text(txt)
+            return any(w in norm for w in wants)
+        except Exception:
+            return False
+
+    # Try up to 6 scroll passes
+    for pass_i in range(6):
+        await page.mouse.wheel(0, 1000)
+        await page.wait_for_timeout(220)
+
+        for sel in container_selectors:
+            locs = page.locator(sel)
+            count = 0
             try:
-                loc = page.locator(sel).first
-                if await loc.count() == 0:
+                count = await locs.count()
+            except Exception:
+                pass
+            for i in range(min(count, 40)):
+                card = locs.nth(i)
+                if not await matches_card_text(card):
                     continue
-                await loc.scroll_into_view_if_needed(timeout=1500)
                 try:
-                    await loc.click(timeout=1200)
+                    await card.scroll_into_view_if_needed(timeout=1500)
                 except Exception:
-                    clickable = loc.locator('xpath=ancestor::*[@role="button" or self::button or self::a]').first
+                    pass
+                # attempt 1: click the card
+                try:
+                    await card.click(timeout=1200, force=True)
+                    await page.get_by_role("dialog").wait_for(timeout=2000)
+                    return
+                except Exception:
+                    pass
+                # attempt 2: click an obvious clickable child
+                try:
+                    clickable = card.locator('button, a, [role="button"]').first
                     if await clickable.count() > 0:
                         await clickable.scroll_into_view_if_needed(timeout=1500)
-                        await clickable.click(timeout=1200)
-                    else:
-                        await loc.focus(timeout=800)
-                        await page.keyboard.press("Enter")
-                await page.get_by_role("dialog").wait_for(timeout=2000)
-                return
-            except Exception:
-                continue
+                        await clickable.click(timeout=1200, force=True)
+                        await page.get_by_role("dialog").wait_for(timeout=2000)
+                        return
+                except Exception:
+                    pass
+                # attempt 3: JS click center
+                try:
+                    await card.evaluate("(el)=>el.click()")
+                    await page.get_by_role("dialog").wait_for(timeout=2000)
+                    return
+                except Exception:
+                    pass
+
+        # small jiggle scroll to load more
+        await page.mouse.wheel(0, 1400)
+        await page.wait_for_timeout(200)
+
     raise RuntimeError(f'Could not open modal for product: "{name}"')
 
 async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, max_to_probe: int = 120) -> None:
@@ -906,7 +953,7 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, ma
             info = page.locator('a:has-text("Toote info"), button:has-text("Toote info")')
             if await info.count() == 0:
                 raise RuntimeError(f'"Toote info" not found in modal for "{name}" ({category_url})')
-            await info.first.click(timeout=1500)
+            await info.first.click(timeout=1800)
         except Exception:
             try:
                 await page.keyboard.press("Escape")
@@ -964,16 +1011,6 @@ async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=True)
-        context = await pw.chromium.launch(headless=True)
-        # Oops, above would create another browser; fix to single:
-        # (Ensure only one browser context)
-        # But safer approach:
-        # browser = await pw.chromium.launch(headless=True)
-        # context = await browser.new_context(...)
-
-        # Correct context creation:
-        await browser.close()  # close accidental
-        browser = await pw.chromium.launch(headless=True)
         context = await browser.new_context(
             user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                         "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"),
@@ -1006,9 +1043,9 @@ async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
         try:
             await page.goto(cat_url, wait_until="networkidle")
             await wait_cookie_banner(page)
-            for _ in range(5):
+            for _ in range(6):
                 await page.mouse.wheel(0, 1500)
-                await page.wait_for_timeout(300)
+                await page.wait_for_timeout(280)
 
             # Try window states too
             for varname in ["__APOLLO_STATE__", "__NEXT_DATA__", "__NUXT__", "__INITIAL_STATE__", "__REACT_QUERY_STATE__", "__REDUX_STATE__"]:
