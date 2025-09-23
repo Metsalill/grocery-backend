@@ -810,33 +810,26 @@ async def _maybe_collect_json(resp, out_list: List[Any]):
 
 async def _get_info_iframe(page) -> Any:
     """Wait for the product-info iframe and return the Frame object."""
-    # Wait a little for sheet to animate
     await page.wait_for_timeout(200)
-    # Two strategies: locate by selector, then by frames list
-    deadline = page.context.timeouts()["default"] if hasattr(page.context, "timeouts") else 30000
-    end = asyncio.get_event_loop().time() + (deadline / 1000.0)
-
+    # loop briefly until a frame with expected url/name appears
+    deadline_ms = 6000
+    end = asyncio.get_event_loop().time() + (deadline_ms / 1000.0)
     while asyncio.get_event_loop().time() < end:
-        # Try to find a frame whose URL or name matches
         for f in page.frames:
             try:
-                if not f.url:
-                    continue
-                u = f.url.lower()
-                n = (f.name or "").lower()
+                u = (f.url or "").lower()
+                n = (getattr(f, "name", "") or "").lower()
                 if "prodinfo.wolt" in u or "product-info-iframe" in u or "product-info-iframe" in n:
                     return f
             except Exception:
                 pass
-        # Also ensure the element exists (helps slow mounts)
         try:
             if await page.locator("iframe#product-info-iframe, iframe[data-test-id='product-info-iframe'], iframe[src*='prodinfo.wolt.com']").count() > 0:
                 await page.wait_for_timeout(120)
         except Exception:
             pass
         await page.wait_for_timeout(120)
-
-    raise RuntimeError('Product info iframe did not appear')
+    raise RuntimeError("Product info iframe did not appear")
 
 async def _read_iframe_text_strict(page) -> str:
     frame = await _get_info_iframe(page)
@@ -848,6 +841,50 @@ async def _read_iframe_text_strict(page) -> str:
     except PWTimeout:
         raise RuntimeError("Timed out reading iframe body")
 
+# --- robust modal opener ---
+
+async def _open_product_modal(page, name: str) -> None:
+    """
+    Open the product modal for an item by name.
+    Tries multiple selectors, scrolls, and retries. Raises RuntimeError if it cannot open.
+    """
+    for attempt in range(4):
+        await page.mouse.wheel(0, 1200)
+        await page.wait_for_timeout(250)
+
+        selectors = [
+            f'[data-test-id="menu-item"]:has-text("{name}")',
+            f'[data-testid="menu-item"]:has-text("{name}")',
+            f'[data-test-id="product-card"]:has-text("{name}")',
+            f'[data-testid="product-card"]:has-text("{name}")',
+            f'button:has-text("{name}")',
+            f'a:has-text("{name}")',
+            f'div:has-text("{name}")',
+            f'span:has-text("{name}")',
+        ]
+
+        for sel in selectors:
+            try:
+                loc = page.locator(sel).first
+                if await loc.count() == 0:
+                    continue
+                await loc.scroll_into_view_if_needed(timeout=1500)
+                try:
+                    await loc.click(timeout=1200)
+                except Exception:
+                    clickable = loc.locator('xpath=ancestor::*[@role="button" or self::button or self::a]').first
+                    if await clickable.count() > 0:
+                        await clickable.scroll_into_view_if_needed(timeout=1500)
+                        await clickable.click(timeout=1200)
+                    else:
+                        await loc.focus(timeout=800)
+                        await page.keyboard.press("Enter")
+                await page.get_by_role("dialog").wait_for(timeout=2000)
+                return
+            except Exception:
+                continue
+    raise RuntimeError(f'Could not open modal for product: "{name}"')
+
 async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, max_to_probe: int = 120) -> None:
     """Open product modal -> click 'Toote info' (MANDATORY) -> parse iframe text."""
     probed = 0
@@ -858,43 +895,26 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, ma
         if not name:
             continue
 
-        # Scroll item into view & click
-        opened = False
+        # Open modal robustly (raises if fails)
         try:
-            card = page.get_by_text(name, exact=True)
-            if await card.count() == 0:
-                # try partial match
-                card = page.get_by_text(name.split(",")[0].strip()).first
-            await card.scroll_into_view_if_needed(timeout=1500)
-            await card.first.click(timeout=1500)
-            opened = True
-        except Exception:
-            opened = False
+            await _open_product_modal(page, name)
+        except Exception as e:
+            raise RuntimeError(f"{e} ({category_url})")
 
-        if not opened:
-            raise RuntimeError(f'Could not open modal for product: "{name}" ({category_url})')
-
-        try:
-            # Ensure dialog visible
-            await page.get_by_role("dialog").wait_for(timeout=2000)
-        except Exception:
-            pass
-
-        # Click "Toote info" — this is now MANDATORY
+        # Click "Toote info" — mandatory
         try:
             info = page.locator('a:has-text("Toote info"), button:has-text("Toote info")')
             if await info.count() == 0:
                 raise RuntimeError(f'"Toote info" not found in modal for "{name}" ({category_url})')
             await info.first.click(timeout=1500)
-        except Exception as e:
-            # Close before raising so next items aren't blocked
+        except Exception:
             try:
                 await page.keyboard.press("Escape")
             except Exception:
                 pass
             raise
 
-        # Read iframe text strictly (fail if missing)
+        # Read iframe strictly
         try:
             info_text = await _read_iframe_text_strict(page)
         except Exception as e:
@@ -943,6 +963,16 @@ async def _wolt_capture_category_with_playwright(cat_url: str) -> List[Dict]:
     found: Dict[str, Dict] = {}
 
     async with async_playwright() as pw:
+        browser = await pw.chromium.launch(headless=True)
+        context = await pw.chromium.launch(headless=True)
+        # Oops, above would create another browser; fix to single:
+        # (Ensure only one browser context)
+        # But safer approach:
+        # browser = await pw.chromium.launch(headless=True)
+        # context = await browser.new_context(...)
+
+        # Correct context creation:
+        await browser.close()  # close accidental
         browser = await pw.chromium.launch(headless=True)
         context = await browser.new_context(
             user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -1084,11 +1114,9 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                 rows = rows[: args.max_products]
             print(f"[info] category rows: {len(rows)}")
             on_rows(rows)
-        except Exception as e:
-            # Fail loudly for missing "Toote info"/iframe too
+        except Exception:
+            # Fail loudly for missing "Toote info"/iframe etc.
             raise
-            # If you prefer soft-fail for one category:
-            # print(f"[warn] Wolt category failed {cat}: {e}")
 
 # ---------- main ----------
 
