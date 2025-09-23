@@ -847,21 +847,20 @@ async def _read_iframe_text_strict(page) -> str:
     except PWTimeout:
         raise RuntimeError("Timed out reading iframe body")
 
-# --- robust modal opener ---
+# --- robust modal opener that verifies the opened product ---
 
-async def _open_product_modal(page, name: str) -> None:
+async def _open_product_modal_for_name(page, target_name: str) -> None:
     """
-    Open the product modal for an item by name.
-    Tries multiple selectors, fuzzy/diacritics-insensitive matching,
-    clicks the card or a clickable descendant, scrolls & retries.
-    Raises RuntimeError if it cannot open.
+    Open the product modal for the *specific* target_name by scanning cards:
+      • iterate visible cards, open each, read modal title, compare to target
+      • if mismatch, close and continue; scroll between passes
+      • raises RuntimeError if not found
     """
-    want = _norm_text(name)
+    want = _norm_text(target_name)
     wants = {want}
-    # also accept prefix (before comma) and first ~20 chars
-    if "," in name:
-        wants.add(_norm_text(name.split(",")[0]))
-    wants.add(_norm_text(name[:20]))
+    if "," in target_name:
+        wants.add(_norm_text(target_name.split(",")[0]))
+    wants.add(_norm_text(target_name[:24]))
 
     container_selectors = [
         '[data-test-id*="menu-item"]',
@@ -870,70 +869,97 @@ async def _open_product_modal(page, name: str) -> None:
         '[data-testid*="product"]',
         '[role="listitem"]',
         'li:has([data-testid*="menu"])',
-        'div:has(img):has-text("{0}")'.format(name),
     ]
 
-    async def matches_card_text(loc) -> bool:
+    async def modal_title_norm() -> Optional[str]:
         try:
-            txt = await loc.inner_text(timeout=800)
-            norm = _norm_text(txt)
-            return any(w in norm for w in wants)
+            dlg = page.get_by_role("dialog")
+            await dlg.wait_for(timeout=2000)
+            # common title spots
+            for sel in ["h1", "h2", "h3", '[data-testid*="title"]', '[data-test-id*="title"]', '[role="heading"]']:
+                loc = dlg.locator(sel).first
+                if await loc.count() > 0:
+                    txt = await loc.inner_text()
+                    if txt:
+                        return _norm_text(txt)
         except Exception:
-            return False
+            return None
+        return None
 
-    # Try up to 6 scroll passes
-    for pass_i in range(6):
-        await page.mouse.wheel(0, 1000)
-        await page.wait_for_timeout(220)
+    async def close_modal():
+        try:
+            close_btn = page.locator('button[aria-label*="Close"], button:has-text("×")')
+            if await close_btn.count() > 0:
+                await close_btn.first.click()
+            else:
+                await page.keyboard.press("Escape")
+        except Exception:
+            pass
+        await page.wait_for_timeout(120)
 
+    # Up to 8 scroll passes scanning 60 cards each
+    scanned = 0
+    for _ in range(8):
         for sel in container_selectors:
             locs = page.locator(sel)
-            count = 0
             try:
-                count = await locs.count()
+                n = min(await locs.count(), 60)
             except Exception:
-                pass
-            for i in range(min(count, 40)):
+                n = 0
+            for i in range(n):
                 card = locs.nth(i)
-                if not await matches_card_text(card):
+                txt = ""
+                try:
+                    txt = await card.inner_text(timeout=800)
+                except Exception:
+                    pass
+                if not txt:
                     continue
+                norm = _norm_text(txt)
+                if not any(w in norm for w in wants):
+                    continue
+
+                # Try opening this card
                 try:
                     await card.scroll_into_view_if_needed(timeout=1500)
                 except Exception:
                     pass
-                # attempt 1: click the card
-                try:
-                    await card.click(timeout=1200, force=True)
-                    await page.get_by_role("dialog").wait_for(timeout=2000)
-                    return
-                except Exception:
-                    pass
-                # attempt 2: click an obvious clickable child
-                try:
-                    clickable = card.locator('button, a, [role="button"]').first
-                    if await clickable.count() > 0:
-                        await clickable.scroll_into_view_if_needed(timeout=1500)
-                        await clickable.click(timeout=1200, force=True)
+                opened = False
+                for click_target in [card, card.locator('button, a, [role="button"]').first]:
+                    try:
+                        if click_target is not None:
+                            await click_target.click(timeout=1200, force=True)
+                            await page.get_by_role("dialog").wait_for(timeout=2000)
+                            opened = True
+                            break
+                    except Exception:
+                        continue
+                if not opened:
+                    try:
+                        await card.evaluate("(el)=>el.click()")
                         await page.get_by_role("dialog").wait_for(timeout=2000)
-                        return
-                except Exception:
-                    pass
-                # attempt 3: JS click center
-                try:
-                    await card.evaluate("(el)=>el.click()")
-                    await page.get_by_role("dialog").wait_for(timeout=2000)
-                    return
-                except Exception:
-                    pass
+                        opened = True
+                    except Exception:
+                        pass
+                if not opened:
+                    continue
 
-        # small jiggle scroll to load more
-        await page.mouse.wheel(0, 1400)
-        await page.wait_for_timeout(200)
+                # Verify title matches the target
+                tnorm = await modal_title_norm()
+                if tnorm and any(w in tnorm for w in wants):
+                    return  # correct modal is open
+                # Not the one → close and continue
+                await close_modal()
+                scanned += 1
 
-    raise RuntimeError(f'Could not open modal for product: "{name}"')
+        # scroll to load more
+        await page.mouse.wheel(0, 1800)
+        await page.wait_for_timeout(260)
+
+    raise RuntimeError(f'Could not open modal for product: "{target_name}"')
 
 async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, max_to_probe: int = 120) -> None:
-    """Open product modal -> click 'Toote info' (MANDATORY) -> parse iframe text."""
+    """Open product modal for each by name → click 'Toote info' (MANDATORY) → parse iframe text."""
     probed = 0
     for item in items:
         if probed >= max_to_probe:
@@ -942,9 +968,9 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, ma
         if not name:
             continue
 
-        # Open modal robustly (raises if fails)
+        # Open the *correct* product modal (raises if fails)
         try:
-            await _open_product_modal(page, name)
+            await _open_product_modal_for_name(page, name)
         except Exception as e:
             raise RuntimeError(f"{e} ({category_url})")
 
@@ -952,6 +978,7 @@ async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, ma
         try:
             info = page.locator('a:has-text("Toote info"), button:has-text("Toote info")')
             if await info.count() == 0:
+                await page.keyboard.press("Escape")
                 raise RuntimeError(f'"Toote info" not found in modal for "{name}" ({category_url})')
             await info.first.click(timeout=1800)
         except Exception:
