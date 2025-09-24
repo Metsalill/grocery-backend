@@ -722,8 +722,7 @@ def _ensure_csv_with_header(out_path: Path) -> None:
 def append_csv(rows: List[Dict], out_path: Path) -> None:
     if not rows:
         return
-    out_path.parent.mkdir(parents=True, exist_ok=True
-    )
+    out_path.parent.mkdir(parents=True, exist_ok=True)
     write_header = (not out_path.exists()) or out_path.stat().st_size == 0
     with out_path.open("a", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=CSV_COLS)
@@ -1012,7 +1011,7 @@ async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str
         probed += 1
         await asyncio.sleep(0.04)
 
-# ====== iframe / modal helpers =============================================
+# ====== iframe scraping helpers (old fallback) ==============================
 
 async def _get_info_iframe(page) -> Any:
     await page.wait_for_timeout(200)
@@ -1039,6 +1038,8 @@ async def _read_iframe_text_strict(page) -> str:
         return txt
     except PWTimeout:
         raise RuntimeError("Timed out reading iframe body")
+
+# --- modal helpers (kept for completeness) ---------------------------------
 
 async def _modal_opened(page) -> bool:
     checks = [
@@ -1090,8 +1091,10 @@ async def _open_product_modal_for_name(page, target_name: str) -> bool:
     for _ in range(18):
         if await _try_click(page.get_by_role("link", name=target_name, exact=True)): return True
         if await _try_click(page.get_by_role("button", name=target_name, exact=True)): return True
+
         if await _try_click(page.locator(f':text-matches("^{rx}$", "i")')): return True
         if await _try_click(page.locator(f':text-matches("{rx}", "i")')): return True
+
         if await _try_click(page.locator(f'img[alt="{target_name}"]')): return True
         if await _try_click(page.locator(f'img[alt*="{target_name[:20]}"]')): return True
 
@@ -1128,37 +1131,6 @@ async def _open_product_modal(page, item: Dict) -> bool:
             pass
     return await _open_product_modal_for_name(page, str(item.get("name") or "").strip())
 
-async def _extract_venue_id_via_modal(page) -> Optional[str]:
-    """
-    As a last resort, open the first visible product card and read the prodinfo iframe src.
-    Returns a 24-hex venueId or None.
-    """
-    try:
-        a = page.locator('a[href*="itemid-"], a[href*="item-"]').first
-        if await a.count() == 0:
-            return None
-        await a.scroll_into_view_if_needed(timeout=1500)
-        await a.click(timeout=2000)
-
-        for _ in range(25):
-            if await page.locator("iframe[src*='prodinfo.wolt.com']").count() > 0:
-                break
-            await page.wait_for_timeout(120)
-
-        if await page.locator("iframe[src*='prodinfo.wolt.com']").count() == 0:
-            return None
-
-        src = await page.locator("iframe[src*='prodinfo.wolt.com']").first.get_attribute("src")
-        if not src:
-            return None
-
-        m = re.search(r"/([a-f0-9]{24})/([a-f0-9]{24})(?:$|[/?#])", src, re.I)
-        if m:
-            return m.group(1)
-    except Exception:
-        pass
-    return None
-
 # ---------- NEW: tile price scraping (PW) -----------------------------------
 
 async def _scrape_tile_prices(page) -> Dict[str, float]:
@@ -1190,7 +1162,40 @@ async def _scrape_tile_prices(page) -> Dict[str, float]:
     except Exception:
         return {}
 
+# ---------- NEW: get venueId via a single modal (PW fallback booster) -------
+
+async def _extract_venue_id_via_modal(page) -> Optional[str]:
+    """
+    On a category page, click the first visible product to open the info modal,
+    then sniff the prodinfo iframe src for the 24-hex venueId.
+    """
+    try:
+        # Find any product tile anchor
+        a = page.locator('a[href*="itemid-"], a[href*="item-"]').first
+        if await a.count() == 0:
+            return None
+        await a.scroll_into_view_if_needed(timeout=1500)
+        await a.click(timeout=2000)
+        # Wait a bit for modal & iframe
+        for _ in range(20):
+            frames = page.frames
+            for fr in frames:
+                try:
+                    src = (fr.url or "").lower()
+                    m = re.search(r"/([a-f0-9]{24})/", src)
+                    if "prodinfo.wolt.com" in src and m:
+                        return m.group(1)
+                except Exception:
+                    pass
+            await page.wait_for_timeout(150)
+    except Exception:
+        pass
+    return None
+
 async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info: bool = True) -> Tuple[List[Dict], List[Any], str, Dict[str, float], Optional[str]]:
+    """
+    Returns: items, blobs, html, tile_prices, venue_id_if_found
+    """
     if async_playwright is None:
         raise RuntimeError("Playwright is required for Wolt fallback but is not installed.")
 
@@ -1229,8 +1234,7 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
 
         html = ""
         tile_prices: Dict[str, float] = {}
-        venue_guess: Optional[str] = None
-
+        venue_id: Optional[str] = None
         try:
             await page.goto(cat_url, wait_until="networkidle")
             await wait_cookie_banner(page)
@@ -1240,6 +1244,7 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
 
             tile_prices = await _scrape_tile_prices(page)
 
+            # Collect global JS blobs if present
             for varname in ["__APOLLO_STATE__", "__NEXT_DATA__", "__NUXT__", "__INITIAL_STATE__", "__REACT_QUERY_STATE__", "__REDUX_STATE__"]:
                 try:
                     data = await page.evaluate(f"window.{varname} || null")
@@ -1250,6 +1255,7 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
 
             html = await page.content()
 
+            # Parse items from collected blobs
             for blob in blobs:
                 try:
                     _walk_collect_items(blob, found)
@@ -1261,17 +1267,16 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
                 for iid in ids:
                     found[iid] = {"id": iid}
 
-            # If no venueId visible in blobs/html, try to sniff it from the product info modal
-            venue_guess = _extract_venue_id_from_html(html)
-            if not venue_guess:
-                try:
-                    venue_guess = await _extract_venue_id_via_modal(page)
-                    if venue_guess:
-                        print(f"[info] venueId discovered via modal: {venue_guess}")
-                except Exception:
-                    pass
+            # Try to infer venueId from blobs/html first
+            venue_id = _extract_venue_id_from_blobs_or_html(blobs, html)
 
-            return list(found.values()), blobs, html, tile_prices, venue_guess
+            # If still missing, open ONE modal to sniff iframe src → venueId
+            if not venue_id:
+                venue_id = await _extract_venue_id_via_modal(page)
+                if venue_id:
+                    print(f"[fix] venueId via modal: {venue_id}")
+
+            return list(found.values()), blobs, html, tile_prices, venue_id
 
         finally:
             await context.close()
@@ -1352,24 +1357,19 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                 blobs = [payload]
                 html = ""
                 tile_prices = {}
+                venue_id = _extract_venue_id_from_blobs_or_html(blobs, html)
             else:
                 print(f"[info] forcing Playwright fallback for {cat}")
-                items, blobs, html, tile_prices, venue_guess = await _wolt_capture_category_with_playwright(cat)
+                items, blobs, html, tile_prices, venue_id = await _wolt_capture_category_with_playwright(cat)
 
-            # venueId resolution
-            venue_id = _extract_venue_id_from_blobs_or_html(blobs, html)
-            if not venue_id and not payload:
-                # In PW path we may have discovered venue_guess via modal
-                venue_id = venue_guess
-
+            # If we still couldn't infer venueId from PW path, we can't enrich → rows will be empty.
             if venue_id:
                 lang = _lang_from_url(cat)
                 await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=240)
             else:
-                print("[warn] venueId not found — skipping direct prodinfo enrichment (will drop items without GTIN)")
+                print("[warn] venueId not found — skipping direct prodinfo enrichment")
 
-            # Merge tile prices for PW path when price is missing
-            if (not payload) and items:
+            if not payload and items:
                 for it in items:
                     if it.get("id"):
                         iid = str(it["id"]).lower()
@@ -1379,16 +1379,17 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
             # Build rows (GTIN-required) and filter out junk
             rows_raw = [_extract_wolt_row(item, cat, store_host_cat) for item in items]
             rows = []
-            skipped_no_gtin = 0
+            skipped_without_gtin = 0
             for r in rows_raw:
                 if not r:
-                    skipped_no_gtin += 1
+                    skipped_without_gtin += 1
                     continue
                 if not _valid_productish(r.get("name"), r.get("price"), r.get("ean_norm") or r.get("ean_raw"), r.get("url"), r.get("brand")):
                     continue
                 rows.append(r)
-            if skipped_no_gtin:
-                print(f"[debug] skipped {skipped_no_gtin} items without GTIN (before filters)")
+
+            if skipped_without_gtin:
+                print(f"[debug] skipped {skipped_without_gtin} items without GTIN (before filters)")
 
             if args.max_products and args.max_products > 0:
                 rows = rows[: args.max_products]
