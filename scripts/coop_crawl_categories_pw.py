@@ -1295,7 +1295,7 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
             await context.close(); await browser.close()
 
 async def run_wolt(args, categories: List[str], on_rows) -> None:
-    store_host = _wolt_store_host(categories[0] if categories else args.region)
+    # NOTE: store_host is computed per-category to isolate venues: wolt:<venue-slug>
     force_pw = bool(args.wolt_force_playwright or str2bool(os.getenv("WOLT_FORCE_PLAYWRIGHT")))
     strict_toote_info = True  # warn & skip instead of raising
 
@@ -1305,6 +1305,7 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
         return (m.group(1).lower() if m else "et")
 
     for cat in categories:
+        store_host_cat = _wolt_store_host(cat)  # per-category venue host (e.g., wolt:coop-lasname)
         print(f"[cat-wolt] {cat}")
         try:
             payload = None if force_pw else await _load_wolt_payload(cat)
@@ -1341,7 +1342,7 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                     print(f"[warn] modal/iframe enrichment failed: {e}")
 
             # Build rows then filter out cookie/consent junk & non-productish
-            rows_raw = [_extract_wolt_row(item, cat, store_host) for item in items]
+            rows_raw = [_extract_wolt_row(item, cat, store_host_cat) for item in items]
             rows = []
             for r in rows_raw:
                 if not _valid_productish(r.get("name"), r.get("price"), r.get("ean_norm") or r.get("ean_raw"), r.get("url"), r.get("brand")):
