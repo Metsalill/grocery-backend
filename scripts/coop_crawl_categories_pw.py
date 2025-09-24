@@ -13,8 +13,9 @@ Modes
          • call prodinfo.wolt.com/<lang>/<venueId>/<itemId> directly to read GTIN, Supplier & Name,
            avoiding modal clicks entirely,
          • keep the old Playwright modal/iframe path as a fallback.
-         • NEW: when using Playwright, also scrape visible tile prices and merge them into items
-                that lack a price in JSON.
+         • When using Playwright, also scrape visible tile prices and merge them into items
+           that lack a price in JSON.
+         • ***Require GTIN/EAN*** for Wolt rows (skip otherwise). Prices normalized to euros.
 
 DB alignment
 - Target table: public.staging_coop_products
@@ -275,15 +276,48 @@ async def parse_json_ld(page: Any) -> Dict:
 # ---------- price helpers ----------
 
 def _parse_wolt_price(value: Any) -> Optional[float]:
+    """
+    Normalize various Wolt price shapes to *euros* (float).
+    Rules:
+      - ints -> cents (e.g., 23 -> 0.23, 326 -> 3.26)
+      - floats: if > 100 treat as cents, else already euros
+      - strings: "0,23" / "0.23" -> euros; "23" (no decimal) -> cents (0.23)
+      - dicts: try common keys recursively
+    """
     try:
-        if isinstance(value, (int, float)):
-            return round(float(value) / (100.0 if float(value) >= 50 else 1.0), 2)
-        if isinstance(value, str):
-            return round(float(value.replace(",", ".").strip()), 2)
+        if value is None:
+            return None
+
+        # dict containers
         if isinstance(value, dict):
-            for k in ("value", "amount", "price", "current", "total", "unit"):
+            for k in ("value", "amount", "current", "total", "price", "baseprice", "base_price", "unit_price"):
                 if k in value:
-                    return _parse_wolt_price(value[k])
+                    out = _parse_wolt_price(value[k])
+                    if out is not None:
+                        return round(float(out), 2)
+            return None
+
+        # numbers
+        if isinstance(value, int):
+            return round(value / 100.0, 2)
+        if isinstance(value, float):
+            return round((value / 100.0 if value > 100 else value), 2)
+
+        # strings
+        if isinstance(value, str):
+            s = value.strip().replace("\xa0", "").replace("€", "")
+            if "," in s or "." in s:
+                try:
+                    return round(float(s.replace(",", ".")), 2)
+                except Exception:
+                    pass
+            # plain digits → cents
+            d = clean_digits(s)
+            if d:
+                try:
+                    return round(int(d) / 100.0, 2)
+                except Exception:
+                    pass
     except Exception:
         return None
     return None
@@ -484,6 +518,12 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
     if not ext_id:
         ext_id = url.rstrip("/").split("/")[-1]
 
+    # normalize price to euros
+    try:
+        price = float(price) if price is not None else None
+    except Exception:
+        price = None
+
     return {
         "chain": "Coop",
         "store_host": store_host,
@@ -495,7 +535,7 @@ async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) ->
         "size_text": size_text,
         "brand": brand,
         "manufacturer": manufacturer,
-        "price": float(price) if price is not None else None,
+        "price": price,
         "currency": currency,
         "image_url": image_url,
         "url": url,
@@ -602,14 +642,18 @@ def _looks_like_cookie_consent(name: Optional[str], brand: Optional[str], url: O
 def _valid_productish(name: Optional[str], price: Optional[float], gtin: Optional[str], url: Optional[str], brand: Optional[str]) -> bool:
     if _looks_like_cookie_consent(name, brand, url):
         return False
-    # Accept if it has a price OR a GTIN; otherwise likely meta/junk
-    if price is not None and price > 0:
-        return True
+    # Accept iff priced or with GTIN; GTIN is mandatory downstream anyway.
     if gtin:
+        return True
+    if price is not None and price > 0:
         return True
     return False
 
-def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Dict:
+def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Optional[Dict]:
+    """
+    Build a row strictly requiring a valid GTIN/EAN.
+    If no ean_norm after enrichment, return None (skip).
+    """
     name = str(item.get("name") or "").strip() or None
     price = None
     for k in ("price", "baseprice", "base_price", "current_price", "total_price", "unit_price"):
@@ -623,13 +667,16 @@ def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Dict:
                     _first_str(item, "supplier", "manufacturer", "producer"))
     ean_raw  = item.get("gtin") or (_search_info_label(item, "GTIN", "EAN", "Ribakood") or _first_str(item, "gtin", "ean", "barcode"))
     ean_norm = normalize_ean(ean_raw)
+    if not ean_norm:
+        return None  # enforce GTIN presence for Wolt rows
+
     brand = _first_str(item, "brand") or likely_brand_from_name(name) or manufacturer
     size_text = _search_info_label(item, "Size", "Kogus", "Maht", "Kaal")
     if not size_text and name:
         m = SIZE_RE.search(name)
         if m:
             size_text = m.group(1)
-    ext_id = ean_norm or str(item.get("id") or item.get("slug") or name or "")
+    ext_id = ean_norm  # ext_id is always the GTIN (no hex leak)
     url = category_url
     if item.get("id"):
         url = f"{category_url}#item-{item.get('id')}"
@@ -638,7 +685,7 @@ def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Dict:
         "store_host": store_host,
         "channel": "wolt",
         "ext_id": ext_id,
-        "ean_raw": ean_raw,
+        "ean_raw": ean_raw or ean_norm,
         "ean_norm": ean_norm,
         "name": name,
         "size_text": size_text,
@@ -676,7 +723,7 @@ def append_csv(rows: List[Dict], out_path: Path) -> None:
             w.writeheader()
         for r in rows:
             row = {k: r.get(k) for k in CSV_COLS}
-            row["price"] = _format_price_for_csv(row.get("price"))
+            row["price"] = _format_price_for_csv(row.get("price")) if row.get("price") is not None else ""
             w.writerow(row)
 
 async def maybe_upsert_db(rows: List[Dict]) -> None:
@@ -884,11 +931,9 @@ def _maybe_venue_id_from_obj(obj: Any) -> Optional[str]:
     return None
 
 def _extract_venue_id_from_html(html: str) -> Optional[str]:
-    # e.g., https://imageproxy.wolt.com/menu/menu-images/<venueId>/...
     m = re.search(r"/menu-images/([a-f0-9]{24})/", html, re.I)
     if m:
         return m.group(1)
-    # fallback: first 24-hex anywhere
     m2 = HEX24_RE.search(html or "")
     return m2.group(0) if m2 else None
 
@@ -908,10 +953,6 @@ def _extract_venue_id_from_blobs(blobs: List[Any]) -> Optional[str]:
     return None
 
 async def _fetch_prodinfo_fields(lang: str, venue_id: str, item_id: str) -> Dict[str, Optional[str]]:
-    """
-    GET prodinfo.wolt.com/<lang>/<venue_id>/<item_id>
-    Return dict with gtin, supplier, and name.
-    """
     url = f"https://prodinfo.wolt.com/{lang}/{venue_id}/{item_id}"
     try:
         html = await _fetch_html(url)
@@ -1085,10 +1126,6 @@ async def _open_product_modal(page, item: Dict) -> bool:
 # ---------- NEW: tile price scraping (PW) -----------------------------------
 
 async def _scrape_tile_prices(page) -> Dict[str, float]:
-    """
-    Scrape visible item card prices from the category grid.
-    Returns dict {item_id_hex24: price_float}
-    """
     try:
         data = await page.evaluate(
             """() => {
@@ -1098,10 +1135,8 @@ async def _scrape_tile_prices(page) -> Dict[str, float]:
                     const href = a.getAttribute('href') || a.href || '';
                     const m = href && href.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
                     if (!m) continue;
-                    // choose the closest reasonable container
                     const card = a.closest('article, a, div') || a;
                     const txt = (card && card.textContent) ? card.textContent : '';
-                    // find a price like 1,23 € but avoid obvious unit prices "/"
                     const mt = txt.match(/(\\d+[.,]\\d{2})\\s*€/);
                     if (mt) {
                         const raw = mt[1].replace(',', '.');
@@ -1114,17 +1149,12 @@ async def _scrape_tile_prices(page) -> Dict[str, float]:
         )
         prices: Dict[str, float] = {}
         for iid, val in data or []:
-            # first one wins; these are card prices already rounded
             prices[str(iid).lower()] = float(val)
         return prices
     except Exception:
         return {}
 
 async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info: bool = True) -> Tuple[List[Dict], List[Any], str, Dict[str, float]]:
-    """
-    Open a Wolt category with Playwright, capture JSON responses, and return page HTML too.
-    Returns (items, blobs, html, tile_prices).
-    """
     if async_playwright is None:
         raise RuntimeError("Playwright is required for Wolt fallback but is not installed.")
 
@@ -1166,15 +1196,12 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
         try:
             await page.goto(cat_url, wait_until="networkidle")
             await wait_cookie_banner(page)
-            # More scrolling to trigger lazy-loaders
             for _ in range(10):
                 await page.mouse.wheel(0, 1500)
                 await page.wait_for_timeout(250)
 
-            # Scrape visible tile prices (best effort)
             tile_prices = await _scrape_tile_prices(page)
 
-            # window state
             for varname in ["__APOLLO_STATE__", "__NEXT_DATA__", "__NUXT__", "__INITIAL_STATE__", "__REACT_QUERY_STATE__", "__REDUX_STATE__"]:
                 try:
                     data = await page.evaluate(f"window.{varname} || null")
@@ -1185,18 +1212,16 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
 
             html = await page.content()
 
-            # collect items from blobs into 'found'
             for blob in blobs:
                 try:
                     _walk_collect_items(blob, found)
                 except Exception:
                     pass
 
-            # EXTRA: if still empty, extract item ids from HTML anchors
             if not found:
                 ids = set(re.findall(r"(?:itemid-|item-)([a-f0-9]{24})", html or "", re.I))
                 for iid in ids:
-                    found[iid] = {"id": iid}  # prodinfo will fill name/brand/gtin later
+                    found[iid] = {"id": iid}
 
             return list(found.values()), blobs, html, tile_prices
 
@@ -1260,11 +1285,8 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
             await context.close(); await browser.close()
 
 async def run_wolt(args, categories: List[str], on_rows) -> None:
-    # per-category venue host (e.g. wolt:coop-lasname)
     force_pw = bool(args.wolt_force_playwright or str2bool(os.getenv("WOLT_FORCE_PLAYWRIGHT")))
-    strict_toote_info = True  # warn & skip instead of raising
 
-    # language from URL path (defaults to et)
     def _lang_from_url(u: str) -> str:
         m = re.search(r"https?://[^/]+/([a-z]{2})(?:/|$)", u, re.I)
         return (m.group(1).lower() if m else "et")
@@ -1284,9 +1306,8 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                 tile_prices = {}
             else:
                 print(f"[info] forcing Playwright fallback for {cat}")
-                items, blobs, html, tile_prices = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
+                items, blobs, html, tile_prices = await _wolt_capture_category_with_playwright(cat)
 
-            # venueId from blobs OR page HTML
             venue_id = _extract_venue_id_from_blobs_or_html(blobs, html)
             if venue_id:
                 lang = _lang_from_url(cat)
@@ -1294,20 +1315,6 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
             else:
                 print("[warn] venueId not found — skipping direct prodinfo enrichment")
 
-            # If still nothing enriched and we were already in PW, try (old) modal flow
-            if not venue_id and not payload and items:
-                try:
-                    print("[info] trying modal/iframe enrichment fallback")
-                    _items_pw, _, _, _ = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
-                    id2 = {str(i.get("id")): i for i in _items_pw if i.get("id")}
-                    for it in items:
-                        iid = str(it.get("id") or "")
-                        if iid and iid in id2:
-                            it.update({k: v for k, v in id2[iid].items() if k in ("gtin","supplier","brand") and v})
-                except Exception as e:
-                    print(f"[warn] modal/iframe enrichment failed: {e}")
-
-            # If we have scraped tile prices, merge them into items missing price
             if not payload and items:
                 for it in items:
                     if it.get("id"):
@@ -1315,10 +1322,12 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                         if it.get("price") in (None, 0) and iid in tile_prices:
                             it["price"] = tile_prices[iid]
 
-            # Build rows then filter out cookie/consent junk & non-productish
+            # Build rows (GTIN-required) and filter out junk
             rows_raw = [_extract_wolt_row(item, cat, store_host_cat) for item in items]
             rows = []
             for r in rows_raw:
+                if not r:
+                    continue
                 if not _valid_productish(r.get("name"), r.get("price"), r.get("ean_norm") or r.get("ean_raw"), r.get("url"), r.get("brand")):
                     continue
                 rows.append(r)
