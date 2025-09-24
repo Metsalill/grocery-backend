@@ -13,6 +13,8 @@ Modes
          • call prodinfo.wolt.com/<lang>/<venueId>/<itemId> directly to read GTIN, Supplier & Name,
            avoiding modal clicks entirely,
          • keep the old Playwright modal/iframe path as a fallback.
+         • NEW: when using Playwright, also scrape visible tile prices and merge them into items
+                that lack a price in JSON.
 
 DB alignment
 - Target table: public.staging_coop_products
@@ -532,7 +534,6 @@ def _html_get_apollo_state(html: str) -> Optional[Dict]:
 def _walk_collect_items(obj: Any, found: Dict[str, Dict]) -> None:
     if isinstance(obj, dict):
         has_name = isinstance(obj.get("name"), str) and obj.get("name").strip()
-        # Allow “item-like” objects even if price is missing (some feeds drop it)
         priceish_keys = ("price", "baseprice", "base_price", "unit_price", "total_price", "current_price", "priceCurrency")
         has_priceish = any(k in obj for k in priceish_keys)
         has_idish = any(k in obj for k in ("id", "itemId", "itemID", "_id", "slug"))
@@ -581,7 +582,7 @@ def _first_urlish(obj: Dict, *keys: str) -> Optional[str]:
                     return v.get(kk).strip()
     return None
 
-# --- NEW: cookie/consent junk guards ---------------------------------------
+# --- cookie/consent junk guards ---------------------------------------
 
 _DENY_EXACT = {  # lowercased exact names seen in screenshots
     "web tracking bundle", "functional", "required", "marketing", "analytics"
@@ -1081,88 +1082,48 @@ async def _open_product_modal(page, item: Dict) -> bool:
             pass
     return await _open_product_modal_for_name(page, str(item.get("name") or "").strip())
 
-async def _wolt_enrich_with_modal(page, items: List[Dict], category_url: str, max_to_probe: int = 120, strict_toote_info: bool = True) -> None:
-    probed = 0
-    for item in items:
-        if probed >= max_to_probe:
-            break
-        name = str(item.get("name") or "").strip()
-        if not name:
-            continue
+# ---------- NEW: tile price scraping (PW) -----------------------------------
 
-        opened = await _open_product_modal(page, item)
-        if not opened:
-            print(f'[warn] Skipping "{name}" — could not open modal ({category_url})')
-            continue
+async def _scrape_tile_prices(page) -> Dict[str, float]:
+    """
+    Scrape visible item card prices from the category grid.
+    Returns dict {item_id_hex24: price_float}
+    """
+    try:
+        data = await page.evaluate(
+            """() => {
+                const out = [];
+                const anchors = Array.from(document.querySelectorAll('a[href*="item"]'));
+                for (const a of anchors) {
+                    const href = a.getAttribute('href') || a.href || '';
+                    const m = href && href.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
+                    if (!m) continue;
+                    // choose the closest reasonable container
+                    const card = a.closest('article, a, div') || a;
+                    const txt = (card && card.textContent) ? card.textContent : '';
+                    // find a price like 1,23 € but avoid obvious unit prices "/"
+                    const mt = txt.match(/(\\d+[.,]\\d{2})\\s*€/);
+                    if (mt) {
+                        const raw = mt[1].replace(',', '.');
+                        const val = parseFloat(raw);
+                        if (!isNaN(val)) out.push([m[1], val]);
+                    }
+                }
+                return out;
+            }"""
+        )
+        prices: Dict[str, float] = {}
+        for iid, val in data or []:
+            # first one wins; these are card prices already rounded
+            prices[str(iid).lower()] = float(val)
+        return prices
+    except Exception:
+        return {}
 
-        info_clicked = False
-        try:
-            info = page.locator('a:has-text("Toote info"), button:has-text("Toote info"), a:has-text("Product info"), button:has-text("Product info")')
-            if await info.count() == 0:
-                if strict_toote_info:
-                    print(f'[warn] Skipping "{name}" — "Toote info" not found ({category_url})')
-                    try:
-                        await page.keyboard.press("Escape")
-                    except Exception:
-                        pass
-                    probed += 1
-                    await page.wait_for_timeout(120)
-                    continue
-            else:
-                await info.first.click(timeout=1800)
-                info_clicked = True
-        except Exception:
-            print(f'[warn] Skipping "{name}" — failed clicking "Toote info" ({category_url})')
-            try:
-                await page.keyboard.press("Escape")
-            except Exception:
-                pass
-            probed += 1
-            await page.wait_for_timeout(120)
-            continue
-
-        info_text = ""
-        if info_clicked:
-            try:
-                info_text = await _read_iframe_text_strict(page)
-            except Exception as e:
-                print(f'[warn] Skipping "{name}" — product info iframe error: {e} ({category_url})')
-                try:
-                    await page.keyboard.press("Escape")
-                except Exception:
-                    pass
-                probed += 1
-                await page.wait_for_timeout(120)
-                continue
-
-        if info_text:
-            m1 = GTIN_IN_ANY.search(info_text or "")
-            if m1:
-                item["gtin"] = m1.group(1).strip()
-            m2 = TARNIJA_BLOCK_RE.search(info_text or "")
-            if m2:
-                supplier = (m2.group(1) or "").strip()
-                if supplier:
-                    item["supplier"] = supplier
-                    if not item.get("brand"):
-                        item["brand"] = supplier
-
-        try:
-            close_btn = page.locator('button[aria-label*="Close"], button:has-text("×")')
-            if await close_btn.count() > 0:
-                await close_btn.first.click()
-            else:
-                await page.keyboard.press("Escape")
-        except Exception:
-            pass
-
-        probed += 1
-        await page.wait_for_timeout(160)
-
-async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info: bool = True) -> Tuple[List[Dict], List[Any], str]:
+async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info: bool = True) -> Tuple[List[Dict], List[Any], str, Dict[str, float]]:
     """
     Open a Wolt category with Playwright, capture JSON responses, and return page HTML too.
-    Returns (items, blobs, html).
+    Returns (items, blobs, html, tile_prices).
     """
     if async_playwright is None:
         raise RuntimeError("Playwright is required for Wolt fallback but is not installed.")
@@ -1201,6 +1162,7 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
         page.on("response", lambda resp: asyncio.create_task(_maybe_collect_json(resp, blobs)))
 
         html = ""
+        tile_prices: Dict[str, float] = {}
         try:
             await page.goto(cat_url, wait_until="networkidle")
             await wait_cookie_banner(page)
@@ -1208,6 +1170,9 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
             for _ in range(10):
                 await page.mouse.wheel(0, 1500)
                 await page.wait_for_timeout(250)
+
+            # Scrape visible tile prices (best effort)
+            tile_prices = await _scrape_tile_prices(page)
 
             # window state
             for varname in ["__APOLLO_STATE__", "__NEXT_DATA__", "__NUXT__", "__INITIAL_STATE__", "__REACT_QUERY_STATE__", "__REDUX_STATE__"]:
@@ -1233,7 +1198,7 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
                 for iid in ids:
                     found[iid] = {"id": iid}  # prodinfo will fill name/brand/gtin later
 
-            return list(found.values()), blobs, html
+            return list(found.values()), blobs, html, tile_prices
 
         finally:
             await context.close()
@@ -1295,7 +1260,7 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
             await context.close(); await browser.close()
 
 async def run_wolt(args, categories: List[str], on_rows) -> None:
-    # NOTE: store_host is computed per-category to isolate venues: wolt:<venue-slug>
+    # per-category venue host (e.g. wolt:coop-lasname)
     force_pw = bool(args.wolt_force_playwright or str2bool(os.getenv("WOLT_FORCE_PLAYWRIGHT")))
     strict_toote_info = True  # warn & skip instead of raising
 
@@ -1305,7 +1270,7 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
         return (m.group(1).lower() if m else "et")
 
     for cat in categories:
-        store_host_cat = _wolt_store_host(cat)  # per-category venue host (e.g., wolt:coop-lasname)
+        store_host_cat = _wolt_store_host(cat)
         print(f"[cat-wolt] {cat}")
         try:
             payload = None if force_pw else await _load_wolt_payload(cat)
@@ -1316,9 +1281,10 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                 items = list(found.values())
                 blobs = [payload]
                 html = ""
+                tile_prices = {}
             else:
                 print(f"[info] forcing Playwright fallback for {cat}")
-                items, blobs, html = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
+                items, blobs, html, tile_prices = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
 
             # venueId from blobs OR page HTML
             venue_id = _extract_venue_id_from_blobs_or_html(blobs, html)
@@ -1332,7 +1298,7 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
             if not venue_id and not payload and items:
                 try:
                     print("[info] trying modal/iframe enrichment fallback")
-                    _items_pw, _, _ = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
+                    _items_pw, _, _, _ = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
                     id2 = {str(i.get("id")): i for i in _items_pw if i.get("id")}
                     for it in items:
                         iid = str(it.get("id") or "")
@@ -1340,6 +1306,14 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                             it.update({k: v for k, v in id2[iid].items() if k in ("gtin","supplier","brand") and v})
                 except Exception as e:
                     print(f"[warn] modal/iframe enrichment failed: {e}")
+
+            # If we have scraped tile prices, merge them into items missing price
+            if not payload and items:
+                for it in items:
+                    if it.get("id"):
+                        iid = str(it["id"]).lower()
+                        if it.get("price") in (None, 0) and iid in tile_prices:
+                            it["price"] = tile_prices[iid]
 
             # Build rows then filter out cookie/consent junk & non-productish
             rows_raw = [_extract_wolt_row(item, cat, store_host_cat) for item in items]
