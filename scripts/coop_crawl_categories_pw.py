@@ -16,6 +16,10 @@ Modes
          • When using Playwright, also scrape visible tile prices and merge them into items
            that lack a price in JSON.
          • ***Require GTIN/EAN*** for Wolt rows (skip otherwise). Prices normalized to euros.
+         • NEW: If venueId can’t be inferred from blobs/html, open exactly one product modal and
+                 sniff the prodinfo iframe src to extract it (makes PW fallback much more reliable).
+         • NEW: Run-wide dedup of (store_host, ext_id) to avoid re-writing the same products.
+                 Use --seed-from-csv to preload previously crawled keys.
 
 DB alignment
 - Target table: public.staging_coop_products
@@ -24,6 +28,8 @@ DB alignment
 Flags & env
 - --wolt-force-playwright  (presence = True), or WOLT_FORCE_PLAYWRIGHT=1/true
 - --write-empty-csv (default: on) → always write CSV header even if 0 rows
+- --seed-from-csv=/path/a.csv,/path/b.csv  to preload dedup keys (store_host,ext_id)
+- --no-dedup to disable deduplication
 - COOP_UPSERT_DB=1 to enable DB upsert (requires asyncpg + DATABASE_URL)
 """
 
@@ -989,8 +995,6 @@ async def _fetch_prodinfo_fields(lang: str, venue_id: str, item_id: str) -> Dict
     return {"gtin": gtin, "supplier": supplier, "name": name}
 
 async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str, max_to_probe: int = 240) -> None:
-    """Probe prodinfo for each item; if lang fails to yield GTIN, try the alternate ('en'/'et')."""
-    alt_lang = "en" if lang.lower() == "et" else "et"
     probed = 0
     for it in items:
         if probed >= max_to_probe:
@@ -1000,12 +1004,6 @@ async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str
             continue
         try:
             info = await _fetch_prodinfo_fields(lang, venue_id, iid)
-            # fallback to alternate language if gtin missing
-            if not info.get("gtin"):
-                info_alt = await _fetch_prodinfo_fields(alt_lang, venue_id, iid)
-                if info_alt.get("gtin"):
-                    info = {**info, **info_alt}  # prefer fields that exist in alt
-
             if info.get("gtin"):
                 it["gtin"] = info["gtin"]
             if info.get("supplier"):
@@ -1178,16 +1176,13 @@ async def _extract_venue_id_via_modal(page) -> Optional[str]:
     then sniff the prodinfo iframe src for the 24-hex venueId.
     """
     try:
-        # Find any product tile anchor
         a = page.locator('a[href*="itemid-"], a[href*="item-"]').first
         if await a.count() == 0:
             return None
         await a.scroll_into_view_if_needed(timeout=1500)
         await a.click(timeout=2000)
-        # Wait a bit for modal & iframe
         for _ in range(20):
-            frames = page.frames
-            for fr in frames:
+            for fr in page.frames:
                 try:
                     src = (fr.url or "").lower()
                     m = re.search(r"/([a-f0-9]{24})/", src)
@@ -1384,12 +1379,6 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                         if it.get("price") in (None, 0) and iid in tile_prices:
                             it["price"] = tile_prices[iid]
 
-            # Pre-debug: list items still missing GTIN after enrichment (first 20)
-            missing = [(str(it.get("id") or ""), it.get("name")) for it in items if not it.get("gtin")]
-            if missing:
-                for iid, nm in missing[:20]:
-                    print(f"[debug] item missing GTIN (post-enrich): id={iid or '∅'} name={repr(nm) if nm else '∅'} in {cat}")
-
             # Build rows (GTIN-required) and filter out junk
             rows_raw = [_extract_wolt_row(item, cat, store_host_cat) for item in items]
             rows = []
@@ -1414,6 +1403,23 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
             print(f"[warn] Wolt category failed {cat}: {e}")
 
 # ---------- main ----------
+
+def _seed_dedup_from_csv(paths: List[str]) -> set[tuple[str, str]]:
+    seen: set[tuple[str, str]] = set()
+    for p in paths:
+        try:
+            fp = Path(p)
+            if not fp.exists():
+                continue
+            with fp.open("r", encoding="utf-8") as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    sh, ext = (row.get("store_host") or "").strip(), (row.get("ext_id") or "").strip()
+                    if sh and ext:
+                        seen.add((sh, ext))
+        except Exception as e:
+            print(f"[warn] could not seed dedup from {p}: {e}")
+    return seen
 
 async def run(args):
     categories: List[str] = []
@@ -1453,10 +1459,39 @@ async def run(args):
     if args.write_empty_csv:
         _ensure_csv_with_header(out_path)
 
+    # --- run-wide dedup ---
+    seen_keys: set[tuple[str, str]] = set()
+    if not args.no_dedup:
+        # seed from csv paths if provided
+        seed_paths = []
+        if args.seed_from_csv:
+            for chunk in args.seed_from_csv.split(","):
+                chunk = chunk.strip()
+                if chunk:
+                    seed_paths.append(chunk)
+        # also seed from current out CSV (if exists)
+        if out_path.exists():
+            seed_paths.append(str(out_path))
+        if seed_paths:
+            seeded = _seed_dedup_from_csv(seed_paths)
+            seen_keys |= seeded
+            if seeded:
+                print(f"[dedup] preloaded {len(seeded)} keys from CSV")
+
     all_rows: List[Dict] = []
 
     def on_rows(batch: List[Dict]):
-        nonlocal all_rows
+        nonlocal all_rows, seen_keys
+        if not batch:
+            return
+        if not args.no_dedup:
+            before = len(batch)
+            batch = [r for r in batch if r.get("store_host") and r.get("ext_id") and (r["store_host"], r["ext_id"]) not in seen_keys]
+            for r in batch:
+                seen_keys.add((r["store_host"], r["ext_id"]))
+            dropped = before - len(batch)
+            if dropped:
+                print(f"[dedup] dropped {dropped} already-seen rows")
         if not batch:
             return
         append_csv(batch, out_path)
@@ -1502,6 +1537,10 @@ def parse_args():
                    help="Force Playwright network fallback for Wolt categories.")
     p.add_argument("--write-empty-csv", action="store_true",
                    default=True, help="Always write CSV header even if no rows.")
+    p.add_argument("--seed-from-csv", default="",
+                   help="Comma-separated CSV paths to preload dedup keys (store_host,ext_id).")
+    p.add_argument("--no-dedup", action="store_true",
+                   help="Disable run-wide deduplication of (store_host,ext_id).")
     return p.parse_args()
 
 if __name__ == "__main__":
