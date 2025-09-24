@@ -989,6 +989,8 @@ async def _fetch_prodinfo_fields(lang: str, venue_id: str, item_id: str) -> Dict
     return {"gtin": gtin, "supplier": supplier, "name": name}
 
 async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str, max_to_probe: int = 240) -> None:
+    """Probe prodinfo for each item; if lang fails to yield GTIN, try the alternate ('en'/'et')."""
+    alt_lang = "en" if lang.lower() == "et" else "et"
     probed = 0
     for it in items:
         if probed >= max_to_probe:
@@ -998,6 +1000,12 @@ async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str
             continue
         try:
             info = await _fetch_prodinfo_fields(lang, venue_id, iid)
+            # fallback to alternate language if gtin missing
+            if not info.get("gtin"):
+                info_alt = await _fetch_prodinfo_fields(alt_lang, venue_id, iid)
+                if info_alt.get("gtin"):
+                    info = {**info, **info_alt}  # prefer fields that exist in alt
+
             if info.get("gtin"):
                 it["gtin"] = info["gtin"]
             if info.get("supplier"):
@@ -1375,6 +1383,12 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                         iid = str(it["id"]).lower()
                         if it.get("price") in (None, 0) and iid in tile_prices:
                             it["price"] = tile_prices[iid]
+
+            # Pre-debug: list items still missing GTIN after enrichment (first 20)
+            missing = [(str(it.get("id") or ""), it.get("name")) for it in items if not it.get("gtin")]
+            if missing:
+                for iid, nm in missing[:20]:
+                    print(f"[debug] item missing GTIN (post-enrich): id={iid or '∅'} name={repr(nm) if nm else '∅'} in {cat}")
 
             # Build rows (GTIN-required) and filter out junk
             rows_raw = [_extract_wolt_row(item, cat, store_host_cat) for item in items]
