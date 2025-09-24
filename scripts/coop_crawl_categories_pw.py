@@ -581,6 +581,33 @@ def _first_urlish(obj: Dict, *keys: str) -> Optional[str]:
                     return v.get(kk).strip()
     return None
 
+# --- NEW: cookie/consent junk guards ---------------------------------------
+
+_DENY_EXACT = {  # lowercased exact names seen in screenshots
+    "web tracking bundle", "functional", "required", "marketing", "analytics"
+}
+_DENY_SUBSTR = { "cookie", "consent", "tracking" }
+
+def _looks_like_cookie_consent(name: Optional[str], brand: Optional[str], url: Optional[str]) -> bool:
+    n = (name or "").strip().lower()
+    b = (brand or "").strip().lower()
+    u = (url or "").strip().lower()
+    if n in _DENY_EXACT or b in _DENY_EXACT:
+        return True
+    if "wolt.com" in u and any(s in n for s in _DENY_SUBSTR):
+        return True
+    return False
+
+def _valid_productish(name: Optional[str], price: Optional[float], gtin: Optional[str], url: Optional[str], brand: Optional[str]) -> bool:
+    if _looks_like_cookie_consent(name, brand, url):
+        return False
+    # Accept if it has a price OR a GTIN; otherwise likely meta/junk
+    if price is not None and price > 0:
+        return True
+    if gtin:
+        return True
+    return False
+
 def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Dict:
     name = str(item.get("name") or "").strip() or None
     price = None
@@ -1304,9 +1331,7 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
             if not venue_id and not payload and items:
                 try:
                     print("[info] trying modal/iframe enrichment fallback")
-                    # Re-open the category and do modal enrichment (lightweight)
                     _items_pw, _, _ = await _wolt_capture_category_with_playwright(cat, strict_toote_info=strict_toote_info)
-                    # Enrichment happens inside the modal helper; merge GTIN/supplier by id
                     id2 = {str(i.get("id")): i for i in _items_pw if i.get("id")}
                     for it in items:
                         iid = str(it.get("id") or "")
@@ -1315,7 +1340,14 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                 except Exception as e:
                     print(f"[warn] modal/iframe enrichment failed: {e}")
 
-            rows = [_extract_wolt_row(item, cat, store_host) for item in items]
+            # Build rows then filter out cookie/consent junk & non-productish
+            rows_raw = [_extract_wolt_row(item, cat, store_host) for item in items]
+            rows = []
+            for r in rows_raw:
+                if not _valid_productish(r.get("name"), r.get("price"), r.get("ean_norm") or r.get("ean_raw"), r.get("url"), r.get("brand")):
+                    continue
+                rows.append(r)
+
             if args.max_products and args.max_products > 0:
                 rows = rows[: args.max_products]
             print(f"[info] category rows: {len(rows)}" + (" (pw-fallback)" if not payload else ""))
