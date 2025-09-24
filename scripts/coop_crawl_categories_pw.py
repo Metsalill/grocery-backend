@@ -21,9 +21,10 @@ DB alignment
 - Target table: public.staging_coop_products
 - PRIMARY KEY (store_host, ext_id)
 
-Flag note
-- Boolean flag: `--wolt-force-playwright` (presence = True). Also respects env
-  WOLT_FORCE_PLAYWRIGHT=1/true (for CI convenience).
+Flags & env
+- --wolt-force-playwright  (presence = True), or WOLT_FORCE_PLAYWRIGHT=1/true
+- --write-empty-csv (default: on) → always write CSV header even if 0 rows
+- COOP_UPSERT_DB=1 to enable DB upsert (requires asyncpg + DATABASE_URL)
 """
 
 import argparse
@@ -712,6 +713,12 @@ CSV_COLS = [
     "size_text","brand","manufacturer","price","currency","image_url","url",
 ]
 
+def _ensure_csv_with_header(out_path: Path) -> None:
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    if not out_path.exists() or out_path.stat().st_size == 0:
+        with out_path.open("w", newline="", encoding="utf-8") as f:
+            csv.DictWriter(f, fieldnames=CSV_COLS).writeheader()
+
 def append_csv(rows: List[Dict], out_path: Path) -> None:
     if not rows:
         return
@@ -728,6 +735,7 @@ def append_csv(rows: List[Dict], out_path: Path) -> None:
 
 async def maybe_upsert_db(rows: List[Dict]) -> None:
     if not rows:
+        print("[info] No rows to upsert.")
         return
     if os.environ.get("COOP_UPSERT_DB", "0").lower() not in ("1", "true"):
         print("[info] DB upsert disabled (COOP_UPSERT_DB != 1)")
@@ -759,8 +767,8 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
             ON CONFLICT (store_host, ext_id) DO UPDATE SET
               name         = COALESCE(EXCLUDED.name,         {table}.name),
-              brand        = COALESCE(EXCLUDED.brand,        {table}.brand),
-              manufacturer = COALESCE(EXCLUDED.manufacturer, {table}.manufacturer),
+              brand        = COALESCE(NULLIF(EXCLUDED.brand,''),        {table}.brand),
+              manufacturer = COALESCE(NULLIF(EXCLUDED.manufacturer,''), {table}.manufacturer),
               ean_raw      = COALESCE(EXCLUDED.ean_raw,      {table}.ean_raw),
               ean_norm     = COALESCE(EXCLUDED.ean_norm,     {table}.ean_norm),
               size_text    = COALESCE(EXCLUDED.size_text,    {table}.size_text),
@@ -1376,6 +1384,10 @@ async def run(args):
         out_path = out_path / f"coop_products_{now_stamp()}.csv"
     print(f"[out] streaming CSV → {out_path}")
 
+    # Always create header if requested
+    if args.write_empty_csv:
+        _ensure_csv_with_header(out_path)
+
     all_rows: List[Dict] = []
 
     def on_rows(batch: List[Dict]):
@@ -1398,6 +1410,11 @@ async def run(args):
     else:
         await run_ecoop(args, categories, base_region, on_rows)
 
+    # End-of-run stats
+    gtin_ok = sum(1 for r in all_rows if (r.get("ean_norm") or r.get("ean_raw")))
+    brand_ok = sum(1 for r in all_rows if (r.get("brand") or r.get("manufacturer")))
+    print(f"[stats] rows={len(all_rows)}  gtin_present={gtin_ok}  brand_or_manufacturer_present={brand_ok}")
+
     print(f"[ok] CSV ready: {out_path}")
     await maybe_upsert_db(all_rows)
 
@@ -1418,6 +1435,8 @@ def parse_args():
     p.add_argument("--out", default="out/coop_products.csv", help="CSV file or output directory")
     p.add_argument("--wolt-force-playwright", action="store_true",
                    help="Force Playwright network fallback for Wolt categories.")
+    p.add_argument("--write-empty-csv", action="store_true",
+                   default=True, help="Always write CSV header even if no rows.")
     return p.parse_args()
 
 if __name__ == "__main__":
