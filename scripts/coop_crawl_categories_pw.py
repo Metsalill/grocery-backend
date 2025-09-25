@@ -643,6 +643,7 @@ def _looks_like_cookie_consent(name: Optional[str], brand: Optional[str], url: O
 def _valid_productish(name: Optional[str], price: Optional[float], gtin: Optional[str], url: Optional[str], brand: Optional[str]) -> bool:
     if _looks_like_cookie_consent(name, brand, url):
         return False
+    # Accept iff priced or with GTIN; GTIN is mandatory downstream anyway.
     if gtin:
         return True
     if price is not None and price > 0:
@@ -987,15 +988,10 @@ async def _fetch_prodinfo_fields(lang: str, venue_id: str, item_id: str) -> Dict
 
     return {"gtin": gtin, "supplier": supplier, "name": name}
 
-async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str, max_to_probe: Optional[int] = None) -> None:
-    """
-    Enrich each item dict in-place with gtin/supplier/name via prodinfo.
-    If max_to_probe is None, probe ALL items.
-    """
-    limit = max_to_probe if isinstance(max_to_probe, int) and max_to_probe > 0 else len(items)
+async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str, max_to_probe: int = 240) -> None:
     probed = 0
     for it in items:
-        if probed >= limit:
+        if probed >= max_to_probe:
             break
         iid = str(it.get("id") or "")
         if not iid or not HEX24_RE.fullmatch(iid):
@@ -1013,7 +1009,7 @@ async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str
         except Exception:
             pass
         probed += 1
-        await asyncio.sleep(0.03)
+        await asyncio.sleep(0.04)
 
 # ====== iframe scraping helpers (old fallback) ==============================
 
@@ -1135,55 +1131,59 @@ async def _open_product_modal(page, item: Dict) -> bool:
             pass
     return await _open_product_modal_for_name(page, str(item.get("name") or "").strip())
 
-# ---------- NEW: tile price scraping (PW) + visible IDs ---------------------
+# ---------- NEW: tile price scraping (PW) -----------------------------------
 
 async def _scrape_tile_prices(page) -> Tuple[Dict[str, float], Set[str]]:
+    """Return (tile_prices_in_eur, visible_item_ids_on_grid)."""
     try:
         data = await page.evaluate(
             """() => {
                 const out = [];
+                const ids = new Set();
                 const anchors = Array.from(document.querySelectorAll('a[href*="item"]'));
                 for (const a of anchors) {
                     const href = a.getAttribute('href') || a.href || '';
                     const m = href && href.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
                     if (!m) continue;
+                    const iid = (m[1] || '').toLowerCase();
+                    ids.add(iid);
                     const card = a.closest('article, a, div') || a;
                     const txt = (card && card.textContent) ? card.textContent : '';
                     const mt = txt.match(/(\\d+[.,]\\d{2})\\s*€/);
                     if (mt) {
                         const raw = mt[1].replace(',', '.');
                         const val = parseFloat(raw);
-                        if (!isNaN(val)) out.push([m[1], val]);
-                    } else {
-                        out.push([m[1], null]);
+                        if (!isNaN(val)) out.push([iid, val]);
                     }
                 }
-                return out;
+                return [out, Array.from(ids)];
             }"""
         )
+        prices_pairs, ids_list = data or [[], []]
         prices: Dict[str, float] = {}
-        ids: Set[str] = set()
-        for iid, val in data or []:
-            iid_l = str(iid).lower()
-            ids.add(iid_l)
-            if val is not None:
-                prices[iid_l] = float(val)
-        return prices, ids
+        for iid, val in prices_pairs or []:
+            prices[str(iid).lower()] = float(val)
+        visible_ids = {str(x).lower() for x in (ids_list or [])}
+        return prices, visible_ids
     except Exception:
         return {}, set()
 
 # ---------- NEW: get venueId via a single modal (PW fallback booster) -------
 
 async def _extract_venue_id_via_modal(page) -> Optional[str]:
+    """
+    On a category page, click the first visible product to open the info modal,
+    then sniff the prodinfo iframe src for the 24-hex venueId.
+    """
     try:
         a = page.locator('a[href*="itemid-"], a[href*="item-"]').first
         if await a.count() == 0:
             return None
         await a.scroll_into_view_if_needed(timeout=1500)
         await a.click(timeout=2000)
+        # Wait for modal & iframe to mount; scan frame URLs
         for _ in range(20):
-            frames = page.frames
-            for fr in frames:
+            for fr in page.frames:
                 try:
                     src = (fr.url or "").lower()
                     m = re.search(r"/([a-f0-9]{24})/", src)
@@ -1196,10 +1196,15 @@ async def _extract_venue_id_via_modal(page) -> Optional[str]:
         pass
     return None
 
-async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info: bool = True) -> Tuple[List[Dict], List[Any], str, Dict[str, float], Optional[str]]:
+# ---------- FIXED PW fallback collector -------------------------------------
+
+async def _wolt_capture_category_with_playwright(
+    cat_url: str,
+    strict_toote_info: bool = True
+) -> Tuple[List[Dict], List[Any], str, Dict[str, float], Optional[str]]:
     """
     Returns: items, blobs, html, tile_prices, venue_id_if_found
-    Now **filters items to those visible on the grid** (by anchor item ids).
+    Filters items to those visible on the grid (by anchor item ids).
     """
     if async_playwright is None:
         raise RuntimeError("Playwright is required for Wolt fallback but is not installed.")
@@ -1209,16 +1214,6 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=True)
-        context = await pw.chromium.launch_persistent_context if False else await pw.chromium.launch  # placeholder to keep formatter calm
-        context = await pw.chromium.launch(headless=True)  # actual
-        context = await pw.chromium.launch(headless=True)  # double-safe
-        # The above two lines are harmless duplicates that some formatters keep – ignore.
-        # We immediately create a regular context below.
-        await browser.close()
-    # ^ The above was a formatter hiccup on some environments. Recreate cleanly:
-
-    async with async_playwright() as pw2:
-        browser = await pw2.chromium.launch(headless=True)
         context = await browser.new_context(
             user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                         "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"),
@@ -1251,6 +1246,7 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
         tile_prices: Dict[str, float] = {}
         visible_ids: Set[str] = set()
         venue_id: Optional[str] = None
+
         try:
             await page.goto(cat_url, wait_until="networkidle")
             await wait_cookie_banner(page)
@@ -1258,11 +1254,12 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
                 await page.mouse.wheel(0, 1500)
                 await page.wait_for_timeout(250)
 
+            # prices + ids visible on the grid
             tile_prices, visible_ids = await _scrape_tile_prices(page)
             if visible_ids:
                 print(f"[debug] visible item ids on grid: {len(visible_ids)}")
 
-            # Collect global JS blobs if present
+            # try to capture global state objects
             for varname in ["__APOLLO_STATE__", "__NEXT_DATA__", "__NUXT__", "__INITIAL_STATE__", "__REACT_QUERY_STATE__", "__REDUX_STATE__"]:
                 try:
                     data = await page.evaluate(f"window.{varname} || null")
@@ -1273,20 +1270,20 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
 
             html = await page.content()
 
-            # Parse items from collected blobs
+            # walk collected blobs for productish objects
             for blob in blobs:
                 try:
                     _walk_collect_items(blob, found)
                 except Exception:
                     pass
 
-            # Restrict to **visible grid ids** to avoid cookie/consent junk
+            # keep only objects whose id is actually visible on the grid
             if visible_ids:
                 before = len(found)
                 found = {k: v for k, v in found.items() if str(v.get("id") or "").lower() in visible_ids}
                 print(f"[debug] items found in blobs: {before} → filtered to visible: {len(found)}")
 
-            # If still nothing, fall back to id regex in HTML (still filter by visible if present)
+            # fallback: ids from HTML (still intersect with visible_ids if we have them)
             if not found:
                 ids = set(re.findall(r"(?:itemid-|item-)([a-f0-9]{24})", html or "", re.I))
                 if visible_ids:
@@ -1294,10 +1291,8 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
                 for iid in ids:
                     found[iid] = {"id": iid}
 
-            # Try to infer venueId from blobs/html first
+            # venueId from blobs/html; else sniff one modal’s iframe src
             venue_id = _extract_venue_id_from_blobs_or_html(blobs, html)
-
-            # If still missing, open ONE modal to sniff iframe src → venueId
             if not venue_id:
                 venue_id = await _extract_venue_id_via_modal(page)
                 if venue_id:
@@ -1391,23 +1386,16 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
 
             if venue_id:
                 lang = _lang_from_url(cat)
-                # Probe ALL collected items (no artificial cap)
-                await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=None)
+                await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=240)
             else:
                 print("[warn] venueId not found — skipping direct prodinfo enrichment")
 
-            # Merge tile prices into items missing price (PW path)
             if not payload and items:
-                tile_map = {}
-                try:
-                    # build map in lowercase
-                    tile_map = {str(k).lower(): v for (k, v) in tile_prices.items()}
-                except Exception:
-                    tile_map = tile_prices or {}
                 for it in items:
-                    iid = str(it.get("id") or "").lower()
-                    if it.get("price") in (None, 0) and iid in tile_map and tile_map[iid] is not None:
-                        it["price"] = tile_map[iid]
+                    if it.get("id"):
+                        iid = str(it["id"]).lower()
+                        if it.get("price") in (None, 0) and iid in tile_prices:
+                            it["price"] = tile_prices[iid]
 
             # Build rows (GTIN-required) and filter out junk
             rows_raw = [_extract_wolt_row(item, cat, store_host_cat) for item in items]
