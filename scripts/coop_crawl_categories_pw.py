@@ -969,8 +969,8 @@ def _maybe_venue_id_from_obj(obj: Any) -> Optional[str]:
                     if isinstance(val, str) and HEX24_RE.fullmatch(val):
                         return val
                 if str(key).lower().endswith("id") and isinstance(val, str) and HEX24_RE.fullmatch(val):
-                    if any("venue" in str(sib).lower() for sib in obj.keys():
-                    ):
+                    # if this dict also has any key that mentions "venue", treat this id as venue id
+                    if any("venue" in str(sib).lower() for sib in obj.keys()):
                         return val
             for v in obj.values():
                 out = _maybe_venue_id_from_obj(v)
