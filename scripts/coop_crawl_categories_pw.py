@@ -15,18 +15,18 @@ Modes
          • keep the old Playwright modal/iframe path as a fallback.
          • When using Playwright, also scrape visible tile prices and merge them into items
            that lack a price in JSON.
-         • Default: ***Require GTIN/EAN*** for Wolt rows (skip otherwise). Prices normalized to euros.
-           (You can temporarily allow GTIN='-' via WOLT_ALLOW_DASH_GTIN=1)
+         • Prices normalized to euros.
 
 DB alignment
 - Target table: public.staging_coop_products
 - PRIMARY KEY (store_host, ext_id)
 
 Flags & env
+- --skip-known-db  (skip rows whose (store_host, ext_id) already exist in DB)
+- --allow-missing-gtin (default: on) → keep items whose GTIN is “-” or unknown; ext_id falls back to itemId
 - --wolt-force-playwright  (presence = True), or WOLT_FORCE_PLAYWRIGHT=1/true
 - --write-empty-csv (default: on) → always write CSV header even if 0 rows
 - COOP_UPSERT_DB=1 to enable DB upsert (requires asyncpg + DATABASE_URL)
-- WOLT_ALLOW_DASH_GTIN=1 to include rows where prodinfo shows GTIN as '-' or '–'
 """
 
 import argparse
@@ -73,9 +73,6 @@ PRODINFO_JSONLD_GTIN_RE = re.compile(r'"gtin(?:8|12|13|14)"\s*:\s*"(\d{8,14})"',
 PRODINFO_TITLE_RE = re.compile(r"<h2[^>]*>([^<]{2,200})</h2>", re.I)
 
 HEX24_RE = re.compile(r"\b[a-f0-9]{24}\b", re.I)
-
-# ---- feature flags ----------------------------------------------------------
-ALLOW_DASH_GTIN = str(os.getenv("WOLT_ALLOW_DASH_GTIN", "0")).lower() in {"1", "true", "yes"}
 
 def str2bool(v: Optional[str]) -> bool:
     return str(v or "").strip().lower() in {"1", "true", "t", "yes", "y", "on"}
@@ -648,17 +645,19 @@ def _looks_like_cookie_consent(name: Optional[str], brand: Optional[str], url: O
 def _valid_productish(name: Optional[str], price: Optional[float], gtin: Optional[str], url: Optional[str], brand: Optional[str]) -> bool:
     if _looks_like_cookie_consent(name, brand, url):
         return False
-    # Accept iff priced or with GTIN; GTIN is mandatory downstream anyway unless dash is allowed.
+    # Accept iff priced or with GTIN; when allowing “-”, caller handles acceptance.
     if gtin:
         return True
     if price is not None and price > 0:
         return True
     return False
 
-def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Optional[Dict]:
+# === Wolt row builder (now supports allowing GTIN='-') =====================
+
+def _extract_wolt_row(item: Dict, category_url: str, store_host: str, allow_missing_gtin: bool = False) -> Optional[Dict]:
     """
-    Build a row enforcing GTIN/EAN unless ALLOW_DASH_GTIN is set.
-    When allowing dash, we use {store_host}:{24-hex itemId} as a stable ext_id fallback.
+    Build a row. By default requires a valid GTIN/EAN. If allow_missing_gtin=True,
+    then accept items where GTIN is '-' or missing; ext_id falls back to itemId.
     """
     name = str(item.get("name") or "").strip() or None
     price = None
@@ -667,28 +666,31 @@ def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Optiona
             price = _parse_wolt_price(item[k])
             if price is not None:
                 break
+
     image_url = _first_urlish(item, "image", "image_url", "imageUrl", "media")
     manufacturer = (item.get("supplier") or
                     _search_info_label(item, "Tarnija info", "Tarnija", "Tootja", "Valmistaja", "Supplier", "Manufacturer") or
                     _first_str(item, "supplier", "manufacturer", "producer"))
-
     ean_raw  = item.get("gtin") or (_search_info_label(item, "GTIN", "EAN", "Ribakood") or _first_str(item, "gtin", "ean", "barcode"))
     ean_norm = normalize_ean(ean_raw)
 
-    ext_id: Optional[str] = None
+    # Decide acceptance & ext_id
+    iid = str(item.get("id") or "")
+    iid_hex = iid if HEX24_RE.fullmatch(iid or "") else None
 
-    if ean_norm:
-        ext_id = ean_norm
+    if not ean_norm:
+        # allow explicit dash or empty if flag set and we have a stable fallback id
+        if not allow_missing_gtin:
+            return None
+        dashish = (str(ean_raw or "").strip() == "-")
+        if not dashish and ean_raw:  # some other garbage value that's not a GTIN
+            # still allow if flag is on – we just won't normalize
+            pass
+        if not iid_hex:
+            return None  # cannot build stable PK without GTIN or itemId
+        ext_id = f"iid:{iid_hex}"
     else:
-        # no real GTIN – optionally allow if GTIN is '-' or '–'
-        if ALLOW_DASH_GTIN and str(ean_raw or "").strip() in {"-", "–"}:
-            iid = str(item.get("id") or "")
-            if HEX24_RE.fullmatch(iid):
-                ext_id = f"{store_host}:{iid}"
-            else:
-                return None
-        else:
-            return None  # strict default
+        ext_id = ean_norm
 
     brand = _first_str(item, "brand") or likely_brand_from_name(name) or manufacturer
     size_text = _search_info_label(item, "Size", "Kogus", "Maht", "Kaal")
@@ -696,15 +698,17 @@ def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Optiona
         m = SIZE_RE.search(name)
         if m:
             size_text = m.group(1)
+
     url = category_url
     if item.get("id"):
         url = f"{category_url}#item-{item.get('id')}"
+
     return {
         "chain": "Coop",
         "store_host": store_host,
         "channel": "wolt",
         "ext_id": ext_id,
-        "ean_raw": ean_raw if ean_norm or (str(ean_raw or "").strip() in {"-", "–"}) else ean_raw,
+        "ean_raw": (ean_raw or ean_norm or ("-" if not ean_norm else ean_norm)),
         "ean_norm": ean_norm,
         "name": name,
         "size_text": size_text,
@@ -750,6 +754,8 @@ def append_csv(rows: List[Dict], out_path: Path) -> None:
             row = {k: r.get(k) for k in CSV_COLS}
             row["price"] = _format_price_for_csv(row.get("price")) if row.get("price") is not None else ""
             w.writerow(row)
+
+# ---------- DB helpers ----------
 
 async def maybe_upsert_db(rows: List[Dict]) -> None:
     if not rows:
@@ -820,6 +826,28 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
         print(f"[ok] Upserted {len(payload)} rows into {table}")
     finally:
         await conn.close()
+
+async def _fetch_known_ext_ids(store_host: str) -> set[str]:
+    """Fetch ext_ids already in DB for this store_host. Empty set if DB not available."""
+    dsn = os.environ.get("DATABASE_URL")
+    if not dsn:
+        return set()
+    try:
+        import asyncpg  # type: ignore
+    except Exception:
+        return set()
+    try:
+        conn = await asyncpg.connect(dsn)
+        try:
+            rows = await conn.fetch(
+                "SELECT ext_id FROM public.staging_coop_products WHERE store_host=$1",
+                store_host,
+            )
+            return {r["ext_id"] for r in rows}
+        finally:
+            await conn.close()
+    except Exception:
+        return set()
 
 # ---------- router (block trackers only) ----------
 
@@ -941,7 +969,8 @@ def _maybe_venue_id_from_obj(obj: Any) -> Optional[str]:
                     if isinstance(val, str) and HEX24_RE.fullmatch(val):
                         return val
                 if str(key).lower().endswith("id") and isinstance(val, str) and HEX24_RE.fullmatch(val):
-                    if any("venue" in str(sib).lower() for sib in obj.keys()):
+                    if any("venue" in str(sib).lower() for sib in obj.keys():
+                    ):
                         return val
             for v in obj.values():
                 out = _maybe_venue_id_from_obj(v)
@@ -1183,10 +1212,6 @@ async def _scrape_tile_prices(page) -> Dict[str, float]:
 # ---------- NEW: get venueId via a single modal (PW fallback booster) -------
 
 async def _extract_venue_id_via_modal(page) -> Optional[str]:
-    """
-    On a category page, click the first visible product to open the info modal,
-    then sniff the prodinfo iframe src for the 24-hex venueId.
-    """
     try:
         a = page.locator('a[href*="itemid-"], a[href*="item-"]').first
         if await a.count() == 0:
@@ -1194,12 +1219,11 @@ async def _extract_venue_id_via_modal(page) -> Optional[str]:
         await a.scroll_into_view_if_needed(timeout=1500)
         await a.click(timeout=2000)
         for _ in range(20):
-            frames = page.frames
-            for fr in frames:
+            for fr in page.frames:
                 try:
                     src = (fr.url or "").lower()
                     m = re.search(r"/([a-f0-9]{24})/", src)
-                    if "prodinfo.wolt" in src and m:
+                    if "prodinfo.wolt.com" in src and m:
                         return m.group(1)
                 except Exception:
                     pass
@@ -1209,9 +1233,6 @@ async def _extract_venue_id_via_modal(page) -> Optional[str]:
     return None
 
 async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info: bool = True) -> Tuple[List[Dict], List[Any], str, Dict[str, float], Optional[str]]:
-    """
-    Returns: items, blobs, html, tile_prices, venue_id_if_found
-    """
     if async_playwright is None:
         raise RuntimeError("Playwright is required for Wolt fallback but is not installed.")
 
@@ -1260,7 +1281,6 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
 
             tile_prices = await _scrape_tile_prices(page)
 
-            # Collect global JS blobs if present
             for varname in ["__APOLLO_STATE__", "__NEXT_DATA__", "__NUXT__", "__INITIAL_STATE__", "__REACT_QUERY_STATE__", "__REDUX_STATE__"]:
                 try:
                     data = await page.evaluate(f"window.{varname} || null")
@@ -1271,7 +1291,6 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
 
             html = await page.content()
 
-            # Parse items from collected blobs
             for blob in blobs:
                 try:
                     _walk_collect_items(blob, found)
@@ -1283,10 +1302,7 @@ async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info
                 for iid in ids:
                     found[iid] = {"id": iid}
 
-            # Try to infer venueId from blobs/html first
             venue_id = _extract_venue_id_from_blobs_or_html(blobs, html)
-
-            # If still missing, open ONE modal to sniff iframe src → venueId
             if not venue_id:
                 venue_id = await _extract_venue_id_via_modal(page)
                 if venue_id:
@@ -1304,6 +1320,11 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
     if async_playwright is None:
         raise RuntimeError("Playwright is not installed but mode=ecoop was requested.")
     store_host = urlparse(base_region).netloc.lower()
+    known_ids: set[str] = set()
+    if args.skip_known_db:
+        known_ids = await _fetch_known_ext_ids(store_host)
+        if known_ids:
+            print(f"[info] skip-known: loaded {len(known_ids)} ext_ids for {store_host}")
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=bool(int(args.headless)))
@@ -1345,7 +1366,11 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
                 for coro in asyncio.as_completed(tasks):
                     r = await coro
                     if r:
+                        if args.skip_known_db and r.get("ext_id") in known_ids:
+                            continue
                         pending_batch.append(r)
+                        if args.skip_known_db and r.get("ext_id"):
+                            known_ids.add(r["ext_id"])
                         if len(pending_batch) >= 25:
                             on_rows(pending_batch); pending_batch = []
                 if pending_batch:
@@ -1362,6 +1387,12 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
 
     for cat in categories:
         store_host_cat = _wolt_store_host(cat)
+        known_ids: set[str] = set()
+        if args.skip_known_db:
+            known_ids = await _fetch_known_ext_ids(store_host_cat)
+            if known_ids:
+                print(f"[info] skip-known: loaded {len(known_ids)} ext_ids for {store_host_cat}")
+
         print(f"[cat-wolt] {cat}")
         try:
             payload = None if force_pw else await _load_wolt_payload(cat)
@@ -1378,25 +1409,9 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                 print(f"[info] forcing Playwright fallback for {cat}")
                 items, blobs, html, tile_prices, venue_id = await _wolt_capture_category_with_playwright(cat)
 
-            # If we still couldn't infer venueId from PW path, we can't enrich → rows will be minimal.
             if venue_id:
                 lang = _lang_from_url(cat)
                 await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=240)
-
-                # ---- DEBUG: list first 15 post-enrich items still missing a valid GTIN
-                missing = []
-                for it in items:
-                    gt = normalize_ean(it.get("gtin"))
-                    if not gt:
-                        iid = str(it.get("id") or "")
-                        name = str(it.get("name") or "")
-                        url_pi = f"https://prodinfo.wolt.com/{lang}/{venue_id}/{iid}" if HEX24_RE.fullmatch(iid) else "(no prodinfo url)"
-                        missing.append((iid, name[:80], url_pi))
-                if missing:
-                    for iid, name, url_pi in missing[:15]:
-                        print(f"[debug] item missing GTIN (post-enrich): id={iid} name='{name}' in {cat}\n        → {url_pi}")
-                    if len(missing) > 15:
-                        print(f"[debug] (+{len(missing)-15} more without GTIN)")
             else:
                 print("[warn] venueId not found — skipping direct prodinfo enrichment")
 
@@ -1407,20 +1422,31 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                         if it.get("price") in (None, 0) and iid in tile_prices:
                             it["price"] = tile_prices[iid]
 
-            # Build rows (GTIN-required unless ALLOW_DASH_GTIN) and filter out junk
-            rows_raw = [_extract_wolt_row(item, cat, store_host_cat) for item in items]
+            # Build rows (+ collect post-enrich missing samples)
             rows = []
-            skipped_without_gtin = 0
-            for r in rows_raw:
+            missing_samples = []
+            for it in items:
+                # record sample for debug if no normalized gtin even after enrichment
+                gtin_norm = normalize_ean(it.get("gtin") or it.get("ean") or it.get("barcode"))
+                if not gtin_norm and len(missing_samples) < 15:
+                    missing_samples.append((str(it.get("id") or ""), str(it.get("name") or "")))
+
+                r = _extract_wolt_row(it, cat, store_host_cat, allow_missing_gtin=bool(args.allow_missing_gtin))
                 if not r:
-                    skipped_without_gtin += 1
                     continue
                 if not _valid_productish(r.get("name"), r.get("price"), r.get("ean_norm") or r.get("ean_raw"), r.get("url"), r.get("brand")):
                     continue
+                # skip-known filter
+                if args.skip_known_db and r.get("ext_id") in known_ids:
+                    continue
                 rows.append(r)
+                if args.skip_known_db and r.get("ext_id"):
+                    known_ids.add(r["ext_id"])
 
-            if skipped_without_gtin:
-                print(f"[debug] skipped {skipped_without_gtin} items without GTIN (before filters)")
+            if missing_samples:
+                # show list of first 15 items that still miss GTIN post-enrich
+                for iid, nm in missing_samples:
+                    print(f"[debug] item missing GTIN (post-enrich): id={iid} name='{nm}' in {cat}")
 
             if args.max_products and args.max_products > 0:
                 rows = rows[: args.max_products]
@@ -1493,9 +1519,9 @@ async def run(args):
         await run_ecoop(args, categories, base_region, on_rows)
 
     # End-of-run stats
-    gtin_ok = sum(1 for r in all_rows if (r.get("ean_norm") or r.get("ean_raw")))
+    gtin_ok = sum(1 for r in all_rows if (r.get("ean_norm") or (str(r.get("ean_raw") or "").strip() == "-")))
     brand_ok = sum(1 for r in all_rows if (r.get("brand") or r.get("manufacturer")))
-    print(f"[stats] rows={len(all_rows)}  gtin_present={gtin_ok}  brand_or_manufacturer_present={brand_ok}")
+    print(f"[stats] rows={len(all_rows)}  gtin_present_or_dash={gtin_ok}  brand_or_manufacturer_present={brand_ok}")
 
     print(f"[ok] CSV ready: {out_path}")
     await maybe_upsert_db(all_rows)
@@ -1515,10 +1541,18 @@ def parse_args():
     p.add_argument("--cat-shards", type=int, default=1, help="Total number of category shards")
     p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
     p.add_argument("--out", default="out/coop_products.csv", help="CSV file or output directory")
+
     p.add_argument("--wolt-force-playwright", action="store_true",
                    help="Force Playwright network fallback for Wolt categories.")
-    p.add_argument("--write-empty-csv", action="store_true",
-                   default=True, help="Always write CSV header even if no rows.")
+    p.add_argument("--write-empty-csv", action="store_true", default=True,
+                   help="Always write CSV header even if no rows.")
+
+    # new toggles
+    p.add_argument("--skip-known-db", action="store_true",
+                   help="Skip rows whose (store_host, ext_id) already exist in DB.")
+    p.add_argument("--allow-missing-gtin", action="store_true", default=True,
+                   help="Allow items with GTIN '-' or missing (ext_id falls back to itemId).")
+
     return p.parse_args()
 
 if __name__ == "__main__":
