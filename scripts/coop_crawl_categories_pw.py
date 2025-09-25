@@ -37,7 +37,7 @@ import re
 import signal
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Set
+from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse, urljoin, urlsplit, urlunsplit, parse_qsl, urlencode
 
 # Optional Playwright (needed for ecoop and Wolt PW fallback)
@@ -1133,40 +1133,34 @@ async def _open_product_modal(page, item: Dict) -> bool:
 
 # ---------- NEW: tile price scraping (PW) -----------------------------------
 
-async def _scrape_tile_prices(page) -> Tuple[Dict[str, float], Set[str]]:
-    """Return (tile_prices_in_eur, visible_item_ids_on_grid)."""
+async def _scrape_tile_prices(page) -> Dict[str, float]:
     try:
         data = await page.evaluate(
             """() => {
                 const out = [];
-                const ids = new Set();
                 const anchors = Array.from(document.querySelectorAll('a[href*="item"]'));
                 for (const a of anchors) {
                     const href = a.getAttribute('href') || a.href || '';
                     const m = href && href.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
                     if (!m) continue;
-                    const iid = (m[1] || '').toLowerCase();
-                    ids.add(iid);
                     const card = a.closest('article, a, div') || a;
                     const txt = (card && card.textContent) ? card.textContent : '';
                     const mt = txt.match(/(\\d+[.,]\\d{2})\\s*€/);
                     if (mt) {
                         const raw = mt[1].replace(',', '.');
                         const val = parseFloat(raw);
-                        if (!isNaN(val)) out.push([iid, val]);
+                        if (!isNaN(val)) out.push([m[1], val]);
                     }
                 }
-                return [out, Array.from(ids)];
+                return out;
             }"""
         )
-        prices_pairs, ids_list = data or [[], []]
         prices: Dict[str, float] = {}
-        for iid, val in prices_pairs or []:
+        for iid, val in data or []:
             prices[str(iid).lower()] = float(val)
-        visible_ids = {str(x).lower() for x in (ids_list or [])}
-        return prices, visible_ids
+        return prices
     except Exception:
-        return {}, set()
+        return {}
 
 # ---------- NEW: get venueId via a single modal (PW fallback booster) -------
 
@@ -1181,13 +1175,12 @@ async def _extract_venue_id_via_modal(page) -> Optional[str]:
             return None
         await a.scroll_into_view_if_needed(timeout=1500)
         await a.click(timeout=2000)
-        # Wait for modal & iframe to mount; scan frame URLs
         for _ in range(20):
             for fr in page.frames:
                 try:
                     src = (fr.url or "").lower()
                     m = re.search(r"/([a-f0-9]{24})/", src)
-                    if "prodinfo.wolt.com" in src and m:
+                    if "prodinfo.wolt" in src and m:
                         return m.group(1)
                 except Exception:
                     pass
@@ -1196,15 +1189,9 @@ async def _extract_venue_id_via_modal(page) -> Optional[str]:
         pass
     return None
 
-# ---------- FIXED PW fallback collector -------------------------------------
-
-async def _wolt_capture_category_with_playwright(
-    cat_url: str,
-    strict_toote_info: bool = True
-) -> Tuple[List[Dict], List[Any], str, Dict[str, float], Optional[str]]:
+async def _wolt_capture_category_with_playwright(cat_url: str, strict_toote_info: bool = True) -> Tuple[List[Dict], List[Any], str, Dict[str, float], Optional[str]]:
     """
     Returns: items, blobs, html, tile_prices, venue_id_if_found
-    Filters items to those visible on the grid (by anchor item ids).
     """
     if async_playwright is None:
         raise RuntimeError("Playwright is required for Wolt fallback but is not installed.")
@@ -1244,9 +1231,7 @@ async def _wolt_capture_category_with_playwright(
 
         html = ""
         tile_prices: Dict[str, float] = {}
-        visible_ids: Set[str] = set()
         venue_id: Optional[str] = None
-
         try:
             await page.goto(cat_url, wait_until="networkidle")
             await wait_cookie_banner(page)
@@ -1254,12 +1239,8 @@ async def _wolt_capture_category_with_playwright(
                 await page.mouse.wheel(0, 1500)
                 await page.wait_for_timeout(250)
 
-            # prices + ids visible on the grid
-            tile_prices, visible_ids = await _scrape_tile_prices(page)
-            if visible_ids:
-                print(f"[debug] visible item ids on grid: {len(visible_ids)}")
+            tile_prices = await _scrape_tile_prices(page)
 
-            # try to capture global state objects
             for varname in ["__APOLLO_STATE__", "__NEXT_DATA__", "__NUXT__", "__INITIAL_STATE__", "__REACT_QUERY_STATE__", "__REDUX_STATE__"]:
                 try:
                     data = await page.evaluate(f"window.{varname} || null")
@@ -1270,28 +1251,17 @@ async def _wolt_capture_category_with_playwright(
 
             html = await page.content()
 
-            # walk collected blobs for productish objects
             for blob in blobs:
                 try:
                     _walk_collect_items(blob, found)
                 except Exception:
                     pass
 
-            # keep only objects whose id is actually visible on the grid
-            if visible_ids:
-                before = len(found)
-                found = {k: v for k, v in found.items() if str(v.get("id") or "").lower() in visible_ids}
-                print(f"[debug] items found in blobs: {before} → filtered to visible: {len(found)}")
-
-            # fallback: ids from HTML (still intersect with visible_ids if we have them)
             if not found:
                 ids = set(re.findall(r"(?:itemid-|item-)([a-f0-9]{24})", html or "", re.I))
-                if visible_ids:
-                    ids &= visible_ids
                 for iid in ids:
                     found[iid] = {"id": iid}
 
-            # venueId from blobs/html; else sniff one modal’s iframe src
             venue_id = _extract_venue_id_from_blobs_or_html(blobs, html)
             if not venue_id:
                 venue_id = await _extract_venue_id_via_modal(page)
@@ -1397,7 +1367,6 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                         if it.get("price") in (None, 0) and iid in tile_prices:
                             it["price"] = tile_prices[iid]
 
-            # Build rows (GTIN-required) and filter out junk
             rows_raw = [_extract_wolt_row(item, cat, store_host_cat) for item in items]
             rows = []
             skipped_without_gtin = 0
@@ -1456,7 +1425,6 @@ async def run(args):
         out_path = out_path / f"coop_products_{now_stamp()}.csv"
     print(f"[out] streaming CSV → {out_path}")
 
-    # Always create header if requested
     if args.write_empty_csv:
         _ensure_csv_with_header(out_path)
 
@@ -1482,7 +1450,6 @@ async def run(args):
     else:
         await run_ecoop(args, categories, base_region, on_rows)
 
-    # End-of-run stats
     gtin_ok = sum(1 for r in all_rows if (r.get("ean_norm") or r.get("ean_raw")))
     brand_ok = sum(1 for r in all_rows if (r.get("brand") or r.get("manufacturer")))
     print(f"[stats] rows={len(all_rows)}  gtin_present={gtin_ok}  brand_or_manufacturer_present={brand_ok}")
