@@ -1036,24 +1036,41 @@ async def _fetch_prodinfo_fields(lang: str, venue_id: str, item_id: str) -> Dict
 
     return {"gtin": gtin, "supplier": supplier, "name": name}
 
-async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str, max_to_probe: int = 240, debug_log_missing:int=15) -> None:
+# --- replace the whole function ---------------------------------------------
+async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str,
+                                     max_to_probe: Optional[int] = None) -> None:
+    """
+    Enrich items with GTIN/supplier/name via prodinfo.wolt.com.
+    Prioritises items that don't yet have a GTIN. If max_to_probe is None,
+    probe everything. Otherwise stops after the given number.
+    """
+    # configurable guardrail (env), default fairly high
+    if max_to_probe is None:
+        try:
+            max_to_probe = int(os.getenv("WOLT_PROBE_LIMIT", "2000"))
+        except Exception:
+            max_to_probe = 2000
+
+    # Prioritise items with missing/invalid GTIN first
+    def _needs_gtin(it: Dict) -> bool:
+        return normalize_ean(it.get("gtin") or it.get("ean") or it.get("ean_norm")) is None
+
+    queue = sorted(items, key=lambda it: (not _needs_gtin(it), str(it.get("id") or "")))
+
     probed = 0
-    logged = 0
-    for it in items:
-        if probed >= max_to_probe:
+    for it in queue:
+        if max_to_probe and probed >= max_to_probe:
             break
         iid = str(it.get("id") or "")
         if not iid or not HEX24_RE.fullmatch(iid):
             continue
+
         try:
             info = await _fetch_prodinfo_fields(lang, venue_id, iid)
-            if info.get("gtin"):
-                it["gtin"] = info["gtin"]
-            else:
-                # debug first N
-                if logged < debug_log_missing:
-                    print(f"[debug] item missing GTIN (post-enrich): id={iid} name={repr(it.get('name'))}")
-                    logged += 1
+            gt = normalize_ean(info.get("gtin"))
+            if gt:
+                it["gtin"] = gt
+            # Supplier/brand/title top-ups
             if info.get("supplier"):
                 it["supplier"] = info["supplier"]
                 if not it.get("brand"):
@@ -1062,8 +1079,17 @@ async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str
                 it["name"] = info["name"]
         except Exception:
             pass
+
         probed += 1
         await asyncio.sleep(0.04)
+
+# --- and update the call site inside run_wolt(...) --------------------------
+if venue_id:
+    lang = _lang_from_url(cat)
+    # probe as many as needed, configurable via env
+    await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=None)
+else:
+    print("[warn] venueId not found — skipping direct prodinfo enrichment")
 
 # ====== iframe scraping helpers (old fallback) ==============================
 
