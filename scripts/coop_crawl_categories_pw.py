@@ -25,11 +25,10 @@ DB alignment
 
 Flags & env
 - --wolt-force-playwright  (presence = True), or WOLT_FORCE_PLAYWRIGHT=1/true
-- --wolt-gtin-required (presence = True) → only output Wolt rows that have a valid GTIN
-- --wolt-probe-cap <int> to cap prodinfo probes per category (default 240; env WOLT_PROBE_LIMIT also works)
 - --write-empty-csv (default: on) → always write CSV header even if 0 rows
 - COOP_UPSERT_DB=1 to enable DB upsert (requires asyncpg + DATABASE_URL)
 - COOP_DEDUP_DB=1 to enable de-duplication against DB by (store_host, ean_norm)
+- WOLT_PROBE_LIMIT (default 2000) limit for prodinfo probes per category
 """
 
 import argparse
@@ -63,17 +62,18 @@ EAN_KEYS_ET = ["Ribakood", "EAN", "Tootekood", "GTIN"]
 CTX_TA_CODE = re.compile(r"(?:Tootekood)\s*[:\-]?\s*(\d{8,14})", re.IGNORECASE)
 CTX_MANUF   = re.compile(r"(?:Tootja|Valmistaja)\s*[:\-]?\s*([^\n<]{2,120})", re.IGNORECASE)
 
-GTIN_IN_ANY      = re.compile(r"\b(?:GTIN|EAN|Ribakood)\b[^\d]{0,20}(\d{8,14})", re.I)
+GTIN_IN_ANY      = re.compile(r"\b(?:GTIN|EAN|Ribakood)\b[^\d]{0,50}(\d{8,14})", re.I)
 TARNIJA_BLOCK_RE = re.compile(r"(?:Tarnija info|Supplier|Tootja info)\s*[\n\r]+([^\n\r]{2,200})", re.I)
 
-# prodinfo HTML patterns (server-rendered; fast & stable)
-PRODINFO_GTIN_RE = re.compile(r"<h3[^>]*>\s*GTIN\s*</h3>\s*<p[^>]*>(\d{8,14})</p>", re.I)
+# --- prodinfo HTML patterns (tolerant) --------------------------------------
+PRODINFO_GTIN_NEARBY_RE = re.compile(
+    r"(?is)gtin[^<]{0,200}?(?:</[^>]+>\s*){0,3}<[^>]*>\s*([0-9]{8,14})\s*</"
+)
 PRODINFO_SUPPLIER_RE = re.compile(
-    r"<h3[^>]*>\s*(?:Tarnija info|Tootja info|Supplier)\s*</h3>\s*<p[^>]*>([^<]{2,200})</p>",
-    re.I
+    r"(?is)<h3[^>]*>\s*(?:Tarnija info|Tootja info|Supplier)\s*</h3>.*?<[^>]+>\s*([^<]{2,200})\s*</"
 )
 PRODINFO_JSONLD_GTIN_RE = re.compile(r'"gtin(?:8|12|13|14)"\s*:\s*"(\d{8,14})"', re.I)
-PRODINFO_TITLE_RE = re.compile(r"<h2[^>]*>([^<]{2,200})</h2>", re.I)
+PRODINFO_TITLE_RE = re.compile(r"(?is)<h2[^>]*>\s*([^<]{2,200})\s*</h2>")
 
 HEX24_RE = re.compile(r"\b[a-f0-9]{24}\b", re.I)
 
@@ -644,20 +644,25 @@ def _looks_like_noise(name: Optional[str]) -> bool:
         return True
     return False
 
-def _valid_productish(name: Optional[str], price: Optional[float], gtin_norm: Optional[str],
-                      url: Optional[str], brand: Optional[str], manufacturer: Optional[str]) -> bool:
-    # If we have a GTIN and name isn't obvious junk → accept.
+def _valid_productish(name: Optional[str], price: Optional[float], gtin_norm: Optional[str], url: Optional[str], brand: Optional[str], manufacturer: Optional[str]) -> bool:
+    # If we have a GTIN, and it's not pure junk, accept.
     if gtin_norm:
         return not _looks_like_noise(name)
 
-    # No GTIN (includes GTIN '-') → require a real price and a non-noise name.
+    # No GTIN (includes GTIN '-') → stricter: needs price and must look like food product.
     if price is None or price <= 0:
         return False
     if _looks_like_noise(name):
         return False
 
-    # Allow through (we'll keep other guards elsewhere). Prefer extra signals, but don't require them.
-    return True
+    # Prefer names that include a size token or have some brand/manufacturer signal.
+    has_size = bool(SIZE_RE.search(name or ""))
+    if has_size or brand or manufacturer:
+        return True
+
+    # Otherwise, still accept multi-word names with reasonable length (heuristic).
+    n = (name or "").strip()
+    return bool(n and len(n) >= 6 and len(n.split()) >= 2)
 
 def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Optional[Dict]:
     name = str(item.get("name") or "").strip() or None
@@ -683,7 +688,7 @@ def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Optiona
         if m:
             size_text = m.group(1)
 
-    # noise & product check
+    # noise & product check (accept '-' GTIN only if productish)
     if not _valid_productish(name, price, ean_norm, category_url, brand, manufacturer):
         return None
 
@@ -696,7 +701,7 @@ def _extract_wolt_row(item: Dict, category_url: str, store_host: str) -> Optiona
     else:
         iid = str(item.get("id") or "").lower()
         if not iid or not HEX24_RE.fullmatch(iid):
-            return None
+            return None  # still reject if no hex id
         ext_id = f"iid:{iid}"
 
     url = category_url
@@ -1012,35 +1017,44 @@ async def _fetch_prodinfo_fields(lang: str, venue_id: str, item_id: str) -> Dict
     except Exception:
         return {"gtin": None, "supplier": None, "name": None}
 
+    # JSON-LD
     gtin = None
-    m = PRODINFO_GTIN_RE.search(html or "")
+    m = PRODINFO_JSONLD_GTIN_RE.search(html or "")
     if m:
         gtin = normalize_ean(m.group(1))
+
+    # Flexible HTML (heading near the number)
     if not gtin:
-        m2 = PRODINFO_JSONLD_GTIN_RE.search(html or "")
+        m2 = PRODINFO_GTIN_NEARBY_RE.search(html or "")
         if m2:
             gtin = normalize_ean(m2.group(1))
 
+    # Plain-text fallback
+    if not gtin:
+        text = re.sub(r"<[^>]+>", " ", html or " ")
+        m3 = GTIN_IN_ANY.search(text)
+        if m3:
+            gtin = normalize_ean(m3.group(1))
+
     supplier = None
-    m3 = PRODINFO_SUPPLIER_RE.search(html or "")
-    if m3:
-        supplier = (m3.group(1) or "").strip()
+    m4 = PRODINFO_SUPPLIER_RE.search(html or "")
+    if m4:
+        supplier = (m4.group(1) or "").strip()
 
     name = None
-    m4 = PRODINFO_TITLE_RE.search(html or "")
-    if m4:
-        name = (m4.group(1) or "").strip()
+    m5 = PRODINFO_TITLE_RE.search(html or "")
+    if m5:
+        name = (m5.group(1) or "").strip()
 
     return {"gtin": gtin, "supplier": supplier, "name": name}
 
-# --- prodinfo enricher -------------------------------------------------------
-
+# Enrichment: probe prodinfo for items to fill GTIN/supplier/name
 async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str,
                                      max_to_probe: Optional[int] = None) -> None:
     """
     Enrich items with GTIN/supplier/name via prodinfo.wolt.com.
     Prioritises items that don't yet have a GTIN. If max_to_probe is None,
-    probe everything. Otherwise stops after the given number.
+    probe everything (bounded by env WOLT_PROBE_LIMIT).
     """
     if max_to_probe is None:
         try:
@@ -1132,12 +1146,12 @@ async def _scrape_tile_prices(page) -> Dict[str, float]:
                 const out = [];
                 const anchors = Array.from(document.querySelectorAll('a[href*="item"]'));
                 for (const a of anchors) {
-                    const href = a.getAttribute('href') or a.href or '';
+                    const href = a.getAttribute('href') || a.href || '';
                     const m = href && href.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
                     if (!m) continue;
                     const card = a.closest('article, a, div') || a;
                     const txt = (card && card.textContent) ? card.textContent : '';
-                    const mt = txt.match(/(\d+[.,]\d{2})\s*€/);
+                    const mt = txt.match(/(\\d+[.,]\\d{2})\\s*€/);
                     if (mt) {
                         const raw = mt[1].replace(',', '.');
                         const val = parseFloat(raw);
@@ -1340,27 +1354,12 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                 print(f"[info] forcing Playwright fallback for {cat}")
                 items, blobs, html, tile_prices, venue_id = await _wolt_capture_category_with_playwright(cat)
 
-            # direct prodinfo enrichment when we know the venue id
             if venue_id:
                 lang = _lang_from_url(cat)
-                cap = int(getattr(args, "wolt_probe_cap", 240) or 240)
-                await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=cap)
+                await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=None)
             else:
                 print("[warn] venueId not found — skipping direct prodinfo enrichment")
 
-            # diagnostics: show sample prodinfo links for missing GTIN cases
-            missing = [it for it in items if not normalize_ean(it.get("gtin") or it.get("ean") or it.get("ean_norm"))]
-            if missing[:15] and venue_id:
-                lang = _lang_from_url(cat)
-                sample_links = [
-                    f"https://prodinfo.wolt.com/{lang}/{venue_id}/{str(it.get('id')).lower()}"
-                    for it in missing[:15]
-                    if HEX24_RE.fullmatch(str(it.get('id') or '').lower())
-                ]
-                print(f"[debug] post-enrich but still missing GTIN (first {len(sample_links)}): {sample_links}")
-                print(f"[debug] items w/o GTIN before filters: {len(missing)}")
-
-            # When using PW fallback, fill prices from tiles if JSON lacked them
             if not payload and items:
                 for it in items:
                     if it.get("id"):
@@ -1379,12 +1378,13 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                 # drop row if its GTIN already exists in DB for this store (when COOP_DEDUP_DB=1)
                 if row.get("ean_norm") and row["ean_norm"] in existing_gtins:
                     continue
-                # optional: only keep rows that HAVE a GTIN if the flag is set
-                if args.wolt_gtin_required and not row.get("ean_norm"):
-                    continue
                 rows_raw.append(row)
 
             rows = rows_raw
+            skipped_without_gtin = sum(1 for r in items if not normalize_ean(r.get("gtin") or r.get("EAN") or r.get("barcode") or ""))
+            if skipped_without_gtin:
+                print(f"[debug] skipped {skipped_without_gtin} items without GTIN (before filters)")
+
             if args.max_products and args.max_products > 0:
                 rows = rows[: args.max_products]
             print(f"[info] category rows: {len(rows)}" + (" (pw-fallback)" if not payload else ""))
@@ -1478,10 +1478,6 @@ def parse_args():
     p.add_argument("--out", default="out/coop_products.csv", help="CSV file or output directory")
     p.add_argument("--wolt-force-playwright", action="store_true",
                    help="Force Playwright network fallback for Wolt categories.")
-    p.add_argument("--wolt-gtin-required", action="store_true",
-                   help="Only output Wolt items that have a valid GTIN.")
-    p.add_argument("--wolt-probe-cap", type=int, default=240,
-                   help="Max prodinfo probes per category (None uses WOLT_PROBE_LIMIT or 2000).")
     p.add_argument("--write-empty-csv", action="store_true",
                    default=True, help="Always write CSV header even if no rows.")
     return p.parse_args()
