@@ -25,9 +25,10 @@ DB alignment
 
 Flags & env
 - --wolt-force-playwright  (presence = True), or WOLT_FORCE_PLAYWRIGHT=1/true
+- --wolt-probe-cap (default: 2000; 0 = unlimited; env override WOLT_PROBE_CAP)
 - --write-empty-csv (default: on) → always write CSV header even if 0 rows
 - COOP_UPSERT_DB=1 to enable DB upsert (requires asyncpg + DATABASE_URL)
-- COOP_DEDUP_DB=1 to enable de-duplication against DB by (store_host, ean_norm)
+- COOP_DEDUP_DB=1 to enable de-duplication against DB by (store_host, ean_norm) and ext_id
 """
 
 import argparse
@@ -173,7 +174,7 @@ async def collect_category_product_links(page: Any, category_url: str, page_limi
         try:
             await page.goto(url, wait_until="domcontentloaded")
         except Exception as e:
-            print(f("[warn] category goto fail: {url} -> {e}"))
+            print(f"[warn] category goto fail: {url} -> {e}")
             continue
 
         await wait_cookie_banner(page)
@@ -761,6 +762,7 @@ def append_csv(rows: List[Dict], out_path: Path) -> None:
 # ---------- DB helpers / de-dup ---------------------------------------------
 
 async def _fetch_existing_gtins(store_host: str) -> Set[str]:
+    """If COOP_DEDUP_DB=1, return GTINs already present for this store_host."""
     if os.environ.get("COOP_DEDUP_DB", "0").lower() not in ("1", "true"):
         return set()
     dsn = os.environ.get("DATABASE_URL")
@@ -778,6 +780,27 @@ async def _fetch_existing_gtins(store_host: str) -> Set[str]:
             store_host,
         )
         return {r["ean_norm"] for r in rows if r["ean_norm"]}
+    finally:
+        await conn.close()
+
+async def _fetch_existing_ext_ids(store_host: str) -> Set[str]:
+    """If COOP_DEDUP_DB=1, return ext_ids already present for this store_host (incl. iid:...)."""
+    if os.environ.get("COOP_DEDUP_DB", "0").lower() not in ("1", "true"):
+        return set()
+    dsn = os.environ.get("DATABASE_URL")
+    if not dsn:
+        return set()
+    try:
+        import asyncpg  # type: ignore
+    except Exception:
+        return set()
+    conn = await asyncpg.connect(dsn)
+    try:
+        rows = await conn.fetch(
+            "SELECT DISTINCT ext_id FROM public.staging_coop_products WHERE store_host=$1",
+            store_host,
+        )
+        return {r["ext_id"] for r in rows if r["ext_id"]}
     finally:
         await conn.close()
 
@@ -1036,18 +1059,20 @@ async def _fetch_prodinfo_fields(lang: str, venue_id: str, item_id: str) -> Dict
 
     return {"gtin": gtin, "supplier": supplier, "name": name}
 
-# --- replace the whole function ---------------------------------------------
+# --- enrichment --------------------------------------------------------------
+
 async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str,
-                                     max_to_probe: Optional[int] = None) -> None:
+                                     max_to_probe: Optional[int] = None,
+                                     debug_log_missing: int = 0) -> None:
     """
     Enrich items with GTIN/supplier/name via prodinfo.wolt.com.
     Prioritises items that don't yet have a GTIN. If max_to_probe is None,
-    probe everything. Otherwise stops after the given number.
+    use env WOLT_PROBE_CAP (default 2000). Set debug_log_missing>0 to print the
+    first N names that still miss GTIN post-enrichment.
     """
-    # configurable guardrail (env), default fairly high
     if max_to_probe is None:
         try:
-            max_to_probe = int(os.getenv("WOLT_PROBE_LIMIT", "2000"))
+            max_to_probe = int(os.getenv("WOLT_PROBE_CAP", "2000"))
         except Exception:
             max_to_probe = 2000
 
@@ -1058,6 +1083,7 @@ async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str
     queue = sorted(items, key=lambda it: (not _needs_gtin(it), str(it.get("id") or "")))
 
     probed = 0
+    still_missing: List[str] = []
     for it in queue:
         if max_to_probe and probed >= max_to_probe:
             break
@@ -1080,61 +1106,17 @@ async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str
         except Exception:
             pass
 
+        if not normalize_ean(it.get("gtin")):
+            nm = str(it.get("name") or "").strip()
+            if nm:
+                still_missing.append(nm)
+
         probed += 1
         await asyncio.sleep(0.04)
 
-# --- and update the call site inside run_wolt(...) --------------------------
-if venue_id:
-    lang = _lang_from_url(cat)
-    # probe as many as needed, configurable via env
-    await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=None)
-else:
-    print("[warn] venueId not found — skipping direct prodinfo enrichment")
-
-# ====== iframe scraping helpers (old fallback) ==============================
-
-async def _get_info_iframe(page) -> Any:
-    await page.wait_for_timeout(200)
-    for _ in range(25):
-        for f in page.frames:
-            try:
-                u = (f.url or "").lower()
-                n = (f.name or "").lower()
-                if "prodinfo.wolt" in u or "product-info-iframe" in u or "product-info-iframe" in n:
-                    return f
-            except Exception:
-                pass
-        if await page.locator("iframe#product-info-iframe, iframe[data-test-id='product-info-iframe'], iframe[src*='prodinfo.wolt.com']").count() > 0:
-            await page.wait_for_timeout(120)
-        await page.wait_for_timeout(120)
-    raise RuntimeError('Product info iframe did not appear')
-
-async def _read_iframe_text_strict(page) -> str:
-    frame = await _get_info_iframe(page)
-    try:
-        txt = await frame.locator("body").inner_text(timeout=2000)
-        if not txt or not txt.strip():
-            raise RuntimeError("Empty iframe body")
-        return txt
-    except PWTimeout:
-        raise RuntimeError("Timed out reading iframe body")
-
-# --- modal helpers kept for completeness ------------------------------------
-
-async def _modal_opened(page) -> bool:
-    checks = [
-        page.get_by_role("dialog"),
-        page.locator('a:has-text("Toote info"), button:has-text("Toote info"), a:has-text("Product info"), button:has-text("Product info")'),
-        page.locator('button[aria-label*="Close"], button:has-text("×")'),
-        page.locator('[data-floating-ui-portal] [role="dialog"], [class*="ModalBase"], [class*="bottomSheet"]'),
-    ]
-    for loc in checks:
-        try:
-            if await loc.count() > 0 and await loc.first.is_visible():
-                return True
-        except Exception:
-            pass
-    return False
+    if debug_log_missing and still_missing:
+        print("[debug] post-enrich but still missing GTIN (first %d): %s" %
+              (debug_log_missing, still_missing[:debug_log_missing]))
 
 # ---------- NEW: tile price scraping (PW) -----------------------------------
 
@@ -1353,12 +1335,16 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                 print(f"[info] forcing Playwright fallback for {cat}")
                 items, blobs, html, tile_prices, venue_id = await _wolt_capture_category_with_playwright(cat)
 
+            # Try to enrich via prodinfo (server-rendered page) for GTIN/supplier/name.
             if venue_id:
                 lang = _lang_from_url(cat)
-                await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=240, debug_log_missing=15)
+                # cap from CLI or env, default 2000; and log first 15 names still missing GTIN
+                cap = int(getattr(args, "wolt_probe_cap", 2000) or 2000)
+                await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=cap, debug_log_missing=15)
             else:
                 print("[warn] venueId not found — skipping direct prodinfo enrichment")
 
+            # Merge visible tile prices into items that lack a price (only in PW fallback case)
             if not payload and items:
                 for it in items:
                     if it.get("id"):
@@ -1366,26 +1352,35 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                         if it.get("price") in (None, 0) and iid in tile_prices:
                             it["price"] = tile_prices[iid]
 
-            # Optional de-dup vs DB by GTIN for this store_host
-            existing_gtins = await _fetch_existing_gtins(store_host_cat)
+            # -------- DB de-dup sets (GTIN + ext_id) --------
+            existing_gtins   = await _fetch_existing_gtins(store_host_cat)
+            existing_ext_ids = await _fetch_existing_ext_ids(store_host_cat)
 
             rows_raw = []
             for item in items:
                 row = _extract_wolt_row(item, cat, store_host_cat)
                 if not row:
                     continue
-                # drop row if its GTIN already exists in DB for this store (when COOP_DEDUP_DB=1)
-                if row.get("ean_norm") and row["ean_norm"] in existing_gtins:
+
+                # Skip duplicates already in DB when COOP_DEDUP_DB=1
+                ext_id = row.get("ext_id")
+                ean    = row.get("ean_norm")
+                if ext_id and ext_id in existing_ext_ids:
                     continue
+                if ean and ean in existing_gtins:
+                    continue
+
                 rows_raw.append(row)
 
             rows = rows_raw
+
             skipped_without_gtin = sum(1 for r in items if not normalize_ean(r.get("gtin") or r.get("EAN") or r.get("barcode") or ""))
             if skipped_without_gtin:
-                print(f"[debug] skipped {skipped_without_gtin} items without GTIN (before filters)")
+                print(f"[debug] items w/o GTIN before filters: {skipped_without_gtin}")
 
             if args.max_products and args.max_products > 0:
                 rows = rows[: args.max_products]
+
             print(f"[info] category rows: {len(rows)}" + (" (pw-fallback)" if not payload else ""))
             on_rows(rows)
 
@@ -1477,6 +1472,9 @@ def parse_args():
     p.add_argument("--out", default="out/coop_products.csv", help="CSV file or output directory")
     p.add_argument("--wolt-force-playwright", action="store_true",
                    help="Force Playwright network fallback for Wolt categories.")
+    p.add_argument("--wolt-probe-cap", type=int, default=2000,
+                   help="Max prodinfo probes per category (0 = unlimited; default 2000). "
+                        "Can also be set via env WOLT_PROBE_CAP.")
     p.add_argument("--write-empty-csv", action="store_true",
                    default=True, help="Always write CSV header even if no rows.")
     return p.parse_args()
