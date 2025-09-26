@@ -106,7 +106,7 @@ jobs:
           if [ -n "$CATS_FILE_INPUT" ]; then
             if [ -f "$CATS_FILE_INPUT" ]; then
               cp "$CATS_FILE_INPUT" /tmp/categories.txt
-            elif [ -f "${GITHUB_WORKSPACE}/${CATS_FILE_INPUT}" ]; then
+            elif [ -f "${GITHUB_WORKSPACE}/${CATS_FILE_INPUT}"] ; then
               cp "${GITHUB_WORKSPACE}/${CATS_FILE_INPUT}" /tmp/categories.txt
             else
               echo "Provided categories_file not found: $CATS_FILE_INPUT"
@@ -146,11 +146,14 @@ jobs:
       - name: Run eCoop crawler (sharded)
         if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
         env:
+          PYTHONUNBUFFERED: "1"  # show logs in real time
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           COOP_UPSERT_DB: ${{ inputs.upsert_db }}
           # Dedup follows upsert toggle; set to 1 when upserting
           COOP_DEDUP_DB: ${{ inputs.upsert_db }}
         run: |
+          set -euo pipefail
+
           REGION="${{ inputs.region }}"
           REQ_DELAY="${{ inputs.req_delay }}"
           PDP_WORKERS="${{ inputs.pdp_workers }}"
@@ -159,6 +162,13 @@ jobs:
           SHARD_COUNT="${{ steps.shard.outputs.count }}"
           EXTRA="${{ inputs.extra_args }}"
 
+          echo "::group::Args"
+          echo "region=$REGION"
+          echo "pdp_workers=$PDP_WORKERS  req_delay=$REQ_DELAY  page_limit=$PAGE_LIMIT  max_products=$MAX_PRODUCTS"
+          echo "::endgroup::"
+
+          # Cap shard runtime to avoid indefinite hangs (exit 124 on timeout)
+          timeout 30m \
           python3 scripts/ecoop_crawler.py \
             --region "$REGION" \
             --categories-file "${{ steps.cats.outputs.path }}" \
@@ -166,12 +176,18 @@ jobs:
             --max-products "$MAX_PRODUCTS" \
             --headless "1" \
             --req-delay "$REQ_DELAY" \
-            --pdp-workers "$PDP_WORKERS" \
+            --pdp-workers "${PDP_WORKERS:-3}" \
             --cat-shards "$SHARD_COUNT" \
             --cat-index "${{ matrix.shard_index }}" \
             --out "out/coop_ecoop_${{ github.run_id }}_shard${{ matrix.shard_index }}.csv" \
             --goto-strategy "domcontentloaded" --nav-timeout "45000" \
             $EXTRA
+
+          code=$?
+          if [ $code -eq 124 ]; then
+            echo "::warning::Shard ${{ matrix.shard_index }} timed out after 30m. Consider lowering --pdp-workers or raising --req-delay."
+          fi
+          exit $code
 
       - name: Upload CSV artifact
         if: ${{ always() && matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
