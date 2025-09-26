@@ -1,0 +1,141 @@
+name: "Coop Wolt – Category Crawl (server payload + PW fallback) + optional DB upsert"
+
+on:
+  workflow_dispatch:
+    inputs:
+      categories_multiline:
+        description: "Wolt category URLs (one per line)"
+        required: false
+        default: ""
+      categories_file:
+        description: "Path to a repo file with Wolt category URLs (one per line)"
+        required: false
+        default: ""
+      force_playwright:
+        description: "Force Playwright fallback (1 = yes, 0 = try server JSON first)"
+        required: false
+        default: "1"
+      max_products:
+        description: "Cap rows per category after parsing (0 = unlimited)"
+        required: false
+        default: "0"
+      shards:
+        description: "Number of shards to split categories across (1–8)"
+        required: false
+        default: "8"
+      upsert_db:
+        description: "Set 1 to upsert into DATABASE_URL (staging_coop_products)"
+        required: false
+        default: "0"
+      dedup_db:
+        description: "Set 1 to deduplicate by (store_host, ean_norm) against staging_coop_products"
+        required: false
+        default: "0"
+      extra_args:
+        description: "Extra flags passed to wolt_crawler.py (space-separated)"
+        required: false
+        default: ""
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    strategy:
+      fail-fast: false
+      matrix:
+        shard_index: [0, 1, 2, 3, 4, 5, 6, 7]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Compute shard count
+        id: shard
+        run: |
+          REQ="${{ github.event_name == 'workflow_dispatch' && inputs.shards || '1' }}"
+          if ! [[ "$REQ" =~ ^[0-9]+$ ]]; then REQ=1; fi
+          if [ "$REQ" -lt 1 ]; then REQ=1; fi
+          if [ "$REQ" -gt 8 ]; then REQ=8; fi
+          echo "count=$REQ" >> $GITHUB_OUTPUT
+
+      - name: Stop if this shard is not requested
+        if: ${{ matrix.shard_index >= fromJSON(steps.shard.outputs.count) }}
+        run: echo "Skipping shard ${{ matrix.shard_index }} (only ${{ steps.shard.outputs.count }} requested)"
+
+      - name: Setup Python
+        if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies (pip + Playwright)
+        if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install playwright asyncpg
+          python -m playwright install --with-deps chromium
+
+      - name: Prepare categories & shard-split
+        if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
+        id: cats
+        env:
+          CATS_FILE_INPUT: ${{ inputs.categories_file }}
+          CATS_MULTILINE: ${{ inputs.categories_multiline }}
+          SHARD_IDX: ${{ matrix.shard_index }}
+          SHARD_COUNT: ${{ steps.shard.outputs.count }}
+        run: |
+          mkdir -p out
+          SRC="/tmp/wolt_categories_all.txt"
+          # Build the full list
+          if [ -n "$CATS_MULTILINE" ]; then
+            printf "%s\n" "$CATS_MULTILINE" > "$SRC"
+          fi
+          if [ -n "$CATS_FILE_INPUT" ] && [ -f "$CATS_FILE_INPUT" ]; then
+            cp "$CATS_FILE_INPUT" "$SRC"
+          fi
+          if [ ! -f "$SRC" ] || [ ! -s "$SRC" ]; then
+            echo "No categories provided. Supply categories_multiline or categories_file."
+            exit 2
+          fi
+          # Shard by line number: keep lines where (NR-1) % SHARD_COUNT == SHARD_IDX
+          DEST="/tmp/wolt_categories_shard.txt"
+          awk -v idx="$SHARD_IDX" -v shards="$SHARD_COUNT" 'NR>=1 { if (((NR-1)%shards)==idx) print }' "$SRC" > "$DEST"
+          if [ ! -s "$DEST" ]; then
+            echo "Shard $SHARD_IDX has no categories; exiting gracefully."
+            echo "path=$DEST" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "path=$DEST" >> $GITHUB_OUTPUT
+
+      - name: Run Wolt crawler (this shard)
+        if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          COOP_UPSERT_DB: ${{ inputs.upsert_db }}
+          COOP_DEDUP_DB: ${{ inputs.dedup_db }}
+          WOLT_FORCE_PLAYWRIGHT: ${{ inputs.force_playwright }}
+        run: |
+          MAX_PRODUCTS="${{ inputs.max_products }}"
+          EXTRA="${{ inputs.extra_args }}"
+          CATS_FILE="${{ steps.cats.outputs.path }}"
+          if [ ! -s "$CATS_FILE" ]; then
+            echo "No categories in this shard — nothing to do."
+            exit 0
+          fi
+
+          python3 wolt_crawler.py \
+            --categories-file "$CATS_FILE" \
+            --max-products "$MAX_PRODUCTS" \
+            --out "out/coop_wolt_${{ github.run_id }}_shard${{ matrix.shard_index }}.csv" \
+            $EXTRA
+
+      - name: Upload CSV artifact
+        if: ${{ always() && matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coop-wolt-${{ github.run_id }}-part-${{ matrix.shard_index }}
+          path: out/*.csv
+          if-no-files-found: warn
+          retention-days: 7
