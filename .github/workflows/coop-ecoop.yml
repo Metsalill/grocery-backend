@@ -92,13 +92,33 @@ jobs:
           CATS_FILE_INPUT: ${{ inputs.categories_file }}
           CATS_MULTILINE: ${{ inputs.categories_multiline }}
         run: |
+          set -euo pipefail
           mkdir -p out
-          if [ -n "$CATS_MULTILINE" ]; then printf "%s\n" "$CATS_MULTILINE" > /tmp/categories.txt; fi
-          if [ -n "$CATS_FILE_INPUT" ] && [ -f "$CATS_FILE_INPUT" ]; then cp "$CATS_FILE_INPUT" /tmp/categories.txt; fi
+          : > /tmp/categories.txt
+
+          # If multiline provided, write it first
+          if [ -n "$CATS_MULTILINE" ]; then
+            printf "%s\n" "$CATS_MULTILINE" > /tmp/categories.txt
+          fi
+
+          # If a file path is provided, prefer it (supports repo-relative paths)
+          if [ -n "$CATS_FILE_INPUT" ]; then
+            if [ -f "$CATS_FILE_INPUT" ]; then
+              cp "$CATS_FILE_INPUT" /tmp/categories.txt
+            elif [ -f "${GITHUB_WORKSPACE}/${CATS_FILE_INPUT}" ]; then
+              cp "${GITHUB_WORKSPACE}/${CATS_FILE_INPUT}" /tmp/categories.txt
+            else
+              echo "Provided categories_file not found: $CATS_FILE_INPUT"
+              echo "Checked: '$CATS_FILE_INPUT' and '${GITHUB_WORKSPACE}/${CATS_FILE_INPUT}'"
+              exit 2
+            fi
+          fi
+
           if [ ! -s /tmp/categories.txt ]; then
             echo "No categories provided. Use categories_multiline or categories_file."
             exit 2
           fi
+
           echo "path=/tmp/categories.txt" >> $GITHUB_OUTPUT
 
       - name: Run eCoop crawler (sharded)
