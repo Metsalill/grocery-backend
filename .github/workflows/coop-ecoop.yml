@@ -70,7 +70,7 @@ jobs:
 
       - name: Skip unused shard
         if: ${{ matrix.shard_index >= fromJSON(steps.shard.outputs.count) }}
-        run: echo "Skipping shard ${{ matrix.shard_index }} (only ${{ steps.shard.outputs.count }} requested)"
+        run: echo "Skipping shard ${{ matrix.shard.outputs.count }} requested; skipping ${{ matrix.shard_index }}"
 
       - name: Setup Python
         if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
@@ -147,13 +147,14 @@ jobs:
       - name: Run eCoop crawler (sharded)
         if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
         env:
-          PYTHONUNBUFFERED: "1"  # flush logs
+          PYTHONUNBUFFERED: "1"  # real-time logs
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           COOP_UPSERT_DB: ${{ inputs.upsert_db }}
           COOP_DEDUP_DB: ${{ inputs.upsert_db }}
         run: |
           set -euo pipefail
 
+          # Coerce inputs to sane defaults if they arrive empty
           REGION="${{ inputs.region }}"
           REQ_DELAY="${{ inputs.req_delay }}"
           PDP_WORKERS="${{ inputs.pdp_workers }}"
@@ -162,27 +163,33 @@ jobs:
           SHARD_COUNT="${{ steps.shard.outputs.count }}"
           EXTRA="${{ inputs.extra_args }}"
 
+          REQ_DELAY="${REQ_DELAY:-0.4}"
+          PDP_WORKERS="${PDP_WORKERS:-6}"
+          PAGE_LIMIT="${PAGE_LIMIT:-0}"
+          MAX_PRODUCTS="${MAX_PRODUCTS:-0}"
+
           echo "::group::Args"
           echo "region=$REGION"
           echo "pdp_workers=$PDP_WORKERS  req_delay=$REQ_DELAY  page_limit=$PAGE_LIMIT  max_products=$MAX_PRODUCTS"
           echo "::endgroup::"
 
-          # Run with hard kill + process-group control; then cleanup stragglers if needed
+          # Hard cap shard runtime; kill stragglers if it times out
           set +e
           timeout --signal=TERM --kill-after=60s 20m \
           bash -lc 'exec stdbuf -oL -eL python3 scripts/ecoop_crawler.py \
             --region "$REGION" \
             --categories-file "${{ steps.cats.outputs.path }}" \
-            --page-limit "$PAGE_LIMIT" \
-            --max-products "$MAX_PRODUCTS" \
+            --page-limit "'"$PAGE_LIMIT"'" \
+            --max-products "'"$MAX_PRODUCTS"'" \
             --headless "1" \
-            --req-delay "$REQ_DELAY" \
-            --pdp-workers "${PDP_WORKERS:-3}" \
-            --cat-shards "$SHARD_COUNT" \
+            --req-delay "'"$REQ_DELAY"'" \
+            --pdp-workers "'"${PDP_WORKERS:-3}"'" \
+            --cat-shards "'"$SHARD_COUNT"'" \
             --cat-index "${{ matrix.shard_index }}" \
             --out "out/coop_ecoop_${{ github.run_id }}_shard${{ matrix.shard_index }}.csv" \
             --goto-strategy "domcontentloaded" --nav-timeout "45000" \
-            $EXTRA'
+            '"$EXTRA"''
+
           code=$?
           set -e
 
