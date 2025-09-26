@@ -1,0 +1,158 @@
+name: "Coop eCoop – Category Crawl (Playwright) + optional DB upsert"
+
+on:
+  workflow_dispatch:
+    inputs:
+      region:
+        description: "Base region URL (e.g., https://haapsalu.ecoop.ee or https://vandra.ecoop.ee)"
+        required: false
+        default: "https://vandra.ecoop.ee"
+      categories_multiline:
+        description: "Category URLs/paths (one per line). Can be full URLs or paths like /et/tootekategooria/joogid"
+        required: false
+        default: ""
+      categories_file:
+        description: "Path to a repo file containing category URLs/paths (one per line)"
+        required: false
+        default: ""
+      page_limit:
+        description: "Cap product links discovered per category (0 = all)"
+        required: false
+        default: "0"
+      max_products:
+        description: "Cap PDPs fetched per category after discovery (0 = unlimited)"
+        required: false
+        default: "0"
+      headless:
+        description: "Headless (1/0)"
+        required: false
+        default: "1"
+      req_delay:
+        description: "Delay between operations (seconds)"
+        required: false
+        default: "0.4"
+      pdp_workers:
+        description: "Concurrent PDP tabs per category"
+        required: false
+        default: "6"
+      shards:
+        description: "Number of shards to split categories across (1–8)"
+        required: false
+        default: "8"
+      upsert_db:
+        description: "Set 1 to upsert into DATABASE_URL (staging_coop_products)"
+        required: false
+        default: "0"
+      dedup_db:
+        description: "Set 1 to deduplicate by (store_host, ean_norm) against staging_coop_products"
+        required: false
+        default: "0"
+      extra_args:
+        description: "Extra flags passed to ecoop_crawler.py (space-separated)"
+        required: false
+        default: ""
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    strategy:
+      fail-fast: false
+      matrix:
+        shard_index: [0, 1, 2, 3, 4, 5, 6, 7]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Only run steps for shards we actually requested
+      - name: Compute shard count
+        id: shard
+        run: |
+          REQ="${{ github.event_name == 'workflow_dispatch' && inputs.shards || '1' }}"
+          if ! [[ "$REQ" =~ ^[0-9]+$ ]]; then REQ=1; fi
+          if [ "$REQ" -lt 1 ]; then REQ=1; fi
+          if [ "$REQ" -gt 8 ]; then REQ=8; fi
+          echo "count=$REQ" >> $GITHUB_OUTPUT
+
+      - name: Stop if this shard is not requested
+        if: ${{ matrix.shard_index >= fromJSON(steps.shard.outputs.count) }}
+        run: echo "Skipping shard ${{ matrix.shard_index }} (only ${{ steps.shard.outputs.count }} requested)"
+
+      - name: Setup Python
+        if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies (pip + Playwright)
+        if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install playwright asyncpg
+          python -m playwright install --with-deps chromium
+
+      - name: Prepare categories input
+        if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
+        id: cats
+        env:
+          CATS_FILE_INPUT: ${{ inputs.categories_file }}
+          CATS_MULTILINE: ${{ inputs.categories_multiline }}
+        run: |
+          mkdir -p out
+          # Write multiline categories to a file if given
+          if [ -n "$CATS_MULTILINE" ]; then
+            printf "%s\n" "$CATS_MULTILINE" > /tmp/categories.txt
+          fi
+          # Use repo file if provided (takes precedence when both present)
+          if [ -n "$CATS_FILE_INPUT" ] && [ -f "$CATS_FILE_INPUT" ]; then
+            cp "$CATS_FILE_INPUT" /tmp/categories.txt
+          fi
+          # Validate that we have categories
+          if [ ! -f /tmp/categories.txt ] || [ ! -s /tmp/categories.txt ]; then
+            echo "No categories provided. Supply categories_multiline or categories_file."
+            exit 2
+          fi
+          echo "path=/tmp/categories.txt" >> $GITHUB_OUTPUT
+
+      - name: Run eCoop crawler (sharded)
+        if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          COOP_UPSERT_DB: ${{ inputs.upsert_db }}
+          COOP_DEDUP_DB: ${{ inputs.dedup_db }}
+          SHARD_COUNT: ${{ steps.shard.outputs.count }}
+        run: |
+          # Region default is validated by the script
+          REGION="${{ inputs.region }}"
+          HEADLESS="${{ inputs.headless }}"
+          REQ_DELAY="${{ inputs.req_delay }}"
+          PDP_WORKERS="${{ inputs.pdp_workers }}"
+          PAGE_LIMIT="${{ inputs.page_limit }}"
+          MAX_PRODUCTS="${{ inputs.max_products }}"
+          EXTRA="${{ inputs.extra_args }}"
+
+          # Call ecoop crawler with internal sharding flags
+          python3 ecoop_crawler.py \
+            --region "$REGION" \
+            --categories-file "${{ steps.cats.outputs.path }}" \
+            --page-limit "$PAGE_LIMIT" \
+            --max-products "$MAX_PRODUCTS" \
+            --headless "$HEADLESS" \
+            --req-delay "$REQ_DELAY" \
+            --pdp-workers "$PDP_WORKERS" \
+            --cat-shards "$SHARD_COUNT" \
+            --cat-index "${{ matrix.shard_index }}" \
+            --out "out/coop_ecoop_${{ github.run_id }}_shard${{ matrix.shard_index }}.csv" \
+            $EXTRA
+
+      - name: Upload CSV artifact
+        if: ${{ always() && matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coop-ecoop-${{ github.run_id }}-part-${{ matrix.shard_index }}
+          path: out/*.csv
+          if-no-files-found: warn
+          retention-days: 7
