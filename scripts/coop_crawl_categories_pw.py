@@ -199,7 +199,6 @@ async def collect_category_product_links(page: Any, category_url: str, page_limi
         try:
             await page.goto(url, wait_until="domcontentloaded")
         except Exception as e:
-            # FIX: correct f-string usage
             print(f"[warn] category goto fail: {url} -> {e}")
             continue
 
@@ -343,40 +342,80 @@ def _parse_wolt_price(value: Any) -> Optional[float]:
         return None
     return None
 
+# --- NEW robust price extractor for eCoop (handles "1 99 €" split) ---
 async def extract_visible_price(page: Any) -> Optional[float]:
-    candidates: List[Tuple[float, str]] = []
-    selectors = [
-        '[data-testid="product-price"]', ".product-price", ".price", ".current-price", '[class*="price"]'
-    ]
-    for sel in selectors:
-        try:
-            locs = page.locator(sel)
-            n = await locs.count()
-            for i in range(min(n, 10)):
-                txt = await locs.nth(i).inner_text()
-                if not txt or looks_like_unit_price(txt):
-                    continue
-                m = PRICE_TOKEN.search(txt.replace("\xa0", ""))
-                if m:
-                    candidates.append((float(m.group(1).replace(",", ".")), txt))
-        except Exception:
-            pass
+    """
+    Try several strategies to read a PDP price:
+      - unified text like '1,99 €' or '1.99 €'
+      - split integer + cents like '1 99 €' (cents in separate <sup>/<span>)
+    Returns a float in euros or None.
+    """
+    candidates: List[float] = []
 
+    # 1) Structured scrape in common price wrappers (rebuild int+cents)
+    js = """
+    () => {
+      const sel = [
+        '[data-testid="product-price"]',
+        '[data-test="product-price"]',
+        '.product-price',
+        '.price',
+        '.current-price',
+        '[class*="price"]'
+      ];
+      const out = [];
+      const reSpace = /[\\s\\u00A0\\u2009\\u202F]+/g;
+      for (const s of sel) {
+        for (const el of document.querySelectorAll(s)) {
+          const t = (el.textContent || '').trim().replace(reSpace, ' ');
+          if (t) out.push(t);
+          const intNode = el.querySelector('[data-testid*="int"], [data-test*="int"], .price__int, .int, .integer, .whole');
+          const centNode = el.querySelector('[data-testid*="cent"], [data-test*="cent"], .price__cent, .cents, .cent, sup');
+          const curNode = el.querySelector('[data-testid*="cur"], [data-test*="cur"], .price__cur, .currency');
+          const whole = intNode && (intNode.textContent || '').replace(/\\D+/g,'');
+          const cents = centNode && (centNode.textContent || '').replace(/\\D+/g,'');
+          const curTxt = (curNode && curNode.textContent) || (el.textContent || '');
+          if (whole && cents && /€/.test(curTxt)) {
+            out.push(`${whole},${cents} €`);
+          }
+        }
+      }
+      return out;
+    }
+    """
+    try:
+        texts = await page.evaluate(js)
+        for s in texts or []:
+            s = (s or "").replace("\xa0", " ")
+            m = re.search(r"(\d+[.,]\d{2})\s*€", s)
+            if m:
+                candidates.append(float(m.group(1).replace(",", ".")))
+                continue
+            m2 = re.search(r"\b(\d+)\s+(\d{2})\s*€", s)
+            if m2:
+                candidates.append(float(f"{m2.group(1)}.{m2.group(2)}"))
+    except Exception:
+        pass
+
+    # 2) Fallback: scan any node containing €
     if not candidates:
         try:
             all_txt = await page.locator("xpath=//*[contains(., '€')]").all_inner_texts()
-            for txt in all_txt[:100]:
-                if not txt or looks_like_unit_price(txt):
-                    continue
-                m = PRICE_TOKEN.search(txt.replace("\xa0", ""))
+            for s in (all_txt or [])[:200]:
+                s = (s or "").replace("\xa0", " ")
+                m = re.search(r"(\d+[.,]\d{2})\s*€", s)
                 if m:
-                    candidates.append((float(m.group(1).replace(",", ".")), txt))
+                    candidates.append(float(m.group(1).replace(",", ".")))
+                else:
+                    m2 = re.search(r"\b(\d+)\s+(\d{2})\s*€", s)
+                    if m2:
+                        candidates.append(float(f"{m2.group(1)}.{m2.group(2)}"))
         except Exception:
             pass
 
     if not candidates:
         return None
-    return max(candidates, key=lambda x: x[0])[0]
+    return round(max(candidates), 2)
 
 # ---------- PDP extraction (ecoop) ----------
 
@@ -405,9 +444,10 @@ async def extract_text_after_label(page: Any, label: str) -> Optional[str]:
     return None
 
 async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) -> Dict:
-    await page.goto(url, wait_until="domcontentloaded")
+    # Stronger wait so price/brand/Tootja render reliably
+    await page.goto(url, wait_until="networkidle")
     await wait_cookie_banner(page)
-    await page.wait_for_timeout(int(req_delay * 1000))
+    await page.wait_for_timeout(int(max(req_delay, 0.8) * 1000))
 
     name = None
     for sel in ["h1", '[data-testid="product-title"]', "article h1"]:
@@ -1156,7 +1196,7 @@ async def _modal_opened(page) -> bool:
 async def _scrape_tile_prices(page) -> Dict[str, float]:
     try:
         data = await page.evaluate(
-            """() => {
+            """(() => {
                 const out = [];
                 const anchors = Array.from(document.querySelectorAll('a[href*="item"]'));
                 for (const a of anchors) {
@@ -1173,7 +1213,7 @@ async def _scrape_tile_prices(page) -> Dict[str, float]:
                     }
                 }
                 return out;
-            }"""
+            })()"""
         )
         prices: Dict[str, float] = {}
         for iid, val in data or []:
@@ -1370,7 +1410,6 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
 
             if venue_id:
                 lang = _lang_from_url(cat)
-                # FIX: match function signature (no debug_log_missing kwarg)
                 await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=240)
             else:
                 print("[warn] venueId not found — skipping direct prodinfo enrichment")
