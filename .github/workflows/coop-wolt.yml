@@ -152,7 +152,7 @@ jobs:
             exit 0
           fi
 
-          python3 wolt_crawler.py \
+          python3 scripts/wolt_crawler.py \
             --categories-file "$CATS_FILE" \
             --max-products "$MAX_PRODUCTS" \
             --out "out/coop_wolt_${{ github.run_id }}_shard${{ matrix.shard_index }}.csv" \
