@@ -24,7 +24,7 @@ import re
 import signal
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Set
+from typing import Any, Dict, List, Optional, Tuple, Set, Literal
 from urllib.parse import urlparse, urljoin, urlsplit, urlunsplit, parse_qsl, urlencode
 
 # ---------- regexes & helpers ----------
@@ -349,9 +349,43 @@ async def extract_text_after_label(page: Any, label: str) -> Optional[str]:
         pass
     return None
 
-async def extract_pdp(page: Any, url: str, req_delay: float, store_host: str) -> Dict:
-    await page.goto(url, wait_until="networkidle")
+async def extract_pdp(
+    page: Any,
+    url: str,
+    req_delay: float,
+    store_host: str,
+    goto_strategy: Literal["auto","domcontentloaded","networkidle","load"]="auto",
+    nav_timeout_ms: int = 45000
+) -> Dict:
+    # resilient navigation (networkidle often never fires)
+    async def safe_goto(target_url: str) -> str:
+        order: List[str]
+        if goto_strategy in ("domcontentloaded", "networkidle", "load"):
+            order = [goto_strategy]
+        else:
+            order = ["domcontentloaded", "load", "networkidle"]  # auto preference
+        last_err = None
+        for ws in order:
+            try:
+                await page.goto(target_url, wait_until=ws, timeout=nav_timeout_ms)
+                return ws
+            except Exception as e:
+                last_err = e
+        try:
+            await page.goto(target_url, timeout=nav_timeout_ms)
+            return "none"
+        except Exception:
+            if last_err:
+                raise last_err
+            raise
+
+    waited = await safe_goto(url)
     await wait_cookie_banner(page)
+    # ensure title (or something) appears regardless of network quiescence
+    try:
+        await page.wait_for_selector("h1, [data-testid='product-title']", timeout=5000)
+    except Exception:
+        pass
     await page.wait_for_timeout(int(max(req_delay, 0.8) * 1000))
 
     name = None
@@ -659,6 +693,13 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
             viewport={"width": 1366, "height": 900},
             java_script_enabled=True,
         )
+        # sane defaults to avoid hanging navigations
+        try:
+            context.set_default_navigation_timeout(max(15000, int(args.nav_timeout)))
+            context.set_default_timeout(max(15000, int(args.nav_timeout)))
+        except Exception:
+            pass
+
         await context.route("**/*", _route_handler)
 
         try:
@@ -679,7 +720,11 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
                     async with sem:
                         p = await context.new_page()
                         try:
-                            return await extract_pdp(p, url, args.req_delay, store_host)
+                            return await extract_pdp(
+                                p, url, args.req_delay, store_host,
+                                goto_strategy=args.goto_strategy,
+                                nav_timeout_ms=int(args.nav_timeout)
+                            )
                         except Exception as e:
                             print(f"[warn] PDP fail {url}: {e}")
                             return None
@@ -773,6 +818,11 @@ def parse_args():
     p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
     p.add_argument("--out", default="out/coop_ecoop.csv", help="CSV file or output directory")
     p.add_argument("--write-empty-csv", action="store_true", default=True, help="Always write CSV header even if no rows.")
+    # new robustness flags
+    p.add_argument("--goto-strategy", choices=["auto","domcontentloaded","networkidle","load"],
+                   default="auto", help="Playwright wait_until strategy for PDP navigation.")
+    p.add_argument("--nav-timeout", default="45000",
+                   help="Navigation timeout in milliseconds for PDP pages.")
     return p.parse_args()
 
 if __name__ == "__main__":
