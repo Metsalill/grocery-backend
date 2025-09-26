@@ -8,7 +8,7 @@ on:
         required: false
         default: ""
       categories_file:
-        description: "Path to a repo file with Wolt category URLs (one per line) — e.g. data/wolt_coop_lasname_categories.txt"
+        description: "Repo file with Wolt category URLs (one per line) — leave empty to auto-pick data/wolt_coop_lasname_categories.txt"
         required: false
         default: ""
       force_playwright:
@@ -95,6 +95,8 @@ jobs:
           if [ -n "$CATS_MULTILINE" ]; then
             printf "%s\n" "$CATS_MULTILINE" > "$SRC"
           fi
+
+          # Prefer explicit file when provided (supports repo-relative paths)
           if [ -n "$CATS_FILE_INPUT" ]; then
             if [ -f "$CATS_FILE_INPUT" ]; then
               cp "$CATS_FILE_INPUT" "$SRC"
@@ -107,8 +109,20 @@ jobs:
             fi
           fi
 
+          # Auto-pick default if still empty
           if [ ! -s "$SRC" ]; then
-            echo "No categories provided. Supply categories_multiline or categories_file."
+            AUTO="data/wolt_coop_lasname_categories.txt"
+            if [ -f "$AUTO" ]; then
+              cp "$AUTO" "$SRC"
+              echo "Auto-selected categories_file: $AUTO"
+            elif [ -f "${GITHUB_WORKSPACE}/${AUTO}" ]; then
+              cp "${GITHUB_WORKSPACE}/${AUTO}" "$SRC"
+              echo "Auto-selected categories_file: ${GITHUB_WORKSPACE}/${AUTO}"
+            fi
+          fi
+
+          if [ ! -s "$SRC" ]; then
+            echo "No categories provided. Supply categories_multiline or categories_file (or ensure ${AUTO} exists)."
             exit 2
           fi
 
