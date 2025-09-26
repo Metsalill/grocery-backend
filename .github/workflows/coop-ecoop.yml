@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       region:
-        description: "Base region URL (e.g., https://haapsalu.ecoop.ee)"
+        description: "Base region URL (e.g., https://haapsalu.ecoop.ee or https://vandra.ecoop.ee)"
         required: false
         default: "https://vandra.ecoop.ee"
       categories_multiline:
@@ -12,7 +12,7 @@ on:
         required: false
         default: ""
       categories_file:
-        description: "Repo file with categories (one per line)"
+        description: "Repo file with categories (one per line) — leave empty to auto-pick from data/ by region"
         required: false
         default: ""
       page_limit:
@@ -91,17 +91,18 @@ jobs:
         env:
           CATS_FILE_INPUT: ${{ inputs.categories_file }}
           CATS_MULTILINE: ${{ inputs.categories_multiline }}
+          REGION_INPUT: ${{ inputs.region }}
         run: |
           set -euo pipefail
           mkdir -p out
           : > /tmp/categories.txt
 
-          # If multiline provided, write it first
+          # 1) If multiline provided, write it first
           if [ -n "$CATS_MULTILINE" ]; then
             printf "%s\n" "$CATS_MULTILINE" > /tmp/categories.txt
           fi
 
-          # If a file path is provided, prefer it (supports repo-relative paths)
+          # 2) If a file path is provided, prefer it (supports repo-relative paths)
           if [ -n "$CATS_FILE_INPUT" ]; then
             if [ -f "$CATS_FILE_INPUT" ]; then
               cp "$CATS_FILE_INPUT" /tmp/categories.txt
@@ -114,8 +115,29 @@ jobs:
             fi
           fi
 
+          # 3) Auto-pick by region if still empty
           if [ ! -s /tmp/categories.txt ]; then
-            echo "No categories provided. Use categories_multiline or categories_file."
+            REGION_LC="$(echo "$REGION_INPUT" | tr '[:upper:]' '[:lower:]')"
+            if echo "$REGION_LC" | grep -q "haapsalu"; then
+              AUTO="data/coop_haapsalu_categories.txt"
+            elif echo "$REGION_LC" | grep -q "vandra"; then
+              AUTO="data/coop_vandra_categories.txt"
+            else
+              AUTO=""
+            fi
+            if [ -n "$AUTO" ]; then
+              if [ -f "$AUTO" ]; then
+                cp "$AUTO" /tmp/categories.txt
+                echo "Auto-selected categories_file: $AUTO"
+              elif [ -f "${GITHUB_WORKSPACE}/${AUTO}" ]; then
+                cp "${GITHUB_WORKSPACE}/${AUTO}" /tmp/categories.txt
+                echo "Auto-selected categories_file: ${GITHUB_WORKSPACE}/${AUTO}"
+              fi
+            fi
+          fi
+
+          if [ ! -s /tmp/categories.txt ]; then
+            echo "No categories provided. Use categories_multiline or categories_file, or set region to auto-pick (haapsalu/vandra)."
             exit 2
           fi
 
