@@ -170,6 +170,7 @@ jobs:
             --cat-shards "$SHARD_COUNT" \
             --cat-index "${{ matrix.shard_index }}" \
             --out "out/coop_ecoop_${{ github.run_id }}_shard${{ matrix.shard_index }}.csv" \
+            --goto-strategy "domcontentloaded" --nav-timeout "45000" \
             $EXTRA
 
       - name: Upload CSV artifact
