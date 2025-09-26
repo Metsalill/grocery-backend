@@ -28,7 +28,6 @@ Flags & env
 - --write-empty-csv (default: on) → always write CSV header even if 0 rows
 - COOP_UPSERT_DB=1 to enable DB upsert (requires asyncpg + DATABASE_URL)
 - COOP_DEDUP_DB=1 to enable de-duplication against DB by (store_host, ean_norm)
-- WOLT_PROBE_LIMIT (default 2000) limit for prodinfo probes per category
 """
 
 import argparse
@@ -62,18 +61,17 @@ EAN_KEYS_ET = ["Ribakood", "EAN", "Tootekood", "GTIN"]
 CTX_TA_CODE = re.compile(r"(?:Tootekood)\s*[:\-]?\s*(\d{8,14})", re.IGNORECASE)
 CTX_MANUF   = re.compile(r"(?:Tootja|Valmistaja)\s*[:\-]?\s*([^\n<]{2,120})", re.IGNORECASE)
 
-GTIN_IN_ANY      = re.compile(r"\b(?:GTIN|EAN|Ribakood)\b[^\d]{0,50}(\d{8,14})", re.I)
+GTIN_IN_ANY      = re.compile(r"\b(?:GTIN|EAN|Ribakood)\b[^\d]{0,20}(\d{8,14})", re.I)
 TARNIJA_BLOCK_RE = re.compile(r"(?:Tarnija info|Supplier|Tootja info)\s*[\n\r]+([^\n\r]{2,200})", re.I)
 
-# --- prodinfo HTML patterns (tolerant) --------------------------------------
-PRODINFO_GTIN_NEARBY_RE = re.compile(
-    r"(?is)gtin[^<]{0,200}?(?:</[^>]+>\s*){0,3}<[^>]*>\s*([0-9]{8,14})\s*</"
-)
+# prodinfo HTML patterns (server-rendered; fast & stable)
+PRODINFO_GTIN_RE = re.compile(r"<h3[^>]*>\s*GTIN\s*</h3>\s*<p[^>]*>(\d{8,14})</p>", re.I)
 PRODINFO_SUPPLIER_RE = re.compile(
-    r"(?is)<h3[^>]*>\s*(?:Tarnija info|Tootja info|Supplier)\s*</h3>.*?<[^>]+>\s*([^<]{2,200})\s*</"
+    r"<h3[^>]*>\s*(?:Tarnija info|Tootja info|Supplier)\s*</h3>\s*<p[^>]*>([^<]{2,200})</p>",
+    re.I
 )
 PRODINFO_JSONLD_GTIN_RE = re.compile(r'"gtin(?:8|12|13|14)"\s*:\s*"(\d{8,14})"', re.I)
-PRODINFO_TITLE_RE = re.compile(r"(?is)<h2[^>]*>\s*([^<]{2,200})\s*</h2>")
+PRODINFO_TITLE_RE = re.compile(r"<h2[^>]*>([^<]{2,200})</h2>", re.I)
 
 HEX24_RE = re.compile(r"\b[a-f0-9]{24}\b", re.I)
 
@@ -131,6 +129,32 @@ def same_host(u: str, host: str) -> bool:
     except Exception:
         return False
 
+def _normalize_region(region: str, category_candidates: List[str]) -> str:
+    """
+    Ensure region is a fully-qualified origin like 'https://vandra.ecoop.ee/'.
+    If 'region' is missing a host (e.g., 'https://' or ''), try to infer the host
+    from any absolute category URL. Fall back to vandra.ecoop.ee.
+    """
+    r = (region or "").strip()
+    if not r:
+        r = "https://vandra.ecoop.ee"
+
+    if not re.match(r"^https?://", r, flags=re.I):
+        r = "https://" + r
+
+    u = urlparse(r)
+    if not u.netloc:
+        for c in category_candidates:
+            cu = urlparse(c)
+            if cu.scheme in ("http", "https") and cu.netloc:
+                u = u._replace(scheme=cu.scheme or "https", netloc=cu.netloc, path="/", query="", fragment="")
+                break
+
+    if not u.netloc:
+        u = urlparse("https://vandra.ecoop.ee/")
+
+    return urlunsplit((u.scheme, u.netloc, "/", "", ""))
+
 # ---------- ecoop (Playwright) utilities ----------
 
 async def wait_cookie_banner(page: Any):
@@ -175,7 +199,8 @@ async def collect_category_product_links(page: Any, category_url: str, page_limi
         try:
             await page.goto(url, wait_until="domcontentloaded")
         except Exception as e:
-            print(f("[warn] category goto fail: {url} -> {e}"))
+            # FIX: correct f-string usage
+            print(f"[warn] category goto fail: {url} -> {e}")
             continue
 
         await wait_cookie_banner(page)
@@ -1017,44 +1042,35 @@ async def _fetch_prodinfo_fields(lang: str, venue_id: str, item_id: str) -> Dict
     except Exception:
         return {"gtin": None, "supplier": None, "name": None}
 
-    # JSON-LD
     gtin = None
-    m = PRODINFO_JSONLD_GTIN_RE.search(html or "")
+    m = PRODINFO_GTIN_RE.search(html or "")
     if m:
         gtin = normalize_ean(m.group(1))
-
-    # Flexible HTML (heading near the number)
     if not gtin:
-        m2 = PRODINFO_GTIN_NEARBY_RE.search(html or "")
+        m2 = PRODINFO_JSONLD_GTIN_RE.search(html or "")
         if m2:
             gtin = normalize_ean(m2.group(1))
 
-    # Plain-text fallback
-    if not gtin:
-        text = re.sub(r"<[^>]+>", " ", html or " ")
-        m3 = GTIN_IN_ANY.search(text)
-        if m3:
-            gtin = normalize_ean(m3.group(1))
-
     supplier = None
-    m4 = PRODINFO_SUPPLIER_RE.search(html or "")
-    if m4:
-        supplier = (m4.group(1) or "").strip()
+    m3 = PRODINFO_SUPPLIER_RE.search(html or "")
+    if m3:
+        supplier = (m3.group(1) or "").strip()
 
     name = None
-    m5 = PRODINFO_TITLE_RE.search(html or "")
-    if m5:
-        name = (m5.group(1) or "").strip()
+    m4 = PRODINFO_TITLE_RE.search(html or "")
+    if m4:
+        name = (m4.group(1) or "").strip()
 
     return {"gtin": gtin, "supplier": supplier, "name": name}
 
-# Enrichment: probe prodinfo for items to fill GTIN/supplier/name
+# --- prodinfo enricher ------------------------------------------------------
+
 async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str,
                                      max_to_probe: Optional[int] = None) -> None:
     """
     Enrich items with GTIN/supplier/name via prodinfo.wolt.com.
     Prioritises items that don't yet have a GTIN. If max_to_probe is None,
-    probe everything (bounded by env WOLT_PROBE_LIMIT).
+    probe everything. Otherwise stops after the given number.
     """
     if max_to_probe is None:
         try:
@@ -1092,7 +1108,7 @@ async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str
         probed += 1
         await asyncio.sleep(0.04)
 
-# ====== iframe scraping helpers (old fallback) ==============================
+# ====== iframe & modal fallbacks (legacy) ===================================
 
 async def _get_info_iframe(page) -> Any:
     await page.wait_for_timeout(200)
@@ -1119,8 +1135,6 @@ async def _read_iframe_text_strict(page) -> str:
         return txt
     except PWTimeout:
         raise RuntimeError("Timed out reading iframe body")
-
-# --- modal helpers kept for completeness ------------------------------------
 
 async def _modal_opened(page) -> bool:
     checks = [
@@ -1356,7 +1370,8 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
 
             if venue_id:
                 lang = _lang_from_url(cat)
-                await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=None)
+                # FIX: match function signature (no debug_log_missing kwarg)
+                await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=240)
             else:
                 print("[warn] venueId not found — skipping direct prodinfo enrichment")
 
@@ -1367,7 +1382,6 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                         if it.get("price") in (None, 0) and iid in tile_prices:
                             it["price"] = tile_prices[iid]
 
-            # Optional de-dup vs DB by GTIN for this store_host
             existing_gtins = await _fetch_existing_gtins(store_host_cat)
 
             rows_raw = []
@@ -1375,7 +1389,6 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                 row = _extract_wolt_row(item, cat, store_host_cat)
                 if not row:
                     continue
-                # drop row if its GTIN already exists in DB for this store (when COOP_DEDUP_DB=1)
                 if row.get("ean_norm") and row["ean_norm"] in existing_gtins:
                     continue
                 rows_raw.append(row)
@@ -1405,11 +1418,8 @@ async def run(args):
         print("[error] No category URLs provided. Pass --categories-multiline or --categories-file.")
         sys.exit(2)
 
-    base_region = args.region.strip()
-    if not re.match(r"^https?://", base_region, flags=re.I):
-        base_region = "https://" + base_region
-    if not base_region.endswith("/"):
-        base_region += "/"
+    # Normalize region *after* reading raw categories so we can infer host if needed
+    base_region = _normalize_region(args.region, categories)
 
     def norm_url(u: str) -> str:
         absu = urljoin(base_region, u)
