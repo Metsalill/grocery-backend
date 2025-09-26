@@ -50,8 +50,9 @@ jobs:
 
     strategy:
       fail-fast: false
+      max-parallel: 8
       matrix:
-        shard: [0, 1, 2, 3]   # ↑ 4 shards in parallel
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]   # ↑ 8 shards in parallel
 
     env:
       PYTHONUNBUFFERED: "1"
@@ -221,10 +222,10 @@ jobs:
           echo "--------------"
           test -s data/barbora_categories.txt
 
-      - name: Shard category list (rotate + 4-way)
+      - name: Shard category list (rotate + 8-way)
         shell: bash
         env:
-          SHARDS: 4
+          SHARDS: 8
           ROTATE_SEED: ${{ github.run_number }}
         run: |
           set -euo pipefail
@@ -271,7 +272,7 @@ jobs:
         if: ${{ env.DATABASE_URL != '' && env.MODE == 'metadata' }}
         shell: bash
         env:
-          SHARDS: 4
+          SHARDS: 8
         run: |
           set -euo pipefail
           : > data/barbora_only_ext_ids.txt
