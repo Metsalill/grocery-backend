@@ -8,7 +8,7 @@ on:
         required: false
         default: ""
       categories_file:
-        description: "Path to a repo file with Wolt category URLs (one per line)"
+        description: "Path to a repo file with Wolt category URLs (one per line) — e.g. data/wolt_coop_lasname_categories.txt"
         required: false
         default: ""
       force_playwright:
@@ -86,19 +86,32 @@ jobs:
           SHARD_IDX: ${{ matrix.shard_index }}
           SHARD_COUNT: ${{ steps.shard.outputs.count }}
         run: |
+          set -euo pipefail
           mkdir -p out
           SRC="/tmp/wolt_categories_all.txt"
+          : > "$SRC"
+
           # Build the full list
           if [ -n "$CATS_MULTILINE" ]; then
             printf "%s\n" "$CATS_MULTILINE" > "$SRC"
           fi
-          if [ -n "$CATS_FILE_INPUT" ] && [ -f "$CATS_FILE_INPUT" ]; then
-            cp "$CATS_FILE_INPUT" "$SRC"
+          if [ -n "$CATS_FILE_INPUT" ]; then
+            if [ -f "$CATS_FILE_INPUT" ]; then
+              cp "$CATS_FILE_INPUT" "$SRC"
+            elif [ -f "${GITHUB_WORKSPACE}/${CATS_FILE_INPUT}" ]; then
+              cp "${GITHUB_WORKSPACE}/${CATS_FILE_INPUT}" "$SRC"
+            else
+              echo "Provided categories_file not found: $CATS_FILE_INPUT"
+              echo "Checked: '$CATS_FILE_INPUT' and '${GITHUB_WORKSPACE}/${CATS_FILE_INPUT}'"
+              exit 2
+            fi
           fi
-          if [ ! -f "$SRC" ] || [ ! -s "$SRC" ]; then
+
+          if [ ! -s "$SRC" ]; then
             echo "No categories provided. Supply categories_multiline or categories_file."
             exit 2
           fi
+
           # Shard by line number: keep lines where (NR-1) % SHARD_COUNT == SHARD_IDX
           DEST="/tmp/wolt_categories_shard.txt"
           awk -v idx="$SHARD_IDX" -v shards="$SHARD_COUNT" 'NR>=1 { if (((NR-1)%shards)==idx) print }' "$SRC" > "$DEST"
