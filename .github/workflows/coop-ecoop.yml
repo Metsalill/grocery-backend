@@ -159,7 +159,7 @@ jobs:
           SHARD_COUNT="${{ steps.shard.outputs.count }}"
           EXTRA="${{ inputs.extra_args }}"
 
-          python3 ecoop_crawler.py \
+          python3 scripts/ecoop_crawler.py \
             --region "$REGION" \
             --categories-file "${{ steps.cats.outputs.path }}" \
             --page-limit "$PAGE_LIMIT" \
