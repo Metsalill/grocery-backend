@@ -106,7 +106,7 @@ def _normalize_region(region: str, category_candidates: List[str]) -> str:
 try:
     from playwright.async_api import async_playwright, TimeoutError as PWTimeout  # noqa: F401
 except Exception as e:  # pragma: no cover
-    async_playwright = None  # loaded only when needed
+    async_playwright = None
     _IMPORT_ERROR = e
 
 async def wait_cookie_banner(page: Any):
@@ -379,9 +379,8 @@ async def extract_pdp(
                 raise last_err
             raise
 
-    waited = await safe_goto(url)
+    _ = await safe_goto(url)
     await wait_cookie_banner(page)
-    # ensure title (or something) appears regardless of network quiescence
     try:
         await page.wait_for_selector("h1, [data-testid='product-title']", timeout=5000)
     except Exception:
@@ -614,7 +613,6 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
 
     table = "staging_coop_products"
 
-    # Connect (best-effort)
     try:
         conn = await asyncpg.connect(dsn)
     except Exception as e:
@@ -719,7 +717,6 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
             viewport={"width": 1366, "height": 900},
             java_script_enabled=True,
         )
-        # sane defaults to avoid hanging navigations
         try:
             context.set_default_navigation_timeout(max(15000, int(args.nav_timeout)))
             context.set_default_timeout(max(15000, int(args.nav_timeout)))
@@ -814,9 +811,10 @@ async def main(args):
         all_rows.extend(batch)
         print(f"[stream] +{len(batch)} rows (total {len(all_rows)})")
 
+    # graceful shutdown so Playwright can close cleanly (avoids Node EPIPE)
     def _sig_handler(signum, frame):
-        print(f"[warn] received signal {signum}; CSV already streamed. Exiting 130.")
-        os._exit(130)
+        print(f"[warn] received signal {signum}; CSV already streamed. Exiting 130 gracefully.")
+        sys.exit(130)  # raise SystemExit -> executes finally blocks
 
     signal.signal(signal.SIGTERM, _sig_handler)
     signal.signal(signal.SIGINT,  _sig_handler)
@@ -844,7 +842,7 @@ def parse_args():
     p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
     p.add_argument("--out", default="out/coop_ecoop.csv", help="CSV file or output directory")
     p.add_argument("--write-empty-csv", action="store_true", default=True, help="Always write CSV header even if no rows.")
-    # new robustness flags
+    # robustness flags
     p.add_argument("--goto-strategy", choices=["auto","domcontentloaded","networkidle","load"],
                    default="auto", help="Playwright wait_until strategy for PDP navigation.")
     p.add_argument("--nav-timeout", default="45000",
