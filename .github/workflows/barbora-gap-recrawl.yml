@@ -1,0 +1,357 @@
+name: "Barbora (Maxima EE) - GAP recrawl (brand_gap / prices_gap)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "brand_gap (default) or prices_gap"
+        required: false
+        default: "brand_gap"
+      headless:
+        description: "Headless (1/0)"
+        required: false
+        default: "1"
+      req_delay:
+        description: "Delay between steps (sec)"
+        required: false
+        default: "0.25"
+      upsert_db:
+        description: "Upsert into Postgres (1=yes, 0=just CSV)"
+        required: false
+        default: "1"
+
+concurrency:
+  group: barbora-gap-recrawl
+  cancel-in-progress: true
+
+jobs:
+  recrawl-gap-and-upsert:
+    name: recrawl-gap-and-upsert (shard ${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]   # 8 shards
+
+    env:
+      PYTHONUNBUFFERED: "1"
+      OUTPUT_CSV: data/barbora_products.csv
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      MODE: ${{ github.event.inputs.mode || 'brand_gap' }}
+      UPSERT_DB: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.upsert_db || '1' }}
+      SHARD: ${{ matrix.shard }}
+      SOFT_TIMEOUT_MIN: "220"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps (Playwright + libs)
+        shell: bash
+        run: |
+          set -euo pipefail
+          pip install playwright beautifulsoup4 lxml pg8000 psycopg2-binary
+          python -m playwright install --with-deps chromium
+
+      - name: Verify scraper exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f scripts/barbora_crawl_categories_pw.py ]; then
+            echo "::error::scripts/barbora_crawl_categories_pw.py missing"
+            exit 1
+          fi
+          python -m py_compile scripts/barbora_crawl_categories_pw.py
+          chmod +x scripts/barbora_crawl_categories_pw.py
+
+      - name: Prepare workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf data
+          mkdir -p data
+
+      - name: Install psql client
+        if: ${{ env.DATABASE_URL != '' }}
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Pull GAP URLs from DB (brand_gap / prices_gap)
+        if: ${{ env.DATABASE_URL != '' }}
+        shell: bash
+        env:
+          SHARDS: 8
+        run: |
+          set -euo pipefail
+          mkdir -p data
+          KIND="brand"
+          if [ "${MODE}" = "prices_gap" ]; then KIND="price"; fi
+          echo "Fetching '${KIND}' URLs from barbora_gap_urls…"
+          psql "$DATABASE_URL" -At -c "SELECT source_url FROM barbora_gap_urls WHERE kind='${KIND}'" \
+            > data/barbora_only_urls_all.txt
+          TOTAL=$(wc -l < data/barbora_only_urls_all.txt || echo 0)
+          echo "Total gap URLs fetched: $TOTAL"
+          if [ "$TOTAL" -eq 0 ]; then
+            echo "::warning::No GAP URLs found for kind='${KIND}'. Exiting early."
+            # still upload empty artifacts for traceability
+            : > data/barbora_only_urls.txt
+          else
+            # shard the URL list across 8 workers
+            : "${SHARD:?SHARD env is required}"
+            awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
+              data/barbora_only_urls_all.txt > data/barbora_only_urls.txt
+            echo "Shard $SHARD slice count: $(wc -l < data/barbora_only_urls.txt)"
+          fi
+
+      - name: Recrawl PDPs (ONLY URL file)
+        env:
+          REQ_DELAY: ${{ github.event.inputs.req_delay }}
+          HEADLESS: ${{ github.event.inputs.headless }}
+        shell: bash
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          REQ_DELAY="${REQ_DELAY:-0.25}"
+          HEADLESS="${HEADLESS:-1}"
+          SOFT_TIMEOUT_MIN="${SOFT_TIMEOUT_MIN:-220}"
+
+          # Use a tiny categories file (not used in URL-only mode but required by CLI)
+          echo "https://barbora.ee" > data/barbora_categories.txt
+
+          ONLY_URL_FLAG=()
+          if [ -s data/barbora_only_urls.txt ]; then
+            ONLY_URL_FLAG=( --only-url-file data/barbora_only_urls.txt )
+          fi
+
+          cmd=( python -u scripts/barbora_crawl_categories_pw.py
+                --cats-file data/barbora_categories.txt
+                --page-limit 0
+                --max-products 0
+                --max-pages-per-category 1
+                --headless "$HEADLESS"
+                --req-delay "$REQ_DELAY"
+                --output-csv "$OUTPUT_CSV"
+                "${ONLY_URL_FLAG[@]}" )
+
+          echo "[info] soft timeout: ${SOFT_TIMEOUT_MIN} minutes"
+          stdbuf -oL -eL timeout -k 60s "${SOFT_TIMEOUT_MIN}m" "${cmd[@]}" | tee data/barbora_run.log
+
+      - name: Ensure CSV exists (header if empty)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -s "$OUTPUT_CSV" ]; then
+            mkdir -p "$(dirname "$OUTPUT_CSV")"
+            echo 'store_chain,store_name,store_channel,ext_id,ean_raw,sku_raw,name,size_text,brand,manufacturer,price,currency,image_url,category_path,category_leaf,source_url' > "$OUTPUT_CSV"
+            echo "Wrote header-only CSV -> $OUTPUT_CSV"
+          fi
+
+      - name: Upload recrawl artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: barbora-gap-${{ env.MODE }}-shard-${{ matrix.shard }}-${{ github.run_id }}
+          path: |
+            data/barbora_products.csv
+            data/barbora_run.log
+            data/barbora_only_urls_all.txt
+            data/barbora_only_urls.txt
+          if-no-files-found: warn
+          retention-days: 7
+
+      # ---------- Optional DB upsert ----------
+      - name: Install psql client (for upsert)
+        if: ${{ env.DATABASE_URL != '' && env.UPSERT_DB == '1' }}
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: DB sanity (connection)
+        if: ${{ env.DATABASE_URL != '' && env.UPSERT_DB == '1' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -c "\conninfo" || true
+          psql "$DATABASE_URL" -c "SELECT current_database(), current_user;" || true
+
+      - name: Prepare DB (ensure tables)
+        if: ${{ env.DATABASE_URL != '' && env.UPSERT_DB == '1' }}
+        shell: bash
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          BEGIN;
+          INSERT INTO public.stores (name, chain, is_online)
+          SELECT 'Barbora ePood', 'Maxima', TRUE
+          WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE name='Barbora ePood' AND chain='Maxima' AND is_online=TRUE);
+
+          CREATE TABLE IF NOT EXISTS public.staging_barbora_products (
+            ext_id        text PRIMARY KEY,
+            name          text NOT NULL,
+            ean_raw       text,
+            sku_raw       text,
+            ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '[^0-9]', '', 'g')) STORED,
+            size_text     text,
+            brand         text,
+            manufacturer  text,
+            price         numeric(12,2),
+            currency      text DEFAULT 'EUR',
+            category_path text,
+            category_leaf text,
+            source_url    text,
+            collected_at  timestamptz DEFAULT now()
+          );
+          CREATE EXTENSION IF NOT EXISTS pg_trgm;
+          CREATE INDEX IF NOT EXISTS ix_barbora_ean       ON public.staging_barbora_products (ean_norm);
+          CREATE INDEX IF NOT EXISTS ix_barbora_name_trgm ON public.staging_barbora_products USING gin (name gin_trgm_ops);
+
+          CREATE TABLE IF NOT EXISTS public.barbora_candidates (
+            ext_id        text PRIMARY KEY,
+            ean_norm      text,
+            ean_raw       text,
+            sku_raw       text,
+            name          text,
+            size_text     text,
+            brand         text,
+            manufacturer  text,
+            price         numeric(12,2),
+            currency      text,
+            category_path text,
+            category_leaf text,
+            source_url    text,
+            last_seen     timestamptz DEFAULT now()
+          );
+          COMMIT;
+          SQL
+
+      - name: Load CSV to DB
+        if: ${{ env.DATABASE_URL != '' && env.UPSERT_DB == '1' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          CSV_ABS="$(python -c 'import os;print(os.path.abspath("data/barbora_products.csv"))')"
+          cat > /tmp/barbora_load.sql <<'SQL'
+          \set ON_ERROR_STOP on
+          BEGIN;
+
+          CREATE TEMP TABLE tmp_barbora_csv_full (
+            store_chain   text,
+            store_name    text,
+            store_channel text,
+            ext_id        text,
+            ean_raw       text,
+            sku_raw       text,
+            name          text,
+            size_text     text,
+            brand         text,
+            manufacturer  text,
+            price         text,
+            currency      text,
+            image_url     text,
+            category_path text,
+            category_leaf text,
+            source_url    text
+          );
+
+          \copy tmp_barbora_csv_full FROM '__CSV__' CSV HEADER
+
+          CREATE TEMP TABLE tmp_staging_barbora_products AS
+          SELECT
+            ext_id,
+            COALESCE(NULLIF(btrim(name), ''), initcap(replace(regexp_replace(COALESCE(ext_id,''), '^.*/', ''), '-', ' '))) AS name,
+            NULLIF(btrim(ean_raw), '') AS ean_raw,
+            NULLIF(btrim(sku_raw), '') AS sku_raw,
+            NULLIF(regexp_replace(COALESCE(ean_raw,''), '[^0-9]', '', 'g'), '') AS ean_norm,
+            NULLIF(btrim(size_text), '') AS size_text,
+            NULLIF(btrim(brand), '') AS brand,
+            NULLIF(btrim(manufacturer), '') AS manufacturer,
+            NULLIF(regexp_replace(price, ',', '.', 'g'), '')::numeric AS price,
+            UPPER(COALESCE(NULLIF(currency,''), 'EUR')) AS currency,
+            NULLIF(btrim(category_path), '') AS category_path,
+            NULLIF(btrim(category_leaf), '') AS category_leaf,
+            NULLIF(btrim(source_url), '') AS source_url
+          FROM tmp_barbora_csv_full
+          WHERE COALESCE(ext_id,'') <> '';
+
+          DELETE FROM tmp_staging_barbora_products
+          WHERE COALESCE(name,'') = '';
+
+          CREATE TEMP TABLE tmp_staging_barbora_products_dedup AS
+          SELECT t.*
+          FROM (
+            SELECT
+              t.*,
+              ROW_NUMBER() OVER (
+                PARTITION BY ext_id
+                ORDER BY
+                  CASE WHEN COALESCE(brand,'') <> '' THEN 1 ELSE 0 END DESC,
+                  CASE WHEN COALESCE(manufacturer,'') <> '' THEN 1 ELSE 0 END DESC,
+                  CASE WHEN price IS NOT NULL THEN 1 ELSE 0 END DESC,
+                  CASE WHEN COALESCE(size_text,'') <> '' THEN 1 ELSE 0 END DESC,
+                  LENGTH(COALESCE(name,'')) DESC
+              ) AS rn
+            FROM tmp_staging_barbora_products t
+          ) t
+          WHERE rn = 1;
+
+          DROP TABLE tmp_staging_barbora_products;
+          ALTER TABLE tmp_staging_barbora_products_dedup RENAME TO tmp_staging_barbora_products;
+          CREATE UNIQUE INDEX ON tmp_staging_barbora_products (ext_id);
+
+          INSERT INTO public.staging_barbora_products
+            (ext_id,name,ean_raw,sku_raw,size_text,brand,manufacturer,price,currency,category_path,category_leaf,source_url,collected_at)
+          SELECT ext_id,name,ean_raw,sku_raw,size_text,brand,manufacturer,price,currency,category_path,category_leaf,source_url,now()
+          FROM tmp_staging_barbora_products
+          ON CONFLICT (ext_id) DO UPDATE
+            SET name          = EXCLUDED.name,
+                ean_raw       = EXCLUDED.ean_raw,
+                sku_raw       = EXCLUDED.sku_raw,
+                size_text     = COALESCE(EXCLUDED.size_text, public.staging_barbora_products.size_text),
+                brand         = COALESCE(EXCLUDED.brand, public.staging_barbora_products.brand),
+                manufacturer  = COALESCE(EXCLUDED.manufacturer, public.staging_barbora_products.manufacturer),
+                price         = EXCLUDED.price,
+                currency      = COALESCE(EXCLUDED.currency, public.staging_barbora_products.currency),
+                category_path = COALESCE(EXCLUDED.category_path, public.staging_barbora_products.category_path),
+                category_leaf = COALESCE(EXCLUDED.category_leaf, public.staging_barbora_products.category_leaf),
+                source_url    = COALESCE(EXCLUDED.source_url, public.staging_barbora_products.source_url),
+                collected_at  = now();
+
+          INSERT INTO public.barbora_candidates
+            (ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, manufacturer, price, currency, category_path, category_leaf, source_url, last_seen)
+          SELECT
+            ext_id, ean_norm, ean_raw, sku_raw, name, size_text, brand, manufacturer, price, currency, category_path, category_leaf, source_url, now()
+          FROM tmp_staging_barbora_products
+          ON CONFLICT (ext_id) DO UPDATE
+            SET price         = EXCLUDED.price,
+                currency      = COALESCE(EXCLUDED.currency, public.barbora_candidates.currency),
+                size_text     = CASE WHEN COALESCE(EXCLUDED.size_text,'')     <> '' THEN EXCLUDED.size_text     ELSE public.barbora_candidates.size_text END,
+                brand         = CASE WHEN COALESCE(EXCLUDED.brand,'')         <> '' THEN EXCLUDED.brand         ELSE public.barbora_candidates.brand     END,
+                manufacturer  = CASE WHEN COALESCE(EXCLUDED.manufacturer,'')  <> '' THEN EXCLUDED.manufacturer  ELSE public.barbora_candidates.manufacturer END,
+                category_path = CASE WHEN COALESCE(EXCLUDED.category_path,'') <> '' THEN EXCLUDED.category_path ELSE public.barbora_candidates.category_path END,
+                category_leaf = CASE WHEN COALESCE(EXCLUDED.category_leaf,'') <> '' THEN EXCLUDED.category_leaf ELSE public.barbora_candidates.category_leaf END,
+                ean_raw       = CASE WHEN COALESCE(EXCLUDED.ean_raw,'')       <> '' THEN EXCLUDED.ean_raw       ELSE public.barbora_candidates.ean_raw END,
+                sku_raw       = CASE WHEN COALESCE(EXCLUDED.sku_raw,'')       <> '' THEN EXCLUDED.sku_raw       ELSE public.barbora_candidates.sku_raw END,
+                source_url    = COALESCE(EXCLUDED.source_url, public.barbora_candidates.source_url),
+                last_seen     = now();
+
+          COMMIT;
+
+          \echo ''
+          \echo '=== Load summary ==='
+          SELECT
+            COUNT(*) AS candidates_total,
+            SUM((price IS NULL OR price = 0)::int) AS zero_price
+          FROM public.barbora_candidates;
+          SQL
+          sed -i "s|__CSV__|$CSV_ABS|g" /tmp/barbora_load.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/barbora_load.sql
