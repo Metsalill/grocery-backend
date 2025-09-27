@@ -15,10 +15,6 @@ on:
         description: "Repo file with categories (one per line) — leave empty to auto-pick from data/ by region"
         required: false
         default: ""
-      page_limit:
-        description: "Cap product links per category (0 = all)"
-        required: false
-        default: "0"
       max_products:
         description: "Cap PDPs per category after discovery (0 = unlimited)"
         required: false
@@ -158,23 +154,20 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Inputs
           REGION="${{ inputs.region }}"
           REQ_DELAY_IN="${{ inputs.req_delay }}"
           PDP_WORKERS_IN="${{ inputs.pdp_workers }}"
-          PAGE_LIMIT_IN="${{ inputs.page_limit }}"
           MAX_PRODUCTS_IN="${{ inputs.max_products }}"
           SHARD_TIMEOUT_MIN_IN="${{ inputs.shard_timeout_min }}"
           SHARD_COUNT="${{ steps.shard.outputs.count }}"
           EXTRA="${{ inputs.extra_args }}"
 
-          # Bash-side defaults (avoid empty strings going to flags)
+          # Bash defaults to avoid empty strings
           REQ_DELAY="${REQ_DELAY_IN:-0.4}"
           PDP_WORKERS="${PDP_WORKERS_IN:-6}"
-          PAGE_LIMIT="${PAGE_LIMIT_IN:-0}"
           MAX_PRODUCTS="${MAX_PRODUCTS_IN:-0}"
+          PAGE_LIMIT="0"  # removed from inputs; override via extra_args if needed
           SHARD_TIMEOUT_MIN="${SHARD_TIMEOUT_MIN_IN:-45}"
-          # sanitize timeout: 10..110
           if ! [[ "$SHARD_TIMEOUT_MIN" =~ ^[0-9]+$ ]]; then SHARD_TIMEOUT_MIN=45; fi
           if [ "$SHARD_TIMEOUT_MIN" -lt 10 ]; then SHARD_TIMEOUT_MIN=10; fi
           if [ "$SHARD_TIMEOUT_MIN" -gt 110 ]; then SHARD_TIMEOUT_MIN=110; fi
@@ -184,7 +177,6 @@ jobs:
           echo "pdp_workers=$PDP_WORKERS  req_delay=$REQ_DELAY  page_limit=$PAGE_LIMIT  max_products=$MAX_PRODUCTS  timeout=${SHARD_TIMEOUT_MIN}m"
           echo "::endgroup::"
 
-          # Hard cap shard runtime: send SIGINT, then kill after 60s
           set +e
           timeout --signal=INT --kill-after=60s ${SHARD_TIMEOUT_MIN}m \
           stdbuf -oL -eL python3 scripts/ecoop_crawler.py \
@@ -205,7 +197,6 @@ jobs:
 
           if [ $code -eq 124 ] || [ $code -eq 130 ]; then
             echo "::warning::Shard ${{ matrix.shard_index }} hit timeout (${SHARD_TIMEOUT_MIN}m). Treating as partial success."
-            # clean any dangling browsers; ignore errors
             pkill -9 -f "playwright" || true
             pkill -9 -f "chromium" || true
             pkill -9 -f "chrome" || true
