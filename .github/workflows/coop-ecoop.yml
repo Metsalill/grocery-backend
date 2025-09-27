@@ -35,6 +35,10 @@ on:
         description: "Number of shards (1–8)"
         required: false
         default: "8"
+      shard_timeout_min:
+        description: "Per-shard hard timeout in minutes (SIGINT, then kill after 60s)"
+        required: false
+        default: "45"
       upsert_db:
         description: "1 = upsert into DATABASE_URL (staging_coop_products)"
         required: false
@@ -70,7 +74,7 @@ jobs:
 
       - name: Skip unused shard
         if: ${{ matrix.shard_index >= fromJSON(steps.shard.outputs.count) }}
-        run: echo "Skipping shard ${{ matrix.shard.outputs.count }} requested; skipping ${{ matrix.shard_index }}"
+        run: echo "Skipping shard ${{ matrix.shard_index }} (only ${{ steps.shard.outputs.count }} requested)"
 
       - name: Setup Python
         if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
@@ -154,28 +158,28 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Coerce inputs to sane defaults if they arrive empty
+          # Inputs + defaults (avoid blanks)
           REGION="${{ inputs.region }}"
-          REQ_DELAY="${{ inputs.req_delay }}"
-          PDP_WORKERS="${{ inputs.pdp_workers }}"
-          PAGE_LIMIT="${{ inputs.page_limit }}"
-          MAX_PRODUCTS="${{ inputs.max_products }}"
+          REQ_DELAY="${{ inputs.req_delay:-0.4 }}"
+          PDP_WORKERS="${{ inputs.pdp_workers:-6 }}"
+          PAGE_LIMIT="${{ inputs.page_limit:-0 }}"
+          MAX_PRODUCTS="${{ inputs.max_products:-0 }}"
           SHARD_COUNT="${{ steps.shard.outputs.count }}"
           EXTRA="${{ inputs.extra_args }}"
-
-          REQ_DELAY="${REQ_DELAY:-0.4}"
-          PDP_WORKERS="${PDP_WORKERS:-6}"
-          PAGE_LIMIT="${PAGE_LIMIT:-0}"
-          MAX_PRODUCTS="${MAX_PRODUCTS:-0}"
+          SHARD_TIMEOUT_MIN="${{ inputs.shard_timeout_min }}"
+          # sanitize timeout: 10..110
+          if ! [[ "$SHARD_TIMEOUT_MIN" =~ ^[0-9]+$ ]]; then SHARD_TIMEOUT_MIN=45; fi
+          if [ "$SHARD_TIMEOUT_MIN" -lt 10 ]; then SHARD_TIMEOUT_MIN=10; fi
+          if [ "$SHARD_TIMEOUT_MIN" -gt 110 ]; then SHARD_TIMEOUT_MIN=110; fi
 
           echo "::group::Args"
           echo "region=$REGION"
-          echo "pdp_workers=$PDP_WORKERS  req_delay=$REQ_DELAY  page_limit=$PAGE_LIMIT  max_products=$MAX_PRODUCTS"
+          echo "pdp_workers=$PDP_WORKERS  req_delay=$REQ_DELAY  page_limit=$PAGE_LIMIT  max_products=$MAX_PRODUCTS  timeout=${SHARD_TIMEOUT_MIN}m"
           echo "::endgroup::"
 
-          # Hard cap shard runtime; kill stragglers if it times out
+          # Hard cap shard runtime: send SIGINT, then kill after 60s
           set +e
-          timeout --signal=TERM --kill-after=60s 20m \
+          timeout --signal=INT --kill-after=60s ${SHARD_TIMEOUT_MIN}m \
           bash -lc 'exec stdbuf -oL -eL python3 scripts/ecoop_crawler.py \
             --region "$REGION" \
             --categories-file "${{ steps.cats.outputs.path }}" \
@@ -193,12 +197,14 @@ jobs:
           code=$?
           set -e
 
-          if [ $code -eq 124 ] || [ $code -eq 137 ]; then
-            echo "::warning::Shard ${{ matrix.shard_index }} exceeded time limit; cleaning up Playwright/Chromium."
+          if [ $code -eq 124 ] || [ $code -eq 130 ]; then
+            echo "::warning::Shard ${{ matrix.shard_index }} hit timeout (${SHARD_TIMEOUT_MIN}m). Treating as partial success."
+            # try to clean any dangling browsers; ignore errors
             pkill -9 -f "playwright" || true
             pkill -9 -f "chromium" || true
             pkill -9 -f "chrome" || true
             pkill -9 -f "node .*playwright" || true
+            code=0
           fi
           exit $code
 
