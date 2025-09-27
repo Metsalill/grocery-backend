@@ -158,15 +158,22 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Inputs + defaults (avoid blanks)
+          # Inputs
           REGION="${{ inputs.region }}"
-          REQ_DELAY="${{ inputs.req_delay:-0.4 }}"
-          PDP_WORKERS="${{ inputs.pdp_workers:-6 }}"
-          PAGE_LIMIT="${{ inputs.page_limit:-0 }}"
-          MAX_PRODUCTS="${{ inputs.max_products:-0 }}"
+          REQ_DELAY_IN="${{ inputs.req_delay }}"
+          PDP_WORKERS_IN="${{ inputs.pdp_workers }}"
+          PAGE_LIMIT_IN="${{ inputs.page_limit }}"
+          MAX_PRODUCTS_IN="${{ inputs.max_products }}"
+          SHARD_TIMEOUT_MIN_IN="${{ inputs.shard_timeout_min }}"
           SHARD_COUNT="${{ steps.shard.outputs.count }}"
           EXTRA="${{ inputs.extra_args }}"
-          SHARD_TIMEOUT_MIN="${{ inputs.shard_timeout_min }}"
+
+          # Bash-side defaults (avoid empty strings going to flags)
+          REQ_DELAY="${REQ_DELAY_IN:-0.4}"
+          PDP_WORKERS="${PDP_WORKERS_IN:-6}"
+          PAGE_LIMIT="${PAGE_LIMIT_IN:-0}"
+          MAX_PRODUCTS="${MAX_PRODUCTS_IN:-0}"
+          SHARD_TIMEOUT_MIN="${SHARD_TIMEOUT_MIN_IN:-45}"
           # sanitize timeout: 10..110
           if ! [[ "$SHARD_TIMEOUT_MIN" =~ ^[0-9]+$ ]]; then SHARD_TIMEOUT_MIN=45; fi
           if [ "$SHARD_TIMEOUT_MIN" -lt 10 ]; then SHARD_TIMEOUT_MIN=10; fi
@@ -180,26 +187,25 @@ jobs:
           # Hard cap shard runtime: send SIGINT, then kill after 60s
           set +e
           timeout --signal=INT --kill-after=60s ${SHARD_TIMEOUT_MIN}m \
-          bash -lc 'exec stdbuf -oL -eL python3 scripts/ecoop_crawler.py \
+          stdbuf -oL -eL python3 scripts/ecoop_crawler.py \
             --region "$REGION" \
             --categories-file "${{ steps.cats.outputs.path }}" \
-            --page-limit "'"$PAGE_LIMIT"'" \
-            --max-products "'"$MAX_PRODUCTS"'" \
+            --page-limit "$PAGE_LIMIT" \
+            --max-products "$MAX_PRODUCTS" \
             --headless "1" \
-            --req-delay "'"$REQ_DELAY"'" \
-            --pdp-workers "'"${PDP_WORKERS:-3}"'" \
-            --cat-shards "'"$SHARD_COUNT"'" \
+            --req-delay "$REQ_DELAY" \
+            --pdp-workers "${PDP_WORKERS:-3}" \
+            --cat-shards "$SHARD_COUNT" \
             --cat-index "${{ matrix.shard_index }}" \
             --out "out/coop_ecoop_${{ github.run_id }}_shard${{ matrix.shard_index }}.csv" \
             --goto-strategy "domcontentloaded" --nav-timeout "45000" \
-            '"$EXTRA"''
-
+            $EXTRA
           code=$?
           set -e
 
           if [ $code -eq 124 ] || [ $code -eq 130 ]; then
             echo "::warning::Shard ${{ matrix.shard_index }} hit timeout (${SHARD_TIMEOUT_MIN}m). Treating as partial success."
-            # try to clean any dangling browsers; ignore errors
+            # clean any dangling browsers; ignore errors
             pkill -9 -f "playwright" || true
             pkill -9 -f "chromium" || true
             pkill -9 -f "chrome" || true
