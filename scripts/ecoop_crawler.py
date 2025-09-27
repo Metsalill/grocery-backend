@@ -578,7 +578,10 @@ async def _fetch_existing_gtins(store_host: str) -> Set[str]:
         import asyncpg  # type: ignore
     except Exception:
         return set()
-    conn = await asyncpg.connect(dsn)
+    try:
+        conn = await asyncpg.connect(dsn)
+    except Exception:
+        return set()
     try:
         rows = await conn.fetch(
             "SELECT DISTINCT ean_norm FROM public.staging_coop_products "
@@ -590,16 +593,19 @@ async def _fetch_existing_gtins(store_host: str) -> Set[str]:
         await conn.close()
 
 async def maybe_upsert_db(rows: List[Dict]) -> None:
+    """Best-effort upsert. Never crash the crawl on DB errors."""
     if not rows:
         print("[info] No rows to upsert.")
         return
     if os.environ.get("COOP_UPSERT_DB", "0").lower() not in ("1", "true"):
         print("[info] DB upsert disabled (COOP_UPSERT_DB != 1)")
         return
+
     dsn = os.environ.get("DATABASE_URL")
     if not dsn:
         print("[info] DATABASE_URL not set; skipping DB upsert")
         return
+
     try:
         import asyncpg  # type: ignore
     except Exception:
@@ -607,12 +613,25 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
         return
 
     table = "staging_coop_products"
-    conn = await asyncpg.connect(dsn)
+
+    # Connect (best-effort)
     try:
-        exists = await conn.fetchval(
-            "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name=$1)",
-            table,
-        )
+        conn = await asyncpg.connect(dsn)
+    except Exception as e:
+        print(f"[warn] Could not connect to DB for upsert ({e!r}). Skipping DB upsert.")
+        return
+
+    try:
+        try:
+            exists = await conn.fetchval(
+                "SELECT EXISTS (SELECT 1 FROM information_schema.tables "
+                "WHERE table_schema='public' AND table_name=$1)",
+                table,
+            )
+        except Exception as e:
+            print(f"[warn] Failed to check table existence: {e!r}. Skipping DB upsert.")
+            return
+
         if not exists:
             print(f"[info] Table {table} does not exist → skipping DB upsert.")
             return
@@ -650,14 +669,21 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
                 r.get("ean_raw"), r.get("ean_norm"), r.get("size_text"),
                 pr, r.get("currency") or "EUR", r.get("image_url"), r.get("url")
             ))
+
         if not payload:
             print("[warn] No rows with ext_id — skipped DB upsert")
             return
 
-        await conn.executemany(stmt, payload)
-        print(f"[ok] Upserted {len(payload)} rows into {table}")
+        try:
+            await conn.executemany(stmt, payload)
+            print(f"[ok] Upserted {len(payload)} rows into {table}")
+        except Exception as e:
+            print(f"[warn] Upsert failed ({e!r}). Skipping DB upsert.")
     finally:
-        await conn.close()
+        try:
+            await conn.close()
+        except Exception:
+            pass
 
 # ---------- router (block trackers only) ----------
 async def _route_handler(route):
