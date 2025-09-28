@@ -143,23 +143,44 @@ async def wait_cookie_banner(page: Any):
         pass
 
 # ---------- Category discovery (robust) ----------
+def _looks_like_product_url(u: str) -> bool:
+    """
+    eCoop PDPs commonly use '/et/toode/...' – but some deployments
+    expose deep '/et/tooted/<cat>/<subcat>/<product-slug>' links.
+    Accept if:
+      - contains 'toode' anywhere, OR
+      - path contains '/tooted/' and has >= 3 segments after 'tooted'
+        (heuristic to treat deep links as PDPs and not top-level categories)
+    """
+    if not u:
+        return False
+    try:
+        parsed = urlparse(u)
+        path = parsed.path.lower()
+    except Exception:
+        path = (u or "").lower()
+
+    if "toode" in path:
+        return True
+    if "/tooted/" in path:
+        # count path segments after '/tooted/'
+        parts = [p for p in path.split("/") if p]
+        try:
+            idx = parts.index("tooted")
+        except ValueError:
+            idx = -1
+        if idx >= 0 and len(parts) - (idx + 1) >= 3:
+            # e.g. /et/tooted/cat/subcat/slug  -> likely PDP
+            return True
+    return False
+
 async def collect_category_product_links(page: Any, category_url: str, page_limit: int, req_delay: float, max_depth: int = 2) -> List[str]:
-    """
-    Collect PDP links from a category page with scrolling + 'Load more'.
-    Very permissive: any anchor containing 'toode' in its href is treated as a PDP link.
-    """
     base = urlparse(category_url)
     base_host = base.netloc
 
     def norm_abs(u: str) -> str:
         u = urljoin(f"{base.scheme}://{base.netloc}{base.path}", u or "")
         return clean_url_keep_allowed_query(u)
-
-    def looks_like_product(u: str) -> bool:
-        if not u:
-            return False
-        u_low = u.lower()
-        return "toode" in u_low  # matches /toode/, /toode-123, etc.
 
     seen_products: set[str] = set()
     seen_pages: set[str] = set()
@@ -181,34 +202,14 @@ async def collect_category_product_links(page: Any, category_url: str, page_limi
 
         stable_rounds = 0
         for _ in range(1000):
-            # 1) direct anchors with 'toode' in href (absolute)
+            # Anchors with hrefs containing product-ish paths
             try:
-                hrefs = await page.eval_on_selector_all('a[href*="toode"]', "els => els.map(e => e.href)")
+                hrefs = await page.eval_on_selector_all('a', "els => els.map(e => e.getAttribute('href') || e.href || '')")
             except Exception:
                 hrefs = []
             for h in hrefs or []:
                 h = norm_abs(h)
-                if looks_like_product(h):
-                    seen_products.add(h)
-
-            # 2) anchors where only getAttribute('href') is set (relative)
-            try:
-                hrefs_attr = await page.eval_on_selector_all('a[href*="toode"]', "els => els.map(e => e.getAttribute('href'))")
-            except Exception:
-                hrefs_attr = []
-            for h in hrefs_attr or []:
-                h = norm_abs(h or "")
-                if looks_like_product(h):
-                    seen_products.add(h)
-
-            # 3) fallback sweep: all anchors, filter in Python (covers dynamic routers)
-            try:
-                all_as = await page.eval_on_selector_all("a", "els => els.map(e => e.getAttribute('href') || e.href || '')")
-            except Exception:
-                all_as = []
-            for h in all_as or []:
-                h = norm_abs(h or "")
-                if looks_like_product(h):
+                if _looks_like_product_url(h):
                     seen_products.add(h)
 
             # Try "Load more" buttons if present
@@ -228,7 +229,7 @@ async def collect_category_product_links(page: Any, category_url: str, page_limi
                 except Exception:
                     pass
 
-            # scroll to trigger lazy loading
+            # Scroll to trigger lazy loading and re-scan
             try:
                 await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
             except Exception:
@@ -236,15 +237,13 @@ async def collect_category_product_links(page: Any, category_url: str, page_limi
             await page.wait_for_timeout(int(req_delay * 1000))
 
             before = len(seen_products)
-
-            # another quick sweep post-scroll
             try:
-                hrefs2 = await page.eval_on_selector_all('a[href*="toode"]', "els => els.map(e => e.getAttribute('href') || e.href || '')")
+                hrefs2 = await page.eval_on_selector_all('a', "els => els.map(e => e.getAttribute('href') || e.href || '')")
             except Exception:
                 hrefs2 = []
             for h in hrefs2 or []:
-                h = norm_abs(h or "")
-                if looks_like_product(h):
+                h = norm_abs(h)
+                if _looks_like_product_url(h):
                     seen_products.add(h)
 
             if len(seen_products) == before and not clicked:
@@ -273,12 +272,14 @@ async def collect_category_product_links(page: Any, category_url: str, page_limi
         if depth < max_depth:
             try:
                 subcats = await page.eval_on_selector_all(
-                    'a[href*="/tootekategooria/"]', "els => els.map(e => e.getAttribute('href') || e.href || '')"
+                    'a[href*="/tootekategooria/"], a[href*="/tooted/"]',
+                    "els => els.map(e => e.getAttribute('href') || e.href || '')"
                 )
             except Exception:
                 subcats = []
             for sc in subcats or []:
                 sc = norm_abs(sc or "")
+                # always queue subcats; PDP filter happens later
                 if sc and same_host(sc, base_host) and sc not in seen_pages:
                     queue.append((sc, depth + 1))
 
