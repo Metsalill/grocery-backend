@@ -53,23 +53,7 @@ jobs:
           pip install playwright==1.47.0 selectolax psycopg[binary] tenacity
           python -m playwright install --with-deps chromium
 
-      - name: Prepare store list (no heredoc)
-        id: prep
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ -z "${{ inputs.stores_multiline }}" ]; then
-            printf "%s\n" \
-              "Lõunakeskuse COOP Maksimarket" \
-              "Eedeni COOP Maksimarket" \
-              "Kvartali COOP Maksimarket" > /tmp/stores.txt
-          else
-            printf "%s" "${{ inputs.stores_multiline }}" | tr -d '\r' > /tmp/stores.txt
-          fi
-          echo "Prepared store list:"
-          cat /tmp/stores.txt
-
-      - name: Crawl each store
+      - name: Crawl each store (array-based, preserves spaces/newlines)
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           CITY_PATH: ${{ inputs.city_path }}
@@ -80,14 +64,30 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Provide safe defaults if inputs are empty (e.g. scheduled runs)
+          # Safe defaults for scheduled runs (inputs can be empty)
           CITY_PATH="${CITY_PATH:-2-tartu}"
           HEADLESS="${HEADLESS:-1}"
           REQ_DELAY="${REQ_DELAY:-0.25}"
           UPSERT_DB="${UPSERT_DB:-1}"
 
+          # Build STORES array
+          if [ -z "${{ inputs.stores_multiline }}" ]; then
+            # Default three Tartu stores
+            STORES=(
+              "Lõunakeskuse COOP Maksimarket"
+              "Eedeni COOP Maksimarket"
+              "Kvartali COOP Maksimarket"
+            )
+          else
+            # Normalize CRLF and split on newlines into array
+            mapfile -t STORES < <(printf "%s" "${{ inputs.stores_multiline }}" | tr -d '\r')
+          fi
+
+          echo "Stores to crawl:"
+          printf ' - %s\n' "${STORES[@]}"
+
           mkdir -p out
-          while IFS= read -r STORE || [ -n "$STORE" ]; do
+          for STORE in "${STORES[@]}"; do
             [ -z "$STORE" ] && continue
             SAFE_NAME="$(echo "$STORE" | tr ' ' '_' | tr -dc '[:alnum:]_')"
             echo "==> Crawling: $STORE (city=${CITY_PATH}, headless=${HEADLESS}, delay=${REQ_DELAY}, upsert=${UPSERT_DB})"
@@ -98,7 +98,7 @@ jobs:
               --req-delay "${REQ_DELAY}" \
               --upsert-db "${UPSERT_DB}" \
               --out "out/coop_bolt_${CITY_PATH}_${SAFE_NAME}.csv"
-          done < /tmp/stores.txt
+          done
 
       - name: Upload CSV artifacts
         uses: actions/upload-artifact@v4
