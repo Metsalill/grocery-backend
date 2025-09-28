@@ -632,6 +632,72 @@ async def _maybe_collect_json(resp, out_list: List[Any]):
     except Exception:
         pass
 
+# --- NEW: robust tile extractor that works for DIV/button tiles as well as anchors
+async def _scrape_tiles_full(page):
+    """
+    Returns dict keyed by 24-hex iid:
+      { id, name, price, image_url }
+    """
+    data = await page.evaluate(
+        """(() => {
+            const seen = {};
+            const out = [];
+            const rx = /(?:itemid-|item-)([a-f0-9]{24})/i;
+
+            // Scan any element whose outerHTML mentions itemid-
+            const all = Array.from(document.querySelectorAll('body *'));
+            for (const el of all) {
+              const html = el.outerHTML || '';
+              const m = html.match(rx);
+              if (!m) continue;
+              const id = m[1].toLowerCase();
+              if (seen[id]) continue; seen[id] = true;
+
+              // build a tile context
+              const tile = el.closest('article, li, div, a, button') || el;
+
+              // name guess
+              let name = '';
+              const nameEl = tile.querySelector('h3, h4, strong, [aria-label], img[alt]');
+              if (nameEl) {
+                name = (nameEl.getAttribute('aria-label') || nameEl.textContent || nameEl.getAttribute('alt') || '').trim();
+              }
+
+              // price guess
+              let price = null;
+              const t = (tile.textContent || '').replace(/\\s+/g,' ');
+              const pm = t.match(/(\\d+[.,]\\d{2})\\s*€/);
+              if (pm) price = parseFloat(pm[1].replace(',', '.'));
+
+              // image
+              let image_url = '';
+              const im = tile.querySelector('img');
+              if (im) image_url = im.src || im.getAttribute('src') || '';
+
+              out.push({ id, name, price, image_url });
+            }
+            return out;
+        })()"""
+    )
+    # pack
+    by_id: Dict[str, Dict[str, Optional[str]]] = {}
+    for row in (data or []):
+        try:
+            iid = str(row.get("id") or "").lower()
+            if not iid or not re.match(r"^[a-f0-9]{24}$", iid):
+                continue
+            price = row.get("price")
+            by_id[iid] = {
+                "id": iid,
+                "name": (row.get("name") or "").strip() or None,
+                "price": float(price) if price is not None else None,
+                "image_url": row.get("image_url") or None,
+            }
+        except Exception:
+            pass
+    return by_id
+
+# legacy simple price scraper (kept for compatibility)
 async def _scrape_tile_prices(page) -> Dict[str, float]:
     try:
         data = await page.evaluate(
@@ -689,11 +755,9 @@ async def _goto_with_backoff(page, url: str, max_tries: int, nav_timeout_ms: int
         for ws in strategies:
             try:
                 resp = await page.goto(url, wait_until=ws, timeout=nav_timeout_ms)
-                # Playwright does not always expose status here; rely on success of render.
                 return resp
             except Exception as e:
                 last_err = e
-        # backoff
         await _sleep_backoff(attempt, retry_after=None, base=1.2)
     if last_err:
         raise last_err
@@ -704,7 +768,7 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
         raise RuntimeError("Playwright is required for Wolt fallback but is not installed.")
 
     found: Dict[str, Dict] = {}
-    blobs: List[Any] = {}
+    blobs: List[Any] = []
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=bool(int(headless)))
@@ -754,7 +818,13 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
                 await page.mouse.wheel(0, 1500)
                 await page.wait_for_timeout(int(max(req_delay, 0.4)*1000 + random.uniform(250, 900)))
 
-            tile_prices = await _scrape_tile_prices(page)
+            # robust tile scan
+            tiles = await _scrape_tiles_full(page)
+            # legacy price-only fallback for anchors
+            legacy_prices = await _scrape_tile_prices(page)
+            for iid, p in legacy_prices.items():
+                if iid in tiles and tiles[iid].get("price") is None:
+                    tiles[iid]["price"] = p
 
             # leak global state blobs
             for varname in ["__APOLLO_STATE__", "__NEXT_DATA__", "__NUXT__", "__INITIAL_STATE__", "__REACT_QUERY_STATE__", "__REDUX_STATE__"]:
@@ -788,6 +858,21 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
                 except Exception:
                     pass
 
+            # If no items were discovered from blobs, synthesize from tiles
+            if not found and tiles:
+                for iid, t in tiles.items():
+                    found[iid] = {"id": iid, "name": t.get("name"), "price": t.get("price"), "image": t.get("image_url")}
+            else:
+                # Enrich existing with tile info where missing
+                for key, it in list(found.items()):
+                    iid = str(it.get("id") or "").lower()
+                    if iid and iid in tiles:
+                        t = tiles[iid]
+                        it.setdefault("name", t.get("name"))
+                        if (it.get("price") in (None, 0)) and t.get("price") is not None:
+                            it["price"] = t.get("price")
+                        it.setdefault("image", t.get("image_url"))
+
             if not found:
                 ids = set(re.findall(r"(?:itemid-|item-)([a-f0-9]{24})", html or "", re.I))
                 for iid in ids:
@@ -799,6 +884,9 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
                 venue_id = m.group(1)
             if not venue_id:
                 venue_id = await _extract_venue_id_via_modal(page)
+
+            # expose tile prices map for outer join (iid->price)
+            tile_prices = {iid: (v.get("price") if v else None) for iid, v in tiles.items() if v and v.get("price") is not None}
 
             return list(found.values()), collected_blobs, html, tile_prices, venue_id
 
