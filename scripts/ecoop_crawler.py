@@ -10,6 +10,8 @@ Coop eCoop (region-specific) category → PDP crawler → CSV/optional DB upsert
 Env:
 - COOP_UPSERT_DB=1 to enable DB upsert (requires asyncpg + DATABASE_URL).
 - COOP_DEDUP_DB=1 to enable de-duplication against DB by (store_host, ean_norm).
+- ECOOP_PRESHARDED=1 to tell the script that the categories list is already pre-sharded
+  by the caller (GitHub Actions), so internal sharding should be skipped.
 
 Domains:
 - Vändra → https://vandra.ecoop.ee
@@ -699,7 +701,7 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
         except Exception:
             pass
 
-# ---------- router (block trackers only) ----------
+# ---------- runner ----------
 async def _route_handler(route):
     try:
         req = route.request
@@ -719,7 +721,6 @@ async def _route_handler(route):
         except Exception:
             return
 
-# ---------- runner ----------
 async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> None:
     if async_playwright is None:
         raise RuntimeError(f"Playwright is not installed but eCoop crawling was requested: {_IMPORT_ERROR}")
@@ -803,12 +804,25 @@ async def main(args):
 
     categories = [norm_url(u) for u in categories]
 
-    if args.cat_shards > 1:
-        if args.cat_index < 0 or args.cat_index >= args.cat_shards:
-            print(f"[error] --cat-index must be in [0, {args.cat_shards-1}]")
+    # --- PRE-SHARDED INPUT GUARD ---
+    presharded = (
+        os.environ.get("ECOOP_PRESHARDED", "").lower() in ("1", "true", "yes")
+        or ("categories_shard" in (args.categories_file or ""))
+    )
+    cat_shards = args.cat_shards
+    cat_index  = args.cat_index
+    if presharded and args.cat_shards > 1:
+        print(f"[shard] Detected pre-sharded categories file ({args.categories_file!r}) "
+              f"or ECOOP_PRESHARDED=1 → ignoring internal sharding.")
+        cat_shards = 1
+        cat_index = 0
+
+    if cat_shards > 1:
+        if cat_index < 0 or cat_index >= cat_shards:
+            print(f"[error] --cat-index must be in [0, {cat_shards-1}]")
             sys.exit(2)
-        categories = [u for i, u in enumerate(categories) if i % args.cat_shards == args.cat_index]
-        print(f"[shard] Using {len(categories)} categories for shard {args.cat_index}/{args.cat_shards}")
+        categories = [u for i, u in enumerate(categories) if i % cat_shards == cat_index]
+        print(f"[shard] Using {len(categories)} categories for shard {cat_index}/{cat_shards}")
 
     out_path = Path(args.out)
     if out_path.is_dir() or str(out_path).endswith("/"):
