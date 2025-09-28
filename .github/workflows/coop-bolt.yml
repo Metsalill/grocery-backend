@@ -64,7 +64,6 @@ jobs:
               "Eedeni COOP Maksimarket" \
               "Kvartali COOP Maksimarket" > /tmp/stores.txt
           else
-            # Normalize Windows line endings if any
             printf "%s" "${{ inputs.stores_multiline }}" | tr -d '\r' > /tmp/stores.txt
           fi
           echo "Prepared store list:"
@@ -80,11 +79,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
+          # Provide safe defaults if inputs are empty (e.g. scheduled runs)
+          CITY_PATH="${CITY_PATH:-2-tartu}"
+          HEADLESS="${HEADLESS:-1}"
+          REQ_DELAY="${REQ_DELAY:-0.25}"
+          UPSERT_DB="${UPSERT_DB:-1}"
+
           mkdir -p out
           while IFS= read -r STORE || [ -n "$STORE" ]; do
             [ -z "$STORE" ] && continue
             SAFE_NAME="$(echo "$STORE" | tr ' ' '_' | tr -dc '[:alnum:]_')"
-            echo "==> Crawling: $STORE"
+            echo "==> Crawling: $STORE (city=${CITY_PATH}, headless=${HEADLESS}, delay=${REQ_DELAY}, upsert=${UPSERT_DB})"
             python scripts/bolt_crawler.py \
               --city "${CITY_PATH}" \
               --store "${STORE}" \
