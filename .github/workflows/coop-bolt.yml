@@ -26,6 +26,10 @@ on:
         description: "Upsert into Postgres (1=yes, 0=just CSV)"
         required: false
         default: "1"
+      categories_dir:
+        description: "Optional: base dir for per-store category files (uses {dir}/{city}/{slug}.txt if present)"
+        required: false
+        default: "data/bolt"
   schedule:
     - cron: "0 */2 * * *" # every 2 hours
 
@@ -60,6 +64,7 @@ jobs:
           HEADLESS: ${{ inputs.headless }}
           REQ_DELAY: ${{ inputs.req_delay }}
           UPSERT_DB: ${{ inputs.upsert_db }}
+          CATEGORIES_DIR: ${{ inputs.categories_dir }}
         shell: bash
         run: |
           set -euo pipefail
@@ -69,6 +74,7 @@ jobs:
           HEADLESS="${HEADLESS:-1}"
           REQ_DELAY="${REQ_DELAY:-0.25}"
           UPSERT_DB="${UPSERT_DB:-1}"
+          CATEGORIES_DIR="${CATEGORIES_DIR:-data/bolt}"
 
           # Build STORES array
           if [ -z "${{ inputs.stores_multiline }}" ]; then
@@ -97,6 +103,7 @@ jobs:
               --headless "${HEADLESS}" \
               --req-delay "${REQ_DELAY}" \
               --upsert-db "${UPSERT_DB}" \
+              --categories-dir "${CATEGORIES_DIR}" \
               --out "out/coop_bolt_${CITY_PATH}_${SAFE_NAME}.csv"
           done
 
