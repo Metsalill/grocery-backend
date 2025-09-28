@@ -39,7 +39,6 @@ SIZE_RE = re.compile(r"(\b\d+[\,\.]?\d*\s?(?:kg|g|l|ml|tk|pcs|x|×)\s?\d*\b)", r
 HEX24_RE = re.compile(r"\b[a-f0-9]{24}\b", re.I)
 
 def now_stamp() -> str:
-    import datetime as dt
     return dt.datetime.now().strftime("%Y%m%d_%H%M%S")
 
 def clean_digits(s: str) -> str:
@@ -110,7 +109,10 @@ async def _fetch_existing_gtins(store_host: str) -> Set[str]:
         import asyncpg  # type: ignore
     except Exception:
         return set()
-    conn = await asyncpg.connect(dsn)
+    try:
+        conn = await asyncpg.connect(dsn)
+    except Exception:
+        return set()
     try:
         rows = await conn.fetch(
             "SELECT DISTINCT ean_norm FROM public.staging_coop_products "
@@ -122,16 +124,19 @@ async def _fetch_existing_gtins(store_host: str) -> Set[str]:
         await conn.close()
 
 async def maybe_upsert_db(rows: List[Dict]) -> None:
+    """Best-effort upsert. Never crash the crawl on DB errors."""
     if not rows:
         print("[info] No rows to upsert.")
         return
     if os.environ.get("COOP_UPSERT_DB", "0").lower() not in ("1", "true"):
         print("[info] DB upsert disabled (COOP_UPSERT_DB != 1)")
         return
+
     dsn = os.environ.get("DATABASE_URL")
     if not dsn:
         print("[info] DATABASE_URL not set; skipping DB upsert")
         return
+
     try:
         import asyncpg  # type: ignore
     except Exception:
@@ -139,12 +144,24 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
         return
 
     table = "staging_coop_products"
-    conn = await asyncpg.connect(dsn)
+
     try:
-        exists = await conn.fetchval(
-            "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name=$1)",
-            table,
-        )
+        conn = await asyncpg.connect(dsn)
+    except Exception as e:
+        print(f"[warn] Could not connect to DB for upsert ({e!r}). Skipping DB upsert.")
+        return
+
+    try:
+        try:
+            exists = await conn.fetchval(
+                "SELECT EXISTS (SELECT 1 FROM information_schema.tables "
+                "WHERE table_schema='public' AND table_name=$1)",
+                table,
+            )
+        except Exception as e:
+            print(f"[warn] Failed to check table existence: {e!r}. Skipping DB upsert.")
+            return
+
         if not exists:
             print(f"[info] Table {table} does not exist → skipping DB upsert.")
             return
@@ -182,14 +199,21 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
                 r.get("ean_raw"), r.get("ean_norm"), r.get("size_text"),
                 pr, r.get("currency") or "EUR", r.get("image_url"), r.get("url")
             ))
+
         if not payload:
             print("[warn] No rows with ext_id — skipped DB upsert")
             return
 
-        await conn.executemany(stmt, payload)
-        print(f"[ok] Upserted {len(payload)} rows into {table}")
+        try:
+            await conn.executemany(stmt, payload)
+            print(f"[ok] Upserted {len(payload)} rows into {table}")
+        except Exception as e:
+            print(f"[warn] Upsert failed ({e!r}). Skipping DB upsert.")
     finally:
-        await conn.close()
+        try:
+            await conn.close()
+        except Exception:
+            pass
 
 # ---------- HTTP utils (no external deps) ----------
 def _browser_headers(referer: Optional[str] = None) -> Dict[str, str]:
@@ -619,21 +643,27 @@ async def _extract_venue_id_via_modal(page) -> Optional[str]:
         pass
     return None
 
-async def _capture_with_playwright(cat_url: str):
+async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: float,
+                                   goto_strategy: str, nav_timeout_ms: int):
     if async_playwright is None:
         raise RuntimeError("Playwright is required for Wolt fallback but is not installed.")
 
     found: Dict[str, Dict] = {}
-    blobs: List[Any] = []
+    blobs: List[Any] = {}
 
     async with async_playwright() as pw:
-        browser = await pw.chromium.launch(headless=True)
+        browser = await pw.chromium.launch(headless=bool(int(headless)))
         context = await browser.new_context(
             user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                         "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"),
             viewport={"width": 1366, "height": 900},
             java_script_enabled=True,
         )
+        try:
+            context.set_default_navigation_timeout(max(15000, int(nav_timeout_ms)))
+            context.set_default_timeout(max(15000, int(nav_timeout_ms)))
+        except Exception:
+            pass
 
         async def route_filter(route):
             try:
@@ -654,31 +684,44 @@ async def _capture_with_playwright(cat_url: str):
         await context.route("**/*", route_filter)
 
         page = await context.new_page()
-        page.on("response", lambda resp: asyncio.create_task(_maybe_collect_json(resp, blobs)))
+        collected_blobs: List[Any] = []
+        page.on("response", lambda resp: asyncio.create_task(_maybe_collect_json(resp, collected_blobs)))
 
         html = ""
         tile_prices: Dict[str, float] = {}
         venue_id: Optional[str] = None
         try:
-            await page.goto(cat_url, wait_until="networkidle")
+            # resilient goto
+            order = [goto_strategy] if goto_strategy in ("domcontentloaded","networkidle","load") else ["domcontentloaded","load","networkidle"]
+            last_err = None
+            for ws in order:
+                try:
+                    await page.goto(cat_url, wait_until=ws, timeout=nav_timeout_ms)
+                    break
+                except Exception as e:
+                    last_err = e
+            else:
+                if last_err:
+                    raise last_err
+
             await wait_cookie_banner(page)
             for _ in range(10):
                 await page.mouse.wheel(0, 1500)
-                await page.wait_for_timeout(250)
+                await page.wait_for_timeout(int(max(req_delay, 0.25)*1000))
 
             tile_prices = await _scrape_tile_prices(page)
 
+            # leak global state blobs
             for varname in ["__APOLLO_STATE__", "__NEXT_DATA__", "__NUXT__", "__INITIAL_STATE__", "__REACT_QUERY_STATE__", "__REDUX_STATE__"]:
                 try:
                     data = await page.evaluate(f"window.{varname} || null")
                     if data:
-                        blobs.append(data)
+                        collected_blobs.append(data)
                 except Exception:
                     pass
 
             html = await page.content()
 
-            # walk collected blobs
             def _walk(o):
                 if isinstance(o, dict):
                     has_name = isinstance(o.get("name"), str) and o.get("name").strip()
@@ -694,7 +737,7 @@ async def _capture_with_playwright(cat_url: str):
                     for v in o:
                         _walk(v)
 
-            for blob in blobs:
+            for blob in collected_blobs:
                 try:
                     _walk(blob)
                 except Exception:
@@ -712,7 +755,7 @@ async def _capture_with_playwright(cat_url: str):
             if not venue_id:
                 venue_id = await _extract_venue_id_via_modal(page)
 
-            return list(found.values()), blobs, html, tile_prices, venue_id
+            return list(found.values()), collected_blobs, html, tile_prices, venue_id
 
         finally:
             await context.close()
@@ -727,7 +770,8 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
     force_pw = bool(args.force_playwright or str(os.getenv("WOLT_FORCE_PLAYWRIGHT", "")).lower() in ("1","true","t","yes","y","on"))
 
     for cat in categories:
-        store_host_cat = _wolt_store_host(cat)
+        # prefer explicit --store-host; otherwise infer from category URL
+        store_host_cat = args.store_host.strip() if args.store_host else _wolt_store_host(cat)
         print(f"[cat-wolt] {cat}")
 
         try:
@@ -743,7 +787,13 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                 venue_id = None
             else:
                 print(f"[info] forcing Playwright fallback for {cat}")
-                items, blobs, html, tile_prices, venue_id = await _capture_with_playwright(cat)
+                items, blobs, html, tile_prices, venue_id = await _capture_with_playwright(
+                    cat,
+                    headless=bool(int(args.headless)),
+                    req_delay=float(args.req_delay),
+                    goto_strategy=args.goto_strategy,
+                    nav_timeout_ms=int(args.nav_timeout),
+                )
 
             if venue_id:
                 lang = _lang_from_url(cat)
@@ -782,14 +832,18 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
 
 # ---------- main ----------
 async def main(args):
+    # categories: from --categories-multiline OR --categories-file (file wins if provided)
     categories: List[str] = []
     if args.categories_multiline:
         categories.extend([ln.strip() for ln in args.categories_multiline.splitlines() if ln.strip()])
     if args.categories_file and Path(args.categories_file).exists():
-        categories.extend([ln.strip() for ln in Path(args.categories_file).read_text(encoding="utf-8").splitlines() if ln.strip()])
+        categories = [ln.strip() for ln in Path(args.categories_file).read_text(encoding="utf-8").splitlines() if ln.strip()] or categories
     if not categories:
         print("[error] No category URLs provided. Pass --categories-multiline or --categories-file.")
         sys.exit(2)
+
+    # echo a bit of the runtime configuration
+    print(f"[args] headless={args.headless} req_delay={args.req_delay} pdp_workers(not used)={args.pdp_workers} goto={args.goto_strategy} nav_timeout={args.nav_timeout}ms store_host={args.store_host or '(auto)'}")
 
     out_path = Path(args.out)
     if out_path.is_dir() or str(out_path).endswith("/"):
@@ -808,9 +862,10 @@ async def main(args):
         all_rows.extend(batch)
         print(f"[stream] +{len(batch)} rows (total {len(all_rows)})")
 
+    # graceful shutdown so Playwright can close cleanly (avoids Node EPIPE)
     def _sig_handler(signum, frame):
-        print(f"[warn] received signal {signum}; CSV already streamed. Exiting 130.")
-        os._exit(130)
+        print(f"[warn] received signal {signum}; CSV already streamed. Exiting 130 gracefully.")
+        sys.exit(130)  # triggers finally blocks
 
     signal.signal(signal.SIGTERM, _sig_handler)
     signal.signal(signal.SIGINT,  _sig_handler)
@@ -825,10 +880,27 @@ async def main(args):
 
 def parse_args():
     p = argparse.ArgumentParser(description="Coop on Wolt category crawler")
+    # Venue and store-host mostly for clarity/consistency with workflows; store-host overrides inference
+    p.add_argument("--venue", default="", help="Wolt venue URL (informational).")
+    p.add_argument("--store-host", default="", help="Store host label to use in output/DB (e.g., wolt:coop-parnu).")
+
+    # Categories (required via one of these)
     p.add_argument("--categories-multiline", dest="categories_multiline", default="",
                    help="Newline-separated category URLs")
     p.add_argument("--categories-file", dest="categories_file", default="", help="Path to txt file with category URLs")
+
+    # General limits / perf
     p.add_argument("--max-products", type=int, default=0, help="Global cap per category (0=all)")
+    p.add_argument("--pdp-workers", type=int, default=4, help="(Reserved) Concurrency hint; not used in Wolt path")
+    p.add_argument("--req-delay", type=float, default=0.4, help="Seconds between ops in PW fallback")
+    p.add_argument("--headless", default="1", help="1/0 headless for PW fallback")
+
+    # Navigation robustness
+    p.add_argument("--goto-strategy", choices=["auto","domcontentloaded","networkidle","load"],
+                   default="auto", help="Playwright wait_until strategy for category navigation.")
+    p.add_argument("--nav-timeout", default="45000", help="Navigation timeout in milliseconds.")
+
+    # Output & behavior
     p.add_argument("--out", default="out/coop_wolt.csv", help="CSV file or output directory")
     p.add_argument("--force-playwright", action="store_true", help="Force Playwright network fallback.")
     p.add_argument("--write-empty-csv", action="store_true", default=True, help="Always write CSV header even if no rows.")
