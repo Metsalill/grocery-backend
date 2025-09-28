@@ -1,12 +1,16 @@
 name: "Coop eCoop – Category Crawl (Playwright) + optional DB upsert"
 
 on:
+  # Auto: every 2 hours (UTC) — Vändra only
+  schedule:
+    - cron: "0 */2 * * *"
+  # Manual: still supported with inputs
   workflow_dispatch:
     inputs:
       region:
-        description: "Base region URL (e.g., https://haapsalu.ecoop.ee or https://vandra.ecoop.ee)"
+        description: "Base region URL (e.g., https://coophaapsalu.ee or https://coopvandra.ee; also supports *.ecoop.ee)"
         required: false
-        default: "https://vandra.ecoop.ee"
+        default: "https://coopvandra.ee"
       categories_multiline:
         description: "Category URLs/paths (one per line)"
         required: false
@@ -44,6 +48,14 @@ on:
         required: false
         default: ""
 
+# Avoid overlapping scheduled runs
+concurrency:
+  group: coop-ecoop-vandra
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
 jobs:
   crawl:
     runs-on: ubuntu-latest
@@ -59,10 +71,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Decide effective REGION (dispatch vs. schedule)
+        id: reg
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.region }}" ]; then
+            echo "value=${{ inputs.region }}" >> "$GITHUB_OUTPUT"
+          else
+            # Scheduled: force Vändra
+            echo "value=https://coopvandra.ee" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Effective REGION set."
+
       - name: Compute shard count
         id: shard
         run: |
-          REQ="${{ github.event_name == 'workflow_dispatch' && inputs.shards || '1' }}"
+          # Use requested shards for manual runs; default 8 for scheduled runs.
+          REQ="${{ github.event_name == 'workflow_dispatch' && inputs.shards || '8' }}"
           if ! [[ "$REQ" =~ ^[0-9]+$ ]]; then REQ=1; fi
           if [ "$REQ" -lt 1 ]; then REQ=1; fi
           if [ "$REQ" -gt 8 ]; then REQ=8; fi
@@ -92,19 +116,19 @@ jobs:
         env:
           CATS_FILE_INPUT: ${{ inputs.categories_file }}
           CATS_MULTILINE: ${{ inputs.categories_multiline }}
-          REGION_INPUT: ${{ inputs.region }}
+          REGION_INPUT: ${{ steps.reg.outputs.value }}
         run: |
           set -euo pipefail
           mkdir -p out
           : > /tmp/categories.txt
 
-          # 1) If multiline provided, write it first
-          if [ -n "$CATS_MULTILINE" ]; then
+          # 1) If multiline provided, write it first (manual runs)
+          if [ -n "${CATS_MULTILINE:-}" ]; then
             printf "%s\n" "$CATS_MULTILINE" > /tmp/categories.txt
           fi
 
-          # 2) If a file path is provided, prefer it (supports repo-relative paths)
-          if [ -n "$CATS_FILE_INPUT" ]; then
+          # 2) If a file path is provided, prefer it
+          if [ -n "${CATS_FILE_INPUT:-}" ]; then
             if [ -f "$CATS_FILE_INPUT" ]; then
               cp "$CATS_FILE_INPUT" /tmp/categories.txt
             elif [ -f "${GITHUB_WORKSPACE}/${CATS_FILE_INPUT}" ]; then
@@ -142,19 +166,28 @@ jobs:
             exit 2
           fi
 
-          echo "path=/tmp/categories.txt" >> $GITHUB_OUTPUT
+          # Shard split lines across workers
+          DEST="/tmp/categories_shard.txt"
+          SHARD_IDX=${{ matrix.shard_index }}
+          SHARD_COUNT=${{ steps.shard.outputs.count }}
+          awk -v idx="$SHARD_IDX" -v shards="$SHARD_COUNT" 'NR>=1 { if (((NR-1)%shards)==idx) print }' /tmp/categories.txt > "$DEST"
+          if [ ! -s "$DEST" ]; then
+            echo "Shard $SHARD_IDX has no categories; exiting gracefully."
+          fi
+          echo "path=$DEST" >> $GITHUB_OUTPUT
 
       - name: Run eCoop crawler (sharded)
         if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
         env:
           PYTHONUNBUFFERED: "1"  # real-time logs
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          COOP_UPSERT_DB: ${{ inputs.upsert_db }}
-          COOP_DEDUP_DB: ${{ inputs.upsert_db }}
+          # Scheduled runs: force upsert/dedup = 1; Manual: honor input.
+          COOP_UPSERT_DB: ${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}
+          COOP_DEDUP_DB:  ${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}
         run: |
           set -euo pipefail
 
-          REGION="${{ inputs.region }}"
+          REGION="${{ steps.reg.outputs.value }}"
           REQ_DELAY_IN="${{ inputs.req_delay }}"
           PDP_WORKERS_IN="${{ inputs.pdp_workers }}"
           MAX_PRODUCTS_IN="${{ inputs.max_products }}"
@@ -162,11 +195,11 @@ jobs:
           SHARD_COUNT="${{ steps.shard.outputs.count }}"
           EXTRA="${{ inputs.extra_args }}"
 
-          # Bash defaults to avoid empty strings
+          # Defaults (also used for schedule)
           REQ_DELAY="${REQ_DELAY_IN:-0.4}"
           PDP_WORKERS="${PDP_WORKERS_IN:-6}"
           MAX_PRODUCTS="${MAX_PRODUCTS_IN:-0}"
-          PAGE_LIMIT="0"  # removed from inputs; override via extra_args if needed
+          PAGE_LIMIT="0"
           SHARD_TIMEOUT_MIN="${SHARD_TIMEOUT_MIN_IN:-45}"
           if ! [[ "$SHARD_TIMEOUT_MIN" =~ ^[0-9]+$ ]]; then SHARD_TIMEOUT_MIN=45; fi
           if [ "$SHARD_TIMEOUT_MIN" -lt 10 ]; then SHARD_TIMEOUT_MIN=10; fi
@@ -175,6 +208,7 @@ jobs:
           echo "::group::Args"
           echo "region=$REGION"
           echo "pdp_workers=$PDP_WORKERS  req_delay=$REQ_DELAY  page_limit=$PAGE_LIMIT  max_products=$MAX_PRODUCTS  timeout=${SHARD_TIMEOUT_MIN}m"
+          echo "upsert_db=$COOP_UPSERT_DB  dedup_db=$COOP_DEDUP_DB"
           echo "::endgroup::"
 
           set +e
@@ -189,7 +223,7 @@ jobs:
             --pdp-workers "${PDP_WORKERS:-3}" \
             --cat-shards "$SHARD_COUNT" \
             --cat-index "${{ matrix.shard_index }}" \
-            --out "out/coop_ecoop_${{ github.run_id }}_shard${{ matrix.shard_index }}.csv" \
+            --out "out/coop_ecoop_${{ github.run_id }}_${{ matrix.shard_index }}.csv" \
             --goto-strategy "domcontentloaded" --nav-timeout "45000" \
             $EXTRA
           code=$?
@@ -209,7 +243,7 @@ jobs:
         if: ${{ always() && matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
         uses: actions/upload-artifact@v4
         with:
-          name: coop-ecoop-${{ github.run_id }}-part-${{ matrix.shard_index }}
+          name: coop-ecoop-${{ github.run_id }}-part-vandra-${{ matrix.shard_index }}
           path: out/*.csv
           if-no-files-found: warn
           retention-days: 7
