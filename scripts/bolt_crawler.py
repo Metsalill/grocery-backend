@@ -234,25 +234,27 @@ def upsert_rows_to_staging_coop(rows: List[Dict], db_url: str):
     if not db_url:
         print("DATABASE_URL empty; skipping DB.", file=sys.stderr)
         return
-
-    with psycopg.connect(db_url) as conn:
-        ensure_staging_schema(conn)
-        ins = """
-        INSERT INTO staging_coop_products(
-          chain,channel,store_name,store_host,city_path,category_name,
-          ext_id,name,brand,manufacturer,size_text,price,currency,image_url,url,
-          description,ean_raw,scraped_at
-        )
-        VALUES (
-          %(chain)s,%(channel)s,%(store_name)s,%(store_host)s,%(city_path)s,%(category_name)s,
-          %(ext_id)s,%(name)s,%(brand)s,%(manufacturer)s,%(size_text)s,%(price)s,%(currency)s,%(image_url)s,%(url)s,
-          %(description)s,%(ean_raw)s,%(scraped_at)s
-        );
-        """
-        with conn.cursor() as cur:
-            cur.executemany(ins, rows)
-        conn.commit()
-    print(f"[db] upserted {len(rows)} rows into staging_coop_products")
+    try:
+        with psycopg.connect(db_url) as conn:
+            ensure_staging_schema(conn)
+            ins = """
+            INSERT INTO staging_coop_products(
+              chain,channel,store_name,store_host,city_path,category_name,
+              ext_id,name,brand,manufacturer,size_text,price,currency,image_url,url,
+              description,ean_raw,scraped_at
+            )
+            VALUES (
+              %(chain)s,%(channel)s,%(store_name)s,%(store_host)s,%(city_path)s,%(category_name)s,
+              %(ext_id)s,%(name)s,%(brand)s,%(manufacturer)s,%(size_text)s,%(price)s,%(currency)s,%(image_url)s,%(url)s,
+              %(description)s,%(ean_raw)s,%(scraped_at)s
+            );
+            """
+            with conn.cursor() as cur:
+                cur.executemany(ins, rows)
+            conn.commit()
+        print(f"[db] upserted {len(rows)} rows into staging_coop_products")
+    except Exception as e:
+        print(f"[db] WARN: upsert skipped due to connection error: {e}", file=sys.stderr)
 
 
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
@@ -270,8 +272,8 @@ def run(
     categories_file: Optional[str] = None,
     categories_dir: Optional[str] = None,
 ):
-
-    start_url = f"https://food.bolt.eu/en-US/{city}"
+    # Start in et-EE; tends to be more consistent for COOP placeholders/names
+    start_url = f"https://food.bolt.eu/et-EE/{city}"
     scraped_at = dt.datetime.utcnow().isoformat()
     rows_out: List[Dict] = []
 
@@ -283,22 +285,58 @@ def run(
         page.goto(start_url, timeout=60_000)
         page.wait_for_load_state("domcontentloaded")
 
-        # open search and find store
-        try:
-            page.click('input[placeholder*="Restaurants"][placeholder*="stores"], input[type="search"]', timeout=10_000)
-        except Exception:
+        # --- robust store search & select ---
+        def open_search() -> bool:
+            # Try various entry points (search input or icon)
+            selectors = [
+                'input[type="search"]',
+                'input[placeholder*="poed"], input[placeholder*="Pood"]',
+                'input[placeholder*="Restaurants"][placeholder*="stores"]',
+                'button:has(svg)',
+                'button[aria-label*="Search"], button[aria-label*="Otsi"]',
+            ]
+            for sel in selectors:
+                try:
+                    page.click(sel, timeout=2000)
+                    return True
+                except Exception:
+                    continue
+            return False
+
+        if not open_search():
             try:
-                page.click("button:has(svg)", timeout=5_000)
+                page.click('a:has-text("Pood"), a:has-text("Stores")', timeout=3000)
+                time.sleep(0.5)
+                open_search()
             except Exception:
                 pass
 
+        # Type name and pick the suggestion that best matches
         page.keyboard.type(store_name)
-        time.sleep(0.6)
-        page.keyboard.press("Enter")
-        time.sleep(1.0)
+        time.sleep(0.8)
 
-        page.wait_for_selector(f"text={store_name}", timeout=20_000)
-        page.click(f"text={store_name}")
+        candidates = [
+            f'role=link[name="{store_name}"]',
+            f'text="{store_name}"',
+            f'li:has-text("{store_name}")',
+            f'button:has-text("{store_name}")',
+        ]
+        clicked = False
+        for loc in candidates:
+            try:
+                page.locator(loc).first.click(timeout=5000)
+                clicked = True
+                break
+            except Exception:
+                continue
+        if not clicked:
+            try:
+                page.keyboard.press("Enter")
+                clicked = True
+            except Exception:
+                pass
+        if not clicked:
+            raise RuntimeError(f"Could not open store: {store_name}")
 
         page.wait_for_load_state("domcontentloaded")
         time.sleep(req_delay)
@@ -309,7 +347,6 @@ def run(
 
         # Decide category source: explicit file > auto file in dir > autodiscovery
         cats: List[Tuple[str, str]] = []
-
         if categories_file and os.path.isfile(categories_file):
             cats = read_categories_override(categories_file, base_url)
             print(f"[info] using explicit categories file: {categories_file} ({len(cats)} cats)")
@@ -320,7 +357,6 @@ def run(
                 print(f"[info] using categories from: {auto_path} ({len(cats)} cats)")
 
         if not cats:
-            # fallback: autodiscover per store
             store_html = page.content()
             discovered = extract_category_links(store_html)
             seen_cat = set()
@@ -336,18 +372,33 @@ def run(
             print(f"[cat] {cat_name} -> {href}")
             page.goto(href, timeout=60_000)
             page.wait_for_load_state("domcontentloaded")
-            time.sleep(req_delay)
+            time.sleep(max(0.5, req_delay))
 
-            # lazy-load
+            # Wait for any product card / add button to appear
             try:
-                for _ in range(8):
-                    page.mouse.wheel(0, 2000)
-                    time.sleep(0.25)
+                page.wait_for_selector('button:has-text("+")', timeout=15000)
             except Exception:
                 pass
 
-            html = page.content()
-            tiles = extract_tiles_from_dom(html)
+            # Progressive scroll until tile count stabilizes
+            last_count = -1
+            tiles_now: List[Dict] = []
+            tries = 0
+            while tries < 10:
+                html = page.content()
+                tiles_now = extract_tiles_from_dom(html)
+                if len(tiles_now) == last_count:
+                    tries += 1
+                else:
+                    tries = 0
+                    last_count = len(tiles_now)
+                try:
+                    page.mouse.wheel(0, 2500)
+                except Exception:
+                    pass
+                time.sleep(0.4)
+
+            tiles = tiles_now
 
             for t in tiles:
                 name = (t.get("name") or "").strip()
@@ -415,8 +466,19 @@ def run(
                 w.writerow(r)
         print(f"[out] wrote {len(rows_out)} rows → {out_csv}")
 
-        if upsert_db and os.getenv("DATABASE_URL"):
-            upsert_rows_to_staging_coop(rows_out, os.getenv("DATABASE_URL"))
+        # Safe upsert (only if we have rows and a DB URL)
+        db_url = os.getenv("DATABASE_URL")
+        if upsert_db and db_url and rows_out:
+            upsert_rows_to_staging_coop(rows_out, db_url)
+        else:
+            reason = []
+            if not upsert_db:
+                reason.append("upsert disabled")
+            if not db_url:
+                reason.append("no DATABASE_URL")
+            if not rows_out:
+                reason.append("0 rows")
+            print(f"[db] skipped upsert ({', '.join(reason)})")
 
         context.close()
         browser.close()
