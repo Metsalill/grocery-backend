@@ -142,7 +142,12 @@ async def wait_cookie_banner(page: Any):
     except Exception:
         pass
 
+# ---------- Category discovery (robust) ----------
 async def collect_category_product_links(page: Any, category_url: str, page_limit: int, req_delay: float, max_depth: int = 2) -> List[str]:
+    """
+    Collect PDP links from a category page with scrolling + 'Load more'.
+    Very permissive: any anchor containing 'toode' in its href is treated as a PDP link.
+    """
     base = urlparse(category_url)
     base_host = base.netloc
 
@@ -150,11 +155,11 @@ async def collect_category_product_links(page: Any, category_url: str, page_limi
         u = urljoin(f"{base.scheme}://{base.netloc}{base.path}", u or "")
         return clean_url_keep_allowed_query(u)
 
-    def is_product(u: str) -> bool:
-        return "/toode/" in u
-
-    def is_category(u: str) -> bool:
-        return "/tootekategooria/" in u
+    def looks_like_product(u: str) -> bool:
+        if not u:
+            return False
+        u_low = u.lower()
+        return "toode" in u_low  # matches /toode/, /toode-123, etc.
 
     seen_products: set[str] = set()
     seen_pages: set[str] = set()
@@ -176,15 +181,37 @@ async def collect_category_product_links(page: Any, category_url: str, page_limi
 
         stable_rounds = 0
         for _ in range(1000):
+            # 1) direct anchors with 'toode' in href (absolute)
             try:
-                hrefs = await page.eval_on_selector_all('a[href*="/toode/"]', "els => els.map(e => e.href)")
+                hrefs = await page.eval_on_selector_all('a[href*="toode"]', "els => els.map(e => e.href)")
             except Exception:
                 hrefs = []
-            for h in hrefs:
+            for h in hrefs or []:
                 h = norm_abs(h)
-                if h and is_product(h):
+                if looks_like_product(h):
                     seen_products.add(h)
 
+            # 2) anchors where only getAttribute('href') is set (relative)
+            try:
+                hrefs_attr = await page.eval_on_selector_all('a[href*="toode"]', "els => els.map(e => e.getAttribute('href'))")
+            except Exception:
+                hrefs_attr = []
+            for h in hrefs_attr or []:
+                h = norm_abs(h or "")
+                if looks_like_product(h):
+                    seen_products.add(h)
+
+            # 3) fallback sweep: all anchors, filter in Python (covers dynamic routers)
+            try:
+                all_as = await page.eval_on_selector_all("a", "els => els.map(e => e.getAttribute('href') || e.href || '')")
+            except Exception:
+                all_as = []
+            for h in all_as or []:
+                h = norm_abs(h or "")
+                if looks_like_product(h):
+                    seen_products.add(h)
+
+            # Try "Load more" buttons if present
             clicked = False
             for sel in [
                 'button:has-text("Lae veel")',
@@ -201,6 +228,7 @@ async def collect_category_product_links(page: Any, category_url: str, page_limi
                 except Exception:
                     pass
 
+            # scroll to trigger lazy loading
             try:
                 await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
             except Exception:
@@ -208,13 +236,15 @@ async def collect_category_product_links(page: Any, category_url: str, page_limi
             await page.wait_for_timeout(int(req_delay * 1000))
 
             before = len(seen_products)
+
+            # another quick sweep post-scroll
             try:
-                hrefs2 = await page.eval_on_selector_all('a[href*="/toode/"]', "els => els.map(e => e.href)")
+                hrefs2 = await page.eval_on_selector_all('a[href*="toode"]', "els => els.map(e => e.getAttribute('href') || e.href || '')")
             except Exception:
                 hrefs2 = []
-            for h in hrefs2:
-                h = norm_abs(h)
-                if h and is_product(h):
+            for h in hrefs2 or []:
+                h = norm_abs(h or "")
+                if looks_like_product(h):
                     seen_products.add(h)
 
             if len(seen_products) == before and not clicked:
@@ -230,32 +260,34 @@ async def collect_category_product_links(page: Any, category_url: str, page_limi
         # pagination links
         try:
             next_links = await page.eval_on_selector_all(
-                'a[rel="next"], a[href*="?page="]', 'els => els.map(e => e.getAttribute("href"))'
+                'a[rel="next"], a[href*="?page="]', 'els => els.map(e => e.getAttribute("href") || e.href || "")'
             )
         except Exception:
             next_links = []
-        for nl in next_links:
+        for nl in next_links or []:
             nl = norm_abs(nl or "")
             if nl and same_host(nl, base_host) and nl not in seen_pages:
                 queue.append((nl, depth))
 
-        # subcategories
-        if depth < 2:
+        # subcategories (limited depth)
+        if depth < max_depth:
             try:
                 subcats = await page.eval_on_selector_all(
-                    'a[href*="/tootekategooria/"]', "els => els.map(e => e.getAttribute('href'))"
+                    'a[href*="/tootekategooria/"]', "els => els.map(e => e.getAttribute('href') || e.href || '')"
                 )
             except Exception:
                 subcats = []
-            for sc in subcats:
+            for sc in subcats or []:
                 sc = norm_abs(sc or "")
-                if sc and is_category(sc) and same_host(sc, base_host) and sc not in seen_pages:
+                if sc and same_host(sc, base_host) and sc not in seen_pages:
                     queue.append((sc, depth + 1))
 
         if page_limit > 0 and len(seen_products) >= page_limit:
             break
 
-    return list(seen_products)
+    links = list(seen_products)
+    print(f"[discover] {category_url} -> {len(links)} PDP links")
+    return links
 
 async def parse_json_ld(page: Any) -> Dict:
     data: Dict = {}
@@ -754,6 +786,9 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
 
                 if args.max_products > 0:
                     links = links[:args.max_products]
+
+                if not links:
+                    print(f"[warn] No PDP links discovered for {cat}")
 
                 sem = asyncio.Semaphore(args.pdp_workers)
 
