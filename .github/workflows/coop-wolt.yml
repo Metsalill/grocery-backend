@@ -1,59 +1,65 @@
-name: "Coop Wolt – Category Crawl + optional DB upsert"
+name: "Coop Wolt – Crawl (Pärnu default, 2-hourly)"
 
 on:
-  # Auto-run every 2 hours (at minute 0)
   schedule:
-    - cron: "0 */2 * * *"
+    - cron: "0 */2 * * *"   # every 2 hours, at minute 0
   workflow_dispatch:
     inputs:
       store:
-        description: "Which Coop Wolt store to crawl (lasname, parnu, all)"
+        description: "Which Wolt Coop store to crawl"
         required: false
-        default: "parnu"          # default is Pärnu now
-      categories_multiline:
-        description: "Category URLs/paths (one per line) — overrides file auto-pick"
-        required: false
-        default: ""
-      categories_file:
-        description: "Repo file with categories (one per line) — leave empty to auto-pick by store"
-        required: false
-        default: ""
+        default: "parnu"
+        type: choice
+        options: [parnu, lasname, all]
       max_products:
-        description: "Cap PDPs per category after discovery (0 = unlimited)"
+        description: "Cap per category after discovery (0 = unlimited)"
         required: false
         default: "0"
-      req_delay:
-        description: "Delay between ops (sec)"
-        required: false
-        default: "0.4"
-      pdp_workers:
-        description: "Concurrent PDP tabs per category"
-        required: false
-        default: "6"
       upsert_db:
         description: "1 = upsert into DATABASE_URL (staging_coop_products)"
         required: false
         default: "0"
-      extra_args:
-        description: "Extra flags for wolt_crawler.py"
+      force_playwright:
+        description: "Force Playwright fallback (debug)"
         required: false
-        default: ""
+        default: "0"
 
 jobs:
   crawl:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 120
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Decide which store(s) to crawl -> JSON array in an output we can fromJSON()
+      - name: Decide store matrix
+        id: decide
+        run: |
+          if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            # scheduled run → default to Pärnu only
+            echo '["parnu"]' > /tmp/stores.json
+          else
+            case "${{ inputs.store }}" in
+              all)     echo '["lasname","parnu"]' > /tmp/stores.json ;;
+              parnu)   echo '["parnu"]'          > /tmp/stores.json ;;
+              lasname) echo '["lasname"]'        > /tmp/stores.json ;;
+              *)       echo '["parnu"]'          > /tmp/stores.json ;;
+            esac
+          fi
+          echo "stores=$(cat /tmp/stores.json)" >> "$GITHUB_OUTPUT"
+
+    # We need strategy after we have decide.outputs.stores → use a separate job with needs
+  run-crawlers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    needs: crawl
 
     strategy:
       fail-fast: false
       matrix:
-        # For scheduled runs (no inputs), crawl Pärnu by default.
-        # For manual runs, respect the selector (lasname | parnu | all).
-        store_slug: ${{ fromJSON(
-          (github.event_name != 'workflow_dispatch' && '["parnu"]') ||
-          (inputs.store == 'all' && '["lasname","parnu"]' ||
-           (inputs.store == 'parnu' && '["parnu"]' || '["lasname"]'))
-        ) }}
+        store: ${{ fromJSON(needs.crawl.outputs.stores || '["parnu"]') }}
 
     steps:
       - name: Checkout
@@ -71,112 +77,49 @@ jobs:
           pip install playwright asyncpg
           python -m playwright install --with-deps chromium
 
-      - name: Compute store config
-        id: cfg
-        env:
-          SLUG: ${{ matrix.store_slug }}
-          FILE_INPUT: ${{ inputs.categories_file }}
+      - name: Prepare categories file
+        id: cats
         run: |
           set -euo pipefail
           mkdir -p out
-
-          case "$SLUG" in
-            lasname)
-              VENUE_URL="https://wolt.com/et/est/tallinn/venue/coop-lasname"
-              DEFAULT_FILE="data/wolt_coop_lasname_categories.txt"
-              STORE_HOST="wolt:coop-lasname"
-              ;;
-            parnu)
-              VENUE_URL="https://wolt.com/et/est/parnu/venue/coop-prnu"
-              DEFAULT_FILE="data/wolt_coop_parnu_categories.txt"
-              STORE_HOST="wolt:coop-parnu"
-              ;;
-            *)
-              echo "Unknown store slug: $SLUG"
-              exit 2
-              ;;
+          case "${{ matrix.store }}" in
+            parnu)   SRC="data/wolt_coop_parnu_categories.txt" ;;
+            lasname) SRC="data/wolt_coop_lasname_categories.txt" ;;
+            *)       SRC="data/wolt_coop_parnu_categories.txt" ;;
           esac
-
-          CATS_FILE=""
-          if [ -n "${FILE_INPUT:-}" ]; then
-            if [ -f "${FILE_INPUT}" ]; then
-              CATS_FILE="${FILE_INPUT}"
-            elif [ -f "${GITHUB_WORKSPACE}/${FILE_INPUT}" ]; then
-              CATS_FILE="${GITHUB_WORKSPACE}/${FILE_INPUT}"
-            else
-              echo "Provided categories_file not found: ${FILE_INPUT}"
-              exit 2
-            fi
+          if [ ! -f "$SRC" ]; then
+            echo "Missing categories file: $SRC"; exit 2
           fi
-          if [ -z "${CATS_FILE}" ]; then
-            if [ -f "${DEFAULT_FILE}" ]; then
-              CATS_FILE="${DEFAULT_FILE}"
-            elif [ -f "${GITHUB_WORKSPACE}/${DEFAULT_FILE}" ]; then
-              CATS_FILE="${GITHUB_WORKSPACE}/${DEFAULT_FILE}"
-            else
-              echo "Auto categories file missing: ${DEFAULT_FILE}"
-              exit 2
-            fi
-          fi
-
-          echo "venue=${VENUE_URL}" >> $GITHUB_OUTPUT
-          echo "cats=${CATS_FILE}"   >> $GITHUB_OUTPUT
-          echo "host=${STORE_HOST}"  >> $GITHUB_OUTPUT
-          echo "slug=${SLUG}"        >> $GITHUB_OUTPUT
-
-      - name: Prepare categories (optional multiline override)
-        id: cats
-        env:
-          MULTI: ${{ inputs.categories_multiline }}
-        run: |
-          set -euo pipefail
-          if [ -n "${MULTI:-}" ]; then
-            printf "%s\n" "${MULTI}" > /tmp/categories.txt
-            echo "path=/tmp/categories.txt" >> $GITHUB_OUTPUT
-          else
-            echo "path=${{ steps.cfg.outputs.cats }}" >> $GITHUB_OUTPUT
-          fi
+          cp "$SRC" /tmp/categories.txt
+          echo "path=/tmp/categories.txt" >> "$GITHUB_OUTPUT"
 
       - name: Run Wolt crawler
         env:
           PYTHONUNBUFFERED: "1"
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          COOP_UPSERT_DB: ${{ inputs.upsert_db }}
-          COOP_DEDUP_DB: ${{ inputs.upsert_db }}
+          COOP_UPSERT_DB: ${{ github.event_name == 'workflow_dispatch' && inputs.upsert_db || '1' }}
+          COOP_DEDUP_DB: ${{ github.event_name == 'workflow_dispatch' && inputs.upsert_db || '1' }}
+          WOLT_FORCE_PLAYWRIGHT: ${{ github.event_name == 'workflow_dispatch' && inputs.force_playwright || '0' }}
         run: |
           set -euo pipefail
-
-          VENUE="${{ steps.cfg.outputs.venue }}"
-          STORE_HOST="${{ steps.cfg.outputs.host }}"
-          REQ_DELAY="${{ inputs.req_delay || '0.4' }}"
-          PDP_WORKERS="${{ inputs.pdp_workers || '6' }}"
-          MAX_PRODUCTS="${{ inputs.max_products || '0' }}"
-          EXTRA="${{ inputs.extra_args }}"
-          OUT="out/wolt_${{ steps.cfg.outputs.slug }}_${{ github.run_id }}.csv"
-
-          echo "::group::Args"
-          echo "venue=$VENUE"
-          echo "store_host=$STORE_HOST"
-          echo "req_delay=$REQ_DELAY  pdp_workers=$PDP_WORKERS  max_products=$MAX_PRODUCTS"
-          echo "cats_file=${{ steps.cats.outputs.path }}"
-          echo "::endgroup::"
-
+          MAX_PRODUCTS="${{ github.event_name == 'workflow_dispatch' && inputs.max_products || '0' }}"
+          STORE_HOST="wolt:coop-${{ matrix.store }}"
+          OUT="out/coop_wolt_${{ github.run_id }}_${{ matrix.store }}.csv"
+          echo "Running ${STORE_HOST} → ${OUT}"
           stdbuf -oL -eL python3 scripts/wolt_crawler.py \
-            --venue "$VENUE" \
-            --store-host "$STORE_HOST" \
+            --store-host "${STORE_HOST}" \
             --categories-file "${{ steps.cats.outputs.path }}" \
-            --max-products "$MAX_PRODUCTS" \
+            --max-products "${MAX_PRODUCTS}" \
             --headless "1" \
-            --req-delay "$REQ_DELAY" \
-            --pdp-workers "$PDP_WORKERS" \
-            --out "$OUT" \
-            --goto-strategy "domcontentloaded" --nav-timeout "45000" \
-            $EXTRA
+            --req-delay "0.4" \
+            --goto-strategy "domcontentloaded" \
+            --nav-timeout "45000" \
+            --out "${OUT}"
 
       - name: Upload CSV artifact
         uses: actions/upload-artifact@v4
         with:
-          name: wolt-${{ steps.cfg.outputs.slug }}-${{ github.run_id }}
+          name: coop-wolt-${{ matrix.store }}-${{ github.run_id }}
           path: out/*.csv
           if-no-files-found: warn
           retention-days: 7
