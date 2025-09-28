@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
     inputs:
       city_path:
-        description: "Bolt city path (see URL, e.g. 2-tartu)"
+        description: "Bolt city path (from URL after /en-US/, e.g. 2-tartu)"
         required: false
         default: "2-tartu"
       stores_multiline:
-        description: "Store display names (one per line). Empty = default Tartu 3 stores."
+        description: "Store display names (one per line). Leave empty to use the 3 Tartu Maksimarkets."
         required: false
         default: |
           Lõunakeskuse COOP Maksimarket
@@ -27,24 +27,16 @@ on:
         required: false
         default: "1"
   schedule:
-    # every 2 hours
-    - cron: "0 */2 * * *"
+    - cron: "0 */2 * * *" # every 2 hours
 
 concurrency:
   group: coop-bolt-crawl
   cancel-in-progress: false
 
 jobs:
-  crawl:
-    name: "Crawl Bolt (${{ matrix.store }})"
+  crawl-bolt:
     runs-on: ubuntu-latest
     timeout-minutes: 120
-
-    strategy:
-      fail-fast: false
-      matrix:
-        store: ${{ fromJSON(format('["{0}"]', join('\",\"', (inputs.stores_multiline != '' && inputs.stores_multiline || 'Lõunakeskuse COOP Maksimarket\nEedeni COOP Maksimarket\nKvartali COOP Maksimarket') ))) }}
-        # Note: the line above builds a JSON array from the newline list. GitHub renders it correctly.
 
     steps:
       - name: Checkout
@@ -61,29 +53,50 @@ jobs:
           pip install playwright==1.47.0 selectolax psycopg[binary] tenacity
           python -m playwright install --with-deps chromium
 
-      - name: Run crawler
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: Prepare store list
+        id: prep
+        shell: bash
         run: |
           set -euo pipefail
-          CITY="${{ inputs.city_path }}"
-          STORE="${{ matrix.store }}"
-          HEADLESS="${{ inputs.headless }}"
-          REQ_DELAY="${{ inputs.req_delay }}"
-          UPSERT_DB="${{ inputs.upsert_db }}"
+          if [ -z "${{ inputs.stores_multiline }}" ]; then
+            cat > /tmp/stores.txt <<'EOF'
+Lõunakeskuse COOP Maksimarket
+Eedeni COOP Maksimarket
+Kvartali COOP Maksimarket
+EOF
+          else
+            printf "%s\n" "${{ inputs.stores_multiline }}" > /tmp/stores.txt
+          fi
+          echo "Prepared store list:"
+          cat /tmp/stores.txt
 
+      - name: Crawl each store
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CITY_PATH: ${{ inputs.city_path }}
+          HEADLESS: ${{ inputs.headless }}
+          REQ_DELAY: ${{ inputs.req_delay }}
+          UPSERT_DB: ${{ inputs.upsert_db }}
+        run: |
+          set -euo pipefail
           mkdir -p out
-          python scripts/bolt_crawler.py \
-            --city "${CITY}" \
-            --store "${STORE}" \
-            --headless "${HEADLESS}" \
-            --req-delay "${REQ_DELAY}" \
-            --upsert-db "${UPSERT_DB}" \
-            --out "out/coop_bolt_${CITY}_$(echo "${STORE}" | tr ' ' '_' ).csv"
+          while IFS= read -r STORE || [ -n "$STORE" ]; do
+            [ -z "$STORE" ] && continue
+            SAFE_NAME="$(echo "$STORE" | tr ' ' '_' | tr -dc '[:alnum:]_')"
+            echo "==> Crawling: $STORE"
+            python scripts/bolt_crawler.py \
+              --city "${CITY_PATH}" \
+              --store "${STORE}" \
+              --headless "${HEADLESS}" \
+              --req-delay "${REQ_DELAY}" \
+              --up " \
+              --upsert-db "${UPSERT_DB}" \
+              --out "out/coop_bolt_${CITY_PATH}_${SAFE_NAME}.csv"
+          done < /tmp/stores.txt
 
-      - name: Upload CSV artifact
+      - name: Upload CSV artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: "coop-bolt-csv-${{ matrix.store }}"
+          name: "coop-bolt-csv"
           path: out/*.csv
           if-no-files-found: warn
