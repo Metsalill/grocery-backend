@@ -19,6 +19,8 @@ on:
         description: "Upsert into Postgres (1=yes, 0=just CSV)"
         required: false
         default: "1"
+  schedule:
+    - cron: "0 */2 * * *"  # every 2 hours (UTC)
 
 concurrency:
   group: barbora-gap-recrawl
@@ -103,10 +105,8 @@ jobs:
           echo "Total gap URLs fetched: $TOTAL"
           if [ "$TOTAL" -eq 0 ]; then
             echo "::warning::No GAP URLs found for kind='${KIND}'. Exiting early."
-            # still upload empty artifacts for traceability
             : > data/barbora_only_urls.txt
           else
-            # shard the URL list across 8 workers
             : "${SHARD:?SHARD env is required}"
             awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
               data/barbora_only_urls_all.txt > data/barbora_only_urls.txt
@@ -125,7 +125,7 @@ jobs:
           HEADLESS="${HEADLESS:-1}"
           SOFT_TIMEOUT_MIN="${SOFT_TIMEOUT_MIN:-220}"
 
-          # Use a tiny categories file (not used in URL-only mode but required by CLI)
+          # Minimal categories file (CLI expects one, but URL-only mode ignores it)
           echo "https://barbora.ee" > data/barbora_categories.txt
 
           ONLY_URL_FLAG=()
