@@ -7,13 +7,6 @@ on:
         description: "Bolt city path (from URL after /en-US/, e.g. 2-tartu)"
         required: false
         default: "2-tartu"
-      stores_multiline:
-        description: "Store display names (one per line). Leave empty to use the 3 Tartu Maksimarkets."
-        required: false
-        default: |
-          Lõunakeskuse COOP Maksimarket
-          Eedeni COOP Maksimarket
-          Kvartali COOP Maksimarket
       headless:
         description: "Headless Playwright (1/0)"
         required: false
@@ -42,6 +35,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
 
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      CITY_PATH: ${{ inputs.city_path || '2-tartu' }}
+      HEADLESS: ${{ inputs.headless || '1' }}
+      REQ_DELAY: ${{ inputs.req_delay || '0.25' }}
+      UPSERT_DB: ${{ inputs.upsert_db || '1' }}
+      CATEGORIES_DIR: ${{ inputs.categories_dir || 'data/bolt' }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,69 +58,55 @@ jobs:
           pip install playwright==1.47.0 selectolax psycopg[binary] tenacity
           python -m playwright install --with-deps chromium
 
-      - name: Prepare store list (file-based, newline-safe)
-        id: prep
-        shell: bash
+      # --- Crawl each store explicitly (no newline parsing needed) ---
+
+      - name: Crawl Lõunakeskuse COOP Maksimarket
         run: |
           set -euo pipefail
-          mkdir -p /tmp
-          STORES_IN="${{ inputs.stores_multiline }}"
-          if [ -z "$STORES_IN" ]; then
-            : > /tmp/stores.txt
-            printf '%s\n' "Lõunakeskuse COOP Maksimarket" >> /tmp/stores.txt
-            printf '%s\n' "Eedeni COOP Maksimarket"      >> /tmp/stores.txt
-            printf '%s\n' "Kvartali COOP Maksimarket"    >> /tmp/stores.txt
-          else
-            # Preserve newlines from the GitHub input; strip CR if present
-            printf '%s' "$STORES_IN" | tr -d '\r' > /tmp/stores.txt
-          fi
-          echo "Prepared store list:"
-          nl -ba /tmp/stores.txt
-          # Expose the path for later steps (GITHUB_OUTPUT)
-          echo "stores_file=/tmp/stores.txt" >> "$GITHUB_OUTPUT"
-
-      - name: Crawl each store (reads file line-by-line)
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          CITY_PATH: ${{ inputs.city_path }}
-          HEADLESS: ${{ inputs.headless }}
-          REQ_DELAY: ${{ inputs.req_delay }}
-          UPSERT_DB: ${{ inputs.upsert_db }}
-          CATEGORIES_DIR: ${{ inputs.categories_dir }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          # Safe defaults for scheduled runs (inputs can be empty)
-          CITY_PATH="${CITY_PATH:-2-tartu}"
-          HEADLESS="${HEADLESS:-1}"
-          REQ_DELAY="${REQ_DELAY:-0.25}"
-          UPSERT_DB="${UPSERT_DB:-1}"
-          CATEGORIES_DIR="${CATEGORIES_DIR:-data/bolt}"
-
-          STORES_FILE="${{ steps.prep.outputs.stores_file }}"
-          if [ ! -s "$STORES_FILE" ]; then
-            echo "No stores specified." >&2
-            exit 1
-          fi
-
-          echo "Stores to crawl:"
-          cat "$STORES_FILE" | sed 's/^/ - /'
-
+          STORE="Lõunakeskuse COOP Maksimarket"
+          SAFE_NAME="$(echo "$STORE" | tr ' ' '_' | tr -dc '[:alnum:]_')"
+          echo "==> Crawling: $STORE (city=${CITY_PATH}, headless=${HEADLESS}, delay=${REQ_DELAY}, upsert=${UPSERT_DB})"
           mkdir -p out
-          while IFS= read -r STORE || [ -n "$STORE" ]; do
-            # skip empty lines
-            [ -z "${STORE// }" ] && continue
-            SAFE_NAME="$(echo "$STORE" | tr ' ' '_' | tr -dc '[:alnum:]_')"
-            echo "==> Crawling: $STORE (city=${CITY_PATH}, headless=${HEADLESS}, delay=${REQ_DELAY}, upsert=${UPSERT_DB})"
-            python scripts/bolt_crawler.py \
-              --city "${CITY_PATH}" \
-              --store "${STORE}" \
-              --headless "${HEADLESS}" \
-              --req-delay "${REQ_DELAY}" \
-              --upsert-db "${UPSERT_DB}" \
-              --categories-dir "${CATEGORIES_DIR}" \
-              --out "out/coop_bolt_${CITY_PATH}_${SAFE_NAME}.csv"
-          done < "$STORES_FILE"
+          python scripts/bolt_crawler.py \
+            --city "${CITY_PATH}" \
+            --store "${STORE}" \
+            --headless "${HEADLESS}" \
+            --req-delay "${REQ_DELAY}" \
+            --upsert-db "${UPSERT_DB}" \
+            --categories-dir "${CATEGORIES_DIR}" \
+            --out "out/coop_bolt_${CITY_PATH}_${SAFE_NAME}.csv"
+
+      - name: Crawl Eedeni COOP Maksimarket
+        run: |
+          set -euo pipefail
+          STORE="Eedeni COOP Maksimarket"
+          SAFE_NAME="$(echo "$STORE" | tr ' ' '_' | tr -dc '[:alnum:]_')"
+          echo "==> Crawling: $STORE (city=${CITY_PATH}, headless=${HEADLESS}, delay=${REQ_DELAY}, upsert=${UPSERT_DB})"
+          mkdir -p out
+          python scripts/bolt_crawler.py \
+            --city "${CITY_PATH}" \
+            --store "${STORE}" \
+            --headless "${HEADLESS}" \
+            --req-delay "${REQ_DELAY}" \
+            --upsert-db "${UPSERT_DB}" \
+            --categories-dir "${CATEGORIES_DIR}" \
+            --out "out/coop_bolt_${CITY_PATH}_${SAFE_NAME}.csv"
+
+      - name: Crawl Kvartali COOP Maksimarket
+        run: |
+          set -euo pipefail
+          STORE="Kvartali COOP Maksimarket"
+          SAFE_NAME="$(echo "$STORE" | tr ' ' '_' | tr -dc '[:alnum:]_')"
+          echo "==> Crawling: $STORE (city=${CITY_PATH}, headless=${HEADLESS}, delay=${REQ_DELAY}, upsert=${UPSERT_DB})"
+          mkdir -p out
+          python scripts/bolt_crawler.py \
+            --city "${CITY_PATH}" \
+            --store "${STORE}" \
+            --headless "${HEADLESS}" \
+            --req-delay "${REQ_DELAY}" \
+            --upsert-db "${UPSERT_DB}" \
+            --categories-dir "${CATEGORIES_DIR}" \
+            --out "out/coop_bolt_${CITY_PATH}_${SAFE_NAME}.csv"
 
       - name: Upload CSV artifacts
         uses: actions/upload-artifact@v4
