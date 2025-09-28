@@ -36,7 +36,7 @@ jobs:
     timeout-minutes: 120
 
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}   # <-- use this secret
       CITY_PATH: ${{ inputs.city_path || '2-tartu' }}
       HEADLESS: ${{ inputs.headless || '1' }}
       REQ_DELAY: ${{ inputs.req_delay || '0.25' }}
