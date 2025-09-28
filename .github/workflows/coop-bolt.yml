@@ -53,19 +53,19 @@ jobs:
           pip install playwright==1.47.0 selectolax psycopg[binary] tenacity
           python -m playwright install --with-deps chromium
 
-      - name: Prepare store list
+      - name: Prepare store list (no heredoc)
         id: prep
         shell: bash
         run: |
           set -euo pipefail
           if [ -z "${{ inputs.stores_multiline }}" ]; then
-            cat > /tmp/stores.txt <<'EOF'
-Lõunakeskuse COOP Maksimarket
-Eedeni COOP Maksimarket
-Kvartali COOP Maksimarket
-EOF
+            printf "%s\n" \
+              "Lõunakeskuse COOP Maksimarket" \
+              "Eedeni COOP Maksimarket" \
+              "Kvartali COOP Maksimarket" > /tmp/stores.txt
           else
-            printf "%s\n" "${{ inputs.stores_multiline }}" > /tmp/stores.txt
+            # Normalize Windows line endings if any
+            printf "%s" "${{ inputs.stores_multiline }}" | tr -d '\r' > /tmp/stores.txt
           fi
           echo "Prepared store list:"
           cat /tmp/stores.txt
