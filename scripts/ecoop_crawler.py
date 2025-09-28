@@ -11,7 +11,9 @@ Env:
 - COOP_UPSERT_DB=1 to enable DB upsert (requires asyncpg + DATABASE_URL).
 - COOP_DEDUP_DB=1 to enable de-duplication against DB by (store_host, ean_norm).
 
-Author: split from your combined script into a dedicated eCoop crawler.
+Domains:
+- Vändra → https://vandra.ecoop.ee
+- Haapsalu → https://coophaapsalu.ee  (note: not *.ecoop.ee)
 """
 
 import argparse
@@ -105,17 +107,16 @@ def _normalize_region(region: str, category_candidates: List[str]) -> str:
 # ---------- store_host mapping ----------
 def map_store_host(region_url: str) -> str:
     """
-    Map ecoop region domains to canonical store_host names expected in DB.
-    - vandra.ecoop.ee     → coopvandra.ee
-    - haapsalu.ecoop.ee   → coophaapsalu.ee
-    Otherwise return the parsed netloc (lowercased).
+    Canonical store_host expected in DB:
+      - vandra.ecoop.ee  → vandra.ecoop.ee  (use as-is)
+      - haapsalu.ecoop.ee (legacy) → coophaapsalu.ee (live site)
+      - coophaapsalu.ee → coophaapsalu.ee (as-is)
+      - otherwise: use the parsed netloc lowercased
     """
     host = urlparse(region_url).netloc.lower()
-    if host == "vandra.ecoop.ee":
-        return "coopvandra.ee"
     if host == "haapsalu.ecoop.ee":
         return "coophaapsalu.ee"
-    return host
+    return host  # vandra.ecoop.ee stays as vandra.ecoop.ee
 
 # ---------- Playwright (required) ----------
 try:
@@ -845,7 +846,8 @@ async def main(args):
 
 def parse_args():
     p = argparse.ArgumentParser(description="Coop eCoop category crawler → PDP extractor")
-    p.add_argument("--region", default="https://vandra.ecoop.ee", help="Base region host (e.g. https://haapsalu.ecoop.ee)")
+    p.add_argument("--region", default="https://vandra.ecoop.ee",
+                   help="Base region origin, e.g. https://vandra.ecoop.ee or https://coophaapsalu.ee")
     p.add_argument("--categories-multiline", dest="categories_multiline", default="",
                    help="Newline-separated category URLs or paths")
     p.add_argument("--categories-file", dest="categories_file", default="", help="Path to txt file with category URLs")
