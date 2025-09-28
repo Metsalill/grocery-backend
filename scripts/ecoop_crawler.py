@@ -27,6 +27,7 @@ import os
 import re
 import signal
 import sys
+import random
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Set, Literal
 from urllib.parse import urlparse, urljoin, urlsplit, urlunsplit, parse_qsl, urlencode
@@ -599,6 +600,18 @@ def append_csv(rows: List[Dict], out_path: Path) -> None:
 
 # ---------- DB helpers ----------
 
+async def _connect_with_retries(dsn: str, max_tries: int = 6):
+    """Open a DB connection with jittered exponential backoff (handles transient DNS)."""
+    import asyncpg  # type: ignore
+    last = None
+    for i in range(max_tries):
+        try:
+            return await asyncpg.connect(dsn)
+        except Exception as e:
+            last = e
+            await asyncio.sleep(1.0 * (2 ** i) + random.uniform(0.0, 0.8))
+    raise last  # type: ignore[misc]
+
 async def _fetch_existing_gtins(store_host: str) -> Set[str]:
     if os.environ.get("COOP_DEDUP_DB", "0").lower() not in ("1", "true"):
         return set()
@@ -610,7 +623,7 @@ async def _fetch_existing_gtins(store_host: str) -> Set[str]:
     except Exception:
         return set()
     try:
-        conn = await asyncpg.connect(dsn)
+        conn = await _connect_with_retries(dsn)
     except Exception:
         return set()
     try:
@@ -646,9 +659,9 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
     table = "staging_coop_products"
 
     try:
-        conn = await asyncpg.connect(dsn)
+        conn = await _connect_with_retries(dsn)
     except Exception as e:
-        print(f"[warn] Could not connect to DB for upsert ({e!r}). Skipping DB upsert.")
+        print(f"[warn] Could not connect to DB for upsert after retries ({e!r}). Skipping DB upsert.")
         return
 
     try:
