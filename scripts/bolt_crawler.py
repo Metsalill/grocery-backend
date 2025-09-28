@@ -33,7 +33,7 @@ from typing import Dict, List, Optional, Tuple
 
 from tenacity import retry, stop_after_attempt, wait_fixed
 from playwright.sync_api import sync_playwright
-from selectolax.parser import HTMLParser
+from selectolax.parser import HTMLParser, Node
 
 # Optional DB
 try:
@@ -62,6 +62,7 @@ def parse_price(text: str) -> Tuple[Optional[float], Optional[str]]:
         return None, None
     t = text.replace("\xa0", " ").strip()
     cur = "EUR" if EUR in t or "€" in t else None
+    # keep only digits, commas and dots, convert comma to dot
     num = re.sub(r"[^0-9,.\-]", "", t).replace(",", ".")
     try:
         return round(float(num), 2), cur
@@ -110,7 +111,6 @@ def normalize_cat_url(base_url: str, href: str) -> str:
         return "https://food.bolt.eu" + href
     if href.startswith("?"):
         return base_url.split("?")[0] + href
-    # relative path segment
     if base_url.endswith("/") and href.startswith("/"):
         return base_url[:-1] + href
     return base_url.rsplit("/", 1)[0] + "/" + href
@@ -131,50 +131,96 @@ def read_categories_override(path: str, base_url: str) -> List[Tuple[str, str]]:
     return out
 
 
+PRICE_RE = re.compile(r"\d[\d\., ]*\s?€")
+
+
+def _ancestor_with_card_features(node: Node, depth: int = 6) -> Optional[Node]:
+    """Walk up to find a plausible product card container."""
+    cur = node
+    steps = 0
+    while cur and steps < depth:
+        # heuristic: container likely has an img/picture and some text
+        if cur.css_first("img, picture") and (cur.css_first("h1,h2,h3,h4,strong,p,span") is not None):
+            return cur
+        cur = cur.parent
+        steps += 1
+    return None
+
+
+def _best_name_from(card: Node) -> Optional[str]:
+    texts: List[str] = []
+    for cand in card.css("h1,h2,h3,h4,strong,p,span,div"):
+        t = (cand.text() or "").strip()
+        if not t:
+            continue
+        if EUR in t or PRICE_RE.search(t):
+            continue
+        # discard very short/very long misc strings
+        if 4 <= len(t) <= 140:
+            texts.append(t)
+    if not texts:
+        return None
+    # pick the longest-ish meaningful string first
+    texts.sort(key=lambda s: (-len(s), s))
+    return texts[0]
+
+
+def _image_from(card: Node) -> Optional[str]:
+    for im in card.css("img"):
+        src = im.attributes.get("src") or im.attributes.get("data-src")
+        if src and src.startswith("http"):
+            return src
+    for pc in card.css("source"):
+        src = pc.attributes.get("srcset")
+        if src and "http" in src:
+            return src.split()[0]
+    return None
+
+
 def extract_tiles_from_dom(page_html: str) -> List[Dict]:
+    """
+    Robust tile extractor:
+    - Look for any element whose text contains a €-price.
+    - Walk up to a card-like ancestor (has image + text).
+    - From the card, extract name/price/image.
+    This works even when the “+” button is icon-only.
+    """
     tree = HTMLParser(page_html)
-    tiles = []
-    for btn in tree.css("button"):
-        btxt = (btn.text() or "").strip().lower()
-        if btxt in {"+", "add", "lisa", "add to cart", "add "}:
-            tile = btn
-            for _ in range(6):
-                tile = tile.parent
-                if tile is None:
-                    break
-                if tile.tag == "article" or ("card" in tile.attributes.get("class", "")):
-                    break
-            if not tile:
-                continue
+    seen_cards = set()
+    tiles: List[Dict] = []
 
-            name = None
-            price_txt = None
-            img = None
+    # Scan text-bearing nodes likely to carry price
+    for node in tree.css("span,div,p,b,strong"):
+        t = (node.text() or "").strip()
+        if not t or not PRICE_RE.search(t):
+            continue
 
-            for cand in tile.css("h1,h2,h3,h4,strong,p,span"):
-                t = (cand.text() or "").strip()
-                if not t:
-                    continue
-                if EUR in t or re.search(r"\d[\d\.,]\s?€", t):
-                    price_txt = price_txt or t
-                if not name and len(t) > 6 and "€" not in t:
-                    name = t
+        price, currency = parse_price(t)
+        if price is None:
+            continue
 
-            for im in tile.css("img"):
-                src = im.attributes.get("src") or im.attributes.get("data-src")
-                if src and "http" in src:
-                    img = src
-                    break
+        card = _ancestor_with_card_features(node, depth=6)
+        if not card:
+            continue
 
-            price, currency = parse_price(price_txt or "")
-            tiles.append(
-                dict(
-                    name=name or "",
-                    price=price,
-                    currency=currency or "EUR",
-                    image_url=img or "",
-                )
+        # de-dup by card's position in DOM or name+price
+        key = id(card)
+        if key in seen_cards:
+            continue
+        seen_cards.add(key)
+
+        name = _best_name_from(card) or ""
+        img = _image_from(card) or ""
+
+        tiles.append(
+            dict(
+                name=name,
+                price=price,
+                currency=currency or "EUR",
+                image_url=img,
             )
+        )
+
     return tiles
 
 
@@ -272,6 +318,7 @@ def run(
     categories_file: Optional[str] = None,
     categories_dir: Optional[str] = None,
 ):
+
     # Start in et-EE; tends to be more consistent for COOP placeholders/names
     start_url = f"https://food.bolt.eu/et-EE/{city}"
     scraped_at = dt.datetime.utcnow().isoformat()
@@ -287,7 +334,6 @@ def run(
 
         # --- robust store search & select ---
         def open_search() -> bool:
-            # Try various entry points (search input or icon)
             selectors = [
                 'input[type="search"]',
                 'input[placeholder*="poed"], input[placeholder*="Pood"]',
@@ -311,7 +357,6 @@ def run(
             except Exception:
                 pass
 
-        # Type name and pick the suggestion that best matches
         page.keyboard.type(store_name)
         time.sleep(0.8)
 
@@ -374,9 +419,9 @@ def run(
             page.wait_for_load_state("domcontentloaded")
             time.sleep(max(0.5, req_delay))
 
-            # Wait for any product card / add button to appear
+            # Wait for the grid to hydrate (either + button or any price text)
             try:
-                page.wait_for_selector('button:has-text("+")', timeout=15000)
+                page.wait_for_selector('button:has-text("+"), :text("€")', timeout=15000)
             except Exception:
                 pass
 
