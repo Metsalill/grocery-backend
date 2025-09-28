@@ -57,44 +57,56 @@ jobs:
           pip install playwright==1.47.0 selectolax psycopg[binary] tenacity
           python -m playwright install --with-deps chromium
 
-      - name: Crawl each store (array-based, preserves spaces/newlines)
+      - name: Crawl each store (newline-safe)
+        shell: bash
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          CITY_PATH: ${{ inputs.city_path }}
-          HEADLESS: ${{ inputs.headless }}
-          REQ_DELAY: ${{ inputs.req_delay }}
-          UPSERT_DB: ${{ inputs.upsert_db }}
-          CATEGORIES_DIR: ${{ inputs.categories_dir }}
-        shell: bash
         run: |
           set -euo pipefail
 
-          # Safe defaults for scheduled runs (inputs can be empty)
+          # Safe defaults for scheduled runs
+          CITY_PATH="${{ inputs.city_path }}"
           CITY_PATH="${CITY_PATH:-2-tartu}"
+          HEADLESS="${{ inputs.headless }}"
           HEADLESS="${HEADLESS:-1}"
+          REQ_DELAY="${{ inputs.req_delay }}"
           REQ_DELAY="${REQ_DELAY:-0.25}"
+          UPSERT_DB="${{ inputs.upsert_db }}"
           UPSERT_DB="${UPSERT_DB:-1}"
+          CATEGORIES_DIR="${{ inputs.categories_dir }}"
           CATEGORIES_DIR="${CATEGORIES_DIR:-data/bolt}"
 
-          # Build STORES array
+          # Build STORES array.
+          # If input is empty, use three explicit elements.
           if [ -z "${{ inputs.stores_multiline }}" ]; then
-            # Default three Tartu stores
             STORES=(
               "Lõunakeskuse COOP Maksimarket"
               "Eedeni COOP Maksimarket"
               "Kvartali COOP Maksimarket"
             )
           else
-            # Normalize CRLF and split on newlines into array
-            mapfile -t STORES < <(printf "%s" "${{ inputs.stores_multiline }}" | tr -d '\r')
+            # Preserve newlines from the GitHub input using a heredoc.
+            # mapfile splits the heredoc content into array items by line.
+            mapfile -t STORES <<'__EOF_STORES__'
+${{ inputs.stores_multiline }}
+__EOF_STORES__
+            # Normalize CRLF and drop empty lines
+            TMP=()
+            for s in "${STORES[@]}"; do
+              s="${s%$'\r'}"
+              [[ -z "${s// }" ]] && continue
+              TMP+=("$s")
+            done
+            STORES=("${TMP[@]}")
           fi
 
           echo "Stores to crawl:"
-          printf ' - %s\n' "${STORES[@]}"
+          for s in "${STORES[@]}"; do
+            echo " - $s"
+          done
 
           mkdir -p out
           for STORE in "${STORES[@]}"; do
-            [ -z "$STORE" ] && continue
             SAFE_NAME="$(echo "$STORE" | tr ' ' '_' | tr -dc '[:alnum:]_')"
             echo "==> Crawling: $STORE (city=${CITY_PATH}, headless=${HEADLESS}, delay=${REQ_DELAY}, upsert=${UPSERT_DB})"
             python scripts/bolt_crawler.py \
