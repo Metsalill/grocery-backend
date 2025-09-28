@@ -197,14 +197,13 @@ jobs:
             exit 0
           fi
           echo "::add-mask::${DATABASE_URL}"
-          python - <<'PY'
+          cat >/tmp/db_preflight.py <<'PY'
 import asyncio, os, sys
 try:
     import asyncpg  # type: ignore
 except Exception:
     print("::warning::asyncpg not installed; skipping DB preflight.")
     sys.exit(0)
-
 dsn = os.environ.get("DATABASE_URL")
 async def go():
     try:
@@ -215,6 +214,7 @@ async def go():
         print(f"::warning::DB preflight failed: {e}. Upsert will likely be skipped.")
 asyncio.run(go())
 PY
+          python /tmp/db_preflight.py
 
       - name: Run eCoop crawler (sharded)
         if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
