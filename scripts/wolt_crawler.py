@@ -27,6 +27,7 @@ import csv
 import datetime as dt
 import json
 import os
+import random
 import re
 import signal
 import sys
@@ -215,12 +216,17 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
         except Exception:
             pass
 
-# ---------- HTTP utils (no external deps) ----------
+# ---------- HTTP utils with backoff ----------
+_UA_POOL = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+]
+_GLOBAL_UA = random.choice(_UA_POOL)
+
 def _browser_headers(referer: Optional[str] = None) -> Dict[str, str]:
     h = {
-        "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                       "AppleWebKit/537.36 (KHTML, like Gecko) "
-                       "Chrome/122.0.0.0 Safari/537.36"),
+        "User-Agent": _GLOBAL_UA,
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "et-EE,et;q=0.9,en-US;q=0.8,en;q=0.7",
         "Connection": "keep-alive",
@@ -232,25 +238,59 @@ def _browser_headers(referer: Optional[str] = None) -> Dict[str, str]:
         h["Referer"] = referer
     return h
 
-async def _fetch_html(url: str) -> str:
-    import urllib.request, gzip, io
-    req = urllib.request.Request(url, headers=_browser_headers())
-    with urllib.request.urlopen(req) as resp:  # nosec
-        data = resp.read()
-        if (resp.headers.get("Content-Encoding", "") or "").lower() == "gzip":
-            data = gzip.GzipFile(fileobj=io.BytesIO(data)).read()
-        return data.decode("utf-8", errors="replace")
+async def _sleep_backoff(attempt: int, retry_after: Optional[str], base: float = 1.2) -> None:
+    if retry_after and retry_after.isdigit():
+        wait_s = max(0.0, float(retry_after))
+    else:
+        wait_s = base * (2 ** attempt) + random.uniform(0.3, 0.9)
+    await asyncio.sleep(wait_s)
 
-async def _fetch_json(url: str) -> Optional[Dict]:
+async def _fetch_html(url: str, max_tries: int = 7) -> str:
     import urllib.request, gzip, io
-    req = urllib.request.Request(url, headers=_browser_headers())
-    with urllib.request.urlopen(req) as resp:  # nosec
-        data = resp.read()
-        if (resp.headers.get("Content-Encoding", "") or "").lower() == "gzip":
-            data = gzip.GzipFile(fileobj=io.BytesIO(data)).read()
+    for attempt in range(max_tries):
         try:
-            return json.loads(data.decode("utf-8", errors="replace"))
-        except Exception:
+            req = urllib.request.Request(url, headers=_browser_headers())
+            with urllib.request.urlopen(req) as resp:  # nosec
+                data = resp.read()
+                if (resp.headers.get("Content-Encoding", "") or "").lower() == "gzip":
+                    data = gzip.GzipFile(fileobj=io.BytesIO(data)).read()
+                return data.decode("utf-8", errors="replace")
+        except Exception as e:
+            # Handle HTTP 429 specifically (urllib.error.HTTPError)
+            retry_after = None
+            try:
+                if hasattr(e, "code") and e.code == 429 and hasattr(e, "headers"):
+                    retry_after = e.headers.get("Retry-After")
+            except Exception:
+                pass
+            if attempt < max_tries - 1:
+                await _sleep_backoff(attempt, retry_after)
+                continue
+            raise
+
+async def _fetch_json(url: str, max_tries: int = 7) -> Optional[Dict]:
+    import urllib.request, gzip, io
+    for attempt in range(max_tries):
+        try:
+            req = urllib.request.Request(url, headers=_browser_headers())
+            with urllib.request.urlopen(req) as resp:  # nosec
+                data = resp.read()
+                if (resp.headers.get("Content-Encoding", "") or "").lower() == "gzip":
+                    data = gzip.GzipFile(fileobj=io.BytesIO(data)).read()
+                try:
+                    return json.loads(data.decode("utf-8", errors="replace"))
+                except Exception:
+                    return None
+        except Exception as e:
+            retry_after = None
+            try:
+                if hasattr(e, "code") and e.code == 429 and hasattr(e, "headers"):
+                    retry_after = e.headers.get("Retry-After")
+            except Exception:
+                pass
+            if attempt < max_tries - 1:
+                await _sleep_backoff(attempt, retry_after, base=1.0)
+                continue
             return None
 
 # ---------- Wolt parsers ----------
@@ -404,7 +444,7 @@ async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str
         except Exception:
             pass
         probed += 1
-        await asyncio.sleep(0.04)
+        await asyncio.sleep(0.08)  # probe throttle
 
 # ---------- noise guards ----------
 _DENY_EXACT = {"web tracking bundle", "functional", "required", "marketing", "analytics",
@@ -643,6 +683,21 @@ async def _extract_venue_id_via_modal(page) -> Optional[str]:
         pass
     return None
 
+async def _goto_with_backoff(page, url: str, max_tries: int, nav_timeout_ms: int, strategies: List[str]):
+    last_err = None
+    for attempt in range(max_tries):
+        for ws in strategies:
+            try:
+                resp = await page.goto(url, wait_until=ws, timeout=nav_timeout_ms)
+                # Playwright does not always expose status here; rely on success of render.
+                return resp
+            except Exception as e:
+                last_err = e
+        # backoff
+        await _sleep_backoff(attempt, retry_after=None, base=1.2)
+    if last_err:
+        raise last_err
+
 async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: float,
                                    goto_strategy: str, nav_timeout_ms: int):
     if async_playwright is None:
@@ -654,8 +709,7 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=bool(int(headless)))
         context = await browser.new_context(
-            user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                        "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"),
+            user_agent=_GLOBAL_UA,
             viewport={"width": 1366, "height": 900},
             java_script_enabled=True,
         )
@@ -691,23 +745,14 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
         tile_prices: Dict[str, float] = {}
         venue_id: Optional[str] = None
         try:
-            # resilient goto
-            order = [goto_strategy] if goto_strategy in ("domcontentloaded","networkidle","load") else ["domcontentloaded","load","networkidle"]
-            last_err = None
-            for ws in order:
-                try:
-                    await page.goto(cat_url, wait_until=ws, timeout=nav_timeout_ms)
-                    break
-                except Exception as e:
-                    last_err = e
-            else:
-                if last_err:
-                    raise last_err
+            strategies = [goto_strategy] if goto_strategy in ("domcontentloaded","networkidle","load") else ["domcontentloaded","load","networkidle"]
+            await _goto_with_backoff(page, cat_url, max_tries=6, nav_timeout_ms=nav_timeout_ms, strategies=strategies)
 
             await wait_cookie_banner(page)
+            # gentle scroll with throttle to let lazy content render
             for _ in range(10):
                 await page.mouse.wheel(0, 1500)
-                await page.wait_for_timeout(int(max(req_delay, 0.25)*1000))
+                await page.wait_for_timeout(int(max(req_delay, 0.4)*1000 + random.uniform(250, 900)))
 
             tile_prices = await _scrape_tile_prices(page)
 
@@ -769,10 +814,14 @@ def _lang_from_url(u: str) -> str:
 async def run_wolt(args, categories: List[str], on_rows) -> None:
     force_pw = bool(args.force_playwright or str(os.getenv("WOLT_FORCE_PLAYWRIGHT", "")).lower() in ("1","true","t","yes","y","on"))
 
-    for cat in categories:
+    for idx, cat in enumerate(categories):
         # prefer explicit --store-host; otherwise infer from category URL
         store_host_cat = args.store_host.strip() if args.store_host else _wolt_store_host(cat)
         print(f"[cat-wolt] {cat}")
+
+        # small stagger between categories to reduce rate-limit bursts
+        if idx > 0:
+            await asyncio.sleep(float(args.req_delay) + random.uniform(0.5, 1.2))
 
         try:
             payload = None if force_pw else await _load_wolt_payload(cat)
