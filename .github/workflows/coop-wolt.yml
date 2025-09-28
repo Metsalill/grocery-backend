@@ -1,48 +1,49 @@
-name: "Coop Wolt – Category Crawl (server payload + PW fallback) + optional DB upsert"
+name: "Coop on Wolt – Crawl + optional DB upsert"
 
 on:
   workflow_dispatch:
     inputs:
+      venue_slug:
+        description: "Wolt venue slug (e.g., coop-lasname, coop-prnu)"
+        required: false
+        default: "coop-prnu"
       categories_multiline:
-        description: "Wolt category URLs (one per line)"
+        description: "Category URLs (one per line). Leave empty to auto-pick by venue_slug."
         required: false
         default: ""
       categories_file:
-        description: "Repo file with Wolt category URLs (one per line) — leave empty to auto-pick data/wolt_coop_lasname_categories.txt"
+        description: "Repo file with categories (one per line). Overrides auto-pick."
         required: false
         default: ""
-      force_playwright:
-        description: "Force Playwright fallback (1 = yes, 0 = try server JSON first)"
-        required: false
-        default: "1"
       max_products:
-        description: "Cap rows per category after parsing (0 = unlimited)"
+        description: "Cap products per category (0 = unlimited)"
         required: false
         default: "0"
       shards:
-        description: "Number of shards to split categories across (1–8)"
+        description: "Number of shards (1–8)"
         required: false
-        default: "8"
+        default: "4"
       upsert_db:
-        description: "Set 1 to upsert into DATABASE_URL (staging_coop_products)"
+        description: "1 = upsert into DATABASE_URL (staging_coop_products)"
         required: false
-        default: "0"
-      dedup_db:
-        description: "Set 1 to deduplicate by (store_host, ean_norm) against staging_coop_products"
+        default: "1"
+      force_playwright:
+        description: "1 = force Playwright fallback instead of fast-path"
         required: false
         default: "0"
       extra_args:
-        description: "Extra flags passed to wolt_crawler.py (space-separated)"
+        description: "Extra flags for wolt_crawler.py"
         required: false
         default: ""
 
 jobs:
   crawl:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 90
 
     strategy:
       fail-fast: false
+      max-parallel: 4
       matrix:
         shard_index: [0, 1, 2, 3, 4, 5, 6, 7]
 
@@ -59,7 +60,7 @@ jobs:
           if [ "$REQ" -gt 8 ]; then REQ=8; fi
           echo "count=$REQ" >> $GITHUB_OUTPUT
 
-      - name: Stop if this shard is not requested
+      - name: Skip unused shard
         if: ${{ matrix.shard_index >= fromJSON(steps.shard.outputs.count) }}
         run: echo "Skipping shard ${{ matrix.shard_index }} (only ${{ steps.shard.outputs.count }} requested)"
 
@@ -69,7 +70,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dependencies (pip + Playwright)
+      - name: Install deps (pip + Playwright)
         if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
         run: |
           python -m pip install --upgrade pip
@@ -77,31 +78,29 @@ jobs:
           pip install playwright asyncpg
           python -m playwright install --with-deps chromium
 
-      - name: Prepare categories & shard-split
+      - name: Prepare categories
         if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
         id: cats
         env:
           CATS_FILE_INPUT: ${{ inputs.categories_file }}
           CATS_MULTILINE: ${{ inputs.categories_multiline }}
-          SHARD_IDX: ${{ matrix.shard_index }}
-          SHARD_COUNT: ${{ steps.shard.outputs.count }}
+          VENUE_SLUG: ${{ inputs.venue_slug }}
         run: |
           set -euo pipefail
           mkdir -p out
-          SRC="/tmp/wolt_categories_all.txt"
-          : > "$SRC"
+          : > /tmp/categories.txt
 
-          # Build the full list
+          # 1) If multiline provided, write it first
           if [ -n "$CATS_MULTILINE" ]; then
-            printf "%s\n" "$CATS_MULTILINE" > "$SRC"
+            printf "%s\n" "$CATS_MULTILINE" > /tmp/categories.txt
           fi
 
-          # Prefer explicit file when provided (supports repo-relative paths)
+          # 2) If a file path is provided, prefer it
           if [ -n "$CATS_FILE_INPUT" ]; then
             if [ -f "$CATS_FILE_INPUT" ]; then
-              cp "$CATS_FILE_INPUT" "$SRC"
+              cp "$CATS_FILE_INPUT" /tmp/categories.txt
             elif [ -f "${GITHUB_WORKSPACE}/${CATS_FILE_INPUT}" ]; then
-              cp "${GITHUB_WORKSPACE}/${CATS_FILE_INPUT}" "$SRC"
+              cp "${GITHUB_WORKSPACE}/${CATS_FILE_INPUT}" /tmp/categories.txt
             else
               echo "Provided categories_file not found: $CATS_FILE_INPUT"
               echo "Checked: '$CATS_FILE_INPUT' and '${GITHUB_WORKSPACE}/${CATS_FILE_INPUT}'"
@@ -109,52 +108,55 @@ jobs:
             fi
           fi
 
-          # Auto-pick default if still empty
-          if [ ! -s "$SRC" ]; then
-            AUTO="data/wolt_coop_lasname_categories.txt"
-            if [ -f "$AUTO" ]; then
-              cp "$AUTO" "$SRC"
-              echo "Auto-selected categories_file: $AUTO"
-            elif [ -f "${GITHUB_WORKSPACE}/${AUTO}" ]; then
-              cp "${GITHUB_WORKSPACE}/${AUTO}" "$SRC"
-              echo "Auto-selected categories_file: ${GITHUB_WORKSPACE}/${AUTO}"
+          # 3) Auto-pick by venue slug if still empty
+          if [ ! -s /tmp/categories.txt ]; then
+            SL="$(echo "${VENUE_SLUG:-}" | tr '[:upper:]' '[:lower:]')"
+            case "$SL" in
+              coop-prnu|coop-prn*) AUTO="data/wolt_coop_prnu_categories.txt" ;;
+              coop-lasname|coop-lasn*) AUTO="data/wolt_coop_lasname_categories.txt" ;;
+              *) AUTO="" ;;
+            esac
+            if [ -n "$AUTO" ]; then
+              if [ -f "$AUTO" ]; then
+                cp "$AUTO" /tmp/categories.txt
+                echo "Auto-selected categories_file: $AUTO"
+              elif [ -f "${GITHUB_WORKSPACE}/${AUTO}" ]; then
+                cp "${GITHUB_WORKSPACE}/${AUTO}" /tmp/categories.txt
+                echo "Auto-selected categories_file: ${GITHUB_WORKSPACE}/${AUTO}"
+              fi
             fi
           fi
 
-          if [ ! -s "$SRC" ]; then
-            echo "No categories provided. Supply categories_multiline or categories_file (or ensure ${AUTO} exists)."
+          if [ ! -s /tmp/categories.txt ]; then
+            echo "No categories found. Provide categories_multiline or categories_file, or set venue_slug to a known one (coop-prnu / coop-lasname)."
             exit 2
           fi
 
-          # Shard by line number: keep lines where (NR-1) % SHARD_COUNT == SHARD_IDX
-          DEST="/tmp/wolt_categories_shard.txt"
-          awk -v idx="$SHARD_IDX" -v shards="$SHARD_COUNT" 'NR>=1 { if (((NR-1)%shards)==idx) print }' "$SRC" > "$DEST"
-          if [ ! -s "$DEST" ]; then
-            echo "Shard $SHARD_IDX has no categories; exiting gracefully."
-            echo "path=$DEST" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          echo "path=$DEST" >> $GITHUB_OUTPUT
+          echo "path=/tmp/categories.txt" >> $GITHUB_OUTPUT
 
-      - name: Run Wolt crawler (this shard)
+      - name: Run Wolt crawler (sharded)
         if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
         env:
+          PYTHONUNBUFFERED: "1"
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           COOP_UPSERT_DB: ${{ inputs.upsert_db }}
-          COOP_DEDUP_DB: ${{ inputs.dedup_db }}
+          COOP_DEDUP_DB: ${{ inputs.upsert_db }}
           WOLT_FORCE_PLAYWRIGHT: ${{ inputs.force_playwright }}
         run: |
-          MAX_PRODUCTS="${{ inputs.max_products }}"
+          set -euo pipefail
+
+          SHARD_COUNT="${{ steps.shard.outputs.count }}"
           EXTRA="${{ inputs.extra_args }}"
-          CATS_FILE="${{ steps.cats.outputs.path }}"
-          if [ ! -s "$CATS_FILE" ]; then
-            echo "No categories in this shard — nothing to do."
-            exit 0
-          fi
+          MAX_PRODUCTS="${{ inputs.max_products }}"
+
+          echo "::group::Args"
+          echo "venue_slug=${{ inputs.venue_slug }}"
+          echo "max_products=$MAX_PRODUCTS"
+          echo "::endgroup::"
 
           python3 scripts/wolt_crawler.py \
-            --categories-file "$CATS_FILE" \
-            --max-products "$MAX_PRODUCTS" \
+            --categories-file "${{ steps.cats.outputs.path }}" \
+            --max-products "${MAX_PRODUCTS:-0}" \
             --out "out/coop_wolt_${{ github.run_id }}_shard${{ matrix.shard_index }}.csv" \
             $EXTRA
 
