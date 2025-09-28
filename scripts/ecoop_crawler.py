@@ -102,6 +102,21 @@ def _normalize_region(region: str, category_candidates: List[str]) -> str:
         u = urlparse("https://vandra.ecoop.ee/")
     return urlunsplit((u.scheme, u.netloc, "/", "", ""))
 
+# ---------- store_host mapping ----------
+def map_store_host(region_url: str) -> str:
+    """
+    Map ecoop region domains to canonical store_host names expected in DB.
+    - vandra.ecoop.ee     → coopvandra.ee
+    - haapsalu.ecoop.ee   → coophaapsalu.ee
+    Otherwise return the parsed netloc (lowercased).
+    """
+    host = urlparse(region_url).netloc.lower()
+    if host == "vandra.ecoop.ee":
+        return "coopvandra.ee"
+    if host == "haapsalu.ecoop.ee":
+        return "coophaapsalu.ee"
+    return host
+
 # ---------- Playwright (required) ----------
 try:
     from playwright.async_api import async_playwright, TimeoutError as PWTimeout  # noqa: F401
@@ -707,7 +722,8 @@ async def _route_handler(route):
 async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> None:
     if async_playwright is None:
         raise RuntimeError(f"Playwright is not installed but eCoop crawling was requested: {_IMPORT_ERROR}")
-    store_host = urlparse(base_region).netloc.lower()
+    # map ecoop region to canonical store_host
+    store_host = map_store_host(base_region)
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=bool(int(args.headless)))
