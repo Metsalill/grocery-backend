@@ -6,7 +6,11 @@ Coop on Bolt Food → categories → products → CSV / upsert to staging_coop_p
 
 - Opens https://food.bolt.eu/en-US/{city_path}
 - Finds the store by its visible display name (exact match).
-- Auto-discovers category tabs (links containing ?categoryName=).
+- Discovers category tabs (links containing ?categoryName=) OR
+  uses an optional categories file:
+    • --categories-file <path>  (one URL or query per line), or
+    • --categories-dir <base>; will auto-pick {base}/{city}/{slug}.txt
+      where slug = slugified store name (e.g., eedeni-coop-maksimarket)
 - Scrapes tiles; Bolt does not expose EAN/GTIN → keep blank.
 - Writes CSV and upserts into your existing `staging_coop_products`
   with channel='bolt' and store_host='bolt:<slug-of-store-name>'.
@@ -46,6 +50,11 @@ def slugify_host(name: str) -> str:
     s = re.sub(r"[^a-z0-9]+", "-", name.lower())
     s = re.sub(r"-+", "-", s).strip("-")
     return f"bolt:{s}"
+
+
+def store_slug(name: str) -> str:
+    s = re.sub(r"[^a-z0-9]+", "-", name.lower())
+    return re.sub(r"-+", "-", s).strip("-")
 
 
 def parse_price(text: str) -> Tuple[Optional[float], Optional[str]]:
@@ -91,6 +100,37 @@ def extract_category_links(page_html: str) -> List[Tuple[str, str]]:
     return out
 
 
+def normalize_cat_url(base_url: str, href: str) -> str:
+    """Resolve category href against the store's base URL."""
+    if not href:
+        return base_url
+    if href.startswith("http"):
+        return href
+    if href.startswith("/"):
+        return "https://food.bolt.eu" + href
+    if href.startswith("?"):
+        return base_url.split("?")[0] + href
+    # relative path segment
+    if base_url.endswith("/") and href.startswith("/"):
+        return base_url[:-1] + href
+    return base_url.rsplit("/", 1)[0] + "/" + href
+
+
+def read_categories_override(path: str, base_url: str) -> List[Tuple[str, str]]:
+    """Read one category per line; lines can be absolute URLs or ?categoryName=..."""
+    out: List[Tuple[str, str]] = []
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            href = line.strip()
+            if not href or href.startswith("#"):
+                continue
+            url = normalize_cat_url(base_url, href)
+            m = re.search(r"[?&]categoryName=([^&]+)", url)
+            cat = (m.group(1) if m else href).replace("%20", " ")
+            out.append((cat, url))
+    return out
+
+
 def extract_tiles_from_dom(page_html: str) -> List[Dict]:
     tree = HTMLParser(page_html)
     tiles = []
@@ -127,12 +167,14 @@ def extract_tiles_from_dom(page_html: str) -> List[Dict]:
                     break
 
             price, currency = parse_price(price_txt or "")
-            tiles.append(dict(
-                name=name or "",
-                price=price,
-                currency=currency or "EUR",
-                image_url=img or "",
-            ))
+            tiles.append(
+                dict(
+                    name=name or "",
+                    price=price,
+                    currency=currency or "EUR",
+                    image_url=img or "",
+                )
+            )
     return tiles
 
 
@@ -218,8 +260,16 @@ def safe_get_text(el):
     return (el.inner_text() or "").strip()
 
 
-def run(city: str, store_name: str, headless: bool, req_delay: float,
-        out_csv: str, upsert_db: bool):
+def run(
+    city: str,
+    store_name: str,
+    headless: bool,
+    req_delay: float,
+    out_csv: str,
+    upsert_db: bool,
+    categories_file: Optional[str] = None,
+    categories_dir: Optional[str] = None,
+):
 
     start_url = f"https://food.bolt.eu/en-US/{city}"
     scraped_at = dt.datetime.utcnow().isoformat()
@@ -253,26 +303,36 @@ def run(city: str, store_name: str, headless: bool, req_delay: float,
         page.wait_for_load_state("domcontentloaded")
         time.sleep(req_delay)
 
-        store_html = page.content()
         store_host = slugify_host(store_name)
+        base_url = page.url
+        slug = store_slug(store_name)
 
-        # discover categories
-        categories = []
-        seen_cat = set()
-        for cat_name, href in extract_category_links(store_html):
-            if cat_name and cat_name.lower() not in seen_cat:
-                seen_cat.add(cat_name.lower())
-                if href.startswith("/"):
-                    href = "https://food.bolt.eu" + href
-                elif href.startswith("?"):
-                    href = page.url.split("?")[0] + href
-                categories.append((cat_name, href))
-        if not categories:
-            categories = [("All", page.url)]
+        # Decide category source: explicit file > auto file in dir > autodiscovery
+        cats: List[Tuple[str, str]] = []
 
-        print(f"[info] discovered {len(categories)} categories")
+        if categories_file and os.path.isfile(categories_file):
+            cats = read_categories_override(categories_file, base_url)
+            print(f"[info] using explicit categories file: {categories_file} ({len(cats)} cats)")
+        elif categories_dir:
+            auto_path = os.path.join(categories_dir, city, f"{slug}.txt")
+            if os.path.isfile(auto_path):
+                cats = read_categories_override(auto_path, base_url)
+                print(f"[info] using categories from: {auto_path} ({len(cats)} cats)")
 
-        for cat_name, href in categories:
+        if not cats:
+            # fallback: autodiscover per store
+            store_html = page.content()
+            discovered = extract_category_links(store_html)
+            seen_cat = set()
+            for cat_name, href in discovered:
+                if cat_name and cat_name.lower() not in seen_cat:
+                    seen_cat.add(cat_name.lower())
+                    cats.append((cat_name, normalize_cat_url(base_url, href)))
+            if not cats:
+                cats = [("All", base_url)]
+        print(f"[info] categories selected: {len(cats)}")
+
+        for cat_name, href in cats:
             print(f"[cat] {cat_name} -> {href}")
             page.goto(href, timeout=60_000)
             page.wait_for_load_state("domcontentloaded")
@@ -301,35 +361,55 @@ def run(city: str, store_name: str, headless: bool, req_delay: float,
                 manufacturer = None
                 ext_id = None
 
-                rows_out.append(dict(
-                    chain=CHAIN,
-                    channel=CHANNEL,
-                    store_name=store_name,
-                    store_host=store_host,
-                    city_path=city,
-                    category_name=cat_name,
-                    ext_id=ext_id,
-                    name=name,
-                    brand=brand,
-                    manufacturer=manufacturer,
-                    size_text=size_text,
-                    price=price,
-                    currency=currency,
-                    image_url=image_url,
-                    url=page.url,
-                    description=None,
-                    ean_raw=None,
-                    scraped_at=scraped_at
-                ))
+                rows_out.append(
+                    dict(
+                        chain=CHAIN,
+                        channel=CHANNEL,
+                        store_name=store_name,
+                        store_host=store_host,
+                        city_path=city,
+                        category_name=cat_name,
+                        ext_id=ext_id,
+                        name=name,
+                        brand=brand,
+                        manufacturer=manufacturer,
+                        size_text=size_text,
+                        price=price,
+                        currency=currency,
+                        image_url=image_url,
+                        url=page.url,
+                        description=None,
+                        ean_raw=None,
+                        scraped_at=scraped_at,
+                    )
+                )
 
         # CSV
         os.makedirs(os.path.dirname(out_csv), exist_ok=True)
         with open(out_csv, "w", newline="", encoding="utf-8") as f:
-            w = csv.DictWriter(f, fieldnames=[
-                "chain","channel","store_name","store_host","city_path","category_name",
-                "ext_id","name","brand","manufacturer","size_text","price","currency",
-                "image_url","url","description","ean_raw","scraped_at"
-            ])
+            w = csv.DictWriter(
+                f,
+                fieldnames=[
+                    "chain",
+                    "channel",
+                    "store_name",
+                    "store_host",
+                    "city_path",
+                    "category_name",
+                    "ext_id",
+                    "name",
+                    "brand",
+                    "manufacturer",
+                    "size_text",
+                    "price",
+                    "currency",
+                    "image_url",
+                    "url",
+                    "description",
+                    "ean_raw",
+                    "scraped_at",
+                ],
+            )
             w.writeheader()
             for r in rows_out:
                 w.writerow(r)
@@ -350,6 +430,9 @@ if __name__ == "__main__":
     ap.add_argument("--req-delay", default="0.25", type=float)
     ap.add_argument("--out", required=True)
     ap.add_argument("--upsert-db", default="1")
+    ap.add_argument("--categories-file", default="", help="Optional: file with category URLs (one per line)")
+    ap.add_argument("--categories-dir", default="", help="Optional: base dir with {dir}/{city}/{slug}.txt")
+
     args = ap.parse_args()
 
     run(
@@ -359,4 +442,6 @@ if __name__ == "__main__":
         req_delay=float(args.req_delay),
         out_csv=args.out,
         upsert_db=(str(args.upsert_db) == "1"),
+        categories_file=(args.categories_file or None),
+        categories_dir=(args.categories_dir or None),
     )
