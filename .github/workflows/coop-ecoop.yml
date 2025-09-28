@@ -82,6 +82,14 @@ jobs:
           fi
           echo "Effective REGION set."
 
+      - name: Compute region slug
+        id: rslug
+        run: |
+          REGION="${{ steps.reg.outputs.value }}"
+          SLUG="$(echo "$REGION" | sed -E 's#https?://([^/]+).*#\1#' | tr '[:upper:]' '[:lower:]' | tr '.' '-')"
+          if [ -z "$SLUG" ]; then SLUG="unknown-region"; fi
+          echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
+
       - name: Compute shard count
         id: shard
         run: |
@@ -176,6 +184,38 @@ jobs:
           fi
           echo "path=$DEST" >> $GITHUB_OUTPUT
 
+      # Optional smoke test so we fail early if DATABASE_URL is misconfigured.
+      - name: Preflight DB connectivity (optional)
+        if: ${{ matrix.shard_index == 0 && (github.event_name == 'schedule' || inputs.upsert_db == '1') }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          if [ -z "${DATABASE_URL:-}" ]; then
+            echo "::warning::DATABASE_URL not set — will skip upsert later."
+            exit 0
+          fi
+          echo "::add-mask::${DATABASE_URL}"
+          python - <<'PY'
+import asyncio, os, sys
+try:
+    import asyncpg  # type: ignore
+except Exception:
+    print("::warning::asyncpg not installed; skipping DB preflight.")
+    sys.exit(0)
+
+dsn = os.environ.get("DATABASE_URL")
+async def go():
+    try:
+        conn = await asyncio.wait_for(asyncpg.connect(dsn), timeout=8.0)
+        await conn.close()
+        print("::notice::DB preflight OK: connection established.")
+    except Exception as e:
+        print(f"::warning::DB preflight failed: {e}. Upsert will likely be skipped.")
+asyncio.run(go())
+PY
+
       - name: Run eCoop crawler (sharded)
         if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
         env:
@@ -243,7 +283,7 @@ jobs:
         if: ${{ always() && matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
         uses: actions/upload-artifact@v4
         with:
-          name: coop-ecoop-${{ github.run_id }}-part-vandra-${{ matrix.shard_index }}
+          name: coop-ecoop-${{ github.run_id }}-part-${{ steps.rslug.outputs.slug }}-${{ matrix.shard_index }}
           path: out/*.csv
           if-no-files-found: warn
           retention-days: 7
