@@ -77,6 +77,7 @@ EOF
           HEADLESS: ${{ inputs.headless }}
           REQ_DELAY: ${{ inputs.req_delay }}
           UPSERT_DB: ${{ inputs.upsert_db }}
+        shell: bash
         run: |
           set -euo pipefail
           mkdir -p out
@@ -89,7 +90,6 @@ EOF
               --store "${STORE}" \
               --headless "${HEADLESS}" \
               --req-delay "${REQ_DELAY}" \
-              --up " \
               --upsert-db "${UPSERT_DB}" \
               --out "out/coop_bolt_${CITY_PATH}_${SAFE_NAME}.csv"
           done < /tmp/stores.txt
