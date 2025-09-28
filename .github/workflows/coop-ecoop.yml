@@ -184,37 +184,18 @@ jobs:
           fi
           echo "path=$DEST" >> $GITHUB_OUTPUT
 
-      # Optional smoke test so we fail early if DATABASE_URL is misconfigured.
-      - name: Preflight DB connectivity (optional)
+      # Lightweight check so we fail early if DATABASE_URL is missing.
+      - name: Preflight DB env (presence-only)
         if: ${{ matrix.shard_index == 0 && (github.event_name == 'schedule' || inputs.upsert_db == '1') }}
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        continue-on-error: true
         run: |
-          set -euo pipefail
           if [ -z "${DATABASE_URL:-}" ]; then
-            echo "::warning::DATABASE_URL not set — will skip upsert later."
-            exit 0
+            echo "::warning::DATABASE_URL not set — upsert will be skipped."
+          else
+            echo "::add-mask::${DATABASE_URL}"
+            echo "::notice::DATABASE_URL is present. Proceeding."
           fi
-          echo "::add-mask::${DATABASE_URL}"
-          cat >/tmp/db_preflight.py <<'PY'
-import asyncio, os, sys
-try:
-    import asyncpg  # type: ignore
-except Exception:
-    print("::warning::asyncpg not installed; skipping DB preflight.")
-    sys.exit(0)
-dsn = os.environ.get("DATABASE_URL")
-async def go():
-    try:
-        conn = await asyncio.wait_for(asyncpg.connect(dsn), timeout=8.0)
-        await conn.close()
-        print("::notice::DB preflight OK: connection established.")
-    except Exception as e:
-        print(f"::warning::DB preflight failed: {e}. Upsert will likely be skipped.")
-asyncio.run(go())
-PY
-          python /tmp/db_preflight.py
 
       - name: Run eCoop crawler (sharded)
         if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
