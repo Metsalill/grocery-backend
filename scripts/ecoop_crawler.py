@@ -31,6 +31,12 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Set, Literal
 from urllib.parse import urlparse, urljoin, urlsplit, urlunsplit, parse_qsl, urlencode
 
+# --- graceful stop (so we can still do DB upsert on SIGINT) ---
+STOP_REQUESTED = False
+def request_stop():
+    global STOP_REQUESTED
+    STOP_REQUESTED = True
+
 # ---------- regexes & helpers ----------
 
 SIZE_RE = re.compile(r"(\b\d+[\,\.]?\d*\s?(?:kg|g|l|ml|tk|pcs|x|×)\s?\d*\b)", re.IGNORECASE)
@@ -142,39 +148,9 @@ async def wait_cookie_banner(page: Any):
     except Exception:
         pass
 
-# ---------- Category discovery (robust) ----------
-def _looks_like_product_url(u: str) -> bool:
-    """
-    eCoop PDPs commonly use '/et/toode/...' – but some deployments
-    expose deep '/et/tooted/<cat>/<subcat>/<product-slug>' links.
-    Accept if:
-      - contains 'toode' anywhere, OR
-      - path contains '/tooted/' and has >= 3 segments after 'tooted'
-        (heuristic to treat deep links as PDPs and not top-level categories)
-    """
-    if not u:
-        return False
-    try:
-        parsed = urlparse(u)
-        path = parsed.path.lower()
-    except Exception:
-        path = (u or "").lower()
-
-    if "toode" in path:
-        return True
-    if "/tooted/" in path:
-        # count path segments after '/tooted/'
-        parts = [p for p in path.split("/") if p]
-        try:
-            idx = parts.index("tooted")
-        except ValueError:
-            idx = -1
-        if idx >= 0 and len(parts) - (idx + 1) >= 3:
-            # e.g. /et/tooted/cat/subcat/slug  -> likely PDP
-            return True
-    return False
-
 async def collect_category_product_links(page: Any, category_url: str, page_limit: int, req_delay: float, max_depth: int = 2) -> List[str]:
+    if STOP_REQUESTED:
+        return []
     base = urlparse(category_url)
     base_host = base.netloc
 
@@ -182,11 +158,17 @@ async def collect_category_product_links(page: Any, category_url: str, page_limi
         u = urljoin(f"{base.scheme}://{base.netloc}{base.path}", u or "")
         return clean_url_keep_allowed_query(u)
 
+    def is_product(u: str) -> bool:
+        return "/toode/" in u
+
+    def is_category(u: str) -> bool:
+        return "/tootekategooria/" in u
+
     seen_products: set[str] = set()
     seen_pages: set[str] = set()
     queue: List[Tuple[str, int]] = [(clean_url_keep_allowed_query(category_url), 0)]
 
-    while queue:
+    while queue and not STOP_REQUESTED:
         url, depth = queue.pop(0)
         if not url or url in seen_pages or not same_host(url, base_host):
             continue
@@ -202,17 +184,17 @@ async def collect_category_product_links(page: Any, category_url: str, page_limi
 
         stable_rounds = 0
         for _ in range(1000):
-            # Anchors with hrefs containing product-ish paths
+            if STOP_REQUESTED:
+                break
             try:
-                hrefs = await page.eval_on_selector_all('a', "els => els.map(e => e.getAttribute('href') || e.href || '')")
+                hrefs = await page.eval_on_selector_all('a[href*="/toode/"]', "els => els.map(e => e.href)")
             except Exception:
                 hrefs = []
-            for h in hrefs or []:
+            for h in hrefs:
                 h = norm_abs(h)
-                if _looks_like_product_url(h):
+                if h and is_product(h):
                     seen_products.add(h)
 
-            # Try "Load more" buttons if present
             clicked = False
             for sel in [
                 'button:has-text("Lae veel")',
@@ -229,7 +211,6 @@ async def collect_category_product_links(page: Any, category_url: str, page_limi
                 except Exception:
                     pass
 
-            # Scroll to trigger lazy loading and re-scan
             try:
                 await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
             except Exception:
@@ -238,12 +219,12 @@ async def collect_category_product_links(page: Any, category_url: str, page_limi
 
             before = len(seen_products)
             try:
-                hrefs2 = await page.eval_on_selector_all('a', "els => els.map(e => e.getAttribute('href') || e.href || '')")
+                hrefs2 = await page.eval_on_selector_all('a[href*="/toode/"]', "els => els.map(e => e.href)")
             except Exception:
                 hrefs2 = []
-            for h in hrefs2 or []:
+            for h in hrefs2:
                 h = norm_abs(h)
-                if _looks_like_product_url(h):
+                if h and is_product(h):
                     seen_products.add(h)
 
             if len(seen_products) == before and not clicked:
@@ -257,38 +238,36 @@ async def collect_category_product_links(page: Any, category_url: str, page_limi
                 break
 
         # pagination links
+        if STOP_REQUESTED:
+            break
         try:
             next_links = await page.eval_on_selector_all(
-                'a[rel="next"], a[href*="?page="]', 'els => els.map(e => e.getAttribute("href") || e.href || "")'
+                'a[rel="next"], a[href*="?page="]', 'els => els.map(e => e.getAttribute("href"))'
             )
         except Exception:
             next_links = []
-        for nl in next_links or []:
+        for nl in next_links:
             nl = norm_abs(nl or "")
             if nl and same_host(nl, base_host) and nl not in seen_pages:
                 queue.append((nl, depth))
 
-        # subcategories (limited depth)
-        if depth < max_depth:
+        # subcategories
+        if depth < 2 and not STOP_REQUESTED:
             try:
                 subcats = await page.eval_on_selector_all(
-                    'a[href*="/tootekategooria/"], a[href*="/tooted/"]',
-                    "els => els.map(e => e.getAttribute('href') || e.href || '')"
+                    'a[href*="/tootekategooria/"]', "els => els.map(e => e.getAttribute('href'))"
                 )
             except Exception:
                 subcats = []
-            for sc in subcats or []:
+            for sc in subcats:
                 sc = norm_abs(sc or "")
-                # always queue subcats; PDP filter happens later
-                if sc and same_host(sc, base_host) and sc not in seen_pages:
+                if sc and is_category(sc) and same_host(sc, base_host) and sc not in seen_pages:
                     queue.append((sc, depth + 1))
 
         if page_limit > 0 and len(seen_products) >= page_limit:
             break
 
-    links = list(seen_products)
-    print(f"[discover] {category_url} -> {len(links)} PDP links")
-    return links
+    return list(seen_products)
 
 async def parse_json_ld(page: Any) -> Dict:
     data: Dict = {}
@@ -408,6 +387,8 @@ async def extract_pdp(
     goto_strategy: Literal["auto","domcontentloaded","networkidle","load"]="auto",
     nav_timeout_ms: int = 45000
 ) -> Dict:
+    if STOP_REQUESTED:
+        return {}
     # resilient navigation (networkidle often never fires)
     async def safe_goto(target_url: str) -> str:
         order: List[str]
@@ -778,6 +759,9 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
 
         try:
             for cat in categories:
+                if STOP_REQUESTED:
+                    print("[info] stop requested — breaking category loop")
+                    break
                 print(f"[cat] {cat}")
                 page = await context.new_page()
                 try:
@@ -788,12 +772,14 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
                 if args.max_products > 0:
                     links = links[:args.max_products]
 
-                if not links:
-                    print(f"[warn] No PDP links discovered for {cat}")
+                if STOP_REQUESTED:
+                    break
 
                 sem = asyncio.Semaphore(args.pdp_workers)
 
                 async def worker(url: str) -> Optional[Dict]:
+                    if STOP_REQUESTED:
+                        return None
                     async with sem:
                         p = await context.new_page()
                         try:
@@ -811,13 +797,25 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
                 pending_batch: List[Dict] = []
                 tasks = [asyncio.create_task(worker(u)) for u in links]
                 for coro in asyncio.as_completed(tasks):
-                    r = await coro
+                    if STOP_REQUESTED:
+                        # Cancel any unfinished tasks fast
+                        for t in tasks:
+                            if not t.done():
+                                t.cancel()
+                        break
+                    try:
+                        r = await coro
+                    except asyncio.CancelledError:
+                        r = None
                     if r:
                         pending_batch.append(r)
                         if len(pending_batch) >= 25:
                             on_rows(pending_batch); pending_batch = []
                 if pending_batch:
                     on_rows(pending_batch)
+                if STOP_REQUESTED:
+                    print("[info] stop requested — leaving after current category")
+                    break
         finally:
             await context.close(); await browser.close()
 
@@ -878,10 +876,10 @@ async def main(args):
         all_rows.extend(batch)
         print(f"[stream] +{len(batch)} rows (total {len(all_rows)})")
 
-    # graceful shutdown so Playwright can close cleanly (avoids Node EPIPE)
+    # graceful shutdown so Playwright can close cleanly BUT still allow final upsert
     def _sig_handler(signum, frame):
-        print(f"[warn] received signal {signum}; CSV already streamed. Exiting 130 gracefully.")
-        sys.exit(130)  # raise SystemExit -> executes finally blocks
+        print(f"[warn] received signal {signum}; will stop after current work and upsert to DB.")
+        request_stop()  # do not exit here; let run_ecoop finish quickly
 
     signal.signal(signal.SIGTERM, _sig_handler)
     signal.signal(signal.SIGINT,  _sig_handler)
