@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
     inputs:
       region:
-        description: "Base region URL (e.g., https://coophaapsalu.ee or https://coopvandra.ee; also supports *.ecoop.ee)"
+        description: "Base region URL (e.g., https://coophaapsalu.ee or https://vandra.ecoop.ee)"
         required: false
-        default: "https://coopvandra.ee"
+        default: "https://vandra.ecoop.ee"
       categories_multiline:
         description: "Category URLs/paths (one per line)"
         required: false
@@ -77,8 +77,8 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.region }}" ]; then
             echo "value=${{ inputs.region }}" >> "$GITHUB_OUTPUT"
           else
-            # Scheduled: force Vändra
-            echo "value=https://coopvandra.ee" >> "$GITHUB_OUTPUT"
+            # Scheduled: force Vändra (correct host)
+            echo "value=https://vandra.ecoop.ee" >> "$GITHUB_OUTPUT"
           fi
           echo "Effective REGION set."
 
