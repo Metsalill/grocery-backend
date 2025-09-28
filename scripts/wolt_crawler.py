@@ -633,12 +633,308 @@ async def _maybe_collect_json(resp, out_list: List[Any]):
 
 async def _scrape_tile_prices(page) -> Dict[str, float]:
     try:
-        data = await page.evaluate(
-            """(() => {
-                const out = [];
-                const anchors = Array.from(document.querySelectorAll('a[href*="item"]'));
-                for (const a of anchors) {
-                    const href = a.getAttribute('href') || a.href || '';
-                    const m = href && href.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
-                    if (!m) continue;
-                    const card = a.closest('article,
+        js = r'''
+(() => {
+  const out = [];
+  const anchors = Array.from(document.querySelectorAll('a[href*="item"]'));
+  for (const a of anchors) {
+    const href = a.getAttribute('href') || a.href || '';
+    const m = href && href.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
+    if (!m) continue;
+    const card = a.closest('article, a, div') || a;
+    const txt = (card && card.textContent) ? card.textContent : '';
+    const mt = txt.match(/(\d+[.,]\d{2})\s*€/);
+    if (mt) {
+      const raw = mt[1].replace(',', '.');
+      const val = parseFloat(raw);
+      if (!isNaN(val)) out.push([m[1], val]);
+    }
+  }
+  return out;
+})()
+'''
+        data = await page.evaluate(js)
+        prices: Dict[str, float] = {}
+        for iid, val in data or []:
+            prices[str(iid).lower()] = float(val)
+        return prices
+    except Exception:
+        return {}
+
+async def _extract_venue_id_via_modal(page) -> Optional[str]:
+    try:
+        a = page.locator('a[href*="itemid-"], a[href*="item-"]').first
+        if await a.count() == 0:
+            return None
+        await a.scroll_into_view_if_needed(timeout=1500)
+        await a.click(timeout=2000)
+        for _ in range(20):
+            frames = page.frames
+            for fr in frames:
+                try:
+                    src = (fr.url or "").lower()
+                    m = re.search(r"/([a-f0-9]{24})/", src)
+                    if "prodinfo.wolt.com" in src and m:
+                        return m.group(1)
+                except Exception:
+                    pass
+            await page.wait_for_timeout(150)
+    except Exception:
+        pass
+    return None
+
+async def _goto_with_backoff(page, url: str, max_tries: int, nav_timeout_ms: int, strategies: List[str]):
+    last_err = None
+    for attempt in range(max_tries):
+        for ws in strategies:
+            try:
+                resp = await page.goto(url, wait_until=ws, timeout=nav_timeout_ms)
+                return resp
+            except Exception as e:
+                last_err = e
+        await _sleep_backoff(attempt, retry_after=None, base=1.2)
+    if last_err:
+        raise last_err
+
+async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: float,
+                                   goto_strategy: str, nav_timeout_ms: int):
+    if async_playwright is None:
+        raise RuntimeError("Playwright is required for Wolt fallback but is not installed.")
+
+    found: Dict[str, Dict] = {}
+    blobs: List[Any] = {}
+
+    async with async_playwright() as pw:
+        browser = await pw.chromium.launch(headless=bool(int(headless)))
+        context = await browser.new_context(
+            user_agent=_GLOBAL_UA,
+            viewport={"width": 1366, "height": 900},
+            java_script_enabled=True,
+        )
+        try:
+            context.set_default_navigation_timeout(max(15000, int(nav_timeout_ms)))
+            context.set_default_timeout(max(15000, int(nav_timeout_ms)))
+        except Exception:
+            pass
+
+        async def route_filter(route):
+            try:
+                url = route.request.url
+                if any(h in url for h in [
+                    "googletagmanager.com","google-analytics.com","doubleclick.net",
+                    "facebook.net","connect.facebook.net","hotjar","fullstory",
+                    "cdn.segment.com","intercom",
+                ]):
+                    return await route.abort()
+                return await route.continue_()
+            except Exception:
+                try:
+                    return await route.continue_()
+                except Exception:
+                    return
+
+        await context.route("**/*", route_filter)
+
+        page = await context.new_page()
+        collected_blobs: List[Any] = []
+        page.on("response", lambda resp: asyncio.create_task(_maybe_collect_json(resp, collected_blobs)))
+
+        html = ""
+        tile_prices: Dict[str, float] = {}
+        venue_id: Optional[str] = None
+        try:
+            strategies = [goto_strategy] if goto_strategy in ("domcontentloaded","networkidle","load") else ["domcontentloaded","load","networkidle"]
+            await _goto_with_backoff(page, cat_url, max_tries=6, nav_timeout_ms=nav_timeout_ms, strategies=strategies)
+
+            await wait_cookie_banner(page)
+            for _ in range(10):
+                await page.mouse.wheel(0, 1500)
+                await page.wait_for_timeout(int(max(req_delay, 0.4)*1000 + random.uniform(250, 900)))
+
+            tile_prices = await _scrape_tile_prices(page)
+
+            for varname in ["__APOLLO_STATE__", "__NEXT_DATA__", "__NUXT__", "__INITIAL_STATE__", "__REACT_QUERY_STATE__", "__REDUX_STATE__"]:
+                try:
+                    data = await page.evaluate(f"window.{varname} || null")
+                    if data:
+                        collected_blobs.append(data)
+                except Exception:
+                    pass
+
+            html = await page.content()
+
+            def _walk(o):
+                if isinstance(o, dict):
+                    has_name = isinstance(o.get("name"), str) and o.get("name").strip()
+                    priceish_keys = ("price", "baseprice", "base_price", "unit_price", "total_price", "current_price")
+                    has_priceish = any(k in o for k in priceish_keys)
+                    has_idish = any(k in o for k in ("id", "itemId", "itemID", "_id", "slug"))
+                    if has_name and (has_priceish or has_idish):
+                        key = str(o.get("id") or o.get("slug") or o.get("name"))
+                        found.setdefault(key, o)
+                    for v in o.values():
+                        _walk(v)
+                elif isinstance(o, list):
+                    for v in o:
+                        _walk(v)
+
+            for blob in collected_blobs:
+                try:
+                    _walk(blob)
+                except Exception:
+                    pass
+
+            if not found:
+                ids = set(re.findall(r"(?:itemid-|item-)([a-f0-9]{24})", html or "", re.I))
+                for iid in ids:
+                    found[iid] = {"id": iid}
+
+            m = re.search(r"/menu-images/([a-f0-9]{24})/", html, re.I)
+            if m:
+                venue_id = m.group(1)
+            if not venue_id:
+                venue_id = await _extract_venue_id_via_modal(page)
+
+            return list(found.values()), collected_blobs, html, tile_prices, venue_id
+
+        finally:
+            await context.close()
+            await browser.close()
+
+# ---------- runner ----------
+def _lang_from_url(u: str) -> str:
+    m = re.search(r"https?://[^/]+/([a-z]{2})(?:/|$)", u, re.I)
+    return (m.group(1).lower() if m else "et")
+
+async def run_wolt(args, categories: List[str], on_rows) -> None:
+    force_pw = bool(args.force_playwright or str(os.getenv("WOLT_FORCE_PLAYWRIGHT", "")).lower() in ("1","true","t","yes","y","on"))
+
+    for idx, cat in enumerate(categories):
+        store_host_cat = args.store_host.strip() if args.store_host else _wolt_store_host(cat)
+        print(f"[cat-wolt] {cat}")
+
+        if idx > 0:
+            await asyncio.sleep(float(args.req_delay) + random.uniform(0.5, 1.2))
+
+        try:
+            payload = None if force_pw else await _load_wolt_payload(cat)
+
+            if payload:
+                found: Dict[str, Dict] = {}
+                _walk_collect_items(payload, found)
+                items = list(found.values())
+                blobs = [payload]
+                html = ""
+                tile_prices = {}
+                venue_id = None
+            else:
+                print(f"[info] forcing Playwright fallback for {cat}")
+                items, blobs, html, tile_prices, venue_id = await _capture_with_playwright(
+                    cat,
+                    headless=bool(int(args.headless)),
+                    req_delay=float(args.req_delay),
+                    goto_strategy=args.goto_strategy,
+                    nav_timeout_ms=int(args.nav_timeout),
+                )
+
+            if venue_id:
+                lang = _lang_from_url(cat)
+                await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=240)
+            else:
+                print("[warn] venueId not found — skipping direct prodinfo enrichment")
+
+            if not payload and items:
+                for it in items:
+                    if it.get("id"):
+                        iid = str(it["id"]).lower()
+                        if it.get("price") in (None, 0) and iid in tile_prices:
+                            it["price"] = tile_prices[iid]
+
+            existing_gtins = await _fetch_existing_gtins(store_host_cat)
+
+            rows_raw = []
+            for item in items:
+                row = _extract_row_from_item(item, cat, store_host_cat)
+                if not row:
+                    continue
+                if row.get("ean_norm") and row["ean_norm"] in existing_gtins:
+                    continue
+                rows_raw.append(row)
+
+            rows = rows_raw
+            if args.max_products and args.max_products > 0:
+                rows = rows[: args.max_products]
+
+            print(f"[info] category rows: {len(rows)}" + (" (pw-fallback)" if not payload else ""))
+            on_rows(rows)
+
+        except Exception as e:
+            print(f"[warn] Wolt category failed {cat}: {e}")
+
+# ---------- main ----------
+async def main(args):
+    categories: List[str] = []
+    if args.categories_multiline:
+        categories.extend([ln.strip() for ln in args.categories_multiline.splitlines() if ln.strip()])
+    if args.categories_file and Path(args.categories_file).exists():
+        categories = [ln.strip() for ln in Path(args.categories_file).read_text(encoding="utf-8").splitlines() if ln.strip()] or categories
+    if not categories:
+        print("[error] No category URLs provided. Pass --categories-multiline or --categories-file.")
+        sys.exit(2)
+
+    print(f"[args] headless={args.headless} req_delay={args.req_delay} pdp_workers(not used)={args.pdp_workers} goto={args.goto_strategy} nav_timeout={args.nav_timeout}ms store_host={args.store_host or '(auto)'}")
+
+    out_path = Path(args.out)
+    if out_path.is_dir() or str(out_path).endswith("/"):
+        out_path = out_path / f"coop_wolt_{now_stamp()}.csv"
+    print(f"[out] streaming CSV → {out_path}")
+    if args.write_empty_csv:
+        _ensure_csv_with_header(out_path)
+
+    all_rows: List[Dict] = []
+
+    def on_rows(batch: List[Dict]):
+        nonlocal all_rows
+        if not batch:
+            return
+        append_csv(batch, out_path)
+        all_rows.extend(batch)
+        print(f"[stream] +{len(batch)} rows (total {len(all_rows)})")
+
+    def _sig_handler(signum, frame):
+        print(f"[warn] received signal {signum}; CSV already streamed. Exiting 130 gracefully.")
+        sys.exit(130)
+
+    signal.signal(signal.SIGTERM, _sig_handler)
+    signal.signal(signal.SIGINT,  _sig_handler)
+
+    await run_wolt(args, categories, on_rows)
+
+    gtin_ok = sum(1 for r in all_rows if (r.get("ean_norm") or (r.get("ean_raw") and r.get("ean_raw") != "-")))
+    brand_ok = sum(1 for r in all_rows if (r.get("brand") or r.get("manufacturer")))
+    print(f"[stats] rows={len(all_rows)}  gtin_present={gtin_ok}  brand_or_manufacturer_present={brand_ok}")
+    print(f"[ok] CSV ready: {out_path}")
+    await maybe_upsert_db(all_rows)
+
+def parse_args():
+    p = argparse.ArgumentParser(description="Coop on Wolt category crawler")
+    p.add_argument("--venue", default="", help="Wolt venue URL (informational).")
+    p.add_argument("--store-host", default="", help="Store host label to use in output/DB (e.g., wolt:coop-parnu).")
+    p.add_argument("--categories-multiline", dest="categories_multiline", default="",
+                   help="Newline-separated category URLs")
+    p.add_argument("--categories-file", dest="categories_file", default="", help="Path to txt file with category URLs")
+    p.add_argument("--max-products", type=int, default=0, help="Global cap per category (0=all)")
+    p.add_argument("--pdp-workers", type=int, default=4, help="(Reserved) Concurrency hint; not used in Wolt path")
+    p.add_argument("--req-delay", type=float, default=0.4, help="Seconds between ops in PW fallback")
+    p.add_argument("--headless", default="1", help="1/0 headless for PW fallback")
+    p.add_argument("--goto-strategy", choices=["auto","domcontentloaded","networkidle","load"],
+                   default="auto", help="Playwright wait_until strategy for category navigation.")
+    p.add_argument("--nav-timeout", default="45000", help="Navigation timeout in milliseconds.")
+    p.add_argument("--out", default="out/coop_wolt.csv", help="CSV file or output directory")
+    p.add_argument("--force-playwright", action="store_true", help="Force Playwright network fallback.")
+    p.add_argument("--write-empty-csv", action="store_true", default=True, help="Always write CSV header even if no rows.")
+    return p.parse_args()
+
+if __name__ == "__main__":
+    args = parse_args()
+    asyncio.run(main(args))
