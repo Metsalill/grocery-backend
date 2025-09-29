@@ -96,6 +96,57 @@ jobs:
           cp "$SRC" /tmp/categories.txt
           echo "path=/tmp/categories.txt" >> "$GITHUB_OUTPUT"
 
+      # Presence-only check so we fail early if secret is missing
+      - name: Preflight DB env (presence-only)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "${DATABASE_URL:-}" ]; then
+            echo "::warning::DATABASE_URL not set — upsert will be skipped."
+          else
+            echo "::add-mask::${DATABASE_URL}"
+            echo "::notice::DATABASE_URL is present. Proceeding."
+          fi
+
+      # DNS + short asyncpg connect check to the same DATABASE_URL
+      - name: DB preflight (DNS + connect)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DATABASE_URL:-}" ]; then
+            echo "::notice::No DATABASE_URL provided; skipping DB preflight."
+            exit 0
+          fi
+          python - <<'PY'
+          import os, socket, sys, urllib.parse, asyncio
+          url = os.environ['DATABASE_URL']
+          p = urllib.parse.urlparse(url)
+          host, port = p.hostname, p.port or 5432
+          print(f"[preflight] host={host} port={port}")
+          try:
+              addr = socket.getaddrinfo(host, port)[0][4][0]
+              print(f"[preflight] DNS {host} -> {addr}:{port}")
+          except Exception as e:
+              print(f"::error::DNS resolution failed for {host}:{port} -> {e}")
+              sys.exit(1)
+          async def go():
+              try:
+                  import asyncpg
+              except Exception:
+                  print("::warning::asyncpg not installed; skipping connect test")
+                  return
+              try:
+                  conn = await asyncpg.connect(url, timeout=6)
+                  ver = await conn.fetchval("select version()")
+                  print("[preflight] connected ok:", ver.split()[0])
+                  await conn.close()
+              except Exception as e:
+                  print(f"::error::DB connect failed: {e}")
+                  sys.exit(1)
+          asyncio.run(go())
+          PY
+
       - name: Run Wolt crawler
         env:
           PYTHONUNBUFFERED: "1"
