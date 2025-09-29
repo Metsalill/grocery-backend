@@ -197,6 +197,48 @@ jobs:
             echo "::notice::DATABASE_URL is present. Proceeding."
           fi
 
+      # Connectivity preflight (DNS + short asyncpg connect). Use DATABASE_PUBLIC_URL value in this secret.
+      - name: DB preflight (DNS + connect)
+        if: ${{ matrix.shard_index == 0 && (github.event_name == 'schedule' || inputs.upsert_db == '1') }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          if [ -z "${DATABASE_URL:-}" ]; then
+            echo "::warning::DATABASE_URL not set; skipping DB preflight."
+            exit 0
+          fi
+          python - <<'PY'
+          import os, socket, sys, urllib.parse, asyncio
+          url = os.environ['DATABASE_URL']
+          p = urllib.parse.urlparse(url)
+          host, port = p.hostname, p.port or 5432
+          print(f"[preflight] host={host} port={port}")
+          try:
+              addr = socket.getaddrinfo(host, port)[0][4][0]
+              print(f"[preflight] DNS {host} -> {addr}:{port}")
+          except Exception as e:
+              print(f"::error::DNS resolution failed for {host}:{port} -> {e}")
+              sys.exit(1)
+
+          async def go():
+              try:
+                  import asyncpg
+              except Exception:
+                  print("::warning::asyncpg not installed; skipping connect test")
+                  return
+              try:
+                  conn = await asyncpg.connect(url, timeout=5)
+                  ver = await conn.fetchval("select version()")
+                  print("[preflight] connected ok:", ver.split()[0])
+                  await conn.close()
+              except Exception as e:
+                  print(f"::error::DB connect failed: {e}")
+                  sys.exit(1)
+
+          asyncio.run(go())
+          PY
+
       - name: Run eCoop crawler (sharded)
         if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
         env:
