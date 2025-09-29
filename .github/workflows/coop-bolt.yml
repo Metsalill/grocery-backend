@@ -28,7 +28,7 @@ on:
 
 concurrency:
   group: coop-bolt-crawl
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   crawl-bolt:
@@ -36,7 +36,7 @@ jobs:
     timeout-minutes: 120
 
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}   # <-- use this secret
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}  # use the public Railway URL
       CITY_PATH: ${{ inputs.city_path || '2-tartu' }}
       HEADLESS: ${{ inputs.headless || '1' }}
       REQ_DELAY: ${{ inputs.req_delay || '0.25' }}
@@ -58,7 +58,22 @@ jobs:
           pip install playwright==1.47.0 selectolax psycopg[binary] tenacity
           python -m playwright install --with-deps chromium
 
-      # --- Crawl each store explicitly (no newline parsing needed) ---
+      # Crawl Kvartali first (has category override file)
+      - name: Crawl Kvartali COOP Maksimarket
+        run: |
+          set -euo pipefail
+          STORE="Kvartali COOP Maksimarket"
+          SAFE_NAME="$(echo "$STORE" | tr ' ' '_' | tr -dc '[:alnum:]_')"
+          echo "==> Crawling: $STORE (city=${CITY_PATH}, headless=${HEADLESS}, delay=${REQ_DELAY}, upsert=${UPSERT_DB})"
+          mkdir -p out
+          python scripts/bolt_crawler.py \
+            --city "${CITY_PATH}" \
+            --store "${STORE}" \
+            --headless "${HEADLESS}" \
+            --req-delay "${REQ_DELAY}" \
+            --upsert-db "${UPSERT_DB}" \
+            --categories-dir "${CATEGORIES_DIR}" \
+            --out "out/coop_bolt_${CITY_PATH}_${SAFE_NAME}.csv"
 
       - name: Crawl Lõunakeskuse COOP Maksimarket
         run: |
@@ -80,22 +95,6 @@ jobs:
         run: |
           set -euo pipefail
           STORE="Eedeni COOP Maksimarket"
-          SAFE_NAME="$(echo "$STORE" | tr ' ' '_' | tr -dc '[:alnum:]_')"
-          echo "==> Crawling: $STORE (city=${CITY_PATH}, headless=${HEADLESS}, delay=${REQ_DELAY}, upsert=${UPSERT_DB})"
-          mkdir -p out
-          python scripts/bolt_crawler.py \
-            --city "${CITY_PATH}" \
-            --store "${STORE}" \
-            --headless "${HEADLESS}" \
-            --req-delay "${REQ_DELAY}" \
-            --upsert-db "${UPSERT_DB}" \
-            --categories-dir "${CATEGORIES_DIR}" \
-            --out "out/coop_bolt_${CITY_PATH}_${SAFE_NAME}.csv"
-
-      - name: Crawl Kvartali COOP Maksimarket
-        run: |
-          set -euo pipefail
-          STORE="Kvartali COOP Maksimarket"
           SAFE_NAME="$(echo "$STORE" | tr ' ' '_' | tr -dc '[:alnum:]_')"
           echo "==> Crawling: $STORE (city=${CITY_PATH}, headless=${HEADLESS}, delay=${REQ_DELAY}, upsert=${UPSERT_DB})"
           mkdir -p out
