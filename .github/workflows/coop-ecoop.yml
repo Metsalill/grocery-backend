@@ -40,7 +40,7 @@ on:
         required: false
         default: "45"
       upsert_db:
-        description: "1 = upsert into DATABASE_URL (staging_coop_products)"
+        description: "1 = upsert into DATABASE_URL_PUBLIC (staging_coop_products)"
         required: false
         default: "0"
       extra_args:
