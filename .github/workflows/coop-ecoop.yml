@@ -188,7 +188,7 @@ jobs:
       - name: Preflight DB env (presence-only)
         if: ${{ matrix.shard_index == 0 && (github.event_name == 'schedule' || inputs.upsert_db == '1') }}
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
         run: |
           if [ -z "${DATABASE_URL:-}" ]; then
             echo "::warning::DATABASE_URL not set — upsert will be skipped."
@@ -197,11 +197,11 @@ jobs:
             echo "::notice::DATABASE_URL is present. Proceeding."
           fi
 
-      # Connectivity preflight (DNS + short asyncpg connect). Use DATABASE_PUBLIC_URL value in this secret.
+      # Connectivity preflight (DNS + short asyncpg connect) using the PUBLIC URL.
       - name: DB preflight (DNS + connect)
         if: ${{ matrix.shard_index == 0 && (github.event_name == 'schedule' || inputs.upsert_db == '1') }}
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
         run: |
           set -euo pipefail
           if [ -z "${DATABASE_URL:-}" ]; then
@@ -243,7 +243,7 @@ jobs:
         if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
         env:
           PYTHONUNBUFFERED: "1"  # real-time logs
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
           # Scheduled runs: force upsert/dedup = 1; Manual: honor input.
           COOP_UPSERT_DB: ${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}
           COOP_DEDUP_DB:  ${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}
