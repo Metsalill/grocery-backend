@@ -38,7 +38,7 @@ on:
       shard_timeout_min:
         description: "Per-shard hard timeout in minutes (SIGINT, then kill after 60s)"
         required: false
-        default: "45"
+        default: "60"
       upsert_db:
         description: "1 = upsert into DATABASE_URL_PUBLIC (staging_coop_products)"
         required: false
