@@ -38,6 +38,28 @@ def request_stop():
     global STOP_REQUESTED
     STOP_REQUESTED = True
 
+# After a stop request, silence BrokenPipe spam from CI by wrapping stdout/err
+class _SafeWriter:
+    def __init__(self, stream):
+        self._stream = stream
+    def write(self, data):
+        try:
+            return self._stream.write(data)
+        except Exception:
+            return 0
+    def flush(self):
+        try:
+            return self._stream.flush()
+        except Exception:
+            return
+
+def _install_quiet_io():
+    try:
+        sys.stdout = _SafeWriter(sys.stdout)  # type: ignore[assignment]
+        sys.stderr = _SafeWriter(sys.stderr)  # type: ignore[assignment]
+    except Exception:
+        pass
+
 # ---------- regexes & helpers ----------
 
 SIZE_RE = re.compile(r"(\b\d+[\,\.]?\d*\s?(?:kg|g|l|ml|tk|pcs|x|×)\s?\d*\b)", re.IGNORECASE)
@@ -130,9 +152,11 @@ def map_store_host(region_url: str) -> str:
 # ---------- Playwright (required) ----------
 try:
     from playwright.async_api import async_playwright, TimeoutError as PWTimeout  # noqa: F401
+    from playwright._impl._errors import TargetClosedError  # type: ignore
 except Exception as e:  # pragma: no cover
     async_playwright = None
     _IMPORT_ERROR = e
+    TargetClosedError = Exception  # fallback typing
 
 async def wait_cookie_banner(page: Any):
     try:
@@ -754,67 +778,79 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
     # map ecoop region to canonical store_host
     store_host = map_store_host(base_region)
 
-    async with async_playwright() as pw:
-        browser = await pw.chromium.launch(headless=bool(int(args.headless)))
-        context = await browser.new_context(
-            user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                        "(KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"),
-            viewport={"width": 1366, "height": 900},
-            java_script_enabled=True,
-        )
-        try:
-            context.set_default_navigation_timeout(max(15000, int(args.nav_timeout)))
-            context.set_default_timeout(max(15000, int(args.nav_timeout)))
-        except Exception:
-            pass
+    # Start/stop Playwright manually to avoid noisy __aexit__ errors on SIGINT
+    pw_cm = async_playwright()
+    pw = await pw_cm.start()
+    browser = await pw.chromium.launch(headless=bool(int(args.headless)))
+    context = await browser.new_context(
+        user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                    "(KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"),
+        viewport={"width": 1366, "height": 900},
+        java_script_enabled=True,
+    )
+    try:
+        context.set_default_navigation_timeout(max(15000, int(args.nav_timeout)))
+        context.set_default_timeout(max(15000, int(args.nav_timeout)))
+    except Exception:
+        pass
 
-        await context.route("**/*", _route_handler)
+    await context.route("**/*", _route_handler)
 
-        try:
-            for cat in categories:
-                if STOP_REQUESTED:
-                    print("[info] stop requested — breaking category loop")
-                    break
-                print(f"[cat] {cat}")
-                page = await context.new_page()
+    try:
+        for cat in categories:
+            if STOP_REQUESTED:
+                print("[info] stop requested — breaking category loop")
+                break
+            print(f"[cat] {cat}")
+            page = await context.new_page()
+            try:
+                links = await collect_category_product_links(page, cat, args.page_limit, args.req_delay, max_depth=2)
+            finally:
                 try:
-                    links = await collect_category_product_links(page, cat, args.page_limit, args.req_delay, max_depth=2)
-                finally:
                     await page.close()
+                except Exception:
+                    pass
 
-                if args.max_products > 0:
-                    links = links[:args.max_products]
+            if args.max_products > 0:
+                links = links[:args.max_products]
 
-                if STOP_REQUESTED:
-                    break
+            if STOP_REQUESTED:
+                break
 
-                sem = asyncio.Semaphore(args.pdp_workers)
+            sem = asyncio.Semaphore(args.pdp_workers)
 
-                async def worker(url: str) -> Optional[Dict]:
+            async def worker(url: str) -> Optional[Dict]:
+                # Acquire slot first; check STOP again before creating a page
+                async with sem:
                     if STOP_REQUESTED:
                         return None
-                    async with sem:
+                    try:
                         p = await context.new_page()
-                        try:
-                            return await extract_pdp(
-                                p, url, args.req_delay, store_host,
-                                goto_strategy=args.goto_strategy,
-                                nav_timeout_ms=int(args.nav_timeout)
-                            )
-                        except Exception as e:
+                    except TargetClosedError:
+                        return None
+                    except Exception:
+                        return None
+                    try:
+                        return await extract_pdp(
+                            p, url, args.req_delay, store_host,
+                            goto_strategy=args.goto_strategy,
+                            nav_timeout_ms=int(args.nav_timeout)
+                        )
+                    except Exception as e:
+                        if not STOP_REQUESTED:
                             print(f"[warn] PDP fail {url}: {e}")
-                            return None
-                        finally:
+                        return None
+                    finally:
+                        try:
                             await p.close()
+                        except Exception:
+                            pass
 
-                pending_batch: List[Dict] = []
-                tasks = [asyncio.create_task(worker(u)) for u in links]
+            pending_batch: List[Dict] = []
+            tasks = [asyncio.create_task(worker(u)) for u in links]
+            try:
                 for coro in asyncio.as_completed(tasks):
                     if STOP_REQUESTED:
-                        # Cancel any unfinished tasks fast
-                        for t in tasks:
-                            if not t.done():
-                                t.cancel()
                         break
                     try:
                         r = await coro
@@ -824,21 +860,33 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
                         pending_batch.append(r)
                         if len(pending_batch) >= 25:
                             on_rows(pending_batch); pending_batch = []
-                if pending_batch:
-                    on_rows(pending_batch)
-                if STOP_REQUESTED:
-                    print("[info] stop requested — leaving after current category]")
-                    break
-        finally:
-            # Crash-proof shutdown: never let close errors abort the run
-            try:
-                await context.close()
-            except Exception as e:
-                print(f"[warn] context.close() failed: {e!r}")
-            try:
-                await browser.close()
-            except Exception as e:
-                print(f"[warn] browser.close() failed: {e!r}")
+            finally:
+                # On stop, cancel the rest and await them to suppress warnings
+                still = [t for t in tasks if not t.done()]
+                for t in still:
+                    t.cancel()
+                if still:
+                    await asyncio.gather(*still, return_exceptions=True)
+
+            if pending_batch:
+                on_rows(pending_batch)
+            if STOP_REQUESTED:
+                print("[info] stop requested — leaving after current category")
+                break
+    finally:
+        # Crash-proof shutdown: never let close errors abort the run
+        try:
+            await context.close()
+        except Exception:
+            pass
+        try:
+            await browser.close()
+        except Exception:
+            pass
+        try:
+            await pw_cm.stop()
+        except Exception:
+            pass
 
 # ---------- main ----------
 async def main(args):
@@ -900,7 +948,8 @@ async def main(args):
     # graceful shutdown so Playwright can close cleanly BUT still allow final upsert
     def _sig_handler(signum, frame):
         print(f"[warn] received signal {signum}; will stop after current work and upsert to DB.")
-        request_stop()  # do not exit here; let run_ecoop finish quickly
+        request_stop()        # do not exit here; let run_ecoop finish quickly
+        _install_quiet_io()   # avoid BrokenPipe spam in CI
 
     signal.signal(signal.SIGTERM, _sig_handler)
     signal.signal(signal.SIGINT,  _sig_handler)
@@ -920,8 +969,8 @@ async def main(args):
     # Always attempt upsert even if crawl failed or was interrupted
     await maybe_upsert_db(all_rows)
 
-    # If you want the step to be red on crawl errors, re-raise after upsert:
-    if crawl_err:
+    # Only fail the step if there was a real error (not our intentional stop)
+    if crawl_err and not STOP_REQUESTED:
         raise crawl_err
 
 def parse_args():
