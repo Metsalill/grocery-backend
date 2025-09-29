@@ -827,10 +827,18 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
                 if pending_batch:
                     on_rows(pending_batch)
                 if STOP_REQUESTED:
-                    print("[info] stop requested — leaving after current category")
+                    print("[info] stop requested — leaving after current category]")
                     break
         finally:
-            await context.close(); await browser.close()
+            # Crash-proof shutdown: never let close errors abort the run
+            try:
+                await context.close()
+            except Exception as e:
+                print(f"[warn] context.close() failed: {e!r}")
+            try:
+                await browser.close()
+            except Exception as e:
+                print(f"[warn] browser.close() failed: {e!r}")
 
 # ---------- main ----------
 async def main(args):
@@ -897,13 +905,24 @@ async def main(args):
     signal.signal(signal.SIGTERM, _sig_handler)
     signal.signal(signal.SIGINT,  _sig_handler)
 
-    await run_ecoop(args, categories, base_region, on_rows)
+    crawl_err = None
+    try:
+        await run_ecoop(args, categories, base_region, on_rows)
+    except Exception as e:
+        crawl_err = e
+        print(f"[warn] run_ecoop terminated with error: {e!r} (will still upsert what we have)")
 
     gtin_ok = sum(1 for r in all_rows if (r.get("ean_norm") or (r.get("ean_raw") and r.get("ean_raw") != "-")))
     brand_ok = sum(1 for r in all_rows if (r.get("brand") or r.get("manufacturer")))
     print(f"[stats] rows={len(all_rows)}  gtin_present={gtin_ok}  brand_or_manufacturer_present={brand_ok}")
     print(f"[ok] CSV ready: {out_path}")
+
+    # Always attempt upsert even if crawl failed or was interrupted
     await maybe_upsert_db(all_rows)
+
+    # If you want the step to be red on crawl errors, re-raise after upsert:
+    if crawl_err:
+        raise crawl_err
 
 def parse_args():
     p = argparse.ArgumentParser(description="Coop eCoop category crawler → PDP extractor")
