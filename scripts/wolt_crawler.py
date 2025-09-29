@@ -35,6 +35,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 from urllib.parse import urlparse
 
+# ---------- shared utils ----------
 DIGITS_ONLY = re.compile(r"[^0-9]")
 SIZE_RE = re.compile(r"(\b\d+[\,\.]?\d*\s?(?:kg|g|l|ml|tk|pcs|x|×)\s?\d*\b)", re.IGNORECASE)
 HEX24_RE = re.compile(r"\b[a-f0-9]{24}\b", re.I)
@@ -54,7 +55,7 @@ def normalize_ean(e: Optional[str]) -> Optional[str]:
     if len(d) in (8, 12, 13, 14):
         if len(d) == 14 and d.startswith("0"):
             d = d[1:]
-        if len(d) == 12:  # UPC-A to EAN-13
+        if len(d) == 12:  # UPC-A → EAN-13
             d = "0" + d
         return d
     return None
@@ -559,9 +560,9 @@ def _extract_row_from_item(item: Dict, category_url: str, store_host: str) -> Op
         "ean_raw": ean_raw if ean_raw not in (None, "") else "-",
         "ean_norm": ean_norm,
         "name": name,
-        "size_text": size_text,
+        "size_text": size_text,           # ← amount
         "brand": brand,
-        "manufacturer": manufacturer,
+        "manufacturer": manufacturer,     # ← Tootja info
         "price": price if price is not None else None,
         "currency": "EUR",
         "image_url": image_url,
@@ -702,7 +703,7 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
         raise RuntimeError("Playwright is required for Wolt fallback but is not installed.")
 
     found: Dict[str, Dict] = {}
-    blobs: List[Any] = {}
+    blobs: List[Any] = []  # kept for debugging if needed
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=bool(int(headless)))
