@@ -16,7 +16,7 @@ on:
         required: false
         default: "0"
       upsert_db:
-        description: "1 = upsert into DATABASE_URL (staging_coop_products)"
+        description: "1 = upsert into DATABASE_URL_PUBLIC (staging_coop_products)"
         required: false
         default: "0"
       force_playwright:
@@ -99,7 +99,7 @@ jobs:
       # Presence-only check so we fail early if secret is missing
       - name: Preflight DB env (presence-only)
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
         run: |
           if [ -z "${DATABASE_URL:-}" ]; then
             echo "::warning::DATABASE_URL not set — upsert will be skipped."
@@ -108,10 +108,10 @@ jobs:
             echo "::notice::DATABASE_URL is present. Proceeding."
           fi
 
-      # DNS + short asyncpg connect check to the same DATABASE_URL
+      # DNS + short asyncpg connect check to the same DATABASE_URL_PUBLIC
       - name: DB preflight (DNS + connect)
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
         run: |
           set -euo pipefail
           if [ -z "${DATABASE_URL:-}" ]; then
@@ -150,7 +150,7 @@ jobs:
       - name: Run Wolt crawler
         env:
           PYTHONUNBUFFERED: "1"
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
           COOP_UPSERT_DB: ${{ github.event_name == 'workflow_dispatch' && inputs.upsert_db || '1' }}
           COOP_DEDUP_DB: ${{ github.event_name == 'workflow_dispatch' && inputs.upsert_db || '1' }}
           WOLT_FORCE_PLAYWRIGHT: ${{ github.event_name == 'workflow_dispatch' && inputs.force_playwright || '0' }}
