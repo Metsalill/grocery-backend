@@ -11,12 +11,18 @@ Fallback:
 - Playwright page load, scroll, capture JSON blobs, tile prices, and venueId via modal.
 - Enrich items via https://prodinfo.wolt.com/<lang>/<venueId>/<itemId> to fetch GTIN & Supplier.
 
-Robustness upgrades (Pärnu fixes):
-- Dismisses the location/geolocation dialog and any sheet/popover that blocks clicks.
-- Finds item IDs anywhere on the page (attributes/text), not only in anchors.
-- Broader click targets to open a product modal (buttons/tiles with "€" text, data-test hooks).
-- Multi-strategy venueId discovery (HTML, perf entries, images, link/script URLs, modal probe).
-- Per-category watchdog timeout to avoid long stalls.
+GTIN/Tootja enrichment is tolerant:
+- Handles JSON-LD, plain text, <dt>/<dd>, headings.
+- If still missing, opens product modal and reads “GTIN / Tootja / Tarnija / Supplier”.
+  Limited by --modal-probe-limit.
+
+Important:
+- ext_id is kept STABLE as iid:<24hex> (Wolt item id) so later runs can update rows.
+
+Guard rails:
+- Filters noisy junk.
+- Accepts GTIN '-' only when the site explicitly shows '-' for GTIN.
+- Per-category watchdog timeout so a stuck page can’t stall the job.
 
 Env:
 - WOLT_FORCE_PLAYWRIGHT=1 to force PW fallback
@@ -633,34 +639,6 @@ async def wait_cookie_banner(page: Any):
     except Exception:
         pass
 
-async def dismiss_location_prompt(page: Any):
-    """
-    Close the address/geolocation dialog + any sheet/popover that blocks clicks.
-    """
-    try:
-        # explicit close button on address sheet
-        for sel in [
-            'button[aria-label="close"]',
-            'button:has-text("×")',
-            'button:has-text("Sulge")',
-            'button:has-text("Close")',
-            '[data-test*="close"]',
-        ]:
-            el = page.locator(sel).first
-            if await el.count() > 0:
-                await el.click(timeout=1000)
-                await page.wait_for_timeout(200)
-                break
-    except Exception:
-        pass
-    # As a last resort: hit Escape a few times
-    try:
-        for _ in range(3):
-            await page.keyboard.press("Escape")
-            await page.wait_for_timeout(120)
-    except Exception:
-        pass
-
 async def _maybe_collect_json(resp, out_list: List[Any]):
     try:
         ct = (resp.headers.get("content-type") or "").lower()
@@ -684,26 +662,18 @@ async def _scrape_tile_prices(page) -> Dict[str, float]:
         js = r'''
 (() => {
   const out = [];
-  // read any article/data-test="menu-item" tile too
-  const cards = Array.from(document.querySelectorAll('a[href*="item"], article, [data-test*="menu-item"]'));
-  for (const el of cards) {
-    const text = (el.textContent || '').replace(/\s+/g,' ');
-    const mprice = text.match(/(\d+[.,]\d{2})\s*€/);
-    // find an id in attributes or text
-    const attrs = ['href','id','data-id','data-item-id','data-product-id','data-test-id','data-testid','data-qa'];
-    const re = /(?:itemid-|item-)?([a-f0-9]{24})/i;
-    let iid = null;
-    for (const a of attrs) {
-      const v = el.getAttribute && el.getAttribute(a);
-      if (v) { const m = v.match(re); if (m) { iid = m[1]; break; } }
-    }
-    if (!iid) {
-      const t = el.textContent || '';
-      const m = t.match(re); if (m) iid = m[1];
-    }
-    if (iid && mprice) {
-      const val = parseFloat(mprice[1].replace(',', '.'));
-      if (!isNaN(val)) out.push([iid.toLowerCase(), val]);
+  const anchors = Array.from(document.querySelectorAll('a[href*="item"]'));
+  for (const a of anchors) {
+    const href = a.getAttribute('href') || a.href || '';
+    const m = href && href.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
+    if (!m) continue;
+    const card = a.closest('article, a, div') || a;
+    const txt = (card && card.textContent) ? card.textContent : '';
+    const mt = txt.match(/[~≈]?\s*(\d+[.,]\d{2})\s*€/);
+    if (mt) {
+      const raw = mt[1].replace(',', '.');
+      const val = parseFloat(raw);
+      if (!isNaN(val)) out.push([m[1], val]);
     }
   }
   return out;
@@ -719,19 +689,11 @@ async def _scrape_tile_prices(page) -> Dict[str, float]:
 
 async def _extract_venue_id_via_modal(page) -> Optional[str]:
     try:
-        # broader click targets to ensure a product opens
-        for sel in [
-            'a[href*="itemid-"], a[href*="item-"]',
-            '[data-test*="menu-item"]',
-            'article:has-text("€")',
-            '[role="button"]:has-text("€")',
-        ]:
-            a = page.locator(sel).first
-            if await a.count() > 0:
-                await a.scroll_into_view_if_needed(timeout=1500)
-                await a.click(timeout=2000)
-                break
-
+        a = page.locator('a[href*="itemid-"], a[href*="item-"]').first
+        if await a.count() == 0:
+            return None
+        await a.scroll_into_view_if_needed(timeout=1500)
+        await a.click(timeout=2000)
         for _ in range(20):
             frames = page.frames
             for fr in frames:
@@ -800,8 +762,6 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
             user_agent=_GLOBAL_UA,
             viewport={"width": 1366, "height": 900},
             java_script_enabled=True,
-            geolocation={"latitude": 59.437, "longitude": 24.753},  # Tallinn-ish, harmless
-            permissions=["geolocation"],
         )
         try:
             context.set_default_navigation_timeout(max(15000, int(nav_timeout_ms)))
@@ -836,19 +796,17 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
         venue_id: Optional[str] = None
         try:
             strategies = [goto_strategy] if goto_strategy in ("domcontentloaded","networkidle","load") else ["domcontentloaded"]
+            # keep tries modest to avoid long stalls
             await _goto_with_backoff(page, cat_url, max_tries=3, nav_timeout_ms=nav_timeout_ms, strategies=strategies)
 
             await wait_cookie_banner(page)
-            await dismiss_location_prompt(page)
-
-            # scroll to trigger lazy loading
-            for _ in range(10):
+            # a bit more scrolling to surface late resources
+            for _ in range(14):
                 await page.mouse.wheel(0, 1500)
                 await page.wait_for_timeout(int(max(req_delay, 0.4)*1000 + random.uniform(250, 900)))
 
             tile_prices = await _scrape_tile_prices(page)
 
-            # collect in-window states
             for varname in ["__APOLLO_STATE__", "__NEXT_DATA__", "__NUXT__", "__INITIAL_STATE__", "__REACT_QUERY_STATE__", "__REDUX_STATE__"]:
                 try:
                     data = await page.evaluate(f"window.{varname} || null")
@@ -859,7 +817,6 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
 
             html = await page.content()
 
-            # walk blobs for items
             def _walk(o):
                 if isinstance(o, dict):
                     has_name = isinstance(o.get("name"), str) and o.get("name").strip()
@@ -881,33 +838,6 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
                 except Exception:
                     pass
 
-            # If no items yet, do an aggressive id scan in DOM (attrs + text)
-            if not found:
-                try:
-                    ids = await page.evaluate("""
-(() => {
-  const ids = new Set();
-  const attrs = ['href','id','data-id','data-item-id','data-product-id','data-test-id','data-testid','data-qa'];
-  const re = /([a-f0-9]{24})/i;
-  for (const el of document.querySelectorAll('*')) {
-    for (const a of attrs) {
-      const v = el.getAttribute && el.getAttribute(a);
-      if (v) { const m = v.match(re); if (m) ids.add(m[1]); }
-    }
-    const t = el.textContent || '';
-    const mt = t.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
-    if (mt) ids.add(mt[1]);
-  }
-  return Array.from(ids);
-})()
-""")
-                    for iid in ids or []:
-                        if HEX24_RE.fullmatch(str(iid)):
-                            found[str(iid)] = {"id": str(iid)}
-                except Exception:
-                    pass
-
-            # A final regex fallback on HTML
             if not found:
                 ids = set(re.findall(r"(?:itemid-|item-)([a-f0-9]{24})", html or "", re.I))
                 for iid in ids:
@@ -948,24 +878,12 @@ async def _enrich_items_via_modal(cat_url: str, items: List[Dict], headless: boo
             strategies = [goto_strategy] if goto_strategy in ("domcontentloaded","networkidle","load") else ["domcontentloaded"]
             await _goto_with_backoff(page, cat_url, max_tries=3, nav_timeout_ms=nav_timeout_ms, strategies=strategies)
             await wait_cookie_banner(page)
-            await dismiss_location_prompt(page)
 
             for it in missing:
                 iid = str(it.get("id"))
-                # broad set of selectors for opening a product
-                selectors = [
-                    f'a[href*="itemid-{iid}"], a[href*="item-{iid}"]',
-                    '[data-test*="menu-item"]',
-                    'article:has-text("€")',
-                    '[role="button"]:has-text("€")',
-                ]
-                a = None
-                for sel in selectors:
-                    cand = page.locator(sel)
-                    if await cand.count() > 0:
-                        a = cand
-                        break
-                if not a:
+                sel = f'a[href*="itemid-{iid}"], a[href*="item-{iid}"]'
+                a = page.locator(sel)
+                if await a.count() == 0:
                     continue
                 try:
                     await a.first.scroll_into_view_if_needed(timeout=1500)
@@ -1050,6 +968,12 @@ async def run_wolt(args, categories: List[str], on_rows_async) -> None:
                 nav_timeout_ms=int(args.nav_timeout),
             )
 
+        # venue id override if supplied
+        venue_id_override = (args.venue_id or "").strip().lower()
+        if venue_id_override and HEX24_RE.fullmatch(venue_id_override):
+            venue_id = venue_id_override
+            print(f"[info] venueId override in use: {venue_id}")
+
         if venue_id:
             lang = _lang_from_url(cat)
             await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=(args.probe_limit or None))
@@ -1124,6 +1048,7 @@ async def main(args):
           f"probe_limit={args.probe_limit or os.getenv('WOLT_PROBE_LIMIT','(env default 60)')} "
           f"modal_probe_limit={args.modal_probe_limit or os.getenv('WOLT_MODAL_PROBE_LIMIT','(env default 15)')} "
           f"category_timeout={args.category_timeout}s "
+          f"venue_id={args.venue_id or '(auto-discover)'} "
           f"upsert_per_category={args.upsert_per_category} flush_every={args.flush_every}")
 
     out_path = Path(args.out)
@@ -1183,7 +1108,7 @@ def parse_args():
     p.add_argument("--categories-file", dest="categories_file", default="", help="Path to txt file with category URLs")
     p.add_argument("--max-products", type=int, default=0, help="Global cap per category (0=all)")
     p.add_argument("--pdp-workers", type=int, default=4, help="(Reserved) Concurrency hint; not used in Wolt path")
-    p.add_argument("--req-delay", type=float, default=0.8, help="Seconds between ops in PW/modal paths")
+    p.add_argument("--req-delay", type=float, default=0.6, help="Seconds between ops in PW/modal paths")
     p.add_argument("--headless", default="1", help="1/0 headless for PW")
     p.add_argument("--goto-strategy", choices=["auto","domcontentloaded","networkidle","load"],
                    default="domcontentloaded", help="Playwright wait_until strategy.")
@@ -1197,8 +1122,10 @@ def parse_args():
     # probe limits
     p.add_argument("--probe-limit", type=int, default=0, help="Override max prodinfo probes per run (env default 60).")
     p.add_argument("--modal-probe-limit", type=int, default=0, help="Override max modal clicks per category (env default 15).")
-    # per-category watchdog timeout
-    p.add_argument("--category-timeout", type=float, default=120.0, help="Max seconds to spend on a single category before skipping.")
+    # per-category watchdog timeout (raised default)
+    p.add_argument("--category-timeout", type=float, default=150.0, help="Max seconds to spend on a single category before skipping.")
+    # NEW: explicit venue id override to skip discovery
+    p.add_argument("--venue-id", default="", help="If set, use this 24-hex Wolt venue id for prodinfo enrichment")
     return p.parse_args()
 
 if __name__ == "__main__":
