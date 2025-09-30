@@ -159,6 +159,8 @@ jobs:
           WOLT_FORCE_PLAYWRIGHT: ${{ github.event_name == 'workflow_dispatch' && inputs.force_playwright || '0' }}
           # Be gentle with prodinfo; keep low by default
           WOLT_PROBE_LIMIT: "60"
+          # Allow limited modal clicks to fetch GTIN/Tootja directly
+          WOLT_MODAL_PROBE_LIMIT: "15"
         run: |
           set -euo pipefail
           # small randomized stagger to avoid bursts / 429s when multiple stores
@@ -181,6 +183,7 @@ jobs:
             --upsert-per-category \
             --flush-every "120" \
             --probe-limit "${WOLT_PROBE_LIMIT}" \
+            --modal-probe-limit "${WOLT_MODAL_PROBE_LIMIT}" \
             --out "${OUT}"
 
       - name: Upload CSV artifact
