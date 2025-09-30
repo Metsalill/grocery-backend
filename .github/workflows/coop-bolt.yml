@@ -28,7 +28,9 @@ on:
 
 concurrency:
   group: coop-bolt-crawl-${{ github.event_name }}
-  cancel-in-progress: true
+  # Cancel only manual reruns; let scheduled runs finish even if another
+  # schedule fires while one is running.
+  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}
 
 jobs:
   crawl-bolt:
