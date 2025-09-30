@@ -162,8 +162,8 @@ jobs:
           # Start without modal clicks while stabilizing; can raise later
           WOLT_MODAL_PROBE_LIMIT: "0"
           # Known venueIds (24-hex) per store
-          VENUE_ID_PARNY: "6282118813e5280bbe9e450f"   # Coop Pärnu Maksimarket
-          VENUE_ID_LASNAME: "628210e98f6be4895159d8fe"  # Coop Lasnamäe
+          VENUE_ID_PARN: "628210e98f6be4895159d8fe"      # Coop Pärnu Maksimarket (verified)
+          VENUE_ID_LASNAMAE: "6282118813e5280bbe9e450f"   # Coop Lasnamäe (adjust if needed)
         run: |
           set -euo pipefail
           # small randomized stagger to avoid bursts / 429s when multiple stores
@@ -177,8 +177,8 @@ jobs:
 
           # pick venue id for this store
           case "${{ matrix.store }}" in
-            parnu)   VENUE_ID="${VENUE_ID_PARNY}" ;;
-            lasname) VENUE_ID="${VENUE_ID_LASNAME}" ;;
+            parnu)   VENUE_ID="${VENUE_ID_PARN}" ;;
+            lasname) VENUE_ID="${VENUE_ID_LASNAMAE}" ;;
             *)       VENUE_ID="" ;;
           esac
 
