@@ -605,7 +605,11 @@ def _wolt_store_host(sample_url: str) -> str:
     return urlparse(sample_url).netloc.lower()
 
 async def _load_wolt_payload(url: str) -> Optional[Dict]:
-    html = await _fetch_html(url)
+    # Make this safe: return None if fast path fails, so caller can fall back to PW
+    try:
+        html = await _fetch_html(url)
+    except Exception:
+        return None
     nd = _html_get_next_data(html)
     if nd:
         return nd
@@ -933,17 +937,28 @@ async def run_wolt(args, categories: List[str], on_rows_async) -> None:
             await asyncio.sleep(float(args.req_delay) + random.uniform(0.5, 1.2))
 
         try:
-            payload = None if force_pw else await _load_wolt_payload(cat)
+            # --- Fast path with safe fallback ---
+            payload = None
+            if not force_pw:
+                try:
+                    payload = await _load_wolt_payload(cat)
+                except Exception as e_fast:
+                    print(f"[warn] fast-path fetch failed for {cat}: {e_fast} → falling back to Playwright")
+
+            items: List[Dict] = []
+            blobs: List[Any] = []
+            html = ""
+            tile_prices: Dict[str, float] = {}
+            venue_id: Optional[str] = None
 
             if payload:
                 found: Dict[str, Dict] = {}
                 _walk_collect_items(payload, found)
                 items = list(found.values())
                 blobs = [payload]
-                html = ""
-                tile_prices = {}
-                venue_id = None
-            else:
+                if not items:
+                    print(f"[info] fast-path yielded 0 items for {cat} → falling back to Playwright")
+            if force_pw or not payload or not items:
                 print(f"[info] forcing Playwright fallback for {cat}")
                 items, blobs, html, tile_prices, venue_id = await _capture_with_playwright(
                     cat,
@@ -961,7 +976,7 @@ async def run_wolt(args, categories: List[str], on_rows_async) -> None:
                 print("[warn] venueId not found — skipping direct prodinfo enrichment")
 
             # Step 2: fill missing prices from tiles (PW path only)
-            if not payload and items:
+            if (force_pw or not payload) and items:
                 for it in items:
                     if it.get("id"):
                         iid = str(it["id"]).lower()
@@ -994,7 +1009,7 @@ async def run_wolt(args, categories: List[str], on_rows_async) -> None:
             if args.max_products and args.max_products > 0:
                 rows = rows[: args.max_products]
 
-            print(f"[info] category rows: {len(rows)}" + (" (pw-fallback)" if not payload else ""))
+            print(f"[info] category rows: {len(rows)}" + (" (pw-fallback)" if (force_pw or not payload) else ""))
             await on_rows_async(rows)  # stream + accumulate + optional flush-every
 
             # Optional: per-category upsert for durability
@@ -1005,7 +1020,7 @@ async def run_wolt(args, categories: List[str], on_rows_async) -> None:
                     pass
 
         except Exception as e:
-            print(f"[warn] Wolt category failed {cat}: {e}")
+            print(f"[warn] Wolt category failed after fallback {cat}: {e}")
 
 # ---------- main ----------
 async def main(args):
