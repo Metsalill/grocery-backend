@@ -798,10 +798,10 @@ async def _ensure_category_route(page, cat_url: str):
     except Exception:
         ok = False
     if not ok:
-        # retry navigation with stricter wait, then re-check
         try:
             await page.wait_for_timeout(200)
-            await page.goto(cat_url, wait_until="networkidle", timeout=45000)
+            # ↓↓↓ change 'networkidle' → 'domcontentloaded'
+            await page.goto(cat_url, wait_until="domcontentloaded", timeout=45000)
             await page.wait_for_timeout(300)
         except Exception:
             pass
