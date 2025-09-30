@@ -7,6 +7,15 @@ Coop eCoop (region-specific) category → PDP crawler → CSV/optional DB upsert
 • Extracts PDP data: name, brand, manufacturer (Tootja), image, price, EAN/GTIN, size
 • Streams results to CSV and (optionally) upserts to Postgres
 
+New in this version
+-------------------
+• Deterministic category rotation:
+  - --rotate-buckets N : split categories into N stable buckets by URL hash
+  - --rotate-index K   : pick which bucket to crawl this run (0..N-1). -1 = auto by UTC hour.
+  - --rotate-salt TEXT : optional extra salt to shift bucket assignment.
+
+• Upserts always "touch" rows (scraped_at = now()) even if nothing changed.
+
 Env:
 - COOP_UPSERT_DB=1 to enable DB upsert (requires asyncpg + DATABASE_URL).
 - COOP_DEDUP_DB=1 to enable de-duplication against DB by (store_host, ean_norm).
@@ -28,6 +37,7 @@ import re
 import signal
 import sys
 import random
+import hashlib
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Set, Literal
 from urllib.parse import urlparse, urljoin, urlsplit, urlunsplit, parse_qsl, urlencode
@@ -889,6 +899,10 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
             pass
 
 # ---------- main ----------
+def _stable_bucket(s: str, buckets: int, salt: str = "") -> int:
+    h = hashlib.sha1((salt + "|" + s).encode("utf-8")).digest()
+    return int.from_bytes(h[:4], "big") % max(1, buckets)
+
 async def main(args):
     categories: List[str] = []
     if args.categories_multiline:
@@ -926,6 +940,31 @@ async def main(args):
             sys.exit(2)
         categories = [u for i, u in enumerate(categories) if i % cat_shards == cat_index]
         print(f"[shard] Using {len(categories)} categories for shard {cat_index}/{cat_shards}")
+
+    # --- DETERMINISTIC ROTATION (stable by URL hash) ---
+    if args.rotate_buckets and args.rotate_buckets > 1:
+        if args.rotate_index < 0:
+            # default: rotate by UTC hour
+            hour = dt.datetime.utcnow().hour
+            idx = hour % args.rotate_buckets
+        else:
+            idx = args.rotate_index % args.rotate_buckets
+
+        salted = args.rotate_salt or ""
+        kept = [u for u in categories if _stable_bucket(u, args.rotate_buckets, salted) == idx]
+        print(f"[rotate] buckets={args.rotate_buckets} index={idx} salt={salted!r} "
+              f"→ keeping {len(kept)}/{len(categories)} categories for this run")
+        categories = kept
+
+        if not categories:
+            print("[rotate] No categories selected for this slice — exiting early.")
+            # Still produce an empty CSV header for consistency if requested
+            out_path = Path(args.out)
+            if out_path.is_dir() or str(out_path).endswith("/"):
+                out_path = out_path / f"coop_ecoop_{now_stamp()}.csv"
+            if args.write_empty_csv:
+                _ensure_csv_with_header(out_path)
+            return
 
     out_path = Path(args.out)
     if out_path.is_dir() or str(out_path).endswith("/"):
@@ -987,6 +1026,13 @@ def parse_args():
     p.add_argument("--pdp-workers", type=int, default=4, help="Concurrent PDP tabs per category")
     p.add_argument("--cat-shards", type=int, default=1, help="Total number of category shards")
     p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
+    # deterministic rotation flags
+    p.add_argument("--rotate-buckets", type=int, default=1,
+                   help="Split categories into N stable buckets by URL hash (1=disable rotation)")
+    p.add_argument("--rotate-index", type=int, default=-1,
+                   help="Which bucket to crawl this run (0..N-1). -1 = auto by UTC hour.")
+    p.add_argument("--rotate-salt", type=str, default="",
+                   help="Optional salt to change bucket assignment without changing URLs.")
     p.add_argument("--out", default="out/coop_ecoop.csv", help="CSV file or output directory")
     p.add_argument("--write-empty-csv", action="store_true", default=True, help="Always write CSV header even if no rows.")
     # robustness flags
