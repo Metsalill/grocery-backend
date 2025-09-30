@@ -11,6 +11,13 @@ Fallback:
 - Playwright page load, scroll, capture JSON blobs, tile prices, and venueId via modal.
 - Enrich items via https://prodinfo.wolt.com/<lang>/<venueId>/<itemId> to fetch GTIN & Supplier.
 
+NEW (robust GTIN/Tootja):
+- More tolerant HTML parsing on prodinfo (handles <h3>/<p>, <dt>/<dd>, plain text, JSON-LD).
+- If GTIN still missing, open product modal and click “Toote info” (or “Product info”) to read:
+    • GTIN
+    • Tootja/Tarnija/Supplier
+  Limited by --modal-probe-limit to control runtime.
+
 Noise guard:
 - Filters out cookie/consent/etc. junk.
 - Accepts items with valid GTIN immediately; accepts GTIN '-' only if name looks productish and price present.
@@ -18,13 +25,8 @@ Noise guard:
 Env:
 - WOLT_FORCE_PLAYWRIGHT=1 to force PW fallback
 - WOLT_PROBE_LIMIT (default 60) to cap prodinfo probes
+- WOLT_MODAL_PROBE_LIMIT (default 15) to cap modal clicks per category
 - COOP_UPSERT_DB=1 / COOP_DEDUP_DB=1 (same semantics as ecoop)
-
-NEW:
-- Incremental DB upsert:
-  • --upsert-per-category → upsert rows for each category as soon as they’re parsed
-  • --flush-every N      → also upsert every N streamed rows (useful for very large categories)
-- Lower default prodinfo probe limit to reduce 429s/timeouts.
 """
 
 import argparse
@@ -380,13 +382,11 @@ def _search_info_label(value: Any, *labels: str) -> Optional[str]:
     return None
 
 # ---------- enrichment via prodinfo.wolt.com ----------
-PRODINFO_GTIN_RE = re.compile(r"<h3[^>]*>\s*GTIN\s*</h3>\s*<p[^>]*>(\d{8,14})</p>", re.I)
-PRODINFO_SUPPLIER_RE = re.compile(
-    r"<h3[^>]*>\s*(?:Tarnija info|Tootja info|Supplier)\s*</h3>\s*<p[^>]*>([^<]{2,200})</p>",
-    re.I
-)
+# tolerant regexes
 PRODINFO_JSONLD_GTIN_RE = re.compile(r'"gtin(?:8|12|13|14)"\s*:\s*"(\d{8,14})"', re.I)
-PRODINFO_TITLE_RE = re.compile(r"<h2[^>]*>([^<]{2,200})</h2>", re.I)
+PRODINFO_ANY_GTIN_RE    = re.compile(r"gtin[^0-9]{0,40}(\d{8,14})", re.I)  # plain text fallback
+PRODINFO_SUPPLIER_TXT_RE = re.compile(r"(?:Tootja|Tarnija|Supplier|Manufacturer)[^A-Za-z0-9]{0,20}([^<>\n]{2,200})", re.I)
+TAG_STRIP_RE = re.compile(r"<[^>]+>")
 
 async def _fetch_prodinfo_fields(lang: str, venue_id: str, item_id: str) -> Dict[str, Optional[str]]:
     url = f"https://prodinfo.wolt.com/{lang}/{venue_id}/{item_id}"
@@ -395,24 +395,30 @@ async def _fetch_prodinfo_fields(lang: str, venue_id: str, item_id: str) -> Dict
     except Exception:
         return {"gtin": None, "supplier": None, "name": None}
 
-    gtin = None
-    m = PRODINFO_GTIN_RE.search(html or "")
-    if m:
-        gtin = normalize_ean(m.group(1))
+    # 1) JSON-LD
+    m = PRODINFO_JSONLD_GTIN_RE.search(html or "")
+    gtin = normalize_ean(m.group(1)) if m else None
+
+    # 2) structured headings (works even if tags differ)
     if not gtin:
-        m2 = PRODINFO_JSONLD_GTIN_RE.search(html or "")
+        # strip tags to text and search "GTIN ... digits"
+        txt = TAG_STRIP_RE.sub(" ", html or " ")
+        m2 = PRODINFO_ANY_GTIN_RE.search(txt)
         if m2:
             gtin = normalize_ean(m2.group(1))
 
+    # Supplier / Tootja / Tarnija
     supplier = None
-    m3 = PRODINFO_SUPPLIER_RE.search(html or "")
+    txt = TAG_STRIP_RE.sub(" ", html or " ")
+    m3 = PRODINFO_SUPPLIER_TXT_RE.search(txt)
     if m3:
-        supplier = (m3.group(1) or "").strip()
+        supplier = m3.group(1).strip()
 
+    # Page title occasionally contains product name
     name = None
-    m4 = PRODINFO_TITLE_RE.search(html or "")
-    if m4:
-        name = (m4.group(1) or "").strip()
+    mt = re.search(r"<h2[^>]*>([^<]{2,200})</h2>", html or "", re.I)
+    if mt:
+        name = (mt.group(1) or "").strip()
 
     return {"gtin": gtin, "supplier": supplier, "name": name}
 
@@ -420,7 +426,6 @@ async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str
                                      max_to_probe: Optional[int] = None) -> None:
     if max_to_probe is None:
         try:
-            # Lower default to reduce 429/timeouts
             max_to_probe = int(os.getenv("WOLT_PROBE_LIMIT", "60"))
         except Exception:
             max_to_probe = 60
@@ -600,7 +605,7 @@ async def _load_wolt_payload(url: str) -> Optional[Dict]:
         return {"apollo": apollo}
     return None
 
-# ---------- Playwright fallback ----------
+# ---------- Playwright ----------
 try:
     from playwright.async_api import async_playwright  # type: ignore
 except Exception:
@@ -809,6 +814,84 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
             await context.close()
             await browser.close()
 
+# ---------- modal enrichment (last-resort, clicks "Toote info") ----------
+async def _enrich_items_via_modal(cat_url: str, items: List[Dict], headless: bool, req_delay: float,
+                                  goto_strategy: str, nav_timeout_ms: int, max_modal: int) -> None:
+    if async_playwright is None or max_modal <= 0:
+        return
+
+    missing = [it for it in items if not normalize_ean(it.get("gtin") or it.get("ean") or it.get("ean_norm")) and HEX24_RE.fullmatch(str(it.get("id") or ""))]
+    if not missing:
+        return
+    missing = missing[:max_modal]
+
+    async with async_playwright() as pw:
+        browser = await pw.chromium.launch(headless=bool(int(headless)))
+        context = await browser.new_context(user_agent=_GLOBAL_UA, viewport={"width": 1366, "height": 900}, java_script_enabled=True)
+        page = await context.new_page()
+        try:
+            strategies = [goto_strategy] if goto_strategy in ("domcontentloaded","networkidle","load") else ["domcontentloaded","load","networkidle"]
+            await _goto_with_backoff(page, cat_url, max_tries=4, nav_timeout_ms=nav_timeout_ms, strategies=strategies)
+            await wait_cookie_banner(page)
+
+            for it in missing:
+                iid = str(it.get("id"))
+                # open product modal
+                sel = f'a[href*="itemid-{iid}"], a[href*="item-{iid}"]'
+                a = page.locator(sel)
+                if await a.count() == 0:
+                    continue
+                try:
+                    await a.first.scroll_into_view_if_needed(timeout=1500)
+                    await asyncio.sleep(max(req_delay, 0.3))
+                    await a.first.click(timeout=2000)
+                except Exception:
+                    continue
+
+                # click Toote info / Product info
+                info_clicked = False
+                for btnsel in [
+                    'button:has-text("Toote info")',
+                    'a:has-text("Toote info")',
+                    'button:has-text("Product info")',
+                    'a:has-text("Product info")',
+                    'button:has-text("Tooteinfo")',
+                ]:
+                    btn = page.locator(btnsel)
+                    try:
+                        if await btn.count() > 0:
+                            await btn.first.click(timeout=1200)
+                            info_clicked = True
+                            break
+                    except Exception:
+                        pass
+
+                await page.wait_for_timeout(int(max(req_delay, 0.3) * 1000))
+
+                try:
+                    modal_text = await page.inner_text("body", timeout=1500)
+                except Exception:
+                    modal_text = ""
+                # very tolerant parses
+                mgt = re.search(r"GTIN[^0-9]{0,40}(\d{8,14})", modal_text, re.I)
+                if mgt and not it.get("gtin"):
+                    it["gtin"] = normalize_ean(mgt.group(1))
+                msup = re.search(r"(?:Tootja|Tarnija|Supplier|Manufacturer)[^A-Za-z0-9]{0,20}([^\n]{2,200})", modal_text, re.I)
+                if msup and not it.get("supplier"):
+                    it["supplier"] = msup.group(1).strip()
+                    if not it.get("brand"):
+                        it["brand"] = it["supplier"]
+
+                # close modal (Esc or X)
+                try:
+                    await page.keyboard.press("Escape")
+                except Exception:
+                    pass
+                await page.wait_for_timeout(int(max(req_delay, 0.25) * 1000))
+        finally:
+            await context.close()
+            await browser.close()
+
 # ---------- runner ----------
 def _lang_from_url(u: str) -> str:
     m = re.search(r"https?://[^/]+/([a-z]{2})(?:/|$)", u, re.I)
@@ -851,18 +934,31 @@ async def run_wolt(args, categories: List[str], on_rows_async) -> None:
                     nav_timeout_ms=int(args.nav_timeout),
                 )
 
+            # Step 1: enrich via prodinfo (HTTP, fast)
             if venue_id:
                 lang = _lang_from_url(cat)
                 await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=(args.probe_limit or None))
             else:
                 print("[warn] venueId not found — skipping direct prodinfo enrichment")
 
+            # Step 2: fill missing prices from tiles (PW path only)
             if not payload and items:
                 for it in items:
                     if it.get("id"):
                         iid = str(it["id"]).lower()
                         if it.get("price") in (None, 0) and iid in tile_prices:
                             it["price"] = tile_prices[iid]
+
+            # Step 3: last-resort modal clicks for missing GTIN/Tootja
+            if args.modal_probe_limit > 0:
+                await _enrich_items_via_modal(
+                    cat, items,
+                    headless=bool(int(args.headless)),
+                    req_delay=float(args.req_delay),
+                    goto_strategy=args.goto_strategy,
+                    nav_timeout_ms=int(args.nav_timeout),
+                    max_modal=int(args.modal_probe_limit),
+                )
 
             existing_gtins = await _fetch_existing_gtins(store_host_cat)
 
@@ -903,7 +999,11 @@ async def main(args):
         print("[error] No category URLs provided. Pass --categories-multiline or --categories-file.")
         sys.exit(2)
 
-    print(f"[args] headless={args.headless} req_delay={args.req_delay} pdp_workers(not used)={args.pdp_workers} goto={args.goto_strategy} nav_timeout={args.nav_timeout}ms store_host={args.store_host or '(auto)'} probe_limit={args.probe_limit or os.getenv('WOLT_PROBE_LIMIT','(env default 60)')} upsert_per_category={args.upsert_per_category} flush_every={args.flush_every}")
+    print(f"[args] headless={args.headless} req_delay={args.req_delay} pdp_workers(not used)={args.pdp_workers} "
+          f"goto={args.goto_strategy} nav_timeout={args.nav_timeout}ms store_host={args.store_host or '(auto)'} "
+          f"probe_limit={args.probe_limit or os.getenv('WOLT_PROBE_LIMIT','(env default 60)')} "
+          f"modal_probe_limit={args.modal_probe_limit or os.getenv('WOLT_MODAL_PROBE_LIMIT','(env default 15)')} "
+          f"upsert_per_category={args.upsert_per_category} flush_every={args.flush_every}")
 
     out_path = Path(args.out)
     if out_path.is_dir() or str(out_path).endswith("/"):
@@ -936,7 +1036,6 @@ async def main(args):
             await flush_now()
 
     def _sig_handler(signum, frame):
-        # Best-effort graceful exit; CSV already on disk. DB flush happens if per-category/flush-every used.
         print(f"[warn] received signal {signum}; exiting 130 gracefully.")
         sys.exit(130)
 
@@ -945,7 +1044,6 @@ async def main(args):
 
     await run_wolt(args, categories, on_rows_async)
 
-    # Final flush of any leftovers collected via flush-every
     await flush_now()
 
     gtin_ok = sum(1 for r in all_rows if (r.get("ean_norm") or (r.get("ean_raw") and r.get("ean_raw") != "-")))
@@ -953,7 +1051,6 @@ async def main(args):
     print(f"[stats] rows={len(all_rows)}  gtin_present={gtin_ok}  brand_or_manufacturer_present={brand_ok}")
     print(f"[ok] CSV ready: {out_path}")
 
-    # Final upsert of everything (harmless if already upserted earlier)
     await maybe_upsert_db(all_rows)
 
 def parse_args():
@@ -965,23 +1062,28 @@ def parse_args():
     p.add_argument("--categories-file", dest="categories_file", default="", help="Path to txt file with category URLs")
     p.add_argument("--max-products", type=int, default=0, help="Global cap per category (0=all)")
     p.add_argument("--pdp-workers", type=int, default=4, help="(Reserved) Concurrency hint; not used in Wolt path")
-    p.add_argument("--req-delay", type=float, default=0.45, help="Seconds between ops in PW fallback")
-    p.add_argument("--headless", default="1", help="1/0 headless for PW fallback")
+    p.add_argument("--req-delay", type=float, default=0.6, help="Seconds between ops in PW/modal paths")
+    p.add_argument("--headless", default="1", help="1/0 headless for PW")
     p.add_argument("--goto-strategy", choices=["auto","domcontentloaded","networkidle","load"],
-                   default="auto", help="Playwright wait_until strategy for category navigation.")
+                   default="domcontentloaded", help="Playwright wait_until strategy.")
     p.add_argument("--nav-timeout", default="45000", help="Navigation timeout in milliseconds.")
     p.add_argument("--out", default="out/coop_wolt.csv", help="CSV file or output directory")
     p.add_argument("--force-playwright", action="store_true", help="Force Playwright network fallback.")
     p.add_argument("--write-empty-csv", action="store_true", default=True, help="Always write CSV header even if no rows.")
-    # NEW:
-    p.add_argument("--upsert-per-category", action="store_true",
-                   help="Upsert to DB after each category finishes.")
-    p.add_argument("--flush-every", type=int, default=0,
-                   help="If >0, also upsert every N streamed rows for durability.")
-    p.add_argument("--probe-limit", type=int, default=0,
-                   help="Override max prodinfo probes per run (default comes from WOLT_PROBE_LIMIT env, 60).")
+    # incremental upserts
+    p.add_argument("--upsert-per-category", action="store_true", help="Upsert to DB after each category finishes.")
+    p.add_argument("--flush-every", type=int, default=0, help="If >0, also upsert every N streamed rows.")
+    # probe limits
+    p.add_argument("--probe-limit", type=int, default=0, help="Override max prodinfo probes per run (env default 60).")
+    p.add_argument("--modal-probe-limit", type=int, default=0, help="Override max modal clicks per category (env default 15).")
     return p.parse_args()
 
 if __name__ == "__main__":
     args = parse_args()
+    # apply env defaults for modal-probe-limit if not passed
+    if not args.modal_probe_limit:
+        try:
+            args.modal_probe_limit = int(os.getenv("WOLT_MODAL_PROBE_LIMIT", "15"))
+        except Exception:
+            args.modal_probe_limit = 15
     asyncio.run(main(args))
