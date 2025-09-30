@@ -639,6 +639,35 @@ async def wait_cookie_banner(page: Any):
     except Exception:
         pass
 
+# NEW: robust helper to dismiss/escape the address/location popover
+async def dismiss_location_prompt(page: Any):
+    try:
+        # try a close "X" / explicit close button first
+        for sel in [
+            'button[aria-label*="lose"]',  # matches "Close" / "Sulge"
+            'button:has-text("Sulge")',
+            '[data-test*="close"] button',
+            '[data-testid*="close"] button',
+            'button[aria-label="Sulge"]',
+        ]:
+            btn = page.locator(sel)
+            if await btn.count() > 0:
+                try:
+                    await btn.first.click(timeout=1000)
+                    await page.wait_for_timeout(200)
+                    return
+                except Exception:
+                    pass
+    except Exception:
+        pass
+    # fallback: tap ESC a couple of times
+    try:
+        for _ in range(3):
+            await page.keyboard.press("Escape")
+            await page.wait_for_timeout(120)
+    except Exception:
+        pass
+
 async def _maybe_collect_json(resp, out_list: List[Any]):
     try:
         ct = (resp.headers.get("content-type") or "").lower()
@@ -722,6 +751,7 @@ async def _scrape_tile_prices(page) -> Dict[str, float]:
 # --- ROBUST VENUE-ID VIA MODAL (broader click targets) ---
 async def _extract_venue_id_via_modal(page) -> Optional[str]:
     try:
+        await dismiss_location_prompt(page)
         selectors = [
             'a[href*="itemid-"]',
             'a[href*="item-"]',
@@ -819,12 +849,22 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=bool(int(headless)))
-        context = await browser.new_context(
+        # Give geolocation permission (Pärnu city center-ish) and locale
+        geoloc = {"latitude": 58.384, "longitude": 24.497}
+        context = await pw.chromium.new_context(
             user_agent=_GLOBAL_UA,
             viewport={"width": 1366, "height": 900},
             java_script_enabled=True,
+            geolocation=geoloc,
+            permissions=["geolocation"],
+            locale="et-EE",
         )
         try:
+            # also explicitly grant to the origin (extra-safe)
+            try:
+                await context.grant_permissions(["geolocation"], origin="https://wolt.com")
+            except Exception:
+                pass
             context.set_default_navigation_timeout(max(15000, int(nav_timeout_ms)))
             context.set_default_timeout(max(15000, int(nav_timeout_ms)))
         except Exception:
@@ -861,7 +901,10 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
             await _goto_with_backoff(page, cat_url, max_tries=3, nav_timeout_ms=nav_timeout_ms, strategies=strategies)
 
             await wait_cookie_banner(page)
-            for _ in range(10):
+            await dismiss_location_prompt(page)
+
+            # scroll a bit more to make sure grids hydrate
+            for _ in range(14):
                 await page.mouse.wheel(0, 1500)
                 await page.wait_for_timeout(int(max(req_delay, 0.4)*1000 + random.uniform(250, 900)))
 
@@ -899,7 +942,7 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
                 except Exception:
                     pass
 
-            # --- NEW: seed 'found' with any 24-hex ids seen anywhere in DOM (attrs or text) ---
+            # --- seed 'found' with any 24-hex ids seen anywhere in DOM (attrs or text) ---
             try:
                 ids = await page.evaluate("""
 (() => {
@@ -958,12 +1001,25 @@ async def _enrich_items_via_modal(cat_url: str, items: List[Dict], headless: boo
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=bool(int(headless)))
-        context = await browser.new_context(user_agent=_GLOBAL_UA, viewport={"width": 1366, "height": 900}, java_script_enabled=True)
-        page = await context.new_page()
+        geoloc = {"latitude": 58.384, "longitude": 24.497}
+        context = await pw.chromium.new_context(
+            user_agent=_GLOBAL_UA,
+            viewport={"width": 1366, "height": 900},
+            java_script_enabled=True,
+            geolocation=geoloc,
+            permissions=["geolocation"],
+            locale="et-EE",
+        )
         try:
+            try:
+                await context.grant_permissions(["geolocation"], origin="https://wolt.com")
+            except Exception:
+                pass
+            page = await context.new_page()
             strategies = [goto_strategy] if goto_strategy in ("domcontentloaded","networkidle","load") else ["domcontentloaded"]
             await _goto_with_backoff(page, cat_url, max_tries=3, nav_timeout_ms=nav_timeout_ms, strategies=strategies)
             await wait_cookie_banner(page)
+            await dismiss_location_prompt(page)
 
             for it in missing:
                 iid = str(it.get("id"))
