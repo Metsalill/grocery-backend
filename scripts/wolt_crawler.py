@@ -657,25 +657,57 @@ async def _maybe_collect_json(resp, out_list: List[Any]):
     except Exception:
         pass
 
+# --- ROBUST TILE PRICE SCRAPER (anchors + articles + testids; allow "~") ---
 async def _scrape_tile_prices(page) -> Dict[str, float]:
     try:
         js = r'''
 (() => {
   const out = [];
-  const anchors = Array.from(document.querySelectorAll('a[href*="item"]'));
-  for (const a of anchors) {
-    const href = a.getAttribute('href') || a.href || '';
-    const m = href && href.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
-    if (!m) continue;
-    const card = a.closest('article, a, div') || a;
-    const txt = (card && card.textContent) ? card.textContent : '';
-    const mt = txt.match(/(\d+[.,]\d{2})\s*€/);
-    if (mt) {
-      const raw = mt[1].replace(',', '.');
-      const val = parseFloat(raw);
-      if (!isNaN(val)) out.push([m[1], val]);
+  const idRe = /(?:itemid-|item-)([a-f0-9]{24})/i;
+  const priceRe = /~?\s*(\d+[.,]\d{2})\s*€/;
+
+  const els = Array.from(document.querySelectorAll(
+    'a[href*="item"], article, [data-testid="menu-item"]'
+  ));
+
+  const attrList = ['data-id','data-item-id','data-product-id','data-test-id','data-testid','id'];
+
+  for (const el of els) {
+    let iid = null;
+
+    if (el.tagName && el.tagName.toLowerCase() === 'a') {
+      const href = el.getAttribute('href') || el.href || '';
+      const m = href && href.match(idRe);
+      if (m) iid = m[1];
     }
+
+    if (!iid) {
+      for (const a of attrList) {
+        const v = el.getAttribute && el.getAttribute(a);
+        if (!v) continue;
+        const m = v.match(/([a-f0-9]{24})/i);
+        if (m) { iid = m[1]; break; }
+      }
+    }
+
+    if (!iid) {
+      const t = (el.textContent || '');
+      const mt = t.match(idRe);
+      if (mt) iid = mt[1];
+    }
+
+    if (!iid) continue;
+
+    const card = el.closest('article, a, div') || el;
+    const txt = (card && card.textContent) ? card.textContent : '';
+    const p = txt.match(priceRe);
+    if (!p) continue;
+
+    const raw = p[1].replace(',', '.');
+    const val = parseFloat(raw);
+    if (!isNaN(val)) out.push([iid.toLowerCase(), val]);
   }
+
   return out;
 })()
 '''
@@ -687,16 +719,39 @@ async def _scrape_tile_prices(page) -> Dict[str, float]:
     except Exception:
         return {}
 
+# --- ROBUST VENUE-ID VIA MODAL (broader click targets) ---
 async def _extract_venue_id_via_modal(page) -> Optional[str]:
     try:
-        a = page.locator('a[href*="itemid-"], a[href*="item-"]').first
-        if await a.count() == 0:
+        selectors = [
+            'a[href*="itemid-"]',
+            'a[href*="item-"]',
+            '[data-test="menu-item"]',
+            '[data-testid="menu-item"]',
+            'article:has-text("€")',
+            '[role="button"]:has-text("€")',
+        ]
+        el = None
+        for sel in selectors:
+            cand = page.locator(sel).first
+            try:
+                if await cand.count() > 0:
+                    el = cand
+                    break
+            except Exception:
+                pass
+
+        if not el:
             return None
-        await a.scroll_into_view_if_needed(timeout=1500)
-        await a.click(timeout=2000)
-        for _ in range(20):
-            frames = page.frames
-            for fr in frames:
+
+        try:
+            await el.scroll_into_view_if_needed(timeout=1500)
+            await page.wait_for_timeout(200)
+            await el.click(timeout=2000)
+        except Exception:
+            return None
+
+        for _ in range(30):
+            for fr in page.frames:
                 try:
                     src = (fr.url or "").lower()
                     m = re.search(r"/([a-f0-9]{24})/", src)
@@ -705,8 +760,14 @@ async def _extract_venue_id_via_modal(page) -> Optional[str]:
                 except Exception:
                     pass
             await page.wait_for_timeout(150)
+
     except Exception:
         pass
+    finally:
+        try:
+            await page.keyboard.press("Escape")
+        except Exception:
+            pass
     return None
 
 async def _extract_venue_id_any(page, html: str) -> Optional[str]:
@@ -816,6 +877,7 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
 
             html = await page.content()
 
+            # Walk blobs to collect items
             def _walk(o):
                 if isinstance(o, dict):
                     has_name = isinstance(o.get("name"), str) and o.get("name").strip()
@@ -836,6 +898,31 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
                     _walk(blob)
                 except Exception:
                     pass
+
+            # --- NEW: seed 'found' with any 24-hex ids seen anywhere in DOM (attrs or text) ---
+            try:
+                ids = await page.evaluate("""
+(() => {
+  const ids = new Set();
+  const attrs = ['href','id','data-id','data-item-id','data-product-id','data-test-id','data-testid','data-qa'];
+  const hex = /([a-f0-9]{24})/i;
+  const anchorId = /(?:itemid-|item-)([a-f0-9]{24})/i;
+  for (const el of document.querySelectorAll('*')) {
+    for (const a of attrs) {
+      const v = el.getAttribute && el.getAttribute(a);
+      if (v) { const m = v.match(hex); if (m) ids.add((m[1]||'').toLowerCase()); }
+    }
+    const t = el.textContent || '';
+    const mt = t && t.match(anchorId);
+    if (mt) ids.add((mt[1]||'').toLowerCase());
+  }
+  return Array.from(ids);
+})()
+""")
+                for iid in ids or []:
+                    found.setdefault(iid, {"id": iid})
+            except Exception:
+                pass
 
             if not found:
                 ids = set(re.findall(r"(?:itemid-|item-)([a-f0-9]{24})", html or "", re.I))
