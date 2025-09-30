@@ -27,7 +27,7 @@ on:
 jobs:
   crawl:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     outputs:
       stores: ${{ steps.decide.outputs.stores }}
 
@@ -55,8 +55,11 @@ jobs:
   # We need strategy after we have crawl.outputs.stores
   run-crawlers:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     needs: crawl
+    concurrency:
+      group: coop-wolt-${{ matrix.store }}
+      cancel-in-progress: true
 
     strategy:
       fail-fast: false
@@ -154,8 +157,8 @@ jobs:
           COOP_UPSERT_DB: ${{ github.event_name == 'workflow_dispatch' && inputs.upsert_db || '1' }}
           COOP_DEDUP_DB: ${{ github.event_name == 'workflow_dispatch' && inputs.upsert_db || '1' }}
           WOLT_FORCE_PLAYWRIGHT: ${{ github.event_name == 'workflow_dispatch' && inputs.force_playwright || '0' }}
-          # Optional: limit prodinfo probes if you want to be extra gentle
-          WOLT_PROBE_LIMIT: "240"
+          # Be gentle with prodinfo; keep low by default
+          WOLT_PROBE_LIMIT: "60"
         run: |
           set -euo pipefail
           # small randomized stagger to avoid bursts / 429s when multiple stores
@@ -172,9 +175,12 @@ jobs:
             --categories-file "${{ steps.cats.outputs.path }}" \
             --max-products "${MAX_PRODUCTS}" \
             --headless "1" \
-            --req-delay "2.0" \
+            --req-delay "0.6" \
             --goto-strategy "domcontentloaded" \
             --nav-timeout "45000" \
+            --upsert-per-category \
+            --flush-every "120" \
+            --probe-limit "${WOLT_PROBE_LIMIT}" \
             --out "${OUT}"
 
       - name: Upload CSV artifact
