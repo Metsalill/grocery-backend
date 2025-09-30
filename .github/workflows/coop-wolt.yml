@@ -35,12 +35,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Decide which store(s) to crawl -> JSON array in an output we can fromJSON()
       - name: Decide store matrix
         id: decide
         run: |
           if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
-            # scheduled run → default to Pärnu only
             echo '["parnu"]' > /tmp/stores.json
           else
             case "${{ inputs.store }}" in
@@ -52,7 +50,6 @@ jobs:
           fi
           echo "stores=$(cat /tmp/stores.json)" >> "$GITHUB_OUTPUT"
 
-  # We need strategy after we have crawl.outputs.stores
   run-crawlers:
     runs-on: ubuntu-latest
     timeout-minutes: 180
@@ -99,7 +96,6 @@ jobs:
           cp "$SRC" /tmp/categories.txt
           echo "path=/tmp/categories.txt" >> "$GITHUB_OUTPUT"
 
-      # Presence-only check so we fail early if secret is missing
       - name: Preflight DB env (presence-only)
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
@@ -111,7 +107,6 @@ jobs:
             echo "::notice::DATABASE_URL is present. Proceeding."
           fi
 
-      # DNS + short asyncpg connect check to the same DATABASE_URL_PUBLIC
       - name: DB preflight (DNS + connect)
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
@@ -157,13 +152,10 @@ jobs:
           COOP_UPSERT_DB: ${{ github.event_name == 'workflow_dispatch' && inputs.upsert_db || '1' }}
           COOP_DEDUP_DB: ${{ github.event_name == 'workflow_dispatch' && inputs.upsert_db || '1' }}
           WOLT_FORCE_PLAYWRIGHT: ${{ github.event_name == 'workflow_dispatch' && inputs.force_playwright || '0' }}
-          # Be gentle with prodinfo; keep modest by default
           WOLT_PROBE_LIMIT: "40"
-          # Start without modal clicks while stabilizing; can raise later
           WOLT_MODAL_PROBE_LIMIT: "0"
         run: |
           set -euo pipefail
-          # small randomized stagger to avoid bursts / 429s when multiple stores
           SLEEP=$(( (RANDOM % 25) + 10 ))
           echo "Staggering start by ${SLEEP}s for store ${{ matrix.store }}..."
           sleep "${SLEEP}"
@@ -171,7 +163,15 @@ jobs:
           MAX_PRODUCTS="${{ github.event_name == 'workflow_dispatch' && inputs.max_products || '0' }}"
           STORE_HOST="wolt:coop-${{ matrix.store }}"
           OUT="out/coop_wolt_${{ github.run_id }}_${{ matrix.store }}.csv"
-          echo "Running ${STORE_HOST} → ${OUT}"
+
+          # Map store -> venueId
+          case "${{ matrix.store }}" in
+            parnu)   VENUE="6282118813e5280bbe9e450f" ;;
+            lasname) VENUE="PUT_LASNAMAE_VENUEID_HERE" ;;
+            *)       VENUE="" ;;
+          esac
+
+          echo "Running ${STORE_HOST} → ${OUT} (venue=${VENUE})"
           stdbuf -oL -eL python3 scripts/wolt_crawler.py \
             --store-host "${STORE_HOST}" \
             --categories-file "${{ steps.cats.outputs.path }}" \
@@ -185,6 +185,7 @@ jobs:
             --flush-every "120" \
             --probe-limit "${WOLT_PROBE_LIMIT}" \
             --modal-probe-limit "${WOLT_MODAL_PROBE_LIMIT}" \
+            --venue-id "${VENUE}" \
             --out "${OUT}"
 
       - name: Upload CSV artifact
