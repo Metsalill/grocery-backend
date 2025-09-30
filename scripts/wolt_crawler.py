@@ -639,32 +639,32 @@ async def wait_cookie_banner(page: Any):
     except Exception:
         pass
 
-# NEW: robust helper to dismiss/escape the address/location popover
 async def dismiss_location_prompt(page: Any):
+    """Close the address/geo popover and any close(X) buttons on dialogs."""
     try:
-        # try a close "X" / explicit close button first
-        for sel in [
-            'button[aria-label*="lose"]',  # matches "Close" / "Sulge"
-            'button:has-text("Sulge")',
-            '[data-test*="close"] button',
-            '[data-testid*="close"] button',
-            'button[aria-label="Sulge"]',
-        ]:
-            btn = page.locator(sel)
-            if await btn.count() > 0:
+        # explicit 'X' in the address banner
+        close_btns = [
+            'button[aria-label="Close"]',
+            'button:has-text("✕")',
+            # popup sheet close icons
+            'button[class*="close"]',
+        ]
+        for sel in close_btns:
+            b = page.locator(sel)
+            if await b.count() > 0:
                 try:
-                    await btn.first.click(timeout=1000)
+                    await b.first.click(timeout=1200)
                     await page.wait_for_timeout(200)
-                    return
+                    break
                 except Exception:
                     pass
-    except Exception:
-        pass
-    # fallback: tap ESC a couple of times
-    try:
-        for _ in range(3):
-            await page.keyboard.press("Escape")
-            await page.wait_for_timeout(120)
+        # try ESC a couple of times just in case
+        for _ in range(2):
+            try:
+                await page.keyboard.press("Escape")
+                await page.wait_for_timeout(120)
+            except Exception:
+                pass
     except Exception:
         pass
 
@@ -686,57 +686,39 @@ async def _maybe_collect_json(resp, out_list: List[Any]):
     except Exception:
         pass
 
-# --- ROBUST TILE PRICE SCRAPER (anchors + articles + testids; allow "~") ---
 async def _scrape_tile_prices(page) -> Dict[str, float]:
     try:
         js = r'''
 (() => {
   const out = [];
-  const idRe = /(?:itemid-|item-)([a-f0-9]{24})/i;
-  const priceRe = /~?\s*(\d+[.,]\d{2})\s*€/;
-
-  const els = Array.from(document.querySelectorAll(
-    'a[href*="item"], article, [data-testid="menu-item"]'
-  ));
-
-  const attrList = ['data-id','data-item-id','data-product-id','data-test-id','data-testid','id'];
-
-  for (const el of els) {
-    let iid = null;
-
-    if (el.tagName && el.tagName.toLowerCase() === 'a') {
-      const href = el.getAttribute('href') || el.href || '';
-      const m = href && href.match(idRe);
-      if (m) iid = m[1];
-    }
-
-    if (!iid) {
-      for (const a of attrList) {
+  // widen the search: menu cards also carry data-test="menu-item"
+  const cards = Array.from(document.querySelectorAll('a[href*="item"], article,[data-test*="menu-item"]'));
+  const reId = /(?:itemid-|item-)([a-f0-9]{24})/i;
+  for (const el of cards) {
+    const href = (el.getAttribute && el.getAttribute('href')) || el.href || '';
+    let m = href && href.match(reId);
+    if (!m) {
+      // try attributes and text
+      const attrs = ['href','id','data-id','data-item-id','data-product-id','data-testid','data-test'];
+      for (const a of attrs) {
         const v = el.getAttribute && el.getAttribute(a);
-        if (!v) continue;
-        const m = v.match(/([a-f0-9]{24})/i);
-        if (m) { iid = m[1]; break; }
+        if (v) { const mm = v.match(/[a-f0-9]{24}/i); if (mm) { m = [null, mm[0]]; break; } }
+      }
+      if (!m) {
+        const t = (el.textContent||'');
+        const mm = t.match(/(?:itemid-|item-)?([a-f0-9]{24})/i);
+        if (mm) m = [null, mm[1]];
       }
     }
-
-    if (!iid) {
-      const t = (el.textContent || '');
-      const mt = t.match(idRe);
-      if (mt) iid = mt[1];
+    if (!m) continue;
+    const txt = (el.textContent||'');
+    const mt = txt.match(/(\d+[.,]\d{2})\s*€/);
+    if (mt) {
+      const raw = mt[1].replace(',', '.');
+      const val = parseFloat(raw);
+      if (!isNaN(val)) out.push([m[1].toLowerCase(), val]);
     }
-
-    if (!iid) continue;
-
-    const card = el.closest('article, a, div') || el;
-    const txt = (card && card.textContent) ? card.textContent : '';
-    const p = txt.match(priceRe);
-    if (!p) continue;
-
-    const raw = p[1].replace(',', '.');
-    const val = parseFloat(raw);
-    if (!isNaN(val)) out.push([iid.toLowerCase(), val]);
   }
-
   return out;
 })()
 '''
@@ -748,56 +730,35 @@ async def _scrape_tile_prices(page) -> Dict[str, float]:
     except Exception:
         return {}
 
-# --- ROBUST VENUE-ID VIA MODAL (broader click targets) ---
 async def _extract_venue_id_via_modal(page) -> Optional[str]:
     try:
-        await dismiss_location_prompt(page)
-        selectors = [
+        # broaden the click target; menu tiles sometimes are role=button
+        for sel in [
             'a[href*="itemid-"]',
             'a[href*="item-"]',
-            '[data-test="menu-item"]',
-            '[data-testid="menu-item"]',
+            '[data-test*="menu-item"]',
             'article:has-text("€")',
             '[role="button"]:has-text("€")',
-        ]
-        el = None
-        for sel in selectors:
-            cand = page.locator(sel).first
-            try:
-                if await cand.count() > 0:
-                    el = cand
-                    break
-            except Exception:
-                pass
-
-        if not el:
-            return None
-
-        try:
-            await el.scroll_into_view_if_needed(timeout=1500)
-            await page.wait_for_timeout(200)
-            await el.click(timeout=2000)
-        except Exception:
-            return None
-
-        for _ in range(30):
-            for fr in page.frames:
-                try:
-                    src = (fr.url or "").lower()
-                    m = re.search(r"/([a-f0-9]{24})/", src)
-                    if "prodinfo.wolt.com" in src and m:
-                        return m.group(1)
-                except Exception:
-                    pass
-            await page.wait_for_timeout(150)
-
+        ]:
+            a = page.locator(sel).first
+            if await a.count() == 0:
+                continue
+            await a.scroll_into_view_if_needed(timeout=1500)
+            await a.click(timeout=2000)
+            for _ in range(20):
+                frames = page.frames
+                for fr in frames:
+                    try:
+                        src = (fr.url or "").lower()
+                        m = re.search(r"/([a-f0-9]{24})/", src)
+                        if "prodinfo.wolt.com" in src and m:
+                            return m.group(1)
+                    except Exception:
+                        pass
+                await page.wait_for_timeout(150)
+            break
     except Exception:
         pass
-    finally:
-        try:
-            await page.keyboard.press("Escape")
-        except Exception:
-            pass
     return None
 
 async def _extract_venue_id_any(page, html: str) -> Optional[str]:
@@ -826,6 +787,25 @@ async def _extract_venue_id_any(page, html: str) -> Optional[str]:
     # 3) modal probe
     return await _extract_venue_id_via_modal(page)
 
+async def _ensure_category_route(page, cat_url: str):
+    """Make sure SPA ended up on the intended category route (prevents 'Lilled' snap)."""
+    await page.wait_for_timeout(300)
+    def _norm(u: str) -> str:
+        return (u or "").split("?")[0].rstrip("/")
+    ok = False
+    try:
+        ok = _norm(page.url) == _norm(cat_url)
+    except Exception:
+        ok = False
+    if not ok:
+        # retry navigation with stricter wait, then re-check
+        try:
+            await page.wait_for_timeout(200)
+            await page.goto(cat_url, wait_until="networkidle", timeout=45000)
+            await page.wait_for_timeout(300)
+        except Exception:
+            pass
+
 async def _goto_with_backoff(page, url: str, max_tries: int, nav_timeout_ms: int, strategies: List[str]):
     last_err = None
     for attempt in range(max_tries):
@@ -849,22 +829,18 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=bool(int(headless)))
-        # Give geolocation permission (Pärnu city center-ish) and locale
-        geoloc = {"latitude": 58.384, "longitude": 24.497}
-        context = await pw.chromium.new_context(
+        # IMPORTANT: create a Browser context from the *browser*, not BrowserType
+        context = await browser.new_context(
             user_agent=_GLOBAL_UA,
             viewport={"width": 1366, "height": 900},
             java_script_enabled=True,
-            geolocation=geoloc,
-            permissions=["geolocation"],
-            locale="et-EE",
+            geolocation={"latitude": 58.384, "longitude": 24.497},  # Pärnu-ish
         )
         try:
-            # also explicitly grant to the origin (extra-safe)
-            try:
-                await context.grant_permissions(["geolocation"], origin="https://wolt.com")
-            except Exception:
-                pass
+            await context.grant_permissions(["geolocation"])
+        except Exception:
+            pass
+        try:
             context.set_default_navigation_timeout(max(15000, int(nav_timeout_ms)))
             context.set_default_timeout(max(15000, int(nav_timeout_ms)))
         except Exception:
@@ -897,14 +873,13 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
         venue_id: Optional[str] = None
         try:
             strategies = [goto_strategy] if goto_strategy in ("domcontentloaded","networkidle","load") else ["domcontentloaded"]
-            # keep tries modest to avoid long stalls
             await _goto_with_backoff(page, cat_url, max_tries=3, nav_timeout_ms=nav_timeout_ms, strategies=strategies)
 
             await wait_cookie_banner(page)
             await dismiss_location_prompt(page)
+            await _ensure_category_route(page, cat_url)
 
-            # scroll a bit more to make sure grids hydrate
-            for _ in range(14):
+            for _ in range(10):
                 await page.mouse.wheel(0, 1500)
                 await page.wait_for_timeout(int(max(req_delay, 0.4)*1000 + random.uniform(250, 900)))
 
@@ -920,7 +895,6 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
 
             html = await page.content()
 
-            # Walk blobs to collect items
             def _walk(o):
                 if isinstance(o, dict):
                     has_name = isinstance(o.get("name"), str) and o.get("name").strip()
@@ -941,31 +915,6 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
                     _walk(blob)
                 except Exception:
                     pass
-
-            # --- seed 'found' with any 24-hex ids seen anywhere in DOM (attrs or text) ---
-            try:
-                ids = await page.evaluate("""
-(() => {
-  const ids = new Set();
-  const attrs = ['href','id','data-id','data-item-id','data-product-id','data-test-id','data-testid','data-qa'];
-  const hex = /([a-f0-9]{24})/i;
-  const anchorId = /(?:itemid-|item-)([a-f0-9]{24})/i;
-  for (const el of document.querySelectorAll('*')) {
-    for (const a of attrs) {
-      const v = el.getAttribute && el.getAttribute(a);
-      if (v) { const m = v.match(hex); if (m) ids.add((m[1]||'').toLowerCase()); }
-    }
-    const t = el.textContent || '';
-    const mt = t && t.match(anchorId);
-    if (mt) ids.add((mt[1]||'').toLowerCase());
-  }
-  return Array.from(ids);
-})()
-""")
-                for iid in ids or []:
-                    found.setdefault(iid, {"id": iid})
-            except Exception:
-                pass
 
             if not found:
                 ids = set(re.findall(r"(?:itemid-|item-)([a-f0-9]{24})", html or "", re.I))
@@ -1001,39 +950,50 @@ async def _enrich_items_via_modal(cat_url: str, items: List[Dict], headless: boo
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=bool(int(headless)))
-        geoloc = {"latitude": 58.384, "longitude": 24.497}
-        context = await pw.chromium.new_context(
+        context = await browser.new_context(
             user_agent=_GLOBAL_UA,
             viewport={"width": 1366, "height": 900},
             java_script_enabled=True,
-            geolocation=geoloc,
-            permissions=["geolocation"],
-            locale="et-EE",
+            geolocation={"latitude": 58.384, "longitude": 24.497},
         )
         try:
-            try:
-                await context.grant_permissions(["geolocation"], origin="https://wolt.com")
-            except Exception:
-                pass
-            page = await context.new_page()
+            await context.grant_permissions(["geolocation"])
+        except Exception:
+            pass
+        page = await context.new_page()
+        try:
             strategies = [goto_strategy] if goto_strategy in ("domcontentloaded","networkidle","load") else ["domcontentloaded"]
             await _goto_with_backoff(page, cat_url, max_tries=3, nav_timeout_ms=nav_timeout_ms, strategies=strategies)
             await wait_cookie_banner(page)
             await dismiss_location_prompt(page)
+            await _ensure_category_route(page, cat_url)
 
             for it in missing:
                 iid = str(it.get("id"))
-                sel = f'a[href*="itemid-{iid}"], a[href*="item-{iid}"]'
-                a = page.locator(sel)
-                if await a.count() == 0:
+                # open product modal
+                sel_candidates = [
+                    f'a[href*="itemid-{iid}"]',
+                    f'a[href*="item-{iid}"]',
+                    '[data-test*="menu-item"]',
+                    'article:has-text("€")',
+                    '[role="button"]:has-text("€")',
+                ]
+                a = None
+                for s in sel_candidates:
+                    loc = page.locator(s)
+                    if await loc.count() > 0:
+                        a = loc.first
+                        break
+                if not a:
                     continue
                 try:
-                    await a.first.scroll_into_view_if_needed(timeout=1500)
+                    await a.scroll_into_view_if_needed(timeout=1500)
                     await asyncio.sleep(max(req_delay, 0.3))
-                    await a.first.click(timeout=2000)
+                    await a.click(timeout=2000)
                 except Exception:
                     continue
 
+                # click Toote info / Product info
                 for btnsel in [
                     'button:has-text("Toote info")',
                     'a:has-text("Toote info")',
@@ -1066,6 +1026,7 @@ async def _enrich_items_via_modal(cat_url: str, items: List[Dict], headless: boo
                     if not it.get("brand"):
                         it["brand"] = it["supplier"]
 
+                # close modal (Esc)
                 try:
                     await page.keyboard.press("Escape")
                 except Exception:
@@ -1257,7 +1218,7 @@ def parse_args():
     # probe limits
     p.add_argument("--probe-limit", type=int, default=0, help="Override max prodinfo probes per run (env default 60).")
     p.add_argument("--modal-probe-limit", type=int, default=0, help="Override max modal clicks per category (env default 15).")
-    # new: per-category watchdog timeout
+    # per-category watchdog timeout
     p.add_argument("--category-timeout", type=float, default=75.0, help="Max seconds to spend on a single category before skipping.")
     return p.parse_args()
 
