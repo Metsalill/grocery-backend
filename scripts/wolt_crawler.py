@@ -18,6 +18,10 @@ NEW (robust GTIN/Tootja):
     • Tootja/Tarnija/Supplier
   Limited by --modal-probe-limit to control runtime.
 
+Important:
+- ext_id is kept STABLE as iid:<24hex> (Wolt item id). When GTIN is discovered later,
+  the same row is updated via ON CONFLICT (store_host, ext_id).
+
 Noise guard:
 - Filters out cookie/consent/etc. junk.
 - Accepts items with valid GTIN immediately; accepts GTIN '-' only if name looks productish and price present.
@@ -552,13 +556,11 @@ def _extract_row_from_item(item: Dict, category_url: str, store_host: str) -> Op
     if not _valid_productish(name, price, ean_norm, category_url, brand, manufacturer):
         return None
 
-    if ean_norm:
-        ext_id = ean_norm
-    else:
-        iid = str(item.get("id") or "").lower()
-        if not iid or not HEX24_RE.fullmatch(iid):
-            return None
-        ext_id = f"iid:{iid}"
+    # --- Stable ext_id: ALWAYS use iid:<24hex> so future enrich runs update the same row ---
+    iid = str(item.get("id") or "").lower()
+    if not iid or not HEX24_RE.fullmatch(iid):
+        return None
+    ext_id = f"iid:{iid}"
 
     url = category_url
     if item.get("id"):
