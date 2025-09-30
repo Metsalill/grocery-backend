@@ -27,7 +27,7 @@ on:
     - cron: "0 */2 * * *" # every 2 hours
 
 concurrency:
-  group: coop-bolt-crawl
+  group: coop-bolt-crawl-${{ github.event_name }}
   cancel-in-progress: true
 
 jobs:
