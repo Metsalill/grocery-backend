@@ -7,32 +7,28 @@ Fast path:
 - Load Wolt category; try __NEXT_DATA__/buildId JSON, Apollo state, etc.
 - Collect item objects from server payloads.
 
-Fallback (Playwright):
-- Page load, scroll, capture JSON blobs, tile prices, and venueId via modal or HTML/script hints.
+Fallback:
+- Playwright page load, scroll, capture JSON blobs, tile prices, and venueId via modal.
 - Enrich items via https://prodinfo.wolt.com/<lang>/<venueId>/<itemId> to fetch GTIN & Supplier.
 
-NEW (robust GTIN/Tootja + resilience):
-- More tolerant HTML parsing on prodinfo (handles <h3>/<p>, <dt>/<dd>, plain text, JSON-LD).
-- If GTIN still missing, open product modal and click “Toote info” (or “Product info”) to read GTIN & supplier.
-- If PW sees zero items after first pass, reload once (networkidle), wait, re-scroll, and try again.
-- Wider venueId detection: menu/venue images, JSON/script text, and modal iframe.
-- Optional geolocation/locale/timezone hints for PW context to look more “human”.
+GTIN/Tootja enrichment is tolerant:
+- Handles JSON-LD, plain text, <dt>/<dd>, headings.
+- If still missing, opens product modal and reads “GTIN / Tootja / Tarnija / Supplier”.
+  Limited by --modal-probe-limit.
 
 Important:
-- ext_id is kept STABLE as iid:<24hex> (Wolt item id). When GTIN is discovered later,
-  the same row is updated via ON CONFLICT (store_host, ext_id).
+- ext_id is kept STABLE as iid:<24hex> (Wolt item id) so later runs can update rows.
 
-Noise guard:
-- Filters out cookie/consent/etc. junk.
-- Accepts items with valid GTIN immediately; accepts GTIN '-' only when Wolt explicitly shows '-'.
+Guard rails:
+- Filters noisy junk.
+- Accepts GTIN '-' only when the site explicitly shows '-' for GTIN.
+- Per-category watchdog timeout so a stuck page can’t stall the job.
 
 Env:
 - WOLT_FORCE_PLAYWRIGHT=1 to force PW fallback
-- WOLT_PROBE_LIMIT (default 60) to cap prodinfo probes
-- WOLT_MODAL_PROBE_LIMIT (default 15) to cap modal clicks per category
-- WOLT_PW_LOCALE (default et-EE), WOLT_PW_TZ (default Europe/Tallinn),
-  WOLT_PW_GEO_LAT / WOLT_PW_GEO_LON (optional), WOLT_PW_ALLOW_TRACKERS=1 (disable route blocking)
-- COOP_UPSERT_DB=1 / COOP_DEDUP_DB=1 (same semantics as ecoop)
+- WOLT_PROBE_LIMIT (default 60) for prodinfo probes
+- WOLT_MODAL_PROBE_LIMIT (default 15) for modal clicks per category
+- COOP_UPSERT_DB=1 / COOP_DEDUP_DB=1 for DB semantics
 """
 
 import argparse
@@ -82,25 +78,6 @@ def likely_brand_from_name(name: Optional[str]) -> Optional[str]:
     if 2 <= len(token) <= 24:
         return token
     return None
-
-# ---------- tiny cache for venueId ----------
-def _cache_path() -> Path:
-    return Path(os.getenv("WOLT_CACHE_FILE", ".wolt_cache.json"))
-
-def _load_cache() -> Dict[str, Any]:
-    p = _cache_path()
-    if p.exists():
-        try:
-            return json.loads(p.read_text(encoding="utf-8"))
-        except Exception:
-            return {}
-    return {}
-
-def _save_cache(cache: Dict[str, Any]) -> None:
-    try:
-        _cache_path().write_text(json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8")
-    except Exception:
-        pass
 
 # ---------- outputs ----------
 CSV_COLS = [
@@ -162,7 +139,6 @@ async def _fetch_existing_gtins(store_host: str) -> Set[str]:
         await conn.close()
 
 async def maybe_upsert_db(rows: List[Dict]) -> None:
-    """Best-effort upsert. Never crash the crawl on DB errors."""
     if not rows:
         print("[info] No rows to upsert.")
         return
@@ -276,7 +252,7 @@ def _browser_headers(referer: Optional[str] = None) -> Dict[str, str]:
     return h
 
 async def _sleep_backoff(attempt: int, retry_after: Optional[str], base: float = 1.2) -> None:
-    if retry_after and retry_after.isdigit():
+    if retry_after and str(retry_after).isdigit():
         wait_s = max(0.0, float(retry_after))
     else:
         wait_s = base * (2 ** attempt) + random.uniform(0.3, 0.9)
@@ -410,11 +386,10 @@ def _search_info_label(value: Any, *labels: str) -> Optional[str]:
     return None
 
 # ---------- enrichment via prodinfo.wolt.com ----------
-# tolerant regexes
-PRODINFO_JSONLD_GTIN_RE = re.compile(r'"gtin(?:8|12|13|14)"\s*:\s*"(\d{8,14})"', re.I)
-PRODINFO_ANY_GTIN_RE    = re.compile(r"gtin[^0-9]{0,40}(\d{8,14})", re.I)  # plain text fallback
-PRODINFO_SUPPLIER_TXT_RE = re.compile(r"(?:Tootja|Tarnija|Supplier|Manufacturer)[^A-Za-z0-9]{0,20}([^<>\n]{2,200})", re.I)
-TAG_STRIP_RE = re.compile(r"<[^>]+>")
+PRODINFO_JSONLD_GTIN_RE   = re.compile(r'"gtin(?:8|12|13|14)"\s*:\s*"(\d{8,14})"', re.I)
+PRODINFO_ANY_GTIN_RE      = re.compile(r"gtin[^0-9]{0,40}(\d{8,14})", re.I)
+PRODINFO_SUPPLIER_TXT_RE  = re.compile(r"(?:Tootja|Tarnija|Supplier|Manufacturer)[^A-Za-z0-9]{0,20}([^<>\n]{2,200})", re.I)
+TAG_STRIP_RE              = re.compile(r"<[^>]+>")
 
 async def _fetch_prodinfo_fields(lang: str, venue_id: str, item_id: str) -> Dict[str, Optional[str]]:
     url = f"https://prodinfo.wolt.com/{lang}/{venue_id}/{item_id}"
@@ -423,11 +398,9 @@ async def _fetch_prodinfo_fields(lang: str, venue_id: str, item_id: str) -> Dict
     except Exception:
         return {"gtin": None, "supplier": None, "name": None}
 
-    # 1) JSON-LD
     m = PRODINFO_JSONLD_GTIN_RE.search(html or "")
     gtin = normalize_ean(m.group(1)) if m else None
 
-    # 2) structured headings / plain text
     if not gtin:
         txt = TAG_STRIP_RE.sub(" ", html or " ")
         m2 = PRODINFO_ANY_GTIN_RE.search(txt)
@@ -438,14 +411,12 @@ async def _fetch_prodinfo_fields(lang: str, venue_id: str, item_id: str) -> Dict
                 if re.search(r"\bGTIN\b[^0-9]{0,40}[-–—]", txt, re.I):
                     gtin = "-"
 
-    # Supplier / Tootja / Tarnija
     supplier = None
     txt = TAG_STRIP_RE.sub(" ", html or " ")
     m3 = PRODINFO_SUPPLIER_TXT_RE.search(txt)
     if m3:
         supplier = m3.group(1).strip()
 
-    # Product name from page, sometimes present
     name = None
     mt = re.search(r"<h2[^>]*>([^<]{2,200})</h2>", html or "", re.I)
     if mt:
@@ -482,7 +453,7 @@ async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str
             if gt:
                 it["gtin"] = gt
             elif (graw or "").strip() == "-":
-                it["gtin"] = "-"  # explicit "no GTIN"
+                it["gtin"] = "-"
             if info.get("supplier"):
                 it["supplier"] = info["supplier"]
                 if not it.get("brand"):
@@ -492,13 +463,13 @@ async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str
         except Exception:
             pass
         probed += 1
-        await asyncio.sleep(0.08)  # probe throttle
+        await asyncio.sleep(0.08)
 
 # ---------- noise guards ----------
 _DENY_EXACT = {"web tracking bundle", "functional", "required", "marketing", "analytics",
                "privacy", "cookie", "consent", "pant", "deposit"}
 _DENY_SUBSTR = {"cookie", "consent", "tracking", "privacy"}
-_DENY_PREFIX = {"otsi", "avasta", "tulemused"}  # search/UX headings
+_DENY_PREFIX = {"otsi", "avasta", "tulemused"}
 _DENY_LOCATIONS = {"aabenraa","aabybro","aachen","aalborg","õnekoski"}
 
 def _looks_like_noise(name: Optional[str]) -> bool:
@@ -588,7 +559,6 @@ def _extract_row_from_item(item: Dict, category_url: str, store_host: str) -> Op
     if not _valid_productish(name, price, ean_norm, category_url, brand, manufacturer):
         return None
 
-    # --- Stable ext_id: ALWAYS use iid:<24hex> so future enrich runs update the same row ---
     iid = str(item.get("id") or "").lower()
     if not iid or not HEX24_RE.fullmatch(iid):
         return None
@@ -603,7 +573,6 @@ def _extract_row_from_item(item: Dict, category_url: str, store_host: str) -> Op
         "store_host": store_host,
         "channel": "wolt",
         "ext_id": ext_id,
-        # IMPORTANT: leave blank when unknown; use '-' only when explicitly shown by Wolt
         "ean_raw": ean_raw or "",
         "ean_norm": ean_norm,
         "name": name,
@@ -624,20 +593,29 @@ def _wolt_store_host(sample_url: str) -> str:
     return urlparse(sample_url).netloc.lower()
 
 async def _load_wolt_payload(url: str) -> Optional[Dict]:
-    html = await _fetch_html(url)
-    nd = _html_get_next_data(html)
-    if nd:
-        return nd
-    build_id = _html_get_build_id(html)
-    if build_id:
-        u = urlparse(url)
-        path = u.path.rstrip("/")
-        jd = await _fetch_json(f"{u.scheme}://{u.netloc}/_next/data/{build_id}{path}.json")
-        if jd:
-            return jd
-    apollo = _html_get_apollo_state(html)
-    if apollo:
-        return {"apollo": apollo}
+    """Best-effort server payload loader. Never raise; return None on failure so caller can PW-fallback."""
+    try:
+        html = await _fetch_html(url)
+    except Exception as e:
+        print(f"[warn] fast-path: HTML fetch failed for {url} ({e}); will use Playwright.")
+        return None
+    try:
+        nd = _html_get_next_data(html)
+        if nd:
+            return nd
+        build_id = _html_get_build_id(html)
+        if build_id:
+            u = urlparse(url)
+            path = u.path.rstrip("/")
+            jd = await _fetch_json(f"{u.scheme}://{u.netloc}/_next/data/{build_id}{path}.json")
+            if jd:
+                return jd
+        apollo = _html_get_apollo_state(html)
+        if apollo:
+            return {"apollo": apollo}
+    except Exception as e:
+        print(f"[warn] fast-path: parse failed for {url} ({e}); will use Playwright.")
+        return None
     return None
 
 # ---------- Playwright ----------
@@ -709,34 +687,6 @@ async def _scrape_tile_prices(page) -> Dict[str, float]:
     except Exception:
         return {}
 
-async def _extract_venue_id_from_html(html: str) -> Optional[str]:
-    # image cdn patterns or embedded state
-    for pat in [
-        r"/(?:menu|venue)-images/([a-f0-9]{24})/",
-        r'"venueId"\s*:\s*"([a-f0-9]{24})"',
-        r"'venueId'\s*:\s*'([a-f0-9]{24})'",
-    ]:
-        m = re.search(pat, html or "", re.I)
-        if m:
-            return m.group(1)
-    return None
-
-async def _extract_venue_id_via_scripts(page) -> Optional[str]:
-    try:
-        els = page.locator("script")
-        count = await els.count()
-        count = min(count, 60)
-        chunks = []
-        for i in range(count):
-            try:
-                chunks.append(await els.nth(i).inner_text())
-            except Exception:
-                pass
-        big = "\n".join(chunks)
-        return await _extract_venue_id_from_html(big)
-    except Exception:
-        return None
-
 async def _extract_venue_id_via_modal(page) -> Optional[str]:
     try:
         a = page.locator('a[href*="itemid-"], a[href*="item-"]').first
@@ -744,7 +694,7 @@ async def _extract_venue_id_via_modal(page) -> Optional[str]:
             return None
         await a.scroll_into_view_if_needed(timeout=1500)
         await a.click(timeout=2000)
-        for _ in range(24):
+        for _ in range(20):
             frames = page.frames
             for fr in frames:
                 try:
@@ -755,14 +705,35 @@ async def _extract_venue_id_via_modal(page) -> Optional[str]:
                 except Exception:
                     pass
             await page.wait_for_timeout(150)
-        # if modal opened but no iframe yet, close it
-        try:
-            await page.keyboard.press("Escape")
-        except Exception:
-            pass
     except Exception:
         pass
     return None
+
+async def _extract_venue_id_any(page, html: str) -> Optional[str]:
+    # 1) HTML regex
+    m = re.search(r"/menu-images/([a-f0-9]{24})/", html or "", re.I)
+    if m:
+        return m.group(1)
+    # 2) resource timing + images + link/script URLs
+    try:
+        js = r'''
+(() => {
+  const re = /\/menu-images\/([a-f0-9]{24})\//i;
+  const hit = (s) => { const m = re.exec(s||''); return m ? m[1] : null; };
+  const perf = (window.performance && performance.getEntriesByType) ? performance.getEntriesByType('resource') : [];
+  for (const e of (perf || [])) { const id = hit(e.name || ''); if (id) return id; }
+  for (const img of Array.from(document.images || [])) { const id = hit(img.currentSrc || img.src || ''); if (id) return id; }
+  for (const el of Array.from(document.querySelectorAll('link,script'))) { const id = hit(el.src || el.href || ''); if (id) return id; }
+  return null;
+})()
+'''
+        found = await page.evaluate(js)
+        if isinstance(found, str) and HEX24_RE.fullmatch(found.lower()):
+            return found.lower()
+    except Exception:
+        pass
+    # 3) modal probe
+    return await _extract_venue_id_via_modal(page)
 
 async def _goto_with_backoff(page, url: str, max_tries: int, nav_timeout_ms: int, strategies: List[str]):
     last_err = None
@@ -773,7 +744,7 @@ async def _goto_with_backoff(page, url: str, max_tries: int, nav_timeout_ms: int
                 return resp
             except Exception as e:
                 last_err = e
-        await _sleep_backoff(attempt, retry_after=None, base=1.2)
+        await _sleep_backoff(attempt, retry_after=None, base=1.1)
     if last_err:
         raise last_err
 
@@ -787,69 +758,54 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=bool(int(headless)))
-        # PW context hints
-        locale = os.getenv("WOLT_PW_LOCALE", "et-EE")
-        tz = os.getenv("WOLT_PW_TZ", "Europe/Tallinn")
-        geo_lat = os.getenv("WOLT_PW_GEO_LAT")
-        geo_lon = os.getenv("WOLT_PW_GEO_LON")
-        ctx_kwargs: Dict[str, Any] = {
-            "user_agent": _GLOBAL_UA,
-            "viewport": {"width": 1366, "height": 900},
-            "java_script_enabled": True,
-            "locale": locale,
-            "timezone_id": tz,
-        }
-        if geo_lat and geo_lon:
-            try:
-                ctx_kwargs["geolocation"] = {"latitude": float(geo_lat), "longitude": float(geo_lon)}
-                ctx_kwargs["permissions"] = ["geolocation"]
-            except Exception:
-                pass
-
-        context = await browser.new_context(**ctx_kwargs)
+        context = await browser.new_context(
+            user_agent=_GLOBAL_UA,
+            viewport={"width": 1366, "height": 900},
+            java_script_enabled=True,
+        )
         try:
             context.set_default_navigation_timeout(max(15000, int(nav_timeout_ms)))
             context.set_default_timeout(max(15000, int(nav_timeout_ms)))
         except Exception:
             pass
 
-        # Allow disabling route blocker (in case it hurts boot logic)
-        allow_trackers = os.getenv("WOLT_PW_ALLOW_TRACKERS", "0").lower() in ("1", "true", "yes", "y")
-
-        if not allow_trackers:
-            async def route_filter(route):
+        async def route_filter(route):
+            try:
+                url = route.request.url
+                if any(h in url for h in [
+                    "googletagmanager.com","google-analytics.com","doubleclick.net",
+                    "facebook.net","connect.facebook.net","hotjar","fullstory",
+                    "cdn.segment.com","intercom",
+                ]):
+                    return await route.abort()
+                return await route.continue_()
+            except Exception:
                 try:
-                    url = route.request.url
-                    if any(h in url for h in [
-                        "googletagmanager.com","google-analytics.com","doubleclick.net",
-                        "facebook.net","connect.facebook.net","hotjar","fullstory",
-                        "cdn.segment.com","intercom",
-                    ]):
-                        return await route.abort()
                     return await route.continue_()
                 except Exception:
-                    try:
-                        return await route.continue_()
-                    except Exception:
-                        return
-            await context.route("**/*", route_filter)
+                    return
+
+        await context.route("**/*", route_filter)
 
         page = await context.new_page()
         collected_blobs: List[Any] = []
         page.on("response", lambda resp: asyncio.create_task(_maybe_collect_json(resp, collected_blobs)))
 
-        async def _scroll_and_collect() -> None:
-            # Scroll to trigger lazy loads
+        html = ""
+        tile_prices: Dict[str, float] = {}
+        venue_id: Optional[str] = None
+        try:
+            strategies = [goto_strategy] if goto_strategy in ("domcontentloaded","networkidle","load") else ["domcontentloaded"]
+            # keep tries modest to avoid long stalls
+            await _goto_with_backoff(page, cat_url, max_tries=3, nav_timeout_ms=nav_timeout_ms, strategies=strategies)
+
             await wait_cookie_banner(page)
             for _ in range(10):
                 await page.mouse.wheel(0, 1500)
                 await page.wait_for_timeout(int(max(req_delay, 0.4)*1000 + random.uniform(250, 900)))
 
-            # Capture tile prices
-            nonlocal tile_prices
             tile_prices = await _scrape_tile_prices(page)
 
-            # Collect known globals if present
             for varname in ["__APOLLO_STATE__", "__NEXT_DATA__", "__NUXT__", "__INITIAL_STATE__", "__REACT_QUERY_STATE__", "__REDUX_STATE__"]:
                 try:
                     data = await page.evaluate(f"window.{varname} || null")
@@ -858,8 +814,6 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
                 except Exception:
                     pass
 
-            # Page HTML for regexes
-            nonlocal html
             html = await page.content()
 
             def _walk(o):
@@ -888,32 +842,12 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
                 for iid in ids:
                     found[iid] = {"id": iid}
 
-        html = ""
-        tile_prices: Dict[str, float] = {}
-        venue_id: Optional[str] = None
-
-        try:
-            strategies = [goto_strategy] if goto_strategy in ("domcontentloaded","networkidle","load") else ["domcontentloaded","load","networkidle"]
-            await _goto_with_backoff(page, cat_url, max_tries=6, nav_timeout_ms=nav_timeout_ms, strategies=strategies)
-
-            await _scroll_and_collect()
-
-            # Zero-items recovery: reload once & retry more patiently
-            if not found:
-                print("[warn] zero items after first load — reloading once (networkidle)…")
-                try:
-                    await page.reload(wait_until="networkidle", timeout=nav_timeout_ms)
-                    await page.wait_for_timeout(int(1000 + random.uniform(300, 900)))
-                    await _scroll_and_collect()
-                except Exception:
-                    pass
-
-            # Try several ways to discover venueId
-            venue_id = await _extract_venue_id_from_html(html)
-            if not venue_id:
-                venue_id = await _extract_venue_id_via_scripts(page)
-            if not venue_id:
-                venue_id = await _extract_venue_id_via_modal(page)
+            # venue id detection (multi-strategy)
+            venue_id = await _extract_venue_id_any(page, html)
+            if venue_id:
+                print(f"[info] venueId detected: {venue_id}")
+            else:
+                print("[warn] venueId not found in PW capture")
 
             return list(found.values()), collected_blobs, html, tile_prices, venue_id
 
@@ -921,7 +855,7 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
             await context.close()
             await browser.close()
 
-# ---------- modal enrichment (last-resort, clicks "Toote info") ----------
+# ---------- modal enrichment ----------
 async def _enrich_items_via_modal(cat_url: str, items: List[Dict], headless: bool, req_delay: float,
                                   goto_strategy: str, nav_timeout_ms: int, max_modal: int) -> None:
     if async_playwright is None or max_modal <= 0:
@@ -940,8 +874,8 @@ async def _enrich_items_via_modal(cat_url: str, items: List[Dict], headless: boo
         context = await browser.new_context(user_agent=_GLOBAL_UA, viewport={"width": 1366, "height": 900}, java_script_enabled=True)
         page = await context.new_page()
         try:
-            strategies = [goto_strategy] if goto_strategy in ("domcontentloaded","networkidle","load") else ["domcontentloaded","load","networkidle"]
-            await _goto_with_backoff(page, cat_url, max_tries=4, nav_timeout_ms=nav_timeout_ms, strategies=strategies)
+            strategies = [goto_strategy] if goto_strategy in ("domcontentloaded","networkidle","load") else ["domcontentloaded"]
+            await _goto_with_backoff(page, cat_url, max_tries=3, nav_timeout_ms=nav_timeout_ms, strategies=strategies)
             await wait_cookie_banner(page)
 
             for it in missing:
@@ -982,7 +916,7 @@ async def _enrich_items_via_modal(cat_url: str, items: List[Dict], headless: boo
                 if mgt and not it.get("gtin"):
                     it["gtin"] = normalize_ean(mgt.group(1))
                 elif re.search(r"\bGTIN\b", modal_text, re.I) and not re.search(r"\b\d{8,14}\b", modal_text):
-                    it["gtin"] = "-"  # explicit no GTIN
+                    it["gtin"] = "-"
                 msup = re.search(r"(?:Tootja|Tarnija|Supplier|Manufacturer)[^A-Za-z0-9]{0,20}([^\n]{2,200})", modal_text, re.I)
                 if msup and not it.get("supplier"):
                     it["supplier"] = msup.group(1).strip()
@@ -1004,110 +938,90 @@ def _lang_from_url(u: str) -> str:
     return (m.group(1).lower() if m else "et")
 
 async def run_wolt(args, categories: List[str], on_rows_async) -> None:
-    """
-    on_rows_async(rows) must be an async callable that:
-      - streams to CSV
-      - updates in-memory totals
-      - handles flush-every logic
-    """
     force_pw = bool(args.force_playwright or str(os.getenv("WOLT_FORCE_PLAYWRIGHT", "")).lower() in ("1","true","t","yes","y","on"))
-    cache = _load_cache()
 
-    for idx, cat in enumerate(categories):
+    async def _process_one(cat: str):
         store_host_cat = args.store_host.strip() if args.store_host else _wolt_store_host(cat)
         print(f"[cat-wolt] {cat}")
 
+        payload = None
+        if not force_pw:
+            try:
+                payload = await _load_wolt_payload(cat)
+            except Exception as e:
+                print(f"[warn] fast-path failed for {cat} ({e}); using Playwright fallback.")
+                payload = None
+
+        if payload:
+            found: Dict[str, Dict] = {}
+            _walk_collect_items(payload, found)
+            items = list(found.values())
+            blobs, html, tile_prices, venue_id = [payload], "", {}, None
+        else:
+            print(f"[info] forcing Playwright fallback for {cat}")
+            items, blobs, html, tile_prices, venue_id = await _capture_with_playwright(
+                cat,
+                headless=bool(int(args.headless)),
+                req_delay=float(args.req_delay),
+                goto_strategy=args.goto_strategy,
+                nav_timeout_ms=int(args.nav_timeout),
+            )
+
+        if venue_id:
+            lang = _lang_from_url(cat)
+            await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=(args.probe_limit or None))
+        else:
+            print("[warn] venueId not found — skipping direct prodinfo enrichment")
+
+        if not payload and items:
+            for it in items:
+                if it.get("id"):
+                    iid = str(it["id"]).lower()
+                    if it.get("price") in (None, 0) and iid in tile_prices:
+                        it["price"] = tile_prices[iid]
+
+        if args.modal_probe_limit > 0:
+            await _enrich_items_via_modal(
+                cat, items,
+                headless=bool(int(args.headless)),
+                req_delay=float(args.req_delay),
+                goto_strategy=args.goto_strategy,
+                nav_timeout_ms=int(args.nav_timeout),
+                max_modal=int(args.modal_probe_limit),
+            )
+
+        existing_gtins = await _fetch_existing_gtins(store_host_cat)
+
+        rows_raw = []
+        for item in items:
+            row = _extract_row_from_item(item, cat, store_host_cat)
+            if not row:
+                continue
+            if row.get("ean_norm") and row["ean_norm"] in existing_gtins:
+                continue
+            rows_raw.append(row)
+
+        rows = rows_raw
+        if args.max_products and args.max_products > 0:
+            rows = rows[: args.max_products]
+
+        print(f"[info] category rows: {len(rows)}" + (" (pw-fallback)" if not payload else ""))
+        await on_rows_async(rows)
+
+        if args.upsert_per_category and rows:
+            try:
+                await maybe_upsert_db(rows)
+            except Exception:
+                pass
+
+    for idx, cat in enumerate(categories):
         if idx > 0:
             await asyncio.sleep(float(args.req_delay) + random.uniform(0.5, 1.2))
-
         try:
-            payload = None
-            if not force_pw:
-                try:
-                    payload = await _load_wolt_payload(cat)
-                except Exception as e:
-                    print(f"[warn] fast-path failed for {cat} ({e}); using Playwright fallback")
-
-            if payload:
-                found: Dict[str, Dict] = {}
-                _walk_collect_items(payload, found)
-                items = list(found.values())
-                blobs = [payload]
-                html = ""
-                tile_prices = {}
-                venue_id = None
-            else:
-                print(f"[info] forcing Playwright fallback for {cat}")
-                items, blobs, html, tile_prices, venue_id = await _capture_with_playwright(
-                    cat,
-                    headless=bool(int(args.headless)),
-                    req_delay=float(args.req_delay),
-                    goto_strategy=args.goto_strategy,
-                    nav_timeout_ms=int(args.nav_timeout),
-                )
-
-            # Use cached venueId if discovery failed
-            if not venue_id:
-                cached_vid = (cache.get("venue_ids") or {}).get(store_host_cat)
-                if cached_vid:
-                    print(f"[info] using cached venueId for {store_host_cat}: {cached_vid}")
-                    venue_id = cached_vid
-
-            # Persist newly discovered venueId
-            if venue_id:
-                cache.setdefault("venue_ids", {})[store_host_cat] = venue_id
-                _save_cache(cache)
-
-            # Step 1: enrich via prodinfo (HTTP, fast)
-            if venue_id:
-                lang = _lang_from_url(cat)
-                await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=(args.probe_limit or None))
-            else:
-                print("[warn] venueId not found — skipping direct prodinfo enrichment")
-
-            # Step 2: fill missing prices from tiles (PW path only)
-            if not payload and items:
-                for it in items:
-                    if it.get("id"):
-                        iid = str(it["id"]).lower()
-                        if it.get("price") in (None, 0) and iid in tile_prices:
-                            it["price"] = tile_prices[iid]
-
-            # Step 3: last-resort modal clicks for missing GTIN/Tootja
-            if args.modal_probe_limit > 0:
-                await _enrich_items_via_modal(
-                    cat, items,
-                    headless=bool(int(args.headless)),
-                    req_delay=float(args.req_delay),
-                    goto_strategy=args.goto_strategy,
-                    nav_timeout_ms=int(args.nav_timeout),
-                    max_modal=int(args.modal_probe_limit),
-                )
-
-            existing_gtins = await _fetch_existing_gtins(store_host_cat)
-
-            rows_raw = []
-            for item in items:
-                row = _extract_row_from_item(item, cat, store_host_cat)
-                if not row:
-                    continue
-                if row.get("ean_norm") and row["ean_norm"] in existing_gtins:
-                    continue
-                rows_raw.append(row)
-
-            rows = rows_raw
-            if args.max_products and args.max_products > 0:
-                rows = rows[: args.max_products]
-
-            print(f"[info] category rows: {len(rows)}" + (" (pw-fallback)" if not payload else ""))
-            await on_rows_async(rows)  # stream + accumulate + optional flush-every
-
-            if args.upsert_per_category and rows:
-                try:
-                    await maybe_upsert_db(rows)
-                except Exception:
-                    pass
-
+            # Per-category watchdog to prevent long stalls
+            await asyncio.wait_for(_process_one(cat), timeout=float(args.category_timeout))
+        except asyncio.TimeoutError:
+            print(f"[warn] category watchdog timeout after {args.category_timeout}s → skipping remainder of {cat}")
         except Exception as e:
             print(f"[warn] Wolt category failed {cat}: {e}")
 
@@ -1126,6 +1040,7 @@ async def main(args):
           f"goto={args.goto_strategy} nav_timeout={args.nav_timeout}ms store_host={args.store_host or '(auto)'} "
           f"probe_limit={args.probe_limit or os.getenv('WOLT_PROBE_LIMIT','(env default 60)')} "
           f"modal_probe_limit={args.modal_probe_limit or os.getenv('WOLT_MODAL_PROBE_LIMIT','(env default 15)')} "
+          f"category_timeout={args.category_timeout}s "
           f"upsert_per_category={args.upsert_per_category} flush_every={args.flush_every}")
 
     out_path = Path(args.out)
@@ -1199,11 +1114,12 @@ def parse_args():
     # probe limits
     p.add_argument("--probe-limit", type=int, default=0, help="Override max prodinfo probes per run (env default 60).")
     p.add_argument("--modal-probe-limit", type=int, default=0, help="Override max modal clicks per category (env default 15).")
+    # new: per-category watchdog timeout
+    p.add_argument("--category-timeout", type=float, default=75.0, help="Max seconds to spend on a single category before skipping.")
     return p.parse_args()
 
 if __name__ == "__main__":
     args = parse_args()
-    # apply env defaults for modal-probe-limit if not passed
     if not args.modal_probe_limit:
         try:
             args.modal_probe_limit = int(os.getenv("WOLT_MODAL_PROBE_LIMIT", "15"))
