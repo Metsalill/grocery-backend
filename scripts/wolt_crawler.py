@@ -103,7 +103,11 @@ def append_csv(rows: List[Dict], out_path: Path) -> None:
             w.writeheader()
         for r in rows:
             row = {k: r.get(k) for k in CSV_COLS}
-            if row.get("price") is None:
+            # coerce None → "" so we don't write literal "None"
+            for k, v in list(row.items()):
+                if v is None:
+                    row[k] = ""
+            if row.get("price") is None or row.get("price") == "":
                 row["price"] = ""
             else:
                 try:
@@ -403,13 +407,17 @@ async def _fetch_prodinfo_fields(lang: str, venue_id: str, item_id: str) -> Dict
     m = PRODINFO_JSONLD_GTIN_RE.search(html or "")
     gtin = normalize_ean(m.group(1)) if m else None
 
-    # 2) structured headings (works even if tags differ)
+    # 2) structured headings / plain text
     if not gtin:
-        # strip tags to text and search "GTIN ... digits"
         txt = TAG_STRIP_RE.sub(" ", html or " ")
         m2 = PRODINFO_ANY_GTIN_RE.search(txt)
         if m2:
             gtin = normalize_ean(m2.group(1))
+        else:
+            # If GTIN label is present but no digits are found, treat as explicit '-'
+            if re.search(r"\bGTIN\b", txt, re.I) and not re.search(r"\b\d{8,14}\b", txt):
+                if re.search(r"\bGTIN\b[^0-9]{0,40}[-–—]", txt, re.I):
+                    gtin = "-"
 
     # Supplier / Tootja / Tarnija
     supplier = None
@@ -435,6 +443,8 @@ async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str
             max_to_probe = 60
 
     def _needs_gtin(it: Dict) -> bool:
+        if (it.get("gtin") or "").strip() == "-":
+            return False
         return normalize_ean(it.get("gtin") or it.get("ean") or it.get("ean_norm")) is None
 
     queue = sorted(items, key=lambda it: (not _needs_gtin(it), str(it.get("id") or "")))
@@ -448,9 +458,12 @@ async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str
             continue
         try:
             info = await _fetch_prodinfo_fields(lang, venue_id, iid)
-            gt = normalize_ean(info.get("gtin"))
+            graw = info.get("gtin")
+            gt = normalize_ean(graw)
             if gt:
                 it["gtin"] = gt
+            elif (graw or "").strip() == "-":
+                it["gtin"] = "-"  # explicit "no GTIN"
             if info.get("supplier"):
                 it["supplier"] = info["supplier"]
                 if not it.get("brand"):
@@ -571,7 +584,8 @@ def _extract_row_from_item(item: Dict, category_url: str, store_host: str) -> Op
         "store_host": store_host,
         "channel": "wolt",
         "ext_id": ext_id,
-        "ean_raw": ean_raw if ean_raw not in (None, "") else "-",
+        # IMPORTANT: leave blank when unknown; use '-' only when explicitly shown by Wolt
+        "ean_raw": ean_raw or "",
         "ean_norm": ean_norm,
         "name": name,
         "size_text": size_text,           # ← amount
@@ -822,7 +836,10 @@ async def _enrich_items_via_modal(cat_url: str, items: List[Dict], headless: boo
     if async_playwright is None or max_modal <= 0:
         return
 
-    missing = [it for it in items if not normalize_ean(it.get("gtin") or it.get("ean") or it.get("ean_norm")) and HEX24_RE.fullmatch(str(it.get("id") or ""))]
+    missing = [it for it in items
+               if (it.get("gtin") or "").strip() != "-"
+               and not normalize_ean(it.get("gtin") or it.get("ean") or it.get("ean_norm"))
+               and HEX24_RE.fullmatch(str(it.get("id") or ""))]
     if not missing:
         return
     missing = missing[:max_modal]
@@ -851,7 +868,6 @@ async def _enrich_items_via_modal(cat_url: str, items: List[Dict], headless: boo
                     continue
 
                 # click Toote info / Product info
-                info_clicked = False
                 for btnsel in [
                     'button:has-text("Toote info")',
                     'a:has-text("Toote info")',
@@ -863,7 +879,6 @@ async def _enrich_items_via_modal(cat_url: str, items: List[Dict], headless: boo
                     try:
                         if await btn.count() > 0:
                             await btn.first.click(timeout=1200)
-                            info_clicked = True
                             break
                     except Exception:
                         pass
@@ -878,13 +893,15 @@ async def _enrich_items_via_modal(cat_url: str, items: List[Dict], headless: boo
                 mgt = re.search(r"GTIN[^0-9]{0,40}(\d{8,14})", modal_text, re.I)
                 if mgt and not it.get("gtin"):
                     it["gtin"] = normalize_ean(mgt.group(1))
+                elif re.search(r"\bGTIN\b", modal_text, re.I) and not re.search(r"\b\d{8,14}\b", modal_text):
+                    it["gtin"] = "-"  # explicit no GTIN
                 msup = re.search(r"(?:Tootja|Tarnija|Supplier|Manufacturer)[^A-Za-z0-9]{0,20}([^\n]{2,200})", modal_text, re.I)
                 if msup and not it.get("supplier"):
                     it["supplier"] = msup.group(1).strip()
                     if not it.get("brand"):
                         it["brand"] = it["supplier"]
 
-                # close modal (Esc or X)
+                # close modal (Esc)
                 try:
                     await page.keyboard.press("Escape")
                 except Exception:
