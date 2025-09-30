@@ -639,34 +639,46 @@ async def wait_cookie_banner(page: Any):
     except Exception:
         pass
 
-# NEW: dismiss address/location prompt & any overlaying dialogs/snackbars
-async def dismiss_location_prompt(page: Any):
+async def _dismiss_location_popovers(page):
+    """Close/accept Wolt address & geolocation UI that blocks product grid."""
     try:
-        # common close buttons & CTAs for the address share prompt
-        selectors = [
-            'button[aria-label="Close"]',
-            'button[aria-label="Sulge"]',
-            'button:has-text("Jaga asukohta")',
-            'button:has-text("Share location")',
-            'button:has-text("Kinnita")',
-            'button:has-text("OK")',
-        ]
-        for sel in selectors:
-            el = page.locator(sel)
-            if await el.count() > 0:
+        # generic close buttons
+        for sel in ['button[aria-label*="Sulge" i]', 'button[aria-label*="Close" i]']:
+            btn = page.locator(sel)
+            if await btn.count() > 0:
                 try:
-                    await el.first.click(timeout=1000)
+                    await btn.first.click(timeout=800)
                     await page.wait_for_timeout(200)
-                    break
                 except Exception:
                     pass
-        # a couple of Esc taps to ensure modals are closed
-        for _ in range(3):
+
+        # Share location (Estonian/English)
+        for sel in ['button:has-text("Jaga asukohta")', 'button:has-text("Share location")']:
+            btn = page.locator(sel)
+            if await btn.count() > 0:
+                try:
+                    await btn.first.click(timeout=1000)
+                    await page.wait_for_timeout(400)
+                except Exception:
+                    pass
+
+        # Later / Hiljem
+        for sel in ['button:has-text("Hiljem")', 'button:has-text("Later")']:
+            btn = page.locator(sel)
+            if await btn.count() > 0:
+                try:
+                    await btn.first.click(timeout=800)
+                    await page.wait_for_timeout(200)
+                except Exception:
+                    pass
+
+        # Escape as last resort
+        for _ in range(2):
             try:
                 await page.keyboard.press("Escape")
-                await page.wait_for_timeout(120)
+                await page.wait_for_timeout(150)
             except Exception:
-                break
+                pass
     except Exception:
         pass
 
@@ -789,17 +801,18 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=bool(int(headless)))
-        # IMPORTANT: grant geolocation so storefront unlocks
+        # IMPORTANT: give geolocation and permission so Wolt stops blocking the grid
         context = await browser.new_context(
             user_agent=_GLOBAL_UA,
             viewport={"width": 1366, "height": 900},
             java_script_enabled=True,
-            geolocation={"latitude": 58.386, "longitude": 24.497},  # Pärnu center-ish
+            locale="et-EE",
+            geolocation={"latitude": 58.3795, "longitude": 24.5120},  # Pärnu-ish
             permissions=["geolocation"],
         )
         try:
-            context.set_default_navigation_timeout(max(15000, int(nav_timeout_ms)))
-            context.set_default_timeout(max(15000, int(nav_timeout_ms)))
+            context.set_default_navigation_timeout(max(20000, int(nav_timeout_ms)))
+            context.set_default_timeout(max(20000, int(nav_timeout_ms)))
         except Exception:
             pass
 
@@ -834,12 +847,12 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
             await _goto_with_backoff(page, cat_url, max_tries=3, nav_timeout_ms=nav_timeout_ms, strategies=strategies)
 
             await wait_cookie_banner(page)
-            await dismiss_location_prompt(page)
+            await _dismiss_location_popovers(page)
 
             # a bit more scrolling to surface late resources
-            for _ in range(14):
-                await page.mouse.wheel(0, 1500)
-                await page.wait_for_timeout(int(max(req_delay, 0.4)*1000 + random.uniform(250, 900)))
+            for _ in range(18):
+                await page.mouse.wheel(0, 1600)
+                await page.wait_for_timeout(int(max(req_delay, 0.5)*1000 + random.uniform(300, 900)))
 
             tile_prices = await _scrape_tile_prices(page)
 
@@ -875,30 +888,9 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
                     pass
 
             if not found:
-                # broader discovery: scan attributes & text for 24-hex ids
-                try:
-                    ids = await page.evaluate("""
-(() => {
-  const ids = new Set();
-  const attrs = ['href','id','data-id','data-item-id','data-product-id','data-test-id','data-testid','data-qa'];
-  const re = /([a-f0-9]{24})/i;
-  for (const el of document.querySelectorAll('*')) {
-    for (const a of attrs) {
-      const v = el.getAttribute(a);
-      if (v) { const m = v.match(re); if (m) ids.add(m[1].toLowerCase()); }
-    }
-    const t = el.textContent || '';
-    const m2 = t && t.match(/(?:itemid-|item-)?([a-f0-9]{24})/i);
-    if (m2) ids.add(m2[1].toLowerCase());
-  }
-  return Array.from(ids);
-})()
-                    """)
-                except Exception:
-                    ids = []
-                for iid in set(ids or []):
-                    if HEX24_RE.fullmatch(iid):
-                        found[iid] = {"id": iid}
+                ids = set(re.findall(r"(?:itemid-|item-)([a-f0-9]{24})", html or "", re.I))
+                for iid in ids:
+                    found[iid] = {"id": iid}
 
             # venue id detection (multi-strategy)
             venue_id = await _extract_venue_id_any(page, html)
@@ -929,20 +921,13 @@ async def _enrich_items_via_modal(cat_url: str, items: List[Dict], headless: boo
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=bool(int(headless)))
-        # keep the same geo permissions for modal flow
-        context = await browser.new_context(
-            user_agent=_GLOBAL_UA,
-            viewport={"width": 1366, "height": 900},
-            java_script_enabled=True,
-            geolocation={"latitude": 58.386, "longitude": 24.497},
-            permissions=["geolocation"],
-        )
+        context = await browser.new_context(user_agent=_GLOBAL_UA, viewport={"width": 1366, "height": 900}, java_script_enabled=True)
         page = await context.new_page()
         try:
             strategies = [goto_strategy] if goto_strategy in ("domcontentloaded","networkidle","load") else ["domcontentloaded"]
             await _goto_with_backoff(page, cat_url, max_tries=3, nav_timeout_ms=nav_timeout_ms, strategies=strategies)
             await wait_cookie_banner(page)
-            await dismiss_location_prompt(page)
+            await _dismiss_location_popovers(page)
 
             for it in missing:
                 iid = str(it.get("id"))
@@ -1188,7 +1173,7 @@ def parse_args():
     p.add_argument("--probe-limit", type=int, default=0, help="Override max prodinfo probes per run (env default 60).")
     p.add_argument("--modal-probe-limit", type=int, default=0, help="Override max modal clicks per category (env default 15).")
     # per-category watchdog timeout (raised default)
-    p.add_argument("--category-timeout", type=float, default=150.0, help="Max seconds to spend on a single category before skipping.")
+    p.add_argument("--category-timeout", type=float, default=210.0, help="Max seconds to spend on a single category before skipping.")
     # NEW: explicit venue id override to skip discovery
     p.add_argument("--venue-id", default="", help="If set, use this 24-hex Wolt venue id for prodinfo enrichment")
     return p.parse_args()
