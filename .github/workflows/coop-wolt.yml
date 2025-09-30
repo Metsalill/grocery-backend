@@ -177,7 +177,7 @@ jobs:
             --categories-file "${{ steps.cats.outputs.path }}" \
             --max-products "${MAX_PRODUCTS}" \
             --headless "1" \
-            --req-delay "0.6" \
+            --req-delay "1.0" \
             --goto-strategy "domcontentloaded" \
             --nav-timeout "45000" \
             --upsert-per-category \
