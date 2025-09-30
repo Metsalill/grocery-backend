@@ -597,6 +597,38 @@ def _extract_row_from_item(item: Dict, category_url: str, store_host: str) -> Op
         "url": url,
     }
 
+# ---------- helpers to discover venue id ----------
+VENUE_IN_TEXT_PATTERNS = [
+    re.compile(r"/menu-images/([a-f0-9]{24})/", re.I),
+    re.compile(r"prodinfo\.wolt\.com/[a-z]{2}/([a-f0-9]{24})/", re.I),
+    re.compile(r'"venueId"\s*:\s*"([a-f0-9]{24})"', re.I),
+    re.compile(r'"venue_id"\s*:\s*"([a-f0-9]{24})"', re.I),
+]
+
+def _extract_venue_id_from_text(text: str) -> Optional[str]:
+    for pat in VENUE_IN_TEXT_PATTERNS:
+        m = pat.search(text or "")
+        if m:
+            return m.group(1)
+    return None
+
+def _extract_venue_id_from_blobs_and_html(blobs: List[Any], html: str) -> Optional[str]:
+    # 1) Try raw HTML
+    vid = _extract_venue_id_from_text(html or "")
+    if vid:
+        return vid
+    # 2) Walk blobs, stringify shallowly
+    for blob in blobs or []:
+        try:
+            js = json.dumps(blob)
+            vid = _extract_venue_id_from_text(js)
+            if vid:
+                return vid
+        except Exception:
+            # best-effort
+            pass
+    return None
+
 # ---------- fast path loader ----------
 def _wolt_store_host(sample_url: str) -> str:
     m = re.search(r"/venue/([^/]+)", sample_url)
@@ -605,11 +637,7 @@ def _wolt_store_host(sample_url: str) -> str:
     return urlparse(sample_url).netloc.lower()
 
 async def _load_wolt_payload(url: str) -> Optional[Dict]:
-    # Make this safe: return None if fast path fails, so caller can fall back to PW
-    try:
-        html = await _fetch_html(url)
-    except Exception:
-        return None
+    html = await _fetch_html(url)
     nd = _html_get_next_data(html)
     if nd:
         return nd
@@ -701,17 +729,45 @@ async def _extract_venue_id_via_modal(page) -> Optional[str]:
             return None
         await a.scroll_into_view_if_needed(timeout=1500)
         await a.click(timeout=2000)
-        for _ in range(20):
-            frames = page.frames
-            for fr in frames:
+
+        # Try clicking "Toote info" to ensure prodinfo iframe is loaded
+        for btnsel in [
+            'button:has-text("Toote info")',
+            'a:has-text("Toote info")',
+            'button:has-text("Product info")',
+            'a:has-text("Product info")',
+            'button:has-text("Tooteinfo")',
+        ]:
+            btn = page.locator(btnsel)
+            try:
+                if await btn.count() > 0:
+                    await btn.first.click(timeout=1200)
+                    break
+            except Exception:
+                pass
+
+        # Look for prodinfo frame url
+        for _ in range(30):
+            for fr in page.frames:
                 try:
                     src = (fr.url or "").lower()
                     m = re.search(r"/([a-f0-9]{24})/", src)
                     if "prodinfo.wolt.com" in src and m:
+                        # Close modal before returning
+                        try:
+                            await page.keyboard.press("Escape")
+                        except Exception:
+                            pass
                         return m.group(1)
                 except Exception:
                     pass
             await page.wait_for_timeout(150)
+
+        # Close modal if still open
+        try:
+            await page.keyboard.press("Escape")
+        except Exception:
+            pass
     except Exception:
         pass
     return None
@@ -822,10 +878,10 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
                 for iid in ids:
                     found[iid] = {"id": iid}
 
-            m = re.search(r"/menu-images/([a-f0-9]{24})/", html, re.I)
-            if m:
-                venue_id = m.group(1)
+            # venue id discovery: html/blobs first
+            venue_id = _extract_venue_id_from_blobs_and_html(collected_blobs, html)
             if not venue_id:
+                # try modal route if needed
                 venue_id = await _extract_venue_id_via_modal(page)
 
             return list(found.values()), collected_blobs, html, tile_prices, venue_id
@@ -936,30 +992,36 @@ async def run_wolt(args, categories: List[str], on_rows_async) -> None:
         if idx > 0:
             await asyncio.sleep(float(args.req_delay) + random.uniform(0.5, 1.2))
 
-        try:
-            # --- Fast path with safe fallback ---
-            payload = None
-            if not force_pw:
-                try:
-                    payload = await _load_wolt_payload(cat)
-                except Exception as e_fast:
-                    print(f"[warn] fast-path fetch failed for {cat}: {e_fast} → falling back to Playwright")
+        # --------- FAST PATH with SAFE FALLBACK ----------
+        payload = None
+        if not force_pw:
+            try:
+                payload = await _load_wolt_payload(cat)
+            except Exception as e:
+                print(f"[warn] fast-path failed for {cat} ({e}); using Playwright fallback")
 
-            items: List[Dict] = []
-            blobs: List[Any] = []
-            html = ""
-            tile_prices: Dict[str, float] = {}
-            venue_id: Optional[str] = None
+        items: List[Dict] = []
+        blobs: List[Any] = []
+        html = ""
+        tile_prices: Dict[str, float] = {}
+        venue_id: Optional[str] = None
 
-            if payload:
-                found: Dict[str, Dict] = {}
+        if payload:
+            found: Dict[str, Dict] = {}
+            try:
                 _walk_collect_items(payload, found)
+            except Exception as e:
+                print(f"[warn] fast-path parse error for {cat} ({e}); switching to PW.")
+                found = {}
+
+            if found:
                 items = list(found.values())
                 blobs = [payload]
-                if not items:
-                    print(f"[info] fast-path yielded 0 items for {cat} → falling back to Playwright")
-            if force_pw or not payload or not items:
-                print(f"[info] forcing Playwright fallback for {cat}")
+            else:
+                print(f"[info] fast-path yielded 0 items for {cat} → PW fallback")
+        if not items:  # no payload, or empty/failed → go PW
+            print(f"[info] forcing Playwright fallback for {cat}")
+            try:
                 items, blobs, html, tile_prices, venue_id = await _capture_with_playwright(
                     cat,
                     headless=bool(int(args.headless)),
@@ -967,60 +1029,60 @@ async def run_wolt(args, categories: List[str], on_rows_async) -> None:
                     goto_strategy=args.goto_strategy,
                     nav_timeout_ms=int(args.nav_timeout),
                 )
+            except Exception as e:
+                print(f"[warn] Playwright fallback failed for {cat}: {e}")
+                continue  # give up on this category only
 
-            # Step 1: enrich via prodinfo (HTTP, fast)
-            if venue_id:
-                lang = _lang_from_url(cat)
-                await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=(args.probe_limit or None))
-            else:
-                print("[warn] venueId not found — skipping direct prodinfo enrichment")
+        # Step 1: enrich via prodinfo (HTTP, fast)
+        if venue_id:
+            lang = _lang_from_url(cat)
+            await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=(args.probe_limit or None))
+        else:
+            print("[warn] venueId not found — skipping direct prodinfo enrichment")
 
-            # Step 2: fill missing prices from tiles (PW path only)
-            if (force_pw or not payload) and items:
-                for it in items:
-                    if it.get("id"):
-                        iid = str(it["id"]).lower()
-                        if it.get("price") in (None, 0) and iid in tile_prices:
-                            it["price"] = tile_prices[iid]
+        # Step 2: fill missing prices from tiles (PW path only)
+        if not payload and items:
+            for it in items:
+                if it.get("id"):
+                    iid = str(it["id"]).lower()
+                    if it.get("price") in (None, 0) and iid in tile_prices:
+                        it["price"] = tile_prices[iid]
 
-            # Step 3: last-resort modal clicks for missing GTIN/Tootja
-            if args.modal_probe_limit > 0:
-                await _enrich_items_via_modal(
-                    cat, items,
-                    headless=bool(int(args.headless)),
-                    req_delay=float(args.req_delay),
-                    goto_strategy=args.goto_strategy,
-                    nav_timeout_ms=int(args.nav_timeout),
-                    max_modal=int(args.modal_probe_limit),
-                )
+        # Step 3: last-resort modal clicks for missing GTIN/Tootja
+        if args.modal_probe_limit > 0:
+            await _enrich_items_via_modal(
+                cat, items,
+                headless=bool(int(args.headless)),
+                req_delay=float(args.req_delay),
+                goto_strategy=args.goto_strategy,
+                nav_timeout_ms=int(args.nav_timeout),
+                max_modal=int(args.modal_probe_limit),
+            )
 
-            existing_gtins = await _fetch_existing_gtins(store_host_cat)
+        existing_gtins = await _fetch_existing_gtins(store_host_cat)
 
-            rows_raw = []
-            for item in items:
-                row = _extract_row_from_item(item, cat, store_host_cat)
-                if not row:
-                    continue
-                if row.get("ean_norm") and row["ean_norm"] in existing_gtins:
-                    continue
-                rows_raw.append(row)
+        rows_raw = []
+        for item in items:
+            row = _extract_row_from_item(item, cat, store_host_cat)
+            if not row:
+                continue
+            if row.get("ean_norm") and row["ean_norm"] in existing_gtins:
+                continue
+            rows_raw.append(row)
 
-            rows = rows_raw
-            if args.max_products and args.max_products > 0:
-                rows = rows[: args.max_products]
+        rows = rows_raw
+        if args.max_products and args.max_products > 0:
+            rows = rows[: args.max_products]
 
-            print(f"[info] category rows: {len(rows)}" + (" (pw-fallback)" if (force_pw or not payload) else ""))
-            await on_rows_async(rows)  # stream + accumulate + optional flush-every
+        print(f"[info] category rows: {len(rows)}" + (" (pw-fallback)" if not payload else ""))
+        await on_rows_async(rows)  # stream + accumulate + optional flush-every
 
-            # Optional: per-category upsert for durability
-            if args.upsert_per_category and rows:
-                try:
-                    await maybe_upsert_db(rows)
-                except Exception:
-                    pass
-
-        except Exception as e:
-            print(f"[warn] Wolt category failed after fallback {cat}: {e}")
+        # Optional: per-category upsert for durability
+        if args.upsert_per_category and rows:
+            try:
+                await maybe_upsert_db(rows)
+            except Exception:
+                pass
 
 # ---------- main ----------
 async def main(args):
