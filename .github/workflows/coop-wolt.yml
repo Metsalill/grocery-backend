@@ -156,7 +156,8 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
           COOP_UPSERT_DB: ${{ github.event_name == 'workflow_dispatch' && inputs.upsert_db || '1' }}
           COOP_DEDUP_DB: ${{ github.event_name == 'workflow_dispatch' && inputs.upsert_db || '1' }}
-          WOLT_FORCE_PLAYWRIGHT: ${{ github.event_name == 'workflow_dispatch' && inputs.force_playwright || '0' }}
+          # ⬇️ Force Playwright during testing (one-line swap)
+          WOLT_FORCE_PLAYWRIGHT: "1"
           # Be gentle with prodinfo; keep modest by default
           WOLT_PROBE_LIMIT: "40"
           # Start without modal clicks while stabilizing; can raise later
