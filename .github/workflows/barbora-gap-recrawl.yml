@@ -88,6 +88,56 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
+      # NEW: rebuild the GAP URL tables each run so we always chase fresh gaps
+      - name: Refresh GAP URL tables (price & brand)
+        if: ${{ env.DATABASE_URL != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          -- Ensure composite PK (kind, source_url) exists
+          DO $$
+          BEGIN
+            IF NOT EXISTS (
+              SELECT 1 FROM information_schema.table_constraints
+              WHERE constraint_type='PRIMARY KEY'
+                AND table_schema='public'
+                AND table_name='barbora_gap_urls'
+            ) THEN
+              ALTER TABLE IF EXISTS barbora_gap_urls
+                ADD CONSTRAINT barbora_gap_urls_pkey PRIMARY KEY (kind, source_url);
+            END IF;
+          END$$;
+
+          -- Rebuild PRICE gap list from latest candidates
+          DELETE FROM barbora_gap_urls WHERE kind='price';
+          WITH z AS (
+            SELECT ext_id, MAX(NULLIF(source_url,'')) AS url
+            FROM barbora_candidates
+            WHERE price IS NULL OR price = 0
+            GROUP BY ext_id
+          )
+          INSERT INTO barbora_gap_urls(kind, source_url)
+          SELECT 'price', url
+          FROM z
+          WHERE url ILIKE '%barbora.ee%'
+          ON CONFLICT (kind, source_url) DO NOTHING;
+
+          -- Rebuild BRAND gap list from latest candidates
+          DELETE FROM barbora_gap_urls WHERE kind='brand';
+          WITH z AS (
+            SELECT ext_id, MAX(NULLIF(source_url,'')) AS url
+            FROM barbora_candidates
+            WHERE COALESCE(NULLIF(TRIM(brand),''),'Määramata') IN ('','Määramata')
+            GROUP BY ext_id
+          )
+          INSERT INTO barbora_gap_urls(kind, source_url)
+          SELECT 'brand', url
+          FROM z
+          WHERE url ILIKE '%barbora.ee%'
+          ON CONFLICT (kind, source_url) DO NOTHING;
+          SQL
+
       - name: Pull GAP URLs from DB (brand_gap / prices_gap)
         if: ${{ env.DATABASE_URL != '' }}
         shell: bash
