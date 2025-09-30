@@ -189,10 +189,10 @@ jobs:
             --categories-file "${{ steps.cats.outputs.path }}" \
             --max-products "${MAX_PRODUCTS}" \
             --headless "1" \
-            --req-delay "0.8" \
+            --req-delay "1.0" \
             --goto-strategy "domcontentloaded" \
             --nav-timeout "45000" \
-            --category-timeout "120" \
+            --category-timeout "210" \
             --upsert-per-category \
             --flush-every "120" \
             --probe-limit "${WOLT_PROBE_LIMIT}" \
