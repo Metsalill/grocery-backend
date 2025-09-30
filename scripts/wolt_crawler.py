@@ -17,8 +17,14 @@ Noise guard:
 
 Env:
 - WOLT_FORCE_PLAYWRIGHT=1 to force PW fallback
-- WOLT_PROBE_LIMIT (default 2000) to cap prodinfo probes
+- WOLT_PROBE_LIMIT (default 60) to cap prodinfo probes
 - COOP_UPSERT_DB=1 / COOP_DEDUP_DB=1 (same semantics as ecoop)
+
+NEW:
+- Incremental DB upsert:
+  • --upsert-per-category → upsert rows for each category as soon as they’re parsed
+  • --flush-every N      → also upsert every N streamed rows (useful for very large categories)
+- Lower default prodinfo probe limit to reduce 429s/timeouts.
 """
 
 import argparse
@@ -414,9 +420,10 @@ async def _enrich_items_via_prodinfo(items: List[Dict], lang: str, venue_id: str
                                      max_to_probe: Optional[int] = None) -> None:
     if max_to_probe is None:
         try:
-            max_to_probe = int(os.getenv("WOLT_PROBE_LIMIT", "2000"))
+            # Lower default to reduce 429/timeouts
+            max_to_probe = int(os.getenv("WOLT_PROBE_LIMIT", "60"))
         except Exception:
-            max_to_probe = 2000
+            max_to_probe = 60
 
     def _needs_gtin(it: Dict) -> bool:
         return normalize_ean(it.get("gtin") or it.get("ean") or it.get("ean_norm")) is None
@@ -807,7 +814,13 @@ def _lang_from_url(u: str) -> str:
     m = re.search(r"https?://[^/]+/([a-z]{2})(?:/|$)", u, re.I)
     return (m.group(1).lower() if m else "et")
 
-async def run_wolt(args, categories: List[str], on_rows) -> None:
+async def run_wolt(args, categories: List[str], on_rows_async) -> None:
+    """
+    on_rows_async(rows) must be an async callable that:
+      - streams to CSV
+      - updates in-memory totals
+      - handles flush-every logic
+    """
     force_pw = bool(args.force_playwright or str(os.getenv("WOLT_FORCE_PLAYWRIGHT", "")).lower() in ("1","true","t","yes","y","on"))
 
     for idx, cat in enumerate(categories):
@@ -840,7 +853,7 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
 
             if venue_id:
                 lang = _lang_from_url(cat)
-                await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=240)
+                await _enrich_items_via_prodinfo(items, lang, venue_id, max_to_probe=(args.probe_limit or None))
             else:
                 print("[warn] venueId not found — skipping direct prodinfo enrichment")
 
@@ -867,7 +880,14 @@ async def run_wolt(args, categories: List[str], on_rows) -> None:
                 rows = rows[: args.max_products]
 
             print(f"[info] category rows: {len(rows)}" + (" (pw-fallback)" if not payload else ""))
-            on_rows(rows)
+            await on_rows_async(rows)  # stream + accumulate + optional flush-every
+
+            # Optional: per-category upsert for durability
+            if args.upsert_per_category and rows:
+                try:
+                    await maybe_upsert_db(rows)
+                except Exception:
+                    pass
 
         except Exception as e:
             print(f"[warn] Wolt category failed {cat}: {e}")
@@ -883,7 +903,7 @@ async def main(args):
         print("[error] No category URLs provided. Pass --categories-multiline or --categories-file.")
         sys.exit(2)
 
-    print(f"[args] headless={args.headless} req_delay={args.req_delay} pdp_workers(not used)={args.pdp_workers} goto={args.goto_strategy} nav_timeout={args.nav_timeout}ms store_host={args.store_host or '(auto)'}")
+    print(f"[args] headless={args.headless} req_delay={args.req_delay} pdp_workers(not used)={args.pdp_workers} goto={args.goto_strategy} nav_timeout={args.nav_timeout}ms store_host={args.store_host or '(auto)'} probe_limit={args.probe_limit or os.getenv('WOLT_PROBE_LIMIT','(env default 60)')} upsert_per_category={args.upsert_per_category} flush_every={args.flush_every}")
 
     out_path = Path(args.out)
     if out_path.is_dir() or str(out_path).endswith("/"):
@@ -893,28 +913,47 @@ async def main(args):
         _ensure_csv_with_header(out_path)
 
     all_rows: List[Dict] = []
+    accum_rows: List[Dict] = []
 
-    def on_rows(batch: List[Dict]):
-        nonlocal all_rows
+    async def flush_now():
+        nonlocal accum_rows
+        if accum_rows:
+            try:
+                await maybe_upsert_db(accum_rows)
+            finally:
+                accum_rows = []
+
+    async def on_rows_async(batch: List[Dict]):
+        nonlocal all_rows, accum_rows
         if not batch:
             return
         append_csv(batch, out_path)
         all_rows.extend(batch)
+        accum_rows.extend(batch)
         print(f"[stream] +{len(batch)} rows (total {len(all_rows)})")
+        if args.flush_every and len(accum_rows) >= args.flush_every:
+            print(f"[info] flush-every threshold reached ({len(accum_rows)} rows) → upserting now…")
+            await flush_now()
 
     def _sig_handler(signum, frame):
-        print(f"[warn] received signal {signum}; CSV already streamed. Exiting 130 gracefully.")
+        # Best-effort graceful exit; CSV already on disk. DB flush happens if per-category/flush-every used.
+        print(f"[warn] received signal {signum}; exiting 130 gracefully.")
         sys.exit(130)
 
     signal.signal(signal.SIGTERM, _sig_handler)
     signal.signal(signal.SIGINT,  _sig_handler)
 
-    await run_wolt(args, categories, on_rows)
+    await run_wolt(args, categories, on_rows_async)
+
+    # Final flush of any leftovers collected via flush-every
+    await flush_now()
 
     gtin_ok = sum(1 for r in all_rows if (r.get("ean_norm") or (r.get("ean_raw") and r.get("ean_raw") != "-")))
     brand_ok = sum(1 for r in all_rows if (r.get("brand") or r.get("manufacturer")))
     print(f"[stats] rows={len(all_rows)}  gtin_present={gtin_ok}  brand_or_manufacturer_present={brand_ok}")
     print(f"[ok] CSV ready: {out_path}")
+
+    # Final upsert of everything (harmless if already upserted earlier)
     await maybe_upsert_db(all_rows)
 
 def parse_args():
@@ -926,7 +965,7 @@ def parse_args():
     p.add_argument("--categories-file", dest="categories_file", default="", help="Path to txt file with category URLs")
     p.add_argument("--max-products", type=int, default=0, help="Global cap per category (0=all)")
     p.add_argument("--pdp-workers", type=int, default=4, help="(Reserved) Concurrency hint; not used in Wolt path")
-    p.add_argument("--req-delay", type=float, default=0.4, help="Seconds between ops in PW fallback")
+    p.add_argument("--req-delay", type=float, default=0.45, help="Seconds between ops in PW fallback")
     p.add_argument("--headless", default="1", help="1/0 headless for PW fallback")
     p.add_argument("--goto-strategy", choices=["auto","domcontentloaded","networkidle","load"],
                    default="auto", help="Playwright wait_until strategy for category navigation.")
@@ -934,6 +973,13 @@ def parse_args():
     p.add_argument("--out", default="out/coop_wolt.csv", help="CSV file or output directory")
     p.add_argument("--force-playwright", action="store_true", help="Force Playwright network fallback.")
     p.add_argument("--write-empty-csv", action="store_true", default=True, help="Always write CSV header even if no rows.")
+    # NEW:
+    p.add_argument("--upsert-per-category", action="store_true",
+                   help="Upsert to DB after each category finishes.")
+    p.add_argument("--flush-every", type=int, default=0,
+                   help="If >0, also upsert every N streamed rows for durability.")
+    p.add_argument("--probe-limit", type=int, default=0,
+                   help="Override max prodinfo probes per run (default comes from WOLT_PROBE_LIMIT env, 60).")
     return p.parse_args()
 
 if __name__ == "__main__":
