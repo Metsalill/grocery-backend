@@ -22,6 +22,7 @@ Expected columns present in staging_coop_products (script adds missing ones):
 import argparse
 import csv
 import datetime as dt
+import hashlib
 import os
 import re
 import sys
@@ -112,11 +113,9 @@ def normalize_cat_url(base_url: str, href: str) -> str:
 
 
 def base_url_from_category(url: str) -> str:
-    """Given a category URL like .../p/1969/smc/XXXX?categoryName=Piim..., return the base store URL (.../p/1969)."""
     m = re.search(r"^(https://food\.bolt\.eu/(?:[a-z]{2}-[A-Z]{2}|en-US)/[^/]+/p/\d+)", url)
     if m:
         return m.group(1)
-    # fallback: strip query then remove /smc/...
     u = url.split("?", 1)[0]
     parts = u.split("/smc/")[0]
     return parts
@@ -136,50 +135,66 @@ def read_categories_override(path: str, base_url: str) -> List[Tuple[str, str]]:
     return out
 
 
+def _extract_from_card(card) -> Optional[Dict]:
+    # Find first price-like text inside the card
+    price_txt = None
+    name = None
+    img = None
+
+    for cand in card.css("h1,h2,h3,strong,span,p,div"):
+        t = (cand.text() or "").strip()
+        if not t:
+            continue
+        if (EUR in t) or re.search(r"\d[\d\.,]\s?€", t):
+            if not price_txt:
+                price_txt = t
+        # pick a plausible product name (long-ish, no €)
+        if not name and len(t) > 3 and "€" not in t:
+            name = t
+
+    # images
+    for im in card.css("img"):
+        src = im.attributes.get("src") or im.attributes.get("data-src")
+        if src and src.startswith("http"):
+            img = src
+            break
+
+    if not (name and price_txt):
+        return None
+
+    price, currency = parse_price(price_txt)
+    return dict(
+        name=name or "",
+        price=price,
+        currency=currency or "EUR",
+        image_url=img or "",
+    )
+
+
 def extract_tiles_from_dom(page_html: str) -> List[Dict]:
+    """
+    Robust card extractor:
+    - Iterate all <article> (preferred for product cards) and also divs with 'card' class.
+    - Extract name/price/image from within each card.
+    """
     tree = HTMLParser(page_html)
-    tiles = []
-    for btn in tree.css("button"):
-        btxt = (btn.text() or "").strip().lower()
-        if btxt in {"+", "add", "lisa", "add to cart", "add "}:
-            tile = btn
-            for _ in range(6):
-                tile = tile.parent
-                if tile is None:
-                    break
-                if tile.tag == "article" or ("card" in tile.attributes.get("class", "")):
-                    break
-            if not tile:
-                continue
+    tiles: List[Dict] = []
 
-            name = None
-            price_txt = None
-            img = None
+    # Primary: <article> cards
+    for card in tree.css("article"):
+        data = _extract_from_card(card)
+        if data:
+            tiles.append(data)
 
-            for cand in tile.css("h1,h2,h3,h4,strong,p,span"):
-                t = (cand.text() or "").strip()
-                if not t:
-                    continue
-                if EUR in t or re.search(r"\d[\d\.,]\s?€", t):
-                    price_txt = price_txt or t
-                if not name and len(t) > 6 and "€" not in t:
-                    name = t
+    # Fallback: divs with 'card' in class if still empty
+    if not tiles:
+        for card in tree.css("div"):
+            cls = card.attributes.get("class", "")
+            if cls and "card" in cls:
+                data = _extract_from_card(card)
+                if data:
+                    tiles.append(data)
 
-            for im in tile.css("img"):
-                src = im.attributes.get("src") or im.attributes.get("data-src")
-                if src and "http" in src:
-                    img = src
-                    break
-
-            price, currency = parse_price(price_txt or "")
-            tiles.append(
-                dict(
-                    name=name or "",
-                    price=price,
-                    currency=currency or "EUR",
-                    image_url=img or "",
-                )
-            )
     return tiles
 
 
@@ -303,7 +318,6 @@ def run(
         base_url = None
 
         if override_path:
-            # Read cats and derive base URL from the first one; go directly (skip searching by text)
             tmp = read_categories_override(override_path, start_url)
             if tmp:
                 base_url = base_url_from_category(tmp[0][1])
@@ -316,7 +330,6 @@ def run(
         else:
             # Fallback: search for the store name
             try:
-                # Try a couple of selectors for the search box
                 found = False
                 for sel in [
                     'input[placeholder*="Stores"]',
@@ -332,7 +345,6 @@ def run(
                     except PWTimeout:
                         pass
                 if not found:
-                    # open magnifier button if present
                     try:
                         page.click("button:has(svg)", timeout=3_000)
                     except PWTimeout:
@@ -343,17 +355,14 @@ def run(
                 page.keyboard.press("Enter")
                 time.sleep(1.0)
 
-                # Tolerant wait for a card or text containing the store name
                 try:
                     page.wait_for_selector(f"text={store_name}", timeout=30_000)
                 except PWTimeout:
-                    # fallback: try heading-ish elements
                     page.wait_for_selector(f"xpath=//h1|//h2|//a[contains(., '{store_name}')]", timeout=15_000)
 
                 try:
                     page.click(f"text={store_name}", timeout=3_000)
                 except PWTimeout:
-                    # fallback click
                     page.click(f"xpath=//h1|//h2|//a[contains(., '{store_name}')]", timeout=5_000)
 
                 page.wait_for_load_state("domcontentloaded")
@@ -365,12 +374,10 @@ def run(
                 browser.close()
                 return
 
-        # Categories
         categories: List[Tuple[str, str]] = []
         if cats_from_file:
             categories = cats_from_file
         else:
-            # autodiscover per store
             store_html = page.content()
             discovered = extract_category_links(store_html)
             seen_cat = set()
@@ -409,7 +416,9 @@ def run(
                 size_text = guess_size(name)
                 brand = guess_brand(name)
                 manufacturer = None
-                ext_id = None
+
+                # Stable synthetic ext_id for DB NOT NULL schemas
+                ext_id = "bolt:" + hashlib.md5(f"{store_host}|{name}".encode("utf-8")).hexdigest()[:16]
 
                 rows_out.append(
                     dict(
