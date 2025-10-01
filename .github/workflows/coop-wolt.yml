@@ -22,7 +22,7 @@ on:
       force_playwright:
         description: "Force Playwright fallback (debug)"
         required: false
-        default: "0"
+        default: "1"   # force PW during testing
 
 jobs:
   crawl:
@@ -52,14 +52,14 @@ jobs:
           fi
           echo "stores=$(cat /tmp/stores.json)" >> "$GITHUB_OUTPUT"
 
-  # We need strategy after we have crawl.outputs.stores
+  # Matrix runner after we know the stores
   run-crawlers:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     needs: crawl
     concurrency:
       group: coop-wolt-${{ matrix.store }}
-      cancel-in-progress: true
+      cancel-in-progress: false   # <- let older runs finish to preserve rows
 
     strategy:
       fail-fast: false
@@ -154,17 +154,18 @@ jobs:
         env:
           PYTHONUNBUFFERED: "1"
           DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+          # scheduled runs default to upserting; workflow_dispatch honors the toggle
           COOP_UPSERT_DB: ${{ github.event_name == 'workflow_dispatch' && inputs.upsert_db || '1' }}
-          COOP_DEDUP_DB: ${{ github.event_name == 'workflow_dispatch' && inputs.upsert_db || '1' }}
-          # Let fast path try by default; allow override on manual runs
-          WOLT_FORCE_PLAYWRIGHT: ${{ github.event_name == 'workflow_dispatch' && inputs.force_playwright || '0' }}
+          COOP_DEDUP_DB:  ${{ github.event_name == 'workflow_dispatch' && inputs.upsert_db || '1' }}
+          # Force PW by default while stabilizing
+          WOLT_FORCE_PLAYWRIGHT: ${{ github.event_name == 'workflow_dispatch' && inputs.force_playwright || '1' }}
           # Be gentle with prodinfo; keep modest by default
           WOLT_PROBE_LIMIT: "40"
-          # Allow some modal enrichment for GTIN/supplier
-          WOLT_MODAL_PROBE_LIMIT: "10"
-          # Known venueIds (24-hex) per store (verify Lasnamäe if needed)
+          # Keep modal enrichment off until pages are stable
+          WOLT_MODAL_PROBE_LIMIT: "0"
+          # Known venueIds (24-hex) per store
           VENUE_ID_PARN: "628210e98f6be4895159d8fe"      # Coop Pärnu Maksimarket (verified)
-          VENUE_ID_LASNAMAE: "6282118813e5280bbe9e450f"   # Coop Lasnamäe (to verify)
+          VENUE_ID_LASNAMAE: "6282118813e5280bbe9e450f"   # Coop Lasnamäe (adjust if needed)
         run: |
           set -euo pipefail
           # small randomized stagger to avoid bursts / 429s when multiple stores
@@ -194,13 +195,15 @@ jobs:
             --nav-timeout "45000" \
             --category-timeout "300" \
             --upsert-per-category \
-            --flush-every "120" \
+            --flush-every "40" \
             --probe-limit "${WOLT_PROBE_LIMIT}" \
             --modal-probe-limit "${WOLT_MODAL_PROBE_LIMIT}" \
             ${VENUE_ID:+--venue-id "${VENUE_ID}"} \
             --out "${OUT}"
 
-      - name: Upload CSV artifact
+      # Try to upload whatever we have, regardless of outcome
+      - name: Upload CSV artifact (partial or final)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: coop-wolt-${{ matrix.store }}-${{ github.run_id }}
