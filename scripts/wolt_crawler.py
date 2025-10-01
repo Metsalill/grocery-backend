@@ -185,6 +185,7 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
               (store_host, ext_id, name, brand, manufacturer, ean_raw, ean_norm, size_text, price, currency, image_url, url)
             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
             ON CONFLICT (store_host, ext_id) DO UPDATE SET
+              channel      = COALESCE(NULLIF(EXCLUDED.channel,''),      {table}.channel),
               name         = COALESCE(EXCLUDED.name,         {table}.name),
               brand        = COALESCE(NULLIF(EXCLUDED.brand,''),        {table}.brand),
               manufacturer = COALESCE(NULLIF(EXCLUDED.manufacturer,''), {table}.manufacturer),
