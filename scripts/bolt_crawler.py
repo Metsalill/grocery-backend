@@ -4,7 +4,7 @@
 """
 Coop on Bolt Food → categories → products → CSV / upsert to staging_coop_products
 
-- Opens https://food.bolt.eu/en-US/{city_path}
+- Opens https://food.bolt.eu/et-EE/{city_path}
 - If categories override is present (file or dir), navigate directly to the store
   using the first category URL in the file (derive base store URL from it); then
   crawl those categories. This avoids brittle searching by store name.
@@ -99,26 +99,30 @@ def extract_category_links(page_html: str) -> List[Tuple[str, str]]:
 
 
 def normalize_cat_url(base_url: str, href: str) -> str:
+    """Resolve category href against the store's base URL and enforce /et-EE/."""
+    def ensure_locale(u: str) -> str:
+        return u.replace("/en-US/", "/et-EE/")
+
     if not href:
-        return base_url
+        return ensure_locale(base_url)
     if href.startswith("http"):
-        return href
+        return ensure_locale(href)
     if href.startswith("/"):
-        return "https://food.bolt.eu" + href
+        return ensure_locale("https://food.bolt.eu" + href)
     if href.startswith("?"):
-        return base_url.split("?")[0] + href
+        return ensure_locale(base_url.split("?")[0] + href)
     if base_url.endswith("/") and href.startswith("/"):
-        return base_url[:-1] + href
-    return base_url.rsplit("/", 1)[0] + "/" + href
+        return ensure_locale(base_url[:-1] + href)
+    return ensure_locale(base_url.rsplit("/", 1)[0] + "/" + href)
 
 
 def base_url_from_category(url: str) -> str:
     m = re.search(r"^(https://food\.bolt\.eu/(?:[a-z]{2}-[A-Z]{2}|en-US)/[^/]+/p/\d+)", url)
     if m:
-        return m.group(1)
+        return m.group(1).replace("/en-US/", "/et-EE/")
     u = url.split("?", 1)[0]
     parts = u.split("/smc/")[0]
-    return parts
+    return parts.replace("/en-US/", "/et-EE/")
 
 
 def read_categories_override(path: str, base_url: str) -> List[Tuple[str, str]]:
@@ -128,7 +132,7 @@ def read_categories_override(path: str, base_url: str) -> List[Tuple[str, str]]:
             href = line.strip()
             if not href or href.startswith("#"):
                 continue
-            url = normalize_cat_url(base_url, href) if not href.startswith("http") else href
+            url = normalize_cat_url(base_url, href) if not href.startswith("http") else href.replace("/en-US/", "/et-EE/")
             m = re.search(r"[?&]categoryName=([^&]+)", url)
             cat = (m.group(1) if m else href).replace("%20", " ")
             out.append((cat, url))
@@ -136,35 +140,48 @@ def read_categories_override(path: str, base_url: str) -> List[Tuple[str, str]]:
 
 
 def _extract_from_card(card) -> Optional[Dict]:
-    # Find first price-like text inside the card
+    """Extract a single product from a card-like node."""
     price_txt = None
     name = None
     img = None
 
-    for cand in card.css("h1,h2,h3,strong,span,p,div"):
+    # Try headings / prominent text for name, collect first euro-like for price
+    for cand in card.css("h1,h2,h3,[role='heading'],strong,span,p,div"):
         t = (cand.text() or "").strip()
         if not t:
             continue
         if (EUR in t) or re.search(r"\d[\d\.,]\s?€", t):
             if not price_txt:
                 price_txt = t
-        # pick a plausible product name (long-ish, no €)
         if not name and len(t) > 3 and "€" not in t:
             name = t
 
-    # images
-    for im in card.css("img"):
-        src = im.attributes.get("src") or im.attributes.get("data-src")
-        if src and src.startswith("http"):
-            img = src
-            break
+    # Fallback name: image alt or aria-label on container
+    if not name:
+        im = next(iter(card.css("img[alt]")), None)
+        if im:
+            name = (im.attributes.get("alt") or "").strip()
+    if not name:
+        lab_node = next((n for n in card.css("[aria-label]")), None)
+        if lab_node:
+            lab = (lab_node.attributes.get("aria-label") or "").strip()
+            if lab and "€" not in lab:
+                name = lab
+
+    # Image
+    im = next(iter(card.css("img")), None)
+    if im:
+        img = im.attributes.get("src") or im.attributes.get("data-src")
 
     if not (name and price_txt):
         return None
 
     price, currency = parse_price(price_txt)
+    if price is None:
+        return None
+
     return dict(
-        name=name or "",
+        name=name,
         price=price,
         currency=currency or "EUR",
         image_url=img or "",
@@ -174,19 +191,17 @@ def _extract_from_card(card) -> Optional[Dict]:
 def extract_tiles_from_dom(page_html: str) -> List[Dict]:
     """
     Robust card extractor:
-    - Iterate all <article> (preferred for product cards) and also divs with 'card' class.
-    - Extract name/price/image from within each card.
+    - Prefer <article> product cards.
+    - Fallback to <div class*='card'> if needed.
     """
     tree = HTMLParser(page_html)
     tiles: List[Dict] = []
 
-    # Primary: <article> cards
     for card in tree.css("article"):
         data = _extract_from_card(card)
         if data:
             tiles.append(data)
 
-    # Fallback: divs with 'card' in class if still empty
     if not tiles:
         for card in tree.css("div"):
             cls = card.attributes.get("class", "")
@@ -290,15 +305,26 @@ def run(
     categories_dir: Optional[str] = None,
     deep: bool = True,
 ):
-    start_url = f"https://food.bolt.eu/en-US/{city}"
+    # Keep the entire session on et-EE to avoid locale redirects.
+    start_url = f"https://food.bolt.eu/et-EE/{city}"
     scraped_at = dt.datetime.utcnow().isoformat()
     rows_out: List[Dict] = []
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=(headless is True or str(headless) == "1"))
-        context = browser.new_context()
-        page = context.new_page()
+        context = browser.new_context(
+            locale="et-EE",
+            extra_http_headers={"Accept-Language": "et-EE,et;q=0.9"},
+        )
+        # Sticky language cookie
+        context.add_cookies([{
+            "name": "language",
+            "value": "et-EE",
+            "domain": "food.bolt.eu",
+            "path": "/",
+        }])
 
+        page = context.new_page()
         page.goto(start_url, timeout=60_000)
         page.wait_for_load_state("domcontentloaded")
 
@@ -405,6 +431,7 @@ def run(
 
             html = page.content()
             tiles = extract_tiles_from_dom(html)
+            print(f"[cat] parsed {len(tiles)} tiles")
 
             for t in tiles:
                 name = (t.get("name") or "").strip()
