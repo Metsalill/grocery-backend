@@ -34,7 +34,7 @@ DEFAULT_REQ_DELAY = 0.25
 DEFAULT_HEADLESS = 1
 
 # Common size tokens seen on EE grocery sites
-SIZE_RE = re.compile(r"(?ix)(\d+[.,]?\d*\s?(?:x\s?\d+)?\s?(?:ml|l|cl|g|kg|mg|tk|pcs))|(\d+\s?x\s?\d+)")
+SIZE_RE = re.compile(r"(?ix)(\d+\s?(?:x\s?\d+)?\s?(?:ml|l|cl|g|kg|mg|tk|pcs))|(\d+\s?x\s?\d+)")
 
 # Labels for brand/manufacturer seen on Barbora PDPs (Estonian + generic)
 SPEC_KEYS_BRAND = {"kaubamärk", "bränd", "brand"}
@@ -53,17 +53,6 @@ def norm(s: Optional[str]) -> str:
 
 def text_of(el) -> str:
     return re.sub(r"\s+", " ", el.get_text(" ", strip=True)) if el else ""
-
-
-def canonical_url(u: str) -> str:
-    """Strip query/fragment and force https://barbora.ee host if relative."""
-    if not u:
-        return u
-    if u.startswith("/"):
-        u = urljoin(BASE, u)
-    parts = urlsplit(u)
-    # Normalize host casing and strip params/fragments
-    return urlunsplit((parts.scheme or "https", parts.netloc, parts.path, "", ""))
 
 
 def get_ext_id(url: str) -> str:
@@ -174,7 +163,7 @@ def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[s
 
     # 2) look for structured sub-spans (whole + cents)
     for box in soup.select(
-        "[data-testid*=price], .e-price, .e-price__main, .e-price--current, .product-price, .price, .pdp-price, .price__current"
+        "[data-testid*=price], .e-price, .e-price__main, .product-price, .price, .pdp-price"
     ):
         whole = box.select_one(".e-price__whole, .price__whole, .whole, .int")
         cents = box.select_one(".e-price__cents, .price__cents, .cents, .fract, .fraction, .decimal")
@@ -208,7 +197,6 @@ def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[s
         ".product__price",
         ".price",
         ".pdp-price",
-        ".price__current",
         "strong",
     ]
     texts: List[str] = []
@@ -456,65 +444,45 @@ def extract_size_from_name(name: str) -> Optional[str]:
     if not name:
         return None
     m = SIZE_RE.search(name)
-    if not m:
-        return None
-    txt = m.group(0)
-    # Normalize spaces and decimal comma
-    txt = re.sub(r"\s+", " ", txt)
-    txt = txt.replace(",", ".")
-    return txt
+    return m.group(0) if m else None
 
-
-def _is_oos(soup: BeautifulSoup) -> bool:
-    """Detect common 'out of stock' markers to avoid writing price=0."""
-    txt = soup.get_text(" ", strip=True).lower()
-    if "pole saadaval" in txt or "out of stock" in txt:
-        return True
-    # Disabled add-to-cart buttons
-    btn = soup.select_one("[data-testid*=add-to-cart][disabled], button[disabled].add-to-cart")
-    return btn is not None
-
-
-def _clean_name(n: Optional[str]) -> Optional[str]:
-    if not n:
-        return n
-    n2 = re.sub(r"\s+", " ", n).strip()
-    return n2 if n2 else None
-
-
-def _clean_brand_manu(v: Optional[str]) -> Optional[str]:
-    if not v:
-        return None
-    v2 = re.sub(r"\s+", " ", v).strip()
-    if not v2:
-        return None
-    if norm(v2) in {"määramata", "maaramata", "undefined", "—", "-"}:
-        return None
-    return v2
 
 def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], category_leaf_hint: str, req_delay: float) -> Dict[str, Optional[str]]:
-    target = canonical_url(url)
-    page.goto(target, timeout=60000, wait_until="domcontentloaded")
+    page.goto(url, timeout=60000, wait_until="domcontentloaded")
     ensure_ready(page)
 
-    # Wait for either title+price-ish or an OOS marker to appear
-    try:
-        page.wait_for_selector("h1, .product-title, [data-testid=product-title], [data-testid=product-name]", timeout=15000)
-    except PWTimeout:
-        pass
-    try:
-        page.wait_for_selector(
-            "[data-testid*=price], .e-price, .e-price__main, .product-price, .price, .pdp-price, text=Pole saadaval",
-            timeout=15000
-        )
-    except PWTimeout:
-        pass
-
-    # let dynamic content hydrate a bit more
+    # wait a bit for dynamic content to hydrate
     try:
         page.wait_for_load_state("networkidle", timeout=4000)
     except PWTimeout:
         pass
+
+    # Prefer to have JSON-LD or a product title
+    try:
+        page.wait_for_selector("script[type='application/ld+json']", timeout=6000)
+    except PWTimeout:
+        pass
+    try:
+        page.wait_for_selector(".e-product__name, [data-testid=product-title], [data-testid=product-name]", timeout=5000)
+    except PWTimeout:
+        pass
+
+    # ---- FIX: keep engines separate (CSS vs text=) ----
+    # First, CSS-only price-like selectors:
+    try:
+        page.wait_for_selector(
+            "css=[data-testid*='price'], .e-price, .e-price__main, .e-price--current, "
+            ".product-price, .price, .pdp-price, .price__current",
+            timeout=15000
+        )
+    except PWTimeout:
+        pass
+    # Then, separately attempt to detect OOS text using the text engine:
+    try:
+        page.wait_for_selector("text=Pole saadaval", timeout=1500)
+    except PWTimeout:
+        pass
+    # -----------------------------------------------
 
     page.wait_for_timeout(int(req_delay * 1000))
 
@@ -553,25 +521,21 @@ def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], categor
     if not currency and c3:
         currency = c3
 
-    # OOS guard: if out-of-stock detected, don't force 0 – return NULL price
-    if _is_oos(soup):
-        price = None
-
     size_text = spec["size"] or extract_size_from_name(name)
     image_url = jl.get("image")
-    brand = _clean_brand_manu(jl.get("brand") or spec["brand"] or b3)
-    manufacturer = _clean_brand_manu(jl.get("manufacturer") or spec["manufacturer"] or m3)
+    brand = jl.get("brand") or spec["brand"] or b3
+    manufacturer = jl.get("manufacturer") or spec["manufacturer"] or m3
     sku_raw = spec["sku"]
 
     # if breadcrumbs missing, do a URL-based guess to avoid empty paths
     if not cat_path:
-        parts = [p for p in urlparse(target).path.strip("/").split("/") if p]
+        parts = [p for p in urlparse(url).path.strip("/").split("/") if p]
         cat_path = " / ".join(p.replace("-", " ").title() for p in parts[:-1]) if parts else ""
         if not category_leaf:
             category_leaf = (parts[-2] if len(parts) >= 2 else (parts[-1] if parts else "")).replace("-", " ").title()
 
     return {
-        "name": _clean_name(name),
+        "name": name,
         "size_text": size_text,
         "brand": brand,
         "manufacturer": manufacturer,
@@ -581,8 +545,6 @@ def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], categor
         "sku_raw": sku_raw,
         "category_path": cat_path,
         "category_leaf": category_leaf,
-        # we use the canonical URL everywhere we emit/compare
-        "_canonical_url": target,
     }
 
 # -------------------- Category listing (robust link harvest + robust pagination) --------------------
@@ -599,7 +561,8 @@ def harvest_product_links(page: Page) -> List[Tuple[str, str]]:
         if not href:
             continue
         if "/toode/" in href or "/p/" in href:
-            href = canonical_url(href)
+            if href.startswith("/"):
+                href = urljoin(BASE, href)
             out.append((href, item.get("text") or ""))
     # De-dup while preserving order
     seen = set()
@@ -841,14 +804,12 @@ def crawl(args) -> None:
                 processed_since_restart = 0
                 RESTART_EVERY = 250  # PDPs per browser session in ONLY-URLs mode
 
-                for raw_url in only_urls:
+                for url in only_urls:
                     if budget_low():
                         print("[info] soft budget reached during ONLY-URLs; flushing and exiting.")
                         break
                     if int(args.max_products) and total >= int(args.max_products):
                         break
-
-                    url = canonical_url(raw_url)
                     ext_id = get_ext_id(url)
                     if skip_ext and ext_id in skip_ext:
                         continue
@@ -880,7 +841,7 @@ def crawl(args) -> None:
                         data.get("image_url") or "",
                         data.get("category_path") or "",
                         data.get("category_leaf") or cat_leaf,
-                        data.get("_canonical_url") or url,
+                        url,
                     ]
                     batch.append(row)
                     total += 1
@@ -921,14 +882,12 @@ def crawl(args) -> None:
                         continue
 
                     batch: List[List[str]] = []
-                    for url_raw, listing_title in prods:
+                    for url, listing_title in prods:
                         if budget_low():
                             print("[info] soft budget reached mid-category; flushing and exiting.")
                             break
                         if int(args.max_products) and total >= int(args.max_products):
                             break
-
-                        url = canonical_url(url_raw)
                         ext_id = get_ext_id(url)
                         if skip_ext and ext_id in skip_ext:
                             continue
@@ -963,7 +922,7 @@ def crawl(args) -> None:
                             data.get("image_url") or "",
                             data.get("category_path") or category_path,
                             data.get("category_leaf") or category_leaf,
-                            data.get("_canonical_url") or url,
+                            url,
                         ]
                         batch.append(row)
                         total += 1
