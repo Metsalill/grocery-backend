@@ -19,8 +19,6 @@ on:
         description: "Upsert into Postgres (1=yes, 0=just CSV)"
         required: false
         default: "1"
-  schedule:
-    - cron: "0 */2 * * *"  # every 2 hours (UTC)
 
 concurrency:
   group: barbora-gap-recrawl
