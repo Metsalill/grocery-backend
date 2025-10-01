@@ -1,6 +1,7 @@
 name: "Coop (Bolt Food) – Auto category crawl → CSV/DB"
 
 on:
+  # Manual runs only
   workflow_dispatch:
     inputs:
       city_path:
@@ -20,30 +21,40 @@ on:
         required: false
         default: "1"
       categories_dir:
-        description: "Optional: base dir for per-store category files (uses {dir}/{city}/{slug}.txt if present)"
+        description: "Base dir for per-store category files (uses {dir}/{city}/{slug}.txt if present)"
         required: false
         default: "data/bolt"
-  schedule:
-    - cron: "0 */2 * * *" # every 2 hours
 
+# Separate concurrency bucket for manual runs; cancel only if a *newer manual* run starts.
 concurrency:
-  group: coop-bolt-crawl-${{ github.event_name }}
-  # Cancel only manual reruns; let scheduled runs finish even if another
-  # schedule fires while one is running.
-  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}
+  group: coop-bolt-crawl-workflow_dispatch
+  cancel-in-progress: true
 
 jobs:
+  # One job per store, in parallel
   crawl-bolt:
+    name: Crawl ${{ matrix.store }}
     runs-on: ubuntu-latest
+
+    # Give each store ample time; running in parallel keeps total wall time low.
     timeout-minutes: 120
 
+    strategy:
+      fail-fast: false
+      matrix:
+        store:
+          - "Kvartali COOP Maksimarket"
+          - "Lõunakeskuse COOP Maksimarket"
+          - "Eedeni COOP Maksimarket"
+
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}  # use the public Railway URL
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       CITY_PATH: ${{ inputs.city_path || '2-tartu' }}
       HEADLESS: ${{ inputs.headless || '1' }}
       REQ_DELAY: ${{ inputs.req_delay || '0.25' }}
       UPSERT_DB: ${{ inputs.upsert_db || '1' }}
       CATEGORIES_DIR: ${{ inputs.categories_dir || 'data/bolt' }}
+      STORE_NAME: ${{ matrix.store }}
 
     steps:
       - name: Checkout
@@ -54,64 +65,39 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ hashFiles('**/requirements*.txt') }}-py311
+          restore-keys: |
+            pip-${{ runner.os }}-
+
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
           pip install playwright==1.47.0 selectolax psycopg[binary] tenacity
           python -m playwright install --with-deps chromium
 
-      # Crawl Kvartali first (has category override file)
-      - name: Crawl Kvartali COOP Maksimarket
+      - name: Crawl ${{ env.STORE_NAME }}
+        shell: bash
         run: |
           set -euo pipefail
-          STORE="Kvartali COOP Maksimarket"
-          SAFE_NAME="$(echo "$STORE" | tr ' ' '_' | tr -dc '[:alnum:]_')"
-          echo "==> Crawling: $STORE (city=${CITY_PATH}, headless=${HEADLESS}, delay=${REQ_DELAY}, upsert=${UPSERT_DB})"
           mkdir -p out
+          SAFE_NAME="$(echo "${STORE_NAME}" | tr ' ' '_' | tr -dc '[:alnum:]_')"
+          echo "==> Crawling: ${STORE_NAME} (city=${CITY_PATH}, headless=${HEADLESS}, delay=${REQ_DELAY}, upsert=${UPSERT_DB})"
           python scripts/bolt_crawler.py \
             --city "${CITY_PATH}" \
-            --store "${STORE}" \
+            --store "${STORE_NAME}" \
             --headless "${HEADLESS}" \
             --req-delay "${REQ_DELAY}" \
             --upsert-db "${UPSERT_DB}" \
             --categories-dir "${CATEGORIES_DIR}" \
             --out "out/coop_bolt_${CITY_PATH}_${SAFE_NAME}.csv"
 
-      - name: Crawl Lõunakeskuse COOP Maksimarket
-        run: |
-          set -euo pipefail
-          STORE="Lõunakeskuse COOP Maksimarket"
-          SAFE_NAME="$(echo "$STORE" | tr ' ' '_' | tr -dc '[:alnum:]_')"
-          echo "==> Crawling: $STORE (city=${CITY_PATH}, headless=${HEADLESS}, delay=${REQ_DELAY}, upsert=${UPSERT_DB})"
-          mkdir -p out
-          python scripts/bolt_crawler.py \
-            --city "${CITY_PATH}" \
-            --store "${STORE}" \
-            --headless "${HEADLESS}" \
-            --req-delay "${REQ_DELAY}" \
-            --upsert-db "${UPSERT_DB}" \
-            --categories-dir "${CATEGORIES_DIR}" \
-            --out "out/coop_bolt_${CITY_PATH}_${SAFE_NAME}.csv"
-
-      - name: Crawl Eedeni COOP Maksimarket
-        run: |
-          set -euo pipefail
-          STORE="Eedeni COOP Maksimarket"
-          SAFE_NAME="$(echo "$STORE" | tr ' ' '_' | tr -dc '[:alnum:]_')"
-          echo "==> Crawling: $STORE (city=${CITY_PATH}, headless=${HEADLESS}, delay=${REQ_DELAY}, upsert=${UPSERT_DB})"
-          mkdir -p out
-          python scripts/bolt_crawler.py \
-            --city "${CITY_PATH}" \
-            --store "${STORE}" \
-            --headless "${HEADLESS}" \
-            --req-delay "${REQ_DELAY}" \
-            --upsert-db "${UPSERT_DB}" \
-            --categories-dir "${CATEGORIES_DIR}" \
-            --out "out/coop_bolt_${CITY_PATH}_${SAFE_NAME}.csv"
-
-      - name: Upload CSV artifacts
+      - name: Upload CSV artifacts (${{ env.STORE_NAME }})
         uses: actions/upload-artifact@v4
         with:
-          name: "coop-bolt-csv"
+          name: "coop-bolt-csv-${{ matrix.store }}"
           path: out/*.csv
           if-no-files-found: warn
