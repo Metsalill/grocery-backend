@@ -156,15 +156,15 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
           COOP_UPSERT_DB: ${{ github.event_name == 'workflow_dispatch' && inputs.upsert_db || '1' }}
           COOP_DEDUP_DB: ${{ github.event_name == 'workflow_dispatch' && inputs.upsert_db || '1' }}
-          # ⬇️ Force Playwright during testing (one-line swap)
-          WOLT_FORCE_PLAYWRIGHT: "1"
+          # Let fast path try by default; allow override on manual runs
+          WOLT_FORCE_PLAYWRIGHT: ${{ github.event_name == 'workflow_dispatch' && inputs.force_playwright || '0' }}
           # Be gentle with prodinfo; keep modest by default
           WOLT_PROBE_LIMIT: "40"
-          # Start without modal clicks while stabilizing; can raise later
-          WOLT_MODAL_PROBE_LIMIT: "0"
-          # Known venueIds (24-hex) per store
+          # Allow some modal enrichment for GTIN/supplier
+          WOLT_MODAL_PROBE_LIMIT: "10"
+          # Known venueIds (24-hex) per store (verify Lasnamäe if needed)
           VENUE_ID_PARN: "628210e98f6be4895159d8fe"      # Coop Pärnu Maksimarket (verified)
-          VENUE_ID_LASNAMAE: "6282118813e5280bbe9e450f"   # Coop Lasnamäe (adjust if needed)
+          VENUE_ID_LASNAMAE: "6282118813e5280bbe9e450f"   # Coop Lasnamäe (to verify)
         run: |
           set -euo pipefail
           # small randomized stagger to avoid bursts / 429s when multiple stores
@@ -189,10 +189,10 @@ jobs:
             --categories-file "${{ steps.cats.outputs.path }}" \
             --max-products "${MAX_PRODUCTS}" \
             --headless "1" \
-            --req-delay "1.0" \
+            --req-delay "0.8" \
             --goto-strategy "domcontentloaded" \
             --nav-timeout "45000" \
-            --category-timeout "210" \
+            --category-timeout "300" \
             --upsert-per-category \
             --flush-every "120" \
             --probe-limit "${WOLT_PROBE_LIMIT}" \
