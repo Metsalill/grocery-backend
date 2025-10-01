@@ -1,7 +1,7 @@
 name: "Coop (Bolt Food) – Auto category crawl → CSV/DB"
 
 on:
-  # Manual runs only
+  # Manual only (no schedule) so you can run it when you want
   workflow_dispatch:
     inputs:
       city_path:
@@ -21,40 +21,33 @@ on:
         required: false
         default: "1"
       categories_dir:
-        description: "Base dir for per-store category files (uses {dir}/{city}/{slug}.txt if present)"
+        description: "Optional: base dir for per-store category files (uses {dir}/{city}/{slug}.txt if present)"
         required: false
         default: "data/bolt"
+      deep:
+        description: "Open product modal to parse brand/manufacturer (1=yes, 0=no)"
+        required: false
+        default: "1"
 
-# Separate concurrency bucket for manual runs; cancel only if a *newer manual* run starts.
+# Separate concurrency group for this workflow (manual only)
 concurrency:
-  group: coop-bolt-crawl-workflow_dispatch
+  group: coop-bolt-crawl-manual
   cancel-in-progress: true
 
 jobs:
-  # One job per store, in parallel
   crawl-bolt:
-    name: Crawl ${{ matrix.store }}
     runs-on: ubuntu-latest
-
-    # Give each store ample time; running in parallel keeps total wall time low.
-    timeout-minutes: 120
-
-    strategy:
-      fail-fast: false
-      matrix:
-        store:
-          - "Kvartali COOP Maksimarket"
-          - "Lõunakeskuse COOP Maksimarket"
-          - "Eedeni COOP Maksimarket"
+    timeout-minutes: 180  # give it more time while testing
 
     env:
+      # Use the public DB URL as discussed
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       CITY_PATH: ${{ inputs.city_path || '2-tartu' }}
       HEADLESS: ${{ inputs.headless || '1' }}
       REQ_DELAY: ${{ inputs.req_delay || '0.25' }}
       UPSERT_DB: ${{ inputs.upsert_db || '1' }}
       CATEGORIES_DIR: ${{ inputs.categories_dir || 'data/bolt' }}
-      STORE_NAME: ${{ matrix.store }}
+      DEEP: ${{ inputs.deep || '1' }}
 
     steps:
       - name: Checkout
@@ -69,35 +62,59 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/pip
-          key: pip-${{ runner.os }}-${{ hashFiles('**/requirements*.txt') }}-py311
+          key: pip-${{ runner.os }}-${{ hashFiles('scripts/bolt_crawler.py') }}
           restore-keys: |
             pip-${{ runner.os }}-
 
-      - name: Install deps
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install playwright==1.47.0 selectolax psycopg[binary] tenacity
           python -m playwright install --with-deps chromium
 
-      - name: Crawl ${{ env.STORE_NAME }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p out
-          SAFE_NAME="$(echo "${STORE_NAME}" | tr ' ' '_' | tr -dc '[:alnum:]_')"
-          echo "==> Crawling: ${STORE_NAME} (city=${CITY_PATH}, headless=${HEADLESS}, delay=${REQ_DELAY}, upsert=${UPSERT_DB})"
-          python scripts/bolt_crawler.py \
-            --city "${CITY_PATH}" \
-            --store "${STORE_NAME}" \
-            --headless "${HEADLESS}" \
-            --req-delay "${REQ_DELAY}" \
-            --upsert-db "${UPSERT_DB}" \
-            --categories-dir "${CATEGORIES_DIR}" \
-            --out "out/coop_bolt_${CITY_PATH}_${SAFE_NAME}.csv"
+      - name: Make output dir
+        run: python -c "import os; os.makedirs('out', exist_ok=True)"
 
-      - name: Upload CSV artifacts (${{ env.STORE_NAME }})
+      # Kvartali (has categories override file already)
+      - name: Crawl Kvartali COOP Maksimarket
+        run: >
+          python scripts/bolt_crawler.py
+          --city "${{ env.CITY_PATH }}"
+          --store "Kvartali COOP Maksimarket"
+          --headless "${{ env.HEADLESS }}"
+          --req-delay "${{ env.REQ_DELAY }}"
+          --upsert-db "${{ env.UPSERT_DB }}"
+          --categories-dir "${{ env.CATEGORIES_DIR }}"
+          --deep "${{ env.DEEP }}"
+          --out "out/coop_bolt_${{ env.CITY_PATH }}_Kvartali_COOP_Maksimarket.csv"
+
+      - name: Crawl Lõunakeskuse COOP Maksimarket
+        run: >
+          python scripts/bolt_crawler.py
+          --city "${{ env.CITY_PATH }}"
+          --store "Lõunakeskuse COOP Maksimarket"
+          --headless "${{ env.HEADLESS }}"
+          --req-delay "${{ env.REQ_DELAY }}"
+          --upsert-db "${{ env.UPSERT_DB }}"
+          --categories-dir "${{ env.CATEGORIES_DIR }}"
+          --deep "${{ env.DEEP }}"
+          --out "out/coop_bolt_${{ env.CITY_PATH }}_Lounakeskuse_COOP_Maksimarket.csv"
+
+      - name: Crawl Eedeni COOP Maksimarket
+        run: >
+          python scripts/bolt_crawler.py
+          --city "${{ env.CITY_PATH }}"
+          --store "Eedeni COOP Maksimarket"
+          --headless "${{ env.HEADLESS }}"
+          --req-delay "${{ env.REQ_DELAY }}"
+          --upsert-db "${{ env.UPSERT_DB }}"
+          --categories-dir "${{ env.CATEGORIES_DIR }}"
+          --deep "${{ env.DEEP }}"
+          --out "out/coop_bolt_${{ env.CITY_PATH }}_Eedeni_COOP_Maksimarket.csv"
+
+      - name: Upload CSV artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: "coop-bolt-csv-${{ matrix.store }}"
+          name: "coop-bolt-csv"
           path: out/*.csv
           if-no-files-found: warn
