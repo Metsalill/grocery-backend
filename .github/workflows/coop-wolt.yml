@@ -160,7 +160,7 @@ jobs:
           # Force PW by default while stabilizing
           WOLT_FORCE_PLAYWRIGHT: ${{ github.event_name == 'workflow_dispatch' && inputs.force_playwright || '1' }}
           # Be gentle with prodinfo; keep modest by default
-          WOLT_PROBE_LIMIT: "40"
+          WOLT_PROBE_LIMIT: "250"
           # Keep modal enrichment off until pages are stable
           WOLT_MODAL_PROBE_LIMIT: "0"
           # Known venueIds (24-hex) per store
