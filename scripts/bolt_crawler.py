@@ -12,11 +12,6 @@ Coop on Bolt Food → categories → products → CSV / upsert to staging_coop_p
 - Scrapes tiles; Bolt does not expose EAN/GTIN → keep blank.
 - Writes CSV and upserts into your existing `staging_coop_products`
   with channel='bolt' and store_host='bolt:<slug-of-store-name>'.
-
-Expected columns present in staging_coop_products (script adds missing ones):
-  chain, channel, store_name, store_host, city_path, category_name,
-  ext_id, name, brand, manufacturer, size_text, price, currency,
-  image_url, url, description, ean_raw, scraped_at
 """
 
 import argparse
@@ -99,7 +94,7 @@ def extract_category_links(page_html: str) -> List[Tuple[str, str]]:
 
 
 def normalize_cat_url(base_url: str, href: str) -> str:
-    """Resolve category href against the store's base URL and enforce /et-EE/."""
+    """Resolve category href against store base URL and enforce /et-EE/."""
     def ensure_locale(u: str) -> str:
         return u.replace("/en-US/", "/et-EE/")
 
@@ -140,12 +135,11 @@ def read_categories_override(path: str, base_url: str) -> List[Tuple[str, str]]:
 
 
 def _extract_from_card(card) -> Optional[Dict]:
-    """Extract a single product from a card-like node."""
+    """Extract a single product from a generic card-like node."""
     price_txt = None
     name = None
     img = None
 
-    # Try headings / prominent text for name, collect first euro-like for price
     for cand in card.css("h1,h2,h3,[role='heading'],strong,span,p,div"):
         t = (cand.text() or "").strip()
         if not t:
@@ -156,7 +150,6 @@ def _extract_from_card(card) -> Optional[Dict]:
         if not name and len(t) > 3 and "€" not in t:
             name = t
 
-    # Fallback name: image alt or aria-label on container
     if not name:
         im = next(iter(card.css("img[alt]")), None)
         if im:
@@ -168,7 +161,6 @@ def _extract_from_card(card) -> Optional[Dict]:
             if lab and "€" not in lab:
                 name = lab
 
-    # Image
     im = next(iter(card.css("img")), None)
     if im:
         img = im.attributes.get("src") or im.attributes.get("data-src")
@@ -188,11 +180,38 @@ def _extract_from_card(card) -> Optional[Dict]:
     )
 
 
+def _extract_via_plus_buttons(tree: HTMLParser) -> List[Dict]:
+    """Fallback extractor: find the +/Lisa/Add buttons and walk up to the product container."""
+    tiles: List[Dict] = []
+    for btn in tree.css("button"):
+        btxt = (btn.text() or "").strip().lower()
+        if btxt not in {"+", "lisa", "add", "add to cart"}:
+            continue
+        node = btn
+        container = None
+        for _ in range(7):
+            node = node.parent
+            if not node:
+                break
+            cls = node.attributes.get("class", "")
+            if node.tag in {"article", "li"} or ("card" in cls) or ("product" in cls):
+                container = node
+                break
+        container = container or btn.parent
+        if not container:
+            continue
+        data = _extract_from_card(container)
+        if data:
+            tiles.append(data)
+    return tiles
+
+
 def extract_tiles_from_dom(page_html: str) -> List[Dict]:
     """
     Robust card extractor:
-    - Prefer <article> product cards.
-    - Fallback to <div class*='card'> if needed.
+    1) Prefer <article> product cards.
+    2) Fallback to <div ...card...>.
+    3) Fallback to [+]/Lisa/Add buttons → walk up to container.
     """
     tree = HTMLParser(page_html)
     tiles: List[Dict] = []
@@ -209,6 +228,9 @@ def extract_tiles_from_dom(page_html: str) -> List[Dict]:
                 data = _extract_from_card(card)
                 if data:
                     tiles.append(data)
+
+    if not tiles:
+        tiles = _extract_via_plus_buttons(tree)
 
     return tiles
 
@@ -305,7 +327,6 @@ def run(
     categories_dir: Optional[str] = None,
     deep: bool = True,
 ):
-    # Keep the entire session on et-EE to avoid locale redirects.
     start_url = f"https://food.bolt.eu/et-EE/{city}"
     scraped_at = dt.datetime.utcnow().isoformat()
     rows_out: List[Dict] = []
@@ -316,7 +337,6 @@ def run(
             locale="et-EE",
             extra_http_headers={"Accept-Language": "et-EE,et;q=0.9"},
         )
-        # Sticky language cookie
         context.add_cookies([{
             "name": "language",
             "value": "et-EE",
@@ -331,7 +351,7 @@ def run(
         store_host = slugify_host(store_name)
         slug = store_slug(store_name)
 
-        # Decide category source: explicit file > auto file in dir > autodiscovery
+        # categories override?
         cats_from_file: List[Tuple[str, str]] = []
         override_path = None
         if categories_file and os.path.isfile(categories_file):
@@ -354,7 +374,7 @@ def run(
                 page.wait_for_load_state("domcontentloaded")
                 time.sleep(req_delay)
         else:
-            # Fallback: search for the store name
+            # Fallback search by store name
             try:
                 found = False
                 for sel in [
@@ -421,13 +441,20 @@ def run(
             page.wait_for_load_state("domcontentloaded")
             time.sleep(req_delay)
 
-            # lazy-load
+            # Heavier lazy-load: wait for any button (often the +) then scroll until stable
             try:
-                for _ in range(8):
-                    page.mouse.wheel(0, 2000)
-                    time.sleep(0.25)
-            except Exception:
+                page.wait_for_selector("button", timeout=10_000)
+            except PWTimeout:
                 pass
+
+            last_y = -1
+            for _ in range(30):
+                page.mouse.wheel(0, 1500)
+                time.sleep(0.25)
+                y = page.evaluate("() => window.scrollY")
+                if y == last_y:
+                    break
+                last_y = y
 
             html = page.content()
             tiles = extract_tiles_from_dom(html)
@@ -444,7 +471,6 @@ def run(
                 brand = guess_brand(name)
                 manufacturer = None
 
-                # Stable synthetic ext_id for DB NOT NULL schemas
                 ext_id = "bolt:" + hashlib.md5(f"{store_host}|{name}".encode("utf-8")).hexdigest()[:16]
 
                 rows_out.append(
@@ -470,30 +496,14 @@ def run(
                     )
                 )
 
-        # CSV
         os.makedirs(os.path.dirname(out_csv), exist_ok=True)
         with open(out_csv, "w", newline="", encoding="utf-8") as f:
             w = csv.DictWriter(
                 f,
                 fieldnames=[
-                    "chain",
-                    "channel",
-                    "store_name",
-                    "store_host",
-                    "city_path",
-                    "category_name",
-                    "ext_id",
-                    "name",
-                    "brand",
-                    "manufacturer",
-                    "size_text",
-                    "price",
-                    "currency",
-                    "image_url",
-                    "url",
-                    "description",
-                    "ean_raw",
-                    "scraped_at",
+                    "chain","channel","store_name","store_host","city_path","category_name",
+                    "ext_id","name","brand","manufacturer","size_text","price","currency",
+                    "image_url","url","description","ean_raw","scraped_at",
                 ],
             )
             w.writeheader()
