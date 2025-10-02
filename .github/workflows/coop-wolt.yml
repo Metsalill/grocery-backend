@@ -24,11 +24,6 @@ on:
         required: false
         default: "1"   # force PW during testing
 
-# Prevent overlapping runs of this workflow (most recent run wins)
-concurrency:
-  group: coop-wolt-parnu-default
-  cancel-in-progress: true
-
 jobs:
   crawl:
     runs-on: ubuntu-latest
@@ -62,10 +57,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     needs: crawl
-    # Ensure only one run per store is active at a time; cancel older ones
+    # One active run per store; DO NOT cancel older runs (preserve rows)
     concurrency:
       group: coop-wolt-${{ matrix.store }}
-      cancel-in-progress: true
+      cancel-in-progress: false
 
     strategy:
       fail-fast: false
