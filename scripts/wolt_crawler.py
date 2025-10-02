@@ -9,6 +9,7 @@ Fast path:
 
 Fallback:
 - Playwright page load, scroll, capture JSON blobs, tile prices, and venueId via modal.
+- If JSON blobs are missing, scrape product cards from the DOM to collect id/name/price/image.
 - Enrich items via https://prodinfo.wolt.com/<lang>/<venueId>/<itemId> to fetch GTIN & Supplier.
 
 GTIN/Tootja enrichment is tolerant:
@@ -180,7 +181,7 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
             print(f"[info] Table {table} does not exist → skipping DB upsert.")
             return
 
-        # Check which columns exist to decide if we can use 'channel'
+        # Adapt to tables with/without a 'channel' column
         cols = set()
         try:
             recs = await conn.fetch(
@@ -200,7 +201,6 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
         ]
         placeholders = ",".join(f"${i}" for i in range(1, len(insert_cols) + 1))
 
-        # Build ON CONFLICT update dynamically (without channel unless present)
         update_assignments = [
             "name         = COALESCE(EXCLUDED.name,         {t}.name)",
             "brand        = COALESCE(NULLIF(EXCLUDED.brand,''),        {t}.brand)",
@@ -215,8 +215,7 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
             "scraped_at   = now()"
         ]
         if has_channel:
-            # Add channel to insert + update if the table supports it
-            insert_cols.insert(2, "channel")  # after ext_id
+            insert_cols.insert(2, "channel")
             placeholders = ",".join(f"${i}" for i in range(1, len(insert_cols) + 1))
             update_assignments.insert(0, "channel = COALESCE(NULLIF(EXCLUDED.channel,''), {t}.channel)")
 
@@ -238,17 +237,15 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
             except Exception:
                 pr = None
 
-            base_values = [
+            vals = [
                 r.get("store_host"), r.get("ext_id"),
                 r.get("name"), r.get("brand"), r.get("manufacturer"),
                 r.get("ean_raw"), r.get("ean_norm"), r.get("size_text"),
                 pr, r.get("currency") or "EUR", r.get("image_url"), r.get("url")
             ]
             if has_channel:
-                # Insert channel after ext_id (index 2)
-                base_values.insert(2, r.get("channel") or "")
-
-            payload.append(tuple(base_values))
+                vals.insert(2, r.get("channel") or "")
+            payload.append(tuple(vals))
 
         if not payload:
             print("[warn] No rows with ext_id — skipped DB upsert")
@@ -741,7 +738,7 @@ async def _scrape_tile_prices(page) -> Dict[str, float]:
         js = r'''
 (() => {
   const out = [];
-  const anchors = Array.from(document.querySelectorAll('a[href*="item"]'));
+  const anchors = Array.from(document.querySelectorAll('a[href*="itemid-"], a[href*="item-"]'));
   for (const a of anchors) {
     const href = a.getAttribute('href') || a.href || '';
     const m = href && href.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
@@ -827,6 +824,80 @@ async def _goto_with_backoff(page, url: str, max_tries: int, nav_timeout_ms: int
     if last_err:
         raise last_err
 
+# --- NEW: DOM card extractor (when JSON blobs are missing) ---
+async def _extract_items_from_dom(page) -> List[Dict]:
+    """
+    Scrape visible product cards to recover item id, name, price, image.
+    Returns list of dicts like {"id": <hex24>, "name": "...", "price": <float>, "image": <url>}
+    """
+    try:
+        js = r'''
+(() => {
+  const seen = new Map(); // id -> {name, priceText, image}
+  const anchors = Array.from(document.querySelectorAll('a[href*="itemid-"], a[href*="item-"]'));
+  for (const a of anchors) {
+    const href = a.getAttribute('href') || a.href || '';
+    const m = href && href.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
+    if (!m) continue;
+    const id = m[1].toLowerCase();
+
+    const card = a.closest('article, a, div') || a;
+    let name = a.getAttribute('aria-label') || '';
+    if (!name && card) {
+      const t = card.querySelector('h3,h4,[data-testid*="title"],[class*="title"]');
+      if (t && t.textContent) name = t.textContent.trim();
+    }
+    // Heuristic: longest non-price line
+    if (!name && card) {
+      const txt = (card.textContent || '').replace(/\s+/g,' ').trim();
+      const parts = txt.split(/(?=[A-ZÄÖÜÕa-zäöüõ0-9])/g).map(s => s.trim()).filter(Boolean);
+      const filtered = parts.filter(s => !/[€]|(?:\d+[.,]\d{2})/.test(s));
+      filtered.sort((a,b) => b.length - a.length);
+      name = (filtered[0] || '').trim();
+    }
+
+    let image = null;
+    if (card) {
+      const imgel = card.querySelector('img');
+      if (imgel) image = imgel.currentSrc || imgel.src || null;
+    }
+
+    let priceText = null;
+    if (card) {
+      const txt = card.textContent || '';
+      const mprice = txt.match(/[~≈]?\s*(\d+[.,]\d{2})\s*€/);
+      if (mprice) priceText = mprice[1];
+    }
+
+    if (!seen.has(id)) seen.set(id, {name, priceText, image});
+  }
+  return Array.from(seen, ([id, v]) => ({id, ...v}));
+})()
+'''
+        data = await page.evaluate(js)
+    except Exception:
+        data = []
+
+    items: List[Dict] = []
+    for it in data or []:
+        iid = str(it.get("id") or "").lower()
+        if not iid or not HEX24_RE.fullmatch(iid):
+            continue
+        name = (it.get("name") or "").strip() or None
+        price = None
+        pt = it.get("priceText")
+        if pt:
+            try:
+                price = float(pt.replace(",", "."))
+            except Exception:
+                price = None
+        item: Dict[str, Any] = {"id": iid}
+        if name: item["name"] = name
+        if price is not None: item["price"] = price
+        if it.get("image"): item["image"] = it["image"]
+        items.append(item)
+    return items
+
 async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: float,
                                    goto_strategy: str, nav_timeout_ms: int):
     if async_playwright is None:
@@ -879,7 +950,6 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
         venue_id: Optional[str] = None
         try:
             strategies = [goto_strategy] if goto_strategy in ("domcontentloaded","networkidle","load") else ["domcontentloaded"]
-            # keep tries modest to avoid long stalls
             await _goto_with_backoff(page, cat_url, max_tries=3, nav_timeout_ms=nav_timeout_ms, strategies=strategies)
 
             await wait_cookie_banner(page)
@@ -923,6 +993,15 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
                 except Exception:
                     pass
 
+            # If network state gave nothing, extract directly from DOM cards
+            if not found:
+                dom_items = await _extract_items_from_dom(page)
+                for it in dom_items:
+                    iid = it.get("id")
+                    if iid:
+                        found.setdefault(iid, {}).update(it)
+
+            # As a last-resort, also seed IDs from HTML
             if not found:
                 ids = set(re.findall(r"(?:itemid-|item-)([a-f0-9]{24})", html or "", re.I))
                 for iid in ids:
