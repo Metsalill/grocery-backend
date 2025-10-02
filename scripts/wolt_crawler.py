@@ -733,7 +733,11 @@ async def _maybe_collect_json(resp, out_list: List[Any]):
     except Exception:
         pass
 
-async def _scrape_tile_prices(page) -> Dict[str, float]:
+# --- UPDATED: scrape tile name + price (not just price) ---
+async def _scrape_tile_prices(page) -> Dict[str, Dict[str, Optional[float]]]:
+    """
+    Return mapping: iid -> {"price": float|None, "name": str|None}
+    """
     try:
         js = r'''
 (() => {
@@ -743,23 +747,59 @@ async def _scrape_tile_prices(page) -> Dict[str, float]:
     const href = a.getAttribute('href') || a.href || '';
     const m = href && href.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
     if (!m) continue;
-    const card = a.closest('article, a, div') || a;
-    const txt = (card && card.textContent) ? card.textContent : '';
-    const mt = txt.match(/[~≈]?\s*(\d+[.,]\d{2})\s*€/);
-    if (mt) {
-      const raw = mt[1].replace(',', '.');
-      const val = parseFloat(raw);
-      if (!isNaN(val)) out.push([m[1], val]);
+    const card = a.closest('article, li, div') || a;
+
+    // try dedicated name nodes if present
+    let name = '';
+    const nameSel = [
+      '[data-testid="product-name"]',
+      '[data-test="product-name"]',
+      'h3, h4, h5',
+      '[class*="title"]',
+      '[class*="name"]'
+    ];
+    for (const s of nameSel) {
+      const el = card && card.querySelector ? card.querySelector(s) : null;
+      if (el && el.textContent && el.textContent.trim().length > 0) {
+        name = el.textContent.trim();
+        break;
+      }
     }
+    if (!name) {
+      // fallback: aria-label on link
+      name = (a.getAttribute('aria-label') || '').trim();
+    }
+    if (!name && card) {
+      // fallback: first non-price-ish line from text
+      let txt = (card.textContent || '').replace(/\u00A0/g,' ').trim();
+      const lines = txt.split(/\n+/).map(s => s.trim()).filter(Boolean);
+      for (const line of lines) {
+        if (/[€]|\/\s*(kg|l)/i.test(line)) continue;
+        if (line.length >= 3) { name = line; break; }
+      }
+    }
+
+    // price like “~7,43 €” or “7.43 €”
+    let price = null;
+    const txt = (card && card.textContent) ? card.textContent.replace(/\u00A0/g,' ') : '';
+    const mt = txt.match(/[~≈]?\s*([0-9]+(?:[.,][0-9]{2}))\s*€/);
+    if (mt) {
+      price = parseFloat(mt[1].replace(',', '.'));
+    }
+
+    out.push([m[1].toLowerCase(), price, name || '']);
   }
   return out;
 })()
 '''
         data = await page.evaluate(js)
-        prices: Dict[str, float] = {}
-        for iid, val in data or []:
-            prices[str(iid).lower()] = float(val)
-        return prices
+        results: Dict[str, Dict[str, Optional[float]]] = {}
+        for iid, val, name in data or []:
+            results[str(iid).lower()] = {
+                "price": (float(val) if val is not None else None),
+                "name": (name.strip() or None),
+            }
+        return results
     except Exception:
         return {}
 
@@ -946,7 +986,7 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
         page.on("response", lambda resp: asyncio.create_task(_maybe_collect_json(resp, collected_blobs)))
 
         html = ""
-        tile_prices: Dict[str, float] = {}
+        tile_prices: Dict[str, Dict[str, Optional[float]]] = {}
         venue_id: Optional[str] = None
         try:
             strategies = [goto_strategy] if goto_strategy in ("domcontentloaded","networkidle","load") else ["domcontentloaded"]
@@ -1145,12 +1185,17 @@ async def run_wolt(args, categories: List[str], on_rows_async) -> None:
         else:
             print("[warn] venueId not found — skipping direct prodinfo enrichment")
 
+        # Reconcile tile-derived price and NAME for PW path
         if not payload and items:
             for it in items:
                 if it.get("id"):
                     iid = str(it["id"]).lower()
-                    if it.get("price") in (None, 0) and iid in tile_prices:
-                        it["price"] = tile_prices[iid]
+                    tile = tile_prices.get(iid) if isinstance(tile_prices, dict) else None
+                    if tile:
+                        if it.get("price") in (None, 0) and isinstance(tile.get("price"), (int, float)):
+                            it["price"] = tile["price"]
+                        if (not it.get("name")) and tile.get("name"):
+                            it["name"] = tile["name"]
 
         if args.modal_probe_limit > 0:
             await _enrich_items_via_modal(
