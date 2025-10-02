@@ -4,17 +4,14 @@
 """
 Coop on Bolt Food → categories → products → CSV / upsert to staging_coop_products
 
-- Opens https://food.bolt.eu/{locale}/{city_path} (locale is taken from the first
-  workable URL we touch so we don't fight et-EE/en-US swaps).
-- If a categories override is present (file or dir), uses those links. Otherwise,
-  discovers categories from the store page.
-- For each category:
-    * tries the URL directly;
-    * if Bolt bounces to the store home, it clicks the visible category chip by text;
-    * if Bolt shows “Menu updated / Menüüd uuendati”, it acknowledges and retries;
-    * waits until real product tiles exist before parsing.
-- Scrapes tiles without opening modals (fast path), but constructs stable ext_id and
-  fills brand/size heuristically from name (Bolt doesn’t expose EAN).
+Key points:
+- Category discovery prefers a per-store override file if present, otherwise
+  discovers from the store page.
+- Product cards are <button role="button" aria-label="NAME … PRICE €">.
+  We read aria-labels directly and also try to pull an <img> src or a
+  background-image URL for the tile.
+- Auto-dismisses occasional "Menüüd uuendati / OK" dialog.
+- Writes CSV and (optionally) upserts to staging_coop_products.
 """
 
 import argparse
@@ -28,7 +25,7 @@ import time
 from typing import Dict, List, Optional, Tuple
 
 from tenacity import retry, stop_after_attempt, wait_fixed
-from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
+from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout, Page
 from selectolax.parser import HTMLParser
 
 # Optional DB
@@ -37,7 +34,7 @@ try:
 except Exception:
     psycopg = None
 
-EUR = "€"
+EUR_SYMBOL = "€"
 CHAIN = "Coop"
 CHANNEL = "bolt"
 
@@ -49,16 +46,24 @@ def slugify_host(name: str) -> str:
 
 
 def store_slug(name: str) -> str:
-    s = re.sub(r"[^a-z0-9]+", "-", name.lower())
-    return re.sub(r"-+", "-", s).strip("-")
+    return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", name.lower())).strip("-")
 
 
 def parse_price(text: str) -> Tuple[Optional[float], Optional[str]]:
     if not text:
         return None, None
     t = text.replace("\xa0", " ").strip()
-    cur = "EUR" if EUR in t or "€" in t else None
-    num = re.sub(r"[^0-9,.\-]", "", t).replace(",", ".")
+    cur = "EUR" if (EUR_SYMBOL in t or "€" in t or "EUR" in t.upper()) else None
+    # pick the last number block in case the label contains other digits
+    m = re.findall(r"(\d[\d\.\,\s]*)(?:\s*€|$)", t)
+    num = m[-1] if m else None
+    if not num:
+        # broad fallback
+        m2 = re.findall(r"(\d+[.,]\d{1,2})", t)
+        num = m2[-1] if m2 else None
+    if not num:
+        return None, cur
+    num = num.replace(" ", "").replace(",", ".")
     try:
         return round(float(num), 2), cur
     except Exception:
@@ -71,8 +76,8 @@ def guess_size(name: str) -> Optional[str]:
 
 
 def guess_brand(name: str) -> Optional[str]:
-    parts = re.split(r"[,-]", name)
-    head = parts[0].strip()
+    # take a plausible first capitalized token
+    head = re.split(r"[–—,:]| {2,}", name)[0]
     tok = re.findall(r"\b[A-ZÄÖÜÕ][\wÄÖÜÕäöüõ&'.-]+\b", head)
     return tok[0] if tok else None
 
@@ -86,9 +91,10 @@ def extract_category_links(page_html: str) -> List[Tuple[str, str]]:
         if "categoryName=" in href:
             cat = a.text().strip()
             if not cat:
-                m = re.search(r"[?&]categoryName=([^&]+)", href)
+                m = re.search(r"categoryName=([^&]+)", href)
                 if m:
                     cat = m.group(1).replace("%20", " ")
+            cat = (cat or "").strip()
             key = (cat, href)
             if key not in seen:
                 seen.add(key)
@@ -97,16 +103,12 @@ def extract_category_links(page_html: str) -> List[Tuple[str, str]]:
 
 
 def normalize_cat_url(base_url: str, href: str) -> str:
-    """Build a fully-qualified category URL that preserves the locale."""
     if not href:
         return base_url
     if href.startswith("http"):
         return href
-    # pull the protocol + host + locale prefix from base_url
-    m = re.match(r"^(https://food\.bolt\.eu/(?:[a-z]{2}-[A-Z]{2}|en-US))", base_url)
-    prefix = m.group(1) if m else "https://food.bolt.eu/en-US"
     if href.startswith("/"):
-        return prefix + href
+        return "https://food.bolt.eu" + href
     if href.startswith("?"):
         return base_url.split("?")[0] + href
     if base_url.endswith("/") and href.startswith("/"):
@@ -118,8 +120,7 @@ def base_url_from_category(url: str) -> str:
     m = re.search(r"^(https://food\.bolt\.eu/(?:[a-z]{2}-[A-Z]{2}|en-US)/[^/]+/p/\d+)", url)
     if m:
         return m.group(1)
-    u = url.split("?", 1)[0]
-    return u.split("/smc/")[0]
+    return url.split("?", 1)[0].split("/smc/", 1)[0]
 
 
 def read_categories_override(path: str, base_url: str) -> List[Tuple[str, str]]:
@@ -134,51 +135,6 @@ def read_categories_override(path: str, base_url: str) -> List[Tuple[str, str]]:
             cat = (m.group(1) if m else href).replace("%20", " ")
             out.append((cat, url))
     return out
-
-
-def _extract_from_card(card) -> Optional[Dict]:
-    price_txt = None
-    name = None
-    img = None
-
-    for cand in card.css("h1,h2,h3,strong,span,p,div"):
-        t = (cand.text() or "").strip()
-        if not t:
-            continue
-        if (EUR in t) or re.search(r"\d[\d\.,]\s?€", t):
-            if not price_txt:
-                price_txt = t
-        if not name and len(t) > 3 and "€" not in t:
-            name = t
-
-    for im in card.css("img"):
-        src = im.attributes.get("src") or im.attributes.get("data-src")
-        if src and src.startswith("http"):
-            img = src
-            break
-
-    if not (name and price_txt):
-        return None
-
-    price, currency = parse_price(price_txt)
-    return dict(name=name, price=price, currency=currency or "EUR", image_url=img or "")
-
-
-def extract_tiles_from_dom(page_html: str) -> List[Dict]:
-    tree = HTMLParser(page_html)
-    tiles: List[Dict] = []
-    for card in tree.css("article"):
-        data = _extract_from_card(card)
-        if data:
-            tiles.append(data)
-    if not tiles:
-        for card in tree.css("div"):
-            cls = card.attributes.get("class", "")
-            if cls and "card" in cls:
-                data = _extract_from_card(card)
-                if data:
-                    tiles.append(data)
-    return tiles
 
 
 def ensure_staging_schema(conn):
@@ -203,17 +159,16 @@ def ensure_staging_schema(conn):
       ean_raw         text,
       scraped_at      timestamptz DEFAULT now()
     );
+    CREATE INDEX IF NOT EXISTS idx_stg_coop_host ON staging_coop_products(store_host);
+    CREATE INDEX IF NOT EXISTS idx_stg_coop_name ON staging_coop_products (lower(name));
     """
     with conn.cursor() as cur:
         cur.execute(ddl)
 
 
 def upsert_rows_to_staging_coop(rows: List[Dict], db_url: str):
-    if not psycopg:
-        print("psycopg not installed; skipping DB.", file=sys.stderr)
-        return
-    if not db_url:
-        print("DATABASE_URL empty; skipping DB.", file=sys.stderr)
+    if not psycopg or not db_url:
+        print("DB skip: psycopg missing or DATABASE_URL empty.", file=sys.stderr)
         return
     with psycopg.connect(db_url) as conn:
         ensure_staging_schema(conn)
@@ -222,7 +177,8 @@ def upsert_rows_to_staging_coop(rows: List[Dict], db_url: str):
           chain,channel,store_name,store_host,city_path,category_name,
           ext_id,name,brand,manufacturer,size_text,price,currency,image_url,url,
           description,ean_raw,scraped_at
-        ) VALUES (
+        )
+        VALUES (
           %(chain)s,%(channel)s,%(store_name)s,%(store_host)s,%(city_path)s,%(category_name)s,
           %(ext_id)s,%(name)s,%(brand)s,%(manufacturer)s,%(size_text)s,%(price)s,%(currency)s,%(image_url)s,%(url)s,
           %(description)s,%(ean_raw)s,%(scraped_at)s
@@ -234,39 +190,140 @@ def upsert_rows_to_staging_coop(rows: List[Dict], db_url: str):
     print(f"[db] upserted {len(rows)} rows into staging_coop_products")
 
 
-@retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
-def safe_text(page, sel, timeout=5000) -> str:
-    page.wait_for_selector(sel, timeout=timeout)
-    return page.inner_text(sel).strip()
+# ---------- Bolt specific helpers ----------
 
-
-def dismiss_update_modal(page):
-    """Dismiss 'Menu updated / Menüüd uuendati' modal if present."""
+def click_ok_if_menu_updated(page: Page):
+    """Dismiss 'Menüüd uuendati' dialog, if it appears."""
     try:
-        # Estonian
-        if page.is_visible("text=Menüüd uuendati"):
-            page.click("text=OK", timeout=2000)
-            time.sleep(0.2)
-        # English
-        if page.is_visible("text=Menu updated"):
-            page.click("text=OK", timeout=2000)
-            time.sleep(0.2)
+        page.locator("text=Menüüd uuendati").wait_for(timeout=2000)
+        page.get_by_text("OK", exact=True).click(timeout=2000)
+        time.sleep(0.2)
+        print("[ui] dismissed 'Menüüd uuendati'")
+    except PWTimeout:
+        pass
     except Exception:
         pass
 
 
-def wait_for_tiles(page, req_delay: float) -> bool:
-    """Scroll and check if tiles appear."""
+def wait_for_grid(page: Page, timeout_ms: int = 15000):
+    # Something with aria-label product tiles must exist
+    page.wait_for_load_state("domcontentloaded")
     try:
-        for _ in range(10):
-            time.sleep(req_delay)
-            html = page.content()
-            if extract_tiles_from_dom(html):
-                return True
-            page.mouse.wheel(0, 1400)
-        return False
-    except Exception:
-        return False
+        page.locator('button[aria-label]').first.wait_for(timeout=timeout_ms)
+    except PWTimeout:
+        # sometimes the list is virtualized; try scrolling a bit to force render
+        for _ in range(5):
+            page.mouse.wheel(0, 2000)
+            time.sleep(0.15)
+        page.locator('button[aria-label]').first.wait_for(timeout=timeout_ms)
+
+
+def scroll_to_load_all(page: Page, max_passes: int = 12):
+    """Scroll until no new height is observed (virtualized lists)."""
+    last_h = 0
+    for _ in range(max_passes):
+        try:
+            h = page.evaluate("() => document.scrollingElement.scrollHeight")
+        except Exception:
+            h = 0
+        if h <= last_h:
+            break
+        last_h = h
+        page.mouse.wheel(0, 2500)
+        time.sleep(0.25)
+
+
+def extract_tiles_via_dom(page: Page) -> List[Dict]:
+    """
+    Read product tiles from aria-labels; pull img src or background-image if present.
+    Returns list of dicts with: name, price, currency, image_url
+    """
+    js = r"""
+    () => {
+      const cards = Array.from(document.querySelectorAll('button[aria-label]'));
+      return cards.map(btn => {
+        const label = btn.getAttribute('aria-label') || '';
+        // Prefer real <img> if exists, else try background-image on a nested div
+        let img = '';
+        const tagImg = btn.querySelector('img');
+        if (tagImg && tagImg.src) img = tagImg.src;
+        if (!img) {
+          const bg = btn.querySelector('[style*="background-image"]');
+          if (bg) {
+            const s = getComputedStyle(bg).backgroundImage || '';
+            const m = s.match(/^url\("?(.*?)"?\)$/);
+            if (m) img = m[1];
+          }
+        }
+        return { label, image: img };
+      });
+    }
+    """
+    raw = page.evaluate(js)
+    tiles: List[Dict] = []
+    for item in raw:
+        label = (item.get("label") or "").strip()
+        if not label:
+            continue
+        price, currency = parse_price(label)
+        # name is label with the trailing price trimmed
+        name = re.sub(r"\s*\d[\d\.\,\s]*\s*€\s*$", "", label).strip(" ,–-")
+        if not name:
+            # fallback: take everything before last comma/dash
+            parts = re.split(r"[–—,-]", label)
+            name = parts[0].strip()
+        tiles.append({
+            "name": name,
+            "price": price,
+            "currency": currency or "EUR",
+            "image_url": item.get("image") or ""
+        })
+    return tiles
+
+
+def extract_some_from_modals(page: Page, limit: int = 4) -> List[Dict]:
+    """
+    Very light modal scrape (first N products): click first tiles and read the title + price + image.
+    Used only if aria-label parsing returned zero (or looks suspicious).
+    """
+    results: List[Dict] = []
+    cards = page.locator('button[aria-label]')
+    count = min(limit, cards.count())
+    for i in range(count):
+        try:
+            cards.nth(i).click(timeout=3000)
+            page.locator('[role="dialog"]').wait_for(timeout=4000)
+            # title is usually a text element in dialog
+            title = page.locator('[role="dialog"] h1, [role="dialog"] [data-testid*="headerContainer"] div').first.inner_text(timeout=3000).strip()
+            # price is near the "Lisa" button area – take the last number with €
+            dlg_text = page.locator('[role="dialog"]').inner_text(timeout=3000)
+            price, currency = parse_price(dlg_text)
+            # image
+            img = ""
+            try:
+                img = page.locator('[role="dialog"] img').first.get_attribute("src", timeout=1500) or ""
+            except Exception:
+                pass
+            results.append({
+                "name": title,
+                "price": price,
+                "currency": currency or "EUR",
+                "image_url": img
+            })
+        except Exception:
+            pass
+        finally:
+            try:
+                page.keyboard.press("Escape")
+                time.sleep(0.1)
+            except Exception:
+                pass
+    return results
+
+
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
+def safe_text(el):
+    return (el.inner_text() or "").strip()
 
 
 def run(
@@ -292,11 +349,12 @@ def run(
         page.goto(start_url, timeout=60_000)
         page.wait_for_load_state("domcontentloaded")
 
+        click_ok_if_menu_updated(page)
+
         store_host = slugify_host(store_name)
         slug = store_slug(store_name)
 
-        # Prepare categories source
-        cats_from_file: List[Tuple[str, str]] = []
+        # Pick category source
         override_path = None
         if categories_file and os.path.isfile(categories_file):
             override_path = categories_file
@@ -306,13 +364,12 @@ def run(
                 override_path = auto_path
 
         base_url = None
+        cats_from_file: List[Tuple[str, str]] = []
 
         if override_path:
-            # derive base from the first url keeping locale
-            tmp = read_categories_override(override_path, page.url)
+            tmp = read_categories_override(override_path, start_url)
             if tmp:
-                first_url = tmp[0][1]
-                base_url = base_url_from_category(first_url)
+                base_url = base_url_from_category(tmp[0][1])
                 cats_from_file = tmp
                 print(f"[info] using categories from: {override_path} ({len(cats_from_file)} cats)")
                 print(f"[info] derived base store URL: {base_url}")
@@ -320,9 +377,9 @@ def run(
                 page.wait_for_load_state("domcontentloaded")
                 time.sleep(req_delay)
         else:
-            # Find store by name
+            # Basic search open + click store by name (fallback)
             try:
-                # Try a couple of searchbox variants
+                opened = False
                 for sel in [
                     'input[placeholder*="Stores"]',
                     'input[placeholder*="Poed"]',
@@ -330,21 +387,27 @@ def run(
                     'input[role="searchbox"]',
                 ]:
                     try:
-                        page.wait_for_selector(sel, timeout=4000)
+                        page.wait_for_selector(sel, timeout=3_000)
                         page.click(sel)
+                        opened = True
                         break
                     except PWTimeout:
-                        continue
+                        pass
+                if not opened:
+                    try:
+                        page.click("button:has(svg)", timeout=2_000)
+                    except PWTimeout:
+                        pass
+
                 page.keyboard.type(store_name)
-                time.sleep(0.6)
+                time.sleep(0.8)
                 page.keyboard.press("Enter")
                 time.sleep(1.0)
-
-                # Click store card / title
                 try:
-                    page.click(f"text={store_name}", timeout=10_000)
+                    page.wait_for_selector(f"text={store_name}", timeout=25_000)
+                    page.click(f"text={store_name}", timeout=2_000)
                 except PWTimeout:
-                    page.click(f"xpath=//h1|//h2|//a[contains(., '{store_name}')]", timeout=10_000)
+                    page.click(f"xpath=//h1|//h2|//a[contains(., '{store_name}')]", timeout=4_000)
 
                 page.wait_for_load_state("domcontentloaded")
                 time.sleep(req_delay)
@@ -355,100 +418,83 @@ def run(
                 browser.close()
                 return
 
-        # Build category list
+        # Categories
+        categories: List[Tuple[str, str]] = []
         if cats_from_file:
             categories = cats_from_file
         else:
             store_html = page.content()
             discovered = extract_category_links(store_html)
             seen_cat = set()
-            categories: List[Tuple[str, str]] = []
             for cat_name, href in discovered:
-                if cat_name:
-                    key = cat_name.lower()
-                    if key not in seen_cat:
-                        seen_cat.add(key)
-                        categories.append((cat_name, normalize_cat_url(base_url, href)))
+                if cat_name and cat_name.lower() not in seen_cat:
+                    seen_cat.add(cat_name.lower())
+                    categories.append((cat_name, normalize_cat_url(base_url, href)))
             if not categories:
                 categories = [("All", base_url)]
 
         print(f"[info] categories selected: {len(categories)}")
 
-        # Crawl categories
         for cat_name, href in categories:
             print(f"[cat] {cat_name} -> {href}")
-            success = False
+            page.goto(href, timeout=60_000)
+            page.wait_for_load_state("domcontentloaded")
+            time.sleep(req_delay)
+            click_ok_if_menu_updated(page)
 
-            for attempt in range(1, 4):
-                try:
-                    # 1) go directly
-                    page.goto(href, timeout=60_000)
-                    page.wait_for_load_state("domcontentloaded")
-                    time.sleep(req_delay)
-                    dismiss_update_modal(page)
+            # Ensure grid rendered and pre-scroll
+            try:
+                wait_for_grid(page, 15_000)
+            except Exception:
+                pass
 
-                    # If URL doesn't include /smc/ (i.e., we're at store home), try clicking the chip by text
-                    if "/smc/" not in page.url:
-                        try:
-                            # category tabs across top
-                            sel = f"button:has-text('{cat_name}')"
-                            if page.is_visible(sel):
-                                page.click(sel, timeout=4000)
-                                time.sleep(req_delay)
-                                dismiss_update_modal(page)
-                        except Exception:
-                            pass
+            scroll_to_load_all(page)
 
-                    if not wait_for_tiles(page, req_delay):
-                        raise RuntimeError("no tiles yet")
+            tiles = extract_tiles_via_dom(page)
+            print(f"[cat] parsed {len(tiles)} tiles")
 
-                    html = page.content()
-                    tiles = extract_tiles_from_dom(html)
-                    print(f"[cat] parsed {len(tiles)} tiles")
-                    for t in tiles:
-                        name = (t.get("name") or "").strip()
-                        if not name:
-                            continue
-                        price = t.get("price")
-                        currency = t.get("currency") or "EUR"
-                        image_url = t.get("image_url") or ""
-                        size_text = guess_size(name)
-                        brand = guess_brand(name)
-                        ext_id = "bolt:" + hashlib.md5(
-                            f"{store_host}|{name}".encode("utf-8")
-                        ).hexdigest()[:16]
+            if not tiles and deep:
+                # Try modals for a few items in case aria-labels aren't present yet
+                modal_tiles = extract_some_from_modals(page, limit=6)
+                print(f"[cat] parsed {len(modal_tiles)} tiles via modal")
+                tiles = modal_tiles
 
-                        rows_out.append(
-                            dict(
-                                chain=CHAIN,
-                                channel=CHANNEL,
-                                store_name=store_name,
-                                store_host=store_host,
-                                city_path=city,
-                                category_name=cat_name,
-                                ext_id=ext_id,
-                                name=name,
-                                brand=brand,
-                                manufacturer=None,
-                                size_text=size_text,
-                                price=price,
-                                currency=currency,
-                                image_url=image_url,
-                                url=page.url,
-                                description=None,
-                                ean_raw=None,
-                                scraped_at=scraped_at,
-                            )
-                        )
-                    success = True
-                    break
-                except Exception as e:
-                    print(f"[cat] attempt {attempt} failed: {e}")
-                    # small backoff then retry (may hit new smc id)
-                    time.sleep(0.8)
+            # materialize rows
+            for t in tiles:
+                name = (t.get("name") or "").strip()
+                if not name:
+                    continue
+                price = t.get("price")
+                currency = t.get("currency") or "EUR"
+                image_url = t.get("image_url") or ""
+                size_text = guess_size(name)
+                brand = guess_brand(name)
+                manufacturer = None
 
-            if not success:
-                print(f"[cat] gave up: {cat_name}")
+                ext_id = "bolt:" + hashlib.md5(f"{store_host}|{name}".encode("utf-8")).hexdigest()[:16]
+
+                rows_out.append(
+                    dict(
+                        chain=CHAIN,
+                        channel=CHANNEL,
+                        store_name=store_name,
+                        store_host=store_host,
+                        city_path=city,
+                        category_name=cat_name,
+                        ext_id=ext_id,
+                        name=name,
+                        brand=brand,
+                        manufacturer=manufacturer,
+                        size_text=size_text,
+                        price=price,
+                        currency=currency,
+                        image_url=image_url,
+                        url=page.url,
+                        description=None,
+                        ean_raw=None,
+                        scraped_at=scraped_at,
+                    )
+                )
 
         # CSV
         os.makedirs(os.path.dirname(out_csv), exist_ok=True)
@@ -456,24 +502,9 @@ def run(
             w = csv.DictWriter(
                 f,
                 fieldnames=[
-                    "chain",
-                    "channel",
-                    "store_name",
-                    "store_host",
-                    "city_path",
-                    "category_name",
-                    "ext_id",
-                    "name",
-                    "brand",
-                    "manufacturer",
-                    "size_text",
-                    "price",
-                    "currency",
-                    "image_url",
-                    "url",
-                    "description",
-                    "ean_raw",
-                    "scraped_at",
+                    "chain","channel","store_name","store_host","city_path","category_name",
+                    "ext_id","name","brand","manufacturer","size_text","price","currency",
+                    "image_url","url","description","ean_raw","scraped_at",
                 ],
             )
             w.writeheader()
@@ -491,14 +522,14 @@ def run(
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--city", required=True, help="Bolt city path (e.g. 2-tartu)")
-    ap.add_argument("--store", required=True, help="Store display name (exact as shown in Bolt)")
+    ap.add_argument("--store", required=True, help="Store display name (Bolt)")
     ap.add_argument("--headless", default="1")
     ap.add_argument("--req-delay", default="0.25", type=float)
     ap.add_argument("--out", required=True)
     ap.add_argument("--upsert-db", default="1")
-    ap.add_argument("--categories-file", default="", help="Optional: file with category URLs (one per line)")
-    ap.add_argument("--categories-dir", default="", help="Optional: base dir with {dir}/{city}/{slug}.txt")
-    ap.add_argument("--deep", default="1", help="(reserved) deep parse of modals for brand/manufacturer")
+    ap.add_argument("--categories-file", default="", help="Optional file with category URLs (one per line)")
+    ap.add_argument("--categories-dir", default="", help="Optional base dir with {dir}/{city}/{slug}.txt")
+    ap.add_argument("--deep", default="1", help="Click a few modals if the grid extractor returns 0")
     args = ap.parse_args()
 
     run(
