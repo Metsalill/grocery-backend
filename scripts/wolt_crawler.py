@@ -180,23 +180,52 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
             print(f"[info] Table {table} does not exist → skipping DB upsert.")
             return
 
+        # Check which columns exist to decide if we can use 'channel'
+        cols = set()
+        try:
+            recs = await conn.fetch(
+                "SELECT column_name FROM information_schema.columns "
+                "WHERE table_schema='public' AND table_name=$1",
+                table,
+            )
+            cols = {r["column_name"] for r in recs}
+        except Exception:
+            pass
+        has_channel = "channel" in cols
+
+        insert_cols = [
+            "store_host", "ext_id", "name", "brand", "manufacturer",
+            "ean_raw", "ean_norm", "size_text", "price", "currency",
+            "image_url", "url"
+        ]
+        placeholders = ",".join(f"${i}" for i in range(1, len(insert_cols) + 1))
+
+        # Build ON CONFLICT update dynamically (without channel unless present)
+        update_assignments = [
+            "name         = COALESCE(EXCLUDED.name,         {t}.name)",
+            "brand        = COALESCE(NULLIF(EXCLUDED.brand,''),        {t}.brand)",
+            "manufacturer = COALESCE(NULLIF(EXCLUDED.manufacturer,''), {t}.manufacturer)",
+            "ean_raw      = COALESCE(EXCLUDED.ean_raw,      {t}.ean_raw)",
+            "ean_norm     = COALESCE(EXCLUDED.ean_norm,     {t}.ean_norm)",
+            "size_text    = COALESCE(EXCLUDED.size_text,    {t}.size_text)",
+            "price        = COALESCE(EXCLUDED.price,        {t}.price)",
+            "currency     = COALESCE(EXCLUDED.currency,     {t}.currency)",
+            "image_url    = COALESCE(EXCLUDED.image_url,    {t}.image_url)",
+            "url          = COALESCE(EXCLUDED.url,          {t}.url)",
+            "scraped_at   = now()"
+        ]
+        if has_channel:
+            # Add channel to insert + update if the table supports it
+            insert_cols.insert(2, "channel")  # after ext_id
+            placeholders = ",".join(f"${i}" for i in range(1, len(insert_cols) + 1))
+            update_assignments.insert(0, "channel = COALESCE(NULLIF(EXCLUDED.channel,''), {t}.channel)")
+
         stmt = f"""
             INSERT INTO {table}
-              (store_host, ext_id, name, brand, manufacturer, ean_raw, ean_norm, size_text, price, currency, image_url, url)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+              ({", ".join(insert_cols)})
+            VALUES ({placeholders})
             ON CONFLICT (store_host, ext_id) DO UPDATE SET
-              channel      = COALESCE(NULLIF(EXCLUDED.channel,''),      {table}.channel),
-              name         = COALESCE(EXCLUDED.name,         {table}.name),
-              brand        = COALESCE(NULLIF(EXCLUDED.brand,''),        {table}.brand),
-              manufacturer = COALESCE(NULLIF(EXCLUDED.manufacturer,''), {table}.manufacturer),
-              ean_raw      = COALESCE(EXCLUDED.ean_raw,      {table}.ean_raw),
-              ean_norm     = COALESCE(EXCLUDED.ean_norm,     {table}.ean_norm),
-              size_text    = COALESCE(EXCLUDED.size_text,    {table}.size_text),
-              price        = COALESCE(EXCLUDED.price,        {table}.price),
-              currency     = COALESCE(EXCLUDED.currency,     {table}.currency),
-              image_url    = COALESCE(EXCLUDED.image_url,    {table}.image_url),
-              url          = COALESCE(EXCLUDED.url,          {table}.url),
-              scraped_at   = now();
+              {", ".join(a.format(t=table) for a in update_assignments)};
         """
 
         payload = []
@@ -208,12 +237,18 @@ async def maybe_upsert_db(rows: List[Dict]) -> None:
                 pr = round(float(pr), 2) if pr is not None else None
             except Exception:
                 pr = None
-            payload.append((
-                r.get("store_host"), r.get("ext_id"), r.get("name"),
-                r.get("brand"), r.get("manufacturer"),
+
+            base_values = [
+                r.get("store_host"), r.get("ext_id"),
+                r.get("name"), r.get("brand"), r.get("manufacturer"),
                 r.get("ean_raw"), r.get("ean_norm"), r.get("size_text"),
                 pr, r.get("currency") or "EUR", r.get("image_url"), r.get("url")
-            ))
+            ]
+            if has_channel:
+                # Insert channel after ext_id (index 2)
+                base_values.insert(2, r.get("channel") or "")
+
+            payload.append(tuple(base_values))
 
         if not payload:
             print("[warn] No rows with ext_id — skipped DB upsert")
