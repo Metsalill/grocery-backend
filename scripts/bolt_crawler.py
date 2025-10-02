@@ -28,7 +28,6 @@ import re
 import sys
 import time
 from typing import Dict, List, Optional, Tuple
-from urllib.parse import parse_qs, urlparse, unquote
 
 from tenacity import retry, stop_after_attempt, wait_fixed
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
@@ -74,7 +73,6 @@ def guess_size(name: str) -> Optional[str]:
 
 
 def guess_brand(name: str) -> Optional[str]:
-    # quick heuristic that works OK for groceries
     parts = re.split(r"[,-]", name)
     head = parts[0].strip()
     tok = re.findall(r"\b[A-ZÄÖÜÕ][\wÄÖÜÕäöüõ&'.-]+\b", head)
@@ -90,7 +88,8 @@ def extract_category_links(page_html: str) -> List[Tuple[str, str]]:
         if "categoryName=" in href:
             cat = a.text().strip() or re.search(r"categoryName=([^&]+)", href)
             if not isinstance(cat, str) and cat:
-                cat = unquote(cat.group(1))
+                cat = cat.group(1)
+                cat = re.sub(r"%20", " ", cat)
             cat = (cat or "").strip()
             key = (cat, href)
             if key not in seen:
@@ -131,55 +130,72 @@ def read_categories_override(path: str, base_url: str) -> List[Tuple[str, str]]:
                 continue
             url = normalize_cat_url(base_url, href) if not href.startswith("http") else href
             m = re.search(r"[?&]categoryName=([^&]+)", url)
-            cat = unquote(m.group(1)) if m else href
+            cat = (m.group(1) if m else href).replace("%20", " ")
             out.append((cat, url))
     return out
 
 
-def _extract_from_card(card) -> Optional[Dict]:
-    price_txt = None
-    name = None
-    img = None
-
-    for cand in card.css("h1,h2,h3,strong,span,p,div"):
-        t = (cand.text() or "").strip()
-        if not t:
-            continue
-        if (EUR in t) or re.search(r"\d[\d\.,]\s?€", t):
-            if not price_txt:
-                price_txt = t
-        if not name and len(t) > 3 and "€" not in t:
-            name = t
-
-    for im in card.css("img"):
-        src = im.attributes.get("src") or im.attributes.get("data-src")
-        if src and src.startswith("http"):
-            img = src
-            break
-
-    if not (name and price_txt):
-        return None
-
-    price, currency = parse_price(price_txt)
-    return dict(name=name or "", price=price, currency=currency or "EUR", image_url=img or "")
-
-
 def extract_tiles_from_dom(page_html: str) -> List[Dict]:
+    """
+    Tile extractor based on the visible “+ / Add” button:
+    - Find 'button' nodes whose visible text looks like a cart add action
+      ('+', 'lisa', 'add', etc).
+    - Walk up to a reasonable parent container and collect nearby name/price/img.
+    This is resilient across Bolt’s CSS/DOM churn.
+    """
     tree = HTMLParser(page_html)
     tiles: List[Dict] = []
 
-    for card in tree.css("article"):
-        data = _extract_from_card(card)
-        if data:
-            tiles.append(data)
+    for btn in tree.css("button"):
+        btxt = (btn.text(strip=True) or "").lower()
+        if btxt in {"+", "add", "add ", "add to cart", "lisa"}:
+            # climb to the card container
+            tile = btn
+            for _ in range(8):
+                tile = tile.parent
+                if not tile:
+                    break
+                cls = tile.attributes.get("class", "")
+                # heuristic: stop at visually “card-ish” blocks
+                if tile.tag in {"article"} or "card" in cls or ("css" in cls and "relative" in cls):
+                    break
 
-    if not tiles:
-        for card in tree.css("div"):
-            cls = card.attributes.get("class", "")
-            if cls and "card" in cls:
-                data = _extract_from_card(card)
-                if data:
-                    tiles.append(data)
+            if not tile:
+                continue
+
+            name = None
+            price_txt = None
+            img = None
+
+            # Collect a plausible product name (first long text w/o €)
+            for cand in tile.css("h1,h2,h3,strong,span,p,div"):
+                t = (cand.text(strip=True) or "").strip()
+                if not t:
+                    continue
+                if (EUR in t) or re.search(r"\d[\d\.,]\s?€", t):
+                    price_txt = price_txt or t
+                elif not name and len(t) > 6:
+                    name = t
+
+            # Try to find an image src
+            for im in tile.css("img"):
+                src = im.attributes.get("src") or im.attributes.get("data-src")
+                if src and src.startswith("http"):
+                    img = src
+                    break
+
+            if not name and not price_txt:
+                continue
+
+            price, currency = parse_price(price_txt or "")
+            tiles.append(
+                dict(
+                    name=name or "",
+                    price=price,
+                    currency=currency or "EUR",
+                    image_url=img or "",
+                )
+            )
 
     return tiles
 
@@ -265,49 +281,6 @@ def safe_get_text(el):
     return (el.inner_text() or "").strip()
 
 
-def _decoded_category_name(url_or_name: str) -> str:
-    if "categoryName=" in url_or_name:
-        q = parse_qs(urlparse(url_or_name).query)
-        if "categoryName" in q and q["categoryName"]:
-            return unquote(q["categoryName"][0])
-    return unquote(url_or_name)
-
-
-def _dismiss_modal_if_any(page):
-    # “Menüü(d) uuendati – OK”, “OK”, “Proovi uuesti”, etc.
-    for text in ["OK", "Proovi uuesti", "Try again"]:
-        try:
-            page.locator(f"button:has-text('{text}')").first.click(timeout=1500)
-            time.sleep(0.3)
-        except PWTimeout:
-            pass
-        except Exception:
-            pass
-
-
-def _ensure_products_visible(page, req_delay: float):
-    # wait for a reasonable signal that products are rendered
-    # try a few short scroll bursts to trigger lazy-load
-    for _ in range(3):
-        try:
-            page.wait_for_selector("article, div[class*='card']", timeout=2500)
-            return
-        except PWTimeout:
-            pass
-        for _ in range(6):
-            try:
-                page.mouse.wheel(0, 1200)
-            except Exception:
-                pass
-            time.sleep(0.15)
-    # last chance: any euro sign on page
-    try:
-        page.wait_for_selector(f"text={EUR}", timeout=2000)
-    except PWTimeout:
-        pass
-    time.sleep(req_delay)
-
-
 def run(
     city: str,
     store_name: str,
@@ -334,7 +307,7 @@ def run(
         store_host = slugify_host(store_name)
         slug = store_slug(store_name)
 
-        # categories source
+        # Decide category source: explicit file > auto file in dir > autodiscovery
         cats_from_file: List[Tuple[str, str]] = []
         override_path = None
         if categories_file and os.path.isfile(categories_file):
@@ -357,7 +330,7 @@ def run(
                 page.wait_for_load_state("domcontentloaded")
                 time.sleep(req_delay)
         else:
-            # fallback search by name
+            # Fallback: search for the store name
             try:
                 found = False
                 for sel in [
@@ -367,7 +340,7 @@ def run(
                     'input[role="searchbox"]',
                 ]:
                     try:
-                        page.wait_for_selector(sel, timeout=5000)
+                        page.wait_for_selector(sel, timeout=5_000)
                         page.click(sel)
                         found = True
                         break
@@ -375,7 +348,7 @@ def run(
                         pass
                 if not found:
                     try:
-                        page.click("button:has(svg)", timeout=3000)
+                        page.click("button:has(svg)", timeout=3_000)
                     except PWTimeout:
                         pass
 
@@ -385,14 +358,14 @@ def run(
                 time.sleep(1.0)
 
                 try:
-                    page.wait_for_selector(f"text={store_name}", timeout=30000)
+                    page.wait_for_selector(f"text={store_name}", timeout=30_000)
                 except PWTimeout:
-                    page.wait_for_selector(f"xpath=//h1|//h2|//a[contains(., '{store_name}')]", timeout=15000)
+                    page.wait_for_selector(f"xpath=//h1|//h2|//a[contains(., '{store_name}')]", timeout=15_000)
 
                 try:
-                    page.click(f"text={store_name}", timeout=3000)
+                    page.click(f"text={store_name}", timeout=3_000)
                 except PWTimeout:
-                    page.click(f"xpath=//h1|//h2|//a[contains(., '{store_name}')]", timeout=5000)
+                    page.click(f"xpath=//h1|//h2|//a[contains(., '{store_name}')]", timeout=5_000)
 
                 page.wait_for_load_state("domcontentloaded")
                 time.sleep(req_delay)
@@ -419,32 +392,22 @@ def run(
 
         print(f"[info] categories selected: {len(categories)}")
         for cat_name, href in categories:
-            label = _decoded_category_name(cat_name or href)
-            print(f"[cat] {label} -> {href}")
-
-            # Try the direct category link first
+            print(f"[cat] {cat_name} -> {href}")
             page.goto(href, timeout=60_000)
             page.wait_for_load_state("domcontentloaded")
-            _dismiss_modal_if_any(page)
             time.sleep(req_delay)
 
-            # If Bolt kicked us to the store main page (no /smc/), click the visible tile instead
-            cur = page.url
-            if ("/smc/" not in cur) and base_url and (cur.split("?")[0] == base_url.split("?")[0]):
-                # click a category tile/link containing the label text
-                try:
-                    # Targets both <a> and <div> tiles with text
-                    page.get_by_text(label, exact=False).first.click(timeout=5000)
-                    page.wait_for_load_state("domcontentloaded")
-                    time.sleep(0.6)
-                    _dismiss_modal_if_any(page)
-                except PWTimeout:
-                    pass
-
-            _ensure_products_visible(page, req_delay)
+            # lazy-load / virtualized list
+            try:
+                for _ in range(10):
+                    page.mouse.wheel(0, 2200)
+                    time.sleep(0.25)
+            except Exception:
+                pass
 
             html = page.content()
             tiles = extract_tiles_from_dom(html)
+            print(f"[cat] parsed {len(tiles)} tiles")
 
             for t in tiles:
                 name = (t.get("name") or "").strip()
@@ -467,7 +430,7 @@ def run(
                         store_name=store_name,
                         store_host=store_host,
                         city_path=city,
-                        category_name=label,
+                        category_name=cat_name,
                         ext_id=ext_id,
                         name=name,
                         brand=brand,
