@@ -521,17 +521,26 @@ def _looks_like_noise(name: Optional[str]) -> bool:
 
 def _valid_productish(name: Optional[str], price: Optional[float], gtin_norm: Optional[str],
                       url: Optional[str], brand: Optional[str], manufacturer: Optional[str]) -> bool:
-    if gtin_norm:
-        return not _looks_like_noise(name)
-    if price is None or price <= 0:
-        return False
+    """
+    Be permissive for Wolt: if we have a clean name + real item id, accept even without price/gtin.
+    Filters only obvious noise.
+    """
     if _looks_like_noise(name):
         return False
-    has_size = bool(SIZE_RE.search(name or ""))
-    if has_size or brand or manufacturer:
+    # If GTIN present, accept.
+    if gtin_norm:
         return True
-    n = (name or "").strip()
-    return bool(n and len(n) >= 6 and len(n.split()) >= 2)
+    # If we have a sensible price, accept.
+    if price is not None and price > 0:
+        return True
+    # Otherwise accept on name + likely size/brand/manufacturer hints.
+    if brand or manufacturer:
+        return True
+    if name:
+        has_size = bool(SIZE_RE.search(name))
+        long_enough = len(name.strip()) >= 5 and len(name.split()) >= 1
+        return has_size or long_enough
+    return False
 
 def _parse_wolt_price(value: Any) -> Optional[float]:
     try:
@@ -574,7 +583,10 @@ def _extract_row_from_item(item: Dict, category_url: str, store_host: str) -> Op
             if price is not None:
                 break
 
-    image_url = _first_urlish(item, "image", "image_url", "imageUrl", "media")
+    # Prefer explicit key; fallback to commonly seen fields and our DOM 'image'
+    image_url = (_first_urlish(item, "image", "image_url", "imageUrl", "media")
+                 or (item.get("image") if isinstance(item.get("image"), str) else None))
+
     manufacturer = (item.get("supplier")
                     or _search_info_label(item, "Tarnija info", "Tarnija", "Tootja", "Valmistaja", "Supplier", "Manufacturer")
                     or _first_str(item, "supplier", "manufacturer", "producer"))
@@ -733,11 +745,7 @@ async def _maybe_collect_json(resp, out_list: List[Any]):
     except Exception:
         pass
 
-# --- UPDATED: scrape tile name + price (not just price) ---
-async def _scrape_tile_prices(page) -> Dict[str, Dict[str, Optional[float]]]:
-    """
-    Return mapping: iid -> {"price": float|None, "name": str|None}
-    """
+async def _scrape_tile_prices(page) -> Dict[str, float]:
     try:
         js = r'''
 (() => {
@@ -747,59 +755,23 @@ async def _scrape_tile_prices(page) -> Dict[str, Dict[str, Optional[float]]]:
     const href = a.getAttribute('href') || a.href || '';
     const m = href && href.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
     if (!m) continue;
-    const card = a.closest('article, li, div') || a;
-
-    // try dedicated name nodes if present
-    let name = '';
-    const nameSel = [
-      '[data-testid="product-name"]',
-      '[data-test="product-name"]',
-      'h3, h4, h5',
-      '[class*="title"]',
-      '[class*="name"]'
-    ];
-    for (const s of nameSel) {
-      const el = card && card.querySelector ? card.querySelector(s) : null;
-      if (el && el.textContent && el.textContent.trim().length > 0) {
-        name = el.textContent.trim();
-        break;
-      }
-    }
-    if (!name) {
-      // fallback: aria-label on link
-      name = (a.getAttribute('aria-label') || '').trim();
-    }
-    if (!name && card) {
-      // fallback: first non-price-ish line from text
-      let txt = (card.textContent || '').replace(/\u00A0/g,' ').trim();
-      const lines = txt.split(/\n+/).map(s => s.trim()).filter(Boolean);
-      for (const line of lines) {
-        if (/[€]|\/\s*(kg|l)/i.test(line)) continue;
-        if (line.length >= 3) { name = line; break; }
-      }
-    }
-
-    // price like “~7,43 €” or “7.43 €”
-    let price = null;
-    const txt = (card && card.textContent) ? card.textContent.replace(/\u00A0/g,' ') : '';
-    const mt = txt.match(/[~≈]?\s*([0-9]+(?:[.,][0-9]{2}))\s*€/);
+    const card = a.closest('article, a, div') || a;
+    const txt = (card && card.textContent) ? card.textContent : '';
+    const mt = txt.match(/[~≈]?\s*(\d+[.,]\d{2})\s*€/);
     if (mt) {
-      price = parseFloat(mt[1].replace(',', '.'));
+      const raw = mt[1].replace(',', '.');
+      const val = parseFloat(raw);
+      if (!isNaN(val)) out.push([m[1], val]);
     }
-
-    out.push([m[1].toLowerCase(), price, name || '']);
   }
   return out;
 })()
 '''
         data = await page.evaluate(js)
-        results: Dict[str, Dict[str, Optional[float]]] = {}
-        for iid, val, name in data or []:
-            results[str(iid).lower()] = {
-                "price": (float(val) if val is not None else None),
-                "name": (name.strip() or None),
-            }
-        return results
+        prices: Dict[str, float] = {}
+        for iid, val in data or []:
+            prices[str(iid).lower()] = float(val)
+        return prices
     except Exception:
         return {}
 
@@ -882,18 +854,22 @@ async def _extract_items_from_dom(page) -> List[Dict]:
     const id = m[1].toLowerCase();
 
     const card = a.closest('article, a, div') || a;
+
+    // Prefer aria-label (Wolt uses it for the name), then headings/text.
     let name = a.getAttribute('aria-label') || '';
     if (!name && card) {
-      const t = card.querySelector('h3,h4,[data-testid*="title"],[class*="title"]');
+      const t = card.querySelector('h2,h3,h4,[data-testid*="title"],[class*="title"]');
       if (t && t.textContent) name = t.textContent.trim();
     }
-    // Heuristic: longest non-price line
     if (!name && card) {
       const txt = (card.textContent || '').replace(/\s+/g,' ').trim();
-      const parts = txt.split(/(?=[A-ZÄÖÜÕa-zäöüõ0-9])/g).map(s => s.trim()).filter(Boolean);
-      const filtered = parts.filter(s => !/[€]|(?:\d+[.,]\d{2})/.test(s));
-      filtered.sort((a,b) => b.length - a.length);
-      name = (filtered[0] || '').trim();
+      // choose the longest non-price token-ish segment
+      const mt = txt.split(/(?=[A-ZÄÖÜÕa-zäöüõ0-9])/g)
+        .map(s => s.trim())
+        .filter(Boolean)
+        .filter(s => !/[€]|(?:\d+[.,]\d{2})/.test(s))
+        .sort((a,b) => b.length - a.length);
+      name = (mt[0] || '').trim();
     }
 
     let image = null;
@@ -986,7 +962,7 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
         page.on("response", lambda resp: asyncio.create_task(_maybe_collect_json(resp, collected_blobs)))
 
         html = ""
-        tile_prices: Dict[str, Dict[str, Optional[float]]] = {}
+        tile_prices: Dict[str, float] = {}
         venue_id: Optional[str] = None
         try:
             strategies = [goto_strategy] if goto_strategy in ("domcontentloaded","networkidle","load") else ["domcontentloaded"]
@@ -994,6 +970,12 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
 
             await wait_cookie_banner(page)
             await _dismiss_location_popovers(page)
+
+            # Ensure product anchors exist before we start scraping.
+            try:
+                await page.wait_for_selector('a[href*="itemid-"], a[href*="item-"]', timeout=10000)
+            except Exception:
+                pass
 
             # a bit more scrolling to surface late resources
             for _ in range(18):
@@ -1033,15 +1015,15 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
                 except Exception:
                     pass
 
-            # If network state gave nothing, extract directly from DOM cards
-            if not found:
-                dom_items = await _extract_items_from_dom(page)
-                for it in dom_items:
-                    iid = it.get("id")
-                    if iid:
-                        found.setdefault(iid, {}).update(it)
+            # Always merge DOM-card extraction (helps when payloads are thin)
+            dom_items = await _extract_items_from_dom(page)
+            for it in dom_items:
+                iid = it.get("id")
+                if not iid:
+                    continue
+                found.setdefault(iid, {}).update(it)
 
-            # As a last-resort, also seed IDs from HTML
+            # As a last-resort, also seed IDs from HTML if still empty
             if not found:
                 ids = set(re.findall(r"(?:itemid-|item-)([a-f0-9]{24})", html or "", re.I))
                 for iid in ids:
@@ -1185,17 +1167,12 @@ async def run_wolt(args, categories: List[str], on_rows_async) -> None:
         else:
             print("[warn] venueId not found — skipping direct prodinfo enrichment")
 
-        # Reconcile tile-derived price and NAME for PW path
         if not payload and items:
             for it in items:
                 if it.get("id"):
                     iid = str(it["id"]).lower()
-                    tile = tile_prices.get(iid) if isinstance(tile_prices, dict) else None
-                    if tile:
-                        if it.get("price") in (None, 0) and isinstance(tile.get("price"), (int, float)):
-                            it["price"] = tile["price"]
-                        if (not it.get("name")) and tile.get("name"):
-                            it["name"] = tile["name"]
+                    if it.get("price") in (None, 0) and iid in tile_prices:
+                        it["price"] = tile_prices[iid]
 
         if args.modal_probe_limit > 0:
             await _enrich_items_via_modal(
