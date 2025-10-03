@@ -3,20 +3,6 @@
 
 """
 Coop on Bolt Food → categories → products → CSV / upsert to staging_coop_products
-
-- Opens https://food.bolt.eu/et-EE/{city_path} (locale default switched to et-EE)
-- If a categories override is present (file or dir), navigate directly to the store
-  using the first category URL in the file (derive base store URL from it); then
-  crawl those categories. This avoids brittle searching by store name.
-- Otherwise: find the store by its visible display name (tolerant selectors).
-- Scrapes grid tiles rendered by Bolt’s web app; EAN/GTIN not exposed → keep blank.
-- Writes CSV and upserts into your existing `staging_coop_products`
-  with channel='bolt' and store_host='bolt:<slug-of-store-name>'.
-
-Expected columns present in staging_coop_products (script adds missing ones):
-  chain, channel, store_name, store_host, city_path, category_name,
-  ext_id, name, brand, manufacturer, size_text, price, currency,
-  image_url, url, description, ean_raw, scraped_at
 """
 
 import argparse
@@ -39,7 +25,7 @@ try:
 except Exception:
     psycopg = None
 
-EUR_SYMBOL = "€"
+EUR = "€"
 CHAIN = "Coop"
 CHANNEL = "bolt"
 
@@ -59,7 +45,7 @@ def parse_price(text: str) -> Tuple[Optional[float], Optional[str]]:
     if not text:
         return None, None
     t = text.replace("\xa0", " ").strip()
-    cur = "EUR" if (EUR_SYMBOL in t or "EUR" in t) else None
+    cur = "EUR" if (EUR in t or "EUR" in t) else None
     num = re.sub(r"[^0-9,.\-]", "", t).replace(",", ".")
     try:
         return round(float(num), 2), cur
@@ -80,7 +66,6 @@ def guess_brand(name: str) -> Optional[str]:
 
 
 def extract_category_links(page_html: str) -> List[Tuple[str, str]]:
-    """Fallback discovery of categories from a store page."""
     tree = HTMLParser(page_html)
     seen = set()
     out = []
@@ -122,92 +107,105 @@ def base_url_from_category(url: str) -> str:
     return parts
 
 
-def read_categories_override(path: str, base_url: str) -> List[Tuple[str, str]]:
-    out: List[Tuple[str, str]] = []
-    with open(path, "r", encoding="utf-8") as f:
-        for line in f:
-            href = line.strip()
-            if not href or href.startswith("#"):
-                continue
-            url = normalize_cat_url(base_url, href) if not href.startswith("http") else href
-            m = re.search(r"[?&]categoryName=([^&]+)", url)
-            cat = (m.group(1) if m else href).replace("%20", " ")
-            out.append((cat, url))
-    return out
-
-
 # ----------------------- Playwright helpers -----------------------
 
 def dismiss_popups(page):
-    """Dismiss common interstitials (‘Menüüd uuendati’, ‘Vabandust...’, cookie-ish modals)."""
-    try:
-        # OK button on ‘Menüüd uuendati’
-        ok = page.locator("button:has-text('OK')")
-        if ok.is_visible():
-            ok.click()
-            time.sleep(0.2)
-    except Exception:
-        pass
-    try:
-        retry = page.locator("button:has-text('Proovi uuesti')")
-        if retry.is_visible():
-            retry.click()
-            time.sleep(0.2)
-    except Exception:
-        pass
-    # Dismiss the bottom-sheet if it happens to be open without content
-    try:
-        close = page.locator("button[aria-label='Close'], button:has-text('Sulge')")
-        if close.is_visible():
-            close.click()
-            time.sleep(0.2)
-    except Exception:
-        pass
+    for sel in ["button:has-text('OK')", "button:has-text('Proovi uuesti')", "button[aria-label='Close']"]:
+        try:
+            loc = page.locator(sel)
+            if loc.is_visible():
+                loc.click()
+                time.sleep(0.2)
+        except Exception:
+            pass
+
+
+def _first_text_without_euro(raw: str) -> str:
+    for line in [l.strip() for l in (raw or "").splitlines()]:
+        if line and EUR not in line:
+            return line
+    return ""
+
+
+def _style_bg_url(style: str) -> str:
+    m = re.search(r'background-image:\s*url\(["\']?(.*?)["\']?\)', style or "")
+    return m.group(1) if m else ""
+
+
+def wait_for_grid(page, timeout=15000) -> None:
+    # Any of these indicates the grid screen is rendered
+    page.wait_for_selector(
+        ",".join(
+            [
+                '[data-testid^="screens.Provider.GridMenu"]',
+                '[data-testid^="components.GridMenu"]',
+                '[class*="GridMenu"]',
+            ]
+        ),
+        timeout=timeout,
+    )
 
 
 def extract_tiles_runtime(page) -> List[Dict]:
     """
-    Extract visible product tiles from Bolt's grid view using runtime DOM (no modal).
-    Targets: button[data-testid tile] + descendants for price & image.
+    Robust tile extractor:
+    - Prefer dish buttons under GridMenu.
+    - Fallback to dish containers without <button>.
+    - Price: dedicated Price node or any descendant text with €, preferring shorter tokens.
     """
     tiles: List[Dict] = []
 
-    # All item tiles (button with data-testid or role=button under dishItem)
-    buttons = page.locator('[data-testid="components.GridMenu.dishItem"] button, button[aria-label][role="button"]')
-    count = buttons.count()
+    candidates = page.locator(
+        ",".join(
+            [
+                # common cases
+                '[data-testid="components.GridMenu.dishItem"] button',
+                '[data-testid="components.GridMenu.dishItem"]',
+                '[data-testid*="GridMenu.dishItem"] button',
+                '[data-testid*="GridMenu.dishItem"]',
+                # fallbacks
+                '[class*="dishItem"] button',
+                '[class*="dishItem"]',
+            ]
+        )
+    )
+
+    count = candidates.count()
     for i in range(count):
         try:
-            btn = buttons.nth(i)
-            name = (btn.get_attribute("aria-label") or "").strip()
-            if not name:
-                # Fallback to visible text (avoid giant text blobs)
-                raw = btn.inner_text().strip()
-                # First non-empty line without € sign
-                for line in [l.strip() for l in raw.splitlines()]:
-                    if line and EUR_SYMBOL not in line:
-                        name = line
-                        break
+            el = candidates.nth(i)
 
-            # price: dedicated testid, else any descendant text with €
+            # Name: aria-label on button; else a visible text fallback / dedicated title
+            name = (el.get_attribute("aria-label") or "").strip()
+            if not name:
+                title = el.locator('[data-testid="components.ProviderDish.title"]')
+                if title.count() > 0:
+                    name = title.first.inner_text().strip()
+            if not name:
+                name = _first_text_without_euro(el.inner_text())
+
+            # Price
             price_text = ""
-            price_node = btn.locator('[data-testid="components.Price.originalPrice"]')
+            price_node = el.locator('[data-testid*="Price"]')
             if price_node.count() > 0:
                 price_text = price_node.first.inner_text().strip()
             if not price_text:
-                with_euro = btn.locator(f":text-matches('.*{EUR_SYMBOL}.*')")
-                if with_euro.count() > 0:
-                    price_text = with_euro.first.inner_text().strip()
+                euro_nodes = el.locator(f":text-matches('.*{EUR}.*')")
+                if euro_nodes.count() > 0:
+                    # pick the shortest snippet containing €
+                    texts = [euro_nodes.nth(j).inner_text().strip() for j in range(min(5, euro_nodes.count()))]
+                    texts = [t for t in texts if EUR in t]
+                    if texts:
+                        price_text = sorted(texts, key=len)[0]
 
             price, currency = parse_price(price_text)
 
-            # image: inline background-image on dish image node
+            # Image
             image_url = ""
-            dish_img = btn.locator('[data-testid="components.ProviderDish.dishImage"]')
+            dish_img = el.locator('[data-testid="components.ProviderDish.dishImage"]')
             if dish_img.count() > 0:
                 style = dish_img.first.get_attribute("style") or ""
-                m = re.search(r'background-image:\s*url\(["\']?(.*?)["\']?\)', style)
-                if m:
-                    image_url = m.group(1)
+                image_url = _style_bg_url(style)
 
             if name and price is not None:
                 tiles.append(
@@ -219,10 +217,28 @@ def extract_tiles_runtime(page) -> List[Dict]:
                     )
                 )
         except Exception:
-            # keep going on individual tile failures
             continue
 
     return tiles
+
+
+def click_category_chip(page, cat_name: str) -> bool:
+    """
+    If we land on the store main page (or tile scan returns empty),
+    click the category chip/tab that matches the requested category name.
+    """
+    try:
+        chip = page.locator(
+            f"button:has-text('{cat_name}') , a:has-text('{cat_name}') , div[role='tab']:has-text('{cat_name}')"
+        ).first
+        if chip and chip.is_visible():
+            chip.click()
+            time.sleep(0.6)
+            dismiss_popups(page)
+            return True
+    except Exception:
+        pass
+    return False
 
 
 # -------------------------- DB utilities --------------------------
@@ -249,27 +265,6 @@ def ensure_staging_schema(conn):
       ean_raw         text,
       scraped_at      timestamptz DEFAULT now()
     );
-    ALTER TABLE staging_coop_products
-      ADD COLUMN IF NOT EXISTS chain           text,
-      ADD COLUMN IF NOT EXISTS channel         text,
-      ADD COLUMN IF NOT EXISTS store_name      text,
-      ADD COLUMN IF NOT EXISTS store_host      text,
-      ADD COLUMN IF NOT EXISTS city_path       text,
-      ADD COLUMN IF NOT EXISTS category_name   text,
-      ADD COLUMN IF NOT EXISTS ext_id          text,
-      ADD COLUMN IF NOT EXISTS name            text,
-      ADD COLUMN IF NOT EXISTS brand           text,
-      ADD COLUMN IF NOT EXISTS manufacturer    text,
-      ADD COLUMN IF NOT EXISTS size_text       text,
-      ADD COLUMN IF NOT EXISTS price           numeric(12,2),
-      ADD COLUMN IF NOT EXISTS currency        text,
-      ADD COLUMN IF NOT EXISTS image_url       text,
-      ADD COLUMN IF NOT EXISTS url             text,
-      ADD COLUMN IF NOT EXISTS description     text,
-      ADD COLUMN IF NOT EXISTS ean_raw         text,
-      ADD COLUMN IF NOT EXISTS scraped_at      timestamptz DEFAULT now();
-    CREATE INDEX IF NOT EXISTS idx_stg_coop_host ON staging_coop_products(store_host);
-    CREATE INDEX IF NOT EXISTS idx_stg_coop_name ON staging_coop_products (lower(name));
     """
     with conn.cursor() as cur:
         cur.execute(ddl)
@@ -319,16 +314,21 @@ def run(
     upsert_db: bool,
     categories_file: Optional[str] = None,
     categories_dir: Optional[str] = None,
-    deep: bool = True,  # reserved for modal parsing
+    deep: bool = True,
 ):
-    # Default to Estonian locale (category files / links are et-EE)
-    start_url = f"https://food.bolt.eu/et-EE/{city}"
+    start_url = f"https://food.bolt.eu/et-EE/{city}"  # et-EE by default
     scraped_at = dt.datetime.utcnow().isoformat()
     rows_out: List[Dict] = []
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=(headless is True or str(headless) == "1"))
-        context = browser.new_context()
+        context = browser.new_context(
+            viewport={"width": 1366, "height": 2000},
+            user_agent=(
+                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            ),
+        )
         page = context.new_page()
 
         page.goto(start_url, timeout=60_000)
@@ -338,7 +338,7 @@ def run(
         store_host = slugify_host(store_name)
         slug = store_slug(store_name)
 
-        # Decide category source: explicit file > auto file in dir > autodiscovery
+        # Determine categories
         cats_from_file: List[Tuple[str, str]] = []
         override_path = None
         if categories_file and os.path.isfile(categories_file):
@@ -351,10 +351,21 @@ def run(
         base_url = None
 
         if override_path:
-            tmp = read_categories_override(override_path, start_url)
+            tmp = []
+            with open(override_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    href = line.strip()
+                    if href and not href.startswith("#"):
+                        tmp.append(href)
             if tmp:
-                base_url = base_url_from_category(tmp[0][1])
-                cats_from_file = tmp
+                # derive base from the first line
+                base_url = base_url_from_category(tmp[0] if tmp[0].startswith("http") else normalize_cat_url(start_url, tmp[0]))
+                cats_from_file = []
+                for href in tmp:
+                    url = href if href.startswith("http") else normalize_cat_url(base_url, href)
+                    m = re.search(r"[?&]categoryName=([^&]+)", url)
+                    cat = (m.group(1) if m else href).replace("%20", " ")
+                    cats_from_file.append((cat, url))
                 print(f"[info] using categories from: {override_path} ({len(cats_from_file)} cats)")
                 print(f"[info] derived base store URL: {base_url}")
                 page.goto(base_url, timeout=60_000)
@@ -362,9 +373,8 @@ def run(
                 time.sleep(req_delay)
                 dismiss_popups(page)
         else:
-            # Fallback: search for the store name
+            # Search by store name
             try:
-                found = False
                 for sel in [
                     'input[placeholder*="Otsi"]',
                     'input[placeholder*="Stores"]',
@@ -373,16 +383,9 @@ def run(
                     'input[role="searchbox"]',
                 ]:
                     try:
-                        page.wait_for_selector(sel, timeout=5_000)
+                        page.wait_for_selector(sel, timeout=5000)
                         page.click(sel)
-                        found = True
                         break
-                    except PWTimeout:
-                        pass
-                if not found:
-                    try:
-                        # open search icon
-                        page.click("button:has(svg)", timeout=3_000)
                     except PWTimeout:
                         pass
 
@@ -392,14 +395,14 @@ def run(
                 time.sleep(1.0)
 
                 try:
-                    page.wait_for_selector(f"text={store_name}", timeout=30_000)
+                    page.wait_for_selector(f"text={store_name}", timeout=30000)
                 except PWTimeout:
-                    page.wait_for_selector(f"xpath=//h1|//h2|//a[contains(., '{store_name}')]", timeout=15_000)
+                    page.wait_for_selector(f"xpath=//h1|//h2|//a[contains(., '{store_name}')]", timeout=15000)
 
                 try:
-                    page.click(f"text={store_name}", timeout=5_000)
+                    page.click(f"text={store_name}", timeout=5000)
                 except PWTimeout:
-                    page.click(f"xpath=//h1|//h2|//a[contains(., '{store_name}')]", timeout=5_000)
+                    page.click(f"xpath=//h1|//h2|//a[contains(., '{store_name}')]", timeout=5000)
 
                 page.wait_for_load_state("domcontentloaded")
                 time.sleep(req_delay)
@@ -411,16 +414,17 @@ def run(
                 browser.close()
                 return
 
+        # Collect categories
         categories: List[Tuple[str, str]] = []
         if cats_from_file:
             categories = cats_from_file
         else:
             store_html = page.content()
             discovered = extract_category_links(store_html)
-            seen_cat = set()
+            seen = set()
             for cat_name, href in discovered:
-                if cat_name and cat_name.lower() not in seen_cat:
-                    seen_cat.add(cat_name.lower())
+                if cat_name and cat_name.lower() not in seen:
+                    seen.add(cat_name.lower())
                     categories.append((cat_name, normalize_cat_url(base_url, href)))
             if not categories:
                 categories = [("All", base_url)]
@@ -433,14 +437,18 @@ def run(
             time.sleep(req_delay)
             dismiss_popups(page)
 
-            # attempt a few times with gentle scrolling if we see no tiles
             tiles: List[Dict] = []
             for attempt in range(1, 4):
-                # lazy-load
+                try:
+                    wait_for_grid(page, timeout=10000)
+                except PWTimeout:
+                    pass
+
+                # lazy-load / scroll
                 try:
                     for _ in range(8):
                         page.mouse.wheel(0, 1800)
-                        time.sleep(0.15)
+                        time.sleep(0.12)
                 except Exception:
                     pass
 
@@ -448,12 +456,20 @@ def run(
                 if tiles:
                     print(f"[cat] parsed {len(tiles)} tiles")
                     break
-                else:
-                    print(f"[cat] attempt {attempt} failed: no tiles yet")
-                    time.sleep(0.6)
-                    dismiss_popups(page)
 
-            # nothing? still record zero and continue
+                # If 0 tiles, try clicking the category chip manually (store homepage case)
+                clicked = click_category_chip(page, cat_name)
+                if clicked:
+                    time.sleep(0.6)
+                    tiles = extract_tiles_runtime(page)
+                    if tiles:
+                        print(f"[cat] parsed {len(tiles)} tiles (after chip click)")
+                        break
+
+                print(f"[cat] attempt {attempt} failed: no tiles yet")
+                time.sleep(0.6)
+                dismiss_popups(page)
+
             if not tiles:
                 print(f"[cat] gave up: {cat_name}")
                 continue
@@ -468,7 +484,6 @@ def run(
                 size_text = guess_size(name)
                 brand = guess_brand(name)
                 manufacturer = None
-
                 ext_id = "bolt:" + hashlib.md5(f"{store_host}|{name}".encode("utf-8")).hexdigest()[:16]
 
                 rows_out.append(
@@ -476,7 +491,7 @@ def run(
                         chain=CHAIN,
                         channel=CHANNEL,
                         store_name=store_name,
-                        store_host=store_host,
+                        store_host=slugify_host(store_name),
                         city_path=city,
                         category_name=cat_name,
                         ext_id=ext_id,
@@ -500,24 +515,9 @@ def run(
             w = csv.DictWriter(
                 f,
                 fieldnames=[
-                    "chain",
-                    "channel",
-                    "store_name",
-                    "store_host",
-                    "city_path",
-                    "category_name",
-                    "ext_id",
-                    "name",
-                    "brand",
-                    "manufacturer",
-                    "size_text",
-                    "price",
-                    "currency",
-                    "image_url",
-                    "url",
-                    "description",
-                    "ean_raw",
-                    "scraped_at",
+                    "chain","channel","store_name","store_host","city_path","category_name",
+                    "ext_id","name","brand","manufacturer","size_text","price","currency",
+                    "image_url","url","description","ean_raw","scraped_at",
                 ],
             )
             w.writeheader()
