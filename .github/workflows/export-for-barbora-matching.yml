@@ -1,4 +1,4 @@
-name: "Export ALL products for Barbora matching"
+name: "Export ALL products for Barbora matching (fast shards)"
 
 on:
   workflow_dispatch: {}
@@ -7,73 +7,114 @@ jobs:
   export:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}   # same secret you use for other exports
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Install psql
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-      # Helper: a tiny SQL macro so we don't repeat ourselves
-      - name: Export Selver
+      - name: Export Selver (sharded)
+        shell: bash
         run: |
+          set -euo pipefail
+          # shard 0 writes header
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
-            SELECT DISTINCT
-              p.id,
-              p.name,
-              COALESCE(NULLIF(trim(p.brand),''),'') AS brand,
-              COALESCE(NULLIF(trim(p.ean),''),'')   AS ean,
-              COALESCE(NULLIF(trim(p.size_text),''),'') AS size_text
-            FROM prices pr
-            JOIN stores   s ON s.id = pr.store_id
-            JOIN products p ON p.id = pr.product_id
-            WHERE s.chain ILIKE 'selver%'
+            SELECT p.id, p.name, COALESCE(p.brand,'') AS brand, COALESCE(p.ean,'') AS ean, COALESCE(p.size_text,'') AS size_text
+            FROM products p
+            WHERE (p.id % 5) = 0
+              AND EXISTS (
+                SELECT 1 FROM prices pr JOIN stores s ON s.id=pr.store_id
+                WHERE pr.product_id=p.id AND s.chain ILIKE 'selver%'
+              )
           ) TO STDOUT WITH CSV HEADER" > selver_products.csv
+          # shards 1..4 append without header
+          for m in 1 2 3 4; do
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+              SELECT p.id, p.name, COALESCE(p.brand,'') AS brand, COALESCE(p.ean,'') AS ean, COALESCE(p.size_text,'') AS size_text
+              FROM products p
+              WHERE (p.id % 5) = ${m}
+                AND EXISTS (
+                  SELECT 1 FROM prices pr JOIN stores s ON s.id=pr.store_id
+                  WHERE pr.product_id=p.id AND s.chain ILIKE 'selver%'
+                )
+            ) TO STDOUT WITH CSV" >> selver_products.csv
+          done
 
-      - name: Export Prisma
+      - name: Export Prisma (sharded)
+        shell: bash
         run: |
+          set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
-            SELECT DISTINCT
-              p.id,
-              p.name,
-              COALESCE(NULLIF(trim(p.brand),''),'') AS brand,
-              COALESCE(NULLIF(trim(p.ean),''),'')   AS ean,
-              COALESCE(NULLIF(trim(p.size_text),''),'') AS size_text
-            FROM prices pr
-            JOIN stores   s ON s.id = pr.store_id
-            JOIN products p ON p.id = pr.product_id
-            WHERE s.chain ILIKE 'prisma%'
+            SELECT p.id, p.name, COALESCE(p.brand,'') AS brand, COALESCE(p.ean,'') AS ean, COALESCE(p.size_text,'') AS size_text
+            FROM products p
+            WHERE (p.id % 5) = 0
+              AND EXISTS (
+                SELECT 1 FROM prices pr JOIN stores s ON s.id=pr.store_id
+                WHERE pr.product_id=p.id AND s.chain ILIKE 'prisma%'
+              )
           ) TO STDOUT WITH CSV HEADER" > prisma_products.csv
+          for m in 1 2 3 4; do
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+              SELECT p.id, p.name, COALESCE(p.brand,'') AS brand, COALESCE(p.ean,'') AS ean, COALESCE(p.size_text,'') AS size_text
+              FROM products p
+              WHERE (p.id % 5) = ${m}
+                AND EXISTS (
+                  SELECT 1 FROM prices pr JOIN stores s ON s.id=pr.store_id
+                  WHERE pr.product_id=p.id AND s.chain ILIKE 'prisma%'
+                )
+            ) TO STDOUT WITH CSV" >> prisma_products.csv
+          done
 
-      - name: Export Rimi
+      - name: Export Rimi (sharded)
+        shell: bash
         run: |
+          set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
-            SELECT DISTINCT
-              p.id,
-              p.name,
-              COALESCE(NULLIF(trim(p.brand),''),'') AS brand,
-              COALESCE(NULLIF(trim(p.ean),''),'')   AS ean,
-              COALESCE(NULLIF(trim(p.size_text),''),'') AS size_text
-            FROM prices pr
-            JOIN stores   s ON s.id = pr.store_id
-            JOIN products p ON p.id = pr.product_id
-            WHERE s.chain ILIKE 'rimi%'
+            SELECT p.id, p.name, COALESCE(p.brand,'') AS brand, COALESCE(p.ean,'') AS ean, COALESCE(p.size_text,'') AS size_text
+            FROM products p
+            WHERE (p.id % 5) = 0
+              AND EXISTS (
+                SELECT 1 FROM prices pr JOIN stores s ON s.id=pr.store_id
+                WHERE pr.product_id=p.id AND s.chain ILIKE 'rimi%'
+              )
           ) TO STDOUT WITH CSV HEADER" > rimi_products.csv
+          for m in 1 2 3 4; do
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+              SELECT p.id, p.name, COALESCE(p.brand,'') AS brand, COALESCE(p.ean,'') AS ean, COALESCE(p.size_text,'') AS size_text
+              FROM products p
+              WHERE (p.id % 5) = ${m}
+                AND EXISTS (
+                  SELECT 1 FROM prices pr JOIN stores s ON s.id=pr.store_id
+                  WHERE pr.product_id=p.id AND s.chain ILIKE 'rimi%'
+                )
+            ) TO STDOUT WITH CSV" >> rimi_products.csv
+          done
 
-      - name: Export Barbora
+      - name: Export Barbora (sharded)
+        shell: bash
         run: |
+          set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
-            SELECT DISTINCT
-              p.id,
-              p.name,
-              COALESCE(NULLIF(trim(p.brand),''),'') AS brand,
-              COALESCE(NULLIF(trim(p.ean),''),'')   AS ean,
-              COALESCE(NULLIF(trim(p.size_text),''),'') AS size_text
-            FROM prices pr
-            JOIN stores   s ON s.id = pr.store_id
-            JOIN products p ON p.id = pr.product_id
-            WHERE s.chain ILIKE 'barbora%'
+            SELECT p.id, p.name, COALESCE(p.brand,'') AS brand, COALESCE(p.ean,'') AS ean, COALESCE(p.size_text,'') AS size_text
+            FROM products p
+            WHERE (p.id % 5) = 0
+              AND EXISTS (
+                SELECT 1 FROM prices pr JOIN stores s ON s.id=pr.store_id
+                WHERE pr.product_id=p.id AND s.chain ILIKE 'barbora%'
+              )
           ) TO STDOUT WITH CSV HEADER" > barbora_products.csv
+          for m in 1 2 3 4; do
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+              SELECT p.id, p.name, COALESCE(p.brand,'') AS brand, COALESCE(p.ean,'') AS ean, COALESCE(p.size_text,'') AS size_text
+              FROM products p
+              WHERE (p.id % 5) = ${m}
+                AND EXISTS (
+                  SELECT 1 FROM prices pr JOIN stores s ON s.id=pr.store_id
+                  WHERE pr.product_id=p.id AND s.chain ILIKE 'barbora%'
+                )
+            ) TO STDOUT WITH CSV" >> barbora_products.csv
+          done
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
