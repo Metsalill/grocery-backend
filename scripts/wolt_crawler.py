@@ -21,7 +21,7 @@ Important:
 - ext_id is kept STABLE as iid:<24hex> (Wolt item id) so later runs can update rows.
 
 Guard rails:
-- Filters noisy junk.
+- Filters noisy junk and obvious category tiles.
 - Accepts GTIN '-' only when the site explicitly shows '-' for GTIN.
 - Per-category watchdog timeout so a stuck page can’t stall the job.
 
@@ -50,6 +50,7 @@ from urllib.parse import urlparse
 DIGITS_ONLY = re.compile(r"[^0-9]")
 SIZE_RE = re.compile(r"(\b\d+[\,\.]?\d*\s?(?:kg|g|l|ml|tk|pcs|x|×)\s?\d*\b)", re.IGNORECASE)
 HEX24_RE = re.compile(r"\b[a-f0-9]{24}\b", re.I)
+UNIT_SUFFIX_RE = re.compile(r"\s*/\s*(?:kg|l|ml|g|tk|pcs)\b", re.I)
 
 def now_stamp() -> str:
     return dt.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -79,6 +80,19 @@ def likely_brand_from_name(name: Optional[str]) -> Optional[str]:
     if 2 <= len(token) <= 24:
         return token
     return None
+
+def sanitize_field(val: Optional[str]) -> Optional[str]:
+    """Collapse whitespace, drop obviously broken GraphQL/React blobs, trim length."""
+    if not val:
+        return None
+    t = re.sub(r"\s+", " ", str(val)).strip()
+    if not t:
+        return None
+    # Drop typical framework internals occasionally leaking into text blobs
+    if "self__next" in t or "$react" in t or "OutletBoundary" in t:
+        return None
+    t = re.sub(r"^info\s+", "", t, flags=re.I)
+    return t[:180]
 
 # ---------- outputs ----------
 CSV_COLS = [
@@ -504,6 +518,9 @@ _DENY_EXACT = {"web tracking bundle", "functional", "required", "marketing", "an
 _DENY_SUBSTR = {"cookie", "consent", "tracking", "privacy"}
 _DENY_PREFIX = {"otsi", "avasta", "tulemused"}
 _DENY_LOCATIONS = {"aabenraa","aabybro","aachen","aalborg","õnekoski"}
+_CATEGORY_TILE_RULES = (
+    "kõik tooted",
+)
 
 def _looks_like_noise(name: Optional[str]) -> bool:
     n = (name or "").strip().lower()
@@ -515,6 +532,11 @@ def _looks_like_noise(name: Optional[str]) -> bool:
         return True
     if any(s in n for s in _DENY_SUBSTR):
         return True
+    # Guard against category tiles
+    if n in _CATEGORY_TILE_RULES:
+        return True
+    if n.endswith(" tooted") or n.endswith("tooted"):
+        return True
     if len(n.split()) == 1 and len(n) <= 6:
         return True
     return False
@@ -522,15 +544,14 @@ def _looks_like_noise(name: Optional[str]) -> bool:
 def _valid_productish(name: Optional[str], price: Optional[float], gtin_norm: Optional[str],
                       url: Optional[str], brand: Optional[str], manufacturer: Optional[str]) -> bool:
     """
-    Be permissive for Wolt: if we have a clean name + real item id, accept even without price/gtin.
-    Filters only obvious noise.
+    Accept if a real product (by name/gtin/price), but reject obvious category tiles.
     """
     if _looks_like_noise(name):
         return False
     # If GTIN present, accept.
     if gtin_norm:
         return True
-    # If we have a sensible price, accept.
+    # If we have a sensible *item* price, accept.
     if price is not None and price > 0:
         return True
     # Otherwise accept on name + likely size/brand/manufacturer hints.
@@ -538,7 +559,7 @@ def _valid_productish(name: Optional[str], price: Optional[float], gtin_norm: Op
         return True
     if name:
         has_size = bool(SIZE_RE.search(name))
-        long_enough = len(name.strip()) >= 5 and len(name.split()) >= 1
+        long_enough = len(name.strip()) >= 6 and len(name.split()) >= 2
         return has_size or long_enough
     return False
 
@@ -547,7 +568,8 @@ def _parse_wolt_price(value: Any) -> Optional[float]:
         if value is None:
             return None
         if isinstance(value, dict):
-            for k in ("value", "amount", "current", "total", "price", "baseprice", "base_price", "unit_price"):
+            # prefer item price fields first; unit_price last
+            for k in ("price", "current", "total", "baseprice", "base_price", "value", "amount", "unit_price"):
                 if k in value:
                     out = _parse_wolt_price(value[k])
                     if out is not None:
@@ -575,9 +597,10 @@ def _parse_wolt_price(value: Any) -> Optional[float]:
     return None
 
 def _extract_row_from_item(item: Dict, category_url: str, store_host: str) -> Optional[Dict]:
-    name = str(item.get("name") or "").strip() or None
+    name = sanitize_field(str(item.get("name") or "").strip() or None)
+    # prefer non-unit price (unit price usually expressed as €/kg etc.)
     price = None
-    for k in ("price", "baseprice", "base_price", "current_price", "total_price", "unit_price"):
+    for k in ("price", "baseprice", "base_price", "current_price", "total_price", "value", "amount", "unit_price"):
         if k in item:
             price = _parse_wolt_price(item[k])
             if price is not None:
@@ -590,10 +613,11 @@ def _extract_row_from_item(item: Dict, category_url: str, store_host: str) -> Op
     manufacturer = (item.get("supplier")
                     or _search_info_label(item, "Tarnija info", "Tarnija", "Tootja", "Valmistaja", "Supplier", "Manufacturer")
                     or _first_str(item, "supplier", "manufacturer", "producer"))
+    manufacturer = sanitize_field(manufacturer)
 
     ean_raw  = item.get("gtin") or (_search_info_label(item, "GTIN", "EAN", "Ribakood") or _first_str(item, "gtin", "ean", "barcode"))
     ean_norm = normalize_ean(ean_raw)
-    brand = _first_str(item, "brand") or likely_brand_from_name(name) or manufacturer
+    brand = sanitize_field(_first_str(item, "brand") or likely_brand_from_name(name) or manufacturer)
 
     size_text = _search_info_label(item, "Size", "Kogus", "Maht", "Kaal")
     if not size_text and name:
@@ -746,6 +770,7 @@ async def _maybe_collect_json(resp, out_list: List[Any]):
         pass
 
 async def _scrape_tile_prices(page) -> Dict[str, float]:
+    """Collect *item* prices from tiles; ignore explicit unit prices like €/kg."""
     try:
         js = r'''
 (() => {
@@ -755,13 +780,17 @@ async def _scrape_tile_prices(page) -> Dict[str, float]:
     const href = a.getAttribute('href') || a.href || '';
     const m = href && href.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
     if (!m) continue;
-    const card = a.closest('article, a, div') || a;
-    const txt = (card && card.textContent) ? card.textContent : '';
-    const mt = txt.match(/[~≈]?\s*(\d+[.,]\d{2})\s*€/);
+    const id = m[1].toLowerCase();
+    const scope = a.closest('[role="article"],article,div') || a;
+
+    const txt = (scope && scope.textContent) ? scope.textContent : '';
+    // Item price: a Euro price *not* followed by a "/unit" suffix
+    const rx = /(~|≈)?\s*(\d+[.,]\d{2})\s*€(?!\s*\/\s*(?:kg|l|ml|g|tk|pcs)\b)/i;
+    const mt = txt.match(rx);
     if (mt) {
-      const raw = mt[1].replace(',', '.');
+      const raw = mt[2].replace(',', '.');
       const val = parseFloat(raw);
-      if (!isNaN(val)) out.push([m[1], val]);
+      if (!isNaN(val)) out.push([id, val]);
     }
   }
   return out;
@@ -836,7 +865,7 @@ async def _goto_with_backoff(page, url: str, max_tries: int, nav_timeout_ms: int
     if last_err:
         raise last_err
 
-# --- NEW: DOM card extractor (when JSON blobs are missing) ---
+# --- DOM card extractor (when JSON blobs are missing/thin) ---
 async def _extract_items_from_dom(page) -> List[Dict]:
     """
     Scrape visible product cards to recover item id, name, price, image.
@@ -853,9 +882,12 @@ async def _extract_items_from_dom(page) -> List[Dict]:
     if (!m) continue;
     const id = m[1].toLowerCase();
 
-    const card = a.closest('article, a, div') || a;
+    // Scope to a compact card container near the anchor to avoid sidebar/breadcrumb bleed
+    let card = a.closest('[data-testid*="product"],[role="article"],article');
+    if (!card) card = a.closest('a');
+    if (!card) card = a.parentElement;
 
-    // Prefer aria-label (Wolt uses it for the name), then headings/text.
+    // Name: prefer aria-label on the anchor; then obvious title nodes inside the card
     let name = a.getAttribute('aria-label') || '';
     if (!name && card) {
       const t = card.querySelector('h2,h3,h4,[data-testid*="title"],[class*="title"]');
@@ -863,26 +895,34 @@ async def _extract_items_from_dom(page) -> List[Dict]:
     }
     if (!name && card) {
       const txt = (card.textContent || '').replace(/\s+/g,' ').trim();
-      // choose the longest non-price token-ish segment
-      const mt = txt.split(/(?=[A-ZÄÖÜÕa-zäöüõ0-9])/g)
+      const parts = txt.split(/(?=[A-ZÄÖÜÕa-zäöüõ0-9])/g)
         .map(s => s.trim())
         .filter(Boolean)
-        .filter(s => !/[€]|(?:\d+[.,]\d{2})/.test(s))
-        .sort((a,b) => b.length - a.length);
-      name = (mt[0] || '').trim();
+        .filter(s => !/[€]|(?:\d+[.,]\d{2})/.test(s));
+      parts.sort((a,b) => b.length - a.length);
+      name = (parts[0] || '').trim();
     }
 
+    // Image: <img src/currentSrc> or CSS background-image on the same card
     let image = null;
     if (card) {
       const imgel = card.querySelector('img');
       if (imgel) image = imgel.currentSrc || imgel.src || null;
+      if (!image) {
+        const style = getComputedStyle(card);
+        const bg = style && style.backgroundImage || '';
+        const m = bg && bg.match(/url\(["']?([^"')]+)["']?\)/);
+        if (m) image = m[1];
+      }
     }
 
+    // Price: pick an item price, not a unit price like €/kg
     let priceText = null;
     if (card) {
       const txt = card.textContent || '';
-      const mprice = txt.match(/[~≈]?\s*(\d+[.,]\d{2})\s*€/);
-      if (mprice) priceText = mprice[1];
+      const rx = /(~|≈)?\s*(\d+[.,]\d{2})\s*€(?!\s*\/\s*(?:kg|l|ml|g|tk|pcs)\b)/i;
+      const m = txt.match(rx);
+      if (m) priceText = m[2];
     }
 
     if (!seen.has(id)) seen.set(id, {name, priceText, image});
@@ -899,7 +939,7 @@ async def _extract_items_from_dom(page) -> List[Dict]:
         iid = str(it.get("id") or "").lower()
         if not iid or not HEX24_RE.fullmatch(iid):
             continue
-        name = (it.get("name") or "").strip() or None
+        name = sanitize_field((it.get("name") or "").strip() or None)
         price = None
         pt = it.get("priceText")
         if pt:
@@ -908,9 +948,12 @@ async def _extract_items_from_dom(page) -> List[Dict]:
             except Exception:
                 price = None
         item: Dict[str, Any] = {"id": iid}
-        if name: item["name"] = name
-        if price is not None: item["price"] = price
-        if it.get("image"): item["image"] = it["image"]
+        if name:
+            item["name"] = name
+        if price is not None:
+            item["price"] = price
+        if it.get("image"):
+            item["image"] = it["image"]
         items.append(item)
     return items
 
@@ -1015,7 +1058,7 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
                 except Exception:
                     pass
 
-            # Always merge DOM-card extraction (helps when payloads are thin)
+            # Merge DOM-card extraction (helps when payloads are thin)
             dom_items = await _extract_items_from_dom(page)
             for it in dom_items:
                 iid = it.get("id")
@@ -1107,7 +1150,7 @@ async def _enrich_items_via_modal(cat_url: str, items: List[Dict], headless: boo
                     it["gtin"] = "-"
                 msup = re.search(r"(?:Tootja|Tarnija|Supplier|Manufacturer)[^A-Za-z0-9]{0,20}([^\n]{2,200})", modal_text, re.I)
                 if msup and not it.get("supplier"):
-                    it["supplier"] = msup.group(1).strip()
+                    it["supplier"] = sanitize_field(msup.group(1))
                     if not it.get("brand"):
                         it["brand"] = it["supplier"]
 
@@ -1311,7 +1354,7 @@ def parse_args():
     p.add_argument("--modal-probe-limit", type=int, default=0, help="Override max modal clicks per category (env default 15).")
     # per-category watchdog timeout (raised default)
     p.add_argument("--category-timeout", type=float, default=210.0, help="Max seconds to spend on a single category before skipping.")
-    # NEW: explicit venue id override to skip discovery
+    # explicit venue id override to skip discovery
     p.add_argument("--venue-id", default="", help="If set, use this 24-hex Wolt venue id for prodinfo enrichment")
     return p.parse_args()
 
