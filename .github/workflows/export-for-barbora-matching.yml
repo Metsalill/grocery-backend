@@ -1,4 +1,4 @@
-name: "Export products for matching (fast temp pids + amount)"
+name: "Export products for matching (per-store fast fill + amount)"
 
 on:
   workflow_dispatch: {}
@@ -8,107 +8,108 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Install psql
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-      # --- Selver ---
-      - name: Export Selver
+      # ---------- Helper: function to build pid table per chain ----------
+      - name: Build Selver PID table (per store)
+        shell: bash
         run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
-            -c "SET statement_timeout = '2h'; SET work_mem='128MB';" \
-            -c "
-              CREATE TEMP TABLE selver_pids AS
-              SELECT DISTINCT pr.product_id
-              FROM stores s
-              JOIN prices pr ON pr.store_id = s.id
-              WHERE s.chain ILIKE 'selver%';
-              ANALYZE selver_pids;
-            " \
-            -c "\copy (
-              SELECT p.id,
-                     p.name,
-                     COALESCE(p.brand,'')     AS brand,
-                     COALESCE(p.ean,'')       AS ean,
-                     COALESCE(p.size_text,'') AS size_text,
-                     COALESCE(p.amount,'')    AS amount
-              FROM products p
-              JOIN selver_pids sp ON sp.product_id = p.id
-            ) TO STDOUT WITH CSV HEADER" > selver_products.csv
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SET statement_timeout='2h';"
+          # temp table with PK to allow ON CONFLICT DO NOTHING
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE TEMP TABLE selver_pids(product_id integer PRIMARY KEY);"
+          # fetch store ids for chain
+          SELVER_STORES=$(psql "$DATABASE_URL" -At -c "SELECT id FROM stores WHERE chain ILIKE 'selver%';")
+          for sid in $SELVER_STORES; do
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SET statement_timeout='30min'; INSERT INTO selver_pids
+              SELECT DISTINCT product_id FROM prices WHERE store_id = ${sid}
+              ON CONFLICT DO NOTHING;"
+          done
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "ANALYZE selver_pids;"
+          # export
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+            SELECT p.id, p.name,
+                   COALESCE(p.brand,'')       AS brand,
+                   COALESCE(p.ean,'')         AS ean,
+                   COALESCE(p.size_text,'')   AS size_text,
+                   COALESCE(p.amount,'')      AS amount
+            FROM products p
+            JOIN selver_pids sp ON sp.product_id = p.id
+          ) TO STDOUT WITH CSV HEADER" > selver_products.csv
 
-      # --- Prisma ---
-      - name: Export Prisma
+      - name: Build Prisma PID table (per store)
+        shell: bash
         run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
-            -c "SET statement_timeout = '2h'; SET work_mem='128MB';" \
-            -c "
-              CREATE TEMP TABLE prisma_pids AS
-              SELECT DISTINCT pr.product_id
-              FROM stores s
-              JOIN prices pr ON pr.store_id = s.id
-              WHERE s.chain ILIKE 'prisma%';
-              ANALYZE prisma_pids;
-            " \
-            -c "\copy (
-              SELECT p.id,
-                     p.name,
-                     COALESCE(p.brand,'')     AS brand,
-                     COALESCE(p.ean,'')       AS ean,
-                     COALESCE(p.size_text,'') AS size_text,
-                     COALESCE(p.amount,'')    AS amount
-              FROM products p
-              JOIN prisma_pids sp ON sp.product_id = p.id
-            ) TO STDOUT WITH CSV HEADER" > prisma_products.csv
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SET statement_timeout='2h';"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE TEMP TABLE prisma_pids(product_id integer PRIMARY KEY);"
+          PRISMA_STORES=$(psql "$DATABASE_URL" -At -c "SELECT id FROM stores WHERE chain ILIKE 'prisma%';")
+          for sid in $PRISMA_STORES; do
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SET statement_timeout='30min'; INSERT INTO prisma_pids
+              SELECT DISTINCT product_id FROM prices WHERE store_id = ${sid}
+              ON CONFLICT DO NOTHING;"
+          done
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "ANALYZE prisma_pids;"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+            SELECT p.id, p.name,
+                   COALESCE(p.brand,'')       AS brand,
+                   COALESCE(p.ean,'')         AS ean,
+                   COALESCE(p.size_text,'')   AS size_text,
+                   COALESCE(p.amount,'')      AS amount
+            FROM products p
+            JOIN prisma_pids sp ON sp.product_id = p.id
+          ) TO STDOUT WITH CSV HEADER" > prisma_products.csv
 
-      # --- Rimi ---
-      - name: Export Rimi
+      - name: Build Rimi PID table (per store)
+        shell: bash
         run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
-            -c "SET statement_timeout = '2h'; SET work_mem='128MB';" \
-            -c "
-              CREATE TEMP TABLE rimi_pids AS
-              SELECT DISTINCT pr.product_id
-              FROM stores s
-              JOIN prices pr ON pr.store_id = s.id
-              WHERE s.chain ILIKE 'rimi%';
-              ANALYZE rimi_pids;
-            " \
-            -c "\copy (
-              SELECT p.id,
-                     p.name,
-                     COALESCE(p.brand,'')     AS brand,
-                     COALESCE(p.ean,'')       AS ean,
-                     COALESCE(p.size_text,'') AS size_text,
-                     COALESCE(p.amount,'')    AS amount
-              FROM products p
-              JOIN rimi_pids sp ON sp.product_id = p.id
-            ) TO STDOUT WITH CSV HEADER" > rimi_products.csv
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SET statement_timeout='2h';"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE TEMP TABLE rimi_pids(product_id integer PRIMARY KEY);"
+          RIMI_STORES=$(psql "$DATABASE_URL" -At -c "SELECT id FROM stores WHERE chain ILIKE 'rimi%';")
+          for sid in $RIMI_STORES; do
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SET statement_timeout='30min'; INSERT INTO rimi_pids
+              SELECT DISTINCT product_id FROM prices WHERE store_id = ${sid}
+              ON CONFLICT DO NOTHING;"
+          done
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "ANALYZE rimi_pids;"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+            SELECT p.id, p.name,
+                   COALESCE(p.brand,'')       AS brand,
+                   COALESCE(p.ean,'')         AS ean,
+                   COALESCE(p.size_text,'')   AS size_text,
+                   COALESCE(p.amount,'')      AS amount
+            FROM products p
+            JOIN rimi_pids sp ON sp.product_id = p.id
+          ) TO STDOUT WITH CSV HEADER" > rimi_products.csv
 
-      # --- Barbora ---
-      - name: Export Barbora
+      - name: Build Barbora PID table (per store)
+        shell: bash
         run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
-            -c "SET statement_timeout = '2h'; SET work_mem='128MB';" \
-            -c "
-              CREATE TEMP TABLE barbora_pids AS
-              SELECT DISTINCT pr.product_id
-              FROM stores s
-              JOIN prices pr ON pr.store_id = s.id
-              WHERE s.chain ILIKE 'barbora%';
-              ANALYZE barbora_pids;
-            " \
-            -c "\copy (
-              SELECT p.id,
-                     p.name,
-                     COALESCE(p.brand,'')     AS brand,
-                     COALESCE(p.ean,'')       AS ean,
-                     COALESCE(p.size_text,'') AS size_text,
-                     COALESCE(p.amount,'')    AS amount
-              FROM products p
-              JOIN barbora_pids sp ON sp.product_id = p.id
-            ) TO STDOUT WITH CSV HEADER" > barbora_products.csv
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SET statement_timeout='2h';"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE TEMP TABLE barbora_pids(product_id integer PRIMARY KEY);"
+          BARBORA_STORES=$(psql "$DATABASE_URL" -At -c "SELECT id FROM stores WHERE chain ILIKE 'barbora%';")
+          for sid in $BARBORA_STORES; do
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SET statement_timeout='30min'; INSERT INTO barbora_pids
+              SELECT DISTINCT product_id FROM prices WHERE store_id = ${sid}
+              ON CONFLICT DO NOTHING;"
+          done
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "ANALYZE barbora_pids;"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+            SELECT p.id, p.name,
+                   COALESCE(p.brand,'')       AS brand,
+                   COALESCE(p.ean,'')         AS ean,
+                   COALESCE(p.size_text,'')   AS size_text,
+                   COALESCE(p.amount,'')      AS amount
+            FROM products p
+            JOIN barbora_pids sp ON sp.product_id = p.id
+          ) TO STDOUT WITH CSV HEADER" > barbora_products.csv
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
