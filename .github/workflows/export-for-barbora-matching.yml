@@ -1,4 +1,4 @@
-name: "Export products for matching (with amount)"
+name: "Export products for matching (fast temp pids + amount)"
 
 on:
   workflow_dispatch: {}
@@ -14,94 +14,101 @@ jobs:
       - name: Install psql
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-      # No index building, no lock_timeout
+      # --- Selver ---
       - name: Export Selver
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
-           -c "SET statement_timeout='2h';" \
-           -c "\copy (
-            SELECT
-              p.id,
-              p.name,
-              COALESCE(p.brand,'')       AS brand,
-              COALESCE(p.ean,'')         AS ean,
-              COALESCE(p.size_text,'')   AS size_text,
-              COALESCE(p.amount,'')      AS amount
-            FROM products p
-            WHERE EXISTS (
-              SELECT 1
-              FROM prices pr
-              JOIN stores s ON s.id = pr.store_id
-              WHERE pr.product_id = p.id
-                AND s.chain ILIKE 'selver%'
-            )
-          ) TO STDOUT WITH CSV HEADER" > selver_products.csv
+            -c "SET statement_timeout = '2h'; SET work_mem='128MB';" \
+            -c "
+              CREATE TEMP TABLE selver_pids AS
+              SELECT DISTINCT pr.product_id
+              FROM stores s
+              JOIN prices pr ON pr.store_id = s.id
+              WHERE s.chain ILIKE 'selver%';
+              ANALYZE selver_pids;
+            " \
+            -c "\copy (
+              SELECT p.id,
+                     p.name,
+                     COALESCE(p.brand,'')     AS brand,
+                     COALESCE(p.ean,'')       AS ean,
+                     COALESCE(p.size_text,'') AS size_text,
+                     COALESCE(p.amount,'')    AS amount
+              FROM products p
+              JOIN selver_pids sp ON sp.product_id = p.id
+            ) TO STDOUT WITH CSV HEADER" > selver_products.csv
 
+      # --- Prisma ---
       - name: Export Prisma
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
-           -c "SET statement_timeout='2h';" \
-           -c "\copy (
-            SELECT
-              p.id,
-              p.name,
-              COALESCE(p.brand,'')       AS brand,
-              COALESCE(p.ean,'')         AS ean,
-              COALESCE(p.size_text,'')   AS size_text,
-              COALESCE(p.amount,'')      AS amount
-            FROM products p
-            WHERE EXISTS (
-              SELECT 1
-              FROM prices pr
-              JOIN stores s ON s.id = pr.store_id
-              WHERE pr.product_id = p.id
-                AND s.chain ILIKE 'prisma%'
-            )
-          ) TO STDOUT WITH CSV HEADER" > prisma_products.csv
+            -c "SET statement_timeout = '2h'; SET work_mem='128MB';" \
+            -c "
+              CREATE TEMP TABLE prisma_pids AS
+              SELECT DISTINCT pr.product_id
+              FROM stores s
+              JOIN prices pr ON pr.store_id = s.id
+              WHERE s.chain ILIKE 'prisma%';
+              ANALYZE prisma_pids;
+            " \
+            -c "\copy (
+              SELECT p.id,
+                     p.name,
+                     COALESCE(p.brand,'')     AS brand,
+                     COALESCE(p.ean,'')       AS ean,
+                     COALESCE(p.size_text,'') AS size_text,
+                     COALESCE(p.amount,'')    AS amount
+              FROM products p
+              JOIN prisma_pids sp ON sp.product_id = p.id
+            ) TO STDOUT WITH CSV HEADER" > prisma_products.csv
 
+      # --- Rimi ---
       - name: Export Rimi
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
-           -c "SET statement_timeout='2h';" \
-           -c "\copy (
-            SELECT
-              p.id,
-              p.name,
-              COALESCE(p.brand,'')       AS brand,
-              COALESCE(p.ean,'')         AS ean,
-              COALESCE(p.size_text,'')   AS size_text,
-              COALESCE(p.amount,'')      AS amount
-            FROM products p
-            WHERE EXISTS (
-              SELECT 1
-              FROM prices pr
-              JOIN stores s ON s.id = pr.store_id
-              WHERE pr.product_id = p.id
-                AND s.chain ILIKE 'rimi%'
-            )
-          ) TO STDOUT WITH CSV HEADER" > rimi_products.csv
+            -c "SET statement_timeout = '2h'; SET work_mem='128MB';" \
+            -c "
+              CREATE TEMP TABLE rimi_pids AS
+              SELECT DISTINCT pr.product_id
+              FROM stores s
+              JOIN prices pr ON pr.store_id = s.id
+              WHERE s.chain ILIKE 'rimi%';
+              ANALYZE rimi_pids;
+            " \
+            -c "\copy (
+              SELECT p.id,
+                     p.name,
+                     COALESCE(p.brand,'')     AS brand,
+                     COALESCE(p.ean,'')       AS ean,
+                     COALESCE(p.size_text,'') AS size_text,
+                     COALESCE(p.amount,'')    AS amount
+              FROM products p
+              JOIN rimi_pids sp ON sp.product_id = p.id
+            ) TO STDOUT WITH CSV HEADER" > rimi_products.csv
 
+      # --- Barbora ---
       - name: Export Barbora
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
-           -c "SET statement_timeout='2h';" \
-           -c "\copy (
-            SELECT
-              p.id,
-              p.name,
-              COALESCE(p.brand,'')       AS brand,
-              COALESCE(p.ean,'')         AS ean,
-              COALESCE(p.size_text,'')   AS size_text,
-              COALESCE(p.amount,'')      AS amount
-            FROM products p
-            WHERE EXISTS (
-              SELECT 1
-              FROM prices pr
-              JOIN stores s ON s.id = pr.store_id
-              WHERE pr.product_id = p.id
-                AND s.chain ILIKE 'barbora%'
-            )
-          ) TO STDOUT WITH CSV HEADER" > barbora_products.csv
+            -c "SET statement_timeout = '2h'; SET work_mem='128MB';" \
+            -c "
+              CREATE TEMP TABLE barbora_pids AS
+              SELECT DISTINCT pr.product_id
+              FROM stores s
+              JOIN prices pr ON pr.store_id = s.id
+              WHERE s.chain ILIKE 'barbora%';
+              ANALYZE barbora_pids;
+            " \
+            -c "\copy (
+              SELECT p.id,
+                     p.name,
+                     COALESCE(p.brand,'')     AS brand,
+                     COALESCE(p.ean,'')       AS ean,
+                     COALESCE(p.size_text,'') AS size_text,
+                     COALESCE(p.amount,'')    AS amount
+              FROM products p
+              JOIN barbora_pids sp ON sp.product_id = p.id
+            ) TO STDOUT WITH CSV HEADER" > barbora_products.csv
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
