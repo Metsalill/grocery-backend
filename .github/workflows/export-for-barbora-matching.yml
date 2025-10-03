@@ -1,0 +1,92 @@
+name: "Export for Barbora matching"
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    env:
+      # Use the EXTERNAL/Public connection string from Railway (no trailing '?')
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install psql
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      # ---------- Selver (canonical with EAN) ----------
+      - name: Export Selver (with EAN)
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+            SELECT DISTINCT
+              p.id,
+              p.name,
+              lower(p.brand) AS brand,
+              NULLIF(regexp_replace(coalesce(p.ean,''),'[^0-9]','','g'),'') AS ean,
+              NULLIF(p.size_text,'') AS size_text
+            FROM prices pr
+            JOIN products p ON p.id = pr.product_id
+            JOIN stores   s ON s.id = pr.store_id
+            WHERE s.chain ILIKE 'selver%'
+              AND regexp_replace(coalesce(p.ean,''),'[^0-9]','','g') ~ '^[0-9]{8,14}$'
+          ) TO STDOUT WITH CSV HEADER" > selver_products.csv
+
+      # ---------- Prisma (canonical with EAN) ----------
+      - name: Export Prisma (with EAN)
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+            SELECT DISTINCT
+              p.id,
+              p.name,
+              lower(p.brand) AS brand,
+              NULLIF(regexp_replace(coalesce(p.ean,''),'[^0-9]','','g'),'') AS ean,
+              NULLIF(p.size_text,'') AS size_text
+            FROM prices pr
+            JOIN products p ON p.id = pr.product_id
+            JOIN stores   s ON s.id = pr.store_id
+            WHERE s.chain ILIKE 'prisma%'
+              AND regexp_replace(coalesce(p.ean,''),'[^0-9]','','g') ~ '^[0-9]{8,14}$'
+          ) TO STDOUT WITH CSV HEADER" > prisma_products.csv
+
+      # ---------- Rimi (include whatever EANs we have now) ----------
+      - name: Export Rimi (any EAN)
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+            SELECT DISTINCT
+              p.id,
+              p.name,
+              lower(p.brand) AS brand,
+              NULLIF(regexp_replace(coalesce(p.ean,''),'[^0-9]','','g'),'') AS ean,
+              NULLIF(p.size_text,'') AS size_text
+            FROM prices pr
+            JOIN products p ON p.id = pr.product_id
+            JOIN stores   s ON s.id = pr.store_id
+            WHERE s.chain ILIKE 'rimi%'
+          ) TO STDOUT WITH CSV HEADER" > rimi_products.csv
+
+      # ---------- Barbora (no EAN expected) ----------
+      - name: Export Barbora (no EAN)
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+            SELECT DISTINCT
+              p.id,
+              p.name,
+              lower(p.brand) AS brand,
+              NULLIF(regexp_replace(coalesce(p.ean,''),'[^0-9]','','g'),'') AS ean,
+              NULLIF(p.size_text,'') AS size_text
+            FROM prices pr
+            JOIN products p ON p.id = pr.product_id
+            JOIN stores   s ON s.id = pr.store_id
+            WHERE s.chain ILIKE 'barbora%'
+          ) TO STDOUT WITH CSV HEADER" > barbora_products.csv
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: exports-for-barbora-matching
+          path: |
+            selver_products.csv
+            prisma_products.csv
+            rimi_products.csv
+            barbora_products.csv
