@@ -1,4 +1,4 @@
-name: "Export products for matching (with amount)"
+name: "Export products for matching (with amount, no index build)"
 
 on:
   workflow_dispatch: {}
@@ -14,18 +14,10 @@ jobs:
       - name: Install psql
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-      # Optional helpers; safe if they already exist
-      - name: Prepare helpful indexes
-        run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
-            CREATE INDEX IF NOT EXISTS idx_prices_product ON prices(product_id);
-            CREATE INDEX IF NOT EXISTS idx_prices_store   ON prices(store_id);
-            CREATE INDEX IF NOT EXISTS idx_stores_chain   ON stores(chain);
-          "
-
       - name: Export Selver
         run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SET lock_timeout='5s'; SET statement_timeout='45min';" \
+           -c "\copy (
             SELECT
               p.id,
               p.name,
@@ -45,7 +37,8 @@ jobs:
 
       - name: Export Prisma
         run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SET lock_timeout='5s'; SET statement_timeout='45min';" \
+           -c "\copy (
             SELECT
               p.id,
               p.name,
@@ -65,7 +58,8 @@ jobs:
 
       - name: Export Rimi
         run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SET lock_timeout='5s'; SET statement_timeout='45min';" \
+           -c "\copy (
             SELECT
               p.id,
               p.name,
@@ -85,7 +79,8 @@ jobs:
 
       - name: Export Barbora
         run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SET lock_timeout='5s'; SET statement_timeout='45min';" \
+           -c "\copy (
             SELECT
               p.id,
               p.name,
