@@ -110,12 +110,10 @@ def base_url_from_category(url: str) -> str:
 # ----------------------- Playwright helpers -----------------------
 
 def dismiss_popups(page):
-    # “Menu updated”, generic errors, cookie-ish toasts, closers
     for sel in [
         "button:has-text('OK')",
         "button:has-text('Proovi uuesti')",
         "button[aria-label='Close']",
-        "button:has(svg)",
         "div[role='dialog'] button:has-text('OK')",
     ]:
         try:
@@ -153,12 +151,8 @@ def wait_for_grid(page, timeout=15000) -> None:
 
 
 def scroll_grid(page):
-    """
-    Scrolls the GridMenu *container* to trigger lazy-loading.
-    Falls back to mouse wheel on the page.
-    """
+    """Scroll the GridMenu container to trigger lazy-loading."""
     scrolled = False
-    # main scrollable containers we’ve seen
     for sel in [
         '[data-testid="screens.Provider.GridMenu.view"]',
         '[data-testid^="screens.Provider.GridMenu"]',
@@ -477,7 +471,7 @@ def run(
             time.sleep(req_delay)
             dismiss_popups(page)
 
-            tiles: List[Dict]] = []
+            tiles: List[Dict] = []  # <-- fixed: no stray bracket
             for attempt in range(1, 5):
                 try:
                     wait_for_grid(page, timeout=12000)
@@ -491,7 +485,6 @@ def run(
                     print(f"[cat] parsed {len(tiles)} tiles")
                     break
 
-                # try chip/tab once if nothing yet
                 clicked = click_category_chip(page, cat_name)
                 if clicked:
                     scroll_grid(page)
