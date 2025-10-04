@@ -2,7 +2,7 @@ name: "Coop Wolt – Crawl (Pärnu default, 2-hourly)"
 
 on:
   schedule:
-    - cron: "0 */4 * * *"   # every 2 hours, at minute 0
+    - cron: "0 */4 * * *"   # every 4 hours, at minute 0
   workflow_dispatch:
     inputs:
       store:
@@ -164,9 +164,6 @@ jobs:
           WOLT_PROBE_LIMIT: "250"
           # Keep modal enrichment off until pages are stable
           WOLT_MODAL_PROBE_LIMIT: "0"
-          # Known venueIds (24-hex) per store
-          VENUE_ID_PARN: "628210e98f6be4895159d8fe"      # Coop Pärnu Maksimarket (verified)
-          VENUE_ID_LASNAMAE: "6282118813e5280bbe9e450f"   # Coop Lasnamäe (adjust if needed)
         run: |
           set -euo pipefail
           # small randomized stagger to avoid bursts / 429s when multiple stores
@@ -178,28 +175,20 @@ jobs:
           STORE_HOST="wolt:coop-${{ matrix.store }}"
           OUT="out/coop_wolt_${{ github.run_id }}_${{ matrix.store }}.csv"
 
-          # pick venue id for this store
-          case "${{ matrix.store }}" in
-            parnu)   VENUE_ID="${VENUE_ID_PARN}" ;;
-            lasname) VENUE_ID="${VENUE_ID_LASNAMAE}" ;;
-            *)       VENUE_ID="" ;;
-          esac
-
-          echo "Running ${STORE_HOST} (venueId=${VENUE_ID:-auto}) → ${OUT}"
+          echo "Running ${STORE_HOST} (venueId=auto) → ${OUT}"
           stdbuf -oL -eL python3 scripts/wolt_crawler.py \
             --store-host "${STORE_HOST}" \
             --categories-file "${{ steps.cats.outputs.path }}" \
             --max-products "${MAX_PRODUCTS}" \
             --headless "1" \
-            --req-delay "0.8" \
-            --goto-strategy "domcontentloaded" \
-            --nav-timeout "45000" \
-            --category-timeout "300" \
+            --req-delay "1.2" \
+            --goto-strategy "networkidle" \
+            --nav-timeout "60000" \
+            --category-timeout "420" \
             --upsert-per-category \
             --flush-every "40" \
             --probe-limit "${WOLT_PROBE_LIMIT}" \
             --modal-probe-limit "${WOLT_MODAL_PROBE_LIMIT}" \
-            ${VENUE_ID:+--venue-id "${VENUE_ID}"} \
             --out "${OUT}"
 
       # Try to upload whatever we have, regardless of outcome
