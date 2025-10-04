@@ -103,18 +103,22 @@ def base_url_from_category(url: str) -> str:
     if m:
         return m.group(1)
     u = url.split("?", 1)[0]
-    parts = u.split("/smc/")[0]
-    return parts
+    return u.split("/smc/")[0]
 
 
 # ----------------------- Playwright helpers -----------------------
 
 def dismiss_popups(page):
-    for sel in ["button:has-text('OK')", "button:has-text('Proovi uuesti')", "button[aria-label='Close']"]:
+    for sel in [
+        "button:has-text('OK')",
+        "button:has-text('Proovi uuesti')",
+        "button[aria-label='Close']",
+        "button:has-text('Got it')",
+    ]:
         try:
             loc = page.locator(sel)
-            if loc.is_visible():
-                loc.click()
+            if loc.count() and loc.first.is_visible():
+                loc.first.click()
                 time.sleep(0.2)
         except Exception:
             pass
@@ -132,89 +136,99 @@ def _style_bg_url(style: str) -> str:
     return m.group(1) if m else ""
 
 
-def wait_for_grid(page, timeout=15000) -> None:
+def wait_for_grid(page, timeout=20000) -> None:
     # Any of these indicates the grid screen is rendered
-    page.wait_for_selector(
-        ",".join(
-            [
-                '[data-testid^="screens.Provider.GridMenu"]',
-                '[data-testid^="components.GridMenu"]',
-                '[class*="GridMenu"]',
-                # Category page grid
-                '[data-testid*="CategoryGridView"]',
-            ]
-        ),
-        timeout=timeout,
+    sel = ",".join(
+        [
+            '[data-testid^="screens.Provider.GridMenu"]',
+            '[data-testid^="components.GridMenu"]',
+            '[class*="GridMenu"]',
+            '[data-testid*="CategoryGridView"]',
+        ]
     )
+    page.wait_for_selector(sel, timeout=timeout)
+
+
+def auto_scroll(page, max_steps: int = 60, pause: float = 0.25) -> None:
+    """True infinite scroll to force lazy tiles to mount."""
+    last_h = 0
+    for _ in range(max_steps):
+        page.mouse.wheel(0, 2200)
+        try:
+            page.evaluate("window.scrollBy(0, document.body.scrollHeight)")
+        except Exception:
+            pass
+        time.sleep(pause)
+        try:
+            h = page.evaluate("document.body.scrollHeight")
+            if h == last_h:
+                break
+            last_h = h
+        except Exception:
+            pass
 
 
 def extract_tiles_runtime(page) -> List[Dict]:
     """
-    Robust tile extractor:
-    - Support both GridMenu dishes and CategoryGridView tiles (Bolt keeps changing this).
-    - Name: aria-label (if present) or ProviderDish.title, else first non-€ text.
-    - Price: components.Price or any descendant text containing € (shortest token).
-    - Image: ProviderDish.dishImage background-image.
+    Robust tile extractor that tolerates Bolt UI changes.
+    Supports GridMenu dishes, CategoryGridView tiles and generic fallbacks.
     """
     tiles: List[Dict] = []
 
-    # --- BROAD set of candidates to survive UI updates ---
     candidates = page.locator(
         ",".join(
             [
-                # Older/alternate structures
+                # GridMenu & ProviderDish
                 '[data-testid="components.GridMenu.dishItem"] button',
-                '[data-testid="components.GridMenu.dishItem"]',
                 '[data-testid*="GridMenu.dishItem"] button',
-                '[data-testid*="GridMenu.dishItem"]',
-                '[class*="dishItem"] button',
-                '[class*="dishItem"]',
-                # Newer category/tile structures
-                '[data-testid*="CategoryGridView.tile"]',
-                '[data-testid="components.CategoryGridView.tile"]',
-                '[data-testid*="ProviderDish.tile"]',
                 '[data-testid="components.ProviderDish.tile"]',
+                '[data-testid*="ProviderDish.tile"]',
+
+                # Category grid
+                '[data-testid="components.CategoryGridView.tile"]',
+                '[data-testid*="CategoryGridView.tile"]',
+
+                # Fallbacks (be careful but permissive)
+                'button[aria-label][data-testid]',
+                'div[role="button"][aria-label]',
+                'article:has(:text("€"))',
             ]
         )
     )
 
-    count = candidates.count()
-    for i in range(count):
+    cnt = candidates.count()
+    for i in range(cnt):
         try:
             el = candidates.nth(i)
 
             # Name
             name = (el.get_attribute("aria-label") or "").strip()
             if not name:
-                title = el.locator('[data-testid="components.ProviderDish.title"]')
-                if title.count() > 0:
-                    name = title.first.inner_text().strip()
+                title = el.locator('[data-testid="components.ProviderDish.title"], [data-testid*="ProviderDish.title"]')
+                if title.count():
+                    name = (title.first.inner_text() or "").strip()
             if not name:
-                # sometimes the button wrapper has inner text with price; filter €
                 name = _first_text_without_euro(el.inner_text())
 
             # Price
             price_text = ""
-            # Prefer dedicated price nodes
             price_node = el.locator('[data-testid="components.Price"], [data-testid*="Price"]')
-            if price_node.count() > 0:
-                price_text = price_node.first.inner_text().strip()
+            if price_node.count():
+                price_text = (price_node.first.inner_text() or "").strip()
             if not price_text:
                 euro_nodes = el.locator(f":text-matches('.*{EUR}.*')")
-                if euro_nodes.count() > 0:
-                    # pick the shortest snippet containing €
-                    use = min(6, euro_nodes.count())
-                    texts = [euro_nodes.nth(j).inner_text().strip() for j in range(use)]
+                c = euro_nodes.count()
+                if c:
+                    texts = [(euro_nodes.nth(j).inner_text() or "").strip() for j in range(min(8, c))]
                     texts = [t for t in texts if EUR in t]
                     if texts:
                         price_text = sorted(texts, key=len)[0]
-
             price, currency = parse_price(price_text)
 
             # Image
             image_url = ""
-            dish_img = el.locator('[data-testid="components.ProviderDish.dishImage"]')
-            if dish_img.count() > 0:
+            dish_img = el.locator('[data-testid="components.ProviderDish.dishImage"], [data-testid*="dishImage"]')
+            if dish_img.count():
                 style = dish_img.first.get_attribute("style") or ""
                 image_url = _style_bg_url(style)
 
@@ -234,17 +248,14 @@ def extract_tiles_runtime(page) -> List[Dict]:
 
 
 def click_category_chip(page, cat_name: str) -> bool:
-    """
-    If we land on the store main page (or tile scan returns empty),
-    click the category chip/tab that matches the requested category name.
-    """
+    """If we’re on the store root, click the tab/chip with the category name."""
     try:
         chip = page.locator(
-            f"button:has-text('{cat_name}') , a:has-text('{cat_name}') , div[role='tab']:has-text('{cat_name}')"
+            f"button:has-text('{cat_name}'), a:has-text('{cat_name}'), div[role='tab']:has-text('{cat_name}')"
         ).first
         if chip and chip.is_visible():
             chip.click()
-            time.sleep(0.6)
+            time.sleep(0.7)
             dismiss_popups(page)
             return True
     except Exception:
@@ -327,18 +338,16 @@ def run(
     categories_dir: Optional[str] = None,
     deep: bool = True,
 ):
-    start_url = f"https://food.bolt.eu/et-EE/{city}"  # et-EE by default
+    start_url = f"https://food.bolt.eu/et-EE/{city}"
     scraped_at = dt.datetime.utcnow().isoformat()
     rows_out: List[Dict] = []
 
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=(headless is True or str(headless) == "1"))
         context = browser.new_context(
-            viewport={"width": 1366, "height": 2000},
-            user_agent=(
-                "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
-                "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-            ),
+            viewport={"width": 1366, "height": 2200},
+            user_agent=("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+                        "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"),
         )
         page = context.new_page()
 
@@ -369,8 +378,9 @@ def run(
                     if href and not href.startswith("#"):
                         tmp.append(href)
             if tmp:
-                # derive base from the first line
-                base_url = base_url_from_category(tmp[0] if tmp[0].startswith("http") else normalize_cat_url(start_url, tmp[0]))
+                base_url = base_url_from_category(
+                    tmp[0] if tmp[0].startswith("http") else normalize_cat_url(start_url, tmp[0])
+                )
                 cats_from_file = []
                 for href in tmp:
                     url = href if href.startswith("http") else normalize_cat_url(base_url, href)
@@ -408,7 +418,9 @@ def run(
                 try:
                     page.wait_for_selector(f"text={store_name}", timeout=30000)
                 except PWTimeout:
-                    page.wait_for_selector(f"xpath=//h1|//h2|//a[contains(., '{store_name}')]", timeout=15000)
+                    page.wait_for_selector(
+                        f"xpath=//h1|//h2|//a[contains(., '{store_name}')]", timeout=15000
+                    )
 
                 try:
                     page.click(f"text={store_name}", timeout=5000)
@@ -451,17 +463,11 @@ def run(
             tiles: List[Dict] = []
             for attempt in range(1, 4):
                 try:
-                    wait_for_grid(page, timeout=10000)
+                    wait_for_grid(page, timeout=15000)
                 except PWTimeout:
                     pass
 
-                # lazy-load / scroll
-                try:
-                    for _ in range(8):
-                        page.mouse.wheel(0, 1800)
-                        time.sleep(0.12)
-                except Exception:
-                    pass
+                auto_scroll(page, max_steps=50, pause=0.22)
 
                 tiles = extract_tiles_runtime(page)
                 if tiles:
@@ -469,16 +475,16 @@ def run(
                     break
 
                 # If 0 tiles, try clicking the category chip manually (store homepage case)
-                clicked = click_category_chip(page, cat_name)
-                if clicked:
-                    time.sleep(0.6)
+                if click_category_chip(page, cat_name):
+                    time.sleep(0.7)
+                    auto_scroll(page, max_steps=40, pause=0.22)
                     tiles = extract_tiles_runtime(page)
                     if tiles:
                         print(f"[cat] parsed {len(tiles)} tiles (after chip click)")
                         break
 
                 print(f"[cat] attempt {attempt} failed: no tiles yet")
-                time.sleep(0.6)
+                time.sleep(0.7)
                 dismiss_popups(page)
 
             if not tiles:
