@@ -1,7 +1,10 @@
 name: "Coop (Bolt Food) – Auto category crawl → CSV/DB"
 
 on:
-  # Manual only (no schedule) so you can run it when you want
+  # Scheduled: every 2 hours (UTC)
+  schedule:
+    - cron: "0 */2 * * *"
+  # Manual trigger with inputs
   workflow_dispatch:
     inputs:
       city_path:
@@ -29,18 +32,17 @@ on:
         required: false
         default: "1"
 
-# Separate concurrency group for this workflow (manual only)
+# Prevent overlapping runs (manual or scheduled share same queue)
 concurrency:
-  group: coop-bolt-crawl-manual
+  group: coop-bolt-crawl
   cancel-in-progress: true
 
 jobs:
   crawl-bolt:
     runs-on: ubuntu-latest
-    timeout-minutes: 180  # give it more time while testing
+    timeout-minutes: 180
 
     env:
-      # Use the public DB URL as discussed
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       CITY_PATH: ${{ inputs.city_path || '2-tartu' }}
       HEADLESS: ${{ inputs.headless || '1' }}
@@ -75,7 +77,6 @@ jobs:
       - name: Make output dir
         run: python -c "import os; os.makedirs('out', exist_ok=True)"
 
-      # Kvartali (has categories override file already)
       - name: Crawl Kvartali COOP Maksimarket
         run: >
           python scripts/bolt_crawler.py
