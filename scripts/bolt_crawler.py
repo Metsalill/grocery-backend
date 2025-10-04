@@ -137,7 +137,6 @@ def _style_bg_url(style: str) -> str:
 
 
 def wait_for_grid(page, timeout=20000) -> None:
-    # Any of these indicates the grid screen is rendered
     sel = ",".join(
         [
             '[data-testid^="screens.Provider.GridMenu"]',
@@ -188,7 +187,7 @@ def extract_tiles_runtime(page) -> List[Dict]:
                 '[data-testid="components.CategoryGridView.tile"]',
                 '[data-testid*="CategoryGridView.tile"]',
 
-                # Fallbacks (be careful but permissive)
+                # Fallbacks
                 'button[aria-label][data-testid]',
                 'div[role="button"][aria-label]',
                 'article:has(:text("€"))',
@@ -302,6 +301,7 @@ def upsert_rows_to_staging_coop(rows: List[Dict], db_url: str):
 
     with psycopg.connect(db_url) as conn:
         ensure_staging_schema(conn)
+        # -------- UP S E R T  (conflict on existing PK store_host + ext_id) --------
         ins = """
         INSERT INTO staging_coop_products(
           chain,channel,store_name,store_host,city_path,category_name,
@@ -312,7 +312,25 @@ def upsert_rows_to_staging_coop(rows: List[Dict], db_url: str):
           %(chain)s,%(channel)s,%(store_name)s,%(store_host)s,%(city_path)s,%(category_name)s,
           %(ext_id)s,%(name)s,%(brand)s,%(manufacturer)s,%(size_text)s,%(price)s,%(currency)s,%(image_url)s,%(url)s,
           %(description)s,%(ean_raw)s,%(scraped_at)s
-        );
+        )
+        ON CONFLICT (store_host, ext_id) DO UPDATE SET
+          chain = EXCLUDED.chain,
+          channel = EXCLUDED.channel,
+          store_name = EXCLUDED.store_name,
+          city_path = EXCLUDED.city_path,
+          category_name = EXCLUDED.category_name,
+          name = EXCLUDED.name,
+          brand = COALESCE(EXCLUDED.brand, staging_coop_products.brand),
+          manufacturer = COALESCE(EXCLUDED.manufacturer, staging_coop_products.manufacturer),
+          size_text = COALESCE(EXCLUDED.size_text, staging_coop_products.size_text),
+          price = EXCLUDED.price,
+          currency = EXCLUDED.currency,
+          image_url = COALESCE(EXCLUDED.image_url, staging_coop_products.image_url),
+          url = EXCLUDED.url,
+          description = COALESCE(EXCLUDED.description, staging_coop_products.description),
+          ean_raw = COALESCE(EXCLUDED.ean_raw, staging_coop_products.ean_raw),
+          scraped_at = EXCLUDED.scraped_at
+        ;
         """
         with conn.cursor() as cur:
             cur.executemany(ins, rows)
