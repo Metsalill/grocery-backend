@@ -1,0 +1,127 @@
+name: "Export products for matching (single-session, fast + amount)"
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install psql
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      # -------- Selver --------
+      - name: Export Selver
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          SET statement_timeout='2h';
+          CREATE TEMP TABLE selver_pids(product_id integer PRIMARY KEY);
+
+          INSERT INTO selver_pids
+          SELECT DISTINCT pr.product_id
+          FROM prices pr
+          JOIN stores s ON s.id = pr.store_id
+          WHERE s.chain ILIKE 'selver%';
+
+          \copy (
+            SELECT p.id,
+                   p.name,
+                   COALESCE(p.brand,'')       AS brand,
+                   COALESCE(p.ean,'')         AS ean,
+                   COALESCE(p.size_text,'')   AS size_text,
+                   COALESCE(p.amount,'')      AS amount
+            FROM products p
+            JOIN selver_pids sp ON sp.product_id = p.id
+          ) TO 'selver_products.csv' WITH CSV HEADER;
+          SQL
+
+      # -------- Prisma --------
+      - name: Export Prisma
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          SET statement_timeout='2h';
+          CREATE TEMP TABLE prisma_pids(product_id integer PRIMARY KEY);
+
+          INSERT INTO prisma_pids
+          SELECT DISTINCT pr.product_id
+          FROM prices pr
+          JOIN stores s ON s.id = pr.store_id
+          WHERE s.chain ILIKE 'prisma%';
+
+          \copy (
+            SELECT p.id,
+                   p.name,
+                   COALESCE(p.brand,'')       AS brand,
+                   COALESCE(p.ean,'')         AS ean,
+                   COALESCE(p.size_text,'')   AS size_text,
+                   COALESCE(p.amount,'')      AS amount
+            FROM products p
+            JOIN prisma_pids sp ON sp.product_id = p.id
+          ) TO 'prisma_products.csv' WITH CSV HEADER;
+          SQL
+
+      # -------- Rimi --------
+      - name: Export Rimi
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          SET statement_timeout='2h';
+          CREATE TEMP TABLE rimi_pids(product_id integer PRIMARY KEY);
+
+          INSERT INTO rimi_pids
+          SELECT DISTINCT pr.product_id
+          FROM prices pr
+          JOIN stores s ON s.id = pr.store_id
+          WHERE s.chain ILIKE 'rimi%';
+
+          \copy (
+            SELECT p.id,
+                   p.name,
+                   COALESCE(p.brand,'')       AS brand,
+                   COALESCE(p.ean,'')         AS ean,
+                   COALESCE(p.size_text,'')   AS size_text,
+                   COALESCE(p.amount,'')      AS amount
+            FROM products p
+            JOIN rimi_pids sp ON sp.product_id = p.id
+          ) TO 'rimi_products.csv' WITH CSV HEADER;
+          SQL
+
+      # -------- Barbora --------
+      - name: Export Barbora
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          SET statement_timeout='2h';
+          CREATE TEMP TABLE barbora_pids(product_id integer PRIMARY KEY);
+
+          INSERT INTO barbora_pids
+          SELECT DISTINCT pr.product_id
+          FROM prices pr
+          JOIN stores s ON s.id = pr.store_id
+          WHERE s.chain ILIKE 'barbora%';
+
+          \copy (
+            SELECT p.id,
+                   p.name,
+                   COALESCE(p.brand,'')       AS brand,
+                   COALESCE(p.ean,'')         AS ean,
+                   COALESCE(p.size_text,'')   AS size_text,
+                   COALESCE(p.amount,'')      AS amount
+            FROM products p
+            JOIN barbora_pids sp ON sp.product_id = p.id
+          ) TO 'barbora_products.csv' WITH CSV HEADER;
+          SQL
+
+      # -------- Upload all artifacts --------
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: export-products-for-matching
+          path: |
+            selver_products.csv
+            prisma_products.csv
+            rimi_products.csv
+            barbora_products.csv
