@@ -1,4 +1,4 @@
-name: "Export products for matching (with amount)"
+name: Export products for matching
 
 on:
   workflow_dispatch:
@@ -6,115 +6,72 @@ on:
 jobs:
   export:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}  # external/public URL
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install psql
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y postgresql-client
+      - name: Install psql client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-      - name: Export Selver
+      - name: Preflight (DNS + connect)
         run: |
           set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          SET lock_timeout = '5s';
-          SET statement_timeout = '45min';
-          SET client_min_messages = WARNING;
+          echo "Host:" "$(echo "$DATABASE_URL" | sed -E 's|.*@([^:/?]+).*|\1|')"
+          dig +short maglev.proxy.rlwy.net || true
+          PGPASSWORD='' psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'SELECT 1;'
 
-          \copy (
-            SELECT p.id,
-                   p.name,
-                   COALESCE(p.brand,'')     AS brand,
-                   COALESCE(p.ean,'')       AS ean,
-                   COALESCE(p.size_text,'') AS size_text,
-                   COALESCE(p.amount,'')    AS amount
+      - name: Export Selver (online store only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+            SELECT p.id, p.name, p.brand, p.ean, p.size_text, p.amount
             FROM products p
             JOIN prices pr ON pr.product_id = p.id
-            JOIN stores s ON s.id = pr.store_id
+            JOIN stores s  ON s.id = pr.store_id
             WHERE s.name ILIKE '%e-Selver%' OR s.name ILIKE '%Selver e-%'
             GROUP BY p.id, p.name, p.brand, p.ean, p.size_text, p.amount
-          ) TO 'selver_products.csv' WITH CSV HEADER;
-          SQL
-
-      - name: Export Prisma
+          ) TO 'selver_products.csv' WITH CSV HEADER;"
+      
+      - name: Export Prisma (Prisma Online (Tallinn))
         run: |
-          set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          SET lock_timeout = '5s';
-          SET statement_timeout = '45min';
-          SET client_min_messages = WARNING;
-
-          \copy (
-            SELECT p.id,
-                   p.name,
-                   COALESCE(p.brand,'')     AS brand,
-                   COALESCE(p.ean,'')       AS ean,
-                   COALESCE(p.size_text,'') AS size_text,
-                   COALESCE(p.amount,'')    AS amount
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+            SELECT p.id, p.name, p.brand, p.ean, p.size_text, p.amount
             FROM products p
             JOIN prices pr ON pr.product_id = p.id
-            JOIN stores s ON s.id = pr.store_id
-            WHERE s.name ILIKE '%Prisma Online%'
+            JOIN stores s  ON s.id = pr.store_id
+            WHERE s.name ILIKE '%Prisma Online (Tallinn)%'
             GROUP BY p.id, p.name, p.brand, p.ean, p.size_text, p.amount
-          ) TO 'prisma_products.csv' WITH CSV HEADER;
-          SQL
+          ) TO 'prisma_products.csv' WITH CSV HEADER;"
 
-      - name: Export Rimi
+      - name: Export Rimi (Rimi ePood)
         run: |
-          set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          SET lock_timeout = '5s';
-          SET statement_timeout = '45min';
-          SET client_min_messages = WARNING;
-
-          \copy (
-            SELECT p.id,
-                   p.name,
-                   COALESCE(p.brand,'')     AS brand,
-                   COALESCE(p.ean,'')       AS ean,
-                   COALESCE(p.size_text,'') AS size_text,
-                   COALESCE(p.amount,'')    AS amount
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+            SELECT p.id, p.name, p.brand, p.ean, p.size_text, p.amount
             FROM products p
             JOIN prices pr ON pr.product_id = p.id
-            JOIN stores s ON s.id = pr.store_id
+            JOIN stores s  ON s.id = pr.store_id
             WHERE s.name ILIKE '%Rimi ePood%'
             GROUP BY p.id, p.name, p.brand, p.ean, p.size_text, p.amount
-          ) TO 'rimi_products.csv' WITH CSV HEADER;
-          SQL
+          ) TO 'rimi_products.csv' WITH CSV HEADER;"
 
-      - name: Export Barbora
+      - name: Export Barbora (Barbora ePood / Maxima)
         run: |
-          set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          SET lock_timeout = '5s';
-          SET statement_timeout = '45min';
-          SET client_min_messages = WARNING;
-
-          \copy (
-            SELECT p.id,
-                   p.name,
-                   COALESCE(p.brand,'')     AS brand,
-                   COALESCE(p.ean,'')       AS ean,
-                   COALESCE(p.size_text,'') AS size_text,
-                   COALESCE(p.amount,'')    AS amount
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+            SELECT p.id, p.name, p.brand, p.ean, p.size_text, p.amount
             FROM products p
             JOIN prices pr ON pr.product_id = p.id
-            JOIN stores s ON s.id = pr.store_id
-            WHERE s.name ILIKE '%Barbora%' OR s.name ILIKE '%Maxima%'
+            JOIN stores s  ON s.id = pr.store_id
+            WHERE s.name ILIKE '%Barbora ePood%' OR s.chain ILIKE '%Maxima%'
             GROUP BY p.id, p.name, p.brand, p.ean, p.size_text, p.amount
-          ) TO 'barbora_products.csv' WITH CSV HEADER;
-          SQL
+          ) TO 'barbora_products.csv' WITH CSV HEADER;"
 
-      - name: Upload exported CSVs
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: exported-products
+          name: products-for-matching
           path: |
             selver_products.csv
             prisma_products.csv
