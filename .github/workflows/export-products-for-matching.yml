@@ -11,10 +11,7 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     steps:
-      - name: Set up job
-        run: echo "Starting product export per online store"
-
-      - name: Run actions/checkout@v4
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install psql
@@ -23,7 +20,6 @@ jobs:
           sudo apt-get install -y postgresql-client
 
       - name: Export Selver
-        shell: bash
         run: |
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
@@ -44,10 +40,9 @@ jobs:
             WHERE s.name ILIKE '%e-Selver%' OR s.name ILIKE '%Selver e-%'
             GROUP BY p.id, p.name, p.brand, p.ean, p.size_text, p.amount
           ) TO 'selver_products.csv' WITH CSV HEADER;
-SQL
+          SQL
 
       - name: Export Prisma
-        shell: bash
         run: |
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
@@ -68,10 +63,9 @@ SQL
             WHERE s.name ILIKE '%Prisma Online%'
             GROUP BY p.id, p.name, p.brand, p.ean, p.size_text, p.amount
           ) TO 'prisma_products.csv' WITH CSV HEADER;
-SQL
+          SQL
 
       - name: Export Rimi
-        shell: bash
         run: |
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
@@ -92,10 +86,9 @@ SQL
             WHERE s.name ILIKE '%Rimi ePood%'
             GROUP BY p.id, p.name, p.brand, p.ean, p.size_text, p.amount
           ) TO 'rimi_products.csv' WITH CSV HEADER;
-SQL
+          SQL
 
       - name: Export Barbora
-        shell: bash
         run: |
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
@@ -116,9 +109,9 @@ SQL
             WHERE s.name ILIKE '%Barbora%' OR s.name ILIKE '%Maxima%'
             GROUP BY p.id, p.name, p.brand, p.ean, p.size_text, p.amount
           ) TO 'barbora_products.csv' WITH CSV HEADER;
-SQL
+          SQL
 
-      - name: Upload artifacts
+      - name: Upload exported CSVs
         uses: actions/upload-artifact@v4
         with:
           name: exported-products
