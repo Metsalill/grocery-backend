@@ -3,7 +3,7 @@ name: Prisma Image Backfill (Every 3 Hours)
 on:
   schedule:
     # Run every 3 hours (UTC)
-    - cron: "0 */3 * * *"
+    - cron: "0 */48 * * *"
   workflow_dispatch: {}
 
 concurrency:
