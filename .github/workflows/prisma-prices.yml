@@ -3,7 +3,7 @@ name: "Prisma → Price Update (every 2 hours)"
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "0 */2 * * *"   # every 2 hours (UTC)
+    - cron: "0 */48 * * *"   # every 2 hours (UTC)
 
 concurrency:
   group: prisma-price-update
