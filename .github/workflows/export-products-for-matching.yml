@@ -1,127 +1,158 @@
-name: "Export products for matching (single-session, fast + amount)"
+name: Export products for matching
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+
+# avoid overlapping runs that can saturate connections
+concurrency:
+  group: export-products
+  cancel-in-progress: true
 
 jobs:
   export:
     runs-on: ubuntu-latest
+
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
+      # Pin the online store IDs (from your checks)
+      STORE_ID_PRISMA:  "14"   # Prisma Online (Tallinn)
+      STORE_ID_RIMI:    "440"  # Rimi ePood
+      STORE_ID_SELVER:  "31"   # Selver e-Selver
+      STORE_ID_BARBORA: "441"  # Barbora ePood (chain recorded as Maxima)
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Install psql
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
-
-      # -------- Selver --------
-      - name: Export Selver
+      - name: Install psql client
         run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          SET statement_timeout='2h';
-          CREATE TEMP TABLE selver_pids(product_id integer PRIMARY KEY);
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
 
-          INSERT INTO selver_pids
-          SELECT DISTINCT pr.product_id
-          FROM prices pr
-          JOIN stores s ON s.id = pr.store_id
-          WHERE s.chain ILIKE 'selver%';
+      # Optional: keep the DB from being hammered if busy
+      - name: DB preflight (wait for free connections)
+        shell: bash
+        run: |
+          set -euo pipefail
+          LIMIT=10    # allow up to 10 active connections before starting
+          ATTEMPTS=60 # up to ~10 min
+          for i in $(seq 1 $ATTEMPTS); do
+            ACTIVE=$(psql "$DATABASE_URL" -At -c \
+              "SELECT count(*) FROM pg_stat_activity WHERE state='active' AND datname=current_database();")
+            echo "Active connections: $ACTIVE"
+            if [ "$ACTIVE" -le "$LIMIT" ]; then
+              echo "DB looks fine, proceeding."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "DB is still busy; failing preflight."
+          exit 1
+
+      - name: Export Selver
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<SQL
+          SET lock_timeout = '5s';
+          SET statement_timeout = '45min';
+          SET idle_in_transaction_session_timeout = '60s';
+          SET idle_session_timeout = '10min';
 
           \copy (
             SELECT p.id,
                    p.name,
-                   COALESCE(p.brand,'')       AS brand,
-                   COALESCE(p.ean,'')         AS ean,
-                   COALESCE(p.size_text,'')   AS size_text,
-                   COALESCE(p.amount,'')      AS amount
+                   COALESCE(p.brand,'')     AS brand,
+                   COALESCE(p.ean,'')       AS ean,
+                   COALESCE(p.size_text,'') AS size_text,
+                   COALESCE(p.amount,'')    AS amount
             FROM products p
-            JOIN selver_pids sp ON sp.product_id = p.id
+            JOIN prices   pr ON pr.product_id = p.id
+            WHERE pr.store_id = ${STORE_ID_SELVER}
+            GROUP BY p.id, p.name, p.brand, p.ean, p.size_text, p.amount
           ) TO 'selver_products.csv' WITH CSV HEADER;
           SQL
 
-      # -------- Prisma --------
       - name: Export Prisma
+        shell: bash
         run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          SET statement_timeout='2h';
-          CREATE TEMP TABLE prisma_pids(product_id integer PRIMARY KEY);
-
-          INSERT INTO prisma_pids
-          SELECT DISTINCT pr.product_id
-          FROM prices pr
-          JOIN stores s ON s.id = pr.store_id
-          WHERE s.chain ILIKE 'prisma%';
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<SQL
+          SET lock_timeout = '5s';
+          SET statement_timeout = '45min';
+          SET idle_in_transaction_session_timeout = '60s';
+          SET idle_session_timeout = '10min';
 
           \copy (
             SELECT p.id,
                    p.name,
-                   COALESCE(p.brand,'')       AS brand,
-                   COALESCE(p.ean,'')         AS ean,
-                   COALESCE(p.size_text,'')   AS size_text,
-                   COALESCE(p.amount,'')      AS amount
+                   COALESCE(p.brand,'')     AS brand,
+                   COALESCE(p.ean,'')       AS ean,
+                   COALESCE(p.size_text,'') AS size_text,
+                   COALESCE(p.amount,'')    AS amount
             FROM products p
-            JOIN prisma_pids sp ON sp.product_id = p.id
+            JOIN prices   pr ON pr.product_id = p.id
+            WHERE pr.store_id = ${STORE_ID_PRISMA}
+            GROUP BY p.id, p.name, p.brand, p.ean, p.size_text, p.amount
           ) TO 'prisma_products.csv' WITH CSV HEADER;
           SQL
 
-      # -------- Rimi --------
       - name: Export Rimi
+        shell: bash
         run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          SET statement_timeout='2h';
-          CREATE TEMP TABLE rimi_pids(product_id integer PRIMARY KEY);
-
-          INSERT INTO rimi_pids
-          SELECT DISTINCT pr.product_id
-          FROM prices pr
-          JOIN stores s ON s.id = pr.store_id
-          WHERE s.chain ILIKE 'rimi%';
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<SQL
+          SET lock_timeout = '5s';
+          SET statement_timeout = '45min';
+          SET idle_in_transaction_session_timeout = '60s';
+          SET idle_session_timeout = '10min';
 
           \copy (
             SELECT p.id,
                    p.name,
-                   COALESCE(p.brand,'')       AS brand,
-                   COALESCE(p.ean,'')         AS ean,
-                   COALESCE(p.size_text,'')   AS size_text,
-                   COALESCE(p.amount,'')      AS amount
+                   COALESCE(p.brand,'')     AS brand,
+                   COALESCE(p.ean,'')       AS ean,
+                   COALESCE(p.size_text,'') AS size_text,
+                   COALESCE(p.amount,'')    AS amount
             FROM products p
-            JOIN rimi_pids sp ON sp.product_id = p.id
+            JOIN prices   pr ON pr.product_id = p.id
+            WHERE pr.store_id = ${STORE_ID_RIMI}
+            GROUP BY p.id, p.name, p.brand, p.ean, p.size_text, p.amount
           ) TO 'rimi_products.csv' WITH CSV HEADER;
           SQL
 
-      # -------- Barbora --------
       - name: Export Barbora
+        shell: bash
         run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          SET statement_timeout='2h';
-          CREATE TEMP TABLE barbora_pids(product_id integer PRIMARY KEY);
-
-          INSERT INTO barbora_pids
-          SELECT DISTINCT pr.product_id
-          FROM prices pr
-          JOIN stores s ON s.id = pr.store_id
-          WHERE s.chain ILIKE 'barbora%';
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<SQL
+          SET lock_timeout = '5s';
+          SET statement_timeout = '45min';
+          SET idle_in_transaction_session_timeout = '60s';
+          SET idle_session_timeout = '10min';
 
           \copy (
             SELECT p.id,
                    p.name,
-                   COALESCE(p.brand,'')       AS brand,
-                   COALESCE(p.ean,'')         AS ean,
-                   COALESCE(p.size_text,'')   AS size_text,
-                   COALESCE(p.amount,'')      AS amount
+                   COALESCE(p.brand,'')     AS brand,
+                   COALESCE(p.ean,'')       AS ean,
+                   COALESCE(p.size_text,'') AS size_text,
+                   COALESCE(p.amount,'')    AS amount
             FROM products p
-            JOIN barbora_pids sp ON sp.product_id = p.id
+            JOIN prices   pr ON pr.product_id = p.id
+            WHERE pr.store_id = ${STORE_ID_BARBORA}
+            GROUP BY p.id, p.name, p.brand, p.ean, p.size_text, p.amount
           ) TO 'barbora_products.csv' WITH CSV HEADER;
           SQL
 
-      # -------- Upload all artifacts --------
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: export-products-for-matching
+          name: exported-products
           path: |
-            selver_products.csv
             prisma_products.csv
             rimi_products.csv
+            selver_products.csv
             barbora_products.csv
+          if-no-files-found: error
