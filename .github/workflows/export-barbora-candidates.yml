@@ -2,30 +2,42 @@ name: "Export Barbora (barbora_candidates) → CSV artifact"
 
 on:
   workflow_dispatch:
-    inputs:
-      include_headers:
-        description: "Include CSV header row"
-        required: false
-        default: "true"
-      gzip_output:
-        description: "Also upload .csv.gz"
-        required: false
-        default: "true"
 
 jobs:
   export-barbora-candidates:
     runs-on: ubuntu-latest
-
     steps:
       - name: Install psql client
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-      # Sanity: show counts so you can verify in logs
+      - name: Prepare DATABASE_URL (public) with sslmode=require
+        id: prep
+        env:
+          DBURL_PUBLIC: ${{ secrets.DATABASE_URL_PUBLIC }}
+          DBURL: ${{ secrets.DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          URL="${DBURL_PUBLIC:-$DBURL}"
+          if [ -z "${URL}" ]; then
+            echo "No DATABASE_URL_PUBLIC or DATABASE_URL secret set." >&2
+            exit 1
+          fi
+          # add sslmode=require if missing
+          if [[ "$URL" == *"?"* ]]; then
+            case "$URL" in
+              *"sslmode="*) URL="$URL" ;;
+              *) URL="${URL}&sslmode=require" ;;
+            esac
+          else
+            URL="${URL}?sslmode=require"
+          fi
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
       - name: Show row & brand counts
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ steps.prep.outputs.url }}
         run: |
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
@@ -37,21 +49,11 @@ jobs:
           FROM barbora_candidates;
           SQL
 
-      # Export CSV (UTF-8, comma separated)
       - name: Export barbora_candidates → CSV
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          INCLUDE_HEADERS: ${{ github.event.inputs.include_headers }}
+          DATABASE_URL: ${{ steps.prep.outputs.url }}
         run: |
           set -euo pipefail
-          # Build \copy options
-          if [ "${INCLUDE_HEADERS:-true}" = "true" ]; then
-            COPY_OPTS="WITH CSV HEADER ENCODING 'UTF8'"
-          else
-            COPY_OPTS="WITH CSV ENCODING 'UTF8'"
-          fi
-
-          # Export — choose the exact columns you want in the file
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
             SELECT
               name,
@@ -67,28 +69,12 @@ jobs:
             FROM barbora_candidates
             WHERE brand IS NOT NULL AND btrim(brand) <> ''
             ORDER BY name, brand, size_text
-          ) TO '/tmp/barbora_products.csv' $COPY_OPTS"
-
-      # Optional: gzip version too
-      - name: Create gzip copy
-        if: ${{ github.event.inputs.gzip_output == 'true' }}
-        run: |
-          set -euo pipefail
-          gzip -c /tmp/barbora_products.csv > /tmp/barbora_products.csv.gz
+          ) TO '/tmp/barbora_products.csv' WITH CSV HEADER ENCODING 'UTF8'"
 
       - name: Upload CSV artifact
         uses: actions/upload-artifact@v4
         with:
           name: barbora_products_csv
           path: /tmp/barbora_products.csv
-          if-no-files-found: error
-          compression-level: 0
-
-      - name: Upload GZIP artifact
-        if: ${{ github.event.inputs.gzip_output == 'true' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: barbora_products_csv_gz
-          path: /tmp/barbora_products.csv.gz
           if-no-files-found: error
           compression-level: 0
