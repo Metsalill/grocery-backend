@@ -355,6 +355,7 @@ def run(
     categories_file: Optional[str] = None,
     categories_dir: Optional[str] = None,
     deep: bool = True,
+    categories_inline: Optional[str] = None,  # NEW: comma/line separated URLs
 ):
     start_url = f"https://food.bolt.eu/et-EE/{city}"
     scraped_at = dt.datetime.utcnow().isoformat()
@@ -388,7 +389,34 @@ def run(
 
         base_url = None
 
-        if override_path:
+        # 1) Inline list has highest priority
+        inline_raw = categories_inline or os.getenv("BOLT_CATEGORIES_INLINE") or ""
+        inline_raw = inline_raw.strip()
+        if inline_raw:
+            tmp: List[str] = []
+            # split by comma and newline
+            for part in re.split(r"[,\n]", inline_raw):
+                href = part.strip()
+                if href and not href.startswith("#"):
+                    tmp.append(href)
+            if tmp:
+                base_url = base_url_from_category(
+                    tmp[0] if tmp[0].startswith("http") else normalize_cat_url(start_url, tmp[0])
+                )
+                for href in tmp:
+                    url = href if href.startswith("http") else normalize_cat_url(base_url, href)
+                    m = re.search(r"[?&]categoryName=([^&]+)", url)
+                    cat = (m.group(1) if m else href).replace("%20", " ")
+                    cats_from_file.append((cat, url))
+                print(f"[info] using categories from --categories-inline ({len(cats_from_file)} cats)")
+                print(f"[info] derived base store URL: {base_url}")
+                page.goto(base_url, timeout=60_000)
+                page.wait_for_load_state("domcontentloaded")
+                time.sleep(req_delay)
+                dismiss_popups(page)
+
+        # 2) Category file (if no inline)
+        elif override_path:
             tmp: List[str] = []
             with open(override_path, "r", encoding="utf-8") as f:
                 for line in f:
@@ -399,7 +427,6 @@ def run(
                 base_url = base_url_from_category(
                     tmp[0] if tmp[0].startswith("http") else normalize_cat_url(start_url, tmp[0])
                 )
-                cats_from_file = []
                 for href in tmp:
                     url = href if href.startswith("http") else normalize_cat_url(base_url, href)
                     m = re.search(r"[?&]categoryName=([^&]+)", url)
@@ -411,6 +438,7 @@ def run(
                 page.wait_for_load_state("domcontentloaded")
                 time.sleep(req_delay)
                 dismiss_popups(page)
+
         else:
             # Search by store name
             try:
@@ -577,6 +605,12 @@ if __name__ == "__main__":
     ap.add_argument("--upsert-db", default="1")
     ap.add_argument("--categories-file", default="", help="Optional: file with category URLs (one per line)")
     ap.add_argument("--categories-dir", default="", help="Optional: base dir with {dir}/{city}/{slug}.txt")
+    ap.add_argument(
+        "--categories-inline",
+        default="",
+        help="Optional: comma/newline-separated category URLs (highest priority). "
+             "You can also set BOLT_CATEGORIES_INLINE env var.",
+    )
     ap.add_argument("--deep", default="1", help="(reserved) deep parse of modals for brand/manufacturer")
     args = ap.parse_args()
 
@@ -590,4 +624,5 @@ if __name__ == "__main__":
         categories_file=(args.categories_file or None),
         categories_dir=(args.categories_dir or None),
         deep=(str(args.deep) == "1"),
+        categories_inline=(args.categories_inline or None),
     )
