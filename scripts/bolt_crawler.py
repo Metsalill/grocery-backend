@@ -264,10 +264,43 @@ def extract_tiles_runtime(page) -> List[Dict]:
     return tiles
 
 
+def open_first_category_from_hc(page) -> bool:
+    """From an /hc/ landing page, open the first real /p/.../smc category."""
+    try:
+        # Prefer direct anchors to /p/
+        anchors = page.locator("[data-testid*='horizontal-category'] a[href*='/p/']")
+        if anchors.count():
+            anchors.first.click()
+            page.wait_for_load_state("networkidle")
+            time.sleep(0.8)
+            dismiss_popups(page)
+            return True
+
+        # Fallback: tabs/buttons switch then look for anchors again
+        chips = page.locator(
+            "[role='tab'], [data-testid*='horizontal-category'] button, [data-testid*='horizontal-category'] a"
+        )
+        if chips.count():
+            chips.first.click()
+            page.wait_for_load_state("networkidle")
+            time.sleep(0.8)
+            dismiss_popups(page)
+            anchors = page.locator("a[href*='/p/'][href*='categoryName=']")
+            if anchors.count():
+                anchors.first.click()
+                page.wait_for_load_state("networkidle")
+                time.sleep(0.8)
+                dismiss_popups(page)
+            return True
+    except Exception:
+        pass
+    return False
+
+
 def click_category_chip(page, cat_name: str) -> bool:
     """
-    If we’re on the store root (hc/… landing view), click the tab/chip with the category name
-    to navigate into canonical /p/…/smc category.
+    On /hc/ landing views, try to navigate to a concrete /p/... category.
+    We first try the exact chip name; if that fails, fall back to opening the first real category.
     """
     try:
         candidates = page.locator(
@@ -288,6 +321,10 @@ def click_category_chip(page, cat_name: str) -> bool:
             return True
     except Exception:
         pass
+
+    if "hc/" in (page.url or ""):
+        return open_first_category_from_hc(page)
+
     return False
 
 
@@ -603,6 +640,15 @@ def run(
                     if tiles:
                         print(f"[cat] parsed {len(tiles)} tiles (after chip click)")
                         break
+
+                # Explicit hc fallback: open first real category if URL still hc and 0 tiles
+                if "hc/" in (page.url or ""):
+                    if open_first_category_from_hc(page):
+                        auto_scroll(page, max_steps=40, pause=0.22)
+                        tiles = extract_tiles_runtime(page)
+                        if tiles:
+                            print(f"[cat] parsed {len(tiles)} tiles (from hc → first category)")
+                            break
 
                 print(f"[cat] attempt {attempt} failed: no tiles yet")
                 time.sleep(0.7)
