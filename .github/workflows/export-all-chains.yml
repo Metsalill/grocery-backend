@@ -1,0 +1,152 @@
+name: "Export products for matching (Barbora/Rimi/Selver/Prisma)"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install psql client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Prepare DATABASE_URL (public) with sslmode=require
+        id: prep
+        env:
+          DBURL_PUBLIC: ${{ secrets.DATABASE_URL_PUBLIC }}
+          DBURL: ${{ secrets.DATABASE_URL }}
+        run: |
+          set -euo pipefail
+          URL="${DBURL_PUBLIC:-$DBURL}"
+          if [ -z "${URL}" ]; then
+            echo "No DATABASE_URL_PUBLIC or DATABASE_URL secret set." >&2
+            exit 1
+          fi
+          if [[ "$URL" == *"?"* ]]; then
+            case "$URL" in
+              *"sslmode="*) : ;;
+              *) URL="${URL}&sslmode=require" ;;
+            esac
+          else
+            URL="${URL}?sslmode=require"
+          fi
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Show table counts (sanity)
+        env:
+          DATABASE_URL: ${{ steps.prep.outputs.url }}
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          \pset footer off
+          SELECT 'barbora_candidates' AS table_name,
+                 COUNT(*) AS rows_total,
+                 COUNT(*) FILTER (WHERE brand IS NOT NULL AND btrim(brand) <> '') AS rows_with_brand
+          FROM barbora_candidates;
+          SELECT 'staging_rimi_products' AS table_name, COUNT(*) FROM staging_rimi_products;
+          SELECT 'staging_selver_products' AS table_name, COUNT(*) FROM staging_selver_products;
+          SELECT 'staging_prisma_products' AS table_name, COUNT(*) FROM staging_prisma_products;
+          SQL
+
+      - name: Export Barbora → /tmp/barbora_products.csv
+        env:
+          DATABASE_URL: ${{ steps.prep.outputs.url }}
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+            SELECT
+              source_url AS barbora_uid,  -- stable ext id for Barbora
+              md5(
+                regexp_replace(
+                  lower(coalesce(brand,'')||'|'||coalesce(name,'')||'|'||coalesce(size_text,'')),
+                  '\s+',' ','g'
+                )
+              ) AS key_fp,
+              name,
+              brand,
+              ean_raw AS ean,
+              size_text,
+              price,
+              currency
+            FROM barbora_candidates
+            WHERE brand IS NOT NULL AND btrim(brand) <> ''
+            ORDER BY name, brand, size_text
+          ) TO '/tmp/barbora_products.csv' WITH CSV HEADER ENCODING 'UTF8'"
+
+      - name: Export Rimi → /tmp/rimi_products.csv
+        env:
+          DATABASE_URL: ${{ steps.prep.outputs.url }}
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+            SELECT
+              md5(
+                regexp_replace(
+                  lower(coalesce(brand,'')||'|'||coalesce(name,'')||'|'||coalesce(size_text,'')),
+                  '\s+',' ','g'
+                )
+              ) AS key_fp,
+              name,
+              brand,
+              ean,
+              size_text
+            FROM staging_rimi_products
+            ORDER BY name, brand, size_text
+          ) TO '/tmp/rimi_products.csv' WITH CSV HEADER ENCODING 'UTF8'"
+
+      - name: Export Selver → /tmp/selver_products.csv
+        env:
+          DATABASE_URL: ${{ steps.prep.outputs.url }}
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+            SELECT
+              md5(
+                regexp_replace(
+                  lower(coalesce(brand,'')||'|'||coalesce(name,'')||'|'||coalesce(size_text,'')),
+                  '\s+',' ','g'
+                )
+              ) AS key_fp,
+              name,
+              brand,
+              ean,
+              size_text
+            FROM staging_selver_products
+            ORDER BY name, brand, size_text
+          ) TO '/tmp/selver_products.csv' WITH CSV HEADER ENCODING 'UTF8'"
+
+      - name: Export Prisma → /tmp/prisma_products.csv
+        env:
+          DATABASE_URL: ${{ steps.prep.outputs.url }}
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+            SELECT
+              md5(
+                regexp_replace(
+                  lower(coalesce(brand,'')||'|'||coalesce(name,'')||'|'||coalesce(size_text,'')),
+                  '\s+',' ','g'
+                )
+              ) AS key_fp,
+              name,
+              brand,
+              ean,
+              size_text
+            FROM staging_prisma_products
+            ORDER BY name, brand, size_text
+          ) TO '/tmp/prisma_products.csv' WITH CSV HEADER ENCODING 'UTF8'"
+
+      - name: Upload artifacts (CSV)
+        uses: actions/upload-artifact@v4
+        with:
+          name: product_exports_csv
+          path: |
+            /tmp/barbora_products.csv
+            /tmp/rimi_products.csv
+            /tmp/selver_products.csv
+            /tmp/prisma_products.csv
+          if-no-files-found: error
+          compression-level: 0
