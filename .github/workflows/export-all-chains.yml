@@ -56,14 +56,14 @@ jobs:
                  COUNT(*) FILTER (WHERE ean IS NOT NULL AND btrim(ean) <> '') AS with_ean
           FROM selver_side_norm;
 
-          SELECT 'products(prisma by retailer)' AS tbl, COUNT(*) AS rows_total,
+          SELECT 'products(prisma)' AS tbl, COUNT(*) AS rows_total,
                  COUNT(*) FILTER (WHERE brand IS NOT NULL AND btrim(brand) <> '') AS with_brand,
                  COUNT(*) FILTER (WHERE ean IS NOT NULL AND btrim(ean) <> '') AS with_ean
           FROM products
-          WHERE lower(retailer) = 'prisma';
+          WHERE source_url ILIKE '%prisma%';
           SQL
 
-      # --- Barbora (NO EAN) ---
+      # --- Barbora ---
       - name: Export Barbora → /tmp/barbora_products.csv
         env:
           DATABASE_URL: ${{ steps.prep.outputs.url }}
@@ -71,7 +71,7 @@ jobs:
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
             SELECT
-              source_url AS barbora_uid,   -- stable ID
+              source_url AS barbora_uid,
               name,
               brand,
               size_text,
@@ -82,7 +82,7 @@ jobs:
             ORDER BY name, brand, size_text
           ) TO '/tmp/barbora_products.csv' WITH CSV HEADER ENCODING 'UTF8'"
 
-      # --- Rimi (EAN = ean_raw) ---
+      # --- Rimi ---
       - name: Export Rimi → /tmp/rimi_products.csv
         env:
           DATABASE_URL: ${{ steps.prep.outputs.url }}
@@ -92,13 +92,13 @@ jobs:
             SELECT
               name,
               brand,
-              ean_raw  AS ean,
+              ean_raw AS ean,
               size_text
             FROM rimi_candidates
             ORDER BY name, brand, size_text
           ) TO '/tmp/rimi_products.csv' WITH CSV HEADER ENCODING 'UTF8'"
 
-      # --- Selver (has ean) ---
+      # --- Selver ---
       - name: Export Selver → /tmp/selver_products.csv
         env:
           DATABASE_URL: ${{ steps.prep.outputs.url }}
@@ -114,7 +114,7 @@ jobs:
             ORDER BY name, brand, size_text
           ) TO '/tmp/selver_products.csv' WITH CSV HEADER ENCODING 'UTF8'"
 
-      # --- Prisma from products (filter by retailer='prisma') ---
+      # --- Prisma (from products.source_url containing 'prisma') ---
       - name: Export Prisma → /tmp/prisma_products.csv
         env:
           DATABASE_URL: ${{ steps.prep.outputs.url }}
@@ -127,7 +127,7 @@ jobs:
               ean,
               size_text
             FROM products
-            WHERE lower(retailer) = 'prisma'
+            WHERE source_url ILIKE '%prisma%'
             ORDER BY name, brand, size_text
           ) TO '/tmp/prisma_products.csv' WITH CSV HEADER ENCODING 'UTF8'"
 
