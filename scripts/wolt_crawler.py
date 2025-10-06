@@ -598,9 +598,9 @@ def _parse_wolt_price(value: Any) -> Optional[float]:
 
 def _extract_row_from_item(item: Dict, category_url: str, store_host: str) -> Optional[Dict]:
     name = sanitize_field(str(item.get("name") or "").strip() or None)
-    # prefer non-unit price (unit price usually expressed as €/kg etc.)
+    # Prefer explicit item price / current price; fall back to unit/base
     price = None
-    for k in ("price", "baseprice", "base_price", "current_price", "total_price", "value", "amount", "unit_price"):
+    for k in ("price", "current_price", "total_price", "baseprice", "base_price", "unit_price", "value", "amount"):
         if k in item:
             price = _parse_wolt_price(item[k])
             if price is not None:
@@ -878,6 +878,7 @@ async def _extract_items_from_dom(page) -> List[Dict]:
   const anchors = Array.from(document.querySelectorAll('a[href*="itemid-"], a[href*="item-"]'));
   for (const a of anchors) {
     const href = a.getAttribute('href') || a.href || '';
+    a.dataset.__seen = '1';
     const m = href && href.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
     if (!m) continue;
     const id = m[1].toLowerCase();
@@ -911,8 +912,8 @@ async def _extract_items_from_dom(page) -> List[Dict]:
       if (!image) {
         const style = getComputedStyle(card);
         const bg = style && style.backgroundImage || '';
-        const m = bg && bg.match(/url\(["']?([^"')]+)["']?\)/);
-        if (m) image = m[1];
+        const m2 = bg && bg.match(/url\(["']?([^"')]+)["']?\)/);
+        if (m2) image = m2[1];
       }
     }
 
@@ -921,8 +922,8 @@ async def _extract_items_from_dom(page) -> List[Dict]:
     if (card) {
       const txt = card.textContent || '';
       const rx = /(~|≈)?\s*(\d+[.,]\d{2})\s*€(?!\s*\/\s*(?:kg|l|ml|g|tk|pcs)\b)/i;
-      const m = txt.match(rx);
-      if (m) priceText = m[2];
+      const m3 = txt.match(rx);
+      if (m3) priceText = m3[2];
     }
 
     if (!seen.has(id)) seen.set(id, {name, priceText, image});
@@ -1014,14 +1015,36 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
             await wait_cookie_banner(page)
             await _dismiss_location_popovers(page)
 
-            # Ensure product anchors exist before we start scraping.
+            # If a blocking popover is still visible, skip quickly
             try:
-                await page.wait_for_selector('a[href*="itemid-"], a[href*="item-"]', timeout=10000)
+                blocker = await page.locator('button:has-text("Jaga asukohta"), button:has-text("Share location"), [aria-modal="true"]').count()
+                if blocker and blocker > 0:
+                    print("[skip] blocking popover still present after dismiss attempts → skipping category")
+                    return [], [], await page.content(), {}, None
             except Exception:
                 pass
 
-            # a bit more scrolling to surface late resources
-            for _ in range(18):
+            # Try to see anchors; do a quick 4-burst scroll probe
+            try:
+                await page.wait_for_selector('a[href*="itemid-"], a[href*="item-"]', timeout=8000)
+            except Exception:
+                pass
+
+            for _ in range(4):
+                await page.mouse.wheel(0, 1400)
+                await page.wait_for_timeout(int(max(req_delay, 0.3)*1000 + random.uniform(200, 500)))
+
+            # Early skip if still nothing and no JSON blobs captured yet
+            try:
+                anchor_count = await page.locator('a[href*="itemid-"], a[href*="item-"]').count()
+            except Exception:
+                anchor_count = 0
+            if anchor_count < 2 and not collected_blobs:
+                print("[skip] no grid anchors or JSON after quick probe → skipping category early")
+                return [], collected_blobs, (await page.content()), {}, await _extract_venue_id_any(page, await page.content())
+
+            # Heavier scrolling to pull late resources only if we saw signs of content
+            for _ in range(12):
                 await page.mouse.wheel(0, 1600)
                 await page.wait_for_timeout(int(max(req_delay, 0.5)*1000 + random.uniform(300, 900)))
 
@@ -1066,7 +1089,7 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
                     continue
                 found.setdefault(iid, {}).update(it)
 
-            # As a last-resort, also seed IDs from HTML if still empty
+            # As a last-resort, seed IDs from HTML if still empty
             if not found:
                 ids = set(re.findall(r"(?:itemid-|item-)([a-f0-9]{24})", html or "", re.I))
                 for iid in ids:
@@ -1170,6 +1193,7 @@ def _lang_from_url(u: str) -> str:
 
 async def run_wolt(args, categories: List[str], on_rows_async) -> None:
     force_pw = bool(args.force_playwright or str(os.getenv("WOLT_FORCE_PLAYWRIGHT", "")).lower() in ("1","true","t","yes","y","on"))
+    seen_ext_ids: Set[str] = set()  # de-dupe across categories within the same run
 
     async def _process_one(cat: str):
         store_host_cat = args.store_host.strip() if args.store_host else _wolt_store_host(cat)
@@ -1234,6 +1258,13 @@ async def run_wolt(args, categories: List[str], on_rows_async) -> None:
             row = _extract_row_from_item(item, cat, store_host_cat)
             if not row:
                 continue
+            # run-level de-dupe by ext_id
+            ext = row.get("ext_id")
+            if ext and ext in seen_ext_ids:
+                continue
+            if ext:
+                seen_ext_ids.add(ext)
+            # DB-level de-dupe by ean_norm
             if row.get("ean_norm") and row["ean_norm"] in existing_gtins:
                 continue
             rows_raw.append(row)
