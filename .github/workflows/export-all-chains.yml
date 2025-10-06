@@ -1,4 +1,4 @@
-name: "Export products for matching (Barbora/Rimi/Selver/Prisma)"
+name: "Export products for matching (Barbora / Rimi / Selver / Prisma)"
 
 on:
   workflow_dispatch:
@@ -42,15 +42,16 @@ jobs:
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           \pset footer off
-          SELECT 'barbora_candidates' AS table_name,
-                 COUNT(*) AS rows_total,
-                 COUNT(*) FILTER (WHERE brand IS NOT NULL AND btrim(brand) <> '') AS rows_with_brand
-          FROM barbora_candidates;
-          SELECT 'staging_rimi_products' AS table_name, COUNT(*) FROM staging_rimi_products;
-          SELECT 'staging_selver_products' AS table_name, COUNT(*) FROM staging_selver_products;
-          SELECT 'staging_prisma_products' AS table_name, COUNT(*) FROM staging_prisma_products;
+          SELECT 'barbora_candidates' AS table_name, COUNT(*) AS rows_total FROM barbora_candidates;
+          SELECT 'rimi_candidates'     AS table_name, COUNT(*) AS rows_total FROM rimi_candidates;
+          SELECT 'selver_side_norm'    AS table_name, COUNT(*) AS rows_total FROM selver_side_norm;
+          -- Adjust the predicate for Prisma if your column name differs
+          SELECT 'products (prisma)'   AS table_name, COUNT(*) AS rows_total
+          FROM products
+          WHERE chain = 'prisma' OR retailer = 'prisma' OR source = 'prisma';
           SQL
 
+      # --- Barbora ---
       - name: Export Barbora → /tmp/barbora_products.csv
         env:
           DATABASE_URL: ${{ steps.prep.outputs.url }}
@@ -58,13 +59,7 @@ jobs:
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
             SELECT
-              source_url AS barbora_uid,  -- stable ext id for Barbora
-              md5(
-                regexp_replace(
-                  lower(coalesce(brand,'')||'|'||coalesce(name,'')||'|'||coalesce(size_text,'')),
-                  '\s+',' ','g'
-                )
-              ) AS key_fp,
+              source_url AS barbora_uid,                                  -- stable ID
               name,
               brand,
               ean_raw AS ean,
@@ -76,6 +71,7 @@ jobs:
             ORDER BY name, brand, size_text
           ) TO '/tmp/barbora_products.csv' WITH CSV HEADER ENCODING 'UTF8'"
 
+      # --- Rimi ---
       - name: Export Rimi → /tmp/rimi_products.csv
         env:
           DATABASE_URL: ${{ steps.prep.outputs.url }}
@@ -83,20 +79,15 @@ jobs:
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
             SELECT
-              md5(
-                regexp_replace(
-                  lower(coalesce(brand,'')||'|'||coalesce(name,'')||'|'||coalesce(size_text,'')),
-                  '\s+',' ','g'
-                )
-              ) AS key_fp,
               name,
               brand,
               ean,
               size_text
-            FROM staging_rimi_products
+            FROM rimi_candidates
             ORDER BY name, brand, size_text
           ) TO '/tmp/rimi_products.csv' WITH CSV HEADER ENCODING 'UTF8'"
 
+      # --- Selver ---
       - name: Export Selver → /tmp/selver_products.csv
         env:
           DATABASE_URL: ${{ steps.prep.outputs.url }}
@@ -104,42 +95,34 @@ jobs:
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
             SELECT
-              md5(
-                regexp_replace(
-                  lower(coalesce(brand,'')||'|'||coalesce(name,'')||'|'||coalesce(size_text,'')),
-                  '\s+',' ','g'
-                )
-              ) AS key_fp,
               name,
               brand,
               ean,
               size_text
-            FROM staging_selver_products
+            FROM selver_side_norm
             ORDER BY name, brand, size_text
           ) TO '/tmp/selver_products.csv' WITH CSV HEADER ENCODING 'UTF8'"
 
+      # --- Prisma (from products) ---
       - name: Export Prisma → /tmp/prisma_products.csv
         env:
           DATABASE_URL: ${{ steps.prep.outputs.url }}
         run: |
           set -euo pipefail
+          # If your products table uses a different column than chain|retailer|source to mark "prisma",
+          # replace the WHERE clause accordingly.
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
             SELECT
-              md5(
-                regexp_replace(
-                  lower(coalesce(brand,'')||'|'||coalesce(name,'')||'|'||coalesce(size_text,'')),
-                  '\s+',' ','g'
-                )
-              ) AS key_fp,
               name,
               brand,
               ean,
               size_text
-            FROM staging_prisma_products
+            FROM products
+            WHERE chain = 'prisma' OR retailer = 'prisma' OR source = 'prisma'
             ORDER BY name, brand, size_text
           ) TO '/tmp/prisma_products.csv' WITH CSV HEADER ENCODING 'UTF8'"
 
-      - name: Upload artifacts (CSV)
+      - name: Upload CSV artifacts
         uses: actions/upload-artifact@v4
         with:
           name: product_exports_csv
