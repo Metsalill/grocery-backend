@@ -3,6 +3,8 @@
 
 """
 Coop on Bolt Food → categories → products → CSV / upsert to staging_coop_products
+- Robust category discovery (handles hc/… chip pages)
+- Incremental option (--skip-known) that avoids re-crawling items we already have for this store_host
 """
 
 import argparse
@@ -13,7 +15,7 @@ import os
 import re
 import sys
 import time
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Set
 
 from tenacity import retry, stop_after_attempt, wait_fixed
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
@@ -66,18 +68,33 @@ def guess_brand(name: str) -> Optional[str]:
 
 
 def extract_category_links(page_html: str) -> List[Tuple[str, str]]:
+    """
+    Collect category links from both canonical category pages (/p/<venue>/smc/…?categoryName=…)
+    and 'hc' (home) pages where chips/tabs point to /p/ links.
+    """
     tree = HTMLParser(page_html)
     seen = set()
     out: List[Tuple[str, str]] = []
     for a in tree.css("a"):
         href = a.attributes.get("href", "")
-        if "categoryName=" in href:
-            cat = a.text().strip() or re.search(r"categoryName=([^&]+)", href)
-            if not isinstance(cat, str) and cat:
-                cat = cat.group(1)
-                cat = re.sub(r"%20", " ", cat)
-            cat = (cat or "").strip()
-            key = (cat, href)
+        if not href:
+            continue
+        # Prefer categoryName when present
+        if "categoryName=" in href and "/p/" in href:
+            cat_text = a.text().strip()
+            if not cat_text:
+                m = re.search(r"[?&]categoryName=([^&]+)", href)
+                cat_text = (m.group(1) if m else "").replace("%20", " ") if m else ""
+            cat = cat_text.strip() or "All"
+            key = (cat.lower(), href)
+            if key not in seen:
+                seen.add(key)
+                out.append((cat, href))
+            continue
+        # Secondary heuristic: anchors styled as chips that lead to /p/
+        if "/p/" in href and ("smc/" in href or "category" in href):
+            cat = a.text().strip() or "All"
+            key = (cat.lower(), href)
             if key not in seen:
                 seen.add(key)
                 out.append((cat, href))
@@ -136,20 +153,21 @@ def _style_bg_url(style: str) -> str:
     return m.group(1) if m else ""
 
 
-def wait_for_grid(page, timeout=20000) -> None:
+def wait_for_grid(page, timeout=25000) -> None:
     sel = ",".join(
         [
             '[data-testid^="screens.Provider.GridMenu"]',
             '[data-testid^="components.GridMenu"]',
             '[class*="GridMenu"]',
             '[data-testid*="CategoryGridView"]',
+            '[data-testid*="MenuCategoryGrid"]',
         ]
     )
     page.wait_for_selector(sel, timeout=timeout)
 
 
 def auto_scroll(page, max_steps: int = 60, pause: float = 0.25) -> None:
-    """True infinite scroll to force lazy tiles to mount."""
+    """Force lazy tiles to mount."""
     last_h = 0
     for _ in range(max_steps):
         page.mouse.wheel(0, 2200)
@@ -247,14 +265,25 @@ def extract_tiles_runtime(page) -> List[Dict]:
 
 
 def click_category_chip(page, cat_name: str) -> bool:
-    """If we’re on the store root, click the tab/chip with the category name."""
+    """
+    If we’re on the store root (hc/… landing view), click the tab/chip with the category name
+    to navigate into canonical /p/…/smc category.
+    """
     try:
-        chip = page.locator(
-            f"button:has-text('{cat_name}'), a:has-text('{cat_name}'), div[role='tab']:has-text('{cat_name}')"
-        ).first
-        if chip and chip.is_visible():
-            chip.click()
-            time.sleep(0.7)
+        candidates = page.locator(
+            ",".join(
+                [
+                    f"button:has-text('{cat_name}')",
+                    f"a:has-text('{cat_name}')",
+                    f"div[role='tab']:has-text('{cat_name}')",
+                    "[data-testid*='horizontal-category'] a[href*='/p/']",
+                ]
+            )
+        )
+        if candidates.count():
+            candidates.first.click()
+            page.wait_for_load_state("networkidle")
+            time.sleep(0.8)
             dismiss_popups(page)
             return True
     except Exception:
@@ -287,8 +316,24 @@ def ensure_staging_schema(conn):
       scraped_at      timestamptz DEFAULT now()
     );
     """
+    idx = """
+    DO $$
+    BEGIN
+      IF NOT EXISTS (
+        SELECT 1 FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE c.relkind = 'i'
+          AND c.relname = 'ux_staging_coop_storehost_extid'
+      )
+      THEN
+        CREATE UNIQUE INDEX ux_staging_coop_storehost_extid
+          ON staging_coop_products (store_host, ext_id);
+      END IF;
+    END $$;
+    """
     with conn.cursor() as cur:
         cur.execute(ddl)
+        cur.execute(idx)
 
 
 def upsert_rows_to_staging_coop(rows: List[Dict], db_url: str):
@@ -301,7 +346,7 @@ def upsert_rows_to_staging_coop(rows: List[Dict], db_url: str):
 
     with psycopg.connect(db_url) as conn:
         ensure_staging_schema(conn)
-        # -------- UP S E R T  (conflict on existing PK store_host + ext_id) --------
+        # -------- UPSERT (conflict on store_host + ext_id) --------
         ins = """
         INSERT INTO staging_coop_products(
           chain,channel,store_name,store_host,city_path,category_name,
@@ -338,6 +383,29 @@ def upsert_rows_to_staging_coop(rows: List[Dict], db_url: str):
     print(f"[db] upserted {len(rows)} rows into staging_coop_products")
 
 
+def preload_known_ext_ids(db_url: str, store_host: str) -> Set[str]:
+    """
+    Load existing (store_host, ext_id) pairs to skip duplicates at crawl time.
+    """
+    known: Set[str] = set()
+    if not psycopg or not db_url:
+        return known
+    try:
+        with psycopg.connect(db_url) as conn:
+            ensure_staging_schema(conn)
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT ext_id FROM staging_coop_products WHERE store_host = %s",
+                    (store_host,),
+                )
+                for (ext_id,) in cur.fetchall():
+                    if ext_id:
+                        known.add(ext_id)
+    except Exception as e:
+        print(f"[warn] preload_known_ext_ids failed: {e}", file=sys.stderr)
+    return known
+
+
 @retry(stop=stop_after_attempt(3), wait=wait_fixed(1))
 def safe_get_text(el):
     return (el.inner_text() or "").strip()
@@ -355,7 +423,8 @@ def run(
     categories_file: Optional[str] = None,
     categories_dir: Optional[str] = None,
     deep: bool = True,
-    categories_inline: Optional[str] = None,  # NEW: comma/line separated URLs
+    categories_inline: Optional[str] = None,  # comma/line separated URLs
+    skip_known: bool = True,                  # NEW: incremental skip
 ):
     start_url = f"https://food.bolt.eu/et-EE/{city}"
     scraped_at = dt.datetime.utcnow().isoformat()
@@ -377,6 +446,13 @@ def run(
         store_host = slugify_host(store_name)
         slug = store_slug(store_name)
 
+        # Incremental preload
+        known_ext_ids: Set[str] = set()
+        if skip_known and os.getenv("DATABASE_URL"):
+            known_ext_ids = preload_known_ext_ids(os.getenv("DATABASE_URL"), store_host)
+            if known_ext_ids:
+                print(f"[inc] preloaded {len(known_ext_ids)} known items for {store_host}")
+
         # Determine categories
         cats_from_file: List[Tuple[str, str]] = []
         override_path = None
@@ -394,7 +470,6 @@ def run(
         inline_raw = inline_raw.strip()
         if inline_raw:
             tmp: List[str] = []
-            # split by comma and newline
             for part in re.split(r"[,\n]", inline_raw):
                 href = part.strip()
                 if href and not href.startswith("#"):
@@ -496,6 +571,7 @@ def run(
                     seen.add(cat_name.lower())
                     categories.append((cat_name, normalize_cat_url(base_url, href)))
             if not categories:
+                # As last resort, run with base_url and let chip-click try to open it
                 categories = [("All", base_url)]
 
         print(f"[info] categories selected: {len(categories)}")
@@ -509,12 +585,11 @@ def run(
             tiles: List[Dict] = []
             for attempt in range(1, 4):
                 try:
-                    wait_for_grid(page, timeout=15000)
+                    wait_for_grid(page, timeout=18000)
                 except PWTimeout:
                     pass
 
                 auto_scroll(page, max_steps=50, pause=0.22)
-
                 tiles = extract_tiles_runtime(page)
                 if tiles:
                     print(f"[cat] parsed {len(tiles)} tiles")
@@ -541,20 +616,25 @@ def run(
                 name = (t.get("name") or "").strip()
                 if not name:
                     continue
+                # ext_id must be stable per (store_host, name)
+                ext_id = "bolt:" + hashlib.md5(f"{store_host}|{name}".encode("utf-8")).hexdigest()[:16]
+                if skip_known and ext_id in known_ext_ids:
+                    # Incremental skip
+                    continue
+
                 price = t.get("price")
                 currency = t.get("currency") or "EUR"
                 image_url = t.get("image_url") or ""
                 size_text = guess_size(name)
                 brand = guess_brand(name)
                 manufacturer = None
-                ext_id = "bolt:" + hashlib.md5(f"{store_host}|{name}".encode("utf-8")).hexdigest()[:16]
 
                 rows_out.append(
                     dict(
                         chain=CHAIN,
                         channel=CHANNEL,
                         store_name=store_name,
-                        store_host=slugify_host(store_name),
+                        store_host=store_host,
                         city_path=city,
                         category_name=cat_name,
                         ext_id=ext_id,
@@ -612,6 +692,7 @@ if __name__ == "__main__":
              "You can also set BOLT_CATEGORIES_INLINE env var.",
     )
     ap.add_argument("--deep", default="1", help="(reserved) deep parse of modals for brand/manufacturer")
+    ap.add_argument("--skip-known", default="1", help="Skip items already present for this store_host in DB (if DATABASE_URL set)")
     args = ap.parse_args()
 
     run(
@@ -625,4 +706,5 @@ if __name__ == "__main__":
         categories_dir=(args.categories_dir or None),
         deep=(str(args.deep) == "1"),
         categories_inline=(args.categories_inline or None),
+        skip_known=(str(args.skip_known) == "1"),
     )
