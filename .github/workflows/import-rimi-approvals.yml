@@ -1,0 +1,204 @@
+name: Import Rimi approvals to Railway
+
+on:
+  workflow_dispatch:
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install psql client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Prepare DATABASE_URL (public) with sslmode=require
+        id: prep
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="${{ secrets.DATABASE_URL_PUBLIC || secrets.DATABASE_URL }}"
+          if [[ -z "${URL}" ]]; then
+            echo "Missing DATABASE_URL_PUBLIC (or DATABASE_URL) secret" >&2
+            exit 1
+          fi
+          [[ "$URL" == *"sslmode="* ]] || URL="${URL}${URL*\?/?'?': '?'}sslmode=require"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Create tables / indexes (idempotent)
+        env:
+          DATABASE_URL: ${{ steps.prep.outputs.url }}
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'PSQL'
+          CREATE TABLE IF NOT EXISTS approved_matches (
+            barbora_uid   text NOT NULL,
+            barbora_name  text,
+            barbora_brand text,
+            barbora_size  text,
+            match_uid     text,
+            match_name    text,
+            match_brand   text,
+            match_size    text,
+            match_ean     text,
+            store         text NOT NULL,
+            similarity    numeric,
+            size_diff_pct numeric,
+            tier          text,
+            is_best_match boolean DEFAULT true,
+            reviewed_at   timestamptz DEFAULT now(),
+            PRIMARY KEY (barbora_uid, store)
+          );
+
+          CREATE TABLE IF NOT EXISTS approved_matches_stage (
+            barbora_uid   text,
+            barbora_name  text,
+            barbora_brand text,
+            barbora_size  text,
+            match_uid     text,
+            match_name    text,
+            match_brand   text,
+            match_size    text,
+            match_ean     text,
+            similarity    text,
+            size_diff_pct text,
+            tier          text
+          );
+
+          CREATE TABLE IF NOT EXISTS cross_store_links (
+            store_a      text   NOT NULL,
+            product_id_a bigint NOT NULL,
+            store_b      text   NOT NULL,
+            product_id_b bigint NOT NULL,
+            source       text,
+            PRIMARY KEY (store_a, product_id_a, store_b, product_id_b)
+          );
+          CREATE INDEX IF NOT EXISTS idx_csl_a ON cross_store_links (store_a, product_id_a);
+          CREATE INDEX IF NOT EXISTS idx_csl_b ON cross_store_links (store_b, product_id_b);
+          PSQL
+
+      - name: Import approved_rimi_matches.csv
+        env:
+          DATABASE_URL: ${{ steps.prep.outputs.url }}
+        run: |
+          set -euo pipefail
+          test -f data/approved_rimi_matches.csv || { echo "CSV not found: data/approved_rimi_matches.csv" >&2; exit 1; }
+
+          # Stage
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "TRUNCATE approved_matches_stage;"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy approved_matches_stage (barbora_uid,barbora_name,barbora_brand,barbora_size,match_uid,match_name,match_brand,match_size,match_ean,similarity,size_diff_pct,tier) FROM 'data/approved_rimi_matches.csv' WITH (FORMAT csv, HEADER true)"
+
+          # Insert (force store='rimi'; cast optional numerics safely)
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'PSQL'
+          INSERT INTO approved_matches (
+            barbora_uid, barbora_name, barbora_brand, barbora_size,
+            match_uid,   match_name,   match_brand,   match_size, match_ean,
+            store,       similarity,   size_diff_pct, tier, is_best_match, reviewed_at
+          )
+          SELECT
+            barbora_uid, barbora_name, barbora_brand, barbora_size,
+            match_uid,   match_name,   match_brand,   match_size, match_ean,
+            'rimi' AS store,
+            NULLIF(similarity,'')::numeric,
+            NULLIF(size_diff_pct,'')::numeric,
+            NULLIF(tier,''),
+            true, now()
+          FROM approved_matches_stage
+          ON CONFLICT (barbora_uid, store) DO UPDATE
+            SET match_uid     = EXCLUDED.match_uid,
+                match_name    = EXCLUDED.match_name,
+                match_brand   = EXCLUDED.match_brand,
+                match_size    = EXCLUDED.match_size,
+                match_ean     = EXCLUDED.match_ean,
+                similarity    = EXCLUDED.similarity,
+                size_diff_pct = EXCLUDED.size_diff_pct,
+                tier          = EXCLUDED.tier,
+                is_best_match = EXCLUDED.is_best_match,
+                reviewed_at   = now();
+          PSQL
+
+      - name: Materialize Barbora links (approved_matches → cross_store_links)
+        env:
+          DATABASE_URL: ${{ steps.prep.outputs.url }}
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'PSQL'
+          WITH ranked AS (
+            SELECT
+              am.barbora_uid,
+              lower(am.store) AS store,
+              am.match_uid,
+              am.match_ean,
+              am.is_best_match,
+              am.similarity,
+              ROW_NUMBER() OVER (
+                PARTITION BY am.barbora_uid, lower(am.store)
+                ORDER BY COALESCE(am.is_best_match,false) DESC,
+                         COALESCE(am.similarity,0) DESC,
+                         COALESCE(am.match_uid, am.match_ean) ASC
+              ) rn
+            FROM approved_matches am
+            WHERE lower(am.store) IN ('selver','prisma','rimi')
+          ),
+          best AS (
+            SELECT * FROM ranked WHERE rn = 1
+          ),
+          best_norm AS (
+            SELECT
+              b.*,
+              NULLIF(
+                REGEXP_REPLACE(
+                  REGEXP_REPLACE(BTRIM(b.match_ean::text), '\.0$', ''),
+                  '[^0-9]', '', 'g'
+                ),
+                ''
+              ) AS match_ean_norm
+            FROM best b
+          ),
+          barbora_pid AS (
+            SELECT
+              b.barbora_uid,
+              (SELECT m.product_id
+                 FROM ext_product_map m
+                WHERE lower(m.source)='barbora'
+                  AND m.ext_id=b.barbora_uid
+                LIMIT 1) AS barbora_product_id,
+              b.store, b.match_uid, b.match_ean_norm
+            FROM best_norm b
+          ),
+          other_pid AS (
+            SELECT
+              bp.barbora_uid,
+              bp.store,
+              COALESCE(
+                (SELECT m.product_id FROM ext_product_map m
+                   WHERE lower(m.source)=bp.store
+                     AND (m.ext_id=bp.match_uid OR m.source_url=bp.match_uid)
+                   LIMIT 1),
+                (SELECT p.id FROM products p WHERE p.ean=bp.match_ean_norm LIMIT 1),
+                (SELECT p.id FROM products p WHERE p.id::text=bp.match_uid LIMIT 1)
+              ) AS other_product_id
+            FROM barbora_pid bp
+          )
+          INSERT INTO cross_store_links (store_a, product_id_a, store_b, product_id_b, source)
+          SELECT 'barbora', bp.barbora_product_id, op.store, op.other_product_id, 'approved_matches'
+          FROM barbora_pid bp
+          JOIN other_pid  op USING (barbora_uid, store)
+          WHERE bp.barbora_product_id IS NOT NULL
+            AND op.other_product_id   IS NOT NULL
+          ON CONFLICT DO NOTHING;
+          PSQL
+
+      - name: Sanity counts
+        env:
+          DATABASE_URL: ${{ steps.prep.outputs.url }}
+        run: |
+          set -euo pipefail
+          echo "Approved rows by store:"
+          psql "$DATABASE_URL" -Atc "SELECT store, COUNT(*) FROM approved_matches GROUP BY store ORDER BY store;"
+          echo "Links from Barbora:"
+          psql "$DATABASE_URL" -Atc "SELECT store_b, COUNT(*) FROM cross_store_links WHERE store_a='barbora' GROUP BY store_b ORDER BY store_b;"
