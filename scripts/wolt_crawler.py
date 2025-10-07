@@ -76,7 +76,7 @@ def likely_brand_from_name(name: Optional[str]) -> Optional[str]:
     if not name:
         return None
     token = (name or "").strip().split()[0]
-    token = re.sub(r"[^\w\-’']+", "", token)
+    token = re.sub(r"[^\w\-’'`]+", "", token)
     if 2 <= len(token) <= 24:
         return token
     return None
@@ -541,23 +541,24 @@ def _looks_like_noise(name: Optional[str]) -> bool:
 def _valid_productish(name: Optional[str], price: Optional[float], gtin_norm: Optional[str],
                       url: Optional[str], brand: Optional[str], manufacturer: Optional[str]) -> bool:
     """
-    Accept if a real product (by name/gtin/price), but reject obvious category tiles.
+    Accept if a real product (GTIN or price is present), otherwise use lenient name/brand hints.
     """
-    if _looks_like_noise(name):
-        return False
-    # If GTIN present, accept.
+    # Strong signals first
     if gtin_norm:
         return True
-    # If we have a sensible *item* price, accept.
     if price is not None and price > 0:
         return True
-    # Otherwise accept on name + likely size/brand/manufacturer hints.
     if brand or manufacturer:
         return True
+
+    # Name-based heuristics next
     if name:
+        if _looks_like_noise(name):
+            return False
         has_size = bool(SIZE_RE.search(name))
-        long_enough = len(name.strip()) >= 6 and len(name.split()) >= 2
+        long_enough = len(name.strip()) >= 4 and len(name.split()) >= 1
         return has_size or long_enough
+
     return False
 
 def _parse_wolt_price(value: Any) -> Optional[float]:
@@ -621,6 +622,10 @@ def _extract_row_from_item(item: Dict, category_url: str, store_host: str) -> Op
         m = SIZE_RE.search(name)
         if m:
             size_text = m.group(1)
+
+    # Allow priced items even if name is missing
+    if not name and price is not None and price > 0:
+        name = "-"
 
     if not _valid_productish(name, price, ean_norm, category_url, brand, manufacturer):
         return None
@@ -809,7 +814,7 @@ async def _trigger_geolocation(page):
     except Exception:
         pass
 
-async def _ensure_product_grid(page, after_nuke_wait_ms: int = 12000) -> None:
+async def _ensure_product_grid(page, after_nuke_wait_ms: int = 20000) -> None:
     """
     Make sure product anchors exist:
       1) click any 'share location' style buttons if present
@@ -992,8 +997,8 @@ async def _extract_items_from_dom(page) -> List[Dict]:
     if (!card) card = a.closest('a');
     if (!card) card = a.parentElement;
 
-    // Name: prefer aria-label on the anchor; then obvious title nodes inside the card
-    let name = a.getAttribute('aria-label') || '';
+    // Name: prefer aria-label on the anchor; then title attr; then obvious title nodes inside the card
+    let name = a.getAttribute('aria-label') || a.getAttribute('title') || '';
     if (!name && card) {
       const t = card.querySelector('h2,h3,h4,[data-testid*="title"],[class*="title"]');
       if (t && t.textContent) name = t.textContent.trim();
@@ -1016,8 +1021,8 @@ async def _extract_items_from_dom(page) -> List[Dict]:
       if (!image) {
         const style = getComputedStyle(card);
         const bg = style && style.backgroundImage || '';
-        const m = bg && bg.match(/url\(["']?([^"')]+)["']?\)/);
-        if (m) image = m[1];
+        const m2 = bg && bg.match(/url\(["']?([^"')]+)["']?\)/);
+        if (m2) image = m2[1];
       }
     }
 
@@ -1026,8 +1031,8 @@ async def _extract_items_from_dom(page) -> List[Dict]:
     if (card) {
       const txt = card.textContent || '';
       const rx = /(~|≈)?\s*(\d+[.,]\d{2})\s*€(?!\s*\/\s*(?:kg|l|ml|g|tk|pcs)\b)/i;
-      const m = txt.match(rx);
-      if (m) priceText = m[2];
+      const mt = txt.match(rx);
+      if (mt) priceText = mt[2];
     }
 
     if (!seen.has(id)) seen.set(id, {name, priceText, image});
@@ -1128,7 +1133,7 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
                 await _nuke_blockers(page)
 
             # Actively ensure the grid appears (share location, geolocation call, maybe one reload)
-            await _ensure_product_grid(page, after_nuke_wait_ms=12000)
+            await _ensure_product_grid(page, after_nuke_wait_ms=20000)
 
             # Quick diagnostic
             try:
