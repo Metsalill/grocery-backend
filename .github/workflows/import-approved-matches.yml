@@ -11,9 +11,12 @@ on:
 jobs:
   import:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Install psql client
         run: |
@@ -44,6 +47,7 @@ jobs:
           DATABASE_URL: ${{ steps.prep.outputs.url }}
         run: |
           set -euo pipefail
+
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
             CREATE TABLE IF NOT EXISTS approved_matches (
               barbora_uid   text NOT NULL,
@@ -63,9 +67,12 @@ jobs:
               reviewed_at   timestamptz DEFAULT now(),
               PRIMARY KEY (barbora_uid, store, match_uid)
             );
-            CREATE INDEX IF NOT EXISTS idx_approved_matches_barbora_uid ON approved_matches (barbora_uid);
-            CREATE INDEX IF NOT EXISTS idx_approved_matches_store_match_uid ON approved_matches (store, match_uid);
+            CREATE INDEX IF NOT EXISTS idx_approved_matches_barbora_uid
+              ON approved_matches (barbora_uid);
+            CREATE INDEX IF NOT EXISTS idx_approved_matches_store_match_uid
+              ON approved_matches (store, match_uid);
           "
+
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
             CREATE OR REPLACE VIEW approved_best_match_per_store AS
             SELECT DISTINCT ON (barbora_uid, store)
@@ -74,7 +81,11 @@ jobs:
                    barbora_name, barbora_brand, barbora_size,
                    match_name, match_brand, match_size
             FROM approved_matches
-            ORDER BY barbora_uid, store, is_best_match DESC, similarity DESC, tier ASC, match_uid;
+            ORDER BY barbora_uid, store,
+                     is_best_match DESC,
+                     similarity DESC,
+                     tier ASC,
+                     match_uid;
           "
 
       - name: Import approved matches (Selver, Rimi, Prisma)
@@ -84,6 +95,7 @@ jobs:
           GITHUB_WORKSPACE: ${{ github.workspace }}
         run: |
           set -euo pipefail
+          echo "Listing CSV dir: $GITHUB_WORKSPACE/$CSV_DIR"
           ls -lah "$GITHUB_WORKSPACE/$CSV_DIR" || true
 
           import_one () {
@@ -93,9 +105,11 @@ jobs:
 
             echo "Importing $chain from $rel"
             if [[ ! -f "$abs" ]]; then
-              echo "::error file=$rel::File not found"; exit 1
+              echo "::error file=$rel::File not found"
+              exit 1
             fi
 
+            # Stage table
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
               DROP TABLE IF EXISTS _stage_approved;
               CREATE TEMP TABLE _stage_approved (
@@ -115,7 +129,11 @@ jobs:
                 is_best_match boolean
               );
             "
-            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -v file="$abs" -c "\copy _stage_approved FROM :'file' WITH CSV HEADER ENCODING 'UTF8';"
+
+            # Use STDIN to avoid path/permissions issues
+            cat "$abs" | psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy _stage_approved FROM STDIN WITH CSV HEADER"
+
+            # Upsert into final table
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
               INSERT INTO approved_matches
               (barbora_uid, barbora_name, barbora_brand, barbora_size,
