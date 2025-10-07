@@ -5,7 +5,8 @@
 Coop on Bolt Food → categories → products → CSV / upsert to staging_coop_products
 - Robust category discovery (handles hc/… chip pages)
 - Incremental option (--skip-known) that avoids re-crawling items we already have for this store_host
-- Absolute-path resolution for --categories-dir / --categories-file (works from any CWD)
+- Absolute-path resolution + explicit logging for categories files
+- ASCII folding for Estonian diacritics in slugs (õ→o, ä→a, ö→o, ü→u, š→s, ž→z)
 """
 
 import argparse
@@ -33,14 +34,32 @@ CHAIN = "Coop"
 CHANNEL = "bolt"
 
 
+def _ascii_fold(s: str) -> str:
+    """Fold common Estonian diacritics to ASCII so filenames/hosts match expectations."""
+    if not s:
+        return s
+    return (
+        s.replace("õ", "o").replace("Õ", "O")
+         .replace("ä", "a").replace("Ä", "A")
+         .replace("ö", "o").replace("Ö", "O")
+         .replace("ü", "u").replace("Ü", "U")
+         .replace("š", "s").replace("Š", "S")
+         .replace("ž", "z").replace("Ž", "Z")
+    )
+
+
 def slugify_host(name: str) -> str:
-    s = re.sub(r"[^a-z0-9]+", "-", name.lower())
+    # host slug (keep "bolt:" prefix)
+    base = _ascii_fold(name).lower()
+    s = re.sub(r"[^a-z0-9]+", "-", base)
     s = re.sub(r"-+", "-", s).strip("-")
     return f"bolt:{s}"
 
 
 def store_slug(name: str) -> str:
-    s = re.sub(r"[^a-z0-9]+", "-", name.lower())
+    # filename/path slug (ASCII folded)
+    base = _ascii_fold(name).lower()
+    s = re.sub(r"[^a-z0-9]+", "-", base)
     return re.sub(r"-+", "-", s).strip("-")
 
 
@@ -483,6 +502,7 @@ def run(
 
         store_host = slugify_host(store_name)
         slug = store_slug(store_name)
+        print(f"[info] computed store slug: {slug}")
 
         # Incremental preload
         known_ext_ids: Set[str] = set()
@@ -491,13 +511,14 @@ def run(
             if known_ext_ids:
                 print(f"[inc] preloaded {len(known_ext_ids)} known items for {store_host}")
 
-        # Determine categories (ABSOLUTE PATHS)
+        # Determine categories (ABSOLUTE PATHS + logs)
         cats_from_file: List[Tuple[str, str]] = []
         override_path = None
         if categories_file:
             cf = os.path.abspath(categories_file)
             if os.path.isfile(cf):
                 override_path = cf
+                print(f"[info] categories-file resolved: {override_path}")
             else:
                 print(f"[info] categories-file not found: {cf}", file=sys.stderr)
         elif categories_dir:
@@ -505,6 +526,7 @@ def run(
             auto_path = os.path.join(base_dir, city, f"{slug}.txt")
             if os.path.isfile(auto_path):
                 override_path = auto_path
+                print(f"[info] auto categories file found: {override_path}")
             else:
                 print(f"[info] auto categories file not found: {auto_path}", file=sys.stderr)
 
@@ -545,7 +567,9 @@ def run(
                             tmp.append(href)
             except Exception as e:
                 print(f"[warn] could not read categories file: {override_path} ({e})", file=sys.stderr)
-            if tmp:
+            if not tmp:
+                print(f"[warn] categories file is empty or has no valid lines: {override_path}", file=sys.stderr)
+            else:
                 base_url = base_url_from_category(
                     tmp[0] if tmp[0].startswith("http") else normalize_cat_url(start_url, tmp[0])
                 )
