@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Install psql client
         run: |
@@ -46,7 +48,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          # final table
+          # Final table
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
             CREATE TABLE IF NOT EXISTS approved_matches (
               barbora_uid   text NOT NULL,
@@ -72,7 +74,7 @@ jobs:
               ON approved_matches (store, match_uid);
           "
 
-          # persistent stage table (NOT TEMP on purpose)
+          # Persistent STAGE: all TEXT so any CSV columns can load
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
             CREATE TABLE IF NOT EXISTS approved_matches_stage (
               barbora_uid   text,
@@ -85,15 +87,15 @@ jobs:
               match_size    text,
               match_ean     text,
               store         text,
-              similarity    numeric(5,4),
-              size_diff_pct numeric(6,2),
+              similarity    text,
+              size_diff_pct text,
               tier          text,
-              is_best_match boolean
+              is_best_match text
             );
             TRUNCATE TABLE approved_matches_stage;
           "
 
-          # view
+          # View
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
             CREATE OR REPLACE VIEW approved_best_match_per_store AS
             SELECT DISTINCT ON (barbora_uid, store)
@@ -117,6 +119,7 @@ jobs:
           ls -lah "$GITHUB_WORKSPACE/$CSV_DIR" || true
 
           upsert_from_stage () {
+            local chain="$1"
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
               INSERT INTO approved_matches
               (barbora_uid, barbora_name, barbora_brand, barbora_size,
@@ -124,14 +127,26 @@ jobs:
                store, similarity, size_diff_pct, tier, is_best_match)
               SELECT
                 NULLIF(BTRIM(barbora_uid), ''),
-                barbora_name, barbora_brand, barbora_size,
+                NULLIF(barbora_name,''),
+                NULLIF(barbora_brand,''),
+                NULLIF(barbora_size,''),
                 NULLIF(BTRIM(match_uid), ''),
-                match_name, match_brand, match_size, match_ean,
-                LOWER(COALESCE(NULLIF(BTRIM(store), ''), '$1')),
-                similarity, size_diff_pct, tier, is_best_match
+                NULLIF(match_name,''),
+                NULLIF(match_brand,''),
+                NULLIF(match_size,''),
+                NULLIF(match_ean,''),
+                LOWER(COALESCE(NULLIF(BTRIM(store), ''), '$chain')),
+                NULLIF(similarity,'')::numeric,
+                NULLIF(size_diff_pct,'')::numeric,
+                NULLIF(tier,''),
+                CASE
+                  WHEN LOWER(COALESCE(is_best_match,'')) IN ('1','t','true','yes','y') THEN TRUE
+                  WHEN LOWER(COALESCE(is_best_match,'')) IN ('0','f','false','no','n') THEN FALSE
+                  ELSE NULL
+                END
               FROM approved_matches_stage
               WHERE NULLIF(BTRIM(barbora_uid),'') IS NOT NULL
-                AND NULLIF(BTRIM(match_uid),'') IS NOT NULL
+                AND NULLIF(BTRIM(match_uid),'')   IS NOT NULL
               ON CONFLICT (barbora_uid, store, match_uid) DO UPDATE SET
                 barbora_name   = EXCLUDED.barbora_name,
                 barbora_brand  = EXCLUDED.barbora_brand,
@@ -159,10 +174,27 @@ jobs:
               echo "::error file=$rel::File not found"; exit 1
             fi
 
-            # load CSV into persistent stage via STDIN
-            cat "$abs" | psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy approved_matches_stage FROM STDIN WITH CSV HEADER"
+            # Build a column list from the CSV header (normalized)
+            header=$(head -n1 "$abs" | tr -d '\r')
+            IFS=',' read -r -a rawcols <<< "$header"
+            allowed=" barbora_uid barbora_name barbora_brand barbora_size match_uid match_name match_brand match_size match_ean store similarity size_diff_pct tier is_best_match "
+            cols=()
+            for h in "${rawcols[@]}"; do
+              c=$(echo "$h" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_]+/_/g' | sed -E 's/^_+|_+$//g')
+              if [[ " $allowed " == *" $c "* ]]; then
+                cols+=("$c")
+              fi
+            done
+            if [[ ${#cols[@]} -eq 0 ]]; then
+              echo "::error ::No recognized columns in $rel header"; exit 1
+            fi
+            col_list=$(IFS=, ; echo "${cols[*]}")
+            echo "Copying columns: $col_list"
 
-            # upsert to final + clear stage
+            # Load into stage via STDIN with the detected columns
+            cat "$abs" | psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy approved_matches_stage ($col_list) FROM STDIN WITH CSV HEADER"
+
+            # Upsert & clear stage
             upsert_from_stage "$chain"
           }
 
