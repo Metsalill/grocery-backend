@@ -348,8 +348,8 @@ async def _fetch_json(url: str, max_tries: int = 7) -> Optional[Dict]:
                 pass
             if attempt < max_tries - 1:
                 await _sleep_backoff(attempt, retry_after, base=1.0)
-            else:
-                return None
+                continue
+            return None
 
 # ---------- Wolt parsers ----------
 def _html_get_next_data(html: str) -> Optional[Dict]:
@@ -534,7 +534,7 @@ def _looks_like_noise(name: Optional[str]) -> bool:
         return True
     if n.endswith(" tooted") or n.endswith("tooted"):
         return True
-    # NOTE: we no longer reject single-word short names (e.g., "Piim", "Munad")
+    # NOTE: do NOT reject short single-word items (e.g., "Piim")
     return False
 
 def _valid_productish(name: Optional[str], price: Optional[float], gtin_norm: Optional[str],
@@ -997,7 +997,7 @@ async def _extract_items_from_dom(page) -> List[Dict]:
     if (!card) card = a.closest('a');
     if (!card) card = a.parentElement;
 
-    // Name: prefer aria-label on the anchor; then title attr; then obvious title nodes inside the card
+    // Name: prefer aria-label or title on the anchor; then obvious title nodes inside the card
     let name = a.getAttribute('aria-label') || a.getAttribute('title') || '';
     if (!name && card) {
       const t = card.querySelector('h2,h3,h4,[data-testid*="title"],[class*="title"]');
@@ -1066,6 +1066,38 @@ async def _extract_items_from_dom(page) -> List[Dict]:
             item["image"] = it["image"]
         items.append(item)
     return items
+
+async def _infinite_scroll(page, rounds: int, req_delay: float) -> None:
+    """
+    More robust scrolling to force Wolt to load all product cards.
+    """
+    try:
+        last_h = 0
+        stagnant = 0
+        for i in range(max(1, rounds)):
+            await page.mouse.wheel(0, 1600)
+            await page.wait_for_timeout(int(max(req_delay, 0.5)*1000 + random.uniform(250, 700)))
+            # also jump to bottom each few rounds
+            if i % 4 == 3:
+                try:
+                    await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                except Exception:
+                    pass
+            # watch content growth
+            try:
+                h = await page.evaluate("document.body.scrollHeight || 0")
+            except Exception:
+                h = 0
+            if h <= last_h:
+                stagnant += 1
+            else:
+                stagnant = 0
+            last_h = h
+            # if no growth for several rounds, bail early
+            if stagnant >= 5:
+                break
+    except Exception:
+        pass
 
 async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: float,
                                    goto_strategy: str, nav_timeout_ms: int):
@@ -1146,10 +1178,8 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
                 print("[skip] no grid anchors or JSON after geolocation → skipping category")
                 return [], collected_blobs, (await page.content()), {}, await _extract_venue_id_any(page, await page.content())
 
-            # Scroll to fetch more cards/resources
-            for _ in range(16):
-                await page.mouse.wheel(0, 1600)
-                await page.wait_for_timeout(int(max(req_delay, 0.5)*1000 + random.uniform(300, 900)))
+            # Scroll a lot to fetch more cards/resources
+            await _infinite_scroll(page, rounds=40, req_delay=req_delay)
 
             tile_prices = await _scrape_tile_prices(page)
 
@@ -1356,19 +1386,23 @@ async def run_wolt(args, categories: List[str], on_rows_async) -> None:
         existing_gtins = await _fetch_existing_gtins(store_host_cat)
 
         rows_raw = []
+        skipped_noise = 0
+        made = 0
         for item in items:
             row = _extract_row_from_item(item, cat, store_host_cat)
             if not row:
+                skipped_noise += 1
                 continue
             if row.get("ean_norm") and row["ean_norm"] in existing_gtins:
                 continue
             rows_raw.append(row)
+            made += 1
 
         rows = rows_raw
         if args.max_products and args.max_products > 0:
             rows = rows[: args.max_products]
 
-        print(f"[info] category rows: {len(rows)}" + (" (pw-fallback)" if not payload else ""))
+        print(f"[info] category rows: {len(rows)} (built={made} skipped={skipped_noise})" + (" (pw-fallback)" if not payload else ""))
         await on_rows_async(rows)
 
         if args.upsert_per_category and rows:
