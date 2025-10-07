@@ -1,165 +1,132 @@
-name: Import approved matches to Railway
+name: Import approved matches (CSV → DB)
 
 on:
   workflow_dispatch:
     inputs:
-      csv_dir:
-        description: Folder containing approved_*_matches.csv
+      csv_path:
+        description: "Path to CSV in the repo (e.g., data/approved_rimi_matches.csv)"
         required: true
-        default: data
+        default: "data/approved_rimi_matches.csv"
+      left_chain:
+        description: "Source chain label for LEFT side (ignored if CSV already has left_chain)"
+        required: true
+        default: "Rimi"
+      right_chain:
+        description: "Target chain label for RIGHT side (e.g., Canonical, Barbora)"
+        required: true
+        default: "Canonical"
+      csv_has_chain_cols:
+        description: "Does CSV include columns left_chain,right_chain? (true/false)"
+        required: true
+        default: "false"
 
 jobs:
   import:
     runs-on: ubuntu-latest
+    env:
+      PGHOST: ${{ secrets.PGHOST }}
+      PGPORT: ${{ secrets.PGPORT }}
+      PGUSER: ${{ secrets.PGUSER }}
+      PGPASSWORD: ${{ secrets.PGPASSWORD }}
+      PGDATABASE: ${{ secrets.PGDATABASE }}
+      CSV_PATH: ${{ github.workspace }}/$﻿{{ github.event.inputs.csv_path }}
+      LEFT_CHAIN: $﻿{{ github.event.inputs.left_chain }}
+      RIGHT_CHAIN: $﻿{{ github.event.inputs.right_chain }}
+      CSV_HAS_CHAIN_COLS: $﻿{{ github.event.inputs.csv_has_chain_cols }}
 
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
+
+      - name: Ensure CSV exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "$CSV_PATH" || { echo "CSV not found at: $CSV_PATH"; exit 1; }
+          echo "Found CSV: $CSV_PATH"
+          head -n 5 "$CSV_PATH" || true
 
       - name: Install psql client
+        shell: bash
         run: |
-          sudo apt-get update
+          set -euo pipefail
+          sudo apt-get update -y
           sudo apt-get install -y postgresql-client
 
-      - name: Prepare DATABASE_URL (public) with sslmode=require
-        id: prep
-        env:
-          DBURL_PUBLIC: ${{ secrets.DATABASE_URL_PUBLIC }}
-          DBURL: ${{ secrets.DATABASE_URL }}
+      - name: Import CSV → approved_matches_active (idempotent upsert)
+        shell: bash
         run: |
           set -euo pipefail
-          URL="${DBURL_PUBLIC:-$DBURL}"
-          if [[ -z "$URL" ]]; then
-            echo "DATABASE_URL_PUBLIC or DATABASE_URL secret is missing." >&2
-            exit 1
-          fi
-          if [[ "$URL" == *"?"* ]]; then
-            [[ "$URL" == *"sslmode="* ]] || URL="${URL}&sslmode=require"
+
+          cat > /tmp/import_matches.sql <<'SQL'
+          \set ON_ERROR_STOP on
+
+          BEGIN;
+
+          -- 1) Active table = one target per left item
+          CREATE TABLE IF NOT EXISTS approved_matches_active (
+            left_chain  text    NOT NULL,       -- e.g. 'Rimi'
+            left_key    text    NOT NULL,       -- e.g. rimi_product_id / EAN / name|size hash
+            right_chain text    NOT NULL,       -- e.g. 'Canonical' or 'Barbora'
+            right_key   text    NOT NULL,       -- e.g. canonical product_id/EAN
+            note        text,
+            approved_by text,
+            approved_at timestamptz NOT NULL DEFAULT now(),
+            PRIMARY KEY (left_chain, left_key)  -- enables ON CONFLICT(left_chain,left_key)
+          );
+
+          -- 2) Temp staging for COPY (auto-drops on COMMIT)
+          DROP TABLE IF EXISTS approved_matches_import;
+          CREATE TEMP TABLE approved_matches_import (
+            left_chain  text,
+            left_key    text,
+            right_chain text,
+            right_key   text,
+            note        text,
+            approved_by text
+          );
+
+          -- 3) COPY (two variants; YAML picks one by replacing the token below)
+          -- __COPY_BLOCK__
+
+          -- 4) Upsert into active (idempotent & allows remaps)
+          INSERT INTO approved_matches_active (left_chain,left_key,right_chain,right_key,note,approved_by)
+          SELECT left_chain,left_key,right_chain,right_key,note,approved_by
+          FROM approved_matches_import
+          WHERE left_key IS NOT NULL AND right_key IS NOT NULL
+          ON CONFLICT (left_chain,left_key) DO UPDATE
+            SET right_chain = EXCLUDED.right_chain,
+                right_key   = EXCLUDED.right_key,
+                note        = COALESCE(EXCLUDED.note, approved_matches_active.note),
+                approved_by = COALESCE(EXCLUDED.approved_by, approved_matches_active.approved_by),
+                approved_at = now();
+
+          COMMIT;
+
+          -- Quick visibility
+          \echo ''
+          \echo '== Row counts per left_chain (approved_matches_active) =='
+          SELECT left_chain, COUNT(*) AS rows FROM approved_matches_active GROUP BY 1 ORDER BY 1;
+          SQL
+
+          # Build the correct COPY block (no trailing backslashes; keep semicolons!)
+          if [[ "$CSV_HAS_CHAIN_COLS" == "true" ]]; then
+            COPY_BLOCK="\\copy approved_matches_import (left_chain,left_key,right_chain,right_key,note,approved_by)\n  FROM '$CSV_PATH' CSV HEADER;"
           else
-            URL="${URL}?sslmode=require"
+            # CSV has only left_key,right_key,(optional note,approved_by) – we hardcode chain labels
+            # Try widest header set first; if missing columns, psql will still succeed because COPY matches by position.
+            # If your CSV only has two columns, make sure they are left_key,right_key in that order.
+            COPY_BLOCK="\\copy approved_matches_import (left_key,right_key,note,approved_by)\n  FROM '$CSV_PATH' CSV HEADER;\n\nUPDATE approved_matches_import SET left_chain = :'LEFT_CHAIN', right_chain = :'RIGHT_CHAIN';"
           fi
-          echo "url=$URL" >> "$GITHUB_OUTPUT"
 
-      - name: Create tables / views (idempotent)
-        env:
-          DATABASE_URL: ${{ steps.prep.outputs.url }}
+          # Inject the COPY block into the SQL file
+          perl -0777 -pe "s/__COPY_BLOCK__/${COPY_BLOCK//\//\\/}/g" -i /tmp/import_matches.sql
+
+          # Run
+          psql -v LEFT_CHAIN="$LEFT_CHAIN" -v RIGHT_CHAIN="$RIGHT_CHAIN" -f /tmp/import_matches.sql
+
+      - name: Show sample rows
+        shell: bash
         run: |
           set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE TABLE IF NOT EXISTS approved_matches (barbora_uid text NOT NULL, barbora_name text, barbora_brand text, barbora_size text, match_uid text NOT NULL, match_name text, match_brand text, match_size text, match_ean text, store text NOT NULL, similarity numeric(10,6), size_diff_pct numeric(10,4), tier text, is_best_match boolean, reviewed_at timestamptz DEFAULT now(), PRIMARY KEY (barbora_uid, store, match_uid));"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE INDEX IF NOT EXISTS idx_approved_matches_b ON approved_matches (barbora_uid);"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE INDEX IF NOT EXISTS idx_approved_matches_s ON approved_matches (store, match_uid);"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE TABLE IF NOT EXISTS approved_matches_stage (barbora_uid text, barbora_name text, barbora_brand text, barbora_size text, match_uid text, match_name text, match_brand text, match_size text, match_ean text, store text, similarity text, size_diff_pct text, tier text, is_best_match text);"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "TRUNCATE approved_matches_stage;"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE TABLE IF NOT EXISTS cross_store_links (store_a text NOT NULL, product_id_a bigint NOT NULL, store_b text NOT NULL, product_id_b bigint NOT NULL, source text DEFAULT 'approved_matches', created_at timestamptz DEFAULT now(), PRIMARY KEY (store_a, product_id_a, store_b, product_id_b), CHECK (store_a <> store_b));"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "CREATE OR REPLACE VIEW cross_store_links_expanded AS SELECT store_a AS src_store, product_id_a AS src_product_id, store_b AS dst_store, product_id_b AS dst_product_id, source, created_at FROM cross_store_links UNION ALL SELECT store_b, product_id_b, store_a, product_id_a, source, created_at FROM cross_store_links;"
-
-      - name: List CSV directory
-        env:
-          CSV_DIR: ${{ github.event.inputs.csv_dir }}
-          GITHUB_WORKSPACE: ${{ github.workspace }}
-        run: |
-          set -euo pipefail
-          ls -lah "$GITHUB_WORKSPACE/$CSV_DIR" || true
-
-      # ---------- Import SELVER ----------
-      - name: Import approved_selver_matches.csv
-        env:
-          DATABASE_URL: ${{ steps.prep.outputs.url }}
-          CSV_DIR: ${{ github.event.inputs.csv_dir }}
-          GITHUB_WORKSPACE: ${{ github.workspace }}
-        run: |
-          set -euo pipefail
-          FILE="$GITHUB_WORKSPACE/$CSV_DIR/approved_selver_matches.csv"
-          if [[ ! -f "$FILE" ]]; then echo "::error file=approved_selver_matches.csv::File not found"; exit 1; fi
-
-          header=$(head -n1 "$FILE" | tr -d '\r')
-          IFS=',' read -r -a rawcols <<< "$header"
-          allowed=" barbora_uid barbora_name barbora_brand barbora_size match_uid match_name match_brand match_size match_ean store similarity size_diff_pct tier is_best_match "
-          cols=()
-          for h in "${rawcols[@]}"; do
-            c=$(echo "$h" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_]+/_/g' | sed -E 's/^_+|_+$//g')
-            if [[ " $allowed " == *" $c "* ]]; then cols+=("$c"); fi
-          done
-          if [[ ${#cols[@]} -eq 0 ]]; then echo "::error ::No recognized columns in approved_selver_matches.csv"; exit 1; fi
-          col_list=$(IFS=, ; echo "${cols[*]}")
-          echo "Copying columns: $col_list"
-
-          cat "$FILE" | psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy approved_matches_stage ($col_list) FROM STDIN WITH CSV HEADER"
-
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "INSERT INTO approved_matches (barbora_uid, barbora_name, barbora_brand, barbora_size, match_uid, match_name, match_brand, match_size, match_ean, store, similarity, size_diff_pct, tier, is_best_match, reviewed_at) SELECT NULLIF(BTRIM(barbora_uid),''), NULLIF(barbora_name,''), NULLIF(barbora_brand,''), NULLIF(barbora_size,''), NULLIF(BTRIM(match_uid),''), NULLIF(match_name,''), NULLIF(match_brand,''), NULLIF(match_size,''), NULLIF(match_ean,''), LOWER(COALESCE(NULLIF(BTRIM(store), ''), 'selver')), CASE WHEN NULLIF(BTRIM(similarity),'') IS NULL THEN NULL WHEN REGEXP_REPLACE(BTRIM(similarity), ',', '.') ~ '^-?[0-9]+(\\.[0-9]+)?$' THEN REGEXP_REPLACE(BTRIM(similarity), ',', '.')::numeric ELSE NULL END, CASE WHEN NULLIF(BTRIM(size_diff_pct),'') IS NULL THEN NULL WHEN REGEXP_REPLACE(REGEXP_REPLACE(BTRIM(size_diff_pct), '%', '', 'g'), ',', '.') ~ '^-?[0-9]+(\\.[0-9]+)?$' THEN REGEXP_REPLACE(REGEXP_REPLACE(BTRIM(size_diff_pct), '%', '', 'g'), ',', '.')::numeric ELSE NULL END, NULLIF(tier,''), CASE WHEN LOWER(COALESCE(is_best_match,'')) IN ('1','t','true','yes','y') THEN TRUE WHEN LOWER(COALESCE(is_best_match,'')) IN ('0','f','false','no','n') THEN FALSE ELSE NULL END, now() FROM approved_matches_stage WHERE NULLIF(BTRIM(barbora_uid),'') IS NOT NULL AND NULLIF(BTRIM(match_uid),'') IS NOT NULL ON CONFLICT (barbora_uid, store, match_uid) DO UPDATE SET barbora_name=EXCLUDED.barbora_name, barbora_brand=EXCLUDED.barbora_brand, barbora_size=EXCLUDED.barbora_size, match_name=EXCLUDED.match_name, match_brand=EXCLUDED.match_brand, match_size=EXCLUDED.match_size, match_ean=EXCLUDED.match_ean, similarity=EXCLUDED.similarity, size_diff_pct=EXCLUDED.size_diff_pct, tier=EXCLUDED.tier, is_best_match=EXCLUDED.is_best_match, reviewed_at=now();"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "TRUNCATE approved_matches_stage;"
-
-      # ---------- Import RIMI ----------
-      - name: Import approved_rimi_matches.csv
-        env:
-          DATABASE_URL: ${{ steps.prep.outputs.url }}
-          CSV_DIR: ${{ github.event.inputs.csv_dir }}
-          GITHUB_WORKSPACE: ${{ github.workspace }}
-        run: |
-          set -euo pipefail
-          FILE="$GITHUB_WORKSPACE/$CSV_DIR/approved_rimi_matches.csv"
-          if [[ ! -f "$FILE" ]]; then echo "::error file=approved_rimi_matches.csv::File not found"; exit 1; fi
-
-          header=$(head -n1 "$FILE" | tr -d '\r')
-          IFS=',' read -r -a rawcols <<< "$header"
-          allowed=" barbora_uid barbora_name barbora_brand barbora_size match_uid match_name match_brand match_size match_ean store similarity size_diff_pct tier is_best_match "
-          cols=()
-          for h in "${rawcols[@]}"; do
-            c=$(echo "$h" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_]+/_/g' | sed -E 's/^_+|_+$//g')
-            if [[ " $allowed " == *" $c "* ]]; then cols+=("$c"); fi
-          done
-          if [[ ${#cols[@]} -eq 0 ]]; then echo "::error ::No recognized columns in approved_rimi_matches.csv"; exit 1; fi
-          col_list=$(IFS=, ; echo "${cols[*]}")
-          echo "Copying columns: $col_list"
-
-          cat "$FILE" | psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy approved_matches_stage ($col_list) FROM STDIN WITH CSV HEADER"
-
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "INSERT INTO approved_matches (barbora_uid, barbora_name, barbora_brand, barbora_size, match_uid, match_name, match_brand, match_size, match_ean, store, similarity, size_diff_pct, tier, is_best_match, reviewed_at) SELECT NULLIF(BTRIM(barbora_uid),''), NULLIF(barbora_name,''), NULLIF(barbora_brand,''), NULLIF(barbora_size,''), NULLIF(BTRIM(match_uid),''), NULLIF(match_name,''), NULLIF(match_brand,''), NULLIF(match_size,''), NULLIF(match_ean,''), LOWER(COALESCE(NULLIF(BTRIM(store), ''), 'rimi')), CASE WHEN NULLIF(BTRIM(similarity),'') IS NULL THEN NULL WHEN REGEXP_REPLACE(BTRIM(similarity), ',', '.') ~ '^-?[0-9]+(\\.[0-9]+)?$' THEN REGEXP_REPLACE(BTRIM(similarity), ',', '.')::numeric ELSE NULL END, CASE WHEN NULLIF(BTRIM(size_diff_pct),'') IS NULL THEN NULL WHEN REGEXP_REPLACE(REGEXP_REPLACE(BTRIM(size_diff_pct), '%', '', 'g'), ',', '.') ~ '^-?[0-9]+(\\.[0-9]+)?$' THEN REGEXP_REPLACE(REGEXP_REPLACE(BTRIM(size_diff_pct), '%', '', 'g'), ',', '.')::numeric ELSE NULL END, NULLIF(tier,''), CASE WHEN LOWER(COALESCE(is_best_match,'')) IN ('1','t','true','yes','y') THEN TRUE WHEN LOWER(COALESCE(is_best_match,'')) IN ('0','f','false','no','n') THEN FALSE ELSE NULL END, now() FROM approved_matches_stage WHERE NULLIF(BTRIM(barbora_uid),'') IS NOT NULL AND NULLIF(BTRIM(match_uid),'') IS NOT NULL ON CONFLICT (barbora_uid, store, match_uid) DO UPDATE SET barbora_name=EXCLUDED.barbora_name, barbora_brand=EXCLUDED.barbora_brand, barbora_size=EXCLUDED.barbora_size, match_name=EXCLUDED.match_name, match_brand=EXCLUDED.match_brand, match_size=EXCLUDED.match_size, match_ean=EXCLUDED.match_ean, similarity=EXCLUDED.similarity, size_diff_pct=EXCLUDED.size_diff_pct, tier=EXCLUDED.tier, is_best_match=EXCLUDED.is_best_match, reviewed_at=now();"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "TRUNCATE approved_matches_stage;"
-
-      # ---------- Import PRISMA ----------
-      - name: Import approved_prisma_matches.csv
-        env:
-          DATABASE_URL: ${{ steps.prep.outputs.url }}
-          CSV_DIR: ${{ github.event.inputs.csv_dir }}
-          GITHUB_WORKSPACE: ${{ github.workspace }}
-        run: |
-          set -euo pipefail
-          FILE="$GITHUB_WORKSPACE/$CSV_DIR/approved_prisma_matches.csv"
-          if [[ ! -f "$FILE" ]]; then echo "::error file=approved_prisma_matches.csv::File not found"; exit 1; fi
-
-          header=$(head -n1 "$FILE" | tr -d '\r')
-          IFS=',' read -r -a rawcols <<< "$header"
-          allowed=" barbora_uid barbora_name barbora_brand barbora_size match_uid match_name match_brand match_size match_ean store similarity size_diff_pct tier is_best_match "
-          cols=()
-          for h in "${rawcols[@]}"; do
-            c=$(echo "$h" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_]+/_/g' | sed -E 's/^_+|_+$//g')
-            if [[ " $allowed " == *" $c "* ]]; then cols+=("$c"); fi
-          done
-          if [[ ${#cols[@]} -eq 0 ]]; then echo "::error ::No recognized columns in approved_prisma_matches.csv"; exit 1; fi
-          col_list=$(IFS=, ; echo "${cols[*]}")
-          echo "Copying columns: $col_list"
-
-          cat "$FILE" | psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy approved_matches_stage ($col_list) FROM STDIN WITH CSV HEADER"
-
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "INSERT INTO approved_matches (barbora_uid, barbora_name, barbora_brand, barbora_size, match_uid, match_name, match_brand, match_size, match_ean, store, similarity, size_diff_pct, tier, is_best_match, reviewed_at) SELECT NULLIF(BTRIM(barbora_uid),''), NULLIF(barbora_name,''), NULLIF(barbora_brand,''), NULLIF(barbora_size,''), NULLIF(BTRIM(match_uid),''), NULLIF(match_name,''), NULLIF(match_brand,''), NULLIF(match_size,''), NULLIF(match_ean,''), LOWER(COALESCE(NULLIF(BTRIM(store), ''), 'prisma')), CASE WHEN NULLIF(BTRIM(similarity),'') IS NULL THEN NULL WHEN REGEXP_REPLACE(BTRIM(similarity), ',', '.') ~ '^-?[0-9]+(\\.[0-9]+)?$' THEN REGEXP_REPLACE(BTRIM(similarity), ',', '.')::numeric ELSE NULL END, CASE WHEN NULLIF(BTRIM(size_diff_pct),'') IS NULL THEN NULL WHEN REGEXP_REPLACE(REGEXP_REPLACE(BTRIM(size_diff_pct), '%', '', 'g'), ',', '.') ~ '^-?[0-9]+(\\.[0-9]+)?$' THEN REGEXP_REPLACE(REGEXP_REPLACE(BTRIM(size_diff_pct), '%', '', 'g'), ',', '.')::numeric ELSE NULL END, NULLIF(tier,''), CASE WHEN LOWER(COALESCE(is_best_match,'')) IN ('1','t','true','yes','y') THEN TRUE WHEN LOWER(COALESCE(is_best_match,'')) IN ('0','f','false','no','n') THEN FALSE ELSE NULL END, now() FROM approved_matches_stage WHERE NULLIF(BTRIM(barbora_uid),'') IS NOT NULL AND NULLIF(BTRIM(match_uid),'') IS NOT NULL ON CONFLICT (barbora_uid, store, match_uid) DO UPDATE SET barbora_name=EXCLUDED.barbora_name, barbora_brand=EXCLUDED.barbora_brand, barbora_size=EXCLUDED.barbora_size, match_name=EXCLUDED.match_name, match_brand=EXCLUDED.match_brand, match_size=EXCLUDED.match_size, match_ean=EXCLUDED.match_ean, similarity=EXCLUDED.similarity, size_diff_pct=EXCLUDED.size_diff_pct, tier=EXCLUDED.tier, is_best_match=EXCLUDED.is_best_match, reviewed_at=now();"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "TRUNCATE approved_matches_stage;"
-
-      - name: Materialize Barbora links (approved_matches → cross_store_links)
-        env:
-          DATABASE_URL: ${{ steps.prep.outputs.url }}
-        run: |
-          set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "WITH ranked AS (SELECT am.barbora_uid, LOWER(am.store) AS store, am.match_uid, am.match_ean, am.is_best_match, am.similarity, ROW_NUMBER() OVER (PARTITION BY am.barbora_uid, LOWER(am.store) ORDER BY COALESCE(am.is_best_match,false) DESC, COALESCE(am.similarity,0) DESC, COALESCE(am.match_uid, am.match_ean) ASC) AS rn FROM approved_matches am WHERE LOWER(am.store) IN ('rimi','selver','prisma')), best AS (SELECT * FROM ranked WHERE rn = 1), barbora_resolved AS (SELECT b.barbora_uid, b.store, b.match_uid, b.match_ean, p_b.id AS barbora_product_id FROM best b JOIN products p_b ON p_b.id::text = b.barbora_uid), other_resolved AS (SELECT br.barbora_uid, br.store, br.barbora_product_id, COALESCE((SELECT m.product_id FROM ext_product_map m WHERE lower(m.source)=br.store AND (m.ext_id=br.match_uid OR m.source_url=br.match_uid) LIMIT 1), (SELECT p.id FROM products p WHERE p.id::text=br.match_uid LIMIT 1), (SELECT p.id FROM products p WHERE p.ean=br.match_ean LIMIT 1)) AS other_product_id FROM barbora_resolved br) INSERT INTO cross_store_links (store_a, product_id_a, store_b, product_id_b, source) SELECT 'barbora', o.barbora_product_id, o.store, o.other_product_id, 'approved_matches' FROM other_resolved o WHERE o.other_product_id IS NOT NULL ON CONFLICT DO NOTHING;"
-
-      - name: Sanity counts
-        env:
-          DATABASE_URL: ${{ steps.prep.outputs.url }}
-        run: |
-          set -euo pipefail
-          echo "== approved_matches per store =="
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT store, COUNT(*) FROM approved_matches GROUP BY store ORDER BY 1;"
-          echo "== Barbora links written =="
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT store_b AS store, COUNT(*) AS links FROM cross_store_links WHERE store_a='barbora' GROUP BY store_b ORDER BY 1;"
+          psql -c "TABLE approved_matches_active LIMIT 15;"
