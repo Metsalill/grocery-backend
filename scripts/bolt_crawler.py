@@ -5,6 +5,7 @@
 Coop on Bolt Food → categories → products → CSV / upsert to staging_coop_products
 - Robust category discovery (handles hc/… chip pages)
 - Incremental option (--skip-known) that avoids re-crawling items we already have for this store_host
+- Absolute-path resolution for --categories-dir / --categories-file (works from any CWD)
 """
 
 import argparse
@@ -490,21 +491,27 @@ def run(
             if known_ext_ids:
                 print(f"[inc] preloaded {len(known_ext_ids)} known items for {store_host}")
 
-        # Determine categories
+        # Determine categories (ABSOLUTE PATHS)
         cats_from_file: List[Tuple[str, str]] = []
         override_path = None
-        if categories_file and os.path.isfile(categories_file):
-            override_path = categories_file
+        if categories_file:
+            cf = os.path.abspath(categories_file)
+            if os.path.isfile(cf):
+                override_path = cf
+            else:
+                print(f"[info] categories-file not found: {cf}", file=sys.stderr)
         elif categories_dir:
-            auto_path = os.path.join(categories_dir, city, f"{slug}.txt")
+            base_dir = os.path.abspath(categories_dir)
+            auto_path = os.path.join(base_dir, city, f"{slug}.txt")
             if os.path.isfile(auto_path):
                 override_path = auto_path
+            else:
+                print(f"[info] auto categories file not found: {auto_path}", file=sys.stderr)
 
         base_url = None
 
         # 1) Inline list has highest priority
-        inline_raw = categories_inline or os.getenv("BOLT_CATEGORIES_INLINE") or ""
-        inline_raw = inline_raw.strip()
+        inline_raw = (categories_inline or os.getenv("BOLT_CATEGORIES_INLINE") or "").strip()
         if inline_raw:
             tmp: List[str] = []
             for part in re.split(r"[,\n]", inline_raw):
@@ -530,11 +537,14 @@ def run(
         # 2) Category file (if no inline)
         elif override_path:
             tmp: List[str] = []
-            with open(override_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    href = line.strip()
-                    if href and not href.startswith("#"):
-                        tmp.append(href)
+            try:
+                with open(override_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        href = line.strip()
+                        if href and not href.startswith("#"):
+                            tmp.append(href)
+            except Exception as e:
+                print(f"[warn] could not read categories file: {override_path} ({e})", file=sys.stderr)
             if tmp:
                 base_url = base_url_from_category(
                     tmp[0] if tmp[0].startswith("http") else normalize_cat_url(start_url, tmp[0])
@@ -699,7 +709,9 @@ def run(
                 )
 
         # CSV
-        os.makedirs(os.path.dirname(out_csv), exist_ok=True)
+        csv_dir = os.path.dirname(out_csv)
+        if csv_dir:
+            os.makedirs(csv_dir, exist_ok=True)
         with open(out_csv, "w", newline="", encoding="utf-8") as f:
             w = csv.DictWriter(
                 f,
