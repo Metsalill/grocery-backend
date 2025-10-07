@@ -8,31 +8,21 @@ on:
         required: true
         default: "data/approved_rimi_matches.csv"
       left_chain:
-        description: "Source chain label for LEFT side (ignored if CSV already has left_chain)"
+        description: "LEFT/source chain label (ignored if CSV already has left_chain)"
         required: true
         default: "Rimi"
       right_chain:
-        description: "Target chain label for RIGHT side (e.g., Canonical, Barbora)"
+        description: "RIGHT/target chain label (e.g., Canonical, Barbora)"
         required: true
         default: "Canonical"
       csv_has_chain_cols:
-        description: "Does CSV include columns left_chain,right_chain? (true/false)"
+        description: "CSV already has left_chain,right_chain columns? (true/false)"
         required: true
         default: "false"
 
 jobs:
   import:
     runs-on: ubuntu-latest
-    env:
-      PGHOST: ${{ secrets.PGHOST }}
-      PGPORT: ${{ secrets.PGPORT }}
-      PGUSER: ${{ secrets.PGUSER }}
-      PGPASSWORD: ${{ secrets.PGPASSWORD }}
-      PGDATABASE: ${{ secrets.PGDATABASE }}
-      CSV_PATH: ${{ github.workspace }}/$﻿{{ github.event.inputs.csv_path }}
-      LEFT_CHAIN: $﻿{{ github.event.inputs.left_chain }}
-      RIGHT_CHAIN: $﻿{{ github.event.inputs.right_chain }}
-      CSV_HAS_CHAIN_COLS: $﻿{{ github.event.inputs.csv_has_chain_cols }}
 
     steps:
       - name: Checkout
@@ -40,10 +30,18 @@ jobs:
 
       - name: Ensure CSV exists
         shell: bash
+        env:
+          INPUT_CSV_PATH: ${{ github.event.inputs.csv_path }}
         run: |
           set -euo pipefail
+          CSV_PATH="$GITHUB_WORKSPACE/$INPUT_CSV_PATH"
+          echo "Checking CSV at: $CSV_PATH"
+          echo "Repo root: $GITHUB_WORKSPACE"
+          ls -la "$GITHUB_WORKSPACE" | sed -n '1,80p' || true
+          echo "Listing data dir (if present):"
+          ls -la "$GITHUB_WORKSPACE/data" || true
           test -f "$CSV_PATH" || { echo "CSV not found at: $CSV_PATH"; exit 1; }
-          echo "Found CSV: $CSV_PATH"
+          echo "CSV head:"
           head -n 5 "$CSV_PATH" || true
 
       - name: Install psql client
@@ -55,27 +53,46 @@ jobs:
 
       - name: Import CSV → approved_matches_active (idempotent upsert)
         shell: bash
+        env:
+          PGHOST: ${{ secrets.PGHOST }}
+          PGPORT: ${{ secrets.PGPORT }}
+          PGUSER: ${{ secrets.PGUSER }}
+          PGPASSWORD: ${{ secrets.PGPASSWORD }}
+          PGDATABASE: ${{ secrets.PGDATABASE }}
+          INPUT_CSV_PATH: ${{ github.event.inputs.csv_path }}
+          INPUT_LEFT_CHAIN: ${{ github.event.inputs.left_chain }}
+          INPUT_RIGHT_CHAIN: ${{ github.event.inputs.right_chain }}
+          INPUT_CSV_HAS_CHAIN_COLS: ${{ github.event.inputs.csv_has_chain_cols }}
         run: |
           set -euo pipefail
 
+          CSV_PATH="$GITHUB_WORKSPACE/$INPUT_CSV_PATH"
+          LEFT_CHAIN="$INPUT_LEFT_CHAIN"
+          RIGHT_CHAIN="$INPUT_RIGHT_CHAIN"
+          CSV_HAS_CHAIN_COLS="$INPUT_CSV_HAS_CHAIN_COLS"
+
+          echo "CSV_PATH  : $CSV_PATH"
+          echo "LEFT_CHAIN: $LEFT_CHAIN"
+          echo "RIGHT_CHAIN: $RIGHT_CHAIN"
+          echo "CSV_HAS_CHAIN_COLS: $CSV_HAS_CHAIN_COLS"
+
           cat > /tmp/import_matches.sql <<'SQL'
           \set ON_ERROR_STOP on
-
           BEGIN;
 
-          -- 1) Active table = one target per left item
+          -- Active table: one target per left item
           CREATE TABLE IF NOT EXISTS approved_matches_active (
-            left_chain  text    NOT NULL,       -- e.g. 'Rimi'
-            left_key    text    NOT NULL,       -- e.g. rimi_product_id / EAN / name|size hash
-            right_chain text    NOT NULL,       -- e.g. 'Canonical' or 'Barbora'
-            right_key   text    NOT NULL,       -- e.g. canonical product_id/EAN
+            left_chain  text    NOT NULL,
+            left_key    text    NOT NULL,
+            right_chain text    NOT NULL,
+            right_key   text    NOT NULL,
             note        text,
             approved_by text,
             approved_at timestamptz NOT NULL DEFAULT now(),
-            PRIMARY KEY (left_chain, left_key)  -- enables ON CONFLICT(left_chain,left_key)
+            PRIMARY KEY (left_chain, left_key)
           );
 
-          -- 2) Temp staging for COPY (auto-drops on COMMIT)
+          -- Temp staging for COPY (auto-drops at COMMIT)
           DROP TABLE IF EXISTS approved_matches_import;
           CREATE TEMP TABLE approved_matches_import (
             left_chain  text,
@@ -86,10 +103,9 @@ jobs:
             approved_by text
           );
 
-          -- 3) COPY (two variants; YAML picks one by replacing the token below)
           -- __COPY_BLOCK__
 
-          -- 4) Upsert into active (idempotent & allows remaps)
+          -- Upsert (idempotent; allows remaps)
           INSERT INTO approved_matches_active (left_chain,left_key,right_chain,right_key,note,approved_by)
           SELECT left_chain,left_key,right_chain,right_key,note,approved_by
           FROM approved_matches_import
@@ -103,30 +119,35 @@ jobs:
 
           COMMIT;
 
-          -- Quick visibility
           \echo ''
           \echo '== Row counts per left_chain (approved_matches_active) =='
-          SELECT left_chain, COUNT(*) AS rows FROM approved_matches_active GROUP BY 1 ORDER BY 1;
+          SELECT left_chain, COUNT(*) AS rows
+          FROM approved_matches_active
+          GROUP BY 1 ORDER BY 1;
           SQL
 
-          # Build the correct COPY block (no trailing backslashes; keep semicolons!)
+          # Build the COPY block (no trailing backslashes; keep semicolons)
           if [[ "$CSV_HAS_CHAIN_COLS" == "true" ]]; then
-            COPY_BLOCK="\\copy approved_matches_import (left_chain,left_key,right_chain,right_key,note,approved_by)\n  FROM '$CSV_PATH' CSV HEADER;"
+            COPY_BLOCK="\\copy approved_matches_import (left_chain,left_key,right_chain,right_key,note,approved_by) FROM '$CSV_PATH' CSV HEADER;"
           else
-            # CSV has only left_key,right_key,(optional note,approved_by) – we hardcode chain labels
-            # Try widest header set first; if missing columns, psql will still succeed because COPY matches by position.
-            # If your CSV only has two columns, make sure they are left_key,right_key in that order.
-            COPY_BLOCK="\\copy approved_matches_import (left_key,right_key,note,approved_by)\n  FROM '$CSV_PATH' CSV HEADER;\n\nUPDATE approved_matches_import SET left_chain = :'LEFT_CHAIN', right_chain = :'RIGHT_CHAIN';"
+            COPY_BLOCK="\\copy approved_matches_import (left_key,right_key,note,approved_by) FROM '$CSV_PATH' CSV HEADER;
+UPDATE approved_matches_import SET left_chain = :'LEFT_CHAIN', right_chain = :'RIGHT_CHAIN';"
           fi
 
-          # Inject the COPY block into the SQL file
+          # Inject COPY block into SQL file
           perl -0777 -pe "s/__COPY_BLOCK__/${COPY_BLOCK//\//\\/}/g" -i /tmp/import_matches.sql
 
-          # Run
+          # Execute
           psql -v LEFT_CHAIN="$LEFT_CHAIN" -v RIGHT_CHAIN="$RIGHT_CHAIN" -f /tmp/import_matches.sql
 
       - name: Show sample rows
         shell: bash
+        env:
+          PGHOST: ${{ secrets.PGHOST }}
+          PGPORT: ${{ secrets.PGPORT }}
+          PGUSER: ${{ secrets.PGUSER }}
+          PGPASSWORD: ${{ secrets.PGPASSWORD }}
+          PGDATABASE: ${{ secrets.PGDATABASE }}
         run: |
           set -euo pipefail
           psql -c "TABLE approved_matches_active LIMIT 15;"
