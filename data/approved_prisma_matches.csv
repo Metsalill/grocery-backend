@@ -1,0 +1,370 @@
+barbora_uid,barbora_name,barbora_brand,barbora_size,match_uid,match_name,match_brand,match_size,match_ean,store,similarity,size_diff_pct,tier
+00261c4ccdd45a8c386dfe00bcc0ab89,Liköör JÄGERMEISTER 35% 350ml,JÄGERMEISTER,350,4067700013026,Jägermeister liköör 35%vol 350ml,Jägermeister,350 ml,4067700013026,prisma,0.9492,,strong
+003f7b2f29e75410832a8f936e4825aa,Whisky ABERLOUR 12YO 40% 700ml tuub,ABERLOUR,700ml,3047100056251,"Aberlour 12YO Single Malt Double Cask whiskey 40%, karbis 700 ml",Aberlour,700 ml,3047100056251,prisma,0.6263,0.0,weak
+00598067e72965db26be37dfddb862a1,"Täisterasepik EESTI PAGAR, 500 g",EESTI PAGAR,500 g,4740086016071,Eesti Pagar Täisterasepik 500 G,Eesti Pagar,500 g,4740086016071,prisma,1.0,0.0,strong
+00b81bd4f4d1e568f7c7407fa9d64317,"Sulatatud juust VALIO, 185g",VALIO,185g,4740553692609,Valio sulatatud juust 185g,Valio,185 g,4740553692609,prisma,1.0,0.0,strong
+013ca77b81f3edaf042d87e610726915,Burgerikukkel seesamis.Eesti Pagar 320g,EESTI PAGAR,320g,4740086011519,Eesti Pagar Burgerikukkel Seesamiseemnete 320 G,Eesti Pagar,320 g,4740086011519,prisma,0.913,0.0,strong
+01e5cea5ff24877daecc13344826da4e,KPN kv.vah. JAUME SERRA Cava Brut 750ml,JAUME SERRA,750ml,8411277205654,"Jaume Serra Cava Brut vahuvein 11,5%vol 750ml",Jaume Serra,750 ml,8411277205654,prisma,0.8182,0.0,medium
+021b24e712e80edcaaee8e1ce4966824,Kohvioad Classic PAULIG 1kg,PAULIG,1kg,6411300164783,Paulig kohvioad Classic 1 kg,Paulig,1 kg,6411300164783,prisma,0.9818,0.0,strong
+032a45d529980282127df318acdb2e7b,"Kaerajook ALPRO, 1l",ALPRO,1l,5411188115366,"Alpro kaerajook, 1l",Alpro,1 l,5411188115366,prisma,0.8182,0.0,medium
+03d232bac4c4351d56f22e64b0dc0a77,"Kohup. MO SAAREMAA rasvatu lak.vaba,500g",MO SAAREMAA,500g,4740153101112,"Mo Saaremaa Pehme kohupiim rasvatu, laktoosivaba 500 g",Mo Saaremaa,500 g,4740153101112,prisma,0.7021,0.0,weak
+03f37ee27b1aa6ad7cab0399a9bc34b6,Jahvatatud kohv In-Cup MERRILD 400g,MERRILD,400g,8000070002395,Merrild tassikohv In-Cup 400 g,Merrild,400 g,8000070002395,prisma,0.8,0.0,medium
+04a0ebb7bd2d36fa38c79d86e2241b1c,"Sinihallitusjuust GOLDEN MONARH, 100g",GOLDEN MONARCH,100g,4740572006234,Golden Monarch sinihallitusjuust 100g,Golden Monarch,100 g,4740572006234,prisma,1.0,0.0,strong
+04fa0b1fa37599a2c2cd8b5ef1665c22,Pealinna peenleib EESTI PAGAR 490g,EESTI PAGAR,490g,4740086001138,Eesti Pagar Pealinna Peenleib 490 G,Eesti Pagar,490 g,4740086001138,prisma,0.9855,0.0,strong
+0532b02618b505312edb93c8400f47e2,Liköör JÄGERMEISTER 35% 700ml,JÄGERMEISTER,700,4067700013019,Jägermeister liköör 35%vol 700ml,Jägermeister,700 ml,4067700013019,prisma,0.9492,,strong
+05f7a186e5faab0327cc4a6648ba1f82,"Must tee Earl Grey DILMAH,20x1,5g",DILMAH,20x1,9312631142105,Dilmah earl grey must tee niidiga kotis 20*1.5g,Dilmah,1.5 g,9312631142105,prisma,0.7692,,medium
+060c4895ad05a89ebae31bef0e4274f4,"Koorejäätis šoko.tk.ONU ESKIMO,65g",ONU ESKIMO,65,4740188012353,ONU ESKIMO Vanillimaitseline koorejäätis kommitükkidega vahvlitopsis 125ml/65g,ONU ESKIMO,125 ml,4740188012353,prisma,0.6562,,weak
+06a93d1120154dcb6a299ab53bd75bae,KPN vein JOHANN BRUNNER Ries.Rhei.750ml,JOHANN BRUNNER,750ml,4044551030198,"Johann Brunner Riesling Rheinhessen KPN vein 10,5%vol 750ml",Johann Brunner,750 ml,4044551030198,prisma,0.7419,0.0,weak
+06d4e6f7be66630ffb5d9ca9f45d0126,"Šokol.-sojajook ALPRO PlantProtein, 1L",ALPRO,1L,5411188118732,"Alpro kookose-mandlijook, laktoosivaba, vegan, 1l",Alpro,1 l,5411188118732,prisma,0.6047,0.0,weak
+0875aaa846cc7efa215fdaea6d055c4e,Beseepõhjad Pavlova REVAL KONDIITER 250g,REVAL KONDIITER,250g,4742581004171,Reval Kondiiter Pavlova Beseekoogi Põhjad 8 X 22 G,Reval Kondiiter,8x22 g,4742581004171,prisma,0.8235,29.6,medium
+08b28e779614a96a2c2ca6eefc2666ac,"Magustatud kondenspiim klassikaline JAANI, 250g",JAANI,250g,4740502002121,"Kondenspiim suhkruga, JAANI, 250 g",Jaani,250 g,4740502002121,prisma,0.75,0.0,medium
+08e656ce328e97b3f9cd853ce5b6e927,"Kohuke SAARE toffee, 40g",SAARE,40g,4742231002533,Saare vanilli kohuke metsamarjatäidise ja maasikamaitselise glasuuriga 40g,Saare,40 g,4742231002533,prisma,0.8,0.0,medium
+09cefebc2d9d7e116dcb37711f4418c2,"Külm.pitsa salaami LaMiaGrande, 380g",DR.OETKER,380g,4001724038900,Dr.Oetker pitsa salaami 320 g,Dr.Oetker,320 g,4001724038900,prisma,0.7467,15.79,weak
+0aa66d65c1c41cd02cdfa87a5a8e432d,Viin KOSKENKORVA 40% 500ml,KOSKENKORVA,500ml,6412700014203,Koskenkorva vodka 40%vol 500ml,Koskenkorva,500 ml,6412700014203,prisma,0.8214,0.0,medium
+0af11ff779efacaca422ee7817f8f1ca,"Koorene jogurt FARMI apelsin&šok., 400g",FARMI,400g,4740113034658,FARMI koorene jogurt virsikutega 4% 400g,FARMI,400 g,4740113034658,prisma,0.7937,0.0,medium
+0afe50e89e0d2294dc4a57fce7a53515,Punane vein BLUE NUN Alcohol-Free 750ml,BLUE NUN,750ml,4022025534038,Blue Nun alkoholivaba punane vein 750ml,Blue Nun,750 ml,4022025534038,prisma,0.8462,0.0,medium
+0b4df2ce671efa93a808532137d8a9bf,Liköör VANA TALLINN Cream 16% 500ml,VANA TALLINN,500,4740050007715,Vana Tallinn Tiramisu Cream liköör 16%vol 500ml,Vana Tallinn,500 ml,4740050007715,prisma,0.9375,,strong
+0c05a4a564904cc4e29d7af75d0d3a79,Viin ABSOLUT Vodka 40% 500 ml,ABSOLUT,500,7312040017072,Absolut vodka 40%vol 500ml,Absolut,500 ml,7312040017072,prisma,0.8364,,medium
+0c1f8a27a3179c7ff3ca936dca15cf28,Multinektar AURA 1L,AURA,1000,4740051004317,Aura multinektar 1L,Aura,1 l,4740051004317,prisma,1.0,,strong
+0d7be49ab3472f8449a0550deb6a1438,"Külm. bataadi MAAHÄRRA friikad, 500g",MAAHÄRRA,500,4740093026940,Maahärra kuldselt krõbe bataadi friikartulid 500 g,Maahärra,500 g,4740093026940,prisma,0.7442,,weak
+0f96697187040257aad76c32354a3d4c,Kohvioad Brazil LÖFBERGS 1kg,LÖFBERGS,1kg,7310050012506,Löfbergs kohvioad Brazil 1kg,Löfbergs,1 kg,7310050012506,prisma,1.0,0.0,strong
+0faf52a1fb047a67a160e3f17695b46a,"Viin VIRU VALGE VÄGEV 80% 0,5 L",VIRU VALGE,500,4740050002369,Viru Valge Vägev viin 80%vol 500ml,Viru Valge,500 ml,4740050002369,prisma,0.8615,,medium
+0fd436568e8a2b73f6715936b1d649a1,Energiajook BATTERY 400ml,BATTERY,400ml,6415600512831,Battery original energiajook 400ml,Battery,400 ml,6415600512831,prisma,1.0,0.0,strong
+103b35e54722fe04e75ed9e62dd97cf2,Energiajook RED BULL 250ml,RED BULL,250ml,90162800,Red Bull suhkruvaba energiajook 250ml,Red Bull,250 ml,90162800,prisma,1.0,0.0,strong
+107af6a70006b254a737002bc57a748a,"Liköör VANA TALLINN 40% Eesti 100, 500ml",VANA TALLINN,500ml,4740050003274,Vana Tallinn Eesti 100 liköör 40%vol 500ml,Vana Tallinn,500 ml,4740050003274,prisma,0.95,0.0,strong
+118e640c069b9778ff9b6c14dc546328,Jõhvikajook AURA 1L,AURA,1000,4740051004379,Aura jõhvikajook 1L,Aura,1 l,4740051004379,prisma,1.0,,strong
+12271b5e71e9248e6cac0bf8be9bdae9,Kohvioad Classic Crema PAULIG 1kg,PAULIG,1kg,6411300172467,Paulig kohvioad Classic Crema 1 kg,Paulig,1 kg,6411300172467,prisma,0.9851,0.0,strong
+12906370d2464a39e2b2bcdb547c83fb,Tume Ciabatta EESTI PAGAR 300g,EESTI PAGAR,300g,4740086023970,Eesti Pagar Tume Ciabatta 300 G,Eesti Pagar,300 g,4740086023970,prisma,0.9836,0.0,strong
+147a38538d001a887fc8c2932c84860e,Brandy ARARAT 5YO 40% 500ml,ARARAT,500ml,4850001001935,Ararat 5YO Brandy 40%vol 500ml,Ararat,500 ml,4850001001935,prisma,0.9474,0.0,strong
+152610ed11adab60b64f4db3530937e2,Hele õlu KARL FRIEDRICH 5% 568ml,KARL FRIEDRICH,568ml,4740019501025,Karl Friedrich õlu 5%vol 568ml,Karl Friedrich,568 ml,4740019501025,prisma,0.9,0.0,strong
+16425a10d1bb194a5f01b3e06a3fdbb8,"Vaarika-mustika smuuti PAI, 280ml",PAI,280ml,4740029052708,Pai vaarika-mustika smuuti 280ml,Pai,280 ml,4740029052708,prisma,1.0,0.0,strong
+1750944389ba0b83d273da3e900a1762,"Metssealiha konserv LINNAMÄE, 240g",LINNAMÄE,240g,4740618003883,"Metskitse konserv, LINNAMÄE, 240 g",Linnamäe,240 g,4740618003883,prisma,0.8611,0.0,medium
+18c6bb8e5932ee25205a3bf01377c344,Liköör JÄGERMEISTER 35% 350ml,JÄGERMEISTER,350ml,4067700013026,Jägermeister liköör 35%vol 350ml,Jägermeister,350 ml,4067700013026,prisma,0.9492,0.0,strong
+1a19fe01c14e2d76cb51a2b88271e606,Granaatõunajook AURA 1L,AURA,1L,4740098072188,Aura granaatõunajook 1L,Aura,1 l,4740098072188,prisma,1.0,0.0,strong
+1aa5520183ad37d640e458c3d138eb3a,Mitmevilja-röstsai Tosta EESTI PAGAR500g,EESTI PAGAR,500g,4740086007239,Eesti Pagar Tosta! Mitmevilja-Röst 500 G,Eesti Pagar,500 g,4740086007239,prisma,0.8941,0.0,medium
+1aa5520183ad37d640e458c3d138eb3a,Mitmevilja-röstsai Tosta EESTI PAGAR500g,EESTI PAGAR,500g,4740086007222,Eesti Pagar Tosta! Röstisai 500 G,Eesti Pagar,500 g,4740086007222,prisma,0.7179,0.0,weak
+1ab2184ddc60ab223f021bf4f4b65bb5,Skyr maasika FARMI 300g,FARMI,300g,4740113097424,"Farmi skyr maasika, 300g",Farmi,300 g,4740113097424,prisma,0.9787,0.0,strong
+1b1a06bf5d48f89b137bf1a427fc74cc,Jahvatatud kohv Classic PAULIG 250g,PAULIG,250g,6411300158102,Paulig filtrikohv Classic 250 g keskmine röst,Paulig,250 g,6411300158102,prisma,0.6,0.0,weak
+1d72a2a5267377979ef348b1085ac26e,Naturaalne mineraalvesi AKVILE Sport 1L,AKVILE,1L,4770405226980,Akvile mineraalvesi Sport gaasita 1L,Akvile,1 l,4770405226980,prisma,0.875,0.0,medium
+1de6d4fb7b226fd6c31d05dd030b98d7,Muu piir.jook PIPRA KIBE NAPS 35% 200ml,PIPRA NAPS,200ml,4742883015035,Pipra Naps muu piiritusjook 35%vol 200ml,Pipra Naps,200 ml,4742883015035,prisma,0.8354,0.0,medium
+1fba023c81c1559788d7a0b88405fd8f,Jahvatatud kohv Presidentti PAULIG 500g,PAULIG,500,6418474020013,Paulig filtrikohv Presidentti keskmine röst 500 g,Paulig,500 g,6418474020013,prisma,0.6364,,weak
+1fbaef699781fc362cb84645c5f22ba1,"Külm.pitsa RISTORANTE Prosciutto, 580g",DR.OETKER,580g,4001724048886,Dr.Oetker pitsa piccolissima prosciutto singi 288g,Dr.Oetker,288 g,4001724048886,prisma,0.6939,50.34,weak
+1ff09e705c0bcc8165fece365d70735c,Hele õlu KARL FRIEDRICH 5% 6x 568ml,KARL FRIEDRICH,6x 568ml,4740019501032,"Karl Friedrich õlu 6-pakk 5%vol 3,408L",Karl Friedrich,3.408 l,4740019501032,prisma,0.6667,0.0,weak
+20063433543f3e28bba0d3e6f73d9fab,"Jäätis Do-re-mi šok.VÄIKE TOM tops, 65g",VÄIKE TOM,65g,4740093364219,Väike Tom DO-RE-MI šokoladi-koorejäätis vahvlitopsis 65g/120ml,Väike Tom,65 g,4740093364219,prisma,0.7213,0.0,weak
+21c1d01e2520cfa2652822cac7dcd2de,Külm.pelmeenid küüslauk PEALINNA 350g,PEALINNA,350g,4740093000551,Pealinna pelmeenid küüslauguga 350g,Pealinna,350 g,4740093000551,prisma,0.8824,0.0,medium
+21d6c4f5df25d5c408979fce96b4ea5d,"Must tee vaarikamaits.DILMAH,20x1,5g",DILMAH,20x1,9312631142211,Dilmah vaarikamaits. must tee niidiga kotis 20*1.5g,Dilmah,1.5 g,9312631142211,prisma,0.617,,weak
+21e1795892ac8f92059b7073a49f6377,Joogivesi SAAREMAA 500ml,SAAREMAA VESI,500ml,4741122000078,SAAREMAA VESI 500 ML,SAAREMAA VESI,500 ml,4741122000078,prisma,0.7879,0.0,medium
+23b1c7a6ae2b0b8a45200ca43f6a2a57,"Külm.kultuurmustikad HARMAVILI,300g",HÄRMAVILI,Kile,4740188019772,"Härmavili kultuurmustikad, 300g",Härmavili,300 g,4740188019772,prisma,0.7895,,medium
+245c133fcc1abba43b2eb2019e6d4d70,KPN vein CASAL GARCIA Rose Vin.V. 750ml,CASAL GARCIA,750ml,5601096328303,"Casal Garcia Vinho Verde Rose KPN vein 9,5%vol 750ml",Casal Garcia,750 ml,5601096328303,prisma,0.9014,0.0,strong
+25cb61eb87468af99a0234b7c75fd144,"Kaerajook ALPRO Barista, 1L",ALPRO,1L,5411188115366,"Alpro kaerajook, 1l",Alpro,1 l,5411188115366,prisma,0.7826,0.0,medium
+2695670c2a51d58574f13993d7649cd0,"Rohumaaveise minutisteik LIIVIMAA,220g",LIIVIMAA LIHAVEIS,220g,4740456009085,Liivimaa Lihaveis Mahe Rohumaaveise Minutisteik 220 G,Liivimaa Lihaveis,220 g,4740456009085,prisma,0.8842,0.0,medium
+2764c811441d3bb9cab8c445b57efd61,"Kohupiim ALMA 4%, 200g",ALMA,200g,4740125638523,Alma kohupiim 4% 200g,Alma,200 g,4740125638523,prisma,0.9767,0.0,strong
+277556ef86dcece1ff98206d337851cb,"Apelsinimahl DON SIMON,1L",DON SIMON,1L,8410261608105,Don Simon apelsinimahl 1L,Don Simon,1 l,8410261608105,prisma,0.9362,0.0,strong
+277556ef86dcece1ff98206d337851cb,"Apelsinimahl DON SIMON,1L",DON SIMON,1L,8410261608532,"Apelsinimahl, DON SIMON, 1 L",Don Simon,1 l,8410261608532,prisma,0.8923,0.0,medium
+27791a7f8757634ef05f9a4e3b44bcdd,Must vormileib EESTI PAGAR 600g,EESTI PAGAR,600g,4740086005068,Eesti Pagar Must Vormileib 600 G,Eesti Pagar,600 g,4740086005068,prisma,0.9841,0.0,strong
+2cddccd29725629d7e02c6b651ee8621,"Külm.pitsa Mozzarella RISTORANTE, 355g",DR.OETKER,355g,4001724039112,Dr.Oetker pitsa mozzarella 355g,Dr.Oetker,355 g,4001724039112,prisma,0.8929,0.0,medium
+2cddccd29725629d7e02c6b651ee8621,"Külm.pitsa Mozzarella RISTORANTE, 355g",DR.OETKER,355g,4001724022398,"Dr.Oetker mozzarella pitsa, gluteenivaba, 370 g",Dr.Oetker,370 g,4001724022398,prisma,0.6737,4.05,weak
+2ced8a678da3dfbe20df2532b715c68a,"Või ALMA 82% laktoosivaba, 200g",ALMA,200g,4740553699844,Alma või laktoosivaba 82% 200g,Alma,200 g,4740553699844,prisma,0.9836,0.0,strong
+2d7bdc525f5b9276387b67228f7613c6,"Külm.pitsa salaami-sib. LaMiaGrande,305g",DR.OETKER,305g,4001724038900,Dr.Oetker pitsa salaami 320 g,Dr.Oetker,320 g,4001724038900,prisma,0.6835,4.69,weak
+2ec69a8ec11ca1b6e71fcdb1dfe9e5b4,Muu piir.jook PIPRA KIBE NAPS 35% 500ml,PIPRA NAPS,500,4742883011495,Pipra Naps muu piiritusjook 35%vol 500ml,Pipra Naps,500 ml,4742883011495,prisma,0.8354,,medium
+2ecd9bb5b3730573ae4783f9602018da,Mahlajook DR.ACTIVE Apel.Anan.Porg.500ml,DR. ACTIVE,500ml,4740098088202,Dr. Active apelsini-ananassi-porgandi mahlajook 500ml,Dr. Active,500 ml,4740098088202,prisma,0.6731,0.0,weak
+2ece29076affa4eee7f715cd6a5d6230,Whisky J.WALKER Red Label 40% 700ml,JOHNNIE WALKER,700,5000267013602,Johnnie Walker Red Label Scotch Whisky 40%vol 1L,Johnnie Walker,1 l,5000267013602,prisma,0.7848,,medium
+2eee78249704f0889f157597ce6ad2e1,"Mandlijook ALPRO Barista, 1L",ALPRO,1L,5411188112709,"Alpro magustamata mandlijook, 1 l",Alpro,1 l,5411188112709,prisma,0.7869,0.0,medium
+30810f7e74fd5b568f60ed7e392a610e,Must tee English Breakfast LIPTON 25x2g,LIPTON,25x2g,8712100510526,Lipton must tee English Breakfast 25 x 2 g,Lipton,25x2 g,8712100510526,prisma,0.9167,0.0,strong
+30a9dd5d16d5f8ca6ebc3164feff2e1a,Jahvatatud kohv JACOBS Kronung 500g,JACOBS,500g,7622400004773,Jacobs jahvatatud kohv Krönung 500 g,Jacobs,500 g,7622400004773,prisma,0.9577,0.0,strong
+322df7ede2826fd73310f9173b1c2d56,Liköör VANA TALLINN 40% 1L,VANA TALLINN,1L,4740050002543,Vana Tallinn liköör 40%vol 1 l,Vana Tallinn,1 l,4740050002543,prisma,0.8889,0.0,medium
+33311478f0dc360ee9cb753312221dd4,Jahv.kohv LÖFBERGS presskannu 500g,LÖFBERGS,500g,7310050001586,Löfbergs presskannukohv 500g,Löfbergs,500 g,7310050001586,prisma,0.7742,0.0,medium
+33aab3a269715c4561f00dc069157905,"Veiseliha hautatud MINU, 250g",MINU,250g,4743144000654,Minu hautatud veiseliha 250 g,Minu,250 g,4743144000654,prisma,0.8889,0.0,medium
+34e01b7c500fd88f2a24de59ba33b5cc,"Vahukoor TERE 35% laktoosivaba, 400ml",TERE,400ml,4740036005292,"Vahukoor 35% laktoosivaba, TERE, 400 ml",Tere,400 ml,4740036005292,prisma,0.9136,0.0,strong
+35b85b36610039befbf2ae6e78576354,"Karastusj. COCA-COLA 330ml, pdl",COCA-COLA,330ml,54490703,Coca-Cola karastusjook 330ml,Coca-Cola,330 ml,54490703,prisma,0.8475,0.0,medium
+38afbe9bd9d272cc29f61451ffdde00b,"Porgandi-peedimahl KADARBIKU, 0.33L",KADARBIKU,33L,4742368000761,"Porgandi-peedimahl, KADARBIKU KÖÖGIVILI, 330 ml",Kadarbiku,330 ml,4742368000761,prisma,0.7473,99.0,weak
+38cbf6f200031e31c6dedd46e38b494b,"Külm.kartuli-sibulasegu MAAHÄRRA,1kg",MAAHÄRRA,1kg,4740093340732,Maahärra kartuli-sibulasegu 1 kg,Maahärra,1 kg,4740093340732,prisma,0.8611,0.0,medium
+396c48265637d067e6e183f00bbd1618,M.alk.jook HARTWALL Orange5.5% 330ml prk,HARTWALL,330ml,4741337001808,Hartwall original long drink orange 330ml,Hartwall,330 ml,4741337001808,prisma,0.642,0.0,weak
+397b317d19f3cccf2c27b2694a421b37,"Rumm CAPTAIN MORGAN White 37,5% 700ml",CAPTAIN MORGAN,700ml,5000281040899,"Captain Morgan White rumm 37,5%vol 700ml",Captain Morgan,700 ml,5000281040899,prisma,0.961,0.0,strong
+3a8beb00e846f96ba9295c1e0c08f5d5,"Külm.minipelm.kanalihaga PEALINNA, 350g",PEALINNA,350g,4740093112230,Pealinna minipelmeenid kanalihaga 350g,Pealinna,350 g,4740093112230,prisma,0.6744,0.0,weak
+3ad691b0dcb70c77086101749d1022bf,Apelsinimahl AURA 1L,AURA,1L,4740051004270,Aura apelsinimahl 1L,Aura,1 l,4740051004270,prisma,1.0,0.0,strong
+3aeceacd3353e9059de65b8eaac0b0b2,Viin VIRU VALGE 40% 500ml,VIRU VALGE,500,4740050002291,Viru Valge viin 40%vol 500ml,Viru Valge,500 ml,4740050002291,prisma,0.9434,,strong
+3e58fd986d5e9b6f5f82a0feccc82e85,"Alk.vaba õlu HEINEKEN 330ml,pdl",HEINEKEN,330ml,8712000050146,"Heineken alkoholivaba õlu, 330 ml",Heineken,330 ml,8712000050146,prisma,0.7419,0.0,weak
+3ec8030b41b64ad6fc4ea44fbf21a7c5,"Veiseliha omas mahlas RANNAROOTSI, 240g",RANNAROOTSI,240g,4740296002642,"Veiseliha omas mahlas, RANNAROOTSI, 240 g",Rannarootsi,240 g,4740296002642,prisma,0.9808,0.0,strong
+3ee52809809fa2d9c2e6c03d89e5a2c3,Puding ALMA vaarika-mascarpon 230g,ALMA,230g,4740125534320,"Puding vaarika-mascarpone maitseline, ALMA, 230 g",Alma,230 g,4740125534320,prisma,0.7727,0.0,medium
+3fe793e470497f33f865ff1e7d0c1474,"Sojatoode mangomaits. ALPRO,400g",ALPRO,400g,5411188125808,ALPRO sojatoode mango 400g,ALPRO,400 g,5411188125808,prisma,0.8125,0.0,medium
+3fe793e470497f33f865ff1e7d0c1474,"Sojatoode mangomaits. ALPRO,400g",ALPRO,400g,5411188128625,Alpro mangomaitseline hapendatud sojatoode 400g,Alpro,400 g,5411188128625,prisma,0.7294,0.0,weak
+4071f919fd1a30215baca49655e556f3,Köögiviljamahl CIDO 1L,CIDO,1000,4750042804338,Cido köögiviljamahl 100% 1L,Cido,1 l,4750042804338,prisma,1.0,,strong
+412e701f792ca44d5e813a8588bbe9a1,"Kookose-mandlijook ALPRO, 1L",ALPRO,1L,5411188118732,"Alpro kookose-mandlijook, laktoosivaba, vegan, 1l",Alpro,1 l,5411188118732,prisma,0.6506,0.0,weak
+4214f309febdada34b13458e95a36ae5,KPN vein GRAN MIRADOR Red Blend 750ml,GRAN MIRADOR,750ml,4740158007785,"Gran Mirador Red Blend vein 12,5%vol 750ml",Gran Mirador,750 ml,4740158007785,prisma,0.9429,0.0,strong
+428d128a499e4c7c08a5ddbb253af67d,"Juust ATLEET Light, 200g",VALIO ATLEET,200g,4740553000299,Valio Atleet Light juust 200g,Valio Atleet,200 g,4740553000299,prisma,0.9831,0.0,strong
+429365981d8739717d010253870e003a,"Kanaliha želees MINU, 250g",MINU,250g,4743144000050,Minu kanaliha želees 250 g,Minu,250 g,4743144000050,prisma,0.8727,0.0,medium
+42c00a069b23f35d686c8d6c425ac532,Liköör VANA TALLINN 45% 500ml,VANA TALLINN,500ml,4740050002031,Vana Tallinn liköör 40%vol 500ml,Vana Tallinn,500 ml,4740050002031,prisma,0.9231,0.0,strong
+43d3473044dff6262b3160451787b6d7,"Taimn.rasvavõie KEIJU 70% lakt.vaba,400g",KEIJU,400g,6438207011613,"Keiju taimne rasvavõie 70%, 400 g",Keiju,400 g,6438207011613,prisma,0.6027,0.0,weak
+43df79b3ec11978ab50c73615255d9f9,"Koorene jogurt FARMI virsikutega, 400g",FARMI,400g,4740113034658,FARMI koorene jogurt virsikutega 4% 400g,FARMI,400 g,4740113034658,prisma,0.9487,0.0,strong
+44292e36b8e37d76a20174382fa9b64c,"Tuunikala purust. vees KAPTEN GRANT,185g",KAPTEN GRANT,185g,4740590100242,Kapten Grant purustatud tuunikala tükid soolvees 185 g,Kapten Grant,185 g,4740590100242,prisma,0.78,0.0,medium
+4490151fab2d716f187c44cad3220cad,Smuuti AURA Kiivi-Ananassi-Mango 330ml,AURA,330ml,4740098091103,"Smuuti kiivi-ananassi-mango, AURA, 330 ml",Aura,330 ml,4740098091103,prisma,0.8571,0.0,medium
+44b9f032e869cd36ad3885dd98c225dd,Kons.turistieine sealihast MINU 250g,MINU,250g,4743144000661,Minu turisti eine sealihast 250 g,Minu,250 g,4743144000661,prisma,0.7826,0.0,medium
+4547a5512e8f071252fb3f0b5ceeed81,Õunajook PÕLTSAMAA 200ml,PÕLTSAMAA,200ml,4740029050025,Põltsamaa õunajook 200ml,Põltsamaa,200 ml,4740029050025,prisma,1.0,0.0,strong
+460dbee12bfa06f082aa8347e02a51db,"Rehe Koorikleib EESTI PAGAR, 200g",EESTI PAGAR,200g,4740086014367,Eesti Pagar Rehe Koorikleib 200 G,Eesti Pagar,200 g,4740086014367,prisma,0.9167,0.0,strong
+47aa7b170044acad27712499c388ee84,"Kodujuust OTTO klassikaline, 330g",PIIMAMEISTER OTTO,330g,4740572005190,"Piimameister Otto Klassikaline kodujuust, 330 g",Piimameister Otto,330 g,4740572005190,prisma,0.9677,0.0,strong
+484e193571254498846bd5407f8dded6,"Grillvorstid juustuga NÕO, 360g",NÕO,360g,4740574008540,Nõo grillvorstid juustuga 360 G,Nõo,360 g,4740574008540,prisma,0.9375,0.0,strong
+48c0509888bbe97e8fe7dafbcc800ed1,Vitam.jook VITAMIN WELL Hydrate 500ml,VITAMIN WELL,500ml,7350042717705,Vitamin Well Hydrate vitamiinijook 500 ml,Vitamin Well,500 ml,7350042717705,prisma,0.9231,0.0,strong
+48c5e30a35a29898d45a46afa19c77b5,"Täispiim FARMI 3,6-4,2%, 1L",FARMI,1L,4740113090555,"Farmi täispiim 3,6%-4,2%, 1l",Farmi,1 l,4740113090555,prisma,0.9818,0.0,strong
+49e44bac8a1a31a8628f42fa1ff74cc5,"Röstsai Eesti Pagar juustuga, 430g",EESTI PAGAR,430g,4740086010710,Eesti Pagar Röstsai Juustuga 430 G,Eesti Pagar,430 g,4740086010710,prisma,0.9706,0.0,strong
+4be7fe01609e772746b6b1ec7465a0ed,Mahlajook DR.ACTIVE Apels.Anan.Porg.1.5L,DR. ACTIVE,5L,4740098088219,"Dr. Active apelsini-ananassi-porgandi mahlajook 1,5L",Dr. Active,1.5 l,4740098088219,prisma,0.699,70.0,weak
+4e0057bc6848cea6228c885612bb992d,"Jäät.vaarikajääga Flamingo VÄIKE TOM,60g",VÄIKE TOM,60g,4740093364325,Väike Tom Flamingo vanilli-koorejäätis vaarikajääga60g/74ml,Väike Tom,74 ml,4740093364325,prisma,0.6667,18.92,weak
+4e895d5efd3c3f6fbc9f9a5957fffd8b,Jõhvikajook PÕLTSAMAA 1L,PÕLTSAMAA,1L,4740029051084,Põltsamaa jõhvikajook 1L,Põltsamaa,1 l,4740029051084,prisma,1.0,0.0,strong
+4f27f90c5214e55c120e206ce7377041,Hele Ciabatta EESTI PAGAR 300g,EESTI PAGAR,300g,4740086020795,"Eesti Pagar Ciabatta hele, 300g",Eesti Pagar,300 g,4740086020795,prisma,0.9836,0.0,strong
+5064ed9a566ad27cebd827fd8334fb28,Naturaal. mineraalvesi AKVILE Kids 500ml,AKVILE,500ml,4770405227468,Akvile mineraalvesi Kids gaasita 500ml,Akvile,500 ml,4770405227468,prisma,0.8824,0.0,medium
+52527565240719ef4f1c8f3baf3964d1,Liköör VANA TALLINN Cream 16% 500ml,VANA TALLINN,500ml,4740050007715,Vana Tallinn Tiramisu Cream liköör 16%vol 500ml,Vana Tallinn,500 ml,4740050007715,prisma,0.9375,0.0,strong
+5257b94c5e2a06995cc35a498939100e,Muu alkohoollne jook APEROL 11% 1l,APEROL,1l,8002230000012,Aperol muu alkohoolne jook 11%vol 1l,Aperol,1 l,8002230000012,prisma,0.9429,0.0,strong
+532c5a8b9dcf1aa9ddb98ffd411db3d9,Klassik.pesto vegan FILIPPO BERIO 190g,FILIPPO BERIO,190g,8002210132962,Filippo Berio Vegan klassikaline pesto 190g,Filippo Berio,190 g,8002210132962,prisma,0.9136,0.0,strong
+53bc3b52b8bcdd9765ccae2e6d03d529,"Külm.paneeritud lõheburger VICI, 250g",VICI,250g,4740056073134,Vici paneeritud lõheburger 250g,Vici,250 g,4740056073134,prisma,0.8493,0.0,medium
+5401aae6b7bd548dbb3036ee0a4fb230,"Hirveliha konserv LINNAMÄE, 240g",LINNAMÄE,240g,4740618001391,"Hirveliha konserv, LINNAMÄE LIHATÖÖSTUS, 240 g",Linnamäe,240 g,4740618001391,prisma,0.7848,0.0,medium
+54b4f93c595ec1d5af6559012ab2930d,"Suur Perenaise sai EESTI PAGAR, 500g",EESTI PAGAR,500g,4740086008526,Eesti Pagar Suur Perenaise Sai 500 G,Eesti Pagar,500 g,4740086008526,prisma,0.9231,0.0,strong
+55bf64cd0896bae498ebba6267533b21,"Juustukaste MO SAAREMAA, 400g",MO SAAREMAA,400g,4740153200051,Mo Saaremaa Juustukaste 400g,Mo Saaremaa,400 g,4740153200051,prisma,1.0,0.0,strong
+56f76f735f0e92291fe5f9caec332ca9,"Külm. bataadi MAAHÄRRA friikad, 500g",MAAHÄRRA,500g,4740093026940,Maahärra kuldselt krõbe bataadi friikartulid 500 g,Maahärra,500 g,4740093026940,prisma,0.7442,0.0,weak
+573c26b1656b91f65434039d3553799a,"Magustatud kondenspiim šokol.,JAANI 250g",JAANI,250g,4740502002121,"Kondenspiim suhkruga, JAANI, 250 g",Jaani,250 g,4740502002121,prisma,0.6824,0.0,weak
+5973aaafc7c1220c3e8dd5d846f3147d,Whisky J.WALKER Red Label 40% 1L,JOHNNIE WALKER,1L,5000267013602,Johnnie Walker Red Label Scotch Whisky 40%vol 1L,Johnnie Walker,1 l,5000267013602,prisma,0.8395,0.0,medium
+598dad10c4a18f9306c9d01913833a61,"Must tee mustasõstramaits.DILMAH,20x1,5g",DILMAH,20x1,9312631142051,"Dilmah must tee mustasõstramaitseline 20 x 1,5 g",Dilmah,20x1.5 g,9312631142051,prisma,0.7158,,weak
+5a7aba1a20bd22eea7d42f87d276e8a8,Marmor-kohupiimakook EESTI PAGAR 350g,EESTI PAGAR,350g,4740086027053,Eesti Pagar Marmor-Kohupiimakook 350 G,Eesti Pagar,350 g,4740086027053,prisma,0.9867,0.0,strong
+5d2c6e9d5863a644fd4c2f2b01264f5e,Liköör COINTREAU 40% 500ml,COINTREAU,500,3035542011365,Cointreau liköör 40%vol 500ml,Cointreau,500 ml,3035542011365,prisma,0.9434,,strong
+5d6b6cbf7b40c558bcceedcebcd06fb1,"Mahe rohumaaveise hakkliha LIIVIMAA,300g",LIIVIMAA LIHAVEIS,300g,4740456009160,Liivimaa Lihaveis Mahe Rohumaaveise Hakkliha 300 G,Liivimaa Lihaveis,300 g,4740456009160,prisma,0.9362,0.0,strong
+5df93e192df9a1bf517795e6e65ecc06,"Külm. bataadifrii AVIKO, 450g",AVIKO,450g,8710449954285,Aviko friikartulid bataadist 450 g,Aviko,450 g,8710449954285,prisma,0.6667,0.0,weak
+5f161e1dfef7f5297cca64c0a192a0b2,Looduslik mineraalvesi EVIAN 1.5L,EVIAN,5L,3068320085005,"Evian looduslik mineraalvesi 1,5 L",Evian,1.5 l,3068320085005,prisma,0.9851,70.0,strong
+5f1a3100f745f7d201d6817f0f40c547,"Kohuke ALMA vaarika, 40g",ALMA,40g,4740125639131,Alma kohuke vaarika kakaoglasuuris 40g,Alma,40 g,4740125639131,prisma,0.7692,0.0,medium
+5f1ea290e2e78416b1ea53ec3531bb7f,"Hummus klassikaline GOURMET CLUB,200g",GOURMET CLUB,200g,4740670119799,"Gourmet Club klassikaline hummus, 200g",Gourmet Club,200 g,4740670119799,prisma,0.925,0.0,strong
+5f8380b4d24094a8db2ac76299e8b53e,Mitmevilja Pehmik EESTI PAGAR 240g,EESTI PAGAR,240g,4740086011601,Eesti Pagar Mitmevilja Pehmik 240 G,Eesti Pagar,240 g,4740086011601,prisma,0.9855,0.0,strong
+5fa6b1c69ba1ed41e2e149cde09fc20f,Whisky THE GLENLIVET 12YO 40% 700ml karp,THE GLENLIVET,700ml,80432402825,The Glenlivet 12YO Single Malt Scotch Whisky 700ml,The Glenlivet,700 ml,80432402825,prisma,0.8732,0.0,medium
+5fac431db57dc76077067a2473612686,"Heeringafilee vähesoolane KGrant, 240g",KAPTEN GRANT,240g,4740687000936,Kapten Grant Heeringafilee Vähesoolane 240 G,Kapten Grant,240 g,4740687000936,prisma,0.9268,0.0,strong
+5fdbe35ced7dda8e6f7908ee1ce43f2f,"Sul.juust MEREVAIK singiga, 200g",MEREVAIK,200g,4740036017516,Merevaik sulatatud juust singiga 200g,Merevaik,200 g,4740036017516,prisma,0.7536,0.0,medium
+6146488c92fee1b21173997f8f536b0f,Külm.pitsa RISTORANTE vegan salaami 295g,DR.OETKER,295g,4001724043393,Dr.Oetker ristorante al salame vegano pitsa 295g,Dr.Oetker,295 g,4001724043393,prisma,0.898,0.0,medium
+61b51d66412961103cb5ec84bd5d580e,"Külm.kartuli-sibulasegu MAAHÄRRA,1kg",MAAHÄRRA,1000,4740093340732,Maahärra kartuli-sibulasegu 1 kg,Maahärra,1 kg,4740093340732,prisma,0.8611,,medium
+61ceb6d2d9ea31adbfddfc9bf6cc618f,Liköör VANA TALLINN 45% 500ml,VANA TALLINN,500,4740050002031,Vana Tallinn liköör 40%vol 500ml,Vana Tallinn,500 ml,4740050002031,prisma,0.9231,,strong
+61d57f40abdc77df5762b4b92ee83d38,"Külm. bataadifrii AVIKO, 450g",AVIKO,450,8710449954285,Aviko friikartulid bataadist 450 g,Aviko,450 g,8710449954285,prisma,0.6667,,weak
+62681ffe51289188d0ede71c39a7ecfe,Hele õlu PILSNER URQUELL 4.4% 500ml prk,PILSNER URQUELL,500ml,4744485010890,"Pilsner Urquell õlu 4,4%vol 500ml",Pilsner Urquell,500 ml,4744485010890,prisma,0.8571,0.0,medium
+639004554c0221882a496f7f5931948e,Liköör JÄGERMEISTER Scharf 33% 700ml,JÄGERMEISTER,700ml,4067700013019,Jägermeister liköör 35%vol 700ml,Jägermeister,700 ml,4067700013019,prisma,0.8727,0.0,medium
+6586696962da59f2c3ca7151c80c2332,Liköör MALIBU 21% 500ml,MALIBU,500,5010284100049,Malibu liköör 21%vol 500ml,Malibu,500 ml,5010284100049,prisma,0.9362,,strong
+65f2243d973312a7dc1d1f37f7743e8d,Brandy IMPERIAL XII XO 36% 500ml,IMPERIAL XII,500ml,4770047234831,Imperial XII XO Brandy 36%vol 500ml,Imperial XII,500 ml,4770047234831,prisma,0.9552,0.0,strong
+66c49aa275776b8ff98ab77ba9dbf122,Külm.kaneelirull kardemoniga EP 1.2kg,EESTI PAGAR,1200,4740086021372,"Eesti Pagar XL Kaneelirull kardemoniga, 1,2kg",Eesti Pagar,1.2 kg,4740086021372,prisma,0.7021,,weak
+67e3504090fa123216320d0dc545d746,M.alk.jook SFF LD Grapefruit 5.5%330ml,SINEBRYCHOFF,330ml,4740019016215,Sinebrychoff long drink grapefruit 330ml,Sinebrychoff,330 ml,4740019016215,prisma,0.7473,0.0,weak
+67ea21ba9ec3e07b430da529024542ec,Rebitud kanatu THORMI 200g,THORMI,200g,4745010359767,Thormi taimne rebitud kanatu 200 g,Thormi,200 g,4745010359767,prisma,0.8936,0.0,medium
+681800615c28aea573d69352fb7e364a,"Kana-caesari ciabatta CHEF LUNDEN, 200g",CHEF LUNDEN,200g,4740376030107,Chef Lunden Kana Caesari Ciabatta 200 G,Chef Lunden,200 g,4740376030107,prisma,0.8,0.0,medium
+69bee0b47e5e8566b917f0e390f5316a,"Mahe kaerajook OATLY, 1l",OATLY,1l,7394376615689,"Oatly mahe kaerajook, 1 l",Oatly,1 l,7394376615689,prisma,0.8727,0.0,medium
+6aa1da54e08bd7ca77daacb8107d3c08,Jõhvikajook AURA 1L,AURA,1L,4740051004379,Aura jõhvikajook 1L,Aura,1 l,4740051004379,prisma,1.0,0.0,strong
+6b0acdc2fe08502b512c07f4d03cdaf7,"M.alk.jook SFF LD Grapefruit 5,5%1,5Lpet",SINEBRYCHOFF,5L,4740019016277,"Sinebrychoff long drink grapefruit 5,5%vol muu alkohoolne jook 1,5L",Sinebrychoff,1.5 l,4740019016277,prisma,0.65,70.0,weak
+6b30e575cfd4dd13634b8005358cfe24,Rosinasai EESTI PAGAR 400g,Eesti Pagar,400g,4740086000452,Eesti Pagar Rosinasai 400 G,Eesti Pagar,400 g,4740086000452,prisma,0.9811,0.0,strong
+6c2f7ec8bcd6da0071446dba224f37a4,"Kookose-ananassi mahlajook PAI, 280ml",PAI,280ml,4740029052753,Pai kookose-ananassi smuuti 280 ml,Pai,280 ml,4740029052753,prisma,0.7733,0.0,medium
+6c353efd4ea92264aeaba6df7da39c98,"Juust Saare MO SAAREMAA light viil.,150g",MO SAAREMAA,150g,4740153081858,"Mo Saaremaa Juust Saare Light, 150 g",Mo Saaremaa,150 g,4740153081858,prisma,0.7895,0.0,medium
+6c54657689513325a7d361547cbfc572,"Piimajook Müllermilch maasika, 400g",MÜLLER,400g,4025500135645,"Müller maasikamaitseline piimajook 1,4%, 400g",Müller,400 g,4025500135645,prisma,0.7059,0.0,weak
+6d51cadcdc4c3fb5b56d18605b87538a,"Sealihakonserv MINU De Lux, 525g",MINU,525g,4743144005338,Minu sealiha de lux 85% 525 g,Minu,525 g,4743144005338,prisma,0.7869,0.0,medium
+6e0c87f13aafa5babc54695969f71c7c,"Sealiha omas mahlas RANNAROOTSI, 240g",RANNAROOTSI,240g,4740296002642,"Veiseliha omas mahlas, RANNAROOTSI, 240 g",Rannarootsi,240 g,4740296002642,prisma,0.9412,0.0,strong
+6f187c31da7286c7dfe757279fb6f2f1,Jäätis mustika-jogurti BALBIINO 54g,BALBIINO,54g,4740188012995,Balbiino mustika-jogurtijäätis jogurtiglasuuris 80ml/54g,Balbiino,80 ml,4740188012995,prisma,0.764,32.5,medium
+6f1e3cad2fadd24189099ee733c37874,Perenaisesai EESTI PAGAR 320g,EESTI PAGAR,320g,4740086000728,Eesti Pagar Perenaise Sai 320 G,Eesti Pagar,320 g,4740086000728,prisma,0.9667,0.0,strong
+6f983be53b0e1c46f473a4f48456e2d2,Seemneleib Jassi EESTI PAGAR 310g,EESTI PAGAR,310g,4740086001114,Eesti Pagar Jassi Seemneleib 310 G,Eesti Pagar,310 g,4740086001114,prisma,0.9851,0.0,strong
+7033d640b3641cfd77f237743828ee50,Muu piir.j.ROOSTER ROJO Blanco 38% 700ml,ROOSTER ROJO,700ml,7503023613200,Rooster Rojo Blanco Tequila piiritusjook 38%vol 700ml,Rooster Rojo,700 ml,7503023613200,prisma,0.7723,0.0,medium
+708330a6fc01189055c005f0a6385547,"Juust ZOTT Toasty Hamburger viil.,120g",ZOTT,120g,4014500517957,Zott toasty hamburger sulatud juust 120 g,Zott,120 g,4014500517957,prisma,0.8308,0.0,medium
+738c01653c14ab449da4f9d3fb2fefb3,Energiajook RED BULL suhkruvaba 250ml,RED BULL,250ml,90162800,Red Bull suhkruvaba energiajook 250ml,Red Bull,250 ml,90162800,prisma,1.0,0.0,strong
+746596db007a82c42bfb42d491b40689,Päik.k.tom.pesto veg.FILIPPO BERIO 190g,FILIPPO BERIO,190g,8002210132986,Filippo Berio Vegan päikesekuivatatud tomatitega pesto 190g,Filippo Berio,190 g,8002210132986,prisma,0.6415,0.0,weak
+74969c587e7fc2c61ab0e20e58757aed,Muu piir.jook PIPRA KIBE NAPS 35% 500ml,PIPRA NAPS,500ml,4742883011495,Pipra Naps muu piiritusjook 35%vol 500ml,Pipra Naps,500 ml,4742883011495,prisma,0.8354,0.0,medium
+749eb6a52142b001a0ff7f6b461e2a21,Whisky TALISKER Sin.Malt 45.8% 700ml,TALISKER,700ml,5000281005416,"Talisker 10 YO Single M Scotch Whisky 45,8%vol 700ml",Talisker,700 ml,5000281005416,prisma,0.7368,0.0,weak
+74fcb768f7c2631a71797cd09b40ac9e,Min.vesi VÄRSKA Naturaal mullita 0.5l,VÄRSKA ORIGINAAL,5l,4740042000809,VÄRSKA ORIGINAAL,VÄRSKA ORIGINAAL,,4740042000809,prisma,1.0,,strong
+75c56e70b6c39fb43920f3f862855647,KGT vein B.MONTALTO Pinot Grigio 750ml,BARONE MONTALTO,750ml,8030423000730,Barone Montalto Pinot Grigio KGT vein 12%vol 750ml,Barone Montalto,750 ml,8030423000730,prisma,0.9247,0.0,strong
+75c56e70b6c39fb43920f3f862855647,KGT vein B.MONTALTO Pinot Grigio 750ml,BARONE MONTALTO,750ml,8030423005254,Barone Montalto Pinot Grigio Blush KGT vein 12%vol 750ml,Barone Montalto,750 ml,8030423005254,prisma,0.8866,0.0,medium
+7676f1d34b85cfd060f86f97ae3807ca,Mineraalvesi EVIAN 500ml,EVIAN,500ml,3068320055008,Evian looduslik mineraalvesi 500 ml,Evian,500 ml,3068320055008,prisma,0.8571,0.0,medium
+7723524e7d3c4648363ed11b560735df,"Külm.pitsa Mozzarella RISTORANTE, 355g",DR.OETKER,355,4001724039112,Dr.Oetker pitsa mozzarella 355g,Dr.Oetker,355 g,4001724039112,prisma,0.8929,,medium
+775261862f09439a9de96714f1969cec,Vein MAORI BAY Sauvignon Blanc 750ml,MAORI BAY,750ml,4044551066593,Maori Bay Sauvignon Blanc GT vein 12% vol 750ml,Maori Bay,750 ml,4044551066593,prisma,1.0,0.0,strong
+7800b1b62c61b4736b15d1c8c2315beb,Marjajook PÕLTSAMAA 1L,PÕLTSAMAA,1L,4740029051404,Põltsamaa marjajook 1L,Põltsamaa,1 l,4740029051404,prisma,1.0,0.0,strong
+781fb36f8aaa52f01ea922db1345ce5f,Apelsinimahl AURA 1L,AURA,1000,4740051004270,Aura apelsinimahl 1L,Aura,1 l,4740051004270,prisma,1.0,,strong
+78807b7c615c5425ce09e7138c98f0c6,"Kohupiim OTTO Ricotta, 200g",PIIMAMEISTER OTTO,200g,4740572006036,Piimameister Otto Ricotta kohupiim 200g,Piimameister Otto,200 g,4740572006036,prisma,0.9873,0.0,strong
+798077a73496029dd692a164e244d140,Näkileivad FINN CRISP Traditional 200g,FINN CRISP,200g,6410500098270,Finn Crisp Traditional näkileivad 200 g,Finn Crisp,200 g,6410500098270,prisma,0.987,0.0,strong
+7989fdd9bc53c4b784976feec2826166,Spordijook rohelise tee GRAM 500ml,GRAM,500ml,4740077004094,GRAM rohelise tee spordijook 500ml,GRAM,500 ml,4740077004094,prisma,1.0,0.0,strong
+79a9b3be1a9c71b3b910921958eeb9bf,"Rehe rukkileib EESTI PAGAR,390g",EESTI PAGAR,390g,4740086008052,Eesti Pagar Rehe Rukkileib 390 G,Eesti Pagar,390 g,4740086008052,prisma,0.8986,0.0,medium
+7b5cc4667cc8ebd17c93113acdb02f8f,"Sinihallitusjuust ROYAL BLUE, 100g",ROYAL BLUE,100g,4740572006227,Royal Blue sinihallitusjuust 100g,Royal Blue,100 g,4740572006227,prisma,1.0,0.0,strong
+7b83c7cccee7cf05f4859a5277622223,"Miniekleer.vahukoor.EESTI KONDIITER,200g",EESTI KONDIITER,200g,4740558004735,"Miniekleerid vahukoorega, EESTI KONDIITER, 200 g",Eesti Kondiiter,200 g,4740558004735,prisma,0.807,0.0,medium
+7c25f26e5836750c722680ca2d707f9a,"Viin VIRU VALGE VÄGEV 80% 0,5 L",VIRU VALGE,5 L,4740050002369,Viru Valge Vägev viin 80%vol 500ml,Viru Valge,500 ml,4740050002369,prisma,0.8615,90.0,medium
+7ca2f89b2eb9ea8e9b850767b4d60a68,Sepik Õnne EESTI PAGAR 300g,EESTI PAGAR,300g,4740086000094,Eesti Pagar Õnne Sepik 300 G,Eesti Pagar,300 g,4740086000094,prisma,0.9811,0.0,strong
+7f932a981e458d0db9d7ee256b027e51,"Porgandimahl KADARBIKU, 0.5L",KADARBIKU,5L,4742368000730,"Porgandimahl, KADARBIKU KÖÖGIVILI, 500 ml",Kadarbiku,500 ml,4742368000730,prisma,0.6923,90.0,weak
+80198128d3a56987fcf91ec95b0ecf75,Must Tseiloni tee DILMAH Premium 30x2g,DILMAH,30x2g,9312631000900,Dilmah must tee Premium 30 x 2 g,Dilmah,30x2 g,9312631000900,prisma,0.8364,0.0,medium
+80f7919710a2b9475e1f864700fa35d6,"Küpsisejäätis küpsik VÄIKE TOM, 75g",VÄIKE TOM,75,4740093623149,"Väike Tom hele küpsisejäätis, 75 g",Väike Tom,75 g,4740093623149,prisma,0.8116,,medium
+8168ef825830332b1c7dbed8a0bb27dd,Külm.pelmeenid praesibul.PEALINNA 350g,PEALINNA,350g,4740093000537,Pealinna pelmeenid praesibulaga 350g,Pealinna,350 g,4740093000537,prisma,0.8434,0.0,medium
+81d93dd00500afd307feeafa7758428a,Viin VIRU VALGE 40% 1L,VIRU VALGE,1000,4740050002314,Viru Valge viin 40%vol 1L,Viru Valge,1 l,4740050002314,prisma,0.9362,,strong
+81eef869209b1f0af61142eb6f778205,"Jog.jook ACTIMEL+, gran.õun-maasika 4x100g",ACTIMEL,4x100g,5900643051283,"Jogurtijook maasikas-granaatõun 4x100g, ACTIMEL, 400 g",Actimel,4x100 g,5900643051283,prisma,0.7321,0.0,weak
+8267c45d6e677b823523ce630d7f10af,Ploominektar AURA 1L,AURA,1L,4740051004331,Aura ploominektar 1L,Aura,1 l,4740051004331,prisma,1.0,0.0,strong
+8296233a11e719057d987d416c368773,"Hele õlu BLOND MUNK 6%,500ml,pdl",KARKSI,500ml,4740098002390,Karksi hele õlu Blond Munk 6%vol 500ml,Karksi,500 ml,4740098002390,prisma,0.8533,0.0,medium
+834ca80ba697cb52f32b8bf8767667d6,KPN vein GRAN CASTILLO Rose 750ml,GRAN CASTILLO,750ml,4740158001981,Gran Castillo Tempranillo Rose vein 11%vol 750ml,Gran Castillo,750 ml,4740158001981,prisma,0.9355,0.0,strong
+8362a5149d38398d5fdaecd7f21b8a40,"Keefir FARMI 2,5% 1kg, kile",FARMI,1kg,4740123000933,"Farmi keefir 2,5%, 1 kg",Farmi,1 kg,4740123000933,prisma,0.84,0.0,medium
+83f9b548f3f5443a8ebd97539c8b8380,"Kodujuust FARMI hapukoorega, 330g",FARMI,330g,4740113090401,FARMI kodujuust hapukoorega 330g,FARMI,330 g,4740113090401,prisma,0.9846,0.0,strong
+848c8804dd92ed426a2dfd7079df3212,"Või MO SAAREMAA küüsl.&soolakrist.,150g",MO SAAREMAA,150g,4740153040022,"Mo Saaremaa Või küüslaugu ja soolakristallidega, 150g",Mo Saaremaa,150 g,4740153040022,prisma,0.7111,0.0,weak
+855fe6913adb4dae0bc8fc13505c2a27,"Rukkisepik EESTI PAGAR, 300g",EESTI PAGAR,300g,4740086009981,Eesti Pagar Rukkisepik 300 G,Eesti Pagar,300 g,4740086009981,prisma,0.9032,0.0,strong
+85883b27b199e6f02e67a7ce7e6d3c55,"Mango-banaani smuuti PAI, 280ml",PAI,280ml,4740029052715,"Mango-banaani smuuti, PAI, 280 ml",Pai,280 ml,4740029052715,prisma,0.9722,0.0,strong
+85e72a91ba576c2ee4633bd7908f365e,Külm.kartulisektorid MAAHÄRRA 500g,MAAHÄRRA,500g,4740093026612,Maahärra kartulisektorid maitsestatud 500g,Maahärra,500 g,4740093026612,prisma,0.7632,0.0,medium
+861e98bfadf3b3bfdfbf7811e38c95cd,Energiajook RED BULL 4x250ml,RED BULL,4x250ml,9002490100490,"Red Bull energiajook 4 -pakk, 1l",Red Bull,1 l,9002490100490,prisma,0.8333,0.0,medium
+864d00f250f4c9315b1ae0229de4cf52,Muu piiritusjook METAXA 7* 40% 700ml,METAXA,200,5202795120023,Metaxa 5Yo muu piiritusjook 38%vol 200ml,Metaxa,200 ml,5202795120023,prisma,0.7931,,medium
+8655f84d33a5ce64ec470932c3083d35,"Meekook EESTI PAGAR, 1kg",EESTI PAGAR,1kg,4740086007185,Eesti Pagar Meekook 1 KG,Eesti Pagar,1 kg,4740086007185,prisma,0.8837,0.0,medium
+866dc5ece9de5732ffec95d415bedf82,Hele õlu ALEXANDER 5.2% 568ml 6tk,ALEXANDER,568ml,4740098071969,"Alexander õlu 5,2%vol 6x568ml",Alexander,6x568 ml,4740098071969,prisma,0.7667,83.33,medium
+86860f19eabfd362c04209709ca1cdff,"Tursamaks Isl.natur.KAPTEN GRANT, 120g",KAPTEN GRANT,120g,4740687001797,Kapten Grant islandi tursamaks naturaalne 120g,Kapten Grant,120 g,4740687001797,prisma,0.7835,0.0,medium
+8714861062fee380d4597604bf6e9c50,"Rehe rukkileib vorm.EESTI PAGAR,600g",EESTI PAGAR,600g,4740086008069,Eesti Pagar Rehe Rukkileib 600 G,Eesti Pagar,600 g,4740086008069,prisma,0.8966,0.0,medium
+898c33365080d50033af5cacf499352d,Multinektar AURA 1L,AURA,1L,4740051004317,Aura multinektar 1L,Aura,1 l,4740051004317,prisma,1.0,0.0,strong
+8a5cfa7b041294c4cd1fa1bcead4b1ca,"Võikeeks EESTI PAGAR, 250g",EESTI PAGAR,250g,4740086015111,Eesti Pagar Võikeeks 250 G,Eesti Pagar,250 g,4740086015111,prisma,0.8966,0.0,medium
+8c352930f011c2f06f99ac41b02a0742,Maasikajook LIMPA 250ml,LIMPA,250ml,4740098091271,Limpa maasikajook 250ml,Limpa,250 ml,4740098091271,prisma,1.0,0.0,strong
+8cccdd04708c4e50e131996e137e46f0,"Kanalihakonserv MINU De Lux, 525g",MINU,525g,4743144005352,Minu de lux kanaliha 525g,Minu,525 g,4743144005352,prisma,0.8621,0.0,medium
+8d55d8ab5fb930c931480947e5e4b259,"Kiivi-mango smuuti PAI, 280ml",PAI,280ml,4740029052777,Pai kiivi-mango smuuti 280ml,Pai,280 ml,4740029052777,prisma,1.0,0.0,strong
+8df4dd9725c642c4dfabd056a67e7e0c,Skyr virsiku FARMI 300g,FARMI,300g,4740113097417,"Skyr virsiku, FARMI, 300 g",Farmi,300 g,4740113097417,prisma,0.8364,0.0,medium
+8e8d5975c23426a3be4d2a6b41790f27,Peedi-porgandi-pastinaagi pehmik EP 240g,EESTI PAGAR,240g,4740086015678,Eesti Pagar Peedi-Porgandi-Pastinaagi Pehmik 240 G,Eesti Pagar,240 g,4740086015678,prisma,0.9608,0.0,strong
+949a0916726fac84b42c14be289c6860,"Külm.marjasegu vaarikatega HORTEX, 300g",HORTEX,300,5900477003939,Hortex marjasegu vaarikatega külmutatud 300g,Hortex,300 g,5900477003939,prisma,0.8222,,medium
+962b1f07e93c7e10e617996f3a2ecf8e,Köögiviljamahl CIDO 1L,CIDO,1L,4750042804338,Cido köögiviljamahl 100% 1L,Cido,1 l,4750042804338,prisma,1.0,0.0,strong
+9645db7f0f17553112242204af4e4015,Karastusjook COCA-COLA 330ml,COCA-COLA,330ml,5449000000996,Coca-Cola karastusjook purk 330ml,Coca-Cola,330 ml,5449000000996,prisma,1.0,0.0,strong
+97750d2b785eb551e34151b304651ad8,Rosinakukkel EESTI PAGAR 4x45g,EESTI PAGAR,4x45g,4740086015791,Eesti Pagar Rosinakukkel 4 Tk 180 G,Eesti Pagar,180 g,4740086015791,prisma,0.8889,0.0,medium
+9ae5d36c7191f49053622836009dba45,Dipikaste Alma Dip! tom.-sib.-papr.200g,ALMA,200g,4740125637113,"Alma dipikaste tomati-sibula-paprika, 200 g",Alma,200 g,4740125637113,prisma,0.716,0.0,weak
+9bf5798265c482fd3fba11893eb8b9d7,Liköör JÄGERMEISTER 35% 500ml,JÄGERMEISTER,500,4067700013057,Jägermeister liköör 35%vol 500ml,Jägermeister,500 ml,4067700013057,prisma,0.9492,,strong
+9c47553e3eac81217e77114e7cdd3001,"Hummus avokaadoga GOURMET CLUB,150g",GOURMET CLUB,150g,4740670124816,Gourmet Club Avokaado hummus 150g,Gourmet Club,150 g,4740670124816,prisma,0.7671,0.0,medium
+9c58baf45168b3c55bf515c0d930c37b,"Aprikoosikook EESTI PAGAR, 310g",Eesti Pagar,310g,4740086015692,"Aprikoosikook, EESTI PAGAR, 310 g",Eesti Pagar,310 g,4740086015692,prisma,0.9474,0.0,strong
+9cb5ec134e774d70d5fc19a0fa02831c,Viin VIRU VALGE 40% 500ml,VIRU VALGE,500ml,4740050002291,Viru Valge viin 40%vol 500ml,Viru Valge,500 ml,4740050002291,prisma,0.9434,0.0,strong
+9cd4c58063c179326c648751cf7bb875,"Juustukukkel EESTI PAGAR, 200g",EESTI PAGAR,200g,4740086007673,Eesti Pagar Juustukukkel 200 G,Eesti Pagar,200 g,4740086007673,prisma,0.9091,0.0,strong
+9e163845fa99fd06a00b4bffab3be274,"Kaerajook OATLY suhkruvaba, 1L",OATLY,1L,7394376621017,Oatly suhkruvaba kaerajook 1L,Oatly,1 l,7394376621017,prisma,0.9831,0.0,strong
+9e163845fa99fd06a00b4bffab3be274,"Kaerajook OATLY suhkruvaba, 1L",OATLY,1L,7394376615689,"Oatly mahe kaerajook, 1 l",Oatly,1 l,7394376615689,prisma,0.6909,0.0,weak
+9e37834468cbe6b5d9e5807cea73f1de,Kohvioad Arabica PAULIG 1kg,PAULIG,1kg,6418474039008,Paulig kohvioad Arabica keskmine röst 1 kg,Paulig,1 kg,6418474039008,prisma,0.92,0.0,strong
+9e47210f426b0f6003d944452d3637ab,"Whisky SCOTTISH LEADER 40% 0,2l",SCOTTISH LEADER,200,5029704217939,Scottish Leader Original Whisky 40%vol 200ml,Scottish Leader,200 ml,5029704217939,prisma,0.8302,,medium
+9f6fbc5d9764ec9885481ecf7838a15d,Multimahlajook PÕLTSAMAA 200ml,PÕLTSAMAA,200ml,4740029051213,Põltsamaa multimahlajook 200ml,Põltsamaa,200 ml,4740029051213,prisma,1.0,0.0,strong
+9fc0eb31f2d6ad4af501429288671019,"Sojajook ALPRO PlantProtein, 1L",ALPRO,1L,5411188130055,Alpro šokolaadimaitseline proteiiniga sojajook 1 l,Alpro,1 l,5411188130055,prisma,0.7,0.0,weak
+9ffd3eca50bb8581f8b58d4eee6d6e7e,"Rukkiröst Tosta EESTI PAGAR, 390g",EESTI PAGAR,390g,4740086008311,Eesti Pagar Tosta! Rukkiröst 390 G,Eesti Pagar,390 g,4740086008311,prisma,0.9167,0.0,strong
+a0441cff3bdb0fb2472e6d1bdf8f6a88,Energiajook RED BULL 355ml,RED BULL,355ml,9002490210939,Red Bull energiajook 355ml,Red Bull,355 ml,9002490210939,prisma,1.0,0.0,strong
+a142e06e401ad94bdfd2761ee4317c3d,Kreemistritsel vaar.-must. EP 350g,EESTI PAGAR,350g,4740086028067,Eesti Pagar Vaarika-Mustika Kreemistritsel Kardemoniga 350 G,Eesti Pagar,350 g,4740086028067,prisma,0.8113,0.0,medium
+a393e70b7b76e80cb3f71f4dcf1f69d4,Jäätisetuutu MARMITON 120g,MARMITON,120g,4742194000652,Marmiton jäätisetuutu 120g,Marmiton,120 g,4742194000652,prisma,1.0,0.0,strong
+a3a0bb46ff61be82cf13618dfc80ceac,Karastusjook COCA-COLA Zero 500ml,COCA-COLA,500ml,5449000131836,Coca-Cola zero karastusjook 500ml,Coca-Cola,500 ml,5449000131836,prisma,1.0,0.0,strong
+a83d9d4307053018c484eda63818874b,Karastusjook SPRITE 500ml,SPRITE,500,47407121,Sprite karastusjook 500ml,Sprite,500 ml,47407121,prisma,1.0,,strong
+a875060f988be1827e4f7c4ef329802e,"Br.kintsuliha šašlõkk Armeenia grill, kg",ARMEENIA GRILL,,2323109200002,"Armeenia Grill Broileri Kintsuliha Šašlõkk, Kg",Armeenia Grill,,2323109200002,prisma,0.8222,,medium
+a8a8ff087371f38250798815dee81173,"Kaerajook ALPRO magustamata, 1l",ALPRO,1l,5411188115366,"Alpro kaerajook, 1l",Alpro,1 l,5411188115366,prisma,0.76,0.0,medium
+a90e82fc421c3e6f9e0c74f4b2f98ad4,Kaera Pehmik EESTI PAGAR 220g,EESTI PAGAR,220g,4740086011595,Eesti Pagar Kaera Pehmik 220 G,Eesti Pagar,220 g,4740086011595,prisma,0.9831,0.0,strong
+a92546d0b96bad4f81c0bae6edac9203,Karastusjook COCA-COLA 6x330ml,COCA-COLA,6x330ml,5449000000965,"Coca-Cola karastusjook 6-pakk 1,98L",Coca-Cola,1.98 l,5449000000965,prisma,0.8462,0.0,medium
+a95ce1829f5b949cad54726056574956,Liköör COINTREAU 40% 500ml,COINTREAU,500ml,3035542011365,Cointreau liköör 40%vol 500ml,Cointreau,500 ml,3035542011365,prisma,0.9434,0.0,strong
+a981055ba593eeb00b9ef1226240beaf,Maksapasteet RANNAROOTSI 240g,RANNAROOTSI,240g,4740296002659,"Maksapasteet, RANNAROOTSI, 240 g",Rannarootsi,240 g,4740296002659,prisma,0.7945,0.0,medium
+aa5fe5b4beec85adbe5580b9fbff6bac,Hele õlu PILSNER URQUELL 4.4% 500ml prk,PILSNER URQUELL,,4744485010890,"Pilsner Urquell õlu 4,4%vol 500ml",Pilsner Urquell,500 ml,4744485010890,prisma,0.8571,,medium
+ab76f3c8390fbf829caca05a7dd689b1,Klassikaline pesto FILIPPO BERIO 190g,FILIPPO BERIO,190g,8002210112445,Filippo Berio klassikaline pesto 190 g,Filippo Berio,190 g,8002210112445,prisma,0.9867,0.0,strong
+ac466cba39bd1e4e8ff9fbeb5a84b5f2,"Või MO SAAREMAA 82%, 200g",MO SAAREMAA,200g,4740153010001,"Mo Saaremaa Või 82%, 200 g",Mo Saaremaa,200 g,4740153010001,prisma,0.9804,0.0,strong
+aca73880943c92653ef5df9faaca001f,"Rukkitasku EESTI PAGAR, 340g",EESTI PAGAR,340g,4740086009820,Eesti Pagar Rukkitasku 340 G,Eesti Pagar,340 g,4740086009820,prisma,0.9032,0.0,strong
+ad131c7f618af124e212a6f2044c15be,KPN- vein GRAN CASTILLO CabSauv.750ml,GRAN CASTILLO,750ml,4740158001936,Gran Castillo Cabernet Sauvignon vein 12%vol 750ml,Gran Castillo,750 ml,4740158001936,prisma,0.6545,0.0,weak
+ad239d4f5533c589c5190e5b503864c6,Vesi Aura Fruit õuna kasemahlaga 1.5l,AURA FRUIT,5l,4740098083924,"Aura Fruit kasemahlaga õunamaitseline vesi 1,5L",Aura Fruit,1.5 l,4740098083924,prisma,0.9412,70.0,strong
+aeaec3ba7587ecda38b6a61b1b7413c9,"Biskviit EESTI PAGAR, 400g",EESTI PAGAR,400g,4740086012677,"Biskviit, EESTI PAGAR, 400 g",Eesti Pagar,400 g,4740086012677,prisma,0.9394,0.0,strong
+aecc5d853313ab7ff6015a87500c6c5d,"Jogurt ALMA mango-virsik laktoosiv.,900g",ALMA,900g,4740125525304,Alma jogurt mango-virsik puuviljadest suhkrutega laktoosivaba 900g,Alma,900 g,4740125525304,prisma,0.75,0.0,medium
+aef880371bba649513d69cbb26b35d80,Smuuti AURA Aprikoos-Banaani-Porg. 330ml,AURA,330ml,4740098091516,"Smuuti aprikoosi-banaani-porgandi, AURA, 330 ml",Aura,330 ml,4740098091516,prisma,0.8261,0.0,medium
+af3b5d31acf30f7513f2b550f44fbb35,Must rukkileib EESTI PAGAR 390g,EESTI PAGAR,390g,4740086012196,Eesti Pagar Must Rukkileib 390 G,Eesti Pagar,390 g,4740086012196,prisma,0.9841,0.0,strong
+af740fef5a9508f3979cd8631ebf367c,Muu piiritusj. STAR DOLLAR 3* 30% 200ml,STAR DOLLAR,200ml,4033209008047,Star Dollar 3 Golden Harmony Muu Piiritusjook 30%vol 200ml,Star Dollar,200 ml,4033209008047,prisma,0.7708,0.0,medium
+b0c4d3dc213d92454f47470adeef5101,"Kohvioad LAVAZZA Crema e Aroma,1kg",LAVAZZA,1kg,8000070024441,Lavazza kohvioad Crema E Aroma 1 kg,Lavazza,1 kg,8000070024441,prisma,0.9275,0.0,strong
+b4ec246fa13f060875b2c65e17478379,"Täispiim FARMI 3,6-4,2%, 2L",FARMI,2L,4740113090555,"Farmi täispiim 3,6%-4,2%, 1l",Farmi,1 l,4740113090555,prisma,0.9455,50.0,strong
+b51d4cc942ae7d38590793045162c96f,Liköör JÄGERMEISTER 35% 700ml,JÄGERMEISTER,700ml,4067700013019,Jägermeister liköör 35%vol 700ml,Jägermeister,700 ml,4067700013019,prisma,0.9492,0.0,strong
+b602cc92a9e69b3eafdcdfb44a73fe2d,"Külmsupp koduaiaürtidega FARMI pure,750g",FARMI,750g,4740113093051,"Farmi külmsupp koduaiaürtidega, 750 g",Farmi,750 g,4740113093051,prisma,0.9091,0.0,strong
+b6fe1e756708e392d92c72be386ab621,Keefirijook maasika-vanilje HELLUS 1kg,HELLUS,1kg,4740036017936,"Keefirijook maasika-vanilje, HELLUS, 1 kg",Hellus,1 kg,4740036017936,prisma,0.8837,0.0,medium
+b77e4fbe75f68570ca6419c347a8fd63,Õuna-Kirsijook LIMPA 250ml,LIMPA,250ml,4740098091264,Limpa õuna-kirsijook 250ml,Limpa,250 ml,4740098091264,prisma,1.0,0.0,strong
+b8d524b1f4620475d67b8a0af387efc6,Karastusjook SPRITE 500ml,SPRITE,500ml,47407121,Sprite karastusjook 500ml,Sprite,500 ml,47407121,prisma,1.0,0.0,strong
+ba455fd5de9b655b07cc1554ce096064,Muu piir.jook IMPERIAL XII VS 30%500ml,IMPERIAL XII,500ml,4770047235845,"Imperial XII VS muu piiritusjook 30%vol 500ml, PET",Imperial XII,500 ml,4770047235845,prisma,0.8409,0.0,medium
+bb0b7a44c57c55a909c95d0cbb15ac5e,"Külmutatud viineripirukas EP, 1,2 kg",EESTI PAGAR,1200,4740086013568,"Eesti Pagar Viineripirukas XL 1,2 kg",Eesti Pagar,1.2 kg,4740086013568,prisma,0.9565,,strong
+bcd9588b2154c9e3704234935e27ae7a,"Pealinna kook EESTI PAGAR, 1.1kg",EESTI PAGAR,1kg,4740086006782,"Eesti Pagar Pealinna Kook 1,1 KG",Eesti Pagar,1.1 kg,4740086006782,prisma,0.8857,9.09,medium
+bd2856d08db9329660578a0f4eb06ba7,Viin DANZKA 40% 500ml,DANZKA,500ml,5788686110019,Danzka vodka 40%vol 500ml,Danzka,500 ml,5788686110019,prisma,0.7826,0.0,medium
+bdd83dd42adb0dfee0be2a508ab52083,"Teratasku Eesti Pagar 4tk, 280g",Eesti Pagar,4tk,4740086015395,Eesti Pagar Teratasku 280 G,Eesti Pagar,280 g,4740086015395,prisma,0.8966,,medium
+be00fcfdfe9c4cac7fa89541d18c1bb9,Muu pir.jook PIPRA NAPS Meega 35% 500ml,PIPRA NAPS,500ml,4740050003830,Pipra Naps Meega muu piiritusjook 35%vol 500ml,Pipra Naps,500 ml,4740050003830,prisma,0.8941,0.0,medium
+c0a7be750d24bd8a24fecfd7d59aa622,Päik.kuiv.tom.pesto FILIPPO BERIO 190g,FILIPPO BERIO,190g,8002210112704,Filippo Berio päikesekuivatatud tomatitega pesto 190 g,Filippo Berio,190 g,8002210112704,prisma,0.7174,0.0,weak
+c1184be8e8fd02935601ed40b60dddcf,"Juustupulgad Pik-Nik Twiller, 80g",PIK-NIK,80g,4770299396899,PIK-NIK juustupulgad Kids Twiller 80g,PIK-NIK,80 g,4770299396899,prisma,0.9143,0.0,strong
+c2e7b7830bf83415d85cbe0afe9ef1c4,Kohvioad Arabica PAULIG 1kg,PAULIG,1000,6418474039008,Paulig kohvioad Arabica keskmine röst 1 kg,Paulig,1 kg,6418474039008,prisma,0.92,,strong
+c329ffe2c3ce94af526de8e6c6c08a15,Kaerasepik EESTI PAGAR 300g,Eesti Pagar,300g,4740086020894,Eesti Pagar Kaerasepik 300 G,Eesti Pagar,300 g,4740086020894,prisma,0.9818,0.0,strong
+c3e0cae83d8033120dd95bdeadd77aa8,Jäätisetops MARMINTON 50g,MARMITON,50g,4742194000300,"Jäätisetops, MARMITON, 50 g",Marmiton,50 g,4742194000300,prisma,0.9412,0.0,strong
+c4b5d2b1183b7a67354041e40078528e,Reservväelaste konserv LINNAMÄE 240g,LINNAMÄE,240g,4740618007942,"Reservväelaste konserv, LINNAMÄE LIHATÖÖSTUS, 240 g",Linnamäe,240 g,4740618007942,prisma,0.8372,0.0,medium
+c4ce23799e89e36bbb65efd2e94d213e,"Kohuke ALMA vaarika, 5x40g",ALMA,5x40g,4740125639407,Alma kohuke vaarika kakaoglasuuris 5x40g,Alma,5x40 g,4740125639407,prisma,0.7907,0.0,medium
+c57689dbf1a0d2539696b790c34cf104,"Mandlijook ALPRO magustamata, 1L",ALPRO,1L,5411188112709,"Alpro magustamata mandlijook, 1 l",Alpro,1 l,5411188112709,prisma,0.9538,0.0,strong
+c5a13cccda96a9788d1e1db2e2e325f5,"Või ALMA 82%, 200g",ALMA,200g,4740553699837,Alma või 82% 200g,Alma,200 g,4740553699837,prisma,0.9714,0.0,strong
+c5a13cccda96a9788d1e1db2e2e325f5,"Või ALMA 82%, 200g",ALMA,200g,4740553699844,Alma või laktoosivaba 82% 200g,Alma,200 g,4740553699844,prisma,0.8387,0.0,medium
+c672237396222d32b02822a41a967b6e,Smuuti AURA Mango-Apelsini 330ml,AURA,330ml,4740098091110,Aura smuuti mango-apelsin 330ml,Aura,330 ml,4740098091110,prisma,0.9841,0.0,strong
+c7131494bb27d5c2cca8b218d8019027,Pealinna peenleib EESTI PAGAR 1kg,EESTI PAGAR,1kg,4740086001145,Eesti Pagar Pealinna Peenleib 1 KG,Eesti Pagar,1 KG,4740086001145,prisma,0.9851,0.0,strong
+c79284e27ab10b25dab6ff93f34a2eb6,"Sulatatud juust VALIO Forte juustu,185g",VALIO,185g,4740553692661,Valio sulatatud juust Forte juustu 185g,Valio,185 g,4740553692661,prisma,0.8718,0.0,medium
+c797779b2dd8100c7dab4103180afde3,"Külm.pelmeenid Uralskije VICI lihaga,1kg",VICI,1000,4770190113557,"Vici pelmeenid lihaga, 1 kg",Vici,1 kg,4770190113557,prisma,0.7164,,weak
+c7a4896d64ead2d5fd2986235c7a7603,Õunamahl AURA 100% 1L,AURA,1L,4740051004294,Aura õunamahl 1L,Aura,1 l,4740051004294,prisma,1.0,0.0,strong
+c7a4896d64ead2d5fd2986235c7a7603,Õunamahl AURA 100% 1L,AURA,1L,4740098097464,Aura ökoloogiline filtreerimata õunamahl 1L,Aura,1 l,4740098097464,prisma,0.8571,0.0,medium
+c87b395d9a7c3e04e028eb52818744f8,"Külm.marjasegu vaarikatega HORTEX, 300g",HORTEX,300g,5900477003939,Hortex marjasegu vaarikatega külmutatud 300g,Hortex,300 g,5900477003939,prisma,0.8222,0.0,medium
+c897e7c16749dd746cb396fb4db48acc,"Juust Gouda NOPRI karulauguga, 250g",NOPRI,250g,4740218004044,Nopri grilljuust karulaugu 200 g,Nopri,200 g,4740218004044,prisma,0.7761,20.0,medium
+c8cc4f39669e8302da47d73ac0a9dab7,"Külm. kalapulgad kilepakendis ESVA, 400g",ESVA,400g,4740056091206,ESVA kalapulgad kiles 400g,ESVA,400 g,4740056091206,prisma,0.8696,0.0,medium
+c8d6f27a2ba740d9eb9f6c62b1745a8d,"Caesari kauss pasta,broil.CH.LUNDEN, 270g",CHEF LUNDEN,270g,4740376103818,CHEF LUNDEN Caesari kauss pasta ja broileriga 270 g,CHEF LUNDEN,270 g,4740376103818,prisma,0.6923,0.0,weak
+ca30a70356fb476efabb0f3b052099e3,Viin ABSOLUT Vodka 40% 1L,ABSOLUT,1000,7312040017034,Absolut vodka 40%vol 1L,Absolut,1 l,7312040017034,prisma,0.875,,medium
+ca5c2478babea822240e5acfa1630c4d,"Tallinna kilufileed VIRU RAND, 100g",VIRU RAND,100g,4740041002248,Viru Rand Tallinna Kilu Fileed 100 G,Viru Rand,100 g,4740041002248,prisma,0.7895,0.0,medium
+ca7c567250806d7eae0cf7150a22769d,"Mineraalvesi VYTAUTAS 1L,g-tud",VYTAUTAS,1L,4770405226126,Vytautas mineraalvesi 1 L,Vytautas,1 l,4770405226126,prisma,0.913,0.0,strong
+cb09eba52a2ec353adf7a8890c66d74a,"Juust snäkk Gouda HIIRTE JUUST, 175g",HIIRTE JUUST,175g,4740572006630,Hiirte Juust Gouda Snäkk 175g,Hiirte Juust,175 g,4740572006630,prisma,1.0,0.0,strong
+cb14dd895e26207105e1459cef4ee9a5,Leib Peremehe EESTI PAGAR 600g,EESTI PAGAR,600g,4740086021211,Eesti Pagar Peremehe Leib 600 G,Eesti Pagar,600 g,4740086021211,prisma,0.9836,0.0,strong
+cb47b46149aa0d8a76cf17d57d35cd52,Kreemistritsel maasik.-rabar. EP 350g,EESTI PAGAR,350g,4740086028074,Eesti Pagar Maasika-Rabarberi Kreemistritsel Kardemoniga 350 G,Eesti Pagar,350 g,4740086028074,prisma,0.8288,0.0,medium
+cc61ea96684453410bce86136d5f3f3e,"Turistieine sealihast MINU De Lux, 525g",MINU,525g,4743144003976,Minu de lux turistieine sealihast 525g,Minu,525 g,4743144003976,prisma,0.987,0.0,strong
+cd4a6fb01e52eb4c0fe08ed3bc6a5ab7,"Taimne rasvavõie KEIJU soolane 70%, 400g",KEIJU,400g,6438207011613,"Keiju taimne rasvavõie 70%, 400 g",Keiju,400 g,6438207011613,prisma,0.9,0.0,strong
+ce146ac678bbb1995d54c1c88f539386,Kons.hautatud sealiha MINU 250g,MINU,250g,4743144000647,Minu hautatud sealiha 250 g,Minu,250 g,4743144000647,prisma,0.8966,0.0,medium
+cfa2a71fee64a8f4b95dfed4682fe0ec,Liköör VANA TALLINN 40% 500ml,VANA TALLINN,500,4740050002031,Vana Tallinn liköör 40%vol 500ml,Vana Tallinn,500 ml,4740050002031,prisma,0.9492,,strong
+d023d26ddbcd3ed1fb4d4a7485477a9a,Külm.pitsaRISTORANTE Mozzarella g.v.370g,DR.OETKER,370g,4001724039112,Dr.Oetker pitsa mozzarella 355g,Dr.Oetker,355 g,4001724039112,prisma,0.7843,4.05,medium
+d257ebb5c37994c0b21697dfedaca81c,Kons.turistieine veiselihast MINU 250g,MINU,250g,4743144000630,Minu turisti eine veiselihast 250 g,Minu,250 g,4743144000630,prisma,0.7945,0.0,medium
+d263c5e43f4d40bc416c370161cf0533,Kaeraküpsis rosinatega VÄIKE VÄÄNIK 250g,VÄIKE VÄÄNIK,250g,4740320004536,Väike Väänik kaeraküpsis rosinaga 250 g,Väike Väänik,250 g,4740320004536,prisma,0.9589,0.0,strong
+d3de22b61ca7ad799c56042d19670ea7,Jõhvika mahlajook PÕLTSAMAA 2L,PÕLTSAMAA,2L,4740029051473,Põltsamaa jõhvika mahlajook 2L,Põltsamaa,2 l,4740029051473,prisma,1.0,0.0,strong
+d428fcf525795d80e8bb49d04514779c,Viin ABSOLUT Vodka 40% 500 ml,ABSOLUT,500 ml,7312040017072,Absolut vodka 40%vol 500ml,Absolut,500 ml,7312040017072,prisma,0.8364,0.0,medium
+d4e0cfd28922b3a014ac4b83e4c55cb0,Ülepannikoogid MAMMA 350g,MAMMA,350g,4740184005892,Mamma .Õuna-Ülepannikoogid 350 G,Mamma,350 g,4740184005892,prisma,0.8837,0.0,medium
+d4f897e9465c4de09e55aaa331faef23,"Puding ALMA kookose, 230g",ALMA,230g,4740125534313,"Puding kookose, ALMA, 230 g",Alma,230 g,4740125534313,prisma,0.8889,0.0,medium
+d71224272b766e62d9b945b6a4001d7e,Tomatimahl AURA 1L,AURA,1L,4740051004287,Aura tomatimahl 1L,Aura,1 l,4740051004287,prisma,1.0,0.0,strong
+d7f91dcdc52eb7a7747b245ad63f02d6,Liköör JÄGERMEISTER 35% 500ml,JÄGERMEISTER,500ml,4067700013057,Jägermeister liköör 35%vol 500ml,Jägermeister,500 ml,4067700013057,prisma,0.9492,0.0,strong
+d8d68ad89518237d3c68c4766fd9f4dd,"Keefirijook HELLUS mango-apr.-avok.,170g",HELLUS,170g,4740036016601,"Keefirijook mango-aprikoos-avokaado, HELLUS, 170 g",Hellus,170 g,4740036016601,prisma,0.701,0.0,weak
+daac9a20e2948c3f7b14680f2f534410,Viin VIRU VALGE 40% 1L,VIRU VALGE,1L,4740050002314,Viru Valge viin 40%vol 1L,Viru Valge,1 l,4740050002314,prisma,0.9362,0.0,strong
+dbd18dc6d36f49dba13f566c1f2c45e7,KPN v.vein JOHANN BRUNNER Ries.Mosel 3L,JOHANN BRUNNER,3L,4044551037425,"Johann Brunner Riesling Mosel KPN vein 9,5%vol 3L",Johann Brunner,3 l,4044551037425,prisma,0.75,0.0,medium
+dd8ffe6711ee4286645dc00d5027cde9,Rumm CAPTAIN MORGAN Dark 40% 500ml,CAPTAIN MORGAN,500,87000651289,Captain Morgan Dark rumm 40%vol 500ml,Captain Morgan,500 ml,87000651289,prisma,0.9577,,strong
+de123369dcc6ee4f6fb163e6ae625858,"Pehme valge juust ATHENA Classic, 200g",ATHENA,200g,4740572004391,Athena pehme valge juust 200g,Athena,200 g,4740572004391,prisma,1.0,0.0,strong
+de8a2634815271585439b1fb818760aa,Kodujuust Alma šok.tükk.lakt.vab.200g,ALMA,200g,4740125633238,"Alma laktoosivaba kodujuust šokolaaditükkidega, 200 g",Alma,200 g,4740125633238,prisma,0.6591,0.0,weak
+ded3d5ed3b0690c2e573799d12c443fe,Röstsai Tosta EESTI PAGAR 500g,EESTI PAGAR,500g,4740086007222,Eesti Pagar Tosta! Röstisai 500 G,Eesti Pagar,500 g,4740086007222,prisma,0.9677,0.0,strong
+df4ef954c1680ea09018e3361776a19e,Pagari kaeraröst EESTI PAGAR 430g,EESTI PAGAR,430g,4740086020900,Eesti Pagar Pagari Kaeraröst 430 G,Eesti Pagar,430 g,4740086020900,prisma,0.9851,0.0,strong
+dfa98c05da03c2e2cec6c8f5ecffed62,Looduslik mineraalvesi EVIAN 1.5L,EVIAN,1500,3068320085005,"Evian looduslik mineraalvesi 1,5 L",Evian,1.5 l,3068320085005,prisma,0.9851,,strong
+dfc4e93c1ae6445868c9ce6719bcc9ee,Tomatimahl AURA 1L,AURA,1000,4740051004287,Aura tomatimahl 1L,Aura,1 l,4740051004287,prisma,1.0,,strong
+e00250f9787008f954c5f199067aeeee,"Mahetäispiim MO SAAREMAA Öko 3,8-4,4%,1L",MO SAAREMAA,1L,4740153600004,"Mo Saaremaa Öko mahetäispiim 3,8 - 4,4% 1L",Mo Saaremaa,1 l,4740153600004,prisma,0.875,0.0,medium
+e03dc6f31bd1c66e9ce5a2c03abf0554,"Mango-apelsini smuuti PAI, 280ml",PAI,280ml,4740029052715,"Mango-banaani smuuti, PAI, 280 ml",Pai,280 ml,4740029052715,prisma,0.7945,0.0,medium
+e0e1e109f03a9c754ce93edfe6aaf3b9,Brandy IMPERIAL XII VSOP 36% 700ml,IMPERIAL XII,700ml,4770033226741,Imperial XII VSOP Brandy 36%vol 500ml,Imperial XII,500 ml,4770033226741,prisma,0.9296,28.57,strong
+e128793f9f431aac20b4f0f04720e0d7,Muu.alk.jk. APEROL Aperitivo 11% 700ml,APEROL,700ml,8002230000302,Aperol muu alkohoolne jook 11%vol 700ml,Aperol,700 ml,8002230000302,prisma,0.6234,0.0,weak
+e1d7232545baafe66f70b81d7e212061,"Valge juust FITAKI Original, 500g",FITAKI,500g,4000504251225,"Fitaki juust Original, 500 g",Fitaki,500 g,4000504251225,prisma,0.918,0.0,strong
+e22fdd22c89de2ffc45de8ac301db9d7,Muu.alk.jk. APEROL Aperitivo 11% 700ml,APEROL,700,8002230000302,Aperol muu alkohoolne jook 11%vol 700ml,Aperol,700 ml,8002230000302,prisma,0.6234,,weak
+e2c28e5ee258e8d298a1f88bf9efe290,"Maasika-banaani smuuti PAI, 280ml",PAI,280ml,4740029052739,"Maasika-banaani smuuti, PAI, 280 ml",Pai,280 ml,4740029052739,prisma,0.9737,0.0,strong
+e2c28e5ee258e8d298a1f88bf9efe290,"Maasika-banaani smuuti PAI, 280ml",PAI,280ml,4740029052715,"Mango-banaani smuuti, PAI, 280 ml",Pai,280 ml,4740029052715,prisma,0.8108,0.0,medium
+e78d0d352ccb75009a1795b299e76633,Multimahlajook PÕLTSAMAA 1L,PÕLTSAMAA,1L,4740029050070,Põltsamaa multimahlajook 1L,Põltsamaa,1 l,4740029050070,prisma,1.0,0.0,strong
+e7aab080263475254d26554ee3db1dc5,Kirsijook AURA 1L,AURA,1L,4740098076698,Aura kirsijook 1L,Aura,1 l,4740098076698,prisma,1.0,0.0,strong
+e7e6c41d27433f6d75cdf088f288dcd6,"Roheline jäätee NESTEA Sidruni 1,5l",NESTEA,5l,5900334003461,"Nestea roheline jäätee tsitrusega 1,5L",Nestea,1.5 l,5900334003461,prisma,0.8732,70.0,medium
+e7e720ee671762933039cba9373557de,"Kohuke ALMA vanilli, 40g",ALMA,40g,4740125639100,Alma kohuke vanilli kakaoglasuuris 40g,Alma,40 g,4740125639100,prisma,0.7692,0.0,medium
+e898a9b7a6b03269c94bb99bef3e444e,"Lõhetükid tomatikast. Kapten Grant,230g",KAPTEN GRANT,230g,4740687001841,Kapten Grant lõhetükid tomatikastmes 230g,Kapten Grant,230 g,4740687001841,prisma,0.8837,0.0,medium
+eaac2df9575e71007fa3bf58b974470d,"Margariin DELMA Extra 39%, 450g",DELMA,450g,8719200240513,"Margariin Extra 39%, DELMA, 450 g",Delma,450 g,8719200240513,prisma,0.9123,0.0,strong
+eaac2df9575e71007fa3bf58b974470d,"Margariin DELMA Extra 39%, 450g",DELMA,450g,8719200240728,"Margariin soolane poolrasvane 39%, DELMA, 450 g",Delma,450 g,8719200240728,prisma,0.7843,0.0,medium
+eb19df62cd72923e216c68a8aadae090,Rumm CAPTAIN MORGAN Dark 40% 500ml,CAPTAIN MORGAN,500ml,87000651289,Captain Morgan Dark rumm 40%vol 500ml,Captain Morgan,500 ml,87000651289,prisma,0.9577,0.0,strong
+ed0257bfd32d5f7c60055afffdf359c7,Pesto Rosso BARILLA 200g,BARILLA,200g,8076809523547,"Barilla pesto rosso, 200g",Barilla,200 g,8076809523547,prisma,0.9796,0.0,strong
+ed23d45445756a60bbb2f4ad5dd03633,"Põdraliha konserv LINNAMÄE, 240g",LINNAMÄE,240g,4740618000684,"Põdraliha konserv, LINNAMÄE LIHATÖÖSTUS, 240 g",Linnamäe,240 g,4740618000684,prisma,0.7848,0.0,medium
+ed83232888d52756a6cc4440c7b9f764,Külm.pitsaRISTORANTE Mozzarella g.v.370g,DR.OETKER,,4001724039112,Dr.Oetker pitsa mozzarella 355g,Dr.Oetker,355 g,4001724039112,prisma,0.7843,,medium
+edb5df95a316afa8bcf675c53358216c,"Suitsupeekon MATSIMOKA,110g viil",MATSIMOKA,110g,4744735010984,"Matsimoka suitsupeekon viilutatud, 110g",Matsimoka,110 g,4744735010984,prisma,0.7901,0.0,medium
+ee08f0ab5dd5ec8c933d1ae8a8edee08,Liköör MALIBU 21% 500ml,MALIBU,500ml,5010284100049,Malibu liköör 21%vol 500ml,Malibu,500 ml,5010284100049,prisma,0.9362,0.0,strong
+ee593b3feae81ce22d7895e0d250de86,"Joogijogurt TERE metsmaasika, 900g",TERE,900g,4740036014218,"Joogijogurt metsmaasika, TERE, 900 g",Tere,900 g,4740036014218,prisma,0.9206,0.0,strong
+f002101ebba60a080c9fe3049203d4c4,Mineraalvesi VÄRSKA originaal 1.5L,VÄRSKA ORIGINAAL,1500,4740042100011,"VÄRSKA ORIGINAAL 1,5 L",VÄRSKA ORIGINAAL,1.5 l,4740042100011,prisma,0.8421,,medium
+f01bde235d41349f7a3ba84ffed31769,"Viin VIRU VALGE Cranberry 37,5% 500ml",VIRU VALGE,500ml,4740050007517,Viru Valge Cranberry viin 38%vol 500ml,Viru Valge,500 ml,4740050007517,prisma,0.9118,0.0,strong
+f02a7081820696ad173b937ee05cbda1,Ploominektar PÕLTSAMAA 1L,PÕLTSAMAA,1L,4740029055099,Põltsamaa ploominektar 1L,Põltsamaa,1 l,4740029055099,prisma,1.0,0.0,strong
+f038ec64ca1ce90957e675836315a4b5,"Täispiim ALMA 3,8-4,2%, 0.5L",ALMA,5L,4740125120332,"Alma täispiim 3,8-4,2% 0,5l",Alma,0.5 l,4740125120332,prisma,0.9818,90.0,strong
+f0d7aaa9cdf34359bfe6d150193c2568,"Toorjuust OTTO küüslaugu-ürtidega,150g",PIIMAMEISTER OTTO,150g,4740572006296,Piimameister Otto toorjuust küüslaugu ja ürtidega 150g,Piimameister Otto,150 g,4740572006296,prisma,0.8627,0.0,medium
+f16532bf24b8ebacb9af0c41b0c74c64,"Kodukandi EESTI PAGAR koorikleib, 300g",EESTI PAGAR,300g,4740086019898,Eesti Pagar Kodukandi Koorikleib 4 X 75 G,Eesti Pagar,4x75 g,4740086019898,prisma,0.8608,0.0,medium
+f194358cdf47d8f1f6f336afe7b6d958,Karastusjook COCA-COLA 330ml,COCA-COLA,330,90375408,Coca-Cola zero karastusjook 330ml,Coca-Cola,330 ml,90375408,prisma,1.0,,strong
+f1e5c3d6e12273e4bbb83d9318adf0c0,Karb.looduslik.min.vesi BORJOMI 6x1.25L,Borjomi,6x1,4860019002084,"Borjomi karboniseeritud looduslik mineraalvesi 6x1,25L",Borjomi,1.25L,4860019002084,prisma,0.7742,,medium
+f20f4c49079e4750241ffe3cb1ea9190,Kodukandi rukkil.viil. EESTI PAGAR 390g,EESTI PAGAR,390g,4740086001497,Eesti Pagar Kodukandi Rukkileib 390 G,Eesti Pagar,390 g,4740086001497,prisma,0.8947,0.0,medium
+f23925be5e9665130109a3419a2744f0,"Narva Peenleib EP, 310g",Eesti Pagar,310g,4740086001114,Eesti Pagar Jassi Seemneleib 310 G,Eesti Pagar,310 g,4740086001114,prisma,0.7536,0.0,medium
+f2b235cab6791a4ffc541da24fecf7a7,Kanepiseemne leib rukkiteradega 500g,EESTI PAGAR,500g,4740086013759,Eesti Pagar Kanepiseemne Leib Rukkiteradega 500 G,Eesti Pagar,500 g,4740086013759,prisma,0.9897,0.0,strong
+f2ba412862fad87502066ff2c017345d,Ploominektar AURA 1L,AURA,1000,4740051004331,Aura ploominektar 1L,Aura,1 l,4740051004331,prisma,1.0,,strong
+f2ba412862fad87502066ff2c017345d,Ploominektar AURA 1L,AURA,1000,4740051004317,Aura multinektar 1L,Aura,1 l,4740051004317,prisma,0.8205,,medium
+f2dde075f07ecfc868f89fb4f37b594e,"Külm.kultuurmustikad HARMAVILI,300g",HÄRMAVILI,300g,4740188019772,"Härmavili kultuurmustikad, 300g",Härmavili,300 g,4740188019772,prisma,0.7895,0.0,medium
+f30ba3d7ef771657807e4b95c519463a,"Margariin RAMA Classic 75%, 400g",RAMA,400g,8719200264854,"Margariin Classic, RAMA, 400 g",Rama,400 g,8719200264854,prisma,0.7761,0.0,medium
+f34e3a5d9c07c92179cc4d595c4d831d,"Pavlova beseek.põhjad REVAL KOND.,8x22g",REVAL KONDIITER,8x22g,4742581004171,Reval Kondiiter Pavlova Beseekoogi Põhjad 8 X 22 G,Reval Kondiiter,8x22 g,4742581004171,prisma,0.7677,0.0,medium
+f36605f02406ff10c4d5335e7feb9590,Viin SAAREMAA 40% 1L,SAAREMAA VODKA,1L,4740054002518,Saaremaa Vodka 40%vol 1L,Saaremaa Vodka,1 l,4740054002518,prisma,0.88,0.0,medium
+f3cd34ca9332bd4d3a48a93e056b1150,Kartuli-röstsibula Pehmik EP 240g,EESTI PAGAR,240g,4740086023550,Eesti Pagar Kartuli-Röstsibula Pehmik 4x60 G,Eesti Pagar,4x60 g,4740086023550,prisma,0.9213,0.0,strong
+f71172df86bbb65f41d68a8e2f05bcc8,"Pealinna EESTI PAGAR teraleib, 390g",EESTI PAGAR,390g,4740086020009,Eesti Pagar Pealinna Teraleib 390 G,Eesti Pagar,390 g,4740086020009,prisma,0.9714,0.0,strong
+f77607ee1816b5c5823ddbfde2236339,Näkileivad Original WASA 275g,WASA,275g,7300400118101,"Wasa original rukkinäkileivad, 275 g",Wasa,275 g,7300400118101,prisma,0.8923,0.0,medium
+f7c102f9618f1b394b717b5cc5f50f64,Viin ABSOLUT Vodka 40% 1L,ABSOLUT,1L,7312040017034,Absolut vodka 40%vol 1L,Absolut,1 l,7312040017034,prisma,0.875,0.0,medium
+f7f3206c7a19006ac26c84131e2ff507,Whisky J.WALKER Red Label 40% 1L,JOHNNIE WALKER,1000,5000267013602,Johnnie Walker Red Label Scotch Whisky 40%vol 1L,Johnnie Walker,1 l,5000267013602,prisma,0.8395,,medium
+f81e8cf872428465dde515628b7ece5e,Vein GRAN CASTILLO V.&Chardonnay 3L BIB,GRAN CASTILLO,3L,4740158006429,Gran Castillo Vi&rdonnay vein 11%vol 3L,Gran Castillo,3 l,4740158006429,prisma,0.8205,0.0,medium
+f889d414d08c62cda95a93e649eb786e,"Või SAULUTE GoldenGhee selitat.99,9%500g",SAULUTE,500g,4770299397964,"Saulute selitatud või Golden Ghee, 500g",Saulute,500 g,4770299397964,prisma,0.6582,0.0,weak
+f90412f05fd7cc0a7361199e9a7b7b6f,Õunamahl AURA 100% 1L,AURA,1000,4740051004294,Aura õunamahl 1L,Aura,1 l,4740051004294,prisma,1.0,,strong
+faf77e1496f84e3fffa7917b60cebaa9,Magus apelsininektar AURA 1L,AURA,1L,4740051476985,Aura magus apelsininektar 1L,Aura,1 l,4740051476985,prisma,1.0,0.0,strong
+fb20524b531d472c05e105b40eeeaa87,"Jogurt ALMA maasikas-ban. lakt.vaba,900g",ALMA,900g,4740125525311,Alma jogurt maasikas-banaan puuviljadest suhkrutega laktoosivaba 900g,Alma,900 g,4740125525311,prisma,0.6055,0.0,weak
+fb2d115ed38f58dbaddb06b88ad3c76b,Tomatimahl PÕLTSAMAA 1L,PÕLTSAMAA,1L,4740029055051,Põltsamaa tomatimahl 100% 1L,Põltsamaa,1 l,4740029055051,prisma,1.0,0.0,strong
+fb4836100fb339eecaa7ed0d17271ba3,M.alk.jook HARTWALL Long Drink5.5%330ml,HARTWALL,330ml,6413600207689,Hartwall original long drink alk.vaba 330ml,Hartwall,330 ml,6413600207689,prisma,0.6098,0.0,weak
+fbcfaf81d97bd32e3da90596c3a95ff7,"Kodujuust OTTO klassikaline, 440g",PIIMAMEISTER OTTO,440g,4740572004353,"Piimameister Otto Klassikaline kodujuust, 440 g",Piimameister Otto,440 g,4740572004353,prisma,0.9677,0.0,strong
+fc02cae070c45ced79a1ba0bcaa91f4a,Külm.lillkapsas ja brokoli MAAHÄRRA 400g,MAAHÄRRA,400g,4740093640139,Maahärra lillkapsas ja brokoli 400 g,Maahärra,400 g,4740093640139,prisma,0.9211,0.0,strong
+fcd08821c4d5b68b8f6dd99ef34ab77c,"Täistera röstsepik EESTI PAGAR,500g",Eesti Pagar,500g,4740086018686,Eesti Pagar Tosta Täistera Röstsepik 500 G,Eesti Pagar,500 g,4740086018686,prisma,0.8451,0.0,medium
+fcd08821c4d5b68b8f6dd99ef34ab77c,"Täistera röstsepik EESTI PAGAR,500g",Eesti Pagar,500g,4740086016071,Eesti Pagar Täisterasepik 500 G,Eesti Pagar,500 g,4740086016071,prisma,0.7222,0.0,weak
+fcf7930652a531dae327728e2921eee6,Õunamahl PÕLTSAMAA 1L,PÕLTSAMAA,1L,4740029055075,Põltsamaa õunamahl 100% 1L,Põltsamaa,1 l,4740029055075,prisma,1.0,0.0,strong
+fd3c0e599840c7f08f2c09c9e2efb2cb,Mahlaj. DR. Active Õuna-arbuusi 0.5l,DR. ACTIVE,5l,4740098092551,Dr. Active õuna-arbuusi mahlajook 500ml,Dr. Active,500 ml,4740098092551,prisma,0.8767,90.0,medium
+fd7255e4b94e957ddd03a5996b8a5b58,"Juust ZOTT Toasty Sandwich viil., 120g",ZOTT,120g,4014500517940,Zott toasty sandwich sulatatud juust 120 g,Zott,120 g,4014500517940,prisma,0.825,0.0,medium
+ff0628a3f1808c99d2fd31a859dea2a9,Karastusjook COCA-COLA 500ml,COCA-COLA,500ml,47402126,Coca-Cola karastusjook 500ml,Coca-Cola,500 ml,47402126,prisma,1.0,0.0,strong
