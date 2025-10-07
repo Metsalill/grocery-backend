@@ -1,4 +1,4 @@
-name: "Import approved matches to Railway"
+name: Import approved matches to Railway
 
 on:
   workflow_dispatch:
@@ -11,8 +11,10 @@ on:
 jobs:
   import:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
@@ -33,13 +35,21 @@ jobs:
             echo "No DATABASE_URL_PUBLIC or DATABASE_URL secret set." >&2
             exit 1
           fi
-          [[ "$URL" == *"sslmode="* ]] || URL="${URL}${URL*\?/?'?': '?'}sslmode=require"
+          if [[ "$URL" == *"?"* ]]; then
+            if [[ "$URL" != *"sslmode="* ]]; then
+              URL="${URL}&sslmode=require"
+            fi
+          else
+            URL="${URL}?sslmode=require"
+          fi
           echo "url=$URL" >> "$GITHUB_OUTPUT"
 
       - name: Create table + indexes (if not exists)
-        env: { DATABASE_URL: ${{ steps.prep.outputs.url }} }
+        env:
+          DATABASE_URL: ${{ steps.prep.outputs.url }}
         run: |
           set -euo pipefail
+
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
             CREATE TABLE IF NOT EXISTS approved_matches (
               barbora_uid    text NOT NULL,
@@ -62,6 +72,7 @@ jobs:
             CREATE INDEX IF NOT EXISTS idx_approved_matches_barbora_uid ON approved_matches (barbora_uid);
             CREATE INDEX IF NOT EXISTS idx_approved_matches_store_match_uid ON approved_matches (store, match_uid);
           "
+
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
             CREATE OR REPLACE VIEW approved_best_match_per_store AS
             SELECT DISTINCT ON (barbora_uid, store)
@@ -81,9 +92,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          echo "Workspace contents:"
-          ls -lah "$GITHUB_WORKSPACE"
-          echo "CSV dir contents:"
+          echo "Workspace: $GITHUB_WORKSPACE"
+          echo "Listing $CSV_DIR:"
           ls -lah "$GITHUB_WORKSPACE/$CSV_DIR" || true
 
           import_one () {
@@ -96,7 +106,7 @@ jobs:
               echo "::error file=$rel::File not found"; exit 1
             fi
 
-            # Stage table
+            # Stage
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
               DROP TABLE IF EXISTS _stage_approved;
               CREATE TEMP TABLE _stage_approved (
@@ -117,7 +127,7 @@ jobs:
               );
             "
 
-            # COPY with absolute path (client-side \copy)
+            # Copy
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -v file="$abs" -c "\copy _stage_approved FROM :'file' WITH CSV HEADER ENCODING 'UTF8';"
 
             # Upsert
@@ -157,7 +167,8 @@ jobs:
           import_one "prisma"  "$CSV_DIR/approved_prisma_matches.csv"
 
       - name: Sanity counts
-        env: { DATABASE_URL: ${{ steps.prep.outputs.url }} }
+        env:
+          DATABASE_URL: ${{ steps.prep.outputs.url }}
         run: |
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\pset footer off"
