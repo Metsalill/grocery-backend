@@ -1,17 +1,16 @@
-name: "Import approved matches to Railway (Rimi/Selver/Prisma)"
+name: "Import approved matches to Railway"
 
 on:
   workflow_dispatch:
     inputs:
       csv_dir:
-        description: "Directory in repo containing approved_*.csv files"
+        description: "Folder with approved_*_matches.csv files"
         required: true
         default: "data"
 
 jobs:
   import:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -30,7 +29,7 @@ jobs:
         run: |
           set -euo pipefail
           URL="${DBURL_PUBLIC:-$DBURL}"
-          if [[ -z "${URL}" ]]; then
+          if [[ -z "$URL" ]]; then
             echo "No DATABASE_URL_PUBLIC or DATABASE_URL secret set." >&2
             exit 1
           fi
@@ -61,7 +60,7 @@ jobs:
             match_brand    text,
             match_size     text,
             match_ean      text,
-            store          text NOT NULL,
+            store          text NOT NULL,          -- rimi | selver | prisma
             similarity     numeric(5,4),
             size_diff_pct  numeric(6,2),
             tier           text,
@@ -92,68 +91,66 @@ jobs:
           set -euo pipefail
 
           import_one () {
-            local f="$1"
-            if [[ -f "$f" ]]; then
-              echo "Importing $f"
-              # Use an unquoted heredoc so $f expands inside \copy
-              psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<PSQL
-              DROP TABLE IF EXISTS _stage_approved;
-              CREATE TEMP TABLE _stage_approved (
-                barbora_uid   text,
-                barbora_name  text,
-                barbora_brand text,
-                barbora_size  text,
-                match_uid     text,
-                match_name    text,
-                match_brand   text,
-                match_size    text,
-                match_ean     text,
-                store         text,
-                similarity    numeric(5,4),
-                size_diff_pct numeric(6,2),
-                tier          text,
-                is_best_match boolean
-              );
-
-              \\copy _stage_approved FROM '${f}' WITH CSV HEADER ENCODING 'UTF8';
-
-              INSERT INTO approved_matches
-              (barbora_uid, barbora_name, barbora_brand, barbora_size,
-               match_uid, match_name, match_brand, match_size, match_ean,
-               store, similarity, size_diff_pct, tier, is_best_match)
-              SELECT
-                NULLIF(BTRIM(barbora_uid), ''),
-                barbora_name, barbora_brand, barbora_size,
-                NULLIF(BTRIM(match_uid), ''),
-                match_name, match_brand, match_size, match_ean,
-                LOWER(NULLIF(BTRIM(store), '')),
-                similarity, size_diff_pct, tier, is_best_match
-              FROM _stage_approved
-              WHERE NULLIF(BTRIM(barbora_uid),'') IS NOT NULL
-                AND NULLIF(BTRIM(match_uid),'') IS NOT NULL
-                AND NULLIF(BTRIM(store),'') IS NOT NULL
-              ON CONFLICT (barbora_uid, store, match_uid) DO UPDATE SET
-                barbora_name   = EXCLUDED.barbora_name,
-                barbora_brand  = EXCLUDED.barbora_brand,
-                barbora_size   = EXCLUDED.barbora_size,
-                match_name     = EXCLUDED.match_name,
-                match_brand    = EXCLUDED.match_brand,
-                match_size     = EXCLUDED.match_size,
-                match_ean      = EXCLUDED.match_ean,
-                similarity     = EXCLUDED.similarity,
-                size_diff_pct  = EXCLUDED.size_diff_pct,
-                tier           = EXCLUDED.tier,
-                is_best_match  = EXCLUDED.is_best_match,
-                reviewed_at    = now();
-              PSQL
-            else
-              echo "Skipping (not found): $f"
+            local chain="$1"   # rimi|selver|prisma
+            local f="$2"
+            if [[ ! -f "$f" ]]; then
+              echo "Missing: $f (chain: $chain)"; return 0;
             fi
+            echo "Importing $chain from $f"
+
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<PSQL
+            DROP TABLE IF EXISTS _stage_approved;
+            CREATE TEMP TABLE _stage_approved (
+              barbora_uid   text,
+              barbora_name  text,
+              barbora_brand text,
+              barbora_size  text,
+              match_uid     text,
+              match_name    text,
+              match_brand   text,
+              match_size    text,
+              match_ean     text,
+              store         text,
+              similarity    numeric(5,4),
+              size_diff_pct numeric(6,2),
+              tier          text,
+              is_best_match boolean
+            );
+            \\copy _stage_approved FROM '${f}' WITH CSV HEADER ENCODING 'UTF8';
+
+            INSERT INTO approved_matches
+            (barbora_uid, barbora_name, barbora_brand, barbora_size,
+             match_uid, match_name, match_brand, match_size, match_ean,
+             store, similarity, size_diff_pct, tier, is_best_match)
+            SELECT
+              NULLIF(BTRIM(barbora_uid), ''),
+              barbora_name, barbora_brand, barbora_size,
+              NULLIF(BTRIM(match_uid), ''),
+              match_name, match_brand, match_size, match_ean,
+              LOWER(COALESCE(NULLIF(BTRIM(store), ''), '${chain}')),
+              similarity, size_diff_pct, tier, is_best_match
+            FROM _stage_approved
+            WHERE NULLIF(BTRIM(barbora_uid),'') IS NOT NULL
+              AND NULLIF(BTRIM(match_uid),'') IS NOT NULL
+            ON CONFLICT (barbora_uid, store, match_uid) DO UPDATE SET
+              barbora_name   = EXCLUDED.barbora_name,
+              barbora_brand  = EXCLUDED.barbora_brand,
+              barbora_size   = EXCLUDED.barbora_size,
+              match_name     = EXCLUDED.match_name,
+              match_brand    = EXCLUDED.match_brand,
+              match_size     = EXCLUDED.match_size,
+              match_ean      = EXCLUDED.match_ean,
+              similarity     = EXCLUDED.similarity,
+              size_diff_pct  = EXCLUDED.size_diff_pct,
+              tier           = EXCLUDED.tier,
+              is_best_match  = EXCLUDED.is_best_match,
+              reviewed_at    = now();
+            PSQL
           }
 
-          import_one "$CSV_DIR/approved_selver_matches.csv"
-          import_one "$CSV_DIR/approved_rimi_matches.csv"
-          import_one "$CSV_DIR/approved_prisma_matches.csv"
+          import_one "selver"  "$CSV_DIR/approved_selver_matches.csv"
+          import_one "rimi"    "$CSV_DIR/approved_rimi_matches.csv"
+          import_one "prisma"  "$CSV_DIR/approved_prisma_matches.csv"
 
       - name: Sanity counts
         env:
@@ -164,6 +161,6 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'PSQL'
           \pset footer off
           SELECT 'approved_matches' AS table, COUNT(*) AS rows FROM approved_matches;
-          -- test the view compiles
+          SELECT store, COUNT(*) FROM approved_matches GROUP BY store ORDER BY 1;
           SELECT COUNT(*) FROM approved_best_match_per_store;
           PSQL
