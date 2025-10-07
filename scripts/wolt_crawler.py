@@ -348,8 +348,8 @@ async def _fetch_json(url: str, max_tries: int = 7) -> Optional[Dict]:
                 pass
             if attempt < max_tries - 1:
                 await _sleep_backoff(attempt, retry_after, base=1.0)
-                continue
-            return None
+            else:
+                return None
 
 # ---------- Wolt parsers ----------
 def _html_get_next_data(html: str) -> Optional[Dict]:
@@ -387,7 +387,7 @@ def _walk_collect_items(obj: Any, found: Dict[str, Dict]) -> None:
         has_priceish = any(k in obj for k in priceish_keys)
         has_idish = any(k in obj for k in ("id", "itemId", "itemID", "_id", "slug"))
         if has_name and (has_priceish or has_idish):
-            key = str(obj.get("id") or obj.get("slug") or obj.get("name"))
+            key = str(obj.get("id") or obj.get("itemId") or obj.get("slug") or obj.get("name"))
             found.setdefault(key, obj)
         for v in obj.values():
             _walk_collect_items(v, found)
@@ -529,13 +529,12 @@ def _looks_like_noise(name: Optional[str]) -> bool:
         return True
     if any(s in n for s in _DENY_SUBSTR):
         return True
-    # Guard against category tiles
+    # Guard against obvious category tiles
     if n in _CATEGORY_TILE_RULES:
         return True
     if n.endswith(" tooted") or n.endswith("tooted"):
         return True
-    if len(n.split()) == 1 and len(n) <= 6:
-        return True
+    # NOTE: we no longer reject single-word short names (e.g., "Piim", "Munad")
     return False
 
 def _valid_productish(name: Optional[str], price: Optional[float], gtin_norm: Optional[str],
@@ -556,7 +555,7 @@ def _valid_productish(name: Optional[str], price: Optional[float], gtin_norm: Op
         if _looks_like_noise(name):
             return False
         has_size = bool(SIZE_RE.search(name))
-        long_enough = len(name.strip()) >= 4 and len(name.split()) >= 1
+        long_enough = len(name.strip()) >= 2 and len(name.split()) >= 1
         return has_size or long_enough
 
     return False
@@ -630,7 +629,8 @@ def _extract_row_from_item(item: Dict, category_url: str, store_host: str) -> Op
     if not _valid_productish(name, price, ean_norm, category_url, brand, manufacturer):
         return None
 
-    iid = str(item.get("id") or "").lower()
+    # accept several common id fields
+    iid = str(item.get("id") or item.get("itemId") or item.get("itemID") or item.get("_id") or "").lower()
     if not iid or not HEX24_RE.fullmatch(iid):
         return None
     ext_id = f"iid:{iid}"
@@ -888,7 +888,7 @@ async def _scrape_tile_prices(page) -> Dict[str, float]:
   const anchors = Array.from(document.querySelectorAll('a[href*="itemid-"], a[href*="item-"]'));
   for (const a of anchors) {
     const href = a.getAttribute('href') || a.href || '';
-       const m = href && href.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
+    const m = href && href.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
     if (!m) continue;
     const id = m[1].toLowerCase();
     const scope = a.closest('[role="article"],article,div') || a;
@@ -1170,7 +1170,7 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
                     has_priceish = any(k in o for k in priceish_keys)
                     has_idish = any(k in o for k in ("id", "itemId", "itemID", "_id", "slug"))
                     if has_name and (has_priceish or has_idish):
-                        key = str(o.get("id") or o.get("slug") or o.get("name"))
+                        key = str(o.get("id") or o.get("itemId") or o.get("slug") or o.get("name"))
                         found.setdefault(key, o)
                     for v in o.values():
                         _walk(v)
