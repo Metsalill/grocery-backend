@@ -11,10 +11,10 @@ on:
 jobs:
   import:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
       - name: Install psql client
         run: |
@@ -26,7 +26,6 @@ jobs:
         env:
           DBURL_PUBLIC: ${{ secrets.DATABASE_URL_PUBLIC }}
           DBURL: ${{ secrets.DATABASE_URL }}
-        shell: bash
         run: |
           set -euo pipefail
           URL="${DBURL_PUBLIC:-$DBURL}"
@@ -34,20 +33,11 @@ jobs:
             echo "No DATABASE_URL_PUBLIC or DATABASE_URL secret set." >&2
             exit 1
           fi
-          if [[ "$URL" == *"?"* ]]; then
-            case "$URL" in
-              *"sslmode="*) : ;;
-              *) URL="${URL}&sslmode=require" ;;
-            esac
-          else
-            URL="${URL}?sslmode=require"
-          fi
+          [[ "$URL" == *"sslmode="* ]] || URL="${URL}${URL*\?/?'?': '?'}sslmode=require"
           echo "url=$URL" >> "$GITHUB_OUTPUT"
 
       - name: Create table + indexes (if not exists)
-        env:
-          DATABASE_URL: ${{ steps.prep.outputs.url }}
-        shell: bash
+        env: { DATABASE_URL: ${{ steps.prep.outputs.url }} }
         run: |
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
@@ -72,7 +62,6 @@ jobs:
             CREATE INDEX IF NOT EXISTS idx_approved_matches_barbora_uid ON approved_matches (barbora_uid);
             CREATE INDEX IF NOT EXISTS idx_approved_matches_store_match_uid ON approved_matches (store, match_uid);
           "
-
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
             CREATE OR REPLACE VIEW approved_best_match_per_store AS
             SELECT DISTINCT ON (barbora_uid, store)
@@ -88,22 +77,26 @@ jobs:
         env:
           DATABASE_URL: ${{ steps.prep.outputs.url }}
           CSV_DIR: ${{ github.event.inputs.csv_dir }}
-        shell: bash
+          GITHUB_WORKSPACE: ${{ github.workspace }}
         run: |
           set -euo pipefail
 
+          echo "Workspace contents:"
+          ls -lah "$GITHUB_WORKSPACE"
+          echo "CSV dir contents:"
+          ls -lah "$GITHUB_WORKSPACE/$CSV_DIR" || true
+
           import_one () {
             local chain="$1"   # rimi|selver|prisma
-            local f="$2"
+            local rel="$2"
+            local abs="$GITHUB_WORKSPACE/$rel"
 
-            if [[ ! -f "$f" ]]; then
-              echo "Missing: $f (chain: $chain) — skipping."
-              return 0
+            echo "Importing $chain from $rel"
+            if [[ ! -f "$abs" ]]; then
+              echo "::error file=$rel::File not found"; exit 1
             fi
 
-            echo "Importing $chain from $f"
-
-            # 1) Stage table
+            # Stage table
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
               DROP TABLE IF EXISTS _stage_approved;
               CREATE TEMP TABLE _stage_approved (
@@ -124,10 +117,10 @@ jobs:
               );
             "
 
-            # 2) COPY from CSV (without heredoc). Use psql variable for filename.
-            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -v file="$f" -c "\copy _stage_approved FROM :'file' WITH CSV HEADER ENCODING 'UTF8';"
+            # COPY with absolute path (client-side \copy)
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -v file="$abs" -c "\copy _stage_approved FROM :'file' WITH CSV HEADER ENCODING 'UTF8';"
 
-            # 3) Upsert into final table
+            # Upsert
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
               INSERT INTO approved_matches
               (barbora_uid, barbora_name, barbora_brand, barbora_size,
@@ -164,9 +157,7 @@ jobs:
           import_one "prisma"  "$CSV_DIR/approved_prisma_matches.csv"
 
       - name: Sanity counts
-        env:
-          DATABASE_URL: ${{ steps.prep.outputs.url }}
-        shell: bash
+        env: { DATABASE_URL: ${{ steps.prep.outputs.url }} }
         run: |
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\pset footer off"
