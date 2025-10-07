@@ -67,7 +67,6 @@ jobs:
           RIGHT_CHAIN="$INPUT_RIGHT_CHAIN"
           CSV_HAS_CHAIN_COLS="$INPUT_CSV_HAS_CHAIN_COLS"
 
-          # Build one SQL file without any tricky inline string replacements
           SQL_FILE="/tmp/import_matches.sql"
 
           cat > "$SQL_FILE" <<'SQL'
@@ -98,7 +97,6 @@ CREATE TEMP TABLE approved_matches_import (
 );
 SQL
 
-          # 3) Append the proper COPY block (choose variant by input)
           if [[ "$CSV_HAS_CHAIN_COLS" == "true" ]]; then
             {
               echo "\\copy approved_matches_import (left_chain,left_key,right_chain,right_key,note,approved_by) FROM '$CSV_PATH' CSV HEADER;";
@@ -110,7 +108,6 @@ SQL
             } >> "$SQL_FILE"
           fi
 
-          # 4) Upsert + diagnostics
           cat >> "$SQL_FILE" <<'SQL'
 
 -- 4) Upsert into active (idempotent & allows remaps)
@@ -132,8 +129,8 @@ COMMIT;
 SELECT left_chain, COUNT(*) AS rows FROM approved_matches_active GROUP BY 1 ORDER BY 1;
 SQL
 
-          echo "=== Final SQL to execute ==="
-          sed -n '1,120p' "$SQL_FILE" || true
+          echo "=== Final SQL (first 150 lines) ==="
+          sed -n '1,150p' "$SQL_FILE" || true
 
           # Execute in a single session so TEMP table lives throughout
           psql -v LEFT_CHAIN="$LEFT_CHAIN" -v RIGHT_CHAIN="$RIGHT_CHAIN" -f "$SQL_FILE"
