@@ -26,10 +26,11 @@ jobs:
         env:
           DBURL_PUBLIC: ${{ secrets.DATABASE_URL_PUBLIC }}
           DBURL: ${{ secrets.DATABASE_URL }}
+        shell: bash
         run: |
           set -euo pipefail
           URL="${DBURL_PUBLIC:-$DBURL}"
-          if [ -z "${URL}" ]; then
+          if [[ -z "${URL}" ]]; then
             echo "No DATABASE_URL_PUBLIC or DATABASE_URL secret set." >&2
             exit 1
           fi
@@ -46,9 +47,10 @@ jobs:
       - name: Create table + indexes (if not exists)
         env:
           DATABASE_URL: ${{ steps.prep.outputs.url }}
+        shell: bash
         run: |
           set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'PSQL'
           CREATE TABLE IF NOT EXISTS approved_matches (
             barbora_uid    text NOT NULL,
             barbora_name   text,
@@ -59,7 +61,7 @@ jobs:
             match_brand    text,
             match_size     text,
             match_ean      text,
-            store          text NOT NULL,          -- rimi | selver | prisma
+            store          text NOT NULL,
             similarity     numeric(5,4),
             size_diff_pct  numeric(6,2),
             tier           text,
@@ -68,11 +70,9 @@ jobs:
             PRIMARY KEY (barbora_uid, store, match_uid)
           );
 
-          -- Helpful indexes for basket joins
           CREATE INDEX IF NOT EXISTS idx_approved_matches_barbora_uid ON approved_matches (barbora_uid);
           CREATE INDEX IF NOT EXISTS idx_approved_matches_store_match_uid ON approved_matches (store, match_uid);
 
-          -- (Optional) View that picks the single best match per Barbora item per store
           CREATE OR REPLACE VIEW approved_best_match_per_store AS
           SELECT DISTINCT ON (barbora_uid, store)
                  barbora_uid, store, match_uid, match_ean,
@@ -81,20 +81,22 @@ jobs:
                  match_name, match_brand, match_size
           FROM approved_matches
           ORDER BY barbora_uid, store, is_best_match DESC, similarity DESC, tier ASC, match_uid;
-          SQL
+          PSQL
 
       - name: Import approved matches (Selver, Rimi, Prisma)
         env:
           DATABASE_URL: ${{ steps.prep.outputs.url }}
           CSV_DIR: ${{ github.event.inputs.csv_dir }}
+        shell: bash
         run: |
           set -euo pipefail
 
           import_one () {
             local f="$1"
-            if [ -f "$f" ]; then
+            if [[ -f "$f" ]]; then
               echo "Importing $f"
-              psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<SQL
+              # Use an unquoted heredoc so $f expands inside \copy
+              psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<PSQL
               DROP TABLE IF EXISTS _stage_approved;
               CREATE TEMP TABLE _stage_approved (
                 barbora_uid   text,
@@ -113,23 +115,23 @@ jobs:
                 is_best_match boolean
               );
 
-              \copy _stage_approved FROM '$f' WITH CSV HEADER ENCODING 'UTF8';
+              \\copy _stage_approved FROM '${f}' WITH CSV HEADER ENCODING 'UTF8';
 
               INSERT INTO approved_matches
               (barbora_uid, barbora_name, barbora_brand, barbora_size,
                match_uid, match_name, match_brand, match_size, match_ean,
                store, similarity, size_diff_pct, tier, is_best_match)
               SELECT
-                nullif(btrim(barbora_uid), ''),
+                NULLIF(BTRIM(barbora_uid), ''),
                 barbora_name, barbora_brand, barbora_size,
-                nullif(btrim(match_uid), ''),
+                NULLIF(BTRIM(match_uid), ''),
                 match_name, match_brand, match_size, match_ean,
-                lower(nullif(btrim(store), '')),
+                LOWER(NULLIF(BTRIM(store), '')),
                 similarity, size_diff_pct, tier, is_best_match
               FROM _stage_approved
-              WHERE nullif(btrim(barbora_uid),'') IS NOT NULL
-                AND nullif(btrim(match_uid),'') IS NOT NULL
-                AND nullif(btrim(store),'') IS NOT NULL
+              WHERE NULLIF(BTRIM(barbora_uid),'') IS NOT NULL
+                AND NULLIF(BTRIM(match_uid),'') IS NOT NULL
+                AND NULLIF(BTRIM(store),'') IS NOT NULL
               ON CONFLICT (barbora_uid, store, match_uid) DO UPDATE SET
                 barbora_name   = EXCLUDED.barbora_name,
                 barbora_brand  = EXCLUDED.barbora_brand,
@@ -143,7 +145,7 @@ jobs:
                 tier           = EXCLUDED.tier,
                 is_best_match  = EXCLUDED.is_best_match,
                 reviewed_at    = now();
-SQL
+              PSQL
             else
               echo "Skipping (not found): $f"
             fi
@@ -156,10 +158,12 @@ SQL
       - name: Sanity counts
         env:
           DATABASE_URL: ${{ steps.prep.outputs.url }}
+        shell: bash
         run: |
           set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'PSQL'
           \pset footer off
           SELECT 'approved_matches' AS table, COUNT(*) AS rows FROM approved_matches;
-          SELECT 'approved_best_match_per_store' AS view_name, COUNT(*) FROM approved_matches; -- just to ensure query works
-          SQL
+          -- test the view compiles
+          SELECT COUNT(*) FROM approved_best_match_per_store;
+          PSQL
