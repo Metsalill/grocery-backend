@@ -15,8 +15,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
 
       - name: Install psql client
         run: |
@@ -42,12 +40,13 @@ jobs:
           fi
           echo "url=$URL" >> "$GITHUB_OUTPUT"
 
-      - name: Create table + indexes (if not exists)
+      - name: Create tables + view (idempotent)
         env:
           DATABASE_URL: ${{ steps.prep.outputs.url }}
         run: |
           set -euo pipefail
 
+          # final table
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
             CREATE TABLE IF NOT EXISTS approved_matches (
               barbora_uid   text NOT NULL,
@@ -73,6 +72,28 @@ jobs:
               ON approved_matches (store, match_uid);
           "
 
+          # persistent stage table (NOT TEMP on purpose)
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
+            CREATE TABLE IF NOT EXISTS approved_matches_stage (
+              barbora_uid   text,
+              barbora_name  text,
+              barbora_brand text,
+              barbora_size  text,
+              match_uid     text,
+              match_name    text,
+              match_brand   text,
+              match_size    text,
+              match_ean     text,
+              store         text,
+              similarity    numeric(5,4),
+              size_diff_pct numeric(6,2),
+              tier          text,
+              is_best_match boolean
+            );
+            TRUNCATE TABLE approved_matches_stage;
+          "
+
+          # view
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
             CREATE OR REPLACE VIEW approved_best_match_per_store AS
             SELECT DISTINCT ON (barbora_uid, store)
@@ -82,10 +103,7 @@ jobs:
                    match_name, match_brand, match_size
             FROM approved_matches
             ORDER BY barbora_uid, store,
-                     is_best_match DESC,
-                     similarity DESC,
-                     tier ASC,
-                     match_uid;
+                     is_best_match DESC, similarity DESC, tier ASC, match_uid;
           "
 
       - name: Import approved matches (Selver, Rimi, Prisma)
@@ -95,45 +113,10 @@ jobs:
           GITHUB_WORKSPACE: ${{ github.workspace }}
         run: |
           set -euo pipefail
-          echo "Listing CSV dir: $GITHUB_WORKSPACE/$CSV_DIR"
+          echo "Listing $GITHUB_WORKSPACE/$CSV_DIR"
           ls -lah "$GITHUB_WORKSPACE/$CSV_DIR" || true
 
-          import_one () {
-            local chain="$1"
-            local rel="$2"
-            local abs="$GITHUB_WORKSPACE/$rel"
-
-            echo "Importing $chain from $rel"
-            if [[ ! -f "$abs" ]]; then
-              echo "::error file=$rel::File not found"
-              exit 1
-            fi
-
-            # Stage table
-            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
-              DROP TABLE IF EXISTS _stage_approved;
-              CREATE TEMP TABLE _stage_approved (
-                barbora_uid   text,
-                barbora_name  text,
-                barbora_brand text,
-                barbora_size  text,
-                match_uid     text,
-                match_name    text,
-                match_brand   text,
-                match_size    text,
-                match_ean     text,
-                store         text,
-                similarity    numeric(5,4),
-                size_diff_pct numeric(6,2),
-                tier          text,
-                is_best_match boolean
-              );
-            "
-
-            # Use STDIN to avoid path/permissions issues
-            cat "$abs" | psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy _stage_approved FROM STDIN WITH CSV HEADER"
-
-            # Upsert into final table
+          upsert_from_stage () {
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
               INSERT INTO approved_matches
               (barbora_uid, barbora_name, barbora_brand, barbora_size,
@@ -144,9 +127,9 @@ jobs:
                 barbora_name, barbora_brand, barbora_size,
                 NULLIF(BTRIM(match_uid), ''),
                 match_name, match_brand, match_size, match_ean,
-                LOWER(COALESCE(NULLIF(BTRIM(store), ''), '${chain}')),
+                LOWER(COALESCE(NULLIF(BTRIM(store), ''), '$1')),
                 similarity, size_diff_pct, tier, is_best_match
-              FROM _stage_approved
+              FROM approved_matches_stage
               WHERE NULLIF(BTRIM(barbora_uid),'') IS NOT NULL
                 AND NULLIF(BTRIM(match_uid),'') IS NOT NULL
               ON CONFLICT (barbora_uid, store, match_uid) DO UPDATE SET
@@ -163,6 +146,24 @@ jobs:
                 is_best_match  = EXCLUDED.is_best_match,
                 reviewed_at    = now();
             "
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "TRUNCATE TABLE approved_matches_stage;"
+          }
+
+          import_one () {
+            local chain="$1"
+            local rel="$2"
+            local abs="$GITHUB_WORKSPACE/$rel"
+
+            echo "Importing $chain from $rel"
+            if [[ ! -f "$abs" ]]; then
+              echo "::error file=$rel::File not found"; exit 1
+            fi
+
+            # load CSV into persistent stage via STDIN
+            cat "$abs" | psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy approved_matches_stage FROM STDIN WITH CSV HEADER"
+
+            # upsert to final + clear stage
+            upsert_from_stage "$chain"
           }
 
           import_one "selver"  "$CSV_DIR/approved_selver_matches.csv"
