@@ -36,10 +36,6 @@ jobs:
           set -euo pipefail
           CSV_PATH="$GITHUB_WORKSPACE/$INPUT_CSV_PATH"
           echo "Checking CSV at: $CSV_PATH"
-          echo "Repo root: $GITHUB_WORKSPACE"
-          ls -la "$GITHUB_WORKSPACE" | sed -n '1,80p' || true
-          echo "Listing data dir (if present):"
-          ls -la "$GITHUB_WORKSPACE/data" || true
           test -f "$CSV_PATH" || { echo "CSV not found at: $CSV_PATH"; exit 1; }
           echo "CSV head:"
           head -n 5 "$CSV_PATH" || true
@@ -71,74 +67,76 @@ jobs:
           RIGHT_CHAIN="$INPUT_RIGHT_CHAIN"
           CSV_HAS_CHAIN_COLS="$INPUT_CSV_HAS_CHAIN_COLS"
 
-          echo "CSV_PATH  : $CSV_PATH"
-          echo "LEFT_CHAIN: $LEFT_CHAIN"
-          echo "RIGHT_CHAIN: $RIGHT_CHAIN"
-          echo "CSV_HAS_CHAIN_COLS: $CSV_HAS_CHAIN_COLS"
+          # Build one SQL file without any tricky inline string replacements
+          SQL_FILE="/tmp/import_matches.sql"
 
-          cat > /tmp/import_matches.sql <<'SQL'
-          \set ON_ERROR_STOP on
-          BEGIN;
+          cat > "$SQL_FILE" <<'SQL'
+\set ON_ERROR_STOP on
+BEGIN;
 
-          -- Active table: one target per left item
-          CREATE TABLE IF NOT EXISTS approved_matches_active (
-            left_chain  text    NOT NULL,
-            left_key    text    NOT NULL,
-            right_chain text    NOT NULL,
-            right_key   text    NOT NULL,
-            note        text,
-            approved_by text,
-            approved_at timestamptz NOT NULL DEFAULT now(),
-            PRIMARY KEY (left_chain, left_key)
-          );
+-- 1) Active table = one target per left item
+CREATE TABLE IF NOT EXISTS approved_matches_active (
+  left_chain  text    NOT NULL,
+  left_key    text    NOT NULL,
+  right_chain text    NOT NULL,
+  right_key   text    NOT NULL,
+  note        text,
+  approved_by text,
+  approved_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (left_chain, left_key)
+);
 
-          -- Temp staging for COPY (auto-drops at COMMIT)
-          DROP TABLE IF EXISTS approved_matches_import;
-          CREATE TEMP TABLE approved_matches_import (
-            left_chain  text,
-            left_key    text,
-            right_chain text,
-            right_key   text,
-            note        text,
-            approved_by text
-          );
+-- 2) Temp staging for COPY (auto-drops at COMMIT)
+DROP TABLE IF EXISTS approved_matches_import;
+CREATE TEMP TABLE approved_matches_import (
+  left_chain  text,
+  left_key    text,
+  right_chain text,
+  right_key   text,
+  note        text,
+  approved_by text
+);
+SQL
 
-          -- __COPY_BLOCK__
-
-          -- Upsert (idempotent; allows remaps)
-          INSERT INTO approved_matches_active (left_chain,left_key,right_chain,right_key,note,approved_by)
-          SELECT left_chain,left_key,right_chain,right_key,note,approved_by
-          FROM approved_matches_import
-          WHERE left_key IS NOT NULL AND right_key IS NOT NULL
-          ON CONFLICT (left_chain,left_key) DO UPDATE
-            SET right_chain = EXCLUDED.right_chain,
-                right_key   = EXCLUDED.right_key,
-                note        = COALESCE(EXCLUDED.note, approved_matches_active.note),
-                approved_by = COALESCE(EXCLUDED.approved_by, approved_matches_active.approved_by),
-                approved_at = now();
-
-          COMMIT;
-
-          \echo ''
-          \echo '== Row counts per left_chain (approved_matches_active) =='
-          SELECT left_chain, COUNT(*) AS rows
-          FROM approved_matches_active
-          GROUP BY 1 ORDER BY 1;
-          SQL
-
-          # Build the COPY block (no trailing backslashes; keep semicolons)
+          # 3) Append the proper COPY block (choose variant by input)
           if [[ "$CSV_HAS_CHAIN_COLS" == "true" ]]; then
-            COPY_BLOCK="\\copy approved_matches_import (left_chain,left_key,right_chain,right_key,note,approved_by) FROM '$CSV_PATH' CSV HEADER;"
+            {
+              echo "\\copy approved_matches_import (left_chain,left_key,right_chain,right_key,note,approved_by) FROM '$CSV_PATH' CSV HEADER;";
+            } >> "$SQL_FILE"
           else
-            COPY_BLOCK="\\copy approved_matches_import (left_key,right_key,note,approved_by) FROM '$CSV_PATH' CSV HEADER;
-UPDATE approved_matches_import SET left_chain = :'LEFT_CHAIN', right_chain = :'RIGHT_CHAIN';"
+            {
+              echo "\\copy approved_matches_import (left_key,right_key,note,approved_by) FROM '$CSV_PATH' CSV HEADER;";
+              echo "UPDATE approved_matches_import SET left_chain = :'LEFT_CHAIN', right_chain = :'RIGHT_CHAIN';"
+            } >> "$SQL_FILE"
           fi
 
-          # Inject COPY block into SQL file
-          perl -0777 -pe "s/__COPY_BLOCK__/${COPY_BLOCK//\//\\/}/g" -i /tmp/import_matches.sql
+          # 4) Upsert + diagnostics
+          cat >> "$SQL_FILE" <<'SQL'
 
-          # Execute
-          psql -v LEFT_CHAIN="$LEFT_CHAIN" -v RIGHT_CHAIN="$RIGHT_CHAIN" -f /tmp/import_matches.sql
+-- 4) Upsert into active (idempotent & allows remaps)
+INSERT INTO approved_matches_active (left_chain,left_key,right_chain,right_key,note,approved_by)
+SELECT left_chain,left_key,right_chain,right_key,note,approved_by
+FROM approved_matches_import
+WHERE left_key IS NOT NULL AND right_key IS NOT NULL
+ON CONFLICT (left_chain,left_key) DO UPDATE
+  SET right_chain = EXCLUDED.right_chain,
+      right_key   = EXCLUDED.right_key,
+      note        = COALESCE(EXCLUDED.note, approved_matches_active.note),
+      approved_by = COALESCE(EXCLUDED.approved_by, approved_matches_active.approved_by),
+      approved_at = now();
+
+COMMIT;
+
+\echo ''
+\echo '== Row counts per left_chain (approved_matches_active) =='
+SELECT left_chain, COUNT(*) AS rows FROM approved_matches_active GROUP BY 1 ORDER BY 1;
+SQL
+
+          echo "=== Final SQL to execute ==="
+          sed -n '1,120p' "$SQL_FILE" || true
+
+          # Execute in a single session so TEMP table lives throughout
+          psql -v LEFT_CHAIN="$LEFT_CHAIN" -v RIGHT_CHAIN="$RIGHT_CHAIN" -f "$SQL_FILE"
 
       - name: Show sample rows
         shell: bash
