@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       csv_dir:
-        description: Folder with approved_*_matches.csv files
+        description: Folder containing approved_*_matches.csv
         required: true
         default: data
 
@@ -23,6 +23,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
+      # Compose DATABASE_URL with sslmode=require (prefer PUBLIC if present)
       - name: Prepare DATABASE_URL (public) with sslmode=require
         id: prep
         env:
@@ -32,7 +33,7 @@ jobs:
           set -euo pipefail
           URL="${DBURL_PUBLIC:-$DBURL}"
           if [[ -z "$URL" ]]; then
-            echo "No DATABASE_URL_PUBLIC or DATABASE_URL secret set." >&2
+            echo "DATABASE_URL_PUBLIC or DATABASE_URL secret is missing." >&2
             exit 1
           fi
           if [[ "$URL" == *"?"* ]]; then
@@ -42,71 +43,65 @@ jobs:
           fi
           echo "url=$URL" >> "$GITHUB_OUTPUT"
 
-      - name: Create tables + view (idempotent)
+      - name: Create tables / view (idempotent)
         env:
           DATABASE_URL: ${{ steps.prep.outputs.url }}
         run: |
           set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          -- Final store of approvals
+          CREATE TABLE IF NOT EXISTS approved_matches (
+            barbora_uid   text NOT NULL,
+            barbora_name  text,
+            barbora_brand text,
+            barbora_size  text,
+            match_uid     text NOT NULL,
+            match_name    text,
+            match_brand   text,
+            match_size    text,
+            match_ean     text,
+            store         text NOT NULL,
+            similarity    numeric(10,6),
+            size_diff_pct numeric(10,4),
+            tier          text,
+            is_best_match boolean,
+            reviewed_at   timestamptz DEFAULT now(),
+            PRIMARY KEY (barbora_uid, store, match_uid)
+          );
+          CREATE INDEX IF NOT EXISTS idx_approved_matches_b ON approved_matches (barbora_uid);
+          CREATE INDEX IF NOT EXISTS idx_approved_matches_s ON approved_matches (store, match_uid);
 
-          # Final table
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
-            CREATE TABLE IF NOT EXISTS approved_matches (
-              barbora_uid   text NOT NULL,
-              barbora_name  text,
-              barbora_brand text,
-              barbora_size  text,
-              match_uid     text NOT NULL,
-              match_name    text,
-              match_brand   text,
-              match_size    text,
-              match_ean     text,
-              store         text NOT NULL,
-              similarity    numeric(5,4),
-              size_diff_pct numeric(6,2),
-              tier          text,
-              is_best_match boolean,
-              reviewed_at   timestamptz DEFAULT now(),
-              PRIMARY KEY (barbora_uid, store, match_uid)
-            );
-            CREATE INDEX IF NOT EXISTS idx_approved_matches_barbora_uid
-              ON approved_matches (barbora_uid);
-            CREATE INDEX IF NOT EXISTS idx_approved_matches_store_match_uid
-              ON approved_matches (store, match_uid);
-          "
+          -- Text-only STAGE so any header subset/order loads
+          CREATE TABLE IF NOT EXISTS approved_matches_stage (
+            barbora_uid   text, barbora_name  text, barbora_brand text, barbora_size  text,
+            match_uid     text, match_name    text, match_brand   text, match_size    text,
+            match_ean     text, store         text, similarity    text, size_diff_pct text,
+            tier          text, is_best_match text
+          );
+          TRUNCATE approved_matches_stage;
 
-          # Persistent STAGE: all TEXT so any CSV columns can load
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
-            CREATE TABLE IF NOT EXISTS approved_matches_stage (
-              barbora_uid   text,
-              barbora_name  text,
-              barbora_brand text,
-              barbora_size  text,
-              match_uid     text,
-              match_name    text,
-              match_brand   text,
-              match_size    text,
-              match_ean     text,
-              store         text,
-              similarity    text,
-              size_diff_pct text,
-              tier          text,
-              is_best_match text
-            );
-            TRUNCATE TABLE approved_matches_stage;
-          "
+          -- Durable links for basket comparison
+          CREATE TABLE IF NOT EXISTS cross_store_links (
+            store_a        text   NOT NULL,
+            product_id_a   bigint NOT NULL,
+            store_b        text   NOT NULL,
+            product_id_b   bigint NOT NULL,
+            source         text   DEFAULT 'approved_matches',
+            created_at     timestamptz DEFAULT now(),
+            PRIMARY KEY (store_a, product_id_a, store_b, product_id_b),
+            CHECK (store_a <> store_b)
+          );
 
-          # View
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
-            CREATE OR REPLACE VIEW approved_best_match_per_store AS
-            SELECT DISTINCT ON (barbora_uid, store)
-                   barbora_uid, store, match_uid, match_ean,
-                   similarity, tier, is_best_match,
-                   barbora_name, barbora_brand, barbora_size,
-                   match_name, match_brand, match_size
-            FROM approved_matches
-            ORDER BY barbora_uid, store,
-                     is_best_match DESC, similarity DESC, tier ASC, match_uid;
-          "
+          -- Handy expanded view
+          CREATE OR REPLACE VIEW cross_store_links_expanded AS
+          SELECT store_a AS src_store, product_id_a AS src_product_id,
+                 store_b AS dst_store, product_id_b AS dst_product_id,
+                 source, created_at
+          FROM cross_store_links
+          UNION ALL
+          SELECT store_b, product_id_b, store_a, product_id_a, source, created_at
+          FROM cross_store_links;
+          SQL
 
       - name: Import approved matches (Selver, Rimi, Prisma)
         env:
@@ -120,48 +115,65 @@ jobs:
 
           upsert_from_stage () {
             local chain="$1"
-            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
-              INSERT INTO approved_matches
-              (barbora_uid, barbora_name, barbora_brand, barbora_size,
-               match_uid, match_name, match_brand, match_size, match_ean,
-               store, similarity, size_diff_pct, tier, is_best_match)
-              SELECT
-                NULLIF(BTRIM(barbora_uid), ''),
-                NULLIF(barbora_name,''),
-                NULLIF(barbora_brand,''),
-                NULLIF(barbora_size,''),
-                NULLIF(BTRIM(match_uid), ''),
-                NULLIF(match_name,''),
-                NULLIF(match_brand,''),
-                NULLIF(match_size,''),
-                NULLIF(match_ean,''),
-                LOWER(COALESCE(NULLIF(BTRIM(store), ''), '$chain')),
-                NULLIF(similarity,'')::numeric,
-                NULLIF(size_diff_pct,'')::numeric,
-                NULLIF(tier,''),
-                CASE
-                  WHEN LOWER(COALESCE(is_best_match,'')) IN ('1','t','true','yes','y') THEN TRUE
-                  WHEN LOWER(COALESCE(is_best_match,'')) IN ('0','f','false','no','n') THEN FALSE
-                  ELSE NULL
-                END
-              FROM approved_matches_stage
-              WHERE NULLIF(BTRIM(barbora_uid),'') IS NOT NULL
-                AND NULLIF(BTRIM(match_uid),'')   IS NOT NULL
-              ON CONFLICT (barbora_uid, store, match_uid) DO UPDATE SET
-                barbora_name   = EXCLUDED.barbora_name,
-                barbora_brand  = EXCLUDED.barbora_brand,
-                barbora_size   = EXCLUDED.barbora_size,
-                match_name     = EXCLUDED.match_name,
-                match_brand    = EXCLUDED.match_brand,
-                match_size     = EXCLUDED.match_size,
-                match_ean      = EXCLUDED.match_ean,
-                similarity     = EXCLUDED.similarity,
-                size_diff_pct  = EXCLUDED.size_diff_pct,
-                tier           = EXCLUDED.tier,
-                is_best_match  = EXCLUDED.is_best_match,
-                reviewed_at    = now();
-            "
-            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "TRUNCATE TABLE approved_matches_stage;"
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<SQL
+            INSERT INTO approved_matches
+            (barbora_uid, barbora_name, barbora_brand, barbora_size,
+             match_uid, match_name, match_brand, match_size, match_ean,
+             store, similarity, size_diff_pct, tier, is_best_match, reviewed_at)
+            SELECT
+              NULLIF(BTRIM(barbora_uid),''),
+              NULLIF(barbora_name,''),
+              NULLIF(barbora_brand,''),
+              NULLIF(barbora_size,''),
+
+              NULLIF(BTRIM(match_uid),''),
+              NULLIF(match_name,''),
+              NULLIF(match_brand,''),
+              NULLIF(match_size,''),
+              NULLIF(match_ean,''),
+
+              LOWER(COALESCE(NULLIF(BTRIM(store), ''), '${chain}')),
+
+              -- robust cast: trim, comma->dot, allow only clean numeric else NULL
+              CASE
+                WHEN NULLIF(BTRIM(similarity),'') IS NULL THEN NULL
+                WHEN REGEXP_REPLACE(BTRIM(similarity), ',', '.') ~ '^-?[0-9]+(\\.[0-9]+)?$'
+                  THEN REGEXP_REPLACE(BTRIM(similarity), ',', '.')::numeric
+                ELSE NULL
+              END,
+
+              CASE
+                WHEN NULLIF(BTRIM(size_diff_pct),'') IS NULL THEN NULL
+                WHEN REGEXP_REPLACE(REGEXP_REPLACE(BTRIM(size_diff_pct), '%', '', 'g'), ',', '.') ~ '^-?[0-9]+(\\.[0-9]+)?$'
+                  THEN REGEXP_REPLACE(REGEXP_REPLACE(BTRIM(size_diff_pct), '%', '', 'g'), ',', '.')::numeric
+                ELSE NULL
+              END,
+
+              NULLIF(tier,''),
+              CASE
+                WHEN LOWER(COALESCE(is_best_match,'')) IN ('1','t','true','yes','y') THEN TRUE
+                WHEN LOWER(COALESCE(is_best_match,'')) IN ('0','f','false','no','n') THEN FALSE
+                ELSE NULL
+              END,
+              now()
+            FROM approved_matches_stage
+            WHERE NULLIF(BTRIM(barbora_uid),'') IS NOT NULL
+              AND NULLIF(BTRIM(match_uid),'')   IS NOT NULL
+            ON CONFLICT (barbora_uid, store, match_uid) DO UPDATE SET
+              barbora_name   = EXCLUDED.barbora_name,
+              barbora_brand  = EXCLUDED.barbora_brand,
+              barbora_size   = EXCLUDED.barbora_size,
+              match_name     = EXCLUDED.match_name,
+              match_brand    = EXCLUDED.match_brand,
+              match_size     = EXCLUDED.match_size,
+              match_ean      = EXCLUDED.match_ean,
+              similarity     = EXCLUDED.similarity,
+              size_diff_pct  = EXCLUDED.size_diff_pct,
+              tier           = EXCLUDED.tier,
+              is_best_match  = EXCLUDED.is_best_match,
+              reviewed_at    = now();
+SQL
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "TRUNCATE approved_matches_stage;"
           }
 
           import_one () {
@@ -169,21 +181,20 @@ jobs:
             local rel="$2"
             local abs="$GITHUB_WORKSPACE/$rel"
 
+            echo ""
             echo "Importing $chain from $rel"
             if [[ ! -f "$abs" ]]; then
               echo "::error file=$rel::File not found"; exit 1
             fi
 
-            # Build a column list from the CSV header (normalized)
+            # Detect usable columns from header
             header=$(head -n1 "$abs" | tr -d '\r')
             IFS=',' read -r -a rawcols <<< "$header"
             allowed=" barbora_uid barbora_name barbora_brand barbora_size match_uid match_name match_brand match_size match_ean store similarity size_diff_pct tier is_best_match "
             cols=()
             for h in "${rawcols[@]}"; do
               c=$(echo "$h" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_]+/_/g' | sed -E 's/^_+|_+$//g')
-              if [[ " $allowed " == *" $c "* ]]; then
-                cols+=("$c")
-              fi
+              if [[ " $allowed " == *" $c "* ]]; then cols+=("$c"); fi
             done
             if [[ ${#cols[@]} -eq 0 ]]; then
               echo "::error ::No recognized columns in $rel header"; exit 1
@@ -191,7 +202,7 @@ jobs:
             col_list=$(IFS=, ; echo "${cols[*]}")
             echo "Copying columns: $col_list"
 
-            # Load into stage via STDIN with the detected columns
+            # Load into stage
             cat "$abs" | psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy approved_matches_stage ($col_list) FROM STDIN WITH CSV HEADER"
 
             # Upsert & clear stage
@@ -202,12 +213,70 @@ jobs:
           import_one "rimi"    "$CSV_DIR/approved_rimi_matches.csv"
           import_one "prisma"  "$CSV_DIR/approved_prisma_matches.csv"
 
+      - name: Materialize Barbora links (approved_matches → cross_store_links)
+        env:
+          DATABASE_URL: ${{ steps.prep.outputs.url }}
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          WITH ranked AS (
+            SELECT
+              am.barbora_uid,
+              LOWER(am.store) AS store,
+              am.match_uid,
+              am.match_ean,
+              am.is_best_match,
+              am.similarity,
+              ROW_NUMBER() OVER (
+                PARTITION BY am.barbora_uid, LOWER(am.store)
+                ORDER BY COALESCE(am.is_best_match,false) DESC,
+                         COALESCE(am.similarity,0) DESC,
+                         COALESCE(am.match_uid, am.match_ean) ASC
+              ) AS rn
+            FROM approved_matches am
+            WHERE LOWER(am.store) IN ('rimi','selver','prisma')
+          ),
+          best AS (
+            SELECT * FROM ranked WHERE rn = 1
+          ),
+          barbora_resolved AS (
+            SELECT
+              b.barbora_uid,
+              b.store,
+              b.match_uid,
+              b.match_ean,
+              p_b.id AS barbora_product_id
+            FROM best b
+            JOIN products p_b ON p_b.id::text = b.barbora_uid
+          ),
+          other_resolved AS (
+            SELECT
+              br.barbora_uid,
+              br.store,
+              br.barbora_product_id,
+              COALESCE(
+                (SELECT m.product_id FROM ext_product_map m
+                  WHERE lower(m.source)=br.store
+                    AND (m.ext_id=br.match_uid OR m.source_url=br.match_uid)
+                  LIMIT 1),
+                (SELECT p.id FROM products p WHERE p.id::text=br.match_uid LIMIT 1),
+                (SELECT p.id FROM products p WHERE p.ean=br.match_ean   LIMIT 1)
+              ) AS other_product_id
+            FROM barbora_resolved br
+          )
+          INSERT INTO cross_store_links (store_a, product_id_a, store_b, product_id_b, source)
+          SELECT 'barbora', o.barbora_product_id, o.store, o.other_product_id, 'approved_matches'
+          FROM other_resolved o
+          WHERE o.other_product_id IS NOT NULL
+          ON CONFLICT DO NOTHING;
+          SQL
+
       - name: Sanity counts
         env:
           DATABASE_URL: ${{ steps.prep.outputs.url }}
         run: |
           set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\pset footer off"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT 'approved_matches' AS table, COUNT(*) AS rows FROM approved_matches;"
+          echo "== approved_matches per store =="
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT store, COUNT(*) FROM approved_matches GROUP BY store ORDER BY 1;"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT COUNT(*) FROM approved_best_match_per_store;"
+          echo "== links from Barbora =="
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT store_b AS store, COUNT(*) AS links FROM cross_store_links WHERE store_a='barbora' GROUP BY store_b ORDER BY 1;"
