@@ -11,6 +11,7 @@ on:
 jobs:
   import:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -49,38 +50,39 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'PSQL'
-          CREATE TABLE IF NOT EXISTS approved_matches (
-            barbora_uid    text NOT NULL,
-            barbora_name   text,
-            barbora_brand  text,
-            barbora_size   text,
-            match_uid      text NOT NULL,
-            match_name     text,
-            match_brand    text,
-            match_size     text,
-            match_ean      text,
-            store          text NOT NULL,          -- rimi | selver | prisma
-            similarity     numeric(5,4),
-            size_diff_pct  numeric(6,2),
-            tier           text,
-            is_best_match  boolean,
-            reviewed_at    timestamptz DEFAULT now(),
-            PRIMARY KEY (barbora_uid, store, match_uid)
-          );
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
+            CREATE TABLE IF NOT EXISTS approved_matches (
+              barbora_uid    text NOT NULL,
+              barbora_name   text,
+              barbora_brand  text,
+              barbora_size   text,
+              match_uid      text NOT NULL,
+              match_name     text,
+              match_brand    text,
+              match_size     text,
+              match_ean      text,
+              store          text NOT NULL,
+              similarity     numeric(5,4),
+              size_diff_pct  numeric(6,2),
+              tier           text,
+              is_best_match  boolean,
+              reviewed_at    timestamptz DEFAULT now(),
+              PRIMARY KEY (barbora_uid, store, match_uid)
+            );
+            CREATE INDEX IF NOT EXISTS idx_approved_matches_barbora_uid ON approved_matches (barbora_uid);
+            CREATE INDEX IF NOT EXISTS idx_approved_matches_store_match_uid ON approved_matches (store, match_uid);
+          "
 
-          CREATE INDEX IF NOT EXISTS idx_approved_matches_barbora_uid ON approved_matches (barbora_uid);
-          CREATE INDEX IF NOT EXISTS idx_approved_matches_store_match_uid ON approved_matches (store, match_uid);
-
-          CREATE OR REPLACE VIEW approved_best_match_per_store AS
-          SELECT DISTINCT ON (barbora_uid, store)
-                 barbora_uid, store, match_uid, match_ean,
-                 similarity, tier, is_best_match,
-                 barbora_name, barbora_brand, barbora_size,
-                 match_name, match_brand, match_size
-          FROM approved_matches
-          ORDER BY barbora_uid, store, is_best_match DESC, similarity DESC, tier ASC, match_uid;
-          PSQL
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
+            CREATE OR REPLACE VIEW approved_best_match_per_store AS
+            SELECT DISTINCT ON (barbora_uid, store)
+                   barbora_uid, store, match_uid, match_ean,
+                   similarity, tier, is_best_match,
+                   barbora_name, barbora_brand, barbora_size,
+                   match_name, match_brand, match_size
+            FROM approved_matches
+            ORDER BY barbora_uid, store, is_best_match DESC, similarity DESC, tier ASC, match_uid;
+          "
 
       - name: Import approved matches (Selver, Rimi, Prisma)
         env:
@@ -93,59 +95,68 @@ jobs:
           import_one () {
             local chain="$1"   # rimi|selver|prisma
             local f="$2"
+
             if [[ ! -f "$f" ]]; then
-              echo "Missing: $f (chain: $chain)"; return 0;
+              echo "Missing: $f (chain: $chain) — skipping."
+              return 0
             fi
+
             echo "Importing $chain from $f"
 
-            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<PSQL
-            DROP TABLE IF EXISTS _stage_approved;
-            CREATE TEMP TABLE _stage_approved (
-              barbora_uid   text,
-              barbora_name  text,
-              barbora_brand text,
-              barbora_size  text,
-              match_uid     text,
-              match_name    text,
-              match_brand   text,
-              match_size    text,
-              match_ean     text,
-              store         text,
-              similarity    numeric(5,4),
-              size_diff_pct numeric(6,2),
-              tier          text,
-              is_best_match boolean
-            );
-            \\copy _stage_approved FROM '${f}' WITH CSV HEADER ENCODING 'UTF8';
+            # 1) Stage table
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
+              DROP TABLE IF EXISTS _stage_approved;
+              CREATE TEMP TABLE _stage_approved (
+                barbora_uid   text,
+                barbora_name  text,
+                barbora_brand text,
+                barbora_size  text,
+                match_uid     text,
+                match_name    text,
+                match_brand   text,
+                match_size    text,
+                match_ean     text,
+                store         text,
+                similarity    numeric(5,4),
+                size_diff_pct numeric(6,2),
+                tier          text,
+                is_best_match boolean
+              );
+            "
 
-            INSERT INTO approved_matches
-            (barbora_uid, barbora_name, barbora_brand, barbora_size,
-             match_uid, match_name, match_brand, match_size, match_ean,
-             store, similarity, size_diff_pct, tier, is_best_match)
-            SELECT
-              NULLIF(BTRIM(barbora_uid), ''),
-              barbora_name, barbora_brand, barbora_size,
-              NULLIF(BTRIM(match_uid), ''),
-              match_name, match_brand, match_size, match_ean,
-              LOWER(COALESCE(NULLIF(BTRIM(store), ''), '${chain}')),
-              similarity, size_diff_pct, tier, is_best_match
-            FROM _stage_approved
-            WHERE NULLIF(BTRIM(barbora_uid),'') IS NOT NULL
-              AND NULLIF(BTRIM(match_uid),'') IS NOT NULL
-            ON CONFLICT (barbora_uid, store, match_uid) DO UPDATE SET
-              barbora_name   = EXCLUDED.barbora_name,
-              barbora_brand  = EXCLUDED.barbora_brand,
-              barbora_size   = EXCLUDED.barbora_size,
-              match_name     = EXCLUDED.match_name,
-              match_brand    = EXCLUDED.match_brand,
-              match_size     = EXCLUDED.match_size,
-              match_ean      = EXCLUDED.match_ean,
-              similarity     = EXCLUDED.similarity,
-              size_diff_pct  = EXCLUDED.size_diff_pct,
-              tier           = EXCLUDED.tier,
-              is_best_match  = EXCLUDED.is_best_match,
-              reviewed_at    = now();
-            PSQL
+            # 2) COPY from CSV (without heredoc). Use psql variable for filename.
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -v file="$f" -c "\copy _stage_approved FROM :'file' WITH CSV HEADER ENCODING 'UTF8';"
+
+            # 3) Upsert into final table
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
+              INSERT INTO approved_matches
+              (barbora_uid, barbora_name, barbora_brand, barbora_size,
+               match_uid, match_name, match_brand, match_size, match_ean,
+               store, similarity, size_diff_pct, tier, is_best_match)
+              SELECT
+                NULLIF(BTRIM(barbora_uid), ''),
+                barbora_name, barbora_brand, barbora_size,
+                NULLIF(BTRIM(match_uid), ''),
+                match_name, match_brand, match_size, match_ean,
+                LOWER(COALESCE(NULLIF(BTRIM(store), ''), '${chain}')),
+                similarity, size_diff_pct, tier, is_best_match
+              FROM _stage_approved
+              WHERE NULLIF(BTRIM(barbora_uid),'') IS NOT NULL
+                AND NULLIF(BTRIM(match_uid),'') IS NOT NULL
+              ON CONFLICT (barbora_uid, store, match_uid) DO UPDATE SET
+                barbora_name   = EXCLUDED.barbora_name,
+                barbora_brand  = EXCLUDED.barbora_brand,
+                barbora_size   = EXCLUDED.barbora_size,
+                match_name     = EXCLUDED.match_name,
+                match_brand    = EXCLUDED.match_brand,
+                match_size     = EXCLUDED.match_size,
+                match_ean      = EXCLUDED.match_ean,
+                similarity     = EXCLUDED.similarity,
+                size_diff_pct  = EXCLUDED.size_diff_pct,
+                tier           = EXCLUDED.tier,
+                is_best_match  = EXCLUDED.is_best_match,
+                reviewed_at    = now();
+            "
           }
 
           import_one "selver"  "$CSV_DIR/approved_selver_matches.csv"
@@ -158,9 +169,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'PSQL'
-          \pset footer off
-          SELECT 'approved_matches' AS table, COUNT(*) AS rows FROM approved_matches;
-          SELECT store, COUNT(*) FROM approved_matches GROUP BY store ORDER BY 1;
-          SELECT COUNT(*) FROM approved_best_match_per_store;
-          PSQL
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\pset footer off"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT 'approved_matches' AS table, COUNT(*) AS rows FROM approved_matches;"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT store, COUNT(*) FROM approved_matches GROUP BY store ORDER BY 1;"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT COUNT(*) FROM approved_best_match_per_store;"
