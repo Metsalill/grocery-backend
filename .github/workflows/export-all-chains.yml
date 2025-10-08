@@ -5,30 +5,21 @@ on:
 
 env:
   DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-  PGPASSWORD: ""
 
 jobs:
   export:
     name: export (${{ matrix.chain }})
     runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       matrix:
         include:
-          # Online store ids in DB:
-          # Prisma Online = 14, e-Selver = 31, Rimi ePood = 440, Barbora ePood = 441
-          - chain: Prisma
-            table: staging_prisma_products
-            store_id: 14
-          - chain: Selver
-            table: staging_selver_products
-            store_id: 31
-          - chain: Rimi
-            table: staging_rimi_products
-            store_id: 440
-          - chain: Barbora
-            table: staging_barbora_products
-            store_id: 441
+          # Store IDs based on your earlier checks
+          - { chain: Prisma,  store_id: 14,  staging: staging_prisma_products  }
+          - { chain: Selver,  store_id: 31,  staging: staging_selver_products  }
+          - { chain: Rimi,    store_id: 440, staging: staging_rimi_products    }
+          - { chain: Barbora, store_id: 441, staging: staging_barbora_products }
 
     steps:
       - name: Checkout
@@ -36,96 +27,118 @@ jobs:
 
       - name: Install psql client
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends postgresql-client
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client
 
       - name: Connectivity check
-        env:
-          PGCONNECT_TIMEOUT: "15"
         run: |
-          set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT current_database() AS db, now() AS ts;"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c '\conninfo' >/dev/null
 
       - name: Export ${{ matrix.chain }} → CSV (matching-ready columns)
+        env:
+          CHAIN:    ${{ matrix.chain }}
+          STORE_ID: ${{ matrix.store_id }}
+          STAGING:  ${{ matrix.staging }}
         run: |
           set -euo pipefail
-          CHAIN="${{ matrix.chain }}"
-          TBL="${{ matrix.table }}"
-          STORE_ID=${{ matrix.store_id }}
           mkdir -p out
+          CHAIN_SNAKE="$(echo "$CHAIN" | tr '[:upper:]' '[:lower:]')"
+          OUT="out/${CHAIN_SNAKE}_products.csv"
 
-          CHAIN_LC="$(echo "$CHAIN" | tr '[:upper:]' '[:lower:]')"
-          OUT="out/${CHAIN_LC}_products.csv"
+          # Die early if the expected staging table is missing
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT to_regclass('public.'||:'STAGING')" -v STAGING="$STAGING" \
+            | grep -q "$STAGING" || { echo "::error::Missing table $STAGING"; exit 1; }
 
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<SQL
-          \copy (
-            SELECT
-              '$CHAIN'::text                               AS chain,
-              $STORE_ID::int                               AS store_id,
+          # Export with COPY (no trailing semicolon parse issue)
+          psql "$DATABASE_URL" \
+            -v ON_ERROR_STOP=1 \
+            -v chain="$CHAIN" \
+            -v store_id="$STORE_ID" \
+            -v staging="$STAGING" <<'SQL' > "$OUT"
+            COPY (
+              WITH src AS (
+                SELECT
+                  ext_id,
+                  name,
+                  price::numeric,
+                  currency,
+                  collected_at,
+                  brand,
+                  size_text,
+                  category_path,
+                  category_leaf,
+                  sku_raw,
+                  source_url,
+                  ean_raw,
+                  ean_norm
+                FROM public.:staging
+              )
+              SELECT
+                :'chain'::text  AS chain,
+                :'store_id'::int AS store_id,
 
-              -- raw staging fields
-              ext_id,
-              name,
-              price,
-              currency,
-              collected_at,
-              brand,
-              size_text,
-              category_path,
-              category_leaf,
-              sku_raw,
-              source_url,
-              ean_raw,
-              ean_norm,
+                ext_id,
+                name,
+                price,
+                currency,
+                collected_at,
+                brand,
+                size_text,
+                category_path,
+                category_leaf,
+                sku_raw,
+                source_url,
+                ean_raw,
+                ean_norm,
 
-              -- helpers
-              CASE WHEN source_url IS NOT NULL
-                   THEN lower(regexp_replace(split_part(source_url,'/',3), '^www\\.', ''))
-              END                                          AS host_from_url,
-              CASE WHEN sku_raw ~ '^[0-9]{8,14}$' THEN sku_raw END
-                                                          AS ean_from_sku_if_digits,
-              CASE
-                WHEN COALESCE(ean_norm,'') <> ''          THEN 'ean_norm'
-                WHEN sku_raw ~ '^[0-9]{8,14}$'            THEN 'sku_digits'
-                ELSE NULL
-              END                                         AS ean_source_hint,
+                /* Helpful matching hints/keys */
+                CASE
+                  WHEN source_url IS NOT NULL
+                    THEN lower(regexp_replace(split_part(source_url,'/',3), '^www\\.', ''))
+                END AS host_from_url,
 
-              -- strong keys (do NOT depend on EAN)
-              md5(COALESCE(ext_id,''))                    AS k_ext_id,
-              md5(COALESCE(source_url,''))                AS k_url,
-              md5(COALESCE(sku_raw,''))                   AS k_sku,
-              md5(lower(COALESCE(name,'')))               AS k_name_lower,
-              md5(lower('$CHAIN') || '|' || COALESCE(ext_id,'')) AS k_chain_ext
+                CASE WHEN sku_raw ~ '^[0-9]{8,14}$' THEN sku_raw END AS ean_from_sku_if_digits,
 
-            FROM public.$TBL
-          ) TO '$OUT' CSV HEADER ;
-          SQL
+                CASE
+                  WHEN COALESCE(ean_norm,'') <> ''       THEN 'ean_norm'
+                  WHEN sku_raw ~ '^[0-9]{8,14}$'         THEN 'sku_digits'
+                  ELSE NULL
+                END AS ean_source_hint,
+
+                md5(COALESCE(ext_id,''))                         AS k_ext_id,
+                md5(COALESCE(source_url,''))                     AS k_url,
+                md5(COALESCE(sku_raw,''))                        AS k_sku,
+                md5(lower(COALESCE(name,'')))                    AS k_name_lower,
+                md5(lower(:'chain') || '|' || COALESCE(ext_id,'')) AS k_chain_ext
+
+              FROM src
+            ) TO STDOUT WITH CSV HEADER
+SQL
 
       - name: Upload ${{ matrix.chain }} CSV
         uses: actions/upload-artifact@v4
         with:
-          name: export-${{ matrix.chain }}
+          name: exports-${{ matrix.chain }}
           path: out/*.csv
           if-no-files-found: error
 
   bundle:
     name: bundle all CSVs
-    needs: export
     runs-on: ubuntu-latest
+    needs: export
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: all_exports
 
-      - name: Combine into single zip
+      - name: Make tarball
         run: |
           set -euo pipefail
-          mkdir -p dist
-          zip -r dist/exports_matching_ready.zip all_exports
+          tar -C all_exports -czf exports_matching_ready.tgz .
 
       - name: Upload bundle
         uses: actions/upload-artifact@v4
         with:
-          name: exports-matching-ready
-          path: dist/exports_matching_ready.zip
+          name: exports-bundle
+          path: exports_matching_ready.tgz
