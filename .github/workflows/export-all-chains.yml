@@ -24,27 +24,29 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
           SQL_QUERY: |
-            \copy (
+            COPY (
               SELECT
                 s.chain,
-                s.name               AS store_name,
-                s.id                 AS store_id,
-                p.id                 AS product_id,
-                p.name               AS product,
+                s.name AS store_name,
+                s.id   AS store_id,
+                p.id   AS product_id,
+                p.name AS product,
                 p.brand,
                 p.size_text,
-                p.ean,               -- may be NULL for Rimi/Barbora
-                pr.ext_id,           -- per-store external id
+                p.ean,
+                pr.ext_id,
                 pr.price,
                 pr.collected_at
               FROM prices pr
               JOIN products p ON p.id = pr.product_id
               JOIN stores   s ON s.id = pr.store_id
               WHERE (s.chain ILIKE :'chain' || '%' OR s.name ILIKE '%' || :'chain' || '%')
-            ) TO STDOUT WITH CSV HEADER
+            )
+            TO STDOUT WITH (FORMAT CSV, HEADER, ENCODING 'UTF8');
         run: |
           set -euo pipefail
           mkdir -p out
+          # Run the SQL; psql prints only the CSV to stdout, status to stderr
           echo "$SQL_QUERY" \
           | psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X -v chain="${{ matrix.chain }}" \
           > "out/${{ matrix.chain }}_products.csv"
