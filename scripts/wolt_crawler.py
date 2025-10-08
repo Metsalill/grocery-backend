@@ -6,29 +6,25 @@ Wolt store crawler (JSON endpoints, no browser automation)
 
 - Discovers category slugs from a Wolt venue page HTML.
 - Fetches JSON from /items/<slug>?language=<lang> for each category.
-- Emits a single CSV with all items.
+- Emits a CSV with all items.
 
-Usage:
-  python wolt_crawler.py \
-    --store-url "https://wolt.com/et/est/parnu/venue/coop-prnu" \
-    --city parnu \
-    --language et \
-    --out-dir out
+Works with either:
+  A) --store-url https://wolt.com/et/est/parnu/venue/coop-prnu
+  B) --store-host wolt:coop-parnu  [and optional --city parnu]
 
-Notes:
-- Relies on the same JSON you saw in DevTools under requests like:
-    https://wolt.com/et/est/parnu/venue/coop-prnu/items/kohv-117?language=et
-- Keeps fields stable; feel free to add/remove columns as needed.
+Also supports:
+  --out <exact filepath>  (preferred in CI)
+  --out-dir <dir>         (fallback; builds filename automatically)
 
-Change log (crawler #9):
-- Removed lxml dependency; switched to selectolax for HTML parsing.
-- Fixed Retry import (use urllib3 Retry).
+Compatibility flags (accepted & ignored safely):
+  --categories-file, --max-products, --headless, --req-delay, --goto-strategy,
+  --nav-timeout, --category-timeout, --upsert-per-category, --flush-every,
+  --probe-limit, --modal-probe-limit
 """
 
 import re
 import csv
 import time
-import json
 import argparse
 from pathlib import Path
 from typing import Iterable, List, Dict, Any, Tuple
@@ -75,43 +71,60 @@ def make_session() -> requests.Session:
     return s
 
 def normalize_store_url(store_url: str) -> str:
-    """
-    Force base venue URL like https://wolt.com/et/est/parnu/venue/coop-prnu
-    """
+    """Force base venue URL like https://wolt.com/et/est/parnu/venue/coop-prnu"""
     store_url = store_url.strip()
     if not store_url.startswith("http"):
         store_url = urljoin(WOLT_HOST, store_url)
-    # strip trailing paths like /items/.. if user pasted a category page
     parts = urlparse(store_url)
     segs = [p for p in parts.path.split("/") if p]
-    # expected .../<lang>/<country>/<city>/venue/<slug>
+    # keep .../venue/<slug>
     if "venue" in segs:
         idx = segs.index("venue")
-        segs = segs[: idx + 2]  # keep .../venue/<slug>
+        segs = segs[: idx + 2]
     clean_path = "/" + "/".join(segs)
     return f"{parts.scheme}://{parts.netloc}{clean_path}"
 
+def infer_city_from_url_or_host(s: str) -> str:
+    s = s.lower()
+    for tag in ("parnu", "pärnu", "parnu", "tallinn", "lasna", "lasname", "lasnamae", "lasnamäe"):
+        if tag in s:
+            # map variants
+            if tag.startswith("par"):
+                return "parnu"
+            if tag.startswith("tallinn"):
+                return "tallinn"
+            # lasnamäe is in Tallinn; we keep city "tallinn"
+            if tag.startswith("las"):
+                return "tallinn"
+    # default fallback
+    return "parnu"
+
+def build_url_from_host(store_host: str, city_hint: str | None) -> str:
+    # store_host like "wolt:coop-parnu"
+    slug = store_host.split(":", 1)[-1]
+    city = city_hint or infer_city_from_url_or_host(slug)
+    return f"{WOLT_HOST}/et/est/{city}/venue/{slug}"
+
+def infer_store_host_from_url(store_url: str) -> str:
+    parts = urlparse(store_url)
+    segs = [p for p in parts.path.split("/") if p]
+    store_slug = segs[-1] if segs else "unknown-store"
+    return f"wolt:{store_slug}"
+
 def discover_category_slugs(session: requests.Session, store_url: str) -> List[str]:
-    """
-    Parse the venue page HTML to discover category slugs under /items/<slug>.
-    We scan all anchors and extract those matching the pattern.
-    """
+    """Parse the venue page HTML to discover category slugs under /items/<slug>."""
     r = session.get(store_url, timeout=30)
     r.raise_for_status()
 
     slugs: set[str] = set()
-
-    # Parse with selectolax
     tree = HTMLParser(r.text)
 
-    # Look at all anchors
     for a in tree.css("a[href]"):
         href = a.attributes.get("href", "")
         m = CATEGORY_HREF_RE.search(href)
         if m:
             slugs.add(m.group(1))
 
-    # Fallback: scan raw HTML for /items/<slug>
     if not slugs:
         for m in re.findall(r"/venue/[^/]+/items/([a-z0-9\-]+)", r.text):
             slugs.add(m)
@@ -121,20 +134,17 @@ def discover_category_slugs(session: requests.Session, store_url: str) -> List[s
 def fetch_category_json(
     session: requests.Session, base_store_url: str, slug: str, language: str
 ) -> Dict[str, Any]:
-    """
-    GET https://wolt.com/.../venue/<store>/items/<slug>?language=<lang>
-    Returns JSON exactly like you saw in DevTools.
-    """
+    """GET .../venue/<store>/items/<slug>?language=<lang>"""
     url = urljoin(base_store_url + "/", f"items/{slug}")
     params = {"language": language}
     r = session.get(url, params=params, timeout=30)
     r.raise_for_status()
 
     text = r.text.strip()
-    if text and text[0] == "{":
+    if text.startswith("{"):
         return r.json()
 
-    # Sometimes the first response is a short/non-JSON body; retry once.
+    # Sometimes first body isn't JSON; retry once.
     time.sleep(0.5)
     r2 = session.get(url, params=params, timeout=30)
     r2.raise_for_status()
@@ -143,24 +153,12 @@ def fetch_category_json(
 
     raise ValueError(f"Category endpoint did not return JSON for slug={slug}. Got: {r.text[:120]}...")
 
-def infer_store_host(store_url: str) -> str:
-    """
-    e.g., 'wolt:coop-prnu' from https://wolt.com/et/est/parnu/venue/coop-prnu
-    """
-    parts = urlparse(store_url)
-    segs = [p for p in parts.path.split("/") if p]
-    store_slug = segs[-1] if segs else "unknown-store"
-    return f"wolt:{store_slug}"
-
 def extract_rows(
     payload: Dict[str, Any],
     store_host: str,
     category_slug: str,
 ) -> Tuple[List[Dict[str, Any]], str]:
-    """
-    Turn a single category JSON payload into flat rows.
-    Also returns venue_id if present (we use it to build output filename).
-    """
+    """Flatten a category JSON payload into rows; return rows and venue_id if seen."""
     rows: List[Dict[str, Any]] = []
     venue_id: str = ""
 
@@ -194,22 +192,16 @@ def extract_rows(
     return rows, venue_id
 
 def maybe_fill_venue(session: requests.Session, store_url: str, language: str) -> str:
-    """
-    Try to obtain a reliable venue_id from a category payload or items.
-    """
+    """Try to obtain venue_id from a category payload or its items."""
     slugs = discover_category_slugs(session, store_url)
     if not slugs:
         return ""
-
     data = fetch_category_json(session, store_url, slugs[0], language)
-
     if isinstance(data.get("venue_id"), str) and data["venue_id"]:
         return data["venue_id"]
-
     for it in (data.get("items") or []):
         if isinstance(it, dict) and it.get("venue_id"):
             return it["venue_id"]
-
     return ""
 
 def write_csv(rows: Iterable[Dict[str, Any]], out_path: Path) -> None:
@@ -223,36 +215,68 @@ def write_csv(rows: Iterable[Dict[str, Any]], out_path: Path) -> None:
     with out_path.open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fieldnames)
         w.writeheader()
-        if rows:
-            for r in rows:
-                # ensure all columns exist
-                for k in fieldnames:
-                    r.setdefault(k, "")
-                w.writerow(r)
+        for r in rows:
+            for k in fieldnames:
+                r.setdefault(k, "")
+            w.writerow(r)
 
 # ------------------------------ Main ----------------------------------- #
 
 def main():
     ap = argparse.ArgumentParser(description="Wolt JSON crawler")
-    ap.add_argument("--store-url", required=True, help="e.g. https://wolt.com/et/est/parnu/venue/coop-prnu")
-    ap.add_argument("--city", required=True, help="city tag for filename (e.g., parnu)")
+
+    # Primary inputs (either store-url or store-host)
+    ap.add_argument("--store-url", help="e.g. https://wolt.com/et/est/parnu/venue/coop-prnu")
+    ap.add_argument("--store-host", help='e.g. "wolt:coop-parnu"')
+
+    # Optional hints
+    ap.add_argument("--city", help="city tag for filename (e.g., parnu)")
+
+    # Output options
+    ap.add_argument("--out", help="Exact output filepath (CSV). If not given, uses --out-dir + auto filename.")
+    ap.add_argument("--out-dir", default="out", help="Output directory when --out is not provided")
+
+    # Other options
     ap.add_argument("--language", default="et", help="language code used by Wolt endpoint (default: et)")
-    ap.add_argument("--out-dir", default="out", help="output directory")
+
+    # Compatibility flags (accepted but unused)
+    ap.add_argument("--categories-file")
+    ap.add_argument("--max-products")
+    ap.add_argument("--headless")
+    ap.add_argument("--req-delay")
+    ap.add_argument("--goto-strategy")
+    ap.add_argument("--nav-timeout")
+    ap.add_argument("--category-timeout")
+    ap.add_argument("--upsert-per-category", action="store_true")
+    ap.add_argument("--flush-every")
+    ap.add_argument("--probe-limit")
+    ap.add_argument("--modal-probe-limit")
+
     args = ap.parse_args()
 
-    store_url = normalize_store_url(args.store_url)
-    store_host = infer_store_host(store_url)
+    # Resolve input mode
+    if not args.store_url and not args.store_host:
+        ap.error("Provide either --store-url or --store-host")
+
+    if args.store_host and not args.store_url:
+        store_url = build_url_from_host(args.store_host, args.city)
+        store_host = args.store_host
+        city = args.city or infer_city_from_url_or_host(args.store_host)
+    else:
+        store_url = normalize_store_url(args.store_url)
+        store_host = infer_store_host_from_url(store_url)
+        city = args.city or infer_city_from_url_or_host(store_url)
 
     session = make_session()
 
     print(f"[info] Store URL:   {store_url}")
     print(f"[info] Store host:  {store_host}")
     print(f"[info] Language:    {args.language}")
+    print(f"[info] City tag:    {city}")
 
     slugs = discover_category_slugs(session, store_url)
     if not slugs:
         raise SystemExit("[error] Could not find any category slugs on the venue page.")
-
     print(f"[info] Found {len(slugs)} category slugs")
 
     all_rows: List[Dict[str, Any]] = []
@@ -271,18 +295,19 @@ def main():
 
         all_rows.extend(rows)
         print(f"[ok]  {i:>2}/{len(slugs)}  '{slug}' → {len(rows)} items")
-
-        # be polite
         time.sleep(0.2)
 
     if not global_venue_id:
         global_venue_id = maybe_fill_venue(session, store_url, args.language) or "unknown"
 
-    # Output path: coop_wolt_<venueId>_<city>.csv
-    out_filename = f"coop_wolt_{global_venue_id}_{args.city}.csv"
-    out_path = Path(args.out_dir) / out_filename
-    write_csv(all_rows, out_path)
+    # Decide output path
+    if args.out:
+        out_path = Path(args.out)
+    else:
+        out_filename = f"coop_wolt_{global_venue_id}_{city}.csv"
+        out_path = Path(args.out_dir) / out_filename
 
+    write_csv(all_rows, out_path)
     print(f"[done] Wrote {len(all_rows)} rows → {out_path}")
 
 if __name__ == "__main__":
