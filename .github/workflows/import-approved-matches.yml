@@ -1,17 +1,17 @@
-name: Import approved matches (CSV → DB)
+name: Import approved matches (CSV to DB)
 
 on:
   workflow_dispatch:
     inputs:
       run_set:
         description: "Which CSVs to import"
-        default: "all"
         type: choice
         options:
           - all
           - rimi
           - selver
           - prisma
+        default: all
       right_chain:
         description: "Target chain label for RIGHT side"
         required: true
@@ -36,13 +36,14 @@ jobs:
           - slug: prisma
             left_chain: Prisma
             csv_path: data/approved_prisma_matches.csv
-    if: ${{ github.event.inputs.run_set == 'all' || github.event.inputs.run_set == matrix.slug }}
 
     steps:
       - name: Checkout
+        if: ${{ github.event.inputs.run_set == 'all' || github.event.inputs.run_set == matrix.slug }}
         uses: actions/checkout@v4
 
       - name: Ensure CSV exists
+        if: ${{ github.event.inputs.run_set == 'all' || github.event.inputs.run_set == matrix.slug }}
         shell: bash
         env:
           INPUT_CSV_PATH: ${{ matrix.csv_path }}
@@ -55,6 +56,7 @@ jobs:
           head -n 5 "$CSV_PATH" || true
 
       - name: Install psql client
+        if: ${{ github.event.inputs.run_set == 'all' || github.event.inputs.run_set == matrix.slug }}
         shell: bash
         run: |
           set -euo pipefail
@@ -62,6 +64,7 @@ jobs:
           sudo apt-get install -y postgresql-client
 
       - name: Import CSV → approved_matches_active (idempotent upsert)
+        if: ${{ github.event.inputs.run_set == 'all' || github.event.inputs.run_set == matrix.slug }}
         shell: bash
         env:
           PGHOST: ${{ secrets.PGHOST }}
@@ -84,7 +87,6 @@ jobs:
           SQL_FILE="/tmp/import_matches.sql"
           : > "$SQL_FILE"
 
-          # 1) DDL + temp staging
           {
             echo '\set ON_ERROR_STOP on'
             echo 'BEGIN;'
@@ -112,7 +114,6 @@ jobs:
             echo ');'
           } >> "$SQL_FILE"
 
-          # 2) COPY block (depends on whether CSV has chain columns)
           if [[ "$CSV_HAS_CHAIN_COLS" == "true" ]]; then
             echo "\\copy approved_matches_import (left_chain,left_key,right_chain,right_key,note,approved_by) FROM '$CSV_PATH' CSV HEADER;" >> "$SQL_FILE"
           else
@@ -120,7 +121,6 @@ jobs:
             echo "UPDATE approved_matches_import SET left_chain = :'LEFT_CHAIN', right_chain = :'RIGHT_CHAIN';" >> "$SQL_FILE"
           fi
 
-          # 3) Upsert + commit
           {
             echo ''
             echo 'INSERT INTO approved_matches_active (left_chain,left_key,right_chain,right_key,note,approved_by)'
@@ -136,13 +136,14 @@ jobs:
             echo ''
             echo 'COMMIT;'
             echo ''
-            echo "SELECT '$LEFT_CHAIN'::text AS left_chain_running, COUNT(*) AS rows FROM approved_matches_active WHERE left_chain = :'LEFT_CHAIN';"
+            echo "SELECT :'LEFT_CHAIN'::text AS left_chain_running, COUNT(*) AS rows FROM approved_matches_active WHERE left_chain = :'LEFT_CHAIN';"
           } >> "$SQL_FILE"
 
-          echo "=== Executing SQL ==="
+          echo "=== Executing SQL for $LEFT_CHAIN ==="
           psql -v LEFT_CHAIN="$LEFT_CHAIN" -v RIGHT_CHAIN="$RIGHT_CHAIN" -f "$SQL_FILE"
 
       - name: Show sample rows
+        if: ${{ github.event.inputs.run_set == 'all' || github.event.inputs.run_set == matrix.slug }}
         shell: bash
         env:
           PGHOST: ${{ secrets.PGHOST }}
