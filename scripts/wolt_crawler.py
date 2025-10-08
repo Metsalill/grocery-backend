@@ -2,30 +2,24 @@
 # -*- coding: utf-8 -*-
 
 """
-Wolt store crawler (JSON endpoints, no browser automation)
+Wolt store crawler (JSON endpoints; Playwright fallback with city & geolocation)
 
-- Discovers category slugs from a Wolt venue page HTML OR reads them from --categories-file.
-- Fetches JSON from /items/<slug>?language=<lang> for each category.
-- Emits a CSV with all items.
+- Reads category slugs from --categories-file (slugs or full URLs) OR discovers from venue HTML.
+- Tries JSON via requests with city headers/cookie.
+- If blocked (404/403/non-JSON), falls back to Playwright:
+  * Launches headless Chromium
+  * Sets geolocation to Pärnu (or Tallinn for lasnamäe)
+  * Grants geolocation permission
+  * Visits the venue once to seed cookies
+  * Fetches /items/<slug>?language=<lang> via context.request
 
-Works with either:
-  A) --store-url https://wolt.com/et/est/parnu/venue/coop-prnu
-  B) --store-host wolt:coop-parnu  [and optional --city parnu]
-Plus an optional:
+CLI:
+  --store-url  https://wolt.com/et/est/parnu/venue/coop-parnu
+  --store-host wolt:coop-parnu
+  --city       parnu|tallinn  (default inferred)
   --categories-file data/wolt_coop_parnu_categories.txt
-    * lines can be either slugs (e.g. "soe-toit-3") or full URLs
-      (e.g. "https://wolt.com/et/est/parnu/venue/coop-prnu/items/soe-toit-3")
-
-Output path:
-  --out <exact filepath>  (preferred in CI)  OR
-  --out-dir <dir> + auto filename "coop_wolt_<venueId>_<city>.csv"
-
-Crawler #9 changes:
-- Removed lxml; use selectolax for HTML parsing.
-- Added dual-CLI compatibility (store-url / store-host, out / out-dir).
-- categories-file now first-class (supports full URLs or slugs).
-- **City context headers/cookies** added to mimic being in Pärnu (or inferred city).
-- 404 fallback retry once with Tallinn city context.
+  --out        out/coop_wolt_<runid>_parnu.csv
+  --out-dir    out  (used if --out not provided)
 """
 
 import re
@@ -41,6 +35,13 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from selectolax.parser import HTMLParser
 
+# Optional Playwright (used for fallback)
+try:
+    from playwright.sync_api import sync_playwright
+    PW_AVAILABLE = True
+except Exception:
+    PW_AVAILABLE = False
+
 # ----------------------------- Constants -------------------------------- #
 
 WOLT_HOST = "https://wolt.com"
@@ -50,8 +51,14 @@ UA = (
     "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 )
 
-# e.g. /et/est/parnu/venue/coop-prnu/items/kohv-117
+# e.g. /et/est/parnu/venue/coop-parnu/items/kohv-117
 CATEGORY_HREF_RE = re.compile(r"/venue/[^/]+/items/([^/?#]+)")
+
+# City geolocations
+GEO = {
+    "parnu":   {"latitude": 58.3859, "longitude": 24.4971, "accuracy": 1500},
+    "tallinn": {"latitude": 59.4370, "longitude": 24.7536, "accuracy": 1500},
+}
 
 # ----------------------------- Helpers ---------------------------------- #
 
@@ -64,34 +71,27 @@ def _base_headers() -> Dict[str, str]:
         "Pragma": "no-cache",
     }
 
-def _city_headers(city: str) -> Dict[str, str]:
-    """
-    Nudge Wolt to treat us as located in a specific city.
-    """
-    c = (city or "").lower()
-    # normalize
-    if c.startswith("pär"):  # "pärnu"
-        c = "parnu"
+def _normalize_city(c: Optional[str]) -> str:
+    c = (c or "").lower()
+    if c.startswith("pär"):
+        return "parnu"
     if c in ("lasname", "lasnamae", "lasnamäe", "lasna"):
-        # Lasnamäe is a district; city context must still be Tallinn
-        c = "tallinn"
+        return "tallinn"
     if c not in ("parnu", "tallinn"):
-        c = "parnu"
+        return "parnu"
+    return c
+
+def _city_headers(city: str) -> Dict[str, str]:
+    city = _normalize_city(city)
     return {
-        "x-city-id": c,
-        "Cookie": f"wolt-session-city={c}",
+        "x-city-id": city,
+        "Cookie": f"wolt-session-city={city}",
     }
 
 def make_session(city: str) -> requests.Session:
-    """
-    Build a session with retries and city/location context so the site returns data.
-    """
     s = requests.Session()
     retries = Retry(
-        total=5,
-        read=5,
-        connect=5,
-        backoff_factor=0.4,
+        total=5, read=5, connect=5, backoff_factor=0.4,
         status_forcelist=(429, 500, 502, 503, 504),
         allowed_methods=frozenset(["GET", "HEAD"]),
         raise_on_status=False,
@@ -102,7 +102,7 @@ def make_session(city: str) -> requests.Session:
     return s
 
 def normalize_store_url(store_url: str) -> str:
-    """Force base venue URL like https://wolt.com/et/est/parnu/venue/coop-prnu"""
+    """Force base venue URL like https://wolt.com/et/est/parnu/venue/coop-parnu"""
     store_url = store_url.strip()
     if not store_url.startswith("http"):
         store_url = urljoin(WOLT_HOST, store_url)
@@ -125,7 +125,7 @@ def infer_city_from_string(s: str) -> str:
 def build_url_from_host(store_host: str, city_hint: Optional[str]) -> str:
     # store_host like "wolt:coop-parnu"
     slug = store_host.split(":", 1)[-1]
-    city = city_hint or infer_city_from_string(slug)
+    city = _normalize_city(city_hint or infer_city_from_string(slug))
     return f"{WOLT_HOST}/et/est/{city}/venue/{slug}"
 
 def infer_store_host_from_url(store_url: str) -> str:
@@ -157,7 +157,6 @@ def discover_category_slugs(session: requests.Session, store_url: str) -> List[s
 
 def parse_categories_file(path: Path) -> Tuple[List[str], Optional[str]]:
     """
-    Read categories file.
     Lines can be:
       - full URLs: https://wolt.com/.../venue/<slug>/items/<cat>
       - or just slugs: soe-toit-3
@@ -172,63 +171,129 @@ def parse_categories_file(path: Path) -> Tuple[List[str], Optional[str]]:
             continue
 
         if line.startswith("http"):
-            # Extract slug
             m = CATEGORY_HREF_RE.search(line)
             if not m:
                 continue
             slugs.append(m.group(1))
-
-            # Derive base venue URL from the URL path (only once)
             if base_url is None:
                 u = urlparse(line)
                 parts = u.path.split("/items/")[0]
                 base_url = f"{u.scheme}://{u.netloc}{parts}".rstrip("/")
         else:
-            # plain slug
             slugs.append(line)
 
     # de-dupe while preserving order
-    seen = set()
-    ordered = []
+    seen, ordered = set(), []
     for s in slugs:
         if s not in seen:
             seen.add(s)
             ordered.append(s)
-
     return ordered, base_url
 
-def fetch_category_json(
+# ------------------------ Fetch JSON (2 paths) -------------------------- #
+
+def requests_fetch_category_json(
     session: requests.Session, base_store_url: str, slug: str, language: str
-) -> Dict[str, Any]:
-    """GET .../venue/<store>/items/<slug>?language=<lang> (with city context)."""
+) -> Optional[Dict[str, Any]]:
+    """Try plain requests path. Return dict or None on failure."""
     url = urljoin(base_store_url + "/", f"items/{slug}")
     params = {"language": language}
-
     r = session.get(url, params=params, timeout=30)
-    # If Wolt shows the “journey ends” page, it often comes as 404 with HTML.
-    if r.status_code == 404:
-        # Retry once with Tallinn city context
-        alt_headers = dict(session.headers)
-        alt_headers.update(_city_headers("tallinn"))
-        r2 = session.get(url, params=params, headers=alt_headers, timeout=30)
-        if not r2.ok:
-            r.raise_for_status()  # raise the original 404
-        r = r2
-
-    r.raise_for_status()
+    if r.status_code in (403, 404):
+        return None
+    try:
+        r.raise_for_status()
+    except Exception:
+        return None
 
     text = r.text.strip()
     if text.startswith("{"):
-        return r.json()
+        try:
+            return r.json()
+        except Exception:
+            return None
 
-    # Sometimes first body isn't JSON; retry once.
+    # Retry once
     time.sleep(0.5)
     r2 = session.get(url, params=params, timeout=30)
-    r2.raise_for_status()
-    if r2.text.strip().startswith("{"):
-        return r2.json()
+    if r2.ok and r2.text.strip().startswith("{"):
+        try:
+            return r2.json()
+        except Exception:
+            return None
+    return None
 
-    raise ValueError(f"Category endpoint did not return JSON for slug={slug}. Got: {r.text[:120]}...")
+def playwright_fetch_category_json(
+    store_url: str, slug: str, language: str, city: str
+) -> Optional[Dict[str, Any]]:
+    """Playwright fallback with geolocation & cookies."""
+    if not PW_AVAILABLE:
+        return None
+
+    city = _normalize_city(city)
+    geo = GEO.get(city, GEO["parnu"])
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context(
+            locale="et-EE",
+            geolocation=geo,
+            permissions=["geolocation"],
+            user_agent=UA,
+            extra_http_headers={**_base_headers(), **_city_headers(city)},
+        )
+        page = context.new_page()
+        try:
+            # Visit venue once to seed cookies & city context server-side
+            page.goto(store_url, wait_until="domcontentloaded", timeout=45000)
+            # Small delay to let any client-side city logic run
+            page.wait_for_timeout(500)
+
+            # Now fetch JSON via the browser context
+            base = normalize_store_url(store_url)
+            url = urljoin(base + "/", f"items/{slug}")
+            resp = context.request.get(url, params={"language": language}, timeout=30000)
+            if resp.ok:
+                try:
+                    return resp.json()
+                except Exception:
+                    return None
+
+            # Try a single city fallback (Tallinn)
+            if city != "tallinn":
+                resp2 = context.request.get(
+                    url,
+                    params={"language": language},
+                    headers={**_base_headers(), **_city_headers("tallinn")},
+                    timeout=30000,
+                )
+                if resp2.ok:
+                    try:
+                        return resp2.json()
+                    except Exception:
+                        return None
+            return None
+        finally:
+            context.close()
+            browser.close()
+
+def fetch_category_json(
+    session: requests.Session, store_url: str, slug: str, language: str, city: str
+) -> Dict[str, Any]:
+    """Try requests first; if blocked, use Playwright; raise on failure."""
+    base_store_url = normalize_store_url(store_url)
+
+    data = requests_fetch_category_json(session, base_store_url, slug, language)
+    if data is not None:
+        return data
+
+    data = playwright_fetch_category_json(base_store_url, slug, language, city)
+    if data is not None:
+        return data
+
+    raise ValueError(f"Failed to fetch JSON for slug={slug} (city={city}) via requests and Playwright")
+
+# ---------------------------- Row building ------------------------------ #
 
 def extract_rows(
     payload: Dict[str, Any],
@@ -268,12 +333,12 @@ def extract_rows(
 
     return rows, venue_id
 
-def maybe_fill_venue(session: requests.Session, store_url: str, language: str) -> str:
+def maybe_fill_venue(session: requests.Session, store_url: str, language: str, city: str) -> str:
     """Try to obtain venue_id from a category payload or its items."""
     slugs = discover_category_slugs(session, store_url)
     if not slugs:
         return ""
-    data = fetch_category_json(session, store_url, slugs[0], language)
+    data = fetch_category_json(session, store_url, slugs[0], language, city)
     if isinstance(data.get("venue_id"), str) and data["venue_id"]:
         return data["venue_id"]
     for it in (data.get("items") or []):
@@ -303,11 +368,11 @@ def main():
     ap = argparse.ArgumentParser(description="Wolt JSON crawler")
 
     # Primary inputs (either store-url or store-host)
-    ap.add_argument("--store-url", help="e.g. https://wolt.com/et/est/parnu/venue/coop-prnu")
+    ap.add_argument("--store-url", help="e.g. https://wolt.com/et/est/parnu/venue/coop-parnu")
     ap.add_argument("--store-host", help='e.g. "wolt:coop-parnu"')
 
     # Optional hints
-    ap.add_argument("--city", help="city tag for filename and headers (e.g., parnu)")
+    ap.add_argument("--city", help="city tag for filename/headers (parnu|tallinn)")
 
     # Output options
     ap.add_argument("--out", help="Exact output filepath (CSV). If not given, uses --out-dir + auto filename.")
@@ -316,10 +381,10 @@ def main():
     # Other options
     ap.add_argument("--language", default="et", help="language code used by Wolt endpoint (default: et)")
 
-    # Categories file (now actually used)
+    # Categories file
     ap.add_argument("--categories-file", help="File with category slugs or full URLs (one per line)")
 
-    # Compatibility flags (accepted but unused in JSON mode)
+    # Compatibility flags (accepted but unused)
     ap.add_argument("--max-products")
     ap.add_argument("--headless")
     ap.add_argument("--req-delay")
@@ -333,7 +398,7 @@ def main():
 
     args = ap.parse_args()
 
-    # Resolve slugs if a categories file is provided
+    # Load categories file if provided
     file_slugs: List[str] = []
     file_base_url: Optional[str] = None
     if args.categories_file:
@@ -342,24 +407,23 @@ def main():
             raise SystemExit(f"[error] categories file not found: {p}")
         file_slugs, file_base_url = parse_categories_file(p)
 
-    # Resolve store URL / host
+    # Resolve store URL / host / city
     if args.store_host and not args.store_url:
         store_url = build_url_from_host(args.store_host, args.city)
         store_host = args.store_host
-        city = args.city or infer_city_from_string(args.store_host)
+        city = _normalize_city(args.city or infer_city_from_string(args.store_host))
     elif args.store_url:
         store_url = normalize_store_url(args.store_url)
         store_host = infer_store_host_from_url(store_url)
-        city = args.city or infer_city_from_string(store_url)
+        city = _normalize_city(args.city or infer_city_from_string(store_url))
     else:
-        # Neither provided → try deriving from categories file URLs
         if file_base_url:
             store_url = normalize_store_url(file_base_url)
             store_host = infer_store_host_from_url(store_url)
-            city = args.city or infer_city_from_string(store_url)
+            city = _normalize_city(args.city or infer_city_from_string(store_url))
         else:
             ap.error("Provide --store-url or --store-host (or include full URLs in --categories-file).")
-            return  # unreachable
+            return
 
     session = make_session(city)
 
@@ -368,7 +432,7 @@ def main():
     print(f"[info] Language:    {args.language}")
     print(f"[info] City tag:    {city}")
 
-    # Determine category slugs: prefer file if given and non-empty; else discover
+    # Determine category slugs
     if file_slugs:
         slugs = file_slugs
         print(f"[info] Using {len(slugs)} category slugs from file: {args.categories_file}")
@@ -383,7 +447,7 @@ def main():
 
     for i, slug in enumerate(slugs, 1):
         try:
-            data = fetch_category_json(session, store_url, slug, args.language)
+            data = fetch_category_json(session, store_url, slug, args.language, city)
         except Exception as e:
             print(f"[warn] Failed category '{slug}': {e}")
             continue
@@ -397,7 +461,7 @@ def main():
         time.sleep(0.2)
 
     if not global_venue_id:
-        global_venue_id = maybe_fill_venue(session, store_url, args.language) or "unknown"
+        global_venue_id = maybe_fill_venue(session, store_url, args.language, city) or "unknown"
 
     # Decide output path
     if args.out:
