@@ -1,144 +1,58 @@
-name: Export products for Barbora, Prisma, Selver, Rimi (matching-ready)
+name: Export all chains (matching dataset)
 
 on:
-  workflow_dispatch: {}
-
-env:
-  DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+  workflow_dispatch:
 
 jobs:
   export:
-    name: export (${{ matrix.chain }})
     runs-on: ubuntu-latest
-
     strategy:
       fail-fast: false
       matrix:
-        include:
-          # Store IDs based on your earlier checks
-          - { chain: Prisma,  store_id: 14,  staging: staging_prisma_products  }
-          - { chain: Selver,  store_id: 31,  staging: staging_selver_products  }
-          - { chain: Rimi,    store_id: 440, staging: staging_rimi_products    }
-          - { chain: Barbora, store_id: 441, staging: staging_barbora_products }
+        chain: [Selver, Prisma, Rimi, Barbora]
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install psql client
+      - name: Install PostgreSQL client
         run: |
-          sudo apt-get update -y
+          sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-      - name: Connectivity check
-        run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c '\conninfo' >/dev/null
-
-      - name: Export ${{ matrix.chain }} → CSV (matching-ready columns)
+      - name: Export ${{ matrix.chain }} products CSV
         env:
-          CHAIN:    ${{ matrix.chain }}
-          STORE_ID: ${{ matrix.store_id }}
-          STAGING:  ${{ matrix.staging }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }} # public host; reachable from GitHub runners
         run: |
           set -euo pipefail
           mkdir -p out
-          CHAIN_SNAKE="$(echo "$CHAIN" | tr '[:upper:]' '[:lower:]')"
-          OUT="out/${CHAIN_SNAKE}_products.csv"
 
-          # Die early if the expected staging table is missing
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT to_regclass('public.'||:'STAGING')" -v STAGING="$STAGING" \
-            | grep -q "$STAGING" || { echo "::error::Missing table $STAGING"; exit 1; }
+          # Prefer exact chain via stores.chain; fallback to name contains
+          FILTER_COND="(s.chain ILIKE '${{ matrix.chain }}%' OR s.name ILIKE '%' || '${{ matrix.chain }}' || '%')"
 
-          # Export with COPY (no trailing semicolon parse issue)
-          psql "$DATABASE_URL" \
-            -v ON_ERROR_STOP=1 \
-            -v chain="$CHAIN" \
-            -v store_id="$STORE_ID" \
-            -v staging="$STAGING" <<'SQL' > "$OUT"
-            COPY (
-              WITH src AS (
-                SELECT
-                  ext_id,
-                  name,
-                  price::numeric,
-                  currency,
-                  collected_at,
-                  brand,
-                  size_text,
-                  category_path,
-                  category_leaf,
-                  sku_raw,
-                  source_url,
-                  ean_raw,
-                  ean_norm
-                FROM public.:staging
-              )
-              SELECT
-                :'chain'::text  AS chain,
-                :'store_id'::int AS store_id,
-
-                ext_id,
-                name,
-                price,
-                currency,
-                collected_at,
-                brand,
-                size_text,
-                category_path,
-                category_leaf,
-                sku_raw,
-                source_url,
-                ean_raw,
-                ean_norm,
-
-                /* Helpful matching hints/keys */
-                CASE
-                  WHEN source_url IS NOT NULL
-                    THEN lower(regexp_replace(split_part(source_url,'/',3), '^www\\.', ''))
-                END AS host_from_url,
-
-                CASE WHEN sku_raw ~ '^[0-9]{8,14}$' THEN sku_raw END AS ean_from_sku_if_digits,
-
-                CASE
-                  WHEN COALESCE(ean_norm,'') <> ''       THEN 'ean_norm'
-                  WHEN sku_raw ~ '^[0-9]{8,14}$'         THEN 'sku_digits'
-                  ELSE NULL
-                END AS ean_source_hint,
-
-                md5(COALESCE(ext_id,''))                         AS k_ext_id,
-                md5(COALESCE(source_url,''))                     AS k_url,
-                md5(COALESCE(sku_raw,''))                        AS k_sku,
-                md5(lower(COALESCE(name,'')))                    AS k_name_lower,
-                md5(lower(:'chain') || '|' || COALESCE(ext_id,'')) AS k_chain_ext
-
-              FROM src
-            ) TO STDOUT WITH CSV HEADER
-SQL
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
+            -c "\copy (
+                  SELECT
+                    s.chain,
+                    s.name               AS store_name,
+                    s.id                 AS store_id,
+                    p.id                 AS product_id,
+                    p.name               AS product,
+                    p.brand,
+                    p.size_text,
+                    p.ean,               -- may be NULL for Rimi/Barbora
+                    pr.ext_id,           -- per-store external id
+                    pr.price,
+                    pr.collected_at
+                  FROM prices pr
+                  JOIN products p ON p.id = pr.product_id
+                  JOIN stores   s ON s.id = pr.store_id
+                  WHERE ${FILTER_COND}
+                ) TO STDOUT WITH CSV HEADER" \
+            > "out/${{ matrix.chain }}_products.csv"
 
       - name: Upload ${{ matrix.chain }} CSV
         uses: actions/upload-artifact@v4
         with:
-          name: exports-${{ matrix.chain }}
-          path: out/*.csv
-          if-no-files-found: error
-
-  bundle:
-    name: bundle all CSVs
-    runs-on: ubuntu-latest
-    needs: export
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: all_exports
-
-      - name: Make tarball
-        run: |
-          set -euo pipefail
-          tar -C all_exports -czf exports_matching_ready.tgz .
-
-      - name: Upload bundle
-        uses: actions/upload-artifact@v4
-        with:
-          name: exports-bundle
-          path: exports_matching_ready.tgz
+          name: ${{ matrix.chain }}-products
+          path: out/${{ matrix.chain }}_products.csv
