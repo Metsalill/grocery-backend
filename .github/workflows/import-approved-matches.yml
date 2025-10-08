@@ -5,9 +5,13 @@ on:
     inputs:
       run_set:
         description: "Which CSVs to import"
+        default: "all"
         type: choice
-        options: [all, rimi, selver, prisma]
-        default: all
+        options:
+          - all
+          - rimi
+          - selver
+          - prisma
       right_chain:
         description: "Target chain label for RIGHT side"
         required: true
@@ -77,103 +81,66 @@ jobs:
           RIGHT_CHAIN="$INPUT_RIGHT_CHAIN"
           CSV_HAS_CHAIN_COLS="$INPUT_CSV_HAS_CHAIN_COLS"
 
-          echo "CSV_PATH: $CSV_PATH"
-          echo "LEFT_CHAIN: $LEFT_CHAIN"
-          echo "RIGHT_CHAIN: $RIGHT_CHAIN"
-          echo "CSV_HAS_CHAIN_COLS: $CSV_HAS_CHAIN_COLS"
+          SQL_FILE="/tmp/import_matches.sql"
+          : > "$SQL_FILE"
 
+          # 1) DDL + temp staging
+          {
+            echo '\set ON_ERROR_STOP on'
+            echo 'BEGIN;'
+            echo ''
+            echo '-- Active table = one target per left item'
+            echo 'CREATE TABLE IF NOT EXISTS approved_matches_active ('
+            echo '  left_chain  text    NOT NULL,'
+            echo '  left_key    text    NOT NULL,'
+            echo '  right_chain text    NOT NULL,'
+            echo '  right_key   text    NOT NULL,'
+            echo '  note        text,'
+            echo '  approved_by text,'
+            echo '  approved_at timestamptz NOT NULL DEFAULT now(),'
+            echo '  PRIMARY KEY (left_chain, left_key)'
+            echo ');'
+            echo ''
+            echo 'DROP TABLE IF EXISTS approved_matches_import;'
+            echo 'CREATE TEMP TABLE approved_matches_import ('
+            echo '  left_chain  text,'
+            echo '  left_key    text,'
+            echo '  right_chain text,'
+            echo '  right_key   text,'
+            echo '  note        text,'
+            echo '  approved_by text'
+            echo ');'
+          } >> "$SQL_FILE"
+
+          # 2) COPY block (depends on whether CSV has chain columns)
           if [[ "$CSV_HAS_CHAIN_COLS" == "true" ]]; then
-            psql -v ON_ERROR_STOP=1 -v LEFT_CHAIN="$LEFT_CHAIN" -v RIGHT_CHAIN="$RIGHT_CHAIN" <<SQL
-\set ON_ERROR_STOP on
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS approved_matches_active (
-  left_chain  text    NOT NULL,
-  left_key    text    NOT NULL,
-  right_chain text    NOT NULL,
-  right_key   text    NOT NULL,
-  note        text,
-  approved_by text,
-  approved_at timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (left_chain, left_key)
-);
-
-DROP TABLE IF EXISTS approved_matches_import;
-CREATE TEMP TABLE approved_matches_import (
-  left_chain  text,
-  left_key    text,
-  right_chain text,
-  right_key   text,
-  note        text,
-  approved_by text
-);
-
-\copy approved_matches_import (left_chain,left_key,right_chain,right_key,note,approved_by) FROM '$CSV_PATH' CSV HEADER;
-
-INSERT INTO approved_matches_active (left_chain,left_key,right_chain,right_key,note,approved_by)
-SELECT left_chain,left_key,right_chain,right_key,note,approved_by
-FROM approved_matches_import
-WHERE left_key IS NOT NULL AND right_key IS NOT NULL
-ON CONFLICT (left_chain,left_key) DO UPDATE
-  SET right_chain = EXCLUDED.right_chain,
-      right_key   = EXCLUDED.right_key,
-      note        = COALESCE(EXCLUDED.note, approved_matches_active.note),
-      approved_by = COALESCE(EXCLUDED.approved_by, approved_matches_active.approved_by),
-      approved_at = now();
-
-COMMIT;
-
-\echo ''
-\echo '== Row counts per left_chain (approved_matches_active) =='
-SELECT left_chain, COUNT(*) AS rows FROM approved_matches_active GROUP BY 1 ORDER BY 1;
-SQL
+            echo "\\copy approved_matches_import (left_chain,left_key,right_chain,right_key,note,approved_by) FROM '$CSV_PATH' CSV HEADER;" >> "$SQL_FILE"
           else
-            psql -v ON_ERROR_STOP=1 -v LEFT_CHAIN="$LEFT_CHAIN" -v RIGHT_CHAIN="$RIGHT_CHAIN" <<SQL
-\set ON_ERROR_STOP on
-BEGIN;
-
-CREATE TABLE IF NOT EXISTS approved_matches_active (
-  left_chain  text    NOT NULL,
-  left_key    text    NOT NULL,
-  right_chain text    NOT NULL,
-  right_key   text    NOT NULL,
-  note        text,
-  approved_by text,
-  approved_at timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (left_chain, left_key)
-);
-
-DROP TABLE IF EXISTS approved_matches_import;
-CREATE TEMP TABLE approved_matches_import (
-  left_chain  text,
-  left_key    text,
-  right_chain text,
-  right_key   text,
-  note        text,
-  approved_by text
-);
-
-\copy approved_matches_import (left_key,right_key,note,approved_by) FROM '$CSV_PATH' CSV HEADER;
-UPDATE approved_matches_import SET left_chain = :'LEFT_CHAIN', right_chain = :'RIGHT_CHAIN';
-
-INSERT INTO approved_matches_active (left_chain,left_key,right_chain,right_key,note,approved_by)
-SELECT left_chain,left_key,right_chain,right_key,note,approved_by
-FROM approved_matches_import
-WHERE left_key IS NOT NULL AND right_key IS NOT NULL
-ON CONFLICT (left_chain,left_key) DO UPDATE
-  SET right_chain = EXCLUDED.right_chain,
-      right_key   = EXCLUDED.right_key,
-      note        = COALESCE(EXCLUDED.note, approved_matches_active.note),
-      approved_by = COALESCE(EXCLUDED.approved_by, approved_matches_active.approved_by),
-      approved_at = now();
-
-COMMIT;
-
-\echo ''
-\echo '== Row counts per left_chain (approved_matches_active) =='
-SELECT left_chain, COUNT(*) AS rows FROM approved_matches_active GROUP BY 1 ORDER BY 1;
-SQL
+            echo "\\copy approved_matches_import (left_key,right_key,note,approved_by) FROM '$CSV_PATH' CSV HEADER;" >> "$SQL_FILE"
+            echo "UPDATE approved_matches_import SET left_chain = :'LEFT_CHAIN', right_chain = :'RIGHT_CHAIN';" >> "$SQL_FILE"
           fi
+
+          # 3) Upsert + commit
+          {
+            echo ''
+            echo 'INSERT INTO approved_matches_active (left_chain,left_key,right_chain,right_key,note,approved_by)'
+            echo 'SELECT left_chain,left_key,right_chain,right_key,note,approved_by'
+            echo 'FROM approved_matches_import'
+            echo 'WHERE left_key IS NOT NULL AND right_key IS NOT NULL'
+            echo 'ON CONFLICT (left_chain,left_key) DO UPDATE'
+            echo '  SET right_chain = EXCLUDED.right_chain,'
+            echo '      right_key   = EXCLUDED.right_key,'
+            echo '      note        = COALESCE(EXCLUDED.note, approved_matches_active.note),'
+            echo '      approved_by = COALESCE(EXCLUDED.approved_by, approved_matches_active.approved_by),'
+            echo '      approved_at = now();'
+            echo ''
+            echo 'COMMIT;'
+            echo ''
+            echo "SELECT '$LEFT_CHAIN'::text AS left_chain_running, COUNT(*) AS rows FROM approved_matches_active WHERE left_chain = :'LEFT_CHAIN';"
+          } >> "$SQL_FILE"
+
+          echo "=== Executing SQL ==="
+          psql -v LEFT_CHAIN="$LEFT_CHAIN" -v RIGHT_CHAIN="$RIGHT_CHAIN" -f "$SQL_FILE"
 
       - name: Show sample rows
         shell: bash
