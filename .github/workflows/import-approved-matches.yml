@@ -3,16 +3,13 @@ name: Import approved matches (CSV → DB)
 on:
   workflow_dispatch:
     inputs:
-      csv_path:
-        description: "Path to CSV in the repo (e.g., data/approved_rimi_matches.csv)"
-        required: true
-        default: "data/approved_rimi_matches.csv"
-      left_chain:
-        description: "LEFT/source chain label (ignored if CSV already has left_chain)"
-        required: true
-        default: "Rimi"
+      run_set:
+        description: "Which CSVs to import"
+        type: choice
+        options: [all, rimi, selver, prisma]
+        default: all
       right_chain:
-        description: "RIGHT/target chain label (e.g., Canonical, Barbora)"
+        description: "Target chain label for RIGHT side"
         required: true
         default: "Canonical"
       csv_has_chain_cols:
@@ -23,6 +20,19 @@ on:
 jobs:
   import:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - slug: rimi
+            left_chain: Rimi
+            csv_path: data/approved_rimi_matches.csv
+          - slug: selver
+            left_chain: Selver
+            csv_path: data/approved_selver_matches.csv
+          - slug: prisma
+            left_chain: Prisma
+            csv_path: data/approved_prisma_matches.csv
+    if: ${{ github.event.inputs.run_set == 'all' || github.event.inputs.run_set == matrix.slug }}
 
     steps:
       - name: Checkout
@@ -31,7 +41,7 @@ jobs:
       - name: Ensure CSV exists
         shell: bash
         env:
-          INPUT_CSV_PATH: ${{ github.event.inputs.csv_path }}
+          INPUT_CSV_PATH: ${{ matrix.csv_path }}
         run: |
           set -euo pipefail
           CSV_PATH="$GITHUB_WORKSPACE/$INPUT_CSV_PATH"
@@ -55,8 +65,8 @@ jobs:
           PGUSER: ${{ secrets.PGUSER }}
           PGPASSWORD: ${{ secrets.PGPASSWORD }}
           PGDATABASE: ${{ secrets.PGDATABASE }}
-          INPUT_CSV_PATH: ${{ github.event.inputs.csv_path }}
-          INPUT_LEFT_CHAIN: ${{ github.event.inputs.left_chain }}
+          INPUT_CSV_PATH: ${{ matrix.csv_path }}
+          INPUT_LEFT_CHAIN: ${{ matrix.left_chain }}
           INPUT_RIGHT_CHAIN: ${{ github.event.inputs.right_chain }}
           INPUT_CSV_HAS_CHAIN_COLS: ${{ github.event.inputs.csv_has_chain_cols }}
         run: |
@@ -67,13 +77,16 @@ jobs:
           RIGHT_CHAIN="$INPUT_RIGHT_CHAIN"
           CSV_HAS_CHAIN_COLS="$INPUT_CSV_HAS_CHAIN_COLS"
 
-          SQL_FILE="/tmp/import_matches.sql"
+          echo "CSV_PATH: $CSV_PATH"
+          echo "LEFT_CHAIN: $LEFT_CHAIN"
+          echo "RIGHT_CHAIN: $RIGHT_CHAIN"
+          echo "CSV_HAS_CHAIN_COLS: $CSV_HAS_CHAIN_COLS"
 
-          cat > "$SQL_FILE" <<'SQL'
+          if [[ "$CSV_HAS_CHAIN_COLS" == "true" ]]; then
+            psql -v ON_ERROR_STOP=1 -v LEFT_CHAIN="$LEFT_CHAIN" -v RIGHT_CHAIN="$RIGHT_CHAIN" <<SQL
 \set ON_ERROR_STOP on
 BEGIN;
 
--- 1) Active table = one target per left item
 CREATE TABLE IF NOT EXISTS approved_matches_active (
   left_chain  text    NOT NULL,
   left_key    text    NOT NULL,
@@ -85,7 +98,6 @@ CREATE TABLE IF NOT EXISTS approved_matches_active (
   PRIMARY KEY (left_chain, left_key)
 );
 
--- 2) Temp staging for COPY (auto-drops at COMMIT)
 DROP TABLE IF EXISTS approved_matches_import;
 CREATE TEMP TABLE approved_matches_import (
   left_chain  text,
@@ -95,22 +107,9 @@ CREATE TEMP TABLE approved_matches_import (
   note        text,
   approved_by text
 );
-SQL
 
-          if [[ "$CSV_HAS_CHAIN_COLS" == "true" ]]; then
-            {
-              echo "\\copy approved_matches_import (left_chain,left_key,right_chain,right_key,note,approved_by) FROM '$CSV_PATH' CSV HEADER;";
-            } >> "$SQL_FILE"
-          else
-            {
-              echo "\\copy approved_matches_import (left_key,right_key,note,approved_by) FROM '$CSV_PATH' CSV HEADER;";
-              echo "UPDATE approved_matches_import SET left_chain = :'LEFT_CHAIN', right_chain = :'RIGHT_CHAIN';"
-            } >> "$SQL_FILE"
-          fi
+\copy approved_matches_import (left_chain,left_key,right_chain,right_key,note,approved_by) FROM '$CSV_PATH' CSV HEADER;
 
-          cat >> "$SQL_FILE" <<'SQL'
-
--- 4) Upsert into active (idempotent & allows remaps)
 INSERT INTO approved_matches_active (left_chain,left_key,right_chain,right_key,note,approved_by)
 SELECT left_chain,left_key,right_chain,right_key,note,approved_by
 FROM approved_matches_import
@@ -128,12 +127,53 @@ COMMIT;
 \echo '== Row counts per left_chain (approved_matches_active) =='
 SELECT left_chain, COUNT(*) AS rows FROM approved_matches_active GROUP BY 1 ORDER BY 1;
 SQL
+          else
+            psql -v ON_ERROR_STOP=1 -v LEFT_CHAIN="$LEFT_CHAIN" -v RIGHT_CHAIN="$RIGHT_CHAIN" <<SQL
+\set ON_ERROR_STOP on
+BEGIN;
 
-          echo "=== Final SQL (first 150 lines) ==="
-          sed -n '1,150p' "$SQL_FILE" || true
+CREATE TABLE IF NOT EXISTS approved_matches_active (
+  left_chain  text    NOT NULL,
+  left_key    text    NOT NULL,
+  right_chain text    NOT NULL,
+  right_key   text    NOT NULL,
+  note        text,
+  approved_by text,
+  approved_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (left_chain, left_key)
+);
 
-          # Execute in a single session so TEMP table lives throughout
-          psql -v LEFT_CHAIN="$LEFT_CHAIN" -v RIGHT_CHAIN="$RIGHT_CHAIN" -f "$SQL_FILE"
+DROP TABLE IF EXISTS approved_matches_import;
+CREATE TEMP TABLE approved_matches_import (
+  left_chain  text,
+  left_key    text,
+  right_chain text,
+  right_key   text,
+  note        text,
+  approved_by text
+);
+
+\copy approved_matches_import (left_key,right_key,note,approved_by) FROM '$CSV_PATH' CSV HEADER;
+UPDATE approved_matches_import SET left_chain = :'LEFT_CHAIN', right_chain = :'RIGHT_CHAIN';
+
+INSERT INTO approved_matches_active (left_chain,left_key,right_chain,right_key,note,approved_by)
+SELECT left_chain,left_key,right_chain,right_key,note,approved_by
+FROM approved_matches_import
+WHERE left_key IS NOT NULL AND right_key IS NOT NULL
+ON CONFLICT (left_chain,left_key) DO UPDATE
+  SET right_chain = EXCLUDED.right_chain,
+      right_key   = EXCLUDED.right_key,
+      note        = COALESCE(EXCLUDED.note, approved_matches_active.note),
+      approved_by = COALESCE(EXCLUDED.approved_by, approved_matches_active.approved_by),
+      approved_at = now();
+
+COMMIT;
+
+\echo ''
+\echo '== Row counts per left_chain (approved_matches_active) =='
+SELECT left_chain, COUNT(*) AS rows FROM approved_matches_active GROUP BY 1 ORDER BY 1;
+SQL
+          fi
 
       - name: Show sample rows
         shell: bash
