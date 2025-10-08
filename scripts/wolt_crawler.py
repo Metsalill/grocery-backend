@@ -19,6 +19,13 @@ Plus an optional:
 Output path:
   --out <exact filepath>  (preferred in CI)  OR
   --out-dir <dir> + auto filename "coop_wolt_<venueId>_<city>.csv"
+
+Crawler #9 changes:
+- Removed lxml; use selectolax for HTML parsing.
+- Added dual-CLI compatibility (store-url / store-host, out / out-dir).
+- categories-file now first-class (supports full URLs or slugs).
+- **City context headers/cookies** added to mimic being in Pärnu (or inferred city).
+- 404 fallback retry once with Tallinn city context.
 """
 
 import re
@@ -34,7 +41,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from selectolax.parser import HTMLParser
 
-# ----------------------------- Helpers --------------------------------- #
+# ----------------------------- Constants -------------------------------- #
 
 WOLT_HOST = "https://wolt.com"
 
@@ -43,18 +50,42 @@ UA = (
     "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 )
 
-HEADERS = {
-    "User-Agent": UA,
-    "Accept": "application/json,text/html;q=0.9,*/*;q=0.8",
-    "Accept-Language": "et-EE,et;q=0.9,en;q=0.8",
-    "Cache-Control": "no-cache",
-    "Pragma": "no-cache",
-}
-
+# e.g. /et/est/parnu/venue/coop-prnu/items/kohv-117
 CATEGORY_HREF_RE = re.compile(r"/venue/[^/]+/items/([^/?#]+)")
-VENUE_PATH_RE   = re.compile(r"^/(?:[a-z]{2}/[a-z]{3}/[^/]+/)?venue/([^/]+)")
 
-def make_session() -> requests.Session:
+# ----------------------------- Helpers ---------------------------------- #
+
+def _base_headers() -> Dict[str, str]:
+    return {
+        "User-Agent": UA,
+        "Accept": "application/json,text/html;q=0.9,*/*;q=0.8",
+        "Accept-Language": "et-EE,et;q=0.9,en;q=0.8",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+    }
+
+def _city_headers(city: str) -> Dict[str, str]:
+    """
+    Nudge Wolt to treat us as located in a specific city.
+    """
+    c = (city or "").lower()
+    # normalize
+    if c.startswith("pär"):  # "pärnu"
+        c = "parnu"
+    if c in ("lasname", "lasnamae", "lasnamäe", "lasna"):
+        # Lasnamäe is a district; city context must still be Tallinn
+        c = "tallinn"
+    if c not in ("parnu", "tallinn"):
+        c = "parnu"
+    return {
+        "x-city-id": c,
+        "Cookie": f"wolt-session-city={c}",
+    }
+
+def make_session(city: str) -> requests.Session:
+    """
+    Build a session with retries and city/location context so the site returns data.
+    """
     s = requests.Session()
     retries = Retry(
         total=5,
@@ -66,7 +97,8 @@ def make_session() -> requests.Session:
         raise_on_status=False,
     )
     s.mount("https://", HTTPAdapter(max_retries=retries))
-    s.headers.update(HEADERS)
+    s.headers.update(_base_headers())
+    s.headers.update(_city_headers(city))
     return s
 
 def normalize_store_url(store_url: str) -> str:
@@ -86,7 +118,7 @@ def infer_city_from_string(s: str) -> str:
     s = s.lower()
     if "parnu" in s or "pärnu" in s:
         return "parnu"
-    if "tallinn" in s or "lasna" in s or "lasname" in s or "lasnamae" in s or "lasnamäe" in s:
+    if any(x in s for x in ("tallinn", "lasna", "lasname", "lasnamae", "lasnamäe")):
         return "tallinn"
     return "parnu"
 
@@ -129,7 +161,7 @@ def parse_categories_file(path: Path) -> Tuple[List[str], Optional[str]]:
     Lines can be:
       - full URLs: https://wolt.com/.../venue/<slug>/items/<cat>
       - or just slugs: soe-toit-3
-    Returns (slugs, base_store_url_if_found_from_urls)
+    Returns (unique_slugs_in_order, base_store_url_if_derived_from_urls)
     """
     slugs: List[str] = []
     base_url: Optional[str] = None
@@ -149,8 +181,6 @@ def parse_categories_file(path: Path) -> Tuple[List[str], Optional[str]]:
             # Derive base venue URL from the URL path (only once)
             if base_url is None:
                 u = urlparse(line)
-                # keep up to ".../venue/<store>"
-                # examples: /et/est/parnu/venue/coop-prnu/items/soe-toit-3
                 parts = u.path.split("/items/")[0]
                 base_url = f"{u.scheme}://{u.netloc}{parts}".rstrip("/")
         else:
@@ -170,10 +200,21 @@ def parse_categories_file(path: Path) -> Tuple[List[str], Optional[str]]:
 def fetch_category_json(
     session: requests.Session, base_store_url: str, slug: str, language: str
 ) -> Dict[str, Any]:
-    """GET .../venue/<store>/items/<slug>?language=<lang>"""
+    """GET .../venue/<store>/items/<slug>?language=<lang> (with city context)."""
     url = urljoin(base_store_url + "/", f"items/{slug}")
     params = {"language": language}
+
     r = session.get(url, params=params, timeout=30)
+    # If Wolt shows the “journey ends” page, it often comes as 404 with HTML.
+    if r.status_code == 404:
+        # Retry once with Tallinn city context
+        alt_headers = dict(session.headers)
+        alt_headers.update(_city_headers("tallinn"))
+        r2 = session.get(url, params=params, headers=alt_headers, timeout=30)
+        if not r2.ok:
+            r.raise_for_status()  # raise the original 404
+        r = r2
+
     r.raise_for_status()
 
     text = r.text.strip()
@@ -266,7 +307,7 @@ def main():
     ap.add_argument("--store-host", help='e.g. "wolt:coop-parnu"')
 
     # Optional hints
-    ap.add_argument("--city", help="city tag for filename (e.g., parnu)")
+    ap.add_argument("--city", help="city tag for filename and headers (e.g., parnu)")
 
     # Output options
     ap.add_argument("--out", help="Exact output filepath (CSV). If not given, uses --out-dir + auto filename.")
@@ -320,7 +361,7 @@ def main():
             ap.error("Provide --store-url or --store-host (or include full URLs in --categories-file).")
             return  # unreachable
 
-    session = make_session()
+    session = make_session(city)
 
     print(f"[info] Store URL:   {store_url}")
     print(f"[info] Store host:  {store_host}")
