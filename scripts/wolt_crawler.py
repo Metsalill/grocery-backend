@@ -19,6 +19,10 @@ Notes:
 - Relies on the same JSON you saw in DevTools under requests like:
     https://wolt.com/et/est/parnu/venue/coop-prnu/items/kohv-117?language=et
 - Keeps fields stable; feel free to add/remove columns as needed.
+
+Change log (crawler #9):
+- Removed lxml dependency; switched to selectolax for HTML parsing.
+- Fixed Retry import (use urllib3 Retry).
 """
 
 import re
@@ -31,8 +35,9 @@ from typing import Iterable, List, Dict, Any, Tuple
 from urllib.parse import urljoin, urlparse
 
 import requests
-from requests.adapters import HTTPAdapter, Retry
-from lxml import html
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+from selectolax.parser import HTMLParser
 
 # ----------------------------- Helpers --------------------------------- #
 
@@ -51,6 +56,7 @@ HEADERS = {
     "Pragma": "no-cache",
 }
 
+# e.g. /et/est/parnu/venue/coop-prnu/items/kohv-117
 CATEGORY_HREF_RE = re.compile(r"/venue/[^/]+/items/([^/?#]+)")
 
 def make_session() -> requests.Session:
@@ -62,6 +68,7 @@ def make_session() -> requests.Session:
         backoff_factor=0.4,
         status_forcelist=(429, 500, 502, 503, 504),
         allowed_methods=frozenset(["GET", "HEAD"]),
+        raise_on_status=False,
     )
     s.mount("https://", HTTPAdapter(max_retries=retries))
     s.headers.update(HEADERS)
@@ -87,25 +94,26 @@ def normalize_store_url(store_url: str) -> str:
 def discover_category_slugs(session: requests.Session, store_url: str) -> List[str]:
     """
     Parse the venue page HTML to discover category slugs under /items/<slug>.
-    We scan both left nav list and the grid anchors.
+    We scan all anchors and extract those matching the pattern.
     """
     r = session.get(store_url, timeout=30)
     r.raise_for_status()
-    doc = html.fromstring(r.text)
 
-    slugs = set()
+    slugs: set[str] = set()
 
-    # All anchors on page; filter those that look like /items/<slug>
-    for a in doc.xpath("//a[@href]"):
-        href = a.get("href", "")
+    # Parse with selectolax
+    tree = HTMLParser(r.text)
+
+    # Look at all anchors
+    for a in tree.css("a[href]"):
+        href = a.attributes.get("href", "")
         m = CATEGORY_HREF_RE.search(href)
         if m:
             slugs.add(m.group(1))
 
-    # Fallback: sometimes Wolt renders via scripts; look in inline scripts for `/items/<slug>`
+    # Fallback: scan raw HTML for /items/<slug>
     if not slugs:
-        m_all = re.findall(r"/venue/[^/]+/items/([a-z0-9\-]+)", r.text)
-        for m in m_all:
+        for m in re.findall(r"/venue/[^/]+/items/([a-z0-9\-]+)", r.text):
             slugs.add(m)
 
     return sorted(slugs)
@@ -122,20 +130,17 @@ def fetch_category_json(
     r = session.get(url, params=params, timeout=30)
     r.raise_for_status()
 
-    # Some endpoints may send '1' then a JSON stream via hydration; if content starts with '{' parse.
     text = r.text.strip()
     if text and text[0] == "{":
         return r.json()
 
-    # Sometimes the response is '1' and a following request contains full JSON. Try again once.
-    # (This mirrors the pattern you saw where many "consumer"/"track" entries were noise.)
+    # Sometimes the first response is a short/non-JSON body; retry once.
     time.sleep(0.5)
     r2 = session.get(url, params=params, timeout=30)
     r2.raise_for_status()
     if r2.text.strip().startswith("{"):
         return r2.json()
 
-    # If still not JSON, fail loudly so we notice.
     raise ValueError(f"Category endpoint did not return JSON for slug={slug}. Got: {r.text[:120]}...")
 
 def infer_store_host(store_url: str) -> str:
@@ -162,15 +167,9 @@ def extract_rows(
     category = payload.get("category", {}) or {}
     items = payload.get("items", []) or []
 
-    # Try to pick venue_id from small consumer payloads if present, else from items
-    # (you shared a sample where venue_id existed in a tiny response; items also imply it)
-    # We’ll scan items and keep the first available 'id' cluster + use store_host for uniqueness.
     for it in items:
-        # Some responses include 'venue_id' in separate calls; if we see it here, use it.
         if not venue_id:
-            # not guaranteed, but keep the hook if present in future payloads
             venue_id = it.get("venue_id", "") or ""
-        # Build row
         row = {
             "store_host": store_host,
             "venue_id": venue_id,  # may be blank; will fill later if we find it
@@ -192,67 +191,44 @@ def extract_rows(
         }
         rows.append(row)
 
-    # If we still don't have venue_id, try extract from category.images URL (not reliable) or leave blank.
-    # You earlier saw: "venue_id": "6282118831e5208be09e450f" in small responses. Items often omit it.
-    # We'll fill later from a separate single-item probe if needed.
     return rows, venue_id
 
 def maybe_fill_venue(session: requests.Session, store_url: str, language: str) -> str:
     """
-    Try to fetch a single product modal JSON (the tiny one you showed with:
-       {"id":"<itemid>","venue_id":"6282118831e5208be09e450f","sections":[]}
-    ) to get a reliable venue_id.
-
-    Strategy:
-      - Pick the first category slug we can find
-      - Fetch its JSON
-      - Grab the first item id
-      - Load item modal path: /<item-slug>?language=<lang>  (Wolt shows this after clicking a card)
-        The request that produced that tiny JSON was named with ...-itemid-<ID> in the URL you captured.
-        On web, the path becomes: /venue/<store>/<category>/<product-name>-<unit>-itemid-<ID>
-      - But we don’t have product slugs reliably, so instead we call the API we’re sure about:
-        the category endpoint – some stores also echo "venue_id" at the top level "venue_id".
-      - If we can’t get it, we return empty and the filename will omit it.
+    Try to obtain a reliable venue_id from a category payload or items.
     """
     slugs = discover_category_slugs(session, store_url)
     if not slugs:
         return ""
 
-    # Try the first category for a top-level "venue_id" (some stores include it).
     data = fetch_category_json(session, store_url, slugs[0], language)
-    # Not common, but check anyway:
-    if "venue_id" in data and isinstance(data["venue_id"], str) and data["venue_id"]:
+
+    if isinstance(data.get("venue_id"), str) and data["venue_id"]:
         return data["venue_id"]
 
-    # Else try to infer from items if any item contains "venue_id"
-    items = (data.get("items") or [])
-    for it in items:
-        if isinstance(it, dict) and "venue_id" in it and it["venue_id"]:
+    for it in (data.get("items") or []):
+        if isinstance(it, dict) and it.get("venue_id"):
             return it["venue_id"]
 
-    # As a last resort, empty string.
     return ""
 
 def write_csv(rows: Iterable[Dict[str, Any]], out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     rows = list(rows)
-    if not rows:
-        # Write header-only file for sanity
-        fieldnames = [
-            "store_host","venue_id","category_slug","category_name","category_id",
-            "item_id","name","price","unit_info","unit_price_value","unit_price_unit",
-            "barcode_gtin","description","checksum","vat_category_code","vat_percentage","image_url"
-        ]
-        with out_path.open("w", newline="", encoding="utf-8") as f:
-            w = csv.DictWriter(f, fieldnames=fieldnames)
-            w.writeheader()
-        return
-
-    fieldnames = list(rows[0].keys())
+    fieldnames = [
+        "store_host","venue_id","category_slug","category_name","category_id",
+        "item_id","name","price","unit_info","unit_price_value","unit_price_unit",
+        "barcode_gtin","description","checksum","vat_category_code","vat_percentage","image_url"
+    ]
     with out_path.open("w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fieldnames)
         w.writeheader()
-        w.writerows(rows)
+        if rows:
+            for r in rows:
+                # ensure all columns exist
+                for k in fieldnames:
+                    r.setdefault(k, "")
+                w.writerow(r)
 
 # ------------------------------ Main ----------------------------------- #
 
