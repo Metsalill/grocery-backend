@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        chain: [Selver, Prisma, Rimi, Barbora]   # Barbora = Maxima online
+        chain: [Selver, Prisma, Rimi, Barbora] # Barbora = Maxima online
 
     steps:
       - name: Checkout
@@ -27,57 +27,58 @@ jobs:
             COPY (
               WITH base AS (
                 SELECT
-                  -- final chain label: Barbora (even if store.chain says Maxima)
                   CASE WHEN lower(s.chain) LIKE 'maxima%' THEN 'Barbora' ELSE s.chain END AS chain,
-                  s.name        AS store_name,
-                  s.id          AS store_id,
-                  p.id          AS product_id,
-                  p.name        AS product,
-                  p.brand,
-                  p.amount      AS size_text,
+                  s.name AS store_name,
+                  s.id AS store_id,
+                  p.id AS product_id,
+                  p.name AS product,
+                  p.brand AS brand_canonical,
+                  p.amount AS size_text,
                   p.ean,
                   pr.price,
                   pr.collected_at,
-                  -- normalized chain key for joins
                   CASE
                     WHEN lower(s.chain) LIKE 'maxima%' THEN 'barbora'
                     WHEN lower(s.chain) LIKE 'selver%' THEN 'selver'
                     WHEN lower(s.chain) LIKE 'prisma%' THEN 'prisma'
-                    WHEN lower(s.chain) LIKE 'rimi%'   THEN 'rimi'
+                    WHEN lower(s.chain) LIKE 'rimi%' THEN 'rimi'
                     ELSE lower(s.chain)
-                  END           AS chain_norm,
-                  -- normalize product name (ASCII, spaces)
-                  regexp_replace(unaccent(lower(p.name)), '[^a-z0-9]+',' ','g') AS name_norm
+                  END AS chain_norm,
+                  regexp_replace(unaccent(lower(p.name)), '[^a-z0-9]+', ' ', 'g') AS name_norm
                 FROM prices pr
                 JOIN products p ON p.id = pr.product_id
-                JOIN stores   s ON s.id = pr.store_id
+                JOIN stores s ON s.id = pr.store_id
                 WHERE (
-                  ( :'chain' = 'Barbora' AND lower(s.chain) LIKE 'maxima%' ) OR
-                  ( :'chain' <> 'Barbora' AND s.chain ILIKE :'chain' || '%' )
+                  ( :'chain' = 'Barbora' AND lower(s.chain) LIKE 'maxima%' )
+                  OR ( :'chain' <> 'Barbora' AND s.chain ILIKE :'chain' || '%' )
                 )
               ),
-              epm AS (  -- ext ids for Selver/Prisma/Rimi (and any future Barbora entries)
+              epm AS (
                 SELECT
                   CASE
                     WHEN lower(source) IN ('barbora','maxima') THEN 'barbora'
-                    WHEN lower(source)='selver' THEN 'selver'
-                    WHEN lower(source)='prisma' THEN 'prisma'
-                    WHEN lower(source)='rimi'   THEN 'rimi'
+                    WHEN lower(source) = 'selver' THEN 'selver'
+                    WHEN lower(source) = 'prisma' THEN 'prisma'
+                    WHEN lower(source) = 'rimi' THEN 'rimi'
                     ELSE lower(source)
                   END AS chain_norm,
                   product_id,
                   ext_id
                 FROM ext_product_map
               ),
-              bc AS (      -- Barbora candidate names (slug → words), deduped
-                SELECT name_norm, MIN(ext_id) AS ext_id
+              bc AS (
+                SELECT
+                  name_norm,
+                  MIN(ext_id) AS ext_id,
+                  MAX(NULLIF(trim(brand), '')) AS brand_barbora
                 FROM (
                   SELECT
                     regexp_replace(
                       unaccent(lower(regexp_replace(ext_id, '^https?[-:]?barbora[-:]?ee[-:]?toode[-:]?', ''))),
-                      '[^a-z0-9]+',' ','g'
+                      '[^a-z0-9]+', ' ', 'g'
                     ) AS name_norm,
-                    ext_id
+                    ext_id,
+                    brand
                   FROM barbora_candidates
                 ) t
                 GROUP BY name_norm
@@ -88,11 +89,13 @@ jobs:
                 b.store_id,
                 b.product_id,
                 b.product,
-                b.brand,
+                CASE
+                  WHEN b.chain_norm = 'barbora' THEN COALESCE(bc.brand_barbora, b.brand_canonical)
+                  ELSE b.brand_canonical
+                END AS brand,
                 b.size_text,
                 b.ean,
                 b.name_norm,
-                -- Barbora gets ext_id from candidates by name; others from ext map
                 CASE
                   WHEN b.chain_norm = 'barbora' THEN bc.ext_id
                   ELSE e.ext_id
@@ -100,23 +103,5 @@ jobs:
                 b.price,
                 b.collected_at
               FROM base b
-              LEFT JOIN epm e
-                ON e.chain_norm = b.chain_norm AND e.product_id = b.product_id
-              LEFT JOIN bc
-                ON b.chain_norm = 'barbora' AND bc.name_norm = b.name_norm
-            ) TO STDOUT WITH (FORMAT CSV, HEADER, ENCODING 'UTF8');
-        run: |
-          set -euo pipefail
-          mkdir -p out
-          # Ensure unaccent exists (safe if it already does)
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X -c "CREATE EXTENSION IF NOT EXISTS unaccent;"
-          # Run export
-          echo "$SQL_QUERY" \
-          | psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X -v chain="${{ matrix.chain }}" \
-          > "out/${{ matrix.chain }}_products.csv"
-
-      - name: Upload ${{ matrix.chain }} CSV
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.chain }}-products
-          path: out/${{ matrix.chain }}_products.csv
+              LEFT JOIN epm e ON e.chain_norm = b.chain_norm AND e.product_id = b.product_id
+              LEFT JOIN bc ON b.chain_norm = 'barbora' AND bc.name_
