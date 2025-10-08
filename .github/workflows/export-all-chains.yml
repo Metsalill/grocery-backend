@@ -1,57 +1,55 @@
-name: Export all chains (matching dataset)
-
-on:
-  workflow_dispatch:
-
-jobs:
-  export:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        chain: [Selver, Prisma, Rimi, Barbora]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install PostgreSQL client
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client
-
-      - name: Export ${{ matrix.chain }} products CSV
+- name: Export ${{ matrix.chain }} products CSV
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-          SQL_QUERY: |
-            COPY (
-              SELECT
-                s.chain,
-                s.name AS store_name,
-                s.id   AS store_id,
-                p.id   AS product_id,
-                p.name AS product,
-                p.brand,
-                p.size_text,
-                p.ean,
-                ext_id,
-                pr.price,
-                pr.collected_at
-              FROM prices pr
-              JOIN products p ON p.id = pr.product_id
-              JOIN stores   s ON s.id = pr.store_id
-              WHERE (s.chain ILIKE :'chain' || '%' OR s.name ILIKE '%' || :'chain' || '%')
-            )
-            TO STDOUT WITH (FORMAT CSV, HEADER, ENCODING 'UTF8');
         run: |
           set -euo pipefail
           mkdir -p out
-          echo "$SQL_QUERY" \
-          | psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X -v chain="${{ matrix.chain }}" \
-          > "out/${{ matrix.chain }}_products.csv"
 
-      - name: Upload ${{ matrix.chain }} CSV
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.chain }}-products
-          path: out/${{ matrix.chain }}_products.csv
+          # Find which table has ext_id
+          TABLE_WITH_EXT=$(psql "$DATABASE_URL" -At -X -v ON_ERROR_STOP=1 \
+            -c "select table_name
+                from information_schema.columns
+                where table_schema='public' and column_name='ext_id'
+                order by table_name limit 1")
+
+          if [ -z "$TABLE_WITH_EXT" ]; then
+            echo "ext_id column not found in public schema"; exit 1
+          fi
+
+          # Build a qualified reference like alias.ext_id
+          # Map table name -> SQL alias used in SELECT
+          case "$TABLE_WITH_EXT" in
+            prices)   EXT_REF="pr.ext_id" ;;
+            products) EXT_REF="p.ext_id" ;;
+            stores)   EXT_REF="s.ext_id" ;; # unlikely, but supported
+            *)
+              # If ext_id is in another table (e.g. store_products), join it
+              EXT_JOIN="LEFT JOIN ${TABLE_WITH_EXT} xx ON xx.product_id = p.id AND xx.store_id = s.id"
+              EXT_REF="xx.ext_id"
+              ;;
+          esac
+
+          read -r -d '' SQL_QUERY <<SQL
+COPY (
+  SELECT
+    s.chain,
+    s.name AS store_name,
+    s.id   AS store_id,
+    p.id   AS product_id,
+    p.name AS product,
+    p.brand,
+    p.size_text,
+    p.ean,
+    ${EXT_REF} AS ext_id,
+    pr.price,
+    pr.collected_at
+  FROM prices pr
+  JOIN products p ON p.id = pr.product_id
+  JOIN stores   s ON s.id = pr.store_id
+  ${EXT_JOIN:-}
+  WHERE (s.chain ILIKE '${{ matrix.chain }}%' OR s.name ILIKE '%' || '${{ matrix.chain }}' || '%')
+) TO STDOUT WITH (FORMAT CSV, HEADER, ENCODING 'UTF8');
+SQL
+
+          echo "$SQL_QUERY" | psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
+            > "out/${{ matrix.chain }}_products.csv"
