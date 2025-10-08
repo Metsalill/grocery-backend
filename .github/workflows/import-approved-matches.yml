@@ -12,10 +12,6 @@ on:
         description: "Target chain label for RIGHT side"
         required: true
         default: "Canonical"
-      csv_has_chain_cols:
-        description: "CSV already has left_chain,right_chain columns? (true/false)"
-        required: true
-        default: "false"
 
 jobs:
   import:
@@ -49,84 +45,162 @@ jobs:
           CSV_PATH="$GITHUB_WORKSPACE/$INPUT_CSV_PATH"
           echo "Checking CSV at: $CSV_PATH"
           test -f "$CSV_PATH" || { echo "CSV not found at: $CSV_PATH"; exit 1; }
-          head -n 5 "$CSV_PATH" || true
+          head -n 3 "$CSV_PATH" || true
 
-      - name: Install psql client
+      - name: Install tools
         if: ${{ github.event.inputs.run_set == 'all' || github.event.inputs.run_set == matrix.slug }}
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update -y
-          sudo apt-get install -y postgresql-client
+          sudo apt-get install -y postgresql-client python3
 
-      - name: Import CSV → approved_matches_active (idempotent upsert)
+      - name: Normalize CSV → /tmp/normalized.csv
         if: ${{ github.event.inputs.run_set == 'all' || github.event.inputs.run_set == matrix.slug }}
         shell: bash
         env:
-          # Preferred public URL (Railway external)
+          INPUT_CSV_PATH: ${{ matrix.csv_path }}
+          INPUT_LEFT_CHAIN: ${{ matrix.left_chain }}
+          INPUT_RIGHT_CHAIN: ${{ github.event.inputs.right_chain }}
+        run: |
+          set -euo pipefail
+          CSV_IN="$GITHUB_WORKSPACE/$INPUT_CSV_PATH"
+          CSV_OUT="/tmp/normalized.csv"
+          echo "Normalizing $CSV_IN → $CSV_OUT (left_chain=${INPUT_LEFT_CHAIN}, right_chain=${INPUT_RIGHT_CHAIN})"
+
+          python3 - <<'PY'
+import csv, os, sys
+
+csv_in = os.environ["CSV_IN"]
+csv_out = os.environ["CSV_OUT"]
+left_chain = os.environ["INPUT_LEFT_CHAIN"]
+right_chain = os.environ["INPUT_RIGHT_CHAIN"]
+
+def find(cols, *cands):
+    low = [c.lower().strip() for c in cols]
+    for cand in cands:
+        for i, name in enumerate(low):
+            if name == cand.lower():
+                return i
+    return None
+
+with open(csv_in, 'r', encoding='utf-8-sig', newline='') as f:
+    reader = csv.reader(f)
+    headers = next(reader)
+    H = [h.strip() for h in headers]
+
+    # Heuristics to pick keys from many possible exports
+    # left_key candidates (source side)
+    idx_left = (
+        find(H, 'left_key','left_id','left_product_id','left_hash',
+                'rimi_id','selver_id','prisma_id','source_id','source_key') )
+    if idx_left is None:
+        idx_left = 0  # fallback: first column
+
+    # right_key candidates (target side)
+    idx_right = (
+        find(H, 'right_key','right_id','right_product_id','product_id',
+                'canonical_id','canonical_product_id','gtin','ean','right_ean','canonical_ean') )
+    if idx_right is None:
+        # fallback: if there is a column literally named 'ean'
+        try:
+            idx_right = H.index('ean')
+        except ValueError:
+            # fallback: last column
+            idx_right = len(H) - 1
+
+    # optional note/approved_by
+    idx_note = None
+    for cand in ('note','notes','comment','comments'):
+        try:
+            idx_note = H.index(cand)
+            break
+        except ValueError:
+            pass
+
+    idx_by = None
+    for cand in ('approved_by','approver','user','author'):
+        try:
+            idx_by = H.index(cand)
+            break
+        except ValueError:
+            pass
+
+    print("Detected columns:", file=sys.stderr)
+    print(" headers =", H, file=sys.stderr)
+    print(" left_key index =", idx_left, "→", H[idx_left] if 0 <= idx_left < len(H) else None, file=sys.stderr)
+    print(" right_key index =", idx_right, "→", H[idx_right] if 0 <= idx_right < len(H) else None, file=sys.stderr)
+    print(" note index =", idx_note, file=sys.stderr)
+    print(" approved_by index =", idx_by, file=sys.stderr)
+
+    with open(csv_out, 'w', encoding='utf-8', newline='') as g:
+        w = csv.writer(g)
+        w.writerow(['left_chain','left_key','right_chain','right_key','note','approved_by'])
+        for row in reader:
+            # guard against ragged rows
+            if not row:
+                continue
+            # pad
+            if len(row) <= max(idx_left, idx_right, idx_note or 0, idx_by or 0):
+                row = row + ['']*(1+max(idx_left, idx_right, idx_note or 0, idx_by or 0) - len(row))
+            left_key  = row[idx_left].strip()
+            right_key = row[idx_right].strip()
+            note      = row[idx_note].strip() if idx_note is not None and idx_note < len(row) else ''
+            by        = row[idx_by].strip() if idx_by is not None and idx_by < len(row) else ''
+            if left_key == '' or right_key == '':
+                continue
+            w.writerow([left_chain, left_key, right_chain, right_key, note, by])
+PY
+          echo "Normalized preview:"
+          head -n 5 "$CSV_OUT" || true
+
+      - name: Import normalized CSV → approved_matches_active (upsert)
+        if: ${{ github.event.inputs.run_set == 'all' || github.event.inputs.run_set == matrix.slug }}
+        shell: bash
+        env:
+          # DB secrets (prefer PUBLIC)
           DATABASE_URL_PUBLIC: ${{ secrets.DATABASE_URL_PUBLIC }}
-          # Optional fallback full URL
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          # Component fallbacks
           PGHOST: ${{ secrets.PGHOST }}
           PGPORT: ${{ secrets.PGPORT }}
           PGUSER: ${{ secrets.PGUSER }}
           PGPASSWORD: ${{ secrets.PGPASSWORD }}
           PGDATABASE: ${{ secrets.PGDATABASE }}
 
-          INPUT_CSV_PATH: ${{ matrix.csv_path }}
-          INPUT_LEFT_CHAIN: ${{ matrix.left_chain }}
-          INPUT_RIGHT_CHAIN: ${{ github.event.inputs.right_chain }}
-          INPUT_CSV_HAS_CHAIN_COLS: ${{ github.event.inputs.csv_has_chain_cols }}
         run: |
           set -euo pipefail
 
-          CSV_PATH="$GITHUB_WORKSPACE/$INPUT_CSV_PATH"
-          LEFT_CHAIN="$INPUT_LEFT_CHAIN"
-          RIGHT_CHAIN="$INPUT_RIGHT_CHAIN"
-          CSV_HAS_CHAIN_COLS="$INPUT_CSV_HAS_CHAIN_COLS"
-
-          # Build DB URL (prefer public, then regular, then components)
-          DB_URL="${DATABASE_URL_PUBLIC:-}"
-          if [[ -z "$DB_URL" ]]; then
-            DB_URL="${DATABASE_URL:-}"
-          fi
+          # Resolve DB URL
+          DB_URL="${DATABASE_URL_PUBLIC:-${DATABASE_URL:-}}"
           if [[ -z "$DB_URL" ]]; then
             if [[ -n "${PGHOST:-}" && -n "${PGPORT:-}" && -n "${PGUSER:-}" && -n "${PGPASSWORD:-}" && -n "${PGDATABASE:-}" ]]; then
               DB_URL="postgresql://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE"
             else
-              echo "❌ Missing DB credentials. Set secrets.DATABASE_URL_PUBLIC or DATABASE_URL, or all of PGHOST/PGPORT/PGUSER/PGPASSWORD/PGDATABASE."
-              exit 1
+              echo "❌ Missing DB credentials. Provide DATABASE_URL_PUBLIC or the five PG* secrets."; exit 1
             fi
           fi
-          # Ensure sslmode=require
-          if [[ "$DB_URL" != *"sslmode="* ]]; then
-            if [[ "$DB_URL" == *"?"* ]]; then DB_URL="${DB_URL}&sslmode=require"; else DB_URL="${DB_URL}?sslmode=require"; fi
-          fi
+          # Ensure SSL
+          [[ "$DB_URL" == *"sslmode="* ]] || DB_URL="${DB_URL}?sslmode=require"
 
           echo "== Connectivity check =="
-          psql "$DB_URL" -Atc "select version();" >/dev/null
+          psql "$DB_URL" -Atc "select current_database();" >/dev/null
 
           SQL_FILE="/tmp/import_matches.sql"
           : > "$SQL_FILE"
 
-          # 1) DDL + temp staging (echo lines to avoid YAML/heredoc issues)
           {
             echo '\set ON_ERROR_STOP on'
             echo 'BEGIN;'
-            echo ''
-            echo '-- Active table = one target per left item'
             echo 'CREATE TABLE IF NOT EXISTS approved_matches_active ('
-            echo '  left_chain  text    NOT NULL,'
-            echo '  left_key    text    NOT NULL,'
-            echo '  right_chain text    NOT NULL,'
-            echo '  right_key   text    NOT NULL,'
+            echo '  left_chain  text NOT NULL,'
+            echo '  left_key    text NOT NULL,'
+            echo '  right_chain text NOT NULL,'
+            echo '  right_key   text NOT NULL,'
             echo '  note        text,'
             echo '  approved_by text,'
             echo '  approved_at timestamptz NOT NULL DEFAULT now(),'
             echo '  PRIMARY KEY (left_chain, left_key)'
             echo ');'
-            echo ''
             echo 'DROP TABLE IF EXISTS approved_matches_import;'
             echo 'CREATE TEMP TABLE approved_matches_import ('
             echo '  left_chain  text,'
@@ -136,19 +210,7 @@ jobs:
             echo '  note        text,'
             echo '  approved_by text'
             echo ');'
-          } >> "$SQL_FILE"
-
-          # 2) COPY block
-          if [[ "$CSV_HAS_CHAIN_COLS" == "true" ]]; then
-            echo "\\copy approved_matches_import (left_chain,left_key,right_chain,right_key,note,approved_by) FROM '$CSV_PATH' CSV HEADER;" >> "$SQL_FILE"
-          else
-            echo "\\copy approved_matches_import (left_key,right_key,note,approved_by) FROM '$CSV_PATH' CSV HEADER;" >> "$SQL_FILE"
-            echo "UPDATE approved_matches_import SET left_chain = :'LEFT_CHAIN', right_chain = :'RIGHT_CHAIN';" >> "$SQL_FILE"
-          fi
-
-          # 3) Upsert + commit
-          {
-            echo ''
+            echo "\\copy approved_matches_import (left_chain,left_key,right_chain,right_key,note,approved_by) FROM '/tmp/normalized.csv' CSV HEADER;"
             echo 'INSERT INTO approved_matches_active (left_chain,left_key,right_chain,right_key,note,approved_by)'
             echo 'SELECT left_chain,left_key,right_chain,right_key,note,approved_by'
             echo 'FROM approved_matches_import'
@@ -159,14 +221,13 @@ jobs:
             echo '      note        = COALESCE(EXCLUDED.note, approved_matches_active.note),'
             echo '      approved_by = COALESCE(EXCLUDED.approved_by, approved_matches_active.approved_by),'
             echo '      approved_at = now();'
-            echo ''
             echo 'COMMIT;'
-            echo ''
-            echo "SELECT :'LEFT_CHAIN'::text AS left_chain_running, COUNT(*) AS rows FROM approved_matches_active WHERE left_chain = :'LEFT_CHAIN';"
+            echo "SELECT left_chain, COUNT(*) AS rows FROM approved_matches_active GROUP BY 1 ORDER BY 1;"
           } >> "$SQL_FILE"
 
-          echo "=== Executing SQL for $LEFT_CHAIN ==="
-          psql "$DB_URL" -v LEFT_CHAIN="$LEFT_CHAIN" -v RIGHT_CHAIN="$RIGHT_CHAIN" -f "$SQL_FILE"
+          echo "=== Executing SQL ==="
+          sed -n '1,160p' "$SQL_FILE" || true
+          psql "$DB_URL" -f "$SQL_FILE"
 
       - name: Show sample rows
         if: ${{ github.event.inputs.run_set == 'all' || github.event.inputs.run_set == matrix.slug }}
@@ -185,7 +246,5 @@ jobs:
           if [[ -z "$DB_URL" ]]; then
             DB_URL="postgresql://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE"
           fi
-          if [[ "$DB_URL" != *"sslmode="* ]]; then
-            if [[ "$DB_URL" == *"?"* ]]; then DB_URL="${DB_URL}&sslmode=require"; else DB_URL="${DB_URL}?sslmode=require"; fi
-          fi
+          [[ "$DB_URL" == *"sslmode="* ]] || DB_URL="${DB_URL}?sslmode=require"
           psql "$DB_URL" -c "TABLE approved_matches_active LIMIT 15;"
