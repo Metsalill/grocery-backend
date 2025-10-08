@@ -23,36 +23,31 @@ jobs:
       - name: Export ${{ matrix.chain }} products CSV
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+          SQL_QUERY: |
+            \copy (
+              SELECT
+                s.chain,
+                s.name               AS store_name,
+                s.id                 AS store_id,
+                p.id                 AS product_id,
+                p.name               AS product,
+                p.brand,
+                p.size_text,
+                p.ean,               -- may be NULL for Rimi/Barbora
+                pr.ext_id,           -- per-store external id
+                pr.price,
+                pr.collected_at
+              FROM prices pr
+              JOIN products p ON p.id = pr.product_id
+              JOIN stores   s ON s.id = pr.store_id
+              WHERE (s.chain ILIKE :'chain' || '%' OR s.name ILIKE '%' || :'chain' || '%')
+            ) TO STDOUT WITH CSV HEADER
         run: |
           set -euo pipefail
           mkdir -p out
-
-          # Compose the SQL safely; no fragile inline quoting.
-          SQL=$(cat <<'SQL'
-\copy (
-  SELECT
-    s.chain,
-    s.name               AS store_name,
-    s.id                 AS store_id,
-    p.id                 AS product_id,
-    p.name               AS product,
-    p.brand,
-    p.size_text,
-    p.ean,               -- may be NULL for Rimi/Barbora
-    pr.ext_id,           -- per-store external id
-    pr.price,
-    pr.collected_at
-  FROM prices pr
-  JOIN products p ON p.id = pr.product_id
-  JOIN stores   s ON s.id = pr.store_id
-  WHERE (s.chain ILIKE :'chain' || '%' OR s.name ILIKE '%' || :'chain' || '%')
-) TO STDOUT WITH CSV HEADER
-SQL
-)
-
-          # Run SQL with a psql variable for the chain and save to file
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X -v chain="${{ matrix.chain }}" -c "$SQL" \
-            > "out/${{ matrix.chain }}_products.csv"
+          echo "$SQL_QUERY" \
+          | psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X -v chain="${{ matrix.chain }}" \
+          > "out/${{ matrix.chain }}_products.csv"
 
       - name: Upload ${{ matrix.chain }} CSV
         uses: actions/upload-artifact@v4
