@@ -34,7 +34,7 @@ jobs:
                 p.brand,
                 p.size_text,
                 p.ean,
-                p.ext_id,              -- ✅ correct column here
+                ext_id,
                 pr.price,
                 pr.collected_at
               FROM prices pr
