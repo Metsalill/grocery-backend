@@ -34,7 +34,7 @@ jobs:
                 p.brand,
                 p.size_text,
                 p.ean,
-                pr.ext_id,
+                p.ext_id,              -- ✅ correct column here
                 pr.price,
                 pr.collected_at
               FROM prices pr
@@ -46,7 +46,6 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p out
-          # Run the SQL; psql prints only the CSV to stdout, status to stderr
           echo "$SQL_QUERY" \
           | psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X -v chain="${{ matrix.chain }}" \
           > "out/${{ matrix.chain }}_products.csv"
