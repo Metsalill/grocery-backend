@@ -1,4 +1,4 @@
-name: Export all chains (matching dataset)
+name: Export all chains (matching dataset, ONLINE ONLY)
 
 on:
   workflow_dispatch:
@@ -20,7 +20,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-      - name: Export ${{ matrix.chain }} products CSV
+      - name: Export ${{ matrix.chain }} products CSV (ONLINE ONLY)
         shell: bash
         run: |
           set -euo pipefail
@@ -29,13 +29,27 @@ jobs:
           # DB connection
           export DATABASE_URL="${{ secrets.DATABASE_URL_PUBLIC }}"
 
-          # Ensure unaccent exists (safe if already present)
+          # Ensure extensions exist (safe if already present)
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X -c "CREATE EXTENSION IF NOT EXISTS unaccent;"
 
           # Write SQL to a file to avoid YAML/bash escaping issues
           cat > export.sql <<'SQL'
           COPY (
-            WITH base AS (
+            WITH online_stores AS (
+              SELECT
+                s.*,
+                (
+                  COALESCE(s.is_online, false)
+                  OR COALESCE(lower(s.channel) = 'online', false)
+                  OR COALESCE(lower(s.type) = 'online', false)
+                  OR COALESCE(s.tags ILIKE '%online%', false)
+                  OR COALESCE(s.name ILIKE '%e-pood%' OR s.name ILIKE '%e-shop%', false)
+                  OR COALESCE(s.url ~* '(barbora\.ee|rimi\.ee|selver\.ee|prismamarket\.ee|prisma\.ee)', false)
+                ) AS is_eshop
+              FROM stores s
+            ),
+
+            base AS (
               SELECT
                 -- Final chain label: Barbora (even if store.chain says Maxima)
                 CASE WHEN lower(s.chain) LIKE 'maxima%' THEN 'Barbora' ELSE s.chain END AS chain,
@@ -44,7 +58,7 @@ jobs:
                 p.id          AS product_id,
                 p.name        AS product,
                 p.brand       AS brand_canonical,
-                p.amount      AS size_text,
+                COALESCE(NULLIF(p.amount, ''), p.size_text) AS size_text,
                 p.ean,
                 pr.price,
                 pr.collected_at,
@@ -60,12 +74,15 @@ jobs:
                 regexp_replace(unaccent(lower(p.name)), '[^a-z0-9]+', ' ', 'g') AS name_norm
               FROM prices pr
               JOIN products p ON p.id = pr.product_id
-              JOIN stores   s ON s.id = pr.store_id
-              WHERE (
-                ( :'chain' = 'Barbora' AND lower(s.chain) LIKE 'maxima%' ) OR
-                ( :'chain' <> 'Barbora' AND s.chain ILIKE :'chain' || '%' )
-              )
+              JOIN online_stores s ON s.id = pr.store_id AND s.is_eshop = true
+              WHERE
+                -- Limit to the requested chain in the matrix, mapping Maxima → Barbora
+                (
+                  ( :'chain' = 'Barbora' AND lower(s.chain) LIKE 'maxima%' ) OR
+                  ( :'chain' <> 'Barbora' AND s.chain ILIKE :'chain' || '%' )
+                )
             ),
+
             epm AS (  -- ext ids for Selver/Prisma/Rimi (and any future Barbora entries)
               SELECT
                 CASE
@@ -79,7 +96,8 @@ jobs:
                 ext_id
               FROM ext_product_map
             ),
-            -- Barbora candidates: normalize by NAME (not ext_id) and bring Barbora brand + ext_id
+
+            -- Barbora candidates: normalize by NAME and bring Barbora brand + ext_id
             bc AS (
               SELECT
                 regexp_replace(unaccent(lower(name)), '[^a-z0-9]+', ' ', 'g') AS name_norm,
@@ -88,6 +106,7 @@ jobs:
               FROM barbora_candidates
               GROUP BY 1
             )
+
             SELECT
               b.chain,
               b.store_name,
