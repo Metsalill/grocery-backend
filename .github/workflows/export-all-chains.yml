@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Online store ids we use in the DB:
+          # Online store ids in DB:
           # Prisma Online = 14, e-Selver = 31, Rimi ePood = 440, Barbora ePood = 441
           - chain: Prisma
             table: staging_prisma_products
@@ -54,24 +54,16 @@ jobs:
           STORE_ID=${{ matrix.store_id }}
           mkdir -p out
 
-          # lower-case name for file
           CHAIN_LC="$(echo "$CHAIN" | tr '[:upper:]' '[:lower:]')"
           OUT="out/${CHAIN_LC}_products.csv"
 
-          # Export:
-          #  - raw product fields we keep in staging (ext_id, name, price, brand, sku_raw, source_url, ean_raw/ean_norm)
-          #  - store_id + chain (constants)
-          #  - host derived from URL (handy for QA)
-          #  - helper 'ean_from_sku_if_digits' (8–14 digits only; Rimi/Barbora often blank)
-          #  - a few robust hash keys we can use for mapping (do not depend on EAN):
-          #       k_ext_id, k_url, k_sku, k_name_lower, k_chain_ext
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<SQL
           \copy (
             SELECT
               '$CHAIN'::text                               AS chain,
               $STORE_ID::int                               AS store_id,
 
-              -- core product fields from staging
+              -- raw staging fields
               ext_id,
               name,
               price,
@@ -89,16 +81,16 @@ jobs:
               -- helpers
               CASE WHEN source_url IS NOT NULL
                    THEN lower(regexp_replace(split_part(source_url,'/',3), '^www\\.', ''))
-                   END                                     AS host_from_url,
+              END                                          AS host_from_url,
               CASE WHEN sku_raw ~ '^[0-9]{8,14}$' THEN sku_raw END
-                                                            AS ean_from_sku_if_digits,
+                                                          AS ean_from_sku_if_digits,
               CASE
                 WHEN COALESCE(ean_norm,'') <> ''          THEN 'ean_norm'
                 WHEN sku_raw ~ '^[0-9]{8,14}$'            THEN 'sku_digits'
                 ELSE NULL
               END                                         AS ean_source_hint,
 
-              -- hashing keys for reliable matching (do NOT rely on EAN)
+              -- strong keys (do NOT depend on EAN)
               md5(COALESCE(ext_id,''))                    AS k_ext_id,
               md5(COALESCE(source_url,''))                AS k_url,
               md5(COALESCE(sku_raw,''))                   AS k_sku,
@@ -106,8 +98,7 @@ jobs:
               md5(lower('$CHAIN') || '|' || COALESCE(ext_id,'')) AS k_chain_ext
 
             FROM public.$TBL
-          ) TO '$OUT' CSV HEADER
-          ;
+          ) TO '$OUT' CSV HEADER ;
           SQL
 
       - name: Upload ${{ matrix.chain }} CSV
@@ -126,12 +117,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: all_exports
-
-      - name: Show tree
-        run: |
-          set -euo pipefail
-          echo "Artifacts downloaded to:"
-          find all_exports -type f -maxdepth 3 -print
 
       - name: Combine into single zip
         run: |
