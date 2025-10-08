@@ -22,34 +22,32 @@ jobs:
 
       - name: Export ${{ matrix.chain }} products CSV
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }} # public host; reachable from GitHub runners
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
         run: |
           set -euo pipefail
           mkdir -p out
 
-          # Prefer exact chain via stores.chain; fallback to name contains
-          FILTER_COND="(s.chain ILIKE '${{ matrix.chain }}%' OR s.name ILIKE '%' || '${{ matrix.chain }}' || '%')"
-
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
-            -c "\copy (
-                  SELECT
-                    s.chain,
-                    s.name               AS store_name,
-                    s.id                 AS store_id,
-                    p.id                 AS product_id,
-                    p.name               AS product,
-                    p.brand,
-                    p.size_text,
-                    p.ean,               -- may be NULL for Rimi/Barbora
-                    pr.ext_id,           -- per-store external id
-                    pr.price,
-                    pr.collected_at
-                  FROM prices pr
-                  JOIN products p ON p.id = pr.product_id
-                  JOIN stores   s ON s.id = pr.store_id
-                  WHERE ${FILTER_COND}
-                ) TO STDOUT WITH CSV HEADER" \
-            > "out/${{ matrix.chain }}_products.csv"
+          # Use a psql here-doc so quoting and || never break.
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X -v chain="${{ matrix.chain }}" <<'PSQL' > "out/${{ matrix.chain }}_products.csv"
+\copy (
+  SELECT
+    s.chain,
+    s.name               AS store_name,
+    s.id                 AS store_id,
+    p.id                 AS product_id,
+    p.name               AS product,
+    p.brand,
+    p.size_text,
+    p.ean,               -- may be NULL for Rimi/Barbora
+    pr.ext_id,           -- per-store external id
+    pr.price,
+    pr.collected_at
+  FROM prices pr
+  JOIN products p ON p.id = pr.product_id
+  JOIN stores   s ON s.id = pr.store_id
+  WHERE (s.chain ILIKE :'chain' || '%' OR s.name ILIKE '%' || :'chain' || '%')
+) TO STDOUT WITH CSV HEADER
+PSQL
 
       - name: Upload ${{ matrix.chain }} CSV
         uses: actions/upload-artifact@v4
