@@ -1,4 +1,4 @@
-name: Import approved matches (CSV to DB)
+name: Import approved matches (CSV → DB, Barbora)
 
 on:
   workflow_dispatch:
@@ -9,9 +9,9 @@ on:
         options: [all, rimi, selver, prisma]
         default: all
       right_chain:
-        description: "Target chain label for RIGHT side"
+        description: "RIGHT/target chain label"
         required: true
-        default: "Canonical"
+        default: "Barbora"
 
 jobs:
   import:
@@ -45,7 +45,8 @@ jobs:
           CSV_PATH="$GITHUB_WORKSPACE/$INPUT_CSV_PATH"
           echo "Checking CSV at: $CSV_PATH"
           test -f "$CSV_PATH" || { echo "CSV not found at: $CSV_PATH"; exit 1; }
-          head -n 3 "$CSV_PATH" || true
+          echo "CSV head:"
+          head -n 5 "$CSV_PATH" || true
 
       - name: Install tools
         if: ${{ github.event.inputs.run_set == 'all' || github.event.inputs.run_set == matrix.slug }}
@@ -55,7 +56,7 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y postgresql-client python3
 
-      - name: Normalize CSV → /tmp/normalized.csv
+      - name: Normalize CSV → /tmp/normalized.csv (left_chain,left_key,right_chain,right_key,note,approved_by)
         if: ${{ github.event.inputs.run_set == 'all' || github.event.inputs.run_set == matrix.slug }}
         shell: bash
         env:
@@ -68,66 +69,110 @@ jobs:
           CSV_OUT="/tmp/normalized.csv"
           PY="/tmp/normalize_matches.py"
           : > "$PY"
-          echo 'import csv, os' >> "$PY"
+
+          # --- Python script written via echo (no heredocs to keep YAML happy) ---
+          echo 'import csv, os, re, sys' >> "$PY"
           echo 'csv_in = os.environ["CSV_IN"]' >> "$PY"
           echo 'csv_out = os.environ["CSV_OUT"]' >> "$PY"
-          echo 'left_chain = os.environ["INPUT_LEFT_CHAIN"]' >> "$PY"
-          echo 'right_chain = os.environ["INPUT_RIGHT_CHAIN"]' >> "$PY"
-          echo 'def find_index(headers, candidates, default_idx):' >> "$PY"
-          echo '    low = [h.strip().lower() for h in headers]' >> "$PY"
-          echo '    for c in candidates:' >> "$PY"
-          echo '        if c in low: return low.index(c)' >> "$PY"
-          echo '    return default_idx' >> "$PY"
+          echo 'LEFT = os.environ["INPUT_LEFT_CHAIN"]' >> "$PY"
+          echo 'RIGHT = os.environ["INPUT_RIGHT_CHAIN"]' >> "$PY"
+          echo 'def lower(xs): return [x.strip().lower() for x in xs]' >> "$PY"
+          echo 'def find_exact(headers, names):' >> "$PY"
+          echo '    h = lower(headers)' >> "$PY"
+          echo '    for n in names:' >> "$PY"
+          echo '        if n in h: return h.index(n)' >> "$PY"
+          echo '    return None' >> "$PY"
+          echo 'def find_contains(headers, subs):' >> "$PY"
+          echo '    h = lower(headers)' >> "$PY"
+          echo '    for i,name in enumerate(h):' >> "$PY"
+          echo '        for s in subs:' >> "$PY"
+          echo '            if s in name: return i' >> "$PY"
+          echo '    return None' >> "$PY"
+          echo 'ean_re = re.compile(r"^[0-9]{8,14}$")' >> "$PY"
           echo 'with open(csv_in, "r", encoding="utf-8-sig", newline="") as f:' >> "$PY"
           echo '    r = csv.reader(f)' >> "$PY"
           echo '    headers = next(r)' >> "$PY"
-          echo '    L = find_index(headers, ["left_key","left_id","left_product_id","left_hash","rimi_id","selver_id","prisma_id","source_id","source_key"], 0)' >> "$PY"
-          echo '    R = find_index(headers, ["right_key","right_id","right_product_id","product_id","canonical_id","gtin","ean","canonical_ean","right_ean"], len(headers)-1)' >> "$PY"
-          echo '    note_i = find_index(headers, ["note","notes","comment","comments"], -1)' >> "$PY"
-          echo '    by_i   = find_index(headers, ["approved_by","approver","user","author"], -1)' >> "$PY"
+          echo '    Hlow = [h.strip().lower() for h in headers]' >> "$PY"
+          echo '    # LEFT key: common id/hash columns, else first column' >> "$PY"
+          echo '    left_idx = find_exact(headers, ["left_key","left_id","left_product_id","left_hash","source_id","source_key","rimi_id","selver_id","prisma_id"])' >> "$PY"
+          echo '    if left_idx is None:' >> "$PY"
+          echo '        left_idx = 0' >> "$PY"
+          echo '    # RIGHT key: prefer Barbora id columns, then generic right_* id, then any header containing "barbora", then ean/gtin/barcode' >> "$PY"
+          echo '    right_idx = find_exact(headers, ["barbora_id","barbora_product_id","barbora_sku","barbora_code"])' >> "$PY"
+          echo '    if right_idx is None:' >> "$PY"
+          echo '        right_idx = find_exact(headers, ["right_key","right_id","right_product_id","target_id","target_product_id","product_b_id","product_id"])' >> "$PY"
+          echo '    if right_idx is None:' >> "$PY"
+          echo '        right_idx = find_contains(headers, ["barbora"])' >> "$PY"
+          echo '    if right_idx is None:' >> "$PY"
+          echo '        right_idx = find_contains(headers, ["ean","gtin","barcode"])' >> "$PY"
+          echo '    # optional note/by' >> "$PY"
+          echo '    note_i = None' >> "$PY"
+          echo '    for nm in ("note","notes","comment","comments","match_strength","strength"): ' >> "$PY"
+          echo '        if nm in Hlow: note_i = Hlow.index(nm); break' >> "$PY"
+          echo '    by_i = None' >> "$PY"
+          echo '    for nm in ("approved_by","approver","user","author"): ' >> "$PY"
+          echo '        if nm in Hlow: by_i = Hlow.index(nm); break' >> "$PY"
+          echo '    total=0; kept=0; empty_right=0' >> "$PY"
           echo '    with open(csv_out, "w", encoding="utf-8", newline="") as g:' >> "$PY"
           echo '        w = csv.writer(g)' >> "$PY"
           echo '        w.writerow(["left_chain","left_key","right_chain","right_key","note","approved_by"])' >> "$PY"
           echo '        for row in r:' >> "$PY"
+          echo '            total += 1' >> "$PY"
           echo '            if not row: continue' >> "$PY"
-          echo '            need = max(L, R, note_i if note_i>=0 else 0, by_i if by_i>=0 else 0) + 1' >> "$PY"
-          echo '            if len(row) < need: row = row + [""]*(need-len(row))' >> "$PY"
-          echo '            lk = row[L].strip()' >> "$PY"
-          echo '            rk = row[R].strip()' >> "$PY"
-          echo '            if not lk or not rk: continue' >> "$PY"
-          echo '            note = row[note_i].strip() if note_i >= 0 else ""' >> "$PY"
-          echo '            by   = row[by_i].strip() if by_i >= 0 else ""' >> "$PY"
-          echo '            w.writerow([left_chain, lk, right_chain, rk, note, by])' >> "$PY"
+          echo '            # pad' >> "$PY"
+          echo '            if len(row) < len(headers): row += [""]*(len(headers)-len(row))' >> "$PY"
+          echo '            left_key = row[left_idx].strip() if left_idx < len(row) else ""' >> "$PY"
+          echo '            # derive right_key' >> "$PY"
+          echo '            right_key = ""' >> "$PY"
+          echo '            if right_idx is not None and right_idx < len(row): right_key = row[right_idx].strip()' >> "$PY"
+          echo '            if not right_key:' >> "$PY"
+          echo '                # scan entire row from right to left: pick last EAN-looking value' >> "$PY"
+          echo '                for val in reversed(row):' >> "$PY"
+          echo '                    v = val.strip()' >> "$PY"
+          echo '                    if ean_re.match(v): right_key = v; break' >> "$PY"
+          echo '            note = row[note_i].strip() if (note_i is not None and note_i < len(row)) else ""' >> "$PY"
+          echo '            by   = row[by_i].strip()   if (by_i   is not None and by_i   < len(row)) else ""' >> "$PY"
+          echo '            if left_key and right_key:' >> "$PY"
+          echo '                kept += 1' >> "$PY"
+          echo '                w.writerow([LEFT, left_key, RIGHT, right_key, note, by])' >> "$PY"
+          echo '            else:' >> "$PY"
+          echo '                if not right_key: empty_right += 1' >> "$PY"
+          echo '    fill = (kept/total) if total else 0.0' >> "$PY"
+          echo '    print(f"[normalize] rows_in={total} rows_out={kept} empty_right={empty_right} fill_rate={fill:.3f}", file=sys.stderr)' >> "$PY"
+          echo '    # fail safe: require at least 90% with right_key' >> "$PY"
+          echo '    if total and (kept/total) < 0.90:' >> "$PY"
+          echo '        print("Too many rows lack right_key; aborting.", file=sys.stderr)' >> "$PY"
+          echo '        sys.exit(2)' >> "$PY"
+
           env CSV_IN="$CSV_IN" CSV_OUT="$CSV_OUT" python3 "$PY"
-          echo "Normalized preview:"
-          head -n 5 "$CSV_OUT" || true
+          echo "Normalized preview:"; head -n 8 "$CSV_OUT" || true
 
       - name: Import normalized CSV → approved_matches_active (upsert)
         if: ${{ github.event.inputs.run_set == 'all' || github.event.inputs.run_set == matrix.slug }}
         shell: bash
         env:
+          # DB connection (prefer public URL)
           DATABASE_URL_PUBLIC: ${{ secrets.DATABASE_URL_PUBLIC }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          PGHOST: ${{ secrets.PGHOST }}
-          PGPORT: ${{ secrets.PGPORT }}
-          PGUSER: ${{ secrets.PGUSER }}
-          PGPASSWORD: ${{ secrets.PGPASSWORD }}
-          PGDATABASE: ${{ secrets.PGDATABASE }}
+          DATABASE_URL:        ${{ secrets.DATABASE_URL }}
+          PGHOST:              ${{ secrets.PGHOST }}
+          PGPORT:              ${{ secrets.PGPORT }}
+          PGUSER:              ${{ secrets.PGUSER }}
+          PGPASSWORD:          ${{ secrets.PGPASSWORD }}
+          PGDATABASE:          ${{ secrets.PGDATABASE }}
+          INPUT_LEFT_CHAIN:    ${{ matrix.left_chain }}
         run: |
           set -euo pipefail
 
-          # Resolve DB URL (prefer public, then private, then pieces)
+          # Build DB URL
           DB_URL="${DATABASE_URL_PUBLIC:-${DATABASE_URL:-}}"
           if [[ -z "$DB_URL" ]]; then
             DB_URL="postgresql://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE"
           fi
           [[ "$DB_URL" == *"sslmode="* ]] || DB_URL="${DB_URL}?sslmode=require"
 
-          echo "== Connectivity check =="
-          psql "$DB_URL" -Atc "select current_database();" >/dev/null
+          echo "== Connectivity check ==" && psql "$DB_URL" -Atc "select current_database();" >/dev/null
 
-          SQL="/tmp/import_matches.sql"
-          : > "$SQL"
+          SQL="/tmp/import_matches.sql"; : > "$SQL"
           {
             echo '\set ON_ERROR_STOP on'
             echo 'BEGIN;'
@@ -162,11 +207,10 @@ jobs:
             echo '      approved_by = COALESCE(EXCLUDED.approved_by, approved_matches_active.approved_by),'
             echo '      approved_at = now();'
             echo 'COMMIT;'
-            echo "SELECT left_chain, COUNT(*) AS rows FROM approved_matches_active GROUP BY 1 ORDER BY 1;"
+            echo "SELECT :'INPUT_LEFT_CHAIN'::text AS left_chain, COUNT(*) AS rows FROM approved_matches_active WHERE left_chain = :'INPUT_LEFT_CHAIN';"
           } >> "$SQL"
 
-          echo "=== Executing SQL ==="
-          sed -n '1,180p' "$SQL" || true
+          echo "=== Executing SQL for $INPUT_LEFT_CHAIN ==="
           psql "$DB_URL" -f "$SQL"
 
       - name: Show sample rows
@@ -174,12 +218,13 @@ jobs:
         shell: bash
         env:
           DATABASE_URL_PUBLIC: ${{ secrets.DATABASE_URL_PUBLIC }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          PGHOST: ${{ secrets.PGHOST }}
-          PGPORT: ${{ secrets.PGPORT }}
-          PGUSER: ${{ secrets.PGUSER }}
-          PGPASSWORD: ${{ secrets.PGPASSWORD }}
-          PGDATABASE: ${{ secrets.PGDATABASE }}
+          DATABASE_URL:        ${{ secrets.DATABASE_URL }}
+          PGHOST:              ${{ secrets.PGHOST }}
+          PGPORT:              ${{ secrets.PGPORT }}
+          PGUSER:              ${{ secrets.PGUSER }}
+          PGPASSWORD:          ${{ secrets.PGPASSWORD }}
+          PGDATABASE:          ${{ secrets.PGDATABASE }}
+          INPUT_LEFT_CHAIN:    ${{ matrix.left_chain }}
         run: |
           set -euo pipefail
           DB_URL="${DATABASE_URL_PUBLIC:-${DATABASE_URL:-}}"
@@ -187,4 +232,4 @@ jobs:
             DB_URL="postgresql://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE"
           fi
           [[ "$DB_URL" == *"sslmode="* ]] || DB_URL="${DB_URL}?sslmode=require"
-          psql "$DB_URL" -c "TABLE approved_matches_active LIMIT 15;"
+          psql "$DB_URL" -c "SELECT * FROM approved_matches_active WHERE left_chain = '$INPUT_LEFT_CHAIN' ORDER BY left_key LIMIT 25;"
