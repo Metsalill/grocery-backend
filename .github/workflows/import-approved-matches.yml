@@ -45,7 +45,6 @@ jobs:
           CSV_PATH="$GITHUB_WORKSPACE/$INPUT_CSV_PATH"
           echo "Checking CSV at: $CSV_PATH"
           test -f "$CSV_PATH" || { echo "CSV not found at: $CSV_PATH"; exit 1; }
-          echo "CSV head:"
           head -n 5 "$CSV_PATH" || true
 
       - name: Install tools
@@ -70,7 +69,7 @@ jobs:
           PY="/tmp/normalize_matches.py"
           : > "$PY"
 
-          # --- Python script written via echo (no heredocs to keep YAML happy) ---
+          # Python script (echo-based; YAML-safe)
           echo 'import csv, os, re, sys' >> "$PY"
           echo 'csv_in = os.environ["CSV_IN"]' >> "$PY"
           echo 'csv_out = os.environ["CSV_OUT"]' >> "$PY"
@@ -93,65 +92,47 @@ jobs:
           echo '    r = csv.reader(f)' >> "$PY"
           echo '    headers = next(r)' >> "$PY"
           echo '    Hlow = [h.strip().lower() for h in headers]' >> "$PY"
-          echo '    # LEFT key: common id/hash columns, else first column' >> "$PY"
+          echo '    # LEFT key' >> "$PY"
           echo '    left_idx = find_exact(headers, ["left_key","left_id","left_product_id","left_hash","source_id","source_key","rimi_id","selver_id","prisma_id"])' >> "$PY"
-          echo '    if left_idx is None:' >> "$PY"
-          echo '        left_idx = 0' >> "$PY"
-          echo '    # RIGHT key: prefer Barbora id columns, then generic right_* id, then any header containing "barbora", then ean/gtin/barcode' >> "$PY"
+          echo '    if left_idx is None: left_idx = 0' >> "$PY"
+          echo '    # RIGHT key: prefer Barbora id names, then generic right_*, then any header containing "barbora", else ean/gtin/barcode, else scan row' >> "$PY"
           echo '    right_idx = find_exact(headers, ["barbora_id","barbora_product_id","barbora_sku","barbora_code"])' >> "$PY"
-          echo '    if right_idx is None:' >> "$PY"
-          echo '        right_idx = find_exact(headers, ["right_key","right_id","right_product_id","target_id","target_product_id","product_b_id","product_id"])' >> "$PY"
-          echo '    if right_idx is None:' >> "$PY"
-          echo '        right_idx = find_contains(headers, ["barbora"])' >> "$PY"
-          echo '    if right_idx is None:' >> "$PY"
-          echo '        right_idx = find_contains(headers, ["ean","gtin","barcode"])' >> "$PY"
-          echo '    # optional note/by' >> "$PY"
-          echo '    note_i = None' >> "$PY"
-          echo '    for nm in ("note","notes","comment","comments","match_strength","strength"): ' >> "$PY"
-          echo '        if nm in Hlow: note_i = Hlow.index(nm); break' >> "$PY"
-          echo '    by_i = None' >> "$PY"
-          echo '    for nm in ("approved_by","approver","user","author"): ' >> "$PY"
-          echo '        if nm in Hlow: by_i = Hlow.index(nm); break' >> "$PY"
+          echo '    if right_idx is None: right_idx = find_exact(headers, ["right_key","right_id","right_product_id","target_id","target_product_id","product_b_id","product_id"])' >> "$PY"
+          echo '    if right_idx is None: right_idx = find_contains(headers, ["barbora"])' >> "$PY"
+          echo '    if right_idx is None: right_idx = find_contains(headers, ["ean","gtin","barcode"])' >> "$PY"
+          echo '    note_i = next((Hlow.index(x) for x in ("note","notes","comment","comments","match_strength","strength") if x in Hlow), None)' >> "$PY"
+          echo '    by_i   = next((Hlow.index(x) for x in ("approved_by","approver","user","author") if x in Hlow), None)' >> "$PY"
           echo '    total=0; kept=0; empty_right=0' >> "$PY"
           echo '    with open(csv_out, "w", encoding="utf-8", newline="") as g:' >> "$PY"
-          echo '        w = csv.writer(g)' >> "$PY"
-          echo '        w.writerow(["left_chain","left_key","right_chain","right_key","note","approved_by"])' >> "$PY"
+          echo '        w = csv.writer(g); w.writerow(["left_chain","left_key","right_chain","right_key","note","approved_by"])' >> "$PY"
           echo '        for row in r:' >> "$PY"
           echo '            total += 1' >> "$PY"
           echo '            if not row: continue' >> "$PY"
-          echo '            # pad' >> "$PY"
           echo '            if len(row) < len(headers): row += [""]*(len(headers)-len(row))' >> "$PY"
           echo '            left_key = row[left_idx].strip() if left_idx < len(row) else ""' >> "$PY"
-          echo '            # derive right_key' >> "$PY"
           echo '            right_key = ""' >> "$PY"
           echo '            if right_idx is not None and right_idx < len(row): right_key = row[right_idx].strip()' >> "$PY"
           echo '            if not right_key:' >> "$PY"
-          echo '                # scan entire row from right to left: pick last EAN-looking value' >> "$PY"
           echo '                for val in reversed(row):' >> "$PY"
-          echo '                    v = val.strip()' >> "$PY"
+          echo '                    v = val.strip();' >> "$PY"
           echo '                    if ean_re.match(v): right_key = v; break' >> "$PY"
           echo '            note = row[note_i].strip() if (note_i is not None and note_i < len(row)) else ""' >> "$PY"
           echo '            by   = row[by_i].strip()   if (by_i   is not None and by_i   < len(row)) else ""' >> "$PY"
           echo '            if left_key and right_key:' >> "$PY"
-          echo '                kept += 1' >> "$PY"
-          echo '                w.writerow([LEFT, left_key, RIGHT, right_key, note, by])' >> "$PY"
+          echo '                kept += 1; w.writerow([LEFT, left_key, RIGHT, right_key, note, by])' >> "$PY"
           echo '            else:' >> "$PY"
           echo '                if not right_key: empty_right += 1' >> "$PY"
           echo '    fill = (kept/total) if total else 0.0' >> "$PY"
           echo '    print(f"[normalize] rows_in={total} rows_out={kept} empty_right={empty_right} fill_rate={fill:.3f}", file=sys.stderr)' >> "$PY"
-          echo '    # fail safe: require at least 90% with right_key' >> "$PY"
-          echo '    if total and (kept/total) < 0.90:' >> "$PY"
-          echo '        print("Too many rows lack right_key; aborting.", file=sys.stderr)' >> "$PY"
-          echo '        sys.exit(2)' >> "$PY"
+          echo '    if total and (kept/total) < 0.90: sys.exit(2)' >> "$PY"
 
           env CSV_IN="$CSV_IN" CSV_OUT="$CSV_OUT" python3 "$PY"
           echo "Normalized preview:"; head -n 8 "$CSV_OUT" || true
 
-      - name: Import normalized CSV → approved_matches_active (upsert)
+      - name: Import normalized CSV → approved_matches_active (dedupe + upsert)
         if: ${{ github.event.inputs.run_set == 'all' || github.event.inputs.run_set == matrix.slug }}
         shell: bash
         env:
-          # DB connection (prefer public URL)
           DATABASE_URL_PUBLIC: ${{ secrets.DATABASE_URL_PUBLIC }}
           DATABASE_URL:        ${{ secrets.DATABASE_URL }}
           PGHOST:              ${{ secrets.PGHOST }}
@@ -162,8 +143,6 @@ jobs:
           INPUT_LEFT_CHAIN:    ${{ matrix.left_chain }}
         run: |
           set -euo pipefail
-
-          # Build DB URL
           DB_URL="${DATABASE_URL_PUBLIC:-${DATABASE_URL:-}}"
           if [[ -z "$DB_URL" ]]; then
             DB_URL="postgresql://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE"
@@ -196,10 +175,18 @@ jobs:
             echo '  approved_by text'
             echo ');'
             echo "\\copy approved_matches_import (left_chain,left_key,right_chain,right_key,note,approved_by) FROM '/tmp/normalized.csv' CSV HEADER;"
+            echo ''
+            echo '-- Dedupe per (left_chain,left_key) so ON CONFLICT can run once per row'
+            echo 'WITH dedup AS ('
+            echo '  SELECT left_chain,left_key,right_chain,right_key,'
+            echo '         max(note) AS note, max(approved_by) AS approved_by,'
+            echo '         row_number() OVER (PARTITION BY left_chain,left_key ORDER BY right_key DESC, note DESC) AS rn'
+            echo '  FROM approved_matches_import'
+            echo '  GROUP BY left_chain,left_key,right_chain,right_key'
+            echo ')'
             echo 'INSERT INTO approved_matches_active (left_chain,left_key,right_chain,right_key,note,approved_by)'
             echo 'SELECT left_chain,left_key,right_chain,right_key,note,approved_by'
-            echo 'FROM approved_matches_import'
-            echo 'WHERE left_key IS NOT NULL AND right_key IS NOT NULL'
+            echo 'FROM dedup WHERE rn = 1'
             echo 'ON CONFLICT (left_chain,left_key) DO UPDATE'
             echo '  SET right_chain = EXCLUDED.right_chain,'
             echo '      right_key   = EXCLUDED.right_key,'
@@ -207,10 +194,11 @@ jobs:
             echo '      approved_by = COALESCE(EXCLUDED.approved_by, approved_matches_active.approved_by),'
             echo '      approved_at = now();'
             echo 'COMMIT;'
-            echo "SELECT :'INPUT_LEFT_CHAIN'::text AS left_chain, COUNT(*) AS rows FROM approved_matches_active WHERE left_chain = :'INPUT_LEFT_CHAIN';"
+            echo ""
+            echo "SELECT '${INPUT_LEFT_CHAIN}'::text AS left_chain, COUNT(*) AS rows FROM approved_matches_active WHERE left_chain = '${INPUT_LEFT_CHAIN}';"
           } >> "$SQL"
 
-          echo "=== Executing SQL for $INPUT_LEFT_CHAIN ==="
+          echo "=== Executing SQL for ${INPUT_LEFT_CHAIN} ==="
           psql "$DB_URL" -f "$SQL"
 
       - name: Show sample rows
@@ -232,4 +220,4 @@ jobs:
             DB_URL="postgresql://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE"
           fi
           [[ "$DB_URL" == *"sslmode="* ]] || DB_URL="${DB_URL}?sslmode=require"
-          psql "$DB_URL" -c "SELECT * FROM approved_matches_active WHERE left_chain = '$INPUT_LEFT_CHAIN' ORDER BY left_key LIMIT 25;"
+          psql "$DB_URL" -c "SELECT * FROM approved_matches_active WHERE left_chain = '${INPUT_LEFT_CHAIN}' ORDER BY left_key LIMIT 25;"
