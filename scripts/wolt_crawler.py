@@ -52,6 +52,10 @@ SIZE_RE = re.compile(r"(\b\d+[\,\.]?\d*\s?(?:kg|g|l|ml|tk|pcs|x|×)\s?\d*\b)", r
 HEX24_RE = re.compile(r"\b[a-f0-9]{24}\b", re.I)
 UNIT_SUFFIX_RE = re.compile(r"\s*/\s*(?:kg|l|ml|g|tk|pcs)\b", re.I)
 
+# NEW: generic 24-hex extraction and broader anchor selector
+ANCHOR_ID_RE = re.compile(r"([a-f0-9]{24})", re.I)
+ANCHOR_SELECTOR = 'a[href*="itemid-"], a[href*="item-"], a[href*="#item-"], a[href*="/item/"], a[href*="?item="], a[href*="product"], a[href*="items"]'
+
 def now_stamp() -> str:
     return dt.datetime.now().strftime("%Y%m%d_%H%M%S")
 
@@ -348,8 +352,8 @@ async def _fetch_json(url: str, max_tries: int = 7) -> Optional[Dict]:
                 pass
             if attempt < max_tries - 1:
                 await _sleep_backoff(attempt, retry_after, base=1.0)
-                continue
-            return None
+            else:
+                return None
 
 # ---------- Wolt parsers ----------
 def _html_get_next_data(html: str) -> Optional[Dict]:
@@ -534,7 +538,7 @@ def _looks_like_noise(name: Optional[str]) -> bool:
         return True
     if n.endswith(" tooted") or n.endswith("tooted"):
         return True
-    # NOTE: do NOT reject short single-word items (e.g., "Piim")
+    # NOTE: we no longer reject single-word short names (e.g., "Piim", "Munad")
     return False
 
 def _valid_productish(name: Optional[str], price: Optional[float], gtin_norm: Optional[str],
@@ -593,6 +597,16 @@ def _parse_wolt_price(value: Any) -> Optional[float]:
         return None
     return None
 
+def _id_from_misc_sources(item: Dict) -> Optional[str]:
+    """Recover 24-hex id from various fields (href, image url, tiny HTML hint)."""
+    for key in ("_href", "image", "image_url", "imageUrl", "media", "img_src", "card_html_hint"):
+        v = item.get(key)
+        if isinstance(v, str):
+            m = ANCHOR_ID_RE.search(v)
+            if m:
+                return m.group(1).lower()
+    return None
+
 def _extract_row_from_item(item: Dict, category_url: str, store_host: str) -> Optional[Dict]:
     name = sanitize_field(str(item.get("name") or "").strip() or None)
     # prefer non-unit price (unit price usually expressed as €/kg etc.)
@@ -605,7 +619,8 @@ def _extract_row_from_item(item: Dict, category_url: str, store_host: str) -> Op
 
     # Prefer explicit key; fallback to commonly seen fields and our DOM 'image'
     image_url = (_first_urlish(item, "image", "image_url", "imageUrl", "media")
-                 or (item.get("image") if isinstance(item.get("image"), str) else None))
+                 or (item.get("image") if isinstance(item.get("image"), str) else None)
+                 or item.get("img_src"))
 
     manufacturer = (item.get("supplier")
                     or _search_info_label(item, "Tarnija info", "Tarnija", "Tootja", "Valmistaja", "Supplier", "Manufacturer")
@@ -626,18 +641,23 @@ def _extract_row_from_item(item: Dict, category_url: str, store_host: str) -> Op
     if not name and price is not None and price > 0:
         name = "-"
 
-    if not _valid_productish(name, price, ean_norm, category_url, brand, manufacturer):
-        return None
-
-    # accept several common id fields
+    # ---- ID handling: explicit fields OR fallback to href/image/html hint ----
     iid = str(item.get("id") or item.get("itemId") or item.get("itemID") or item.get("_id") or "").lower()
+    if not iid or not HEX24_RE.fullmatch(iid):
+        fallback = _id_from_misc_sources(item)
+        if fallback:
+            iid = fallback
+
     if not iid or not HEX24_RE.fullmatch(iid):
         return None
     ext_id = f"iid:{iid}"
 
+    if not _valid_productish(name, price, ean_norm, category_url, brand, manufacturer):
+        return None
+
     url = category_url
-    if item.get("id"):
-        url = f"{category_url}#item-{item.get('id')}"
+    if iid:
+        url = f"{category_url}#item-{iid}"
 
     return {
         "chain": "Coop",
@@ -885,13 +905,13 @@ async def _scrape_tile_prices(page) -> Dict[str, float]:
         js = r'''
 (() => {
   const out = [];
-  const anchors = Array.from(document.querySelectorAll('a[href*="itemid-"], a[href*="item-"]'));
+  const anchors = Array.from(document.querySelectorAll(%(SEL)s));
   for (const a of anchors) {
     const href = a.getAttribute('href') || a.href || '';
-    const m = href && href.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
+    const m = href && href.match(/[a-f0-9]{24}/i);
     if (!m) continue;
-    const id = m[1].toLowerCase();
-    const scope = a.closest('[role="article"],article,div') || a;
+    const id = m[0].toLowerCase();
+    const scope = a.closest('[role="article"],[data-testid*="product"],article,div') || a;
 
     const txt = (scope && scope.textContent) ? scope.textContent : '';
     // Item price: a Euro price *not* followed by a "/unit" suffix
@@ -905,7 +925,7 @@ async def _scrape_tile_prices(page) -> Dict[str, float]:
   }
   return out;
 })()
-'''
+''' % {"SEL": json.dumps(ANCHOR_SELECTOR)}
         data = await page.evaluate(js)
         prices: Dict[str, float] = {}
         for iid, val in data or []:
@@ -978,19 +998,18 @@ async def _goto_with_backoff(page, url: str, max_tries: int, nav_timeout_ms: int
 # --- DOM card extractor (when JSON blobs are missing/thin) ---
 async def _extract_items_from_dom(page) -> List[Dict]:
     """
-    Scrape visible product cards to recover item id, name, price, image.
-    Returns list of dicts like {"id": <hex24>, "name": "...", "price": <float>, "image": <url>}
+    Scrape visible product cards to recover id, name, price, image, href.
+    Returns: {"id": <hex24?>, "name": "...", "price": <float>, "image": <url>, "href": <str>, "img_src": <str>, "card_html_hint": <str>}
     """
     try:
         js = r'''
 (() => {
-  const seen = new Map(); // id -> {name, priceText, image}
-  const anchors = Array.from(document.querySelectorAll('a[href*="itemid-"], a[href*="item-"]'));
+  const seen = new Map(); // id? -> data
+  const anchors = Array.from(document.querySelectorAll(%(SEL)s));
   for (const a of anchors) {
     const href = a.getAttribute('href') || a.href || '';
-    const m = href && href.match(/(?:itemid-|item-)([a-f0-9]{24})/i);
-    if (!m) continue;
-    const id = m[1].toLowerCase();
+    const mid = href && href.match(/[a-f0-9]{24}/i);
+    const id = mid ? mid[0].toLowerCase() : null;
 
     // Scope to a compact card container near the anchor to avoid sidebar/breadcrumb bleed
     let card = a.closest('[data-testid*="product"],[role="article"],article');
@@ -1005,7 +1024,7 @@ async def _extract_items_from_dom(page) -> List[Dict]:
     }
     if (!name && card) {
       const txt = (card.textContent || '').replace(/\s+/g,' ').trim();
-      const parts = txt.split(/(?=[A-ZÄÖÜÕa-zäöüõ0-9])/g)
+      const parts = txt.split(/(?=[A-Za-zÄÖÜÕäöüõ0-9])/g)
         .map(s => s.trim())
         .filter(Boolean)
         .filter(s => !/[€]|(?:\d+[.,]\d{2})/.test(s));
@@ -1014,17 +1033,30 @@ async def _extract_items_from_dom(page) -> List[Dict]:
     }
 
     // Image: <img src/currentSrc> or CSS background-image on the same card
-    let image = null;
+    let image = null, img_src = null;
     if (card) {
       const imgel = card.querySelector('img');
-      if (imgel) image = imgel.currentSrc || imgel.src || null;
+      if (imgel) {
+        img_src = imgel.currentSrc || imgel.src || null;
+        image = img_src;
+      }
       if (!image) {
         const style = getComputedStyle(card);
         const bg = style && style.backgroundImage || '';
         const m2 = bg && bg.match(/url\(["']?([^"')]+)["']?\)/);
-        if (m2) image = m2[1];
+        if (m2) { image = m2[1]; img_src = img_src || m2[1]; }
       }
     }
+
+    // Try data attributes for ids
+    let dataId = null;
+    if (card) {
+      for (const attr of ['data-item-id','data-id','data-itemid','data-product-id','data-productid']) {
+        const val = card.getAttribute && card.getAttribute(attr);
+        if (val && /[a-f0-9]{24}/i.test(val)) { dataId = (val.match(/[a-f0-9]{24}/i)||[])[0].toLowerCase(); break; }
+      }
+    }
+    const finalId = id || dataId || null;
 
     // Price: pick an item price, not a unit price like €/kg
     let priceText = null;
@@ -1035,21 +1067,25 @@ async def _extract_items_from_dom(page) -> List[Dict]:
       if (mt) priceText = mt[2];
     }
 
-    if (!seen.has(id)) seen.set(id, {name, priceText, image});
+    // keep a tiny html hint for last-resort id scrape (limit to 280 chars)
+    const hint = (card && card.innerHTML) ? card.innerHTML.replace(/\s+/g,' ').slice(0,280) : '';
+
+    // Use seen key by finalId if present, else href (so we still dedup)
+    const key = finalId || href || Math.random().toString(36).slice(2);
+    if (!seen.has(key)) seen.set(key, {id: finalId, name, priceText, image, href, img_src, card_html_hint: hint});
   }
-  return Array.from(seen, ([id, v]) => ({id, ...v}));
+  return Array.from(seen.values());
 })()
-'''
+''' % {"SEL": json.dumps(ANCHOR_SELECTOR)}
         data = await page.evaluate(js)
     except Exception:
         data = []
 
     items: List[Dict] = []
     for it in data or []:
-        iid = str(it.get("id") or "").lower()
-        if not iid or not HEX24_RE.fullmatch(iid):
-            continue
+        iid = (it.get("id") or "") or ""
         name = sanitize_field((it.get("name") or "").strip() or None)
+        # price
         price = None
         pt = it.get("priceText")
         if pt:
@@ -1057,47 +1093,23 @@ async def _extract_items_from_dom(page) -> List[Dict]:
                 price = float(pt.replace(",", "."))
             except Exception:
                 price = None
-        item: Dict[str, Any] = {"id": iid}
+        item: Dict[str, Any] = {}
+        if iid:
+            item["id"] = str(iid).lower()
         if name:
             item["name"] = name
         if price is not None:
             item["price"] = price
         if it.get("image"):
             item["image"] = it["image"]
+        if it.get("href"):
+            item["_href"] = it["href"]
+        if it.get("img_src"):
+            item["img_src"] = it["img_src"]
+        if it.get("card_html_hint"):
+            item["card_html_hint"] = it["card_html_hint"]
         items.append(item)
     return items
-
-async def _infinite_scroll(page, rounds: int, req_delay: float) -> None:
-    """
-    More robust scrolling to force Wolt to load all product cards.
-    """
-    try:
-        last_h = 0
-        stagnant = 0
-        for i in range(max(1, rounds)):
-            await page.mouse.wheel(0, 1600)
-            await page.wait_for_timeout(int(max(req_delay, 0.5)*1000 + random.uniform(250, 700)))
-            # also jump to bottom each few rounds
-            if i % 4 == 3:
-                try:
-                    await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-                except Exception:
-                    pass
-            # watch content growth
-            try:
-                h = await page.evaluate("document.body.scrollHeight || 0")
-            except Exception:
-                h = 0
-            if h <= last_h:
-                stagnant += 1
-            else:
-                stagnant = 0
-            last_h = h
-            # if no growth for several rounds, bail early
-            if stagnant >= 5:
-                break
-    except Exception:
-        pass
 
 async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: float,
                                    goto_strategy: str, nav_timeout_ms: int):
@@ -1174,12 +1186,25 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
                 anchor_count = 0
             print(f"[grid] anchors={anchor_count} json_blobs={len(collected_blobs)} (after geolocation)")
 
+            # Peek a few href samples to see actual pattern
+            try:
+                if anchor_count >= 1:
+                    samples = await page.evaluate(
+                        'Array.from(document.querySelectorAll(%s)).slice(0,5).map(a => a.getAttribute("href") || a.href || "")'
+                        % json.dumps(ANCHOR_SELECTOR)
+                    )
+                    print(f"[debug] anchor href samples: {samples}")
+            except Exception:
+                pass
+
             if anchor_count < 2 and not collected_blobs:
                 print("[skip] no grid anchors or JSON after geolocation → skipping category")
                 return [], collected_blobs, (await page.content()), {}, await _extract_venue_id_any(page, await page.content())
 
-            # Scroll a lot to fetch more cards/resources
-            await _infinite_scroll(page, rounds=40, req_delay=req_delay)
+            # Scroll to fetch more cards/resources
+            for _ in range(18):
+                await page.mouse.wheel(0, 1600)
+                await page.wait_for_timeout(int(max(req_delay, 0.5)*1000 + random.uniform(300, 900)))
 
             tile_prices = await _scrape_tile_prices(page)
 
@@ -1216,11 +1241,19 @@ async def _capture_with_playwright(cat_url: str, headless: bool, req_delay: floa
 
             # Merge DOM-card extraction (helps when payloads are thin)
             dom_items = await _extract_items_from_dom(page)
+            # Debug counts
+            try:
+                c_total = len(dom_items)
+                c_with_id = sum(1 for d in dom_items if d.get("id") and HEX24_RE.fullmatch(str(d["id"])))
+                c_with_price = sum(1 for d in dom_items if d.get("price") is not None)
+                c_with_name = sum(1 for d in dom_items if d.get("name"))
+                print(f"[debug] dom_items total={c_total} id24={c_with_id} price={c_with_price} name={c_with_name}")
+            except Exception:
+                pass
+
             for it in dom_items:
-                iid = it.get("id")
-                if not iid:
-                    continue
-                found.setdefault(iid, {}).update(it)
+                key = it.get("id") or it.get("_href") or it.get("img_src") or it.get("name") or str(len(found))
+                found.setdefault(key, {}).update(it)
 
             # As a last-resort, also seed IDs from HTML if still empty
             if not found:
@@ -1267,7 +1300,9 @@ async def _enrich_items_via_modal(cat_url: str, items: List[Dict], headless: boo
 
             for it in missing:
                 iid = str(it.get("id"))
-                sel = f'a[href*="itemid-{iid}"], a[href*="item-{iid}"]'
+                if not iid or not HEX24_RE.fullmatch(iid):
+                    continue
+                sel = f'a[href*="{iid}"]'
                 a = page.locator(sel)
                 if await a.count() == 0:
                     continue
@@ -1368,6 +1403,7 @@ async def run_wolt(args, categories: List[str], on_rows_async) -> None:
 
         if not payload and items:
             for it in items:
+                # Fill missing prices from tile map
                 if it.get("id"):
                     iid = str(it["id"]).lower()
                     if it.get("price") in (None, 0) and iid in tile_prices:
@@ -1386,23 +1422,24 @@ async def run_wolt(args, categories: List[str], on_rows_async) -> None:
         existing_gtins = await _fetch_existing_gtins(store_host_cat)
 
         rows_raw = []
-        skipped_noise = 0
-        made = 0
+        built = 0
+        skipped = 0
         for item in items:
             row = _extract_row_from_item(item, cat, store_host_cat)
             if not row:
-                skipped_noise += 1
+                skipped += 1
                 continue
             if row.get("ean_norm") and row["ean_norm"] in existing_gtins:
+                skipped += 1
                 continue
             rows_raw.append(row)
-            made += 1
+            built += 1
 
         rows = rows_raw
         if args.max_products and args.max_products > 0:
             rows = rows[: args.max_products]
 
-        print(f"[info] category rows: {len(rows)} (built={made} skipped={skipped_noise})" + (" (pw-fallback)" if not payload else ""))
+        print(f"[info] category rows: {len(rows)} (built={built} skipped={skipped})" + (" (pw-fallback)" if not payload else ""))
         await on_rows_async(rows)
 
         if args.upsert_per_category and rows:
