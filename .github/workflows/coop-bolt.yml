@@ -3,7 +3,7 @@ name: "Coop (Bolt Food) – Auto category crawl → CSV/DB"
 on:
   # Scheduled: every 2 hours (UTC)
   schedule:
-    - cron: "0 */3 * * *"
+    - cron: "0 */24 * * *"
   # Manual trigger with inputs
   workflow_dispatch:
     inputs:
