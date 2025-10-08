@@ -6,11 +6,7 @@ on:
       run_set:
         description: "Which CSVs to import"
         type: choice
-        options:
-          - all
-          - rimi
-          - selver
-          - prisma
+        options: [all, rimi, selver, prisma]
         default: all
       right_chain:
         description: "Target chain label for RIGHT side"
@@ -25,6 +21,7 @@ jobs:
   import:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
           - slug: rimi
@@ -52,7 +49,6 @@ jobs:
           CSV_PATH="$GITHUB_WORKSPACE/$INPUT_CSV_PATH"
           echo "Checking CSV at: $CSV_PATH"
           test -f "$CSV_PATH" || { echo "CSV not found at: $CSV_PATH"; exit 1; }
-          echo "CSV head:"
           head -n 5 "$CSV_PATH" || true
 
       - name: Install psql client
@@ -67,11 +63,17 @@ jobs:
         if: ${{ github.event.inputs.run_set == 'all' || github.event.inputs.run_set == matrix.slug }}
         shell: bash
         env:
+          # Preferred public URL (Railway external)
+          DATABASE_URL_PUBLIC: ${{ secrets.DATABASE_URL_PUBLIC }}
+          # Optional fallback full URL
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          # Component fallbacks
           PGHOST: ${{ secrets.PGHOST }}
           PGPORT: ${{ secrets.PGPORT }}
           PGUSER: ${{ secrets.PGUSER }}
           PGPASSWORD: ${{ secrets.PGPASSWORD }}
           PGDATABASE: ${{ secrets.PGDATABASE }}
+
           INPUT_CSV_PATH: ${{ matrix.csv_path }}
           INPUT_LEFT_CHAIN: ${{ matrix.left_chain }}
           INPUT_RIGHT_CHAIN: ${{ github.event.inputs.right_chain }}
@@ -84,9 +86,31 @@ jobs:
           RIGHT_CHAIN="$INPUT_RIGHT_CHAIN"
           CSV_HAS_CHAIN_COLS="$INPUT_CSV_HAS_CHAIN_COLS"
 
+          # Build DB URL (prefer public, then regular, then components)
+          DB_URL="${DATABASE_URL_PUBLIC:-}"
+          if [[ -z "$DB_URL" ]]; then
+            DB_URL="${DATABASE_URL:-}"
+          fi
+          if [[ -z "$DB_URL" ]]; then
+            if [[ -n "${PGHOST:-}" && -n "${PGPORT:-}" && -n "${PGUSER:-}" && -n "${PGPASSWORD:-}" && -n "${PGDATABASE:-}" ]]; then
+              DB_URL="postgresql://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE"
+            else
+              echo "❌ Missing DB credentials. Set secrets.DATABASE_URL_PUBLIC or DATABASE_URL, or all of PGHOST/PGPORT/PGUSER/PGPASSWORD/PGDATABASE."
+              exit 1
+            fi
+          fi
+          # Ensure sslmode=require
+          if [[ "$DB_URL" != *"sslmode="* ]]; then
+            if [[ "$DB_URL" == *"?"* ]]; then DB_URL="${DB_URL}&sslmode=require"; else DB_URL="${DB_URL}?sslmode=require"; fi
+          fi
+
+          echo "== Connectivity check =="
+          psql "$DB_URL" -Atc "select version();" >/dev/null
+
           SQL_FILE="/tmp/import_matches.sql"
           : > "$SQL_FILE"
 
+          # 1) DDL + temp staging (echo lines to avoid YAML/heredoc issues)
           {
             echo '\set ON_ERROR_STOP on'
             echo 'BEGIN;'
@@ -114,6 +138,7 @@ jobs:
             echo ');'
           } >> "$SQL_FILE"
 
+          # 2) COPY block
           if [[ "$CSV_HAS_CHAIN_COLS" == "true" ]]; then
             echo "\\copy approved_matches_import (left_chain,left_key,right_chain,right_key,note,approved_by) FROM '$CSV_PATH' CSV HEADER;" >> "$SQL_FILE"
           else
@@ -121,6 +146,7 @@ jobs:
             echo "UPDATE approved_matches_import SET left_chain = :'LEFT_CHAIN', right_chain = :'RIGHT_CHAIN';" >> "$SQL_FILE"
           fi
 
+          # 3) Upsert + commit
           {
             echo ''
             echo 'INSERT INTO approved_matches_active (left_chain,left_key,right_chain,right_key,note,approved_by)'
@@ -140,12 +166,14 @@ jobs:
           } >> "$SQL_FILE"
 
           echo "=== Executing SQL for $LEFT_CHAIN ==="
-          psql -v LEFT_CHAIN="$LEFT_CHAIN" -v RIGHT_CHAIN="$RIGHT_CHAIN" -f "$SQL_FILE"
+          psql "$DB_URL" -v LEFT_CHAIN="$LEFT_CHAIN" -v RIGHT_CHAIN="$RIGHT_CHAIN" -f "$SQL_FILE"
 
       - name: Show sample rows
         if: ${{ github.event.inputs.run_set == 'all' || github.event.inputs.run_set == matrix.slug }}
         shell: bash
         env:
+          DATABASE_URL_PUBLIC: ${{ secrets.DATABASE_URL_PUBLIC }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
           PGHOST: ${{ secrets.PGHOST }}
           PGPORT: ${{ secrets.PGPORT }}
           PGUSER: ${{ secrets.PGUSER }}
@@ -153,4 +181,11 @@ jobs:
           PGDATABASE: ${{ secrets.PGDATABASE }}
         run: |
           set -euo pipefail
-          psql -c "TABLE approved_matches_active LIMIT 15;"
+          DB_URL="${DATABASE_URL_PUBLIC:-${DATABASE_URL:-}}"
+          if [[ -z "$DB_URL" ]]; then
+            DB_URL="postgresql://$PGUSER:$PGPASSWORD@$PGHOST:$PGPORT/$PGDATABASE"
+          fi
+          if [[ "$DB_URL" != *"sslmode="* ]]; then
+            if [[ "$DB_URL" == *"?"* ]]; then DB_URL="${DB_URL}&sslmode=require"; else DB_URL="${DB_URL}?sslmode=require"; fi
+          fi
+          psql "$DB_URL" -c "TABLE approved_matches_active LIMIT 15;"
