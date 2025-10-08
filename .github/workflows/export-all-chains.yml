@@ -27,8 +27,8 @@ jobs:
           set -euo pipefail
           mkdir -p out
 
-          # Use a psql here-doc so quoting and || never break.
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X -v chain="${{ matrix.chain }}" <<'PSQL' > "out/${{ matrix.chain }}_products.csv"
+          # Compose the SQL safely; no fragile inline quoting.
+          SQL=$(cat <<'SQL'
 \copy (
   SELECT
     s.chain,
@@ -47,7 +47,12 @@ jobs:
   JOIN stores   s ON s.id = pr.store_id
   WHERE (s.chain ILIKE :'chain' || '%' OR s.name ILIKE '%' || :'chain' || '%')
 ) TO STDOUT WITH CSV HEADER
-PSQL
+SQL
+)
+
+          # Run SQL with a psql variable for the chain and save to file
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X -v chain="${{ matrix.chain }}" -c "$SQL" \
+            > "out/${{ matrix.chain }}_products.csv"
 
       - name: Upload ${{ matrix.chain }} CSV
         uses: actions/upload-artifact@v4
