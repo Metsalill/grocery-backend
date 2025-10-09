@@ -280,6 +280,9 @@ def _recursive_find_items(node: Any) -> List[Dict[str, Any]]:
     walk(node)
     return found
 
+def _cents_to_eur(x):
+    return (float(x) / 100.0) if isinstance(x, (int, float)) else None
+
 def playwright_nextdata_items(
     store_url: str, category_slug: str, language: str, headers: Dict[str, str]
 ) -> Optional[Dict[str, Any]]:
@@ -318,14 +321,16 @@ def playwright_nextdata_items(
 
             norm_items: List[Dict[str, Any]] = []
             for it in items:
+                up = it.get("unit_price", {}) or {}
                 norm_items.append({
                     "id": it.get("id") or it.get("_id") or "",
                     "name": it.get("name") or it.get("title") or "",
-                    "price": it.get("price") if isinstance(it.get("price"), (int, float)) else None,
+                    # SCALE: cents -> euros
+                    "price": _cents_to_eur(it.get("price")),
                     "unit_info": it.get("unit_info") or "",
                     "unit_price": {
-                        "price": (it.get("unit_price", {}) or {}).get("price") if isinstance(it.get("unit_price"), dict) else None,
-                        "unit":  (it.get("unit_price", {}) or {}).get("unit")  if isinstance(it.get("unit_price"), dict) else "",
+                        "price": _cents_to_eur(up.get("price")) if isinstance(up, dict) else None,
+                        "unit":  up.get("unit") if isinstance(up, dict) else "",
                     },
                     "barcode_gtin": it.get("barcode_gtin") or "",
                     "description": it.get("description") or "",
@@ -382,6 +387,17 @@ def extract_rows(payload: Dict[str, Any], store_host: str, category_slug: str) -
         else:
             ext_id = "wolt:" + hashlib.md5(f"{store_host}|{it.get('name','')}".encode("utf-8")).hexdigest()[:16]
 
+        # SCALE: Wolt API returns price and unit_price.price in cents (integers)
+        up = it.get("unit_price", {}) or {}
+        price_eur = (
+            it.get("price") if isinstance(it.get("price"), float) and it.get("price") < 1000
+            else _cents_to_eur(it.get("price"))
+        )
+        unit_price_value_eur = (
+            up.get("price") if isinstance(up.get("price"), float) and up.get("price") < 1000
+            else _cents_to_eur(up.get("price")) if isinstance(up, dict) else None
+        )
+
         row = {
             "store_host": store_host,
             "venue_id": venue_id,
@@ -390,10 +406,10 @@ def extract_rows(payload: Dict[str, Any], store_host: str, category_slug: str) -
             "category_id": category.get("id", ""),
             "item_id": it.get("id", ""),
             "name": it.get("name", ""),
-            "price": it.get("price", None),
+            "price": price_eur,
             "unit_info": it.get("unit_info", ""),
-            "unit_price_value": (it.get("unit_price", {}) or {}).get("price", None) if isinstance(it.get("unit_price"), dict) else None,
-            "unit_price_unit": (it.get("unit_price", {}) or {}).get("unit", "") if isinstance(it.get("unit_price"), dict) else "",
+            "unit_price_value": unit_price_value_eur,
+            "unit_price_unit": up.get("unit", "") if isinstance(up, dict) else "",
             "barcode_gtin": it.get("barcode_gtin", ""),
             "description": it.get("description", ""),
             "checksum": it.get("checksum", ""),
@@ -605,7 +621,7 @@ def main():
         # CSV rows
         all_rows_csv.extend(rows)
 
-        # DB rows projection
+        # DB rows projection (uses already-scaled euros from extract_rows)
         for r in rows:
             all_rows_db.append(
                 dict(
