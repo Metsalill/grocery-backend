@@ -205,28 +205,47 @@ def parse_categories_file(path: Path) -> Tuple[List[str], Optional[str]]:
 # --------------------- consumer API fetch ---------------------
 
 def consumer_api_fetch_category_json(
-    session: requests.Session, venue_slug: str, category_slug: str, language: str
+    session: requests.Session,
+    venue_slug: str,
+    category_slug: str,
+    language: str,
+    header_variants: List[Dict[str, str]],
 ) -> Optional[Dict[str, Any]]:
     """
-    Try both API base paths in order; return the first JSON payload we get.
+    Try both API base paths *and* a few header variants (with/without x-city-id, alt city).
+    Return the first payload that contains non-empty 'items'.
     """
-    for base in CONSUMER_API_BASES:
-        url = (
-            f"{base}/venues/slug/{venue_slug}/assortment/"
-            f"categories/slug/{category_slug}"
-        )
-        r = session.get(url, params={"language": language}, timeout=30)
-        if r.status_code in (403, 404):
-            # hard fail for this base; try the other
-            continue
+    for hdrs in header_variants:
+        # Temporarily override session headers for this attempt
+        old_vals = {k: session.headers.get(k) for k in hdrs}
+        session.headers.update(hdrs)
         try:
-            r.raise_for_status()
-        except Exception:
-            continue
-        try:
-            return r.json()
-        except Exception:
-            continue
+            for base in CONSUMER_API_BASES:
+                url = (
+                    f"{base}/venues/slug/{venue_slug}/assortment/"
+                    f"categories/slug/{category_slug}"
+                )
+                r = session.get(url, params={"language": language}, timeout=30)
+                if r.status_code in (403, 404):
+                    continue
+                try:
+                    r.raise_for_status()
+                except Exception:
+                    continue
+                try:
+                    data = r.json()
+                except Exception:
+                    continue
+                # Accept only if the API actually returned items
+                if isinstance(data, dict) and isinstance(data.get("items"), list) and data["items"]:
+                    return data
+        finally:
+            # Restore original header values
+            for k, v in old_vals.items():
+                if v is None:
+                    session.headers.pop(k, None)
+                else:
+                    session.headers[k] = v
     return None
 
 # --------------------- Playwright fallbacks ---------------------
@@ -249,7 +268,6 @@ def playwright_fetch_consumer_api(
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(**_playwright_context(headers))
-        # set cookies in context too (domain-only cookie set is fine to skip; header suffices)
         page = context.new_page()
         try:
             page.goto(store_url, wait_until="domcontentloaded", timeout=45000)
@@ -262,9 +280,11 @@ def playwright_fetch_consumer_api(
                 resp = context.request.get(url, params={"language": language}, timeout=30000)
                 if resp.ok:
                     try:
-                        return resp.json()
+                        data = resp.json()
                     except Exception:
-                        pass
+                        data = None
+                    if isinstance(data, dict) and isinstance(data.get("items"), list) and data["items"]:
+                        return data
             return None
         finally:
             context.close(); browser.close()
@@ -353,24 +373,32 @@ def fetch_category_json(
 ) -> Dict[str, Any]:
     venue_slug = venue_slug_from_url(store_url)
 
+    # Header variants to dodge empty arrays from API when context doesn't match exactly
+    base_city = headers.get("x-city-id", "")
+    header_variants: List[Dict[str, str]] = [
+        {},                         # as-is
+        {"x-city-id": ""},          # drop city header
+        {"x-city-id": "tallinn"},   # alternate city sometimes coerces data
+        {"x-city-id": base_city},   # restore explicit (noop for first pass, helps on later calls)
+    ]
+
     # 1) Consumer API via requests with browser-like headers/cookies
-    data = consumer_api_fetch_category_json(session, venue_slug, category_slug, language)
-    if data is not None:
+    data = consumer_api_fetch_category_json(session, venue_slug, category_slug, language, header_variants)
+    if data and isinstance(data.get("items"), list) and data["items"]:
         return data
 
     # 2) Same via Playwright network
     data = playwright_fetch_consumer_api(store_url, venue_slug, category_slug, language, headers, cookies)
-    if data is not None:
+    if data and isinstance(data.get("items"), list) and data["items"]:
         return data
 
     # 3) As a last resort, scrape Next.js data
     data = playwright_nextdata_items(store_url, category_slug, language, headers)
-    if data is not None:
+    if data and isinstance(data.get("items"), list) and data["items"]:
         return data
 
-    raise ValueError(
-        f"Failed to fetch JSON for slug={category_slug} via consumer API / Playwright / NextData"
-    )
+    # If everything returned empty or failed, produce an explicit empty payload so caller can log 0
+    return {"category": {"id": category_slug, "name": category_slug}, "items": []}
 
 # --------------------- rows & CSV ---------------------
 
@@ -497,6 +525,12 @@ def main():
     print(f"[info] Store host:  {store_host}")
     print(f"[info] Language:    {args.language}")
     print(f"[info] City tag:    {city}")
+
+    # Prime session context like a browser (sets cookies, geo, etc.)
+    try:
+        session.get(store_url, timeout=20)
+    except Exception:
+        pass
 
     # Category slugs
     if file_slugs:
