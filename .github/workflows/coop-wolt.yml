@@ -2,7 +2,7 @@ name: "Coop Wolt – Crawl (Pärnu default, 2-hourly)"
 
 on:
   schedule:
-    - cron: "0 */2 * * *"   # every 2 hours, at minute 0
+    - cron: "0 */4 * * *"   # every 2 hours, at minute 0
   workflow_dispatch:
     inputs:
       store:
