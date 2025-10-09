@@ -3,7 +3,7 @@ name: "Coop eCoop – Category Crawl (Playwright) + optional DB upsert"
 on:
   # Auto: every 2 hours (UTC) — Vändra only
   schedule:
-    - cron: "0 */4 * * *"
+    - cron: "0 */48 * * *"
   # Manual: still supported with inputs
   workflow_dispatch:
     inputs:
