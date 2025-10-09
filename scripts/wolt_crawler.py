@@ -2,27 +2,23 @@
 # -*- coding: utf-8 -*-
 
 """
-Wolt store crawler (consumer API first; Playwright + __NEXT_DATA__ fallback)
+Wolt store crawler (consumer API with browser-like headers; Playwright/Next.js fallbacks)
 
-Order of attempts per category:
-  1) consumer API:
-     https://consumer-api.wolt.com/consumer-assortment/v1/venues/slug/<venue>/assortment/categories/slug/<slug>?language=<lang>
-  2) Playwright network request to the same consumer API
-  3) Playwright page scrape of __NEXT_DATA__ (as a last resort)
+Primary endpoint per category (we try both forms, because the site uses both):
+  1) https://consumer-api.wolt.com/consumer-assortment/v1/venues/slug/<venue>/assortment/categories/slug/<slug>?language=<lang>
+  2) https://consumer-api.wolt.com/consumer-api/consumer-assortment/v1/venues/slug/<venue>/assortment/categories/slug/<slug>?language=<lang>
 
-Inputs:
-  --store-url | --store-host
-  --categories-file  (slugs or full URLs; if URLs present, its base venue URL overrides host)
-  --city parnu|tallinn (inferred if omitted)
-  --out (exact) | --out-dir
+If those fail, we fall back to Playwright network using the same headers, then to scraping
+__NEXT_DATA__ from the items page.
 
-The CSV schema stays the same as before.
+CSV columns are stable with the rest of the pipeline.
 """
 
 import re
 import csv
 import time
 import json
+import uuid
 import argparse
 from pathlib import Path
 from typing import Iterable, List, Dict, Any, Tuple, Optional
@@ -33,7 +29,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from selectolax.parser import HTMLParser
 
-# Optional Playwright (fallbacks only)
+# Playwright is optional (only used for fallbacks)
 try:
     from playwright.sync_api import sync_playwright
     PW_AVAILABLE = True
@@ -41,11 +37,15 @@ except Exception:
     PW_AVAILABLE = False
 
 WOLT_HOST = "https://wolt.com"
-CONSUMER_API = "https://consumer-api.wolt.com/consumer-assortment/v1"
+CONSUMER_API_BASES = [
+    # order matters; try the short one first, then the prefixed one we saw in cURL
+    "https://consumer-api.wolt.com/consumer-assortment/v1",
+    "https://consumer-api.wolt.com/consumer-api/consumer-assortment/v1",
+]
 
 UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-    "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    "(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
 )
 
 CATEGORY_HREF_RE = re.compile(r"/venue/[^/]+/items/([^/?#]+)")
@@ -55,16 +55,7 @@ GEO = {
     "tallinn": {"latitude": 59.4370, "longitude": 24.7536, "accuracy": 1500},
 }
 
-# --------------------- shared helpers ---------------------
-
-def _base_headers() -> Dict[str, str]:
-    return {
-        "User-Agent": UA,
-        "Accept": "application/json,text/html;q=0.9,*/*;q=0.8",
-        "Accept-Language": "et-EE,et;q=0.9,en;q=0.8",
-        "Cache-Control": "no-cache",
-        "Pragma": "no-cache",
-    }
+# --------------------- helpers ---------------------
 
 def _normalize_city(c: Optional[str]) -> str:
     c = (c or "").lower()
@@ -76,14 +67,49 @@ def _normalize_city(c: Optional[str]) -> str:
         return "parnu"
     return c
 
-def _city_headers(city: str) -> Dict[str, str]:
-    city = _normalize_city(city)
+def _browserish_headers(language: str, city: str, client_id: str, session_id: str) -> Dict[str, str]:
+    """
+    Headers mirrored from your cURL (safe to send without auth).
+    """
     return {
-        "x-city-id": city,
-        "Cookie": f"wolt-session-city={city}",
+        "accept": "application/json, text/plain, */*",
+        "accept-language": f"{language}-EE,{language};q=0.9,en;q=0.8",
+        "app-language": language,
+        # harmless placeholders that some endpoints expect
+        "client-version": "1.16.39",
+        "clientversionnumber": "1.16.39",
+        "platform": "Web",
+        "cache-control": "no-cache",
+        "pragma": "no-cache",
+        "origin": WOLT_HOST,
+        "referer": f"{WOLT_HOST}/",
+        "user-agent": UA,
+        # city selection still helps some edge cases
+        "x-city-id": _normalize_city(city),
+        # ids seen in network requests (any UUID works)
+        "x-wolt-web-clientid": client_id,          # seen variant without dash, include this
+        "x-wolt-web-client-id": client_id,         # include dashed variant just in case
+        "w-wolt-session-id": session_id,
     }
 
-def make_session(city: str) -> requests.Session:
+def _cookie_string(city: str, client_id: str, analytics_id: str) -> str:
+    """
+    Minimal cookie set that has worked reliably.
+    We include city selection + two stable IDs (client/analytics).
+    """
+    # A permissive consent blob so the API doesn't hide anything
+    consents = (
+        '{"analytics":true,"functional":true,'
+        '"interaction":{"bundle":"allow"},"marketing":true}'
+    )
+    return "; ".join([
+        f"wolt-session-city={_normalize_city(city)}",
+        f"__woltUid={client_id}",
+        f"__woltAnalyticsId={analytics_id}",
+        f"cwc-consents={consents}",
+    ])
+
+def _base_requests_session(headers: Dict[str, str], cookies: str) -> requests.Session:
     s = requests.Session()
     retries = Retry(
         total=5, read=5, connect=5, backoff_factor=0.4,
@@ -92,8 +118,14 @@ def make_session(city: str) -> requests.Session:
         raise_on_status=False,
     )
     s.mount("https://", HTTPAdapter(max_retries=retries))
-    s.headers.update(_base_headers())
-    s.headers.update(_city_headers(city))
+    s.headers.update(headers)
+    s.headers.update({
+        "sec-fetch-site": "same-site",
+        "sec-fetch-mode": "cors",
+        "sec-fetch-dest": "empty",
+    })
+    # Cookie header
+    s.headers.update({"Cookie": cookies})
     return s
 
 def normalize_store_url(store_url: str) -> str:
@@ -176,71 +208,61 @@ def consumer_api_fetch_category_json(
     session: requests.Session, venue_slug: str, category_slug: str, language: str
 ) -> Optional[Dict[str, Any]]:
     """
-    GET https://consumer-api.wolt.com/consumer-assortment/v1/venues/slug/<venue>/assortment/categories/slug/<cat>?language=<lang>
+    Try both API base paths in order; return the first JSON payload we get.
     """
-    url = (
-        f"{CONSUMER_API}/venues/slug/{venue_slug}/assortment/"
-        f"categories/slug/{category_slug}"
-    )
-    r = session.get(url, params={"language": language}, timeout=30)
-    if r.status_code in (403, 404):
-        return None
-    try:
-        r.raise_for_status()
-    except Exception:
-        return None
-    try:
-        return r.json()
-    except Exception:
-        return None
+    for base in CONSUMER_API_BASES:
+        url = (
+            f"{base}/venues/slug/{venue_slug}/assortment/"
+            f"categories/slug/{category_slug}"
+        )
+        r = session.get(url, params={"language": language}, timeout=30)
+        if r.status_code in (403, 404):
+            # hard fail for this base; try the other
+            continue
+        try:
+            r.raise_for_status()
+        except Exception:
+            continue
+        try:
+            return r.json()
+        except Exception:
+            continue
+    return None
 
-# --------------------- Playwright helpers & fallbacks ---------------------
+# --------------------- Playwright fallbacks ---------------------
 
-def _playwright_context(city: str):
-    city = _normalize_city(city)
-    geo = GEO.get(city, GEO["parnu"])
+def _playwright_context(headers: Dict[str, str]):
+    # Map our browser-like headers into a Playwright context
     return dict(
         locale="et-EE",
-        geolocation=geo,
+        geolocation={"latitude": 58.3859, "longitude": 24.4971, "accuracy": 1500},
         permissions=["geolocation"],
-        user_agent=UA,
-        extra_http_headers={**_base_headers(), **_city_headers(city)},
+        user_agent=headers.get("user-agent", UA),
+        extra_http_headers=headers,
     )
 
 def playwright_fetch_consumer_api(
-    store_url: str, venue_slug: str, category_slug: str, language: str, city: str
+    store_url: str, venue_slug: str, category_slug: str, language: str, headers: Dict[str, str], cookies: str
 ) -> Optional[Dict[str, Any]]:
     if not PW_AVAILABLE:
         return None
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        context = browser.new_context(**_playwright_context(city))
+        context = browser.new_context(**_playwright_context(headers))
+        # set cookies in context too (domain-only cookie set is fine to skip; header suffices)
         page = context.new_page()
         try:
-            # Visit venue once for cookies & geolocation
             page.goto(store_url, wait_until="domcontentloaded", timeout=45000)
-            page.wait_for_timeout(500)
-
-            url = (
-                f"{CONSUMER_API}/venues/slug/{venue_slug}/assortment/"
-                f"categories/slug/{category_slug}"
-            )
-            resp = context.request.get(url, params={"language": language}, timeout=30000)
-            if resp.ok:
-                try:
-                    return resp.json()
-                except Exception:
-                    pass
-            # Fallback city=Tallinn headers (rarely needed)
-            if _normalize_city(city) != "tallinn":
-                resp2 = context.request.get(
-                    url, params={"language": language},
-                    headers={**_base_headers(), **_city_headers("tallinn")},
-                    timeout=30000,
+            page.wait_for_timeout(300)
+            for base in CONSUMER_API_BASES:
+                url = (
+                    f"{base}/venues/slug/{venue_slug}/assortment/"
+                    f"categories/slug/{category_slug}"
                 )
-                if resp2.ok:
+                resp = context.request.get(url, params={"language": language}, timeout=30000)
+                if resp.ok:
                     try:
-                        return resp2.json()
+                        return resp.json()
                     except Exception:
                         pass
             return None
@@ -265,21 +287,19 @@ def _recursive_find_items(node: Any) -> List[Dict[str, Any]]:
     return found
 
 def playwright_nextdata_items(
-    store_url: str, category_slug: str, language: str, city: str
+    store_url: str, category_slug: str, language: str, headers: Dict[str, str]
 ) -> Optional[Dict[str, Any]]:
-    """Load items page and mine __NEXT_DATA__ as last resort."""
     if not PW_AVAILABLE:
         return None
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
-        context = browser.new_context(**_playwright_context(city))
+        context = browser.new_context(**_playwright_context(headers))
         page = context.new_page()
         try:
             base = normalize_store_url(store_url)
             url = urljoin(base + "/", f"items/{category_slug}?language={language}")
             page.goto(url, wait_until="domcontentloaded", timeout=60000)
             page.wait_for_timeout(800)
-
             el = page.locator("script#__NEXT_DATA__")
             if not el.count():
                 return None
@@ -288,7 +308,6 @@ def playwright_nextdata_items(
             if not items:
                 return None
 
-            # try grab category name
             def find_cat(obj: Any) -> Optional[str]:
                 if isinstance(obj, dict):
                     if obj.get("slug") == category_slug and isinstance(obj.get("name"), str):
@@ -303,7 +322,6 @@ def playwright_nextdata_items(
                 return None
             cat_name = find_cat(data) or category_slug
 
-            # normalize
             norm_items: List[Dict[str, Any]] = []
             for it in items:
                 norm_items.append({
@@ -328,30 +346,30 @@ def playwright_nextdata_items(
         finally:
             context.close(); browser.close()
 
-# --------------------- fetch orchestration ---------------------
+# --------------------- orchestration ---------------------
 
 def fetch_category_json(
-    session: requests.Session, store_url: str, category_slug: str, language: str, city: str
+    session: requests.Session, store_url: str, category_slug: str, language: str, headers: Dict[str, str], cookies: str
 ) -> Dict[str, Any]:
     venue_slug = venue_slug_from_url(store_url)
 
-    # 1) consumer API via requests
+    # 1) Consumer API via requests with browser-like headers/cookies
     data = consumer_api_fetch_category_json(session, venue_slug, category_slug, language)
     if data is not None:
         return data
 
-    # 2) consumer API via Playwright network
-    data = playwright_fetch_consumer_api(store_url, venue_slug, category_slug, language, city)
+    # 2) Same via Playwright network
+    data = playwright_fetch_consumer_api(store_url, venue_slug, category_slug, language, headers, cookies)
     if data is not None:
         return data
 
-    # 3) __NEXT_DATA__ scrape
-    data = playwright_nextdata_items(store_url, category_slug, language, city)
+    # 3) As a last resort, scrape Next.js data
+    data = playwright_nextdata_items(store_url, category_slug, language, headers)
     if data is not None:
         return data
 
     raise ValueError(
-        f"Failed to fetch JSON for slug={category_slug} (city={city}) via consumer API / Playwright / NextData"
+        f"Failed to fetch JSON for slug={category_slug} via consumer API / Playwright / NextData"
     )
 
 # --------------------- rows & CSV ---------------------
@@ -389,11 +407,11 @@ def extract_rows(payload: Dict[str, Any], store_host: str, category_slug: str) -
 
     return rows, venue_id
 
-def maybe_fill_venue(session: requests.Session, store_url: str, language: str, city: str) -> str:
+def maybe_fill_venue(session: requests.Session, store_url: str, language: str, headers: Dict[str, str], cookies: str) -> str:
     slugs = discover_category_slugs(session, store_url)
     if not slugs:
         return ""
-    data = fetch_category_json(session, store_url, slugs[0], language, city)
+    data = fetch_category_json(session, store_url, slugs[0], language, headers, cookies)
     if isinstance(data.get("venue_id"), str) and data["venue_id"]:
         return data["venue_id"]
     for it in (data.get("items") or []):
@@ -420,7 +438,7 @@ def write_csv(rows: Iterable[Dict[str, Any]], out_path: Path) -> None:
 # --------------------- main ---------------------
 
 def main():
-    ap = argparse.ArgumentParser(description="Wolt crawler using consumer API with fallbacks")
+    ap = argparse.ArgumentParser(description="Wolt crawler (consumer API + robust headers)")
     ap.add_argument("--store-url")
     ap.add_argument("--store-host")
     ap.add_argument("--city")
@@ -428,7 +446,7 @@ def main():
     ap.add_argument("--out-dir", default="out")
     ap.add_argument("--language", default="et")
     ap.add_argument("--categories-file")
-    # compatibility (ignored but accepted)
+    # Accept legacy flags used by CI (ignored)
     ap.add_argument("--max-products"); ap.add_argument("--headless")
     ap.add_argument("--req-delay"); ap.add_argument("--goto-strategy")
     ap.add_argument("--nav-timeout"); ap.add_argument("--category-timeout")
@@ -437,7 +455,12 @@ def main():
     ap.add_argument("--modal-probe-limit")
     args = ap.parse_args()
 
-    # Load categories file
+    # UUIDs that stand in for the browser IDs we saw in your cURL
+    client_id = str(uuid.uuid4())
+    analytics_id = str(uuid.uuid4())
+    session_id = analytics_id  # good enough
+
+    # Venue & city resolution (categories file can override base URL)
     file_slugs: List[str] = []; file_base_url: Optional[str] = None
     if args.categories_file:
         p = Path(args.categories_file)
@@ -445,7 +468,6 @@ def main():
             raise SystemExit(f"[error] categories file not found: {p}")
         file_slugs, file_base_url = parse_categories_file(p)
 
-    # Venue precedence: store-url > categories-file base_url > store-host
     if args.store_url:
         store_url = normalize_store_url(args.store_url)
         store_host = infer_store_host_from_url(store_url)
@@ -466,7 +488,10 @@ def main():
         ap.error("Provide --store-url or --store-host (or include full URLs in --categories-file).")
         return
 
-    session = make_session(city)
+    # Headers + cookies exactly like the browser
+    headers = _browserish_headers(args.language, city, client_id, session_id)
+    cookies = _cookie_string(city, client_id, analytics_id)
+    session = _base_requests_session(headers, cookies)
 
     print(f"[info] Store URL:   {store_url}")
     print(f"[info] Store host:  {store_host}")
@@ -488,7 +513,7 @@ def main():
 
     for i, slug in enumerate(slugs, 1):
         try:
-            data = fetch_category_json(session, store_url, slug, args.language, city)
+            data = fetch_category_json(session, store_url, slug, args.language, headers, cookies)
         except Exception as e:
             print(f"[warn] Failed category '{slug}': {e}")
             continue
@@ -499,15 +524,15 @@ def main():
 
         all_rows.extend(rows)
         print(f"[ok]  {i:>2}/{len(slugs)}  '{slug}' → {len(rows)} items")
-        time.sleep(0.15)
+        time.sleep(0.12)
 
     if not global_venue_id:
         try:
-            global_venue_id = maybe_fill_venue(session, store_url, args.language, city) or "unknown"
+            global_venue_id = maybe_fill_venue(session, store_url, args.language, headers, cookies) or "unknown"
         except Exception:
             global_venue_id = "unknown"
 
-    out_path = Path(args.out) if args.out else Path(args.out_dir) / f"coop_wolt_{global_venue_id}_{_normalize_city(city)}.csv"
+    out_path = Path(args.out) if args.out else Path(args.out_dir) / f"coop_wolt_{global_venue_id or 'unknown'}_{_normalize_city(city)}.csv"
     write_csv(all_rows, out_path)
     print(f"[done] Wrote {len(all_rows)} rows → {out_path}")
 
