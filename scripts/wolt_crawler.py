@@ -11,9 +11,6 @@ Primary endpoint per category (we try both forms, because the site uses both):
 If those fail, we fall back to Playwright network using the same headers, then to scraping
 __NEXT_DATA__ from the items page.
 
-NEW: If a category returns 0 items, we will auto-expand it by scraping its
-/items/<parent-slug> page and trying likely child slugs from the left menu.
-
 CSV columns are stable with the rest of the pipeline.
 """
 
@@ -51,7 +48,6 @@ UA = (
     "(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
 )
 
-# generic "find slug from venue items URL" (works both on venue landing and items pages)
 CATEGORY_HREF_RE = re.compile(r"/venue/[^/]+/items/([^/?#]+)")
 
 GEO = {
@@ -370,71 +366,6 @@ def playwright_nextdata_items(
         finally:
             context.close(); browser.close()
 
-# --------------------- parent → child auto-expansion ---------------------
-
-def discover_child_slugs_from_items_page(session: requests.Session, store_url: str, parent_slug: str, language: str) -> List[str]:
-    """
-    Load the /items/<parent> page and collect candidate child slugs from the left sidebar.
-    We simply collect all /items/<slug> links on that page (in order), then de-duplicate
-    and drop the parent itself. We will later verify each candidate by trying the API.
-    """
-    base = normalize_store_url(store_url)
-    url = urljoin(base + "/", f"items/{parent_slug}?language={language}")
-    try:
-        r = session.get(url, timeout=30)
-        r.raise_for_status()
-    except Exception:
-        return []
-
-    candidates: List[str] = []
-    for m in CATEGORY_HREF_RE.finditer(r.text):
-        slug = m.group(1)
-        if slug and slug != parent_slug:
-            candidates.append(slug)
-
-    # keep order, drop dups
-    seen = set()
-    ordered: List[str] = []
-    for s in candidates:
-        if s not in seen:
-            seen.add(s)
-            ordered.append(s)
-    return ordered
-
-def expand_parent_category(
-    session: requests.Session,
-    store_url: str,
-    parent_slug: str,
-    language: str,
-    headers: Dict[str, str],
-    cookies: str,
-    max_children: int = 12,
-) -> List[Tuple[str, Dict[str, Any]]]:
-    """
-    Try to auto-discover and fetch child categories for a 'parent' slug that returned 0 items.
-    We scrape candidates from the page and then keep only those that return non-empty items.
-    """
-    child_slugs = discover_child_slugs_from_items_page(session, store_url, parent_slug, language)
-    if not child_slugs:
-        return []
-
-    found: List[Tuple[str, Dict[str, Any]]] = []
-    consecutive_empty = 0
-    for s in child_slugs:
-        # stop if we have enough, or too many empties
-        if len(found) >= max_children:
-            break
-        data = fetch_category_json(session, store_url, s, language, headers, cookies)
-        if isinstance(data, dict) and isinstance(data.get("items"), list) and data["items"]:
-            found.append((s, data))
-            consecutive_empty = 0
-        else:
-            consecutive_empty += 1
-            # a small guard to avoid testing the entire menu if it's not subcats
-            if len(found) >= 2 and consecutive_empty >= 6:
-                break
-    return found
-
 # --------------------- orchestration ---------------------
 
 def fetch_category_json(
@@ -535,7 +466,7 @@ def write_csv(rows: Iterable[Dict[str, Any]], out_path: Path) -> None:
 # --------------------- main ---------------------
 
 def main():
-    ap = argparse.ArgumentParser(description="Wolt crawler (consumer API + robust headers + parent auto-expansion)")
+    ap = argparse.ArgumentParser(description="Wolt crawler (consumer API + robust headers)")
     ap.add_argument("--store-url")
     ap.add_argument("--store-host")
     ap.add_argument("--city")
@@ -550,8 +481,6 @@ def main():
     ap.add_argument("--upsert-per-category", action="store_true")
     ap.add_argument("--flush-every"); ap.add_argument("--probe-limit")
     ap.add_argument("--modal-probe-limit")
-    # tuning for parent expansion
-    ap.add_argument("--max-children-per-parent", type=int, default=12)
     args = ap.parse_args()
 
     # UUIDs that stand in for the browser IDs we saw in your cURL
@@ -624,36 +553,11 @@ def main():
             continue
 
         rows, venue_id = extract_rows(data, store_host, slug)
+        if venue_id and not global_venue_id:
+            global_venue_id = venue_id
 
-        # If this looks like a parent (0 items), try to auto-expand
-        if not rows:
-            children = expand_parent_category(
-                session=session,
-                store_url=store_url,
-                parent_slug=slug,
-                language=args.language,
-                headers=headers,
-                cookies=cookies,
-                max_children=args.max_children_per_parent,
-            )
-            if children:
-                total_child_rows = 0
-                for child_slug, child_data in children:
-                    child_rows, child_vid = extract_rows(child_data, store_host, child_slug)
-                    if child_vid and not global_venue_id:
-                        global_venue_id = child_vid
-                    all_rows.extend(child_rows)
-                    total_child_rows += len(child_rows)
-                    print(f"[ok]  .. expanded '{slug}' → child '{child_slug}' = {len(child_rows)} items")
-                print(f"[ok]  {i:>2}/{len(slugs)}  '{slug}' (parent) expanded → {total_child_rows} items across {len(children)} children")
-            else:
-                print(f"[ok]  {i:>2}/{len(slugs)}  '{slug}' → 0 items (no children found)")
-        else:
-            if venue_id and not global_venue_id:
-                global_venue_id = venue_id
-            all_rows.extend(rows)
-            print(f"[ok]  {i:>2}/{len(slugs)}  '{slug}' → {len(rows)} items")
-
+        all_rows.extend(rows)
+        print(f"[ok]  {i:>2}/{len(slugs)}  '{slug}' → {len(rows)} items")
         time.sleep(0.12)
 
     if not global_venue_id:
