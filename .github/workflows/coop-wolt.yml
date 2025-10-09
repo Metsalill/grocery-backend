@@ -1,28 +1,29 @@
-name: "Coop Wolt – Crawl (Pärnu default, 2-hourly)"
+name: "Coop Wolt – Crawl (Pärnu + Tallinn venues)"
 
 on:
   schedule:
-    - cron: "0 */4 * * *"   # every 2 hours, at minute 0
+    - cron: "0 */4 * * *"   # every 4 hours, at minute 0
   workflow_dispatch:
     inputs:
       store:
-        description: "Which Wolt Coop store to crawl"
+        description: "Which Wolt Coop venue(s) to crawl"
         required: false
         default: "parnu"
         type: choice
-        options: [parnu, lasname, all]
-      max_products:
-        description: "Cap per category after discovery (0 = unlimited)"
-        required: false
-        default: "0"
+        options:
+          - parnu
+          - coop-lasname
+          - coop-mustakivi
+          - coop-akadeemia
+          - coop-miiduranna
+          - coop-laagri
+          - konsum-juri
+          - konsum-saku
+          - all
       upsert_db:
         description: "1 = upsert into DATABASE_URL_PUBLIC (staging_coop_products)"
         required: false
         default: "0"
-      force_playwright:
-        description: "Force Playwright fallback (debug)"
-        required: false
-        default: "1"   # force PW during testing
 
 jobs:
   crawl:
@@ -35,29 +36,37 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Decide which store(s) to crawl -> JSON array in an output we can fromJSON()
+      # Decide which venue slug(s) to crawl -> JSON array for matrix
       - name: Decide store matrix
         id: decide
+        shell: bash
         run: |
+          set -euo pipefail
+          # Default set (all Tallinn venues + Pärnu)
+          ALL='["coop-prnu","coop-lasname","coop-mustakivi","coop-akadeemia","coop-miiduranna","coop-laagri","konsum-juri","konsum-saku"]'
+
           if [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
-            # scheduled run → default to Pärnu only
-            echo '["parnu"]' > /tmp/stores.json
+            echo '["coop-prnu"]' > /tmp/stores.json   # scheduled: Pärnu only
           else
             case "${{ inputs.store }}" in
-              all)     echo '["lasname","parnu"]' > /tmp/stores.json ;;
-              parnu)   echo '["parnu"]'          > /tmp/stores.json ;;
-              lasname) echo '["lasname"]'        > /tmp/stores.json ;;
-              *)       echo '["parnu"]'          > /tmp/stores.json ;;
+              all)                  echo "${ALL}"                > /tmp/stores.json ;;
+              parnu)                echo '["coop-prnu"]'         > /tmp/stores.json ;;
+              coop-lasname)         echo '["coop-lasname"]'      > /tmp/stores.json ;;
+              coop-mustakivi)       echo '["coop-mustakivi"]'    > /tmp/stores.json ;;
+              coop-akadeemia)       echo '["coop-akadeemia"]'    > /tmp/stores.json ;;
+              coop-miiduranna)      echo '["coop-miiduranna"]'   > /tmp/stores.json ;;
+              coop-laagri)          echo '["coop-laagri"]'       > /tmp/stores.json ;;
+              konsum-juri)          echo '["konsum-juri"]'       > /tmp/stores.json ;;
+              konsum-saku)          echo '["konsum-saku"]'       > /tmp/stores.json ;;
+              *)                    echo '["coop-prnu"]'         > /tmp/stores.json ;;
             esac
           fi
           echo "stores=$(cat /tmp/stores.json)" >> "$GITHUB_OUTPUT"
 
-  # Matrix runner after we know the stores
   run-crawlers:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     needs: crawl
-    # One active run per store; DO NOT cancel older runs (preserve rows)
     concurrency:
       group: coop-wolt-${{ matrix.store }}
       cancel-in-progress: false
@@ -66,7 +75,7 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        store: ${{ fromJSON(needs.crawl.outputs.stores || '["parnu"]') }}
+        store: ${{ fromJSON(needs.crawl.outputs.stores || '["coop-prnu"]') }}
 
     steps:
       - name: Checkout
@@ -77,43 +86,40 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: System deps for lxml & Playwright
+      - name: System deps for Playwright
+        shell: bash
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            libxml2-dev libxslt1-dev python3-dev build-essential \
-            libffi-dev libssl-dev libjpeg-dev
+          sudo apt-get install -y libxml2-dev libxslt1-dev python3-dev build-essential libffi-dev libssl-dev libjpeg-dev
 
       - name: Install deps (pip + Playwright)
+        shell: bash
         run: |
           python -m pip install --upgrade pip wheel
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
           fi
-          # Ensure these are present even if not in requirements.txt
-          pip install playwright selectolax lxml tenacity user-agents "psycopg[binary]>=3.1" asyncpg
+          pip install playwright selectolax lxml "psycopg[binary]>=3.1" asyncpg
           python -m playwright install --with-deps chromium
 
-      - name: Prepare categories file
+      - name: Prepare categories file (shared slugs-only list)
         id: cats
+        shell: bash
         run: |
           set -euo pipefail
           mkdir -p out
-          case "${{ matrix.store }}" in
-            parnu)   SRC="data/wolt_coop_parnu_categories.txt" ;;
-            lasname) SRC="data/wolt_coop_lasname_categories.txt" ;;
-            *)       SRC="data/wolt_coop_parnu_categories.txt" ;;
-          esac
+          SRC="data/wolt_categories_slugs.txt"
           if [ ! -f "$SRC" ]; then
-            echo "Missing categories file: $SRC"; exit 2
+            echo "::error::Missing categories file: $SRC"
+            exit 2
           fi
           cp "$SRC" /tmp/categories.txt
           echo "path=/tmp/categories.txt" >> "$GITHUB_OUTPUT"
 
-      # Presence-only check so we fail early if secret is missing
       - name: Preflight DB env (presence-only)
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+        shell: bash
         run: |
           if [ -z "${DATABASE_URL:-}" ]; then
             echo "::warning::DATABASE_URL not set — upsert will be skipped."
@@ -122,10 +128,10 @@ jobs:
             echo "::notice::DATABASE_URL is present. Proceeding."
           fi
 
-      # DNS + short asyncpg connect check to the same DATABASE_URL_PUBLIC
       - name: DB preflight (DNS + connect)
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+        shell: bash
         run: |
           set -euo pipefail
           if [ -z "${DATABASE_URL:-}" ]; then
@@ -165,43 +171,35 @@ jobs:
         env:
           PYTHONUNBUFFERED: "1"
           DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-          # scheduled runs default to upserting; workflow_dispatch honors the toggle
-          COOP_UPSERT_DB: ${{ github.event_name == 'workflow_dispatch' && inputs.upsert_db || '1' }}
-          COOP_DEDUP_DB:  ${{ github.event_name == 'workflow_dispatch' && inputs.upsert_db || '1' }}
-          # Force PW by default while stabilizing
-          WOLT_FORCE_PLAYWRIGHT: ${{ github.event_name == 'workflow_dispatch' && inputs.force_playwright || '1' }}
-          # Be gentle with prodinfo; keep modest by default
-          WOLT_PROBE_LIMIT: "250"
-          # Keep modal enrichment off until pages are stable
-          WOLT_MODAL_PROBE_LIMIT: "0"
+        shell: bash
         run: |
           set -euo pipefail
-          # small randomized stagger to avoid bursts / 429s when multiple stores
+          # stagger a bit when multiple venues
           SLEEP=$(( (RANDOM % 25) + 10 ))
-          echo "Staggering start by ${SLEEP}s for store ${{ matrix.store }}..."
+          echo "Staggering start by ${SLEEP}s for venue ${{ matrix.store }}..."
           sleep "${SLEEP}"
 
-          MAX_PRODUCTS="${{ github.event_name == 'workflow_dispatch' && inputs.max_products || '0' }}"
-          STORE_HOST="wolt:coop-${{ matrix.store }}"
-          OUT="out/coop_wolt_${{ github.run_id }}_${{ matrix.store }}.csv"
+          VENUE_SLUG="${{ matrix.store }}"
+          STORE_HOST="wolt:${VENUE_SLUG}"
+          # City hint: Pärnu vs Tallinn (affects headers/cookies only)
+          if [ "${VENUE_SLUG}" = "coop-prnu" ]; then
+            CITY="parnu"
+          else
+            CITY="tallinn"
+          fi
 
-          echo "Running ${STORE_HOST} (venueId=auto) → ${OUT}"
+          OUT="out/coop_wolt_${{ github.run_id }}_${VENUE_SLUG}.csv"
+          UPSERT_FLAG="${{ github.event_name == 'workflow_dispatch' && inputs.upsert_db || '1' }}"
+
+          echo "Running ${STORE_HOST} (city=${CITY}) → ${OUT}"
           stdbuf -oL -eL python3 scripts/wolt_crawler.py \
             --store-host "${STORE_HOST}" \
+            --city "${CITY}" \
+            --language "et" \
             --categories-file "${{ steps.cats.outputs.path }}" \
-            --max-products "${MAX_PRODUCTS}" \
-            --headless "1" \
-            --req-delay "1.2" \
-            --goto-strategy "networkidle" \
-            --nav-timeout "60000" \
-            --category-timeout "420" \
-            --upsert-per-category \
-            --flush-every "40" \
-            --probe-limit "${WOLT_PROBE_LIMIT}" \
-            --modal-probe-limit "${WOLT_MODAL_PROBE_LIMIT}" \
-            --out "${OUT}"
+            --out "${OUT}" \
+            --upsert-db "${UPSERT_FLAG}"
 
-      # Try to upload whatever we have, regardless of outcome
       - name: Upload CSV artifact (partial or final)
         if: always()
         uses: actions/upload-artifact@v4
