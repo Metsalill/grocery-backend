@@ -67,6 +67,17 @@ GEO = {
 CHAIN = "Coop"
 CHANNEL = "wolt"
 
+# Known Tallinn venue slugs to improve city inference when --city is omitted
+KNOWN_TALLINN_VENUES = {
+    "coop-lasname",
+    "coop-mustakivi",
+    "coop-akadeemia",
+    "coop-miiduranna",
+    "coop-laagri",
+    "konsum-juri",
+    "konsum-saku",
+}
+
 # --------------------- helpers ---------------------
 
 def _normalize_city(c: Optional[str]) -> str:
@@ -141,11 +152,16 @@ def normalize_store_url(store_url: str) -> str:
     return f"{parts.scheme}://{parts.netloc}{clean_path}"
 
 def infer_city_from_string(s: str) -> str:
-    s = s.lower()
-    if "parnu" in s or "pärnu" in s:
+    """Heuristics to pick city from a slug or URL path."""
+    s = (s or "").lower()
+    # Pärnu: handles "parnu" and "prnu" (slug form)
+    if "parnu" in s or "pärnu" in s or "prnu" in s:
         return "parnu"
-    if any(x in s for x in ("tallinn", "lasna", "lasname", "lasnamae", "lasnamäe")):
+    # Tallinn: explicit mentions OR known venue slugs
+    if ("tallinn" in s or "lasna" in s or "lasname" in s or "lasnamae" in s or "lasnamäe" in s
+        or any(v in s for v in KNOWN_TALLINN_VENUES)):
         return "tallinn"
+    # Default to Pärnu if unknown
     return "parnu"
 
 def build_url_from_host(store_host: str, city_hint: Optional[str]) -> str:
@@ -570,6 +586,7 @@ def main():
     elif args.store_host:
         store_url = build_url_from_host(args.store_host, args.city)
         store_host = args.store_host
+        # Improved inference: recognizes Tallinn venues and 'coop-prnu'
         city = _normalize_city(args.city or infer_city_from_string(args.store_host))
     else:
         ap.error("Provide --store-url or --store-host (or include full URLs in --categories-file).")
