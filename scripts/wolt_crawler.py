@@ -2,20 +2,21 @@
 # -*- coding: utf-8 -*-
 
 """
-Wolt store crawler (JSON endpoints; Playwright + __NEXT_DATA__ fallback)
+Wolt store crawler (consumer API first; Playwright + __NEXT_DATA__ fallback)
 
-Priority:
-  1) requests -> /items/<slug>?language=...
-  2) Playwright context.request.get(...)
-  3) Playwright page scrape of __NEXT_DATA__ from the items page
+Order of attempts per category:
+  1) consumer API:
+     https://consumer-api.wolt.com/consumer-assortment/v1/venues/slug/<venue>/assortment/categories/slug/<slug>?language=<lang>
+  2) Playwright network request to the same consumer API
+  3) Playwright page scrape of __NEXT_DATA__ (as a last resort)
 
 Inputs:
   --store-url | --store-host
-  --categories-file (slugs or full URLs; if it includes URLs, its base venue URL overrides host)
+  --categories-file  (slugs or full URLs; if URLs present, its base venue URL overrides host)
   --city parnu|tallinn (inferred if omitted)
   --out (exact) | --out-dir
 
-Still supports all the compatibility flags used by CI.
+The CSV schema stays the same as before.
 """
 
 import re
@@ -24,7 +25,7 @@ import time
 import json
 import argparse
 from pathlib import Path
-from typing import Iterable, List, Dict, Any, Tuple, Optional, Union
+from typing import Iterable, List, Dict, Any, Tuple, Optional
 from urllib.parse import urljoin, urlparse
 
 import requests
@@ -32,7 +33,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from selectolax.parser import HTMLParser
 
-# Optional Playwright (only used when needed)
+# Optional Playwright (fallbacks only)
 try:
     from playwright.sync_api import sync_playwright
     PW_AVAILABLE = True
@@ -40,8 +41,12 @@ except Exception:
     PW_AVAILABLE = False
 
 WOLT_HOST = "https://wolt.com"
-UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-      "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+CONSUMER_API = "https://consumer-api.wolt.com/consumer-assortment/v1"
+
+UA = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+    "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+)
 
 CATEGORY_HREF_RE = re.compile(r"/venue/[^/]+/items/([^/?#]+)")
 
@@ -73,13 +78,19 @@ def _normalize_city(c: Optional[str]) -> str:
 
 def _city_headers(city: str) -> Dict[str, str]:
     city = _normalize_city(city)
-    return {"x-city-id": city, "Cookie": f"wolt-session-city={city}"}
+    return {
+        "x-city-id": city,
+        "Cookie": f"wolt-session-city={city}",
+    }
 
 def make_session(city: str) -> requests.Session:
     s = requests.Session()
-    retries = Retry(total=5, read=5, connect=5, backoff_factor=0.4,
-                    status_forcelist=(429, 500, 502, 503, 504),
-                    allowed_methods=frozenset(["GET", "HEAD"]), raise_on_status=False)
+    retries = Retry(
+        total=5, read=5, connect=5, backoff_factor=0.4,
+        status_forcelist=(429, 500, 502, 503, 504),
+        allowed_methods=frozenset(["GET", "HEAD"]),
+        raise_on_status=False,
+    )
     s.mount("https://", HTTPAdapter(max_retries=retries))
     s.headers.update(_base_headers())
     s.headers.update(_city_headers(city))
@@ -115,6 +126,11 @@ def infer_store_host_from_url(store_url: str) -> str:
     segs = [p for p in parts.path.split("/") if p]
     store_slug = segs[-1] if segs else "unknown-store"
     return f"wolt:{store_slug}"
+
+def venue_slug_from_url(store_url: str) -> str:
+    parts = urlparse(store_url)
+    segs = [p for p in parts.path.split("/") if p]
+    return segs[-1] if segs else ""
 
 def discover_category_slugs(session: requests.Session, store_url: str) -> List[str]:
     r = session.get(store_url, timeout=30)
@@ -154,32 +170,31 @@ def parse_categories_file(path: Path) -> Tuple[List[str], Optional[str]]:
             seen.add(s); ordered.append(s)
     return ordered, base_url
 
-# --------------------- fetch JSON (requests/Playwright) ---------------------
+# --------------------- consumer API fetch ---------------------
 
-def requests_fetch_category_json(session, base_store_url, slug, language) -> Optional[Dict[str, Any]]:
-    url = urljoin(base_store_url + "/", f"items/{slug}")
-    params = {"language": language}
-    r = session.get(url, params=params, timeout=30)
+def consumer_api_fetch_category_json(
+    session: requests.Session, venue_slug: str, category_slug: str, language: str
+) -> Optional[Dict[str, Any]]:
+    """
+    GET https://consumer-api.wolt.com/consumer-assortment/v1/venues/slug/<venue>/assortment/categories/slug/<cat>?language=<lang>
+    """
+    url = (
+        f"{CONSUMER_API}/venues/slug/{venue_slug}/assortment/"
+        f"categories/slug/{category_slug}"
+    )
+    r = session.get(url, params={"language": language}, timeout=30)
     if r.status_code in (403, 404):
         return None
     try:
         r.raise_for_status()
     except Exception:
         return None
-    t = r.text.strip()
-    if t.startswith("{"):
-        try:
-            return r.json()
-        except Exception:
-            return None
-    time.sleep(0.5)
-    r2 = session.get(url, params=params, timeout=30)
-    if r2.ok and r2.text.strip().startswith("{"):
-        try:
-            return r2.json()
-        except Exception:
-            return None
-    return None
+    try:
+        return r.json()
+    except Exception:
+        return None
+
+# --------------------- Playwright helpers & fallbacks ---------------------
 
 def _playwright_context(city: str):
     city = _normalize_city(city)
@@ -192,29 +207,36 @@ def _playwright_context(city: str):
         extra_http_headers={**_base_headers(), **_city_headers(city)},
     )
 
-def playwright_fetch_category_json_via_request(store_url, slug, language, city) -> Optional[Dict[str, Any]]:
+def playwright_fetch_consumer_api(
+    store_url: str, venue_slug: str, category_slug: str, language: str, city: str
+) -> Optional[Dict[str, Any]]:
     if not PW_AVAILABLE:
         return None
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(**_playwright_context(city))
+        page = context.new_page()
         try:
-            page = context.new_page()
+            # Visit venue once for cookies & geolocation
             page.goto(store_url, wait_until="domcontentloaded", timeout=45000)
             page.wait_for_timeout(500)
-            base = normalize_store_url(store_url)
-            url = urljoin(base + "/", f"items/{slug}")
+
+            url = (
+                f"{CONSUMER_API}/venues/slug/{venue_slug}/assortment/"
+                f"categories/slug/{category_slug}"
+            )
             resp = context.request.get(url, params={"language": language}, timeout=30000)
             if resp.ok:
                 try:
                     return resp.json()
                 except Exception:
                     pass
-            # Tallinn fallback
+            # Fallback city=Tallinn headers (rarely needed)
             if _normalize_city(city) != "tallinn":
                 resp2 = context.request.get(
                     url, params={"language": language},
-                    headers={**_base_headers(), **_city_headers("tallinn")}, timeout=30000
+                    headers={**_base_headers(), **_city_headers("tallinn")},
+                    timeout=30000,
                 )
                 if resp2.ok:
                     try:
@@ -225,40 +247,27 @@ def playwright_fetch_category_json_via_request(store_url, slug, language, city) 
         finally:
             context.close(); browser.close()
 
-# --------------------- Playwright __NEXT_DATA__ fallback ---------------------
-
 def _recursive_find_items(node: Any) -> List[Dict[str, Any]]:
-    """
-    Walk arbitrary JSON looking for product-like 'items' arrays where
-    elements look like dicts with 'id' and 'name' or 'price'.
-    """
     found: List[Dict[str, Any]] = []
-
     def looks_like_item(x: Any) -> bool:
         return isinstance(x, dict) and ("name" in x or "price" in x or "id" in x)
-
     def walk(obj: Any):
-        nonlocal found
         if isinstance(obj, dict):
             for k, v in obj.items():
                 if k == "items" and isinstance(v, list) and v and all(isinstance(e, dict) for e in v):
-                    # Heuristic: at least some elements look like product entries
                     if any(looks_like_item(e) for e in v):
-                        # extend but keep as dicts
                         found.extend(e for e in v if isinstance(e, dict))
                 walk(v)
         elif isinstance(obj, list):
             for e in obj:
                 walk(e)
-
     walk(node)
     return found
 
-def playwright_fetch_category_json_via_page(store_url, slug, language, city) -> Optional[Dict[str, Any]]:
-    """
-    Navigate to the items page, read __NEXT_DATA__, extract product 'items'.
-    Returns a synthetic payload: {"category":{...}, "items":[...]} or None.
-    """
+def playwright_nextdata_items(
+    store_url: str, category_slug: str, language: str, city: str
+) -> Optional[Dict[str, Any]]:
+    """Load items page and mine __NEXT_DATA__ as last resort."""
     if not PW_AVAILABLE:
         return None
     with sync_playwright() as p:
@@ -267,91 +276,83 @@ def playwright_fetch_category_json_via_page(store_url, slug, language, city) -> 
         page = context.new_page()
         try:
             base = normalize_store_url(store_url)
-            url = urljoin(base + "/", f"items/{slug}?language={language}")
+            url = urljoin(base + "/", f"items/{category_slug}?language={language}")
             page.goto(url, wait_until="domcontentloaded", timeout=60000)
-            # Wait briefly for client-side hydration
             page.wait_for_timeout(800)
 
-            # Pull Next.js data
             el = page.locator("script#__NEXT_DATA__")
             if not el.count():
                 return None
-            raw = el.first.inner_text()
-            data = json.loads(raw)
-
-            # Heuristically find items anywhere in the object graph
+            data = json.loads(el.first.inner_text())
             items = _recursive_find_items(data)
             if not items:
                 return None
 
-            # Try to find a category name (left nav often present in Next data)
-            category_name = ""
-            # simple heuristic search for slug->name mapping
-            def find_category_name(obj: Any) -> Optional[str]:
+            # try grab category name
+            def find_cat(obj: Any) -> Optional[str]:
                 if isinstance(obj, dict):
-                    # look for objects that contain both 'slug' and 'name'
-                    if obj.get("slug") == slug and isinstance(obj.get("name"), str):
+                    if obj.get("slug") == category_slug and isinstance(obj.get("name"), str):
                         return obj["name"]
                     for v in obj.values():
-                        r = find_category_name(v)
+                        r = find_cat(v)
                         if r: return r
                 elif isinstance(obj, list):
                     for v in obj:
-                        r = find_category_name(v)
+                        r = find_cat(v)
                         if r: return r
                 return None
-            category_name = find_category_name(data) or ""
+            cat_name = find_cat(data) or category_slug
 
-            # Normalize fields to what the CSV pipeline expects
+            # normalize
             norm_items: List[Dict[str, Any]] = []
             for it in items:
                 norm_items.append({
-                    "id": it.get("id") or it.get("_id") or it.get("item_id") or "",
+                    "id": it.get("id") or it.get("_id") or "",
                     "name": it.get("name") or it.get("title") or "",
-                    "price": it.get("price") if isinstance(it.get("price"), (int, float)) else it.get("unit_price") or None,
+                    "price": it.get("price") if isinstance(it.get("price"), (int, float)) else None,
                     "unit_info": it.get("unit_info") or "",
                     "unit_price": {
                         "price": (it.get("unit_price", {}) or {}).get("price") if isinstance(it.get("unit_price"), dict) else None,
                         "unit":  (it.get("unit_price", {}) or {}).get("unit")  if isinstance(it.get("unit_price"), dict) else "",
                     },
                     "barcode_gtin": it.get("barcode_gtin") or "",
-                    "description": it.get("description") or it.get("desc") or "",
+                    "description": it.get("description") or "",
                     "checksum": it.get("checksum") or "",
                     "vat_category_code": it.get("vat_category_code") or "",
                     "vat_percentage": it.get("vat_percentage") if isinstance(it.get("vat_percentage"), (int, float)) else None,
-                    "images": [{"url": (it.get("image") or it.get("img") or it.get("image_url") or "")}],
-                    # venue_id generally missing in Next payload; leave blank
+                    "images": [{"url": (it.get("image") or it.get("image_url") or "")}],
                 })
-
-            payload = {
-                "category": {"name": category_name or slug, "id": slug},
-                "items": norm_items,
-            }
-            return payload
+            return {"category": {"name": cat_name, "id": category_slug}, "items": norm_items}
         except Exception:
             return None
         finally:
             context.close(); browser.close()
 
-def fetch_category_json(session, store_url, slug, language, city) -> Dict[str, Any]:
-    base_store_url = normalize_store_url(store_url)
+# --------------------- fetch orchestration ---------------------
 
-    # 1) requests direct JSON
-    data = requests_fetch_category_json(session, base_store_url, slug, language)
+def fetch_category_json(
+    session: requests.Session, store_url: str, category_slug: str, language: str, city: str
+) -> Dict[str, Any]:
+    venue_slug = venue_slug_from_url(store_url)
+
+    # 1) consumer API via requests
+    data = consumer_api_fetch_category_json(session, venue_slug, category_slug, language)
     if data is not None:
         return data
 
-    # 2) playwright network request
-    data = playwright_fetch_category_json_via_request(base_store_url, slug, language, city)
+    # 2) consumer API via Playwright network
+    data = playwright_fetch_consumer_api(store_url, venue_slug, category_slug, language, city)
     if data is not None:
         return data
 
-    # 3) playwright page scrape of __NEXT_DATA__
-    data = playwright_fetch_category_json_via_page(base_store_url, slug, language, city)
+    # 3) __NEXT_DATA__ scrape
+    data = playwright_nextdata_items(store_url, category_slug, language, city)
     if data is not None:
         return data
 
-    raise ValueError(f"Failed to fetch JSON for slug={slug} (city={city}) via requests/Playwright/NextData")
+    raise ValueError(
+        f"Failed to fetch JSON for slug={category_slug} (city={city}) via consumer API / Playwright / NextData"
+    )
 
 # --------------------- rows & CSV ---------------------
 
@@ -388,7 +389,7 @@ def extract_rows(payload: Dict[str, Any], store_host: str, category_slug: str) -
 
     return rows, venue_id
 
-def maybe_fill_venue(session, store_url, language, city) -> str:
+def maybe_fill_venue(session: requests.Session, store_url: str, language: str, city: str) -> str:
     slugs = discover_category_slugs(session, store_url)
     if not slugs:
         return ""
@@ -419,7 +420,7 @@ def write_csv(rows: Iterable[Dict[str, Any]], out_path: Path) -> None:
 # --------------------- main ---------------------
 
 def main():
-    ap = argparse.ArgumentParser(description="Wolt JSON crawler with Playwright & NextData fallback")
+    ap = argparse.ArgumentParser(description="Wolt crawler using consumer API with fallbacks")
     ap.add_argument("--store-url")
     ap.add_argument("--store-host")
     ap.add_argument("--city")
@@ -427,7 +428,7 @@ def main():
     ap.add_argument("--out-dir", default="out")
     ap.add_argument("--language", default="et")
     ap.add_argument("--categories-file")
-    # compatibility (ignored)
+    # compatibility (ignored but accepted)
     ap.add_argument("--max-products"); ap.add_argument("--headless")
     ap.add_argument("--req-delay"); ap.add_argument("--goto-strategy")
     ap.add_argument("--nav-timeout"); ap.add_argument("--category-timeout")
@@ -436,7 +437,7 @@ def main():
     ap.add_argument("--modal-probe-limit")
     args = ap.parse_args()
 
-    # Load categories file (slugs + potential base URL)
+    # Load categories file
     file_slugs: List[str] = []; file_base_url: Optional[str] = None
     if args.categories_file:
         p = Path(args.categories_file)
@@ -498,7 +499,7 @@ def main():
 
         all_rows.extend(rows)
         print(f"[ok]  {i:>2}/{len(slugs)}  '{slug}' → {len(rows)} items")
-        time.sleep(0.2)
+        time.sleep(0.15)
 
     if not global_venue_id:
         try:
@@ -506,7 +507,7 @@ def main():
         except Exception:
             global_venue_id = "unknown"
 
-    out_path = Path(args.out) if args.out else Path(args.out_dir) / f"coop_wolt_{global_venue_id}_{city}.csv"
+    out_path = Path(args.out) if args.out else Path(args.out_dir) / f"coop_wolt_{global_venue_id}_{_normalize_city(city)}.csv"
     write_csv(all_rows, out_path)
     print(f"[done] Wrote {len(all_rows)} rows → {out_path}")
 
