@@ -1,0 +1,105 @@
+name: Import Barbora Strong Matches
+
+on:
+  workflow_dispatch:
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Prepare staging (matches CSV headers)
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
+          CREATE TABLE IF NOT EXISTS staging_barbora_matches (
+            left_chain      text,
+            left_ext_id     text,
+            left_name       text,
+            left_brand      text,
+            left_size_text  text,
+            right_chain     text,
+            right_ext_id    text,
+            right_name      text,
+            right_brand     text,
+            right_size_text text,
+            match_reason    text,
+            match_score     numeric
+          );
+          SQL
+
+      - name: Load *strong* CSVs
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(data/matches/matches_Barbora_to_*_strong.csv)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No *strong* CSVs found under data/matches/"
+            exit 1
+          fi
+
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X -c "TRUNCATE staging_barbora_matches;"
+
+          for f in "${files[@]}"; do
+            echo "Loading $f"
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
+              -c "\copy staging_barbora_matches FROM '${f}' WITH (FORMAT CSV, HEADER, ENCODING 'UTF8')"
+          done
+
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
+            -c "DELETE FROM staging_barbora_matches WHERE match_reason IS DISTINCT FROM 'strong';"
+
+      - name: Upsert into approved_matches_active
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
+          CREATE UNIQUE INDEX IF NOT EXISTS ux_ama_source_target
+          ON approved_matches_active (source_chain, source_ext_id, target_chain);
+
+          INSERT INTO approved_matches_active (
+            source_chain, source_ext_id, target_chain, target_ext_id,
+            score, tier,
+            left_name, left_brand, left_size_text,
+            right_name, right_brand, right_size_text
+          )
+          SELECT
+            'Barbora'                       AS source_chain,
+            left_ext_id                     AS source_ext_id,
+            right_chain                     AS target_chain,
+            NULLIF(right_ext_id,'')         AS target_ext_id,
+            match_score                     AS score,
+            match_reason                    AS tier,
+            left_name, left_brand, left_size_text,
+            right_name, right_brand, right_size_text
+          FROM staging_barbora_matches
+          ON CONFLICT (source_chain, source_ext_id, target_chain)
+          DO UPDATE SET
+            target_ext_id    = EXCLUDED.target_ext_id,
+            score            = EXCLUDED.score,
+            tier             = EXCLUDED.tier,
+            left_name        = EXCLUDED.left_name,
+            left_brand       = EXCLUDED.left_brand,
+            left_size_text   = EXCLUDED.left_size_text,
+            right_name       = EXCLUDED.right_name,
+            right_brand      = EXCLUDED.right_brand,
+            right_size_text  = EXCLUDED.right_size_text;
+          SQL
+
+      - name: Verify imported counts
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
+          SELECT target_chain AS chain,
+                 COUNT(*) AS strong_rows,
+                 ROUND(AVG(score)::numeric, 3) AS avg_score
+          FROM approved_matches_active
+          WHERE source_chain = 'Barbora' AND tier = 'strong'
+          GROUP BY target_chain
+          ORDER BY target_chain;
+          SQL
