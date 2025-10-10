@@ -6,7 +6,7 @@ on:
       BACKFILL_RIGHT_EPM:
         description: "Also backfill right-side ext_product_map from strong matches?"
         required: false
-        default: "false"   # set to "true" to enable optional step
+        default: "false"
 
 jobs:
   import-strong:
@@ -29,10 +29,10 @@ jobs:
           echo "Looking for CSVs under data/matches/:"
           ls -al data/matches || true
 
-      - name: Prepare tables (idempotent & schema-aware)
+      - name: Prepare tables (idempotent & schema-aware; relax legacy NOT NULLs)
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
-          -- Staging mirrors CSV headers produced by the matcher
+          -- Staging mirrors CSV headers
           CREATE TABLE IF NOT EXISTS staging_barbora_matches (
             left_chain        text,
             left_ext_id       text,
@@ -48,7 +48,7 @@ jobs:
             match_score       numeric
           );
 
-          -- Final table for ext_id<->ext_id matches (do NOT alter existing PKs)
+          -- Final table (create if missing)
           CREATE TABLE IF NOT EXISTS approved_matches_active (
             source_chain        text,
             source_ext_id       text,
@@ -79,11 +79,26 @@ jobs:
             ADD COLUMN IF NOT EXISTS right_brand         text,
             ADD COLUMN IF NOT EXISTS right_size_text     text;
 
+          -- 🔧 Legacy columns may exist and be NOT NULL; make them nullable so insert doesn't fail
+          DO $$
+          DECLARE r record;
+          BEGIN
+            FOR r IN
+              SELECT column_name
+              FROM information_schema.columns
+              WHERE table_name='approved_matches_active'
+                AND column_name IN ('left_chain','right_chain','left_ext_id','right_ext_id')
+                AND is_nullable='NO'
+            LOOP
+              EXECUTE format('ALTER TABLE approved_matches_active ALTER COLUMN %I DROP NOT NULL', r.column_name);
+            END LOOP;
+          END$$;
+
           -- Unique index for ON CONFLICT upsert (safe if it already exists)
           CREATE UNIQUE INDEX IF NOT EXISTS ux_approved_matches_active_source_target
           ON approved_matches_active (source_chain, source_ext_id, target_chain);
 
-          -- Product-level link table (by product_id)
+          -- Product-level links table
           CREATE TABLE IF NOT EXISTS approved_product_links (
             left_chain       text,
             left_product_id  bigint,
@@ -103,7 +118,6 @@ jobs:
           files=(data/matches/matches_Barbora_to_*_strong.csv)
           if [ ${#files[@]} -eq 0 ]; then
             echo "❌ No *strong* CSVs found at data/matches/."
-            echo "Expected files like: matches_Barbora_to_Rimi_strong.csv"
             exit 1
           fi
 
@@ -117,7 +131,7 @@ jobs:
               -c "\copy staging_barbora_matches FROM '${f}' WITH (FORMAT CSV, HEADER, ENCODING 'UTF8')"
           done
 
-          # Defensive filter: keep only strong
+          # Keep only strong rows (defensive)
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
             -c "DELETE FROM staging_barbora_matches WHERE match_reason IS DISTINCT FROM 'strong';"
 
@@ -129,7 +143,7 @@ jobs:
             left_name, left_brand, left_size_text, right_name, right_brand, right_size_text
           )
           SELECT
-            'Barbora'                       AS source_chain,      -- ensure NOT NULL
+            'Barbora'                       AS source_chain,
             left_ext_id                     AS source_ext_id,
             right_chain                     AS target_chain,
             NULLIF(right_ext_id,'')         AS target_ext_id,
@@ -150,6 +164,50 @@ jobs:
             right_name        = EXCLUDED.right_name,
             right_brand       = EXCLUDED.right_brand,
             right_size_text   = EXCLUDED.right_size_text;
+          SQL
+
+      - name: Backfill legacy columns from new ones (keeps both schemas in sync)
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
+          -- Fill legacy columns if they exist and are NULL
+          DO $$
+          BEGIN
+            IF EXISTS (
+              SELECT 1 FROM information_schema.columns
+              WHERE table_name='approved_matches_active' AND column_name='left_chain'
+            ) THEN
+              UPDATE approved_matches_active
+              SET left_chain = source_chain
+              WHERE left_chain IS NULL;
+            END IF;
+
+            IF EXISTS (
+              SELECT 1 FROM information_schema.columns
+              WHERE table_name='approved_matches_active' AND column_name='right_chain'
+            ) THEN
+              UPDATE approved_matches_active
+              SET right_chain = target_chain
+              WHERE right_chain IS NULL;
+            END IF;
+
+            IF EXISTS (
+              SELECT 1 FROM information_schema.columns
+              WHERE table_name='approved_matches_active' AND column_name='left_ext_id'
+            ) THEN
+              UPDATE approved_matches_active
+              SET left_ext_id = source_ext_id
+              WHERE left_ext_id IS NULL;
+            END IF;
+
+            IF EXISTS (
+              SELECT 1 FROM information_schema.columns
+              WHERE table_name='approved_matches_active' AND column_name='right_ext_id'
+            ) THEN
+              UPDATE approved_matches_active
+              SET right_ext_id = target_ext_id
+              WHERE right_ext_id IS NULL;
+            END IF;
+          END$$;
           SQL
 
       - name: Create/Update product_id<->product_id links via ext_product_map
@@ -223,7 +281,7 @@ jobs:
               CASE
                 WHEN lower(target_chain) LIKE 'rimi%'   THEN 'rimi'
                 WHEN lower(target_chain) LIKE 'prisma%' THEN 'prisma'
-                WHEN lower(target_chain) LIKE 'selver%' THEN 'selver'
+                WHEN lower(target_chain) LIKE 'selver'  THEN 'selver'
                 ELSE lower(target_chain)
               END AS chain_norm,
               target_ext_id,
