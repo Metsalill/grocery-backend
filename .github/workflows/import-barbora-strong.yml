@@ -42,7 +42,7 @@ jobs:
             match_score       numeric
           );
 
-          -- Final table (create if missing)
+          -- Final table (create if missing; do NOT change existing PK)
           CREATE TABLE IF NOT EXISTS approved_matches_active (
             source_chain        text,
             source_ext_id       text,
@@ -55,11 +55,10 @@ jobs:
             left_size_text      text,
             right_name          text,
             right_brand         text,
-            right_size_text     text,
-            PRIMARY KEY (source_chain, source_ext_id, target_chain)
+            right_size_text     text
           );
 
-          -- If table exists with a different schema, add missing columns safely
+          -- Add any missing columns safely
           ALTER TABLE approved_matches_active
             ADD COLUMN IF NOT EXISTS source_chain        text,
             ADD COLUMN IF NOT EXISTS source_ext_id       text,
@@ -74,18 +73,9 @@ jobs:
             ADD COLUMN IF NOT EXISTS right_brand         text,
             ADD COLUMN IF NOT EXISTS right_size_text     text;
 
-          -- Ensure PK exists
-          DO $$
-          BEGIN
-            IF NOT EXISTS (
-              SELECT 1 FROM pg_constraint
-              WHERE conname = 'approved_matches_active_pk'
-            ) THEN
-              ALTER TABLE approved_matches_active
-                ADD CONSTRAINT approved_matches_active_pk
-                PRIMARY KEY (source_chain, source_ext_id, target_chain);
-            END IF;
-          END$$;
+          -- Ensure we have a UNIQUE INDEX for upsert (even if PK differs)
+          CREATE UNIQUE INDEX IF NOT EXISTS ux_approved_matches_active_source_target
+          ON approved_matches_active (source_chain, source_ext_id, target_chain);
           SQL
 
       - name: Import only *strong* CSVs from data/matches/
@@ -114,7 +104,7 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
             -c "DELETE FROM staging_barbora_matches WHERE match_reason IS DISTINCT FROM 'strong';"
 
-          # Upsert into final
+          # Upsert into final (uses the UNIQUE INDEX above)
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
           INSERT INTO approved_matches_active (
             source_chain, source_ext_id, target_chain, target_ext_id, score, tier,
