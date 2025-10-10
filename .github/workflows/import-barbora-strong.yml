@@ -115,3 +115,161 @@ jobs:
             echo "➡️ Loading $f"
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
               -c "\copy staging_barbora_matches FROM '${f}' WITH (FORMAT CSV, HEADER, ENCODING 'UTF8')"
+          done
+
+          # Defensive filter: keep only strong
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
+            -c "DELETE FROM staging_barbora_matches WHERE match_reason IS DISTINCT FROM 'strong';"
+
+      - name: Upsert ext_id<->ext_id matches (force source_chain='Barbora')
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
+          INSERT INTO approved_matches_active (
+            source_chain, source_ext_id, target_chain, target_ext_id, score, tier,
+            left_name, left_brand, left_size_text, right_name, right_brand, right_size_text
+          )
+          SELECT
+            'Barbora'                       AS source_chain,      -- ensure NOT NULL
+            left_ext_id                     AS source_ext_id,
+            right_chain                     AS target_chain,
+            NULLIF(right_ext_id,'')         AS target_ext_id,
+            match_score                     AS score,
+            match_reason                    AS tier,
+            left_name, left_brand, left_size_text,
+            right_name, right_brand, right_size_text
+          FROM staging_barbora_matches
+          WHERE match_reason = 'strong'
+          ON CONFLICT (source_chain, source_ext_id, target_chain)
+          DO UPDATE SET
+            target_ext_id     = EXCLUDED.target_ext_id,
+            score             = EXCLUDED.score,
+            tier              = EXCLUDED.tier,
+            left_name         = EXCLUDED.left_name,
+            left_brand        = EXCLUDED.left_brand,
+            left_size_text    = EXCLUDED.left_size_text,
+            right_name        = EXCLUDED.right_name,
+            right_brand       = EXCLUDED.right_brand,
+            right_size_text   = EXCLUDED.right_size_text;
+          SQL
+
+      - name: Create/Update product_id<->product_id links via ext_product_map
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
+          WITH strong AS (
+            SELECT *
+            FROM approved_matches_active
+            WHERE source_chain = 'Barbora' AND tier = 'strong'
+              AND COALESCE(target_ext_id,'') <> ''
+          ),
+          lmap AS (
+            SELECT s.source_ext_id,
+                   e.product_id AS left_product_id
+            FROM strong s
+            JOIN ext_product_map e
+              ON e.ext_id = s.source_ext_id
+             AND lower(e.source) IN ('barbora','maxima','barbora.ee','maxima.ee','barbora_estonia')
+          ),
+          rmap AS (
+            SELECT s.target_chain,
+                   s.target_ext_id,
+                   e.product_id AS right_product_id
+            FROM strong s
+            JOIN ext_product_map e
+              ON e.ext_id = s.target_ext_id
+             AND CASE
+                   WHEN lower(s.target_chain) LIKE 'rimi%'   THEN lower(e.source) = 'rimi'
+                   WHEN lower(s.target_chain) LIKE 'prisma%' THEN lower(e.source) = 'prisma'
+                   WHEN lower(s.target_chain) LIKE 'selver%' THEN lower(e.source) = 'selver'
+                   ELSE FALSE
+                 END
+          ),
+          resolved AS (
+            SELECT
+              'Barbora'      AS left_chain,
+              l.left_product_id,
+              s.target_chain AS right_chain,
+              r.right_product_id,
+              s.score,
+              s.tier
+            FROM strong s
+            JOIN lmap l ON l.source_ext_id = s.source_ext_id
+            JOIN rmap r ON r.target_ext_id = s.target_ext_id
+            WHERE l.left_product_id IS NOT NULL
+              AND r.right_product_id IS NOT NULL
+          )
+          INSERT INTO approved_product_links
+          (left_chain, left_product_id, right_chain, right_product_id, score, tier)
+          SELECT left_chain, left_product_id, right_chain, right_product_id, score, tier
+          FROM resolved
+          ON CONFLICT (left_chain, left_product_id, right_chain)
+          DO UPDATE SET
+            right_product_id = EXCLUDED.right_product_id,
+            score            = EXCLUDED.score,
+            tier             = EXCLUDED.tier;
+          SQL
+
+      - name: OPTIONAL — Backfill missing right-side ext_product_map (exact-name resolver)
+        if: env.BACKFILL_RIGHT_EPM == 'true'
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
+          WITH s AS (
+            SELECT DISTINCT target_chain, target_ext_id, right_name
+            FROM approved_matches_active
+            WHERE source_chain = 'Barbora' AND tier = 'strong'
+              AND COALESCE(target_ext_id,'') <> ''
+          ),
+          right_norm AS (
+            SELECT
+              CASE
+                WHEN lower(target_chain) LIKE 'rimi%'   THEN 'rimi'
+                WHEN lower(target_chain) LIKE 'prisma%' THEN 'prisma'
+                WHEN lower(target_chain) LIKE 'selver%' THEN 'selver'
+                ELSE lower(target_chain)
+              END AS chain_norm,
+              target_ext_id,
+              right_name
+            FROM s
+          ),
+          need AS (
+            SELECT r.*
+            FROM right_norm r
+            LEFT JOIN ext_product_map e
+              ON e.ext_id = r.target_ext_id
+             AND lower(e.source) = r.chain_norm
+            WHERE e.ext_id IS NULL
+          ),
+          candidates AS (
+            SELECT n.chain_norm,
+                   n.target_ext_id,
+                   MIN(p.id) AS product_id
+            FROM need n
+            JOIN stores st ON (
+                  (n.chain_norm = 'rimi'   AND st.chain ILIKE 'Rimi%')
+               OR (n.chain_norm = 'prisma' AND st.chain ILIKE 'Prisma%')
+               OR (n.chain_norm = 'selver' AND st.chain ILIKE 'Selver%')
+            ) AND st.is_online = TRUE
+            JOIN prices pr ON pr.store_id = st.id
+            JOIN products p ON p.id = pr.product_id
+            WHERE p.name = n.right_name
+            GROUP BY 1,2
+          )
+          INSERT INTO ext_product_map (source, product_id, ext_id)
+          SELECT chain_norm AS source, product_id, target_ext_id
+          FROM candidates
+          WHERE product_id IS NOT NULL
+          ON CONFLICT DO NOTHING;
+          SQL
+
+      - name: Quick verification
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
+          SELECT target_chain, COUNT(*) AS strong_rows, ROUND(AVG(score)::numeric,4) AS avg_score
+          FROM approved_matches_active
+          WHERE source_chain = 'Barbora' AND tier = 'strong'
+          GROUP BY target_chain ORDER BY target_chain;
+
+          SELECT right_chain, COUNT(*) AS product_links
+          FROM approved_product_links
+          WHERE left_chain = 'Barbora'
+          GROUP BY right_chain ORDER BY right_chain;
+          SQL
