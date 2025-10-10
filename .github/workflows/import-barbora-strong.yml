@@ -42,54 +42,66 @@ jobs:
           shopt -s nullglob
           files=(data/matches/matches_Barbora_to_*_strong.csv)
           if [ ${#files[@]} -eq 0 ]; then
-            echo "No *strong* CSVs found under data/matches/"
+            echo "❌ No *strong* CSVs found under data/matches/"
             exit 1
           fi
-
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X -c "TRUNCATE staging_barbora_matches;"
-
           for f in "${files[@]}"; do
-            echo "Loading $f"
+            echo "➡️ Loading $f"
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
               -c "\copy staging_barbora_matches FROM '${f}' WITH (FORMAT CSV, HEADER, ENCODING 'UTF8')"
           done
-
+          # Defensive: keep only strong
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
             -c "DELETE FROM staging_barbora_matches WHERE match_reason IS DISTINCT FROM 'strong';"
 
-      - name: Upsert into approved_matches_active
+      - name: Upsert into approved_matches_active (fill legacy mirrors too)
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
+          -- Unique index for conflict target (safe if already exists)
           CREATE UNIQUE INDEX IF NOT EXISTS ux_ama_source_target
           ON approved_matches_active (source_chain, source_ext_id, target_chain);
 
           INSERT INTO approved_matches_active (
+            -- new schema
             source_chain, source_ext_id, target_chain, target_ext_id,
+            -- legacy mirrors (your DB has NOT NULL here)
+            left_chain,  left_ext_id,  right_chain,  right_ext_id,
+            -- metadata
             score, tier,
             left_name, left_brand, left_size_text,
             right_name, right_brand, right_size_text
           )
           SELECT
-            'Barbora'                       AS source_chain,
-            left_ext_id                     AS source_ext_id,
-            right_chain                     AS target_chain,
-            NULLIF(right_ext_id,'')         AS target_ext_id,
-            match_score                     AS score,
-            match_reason                    AS tier,
+            -- new schema
+            'Barbora'                   AS source_chain,
+            left_ext_id                 AS source_ext_id,
+            right_chain                 AS target_chain,
+            NULLIF(right_ext_id,'')     AS target_ext_id,
+            -- legacy mirrors
+            'Barbora'                   AS left_chain,
+            left_ext_id                 AS left_ext_id,
+            right_chain                 AS right_chain,
+            NULLIF(right_ext_id,'')     AS right_ext_id,
+            -- metadata
+            match_score                 AS score,
+            match_reason                AS tier,
             left_name, left_brand, left_size_text,
             right_name, right_brand, right_size_text
           FROM staging_barbora_matches
           ON CONFLICT (source_chain, source_ext_id, target_chain)
           DO UPDATE SET
-            target_ext_id    = EXCLUDED.target_ext_id,
-            score            = EXCLUDED.score,
-            tier             = EXCLUDED.tier,
-            left_name        = EXCLUDED.left_name,
-            left_brand       = EXCLUDED.left_brand,
-            left_size_text   = EXCLUDED.left_size_text,
-            right_name       = EXCLUDED.right_name,
-            right_brand      = EXCLUDED.right_brand,
-            right_size_text  = EXCLUDED.right_size_text;
+            target_ext_id     = EXCLUDED.target_ext_id,
+            -- keep mirrors in sync
+            right_ext_id      = EXCLUDED.right_ext_id,
+            score             = EXCLUDED.score,
+            tier              = EXCLUDED.tier,
+            left_name         = EXCLUDED.left_name,
+            left_brand        = EXCLUDED.left_brand,
+            left_size_text    = EXCLUDED.left_size_text,
+            right_name        = EXCLUDED.right_name,
+            right_brand       = EXCLUDED.right_brand,
+            right_size_text   = EXCLUDED.right_size_text;
           SQL
 
       - name: Verify imported counts
