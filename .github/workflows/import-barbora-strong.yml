@@ -55,13 +55,36 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
             -c "DELETE FROM staging_barbora_matches WHERE match_reason IS DISTINCT FROM 'strong';"
 
-      - name: Upsert into approved_matches_active (write legacy mirrors too)
+      - name: Upsert into approved_matches_active (dedupe + write legacy mirrors)
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
-          -- Unique index for ON CONFLICT (safe if already exists)
+          -- Conflict index (safe if already exists)
           CREATE UNIQUE INDEX IF NOT EXISTS ux_ama_source_target
           ON approved_matches_active (source_chain, source_ext_id, target_chain);
 
+          WITH ranked AS (
+            SELECT
+              -- key
+              COALESCE(NULLIF(left_ext_id,''), '') AS left_ext_id,
+              right_chain,
+              -- payload
+              NULLIF(right_ext_id,'') AS right_ext_id,
+              match_score, match_reason,
+              left_name, left_brand, left_size_text,
+              right_name, right_brand, right_size_text,
+              -- choose the best per key
+              ROW_NUMBER() OVER (
+                PARTITION BY left_ext_id, right_chain
+                ORDER BY match_score DESC NULLS LAST
+              ) AS rn
+            FROM staging_barbora_matches
+            WHERE match_reason = 'strong'
+          ),
+          to_upsert AS (
+            SELECT *
+            FROM ranked
+            WHERE rn = 1
+          )
           INSERT INTO approved_matches_active (
             -- new schema
             source_chain, source_ext_id, target_chain, target_ext_id,
@@ -73,26 +96,24 @@ jobs:
             right_name, right_brand, right_size_text
           )
           SELECT
-            -- new schema
-            'Barbora'                   AS source_chain,
-            left_ext_id                 AS source_ext_id,
-            right_chain                 AS target_chain,
-            NULLIF(right_ext_id,'')     AS target_ext_id,
-            -- legacy mirrors
-            'Barbora'                   AS left_chain,
-            left_ext_id                 AS left_key,
-            right_chain                 AS right_chain,
-            NULLIF(right_ext_id,'')     AS right_key,
-            -- metadata
-            match_score                 AS score,
-            match_reason                AS tier,
+            'Barbora'                AS source_chain,
+            left_ext_id              AS source_ext_id,
+            right_chain              AS target_chain,
+            right_ext_id             AS target_ext_id,
+            -- mirrors
+            'Barbora'                AS left_chain,
+            left_ext_id              AS left_key,
+            right_chain              AS right_chain,
+            right_ext_id             AS right_key,
+            -- meta
+            match_score              AS score,
+            match_reason             AS tier,
             left_name, left_brand, left_size_text,
             right_name, right_brand, right_size_text
-          FROM staging_barbora_matches
+          FROM to_upsert
           ON CONFLICT (source_chain, source_ext_id, target_chain)
           DO UPDATE SET
             target_ext_id     = EXCLUDED.target_ext_id,
-            -- keep mirrors in sync
             right_key         = EXCLUDED.right_key,
             score             = EXCLUDED.score,
             tier              = EXCLUDED.tier,
