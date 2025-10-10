@@ -12,14 +12,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install psql
+      - name: Install PostgreSQL client
         run: |
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
-      - name: Prepare tables (idempotent)
+      - name: Show expected files (debug)
+        run: |
+          ls -al
+          echo "Looking for CSVs under data/matches/:"
+          ls -al data/matches || true
+
+      - name: Prepare tables (idempotent & schema-aware)
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
+          -- Staging mirrors CSV headers
           CREATE TABLE IF NOT EXISTS staging_barbora_matches (
             left_chain        text,
             left_ext_id       text,
@@ -35,21 +42,50 @@ jobs:
             match_score       numeric
           );
 
+          -- Final table (create if missing)
           CREATE TABLE IF NOT EXISTS approved_matches_active (
-            source_chain       text,
-            source_ext_id      text,
-            target_chain       text,
-            target_ext_id      text,
-            score              numeric,
-            tier               text,
-            left_name          text,
-            left_brand         text,
-            left_size_text     text,
-            right_name         text,
-            right_brand        text,
-            right_size_text    text,
+            source_chain        text,
+            source_ext_id       text,
+            target_chain        text,
+            target_ext_id       text,
+            score               numeric,
+            tier                text,
+            left_name           text,
+            left_brand          text,
+            left_size_text      text,
+            right_name          text,
+            right_brand         text,
+            right_size_text     text,
             PRIMARY KEY (source_chain, source_ext_id, target_chain)
           );
+
+          -- If table exists with a different schema, add missing columns safely
+          ALTER TABLE approved_matches_active
+            ADD COLUMN IF NOT EXISTS source_chain        text,
+            ADD COLUMN IF NOT EXISTS source_ext_id       text,
+            ADD COLUMN IF NOT EXISTS target_chain        text,
+            ADD COLUMN IF NOT EXISTS target_ext_id       text,
+            ADD COLUMN IF NOT EXISTS score               numeric,
+            ADD COLUMN IF NOT EXISTS tier                text,
+            ADD COLUMN IF NOT EXISTS left_name           text,
+            ADD COLUMN IF NOT EXISTS left_brand          text,
+            ADD COLUMN IF NOT EXISTS left_size_text      text,
+            ADD COLUMN IF NOT EXISTS right_name          text,
+            ADD COLUMN IF NOT EXISTS right_brand         text,
+            ADD COLUMN IF NOT EXISTS right_size_text     text;
+
+          -- Ensure PK exists
+          DO $$
+          BEGIN
+            IF NOT EXISTS (
+              SELECT 1 FROM pg_constraint
+              WHERE conname = 'approved_matches_active_pk'
+            ) THEN
+              ALTER TABLE approved_matches_active
+                ADD CONSTRAINT approved_matches_active_pk
+                PRIMARY KEY (source_chain, source_ext_id, target_chain);
+            END IF;
+          END$$;
           SQL
 
       - name: Import only *strong* CSVs from data/matches/
@@ -57,11 +93,10 @@ jobs:
           set -euo pipefail
           shopt -s nullglob
 
-          # Expect these files in your repo:
-          #   data/matches/matches_Barbora_to_{Rimi,Prisma,Selver}_strong.csv
           files=(data/matches/matches_Barbora_to_*_strong.csv)
           if [ ${#files[@]} -eq 0 ]; then
-            echo "No *strong* CSVs found in data/matches/. Add them and re-run."
+            echo "❌ No *strong* CSVs found at data/matches/."
+            echo "Expected files like: matches_Barbora_to_Rimi_strong.csv"
             exit 1
           fi
 
@@ -70,14 +105,14 @@ jobs:
 
           # Load strong CSVs into staging
           for f in "${files[@]}"; do
-            echo "Loading $f"
+            echo "➡️ Loading $f"
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
               -c "\copy staging_barbora_matches FROM '${f}' WITH (FORMAT CSV, HEADER, ENCODING 'UTF8')"
           done
 
-          # Keep only strong rows (just in case)
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X -c \
-            "DELETE FROM staging_barbora_matches WHERE match_reason IS DISTINCT FROM 'strong';"
+          # Defensive filter: keep only strong
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
+            -c "DELETE FROM staging_barbora_matches WHERE match_reason IS DISTINCT FROM 'strong';"
 
           # Upsert into final
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
@@ -98,21 +133,24 @@ jobs:
           WHERE match_reason = 'strong'
           ON CONFLICT (source_chain, source_ext_id, target_chain)
           DO UPDATE SET
-            target_ext_id    = EXCLUDED.target_ext_id,
-            score            = EXCLUDED.score,
-            tier             = EXCLUDED.tier,
-            left_name        = EXCLUDED.left_name,
-            left_brand       = EXCLUDED.left_brand,
-            left_size_text   = EXCLUDED.left_size_text,
-            right_name       = EXCLUDED.right_name,
-            right_brand      = EXCLUDED.right_brand,
-            right_size_text  = EXCLUDED.right_size_text;
+            target_ext_id     = EXCLUDED.target_ext_id,
+            score             = EXCLUDED.score,
+            tier              = EXCLUDED.tier,
+            left_name         = EXCLUDED.left_name,
+            left_brand        = EXCLUDED.left_brand,
+            left_size_text    = EXCLUDED.left_size_text,
+            right_name        = EXCLUDED.right_name,
+            right_brand       = EXCLUDED.right_brand,
+            right_size_text   = EXCLUDED.right_size_text;
           SQL
 
       - name: Quick verification (counts per chain)
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
-          SELECT target_chain AS chain, COUNT(*) AS strong_rows
+          SELECT
+            target_chain AS chain,
+            COUNT(*)     AS strong_rows,
+            ROUND(AVG(score)::numeric, 4) AS avg_score
           FROM approved_matches_active
           WHERE source_chain = 'Barbora' AND tier = 'strong'
           GROUP BY target_chain
