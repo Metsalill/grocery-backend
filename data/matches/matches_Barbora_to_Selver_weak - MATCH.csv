@@ -1,0 +1,538 @@
+﻿left_chain,left_ext_id,left_name,left_brand,left_size_text,right_chain,right_ext_id,right_name,right_brand,right_size_text,match_reason,match_score
+Barbora,https-barbora-ee-toode-gin-crafters-london-dry-43-proc-0-7-l,Gin CRAFTERS London Dry 43% 0.7L,CRAFTERS GIN,,Selver,4.74005E+12,Crafters London Dry Gin 43%vol 700ml,Crafters London,,weak,0.5714
+Barbora,000000000000160559,Punase apelsininektar PFANNER 2L,PFANNER,,Selver,https://www.selver.ee/apelsininektar-50-pfanner-2-l,"Apelsininektar 50%, PFANNER, 2 l",SELVER AS,,weak,0.5
+Barbora,000000000001177251,"KÃ¼lmutatud mini-frikadellid EHE, 350g",RANNAROOTSI,,Selver,4.7403E+12,"KÃ¼lmutatud EHE mini-frikadellid, RANNAROOTSI EHE, 350 g",RANNAROOTSI LIHATÃ–Ã–STUS AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-kirsi-ouna-aroon-mahlajook-poltsamaa-2-l,Kirsi-Ãµuna-aroon. mahlajook PÃ•LTSAMAA 2L,PÃ•LTSAMAA,,Selver,4.74003E+12,"Kirsi-Ãµuna-aroonia mahlajook, PÃ•LTSAMAA, 2 L",ORKLA EESTI AS,,weak,0.5714
+Barbora,000000000001162505,"KÃ¼lm.pitsarull EESTI PAGAR,400g",EESTI PAGAR,,Selver,4.74009E+12,"Pitsarull, EESTI PAGAR, 400 g",EESTI PAGAR AS,,weak,0.6
+Barbora,https-barbora-ee-toode-riivjuust-eesti-juust-200-g,"Riivjuust EESTI JUUST, 200g",ESTOVER,,Selver,4.74014E+12,"Eesti riivjuust, 250 g",Eesti,250 g,weak,0.5
+Barbora,000000000001378188,Peakapsa Kimchi 300g,KADARBIKU,,Selver,4.74237E+12,"Peakapsa Kimchi, KADARBIKU KÃ–Ã–GIVILI, 300g",KADARBIKU KÃ–Ã–GIVILI OÃœ,,weak,0.6
+Barbora,000000000000668648,"Till taldrikul, pakitud, kg",,,Selver,https://www.selver.ee/aedtill-pakitud-taldrikul-kg,"Aedtill pakitud taldrikul, kg",MÃ¤Ã¤ramata,,weak,0.5
+Barbora,https-barbora-ee-toode-kanasult-fitlap-noo-300-g,"KanasÃ¼lt Fitlap NÃ•O, 300g",NÃ•O,,Selver,4.74057E+12,"KanasÃ¼lt Fitlap, NÃ•O LIHAVÃœRST, 300 g",NÃ•O LIHATÃ–Ã–STUS OÃœ,,weak,0.6
+Barbora,000000000001291762,"KÃ¼lm.pitsa RISTORANTE Speciale, 345g",DR.OETKER,,Selver,4.00172E+12,"Pitsa Ristorante Speciale, DR.OETKER, 345g",JUNGENT ESTONIA OÃœ,,weak,0.5714
+Barbora,https-barbora-ee-toode-tuunikala-oliiviolis-rio-mare-160-g,"Tuunikala oliiviÃµlis RIO MARE,160g",RIO MARE,,Selver,https://www.selver.ee/tuunikala-soolvees-rio-mare-160-g,"Tuunikala soolvees, RIO MARE, 160 g",INTERALTUS OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-suitsusardell-rakvere-500-g,"Suitsusardell RAKVERE, 500g",RAKVERE,,Selver,4.74E+12,"Suitsusardell, RAKVERE LK, 500 g",RAKVERE LIHAKOMBINAAT AS,,weak,0.5
+Barbora,https-barbora-ee-toode-energiajook-starter-500-ml,Energiajook STARTER 500ml,STARTER,,Selver,4.74005E+12,"Energiajook, STARTER, 500 ml",LIVIKO AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-pehme-valge-juust-athena-classic-500-g,"Pehme valge juust ATHENA Classic, 500g",ATHENA,,Selver,4.74057E+12,"Pehme valge juust, ATHENA, 500 g",ESTOVER OÃœ,,weak,0.6667
+Barbora,https-barbora-ee-toode-varska-naturaal-mulliga-1-5-l,"VÃ¤rska Naturaal Mulliga 1,5L",VÃ„RSKA ORIGINAAL,,Selver,4.74004E+12,"Joogivesi Naturaal mulliga, VÃ„RSKA, 1,5 l",SAKU Ã•LLETEHASE AS,,weak,0.6
+Barbora,https-barbora-ee-toode-kaerajook-oatly-barista-edition-500-ml,"Kaerajook OATLY Barista Edition, 500ml",OATLY,,Selver,7.39438E+12,"Vahustatav kaerajook Barista Edition, OATLY, 1 l",CLUB-MATE EESTI OÃœ,,weak,0.6667
+Barbora,https-barbora-ee-toode-jogurt-natural-maitsestamata-tere-380-g,Jogurt Natural maitsestamata TERE 380g,TERE,,Selver,125069,"Jogurt Natural maitsestamata laktoosivaba, TERE, 380 g",,,weak,0.6667
+Barbora,https-barbora-ee-toode-kulm-merluus-esva-argentiina-peata-595-g,"KÃ¼lm.merluus ESVA Argentiina peata, 595g",ESVA,,Selver,4.77019E+12,"Argentiina merluus peata, 595 g",Argentiina,595 g,weak,0.5
+Barbora,https-barbora-ee-toode-munavalged-orrekanade-munadest-1-kg,"Munavalged Ãµrrekanade munadest, 1kg",,,Selver,5.70161E+12,"Whitepro munavalged Ãµrrekanade munadest, 1 kg",Whitepro,1 kg,weak,0.6
+Barbora,https-barbora-ee-toode-hummus-avokaadoga-noa-175-g,Hummus avokaadoga NOA 175g,,,Selver,4.05809E+12,"Noa Spread avokaado hummus, 175g",Noa Spread,175 g,weak,0.5
+Barbora,000000000000296429,LikÃ¶Ã¶r BLUE CURACAO 20% 700ml,RETRO,,Selver,8.41477E+12,"LikÃ¶Ã¶r BEVELAND Blue Curacao, 70 cl",LIVIKO AS,,weak,0.5
+Barbora,000000000000961820,"KÃ¼lm.pelmeenid seentega Gyoza, 400g",VICI,,Selver,4.77019E+12,"Pelmeenid seentega Gyoza, Vici, 400 g",VICIUNAI BALTIC OÃœ,,weak,0.5
+Barbora,000000000000144157,"Viin VIRU VALGE VÃ„GEV 80% 0,5 L",VIRU VALGE,,Selver,4.74005E+12,Viru Valge VÃ¤gev viin 80%vol 500ml,Viru Valge,500 ml,weak,0.6667
+Barbora,000000000000697930,"Eesti kÃ¼Ã¼slaugu kÃ¼Ã¼ned pakitud, 100g",,,Selver,4.74027E+12,"KÃ¼Ã¼slaugu kÃ¼Ã¼ned pakitud, 100 g",KÃ¼Ã¼slaugu,100 g,weak,0.6
+Barbora,000000000000184820,Cognac HENNESSY XO 40% 350ml karp,HENNESSY,,Selver,3.24599E+12,"Hennessy XO Cognac 40%vol 350ml, karbis",Hennessy XO,,weak,0.5714
+Barbora,000000000001291761,"KÃ¼lm.pitsa Prosciutto RISTORANTE, 340g",DR.OETKER,,Selver,4.00172E+12,Ristorante Pitsa Prosciutto 340 g,Ristorante Pitsa,340 g,weak,0.6
+Barbora,https-barbora-ee-toode-suitsusardell-rannarootsi-500-g,"Suitsusardell RANNAROOTSI, 500g",RANNAROOTSI,,Selver,4.7403E+12,"Suitsusardell, RANNAROOTSI, 500 g",RANNAROOTSI LIHATÃ–Ã–STUS AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-kodune-kotletisegu-m-m-500-g,"Kodune kotletisegu M&M, 500g",MAKS & MOORITS,,Selver,4.74017E+12,Ma&orits Kodune Kotletisegu 500G,Ma&orits Kodune,500 g,weak,0.5
+Barbora,https-barbora-ee-toode-energiajook-red-bull-473-ml-prk,"Energiajook RED BULL 473ml,prk",RED BULL,,Selver,9.00249E+12,"Energiajook, RED BULL, 473 ml",TRIDENS AS,,weak,0.6
+Barbora,https-barbora-ee-toode-kulm-kentucky-broileriribad-250-g,KÃ¼lm. Kentucky broileriribad 250g,,,Selver,8.42032E+12,"VÃ¼rtsikad Kentucky broileriribad, FRIPOZO, 250g",JUNGENT ESTONIA OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-kohupiimakreem-tere-emma-kakao-150-g,"Kohupiimakreem TERE Emma kakao,150g",TERE,,Selver,4.74004E+12,"Kohupiimakreem kakao, EMMA, 150 g",TERE AS,,weak,0.6
+Barbora,https-barbora-ee-toode-keefir-nopri-2-5-proc-1-l,"Keefir NOPRI 2,5%, 1L",NOPRI,,Selver,4.74022E+12,"Keefir 2,5%, NOPRI, 1 kg",NOPRI TALUMEIEREI OÃœ,,weak,0.6667
+Barbora,000000000001378188,Peakapsa Kimchi 300g,KADARBIKU,,Selver,4.74237E+12,"Peakapsa Kimchi, KADARBIKU KÃ–Ã–GIVILI, 300g",KADARBIKU KÃ–Ã–GIVILI OÃœ,,weak,0.6
+Barbora,https-barbora-ee-toode-kaerajook-oatly-barista-edition-1-l,"Kaerajook OATLY Barista Edition, 1l",OATLY,,Selver,7.39438E+12,"Vahustatav kaerajook Barista Edition, OATLY, 1 l",CLUB-MATE EESTI OÃœ,,weak,0.6667
+Barbora,000000000001163659,Pestud porgand KADARBIKU 1kg,KADARBIKU,,Selver,2.70002E+12,"Porgand pestud, kg",MÃ¤Ã¤ramata,,weak,0.5
+Barbora,https-barbora-ee-toode-toorjuust-farmi-originaal-29-8-proc-150-g,"Toorjuust FARMI originaal 29.8%,150g",FARMI,,Selver,4.74012E+12,"Toorjuust originaal, 150 g",Toorjuust,150 g,weak,0.5
+Barbora,000000000000037449,Gin BEEFEATER 40% 700ml,BEEFEATER,,Selver,85652,Beefeater London Dry Gin 40%vol 700ml,Beefeater London,,weak,0.5
+Barbora,https-barbora-ee-toode-hautatud-veiseliha-frank-pott-240-g,"Hautatud veiseliha Frank Pott, 240g",FRANK POTT,,Selver,4.74022E+12,"Hautatud sealiha, FRANK POTT, 240 g",RANNAROOTSI LIHATÃ–Ã–STUS AS,,weak,0.5
+Barbora,000000000001378337,Punase peakapsa Kimchi 300g,KADARBIKU,,Selver,4.74237E+12,"Punase peakapsa Kimchi, KADARBIKU KÃ–Ã–GIVILI, 300g",KADARBIKU KÃ–Ã–GIVILI OÃœ,,weak,0.6667
+Barbora,https-barbora-ee-toode-kohupiimakreem-alma-mangokisselliga-140-g,"Kohupiimakreem ALMA mangokisselliga,140g",ALMA,,Selver,4.74013E+12,"Mangokisselliga kohupiimakreem, 140 g",Mangokisselliga,140 g,weak,0.5
+Barbora,000000000001207773,"Hapukurk PEIPSI, 400g",PEIPSI,,Selver,4.74466E+12,Peipsi hapukurk 400g Germani talu,Peipsi,400 g,weak,0.6
+Barbora,https-barbora-ee-toode-rukkipala-idandatud-teradega-240-g,Rukkipala idandatud teradega 240g,LEIBUR,,Selver,4.74007E+12,Leibur Rukkipala Idandatud Teradega 240 G,Leibur Rukkipala,240 G,weak,0.6
+Barbora,https-barbora-ee-toode-poolsuitsuvorst-tommu-juustuga-woro-350-g,"Poolsuitsuvorst TÃµmmu juustuga WÃ•RO,350g",WÃ•RO,,Selver,4.74056E+12,"Poolsuitsuvorst TÃµmmu, WÃ•RO, 350 g",Suitsuvorst TÃµmmu,,weak,0.6
+Barbora,https-barbora-ee-toode-margariin-voimix-soolane-60-proc-400-g,"Margariin VOIMIX soolane 60%, 400g",VOIMIX,,Selver,6.43821E+12,"Voimix Soolane 60%, VOIMIX, 400 g",Soolane,400 g,weak,0.5
+Barbora,000000000001204966,"KÃ¼lm.pitsataigen EESTI PAGAR,600g",EESTI PAGAR,,Selver,4.74009E+12,"Pitsataigen, EESTI PAGAR, 600 g",EESTI PAGAR AS,,weak,0.6
+Barbora,000000000001168372,"Kimchi salat, 450g",DIMDIÅ…I,,Selver,4.751E+12,"Kimchi salat, DIMDINI, 450 g",MÃ¤Ã¤ramata,,weak,0.5
+Barbora,https-barbora-ee-toode-viin-hobe-mahe-39-2-proc-700-ml,Viin HÃ•BE Mahe 39.2% 700ml,HÃ•BE,,Selver,4.74005E+12,"Viin HÃµbe mahe, 70cl",LIVIKO AS,,weak,0.6
+Barbora,https-barbora-ee-toode-doktorivorst-lihakas-rakvere-170-g-viil,"Doktorivorst Lihakas RAKVERE, 170g viil",RAKVERE,,Selver,4.74E+12,"Lihakas doktorivorst, RAKVERE, 170 g",MAAG EESTI AS,,weak,0.6
+Barbora,https-barbora-ee-toode-alk-jook-cooler-green-apple-4-proc-275-ml,Alk.jook Cooler Green Apple 4% 275ml,COOLER,,Selver,4.74005E+12,Cooler Green Apple 4%vol muu alkohoolne jook 275ml,Cooler Green,275 ml,weak,0.5556
+Barbora,https-barbora-ee-toode-jogurt-gefilus-maitsestamata-2-5-proc-380-g,"Jogurt GEFILUS maitsestamata 2.5%, 380g",VALIO GEFILUS,,Selver,4.74013E+12,"Maitsestamata jogurt 2,5%, 380 g",Maitsestamata,380 g,weak,0.5
+Barbora,https-barbora-ee-toode-bechamel-koorekaste-foodstudio-350-ml,"Bechamel koorekaste FOODSTUDIO, 350ml",FOODSTUDIO,,Selver,https://www.selver.ee/bechamel-valge-koorekaste-foodstudio-350-ml,"Bechamel valge koorekaste, FOODSTUDIO, 350 ml",ABESTOCK AS,,weak,0.6
+Barbora,https-barbora-ee-toode-mineraalvesi-varska-0-5-l,"Mineraalvesi VÃ„RSKA 0,5 L",VÃ„RSKA,,Selver,4.74004E+12,"VÃ¤rska Originaal karboniseeritud mineraalvesi, 500 ml",VÃ¤rska Originaal,500 ml,weak,0.5
+Barbora,https-barbora-ee-toode-viin-viru-valge-40-proc-700-ml,Viin VIRU VALGE 40% 700ml,VIRU VALGE,,Selver,4.74005E+12,"Viin VIRU VALGE , 70 cl",LIVIKO AS,,weak,0.6
+Barbora,https-barbora-ee-toode-sojajook-alpro-sokolaadi-250-ml,"Sojajook ALPRO Å¡okolaadi, 250ml",ALPRO,,Selver,5.41119E+12,"Å okolaadi sojajook laktoosivaba, ALPRO, 250 ml",NUTRICIA SIA,,weak,0.6
+Barbora,https-barbora-ee-toode-juust-hiirte-estover-viilutatud-500-g,"Juust Hiirte ESTOVER viilutatud, 500g",ESTOVER,,Selver,4.74057E+12,"Hiirte juust, viilutatud, 500 g",Hiirte,500 g,weak,0.6
+Barbora,https-barbora-ee-toode-sulat-juust-old-saare-mo-saaremaa-185-g,"Sulat.juust Old Saare MO SAAREMAA,185g",MO SAAREMAA,,Selver,4.74015E+12,"Sulatatud juust Old Saare, MO SAAREMAA, 185 g",PINUS AS,,weak,0.625
+Barbora,000000000000756274,Dattel 200g,,,Selver,https://www.selver.ee/dattel-200-g,"Dattel, 200 g",MÃ¤Ã¤ramata,,weak,0.5
+Barbora,000000000000181718,"Virsik 1kl., kg",,,Selver,2.70004E+12,"Virsik, kg",MÃ¤Ã¤ramata,,weak,0.5
+Barbora,https-barbora-ee-toode-juustumuhkel-fazer-200-g,Juustumuhkel FAZER 200g,FAZER,,Selver,4.7401E+12,Fazer Juustumuhkel 200 G,Fazer Juustumuhkel,200 G,weak,0.6667
+Barbora,000000000001286055,"Pirn Conference pakitud, 1kg",,,Selver,2.70139E+12,"Pirn Conference, kg",MÃ¤Ã¤ramata,,weak,0.5
+Barbora,https-barbora-ee-toode-skyr-farmi-apelsini-stracciatella-150-g,"Skyr FARMI apelsini-stracciatella, 150g",SKYR,,Selver,4.74011E+12,"Apelsini-Stracciatella skyr, 150 g",Apelsini-Stracciatella,150 g,weak,0.6
+Barbora,https-barbora-ee-toode-jahvatatud-kohv-in-cup-merrild-400-g,Jahvatatud kohv In-Cup MERRILD 400g,MERRILD,,Selver,8.00007E+12,"Jahvatatud tassikohv In-Cup, MERRILD, 400 g",SELVER AS,,weak,0.5
+Barbora,https-barbora-ee-toode-koore-kukeseene-kaste-foodstudio-230-ml,Koore. kukeseene kaste FOODSTUDIO 230ml,FOODSTUDIO,,Selver,4.74448E+12,"Koorene Kukeseene kaste, FOODSTUDIO, 230ml",ABESTOCK AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-kohvioad-selezione-crema-segafredo-1-kg,Kohvioad Selezione Crema SEGAFREDO 1kg,SEGAFREDO,,Selver,9.00181E+12,"Kohvioad Selezione Crema, SEGAFREDO ZANETTI, 1 kg",MEIRA EESTI OÃœ,,weak,0.6667
+Barbora,000000000001163659,Pestud porgand KADARBIKU 1kg,KADARBIKU,,Selver,2.70002E+12,"Porgand pestud, kg",MÃ¤Ã¤ramata,,weak,0.5
+Barbora,37796,Mineraalvesi VYTAUTAS 1.5L,VYTAUTAS,,Selver,4.77041E+12,"Mineraalvesi Vytautas, VYTAUTAS, 1,5 L",GOLDBERGER OÃœ,,weak,0.6667
+Barbora,https-barbora-ee-toode-jaatis-brookies-kupsise-ben-jerry-s-388-g,JÃ¤Ã¤tis Brookies kÃ¼psise.BEN&JERRY'S 388g,BEN&JERRY,,Selver,8.71133E+12,"Brookies and cream jÃ¤Ã¤tis, BEN&JERRYÂ´S, 388 g",UNILEVER EESTI AS,,weak,0.625
+Barbora,https-barbora-ee-toode-rumm-captain-morgan-dark-40-proc-1-l,Rumm CAPTAIN MORGAN Dark 40% 1L,CAPTAIN MORGAN,,Selver,0087000006935,"Rumm CAPTAIN MORGAN Dark, 100cl",PRIKE AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-gin-tanqueray-sevilla-41-3-proc-700-ml,Gin TANQUERAY Sevilla 41.3% 700ml,TANQUERAY,,Selver,5.00028E+12,"Tanqueray Gin 43,1%vol 700ml",Tanqueray Gin,,weak,0.6
+Barbora,https-barbora-ee-toode-toorvorstikesed-forte-juustu-m-m-400-g,"Toorvorstikesed Forte juustu M&M,400g",MAKS & MOORITS,,Selver,6780,Forte juustu toorvorstikesed 400 g,Forte,400 g,weak,0.6
+Barbora,https-barbora-ee-toode-juust-eesti-valio-atleet-viil-500-g,"Juust Eesti VALIO ATLEET viil., 500g",VALIO ATLEET,,Selver,4.74055E+12,"Juust Atleet Eesti viilud, VALIO, 500 g",VALIO EESTI AS,,weak,0.5714
+Barbora,https-barbora-ee-toode-kulm-seenesegu-maaharra-400-g,"KÃ¼lm. seenesegu MAAHÃ„RRA, 400g",MAAHÃ„RRA,,Selver,4.74009E+12,"Seenesegu, MAAHÃ„RRA, 400 g",PREMIA TALLINNA KÃœLMHOONE AS,,weak,0.5
+Barbora,https-barbora-ee-toode-kulm-pelmeenid-pealinna-350-g,"KÃ¼lm.pelmeenid PEALINNA, 350g",PEALINNA,,Selver,4.74009E+12,Pealinna pelmeenid 350 g,Pealinna,350 g,weak,0.5
+Barbora,https-barbora-ee-toode-ameerika-burgerikaste-heinz-418-g-400-ml,Ameerika burgerikaste HEINZ 418g/400ml,HEINZ,,Selver,8.7157E+12,"AmeerikapÃ¤rane burgerikaste, HEINZ, 400ml",EUGESTA EESTI OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-teratasku-eesti-pagar-4-tk-280-g,"Teratasku Eesti Pagar 4tk, 280g",Eesti Pagar,,Selver,4.74009E+12,Eesti Pagar Teratasku 280 G,Eesti Pagar,280 G,weak,0.6
+Barbora,https-barbora-ee-toode-tomati-ricotta-pesto-filippo-berio-190-g,Tomati.ricotta pesto FILIPPO BERIO 190g,FILIPPO BERIO,,Selver,8.00221E+12,"Pesto tomati ja ricotta juustuga, FILIPPO BERIO, 190 g",SVENSKY KAUBANDUSE AS,,weak,0.625
+Barbora,https-barbora-ee-toode-jahvatatud-kohv-jacobs-kronung-500-g,Jahvatatud kohv JACOBS Kronung 500g,JACOBS,,Selver,8.711E+12,"Jahvatatud kohv KrÃ¶nung, JACOBS, 500 g",SELVER AS,,weak,0.5
+Barbora,https-barbora-ee-toode-jog-jook-actimel-maasika-8-x-100-g,"Jog.jook ACTIMEL maasika, 8x100g",ACTIMEL,,Selver,4.75101E+12,"Jogurtijook maasika 8x100g, ACTIMEL, 800 g",NUTRICIA SIA,,weak,0.5
+Barbora,https-barbora-ee-toode-juust-hiirte-estover-viilutatud-200-g,"Juust Hiirte ESTOVER viilutatud, 200g",ESTOVER,,Selver,4.74057E+12,"Viilutatud juust 25,2%, HIIRTE JUUST, 200 g",ESTOVER OÃœ,,weak,0.6
+Barbora,https-barbora-ee-toode-koorejogurt-muah-marja-plomb-alma-180-g,Koorejogurt Muah marja-plomb. ALMA 180g,ALMA,,Selver,4.74013E+12,"Koorejogurt muah marja-plombiirimaitseline, ALMA, 180 g",VALIO EESTI AS,,weak,0.5714
+Barbora,https-barbora-ee-toode-hele-olu-saku-rock-5-3-proc-500-ml-pdl,"Hele Ãµlu SAKU ROCK 5,3% 500ml PDL",SAKU,,Selver,4.74002E+12,"Hele Ãµlu Rock, SAKU, 500 ml pudel",SAKU Ã•LLETEHASE AS,,weak,0.5714
+Barbora,https-barbora-ee-toode-voi-tere-82-proc-200-g,"VÃµi TERE 82%, 200g",TERE,,Selver,4.74004E+12,"Tere VÃµi 82%, 200 g",Tere VÃµi,200 g,weak,0.6667
+Barbora,https-barbora-ee-toode-lastevorst-lihakas-rakvere-170-g-viil,"Lastevorst Lihakas RAKVERE, 170g viil",RAKVERE,,Selver,4.74E+12,"Lihakas lastevorst, RAKVERE, 170 g",Rakvere Lihakas,,weak,0.6
+Barbora,https-barbora-ee-toode-wrapikaste-felix-395-g,"Wrapikaste FELIX, 395g",FELIX,,Selver,4.74003E+12,"Felix Wrapikaste, 220 g","Felix Wrapikaste,",220 g,weak,0.6667
+Barbora,000000000000152409,Whisky J.WALKER Red Label 40% 1L,JOHNNIE WALKER,,Selver,5.00027E+12,Johnnie Walker Red Label Scotch Whisky 40%vol 1L,Johnnie Walker,,weak,0.5556
+Barbora,https-barbora-ee-toode-kookose-mandlijook-alpro-1-l,"Kookose-mandlijook ALPRO, 1L",ALPRO,,Selver,5.41119E+12,"Alpro kookose-mandlijook, laktoosivaba, vegan, 1l",Alpro,1 l,weak,0.6667
+Barbora,https-barbora-ee-toode-juust-zott-toasty-hamburger-viil-120-g,"Juust ZOTT Toasty Hamburger viil.,120g",ZOTT,,Selver,4.0145E+12,Zott toasty hamburger sulatud juust 120 g,Zott,120 g,weak,0.5714
+Barbora,000000000000181258,"Valge paprika 1.kl.,kg",,,Selver,2.70499E+12,"Valge paprika, kg",MÃ¤Ã¤ramata,,weak,0.6667
+Barbora,https-barbora-ee-toode-lahustuv-kohv-merrild-classic-200-g,Lahustuv kohv MERRILD Classic 200g,MERRILD,,Selver,8.00007E+12,"Lahustuv kohv Gold, MERRILD, 200 g",SELVER AS,,weak,0.5
+Barbora,https-barbora-ee-toode-surimipulgad-sriracha-kastmega-vici-200-g,"Surimipulgad sriracha kastmega VICI,200g",VICI,,Selver,4.77019E+12,"Mini surimipulgad sriracha majoneesiga, VICI, 200g",VIÄŒIUNAI BALTIC OÃœ,,weak,0.5714
+Barbora,000000000000014335,Jahvatatud kohv KRÃ–NUNG 250g,JACOBS,,Selver,8.711E+12,"Jahvatatud kohv KrÃ¶nung, JACOBS, 250 g",SELVER AS,,weak,0.6
+Barbora,000000000000054498,"KÃ¼lm.kalaburgerid ESVA, 250g",ESVA,,Selver,4.74006E+12,"Kalaburgerid, ESVA, 250 g",VIÄŒIUNAI BALTIC OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-peekon-maks-moorits-100-g-viil,"Peekon MAKS&MOORITS, 100g viil",MAKS & MOORITS,,Selver,4.74017E+12,"Peekon, MAKS&MOORITS, 100 g",Peekon,100 g,weak,0.6
+Barbora,https-barbora-ee-toode-kodujuust-otto-klassikaline-330-g,"Kodujuust OTTO klassikaline, 330g",PIIMAMEISTER OTTO,,Selver,4.74057E+12,"Piimameister Otto Klassikaline kodujuust, 330 g",Piimameister Otto,330 g,weak,0.6
+Barbora,https-barbora-ee-toode-podraliha-konserv-linnamae-240-g,"PÃµdraliha konserv LINNAMÃ„E, 240g",LINNAMÃ„E,,Selver,4.74062E+12,"PÃµdraliha konserv, LINNAMÃ„E LIHATÃ–Ã–STUS, 240 g",LinnamÃ¤e,,weak,0.6
+Barbora,https-barbora-ee-toode-kapslid-nesquik-dg-nescafe-16-x-16-g,Kakaokapslid NESCAFÃ‰Â® Dolce GustoÂ® NesquikÂ® 16tk,NESCAFE DOLCE GUSTO,,Selver,7.61303E+12,"Kakaokapslid Dolce Gusto Nesquik, NESCAFE, 16 tk",SELVER AS,,weak,0.5
+Barbora,000000000001276893,"KÃ¼lm.kÃ¶Ã¶givil.segu Go Green BAUER,400g",BAUER,,Selver,5.90315E+12,"KÃ¶Ã¶giviljasegu â€žGO Greenâ€œ, BAUER, 400g",BIMAR OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-kanatiib-maisikattega-vurts-tallegg-300-g,"Kanatiib maisikattega vÃ¼rts.TALLEGG,300g",TALLEGG,,Selver,4.74005E+12,"Maisikattega vÃ¼rtsikas kanatiib, TALLEGG, 300 g",TALLEGG Maisikattega,300 g,weak,0.5
+Barbora,https-barbora-ee-toode-grill-sardiinid-olis-briis-eo-140-g,"Grill sardiinid Ãµlis BRIIS, EO 140g",EPINELL,,Selver,4.74231E+12,"Grill sardiinid Ãµlis, EPINELL, 140g",DGM SHIPPING AS,,weak,0.5714
+Barbora,https-barbora-ee-toode-jogurt-farmi-leiva-pahkli-lakt-vaba-400-g,"Jogurt FARMI leiva-pÃ¤hkli lakt.vaba,400g",FARMI,,Selver,https://www.selver.ee/hulgi-jogurt-leiva-pahkli-3tk-farmi-3-x-400g,"HULGI Jogurt leiva-pÃ¤hkli 3tk, FARMI, 3 x 400g",FARMI PIIMATÃ–Ã–STUS AS,,weak,0.5556
+Barbora,https-barbora-ee-toode-keefir-gefilus-jaakohv-300-g,"Keefir GEFILUS jÃ¤Ã¤kohv, 300g",VALIO GEFILUS,,Selver,4.74013E+12,Gefilus keefir jÃ¤Ã¤kohvi 300g,Gefilus,300 g,weak,0.6
+Barbora,000000000000037449,Gin BEEFEATER 40% 700ml,BEEFEATER,,Selver,85652,Beefeater London Dry Gin 40%vol 700ml,Beefeater London,,weak,0.5
+Barbora,https-barbora-ee-toode-taissuitsuvorst-juustuga-moskva-noo-250-g,"TÃ¤issuitsuvorst juustuga Moskva NÃ•O,250g",NÃ•O,,Selver,4.74057E+12,"TÃ¤issuitsuvorst Moskva, NÃ•O, 250 g",NÃ•O LIHATÃ–Ã–STUS OÃœ,,weak,0.6
+Barbora,https-barbora-ee-toode-varska-naturaal-mullita-1-5-l,"VÃ„RSKA Naturaal Mullita 1,5L",VÃ„RSKA ORIGINAAL,,Selver,4.74004E+12,"VÃ¤rska Naturaal Gaseerimata vesi 1,5L",VÃ¤rska Naturaal,"1,5L",weak,0.5
+Barbora,https-barbora-ee-toode-veiserind-oskar-100-g-viil,"Veiserind OSKAR, 100g viil",OSKAR,,Selver,4.74057E+12,"Veiserind, OSKAR, 100 g",OSKAR LT AS,,weak,0.5
+Barbora,https-barbora-ee-toode-jogurt-activia-maasikatega-4-x-120-g,"Jogurt ACTIVIA maasikatega, 4x120g",ACTIVIA,,Selver,4.75101E+12,"Jogurt maasika 4x120g, ACTIVIA, 480 g",NUTRICIA SIA,,weak,0.6
+Barbora,000000000001168372,"Kimchi salat, 450g",DIMDIÅ…I,,Selver,4.751E+12,"Kimchi salat, DIMDINI, 450 g",MÃ¤Ã¤ramata,,weak,0.5
+Barbora,https-barbora-ee-toode-brandy-imperial-xii-vsop-36-proc-700-ml,Brandy IMPERIAL XII VSOP 36% 700ml,IMPERIAL XII,,Selver,4.77003E+12,Imperial XII VSOP Brandy 36%vol 500ml,Imperial XII,,weak,0.5714
+Barbora,000000000000184858,Cognac LARSEN VSOP 40% 500ml,LARSEN,,Selver,3.27251E+12,Larsen VSOP Cognac karbis 40%vol 500ml,Larsen VSOP,,weak,0.6667
+Barbora,https-barbora-ee-toode-jaatis-passion-virsik-mango-classic-64-g,JÃ¤Ã¤tis passion-virsik-mango CLASSIC 64g,CLASSIC,,Selver,4.74019E+12,"Mango-virsik-passion koorejÃ¤Ã¤tis jogurtiglasuuris, CLASSIC, 64 g",BALBIINO AS,,weak,0.5
+Barbora,https-barbora-ee-toode-juust-gouda-nopri-karulauguga-250-g,"Juust Gouda NOPRI karulauguga, 250g",NOPRI,,Selver,11085,"Gouda Karulauguga, NOPRI, 250 g",Gouda,250 g,weak,0.6
+Barbora,37795,"Mineraalvesi VYTAUTAS 1L,g-tud",VYTAUTAS,,Selver,4.77041E+12,"Mineraalvesi, VYTAUTAS, 1 L",GOLDBERGER OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-juustu-snakk-farmi-ornsuitsuvurts-200-g,"Juustu snÃ¤kk FARMI ÃµrnsuitsuvÃ¼rts.,200g",FARMI,,Selver,4.74012E+12,"Farmi Juustu snÃ¤kk, 200 g",Farmi Juustu,200 g,weak,0.6
+Barbora,https-barbora-ee-toode-mandlijook-alpro-barista-1-l,"Mandlijook ALPRO Barista, 1L",ALPRO,,Selver,8716,"Barista mandlijook laktoosivaba, ALPRO, 1 l",ALPRO BARISTA,1 l,weak,0.6
+Barbora,000000000001378337,Punase peakapsa Kimchi 300g,KADARBIKU,,Selver,4.74237E+12,"Punase peakapsa Kimchi, KADARBIKU KÃ–Ã–GIVILI, 300g",KADARBIKU KÃ–Ã–GIVILI OÃœ,,weak,0.6667
+Barbora,000000000001284310,"KÃ¼lm.Å¡okolaadisaiake EESTI PAGAR, 240g",EESTI PAGAR,,Selver,4.74009E+12,"Å okolaadisaiake vÃµiga, EESTI PAGAR, 240 g",EESTI PAGAR AS,,weak,0.5
+Barbora,000000000000038223,KPN vein EL COTO Blanco Rioja 750ml,EL COTO,,Selver,8.41054E+12,El Coto Rioja Blanco 75 cl,MEDIATO AS,,weak,0.5
+Barbora,https-barbora-ee-toode-kuuslaugu-urtide-kaste-hellmann-s-260-g,KÃ¼Ã¼slaugu&Ã¼rtide kaste HELLMANN'S 260g,HELLMANN'S,,Selver,8.7112E+12,"KÃ¼Ã¼slaugu-Ã¼rdi kaste, HELLMANN'S, 250 ml",UNILEVER EESTI OÃœ,,weak,0.5714
+Barbora,https-barbora-ee-toode-vin-vorst-iberico-fuetec-elpozo-150-g,"Vin. vorst Iberico Fuetec ELPOZO, 150 g",ELPOZO,,Selver,8.41084E+12,"Salaami Fuetec Iberico, ELPOZO, 150 g",Fuetec Iberico,,weak,0.5
+Barbora,https-barbora-ee-toode-pr-raimed-tomatikastmes-kaluri-500-g,"Pr.rÃ¤imed tomatikastmes KALURI,500g",KALURI,,Selver,4.74059E+12,"Praetud rÃ¤imed tomatikastmes, KALURI, 500 g",LÃ„Ã„TSA KALATÃ–Ã–STUS AS,,weak,0.5
+Barbora,https-barbora-ee-toode-kohvioad-arabica-selected-paulig-1-kg,Kohvioad Arabica Selected PAULIG 1kg,PAULIG,,Selver,6.4113E+12,"Kohviuba Arabica Selected, PAULIG, 1 kg",PAULIG COFFEE ESTONIA AS,,weak,0.5
+Barbora,000000000001025726,"KÃ¼lm.Panko kalafileepulgad VICI,285g",VICI,,Selver,4.74006E+12,"Kalafileepulgad Panko paneeringus, VICI, 285 g",VICIUNAI BALTIC OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-kulmutatud-kalapulgad-esva-250-g,"KÃ¼lmutatud kalapulgad ESVA, 250g",ESVA,,Selver,4.74006E+12,"Esva Silver kalapulgad, 250g",Esva Silver,250 g,weak,0.6
+Barbora,https-barbora-ee-toode-jahvatatud-kohv-jacobs-kronung-mild-500-g,Jahvatatud kohv JACOBS Kronung Mild 500g,JACOBS,,Selver,8.711E+12,"Jahvatatud kohv KrÃ¶nung mild, JACOBS, 500 g",SELVER AS,,weak,0.5714
+Barbora,https-barbora-ee-toode-pirni-ounamahlajook-aura-fresh-2-l,Pirni-Ãµunamahlajook AURA Fresh 2L,AURA,,Selver,4.7401E+12,Aura Fresh pirni-Ãµuna mahlajook 2L,Aura Fresh,2 L,weak,0.5714
+Barbora,https-barbora-ee-toode-koorejogurt-muah-barbarissi-alma-180-g,Koorejogurt Muah barbarissi ALMA 180g,ALMA,,Selver,4.74013E+12,"Koorejogurt muah troopiline, ALMA, 180 g",VALIO EESTI AS,,weak,0.5
+Barbora,000000000000382955,Mineraalvesi VÃ„RSKA originaal 500ml,VÃ„RSKA ORIGINAAL,,Selver,4.74004E+12,"VÃ¤rska Originaal karboniseeritud mineraalvesi, 500 ml",VÃ¤rska Originaal,500 ml,weak,0.6
+Barbora,https-barbora-ee-toode-rebitud-kanatu-thormi-200-g,Rebitud kanatu THORMI 200g,THORMI,,Selver,4.74501E+12,Thormi taimne rebitud kanatu 200 g,Thormi,200 g,weak,0.6
+Barbora,https-barbora-ee-toode-mineraalvesi-vichy-looduslik-g-tud-1-5-l,Mineraalvesi VICHY Looduslik g-tud 1.5L,VICHY,,Selver,4.74002E+12,"Vichy Looduslik Mineraalvesi 1,5L PET",Vichy Looduslik,1.5 L,weak,0.6667
+Barbora,https-barbora-ee-toode-viin-laua-40-proc-200-ml,Viin LAUA 40% 200ml,LAUA VIIN,,Selver,4.74005E+12,"Laua Viin 40%vol 200ml, PET",Laua Viin,200 ml,weak,0.6
+Barbora,https-barbora-ee-toode-pitsakate-noo-300-g,"Pitsakate NÃ•O, 300g",NÃ•O,,Selver,4.74057E+12,"Pitsakate, NÃ•O, 300 g",NÃµo Pitsakate,300 g,weak,0.6667
+Barbora,https-barbora-ee-toode-whisky-tullamore-dew-40-proc-500-ml,Whisky TULLAMORE DEW 40% 500ml,TULLAMORE,,Selver,5.39152E+12,Tullamore Dew Irish Whisky 40%vol 500ml,Tullamore Dew,,weak,0.6667
+Barbora,000000000000068761,Kohvivalgendaja COFFEETA 200g,COFFEETA,,Selver,https://www.selver.ee/kohvivalgendaja-coffeeta-400-g,"Kohvivalgendaja, COFFEETA, 400 g",OSAMA EESTI OÃœ,,weak,0.6667
+Barbora,https-barbora-ee-toode-tarrejanks-tutti-frutti-tarretis-150-g,"TarreJÃ¤nks Tutti - Frutti tarretis, 150g",JÃ„NKS,,Selver,4.74011E+12,"Tarretis tutti-frutti, JÃ„NKS, 150 g",FARMI PIIMATÃ–Ã–STUS AS,,weak,0.5
+Barbora,https-barbora-ee-toode-delikatess-seahakkliha-m-m-300-g,"Delikatess seahakkliha M&M, 300g",MAKS & MOORITS,,Selver,4.74017E+12,Ma&orits Delikatess Seahakkliha 300G,Ma&orits Delikatess,300 g,weak,0.5
+Barbora,000000000000014419,Vermut Martini Extra Dry 1L,MARTINI,,Selver,7.63004E+12,"MARTINI Extra Dry, 100 cl",LIVIKO AS,,weak,0.5
+Barbora,https-barbora-ee-toode-pereviiner-rakvere-500-g,"Pereviiner RAKVERE, 500g",RAKVERE,,Selver,4.74E+12,Rakvere Pereviiner 500 G,Rakvere Pereviiner,500 g,weak,0.6667
+Barbora,000000000000027644,Kohvioad Arabica PAULIG 1kg,PAULIG,,Selver,6.41847E+12,Paulig kohvioad Arabica keskmine rÃ¶st 1 kg,Paulig,1 kg,weak,0.5
+Barbora,000000000001177251,"KÃ¼lmutatud mini-frikadellid EHE, 350g",RANNAROOTSI,,Selver,4.7403E+12,"KÃ¼lmutatud EHE mini-frikadellid, RANNAROOTSI EHE, 350 g",RANNAROOTSI LIHATÃ–Ã–STUS AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-must-tee-earl-grey-lemon-lipton-25-x-2-g,"Must tee Earl Grey Lemon LIPTON,25x2g",LIPTON,,Selver,8.72061E+12,"Tee Earl Grey Lemon niidiga kotis 25pk, LIPTON, 50 g",MOBEC AS,,weak,0.5
+Barbora,000000000000182308,"Greip punane suur Star Ruby 1kl, kg",,,Selver,https://www.selver.ee/greip-star-ruby-kg,"Greip Star Ruby, kg",MÃ¤Ã¤ramata,,weak,0.5
+Barbora,000000000001177252,"KÃ¼lmutatud mini-pelmeenid EHE, 350g",RANNAROOTSI,,Selver,4.7403E+12,"KÃ¼lmutatud EHE mini-pelmeenid, RANNAROOTSI EHE, 350 g",RANNAROOTSI LIHATÃ–Ã–STUS AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-kodujuust-alma-5-proc-380-g,"Kodujuust ALMA 5%,380g",ALMA,,Selver,4.74013E+12,"Alma Klassikaline kodujuust 5%, 380 g",Alma Klassikaline,380 g,weak,0.5
+Barbora,000000000000014419,Vermut Martini Extra Dry 1L,MARTINI,,Selver,7.63004E+12,"MARTINI Extra Dry, 100 cl",LIVIKO AS,,weak,0.5
+Barbora,https-barbora-ee-toode-koorejaatis-vaarika-sok-onu-eskimo-680-g,"KoorejÃ¤Ã¤tis vaarika&Å¡ok.ONU ESKIMO, 680g",BALBIINO,,Selver,4.74019E+12,"Vaarika- ja Å¡okolaadi-koorejÃ¤Ã¤tis, ONU ESKIMO, 680 g",BALBIINO AS,,weak,0.5
+Barbora,https-barbora-ee-toode-jogurt-tere-hellus-mustasostra-350-g,"Jogurt TERE Hellus mustasÃµstra, 350g",HELLUS,,Selver,4.74004E+12,"Jogurt mustasÃµstra, HELLUS, 350 g",TERE AS,,weak,0.6
+Barbora,000000000000013580,Karastusjook SPRITE 500ml,SPRITE,,Selver,5.449E+12,"Karastusjook Sprite, SPRITE, 500 ml",COCA-COLA HBC EESTI AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-praetud-pelmeenid-uvic-350-g,"Praetud pelmeenid UVIC, 350g",UVIC,,Selver,4.74022E+12,UVIC Praetud pelmeenid lihaga 350 g,UVIC Praetud,350 g,weak,0.6
+Barbora,000000000000057743,Cognac LARSEN VS 40% 500ml,LARSEN,,Selver,3.27251E+12,Larsen VS Cognac karbis 40%vol 500ml,Larsen VS,,weak,0.6667
+Barbora,https-barbora-ee-toode-kohvioad-kronung-jacobs-1-kg,Kohvioad KrÃ¶nung JACOBS 1 kg,JACOBS,,Selver,8.711E+12,"Kohviuba KrÃ¶nung, JACOBS, 1 kg",SELVER AS,,weak,0.5
+Barbora,https-barbora-ee-toode-tursamaks-steinhauer-190-g,Tursamaks STEINHAUER 190g,STEINHAUER,,Selver,4.03001E+12,"Tursamaks, STEINHAUER, 190 g",BALTIC PREMIER GROUP OÃœ,,weak,0.6667
+Barbora,https-barbora-ee-toode-juustuvorst-rakvere-600-g,"Juustuvorst RAKVERE, 600g",RAKVERE,,Selver,4.74E+12,"Juustuvorst, RAKVERE LK, 600 g",Juustuvorst,,weak,0.5
+Barbora,https-barbora-ee-toode-keeduvorst-juustu-rakvere-300-g,"Keeduvorst Juustu RAKVERE, 300g",RAKVERE,,Selver,4.74E+12,"Keeduvorst Juustu, RAKVERE LK, 300 g",MAAG EESTI AS,,weak,0.6
+Barbora,https-barbora-ee-toode-majonees-salvest-madaroikamaits-430-g,"Majonees SALVEST mÃ¤darÃµikamaits.,430g",SALVEST,,Selver,4.74007E+12,"MÃ¤darÃµikamaitseline majonees, SALVEST, 430g",SALVEST AS,,weak,0.6
+Barbora,https-barbora-ee-toode-jah-krabim-pulgad-surimist-vici-150-g,"Jah. krabim.pulgad surimist VICI, 150g",VICI,,Selver,4.77019E+12,"Vici Surimist Pulgad, Jahutatud, 150G",Vici Surimist,150 g,weak,0.5714
+Barbora,https-barbora-ee-toode-piim-alma-2-5-proc-0-5-l,"Piim ALMA 2,5%, 0,5L",ALMA,,Selver,4.74013E+12,"Alma Piim 2,5%, 0,5 l",Alma Piim,0.5 l,weak,0.6667
+Barbora,https-barbora-ee-toode-hirveliha-konserv-linnamae-240-g,"Hirveliha konserv LINNAMÃ„E, 240g",LINNAMÃ„E,,Selver,4.74062E+12,"Hirveliha konserv, LINNAMÃ„E LIHATÃ–Ã–STUS, 240 g",LinnamÃ¤e,,weak,0.6
+Barbora,000000000001150893,"KÃ¼lmutatud pelmeenid EHE , 350g",RANNAROOTSI,,Selver,4.7403E+12,"KÃ¼lmutatud EHE mini-pelmeenid, RANNAROOTSI EHE, 350 g",RANNAROOTSI LIHATÃ–Ã–STUS AS,,weak,0.5
+Barbora,https-barbora-ee-toode-grill-liha-mustikamarin-rakvere-500-g,"Grill-liha mustikamarin. RAKVERE,500g",RAKVERE,,Selver,4.74E+12,Rakvere Mustika Grill-Liha 500G,Rakvere Mustika,500 g,weak,0.6667
+Barbora,https-barbora-ee-toode-kpn-vein-johann-brunner-ries-rhei-750-ml,KPN vein JOHANN BRUNNER Ries.Rhei.750ml,JOHANN BRUNNER,,Selver,4.04455E+12,"Johann Brunner Riesling Rheinhessen KPN vein 10,5%vol 750ml",Johann Brunner,,weak,0.5
+Barbora,000000000000146717,Viin NEMIROFF Original 40% 500ml,Nemiroff,,Selver,4.82018E+12,"Viin NEMIROFF Original, 50 cl",3BS ESTONIA OÃœ,,weak,0.6
+Barbora,https-barbora-ee-toode-perepihvid-rakvere-400-g,"Perepihvid RAKVERE, 400g",RAKVERE,,Selver,4.74E+12,Rakvere Perepihvid 400 G,Rakvere Perepihvid,400 g,weak,0.6667
+Barbora,https-barbora-ee-toode-hapukoor-tere-20-proc-250-g,"Hapukoor TERE 20%, 250g",TERE,,Selver,4.74004E+12,"Tere Hapukoor 20%, 250 g",Tere Hapukoor,,weak,0.6667
+Barbora,https-barbora-ee-toode-seemneleib-fazer-400-g,"Seemneleib FAZER, 400g",FAZER,,Selver,4.7401E+12,"Seemneleib, FAZER, 400 g",MÃ¤Ã¤ramata,,weak,0.6667
+Barbora,000000000000038431,Cognac MEUKOW VS 40% 700ml karp,MEUKOW,,Selver,3.25715E+12,Meukow VS Cognac 40%vol 700ml,Meukow VS,,weak,0.6667
+Barbora,https-barbora-ee-toode-nektariin-1-kl-kg,"Nektariin 1kl., kg",,,Selver,2.70007E+12,"Nektariin, kg",MÃ¤Ã¤ramata,,weak,0.5
+Barbora,https-barbora-ee-toode-salat-surimi-riisi-koogivil-vici-200-g,"Salat surimi, riisi&kÃ¶Ã¶givil.VICI, 200g",VICI,,Selver,4.77019E+12,"Surimi salat riisi ja kÃ¶Ã¶giviljadega, VICI, 200 g",VIÄŒIUNAI BALTIC OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-kohupiim-tere-vanilje-200-g,"Kohupiim TERE vanilje, 200g",TERE,,Selver,4.74004E+12,"Tere kohupiim 0,1% 200g vanilli",Tere,200 g,weak,0.6
+Barbora,https-barbora-ee-toode-oun-kanzi-1-kl-kg,"Ã•un KANZI 1kl., kg",,,Selver,2.70234E+12,"Ã•un Kanzi, kg",MÃ¤Ã¤ramata,,weak,0.6667
+Barbora,000000000000182366,"Kiivi 1kl., kg",,,Selver,2.70001E+12,"Kiivi, kg",MÃ¤Ã¤ramata,,weak,0.5
+Barbora,https-barbora-ee-toode-burgerikukkel-seesamis-eesti-pagar-320-g,Burgerikukkel seesamis.Eesti Pagar 320g,EESTI PAGAR,,Selver,4.74009E+12,Eesti Pagar Burgerikukkel Seesamiseemnete 320 G,Eesti Pagar,320 G,weak,0.5
+Barbora,https-barbora-ee-toode-jog-jook-actimel-maasika-4-x-100-g,"Jog.jook ACTIMEL maasika, 4x100g",ACTIMEL,,Selver,https://www.selver.ee/jogurtijook-maasika-4x100g-actimel-400-g,"Jogurtijook maasika 4x100g, ACTIMEL, 400 g",NUTRICIA SIA,,weak,0.5
+Barbora,https-barbora-ee-toode-kohuke-tere-mustika-multipakk-5-x-40-g,"Kohuke TERE mustika multipakk, 5x40g",TERE,,Selver,4.74004E+12,"Kohuke jÃµhvika multipakk 5x40g, TERE, 200 g",TERE AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-must-tee-earl-grey-dilmah-20-x-1-5-g,"Must tee Earl Grey DILMAH,20x1,5g",DILMAH,,Selver,9.31263E+12,Dilmah earl grey must tee niidiga kotis 20*1.5g,Dilmah,1.5 g,weak,0.6667
+Barbora,https-barbora-ee-toode-jahvatatud-kohv-club-lavazza-250-g,Jahvatatud kohv Club LAVAZZA 250g,LAVAZZA,,Selver,8.00007E+12,"Jahvatatud kohv Club purgis, LAVAZZA, 250 g",SELVER AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-paprikakaste-felix-275-g,Paprikakaste FELIX 275g,FELIX,,Selver,4.74003E+12,"Paprikakaste, FELIX, 275 g",ORKLA EESTI AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-kaerajook-deary-1-l,"Kaerajook DEARY,1L",DEARY,,Selver,4.74004E+12,Tere Deary barista kaerajook 1L,Tere Deary,1 L,weak,0.6
+Barbora,https-barbora-ee-toode-kulmutatud-broilerimaks-tallegg-500-g,"KÃ¼lmutatud broilerimaks TALLEGG, 500g",TALLEGG,,Selver,4.74005E+12,Tallegg Broilerimaks Jahutatud 500G,Tallegg Broilerimaks,500 g,weak,0.6
+Barbora,https-barbora-ee-toode-hot-dog-saiake-leibur-300-g,Hot Dog saiake LEIBUR 300g,LEIBUR,,Selver,4.74007E+12,Leiburi Hot Dog Saiake 300 G,Leiburi Hot,,weak,0.5
+Barbora,https-barbora-ee-toode-kuldne-graham-rostsai-leibur-500-g,Kuldne graham rÃ¶stsai LEIBUR 500g,LEIBUR,,Selver,4.74007E+12,Leibur Kuldne Graham 500 g,Leibur Kuldne,,weak,0.6
+Barbora,https-barbora-ee-toode-rukki-juuretise-rost-fazer-450-g,Rukki juuretise rÃ¶st FAZER 450g,FAZER,,Selver,51592,Fazer Juuretise RÃ¶st 450 G,Fazer Juuretise,,weak,0.6
+Barbora,000000000001277647,"KÃ¼lm.hinkaalid RANNAROOTSI, 420g",RANNAROOTSI,,Selver,4.7403E+12,"Hinkaalid, RANNAROOTSI, 420 g",RANNAROOTSI LIHATÃ–Ã–STUS AS,,weak,0.5
+Barbora,https-barbora-ee-toode-juustupulgad-pik-nik-classic-140-g,"Juustupulgad PIK-NIK Classic, 140g",PIK-NIK,,Selver,4.7703E+12,"Pik-Nik Rebitavad juustupulgad, 140 g",Pik-Nik Rebitavad,140 g,weak,0.5
+Barbora,417782,"VÃ¤rske soolakurk Ã¤mbris PEIPSI, 500g",,,Selver,4.7428E+12,VÃ¤rske soolakurk 500g,VÃ¤rske,500 g,weak,0.6
+Barbora,https-barbora-ee-toode-vahukoor-alma-35-proc-200-ml-pp,Vahukoor ALMA 35% 200ml PP,ALMA,,Selver,4.74013E+12,"Vahukoor 35%, ALMA, 200 ml",Vahukoor,200 ml,weak,0.5
+Barbora,https-barbora-ee-toode-sasloki-toorvorstid-rakvere-400-g,"Å aÅ¡lÃµki toorvorstid RAKVERE,400g",RAKVERE,,Selver,4.74E+12,"Å aÅ¡lÃµki toorvorstid, RAKVERE LK, 400 g",Å aÅ¡lÃµki,400 G,weak,0.6
+Barbora,https-barbora-ee-toode-tomat-lahtine-1-kl-kg,"Tomat lahtine 1 kl., kg",,,Selver,123863,"Tomat lahtine, INTSU, kg",,,weak,0.5
+Barbora,000000000001342794,"Kapsasalat kurkumiga, 450g",EESTI AND,,Selver,4.7428E+12,"Kapsasalat kurkumiga, EESTI AND, 450 g",EESTI AND OÃœ,,weak,0.5
+Barbora,000000000000961820,"KÃ¼lm.pelmeenid seentega Gyoza, 400g",VICI,,Selver,4.77019E+12,"Pelmeenid seentega Gyoza, Vici, 400 g",VICIUNAI BALTIC OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-sojatoode-mangomaits-alpro-400-g,"Sojatoode mangomaits. ALPRO,400g",ALPRO,,Selver,5.41119E+12,ALPRO sojatoode mango 400g,ALPRO,400 g,weak,0.6
+Barbora,000000000001204966,"KÃ¼lm.pitsataigen EESTI PAGAR,600g",EESTI PAGAR,,Selver,4.74009E+12,"Pitsataigen, EESTI PAGAR, 600 g",EESTI PAGAR AS,,weak,0.6
+Barbora,https-barbora-ee-toode-triibuliha-soola-ja-pipraga-ehe-250-g,"Triibuliha soola ja pipraga EHE,250g",RANNAROOTSI,,Selver,4.7403E+12,Rannarootsi Ehe Triibuliha Soola Ja Musta Pipraga 25,Rannarootsi Ehe,250 g,weak,0.625
+Barbora,https-barbora-ee-toode-raimerullid-kuuslaugumar-viru-rand-400-g,"RÃ¤imerullid kÃ¼Ã¼slaugumar.VIRU RAND, 400g",VIRU RAND,,Selver,4.74004E+12,"RÃ¤imerullid kÃ¼Ã¼slaugumarinaadis, VIRU RAND, 400 g",VIRU RAND OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-maamehe-suitsusink-noo-105-g-viil,"Maamehe suitsusink NÃ•O, 105g viil",NÃ•O,,Selver,4.74057E+12,"Maamehe suitsusink, NÃ•O, 105 g",NÃ•O LIHATÃ–Ã–STUS OÃœ,,weak,0.6
+Barbora,https-barbora-ee-toode-kuiv-suitsumaits-kalmaari-ribad-msdm-36-g,"Kuiv.suitsumaits.kalmaari ribad MSDM,36g",MSDM,,Selver,124248,"Kalmaari ribad, MSDM, 36 g",,,weak,0.5
+Barbora,https-barbora-ee-toode-viin-hlibny-dar-wheat-40-proc-700-ml,Viin HLIBNY DAR Wheat 40% 700ml,HLEBNIY DAR,,Selver,4.82008E+12,"Viin HLIBNY DAR, 70 cl",DUNKER ESTONIA OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-pr-kilud-tomatikastmes-rannakula-240-g,"Pr. kilud tomatikastmes RANNAKÃœLA,240g",RANNAKÃœLA,,Selver,4.74284E+12,"Praetud kilud tomatikastmes, RANNAKÃœLA, 240 g",MOBEC AS,,weak,0.5
+Barbora,https-barbora-ee-toode-energiaj-starter-x-tra-wild-cherry-500-ml,Energiaj.STARTER X-tra Wild Cherry 500ml,STARTER,,Selver,4.74005E+12,"Energiajook X-tra Wild Cherry, STARTER, 500 ml",LIVIKO AS,,weak,0.5714
+Barbora,89169,Karastusjook SPRITE 1.5L,SPRITE,,Selver,5.00011E+12,"Karastusjook Sprite, SPRITE, 1,5 L",COCA-COLA HBC EESTI AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-arom-veinijook-dreamer-sweet-red-1-l,Arom. veinijook DREAMER Sweet Red 1L,DREAMER,,Selver,4.74016E+12,Dreamer Sweet Red tetra aromatiseeritud veinijook 10%vol 1L,Dreamer Sweet,,weak,0.5556
+Barbora,https-barbora-ee-toode-multipuuvilja-mahlajook-aura-fresh-2-l,Multipuuvilja mahlajook AURA Fresh 2L,AURA,,Selver,4.7401E+12,Aura Fresh multifruit mahlajook 2L,Aura Fresh,2 L,weak,0.6667
+Barbora,https-barbora-ee-toode-gruusia-rahvusleib-puri-ep-330-g,"Gruusia rahvusleib Puri EP, 330 g",EESTI PAGAR,,Selver,4.74048E+12,"Gruusia rahvusleib Puri, KILIKIA, 330 g",WORKSTAR OÃœ,,weak,0.6
+Barbora,https-barbora-ee-toode-viiner-rakvere-500-g,"Viiner RAKVERE, 500g",RAKVERE,,Selver,4.74E+12,Rakvere Viiner 500 G,Rakvere Viiner,500 g,weak,0.6667
+Barbora,000000000000438323,"Virsik PARAGUAYO 1kl., kg",,,Selver,2.70499E+12,"Virsik Paraguayo, kg",MÃ¤Ã¤ramata,,weak,0.6667
+Barbora,https-barbora-ee-toode-majonees-tarplan-provansaal-50-proc-430-g-tops,Majonees TARPLAN Provansaal 50%430g tops,TARPLAN,,Selver,4.74016E+12,"Tarplan Majonees Provansaal, 430 g",Tarplan Majonees,430 g,weak,0.6
+Barbora,https-barbora-ee-toode-riivjuust-e-piim-light-250-g,"Riivjuust E-PIIM Light, 250g",E-PIIM,,Selver,4.74014E+12,Epiim Light riivjuust 250g,Epiim Light,250 g,weak,0.5
+Barbora,https-barbora-ee-toode-kohvioad-keskm-rost-lofbergs-1-kg,Kohvioad keskm.rÃ¶st LÃ–FBERGS 1kg,LÃ–FBERGS,,Selver,7.31005E+12,"Kohvioad keskmine rÃ¶st, LÃ–FBERGS, 1 kg",SELVER AS,,weak,0.5
+Barbora,https-barbora-ee-toode-kohvivalgendaja-coffeeta-400-g,Kohvivalgendaja COFFEETA 400g,COFFEETA,,Selver,https://www.selver.ee/kohvivalgendaja-coffeeta-400-g,"Kohvivalgendaja, COFFEETA, 400 g",OSAMA EESTI OÃœ,,weak,0.6667
+Barbora,000000000000038308,Viin SMIRNOFF Red 40% 700ml,SMIRNOFF,,Selver,5.41032E+12,"Viin SMIRNOFF Red, 70 cl",PRIKE AS,,weak,0.6
+Barbora,000000000001025726,"KÃ¼lm.Panko kalafileepulgad VICI,285g",VICI,,Selver,4.74006E+12,"Kalafileepulgad Panko paneeringus, VICI, 285 g",VICIUNAI BALTIC OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-vinnut-veiseliha-teriyaki-karni-50-g,"Vinnut.veiseliha Teriyaki KARNI,50g",KARNI,,Selver,4.74058E+12,"Vinnutatud veiseliha Teriyaki, KARNI, 50 g",ARKE LIHATÃ–Ã–STUS AS,,weak,0.5
+Barbora,https-barbora-ee-toode-kohupiimavorm-farmi-rosinatega-250-g,"Kohupiimavorm FARMI rosinatega, 250g",FARMI,,Selver,4.74011E+12,"Vanilli kohupiimavorm rosinatega, FARMI, 250 g",FARMI PIIMATÃ–Ã–STUS AS,,weak,0.6
+Barbora,https-barbora-ee-toode-ruks-vormileib-leibur-300-g,Ruks vormileib LEIBUR 300g,LEIBUR,,Selver,4.74007E+12,Leibur Ruks TÃ¤istera Vormileib 300 G,Leibur Ruks,,weak,0.6
+Barbora,https-barbora-ee-toode-riivjuust-atleet-valio-kupsetistele-200-g,"Riivjuust Atleet VALIO kÃ¼psetistele,200g",VALIO ATLEET,,Selver,4.74055E+12,"Atleet riivjuust kÃ¼psetistele, 200 g",Atleet,,weak,0.6
+Barbora,000000000000163129,Hele Ãµlu PILSNER URQUELL 4.4% 500ml prk,PILSNER URQUELL,,Selver,8.5944E+12,"Hele Ãµlu, PILSNER URQUELL, 500 ml pudel",MOMENTIN EESTI OÃœ,,weak,0.5714
+Barbora,000000000000139460,LikÃ¶Ã¶r KÃ„NNU KUKK 45% 500ml karbis,LIVIKO,,Selver,4.74005E+12,"LikÃ¶Ã¶r LIVIKO KÃ¤nnu Kukk (karbis), 50 cl",LIVIKO AS,,weak,0.5714
+Barbora,000000000000182192,"Ploom sinine, kg",,,Selver,2.70385E+12,"Sinine ploom Lepotica, kg",MÃ¤Ã¤ramata,,weak,0.6667
+Barbora,https-barbora-ee-toode-steik-kintsulihast-kolme-juustuga-400-g,"Steik kintsulihast kolme juustuga, 400g",TALLEGG,,Selver,4.74005E+12,Tallegg Kintsulihast Steik Kolme Juustuga 400 G,Tallegg Kintsulihast,,weak,0.6667
+Barbora,000000000000182190,"Viinamari tume 1kl., kg",,,Selver,2.70003E+12,"Tume viinamari Moldova, kg",MÃ¤Ã¤ramata,,weak,0.5
+Barbora,https-barbora-ee-toode-tsillimajonees-felix-220-g,"TÅ¡illimajonees FELIX, 220g",FELIX,,Selver,4.74003E+12,Felix TÅ¡illimajonees 220 g,Felix TÅ¡illimajonees,,weak,0.6667
+Barbora,https-barbora-ee-toode-brandy-j-p-chenet-vsop-36-proc-700-ml,Brandy J.P.CHENET VSOP 36% 700ml,J.P CHENET,,Selver,3.26328E+12,"BrÃ¤ndi J.P. Chenet VSOP, 70 cl",DUNKER ESTONIA OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-vinnut-veiseliha-hot-karni-50-g,"Vinnut.veiseliha Hot KARNI,50g",KARNI,,Selver,4.74058E+12,"Vinnutatud veiseliha Hot, KARNI, 50 g",ARKE LIHATÃ–Ã–STUS AS,,weak,0.5
+Barbora,https-barbora-ee-toode-gouda-nopri-musta-kuuslauguga-250-g,Gouda NOPRI musta kÃ¼Ã¼slauguga 250g,NOPRI,,Selver,4.74022E+12,"Gouda musta kÃ¼Ã¼slaugu, NOPRI, 250 g",NOPRI TALUMEIEREI OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-tummine-seljanka-valmis-poltsamaa-380-g,Tummine seljanka Valmis PÃ•LTSAMAA 380g,PÃ•LTSAMAA,,Selver,4.74003E+12,"PÃµltsamaa Valmis! Tummine seljanka supp, 380 g",PÃµltsamaa Valmis!,380 g,weak,0.6667
+Barbora,https-barbora-ee-toode-kohuke-alma-vaarika-5-x-40-g,"Kohuke ALMA vaarika, 5x40g",ALMA,,Selver,4.74013E+12,Alma kohuke vaarika kakaoglasuuris 40g,Alma,40 g,weak,0.5
+Barbora,000000000000019944,Jahvatatud kohv LAVAZZA Espresso 250g,LAVAZZA,,Selver,8.00007E+12,"Jahvatatud kohv Espresso Italiano Classico, LAVAZZA, 250 g",SELVER AS,,weak,0.5714
+Barbora,000000000001177252,"KÃ¼lmutatud mini-pelmeenid EHE, 350g",RANNAROOTSI,,Selver,4.7403E+12,"KÃ¼lmutatud EHE mini-pelmeenid, RANNAROOTSI EHE, 350 g",RANNAROOTSI LIHATÃ–Ã–STUS AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-kohvipadjad-classic-senseo-36-x-6-94-g,"Kohvipadjad Classic SENSEO 36x6,94g",SENSEO,,Selver,8.711E+12,"Kohvipadjad Classic, SENSEO, 36tk",SELVER AS,,weak,0.5
+Barbora,https-barbora-ee-toode-vinnut-veiseliha-original-karni-50-g,"Vinnut.veiseliha Original KARNI,50g",KARNI,,Selver,4.74058E+12,"Vinnutatud veiseliha Original, KARNI, 50 g",Beef Ground,,weak,0.5
+Barbora,https-barbora-ee-toode-keefir-gefilus-2-5-proc-1-kg-pp,"Keefir GEFILUS 2,5% 1kg, PP",VALIO GEFILUS,,Selver,4.74013E+12,"Gefilus Keefir 2,5%, 1 kg",Gefilus Keefir,1 kg,weak,0.5
+Barbora,https-barbora-ee-toode-reservvaelaste-konserv-linnamae-240-g,ReservvÃ¤elaste konserv LINNAMÃ„E 240g,LINNAMÃ„E,,Selver,4.74062E+12,"ReservvÃ¤elaste konserv, LINNAMÃ„E LIHATÃ–Ã–STUS, 240 g",LinnamÃ¤e,,weak,0.6
+Barbora,https-barbora-ee-toode-seakorvasnakid-noo-130-g,"SeakÃµrvasnÃ¤kid NÃ•O,130g",NÃ•O,,Selver,4.74057E+12,"SeakÃµrvasnÃ¤kid, NÃ•O, 130 g",NÃ•O LIHATÃ–Ã–STUS OÃœ,,weak,0.6667
+Barbora,https-barbora-ee-toode-pesto-tsilli-kuusl-tomat-tartu-mill-190-g,Pesto tÅ¡illi.kÃ¼Ã¼sl.tomat TARTU MILL 190g,TARTU MILL,,Selver,4.7433E+12,"Tartu mill pesto tÅ¡illi, kÃ¼Ã¼slauk ja tomat 190g",Tartu,190 g,weak,0.6667
+Barbora,https-barbora-ee-toode-frankfurter-rannarootsi-500-g,"Frankfurter RANNAROOTSI, 500g",RANNAROOTSI,,Selver,4.7403E+12,"Frankfurter, RANNAROOTSI, 500 g",RANNAROOTSI LIHATÃ–Ã–STUS AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-rohumaaveise-minutisteik-liivimaa-220-g,"Rohumaaveise minutisteik LIIVIMAA,220g",LIIVIMAA LIHAVEIS,,Selver,4.74046E+12,Liivimaa Lihaveis Mahe Rohumaaveise Minutisteik 220 G,Liivimaa Lihaveis,220 g,weak,0.5
+Barbora,000000000000037183,Cognac MARTELL VS 40% 700ml,MARTELL,,Selver,3.21982E+12,Martell VS Cognac 40%vol 700 ml,Martell VS,,weak,0.6
+Barbora,https-barbora-ee-toode-doktorivorst-rakvere-600-g,"Doktorivorst RAKVERE, 600g",RAKVERE,,Selver,4.74E+12,"Doktorivorst, RAKVERE LK, 600 g",Doktorivorst,,weak,0.5
+Barbora,https-barbora-ee-toode-rehe-rukkileib-vorm-eesti-pagar-600-g,"Rehe rukkileib vorm.EESTI PAGAR,600g",EESTI PAGAR,,Selver,4.74009E+12,Eesti Pagar Rehe Rukkileib 600 G,Eesti Pagar,600 G,weak,0.6667
+Barbora,000000000001291761,"KÃ¼lm.pitsa Prosciutto RISTORANTE, 340g",DR.OETKER,,Selver,4.00172E+12,Ristorante Pitsa Prosciutto 340 g,Ristorante Pitsa,340 g,weak,0.6
+Barbora,https-barbora-ee-toode-hele-olu-alexander-5-2-proc-500-ml,Hele Ãµlu ALEXANDER 5.2% 500ml,ALEXANDER,,Selver,4.7401E+12,"Hele Ãµlu Alexander, ALEXANDER, 500 ml pudel",A. LE COQ AS,,weak,0.6
+Barbora,https-barbora-ee-toode-sealiha-omas-mahlas-rgk-325-g,"Sealiha omas mahlas RGK,325g",RGK,,Selver,4.7403E+12,"Sealiha omas mahlas, RANNAROOTSI, 240 g",RANNAROOTSI LIHATÃ–Ã–STUS AS,,weak,0.5
+Barbora,https-barbora-ee-toode-fileerib-jogurti-tilli-mar-tallegg-500-g,"Fileerib.jogurti-tilli mar.TALLEGG, 500g",TALLEGG,,Selver,4.74005E+12,Tallegg Fileeribad Jogurti-Tilli Marinaadis 500G,Tallegg Fileeribad,500 g,weak,0.5
+Barbora,https-barbora-ee-toode-kulm-mintai-kalapulgad-findus-420-g,"KÃ¼lm.mintai kalapulgad FINDUS, 420g",FINDUS,,Selver,https://www.selver.ee/alaska-mintai-kalapulgad-findus-420-g,"Alaska mintai kalapulgad, FINDUS, 420 g",SANITEX OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-kapsl-nescafe-dg-flatwhite-16-x-11-7-g,Kohvikapslid NESCAFÃ‰Â® Dolce GustoÂ® Flat White 16tk,NESCAFE DOLCE GUSTO,,Selver,7.61304E+12,"Kohvikapslid Dolce Gusto Flat White, NESCAFE, 16 tk",SELVER AS,,weak,0.5556
+Barbora,https-barbora-ee-toode-salaami-fuetec-truhvliga-elpozo-150-g,"Salaami Fuetec trÃ¼hvliga ELPOZO,150g",ELPOZO,,Selver,8.41084E+12,"Fuetec trÃ¼hvliga, ELPOZO, 150 g",JUNGENT ESTONIA OÃœ,,weak,0.6
+Barbora,https-barbora-ee-toode-seemnerost-fazer-450-g,"SeemnerÃ¶st FAZER,450g",FAZER,,Selver,4.7401E+12,Fazer SeemnerÃ¶st 450 G,Fazer SeemnerÃ¶st,,weak,0.6667
+Barbora,https-barbora-ee-toode-tsilli-pesto-filippo-berio-190-g,TÅ¡illi pesto FILIPPO BERIO 190g,FILIPPO BERIO,,Selver,8.00221E+12,"Terav tÅ¡illi pesto, FILIPPO BERIO, 190 g",SVENSKY KAUBANDUSE AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-majonees-baltika-provansaal-klas-300-g,"Majonees BALTIKA Provansaal Klas.,300g",BALTIKA,,Selver,4.74501E+12,"Klassikaline Provansaal majonees, BALTIKA, 300 g",BALTIKA FOOD OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-hele-olu-saku-kuld-5-2-proc-500-ml-prk,"Hele Ãµlu SAKU Kuld 5,2% 500ml prk",SAKU,,Selver,4.74002E+12,"Hele Ãµlu Kuld, SAKU, 500 ml purk",SAKU Ã•LLETEHASE AS,,weak,0.5714
+Barbora,000000000001237562,"KÃ¼lm.Mozzarella pulgad paneer.SALUD,250g",SALUD,,Selver,8.71715E+12,"Mozzarella pulgad, SALUD, 250 g",BIMAR OÃœ,,weak,0.5
+Barbora,000000000001082224,"VÃ¤rske valge redis, kg",,,Selver,https://www.selver.ee/valge-redis-pakitud-kg,"Valge redis pakitud, kg",MÃ¤Ã¤ramata,,weak,0.5
+Barbora,https-barbora-ee-toode-viin-grey-goose-40-proc-0-7-l,Viin GREY GOOSE 40% 0.7L,GREY GOOSE,,Selver,5.01068E+12,"Viin, GREY GOOSE, 70 cl",LIVIKO AS,,weak,0.6
+Barbora,000000000001276213,"KÃ¼lm.vaarikad, mustikad HÃ„RMAVILI, 300g",HÃ„RMAVILI,,Selver,4.74019E+12,"Vaarikad, mustikad, HÃ„RMAVILI, 300 g",BALBIINO AS,,weak,0.6
+Barbora,https-barbora-ee-toode-toidukoor-alma-20-proc-400-ml,"Toidukoor Alma 20%, 400ml",ALMA,,Selver,4.74013E+12,"Alma Toidukoor 20%, 400 ml",Alma Toidukoor,400 ml,weak,0.6667
+Barbora,https-barbora-ee-toode-kohupiim-liisu-9-proc-250-g,"Kohupiim LIISU 9%, 250g",LIISU,,Selver,4.75007E+12,"Kohupiim 9%, LIISU, 250 g",Kohupiim,250 g,weak,0.6667
+Barbora,https-barbora-ee-toode-kodujuust-otto-hapukoorega-440-g,"Kodujuust OTTO hapukoorega, 440g",PIIMAMEISTER OTTO,,Selver,4.74057E+12,"Kodujuust hapukoorega, PIIMAMEISTER OTTO, 330 g",Hapukoorega,,weak,0.6
+Barbora,https-barbora-ee-toode-kuumsuitsu-skumbriafilee-nahaga-175-g,"Kuumsuitsu skumbriafilee nahaga, 175g",VICI,,Selver,4.77019E+12,"Kuumsuitsu skumbriafilee nahaga, VICI, 175 g",Kuumsuitsu,,weak,0.6
+Barbora,https-barbora-ee-toode-kulm-kalapulgad-smart-choice-250-g-vici,"KÃ¼lm. kalapulgad Smart Choice 250g, VICI",VICI,,Selver,4.74006E+12,"Kalapulgad Smart Choice, VICI, 250 g",VICIUNAI BALTIC OÃœ,,weak,0.6667
+Barbora,https-barbora-ee-toode-peakapsas-kg,"Peakapsas, kg",,,Selver,2.70003E+12,"Peakapsas varajane, kg",MÃ¤Ã¤ramata,,weak,0.5
+Barbora,https-barbora-ee-toode-maksapasteet-oskar-200-g,"Maksapasteet OSKAR, 200g",,,Selver,4.74057E+12,"Maksapasteet Oskari, OSKAR, 200 g",OSKAR LT AS,,weak,0.5
+Barbora,https-barbora-ee-toode-jaatis-vana-toomas-vanilliplombiir-90-g,"JÃ¤Ã¤tis VANA TOOMAS vanilliplombiir, 90g",VANA TOOMAS,,Selver,4.74009E+12,"Vanilliplombiir Å¡okolaadiglasuuriga, VANA TOOMAS, 90 g",PREMIA TALLINNA KÃœLMHOONE AS,,weak,0.5
+Barbora,https-barbora-ee-toode-kpn-vahuvein-la-gioiosa-prosseco-750-ml,KPN Vahuvein LA GIOIOSA Prosseco 750ml,LA GIOIOSA,,Selver,8.00681E+12,La Gioiosa Valdobbiadene Prosecco Superiore KPN vahuvein 11%vol 750ml,La Gioiosa,,weak,0.5
+Barbora,https-barbora-ee-toode-smuuti-froosh-mango-apelsin-250-ml,"Smuuti FROOSH mango, apelsin 250ml",FROOSH,,Selver,7.35002E+12,"Mango-apelsini smuuti, FROOSH, 250 ml",FAIRFOOD OÃœ,,weak,0.5
+Barbora,000000000000139460,LikÃ¶Ã¶r KÃ„NNU KUKK 45% 500ml karbis,LIVIKO,,Selver,4.74005E+12,"LikÃ¶Ã¶r LIVIKO KÃ¤nnu Kukk (karbis), 50 cl",LIVIKO AS,,weak,0.5714
+Barbora,https-barbora-ee-toode-jah-surimist-pulgad-vici-300-g,"Jah. surimist pulgad VICI, 300g",VICI,,Selver,4.77019E+12,"Vici Surimist Pulgad, Jahutatud, 300G",Vici Surimist,300 g,weak,0.6667
+Barbora,https-barbora-ee-toode-kanasink-fitlap-noo-105-g-viil,"Kanasink Fitlap NÃ•O, 105g viil",NÃ•O,,Selver,4.74057E+12,NÃµo Fitlap Kanasink 105 G,NÃµo Fitlap,105 g,weak,0.6
+Barbora,000000000001205547,"KÃ¼lm.marjasegu vaarikatega HORTEX, 300g",HORTEX,,Selver,5.90048E+12,Hortex marjasegu vaarikatega kÃ¼lmutatud 300g,Hortex,300 g,weak,0.6667
+Barbora,https-barbora-ee-toode-praetud-raimed-tomatikastmes-270-g,"Praetud rÃ¤imed tomatikastmes,270g",BRIIS,,Selver,4.74231E+12,"Praetud rÃ¤imed tomatikastmes, BRIIS, 270 g",DGM SHIPPING AS,,weak,0.6
+Barbora,000000000001207773,"Hapukurk PEIPSI, 400g",PEIPSI,,Selver,4.74466E+12,Peipsi hapukurk 400g Germani talu,Peipsi,400 g,weak,0.6
+Barbora,https-barbora-ee-toode-hapendatud-taispiim-farmi-3-8-4-2-proc-1-kg,"Hapendatud tÃ¤ispiim FARMI 3,8-4,2%, 1kg",FARMI,,Selver,4.74011E+12,"Hapendatud tÃ¤ispiim 4%, 1 kg",Hapendatud,1 kg,weak,0.5
+Barbora,https-barbora-ee-toode-kulm-kartulisektorid-maaharra-500-g,KÃ¼lm.kartulisektorid MAAHÃ„RRA 500g,MAAHÃ„RRA,,Selver,4.74009E+12,MaahÃ¤rra kartulisektorid maitsestatud 500g,MaahÃ¤rra,500 g,weak,0.6
+Barbora,000000000001220964,"KÃ¼lm. kalapulgad Muumi VICI, 250g",VICI,,Selver,4.74006E+12,"Kalapulgad Muumi, VICI, 250 g",VICIUNAI BALTIC OÃœ,,weak,0.6
+Barbora,000000000000019941,Jahvatatud kohv LAVAZZA Qualita Oro 250g,LAVAZZA,,Selver,8.00007E+12,Jahvatatud kohv Qualita Oro 250 g,Jahvatatud,250 g,weak,0.6667
+Barbora,https-barbora-ee-toode-viin-hlibny-dar-klassika-40-proc-1-75-l,Viin HLIBNY DAR Klassika 40% 1.75L,HLIBNY DAR,,Selver,4.82008E+12,"Viin HLIBNY DAR, 70 cl",DUNKER ESTONIA OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-cognac-martell-vsop-40-proc-700-ml,Cognac MARTELL VSOP 40% 700ml,MARTELL,,Selver,3.24599E+12,Hennessy VSOP Cognac 40%vol 700ml,Hennessy VSOP,,weak,0.5
+Barbora,https-barbora-ee-toode-proteiini-mousse-soko-valio-profeel-150-g,Proteiini-mousse Å¡oko.VALIO PROFEEL 150g,VALIO,,Selver,6.40843E+12,"Valio PROfeel proteiini-mousse vaarika, laktoosivaba, 150 g",Valio PROfeel,150 g,weak,0.5
+Barbora,000000000000054498,"KÃ¼lm.kalaburgerid ESVA, 250g",ESVA,,Selver,4.74006E+12,"Kalaburgerid, ESVA, 250 g",VIÄŒIUNAI BALTIC OÃœ,,weak,0.5
+Barbora,000000000000038223,KPN vein EL COTO Blanco Rioja 750ml,EL COTO,,Selver,8.41054E+12,El Coto Rioja Blanco 75 cl,MEDIATO AS,,weak,0.5
+Barbora,000000000001170349,"KÃ¼lm.kartuli-sibulasegu MAAHÃ„RRA,1kg",MAAHÃ„RRA,,Selver,4.74009E+12,MaahÃ¤rra kartuli-sibulasegu 1 kg,MaahÃ¤rra,1 kg,weak,0.6
+Barbora,https-barbora-ee-toode-maksarongas-rakvere-300-g,"MaksarÃµngas RAKVERE, 300g",RAKVERE,,Selver,4.74E+12,"MaksarÃµngas, RAKVERE LK, 300 g",MaksarÃµngas,300 g,weak,0.5
+Barbora,https-barbora-ee-toode-jahv-kohv-pausa-segafredo-450-g,Jahv.kohv Pausa SEGAFREDO 450g,SEGAFREDO,,Selver,6.4201E+12,"Jahvatatud kohv Pausa, SEGAFREDO, 450 g",MEIRA EESTI OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-hele-olu-saku-on-ice-5-proc-0-33-l,Hele Ãµlu SAKU ON ICE 5% 0.33l,SAKU ON ICE,,Selver,4.74002E+12,Saku On Ice hele Ãµlu 5%vol 330ml,Saku On,330 ml,weak,0.5714
+Barbora,000000000000037132,Viin ABSOLUT Vodka 40% 1L,ABSOLUT,,Selver,7.31204E+12,Absolut vodka 40%vol 1L,Absolut,1 L,weak,0.6
+Barbora,https-barbora-ee-toode-sojajook-alpro-kaltsiumiga-1-l,"Sojajook ALPRO kaltsiumiga, 1L",ALPRO,,Selver,5.41119E+12,"Sojajook kaltsiumiga laktoosivaba, ALPRO, 1 l",NUTRICIA SIA,,weak,0.6
+Barbora,000000000000027644,Kohvioad Arabica PAULIG 1kg,PAULIG,,Selver,6.41847E+12,Paulig kohvioad Arabica keskmine rÃ¶st 1 kg,Paulig,1 kg,weak,0.5
+Barbora,https-barbora-ee-toode-kulm-julienne-metsaseened-hortex-400-g,"KÃ¼lm. Julienne metsaseened HORTEX, 400g",HORTEX,,Selver,5.90048E+12,"Julienne metsaseened, HORTEX, 400 g",VIÄŒIUNAI BALTIC OÃœ,,weak,0.6
+Barbora,https-barbora-ee-toode-kohvipadjad-strong-senseo-36-x-6-94-g,"Kohvipadjad Strong SENSEO 36x6,94g",SENSEO,,Selver,8.711E+12,"Kohvipadjad Strong, SENSEO, 36tk",SELVER AS,,weak,0.5
+Barbora,https-barbora-ee-toode-jah-krabinuudel-surimi-vici-200-g,"Jah. krabinuudel, surimi, VICI, 200g",VICI,,Selver,4.77019E+12,"Krabinuudel surimi, VICI, 200 g",VICIUNAI BALTIC OÃœ,,weak,0.6
+Barbora,https-barbora-ee-toode-kulm-fit-tervisepada-maaharra-400-g,KÃ¼lm. fit tervisepada MAAHÃ„RRA 400g,MAAHÃ„RRA,,Selver,4.74009E+12,"FIT tervisepada, MAAHÃ„RRA, 400 g",PREMIA TALLINNA KÃœLMHOONE AS,,weak,0.6
+Barbora,https-barbora-ee-toode-kodujuust-alma-soolakurgi-tilliga-200-g,"Kodujuust ALMA soolakurgi-tilliga,200g",ALMA,,Selver,4.74013E+12,"Alma Soolakurgi ja tilliga kodujuust, 200 g",Alma Soolakurgi,200 g,weak,0.6667
+Barbora,https-barbora-ee-toode-kohvioad-lavazza-barista-perfetto-1-kg,Kohvioad LAVAZZA Barista Perfetto 1kg,LAVAZZA,,Selver,8.00007E+12,"Kohvioad Lavazza Espresso Barista Perfetto , LAVAZZA, 1 kg",SELVER AS,,weak,0.6667
+Barbora,000000000000184820,Cognac HENNESSY XO 40% 350ml karp,HENNESSY,,Selver,3.24599E+12,"Hennessy XO Cognac 40%vol 350ml, karbis",Hennessy XO,,weak,0.5714
+Barbora,https-barbora-ee-toode-kulm-suvine-marjasegu-harmavili-300-g,KÃ¼lm. suvine marjasegu HÃ„RMAVILI 300g,HÃ„RMAVILI,,Selver,4.74019E+12,"Suvine marjasegu, HÃ„RMAVILI, 300 g",BALBIINO AS,,weak,0.6
+Barbora,https-barbora-ee-toode-porgandi-peedimahl-kadarbiku-0-33-l,"Porgandi-peedimahl KADARBIKU, 0.33L",KADARBIKU,,Selver,4.74237E+12,"Porgandi-peedimahl, KADARBIKU KÃ–Ã–GIVILI, 330 ml",Kadarbiku,,weak,0.6
+Barbora,https-barbora-ee-toode-alkoholivaba-vein-blue-nun-valge-750-ml,Alkoholivaba vein BLUE NUN Valge750ml,BLUE NUN,,Selver,https://www.selver.ee/blue-nun-alkoholivaba-blue-nun-750-ml,"Blue Nun alkoholivaba, BLUE NUN, 750 ml",MEDIATO AS,,weak,0.6
+Barbora,https-barbora-ee-toode-vein-franz-hoffner-weisswein-750-ml,Vein FRANZ HOFFNER Weisswein 750ml,FRANZ HOFFNER,,Selver,4.74016E+12,Franz Hoffner Weisswein 75 cl,DUNKER ESTONIA OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-karastusjook-fentimans-rose-lemona-275-ml,Karastusjook FENTIMANS Rose Lemona.275ml,FENTIMANS,,Selver,5.0294E+12,"Karastusjook Rose Lemonade, FENTIMANS, 275 ml",IMPORT OÃœ,,weak,0.5
+Barbora,000000000000038308,Viin SMIRNOFF Red 40% 700ml,SMIRNOFF,,Selver,5.41032E+12,"Viin SMIRNOFF Red, 70 cl",PRIKE AS,,weak,0.6
+Barbora,https-barbora-ee-toode-keeduvorst-doktori-rakvere-300-g,"Keeduvorst Doktori RAKVERE, 300g",RAKVERE,,Selver,4.74E+12,"Keeduvorst Doktori, RAKVERE LK, 300 g",MAAG EESTI AS,,weak,0.6
+Barbora,https-barbora-ee-toode-kaerasepik-leibur-360-g,"Kaerasepik LEIBUR, 360g",LEIBUR,,Selver,4.74007E+12,"Kaerasepik, LEIBUR, 360 g",LEIBUR AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-energiajook-red-bull-yellow-250-ml,Energiajook RED BULL Yellow 250ml,RED BULL,,Selver,https://www.selver.ee/energiajook-yellow-edition-red-bull-250-ml,"Energiajook Yellow Edition, RED BULL, 250 ml",TRIDENS AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-juustupannkoogid-mamma-200-g,"Juustupannkoogid MAMMA, 200g",MAMMA,,Selver,4.74018E+12,Mamma Juustupannkoogid 200 G,Mamma Juustupannkoogid,200 g,weak,0.6667
+Barbora,https-barbora-ee-toode-voileivapeekon-rakvere-130-g,"VÃµileivapeekon RAKVERE, 130g",RAKVERE,,Selver,4.74E+12,"VÃµileivapeekon, RAKVERE, 130 g",VÃµileivapeekon,130 g,weak,0.6667
+Barbora,000000000000163129,Hele Ãµlu PILSNER URQUELL 4.4% 500ml prk,PILSNER URQUELL,,Selver,8.5944E+12,"Hele Ãµlu, PILSNER URQUELL, 500 ml pudel",MOMENTIN EESTI OÃœ,,weak,0.5714
+Barbora,https-barbora-ee-toode-likoor-amaretto-bonino-21-proc-200-ml,LikÃ¶Ã¶r AMARETTO Bonino 21% 200ml,AMARETTO,,Selver,4.03321E+12,Bonino Amaretto mandlilikÃ¶Ã¶r 21%vol 200ml,Bonino Amaretto,,weak,0.5
+Barbora,https-barbora-ee-toode-suitsujuustuvorst-lihakas-rakvere-360-g,"Suitsujuustuvorst Lihakas RAKVERE, 360g",RAKVERE,,Selver,4.74E+12,"Lihakas Suitsujuustuvorst, RAKVERE LK, 360 g",MAAG EESTI AS,,weak,0.6
+Barbora,https-barbora-ee-toode-juust-emmental-estover-viil-150-g,"Juust Emmental ESTOVER viil.,150g",ESTOVER,,Selver,4.74057E+12,"Emmental juust viilutatud, 150g",Emmental,,weak,0.5
+Barbora,https-barbora-ee-toode-heeringafilee-tk-tilliga-olis-vici-210-g,"Heeringafilee tk. tilliga Ãµlis VICI,210g",VICI,,Selver,https://www.selver.ee/atlandi-heeringafilee-tukid-tilliga-olis-vici-210-g,"Atlandi heeringafilee tÃ¼kid tilliga Ãµlis, VICI, 210 g",VIÄŒIUNAI BALTIC OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-puuviljatee-ananass-pirn-loydpur-20-x-2-g,Puuviljatee ananass+pirn LOYDpÃ¼r.20 x 2g,LOYD,,Selver,5.9004E+12,"Puuviljatee Ananass & Pirn, LOYD, 40 g",SANITEX OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-puding-alma-sokolaadi-metsapahkli-230-g,"Puding ALMA Å¡okolaadi-metsapÃ¤hkli, 230g",ALMA,,Selver,4.74013E+12,"Puding Alma Å¡okolaadi-metsapÃ¤hkli maitseline, ALMA, 230 G",Puding,230 g,weak,0.6667
+Barbora,000000000000382955,Mineraalvesi VÃ„RSKA originaal 500ml,VÃ„RSKA ORIGINAAL,,Selver,4.74004E+12,"VÃ¤rska Originaal karboniseeritud mineraalvesi, 500 ml",VÃ¤rska Originaal,500 ml,weak,0.6
+Barbora,https-barbora-ee-toode-e-vaba-taissuitsuvorst-oskar-120-g-viil,"E-vaba tÃ¤issuitsuvorst OSKAR, 120g viil",OSKAR,,Selver,4.74057E+12,"TÃ¤issuitsuvorst E-vaba, OSKAR, 120 g",OSKAR LT AS,,weak,0.6667
+Barbora,000000000000182281,"Viinamari hele, seemneteta, 500g",,,Selver,124362,"Viinamari hele seemneteta, SELVER, 500 g",,,weak,0.6
+Barbora,https-barbora-ee-toode-pestokaste-paprika-ricotta-panzani-190-g,Pestokaste paprika ricotta PANZANI 190g,PANZANI,,Selver,3.03836E+12,"Pestokaste paprika ja Ricotta, PANZANI, 190 g",ABESTOCK AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-kookose-ananassi-mahlajook-pai-280-ml,"Kookose-ananassi mahlajook PAI, 280ml",PAI,,Selver,4.74003E+12,Pai kookose-ananassi smuuti 280 ml,Pai,280 ml,weak,0.5
+Barbora,https-barbora-ee-toode-arom-veinij-dreamer-sweet-white-1-l-tetra,"Arom.veinij.DREAMER Sweet White 1L,tetra",DREAMER,,Selver,4.74016E+12,Dreamer Sweet White tetra aromatiseeritud veinijook 10%vol 1L,Dreamer Sweet,,weak,0.5
+Barbora,000000000000141038,Piiritusjook METAXA 5*  38% 700ml,METAXA,,Selver,5.2028E+12,"Piiritusjook METAXA 5*, 70 cl",LIVIKO AS,,weak,0.5
+Barbora,https-barbora-ee-toode-kanasigar-tallegg-200-g,"Kanasigar TALLEGG, 200g",TALLEGG,,Selver,4.74005E+12,"Kanasigar, TALLEGG, 200 g",Kanasigar,,weak,0.6667
+Barbora,https-barbora-ee-toode-paneer-helb-panko-japanese-choice-150-g,Paneer.helb.Panko JAPANESE CHOICE 150g,JAPANESE-CHOICE,,Selver,8.85198E+12,Japanese choice paneerimishelbed panko 150g,Japanese,150 g,weak,0.5714
+Barbora,https-barbora-ee-toode-likoor-vana-tallinn-40-proc-1-l,LikÃ¶Ã¶r VANA TALLINN 40% 1L,VANA TALLINN,,Selver,4.74005E+12,Vana Tallinn likÃ¶Ã¶r 40%vol 1 l,Vana Tallinn,,weak,0.6
+Barbora,https-barbora-ee-toode-kohvioad-arabica-espresso-paulig-1-kg,Kohvioad Arabica Espresso PAULIG 1kg,PAULIG,,Selver,6.4113E+12,"Kohviuba Arabica Espresso, PAULIG, 1 kg",PAULIG COFFEE ESTONIA AS,,weak,0.5
+Barbora,https-barbora-ee-toode-looduslik-karbon-mineraalvesi-borjomi-1-l,Looduslik karbon.mineraalvesi BORJOMI 1L,Borjomi,,Selver,4.86002E+12,"Karboniseeritud looduslik mineraalvesi, BORJOMI, 1 L",SANITEX OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-hele-olu-karl-friedrich-5-proc-500-ml,Hele Ãµlu KARL FRIEDRICH 5% 500ml,KARL FRIEDRICH,,Selver,4.74002E+12,"Hele Ãµlu Karl Friedrich, SAKU, 500 ml pudel",SAKU Ã•LLETEHASE AS,,weak,0.5714
+Barbora,000000000000185109,Whisky JACK DANIEL'S Tennessee 40%700ml,JACK DANIEL`S,,Selver,5.09987E+12,Jack Daniel's Tennessee whiskey 40% 200 ml,Jack Daniel's,,weak,0.5714
+Barbora,000000000001235038,"KoorejÃ¤Ã¤tis RAKS piparmÃ¼ndi, 56g",RAKS,,Selver,4.74019E+12,"PiparmÃ¼ndi-koorejÃ¤Ã¤tis kÃ¼psistega, RAKS, 56 g",BALBIINO AS,,weak,0.6
+Barbora,https-barbora-ee-toode-hapendatud-pett-farmi-0-2-proc-1-kg-pp,"Hapendatud pett FARMI 0.2%, 1kg PP",FARMI,,Selver,4.74011E+12,"Farmi Hapendatud pett, 1 kg",Farmi Hapendatud,1 kg,weak,0.6
+Barbora,https-barbora-ee-toode-kulm-minipelmeenid-pealinna-350-g,"KÃ¼lm.minipelmeenid PEALINNA, 350g",PREMIA,,Selver,4.74009E+12,Pealinna minipelmeenid kanalihaga 350g,Pealinna,350 g,weak,0.6
+Barbora,https-barbora-ee-toode-lahust-tee-tiger-spice-david-rio-398-g,Lahust.tee Tiger Spice DAVID RIO 398g,DAVID RIO,,Selver,0658564803980,"Tee Chai Tiger Spice Consumer, DAVID RIO, 398 g",EUGESTA EESTI OÃœ,,weak,0.5556
+Barbora,000000000000014416,Bitter CAMPARI BITTER 25% 700ml,CAMPARI,,Selver,https://www.selver.ee/bitter-campari-70-cl,"Bitter CAMPARI, 70 cl",ANORA ESTONIA AS,,weak,0.5
+Barbora,https-barbora-ee-toode-vahuvein-torley-charmant-rose-750-ml,Vahuvein TÃ–RLEY Charmant Rose 750ml,TÃ–RLEY,,Selver,https://www.selver.ee/alkoholivaba-vahuvein-rose-torley-750-ml,"Alkoholivaba vahuvein Rose, TÃ–RLEY, 750 ml",HENKELL FREIXENET EESTI AS,,weak,0.5
+Barbora,000000000000014420,Vermut MARTINI Bianco 15% 1L,MARTINI,,Selver,7.63004E+12,"Vermut MARTINI Bianco, 100 cl",LIVIKO AS,,weak,0.6
+Barbora,000000000001237562,"KÃ¼lm.Mozzarella pulgad paneer.SALUD,250g",SALUD,,Selver,8.71715E+12,"Mozzarella pulgad, SALUD, 250 g",BIMAR OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-suitsusingike-rakvere-130-g-viil,"Suitsusingike RAKVERE,130g viil",RAKVERE,,Selver,125237,"Suitsusingike, RAKVERE, 130 g",,,weak,0.5
+Barbora,https-barbora-ee-toode-pr-raimed-koduses-marinaadis-kaluri-500-g,"Pr.rÃ¤imed koduses marinaadis KALURI,500g",KALURI,,Selver,4.74059E+12,"Praetud rÃ¤imed koduses marinaadis, KALURI, 500 g",Praetud,500 g,weak,0.5714
+Barbora,https-barbora-ee-toode-grilljuust-well-done-43-proc-200-g,Grilljuust WELL DONE 43% 200g,,,Selver,4.74022E+12,Grilljuust 200g,Grilljuust,,weak,0.5
+Barbora,https-barbora-ee-toode-likoor-koskenkorva-minttu-35-proc-500-ml,LikÃ¶Ã¶r KOSKENKORVA Minttu 35% 500ml,KOSKENKORVA,,Selver,6.4127E+12,"LikÃ¶Ã¶r KOSKENKORVA Minttu, 50 cl",ANORA ESTONIA AS,,weak,0.6
+Barbora,https-barbora-ee-toode-viinamari-hele-seem-ta-sultana-1-kl-kg,"Viinamari hele seem-ta SULTANA 1kl., kg",,,Selver,2.71143E+12,"Hele viinamari Sultana, kg",MÃ¤Ã¤ramata,,weak,0.5
+Barbora,https-barbora-ee-toode-viin-ukrainka-platinum-40-proc-500-ml,Viin UKRAINKA Platinum 40% 500ml,,,Selver,4.82002E+12,"Viin UKRAINKA Platinum, 50 cl",LIVIKO AS,,weak,0.6
+Barbora,000000000000181722,"Pirn GUYOT 1kl., kg",,,Selver,2.70145E+12,"Pirn Guyot, kg",MÃ¤Ã¤ramata,,weak,0.6667
+Barbora,https-barbora-ee-toode-jah-surimist-liha-lumekrabi-120-g,"Jah. surimist liha Lumekrabi , 120g",VICI,,Selver,4.77019E+12,"Vici Lumekrabi Surimist Liha, Jahut.120G",Vici Lumekrabi,120 g,weak,0.5714
+Barbora,000000000000184858,Cognac LARSEN VSOP 40% 500ml,LARSEN,,Selver,3.27251E+12,Larsen VSOP Cognac karbis 40%vol 500ml,Larsen VSOP,,weak,0.6667
+Barbora,https-barbora-ee-toode-verikakk-rakvere-440-g,"VerikÃ¤kk RAKVERE, 440g",RAKVERE,,Selver,4.74E+12,Rakvere VerikÃ¤kk 440 G,Rakvere VerikÃ¤kk,440 g,weak,0.6667
+Barbora,000000000001342794,"Kapsasalat kurkumiga, 450g",EESTI AND,,Selver,4.7428E+12,"Kapsasalat kurkumiga, EESTI AND, 450 g",EESTI AND OÃœ,,weak,0.5
+Barbora,000000000000141038,Piiritusjook METAXA 5* 38% 700ml,METAXA,,Selver,5.2028E+12,"Piiritusjook METAXA 5*, 70 cl",LIVIKO AS,,weak,0.5
+Barbora,https-barbora-ee-toode-juust-royal-gouda-valio-black-viil-150-g,"Juust Royal Gouda VALIO Black viil.,150g",VALIO,,Selver,4.74055E+12,"Juust Royal Gouda Black, viilutatud, 150g",Juust Royal,150 g,weak,0.625
+Barbora,000000000001276893,"KÃ¼lm.kÃ¶Ã¶givil.segu Go Green BAUER,400g",BAUER,,Selver,5.90315E+12,"KÃ¶Ã¶giviljasegu â€žGO Greenâ€œ, BAUER, 400g",BIMAR OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-juust-royal-gouda-valio-red-250-g,"Juust Royal Gouda VALIO Red, 250g",VALIO,,Selver,4.74055E+12,"Juust Royal Gouda Red, 250 g",Juust Royal,250 g,weak,0.6667
+Barbora,https-barbora-ee-toode-valge-juust-fitaki-original-500-g,"Valge juust FITAKI Original, 500g",FITAKI,,Selver,4.0005E+12,"Fitaki juust Original, 500 g",Fitaki,500 g,weak,0.6
+Barbora,https-barbora-ee-toode-piim-alma-2-5-proc-1-5-l,"Piim ALMA 2,5%, 1,5L",ALMA,,Selver,4.74013E+12,"Alma Piim 2,5%, 1,5 l",Alma Piim,1.5 l,weak,0.6667
+Barbora,https-barbora-ee-toode-kuiv-suitsumaitseline-stauriid-msdm-36-g,"Kuiv.suitsumaitseline stauriid MSDM,36g",MSDM,,Selver,4.26015E+12,"Stauriid suitsumaitseline, MSDM, 36 g","Stauriid,suitsumaitseline,kuivatatud",36 g,weak,0.6
+Barbora,https-barbora-ee-toode-kodusai-fazer-350-g,Kodusai FAZER 350g,FAZER,,Selver,4.7401E+12,Fazer Kodusai 350 G,Fazer Kodusai,350 G,weak,0.6667
+Barbora,https-barbora-ee-toode-whisky-jameson-black-bar-40-proc-700-ml-karp,Whisky JAMESON Black Bar.40% 700ml karp,JAMESON,,Selver,5.01101E+12,Jameson Black Barrel Whisky 700ml,Jameson Black,,weak,0.5714
+Barbora,000000000000014416,Bitter CAMPARI BITTER 25% 700ml,CAMPARI,,Selver,https://www.selver.ee/bitter-campari-70-cl,"Bitter CAMPARI, 70 cl",ANORA ESTONIA AS,,weak,0.5
+Barbora,https-barbora-ee-toode-mahe-rohumaaveise-hakkliha-liivimaa-300-g,"Mahe rohumaaveise hakkliha LIIVIMAA,300g",LIIVIMAA LIHAVEIS,,Selver,4.74046E+12,Liivimaa Lihaveis Mahe Rohumaaveise Hakkliha 300 G,Liivimaa Lihaveis,300 g,weak,0.6667
+Barbora,https-barbora-ee-toode-kulm-ciabatta-tume-eesti-pagar-300-g,"KÃ¼lm.ciabatta tume EESTI PAGAR,300g",EESTI PAGAR,,Selver,4.74009E+12,"Eesti Pagar Ciabatta hele, 300g",Eesti Pagar,,weak,0.5714
+Barbora,https-barbora-ee-toode-tailihaviiner-matsimoka-250-g,"Tailihaviiner MATSIMOKA,250g",MATSIMOKA,,Selver,4.74474E+12,Matsimoka Tailihaviiner 250 G,Matsimoka Tailihaviiner,,weak,0.6667
+Barbora,000000000000961818,KÃ¼lm. pelmeenid lihaga GYOZA VICI 400g,,,Selver,4.77019E+12,"Pelmeenid lihaga Gyoza, VICI 400 g",VIÄŒIUNAI BALTIC OÃœ,,weak,0.6667
+Barbora,https-barbora-ee-toode-pirn-conference-1-kl-kg,"Pirn Conference 1kl., kg",,,Selver,2.70139E+12,"Pirn Conference, kg",MÃ¤Ã¤ramata,,weak,0.6667
+Barbora,https-barbora-ee-toode-talurulaad-rakvere-350-g,"Talurulaad RAKVERE, 350g",RAKVERE,,Selver,4.74E+12,"Talurulaad, RAKVERE LK, 350 g",MAAG EESTI AS,,weak,0.5
+Barbora,000000000001162505,"KÃ¼lm.pitsarull EESTI PAGAR,400g",EESTI PAGAR,,Selver,4.74009E+12,"Pitsarull, EESTI PAGAR, 400 g",EESTI PAGAR AS,,weak,0.6
+Barbora,https-barbora-ee-toode-porgandimahl-kadarbiku-0-5-l,"Porgandimahl KADARBIKU, 0.5L",KADARBIKU,,Selver,4.74237E+12,"Porgandimahl, KADARBIKU KÃ–Ã–GIVILI, 500 ml",Kadarbiku,,weak,0.5
+Barbora,https-barbora-ee-toode-koogikaste-alpro-250-ml,"KÃ¶Ã¶gikaste ALPRO, 250ml",ALPRO,,Selver,5.41119E+12,"KÃ¶Ã¶gikaste laktoosivaba, ALPRO, 250 ml",NUTRICIA SIA,,weak,0.5
+Barbora,https-barbora-ee-toode-alk-jook-cooler-dark-cherry-4-proc-275-ml,Alk.jook COOLER Dark Cherry 4% 275ml,COOLER,,Selver,4.74005E+12,Cooler Dark Cherry 4%vol muu alkohoolne jook 275ml,Cooler Dark,275 ml,weak,0.5556
+Barbora,000000000001221391,"KÃ¼lm.grillitud kÃ¶Ã¶giviljad BAUER, 400g",BAUER,,Selver,5.90315E+12,"Grillitud kÃ¶Ã¶giviljad, BAUER, 400 g",BIMAR OÃœ,,weak,0.6
+Barbora,https-barbora-ee-toode-kodujuust-otto-hapukoorega-330-g,"Kodujuust OTTO hapukoorega, 330g",PIIMAMEISTER OTTO,,Selver,4.74057E+12,"Kodujuust hapukoorega, PIIMAMEISTER OTTO, 330 g",Hapukoorega,,weak,0.6
+Barbora,000000000001276213,"KÃ¼lm.vaarikad, mustikad HÃ„RMAVILI, 300g",HÃ„RMAVILI,,Selver,4.74019E+12,"Vaarikad, mustikad, HÃ„RMAVILI, 300 g",BALBIINO AS,,weak,0.6
+Barbora,https-barbora-ee-toode-kanafileesink-kuubikud-m-m-250-g,"Kanafileesink kuubikud M&M, 250g",MAKS & MOORITS,,Selver,4.74017E+12,Ma&orits Kanafileesink Kuubikud 250G,Ma&orits Kanafileesink,250 g,weak,0.5
+Barbora,000000000000160559,Punase apelsininektar PFANNER 2L,PFANNER,,Selver,https://www.selver.ee/apelsininektar-50-pfanner-2-l,"Apelsininektar 50%, PFANNER, 2 l",SELVER AS,,weak,0.5
+Barbora,000000000001220964,"KÃ¼lm. kalapulgad Muumi VICI, 250g",VICI,,Selver,4.74006E+12,"Kalapulgad Muumi, VICI, 250 g",VICIUNAI BALTIC OÃœ,,weak,0.6
+Barbora,https-barbora-ee-toode-kodujuust-tere-soolariisikatega-300-g,"Kodujuust TERE soolariisikatega, 300g",TERE,,Selver,4.74004E+12,"Kodujuust Setomaa soolariisikatega, TERE, 300 g",Kodujuust Setomaa,,weak,0.6
+Barbora,000000000000014420,Vermut MARTINI Bianco 15% 1L,MARTINI,,Selver,7.63004E+12,"Vermut MARTINI Bianco, 100 cl",LIVIKO AS,,weak,0.6
+Barbora,https-barbora-ee-toode-e-vaba-suitsupeekon-oskar-120-g-viil,"E-vaba suitsupeekon OSKAR, 120g viil",OSKAR,,Selver,4.74057E+12,"E-vaba suitsupeekon, OSKAR, 120 g",E-vaba,,weak,0.6667
+Barbora,000000000000181218,"Kurk Luunja, kg",,,Selver,2.70001E+12,"Kurk Luunja, GRÃœNE FEE, kg",GRÃœNE FEE EESTI AS,,weak,0.5
+Barbora,000000000000014321,Lahustuv kohv NESCAFÃ‰Â® CLASSIC 100g,NESCAFE,,Selver,7.61303E+12,"Lahustuv kohv Classic (klaaspurk), NESCAFE, 100g",SELVER AS,,weak,0.5714
+Barbora,https-barbora-ee-toode-juust-royal-gouda-valio-black-200-g,"Juust Royal Gouda VALIO Black, 200g",VALIO,,Selver,4.74055E+12,"Juust Royal Gouda Black, 200 g",Juust Royal,200 g,weak,0.6667
+Barbora,https-barbora-ee-toode-kpn-kv-vah-jaume-serra-cava-brut-750-ml,KPN kv.vah. JAUME SERRA Cava Brut 750ml,JAUME SERRA,,Selver,8.41128E+12,"Jaume Serra Cava Brut Nature KPN kvaliteetvahuvein 11,5%vol 750ml",Jaume Serra,,weak,0.5455
+Barbora,000000000000014321,Lahustuv kohv NESCAFÃ‰Â® CLASSIC 100g,NESCAFE,,Selver,7.61303E+12,"Lahustuv kohv Classic (klaaspurk), NESCAFE, 100g",SELVER AS,,weak,0.5714
+Barbora,https-barbora-ee-toode-rebitud-sealiha-bbq-kastmes-m-m-200-g,"Rebitud sealiha BBQ kastmes M&M, 200g",Maks&Moorits,,Selver,4.74017E+12,"Rebitud sealiha BBQ kastmes, MAKS&MOORITS, 200 g",Rebitud,,weak,0.5
+Barbora,https-barbora-ee-toode-muu-pir-jook-pipra-naps-meega-35-proc-500-ml,Muu pir.jook PIPRA NAPS Meega 35% 500ml,PIPRA NAPS,,Selver,4.74005E+12,Pipra Naps Meega muu piiritusjook 35%vol 500ml,Pipra Naps,500 ml,weak,0.5556
+Barbora,https-barbora-ee-toode-piim-tere-2-5-proc-d-vitamiiniga-1-l-kile,"Piim TERE 2,5%, D-vitamiiniga 1L kile",TERE,,Selver,4.74004E+12,"Tere Piim 2,5%, D-vitamiiniga, 1 l",Tere Piim,1 l,weak,0.6667
+Barbora,https-barbora-ee-toode-suitsupeekon-ehe-rannarootsi-120-g-viil,"Suitsupeekon Ehe RANNAROOTSI,120g viil",RANNAROOTSI,,Selver,4.7403E+12,"Suitsupeekon Ehe, RANNAROOTSI, 120 g","EHE Suitsupeekon,",,weak,0.6
+Barbora,https-barbora-ee-toode-pihvid-rakvere-400-g,"Pihvid RAKVERE, 400g",RAKVERE,,Selver,4.74E+12,"Rakvere pihvid, RAKVERE LK, 400 g",RAKVERE Pihvid,400 g,weak,0.5
+Barbora,https-barbora-ee-toode-kpn-vein-gran-castillo-rose-750-ml,KPN vein GRAN CASTILLO Rose 750ml,GRAN CASTILLO,,Selver,4.74016E+12,Gran Castillo Tempranillo Rose vein 11%vol 750ml,Gran Castillo,,weak,0.625
+Barbora,https-barbora-ee-toode-kohvioad-gran-crema-lavazza-1-kg,"Kohvioad Gran Crema LAVAZZA, 1kg",LAVAZZA,,Selver,https://www.selver.ee/kohvioad-caffe-crema-classico-lavazza-1kg,"Kohvioad Caffe Crema Classico, LAVAZZA, 1kg",MERRILD BALTICS SIA,,weak,0.5714
+Barbora,https-barbora-ee-toode-kaera-lapi-leib-fazer-kartulihelv-310-g,Kaera lapi leib FAZER kartulihelv.310g,FAZER,,Selver,4.7401E+12,Fazer Kaera Lapi Leib Kartulihelvestega 310 G,Fazer Kaera,310 G,weak,0.5714
+Barbora,https-barbora-ee-toode-viinamarjanektar-aura-1-l,Viinamarjanektar AURA 1L,AURA,,Selver,4.7401E+12,"Viinamarjanektar, AURA, 1 L",A. LE COQ AS,,weak,0.6667
+Barbora,000000000000092493,Brandy ST-REMY Authentic XO 40% 700ml,ST.REMY,,Selver,https://www.selver.ee/brandi-st-remy-authentic-xo-70-cl,"BrÃ¤ndi ST. REMY Authentic XO, 70 cl",LIVIKO AS,,weak,0.5
+Barbora,https-barbora-ee-toode-jog-jook-actimel-metsamarja-8-x-100-g,"Jog.jook ACTIMEL metsamarja, 8x100g",ACTIMEL,,Selver,https://www.selver.ee/jogurtijook-metsamarja-8x100g-actimel-800-g,"Jogurtijook metsamarja 8x100g, ACTIMEL, 800 g",NUTRICIA SIA,,weak,0.5
+Barbora,https-barbora-ee-toode-suitsupeekon-oskar-120-g-viil,"Suitsupeekon OSKAR,120g viil",OSKAR,,Selver,4.74057E+12,"Suitsupeekon, OSKAR, 120 g",OSKAR LT AS,,weak,0.5
+Barbora,https-barbora-ee-toode-ruks-seemneleib-leibur-10-proc-seemneid-390-g,Ruks seemneleib LEIBUR 10% seemneid 390g,LEIBUR,,Selver,4.74007E+12,Leibur Ruks Seemneleib 390 G,Leibur Ruks,390 G,weak,0.6
+Barbora,https-barbora-ee-toode-jog-jook-actimel-puuvilja-4-x-100-g,"Jog.jook ACTIMEL puuvilja, 4x100g",ACTIMEL,,Selver,47500891,"Jogurtijook puuvilja 4x100g, ACTIMEL, 400 g",NUTRICIA SIA,,weak,0.5
+Barbora,https-barbora-ee-toode-peedi-porgandi-pastinaagi-pehmik-ep-240-g,Peedi-porgandi-pastinaagi pehmik EP 240g,EESTI PAGAR,,Selver,4.74009E+12,Eesti Pagar Peedi-Porgandi-Pastinaagi Pehmik 240 G,Eesti Pagar,240 G,weak,0.5
+Barbora,000000000000038343,LikÃ¶Ã¶r MALIBU 21% 500ml,MALIBU,,Selver,126222,"LikÃ¶Ã¶r MALIBU, 50 cl",,,weak,0.5
+Barbora,https-barbora-ee-toode-kanepiseemne-leib-rukkiteradega-500-g,Kanepiseemne leib rukkiteradega 500g,EESTI PAGAR,,Selver,4.74009E+12,Eesti Pagar Kanepiseemne Leib Rukkiteradega 500 G,Eesti Pagar,500 G,weak,0.5
+Barbora,https-barbora-ee-toode-jah-surimist-pulgad-smart-choice-250-g,"Jah. surimist pulgad Smart Choice, 250g",VICI,,Selver,4.77019E+12,"Surimist pulgad Smart Choice, VICI, 250 g",Surimist,,weak,0.5714
+Barbora,https-barbora-ee-toode-delikatessrulaad-tallegg-130-g-viil,"Delikatessrulaad TALLEGG, 130g viil",TALLEGG,,Selver,4.74005E+12,"Delikatessrulaad, TALLEGG, 130 g",MAAG EESTI AS,,weak,0.5
+Barbora,https-barbora-ee-toode-joogijog-activia-maasika-kiivi-300-g,"Joogijog. ACTIVIA maasika-kiivi, 300g",ACTIVIA,,Selver,5.90064E+12,"Joogijogurt maasika-kiivi, ACTIVIA, 300 g",NUTRICIA SIA,,weak,0.5
+Barbora,https-barbora-ee-toode-pehme-kohupiim-mo-saaremaa-5-proc-500-g,"Pehme kohupiim MO SAAREMAA 5%, 500g",MO SAAREMAA,,Selver,4.74015E+12,"Pehme kohupiim 5%, 500g",Pehme,500 g,weak,0.6
+Barbora,000000000000152409,Whisky J.WALKER Red Label 40% 1L,JOHNNIE WALKER,,Selver,5.00027E+12,Johnnie Walker Red Label Scotch Whisky 40%vol 1L,Johnnie Walker,,weak,0.5556
+Barbora,https-barbora-ee-toode-kulmutatud-part-ilma-rupsita-2-2-kg,"KÃ¼lmutatud part ilma rupsita, 2.2kg",,,Selver,5.90831E+12,"Part A-klass (ilma rupsita), 2,1 kg",MAAG HORECA OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-kalkunisink-fitlap-noo-105-g-viil,"Kalkunisink Fitlap NÃ•O, 105g viil",NÃ•O,,Selver,4.74057E+12,"Kalkunisink Fitlap, NÃ•O LIHAVÃœRST, 105 g",NÃ•O LIHATÃ–Ã–STUS OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-kova-juust-e-piim-bresto-light-200-g,"KÃµva juust E-PIIM Bresto light, 200g",E-PIIM,,Selver,4.74014E+12,"juust Bresto Light, 200g",juust,200 g,weak,0.5714
+Barbora,000000000000177035,Jahvatatud kohv Rossa LAVAZZA 250g,LAVAZZA,,Selver,8.00007E+12,"Jahvatatud kohv Qualita Rossa, LAVAZZA, 250 g",SELVER AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-poolsuitsuvorst-servelaat-rakvere-500-g,"Poolsuitsuvorst Servelaat RAKVERE, 500g",RAKVERE,,Selver,4.74E+12,"Poolsuitsuvorst Servelaat, RAKVERE LK, 500 g",MAAG EESTI AS,,weak,0.6
+Barbora,https-barbora-ee-toode-majoneesi-ketsupikaste-heinz-425-g,Majoneesi-ketÅ¡upikaste HEINZ 425g,HEINZ,,Selver,5.00016E+12,"Majoneesi-ketÅ¡upikaste, HEINZ, 415ml",EUGESTA EESTI AS,,weak,0.6
+Barbora,https-barbora-ee-toode-redis-punane-pakitud-125-g,"Redis punane pakitud, 125g",,,Selver,4.74061E+12,"Redis pakitud, 125 g",MÃ¤Ã¤ramata,,weak,0.5
+Barbora,https-barbora-ee-toode-koorejaatis-regatt-vanilli-480-g,"KoorejÃ¤Ã¤tis REGATT vanilli, 480g",REGATT,,Selver,125963,"KoorejÃ¤Ã¤tis, REGATT, 480 g",,,weak,0.5
+Barbora,https-barbora-ee-toode-poolsuitsuvorst-tapi-noo-135-g-viil,"Poolsuitsuvorst TÃ¤pi NÃ•O, 135g viil",NÃ•O,,Selver,4.74057E+12,"Poolsuitsuvorst TÃ¤pi, NÃ•O, 135 g",TÃ¤pi,,weak,0.6
+Barbora,https-barbora-ee-toode-kartulikaste-felix-400-g,"Kartulikaste FELIX, 400g",FELIX,,Selver,4.74003E+12,Felix Kartulikaste 220g,Felix Kartulikaste,220 g,weak,0.5
+Barbora,000000000000057743,Cognac LARSEN VS 40% 500ml,LARSEN,,Selver,3.27251E+12,Larsen VS Cognac karbis 40%vol 500ml,Larsen VS,,weak,0.6667
+Barbora,000000000000013716,Must tee Yellow Label LIPTON 25x2g,LIPTON,,Selver,8.71716E+12,"Must tee Yellow Label niidiga kotis 25pk, LIPTON, 50 g",MOBEC AS,,weak,0.5556
+Barbora,https-barbora-ee-toode-sokolaadibatoonike-kinder-maxi-king-35-g,Å okolaadibatoonike KINDER Maxi King 35g,KINDER,,Selver,4.0084E+12,"Biskviitkook Kinder Maxi King, KINDER, 35 g",Kinder Maxi,35 g,weak,0.5
+Barbora,https-barbora-ee-toode-hapukoor-alma-20-proc-500-g,"Hapukoor ALMA 20%, 500g",ALMA,,Selver,4.74013E+12,"Alma Hapukoor 20%, 500 g",Alma Hapukoor,500 g,weak,0.6667
+Barbora,https-barbora-ee-toode-vaike-kanaviiner-m-m-300-g,"VÃ¤ike kanaviiner M&M,300g",MAKS & MOORITS,,Selver,4.74017E+12,Ma&orits VÃ¤ike Kanaviiner 300G,Ma&orits VÃ¤ike,300 g,weak,0.5
+Barbora,https-barbora-ee-toode-kodujuust-otto-klassikaline-440-g,"Kodujuust OTTO klassikaline, 440g",PIIMAMEISTER OTTO,,Selver,4.74057E+12,"Piimameister Otto Klassikaline kodujuust, 440 g",Piimameister Otto,,weak,0.6
+Barbora,https-barbora-ee-toode-likoor-canari-tiramisu-16-proc-350-ml,LikÃ¶Ã¶r CANARI Tiramisu 16% 350ml,CANARI,,Selver,5.90106E+12,Canari Tiramisu likÃ¶Ã¶r 15%vol 350 ml,Canari Tiramisu,,weak,0.6
+Barbora,https-barbora-ee-toode-maksapasteet-rannarootsi-240-g,Maksapasteet RANNAROOTSI 240g,RANNAROOTSI,,Selver,4.7403E+12,"Maksapasteet, RANNAROOTSI, 240 g",Rannarootsi,,weak,0.6667
+Barbora,https-barbora-ee-toode-voileivavorst-valla-240-g-viil,"VÃµileivavorst VALLA, 240g viil",VALLA,,Selver,4.74E+12,"VÃµileivavorst, VALLA, 240 g","VÃµileivavorst,",,weak,0.5
+Barbora,https-barbora-ee-toode-kulm-kala-juurviljaburger-esva-365-g,"KÃ¼lm. kala-juurviljaburger ESVA,365g",ESVA,,Selver,4.74006E+12,"Kala-juurviljaburger, ESVA, 375 g",VICIUNAI BALTIC OÃœ,,weak,0.6
+Barbora,000000000001189828,"KÃ¼lm.pelmeenid broilerilihaga RAKVERE,400g",RAKVERE,,Selver,4.74E+12,Pelmeenid broilerilihaga 400g,Pelmeenid,400 g,weak,0.6
+Barbora,000000000000181812,"Ã•un Paulared 1kl., kg",,,Selver,2.70137E+12,"Ã•un Paulared, kg",MÃ¤Ã¤ramata,,weak,0.6667
+Barbora,https-barbora-ee-toode-kanasink-tilliga-tallegg-130-g-viil,"Kanasink tilliga TALLEGG, 130g viil",TALLEGG,,Selver,4.74005E+12,Tallegg Kanasink Tilliga 130 G,Tallegg Kanasink,130 g,weak,0.6
+Barbora,https-barbora-ee-toode-kpn-vein-casal-garcia-rose-vin-v-750-ml,KPN vein CASAL GARCIA Rose Vin.V. 750ml,CASAL GARCIA,,Selver,5.6011E+12,"Casal Garcia Vinho Verde Rose KPN vein 9,5%vol 750ml",Casal Garcia,,weak,0.5455
+Barbora,000000000000013716,Must tee Yellow Label LIPTON 25x2g,LIPTON,,Selver,8.71716E+12,"Must tee Yellow Label niidiga kotis 25pk, LIPTON, 50 g",MOBEC AS,,weak,0.5556
+Barbora,https-barbora-ee-toode-kakaopuding-tere-laktoosivaba-200-g,"Kakaopuding TERE laktoosivaba, 200g",TERE,,Selver,4.74004E+12,"Laktoosivaba kakaopuding, 200 g",Laktoosivaba,200 g,weak,0.5
+Barbora,https-barbora-ee-toode-lahustuv-kohv-classic-nescafe-200-g,Lahustuv kohv Classic NESCAFE 200g,NESCAFE,,Selver,8.44529E+12,"Lahustuv kohv Classic (klaaspurk), NESCAFE, 200 g",SELVER AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-kali-karl-friedrich-500-ml,Kali Karl Friedrich 500ml,KARL FRIEDRICH,,Selver,4.74002E+12,"Friedrich Kali Apelsin, KARL, 500 ml",SAKU Ã•LLETEHASE AS,,weak,0.6
+Barbora,https-barbora-ee-toode-kohvioad-lavazza-qualita-oro-500-g,Kohvioad LAVAZZA Qualita Oro 500g,LAVAZZA,,Selver,8.00007E+12,"Qualita Oro 2x250g, LAVAZZA, 500g",SELVER AS,,weak,0.6667
+Barbora,000000000001235038,"KoorejÃ¤Ã¤tis RAKS piparmÃ¼ndi, 56g",RAKS,,Selver,4.74019E+12,"PiparmÃ¼ndi-koorejÃ¤Ã¤tis kÃ¼psistega, RAKS, 56 g",BALBIINO AS,,weak,0.6
+Barbora,https-barbora-ee-toode-hapukoor-farmi-20-proc-500-g,"Hapukoor FARMI 20%, 500g",FARMI,,Selver,4.74012E+12,"Hapukoor 20%, FARMI, 500 g",FARMI PIIMATÃ–Ã–STUS AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-proteiini-mousse-vaar-valio-profeel-150-g,Proteiini-mousse vaar.VALIO PROFEEL 150g,VALIO,,Selver,6.40843E+12,"Valio PROfeel proteiini-mousse vaarika, laktoosivaba, 150 g",Valio PROfeel,150 g,weak,0.5
+Barbora,https-barbora-ee-toode-salaami-itaaliaparane-parma-rakvere-200-g,"Palermo salaami RAKVERE,200g",RAKVERE,,Selver,4.74E+12,"Palermo salaami , RAKVERE LK, 200 g",ItaaliapÃ¤rane Parma,,weak,0.6
+Barbora,000000000000057744,Cognac LARSEN VSOP 40% 700ml,LARSEN,,Selver,3.27251E+12,Larsen VSOP Cognac karbis 40%vol 700ml,Larsen VSOP,,weak,0.6667
+Barbora,https-barbora-ee-toode-salaami-seemnekattega-rakvere-200-g,"Salaami seemnekattega RAKVERE,200g",RAKVERE,,Selver,4.74E+12,"Salaami seemnekattega, RAKVERE LK, 200 g",Seemnekattega,,weak,0.6
+Barbora,000000000001241299,"KÃ¼lm.pelmeenid praesibulaga RAKVERE,400g",RAKVERE,,Selver,4.75017E+12,Pelmeenid praesibulaga 400g,Pelmeenid,400 g,weak,0.6
+Barbora,000000000000180827,"Kartul varajane, lahtine,kg",,,Selver,124485,"Varajane kartul, kg",,,weak,0.6667
+Barbora,https-barbora-ee-toode-klassika-pelmeenid-maks-moorits-400-g,Klassika. pelmeenid MAKS&MOORITS 400g,MAKS & MOORITS,,Selver,125163,"Klassikalised pelmeenid, MAKS&MOORITS, 400 g",,,weak,0.5
+Barbora,https-barbora-ee-toode-sealihasardell-rannarootsi-500-g,"Sealihasardell RANNAROOTSI, 500g",RANNAROOTSI,,Selver,4.7403E+12,"Sealihasardell, RANNAROOTSI, 500 g",Sealihasardell,,weak,0.6667
+Barbora,https-barbora-ee-toode-kulm-minipelm-kanalihaga-pealinna-350-g,"KÃ¼lm.minipelm.kanalihaga PEALINNA, 350g",PEALINNA,,Selver,4.74009E+12,Pealinna minipelmeenid kanalihaga 350g,Pealinna,350 g,weak,0.5
+Barbora,https-barbora-ee-toode-kulm-vareenikud-uvic-kartuli-seene-500-g,"KÃ¼lm. vareenikud UVIC kartuli-seene,500g",UVIC,,Selver,4.74022E+12,"Vareenikud Ivan kartuli-seene, UVIC, 500 g",ECOTRADE OÃœ,,weak,0.5714
+Barbora,https-barbora-ee-toode-kohupiimakreem-tere-emma-banaani-150-g,"Kohupiimakreem TERE Emma banaani, 150g",TERE,,Selver,4.74029E+12,"Kohupiimakreem banaani, EMMA, 150 g",TERE AS,,weak,0.6
+Barbora,https-barbora-ee-toode-majonees-baltika-provansaal-orig-300-g,"Majonees BALTIKA Provansaal Orig.,300g",BALTIKA,,Selver,4.74501E+12,"Klassikaline Provansaal majonees, BALTIKA, 300 g",BALTIKA FOOD OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-johvikamahlajook-aura-fresh-2-l,JÃµhvikamahlajook AURA Fresh 2L,AURA,,Selver,4.7401E+12,Aura Fresh jÃµhvikajook 2L,Aura Fresh,,weak,0.6
+Barbora,https-barbora-ee-toode-lastevorst-rakvere-600-g,"Lastevorst RAKVERE, 600g",RAKVERE,,Selver,4.74E+12,"Lastevorst, RAKVERE LK, 600 g",Lastevorst,,weak,0.5
+Barbora,000000000000014335,Jahvatatud kohv KRÃ–NUNG 250g,JACOBS,,Selver,8.711E+12,"Jahvatatud kohv KrÃ¶nung, JACOBS, 250 g",SELVER AS,,weak,0.6
+Barbora,000000000000184857,Cognac LARSEN VS 40% 700ml,LARSEN,,Selver,3.25715E+12,Meukow VS Cognac 40%vol 700ml,Meukow VS,,weak,0.5
+Barbora,https-barbora-ee-toode-sealihasult-rannarootsi-330-g,"SealihasÃ¼lt RANNAROOTSI, 330g",RANNAROOTSI,,Selver,4.7403E+12,"SealihasÃ¼lt, RANNAROOTSI, 330 g",SÃ¼lt Rannarootsi,,weak,0.6667
+Barbora,https-barbora-ee-toode-jaatis-la-muu-mango-passion-vegan-250-g,"JÃ¤Ã¤tis LA MUU mango-passion, vegan 250g",LA MUU,,Selver,4.74296E+12,"Mango-passioni jÃ¤Ã¤tis, vegan, LA MUU, 250 g",JUNGENT ESTONIA OÃœ,,weak,0.625
+Barbora,https-barbora-ee-toode-juustupulgad-pik-nik-original-kids-140-g,"Juustupulgad PIK-NIK Original Kids, 140g",PIK-NIK,,Selver,4.7703E+12,"Pik-Nik Rebitavad juustupulgad Kids, 140 g",Pik-Nik Rebitavad,140 g,weak,0.5714
+Barbora,https-barbora-ee-toode-jaatis-madagaskari-vanil-la-muu-250-g,JÃ¤Ã¤tis Madagaskari vanil. LA MUU 250g,LA MUU,,Selver,4.74296E+12,"Madagaskari vanilliga jÃ¤Ã¤tis, laktoosivaba, LA MUU, 250 g",JUNGENT ESTONIA OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-heeringafilee-ilma-olita-vici-200-g,"Heeringafilee ilma Ãµlita VICI, 200g",VICI,,Selver,https://www.selver.ee/atlandi-heeringafilee-ilma-olita-vici-200-g,"Atlandi heeringafilee ilma Ãµlita, VICI, 200 g",VIÄŒIUNAI BALTIC OÃœ,,weak,0.6667
+Barbora,https-barbora-ee-toode-hele-olu-warsteiner-premium-4-8-proc-500-ml,Hele Ãµlu WARSTEINER Premium4.8%500ml,WARSTEINER,,Selver,4.00086E+12,"Hele Ãµlu, WARSTEINER, 500 ml purk",A. LE COQ AS,,weak,0.5
+Barbora,https-barbora-ee-toode-ohuline-viru-sink-rakvere-150-g-viil,"Ã•huline Viru sink RAKVERE, 150g viil",RAKVERE,,Selver,4.74E+12,"Ã•huline Viru sink, RAKVERE LK, 150 g",Ã•huline Viru,,weak,0.5714
+Barbora,000000000001284310,"KÃ¼lm.Å¡okolaadisaiake EESTI PAGAR, 240g",EESTI PAGAR,,Selver,4.74009E+12,"Å okolaadisaiake vÃµiga, EESTI PAGAR, 240 g",EESTI PAGAR AS,,weak,0.5
+Barbora,https-barbora-ee-toode-ananassinektar-aura-1-l,Ananassinektar AURA 1L,AURA,,Selver,https://www.selver.ee/ananassinektar-aura-1-l,"Ananassinektar, AURA, 1 L",A. LE COQ AS,,weak,0.6667
+Barbora,000000000000144157,"Viin VIRU VALGE VÃ„GEV 80% 0,5 L",VIRU VALGE,,Selver,4.74005E+12,Viru Valge VÃ¤gev viin 80%vol 500ml,Viru Valge,500 ml,weak,0.6667
+Barbora,000000000000038343,LikÃ¶Ã¶r MALIBU 21% 500ml,MALIBU,,Selver,126222,"LikÃ¶Ã¶r MALIBU, 50 cl",,,weak,0.5
+Barbora,000000000001231348,"KÃ¼psisejÃ¤Ã¤tis kÃ¼psik VÃ„IKE TOM, 75g",VÃ„IKE TOM,,Selver,4.74009E+12,"VÃ¤ike Tom hele kÃ¼psisejÃ¤Ã¤tis, 75 g",VÃ¤ike Tom,75 g,weak,0.5
+Barbora,https-barbora-ee-toode-vin-vorst-fuetec-salaami-elpozo-170-g,"Vin.vorst Fuetec Salaami ELPOZO,170g",ELPOZO,,Selver,8.41084E+12,"Fuetec salaami, ELPOZO, 170 g",Fuetec,,weak,0.5
+Barbora,https-barbora-ee-toode-kanafileesink-fit-tallegg-130-g-viil,"Kanafileesink Fit TALLEGG, 130g viil",TALLEGG,,Selver,4.74005E+12,Tallegg Fit! Kanafileesink 130 G,Tallegg Fit!,130 g,weak,0.6
+Barbora,https-barbora-ee-toode-taispiim-farmi-3-8-4-2-proc-2-l,"TÃ¤ispiim FARMI 3,6-4,2%, 2L",FARMI,,Selver,4.74011E+12,"Farmi TÃ¤ispiim 3,6%-4,2%, 2 l",Farmi TÃ¤ispiim,2 l,weak,0.6667
+Barbora,https-barbora-ee-toode-jogurtijaatis-virsiku-balbiino-54-g,JogurtijÃ¤Ã¤tis virsiku BALBIINO 54g,BALBIINO,,Selver,4.74019E+12,"Virsiku-jogurtijÃ¤Ã¤tis jogurtiglasuuris, BALBIINO, 54 g",BALBIINO AS,,weak,0.6
+Barbora,https-barbora-ee-toode-toorsuitsu-panniliha-noo-105-g-viil,"Toorsuitsu panniliha NÃ•O,105g viil",NÃ•O,,Selver,4.74057E+12,"Toorsuitsu panniliha, NÃ•O, 105 g",NÃ•O LIHATÃ–Ã–STUS OÃœ,,weak,0.6
+Barbora,https-barbora-ee-toode-kohupiimakreem-alma-maasika-vahukom-150-g,Kohupiimakreem ALMA maasika-vahukom.150g,VALIO ALMA,,Selver,4.74013E+12,"Kohupiimakreem maasika-vahukommimaitseline, ALMA, 150g",Alma,150 g,weak,0.6667
+Barbora,https-barbora-ee-toode-viin-ukrainka-40-proc-500-ml,Viin UKRAINKA 40% 500ml,,,Selver,4.82002E+12,"Viin UKRAINKA, 50 cl",LIVIKO AS,,weak,0.5
+Barbora,https-barbora-ee-toode-tursamaks-isl-natur-kapten-grant-120-g,"Tursamaks Isl.natur.KAPTEN GRANT, 120g",KAPTEN GRANT,,Selver,4.74069E+12,Kapten Grant islandi tursamaks naturaalne 120g,Kapten Grant,,weak,0.5
+Barbora,000000000001277647,"KÃ¼lm.hinkaalid RANNAROOTSI, 420g",RANNAROOTSI,,Selver,4.7403E+12,"Hinkaalid, RANNAROOTSI, 420 g",RANNAROOTSI LIHATÃ–Ã–STUS AS,,weak,0.5
+Barbora,https-barbora-ee-toode-kulm-minipelmeenid-pealinna-700-g,KÃ¼lm. minipelmeenid PEALINNA 700g,PREMIA,,Selver,4.74009E+12,Pealinna minipelmeenid 700 g,Pealinna,700 g,weak,0.5
+Barbora,https-barbora-ee-toode-punane-vein-blue-nun-alcohol-free-750-ml,Punane vein BLUE NUN Alcohol-Free 750ml,BLUE NUN,,Selver,4.02203E+12,Blue Nun alkoholivaba punane vein 750ml,Blue Nun,,weak,0.625
+Barbora,https-barbora-ee-toode-toored-grillvorstid-lambasooles-vk-400-g,Toored grillvorstid lambasooles VK 400g,,,Selver,4.74017E+12,Ma&orits Toored Grillvorstid Lambasooles 400G,Ma&orits Toored,400 g,weak,0.5714
+Barbora,https-barbora-ee-toode-kohvikoor-tere-10-proc-380-ml,"Kohvikoor TERE 10%, 380ml",TERE,,Selver,125405,"Kohvikoor 10%, TERE, 380 ml",,,weak,0.6667
+Barbora,https-barbora-ee-toode-suitsujuust-tere-200-g,"Suitsujuust TERE, 200g",TERE,,Selver,4.74004E+12,"Tere Suitsujuust, 200 g","Tere Suitsujuust,",200 g,weak,0.6667
+Barbora,000000000000181248,"Punane paprika 1.kl.,kg",,,Selver,2.70002E+12,"Paprika punane, kg",MÃ¤Ã¤ramata,,weak,0.6667
+Barbora,https-barbora-ee-toode-kanafileenagitsad-tallegg-300-g,"Kanafileenagitsad TALLEGG, 300g",TALLEGG,,Selver,4.74005E+12,Tallegg Kanafileenagitsad 300 G,Tallegg Kanafileenagitsad,300 g,weak,0.6667
+Barbora,https-barbora-ee-toode-kulm-lillkapsas-ja-brokoli-maaharra-400-g,KÃ¼lm.lillkapsas ja brokoli MAAHÃ„RRA 400g,MAAHÃ„RRA,,Selver,4.74009E+12,MaahÃ¤rra lillkapsas ja brokoli 400 g,MaahÃ¤rra,400 g,weak,0.6667
+Barbora,https-barbora-ee-toode-juust-gouda-nopri-lambalaatsega-250-g,"Juust Gouda NOPRI lambalÃ¤Ã¤tsega, 250g",NOPRI,,Selver,4.74022E+12,"Gouda juust lambalÃ¤Ã¤tsedega, NOPRI, 250 g",NOPRI TALUMEIEREI OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-sprotid-olis-kapten-grant-250-g,"Sprotid Ãµlis KAPTEN GRANT, 250g",KAPTEN GRANT,,Selver,4.74069E+12,"Sprotid Ãµlis EO, KAPTEN GRANT, 240 g",KAPTEN GRANT OÃœ,,weak,0.6667
+Barbora,https-barbora-ee-toode-juust-eesti-viilutatud-500-g,"Juust EESTI viilutatud, 500g",ESTOVER,,Selver,4.74014E+12,"Eesti juust light, viilutatud, 500 g",Eesti,500 g,weak,0.6
+Barbora,https-barbora-ee-toode-koorejaatis-vanilliplomb-onu-eskimo-480-g,"KoorejÃ¤Ã¤tis vanilliplomb.ONU ESKIMO,480g",ONU ESKIMO,,Selver,4.74019E+12,"Vanillimaitseline koorejÃ¤Ã¤tis, ONU ESKIMO, 480 g",BALBIINO AS,,weak,0.5
+Barbora,420727,"Kartul pestud Laura pakitud, 2kg",,,Selver,4.7431E+12,Kartul punane Laura 2kg,Kartul,,weak,0.5
+Barbora,https-barbora-ee-toode-kulm-kalapulgad-kilepakendis-esva-400-g,"KÃ¼lm. kalapulgad kilepakendis ESVA, 400g",ESVA,,Selver,4.74006E+12,ESVA kalapulgad kiles 400g,ESVA,400 g,weak,0.5
+Barbora,https-barbora-ee-toode-jogurt-natural-johvikamusliga-tere-150-g,Jogurt Natural jÃµhvikamÃ¼sliga TERE 150g,TERE,,Selver,4.74004E+12,"Jogurt Natural jÃµhvikamÃ¼sliga, laktoosivaba, TERE, 150 g",NORDIC MILK OÃœ,,weak,0.6667
+Barbora,https-barbora-ee-toode-toorjuust-philadelphia-light-kuusl-200-g,Toorjuust PHILADELPHIA Light kÃ¼Ã¼sl. 200g,PHILADELPHIA,,Selver,7.6222E+12,"Toorjuust Light, PHILADELPHIA, 200 g",KRAFT FOODS,,weak,0.6
+Barbora,https-barbora-ee-toode-delikatessviiner-juustu-rannarootsi-250-g,"Delikatessviiner juustu RANNAROOTSI,250g",RANNAROOTSI,,Selver,4.7403E+12,"Delikatessviiner, RANNAROOTSI, 250 g",,,weak,0.5
+Barbora,https-barbora-ee-toode-lounasink-oskar-300-g-viil,"LÃµunasink OSKAR, 300g viil",OSKAR,,Selver,4.74057E+12,"LÃµunasink, OSKAR, 300 g",OSKAR LT AS,,weak,0.5
+Barbora,https-barbora-ee-toode-sealihasult-oskar-330-g,"SealihasÃ¼lt OSKAR, 330g",OSKAR,,Selver,4.74057E+12,"SealihasÃ¼lt, OSKAR, 330 g",SealihasÃ¼lt,,weak,0.6667
+Barbora,https-barbora-ee-toode-kohupiimakreem-alma-kakao-380-g,"Kohupiimakreem ALMA kakao, 380g",ALMA,,Selver,4.74013E+12,"Kohupiimakreem kakao 2,5% tops, ALMA, 380 g",VALIO EESTI AS,,weak,0.6
+Barbora,https-barbora-ee-toode-poolsuitsuvorst-mini-noo-135-g-viil,"Poolsuitsuvorst Mini NÃ•O, 135g viil",NÃ•O,,Selver,4.74057E+12,"Poolsuitsuvorst Mini, NÃ•O, 135 g",NÃ•O LIHATÃ–Ã–STUS OÃœ,,weak,0.6
+Barbora,https-barbora-ee-toode-skumbria-olis-kapten-grant-240-g,"Skumbria Ãµlis KAPTEN GRANT,240g",KAPTEN GRANT,,Selver,4.74059E+12,"Skumbria tomatikastmes, KAPTEN GRANT, 240 g",KAPTEN GRANT OÃœ,,weak,0.5
+Barbora,000000000001241299,"KÃ¼lm.pelmeenid praesibulaga RAKVERE,400g",RAKVERE,,Selver,4.75017E+12,Pelmeenid praesibulaga 400g,Pelmeenid,400 g,weak,0.6
+Barbora,000000000000037183,Cognac MARTELL VS 40% 700ml,MARTELL,,Selver,3.21982E+12,Martell VS Cognac 40%vol 700 ml,Martell VS,,weak,0.6
+Barbora,https-barbora-ee-toode-rulaad-noo-135-g-viil,"Rulaad NÃ•O, 135g viil",NÃ•O,,Selver,4.74057E+12,"Rulaad NÃµo, NÃ•O, 135 g",NÃµo Rulaad,135 g,weak,0.5
+Barbora,https-barbora-ee-toode-viin-belvedere-pure-40-proc-700-ml,Viin BELVEDERE Pure 40% 700ml,BELVEDERE,,Selver,5.90187E+12,"Viin BELVEDERE Pure, 70 cl",PRIKE AS,,weak,0.6
+Barbora,https-barbora-ee-toode-kpn-vein-johann-brunner-ries-mosel-750-ml,KPN vein JOHANN BRUNNER Ries.Mosel 750ml,JOHANN BRUNNER,,Selver,4.04455E+12,"Johann Brunner Riesling Mosel KPN vein 9,5%vol 750ml",Johann Brunner,,weak,0.6667
+Barbora,https-barbora-ee-toode-mini-juustuviiner-rakvere-200-g,"Mini juustuviiner RAKVERE, 200g",RAKVERE,,Selver,4.74E+12,"Mini juustuviiner, RAKVERE LK, 200 g",Mini,200 g,weak,0.6
+Barbora,https-barbora-ee-toode-juust-eesti-viilutatud-350-g,"Juust EESTI viilutatud, 350g",ESTOVER,,Selver,4.74057E+12,"Estover Eesti juust, viilutatud, 350 g",Estover Eesti,,weak,0.6
+Barbora,https-barbora-ee-toode-jogurt-hellus-maitsestamata-1-kg,"Jogurt HELLUS maitsestamata, 1kg",HELLUS,,Selver,4.74013E+12,"Maitsestamata jogurt 2,5%, 1 kg",Maitsestamata,1 kg,weak,0.5
+Barbora,https-barbora-ee-toode-vein-i-heart-pinot-grigio-kuiv-187-ml,Vein I HEART Pinot Grigio kuiv 187ml,I HEART,,Selver,5.06022E+12,"I heart Pinot Grigio 18,7 cl",HENKELL FREIXENET EESTI AS,,weak,0.5
+Barbora,https-barbora-ee-toode-kulm-laste-pelmeenid-pealinna-350-g,KÃ¼lm.laste pelmeenid PEALINNA 350g,PEALINNA,,Selver,4.74009E+12,"Laste pelmeenid, PEALINNA, 350 g",PREMIA TALLINNA KÃœLMHOONE AS,,weak,0.6
+Barbora,000000000001201831,"KÃ¼lm.supikÃ¶Ã¶giviljad Talv HORTEX, 450g",HORTEX,,Selver,5.90048E+12,"SupikÃ¶Ã¶giviljad Talv, HORTEX, 450 g",VIÄŒIUNAI BALTIC OÃœ,,weak,0.6
+Barbora,https-barbora-ee-toode-kohvioad-caffe-espresso-lavazza-1-kg,Kohvioad Caffe Espresso LAVAZZA 1kg,LAVAZZA,,Selver,https://www.selver.ee/kohvioad-caffe-crema-classico-lavazza-1kg,"Kohvioad Caffe Crema Classico, LAVAZZA, 1kg",MERRILD BALTICS SIA,,weak,0.5714
+Barbora,https-barbora-ee-toode-viin-hlibny-dar-classic-40-proc-200-ml,Viin HLIBNY DAR Classic 40% 200ml,HLEBNIY DAR,,Selver,145527,"Viin HLIBNY DAR, 50 cl",,,weak,0.5
+Barbora,https-barbora-ee-toode-joogivesi-saaremaa-vesi-5-l,Joogivesi SAAREMAA Vesi 5l,SAAREMAA VESI,,Selver,4.74112E+12,SAAREMAA VESI 5 L,SAAREMAA VESI,5 L,weak,0.5
+Barbora,https-barbora-ee-toode-cognac-hennessy-vsop-40-proc-700-ml-karp,Cognac HENNESSY VSOP 40% 700ml karp,HENNESSY,,Selver,3.24599E+12,Hennessy VSOP Cognac 40%vol 700ml,Hennessy VSOP,,weak,0.6667
+Barbora,https-barbora-ee-toode-majonees-hellmann-s-original-625-ml,"Majonees HELLMANN'S Original, 625ml",HELLMANN'S,,Selver,8.72018E+12,"Originaal majonees, HELLMANN'S, 625 ml",UNILEVER EESTI OÃœ,,weak,0.5
+Barbora,https-barbora-ee-toode-kohvikapslid-lavazza-lungo-dolce-16-x-8-g,Kohvikapslid LAVAZZA Lungo Dolce 16x8g,LAVAZZA,,Selver,8.00007E+12,"Kohvikapslid A Modo Mio Lungo Dolce, LAVAZZA, 16tk",SELVER AS,,weak,0.5
+Barbora,https-barbora-ee-toode-voileivamaare-farmi-hapukur-tilli-150-g,"VÃµileivamÃ¤Ã¤re FARMI hapukur.-tilli,150g",FARMI,,Selver,4.74011E+12,"VÃµileivamÃ¤Ã¤re Hapukurgi- Tilli, FARMI, 150 g",FARMI PIIMATÃ–Ã–STUS AS,,weak,0.5
+Barbora,https-barbora-ee-toode-mineraalvesi-evian-500-ml,Mineraalvesi EVIAN 500ml,EVIAN,,Selver,3.06832E+12,Evian looduslik mineraalvesi 500 ml,Evian,500 ml,weak,0.5
+Barbora,https-barbora-ee-toode-koorejaatis-onu-eskimo-kirsi-vahvlik-87-g,KoorejÃ¤Ã¤tis ONU ESKIMO kirsi vahvlik.87g,ONU ESKIMO,,Selver,4.74019E+12,"Kirsi-koorejÃ¤Ã¤tis vahvlikoonuses, ONU ESKIMO, 87 g",BALBIINO AS,,weak,0.5714
+Barbora,https-barbora-ee-toode-grill-liha-pun-veini-marin-rakvere-500-g,"Grill-liha pun.veini marin. RAKVERE,500g",RAKVERE,,Selver,4.74E+12,Rakvere Grill-Liha Punase Veini Marinaadis 500G,Rakvere Grill-Liha,,weak,0.5556
+Barbora,https-barbora-ee-toode-taissuitsuvorst-pepperoni-oskar-80-g-viil,"TÃ¤issuitsuvorst Pepperoni OSKAR,80g viil",OSKAR,,Selver,4.74057E+12,"TÃ¤issuitsuvorst Pepperoni, OSKAR, 80 g",Pepperoni,80 g,weak,0.6
+Barbora,000000000000092493,Brandy ST-REMY Authentic XO 40% 700ml,ST.REMY,,Selver,https://www.selver.ee/brandi-st-remy-authentic-xo-70-cl,"BrÃ¤ndi ST. REMY Authentic XO, 70 cl",LIVIKO AS,,weak,0.5
+Barbora,000000000000057744,Cognac LARSEN VSOP 40% 700ml,LARSEN,,Selver,3.27251E+12,Larsen VSOP Cognac karbis 40%vol 700ml,Larsen VSOP,,weak,0.6667
+Barbora,000000000000013580,Karastusjook SPRITE 500ml,SPRITE,,Selver,5.449E+12,"Karastusjook Sprite, SPRITE, 500 ml",COCA-COLA HBC EESTI AS,,weak,0.6667
+Barbora,000000000000146717,Viin NEMIROFF Original 40% 500ml,Nemiroff,,Selver,4.82018E+12,"Viin NEMIROFF Original, 50 cl",3BS ESTONIA OÃœ,,weak,0.6
+Barbora,000000000000019941,Jahvatatud kohv LAVAZZA Qualita Oro 250g,LAVAZZA,,Selver,8.00007E+12,Jahvatatud kohv Qualita Oro 250 g,Jahvatatud,250 g,weak,0.6667
+Barbora,https-barbora-ee-toode-must-tee-leaf-of-ceylon-basilur-100-g,"Must tee Leaf of Ceylon BASILUR,100g",BASILUR,,Selver,4.79225E+12,"Must purutee Leaf of Ceylon UVA, BASILUR, 100 g",SELVER AS,,weak,0.5
+Barbora,000000000000037132,Viin ABSOLUT Vodka 40% 1L,ABSOLUT,,Selver,7.31204E+12,Absolut vodka 40%vol 1L,Absolut,1 L,weak,0.6
+Barbora,https-barbora-ee-toode-taissuitsu-podravorst-linnamae-230-g,"TÃ¤issuitsu pÃµdravorst LINNAMÃ„E, 230g",LINNAMÃ„E,,Selver,4.74062E+12,"TÃ¤issuitsu pÃµdravorst, LINNAMÃ„E LIHATÃ–Ã–STUS, 230 g",LINNAMÃ„E LIHATÃ–Ã–STUS AS,,weak,0.6
+Barbora,000000000001150893,"KÃ¼lmutatud pelmeenid EHE , 350g",RANNAROOTSI,,Selver,4.7403E+12,"KÃ¼lmutatud EHE mini-pelmeenid, RANNAROOTSI EHE, 350 g",RANNAROOTSI LIHATÃ–Ã–STUS AS,,weak,0.5
+Barbora,https-barbora-ee-toode-rostsai-tosta-eesti-pagar-500-g,RÃ¶stsai Tosta EESTI PAGAR 500g,EESTI PAGAR,,Selver,4.74009E+12,Eesti Pagar Tosta! RÃ¶stisai 500 G,Eesti Pagar,,weak,0.5
+Barbora,https-barbora-ee-toode-mango-kg,"Mango, kg",,,Selver,2.70002E+12,"Mango Palmer, kg",MÃ¤Ã¤ramata,,weak,0.5
+Barbora,000000000000013428,"Gin GORDON`S 37,5% 700ml",GORDON'S,,Selver,5.01033E+12,"Hendrick's Gin 41,4%vol 700ml",Hendrick's Gin,,weak,0.5
+Barbora,000000000001201831,"KÃ¼lm.supikÃ¶Ã¶giviljad Talv HORTEX, 450g",HORTEX,,Selver,5.90048E+12,"SupikÃ¶Ã¶giviljad Talv, HORTEX, 450 g",VIÄŒIUNAI BALTIC OÃœ,,weak,0.6
+Barbora,https-barbora-ee-toode-kpn-vein-conde-villar-branco-750-ml,KPN vein CONDE VILLAR Branco 750ml,,,Selver,5.60324E+12,"Conde Villar Vinho Verde Branco KPN vein 10,5%vol 750ml",Conde Villar,750 ml,weak,0.6667
+Barbora,https-barbora-ee-toode-taimne-dessert-mango-deary-150-g,"Taimne dessert mango DEARY,150g",DEARY,,Selver,4.74004E+12,"Taimne dessert mango laktoosivaba, DEARY, 150 g",DEARY OÃœ,,weak,0.6667
+Barbora,https-barbora-ee-toode-juust-zott-toasty-sandwich-viil-120-g,"Juust ZOTT Toasty Sandwich viil., 120g",ZOTT,,Selver,4.0145E+12,Zott toasty sandwich sulatatud juust 120 g,Zott,120 g,weak,0.5714
+Barbora,000000000000038431,Cognac MEUKOW VS 40% 700ml karp,MEUKOW,,Selver,3.25715E+12,Meukow VS Cognac 40%vol 700ml,Meukow VS,,weak,0.6667
+Barbora,https-barbora-ee-toode-kreeka-jogurt-alma-maitsestamata-180-g,"Kreeka jogurt ALMA maitsestamata, 180g",ALMA,,Selver,4.74013E+12,"Maitsestamata kreeka jogurt, 180 g",Maitsestamata,180 g,weak,0.6
+Barbora,https-barbora-ee-toode-hele-olu-karl-friedrich-5-proc-568-ml,Hele Ãµlu KARL FRIEDRICH 5% 568ml,KARL FRIEDRICH,,Selver,4.74002E+12,Karl Friedrich Ãµlu 5%vol 568ml,Karl Friedrich,568 ml,weak,0.6667
+Barbora,https-barbora-ee-toode-kohupiimapasta-tere-banaani-300-g,"Kohupiimapasta TERE banaani, 300g",TERE,,Selver,4.74004E+12,"Banaani kohupiimapasta, 300 g",Banaani,300 g,weak,0.5
+Barbora,000000000001170349,"KÃ¼lm.kartuli-sibulasegu MAAHÃ„RRA,1kg",MAAHÃ„RRA,,Selver,4.74009E+12,MaahÃ¤rra kartuli-sibulasegu 1 kg,MaahÃ¤rra,1 kg,weak,0.6
+Barbora,000000000000177035,Jahvatatud kohv Rossa LAVAZZA 250g,LAVAZZA,,Selver,8.00007E+12,"Jahvatatud kohv Qualita Rossa, LAVAZZA, 250 g",SELVER AS,,weak,0.6667
+Barbora,https-barbora-ee-toode-grillribi-punases-marinaadis-m-m-kg,"Grillribi punases marinaadis M&M,kg",MAKS & MOORITS,,Selver,2.31717E+12,"Grillribi punases marinaadis, MAKS&MOORITS, kg",ATRIA EESTI AS,,weak,0.5
+Barbora,000000000001205547,"KÃ¼lm.marjasegu vaarikatega HORTEX, 300g",HORTEX,,Selver,5.90048E+12,Hortex marjasegu vaarikatega kÃ¼lmutatud 300g,Hortex,300 g,weak,0.6667
+Barbora,80901,"Brokoli, 400g",,,Selver,4.74019E+12,"Brokoli, 400 g","Brokoli,",,weak,0.5
+Barbora,https-barbora-ee-toode-ribisnakk-snakk-pro-rakvere-300-g,"SnÃ¤kk pro RibisnÃ¤kk RAKVERE, 300g",RAKVERE,,Selver,4.74E+12,"RibisnÃ¤kk SNÃ„KK pro, RAKVERE LK, 300 g",MAAG EESTI AS,,weak,0.6667
