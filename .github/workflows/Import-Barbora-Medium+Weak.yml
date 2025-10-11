@@ -10,11 +10,13 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
     steps:
+      - name: Set up job
+        run: echo "Starting medium+weak import…"
+
       - uses: actions/checkout@v4
 
       - name: Install PostgreSQL client
         run: |
-          set -euxo pipefail
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
@@ -41,10 +43,10 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          # Match the exact filenames with spaces: "*_medium - MATCH.csv" and "*_weak - MATCH.csv"
+          # Your files look like: matches_Barbora_to_<Chain>_medium - MATCH.csv / _weak - MATCH.csv
           files=( \
-            data/matches/matches_Barbora_to_*_medium\ -\ MATCH.csv \
-            data/matches/matches_Barbora_to_*_weak\ -\ MATCH.csv \
+            data/matches/matches_Barbora_to_*_medium*.csv \
+            data/matches/matches_Barbora_to_*_weak*.csv \
           )
           if [ ${#files[@]} -eq 0 ]; then
             echo "❌ No medium/weak CSVs found under data/matches/"
@@ -56,13 +58,14 @@ jobs:
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
               -c "\copy staging_barbora_matches FROM '${f}' WITH (FORMAT CSV, HEADER, ENCODING 'UTF8')"
           done
-          # keep only medium/weak
+          # Keep only medium/weak rows, drop anything else defensively
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
             -c "DELETE FROM staging_barbora_matches WHERE match_reason NOT IN ('medium','weak');"
 
       - name: Insert medium+weak into approved_product_links (many-to-many, keep strong)
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
+          -- Many-to-many link table (idempotent)
           CREATE TABLE IF NOT EXISTS approved_product_links (
             left_chain       text,
             left_product_id  bigint,
@@ -77,7 +80,7 @@ jobs:
             SELECT
               COALESCE(NULLIF(left_ext_id,''), '') AS left_ext_id,
               right_chain,
-              NULLIF(right_ext_id,'') AS right_ext_id,
+              NULLIF(right_ext_id,'')             AS right_ext_id,
               match_score, match_reason,
               ROW_NUMBER() OVER (
                 PARTITION BY left_ext_id, right_chain
@@ -128,63 +131,71 @@ jobs:
           (left_chain, left_product_id, right_chain, right_product_id, score, tier)
           SELECT * FROM resolved
           ON CONFLICT (left_chain, left_product_id, right_chain)
-          DO UPDATE SET
-            right_product_id = EXCLUDED.right_product_id,
-            score            = EXCLUDED.score,
-            tier             = EXCLUDED.tier
-          -- never override a strong link
+          DO UPDATE
+          SET right_product_id = EXCLUDED.right_product_id,
+              score            = EXCLUDED.score,
+              tier             = EXCLUDED.tier
+          -- never downgrade/override an existing strong link
           WHERE approved_product_links.tier IS DISTINCT FROM 'strong';
           SQL
 
       - name: Upsert BEST medium/weak per Barbora into approved_matches_active (do not override strong)
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
-          -- Unique index used by upsert
+          -- Helper unique index (safe if it already exists)
           CREATE UNIQUE INDEX IF NOT EXISTS ux_ama_source_target
           ON approved_matches_active (source_chain, source_ext_id, target_chain);
 
           WITH ranked AS (
             SELECT
-              COALESCE(NULLIF(left_ext_id,''), '') AS left_ext_id,
-              right_chain,
+              NULLIF(left_ext_id,'')  AS left_ext_id,
               NULLIF(right_ext_id,'') AS right_ext_id,
+              right_chain,
               match_score, match_reason,
               left_name, left_brand, left_size_text,
               right_name, right_brand, right_size_text,
               ROW_NUMBER() OVER (
-                PARTITION BY left_ext_id
+                PARTITION BY NULLIF(left_ext_id,'')
                 ORDER BY match_score DESC NULLS LAST
               ) AS rn
             FROM staging_barbora_matches
             WHERE match_reason IN ('medium','weak')
+              AND NULLIF(left_ext_id,'')  IS NOT NULL
+              AND NULLIF(right_ext_id,'') IS NOT NULL
           ),
           best AS (
             SELECT * FROM ranked WHERE rn = 1
           )
           INSERT INTO approved_matches_active (
             source_chain, source_ext_id, target_chain, target_ext_id,
-            left_chain, left_key, right_chain, right_key,
+            left_chain,  left_key,     right_chain,  right_key,
             score, tier,
             left_name, left_brand, left_size_text,
             right_name, right_brand, right_size_text
           )
           SELECT
-            'Barbora'    AS source_chain,
-            left_ext_id  AS source_ext_id,
-            right_chain  AS target_chain,
-            right_ext_id AS target_ext_id,
-            'Barbora'    AS left_chain,
-            left_ext_id  AS left_key,
-            right_chain  AS right_chain,
-            right_ext_id AS right_key,
-            match_score  AS score,
-            match_reason AS tier,
+            'Barbora'      AS source_chain,
+            left_ext_id    AS source_ext_id,
+            right_chain    AS target_chain,
+            right_ext_id   AS target_ext_id,
+            -- mirrors / PK
+            'Barbora'      AS left_chain,
+            left_ext_id    AS left_key,
+            right_chain    AS right_chain,
+            right_ext_id   AS right_key,
+            match_score    AS score,
+            match_reason   AS tier,
             left_name, left_brand, left_size_text,
             right_name, right_brand, right_size_text
           FROM best
-          ON CONFLICT (source_chain, source_ext_id, target_chain)
+          -- Upsert on PRIMARY KEY (left_chain, left_key)
+          ON CONFLICT ON CONSTRAINT approved_matches_active_pkey
           DO UPDATE SET
+            source_chain    = EXCLUDED.source_chain,
+            source_ext_id   = EXCLUDED.source_ext_id,
+            target_chain    = EXCLUDED.target_chain,
             target_ext_id   = EXCLUDED.target_ext_id,
+            right_chain     = EXCLUDED.right_chain,
             right_key       = EXCLUDED.right_key,
             score           = EXCLUDED.score,
             tier            = EXCLUDED.tier,
@@ -194,23 +205,29 @@ jobs:
             right_name      = EXCLUDED.right_name,
             right_brand     = EXCLUDED.right_brand,
             right_size_text = EXCLUDED.right_size_text
-          -- never override a strong decision
           WHERE approved_matches_active.tier IS DISTINCT FROM 'strong';
           SQL
 
       - name: Verify results
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
+          \echo '→ approved_product_links (Barbora -> others)'
           SELECT right_chain, COUNT(*) AS links
           FROM approved_product_links
           WHERE left_chain = 'Barbora'
-          GROUP BY right_chain ORDER BY right_chain;
+          GROUP BY right_chain
+          ORDER BY right_chain;
 
+          \echo '→ approved_matches_active (Barbora, by tier & chain)'
           SELECT target_chain AS chain,
-                 COUNT(*) AS rows_added_or_kept,
+                 tier,
+                 COUNT(*) AS rows,
                  ROUND(AVG(score)::numeric, 3) AS avg_score
           FROM approved_matches_active
-          WHERE source_chain='Barbora' AND tier IN ('medium','weak')
-          GROUP BY target_chain
-          ORDER BY target_chain;
+          WHERE source_chain = 'Barbora'
+          GROUP BY target_chain, tier
+          ORDER BY chain, tier;
           SQL
+
+      - name: Complete job
+        run: echo "✅ Medium+weak import finished."
