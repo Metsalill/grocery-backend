@@ -14,6 +14,7 @@ jobs:
 
       - name: Install PostgreSQL client
         run: |
+          set -euxo pipefail
           sudo apt-get update
           sudo apt-get install -y postgresql-client
 
@@ -40,7 +41,11 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          files=(data/matches/matches_Barbora_to_*_medium.csv data/matches/matches_Barbora_to_*_weak.csv)
+          # Match the exact filenames with spaces: "*_medium - MATCH.csv" and "*_weak - MATCH.csv"
+          files=( \
+            data/matches/matches_Barbora_to_*_medium\ -\ MATCH.csv \
+            data/matches/matches_Barbora_to_*_weak\ -\ MATCH.csv \
+          )
           if [ ${#files[@]} -eq 0 ]; then
             echo "❌ No medium/weak CSVs found under data/matches/"
             exit 1
@@ -51,11 +56,11 @@ jobs:
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
               -c "\copy staging_barbora_matches FROM '${f}' WITH (FORMAT CSV, HEADER, ENCODING 'UTF8')"
           done
-          # keep only medium/weak (guard in case other reasons slipped in)
+          # keep only medium/weak
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
             -c "DELETE FROM staging_barbora_matches WHERE match_reason NOT IN ('medium','weak');"
 
-      - name: Insert medium+weak into approved_product_links (many-to-many)
+      - name: Insert medium+weak into approved_product_links (many-to-many, keep strong)
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
           CREATE TABLE IF NOT EXISTS approved_product_links (
@@ -72,9 +77,8 @@ jobs:
             SELECT
               COALESCE(NULLIF(left_ext_id,''), '') AS left_ext_id,
               right_chain,
-              NULLIF(right_ext_id,'')            AS right_ext_id,
-              match_score,
-              match_reason,
+              NULLIF(right_ext_id,'') AS right_ext_id,
+              match_score, match_reason,
               ROW_NUMBER() OVER (
                 PARTITION BY left_ext_id, right_chain
                 ORDER BY match_score DESC NULLS LAST
@@ -93,7 +97,9 @@ jobs:
              AND lower(e.source) IN ('barbora','maxima','barbora.ee','maxima.ee')
           ),
           rmap AS (
-            SELECT d.right_chain, d.right_ext_id, e.product_id AS right_product_id
+            SELECT d.right_chain,
+                   d.right_ext_id,
+                   e.product_id AS right_product_id
             FROM dedup d
             JOIN ext_product_map e
               ON e.ext_id = d.right_ext_id
@@ -106,12 +112,12 @@ jobs:
           ),
           resolved AS (
             SELECT
-              'Barbora'              AS left_chain,
+              'Barbora' AS left_chain,
               l.left_product_id,
               d.right_chain,
               r.right_product_id,
-              d.match_score          AS score,
-              d.match_reason         AS tier
+              d.match_score AS score,
+              d.match_reason AS tier
             FROM dedup d
             JOIN lmap l ON l.left_ext_id = d.left_ext_id
             JOIN rmap r ON r.right_ext_id = d.right_ext_id
@@ -126,14 +132,14 @@ jobs:
             right_product_id = EXCLUDED.right_product_id,
             score            = EXCLUDED.score,
             tier             = EXCLUDED.tier
-          -- keep existing STRONG; otherwise allow medium/weak to refresh if better
-          WHERE approved_product_links.tier IS DISTINCT FROM 'strong'
-            AND COALESCE(EXCLUDED.score,0) >= COALESCE(approved_product_links.score,0);
+          -- never override a strong link
+          WHERE approved_product_links.tier IS DISTINCT FROM 'strong';
           SQL
 
       - name: Upsert BEST medium/weak per Barbora into approved_matches_active (do not override strong)
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
+          -- Unique index used by upsert
           CREATE UNIQUE INDEX IF NOT EXISTS ux_ama_source_target
           ON approved_matches_active (source_chain, source_ext_id, target_chain);
 
@@ -141,9 +147,8 @@ jobs:
             SELECT
               COALESCE(NULLIF(left_ext_id,''), '') AS left_ext_id,
               right_chain,
-              NULLIF(right_ext_id,'')            AS right_ext_id,
-              match_score,
-              match_reason,
+              NULLIF(right_ext_id,'') AS right_ext_id,
+              match_score, match_reason,
               left_name, left_brand, left_size_text,
               right_name, right_brand, right_size_text,
               ROW_NUMBER() OVER (
@@ -164,18 +169,16 @@ jobs:
             right_name, right_brand, right_size_text
           )
           SELECT
-            'Barbora'       AS source_chain,
-            left_ext_id     AS source_ext_id,
-            right_chain     AS target_chain,
-            right_ext_id    AS target_ext_id,
-            -- mirrors
-            'Barbora'       AS left_chain,
-            left_ext_id     AS left_key,
-            right_chain     AS right_chain,
-            right_ext_id    AS right_key,
-            -- meta
-            match_score     AS score,
-            match_reason    AS tier,
+            'Barbora'    AS source_chain,
+            left_ext_id  AS source_ext_id,
+            right_chain  AS target_chain,
+            right_ext_id AS target_ext_id,
+            'Barbora'    AS left_chain,
+            left_ext_id  AS left_key,
+            right_chain  AS right_chain,
+            right_ext_id AS right_key,
+            match_score  AS score,
+            match_reason AS tier,
             left_name, left_brand, left_size_text,
             right_name, right_brand, right_size_text
           FROM best
@@ -191,25 +194,23 @@ jobs:
             right_name      = EXCLUDED.right_name,
             right_brand     = EXCLUDED.right_brand,
             right_size_text = EXCLUDED.right_size_text
-          -- keep an existing STRONG; otherwise let higher score replace lower
-          WHERE approved_matches_active.tier IS DISTINCT FROM 'strong'
-            AND COALESCE(EXCLUDED.score,0) > COALESCE(approved_matches_active.score,0);
+          -- never override a strong decision
+          WHERE approved_matches_active.tier IS DISTINCT FROM 'strong';
           SQL
 
       - name: Verify results
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
-          -- Link coverage by right_chain
-          SELECT right_chain, tier, COUNT(*) AS links
+          SELECT right_chain, COUNT(*) AS links
           FROM approved_product_links
-          WHERE left_chain = 'Barbora' AND tier IN ('medium','weak','strong')
-          GROUP BY right_chain, tier
-          ORDER BY right_chain, tier;
+          WHERE left_chain = 'Barbora'
+          GROUP BY right_chain ORDER BY right_chain;
 
-          -- Active rows for Barbora by tier (ensures we didn't clobber strong)
-          SELECT target_chain AS chain, tier, COUNT(*) AS rows, ROUND(AVG(score)::numeric,3) AS avg_score
+          SELECT target_chain AS chain,
+                 COUNT(*) AS rows_added_or_kept,
+                 ROUND(AVG(score)::numeric, 3) AS avg_score
           FROM approved_matches_active
-          WHERE source_chain='Barbora'
-          GROUP BY target_chain, tier
-          ORDER BY target_chain, tier;
+          WHERE source_chain='Barbora' AND tier IN ('medium','weak')
+          GROUP BY target_chain
+          ORDER BY target_chain;
           SQL
