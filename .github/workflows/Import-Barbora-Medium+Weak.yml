@@ -43,7 +43,6 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          # Your files look like: matches_Barbora_to_<Chain>_medium - MATCH.csv / _weak - MATCH.csv
           files=( \
             data/matches/matches_Barbora_to_*_medium*.csv \
             data/matches/matches_Barbora_to_*_weak*.csv \
@@ -58,7 +57,6 @@ jobs:
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
               -c "\copy staging_barbora_matches FROM '${f}' WITH (FORMAT CSV, HEADER, ENCODING 'UTF8')"
           done
-          # Keep only medium/weak rows, drop anything else defensively
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X \
             -c "DELETE FROM staging_barbora_matches WHERE match_reason NOT IN ('medium','weak');"
 
@@ -92,41 +90,60 @@ jobs:
           dedup AS (
             SELECT * FROM ranked WHERE rn = 1
           ),
+
+          -- LEFT (Barbora) via product_aliases (Barbora doesn’t have ext_product_map)
           lmap AS (
-            SELECT d.left_ext_id, e.product_id AS left_product_id
+            SELECT d.left_ext_id, ba.product_id AS left_product_id
             FROM dedup d
-            JOIN ext_product_map e
-              ON e.ext_id = d.left_ext_id
-             AND lower(e.source) IN ('barbora','maxima','barbora.ee','maxima.ee')
+            JOIN product_aliases ba
+              ON lower(ba.source) = 'barbora'
+             AND lower(ba.alias)  = d.left_ext_id
+          ),
+
+          -- RIGHT via ext_product_map, with fallback to product_aliases
+          rmap_raw AS (
+            SELECT
+              d.right_chain,
+              d.right_ext_id,
+              ep.product_id        AS ep_pid,
+              ba.product_id        AS ba_pid
+            FROM dedup d
+            LEFT JOIN ext_product_map ep
+              ON ep.ext_id = d.right_ext_id
+             AND (
+               (lower(d.right_chain) LIKE 'rimi%'   AND lower(ep.source) = 'rimi')   OR
+               (lower(d.right_chain) LIKE 'prisma%' AND lower(ep.source) = 'prisma') OR
+               (lower(d.right_chain) LIKE 'selver%' AND lower(ep.source) = 'selver')
+             )
+            LEFT JOIN product_aliases ba
+              ON lower(ba.alias) = d.right_ext_id
+             AND (
+               (lower(d.right_chain) LIKE 'rimi%'   AND lower(ba.source) = 'rimi')   OR
+               (lower(d.right_chain) LIKE 'prisma%' AND lower(ba.source) = 'prisma') OR
+               (lower(d.right_chain) LIKE 'selver%' AND lower(ba.source) = 'selver')
+             )
           ),
           rmap AS (
-            SELECT d.right_chain,
-                   d.right_ext_id,
-                   e.product_id AS right_product_id
-            FROM dedup d
-            JOIN ext_product_map e
-              ON e.ext_id = d.right_ext_id
-             AND CASE
-                   WHEN lower(d.right_chain) LIKE 'rimi%'   THEN lower(e.source) = 'rimi'
-                   WHEN lower(d.right_chain) LIKE 'prisma%' THEN lower(e.source) = 'prisma'
-                   WHEN lower(d.right_chain) LIKE 'selver%' THEN lower(e.source) = 'selver'
-                   ELSE FALSE
-                 END
+            SELECT right_chain, right_ext_id,
+                   COALESCE(ep_pid, ba_pid) AS right_product_id
+            FROM rmap_raw
           ),
+
           resolved AS (
             SELECT
               'Barbora' AS left_chain,
               l.left_product_id,
-              d.right_chain,
+              r.right_chain,
               r.right_product_id,
               d.match_score AS score,
               d.match_reason AS tier
             FROM dedup d
-            JOIN lmap l ON l.left_ext_id = d.left_ext_id
-            JOIN rmap r ON r.right_ext_id = d.right_ext_id
+            JOIN lmap l ON l.left_ext_id   = d.left_ext_id
+            JOIN rmap r ON r.right_ext_id  = d.right_ext_id
             WHERE l.left_product_id  IS NOT NULL
               AND r.right_product_id IS NOT NULL
           )
+
           INSERT INTO approved_product_links
           (left_chain, left_product_id, right_chain, right_product_id, score, tier)
           SELECT * FROM resolved
@@ -135,14 +152,12 @@ jobs:
           SET right_product_id = EXCLUDED.right_product_id,
               score            = EXCLUDED.score,
               tier             = EXCLUDED.tier
-          -- never downgrade/override an existing strong link
           WHERE approved_product_links.tier IS DISTINCT FROM 'strong';
           SQL
 
       - name: Upsert BEST medium/weak per Barbora into approved_matches_active (do not override strong)
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -X <<'SQL'
-          -- Helper unique index (safe if it already exists)
           CREATE UNIQUE INDEX IF NOT EXISTS ux_ama_source_target
           ON approved_matches_active (source_chain, source_ext_id, target_chain);
 
@@ -174,21 +189,12 @@ jobs:
             right_name, right_brand, right_size_text
           )
           SELECT
-            'Barbora'      AS source_chain,
-            left_ext_id    AS source_ext_id,
-            right_chain    AS target_chain,
-            right_ext_id   AS target_ext_id,
-            -- mirrors / PK
-            'Barbora'      AS left_chain,
-            left_ext_id    AS left_key,
-            right_chain    AS right_chain,
-            right_ext_id   AS right_key,
-            match_score    AS score,
-            match_reason   AS tier,
+            'Barbora', left_ext_id, right_chain, right_ext_id,
+            'Barbora', left_ext_id, right_chain, right_ext_id,
+            match_score, match_reason,
             left_name, left_brand, left_size_text,
             right_name, right_brand, right_size_text
           FROM best
-          -- Upsert on PRIMARY KEY (left_chain, left_key)
           ON CONFLICT ON CONSTRAINT approved_matches_active_pkey
           DO UPDATE SET
             source_chain    = EXCLUDED.source_chain,
