@@ -1,4 +1,4 @@
-name: Export Coop Vändra & Haapsalu (one-off)
+name: Export Coop products (EAN-safe CSV)
 
 on:
   workflow_dispatch: {}
@@ -6,7 +6,7 @@ on:
 jobs:
   export:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
@@ -14,75 +14,70 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Verify DB secret
-        run: |
-          if [ -z "${DATABASE_URL:-}" ]; then
-            echo "::error::DATABASE_URL_PUBLIC secret is missing"
-            exit 1
-          fi
-          echo "::add-mask::${DATABASE_URL}"
-          echo "OK: DATABASE_URL present."
-
       - name: Install psql client
         run: |
           sudo apt-get update -y
           sudo apt-get install -y postgresql-client
+          mkdir -p out
 
-      - name: Sanity counts (table + per-store)
+      # --- Haapsalu (has EANs) ---
+      - name: Export coophaapsalu.ee
         run: |
-          set -euo pipefail
-          psql "$DATABASE_URL" -Atc "SELECT COUNT(*) FROM staging_coop_products;" | awk '{print "Total rows in staging_coop_products:", $0}'
-          psql "$DATABASE_URL" -Atc "SELECT store_host, COUNT(*) FROM staging_coop_products WHERE store_host IN ('vandra.ecoop.ee','coophaapsalu.ee') GROUP BY 1 ORDER BY 2 DESC;" \
-            | awk -F'|' '{printf "store=%s rows=%s\n",$1,$2}'
-
-      - name: Prepare output dir
-        run: mkdir -p out
-
-      - name: Export Vändra
-        run: |
-          set -euo pipefail
-          # Check count first so we fail loudly instead of creating an empty CSV.
-          CNT=$(psql "$DATABASE_URL" -Atc "SELECT COUNT(*) FROM staging_coop_products WHERE store_host = 'vandra.ecoop.ee';")
-          echo "vandra.ecoop.ee rows=$CNT"
-          if [ "${CNT}" -eq 0 ]; then
-            echo "::error::Query for vandra.ecoop.ee returned 0 rows (wrong store_host or empty source)."
-            exit 1
-          fi
           psql "$DATABASE_URL" -c "\copy (
             SELECT
-              chain, channel, store_name, store_host, city_path, category_name,
-              ext_id, name, brand, manufacturer, size_text, price, currency,
-              image_url, url, description, ean_raw, scraped_at
-            FROM staging_coop_products
-            WHERE store_host = 'vandra.ecoop.ee'
-            ORDER BY name
-          ) TO STDOUT WITH CSV HEADER" > out/coop-vandra.ecoop.ee.csv
-          ls -lh out/coop-vandra.ecoop.ee.csv
-
-      - name: Export Haapsalu
-        run: |
-          set -euo pipefail
-          CNT=$(psql "$DATABASE_URL" -Atc "SELECT COUNT(*) FROM staging_coop_products WHERE store_host = 'coophaapsalu.ee';")
-          echo "coophaapsalu.ee rows=$CNT"
-          if [ "${CNT}" -eq 0 ]; then
-            echo "::error::Query for coophaapsalu.ee returned 0 rows (wrong store_host or empty source)."
-            exit 1
-          fi
-          psql "$DATABASE_URL" -c "\copy (
-            SELECT
-              chain, channel, store_name, store_host, city_path, category_name,
-              ext_id, name, brand, manufacturer, size_text, price, currency,
-              image_url, url, description, ean_raw, scraped_at
+              chain,
+              channel,
+              store_host,
+              city_path,
+              category_name,
+              ext_id,
+              name,
+              brand,
+              manufacturer,
+              size_text,
+              price,
+              currency,
+              description,
+              image_url,
+              url,
+              scraped_at,
+              ean_raw::text AS ean_raw   -- keep as text to avoid Excel issues
             FROM staging_coop_products
             WHERE store_host = 'coophaapsalu.ee'
-            ORDER BY name
-          ) TO STDOUT WITH CSV HEADER" > out/coop-coophaapsalu.ee.csv
-          ls -lh out/coop-coophaapsalu.ee.csv
+            ORDER BY LOWER(name)
+          ) TO STDOUT WITH CSV HEADER QUOTE '\"' FORCE QUOTE *" > out/coop_coophaapsalu.ee.csv
 
-      - name: Upload artifacts
+      # --- Vändra (mostly missing EANs, kept as NULL/empty) ---
+      - name: Export vandra.ecoop.ee
+        run: |
+          psql "$DATABASE_URL" -c "\copy (
+            SELECT
+              chain,
+              channel,
+              store_host,
+              city_path,
+              category_name,
+              ext_id,
+              name,
+              brand,
+              manufacturer,
+              size_text,
+              price,
+              currency,
+              description,
+              image_url,
+              url,
+              scraped_at,
+              ean_raw::text AS ean_raw
+            FROM staging_coop_products
+            WHERE store_host = 'vandra.ecoop.ee'
+            ORDER BY LOWER(name)
+          ) TO STDOUT WITH CSV HEADER QUOTE '\"' FORCE QUOTE *" > out/coop_vandra.ecoop.ee.csv
+
+      - name: Upload CSVs
         uses: actions/upload-artifact@v4
         with:
-          name: coop-vandra-haapsalu
+          name: coop-vandra-haapsalu-exports
           path: out/*.csv
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 14
