@@ -23,7 +23,10 @@ jobs:
       # --- Haapsalu (has EANs) ---
       - name: Export coophaapsalu.ee
         run: |
-          psql "$DATABASE_URL" -c "\copy (
+          psql "$DATABASE_URL" <<'SQL'
+          \t on
+          \pset footer off
+          \copy (
             SELECT
               chain,
               channel,
@@ -41,16 +44,20 @@ jobs:
               image_url,
               url,
               scraped_at,
-              ean_raw::text AS ean_raw   -- keep as text to avoid Excel issues
+              ean_raw::text AS ean_raw
             FROM staging_coop_products
             WHERE store_host = 'coophaapsalu.ee'
-            ORDER BY LOWER(name)
-          ) TO STDOUT WITH CSV HEADER QUOTE '\"' FORCE QUOTE *" > out/coop_coophaapsalu.ee.csv
+            ORDER BY lower(name)
+          ) TO 'out/coop_coophaapsalu.ee.csv' WITH (FORMAT csv, HEADER true, QUOTE '"', FORCE_QUOTE *);
+          SQL
 
-      # --- Vändra (mostly missing EANs, kept as NULL/empty) ---
+      # --- Vändra (mostly missing EANs) ---
       - name: Export vandra.ecoop.ee
         run: |
-          psql "$DATABASE_URL" -c "\copy (
+          psql "$DATABASE_URL" <<'SQL'
+          \t on
+          \pset footer off
+          \copy (
             SELECT
               chain,
               channel,
@@ -71,8 +78,9 @@ jobs:
               ean_raw::text AS ean_raw
             FROM staging_coop_products
             WHERE store_host = 'vandra.ecoop.ee'
-            ORDER BY LOWER(name)
-          ) TO STDOUT WITH CSV HEADER QUOTE '\"' FORCE QUOTE *" > out/coop_vandra.ecoop.ee.csv
+            ORDER BY lower(name)
+          ) TO 'out/coop_vandra.ecoop.ee.csv' WITH (FORMAT csv, HEADER true, QUOTE '"', FORCE_QUOTE *);
+          SQL
 
       - name: Upload CSVs
         uses: actions/upload-artifact@v4
