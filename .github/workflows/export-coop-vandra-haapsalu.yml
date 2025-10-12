@@ -1,0 +1,103 @@
+name: "Export – Coop Vändra & Haapsalu (one-off CSV)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      stores:
+        description: "Which stores to export"
+        type: choice
+        required: false
+        default: "both"
+        options: [both, vandra, haapsalu]
+
+jobs:
+  decide:
+    runs-on: ubuntu-latest
+    outputs:
+      stores: ${{ steps.pick.outputs.stores }}
+    steps:
+      - id: pick
+        run: |
+          case "${{ inputs.stores }}" in
+            vandra)   echo '["vandra"]'   > /tmp/stores.json ;;
+            haapsalu) echo '["haapsalu"]' > /tmp/stores.json ;;
+            *)        echo '["vandra","haapsalu"]' > /tmp/stores.json ;;
+          esac
+          echo "stores=$(cat /tmp/stores.json)" >> "$GITHUB_OUTPUT"
+
+  export:
+    needs: decide
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        store: ${{ fromJSON(needs.decide.outputs.stores) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install psql client
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client
+
+      - name: Ensure DATABASE_URL
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+        run: |
+          if [ -z "${DATABASE_URL:-}" ]; then
+            echo "::error::DATABASE_URL_PUBLIC missing in secrets."; exit 1
+          fi
+          echo "::add-mask::${DATABASE_URL}"
+
+      - name: Prepare SQL and outputs
+        id: prep
+        run: |
+          mkdir -p out
+          case "${{ matrix.store }}" in
+            vandra)
+              HOST="vandra.ecoop.ee"
+              LABEL="coop-vandra"
+              OUT="out/coop-vandra_products.csv"
+              ;;
+            haapsalu)
+              HOST="coophaapsalu.ee"
+              LABEL="coop-haapsalu"
+              OUT="out/coop-haapsalu_products.csv"
+              ;;
+            *) exit 2 ;;
+          esac
+          echo "host=${HOST}"   >> "$GITHUB_OUTPUT"
+          echo "label=${LABEL}" >> "$GITHUB_OUTPUT"
+          echo "out=${OUT}"     >> "$GITHUB_OUTPUT"
+
+          cat > /tmp/export.sql <<'SQL'
+          \pset footer off
+          \copy (
+            SELECT
+              chain, channel, store_name, store_host, city_path, category_name,
+              ext_id, name, brand, manufacturer, size_text, price, currency,
+              image_url, url, description, ean_raw, scraped_at
+            FROM staging_coop_products
+            WHERE store_host = :'store_host'
+            ORDER BY LOWER(name), COALESCE(size_text,''), scraped_at DESC
+          ) TO STDOUT WITH CSV HEADER
+          SQL
+
+      - name: Export CSV
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+        run: |
+          store_host="${{ steps.prep.outputs.host }}"
+          out="${{ steps.prep.outputs.out }}"
+          psql "$DATABASE_URL" -v store_host="$store_host" -f /tmp/export.sql > "$out"
+          echo "Wrote $(($(wc -l < "$out")-1)) rows → $out"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.prep.outputs.label }}-csv
+          path: ${{ steps.prep.outputs.out }}
+          if-no-files-found: error
+          retention-days: 7
