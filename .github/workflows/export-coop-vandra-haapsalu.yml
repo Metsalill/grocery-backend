@@ -18,30 +18,19 @@ jobs:
         run: |
           sudo apt-get update -y
           sudo apt-get install -y postgresql-client
-          mkdir -p "$GITHUB_WORKSPACE/out"
+          mkdir -p out
 
-      - name: Preflight DB check (row counts)
+      - name: Preflight row count check
         run: |
-          set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "
-            SELECT store_host, COUNT(*) AS rows,
-                   SUM((ean_raw ~ '^[0-9]+$' AND length(ean_raw) IN (8,12,13,14))::int) AS with_valid_ean
-            FROM staging_coop_products
-            WHERE store_host IN ('coophaapsalu.ee','vandra.ecoop.ee')
-            GROUP BY store_host
-            ORDER BY store_host;
-          "
+          SELECT store_host, COUNT(*) AS rows
+          FROM staging_coop_products
+          WHERE store_host IN ('coophaapsalu.ee','vandra.ecoop.ee')
+          GROUP BY store_host;"
 
       - name: Export coophaapsalu.ee
         run: |
-          set -euo pipefail
-          OUT="$GITHUB_WORKSPACE/out/coop_coophaapsalu.ee.csv"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<SQL
-          \set ON_ERROR_STOP on
-          \t on
-          \pset footer off
-          \echo Exporting coophaapsalu.ee to :OUT
-          \copy (
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
             SELECT
               chain,
               channel,
@@ -63,22 +52,11 @@ jobs:
             FROM staging_coop_products
             WHERE store_host = 'coophaapsalu.ee'
             ORDER BY lower(name)
-          ) TO :'OUT' WITH (FORMAT csv, HEADER true, QUOTE '"', FORCE_QUOTE *);
-          SQL
-          echo "Preview coophaapsalu.ee:"
-          wc -l "$OUT" || true
-          head -n 3 "$OUT" || true
+          ) TO 'out/coop_coophaapsalu.ee.csv' WITH (FORMAT csv, HEADER true, QUOTE '\"', FORCE_QUOTE *);"
 
       - name: Export vandra.ecoop.ee
         run: |
-          set -euo pipefail
-          OUT="$GITHUB_WORKSPACE/out/coop_vandra.ecoop.ee.csv"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<SQL
-          \set ON_ERROR_STOP on
-          \t on
-          \pset footer off
-          \echo Exporting vandra.ecoop.ee to :OUT
-          \copy (
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
             SELECT
               chain,
               channel,
@@ -100,16 +78,10 @@ jobs:
             FROM staging_coop_products
             WHERE store_host = 'vandra.ecoop.ee'
             ORDER BY lower(name)
-          ) TO :'OUT' WITH (FORMAT csv, HEADER true, QUOTE '"', FORCE_QUOTE *);
-          SQL
-          echo "Preview vandra.ecoop.ee:"
-          wc -l "$OUT" || true
-          head -n 3 "$OUT" || true
+          ) TO 'out/coop_vandra.ecoop.ee.csv' WITH (FORMAT csv, HEADER true, QUOTE '\"', FORCE_QUOTE *);"
 
-      - name: List output dir
-        run: |
-          echo "Workspace: $GITHUB_WORKSPACE"
-          ls -lah "$GITHUB_WORKSPACE/out" || true
+      - name: List output files
+        run: ls -lah out/
 
       - name: Upload CSVs
         uses: actions/upload-artifact@v4
