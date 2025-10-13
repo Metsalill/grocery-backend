@@ -1,0 +1,180 @@
+name: Rimi Wolt (crawl + EAN merge)
+
+on:
+  workflow_dispatch:
+    inputs:
+      venue_slug:
+        description: "Wolt venue slug"
+        required: true
+        default: "rimi-haabersti"
+      categories_path:
+        description: "Path to category URLs/slugs file"
+        required: true
+        default: "wolt/categories/rimi-haabersti.txt"
+      out_path:
+        description: "Output CSV path"
+        required: true
+        default: "out/rimi_wolt_haabersti.csv"
+      run_merge:
+        description: "Run DB merge to update EANs (requires secrets.DATABASE_URL)"
+        required: true
+        default: "true"
+        type: choice
+        options: ["true", "false"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rimi-wolt-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Ensure output dir
+        run: |
+          mkdir -p "$(dirname '${{ inputs.out_path }}')"
+
+      - name: Run Wolt → Rimi crawler
+        run: |
+          python scripts/wolt_rimi_crawler.py \
+            --venue-slug "${{ inputs.venue_slug }}" \
+            --categories-file "${{ inputs.categories_path }}" \
+            --language et \
+            --out "${{ inputs.out_path }}" \
+            --delay 0.2
+        # If your script lives elsewhere, adjust the path above.
+
+      - name: Upload CSV artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rimi-wolt-csv
+          path: ${{ inputs.out_path }}
+          if-no-files-found: error
+
+  merge:
+    needs: crawl
+    if: ${{ inputs.run_merge == 'true' }}
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Download CSV artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: rimi-wolt-csv
+          path: artifact
+
+      - name: Show artifact files
+        run: ls -la artifact || true
+
+      - name: Install psql client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends postgresql-client
+
+      - name: Merge EANs into Rimi products
+        env:
+          CSV_PATH: artifact/${{ inputs.out_path }}
+        run: |
+          if [ -z "${DATABASE_URL}" ]; then
+            echo "ERROR: secrets.DATABASE_URL is not set. Skipping merge."
+            exit 1
+          fi
+          if [ ! -f "${CSV_PATH}" ]; then
+            # If upload trimmed the path, try fallback to any CSV in artifact dir
+            CSV_PATH="$(ls artifact/*.csv | head -n1)"
+            echo "Resolved CSV_PATH to ${CSV_PATH}"
+          fi
+
+          cat > /tmp/rimi_wolt_merge.sql <<'SQL'
+          -- 1) Temp staging table that matches the crawler's CSV columns
+          DROP TABLE IF EXISTS tmp_wolt_rimi;
+          CREATE TEMP TABLE tmp_wolt_rimi (
+            chain              text,
+            channel            text,
+            venue_slug         text,
+            category_slug      text,
+            category_name      text,
+            ext_id             text,
+            name               text,
+            brand              text,
+            price              text,
+            currency           text,
+            unit_price_value   text,
+            unit_price_unit    text,
+            barcode_gtin       text,
+            description        text,
+            image_url          text
+          );
+
+          -- 2) Load CSV into temp table
+          \copy tmp_wolt_rimi FROM PROGRAM 'cat '"'"'${CSV_PATH}'"'"'' WITH (FORMAT csv, HEADER true, ENCODING 'utf8');
+
+          -- 3) Normalize / derive fields
+          ALTER TABLE tmp_wolt_rimi ADD COLUMN ean text;
+          UPDATE tmp_wolt_rimi
+          SET ean = regexp_replace(barcode_gtin, '[^0-9Xx]', '', 'g')
+          WHERE barcode_gtin IS NOT NULL AND barcode_gtin <> '';
+
+          ALTER TABLE tmp_wolt_rimi ADD COLUMN name_norm text;
+          UPDATE tmp_wolt_rimi
+          SET name_norm = regexp_replace(lower(name), '\s+', ' ', 'g');
+
+          -- 4) Update only Rimi-linked products, fill ean if missing, validate plausible lengths
+          WITH rimi_products AS (
+            SELECT DISTINCT p.id, lower(regexp_replace(p.name, '\s+', ' ', 'g')) AS name_norm
+            FROM products p
+            JOIN prices pr ON pr.product_id = p.id
+            JOIN stores s  ON s.id = pr.store_id
+            WHERE s.chain = 'Rimi'
+          ),
+          candidates AS (
+            SELECT rp.id AS product_id, t.ean
+            FROM rimi_products rp
+            JOIN tmp_wolt_rimi t
+              ON t.name_norm = rp.name_norm
+            WHERE t.ean IS NOT NULL AND t.ean <> ''
+          )
+          UPDATE products p
+          SET ean = c.ean
+          FROM candidates c
+          WHERE p.id = c.product_id
+            AND (p.ean IS NULL OR p.ean = '')
+            AND length(c.ean) IN (8,12,13,14);
+
+          -- 5) Report counts (updated Rimi products with non-empty EAN)
+          WITH rimi_all AS (
+            SELECT DISTINCT p.id
+            FROM products p
+            JOIN prices pr ON pr.product_id = p.id
+            JOIN stores s  ON s.id = pr.store_id
+            WHERE s.chain = 'Rimi'
+          )
+          SELECT
+            (SELECT count(*) FROM rimi_all)                              AS rimi_products_total,
+            (SELECT count(*) FROM products p JOIN rimi_all r ON r.id=p.id WHERE p.ean IS NOT NULL AND p.ean <> '') AS rimi_products_with_ean;
+          SQL
+
+          psql "${DATABASE_URL}" -v ON_ERROR_STOP=1 -f /tmp/rimi_wolt_merge.sql
+
+      - name: Done
+        run: echo "EAN merge completed."
