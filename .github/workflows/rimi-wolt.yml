@@ -10,7 +10,7 @@ on:
       categories_path:
         description: "Path to category URLs/slugs file"
         required: true
-        default: "wolt/categories/rimi-haabersti.txt"
+        default: "data/rimi-haabersti.txt"   # ← uses your /data file
       out_path:
         description: "Output CSV path"
         required: true
@@ -58,7 +58,6 @@ jobs:
             --language et \
             --out "${{ inputs.out_path }}" \
             --delay 0.2
-        # If your script lives elsewhere, adjust the path above.
 
       - name: Upload CSV artifact
         uses: actions/upload-artifact@v4
@@ -100,13 +99,11 @@ jobs:
             exit 1
           fi
           if [ ! -f "${CSV_PATH}" ]; then
-            # If upload trimmed the path, try fallback to any CSV in artifact dir
             CSV_PATH="$(ls artifact/*.csv | head -n1)"
             echo "Resolved CSV_PATH to ${CSV_PATH}"
           fi
 
           cat > /tmp/rimi_wolt_merge.sql <<'SQL'
-          -- 1) Temp staging table that matches the crawler's CSV columns
           DROP TABLE IF EXISTS tmp_wolt_rimi;
           CREATE TEMP TABLE tmp_wolt_rimi (
             chain              text,
@@ -126,10 +123,8 @@ jobs:
             image_url          text
           );
 
-          -- 2) Load CSV into temp table
           \copy tmp_wolt_rimi FROM PROGRAM 'cat '"'"'${CSV_PATH}'"'"'' WITH (FORMAT csv, HEADER true, ENCODING 'utf8');
 
-          -- 3) Normalize / derive fields
           ALTER TABLE tmp_wolt_rimi ADD COLUMN ean text;
           UPDATE tmp_wolt_rimi
           SET ean = regexp_replace(barcode_gtin, '[^0-9Xx]', '', 'g')
@@ -139,7 +134,6 @@ jobs:
           UPDATE tmp_wolt_rimi
           SET name_norm = regexp_replace(lower(name), '\s+', ' ', 'g');
 
-          -- 4) Update only Rimi-linked products, fill ean if missing, validate plausible lengths
           WITH rimi_products AS (
             SELECT DISTINCT p.id, lower(regexp_replace(p.name, '\s+', ' ', 'g')) AS name_norm
             FROM products p
@@ -161,7 +155,6 @@ jobs:
             AND (p.ean IS NULL OR p.ean = '')
             AND length(c.ean) IN (8,12,13,14);
 
-          -- 5) Report counts (updated Rimi products with non-empty EAN)
           WITH rimi_all AS (
             SELECT DISTINCT p.id
             FROM products p
@@ -170,7 +163,7 @@ jobs:
             WHERE s.chain = 'Rimi'
           )
           SELECT
-            (SELECT count(*) FROM rimi_all)                              AS rimi_products_total,
+            (SELECT count(*) FROM rimi_all) AS rimi_products_total,
             (SELECT count(*) FROM products p JOIN rimi_all r ON r.id=p.id WHERE p.ean IS NOT NULL AND p.ean <> '') AS rimi_products_with_ean;
           SQL
 
