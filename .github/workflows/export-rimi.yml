@@ -54,7 +54,7 @@ jobs:
             echo "conn=${DATABASE_URL}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Export products for chain (robust \copy with psql variables)
+      - name: Export products for chain (psql \o + \g csv)
         env:
           CONN: ${{ steps.dburl.outputs.conn }}
           OUT: ${{ inputs.out_path }}
@@ -67,37 +67,45 @@ jobs:
           # Escape single quotes for the chain value
           CHAIN_ESCAPED=$(printf "%s" "${CHAIN_IN}" | sed "s/'/''/g")
 
-          # psql script; NOTE: TO :'outfile' (quoted var so path is a string)
+          # psql script that writes CSV using \o and \g (no \copy)
           cat > /tmp/export_chain.sql <<'PSQL'
           \set ON_ERROR_STOP on
           \pset footer off
           \echo === Exporting products for chain :chain ===
-          \copy (
-            WITH rimi_products AS (
-              SELECT DISTINCT
-                p.id,
-                p.name,
-                p.brand,
-                trim(both ' ' from concat(NULLIF(p.net_qty::text, ''), ' ', NULLIF(p.net_unit, ''))) AS size_text,
-                p.ean
-              FROM products p
-              JOIN prices  pr ON pr.product_id = p.id
-              JOIN stores  s  ON s.id         = pr.store_id
-              WHERE lower(s.chain) = lower(:'chain')
-            )
-            SELECT
-              id,
-              name,
-              brand,
-              size_text,
-              ean,
-              regexp_replace(lower(name), '\s+', ' ', 'g') AS name_norm
-            FROM rimi_products
-            ORDER BY name
-          ) TO :'outfile' WITH (FORMAT csv, HEADER, ENCODING 'UTF8');
+
+          -- Send query result to local file
+          \o :outfile
+
+          WITH rimi_products AS (
+            SELECT DISTINCT
+              p.id,
+              p.name,
+              p.brand,
+              trim(both ' ' from concat(NULLIF(p.net_qty::text, ''), ' ', NULLIF(p.net_unit, ''))) AS size_text,
+              p.ean
+            FROM products p
+            JOIN prices  pr ON pr.product_id = p.id
+            JOIN stores  s  ON s.id         = pr.store_id
+            WHERE lower(s.chain) = lower(:'chain')
+          )
+          SELECT
+            id,
+            name,
+            brand,
+            size_text,
+            ean,
+            regexp_replace(lower(name), '\s+', ' ', 'g') AS name_norm
+          FROM rimi_products
+          ORDER BY name;
+
+          -- Write the *previous* query's result in CSV with header
+          \g (FORMAT csv, HEADER, ENCODING 'UTF8')
+
+          -- Reset output to stdout
+          \o
           PSQL
 
-          # Run the script with variables for chain and outfile
+          # Run script with variables
           psql "${CONN}" -v chain="${CHAIN_ESCAPED}" -v outfile="${OUT}" -f /tmp/export_chain.sql
 
       - name: Upload CSV artifact
