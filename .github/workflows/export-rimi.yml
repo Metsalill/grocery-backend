@@ -67,7 +67,7 @@ jobs:
           # Escape single quotes for the chain value
           CHAIN_ESCAPED=$(printf "%s" "${CHAIN_IN}" | sed "s/'/''/g")
 
-          # psql script; NOTE: TO :outfile (no quotes)
+          # psql script; NOTE: TO :'outfile' (quoted var so path is a string)
           cat > /tmp/export_chain.sql <<'PSQL'
           \set ON_ERROR_STOP on
           \pset footer off
@@ -94,7 +94,7 @@ jobs:
               regexp_replace(lower(name), '\s+', ' ', 'g') AS name_norm
             FROM rimi_products
             ORDER BY name
-          ) TO :outfile WITH (FORMAT csv, HEADER, ENCODING 'UTF8');
+          ) TO :'outfile' WITH (FORMAT csv, HEADER, ENCODING 'UTF8');
           PSQL
 
           # Run the script with variables for chain and outfile
