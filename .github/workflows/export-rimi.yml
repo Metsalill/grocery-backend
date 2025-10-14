@@ -1,0 +1,101 @@
+name: Export Rimi products from Railway
+
+on:
+  workflow_dispatch:
+    inputs:
+      chain:
+        description: "Store chain to export"
+        required: true
+        default: "Rimi"
+      out_path:
+        description: "Output CSV path"
+        required: true
+        default: "out/rimi_export.csv"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: export-rimi-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    env:
+      # Must be the EXTERNAL Railway connection string
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install psql client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends postgresql-client
+
+      - name: Normalize DATABASE_URL for SSL (if missing)
+        id: dburl
+        shell: bash
+        run: |
+          if [[ -z "${DATABASE_URL}" ]]; then
+            echo "DATABASE_URL is empty"; exit 1
+          fi
+          if [[ "${DATABASE_URL}" == *"postgres.railway.internal"* ]]; then
+            echo "Internal Railway hostname detected. Use EXTERNAL connection string with sslmode=require." >&2
+            exit 2
+          fi
+          if [[ "${DATABASE_URL}" != *"sslmode="* ]]; then
+            if [[ "${DATABASE_URL}" == *"?"* ]]; then
+              echo "conn=${DATABASE_URL}&sslmode=require" >> $GITHUB_OUTPUT
+            else
+              echo "conn=${DATABASE_URL}?sslmode=require" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "conn=${DATABASE_URL}" >> $GITHUB_OUTPUT
+          fi
+          echo "Normalized connection string ready."
+
+      - name: Export products for chain
+        env:
+          CONN: ${{ steps.dburl.outputs.conn }}
+          OUT: ${{ inputs.out_path }}
+          CHAIN: ${{ inputs.chain }}
+        run: |
+          mkdir -p "$(dirname "${OUT}")"
+          cat > /tmp/export_chain.sql <<'SQL'
+          \echo === Exporting products for chain :chain ===
+          -- Distinct products that have price records in stores of the chosen chain.
+          -- Includes a normalized name to help with downstream matching if needed.
+          \copy (
+            WITH chain_products AS (
+              SELECT DISTINCT p.id, p.name, p.brand, p.ean,
+                     COALESCE(p.size_text, '') AS size_text
+              FROM products p
+              JOIN prices pr ON pr.product_id = p.id
+              JOIN stores s  ON s.id = pr.store_id
+              WHERE s.chain = :'chain'
+            )
+            SELECT
+              id,
+              name,
+              brand,
+              size_text,
+              ean,
+              regexp_replace(lower(name), '\s+', ' ', 'g') AS name_norm
+            FROM chain_products
+            ORDER BY name
+          ) TO :'outfile' WITH (FORMAT csv, HEADER true, ENCODING 'utf8');
+          SQL
+
+          psql "${CONN}" -v ON_ERROR_STOP=1 \
+                         -v chain="${CHAIN}" \
+                         -v outfile="${OUT}" \
+                         -f /tmp/export_chain.sql
+
+      - name: Upload CSV artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rimi-export
+          path: ${{ inputs.out_path }}
+          if-no-files-found: error
