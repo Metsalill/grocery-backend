@@ -23,7 +23,7 @@ jobs:
   export:
     runs-on: ubuntu-latest
     env:
-      # Use EXTERNAL Railway URL (NOT postgres.railway.internal)
+      # Use the EXTERNAL Railway URL (NOT postgres.railway.internal)
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
     steps:
       - name: Checkout repo
@@ -42,7 +42,7 @@ jobs:
             echo "DATABASE_URL is empty"; exit 1
           fi
           if [[ "${DATABASE_URL}" == *"postgres.railway.internal"* ]]; then
-            echo "Internal Railway hostname detected. Use EXTERNAL connection string with sslmode=require." >&2
+            echo "Use the EXTERNAL Railway connection string (with sslmode=require)." >&2
             exit 2
           fi
           if [[ "${DATABASE_URL}" != *"sslmode="* ]]; then
@@ -54,7 +54,6 @@ jobs:
           else
             echo "conn=${DATABASE_URL}" >> $GITHUB_OUTPUT
           fi
-          echo "Normalized connection string ready."
 
       - name: Export products for chain
         env:
@@ -66,21 +65,21 @@ jobs:
           set -euo pipefail
           mkdir -p "$(dirname "${OUT}")"
 
-          # Safely quote the chain value for SQL (escape single quotes)
+          # Safely quote the chain for SQL
           CHAIN_ESCAPED=$(printf "%s" "${CHAIN_IN}" | sed "s/'/''/g")
 
-          # Compose the SELECT with the quoted chain value inline (case-insensitive)
+          # Build the SELECT. size_text = net_qty + ' ' + net_unit
           read -r -d '' SQL <<EOSQL
-          WITH chain_products AS (
+          WITH rimi_products AS (
             SELECT DISTINCT
               p.id,
               p.name,
               p.brand,
-              p.ean,
-              COALESCE(p.size_text, '') AS size_text
+              trim(both ' ' from concat(NULLIF(p.net_qty::text, ''), ' ', NULLIF(p.net_unit, ''))) AS size_text,
+              p.ean
             FROM products p
             JOIN prices  pr ON pr.product_id = p.id
-            JOIN stores  s  ON s.id = pr.store_id
+            JOIN stores  s  ON s.id        = pr.store_id
             WHERE lower(s.chain) = lower('${CHAIN_ESCAPED}')
           )
           SELECT
@@ -90,12 +89,13 @@ jobs:
             size_text,
             ean,
             regexp_replace(lower(name), '\\s+', ' ', 'g') AS name_norm
-          FROM chain_products
+          FROM rimi_products
           ORDER BY name
           EOSQL
 
           echo "=== Exporting products for chain ${CHAIN_IN} → ${OUT} ==="
-          psql "${CONN}" -v ON_ERROR_STOP=1 \
+          # COPY query results to STDOUT and redirect to file
+          psql "${CONN}" -v ON_ERROR_STOP=1 -e \
             -c "COPY ( ${SQL} ) TO STDOUT WITH (FORMAT CSV, HEADER, ENCODING 'UTF8');" \
             > "${OUT}"
           echo "Export written to ${OUT}"
