@@ -23,58 +23,46 @@ jobs:
   export:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}   # external URL, ideally with sslmode=require
+      # MUST be the EXTERNAL Railway URL. Add `?sslmode=require` if your URL lacks it.
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install psql client
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends postgresql-client
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-      - name: Normalize DATABASE_URL for SSL (if missing)
-        id: dburl
-        shell: bash
+      - name: Install deps
         run: |
-          if [[ -z "${DATABASE_URL}" ]]; then
-            echo "DATABASE_URL is empty"; exit 1
-          fi
-          if [[ "${DATABASE_URL}" == *"postgres.railway.internal"* ]]; then
-            echo "Use the EXTERNAL Railway connection string (with sslmode=require)." >&2
-            exit 2
-          fi
-          if [[ "${DATABASE_URL}" != *"sslmode="* ]]; then
-            if [[ "${DATABASE_URL}" == *"?"* ]]; then
-              echo "conn=${DATABASE_URL}&sslmode=require" >> $GITHUB_OUTPUT
-            else
-              echo "conn=${DATABASE_URL}?sslmode=require" >> $GITHUB_OUTPUT
-            fi
-          else
-            echo "conn=${DATABASE_URL}" >> $GITHUB_OUTPUT
-          fi
+          python -m pip install --upgrade pip
+          pip install psycopg2-binary
 
-      - name: Export products for chain (robust literal-path \copy)
+      - name: Export products for chain (Python + psycopg2 copy_expert)
         env:
-          CONN: ${{ steps.dburl.outputs.conn }}
-          OUT: ${{ inputs.out_path }}
-          CHAIN_IN: ${{ inputs.chain }}
-        shell: bash
+          DBURL: ${{ env.DATABASE_URL }}
+          CHAIN: ${{ inputs.chain }}
+          OUT_PATH: ${{ inputs.out_path }}
         run: |
           set -euo pipefail
-          mkdir -p "$(dirname "${OUT}")"
+          python - <<'PY'
+          import os, sys, pathlib
+          import psycopg2
 
-          # Escape single quotes in values we interpolate into SQL
-          CHAIN_ESCAPED=$(printf "%s" "${CHAIN_IN}" | sed "s/'/''/g")
-          OUT_ESCAPED=$(printf "%s" "${OUT}" | sed "s/'/''/g")
+          dburl    = os.environ["DBURL"]
+          chain    = os.environ["CHAIN"]
+          out_path = os.environ["OUT_PATH"]
 
-          # Write a psql script; we embed the outfile as a *literal* string
-          cat > /tmp/export_chain.sql <<EOF
-          \\set ON_ERROR_STOP on
-          \\pset footer off
-          \\echo === Exporting products for chain ${CHAIN_ESCAPED} ===
+          # Ensure sslmode=require is present (safe no-op if already there)
+          if "sslmode=" not in dburl:
+            sep = "&" if "?" in dburl else "?"
+            dburl = f"{dburl}{sep}sslmode=require"
 
-          \\copy (
+          pathlib.Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+
+          sql = """
+          COPY (
             WITH rimi_products AS (
               SELECT DISTINCT
                 p.id,
@@ -85,7 +73,7 @@ jobs:
               FROM products p
               JOIN prices  pr ON pr.product_id = p.id
               JOIN stores  s  ON s.id         = pr.store_id
-              WHERE lower(s.chain) = lower('${CHAIN_ESCAPED}')
+              WHERE lower(s.chain) = lower(%s)
             )
             SELECT
               id,
@@ -93,14 +81,22 @@ jobs:
               brand,
               size_text,
               ean,
-              regexp_replace(lower(name), '\\\\s+', ' ', 'g') AS name_norm
+              regexp_replace(lower(name), '\\s+', ' ', 'g') AS name_norm
             FROM rimi_products
             ORDER BY name
-          ) TO '${OUT_ESCAPED}' WITH (FORMAT csv, HEADER, ENCODING 'UTF8');
-          EOF
+          ) TO STDOUT WITH CSV HEADER ENCODING 'UTF8'
+          """
 
-          # Run it
-          psql "${CONN}" -f /tmp/export_chain.sql -v ON_ERROR_STOP=1 -e
+          # Connect and stream to file
+          with psycopg2.connect(dburl) as conn:
+            with conn.cursor() as cur:
+              # COPY doesn't accept bind params directly; use mogrify to safely inject
+              final = cur.mogrify(sql, (chain,)).decode("utf-8")
+              with open(out_path, "w", encoding="utf-8", newline="") as f:
+                cur.copy_expert(final, f)
+
+          print(f"Export written to {out_path}")
+          PY
 
       - name: Upload CSV artifact
         uses: actions/upload-artifact@v4
