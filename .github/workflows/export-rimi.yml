@@ -23,7 +23,7 @@ jobs:
   export:
     runs-on: ubuntu-latest
     env:
-      # Must be the EXTERNAL Railway connection string (NOT postgres.railway.internal)
+      # Use EXTERNAL Railway URL (NOT postgres.railway.internal)
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
     steps:
       - name: Checkout repo
@@ -60,14 +60,17 @@ jobs:
         env:
           CONN: ${{ steps.dburl.outputs.conn }}
           OUT: ${{ inputs.out_path }}
-          CHAIN: ${{ inputs.chain }}
+          CHAIN_IN: ${{ inputs.chain }}
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p "$(dirname "${OUT}")"
 
-          # Write the SELECT as a file to avoid quoting issues
-          cat > /tmp/export_query.sql <<'SQL'
+          # Safely quote the chain value for SQL (escape single quotes)
+          CHAIN_ESCAPED=$(printf "%s" "${CHAIN_IN}" | sed "s/'/''/g")
+
+          # Compose the SELECT with the quoted chain value inline (case-insensitive)
+          read -r -d '' SQL <<EOSQL
           WITH chain_products AS (
             SELECT DISTINCT
               p.id,
@@ -78,7 +81,7 @@ jobs:
             FROM products p
             JOIN prices  pr ON pr.product_id = p.id
             JOIN stores  s  ON s.id = pr.store_id
-            WHERE lower(s.chain) = lower(:'chain')
+            WHERE lower(s.chain) = lower('${CHAIN_ESCAPED}')
           )
           SELECT
             id,
@@ -86,17 +89,14 @@ jobs:
             brand,
             size_text,
             ean,
-            regexp_replace(lower(name), '\s+', ' ', 'g') AS name_norm
+            regexp_replace(lower(name), '\\s+', ' ', 'g') AS name_norm
           FROM chain_products
           ORDER BY name
-          SQL
+          EOSQL
 
-          echo "=== Exporting products for chain ${CHAIN} → ${OUT} ==="
-          # COPY query results to STDOUT and redirect to file (reliable in CI)
-          psql "${CONN}" \
-            -v ON_ERROR_STOP=1 \
-            -v chain="${CHAIN}" \
-            -c "COPY ( $(cat /tmp/export_query.sql) ) TO STDOUT WITH (FORMAT CSV, HEADER, ENCODING 'UTF8');" \
+          echo "=== Exporting products for chain ${CHAIN_IN} → ${OUT} ==="
+          psql "${CONN}" -v ON_ERROR_STOP=1 \
+            -c "COPY ( ${SQL} ) TO STDOUT WITH (FORMAT CSV, HEADER, ENCODING 'UTF8');" \
             > "${OUT}"
           echo "Export written to ${OUT}"
 
