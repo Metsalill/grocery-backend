@@ -10,15 +10,21 @@ on:
       categories_path:
         description: "Path to category URLs/slugs file"
         required: true
-        default: "data/rimi-haabersti.txt"   # ← uses your /data file
+        default: "data/rimi-haabersti.txt"
       out_path:
-        description: "Output CSV path"
+        description: "Output CSV path (artifact path too)"
         required: true
         default: "out/rimi_wolt_haabersti.csv"
       run_merge:
-        description: "Run DB merge to update EANs (requires secrets.DATABASE_URL)"
+        description: "Run DB merge to update EANs"
         required: true
         default: "true"
+        type: choice
+        options: ["true", "false"]
+      run_fuzzy:
+        description: "Second pass: fuzzy name match (pg_trgm)"
+        required: true
+        default: "false"
         type: choice
         options: ["true", "false"]
 
@@ -71,7 +77,9 @@ jobs:
     if: ${{ inputs.run_merge == 'true' }}
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # Use your existing secret name that holds the EXTERNAL Railway URL
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      RUN_FUZZY: ${{ inputs.run_fuzzy }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -90,20 +98,43 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends postgresql-client
 
+      - name: Normalize DATABASE_URL for SSL (if missing)
+        id: dburl
+        shell: bash
+        run: |
+          if [[ -z "${DATABASE_URL}" ]]; then
+            echo "DATABASE_URL is empty"; exit 1
+          fi
+          # If url contains internal hostname -> fail fast with hint
+          if [[ "${DATABASE_URL}" == *"postgres.railway.internal"* ]]; then
+            echo "Internal Railway hostname detected. Please use EXTERNAL connection string with sslmode=require." >&2
+            exit 2
+          fi
+          # Append sslmode=require if not present
+          if [[ "${DATABASE_URL}" != *"sslmode="* ]]; then
+            if [[ "${DATABASE_URL}" == *"?"* ]]; then
+              echo "conn=${DATABASE_URL}&sslmode=require" >> $GITHUB_OUTPUT
+            else
+              echo "conn=${DATABASE_URL}?sslmode=require" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "conn=${DATABASE_URL}" >> $GITHUB_OUTPUT
+          fi
+          echo "Normalized connection string ready."
+
       - name: Merge EANs into Rimi products
         env:
           CSV_PATH: artifact/${{ inputs.out_path }}
+          CONN: ${{ steps.dburl.outputs.conn }}
         run: |
-          if [ -z "${DATABASE_URL}" ]; then
-            echo "ERROR: secrets.DATABASE_URL is not set. Skipping merge."
-            exit 1
-          fi
+          set -euo pipefail
           if [ ! -f "${CSV_PATH}" ]; then
             CSV_PATH="$(ls artifact/*.csv | head -n1)"
             echo "Resolved CSV_PATH to ${CSV_PATH}"
           fi
 
           cat > /tmp/rimi_wolt_merge.sql <<'SQL'
+          -- Create temp staging to load artifact CSV
           DROP TABLE IF EXISTS tmp_wolt_rimi;
           CREATE TEMP TABLE tmp_wolt_rimi (
             chain              text,
@@ -119,12 +150,14 @@ jobs:
             unit_price_value   text,
             unit_price_unit    text,
             barcode_gtin       text,
+            barcode_gtin_text  text,
             description        text,
             image_url          text
           );
 
           \copy tmp_wolt_rimi FROM PROGRAM 'cat '"'"'${CSV_PATH}'"'"'' WITH (FORMAT csv, HEADER true, ENCODING 'utf8');
 
+          -- Derive helpers
           ALTER TABLE tmp_wolt_rimi ADD COLUMN ean text;
           UPDATE tmp_wolt_rimi
           SET ean = regexp_replace(barcode_gtin, '[^0-9Xx]', '', 'g')
@@ -134,6 +167,18 @@ jobs:
           UPDATE tmp_wolt_rimi
           SET name_norm = regexp_replace(lower(name), '\s+', ' ', 'g');
 
+          -- Audit table (persistent)
+          CREATE TABLE IF NOT EXISTS audit_rimi_ean_updates (
+            product_id   bigint,
+            old_ean      text,
+            new_ean      text,
+            src_category text,
+            src_name     text,
+            src_barcode  text,
+            updated_at   timestamptz DEFAULT now()
+          );
+
+          -- Pass 1: exact normalized name match
           WITH rimi_products AS (
             SELECT DISTINCT p.id, lower(regexp_replace(p.name, '\s+', ' ', 'g')) AS name_norm
             FROM products p
@@ -142,19 +187,23 @@ jobs:
             WHERE s.chain = 'Rimi'
           ),
           candidates AS (
-            SELECT rp.id AS product_id, t.ean
+            SELECT rp.id AS product_id, t.ean, t.category_name, t.name AS src_name, t.barcode_gtin
             FROM rimi_products rp
-            JOIN tmp_wolt_rimi t
-              ON t.name_norm = rp.name_norm
-            WHERE t.ean IS NOT NULL AND t.ean <> ''
+            JOIN tmp_wolt_rimi t ON t.name_norm = rp.name_norm
+            WHERE t.ean ~ '^[0-9Xx]{8}$|^[0-9Xx]{12}$|^[0-9Xx]{13}$|^[0-9Xx]{14}$'
+          ),
+          updates AS (
+            UPDATE products p
+            SET ean = c.ean
+            FROM candidates c
+            WHERE p.id = c.product_id
+              AND (p.ean IS NULL OR p.ean = '')
+            RETURNING p.id AS product_id, NULLIF(p.ean,'') AS old_ean, c.ean AS new_ean, c.category_name AS src_category, c.src_name, c.barcode_gtin AS src_barcode
           )
-          UPDATE products p
-          SET ean = c.ean
-          FROM candidates c
-          WHERE p.id = c.product_id
-            AND (p.ean IS NULL OR p.ean = '')
-            AND length(c.ean) IN (8,12,13,14);
+          INSERT INTO audit_rimi_ean_updates (product_id, old_ean, new_ean, src_category, src_name, src_barcode)
+          SELECT * FROM updates;
 
+          -- Summary after pass 1
           WITH rimi_all AS (
             SELECT DISTINCT p.id
             FROM products p
@@ -164,10 +213,22 @@ jobs:
           )
           SELECT
             (SELECT count(*) FROM rimi_all) AS rimi_products_total,
-            (SELECT count(*) FROM products p JOIN rimi_all r ON r.id=p.id WHERE p.ean IS NOT NULL AND p.ean <> '') AS rimi_products_with_ean;
+            (SELECT count(*) FROM products p JOIN rimi_all r ON r.id=p.id WHERE p.ean IS NOT NULL AND p.ean <> '') AS rimi_products_with_ean_pass1;
           SQL
 
-          psql "${DATABASE_URL}" -v ON_ERROR_STOP=1 -f /tmp/rimi_wolt_merge.sql
+          psql "${CONN}" -v ON_ERROR_STOP=1 -f /tmp/rimi_wolt_merge.sql
 
-      - name: Done
-        run: echo "EAN merge completed."
+          # Optional pass 2: fuzzy match with pg_trgm
+          if [ "${RUN_FUZZY}" = "true" ]; then
+            cat > /tmp/rimi_wolt_fuzzy.sql <<'SQL'
+            CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+            WITH rimi_products AS (
+              SELECT DISTINCT p.id, p.name, lower(regexp_replace(p.name, '\s+', ' ', 'g')) AS name_norm
+              FROM products p
+              JOIN prices pr ON pr.product_id = p.id
+              JOIN stores s  ON s.id = pr.store_id
+              WHERE s.chain = 'Rimi'
+            ),
+            scored AS (
+              SE
