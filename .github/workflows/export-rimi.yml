@@ -8,7 +8,7 @@ on:
         required: true
         default: "Rimi"
       out_path:
-        description: "Output CSV path"
+        description: "Output CSV path (created in repo workspace)"
         required: true
         default: "out/rimi_export.csv"
 
@@ -55,7 +55,7 @@ jobs:
             echo "conn=${DATABASE_URL}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Export products for chain
+      - name: Export products for chain (robust \copy with psql variables)
         env:
           CONN: ${{ steps.dburl.outputs.conn }}
           OUT: ${{ inputs.out_path }}
@@ -65,40 +65,44 @@ jobs:
           set -euo pipefail
           mkdir -p "$(dirname "${OUT}")"
 
-          # Safely quote the chain for SQL
+          # Escape single quotes for psql variable value
           CHAIN_ESCAPED=$(printf "%s" "${CHAIN_IN}" | sed "s/'/''/g")
 
-          # Build the SELECT. size_text = net_qty + ' ' + net_unit
-          read -r -d '' SQL <<EOSQL
-          WITH rimi_products AS (
-            SELECT DISTINCT
-              p.id,
-              p.name,
-              p.brand,
-              trim(both ' ' from concat(NULLIF(p.net_qty::text, ''), ' ', NULLIF(p.net_unit, ''))) AS size_text,
-              p.ean
-            FROM products p
-            JOIN prices  pr ON pr.product_id = p.id
-            JOIN stores  s  ON s.id        = pr.store_id
-            WHERE lower(s.chain) = lower('${CHAIN_ESCAPED}')
-          )
-          SELECT
-            id,
-            name,
-            brand,
-            size_text,
-            ean,
-            regexp_replace(lower(name), '\\s+', ' ', 'g') AS name_norm
-          FROM rimi_products
-          ORDER BY name
-          EOSQL
+          # Write a psql script; use variables :chain and :outfile
+          cat > /tmp/export_chain.sql <<'PSQL'
+          \set ON_ERROR_STOP on
+          \pset footer off
 
-          echo "=== Exporting products for chain ${CHAIN_IN} → ${OUT} ==="
-          # COPY query results to STDOUT and redirect to file
-          psql "${CONN}" -v ON_ERROR_STOP=1 -e \
-            -c "COPY ( ${SQL} ) TO STDOUT WITH (FORMAT CSV, HEADER, ENCODING 'UTF8');" \
-            > "${OUT}"
-          echo "Export written to ${OUT}"
+          -- Expect -v chain='…' and -v outfile='…' from the runner
+          \echo === Exporting products for chain :chain ===
+
+          \copy (
+            WITH rimi_products AS (
+              SELECT DISTINCT
+                p.id,
+                p.name,
+                p.brand,
+                trim(both ' ' from concat(NULLIF(p.net_qty::text, ''), ' ', NULLIF(p.net_unit, ''))) AS size_text,
+                p.ean
+              FROM products p
+              JOIN prices  pr ON pr.product_id = p.id
+              JOIN stores  s  ON s.id = pr.store_id
+              WHERE lower(s.chain) = lower(:'chain')
+            )
+            SELECT
+              id,
+              name,
+              brand,
+              size_text,
+              ean,
+              regexp_replace(lower(name), '\s+', ' ', 'g') AS name_norm
+            FROM rimi_products
+            ORDER BY name
+          ) TO :'outfile' WITH (FORMAT csv, HEADER, ENCODING 'UTF8')
+          PSQL
+
+          # Run the psql script; pass variables for chain and outfile
+          psql "${CONN}" -v chain="${CHAIN_ESCAPED}" -v outfile="${OUT}" -f /tmp/export_chain.sql
 
       - name: Upload CSV artifact
         uses: actions/upload-artifact@v4
