@@ -23,8 +23,7 @@ jobs:
   export:
     runs-on: ubuntu-latest
     env:
-      # Use the EXTERNAL Railway URL (NOT postgres.railway.internal)
-      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}   # external URL with sslmode=require
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -65,17 +64,14 @@ jobs:
           set -euo pipefail
           mkdir -p "$(dirname "${OUT}")"
 
-          # Escape single quotes for psql variable value
+          # Escape single quotes for the chain value
           CHAIN_ESCAPED=$(printf "%s" "${CHAIN_IN}" | sed "s/'/''/g")
 
-          # Write a psql script; use variables :chain and :outfile
+          # psql script; NOTE: TO :outfile (no quotes)
           cat > /tmp/export_chain.sql <<'PSQL'
           \set ON_ERROR_STOP on
           \pset footer off
-
-          -- Expect -v chain='…' and -v outfile='…' from the runner
           \echo === Exporting products for chain :chain ===
-
           \copy (
             WITH rimi_products AS (
               SELECT DISTINCT
@@ -86,7 +82,7 @@ jobs:
                 p.ean
               FROM products p
               JOIN prices  pr ON pr.product_id = p.id
-              JOIN stores  s  ON s.id = pr.store_id
+              JOIN stores  s  ON s.id         = pr.store_id
               WHERE lower(s.chain) = lower(:'chain')
             )
             SELECT
@@ -98,10 +94,10 @@ jobs:
               regexp_replace(lower(name), '\s+', ' ', 'g') AS name_norm
             FROM rimi_products
             ORDER BY name
-          ) TO :'outfile' WITH (FORMAT csv, HEADER, ENCODING 'UTF8')
+          ) TO :outfile WITH (FORMAT csv, HEADER, ENCODING 'UTF8');
           PSQL
 
-          # Run the psql script; pass variables for chain and outfile
+          # Run the script with variables for chain and outfile
           psql "${CONN}" -v chain="${CHAIN_ESCAPED}" -v outfile="${OUT}" -f /tmp/export_chain.sql
 
       - name: Upload CSV artifact
