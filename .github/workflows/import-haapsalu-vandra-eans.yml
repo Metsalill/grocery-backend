@@ -6,7 +6,7 @@ on:
       csv_path:
         description: "Path to merged matches CSV (committed in the repo)"
         required: true
-        default: "data/haapsalu_vandra_matches.csv"
+        default: "data/matces_haapsalu_vandra_all.csv"
 
 jobs:
   import:
