@@ -28,31 +28,79 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install psql client
+      - name: Install tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y postgresql-client
+          sudo apt-get install -y postgresql-client python3 python3-pip
+          python3 -V
+          psql --version
 
       - name: Verify CSVs exist
         run: |
           for f in "${{ inputs.strong_csv }}" "${{ inputs.medium_csv }}" "${{ inputs.weak_csv }}"; do
             [ -f "$f" ] || { echo "::error::Missing file: $f"; exit 1; }
-            ls -lh "$f"
+            echo "Found $f"
+            head -n 1 "$f"
           done
 
-      - name: Compute absolute CSV paths
-        id: paths
-        shell: bash
+      - name: Build 2-column map CSV (vandra_ext_id, ean)
+        id: buildmap
         run: |
-          echo "strong=$(realpath '${{ inputs.strong_csv }}')" >> "$GITHUB_OUTPUT"
-          echo "medium=$(realpath '${{ inputs.medium_csv }}')" >> "$GITHUB_OUTPUT"
-          echo "weak=$(realpath '${{ inputs.weak_csv }}')" >> "$GITHUB_OUTPUT"
+          python3 - <<'PY'
+          import csv, sys, os
+          from pathlib import Path
 
-      - name: Write SQL templates
-        shell: bash
+          files = [
+            Path("${{ inputs.strong_csv }}"),
+            Path("${{ inputs.medium_csv }}"),
+            Path("${{ inputs.weak_csv }}"),
+          ]
+
+          out_path = Path("/tmp/vandra_map.csv")
+          seen = set()
+          n_in, n_out = 0, 0
+
+          def clean_ean(s):
+            if s is None: return ""
+            s = str(s).strip()
+            if s.endswith(".0"): s = s[:-2]
+            return s
+
+          with out_path.open("w", newline="", encoding="utf-8") as f_out:
+            w = csv.writer(f_out)
+            w.writerow(["vandra_ext_id", "ean"])
+            for fp in files:
+              with fp.open("r", encoding="utf-8") as f_in:
+                r = csv.DictReader(f_in)
+                # tolerate header variants
+                ve_keys = [k for k in r.fieldnames if k and k.lower().strip()=="vandra_ext_id"]
+                ean_keys = [k for k in r.fieldnames if k and k.lower().strip()=="ean_to_copy_to_vandra"]
+                if not ve_keys or not ean_keys:
+                  print(f"::error::Required columns not found in {fp.name}. Found headers: {r.fieldnames}", file=sys.stderr)
+                  sys.exit(1)
+                ve, ek = ve_keys[0], ean_keys[0]
+                for row in r:
+                  n_in += 1
+                  ext = (row.get(ve) or "").strip()
+                  ean = clean_ean(row.get(ek))
+                  if not ext or not ean: 
+                    continue
+                  key = (ext, ean)
+                  if key in seen:
+                    continue
+                  seen.add(key)
+                  w.writerow([ext, ean])
+                  n_out += 1
+
+          print(f"Built map at {out_path}  rows_in={n_in}  unique_pairs={n_out}")
+          print(f"::set-output name=map_path::{out_path}")
+          PY
+
+      - name: Before counts
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
         run: |
-          # before.sql
-          cat <<'SQL' > before.sql
+          cat > before.sql <<'SQL'
           WITH latest AS (
             SELECT DISTINCT ON (store_host, ext_id) *
             FROM staging_coop_products
@@ -67,9 +115,14 @@ jobs:
           GROUP BY store_host
           ORDER BY store_host;
           SQL
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f before.sql
 
-          # wipe.sql
-          cat <<'SQL' > wipe.sql
+      - name: Wipe existing Vändra EANs (optional)
+        if: ${{ inputs.wipe_before == 'yes' }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+        run: |
+          cat > wipe.sql <<'SQL'
           BEGIN;
           UPDATE staging_coop_products
           SET ean_norm = NULL, ean_raw = NULL
@@ -77,41 +130,25 @@ jobs:
             AND (COALESCE(ean_norm,'') <> '' OR COALESCE(ean_raw,'') <> '');
           COMMIT;
           SQL
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f wipe.sql
 
-          # backfill.sql.tmpl with placeholders
-          cat <<'SQL' > backfill.sql.tmpl
+      - name: Backfill from matches (only Vändra)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+        run: |
+          echo "Using map: ${{ steps.buildmap.outputs.map_path }}"
+          test -f "${{ steps.buildmap.outputs.map_path }}" || { echo "::error::map file missing"; exit 1; }
+
+          cat > backfill.sql <<'SQL'
           BEGIN;
 
-          DROP TABLE IF EXISTS tmp_vandra_ean_raw;
-          CREATE TEMP TABLE tmp_vandra_ean_raw (
-            match_level text, match_rule text, ean_to_copy_to_vandra text, ean_copy_reason text,
-            haapsalu_name text, haapsalu_brand text, haapsalu_size_text text, haapsalu_price text,
-            haapsalu_image_url text, haapsalu_url text, haapsalu_ean_raw text,
-            vandra_name text, vandra_brand text, vandra_size_text text, vandra_price text,
-            vandra_image_url text, vandra_url text, vandra_ean_raw text,
-            haapsalu_city_path text, haapsalu_category_name text, haapsalu_ext_id text,
-            haapsalu_manufacturer text, haapsalu_currency text, haapsalu_description text, haapsalu_scraped_at text,
-            haapsalu_name_clean text, haapsalu_brand_clean text, haapsalu_size_norm text, haapsalu_name_key text,
-            haapsalu_first2 text, haapsalu_first1 text, haapsalu_chain text, haapsalu_channel text,
-            haapsalu_store_host text, haapsalu_city text, haapsalu_chain_norm text, haapsalu_chain_host text, haapsalu_store_id text,
-            vandra_city text, haapsalu_unit_price_raw text, haapsalu_unit_price_eur text, vandra_unit_price_raw text, vandra_unit_price_eur text,
-            vandra_chain text, vandra_channel text, vandra_store_host text, vandra_city_path text, vandra_category_name text,
-            vandra_ext_id text, vandra_manufacturer text, vandra_currency text, vandra_description text, vandra_scraped_at text,
-            vandra_name_clean text, vandra_brand_clean text, vandra_size_norm text, vandra_name_key text, vandra_first2 text, vandra_first1 text
+          DROP TABLE IF EXISTS tmp_vandra_ean_map;
+          CREATE TEMP TABLE tmp_vandra_ean_map (
+            vandra_ext_id text,
+            ean text
           );
 
-          \copy tmp_vandra_ean_raw FROM '__ABS_STRONG__' WITH (FORMAT csv, HEADER true)
-          \copy tmp_vandra_ean_raw FROM '__ABS_MEDIUM__' WITH (FORMAT csv, HEADER true)
-          \copy tmp_vandra_ean_raw FROM '__ABS_WEAK__'   WITH (FORMAT csv, HEADER true)
-
-          DROP TABLE IF EXISTS tmp_vandra_ean_map;
-          CREATE TEMP TABLE tmp_vandra_ean_map AS
-          SELECT DISTINCT
-            trim(vandra_ext_id) AS vandra_ext_id,
-            regexp_replace(trim(ean_to_copy_to_vandra), '\.0$', '') AS ean
-          FROM tmp_vandra_ean_raw
-          WHERE coalesce(trim(vandra_ext_id),'') <> ''
-            AND coalesce(trim(ean_to_copy_to_vandra),'') <> '';
+          \copy tmp_vandra_ean_map (vandra_ext_id, ean) FROM '${{ steps.buildmap.outputs.map_path }}' WITH (FORMAT csv, HEADER true)
 
           CREATE UNIQUE INDEX ON tmp_vandra_ean_map(vandra_ext_id);
 
@@ -131,33 +168,10 @@ jobs:
           COMMIT;
           SQL
 
-      - name: Render backfill.sql with absolute paths
-        shell: bash
-        run: |
-          sed -e "s|__ABS_STRONG__|${{ steps.paths.outputs.strong }}|g" \
-              -e "s|__ABS_MEDIUM__|${{ steps.paths.outputs.medium }}|g" \
-              -e "s|__ABS_WEAK__|${{ steps.paths.outputs.weak }}|g" \
-              backfill.sql.tmpl > backfill.sql
-          echo "Backfill SQL rendered:"
-          head -n 40 backfill.sql
-
-      - name: Before counts
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f before.sql
-
-      - name: Wipe existing Vändra EANs (optional)
-        if: ${{ inputs.wipe_before == 'yes' }}
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f wipe.sql
-
-      - name: Backfill from matches
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f backfill.sql
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f backfill.sql
 
       - name: After counts
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f before.sql
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f before.sql
