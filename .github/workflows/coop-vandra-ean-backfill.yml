@@ -1,0 +1,104 @@
+name: Coop Vändra EAN backfill (from Haapsalu matches)
+
+on:
+  workflow_dispatch:
+    inputs:
+      strong_csv:
+        description: Path to coop_match_strong.csv in the repo
+        required: true
+        default: data/coop_match_strong.csv
+      medium_csv:
+        description: Path to coop_match_medium.csv in the repo
+        required: true
+        default: data/coop_match_medium.csv
+      weak_csv:
+        description: Path to coop_match_weak.csv in the repo
+        required: true
+        default: data/coop_match_weak.csv
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install psql client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Verify CSVs exist
+        run: |
+          for f in "${{ inputs.strong_csv }}" "${{ inputs.medium_csv }}" "${{ inputs.weak_csv }}"; do
+            [ -f "$f" ] || { echo "::error::Missing file: $f"; exit 1; }
+            ls -lh "$f"
+          done
+
+      - name: Backfill EANs for Vändra (staging_coop_products)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+          STRONG: ${{ inputs.strong_csv }}
+          MEDIUM: ${{ inputs.medium_csv }}
+          WEAK: ${{ inputs.weak_csv }}
+        run: |
+          set -euo pipefail
+
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+            --set=strong_csv="$STRONG" \
+            --set=medium_csv="$MEDIUM" \
+            --set=weak_csv="$WEAK" <<'SQL'
+          BEGIN;
+
+          -- Temp table shaped to match your CSV headers (from coop_match_* files)
+          DROP TABLE IF EXISTS tmp_vandra_ean_raw;
+          CREATE TEMP TABLE tmp_vandra_ean_raw (
+            match_level text, match_rule text, ean_to_copy_to_vandra text, ean_copy_reason text,
+            haapsalu_name text, haapsalu_brand text, haapsalu_size_text text, haapsalu_price text,
+            haapsalu_image_url text, haapsalu_url text, haapsalu_ean_raw text,
+            vandra_name text, vandra_brand text, vandra_size_text text, vandra_price text,
+            vandra_image_url text, vandra_url text, vandra_ean_raw text,
+            haapsalu_city_path text, haapsalu_category_name text, haapsalu_ext_id text,
+            haapsalu_manufacturer text, haapsalu_currency text, haapsalu_description text, haapsalu_scraped_at text,
+            haapsalu_name_clean text, haapsalu_brand_clean text, haapsalu_size_norm text, haapsalu_name_key text,
+            haapsalu_first2 text, haapsalu_first1 text, haapsalu_chain text, haapsalu_channel text,
+            haapsalu_store_host text, haapsalu_city text, haapsalu_chain_norm text, haapsalu_chain_host text, haapsalu_store_id text,
+            vandra_city text, haapsalu_unit_price_raw text, haapsalu_unit_price_eur text, vandra_unit_price_raw text, vandra_unit_price_eur text,
+            vandra_chain text, vandra_channel text, vandra_store_host text, vandra_city_path text, vandra_category_name text,
+            vandra_ext_id text, vandra_manufacturer text, vandra_currency text, vandra_description text, vandra_scraped_at text,
+            vandra_name_clean text, vandra_brand_clean text, vandra_size_norm text, vandra_name_key text, vandra_first2 text, vandra_first1 text
+          );
+
+          \copy tmp_vandra_ean_raw FROM :'strong_csv' WITH (FORMAT csv, HEADER true)
+          \copy tmp_vandra_ean_raw FROM :'medium_csv' WITH (FORMAT csv, HEADER true)
+          \copy tmp_vandra_ean_raw FROM :'weak_csv'   WITH (FORMAT csv, HEADER true)
+
+          -- Build clean map: vandra_ext_id -> EAN
+          DROP TABLE IF EXISTS tmp_vandra_ean_map;
+          CREATE TEMP TABLE tmp_vandra_ean_map AS
+          SELECT DISTINCT
+            trim(vandra_ext_id) AS vandra_ext_id,
+            regexp_replace(trim(ean_to_copy_to_vandra), '\.0$', '') AS ean
+          FROM tmp_vandra_ean_raw
+          WHERE coalesce(trim(vandra_ext_id),'') <> ''
+            AND coalesce(trim(ean_to_copy_to_vandra),'') <> '';
+
+          CREATE UNIQUE INDEX ON tmp_vandra_ean_map(vandra_ext_id);
+
+          -- Update ONLY Vändra rows in staging_coop_products
+          WITH upd AS (
+            UPDATE staging_coop_products s
+            SET
+              ean_norm = COALESCE(NULLIF(s.ean_norm,''), m.ean),
+              ean_raw  = COALESCE(NULLIF(s.ean_raw,''),  m.ean)
+            FROM tmp_vandra_ean_map m
+            WHERE s.store_host = 'vandra.ecoop.ee'
+              AND s.ext_id = m.vandra_ext_id
+              AND (NULLIF(s.ean_norm,'') IS NULL OR NULLIF(s.ean_raw,'') IS NULL)
+            RETURNING s.ext_id
+          )
+          SELECT COUNT(*) AS vandra_rows_updated FROM upd;
+
+          COMMIT;
+          SQL
