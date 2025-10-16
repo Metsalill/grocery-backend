@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       csv_path:
-        description: "Path to the combined matches CSV in the repo"
+        description: "Path to merged matches CSV (committed in the repo)"
         required: true
-        default: "data/matches_haapsalu_vandra_all.csv"
+        default: "data/haapsalu_vandra_matches.csv"
 
 jobs:
   import:
@@ -24,10 +24,8 @@ jobs:
 
       - name: Sanity check file exists
         run: |
-          test -f "${{ inputs.csv_path }}" || { echo "CSV not found: ${{ inputs.csv_path }}"; exit 1; }
-          echo "File found: ${{ inputs.csv_path }}"
-          head -n 3 "${{ inputs.csv_path }}" || true
-          wc -l "${{ inputs.csv_path }}"
+          test -f "${{ inputs.csv_path }}" || { echo "::error file not found::${{ inputs.csv_path }}"; exit 1; }
+          ls -lh "${{ inputs.csv_path }}"
 
       - name: Import & apply
         env:
@@ -42,91 +40,76 @@ jobs:
           SELECT * FROM staging_coop_products WHERE store_host = 'vandra.ecoop.ee';
           SQL
 
-          echo "==> Create temp table for matches"
+          echo "==> Create persistent staging table for matches"
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          DROP TABLE IF EXISTS _tmp_matches;
-          CREATE TEMP TABLE _tmp_matches(
-            vandra_name   text,
-            vandra_size   text,
-            vandra_brand  text,
-            vandra_price  text,
-            vandra_image_url text,
-            vandra_url    text,
-            vandra_ean    text,
-            haapsalu_name text,
-            haapsalu_size text,
-            haapsalu_brand text,
-            haapsalu_price text,
+          DROP TABLE IF EXISTS staging_vandra_haapsalu_matches;
+          CREATE TABLE staging_vandra_haapsalu_matches (
+            vandra_name       text,
+            vandra_size       text,
+            vandra_brand      text,
+            vandra_price      text,
+            vandra_image_url  text,
+            vandra_url        text,
+            vandra_ean        text,
+            haapsalu_name     text,
+            haapsalu_size     text,
+            haapsalu_brand    text,
+            haapsalu_price    text,
             haapsalu_image_url text,
-            haapsalu_url  text,
-            haapsalu_ean  text,
-            score         numeric,
-            match_strength text
+            haapsalu_url      text,
+            haapsalu_ean      text,
+            score             numeric,
+            match_strength    text
           );
           SQL
 
-          echo "==> COPY CSV -> temp table"
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy _tmp_matches FROM '${{ inputs.csv_path }}' CSV HEADER"
+          echo "==> COPY CSV into staging table"
+          # NOTE: the CSV must have a header row with the same column names as above.
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+            -c "\copy staging_vandra_haapsalu_matches FROM '${{ inputs.csv_path }}' CSV HEADER"
 
-          echo "==> Apply: set Vändra EAN from Haapsalu EAN (Haapsalu priority)"
+          echo "==> Quick row count from staging file"
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          WITH vandra_targets AS (
-            SELECT
-              ctid AS rid,
-              lower(trim(name)) AS key_name,
-              coalesce(size_text,'') AS key_size,
-              ean_raw
-            FROM staging_coop_products
-            WHERE store_host = 'vandra.ecoop.ee'
-          ),
-          dedup AS (
-            -- build a clean mapping from matches: (name,size) -> single EAN (take MIN just to have a value)
+          SELECT COUNT(*) AS staged_rows,
+                 SUM( (haapsalu_ean ~ '^[0-9]+$' AND length(haapsalu_ean) IN (8,12,13,14))::int ) AS valid_haapsalu_eans
+          FROM staging_vandra_haapsalu_matches;
+          SQL
+
+          echo "==> Apply: overwrite Vändra EAN using Haapsalu EAN (only unambiguous per name+size)"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          WITH dedup AS (
             SELECT
               lower(trim(vandra_name)) AS key_name,
               coalesce(vandra_size,'') AS key_size,
-              MIN(haapsalu_ean) AS ean_raw,
+              MIN(haapsalu_ean)        AS ean_raw,
               COUNT(DISTINCT haapsalu_ean) AS n_eans
-            FROM _tmp_matches
-            WHERE haapsalu_ean ~ '^[0-9]+$' AND length(haapsalu_ean) IN (8,12,13,14)
+            FROM staging_vandra_haapsalu_matches
+            WHERE haapsalu_ean ~ '^[0-9]+$'
+              AND length(haapsalu_ean) IN (8,12,13,14)
             GROUP BY 1,2
-            HAVING COUNT(DISTINCT haapsalu_ean) = 1   -- only unambiguous per (name,size)
+            HAVING COUNT(DISTINCT haapsalu_ean) = 1
           )
           UPDATE staging_coop_products v
           SET ean_raw = d.ean_raw
-          FROM vandra_targets vt
-          JOIN dedup d USING (key_name, key_size)
-          WHERE v.ctid = vt.rid
-            AND coalesce(v.ean_raw,'') <> d.ean_raw
-          ;
+          FROM dedup d
+          WHERE v.store_host = 'vandra.ecoop.ee'
+            AND lower(trim(v.name)) = d.key_name
+            AND coalesce(v.size_text,'') = d.key_size
+            AND coalesce(v.ean_raw,'') <> d.ean_raw;
           SQL
 
-          echo "==> Post-update report"
+          echo "==> Post-update report for Vändra"
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           WITH v AS (
             SELECT * FROM staging_coop_products WHERE store_host = 'vandra.ecoop.ee'
           )
           SELECT
             COUNT(*) AS total_vandra_rows,
-            SUM( (ean_raw ~ '^[0-9]+$' AND length(ean_raw) IN (8,12,13,14))::int ) AS with_valid_ean,
-            SUM( (ean_raw IS NULL OR ean_raw = '' OR NOT (ean_raw ~ '^[0-9]+$'))::int ) AS missing_or_invalid
+            SUM((ean_raw ~ '^[0-9]+$' AND length(ean_raw) IN (8,12,13,14))::int) AS with_valid_ean,
+            SUM((ean_raw IS NULL OR ean_raw = '' OR NOT (ean_raw ~ '^[0-9]+$'))::int) AS missing_or_invalid
           FROM v;
-
-          -- show a few changed examples
-          WITH before AS (
-            SELECT store_host, name, size_text, ean_raw AS old_ean
-            FROM staging_coop_products_backup_vandra_before_ean
-          ),
-          after AS (
-            SELECT store_host, name, size_text, ean_raw AS new_ean
-            FROM staging_coop_products
-            WHERE store_host = 'vandra.ecoop.ee'
-          )
-          SELECT a.store_host, a.name, a.size_text, b.old_ean, a.new_ean
-          FROM after a
-          JOIN before b USING (store_host, name, size_text)
-          WHERE COALESCE(b.old_ean,'') <> COALESCE(a.new_ean,'')
-          ORDER BY a.name
-          LIMIT 50;
           SQL
 
-          echo "Done."
+      - name: Post Checkout
+        if: always()
+        run: echo "Done."
