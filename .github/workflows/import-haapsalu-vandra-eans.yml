@@ -1,0 +1,132 @@
+name: "Import Haapsalu→Vändra EAN matches (one-off)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      csv_path:
+        description: "Path to the combined matches CSV in the repo"
+        required: true
+        default: "data/matches_haapsalu_vandra_all.csv"
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install psql client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Sanity check file exists
+        run: |
+          test -f "${{ inputs.csv_path }}" || { echo "CSV not found: ${{ inputs.csv_path }}"; exit 1; }
+          echo "File found: ${{ inputs.csv_path }}"
+          head -n 3 "${{ inputs.csv_path }}" || true
+          wc -l "${{ inputs.csv_path }}"
+
+      - name: Import & apply
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+        run: |
+          set -euo pipefail
+
+          echo "==> Taking safety snapshot of current Vändra rows"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          DROP TABLE IF EXISTS staging_coop_products_backup_vandra_before_ean;
+          CREATE TABLE staging_coop_products_backup_vandra_before_ean AS
+          SELECT * FROM staging_coop_products WHERE store_host = 'vandra.ecoop.ee';
+          SQL
+
+          echo "==> Create temp table for matches"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          DROP TABLE IF EXISTS _tmp_matches;
+          CREATE TEMP TABLE _tmp_matches(
+            vandra_name   text,
+            vandra_size   text,
+            vandra_brand  text,
+            vandra_price  text,
+            vandra_image_url text,
+            vandra_url    text,
+            vandra_ean    text,
+            haapsalu_name text,
+            haapsalu_size text,
+            haapsalu_brand text,
+            haapsalu_price text,
+            haapsalu_image_url text,
+            haapsalu_url  text,
+            haapsalu_ean  text,
+            score         numeric,
+            match_strength text
+          );
+          SQL
+
+          echo "==> COPY CSV -> temp table"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy _tmp_matches FROM '${{ inputs.csv_path }}' CSV HEADER"
+
+          echo "==> Apply: set Vändra EAN from Haapsalu EAN (Haapsalu priority)"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          WITH vandra_targets AS (
+            SELECT
+              ctid AS rid,
+              lower(trim(name)) AS key_name,
+              coalesce(size_text,'') AS key_size,
+              ean_raw
+            FROM staging_coop_products
+            WHERE store_host = 'vandra.ecoop.ee'
+          ),
+          dedup AS (
+            -- build a clean mapping from matches: (name,size) -> single EAN (take MIN just to have a value)
+            SELECT
+              lower(trim(vandra_name)) AS key_name,
+              coalesce(vandra_size,'') AS key_size,
+              MIN(haapsalu_ean) AS ean_raw,
+              COUNT(DISTINCT haapsalu_ean) AS n_eans
+            FROM _tmp_matches
+            WHERE haapsalu_ean ~ '^[0-9]+$' AND length(haapsalu_ean) IN (8,12,13,14)
+            GROUP BY 1,2
+            HAVING COUNT(DISTINCT haapsalu_ean) = 1   -- only unambiguous per (name,size)
+          )
+          UPDATE staging_coop_products v
+          SET ean_raw = d.ean_raw
+          FROM vandra_targets vt
+          JOIN dedup d USING (key_name, key_size)
+          WHERE v.ctid = vt.rid
+            AND coalesce(v.ean_raw,'') <> d.ean_raw
+          ;
+          SQL
+
+          echo "==> Post-update report"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          WITH v AS (
+            SELECT * FROM staging_coop_products WHERE store_host = 'vandra.ecoop.ee'
+          )
+          SELECT
+            COUNT(*) AS total_vandra_rows,
+            SUM( (ean_raw ~ '^[0-9]+$' AND length(ean_raw) IN (8,12,13,14))::int ) AS with_valid_ean,
+            SUM( (ean_raw IS NULL OR ean_raw = '' OR NOT (ean_raw ~ '^[0-9]+$'))::int ) AS missing_or_invalid
+          FROM v;
+
+          -- show a few changed examples
+          WITH before AS (
+            SELECT store_host, name, size_text, ean_raw AS old_ean
+            FROM staging_coop_products_backup_vandra_before_ean
+          ),
+          after AS (
+            SELECT store_host, name, size_text, ean_raw AS new_ean
+            FROM staging_coop_products
+            WHERE store_host = 'vandra.ecoop.ee'
+          )
+          SELECT a.store_host, a.name, a.size_text, b.old_ean, a.new_ean
+          FROM after a
+          JOIN before b USING (store_host, name, size_text)
+          WHERE COALESCE(b.old_ean,'') <> COALESCE(a.new_ean,'')
+          ORDER BY a.name
+          LIMIT 50;
+          SQL
+
+          echo "Done."
