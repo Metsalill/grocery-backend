@@ -48,7 +48,7 @@ jobs:
           echo "medium=$(realpath '${{ inputs.medium_csv }}')" >> "$GITHUB_OUTPUT"
           echo "weak=$(realpath '${{ inputs.weak_csv }}')" >> "$GITHUB_OUTPUT"
 
-      - name: Write SQL files
+      - name: Write SQL templates
         shell: bash
         run: |
           # before.sql
@@ -78,8 +78,8 @@ jobs:
           COMMIT;
           SQL
 
-          # backfill.sql (uses psql variables abs_strong/abs_medium/abs_weak)
-          cat <<'SQL' > backfill.sql
+          # backfill.sql.tmpl with placeholders
+          cat <<'SQL' > backfill.sql.tmpl
           BEGIN;
 
           DROP TABLE IF EXISTS tmp_vandra_ean_raw;
@@ -100,9 +100,9 @@ jobs:
             vandra_name_clean text, vandra_brand_clean text, vandra_size_norm text, vandra_name_key text, vandra_first2 text, vandra_first1 text
           );
 
-          \copy tmp_vandra_ean_raw FROM :'abs_strong' WITH (FORMAT csv, HEADER true)
-          \copy tmp_vandra_ean_raw FROM :'abs_medium' WITH (FORMAT csv, HEADER true)
-          \copy tmp_vandra_ean_raw FROM :'abs_weak'   WITH (FORMAT csv, HEADER true)
+          \copy tmp_vandra_ean_raw FROM '__ABS_STRONG__' WITH (FORMAT csv, HEADER true)
+          \copy tmp_vandra_ean_raw FROM '__ABS_MEDIUM__' WITH (FORMAT csv, HEADER true)
+          \copy tmp_vandra_ean_raw FROM '__ABS_WEAK__'   WITH (FORMAT csv, HEADER true)
 
           DROP TABLE IF EXISTS tmp_vandra_ean_map;
           CREATE TEMP TABLE tmp_vandra_ean_map AS
@@ -131,6 +131,16 @@ jobs:
           COMMIT;
           SQL
 
+      - name: Render backfill.sql with absolute paths
+        shell: bash
+        run: |
+          sed -e "s|__ABS_STRONG__|${{ steps.paths.outputs.strong }}|g" \
+              -e "s|__ABS_MEDIUM__|${{ steps.paths.outputs.medium }}|g" \
+              -e "s|__ABS_WEAK__|${{ steps.paths.outputs.weak }}|g" \
+              backfill.sql.tmpl > backfill.sql
+          echo "Backfill SQL rendered:"
+          head -n 40 backfill.sql
+
       - name: Before counts
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
@@ -145,12 +155,7 @@ jobs:
       - name: Backfill from matches
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-        run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
-            -v abs_strong="${{ steps.paths.outputs.strong }}" \
-            -v abs_medium="${{ steps.paths.outputs.medium }}" \
-            -v abs_weak="${{ steps.paths.outputs.weak }}" \
-            -f backfill.sql
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f backfill.sql
 
       - name: After counts
         env:
