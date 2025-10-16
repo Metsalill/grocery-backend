@@ -3,16 +3,20 @@ name: Coop Vändra EAN backfill (from Haapsalu matches)
 on:
   workflow_dispatch:
     inputs:
+      wipe_before:
+        description: Wipe existing Vändra EANs before backfill? (yes/no)
+        required: true
+        default: "no"
       strong_csv:
-        description: Path to coop_match_strong.csv in the repo
+        description: Path to coop_match_strong.csv (in repo)
         required: true
         default: data/coop_match_strong.csv
       medium_csv:
-        description: Path to coop_match_medium.csv in the repo
+        description: Path to coop_match_medium.csv (in repo)
         required: true
         default: data/coop_match_medium.csv
       weak_csv:
-        description: Path to coop_match_weak.csv in the repo
+        description: Path to coop_match_weak.csv (in repo)
         required: true
         default: data/coop_match_weak.csv
 
@@ -42,16 +46,55 @@ jobs:
           STRONG: ${{ inputs.strong_csv }}
           MEDIUM: ${{ inputs.medium_csv }}
           WEAK: ${{ inputs.weak_csv }}
+          WIPE: ${{ inputs.wipe_before }}
         run: |
           set -euo pipefail
+          ABS_STRONG="$(realpath "$STRONG")"
+          ABS_MEDIUM="$(realpath "$MEDIUM")"
+          ABS_WEAK="$(realpath "$WEAK")"
 
+          echo "Using:"
+          echo "  STRONG = $ABS_STRONG"
+          echo "  MEDIUM = $ABS_MEDIUM"
+          echo "  WEAK   = $ABS_WEAK"
+
+          echo "==> Before counts"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          WITH latest AS (
+            SELECT DISTINCT ON (store_host, ext_id) *
+            FROM staging_coop_products
+            WHERE store_host IN ('coophaapsalu.ee','vandra.ecoop.ee')
+            ORDER BY store_host, ext_id, scraped_at DESC
+          )
+          SELECT
+            store_host,
+            COUNT(DISTINCT ext_id) AS distinct_products,
+            COUNT(DISTINCT NULLIF(COALESCE(ean_norm, ean_raw), '')) AS unique_eans
+          FROM latest
+          GROUP BY store_host
+          ORDER BY store_host;
+          SQL
+
+          if [ "$WIPE" = "yes" ]; then
+            echo "==> Wiping existing Vändra EANs"
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+            BEGIN;
+            UPDATE staging_coop_products
+            SET ean_norm = NULL, ean_raw = NULL
+            WHERE store_host = 'vandra.ecoop.ee'
+              AND (COALESCE(ean_norm,'') <> '' OR COALESCE(ean_raw,'') <> '');
+            COMMIT;
+            SQL
+          fi
+
+          echo "==> Importing matches & backfilling"
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
-            --set=strong_csv="$STRONG" \
-            --set=medium_csv="$MEDIUM" \
-            --set=weak_csv="$WEAK" <<'SQL'
+            --set=strong_csv="$ABS_STRONG" \
+            --set=medium_csv="$ABS_MEDIUM" \
+            --set=weak_csv="$ABS_WEAK" <<'SQL'
           BEGIN;
 
-          -- Temp table shaped to match your CSV headers (from coop_match_* files)
+          -- Temp table shaped like your CSV headers
           DROP TABLE IF EXISTS tmp_vandra_ean_raw;
           CREATE TEMP TABLE tmp_vandra_ean_raw (
             match_level text, match_rule text, ean_to_copy_to_vandra text, ean_copy_reason text,
@@ -74,7 +117,7 @@ jobs:
           \copy tmp_vandra_ean_raw FROM :'medium_csv' WITH (FORMAT csv, HEADER true)
           \copy tmp_vandra_ean_raw FROM :'weak_csv'   WITH (FORMAT csv, HEADER true)
 
-          -- Build clean map: vandra_ext_id -> EAN
+          -- Map: vandra_ext_id -> EAN (cleaned)
           DROP TABLE IF EXISTS tmp_vandra_ean_map;
           CREATE TEMP TABLE tmp_vandra_ean_map AS
           SELECT DISTINCT
@@ -86,7 +129,7 @@ jobs:
 
           CREATE UNIQUE INDEX ON tmp_vandra_ean_map(vandra_ext_id);
 
-          -- Update ONLY Vändra rows in staging_coop_products
+          -- Backfill ONLY Vändra rows
           WITH upd AS (
             UPDATE staging_coop_products s
             SET
@@ -101,4 +144,21 @@ jobs:
           SELECT COUNT(*) AS vandra_rows_updated FROM upd;
 
           COMMIT;
+          SQL
+
+          echo "==> After counts"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+          WITH latest AS (
+            SELECT DISTINCT ON (store_host, ext_id) *
+            FROM staging_coop_products
+            WHERE store_host IN ('coophaapsalu.ee','vandra.ecoop.ee')
+            ORDER BY store_host, ext_id, scraped_at DESC
+          )
+          SELECT
+            store_host,
+            COUNT(DISTINCT ext_id) AS distinct_products,
+            COUNT(DISTINCT NULLIF(COALESCE(ean_norm, ean_raw), '')) AS unique_eans
+          FROM latest
+          GROUP BY store_host
+          ORDER BY store_host;
           SQL
