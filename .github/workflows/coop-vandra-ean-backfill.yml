@@ -1,30 +1,29 @@
-name: Coop Vändra EAN backfill (from Haapsalu matches)
+name: Coop Vandra EAN backfill (from Haapsalu matches)
 
 on:
   workflow_dispatch:
     inputs:
       wipe_before:
-        description: Wipe existing Vändra EANs before backfill? (yes/no)
+        description: "Wipe existing Vandra EANs before backfill? (yes/no)"
         required: true
         default: "no"
       strong_csv:
-        description: Path to coop_match_strong.csv (in repo)
+        description: "Path to coop_match_strong.csv (in repo)"
         required: true
-        default: data/coop_match_strong.csv
+        default: "data/coop_match_strong.csv"
       medium_csv:
-        description: Path to coop_match_medium.csv (in repo)
+        description: "Path to coop_match_medium.csv (in repo)"
         required: true
-        default: data/coop_match_medium.csv
+        default: "data/coop_match_medium.csv"
       weak_csv:
-        description: Path to coop_match_weak.csv (in repo)
+        description: "Path to coop_match_weak.csv (in repo)"
         required: true
-        default: data/coop_match_weak.csv
+        default: "data/coop_match_weak.csv"
 
 jobs:
   backfill:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,23 +34,23 @@ jobs:
           sudo apt-get install -y postgresql-client python3
 
       - name: Verify CSVs exist
+        shell: bash
         run: |
           for f in "${{ inputs.strong_csv }}" "${{ inputs.medium_csv }}" "${{ inputs.weak_csv }}"; do
             [ -f "$f" ] || { echo "::error::Missing file: $f"; exit 1; }
             echo "Found $f"; head -n 1 "$f" || true
           done
 
-      # Build a clean two-column CSV: vandra_ext_id, ean
-      # Priority resolution when duplicates exist: strong > medium > weak
-      - name: Build 2-column map CSV (priority: strong > medium > weak)
+      - name: Build map CSV (priority strong > medium > weak)
         id: buildmap
+        shell: bash
         env:
-          STRONG: ${{ inputs.strong_csv }}
-          MEDIUM: ${{ inputs.medium_csv }}
-          WEAK: ${{ inputs.weak_csv }}
+          STRONG: "${{ inputs.strong_csv }}"
+          MEDIUM: "${{ inputs.medium_csv }}"
+          WEAK: "${{ inputs.weak_csv }}"
         run: |
           python3 - <<'PY'
-          import csv, sys, os
+          import csv, os
           from pathlib import Path
 
           strong = Path(os.environ["STRONG"])
@@ -67,7 +66,7 @@ jobs:
             return s
 
           out_map = {}   # vandra_ext_id -> (prio, ean, source)
-          conflicts = [] # rows: [vandra_ext_id, existing_ean, new_ean, kept_from, skipped_from]
+          conflicts = [] # [vandra_ext_id, existing_ean, new_ean, kept_from, skipped_from]
 
           for label, fp in inputs:
             with fp.open("r", encoding="utf-8") as f:
@@ -77,12 +76,11 @@ jobs:
                 ve_idx = headers.index("vandra_ext_id")
                 ean_idx = headers.index("ean_to_copy_to_vandra")
               except ValueError:
-                print(f"::error::Required columns not found in {fp}. Headers: {r.fieldnames}", file=sys.stderr)
-                sys.exit(1)
+                raise SystemExit(f"Required columns not found in {fp}. Headers: {r.fieldnames}")
               for row in r:
                 ext = (row[r.fieldnames[ve_idx]] or "").strip()
                 ean = clean_ean(row[r.fieldnames[ean_idx]])
-                if not ext or not ean: 
+                if not ext or not ean:
                   continue
                 if ext not in out_map:
                   out_map[ext] = (priority[label], ean, label)
@@ -94,7 +92,6 @@ jobs:
                       conflicts.append([ext, cur_ean, ean, label, cur_src])
                     out_map[ext] = (new_p, ean, label)
                   elif new_p == cur_p and cur_ean != ean:
-                    # same tier conflict — keep existing, record
                     conflicts.append([ext, cur_ean, ean, cur_src, label])
 
           map_path = Path("/tmp/vandra_map.csv")
@@ -110,16 +107,16 @@ jobs:
             w.writerow(["vandra_ext_id","existing_ean","new_ean","kept_from","skipped_from"])
             w.writerows(conflicts)
 
-          print(f"Built map: {map_path} rows={len(out_map)} conflicts={len(conflicts)}")
-          # Expose paths to later steps via GITHUB_OUTPUT
+          # Expose outputs
           with open(os.environ["GITHUB_OUTPUT"], "a") as gh:
             gh.write(f"map={map_path}\n")
             gh.write(f"conflicts={conf_path}\n")
           PY
 
       - name: Before counts
+        shell: bash
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+          DATABASE_URL: "${{ secrets.DATABASE_URL_PUBLIC }}"
         run: |
           cat > before.sql <<'SQL'
           WITH latest AS (
@@ -138,10 +135,11 @@ jobs:
           SQL
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f before.sql
 
-      - name: Wipe existing Vändra EANs (optional)
+      - name: Wipe existing Vandra EANs (optional)
         if: ${{ inputs.wipe_before == 'yes' }}
+        shell: bash
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+          DATABASE_URL: "${{ secrets.DATABASE_URL_PUBLIC }}"
         run: |
           cat > wipe.sql <<'SQL'
           BEGIN;
@@ -153,9 +151,10 @@ jobs:
           SQL
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f wipe.sql
 
-      - name: Backfill from matches (only Vändra)
+      - name: Backfill from matches (only Vandra)
+        shell: bash
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+          DATABASE_URL: "${{ secrets.DATABASE_URL_PUBLIC }}"
         run: |
           echo "Using map: ${{ steps.buildmap.outputs.map }}"
           test -f "${{ steps.buildmap.outputs.map }}" || { echo "::error::map file missing"; exit 1; }
@@ -171,7 +170,6 @@ jobs:
 
           \copy tmp_vandra_ean_map (vandra_ext_id, ean) FROM '${{ steps.buildmap.outputs.map }}' WITH (FORMAT csv, HEADER true)
 
-          -- Update ONLY Vändra rows; fill blanks
           WITH upd AS (
             UPDATE staging_coop_products s
             SET
@@ -191,14 +189,15 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f backfill.sql
 
       - name: After counts
+        shell: bash
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+          DATABASE_URL: "${{ secrets.DATABASE_URL_PUBLIC }}"
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f before.sql
 
-      - name: Upload conflict report (if any)
+      - name: Upload conflict report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: vandra-conflicts
-          path: ${{ steps.buildmap.outputs.conflicts }}
+          path: "${{ steps.buildmap.outputs.conflicts }}"
