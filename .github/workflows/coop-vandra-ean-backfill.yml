@@ -40,26 +40,19 @@ jobs:
             ls -lh "$f"
           done
 
-      - name: Backfill EANs for Vändra (staging_coop_products)
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-          STRONG: ${{ inputs.strong_csv }}
-          MEDIUM: ${{ inputs.medium_csv }}
-          WEAK: ${{ inputs.weak_csv }}
-          WIPE: ${{ inputs.wipe_before }}
+      - name: Compute absolute CSV paths
+        id: paths
+        shell: bash
         run: |
-          set -euo pipefail
+          echo "strong=$(realpath '${{ inputs.strong_csv }}')" >> "$GITHUB_OUTPUT"
+          echo "medium=$(realpath '${{ inputs.medium_csv }}')" >> "$GITHUB_OUTPUT"
+          echo "weak=$(realpath '${{ inputs.weak_csv }}')" >> "$GITHUB_OUTPUT"
 
-          ABS_STRONG="$(realpath "$STRONG")"
-          ABS_MEDIUM="$(realpath "$MEDIUM")"
-          ABS_WEAK="$(realpath "$WEAK")"
-
-          echo "STRONG=$ABS_STRONG"
-          echo "MEDIUM=$ABS_MEDIUM"
-          echo "WEAK=$ABS_WEAK"
-
-          # 0) BEFORE COUNTS
-          cat > before.sql <<'SQL'
+      - name: Write SQL files
+        shell: bash
+        run: |
+          # before.sql
+          cat <<'SQL' > before.sql
           WITH latest AS (
             SELECT DISTINCT ON (store_host, ext_id) *
             FROM staging_coop_products
@@ -74,23 +67,19 @@ jobs:
           GROUP BY store_host
           ORDER BY store_host;
           SQL
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f before.sql
 
-          # 1) WIPE (optional)
-          if [ "$WIPE" = "yes" ]; then
-            cat > wipe.sql <<'SQL'
-            BEGIN;
-            UPDATE staging_coop_products
-            SET ean_norm = NULL, ean_raw = NULL
-            WHERE store_host = 'vandra.ecoop.ee'
-              AND (COALESCE(ean_norm,'') <> '' OR COALESCE(ean_raw,'') <> '');
-            COMMIT;
-            SQL
-            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f wipe.sql
-          fi
+          # wipe.sql
+          cat <<'SQL' > wipe.sql
+          BEGIN;
+          UPDATE staging_coop_products
+          SET ean_norm = NULL, ean_raw = NULL
+          WHERE store_host = 'vandra.ecoop.ee'
+            AND (COALESCE(ean_norm,'') <> '' OR COALESCE(ean_raw,'') <> '');
+          COMMIT;
+          SQL
 
-          # 2) BACKFILL
-          cat > backfill.sql.tmpl <<'SQL'
+          # backfill.sql (uses psql variables abs_strong/abs_medium/abs_weak)
+          cat <<'SQL' > backfill.sql
           BEGIN;
 
           DROP TABLE IF EXISTS tmp_vandra_ean_raw;
@@ -111,9 +100,9 @@ jobs:
             vandra_name_clean text, vandra_brand_clean text, vandra_size_norm text, vandra_name_key text, vandra_first2 text, vandra_first1 text
           );
 
-          \copy tmp_vandra_ean_raw FROM '__ABS_STRONG__' WITH (FORMAT csv, HEADER true)
-          \copy tmp_vandra_ean_raw FROM '__ABS_MEDIUM__' WITH (FORMAT csv, HEADER true)
-          \copy tmp_vandra_ean_raw FROM '__ABS_WEAK__'   WITH (FORMAT csv, HEADER true)
+          \copy tmp_vandra_ean_raw FROM :'abs_strong' WITH (FORMAT csv, HEADER true)
+          \copy tmp_vandra_ean_raw FROM :'abs_medium' WITH (FORMAT csv, HEADER true)
+          \copy tmp_vandra_ean_raw FROM :'abs_weak'   WITH (FORMAT csv, HEADER true)
 
           DROP TABLE IF EXISTS tmp_vandra_ean_map;
           CREATE TEMP TABLE tmp_vandra_ean_map AS
@@ -142,11 +131,28 @@ jobs:
           COMMIT;
           SQL
 
-          sed -e "s|__ABS_STRONG__|$ABS_STRONG|g" \
-              -e "s|__ABS_MEDIUM__|$ABS_MEDIUM|g" \
-              -e "s|__ABS_WEAK__|$ABS_WEAK|g" backfill.sql.tmpl > backfill.sql
+      - name: Before counts
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f before.sql
 
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f backfill.sql
+      - name: Wipe existing Vändra EANs (optional)
+        if: ${{ inputs.wipe_before == 'yes' }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f wipe.sql
 
-          # 3) AFTER COUNTS
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f before.sql
+      - name: Backfill from matches
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+        run: |
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+            -v abs_strong="${{ steps.paths.outputs.strong }}" \
+            -v abs_medium="${{ steps.paths.outputs.medium }}" \
+            -v abs_weak="${{ steps.paths.outputs.weak }}" \
+            -f backfill.sql
+
+      - name: After counts
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f before.sql
