@@ -24,6 +24,7 @@ jobs:
   backfill:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,34 +32,33 @@ jobs:
       - name: Install tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y postgresql-client python3 python3-pip
-          python3 -V
-          psql --version
+          sudo apt-get install -y postgresql-client python3
 
       - name: Verify CSVs exist
         run: |
           for f in "${{ inputs.strong_csv }}" "${{ inputs.medium_csv }}" "${{ inputs.weak_csv }}"; do
             [ -f "$f" ] || { echo "::error::Missing file: $f"; exit 1; }
-            echo "Found $f"
-            head -n 1 "$f"
+            echo "Found $f"; head -n 1 "$f" || true
           done
 
-      - name: Build 2-column map CSV (vandra_ext_id, ean)
+      # Build a clean two-column CSV: vandra_ext_id, ean
+      # Priority resolution when duplicates exist: strong > medium > weak
+      - name: Build 2-column map CSV (priority: strong > medium > weak)
         id: buildmap
+        env:
+          STRONG: ${{ inputs.strong_csv }}
+          MEDIUM: ${{ inputs.medium_csv }}
+          WEAK: ${{ inputs.weak_csv }}
         run: |
           python3 - <<'PY'
           import csv, sys, os
           from pathlib import Path
 
-          files = [
-            Path("${{ inputs.strong_csv }}"),
-            Path("${{ inputs.medium_csv }}"),
-            Path("${{ inputs.weak_csv }}"),
-          ]
-
-          out_path = Path("/tmp/vandra_map.csv")
-          seen = set()
-          n_in, n_out = 0, 0
+          strong = Path(os.environ["STRONG"])
+          medium = Path(os.environ["MEDIUM"])
+          weak = Path(os.environ["WEAK"])
+          inputs = [("strong", strong), ("medium", medium), ("weak", weak)]
+          priority = {"strong": 3, "medium": 2, "weak": 1}
 
           def clean_ean(s):
             if s is None: return ""
@@ -66,34 +66,55 @@ jobs:
             if s.endswith(".0"): s = s[:-2]
             return s
 
-          with out_path.open("w", newline="", encoding="utf-8") as f_out:
-            w = csv.writer(f_out)
-            w.writerow(["vandra_ext_id", "ean"])
-            for fp in files:
-              with fp.open("r", encoding="utf-8") as f_in:
-                r = csv.DictReader(f_in)
-                # tolerate header variants
-                ve_keys = [k for k in r.fieldnames if k and k.lower().strip()=="vandra_ext_id"]
-                ean_keys = [k for k in r.fieldnames if k and k.lower().strip()=="ean_to_copy_to_vandra"]
-                if not ve_keys or not ean_keys:
-                  print(f"::error::Required columns not found in {fp.name}. Found headers: {r.fieldnames}", file=sys.stderr)
-                  sys.exit(1)
-                ve, ek = ve_keys[0], ean_keys[0]
-                for row in r:
-                  n_in += 1
-                  ext = (row.get(ve) or "").strip()
-                  ean = clean_ean(row.get(ek))
-                  if not ext or not ean: 
-                    continue
-                  key = (ext, ean)
-                  if key in seen:
-                    continue
-                  seen.add(key)
-                  w.writerow([ext, ean])
-                  n_out += 1
+          out_map = {}   # vandra_ext_id -> (prio, ean, source)
+          conflicts = [] # rows: [vandra_ext_id, existing_ean, new_ean, kept_from, skipped_from]
 
-          print(f"Built map at {out_path}  rows_in={n_in}  unique_pairs={n_out}")
-          print(f"::set-output name=map_path::{out_path}")
+          for label, fp in inputs:
+            with fp.open("r", encoding="utf-8") as f:
+              r = csv.DictReader(f)
+              headers = [h.strip().lower() for h in r.fieldnames]
+              try:
+                ve_idx = headers.index("vandra_ext_id")
+                ean_idx = headers.index("ean_to_copy_to_vandra")
+              except ValueError:
+                print(f"::error::Required columns not found in {fp}. Headers: {r.fieldnames}", file=sys.stderr)
+                sys.exit(1)
+              for row in r:
+                ext = (row[r.fieldnames[ve_idx]] or "").strip()
+                ean = clean_ean(row[r.fieldnames[ean_idx]])
+                if not ext or not ean: 
+                  continue
+                if ext not in out_map:
+                  out_map[ext] = (priority[label], ean, label)
+                else:
+                  cur_p, cur_ean, cur_src = out_map[ext]
+                  new_p = priority[label]
+                  if new_p > cur_p:
+                    if cur_ean != ean:
+                      conflicts.append([ext, cur_ean, ean, label, cur_src])
+                    out_map[ext] = (new_p, ean, label)
+                  elif new_p == cur_p and cur_ean != ean:
+                    # same tier conflict — keep existing, record
+                    conflicts.append([ext, cur_ean, ean, cur_src, label])
+
+          map_path = Path("/tmp/vandra_map.csv")
+          with map_path.open("w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["vandra_ext_id","ean"])
+            for ext, (_, ean, _) in out_map.items():
+              w.writerow([ext, ean])
+
+          conf_path = Path("/tmp/vandra_conflicts.csv")
+          with conf_path.open("w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["vandra_ext_id","existing_ean","new_ean","kept_from","skipped_from"])
+            w.writerows(conflicts)
+
+          print(f"Built map: {map_path} rows={len(out_map)} conflicts={len(conflicts)}")
+          # Expose paths to later steps via GITHUB_OUTPUT
+          with open(os.environ["GITHUB_OUTPUT"], "a") as gh:
+            gh.write(f"map={map_path}\n")
+            gh.write(f"conflicts={conf_path}\n")
           PY
 
       - name: Before counts
@@ -136,8 +157,8 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
         run: |
-          echo "Using map: ${{ steps.buildmap.outputs.map_path }}"
-          test -f "${{ steps.buildmap.outputs.map_path }}" || { echo "::error::map file missing"; exit 1; }
+          echo "Using map: ${{ steps.buildmap.outputs.map }}"
+          test -f "${{ steps.buildmap.outputs.map }}" || { echo "::error::map file missing"; exit 1; }
 
           cat > backfill.sql <<'SQL'
           BEGIN;
@@ -148,10 +169,9 @@ jobs:
             ean text
           );
 
-          \copy tmp_vandra_ean_map (vandra_ext_id, ean) FROM '${{ steps.buildmap.outputs.map_path }}' WITH (FORMAT csv, HEADER true)
+          \copy tmp_vandra_ean_map (vandra_ext_id, ean) FROM '${{ steps.buildmap.outputs.map }}' WITH (FORMAT csv, HEADER true)
 
-          CREATE UNIQUE INDEX ON tmp_vandra_ean_map(vandra_ext_id);
-
+          -- Update ONLY Vändra rows; fill blanks
           WITH upd AS (
             UPDATE staging_coop_products s
             SET
@@ -175,3 +195,10 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
         run: |
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f before.sql
+
+      - name: Upload conflict report (if any)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vandra-conflicts
+          path: ${{ steps.buildmap.outputs.conflicts }}
