@@ -1,68 +1,44 @@
-chain: "Coop"
-source: "https://www.coop.ee/kauplused"
+name: Seed Coop physical stores (one-time)
 
-list:
-  url: "https://www.coop.ee/kauplused"
-  paginate: false
+on:
+  workflow_dispatch:
 
-  # Container for the right-hand store list; adjust if needed.
-  row_selector: "section[data-testid='store-list'] article, div.store-list article, li[data-store]"  # fallback: multiple options
+jobs:
+  seed-coop-stores:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: coop-seed-stores
+      cancel-in-progress: false
 
-  fields:
-    # Visible store name text
-    name:
-      selector: ".store__title, .MuiTypography-root, .store-card__title, h3, .store-title"
-      attr: text
-      cleanup:
-        - strip
+    env:
+      LANG: C.UTF-8
+      PYTHONUNBUFFERED: "1"
 
-    # Visible address line
-    address:
-      selector: ".store__address, .store-card__address, address, .MuiTypography-root + p"
-      attr: text
-      cleanup:
-        - strip
+      # Single connection string
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
-    # City / county is often part of the address; leave blank if not needed
-    city:
-      selector: ".store__city, .store-city"
-      attr: text
-      optional: true
-      cleanup: [strip]
+      # Optional discrete vars (if your script expects them)
+      PGHOST:     ${{ secrets.PGHOST }}
+      PGPORT:     ${{ secrets.PGPORT }}
+      PGDATABASE: ${{ secrets.PGDATABASE }}
+      PGUSER:     ${{ secrets.PGUSER }}
+      PGPASSWORD: ${{ secrets.PGPASSWORD }}
 
-    # Link to Google Maps (we’ll regex lat/lon from it)
-    gmaps_href:
-      selector: "a[href*='google'], a[href*='goo.gl/maps'], a:contains('Google Maps')"
-      attr: href
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    # Latitude from Google Maps link: tries @lat,lon or q=lat,lon
-    lat:
-      from: gmaps_href
-      regex_any:
-        - '(?<=@)(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)'   # @lat,lon,zoom form
-        - '(?<=\?q=)(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)' # ?q=lat,lon
-      group: 1
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-    lon:
-      from: gmaps_href
-      regex_any:
-        - '(?<=@)(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)'   # @lat,lon,zoom form
-        - '(?<=\?q=)(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)' # ?q=lat,lon
-      group: 2
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install requests beautifulsoup4 lxml psycopg2-binary || true
 
-upsert:
-  # How to write into your `stores` table
-  table: "stores"
-  conflict_on: # matches your existing unique constraint on (chain, name)
-    - "chain"
-    - "name"
-
-  set_on_insert:
-    chain: "Coop"
-    is_online: false
-
-  map:
-    name: "name"
-    address: "address"
-    lat: "lat"
-    lon: "lon"
+      - name: Run Coop store scraper
+        run: |
+          python scripts/scrape_coop_stores.py
