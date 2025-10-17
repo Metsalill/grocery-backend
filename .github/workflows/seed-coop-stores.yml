@@ -1,0 +1,30 @@
+name: Seed Coop physical stores (one-time)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  seed-coop-stores:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Python deps
+        run: |
+          pip install -r requirements.txt || true
+          pip install playwright psycopg[binary]
+          playwright install --with-deps chromium
+
+      - name: Run Coop store scraper
+        run: |
+          python scripts/scrape_coop_stores.py
