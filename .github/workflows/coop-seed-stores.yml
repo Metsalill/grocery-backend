@@ -1,66 +1,68 @@
-# coop-seed-stores.yml
 chain: "Coop"
-is_online: false
+source: "https://www.coop.ee/kauplused"
 
-# Where to get the store data from.
-# If your scraper supports a JSON endpoint, prefer "json_endpoint".
-# If not, let it fetch start_url and parse the embedded JSON from the HTML.
-source:
-  start_url: "https://www.coop.ee/kauplused"
-  # If you discover a JSON the page loads (recommended), set it like:
-  # json_endpoint: "https://www.coop.ee/api/kauplused"   # <-- example; change to the real one if known
+list:
+  url: "https://www.coop.ee/kauplused"
+  paginate: false
 
-# Tell the scraper how to find the store list.
-# Choose one of the two strategies your scraper supports:
+  # Container for the right-hand store list; adjust if needed.
+  row_selector: "section[data-testid='store-list'] article, div.store-list article, li[data-store]"  # fallback: multiple options
 
-# Strategy A: embedded JSON in a script tag (very common with Nuxt/Next/Vue apps)
-embedded_json:
-  # How to locate the script tag that contains the JSON blob
-  # (Examples: id, data-key, or a safe substring search)
-  script_selector: "script[type='application/json'],script#__NUXT_DATA__,script#__NEXT_DATA__"
-  # A JSON path (dot-notation) inside that blob to the array of stores.
-  # If the blob is flat array, leave this empty.
-  json_path: ""  # e.g. "state.stores" if needed
+  fields:
+    # Visible store name text
+    name:
+      selector: ".store__title, .MuiTypography-root, .store-card__title, h3, .store-title"
+      attr: text
+      cleanup:
+        - strip
 
-# Strategy B: direct JSON endpoint (skip if using embedded_json)
-#json_list_path: ""  # e.g. "data.stores" if the endpoint wraps results
+    # Visible address line
+    address:
+      selector: ".store__address, .store-card__address, address, .MuiTypography-root + p"
+      attr: text
+      cleanup:
+        - strip
 
-# Map fields from each JSON object to DB columns
-fields:
-  name: ["name", "title"]                           # try these keys in order
-  address: ["address", "addr", "streetAddress"]
-  latitude: ["lat", "latitude", "coords.lat"]
-  longitude: ["lng", "lon", "longitude", "coords.lng"]
-  city: ["city", "locality"]                        # optional
-  county: ["county", "maakond"]                     # optional
-  zipcode: ["postalCode", "zip"]                    # optional
-  # If there is a unique external id per store, map it; nice to keep stable dedupe beyond name:
-  external_key: ["id", "storeId", "slug"]           # optional but recommended
+    # City / county is often part of the address; leave blank if not needed
+    city:
+      selector: ".store__city, .store-city"
+      attr: text
+      optional: true
+      cleanup: [strip]
 
-# Normalization rules (optional but handy)
-normalize:
-  trim: true
-  collapse_spaces: true
+    # Link to Google Maps (we’ll regex lat/lon from it)
+    gmaps_href:
+      selector: "a[href*='google'], a[href*='goo.gl/maps'], a:contains('Google Maps')"
+      attr: href
 
-# Upsert rules for the DB
+    # Latitude from Google Maps link: tries @lat,lon or q=lat,lon
+    lat:
+      from: gmaps_href
+      regex_any:
+        - '(?<=@)(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)'   # @lat,lon,zoom form
+        - '(?<=\?q=)(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)' # ?q=lat,lon
+      group: 1
+
+    lon:
+      from: gmaps_href
+      regex_any:
+        - '(?<=@)(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)'   # @lat,lon,zoom form
+        - '(?<=\?q=)(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)' # ?q=lat,lon
+      group: 2
+
 upsert:
+  # How to write into your `stores` table
   table: "stores"
-  # Prefer to dedupe by external_key when present; fallback to (chain, name)
-  conflict_target:
-    - ["external_key"]      # if present
-    - ["chain", "name"]     # fallback
+  conflict_on: # matches your existing unique constraint on (chain, name)
+    - "chain"
+    - "name"
+
   set_on_insert:
     chain: "Coop"
     is_online: false
-  set_on_update:
-    # only update if provided / changed
-    name: "{{ name }}"
-    address: "{{ address }}"
-    lat: "{{ latitude }}"
-    lon: "{{ longitude }}"
-    # If you keep external_key for physical stores, set it too:
-    external_key: "{{ external_key }}"
 
-# Optional guardrails (skip rows without coords)
-filters:
-  require_lat_lon: true
+  map:
+    name: "name"
+    address: "address"
+    lat: "lat"
+    lon: "lon"
