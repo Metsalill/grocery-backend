@@ -5,7 +5,7 @@
 Scrape Coop physical stores from https://www.coop.ee/kauplused and upsert into stores.
 - Finds rows in #shop-search-page .c-shops-list .c-shops-list__item
 - Extracts: name, address, lat, lon (from the 'Google Maps' href)
-- Upserts into stores on (chain, name) via uq_stores_chain_name
+- Upserts into stores on UNIQUE(name) via stores_name_key
 - Writes CSV to data/coop_stores.csv for audit
 """
 
@@ -83,8 +83,7 @@ def collect_rows():
         for i in range(total):
             card = items.nth(i)
 
-            # Name
-            # Name element has u-fw-600 and u-fs20; make this resilient
+            # Name (make resilient)
             name = card.locator("p.u-fw-600").first.inner_text().strip()
 
             # Address
@@ -127,11 +126,13 @@ def upsert_rows(rows):
     sql = """
         INSERT INTO stores (name, chain, is_online, lat, lon, address)
         VALUES (%(name)s, %(chain)s, %(is_online)s, %(lat)s, %(lon)s, %(address)s)
-        ON CONFLICT ON CONSTRAINT uq_stores_chain_name
+        ON CONFLICT ON CONSTRAINT stores_name_key
         DO UPDATE SET
-            lat = EXCLUDED.lat,
-            lon = EXCLUDED.lon,
-            address = EXCLUDED.address;
+            chain     = EXCLUDED.chain,
+            is_online = EXCLUDED.is_online,
+            lat       = EXCLUDED.lat,
+            lon       = EXCLUDED.lon,
+            address   = EXCLUDED.address;
     """
 
     with closing(psycopg.connect(db_url, autocommit=True)) as conn:
