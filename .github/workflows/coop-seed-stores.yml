@@ -1,0 +1,66 @@
+# coop-seed-stores.yml
+chain: "Coop"
+is_online: false
+
+# Where to get the store data from.
+# If your scraper supports a JSON endpoint, prefer "json_endpoint".
+# If not, let it fetch start_url and parse the embedded JSON from the HTML.
+source:
+  start_url: "https://www.coop.ee/kauplused"
+  # If you discover a JSON the page loads (recommended), set it like:
+  # json_endpoint: "https://www.coop.ee/api/kauplused"   # <-- example; change to the real one if known
+
+# Tell the scraper how to find the store list.
+# Choose one of the two strategies your scraper supports:
+
+# Strategy A: embedded JSON in a script tag (very common with Nuxt/Next/Vue apps)
+embedded_json:
+  # How to locate the script tag that contains the JSON blob
+  # (Examples: id, data-key, or a safe substring search)
+  script_selector: "script[type='application/json'],script#__NUXT_DATA__,script#__NEXT_DATA__"
+  # A JSON path (dot-notation) inside that blob to the array of stores.
+  # If the blob is flat array, leave this empty.
+  json_path: ""  # e.g. "state.stores" if needed
+
+# Strategy B: direct JSON endpoint (skip if using embedded_json)
+#json_list_path: ""  # e.g. "data.stores" if the endpoint wraps results
+
+# Map fields from each JSON object to DB columns
+fields:
+  name: ["name", "title"]                           # try these keys in order
+  address: ["address", "addr", "streetAddress"]
+  latitude: ["lat", "latitude", "coords.lat"]
+  longitude: ["lng", "lon", "longitude", "coords.lng"]
+  city: ["city", "locality"]                        # optional
+  county: ["county", "maakond"]                     # optional
+  zipcode: ["postalCode", "zip"]                    # optional
+  # If there is a unique external id per store, map it; nice to keep stable dedupe beyond name:
+  external_key: ["id", "storeId", "slug"]           # optional but recommended
+
+# Normalization rules (optional but handy)
+normalize:
+  trim: true
+  collapse_spaces: true
+
+# Upsert rules for the DB
+upsert:
+  table: "stores"
+  # Prefer to dedupe by external_key when present; fallback to (chain, name)
+  conflict_target:
+    - ["external_key"]      # if present
+    - ["chain", "name"]     # fallback
+  set_on_insert:
+    chain: "Coop"
+    is_online: false
+  set_on_update:
+    # only update if provided / changed
+    name: "{{ name }}"
+    address: "{{ address }}"
+    lat: "{{ latitude }}"
+    lon: "{{ longitude }}"
+    # If you keep external_key for physical stores, set it too:
+    external_key: "{{ external_key }}"
+
+# Optional guardrails (skip rows without coords)
+filters:
+  require_lat_lon: true
