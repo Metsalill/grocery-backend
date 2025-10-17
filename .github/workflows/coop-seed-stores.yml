@@ -13,11 +13,8 @@ jobs:
     env:
       LANG: C.UTF-8
       PYTHONUNBUFFERED: "1"
-
-      # Single connection string
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-
-      # Optional discrete vars (if your script expects them)
+      # Optional discrete PG vars if your code reads them:
       PGHOST:     ${{ secrets.PGHOST }}
       PGPORT:     ${{ secrets.PGPORT }}
       PGDATABASE: ${{ secrets.PGDATABASE }}
@@ -33,11 +30,20 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install deps
+      - name: Install Python deps
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-          pip install requests beautifulsoup4 lxml psycopg2-binary || true
+          # Ensure these are present even if not in requirements
+          pip install playwright psycopg2-binary beautifulsoup4 lxml requests
+
+      - name: Install Playwright browsers (Chromium) + Linux deps
+        run: |
+          python -m playwright install --with-deps chromium
+        # If --with-deps isn't available for your version, use:
+        # run: |
+        #   python -m playwright install chromium
+        #   sudo python -m playwright install-deps chromium
 
       - name: Run Coop store scraper
         run: |
