@@ -1,15 +1,17 @@
-
 name: Seed Maxima stores
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 4 * * 1"  # Mondays at 04:00 UTC
+
+concurrency:
+  group: seed-maxima-stores
+  cancel-in-progress: false
 
 jobs:
   seed-maxima-stores:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,13 +27,28 @@ jobs:
           pip install playwright psycopg[binary]
           python -m playwright install --with-deps chromium
 
+      - name: Show DB host (masked)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+        run: |
+          python - <<'PY'
+          import os, urllib.parse
+          url = os.environ.get('DATABASE_URL','')
+          p = urllib.parse.urlparse(url)
+          def mask(s): return s[:2] + ('*' * max(0, len(s)-4)) + s[-2:] if s and len(s)>4 else s
+          print("DB host:", mask(p.hostname or ""))
+          print("Port:", p.port)
+          print("SSL in query:", 'sslmode=require' in (p.query or ''))
+          PY
+
       - name: Run Maxima store scraper
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}  # Use EXTERNAL Railway URL
         run: |
           python scripts/scrape_maxima_stores.py
 
       - name: Upload CSV artifact (audit)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: maxima-stores-csv
