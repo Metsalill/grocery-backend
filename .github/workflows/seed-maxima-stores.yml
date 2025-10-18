@@ -1,0 +1,38 @@
+
+name: Seed Maxima stores
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * 1"  # Mondays at 04:00 UTC
+
+jobs:
+  seed-maxima-stores:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          pip install playwright psycopg[binary]
+          python -m playwright install --with-deps chromium
+
+      - name: Run Maxima store scraper
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          python scripts/scrape_maxima_stores.py
+
+      - name: Upload CSV artifact (audit)
+        uses: actions/upload-artifact@v4
+        with:
+          name: maxima-stores-csv
+          path: data/maxima_stores.csv
