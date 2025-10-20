@@ -1,20 +1,27 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Bolt Food — store category crawler (Coop / Wolt-style venues)
-Fixes: deep-link redirects to /et-EE/<city> by navigating via the store page UI.
-Tested headless and non-headless.
+Bolt Food crawler (Coop venues) — backward-compatible CLI.
 
-Usage example:
-  python bolt_crawler.py \
-    --categories-file kvartali-coop-maksimarket.txt \
-    --out out/coop_kvartali_bolt.csv \
-    --headless 0 \
-    --req-delay 0.45
+Fixes deep-link redirect by:
+1) Opening the store root (/p/<venue>) first
+2) Opening categories by clicking the store page's anchors/chips (not goto deep URL)
+
+CLI:
+  Old (kept for GitHub Actions):
+    --city --store --categories-dir --out [--headless 0/1] [--req-delay 0.45] [--deep 0/1] [--upsert-db 0/1]
+    -> picks categories file: <categories-dir>/<slugified store>.txt
+
+  New (simple):
+    --categories-file <file> --out <csv>
+
+DB upsert flags are accepted but NO-OP in this script (your pipeline imports CSV later).
 """
+
 import argparse
 import csv
 import json
+import os
 import re
 import sys
 import time
@@ -24,6 +31,7 @@ from urllib.parse import urlparse, parse_qs
 
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 
+# ---------------------- regexes ---------------------- #
 PRICE_RE = re.compile(r"(\d+([.,]\d{1,2})?)\s*€")
 SPACE_RE = re.compile(r"\s+")
 SMC_ID_RE = re.compile(r"/smc/(\d+)")
@@ -45,6 +53,7 @@ class Product:
     raw: Dict
 
 
+# ---------------------- utils ---------------------- #
 def norm_space(s: str) -> str:
     return SPACE_RE.sub(" ", s or "").strip()
 
@@ -59,23 +68,25 @@ def parse_price(text: str) -> Optional[float]:
 
 
 def extract_city_and_venue(url: str) -> Tuple[str, str]:
-    """
-    Returns (city_slug, venue_id) from a store URL like:
-    https://food.bolt.eu/et-EE/2-tartu/p/1969
-    """
     m = CITY_RE.search(url)
     if not m:
         return "", ""
     return m.group(1), m.group(2)
 
 
+ESTONIAN_MAP = str.maketrans({
+    "ä": "a", "ö": "o", "ü": "u", "õ": "o",
+    "š": "s", "ž": "z", "Ä": "a", "Ö": "o", "Ü": "u", "Õ": "o", "Š": "s", "Ž": "z",
+})
+
+
+def slugify_store(name: str) -> str:
+    s = (name or "").translate(ESTONIAN_MAP).lower()
+    s = re.sub(r"[^a-z0-9]+", "-", s).strip("-")
+    return s
+
+
 def parse_categories_file(path: str) -> List[Tuple[str, str]]:
-    """
-    Accepts lines either as:
-      Category Name -> https://food.bolt.eu/et-EE/2-tartu/p/1969/smc/<id>?categoryName=Piim&backPath=%2Fp%2F1969
-    or:
-      https://food.bolt.eu/et-EE/2-tartu/p/1969/smc/<id>?categoryName=Piim&backPath=%2Fp%2F1969
-    """
     out: List[Tuple[str, str]] = []
     with open(path, "r", encoding="utf-8") as f:
         for raw in f:
@@ -87,28 +98,42 @@ def parse_categories_file(path: str) -> List[Tuple[str, str]]:
                 out.append((name, href))
             else:
                 href = line
-                # derive category name from query param if present
-                name = parse_qs(urlparse(href).query).get(CATEGORY_NAME_Q, [""])[0]
-                if not name:
-                    # fallback: last path segment or empty
-                    name = " ".join(urlparse(href).path.split("/")[-1].split("-")).strip() or "Unknown"
+                name = parse_qs(urlparse(href).query).get(CATEGORY_NAME_Q, [""])[0] or "Unknown"
                 out.append((name, href))
     return out
 
 
-# ---------------------- Playwright helpers ---------------------- #
+def find_categories_file(categories_dir: str, store_name: str) -> Optional[str]:
+    """Derive <categories-dir>/<slugified store>.txt, with forgiving matching."""
+    if not categories_dir or not store_name:
+        return None
+    want_slug = slugify_store(store_name)
+    candidate = os.path.join(categories_dir, f"{want_slug}.txt")
+    if os.path.isfile(candidate):
+        return candidate
 
+    # Case/sep-insensitive scan
+    norm = lambda s: re.sub(r"[^a-z0-9]", "", slugify_store(s))
+    want_norm = norm(store_name)
+    best = None
+    if os.path.isdir(categories_dir):
+        for fn in os.listdir(categories_dir):
+            if not fn.lower().endswith(".txt"):
+                continue
+            if norm(fn) == want_norm:
+                best = os.path.join(categories_dir, fn)
+                break
+    return best
+
+
+# ---------------------- Playwright helpers ---------------------- #
 def dismiss_popups(page) -> None:
-    """
-    Close cookie banners, sign-in nags, or app-download overlays when they appear.
-    """
     selectors = [
         'button:has-text("Nõustun")',
-        'button:has-text("Luban kõik")',
         'button:has-text("Luba kõik")',
+        'button:has-text("Luban kõik")',
         'button:has-text("OK")',
         'button:has-text("Accept")',
-        'button:has-text("Got it")',
         '[data-testid="cookie-accept-all"]',
         '[aria-label="Close"]',
         'button[aria-label="close"]',
@@ -124,13 +149,8 @@ def dismiss_popups(page) -> None:
 
 
 def click_category_chip(page, category_name: str) -> bool:
-    """
-    Clicks the category chip/tab by visible text.
-    """
     if not category_name:
         return False
-
-    # Try a11y role first
     try:
         chip = page.get_by_role("link", name=re.compile(rf"^{re.escape(category_name)}\b", re.I))
         if chip.count():
@@ -139,8 +159,6 @@ def click_category_chip(page, category_name: str) -> bool:
             return True
     except Exception:
         pass
-
-    # Try text contains
     try:
         chip = page.locator(f'//a[contains(normalize-space(.), "{category_name}")]')
         if chip.count():
@@ -149,15 +167,10 @@ def click_category_chip(page, category_name: str) -> bool:
             return True
     except Exception:
         pass
-
     return False
 
 
 def open_first_category_from_hc(page) -> bool:
-    """
-    When landing to a holding/collection page (hc) that shows a list of categories,
-    open the first visible category.
-    """
     try:
         anchors = page.locator('a[href*="/smc/"]')
         if anchors.count():
@@ -170,40 +183,27 @@ def open_first_category_from_hc(page) -> bool:
 
 
 def wait_for_grid(page, timeout: int = 20000) -> None:
-    """
-    Wait until product grid/tiles render.
-    """
     candidates = [
         '[data-testid="product-card"]',
         '[data-test="product-card"]',
         '[data-testid="productTile"]',
         '[data-test="productTile"]',
-        # generic card items
-        'div:has(> div >> text=/€/)',
         'article:has-text("€")',
+        'div:has(> div >> text=/€/)',
     ]
     start = time.time()
-    last_err = None
-    for _ in range(50):
+    while (time.time() - start) * 1000 < timeout:
         for sel in candidates:
             try:
-                loc = page.locator(sel)
-                if loc.count():
+                if page.locator(sel).count():
                     return
-            except Exception as e:
-                last_err = e
-        if (time.time() - start) * 1000 > timeout:
-            break
+            except Exception:
+                pass
         time.sleep(0.2)
-    if last_err:
-        raise PWTimeout(str(last_err))
     raise PWTimeout("product grid not found")
 
 
 def auto_scroll(page, max_steps: int = 60, pause: float = 0.25) -> None:
-    """
-    Simple incremental scroll to load lazy content.
-    """
     page.evaluate(
         """
         (steps, pause) => new Promise(async (res) => {
@@ -221,10 +221,6 @@ def auto_scroll(page, max_steps: int = 60, pause: float = 0.25) -> None:
 
 
 def extract_tiles_runtime(page) -> List[Dict]:
-    """
-    Extract tiles via DOM traversal. Returns a list of dicts with basic fields.
-    We attempt to find each card's name, price, unit text, image, and link.
-    """
     tiles = page.evaluate(
         """
         () => {
@@ -237,7 +233,7 @@ def extract_tiles_runtime(page) -> List[Dict]:
             try {
               const txt = (el.textContent || "").replace(/\\s+/g, " ").trim();
               if (!/€/.test(txt)) continue;
-              // name: try specific selectors, else generic strong/span/div lines
+
               let nameEl =
                 el.querySelector('[data-testid="product-name"],[data-test="product-name"]') ||
                 el.querySelector('h3,h4,strong') ||
@@ -245,13 +241,11 @@ def extract_tiles_runtime(page) -> List[Dict]:
               let name = nameEl ? (nameEl.getAttribute('title') || nameEl.textContent || '') : '';
               name = name.replace(/\\s+/g, ' ').trim();
               if (!name) {
-                // heuristics: take first line before price
                 const parts = txt.split('€')[0].trim();
                 name = parts.split(' + ')[0].trim();
               }
               if (!name) continue;
 
-              // price: grab closest price-looking token
               const priceEl =
                 el.querySelector('[data-testid="product-price"],[data-test="product-price"]') ||
                 el.querySelector('span,div');
@@ -261,11 +255,9 @@ def extract_tiles_runtime(page) -> List[Dict]:
               if (!m) continue;
               const price = m[1];
 
-              // image
               let imgEl = el.querySelector('img');
               let img = imgEl ? (imgEl.getAttribute('src') || imgEl.getAttribute('data-src') || '') : '';
 
-              // link
               let linkEl = el.closest('a') || el.querySelector('a[href*="/p/"]') || el.querySelector('a[href*="/smc/"]');
               let href = linkEl ? linkEl.getAttribute('href') : '';
 
@@ -291,7 +283,6 @@ def extract_tiles_runtime(page) -> List[Dict]:
 
 
 def ensure_on_store_page(page, base_url: str, req_delay: float = 0.3) -> None:
-    """Guarantee we're on the store root (/p/<venue>) before opening a category."""
     if not base_url:
         return
     try:
@@ -300,20 +291,14 @@ def ensure_on_store_page(page, base_url: str, req_delay: float = 0.3) -> None:
             time.sleep(req_delay)
             dismiss_popups(page)
     except Exception:
-        # try once more with a normal goto
         page.goto(base_url, timeout=60_000)
         time.sleep(req_delay)
         dismiss_popups(page)
 
 
 def open_category_via_page(page, base_url: str, href: str, cat_name: str, req_delay: float = 0.3) -> bool:
-    """
-    Prefer clicking the exact <a href=".../smc/<id>?categoryName=..."> that exists on the store page.
-    Falls back to clicking the chip by visible text.
-    """
     ensure_on_store_page(page, base_url, req_delay)
 
-    # Try exact href match first
     try:
         locator = page.locator(f'a[href="{href}"]')
         if locator.count():
@@ -325,7 +310,6 @@ def open_category_via_page(page, base_url: str, href: str, cat_name: str, req_de
     except Exception:
         pass
 
-    # Try matching by smc/<id>
     try:
         m = SMC_ID_RE.search(href or "")
         if m:
@@ -340,7 +324,6 @@ def open_category_via_page(page, base_url: str, href: str, cat_name: str, req_de
     except Exception:
         pass
 
-    # Fall back to chip click by category name
     if click_category_chip(page, cat_name):
         time.sleep(req_delay)
         dismiss_popups(page)
@@ -349,23 +332,16 @@ def open_category_via_page(page, base_url: str, href: str, cat_name: str, req_de
     return False
 
 
-# ---------------------- Main crawler ---------------------- #
-
-def crawl(categories: List[Tuple[str, str]],
-          out_path: str,
-          headless: bool = True,
-          req_delay: float = 0.35) -> None:
-
+# ---------------------- main crawl ---------------------- #
+def crawl(categories: List[Tuple[str, str]], out_path: str, headless: bool = True, req_delay: float = 0.35) -> None:
     if not categories:
         print("No categories to crawl.")
         return
 
-    # Derive base store URL from first category
     first_href = categories[0][1]
     if "/smc/" in first_href:
-        base_url = first_href.split("/smc/")[0]  # .../et-EE/<city>/p/<venue>
+        base_url = first_href.split("/smc/")[0]
     else:
-        # fallback to removing query part and keeping /p/<venue>
         parsed = urlparse(first_href)
         parts = parsed.path.split("/")
         try:
@@ -402,7 +378,6 @@ def crawl(categories: List[Tuple[str, str]],
             permissions=["geolocation"],
             extra_http_headers={"Accept-Language": "et-EE,et;q=0.9,en;q=0.8"},
         )
-        # Light stealth
         context.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined});")
         context.add_init_script("window.chrome = { runtime: {} };")
         context.add_init_script("Object.defineProperty(navigator, 'languages', {get: () => ['et-EE','et','en']});")
@@ -411,7 +386,6 @@ def crawl(categories: List[Tuple[str, str]],
         page = context.new_page()
         page.set_default_timeout(30_000)
 
-        # Enter the store root once
         page.goto(base_url, wait_until="domcontentloaded")
         time.sleep(req_delay)
         dismiss_popups(page)
@@ -419,10 +393,7 @@ def crawl(categories: List[Tuple[str, str]],
         for cat_name, href in categories:
             print(f"[cat] {cat_name} -> {href}")
 
-            # Navigate via anchors/chips from the store page (prevents deep-link redirect to city root)
             ok = open_category_via_page(page, base_url, href, cat_name, req_delay=req_delay)
-
-            # If that still failed, try a direct goto once as a last resort
             if not ok:
                 try:
                     page.goto(href, timeout=60_000, wait_until="domcontentloaded")
@@ -433,7 +404,6 @@ def crawl(categories: List[Tuple[str, str]],
 
             tiles: List[Dict] = []
             for attempt in range(1, 4):
-                # If we got bounced away from the store or not on a /p/<venue> path, jump back and try chip
                 if "/p/" not in (page.url or ""):
                     ensure_on_store_page(page, base_url, req_delay)
                     click_category_chip(page, cat_name)
@@ -449,7 +419,6 @@ def crawl(categories: List[Tuple[str, str]],
                     print(f"[cat] parsed {len(tiles)} tiles")
                     break
 
-                # Explicit fallback if landing on holding/collection
                 if "hc/" in (page.url or ""):
                     if open_first_category_from_hc(page):
                         auto_scroll(page, max_steps=40, pause=0.22)
@@ -464,18 +433,15 @@ def crawl(categories: List[Tuple[str, str]],
 
             if not tiles:
                 print(f"[cat] gave up: {cat_name}")
-                # go back to store root for next category regardless
                 ensure_on_store_page(page, base_url, req_delay)
                 continue
 
-            # Build product rows
             for t in tiles:
                 name = norm_space(t.get("name", ""))
                 price_val = parse_price(t.get("price_text") or t.get("text") or "")
                 unit_text = ""
                 img = t.get("image", "")
                 href_rel = t.get("href", "")
-                # absolute URL if href is relative
                 if href_rel and href_rel.startswith("/"):
                     href_abs = f"{urlparse(base_url).scheme}://{urlparse(base_url).netloc}{href_rel}"
                 else:
@@ -499,7 +465,6 @@ def crawl(categories: List[Tuple[str, str]],
                     )
                 )
 
-            # Return to store root for the next category
             ensure_on_store_page(page, base_url, req_delay)
 
         browser.close()
@@ -518,6 +483,7 @@ def crawl(categories: List[Tuple[str, str]],
             "url",
             "raw_json",
         ]
+        os.makedirs(os.path.dirname(out_path), exist_ok=True)
         with open(out_path, "w", encoding="utf-8", newline="") as f:
             w = csv.DictWriter(f, fieldnames=fieldnames)
             w.writeheader()
@@ -541,15 +507,35 @@ def crawl(categories: List[Tuple[str, str]],
         print("[done] no products extracted")
 
 
+# ---------------------- CLI ---------------------- #
 def main():
     ap = argparse.ArgumentParser("bolt food store crawler")
-    ap.add_argument("--categories-file", required=True, help="File with category lines: 'Name -> URL' or just URL")
+    # New style
+    ap.add_argument("--categories-file", help="File with category lines: 'Name -> URL' or just URL")
+    # Old style (back-compat)
+    ap.add_argument("--categories-dir", help="Directory containing per-store .txt category files")
+    ap.add_argument("--city", help="City slug (unused by crawler, for naming/back-compat)", default="")
+    ap.add_argument("--store", help="Store name (used to find <categories-dir>/<slugified>.txt)")
+    ap.add_argument("--deep", help="Back-compat flag, ignored", default="0")
+    ap.add_argument("--upsert-db", help="Back-compat flag, ignored", default="0")
+
     ap.add_argument("--out", required=True, help="Output CSV path")
     ap.add_argument("--headless", type=int, default=1, help="1=headless (default), 0=show browser")
     ap.add_argument("--req-delay", type=float, default=0.35, help="Delay after navigations")
     args = ap.parse_args()
 
-    categories = parse_categories_file(args.categories_file)
+    # Resolve categories file
+    categories_file = args.categories_file
+    if not categories_file:
+        categories_file = find_categories_file(args.categories_dir or "", args.store or "")
+
+    if not categories_file or not os.path.isfile(categories_file):
+        ap.error("the following arguments are required: --categories-file "
+                 "(or provide --categories-dir AND --store so I can infer it)")
+
+    categories = parse_categories_file(categories_file)
+
+    # Go crawl
     try:
         crawl(
             categories=categories,
