@@ -3,21 +3,20 @@
 """
 Bolt Food crawler (Coop venues) — backward-compatible CLI.
 
-Fixes deep-link redirect by:
-1) Opening the store root (/p/<venue>) first
-2) Opening categories by clicking the store page's anchors/chips (not goto deep URL)
+Fixes:
+- Deep-link redirect by navigating via store root + clicking anchors/chips.
+- Auto-resolve categories file in city subfolders (e.g., data/bolt/2-tartu/*.txt).
+- Recursive search fallback inside --categories-dir.
 
 CLI:
   Old (kept for GitHub Actions):
     --city --store --categories-dir --out [--headless 0/1] [--req-delay 0.45] [--deep 0/1] [--upsert-db 0/1]
-    -> picks categories file: <categories-dir>/<slugified store>.txt
+    -> picks categories file: <categories-dir>/<city>/<slugified store>.txt
+       (falls back to <categories-dir>/<slugified store>.txt and then recursive search)
 
   New (simple):
     --categories-file <file> --out <csv>
-
-DB upsert flags are accepted but NO-OP in this script (your pipeline imports CSV later).
 """
-
 import argparse
 import csv
 import json
@@ -87,6 +86,11 @@ def slugify_store(name: str) -> str:
 
 
 def parse_categories_file(path: str) -> List[Tuple[str, str]]:
+    """
+    Accepts either:
+      Category Name -> https://.../smc/<id>?categoryName=Piim&backPath=%2Fp%2F1969
+    or just the URL.
+    """
     out: List[Tuple[str, str]] = []
     with open(path, "r", encoding="utf-8") as f:
         for raw in f:
@@ -103,26 +107,43 @@ def parse_categories_file(path: str) -> List[Tuple[str, str]]:
     return out
 
 
-def find_categories_file(categories_dir: str, store_name: str) -> Optional[str]:
-    """Derive <categories-dir>/<slugified store>.txt, with forgiving matching."""
+def _norm_for_match(s: str) -> str:
+    return re.sub(r"[^a-z0-9]", "", slugify_store(s))
+
+
+def find_categories_file(categories_dir: str, store_name: str, city: str = "") -> Optional[str]:
+    """
+    Resolve categories file in a forgiving way:
+      1) <dir>/<city>/<slug>.txt
+      2) <dir>/<slug>.txt
+      3) recursive search under <dir> for any file whose normalized name matches.
+    """
     if not categories_dir or not store_name:
         return None
     want_slug = slugify_store(store_name)
+    want_norm = _norm_for_match(store_name)
+
+    # 1) city subfolder
+    if city:
+        candidate = os.path.join(categories_dir, city, f"{want_slug}.txt")
+        if os.path.isfile(candidate):
+            return candidate
+
+    # 2) top-level
     candidate = os.path.join(categories_dir, f"{want_slug}.txt")
     if os.path.isfile(candidate):
         return candidate
 
-    # Case/sep-insensitive scan
-    norm = lambda s: re.sub(r"[^a-z0-9]", "", slugify_store(s))
-    want_norm = norm(store_name)
+    # 3) recursive scan
     best = None
     if os.path.isdir(categories_dir):
-        for fn in os.listdir(categories_dir):
-            if not fn.lower().endswith(".txt"):
-                continue
-            if norm(fn) == want_norm:
-                best = os.path.join(categories_dir, fn)
-                break
+        for root, _, files in os.walk(categories_dir):
+            for fn in files:
+                if not fn.lower().endswith(".txt"):
+                    continue
+                if _norm_for_match(fn) == want_norm:
+                    best = os.path.join(root, fn)
+                    return best
     return best
 
 
@@ -514,8 +535,8 @@ def main():
     ap.add_argument("--categories-file", help="File with category lines: 'Name -> URL' or just URL")
     # Old style (back-compat)
     ap.add_argument("--categories-dir", help="Directory containing per-store .txt category files")
-    ap.add_argument("--city", help="City slug (unused by crawler, for naming/back-compat)", default="")
-    ap.add_argument("--store", help="Store name (used to find <categories-dir>/<slugified>.txt)")
+    ap.add_argument("--city", help="City slug (e.g. '2-tartu')", default="")
+    ap.add_argument("--store", help="Store name (used to find <categories-dir>/<city>/<slugified>.txt)")
     ap.add_argument("--deep", help="Back-compat flag, ignored", default="0")
     ap.add_argument("--upsert-db", help="Back-compat flag, ignored", default="0")
 
@@ -527,12 +548,15 @@ def main():
     # Resolve categories file
     categories_file = args.categories_file
     if not categories_file:
-        categories_file = find_categories_file(args.categories_dir or "", args.store or "")
+        categories_file = find_categories_file(args.categories_dir or "", args.store or "", args.city or "")
 
     if not categories_file or not os.path.isfile(categories_file):
-        ap.error("the following arguments are required: --categories-file "
-                 "(or provide --categories-dir AND --store so I can infer it)")
+        ap.error(
+            "the following arguments are required: --categories-file "
+            "(or provide --categories-dir AND --store, optionally --city, so I can infer it)"
+        )
 
+    print(f"[info] using categories file: {categories_file}")
     categories = parse_categories_file(categories_file)
 
     # Go crawl
