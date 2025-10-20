@@ -7,6 +7,7 @@ Fixes:
 - Deep-link redirect by navigating via store root + clicking anchors/chips.
 - Auto-resolve categories file in city subfolders (e.g., data/bolt/2-tartu/*.txt).
 - Recursive search fallback inside --categories-dir.
+- Uses Bolt-specific selectors for reliable tile extraction.
 
 CLI:
   Old (kept for GitHub Actions):
@@ -204,7 +205,12 @@ def open_first_category_from_hc(page) -> bool:
 
 
 def wait_for_grid(page, timeout: int = 20000) -> None:
+    """
+    Recognize Bolt's GridMenuDishBase buttons as well as generic tiles.
+    """
     candidates = [
+        '[data-testid="components.GridMenuDishBase.button"]',
+        '[data-testid="components.GridMenuDishBase.view"]',
         '[data-testid="product-card"]',
         '[data-test="product-card"]',
         '[data-testid="productTile"]',
@@ -226,8 +232,7 @@ def wait_for_grid(page, timeout: int = 20000) -> None:
 
 def auto_scroll(page, max_steps: int = 60, pause: float = 0.25) -> None:
     """
-    Simple incremental scroll to load lazy content.
-    Works with Playwright Python (single arg to evaluate).
+    Works with Playwright Python (single-arg evaluate).
     """
     page.evaluate(
         """
@@ -243,7 +248,53 @@ def auto_scroll(page, max_steps: int = 60, pause: float = 0.25) -> None:
         {"steps": int(max_steps), "pause": float(pause)},
     )
 
+
+def extract_tiles_bolt(page) -> List[Dict]:
+    """
+    Bolt-specific extractor using GridMenuDishBase testids (name/price/image live here).
+    """
+    return page.evaluate(
+        """
+        () => {
+          const btns = Array.from(document.querySelectorAll(
+            'button[data-testid="components.GridMenuDishBase.button"],button[data-testid="components.GridMenuDishBase.view"]'
+          ));
+          const out = [];
+          const seen = new Set();
+          for (const btn of btns) {
+            const nameEl  = btn.querySelector('[data-testid="components.GridMenuDishBase.title"]');
+            const priceEl = btn.querySelector('[data-testid="components.GridMenuDishBase.price"]');
+            const imgEl   = btn.querySelector('[data-testid="components.GridMenuDishBase.image"] img, img');
+            const aria    = btn.getAttribute('aria-label') || '';
+
+            let name = (nameEl?.textContent || aria || '').replace(/\\s+/g, ' ').trim();
+            if (!nameEl && /€/.test(name)) name = name.split('€')[0].trim().replace(/,\\s*$/, '');
+
+            const priceTextRaw = (priceEl?.textContent || aria || '').replace(/\\s+/g, ' ').trim();
+            const m = priceTextRaw.match(/(\\d+(?:[.,]\\d{1,2}))\\s*€/);
+            const price_text = m ? (m[1] + ' €') : '';
+
+            const hrefEl = btn.closest('a') || btn.querySelector('a[href]');
+            const href = hrefEl?.getAttribute('href') || '';
+            const image = imgEl?.getAttribute('src') || imgEl?.getAttribute('data-src') || '';
+
+            if (!name || !price_text) continue;
+            const key = name + '|' + price_text + '|' + image;
+            if (seen.has(key)) continue;
+            seen.add(key);
+
+            out.push({ name, price_text, unit_text: '', image, href, text: btn.textContent || '' });
+          }
+          return out;
+        }
+        """
+    ) or []
+
+
 def extract_tiles_runtime(page) -> List[Dict]:
+    """
+    Generic fallback extractor (kept for safety).
+    """
     tiles = page.evaluate(
         """
         () => {
@@ -401,6 +452,7 @@ def crawl(categories: List[Tuple[str, str]], out_path: str, headless: bool = Tru
             permissions=["geolocation"],
             extra_http_headers={"Accept-Language": "et-EE,et;q=0.9,en;q=0.8"},
         )
+        # Light stealth
         context.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined});")
         context.add_init_script("window.chrome = { runtime: {} };")
         context.add_init_script("Object.defineProperty(navigator, 'languages', {get: () => ['et-EE','et','en']});")
@@ -437,7 +489,7 @@ def crawl(categories: List[Tuple[str, str]], out_path: str, headless: bool = Tru
                     pass
 
                 auto_scroll(page, max_steps=50, pause=0.22)
-                tiles = extract_tiles_runtime(page)
+                tiles = extract_tiles_bolt(page) or extract_tiles_runtime(page)
                 if tiles:
                     print(f"[cat] parsed {len(tiles)} tiles")
                     break
@@ -445,7 +497,7 @@ def crawl(categories: List[Tuple[str, str]], out_path: str, headless: bool = Tru
                 if "hc/" in (page.url or ""):
                     if open_first_category_from_hc(page):
                         auto_scroll(page, max_steps=40, pause=0.22)
-                        tiles = extract_tiles_runtime(page)
+                        tiles = extract_tiles_bolt(page) or extract_tiles_runtime(page)
                         if tiles:
                             print(f"[cat] parsed {len(tiles)} tiles (from hc → first category)")
                             break
