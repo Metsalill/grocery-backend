@@ -225,21 +225,23 @@ def wait_for_grid(page, timeout: int = 20000) -> None:
 
 
 def auto_scroll(page, max_steps: int = 60, pause: float = 0.25) -> None:
+    """
+    Simple incremental scroll to load lazy content.
+    Works with Playwright Python (single arg to evaluate).
+    """
     page.evaluate(
         """
-        (steps, pause) => new Promise(async (res) => {
+        ({ steps, pause }) => new Promise(async (res) => {
           const sleep = (ms) => new Promise(r => setTimeout(r, ms));
-          for (let i=0; i<steps; i++) {
+          for (let i = 0; i < steps; i++) {
             window.scrollBy(0, Math.round(window.innerHeight * 0.9));
             await sleep(pause * 1000);
           }
           res();
         })
         """,
-        max_steps,
-        pause,
+        {"steps": int(max_steps), "pause": float(pause)},
     )
-
 
 def extract_tiles_runtime(page) -> List[Dict]:
     tiles = page.evaluate(
