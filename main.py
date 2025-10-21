@@ -3,12 +3,12 @@ import os
 import sys
 import logging
 import asyncpg
-import traceback  # <-- DEV helper
-from fastapi import FastAPI
+import traceback  # DEV helper
+from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from fastapi.staticfiles import StaticFiles
-from starlette.middleware.base import BaseHTTPMiddleware  # <-- DEV helper
+from starlette.middleware.base import BaseHTTPMiddleware  # DEV helper
 
 # --- ensure app root on sys.path so "services" imports resolve in Railway ---
 APP_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -24,15 +24,16 @@ from middlewares.headers import security_and_cache_headers
 from middlewares.rate_limit import RateLimitMiddleware
 from middlewares.docs_guard import SwaggerAuthMiddleware
 
+# Routers
 from auth import router as auth_router
-from compare import router as compare_router          # no compute_compare import
-from products import router as products_router
-from upload_prices import router as upload_router
-from admin.routes import router as admin_router
-from basket_history import router as basket_history_router
-from api.upload_image import router as upload_image_router            # manual R2 upload
-from admin.image_gallery import router as image_admin_router          # /admin/images gallery
-from app.routers.stores import router as stores_router                # <-- moved: /stores endpoints
+from compare import router as compare_router               # /compare
+from products import router as products_router             # /products, /products/search, /search-products
+from upload_prices import router as upload_router          # /upload-prices (admin-ish)
+from admin.routes import router as admin_router            # /admin/*
+from basket_history import router as basket_history_router # /basket-history/*
+from api.upload_image import router as upload_image_router # /upload-image (manual R2 upload)
+from admin.image_gallery import router as image_admin_router # /admin/images gallery
+from app.routers.stores import router as stores_router     # /stores/*
 
 logger = logging.getLogger("uvicorn.error")
 os.makedirs(IMAGES_DIR, exist_ok=True)
@@ -45,7 +46,7 @@ app = FastAPI(
     openapi_url="/openapi.json" if ENABLE_DOCS else None,
 )
 
-# --- Traceback middleware (DEV helper) ---
+# -------- DEV traceback middleware (keeps full stack in logs) --------
 class TraceLogMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         try:
@@ -58,9 +59,9 @@ class TraceLogMiddleware(BaseHTTPMiddleware):
             raise
 
 app.add_middleware(TraceLogMiddleware)
-# -----------------------------------------
+# ---------------------------------------------------------------------
 
-# Static + headers
+# Static + security/cache headers
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 app.middleware("http")(security_and_cache_headers)
 
@@ -81,7 +82,7 @@ if ENABLE_DOCS:
 # Rate limit
 app.add_middleware(RateLimitMiddleware, rate_per_min=RATE_PER_MIN, window=WINDOW, redis_url=REDIS_URL)
 
-# DB pool
+# ------------------------ DB pool ------------------------
 @app.on_event("startup")
 async def startup():
     try:
@@ -100,18 +101,28 @@ async def shutdown():
     except Exception as e:
         logger.error(f"Shutdown error: {e}")
 
-# Routers
-app.include_router(auth_router)
-app.include_router(compare_router)
-app.include_router(products_router)
-app.include_router(upload_router)
-app.include_router(admin_router)
-app.include_router(basket_history_router)
-app.include_router(upload_image_router)   # manual R2 upload endpoint
-app.include_router(image_admin_router)    # /admin/images gallery
-app.include_router(stores_router)         # /stores routes
+# ------------------------ Routers ------------------------
+# Expose at root (back-compat): /products, /compare, /stores, etc.
+app.include_router(auth_router)                # /auth/*
+app.include_router(compare_router)             # /compare
+app.include_router(products_router)            # /products, /products/search, /search-products
+app.include_router(upload_router)              # /upload-prices
+app.include_router(admin_router)               # /admin/*
+app.include_router(basket_history_router)      # /basket-history/*
+app.include_router(upload_image_router)        # /upload-image
+app.include_router(image_admin_router)         # /admin/images
+app.include_router(stores_router)              # /stores/*
 
-# robots.txt + health
+# ALSO expose under /api/* (mobile client expects /api/products, /api/compare, etc.)
+api = APIRouter(prefix="/api")
+api.include_router(compare_router)             # /api/compare
+api.include_router(products_router)            # /api/products, /api/products/search, /api/search-products
+api.include_router(basket_history_router)      # /api/basket-history/*
+api.include_router(upload_image_router)        # /api/upload-image
+api.include_router(stores_router)              # /api/stores/*
+app.include_router(api)
+
+# ---------------- robots + health ----------------
 @app.get("/robots.txt", response_class=PlainTextResponse)
 async def robots():
     return (
@@ -139,7 +150,7 @@ if LOG_REQUESTS:
         logger.info(f"⬅ {request.method} {request.url.path} -> {resp.status_code}")
         return resp
 
-# OpenAPI security default
+# ---------------- OpenAPI: default bearer auth ----------------
 from fastapi.openapi.utils import get_openapi
 from fastapi.security import HTTPBearer
 
@@ -165,6 +176,7 @@ def custom_openapi():
 
 app.openapi = custom_openapi
 
+# ---------------- Uvicorn entry ----------------
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("PORT", "8000")), reload=True, log_level="debug")
