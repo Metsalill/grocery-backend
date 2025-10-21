@@ -1,182 +1,226 @@
-# main.py
-import os
-import sys
-import logging
-import asyncpg
-import traceback  # DEV helper
-from fastapi import FastAPI, APIRouter
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import PlainTextResponse
-from fastapi.staticfiles import StaticFiles
-from starlette.middleware.base import BaseHTTPMiddleware  # DEV helper
+# products.py
+from fastapi import APIRouter, Request, Query, HTTPException
+from typing import Optional
+from asyncpg import exceptions as pgerr
+from utils.throttle import throttle
 
-# --- ensure app root on sys.path so "services" imports resolve in Railway ---
-APP_ROOT = os.path.dirname(os.path.abspath(__file__))
-if APP_ROOT not in sys.path:
-    sys.path.insert(0, APP_ROOT)
+router = APIRouter()
 
-from settings import (
-    ENABLE_DOCS, STATIC_DIR, IMAGES_DIR,
-    ALLOW_ORIGINS, DATABASE_URL, DB_CONNECT_TIMEOUT,
-    LOG_REQUESTS, RATE_PER_MIN, REDIS_URL, WINDOW,
-)
-from middlewares.headers import security_and_cache_headers
-from middlewares.rate_limit import RateLimitMiddleware
-from middlewares.docs_guard import SwaggerAuthMiddleware
+MAX_LIMIT = 50  # server-side cap
 
-# Routers
-from auth import router as auth_router
-from compare import router as compare_router               # /compare
-from products import router as products_router             # /products, /products/search, /search-products
-from upload_prices import router as upload_router          # /upload-prices (admin-ish)
-from admin.routes import router as admin_router            # /admin/*
-from basket_history import router as basket_history_router # /basket-history/*
-from api.upload_image import router as upload_image_router # /upload-image (manual R2 upload)
-from admin.image_gallery import router as image_admin_router # /admin/images gallery
-from app.routers.stores import router as stores_router     # /stores/*
 
-logger = logging.getLogger("uvicorn.error")
-os.makedirs(IMAGES_DIR, exist_ok=True)
+def _fmt(price) -> Optional[float]:
+    return None if price is None else round(float(price), 2)
 
-app = FastAPI(
-    title="Grocery App",
-    version="1.0.0",
-    docs_url="/docs" if ENABLE_DOCS else None,
-    redoc_url="/redoc" if ENABLE_DOCS else None,
-    openapi_url="/openapi.json" if ENABLE_DOCS else None,
-)
 
-# -------- DEV traceback middleware (keeps full stack in logs) --------
-class TraceLogMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
+# ----------------------------- LIST (paged) -----------------------------
+@router.get("/products")
+@throttle(limit=120, window=60)
+async def list_products(
+    request: Request,
+    q: Optional[str] = Query("", description="Search by product name (uses products + optional aliases)"),
+    offset: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=200),
+):
+    """
+    Returns one row per product (name+brand+size_text), aggregated over prices.
+    Only products that actually have at least one price row are included.
+    NOTE: No references to prices.image_url to remain schema-agnostic.
+    """
+    limit = min(int(limit), MAX_LIMIT)
+    like = f"%{q.strip()}%" if q else "%"
+
+    # With aliases
+    SQL_COUNT_WITH_ALIASES = """
+      SELECT COUNT(*) FROM (
+        SELECT 1
+        FROM prices p
+        JOIN products pr ON pr.id = p.product_id
+        WHERE
+          LOWER(pr.name) LIKE LOWER($1)
+          OR EXISTS (
+            SELECT 1 FROM product_aliases a
+            WHERE a.product_id = pr.id AND LOWER(a.alias) LIKE LOWER($1)
+          )
+        GROUP BY pr.name, COALESCE(pr.brand,''), COALESCE(pr.size_text,'')
+      ) t
+    """
+
+    SQL_PAGE_WITH_ALIASES = """
+      WITH grouped AS (
+        SELECT
+          pr.name                           AS product,
+          COALESCE(pr.brand,'')             AS brand,
+          COALESCE(pr.size_text,'')         AS size_text,
+          MIN(p.price)                      AS min_price,
+          MAX(p.price)                      AS max_price,
+          COUNT(DISTINCT p.store_id)        AS store_count
+        FROM prices p
+        JOIN products pr ON pr.id = p.product_id
+        WHERE
+          LOWER(pr.name) LIKE LOWER($1)
+          OR EXISTS (
+            SELECT 1 FROM product_aliases a
+            WHERE a.product_id = pr.id AND LOWER(a.alias) LIKE LOWER($1)
+          )
+        GROUP BY pr.name, COALESCE(pr.brand,''), COALESCE(pr.size_text,'')
+      )
+      SELECT *
+      FROM grouped
+      ORDER BY lower(product), lower(brand), lower(size_text)
+      OFFSET $2
+      LIMIT  $3
+    """
+
+    # Fallbacks when product_aliases table is missing
+    SQL_COUNT_NO_ALIASES = """
+      SELECT COUNT(*) FROM (
+        SELECT 1
+        FROM prices p
+        JOIN products pr ON pr.id = p.product_id
+        WHERE LOWER(pr.name) LIKE LOWER($1)
+        GROUP BY pr.name, COALESCE(pr.brand,''), COALESCE(pr.size_text,'')
+      ) t
+    """
+
+    SQL_PAGE_NO_ALIASES = """
+      WITH grouped AS (
+        SELECT
+          pr.name                           AS product,
+          COALESCE(pr.brand,'')             AS brand,
+          COALESCE(pr.size_text,'')         AS size_text,
+          MIN(p.price)                      AS min_price,
+          MAX(p.price)                      AS max_price,
+          COUNT(DISTINCT p.store_id)        AS store_count
+        FROM prices p
+        JOIN products pr ON pr.id = p.product_id
+        WHERE LOWER(pr.name) LIKE LOWER($1)
+        GROUP BY pr.name, COALESCE(pr.brand,''), COALESCE(pr.size_text,'')
+      )
+      SELECT *
+      FROM grouped
+      ORDER BY lower(product), lower(brand), lower(size_text)
+      OFFSET $2
+      LIMIT  $3
+    """
+
+    async with request.app.state.db.acquire() as conn:
         try:
-            return await call_next(request)
-        except Exception:
-            logger.error("\n===== UNCAUGHT EXCEPTION =====")
-            logger.error("Path: %s %s", request.method, request.url.path)
-            logger.error(traceback.format_exc())
-            logger.error("===== END TRACE =====\n")
-            raise
+            total = await conn.fetchval(SQL_COUNT_WITH_ALIASES, like) or 0
+            rows = await conn.fetch(SQL_PAGE_WITH_ALIASES, like, offset, limit)
+        except pgerr.UndefinedTableError:
+            total = await conn.fetchval(SQL_COUNT_NO_ALIASES, like) or 0
+            rows = await conn.fetch(SQL_PAGE_NO_ALIASES, like, offset, limit)
 
-app.add_middleware(TraceLogMiddleware)
-# ---------------------------------------------------------------------
+    items = [
+        {
+            "product": r["product"],
+            "brand": r["brand"],
+            "size_text": r["size_text"],
+            "min_price": _fmt(r["min_price"]),
+            "max_price": _fmt(r["max_price"]),
+            "store_count": r["store_count"],
+            # Keep the field for UI consistency; value may be None
+            "image_url": None,
+        }
+        for r in rows
+    ]
+    return {"total": total, "offset": offset, "limit": limit, "items": items}
 
-# Static + security/cache headers
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-app.middleware("http")(security_and_cache_headers)
 
-# CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=ALLOW_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"],
-    allow_headers=["Authorization", "Content-Type"],
-)
+# ----------------------------- LEGACY SUGGESTIONS (with image) -----------------------------
+@router.get("/search-products")
+@throttle(limit=30, window=60)
+async def search_products_legacy(
+    request: Request,
+    query: str = Query(..., min_length=2),
+):
+    """
+    Legacy suggestions for typeahead. Image is omitted if your schema has no image source.
+    """
+    q = query.strip()
+    if not q or set(q) <= {"%", "*"}:
+        raise HTTPException(status_code=400, detail="Query too broad")
+    like = f"%{q}%"
 
-# Docs basic auth (only if docs are enabled)
-if ENABLE_DOCS:
-    from settings import SWAGGER_USERNAME, SWAGGER_PASSWORD
-    app.add_middleware(SwaggerAuthMiddleware, username=SWAGGER_USERNAME, password=SWAGGER_PASSWORD)
+    async with request.app.state.db.acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT pr.name AS name
+            FROM prices p
+            JOIN products pr ON pr.id = p.product_id
+            WHERE LOWER(pr.name) LIKE LOWER($1)
+            GROUP BY pr.name
+            ORDER BY lower(pr.name)
+            LIMIT 10
+            """,
+            like,
+        )
 
-# Rate limit
-app.add_middleware(RateLimitMiddleware, rate_per_min=RATE_PER_MIN, window=WINDOW, redis_url=REDIS_URL)
+    return [{"name": r["name"], "image": None} for r in rows]
 
-# ------------------------ DB pool ------------------------
-@app.on_event("startup")
-async def startup():
-    try:
-        app.state.db = await asyncpg.create_pool(DATABASE_URL, timeout=DB_CONNECT_TIMEOUT)
-        logger.info("✅ DB pool created")
-    except Exception as e:
-        app.state.db = None
-        logger.error(f"⚠️ Failed to connect to DB at startup: {e}")
 
-@app.on_event("shutdown")
-async def shutdown():
-    try:
-        if getattr(app.state, "db", None):
-            await app.state.db.close()
-            logger.info("🔌 DB pool closed")
-    except Exception as e:
-        logger.error(f"Shutdown error: {e}")
+# ----------------------------- NEW: TRIGRAM AUTOCOMPLETE -----------------------------
+@router.get("/products/search")
+@throttle(limit=60, window=60)
+async def products_search(
+    request: Request,
+    q: str = Query(..., min_length=1, max_length=64, description="Search text"),
+    limit: int = Query(10, ge=1, le=50),
+):
+    """
+    Autocomplete based on products.name (pg_trgm if available), with alias fallback.
+    """
+    term = q.strip()
+    if not term:
+        return []
 
-# ------------------------ Routers ------------------------
-# Expose at root (back-compat): /products, /compare, /stores, etc.
-app.include_router(auth_router)                # /auth/*
-app.include_router(compare_router)             # /compare
-app.include_router(products_router)            # /products, /products/search, /search-products
-app.include_router(upload_router)              # /upload-prices
-app.include_router(admin_router)               # /admin/*
-app.include_router(basket_history_router)      # /basket-history/*
-app.include_router(upload_image_router)        # /upload-image
-app.include_router(image_admin_router)         # /admin/images
-app.include_router(stores_router)              # /stores/*
+    SQL_TRGM_WITH_ALIASES = """
+    WITH input AS (SELECT $1::text AS q)
+    SELECT p.id, p.name
+    FROM products p
+    LEFT JOIN product_aliases a ON a.product_id = p.id
+    , input
+    WHERE
+           p.name ILIKE q || '%'
+        OR p.name % q
+        OR p.name ILIKE '%' || q || '%'
+        OR a.alias ILIKE q || '%'
+        OR a.alias % q
+        OR a.alias ILIKE '%' || q || '%'
+    GROUP BY p.id, p.name
+    ORDER BY
+      CASE WHEN p.name ILIKE q || '%' THEN 0 ELSE 1 END,
+      similarity(p.name, q) DESC,
+      p.name ASC
+    LIMIT $2
+    """
 
-# ALSO expose under /api/* (mobile client expects /api/products, /api/compare, etc.)
-api = APIRouter(prefix="/api")
-api.include_router(compare_router)             # /api/compare
-api.include_router(products_router)            # /api/products, /api/products/search, /api/search-products
-api.include_router(basket_history_router)      # /api/basket-history/*
-api.include_router(upload_image_router)        # /api/upload-image
-api.include_router(stores_router)              # /api/stores/*
-app.include_router(api)
+    SQL_TRGM_NO_ALIASES = """
+    WITH input AS (SELECT $1::text AS q)
+    SELECT p.id, p.name
+    FROM products p, input
+    WHERE
+           p.name ILIKE q || '%'
+        OR p.name % q
+        OR p.name ILIKE '%' || q || '%'
+    ORDER BY
+      CASE WHEN p.name ILIKE q || '%' THEN 0 ELSE 1 END,
+      similarity(p.name, q) DESC,
+      p.name ASC
+    LIMIT $2
+    """
 
-# ---------------- robots + health ----------------
-@app.get("/robots.txt", response_class=PlainTextResponse)
-async def robots():
-    return (
-        "User-agent: *\n"
-        "Disallow: /products\n"
-        "Disallow: /products/search\n"
-        "Disallow: /search-products\n"
-        "Disallow: /stores\n"
-        "Disallow: /compare\n"
-        "Disallow: /basket-history\n"
-        "Disallow: /api/upload-image\n"
-        "Disallow: /admin/images\n"
-    )
+    async with request.app.state.db.acquire() as conn:
+        try:
+            rows = await conn.fetch(SQL_TRGM_WITH_ALIASES, term, limit)
+        except (pgerr.UndefinedTableError, pgerr.UndefinedFunctionError):
+            try:
+                rows = await conn.fetch(SQL_TRGM_NO_ALIASES, term, limit)
+            except pgerr.UndefinedFunctionError:
+                rows = await conn.fetch(
+                    "SELECT id, name FROM products WHERE LOWER(name) LIKE LOWER($1) ORDER BY name LIMIT $2",
+                    f"%{term}%", limit,
+                )
 
-@app.get("/healthz", response_class=PlainTextResponse)
-async def healthz():
-    return "ok"
-
-# Optional request logging
-if LOG_REQUESTS:
-    @app.middleware("http")
-    async def _req_logger(request, call_next):
-        logger.info(f"➡ {request.method} {request.url.path} from {request.client.host if request.client else 'unknown'}")
-        resp = await call_next(request)
-        logger.info(f"⬅ {request.method} {request.url.path} -> {resp.status_code}")
-        return resp
-
-# ---------------- OpenAPI: default bearer auth ----------------
-from fastapi.openapi.utils import get_openapi
-from fastapi.security import HTTPBearer
-
-bearer_scheme = HTTPBearer()
-
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-    schema = get_openapi(
-        title="Grocery App",
-        version="1.0.0",
-        description="Compare prices, upload product data, and manage users",
-        routes=app.routes,
-    )
-    schema["components"]["securitySchemes"] = {
-        "BearerAuth": {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}
-    }
-    for path in schema["paths"].values():
-        for operation in path.values():
-            operation.setdefault("security", [{"BearerAuth": []}])
-    app.openapi_schema = schema
-    return app.openapi_schema
-
-app.openapi = custom_openapi
-
-# ---------------- Uvicorn entry ----------------
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("PORT", "8000")), reload=True, log_level="debug")
+    return [{"id": r["id"], "name": r["name"]} for r in rows]
