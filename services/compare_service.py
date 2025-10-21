@@ -89,7 +89,7 @@ async def _resolve_products(conn: asyncpg.Connection, names: List[str]) -> Dict[
     except (pgerr.UndefinedTableError, pgerr.UndefinedColumnError):
         rows = await conn.fetch(sql_products_only, keys)
 
-    by_norm: Dict[str, asyncpg.Record] = { _rv(r, "match_key"): r for r in rows }
+    by_norm: Dict[str, asyncpg.Record] = {_rv(r, "match_key"): r for r in rows}
 
     # EAN fallback for unresolved
     unresolved = [k for k in keys if k not in by_norm]
@@ -125,43 +125,75 @@ async def _candidate_stores(
     offset: int,
 ) -> List[asyncpg.Record]:
     """
-    Return stores within radius_km of (lat,lon) using haversine. If lat/lon
-    are None, return all stores ordered by id with NULL distance.
+    Return *physical* stores within radius_km of (lat,lon) using haversine,
+    excluding:
+      - any store used as a host (appears as host_store_id in store_host_map)
+      - any store flagged as online (stores.is_online = true)
+
+    If lat/lon are None, return all physical stores (NULL distance) with the same filters.
+
+    Safe fallback: if store_host_map doesn't exist, we still filter by is_online.
     """
-    if lat is None or lon is None:
+    # Common WHERE snippet – we format this into the queries below
+    host_and_online_filter = """
+      AND s.id NOT IN (SELECT DISTINCT host_store_id FROM store_host_map)
+      AND COALESCE(s.is_online, false) = false
+    """
+    online_only_filter = """
+      AND COALESCE(s.is_online, false) = false
+    """
+
+    async def _query_no_coords(_filter_sql: str) -> List[asyncpg.Record]:
         return await conn.fetch(
-            """
+            f"""
             SELECT id, name, chain, lat, lon, NULL::double precision AS distance_km
-            FROM stores
-            WHERE lat IS NOT NULL AND lon IS NOT NULL
+            FROM stores s
+            WHERE s.lat IS NOT NULL AND s.lon IS NOT NULL
+              {_filter_sql}
             ORDER BY id
             OFFSET $1 LIMIT $2
             """,
             int(offset), int(limit),
         )
 
-    # pure trig haversine (no extensions required)
-    sql2 = """
-    WITH params(lat,lon,radius_km) AS (VALUES ($1::float8, $2::float8, $3::float8)),
-    with_dist AS (
-      SELECT
-        s.id, s.name, s.chain, s.lat, s.lon,
-        2*6371*asin(
-          sqrt(
-            pow(sin(radians((s.lat - (SELECT lat FROM params))/2)),2) +
-            cos(radians((SELECT lat FROM params))) * cos(radians(s.lat)) *
-            pow(sin(radians((s.lon - (SELECT lon FROM params))/2)),2)
-          )
-        ) AS distance_km
-      FROM stores s
-      WHERE s.lat IS NOT NULL AND s.lon IS NOT NULL
-    )
-    SELECT * FROM with_dist
-    WHERE distance_km <= (SELECT radius_km FROM params)
-    ORDER BY distance_km, chain, name
-    OFFSET $4 LIMIT $5;
-    """
-    return await conn.fetch(sql2, float(lat), float(lon), float(radius_km), int(offset), int(limit))
+    async def _query_haversine(_filter_sql: str) -> List[asyncpg.Record]:
+        return await conn.fetch(
+            f"""
+            WITH params(lat,lon,radius_km) AS (VALUES ($1::float8, $2::float8, $3::float8)),
+            with_dist AS (
+              SELECT
+                s.id, s.name, s.chain, s.lat, s.lon,
+                2*6371*asin(
+                  sqrt(
+                    pow(sin(radians((s.lat - (SELECT lat FROM params))/2)),2) +
+                    cos(radians((SELECT lat FROM params))) * cos(radians(s.lat)) *
+                    pow(sin(radians((s.lon - (SELECT lon FROM params))/2)),2)
+                  )
+                ) AS distance_km
+              FROM stores s
+              WHERE s.lat IS NOT NULL AND s.lon IS NOT NULL
+                {_filter_sql}
+            )
+            SELECT * FROM with_dist
+            WHERE distance_km <= (SELECT radius_km FROM params)
+            ORDER BY distance_km, chain, name
+            OFFSET $4 LIMIT $5;
+            """,
+            float(lat), float(lon), float(radius_km), int(offset), int(limit),
+        )
+
+    # Choose path & handle fallback if store_host_map is missing
+    if lat is None or lon is None:
+        try:
+            return await _query_no_coords(host_and_online_filter)
+        except (pgerr.UndefinedTableError, pgerr.UndefinedObjectError):
+            # store_host_map missing – filter only online
+            return await _query_no_coords(online_only_filter)
+
+    try:
+        return await _query_haversine(host_and_online_filter)
+    except (pgerr.UndefinedTableError, pgerr.UndefinedObjectError):
+        return await _query_haversine(online_only_filter)
 
 
 # ---------------- prices (effective) ----------------
