@@ -202,38 +202,35 @@ async def products_search(
     if not term:
         return []
 
+    # ---- Fixed versions: no CTE, use $1 directly ----
     SQL_TRGM_WITH_ALIASES = """
-    WITH input AS (SELECT $1::text AS q)
     SELECT p.id, p.name
     FROM products p
     LEFT JOIN product_aliases a ON a.product_id = p.id
-    , input
-    WHERE
-           p.name ILIKE q || '%'
-        OR p.name % q
-        OR p.name ILIKE '%' || q || '%'
-        OR a.alias ILIKE q || '%'
-        OR a.alias % q
-        OR a.alias ILIKE '%' || q || '%'
+    WHERE      p.name ILIKE $1 || '%'
+            OR p.name % $1
+            OR p.name ILIKE '%' || $1 || '%'
+            OR a.alias ILIKE $1 || '%'
+            OR a.alias % $1
+            OR a.alias ILIKE '%' || $1 || '%'
     GROUP BY p.id, p.name
     ORDER BY
-      CASE WHEN p.name ILIKE q || '%' THEN 0 ELSE 1 END,
-      similarity(p.name, q) DESC,
+      CASE WHEN p.name ILIKE $1 || '%' THEN 0 ELSE 1 END,
+      similarity(p.name, $1) DESC,
       p.name ASC
     LIMIT $2
     """
 
     SQL_TRGM_NO_ALIASES = """
-    WITH input AS (SELECT $1::text AS q)
     SELECT p.id, p.name
-    FROM products p, input
-    WHERE
-           p.name ILIKE q || '%'
-        OR p.name % q
-        OR p.name ILIKE '%' || q || '%'
+    FROM products p
+    WHERE      p.name ILIKE $1 || '%'
+            OR p.name % $1
+            OR p.name ILIKE '%' || $1 || '%'
+    GROUP BY p.id, p.name
     ORDER BY
-      CASE WHEN p.name ILIKE q || '%' THEN 0 ELSE 1 END,
-      similarity(p.name, q) DESC,
+      CASE WHEN p.name ILIKE $1 || '%' THEN 0 ELSE 1 END,
+      similarity(p.name, $1) DESC,
       p.name ASC
     LIMIT $2
     """
