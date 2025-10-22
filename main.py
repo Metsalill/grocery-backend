@@ -4,6 +4,7 @@ import sys
 import logging
 import asyncpg
 import traceback
+import inspect  # <- for runtime signature logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
@@ -100,6 +101,13 @@ async def startup():
     except Exception as e:
         app.state.db = None
         logger.error(f"⚠️ Failed to connect to DB at startup: {e}")
+
+    # Log compare service signature so we always know what it expects
+    try:
+        from services.compare_service import compare_basket_service
+        logger.info("compare_basket_service signature: %s", inspect.signature(compare_basket_service))
+    except Exception as e:
+        logger.warning("Could not introspect compare_basket_service signature: %s", e)
 
 @app.on_event("shutdown")
 async def shutdown():
