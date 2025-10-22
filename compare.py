@@ -13,7 +13,7 @@ router = APIRouter()
 MAX_ITEMS = 50
 MIN_RADIUS = 0.1
 MAX_RADIUS = 15.0
-MAX_STORES = 200
+MAX_STORES = 50
 
 
 # --------- Pydantic models (public API) ----------
