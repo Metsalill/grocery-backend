@@ -1,44 +1,58 @@
 # compare.py
-from __future__ import annotations
-
-from typing import Any, Dict, List, Tuple
-
-from fastapi import APIRouter, Body, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request
+from pydantic import BaseModel, confloat, conint
+from typing import List, Tuple, Optional, Dict, Any
 
 from utils.throttle import throttle
 from services.compare_service import compare_basket_service
 
-# Expose /api/compare (mobile calls this path)
-router = APIRouter(prefix="/api", tags=["compare"])
+# single router object; we’ll register two paths on it (/compare and /api/compare)
+router = APIRouter()
 
-# ---- server-side caps / sane defaults ----
+# ---- server-side caps ----
 MAX_ITEMS = 50
 MIN_RADIUS = 0.1
 MAX_RADIUS = 15.0
 MAX_STORES = 200
 
 
+# --------- Pydantic models (public API) ----------
+class GroceryItem(BaseModel):
+    product: str
+    quantity: conint(ge=1) = 1
+
+
+class GroceryList(BaseModel):
+    items: List[GroceryItem]
+
+
+class CompareRequest(BaseModel):
+    grocery_list: GroceryList
+    # optional: app may omit and let backend do non-geo candidate list
+    lat: Optional[float] = None
+    lon: Optional[float] = None
+    radius_km: confloat(ge=MIN_RADIUS, le=MAX_RADIUS) = 2.0
+    limit_stores: conint(ge=1, le=MAX_STORES) = 50
+    offset_stores: conint(ge=0) = 0
+    include_lines: bool = True
+    require_all_items: bool = True
+
+
 # --------- Backward-compat shim (for basket_history.py etc.) ----------
 async def compute_compare(
-    pool: Any,
+    pool,  # asyncpg.Pool
     items: List[Tuple[str, int]],
-    user_lat: float,
-    user_lon: float,
+    user_lat: Optional[float],
+    user_lon: Optional[float],
     radius_km: float,
 ):
     """
-    Legacy helper that builds a request body and forwards to the new service.
+    Delegates to compare_basket_service so older code still works.
     """
     body: Dict[str, Any] = {
-        "grocery_list": {
-            "items": [
-                {"product": p.strip(), "quantity": int(q)}
-                for (p, q) in items
-                if isinstance(p, str) and p.strip()
-            ]
-        },
-        "lat": float(user_lat),
-        "lon": float(user_lon),
+        "grocery_list": {"items": [{"product": n, "quantity": q} for n, q in items]},
+        "lat": user_lat,
+        "lon": user_lon,
         "radius_km": float(max(MIN_RADIUS, min(MAX_RADIUS, radius_km))),
         "limit_stores": 50,
         "offset_stores": 0,
@@ -48,69 +62,62 @@ async def compute_compare(
     return await compare_basket_service(pool, body)
 
 
-# --------- Public API endpoint (/api/compare) ----------
-@router.post("/compare")
-@throttle(limit=60, window=60)
-async def compare_basket(
-    request: Request,
-    body: Dict[str, Any] = Body(..., description="Basket compare payload"),
-):
+# --------- Public API endpoint (registered on /compare and /api/compare) ----------
+@throttle(limit=30, window=60)
+async def _compare_handler(request: Request, body: CompareRequest):
     """
-    Proxy endpoint that validates input lightly and forwards to compare_basket_service.
-
-    Expected body (keys optional except grocery_list.items):
-    {
-      "grocery_list": { "items": [ { "product": "Nutella 400g", "quantity": 1 }, ... ] },
-      "lat": 59.43,                // optional; service can work without
-      "lon": 24.75,                // optional; service can work without
-      "radius_km": 2.0,            // [0.1 .. 15.0]
-      "limit_stores": 50,          // <= 200
-      "offset_stores": 0,
-      "include_lines": false,
-      "require_all_items": false
-    }
+    Compare a basket across nearby stores.
     """
-    db = getattr(request.app.state, "db", None)
-    if db is None:
-        raise HTTPException(status_code=503, detail="DB not ready")
-
-    if not isinstance(body, dict):
-        raise HTTPException(status_code=400, detail="Invalid JSON")
-
-    # Basic basket validation & caps
-    gl = (body.get("grocery_list") or {}).get("items") or []
-    if not isinstance(gl, list) or not gl:
+    # basic basket validation
+    if not body.grocery_list.items:
         raise HTTPException(status_code=400, detail="Basket is empty")
-
-    if len(gl) > MAX_ITEMS:
+    if len(body.grocery_list.items) > MAX_ITEMS:
         raise HTTPException(status_code=400, detail=f"Basket too large (>{MAX_ITEMS} items)")
 
-    # Clamp optional knobs if present
-    if "radius_km" in body:
-        try:
-            r = float(body["radius_km"])
-            body["radius_km"] = max(MIN_RADIUS, min(MAX_RADIUS, r))
-        except Exception:
-            body["radius_km"] = 2.0
+    items_tuples: List[Tuple[str, int]] = [
+        (it.product.strip(), int(it.quantity))
+        for it in body.grocery_list.items
+        if isinstance(it.product, str) and it.product.strip()
+    ]
+    if not items_tuples:
+        raise HTTPException(status_code=400, detail="All product names are empty")
 
-    if "limit_stores" in body:
-        try:
-            body["limit_stores"] = max(1, min(MAX_STORES, int(body["limit_stores"])))
-        except Exception:
-            body["limit_stores"] = 50
+    pool = request.app.state.db
+    if pool is None:
+        raise HTTPException(status_code=500, detail="DB not ready")
 
-    if "offset_stores" in body:
-        try:
-            body["offset_stores"] = max(0, int(body["offset_stores"]))
-        except Exception:
-            body["offset_stores"] = 0
+    # clamp server-controlled knobs
+    radius = float(max(MIN_RADIUS, min(MAX_RADIUS, float(body.radius_km))))
+    limit_stores = int(max(1, min(MAX_STORES, int(body.limit_stores))))
+    offset_stores = int(max(0, int(body.offset_stores)))
+
+    svc_body: Dict[str, Any] = {
+        "grocery_list": {"items": [{"product": n, "quantity": q} for n, q in items_tuples]},
+        "lat": body.lat,   # may be None -> service handles
+        "lon": body.lon,   # may be None -> service handles
+        "radius_km": radius,
+        "limit_stores": limit_stores,
+        "offset_stores": offset_stores,
+        "include_lines": bool(body.include_lines),
+        "require_all_items": bool(body.require_all_items),
+    }
 
     try:
-        # IMPORTANT: pass the DB pool/conn as the first arg; body as-is
-        result = await compare_basket_service(db, body)
-        return result
+        payload = await compare_basket_service(pool, svc_body)
+        return {
+            "results": payload.get("results", []),
+            "totals": payload.get("totals", {}),
+            "stores": payload.get("stores", []),
+            "radius_km": payload.get("radius_km"),
+            "missing_products": payload.get("missing_products", []),
+        }
     except HTTPException:
         raise
     except Exception as e:
-        # Tracebacks are logged by TraceLogMiddleware; surface concise message to client
-        raise HTTPException(status_code=500, detail=f"Compare failed: {e}")
+        # concise error; detailed stack is logged by middleware
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# Register the same handler on BOTH paths so app calls to /api/compare also work.
+router.add_api_route("/compare", _compare_handler, methods=["POST"])
+router.add_api_route("/api/compare", _compare_handler, methods=["POST"])
