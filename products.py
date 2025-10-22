@@ -1,6 +1,5 @@
-# products.py
 from fastapi import APIRouter, Request, Query, HTTPException
-from typing import Optional, List, Dict, Any
+from typing import Optional
 from asyncpg import exceptions as pgerr
 
 from utils.throttle import throttle
@@ -14,30 +13,30 @@ def _fmt(price) -> Optional[float]:
     return None if price is None else round(float(price), 2)
 
 
-# -------------------------------------------------------------------
-# LIST (paged) — one row per logical product (name+brand+size_text)
-# NOTE: no image fields are referenced; image_url is returned as null.
-# -------------------------------------------------------------------
+# ----------------------------- LIST (paged) -----------------------------
 @router.get("/products")
 @throttle(limit=120, window=60)
 async def list_products(
     request: Request,
     q: Optional[str] = Query(
         "",
-        description="Search by product name (products.name + optional aliases)",
+        description="Search by product name (uses products + optional aliases)",
     ),
     offset: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=200),
 ):
     """
-    Returns one row per product (name, brand, size_text) aggregated over prices.
-    Only products that have at least one price row are included.
-    """
-    like = f"%{(q or '').strip()}%" if q else "%"
-    limit = min(int(limit), MAX_LIMIT)
+    Returns one row per product (name+brand+size_text), aggregated over prices.
+    Only products that actually have at least one price row are included.
 
-    # Prefer matching products + aliases if aliases table exists;
-    # otherwise fall back to products-only queries.
+    Notes:
+    - This version **does not** reference any image column (none exist yet).
+      It returns image_url = null so the app can show a placeholder.
+    - If product_aliases table is missing, we fall back transparently.
+    """
+    limit = min(int(limit), MAX_LIMIT)
+    like = f"%{(q or '').strip()}%" if q is not None else "%"
+
     SQL_COUNT_WITH_ALIASES = """
       SELECT COUNT(*) FROM (
         SELECT 1
@@ -56,12 +55,12 @@ async def list_products(
     SQL_PAGE_WITH_ALIASES = """
       WITH grouped AS (
         SELECT
-          pr.name                         AS product,
-          COALESCE(pr.brand,'')           AS brand,
-          COALESCE(pr.size_text,'')       AS size_text,
-          MIN(p.price)                    AS min_price,
-          MAX(p.price)                    AS max_price,
-          COUNT(DISTINCT p.store_id)      AS store_count
+          pr.name                                 AS product,
+          COALESCE(pr.brand,'')                   AS brand,
+          COALESCE(pr.size_text,'')               AS size_text,
+          MIN(p.price)                            AS min_price,
+          MAX(p.price)                            AS max_price,
+          COUNT(DISTINCT p.store_id)              AS store_count
         FROM prices p
         JOIN products pr ON pr.id = p.product_id
         WHERE
@@ -72,7 +71,14 @@ async def list_products(
           )
         GROUP BY pr.name, COALESCE(pr.brand,''), COALESCE(pr.size_text,'')
       )
-      SELECT product, brand, size_text, min_price, max_price, store_count
+      SELECT
+        product,
+        brand,
+        size_text,
+        min_price,
+        max_price,
+        store_count,
+        NULL::text AS image_url
       FROM grouped
       ORDER BY lower(product), lower(brand), lower(size_text)
       OFFSET $2
@@ -92,18 +98,25 @@ async def list_products(
     SQL_PAGE_NO_ALIASES = """
       WITH grouped AS (
         SELECT
-          pr.name                         AS product,
-          COALESCE(pr.brand,'')           AS brand,
-          COALESCE(pr.size_text,'')       AS size_text,
-          MIN(p.price)                    AS min_price,
-          MAX(p.price)                    AS max_price,
-          COUNT(DISTINCT p.store_id)      AS store_count
+          pr.name                                 AS product,
+          COALESCE(pr.brand,'')                   AS brand,
+          COALESCE(pr.size_text,'')               AS size_text,
+          MIN(p.price)                            AS min_price,
+          MAX(p.price)                            AS max_price,
+          COUNT(DISTINCT p.store_id)              AS store_count
         FROM prices p
         JOIN products pr ON pr.id = p.product_id
         WHERE LOWER(pr.name) LIKE LOWER($1)
         GROUP BY pr.name, COALESCE(pr.brand,''), COALESCE(pr.size_text,'')
       )
-      SELECT product, brand, size_text, min_price, max_price, store_count
+      SELECT
+        product,
+        brand,
+        size_text,
+        min_price,
+        max_price,
+        store_count,
+        NULL::text AS image_url
       FROM grouped
       ORDER BY lower(product), lower(brand), lower(size_text)
       OFFSET $2
@@ -115,6 +128,7 @@ async def list_products(
             total = await conn.fetchval(SQL_COUNT_WITH_ALIASES, like) or 0
             rows = await conn.fetch(SQL_PAGE_WITH_ALIASES, like, offset, limit)
         except pgerr.UndefinedTableError:
+            # product_aliases doesn’t exist here – proceed without it
             total = await conn.fetchval(SQL_COUNT_NO_ALIASES, like) or 0
             rows = await conn.fetch(SQL_PAGE_NO_ALIASES, like, offset, limit)
 
@@ -125,18 +139,16 @@ async def list_products(
             "size_text": r["size_text"],
             "min_price": _fmt(r["min_price"]),
             "max_price": _fmt(r["max_price"]),
-            "store_count": int(r["store_count"]),
-            "image_url": None,  # image support will be added later
+            "store_count": r["store_count"],
+            "image_url": r["image_url"],  # always null for now
         }
         for r in rows
     ]
 
-    return {"total": int(total), "offset": int(offset), "limit": int(limit), "items": items}
+    return {"total": total, "offset": offset, "limit": limit, "items": items}
 
 
-# -------------------------------------------------------------------
-# Legacy suggestions endpoint — no images; returns minimal payload.
-# -------------------------------------------------------------------
+# ----------------------------- LEGACY SUGGESTIONS (with image=null) -----------------------------
 @router.get("/search-products")
 @throttle(limit=30, window=60)
 async def search_products_legacy(
@@ -144,10 +156,10 @@ async def search_products_legacy(
     query: str = Query(..., min_length=2),
 ):
     """
-    Simple LIKE suggestions (products with at least one price).
-    Returns list of { name, image } where image is null (for now).
+    Legacy suggestions for typeahead. Only hits products that have prices.
+    Returns [{name, image=null}, ...].
     """
-    q = (query or "").strip()
+    q = query.strip()
     if not q or set(q) <= {"%", "*"}:
         raise HTTPException(status_code=400, detail="Query too broad")
     like = f"%{q}%"
@@ -155,23 +167,26 @@ async def search_products_legacy(
     async with request.app.state.db.acquire() as conn:
         rows = await conn.fetch(
             """
-            SELECT pr.name AS name
-            FROM prices p
-            JOIN products pr ON pr.id = p.product_id
-            WHERE LOWER(pr.name) LIKE LOWER($1)
-            GROUP BY pr.name
-            ORDER BY lower(pr.name)
+            WITH base AS (
+              SELECT pr.name AS name
+              FROM prices p
+              JOIN products pr ON pr.id = p.product_id
+              WHERE LOWER(pr.name) LIKE LOWER($1)
+              GROUP BY pr.name
+            )
+            SELECT name
+            FROM base
+            ORDER BY lower(name)
             LIMIT 10
             """,
             like,
         )
 
+    # image is null until we wire up CF images
     return [{"name": r["name"], "image": None} for r in rows]
 
 
-# -------------------------------------------------------------------
-# Trigram (or LIKE) autocomplete for the typeahead.
-# -------------------------------------------------------------------
+# ----------------------------- NEW: TRIGRAM AUTOCOMPLETE -----------------------------
 @router.get("/products/search")
 @throttle(limit=60, window=60)
 async def products_search(
@@ -180,56 +195,58 @@ async def products_search(
     limit: int = Query(10, ge=1, le=50),
 ):
     """
-    Autocomplete based on products.name, optionally product_aliases.alias,
-    using pg_trgm when available; falls back to LIKE if needed.
+    Autocomplete based on products.name, with pg_trgm + prefix boost when available.
+    Also matches product_aliases.alias when available. Falls back to LIKE.
     """
-    term = (q or "").strip()
+    term = q.strip()
     if not term:
         return []
 
     SQL_TRGM_WITH_ALIASES = """
-      WITH input AS (SELECT $1::text AS q)
-      SELECT p.id, p.name
-      FROM products p
-      LEFT JOIN product_aliases a ON a.product_id = p.id
-      , input
-      WHERE
-             p.name ILIKE q || '%'
-          OR p.name % q
-          OR p.name ILIKE '%' || q || '%'
-          OR a.alias ILIKE q || '%'
-          OR a.alias % q
-          OR a.alias ILIKE '%' || q || '%'
-      GROUP BY p.id, p.name
-      ORDER BY
-        CASE WHEN p.name ILIKE q || '%' THEN 0 ELSE 1 END,
-        similarity(p.name, q) DESC,
-        p.name ASC
-      LIMIT $2
+    WITH input AS (SELECT $1::text AS q)
+    SELECT p.id, p.name
+    FROM products p
+    LEFT JOIN product_aliases a ON a.product_id = p.id
+    , input
+    WHERE
+           p.name ILIKE q || '%'
+        OR p.name % q
+        OR p.name ILIKE '%' || q || '%'
+        OR a.alias ILIKE q || '%'
+        OR a.alias % q
+        OR a.alias ILIKE '%' || q || '%'
+    GROUP BY p.id, p.name
+    ORDER BY
+      CASE WHEN p.name ILIKE q || '%' THEN 0 ELSE 1 END,
+      similarity(p.name, q) DESC,
+      p.name ASC
+    LIMIT $2
     """
 
     SQL_TRGM_NO_ALIASES = """
-      WITH input AS (SELECT $1::text AS q)
-      SELECT p.id, p.name
-      FROM products p, input
-      WHERE
-             p.name ILIKE q || '%'
-          OR p.name % q
-          OR p.name ILIKE '%' || q || '%'
-      ORDER BY
-        CASE WHEN p.name ILIKE q || '%' THEN 0 ELSE 1 END,
-        similarity(p.name, q) DESC,
-        p.name ASC
-      LIMIT $2
+    WITH input AS (SELECT $1::text AS q)
+    SELECT p.id, p.name
+    FROM products p, input
+    WHERE
+           p.name ILIKE q || '%'
+        OR p.name % q
+        OR p.name ILIKE '%' || q || '%'
+    ORDER BY
+      CASE WHEN p.name ILIKE q || '%' THEN 0 ELSE 1 END,
+      similarity(p.name, q) DESC,
+      p.name ASC
+    LIMIT $2
     """
 
     async with request.app.state.db.acquire() as conn:
         try:
             rows = await conn.fetch(SQL_TRGM_WITH_ALIASES, term, limit)
         except (pgerr.UndefinedTableError, pgerr.UndefinedFunctionError):
+            # missing product_aliases or pg_trgm
             try:
                 rows = await conn.fetch(SQL_TRGM_NO_ALIASES, term, limit)
             except pgerr.UndefinedFunctionError:
+                # final fallback: plain LIKE
                 rows = await conn.fetch(
                     """
                     SELECT id, name
@@ -238,7 +255,8 @@ async def products_search(
                     ORDER BY name
                     LIMIT $2
                     """,
-                    f"%{term}%", limit,
+                    f"%{term}%",
+                    limit,
                 )
 
     return [{"id": r["id"], "name": r["name"]} for r in rows]
