@@ -1,132 +1,116 @@
 # compare.py
-from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel, confloat, conint
-from typing import List, Tuple
+from __future__ import annotations
 
-# import throttle decorator from utils instead of main
+from typing import Any, Dict, List, Tuple
+
+from fastapi import APIRouter, Body, HTTPException, Request
+
 from utils.throttle import throttle
-
-# SQL-first service (does the heavy lifting incl. geo filtering)
 from services.compare_service import compare_basket_service
 
-router = APIRouter(prefix="")  # route stays /compare
+# Expose /api/compare (mobile calls this path)
+router = APIRouter(prefix="/api", tags=["compare"])
 
-# ---- server-side caps ----
+# ---- server-side caps / sane defaults ----
 MAX_ITEMS = 50
 MIN_RADIUS = 0.1
 MAX_RADIUS = 15.0
 MAX_STORES = 200
 
 
-# --------- Pydantic models (public API) ----------
-class GroceryItem(BaseModel):
-    product: str
-    quantity: conint(ge=1) = 1
-
-
-class GroceryList(BaseModel):
-    items: List[GroceryItem]
-
-
-class CompareRequest(BaseModel):
-    grocery_list: GroceryList
-    lat: float
-    lon: float
-    radius_km: confloat(ge=MIN_RADIUS, le=MAX_RADIUS) = 2.0
-    # new optional tuning knobs (passed through to service)
-    limit_stores: conint(ge=1, le=MAX_STORES) = 50
-    offset_stores: conint(ge=0) = 0
-    include_lines: bool = True
-    require_all_items: bool = True  # when True, stores missing any line may rank lower (service decides)
-
-
 # --------- Backward-compat shim (for basket_history.py etc.) ----------
 async def compute_compare(
-    pool,
+    pool: Any,
     items: List[Tuple[str, int]],
     user_lat: float,
     user_lon: float,
     radius_km: float,
 ):
     """
-    Backward-compatibility wrapper.
-    Delegates to compare_basket_service so older code (like basket_history.py) still works.
+    Legacy helper that builds a request body and forwards to the new service.
     """
-    return await compare_basket_service(
-        pool=pool,
-        items=items,
-        lat=float(user_lat),
-        lon=float(user_lon),
-        radius_km=float(radius_km),
-        limit_stores=50,
-        offset_stores=0,
-        include_lines=True,
-        require_all_items=True,
-    )
+    body: Dict[str, Any] = {
+        "grocery_list": {
+            "items": [
+                {"product": p.strip(), "quantity": int(q)}
+                for (p, q) in items
+                if isinstance(p, str) and p.strip()
+            ]
+        },
+        "lat": float(user_lat),
+        "lon": float(user_lon),
+        "radius_km": float(max(MIN_RADIUS, min(MAX_RADIUS, radius_km))),
+        "limit_stores": 50,
+        "offset_stores": 0,
+        "include_lines": True,
+        "require_all_items": True,
+    }
+    return await compare_basket_service(pool, body)
 
 
-# --------- Public API endpoint ----------
+# --------- Public API endpoint (/api/compare) ----------
 @router.post("/compare")
-@throttle(limit=30, window=60)
-async def compare_basket(body: CompareRequest, request: Request):
+@throttle(limit=60, window=60)
+async def compare_basket(
+    request: Request,
+    body: Dict[str, Any] = Body(..., description="Basket compare payload"),
+):
     """
-    Compare a basket across nearby stores.
+    Proxy endpoint that validates input lightly and forwards to compare_basket_service.
 
-    Request:
-      - grocery_list.items: [{ product: string, quantity: int >= 1 }]
-      - lat, lon: user location
-      - radius_km: search radius (km)
-      - limit_stores, offset_stores: paging across candidate stores
-      - include_lines: include per-product line details in results
-      - require_all_items: hint to service for ranking behavior
-
-    Response:
-      - results: ranked per-store totals (and optional lines)
-      - totals: summary across results
-      - stores: candidate store metadata (id, name, chain, distance_km)
-      - radius_km: effective radius used
-      - missing_products: names not resolved in catalog
+    Expected body (keys optional except grocery_list.items):
+    {
+      "grocery_list": { "items": [ { "product": "Nutella 400g", "quantity": 1 }, ... ] },
+      "lat": 59.43,                // optional; service can work without
+      "lon": 24.75,                // optional; service can work without
+      "radius_km": 2.0,            // [0.1 .. 15.0]
+      "limit_stores": 50,          // <= 200
+      "offset_stores": 0,
+      "include_lines": false,
+      "require_all_items": false
+    }
     """
+    db = getattr(request.app.state, "db", None)
+    if db is None:
+        raise HTTPException(status_code=503, detail="DB not ready")
+
+    if not isinstance(body, dict):
+        raise HTTPException(status_code=400, detail="Invalid JSON")
+
+    # Basic basket validation & caps
+    gl = (body.get("grocery_list") or {}).get("items") or []
+    if not isinstance(gl, list) or not gl:
+        raise HTTPException(status_code=400, detail="Basket is empty")
+
+    if len(gl) > MAX_ITEMS:
+        raise HTTPException(status_code=400, detail=f"Basket too large (>{MAX_ITEMS} items)")
+
+    # Clamp optional knobs if present
+    if "radius_km" in body:
+        try:
+            r = float(body["radius_km"])
+            body["radius_km"] = max(MIN_RADIUS, min(MAX_RADIUS, r))
+        except Exception:
+            body["radius_km"] = 2.0
+
+    if "limit_stores" in body:
+        try:
+            body["limit_stores"] = max(1, min(MAX_STORES, int(body["limit_stores"])))
+        except Exception:
+            body["limit_stores"] = 50
+
+    if "offset_stores" in body:
+        try:
+            body["offset_stores"] = max(0, int(body["offset_stores"]))
+        except Exception:
+            body["offset_stores"] = 0
+
     try:
-        if not body.grocery_list.items:
-            raise HTTPException(status_code=400, detail="Basket is empty")
-        if len(body.grocery_list.items) > MAX_ITEMS:
-            raise HTTPException(status_code=400, detail=f"Basket too large (>{MAX_ITEMS} items)")
-
-        items_tuples: List[Tuple[str, int]] = [
-            (it.product.strip(), int(it.quantity))
-            for it in body.grocery_list.items
-            if isinstance(it.product, str) and it.product.strip()
-        ]
-        if not items_tuples:
-            raise HTTPException(status_code=400, detail="All product names are empty")
-
-        pool = request.app.state.db
-        if pool is None:
-            raise HTTPException(status_code=500, detail="DB not ready")
-
-        payload = await compare_basket_service(
-            pool=pool,
-            items=items_tuples,
-            lat=float(body.lat),
-            lon=float(body.lon),
-            radius_km=float(body.radius_km),
-            limit_stores=int(body.limit_stores),
-            offset_stores=int(body.offset_stores),
-            include_lines=bool(body.include_lines),
-            require_all_items=bool(body.require_all_items),
-        )
-
-        return {
-            "results": payload.get("results", []),
-            "totals": payload.get("totals", {}),
-            "stores": payload.get("stores", []),  # richer data (id, name, chain, distance_km)
-            "radius_km": payload.get("radius_km"),
-            "missing_products": payload.get("missing_products", []),
-        }
-
+        # IMPORTANT: pass the DB pool/conn as the first arg; body as-is
+        result = await compare_basket_service(db, body)
+        return result
     except HTTPException:
         raise
     except Exception as e:
-        # Surface concise error for client; detailed trace is logged by middleware
-        raise HTTPException(status_code=500, detail=str(e))
+        # Tracebacks are logged by TraceLogMiddleware; surface concise message to client
+        raise HTTPException(status_code=500, detail=f"Compare failed: {e}")
