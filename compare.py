@@ -64,19 +64,19 @@ async def compute_compare(
     radius_km: float,
 ):
     """
-    Backward-compatible wrapper that delegates to compare_basket_service
-    WITHOUT passing 'pool' (current deployed service doesn't accept it).
+    Backward-compatible wrapper that delegates to compare_basket_service.
+    IMPORTANT: call the service *positionally* (no keywords) and do NOT pass pool.
     """
-    radius_km = float(_clamp(float(radius_km), MIN_RADIUS, MAX_RADIUS))
+    r = float(_clamp(float(radius_km), MIN_RADIUS, MAX_RADIUS))
     return await compare_basket_service(
-        items=items,
-        lat=float(user_lat),
-        lon=float(user_lon),
-        radius_km=radius_km,
-        limit_stores=50,
-        offset_stores=0,
-        include_lines=True,
-        require_all_items=True,
+        items,
+        float(user_lat),
+        float(user_lon),
+        r,
+        50,      # limit_stores
+        0,       # offset_stores
+        True,    # include_lines
+        True,    # require_all_items
     )
 
 
@@ -97,31 +97,31 @@ async def compare_basket(body: CompareRequest, request: Request):
         if not items_tuples:
             raise HTTPException(status_code=400, detail="All product names are empty")
 
-        # Ensure DB pool exists (service may use app state internally even
-        # though current signature doesn't take 'pool')
+        # Ensure DB pool exists (service may use app state internally)
         if getattr(request.app.state, "db", None) is None:
             raise HTTPException(status_code=500, detail="DB not ready")
 
-        radius_km = float(_clamp(float(body.radius_km), MIN_RADIUS, MAX_RADIUS))
+        r = float(_clamp(float(body.radius_km), MIN_RADIUS, MAX_RADIUS))
         limit_stores = int(_clamp_int(int(body.limit_stores), 1, MAX_STORES))
         offset_stores = max(0, int(body.offset_stores))
 
+        # IMPORTANT: positional call — avoids 'unexpected keyword argument' errors
         payload = await compare_basket_service(
-            items=items_tuples,
-            lat=float(body.lat),
-            lon=float(body.lon),
-            radius_km=radius_km,
-            limit_stores=limit_stores,
-            offset_stores=offset_stores,
-            include_lines=bool(body.include_lines),
-            require_all_items=bool(body.require_all_items),
+            items_tuples,
+            float(body.lat),
+            float(body.lon),
+            r,
+            limit_stores,
+            offset_stores,
+            bool(body.include_lines),
+            bool(body.require_all_items),
         )
 
         return {
             "results": payload.get("results", []),
             "totals": payload.get("totals", {}),
             "stores": payload.get("stores", []),
-            "radius_km": payload.get("radius_km", radius_km),
+            "radius_km": payload.get("radius_km", r),
             "missing_products": payload.get("missing_products", []),
         }
 
