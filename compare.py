@@ -11,7 +11,7 @@ router = APIRouter(prefix="")  # route stays /compare
 # ---- server-side caps ----
 MAX_ITEMS = 50
 MIN_RADIUS = 0.1
-MAX_RADIUS = 15.0
+MAX_RADIUS = 50.0          # <— bumped from 15.0 to 50.0
 MAX_STORES = 50
 
 
@@ -105,7 +105,6 @@ async def compare_basket(body: CompareRequest, request: Request):
         limit_stores = int(_clamp_int(int(body.limit_stores), 1, MAX_STORES))
         offset_stores = max(0, int(body.offset_stores))
 
-        # The service wants a single dict payload:
         payload_in = {
             "items": items_tuples,
             "lat": float(body.lat),
@@ -117,7 +116,7 @@ async def compare_basket(body: CompareRequest, request: Request):
             "require_all_items": bool(body.require_all_items),
         }
 
-        # Call as: compare_basket_service(pool, payload_dict)
+        # Service signature: compare_basket_service(pool, payload_dict)
         payload_out = await compare_basket_service(pool, payload_in)
 
         return {
@@ -131,5 +130,4 @@ async def compare_basket(body: CompareRequest, request: Request):
     except HTTPException:
         raise
     except Exception as e:
-        # concise detail for client; full trace is logged by our middleware
         raise HTTPException(status_code=500, detail=str(e))
