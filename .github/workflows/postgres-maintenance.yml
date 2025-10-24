@@ -1,0 +1,44 @@
+name: Postgres maintenance (reindex + refresh collation)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  maintenance:
+    runs-on: ubuntu-latest
+    # Use Postgres image so psql is available
+    container:
+      image: postgres:16
+
+    steps:
+      - name: Reindex + refresh collation version
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+        run: |
+          set -e
+
+          if [ -z "$DATABASE_URL" ]; then
+            echo "DATABASE_URL_PUBLIC is empty. Add it in GitHub → Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+
+          echo "$DATABASE_URL" | sed -E 's#(.*://)(.*:.*)@(.*)/.*#Connecting to host: \3#g'
+
+          # Info
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT current_database() AS db, version();"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT name, setting FROM pg_settings WHERE name IN ('lc_collate','lc_ctype');"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT datname, datcollversion FROM pg_database WHERE datname=current_database();"
+
+          echo "---- Attempt REINDEX SCHEMA public CONCURRENTLY (may fail on some PG setups) ----"
+          if ! psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "REINDEX (VERBOSE, CONCURRENTLY) SCHEMA public;"; then
+            echo "CONCURRENTLY not supported or failed; falling back to non-concurrent REINDEX…"
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "REINDEX (VERBOSE) SCHEMA public;"
+          fi
+
+          # Refresh the recorded collation version for the current database
+          DBNAME=$(psql "$DATABASE_URL" -t -A -c 'SELECT current_database();')
+          echo "Refreshing collation version for database: $DBNAME"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "ALTER DATABASE \"$DBNAME\" REFRESH COLLATION VERSION;"
+
+          echo "---- After refresh ----"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "SELECT datname, datcollversion FROM pg_database WHERE datname=current_database();"
