@@ -4,7 +4,7 @@ from __future__ import annotations
 import asyncio
 import math
 from decimal import Decimal, ROUND_HALF_UP
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Iterable
 
 import asyncpg
 from asyncpg import exceptions as pgerr
@@ -24,12 +24,14 @@ def _norm(s: str) -> str:
 
 
 def _rv(r: asyncpg.Record, key: str) -> Any:
-    # record value getter with key existence check
+    """
+    Safe record value getter. asyncpg.Record lets you use both
+    dict-style and attribute-style. We'll try both.
+    """
     try:
         return r[key]
     except Exception:
-        # asyncpg.Record supports attributes too sometimes
-        return getattr(r, key)
+        return getattr(r, key, None)
 
 
 async def _acquire(conn_or_pool: Any) -> Tuple[asyncpg.Connection, bool]:
@@ -47,9 +49,20 @@ async def _acquire(conn_or_pool: Any) -> Tuple[asyncpg.Connection, bool]:
 
 
 # ---------------- product resolution ----------------
+#
+# Two paths now:
+#   1. We may get explicit product_id directly from the app.
+#   2. We may only get free-text names/EANs (legacy / suggestions).
+#
+# We'll support both. For #1 we just trust product_id and look up its
+# metadata by ID. For #2 we try to do fuzzy-ish resolution via aliases.
+#
 
 
-async def _resolve_products(conn: asyncpg.Connection, names: List[str]) -> Dict[str, asyncpg.Record]:
+async def _resolve_products_by_name(
+    conn: asyncpg.Connection,
+    names: List[str],
+) -> Dict[str, asyncpg.Record]:
     """
     Resolve user-provided product names (or EAN strings) to a product row.
     Prefers product_aliases -> products by normalized name; falls back to
@@ -111,6 +124,30 @@ async def _resolve_products(conn: asyncpg.Connection, names: List[str]) -> Dict[
             by_norm[_rv(r, "match_key")] = r
 
     return by_norm
+
+
+async def _fetch_products_by_id(
+    conn: asyncpg.Connection,
+    product_ids: Iterable[int],
+) -> Dict[int, asyncpg.Record]:
+    """
+    Fetch canonical product metadata for a set of product_ids.
+    Returns { product_id -> row }.
+    """
+    ids_list = sorted({int(pid) for pid in product_ids if pid is not None})
+    if not ids_list:
+        return {}
+
+    rows = await conn.fetch(
+        """
+        SELECT id, ean, name, size_text, net_qty, net_unit, pack_count
+        FROM products
+        WHERE id = ANY($1::int[])
+        """,
+        ids_list,
+    )
+    out: Dict[int, asyncpg.Record] = {int(_rv(r, "id")): r for r in rows}
+    return out
 
 
 # ---------------- stores ----------------
@@ -288,28 +325,81 @@ async def _latest_prices(
 
 
 # ---------------- main service ----------------
+#
+# We now support TWO request shapes:
+#
+# NEW SHAPE (from /compare endpoint via Flutter):
+#   body = {
+#     "items": [
+#       {"product": "Piim ALMA 2,5%, 0,5L", "quantity": 1, "product_id": 421264},
+#       {"product": "Ruks seemnepala Leib, 260g", "quantity": 2, "product_id": 422013},
+#       ...
+#     ],
+#     "lat": ...,
+#     "lon": ...,
+#     "radius_km": ...,
+#     "limit_stores": ...,
+#     "offset_stores": ...,
+#     "include_lines": ...,
+#     "require_all_items": ...
+#   }
+#
+# LEGACY SHAPE (from compute_compare / basket_history etc.):
+#   body = {
+#     "items": [
+#       ("Piim ALMA 2,5%, 0,5L", 1),
+#       ("Ruks seemnepala Leib, 260g", 2),
+#       ...
+#     ],
+#     "lat": ...,
+#     "lon": ...,
+#     "radius_km": ...,
+#     ...
+#   }
+#
+# SUPER LEGACY (older code paths we keep graceful fallback for):
+#   body = {
+#     "grocery_list": {
+#        "items": [
+#           {"product": "Piim...", "quantity": 1},
+#           ...
+#        ]
+#     },
+#     "lat": ...,
+#     "lon": ...
+#   }
+#
+# We'll normalize all of these into a single internal basket spec:
+#    basket_lines = [ { "pid": <int product_id>, "qty": <int> }, ... ]
+# and also collect metadata per pid (name/ean...) for line details.
+#
+
+
+def _as_int_or_none(v: Any) -> Optional[int]:
+    if v is None:
+        return None
+    if isinstance(v, int):
+        return v
+    if isinstance(v, float):
+        return int(v)
+    try:
+        return int(str(v))
+    except Exception:
+        return None
 
 
 async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any]:
     """
     Perform location-based basket comparison.
 
-    Body structure expected:
-    {
-      "grocery_list": { "items": [ { "product": "Nutella 400g", "quantity": 1 }, ... ] },
-      "lat": 59.4370,
-      "lon": 24.7536,
-      "radius_km": 8,
-      "limit_stores": 50,
-      "offset_stores": 0,
-      "include_lines": false,
-      "require_all_items": false
-    }
+    We accept multiple possible shapes (see big comment above),
+    normalize them, look up candidate stores and latest prices,
+    then compute totals / cheapest store, etc.
     """
     conn, should_release = await _acquire(db)
     try:
-        gl = (body or {}).get("grocery_list") or {}
-        items = gl.get("items") or []
+        # ---- 1. Extract request fields ----
+        # lat/lon/radius/etc.
         lat = body.get("lat")
         lon = body.get("lon")
         radius_km = float(body.get("radius_km") or 5.0)
@@ -318,16 +408,62 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
         include_lines = bool(body.get("include_lines") or False)
         require_all = bool(body.get("require_all_items") or False)
 
-        # --- normalize and collapse quantities per input key ---
-        wanted: Dict[str, int] = {}
-        for it in items:
-            name = _norm(str(it.get("product", "")))
-            if not name:
-                continue
-            qty = int(it.get("quantity") or 1)
-            wanted[name] = wanted.get(name, 0) + max(qty, 1)
+        # items can come in a few formats
+        # Prefer body["items"]; fallback to body["grocery_list"]["items"].
+        raw_items = body.get("items")
+        if raw_items is None and "grocery_list" in body:
+            gl = body.get("grocery_list") or {}
+            raw_items = gl.get("items")
 
-        if not wanted:
+        raw_items = raw_items or []
+
+        # ---- 2. Normalize items into dicts with product, quantity, product_id ----
+        normalized_items: List[Dict[str, Any]] = []
+
+        for it in raw_items:
+            # case A: modern dict {product, quantity, product_id?}
+            if isinstance(it, dict):
+                name = str(it.get("product", "") or "").strip()
+                if not name:
+                    continue
+                qty = int(it.get("quantity") or 1)
+                if qty <= 0:
+                    continue
+                pid = _as_int_or_none(it.get("product_id"))
+                normalized_items.append(
+                    {
+                        "product": name,
+                        "quantity": qty,
+                        "product_id": pid,
+                    }
+                )
+                continue
+
+            # case B: legacy tuple/list ["Piim ...", 1]
+            if isinstance(it, (list, tuple)) and len(it) >= 1:
+                name = str(it[0] or "").strip()
+                if not name:
+                    continue
+                qty_raw = it[1] if len(it) > 1 else 1
+                try:
+                    qty = int(qty_raw)
+                except Exception:
+                    qty = 1
+                if qty <= 0:
+                    continue
+                normalized_items.append(
+                    {
+                        "product": name,
+                        "quantity": qty,
+                        "product_id": None,
+                    }
+                )
+                continue
+
+            # else: ignore unknown shapes
+
+        # short-circuit?
+        if not normalized_items:
             return {
                 "results": [],
                 "totals": {},
@@ -336,13 +472,45 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                 "missing_products": [],
             }
 
-        # --- resolve products ---
-        resolved = await _resolve_products(conn, list(wanted.keys()))
-        missing_keys = [k for k in wanted.keys() if k not in resolved]
-        missing_products = [{"input": k} for k in missing_keys]
+        # ---- 3. Aggregate quantities by either product_id (preferred) or name ----
+        #
+        # We'll build:
+        #   qty_by_pid: { pid:int -> total_qty:int }
+        #   qty_by_name: { norm_name:str -> total_qty:int }  # only for lines w/o pid
+        #
+        qty_by_pid: Dict[int, int] = {}
+        qty_by_name: Dict[str, int] = {}
+        for it in normalized_items:
+            pid = _as_int_or_none(it.get("product_id"))
+            qty = int(it.get("quantity") or 1)
+            qty = max(qty, 1)
 
-        product_ids: List[int] = [int(_rv(r, "id")) for r in resolved.values()]
-        if not product_ids:
+            if pid is not None:
+                qty_by_pid[pid] = qty_by_pid.get(pid, 0) + qty
+            else:
+                nm = _norm(str(it.get("product") or ""))
+                if nm:
+                    qty_by_name[nm] = qty_by_name.get(nm, 0) + qty
+
+        # ---- 4. Resolve name-only items into product_ids (via aliases/EAN) ----
+        resolved_by_name = await _resolve_products_by_name(conn, list(qty_by_name.keys()))
+
+        missing_name_keys = [
+            k for k in qty_by_name.keys() if k not in resolved_by_name
+        ]
+        missing_products = [{"input": k} for k in missing_name_keys]
+
+        # merge resolved name->id into qty_by_pid
+        for nm, rec in resolved_by_name.items():
+            pid = int(_rv(rec, "id"))
+            qty = qty_by_name.get(nm, 0)
+            if qty <= 0:
+                continue
+            qty_by_pid[pid] = qty_by_pid.get(pid, 0) + qty
+
+        # After this, qty_by_pid represents ALL lines we can actually price.
+        if not qty_by_pid:
+            # nothing priceable
             return {
                 "results": [],
                 "totals": {},
@@ -351,10 +519,26 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                 "missing_products": missing_products,
             }
 
-        # maintain mapping key->product for later
-        key_to_product: Dict[str, asyncpg.Record] = resolved
+        # ---- 5. Fetch product metadata by pid (for *all* pids incl. direct pids) ----
+        #
+        # We already have some metadata for name-resolved ones in resolved_by_name,
+        # but for direct product_id lines we might not. So we load the union.
+        all_pids = sorted(qty_by_pid.keys())
 
-        # --- candidate stores ---
+        # metadata_from_id: {pid -> row}
+        metadata_from_id = await _fetch_products_by_id(conn, all_pids)
+
+        # also fill in from resolved_by_name where we might not have from _fetch_products_by_id
+        for nm, rec in resolved_by_name.items():
+            pid = int(_rv(rec, "id"))
+            if pid not in metadata_from_id:
+                metadata_from_id[pid] = rec
+
+        # For any pid where we *still* don't have metadata_from_id
+        # (extremely unlikely unless DB is inconsistent), we just won't
+        # produce nice line details but we can still total prices.
+
+        # ---- 6. Candidate stores ----
         stores = await _candidate_stores(conn, lat, lon, radius_km, limit_stores, offset_stores)
         if not stores:
             return {
@@ -366,8 +550,8 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             }
         store_ids = [int(_rv(s, "id")) for s in stores]
 
-        # --- prices (effective sources) ---
-        price_rows = await _latest_prices(conn, product_ids, store_ids)
+        # ---- 7. Latest prices ----
+        price_rows = await _latest_prices(conn, all_pids, store_ids)
         # structure: (store_id -> product_id -> price)
         by_store: Dict[int, Dict[int, float]] = {}
         for r in price_rows:
@@ -376,8 +560,8 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             price = float(_rv(r, "price"))
             by_store.setdefault(sid, {})[pid] = price
 
-        # --- per-store totals ---
-        required = len(product_ids)  # required lines = resolved items count
+        # ---- 8. Build per-store results ----
+        required = len(all_pids)  # required lines = distinct products we're pricing
         results: List[Dict[str, Any]] = []
         best_total: Optional[float] = None
         best_store_id: Optional[int] = None
@@ -389,35 +573,40 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             total = 0.0
             lines_found = 0
 
-            # build lines based on *resolved* products, not raw inputs
-            for key, qty in wanted.items():
-                pr = key_to_product.get(key)
-                if not pr:
-                    continue
-                pid = int(_rv(pr, "id"))
+            # For each canonical product in the user's basket, compute extended price
+            for pid, qty in qty_by_pid.items():
                 unit_price = s_prices.get(pid)
                 if unit_price is None:
                     continue
+
                 line_total = unit_price * qty
                 lines_found += 1
                 total += line_total
-                if include_lines:
-                    lines.append({
-                        "product_id": pid,
-                        "ean": _rv(pr, "ean"),
-                        "product_name": _rv(pr, "name"),
-                        "qty": qty,
-                        "unit_price": _round2(unit_price),
-                        "line_total": _round2(line_total),
-                    })
 
-            total_price: Optional[float] = _round2(total) if (not require_all or lines_found == required) else None
+                if include_lines:
+                    meta = metadata_from_id.get(pid)
+                    lines.append(
+                        {
+                            "product_id": pid,
+                            "ean": _rv(meta, "ean") if meta else None,
+                            "product_name": _rv(meta, "name") if meta else f"#{pid}",
+                            "qty": qty,
+                            "unit_price": _round2(unit_price),
+                            "line_total": _round2(line_total),
+                        }
+                    )
+
+            total_price: Optional[float] = _round2(total) if (
+                not require_all or lines_found == required
+            ) else None
 
             result = {
                 "store_id": sid,
                 "chain": _rv(s, "chain"),
                 "store_name": _rv(s, "name"),
-                "distance_km": _round2(float(_rv(s, "distance_km"))) if _rv(s, "distance_km") is not None else None,
+                "distance_km": _round2(float(_rv(s, "distance_km")))
+                if _rv(s, "distance_km") is not None
+                else None,
                 "lines_found": lines_found,
                 "required_lines": required,
                 "total_price": total_price,
@@ -427,22 +616,28 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
 
             results.append(result)
 
-            if total_price is not None and (best_total is None or total_price < best_total):
+            if total_price is not None and (
+                best_total is None or total_price < best_total
+            ):
                 best_total = total_price
                 best_store_id = sid
 
-        # sort: complete first, then lines, then price, then distance
+        # ---- 9. Sort stores ----
+        # sort: complete first, then lines_found, then price, then distance
         def sort_key(x: Dict[str, Any]) -> Tuple[int, int, float, float]:
-            complete = 1 if (x.get("total_price") is not None and x.get("lines_found") == x.get("required_lines")) else 0
+            complete = 1 if (
+                x.get("total_price") is not None
+                and x.get("lines_found") == x.get("required_lines")
+            ) else 0
             price = x.get("total_price") if x.get("total_price") is not None else float("inf")
             dist = x.get("distance_km") if x.get("distance_km") is not None else float("inf")
             return (-complete, -int(x.get("lines_found", 0)), price, dist)
 
         results.sort(key=sort_key)
 
+        # ---- 10. Totals / winner ----
         totals: Dict[str, Any] = {}
         if best_total is not None and best_store_id is not None:
-            # include winning store meta
             win = next((r for r in results if r["store_id"] == best_store_id), None)
             if win:
                 totals = {
@@ -452,6 +647,7 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                     "cheapest_store_name": win["store_name"],
                 }
 
+        # ---- 11. Final envelope ----
         return {
             "results": results,
             "totals": totals,
@@ -460,7 +656,9 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                     "id": int(_rv(s, "id")),
                     "name": _rv(s, "name"),
                     "chain": _rv(s, "chain"),
-                    "distance_km": _round2(float(_rv(s, "distance_km"))) if _rv(s, "distance_km") is not None else None,
+                    "distance_km": _round2(float(_rv(s, "distance_km")))
+                    if _rv(s, "distance_km") is not None
+                    else None,
                     "lat": float(_rv(s, "lat")) if _rv(s, "lat") is not None else None,
                     "lon": float(_rv(s, "lon")) if _rv(s, "lon") is not None else None,
                 }
@@ -469,6 +667,7 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             "radius_km": float(radius_km),
             "missing_products": missing_products,
         }
+
     finally:
         if should_release:
             await db.release(conn)
