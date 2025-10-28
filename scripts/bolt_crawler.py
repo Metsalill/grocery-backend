@@ -544,7 +544,7 @@ def crawl(categories: List[Tuple[str, str]], out_path: str, headless: bool = Tru
 
         browser.close()
 
-    # Write CSV
+    # Write CSV (current behavior / analytics)
     if products:
         fieldnames = [
             "city_slug",
@@ -580,6 +580,31 @@ def crawl(categories: List[Tuple[str, str]], out_path: str, headless: bool = Tru
         print(f"[done] wrote {len(products)} rows → {out_path}")
     else:
         print("[done] no products extracted")
+
+    # -------- NEW: generate canonical INSERTs for `products` table --------
+    #
+    # Goal:
+    # - You paste this into Railway console to "register" each product in `products`
+    #   exactly once (name, maybe ean later).
+    # - You add a UNIQUE constraint in DB, e.g. UNIQUE (LOWER(name)), so re-running
+    #   these INSERTs won't create duplicates.
+    #
+    # We'll escape single quotes in SQL.
+    def _sql_escape(val: str) -> str:
+        return val.replace("'", "''")
+
+    if products:
+        print("\n-- COPY/PASTE INTO RAILWAY PSQL: canonical upsert of products --")
+        for p in products:
+            nm = _sql_escape(p.name)
+            sz = _sql_escape(p.unit_text or "")
+            # placeholder ean NULL for now
+            print(
+                "INSERT INTO products (name, size_text, ean)"
+                f" VALUES ('{nm}', '{sz}', NULL)"
+                " ON CONFLICT DO NOTHING;"
+            )
+        print("-- END canonical upsert block --\n")
 
 
 # ---------------------- CLI ---------------------- #
