@@ -1,28 +1,54 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Rimi.ee (Rimi ePood) category crawler → PDP extractor → CSV/DB friendly
+Rimi.ee (Rimi ePood) category crawler → PDP extractor → DB ingest (+ optional CSV backup)
 
-Key bits:
-- Strong brand/manufacturer/size extraction (JSON-LD, meta, spec tables, dl/dt/dd, DOM "Kaubamärk"/"Tootja")
-- Strict guards so "Koostisosad"/"Kogus"/"Päritolumaa" never end up as brand/manufacturer
-- EAN normalization (accepts 8/12/13/14 → normalizes to 13 when possible)
-- Robust price parsing (JSON-LD, meta, visible text)
-- Stable/fast (blocks heavy 3rd-party, auto-accepts overlays)
-- Reuses Chromium pages across PDPs (supports simple round-robin multi-page with --pdp-workers)
-- Supports --only-ext-file to crawl *only* the ext_ids you feed in
-- Response sniffer: scans PDP JSON/XHR for brand/manufacturer too
-- On-fail artifacts: dump HTML + screenshot when brand missing
-- NEW: Soft timeout via --soft-timeout-min (or env SOFT_TIME_BUDGET_MIN) for clean early exit
+What this script does now:
+- Crawls category pages (or a provided list of PDP URLs)
+- Extracts product info (name, brand, size_text, EAN, price, etc.)
+- Writes rows to CSV (for debugging / offline analysis)
+- ALSO calls services.ingest_service.ingest_snapshot() in bulk at the end:
+    - Reuse/create canonical `products` row (by EAN if available)
+    - Insert latest price into `prices` for a given store_id
+
+Important env vars:
+- DATABASE_URL  = Postgres DSN for asyncpg, e.g.
+                  postgres://user:pass@host:5432/dbname
+- STORE_ID      = the integer `stores.id` that this crawl represents
+                  (e.g. Selver online, Rimi ePood, etc.)
+- SOFT_TIME_BUDGET_MIN = optional soft timeout minutes; crawler will exit early
+                         but still ingest what it gathered so far
+- OUTPUT_CSV    = optional path for CSV backup
+
+You can still run headless category crawling, OR direct-only mode with a list of PDP URLs/ext_ids.
+Brand / manufacturer extraction is defensive and won't treat junk text
+("Näita kõiki tooteid", cookie banners, etc.) as actual brands.
+
+We assume:
+- One physical product (EAN) -> one products.id globally (so no dup products per chain)
+- We snapshot every scrape into `prices` with timestamped rows
+
+Flow per run:
+1. Discover PDP URLs
+2. Parse PDPs
+3. Save rows to CSV (append mode)
+4. Bulk-ingest rows into DB using ingest_service.ingest_snapshot()
+
+If STORE_ID or DATABASE_URL is missing, ingest step is skipped (but CSV still writes).
 """
 
 from __future__ import annotations
-import argparse, os, re, csv, json, sys, traceback, atexit, time
+import argparse, os, re, csv, json, sys, traceback, atexit, time, asyncio
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse, urljoin
+from decimal import Decimal
 
+import asyncpg
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
+
+# our ingestion helper
+from services.ingest_service import ingest_snapshot
 
 STORE_CHAIN   = "Rimi"
 STORE_NAME    = "Rimi ePood"
@@ -52,6 +78,22 @@ def norm_price_str(s: str) -> str:
         digits = s.replace(" ", "")
         s = f"{digits[:-2]}.{digits[-2:]}"
     return s.replace(",", ".")
+
+def to_float_price(s: str) -> Optional[float]:
+    """
+    best-effort "8.22" -> 8.22
+    returns None if can't parse
+    """
+    if s is None:
+        return None
+    s = str(s).strip()
+    if not s:
+        return None
+    s = s.replace(",", ".")
+    try:
+        return float(s)
+    except Exception:
+        return None
 
 def deep_find_kv(obj: Any, keys: set) -> Dict[str, str]:
     out: Dict[str, str] = {}
@@ -131,9 +173,11 @@ _BAD_BRAND_TOKENS = [
     "close", "sulge", "continue"
 ]
 
-_NOISE_KEYS = {"kogus","netokogus","maht","pakend","neto","suurus","mahtuvus",
-               "koostisosad","päritolumaa","paritolumaa","lisainfo","säilitustemperatuur",
-               "sailitustemperatuur","toitumisalane teave","toitumisalane","energia","allergia"}
+_NOISE_KEYS = {
+    "kogus","netokogus","maht","pakend","neto","suurus","mahtuvus",
+    "koostisosad","päritolumaa","paritolumaa","lisainfo","säilitustemperatuur",
+    "sailitustemperatuur","toitumisalane teave","toitumisalane","energia","allergia"
+}
 
 def _has_letter(s: str) -> bool:
     return bool(re.search(r"[A-Za-zÄÖÜÕäöüõŠšŽž]", s or ""))
@@ -148,8 +192,10 @@ def _strip_label_prefix(s: str) -> str:
 
 def _norm_key(s: str) -> str:
     s = (s or "").strip().lower()
-    return (s.replace("ä","a").replace("ö","o").replace("õ","o").replace("ü","u")
-             .replace("š","s").replace("ž","z"))
+    return (
+        s.replace("ä","a").replace("ö","o").replace("õ","o")
+         .replace("ü","u").replace("š","s").replace("ž","z")
+    )
 
 # normalized tokens that mean "unspecified"
 _UNSET_TOKENS = {
@@ -174,7 +220,7 @@ def clean_brand(s: str) -> str:
         return ""
     norm_unset = _normalize_unset_token(s)
     if norm_unset is not None:
-        return norm_unset  # treat as a valid brand
+        return norm_unset  # treat "Määramata" etc. as valid
     low = s.lower()
     if ":" in s or "\n" in s or len(s) > 50 or len(s) < 2:
         return ""
@@ -190,7 +236,7 @@ def clean_manufacturer(s: str) -> str:
         return ""
     norm_unset = _normalize_unset_token(s)
     if norm_unset is not None:
-        return norm_unset  # also allow "Määramata" as manufacturer
+        return norm_unset
     low = s.lower()
     if ":" in s or "\n" in s or len(s) > 80 or len(s) < 2:
         return ""
@@ -201,10 +247,12 @@ def clean_manufacturer(s: str) -> str:
     return s
 
 DIGITS_ONLY = re.compile(r"\D+")
-def _digits(s: str) -> str: return DIGITS_ONLY.sub("", s or "")
+def _digits(s: str) -> str:
+    return DIGITS_ONLY.sub("", s or "")
 
 def _valid_ean13(code: str) -> bool:
-    if not re.fullmatch(r"\d{13}", code or ""): return False
+    if not re.fullmatch(r"\d{13}", code or ""):
+        return False
     s_odd  = sum(int(code[i]) for i in range(0, 12, 2))
     s_even = sum(int(code[i]) * 3 for i in range(1, 12, 2))
     chk = (10 - ((s_odd + s_even) % 10)) % 10
@@ -212,10 +260,14 @@ def _valid_ean13(code: str) -> bool:
 
 def normalize_ean_digits(e: str) -> str:
     d = _digits(e)
-    if len(d) == 13 and _valid_ean13(d): return d
-    if len(d) == 14 and d[0] in ("0","1") and _valid_ean13(d[1:]): return d[1:]
-    if len(d) == 12 and _valid_ean13("0" + d): return "0" + d
-    if len(d) == 8: return d
+    if len(d) == 13 and _valid_ean13(d):
+        return d
+    if len(d) == 14 and d[0] in ("0","1") and _valid_ean13(d[1:]):
+        return d[1:]
+    if len(d) == 12 and _valid_ean13("0" + d):
+        return "0" + d
+    if len(d) == 8:
+        return d
     return d
 
 SIZE_IN_NAME_RE = re.compile(
@@ -223,53 +275,79 @@ SIZE_IN_NAME_RE = re.compile(
     re.I
 )
 
-def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:  # noqa: E501
+def parse_brand_mfr_size(
+    soup: BeautifulSoup,
+    name: str,
+) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     brand = mfr = size_text = None
 
     def set_brand(v: str):
-        nonlocal brand; v = clean_brand(v)
-        if v and not brand: brand = v
+        nonlocal brand
+        v = clean_brand(v)
+        if v and not brand:
+            brand = v
 
     def set_mfr(v: str):
-        nonlocal mfr; v = clean_manufacturer(v)
-        if v and not mfr: mfr = v
+        nonlocal mfr
+        v = clean_manufacturer(v)
+        if v and not mfr:
+            mfr = v
 
     def set_size(v: str):
-        nonlocal size_text; v = (v or "").strip()
-        if v and not size_text: size_text = v
+        nonlocal size_text
+        v = (v or "").strip()
+        if v and not size_text:
+            size_text = v
 
+    # table rows
     for row in soup.select("table tr"):
         cells = row.find_all(["th","td"])
-        if not cells: continue
+        if not cells:
+            continue
         key_cell = cells[0]
         val_cell = cells[1] if len(cells) > 1 else None
         key = _norm_key(key_cell.get_text(" ", strip=True))
         val = val_cell.get_text(" ", strip=True) if val_cell else ""
-        if key in ("kaubamark","brand","brand name","brandname","bränd","kaubamärk"): set_brand(val)
-        elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
-        elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"): set_size(val)
+        if key in ("kaubamark","brand","brand name","brandname","bränd","kaubamärk"):
+            set_brand(val)
+        elif key in ("tootja","manufacturer","valmistaja","producer"):
+            set_mfr(val)
+        elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"):
+            set_size(val)
 
+    # <dl><dt>key</dt><dd>value</dd></dl>
     for dl in soup.select("dl"):
         dts, dds = dl.find_all("dt"), dl.find_all("dd")
         for i in range(min(len(dts), len(dds))):
             key = _norm_key(dts[i].get_text(" ", strip=True))
             val = dds[i].get_text(" ", strip=True)
-            if key in ("kaubamark","kaubamärk","brand","bränd"): set_brand(val)
-            elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
-            elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"): set_size(val)
+            if key in ("kaubamark","kaubamärk","brand","bränd"):
+                set_brand(val)
+            elif key in ("tootja","manufacturer","valmistaja","producer"):
+                set_mfr(val)
+            elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"):
+                set_size(val)
 
-    for el in soup.select(".product-attributes__row, .product-details__row, .key-value, .MuiGrid-root, li, div, p, span"):
+    # generic key:value scraps
+    for el in soup.select(
+        ".product-attributes__row, .product-details__row, .key-value, .MuiGrid-root, li, div, p, span"
+    ):
         t = (el.get_text(" ", strip=True) or "")
-        if ":" not in t or len(t) > 220: continue
+        if ":" not in t or len(t) > 220:
+            continue
         k, v = t.split(":", 1)
         key = _norm_key(k)
-        if key in _NOISE_KEYS: continue
         val = v.strip()
-        if key in ("kaubamark","kaubamärk","brand","bränd"): set_brand(val)
-        elif key in ("tootja","manufacturer","valmistaja","producer"): set_mfr(val)
-        elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"): set_size(val)
+        if key in _NOISE_KEYS:
+            continue
+        if key in ("kaubamark","kaubamärk","brand","bränd"):
+            set_brand(val)
+        elif key in ("tootja","manufacturer","valmistaja","producer"):
+            set_mfr(val)
+        elif key in ("kogus","netokogus","maht","pakend","neto","suurus","mahtuvus"):
+            set_size(val)
 
-    # Explicit block: "Veel tooteid kaubamärgilt <a>Brand</a>"
+    # "Veel tooteid kaubamärgilt <a>Brand</a>"
     if not brand:
         a = soup.select_one(".other-from-brand a")
         if a and a.get_text(strip=True):
@@ -279,41 +357,60 @@ def parse_brand_mfr_size(soup: BeautifulSoup, name: str) -> Tuple[Optional[str],
         node = soup.find(string=re.compile(r"kaubam[aä]rgilt", re.I))
         if node and getattr(node, "parent", None):
             a = node.parent.find("a")
-            if a and a.get_text(strip=True): set_brand(a.get_text(strip=True))
+            if a and a.get_text(strip=True):
+                set_brand(a.get_text(strip=True))
 
+    # guess size from product name (e.g. "500g", "0,5L")
     if not size_text and name:
         m = SIZE_IN_NAME_RE.search(name)
-        if m: size_text = m.group(1).replace("L","l")
+        if m:
+            size_text = m.group(1).replace("L", "l")
 
     return brand, mfr, size_text
 
 def parse_price_from_dom_or_meta(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
-    for sel in ['meta[itemprop="price"]',
-                'meta[property="product:price:amount"]',
-                'meta[property="og:price:amount"]']:
+    # meta tags first
+    for sel in [
+        'meta[itemprop="price"]',
+        'meta[property="product:price:amount"]',
+        'meta[property="og:price:amount"]',
+    ]:
         for tag in soup.select(sel):
             val = (tag.get("content") or tag.get_text(strip=True) or "").strip()
-            if val: return norm_price_str(val), "EUR"
+            if val:
+                return norm_price_str(val), "EUR"
 
     tag = soup.find(attrs={"itemprop":"price"})
     if tag:
         val = (tag.get("content") or tag.get_text(strip=True) or "").strip()
-        if val: return norm_price_str(val), "EUR"
+        if val:
+            return norm_price_str(val), "EUR"
 
     m = MONEY_RE.search(soup.get_text(" ", strip=True))
-    if m: return norm_price_str(m.group(1)), "EUR"
+    if m:
+        return norm_price_str(m.group(1)), "EUR"
+
     return None, None
 
 def extract_ext_id(url: str) -> str:
     try:
         parts = urlparse(url).path.rstrip("/").split("/")
         if "p" in parts:
-            i = parts.index("p"); return parts[i+1]
+            i = parts.index("p")
+            return parts[i+1]
     except Exception:
         pass
     return ""
 
-def parse_jsonld_for_product_and_breadcrumbs_and_brand(soup: BeautifulSoup) -> Tuple[Dict[str,Any], List[str], Optional[str], Optional[str]]:  # noqa: E501
+def parse_jsonld_for_product_and_breadcrumbs_and_brand(
+    soup: BeautifulSoup,
+) -> Tuple[Dict[str,Any], List[str], Optional[str], Optional[str]]:
+    """
+    Extract:
+    - flat info (price, currency, gtin/ean, sku, etc.) from Product
+    - breadcrumbs
+    - brand/manufacturer hints
+    """
     flat: Dict[str, Any] = {}
     crumbs: List[str] = []
     brand = None
@@ -328,26 +425,41 @@ def parse_jsonld_for_product_and_breadcrumbs_and_brand(soup: BeautifulSoup) -> T
         for d in seq:
             at = d.get("@type")
             at_list = at if isinstance(at, list) else [at]
+            # Product block
             if isinstance(d, dict) and ("Product" in at_list):
                 offers = d.get("offers")
                 if isinstance(offers, dict):
-                    if "price" in offers: flat["price"] = offers.get("price")
-                    if "priceCurrency" in offers: flat["currency"] = offers.get("priceCurrency")
+                    if "price" in offers:
+                        flat["price"] = offers.get("price")
+                    if "priceCurrency" in offers:
+                        flat["currency"] = offers.get("priceCurrency")
                 elif isinstance(offers, list) and offers:
                     of0 = offers[0]
                     if isinstance(of0, dict):
-                        if "price" in of0: flat["price"] = of0.get("price")
-                        if "priceCurrency" in of0: flat["currency"] = of0.get("priceCurrency")
+                        if "price" in of0:
+                            flat["price"] = of0.get("price")
+                        if "priceCurrency" in of0:
+                            flat["currency"] = of0.get("priceCurrency")
+
                 for k in ("gtin13","gtin","ean","ean13","barcode","sku","mpn"):
-                    if k in d and d.get(k): flat[k] = d.get(k)
+                    if k in d and d.get(k):
+                        flat[k] = d.get(k)
+
                 if "brand" in d and not brand:
                     v = d.get("brand")
-                    if isinstance(v, dict) and v.get("name"): brand = str(v["name"])
-                    elif isinstance(v, str): brand = v
+                    if isinstance(v, dict) and v.get("name"):
+                        brand = str(v.get("name"))
+                    elif isinstance(v, str):
+                        brand = v
+
                 if "manufacturer" in d and not manufacturer:
                     v = d.get("manufacturer")
-                    if isinstance(v, dict) and v.get("name"): manufacturer = str(v["name"])
-                    elif isinstance(v, str): manufacturer = v
+                    if isinstance(v, dict) and v.get("name"):
+                        manufacturer = str(v.get("name"))
+                    elif isinstance(v, str):
+                        manufacturer = v
+
+            # BreadcrumbList block
             if isinstance(d, dict) and ("BreadcrumbList" in at_list):
                 try:
                     items = d.get("itemListElement") or []
@@ -357,29 +469,39 @@ def parse_jsonld_for_product_and_breadcrumbs_and_brand(soup: BeautifulSoup) -> T
                             t = it.get("name") or (it.get("item") or {}).get("name")
                             if not t and isinstance(it.get("item"), str):
                                 t = it.get("item").split("/")[-1]
-                            if t: names.append(str(t).strip())
-                    if names: crumbs = names
+                            if t:
+                                names.append(str(t).strip())
+                    if names:
+                        crumbs = names
                 except Exception:
                     pass
+
     return flat, crumbs, (brand.strip() if brand else None), (manufacturer.strip() if manufacturer else None)
 
 def parse_visible_for_ean(soup: BeautifulSoup) -> Optional[str]:
     for el in soup.find_all(string=EAN_LABEL_RE):
         seg = el.parent.get_text(" ", strip=True) if el and getattr(el, "parent", None) else str(el)
         m = EAN13_RE.search(seg)
-        if m: return m.group(0)
+        if m:
+            return m.group(0)
     m = EAN13_RE.search(soup.get_text(" ", strip=True))
     return m.group(0) if m else None
 
 # ---- cookie-blocked dataLayer parser (brand under <script type="text/plain">) ----
 
-DATA_LAYER_PUSH_RE = re.compile(r'dataLayer\.push\s*\(\s*(\{.*?\})\s*\)', re.DOTALL)
+DATA_LAYER_PUSH_RE = re.compile(
+    r'dataLayer\.push\s*\(\s*(\{.*?\})\s*\)',
+    re.DOTALL,
+)
 
 def extract_brand_from_cookieblocked_datalayer_html(html: str) -> Optional[str]:
     """
     Some PDPs render GA dataLayer as a non-executed script:
-      <script type="text/plain" data-cookieconsent="statistics"> dataLayer.push({...}) </script>
-    We scan the HTML and pull impressions[0].brand (or any "brand": "...").
+      <script type="text/plain" data-cookieconsent="statistics">
+         dataLayer.push({...})
+      </script>
+
+    We scan that blob and pull impressions[0].brand.
     """
     if not html:
         return None
@@ -399,7 +521,7 @@ def extract_brand_from_cookieblocked_datalayer_html(html: str) -> Optional[str]:
                             return b2
         except Exception:
             pass
-        # Fallback regex
+        # Fallback naive regex
         m2 = re.search(r'"brand"\s*:\s*"([^"]+)"', blob)
         if m2:
             b2 = clean_brand(m2.group(1))
@@ -410,9 +532,9 @@ def extract_brand_from_cookieblocked_datalayer_html(html: str) -> Optional[str]:
 # -------------------- aggressive live-DOM extractor ---------------------------
 
 def extract_brand_mfr_dom(page) -> Tuple[str, str]:
-    """Pull Kaubamärk/Tootja from the live DOM, covering tables, dl/dt/dd and brand pills."""
+    """Pull Kaubamärk / Tootja from the live DOM (tables, dl/dt/dd, brand pills)."""
     try:
-        # Open details tab if present
+        # open "Toote andmed" etc., try to expose spec table
         for label in ("Toote andmed", "Tooteinfo"):
             try:
                 page.get_by_role("tab", name=re.compile(label, re.I)).click(timeout=700)
@@ -422,24 +544,25 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
                 except Exception:
                     pass
 
-        # Force lazy sections to render
+        # force lazy sections to render
         for _ in range(4):
             page.mouse.wheel(0, 1800)
             page.wait_for_timeout(250)
 
-        # Wait briefly for spec nodes
+        # Wait briefly for spec-y nodes
         try:
             page.wait_for_function(
                 """() => {
                    const any = sel => !!document.querySelector(sel);
                    return any('tr th, tr td, dl dt, dl dd, .product-attributes__row, .product-details__row');
                 }""",
-                timeout=4000
+                timeout=4000,
             )
         except Exception:
             pass
 
-        got = page.evaluate("""
+        got = page.evaluate(
+            """
         () => {
           const pick = s => (s||'').replace(/\\s+/g,' ').trim();
           const norm = s => pick(s)
@@ -450,13 +573,13 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
 
           let brand = '', manufacturer = '';
 
-          // 0) Direct brand widgets/pills (incl. "Veel tooteid kaubamärgilt" block)
+          // brand pills / "Veel tooteid kaubamärgilt"
           const pill = document.querySelector(
             ".product-page__brand a, [data-test*='brand'] a, .other-from-brand a, a[href*='kaubam']"
           );
           if (pill && pick(pill.textContent).length > 1) brand = pick(pill.textContent);
 
-          // 1) Parse tables
+          // tables
           document.querySelectorAll('tr').forEach(tr => {
             const c = tr.querySelectorAll('th,td');
             if (!c.length) return;
@@ -466,7 +589,7 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             if (!manufacturer && /(tootja|manufacturer|producer|valmistaja)/.test(k)) manufacturer = v;
           });
 
-          // 2) Parse definition lists <dl>
+          // dl/dt/dd
           document.querySelectorAll('dl').forEach(dl => {
             const dts = dl.querySelectorAll('dt');
             const dds = dl.querySelectorAll('dd');
@@ -478,9 +601,11 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             }
           });
 
-          // 3) Generic "key: value" blobs
+          // generic "key: value" rows
           if (!brand || !manufacturer) {
-            const nodes = Array.from(document.querySelectorAll('.product-attributes__row, .product-details__row, .key-value, li, div, p, span')).slice(0, 3000);
+            const nodes = Array.from(document.querySelectorAll(
+              '.product-attributes__row, .product-details__row, .key-value, li, div, p, span'
+            )).slice(0, 3000);
             for (const n of nodes) {
               const t = pick(n.textContent);
               if (!t || t.length > 300 || t.indexOf(':') === -1) continue;
@@ -493,9 +618,10 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
             }
           }
 
-          // 4) "Veel tooteid kaubamärgilt <A>" by text
+          // text "Veel tooteid kaubamärgilt ..."
           if (!brand) {
-            const host = Array.from(document.querySelectorAll('section,div,p,span'))
+            const host = Array
+              .from(document.querySelectorAll('section,div,p,span'))
               .find(el => /veel\\s+tooteid\\s+kaubam[aä]rgilt/i.test(el.textContent||''));
             if (host) {
               const a = host.querySelector('a');
@@ -505,7 +631,8 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
 
           return { brand: pick(brand), manufacturer: pick(manufacturer) };
         }
-        """)
+        """
+        )
 
         return (got.get("brand","").strip(), got.get("manufacturer","").strip())
     except Exception:
@@ -514,7 +641,8 @@ def extract_brand_mfr_dom(page) -> Tuple[str, str]:
 # ---------------------------- collectors --------------------------------------
 
 def _is_full_pdp(u: Optional[str]) -> bool:
-    if not u: return False
+    if not u:
+        return False
     try:
         p = urlparse(u).path
         return "/tooted/" in p and "/p/" in p
@@ -531,7 +659,8 @@ def _iter_href_from_locator(page, sel: str) -> List[str]:
                 h = None
             if h:
                 h = normalize_href(h)
-                if _is_full_pdp(h): hrefs.append(h)
+                if _is_full_pdp(h):
+                    hrefs.append(h)
     except Exception:
         pass
     return hrefs
@@ -575,27 +704,45 @@ def collect_subcategory_links(page, base_cat_url: str) -> List[str]:
 def _deadline_passed(deadline_ts: Optional[float]) -> bool:
     return bool(deadline_ts and time.monotonic() >= deadline_ts)
 
-def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay: float,
-                   deadline_ts: Optional[float] = None) -> List[str]:
-    """Return a list of PDP URLs discovered from a category (and its subcategories).
-       Respects `deadline_ts` (monotonic seconds); exits early when exceeded."""
+def crawl_category(
+    pw,
+    cat_url: str,
+    page_limit: int,
+    headless: bool,
+    req_delay: float,
+    deadline_ts: Optional[float] = None,
+) -> List[str]:
+    """
+    Return a list of PDP URLs discovered from a category (and its subcategories).
+    Respects `deadline_ts` (monotonic seconds); exits early when exceeded.
+    """
     browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
     ctx = browser.new_context(
         locale="et-EE",
         viewport={"width":1440, "height":900},
-        user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"),
+        user_agent=(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/124 Safari/537.36"
+        ),
     )
 
     BLOCK = [
         "googletagmanager.com","google-analytics.com","doubleclick.net",
         "facebook.net","hotjar.com","newrelic.com","cookiebot.com","demdex.net","adobedtm.com",
-        "nr-data.net","js-agent.newrelic.com","typekit.net","use.typekit.net"
+        "nr-data.net","js-agent.newrelic.com","typekit.net","use.typekit.net",
     ]
+
     def router(route, request):
         host = urlparse(request.url).netloc.lower()
-        if any(host.endswith(d) for d in BLOCK): return route.abort()
-        if request.resource_type in {"image","font","media","stylesheet","websocket","manifest"}: return route.abort()
+        if any(host.endswith(d) for d in BLOCK):
+            return route.abort()
+        if request.resource_type in {
+            "image","font","media","stylesheet","websocket","manifest"
+        }:
+            return route.abort()
         return route.continue_()
+
     ctx.route("**/*", router)
 
     page = ctx.new_page()
@@ -606,11 +753,15 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
     try:
         while q:
             if _deadline_passed(deadline_ts):
-                print("[rimi] soft-timeout reached during category discovery; returning partial results.")
+                print(
+                    "[rimi] soft-timeout reached during category discovery; "
+                    "returning partial results."
+                )
                 break
 
             cat = q.pop(0)
-            if not cat or cat in visited: continue
+            if not cat or cat in visited:
+                continue
             visited.add(cat)
 
             try:
@@ -620,15 +771,20 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
             auto_accept_overlays(page)
             wait_for_hydration(page)
 
+            # enqueue subcats
             for sc in collect_subcategory_links(page, cat):
                 if sc not in visited:
                     q.append(sc)
 
+            # paginate / infinite-scroll
             pages_seen = 0
             last_total = -1
             while True:
                 if _deadline_passed(deadline_ts):
-                    print("[rimi] soft-timeout reached on category page; stopping pagination.")
+                    print(
+                        "[rimi] soft-timeout reached on category page; "
+                        "stopping pagination."
+                    )
                     break
 
                 all_pdps.extend(collect_pdp_links(page))
@@ -646,7 +802,9 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
                         try:
                             page.locator(sel).first.click(timeout=3000)
                             clicked = True
-                            page.wait_for_timeout(int(max(req_delay, 0.2) * 1000))
+                            page.wait_for_timeout(
+                                int(max(req_delay, 0.2) * 1000)
+                            )
                             break
                         except Exception:
                             pass
@@ -655,7 +813,9 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
                     before = len(collect_pdp_links(page))
                     for _ in range(3):
                         page.mouse.wheel(0, 2400)
-                        page.wait_for_timeout(int(max(req_delay, 0.2) * 1000))
+                        page.wait_for_timeout(
+                            int(max(req_delay, 0.2) * 1000)
+                        )
                     after = len(collect_pdp_links(page))
                     if after <= before:
                         break
@@ -664,33 +824,47 @@ def crawl_category(pw, cat_url: str, page_limit: int, headless: bool, req_delay:
                 if page_limit and pages_seen >= page_limit:
                     break
                 if len(all_pdps) == last_total:
-                    page.wait_for_timeout(int(max(req_delay, 0.2) * 1000))
+                    page.wait_for_timeout(
+                        int(max(req_delay, 0.2) * 1000)
+                    )
                 last_total = len(all_pdps)
 
     finally:
-        ctx.close(); browser.close()
+        ctx.close()
+        browser.close()
 
+    # de-dup & filter valid PDPs
     seen, out = set(), []
     for u in all_pdps:
         if u and u not in seen and _is_full_pdp(u):
-            seen.add(u); out.append(u)
+            seen.add(u)
+            out.append(u)
     return out
 
 # --------------------------- PDP parser (reused page) -------------------------
 
 def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,str]]:
+    """
+    Go to PDP, pull product info into a dict row.
+    """
     name = brand = manufacturer = size_text = image_url = ""
     ean = sku = price = currency = None
     category_path = ""
     sniff: Dict[str, str] = {}
 
     def response_handler(resp):
+        # try to sniff JSON XHRs for brand/manufacturer/etc.
         try:
             ct = (resp.headers or {}).get("content-type", "")
-            if "application/json" not in ct: return
-            if "/epood/" not in resp.url and "/tooted/" not in resp.url: return
+            if "application/json" not in ct:
+                return
+            if "/epood/" not in resp.url and "/tooted/" not in resp.url:
+                return
             data = resp.json()
-            found = deep_find_kv(data, { *EAN_KEYS, *SKU_KEYS, *PRICE_KEYS, *CURR_KEYS, *BRAND_KEYS })
+            found = deep_find_kv(
+                data,
+                { *EAN_KEYS, *SKU_KEYS, *PRICE_KEYS, *CURR_KEYS, *BRAND_KEYS },
+            )
             for k, v in found.items():
                 if v and len(str(v)) < 200:
                     sniff[k] = str(v)
@@ -703,13 +877,20 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
         page.goto(url, timeout=60000, wait_until="domcontentloaded")
         auto_accept_overlays(page)
         wait_for_hydration(page)
+
+        # expand "Toote andmed" so spec table renders
         try:
-            page.get_by_role("tab", name=re.compile(r"Toote (andmed|info)", re.I)).click(timeout=700)
+            page.get_by_role(
+                "tab", name=re.compile(r"Toote (andmed|info)", re.I)
+            ).click(timeout=700)
         except Exception:
             try:
-                page.get_by_role("button", name=re.compile(r"Toote (andmed|info)", re.I)).click(timeout=700)
+                page.get_by_role(
+                    "button", name=re.compile(r"Toote (andmed|info)", re.I)
+                ).click(timeout=700)
             except Exception:
                 pass
+
         for _ in range(3):
             page.mouse.wheel(0, 1600)
             page.wait_for_timeout(250)
@@ -720,155 +901,229 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
         soup = BeautifulSoup(html, "lxml")
 
         h1 = soup.find("h1")
-        if h1: name = h1.get_text(strip=True)
+        if h1:
+            name = h1.get_text(strip=True)
 
+        # choose best product image
         ogimg = soup.find("meta", {"property":"og:image"})
         if ogimg and ogimg.get("content"):
             image_url = normalize_href(ogimg.get("content")) or ""
         else:
             img = soup.find("img")
-            if img: image_url = normalize_href(img.get("src") or img.get("data-src") or "") or ""
+            if img:
+                image_url = (
+                    normalize_href(
+                        img.get("src") or img.get("data-src") or ""
+                    )
+                    or ""
+                )
 
-        # Cookie-blocked dataLayer (brand in impressions[0].brand)
+        # Cookie-blocked dataLayer brand fallback
         if not b_pre:
             b_cookie = extract_brand_from_cookieblocked_datalayer_html(html)
             if b_cookie:
                 b_pre = b_cookie
 
-        flat_ld, crumbs_ld, brand_ld, manufacturer_ld = parse_jsonld_for_product_and_breadcrumbs_and_brand(soup)
+        flat_ld, crumbs_ld, brand_ld, manufacturer_ld = (
+            parse_jsonld_for_product_and_breadcrumbs_and_brand(soup)
+        )
+
         if flat_ld.get("price") and not price:
             price = norm_price_str(str(flat_ld.get("price")))
             currency = currency or (flat_ld.get("currency") or "EUR")
-        for k in ("gtin13","ean","ean13","barcode","gtin"):
-            if not ean and flat_ld.get(k): ean = str(flat_ld.get(k))
+
+        for k in ("gtin13","gtin","ean","ean13","barcode","gtin"):
+            if not ean and flat_ld.get(k):
+                ean = str(flat_ld.get(k))
         for k in ("sku","mpn"):
-            if not sku and flat_ld.get(k): sku = str(flat_ld.get(k))
+            if not sku and flat_ld.get(k):
+                sku = str(flat_ld.get(k))
 
         brand = clean_brand(b_pre or brand_ld or "")
         manufacturer = clean_manufacturer(m_pre or manufacturer_ld or "")
 
-        crumbs_dom = [a.get_text(strip=True) for a in soup.select(
-            "nav[aria-label='breadcrumb'] a, .breadcrumbs a, .breadcrumb a, ol.breadcrumb a, nav.breadcrumbs a"
-        ) if a.get_text(strip=True)]
+        # category path
+        crumbs_dom = [
+            a.get_text(strip=True)
+            for a in soup.select(
+                "nav[aria-label='breadcrumb'] a, "
+                ".breadcrumbs a, "
+                ".breadcrumb a, "
+                "ol.breadcrumb a, "
+                "nav.breadcrumbs a"
+            )
+            if a.get_text(strip=True)
+        ]
         crumbs = crumbs_dom or crumbs_ld
         if crumbs:
             crumbs = [c for c in crumbs if c]
             category_path = " > ".join(crumbs[-5:])
 
+        # parse_brand_mfr_size: table/dl scanning and size guess from name
         b2, m2, s2 = parse_brand_mfr_size(soup, name or "")
-        if not brand and b2: brand = b2
-        if not manufacturer and m2: manufacturer = m2
-        if not size_text and s2: size_text = s2
+        if not brand and b2:
+            brand = b2
+        if not manufacturer and m2:
+            manufacturer = m2
+        if not size_text and s2:
+            size_text = s2
 
+        # final attempt with DOM eval
         if not brand or not manufacturer:
             b_dom, m_dom = extract_brand_mfr_dom(page)
             b_dom = clean_brand(b_dom)
             m_dom = clean_manufacturer(m_dom)
-            if not brand and b_dom: brand = b_dom
-            if not manufacturer and m_dom: manufacturer = m_dom
+            if not brand and b_dom:
+                brand = b_dom
+            if not manufacturer and m_dom:
+                manufacturer = m_dom
 
+        # microdata/meta fallback for ean/sku
         if not ean or not sku:
-            for it in ("gtin13","gtin","ean","ean13","barcode","sku","mpn"):
+            for it in (
+                "gtin13","gtin","ean","ean13","barcode","sku","mpn"
+            ):
                 meta = soup.find(attrs={"itemprop": it})
                 if meta:
-                    val = (meta.get("content") or meta.get_text(strip=True))
-                    if not val: continue
-                    if it in ("gtin13","gtin","ean","ean13","barcode") and not ean: ean = val
-                    if it in ("sku","mpn") and not sku: sku = val
+                    val = (
+                        meta.get("content")
+                        or meta.get_text(strip=True)
+                    )
+                    if not val:
+                        continue
+                    if (
+                        it
+                        in (
+                            "gtin13","gtin","ean","ean13","barcode","gtin"
+                        )
+                        and not ean
+                    ):
+                        ean = val
+                    if it in ("sku","mpn","code","id") and not sku:
+                        sku = val
 
+        # meta brand
         if not brand:
-            mbrand = soup.find("meta", {"property":"product:brand"})
+            mbrand = soup.find(
+                "meta", {"property":"product:brand"}
+            )
             if mbrand and mbrand.get("content"):
                 brand = clean_brand(mbrand["content"].strip())
 
+        # fallback price from visible
         if not price:
             p, c = parse_price_from_dom_or_meta(soup)
             price, currency = p or price, c or currency
 
+        # window globals / dataLayer sniff
         if not (brand and manufacturer) or not (ean and sku and price):
-            for glb in ["__NUXT__","__NEXT_DATA__","APP_STATE","dataLayer",
-                        "Storefront","__APOLLO_STATE__","APOLLO_STATE",
-                        "apolloState","__INITIAL_STATE__","__PRELOADED_STATE__","__STATE__"]:
+            for glb in [
+                "__NUXT__","__NEXT_DATA__","APP_STATE","dataLayer",
+                "Storefront","__APOLLO_STATE__","APOLLO_STATE",
+                "apolloState","__INITIAL_STATE__",
+                "__PRELOADED_STATE__","__STATE__",
+            ]:
                 try:
                     data = page.evaluate(f"window['{glb}']")
                 except Exception:
                     data = None
-                if not data: continue
-                got = deep_find_kv(data, { *EAN_KEYS, *SKU_KEYS, *PRICE_KEYS, *CURR_KEYS, *BRAND_KEYS })
+                if not data:
+                    continue
+                got = deep_find_kv(
+                    data,
+                    {
+                        *EAN_KEYS,*SKU_KEYS,
+                        *PRICE_KEYS,*CURR_KEYS,*BRAND_KEYS,
+                    },
+                )
+
                 if not ean:
-                    for k in ("gtin13","gtin","ean","ean13","barcode","gtin"):
-                        if got.get(k): ean = got.get(k); break
+                    for kk in (
+                        "gtin13","ean13","ean","barcode","gtin"
+                    ):
+                        if got.get(kk):
+                            ean = got.get(kk)
+                            break
                 if not sku:
-                    for k in ("sku","mpn","code","id"):
-                        if got.get(k): sku = got.get(k); break
+                    for kk in ("sku","mpn","code","id"):
+                        if got.get(kk):
+                            sku = got.get(kk)
+                            break
                 if not price:
-                    for k in ("price","currentprice","priceamount","value","unitprice"):
-                        if got.get(k): price = norm_price_str(got.get(k)); break
+                    for kk in (
+                        "price","currentprice",
+                        "priceamount","value","unitprice",
+                    ):
+                        if got.get(kk):
+                            price = norm_price_str(got.get(kk))
+                            break
                 if not currency:
-                    for k in ("currency","pricecurrency","currencycode","curr"):
-                        if got.get(k): currency = got.get(k); break
+                    for kk in (
+                        "currency","pricecurrency",
+                        "currencycode","curr",
+                    ):
+                        if got.get(kk):
+                            currency = got.get(kk)
+                            break
                 if not brand and got.get("brand"):
                     cb = clean_brand(got.get("brand"))
-                    if cb: brand = cb
+                    if cb:
+                        brand = cb
                 for kk in ("manufacturer","producer","tootja"):
                     if not manufacturer and got.get(kk):
                         cm = clean_manufacturer(got.get(kk))
-                        if cm: manufacturer = cm; break
+                        if cm:
+                            manufacturer = cm
+                            break
 
-        if sniff:
-            if not brand:
-                for kk in ("brand","brandname","kaubamark","bränd"):
-                    if sniff.get(kk):
-                        cb = clean_brand(sniff.get(kk))
-                        if cb: brand = cb; break
-            if not manufacturer:
-                for kk in ("manufacturer","producer","tootja","valmistaja"):
-                    if sniff.get(kk):
-                        cm = clean_manufacturer(sniff.get(kk))
-                        if cm: manufacturer = cm; break
-            if not ean:
-                for kk in ("gtin13","ean13","ean","barcode","gtin"):
-                    if sniff.get(kk): ean = sniff.get(kk); break
-            if not sku:
-                for kk in ("sku","mpn","code","id"):
-                    if sniff.get(kk): sku = sniff.get(kk); break
-            if not price:
-                for kk in ("price","currentprice","priceamount","value","unitprice"):
-                    if sniff.get(kk): price = norm_price_str(sniff.get(kk)); break
-            if not currency:
-                for kk in ("currency","pricecurrency","currencycode","curr"):
-                    if sniff.get(kk): currency = sniff.get(kk); break
-
-        # Last-resort: brand guess from name (allow-list)
+        # Last-resort brand guess from name, allow small curated list
         if not brand and name:
             nkey = _norm_key(name)
             BRAND_GUESSES = [
-                "Rimi","Rimi Free From","Proceli","Tallegg","Tartu Mill","Oskar","ICA","Alpro","Yook",
-                "Alma","Farmi","Leibur","Nopri","Andri-Peedo","Jäämari","BabyCool","Äntu Gurmee",
-                "Tõrvaaugu","Jahu-Jaan","Viinamärdi","Kodutalu","Pik-Nik","Saaremaa",
-                "Valio","Gefilus","Actimel","Danone","Kārums","Karums","Formagia","Merevaik",
-                "Rakvere","Tallegg","Santa Maria","Nestlé","Nestle","Nutella","Zewa","Grite"
+                "Rimi","Rimi Free From","Proceli","Tallegg",
+                "Tartu Mill","Oskar","ICA","Alpro","Yook",
+                "Alma","Farmi","Leibur","Nopri",
+                "Jäämari","BabyCool","Äntu Gurmee",
+                "Tõrvaaugu","Jahu-Jaan","Viinamärdi",
+                "Kodutalu","Pik-Nik","Saaremaa",
+                "Valio","Gefilus","Actimel","Danone",
+                "Kārums","Karums","Formagia","Merevaik",
+                "Rakvere","Tallegg","Santa Maria",
+                "Nestlé","Nestle","Nutella",
+                "Zewa","Grite",
             ]
             for b in BRAND_GUESSES:
-                if re.search(r"\b" + re.escape(_norm_key(b)) + r"\b", nkey):
+                if re.search(
+                    r"\b" + re.escape(_norm_key(b)) + r"\b",
+                    nkey,
+                ):
                     brand = clean_brand(b)
                     break
 
+        # handle "Rimi" as implicit brand if name literally contains it
         if (not brand) and name:
-            if re.search(r"\brimi\b", name, re.I) or re.search(r"\brimi\s+free\s+from\b", name, re.I):
+            if re.search(r"\brimi\b", name, re.I) or re.search(
+                r"\brimi\s+free\s+from\b", name, re.I
+            ):
                 brand = "Rimi"
 
+        # last fallback for EAN: scrape visible text for "EAN: 4740..."
         if not ean:
             e2 = parse_visible_for_ean(soup)
-            if e2: ean = e2
+            if e2:
+                ean = e2
 
         if not currency and price:
             currency = "EUR"
 
     except PWTimeout:
+        # page timed out, keep whatever we did parse
         name = name or ""
 
-    if ean: ean = normalize_ean_digits(ean)
+    # final normalize EAN
+    if ean:
+        ean = normalize_ean_digits(ean)
+
     brand = clean_brand(brand)
     manufacturer = clean_manufacturer(manufacturer)
 
@@ -894,14 +1149,26 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
         "source_url": src_url,
     }
 
-    # Accept empty brand (we will allow "Määramata" as valid and otherwise upsert logic will handle).
-    # Only skip if NAME is missing.
+    # If we didn't even get a product name -> treat as broken PDP
     if not row["name"]:
         try:
             os.makedirs("artifacts", exist_ok=True)
-            with open(os.path.join("artifacts", f"{ext_id or 'unknown'}-noname.html"), "w", encoding="utf-8") as fh:
+            with open(
+                os.path.join(
+                    "artifacts",
+                    f"{ext_id or 'unknown'}-noname.html",
+                ),
+                "w",
+                encoding="utf-8",
+            ) as fh:
                 fh.write(page.content())
-            page.screenshot(path=os.path.join("artifacts", f"{ext_id or 'unknown'}-noname.png"), full_page=True)
+            page.screenshot(
+                path=os.path.join(
+                    "artifacts",
+                    f"{ext_id or 'unknown'}-noname.png",
+                ),
+                full_page=True,
+            )
         except Exception:
             pass
         print(f"[rimi] skip (no name) ext_id={ext_id} url={src_url}")
@@ -913,9 +1180,13 @@ def parse_pdp_with_page(page, url: str, req_delay: float) -> Optional[Dict[str,s
 
 def read_categories(path: str) -> List[str]:
     with open(path, "r", encoding="utf-8") as f:
-        return [ln.strip() for ln in f if ln.strip() and not ln.strip().startswith("#")]
+        return [
+            ln.strip()
+            for ln in f
+            if ln.strip() and not ln.strip().startswith("#")
+        ]
 
-def _read_id_file(path: Optional[str]) -> tuple[set[str], set[str]]:
+def _read_id_file(path: Optional[str]) -> Tuple[set[str], set[str]]:
     urls: set[str] = set()
     ids: set[str] = set()
     if not path or not os.path.exists(path):
@@ -923,20 +1194,22 @@ def _read_id_file(path: Optional[str]) -> tuple[set[str], set[str]]:
     with open(path, "r", encoding="utf-8") as f:
         for ln in f:
             s = ln.strip()
-            if not s: continue
+            if not s:
+                continue
             if s.startswith("http"):
                 u = s.split("?")[0].split("#")[0]
                 urls.add(u)
                 xid = extract_ext_id(u)
-                if xid: ids.add(xid)
+                if xid:
+                    ids.add(xid)
             else:
                 ids.add(s)
     return urls, ids
 
-def read_skip_file(path: Optional[str]) -> tuple[set[str], set[str]]:
+def read_skip_file(path: Optional[str]) -> Tuple[set[str], set[str]]:
     return _read_id_file(path)
 
-def read_only_file(path: Optional[str]) -> tuple[set[str], set[str]]:
+def read_only_file(path: Optional[str]) -> Tuple[set[str], set[str]]:
     return _read_id_file(path)
 
 def write_csv(rows: List[Dict[str,str]], out_path: str) -> None:
@@ -945,38 +1218,117 @@ def write_csv(rows: List[Dict[str,str]], out_path: str) -> None:
         "ext_id","ean_raw","sku_raw","name","size_text","brand","manufacturer",
         "price","currency","image_url","category_path","category_leaf","source_url",
     ]
-    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True
-    )
+    os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
     new_file = not os.path.exists(out_path)
     with open(out_path, "a", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
-        if new_file: w.writeheader()
+        if new_file:
+            w.writeheader()
         for r in rows:
             w.writerow({k: r.get(k,"") for k in fields})
+
+# -------------------------- bulk ingest into DB -------------------------------
+
+async def _bulk_ingest_to_db(
+    rows: List[Dict[str, str]],
+    store_id: int,
+) -> None:
+    """
+    Push all scraped rows into postgres using ingest_service.ingest_snapshot().
+
+    For each row, we:
+      - normalize EAN
+      - get/insert products row (if EAN is known) inside ingest_snapshot()
+      - insert a new price snapshot row in `prices`
+
+    Skips if DATABASE_URL or store_id is missing/invalid.
+    """
+    if store_id <= 0:
+        print("[rimi] STORE_ID not set or invalid, skipping DB ingest.")
+        return
+
+    dsn = (
+        os.environ.get("DATABASE_URL")
+        or os.environ.get("DB_DSN")
+        or os.environ.get("PG_DSN")
+    )
+    if not dsn:
+        print("[rimi] DATABASE_URL not set, skipping DB ingest.")
+        return
+
+    pool = await asyncpg.create_pool(dsn)
+    try:
+        ingest_count = 0
+        for r in rows:
+            # convert price string to float, skip if not parseable
+            price_val = to_float_price(r.get("price", ""))
+            if price_val is None:
+                continue
+
+            # call helper
+            try:
+                await ingest_snapshot(
+                    pool,
+                    store_id=store_id,
+                    ean=r.get("ean_raw") or "",
+                    name=r.get("name") or "",
+                    size_text=r.get("size_text") or "",
+                    brand=r.get("brand") or "",
+                    price=price_val,
+                    currency=r.get("currency") or "EUR",
+                    image_url=r.get("image_url") or "",
+                )
+                ingest_count += 1
+            except Exception as ex:
+                # swallow individual ingest errors but print them
+                print(f"[rimi] ingest_snapshot failed for {r.get('name')}: {ex}")
+        print(f"[rimi] DB ingest complete ({ ingest_count } rows).")
+    finally:
+        await pool.close()
 
 # -------------------------------- main ----------------------------------------
 
 def main():
     ap = argparse.ArgumentParser(add_help=True)
-    ap.add_argument("--cats-file", required=True, help="File with category URLs (one per line)")
+    ap.add_argument("--cats-file", required=True,
+        help="File with category URLs (one per line)")
     ap.add_argument("--page-limit", default="0")
     ap.add_argument("--max-products", default="0")
     ap.add_argument("--headless", default="1")
     ap.add_argument("--req-delay", default="0.5")
-    ap.add_argument("--output-csv", default=os.environ.get("OUTPUT_CSV","data/rimi_products.csv"))
-    ap.add_argument("--skip-ext-file", default=os.environ.get("SKIP_EXT_FILE",""))
-    ap.add_argument("--only-ext-file", default=os.environ.get("ONLY_EXT_FILE",""))
-    ap.add_argument("--pdp-workers", default="2", help="How many Playwright pages to reuse in round-robin for PDPs")
+    ap.add_argument(
+        "--output-csv",
+        default=os.environ.get("OUTPUT_CSV","data/rimi_products.csv"),
+    )
+    ap.add_argument(
+        "--skip-ext-file",
+        default=os.environ.get("SKIP_EXT_FILE",""),
+    )
+    ap.add_argument(
+        "--only-ext-file",
+        default=os.environ.get("ONLY_EXT_FILE",""),
+    )
+    ap.add_argument(
+        "--pdp-workers",
+        default="2",
+        help="How many Playwright pages to reuse in round-robin for PDPs",
+    )
     ap.add_argument(
         "--direct-only",
         default="auto",
-        help="auto|0|1 — if ONLY list present, go straight to PDPs and skip category discovery",
+        help=(
+            "auto|0|1 — if ONLY list present, go straight to PDPs "
+            "and skip category discovery"
+        ),
     )
     # ---- NEW: soft timeout in minutes ----
     ap.add_argument(
         "--soft-timeout-min",
         default=os.environ.get("SOFT_TIME_BUDGET_MIN", "0"),
-        help="Soft timeout in minutes; if exceeded, exit cleanly with partial results (0 = no limit).",
+        help=(
+            "Soft timeout in minutes; if exceeded, exit cleanly with "
+            "partial results (0 = no limit)."
+        ),
     )
     args = ap.parse_args()
 
@@ -992,8 +1344,12 @@ def main():
         soft_minutes = float(args.soft_timeout_min or 0)
     except Exception:
         soft_minutes = 0.0
-    start_ts = time.monotonic()
-    deadline_ts: Optional[float] = (start_ts + soft_minutes * 60.0) if soft_minutes > 0 else None
+    start_ts   = time.monotonic()
+    deadline_ts: Optional[float] = (
+        start_ts + soft_minutes * 60.0
+        if soft_minutes > 0
+        else None
+    )
 
     skip_urls, skip_ext = read_skip_file(args.skip_ext_file)
     only_urls, only_ext = read_only_file(args.only_ext_file)
@@ -1008,9 +1364,9 @@ def main():
         # auto: if an ONLY list exists, go direct
         direct_only = bool(only_urls or only_ext)
 
-    def pdps_from_only_lists() -> list[str]:
+    def pdps_from_only_lists() -> List[str]:
         urls: set[str] = set()
-        # from URLs
+        # URLs
         for u in only_urls:
             if not u:
                 continue
@@ -1023,51 +1379,70 @@ def main():
                 xid = extract_ext_id(u2)
                 if xid:
                     urls.add(f"{BASE}/epood/ee/tooted/p/{xid}")
-        # from ext_ids
+        # ext_ids
         for xid in only_ext:
             xid = (xid or "").strip()
             if xid:
                 urls.add(f"{BASE}/epood/ee/tooted/p/{xid}")
         return sorted(urls)
 
-    # Buffered writer with periodic flush (row-count or time)
-    rows: List[Dict[str,str]] = []
+    # Buffered writer for CSV (periodic flush).
+    rows_for_csv: List[Dict[str,str]] = []
+    rows_for_ingest: List[Dict[str,str]] = []
     last_flush = time.monotonic()
 
-    def flush():
-        nonlocal rows, last_flush
-        if rows:
-            write_csv(rows, args.output_csv)
-            rows = []
+    def flush_csv():
+        nonlocal rows_for_csv, last_flush
+        if rows_for_csv:
+            write_csv(rows_for_csv, args.output_csv)
+            rows_for_csv = []
         last_flush = time.monotonic()
 
-    atexit.register(flush)
+    atexit.register(flush_csv)
 
     all_pdps: List[str] = []
+
     with sync_playwright() as pw:
-        # 1) Pick discovery mode
+        # 1) gather PDP URLs
         if direct_only:
-            print(f"[rimi] DIRECT-ONLY: using ONLY list; skipping category discovery")
+            print(
+                "[rimi] DIRECT-ONLY: using ONLY list; "
+                "skipping category discovery"
+            )
             all_pdps = pdps_from_only_lists()
         else:
             for cat in cats:
                 if _deadline_passed(deadline_ts):
-                    print("[rimi] soft-timeout reached before finishing category list; moving to PDP phase.")
+                    print(
+                        "[rimi] soft-timeout reached before "
+                        "finishing category list; moving to PDP phase."
+                    )
                     break
                 try:
                     print(f"[rimi] {cat}")
-                    pdps = crawl_category(pw, cat, page_limit, headless, req_delay, deadline_ts=deadline_ts)
+                    pdps = crawl_category(
+                        pw,
+                        cat,
+                        page_limit,
+                        headless,
+                        req_delay,
+                        deadline_ts=deadline_ts,
+                    )
                     all_pdps.extend(pdps)
                     if max_products and len(all_pdps) >= max_products:
                         break
                 except Exception as e:
-                    print(f"[rimi] category error: {cat} → {e}", file=sys.stderr)
+                    print(
+                        f"[rimi] category error: {cat} → {e}",
+                        file=sys.stderr,
+                    )
 
-        # 2) Dedup & filters
+        # 2) dedupe and apply ONLY / SKIP filters
         seen, q = set(), []
         for u in all_pdps:
             if u and (u not in seen) and _is_full_pdp(u):
-                seen.add(u); q.append(u)
+                seen.add(u)
+                q.append(u)
 
         if only_urls or only_ext:
             q_only = []
@@ -1075,56 +1450,94 @@ def main():
                 xid = extract_ext_id(u)
                 if (u in only_urls) or (xid and xid in only_ext):
                     q_only.append(u)
-            print(f"[rimi] ONLY filter active: {len(q_only)} URLs retained (of {len(q)})")
+            print(
+                f"[rimi] ONLY filter active: {len(q_only)} URLs "
+                f"retained (of {len(q)})"
+            )
             q = q_only
 
         if skip_urls or skip_ext:
             q2, skipped = [], 0
             for u in q:
                 if (u in skip_urls) or (extract_ext_id(u) in skip_ext):
-                    skipped += 1; continue
+                    skipped += 1
+                    continue
                 q2.append(u)
-            print(f"[rimi] skip filter: {skipped} URLs skipped (already priced/complete).")
+            print(
+                f"[rimi] skip filter: {skipped} URLs skipped "
+                "(already priced/complete)."
+            )
             q = q2
 
-        # If time is already up, bail before opening the browser to parse PDPs
+        # If time is already up, bail before PDP stage
         if _deadline_passed(deadline_ts):
-            print("[rimi] soft-timeout reached before PDP parsing; writing any buffered rows and exiting.")
-            flush()
-            print(f"[rimi] wrote 0 product rows (PDP phase skipped due to timeout).")
+            print(
+                "[rimi] soft-timeout reached before PDP parsing; "
+                "writing any buffered rows and exiting."
+            )
+            flush_csv()
+            print("[rimi] wrote 0 product rows (PDP phase skipped due to timeout).")
+            # We'll still attempt ingest (it's empty anyway)
+            try:
+                store_id_env = int(os.environ.get("STORE_ID","0") or "0")
+            except Exception:
+                store_id_env = 0
+            asyncio.run(_bulk_ingest_to_db(rows_for_ingest, store_id_env))
             return
 
-        # 3) PDP parsing with round-robin multi-page reuse
+        # 3) PDP parsing w/ round-robin pages
         browser = pw.chromium.launch(headless=headless, args=["--no-sandbox"])
         ctx = browser.new_context(
             locale="et-EE",
             viewport={"width":1440,"height":900},
-            user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"),
+            user_agent=(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/124 Safari/537.36"
+            ),
         )
         pages = [ctx.new_page() for _ in range(max(1, pdp_workers))]
 
         total = 0
         for i, url in enumerate(q, 1):
             if _deadline_passed(deadline_ts):
-                print("[rimi] soft-timeout reached during PDP parsing; finishing with partial results.")
+                print(
+                    "[rimi] soft-timeout reached during PDP parsing; "
+                    "finishing with partial results."
+                )
                 break
             page = pages[(i-1) % len(pages)]
             try:
                 row = parse_pdp_with_page(page, url, req_delay)
                 if row:
-                    rows.append(row); total += 1
-                    print(f"[rimi] ok ext_id={row['ext_id']} brand={row['brand'][:40]}")
-                    # Flush triggers: every 25 rows or every 60s
-                    if len(rows) >= 25 or (time.monotonic() - last_flush) > 60:
-                        flush()
+                    rows_for_csv.append(row)
+                    rows_for_ingest.append(row)
+                    total += 1
+                    print(
+                        f"[rimi] ok ext_id={row['ext_id']} "
+                        f"brand={row['brand'][:40]}"
+                    )
+                    # Flush triggers: every 25 rows OR every 60s
+                    if len(rows_for_csv) >= 25 or (
+                        time.monotonic() - last_flush
+                    ) > 60:
+                        flush_csv()
             except Exception:
                 traceback.print_exc()
             if max_products and total >= max_products:
                 break
 
-        # Final flush happens via atexit as well, but do it explicitly:
-        flush()
-        ctx.close(); browser.close()
+        # Final CSV flush
+        flush_csv()
+        ctx.close()
+        browser.close()
+
+    # 4) Bulk-ingest to DB
+    try:
+        store_id_env = int(os.environ.get("STORE_ID","0") or "0")
+    except Exception:
+        store_id_env = 0
+    asyncio.run(_bulk_ingest_to_db(rows_for_ingest, store_id_env))
 
     print(f"[rimi] wrote {total} product rows.")
 
