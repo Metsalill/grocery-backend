@@ -43,6 +43,7 @@ SPEC_KEYS_MFR = {"tootja", "valmistaja", "manufacturer", "tarnija"}
 SPEC_KEYS_SIZE = {"kogus", "netokogus", "maht", "neto"}
 BAD_NAMES = {"pealeht"}  # "Home" in Estonian
 
+
 # -------------------- small helpers --------------------
 
 def norm(s: Optional[str]) -> str:
@@ -62,6 +63,7 @@ def get_ext_id(url: str) -> str:
         return m.group(1)
     slug = re.sub(r"[^a-zA-Z0-9]+", "-", url).strip("-")
     return slug[-120:]
+
 
 # -------------------- Cookie banner / helpers --------------------
 
@@ -98,6 +100,7 @@ def ensure_ready(page: Page) -> None:
         page.evaluate("window.scrollTo(0, 0)")
     except Exception:
         pass
+
 
 # -------------------- Robust price parsing --------------------
 
@@ -217,6 +220,7 @@ def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[s
             return val, "EUR"
 
     return None, "EUR"
+
 
 # -------------------- PDP parsing --------------------
 
@@ -547,6 +551,7 @@ def extract_from_pdp(page: Page, url: str, listing_title: Optional[str], categor
         "category_leaf": category_leaf,
     }
 
+
 # -------------------- Category listing (robust link harvest + robust pagination) --------------------
 
 def harvest_product_links(page: Page) -> List[Tuple[str, str]]:
@@ -712,6 +717,7 @@ def collect_category_products(page: Page, cat_url: str, req_delay: float, max_pa
     print(f"[cat] {cat_url} → products found: {len(uniq)} across {pages_done} page(s)")
     return uniq
 
+
 # -------------------- CSV helpers --------------------
 
 CSV_HEADER = [
@@ -738,6 +744,7 @@ def append_rows(path: str, rows: List[List[str]]) -> None:
     with open(path, "a", encoding="utf-8", newline="") as f:
         w = csv.writer(f)
         w.writerows(rows)
+
 
 # -------------------- Runner --------------------
 
