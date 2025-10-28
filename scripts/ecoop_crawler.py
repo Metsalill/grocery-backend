@@ -86,15 +86,25 @@ def clean_digits(s: str) -> str:
     return DIGITS_ONLY.sub("", s or "")
 
 def normalize_ean(e: Optional[str]) -> Optional[str]:
+    """
+    Canonicalize any barcode-ish value:
+    - strip non-digits
+    - accept 8/12/13/14 length
+    - convert UPC-A (12 digits) -> EAN13 by prefixing 0
+    - drop leading 0 if it's EAN14 starting with 0
+    Return None if it's junk / impossible length.
+    """
     if not e:
         return None
     if e.strip() == "-":
         return None
     d = clean_digits(e)
     if len(d) in (8, 12, 13, 14):
+        # EAN-14 that is actually 13 with leading "0"
         if len(d) == 14 and d.startswith("0"):
             d = d[1:]
-        if len(d) == 12:  # UPC-A to EAN-13
+        # UPC-A -> fake-EAN13 with leading 0
+        if len(d) == 12:
             d = "0" + d
         return d
     return None
@@ -564,9 +574,15 @@ async def extract_pdp(
         if m:
             size_text = m.group(1)
 
+    # ext_id = stable per-store product handle
     ext_id = None
+    # prefer GTIN if present so the same milk in 2 Coop regions maps together
+    # across store_host we'll still separate rows in DB, but ext_id helps
+    # dedupe inside same store_host.
     if ean_raw and normalize_ean(ean_raw):
         ext_id = normalize_ean(ean_raw)
+
+    # fallback to URL slug / numeric id
     if not ext_id:
         m = re.search(r"/toode/(\d+)", url)
         if m:
