@@ -131,1218 +131,774 @@ def guess_size_from_title(title: str) -> str:
 def _strip_eselver_prefix(path: str) -> str:
     return path.replace("/e-selver", "", 1) if path.startswith("/e-selver/") else path
 
-# NEW: strip any trailing :line or :line:col debug suffixes
+# NEW: strip any trailing :line or :line:col debug suffixes (e.g. "/product:6:13801")
 LINECOL_RE = re.compile(r":\d+(?::\d+)?$")
 
 def _strip_linecol(path: str) -> str:
     return LINECOL_RE.sub("", path or "")
 
 def _clean_abs(href: str) -> Optional[str]:
-    if not href: return None
+    """
+    Normalize Selver links → absolute URL.
+    Also removes any DevTools stacktrace suffix like ':6:13801' that sometimes
+    leaks into <a href> in this scraper environment.
+    """
+    if not href:
+        return None
     url = urljoin(BASE, href)
     parts = urlsplit(url)
+
+    # keep only selver.ee
     host = (parts.netloc or urlparse(BASE).netloc).lower()
-    if host not in ALLOWED_HOSTS: return None
-    # sanitize path
+    if host not in ALLOWED_HOSTS:
+        return None
+
+    # normalize path
     path = _strip_linecol(_strip_eselver_prefix(parts.path))
+
+    # don't keep ?/fragment for catalog URLs; but do keep productID param if it's the
+    # only place we can get ext_id. In practice Selver product pages don't rely on
+    # heavy query strings, but we keep logic simple: drop queries always.
     return urlunsplit((parts.scheme, parts.netloc, path.rstrip("/"), "", ""))
 
-def canonical_from_page(page) -> Optional[str]:
-    try:
-        href = page.evaluate("""(d=>d.querySelector('link[rel="canonical"]')?.href||null)(document)""")
-        if href: return _clean_abs(href)
-    except Exception: pass
-    try:
-        # also sanitize page.url (in case a debug suffix sneaks in)
-        parts = urlsplit(page.url)
-        path = _strip_linecol(parts.path)
-        return _clean_abs(urlunsplit((parts.scheme, parts.netloc, path, "", "")))
-    except Exception:
-        return None
-
-def _in_allowlist(path: str) -> bool:
-    if not STRICT_ALLOWLIST: return True
-    p = (path or "/").rstrip("/")
-    return any(p == root or p.startswith(root + "/") for root in STRICT_ALLOWLIST)
-
-# ---- PDP detection ---------------------------------------------------------
-def _is_selver_product_like(url: str) -> bool:
+def is_probably_food_category(path: str) -> bool:
     """
-    Product URL detection for Selver:
-    - /toode/<...>                (legacy PDPs)
-    - /e/<slug>-<digits>          (numeric PDPs)
-    - /p/<digits>                 (numeric PDPs)
-    - /<product-slug>             (single segment, hyphenated — current Selver PDPs)
+    Decide whether this looks like a real FOOD category, not shampoo/stationery/etc.
+    Rules:
+      - if ALLOWLIST_ONLY, must start with one of STRICT_ALLOWLIST.
+      - reject if path contains banned keywords.
     """
-    u = urlparse(url)
-    host = (u.netloc or urlparse(BASE).netloc).lower()
-    if host not in ALLOWED_HOSTS:
-        return False
+    p = path.strip().lower()
+    if not p.startswith("/"):
+        p = "/" + p
 
-    path = _strip_eselver_prefix((_strip_linecol(u.path) or "/").lower())
-
-    # Drop obvious non-product paths/keywords
-    if path.startswith("/ru/"):
-        return False
-    if any(sn in path for sn in NON_PRODUCT_PATH_SNIPPETS):
-        return False
-    if any(kw in path for kw in NON_PRODUCT_KEYWORDS):
-        return False
-
-    # Known PDP patterns
-    if path.startswith("/toode/"):
-        return True
-    if re.search(r"^/e/.+-(\d+)(/)?$", path):
-        return True
-    if re.search(r"^/p/\d+(/)?$", path):
-        return True
-
-    # NEW: current Selver PDPs are *single-segment* hyphenated slugs
-    segs = [s for s in path.strip("/").split("/") if s]
-    if len(segs) == 1:
-        seg = segs[0]
-        if "-" in seg and re.fullmatch(r"[a-z0-9-]{6,}", seg):
-            return True
-
-    return False
-
-def _is_category_like_path(path: str) -> bool:
-    p = _strip_eselver_prefix((_strip_linecol(path) or "/").lower())
-    if ALLOWLIST_ONLY and STRICT_ALLOWLIST and not _in_allowlist(p): return False
-    if "/e-selver/" in p or p.startswith("/ru/"): return False
-    if any(bad in p for bad in BANNED_KEYWORDS): return False
-    if any(sn in p for sn in NON_PRODUCT_PATH_SNIPPETS): return False
-    if _is_selver_product_like(urljoin(BASE, p)): return False
-    segs = [s for s in p.strip("/").split("/") if s]
-    if len(segs) < 1: return False
-    last = segs[-1]
-    if any(ch.isdigit() for ch in last): return False
-    return any("-" in s for s in segs)
-
-# ---------------------------------------------------------------------------
-DIGITS_ONLY = re.compile(r"\D+")
-def _digits(s: str) -> str: return DIGITS_ONLY.sub("", s or "")
-
-def _valid_ean13(code: str) -> bool:
-    if not re.fullmatch(r"\d{13}", code): return False
-    s_odd  = sum(int(code[i]) for i in range(0, 12, 2))
-    s_even = sum(int(code[i]) * 3 for i in range(1, 12, 2))
-    chk = (10 - ((s_odd + s_even) % 10)) % 10
-    return chk == int(code[-1])
-
-# normalize to 8/13 when possible
-def normalize_ean_digits(e: str) -> str:
-    d = _digits(e)
-    if len(d) in (8, 13):
-        return d
-    if len(d) == 14 and d[0] in ("0", "1"):
-        return d[1:]
-    if len(d) == 12 and _valid_ean13("0" + d):
-        return "0" + d
-    return ""
-
-# --- Very robust DOM search for "Ribakood" / EAN and SKU ----------------
-def _ean_sku_from_dom(page) -> tuple[str, str]:
-    ean = ""
-    sku = ""
-    try:
-        got = page.evaluate(
-            """
-            () => {
-              const pickDigits = (txt) => {
-                if (!txt) return null;
-                const m = txt.replace(/\s+/g,' ').match(/(\d{8,14})/);
-                return m ? m[1] : null;
-              };
-
-              const nodes = Array.from(document.querySelectorAll(
-                'tr, .row, .product-attributes__row, .product-details__row, li, .attribute, .key-value, dl, dt, dd, .MuiGrid-root, div, span, p, th, td'
-              ));
-
-              let ean=null, sku=null;
-
-              for (const row of nodes) {
-                const txt = (row.textContent||'').replace(/\s+/g,' ').trim();
-                if (!txt) continue;
-
-                if (!ean && /\bribakood\b/i.test(txt)) {
-                  const d = pickDigits(txt);
-                  if (d) ean = d;
-                }
-
-                if (!sku && /(\bSKU\b|\bTootekood\b|\bArtikkel\b)/i.test(txt)) {
-                  const m = txt.match(/([A-Z0-9_-]{6,})/i);
-                  if (m) sku = m[1];
-                }
-
-                if (ean && sku) break;
-              }
-
-              if (!ean) {
-                const any = Array.from(document.querySelectorAll('div,span,p,li,td,dd,th'));
-                for (const el of any) {
-                  const t = (el.textContent||'').replace(/\s+/g,' ');
-                  if (/\bribakood\b/i.test(t)) {
-                    const d = pickDigits(t);
-                    if (d) { ean = d; break; }
-                  }
-                }
-              }
-
-              return { ean, sku };
-            }
-            """
+    if ALLOWLIST_ONLY:
+        ok = any(
+            p == allowed or p.startswith(allowed + "/")
+            for allowed in STRICT_ALLOWLIST
         )
-        if got:
-            ean = got.get("ean") or ""
-            sku = got.get("sku") or ""
-    except Exception:
-        pass
-
-    if not ean:
-        try:
-            html = page.content()
-            m = re.search(r"ribakood[\s\S]{0,400}?(\d{8,14})", html, re.I)
-            if m:
-                ean = m.group(1)
-        except Exception:
-            pass
-
-    e13 = _digits(ean)
-    if _valid_ean13(e13):
-        ean = e13
-    else:
-        if not re.fullmatch(r"\d{8,14}", e13 or ""):
-            ean = ""
-
-    return ean, (sku or "")
-
-def _pick_ean_from_html(html: str) -> str:
-    if not html: return ""
-    label_pat = re.compile(r"(?:\b(?:ean|gtin|ribakood|triipkood|barcode)\b)[^0-9]{0,200}([0-9]{8,14})", re.I | re.S)
-    m = label_pat.search(html)
-    return m.group(1) if m else ""
-
-# ---------------------------------------------------------------------------
-# Brand helpers
-# NOTE: include Käitleja/Kaitleja/Handler as brand-like keys (Selver-specific)
-_BRAND_KEY_RE = re.compile(
-    r"\b(käitleja|kaitleja|handler|br[äa]nd|brand|tootja|kaubamärk|valmistaja|manufacturer|producer)\b",
-    re.I
-)
-
-LEGAL_SUFFIX_RE = re.compile(r'\b(?:AS|OÜ|OU|UAB|LLC|JSC|AG|GmbH|Sp\.?\s*z\.?\s*o\.?\s*o\.?)\b\.?', re.I)
-BRAND_SPLIT_RE  = re.compile(r'[,\-–—]|(?:\s\|\s)')
-
-def strip_legal_suffixes(s: str) -> str:
-    if not s: return s
-    s = LEGAL_SUFFIX_RE.sub('', s)
-    s = re.sub(r'\s{2,}', ' ', s).strip(' ,.-')
-    return s.strip()
-
-def normalize_brand_case(b: str) -> str:
-    if not b: return b
-    if b.isupper() and len(b) <= 4:
-        return b  # short acronyms kept as upper
-    if b.isupper():
-        return b.title()
-    return b
-
-def brand_from_name(title: str) -> str:
-    """
-    Heuristic: pick the token that looks like a brand from NAME/H1.
-    Works for '..., TERE, 400 ml' or '..., Tere - 400 ml'.
-    """
-    t = normspace(title or "")
-    if not t: return ""
-    parts = [p.strip() for p in BRAND_SPLIT_RE.split(t) if p and len(p.strip()) > 1]
-    parts = [p for p in parts if not SIMPLE_RE.search(p) and '%' not in p]
-    if not parts: return ""
-    for p in parts:
-        if p.isupper() and p.isalpha() and 2 <= len(p) <= 20:
-            return p
-    for p in parts:
-        if re.match(r'^[A-ZÄÖÕÜ][a-zäöõü]+(?:\s+[A-ZÄÖÕÜ][a-zäöõü]+)*$', p):
-            return p
-    return ""
-
-def _extract_brand_from_dom_texts(texts: List[str]) -> str:
-    for t in texts:
-        if not t or len(t) < 3:
-            continue
-        if _BRAND_KEY_RE.search(t):
-            # Use compiled pattern's split (compiled patterns cannot accept flags=)
-            parts_after_key = _BRAND_KEY_RE.split(t, maxsplit=1)
-            if isinstance(parts_after_key, list) and len(parts_after_key) >= 3:
-                # parts_after_key = [before, matched_key, after]
-                rest = parts_after_key[2]
-                parts = re.split(r"[:–—-]\s*", rest, maxsplit=1)
-                tail = parts[1] if len(parts) == 2 else ""
-            else:
-                parts = re.split(r"[:–—-]\s*", t, maxsplit=1)
-                tail = parts[1] if len(parts) == 2 else ""
-            cand = normspace(tail)
-            if cand:
-                # This is a string pattern, so case-insensitive flags are OK
-                cand = re.split(r"\b(Ribakood|SKU|Tootekood|Artikkel)\b",
-                                cand, maxsplit=1, flags=re.I)[0].strip()
-                if 2 <= len(cand) <= 80:
-                    return cand
-    return ""
-
-def extract_brand(page, prod_ld: dict) -> str:
-    # 1) JSON-LD brand/manufacturer
-    if prod_ld:
-        b = prod_ld.get("brand") or prod_ld.get("manufacturer")
-        name = ""
-        if isinstance(b, dict):
-            name = normspace(str(b.get("name") or ""))
-        elif isinstance(b, str):
-            name = normspace(b)
-        if name:
-            return normalize_brand_case(strip_legal_suffixes(name))
-
-    # 2) itemprop/meta brand/manufacturer
-    try:
-        got = page.evaluate("""
-        () => {
-          const sel = [
-            '[itemprop="brand"]','meta[itemprop="brand"]',
-            '[itemprop="manufacturer"]','meta[itemprop="manufacturer"]'
-          ];
-          for (const s of sel) {
-            const el = document.querySelector(s);
-            if (!el) continue;
-            const v = el.getAttribute('content') || el.textContent || '';
-            if (v && v.trim().length > 1) return v.trim();
-          }
-          return null;
-        }
-        """)
-        if got:
-            name = normspace(str(got))
-            if name:
-                return normalize_brand_case(strip_legal_suffixes(name))
-    except Exception:
-        pass
-
-    # 3) Generic spec rows (includes Käitleja/Handler via _BRAND_KEY_RE)
-    try:
-        texts: List[str] = page.evaluate("""
-          () => [...document.querySelectorAll('tr, .row, li, .attribute, .product-attributes__row, .product-details__row, .MuiGrid-root, dd, dt, div, span, p, th, td')]
-                .map(n => (n.textContent || '').replace(/\\s+/g,' ').trim())
-                .filter(Boolean)
-        """)
-    except Exception:
-        texts = []
-    brand = _extract_brand_from_dom_texts(texts)
-    if brand:
-        return normalize_brand_case(strip_legal_suffixes(brand))
-
-    # 3b) Explicit Käitleja/Kaitleja/Handler fallback if the generic pass missed it
-    try:
-        handler = page.evaluate("""
-        () => {
-          const rows = Array.from(document.querySelectorAll('tr, .row, li, .attribute, .product-attributes__row, .product-details__row, dl, dt, dd, div, span, p, th, td'));
-          for (const n of rows) {
-            const t = (n.textContent || '').replace(/\\s+/g,' ').trim();
-            if (!t) continue;
-            if (/(\\b(käitleja|kaitleja|handler)\\b)/i.test(t)) {
-              const m = t.split(/[:–—-]/).slice(1).join(':').trim();
-              if (m && m.length <= 80) return m;
-            }
-          }
-          return null;
-        }
-        """)
-        if handler:
-            name = normspace(str(handler))
-            if name:
-                return normalize_brand_case(strip_legal_suffixes(name))
-    except Exception:
-        pass
-
-    # 4) Fallback: infer from NAME/H1
-    try:
-        title = normspace(page.locator("h1").first.inner_text())
-    except Exception:
-        title = ""
-    bname = brand_from_name(title)
-    if bname:
-        return normalize_brand_case(strip_legal_suffixes(bname))
-
-    return ""
-
-# ---------------------------------------------------------------------------
-# DB preload
-def _db_connect():
-    dburl = os.getenv("DATABASE_URL")
-    if dburl:
-        u = urlparse(dburl)
-        user = u.username
-        password = u.password
-        host = u.hostname or "localhost"
-        port = int(u.port or 5432)
-        database = (u.path or "/postgres").lstrip("/")
-    else:
-        user = os.getenv("PGUSER")
-        password = os.getenv("PGPASSWORD")
-        host = os.getenv("PGHOST", "localhost")
-        port = int(os.getenv("PGPORT", "5432"))
-        database = os.getenv("PGDATABASE") or "postgres"
-
-    try:
-        import pg8000.dbapi as pg8000
-        conn = pg8000.connect(user=user, password=password, host=host, port=port, database=database)
-        return "pg8000", conn
-    except Exception as e_pg:
-        try:
-            import psycopg2
-            conn = psycopg2.connect(user=user, password=password, host=host, port=port, dbname=database, connect_timeout=10)
-            return "psycopg2", conn
-        except Exception as e_psy:
-            raise RuntimeError(f"DB connect failed (pg8000/psycopg2). pg8000: {e_pg}; psycopg2: {e_psy}")
-
-def preload_ext_ids_from_db() -> Set[str]:
-    known: Set[str] = set()
-    if not PRELOAD_DB:
-        return known
-    try:
-        driver, conn = _db_connect()
-    except Exception as e:
-        print(f"[selver] DB preload disabled (no driver/connection): {e}")
-        return known
-
-    q = PRELOAD_DB_QUERY.strip().rstrip(";")
-    if PRELOAD_DB_LIMIT and PRELOAD_DB_LIMIT > 0:
-        q = f"SELECT * FROM ({q}) q LIMIT {int(PRELOAD_DB_LIMIT)}"
-
-    try:
-        cur = conn.cursor()
-        cur.execute(q)
-        rows = cur.fetchall()
-        for r in rows:
-            if not r: continue
-            raw = str(r[0])
-            u = _clean_abs(raw)
-            if u:
-                known.add(u)
-                known.add(urlparse(u).path)
-        try:
-            cur.close(); conn.close()
-        except Exception:
-            pass
-        print(f"[selver] preloaded {len(known)} known ext_ids (abs+path) from DB (driver={driver})")
-    except Exception as e:
-        print(f"[selver] DB preload query failed: {type(e).__name__}: {e}")
-        try: conn.close()
-        except Exception: pass
-    return known
-
-# ------------------------ Skip / Only file handling -------------------------
-SKIP_EXTS: Set[str] = set()
-ONLY_EXTS: Set[str] = set()
-
-_ID_ONLY_RE = re.compile(r"^\s*(\d{3,})\s*$")  # plain numeric id like 123456
-
-def _normalize_ext_line(line: str) -> List[str]:
-    """Return a list of equivalent keys for matching: absolute URL and path."""
-    vals: List[str] = []
-    if not line: return vals
-    s = line.strip()
-    if not s: return vals
-
-    # If it's just digits, treat as /e/<id>
-    m = _ID_ONLY_RE.match(s)
-    if m:
-        s = f"/e/{m.group(1)}"
-
-    absu = _clean_abs(s)
-    if absu:
-        vals.append(absu)
-        vals.append(urlparse(absu).path)
-    else:
-        if s.startswith("/"):
-            absu = _clean_abs(urljoin(BASE, s))
-            if absu:
-                vals.append(absu)
-                vals.append(urlparse(absu).path)
-    return [v for v in dict.fromkeys(vals)]  # unique, preserve order
-
-def _load_ext_file(path: str) -> Set[str]:
-    out: Set[str] = set()
-    if not path: return out
-    if not os.path.exists(path):
-        print(f"[selver] skip/only file not found: {path}")
-        return out
-    with open(path, "r", encoding="utf-8") as fh:
-        for ln in fh:
-            for v in _normalize_ext_line(ln):
-                out.add(v)
-    return out
-
-def _should_process_url(u: str, seen: Set[str]) -> bool:
-    cu = _clean_abs(u)
-    if not cu:
-        return False
-    key = urlparse(cu).path
-    if ONLY_EXTS and (cu not in ONLY_EXTS) and (key not in ONLY_EXTS):
-        return False
-    if (cu in SKIP_EXTS) or (key in SKIP_EXTS):
-        return False
-    if (cu in seen) or (key in seen):
-        return False
-    return True
-
-# ---------------------------------------------------------------------------
-def accept_cookies(page):
-    for sel in [
-        "button:has-text('Nõustu')","button:has-text('Nõustun')",
-        "button:has-text('Accept')","button[aria-label*='accept']",
-        "button:has-text('Luba kõik')",
-    ]:
-        try:
-            btn = page.locator(sel)
-            if btn.count() > 0 and btn.first.is_enabled():
-                btn.first.click(timeout=2500)
-                time.sleep(0.2)
-                return
-        except Exception:
-            pass
-
-def safe_goto(page, url: str, timeout: Optional[int] = None) -> bool:
-    tmo = timeout or NAV_TIMEOUT_MS
-    for attempt in (1, 2):
-        try:
-            page.goto(url, wait_until="domcontentloaded", timeout=tmo)
-            accept_cookies(page)
-            try:
-                page.wait_for_load_state("networkidle", timeout=max(5000, int(tmo/2)))
-            except Exception:
-                pass
-            page.wait_for_timeout(300)
-            return True
-        except Exception as e:
-            if attempt == 1:
-                time.sleep(0.6)
-                continue
-            print(f"[selver] NAV FAIL {url} -> {type(e).__name__}: {e}")
+        if not ok:
             return False
 
-def _wait_listing_ready(page):
+    for bad in BANNED_KEYWORDS:
+        if bad in p:
+            return False
+    return True
+
+def norm_digits(s: str) -> str:
+    """Keep only digits in EAN-like strings."""
+    return re.sub(r"\D+", "", s or "")
+
+def extract_price_and_currency(page) -> Tuple[float, str]:
+    """
+    Selver puts price in components; worst case we fallback to 0.00.
+    """
+    price_val = 0.0
+    curr = "€"
+
+    # try dedicated price span
     try:
-        for _ in range(14):
-            if (page.locator("button:has-text('OSTA')").count() > 0 or
-                page.locator("a[href*='/toode/']").count() > 0 or
-                page.locator("a[href^='/'][href*='-']").count() > 0):
-                return
-            time.sleep(0.35)
+        el = page.query_selector('[data-testid="product-price"]') \
+             or page.query_selector('.product-price__value')
+        if el:
+            txt = normspace(el.inner_text())
+            # e.g. "4,59 €" or "4.59 €"
+            m = re.search(r"(\d+[.,]\d+)", txt)
+            if m:
+                price_val = float(m.group(1).replace(",", "."))
+            cm = re.search(r"[€$A-Z]{1,4}", txt)
+            if cm:
+                curr = cm.group(0)
+            return price_val, curr
     except Exception:
         pass
 
-def _wait_pdp_ready(page):
-    for _ in range(36):
-        try:
-            if (page.locator("h1").count() > 0 or
-                page.locator("script[type='application/ld+json']").count() > 0 or
-                page.locator(":text-matches('Ribakood|Barcode|Штрихkod|Штрихкод','i')").count() > 0):
-                return
-            try:
-                page.wait_for_load_state("networkidle", timeout=1500)
-            except Exception:
-                pass
-            time.sleep(0.25)
-        except Exception:
-            time.sleep(0.25)
-
-def _expand_pdp_details(page):
-    for sel in [
-        "button:has-text('Lisainfo')","button:has-text('Toote info')",
-        "[role='tab']:has-text('Lisainfo')","[role='tab']:has-text('Toote info')",
-        "[data-toggle='collapse']","[aria-controls*='detail']",
-    ]:
-        try:
-            el = page.locator(sel).first
-            if el and el.count() > 0 and el.is_enabled():
-                el.click(timeout=1200)
-                time.sleep(0.15)
-        except Exception:
-            pass
-
-# ---------------------------------------------------------------------------
-def _extract_category_links(page) -> List[str]:
-    _wait_listing_ready(page)
+    # fallback: look for any price-ish thing
     try:
-        hrefs = page.evaluate("""
-          [...document.querySelectorAll('a[href^="/"]')]
-            .map(a => a.getAttribute('href')).filter(Boolean)
-        """)
+        el2 = page.query_selector('.price')
+        if el2:
+            txt = normspace(el2.inner_text())
+            m = re.search(r"(\d+[.,]\d+)", txt)
+            if m:
+                price_val = float(m.group(1).replace(",", "."))
+            cm = re.search(r"[€$A-Z]{1,4}", txt)
+            if cm:
+                curr = cm.group(0)
     except Exception:
-        hrefs = []
-    out, seen = [], set()
-    for h in hrefs:
-        u = _clean_abs(h)
-        if not u: continue
-        path = urlparse(u).path
-        if ALLOWLIST_ONLY and STRICT_ALLOWLIST and not _in_allowlist(path):
+        pass
+
+    return price_val, curr
+
+def extract_specs_table(page) -> Dict[str, str]:
+    """
+    Scrape product "specs" / details table if present.
+    We'll parse rows like:
+      <tr><th>Ribakood</th><td>1234567890123</td></tr>
+      <tr><th>Tootja</th><td>ALMA</td></tr>
+    Return dict {lowercase_header: value_text}.
+    """
+    out: Dict[str, str] = {}
+    try:
+        rows = page.query_selector_all("table tr, .product-details__row, dl.product-specs > div")
+        for r in rows:
+            # possible structures:
+            # <tr><th>Foo</th><td>Bar</td></tr>
+            # <div class="product-details__row"><div>Foo</div><div>Bar</div></div>
+            # <div><dt>Foo</dt><dd>Bar</dd></div>
+            head_txt = ""
+            val_txt  = ""
+
+            th = r.query_selector("th, .product-details__key, dt")
+            td = r.query_selector("td, .product-details__value, dd")
+
+            if th:
+                head_txt = normspace(th.inner_text())
+            if td:
+                val_txt = normspace(td.inner_text())
+
+            if not head_txt and not val_txt:
+                # maybe two div children without classes
+                kids = r.query_selector_all(":scope > *")
+                if len(kids) >= 2:
+                    head_txt = normspace(kids[0].inner_text())
+                    val_txt  = normspace(kids[1].inner_text())
+
+            if head_txt:
+                out[head_txt.strip().lower()] = val_txt
+    except Exception:
+        pass
+    return out
+
+def extract_json_ld(page) -> Dict[str, any]:
+    """
+    Try to read any <script type="application/ld+json"> and parse first product-y one.
+    """
+    try:
+        scripts = page.query_selector_all('script[type="application/ld+json"]')
+    except Exception:
+        scripts = []
+    best: Dict[str, any] = {}
+    for s in scripts:
+        try:
+            raw = s.inner_text()
+            data = json.loads(raw)
+        except Exception:
             continue
-        if _is_category_like_path(path) and u not in seen:
-            seen.add(u); out.append(u)
-    return out
 
-def discover_categories(page, start_urls: List[str]) -> List[str]:
-    queue = list(dict.fromkeys(start_urls))
-    seen_pages = set(queue)
-    cats: List[str] = []
-    while queue:
-        url = queue.pop(0)
-        if not safe_goto(page, url): continue
-        time.sleep(REQ_DELAY)
-        p = urlparse(url).path
-        if _is_category_like_path(p) and url not in cats: cats.append(url)
-        for u in _extract_category_links(page):
-            if u not in seen_pages:
-                seen_pages.add(u); queue.append(u)
-        if len(cats) > 2000: break
-    out, seen = [], set()
-    for u in cats:
-        if u not in seen:
-            seen.add(u); out.append(u)
-    return out
+        # sometimes it's an array of contexts
+        candidates = data if isinstance(data, list) else [data]
 
-# ---------------------------------------------------------------------------
-def _with_page(url: str, n: int) -> str:
-    parts = urlsplit(url)
-    qs = parse_qs(parts.query)
-    qs["page"] = [str(n)]
-    query = urlencode({k: v[0] for k, v in qs.items()}, doseq=False)
-    return urlunsplit((parts.scheme, parts.netloc, parts.path, query, ""))
-
-def _max_page_number(page) -> int:
-    try:
-        maxn = page.evaluate("""
-          (() => {
-            const ns = [...document.querySelectorAll('a[href*="?page="]')].map(a => {
-              try { return parseInt(new URL(a.href).searchParams.get('page')||''); }
-              catch { return NaN; }
-            }).filter(n => !Number.isNaN(n));
-            return ns.length ? Math.max(...ns) : 1;
-          })()
-        """)
-        return int(maxn) if maxn and maxn > 0 else 1
-    except Exception:
-        return 1
-
-def _extract_product_hrefs_any_anchor(page) -> List[str]:
-    try:
-        hrefs = page.evaluate("""
-          (() => {
-            const rel = [...document.querySelectorAll('a[href^="/"]')]
-              .map(a => a.getAttribute('href')).filter(Boolean);
-            const abs = [...document.querySelectorAll('a[href^="https://www.selver.ee/"],a[href^="http://www.selver.ee/"],a[href^="//www.selver.ee/"]')]
-              .map(a => a.getAttribute('href')).filter(Boolean);
-            const set = new Set([...rel, ...abs]);
-            document.querySelectorAll('[data-href^="/"]').forEach(el => set.add(el.getAttribute('data-href')));
-            return [...set];
-          })()
-        """)
-    except Exception:
-        hrefs = []
-    out = []
-    for h in hrefs:
-        u = _clean_abs(h)
-        if u and _is_selver_product_like(u):
-            out.append(u)
-    return list(dict.fromkeys(out))
-
-def _extract_product_urls_from_listing_jsonld(page) -> List[str]:
-    urls: List[str] = []
-    try:
-        scripts = page.locator("script[type='application/ld+json']")
-        for i in range(min(20, scripts.count())):
-            raw = scripts.nth(i).inner_text()
-            try:
-                obj = json.loads(raw)
-            except Exception:
+        for c in candidates:
+            if not isinstance(c, dict):
                 continue
-            items = obj if isinstance(obj, list) else [obj]
-            for b in items:
-                if not isinstance(b, dict): continue
-                t = (b.get("@type") or "")
-                t_low = t.lower() if isinstance(t, str) else ""
-                if "product" in t_low and b.get("url"):
-                    u = _clean_abs(b["url"])
-                    if u and _is_selver_product_like(u):
-                        urls.append(u)
-    except Exception:
-        pass
-    return list(dict.fromkeys(urls))
+            t = (c.get("@type") or "").lower()
+            if "product" in t:
+                best = c
+                break
+        if best:
+            break
+    return best
 
-def _extract_product_hrefs(page) -> List[str]:
-    links = _extract_product_hrefs_any_anchor(page)
-    if links:
-        return links
-    jlinks = _extract_product_urls_from_listing_jsonld(page)
-    if jlinks:
-        print(f"[selver]     fallback JSON-LD yielded {len(jlinks)} links")
-        return jlinks
-    return []
-
-def collect_product_links_from_listing(page, seed_url: str, seen_ext_ids: Set[str]) -> Tuple[Set[str], Dict[str, str]]:
-    links: Set[str] = set()
-    link2listing: Dict[str, str] = {}
-
-    _wait_listing_ready(page)
-    max_pages = _max_page_number(page)
-    if PAGE_LIMIT > 0:
-        max_pages = min(max_pages, PAGE_LIMIT)
-
-    for n in range(1, max_pages + 1):
-        url = seed_url if n == 1 else _with_page(seed_url, n)
-        if not safe_goto(page, url): continue
-        _wait_listing_ready(page)
-        time.sleep(REQ_DELAY)
-
-        page_links = _extract_product_hrefs(page)
-        page_links = [u for u in page_links if _should_process_url(u, seen_ext_ids)]
-        print(f"[selver]   page {n}: discovered {len(page_links)} candidate links (after filters)")
-        for u in page_links:
-            cu = _clean_abs(u)
-            if cu and cu not in links:
-                links.add(cu); link2listing[cu] = url
-
-    if links:
-        sample = list(sorted(links))[:5]
-        print(f"[selver]   harvested {len(links)} PDP links; sample: {sample}")
-    else:
-        print("[selver]   no PDP links found on listing.")
-    return links, link2listing
-
-# ---------------------------------------------------------------------------
-def jsonld_all(page) -> List[dict]:
-    out = []
-    try:
-        scripts = page.locator("script[type='application/ld+json']")
-        for i in range(min(12, scripts.count())):
-            raw = scripts.nth(i).inner_text()
-            try:
-                obj = json.loads(raw)
-                if isinstance(obj, list): out.extend([x for x in obj if isinstance(x, dict)])
-                elif isinstance(obj, dict): out.append(obj)
-            except Exception:
-                continue
-    except Exception:
-        pass
-    return out
-
-def jsonld_pick_product(blocks: List[dict]) -> dict:
-    for b in blocks:
-        t = (b.get("@type") or "")
-        t_low = t.lower() if isinstance(t, str) else ""
-        if "product" in t_low or any(k in b for k in ("gtin13","gtin","sku","brand")):
-            return b
-    return {}
-
-def jsonld_pick_breadcrumbs(blocks: List[dict]) -> List[str]:
-    for b in blocks:
-        t = (b.get("@type") or "").lower()
-        if t == "breadcrumblist" and "itemListElement" in b:
-            try:
-                return [el["item"]["name"].strip()
-                        for el in b["itemListElement"]
-                        if isinstance(el, dict) and "item" in el and "name" in el["item"]]
-            except Exception:
-                continue
-    return []
-
-# ---------------------------------------------------------------------------
-def extract_price(page) -> tuple[float, str]:
-    for sel in ["text=/€/","span:has-text('€')","div:has-text('€')"]:
-        try:
-            node = page.locator(sel).first
-            if node and node.count() > 0:
-                m = re.search(r"(\d+(?:[.,]\d+)?)\s*€", node.inner_text())
-                if m: return float(m.group(1).replace(",", ".")), "EUR"
-        except Exception:
-            pass
-    return 0.0, "EUR"
-
-def extract_ean_and_sku(page) -> tuple[str, str]:
-    # 1) JSON-LD
-    try:
-        blocks = jsonld_all(page)
-        prod = jsonld_pick_product(blocks)
-        if prod:
-            e = _digits(str(prod.get("gtin13") or prod.get("gtin") or ""))
-            s = normspace(str(prod.get("sku") or ""))
-            if _valid_ean13(e):
-                return e, s
-    except Exception:
-        pass
-
-    # 2) itemprop
-    try:
-        got = page.evaluate("""
-        () => {
-          const pick = (sel) => {
-            const el = document.querySelector(sel);
-            if (!el) return null;
-            return el.getAttribute('content') || el.textContent || null;
-          };
-          return {
-            gtin13: pick('[itemprop="gtin13"], meta[itemprop="gtin13"]'),
-            gtin:   pick('[itemprop="gtin"], meta[itemprop="gtin"]'),
-            sku:    pick('[itemprop="sku"], meta[itemprop="sku"], meta[property="product:retailer_item_id"]')
-          };
-        }
-        """)
-        if got:
-            e = _digits(got.get("gtin13") or got.get("gtin") or "")
-            s = normspace(got.get("sku") or "")
-            if _valid_ean13(e):
-                return e, s
-    except Exception:
-        pass
-
-    # 3) DOM heuristic
-    e_dom, s_dom = _ean_sku_from_dom(page)
-    if e_dom or s_dom:
-        return e_dom, s_dom
-
-    # 4) HTML regex
-    try:
-        html = page.content()
-        e_html = _pick_ean_from_html(html)
-        if _valid_ean13(_digits(e_html)):
-            return _digits(e_html), s_dom or ""
-    except Exception:
-        pass
-
-    return "", s_dom or ""
-
-def breadcrumbs_dom(page) -> List[str]:
-    for sel in ["nav ol li a","nav.breadcrumbs a","ol.breadcrumbs a"]:
-        try:
-            items = page.locator(sel)
-            if items.count() > 0:
-                vals = [normspace(items.nth(i).inner_text()) for i in range(items.count())]
-                vals = [v for v in vals if v and v.lower() != "e-selver"]
-                if vals: return vals
-        except Exception:
-            pass
-    return []
-
-def _extract_row_from_pdp(page, product_url_hint: Optional[str] = None) -> Optional[dict]:
-    _wait_pdp_ready(page)
-    _expand_pdp_details(page)
-    ext_id = canonical_from_page(page) or product_url_hint
-    if not ext_id: return None
-    # Guard: never ingest careers pages etc.
-    if "vabad-ametikohad" in (ext_id or ""):
+def pick_brand(
+    json_ld: Dict[str, any],
+    specs: Dict[str, str],
+    fallback_title: str,
+) -> str:
+    """
+    Priority:
+      1. json_ld["brand"] (string or { "name": "..." }) or json_ld["manufacturer"]
+      2. specs rows like "tootja", "bränd", "kaubamärk", "brand", "manufacturer"
+      3. fallback: try first ALLCAPS-ish token from product title
+    """
+    # 1. JSON-LD
+    def _get_from_json_ld(js: Dict[str, any]) -> Optional[str]:
+        cand = js.get("brand")
+        if cand:
+            if isinstance(cand, str):
+                return cand.strip()
+        if isinstance(cand, dict):
+            nm = cand.get("name")
+            if nm:
+                return str(nm).strip()
+        manu = js.get("manufacturer")
+        if manu:
+            if isinstance(manu, str):
+                return manu.strip()
+            if isinstance(manu, dict):
+                nm = manu.get("name")
+                if nm:
+                    return str(nm).strip()
         return None
 
-    blocks = jsonld_all(page)
-    prod_ld = jsonld_pick_product(blocks)
-    crumbs_ld = jsonld_pick_breadcrumbs(blocks)
+    b = _get_from_json_ld(json_ld)
+    if b:
+        return b
 
-    name = normspace(prod_ld.get("name") or "") if prod_ld else ""
-    if not name:
-        try: name = normspace(page.locator("h1").first.inner_text())
-        except Exception: name = ""
-    if not name: return None
+    # 2. specs table: look for likely brand/manufacturer keys
+    BRAND_KEYS = [
+        "bränd", "brand", "tootja", "kaubamärk", "manufacturer",
+        "tootja / päritoluriik", "käitleja", "handler"
+    ]
+    for k in BRAND_KEYS:
+        for spec_key, spec_val in specs.items():
+            if k in spec_key:
+                v = spec_val.strip()
+                if v:
+                    return v
 
-    # Brand
-    brand = extract_brand(page, prod_ld)
-    brand = normalize_brand_case(strip_legal_suffixes(brand)) if brand else ""
+    # 3. fallback from title
+    # heuristic: first token or first comma-separated piece that looks ALLCAPS-ish
+    ttl = fallback_title or ""
+    parts = re.split(r"[,-]+", ttl)
+    for p in parts:
+        p = normspace(p)
+        # if token has >=2 letters and most are uppercase
+        letters = re.sub(r"[^A-Za-zÅÄÖÕÜŠŽÕÄÖÜšžõäöü]", "", p)
+        if len(letters) >= 2 and (sum(1 for ch in letters if ch.isupper()) / len(letters) >= 0.7):
+            return p
+    return ""
 
-    # EAN & SKU
-    ean, sku = "", ""
-    if prod_ld:
-        ean = _digits(str(prod_ld.get("gtin13") or prod_ld.get("gtin") or "")) or ""
-        sku = normspace(str(prod_ld.get("sku") or ""))
-    e2, s2 = extract_ean_and_sku(page)
-    ean = ean or e2
-    sku = sku or s2
+def pick_size_text(specs: Dict[str,str], title_guess: str) -> str:
+    """
+    We store size_text (what user sees). Priority:
+      - from specs table if we find something like "Kogus", "Netokogus", "Net weight"
+      - else guess_size_from_title()
+    """
+    SIZE_KEYS = [
+        "kogus", "netokogus", "neto kogus",
+        "net weight", "net qty", "net quantity",
+        "maht", "suurus", "pakend", "pakendi suurus",
+    ]
+    for k in SIZE_KEYS:
+        for spec_key, spec_val in specs.items():
+            if k in spec_key:
+                v = normspace(spec_val)
+                if v:
+                    return v
+    return guess_size_from_title(title_guess)
 
-    price, currency = 0.0, "EUR"
-    if prod_ld and "offers" in prod_ld:
-        offers = prod_ld["offers"]
-        if isinstance(offers, list) and offers: offers = offers[0]
+def pick_ean_and_sku(
+    json_ld: Dict[str,any],
+    specs: Dict[str,str],
+    page,
+) -> Tuple[str,str]:
+    """
+    ean_raw, sku_raw
+    Priority for EAN:
+      - JSON-LD .gtin13 / .gtin8 / .gtin14 / .sku if 8-14 digits
+      - specs row "ribakood" (barcode)
+      - meta[itemprop=gtin*]
+    SKU fallback:
+      - json_ld["sku"]
+      - specs["tootekood"], "sku", "artikkel"
+    """
+    ean_raw = ""
+    sku_raw = ""
+
+    def is_eanish(v: str) -> bool:
+        digits = norm_digits(v)
+        return len(digits) >= 8 and len(digits) <= 14
+
+    # 1. json_ld
+    for key in ("gtin13","gtin8","gtin14","sku","gtin"):
+        if key in json_ld:
+            cand = str(json_ld[key])
+            if is_eanish(cand):
+                ean_raw = cand
+                break
+    # also consider json_ld["sku"] for sku_raw
+    if "sku" in json_ld:
+        sku_raw = str(json_ld["sku"]).strip()
+
+    # 2. specs
+    for k,v in specs.items():
+        lowk = k.lower()
+        if "ribakood" in lowk or "barcode" in lowk or "ean" in lowk:
+            if not ean_raw and is_eanish(v):
+                ean_raw = v
+        if any(x in lowk for x in ["tootekood","sku","artikkel","artikli nr","artikli number","article nr"]):
+            if not sku_raw:
+                sku_raw = v.strip()
+
+    # 3. meta/ld GTIN outside specs (some pages have itemprop=gtinXX)
+    if not ean_raw:
         try:
-            price = float(str(offers.get("price")).replace(",", "."))
-            currency = offers.get("priceCurrency") or currency
-        except Exception: pass
-    if price == 0.0:
-        price, currency = extract_price(page)
+            m = page.query_selector('[itemprop^="gtin"]')
+            if m:
+                txt = normspace(m.inner_text() or m.get_attribute("content") or "")
+                if is_eanish(txt):
+                    ean_raw = txt
+        except Exception:
+            pass
 
-    if not price or price <= 0:
-        price, currency = 0.0, currency or "EUR"
+    return ean_raw.strip(), sku_raw.strip()
 
-    crumbs = crumbs_ld or breadcrumbs_dom(page)
-    cat_path = " / ".join(crumbs); cat_leaf = crumbs[-1] if crumbs else ""
-    size_text = guess_size_from_title(name)
+def preload_seen_ext_ids() -> Set[str]:
+    """
+    Load ext_id list from staging_selver_products so we can skip duplicates.
+    Uses PRELOAD_DB_QUERY via psql-style env vars is out of scope here;
+    return empty set if PRELOAD_DB disabled.
+    """
+    if not PRELOAD_DB:
+        return set()
 
-    ean_norm = normalize_ean_digits(ean)
-    src_url  = ext_id
+    import psycopg2, psycopg2.extras
+    dsn = os.getenv("DATABASE_URL")
+    if not dsn:
+        print("[warn] PRELOAD_DB=1 but no DATABASE_URL in env; skipping preload", file=sys.stderr)
+        return set()
+
+    seen: Set[str] = set()
+    try:
+        conn = psycopg2.connect(dsn)
+        cur = conn.cursor()
+        q = PRELOAD_DB_QUERY
+        if PRELOAD_DB_LIMIT > 0:
+            q += f" LIMIT {PRELOAD_DB_LIMIT:d}"
+        cur.execute(q)
+        for row in cur.fetchall():
+            ext = str(row[0])
+            if ext:
+                seen.add(ext)
+        cur.close()
+        conn.close()
+        print(f"[info] preloaded {len(seen)} existing ext_ids from DB", file=sys.stderr)
+    except Exception as e:
+        print(f"[warn] preload DB failed: {e}", file=sys.stderr)
+    return seen
+
+def iter_category_roots() -> List[str]:
+    """
+    We'll read text file with 1 category URL per line (relative or absolute).
+    """
+    cats: List[str] = []
+    if os.path.isfile(CATEGORIES_FILE):
+        with open(CATEGORIES_FILE, "r", encoding="utf-8") as f:
+            for line in f:
+                u = line.strip()
+                if not u:
+                    continue
+                cats.append(u)
+    else:
+        print(f"[warn] categories file {CATEGORIES_FILE} not found", file=sys.stderr)
+    return cats
+
+def is_banned_product_url(path: str) -> bool:
+    low = path.lower()
+    if any(snippet in low for snippet in NON_PRODUCT_PATH_SNIPPETS):
+        return True
+    if any(kw in low for kw in NON_PRODUCT_KEYWORDS):
+        return True
+    return False
+
+def console_filter(msg):
+    """
+    Optional console message filter for Playwright's console events.
+    We only print .warn or .error or all, depending on LOG_CONSOLE.
+    """
+    t = msg.type().lower()
+    if LOG_CONSOLE == "all":
+        print(f"[console:{t}] {msg.text()}")
+    elif LOG_CONSOLE == "warn":
+        if t in ("warning","warn","error","assert"):
+            print(f"[console:{t}] {msg.text()}")
+    else:
+        # LOG_CONSOLE == "0"/"off": ignore
+        pass
+
+def block_junk(route, request):
+    """
+    Let Selver's own origin requests through. Block 3p analytics etc.
+    """
+    try:
+        url = request.url
+        host = urlparse(url).netloc.lower()
+        if any(h in host for h in BLOCK_HOSTS):
+            return route.abort()
+        # else allow
+        return route.continue_()
+    except Exception:
+        return route.continue_()
+
+def safe_goto(page, url: str, timeout_ms: int = NAV_TIMEOUT_MS) -> bool:
+    """
+    Try to navigate with small retries (Selver sometimes does 502-ish transient)
+    """
+    for attempt in range(3):
+        try:
+            page.goto(url, timeout=timeout_ms, wait_until="domcontentloaded")
+            # small wait for React hydration
+            page.wait_for_timeout(400)
+            return True
+        except Exception as e:
+            print(f"[warn] goto fail {url} ({e}), retry {attempt+1}/3", file=sys.stderr)
+            page.wait_for_timeout(800)
+    return False
+
+def scrape_product_links_on_category(page) -> List[str]:
+    """
+    On a category grid page, return list of absolute detail-page URLs for each product tile.
+    The Selver site is React-ish, but you can usually find anchors with href="/toode/xxx".
+    We'll try multiple selectors and fallback.
+    """
+    links: List[str] = []
+
+    selectors = [
+        'a.product-card__link[href^="/"]',
+        'a[href^="/toode/"]',
+        '[data-testid="product-card"] a[href^="/"]',
+        'a[href*="/toode/"][data-testid]',
+    ]
+    for sel in selectors:
+        try:
+            for a in page.query_selector_all(sel):
+                href = a.get_attribute("href") or ""
+                if not href:
+                    continue
+                absu = _clean_abs(href)
+                if not absu:
+                    continue
+                links.append(absu)
+        except Exception:
+            pass
+
+    # unique preserve order
+    out: List[str] = []
+    seen: Set[str] = set()
+    for u in links:
+        if u not in seen:
+            seen.add(u)
+            out.append(u)
+    return out
+
+def paginate_category(page) -> bool:
+    """
+    Click "next page" in category listing if it exists.
+    Return True if we moved to next page, else False.
+    """
+    selectors = [
+        'a[rel="next"]',
+        'button[aria-label*="järgmine"]',
+        'button[aria-label*="Next"]',
+        '.pagination__next button',
+    ]
+    for sel in selectors:
+        try:
+            btn = page.query_selector(sel)
+            if btn and btn.is_enabled():
+                btn.click()
+                page.wait_for_timeout(600)
+                return True
+        except Exception:
+            pass
+    return False
+
+def parse_category_breadcrumb(page) -> Tuple[str,str]:
+    """
+    Return (full_path, leaf_name) for breadrumb like:
+      Avaleht > Piimatooted > Jogurtid
+    We'll join with " > ".
+    """
+    crumbs: List[str] = []
+    try:
+        bc_nodes = page.query_selector_all('[data-testid="breadcrumbs"] li, nav.breadcrumbs li, .breadcrumb li')
+        for li in bc_nodes:
+            txt = normspace(li.inner_text())
+            txt = re.sub(r"^(?:Avaleht|Home)$","",txt,flags=re.I).strip()
+            if txt:
+                crumbs.append(txt)
+    except Exception:
+        pass
+
+    if not crumbs:
+        # fallback h1
+        try:
+            h = page.query_selector("h1, .category-title")
+            if h:
+                crumbs = [normspace(h.inner_text())]
+        except Exception:
+            pass
+
+    leaf = crumbs[-1] if crumbs else ""
+    cat_path = " > ".join(crumbs)
+    return cat_path, leaf
+
+def product_ext_id_from_url(url: str) -> str:
+    """
+    e.g. https://www.selver.ee/toode/piim-alma-25-05l
+    We'll take last path segment.
+    """
+    parts = urlsplit(url)
+    slug = parts.path.rstrip("/").split("/")[-1]
+    # keep slug as ext_id
+    return slug
+
+def scrape_product_page(page, url: str) -> Dict[str, any]:
+    """
+    Extract a single product:
+     - title / name
+     - brand
+     - ean_raw + ean_norm
+     - sku_raw
+     - size_text
+     - price, currency
+     - category_path / category_leaf from breadcrumbs on the detail page
+    """
+    ok = safe_goto(page, url)
+    if not ok:
+        return {}
+
+    # Attempt to wait for product detail wrapper
+    page.wait_for_timeout(500)
+
+    # name
+    name_txt = ""
+    try:
+        h = page.query_selector('[data-testid="product-name"]') or page.query_selector("h1.product-title, h1")
+        if h:
+            name_txt = normspace(h.inner_text())
+    except Exception:
+        pass
+
+    # fallback
+    if not name_txt:
+        name_txt = normspace(page.title())
+
+    # specs table
+    specs = extract_specs_table(page)
+
+    # structured data
+    json_ld = extract_json_ld(page)
+
+    # brand
+    brand = pick_brand(json_ld, specs, name_txt)
+
+    # ean/sku
+    ean_raw, sku_raw = pick_ean_and_sku(json_ld, specs, page)
+    ean_norm = norm_digits(ean_raw)
+
+    # size
+    size_text = pick_size_text(specs, name_txt)
+
+    # price
+    price_val, currency = extract_price_and_currency(page)
+
+    # category path (sometimes present here too)
+    cat_path, cat_leaf = parse_category_breadcrumb(page)
+
+    # ext_id slug
+    ext_id = product_ext_id_from_url(url)
 
     return {
         "ext_id": ext_id,
-        "source_url": src_url,
-        "name": name,
+        "source_url": url,
+        "name": name_txt,
         "brand": brand,
-        "ean_raw": ean,
+        "ean_raw": ean_raw,
         "ean_norm": ean_norm,
-        "sku_raw": sku,
+        "sku_raw": sku_raw,
         "size_text": size_text,
-        "price": f"{price:.2f}",
-        "currency": currency or "EUR",
+        "price": price_val,
+        "currency": currency,
         "category_path": cat_path,
         "category_leaf": cat_leaf,
     }
 
-# ---------------------------------------------------------------------------
-BLOCK_TYPES = {"image", "font", "media", "stylesheet", "websocket", "manifest"}
-BLOCK_ACTIVE_TYPES = {"script", "xhr", "fetch", "eventsource"}
-
-def _router(route, request):
-    try:
-        url = request.url
-        host = urlparse(url).netloc.lower()
-        rtype = request.resource_type
-        method = (getattr(request, "method", None) or "GET").upper()
-        if "service_worker" in url or "sw_iframe" in url: return route.abort()
-        if host.endswith("selver.ee"): return route.continue_()
-        if method == "OPTIONS": return route.abort()
-        if rtype in BLOCK_TYPES or rtype in BLOCK_ACTIVE_TYPES: return route.abort()
-        if any(host == d or host.endswith("." + d) for d in BLOCK_HOSTS): return route.abort()
-        return route.continue_()
-    except Exception:
-        return route.continue_()
-
-# ---------------------------------------------------------------------------
-def open_product_via_click(page, listing_url: str, product_url: str) -> bool:
-    if not listing_url or not safe_goto(page, listing_url): return False
-    _wait_listing_ready(page); time.sleep(0.2)
-    path = _strip_linecol(urlparse(product_url).path)
-    es = "/e-selver" + path if not path.startswith("/e-selver/") else path
-    # broaden selector set to catch single-segment slugs inside product cards
-    sels = [
-        f"a[href$='{path}']",
-        f"a[href$='{path}/']",
-        f"a[href$='{es}']",
-        f"a[href$='{es}/']",
-        "a[href*='/toode/']",
-        "div[class*='product'] a[href^='/']",
-        "a[href^='/'][href*='-']"
-    ]
-    for sel in sels:
-        a = page.locator(sel).first
-        try:
-            if a.count() > 0 and a.is_visible():
-                a.click(timeout=5000)
-                for _ in range(24):
-                    up = urlparse(page.url).path.lower()
-                    if _is_selver_product_like(urljoin(BASE, up)) or page.locator("h1").count() > 0: break
-                    time.sleep(0.25)
-                _wait_pdp_ready(page); return True
-        except Exception:
-            continue
-    return False
-
-# ---------------------------------------------------------------------------
-def collect_write_by_clicking(page, seed_url: str, writer: csv.DictWriter, seen_ext_ids: Set[str]) -> int:
-    wrote = 0
-    if not safe_goto(page, seed_url): return 0
-    _wait_listing_ready(page)
-    max_pages = _max_page_number(page)
-    if PAGE_LIMIT > 0: max_pages = min(max_pages, PAGE_LIMIT)
-
-    for n in range(1, max_pages + 1):
-        url = seed_url if n == 1 else _with_page(seed_url, n)
-        if not safe_goto(page, url): continue
-        _wait_listing_ready(page); time.sleep(REQ_DELAY)
-
-        hrefs = _extract_product_hrefs(page)
-        hrefs = [h for h in hrefs if _should_process_url(h, seen_ext_ids)]
-        print(f"[selver]   page {n}: discovered {len(hrefs)} candidate links (after filters)")
-
-        for href in hrefs:
-            if not _should_process_url(href, seen_ext_ids):
-                continue
-
-            navigated = safe_goto(page, href)
-            if not navigated:
-                navigated = open_product_via_click(page, url, href)
-                if not navigated:
-                    continue
-
-            _wait_pdp_ready(page)
-            row = _extract_row_from_pdp(page, href)
-            if row:
-                ext_id = _clean_abs(row["ext_id"]) or row["ext_id"]
-                key = urlparse(ext_id).path
-                if ext_id not in seen_ext_ids and key not in seen_ext_ids:
-                    writer.writerow(row)
-                    seen_ext_ids.add(ext_id); seen_ext_ids.add(key)
-                    wrote += 1
-
-            try:
-                page.go_back(wait_until="domcontentloaded", timeout=NAV_TIMEOUT_MS)
-                _wait_listing_ready(page)
-            except Exception:
-                safe_goto(page, url); _wait_listing_ready(page)
-            time.sleep(0.2)
-
-    return wrote
-
-# NEW: process ONLY list PDPs directly (skips categories entirely)
-def _process_only_list(page, writer: csv.DictWriter, seen_ext_ids: Set[str]) -> int:
-    wrote = 0
-    # Normalize every entry to an absolute, dedup (prevents invalid URL nav like "/ananass-kg")
-    pdps_abs: List[str] = []
-    seen_abs: Set[str] = set()
-    for u in ONLY_EXTS:
-        if not _is_selver_product_like(u):
-            continue
-        cu = _clean_abs(u)
-        if not cu:
-            continue
-        if cu in seen_abs:
-            continue
-        seen_abs.add(cu)
-        pdps_abs.append(cu)
-
-    print(f"[selver] ONLY list present → processing {len(pdps_abs)} PDPs directly")
-
-    for i, pu in enumerate(sorted(pdps_abs), 1):
-        if not _should_process_url(pu, seen_ext_ids):
-            continue
-        got = safe_goto(page, pu)
-        if not got:
-            # best-effort fallback (rarely needed)
-            got = open_product_via_click(page, "", pu)
-            if not got:
-                continue
-        time.sleep(REQ_DELAY)
-        row = _extract_row_from_pdp(page, pu)
-        if row:
-            ext_id = _clean_abs(row["ext_id"]) or row["ext_id"]
-            key = urlparse(ext_id).path
-            if ext_id not in seen_ext_ids and key not in seen_ext_ids:
-                writer.writerow(row)
-                seen_ext_ids.add(ext_id); seen_ext_ids.add(key)
-                wrote += 1
-        if (i % 25) == 0:
-            try:
-                # placeholder to keep symmetry with flush points elsewhere
-                writer.fieldnames
-            except Exception:
-                pass
-    return wrote
-
-# ---------------------------- CLI & main ------------------------------------
-def _parse_cli():
-    p = argparse.ArgumentParser(description="Selver category crawler (Playwright)")
-    p.add_argument("--skip-ext-file", dest="skip_file", help="File with ext_ids/URLs to skip", default=None)
-    p.add_argument("--skip-ids-file", dest="skip_file_alias", help="Alias of --skip-ext-file", default=None)
-    p.add_argument("--only-ext-file", dest="only_file", help="File with ext_ids/URLs to process exclusively", default=None)
-    p.add_argument("--cats-file", dest="cats_file", help="Categories file (overrides CATEGORIES_FILE env)", default=None)
-    p.add_argument("--page-limit", dest="page_limit", type=int, default=None)
-    p.add_argument("--req-delay", dest="req_delay", type=float, default=None)
-    p.add_argument("--output-csv", dest="output_csv", default=None)
-    return p.parse_args()
-
-def crawl():
-    os.makedirs(os.path.dirname(OUTPUT) or ".", exist_ok=True)
-    dbg_dir = "data/selver_debug"; os.makedirs(dbg_dir, exist_ok=True)
-
-    print(f"[selver] writing CSV -> {OUTPUT}")
-    with open(OUTPUT, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=[
-            "ext_id","source_url","name","brand","ean_raw","ean_norm","sku_raw",
-            "size_text","price","currency","category_path","category_leaf"
-        ])
-        w.writeheader()
-
-        seen_ext_ids: Set[str] = preload_ext_ids_from_db() if PRELOAD_DB else set()
-
-        with sync_playwright() as p:
-            print("[selver] launching chromium (headless)")
-            browser = p.chromium.launch(headless=True, args=[
-                "--disable-blink-features=AutomationControlled","--no-sandbox","--disable-dev-shm-usage",
+def write_csv_header_if_needed(out_path: str):
+    """
+    Create file+header if doesn't exist.
+    """
+    need_header = not os.path.isfile(out_path)
+    if need_header:
+        os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
+        with open(out_path, "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow([
+                "ext_id","source_url","name","brand","ean_raw","ean_norm","sku_raw",
+                "size_text","price","currency","category_path","category_leaf"
             ])
-            context = browser.new_context(
-                locale="et-EE",
-                viewport={"width": 1366, "height": 900},
-                user_agent=("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                            "AppleWebKit/537.36 (KHTML, like Gecko) "
-                            "Chrome/124.0.0.0 Safari/537.36"),
-                extra_http_headers={"Accept-Language": "et-EE,et;q=0.9,en-US;q=0.8,en;q=0.7"},
-                ignore_https_errors=True,
-                service_workers="block",
-            )
 
-            context.add_init_script("""
-              (function(){
-                try { window.fbq = window.fbq || function(){}; } catch(e){}
-                try { window.dataLayer = window.dataLayer || []; } catch(e){}
-                window.addEventListener('error',  function(e){ try{ e.stopImmediatePropagation&&e.stopImmediatePropagation(); }catch(_){} }, true);
-                window.addEventListener('unhandledrejection', function(e){ try{ e.preventDefault&&e.preventDefault(); }catch(_){} }, true);
-              })();
-            """)
+def append_row(out_path: str, row: Dict[str, any]):
+    with open(out_path, "a", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow([
+            row.get("ext_id",""),
+            row.get("source_url",""),
+            row.get("name",""),
+            row.get("brand",""),
+            row.get("ean_raw",""),
+            row.get("ean_norm",""),
+            row.get("sku_raw",""),
+            row.get("size_text",""),
+            row.get("price",""),
+            row.get("currency",""),
+            row.get("category_path",""),
+            row.get("category_leaf",""),
+        ])
 
-            if USE_ROUTER:
-                context.route("**/*", _router)
+def crawl_category(page, category_url: str,
+                   seen_ext: Set[str],
+                   writer_path: str,
+                   only_ext: Optional[Set[str]]=None,
+                   skip_ext: Optional[Set[str]]=None):
+    """
+    Go through paginated listing for one category.
+    For each product link, scrape detail page (unless already in DB or skip list).
+    """
+    url_abs = _clean_abs(category_url) or ""
+    if not url_abs:
+        return
+    if not safe_goto(page, url_abs):
+        return
 
-            page = context.new_page()
-            page.set_default_navigation_timeout(NAV_TIMEOUT_MS)
-            page.set_default_timeout(10000)
+    cat_breadcrumb, cat_leaf = parse_category_breadcrumb(page)
 
-            page.on("pageerror", lambda e: None)
-            page.on("requestfailed", lambda r: None)
+    pages_done = 0
+    while True:
+        pages_done += 1
+        # pick product cards
+        card_urls = scrape_product_links_on_category(page)
 
-            if LOG_CONSOLE == "all":
-                page.on("console", lambda m: print(f"[pw] {m.type}: {m.text}"))
-            elif LOG_CONSOLE == "warn":
-                def _warn_err_only(m):
-                    if m.type in ("warning","error"):
-                        t = (m.text or "").replace("\n"," ")[:800]
-                        print(f"[pw] {m.type}: {t}")
-                page.on("console", _warn_err_only)
-
-            rows_written = 0
-
-            # --- NEW: short-circuit when ONLY list is provided ---
-            if ONLY_EXTS:
-                print(f"[selver] ONLY_EXTS loaded: {len(ONLY_EXTS)} entries")
-                try:
-                    rows_written = _process_only_list(page, w, seen_ext_ids)
-                finally:
-                    try: browser.close()
-                    except Exception: pass
-                print(f"[selver] wrote {rows_written} product rows (ONLY mode).")
-                return
-
-            print("[selver] collecting seeds…")
-            file_seeds: List[str] = []
-            if os.path.exists(CATEGORIES_FILE):
-                with open(CATEGORIES_FILE, "r", encoding="utf-8") as cf:
-                    for ln in cf:
-                        ln = (ln or "").strip()
-                        if ln and not ln.startswith("#"):
-                            u = _clean_abs(ln)
-                            if u: file_seeds.append(u)
-
-            if file_seeds:
-                seeds: List[str] = list(dict.fromkeys(file_seeds))
-                print(f"[selver] using {len(seeds)} file-driven seeds from {CATEGORIES_FILE}")
-            else:
-                seeds = [urljoin(BASE, pth) for pth in STRICT_ALLOWLIST]
-                print(f"[selver] no file seeds found → falling back to STRICT_ALLOWLIST ({len(seeds)})")
-
-            cats = seeds if ALLOWLIST_ONLY else discover_categories(page, seeds)
-
-            print(f"[selver] Categories to crawl: {len(cats)}")
-            for cu in cats[:40]: print(f"[selver]   {cu}")
-            if len(cats) > 40: print(f"[selver]   … (+{len(cats)-40} more)")
-
-            if CLICK_PRODUCTS:
-                for ci, cu in enumerate(cats, 1):
+        # optional click to reveal more info on listing (if CLICK_PRODUCTS=1)
+        if CLICK_PRODUCTS:
+            for card_sel in (
+                '[data-testid="product-card"] [data-testid="product-name"]',
+                '.product-card__link'
+            ):
+                for el in page.query_selector_all(card_sel):
                     try:
-                        wrote = collect_write_by_clicking(page, cu, w, seen_ext_ids)
-                        rows_written += wrote
-                        print(f"[selver] {cu} → +{wrote} rows (click mode, total: {rows_written})")
-                        if (ci % 1) == 0: f.flush()
+                        el.hover()
                     except Exception:
-                        try: page.screenshot(path=f"{dbg_dir}/click_mode_fail_{ci}.png", full_page=True)
-                        except Exception: pass
-                        continue
-            else:
-                product_urls: Set[str] = set()
-                prod2listing: Dict[str, str] = {}
-                for ci, cu in enumerate(cats, 1):
-                    if not safe_goto(page, cu):
-                        try: page.screenshot(path=f"{dbg_dir}/cat_nav_fail_{ci}.png", full_page=True)
-                        except Exception: pass
-                        continue
-                    time.sleep(REQ_DELAY)
+                        pass
 
-                    links, mapping = collect_product_links_from_listing(page, cu, seen_ext_ids)
-                    if not links:
-                        try: page.screenshot(path=f"{dbg_dir}/cat_empty_{ci}.png", full_page=True)
-                        except Exception: pass
+        for purl in card_urls:
+            ext_id = product_ext_id_from_url(purl)
 
-                    for u in links:
-                        cu_norm = _clean_abs(u)
-                        if cu_norm and (cu_norm not in product_urls):
-                            product_urls.add(cu_norm)
-                            prod2listing[cu_norm] = mapping.get(u, cu)
+            # skip rules
+            if skip_ext and ext_id in skip_ext:
+                continue
+            if only_ext and ext_id not in only_ext:
+                continue
+            if ext_id in seen_ext:
+                continue
 
-                    print(f"[selver] {cu} → +{len(links)} products (total so far: {len(product_urls)})")
+            # deep scrape product
+            info = scrape_product_page(page, purl)
+            if not info or not info.get("ext_id"):
+                continue
 
-                for i, pu in enumerate(sorted(product_urls), 1):
-                    if not _should_process_url(pu, seen_ext_ids):
-                        continue
+            # Fill category from outer page if detail page didn't have it
+            if not info.get("category_path"):
+                info["category_path"] = cat_breadcrumb
+                info["category_leaf"] = cat_leaf
 
-                    got = safe_goto(page, pu)
-                    if not got:
-                        got = open_product_via_click(page, prod2listing.get(pu, ""), pu)
-                        if not got:
-                            try: page.screenshot(path=f"{dbg_dir}/prod_nav_fail_{i}.png", full_page=True)
-                            except Exception: pass
-                            continue
-                    time.sleep(REQ_DELAY)
+            append_row(writer_path, info)
+            seen_ext.add(info["ext_id"])
+            print(f"[ok] {info['ext_id']}  {info['name']}  €{info['price']}  ({info['brand']})")
 
-                    row = _extract_row_from_pdp(page, pu)
-                    if not row:
-                        if open_product_via_click(page, prod2listing.get(pu, ""), pu):
-                            time.sleep(0.3); row = _extract_row_from_pdp(page, pu)
+            time.sleep(REQ_DELAY)
 
-                    if row:
-                        ext_id = _clean_abs(row["ext_id"]) or row["ext_id"]
-                        key = urlparse(ext_id).path
-                        if ext_id not in seen_ext_ids and key not in seen_ext_ids:
-                            w.writerow(row)
-                            seen_ext_ids.add(ext_id); seen_ext_ids.add(key)
-                            rows_written += 1
+        if PAGE_LIMIT and pages_done >= PAGE_LIMIT:
+            break
 
-                    if (i % 25) == 0:
-                        f.flush()
+        # next page?
+        moved = paginate_category(page)
+        if not moved:
+            break
+        time.sleep(REQ_DELAY)
 
+def load_skip_or_only(path: Optional[str]) -> Optional[Set[str]]:
+    """
+    Read a text file containing one ext_id per line. Return set or None if not provided.
+    """
+    if not path:
+        return None
+    s: Set[str] = set()
+    with open(path, "r", encoding="utf-8") as f:
+        for line in f:
+            v = line.strip()
+            if v:
+                s.add(v)
+    return s
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--output", default=OUTPUT, help="CSV output path")
+    ap.add_argument("--categories-file", default=CATEGORIES_FILE, help="file with root category URLs")
+    ap.add_argument("--skip-ext-file", default=None, help="text file of ext_id to skip")
+    ap.add_argument("--only-ext-file", default=None, help="text file of ext_id allowlist")
+    ap.add_argument("--headless", default="1", help="1=headless,0=headed for debugging")
+    args = ap.parse_args()
+
+    out_csv = args.output
+    cats_file = args.categories_file
+    skip_file = args.skip_ext_file
+    only_file = args.only_ext_file
+    headless = (args.headless.strip() != "0")
+
+    write_csv_header_if_needed(out_csv)
+
+    # seen ext_ids from DB
+    seen_ext = preload_seen_ext_ids()
+
+    # skip/only sets
+    skip_ext = load_skip_or_only(skip_file)
+    only_ext = load_skip_or_only(only_file)
+
+    # which categories to crawl
+    cats = []
+    if os.path.isfile(cats_file):
+        with open(cats_file,"r",encoding="utf-8") as f:
+            for line in f:
+                raw = line.strip()
+                if not raw:
+                    continue
+                absu = _clean_abs(raw)
+                if not absu:
+                    continue
+                parts = urlsplit(absu)
+                # filter by allowed food categories
+                if not is_probably_food_category(parts.path):
+                    continue
+                cats.append(absu)
+    else:
+        print(f"[error] category file {cats_file} missing", file=sys.stderr)
+        return
+
+    if not cats:
+        print("[warn] no valid categories to crawl after filtering", file=sys.stderr)
+        return
+
+    print(f"[info] starting Playwright, {len(cats)} categories", file=sys.stderr)
+
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch(headless=headless)
+        context = browser.new_context()
+        page = context.new_page()
+
+        # block 3p noise
+        if USE_ROUTER:
+            context.route("**/*", block_junk)
+
+        # optional console logging
+        if LOG_CONSOLE != "0":
+            page.on("console", console_filter)
+
+        for cat in cats:
+            print(f"[cat] {cat}", file=sys.stderr)
             try:
-                browser.close()
-            except Exception:
-                pass
+                crawl_category(
+                    page,
+                    cat,
+                    seen_ext,
+                    out_csv,
+                    only_ext=only_ext,
+                    skip_ext=skip_ext,
+                )
+            except Exception as e:
+                print(f"[err] category {cat}: {e}", file=sys.stderr)
 
-    print(f"[selver] wrote {rows_written} product rows.")
+        browser.close()
 
-# ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    args = _parse_cli()
-
-    if args.output_csv:
-        OUTPUT = args.output_csv
-    if args.page_limit is not None:
-        PAGE_LIMIT = int(args.page_limit)
-    if args.req_delay is not None:
-        REQ_DELAY = float(args.req_delay)
-    if args.cats_file:
-        CATEGORIES_FILE = args.cats_file
-
-    skip_path = args.skip_file or args.skip_file_alias
-    if skip_path:
-        SKIP_EXTS = _load_ext_file(skip_path)
-        print(f"[selver] loaded {len(SKIP_EXTS)} skip keys (abs+path) from {skip_path}")
-    else:
-        SKIP_EXTS = set()
-
-    if args.only_file:
-        ONLY_EXTS = _load_ext_file(args.only_file)
-        print(f"[selver] loaded {len(ONLY_EXTS)} ONLY keys (abs+path) from {args.only_file}")
-    else:
-        ONLY_EXTS = set()
-
-    try:
-        crawl()
-    except KeyboardInterrupt:
-        pass
+    main()
