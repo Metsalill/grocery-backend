@@ -1,58 +1,41 @@
-name: "Coop (Bolt Food) – Auto category crawl → CSV/DB"
+name: Coop Bolt scrape + DB ingest
 
 on:
-  # Scheduled: every 2 hours (UTC)
+  workflow_dispatch: {}
   schedule:
-    - cron: "0 */24 * * *"
-  # Manual trigger with inputs
-  workflow_dispatch:
-    inputs:
-      city_path:
-        description: "Bolt city path (from URL after /en-US/, e.g. 2-tartu)"
-        required: false
-        default: "2-tartu"
-      headless:
-        description: "Headless Playwright (1/0)"
-        required: false
-        default: "1"
-      req_delay:
-        description: "Delay between steps (sec)"
-        required: false
-        default: "0.25"
-      upsert_db:
-        description: "Upsert into Postgres (1=yes, 0=just CSV)"
-        required: false
-        default: "1"
-      categories_dir:
-        description: "Optional: base dir for per-store category files (uses {dir}/{city}/{slug}.txt if present)"
-        required: false
-        default: "data/bolt"
-      deep:
-        description: "Open product modal to parse brand/manufacturer (1=yes, 0=no)"
-        required: false
-        default: "1"
-
-# Prevent overlapping runs (manual or scheduled share same queue)
-concurrency:
-  group: coop-bolt-crawl
-  cancel-in-progress: true
+    # run every 6 hours (UTC); adjust if you want
+    - cron: "0 */6 * * *"
 
 jobs:
-  crawl-bolt:
+  scrape-bolt:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 60
+
+    # one job per Bolt venue you care about
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # example entries – adjust city/store/out paths to match
+          - city: "2-tartu"
+            store: "Coop Akadeemia"
+            categories_dir: "data/bolt"
+            outfile: "out/bolt_akadeemia.csv"
+
+          - city: "2-tartu"
+            store: "Coop Mustakivi"
+            categories_dir: "data/bolt"
+            outfile: "out/bolt_mustakivi.csv"
 
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-      CITY_PATH: ${{ inputs.city_path || '2-tartu' }}
-      HEADLESS: ${{ inputs.headless || '1' }}
-      REQ_DELAY: ${{ inputs.req_delay || '0.25' }}
-      UPSERT_DB: ${{ inputs.upsert_db || '1' }}
-      CATEGORIES_DIR: ${{ inputs.categories_dir || 'data/bolt' }}
-      DEEP: ${{ inputs.deep || '1' }}
+      TZ: Europe/Tallinn
+      PYTHONUNBUFFERED: "1"
+
+      # 🔐 must exist in repo secrets (Railway RW URL, NOT read-only)
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
 
     steps:
-      - name: Checkout
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -60,62 +43,18 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: pip-${{ runner.os }}-${{ hashFiles('scripts/bolt_crawler.py') }}
-          restore-keys: |
-            pip-${{ runner.os }}-
-
-      - name: Install dependencies
+      - name: Install crawler deps
         run: |
           python -m pip install --upgrade pip
-          pip install playwright==1.47.0 selectolax psycopg[binary] tenacity
-          python -m playwright install --with-deps chromium
+          pip install playwright asyncpg
+          playwright install --with-deps chromium
 
-      - name: Make output dir
-        run: python -c "import os; os.makedirs('out', exist_ok=True)"
-
-      - name: Crawl Kvartali COOP Maksimarket
-        run: >
-          python scripts/bolt_crawler.py
-          --city "${{ env.CITY_PATH }}"
-          --store "Kvartali COOP Maksimarket"
-          --headless "${{ env.HEADLESS }}"
-          --req-delay "${{ env.REQ_DELAY }}"
-          --upsert-db "${{ env.UPSERT_DB }}"
-          --categories-dir "${{ env.CATEGORIES_DIR }}"
-          --deep "${{ env.DEEP }}"
-          --out "out/coop_bolt_${{ env.CITY_PATH }}_Kvartali_COOP_Maksimarket.csv"
-
-      - name: Crawl Lõunakeskuse COOP Maksimarket
-        run: >
-          python scripts/bolt_crawler.py
-          --city "${{ env.CITY_PATH }}"
-          --store "Lõunakeskuse COOP Maksimarket"
-          --headless "${{ env.HEADLESS }}"
-          --req-delay "${{ env.REQ_DELAY }}"
-          --upsert-db "${{ env.UPSERT_DB }}"
-          --categories-dir "${{ env.CATEGORIES_DIR }}"
-          --deep "${{ env.DEEP }}"
-          --out "out/coop_bolt_${{ env.CITY_PATH }}_Lounakeskuse_COOP_Maksimarket.csv"
-
-      - name: Crawl Eedeni COOP Maksimarket
-        run: >
-          python scripts/bolt_crawler.py
-          --city "${{ env.CITY_PATH }}"
-          --store "Eedeni COOP Maksimarket"
-          --headless "${{ env.HEADLESS }}"
-          --req-delay "${{ env.REQ_DELAY }}"
-          --upsert-db "${{ env.UPSERT_DB }}"
-          --categories-dir "${{ env.CATEGORIES_DIR }}"
-          --deep "${{ env.DEEP }}"
-          --out "out/coop_bolt_${{ env.CITY_PATH }}_Eedeni_COOP_Maksimarket.csv"
-
-      - name: Upload CSV artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: "coop-bolt-csv"
-          path: out/*.csv
-          if-no-files-found: warn
+      - name: Run Bolt crawler + ingest
+        run: |
+          python bolt_crawler.py \
+            --categories-dir "${{ matrix.categories_dir }}" \
+            --city "${{ matrix.city }}" \
+            --store "${{ matrix.store }}" \
+            --out "${{ matrix.outfile }}" \
+            --headless 1 \
+            --req-delay 0.35
