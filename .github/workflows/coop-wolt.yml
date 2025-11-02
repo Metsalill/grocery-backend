@@ -1,49 +1,64 @@
 name: Coop Wolt Crawl + Ingest
 
 on:
-  # run manually
   workflow_dispatch: {}
-  # and optionally on a schedule (every 6h here, tweak if you want)
   schedule:
-    - cron: "0 */6 * * *"
+    # run e.g. every 6h; adjust if you want
+    - cron: "30 */6 * * *"
 
 concurrency:
-  group: coop-wolt-crawl
+  group: coop-wolt-scrape
   cancel-in-progress: true
 
 jobs:
   crawl-wolt:
-    name: crawl-wolt (wolt:${{ matrix.venue_id }}, ${{ matrix.store_id }})
+    name: crawl-wolt (wolt:${{ matrix.venue }}, ${{ matrix.city }}, ${{ matrix.store_id }})
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     strategy:
       fail-fast: false
       matrix:
         include:
-          # NOTE: store_id MUST match stores.id in Railway
-          - venue_id: "coop-parnu"
-            store_id: "551"   # Wolt: Coop Pärnu
-          - venue_id: "coop-laagri"
-            store_id: "552"   # Wolt: Coop Laagri
-          - venue_id: "konsum-juri"
-            store_id: "553"   # Wolt: Konsum Jüri
-          - venue_id: "coop-miiduranna"
-            store_id: "554"   # Wolt: Coop Miiduranna
-          - venue_id: "coop-akadeemia_tallinn"
-            store_id: "555"   # Wolt: Coop Akadeemia
-          - venue_id: "coop-lasnamae_tallinn"
-            store_id: "556"   # Wolt: Coop Lasnamäe
-          - venue_id: "coop-mustakivi_tallinn"
-            store_id: "557"   # Wolt: Coop Mustakivi
-          - venue_id: "konsum-saku_tallinn"
-            store_id: "558"   # Wolt: Konsum Saku
+          # each row = one Wolt/Bolt venue mapped to a Coop store_id in DB
+          - venue: "coop-parnu"        # <-- whatever slug you use in crawler
+            city:  "parnu"
+            store_id: "551"
+          - venue: "coop-laagri"
+            city:  "tallinn"
+            store_id: "552"
+          - venue: "konsum-juri"
+            city:  "tallinn"
+            store_id: "553"
+          - venue: "coop-miiduranna"
+            city:  "tallinn"
+            store_id: "554"
+          - venue: "coop-akadeemia"
+            city:  "tallinn"
+            store_id: "555"
+          - venue: "coop-lasnamae"
+            city:  "tallinn"
+            store_id: "556"
+          - venue: "coop-mustakivi"
+            city:  "tallinn"
+            store_id: "557"
+          - venue: "konsum-saku"
+            city:  "tallinn"
+            store_id: "559"
+          - venue: "coop-kvartali-maksimarket"
+            city:  "tartu"
+            store_id: "560"
+          - venue: "coop-eedeni-maksimarket"
+            city:  "tartu"
+            store_id: "561"
 
     env:
       TZ: Europe/Tallinn
-      # write-access DB url from repo Secrets
       DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
       PYTHONUNBUFFERED: "1"
+      STORE_ID: ${{ matrix.store_id }}
+      VENUE_SLUG: ${{ matrix.venue }}
+      CITY: ${{ matrix.city }}
 
     steps:
       - name: Checkout
@@ -56,17 +71,18 @@ jobs:
 
       - name: Install deps
         run: |
-          pip install -r requirements.txt
+          pip install -r requirements.txt || true
+          # crawler-only deps that might not be in requirements.txt yet:
+          pip install playwright selectolax
           python -m playwright install --with-deps chromium
 
       - name: Crawl & ingest this Wolt store
-        env:
-          # pass through DB + store-specific info
-          DATABASE_URL: ${{ env.DATABASE_URL }}
-          STORE_ID: ${{ matrix.store_id }}
-          SOURCE: "wolt"
         run: |
           python3 scripts/wolt_crawler.py \
-            --venue "${{ matrix.venue_id }}" \
-            --store-id "${{ matrix.store_id }}" \
-            --source "wolt"
+            --store-id "${STORE_ID}" \
+            --venue-slug "${VENUE_SLUG}" \
+            --city "${CITY}"
+
+      - name: Post Setup Python
+        if: always()
+        run: echo "Done (or failed) for $STORE_ID"
