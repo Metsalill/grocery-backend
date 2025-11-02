@@ -32,7 +32,7 @@ Flow per run:
 1. Discover PDP URLs
 2. Parse PDPs
 3. Save rows to CSV (append mode)
-4. Bulk-ingest rows into DB using ingest_service.ingest_snapshot()
+4. -ingest rows into DB using ingest_service.ingest_snapshot()
 
 If STORE_ID or DATABASE_URL is missing, ingest step is skipped (but CSV still writes).
 """
