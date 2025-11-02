@@ -1,312 +1,76 @@
-name: "Coop eCoop – Category Crawl (Playwright) + optional DB upsert"
+name: Coop eCoop scrape + upsert
 
 on:
-  # Auto: every 2 hours (UTC) — Vändra only
+  workflow_dispatch: {}
   schedule:
-    - cron: "0 */48 * * *"
-  # Manual: still supported with inputs
-  workflow_dispatch:
-    inputs:
-      region:
-        description: "Base region URL (e.g., https://coophaapsalu.ee or https://vandra.ecoop.ee)"
-        required: false
-        default: "https://vandra.ecoop.ee"
-      categories_multiline:
-        description: "Category URLs/paths (one per line)"
-        required: false
-        default: ""
-      categories_file:
-        description: "Repo file with categories (one per line) — leave empty to auto-pick from data/ by region"
-        required: false
-        default: ""
-      max_products:
-        description: "Cap PDPs per category after discovery (0 = unlimited)"
-        required: false
-        default: "0"
-      req_delay:
-        description: "Delay between ops (sec)"
-        required: false
-        default: "0.4"
-      pdp_workers:
-        description: "Concurrent PDP tabs per category"
-        required: false
-        default: "6"
-      shards:
-        description: "Number of shards (1–8)"
-        required: false
-        default: "8"
-      shard_timeout_min:
-        description: "Per-shard hard timeout in minutes (SIGINT, then kill after 60s)"
-        required: false
-        default: "60"
-      upsert_db:
-        description: "1 = upsert into DATABASE_URL_PUBLIC (staging_coop_products)"
-        required: false
-        default: "0"
-      extra_args:
-        description: "Extra flags for ecoop_crawler.py"
-        required: false
-        default: ""
+    # run every 6 hours UTC (tune however you want)
+    - cron: "0 */6 * * *"
 
-# Avoid overlapping scheduled runs
 concurrency:
-  group: coop-ecoop-vandra
-  cancel-in-progress: false
-
-permissions:
-  contents: read
+  group: coop-ecoop-scrape
+  cancel-in-progress: true
 
 jobs:
-  crawl:
+  scrape:
     runs-on: ubuntu-latest
     timeout-minutes: 120
 
     strategy:
       fail-fast: false
-      max-parallel: 4
       matrix:
-        shard_index: [0, 1, 2, 3, 4, 5, 6, 7]
+        # one entry per online Coop store
+        include:
+          - store_id: "445"
+            region: "https://coophaapsalu.ee"
+            categories_file: "categories_haapsalu.txt"
+          - store_id: "446"
+            region: "https://vandra.ecoop.ee"
+            categories_file: "categories_vandra.txt"
+
+    env:
+      # DB with write access (same style you used in prisma/rimi workflows)
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
+      PYTHONUNBUFFERED: "1"
+
+      # pass the correct stores.id into the crawler so prices land in `prices.store_id`
+      STORE_ID: ${{ matrix.store_id }}
+
+      # if you pre-shard category files externally and feed each job only URLs for that region:
+      ECOOP_PRESHARDED: "1"
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Decide effective REGION (dispatch vs. schedule)
-        id: reg
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.region }}" ]; then
-            echo "value=${{ inputs.region }}" >> "$GITHUB_OUTPUT"
-          else
-            # Scheduled: force Vändra (correct host)
-            echo "value=https://vandra.ecoop.ee" >> "$GITHUB_OUTPUT"
-          fi
-          echo "Effective REGION set."
-
-      - name: Compute region slug
-        id: rslug
-        run: |
-          REGION="${{ steps.reg.outputs.value }}"
-          SLUG="$(echo "$REGION" | sed -E 's#https?://([^/]+).*#\1#' | tr '[:upper:]' '[:lower:]' | tr '.' '-')"
-          if [ -z "$SLUG" ]; then SLUG="unknown-region"; fi
-          echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
-
-      - name: Compute shard count
-        id: shard
-        run: |
-          # Use requested shards for manual runs; default 8 for scheduled runs.
-          REQ="${{ github.event_name == 'workflow_dispatch' && inputs.shards || '8' }}"
-          if ! [[ "$REQ" =~ ^[0-9]+$ ]]; then REQ=1; fi
-          if [ "$REQ" -lt 1 ]; then REQ=1; fi
-          if [ "$REQ" -gt 8 ]; then REQ=8; fi
-          echo "count=$REQ" >> $GITHUB_OUTPUT
-
-      - name: Skip unused shard
-        if: ${{ matrix.shard_index >= fromJSON(steps.shard.outputs.count) }}
-        run: echo "Skipping shard ${{ matrix.shard_index }} (only ${{ steps.shard.outputs.count }} requested)"
-
       - name: Setup Python
-        if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install deps (pip + Playwright)
-        if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
+      - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install playwright asyncpg
-          python -m playwright install --with-deps chromium
+          playwright install chromium
 
-      - name: Prepare categories
-        if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
-        id: cats
+      - name: Crawl Coop eCoop (${ { matrix.store_id } })
         env:
-          CATS_FILE_INPUT: ${{ inputs.categories_file }}
-          CATS_MULTILINE: ${{ inputs.categories_multiline }}
-          REGION_INPUT: ${{ steps.reg.outputs.value }}
+          REGION: ${{ matrix.region }}
         run: |
-          set -euo pipefail
-          mkdir -p out
-          : > /tmp/categories.txt
-
-          # 1) If multiline provided, write it first (manual runs)
-          if [ -n "${CATS_MULTILINE:-}" ]; then
-            printf "%s\n" "$CATS_MULTILINE" > /tmp/categories.txt
-          fi
-
-          # 2) If a file path is provided, prefer it
-          if [ -n "${CATS_FILE_INPUT:-}" ]; then
-            if [ -f "$CATS_FILE_INPUT" ]; then
-              cp "$CATS_FILE_INPUT" /tmp/categories.txt
-            elif [ -f "${GITHUB_WORKSPACE}/${CATS_FILE_INPUT}" ]; then
-              cp "${GITHUB_WORKSPACE}/${CATS_FILE_INPUT}" /tmp/categories.txt
-            else
-              echo "Provided categories_file not found: $CATS_FILE_INPUT"
-              echo "Checked: '$CATS_FILE_INPUT' and '${GITHUB_WORKSPACE}/${CATS_FILE_INPUT}'"
-              exit 2
-            fi
-          fi
-
-          # 3) Auto-pick by region if still empty
-          if [ ! -s /tmp/categories.txt ]; then
-            REGION_LC="$(echo "$REGION_INPUT" | tr '[:upper:]' '[:lower:]')"
-            if echo "$REGION_LC" | grep -q "haapsalu"; then
-              AUTO="data/coop_haapsalu_categories.txt"
-            elif echo "$REGION_LC" | grep -q "vandra"; then
-              AUTO="data/coop_vandra_categories.txt"
-            else
-              AUTO=""
-            fi
-            if [ -n "$AUTO" ]; then
-              if [ -f "$AUTO" ]; then
-                cp "$AUTO" /tmp/categories.txt
-                echo "Auto-selected categories_file: $AUTO"
-              elif [ -f "${GITHUB_WORKSPACE}/${AUTO}" ]; then
-                cp "${GITHUB_WORKSPACE}/${AUTO}" /tmp/categories.txt
-                echo "Auto-selected categories_file: ${GITHUB_WORKSPACE}/${AUTO}"
-              fi
-            fi
-          fi
-
-          if [ ! -s /tmp/categories.txt ]; then
-            echo "No categories provided. Use categories_multiline or categories_file, or set region to auto-pick (haapsalu/vandra)."
-            exit 2
-          fi
-
-          # Shard split lines across workers
-          DEST="/tmp/categories_shard.txt"
-          SHARD_IDX=${{ matrix.shard_index }}
-          SHARD_COUNT=${{ steps.shard.outputs.count }}
-          awk -v idx="$SHARD_IDX" -v shards="$SHARD_COUNT" 'NR>=1 { if (((NR-1)%shards)==idx) print }' /tmp/categories.txt > "$DEST"
-          if [ ! -s "$DEST" ]; then
-            echo "Shard $SHARD_IDX has no categories; exiting gracefully."
-          fi
-          echo "path=$DEST" >> $GITHUB_OUTPUT
-
-      # Lightweight check so we fail early if DATABASE_URL is missing.
-      - name: Preflight DB env (presence-only)
-        if: ${{ matrix.shard_index == 0 && (github.event_name == 'schedule' || inputs.upsert_db == '1') }}
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-        run: |
-          if [ -z "${DATABASE_URL:-}" ]; then
-            echo "::warning::DATABASE_URL not set — upsert will be skipped."
-          else
-            echo "::add-mask::${DATABASE_URL}"
-            echo "::notice::DATABASE_URL is present. Proceeding."
-          fi
-
-      # Connectivity preflight (DNS + short asyncpg connect) using the PUBLIC URL.
-      - name: DB preflight (DNS + connect)
-        if: ${{ matrix.shard_index == 0 && (github.event_name == 'schedule' || inputs.upsert_db == '1') }}
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-        run: |
-          set -euo pipefail
-          if [ -z "${DATABASE_URL:-}" ]; then
-            echo "::warning::DATABASE_URL not set; skipping DB preflight."
-            exit 0
-          fi
-          python - <<'PY'
-          import os, socket, sys, urllib.parse, asyncio
-          url = os.environ['DATABASE_URL']
-          p = urllib.parse.urlparse(url)
-          host, port = p.hostname, p.port or 5432
-          print(f"[preflight] host={host} port={port}")
-          try:
-              addr = socket.getaddrinfo(host, port)[0][4][0]
-              print(f"[preflight] DNS {host} -> {addr}:{port}")
-          except Exception as e:
-              print(f"::error::DNS resolution failed for {host}:{port} -> {e}")
-              sys.exit(1)
-
-          async def go():
-              try:
-                  import asyncpg
-              except Exception:
-                  print("::warning::asyncpg not installed; skipping connect test")
-                  return
-              try:
-                  conn = await asyncpg.connect(url, timeout=5)
-                  ver = await conn.fetchval("select version()")
-                  print("[preflight] connected ok:", ver.split()[0])
-                  await conn.close()
-              except Exception as e:
-                  print(f"::error::DB connect failed: {e}")
-                  sys.exit(1)
-
-          asyncio.run(go())
-          PY
-
-      - name: Run eCoop crawler (sharded)
-        if: ${{ matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
-        env:
-          PYTHONUNBUFFERED: "1"  # real-time logs
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-          # Scheduled runs: force upsert/dedup = 1; Manual: honor input.
-          COOP_UPSERT_DB: ${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}
-          COOP_DEDUP_DB:  ${{ github.event_name == 'schedule' && '1' || inputs.upsert_db }}
-        run: |
-          set -euo pipefail
-
-          REGION="${{ steps.reg.outputs.value }}"
-          REQ_DELAY_IN="${{ inputs.req_delay }}"
-          PDP_WORKERS_IN="${{ inputs.pdp_workers }}"
-          MAX_PRODUCTS_IN="${{ inputs.max_products }}"
-          SHARD_TIMEOUT_MIN_IN="${{ inputs.shard_timeout_min }}"
-          SHARD_COUNT="${{ steps.shard.outputs.count }}"
-          EXTRA="${{ inputs.extra_args }}"
-
-          # Defaults (also used for schedule)
-          REQ_DELAY="${REQ_DELAY_IN:-0.4}"
-          PDP_WORKERS="${PDP_WORKERS_IN:-6}"
-          MAX_PRODUCTS="${MAX_PRODUCTS_IN:-0}"
-          PAGE_LIMIT="0"
-          SHARD_TIMEOUT_MIN="${SHARD_TIMEOUT_MIN_IN:-45}"
-          if ! [[ "$SHARD_TIMEOUT_MIN" =~ ^[0-9]+$ ]]; then SHARD_TIMEOUT_MIN=45; fi
-          if [ "$SHARD_TIMEOUT_MIN" -lt 10 ]; then SHARD_TIMEOUT_MIN=10; fi
-          if [ "$SHARD_TIMEOUT_MIN" -gt 110 ]; then SHARD_TIMEOUT_MIN=110; fi
-
-          echo "::group::Args"
-          echo "region=$REGION"
-          echo "pdp_workers=$PDP_WORKERS  req_delay=$REQ_DELAY  page_limit=$PAGE_LIMIT  max_products=$MAX_PRODUCTS  timeout=${SHARD_TIMEOUT_MIN}m"
-          echo "upsert_db=$COOP_UPSERT_DB  dedup_db=$COOP_DEDUP_DB"
-          echo "::endgroup::"
-
-          set +e
-          timeout --signal=INT --kill-after=60s ${SHARD_TIMEOUT_MIN}m \
-          stdbuf -oL -eL python3 scripts/ecoop_crawler.py \
-            --region "$REGION" \
-            --categories-file "${{ steps.cats.outputs.path }}" \
-            --page-limit "$PAGE_LIMIT" \
-            --max-products "$MAX_PRODUCTS" \
+          python3 ecoop_crawler.py \
+            --region "${REGION}" \
+            --categories-file "${{ matrix.categories_file }}" \
             --headless "1" \
-            --req-delay "$REQ_DELAY" \
-            --pdp-workers "${PDP_WORKERS:-3}" \
-            --cat-shards "$SHARD_COUNT" \
-            --cat-index "${{ matrix.shard_index }}" \
-            --out "out/coop_ecoop_${{ github.run_id }}_${{ matrix.shard_index }}.csv" \
-            --goto-strategy "domcontentloaded" --nav-timeout "45000" \
-            $EXTRA
-          code=$?
-          set -e
+            --pdp-workers 4 \
+            --req-delay 0.5 \
+            --rotate-buckets 4 \
+            --rotate-index -1 \
+            --out "out/coop_ecoop_${{ matrix.store_id }}.csv" \
+            --write-empty-csv
 
-          if [ $code -eq 124 ] || [ $code -eq 130 ]; then
-            echo "::warning::Shard ${{ matrix.shard_index }} hit timeout (${SHARD_TIMEOUT_MIN}m). Treating as partial success."
-            pkill -9 -f "playwright" || true
-            pkill -9 -f "chromium" || true
-            pkill -9 -f "chrome" || true
-            pkill -9 -f "node .*playwright" || true
-            code=0
-          fi
-          exit $code
-
-      - name: Upload CSV artifact
-        if: ${{ always() && matrix.shard_index < fromJSON(steps.shard.outputs.count) }}
+      - name: Upload CSV artifact (for debugging / diffing)
         uses: actions/upload-artifact@v4
         with:
-          name: coop-ecoop-${{ github.run_id }}-part-${{ steps.rslug.outputs.slug }}-${{ matrix.shard_index }}
-          path: out/*.csv
-          if-no-files-found: warn
-          retention-days: 7
+          name: coop-ecoop-${{ matrix.store_id }}-${{ github.run_id }}
+          path: out/coop_ecoop_${{ matrix.store_id }}.csv
+          if-no-files-found: ignore
