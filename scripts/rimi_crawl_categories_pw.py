@@ -1518,9 +1518,9 @@ def main():
             print("[rimi] wrote 0 product rows (PDP phase skipped due to timeout).")
             # We'll still attempt ingest (it's empty anyway)
             try:
-                store_id_env = int(os.environ.get("STORE_ID","0") or "0")
+                store_id_env = int(os.environ.get("STORE_ID","440") or "440")
             except Exception:
-                store_id_env = 0
+                store_id_env = 440
             asyncio.run(_bulk_ingest_to_db(rows_for_ingest, store_id_env))
             return
 
@@ -1573,9 +1573,9 @@ def main():
 
     # 4) Bulk-ingest to DB
     try:
-        store_id_env = int(os.environ.get("STORE_ID","0") or "0")
+        store_id_env = int(os.environ.get("STORE_ID","440") or "440")
     except Exception:
-        store_id_env = 0
+        store_id_env = 440
     asyncio.run(_bulk_ingest_to_db(rows_for_ingest, store_id_env))
 
     print(f"[rimi] wrote {total} product rows.")
