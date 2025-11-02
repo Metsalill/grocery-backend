@@ -57,6 +57,7 @@ jobs:
       OUTPUT_CSV: data/rimi_products.csv
       SHARD: ${{ matrix.shard }}
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      STORE_ID: "440"          # 👈 Add this line (Rimi ePood store_id in your DB)
       MODE: ${{ github.event.inputs.mode || 'prices' }}
       MODE_IS_PRICES: ${{ (github.event.inputs.mode || 'prices') == 'prices' }}
       MODE_IS_METADATA: ${{ (github.event.inputs.mode || 'prices') == 'metadata' }}
