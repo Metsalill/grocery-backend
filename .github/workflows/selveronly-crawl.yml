@@ -42,6 +42,7 @@ jobs:
     env:
       TZ: Europe/Tallinn
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      STORE_ID: "31"
       SHARD: ${{ matrix.shard }}
       MODE: ${{ inputs.mode || 'metadata' }}
       SHARDS: ${{ strategy.job-total }}   # keep shard slicing in sync
