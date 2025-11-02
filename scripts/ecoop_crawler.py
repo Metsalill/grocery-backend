@@ -1,30 +1,35 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Coop eCoop (region-specific) category → PDP crawler → CSV/optional DB upsert.
+Coop eCoop (region-specific) category → PDP crawler → CSV + canonical DB upsert.
 
-• Discovers product PDP links from eCoop category pages (pagination + "Load more")
-• Extracts PDP data: name, brand, manufacturer (Tootja), image, price, EAN/GTIN, size
-• Streams results to CSV and (optionally) upserts to Postgres
+What this script does now:
+1. Crawls category pages for a single Coop online region (e.g. Vändra or Haapsalu).
+2. Visits each PDP and extracts:
+   - name, brand/manufacturer
+   - size_text
+   - price + currency
+   - EAN / GTIN
+   - product URL
+3. Streams rows to CSV for debugging.
+4. After crawl (or even if it was interrupted nicely), bulk-upserts everything
+   into your production schema by calling the DB function
+   `upsert_product_and_price(...)`, which writes to:
+      - products
+      - ext_product_map
+      - prices
+   in one go.
 
-New in this version
--------------------
-• Deterministic category rotation:
-  - --rotate-buckets N : split categories into N stable buckets by URL hash
-  - --rotate-index K   : pick which bucket to crawl this run (0..N-1). -1 = auto by UTC hour.
-  - --rotate-salt TEXT : optional extra salt to shift bucket assignment.
+Important:
+- Each Coop "region" is actually its own online store in your `stores` table.
+  So each workflow run must target exactly one region, with the right STORE_ID.
 
-• Upserts always "touch" rows (scraped_at = now()) even if nothing changed.
+Current known online Coop store IDs in `stores`:
+  Haapsalu eCoop      -> store_id 445
+  Vändra eCoop        -> store_id 446
 
-Env:
-- COOP_UPSERT_DB=1 to enable DB upsert (requires asyncpg + DATABASE_URL).
-- COOP_DEDUP_DB=1 to enable de-duplication against DB by (store_host, ean_norm).
-- ECOOP_PRESHARDED=1 to tell the script that the categories list is already pre-sharded
-  by the caller (GitHub Actions), so internal sharding should be skipped.
-
-Domains:
-- Vändra → https://vandra.ecoop.ee
-- Haapsalu → https://coophaapsalu.ee  (note: not *.ecoop.ee)
+We'll pass that STORE_ID in the GitHub Action env so prices land in the right store.
+If STORE_ID isn't provided, we try to guess from the region host.
 """
 
 import argparse
@@ -155,19 +160,32 @@ def _normalize_region(region: str, category_candidates: List[str]) -> str:
         u = urlparse("https://vandra.ecoop.ee/")
     return urlunsplit((u.scheme, u.netloc, "/", "", ""))
 
-# ---------- store_host mapping ----------
+# ---------- store_host / store_id mapping ----------
+
 def map_store_host(region_url: str) -> str:
     """
-    Canonical store_host expected in DB:
-      - vandra.ecoop.ee  → vandra.ecoop.ee  (use as-is)
-      - haapsalu.ecoop.ee (legacy) → coophaapsalu.ee (live site)
-      - coophaapsalu.ee → coophaapsalu.ee (as-is)
-      - otherwise: use the parsed netloc lowercased
+    Canonical host string for the Coop 'region', to match how we store it in DB.
+      - vandra.ecoop.ee        → vandra.ecoop.ee
+      - haapsalu.ecoop.ee      → coophaapsalu.ee (legacy -> live)
+      - coophaapsalu.ee        → coophaapsalu.ee
     """
     host = urlparse(region_url).netloc.lower()
     if host == "haapsalu.ecoop.ee":
         return "coophaapsalu.ee"
-    return host  # vandra.ecoop.ee stays as vandra.ecoop.ee
+    return host  # e.g. vandra.ecoop.ee stays vandra.ecoop.ee
+
+def map_store_id(store_host: str) -> int:
+    """
+    Map the canonical host to the stores.id you showed in `stores`:
+      445 -> Haapsalu eCoop
+      446 -> Vändra eCoop
+    """
+    host = store_host.lower()
+    if host in ("coophaapsalu.ee", "haapsalu.ecoop.ee"):
+        return 445
+    if host in ("vandra.ecoop.ee",):
+        return 446
+    return 0  # unknown / fallback (will force us to rely on STORE_ID env)
 
 # ---------- Playwright (required) ----------
 try:
@@ -194,6 +212,10 @@ async def wait_cookie_banner(page: Any):
         pass
 
 async def collect_category_product_links(page: Any, category_url: str, page_limit: int, req_delay: float, max_depth: int = 2) -> List[str]:
+    """
+    Crawl category_url, auto-click "Load more", scroll, follow pagination + subcats,
+    and gather all PDP URLs (…/toode/...).
+    """
     if STOP_REQUESTED:
         return []
     base = urlparse(category_url)
@@ -432,8 +454,12 @@ async def extract_pdp(
     goto_strategy: Literal["auto","domcontentloaded","networkidle","load"]="auto",
     nav_timeout_ms: int = 45000
 ) -> Dict:
+    """
+    Visit one PDP URL, scrape product info, return dict.
+    """
     if STOP_REQUESTED:
         return {}
+
     # resilient navigation (networkidle often never fires)
     async def safe_goto(target_url: str) -> str:
         order: List[str]
@@ -499,6 +525,7 @@ async def extract_pdp(
                 pass
 
     if not brand:
+        # sometimes brand is in specs "Bränd", "Kaubamärk", etc
         try:
             spec_xpath = ("xpath=//dt[normalize-space()[contains(., $key)]]/following-sibling::dd[1]"
                           " | //tr[th[normalize-space()[contains(., $key)]]]/td[1]")
@@ -529,12 +556,15 @@ async def extract_pdp(
     image_url = None
     try:
         if ld.get("image"):
-            image_url = ld["image"] if isinstance(ld["image"], str) else (ld["image"][0] if isinstance(ld["image"], list) and ld["image"] else None)
+            image_url = ld["image"] if isinstance(ld["image"], str) else (
+                ld["image"][0] if isinstance(ld["image"], list) and ld["image"] else None
+            )
         if not image_url:
             image_url = await page.get_attribute('meta[property="og:image"]', "content")
     except Exception:
         pass
 
+    # Figure out EAN/GTIN
     ean_raw = None
     val = await extract_text_after_label(page, "Tootekood")
     if not val:
@@ -574,23 +604,21 @@ async def extract_pdp(
         if m:
             size_text = m.group(1)
 
-    # ext_id = stable per-store product handle
+    # ext_id = store-specific product handle
     ext_id = None
-    # prefer GTIN if present so the same milk in 2 Coop regions maps together
-    # across store_host we'll still separate rows in DB, but ext_id helps
-    # dedupe inside same store_host.
+    # Prefer GTIN if present so the same milk in 2 Coop regions maps together inside that region.
     if ean_raw and normalize_ean(ean_raw):
         ext_id = normalize_ean(ean_raw)
 
-    # fallback to URL slug / numeric id
+    # fallback to numeric ID or slug from URL
     if not ext_id:
-        m = re.search(r"/toode/(\d+)", url)
-        if m:
-            ext_id = m.group(1)
+        m3 = re.search(r"/toode/(\d+)", url)
+        if m3:
+            ext_id = m3.group(1)
     if not ext_id:
-        m2 = re.search(r"/toode/([^/?#]+)/?", url)
-        if m2:
-            ext_id = m2.group(1)
+        m4 = re.search(r"/toode/([^/?#]+)/?", url)
+        if m4:
+            ext_id = m4.group(1)
     if not ext_id:
         ext_id = url.rstrip("/").split("/")[-1]
 
@@ -616,7 +644,7 @@ async def extract_pdp(
         "url": url,
     }
 
-# ---------- outputs ----------
+# ---------- CSV helpers ----------
 
 CSV_COLS = [
     "chain","store_host","channel","ext_id","ean_raw","ean_norm","name",
@@ -648,7 +676,7 @@ def append_csv(rows: List[Dict], out_path: Path) -> None:
                     pass
             w.writerow(row)
 
-# ---------- DB helpers ----------
+# ---------- DB helpers (canonical upsert) ----------
 
 async def _connect_with_retries(dsn: str, max_tries: int = 6):
     """Open a DB connection with jittered exponential backoff (handles transient DNS)."""
@@ -662,123 +690,72 @@ async def _connect_with_retries(dsn: str, max_tries: int = 6):
             await asyncio.sleep(1.0 * (2 ** i) + random.uniform(0.0, 0.8))
     raise last  # type: ignore[misc]
 
-async def _fetch_existing_gtins(store_host: str) -> Set[str]:
-    if os.environ.get("COOP_DEDUP_DB", "0").lower() not in ("1", "true"):
-        return set()
-    dsn = os.environ.get("DATABASE_URL")
-    if not dsn:
-        return set()
-    try:
-        import asyncpg  # type: ignore
-    except Exception:
-        return set()
-    try:
-        conn = await _connect_with_retries(dsn)
-    except Exception:
-        return set()
-    try:
-        rows = await conn.fetch(
-            "SELECT DISTINCT ean_norm FROM public.staging_coop_products "
-            "WHERE store_host=$1 AND ean_norm IS NOT NULL",
-            store_host,
-        )
-        return {r["ean_norm"] for r in rows if r["ean_norm"]}
-    finally:
-        await conn.close()
+async def _bulk_ingest_to_db(
+    rows: List[Tuple[Any, ...]],
+    store_id: int,
+) -> None:
+    """
+    rows is a list of tuples shaped exactly for upsert_product_and_price():
+        (in_source, in_ext_id, in_name, in_brand, in_size_text,
+         in_ean_raw, in_price, in_currency, in_store_id,
+         in_seen_at, in_source_url)
 
-async def maybe_upsert_db(rows: List[Dict]) -> None:
-    """Best-effort upsert. Never crash the crawl on DB errors."""
+    We'll executemany() them in one go.
+    """
+    if store_id <= 0:
+        print("[coop-ecoop] STORE_ID not set or invalid, skipping DB ingest.")
+        return
     if not rows:
-        print("[info] No rows to upsert.")
-        return
-    if os.environ.get("COOP_UPSERT_DB", "0").lower() not in ("1", "true"):
-        print("[info] DB upsert disabled (COOP_UPSERT_DB != 1)")
+        print("[coop-ecoop] No rows to ingest.")
         return
 
     dsn = os.environ.get("DATABASE_URL")
     if not dsn:
-        print("[info] DATABASE_URL not set; skipping DB upsert")
+        print("[coop-ecoop] DATABASE_URL not set, skipping DB ingest.")
         return
 
     try:
         import asyncpg  # type: ignore
     except Exception:
-        print("[warn] asyncpg not installed; skipping DB upsert")
+        print("[coop-ecoop] asyncpg not installed, skipping DB ingest.")
         return
 
-    table = "staging_coop_products"
+    sql = """
+        SELECT upsert_product_and_price(
+            $1,  -- in_source
+            $2,  -- in_ext_id
+            $3,  -- in_name
+            $4,  -- in_brand
+            $5,  -- in_size_text
+            $6,  -- in_ean_raw
+            $7,  -- in_price
+            $8,  -- in_currency
+            $9,  -- in_store_id
+            $10, -- in_seen_at
+            $11  -- in_source_url
+        );
+    """
 
     try:
         conn = await _connect_with_retries(dsn)
     except Exception as e:
-        print(f"[warn] Could not connect to DB for upsert after retries ({e!r}). Skipping DB upsert.")
+        print(f"[coop-ecoop] Could not connect to DB after retries ({e!r}). Skipping DB ingest.")
         return
 
     try:
         try:
-            exists = await conn.fetchval(
-                "SELECT EXISTS (SELECT 1 FROM information_schema.tables "
-                "WHERE table_schema='public' AND table_name=$1)",
-                table,
-            )
+            await conn.executemany(sql, rows)
+            print(f"[coop-ecoop] Upserted {len(rows)} rows via upsert_product_and_price()")
         except Exception as e:
-            print(f"[warn] Failed to check table existence: {e!r}. Skipping DB upsert.")
-            return
-
-        if not exists:
-            print(f"[info] Table {table} does not exist → skipping DB upsert.")
-            return
-
-        stmt = f"""
-            INSERT INTO {table}
-              (store_host, ext_id, name, brand, manufacturer, ean_raw, ean_norm, size_text, price, currency, image_url, url)
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-            ON CONFLICT (store_host, ext_id) DO UPDATE SET
-              name         = COALESCE(EXCLUDED.name,         {table}.name),
-              brand        = COALESCE(NULLIF(EXCLUDED.brand,''),        {table}.brand),
-              manufacturer = COALESCE(NULLIF(EXCLUDED.manufacturer,''), {table}.manufacturer),
-              ean_raw      = COALESCE(EXCLUDED.ean_raw,      {table}.ean_raw),
-              ean_norm     = COALESCE(EXCLUDED.ean_norm,     {table}.ean_norm),
-              size_text    = COALESCE(EXCLUDED.size_text,    {table}.size_text),
-              price        = COALESCE(EXCLUDED.price,        {table}.price),
-              currency     = COALESCE(EXCLUDED.currency,     {table}.currency),
-              image_url    = COALESCE(EXCLUDED.image_url,    {table}.image_url),
-              url          = COALESCE(EXCLUDED.url,          {table}.url),
-              scraped_at   = now();
-        """
-
-        payload = []
-        for r in rows:
-            if not r.get("ext_id"):
-                continue
-            pr = r.get("price")
-            try:
-                pr = round(float(pr), 2) if pr is not None else None
-            except Exception:
-                pr = None
-            payload.append((
-                r.get("store_host"), r.get("ext_id"), r.get("name"),
-                r.get("brand"), r.get("manufacturer"),
-                r.get("ean_raw"), r.get("ean_norm"), r.get("size_text"),
-                pr, r.get("currency") or "EUR", r.get("image_url"), r.get("url")
-            ))
-
-        if not payload:
-            print("[warn] No rows with ext_id — skipped DB upsert")
-            return
-
-        try:
-            await conn.executemany(stmt, payload)
-            print(f"[ok] Upserted {len(payload)} rows into {table}")
-        except Exception as e:
-            print(f"[warn] Upsert failed ({e!r}). Skipping DB upsert.")
+            print(f"[coop-ecoop] executemany failed: {e!r}")
     finally:
         try:
             await conn.close()
         except Exception:
             pass
 
-# ---------- runner ----------
+# ---------- crawler runner ----------
+
 async def _route_handler(route):
     try:
         req = route.request
@@ -799,12 +776,20 @@ async def _route_handler(route):
             return
 
 async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> None:
+    """
+    Drives Playwright:
+    - open browser
+    - loop categories
+    - discover PDP URLs
+    - scrape PDP in parallel
+    - call on_rows(batched_rows) whenever we have ~25 new products
+    """
     if async_playwright is None:
         raise RuntimeError(f"Playwright is not installed but eCoop crawling was requested: {_IMPORT_ERROR}")
-    # map ecoop region to canonical store_host
+
     store_host = map_store_host(base_region)
 
-    # Start/stop Playwright manually to avoid noisy __aexit__ errors on SIGINT
+    # start Playwright "manually" so we can close cleanly even on SIGINT
     pw_cm = async_playwright()
     pw = await pw_cm.start()
     browser = await pw.chromium.launch(headless=bool(int(args.headless)))
@@ -830,7 +815,13 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
             print(f"[cat] {cat}")
             page = await context.new_page()
             try:
-                links = await collect_category_product_links(page, cat, args.page_limit, args.req_delay, max_depth=2)
+                links = await collect_category_product_links(
+                    page,
+                    cat,
+                    args.page_limit,
+                    args.req_delay,
+                    max_depth=2
+                )
             finally:
                 try:
                     await page.close()
@@ -858,9 +849,12 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
                         return None
                     try:
                         return await extract_pdp(
-                            p, url, args.req_delay, store_host,
+                            p,
+                            url,
+                            args.req_delay,
+                            store_host,
                             goto_strategy=args.goto_strategy,
-                            nav_timeout_ms=int(args.nav_timeout)
+                            nav_timeout_ms=int(args.nav_timeout),
                         )
                     except Exception as e:
                         if not STOP_REQUESTED:
@@ -885,9 +879,10 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
                     if r:
                         pending_batch.append(r)
                         if len(pending_batch) >= 25:
-                            on_rows(pending_batch); pending_batch = []
+                            on_rows(pending_batch)
+                            pending_batch = []
             finally:
-                # On stop, cancel the rest and await them to suppress warnings
+                # cancel leftovers so Playwright can shut down cleanly
                 still = [t for t in tasks if not t.done()]
                 for t in still:
                     t.cancel()
@@ -896,11 +891,12 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
 
             if pending_batch:
                 on_rows(pending_batch)
+
             if STOP_REQUESTED:
                 print("[info] stop requested — leaving after current category")
                 break
     finally:
-        # Crash-proof shutdown: never let close errors abort the run
+        # always try to close nicely
         try:
             await context.close()
         except Exception:
@@ -914,30 +910,51 @@ async def run_ecoop(args, categories: List[str], base_region: str, on_rows) -> N
         except Exception:
             pass
 
-# ---------- main ----------
+# ---------- main orchestration ----------
+
 def _stable_bucket(s: str, buckets: int, salt: str = "") -> int:
     h = hashlib.sha1((salt + "|" + s).encode("utf-8")).digest()
     return int.from_bytes(h[:4], "big") % max(1, buckets)
 
 async def main(args):
+    # 1. Load category URLs
     categories: List[str] = []
     if args.categories_multiline:
-        categories.extend([ln.strip() for ln in args.categories_multiline.splitlines() if ln.strip()])
+        categories.extend([
+            ln.strip() for ln in args.categories_multiline.splitlines() if ln.strip()
+        ])
     if args.categories_file and Path(args.categories_file).exists():
-        categories.extend([ln.strip() for ln in Path(args.categories_file).read_text(encoding="utf-8").splitlines() if ln.strip()])
+        categories.extend([
+            ln.strip()
+            for ln in Path(args.categories_file).read_text(encoding="utf-8").splitlines()
+            if ln.strip()
+        ])
     if not categories:
         print("[error] No category URLs provided. Pass --categories-multiline or --categories-file.")
         sys.exit(2)
 
+    # 2. Normalize base region (https://vandra.ecoop.ee / https://coophaapsalu.ee …)
     base_region = _normalize_region(args.region, categories)
+    canonical_host = map_store_host(base_region)
 
+    # 3. Figure out which stores.id we should write prices under
+    #    First: env STORE_ID from GitHub Action
+    try:
+        store_id_env = int(os.environ.get("STORE_ID", "0") or "0")
+    except Exception:
+        store_id_env = 0
+    #    Fallback: guess from host
+    if store_id_env <= 0:
+        store_id_env = map_store_id(canonical_host)
+    print(f"[coop-ecoop] using store_id={store_id_env} (host={canonical_host})")
+
+    # 4. Shard category list / rotate buckets (same logic you already had)
     def norm_url(u: str) -> str:
         absu = urljoin(base_region, u)
         return clean_url_keep_allowed_query(absu)
 
     categories = [norm_url(u) for u in categories]
 
-    # --- PRE-SHARDED INPUT GUARD ---
     presharded = (
         os.environ.get("ECOOP_PRESHARDED", "").lower() in ("1", "true", "yes")
         or ("categories_shard" in (args.categories_file or ""))
@@ -945,10 +962,9 @@ async def main(args):
     cat_shards = args.cat_shards
     cat_index  = args.cat_index
     if presharded and args.cat_shards > 1:
-        print(f"[shard] Detected pre-sharded categories file ({args.categories_file!r}) "
-              f"or ECOOP_PRESHARDED=1 → ignoring internal sharding.")
+        print(f"[shard] Detected pre-sharded input → ignoring internal sharding.")
         cat_shards = 1
-        cat_index = 0
+        cat_index  = 0
 
     if cat_shards > 1:
         if cat_index < 0 or cat_index >= cat_shards:
@@ -957,10 +973,9 @@ async def main(args):
         categories = [u for i, u in enumerate(categories) if i % cat_shards == cat_index]
         print(f"[shard] Using {len(categories)} categories for shard {cat_index}/{cat_shards}")
 
-    # --- DETERMINISTIC ROTATION (stable by URL hash) ---
+    # Deterministic rotation (stable buckets by URL hash)
     if args.rotate_buckets and args.rotate_buckets > 1:
         if args.rotate_index < 0:
-            # default: rotate by UTC hour
             hour = dt.datetime.utcnow().hour
             idx = hour % args.rotate_buckets
         else:
@@ -969,46 +984,88 @@ async def main(args):
         salted = args.rotate_salt or ""
         kept = [u for u in categories if _stable_bucket(u, args.rotate_buckets, salted) == idx]
         print(f"[rotate] buckets={args.rotate_buckets} index={idx} salt={salted!r} "
-              f"→ keeping {len(kept)}/{len(categories)} categories for this run")
+              f"→ keeping {len(kept)}/{len(categories)} URLs this run")
         categories = kept
 
         if not categories:
             print("[rotate] No categories selected for this slice — exiting early.")
-            # Still produce an empty CSV header for consistency if requested
+            # still create CSV header if requested
             out_path = Path(args.out)
             if out_path.is_dir() or str(out_path).endswith("/"):
                 out_path = out_path / f"coop_ecoop_{now_stamp()}.csv"
             if args.write_empty_csv:
                 _ensure_csv_with_header(out_path)
+            # (no DB ingest because there's nothing)
             return
 
+    # 5. Prepare CSV output path
     out_path = Path(args.out)
     if out_path.is_dir() or str(out_path).endswith("/"):
         out_path = out_path / f"coop_ecoop_{now_stamp()}.csv"
     print(f"[out] streaming CSV → {out_path}")
-
     if args.write_empty_csv:
         _ensure_csv_with_header(out_path)
 
+    # We'll collect:
+    # - all_rows: dicts for stats/debug
+    # - rows_for_ingest: tuples for DB upsert_product_and_price()
     all_rows: List[Dict] = []
+    rows_for_ingest: List[Tuple[Any, ...]] = []
 
     def on_rows(batch: List[Dict]):
-        nonlocal all_rows
+        """
+        Called repeatedly during crawl with ~25-row chunks.
+        We:
+        - append to CSV
+        - stage DB tuples
+        - keep stats
+        """
+        nonlocal all_rows, rows_for_ingest
         if not batch:
             return
+
         append_csv(batch, out_path)
         all_rows.extend(batch)
-        print(f"[stream] +{len(batch)} rows (total {len(all_rows)})")
 
-    # graceful shutdown so Playwright can close cleanly BUT still allow final upsert
+        # We'll capture one timestamp for this batch for consistency.
+        seen_at_ts = dt.datetime.now(dt.timezone.utc)
+
+        for r in batch:
+            ext_id = r.get("ext_id") or ""
+            if not ext_id:
+                # can't upsert without a stable ext_id
+                continue
+
+            # We'll prefer brand, but fall back to manufacturer
+            brand_for_db = r.get("brand") or r.get("manufacturer") or ""
+
+            rows_for_ingest.append((
+                "coop",                         # $1 in_source
+                ext_id,                         # $2 in_ext_id
+                r.get("name") or "",            # $3 in_name
+                brand_for_db,                   # $4 in_brand
+                r.get("size_text") or "",       # $5 in_size_text
+                r.get("ean_raw") or r.get("ean_norm") or "",  # $6 in_ean_raw
+                r.get("price"),                 # $7 in_price (float or None)
+                r.get("currency") or "EUR",     # $8 in_currency
+                store_id_env,                   # $9 in_store_id
+                seen_at_ts,                     # $10 in_seen_at (timestamptz)
+                r.get("url") or "",             # $11 in_source_url
+            ))
+
+        print(f"[stream] +{len(batch)} rows (total {len(all_rows)}) "
+              f"(ingest buffer now {len(rows_for_ingest)})")
+
+    # graceful shutdown:
     def _sig_handler(signum, frame):
-        print(f"[warn] received signal {signum}; will stop after current work and upsert to DB.")
-        request_stop()        # do not exit here; let run_ecoop finish quickly
-        _install_quiet_io()   # avoid BrokenPipe spam in CI
+        print(f"[warn] received signal {signum}; will stop after current work and then ingest to DB.")
+        request_stop()        # tell crawl loops to finish ASAP
+        _install_quiet_io()   # quiet stdout/stderr so CI doesn't freak out
 
     signal.signal(signal.SIGTERM, _sig_handler)
     signal.signal(signal.SIGINT,  _sig_handler)
 
+    # 6. Run crawl
     crawl_err = None
     try:
         await run_ecoop(args, categories, base_region, on_rows)
@@ -1016,32 +1073,40 @@ async def main(args):
         crawl_err = e
         print(f"[warn] run_ecoop terminated with error: {e!r} (will still upsert what we have)")
 
-    gtin_ok = sum(1 for r in all_rows if (r.get("ean_norm") or (r.get("ean_raw") and r.get("ean_raw") != "-")))
-    brand_ok = sum(1 for r in all_rows if (r.get("brand") or r.get("manufacturer")))
+    # 7. Stats
+    gtin_ok   = sum(1 for r in all_rows if (r.get("ean_norm") or (r.get("ean_raw") and r.get("ean_raw") != "-")))
+    brand_ok  = sum(1 for r in all_rows if (r.get("brand") or r.get("manufacturer")))
     print(f"[stats] rows={len(all_rows)}  gtin_present={gtin_ok}  brand_or_manufacturer_present={brand_ok}")
     print(f"[ok] CSV ready: {out_path}")
 
-    # Always attempt upsert even if crawl failed or was interrupted
-    await maybe_upsert_db(all_rows)
+    # 8. DB ingest into canonical tables
+    await _bulk_ingest_to_db(rows_for_ingest, store_id_env)
 
-    # Only fail the step if there was a real error (not our intentional stop)
+    # 9. exit code
     if crawl_err and not STOP_REQUESTED:
+        # If we truly crashed (not just CTRL+C / SIGTERM), bubble that up.
         raise crawl_err
 
 def parse_args():
-    p = argparse.ArgumentParser(description="Coop eCoop category crawler → PDP extractor")
+    p = argparse.ArgumentParser(description="Coop eCoop category crawler → PDP extractor → canonical upsert")
     p.add_argument("--region", default="https://vandra.ecoop.ee",
                    help="Base region origin, e.g. https://vandra.ecoop.ee or https://coophaapsalu.ee")
     p.add_argument("--categories-multiline", dest="categories_multiline", default="",
                    help="Newline-separated category URLs or paths")
-    p.add_argument("--categories-file", dest="categories_file", default="", help="Path to txt file with category URLs")
-    p.add_argument("--page-limit", type=int, default=0, help="Hard cap of product links per category (0=all)")
-    p.add_argument("--max-products", type=int, default=0, help="Global cap per category after discovery (0=all)")
+    p.add_argument("--categories-file", dest="categories_file", default="",
+                   help="Path to txt file with category URLs")
+    p.add_argument("--page-limit", type=int, default=0,
+                   help="Hard cap of product links per category (0=all)")
+    p.add_argument("--max-products", type=int, default=0,
+                   help="Global cap per category after discovery (0=all)")
     p.add_argument("--headless", default="1", help="1/0 headless")
     p.add_argument("--req-delay", type=float, default=0.5, help="Seconds between ops")
-    p.add_argument("--pdp-workers", type=int, default=4, help="Concurrent PDP tabs per category")
-    p.add_argument("--cat-shards", type=int, default=1, help="Total number of category shards")
-    p.add_argument("--cat-index", type=int, default=0, help="This shard index (0-based)")
+    p.add_argument("--pdp-workers", type=int, default=4,
+                   help="Concurrent PDP tabs per category")
+    p.add_argument("--cat-shards", type=int, default=1,
+                   help="Total number of category shards")
+    p.add_argument("--cat-index", type=int, default=0,
+                   help="This shard index (0-based)")
     # deterministic rotation flags
     p.add_argument("--rotate-buckets", type=int, default=1,
                    help="Split categories into N stable buckets by URL hash (1=disable rotation)")
@@ -1049,13 +1114,16 @@ def parse_args():
                    help="Which bucket to crawl this run (0..N-1). -1 = auto by UTC hour.")
     p.add_argument("--rotate-salt", type=str, default="",
                    help="Optional salt to change bucket assignment without changing URLs.")
-    p.add_argument("--out", default="out/coop_ecoop.csv", help="CSV file or output directory")
-    p.add_argument("--write-empty-csv", action="store_true", default=True, help="Always write CSV header even if no rows.")
+    p.add_argument("--out", default="out/coop_ecoop.csv",
+                   help="CSV file or output directory")
+    p.add_argument("--write-empty-csv", action="store_true", default=True,
+                   help="Always write CSV header even if no rows.")
     # robustness flags
     p.add_argument("--goto-strategy", choices=["auto","domcontentloaded","networkidle","load"],
-                   default="auto", help="Playwright wait_until strategy for PDP navigation.")
+                   default="auto",
+                   help="Playwright wait_until strategy for PDP navigation.")
     p.add_argument("--nav-timeout", default="45000",
-                   help="Navigation timeout in milliseconds for PDP pages.")
+                   help="Navigation timeout in ms for PDP pages.")
     return p.parse_args()
 
 if __name__ == "__main__":
