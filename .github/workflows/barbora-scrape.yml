@@ -1,27 +1,18 @@
-name: Barbora Scrape + Ingest
+name: Barbora scrape + ingest
 
 on:
   workflow_dispatch: {}
   schedule:
-    # scrape a few times per day; adjust if you want
-    - cron: "0 */6 * * *"   # every 6h UTC
-
-concurrency:
-  group: barbora-scrape
-  cancel-in-progress: true
+    - cron: "0 */6 * * *"   # every 6h or whatever you want
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 60
 
     env:
-      # --- DB connection for asyncpg / upsert_product_and_price()
-      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}  # must be writeable URL
-      # this must match the "Barbora ePood" row in public.stores (is_online = true)
-      STORE_ID: "441"
-      # leave some headroom so crawler exits cleanly and ingests
-      SOFT_TIMEOUT_MIN: "210"
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
+      STORE_ID: "441"         # Barbora ePood store_id from Railway.stores
       PYTHONUNBUFFERED: "1"
 
     steps:
@@ -36,31 +27,18 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          # your repo may already have requirements.txt / requirements-crawler.txt.
-          # Make sure it includes: playwright, bs4, asyncpg, lxml, etc.
-          pip install -r requirements.txt
-          python -m playwright install --with-deps chromium
+          pip install playwright asyncpg httpx beautifulsoup4
+          playwright install chromium
 
       - name: Run Barbora crawler
         run: |
           mkdir -p data
-          python barbora_crawl_categories_pw.py \
-            --cats-file crawler_input/barbora_categories.txt \
-            --headless 1 \
-            --req-delay 0.25 \
-            --max-pages-per-category 120 \
-            --max-products 0 \
-            --page-limit 0 \
-            --output-csv data/barbora_products.csv
-        # IMPORTANT:
-        #   crawler_input/barbora_categories.txt
-        #   should be a simple text file in your repo listing Barbora category URLs (one per line).
-        #   If your path/name is different, update it here.
+          python scripts/barbora_crawl_categories_pw.py \
+            --out data/barbora_products.csv
 
       - name: Upload CSV artifact
-        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: barbora_products_csv
+          name: barbora_products
           path: data/barbora_products.csv
           if-no-files-found: warn
