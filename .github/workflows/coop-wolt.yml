@@ -1,55 +1,48 @@
 name: Coop Wolt Crawl + Ingest
 
 on:
+  # run manually
   workflow_dispatch: {}
+  # and optionally on a schedule (every 6h here, tweak if you want)
   schedule:
-    # every 4 hours (UTC); adjust if you want slower/faster
-    - cron: "0 */4 * * *"
+    - cron: "0 */6 * * *"
+
+concurrency:
+  group: coop-wolt-crawl
+  cancel-in-progress: true
 
 jobs:
   crawl-wolt:
+    name: crawl-wolt (wolt:${{ matrix.venue_id }}, ${{ matrix.store_id }})
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
 
     strategy:
       fail-fast: false
       matrix:
         include:
-          # IMPORTANT:
-          # - store_host must match the slug after /venue/ in wolt.com URL
-          #   e.g. https://wolt.com/.../venue/coop-lasnamae -> "wolt:coop-lasnamae"
-          # - store_id must match stores.id in Postgres
-          # - city is just a geo hint ("tallinn" or "parnu")
-          #
-          - store_host: "wolt:coop-parnu"
-            city: "parnu"
-            store_id: "551"   # Wolt: Coop Põrnu (in DB)
-          - store_host: "wolt:coop-laagri"
-            city: "tallinn"
+          # NOTE: store_id MUST match stores.id in Railway
+          - venue_id: "coop-parnu"
+            store_id: "551"   # Wolt: Coop Pärnu
+          - venue_id: "coop-laagri"
             store_id: "552"   # Wolt: Coop Laagri
-          - store_host: "wolt:konsum-juri"
-            city: "tallinn"
+          - venue_id: "konsum-juri"
             store_id: "553"   # Wolt: Konsum Jüri
-          - store_host: "wolt:coop-miiduranna"
-            city: "tallinn"
+          - venue_id: "coop-miiduranna"
             store_id: "554"   # Wolt: Coop Miiduranna
-          - store_host: "wolt:coop-akadeemia"
-            city: "tallinn"
+          - venue_id: "coop-akadeemia_tallinn"
             store_id: "555"   # Wolt: Coop Akadeemia
-          - store_host: "wolt:coop-lasnamae"
-            city: "tallinn"
-            store_id: "556"   # Wolt: Coop Lasnamõe
-          - store_host: "wolt:coop-mustakivi"
-            city: "tallinn"
+          - venue_id: "coop-lasnamae_tallinn"
+            store_id: "556"   # Wolt: Coop Lasnamäe
+          - venue_id: "coop-mustakivi_tallinn"
             store_id: "557"   # Wolt: Coop Mustakivi
-          - store_host: "wolt:konsum-saku"
-            city: "tallinn"
+          - venue_id: "konsum-saku_tallinn"
             store_id: "558"   # Wolt: Konsum Saku
 
     env:
       TZ: Europe/Tallinn
-      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}   # same style you already use
-      STORE_ID: ${{ matrix.store_id }}
+      # write-access DB url from repo Secrets
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
       PYTHONUNBUFFERED: "1"
 
     steps:
@@ -64,11 +57,16 @@ jobs:
       - name: Install deps
         run: |
           pip install -r requirements.txt
+          python -m playwright install --with-deps chromium
 
       - name: Crawl & ingest this Wolt store
+        env:
+          # pass through DB + store-specific info
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          STORE_ID: ${{ matrix.store_id }}
+          SOURCE: "wolt"
         run: |
-          python3 wolt_crawler.py \
-            --store-host "${{ matrix.store_host }}" \
-            --city "${{ matrix.city }}" \
-            --upsert-db 1 \
-            --ingest-mode main
+          python3 scripts/wolt_crawler.py \
+            --venue "${{ matrix.venue_id }}" \
+            --store-id "${{ matrix.store_id }}" \
+            --source "wolt"
