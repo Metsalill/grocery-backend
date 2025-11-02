@@ -47,9 +47,6 @@ import asyncpg
 from bs4 import BeautifulSoup
 from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 
-# our ingestion helper
-from services.ingest_service import ingest_snapshot
-
 STORE_CHAIN   = "Rimi"
 STORE_NAME    = "Rimi ePood"
 STORE_CHANNEL = "online"
@@ -1234,15 +1231,15 @@ async def _bulk_ingest_to_db(
     store_id: int,
 ) -> None:
     """
-    Push all scraped rows into postgres using ingest_service.ingest_snapshot().
+    Push all scraped rows into postgres by calling the DB function
+    upsert_product_and_price(...) for each product.
 
-    For each row, we:
-      - normalize EAN
-      - get/insert products row (if EAN is known) inside ingest_snapshot()
-      - insert a new price snapshot row in `prices`
-
-    Skips if DATABASE_URL or store_id is missing/invalid.
+    That function will:
+      - create/reuse products.id
+      - update ext_product_map
+      - insert/merge into prices
     """
+
     if store_id <= 0:
         print("[rimi] STORE_ID not set or invalid, skipping DB ingest.")
         return
@@ -1257,32 +1254,74 @@ async def _bulk_ingest_to_db(
         return
 
     pool = await asyncpg.create_pool(dsn)
+
     try:
-        ingest_count = 0
+        upserted = 0
+
         for r in rows:
-            # convert price string to float, skip if not parseable
+            # convert scraped price text -> numeric
             price_val = to_float_price(r.get("price", ""))
             if price_val is None:
+                # skip rows with no valid price
                 continue
 
-            # call helper
             try:
-                await ingest_snapshot(
-                    pool,
-                    store_id=store_id,
-                    ean=r.get("ean_raw") or "",
-                    name=r.get("name") or "",
-                    size_text=r.get("size_text") or "",
-                    brand=r.get("brand") or "",
-                    price=price_val,
-                    currency=r.get("currency") or "EUR",
-                    image_url=r.get("image_url") or "",
+                # Call the Postgres function you created in Railway:
+                # upsert_product_and_price(
+                #   in_source text,
+                #   in_ext_id text,
+                #   in_name text,
+                #   in_brand text,
+                #   in_size_text text,
+                #   in_ean_raw text,
+                #   in_price numeric,
+                #   in_currency text,
+                #   in_store_id integer,
+                #   in_seen_at timestamptz,
+                #   in_source_url text
+                # ) RETURNS integer (product_id)
+
+                product_id = await pool.fetchval(
+                    """
+                    SELECT upsert_product_and_price(
+                        $1,   -- in_source (chain key, e.g. 'rimi')
+                        $2,   -- in_ext_id
+                        $3,   -- in_name
+                        $4,   -- in_brand
+                        $5,   -- in_size_text
+                        $6,   -- in_ean_raw
+                        $7,   -- in_price
+                        $8,   -- in_currency
+                        $9,   -- in_store_id
+                        NOW(),-- in_seen_at (timestamp)
+                        $10   -- in_source_url
+                    );
+                    """,
+                    "rimi",                               # $1 source label in ext_product_map.source
+                    r.get("ext_id") or "",                # $2 ext_id from PDP URL
+                    r.get("name") or "",                  # $3 product name
+                    r.get("brand") or "",                 # $4 brand
+                    r.get("size_text") or "",             # $5 size_text like "1 l" / "500 g"
+                    r.get("ean_raw") or "",               # $6 raw/parsed EAN/barcode
+                    price_val,                            # $7 numeric price
+                    (r.get("currency") or "EUR"),         # $8 currency
+                    store_id,                             # $9 store_id (e.g. 440 for Rimi ePood)
+                    r.get("source_url") or "",            # $10 canonical PDP URL
                 )
-                ingest_count += 1
+
+                upserted += 1
+                # Optional debug:
+                # print(f"[rimi] upsert ok ext_id={r.get('ext_id')} -> product_id={product_id}")
+
             except Exception as ex:
-                # swallow individual ingest errors but print them
-                print(f"[rimi] ingest_snapshot failed for {r.get('name')}: {ex}")
-        print(f"[rimi] DB ingest complete ({ ingest_count } rows).")
+                # Don't crash the whole run if just one row is weird.
+                print(
+                    f"[rimi] upsert_product_and_price FAILED "
+                    f"ext_id={r.get('ext_id')} name={r.get('name')[:50]!r}: {ex}"
+                )
+
+        print(f"[rimi] DB ingest complete ({upserted} rows upserted).")
+
     finally:
         await pool.close()
 
