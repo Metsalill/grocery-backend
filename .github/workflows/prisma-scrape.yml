@@ -19,6 +19,7 @@ jobs:
       DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}   # Railway URL secret
       PRODUCTS_TABLE: products
       PYTHONUNBUFFERED: "1"
+      STORE_ID: "14"
 
     steps:
       - name: Checkout
