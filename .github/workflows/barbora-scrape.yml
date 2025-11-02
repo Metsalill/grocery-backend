@@ -1,82 +1,28 @@
-name: "Barbora (Maxima EE) - Category Crawl + optional DB upsert"
+name: Barbora Scrape + Ingest
 
 on:
-  workflow_dispatch:
-    inputs:
-      mode:
-        description: "prices (default) or metadata (crawl only items missing brand/manufacturer)"
-        required: false
-        default: "prices"
-      categories_multiline:
-        description: "Category URLs (one per line). If empty, auto-discover from Barbora."
-        required: false
-        default: ""
-      page_limit:
-        description: "Max categories to process (0 = all)"
-        required: false
-        default: "0"
-      max_products:
-        description: "Cap total PDPs (0 = unlimited)"
-        required: false
-        default: "0"
-      headless:
-        description: "Headless (1/0)"
-        required: false
-        default: "1"
-      req_delay:
-        description: "Delay between steps (sec)"
-        required: false
-        default: "0.25"
-      max_pages_per_category:
-        description: "Cap pages per category (0 = unlimited)"
-        required: false
-        default: "35"
-      upsert_db:
-        description: "Upsert into Postgres (1=yes, 0=just CSV)"
-        required: false
-        default: "1"
-      recovery:
-        description: "Broaden scope & crawl deeper (1=yes, ignore excludes + use deeper page cap)"
-        required: false
-        default: "0"
+  workflow_dispatch: {}
   schedule:
-    - cron: "19 3 * * 0"   # Sun at 03:19 UTC
+    # scrape a few times per day; adjust if you want
+    - cron: "0 */6 * * *"   # every 6h UTC
 
 concurrency:
-  group: barbora-category-crawl
+  group: barbora-scrape
   cancel-in-progress: true
 
 jobs:
-  crawl-and-upsert:
-    name: crawl-and-upsert (shard ${{ matrix.shard }})
+  scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 240
-
-    strategy:
-      fail-fast: false
-      max-parallel: 8
-      matrix:
-        shard: [0, 1, 2, 3, 4, 5, 6, 7]   # ↑ 8 shards in parallel
+    timeout-minutes: 120
 
     env:
+      # --- DB connection for asyncpg / upsert_product_and_price()
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}  # must be writeable URL
+      # this must match the "Barbora ePood" row in public.stores (is_online = true)
+      STORE_ID: "441"
+      # leave some headroom so crawler exits cleanly and ingests
+      SOFT_TIMEOUT_MIN: "210"
       PYTHONUNBUFFERED: "1"
-      OUTPUT_CSV: data/barbora_products.csv
-      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-      MODE: ${{ github.event.inputs.mode || 'prices' }}
-
-      # Recovery mode: drop excludes to widen sweep. Otherwise keep household/baby out by default.
-      EXCLUDE_SECTIONS: ${{ (github.event.inputs.recovery || '0') == '1' && '' || 'https://barbora.ee/kodukaubad-ja-vaba-aeg https://barbora.ee/enesehooldustooted https://barbora.ee/puhastustarbed-ja-lemmikloomatooted https://barbora.ee/lastekaubad' }}
-      INCLUDE_SECTIONS: "https://barbora.ee/enesehooldustooted/suuhugieen/hambapastad https://barbora.ee/enesehooldustooted/raseerimisvahendid https://barbora.ee/enesehooldustooted/intiimhugieeni-vahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/pesupesemisvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/noudepesuvahendid https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/kodukeemia https://barbora.ee/puhastustarbed-ja-lemmikloomatooted/majapidamis-ja-koristustarbed https://barbora.ee/lastekaubad/piimasegud-ja-jatkupiimasegud https://barbora.ee/lastekaubad/pudrud https://barbora.ee/lastekaubad/mahkmed https://barbora.ee/lastekaubad/puuviljapureed https://barbora.ee/lastekaubad/laste-hugieenitarbed/niisked-salvratikud https://barbora.ee/lastekaubad/liha-ja-koogiviljapureed"
-
-      # Ensure scheduled & manual runs upsert by default (unless user overrides)
-      UPSERT_DB: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.upsert_db || '1' }}
-
-      # Shard index from matrix
-      SHARD: ${{ matrix.shard }}
-
-      # Crawl caps / soft timeout so DB steps can run
-      MAX_PAGES_PER_CAT: ${{ (github.event.inputs.recovery || '0') == '1' && '200' || (github.event.inputs.max_pages_per_category || '35') }}
-      SOFT_TIMEOUT_MIN: "220"
 
     steps:
       - name: Checkout
@@ -87,402 +33,34 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install deps (Playwright + libs)
-        shell: bash
+      - name: Install deps
         run: |
-          set -euo pipefail
-          pip install playwright beautifulsoup4 lxml pg8000 psycopg2-binary
+          python -m pip install --upgrade pip
+          # your repo may already have requirements.txt / requirements-crawler.txt.
+          # Make sure it includes: playwright, bs4, asyncpg, lxml, etc.
+          pip install -r requirements.txt
           python -m playwright install --with-deps chromium
 
-      - name: Verify scraper exists
-        shell: bash
+      - name: Run Barbora crawler
         run: |
-          set -euo pipefail
-          if [ ! -f scripts/barbora_crawl_categories_pw.py ]; then
-            echo "::error::scripts/barbora_crawl_categories_pw.py missing"
-            exit 1
-          fi
-          python -m py_compile scripts/barbora_crawl_categories_pw.py
-          chmod +x scripts/barbora_crawl_categories_pw.py
-
-      - name: Prepare workspace
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf data
           mkdir -p data
+          python barbora_crawl_categories_pw.py \
+            --cats-file crawler_input/barbora_categories.txt \
+            --headless 1 \
+            --req-delay 0.25 \
+            --max-pages-per-category 120 \
+            --max-products 0 \
+            --page-limit 0 \
+            --output-csv data/barbora_products.csv
+        # IMPORTANT:
+        #   crawler_input/barbora_categories.txt
+        #   should be a simple text file in your repo listing Barbora category URLs (one per line).
+        #   If your path/name is different, update it here.
 
-      - name: Auto-discover categories (unless provided via input) + validate
-        env:
-          INPUT_CATS: ${{ github.event.inputs.categories_multiline }}
-          EXCLUDES: ${{ env.EXCLUDE_SECTIONS }}
-          INCLUDES: ${{ env.INCLUDE_SECTIONS }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p data
-
-          # 1) Explicit input wins
-          if [ -n "${INPUT_CATS}" ]; then
-            printf "%s\n" "${INPUT_CATS}" | tr -d '\r' | sed '/^[[:space:]]*$/d' > data/barbora_categories.txt
-            echo "Using categories from workflow input."
-          # 2) Repo file next (if already committed)
-          elif [ -s data/barbora_categories.txt ]; then
-            echo "Using repo file data/barbora_categories.txt"
-          else
-            # 3) Try autodiscover from homepage (write python file with echo; no heredocs)
-            {
-              echo 'import os'
-              echo 'from urllib.parse import urljoin, urlparse'
-              echo 'from playwright.sync_api import sync_playwright'
-              echo 'BASE = "https://barbora.ee"'
-              echo 'excludes = tuple(os.environ.get("EXCLUDES","").split())'
-              echo 'includes = tuple(os.environ.get("INCLUDES","").split())'
-              echo 'discovered = set()'
-              echo 'def absu(href): return urljoin(BASE, href)'
-              echo 'def is_category(url):'
-              echo '    p = urlparse(url)'
-              echo '    if not (p.scheme and p.netloc and p.netloc.endswith("barbora.ee")): return False'
-              echo '    segs = [s for s in p.path.split("/") if s]'
-              echo '    if any(s in ("retseptid","info","blogi","kampaania") for s in segs): return False'
-              echo '    return 1 <= len(segs) <= 4'
-              echo 'def allowed(url):'
-              echo '    if any(url.startswith(pref) for pref in includes): return True'
-              echo '    if any(url.startswith(pref) for pref in excludes): return False'
-              echo '    return is_category(url)'
-              echo 'with sync_playwright() as pw:'
-              echo '    b = pw.chromium.launch(headless=True)'
-              echo '    ctx = b.new_context(locale="et-EE")'
-              echo '    p = ctx.new_page()'
-              echo '    p.goto(BASE, timeout=45000, wait_until="domcontentloaded")'
-              echo '    for sel in ['"'"'#onetrust-accept-btn-handler'"'"','"'"'button:has-text("Nõustun")'"'"','"'"'button:has-text("Accept")'"'"']:'
-              echo '        try:'
-              echo '            loc = p.locator(sel)'
-              echo '            if loc.count() and loc.first.is_visible():'
-              echo '                loc.first.click(timeout=1000)'
-              echo '        except Exception:'
-              echo '            pass'
-              echo '    for a in p.locator("a").all():'
-              echo '        href = (a.get_attribute("href") or "").strip()'
-              echo '        if not href: continue'
-              echo '        u = absu(href)'
-              echo '        if allowed(u): discovered.add(u)'
-              echo '    os.makedirs("data", exist_ok=True)'
-              echo '    with open("data/barbora_categories.txt","w",encoding="utf-8") as f:'
-              echo '        for u in sorted(discovered): f.write(u + "\n")'
-              echo '    print(f"[discover] wrote {len(discovered)} -> data/barbora_categories.txt")'
-              echo '    ctx.close(); b.close()'
-            } > /tmp/discover_barbora.py
-            python /tmp/discover_barbora.py
-          fi
-
-          # 4) Fallback to curated FOOD roots if autodiscover empty/too small
-          if [ ! -s data/barbora_categories.txt ] || [ "$(wc -l < data/barbora_categories.txt)" -lt 10 ]; then
-            printf '%s\n' \
-              'https://barbora.ee/koogiviljad-puuviljad' \
-              'https://barbora.ee/piimatooted-ja-munad' \
-              'https://barbora.ee/juustud' \
-              'https://barbora.ee/leivad-saiad-kondiitritooted' \
-              'https://barbora.ee/liha-kala-valmistoit' \
-              'https://barbora.ee/kuivained-ja-hoidised' \
-              'https://barbora.ee/maitseained-ja-kastmed' \
-              'https://barbora.ee/suupisted-maiustused' \
-              'https://barbora.ee/joogid' \
-              'https://barbora.ee/kulmutatud-tooted' \
-              > data/barbora_categories.txt
-            echo "Autodiscover small → wrote curated FOOD roots to data/barbora_categories.txt"
-          fi
-
-          # Fix stale slugs if present (compat)
-          sed -i 's#https://barbora.ee/piimatooted-munad-void#https://barbora.ee/piimatooted-ja-munad#g' data/barbora_categories.txt
-          sed -i 's#https://barbora.ee/leib-sai-kondiitritooted#https://barbora.ee/leivad-saiad-kondiitritooted#g' data/barbora_categories.txt
-          sed -i 's#https://barbora.ee/valmistoidud#https://barbora.ee/liha-kala-valmistoit#g' data/barbora_categories.txt
-
-          # Validate category URLs (drop 404 / “Palume vabandust”)
-          {
-            echo 'from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout'
-            echo 'import pathlib'
-            echo 'infile = pathlib.Path("data/barbora_categories.txt")'
-            echo 'cats = [l.strip() for l in infile.read_text("utf-8").splitlines() if l.strip()]'
-            echo 'valid = []'
-            echo 'with sync_playwright() as pw:'
-            echo '    b = pw.chromium.launch(headless=True)'
-            echo '    p = b.new_page()'
-            echo '    for u in cats:'
-            echo '        try:'
-            echo '            r = p.goto(u, timeout=30000, wait_until="domcontentloaded")'
-            echo '            html = (p.content() or "")'
-            echo '            code = r.status if r else 200'
-            echo '            bad = (code == 404) or ("Palume vabandust" in html and "404" in html)'
-            echo '            if not bad:'
-            echo '                valid.append(u)'
-            echo '        except PWTimeout:'
-            echo '            pass'
-            echo '    b.close()'
-            echo 'pathlib.Path("data/barbora_categories.txt").write_text("\n".join(dict.fromkeys(valid)) + ("\n" if valid else ""), encoding="utf-8")'
-            echo 'print(f"Validated categories kept: {len(valid)}")'
-          } > /tmp/validate_barbora.py
-          python /tmp/validate_barbora.py
-
-          echo "TOTAL categories: $(wc -l < data/barbora_categories.txt || echo 0)"
-          echo "--- preview ---"
-          head -n 30 data/barbora_categories.txt || true
-          echo "--------------"
-          test -s data/barbora_categories.txt
-
-      - name: Shard category list (rotate + 8-way)
-        shell: bash
-        env:
-          SHARDS: 8
-          ROTATE_SEED: ${{ github.run_number }}
-        run: |
-          set -euo pipefail
-          cp -f data/barbora_categories.txt data/barbora_categories_all.txt
-          TOTAL=$(wc -l < data/barbora_categories_all.txt)
-          : "${SHARD:?SHARD env is required}"
-
-          # Rotate the list so we don't always start from the same categories.
-          ROTATE=$(( (ROTATE_SEED + SHARD) % (TOTAL>0?TOTAL:1) ))
-          echo "TOTAL categories: $TOTAL"
-          echo "Rotate offset (seed=${ROTATE_SEED}, shard=${SHARD}): $ROTATE"
-
-          awk 'NR>0{a[NR]=$0} END{ if(NR==0){exit}; r='"$ROTATE"'; for(i=r+1;i<=NR;i++)print a[i]; for(i=1;i<=r;i++)print a[i] }' \
-            data/barbora_categories_all.txt > data/barbora_categories_rot.txt
-
-          # Now shard the rotated list
-          awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
-            data/barbora_categories_rot.txt > data/barbora_categories.txt
-
-          echo "Shard: $SHARD / $SHARDS"
-          echo "Slice count: $(wc -l < data/barbora_categories.txt)"
-          head -n 20 data/barbora_categories.txt || true
-
-      # Ensure psql available for the skip/only steps
-      - name: Install psql client (for skip/only lists)
-        if: ${{ env.DATABASE_URL != '' }}
-        shell: bash
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client
-
-      # MODE=prices → DO NOT SKIP ANY ITEMS (we want fresh prices)
-      - name: Build skip list (disabled in prices mode)
-        if: ${{ env.DATABASE_URL != '' && env.MODE == 'prices' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          : > data/barbora_skip_ext_ids.txt
-          echo "0" > data/_barbora_skip_count.txt
-          echo "Skip list disabled for prices → crawl all items."
-
-      # MODE=metadata → produce BOTH ext_ids and URLs, and shard URLs
-      - name: Build ONLY lists (missing brand/manufacturer; produce URLs too)
-        if: ${{ env.DATABASE_URL != '' && env.MODE == 'metadata' }}
-        shell: bash
-        env:
-          SHARDS: 8
-        run: |
-          set -euo pipefail
-          : > data/barbora_only_ext_ids.txt
-          : > data/barbora_only_urls_all.txt
-
-          HAS_MANU="$(psql "$DATABASE_URL" -Atc "
-            WITH cols AS (
-              SELECT table_name
-              FROM information_schema.columns
-              WHERE table_schema='public'
-                AND column_name='manufacturer'
-                AND table_name IN ('barbora_candidates','staging_barbora_products')
-            )
-            SELECT CASE WHEN COUNT(*)=2 THEN '1' ELSE '0' END FROM cols;
-          ")"
-          echo "HAS_MANUFACTURER_COLS=${HAS_MANU}"
-
-          if [ "${HAS_MANU}" = "1" ]; then
-            psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 -c "
-              WITH all_rows AS (
-                SELECT ext_id, source_url FROM public.barbora_candidates
-                UNION
-                SELECT ext_id, source_url FROM public.staging_barbora_products
-              )
-              SELECT a.ext_id || ' ' || a.source_url
-              FROM all_rows a
-              LEFT JOIN public.barbora_candidates bc ON bc.ext_id = a.ext_id
-              LEFT JOIN public.staging_barbora_products sp ON sp.ext_id = a.ext_id
-              WHERE
-                (COALESCE(NULLIF(btrim(COALESCE(bc.brand,        sp.brand,        '')), ''), NULL) IS NULL
-                 OR COALESCE(NULLIF(btrim(COALESCE(bc.manufacturer, sp.manufacturer, '')), ''), NULL) IS NULL)
-                AND COALESCE(a.source_url,'') ILIKE 'https://barbora.ee%'
-              ORDER BY 1;
-            " > data/_barbora_only_pairs.txt
-          else
-            echo "::warning::manufacturer column missing -> falling back to (brand/name)"
-            psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 -c "
-              WITH all_rows AS (
-                SELECT ext_id, source_url FROM public.barbora_candidates
-                UNION
-                SELECT ext_id, source_url FROM public.staging_barbora_products
-              )
-              SELECT a.ext_id || ' ' || a.source_url
-              FROM all_rows a
-              LEFT JOIN public.barbora_candidates bc ON bc.ext_id = a.ext_id
-              LEFT JOIN public.staging_barbora_products sp ON sp.ext_id = a.ext_id
-              WHERE
-                (COALESCE(NULLIF(btrim(COALESCE(bc.brand, sp.brand, '')), ''), NULL) IS NULL
-                 OR COALESCE(NULLIF(btrim(COALESCE(bc.name,  sp.name,  '')), ''), NULL) IS NULL)
-                AND COALESCE(a.source_url,'') ILIKE 'https://barbora.ee%'
-              ORDER BY 1;
-            " > data/_barbora_only_pairs.txt
-          fi
-
-          # Split the "ext_id URL" pairs into two files
-          awk '{print $1}' data/_barbora_only_pairs.txt | sed '/^$/d' > data/barbora_only_ext_ids.txt
-          awk '{print $2}' data/_barbora_only_pairs.txt | sed '/^$/d' > data/barbora_only_urls_all.txt
-
-          echo "ONLY list rows: $(wc -l < data/barbora_only_ext_ids.txt)"
-
-          # Shard the URL list to avoid double-work across matrix shards
-          : "${SHARD:?SHARD env is required}"
-          awk -v s="$SHARD" -v n="$SHARDS" 'NR>0 { if ((NR-1)%n==s) print }' \
-            data/barbora_only_urls_all.txt > data/barbora_only_urls.txt
-          echo "Shard URL slice count: $(wc -l < data/barbora_only_urls.txt)"
-
-      - name: Crawl Barbora (categories or ONLY URLs)
-        env:
-          REQ_DELAY: ${{ github.event.inputs.req_delay }}
-          PAGE_LIMIT: ${{ github.event.inputs.page_limit }}
-          MAX_PRODUCTS: ${{ github.event.inputs.max_products }}
-          MAX_PAGES_PER_CAT: ${{ env.MAX_PAGES_PER_CAT }}
-          HEADLESS: ${{ github.event.inputs.headless }}
-        shell: bash
-        continue-on-error: true
-        run: |
-          set -euo pipefail
-          REQ_DELAY="${REQ_DELAY:-0.25}"
-          PAGE_LIMIT="${PAGE_LIMIT:-0}"
-          MAX_PRODUCTS="${MAX_PRODUCTS:-0}"
-          HEADLESS="${HEADLESS:-1}"
-          MAX_PAGES_PER_CAT="${MAX_PAGES_PER_CAT:-35}"
-          SOFT_TIMEOUT_MIN="${SOFT_TIMEOUT_MIN:-220}"
-
-          ONLY_EXT_FLAG=()
-          ONLY_URL_FLAG=()
-
-          if [ "${MODE}" = "metadata" ] && [ -s data/barbora_only_urls.txt ]; then
-            ONLY_URL_FLAG=( --only-url-file data/barbora_only_urls.txt )
-          elif [ "${MODE}" = "metadata" ] && [ -s data/barbora_only_ext_ids.txt ]; then
-            ONLY_EXT_FLAG=( --only-ext-file data/barbora_only_ext_ids.txt )
-          fi
-
-          cmd=( python -u scripts/barbora_crawl_categories_pw.py
-                --cats-file data/barbora_categories.txt
-                --page-limit "$PAGE_LIMIT"
-                --max-products "$MAX_PRODUCTS"
-                --max-pages-per-category "$MAX_PAGES_PER_CAT"
-                --headless "$HEADLESS"
-                --req-delay "$REQ_DELAY"
-                --output-csv "$OUTPUT_CSV"
-                "${ONLY_EXT_FLAG[@]}"
-                "${ONLY_URL_FLAG[@]}" )
-
-          echo "[info] soft timeout: ${SOFT_TIMEOUT_MIN} minutes"
-          stdbuf -oL -eL timeout -k 60s "${SOFT_TIMEOUT_MIN}m" "${cmd[@]}" | tee data/barbora_run.log
-
-      - name: Ensure CSV exists (header if empty)
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [ ! -s "$OUTPUT_CSV" ]; then
-            mkdir -p "$(dirname "$OUTPUT_CSV")"
-            echo 'store_chain,store_name,store_channel,ext_id,ean_raw,sku_raw,name,size_text,brand,manufacturer,price,currency,image_url,category_path,category_leaf,source_url' > "$OUTPUT_CSV"
-            echo "Wrote header-only CSV -> $OUTPUT_CSV"
-          fi
-
-      - name: Upload crawl artifacts
-        if: ${{ always() }}
+      - name: Upload CSV artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: barbora-crawl-${{ env.MODE }}-shard-${{ matrix.shard }}-${{ github.run_id }}
-          path: |
-            data/barbora_products.csv
-            data/barbora_run.log
-            data/_barbora_skip_count.txt
-            data/barbora_skip_ext_ids.txt
-            data/barbora_only_ext_ids.txt
-            data/barbora_only_urls_all.txt
-            data/barbora_only_urls.txt
+          name: barbora_products_csv
+          path: data/barbora_products.csv
           if-no-files-found: warn
-          retention-days: 7
-
-      # ---------- Optional DB part ----------
-      - name: Install psql client
-        if: ${{ env.DATABASE_URL != '' && env.UPSERT_DB == '1' }}
-        shell: bash
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client
-
-      - name: DB sanity (connection)
-        if: ${{ env.DATABASE_URL != '' && env.UPSERT_DB == '1' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          psql "$DATABASE_URL" -c "\conninfo" || true
-          psql "$DATABASE_URL" -c "SELECT current_database(), current_user;" || true
-
-      - name: Prepare DB (store + staging)
-        if: ${{ env.DATABASE_URL != '' && env.UPSERT_DB == '1' }}
-        shell: bash
-        run: |
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          BEGIN;
-          INSERT INTO public.stores (name, chain, is_online)
-          SELECT 'Barbora ePood', 'Maxima', TRUE
-          WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE name='Barbora ePood' AND chain='Maxima' AND is_online=TRUE);
-
-          CREATE TABLE IF NOT EXISTS public.staging_barbora_products (
-            ext_id        text PRIMARY KEY,
-            name          text NOT NULL,
-            ean_raw       text,
-            sku_raw       text,
-            ean_norm      text GENERATED ALWAYS AS (regexp_replace(COALESCE(ean_raw,''), '[^0-9]', '', 'g')) STORED,
-            size_text     text,
-            brand         text,
-            manufacturer  text,
-            price         numeric(12,2),
-            currency      text DEFAULT 'EUR',
-            category_path text,
-            category_leaf text,
-            source_url    text,
-            collected_at  timestamptz DEFAULT now()
-          );
-          CREATE EXTENSION IF NOT EXISTS pg_trgm;
-          CREATE INDEX IF NOT EXISTS ix_barbora_ean       ON public.staging_barbora_products (ean_norm);
-          CREATE INDEX IF NOT EXISTS ix_barbora_name_trgm ON public.staging_barbora_products USING gin (name gin_trgm_ops);
-
-          CREATE TABLE IF NOT EXISTS public.barbora_candidates (
-            ext_id        text PRIMARY KEY,
-            ean_norm      text,
-            ean_raw       text,
-            sku_raw       text,
-            name          text,
-            size_text     text,
-            brand         text,
-            manufacturer  text,
-            price         numeric(12,2),
-            currency      text,
-            category_path text,
-            category_leaf text,
-            source_url    text,
-            last_seen     timestamptz DEFAULT now()
-          );
-          COMMIT;
-          SQL
-
-      - name: Load CSV to DB
-        if: ${{ env.DATABASE_URL != '' && env.UPSERT_DB == '1' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          CSV_ABS="$(python -c 'import os;print(os.path.abspath("data/barbora_products.csv"))')"
-          cat > /tmp/barbora
