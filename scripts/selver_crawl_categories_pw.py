@@ -2,33 +2,57 @@
 # -*- coding: utf-8 -*-
 
 """
-Selver category crawler → CSV (staging_selver_products)
+Selver category crawler → CSV + direct DB ingest (upsert_product_and_price)
 
-Adds robust **brand** extraction in addition to the EAN/SKU hardening:
-- JSON-LD: product.brand / manufacturer (string or object)
-- itemprop/meta: brand/manufacturer
-- DOM spec rows: "Bränd", "Tootja", "Kaubamärk", "Käitleja", "Handler", "Brand"
-- Fallbacks from H1/NAME (picks brand-like token, e.g., "... , TERE, 400 ml")
+What it does now:
+1. Crawls allowed food categories from Selver.
+2. For every product:
+   - Extracts name / brand / EAN / SKU / size_text / price / currency / category.
+   - Writes a debug CSV row (so you can diff later).
+   - Adds the row to rows_for_ingest in memory.
+3. After crawl finishes, bulk_ingest_to_db() calls the Postgres function
+   upsert_product_and_price(...) for each row, so:
+   - products table is created/updated
+   - ext_product_map is created/updated
+   - prices is upserted for the Selver online store
 
-Also includes:
-- resilient EAN (Ribakood) + SKU extraction
-- SPA noise suppression, request routing and small navigation retries
-- proceeds even if price widget fails (price=0.00)
-- skip/only lists via CLI flags (--skip-ext-file / --only-ext-file)
+ENV it cares about:
+- DATABASE_URL : Railway Postgres connection string
+- STORE_ID     : which store row in `stores` to attribute these prices to.
+                 default "31" which is "Selver e-Selver" (is_online = true)
+- OUTPUT_CSV   : local CSV dump path (default data/selver.csv)
+- CATEGORIES_FILE : list of category URLs to crawl
+- PRELOAD_DB / PRELOAD_DB_QUERY : optional skip logic for already-scraped ext_ids
 
-Hardening:
-- Strips any accidental DevTools stack-trace suffixes like ":6:13801" from paths.
+The DB-side function signature we call is:
 
-CSV columns written:
-  ext_id, source_url, name, brand, ean_raw, ean_norm, sku_raw,
-  size_text, price, currency, category_path, category_leaf
+    SELECT upsert_product_and_price(
+        in_source       text,       -- 'selver'
+        in_ext_id       text,       -- per-chain product code / slug
+        in_name         text,       -- product name
+        in_brand        text,       -- brand text
+        in_size_text    text,       -- e.g. "1 l", "3x200 g"
+        in_ean_raw      text,       -- barcode/EAN string (may be NULL/empty)
+        in_price        numeric,    -- price we saw
+        in_currency     text,       -- usually 'EUR'
+        in_store_id     integer,    -- stores.id for Selver e-Selver (31)
+        in_seen_at      timestamptz,-- when we saw this price
+        in_source_url   text        -- PDP URL
+    );
+
+That function takes care of inserting/updating rows in:
+    products, ext_product_map, prices
+so Flutter can immediately compare baskets across chains.
+
 """
 
 from __future__ import annotations
-import os, re, csv, time, json, argparse, sys
+import os, re, csv, time, json, argparse, sys, datetime
 from typing import Dict, Set, Tuple, List, Optional
-from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit, parse_qs, urlencode
+from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit
 from playwright.sync_api import sync_playwright
+
+import psycopg2, psycopg2.extras  # used for bulk ingest into Railway
 
 # ---------------------------------------------------------------------------
 BASE = "https://www.selver.ee"
@@ -131,7 +155,7 @@ def guess_size_from_title(title: str) -> str:
 def _strip_eselver_prefix(path: str) -> str:
     return path.replace("/e-selver", "", 1) if path.startswith("/e-selver/") else path
 
-# NEW: strip any trailing :line or :line:col debug suffixes (e.g. "/product:6:13801")
+# strip trailing ":6:13801" DevTools nonsense from hrefs
 LINECOL_RE = re.compile(r":\d+(?::\d+)?$")
 
 def _strip_linecol(path: str) -> str:
@@ -140,8 +164,7 @@ def _strip_linecol(path: str) -> str:
 def _clean_abs(href: str) -> Optional[str]:
     """
     Normalize Selver links → absolute URL.
-    Also removes any DevTools stacktrace suffix like ':6:13801' that sometimes
-    leaks into <a href> in this scraper environment.
+    Also removes any DevTools stacktrace suffix like ':6:13801'.
     """
     if not href:
         return None
@@ -156,17 +179,12 @@ def _clean_abs(href: str) -> Optional[str]:
     # normalize path
     path = _strip_linecol(_strip_eselver_prefix(parts.path))
 
-    # don't keep ?/fragment for catalog URLs; but do keep productID param if it's the
-    # only place we can get ext_id. In practice Selver product pages don't rely on
-    # heavy query strings, but we keep logic simple: drop queries always.
+    # drop query/fragment
     return urlunsplit((parts.scheme, parts.netloc, path.rstrip("/"), "", ""))
 
 def is_probably_food_category(path: str) -> bool:
     """
     Decide whether this looks like a real FOOD category, not shampoo/stationery/etc.
-    Rules:
-      - if ALLOWLIST_ONLY, must start with one of STRICT_ALLOWLIST.
-      - reject if path contains banned keywords.
     """
     p = path.strip().lower()
     if not p.startswith("/"):
@@ -191,18 +209,17 @@ def norm_digits(s: str) -> str:
 
 def extract_price_and_currency(page) -> Tuple[float, str]:
     """
-    Selver puts price in components; worst case we fallback to 0.00.
+    Selver puts price in components; fallback to 0.00 / '€'.
     """
     price_val = 0.0
     curr = "€"
 
-    # try dedicated price span
+    # dedicated price span
     try:
         el = page.query_selector('[data-testid="product-price"]') \
-             or page.query_selector('.product-price__value')
+          or page.query_selector('.product-price__value')
         if el:
             txt = normspace(el.inner_text())
-            # e.g. "4,59 €" or "4.59 €"
             m = re.search(r"(\d+[.,]\d+)", txt)
             if m:
                 price_val = float(m.group(1).replace(",", "."))
@@ -213,7 +230,7 @@ def extract_price_and_currency(page) -> Tuple[float, str]:
     except Exception:
         pass
 
-    # fallback: look for any price-ish thing
+    # fallback
     try:
         el2 = page.query_selector('.price')
         if el2:
@@ -232,19 +249,12 @@ def extract_price_and_currency(page) -> Tuple[float, str]:
 def extract_specs_table(page) -> Dict[str, str]:
     """
     Scrape product "specs" / details table if present.
-    We'll parse rows like:
-      <tr><th>Ribakood</th><td>1234567890123</td></tr>
-      <tr><th>Tootja</th><td>ALMA</td></tr>
     Return dict {lowercase_header: value_text}.
     """
     out: Dict[str, str] = {}
     try:
         rows = page.query_selector_all("table tr, .product-details__row, dl.product-specs > div")
         for r in rows:
-            # possible structures:
-            # <tr><th>Foo</th><td>Bar</td></tr>
-            # <div class="product-details__row"><div>Foo</div><div>Bar</div></div>
-            # <div><dt>Foo</dt><dd>Bar</dd></div>
             head_txt = ""
             val_txt  = ""
 
@@ -257,7 +267,7 @@ def extract_specs_table(page) -> Dict[str, str]:
                 val_txt = normspace(td.inner_text())
 
             if not head_txt and not val_txt:
-                # maybe two div children without classes
+                # fallback: two div kids
                 kids = r.query_selector_all(":scope > *")
                 if len(kids) >= 2:
                     head_txt = normspace(kids[0].inner_text())
@@ -271,7 +281,7 @@ def extract_specs_table(page) -> Dict[str, str]:
 
 def extract_json_ld(page) -> Dict[str, any]:
     """
-    Try to read any <script type="application/ld+json"> and parse first product-y one.
+    Try to read first product-like <script type="application/ld+json">.
     """
     try:
         scripts = page.query_selector_all('script[type="application/ld+json"]')
@@ -285,9 +295,7 @@ def extract_json_ld(page) -> Dict[str, any]:
         except Exception:
             continue
 
-        # sometimes it's an array of contexts
         candidates = data if isinstance(data, list) else [data]
-
         for c in candidates:
             if not isinstance(c, dict):
                 continue
@@ -306,11 +314,10 @@ def pick_brand(
 ) -> str:
     """
     Priority:
-      1. json_ld["brand"] (string or { "name": "..." }) or json_ld["manufacturer"]
-      2. specs rows like "tootja", "bränd", "kaubamärk", "brand", "manufacturer"
-      3. fallback: try first ALLCAPS-ish token from product title
+      1. json_ld["brand"] / ["manufacturer"]
+      2. specs rows like "Tootja", "Bränd", "Manufacturer", etc.
+      3. try an ALLCAPS token from product title
     """
-    # 1. JSON-LD
     def _get_from_json_ld(js: Dict[str, any]) -> Optional[str]:
         cand = js.get("brand")
         if cand:
@@ -334,7 +341,6 @@ def pick_brand(
     if b:
         return b
 
-    # 2. specs table: look for likely brand/manufacturer keys
     BRAND_KEYS = [
         "bränd", "brand", "tootja", "kaubamärk", "manufacturer",
         "tootja / päritoluriik", "käitleja", "handler"
@@ -346,23 +352,20 @@ def pick_brand(
                 if v:
                     return v
 
-    # 3. fallback from title
-    # heuristic: first token or first comma-separated piece that looks ALLCAPS-ish
     ttl = fallback_title or ""
     parts = re.split(r"[,-]+", ttl)
     for p in parts:
         p = normspace(p)
-        # if token has >=2 letters and most are uppercase
         letters = re.sub(r"[^A-Za-zÅÄÖÕÜŠŽÕÄÖÜšžõäöü]", "", p)
-        if len(letters) >= 2 and (sum(1 for ch in letters if ch.isupper()) / len(letters) >= 0.7):
-            return p
+        if len(letters) >= 2:
+            upper_count = sum(1 for ch in letters if ch.isupper())
+            if upper_count / len(letters) >= 0.7:
+                return p
     return ""
 
 def pick_size_text(specs: Dict[str,str], title_guess: str) -> str:
     """
-    We store size_text (what user sees). Priority:
-      - from specs table if we find something like "Kogus", "Netokogus", "Net weight"
-      - else guess_size_from_title()
+    Preferred size/amount text.
     """
     SIZE_KEYS = [
         "kogus", "netokogus", "neto kogus",
@@ -383,14 +386,7 @@ def pick_ean_and_sku(
     page,
 ) -> Tuple[str,str]:
     """
-    ean_raw, sku_raw
-    Priority for EAN:
-      - JSON-LD .gtin13 / .gtin8 / .gtin14 / .sku if 8-14 digits
-      - specs row "ribakood" (barcode)
-      - meta[itemprop=gtin*]
-    SKU fallback:
-      - json_ld["sku"]
-      - specs["tootekood"], "sku", "artikkel"
+    Return (ean_raw, sku_raw).
     """
     ean_raw = ""
     sku_raw = ""
@@ -399,18 +395,17 @@ def pick_ean_and_sku(
         digits = norm_digits(v)
         return len(digits) >= 8 and len(digits) <= 14
 
-    # 1. json_ld
+    # JSON-LD first
     for key in ("gtin13","gtin8","gtin14","sku","gtin"):
         if key in json_ld:
             cand = str(json_ld[key])
             if is_eanish(cand):
                 ean_raw = cand
                 break
-    # also consider json_ld["sku"] for sku_raw
     if "sku" in json_ld:
         sku_raw = str(json_ld["sku"]).strip()
 
-    # 2. specs
+    # specs fallback
     for k,v in specs.items():
         lowk = k.lower()
         if "ribakood" in lowk or "barcode" in lowk or "ean" in lowk:
@@ -420,7 +415,7 @@ def pick_ean_and_sku(
             if not sku_raw:
                 sku_raw = v.strip()
 
-    # 3. meta/ld GTIN outside specs (some pages have itemprop=gtinXX)
+    # meta[itemprop^="gtin"]
     if not ean_raw:
         try:
             m = page.query_selector('[itemprop^="gtin"]')
@@ -435,17 +430,15 @@ def pick_ean_and_sku(
 
 def preload_seen_ext_ids() -> Set[str]:
     """
-    Load ext_id list from staging_selver_products so we can skip duplicates.
-    Uses PRELOAD_DB_QUERY via psql-style env vars is out of scope here;
-    return empty set if PRELOAD_DB disabled.
+    Load ext_id list from staging_selver_products so we skip duplicates
+    we've *already* sent to the DB.
     """
     if not PRELOAD_DB:
         return set()
 
-    import psycopg2, psycopg2.extras
     dsn = os.getenv("DATABASE_URL")
     if not dsn:
-        print("[warn] PRELOAD_DB=1 but no DATABASE_URL in env; skipping preload", file=sys.stderr)
+        print("[warn] PRELOAD_DB=1 but no DATABASE_URL; skipping preload", file=sys.stderr)
         return set()
 
     seen: Set[str] = set()
@@ -467,22 +460,6 @@ def preload_seen_ext_ids() -> Set[str]:
         print(f"[warn] preload DB failed: {e}", file=sys.stderr)
     return seen
 
-def iter_category_roots() -> List[str]:
-    """
-    We'll read text file with 1 category URL per line (relative or absolute).
-    """
-    cats: List[str] = []
-    if os.path.isfile(CATEGORIES_FILE):
-        with open(CATEGORIES_FILE, "r", encoding="utf-8") as f:
-            for line in f:
-                u = line.strip()
-                if not u:
-                    continue
-                cats.append(u)
-    else:
-        print(f"[warn] categories file {CATEGORIES_FILE} not found", file=sys.stderr)
-    return cats
-
 def is_banned_product_url(path: str) -> bool:
     low = path.lower()
     if any(snippet in low for snippet in NON_PRODUCT_PATH_SNIPPETS):
@@ -493,8 +470,7 @@ def is_banned_product_url(path: str) -> bool:
 
 def console_filter(msg):
     """
-    Optional console message filter for Playwright's console events.
-    We only print .warn or .error or all, depending on LOG_CONSOLE.
+    Optional console message filter.
     """
     t = msg.type().lower()
     if LOG_CONSOLE == "all":
@@ -503,31 +479,28 @@ def console_filter(msg):
         if t in ("warning","warn","error","assert"):
             print(f"[console:{t}] {msg.text()}")
     else:
-        # LOG_CONSOLE == "0"/"off": ignore
         pass
 
 def block_junk(route, request):
     """
-    Let Selver's own origin requests through. Block 3p analytics etc.
+    Block 3rd-party analytics etc.
     """
     try:
         url = request.url
         host = urlparse(url).netloc.lower()
         if any(h in host for h in BLOCK_HOSTS):
             return route.abort()
-        # else allow
         return route.continue_()
     except Exception:
         return route.continue_()
 
 def safe_goto(page, url: str, timeout_ms: int = NAV_TIMEOUT_MS) -> bool:
     """
-    Try to navigate with small retries (Selver sometimes does 502-ish transient)
+    Navigate with retry because Selver sometimes flakes.
     """
     for attempt in range(3):
         try:
             page.goto(url, timeout=timeout_ms, wait_until="domcontentloaded")
-            # small wait for React hydration
             page.wait_for_timeout(400)
             return True
         except Exception as e:
@@ -537,12 +510,9 @@ def safe_goto(page, url: str, timeout_ms: int = NAV_TIMEOUT_MS) -> bool:
 
 def scrape_product_links_on_category(page) -> List[str]:
     """
-    On a category grid page, return list of absolute detail-page URLs for each product tile.
-    The Selver site is React-ish, but you can usually find anchors with href="/toode/xxx".
-    We'll try multiple selectors and fallback.
+    On a category grid page, return list of absolute product detail URLs.
     """
     links: List[str] = []
-
     selectors = [
         'a.product-card__link[href^="/"]',
         'a[href^="/toode/"]',
@@ -562,19 +532,17 @@ def scrape_product_links_on_category(page) -> List[str]:
         except Exception:
             pass
 
-    # unique preserve order
     out: List[str] = []
-    seen: Set[str] = set()
+    seen_local: Set[str] = set()
     for u in links:
-        if u not in seen:
-            seen.add(u)
+        if u not in seen_local:
+            seen_local.add(u)
             out.append(u)
     return out
 
 def paginate_category(page) -> bool:
     """
-    Click "next page" in category listing if it exists.
-    Return True if we moved to next page, else False.
+    Click "next page" in listing if available.
     """
     selectors = [
         'a[rel="next"]',
@@ -595,9 +563,7 @@ def paginate_category(page) -> bool:
 
 def parse_category_breadcrumb(page) -> Tuple[str,str]:
     """
-    Return (full_path, leaf_name) for breadrumb like:
-      Avaleht > Piimatooted > Jogurtid
-    We'll join with " > ".
+    Return (category_path, leaf_name) from breadcrumb.
     """
     crumbs: List[str] = []
     try:
@@ -611,7 +577,6 @@ def parse_category_breadcrumb(page) -> Tuple[str,str]:
         pass
 
     if not crumbs:
-        # fallback h1
         try:
             h = page.query_selector("h1, .category-title")
             if h:
@@ -625,33 +590,23 @@ def parse_category_breadcrumb(page) -> Tuple[str,str]:
 
 def product_ext_id_from_url(url: str) -> str:
     """
-    e.g. https://www.selver.ee/toode/piim-alma-25-05l
-    We'll take last path segment.
+    Take last slug of /toode/... as ext_id.
     """
     parts = urlsplit(url)
     slug = parts.path.rstrip("/").split("/")[-1]
-    # keep slug as ext_id
     return slug
 
 def scrape_product_page(page, url: str) -> Dict[str, any]:
     """
-    Extract a single product:
-     - title / name
-     - brand
-     - ean_raw + ean_norm
-     - sku_raw
-     - size_text
-     - price, currency
-     - category_path / category_leaf from breadcrumbs on the detail page
+    Extract a single product and return dict ready for ingest.
     """
     ok = safe_goto(page, url)
     if not ok:
         return {}
 
-    # Attempt to wait for product detail wrapper
     page.wait_for_timeout(500)
 
-    # name
+    # product name
     name_txt = ""
     try:
         h = page.query_selector('[data-testid="product-name"]') or page.query_selector("h1.product-title, h1")
@@ -659,31 +614,27 @@ def scrape_product_page(page, url: str) -> Dict[str, any]:
             name_txt = normspace(h.inner_text())
     except Exception:
         pass
-
-    # fallback
     if not name_txt:
         name_txt = normspace(page.title())
 
-    # specs table
+    # specs / ld+json
     specs = extract_specs_table(page)
-
-    # structured data
     json_ld = extract_json_ld(page)
 
     # brand
     brand = pick_brand(json_ld, specs, name_txt)
 
-    # ean/sku
+    # ean / sku
     ean_raw, sku_raw = pick_ean_and_sku(json_ld, specs, page)
     ean_norm = norm_digits(ean_raw)
 
-    # size
+    # size_text
     size_text = pick_size_text(specs, name_txt)
 
-    # price
+    # price / currency
     price_val, currency = extract_price_and_currency(page)
 
-    # category path (sometimes present here too)
+    # breadcrumb/category
     cat_path, cat_leaf = parse_category_breadcrumb(page)
 
     # ext_id slug
@@ -736,14 +687,92 @@ def append_row(out_path: str, row: Dict[str, any]):
             row.get("category_leaf",""),
         ])
 
-def crawl_category(page, category_url: str,
+def normalize_currency(cur: str) -> str:
+    """
+    Turn "€" into "EUR", keep other values if present.
+    """
+    c = (cur or "").strip()
+    if c == "€":
+        return "EUR"
+    if not c:
+        return "EUR"
+    return c
+
+def bulk_ingest_to_db(rows: List[Dict[str, any]], store_id: int) -> None:
+    """
+    Push rows into Postgres by calling upsert_product_and_price(...) for each.
+    This is where Selver joins the shared product universe.
+    """
+    if store_id <= 0:
+        print("[selver] STORE_ID not set or invalid, skipping DB ingest.", file=sys.stderr)
+        return
+
+    dsn = os.getenv("DATABASE_URL")
+    if not dsn:
+        print("[selver] no DATABASE_URL env var, skipping DB ingest.", file=sys.stderr)
+        return
+
+    if not rows:
+        print("[selver] nothing to ingest.", file=sys.stderr)
+        return
+
+    # We'll stamp seen_at once per row with 'now' in UTC
+    # (upsert_product_and_price also stores collected_at internally)
+    ts_now = datetime.datetime.now(datetime.timezone.utc)
+
+    sql = """
+        SELECT upsert_product_and_price(
+            %s,  -- in_source
+            %s,  -- in_ext_id
+            %s,  -- in_name
+            %s,  -- in_brand
+            %s,  -- in_size_text
+            %s,  -- in_ean_raw
+            %s,  -- in_price
+            %s,  -- in_currency
+            %s,  -- in_store_id
+            %s,  -- in_seen_at
+            %s   -- in_source_url
+        );
+    """
+
+    payload: List[tuple] = []
+    for r in rows:
+        payload.append((
+            "selver",                                 # source label
+            r.get("ext_id") or "",
+            r.get("name") or "",
+            r.get("brand") or "",
+            r.get("size_text") or "",
+            r.get("ean_raw") or "",
+            float(r.get("price") or 0.0),
+            normalize_currency(r.get("currency") or ""),
+            store_id,
+            ts_now,
+            r.get("source_url") or "",
+        ))
+
+    try:
+        conn = psycopg2.connect(dsn)
+        cur = conn.cursor()
+        psycopg2.extras.execute_batch(cur, sql, payload, page_size=100)
+        conn.commit()
+        cur.close()
+        conn.close()
+        print(f"[selver] ingested {len(rows)} rows into DB.", file=sys.stderr)
+    except Exception as e:
+        print(f"[selver] DB ingest FAILED: {e}", file=sys.stderr)
+
+def crawl_category(page,
+                   category_url: str,
                    seen_ext: Set[str],
                    writer_path: str,
+                   rows_for_ingest: List[Dict[str, any]],
                    only_ext: Optional[Set[str]]=None,
                    skip_ext: Optional[Set[str]]=None):
     """
-    Go through paginated listing for one category.
-    For each product link, scrape detail page (unless already in DB or skip list).
+    Walk a category listing (with pagination), scrape each product page.
+    Also push scraped dicts into rows_for_ingest and CSV.
     """
     url_abs = _clean_abs(category_url) or ""
     if not url_abs:
@@ -756,10 +785,11 @@ def crawl_category(page, category_url: str,
     pages_done = 0
     while True:
         pages_done += 1
-        # pick product cards
+
+        # product cards
         card_urls = scrape_product_links_on_category(page)
 
-        # optional click to reveal more info on listing (if CLICK_PRODUCTS=1)
+        # optional hover to trigger lazy content
         if CLICK_PRODUCTS:
             for card_sel in (
                 '[data-testid="product-card"] [data-testid="product-name"]',
@@ -774,7 +804,7 @@ def crawl_category(page, category_url: str,
         for purl in card_urls:
             ext_id = product_ext_id_from_url(purl)
 
-            # skip rules
+            # skip/only logic
             if skip_ext and ext_id in skip_ext:
                 continue
             if only_ext and ext_id not in only_ext:
@@ -782,26 +812,34 @@ def crawl_category(page, category_url: str,
             if ext_id in seen_ext:
                 continue
 
-            # deep scrape product
             info = scrape_product_page(page, purl)
             if not info or not info.get("ext_id"):
                 continue
 
-            # Fill category from outer page if detail page didn't have it
+            # fill category from list page if product page didn't have it
             if not info.get("category_path"):
                 info["category_path"] = cat_breadcrumb
                 info["category_leaf"] = cat_leaf
 
+            # debug CSV
             append_row(writer_path, info)
+
+            # add to ingest batch
+            rows_for_ingest.append(info)
+
+            # mark as seen this run (avoid dup calls)
             seen_ext.add(info["ext_id"])
-            print(f"[ok] {info['ext_id']}  {info['name']}  €{info['price']}  ({info['brand']})")
+
+            print(
+                f"[ok] {info['ext_id']}  {info['name']}  €{info['price']}  ({info['brand']})",
+                file=sys.stderr
+            )
 
             time.sleep(REQ_DELAY)
 
         if PAGE_LIMIT and pages_done >= PAGE_LIMIT:
             break
 
-        # next page?
         moved = paginate_category(page)
         if not moved:
             break
@@ -809,7 +847,7 @@ def crawl_category(page, category_url: str,
 
 def load_skip_or_only(path: Optional[str]) -> Optional[Set[str]]:
     """
-    Read a text file containing one ext_id per line. Return set or None if not provided.
+    Read a text file of one ext_id per line.
     """
     if not path:
         return None
@@ -838,15 +876,14 @@ def main():
 
     write_csv_header_if_needed(out_csv)
 
-    # seen ext_ids from DB
+    # have we already inserted some SKUs historically?
     seen_ext = preload_seen_ext_ids()
 
-    # skip/only sets
     skip_ext = load_skip_or_only(skip_file)
     only_ext = load_skip_or_only(only_file)
 
-    # which categories to crawl
-    cats = []
+    # categories to crawl (after filtering)
+    cats: List[str] = []
     if os.path.isfile(cats_file):
         with open(cats_file,"r",encoding="utf-8") as f:
             for line in f:
@@ -856,9 +893,8 @@ def main():
                 absu = _clean_abs(raw)
                 if not absu:
                     continue
-                parts = urlsplit(absu)
-                # filter by allowed food categories
-                if not is_probably_food_category(parts.path):
+                path_only = urlsplit(absu).path
+                if not is_probably_food_category(path_only):
                     continue
                 cats.append(absu)
     else:
@@ -871,12 +907,14 @@ def main():
 
     print(f"[info] starting Playwright, {len(cats)} categories", file=sys.stderr)
 
+    rows_for_ingest: List[Dict[str, any]] = []
+
     with sync_playwright() as pw:
         browser = pw.chromium.launch(headless=headless)
         context = browser.new_context()
         page = context.new_page()
 
-        # block 3p noise
+        # block analytics noise
         if USE_ROUTER:
             context.route("**/*", block_junk)
 
@@ -892,6 +930,7 @@ def main():
                     cat,
                     seen_ext,
                     out_csv,
+                    rows_for_ingest,
                     only_ext=only_ext,
                     skip_ext=skip_ext,
                 )
@@ -899,6 +938,18 @@ def main():
                 print(f"[err] category {cat}: {e}", file=sys.stderr)
 
         browser.close()
+
+    # ---------------------------
+    # Bulk-ingest scraped rows
+    # ---------------------------
+    try:
+        store_id_env = int(os.environ.get("STORE_ID", "31") or "31")
+    except Exception:
+        store_id_env = 31
+
+    bulk_ingest_to_db(rows_for_ingest, store_id_env)
+
+    print(f"[selver] wrote {len(rows_for_ingest)} product rows.", file=sys.stderr)
 
 if __name__ == "__main__":
     main()
