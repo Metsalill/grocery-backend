@@ -3,39 +3,36 @@ name: Coop Bolt scrape + DB ingest
 on:
   workflow_dispatch: {}
   schedule:
-    # run every 6 hours (UTC); adjust if you want
-    - cron: "0 */6 * * *"
+    - cron: "25 */12 * * *"
 
 jobs:
   scrape-bolt:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
 
-    # one job per Bolt venue you care about
     strategy:
       fail-fast: false
       matrix:
         include:
-          # example entries – adjust city/store/out paths to match
-          - city: "2-tartu"
-            store: "Coop Akadeemia"
-            categories_dir: "data/bolt"
-            outfile: "out/bolt_akadeemia.csv"
-
-          - city: "2-tartu"
-            store: "Coop Mustakivi"
-            categories_dir: "data/bolt"
-            outfile: "out/bolt_mustakivi.csv"
+          - city: tartu
+            venue_slug: kvartali-coop-maksimarket
+            store_id: 559
+            out: out/bolt_kvartali.csv
+          - city: tartu
+            venue_slug: lounakeskuse-coop-maksimarket
+            store_id: 561
+            out: out/bolt_lounakeskus.csv
+          - city: tartu
+            venue_slug: eedeni-coop-maksimarket
+            store_id: 560
+            out: out/bolt_eedeni.csv
 
     env:
-      TZ: Europe/Tallinn
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
       PYTHONUNBUFFERED: "1"
 
-      # 🔐 must exist in repo secrets (Railway RW URL, NOT read-only)
-      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
-
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -46,15 +43,23 @@ jobs:
       - name: Install crawler deps
         run: |
           python -m pip install --upgrade pip
-          pip install playwright asyncpg
-          playwright install --with-deps chromium
+          pip install "playwright>=1.44,<2" httpx beautifulsoup4 "selectolax>=0.3.12" lxml psycopg2-binary
+          python -m playwright install --with-deps chromium
 
       - name: Run Bolt crawler + ingest
         run: |
-          python bolt_crawler.py \
-            --categories-dir "${{ matrix.categories_dir }}" \
-            --city "${{ matrix.city }}" \
-            --store "${{ matrix.store }}" \
-            --out "${{ matrix.outfile }}" \
-            --headless 1 \
-            --req-delay 0.35
+          mkdir -p out
+          python3 scripts/bolt_crawler.py \
+            --store-id ${{ matrix.store_id }} \
+            --venue-slug ${{ matrix.venue_slug }} \
+            --categories-file data/bolt_categories_slugs.txt \
+            --upsert-db main \
+            --headless true \
+            --out ${{ matrix.out }}
+
+      - name: Upload CSV artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.city }}-bolt-${{ matrix.venue_slug }}
+          path: ${{ matrix.out }}
