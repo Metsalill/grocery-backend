@@ -3,35 +3,25 @@
 """
 Barbora.ee (Maxima EE) – Category → PDP crawler → CSV + direct DB ingest
 
-What changed (patch notes):
-- We still crawl categories and PDPs with Playwright, parse brand / size / price / etc.
-- We STILL write out a CSV (so you can archive/debug like before).
-- NEW: we ALSO push every row straight into Railway Postgres by calling
-  SELECT upsert_product_and_price(...)
-  so prices/products/ext_product_map stay in sync with other chains.
+Patch highlights in this version:
+- Writes CSV like before *and* ingests directly into Railway via
+  SELECT upsert_product_and_price(...).
+- Default STORE_ID=441 (Barbora ePood). Can be overridden via env STORE_ID.
+- Time-budget friendly: set SOFT_TIMEOUT_MIN env (e.g. "118") to stop early,
+  flush CSV, and still ingest before GH Actions’ 120-min cap.
+- Horizontal sharding for GH matrix runs:
+  env SHARD=<0..N-1>, SHARDS=<N>. Each shard processes a disjoint subset
+  of categories by index (no overlap).
+- Tougher pagination, price parsing, and PDP extraction.
 
-DB ingest details:
-- STORE_ID comes from env STORE_ID. We default to "441" (Barbora ePood in your stores table).
-- DATABASE_URL comes from env DATABASE_URL (same secret you already use elsewhere).
-- We call the Postgres function upsert_product_and_price(
-      in_source text,          -- e.g. 'barbora'
-      in_ext_id text,          -- per-chain SKU / URL tail
-      in_name text,
-      in_brand text,
-      in_size_text text,
-      in_ean_raw text,         -- we don't have reliable EAN from Barbora, so this is "" for now
-      in_price numeric,
-      in_currency text,
-      in_store_id integer,
-      in_seen_at timestamptz,
-      in_source_url text
-  )
-so this lands into:
-  - products (canonical row if missing)
-  - ext_product_map (barbora SKU → canonical product_id)
-  - prices (with correct store_id 441)
+DB ingest lands into:
+  - products (canonical row if missing/updated)
+  - ext_product_map (source='barbora', ext_id → product_id)
+  - prices (with the correct store_id)
 
-That means Barbora is now fully flowing into compare just like Rimi, Prisma, Selver, Coop, etc.
+YAML must install deps (example):
+  pip install playwright asyncpg bs4 lxml selectolax
+  playwright install --with-deps chromium
 """
 
 from __future__ import annotations
@@ -70,27 +60,25 @@ STORE_CHAIN = "Maxima"
 STORE_NAME = "Barbora ePood"
 STORE_CHANNEL = "online"
 
-# NOTE: in DB we always map ext_product_map.source to a short lowercase source label.
-# use "barbora" here so we don't collide with prisma/rimi/etc.
+# short, lowercase label for ext_product_map.source
 DB_SOURCE_LABEL = "barbora"
 
-# Default behaviour
+# Defaults
 DEFAULT_REQ_DELAY = 0.25
 DEFAULT_HEADLESS = 1
 
-# Common size tokens seen on EE grocery sites
+# Common size tokens
 SIZE_RE = re.compile(r"(?ix)(\d+\s?(?:x\s?\d+)?\s?(?:ml|l|cl|g|kg|mg|tk|pcs))|(\d+\s?x\s?\d+)")
 
 # Labels for brand/manufacturer in Barbora PDPs
 SPEC_KEYS_BRAND = {"kaubamärk", "bränd", "brand"}
-# also treat 'tarnija' (supplier) like manufacturer fallback
 SPEC_KEYS_MFR = {"tootja", "valmistaja", "manufacturer", "tarnija"}
 SPEC_KEYS_SIZE = {"kogus", "netokogus", "maht", "neto"}
 BAD_NAMES = {"pealeht"}  # "Home" in Estonian etc.
 
 
 # ---------------------------------------------------------------------
-# tiny helpers
+# small helpers
 # ---------------------------------------------------------------------
 
 def norm(s: Optional[str]) -> str:
@@ -105,9 +93,8 @@ def text_of(el) -> str:
 
 def get_ext_id(url: str) -> str:
     """
-    Produce a stable per-product external ID for Barbora.
-    Prefer numeric ID at the end of the URL (/p/12345 or slug-12345).
-    Otherwise fall back to a slug tail.
+    Stable per-product external ID.
+    Prefer numeric ID (/p/12345 or slug-12345), fallback to sanitized tail.
     """
     m = re.search(r"/p/(\d+)", url) or re.search(r"-(\d+)$", url)
     if m:
@@ -121,7 +108,6 @@ def get_ext_id(url: str) -> str:
 # ---------------------------------------------------------------------
 
 def accept_cookies(page: Page) -> None:
-    """Try hard to accept cookie banner so products render & clicks work."""
     selectors = [
         "[data-testid='cookie-banner-accept-all']",
         "button#onetrust-accept-btn-handler",
@@ -148,7 +134,6 @@ def accept_cookies(page: Page) -> None:
 
 def ensure_ready(page: Page) -> None:
     accept_cookies(page)
-    # nudge lazy content
     try:
         page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
         page.wait_for_timeout(150)
@@ -170,20 +155,16 @@ def _first_str(*vals) -> Optional[str]:
 
 def _clean_decimal(s: str) -> Optional[str]:
     """
-    Normalize various price texts to a decimal string "X.YY".
-    Handles:
-      - "3,49", "3.49", "3 49", "3€49"
-      - strips currency/unit and ignores percentages.
+    Normalize to a decimal string "X.YY".
+    Handles "3,49", "3.49", "3 49", "3€49", and strips % etc.
     """
     if not s:
         return None
     raw = s.replace("\xa0", " ").strip()
 
-    # Ignore obvious "30%" style texts
     if re.fullmatch(r"\d+\s*%+", raw):
         return None
 
-    # pattern like "3€49"
     m = re.search(r"(\d[\d\s]*)\s*€\s*(\d{1,2})", raw)
     if m:
         whole = re.sub(r"\D", "", m.group(1))
@@ -191,17 +172,14 @@ def _clean_decimal(s: str) -> Optional[str]:
         if whole:
             return f"{int(whole)}.{cents[:2]:0<2}"
 
-    # "3,49" or "3.49"
     m = re.search(r"(\d+)[,\.](\d{1,2})", raw)
     if m:
         return f"{m.group(1)}.{m.group(2):0<2}"
 
-    # "3 49" (space separated)
     m = re.search(r"(\d+)\s+(\d{2})", raw)
     if m:
         return f"{m.group(1)}.{m.group(2)}"
 
-    # fallback "349" -> "3.49"
     digits = re.sub(r"[^\d]", "", raw)
     if digits and len(digits) > 2:
         return f"{digits[:-2]}.{digits[-2:]}"
@@ -209,11 +187,7 @@ def _clean_decimal(s: str) -> Optional[str]:
 
 
 def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
-    """
-    Multiple strategies to recover a visible price.
-    Returns (price_decimal_str, currency_code)
-    """
-    # 1) JSON-LD-ish meta itemprop=price
+    # 1) itemprop meta
     meta = soup.select_one("[itemprop=price][content]")
     if meta and meta.get("content"):
         val = _clean_decimal(meta.get("content"))
@@ -221,7 +195,7 @@ def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[s
             cur = (soup.select_one("[itemprop=priceCurrency][content]") or {}).get("content") or "EUR"
             return val, cur
 
-    # 2) chunked whole+cents (typical e.g. <span class=whole>3</span><span class=cents>49</span>)
+    # 2) whole+cents blocks
     for box in soup.select(
         "[data-testid*=price], .e-price, .e-price__main, .product-price, "
         ".price, .pdp-price"
@@ -234,7 +208,7 @@ def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[s
             if w:
                 return (f"{int(w)}.{c[:2]:0<2}" if c else str(int(w))), "EUR"
 
-    # 3) data-* attributes on buy buttons
+    # 3) data-* attributes
     data_attrs = [
         "[data-testid=buy-button-price]",
         "[data-price]",
@@ -249,7 +223,7 @@ def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[s
                 if val:
                     return val, "EUR"
 
-    # 4) brute-force text scan of "€"
+    # 4) scan text for "€"
     for node in soup.find_all(string=re.compile("€")):
         val = _clean_decimal(str(node))
         if val:
@@ -263,12 +237,6 @@ def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[s
 # ---------------------------------------------------------------------
 
 def from_json_ld(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
-    """
-    Parse JSON-LD blocks robustly; supports:
-      - offers as dict or list
-      - nested priceSpecification
-      - brand/manufacturer possibly objects
-    """
     out = {
         "name": None,
         "brand": None,
@@ -332,13 +300,8 @@ def from_json_ld(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
 
 
 def _scan_label_value_pairs(soup: BeautifulSoup) -> Dict[str, str]:
-    """
-    Some PDPs render spec as simple "Label: Value" text lines.
-    We walk likely info blocks and scrape possible brand/manufacturer.
-    """
     capture: Dict[str, str] = {}
 
-    # likely regions
     containers = []
     for head in soup.find_all(["h2", "h3", "h4"]):
         ht = norm(text_of(head))
@@ -347,7 +310,6 @@ def _scan_label_value_pairs(soup: BeautifulSoup) -> Dict[str, str]:
             if sib:
                 containers.append(sib)
 
-    # fallback: global-ish, but mild
     containers.extend(soup.select("li, p, div"))
 
     label_re = re.compile(r"^\s*([^:]+):\s*(.+)\s*$")
@@ -368,12 +330,8 @@ def _scan_label_value_pairs(soup: BeautifulSoup) -> Dict[str, str]:
 
 
 def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
-    """
-    Scrape brand / manufacturer / size / sku-ish from various PDP layouts.
-    """
     out = {"brand": None, "manufacturer": None, "size": None, "sku": None}
 
-    # dl/dt/dd or table th/td pairs
     for head in soup.select("dt, th"):
         k = norm(text_of(head)).rstrip(":")
         val_el = head.find_next_sibling(["dd", "td"])
@@ -389,10 +347,8 @@ def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
         elif "sku" in k and not out["sku"]:
             out["sku"] = v
         elif "ean" in k and not out["sku"]:
-            # sometimes they'll literally label "EAN", "EAN-kood"
             out["sku"] = v
 
-    # also explicit label/value classes (Barbora often has these)
     labels = soup.select(".e-attribute__label, .product-attribute__label")
     for lab in labels:
         k = norm(text_of(lab)).rstrip(":")
@@ -414,12 +370,10 @@ def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
         elif "ean" in k and not out["sku"]:
             out["sku"] = v
 
-    # final fallback: label:value free text
     pairs = _scan_label_value_pairs(soup)
     out["brand"] = out["brand"] or pairs.get("brand")
     out["manufacturer"] = out["manufacturer"] or pairs.get("manufacturer")
 
-    # drop obvious garbage brand
     if out["brand"] and norm(out["brand"]) in {"-", "puudub"}:
         out["brand"] = None
 
@@ -429,10 +383,6 @@ def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
 def parse_app_state_for_brand_or_price(
     soup: BeautifulSoup,
 ) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
-    """
-    Crawl embedded inline JSON/JS blobs to maybe recover brand/manufacturer/price.
-    Returns (brand, manufacturer, price, currency)
-    """
     brand = manufacturer = price = currency = None
     for s in soup.find_all("script"):
         txt = (s.string or "").strip()
@@ -471,9 +421,6 @@ def extract_product_title_from_dom(soup: BeautifulSoup) -> str:
 
 
 def prefer_valid_name(candidates: List[str], category_leaf: str) -> str:
-    """
-    Pick the best non-garbage product name.
-    """
     for cand in candidates:
         c = (cand or "").strip()
         if not c:
@@ -520,20 +467,14 @@ def extract_from_pdp(
     category_leaf_hint: str,
     req_delay: float,
 ) -> Dict[str, Optional[str]]:
-    """
-    Visit one PDP and extract:
-    name, brand, manufacturer, price, currency, size_text, sku_raw, etc.
-    """
     page.goto(url, timeout=60000, wait_until="domcontentloaded")
     ensure_ready(page)
 
-    # let dynamic stuff hydrate
     try:
         page.wait_for_load_state("networkidle", timeout=4000)
     except PWTimeout:
         pass
 
-    # Make a best effort to ensure either JSON-LD or title is present
     try:
         page.wait_for_selector("script[type='application/ld+json']", timeout=6000)
     except PWTimeout:
@@ -546,8 +487,6 @@ def extract_from_pdp(
     except PWTimeout:
         pass
 
-    # --- IMPORTANT: Playwright "text=" must NOT be mixed into CSS lists
-    # So we first wait for any price-ish CSS selector:
     try:
         page.wait_for_selector(
             "css=[data-testid*='price'], .e-price, .e-price__main, "
@@ -557,7 +496,6 @@ def extract_from_pdp(
         )
     except PWTimeout:
         pass
-    # Then *separately* we probe out-of-stock text with a text= query:
     try:
         page.wait_for_selector("text=Pole saadaval", timeout=1500)
     except PWTimeout:
@@ -565,7 +503,7 @@ def extract_from_pdp(
 
     page.wait_for_timeout(int(req_delay * 1000))
 
-    # try opening accordions / spec tables
+    # open accordions / spec
     try:
         for sel in [
             "button[aria-expanded='false']",
@@ -595,7 +533,6 @@ def extract_from_pdp(
 
     name = prefer_valid_name(candidates, category_leaf)
 
-    # pick price (priority: JSON-LD → DOM scan → inline JSON)
     price = jl.get("price")
     currency = jl.get("currency") or "EUR"
     if not price:
@@ -610,19 +547,15 @@ def extract_from_pdp(
     image_url = jl.get("image")
     brand = jl.get("brand") or spec["brand"] or b3
     manufacturer = jl.get("manufacturer") or spec["manufacturer"] or m3
-    sku_raw = spec["sku"]  # can be SKU / barcode / EAN-ish if Barbora exposes it
+    sku_raw = spec["sku"]
 
-    # fallback breadcrumb guess if site hides breadcrumbs:
+    # fallback breadcrumb guess
     if not cat_path:
         parts = [p for p in urlparse(url).path.strip("/").split("/") if p]
-        cat_path = " / ".join(
-            p.replace("-", " ").title() for p in parts[:-1]
-        ) if parts else ""
+        cat_path = " / ".join(p.replace("-", " ").title() for p in parts[:-1]) if parts else ""
         if not category_leaf:
             category_leaf = (
-                parts[-2]
-                if len(parts) >= 2
-                else (parts[-1] if parts else "")
+                parts[-2] if len(parts) >= 2 else (parts[-1] if parts else "")
             ).replace("-", " ").title()
 
     return {
@@ -633,7 +566,7 @@ def extract_from_pdp(
         "price": price,
         "currency": currency or "EUR",
         "image_url": image_url,
-        "sku_raw": sku_raw,  # we will *not* blindly treat this as EAN, but we keep it
+        "sku_raw": sku_raw,
         "category_path": cat_path,
         "category_leaf": category_leaf,
     }
@@ -644,9 +577,6 @@ def extract_from_pdp(
 # ---------------------------------------------------------------------
 
 def harvest_product_links(page: Page) -> List[Tuple[str, str]]:
-    """
-    Pull PDP links (and any visible link text) out of a category/listing page.
-    """
     hrefs = page.eval_on_selector_all(
         "a",
         "els => els.map(e => ({href: e.href || e.getAttribute('href') || '', text: (e.textContent||'').trim()}))",
@@ -705,12 +635,6 @@ def _current_page_from_url(u: str) -> int:
 
 
 def next_page_if_any(page: Page) -> bool:
-    """
-    Click 'next' pagination if available.
-    If not found, synthesize ?page=N URLs.
-    Returns True if we navigated to a new page.
-    """
-    # scroll a bit to trigger lazy pagination controls
     try:
         page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
         page.wait_for_timeout(200)
@@ -744,7 +668,7 @@ def next_page_if_any(page: Page) -> bool:
 
     cur = _current_page_from_url(page.url)
 
-    # try to guess the max page from numeric buttons
+    # estimate max page from numeric buttons
     try:
         nums = page.eval_on_selector_all(
             "a, button",
@@ -777,10 +701,6 @@ def collect_category_products(
     req_delay: float,
     max_pages: int = 60,
 ) -> List[Tuple[str, str]]:
-    """
-    Walk paginated category listing, return [(pdp_url, listing_title), ...].
-    We repeatedly hit "next" (› / ») or synthesize ?page=N URLs.
-    """
     go_to_category(page, cat_url, req_delay)
 
     all_links: List[Tuple[str, str]] = []
@@ -870,8 +790,7 @@ def append_rows(path: str, rows: List[List[str]]) -> None:
 
 async def _bulk_ingest_to_db(rows: List[Dict[str, object]], store_id: int) -> None:
     """
-    For each scraped product row, call upsert_product_and_price(...) in Postgres.
-    This links/ext-maps/updates price so compare can use it immediately.
+    Call upsert_product_and_price(...) for each row.
     """
     if store_id <= 0:
         print("[barbora] STORE_ID not set or invalid, skipping DB ingest.")
@@ -886,7 +805,6 @@ async def _bulk_ingest_to_db(rows: List[Dict[str, object]], store_id: int) -> No
     try:
         async with conn.transaction():
             for r in rows:
-                # price must be numeric or None
                 price_val = None
                 try:
                     ptxt = r.get("price")
@@ -906,7 +824,7 @@ async def _bulk_ingest_to_db(rows: List[Dict[str, object]], store_id: int) -> No
                     r.get("name") or "",             # $3 in_name
                     r.get("brand") or "",            # $4 in_brand
                     r.get("size_text") or "",        # $5 in_size_text
-                    r.get("ean_raw") or "",          # $6 in_ean_raw (blank/None for Barbora)
+                    r.get("ean_raw") or "",          # $6 in_ean_raw
                     price_val,                       # $7 in_price
                     r.get("currency") or "EUR",      # $8 in_currency
                     store_id,                        # $9 in_store_id
@@ -915,6 +833,26 @@ async def _bulk_ingest_to_db(rows: List[Dict[str, object]], store_id: int) -> No
                 )
     finally:
         await conn.close()
+
+
+# ---------------------------------------------------------------------
+# sharding utils
+# ---------------------------------------------------------------------
+
+def apply_shard(full_list: List[str]) -> List[str]:
+    """Return the subset of categories for this shard."""
+    try:
+        shard = int(os.environ.get("SHARD", "0"))
+        shards = int(os.environ.get("SHARDS", "1"))
+    except Exception:
+        shard, shards = 0, 1
+
+    if shards <= 1:
+        return full_list
+
+    out = [c for i, c in enumerate(full_list) if i % shards == shard]
+    print(f"[shard] shard {shard+1}/{shards}: {len(out)}/{len(full_list)} categories")
+    return out
 
 
 # ---------------------------------------------------------------------
@@ -927,7 +865,8 @@ def read_lines(path: str) -> List[str]:
 
 
 def crawl(args) -> None:
-    cats = read_lines(args.cats_file)
+    cats_all = read_lines(args.cats_file)
+    cats = apply_shard(cats_all)
 
     skip_ext: set[str] = (
         set(read_lines(args.skip_ext_file))
@@ -950,7 +889,7 @@ def crawl(args) -> None:
     req_delay = float(args.req_delay)
     per_cat_page_limit = int(args.max_pages_per_category or "0")
 
-    # budget kill switch (leave time to flush/DB-ingest so GH Action doesn't nuke mid-write)
+    # budget kill switch
     stop_flag = {"v": False}
 
     def _sig_handler(signum, frame):
@@ -969,21 +908,15 @@ def crawl(args) -> None:
         return (deadline_ts - time.time()) if deadline_ts else 9e9
 
     def budget_low() -> bool:
-        # leave ~90s margin for flush + DB ingest
-        return stop_flag["v"] or (
-            deadline_ts is not None and time_left() <= 90
-        )
+        return stop_flag["v"] or (deadline_ts is not None and time_left() <= 90)
 
     ensure_csv_header(args.output_csv)
 
-    # we'll accumulate:
-    # - CSV rows (strings)
-    # - rows_for_ingest (dicts for DB)
     rows_for_ingest: List[Dict[str, object]] = []
 
     with sync_playwright() as pw:
         def new_browser():
-            b = pw.chromium.launch(headless= headless)
+            b = pw.chromium.launch(headless=headless)
             ctx = b.new_context(locale="et-EE")
             return b, ctx, ctx.new_page()
 
@@ -1003,17 +936,15 @@ def crawl(args) -> None:
                 print(f"[info] restarted browser ({reason})")
 
         try:
-            # --------------------------------------------------
-            # MODE A: ONLY given PDP URLs
-            # --------------------------------------------------
+            # MODE A: ONLY-URLs
             if only_urls:
                 batch_csv: List[List[str]] = []
                 processed_since_restart = 0
-                RESTART_EVERY = 250  # PDPs per browser session in ONLY-URLs mode
+                RESTART_EVERY = 250
 
                 for url in only_urls:
                     if budget_low():
-                        print("[info] soft budget reached (ONLY URLs); flushing & exit.")
+                        print("[info] budget reached (ONLY URLs); flushing & exit.")
                         break
                     if int(args.max_products) and total >= int(args.max_products):
                         break
@@ -1022,12 +953,9 @@ def crawl(args) -> None:
                     if skip_ext and ext_id in skip_ext:
                         continue
 
-                    # guess category leaf from URL pieces (for name sanity check)
                     parts = [p for p in urlparse(url).path.strip("/").split("/") if p]
                     cat_leaf_guess = (
-                        parts[-2]
-                        if len(parts) >= 2
-                        else (parts[-1] if parts else "")
+                        parts[-2] if len(parts) >= 2 else (parts[-1] if parts else "")
                     ).replace("-", " ").title()
 
                     data: Optional[Dict[str, Optional[str]]] = None
@@ -1042,16 +970,11 @@ def crawl(args) -> None:
                             )
                             break
                         except Exception as e:
-                            print(
-                                f"[warn] PDP parse failed for {ext_id} "
-                                f"(attempt {attempt}): {e}",
-                                file=sys.stderr,
-                            )
+                            print(f"[warn] PDP parse failed for {ext_id} (attempt {attempt}): {e}", file=sys.stderr)
                             restart_browser("only-urls retry")
                     if not data:
                         continue
 
-                    # skip garbage names like "Pealeht"
                     if norm(data["name"]) in BAD_NAMES or norm(
                         data["name"]
                     ) == norm(data.get("category_leaf") or cat_leaf_guess):
@@ -1059,13 +982,12 @@ def crawl(args) -> None:
 
                     seen_at_ts = datetime.now(timezone.utc)
 
-                    # build CSV row
                     row_csv = [
                         STORE_CHAIN,
                         STORE_NAME,
                         STORE_CHANNEL,
                         ext_id,
-                        "",  # ean_raw intentionally blank (Barbora hides / not reliable)
+                        "",  # ean_raw unknown/unreliable
                         data.get("sku_raw") or "",
                         data.get("name") or "",
                         data.get("size_text") or "",
@@ -1080,15 +1002,12 @@ def crawl(args) -> None:
                     ]
                     batch_csv.append(row_csv)
 
-                    # build ingest row
                     rows_for_ingest.append(
                         {
                             "ext_id": ext_id,
                             "name": data.get("name") or "",
                             "brand": data.get("brand") or "",
                             "size_text": data.get("size_text") or "",
-                            # we do NOT trust sku_raw as guaranteed EAN,
-                            # so pass "" to ean_raw. that's fine for upsert_product_and_price
                             "ean_raw": "",
                             "price": data.get("price") or "",
                             "currency": data.get("currency") or "EUR",
@@ -1100,12 +1019,10 @@ def crawl(args) -> None:
                     total += 1
                     processed_since_restart += 1
 
-                    # flush CSV batch every ~50 rows
                     if len(batch_csv) >= 50:
                         append_rows(args.output_csv, batch_csv)
                         batch_csv.clear()
 
-                    # keep browser fresh in long runs
                     if processed_since_restart >= RESTART_EVERY:
                         append_rows(args.output_csv, batch_csv)
                         batch_csv.clear()
@@ -1115,24 +1032,20 @@ def crawl(args) -> None:
                     if req_delay:
                         time.sleep(req_delay)
 
-                # final flush after ONLY-URLs loop
                 append_rows(args.output_csv, batch_csv)
 
-            # --------------------------------------------------
-            # MODE B: crawl categories / paginate / PDP-fetch
-            # --------------------------------------------------
+            # MODE B: crawl categories
             else:
                 for idx, cat in enumerate(cats, start=1):
                     if budget_low():
-                        print("[info] soft budget reached before next category; exiting early.")
+                        print("[info] budget reached before next category; exit early.")
                         break
                     if int(args.page_limit) and idx > int(args.page_limit):
                         break
 
-                    # derive a human-ish default category leaf from URL
                     leaf_seg = cat.strip("/").split("/")[-1]
                     category_leaf_hint = leaf_seg.replace("-", " ").title()
-                    category_path_hint = ""  # we fill from PDP anyway
+                    category_path_hint = ""
 
                     prods = collect_category_products(
                         page,
@@ -1141,10 +1054,7 @@ def crawl(args) -> None:
                         max_pages=per_cat_page_limit if per_cat_page_limit > 0 else 120,
                     )
                     if not prods:
-                        print(
-                            f"[cat] {cat} → 0 items "
-                            "(maybe login / geo restriction / category empty)."
-                        )
+                        print(f"[cat] {cat} → 0 items (maybe geo/login block).")
                         restart_browser("post-category")
                         continue
 
@@ -1152,7 +1062,7 @@ def crawl(args) -> None:
 
                     for url, listing_title in prods:
                         if budget_low():
-                            print("[info] soft budget reached mid-category; flushing & exit.")
+                            print("[info] budget reached mid-category; flushing & exit.")
                             break
                         if int(args.max_products) and total >= int(args.max_products):
                             break
@@ -1175,21 +1085,14 @@ def crawl(args) -> None:
                                 )
                                 break
                             except Exception as e:
-                                print(
-                                    f"[warn] PDP parse failed for {ext_id} "
-                                    f"(attempt {attempt}): {e}",
-                                    file=sys.stderr,
-                                )
+                                print(f"[warn] PDP parse failed for {ext_id} (attempt {attempt}): {e}", file=sys.stderr)
                                 restart_browser("pdp retry")
                         if not data:
                             continue
 
-                        # skip garbage names
                         if norm(data["name"]) in BAD_NAMES or norm(
                             data["name"]
-                        ) == norm(
-                            data.get("category_leaf") or category_leaf_hint
-                        ):
+                        ) == norm(data.get("category_leaf") or category_leaf_hint):
                             continue
 
                         seen_at_ts = datetime.now(timezone.utc)
@@ -1230,7 +1133,6 @@ def crawl(args) -> None:
 
                         total += 1
 
-                        # flush CSV batch
                         if len(batch_csv) >= 50:
                             append_rows(args.output_csv, batch_csv)
                             batch_csv.clear()
@@ -1238,10 +1140,7 @@ def crawl(args) -> None:
                         if req_delay:
                             time.sleep(req_delay)
 
-                    # flush remaining rows for that category
                     append_rows(args.output_csv, batch_csv)
-
-                    # restart browser per category to reduce flaky crashes
                     restart_browser("post-category")
 
         finally:
@@ -1256,15 +1155,12 @@ def crawl(args) -> None:
     # after crawling: DB ingest
     # -----------------------------------------------------------------
     try:
-        # default Barbora ePood store_id = 441
         store_id_env = int(os.environ.get("STORE_ID", "441") or "441")
     except Exception:
         store_id_env = 441
 
-    # run async ingestion
     asyncio.run(_bulk_ingest_to_db(rows_for_ingest, store_id_env))
 
-    # quick local summary
     try:
         lines = sum(1 for _ in open(args.output_csv, "r", encoding="utf-8"))
         print(f"[done] barbora: wrote ~{max(0, lines-1)} CSV rows, ingested {len(rows_for_ingest)} rows to DB")
@@ -1278,7 +1174,7 @@ def crawl(args) -> None:
 
 def build_argparser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        description="Barbora.ee category→PDP crawler (now also DB ingest)."
+        description="Barbora.ee category→PDP crawler (CSV + direct DB ingest)."
     )
     p.add_argument(
         "--cats-file",
