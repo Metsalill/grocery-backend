@@ -3,40 +3,33 @@ name: Coop eCoop scrape + upsert
 on:
   workflow_dispatch: {}
   schedule:
-    # run every 6 hours UTC (tune however you want)
+    # every 6 hours (UTC)
     - cron: "0 */6 * * *"
 
 concurrency:
-  group: coop-ecoop-scrape
+  group: coop-ecoop
   cancel-in-progress: true
 
 jobs:
   scrape:
+    name: scrape (${{ matrix.store_id }}, ${{ matrix.base_url }}, ${{ matrix.cats_file }})
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 45
+
+    env:
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
+      PYTHONUNBUFFERED: "1"
 
     strategy:
       fail-fast: false
       matrix:
-        # one entry per online Coop store
         include:
-          - store_id: "445"
-            region: "https://coophaapsalu.ee"
-            categories_file: "categories_haapsalu.txt"
-          - store_id: "446"
-            region: "https://vandra.ecoop.ee"
-            categories_file: "categories_vandra.txt"
-
-    env:
-      # DB with write access (same style you used in prisma/rimi workflows)
-      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
-      PYTHONUNBUFFERED: "1"
-
-      # pass the correct stores.id into the crawler so prices land in `prices.store_id`
-      STORE_ID: ${{ matrix.store_id }}
-
-      # if you pre-shard category files externally and feed each job only URLs for that region:
-      ECOOP_PRESHARDED: "1"
+          - store_id: 445
+            base_url: "https://coophaapsalu.ee"
+            cats_file: "coop_haapsalu_categories.txt"
+          - store_id: 446
+            base_url: "https://vandra.ecoop.ee"
+            cats_file: "coop_vandra_categories.txt"
 
     steps:
       - name: Checkout
@@ -50,27 +43,27 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          pip install playwright asyncpg
-          playwright install chromium
+          # Use repo requirements if present; otherwise install minimal deps
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install requests beautifulsoup4 lxml selectolax
+          fi
 
-      - name: Crawl Coop eCoop (${ { matrix.store_id } })
-        env:
-          REGION: ${{ matrix.region }}
+      - name: Crawl Coop eCoop (${{ matrix.store_id }})
         run: |
-          python3 ecoop_crawler.py \
-            --region "${REGION}" \
-            --categories-file "${{ matrix.categories_file }}" \
-            --headless "1" \
-            --pdp-workers 4 \
-            --req-delay 0.5 \
-            --rotate-buckets 4 \
-            --rotate-index -1 \
-            --out "out/coop_ecoop_${{ matrix.store_id }}.csv" \
-            --write-empty-csv
+          python3 scripts/ecoop_crawler.py \
+            --store-url "${{ matrix.base_url }}" \
+            --cats-file "data/${{ matrix.cats_file }}" \
+            --store-id "${{ matrix.store_id }}" \
+            --upsert-db main \
+            --headless 1
 
+      # Optional: keep a CSV for diffing when debugging locally.
       - name: Upload CSV artifact (for debugging / diffing)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coop-ecoop-${{ matrix.store_id }}-${{ github.run_id }}
-          path: out/coop_ecoop_${{ matrix.store_id }}.csv
+          name: ecoop-${{ matrix.store_id }}-csv
+          path: data/ecoop_${{ matrix.store_id }}_products.csv
           if-no-files-found: ignore
