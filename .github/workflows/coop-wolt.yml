@@ -3,53 +3,51 @@ name: Coop Wolt Crawl + Ingest
 on:
   workflow_dispatch: {}
   schedule:
-    # Every night at 02:15 UTC
-    - cron: "15 2 * * *"
-
-concurrency:
-  group: coop-wolt-scrape
-  cancel-in-progress: true
+    # every 6 hours
+    - cron: "0 */6 * * *"
 
 jobs:
   crawl-wolt:
-    name: crawl-wolt ({{ matrix.store_host }}, {{ matrix.city }}, {{ matrix.store_id }})
     runs-on: ubuntu-latest
-    timeout-minutes: 90
-
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
         include:
-          # WOLT (not Bolt) venues only — Bolt venues (Kvartali/Eedeni/Lõunakeskus) live in coop-bolt.yml
-          - store_id: 551
-            store_host: "wolt:coop-parnu"
+          # id 551 — Pärnu
+          - store_id: "551"
             city: "parnu"
-          - store_id: 552
-            store_host: "wolt:coop-laagri"
+            store_host: "coop-prnu"
+          # id 552 — Laagri
+          - store_id: "552"
             city: "tallinn"
-          - store_id: 553
-            store_host: "wolt:konsum-juri"
+            store_host: "coop-laagri"
+          # id 553 — Jüri (Konsum)
+          - store_id: "553"
             city: "tallinn"
-          - store_id: 554
-            store_host: "wolt:coop-miiduranna"
+            store_host: "konsum-juri"
+          # id 554 — Miiduranna
+          - store_id: "554"
             city: "tallinn"
-          - store_id: 555
-            store_host: "wolt:coop-akadeemia"
+            store_host: "coop-miiduranna"
+          # id 555 — Akadeemia (Tartu)
+          - store_id: "555"
+            city: "tartu"
+            store_host: "coop-akadeemia"
+          # id 556 — Lasnamäe (note the slug!)
+          - store_id: "556"
             city: "tallinn"
-          - store_id: 556
-            store_host: "wolt:coop-lasnamae"
+            store_host: "coop-lasname"
+          # id 557 — Mustakivi
+          - store_id: "557"
             city: "tallinn"
-          - store_id: 557
-            store_host: "wolt:coop-mustakivi"
-            city: "tallinn"
-          - store_id: 558
-            store_host: "wolt:konsum-saku"
-            city: "tallinn"
+            store_host: "coop-mustakivi"
 
     env:
-      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}   # Railway RW connection string
-      STORE_ID: ${{ matrix.store_id }}               # <- used by wolt_crawler.py for direct DB ingest
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
       PYTHONUNBUFFERED: "1"
+      # The crawler reads STORE_ID from env
+      STORE_ID: ${{ matrix.store_id }}
 
     steps:
       - name: Checkout
@@ -63,25 +61,12 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          pip install requests selectolax "psycopg[binary]" playwright
-
-      - name: Install Playwright Chromium
-        run: |
-          python -m playwright install --with-deps chromium
+          pip install requests selectolax tenacity
 
       - name: Crawl & ingest this Wolt store
         run: |
           python3 scripts/wolt_crawler.py \
             --store-host "${{ matrix.store_host }}" \
             --city "${{ matrix.city }}" \
-            --upsert-db 1 \
+            --categories-file "data/wolt_categories_slugs.txt" \
             --ingest-mode main
-
-      - name: Upload CSV snapshot
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: "wolt-${{ matrix.store_host }}-${{ matrix.city }}"
-          path: |
-            out/*.csv
-          if-no-files-found: ignore
