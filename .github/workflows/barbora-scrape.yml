@@ -3,21 +3,28 @@ name: Barbora DB Scrape + Ingest
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "15 */6 * * *"   # optional
+    # every 6 hours; tune as you like
+    - cron: "0 */6 * * *"
 
 concurrency:
-  group: barbora-db-scrape
-  cancel-in-progress: true
+  group: barbora-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 100    # per shard (kept < 2h runner limit)
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9]   # 10 shards
+
     env:
       TZ: Europe/Tallinn
       DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
-      STORE_ID: "441"          # Barbora ePood in your DB
-      PYTHONUNBUFFERED: "1"
+      STORE_ID: "441"             # Barbora ePood (from your stores table)
+      SHARD: ${{ matrix.shard }}  # current shard index
+      SHARDS: 10                  # total shard count
 
     steps:
       - name: Checkout
@@ -30,21 +37,27 @@ jobs:
 
       - name: Install deps
         run: |
-          pip install -r requirements.txt
-          pip install beautifulsoup4 lxml
+          python -m pip install -U pip
+          pip install playwright bs4 selectolax lxml tenacity psycopg[binary]
           python -m playwright install --with-deps chromium
 
       - name: Run Barbora crawler
         run: |
-          mkdir -p data
+          mkdir -p out data
           python scripts/barbora_crawl_categories_pw.py \
             --cats-file data/barbora_categories.txt \
-            --output-csv data/barbora_products.csv \
-            --headless 1
+            --headless true \
+            --page-limit 0 \
+            --max-products 0 \
+            --max-pages-per-category 0 \
+            --ingest-mode main \
+            --upsert-db \
+            --output-csv "out/barbora_shard_${SHARD}.csv"
 
-      - name: Upload CSV artifact
+      - name: Upload CSV (per shard)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: barbora-products
-          path: data/barbora_products.csv
-          if-no-files-found: warn
+          name: barbora_${{ matrix.shard }}
+          path: out/barbora_shard_${{ matrix.shard }}.csv
+          if-no-files-found: ignore
