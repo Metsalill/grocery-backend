@@ -3,8 +3,8 @@ name: Coop Wolt Crawl + Ingest
 on:
   workflow_dispatch: {}
   schedule:
-    # run e.g. every 6h; adjust if you want
-    - cron: "30 */6 * * *"
+    # Every night at 02:15 UTC
+    - cron: "15 2 * * *"
 
 concurrency:
   group: coop-wolt-scrape
@@ -12,53 +12,44 @@ concurrency:
 
 jobs:
   crawl-wolt:
-    name: crawl-wolt (wolt:${{ matrix.venue }}, ${{ matrix.city }}, ${{ matrix.store_id }})
+    name: crawl-wolt ({{ matrix.store_host }}, {{ matrix.city }}, {{ matrix.store_id }})
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
 
     strategy:
       fail-fast: false
       matrix:
         include:
-          # each row = one Wolt/Bolt venue mapped to a Coop store_id in DB
-          - venue: "coop-parnu"        # <-- whatever slug you use in crawler
-            city:  "parnu"
-            store_id: "551"
-          - venue: "coop-laagri"
-            city:  "tallinn"
-            store_id: "552"
-          - venue: "konsum-juri"
-            city:  "tallinn"
-            store_id: "553"
-          - venue: "coop-miiduranna"
-            city:  "tallinn"
-            store_id: "554"
-          - venue: "coop-akadeemia"
-            city:  "tallinn"
-            store_id: "555"
-          - venue: "coop-lasnamae"
-            city:  "tallinn"
-            store_id: "556"
-          - venue: "coop-mustakivi"
-            city:  "tallinn"
-            store_id: "557"
-          - venue: "konsum-saku"
-            city:  "tallinn"
-            store_id: "559"
-          - venue: "coop-kvartali-maksimarket"
-            city:  "tartu"
-            store_id: "560"
-          - venue: "coop-eedeni-maksimarket"
-            city:  "tartu"
-            store_id: "561"
+          # WOLT (not Bolt) venues only — Bolt venues (Kvartali/Eedeni/Lõunakeskus) live in coop-bolt.yml
+          - store_id: 551
+            store_host: "wolt:coop-parnu"
+            city: "parnu"
+          - store_id: 552
+            store_host: "wolt:coop-laagri"
+            city: "tallinn"
+          - store_id: 553
+            store_host: "wolt:konsum-juri"
+            city: "tallinn"
+          - store_id: 554
+            store_host: "wolt:coop-miiduranna"
+            city: "tallinn"
+          - store_id: 555
+            store_host: "wolt:coop-akadeemia"
+            city: "tallinn"
+          - store_id: 556
+            store_host: "wolt:coop-lasnamae"
+            city: "tallinn"
+          - store_id: 557
+            store_host: "wolt:coop-mustakivi"
+            city: "tallinn"
+          - store_id: 558
+            store_host: "wolt:konsum-saku"
+            city: "tallinn"
 
     env:
-      TZ: Europe/Tallinn
-      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}   # Railway RW connection string
+      STORE_ID: ${{ matrix.store_id }}               # <- used by wolt_crawler.py for direct DB ingest
       PYTHONUNBUFFERED: "1"
-      STORE_ID: ${{ matrix.store_id }}
-      VENUE_SLUG: ${{ matrix.venue }}
-      CITY: ${{ matrix.city }}
 
     steps:
       - name: Checkout
@@ -71,18 +62,26 @@ jobs:
 
       - name: Install deps
         run: |
-          pip install -r requirements.txt || true
-          # crawler-only deps that might not be in requirements.txt yet:
-          pip install playwright selectolax
+          python -m pip install --upgrade pip
+          pip install requests selectolax "psycopg[binary]" playwright
+
+      - name: Install Playwright Chromium
+        run: |
           python -m playwright install --with-deps chromium
 
       - name: Crawl & ingest this Wolt store
         run: |
           python3 scripts/wolt_crawler.py \
-            --store-id "${STORE_ID}" \
-            --venue-slug "${VENUE_SLUG}" \
-            --city "${CITY}"
+            --store-host "${{ matrix.store_host }}" \
+            --city "${{ matrix.city }}" \
+            --upsert-db 1 \
+            --ingest-mode main
 
-      - name: Post Setup Python
+      - name: Upload CSV snapshot
         if: always()
-        run: echo "Done (or failed) for $STORE_ID"
+        uses: actions/upload-artifact@v4
+        with:
+          name: "wolt-${{ matrix.store_host }}-${{ matrix.city }}"
+          path: |
+            out/*.csv
+          if-no-files-found: ignore
