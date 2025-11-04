@@ -1,34 +1,36 @@
 name: Coop eCoop scrape + upsert
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
   schedule:
-    # every 6 hours UTC
-    - cron: "0 */6 * * *"
+    - cron: "17 */12 * * *"   # twice a day; tweak as you like
+
+concurrency:
+  group: coop-ecoop-scrape
+  cancel-in-progress: false
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
         include:
-          - store_id: 445
-            store_host: "https://coophaapsalu.ee"
+          - store_name: "haapsalu eCoop"
+            store_id: 445
+            store_url: "https://coophaapsalu.ee"
             cats_file: "data/coop_haapsalu_categories.txt"
             out_csv: "out/ecoop_haapsalu.csv"
-
-          - store_id: 446
-            store_host: "https://vandra.ecoop.ee"
+          - store_name: "vandra eCoop"
+            store_id: 446
+            store_url: "https://vandra.ecoop.ee"
             cats_file: "data/coop_vandra_categories.txt"
             out_csv: "out/ecoop_vandra.csv"
 
     env:
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
       PYTHONUNBUFFERED: "1"
-      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}   # Railway RW DB URL
-      STORE_ID: ${{ matrix.store_id }}               # read by the crawler
 
     steps:
       - name: Checkout
@@ -39,26 +41,26 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install deps
+      - name: Install crawler deps (pip + Playwright)
         run: |
-          python -m pip install --upgrade pip
-          # deps used across our crawlers
-          pip install requests httpx selectolax lxml pandas tenacity tqdm
+          python -m pip install -U pip wheel
+          pip install -U playwright requests selectolax lxml bs4 pandas asyncpg tenacity
+          python -m playwright install --with-deps chromium
 
-      - name: Run eCoop crawler
+      - name: Run eCoop crawler (${ { matrix.store_name } })
         run: |
           mkdir -p out
           python3 scripts/ecoop_crawler.py \
+            --store-url "${{ matrix.store_url }}" \
+            --store-id  "${{ matrix.store_id }}" \
             --categories-file "${{ matrix.cats_file }}" \
-            --out "${{ matrix.out_csv }}" \
-            --page-limit 500 \
-            --max-products 50000 \
-            --req-delay 0.4
+            --upsert-db main \
+            --headless true \
+            --out "${{ matrix.out_csv }}"
 
-      - name: Upload CSV artifact (for debugging / diffing)
+      - name: Upload CSV artifact (for debugging)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.store_id }}-ecoop-products
+          name: ${{ matrix.out_csv }}
           path: ${{ matrix.out_csv }}
-          if-no-files-found: ignore
