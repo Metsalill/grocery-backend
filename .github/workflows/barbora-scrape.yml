@@ -1,31 +1,29 @@
 name: Barbora DB Scrape + Ingest
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
   schedule:
-    # every 6 hours; tune as you like
-    - cron: "0 */6 * * *"
+    # every 6 hours (UTC)
+    - cron: "5 */6 * * *"
 
 concurrency:
-  group: barbora-${{ github.ref }}
+  group: barbora-db-scrape
   cancel-in-progress: false
 
 jobs:
   scrape:
+    name: scrape (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
-    timeout-minutes: 100    # per shard (kept < 2h runner limit)
+    timeout-minutes: 150
     strategy:
       fail-fast: false
       matrix:
-        shard: [0,1,2,3,4,5,6,7,8,9]   # 10 shards
-
+        # Increase/decrease to control parallelism
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]  # 8 shards
     env:
       TZ: Europe/Tallinn
-      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
-      STORE_ID: "441"             # Barbora ePood (from your stores table)
-      SHARD: ${{ matrix.shard }}  # current shard index
-      SHARDS: 10                  # total shard count
-
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}   # Railway RW URL
+      STORE_ID: "441"                                # Barbora ePood store_id
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -37,27 +35,29 @@ jobs:
 
       - name: Install deps
         run: |
-          python -m pip install -U pip
-          pip install playwright bs4 selectolax lxml tenacity psycopg[binary]
+          python -m pip install --upgrade pip
+          # Core crawler + DB deps
+          pip install asyncpg playwright httpx selectolax beautifulsoup4 lxml fake-useragent tenacity tqdm chardet
           python -m playwright install --with-deps chromium
 
       - name: Run Barbora crawler
         run: |
-          mkdir -p out data
+          mkdir -p data
           python scripts/barbora_crawl_categories_pw.py \
             --cats-file data/barbora_categories.txt \
+            --cat-shards ${{ strategy.job-total }} \
+            --cat-index ${{ matrix.shard }} \
+            --page-limit 50 \
+            --max-products 20000 \
             --headless true \
-            --page-limit 0 \
-            --max-products 0 \
-            --max-pages-per-category 0 \
-            --ingest-mode main \
-            --upsert-db \
-            --output-csv "out/barbora_shard_${SHARD}.csv"
+            --req-delay 0.5 \
+            --out-csv data/barbora_products_${{ matrix.shard }}.csv \
+            --upsert-db main
 
       - name: Upload CSV (per shard)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: barbora_${{ matrix.shard }}
-          path: out/barbora_shard_${{ matrix.shard }}.csv
+          name: barbora-shard-${{ matrix.shard }}
+          path: data/barbora_products_${{ matrix.shard }}.csv
           if-no-files-found: ignore
