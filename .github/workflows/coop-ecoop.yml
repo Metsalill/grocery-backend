@@ -3,34 +3,37 @@ name: Coop eCoop scrape + upsert
 on:
   workflow_dispatch:
   schedule:
-    - cron: "17 */12 * * *"   # twice a day; tweak as you like
+    - cron: "22 */12 * * *"  # twice per day; adjust as you like
 
 concurrency:
-  group: coop-ecoop-scrape
-  cancel-in-progress: false
+  group: coop-ecoop
+  cancel-in-progress: true
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
+
     strategy:
       fail-fast: false
       matrix:
         include:
-          - store_name: "haapsalu eCoop"
-            store_id: 445
-            store_url: "https://coophaapsalu.ee"
-            cats_file: "data/coop_haapsalu_categories.txt"
-            out_csv: "out/ecoop_haapsalu.csv"
-          - store_name: "vandra eCoop"
-            store_id: 446
-            store_url: "https://vandra.ecoop.ee"
-            cats_file: "data/coop_vandra_categories.txt"
-            out_csv: "out/ecoop_vandra.csv"
+          - store_id: 445
+            store_name: "haapsalu eCoop"
+            cats_file: data/coop_haapsalu_categories.txt
+            out_name: ecoop_haapsalu.csv
+          - store_id: 446
+            store_name: "vandra eCoop"
+            cats_file: data/coop_vandra_categories.txt
+            out_name: ecoop_vandra.csv
 
     env:
+      TZ: Europe/Tallinn
       DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
       PYTHONUNBUFFERED: "1"
+      # the crawler reads these from env (it does not accept --store-id/--upsert-db)
+      STORE_ID: ${{ matrix.store_id }}
+      UPSERT_DB: "main"   # set to "none" to disable ingest and only write CSV
 
     steps:
       - name: Checkout
@@ -43,24 +46,24 @@ jobs:
 
       - name: Install crawler deps (pip + Playwright)
         run: |
-          python -m pip install -U pip wheel
-          pip install -U playwright requests selectolax lxml bs4 pandas asyncpg tenacity
+          python -m pip install --upgrade pip
+          # core libs the crawler uses
+          pip install playwright asyncpg httpx pydantic tenacity selectolax bs4 lxml
+          # install browser runtime
           python -m playwright install --with-deps chromium
 
-      - name: Run eCoop crawler (${ { matrix.store_name } })
+      - name: Run eCoop crawler (${{ matrix.store_name }})
         run: |
           mkdir -p out
-          python3 scripts/ecoop_crawler.py \
-            --store-url "${{ matrix.store_url }}" \
-            --store-id  "${{ matrix.store_id }}" \
+          python scripts/ecoop_crawler.py \
             --categories-file "${{ matrix.cats_file }}" \
-            --upsert-db main \
-            --headless true \
-            --out "${{ matrix.out_csv }}"
+            --page-limit 0 \
+            --max-products 0 \
+            --headless 1 \
+            --out "out/${{ matrix.out_name }}"
 
-      - name: Upload CSV artifact (for debugging)
-        if: always()
+      - name: Upload CSV artifact (${{ matrix.store_name }})
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.out_csv }}
-          path: ${{ matrix.out_csv }}
+          name: ${{ matrix.out_name }}
+          path: out/${{ matrix.out_name }}
