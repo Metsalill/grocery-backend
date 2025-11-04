@@ -3,17 +3,24 @@ name: Coop Bolt scrape + DB ingest
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: "25 */12 * * *"
+    # every day at 03:10 UTC (tune as you like)
+    - cron: "10 3 * * *"
+
+concurrency:
+  group: coop-bolt-scrape
+  cancel-in-progress: true
 
 jobs:
   scrape-bolt:
+    name: scrape-bolt ({{ matrix.city }}, {{ matrix.venue_slug }}, {{ matrix.store_id }}, {{ matrix.out }})
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 20
 
     strategy:
       fail-fast: false
       matrix:
         include:
+          # ---- Tartu (Bolt) ----
           - city: tartu
             venue_slug: kvartali-coop-maksimarket
             store_id: 559
@@ -28,11 +35,14 @@ jobs:
             out: out/bolt_eedeni.csv
 
     env:
-      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
       PYTHONUNBUFFERED: "1"
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }} # Railway RW connection for upserts
 
     steps:
-      - name: Checkout
+      - name: Set up job
+        run: echo "Start Coop Bolt scrape for ${{ matrix.venue_slug }}"
+
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -43,23 +53,46 @@ jobs:
       - name: Install crawler deps
         run: |
           python -m pip install --upgrade pip
-          pip install "playwright>=1.44,<2" httpx beautifulsoup4 "selectolax>=0.3.12" lxml psycopg2-binary
+          # If you keep a requirements file, install it first (non-fatal if missing):
+          if [ -f requirements.txt ]; then pip install -r requirements.txt || true; fi
+          pip install httpx selectolax beautifulsoup4 lxml fake-useragent asyncpg tenacity tqdm
           python -m playwright install --with-deps chromium
 
       - name: Run Bolt crawler + ingest
+        shell: bash
         run: |
+          set -euo pipefail
           mkdir -p out
-          python3 scripts/bolt_crawler.py \
-            --store-id ${{ matrix.store_id }} \
-            --venue-slug ${{ matrix.venue_slug }} \
-            --categories-file data/bolt_categories_slugs.txt \
+
+          # Categories file path (NOTE: files must be under data/bolt/tartu/)
+          CATS_FILE="data/bolt/tartu/${{ matrix.venue_slug }}.txt"
+          if [[ ! -f "$CATS_FILE" ]]; then
+            echo "::error::Categories file not found at $CATS_FILE"
+            exit 2
+          fi
+
+          # Prefer scripts/bolt_crawler.py; fall back to repo root if needed
+          CRAWLER="scripts/bolt_crawler.py"
+          [[ -f "$CRAWLER" ]] || CRAWLER="bolt_crawler.py"
+
+          if [[ ! -f "$CRAWLER" ]]; then
+            echo "::error::bolt_crawler.py not found (looked in scripts/ and repo root)"
+            exit 2
+          fi
+
+          python "$CRAWLER" \
+            --city "${{ matrix.city }}" \
+            --venue-slug "${{ matrix.venue_slug }}" \
+            --cats-file "$CATS_FILE" \
+            --out "${{ matrix.out }}" \
+            --store-id "${{ matrix.store_id }}" \
             --upsert-db main \
-            --headless true \
-            --out ${{ matrix.out }}
+            --headless
 
       - name: Upload CSV artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.city }}-bolt-${{ matrix.venue_slug }}
+          name: ${{ matrix.city }}-${{ matrix.venue_slug }}-bolt
           path: ${{ matrix.out }}
+          if-no-files-found: warn
