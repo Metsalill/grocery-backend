@@ -3,23 +3,20 @@
 """
 Barbora.ee (Maxima EE) – Category → PDP crawler → CSV + direct DB ingest
 
-Patch highlights in this version:
-- Writes CSV like before *and* ingests directly into Railway via
+Highlights
+- Writes CSV *and* ingests directly into Railway via
   SELECT upsert_product_and_price(...).
 - Default STORE_ID=441 (Barbora ePood). Can be overridden via env STORE_ID.
-- Time-budget friendly: set SOFT_TIMEOUT_MIN env (e.g. "118") to stop early,
-  flush CSV, and still ingest before GH Actions’ 120-min cap.
-- Horizontal sharding for GH matrix runs:
-  env SHARD=<0..N-1>, SHARDS=<N>. Each shard processes a disjoint subset
-  of categories by index (no overlap).
-- Tougher pagination, price parsing, and PDP extraction.
+- Time-budget friendly: SOFT_TIMEOUT_MIN env (e.g. "118") to stop early,
+  flush CSV, and still ingest before GH Actions’ cap.
+- Horizontal sharding:
+    * Env: SHARD=<0..N-1>, SHARDS=<N>
+    * CLI: --cat-index <i> and --cat-shards <N>  (CLI overrides env)
+- Tough pagination, price parsing, PDP extraction.
+- Backward-compatible CLI flags for your workflows:
+    --out-csv (alias of --output-csv), --cat-shards, --cat-index, --upsert-db
 
-DB ingest lands into:
-  - products (canonical row if missing/updated)
-  - ext_product_map (source='barbora', ext_id → product_id)
-  - prices (with the correct store_id)
-
-YAML must install deps (example):
+YAML deps (example):
   pip install playwright asyncpg bs4 lxml selectolax
   playwright install --with-deps chromium
 """
@@ -839,19 +836,23 @@ async def _bulk_ingest_to_db(rows: List[Dict[str, object]], store_id: int) -> No
 # sharding utils
 # ---------------------------------------------------------------------
 
-def apply_shard(full_list: List[str]) -> List[str]:
-    """Return the subset of categories for this shard."""
+def apply_shard(full_list: List[str], shard: Optional[int], shards: Optional[int]) -> List[str]:
+    """Return the subset of categories for this shard, using CLI overrides first, then env."""
     try:
-        shard = int(os.environ.get("SHARD", "0"))
-        shards = int(os.environ.get("SHARDS", "1"))
+        env_shard = int(os.environ.get("SHARD", "0"))
+        env_shards = int(os.environ.get("SHARDS", "1"))
     except Exception:
-        shard, shards = 0, 1
+        env_shard, env_shards = 0, 1
 
-    if shards <= 1:
+    s = env_shard if shard is None else shard
+    n = env_shards if shards is None else shards
+
+    if n <= 1:
         return full_list
 
-    out = [c for i, c in enumerate(full_list) if i % shards == shard]
-    print(f"[shard] shard {shard+1}/{shards}: {len(out)}/{len(full_list)} categories")
+    s = max(0, min(s, n - 1))
+    out = [c for i, c in enumerate(full_list) if i % n == s]
+    print(f"[shard] shard {s+1}/{n}: {len(out)}/{len(full_list)} categories")
     return out
 
 
@@ -866,7 +867,7 @@ def read_lines(path: str) -> List[str]:
 
 def crawl(args) -> None:
     cats_all = read_lines(args.cats_file)
-    cats = apply_shard(cats_all)
+    cats = apply_shard(cats_all, args.cat_index, args.cat_shards)
 
     skip_ext: set[str] = (
         set(read_lines(args.skip_ext_file))
@@ -1202,26 +1203,21 @@ def build_argparser() -> argparse.ArgumentParser:
         default=str(DEFAULT_REQ_DELAY),
         help="Delay between steps in seconds",
     )
+    # Accept both --output-csv and legacy --out-csv
     p.add_argument(
-        "--output-csv",
+        "--output-csv", "--out-csv",
+        dest="output_csv",
         default="data/barbora_products.csv",
-        help="Output CSV file path (will append)",
+        help="Output CSV path (will append)",
     )
-    p.add_argument(
-        "--skip-ext-file",
-        default="",
-        help="File with ext_ids to SKIP (one per line)",
-    )
-    p.add_argument(
-        "--only-ext-file",
-        default="",
-        help="File with ext_ids to INCLUDE exclusively (one per line)",
-    )
-    p.add_argument(
-        "--only-url-file",
-        default="",
-        help="Optional file with PDP URLs to visit exclusively (no category crawl)",
-    )
+    p.add_argument("--skip-ext-file", default="", help="File with ext_ids to SKIP (one per line)")
+    p.add_argument("--only-ext-file", default="", help="File with ext_ids to INCLUDE exclusively")
+    p.add_argument("--only-url-file", default="", help="File with PDP URLs to visit exclusively")
+
+    # Compatibility flags used by older YAMLs (ignored except for sharding)
+    p.add_argument("--cat-shards", type=int, default=None, help="Total shards (CLI overrides env SHARDS)")
+    p.add_argument("--cat-index", type=int, default=None, help="This shard index [0..N-1] (overrides env SHARD)")
+    p.add_argument("--upsert-db", default="", help="Compat: ignored; ingest uses DATABASE_URL")
     return p
 
 
