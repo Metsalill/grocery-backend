@@ -1,40 +1,43 @@
 name: Coop eCoop scrape + upsert
 
 on:
-  # Run on a schedule (adjust to your liking) and on manual dispatch
+  workflow_dispatch:
   schedule:
-    - cron: "15 */6 * * *"
-  workflow_dispatch: {}
-
-concurrency:
-  group: ecoop-scrape
-  cancel-in-progress: false
+    - cron: "23 2 * * *" # nightly
 
 jobs:
   scrape:
+    name: scrape ({{ matrix.store_name }}, data/{{ matrix.cats }}, out/{{ matrix.out }})
     runs-on: ubuntu-latest
-    timeout-minutes: 90   # previously 30m → increase to avoid mid-run cancellations
+    timeout-minutes: 40
+
     strategy:
       fail-fast: false
       matrix:
-        # Two eCoop stores + 4 category shards each (increase to 6 if still tight)
-        store:
-          - store_id: "445"
-            store_name: "haapsalu eCoop"
-            categories: "data/coop_haapsalu_categories.txt"
-            out: "ecoop_haapsalu"
-          - store_id: "446"
-            store_name: "vandra eCoop"
-            categories: "data/coop_vandra_categories.txt"
-            out: "ecoop_vandra"
-        cat_index: [0, 1, 2, 3]
+        include:
+          # Haapsalu eCoop
+          - store_id: 445
+            store_name: haapsalu eCoop
+            host: vandra.ecoop.ee
+            cats: coop_haapsalu_categories.txt
+            out: ecoop_haapsalu.csv
+            cat_shards: 8
+          # Vändra eCoop
+          - store_id: 446
+            store_name: vandra eCoop
+            host: vandra.ecoop.ee
+            cats: coop_vandra_categories.txt
+            out: ecoop_vandra.csv
+            cat_shards: 8
+
     env:
       TZ: Europe/Tallinn
-      PYTHONUNBUFFERED: "1"
-      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
-      CAT_SHARDS: "4"   # keep in sync with matrix.cat_index length
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
 
     steps:
+      - name: Set up job
+        run: echo "Starting ${{ matrix.store_name }}"
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -42,46 +45,144 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
 
-      # Caches Playwright browsers between shards/runs (big speed-up)
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
-          path: ${{ runner.temp }}/pw-browsers
-          key: pw-${{ runner.os }}-chromium
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-v1
 
       - name: Install crawler deps (pip + Playwright)
-        env:
-          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/pw-browsers
         run: |
-          pip install -r requirements.txt || true
-          # Ensure these are present for DB + crawling
-          pip install asyncpg playwright
-          python -m playwright install --with-deps chromium
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          playwright install chromium
 
-      - name: Run eCoop crawler (${{ matrix.store.store_name }} | shard ${{ matrix.cat_index }})
-        env:
-          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/pw-browsers
-          STORE_ID: ${{ matrix.store.store_id }}   # many crawlers read STORE_ID from env
+      - name: Run eCoop crawler ({{ matrix.store_name }}, shard 0)
         run: |
           mkdir -p out
-          python3 scripts/ecoop_crawler.py \
-            --categories-file "${{ matrix.store.categories }}" \
-            --cat-shards "${CAT_SHARDS}" \
-            --cat-index "${{ matrix.cat_index }}" \
-            --req-delay 0.25 \
-            --nav-timeout 60 \
-            --category-timeout 420 \
-            --goto-strategy auto \
-            --out "out/${{ matrix.store.out }}_${{ matrix.cat_index }}.csv" \
-            --write-empty-csv
+          python scripts/ecoop_crawler.py \
+            --store-url https://${{ matrix.host }} \
+            --categories-file data/${{ matrix.cats }} \
+            --store-id ${{ matrix.store_id }} \
+            --cat-shards ${{ matrix.cat_shards }} \
+            --cat-index 0 \
+            --page-limit 400 \
+            --max-products 2000 \
+            --req-delay 1.8 \
+            --goto-strategy networkidle \
+            --nav-timeout 420 \
+            --out out/${{ matrix.out }}
 
-      # Optional: upload per-shard CSVs for debugging/diffing (ingest happens inside the crawler)
-      - name: Upload CSV artifact (per shard)
+      - name: Run eCoop crawler ({{ matrix.store_name }}, shard 1)
+        run: |
+          python scripts/ecoop_crawler.py \
+            --store-url https://${{ matrix.host }} \
+            --categories-file data/${{ matrix.cats }} \
+            --store-id ${{ matrix.store_id }} \
+            --cat-shards ${{ matrix.cat_shards }} \
+            --cat-index 1 \
+            --page-limit 400 \
+            --max-products 2000 \
+            --req-delay 1.8 \
+            --goto-strategy networkidle \
+            --nav-timeout 420 \
+            --out out/${{ matrix.out }}
+
+      - name: Run eCoop crawler ({{ matrix.store_name }}, shard 2)
+        run: |
+          python scripts/ecoop_crawler.py \
+            --store-url https://${{ matrix.host }} \
+            --categories-file data/${{ matrix.cats }} \
+            --store-id ${{ matrix.store_id }} \
+            --cat-shards ${{ matrix.cat_shards }} \
+            --cat-index 2 \
+            --page-limit 400 \
+            --max-products 2000 \
+            --req-delay 1.8 \
+            --goto-strategy networkidle \
+            --nav-timeout 420 \
+            --out out/${{ matrix.out }}
+
+      - name: Run eCoop crawler ({{ matrix.store_name }}, shard 3)
+        run: |
+          python scripts/ecoop_crawler.py \
+            --store-url https://${{ matrix.host }} \
+            --categories-file data/${{ matrix.cats }} \
+            --store-id ${{ matrix.store_id }} \
+            --cat-shards ${{ matrix.cat_shards }} \
+            --cat-index 3 \
+            --page-limit 400 \
+            --max-products 2000 \
+            --req-delay 1.8 \
+            --goto-strategy networkidle \
+            --nav-timeout 420 \
+            --out out/${{ matrix.out }}
+
+      - name: Run eCoop crawler ({{ matrix.store_name }}, shard 4)
+        run: |
+          python scripts/ecoop_crawler.py \
+            --store-url https://${{ matrix.host }} \
+            --categories-file data/${{ matrix.cats }} \
+            --store-id ${{ matrix.store_id }} \
+            --cat-shards ${{ matrix.cat_shards }} \
+            --cat-index 4 \
+            --page-limit 400 \
+            --max-products 2000 \
+            --req-delay 1.8 \
+            --goto-strategy networkidle \
+            --nav-timeout 420 \
+            --out out/${{ matrix.out }}
+
+      - name: Run eCoop crawler ({{ matrix.store_name }}, shard 5)
+        run: |
+          python scripts/ecoop_crawler.py \
+            --store-url https://${{ matrix.host }} \
+            --categories-file data/${{ matrix.cats }} \
+            --store-id ${{ matrix.store_id }} \
+            --cat-shards ${{ matrix.cat_shards }} \
+            --cat-index 5 \
+            --page-limit 400 \
+            --max-products 2000 \
+            --req-delay 1.8 \
+            --goto-strategy networkidle \
+            --nav-timeout 420 \
+            --out out/${{ matrix.out }}
+
+      - name: Run eCoop crawler ({{ matrix.store_name }}, shard 6)
+        run: |
+          python scripts/ecoop_crawler.py \
+            --store-url https://${{ matrix.host }} \
+            --categories-file data/${{ matrix.cats }} \
+            --store-id ${{ matrix.store_id }} \
+            --cat-shards ${{ matrix.cat_shards }} \
+            --cat-index 6 \
+            --page-limit 400 \
+            --max-products 2000 \
+            --req-delay 1.8 \
+            --goto-strategy networkidle \
+            --nav-timeout 420 \
+            --out out/${{ matrix.out }}
+
+      - name: Run eCoop crawler ({{ matrix.store_name }}, shard 7)
+        run: |
+          python scripts/ecoop_crawler.py \
+            --store-url https://${{ matrix.host }} \
+            --categories-file data/${{ matrix.cats }} \
+            --store-id ${{ matrix.store_id }} \
+            --cat-shards ${{ matrix.cat_shards }} \
+            --cat-index 7 \
+            --page-limit 400 \
+            --max-products 2000 \
+            --req-delay 1.8 \
+            --goto-strategy networkidle \
+            --nav-timeout 420 \
+            --out out/${{ matrix.out }}
+
+      - name: Upload CSV artifacts (per store)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.store.out }}_${{ matrix.cat_index }}
-          path: out/${{ matrix.store.out }}_${{ matrix.cat_index }}.csv
-          if-no-files-found: ignore
+          name: ${{ matrix.out }}
+          path: out/${{ matrix.out }}
+          if-no-files-found: warn
