@@ -1,39 +1,38 @@
 name: Coop eCoop scrape + upsert
 
 on:
-  workflow_dispatch:
+  # Run on a schedule (adjust to your liking) and on manual dispatch
   schedule:
-    - cron: "22 */12 * * *"  # twice per day; adjust as you like
+    - cron: "15 */6 * * *"
+  workflow_dispatch: {}
 
 concurrency:
-  group: coop-ecoop
-  cancel-in-progress: true
+  group: ecoop-scrape
+  cancel-in-progress: false
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-
+    timeout-minutes: 90   # previously 30m → increase to avoid mid-run cancellations
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - store_id: 445
+        # Two eCoop stores + 4 category shards each (increase to 6 if still tight)
+        store:
+          - store_id: "445"
             store_name: "haapsalu eCoop"
-            cats_file: data/coop_haapsalu_categories.txt
-            out_name: ecoop_haapsalu.csv
-          - store_id: 446
+            categories: "data/coop_haapsalu_categories.txt"
+            out: "ecoop_haapsalu"
+          - store_id: "446"
             store_name: "vandra eCoop"
-            cats_file: data/coop_vandra_categories.txt
-            out_name: ecoop_vandra.csv
-
+            categories: "data/coop_vandra_categories.txt"
+            out: "ecoop_vandra"
+        cat_index: [0, 1, 2, 3]
     env:
       TZ: Europe/Tallinn
-      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
       PYTHONUNBUFFERED: "1"
-      # the crawler reads these from env (it does not accept --store-id/--upsert-db)
-      STORE_ID: ${{ matrix.store_id }}
-      UPSERT_DB: "main"   # set to "none" to disable ingest and only write CSV
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
+      CAT_SHARDS: "4"   # keep in sync with matrix.cat_index length
 
     steps:
       - name: Checkout
@@ -43,27 +42,46 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
+
+      # Caches Playwright browsers between shards/runs (big speed-up)
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/pw-browsers
+          key: pw-${{ runner.os }}-chromium
 
       - name: Install crawler deps (pip + Playwright)
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/pw-browsers
         run: |
-          python -m pip install --upgrade pip
-          # core libs the crawler uses
-          pip install playwright asyncpg httpx pydantic tenacity selectolax bs4 lxml
-          # install browser runtime
+          pip install -r requirements.txt || true
+          # Ensure these are present for DB + crawling
+          pip install asyncpg playwright
           python -m playwright install --with-deps chromium
 
-      - name: Run eCoop crawler (${{ matrix.store_name }})
+      - name: Run eCoop crawler (${{ matrix.store.store_name }} | shard ${{ matrix.cat_index }})
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/pw-browsers
+          STORE_ID: ${{ matrix.store.store_id }}   # many crawlers read STORE_ID from env
         run: |
           mkdir -p out
-          python scripts/ecoop_crawler.py \
-            --categories-file "${{ matrix.cats_file }}" \
-            --page-limit 0 \
-            --max-products 0 \
-            --headless 1 \
-            --out "out/${{ matrix.out_name }}"
+          python3 scripts/ecoop_crawler.py \
+            --categories-file "${{ matrix.store.categories }}" \
+            --cat-shards "${CAT_SHARDS}" \
+            --cat-index "${{ matrix.cat_index }}" \
+            --req-delay 0.25 \
+            --nav-timeout 60 \
+            --category-timeout 420 \
+            --goto-strategy auto \
+            --out "out/${{ matrix.store.out }}_${{ matrix.cat_index }}.csv" \
+            --write-empty-csv
 
-      - name: Upload CSV artifact (${{ matrix.store_name }})
+      # Optional: upload per-shard CSVs for debugging/diffing (ingest happens inside the crawler)
+      - name: Upload CSV artifact (per shard)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.out_name }}
-          path: out/${{ matrix.out_name }}
+          name: ${{ matrix.store.out }}_${{ matrix.cat_index }}
+          path: out/${{ matrix.store.out }}_${{ matrix.cat_index }}.csv
+          if-no-files-found: ignore
