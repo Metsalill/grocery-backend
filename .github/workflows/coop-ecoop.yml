@@ -1,43 +1,30 @@
 name: Coop eCoop scrape + upsert
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: "23 2 * * *" # nightly
+    - cron: "17 */8 * * *"   # every 8h
+  workflow_dispatch:
 
 jobs:
   scrape:
     name: scrape ({{ matrix.store_name }}, data/{{ matrix.cats }}, out/{{ matrix.out }})
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 45
 
     strategy:
       fail-fast: false
       matrix:
         include:
-          # Haapsalu eCoop
-          - store_id: 445
-            store_name: haapsalu eCoop
-            host: vandra.ecoop.ee
-            cats: coop_haapsalu_categories.txt
-            out: ecoop_haapsalu.csv
-            cat_shards: 8
-          # Vändra eCoop
-          - store_id: 446
-            store_name: vandra eCoop
-            host: vandra.ecoop.ee
-            cats: coop_vandra_categories.txt
-            out: ecoop_vandra.csv
-            cat_shards: 8
-
-    env:
-      TZ: Europe/Tallinn
-      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+          - store_name: "haapsalu eCoop"
+            region: haapsalu
+            cats: data/coop_haapsalu_categories.txt
+            out: out/ecoop_haapsalu.csv
+          - store_name: "vandra eCoop"
+            region: vandra
+            cats: data/coop_vandra_categories.txt
+            out: out/ecoop_vandra.csv
 
     steps:
-      - name: Set up job
-        run: echo "Starting ${{ matrix.store_name }}"
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -54,135 +41,32 @@ jobs:
 
       - name: Install crawler deps (pip + Playwright)
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          playwright install chromium
+          python -m pip install -U pip
+          pip install -r requirements-crawler.txt
+          pip install playwright
+          python -m playwright install --with-deps chromium
 
-      - name: Run eCoop crawler ({{ matrix.store_name }}, shard 0)
+      - name: Run eCoop crawler ({{ matrix.store_name }})
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
+          set -e
           mkdir -p out
           python scripts/ecoop_crawler.py \
-            --store-url https://${{ matrix.host }} \
-            --categories-file data/${{ matrix.cats }} \
-            --store-id ${{ matrix.store_id }} \
-            --cat-shards ${{ matrix.cat_shards }} \
-            --cat-index 0 \
-            --page-limit 400 \
-            --max-products 2000 \
-            --req-delay 1.8 \
-            --goto-strategy networkidle \
+            --region "${{ matrix.region }}" \
+            --categories-file "${{ matrix.cats }}" \
+            --page-limit 200 \
+            --max-products 250000 \
+            --headless true \
+            --req-delay 150 \
+            --pdp-workers 4 \
+            --goto-strategy domcontentloaded \
             --nav-timeout 420 \
-            --out out/${{ matrix.out }}
+            --out "${{ matrix.out }}"
 
-      - name: Run eCoop crawler ({{ matrix.store_name }}, shard 1)
-        run: |
-          python scripts/ecoop_crawler.py \
-            --store-url https://${{ matrix.host }} \
-            --categories-file data/${{ matrix.cats }} \
-            --store-id ${{ matrix.store_id }} \
-            --cat-shards ${{ matrix.cat_shards }} \
-            --cat-index 1 \
-            --page-limit 400 \
-            --max-products 2000 \
-            --req-delay 1.8 \
-            --goto-strategy networkidle \
-            --nav-timeout 420 \
-            --out out/${{ matrix.out }}
-
-      - name: Run eCoop crawler ({{ matrix.store_name }}, shard 2)
-        run: |
-          python scripts/ecoop_crawler.py \
-            --store-url https://${{ matrix.host }} \
-            --categories-file data/${{ matrix.cats }} \
-            --store-id ${{ matrix.store_id }} \
-            --cat-shards ${{ matrix.cat_shards }} \
-            --cat-index 2 \
-            --page-limit 400 \
-            --max-products 2000 \
-            --req-delay 1.8 \
-            --goto-strategy networkidle \
-            --nav-timeout 420 \
-            --out out/${{ matrix.out }}
-
-      - name: Run eCoop crawler ({{ matrix.store_name }}, shard 3)
-        run: |
-          python scripts/ecoop_crawler.py \
-            --store-url https://${{ matrix.host }} \
-            --categories-file data/${{ matrix.cats }} \
-            --store-id ${{ matrix.store_id }} \
-            --cat-shards ${{ matrix.cat_shards }} \
-            --cat-index 3 \
-            --page-limit 400 \
-            --max-products 2000 \
-            --req-delay 1.8 \
-            --goto-strategy networkidle \
-            --nav-timeout 420 \
-            --out out/${{ matrix.out }}
-
-      - name: Run eCoop crawler ({{ matrix.store_name }}, shard 4)
-        run: |
-          python scripts/ecoop_crawler.py \
-            --store-url https://${{ matrix.host }} \
-            --categories-file data/${{ matrix.cats }} \
-            --store-id ${{ matrix.store_id }} \
-            --cat-shards ${{ matrix.cat_shards }} \
-            --cat-index 4 \
-            --page-limit 400 \
-            --max-products 2000 \
-            --req-delay 1.8 \
-            --goto-strategy networkidle \
-            --nav-timeout 420 \
-            --out out/${{ matrix.out }}
-
-      - name: Run eCoop crawler ({{ matrix.store_name }}, shard 5)
-        run: |
-          python scripts/ecoop_crawler.py \
-            --store-url https://${{ matrix.host }} \
-            --categories-file data/${{ matrix.cats }} \
-            --store-id ${{ matrix.store_id }} \
-            --cat-shards ${{ matrix.cat_shards }} \
-            --cat-index 5 \
-            --page-limit 400 \
-            --max-products 2000 \
-            --req-delay 1.8 \
-            --goto-strategy networkidle \
-            --nav-timeout 420 \
-            --out out/${{ matrix.out }}
-
-      - name: Run eCoop crawler ({{ matrix.store_name }}, shard 6)
-        run: |
-          python scripts/ecoop_crawler.py \
-            --store-url https://${{ matrix.host }} \
-            --categories-file data/${{ matrix.cats }} \
-            --store-id ${{ matrix.store_id }} \
-            --cat-shards ${{ matrix.cat_shards }} \
-            --cat-index 6 \
-            --page-limit 400 \
-            --max-products 2000 \
-            --req-delay 1.8 \
-            --goto-strategy networkidle \
-            --nav-timeout 420 \
-            --out out/${{ matrix.out }}
-
-      - name: Run eCoop crawler ({{ matrix.store_name }}, shard 7)
-        run: |
-          python scripts/ecoop_crawler.py \
-            --store-url https://${{ matrix.host }} \
-            --categories-file data/${{ matrix.cats }} \
-            --store-id ${{ matrix.store_id }} \
-            --cat-shards ${{ matrix.cat_shards }} \
-            --cat-index 7 \
-            --page-limit 400 \
-            --max-products 2000 \
-            --req-delay 1.8 \
-            --goto-strategy networkidle \
-            --nav-timeout 420 \
-            --out out/${{ matrix.out }}
-
-      - name: Upload CSV artifacts (per store)
+      - name: Upload CSV artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.out }}
-          path: out/${{ matrix.out }}
-          if-no-files-found: warn
+          path: ${{ matrix.out }}
