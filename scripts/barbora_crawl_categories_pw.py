@@ -100,6 +100,25 @@ def get_ext_id(url: str) -> str:
     return slug[-120:]
 
 
+def parse_bool_flag(v) -> bool:
+    """
+    Robust boolean parsing for CLI/env flags.
+    Accepts: 1/0, true/false, yes/no, on/off (any case), and booleans.
+    """
+    if isinstance(v, bool):
+        return v
+    s = str(v).strip().lower()
+    if s in {"1", "true", "yes", "y", "on"}:
+        return True
+    if s in {"0", "false", "no", "n", "off"}:
+        return False
+    # fallback: non-empty string -> True
+    try:
+        return bool(int(s))
+    except Exception:
+        return bool(s)
+
+
 # ---------------------------------------------------------------------
 # cookie banner / page priming
 # ---------------------------------------------------------------------
@@ -886,7 +905,7 @@ def crawl(args) -> None:
     )
 
     total = 0
-    headless = bool(int(args.headless))
+    headless = parse_bool_flag(args.headless)       # <<< robust boolean parsing
     req_delay = float(args.req_delay)
     per_cat_page_limit = int(args.max_pages_per_category or "0")
 
@@ -1197,7 +1216,7 @@ def build_argparser() -> argparse.ArgumentParser:
         default="0",
         help="Cap pages per category (0=unlimited)",
     )
-    p.add_argument("--headless", default=str(DEFAULT_HEADLESS), help="1/0")
+    p.add_argument("--headless", default=str(DEFAULT_HEADLESS), help="1/0/true/false/yes/no")
     p.add_argument(
         "--req-delay",
         default=str(DEFAULT_REQ_DELAY),
