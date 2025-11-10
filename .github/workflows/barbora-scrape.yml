@@ -1,29 +1,21 @@
 name: Barbora DB Scrape + Ingest
 
 on:
-  workflow_dispatch:
   schedule:
-    # every 6 hours (UTC)
-    - cron: "5 */6 * * *"
-
-concurrency:
-  group: barbora-db-scrape
-  cancel-in-progress: false
+    - cron: "17 */6 * * *"   # run every 6h (tweak as you like)
+  workflow_dispatch:
 
 jobs:
   scrape:
-    name: scrape (shard ${{ matrix.shard }})
+    # Avoid 2h30m cancellations
+    timeout-minutes: 330
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+
     strategy:
       fail-fast: false
       matrix:
-        # Increase/decrease to control parallelism
-        shard: [0, 1, 2, 3, 4, 5, 6, 7]  # 8 shards
-    env:
-      TZ: Europe/Tallinn
-      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}   # Railway RW URL
-      STORE_ID: "441"                                # Barbora ePood store_id
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]  # 16-way sharding
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,31 +25,34 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install deps
+      - name: Install crawler deps (pip + Playwright)
         run: |
-          python -m pip install --upgrade pip
-          # Core crawler + DB deps
-          pip install asyncpg playwright httpx selectolax beautifulsoup4 lxml fake-useragent tenacity tqdm chardet
+          python -m pip install -U pip
+          # keep this file minimal: playwright, requests, pandas, asyncpg if ingesting
+          pip install -r requirements-crawler.txt
           python -m playwright install --with-deps chromium
 
-      - name: Run Barbora crawler
+      - name: Run Barbora crawler (shard ${{ matrix.shard }})
+        env:
+          CATS_FILE: data/barbora_categories.txt           # <-- ensure this file path matches your repo
+          OUT_CSV:   out/barbora_${{ matrix.shard }}.csv
         run: |
-          mkdir -p data
-          python scripts/barbora_crawl_categories_pw.py \
-            --cats-file data/barbora_categories.txt \
-            --cat-shards ${{ strategy.job-total }} \
+          mkdir -p out
+          python3 scripts/barbora_crawl_categories_pw.py \
+            --cats-file "$CATS_FILE" \
+            --out-csv "$OUT_CSV" \
+            --cat-shards 16 \
             --cat-index ${{ matrix.shard }} \
-            --page-limit 50 \
-            --max-products 20000 \
-            --headless true \
-            --req-delay 0.5 \
-            --out-csv data/barbora_products_${{ matrix.shard }}.csv \
+            --max-pages-per-category 6 \
+            --req-delay 0.25 \
+            --headless \
+            --goto-strategy domcontentloaded \
+            --page-limit 999999 \
             --upsert-db main
 
-      - name: Upload CSV (per shard)
-        if: always()
+      - name: Upload CSV artifact (per shard)
         uses: actions/upload-artifact@v4
         with:
-          name: barbora-shard-${{ matrix.shard }}
-          path: data/barbora_products_${{ matrix.shard }}.csv
+          name: barbora-csv-${{ matrix.shard }}
+          path: ${{ env.OUT_CSV }}
           if-no-files-found: ignore
