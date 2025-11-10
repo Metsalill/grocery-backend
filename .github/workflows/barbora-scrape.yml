@@ -2,7 +2,7 @@ name: Barbora DB Scrape + Ingest
 
 on:
   schedule:
-    # run every night at 02:05 UTC (adjust if you like)
+    # nightly at 02:05 UTC
     - cron: "5 2 * * *"
   workflow_dispatch:
 
@@ -21,16 +21,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # 16 shards → no duplicate work, each shard gets 1/16 of the categories
-        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]  # 16 shards
 
     env:
       PYTHONUNBUFFERED: "1"
-      # DB access for upsert inside the crawler (adjust to your secret/env naming)
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      # path to the categories file used by the crawler
       CATS_FILE: data/barbora_categories.txt
-      # total number of shards (must match the matrix size above)
       TOTAL_SHARDS: 16
 
     steps:
@@ -44,24 +40,27 @@ jobs:
 
       - name: Install crawler deps (pip + Playwright)
         shell: bash
-        env:
-          CRAWLER_REQ_FILE: requirements.txt
         run: |
           set -euo pipefail
-          python -m pip install -U pip
-          found=""
-          for f in "$CRAWLER_REQ_FILE" "requirements.txt" "crawler-requirements.txt" "requirements-crawler.txt" "scripts/requirements-crawler.txt"; do
+          python -m pip install -U pip setuptools wheel
+
+          # Prefer a repo requirements file if present
+          REQ_FILE=""
+          for f in scripts/requirements-crawler.txt requirements-crawler.txt crawler-requirements.txt requirements.txt; do
             if [[ -f "$f" ]]; then
               echo "➡️ Using requirements file: $f"
+              REQ_FILE="$f"
               python -m pip install -r "$f"
-              found="yes"
               break
             fi
           done
-          if [[ -z "$found" ]]; then
-            echo "⚠️ No requirements file found — installing a minimal set for crawlers."
-            python -m pip install playwright requests httpx==0.27.0 pandas asyncpg lxml beautifulsoup4
-          fi
+
+          # Always ensure the core libs this crawler needs
+          python -m pip install -U beautifulsoup4 lxml selectolax
+          # Common infra deps (ok if already installed)
+          python -m pip install -U playwright requests httpx==0.27.0 pandas asyncpg
+
+          # Install browser for Playwright
           python -m playwright install --with-deps chromium
 
       - name: Run Barbora crawler
@@ -69,7 +68,6 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p data out
-          # Each shard writes its own CSV
           OUT="out/barbora_products_${{ matrix.shard }}.csv"
 
           python scripts/barbora_crawl_categories_pw.py \
