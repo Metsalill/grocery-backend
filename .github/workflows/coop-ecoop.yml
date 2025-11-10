@@ -10,6 +10,7 @@ jobs:
     name: scrape ({{ matrix.store_name }}, data/{{ matrix.cats }}, out/{{ matrix.out }})
     runs-on: ubuntu-latest
     timeout-minutes: 40
+
     strategy:
       fail-fast: false
       matrix:
@@ -25,15 +26,13 @@ jobs:
             cats: data/coop_vandra_categories.txt
             out: out/ecoop_vandra.csv
 
+    # Keep Playwright browsers in a workspace-local folder (no runner.* context).
     env:
-      PLAYWRIGHT_BROWSERS_PATH: ${{ runner.temp }}/pw-browsers
+      PLAYWRIGHT_BROWSERS_PATH: pw-browsers
       PYTHONUNBUFFERED: "1"
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     steps:
-      - name: Set up job
-        run: echo "Starting eCoop scrape for ${{ matrix.store_name }}"
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -49,7 +48,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.PLAYWRIGHT_BROWSERS_PATH }}
-          key: pw-${{ runner.os }}-${{ hashFiles('requirements.txt') }}
+          key: pw-${{ hashFiles('requirements.txt') }}
 
       - name: Install crawler deps (pip + Playwright)
         run: |
