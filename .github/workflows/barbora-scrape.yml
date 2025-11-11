@@ -2,90 +2,91 @@ name: Barbora DB Scrape + Ingest
 
 on:
   schedule:
-    # nightly at 02:05 UTC
-    - cron: "5 2 * * *"
+    - cron: "17 2 * * *"      # daily at ~02:17
   workflow_dispatch:
 
-permissions:
-  contents: read
+env:
+  SHARDS: "24"                # increase if still slow (try 32)
+  PAGE_LIMIT: "60"            # safety cap per category
+  MAX_PAGES_PER_CATEGORY: "18"
+  PDP_WORKERS: "2"            # keep small to avoid rate limits
+  REQ_DELAY: "0.35"           # seconds between requests
+  NAV_TIMEOUT: "420"          # seconds (7 minutes)
+  DB_POOL_SIZE: "1"           # keep DB pool tiny per job
+  PYTHONUTF8: "1"
 
 concurrency:
   group: barbora-scrape
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   scrape:
     name: scrape (shard ${{ matrix.shard }})
+    timeout-minutes: 150
     runs-on: ubuntu-latest
-    timeout-minutes: 330
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]  # 16 shards
-
-    env:
-      PYTHONUNBUFFERED: "1"
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      CATS_FILE: data/barbora_categories.txt
-      TOTAL_SHARDS: 16
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            requirements.txt
+            requirements-crawler.txt
 
-      - name: Install crawler deps (pip + Playwright)
-        shell: bash
+      - name: Install crawler deps (pip)
         run: |
-          set -euo pipefail
-          python -m pip install -U pip setuptools wheel
+          python -m pip install -U pip
+          pip install -r requirements-crawler.txt
 
-          # Prefer a repo requirements file if present
-          REQ_FILE=""
-          for f in scripts/requirements-crawler.txt requirements-crawler.txt crawler-requirements.txt requirements.txt; do
-            if [[ -f "$f" ]]; then
-              echo "➡️ Using requirements file: $f"
-              REQ_FILE="$f"
-              python -m pip install -r "$f"
-              break
-            fi
-          done
-
-          # Always ensure the core libs this crawler needs
-          python -m pip install -U beautifulsoup4 lxml selectolax
-          # Common infra deps (ok if already installed)
-          python -m pip install -U playwright requests httpx==0.27.0 pandas asyncpg
-
-          # Install browser for Playwright
+      - name: Install Playwright (browser cache)
+        run: |
           python -m playwright install --with-deps chromium
 
-      - name: Run Barbora crawler
-        shell: bash
+      - name: Prepare shard files
+        shell: python
         run: |
-          set -euo pipefail
-          mkdir -p data out
-          OUT="out/barbora_products_${{ matrix.shard }}.csv"
+          from pathlib import Path
+          cats = [l.strip() for l in Path("data/barbora_categories.txt").read_text().splitlines() if l.strip()]
+          shards = int("${{ env.SHARDS }}")
+          outdir = Path("data/shards"); outdir.mkdir(parents=True, exist_ok=True)
+          # round-robin split to balance long/short categories
+          parts = [[] for _ in range(shards)]
+          for i, c in enumerate(cats):
+            parts[i % shards].append(c)
+          for i, p in enumerate(parts):
+            Path(outdir / f"barbora_shard_{i}.txt").write_text("\n".join(p))
 
+      - name: Run Barbora crawler
+        env:
+          # throttle DB connections per shard
+          PGPOOL_MAX_SIZE: ${{ env.DB_POOL_SIZE }}
+        run: |
+          mkdir -p out
           python scripts/barbora_crawl_categories_pw.py \
-            --cats-file "$CATS_FILE" \
-            --page-limit 0 \
-            --max-products 0 \
-            --max-pages-per-category 0 \
-            --headless true \
-            --req-delay 0.25 \
-            --output-csv "$OUT" \
-            --cat-shards "$TOTAL_SHARDS" \
-            --cat-index "${{ matrix.shard }}" \
+            --cats-file "data/shards/barbora_shard_${{ matrix.shard }}.txt" \
+            --output-csv "out/barbora_${{ matrix.shard }}.csv" \
+            --headless \
+            --page-limit ${{ env.PAGE_LIMIT }} \
+            --max-pages-per-category ${{ env.MAX_PAGES_PER_CATEGORY }} \
+            --pdp-workers ${{ env.PDP_WORKERS }} \
+            --req-delay ${{ env.REQ_DELAY }} \
+            --nav-timeout ${{ env.NAV_TIMEOUT }} \
+            --db-pool-size ${{ env.DB_POOL_SIZE }} \
             --upsert-db main
 
       - name: Upload CSV artifact (per shard)
-        if: always()
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: barbora-csv-shard-${{ matrix.shard }}
-          path: out/*.csv
-          if-no-files-found: warn
+          name: barbora_${{ matrix.shard }}.csv
+          path: out/barbora_${{ matrix.shard }}.csv
+          if-no-files-found: ignore
