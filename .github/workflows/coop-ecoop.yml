@@ -7,28 +7,27 @@ on:
 
 jobs:
   scrape:
-    # eCoop needs more than 40 minutes on GH runners
-    timeout-minutes: 120
+    name: scrape ({{ matrix.store_name }}, data/{{ matrix.cats }}, out/{{ matrix.out }})
     runs-on: ubuntu-latest
+    timeout-minutes: 90
+
     strategy:
       fail-fast: false
       matrix:
         include:
-          - store_id: 445
-            store_name: "haapsalu eCoop"
-            store_url: "https://coophaapsalu.ee"
-            cats: "data/coop_haapsalu_categories.txt"
-            out: "ecoop_haapsalu"
-            region: "haapsalu"
-          - store_id: 446
-            store_name: "vandra eCoop"
-            store_url: "https://vandra.ecoop.ee"
-            cats: "data/coop_vandra_categories.txt"
-            out: "ecoop_vandra"
-            region: "vandra"
+          - store_name: haapsalu eCoop
+            store_id: 445
+            store_host: coophaapsalu.ee
+            cats: data/coop_haapsalu_categories.txt
+            out: out/ecoop_haapsalu.csv
+          - store_name: vandra eCoop
+            store_id: 446
+            store_host: vandra.ecoop.ee
+            cats: data/coop_vandra_categories.txt
+            out: out/ecoop_vandra.csv
 
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -36,45 +35,32 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-1.47.0
-
       - name: Install crawler deps (pip + Playwright)
         run: |
           python -m pip install -U pip
           pip install -r requirements.txt
           python -m playwright install --with-deps chromium
 
-      - name: Run eCoop crawler (${{ matrix.store_name }})
+      - name: Run eCoop crawler ({{ matrix.store_name }})
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          # add your DB env/secrets here if needed by --upsert-db
+          # DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          PYTHONUNBUFFERED: "1"
         run: |
-          set -euo pipefail
           mkdir -p out
-
           python scripts/ecoop_crawler.py \
-            --region "${{ matrix.region }}" \
             --categories-file "${{ matrix.cats }}" \
-            --page-limit 400 \
-            --max-products 20000 \
-            --headless 1 \
-            --req-delay 300 \
-            --pdp-workers 4 \
-            --goto-strategy autodetect \
-            --write-empty-csv \
-            --store-id ${{ matrix.store_id }} \
-            --store-url "${{ matrix.store_url }}" \
-            --upsert-db main \
-            --out "out/${{ matrix.out }}.csv"
+            --store-id "${{ matrix.store_id }}" \
+            --store-host "${{ matrix.store_host }}" \
+            --out "${{ matrix.out }}" \
+            --headless true \
+            --upsert-db main
 
-      # IMPORTANT: 'name' must NOT contain '/' – only the 'path' may
-      - name: Upload CSV (${{ matrix.store_name }})
+      - name: Upload CSV ({{ matrix.store_name }})
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.out }}
-          path: out/${{ matrix.out }}.csv
-          if-no-files-found: error
-          retention-days: 7
+          # ✅ artifact *name* must NOT contain slashes
+          name: ecoop_${{ matrix.store_name }}_${{ matrix.store_id }}
+          # ✅ artifact *path* is the actual file path with slashes
+          path: ${{ matrix.out }}
