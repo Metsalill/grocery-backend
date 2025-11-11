@@ -2,17 +2,17 @@ name: Barbora DB Scrape + Ingest
 
 on:
   schedule:
-    - cron: "17 2 * * *"      # daily at ~02:17
+    - cron: "17 2 * * *"
   workflow_dispatch:
 
 env:
-  SHARDS: "24"                # increase if still slow (try 32)
-  PAGE_LIMIT: "60"            # safety cap per category
+  SHARDS: "24"
+  PAGE_LIMIT: "60"
   MAX_PAGES_PER_CATEGORY: "18"
-  PDP_WORKERS: "2"            # keep small to avoid rate limits
-  REQ_DELAY: "0.35"           # seconds between requests
-  NAV_TIMEOUT: "420"          # seconds (7 minutes)
-  DB_POOL_SIZE: "1"           # keep DB pool tiny per job
+  PDP_WORKERS: "2"
+  REQ_DELAY: "0.35"
+  NAV_TIMEOUT: "420"
+  DB_POOL_SIZE: "1"
   PYTHONUTF8: "1"
 
 concurrency:
@@ -38,14 +38,14 @@ jobs:
         with:
           python-version: "3.11"
           cache: "pip"
-          cache-dependency-path: |
-            requirements.txt
-            requirements-crawler.txt
+          cache-dependency-path: requirements.txt
 
       - name: Install crawler deps (pip)
         run: |
           python -m pip install -U pip
-          pip install -r requirements-crawler.txt
+          pip install -r requirements.txt
+          # crawler imports:
+          pip install beautifulsoup4 lxml
 
       - name: Install Playwright (browser cache)
         run: |
@@ -58,7 +58,6 @@ jobs:
           cats = [l.strip() for l in Path("data/barbora_categories.txt").read_text().splitlines() if l.strip()]
           shards = int("${{ env.SHARDS }}")
           outdir = Path("data/shards"); outdir.mkdir(parents=True, exist_ok=True)
-          # round-robin split to balance long/short categories
           parts = [[] for _ in range(shards)]
           for i, c in enumerate(cats):
             parts[i % shards].append(c)
@@ -67,7 +66,6 @@ jobs:
 
       - name: Run Barbora crawler
         env:
-          # throttle DB connections per shard
           PGPOOL_MAX_SIZE: ${{ env.DB_POOL_SIZE }}
         run: |
           mkdir -p out
