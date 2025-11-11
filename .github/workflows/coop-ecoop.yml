@@ -2,29 +2,37 @@ name: Coop eCoop scrape + upsert
 
 on:
   schedule:
-    - cron: "17 * * * *"
+    - cron: "17 * * * *"  # run hourly at :17 — adjust as you like
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   scrape:
-    name: scrape ({{ matrix.store_name }}, data/{{ matrix.cats }}, out/{{ matrix.out }})
+    name: scrape ({{ matrix.store_name }}, {{ matrix.city }}, out/{{ matrix.artifact }})
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 120
 
     strategy:
       fail-fast: false
       matrix:
         include:
-          - store_name: haapsalu eCoop
+          - store_name: "haapsalu eCoop"
+            city: haapsalu
             store_id: 445
-            store_host: coophaapsalu.ee
-            cats: data/coop_haapsalu_categories.txt
-            out: out/ecoop_haapsalu.csv
-          - store_name: vandra eCoop
+            store_host: "coophaapsalu.ee"
+            cats: "data/coop_haapsalu_categories.txt"
+            out: "out/ecoop_haapsalu.csv"
+            artifact: "ecoop_haapsalu.csv"
+
+          - store_name: "vandra eCoop"
+            city: vandra
             store_id: 446
-            store_host: vandra.ecoop.ee
-            cats: data/coop_vandra_categories.txt
-            out: out/ecoop_vandra.csv
+            store_host: "vandra.ecoop.ee"
+            cats: "data/coop_vandra_categories.txt"
+            out: "out/ecoop_vandra.csv"
+            artifact: "ecoop_vandra.csv"
 
     steps:
       - name: Checkout
@@ -35,16 +43,27 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install crawler deps (pip + Playwright)
+      # Cache Playwright browser binaries (Chromium)
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-chromium-1.47.0
+
+      - name: Install crawler deps (pip)
+        env:
+          PIP_DISABLE_PIP_VERSION_CHECK: "1"
         run: |
           python -m pip install -U pip
           pip install -r requirements.txt
-          python -m playwright install --with-deps chromium
+
+      - name: Install Playwright (Chromium)
+        run: |
+          python -m playwright install-deps chromium
+          python -m playwright install chromium
 
       - name: Run eCoop crawler ({{ matrix.store_name }})
         env:
-          # add your DB env/secrets here if needed by --upsert-db
-          # DATABASE_URL: ${{ secrets.DATABASE_URL }}
           PYTHONUNBUFFERED: "1"
         run: |
           mkdir -p out
@@ -54,13 +73,15 @@ jobs:
             --store-host "${{ matrix.store_host }}" \
             --out "${{ matrix.out }}" \
             --headless true \
+            --goto-strategy auto \
             --upsert-db main
 
+      # NOTE: artifact *name* cannot contain slashes — keep it clean here,
+      #       and use 'path' to point to the file inside 'out/'.
       - name: Upload CSV ({{ matrix.store_name }})
-        if: always()
         uses: actions/upload-artifact@v4
         with:
-          # ✅ artifact *name* must NOT contain slashes
-          name: ecoop_${{ matrix.store_name }}_${{ matrix.store_id }}
-          # ✅ artifact *path* is the actual file path with slashes
+          name: ${{ matrix.artifact }}
           path: ${{ matrix.out }}
+          if-no-files-found: error
+          retention-days: 7
