@@ -15,6 +15,7 @@ Highlights
 - Tough pagination, price parsing, PDP extraction.
 - Backward-compatible CLI flags for your workflows:
     --out-csv (alias of --output-csv), --cat-shards, --cat-index, --upsert-db
+- Handles alcohol **age verification** popup (“Olen 18-aastane”).
 
 YAML deps (example):
   pip install playwright asyncpg bs4 lxml selectolax
@@ -35,12 +36,7 @@ import time
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import (
-    urljoin,
-    urlparse,
-    urlsplit,
-    urlunsplit,
-    parse_qsl,
-    urlencode,
+    urljoin, urlparse, urlsplit, urlunsplit, parse_qsl, urlencode,
 )
 
 import asyncpg
@@ -73,7 +69,6 @@ SPEC_KEYS_MFR = {"tootja", "valmistaja", "manufacturer", "tarnija"}
 SPEC_KEYS_SIZE = {"kogus", "netokogus", "maht", "neto"}
 BAD_NAMES = {"pealeht"}  # "Home" in Estonian etc.
 
-
 # ---------------------------------------------------------------------
 # small helpers
 # ---------------------------------------------------------------------
@@ -83,10 +78,8 @@ def norm(s: Optional[str]) -> str:
         return ""
     return re.sub(r"\s+", " ", s).strip().lower()
 
-
 def text_of(el) -> str:
     return re.sub(r"\s+", " ", el.get_text(" ", strip=True)) if el else ""
-
 
 def get_ext_id(url: str) -> str:
     """
@@ -98,7 +91,6 @@ def get_ext_id(url: str) -> str:
         return m.group(1)
     slug = re.sub(r"[^a-zA-Z0-9]+", "-", url).strip("-")
     return slug[-120:]
-
 
 def parse_bool_flag(v) -> bool:
     """
@@ -112,15 +104,13 @@ def parse_bool_flag(v) -> bool:
         return True
     if s in {"0", "false", "no", "n", "off"}:
         return False
-    # fallback: non-empty string -> True
     try:
         return bool(int(s))
     except Exception:
         return bool(s)
 
-
 # ---------------------------------------------------------------------
-# cookie banner / page priming
+# cookie / age-gate / page priming
 # ---------------------------------------------------------------------
 
 def accept_cookies(page: Page) -> None:
@@ -147,16 +137,59 @@ def accept_cookies(page: Page) -> None:
     except Exception:
         pass
 
+def handle_age_gate(page: Page) -> None:
+    """
+    Dismiss Barbora 18+ modal if present, and set fallbacks to persist approval.
+    """
+    try:
+        # direct click on the confirm button (common copy)
+        for sel in [
+            "button:has-text('Olen 18-aastane')",
+            "button:has-text('Olen 18 aastane')",
+            "button:has-text('Olen 18')",
+            "button:has-text(\"I'm 18\")",
+            "button:has-text('I am 18')",
+        ]:
+            loc = page.locator(sel)
+            if loc.count() and loc.first.is_visible():
+                loc.first.click(timeout=1200)
+                page.wait_for_timeout(200)
+                break
+    except Exception:
+        pass
+
+    # storage/cookie fallbacks to keep the gate away
+    try:
+        page.add_init_script("""
+            try {
+              localStorage.setItem('ageConfirmed', 'true');
+              localStorage.setItem('adult', 'true');
+              localStorage.setItem('isAdult', 'true');
+              document.cookie = 'ageConfirmed=true; path=/; max-age=' + (3600*24*365*2);
+              document.cookie = 'adult=true; path=/; max-age=' + (3600*24*365*2);
+            } catch (e) {}
+        """)
+        page.evaluate("""
+            try {
+              localStorage.setItem('ageConfirmed', 'true');
+              localStorage.setItem('adult', 'true');
+              localStorage.setItem('isAdult', 'true');
+              document.cookie = 'ageConfirmed=true; path=/; max-age=' + (3600*24*365*2);
+              document.cookie = 'adult=true; path=/; max-age=' + (3600*24*365*2);
+            } catch (e) {}
+        """)
+    except Exception:
+        pass
 
 def ensure_ready(page: Page) -> None:
     accept_cookies(page)
+    handle_age_gate(page)
     try:
         page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
         page.wait_for_timeout(150)
         page.evaluate("window.scrollTo(0, 0)")
     except Exception:
         pass
-
 
 # ---------------------------------------------------------------------
 # price parsing helpers
@@ -167,7 +200,6 @@ def _first_str(*vals) -> Optional[str]:
         if isinstance(v, str) and v.strip():
             return v.strip()
     return None
-
 
 def _clean_decimal(s: str) -> Optional[str]:
     """
@@ -200,7 +232,6 @@ def _clean_decimal(s: str) -> Optional[str]:
     if digits and len(digits) > 2:
         return f"{digits[:-2]}.{digits[-2:]}"
     return None
-
 
 def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[str]]:
     # 1) itemprop meta
@@ -247,19 +278,14 @@ def parse_price_from_dom(soup: BeautifulSoup) -> Tuple[Optional[str], Optional[s
 
     return None, "EUR"
 
-
 # ---------------------------------------------------------------------
 # PDP parsing
 # ---------------------------------------------------------------------
 
 def from_json_ld(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
     out = {
-        "name": None,
-        "brand": None,
-        "manufacturer": None,
-        "image": None,
-        "price": None,
-        "currency": None,
+        "name": None, "brand": None, "manufacturer": None,
+        "image": None, "price": None, "currency": None,
     }
     for tag in soup.find_all("script", {"type": "application/ld+json"}):
         try:
@@ -314,7 +340,6 @@ def from_json_ld(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
                     out["currency"] = currency
     return out
 
-
 def _scan_label_value_pairs(soup: BeautifulSoup) -> Dict[str, str]:
     capture: Dict[str, str] = {}
 
@@ -343,7 +368,6 @@ def _scan_label_value_pairs(soup: BeautifulSoup) -> Dict[str, str]:
         elif any(k == label for k in SPEC_KEYS_MFR) and "manufacturer" not in capture:
             capture["manufacturer"] = value
     return capture
-
 
 def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
     out = {"brand": None, "manufacturer": None, "size": None, "sku": None}
@@ -395,7 +419,6 @@ def parse_spec_table(soup: BeautifulSoup) -> Dict[str, Optional[str]]:
 
     return out
 
-
 def parse_app_state_for_brand_or_price(
     soup: BeautifulSoup,
 ) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
@@ -425,7 +448,6 @@ def parse_app_state_for_brand_or_price(
                 currency = mc.group(1)
     return brand, manufacturer, price, currency
 
-
 def extract_product_title_from_dom(soup: BeautifulSoup) -> str:
     sel = (
         ".e-product__name, [data-testid=product-title], [data-testid=product-name], "
@@ -434,7 +456,6 @@ def extract_product_title_from_dom(soup: BeautifulSoup) -> str:
     )
     el = soup.select_one(sel)
     return text_of(el)
-
 
 def prefer_valid_name(candidates: List[str], category_leaf: str) -> str:
     for cand in candidates:
@@ -447,7 +468,6 @@ def prefer_valid_name(candidates: List[str], category_leaf: str) -> str:
             continue
         return c
     return candidates[0] if candidates else ""
-
 
 def extract_breadcrumbs(soup: BeautifulSoup) -> Tuple[str, str]:
     path = []
@@ -468,13 +488,11 @@ def extract_breadcrumbs(soup: BeautifulSoup) -> Tuple[str, str]:
     leaf = cleaned[-1] if cleaned else ""
     return " / ".join(cleaned), leaf
 
-
 def extract_size_from_name(name: str) -> Optional[str]:
     if not name:
         return None
     m = SIZE_RE.search(name)
     return m.group(0) if m else None
-
 
 def extract_from_pdp(
     page: Page,
@@ -485,6 +503,7 @@ def extract_from_pdp(
 ) -> Dict[str, Optional[str]]:
     page.goto(url, timeout=60000, wait_until="domcontentloaded")
     ensure_ready(page)
+    handle_age_gate(page)
 
     try:
         page.wait_for_load_state("networkidle", timeout=4000)
@@ -587,7 +606,6 @@ def extract_from_pdp(
         "category_leaf": category_leaf,
     }
 
-
 # ---------------------------------------------------------------------
 # category listing / pagination
 # ---------------------------------------------------------------------
@@ -616,7 +634,6 @@ def harvest_product_links(page: Page) -> List[Tuple[str, str]]:
         uniq.append((u, t))
     return uniq
 
-
 def ensure_category_loaded(page: Page, req_delay: float) -> None:
     try:
         page.wait_for_selector("a, [role='link']", timeout=8000)
@@ -626,14 +643,13 @@ def ensure_category_loaded(page: Page, req_delay: float) -> None:
         page.wait_for_load_state("networkidle", timeout=3000)
     except PWTimeout:
         pass
+    handle_age_gate(page)
     page.wait_for_timeout(int(req_delay * 1000))
-
 
 def go_to_category(page: Page, url: str, req_delay: float) -> None:
     page.goto(url, timeout=60000, wait_until="domcontentloaded")
     ensure_ready(page)
     ensure_category_loaded(page, req_delay)
-
 
 def _set_query_param(u: str, key: str, value: str) -> str:
     parts = urlsplit(u)
@@ -641,14 +657,12 @@ def _set_query_param(u: str, key: str, value: str) -> str:
     q[key] = value
     return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(q), parts.fragment))
 
-
 def _current_page_from_url(u: str) -> int:
     try:
         q = dict(parse_qsl(urlsplit(u).query, keep_blank_values=True))
         return int(q.get("page", "1"))
     except Exception:
         return 1
-
 
 def next_page_if_any(page: Page) -> bool:
     try:
@@ -710,12 +724,8 @@ def next_page_if_any(page: Page) -> bool:
     except Exception:
         return False
 
-
 def collect_category_products(
-    page: Page,
-    cat_url: str,
-    req_delay: float,
-    max_pages: int = 60,
+    page: Page, cat_url: str, req_delay: float, max_pages: int = 60,
 ) -> List[Tuple[str, str]]:
     go_to_category(page, cat_url, req_delay)
 
@@ -756,28 +766,15 @@ def collect_category_products(
     print(f"[cat] {cat_url} → {len(uniq)} products across {pages_done} page(s)")
     return uniq
 
-
 # ---------------------------------------------------------------------
 # CSV helpers
 # ---------------------------------------------------------------------
 
 CSV_HEADER = [
-    "store_chain",
-    "store_name",
-    "store_channel",
-    "ext_id",
-    "ean_raw",
-    "sku_raw",
-    "name",
-    "size_text",
-    "brand",
-    "manufacturer",
-    "price",
-    "currency",
-    "image_url",
-    "category_path",
-    "category_leaf",
-    "source_url",
+    "store_chain", "store_name", "store_channel",
+    "ext_id", "ean_raw", "sku_raw", "name", "size_text",
+    "brand", "manufacturer", "price", "currency", "image_url",
+    "category_path", "category_leaf", "source_url",
 ]
 
 def ensure_dir(path: str) -> None:
@@ -798,7 +795,6 @@ def append_rows(path: str, rows: List[List[str]]) -> None:
     with open(path, "a", encoding="utf-8", newline="") as f:
         w = csv.writer(f)
         w.writerows(rows)
-
 
 # ---------------------------------------------------------------------
 # DB ingest helper
@@ -850,7 +846,6 @@ async def _bulk_ingest_to_db(rows: List[Dict[str, object]], store_id: int) -> No
     finally:
         await conn.close()
 
-
 # ---------------------------------------------------------------------
 # sharding utils
 # ---------------------------------------------------------------------
@@ -874,7 +869,6 @@ def apply_shard(full_list: List[str], shard: Optional[int], shards: Optional[int
     print(f"[shard] shard {s+1}/{n}: {len(out)}/{len(full_list)} categories")
     return out
 
-
 # ---------------------------------------------------------------------
 # main crawl runner
 # ---------------------------------------------------------------------
@@ -882,7 +876,6 @@ def apply_shard(full_list: List[str], shard: Optional[int], shards: Optional[int
 def read_lines(path: str) -> List[str]:
     with open(path, "r", encoding="utf-8") as f:
         return [ln.strip() for ln in f if ln.strip()]
-
 
 def crawl(args) -> None:
     cats_all = read_lines(args.cats_file)
@@ -905,7 +898,7 @@ def crawl(args) -> None:
     )
 
     total = 0
-    headless = parse_bool_flag(args.headless)       # <<< robust boolean parsing
+    headless = parse_bool_flag(args.headless)       # robust boolean parsing
     req_delay = float(args.req_delay)
     per_cat_page_limit = int(args.max_pages_per_category or "0")
 
@@ -945,9 +938,7 @@ def crawl(args) -> None:
         def restart_browser(reason: str = ""):
             nonlocal browser, ctx, page
             try:
-                page.close()
-                ctx.close()
-                browser.close()
+                page.close(); ctx.close(); browser.close()
             except Exception:
                 pass
             time.sleep(0.5)
@@ -982,11 +973,8 @@ def crawl(args) -> None:
                     for attempt in (1, 2):
                         try:
                             data = extract_from_pdp(
-                                page,
-                                url,
-                                listing_title=None,
-                                category_leaf_hint=cat_leaf_guess,
-                                req_delay=req_delay,
+                                page, url, listing_title=None,
+                                category_leaf_hint=cat_leaf_guess, req_delay=req_delay,
                             )
                             break
                         except Exception as e:
@@ -1003,22 +991,15 @@ def crawl(args) -> None:
                     seen_at_ts = datetime.now(timezone.utc)
 
                     row_csv = [
-                        STORE_CHAIN,
-                        STORE_NAME,
-                        STORE_CHANNEL,
-                        ext_id,
+                        STORE_CHAIN, STORE_NAME, STORE_CHANNEL, ext_id,
                         "",  # ean_raw unknown/unreliable
-                        data.get("sku_raw") or "",
-                        data.get("name") or "",
-                        data.get("size_text") or "",
-                        data.get("brand") or "",
+                        data.get("sku_raw") or "", data.get("name") or "",
+                        data.get("size_text") or "", data.get("brand") or "",
                         data.get("manufacturer") or "",
-                        data.get("price") or "",
-                        data.get("currency") or "EUR",
+                        data.get("price") or "", data.get("currency") or "EUR",
                         data.get("image_url") or "",
                         data.get("category_path") or "",
-                        data.get("category_leaf") or cat_leaf_guess,
-                        url,
+                        data.get("category_leaf") or cat_leaf_guess, url,
                     ]
                     batch_csv.append(row_csv)
 
@@ -1040,12 +1021,10 @@ def crawl(args) -> None:
                     processed_since_restart += 1
 
                     if len(batch_csv) >= 50:
-                        append_rows(args.output_csv, batch_csv)
-                        batch_csv.clear()
+                        append_rows(args.output_csv, batch_csv); batch_csv.clear()
 
                     if processed_since_restart >= RESTART_EVERY:
-                        append_rows(args.output_csv, batch_csv)
-                        batch_csv.clear()
+                        append_rows(args.output_csv, batch_csv); batch_csv.clear()
                         processed_since_restart = 0
                         restart_browser("periodic")
 
@@ -1068,13 +1047,11 @@ def crawl(args) -> None:
                     category_path_hint = ""
 
                     prods = collect_category_products(
-                        page,
-                        cat,
-                        req_delay,
+                        page, cat, req_delay,
                         max_pages=per_cat_page_limit if per_cat_page_limit > 0 else 120,
                     )
                     if not prods:
-                        print(f"[cat] {cat} → 0 items (maybe geo/login block).")
+                        print(f"[cat] {cat} → 0 items (maybe geo/login/age gate).")
                         restart_browser("post-category")
                         continue
 
@@ -1097,11 +1074,8 @@ def crawl(args) -> None:
                         for attempt in (1, 2):
                             try:
                                 data = extract_from_pdp(
-                                    page,
-                                    url,
-                                    listing_title,
-                                    category_leaf_hint,
-                                    req_delay,
+                                    page, url, listing_title,
+                                    category_leaf_hint, req_delay,
                                 )
                                 break
                             except Exception as e:
@@ -1118,22 +1092,15 @@ def crawl(args) -> None:
                         seen_at_ts = datetime.now(timezone.utc)
 
                         row_csv = [
-                            STORE_CHAIN,
-                            STORE_NAME,
-                            STORE_CHANNEL,
-                            ext_id,
+                            STORE_CHAIN, STORE_NAME, STORE_CHANNEL, ext_id,
                             "",  # ean_raw blank
-                            data.get("sku_raw") or "",
-                            data.get("name") or "",
-                            data.get("size_text") or "",
-                            data.get("brand") or "",
+                            data.get("sku_raw") or "", data.get("name") or "",
+                            data.get("size_text") or "", data.get("brand") or "",
                             data.get("manufacturer") or "",
-                            data.get("price") or "",
-                            data.get("currency") or "EUR",
+                            data.get("price") or "", data.get("currency") or "EUR",
                             data.get("image_url") or "",
                             data.get("category_path") or category_path_hint,
-                            data.get("category_leaf") or category_leaf_hint,
-                            url,
+                            data.get("category_leaf") or category_leaf_hint, url,
                         ]
                         batch_csv.append(row_csv)
 
@@ -1154,8 +1121,7 @@ def crawl(args) -> None:
                         total += 1
 
                         if len(batch_csv) >= 50:
-                            append_rows(args.output_csv, batch_csv)
-                            batch_csv.clear()
+                            append_rows(args.output_csv, batch_csv); batch_csv.clear()
 
                         if req_delay:
                             time.sleep(req_delay)
@@ -1165,9 +1131,7 @@ def crawl(args) -> None:
 
         finally:
             try:
-                page.close()
-                ctx.close()
-                browser.close()
+                page.close(); ctx.close(); browser.close()
             except Exception:
                 pass
 
@@ -1187,7 +1151,6 @@ def crawl(args) -> None:
     except Exception:
         print(f"[done] barbora: wrote CSV + ingested {len(rows_for_ingest)} rows to DB")
 
-
 # ---------------------------------------------------------------------
 # argparse wiring
 # ---------------------------------------------------------------------
@@ -1196,32 +1159,22 @@ def build_argparser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         description="Barbora.ee category→PDP crawler (CSV + direct DB ingest)."
     )
+    p.add_argument("--cats-file", required=True, help="Text file with category URLs (one per line)")
+    p.add_argument("--page-limit", default="0", help="Max categories to process (0=all)")
+    p.add_argument("--max-products", default="0", help="Cap total PDPs visited (0=unlimited)")
+    p.add_argument("--max-pages-per-category", default="0", help="Cap pages per category (0=unlimited)")
+
+    # Accept `--headless` (implied true) *or* `--headless false`
     p.add_argument(
-        "--cats-file",
-        required=True,
-        help="Text file with category URLs (one per line)",
+        "--headless",
+        nargs="?",                # allow presence without value
+        const=str(DEFAULT_HEADLESS),
+        default=str(DEFAULT_HEADLESS),
+        help="1/0/true/false/yes/no (presence without value => default)",
     )
-    p.add_argument(
-        "--page-limit",
-        default="0",
-        help="Max categories to process (0=all)",
-    )
-    p.add_argument(
-        "--max-products",
-        default="0",
-        help="Cap total PDPs visited (0=unlimited)",
-    )
-    p.add_argument(
-        "--max-pages-per-category",
-        default="0",
-        help="Cap pages per category (0=unlimited)",
-    )
-    p.add_argument("--headless", default=str(DEFAULT_HEADLESS), help="1/0/true/false/yes/no")
-    p.add_argument(
-        "--req-delay",
-        default=str(DEFAULT_REQ_DELAY),
-        help="Delay between steps in seconds",
-    )
+
+    p.add_argument("--req-delay", default=str(DEFAULT_REQ_DELAY), help="Delay between steps in seconds")
+
     # Accept both --output-csv and legacy --out-csv
     p.add_argument(
         "--output-csv", "--out-csv",
@@ -1229,6 +1182,7 @@ def build_argparser() -> argparse.ArgumentParser:
         default="data/barbora_products.csv",
         help="Output CSV path (will append)",
     )
+
     p.add_argument("--skip-ext-file", default="", help="File with ext_ids to SKIP (one per line)")
     p.add_argument("--only-ext-file", default="", help="File with ext_ids to INCLUDE exclusively")
     p.add_argument("--only-url-file", default="", help="File with PDP URLs to visit exclusively")
@@ -1238,7 +1192,6 @@ def build_argparser() -> argparse.ArgumentParser:
     p.add_argument("--cat-index", type=int, default=None, help="This shard index [0..N-1] (overrides env SHARD)")
     p.add_argument("--upsert-db", default="", help="Compat: ignored; ingest uses DATABASE_URL")
     return p
-
 
 if __name__ == "__main__":
     parser = build_argparser()
