@@ -3,66 +3,64 @@ name: Barbora DB Scrape + Ingest
 on:
   workflow_dispatch:
   schedule:
-    - cron: "17 * * * *" # adjust as you like
+    - cron: "17 2 * * *"  # run daily at 02:17 UTC (adjust as you like)
+
+concurrency:
+  group: barbora-scrape
+  cancel-in-progress: false
 
 jobs:
   scrape:
     name: scrape (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
-    timeout-minutes: 330
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
-        total_shards: [24]
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
 
       - name: Install crawler deps (pip)
         run: |
-          python -m pip install -U pip
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('**/requirements.txt') }}
-
       - name: Install Playwright (Chromium)
-        run: |
-          python -m playwright install --with-deps chromium
+        run: python -m playwright install --with-deps chromium
 
       - name: Prepare folders
-        run: mkdir -p out
+        run: mkdir -p out data
 
-      - name: Run Barbora crawler (shard ${{ matrix.shard }})
+      - name: Run Barbora crawler
         env:
-          DSN: ${{ secrets.DATABASE_URL }}   # <<< Option A: pass real DSN from secrets
-          PYTHONUNBUFFERED: "1"
+          HEADLESS: "1"
         run: |
+          set -euo pipefail
           python scripts/barbora_crawl_categories_pw.py \
             --cats-file data/barbora_categories.txt \
-            --page-limit 999 \
-            --max-products 100000 \
-            --headless true \
-            --req-delay 0.35 \
-            --output-csv out/barbora_${{ matrix.shard }}.csv \
-            --cat-shards ${{ matrix.total_shards }} \
+            --page-limit 0 \
+            --max-products 0 \
+            --max-pages-per-category 0 \
+            --headless "${HEADLESS}" \
+            --cat-shards 24 \
             --cat-index ${{ matrix.shard }} \
-            --upsert-db "$DSN"
+            --output-csv out/barbora_products_${{ matrix.shard }}.csv \
+            --upsert-db main
 
       - name: Upload CSV artifact (per shard)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: barbora_${{ matrix.shard }}
-          path: out/barbora_${{ matrix.shard }}.csv
+          name: barbora_products_${{ matrix.shard }}.csv
+          path: out/barbora_products_${{ matrix.shard }}.csv
           if-no-files-found: warn
+          retention-days: 7
