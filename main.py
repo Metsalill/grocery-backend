@@ -33,6 +33,7 @@ from admin.routes import router as admin_router
 from basket_history import router as basket_history_router
 from api.upload_image import router as upload_image_router
 from admin.image_gallery import router as image_admin_router
+from categories import router as categories_router  # <-- NEW
 
 logger = logging.getLogger("uvicorn.error")
 os.makedirs(IMAGES_DIR, exist_ok=True)
@@ -52,16 +53,19 @@ app = FastAPI(
     openapi_url="/openapi.json" if ENABLE_DOCS else None,
 )
 
+
 class TraceLogMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
-        try:
-            return await call_next(request)
-        except Exception:
-            logger.error("\n===== UNCAUGHT EXCEPTION =====")
-            logger.error("Path: %s %s", request.method, request.url.path)
-            logger.error(traceback.format_exc())
-            logger.error("===== END TRACE =====\n")
-            raise
+  async def dispatch(self, request, call_next):
+      try:
+          return await call_next(request)
+      except Exception:
+          logger.error("\n===== UNCAUGHT EXCEPTION =====")
+          logger.error("Path: %s %s", request.method, request.url.path)
+          logger.error(traceback.format_exc())
+          logger.error("===== END TRACE =====\n")
+          raise
+
+
 app.add_middleware(TraceLogMiddleware)
 
 # Static + security headers
@@ -104,6 +108,7 @@ async def startup():
         app.state.db = None
         logger.error(f"⚠️ Failed to connect to DB at startup: {e}")
 
+
 @app.on_event("shutdown")
 async def shutdown():
     try:
@@ -113,17 +118,19 @@ async def shutdown():
     except Exception as e:
         logger.error(f"Shutdown error: {e}")
 
+
 # -------- Router mounts (root) --------
 app.include_router(auth_router)
-app.include_router(compare_router)           # /compare
-app.include_router(products_router)          # /products, /products/search, /search-products
+app.include_router(compare_router)            # /compare
+app.include_router(products_router)           # /products, /products/search, /search-products
 app.include_router(upload_router)
 app.include_router(admin_router)
 app.include_router(basket_history_router)
-app.include_router(upload_image_router)      # /api/upload-image
-app.include_router(image_admin_router)       # /admin/images
+app.include_router(upload_image_router)       # /api/upload-image
+app.include_router(image_admin_router)        # /admin/images
+app.include_router(categories_router)         # /categories           <-- NEW
 if stores_router:
-    app.include_router(stores_router)        # /stores
+    app.include_router(stores_router)         # /stores
 
 # -------- Duplicate mounts under /api --------
 app.include_router(products_router, prefix="/api")
@@ -131,6 +138,8 @@ app.include_router(compare_router, prefix="/api")
 if stores_router:
     app.include_router(stores_router, prefix="/api")
 app.include_router(basket_history_router, prefix="/api")
+app.include_router(categories_router, prefix="/api")  # /api/categories  <-- NEW
+
 
 @app.get("/robots.txt", response_class=PlainTextResponse)
 async def robots():
@@ -141,26 +150,34 @@ async def robots():
         "Disallow: /search-products\n"
         "Disallow: /stores\n"
         "Disallow: /compare\n"
+        "Disallow: /categories\n"        # <-- NEW
         "Disallow: /basket-history\n"
         "Disallow: /api/upload-image\n"
         "Disallow: /admin/images\n"
     )
 
+
 @app.get("/healthz", response_class=PlainTextResponse)
 async def healthz():
     return "ok"
 
+
 if LOG_REQUESTS:
     @app.middleware("http")
     async def _req_logger(request, call_next):
-        logger.info(f"➡ {request.method} {request.url.path} from {request.client.host if request.client else 'unknown'}")
+        logger.info(
+            f"➡ {request.method} {request.url.path} from {request.client.host if request.client else 'unknown'}"
+        )
         resp = await call_next(request)
         logger.info(f"⬅ {request.method} {request.url.path} -> {resp.status_code}")
         return resp
 
+
 from fastapi.openapi.utils import get_openapi
 from fastapi.security import HTTPBearer
+
 bearer_scheme = HTTPBearer()
+
 
 def custom_openapi():
     if app.openapi_schema:
@@ -180,10 +197,12 @@ def custom_openapi():
     app.openapi_schema = schema
     return app.openapi_schema
 
+
 app.openapi = custom_openapi
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
