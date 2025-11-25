@@ -1,70 +1,40 @@
 -- 2025-08-22-selver-bootstrap.sql
--- Selver helper structures: EANs, staging table, host → store mapping
+-- Bootstrap tables for Selver scraping + shared EAN storage.
+-- Pure DDL, idempotent, no data backfill.
 
 BEGIN;
 
--- 1) Ensure pg_trgm, used elsewhere as well
-CREATE EXTENSION IF NOT EXISTS "pg_trgm";
+-- Make sure trigram extension exists (for name search etc)
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
--- 2) Canonical product EANs
---    ean_norm is a GENERATED column, so we never insert into it manually.
+-- 1) Table for normalised EANs per canonical product
 CREATE TABLE IF NOT EXISTS product_eans (
-    product_id INT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    ean_raw    TEXT NOT NULL,
-    -- keep only digits from ean_raw
-    ean_norm   TEXT GENERATED ALWAYS AS (regexp_replace(ean_raw, '\D', '', 'g')) STORED,
+    product_id  INT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    ean_raw     TEXT NOT NULL,
+    -- digits-only version, stored as generated column
+    ean_norm    TEXT GENERATED ALWAYS AS (regexp_replace(ean_raw, '\D', '', 'g')) STORED,
     PRIMARY KEY (product_id, ean_norm)
 );
 
--- unique across all products, so we can look up by normalized EAN
 CREATE UNIQUE INDEX IF NOT EXISTS uq_product_eans_norm
-    ON product_eans (ean_norm);
+    ON product_eans (ean_norm, product_id);
 
--- Backfill from existing products.
--- NOTE: we only insert product_id + ean_raw; ean_norm is generated.
-DO $$
-BEGIN
-    INSERT INTO product_eans (product_id, ean_raw)
-    SELECT
-        p.id,
-        p.ean
-    FROM products p
-    WHERE p.ean IS NOT NULL
-      AND p.ean <> ''
-    ON CONFLICT DO NOTHING;
-END $$;
-
--- 3) Staging table for Selver web scrape
+-- 2) Staging table for raw Selver products (scraper will insert here)
 CREATE TABLE IF NOT EXISTS staging_selver_products (
-    id          BIGSERIAL PRIMARY KEY,
-    ext_id      TEXT,             -- external id from Selver
-    name        TEXT,
-    size_text   TEXT,
-    brand       TEXT,
-    ean         TEXT,
-    category    TEXT,
-    subcategory TEXT,
-    price       NUMERIC(10, 2),
-    url         TEXT,
-    image_url   TEXT,
-    raw         JSONB             -- full raw payload if we want it
+    id           BIGSERIAL PRIMARY KEY,
+    ext_id       TEXT,
+    name         TEXT NOT NULL,
+    size_text    TEXT,
+    brand        TEXT,
+    ean_raw      TEXT,
+    price        NUMERIC(10, 2),
+    url          TEXT,
+    image_url    TEXT,
+    collected_at TIMESTAMPTZ DEFAULT now()
 );
 
--- If the table already existed from an older migration, it may not have ean yet.
-ALTER TABLE staging_selver_products
-    ADD COLUMN IF NOT EXISTS ean TEXT;
-
-CREATE INDEX IF NOT EXISTS ix_selver_ean
-    ON staging_selver_products (ean);
-
-CREATE INDEX IF NOT EXISTS ix_selver_name_trgm
+CREATE INDEX IF NOT EXISTS ix_selver_products_name_trgm
     ON staging_selver_products
-    USING GIN (name gin_trgm_ops);
-
--- 4) Mapping from HTTP host → store_id
-CREATE TABLE IF NOT EXISTS store_host_map (
-    host     TEXT PRIMARY KEY,
-    store_id INT NOT NULL REFERENCES stores(id)
-);
+    USING gin (name gin_trgm_ops);
 
 COMMIT;
