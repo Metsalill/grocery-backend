@@ -50,6 +50,10 @@ CREATE TABLE IF NOT EXISTS staging_selver_products (
     raw         JSONB             -- full raw payload if we want it
 );
 
+-- If the table already existed from an older migration, it may not have ean yet.
+ALTER TABLE staging_selver_products
+    ADD COLUMN IF NOT EXISTS ean TEXT;
+
 CREATE INDEX IF NOT EXISTS ix_selver_ean
     ON staging_selver_products (ean);
 
