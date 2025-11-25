@@ -1,62 +1,82 @@
 -- 2025-08-22-selver-bootstrap.sql
--- Bootstrap for Selver integration: canonical EANs, Selver staging table, and one Selver online store
+-- Selver bootstrap: helper EAN table + Selver staging table + indexes.
+-- Designed to be idempotent so it can be re-run safely.
 
 BEGIN;
 
--- Extensions we rely on elsewhere
+-- 1) Ensure pg_trgm is available for trigram search on Selver product names
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
--- 1) Canonical EANs for your products (many barcodes can map to one product)
-CREATE TABLE IF NOT EXISTS public.product_eans (
-  product_id INT  NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
-  ean_raw    TEXT,
-  ean_norm   TEXT GENERATED ALWAYS AS (regexp_replace(coalesce(ean_raw,''), '\D', '', 'g')) STORED,
-  PRIMARY KEY (product_id, ean_norm)
+-- 2) Helper table for mapping canonical products <-> EAN
+CREATE TABLE IF NOT EXISTS product_eans (
+    product_id INT  NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    ean_raw    TEXT NOT NULL,
+    ean_norm   TEXT NOT NULL
 );
-CREATE UNIQUE INDEX IF NOT EXISTS uq_product_eans_norm ON public.product_eans(ean_norm);
 
--- Optional backfill: if your products table already has an EAN/Barcode column, copy it in once.
+-- Unique EAN (normalized) across the helper table
+CREATE UNIQUE INDEX IF NOT EXISTS uq_product_eans_norm
+    ON product_eans (ean_norm);
+
+-- Backfill product_eans from products.ean, but only if that column exists.
+-- Uses ON CONFLICT DO NOTHING so it is safe to run multiple times.
 DO $$
 BEGIN
-  IF EXISTS (SELECT 1 FROM information_schema.columns
-             WHERE table_schema='public' AND table_name='products' AND column_name='ean') THEN
-    INSERT INTO public.product_eans(product_id, ean_raw)
-    SELECT id, ean
-    FROM public.products
-    WHERE ean IS NOT NULL AND btrim(ean) <> ''
-    ON CONFLICT DO NOTHING;
-  ELSIF EXISTS (SELECT 1 FROM information_schema.columns
-                WHERE table_schema='public' AND table_name='products' AND column_name='barcode') THEN
-    INSERT INTO public.product_eans(product_id, ean_raw)
-    SELECT id, barcode
-    FROM public.products
-    WHERE barcode IS NOT NULL AND btrim(barcode) <> ''
-    ON CONFLICT DO NOTHING;
-  END IF;
-END$$;
+    -- If products.ean doesn’t exist yet, just skip the bootstrap.
+    PERFORM 1
+    FROM information_schema.columns
+    WHERE table_name = 'products' AND column_name = 'ean';
 
--- 2) Selver staging (what the importer writes to before matching)
-CREATE TABLE IF NOT EXISTS public.staging_selver_products (
-  ext_id       TEXT PRIMARY KEY,        -- Selver SKU/ID
-  name         TEXT NOT NULL,
-  ean_raw      TEXT,
-  ean_norm     TEXT GENERATED ALWAYS AS (regexp_replace(coalesce(ean_raw,''), '\D', '', 'g')) STORED,
-  size_text    TEXT,
-  price        NUMERIC(12,2) NOT NULL,
-  currency     TEXT DEFAULT 'EUR',
-  collected_at TIMESTAMPTZ DEFAULT now()
+    IF NOT FOUND THEN
+        RETURN;
+    END IF;
+
+    INSERT INTO product_eans (product_id, ean_raw, ean_norm)
+    SELECT
+        p.id,
+        p.ean,
+        regexp_replace(p.ean, '\D', '', 'g')  -- keep only digits
+    FROM products p
+    WHERE p.ean IS NOT NULL
+      AND p.ean <> ''
+    ON CONFLICT DO NOTHING;
+END
+$$;
+
+-- 3) Staging table for raw Selver crawl results
+CREATE TABLE IF NOT EXISTS staging_selver_products (
+    id           BIGSERIAL PRIMARY KEY,
+    ext_id       TEXT NOT NULL,               -- Selver external id / SKU
+    name         TEXT NOT NULL,               -- product name as shown on site
+    brand        TEXT,
+    size_text    TEXT,
+    ean          TEXT,
+    price        NUMERIC(10,2),
+    image_url    TEXT,
+    category_raw TEXT,                        -- raw category path / breadcrumb
+    payload      JSONB,                       -- full raw JSON from crawler
+    seen_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX IF NOT EXISTS ix_selver_ean       ON public.staging_selver_products(ean_norm);
-CREATE INDEX IF NOT EXISTS ix_selver_name_trgm ON public.staging_selver_products USING gin (name gin_trgm_ops);
 
--- 3) Exactly one ONLINE Selver per chain (partial unique index)
-CREATE UNIQUE INDEX IF NOT EXISTS uniq_chain_online
-  ON public.stores (lower(chain))
-  WHERE COALESCE(is_online,false) = TRUE;
+-- Helpful indexes for Selver staging lookups
+CREATE INDEX IF NOT EXISTS ix_selver_ean
+    ON staging_selver_products (ean);
 
--- Insert the canonical online Selver store iff none exists (conflict-safe)
-INSERT INTO public.stores (name, chain, is_online)
-VALUES ('Selver e-Selver', 'Selver', TRUE)
-ON CONFLICT DO NOTHING;
+CREATE INDEX IF NOT EXISTS ix_selver_name_trgm
+    ON staging_selver_products
+    USING GIN (name gin_trgm_ops);
+
+-- 4) Stores: drop any old unique index on online chains and replace
+--    it with a non-unique index so multiple online stores per chain
+--    (e.g. Coop eCoop, Wolt Coop, Bolt Coop) are allowed.
+
+-- Old version (problematic) was:
+--   CREATE UNIQUE INDEX uniq_chain_online ON stores (lower(chain)) WHERE is_online;
+-- which fails as soon as there are multiple is_online rows for the same chain.
+DROP INDEX IF EXISTS uniq_chain_online;
+
+CREATE INDEX IF NOT EXISTS idx_chain_online
+    ON stores (lower(chain))
+    WHERE is_online;
 
 COMMIT;
