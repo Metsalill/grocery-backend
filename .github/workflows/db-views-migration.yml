@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       file:
-        description: "Optional: run a single migration file (e.g., migrations/20250825_prices_schema_rev3.sql)"
+        description: "Optional: run a single migration file (e.g., migrations/2025-08-25-prices-schema-rev3.sql)"
         required: false
         default: ""
   push:
@@ -21,7 +21,10 @@ concurrency:
 jobs:
   migrate-views:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+
+    # ⬇ Increase job timeout (was 10)
+    timeout-minutes: 60
+
     env:
       DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}  # e.g. postgres://.../db?sslmode=require
 
@@ -40,6 +43,7 @@ jobs:
         run: |
           set -euo pipefail
           single="${{ github.event.inputs.file }}"
+
           if [[ -n "${single}" ]]; then
             if [[ ! -f "${single}" ]]; then
               echo "::error file=${single},line=1,col=1::Specified file not found"
