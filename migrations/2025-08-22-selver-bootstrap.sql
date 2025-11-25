@@ -1,40 +1,52 @@
--- 2025-08-22-selver-bootstrap.sql
--- Bootstrap tables for Selver scraping + shared EAN storage.
--- Pure DDL, idempotent, no data backfill.
+-- migrations/2025-08-22-selver-bootstrap.sql
+-- Selver bootstrap / helper tables
+-- Simplified to be FAST and idempotent for GitHub Actions:
+--   - Only creates tables / indexes if missing
+--   - Does NOT run any large backfill INSERT/UPDATE
 
-BEGIN;
-
--- Make sure trigram extension exists (for name search etc)
+-- 1) Ensure pg_trgm is available (used elsewhere too)
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
--- 1) Table for normalised EANs per canonical product
+-- 2) Helper table for EANs per canonical product
 CREATE TABLE IF NOT EXISTS product_eans (
-    product_id  INT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-    ean_raw     TEXT NOT NULL,
-    -- digits-only version, stored as generated column
-    ean_norm    TEXT GENERATED ALWAYS AS (regexp_replace(ean_raw, '\D', '', 'g')) STORED,
-    PRIMARY KEY (product_id, ean_norm)
+    product_id   INT PRIMARY KEY,
+    ean_raw      TEXT NOT NULL,
+    -- Normalised digits-only EAN, generated from ean_raw
+    ean_norm     TEXT GENERATED ALWAYS AS (
+        regexp_replace(ean_raw, '\D', '', 'g')
+    ) STORED
 );
 
+-- Unique index on the normalised EAN (safe no-op if already exists)
 CREATE UNIQUE INDEX IF NOT EXISTS uq_product_eans_norm
-    ON product_eans (ean_norm, product_id);
+    ON product_eans (ean_norm);
 
--- 2) Staging table for raw Selver products (scraper will insert here)
+-- 3) Staging table for Selver crawler.
+-- We only declare a minimal, backwards-compatible structure.
 CREATE TABLE IF NOT EXISTS staging_selver_products (
-    id           BIGSERIAL PRIMARY KEY,
-    ext_id       TEXT,
-    name         TEXT NOT NULL,
-    size_text    TEXT,
-    brand        TEXT,
-    ean_raw      TEXT,
-    price        NUMERIC(10, 2),
-    url          TEXT,
-    image_url    TEXT,
-    collected_at TIMESTAMPTZ DEFAULT now()
+    id          BIGSERIAL PRIMARY KEY,
+    ext_id      TEXT,
+    chain       TEXT,
+    name        TEXT,
+    brand       TEXT,
+    size_text   TEXT,
+    price       NUMERIC,
+    url         TEXT,
+    raw_json    JSONB,
+    created_at  TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS ix_selver_products_name_trgm
-    ON staging_selver_products
-    USING gin (name gin_trgm_ops);
-
-COMMIT;
+-- NOTE:
+-- Any heavy backfill of product_eans or staging_selver_products
+-- has been intentionally removed from this migration to keep CI
+-- under the 10 minute limit.
+--
+-- If you ever need to regenerate product_eans manually, you can run
+-- something like (outside of GitHub Actions):
+--
+--   INSERT INTO product_eans (product_id, ean_raw)
+--   SELECT id, ean
+--   FROM products
+--   WHERE ean IS NOT NULL AND ean <> ''
+--   ON CONFLICT (product_id) DO UPDATE
+--     SET ean_raw = EXCLUDED.ean_raw;
