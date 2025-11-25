@@ -1,0 +1,36 @@
+name: Seed product categories
+
+on:
+  workflow_dispatch:
+
+jobs:
+  seed-categories:
+    runs-on: ubuntu-latest
+
+    # Use your writable DB URL secret here
+    env:
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install psql client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Show psql version
+        run: psql --version
+
+      - name: Apply categories schema and seed data
+        run: |
+          set -euo pipefail
+
+          if [ -z "${DATABASE_URL:-}" ]; then
+            echo "DATABASE_URL is empty. Set secrets.RW_DATABASE_URL (or change env in the workflow)."
+            exit 1
+          fi
+
+          echo "Running migrations/2025-11-25_seed_categories.sql against DATABASE_URL"
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/2025-11-25_seed_categories.sql
