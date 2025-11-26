@@ -16,10 +16,24 @@ async def list_products(
     request: Request,
     q: Optional[str] = Query(
         "",
-        description="Search by product name (uses products + optional aliases); empty lists everything (paged).",
+        description=(
+            "Search by product name (uses products + optional aliases); "
+            "empty lists everything (paged)."
+        ),
     ),
     offset: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=200),
+    main: Optional[str] = Query(
+        None,
+        description="Main category code (categories_main.code / products.food_group).",
+    ),
+    sub: Optional[str] = Query(
+        None,
+        description=(
+            "Subcategory code (categories_sub.code). "
+            "Reserved for future – currently ignored."
+        ),
+    ),
 ):
     """
     Lightweight catalogue:
@@ -27,9 +41,13 @@ async def list_products(
       - NO min/max/store price aggregation.
       - Only include products that have at least one row in `prices`.
       - Hide garbage names that are only digits (e.g. '19765').
+      - Optional filter by main category (products.food_group).
 
     Returned fields: id, product, brand, size_text, image_url (null for now).
     """
+    # `sub` is currently unused (will be wired once product_categories is filled)
+    _ = sub  # quiet linters
+
     limit = min(int(limit), MAX_LIMIT)
     like = f"%{(q or '').strip()}%" if q is not None else "%"
 
@@ -46,6 +64,7 @@ async def list_products(
                 WHERE a.product_id = pr.id AND LOWER(a.alias) LIKE LOWER($1)
            )
         )
+        AND ($2::text IS NULL OR pr.food_group = $2)
     """
 
     SQL_PAGE_WITH_ALIASES = """
@@ -65,9 +84,10 @@ async def list_products(
                 WHERE a.product_id = pr.id AND LOWER(a.alias) LIKE LOWER($1)
            )
         )
+        AND ($2::text IS NULL OR pr.food_group = $2)
       ORDER BY lower(pr.name), lower(brand), lower(size_text)
-      OFFSET $2
-      LIMIT  $3
+      OFFSET $3
+      LIMIT  $4
     """
 
     # Fallback if product_aliases table is missing
@@ -77,6 +97,7 @@ async def list_products(
       WHERE pr.name !~ '^[0-9]+$'
         AND EXISTS (SELECT 1 FROM prices p WHERE p.product_id = pr.id)
         AND LOWER(pr.name) LIKE LOWER($1)
+        AND ($2::text IS NULL OR pr.food_group = $2)
     """
 
     SQL_PAGE_NO_ALIASES = """
@@ -90,19 +111,21 @@ async def list_products(
       WHERE pr.name !~ '^[0-9]+$'
         AND EXISTS (SELECT 1 FROM prices p WHERE p.product_id = pr.id)
         AND LOWER(pr.name) LIKE LOWER($1)
+        AND ($2::text IS NULL OR pr.food_group = $2)
       ORDER BY lower(pr.name), lower(brand), lower(size_text)
-      OFFSET $2
-      LIMIT  $3
+      OFFSET $3
+      LIMIT  $4
     """
 
     async with request.app.state.db.acquire() as conn:
         try:
-            total = await conn.fetchval(SQL_COUNT_WITH_ALIASES, like) or 0
-            rows = await conn.fetch(SQL_PAGE_WITH_ALIASES, like, offset, limit)
+            # With product_aliases table
+            total = await conn.fetchval(SQL_COUNT_WITH_ALIASES, like, main) or 0
+            rows = await conn.fetch(SQL_PAGE_WITH_ALIASES, like, main, offset, limit)
         except pgerr.UndefinedTableError:
             # product_aliases doesn’t exist – proceed without it
-            total = await conn.fetchval(SQL_COUNT_NO_ALIASES, like) or 0
-            rows = await conn.fetch(SQL_PAGE_NO_ALIASES, like, offset, limit)
+            total = await conn.fetchval(SQL_COUNT_NO_ALIASES, like, main) or 0
+            rows = await conn.fetch(SQL_PAGE_NO_ALIASES, like, main, offset, limit)
 
     items = [
         {
