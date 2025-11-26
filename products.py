@@ -51,8 +51,8 @@ async def list_products(
     limit = min(int(limit), MAX_LIMIT)
     like = f"%{(q or '').strip()}%" if q is not None else "%"
 
-    # Normalise category code (lowercase, empty → None)
-    main_code = (main or "").strip().lower() or None
+    # Normalise category code (always text; empty string = "no filter")
+    main_code = (main or "").strip().lower()
 
     # With product_aliases (preferred)
     SQL_COUNT_WITH_ALIASES = """
@@ -60,7 +60,7 @@ async def list_products(
       FROM products pr
       WHERE pr.name !~ '^[0-9]+$'                    -- hide purely numeric "names"
         AND EXISTS (SELECT 1 FROM prices p WHERE p.product_id = pr.id)
-        AND ($2 IS NULL OR LOWER(pr.food_group) = LOWER($2))
+        AND ($2 = '' OR LOWER(pr.food_group) = LOWER($2))
         AND (
               LOWER(pr.name) LIKE LOWER($1)
            OR EXISTS (
@@ -80,7 +80,7 @@ async def list_products(
       FROM products pr
       WHERE pr.name !~ '^[0-9]+$'
         AND EXISTS (SELECT 1 FROM prices p WHERE p.product_id = pr.id)
-        AND ($2 IS NULL OR LOWER(pr.food_group) = LOWER($2))
+        AND ($2 = '' OR LOWER(pr.food_group) = LOWER($2))
         AND (
               LOWER(pr.name) LIKE LOWER($1)
            OR EXISTS (
@@ -99,7 +99,7 @@ async def list_products(
       FROM products pr
       WHERE pr.name !~ '^[0-9]+$'
         AND EXISTS (SELECT 1 FROM prices p WHERE p.product_id = pr.id)
-        AND ($2 IS NULL OR LOWER(pr.food_group) = LOWER($2))
+        AND ($2 = '' OR LOWER(pr.food_group) = LOWER($2))
         AND LOWER(pr.name) LIKE LOWER($1)
     """
 
@@ -113,7 +113,7 @@ async def list_products(
       FROM products pr
       WHERE pr.name !~ '^[0-9]+$'
         AND EXISTS (SELECT 1 FROM prices p WHERE p.product_id = pr.id)
-        AND ($2 IS NULL OR LOWER(pr.food_group) = LOWER($2))
+        AND ($2 = '' OR LOWER(pr.food_group) = LOWER($2))
         AND LOWER(pr.name) LIKE LOWER($1)
       ORDER BY lower(pr.name), lower(brand), lower(size_text)
       OFFSET $3
@@ -242,23 +242,23 @@ async def products_search(
     """
 
     async with request.app.state.db.acquire() as conn:
-        try:
-            rows = await conn.fetch(SQL_TRGM_WITH_ALIASES, term, limit)
-        except (pgerr.UndefinedTableError, pgerr.UndefinedFunctionError):
-            try:
-                rows = await conn.fetch(SQL_TRGM_NO_ALIASES, term, limit)
-            except pgerr.UndefinedFunctionError:
-                rows = await conn.fetch(
-                    """
-                    SELECT id, name
-                    FROM products
-                    WHERE name !~ '^[0-9]+$'
-                      AND LOWER(name) LIKE LOWER($1)
-                    ORDER BY name
-                    LIMIT $2
-                    """,
-                    f"%{term}%",
-                    limit,
-                )
+      try:
+          rows = await conn.fetch(SQL_TRGM_WITH_ALIASES, term, limit)
+      except (pgerr.UndefinedTableError, pgerr.UndefinedFunctionError):
+          try:
+              rows = await conn.fetch(SQL_TRGM_NO_ALIASES, term, limit)
+          except pgerr.UndefinedFunctionError:
+              rows = await conn.fetch(
+                  """
+                  SELECT id, name
+                  FROM products
+                  WHERE name !~ '^[0-9]+$'
+                    AND LOWER(name) LIKE LOWER($1)
+                  ORDER BY name
+                  LIMIT $2
+                  """,
+                  f"%{term}%",
+                  limit,
+              )
 
     return [{"id": r["id"], "name": r["name"]} for r in rows]
