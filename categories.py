@@ -1,99 +1,109 @@
 # categories.py
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
-from typing import List
-import asyncpg
-
-from settings import get_db_pool
+from fastapi import APIRouter, Request, Depends, HTTPException
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 router = APIRouter(prefix="/categories", tags=["categories"])
+bearer_scheme = HTTPBearer(auto_error=False)
 
 
-class CategoryOut(BaseModel):
-    code: str
-    label: str
-    product_count: int
+async def get_db(request: Request):
+    conn = getattr(request.app.state, "db", None)
+    if conn is None:
+        raise HTTPException(status_code=500, detail="DB pool not available")
+    return conn
 
 
-class SubcategoryOut(BaseModel):
-    code: str
-    label: str
-    product_count: int
-
-
-@router.get("/main", response_model=List[CategoryOut])
+# ─────────────────────────────────────────────────────────
+# 1) Main categories
+# ─────────────────────────────────────────────────────────
+@router.get("/main")
 async def list_main_categories(
-    pool: asyncpg.pool.Pool = Depends(get_db_pool),
+    request: Request,
+    db=Depends(get_db),
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
 ):
     """
-    Main categories from products.food_group.
-    Replace `food_group` with your actual column name if different.
+    Return all main categories with an approximate product_count.
+
+    product_count is currently based on products.food_group so that
+    you see real numbers even before product_categories is filled.
     """
     sql = """
         SELECT
-            food_group AS label,
-            lower(regexp_replace(food_group, '\W+', '_', 'g')) AS code,
-            COUNT(*)::int AS product_count
-        FROM products
-        WHERE food_group IS NOT NULL
-          AND food_group <> ''
-        GROUP BY food_group
-        ORDER BY food_group;
+            m.code,
+            m.label_et,
+            COALESCE(m.label_en, m.label_et) AS label_en,
+            COUNT(DISTINCT p.id) AS product_count
+        FROM categories_main AS m
+        LEFT JOIN products AS p
+          ON p.food_group = m.code
+        GROUP BY
+            m.id, m.code, m.label_et, m.label_en, m.sort_order
+        ORDER BY m.sort_order, m.id;
     """
-    async with pool.acquire() as conn:
-        rows = await conn.fetch(sql)
 
+    rows = await db.fetch(sql)
     return [
-        CategoryOut(
-            code=row["code"],
-            label=row["label"],
-            product_count=row["product_count"],
-        )
-        for row in rows
+        {
+            "code": r["code"],
+            "label": r["label_et"],
+            "label_en": r["label_en"],
+            "product_count": r["product_count"],
+        }
+        for r in rows
     ]
 
 
-@router.get("/{main_code}/sub", response_model=List[SubcategoryOut])
+# ─────────────────────────────────────────────────────────
+# 2) Subcategories under a main category
+# ─────────────────────────────────────────────────────────
+@router.get("/{main_code}/sub")
 async def list_subcategories(
     main_code: str,
-    pool: asyncpg.pool.Pool = Depends(get_db_pool),
+    request: Request,
+    db=Depends(get_db),
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
 ):
     """
-    Sub-categories from products.food_subgroup under a given food_group.
+    Return subcategories for a given main category.
 
-    ⚠️ If your schema uses another column name for the sub-level
-       (e.g. category_l2), replace `food_subgroup` accordingly.
+    Uses categories_sub + product_categories mapping.
+    No more reference to products.food_subgroup.
     """
+    # Make sure main category exists
+    main_row = await db.fetchrow(
+        "SELECT id, code, label_et FROM categories_main WHERE code = $1",
+        main_code,
+    )
+    if not main_row:
+        raise HTTPException(status_code=404, detail="Main category not found")
+
     sql = """
-        WITH main_groups AS (
-            SELECT
-                food_group,
-                lower(regexp_replace(food_group, '\W+', '_', 'g')) AS main_code
-            FROM products
-            WHERE food_group IS NOT NULL
-              AND food_group <> ''
-            GROUP BY food_group
-        )
         SELECT
-            food_subgroup AS label,
-            lower(regexp_replace(food_subgroup, '\W+', '_', 'g')) AS code,
-            COUNT(*)::int AS product_count
-        FROM products p
-        JOIN main_groups g ON p.food_group = g.food_group
-        WHERE g.main_code = $1
-          AND food_subgroup IS NOT NULL
-          AND food_subgroup <> ''
-        GROUP BY food_subgroup
-        ORDER BY food_subgroup;
+            s.code,
+            s.label_et,
+            COALESCE(s.label_en, s.label_et) AS label_en,
+            COUNT(DISTINCT pc.product_id) AS product_count
+        FROM categories_sub AS s
+        JOIN categories_main AS m
+          ON s.main_id = m.id
+        LEFT JOIN product_categories AS pc
+          ON pc.main_id = m.id
+         AND pc.sub_id  = s.id
+        WHERE m.code = $1
+        GROUP BY
+            s.id, s.code, s.label_et, s.label_en, s.sort_order
+        ORDER BY s.sort_order, s.id;
     """
-    async with pool.acquire() as conn:
-        rows = await conn.fetch(sql, main_code)
+
+    rows = await db.fetch(sql, main_code)
 
     return [
-        SubcategoryOut(
-            code=row["code"],
-            label=row["label"],
-            product_count=row["product_count"],
-        )
-        for row in rows
+        {
+            "code": r["code"],
+            "label": r["label_et"],
+            "label_en": r["label_en"],
+            "product_count": r["product_count"],
+        }
+        for r in rows
     ]
