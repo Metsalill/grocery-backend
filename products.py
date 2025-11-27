@@ -23,16 +23,16 @@ async def list_products(
     ),
     offset: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=200),
-    main: Optional[str] = Query(
+    # New: optional category filters
+    main_code: Optional[str] = Query(
         None,
-        description=(
-            "Optional high-level category code; "
-            "maps to products.food_group (e.g. 'produce', 'meat_fish')."
-        ),
+        alias="main_code",
+        description="Main category code (maps to products.food_group).",
     ),
-    sub: Optional[str] = Query(
+    sub_code: Optional[str] = Query(
         None,
-        description="Reserved for future subcategory filtering (not used yet).",
+        alias="sub_code",
+        description="Subcategory code (reserved for future; currently ignored).",
     ),
 ):
     """
@@ -42,17 +42,17 @@ async def list_products(
       - Only include products that have at least one row in `prices`.
       - Hide garbage names that are only digits (e.g. '19765').
 
-    Filters (current implementation):
-      - `q`   → name / aliases LIKE
-      - `main`→ products.food_group = :main  (case-insensitive)
+    Optional filtering:
+      - If `main_code` is provided, restrict to products where
+        products.food_group = main_code.
 
     Returned fields: id, product, brand, size_text, image_url (null for now).
     """
     limit = min(int(limit), MAX_LIMIT)
     like = f"%{(q or '').strip()}%" if q is not None else "%"
 
-    # Normalise category code (always text; empty string = "no filter")
-    main_code = (main or "").strip().lower()
+    # Normalize main_code → strip/empty → None
+    main_code = (main_code or "").strip() or None
 
     # With product_aliases (preferred)
     SQL_COUNT_WITH_ALIASES = """
@@ -60,7 +60,10 @@ async def list_products(
       FROM products pr
       WHERE pr.name !~ '^[0-9]+$'                    -- hide purely numeric "names"
         AND EXISTS (SELECT 1 FROM prices p WHERE p.product_id = pr.id)
-        AND ($2 = '' OR LOWER(pr.food_group) = LOWER($2))
+        AND (
+              $2::text IS NULL
+              OR pr.food_group = $2::text
+        )
         AND (
               LOWER(pr.name) LIKE LOWER($1)
            OR EXISTS (
@@ -80,7 +83,10 @@ async def list_products(
       FROM products pr
       WHERE pr.name !~ '^[0-9]+$'
         AND EXISTS (SELECT 1 FROM prices p WHERE p.product_id = pr.id)
-        AND ($2 = '' OR LOWER(pr.food_group) = LOWER($2))
+        AND (
+              $2::text IS NULL
+              OR pr.food_group = $2::text
+        )
         AND (
               LOWER(pr.name) LIKE LOWER($1)
            OR EXISTS (
@@ -93,13 +99,16 @@ async def list_products(
       LIMIT  $4
     """
 
-    # Fallback if product_aliases table OR food_group column is missing
+    # Fallback if product_aliases table is missing
     SQL_COUNT_NO_ALIASES = """
       SELECT COUNT(*)
       FROM products pr
       WHERE pr.name !~ '^[0-9]+$'
         AND EXISTS (SELECT 1 FROM prices p WHERE p.product_id = pr.id)
-        AND ($2 = '' OR LOWER(pr.food_group) = LOWER($2))
+        AND (
+              $2::text IS NULL
+              OR pr.food_group = $2::text
+        )
         AND LOWER(pr.name) LIKE LOWER($1)
     """
 
@@ -113,7 +122,10 @@ async def list_products(
       FROM products pr
       WHERE pr.name !~ '^[0-9]+$'
         AND EXISTS (SELECT 1 FROM prices p WHERE p.product_id = pr.id)
-        AND ($2 = '' OR LOWER(pr.food_group) = LOWER($2))
+        AND (
+              $2::text IS NULL
+              OR pr.food_group = $2::text
+        )
         AND LOWER(pr.name) LIKE LOWER($1)
       ORDER BY lower(pr.name), lower(brand), lower(size_text)
       OFFSET $3
@@ -122,20 +134,33 @@ async def list_products(
 
     async with request.app.state.db.acquire() as conn:
         try:
-            # Preferred path: product_aliases + food_group column present
             total = await conn.fetchval(
-                SQL_COUNT_WITH_ALIASES, like, main_code
+                SQL_COUNT_WITH_ALIASES,
+                like,
+                main_code,
             ) or 0
+
             rows = await conn.fetch(
-                SQL_PAGE_WITH_ALIASES, like, main_code, offset, limit
+                SQL_PAGE_WITH_ALIASES,
+                like,
+                main_code,
+                offset,
+                limit,
             )
-        except (pgerr.UndefinedTableError, pgerr.UndefinedColumnError):
-            # Either product_aliases or food_group missing – fall back to simpler query.
+        except pgerr.UndefinedTableError:
+            # product_aliases doesn’t exist – proceed without it
             total = await conn.fetchval(
-                SQL_COUNT_NO_ALIASES, like, main_code
+                SQL_COUNT_NO_ALIASES,
+                like,
+                main_code,
             ) or 0
+
             rows = await conn.fetch(
-                SQL_PAGE_NO_ALIASES, like, main_code, offset, limit
+                SQL_PAGE_NO_ALIASES,
+                like,
+                main_code,
+                offset,
+                limit,
             )
 
     items = [
@@ -242,23 +267,23 @@ async def products_search(
     """
 
     async with request.app.state.db.acquire() as conn:
-      try:
-          rows = await conn.fetch(SQL_TRGM_WITH_ALIASES, term, limit)
-      except (pgerr.UndefinedTableError, pgerr.UndefinedFunctionError):
-          try:
-              rows = await conn.fetch(SQL_TRGM_NO_ALIASES, term, limit)
-          except pgerr.UndefinedFunctionError:
-              rows = await conn.fetch(
-                  """
-                  SELECT id, name
-                  FROM products
-                  WHERE name !~ '^[0-9]+$'
-                    AND LOWER(name) LIKE LOWER($1)
-                  ORDER BY name
-                  LIMIT $2
-                  """,
-                  f"%{term}%",
-                  limit,
-              )
+        try:
+            rows = await conn.fetch(SQL_TRGM_WITH_ALIASES, term, limit)
+        except (pgerr.UndefinedTableError, pgerr.UndefinedFunctionError):
+            try:
+                rows = await conn.fetch(SQL_TRGM_NO_ALIASES, term, limit)
+            except pgerr.UndefinedFunctionError:
+                rows = await conn.fetch(
+                    """
+                    SELECT id, name
+                    FROM products
+                    WHERE name !~ '^[0-9]+$'
+                      AND LOWER(name) LIKE LOWER($1)
+                    ORDER BY name
+                    LIMIT $2
+                    """,
+                    f"%{term}%",
+                    limit,
+                )
 
     return [{"id": r["id"], "name": r["name"]} for r in rows]
