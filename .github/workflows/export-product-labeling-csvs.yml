@@ -1,0 +1,59 @@
+name: Export product labeling CSVs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    env:
+      # Use your existing Railway DB secret – adjust the name if needed.
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Export CSVs for manual category labeling
+        run: |
+          set -euo pipefail
+          mkdir -p exports
+
+          # We'll start with the non-"other" food_groups.
+          MAIN_GROUPS="produce meat_fish dairy_eggs_fats dry_preserves bakery drinks frozen_food"
+
+          for FG in $MAIN_GROUPS; do
+            echo "Exporting $FG ..."
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<EOF
+\COPY (
+  SELECT
+    p.id                               AS product_id,
+    p.name                             AS name,
+    COALESCE(p.brand, '')             AS brand,
+    COALESCE(p.size_text, '')         AS size_text,
+    p.food_group,
+    STRING_AGG(DISTINCT s.chain, ', ') AS stores_sample,
+    cs.code                            AS current_sub_code,
+    ''::text                           AS new_sub_code
+  FROM products p
+  JOIN prices pr       ON pr.product_id = p.id
+  JOIN stores s        ON s.id = pr.store_id
+  LEFT JOIN product_categories pc ON pc.product_id = p.id
+  LEFT JOIN categories_sub cs     ON cs.id = pc.sub_id
+  WHERE p.food_group = '$FG'
+  GROUP BY p.id, p.name, p.brand, p.size_text, p.food_group, cs.code
+  ORDER BY lower(p.name)
+) TO 'exports/products_${FG}_for_labeling.csv' CSV HEADER;
+EOF
+          done
+
+      - name: Upload CSVs as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: product-labeling-csvs
+          path: exports/*.csv
