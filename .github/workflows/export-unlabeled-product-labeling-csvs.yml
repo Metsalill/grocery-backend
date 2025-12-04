@@ -1,29 +1,68 @@
-name: Apply Excel product categories
+name: Export unlabeled product labeling CSVs
 
 on:
   workflow_dispatch:
 
 jobs:
-  apply-excel-categories:
+  export-unlabeled:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
+      MAX_PER_FILE: 900
+
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
-      - name: Install deps
-        run: pip install psycopg2-binary pandas
+      - name: Export products with missing food_group
+        run: |
+          mkdir -p exports/unlabeled
+          MAX_PER_FILE=${MAX_PER_FILE}
 
-      - name: Apply Excel categories
-        env:
-          DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
-        run: python scripts/apply_excel_categories.py
+          # 1) How many rows need a main food_group?
+          TOTAL=$(psql "$DATABASE_URL" -t -A -c \
+            "SELECT COUNT(*) FROM products WHERE food_group IS NULL OR food_group = ''")
+          echo "Total rows with missing food_group: $TOTAL"
 
-      - name: Upload uncertain products CSV
-        uses: actions/upload-artifact@v4
-        with:
-          name: products-uncertain-after-apply
-          path: data/product_labels/products_uncertain_after_apply.csv
-          if-no-files-found: ignore
+          if [ "$TOTAL" -eq 0 ]; then
+            echo "Nothing to export"; exit 0; fi
+
+          # 2) How many CSV parts of <= MAX_PER_FILE rows?
+          MAX_BATCH=$(( (TOTAL + MAX_PER_FILE - 1) / MAX_PER_FILE ))
+          echo "Will create $MAX_BATCH CSV parts"
+
+          for B in $(seq 1 "$MAX_BATCH"); do
+            OUTFILE="exports/unlabeled/products_missing_foodgroup_unlabeled_part$((B-1)).csv"
+            echo "Writing $OUTFILE"
+
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<EOF
+\COPY (
+  WITH numbered AS (
+      SELECT
+          p.id AS product_id,
+          p.name,
+          p.brand,
+          p.size_text,
+          COALESCE(p.food_group, '') AS current_food_group,
+          p.sub_code AS current_sub_code,
+          (
+            SELECT string_agg(DISTINCT s.chain, ', ' ORDER BY s.chain)
+            FROM prices pr
+            JOIN stores s ON s.id = pr.store_id
+            WHERE pr.product_id = p.id
+          ) AS stores_sample,
+          row_number() OVER (ORDER BY p.id) AS rn
+      FROM products p
+      WHERE p.food_group IS NULL OR p.food_group = ''
+  )
+  SELECT
+      product_id,
+      name,
+      brand,
+      size_text,
+      stores_sample,
+      current_food_group,
+      current_sub_code,
+      ''::text AS food_group
