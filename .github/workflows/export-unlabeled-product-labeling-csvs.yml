@@ -1,118 +1,29 @@
-name: Export unlabeled product labeling CSVs
+name: Apply Excel product categories
 
 on:
   workflow_dispatch:
 
 jobs:
-  export-unlabeled:
+  apply-excel-categories:
     runs-on: ubuntu-latest
-    env:
-      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Export unlabeled products into CSV chunks (<=900 rows each)
-        run: |
-          set -euo pipefail
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-          mkdir -p exports
+      - name: Install deps
+        run: pip install psycopg2-binary pandas
 
-          # All main food groups (matches categories_main.code)
-          MAIN_GROUPS="produce meat_fish dairy_eggs_fats cheese bakery ready_meals dry_preserves world_spices sauces_oils sweets_snacks frozen_food drinks baby pet personal_care household other"
+      - name: Apply Excel categories
+        env:
+          DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
+        run: python scripts/apply_excel_categories.py
 
-          for FG in $MAIN_GROUPS; do
-            echo "=== Food group: $FG ==="
-
-            # Figure out how many 900-row batches we need for this group
-            MAX_BATCH=$(psql "$DATABASE_URL" -Atqc "
-              WITH base AS (
-                SELECT p.id
-                FROM products p
-                WHERE p.sub_code IS NULL
-                  AND p.food_group = '${FG}'
-                  AND EXISTS (
-                    SELECT 1 FROM prices pr
-                    WHERE pr.product_id = p.id
-                  )
-              ),
-              numbered AS (
-                SELECT (row_number() OVER (ORDER BY id) - 1) / 900 AS batch
-                FROM base
-              )
-              SELECT COALESCE(MAX(batch), -1) FROM numbered;
-            ")
-
-            if [ \"$MAX_BATCH\" -lt 0 ]; then
-              echo \"  -> No unlabeled products with prices for $FG\"
-              continue
-            fi
-
-            echo \"  -> Max batch index for $FG: $MAX_BATCH\"
-
-            for B in $(seq 0 "$MAX_BATCH"); do
-              OUTFILE="exports/products_${FG}_unlabeled_part${B}.csv"
-              echo "  -> Writing $OUTFILE"
-
-              psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\COPY (
-                WITH store_sample AS (
-                  SELECT
-                    pr.product_id,
-                    string_agg(DISTINCT s.chain, ', ' ORDER BY s.chain) AS stores_sample
-                  FROM prices pr
-                  JOIN stores s ON s.id = pr.store_id
-                  GROUP BY pr.product_id
-                ),
-                base AS (
-                  SELECT
-                    p.id AS product_id,
-                    p.name,
-                    p.brand,
-                    p.size_text,
-                    p.food_group,
-                    COALESCE(ss.stores_sample, '') AS stores_sample,
-                    p.sub_code AS current_sub_code,
-                    ''::text   AS new_sub_code,
-                    p.food_group AS food_group_corrected
-                  FROM products p
-                  LEFT JOIN store_sample ss ON ss.product_id = p.id
-                  WHERE p.sub_code IS NULL
-                    AND p.food_group = '${FG}'
-                    AND EXISTS (
-                      SELECT 1 FROM prices pr
-                      WHERE pr.product_id = p.id
-                    )
-                ),
-                numbered AS (
-                  SELECT *,
-                         (row_number() OVER (ORDER BY product_id) - 1) / 900 AS batch
-                  FROM base
-                )
-                SELECT
-                  product_id,
-                  name,
-                  brand,
-                  size_text,
-                  food_group,
-                  stores_sample,
-                  current_sub_code,
-                  new_sub_code,
-                  food_group_corrected
-                FROM numbered
-                WHERE batch = ${B}
-                ORDER BY product_id
-              ) TO STDOUT WITH CSV HEADER" > "$OUTFILE"
-
-              # Remove empty file if this batch had 0 rows
-              if [ ! -s "$OUTFILE" ]; then
-                rm "$OUTFILE"
-              fi
-            done
-          done
-
-      - name: Upload unlabeled CSVs as artifact
+      - name: Upload uncertain products CSV
         uses: actions/upload-artifact@v4
         with:
-          name: unlabeled-product-labeling-csvs
-          path: exports/*.csv
+          name: products-uncertain-after-apply
+          path: data/product_labels/products_uncertain_after_apply.csv
+          if-no-files-found: ignore
