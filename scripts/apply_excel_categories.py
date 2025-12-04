@@ -1,164 +1,153 @@
-# scripts/apply_excel_categories.py
-
-import csv
+#!/usr/bin/env python
 import os
+import sys
 from pathlib import Path
 
+import pandas as pd
 import psycopg2
 import psycopg2.extras
 
-
-# Directory where the 6 CSVs live.
-# Can be overridden by env LABELS_DIR if you want.
-LABELS_DIR = Path(os.getenv("LABELS_DIR", "data/product_labels"))
-
-CSV_FILENAMES = [
-    "products_dairy_eggs_fats_with_corrected_groups_and_subcodes.csv",
-    "products_drinks_with_corrected_groups_and_subcodes.csv",
-    "products_dry_preserves_with_corrected_groups_and_subcodes.csv",
-    "products_frozen_food_with_corrected_groups_and_subcodes.csv",
-    "products_meat_fish_with_corrected_groups_and_subcodes.csv",
-    "products_bakery_with_corrected_groups_and_subcodes.csv",
-]
-
-# Set to True for a dry-run that only prints a sample of mappings
-DRY_RUN = False
+# <-- THIS is your existing folder with the Excel-edited files
+LABEL_DIR = Path("data/product_labels")
+PATTERN = "products_*_with_corrected_groups_and_subcodes*.csv"
 
 
-def load_labels() -> dict[int, tuple[str, str]]:
-    """
-    Read all CSV files and build a mapping:
-        product_id -> (food_group_corrected, new_sub_code)
+def load_updates_from_file(path: Path):
+    print(f"Reading {path} ...")
+    df = pd.read_csv(path)
 
-    - Skips rows without product_id, food_group_corrected or new_sub_code.
-    - If the same product_id appears multiple times with different labels,
-      the last one wins (and a warning is printed).
-    """
-    mapping: dict[int, tuple[str, str]] = {}
-    total_rows = 0
-    missing_fg_or_sub = 0
+    if "product_id" not in df.columns:
+        raise RuntimeError(f"{path} is missing 'product_id' column")
 
-    for fname in CSV_FILENAMES:
-        path = LABELS_DIR / fname
-        if not path.exists():
-            raise FileNotFoundError(f"CSV file not found: {path}")
+    # food_group_corrected: what we want to write to products.food_group
+    if "food_group_corrected" not in df.columns:
+        if "food_group" in df.columns:
+            df["food_group_corrected"] = df["food_group"]
+        else:
+            raise RuntimeError(
+                f"{path} is missing 'food_group_corrected' (or 'food_group') column"
+            )
 
-        print(f"Reading {path} ...")
-        with path.open(newline="", encoding="utf-8") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                total_rows += 1
-                raw_id = (row.get("product_id") or "").strip()
-                if not raw_id:
-                    continue
+    # new_sub_code: what we want to write to products.sub_code
+    if "new_sub_code" not in df.columns:
+        if "sub_code" in df.columns:
+            df["new_sub_code"] = df["sub_code"]
+        else:
+            df["new_sub_code"] = ""
 
-                try:
-                    product_id = int(raw_id)
-                except ValueError:
-                    print(f"  ! Skipping row with non-integer product_id: {raw_id}")
-                    continue
+    df["food_group_corrected"] = (
+        df["food_group_corrected"].fillna("").astype(str).str.strip()
+    )
+    df["new_sub_code"] = df["new_sub_code"].fillna("").astype(str).str.strip()
 
-                fg = (row.get("food_group_corrected") or "").strip()
-                if not fg:
-                    # fallback to existing food_group column if corrected missing
-                    fg = (row.get("food_group") or "").strip()
+    updates = []
+    for _, r in df.iterrows():
+        pid = int(r["product_id"])
+        fg = r["food_group_corrected"] or None
+        sub = r["new_sub_code"] or None
+        updates.append((pid, fg, sub))
 
-                sub = (row.get("new_sub_code") or "").strip()
+    # "Not certain" = still 'other' OR sub_code empty
+    uncertain_mask = (df["food_group_corrected"].eq("other")) | (
+        df["new_sub_code"].eq("")
+    )
+    uncertain = df.loc[uncertain_mask].copy()
+    uncertain["source_file"] = path.name
 
-                if not fg or not sub:
-                    missing_fg_or_sub += 1
-                    continue
+    print(
+        f"  -> {len(df)} rows, {len(updates)} updates, "
+        f"{len(uncertain)} marked as uncertain"
+    )
 
-                new_value = (fg, sub)
-                old_value = mapping.get(product_id)
-                if old_value and old_value != new_value:
-                    print(
-                        f"  ! WARNING: product_id {product_id} has conflicting labels "
-                        f"{old_value} vs {new_value}. Using {new_value}."
-                    )
-
-                mapping[product_id] = new_value
-
-    print(f"\nTotal CSV rows read: {total_rows}")
-    print(f"Rows skipped due to missing food_group/sub_code: {missing_fg_or_sub}")
-    print(f"Unique product_ids with labels: {len(mapping)}")
-    return mapping
+    return updates, uncertain
 
 
-def main() -> None:
-    database_url = os.getenv("DATABASE_URL")
-    if not database_url:
-        raise RuntimeError("DATABASE_URL environment variable is not set")
+def main():
+    db_url = os.environ.get("DATABASE_URL")
+    if not db_url:
+        print("ERROR: DATABASE_URL env var is not set", file=sys.stderr)
+        sys.exit(1)
 
-    print(f"Using LABELS_DIR = {LABELS_DIR.resolve()}")
-    mapping = load_labels()
-    if not mapping:
-        print("No mappings loaded from CSVs, exiting.")
+    LABEL_DIR.mkdir(exist_ok=True)
+
+    files = sorted(LABEL_DIR.glob(PATTERN))
+    if not files:
+        print(f"No files matching {LABEL_DIR}/{PATTERN}, nothing to do.")
         return
 
-    if DRY_RUN:
-        print("\nDRY RUN: showing first 15 mappings:")
-        for i, (pid, (fg, sub)) in enumerate(mapping.items()):
-            print(f"  id={pid} -> food_group={fg}, sub_code={sub}")
-            if i >= 14:
-                break
-        print("No database changes made (DRY_RUN=True).")
-        return
+    all_updates = []
+    uncertain_chunks = []
 
-    conn = psycopg2.connect(database_url)
+    for path in files:
+        updates, uncertain = load_updates_from_file(path)
+        all_updates.extend(updates)
+        if not uncertain.empty:
+            uncertain_chunks.append(uncertain)
+
+    print(f"\nTotal prepared updates: {len(all_updates)} from {len(files)} files\n")
+
+    # --- apply updates to products ---
+    conn = psycopg2.connect(db_url)
     conn.autocommit = False
-    cur = conn.cursor()
+    try:
+        with conn.cursor() as cur:
+            template = "(%s::integer, %s::text, %s::text)"
+            psycopg2.extras.execute_values(
+                cur,
+                """
+                UPDATE products AS p
+                SET food_group = v.food_group,
+                    sub_code   = v.sub_code
+                FROM (VALUES %s) AS v(product_id, food_group, sub_code)
+                WHERE p.id = v.product_id;
+                """,
+                all_updates,
+                template=template,
+            )
+        conn.commit()
+        print("✅ DB update committed.")
+    except Exception as e:
+        conn.rollback()
+        print(f"❌ ERROR, rolled back: {e}", file=sys.stderr)
+        raise
+    finally:
+        conn.close()
 
-    # Make sure sub_code column exists (safe, idempotent)
-    print("\nEnsuring products.sub_code column exists ...")
-    cur.execute(
-        """
-        ALTER TABLE products
-        ADD COLUMN IF NOT EXISTS sub_code text;
-        """
-    )
-    conn.commit()
+    # --- post-update stats ---
+    conn = psycopg2.connect(db_url)
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT COUNT(*) FROM products;")
+            total = cur.fetchone()[0]
 
-    # Check how many of the product_ids actually exist in products
-    id_list = list(mapping.keys())
-    print(f"\nChecking how many of these IDs exist in products ({len(id_list)} total) ...")
-    cur.execute("SELECT COUNT(*) FROM products WHERE id = ANY(%s);", (id_list,))
-    (existing_count,) = cur.fetchone()
-    missing_count = len(id_list) - existing_count
-    print(f"Canonical products found: {existing_count}")
-    print(f"product_ids from CSV missing in products: {missing_count}")
+            cur.execute(
+                """
+                SELECT COUNT(*) FROM products
+                WHERE food_group IS NULL OR food_group = '' OR food_group = 'other';
+                """
+            )
+            without_fg = cur.fetchone()[0]
 
-    # Prepare batched UPDATE
-    update_sql = """
-        UPDATE products
-        SET food_group = %s,
-            sub_code   = %s
-        WHERE id = %s;
-    """
-    params = [(fg, sub, pid) for pid, (fg, sub) in mapping.items()]
+            cur.execute(
+                "SELECT COUNT(*) FROM products WHERE sub_code IS NULL;"
+            )
+            without_sub = cur.fetchone()[0]
 
-    print("\nUpdating products table ...")
-    psycopg2.extras.execute_batch(cur, update_sql, params, page_size=1000)
-    conn.commit()
+        print("\n-- Post-update stats --")
+        print(f"total_products             = {total}")
+        print(f"without_food_group/other   = {without_fg}")
+        print(f"without_sub_code           = {without_sub}")
+    finally:
+        conn.close()
 
-    # Post-update sanity check: how many of these ids now have sub_code set?
-    cur.execute(
-        """
-        SELECT COUNT(*)
-        FROM products
-        WHERE id = ANY(%s)
-          AND sub_code IS NOT NULL;
-        """,
-        (id_list,),
-    )
-    (updated_with_subcode,) = cur.fetchone()
-
-    cur.close()
-    conn.close()
-
-    print("\nDone.")
-    print(f"Intended updates (unique product_ids in CSV): {len(mapping)}")
-    print(f"Rows that now have sub_code among those IDs: {updated_with_subcode}")
+    # --- write “not certain” file ---
+    if uncertain_chunks:
+        uncertain_df = pd.concat(uncertain_chunks, ignore_index=True)
+        out_path = LABEL_DIR / "products_uncertain_after_apply.csv"
+        uncertain_df.to_csv(out_path, index=False)
+        print(f"\n📄 Wrote {len(uncertain_df)} uncertain rows to {out_path}")
+    else:
+        print("\nNo uncertain rows collected.")
 
 
 if __name__ == "__main__":
