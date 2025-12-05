@@ -1,0 +1,997 @@
+product_id,name,brand,size_text,food_group,stores_sample,current_sub_code,new_sub_code,food_group_corrected,food_group_corrected_prev,new_sub_code_prev,confidence
+1124,3-juustu suitsukanapirukas 84 g,3-juustu,84 g,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,bakery,bakery_cakes_pastries,high
+101046,"Aasa Kirssidega kodujuust, 150 g",Aasa Kirssidega,150 g,dairy_eggs_fats,Prisma,,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+17648,"AB-jogurt banaani Laktoosivaba, TERE, 150 g",AB-jogurt,150 g,dairy_eggs_fats,"Coop, Selver",,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+11913,Actimel jogurtijook banaani-maasika 8x100g,Actimel,8x100 g,dairy_eggs_fats,Prisma,,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+41190,Aitäh valik piimašokolaadikomme 226g,Aitäh,226 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+10025,Alentaja lisatud kaaliumiga taimerasvavõie 400g,Alentaja,400 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+100456,"Alma Brownie kohupiimakreem, 380 g",Alma Brownie,380 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+12170,"Alma Hapukoorega kodujuust, 380 g",Alma Hapukoorega,380 g,dairy_eggs_fats,"Coop, Prisma",,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+10229,Alma jogurt maasikas-banaan puuviljadest suhkrutega laktoosivaba 900g,Alma,900 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+8806,Alma jogurt mango-virsik puuviljadest suhkrutega laktoosivaba 900g,Alma,900 g,dairy_eggs_fats,"Barbora, Maxima, Prisma",,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+11250,Alma jogurt vaarika-rabarberi 1kg,Alma,1 kg,dairy_eggs_fats,Prisma,,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+1489,"Alma Klassikaline kodujuust 5%, 200 g",Alma Klassikaline,200 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+1829,"Alma Klassikaline kodujuust 5%, 380 g",Alma Klassikaline,380 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+2143,Alma Kodujuust 5% 500g,Alma Kodujuust,500 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+11331,"Alma Kodujuust crème brûlée maitseline, 200 g",Alma Kodujuust,200 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+3130,Alma kohuke kakao kakaoglasuuris 40g,Alma,40 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi",,dry_other,other,dairy_eggs_fats,dairy_other,fallback
+2623,Alma kohuke mango kakaoglasuuris 40g,Alma,40 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,produce_tropical,produce,dairy_eggs_fats,dairy_other,high
+53248,"Alma kohuke metsmaasika kakaoglasuuris, 40g",Alma,40 g,dairy_eggs_fats,"Coop, Prisma",,produce_berries,produce,dairy_eggs_fats,dairy_other,high
+3719,Alma kohuke vaarika kakaoglasuuris 40g,Alma,40 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_other,high
+4478,Alma kohuke vaarika kakaoglasuuris 5x40g,Alma,5x40 g,dairy_eggs_fats,"Barbora, Maxima, Prisma",,produce_berries,produce,dairy_eggs_fats,dairy_other,high
+3115,Alma kohuke vanilli kakaoglasuuris 40g,Alma,40 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dry_other,other,dairy_eggs_fats,dairy_other,fallback
+8769,Alma kohupiim 4% 200g,Alma,200 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+8605,Alma kohupiim lahja 200g,Alma,200 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+240,"Alma Kohupiim Vanilli, 200 g",Alma Kohupiim,200 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+4298,"Alma Kreeka jogurt, 370 g",Alma Kreeka,370 g,dairy_eggs_fats,"Prisma, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+2512,"Alma laktoosivaba kodujuust šokolaaditükkidega, 200 g",Alma,200 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cottage_quark,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+47414,"Alma Maitsestamata kohupiimakreem, 300 g",Alma Maitsestamata,300 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+10581,"Alma Mandlitükkide ja šokolaadiga jogurt, 150 g",Alma Mandlitükkide,150 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+1417,"Alma Metsmaasikajogurt, 1 kg","Alma Metsmaasikajogurt,",1 kg,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+3867,"Alma Muah! creme-brulee koorejogurt, 380 g",Alma Muah!,380 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+4080,Alma Muah koorejogurt sidruni-juustukoogimaitseline 380g,Alma Muah,380 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+1285,"Alma Muah! rukkileiva-kaneeli koorejogurt, 380 g",Alma Muah!,380 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+2563,"Alma Muah! stracciatella koorejogurt, 380 g",Alma Muah!,380 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+2589,"Alma Murakamoosiga kodujuust, 200 g",Alma Murakamoosiga,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+2671,"Alma Piim 2,5%, 0,5 l",Alma Piim,0.5 l,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+158,"Alma Piim 2,5%, 1,5 l",Alma Piim,1.5 l,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+4083,"Alma Piim 2,5%, 1 l",Alma Piim,1 l,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+267,"Alma Piim 2,5%, 1 l",Alma Piim,1 l,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+2562,"Alma Šokolaadirõngastega jogurt, 150 g",Alma Šokolaadirõngastega,150 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+12038,"Alma Šokolaaditükkidega kohupiimakreem, 150 g",Alma Šokolaaditükkidega,150 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+1277,"Alma Soolakurgi ja tilliga kodujuust, 200 g",Alma Soolakurgi,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_cottage_quark,high
+251376,"Alma sulatatud juust, 200g",Alma,200 g,dairy_eggs_fats,"Coop, Prisma",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+303367,"Alma sulatatud juust krevetiga, 200g",Alma,200 g,dairy_eggs_fats,"Coop, Prisma",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+566223,"Alma sulatatud juust maitseürdiga, 200g",Alma,200 g,dairy_eggs_fats,"Coop, Prisma",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+272208,"Alma sulatatud juust trühvlimaitseline, 200g",Alma,200 g,dairy_eggs_fats,"Coop, Prisma",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+11164,"Alma täispiim 3,8-4,2% 0,5l",Alma,0.5 l,dairy_eggs_fats,"Barbora, Maxima, Prisma",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+1497,"Alma Täispiim 3,8-4,2%, 1,5l",Alma Täispiim,1.5 l,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+3412,"Alma Täispiim 3,8-4,2%, 1 l",Alma Täispiim,1 l,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+4024,"Alma täispiim 3,8-4,2% 2l",Alma,2 l,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+3551,"Alma Vanilli kohupiimakreem, 300 g",Alma Vanilli,300 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+1754,Alma või 82% 200g,Alma,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+4032,Alma või laktoosivaba 82% 200g,Alma,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+3036,"Altenburger Kitsepiimast kreemjuust, 150 g",Altenburger Kitsepiimast,150 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+68114,Amona maapähklivõie crunchy 350g,Amona,350 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+66805,Amona maapähklivõie smooth 350 g,Amona,350 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+67234,Amona maapähklivõie smooth 600g,Amona,600 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+2779,Änglamark orgaaniline kreemjas maapähklivõi 350g mahe,Änglamark,350 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+11102,Apetina juustusnäkk õlimarinaadis paprikaga 100g,Apetina,100 g,dairy_eggs_fats,Prisma,,produce_root_veg,produce,dairy_eggs_fats,dairy_cheese_slices,high
+95190,Apetina juustusnäkk õlis tšilliga 100g,Apetina,100 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+95394,Apetina Original laktoosivabad vahemerepärase valge juustu (10%) kuubikud soolvees 200 g,Apetina Original,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+50098,Apetina Original salatijuust 150g,Apetina Original,150 g,dairy_eggs_fats,Prisma,,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_cheese_slices,high
+11939,Apetina Original vahemerepärase valge juustu kuubikud soolvees 200 g,Apetina Original,200 g,dairy_eggs_fats,"Prisma, Rimi",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+37827,"Apetina salatijuustupala, laktoosivaba, 200 g",Apetina,200 g,dairy_eggs_fats,"Coop, Prisma",,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_other,high
+11886,Apetina vahemerepärase valge juustu kuubikud maitseõlis päikesekuivatatud tomatitega 265g/140 g,Apetina,265 g,dairy_eggs_fats,Prisma,,produce_root_veg,produce,dairy_eggs_fats,dairy_cheese_slices,high
+20745,"Aptamil 1 piimajook 2 x 200 ml, alates sünnist",Aptamil,2x200 ml,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,baby,baby_other,high
+1469,"Aptamil 2 jätkupiimajook 2 x 200 ml, alates 6-elukuust",Aptamil,2x200 ml,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+124488,APTAMIL3 PIIMASEGU 200G 12K,APTAMIL3 PIIMASEGU,200 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+584142,"Aptamil Comfort 1 piimasegu 400 g, alates sünnist",Aptamil Comfort,400 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+589208,"Aptamil Comfort 2 jätkupiimasegu 400g, alates 6-elukuust",Aptamil Comfort,400 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+587303,"Aptamil® NUTRIBIOTIK™ 1 piimal põhinev imiku piimasegu alates sünnist, 400g",Aptamil® NUTRIBIOTIK™,400 g,dairy_eggs_fats,Prisma,,meat_pork,meat_fish,baby,baby_formula,high
+1454,"Aptamil® NUTRIBIOTIK™ 1 piimal põhinev imiku piimasegu alates sünnist, 800g",Aptamil® NUTRIBIOTIK™,800 g,dairy_eggs_fats,"Coop, Prisma",,meat_pork,meat_fish,baby,baby_formula,high
+1200,"Aptamil® NUTRIBIOTIK™ 2 piimal põhinev imiku jätkupiimasegu alates 6 kuust, 1,2kg",Aptamil® NUTRIBIOTIK™,1.2 kg,dairy_eggs_fats,"Prisma, Selver",,meat_pork,meat_fish,baby,baby_formula,high
+587063,"Aptamil® NUTRIBIOTIK™ 2 piimal põhinev imiku jätkupiimasegu alates 6 kuust, 400g",Aptamil® NUTRIBIOTIK™,400 g,dairy_eggs_fats,Prisma,,meat_pork,meat_fish,baby,baby_formula,high
+18709,"Aptamil® NUTRIBIOTIK™ 2 piimal põhinev imiku jätkupiimasegu alates 6 kuust, 800g",Aptamil® NUTRIBIOTIK™,800 g,dairy_eggs_fats,"Coop, Prisma, Selver",,meat_pork,meat_fish,baby,baby_formula,high
+18201,"Aptamil® NUTRIBIOTIK™ 3 piimajook alates 12 kuust, 1,2kg",Aptamil® NUTRIBIOTIK™,1.2 kg,dairy_eggs_fats,"Coop, Prisma",,meat_pork,meat_fish,baby,baby_other,high
+52071,"Aptamil® NUTRIBIOTIK™ 3 piimajook alates 12 kuust, 800g",Aptamil® NUTRIBIOTIK™,800 g,dairy_eggs_fats,"Coop, Prisma",,meat_pork,meat_fish,baby,baby_other,high
+283205,"Aptamil® NUTRIBIOTIK™ 4 piimajook alates 2 aasta vanusest, 800g",Aptamil® NUTRIBIOTIK™,800 g,dairy_eggs_fats,"Coop, Prisma",,meat_pork,meat_fish,baby,baby_other,high
+583717,Aptamil spetsiaalne piimasegu laktoosivaba 0k+ 400g,Aptamil,400 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+10878,"Arla Apetina vahemerepärased salatijuustukuubikud õlis mustade oliividega, 100 g",Arla Apetina,100 g,dairy_eggs_fats,Prisma,,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_other,high
+50271,"Arla Keso laktoosivaba naturaalne kodujuust (1,5%) 200 g",Arla Keso,200 g,dairy_eggs_fats,Prisma,,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+9100,"Arla proteiinirikas banaanikohupiim, laktoosivaba, 200 g",Arla,200 g,dairy_eggs_fats,Prisma,,produce_tropical,produce,dairy_eggs_fats,dairy_cottage_quark,high
+9782,"Arla proteiinirikas kohvikohupiim, laktoosivaba, 200 g",Arla,200 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+48052,"Arla Protein laktoosivaba mustikakohupiim, 200 g",Arla Protein,200 g,dairy_eggs_fats,Prisma,,produce_berries,produce,dairy_eggs_fats,dairy_cottage_quark,high
+48653,"Arla Protein vanillimaitseline kohupiim, laktoosivaba, 200 g",Arla Protein,200 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+2798,"Arla vähese soolasisaldusega või, laktoosivaba, 500 g",Arla,500 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+38895,AROMA GOLD Irish Cream DG kapslid 16 kpl,AROMA GOLD,,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+459423,Astri Köök Kohupiimakreem Kisselliga 200 G,Astri Köök,200 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+1989,Astri Köök Munavõi 100G,Astri Köök,100 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+3384,Athena pehme valge juust 200g,Athena,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+9418,"Atleet Cheddari riivjuust, 200 g",Atleet Cheddari,200 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+9245,"Atleet Cheddar juust, 250 g",Atleet Cheddar,250 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+50913,"Atleet Cheddar juust, viilutatud, 150 g",Atleet Cheddar,150 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12760,Atleet Cheddar viilujuust 500g,Atleet Cheddar,500 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12673,"Atleet juust Originaal viilutatud 26%, 300g",Atleet,300 g,dairy_eggs_fats,"Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+37607,"Atleet riivjuust küpsetistele, 200 g",Atleet,200 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+11447,Atleet riivjuust pitsale 200g,Atleet,200 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+6458,Auran tšilli ja vegan juustuga tex-mex kaste 270 g,Auran,270 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+8906,"Aura sinihallitusjuust 29%, 170 g",Aura,170 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1987,Axa müslibatoon jogurti ja troopiliste viljadega 25g,Axa,25 g,dairy_eggs_fats,"Coop, Prisma",,dairy_yogurt_kefir,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+1104,Baguette juustuga,Baguette,,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1109,Baguette juustu-küüslaugu,Baguette,,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+3776,"Baguette küüslauguvõidega, 175 g",Baguette,175 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+30334,Bahlsen Leibniz Minis Choco piimašokolaadiga 100g,Bahlsen Leibniz,100 g,dairy_eggs_fats,"Coop, Prisma, Rimi",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+328036,Baileys Irish Cream liköör 17%vol 700ml,Baileys Irish,700 ml,dairy_eggs_fats,"Barbora, Maxima, Prisma, Rimi",,dairy_cream_sourcream,dairy_eggs_fats,drinks,drinks_spirits,high
+278,Balbiino mustika-jogurtijäätis jogurtiglasuuris 80ml/54g,Balbiino,80 ml,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_berries,produce,frozen_food,frozen_desserts_icecream,high
+50445,Balsnack juustu- ja küüslaugumaitseline leib 80g,Balsnack,80 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,bakery,bakery_bread_loaves,high
+45975,Balsnack juustu-sibulamaitseline leib 300g,Balsnack,300 g,dairy_eggs_fats,"Prisma, Selver",,produce_root_veg,produce,bakery,bakery_bread_loaves,high
+94432,"Baltais kodujuust, 500g",Baltais,500 g,dairy_eggs_fats,Prisma,,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+109265,"Baltais virsiku joogijogurt, 1 kg",Baltais,1 kg,dairy_eggs_fats,Prisma,,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+9291,"Baltika Kass Arturi kondenspiim karamelli, 370 g",Baltika Kass,370 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_candies,high
+46772,Barni piimatäidisega biskviitküpsis 150 g,Barni,150 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_biscuits_cookies,high
+30159,Barni piimatäidisega biskviitküpsis 30 g,Barni,30 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_biscuits_cookies,high
+104610,"Bavaria blu sinihallitusjuust, 175 g",Bavaria,175 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+9216,Bergader Briolo juust 150 g,Bergader Briolo,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+41948,BOLD Protein Iced Espresso kohvijook piimaga 250ml,BOLD Protein,250 ml,dairy_eggs_fats,"Prisma, Rimi",,dairy_milk,dairy_eggs_fats,drinks,drinks_tea_coffee,high
+39652,BOLD Salted Caramel Iced Espresso kohvijook piimaga 250ml,BOLD Salted,250 ml,dairy_eggs_fats,Prisma,,fish_salted_smoked,meat_fish,drinks,drinks_tea_coffee,high
+40106,Bold True Iced Espresso kohvijook piimaga 250 ml,Bold True,250 ml,dairy_eggs_fats,"Prisma, Rimi",,dairy_milk,dairy_eggs_fats,drinks,drinks_tea_coffee,high
+31054,Bon Chance küüslaugu-juustumaitselised leivakrõpsud 120 g,Bon Chance,120 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+11255,"Brie valgehallitusjuust, 180 g",Brie,180 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+35750,"Brie valgehallitusjuust, 200 g",Brie,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+10361,"Brie valgehallitusjuust, PRESIDENT, 125 g",Brie,125 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+6753,"Broileri pooltiivad jogurti-tillimarinaadis, TALLEGG, 800 g",Pooltiivad,800 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+62400,"Bulgaaria jogurt, 150 g",Bulgaaria,150 g,dairy_eggs_fats,Prisma,,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+3442,"Butero käsitöövõi, 150 g",Butero,150 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+10584,"Butero käsitöövõi küüslauguga, 150 g",Butero,150 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+75176,"Butero käsitöövõi meresoolaga, 150 g",Butero,150 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+10282,"Cambozola 70%, KÄSEREI, 150 g",Juust CAMBOZOLA,150 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+11623,"Camembert juust, 120 g",Camembert,120 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12333,"Camembert juust pähklitega, 120 g",Camembert,120 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12850,"Castelli Gran Castelli juust, 125 g",Castelli Gran,125 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+102576,"Castelli Gran Castelli kõva juust, 200 g",Castelli Gran,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+10092,"Castelli Parmigiano Reggiano juust, 200g",Castelli Parmigiano,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12362,"Castelli Parmigiano Reggiano riivjuust, 70 g",Castelli Parmigiano,70 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+96297,"Castello ökoloogiline sinihallitusjuust, 150 g",Castello,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+36212,"Castello valgehallitusjuust punase tšilliga, 150 g",Castello,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+38143,Cheetos jalgpallikujulised juustu maisikrõpsud 100g,Cheetos,100 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+9499,Chef Lunden India Kauss Kitchari-Paneer Juustu 285G,Chef Lunden,285 g,dairy_eggs_fats,"Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+8502,CHEF LUNDEN Kitsejuustu-pesto ciabatta 135 g,CHEF LUNDEN,135 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+10939,CHEF LUNDEN Singi-juustu rukkileib munaga 150 g,CHEF LUNDEN,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,bakery,bakery_bread_loaves,high
+48118,Clara Kohupiimastritsel 380 G,Clara Kohupiimastritsel,380 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+228458,COOP banaanijogurt 150g,COOP,150 g,dairy_eggs_fats,Prisma,,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+105824,Coop Cheddar burgerijuustuviilud 150g,Coop Cheddar,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+9444,"Coop Cheddari juust, 12 kuud laagerdunud, 200 g",Coop Cheddari,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+8695,"Coop Cheddar riivjuust, 34% rasva, 150g",Coop Cheddar,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+3186,"Coop Cheddar sulatatud juustuviilud, 200g",Coop Cheddar,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+4333,"Coop Cheddar Vegan võileivaviilud, 200g",Coop Cheddar,200 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+36666,Coop Chevre valgehallitusjuust kitsepiimast 180g,Coop Chevre,180 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+10533,"Coop Edam juust 17 %, 800g",Coop Edam,800 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+35789,Coop ekstraküps Gouda juust 400g,Coop,400 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+9454,Coop emmentali juust riivitud 150g,Coop,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+10319,Coop fetajuust 150g,Coop,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+37062,"Coop Fetajuust, laktoosivaba, 150 g","Coop Fetajuust,",150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+36279,"Coop Gouda viilutatud juust, 450 g",Coop Gouda,450 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+96757,Coop Grana Padano juust 150 g,Coop Grana,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+102626,"Coop Grana Padano riivjuust KPN, 29% rasva, 70g",Coop Grana,70 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2638,Coop grilljuust laktoosivaba 200g,Coop,200 g,dairy_eggs_fats,"Prisma, Rimi",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+50758,Coop halloumi juust 200g,Coop,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+10931,Coop juust Pecorino Romano 34% 150 g,Coop,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+37225,Coop juustukaste 300 g medium,Coop,300 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+48946,Coop juustumaitselised riisigaletid 125g gv,Coop,125 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,sweets_snacks,sweets_other,high
+96309,"Coop juustu-, tomati-, sibula- ja küüslaugumaitselised maisigaletid 125g",Coop,125 g,dairy_eggs_fats,Prisma,,produce_root_veg,produce,sweets_snacks,sweets_other,high
+2243,Coop Juustu Tortelliinid 250 G,Coop Juustu,250 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+32033,Coop Kanalihaga kolmnurk võileib 150g,Coop Kanalihaga,150 g,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,bakery,bakery_bread_loaves,high
+11033,"Coop koorejuust 17%, 1 kg",Coop,1 kg,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12576,"Coop koorejuust, 1 kg",Coop,1 kg,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1447,Coop maasikajogurt 150g,Coop,150 g,dairy_eggs_fats,Prisma,,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+23829,"Coop magus granola jogurtikattega maisihelvestega 6% ja külmkuivatud maasikatükkidega 1,5% 725g",Coop,725 g,dairy_eggs_fats,Prisma,,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+224602,Coop mango-apelsinijogurt 150g,Coop,150 g,dairy_eggs_fats,Prisma,,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+35969,Coop mascarpone toorjuust koorest 250g,Coop,250 g,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+219000,Coop metsamarjajogurt 150 g,Coop,150 g,dairy_eggs_fats,Prisma,,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+24087,Coop Micro Popcorn võiga 3-pakk,Coop Micro,,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+8668,Coop mozzarella pühvlipiimast 100g,Coop,100 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+3183,Coop Mozzarella riivjuust 21% 150g,Coop Mozzarella,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+4226,Coop müslibatoon jogurtipulbriga valge šokolaadi tükkidega 3% ja külmkuivatud maasikatükkidega 1% 138g,Coop,138 g,dairy_eggs_fats,Prisma,,produce_berries,produce,sweets_snacks,sweets_chocolate_bars,high
+1935,Coop müslibatoon piimašokolaadiga 14% ja tumeda šokolaadi tükkidega 3% 6x23g,Coop,6x23 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+1413,Coop Päikesekuivatatud Tomati Ja Juustu Torte,Coop Päikesekuivatatud,250 g,dairy_eggs_fats,Prisma,,produce_root_veg,produce,dairy_eggs_fats,dairy_cheese_slices,high
+12746,"Coop parmesanijuust Parmigiano Reggiano 30%, 30 kuud, 125 g",Coop,125 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12248,"Coop Parmigiano Reggiano juust, 150 g",Coop Parmigiano,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+10841,"Coop Parmigiano Reggiano juust 30%, 125 g",Coop Parmigiano,125 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+23401,Coop pasta carbonara juustu ja peekoniga 70 g,Coop,70 g,dairy_eggs_fats,Prisma,,meat_pork,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+158210,Coop pastaroog juustuga 160g,Coop,160 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+22193,Coop pastaroog juustuga 5% ja peekoniga 2% 155g,Coop,155 g,dairy_eggs_fats,Prisma,,meat_pork,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+11286,"Coop Pecorino Romano riivjuust KPN, 34% rasva, 50g",Coop Pecorino,50 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+69128,Coop piimashokolaadi tükid 100g küpsetamiseks,Coop,100 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+18219,COOP Piimašokolaadi batoonid 200g 16tk,COOP Piimašokolaadi,200 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+1167,Coop piimašokolaadiga kaetud riisigaletid 100g,Coop,100 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+3559,COOP piimhappebakter 30tbl,COOP,,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+3979,"Coop pikk sai küüslauguvõiga 2tk, 350g",Coop,350 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,bakery,bakery_buns_croissants,high
+3550,"Coop pikk sai ürdivõiga 2tk, 350g",Coop,350 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,bakery,bakery_buns_croissants,high
+433822,Coop pirni-vanillijogurt 150g,Coop,150 g,dairy_eggs_fats,Prisma,,produce_apples_pears,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+10932,COOP puuviljakohupiim 6x50g,COOP,6x50 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+10250,"Coop riivjuust 4 juustu segu, 26% rasva, 150g",Coop,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+95966,Coop riivjuust pitsale 27% rasva 150g,Coop,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+552803,"Coop saida- või mintaikuubikud, 300 g",Coop,300 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+8629,Coop Salaamiga võileib 150g,Coop Salaamiga,150 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,bakery,bakery_bread_loaves,high
+95202,"Coop salatijuust plokina, 18% rasva, 200g",Coop,200 g,dairy_eggs_fats,Prisma,,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_cheese_slices,high
+36551,COOP SALATIJUUSTUKUUBIKUD 150G,COOP SALATIJUUSTUKUUBIKUD,150 g,dairy_eggs_fats,Prisma,,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_other,high
+8979,Coop salatijuustukuubikud 175g,Coop,175 g,dairy_eggs_fats,Prisma,,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_other,high
+35385,"Coop salatijuustukuubikud õlis küüslaugu ja peterselliga, 100 g",Coop,100 g,dairy_eggs_fats,Prisma,,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_other,high
+10392,"Coop salatijuustukuubikud õlis tšilliga, 100 g",Coop,100 g,dairy_eggs_fats,Prisma,,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_other,high
+11379,Coop Singiga kolmnurk võileib 150g,Coop Singiga,150 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,bakery,bakery_bread_loaves,high
+22902,Coop Singi ja juustuga võileib 150 g,Coop Singi,150 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,bakery,bakery_bread_loaves,high
+10970,Coop sinihallitusjuust 125g,Coop,125 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+95000,"Coop sinihallitusjuust, riivitud, 150g",Coop,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+5548,Coop soolaga juustumaitselised maisikrõpsud 150g,Coop,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+136385,"Coop sulatatud juust, 400 g",Coop,400 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+10875,"Coop sulatatud juustuviilud 6%, 200g",Coop,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1393,Coop Tomati - Kitsejuustusupp 300 G,Coop Tomati,300 g,dairy_eggs_fats,Prisma,,produce_root_veg,produce,dairy_eggs_fats,dairy_other,high
+23832,Coop tomatisupp mascarpone juustuga 1% 570ml,Coop,570 ml,dairy_eggs_fats,Prisma,,produce_root_veg,produce,dairy_eggs_fats,dairy_cottage_quark,high
+37168,"Coop toorjuust küüslaugu-ürdi, 200G",Coop,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1906,Coop toorjuust maitsestamata 200g,Coop,200 g,dairy_eggs_fats,"Prisma, Rimi",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+3563,"Coop toorjuust sibula-paprika, 200g",Coop,200 g,dairy_eggs_fats,Prisma,,produce_root_veg,produce,dairy_eggs_fats,dairy_cheese_slices,high
+10675,Coop Tuunikalaga kolmnurk võileib 150g,Coop Tuunikalaga,150 g,dairy_eggs_fats,Prisma,,fish_fresh,meat_fish,bakery,bakery_bread_loaves,high
+9200,"Coop vanilli kohupiimakreem, 150 g",Coop,150 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+2897,CORNY BIG Banaani-piimašokolaadi 50g,CORNY BIG,50 g,dairy_eggs_fats,Prisma,,produce_tropical,produce,sweets_snacks,sweets_chocolate_bars,high
+3873,CORNY BIG Maapähklitega piimašokolaadis 50g,CORNY BIG,50 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+2242,CORNY BIG MILK piimatäidise ja kakaoga 40g,CORNY BIG,40 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+2441,CORNY BIG Piimašokolaadi-karamelli müslibatoon meresoolaga 40g,CORNY BIG,40 g,dairy_eggs_fats,Coop,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+2344,Corny big piimašokolaadi müslibatoon küpsise ja vahukommiga 40g,Corny,40 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+4362,"Corny big zero müslibatoon maapähklite ja piimašokolaadiga, magusainetega 40g",Corny,40 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+2459,"Corny big zero müslibatoon piimašokolaadiga, magusainetega 40g",Corny,40 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+2987,Corny milk 4-pakk piimatäidisega 120g,Corny,120 g,dairy_eggs_fats,"Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+44810,Cream liköör 17%vol 700ml,Cream,700 ml,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,drinks,drinks_spirits,high
+599504,Crest Halloween piimašokolaadi pulgakomm 20g,Crest Halloween,20 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+48087,Croissant singi ja juustuga,Croissant,,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2778,Danvita näkileib juustu ja küüslauguga 130 g,Danvita,130 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,bakery,bakery_bread_loaves,high
+2527,"Dava Õrrekanade munad L, 10 tk",Dava Õrrekanade,10 pcs,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_eggs,high
+1187,"Dava Õrrekanade munad M, 10tk",Dava Õrrekanade,10 pcs,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,dairy_eggs_fats,dairy_eggs,high
+125136,"Deline Kitsepiimajuust, viilutatud, 150 g","Deline Kitsepiimajuust,",150 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+47919,Delma margariin võileiva 20% 450g,Delma,450 g,dairy_eggs_fats,"Coop, Prisma",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+8318,"Doritos juustumaitselised maisikrõpsud,170g",Doritos,170 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+173706,Dr.Oetker Ristorante Pitsa 4 juustu 340 g,Dr.Oetker Ristorante,340 g,dairy_eggs_fats,"Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+9230,"Džiugas Kõva juust Mild, 12 kuud, 180 g",Džiugas Kõva,180 g,dairy_eggs_fats,"Barbora, Maxima, Prisma",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+4147,"Eesti juust light, viilutatud, 500 g",Eesti,500 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+8690,Eesti juust riivitud 400g,Eesti,400 g,dairy_eggs_fats,"Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+35504,"Eesti juust täispiimast, viilutatud, 180 g",Eesti,180 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+37561,"Eesti juust täispiimast, viilutatud, 450 g",Eesti,450 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+47376,Eesti Kondiiter Juustuküpsis 250 g,Eesti Kondiiter,250 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,sweets_snacks,sweets_biscuits_cookies,high
+29753,Eesti Leivatööstus Kohupiima-Sefiirikorvike 86 G,Eesti Leivatööstus,86 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+30076,Eesti Leivatööstus Küpsis Juustu ja Küüslauguga 300 g,Eesti Leivatööstus,300 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,sweets_snacks,sweets_biscuits_cookies,high
+48662,Eesti Leivatööstus Sotsnik Kohupiimaga 140 G,Eesti Leivatööstus,140 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+4142,Eesti Pagar Juustukukkel 200 G,Eesti Pagar,200 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+4130,Eesti Pagar Kohupiimarull 350 G,Eesti Pagar,350 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+30647,Eesti Pagar Röstsai Juustuga 430 G,Eesti Pagar,430 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,bakery,bakery_buns_croissants,high
+29116,Eesti Pagar Võikeeks 250 G,Eesti Pagar,250 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+8885,"Eesti riivjuust, 250 g",Eesti,250 g,dairy_eggs_fats,"Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12602,Eesti Sulatatud suitsujuust 200g,Eesti Sulatatud,200 g,dairy_eggs_fats,Prisma,,fish_salted_smoked,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+2212,"Eggo Peremunad M, 10 tk",Eggo Peremunad,10 pcs,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_eggs,dairy_eggs_fats,dairy_eggs_fats,dairy_eggs,high
+2649,"Eggo Suured munad L, 10 tk",Eggo Suured,10 pcs,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_eggs,dairy_eggs_fats,dairy_eggs_fats,dairy_eggs,high
+34421,EHE Juustuviiner 330 g,EHE Juustuviiner,330 g,dairy_eggs_fats,"Coop, Prisma, Rimi",,meat_sausages,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+11449,"Ehrmanni kohupiim (0,2%) 250 g",Ehrmanni,250 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+6504,Ekol piimašokolaad Dubai Original 100g,Ekol,100 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+10205,Emma kohupiimakreem maasika 150 g,Emma,150 g,dairy_eggs_fats,"Barbora, Maxima, Prisma",,produce_berries,produce,dairy_eggs_fats,dairy_cottage_quark,high
+63950,"Emma Laktoosivaba banaanijogurt tuubis, 110 g",Emma Laktoosivaba,110 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+4082,"Emma Laktoosivaba maasikajogurt tuubis, 110 g",Emma Laktoosivaba,110 g,dairy_eggs_fats,"Coop, Prisma, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+48711,"Emma Laktoosivaba mustikajogurt tuubis, 110 g",Emma Laktoosivaba,110 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+2534,"Emma Maasikakisselliga kohupiimakreem, 150 g",Emma Maasikakisselliga,150 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_cottage_quark,high
+2854,"Emma Mustikakisselliga kohupiimakreem, 150 g",Emma Mustikakisselliga,150 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_cottage_quark,high
+2171,"Emma Vaarikakisselliga kohupiimakreem, 150 g",Emma Vaarikakisselliga,150 g,dairy_eggs_fats,"Coop, Prisma, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_cottage_quark,high
+97314,"Emmental juust viilutatud, 150g",Emmental,150 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+94510,"Entremont Raclette juust, viilutatud, 250 g",Entremont Raclette,250 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+50960,E-PIIM BRESTO JUUST 200G,E-PIIM BRESTO,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2291,"E-Piim Eesti juust, viilutatud, 150 g",E-Piim Eesti,150 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+5782,"E-Piim Eesti juust viilutatud, 300g",E-Piim Eesti,300 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+9596,"E-Piim Eesti juust, viilutatud, 500 g",E-Piim Eesti,500 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2896,"E-Piim Eesti või 82%, 250 g",E-Piim Eesti,250 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+12050,Epiim Gouda juust 350g tükk,Epiim Gouda,350 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1941,"E-Piim grilljuust, 330 g",E-Piim,330 g,dairy_eggs_fats,"Prisma, Rimi",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+10207,"E-Piim Juust Gouda, viilutatud, 300g",E-Piim Juust,300 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1414,"Epiim Light juust, viilutatud, 150 g",Epiim Light,150 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1774,Epiim Light riivjuust 250g,Epiim Light,250 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1398,E-Piim Sulatatud juust 180g,E-Piim Sulatatud,180 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+49404,Erlandia Kohupiimapirukas Õlis 140 G,Erlandia Kohupiimapirukas,140 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+28687,Erlandia Röstsibula - Juustukangid 200 G,Erlandia Röstsibula,200 g,dairy_eggs_fats,Prisma,,produce_root_veg,produce,dairy_eggs_fats,dairy_cheese_slices,high
+124564,"Estover Eesti juust, viilutatud, 350 g",Estover Eesti,350 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+175917,"Estover Eesti juust, viilutatud, 500 g",Estover Eesti,500 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+3161,"Estover Eesti riivjuust, 200 g",Estover Eesti,200 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1461,"Estover Eesti taluvõi 82%, 150 g",Estover Eesti,150 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+3037,"Estover Maasdam juust, viilutatud, 150 g",Estover Maasdam,150 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2258,"Estover Vene juust, viilutatud, 150 g",Estover Vene,150 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+25300,ESTRELLA Mikropopkorn juustumaitseline 90 g,ESTRELLA Mikropopkorn,90 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+25676,Estrella Mikropopkorn võimaitseline 3-pakk 240g,Estrella Mikropopkorn,240 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+27059,ESTRELLA Mikropopkorn võimaitseline 90 g,ESTRELLA Mikropopkorn,90 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+129745,Estrella sinihallitusjuustumaitseline dipikastmepulber 15g,Estrella,15 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+611172,"Exportas või 82,5%, 200g",Exportas,200 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+49440,"Fantasia koorene jogurt Mars, 104 g",Fantasia,104 g,dairy_eggs_fats,Prisma,,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+4412,"Fantasia Koorene jogurt šokolaadipallidega, 100 g",Fantasia Koorene,100 g,dairy_eggs_fats,"Barbora, Maxima, Prisma",,dairy_yogurt_kefir,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+3673,"Farmi Juustu mix, 200 g",Farmi Juustu,200 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2535,"Farmi Juustu snäkk, 200 g",Farmi Juustu,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+4340,"Farmi Keefir täispiimast 3,8-4,2%, 1 kg",Farmi Keefir,1 kg,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+10897,FARMI kodujuust hapukoorega 330g,FARMI,330 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma",,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+2225,"Farmi Kodujuust väherasvane, laktoosivaba 330 g",Farmi Kodujuust,330 g,dairy_eggs_fats,"Coop, Prisma",,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+16826,Farmi Koorene jogurt apelsini ja šokolaaditükkidega 400 g,Farmi Koorene,400 g,dairy_eggs_fats,"Coop, Prisma",,produce_tropical,produce,sweets_snacks,sweets_chocolate_bars,high
+3671,"Farmi Koorene jogurt mustade kirssidega, 400 g",Farmi Koorene,400 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+3078,"Farmi Koorene jogurt Polka maasikatega, 400 g",Farmi Koorene,400 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+3269,FARMI koorene jogurt virsikutega 4% 400g,FARMI,400 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+2542,"Farmi Koorene mustikajogurt, 400 g",Farmi Koorene,400 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+2471,"Farmi Koorevõi 82%, 150g",Farmi Koorevõi,150 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Rimi, Selver",,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+10212,"Farmi Kreeka jogurt 10%, laktoosivaba, 370 g",Farmi Kreeka,370 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+12838,"Farmi Lahja kohupiim vanilliiniga, 200 g",Farmi Lahja,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+96511,"Farmi Laktoosivaba toorjuust 15%, 400 g",Farmi Laktoosivaba,400 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+3939,FARMI Maasika-arbuusi jogurt 130g,FARMI Maasika-arbuusi,130 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+12497,"Farmi Mustade kirssidega koorene kohupiimakreem, 150 g",Farmi Mustade,150 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+2627,FARMI Puuviljasuhkruga Mangojogurt 130g,FARMI Puuviljasuhkruga,130 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+36122,"Farmi Rohke koorega kodujuust, 330 g",Farmi Rohke,330 g,dairy_eggs_fats,"Coop, Prisma",,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+2034,"Farmi täispiim 3,6%-4,2%, 1l",Farmi,1 l,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+186,"Farmi Täispiim 3,6%-4,2%, 2 l",Farmi Täispiim,2 l,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+21512,"Farmi Toorjuust küüslauguga, 150 g",Farmi Toorjuust,150 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+95459,"Fazer fasupala geisha pähklikreemitäidisega vahvel, kaetud piimašokolaadiga 175 g",Fazer,175 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+1693,Fazer Juustumuhkel 200 G,Fazer Juustumuhkel,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+157099,Fazer Pätkis piimašokolaadibatoon 18g,Fazer Pätkis,18 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+155877,Fazer piima- ja valge šokolaad 38g,Fazer,38 g,dairy_eggs_fats,"Prisma, Rimi",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+1099,Fazer Salaami-Fetajuustu Minipitsa 110 g,Fazer Salaami-Fetajuustu,110 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+227314,Fazer Singi - Juustustritsel 330 g,Fazer Singi,330 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,bakery,bakery_other,high
+47294,Fazer Street Food Võileiva tasku 400 g,Fazer Street,400 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+9736,"Fetajuust, 200 g","Fetajuust,",200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+73675,Filos Original halloumi juust 200g,Filos Original,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+10727,"Filos vähendatud soolaga Halloumi juust, 200g",Filos,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2522,Findus pitsataskud 3 juustu 250g,Findus,250 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+563532,Findus Tšilli-Juustupitsataskud 250 G,Findus Tšilli-Juustupitsataskud,250 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+12482,"Fitaki juust Original, 500 g",Fitaki,500 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1808,"Fit Broilerifileešašlõkk jogurtimarinaadis, TALLEGG, 800 g",Tallegg Fit!,800 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,meat_pork,meat_fish,dairy_eggs_fats,dairy_yogurt_kefir,high
+49418,Flint juustumaitselised kuivikud 110g,Flint,110 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+11571,"Flora laktoosi- ja piimavaba leivamääre, 400 g",Flora,400 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+4417,"Flora taimne võie, 500 g",Flora,500 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+68264,"Foodin tooršokolaadiga sarapuupähklivõie, suhkruta 230 g",Foodin,230 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+11771,"FOOD ON FOOT Burger kanakotleti, marineeritud kurgi ja juustuga 220 g",FOOD ON,220 g,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+11634,FOOD ON FOOT Kolmnurkvõileib lõhe ja munaga 165 g,FOOD ON,165 g,dairy_eggs_fats,Prisma,,fish_fresh,meat_fish,bakery,bakery_bread_loaves,high
+9361,"Forte Classico juust, 500 g",Forte Classico,500 g,dairy_eggs_fats,"Prisma, Rimi",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+9219,"Forte Classico kõva itaaliapärane juust, 180 g",Forte Classico,180 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+6780,Forte juustu toorvorstikesed 400 g,Forte,400 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Selver",,meat_sausages,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+12183,"Forte Superiore kõva itaaliapärane juust, 180 g",Forte Superiore,180 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+38727,Frezza Forte Double Trouble kohvijook piimaga 250 ml,Frezza Forte,250 ml,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+41473,Frezza Latte Love kohvijook piimaga 250 ml,Frezza Latte,250 ml,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+43408,Frezza Mint Mighty Minty mündi-šokolaadimaitseline kohvijook piimaga 250 ml,Frezza Mint,250 ml,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+39895,Frezza Mocca Choco Loco šokolaadimaitseline kohvijook piimaga 250 ml,Frezza Mocca,250 ml,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+39036,Frezza Vanilla Sweet Treat vanillimaitseline kohvijook piimaga 250 ml,Frezza Vanilla,250 ml,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+594790,"Friso Gold 3 jätkupiimasegu 400g, alates 12-elukuust",Friso Gold,400 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+589414,"Friso Gold Comfort Next 3 piimasegu 400g, alates 12-elukuust",Friso Gold,400 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+589440,Friso Jätkupiimasegu 6-12 kuud 400 g,Friso Jätkupiimasegu,400 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+22709,Friso Seedeprobleemidega imiku piimasegu 0-6 kuud 400 g,Friso Seedeprobleemidega,400 g,dairy_eggs_fats,"Prisma, Rimi",,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+42038,Friso Seedeprobleemidega jätkupiimasegu 6-12 kuud 400 g,Friso Seedeprobleemidega,400 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+18304,Gefilus C-vitamiini vaarika-maasikamaitselised närimistabletid piimhappebakteritega 30 tk 13 g,Gefilus C-vitamiini,13 g,dairy_eggs_fats,Prisma,,produce_berries,produce,dairy_eggs_fats,dairy_milk,high
+47143,Gefilus jogurtijook apelsini-mango C-vitamiiniga laktoosivaba 4x100g,Gefilus,4x100 g,dairy_eggs_fats,Prisma,,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+11066,Gefilus jogurtijook mustika-banaani kaltsiumiga 4x100g,Gefilus,4x100 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Rimi",,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+9045,"Gefilus Maitsestamata jogurt, 1 kg",Gefilus Maitsestamata,1 kg,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+36341,"Gefilus Mango-banaani-chia jogurt, 380 g",Gefilus Mango-banaani-chia,380 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Rimi, Selver",,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+125065,"Gefilus Mustikajogurt, 380 g","Gefilus Mustikajogurt,",380 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+3803,Gefilus piimhappebakteritega kapslid 20tk 6g,Gefilus,6 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+46061,"Gefilus Virsiku-papaia jogurt, 380 g",Gefilus Virsiku-papaia,380 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+3674,GEISHA PIIMAŠOKOLAADIKOMPVEKID 185G,GEISHA PIIMAŠOKOLAADIKOMPVEKID,185 G,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+10500,Golden Monarch sinihallitusjuust 100g,Golden Monarch,100 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+9575,"Gouda juust tšilliga, 250 g",Gouda,250 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+11085,"Gouda Karulauguga, NOPRI, 250 g",Gouda,250 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dry_other,other,dairy_eggs_fats,dairy_cheese_slices,fallback
+35693,"Granarolo Grana Padano juust 12k, 150g",Granarolo Grana,150 g,dairy_eggs_fats,"Barbora, Maxima, Prisma",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12069,"Granarolo Grana Padano juust 9k, 150g",Granarolo Grana,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+36859,Granarolo Mozzarella juust 250g,Granarolo Mozzarella,250 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+102477,"Gran Castelli riivjuust, 50 g",Gran Castelli,50 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12773,"Gran Regale juust, 180 g",Gran Regale,180 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+3252,Griesson Twist´n Snack juustupulgad 125 g,Griesson Twist´n,125 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+338955,"Grillitud šašlõkk kolme juustuga, kg",Grillitud,,dairy_eggs_fats,Prisma,,meat_pork,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+95268,Grilljuust 200g,Grilljuust,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+53446,"Grillvorstid rohke juustuga, RAKVERE, 400 g",Rohke,400 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,meat_sausages,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+35113,"Grillvorst suitsujuustuga Peipsi, WÕRO, 600 g",Peipsi,600 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,meat_sausages,meat_fish,dairy_eggs_fats,dairy_other,high
+30666,Gullon crackers cheddari juustu maitsega 250g,Gullon,250 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+95241,Gustav Rummipallid Ehtsa Võiga 250 G,Gustav Rummipallid,250 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+14288,Hambapasta 50ml 0-5a piimahammaste 50ml,Hambapasta,50 ml,dairy_eggs_fats,Coop,,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+11525,"Hapendatud täispiim 4%, 1 kg",Hapendatud,1 kg,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+9186,"Hapupiim 2,5%, 1 l",Hapupiim,1 l,dairy_eggs_fats,"Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+76282,"Hapupiimajook Airan 1%, 500 ml",Hapupiimajook Airan,500 ml,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+49520,"Hapupiimajook Rjaženka bifidobakteritega rasvasus 3,2%, 500g",Hapupiimajook Rjaženka,500 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+12092,"Harilik kohupiim, SAIDA FARM, 500 g",Harilik,500 g,dairy_eggs_fats,"Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+37736,Heinz mascarpone ja grana padano juustuga maitsestatud pastakaste 350 g,Heinz,350 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+4269,Herkku Nelja juustu tortelliinid 250 g,Herkku Nelja,250 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+400338,Hiirte Juust Gouda Snäkk 175g,Hiirte Juust,175 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1520,"Hiirte juust, viilutatud, 500 g",Hiirte,500 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1174,Hiirte Sulatatud Juust 185g,Hiirte Sulatatud,185 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+9174,Hiirte Sulatatud Juust krevettidega 185g,Hiirte Sulatatud,185 g,dairy_eggs_fats,"Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+8504,Hiirte Sulatatud Juust kukeseentega 185g,Hiirte Sulatatud,185 g,dairy_eggs_fats,Prisma,,produce_mushrooms,produce,dairy_eggs_fats,dairy_cheese_slices,high
+10218,Hiirte Sulatatud Juust maitserohelisega 185g,Hiirte Sulatatud,185 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1852,Hiirte Sulatatud Juust suitsujuustuga 185g,Hiirte Sulatatud,185 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,fish_salted_smoked,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+3928,"HIIUMAA KÖÖK Juustu-küüslauguvõie, 150 g",HIIUMAA KÖÖK,150 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+2782,HIIUMAA KÖÖK Kohupiimamaius musta sõstraga 150 g,HIIUMAA KÖÖK,150 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+17653,HIPP 1 BIO Combiotik imiku piimasegu al. sünnist,HIPP,,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+17265,HIPP 2 BIO Combiotik jätkupiimasegu al.6k,HIPP,,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+21522,HIPP 3 Junior Combiotic väikelastepiim alates 12-elukuust,HIPP,,dairy_eggs_fats,"Prisma, Rimi",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+63889,"HIPP 5-vilja piimapuder ploomi ja probiootikumidega 250 g, alates 6-elukuust",HIPP,250 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+1378,"Hipp Combiotic 1 piimasegu 800 g, alates sünnist",Hipp Combiotic,800 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+283459,Hipp comfort eripiimasegu al.sünnist300g,Hipp,,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+45557,"Hipp head ööd banaani-kuiviku piimapudrupulber 250 g, öko, alates 4-",Hipp,250 g,dairy_eggs_fats,Prisma,,produce_tropical,produce,dairy_eggs_fats,dairy_milk,high
+565576,HiPP head ööd teraviljapuder piimasegu ja puuviljadega öko peale 4.k 190g,HiPP,190 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+61790,"Hipp kaera-õuna-piimapuder 250g, alates 6-elukuust",Hipp,250 g,dairy_eggs_fats,"Prisma, Rimi",,produce_apples_pears,produce,dairy_eggs_fats,dairy_milk,high
+17749,Hipp Organic Combiotic jätkupiimasegu al.6.k,Hipp Organic,,dairy_eggs_fats,"Prisma, Selver",,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+583996,"HiPP Piimapudrupulber maisi ja puuviljadega al. 6 kuust, 250 g",HiPP Piimapudrupulber,250 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+43539,HIPP piimapudrupulber puuviljad jogurtiga BIO 250 g 8k,HIPP,250 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+51857,"Hipp puuviljasõber jogurti-kirsi-banaanibatoon 23g, öko, alates 1- eluaastast",Hipp,23 g,dairy_eggs_fats,"Prisma, Rimi",,produce_tropical,produce,sweets_snacks,sweets_chocolate_bars,high
+42028,"Hipp tatra piimapudrupulber 250 g, alates 4-elukuust",Hipp,250 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+9651,Hispaaniapärane juustuvalik 180 g,Hispaaniapärane,180 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+22759,"Holle 2 kitse jätkupiimasegu 400 g, öko, alates 6-elukuust",Holle,400 g,dairy_eggs_fats,"Prisma, Selver",,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+46004,"Holle piimasegu 1 400 g, alates sünnist",Holle,400 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+13372,Ibero juuste tupeerimishari,Ibero,,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+361526,Indian terav juustudipp 300 g,Indian,300 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+12534,"Isey Skyr Air kirsi-šokolaadimaitseline piimatoode, laktoosivaba, 125 g",Isey Skyr,125 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+9932,"Isey Skyr Air sidrunimaitseline laktoosivaba piimatoode, 125 g",Isey Skyr,125 g,dairy_eggs_fats,Prisma,,produce_tropical,produce,dairy_eggs_fats,dairy_milk,high
+46787,"Isey Skyr vanillimaitseline piimatoode, laktoosivaba 125 g",Isey Skyr,125 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+39995,Jaanihanso Eau De Vie 40%vol Õuna- ja/või pirnisiidrist valmistatud piiritusjook 350ml,Jaanihanso Eau,350 ml,dairy_eggs_fats,Prisma,,produce_apples_pears,produce,dairy_eggs_fats,dairy_butter_margarine,high
+11418,"Jäätisemaitseline AB-jogurt šokolaadiriisipallidega, 165 g",Jäätisemaitseline AB-jogurt,165 g,dairy_eggs_fats,"Coop, Prisma",,dairy_yogurt_kefir,dairy_eggs_fats,frozen_food,frozen_desserts_icecream,high
+1451,Jeppi vanillimaitseline kohupiimadessert 38 g,Jeppi,38 g,dairy_eggs_fats,"Prisma, Rimi",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+3237,Jeppi vanillimaitseline kohupiimadessert multipakk 5 x 38 g,Jeppi,5x38 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+12815,"Jogurtijook 12x100g, maasika-mustika",Jogurtijook,12x100 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+11283,"Jogurtijook 4x100g, maasika",Jogurtijook,4x100 g,dairy_eggs_fats,Prisma,,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+47078,"Jogurtijook maasikas-granaatõun 4x100g, ACTIMEL, 400 g",Actimel,4x100 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_apples_pears,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+77468,"Jogurtijook metsmaasika, laktoosivaba 4x100 g",Jogurtijook,4x100 g,dairy_eggs_fats,"Coop, Prisma, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+12178,"Jogurtijook vaarika-mustika, laktoosivaba 4x100 g",Jogurtijook,4x100 g,dairy_eggs_fats,"Coop, Prisma",,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+8674,"Jogurt kakaoküpsistega, MESIKÄPP, 140 g",Mesikäpp,140 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,sweets_snacks,sweets_biscuits_cookies,high
+11552,"Jõhvikakisselliga kohupiimakreem, 150 g",Jõhvikakisselliga,150 g,dairy_eggs_fats,"Coop, Prisma, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_cottage_quark,high
+10688,"Joogijogurt banaani-maasika 1,5%, ALMA, 1 kg",Banaani-maasika,1 kg,dairy_eggs_fats,"Coop, Prisma, Selver",,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+10135,Joogijogurt Harmoonia maasika-pohla laktoosivaba 1kg,Joogijogurt Harmoonia,1 kg,dairy_eggs_fats,"Prisma, Rimi, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+12239,Joogijogurt maasika-nektariini 900 g,Joogijogurt,900 g,dairy_eggs_fats,"Coop, Prisma",,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+9348,"Joogijogurt mango, ALMA, 900 g",Mango,900 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+48513,"Joogijogurt metsamarjamaitseline, ALMA, 900 g",Metsamarja,900 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+8723,"Joogijogurt metsmaasika, TERE, 900 g",Tere,900 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+9250,"Joogijogurt vaarika-passioni laktoosivaba, GEFILUS, 1 L",Gefilus,1 kg,dairy_eggs_fats,"Prisma, Rimi, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+13172,Juuksegeel Glued kulmudele ja lahtistele juustele 16ml,Juuksegeel Glued,16 ml,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,personal_care,pcare_other,high
+36652,"Juust Atleet Light, viilutatud, 150 g",Juust Atleet,150 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+11147,"Juust Atleet Originaal, 200 g",Juust Atleet,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+51365,"Juust Atleet Originaal, 500 g",Juust Atleet,500 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+73331,"Juust Atleet Originaal, viilutatud, 150 g",Juust Atleet,150 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+7375,"Juust Atleet Originaal, viilutatud, 500 g",Juust Atleet,500 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+8676,"juust Bresto Light, 200g",juust,200 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2028,Juustekapslid Evonia N56 80 g,Juustekapslid Evonia,80 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+18871,"Juustele, nah&ntele kummikommid mustika 60tk","Juustele,",,dairy_eggs_fats,Prisma,,produce_berries,produce,sweets_snacks,sweets_candies,high
+10270,"Juust Grand, kg","Juust Grand,",,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2819,Juustoportti Hyvin magustamata marjane mahlasupp 1kg,Juustoportti Hyvin,1 kg,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+1924,Juustoportti .Kanakebab Riisiga 350 G,Juustoportti,350 g,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_other,high
+10811,Juustoportti magustamata laktoosivaba mangojogurt 150 g,Juustoportti,150 g,dairy_eggs_fats,Prisma,,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+12132,"Juust Royal Gouda Black, viilutatud, 150g",Juust Royal,150 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+11962,"Juust Royal Gouda Red, 250 g",Juust Royal,250 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+11049,"Juust Royal Gouda Red, viilutatud, 150 g",Juust Royal,150 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+36217,Juustuampsud 200 g,Juustuampsud,200 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+1149,Juustucroissant,Juustucroissant,,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+608153,Juustukaste 180g,Juustukaste,180 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+9849,Juustumakaronid suitsupeekoniga 280 g,Juustumakaronid,280 g,dairy_eggs_fats,"Prisma, Rimi",,meat_pork,meat_fish,dairy_eggs_fats,dairy_other,high
+3464,"Juusturull, 400 g","Juusturull,",400 g,dairy_eggs_fats,"Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+1088,Juusturull mozzarellaga,Juusturull,,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1145,Juustustritsel,Juustustritsel,,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,bakery,bakery_other,high
+21860,"Juustu täidisega kuumsuitsulõhe kogufilee 1,2-1,5 kg",Juustu,1.5 kg,dairy_eggs_fats,Prisma,,fish_fresh,meat_fish,dairy_eggs_fats,dairy_other,high
+34913,"Juustuvorst, RAKVERE LK, 600 g",Juustuvorst,600 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_sausages,meat_fish,dairy_eggs_fats,dairy_other,high
+98853,"Kadaka juust, viilutatud, 150 g",Kadaka,150 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+8465,KALEV Anneke õhuline piimašokolaad 65g,KALEV Anneke,65 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+5981,Kalev Anneke piimašokolaad 100 g,Kalev Anneke,100 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+25457,Kalev Anneke piimašokolaad 20 g,Kalev Anneke,20 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+1904,Kalevipoja kanamunad L 10TK,Kalevipoja,10 pcs,dairy_eggs_fats,"Coop, Prisma",,meat_poultry,meat_fish,dairy_eggs_fats,dairy_eggs,high
+3633,Kalevipoja kanamunad M 10TK,Kalevipoja,10 pcs,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_eggs,high
+127088,Kalev linnupiimavalik 238g,Kalev,238 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+3398,Kalev linnupiim vahustatud vanillitäidisega šokolaadikommid 136g,Kalev,136 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+35215,Kalev maapähklibatoon karamelliga piimašokolaadis 50g,Kalev,50 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+4664,KALEV Nurr piimašokolaad 20g,KALEV Nurr,20 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+38269,Kalev Pilveke piimabatoonike 150 g,Kalev Pilveke,150 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+26829,Kalev soolakaramelli batoon piimašokolaadis 40g,Kalev,40 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+10129,Kalev tiramisumaitseline piimašokolaad küpsisega 100g,Kalev,100 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+459665,Kalev Vana Tallinn Cream koorelikööritäidisega šokolaadikompvekid 122 g,Kalev Vana,122 g,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,drinks,drinks_spirits,high
+42514,"Kanagrillvorst juustuga lambasooles, TALLEGG, 400 g",Kanagrillvorst,400 g,dairy_eggs_fats,"Coop, Prisma, Selver",,meat_poultry,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+11546,"Kana-juustupihvid, TALLEGG, 320 g",TALLEGG Kana-juustupihvid,320 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_poultry,meat_fish,dairy_eggs_fats,dairy_other,high
+31465,"Kanasigar juustuga, TALLEGG, 200 g",Kanasigar,200 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+6515,Karl Fazer Dumle piimašokolaad 180 g,Karl Fazer,180 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+7679,Karl Fazer piimašokolaad tervete metsapähklitega 200 g,Karl Fazer,200 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+57693,Kartulid küüslaugu ja grana padano juustuga 500 g,Kartulid,500 g,dairy_eggs_fats,Prisma,,produce_root_veg,produce,dairy_eggs_fats,dairy_cheese_slices,high
+3535,Kartulivahvlid juustu- ja sibulamaitselised 90 g,Kartulivahvlid,90 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_root_veg,produce,sweets_snacks,sweets_waffles_cakes,high
+2168,"Karums arbuusi glasuurkohuke, 45 g",Karums,45 g,dairy_eggs_fats,"Coop, Prisma, Selver",,produce_tropical,produce,dairy_eggs_fats,dairy_other,high
+192,"Karums Karamelli glasuurkohuke, 45 g",Karums Karamelli,45 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma",,drinks_spirits,drinks,sweets_snacks,sweets_candies,high
+1245,"Karums Mustikamaitseline kohuke, 45g",Karums Mustikamaitseline,45 g,dairy_eggs_fats,"Prisma, Rimi",,produce_berries,produce,dairy_eggs_fats,dairy_other,high
+264,"Karums Šokolaadi glasuurkohuke, 45 g",Karums Šokolaadi,45 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,drinks_spirits,drinks,sweets_snacks,sweets_chocolate_bars,high
+128,"Karums Vanilli glasuurkohuke, 45 g",Karums Vanilli,45 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,drinks_spirits,drinks,dairy_eggs_fats,dairy_other,high
+48085,"Karums Vanilli glasuurkohuke, 7 x 45 g",Karums Vanilli,7x45 g,dairy_eggs_fats,"Coop, Prisma, Selver",,drinks_spirits,drinks,dairy_eggs_fats,dairy_other,high
+4073,"Karums virsiku glasuurkohuke, laktoosivaba, 30% vähem suhkrut, 40 g",Karums,40 g,dairy_eggs_fats,Prisma,,drinks_spirits,drinks,dairy_eggs_fats,dairy_other,high
+34886,"Keeduvorst juustu, VALLA, 600 g",Juustuvorst,600 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,meat_sausages,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+2181,"Keiju Taimne rasvavõie 50%, 400 g",Keiju Taimne,400 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+3820,"Keiju taimne rasvavõie 70%, 400 g",Keiju,400 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+4259,"Keiju Taimne soolane rasvavõie 70%, 400 g",Keiju Taimne,400 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+28924,Kiievi kotlet küüslauguvõidega. 330 g,Kiievi,330 g,dairy_eggs_fats,"Prisma, Rimi",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+272795,Kikas Juustu-Kanarull 330 G,Kikas Juustu-Kanarull,330 g,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+8733,KIKAS Juustupallid 300 g,KIKAS Juustupallid,300 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2631,"Kikerikii Ökomunad L, 10 tk",Kikerikii Ökomunad,10 pcs,dairy_eggs_fats,Prisma,,dairy_eggs,dairy_eggs_fats,dairy_eggs_fats,dairy_eggs,high
+1557,"Kikerikii Ökomunad M, 10 tk",Kikerikii Ökomunad,10 pcs,dairy_eggs_fats,Prisma,,dairy_eggs,dairy_eggs_fats,dairy_eggs_fats,dairy_eggs,high
+1818,Kinder Country piimašokolaad piimatäidise ja teraviljadega 24g.,Kinder Country,24 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+2498,Kinder Delice kakaobatoon piimakreemitäidisega 39 g,Kinder Delice,39 g,dairy_eggs_fats,"Coop, Prisma, Rimi",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+552440,Kinder Maxi piimašokolaadibatoon 21g,Kinder Maxi,21 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+595081,Kinder piimašokolaadifiguur piima- ja kakaoküpsisetükkidega 122g,Kinder,122 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+592184,Kinder piimatäidisega piimašokolaad T8 100 g,Kinder,100 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+9857,"Kirsi proteiinijogurtijook, 275g",Kirsi,275 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+247579,Kitchen joy võikana,Kitchen,,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_other,high
+11494,"Kitsejuust, 150 g","Kitsejuust,",150 g,dairy_eggs_fats,"Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+10823,"Kitsepiimajuust, 150 g","Kitsepiimajuust,",150 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+45935,"Kitsepiim pastöriseeritud 0,96L",Kitsepiim,0.96 l,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+1335,Knoppers piima- ja pähklitäidisega krõbe vahvel 25 g,Knoppers,25 g,dairy_eggs_fats,"Prisma, Rimi",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_waffles_cakes,high
+18322,Knorr juustupüreesupp 22 g,Knorr,22 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+150330,Knorr juustusupp 17g,Knorr,17 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+23873,Knorr kiirnuudlid juustu- ja ürdimaitselised 61g,Knorr,61 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+5549,Knorr spagetid peekoni ja juustuga 71 g,Knorr,71 g,dairy_eggs_fats,"Coop, Prisma, Rimi",,meat_pork,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+2048,Knorr tops Pasta juustu/koore 55g,Knorr,55 g,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1943,Kodujuust 7% 300g,Kodujuust,300 g,dairy_eggs_fats,Prisma,,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+9127,"Kodujuust rasvatu, 400 g",Kodujuust,400 g,dairy_eggs_fats,Prisma,,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+36346,"Kodujuust Setomaa soolariisikatega, TERE, 300 g",Kodujuust Setomaa,300 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Selver",,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+12790,"Kohupiim 15%, 300 g",Kohupiim,300 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+12026,"Kohupiim, 200 g","Kohupiim,",200 g,dairy_eggs_fats,"Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+12653,"Kohupiim 5%, 200 g",Kohupiim,200 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+9113,"Kohupiim 9%, LIISU, 250 g",Kohupiim,250 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+8992,"Kohupiimakreemide segu, mahe, PAJUMÄE TALU, 190 g",Pajumäe Talu,190 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+9770,"Kohupiimakreem maasika-vahukommimaitseline, ALMA, 150g",Alma,150 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,produce_berries,produce,sweets_snacks,sweets_candies,high
+9914,"Kohupiimakreem mustika, ALMA, 300 g",Mustika,300 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_cottage_quark,high
+10410,Kohupiimakreem šokolaaditükkidega 400g,Kohupiimakreem,400 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+138,Kohupiimapall,Kohupiimapall,,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+1087,Kohupiimasõrnik,Kohupiimasõrnik,,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+1143,Kohupiimatasku,Kohupiimatasku,,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+45900,"Kohupiim metsmaasika, ALMA, 200 g",Alma,200 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Rimi, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_cottage_quark,high
+11088,"Kondenspiim suhkruga, JAANI, 250 g",Jaani,250 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+9774,"Köögi toorjuust, 400 g",Köögi,400 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+43520,Koskenkorva Salmiakki Cream liköör 15%vol 500 ml,Koskenkorva Salmiakki,500 ml,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,drinks,drinks_spirits,high
+36120,"Kotimaista Black Label riivitud Emmentali juust, 150 g",Kotimaista Black,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+35814,"Kotimaista Edami juust, 325 g",Kotimaista Edami,325 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+49731,"Kotimaista Emmentali viilutatud juust, 120 g",Kotimaista Emmentali,120 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+36399,"Kotimaista koorejuust, 500 g",Kotimaista,500 g,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+99211,"Kotimaista laktoosi- ja rasvavaba hapupiim, 1 L",Kotimaista,1 l,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+179481,"Kotimaista laktoosi- ja rasvavaba piimajook, 1 L",Kotimaista,1 l,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+3108,"Kotimaista laktoosivaba piimajook, 1,5%, 1L",Kotimaista,1 l,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+3317,"Kotimaista laktoosivaba piimajook, 3%, 1L",Kotimaista,1 l,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+48594,Kotimaista laktoosivaba rasvata piim 0% 1l,Kotimaista,1 l,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+11676,Kotimaista madala laktoosisisaldusega soolane või 500 g,Kotimaista,500 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+35650,"Kotimaista maheda maitsega sulatatud juustu viilud, 200 g",Kotimaista,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2504,Kotimaista mahe kanamunad M6 348g,Kotimaista,348 g,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_eggs,high
+47210,"Kotimaista maitsestamata mahe AB-jogurt, 1 kg",Kotimaista,1 kg,dairy_eggs_fats,Prisma,,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+11869,Kotimaista naturaalne laktoosivaba AB jogurt 1 kg,Kotimaista,1 kg,dairy_eggs_fats,Prisma,,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+2789,Kotimaista õrrekanade kanamunad M 6tk,Kotimaista,6 pcs,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_eggs,high
+3526,Kotimaista õrrekanade munad L 15 tk,Kotimaista,15 pcs,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_eggs,high
+4153,Kotimaista õrrekanade munad L 6 tk,Kotimaista,6 pcs,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_eggs,high
+174,Kotimaista õrrekanade munad M 10 TK,Kotimaista,10 pcs,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_eggs,high
+37290,Kotimaista õrrekanade munad M 24tk,Kotimaista,24 pcs,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_eggs,high
+35609,Kotimaista õrrekande munad omega M 6tk,Kotimaista,6 pcs,dairy_eggs_fats,Prisma,,dairy_eggs,dairy_eggs_fats,dairy_eggs_fats,dairy_eggs,high
+45963,"Kotimaista piim 1,5%, 1 L",Kotimaista,1 l,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+12263,"Kotimaista Red Label Emmental juust, 500 g",Kotimaista Red,500 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+37835,"Kotimaista Sinileima Emmentali juust, 500 g",Kotimaista Sinileima,500 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+9299,"Kotimaista suitsujuustuviilud, 200 g",Kotimaista,200 g,dairy_eggs_fats,Prisma,,fish_salted_smoked,meat_fish,dairy_eggs_fats,dairy_other,high
+9847,"Kotimaista sulajuustuviilud, 400 g",Kotimaista,400 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+95916,"Kotimaista sulatatud juust, 200 g",Kotimaista,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+97681,"Kotimaista tugeva maitsega sulatatud juustu viilud (6%), 200 g",Kotimaista,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1946,Kotimaista vabalt peetavate kanade munad M10,Kotimaista,,dairy_eggs_fats,Prisma,,produce_root_veg,produce,dairy_eggs_fats,dairy_eggs,high
+99979,"Kotimaista vähese laktoosisisaldusega sulatatud juustu viilud (12%), 200 g",Kotimaista,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+61686,"Kotimaista vähese laktoosisisaldusega või, 200 g",Kotimaista,200 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+1810,Kotimaista väikese laktoosisisaldusega leibjuust 335g,Kotimaista,335 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,bakery,bakery_bread_loaves,high
+599377,"Kotimaista või 80%, soolane, 500g",Kotimaista,500 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+52694,Kotimaista võitaigen 400 g,Kotimaista,400 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+9163,"Kõva riivitud juust, 40% rasva kuivaines, 100g",Kõva,100 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12412,"Kreeka jogurt 0%, 150 g",Kreeka,150 g,dairy_eggs_fats,Prisma,,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+3682,"Kreeka jogurt 10%, SAARE, 380 g",Saare Kreeka,380 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+7863,"Kreeka jogurti-tzatziki grill-liha, LINNAMÄE LIHATÖÖSTUS, 400 g",Kreeka,400 g,dairy_eggs_fats,"Prisma, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+25211,Kuivatatud juustupallid Džiugas trühvli 40g,Kuivatatud,40 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+26508,Kuivatatud krõmpsuvad juustupallid Džiugas 40g,Kuivatatud,40 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+38697,Kuivatatud krõmpsuvad juustupallid hapukoore-sibula 40g,Kuivatatud,40 g,dairy_eggs_fats,Prisma,,produce_root_veg,produce,dairy_eggs_fats,dairy_cream_sourcream,high
+25813,Kuivatatud krõmpsuvad juustupallid karamelliseeritud sibula 40g,Kuivatatud,40 g,dairy_eggs_fats,Prisma,,produce_root_veg,produce,sweets_snacks,sweets_candies,high
+19767,Kunnon Arki juustuburger 180 g,Kunnon Arki,180 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1184,Kupiec Fitos maisivahvlid cheddari juustuga 120g,Kupiec Fitos,120 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,sweets_snacks,sweets_waffles_cakes,high
+1436,Kupiec maisivahvlid jogurti ja maasikamaitseliste tükkidega 64g,Kupiec,64 g,dairy_eggs_fats,Prisma,,produce_berries,produce,sweets_snacks,sweets_waffles_cakes,high
+28899,Kupiec riisivahvlid piimaðokolaadiga 60g,Kupiec,60 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_waffles_cakes,high
+6227,"Küüslaugu-juustu dipikaste, 200 g",Küüslaugu-juustu,200 g,dairy_eggs_fats,"Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+35865,"Küüslauguvõie, 125g","Küüslauguvõie,",125 g,dairy_eggs_fats,"Coop, Prisma",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+39662,Läätsekrõpsud Cheddar juustuga 100 g,Läätsekrõpsud Cheddar,100 g,dairy_eggs_fats,"Coop, Prisma",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+9435,Lacteous Ghee selitatud või 160 g,Lacteous Ghee,160 g,dairy_eggs_fats,"Prisma, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+3651,Lacto Seven piimhappebakteritega inuliin 100 tk 40 g,Lacto Seven,40 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+407257,LaFesta kuum šokolaadijook piimašokolaadi maitsega 250gr,LaFesta,,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+9042,"Lahja kohupiim, 200 g",Lahja,200 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+10382,"Laktoosivaba kohupiimapasta, 300 g",Laktoosivaba,300 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+12539,Laktoosivaba toidukoor juustuga UHT 15% 200ml,Laktoosivaba,200 ml,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_cream_sourcream,high
+9051,"Laktoosivaba vanilli glasuurkohuke, 40 g",Laktoosivaba,40 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dry_other,other,dairy_eggs_fats,dairy_other,fallback
+35296,"Landana juust 500 päeva, 180 g",Landana,180 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+15649,La Rive keha- ja juustesprei Crazy In Love,La Rive,,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+20998,Lay's Juustumaitselised Kartulirõpsud 200g,Lay's Juustumaitselised,200 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_root_veg,produce,dairy_eggs_fats,dairy_cheese_slices,high
+10086,"Lemmik Juustu majonees, 200 g",Lemmik Juustu,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+11312,"Lepasuitsu Eesti juust, 370 g",Lepasuitsu Eesti,370 g,dairy_eggs_fats,"Coop, Prisma",,fish_salted_smoked,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+35959,Le Rustique brie juust 200 g,Le Rustique,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+3667,Linnamäe Hirveliha Grillsteik Ürdivõiga 200 G,Linnamäe Hirveliha,200 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+112165,Linnamäe Juustu Ja Ürtidega Hirveliha Burger 170,Linnamäe Juustu,170 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+3943,Linnamäe Veiseliha Grillsteik Ürdivõiga 200 G,Linnamäe Veiseliha,200 g,dairy_eggs_fats,Prisma,,meat_beef_lamb_game,meat_fish,dairy_eggs_fats,dairy_butter_margarine,high
+4028,Linnu Talu Õrrekanade munad L 10TK,Linnu Talu,10 pcs,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_eggs,high
+1233,Linnu Talu Õrrekanade munad M 10tk,Linnu Talu,,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_eggs,high
+2700,Linnu Talu Vabapidamise kanamunad L 10 tk,Linnu Talu,10 pcs,dairy_eggs_fats,"Prisma, Selver",,meat_poultry,meat_fish,dairy_eggs_fats,dairy_eggs,high
+2139,Linnu Talu Vabapidamise kanamunad M 10 tk,Linnu Talu,10 pcs,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_eggs,high
+52551,Lotte maisikepikesed kondenspiimaga 130 g,Lotte,130 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_other,high
+3016,Luksi Talu vutimunad 12 tk,Luksi Talu,12 pcs,dairy_eggs_fats,Prisma,,dairy_eggs,dairy_eggs_fats,dairy_eggs_fats,dairy_eggs,high
+11868,Maasika-banaanijogurt tuubis 70G,Maasika-banaanijogurt,70 G,dairy_eggs_fats,Prisma,,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+48170,Maasika ja banaani jogurtijook L. casei Danone ning B6 ja D vitamiinidega 4x100g,Maasika,4x100 g,dairy_eggs_fats,"Prisma, Selver",,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+11548,"Maasika jogurtijook, 4 x 100 g",Maasika,4x100 g,dairy_eggs_fats,Prisma,,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+11696,"Maasikajogurt tuubis, 70g",Maasikajogurt,70 g,dairy_eggs_fats,Prisma,,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+3355,Maasika joogijogurt 1kg,Maasika,1 kg,dairy_eggs_fats,Prisma,,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+10071,"Maasika-vaarika kohupiimakreem 0,2%, 150 g",Maasika-vaarika,150 g,dairy_eggs_fats,Prisma,,produce_berries,produce,dairy_eggs_fats,dairy_cottage_quark,high
+21777,Maggi juustu kiirsupp 19 g,Maggi,19 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+90973,Maggi võimaitseline kartulipüree tilliga 35 g,Maggi,35 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_other,high
+38386,"Magija karamelliga kohuke, 45g",Magija,45 g,dairy_eggs_fats,Prisma,,dry_other,other,sweets_snacks,sweets_candies,fallback
+40184,"Magija shokolaadikohuke, 45 g",Magija,45 g,dairy_eggs_fats,Prisma,,dry_other,other,sweets_snacks,sweets_chocolate_bars,fallback
+9311,"Mahejuust, viilutatud, 150 g","Mahejuust,",150 g,dairy_eggs_fats,"Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+11616,"Mahe lahja kohupiim, 250 g",Mahe,250 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+9058,"Maitsestamata jogurt, 150 g",Maitsestamata,150 g,dairy_eggs_fats,Prisma,,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+10160,"Maitsestamata jogurt, 1 kg",Maitsestamata,1 kg,dairy_eggs_fats,"Barbora, Maxima, Prisma",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+11456,"Maitsestamata jogurt 2,5%, 1 kg",Maitsestamata,1 kg,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+9773,"Maitsestamata jogurt 2,5%, 380 g",Maitsestamata,380 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+11453,"Maitsestamata jogurt kitsepiimast 0,5L",Maitsestamata,0.5 l,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+11798,"Maitsestamata kreeka jogurt, 180 g",Maitsestamata,180 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+48563,"Maitsestamata rasvavaba jogurt, 1 kg",Maitsestamata,1 kg,dairy_eggs_fats,Prisma,,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+3946,Maks ja Moorits Kanafilee Jogurti-Karulaugu Marin.500G,Maks,500 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,meat_poultry,meat_fish,dairy_eggs_fats,dairy_yogurt_kefir,high
+2002,Maks ja Moorits Kodupihvid Kreemja Juustutäidisega 400 G,Maks,400 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12824,Makula Külmsuitsulõhe võileib 210g,Makula Külmsuitsulõhe,210 g,dairy_eggs_fats,Prisma,,fish_fresh,meat_fish,bakery,bakery_bread_loaves,high
+9919,Makula võileib Vöner 210g,Makula,210 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,bakery,bakery_bread_loaves,high
+19868,"Mama riisinuudlid Creamy Tom Yum, gluteenivaba, 55g",Mama,55 g,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+2859,MAMMA Aiaürtidega kodujuustupannkoogid 200 g,MAMMA Aiaürtidega,200 g,dairy_eggs_fats,"Coop, Prisma",,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+28764,MAMMA Hamburger juustuga 195 g,MAMMA Hamburger,195 g,dairy_eggs_fats,"Coop, Prisma",,meat_hams,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+12676,Mamma Juustune Kana-Köögiviljasupp 1 Kg,Mamma Juustune,1 kg,dairy_eggs_fats,"Barbora, Maxima, Prisma",,meat_poultry,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+2001,Mamma Juustune Kana-Köögiviljasupp 300 G,Mamma Juustune,300 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi",,meat_poultry,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+1547,Mamma Juustupannkoogid 200 G,Mamma Juustupannkoogid,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+4066,Mamma Kohupiimapannkoogid 200G,Mamma Kohupiimapannkoogid,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+4081,Mamma Kohupiimapannkoogid 400G,Mamma Kohupiimapannkoogid,400 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+4175,Mamma Kõrvitsa-Kohupiimapannkoogid 200 G,Mamma Kõrvitsa-Kohupiimapannkoogid,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,produce_root_veg,produce,dairy_eggs_fats,dairy_cottage_quark,high
+4445,Mamma Kõrvitsa-Kohupiimapannkoogid 400G,Mamma Kõrvitsa-Kohupiimapannkoogid,400 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,produce_root_veg,produce,dairy_eggs_fats,dairy_cottage_quark,high
+10179,MAMMA Singi-juustubatoon 190 g,MAMMA Singi-juustubatoon,190 g,dairy_eggs_fats,"Coop, Prisma, Rimi",,dairy_cheese_slices,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+48997,"Mango-ananassi kohupiimakreem 0,2%, 150 g",Mango-ananassi,150 g,dairy_eggs_fats,Prisma,,produce_tropical,produce,dairy_eggs_fats,dairy_cottage_quark,high
+12425,"Mangokisselliga kohupiimakreem, 140 g",Mangokisselliga,140 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,produce_tropical,produce,dairy_eggs_fats,dairy_cottage_quark,high
+2807,Ma&orits Juustuviiner 300 G,Ma&orits Juustuviiner,300 g,dairy_eggs_fats,"Coop, Prisma",,meat_sausages,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+345105,Marabou Piimashokolaad 160g,Marabou Piimashokolaad,160 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+6700,Marabout Toffee piimašokolaad tervete pähklitega 300g,Marabout Toffee,300 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+100072,Maretti bruschetta-krõpsud juustuga 70g,Maretti,70 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2343,"Marge piim UHT 2,0%, 1 l",Marge,1 l,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+2123,"Marge piim UHT 3,2%, 1 l",Marge,1 l,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+94347,Maris Gilden Kaerahelbeküpsis Võiga 180 G,Maris Gilden,180 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,sweets_snacks,sweets_biscuits_cookies,high
+12567,"Marjamaitseline jogurtijook, 4 x 100 g",Marjamaitseline,4x100 g,dairy_eggs_fats,Prisma,,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+50389,Marta Pagar Juusturull 2x60 G,Marta Pagar,2x60 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+49497,Marta Pagar Kohupiimakorp 2x60 G,Marta Pagar,2x60 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+48117,Marta Pagar Võiroos 150 G,Marta Pagar,150 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+2233,MERCI jogurti ja puuvilja täidisega šokolaadi kommikarp 250g,MERCI,250 g,dairy_eggs_fats,Prisma,,dairy_yogurt_kefir,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+203249,MERCI Milk assortii piimašokolaadist 250g,MERCI Milk,250 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+6075,"Merevaik juustumajonees, 210 g",Merevaik,210 g,dairy_eggs_fats,"Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+8991,Merevaik Premium sulatatud juust 170 g,Merevaik Premium,170 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2587,"Merevaik Sulatatud juust, 200 g",Merevaik Sulatatud,200 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+3180,Merevaik sulatatud juust 370 g,Merevaik,370 g,dairy_eggs_fats,"Coop, Prisma",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12051,Merevaik sulatatud juust singiga 200g,Merevaik,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+53129,MESIKÄPP Mesikäpp riisiampsud piimašokolaadis 140g,MESIKÄPP Mesikäpp,140 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+47961,"Metsamarja proteiinijogurtijook, 275 g",Metsamarja,275 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+10108,"Metsmaasika kohupiimakreem, 300 g",Metsmaasika,300 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_cottage_quark,high
+48836,"Metsmaasika kreeka jogurtijook, 275 g",Metsmaasika,275 g,dairy_eggs_fats,Prisma,,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+127261,Milka Bubbly piima- ja valge šokolaadisegu 95 g,Milka Bubbly,95 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+601592,Milky Mood masikamaits. piimakõrred 30g,Milky Mood,30 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+595902,Milky Mood šokolaadimaitselised piimakõrred 30g,Milky Mood,30 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+1860,Milky Way piimašokolaad 21 g,Milky Way,21 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+11117,Milleret Tuhaga valgehallitusjuust 125g,Milleret Tuhaga,125 g,dairy_eggs_fats,"Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+6565,"Mini juustuviiner, RAKVERE LK, 200 g",Mini,200 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Selver",,meat_sausages,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+32861,"Mini Kiievi kotlet juustuvõiga, TALLEGG, 300 g",TALLEGG Mini,300 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+12674,"Mooniseemnetega kohuke, 40 g",Mooniseemnetega,40 g,dairy_eggs_fats,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dairy_eggs_fats,dairy_other,high
+4337,Mo Saaremaa Hollandi leibjuust viilutatud 450g,Mo Saaremaa,450 g,dairy_eggs_fats,"Coop, Prisma",,dairy_cheese_slices,dairy_eggs_fats,bakery,bakery_bread_loaves,high
+12701,Mo Saaremaa juust 500g,Mo Saaremaa,500 g,dairy_eggs_fats,"Prisma, Rimi",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+126857,Mo Saaremaa Juust Old Saare 280g,Mo Saaremaa,280 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+36306,"Mo Saaremaa Juust Saare Light, 150 g",Mo Saaremaa,150 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+4198,Mo Saaremaa Juustukaste 400g,Mo Saaremaa,400 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+35572,Mo Saaremaa juust viilutatud 450g,Mo Saaremaa,450 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+4123,"Mo Saaremaa Öko mahetäispiim 3,8 - 4,4% 1L",Mo Saaremaa,1 l,dairy_eggs_fats,"Barbora, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+10703,"Mo Saaremaa Pehme kohupiim rasvatu, laktoosivaba 500 g",Mo Saaremaa,500 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+9508,Mo Saaremaa Red Cheddar juust 280 g,Mo Saaremaa,280 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1215,Mo Saaremaa Saaremaa juust viilutatud 150g,Mo Saaremaa,150 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+10950,"Mo Saaremaa Soolakristallidega või 80%, 200 g",Mo Saaremaa,200 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+3481,"Mo Saaremaa Või 82%, 200 g",Mo Saaremaa,200 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+47759,"Mo Saaremaa Või küüslaugu ja soolakristallidega, 150g",Mo Saaremaa,150 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+599801,Mozart Chocolate Cream liköör 17%vol 500ml,Mozart Chocolate,500 ml,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,drinks,drinks_spirits,high
+10137,"Mozzarella juust Zottarella, 125 g",Mozzarella,125 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+9347,"Müller maasikamaitseline piimajook 1,4%, 400g",Müller,400 g,dairy_eggs_fats,"Prisma, Rimi",,produce_berries,produce,dairy_eggs_fats,dairy_milk,high
+3040,Munaliisa Kanamunad M 10 tk,Munaliisa Kanamunad,10 pcs,dairy_eggs_fats,"Coop, Prisma",,meat_poultry,meat_fish,dairy_eggs_fats,dairy_eggs,high
+3828,"Munaliisa Kanamunad S, 10 tk",Munaliisa Kanamunad,10 pcs,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_eggs,high
+4064,Munaliisa kanamunad XL 10 tk,Munaliisa,10 pcs,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_eggs,high
+3997,müslibatoon piimatäidisega 40g,müslibatoon,40 g,dairy_eggs_fats,Coop,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+50599,"Mustikatega kodujuust, 150 g",Mustikatega,150 g,dairy_eggs_fats,Prisma,,produce_berries,produce,dairy_eggs_fats,dairy_cottage_quark,high
+24636,MYSNACK Hernesnäkid juustuga 80g,MYSNACK Hernesnäkid,80 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+589512,"NAN SENSILAC 1 piimal põhinev imiku piimasegu 800G, alates sünnist",NAN SENSILAC,800 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+67221,Natty almondo - mahe mandlivõie 333g,Natty,333 g,dairy_eggs_fats,"Prisma, Rimi",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+68347,Natty kranži - krõbisev mahe maapähklivõie 333g,Natty,333 g,dairy_eggs_fats,"Prisma, Rimi",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+65861,Natty smuuud - kreemjas mahe maapähklivõie 333g,Natty,333 g,dairy_eggs_fats,"Prisma, Rimi",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+12150,"Naturli Veganlik võileivakate, mahe, 225g",Naturli Veganlik,225 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+38100,Nescafe 3in1 Creamy Latte lahustuv kohvijook 10x15g,Nescafe,10x15 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+589068,"Nestle COMFORT NAN Eripiimasegu imikutele alates sünnist kõhukinnisuse korral, 400g,",Nestle COMFORT,400 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+588193,Nestle NAN 1 piimasegu orgaaniline 500ml,Nestle NAN,500 ml,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+596885,Nestle NAN 2 piimasegu orgaaniline 500ml,Nestle NAN,500 ml,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+17912,"Nestle Nan Ha 1 piimajook 200ml, alates sünnist",Nestle Nan,200 ml,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+595111,Nestlé NAN HA 1 piimasegu 800g,Nestlé NAN,800 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+345246,"Nestle Nan Ha 2 jätkupiimajook 200 ml, alates 6-elukuust",Nestle Nan,200 ml,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+571679,"Nestle NAN LAKTOOSIVABA Eripiimasegu imikutele alates sünnist , 400g, purgis",Nestle NAN,400 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+17659,Nestle Nan pro 1 imiku piimasegu 200ml,Nestle Nan,200 ml,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+568502,Nestle Nan pro 1 imiku piimasegu 500ml,Nestle Nan,500 ml,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+17386,"Nestle Nan Pro 1 Piimal põhinev imiku piimasegu 800 g, alates sünnist",Nestle Nan,800 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+18768,Nestle Nan Pro 2 jätkupiimasegu 6k+ 500ml,Nestle Nan,500 ml,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+22533,"Nestle Nan Pro 2 Piimal põhinev jätkupiimasegu 800 g, alates 6-elukuust",Nestle Nan,800 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+17967,Nestle Nan pro 2 piimapõhine kasutusvalmis võõrutussegu 1L,Nestle Nan,1 l,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+19567,Nestle Nan Pro 2 piimapõhine võõrutussegu 200ml,Nestle Nan,200 ml,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+587742,"Nestle Nan Pro 3 jätkupiimasegu 800g, alates 12-elukuust",Nestle Nan,800 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+587186,Nestle NAN Pro piimajook 1000ml,Nestle NAN,1000 ml,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+35013,Nõo grillvorstid juustuga 360 G,Nõo,360 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma",,meat_sausages,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+32601,Nõo sardell juustuga 450 G,Nõo,450 g,dairy_eggs_fats,Prisma,,meat_sausages,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+46390,Nopri grilljuust karulaugu 200 g,Nopri,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2705,"Nopri Pastöriseerimata toorpiim, 1 l",Nopri Pastöriseerimata,1 l,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+125838,"Nuppi Gold 1, piimasegu, 350 g, alates 0-6 kuud",Nuppi Gold,350 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+45551,"Nuppi Gold 2 jätkupiimasegu, 350g, alates 6-elukuust",Nuppi Gold,350 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+133798,Nurr krõbinad rosinad piimašokolaadis 70g,Nurr,70 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+595262,"Nutricia Nutrilon Nutriton piimasegu 135 g, alates sünnist",Nutricia Nutrilon,135 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+68220,Nuts About Nature Crunchy 100% maapähklivõie 340 g,Nuts About,340 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+65281,Nuts About Nature maapähklivõie 340 g,Nuts About,340 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+50660,Nuts About Nature maapähklivõie 340g,Nuts About,340 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+11531,"Oatly võileivamääre, 150 g",Oatly,150 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+40772,"Ökoloogiline Mustika-jogurtismuuti, SMUSHIE, 170 g",Salvest Smushie,170 g,dairy_eggs_fats,"Coop, Prisma, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+2564,Olimp Proteiiniküpsis Hazelnut Cream 60g,Olimp Proteiiniküpsis,60 g,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,sweets_snacks,sweets_biscuits_cookies,high
+9015,"Oltermanni juust, 500 g",Oltermanni,500 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+51509,"Olympus fetajuust PDO, madala soola sisaldusega, 150 g",Olympus,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+96091,Olympus halloumi juust 200g,Olympus,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12271,OLYMPUS Salatijuust laktoosivaba 150g,OLYMPUS Salatijuust,150 g,dairy_eggs_fats,Prisma,,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_cheese_slices,high
+586784,Opera d'Oro võioad 400g,Opera,400 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+9588,"Oreo piimasuupiste, 27 g",Oreo,27 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+30430,Pagaripoisid Juustukeeleke Küpsis 120 G,Pagaripoisid Juustukeeleke,120 G,dairy_eggs_fats,"Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,sweets_snacks,sweets_biscuits_cookies,high
+46503,Pagaripreili Krõbedad Vahvlid Võiga 125 G,Pagaripreili Krõbedad,125 g,dairy_eggs_fats,"Prisma, Rimi",,dairy_butter_margarine,dairy_eggs_fats,sweets_snacks,sweets_waffles_cakes,high
+10307,"Pajumäe Talu mahe-kohupiimakreem kakaoga, 190 g",Pajumäe Talu,190 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+173681,"Paneeritud juust, 200 g",Paneeritud,200 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+45971,Pärnamäed Kohupiima-marmelaadi rõngas 2x75 g,Pärnamäed Kohupiima-marmelaadi,2x75 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+11968,Parrano Robusto riivjuust 60g,Parrano Robusto,60 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1136,"Passioni,juustukoogirull, sulatatud 485 g","Passioni,juustukoogirull,",485 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+1141,Päts cheddar juustuga,Päts,,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+10967,"Pehme kohupiim 5%, 500g",Pehme,500 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+290,"Pere Pere piim 2,5% 1L kile",Pere Pere,1 l,dairy_eggs_fats,"Barbora, Maxima, Prisma",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+1915,Philadelphia Original toorjuust 300g,Philadelphia Original,300 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+24386,"Philadelphia Original toorjuust, 500 g",Philadelphia Original,500 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+117100,"Philadelphia toorjuust, 145g",Philadelphia,145 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+99995,"Piimameister Otto Hapukoorega kodujuust, 330g",Piimameister Otto,330 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+2031,"Piimameister Otto Klassikaline kodujuust, 330 g",Piimameister Otto,330 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+95389,"Piimameister Otto Klassikaline kodujuust, 440 g",Piimameister Otto,440 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+10890,"Piimameister Otto Laktoosivaba kodujuust, 220 g",Piimameister Otto,220 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+10339,Piimameister Otto Mozzarella kirsid 125 g,Piimameister Otto,125 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+11891,Piimameister Otto Ricotta kohupiim 200g,Piimameister Otto,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+10977,Piimameister Otto toorjuust küüslaugu ja ürtidega 150g,Piimameister Otto,150 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+3163,"Piim rasvatu 0,05%, ALMA, 1 L",Piim,1 l,dairy_eggs_fats,"Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+2551,PIK-NIK juustupulgad Kids Twiller 80g,PIK-NIK,80 g,dairy_eggs_fats,"Barbora, Maxima, Prisma",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2368,"Pik-Nik Rebitavad juustupulgad, 140 g",Pik-Nik Rebitavad,140 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+13882,"Pik-Nik Rebitavad juustupulgad, 280 g",Pik-Nik Rebitavad,280 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2640,"Pik-Nik Rebitavad juustupulgad Kids, 140 g",Pik-Nik Rebitavad,140 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1968,"Pizza mozzarella ja cheddari juustuga, 531 g uudis!",Pizza,531 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+598538,Poco Loco Halloween Creepy Friends juustumaits.kartulisnäkid 75g,Poco Loco,75 g,dairy_eggs_fats,Prisma,,produce_root_veg,produce,dairy_eggs_fats,dairy_cheese_slices,high
+192876,Poissmehe panniroog kartuli juustu ja grillvorstiga,Poissmehe,,dairy_eggs_fats,Prisma,,produce_root_veg,produce,dairy_eggs_fats,dairy_cheese_slices,high
+2178,"Põldvutimunad, 12 tk","Põldvutimunad,",12 pcs,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_eggs,dairy_eggs_fats,dairy_eggs_fats,dairy_eggs,high
+149352,Põltsamaa võileivakurk 460/240 g,Põltsamaa,240 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_root_veg,produce,dairy_eggs_fats,dairy_other,high
+42716,PÕNN Ökoloogiline Makaroni-juusturoog veiselihaga 7+ 130g,PÕNN Ökoloogiline,130 g,dairy_eggs_fats,"Coop, Prisma",,meat_beef_lamb_game,meat_fish,dairy_eggs_fats,dairy_other,high
+18247,"Põnn ökö teraviljapuder piima, puuvilja 6k, 110 g",Põnn,110 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+1453,"Põnn piimal põh. imiku piimasegu 0-6 k, 400 g",Põnn,400 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+32100,"Poolsuitsuvorst juustu, RANNAROOTSI, 150 g",Poolsuitsu,150 g,dairy_eggs_fats,"Prisma, Selver",,meat_sausages,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+580752,Profeel Proteiinijogurt mustasõstra 200 g,Profeel Proteiinijogurt,200 g,dairy_eggs_fats,"Coop, Prisma",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+15870,Proteesiliim Ultra Cream 40 g,Proteesiliim Ultra,40 g,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+2460,Proteiinibatoon Bite juustukoogi 35 g,Proteiinibatoon Bite,35 g,dairy_eggs_fats,Coop,,dairy_cheese_slices,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+11932,"Proteiinikohupiimakreem vaarika, VALIO PROFEEL, 200 g",Vaarika,200 g,dairy_eggs_fats,"Prisma, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_cottage_quark,high
+10248,"Proteiinipuding piimašokolaadimaitseline, VALIO PROFEEL, 150g",Profeel,150 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+73716,"Puna-valgehallitusjuust, 150 g","Puna-valgehallitusjuust,",150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+62012,"Rainbow banaani-aprikoosi-jogurtismuuti, alates 10-elukuust, 90g",Rainbow,90 g,dairy_eggs_fats,Prisma,,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+123236,"Rainbow banaani-maasikasmuuti jogurtiga 90 g, alates 10-elukuust",Rainbow,90 g,dairy_eggs_fats,Prisma,,produce_tropical,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+62119,"Rainbow jogurtikohupiim, 250 g",Rainbow,250 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+53037,"Rainbow kalkuni-juustutäidisega kanašnitsel, 200 g",Rainbow,200 g,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_other,high
+11897,"Rainbow kodujuust 2%, 400 g",Rainbow,400 g,dairy_eggs_fats,Prisma,,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+11963,Rainbow Kreeka jogurt 2% laktoosivaba 150g,Rainbow Kreeka,150 g,dairy_eggs_fats,Prisma,,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+4235,"Rainbow kreeka stiilis laktoosivaba jogurt 10%, 500g",Rainbow,500 g,dairy_eggs_fats,Prisma,,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+12370,"Rainbow ökoloogiline või, 250 g",Rainbow,250 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+1284,"Rainbow Toorjuust vanilli, laktoosivaba, 200g",Rainbow Toorjuust,200 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+48721,Rainbow Türgi jogurt 500g,Rainbow Türgi,500 g,dairy_eggs_fats,Prisma,,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+10683,Rakvere Lihapallid toorjuustutäidisega 300 g,Rakvere Lihapallid,300 g,dairy_eggs_fats,"Coop, Prisma, Rimi",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+10562,Rakvere Lihapallid Ürdi-Toorjuustutäidisega 300G,Rakvere Lihapallid,300 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+9719,"Rambyno suitsujuustu suupiste BBQ ja tšillipipraga Chipotle, 45% rasva kuivaines, 75g",Rambyno,75 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,fish_salted_smoked,meat_fish,dairy_eggs_fats,dairy_other,high
+12119,Rambyno Sulatatud suitsujuustusnäkk original 75g,Rambyno Sulatatud,75 g,dairy_eggs_fats,"Coop, Prisma, Selver",,fish_salted_smoked,meat_fish,dairy_eggs_fats,dairy_other,high
+21354,Ramlösa Kvarn Manitoba Cream nisujahu 2 kg,Ramlösa Kvarn,2 kg,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+489451,Rannamõisa Sulajuustuga Šnitsel Broilerist 300G,Rannamõisa Sulajuustuga,300 g,dairy_eggs_fats,"Coop, Prisma",,meat_poultry,meat_fish,dairy_eggs_fats,dairy_other,high
+488894,Rannamõisa Ürdivõiga Ahjubroiler U 2Kg,Rannamõisa Ürdivõiga,2 kg,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_butter_margarine,high
+2719,"Rannarootsi juustuäärega pitsa mozzarella ja pepperoniga, 475g",Rannarootsi,475 g,dairy_eggs_fats,"Coop, Prisma, Selver",,produce_root_veg,produce,dairy_eggs_fats,dairy_cheese_slices,high
+9949,"Rasvasegu võie Võideks light, MUMUU, 200 g",Võideks,200 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+11528,"Rasvatu kodujuust 0,1%, 200 g",Rasvatu,200 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+9380,"Rasvatu kohupiimakreem, 300 g",Rasvatu,300 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+49102,Reval Kondiiter Kirsi-Kohupiima Sotsnik 2tk 150 G,Reval Kondiiter,150 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+96353,Reval Kondiiter Kohupiimakorp 160 G,Reval Kondiiter,160 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+37905,"Riivjuust, 200 g","Riivjuust,",200 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+8937,Rocher piimašokolaad sarapuupähklitega 90g,Rocher,90 g,dairy_eggs_fats,"Coop, Prisma, Rimi",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+29553,Rõngu Pagar Juustuküpsis 250 G,Rõngu Pagar,250 g,dairy_eggs_fats,"Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,sweets_snacks,sweets_biscuits_cookies,high
+95317,Rõngu Pagar Juustusnäkk 300 G,Rõngu Pagar,300 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+28964,Rõngu Pagar Martsipani-Kohupiimatort 250 G,Rõngu Pagar,250 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+47420,Rõngu Pagar Moorapea Kohupiimakreemiga 40 G,Rõngu Pagar,40 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+30029,Rõngu Pagar Šokolaadi-Kohupiimatort 200 G,Rõngu Pagar,200 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+48755,"Rõngu Pagar Võiküpsis, Gluteenivaba 300 G",Rõngu Pagar,300 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,sweets_snacks,sweets_biscuits_cookies,high
+118535,Roshen õhuline piimašokolaad 80g,Roshen,80 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+120550,"Roshen piimašokolaad lacmi bubble crisp 85g piimatäidisega, krõbeda riisi ja vahvliga",Roshen,85 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+52107,Roshen vahvlid piimakreemiga 216g,Roshen,216 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_waffles_cakes,high
+8930,"Rosinakohupiim, 200 g","Rosinakohupiim,",200 g,dairy_eggs_fats,"Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+12843,Royal Blue sinihallitusjuust 100g,Royal Blue,100 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+10322,Royal Blu juust Dor Blu 55% 100g,Royal Blu,100 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+11732,"Saaremaa Koduaia ürtidega või, 150 g",Saaremaa Koduaia,150 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+158943,Saaremaa Mahemunad Taneli Majonees Saaremaalt vürtsikas 300ml,Saaremaa Mahemunad,300 ml,dairy_eggs_fats,"Coop, Prisma",,dairy_eggs,dairy_eggs_fats,dairy_eggs_fats,dairy_eggs,high
+47139,"Saaremaa maitsestamata mahejogurt 6%, 300 g",Saaremaa,300 g,dairy_eggs_fats,Prisma,,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+4331,"Saare Muraka-sidruni koorene glasuurkohuke, 40 g",Saare Muraka-sidruni,40 g,dairy_eggs_fats,"Prisma, Selver",,produce_tropical,produce,dairy_eggs_fats,dairy_other,high
+169,"Saare Toffee koorene glasuurkohuke, 40 g",Saare Toffee,40 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+4136,Saare vanilli kohuke metsamarjatäidise ja maasikamaitselise glasuuriga 40g,Saare,40 g,dairy_eggs_fats,Prisma,,produce_berries,produce,dairy_eggs_fats,dairy_other,high
+10685,SAARIOINEN Tomati-juustu pitsa 200 g,SAARIOINEN Tomati-juustu,200 g,dairy_eggs_fats,Prisma,,produce_root_veg,produce,dairy_eggs_fats,dairy_other,high
+11537,Saint Agur prantsuse sinihallitusjuust 115 g,Saint Agur,115 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12332,Salakis naturaalne kreeka jogurt 10% 1kg,Salakis,1 kg,dairy_eggs_fats,Prisma,,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+11594,"Salatijuustukuubikud 17%, 325 g",Salatijuustukuubikud,325 g,dairy_eggs_fats,Prisma,,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_other,high
+73641,"Salatijuustupala, 200 g","Salatijuustupala,",200 g,dairy_eggs_fats,Prisma,,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_other,high
+140583,Salvest võileivakurk 530g,Salvest,530 g,dairy_eggs_fats,"Coop, Prisma",,produce_root_veg,produce,dairy_eggs_fats,dairy_other,high
+363753,"Santa Maria juustudipp Nacho stiilis, 250 g",Santa Maria,250 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+8477,Santa Maria juustumaitselised tortillakrõpsud 475 g,Santa Maria,475 g,dairy_eggs_fats,"Coop, Prisma",,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_cheese_slices,high
+599118,Santa Maria juustune tako vürtsisegu 28g,Santa Maria,28 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+7222,Santa Maria krõbedad ja juustused tortillaribad 185 g,Santa Maria,185 g,dairy_eggs_fats,"Prisma, Selver",,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_cheese_slices,high
+54021,Santa maria nacho juustudipp 250 g,Santa,250 g,dairy_eggs_fats,"Coop, Prisma",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+1565,Santa maria tortilla krõpsud juustu 185 g,Santa,185 g,dairy_eggs_fats,"Coop, Prisma",,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_cheese_slices,high
+5281,Santa maria tortilla krõpsud juustu ja jalapenoga 185g,Santa,185 g,dairy_eggs_fats,Prisma,,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_cheese_slices,high
+5519,"Šašlõkk kolme juustuga, kg",Šašlõkk,,dairy_eggs_fats,Prisma,,meat_pork,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+9598,"Saulute selitatud või Golden Ghee, 500g",Saulute,500 g,dairy_eggs_fats,"Coop, Prisma",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+30778,Schär vanilla creams gluteenivaba küpsis koore ja magusainega 115 g,Schär,115 g,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,sweets_snacks,sweets_biscuits_cookies,high
+41393,Segafredo Caramel Macchiato kohvijook piimaga 235 ml,Segafredo Caramel,235 ml,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+45029,Segafredo Latte Macchiato kohvijook piimaga 235 ml,Segafredo Latte,235 ml,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+82355,Segafredo Vanilla Espresso+milk kohvijook piimaga 235 ml,Segafredo Vanilla,235 ml,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+227,"Šeimininkes koorevõi 82%, 200g",Šeimininkes,200 g,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+3365,Selga kondenspiimamaitseline küpsis 180 g,Selga,180 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_biscuits_cookies,high
+50337,"Seltskonna juustuampsud koduaia ürtidega, 200 g",Seltskonna,200 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12489,"Seltskonna juustuampsud päikesekuivatatud tomatitega, 200 g",Seltskonna,200 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_root_veg,produce,dairy_eggs_fats,dairy_cheese_slices,high
+74561,"Sidruni-laimi laktoosivaba kohupiimapasta, 300 g",Sidruni-laimi,300 g,dairy_eggs_fats,"Coop, Prisma, Selver",,produce_tropical,produce,dairy_eggs_fats,dairy_cottage_quark,high
+28449,Singi-juustu pirukas,Singi-juustu,,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,bakery,bakery_cakes_pastries,high
+1096,Singi-juustupirukas,Singi-juustupirukas,,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,bakery,bakery_cakes_pastries,high
+57569,Singi-juustupirukas 360g,Singi-juustupirukas,360 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,bakery,bakery_cakes_pastries,high
+34955,"Singivõie, KARNI, 190 g",Singivõie,190 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+10371,"Sinihallitusjuust, 150 g","Sinihallitusjuust,",150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+11486,"Sinihallitusjuust Dorblu, 100 g","Sinihallitusjuust Dorblu,",100 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+3705,SIPSIKU jäätisemaitseline AB-jogurt šokolaadikommidega 165g,SIPSIKU,165 g,dairy_eggs_fats,"Coop, Prisma, Rimi",,dairy_yogurt_kefir,dairy_eggs_fats,frozen_food,frozen_desserts_icecream,high
+6233,"Snäkk Parmigiano-Reggiano juustuga, NÕO, 85 g",Snäkkvorst,85 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,meat_sausages,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+49953,"Soignon kitsejuustumääre, maitsestamata 150 g",Soignon,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+182,"Šokolaaditükkidega kohuke, 40 g",Šokolaaditükkidega,40 g,dairy_eggs_fats,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+3469,Spinati-juustupirukas 360 g,Spinati-juustupirukas,360 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,produce_herbs_salads_sprouts,produce,bakery,bakery_cakes_pastries,high
+38487,Starbucks Caramel Macchiato piimajook kohviga 220 ml,Starbucks Caramel,220 ml,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+82404,Starbucks Doubleshot Espresso kohvijook piimaga 200 ml,Starbucks Doubleshot,200 ml,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+3322,Start padjakesed piimamaitselise täidisega 500g,Start,500 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+496206,Steenland piimašokolaadist kaelariputatav medal nr.1 23 g,Steenland,23 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+32401,Suitsujuustu-jalapeno grillvorst 600 g,Suitsujuustu-jalapeno,600 g,dairy_eggs_fats,"Coop, Prisma",,meat_sausages,meat_fish,dairy_eggs_fats,dairy_other,high
+9891,Suitsujuustune Kanapasta 300 g,Suitsujuustune Kanapasta,300 g,dairy_eggs_fats,"Prisma, Rimi",,meat_poultry,meat_fish,dairy_eggs_fats,dairy_other,high
+200657,Suitsujuustune kanapasta pennedega,Suitsujuustune,,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_other,high
+11556,Suitsujuustu punupats 150g,Suitsujuustu,150 g,dairy_eggs_fats,"Prisma, Selver",,fish_salted_smoked,meat_fish,dairy_eggs_fats,dairy_other,high
+63106,Suitsukanavõie 190 g,Suitsukanavõie,190 g,dairy_eggs_fats,"Coop, Prisma",,meat_poultry,meat_fish,dairy_eggs_fats,dairy_butter_margarine,high
+32256,"Suitsusardell juustuga, RANNAROOTSI, 500 g",Suitsusardell,500 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_sausages,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+11109,"Suitsutatud Kadaka riivjuust, 200 g",Suitsutatud Kadaka,200 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,fish_salted_smoked,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+50519,"Sulatatud juust, 200 g",Sulatatud,200 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1768,"Sulatatud juust murulauguga, 200 g",Sulatatud,200 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+10097,"Sulatatud juust röstitud kanaga, 200 g",Sulatatud,200 g,dairy_eggs_fats,"Coop, Prisma, Selver",,meat_poultry,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+65359,"Sunfly päevalilleseemnevõie krõbisev, 330g",Sunfly,330 g,dairy_eggs_fats,"Coop, Prisma, Rimi",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+67220,"Sunfly päevalilleseemnevõie šokolaadi, 330g",Sunfly,330 g,dairy_eggs_fats,"Coop, Prisma, Rimi",,dairy_butter_margarine,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+102969,Super nutri sukruvaba pähklivõie 340g,Super,340 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+4185,Suur kana-juustu pitsa tomatikastmega 355 g,Suur,355 g,dairy_eggs_fats,"Coop, Prisma, Selver",,produce_root_veg,produce,dairy_eggs_fats,dairy_other,high
+3843,Suur nelja-juustu pitsa tomatikastmega 340 g,Suur,340 g,dairy_eggs_fats,"Coop, Prisma, Selver",,produce_root_veg,produce,dairy_eggs_fats,dairy_other,high
+1128,Suur võicroissant,Suur,,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+1724,TAFFEL Cheddari juustu maitselised siledad kartulilaastud 180g,TAFFEL Cheddari,180 g,dairy_eggs_fats,"Prisma, Rimi",,produce_root_veg,produce,dairy_eggs_fats,dairy_cheese_slices,high
+25618,Taffel Cheese Balls juustusnäkid 190g,Taffel Cheese,190 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+24280,Taffel Hearts maisisnäkid nacho-juustumaitselised 200g,Taffel Hearts,200 g,dairy_eggs_fats,Coop,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+38707,Taffel juustumaitseline popkorn 150g,Taffel,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+39638,Taffel Nacho Juustupallid 60 g,Taffel Nacho,60 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+24905,Taffel võimaitseline mikrolaineahjupopkorn 90g,Taffel,90 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+50683,"Täispiimast juust, 500 g",Täispiimast,500 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12121,"Täispiimast juust, viilutatud, 150 g",Täispiimast,150 g,dairy_eggs_fats,"Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2749,Tallegg Broileri Kintsulihašašlõkk Kolme Juustug,Tallegg Broileri,800 g,dairy_eggs_fats,"Coop, Prisma",,meat_pork,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+4055,Tallegg Fileeribad Jogurti-Tilli Marinaadis 500G,Tallegg Fileeribad,500 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Rimi, Selver",,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+124168,Tallegg Juustuga Minutipihv Broileri Fileest350G,Tallegg Juustuga,,dairy_eggs_fats,"Prisma, Selver",,meat_poultry,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+3185,Tallegg Kanaampsud Juustuga 300 G,Tallegg Kanaampsud,300 g,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+34387,Tallegg Kintsulihast Steik Kolme Juustuga 400 G,Tallegg Kintsulihast,400 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+125113,"Tallegg Kolme Juustu Ahjubroiler U 1,8Kg",Tallegg Kolme,1.8 kg,dairy_eggs_fats,"Prisma, Selver",,meat_poultry,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+2611,Tallegg Kreeka Jogurti-Tzatzikimarinaadis Broil,Tallegg Kreeka,400 g,dairy_eggs_fats,Prisma,,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+2994,Tallegg Maisikattega Kanafileefriikad Juustuga 3,Tallegg Maisikattega,300 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,meat_poultry,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+33577,Tallegg Poolkoivad Jogurti-Tilli Marinaadis 800G,Tallegg Poolkoivad,800 g,dairy_eggs_fats,"Prisma, Selver",,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+11194,"Tere Banaani kohupiimapasta, 300 g",Tere Banaani,300 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,produce_tropical,produce,dairy_eggs_fats,dairy_cottage_quark,high
+12090,Tere FIT Proteiinijogurt karamelli 150g,Tere FIT,150 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Rimi, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,sweets_snacks,sweets_candies,high
+125463,Tere FIT Proteiinijogurt mustika 150g,Tere FIT,150 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Rimi, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+10899,"Tere joogijogurt metsmaasika, 1 kg",Tere,1 kg,dairy_eggs_fats,Prisma,,produce_berries,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+10511,"Tere Kakao kohupiimapasta, 300 g",Tere Kakao,300 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+12575,"Tere Karulaugupestoga kodujuust, 300 g",Tere Karulaugupestoga,300 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+11832,"Tere Klassikaline kodujuust 4%, 300 g",Tere Klassikaline,300 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+37828,Tere Kodujuust klassikaline 380 g,Tere Kodujuust,380 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+11029,TERE kodujuust kurgi - magusa sinepiga 300 g,TERE,300 g,dairy_eggs_fats,Prisma,,dairy_cottage_quark,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+295,Tere Kohuke jõhvika šokolaadiglasuuriga 40 g,Tere Kohuke,40 g,dairy_eggs_fats,Prisma,,produce_berries,produce,sweets_snacks,sweets_chocolate_bars,high
+265,Tere Kohuke juustukoogi šokolaadiglasuuriga 40 g,Tere Kohuke,40 g,dairy_eggs_fats,"Prisma, Rimi",,dairy_cheese_slices,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+266,Tere Kohuke kondenspiima ja karamelliglasuuriga 40 g,Tere Kohuke,40 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_candies,high
+1234,"Tere Kohuke mustika šokolaadiglasuuriga, 40 g",Tere Kohuke,40 g,dairy_eggs_fats,"Prisma, Rimi",,produce_berries,produce,sweets_snacks,sweets_chocolate_bars,high
+2227,Tere Kohuke vanilli laktoosivaba 40g,Tere Kohuke,40 g,dairy_eggs_fats,"Barbora, Maxima, Prisma",,dry_other,other,dairy_eggs_fats,dairy_other,fallback
+280,Tere Kohuke vanilli šokolaadiglasuuriga 40g,Tere Kohuke,40 g,dairy_eggs_fats,"Barbora, Maxima, Prisma",,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+3283,"Tere kohupiim 0,1% 200g vanilli",Tere,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+4351,"Tere Kõrgkuumutatud cappuccino piim 3,5%, 1 l",Tere Kõrgkuumutatud,1 l,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+1330,"Tere Kõrgkuumutatud latte piim 2,5%, 1 l",Tere Kõrgkuumutatud,1 l,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+2709,"Tere Kreeka jogurt maitsestamata, laktoosivaba 350 g",Tere Kreeka,350 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+139,"Tere Laktoosivaba piim 2,5%, 1 l",Tere Laktoosivaba,1 l,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+2269,Tere Laktoosivaba rasvata kohupiim 200g,Tere Laktoosivaba,200 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+2641,"Tere Laktoosivaba või 82%, 200 g",Tere Laktoosivaba,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+163055,"Tere Maitsestamata jogurt laktoosivaba, 380 g",Tere Maitsestamata,380 g,dairy_eggs_fats,Prisma,,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high
+1207,"Tere Piim 1,8%, 1,5 l",Tere Piim,1.5 l,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+26620,"Tere Piim 2,5%, D-vitamiiniga, 1 l",Tere Piim,1 l,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+2336,"Tere Suitsujuust, 200 g","Tere Suitsujuust,",200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,fish_salted_smoked,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+4247,"Tere Vanilje kohupiimapasta, 300 g",Tere Vanilje,300 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+4112,"Tere Või 82%, 200 g",Tere Või,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+37629,"Tere Või 82%, 500 g",Tere Või,500 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+39868,TEXAS juustu- ja sibulamaitselised maisirõngas 50g,TEXAS,50 g,dairy_eggs_fats,"Coop, Prisma",,produce_root_veg,produce,dairy_eggs_fats,dairy_cheese_slices,high
+4254,Texas juustumaitseline popcorn 60 g,Texas,60 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+39371,TEXAS võimaitseline popcorn 60g,TEXAS,60 g,dairy_eggs_fats,"Prisma, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+32804,"Tõmmu suitsuvorst juustuga, WÕRO, 350 g",Tõmmu,350 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_sausages,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+11137,"Toorjuust, 400 g","Toorjuust,",400 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+11672,"Toorjuust originaal, 150 g",Toorjuust,150 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+10693,Toorjuustu dessert laimi ja valge šokolaadiga 150g,Toorjuustu,150 g,dairy_eggs_fats,Prisma,,produce_tropical,produce,sweets_snacks,sweets_chocolate_bars,high
+561378,Trolli silmamunad hapu täidisega 38g,Trolli,38 g,dairy_eggs_fats,Prisma,,dairy_eggs,dairy_eggs_fats,dairy_eggs_fats,dairy_eggs,high
+49940,Trube Võitäidisega Keerusai 350 g,Trube Võitäidisega,350 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,bakery,bakery_buns_croissants,high
+3476,TRUE DATES Creamy Peanut Butter 100g,TRUE DATES,100 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+7625,T/S Snackivorst Parmigiano Reggiano juustuga 85g,T/S Snackivorst,85 g,dairy_eggs_fats,Prisma,,meat_sausages,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+12821,Turek Camembert Natural valgehallitusjuust 120g,Turek Camembert,120 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+596091,"Tutteli 1 piimal põhinev imiku piimasegu kasutamiseks sünnist, 300g",Tutteli,300 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+127845,"Tutteli 1 piimal põhinev imiku piimasegu kasutamiseks sünnist, 650g",Tutteli,650 g,dairy_eggs_fats,"Prisma, Rimi",,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+590201,"Tutteli 2 piimal põhinev imiku jätkupiimasegu alates 6 kuust, 300g",Tutteli,300 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+18449,"Tutteli 2 piimal põhinev imiku jätkupiimasegu alates 6 kuust, 650g",Tutteli,650 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_milk,dairy_eggs_fats,baby,baby_formula,high
+38127,"Tutteli 3 Junior piimajook alates 12 kuust, 300g",Tutteli,300 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+22515,"Tutteli 3 Junior piimajook alates 12 kuust, 650g",Tutteli,650 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+52329,UVIC Praetud tšeburekid ricotta juustu ja ürtidega 250 g,UVIC Praetud,250 g,dairy_eggs_fats,"Prisma, Rimi",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+45565,Vaasan fetajuustu pirukas 90 g,Vaasan,90 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,bakery,bakery_cakes_pastries,high
+125406,"Väike Tom kõrgkuumutatud piimjook maasikalisandi ja vitamiinidega, 200 ml",Väike Tom,200 ml,dairy_eggs_fats,"Coop, Prisma, Selver",,produce_berries,produce,dairy_eggs_fats,dairy_milk,high
+95683,"Valgehallitusjuust, 150 g","Valgehallitusjuust,",150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+9446,"Valgehallitusjuust kitsepiimast, 120 g",Valgehallitusjuust,120 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+125626,Valio Atleet Light juust 200g,Valio Atleet,200 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1298,"Valio Eila laktoosivaba piimajook, 1 l",Valio Eila,1 l,dairy_eggs_fats,"Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+10036,"Valio Forte Classico riivjuust, 80 g",Valio Forte,80 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+10747,"Valio Juust Royal Gouda Black, 200 g",Valio Juust,200 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+36910,"Valio Juust Royal Gouda Yellow, 300 g",Valio Juust,300 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2156,"Valio Juust Royal Gouda Yellow, viilutatud, 150 g",Valio Juust,150 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2108,"Valio Juust Royal Gouda Yellow, viilutatud, 500 g",Valio Juust,500 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+9286,Valio Oltermanni juust 1kg,Valio Oltermanni,1 kg,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1739,Valio piimapulber väherasvane 400 g LV,Valio,400 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+125458,"Valio Profeel Ahjuõunajogurt, 200 g",Valio Profeel,200 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,produce_apples_pears,produce,dairy_eggs_fats,dairy_yogurt_kefir,high
+10558,Valio PROfeel proteiinikohupiimakreem maasika-banaani 200g,Valio PROfeel,200 g,dairy_eggs_fats,"Coop, Prisma",,produce_tropical,produce,dairy_eggs_fats,dairy_cottage_quark,high
+9308,Valio PROfeel proteiinikohupiimakreem vanilli 200g,Valio PROfeel,200 g,dairy_eggs_fats,"Coop, Prisma",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+4011,"Valio Soolata või 82%, 500 g",Valio Soolata,500 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+3762,Valio sulatatud juust 185g,Valio,185 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+8964,Valio sulatatud juust Forte juustu 185g,Valio,185 g,dairy_eggs_fats,"Barbora, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+11110,Valio sulatatud juust murulaugu-ürdi 185g,Valio,185 g,dairy_eggs_fats,"Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+4043,Valio Võru või 82% 200g,Valio Võru,200 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+42370,Vana Tallinn Tiramisu Cream liköör 16%vol 500ml,Vana Tallinn,500 ml,dairy_eggs_fats,"Coop, Prisma",,dairy_cream_sourcream,dairy_eggs_fats,drinks,drinks_spirits,high
+32983,Vasalli keedusalaami juustuga 90 g,Vasalli,90 g,dairy_eggs_fats,"Coop, Prisma",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+35660,"Västerbottensost juust, 450 g",Västerbottensost,450 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2674,"Vedelseep/täitepakk Cream Wash 500 ml, hooldav",Vedelseep/täitepakk Cream,500 ml,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+161431,"Vici Moonstery pitsa juustuga, 300g",Vici Moonstery,300 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+574108,VIGUR Juustumaitselised maisikrõpsud 90g,VIGUR Juustumaitselised,90 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+3545,Vigur krõpsud juustu ja sibulaga 90 g,Vigur,90 g,dairy_eggs_fats,"Coop, Prisma, Selver",,produce_root_veg,produce,dairy_eggs_fats,dairy_cheese_slices,high
+86800,Viineriampsud juustuga 280g,Viineriampsud,280 g,dairy_eggs_fats,"Barbora, Maxima, Prisma",,meat_sausages,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+1490,Vikstal minirõngik juustumaitseline 140gr,Vikstal,,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+15250,Vilma küpsetusšokolaad piima 190g,Vilma,190 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+4484,Violife Mature Cheddar maitselised võileivaviilud 200g,Violife Mature,200 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+36493,"Violife taimne kreemine võileivamääre küüslaugu ja ürtidega, 150 g",Violife,150 g,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_desserts,high
+133358,"Virsiku kohupiimakreem, 150 g",Virsiku,150 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+29462,Võicroissant,Võicroissant,,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+11091,"Võie Oivariini 75%, 400 g",Võie Oivariini,400 g,dairy_eggs_fats,"Prisma, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+3609,"Võiga pärmi-lehttaigen, 400 g",Võiga,400 g,dairy_eggs_fats,"Coop, Prisma, Selver",,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high
+3304,Võileiva-friikartulipaber grill house10tk,Võileiva-friikartulipaber,,dairy_eggs_fats,Prisma,,produce_root_veg,produce,dairy_eggs_fats,dairy_other,high
+6866,"Võileivapeekon, RAKVERE, 130 g",Võileivapeekon,130 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,meat_pork,meat_fish,dairy_eggs_fats,dairy_other,high
+62434,"Võileivavorst, VALLA, 240 g","Võileivavorst,",240 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_sausages,meat_fish,dairy_eggs_fats,dairy_other,high
+1122,Võisai,Võisai,,dairy_eggs_fats,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_other,high
+29665,Waffa sofi vahvel kondentspiimavahvel sokolaadiga 400g,Waffa,400 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_waffles_cakes,high
+4126,"Whitepro munavalged õrrekanade munadest, 1 kg",Whitepro,1 kg,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,meat_poultry,meat_fish,dairy_eggs_fats,dairy_eggs,high
+4092,Wõro Õllemops Juustuga 500 G,Wõro Õllemops,500 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+10473,Xtra Edam juust 500g,Xtra Edam,500 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+49623,"Xtra Edam viilutatud juust 24%, 1 kg",Xtra Edam,1 kg,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+2324,"Xtra Edam viilutatud juust, 400 g",Xtra Edam,400 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12508,"Xtra emmentali juust, 400 g",Xtra,400 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12371,"X-tra Emmentali juust, viilutatud, 150g",X-tra Emmentali,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+9093,"Xtra Emmental juust, viilutatud, 400g",Xtra Emmental,400 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+10748,"Xtra Gouda juust, 500g",Xtra Gouda,500 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+100078,"X-tra Gouda juust, viilutatud, 150 g",X-tra Gouda,150 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+37668,"Xtra Gouda viilutatud juust 16%, 400 g",Xtra Gouda,400 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+50635,"Xtra Gouda viilutatud juust 30%, 1 kg",Xtra Gouda,1 kg,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+1236,"Xtra koorejuust, 1 kg",Xtra,1 kg,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+51860,"Xtra Koorejuust, 25% rasva, 150 g","Xtra Koorejuust,",150 g,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+94423,"Xtra koorejuust, viilutatud, 1 kg",Xtra,1 kg,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+102379,"X-tra koorejuust, viilutatud, 400g",X-tra,400 g,dairy_eggs_fats,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+3432,.X-TRA PIIMASHOKOLAAD 100 GT UTZ,.X-TRA,,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+25273,X-tra purustatud metsapähklitega piimašokolaad 100 g,X-tra,100 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+35363,X-tra puurikanade munad M 15 TK,X-tra,15 pcs,dairy_eggs_fats,Prisma,,meat_poultry,meat_fish,dairy_eggs_fats,dairy_eggs,high
+94885,"Xtra riivitud juust 15%, 500 g",Xtra,500 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+10531,Xtra riivitud juust 23% rasva 500g,Xtra,500 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+12407,"Xtra riivitud juust ja taimerasva toode, 500 g",Xtra,500 g,dairy_eggs_fats,Prisma,,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+8651,"Xtra salatijuust, 200 g",Xtra,200 g,dairy_eggs_fats,Prisma,,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_cheese_slices,high
+12342,"Xtra salatijuust õlis, 300 g",Xtra,300 g,dairy_eggs_fats,Prisma,,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_cheese_slices,high
+7722,Xtra tortilla chipsid juustumaitselised 450g,Xtra,450 g,dairy_eggs_fats,Prisma,,produce_herbs_salads_sprouts,produce,dairy_eggs_fats,dairy_cheese_slices,high
+67549,Yes juustumaitselised päevalilleseemned 150 g,Yes,150 g,dairy_eggs_fats,"Coop, Prisma, Rimi",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high
+4237,Yook Barista Extra Creamy Kaerajook 1L,Yook Barista,1 l,dairy_eggs_fats,"Barbora, Maxima, Prisma, Rimi, Selver",,dairy_plant_drinks,dairy_eggs_fats,dairy_eggs_fats,dairy_plant_drinks,high
+12401,Žemaitijos kohupiim 9% rasva 180g,Žemaitijos,180 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_cottage_quark,high
+50359,"Zottis puuviljadega piimadessert, 115 g, 1 TK",Zottis,115 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high
+1498,"Zott Monte šokolaadi-pähkli piimadessert, 55 g, 1 TK",Zott Monte,55 g,dairy_eggs_fats,Prisma,,dairy_milk,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+3577,Zott toasty hamburger sulatud juust 120 g,Zott,120 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,meat_hams,meat_fish,dairy_eggs_fats,dairy_cheese_slices,high
+8745,Zott toasty sandwich sulatatud juust 120 g,Zott,120 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Selver",,dairy_cheese_slices,dairy_eggs_fats,dairy_eggs_fats,dairy_cheese_slices,high

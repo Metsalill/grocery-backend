@@ -1,0 +1,901 @@
+product_id,name,brand,size_text,stores_sample,current_food_group,current_sub_code,food_group_corrected,new_sub_code,confidence
+419395,Mikrofiiberlapp Spontex 4 Tk,,,,,,other,dry_other,fallback
+419396,Mikropluusist Lapid Vileda Colors 4 Tk,,,,,,other,dry_other,fallback
+419397,Niisk Tualettpaberid Bella No 1 60 Tk,,,,,,household,hh_paper,high
+419398,Niisk Tualettpaberid Zewa Kids 42 Tk,,,,,,household,hh_paper,high
+419399,Niisked Majapidamislapid Home Expert 3 Tk,,,,,,household,hh_other,high
+419400,Niiskust Imavad Lapid Home Expert 3 Tk,,,,,,other,dry_other,fallback
+419401,Noudepesukasn Home Expert 5 Tk 66534,,,,,,other,dry_other,fallback
+419402,Noudepesukasnad Spontex 30 Tk,,,,,,other,dry_other,fallback
+419403,Porandahari Varrega Turbocleaning Vileda,,,,,,other,dry_other,fallback
+419404,Porandalapp Vileda 907 Ultra Max,,,,,,other,dry_other,fallback
+419405,Porandalapp Vileda Microfiiber 48 5 X 60 Cm,,,,,,other,dry_other,fallback
+419406,Porandamopp Promist Vileda,,,,,,other,dry_other,fallback
+419407,Porandamopp Wring Clean Turbo Vileda,,,,,,other,dry_other,fallback
+419408,Porandapesumopp Vileda 1 2 Spray Max,,,,,,other,dry_other,fallback
+419409,Puhastuslapid Rullis Home Expert 50 Tk,,,,,,household,hh_cleaners,high
+419410,Salvratikud Zewa Soft Sens Box 4 Kih 80 Tk,,,,,,other,dry_other,fallback
+419411,Svammlapp Spontex 5 Tk,,,,,,other,dry_other,fallback
+419412,Svammlapp Spontex Antibakteriaalne 3 Tk,,,,,,other,dry_other,fallback
+419413,Taskuratikud Zewa Softis 4 Kih 10 X 9 Tk,,,,,,other,dry_other,fallback
+419414,Taskuratikud Zewa Softis 4 Kih 6 X 9 Tk,,,,,,other,dry_other,fallback
+419415,Taskuratikud Zewa Softissens 4 Kih 10 X 9 Tk,,,,,,other,dry_other,fallback
+419416,Uldotstarbelised Lapid Spontex 10 Tk,,,,,,other,dry_other,fallback
+419417,Univers Svammlapp Spontex Fastwipes 3 Tk,,,,,,other,dry_other,fallback
+419418,Universaalne Lapp Home Expert 3 Tk,,,,,,other,dry_other,fallback
+419419,Vaakumpump Spontex,,,,,,other,dry_other,fallback
+419420,Wc Paber Grite Blossom 3 Kih 40 Rl,,,,,,other,dry_other,fallback
+419421,Wc Paber Grite Blossom 3 Kih 8 Rl,,,,,,other,dry_other,fallback
+419422,Wc Paber Grite Ecological 3 Kih 8 Rl,,,,,,other,dry_other,fallback
+419423,Wc Paber Grite Orch White 16 Rl 3 Kih,,,,,,other,dry_other,fallback
+419424,Wc Paber Zewa Excl Ultra Soft 4 Kih 8 Rl,,,,,,other,dry_other,fallback
+419425,Wc Paber Zewa Just 1 5 Kih 6 Rl,,,,,,other,dry_other,fallback
+419426,Aknapuhastaja Home Expert 63852,,,,,,other,dry_other,fallback
+419427,Amber Home Expert 20 L,,,,,,other,dry_other,fallback
+419428,Biolagunev Prugikott 10 L 20 Tk,,,,,,other,dry_other,fallback
+419429,Biolagunev Prugikott Biobag 20 L 15 Tk,,,,,,other,dry_other,fallback
+419430,Biolagunev Prugikott Biobag 8 L 25 Tk,,,,,,other,dry_other,fallback
+419431,Biolagunevad Prugikotid Mclean 140 L 10 Tk,,,,,,other,dry_other,fallback
+419432,Biolagunevad Prugikotid Mclean 30 L 10 Tk,,,,,,other,dry_other,fallback
+419433,Biolagunevad Prugikotid Mclean 5 L 20 Tk,,,,,,other,dry_other,fallback
+419434,Biolagunevad Prugikotid Mclean 75 L 10 Tk,,,,,,other,dry_other,fallback
+419435,Harja Ja Kuhvli Komplekt Home Expert,,,,,,other,dry_other,fallback
+419436,Harjavars Vileda,,,,,,other,dry_other,fallback
+419437,Jaatmete Sort Kast Home Expert 10 L,,,,,,sauces_oils,sauces_other,heuristic
+419438,Kasnad Vileda Ultra Fresh 2 Tk,,,,,,other,dry_other,fallback
+419439,Klaasipuhastus Lapp Home Expert 2 Tk,,,,,,household,hh_cleaners,high
+419440,Klaasipuhastuskaabits Leifheit Cabino,,,,,,household,hh_cleaners,high
+419441,Kosm Salvratikud Grite Blossom 2 Kih 80 Tk,,,,,,other,dry_other,fallback
+419442,Kosm Salvratikud Grite Orchid 3 Kih 100 Tk,,,,,,other,dry_other,fallback
+419443,Krob Noudesvamm Pur Active Vileda 2 Tk,,,,,,other,dry_other,fallback
+419444,Kuhvel Harjaga Vileda,,,,,,other,dry_other,fallback
+419445,Kujulised Noudekasnad Home Expert 5 Tk,,,,,,other,dry_other,fallback
+419446,Kuurimishari Home Expert,,,,,,other,dry_other,fallback
+419447,Kuurimiskasn Vortex 10 Tk,,,,,,other,dry_other,fallback
+419448,Kuurimissvamm Spontex Scrub Flex 3 Tk,,,,,,other,dry_other,fallback
+419449,Kuurimissvamm Vileda Glitzi 1 Tk,,,,,,other,dry_other,fallback
+419450,Latekskindad Vileda M L 10 Tk,,,,,,other,dry_other,fallback
+419451,Latekskindad Vileda S M 10 Tk,,,,,,other,dry_other,fallback
+419452,Lohnast Prugikotid Home Expert 35 L 15 Tk,,,,,,other,dry_other,fallback
+419453,Lohnast Prugikotid Home Expert 60 L 10 Tk,,,,,,other,dry_other,fallback
+419454,Majapidamisk Vileda Extra Sensation,,,,,,household,hh_other,high
+419455,Majapidamisk Vileda Extra Sensation 61362,,,,,,household,hh_other,high
+419456,Mikrofiiberlapp Vortex Light Glide,,,,,,other,dry_other,fallback
+419457,Mikrokiust Lapp Vortex Klaasile 1 Tk,,,,,,other,dry_other,fallback
+419458,Mikrokiust Lappide Kompl Home Expert 2 Tk,,,,,,other,dry_other,fallback
+419459,Noudepesuhari Home Expert 63853,,,,,,other,dry_other,fallback
+419460,Plastnou Home Expert 6 L 32 X 32 X 13 Cm,,,,,,other,dry_other,fallback
+419461,Por Pesija Vah Kate Leifheit Mic Duo 33 Cm,,,,,,other,dry_other,fallback
+419462,Porand Puhas Komp Vars Lapid 8 3 Swiffer,,,,,,other,dry_other,fallback
+419463,Poranda Puhas Lapid Kuivad Swiffer 18 Tk,,,,,,other,dry_other,fallback
+419464,Pudelihari Home Expert 63855,,,,,,meat_fish,meat_other,heuristic
+419465,Puhast Lapid Niisk Tsitrus Swiffer 10 Tk,,,,,,other,dry_other,fallback
+419466,Salvratikud Zewa Natural Box 4 Kih 80 Tk,,,,,,other,dry_other,fallback
+419467,Seotavad Prugikotid Home Expert 35 L 30 Tk,,,,,,other,dry_other,fallback
+419468,Seotavad Prugikotid Home Expert 60 L 18 Tk,,,,,,other,dry_other,fallback
+419469,Svammlapp Spontex Antibakteriaalne 3 Tk 56114,,,,,,other,dry_other,fallback
+419470,Tolmuharja Kompl Swiffer Vars Lapid 2 Tk,,,,,,other,dry_other,fallback
+419471,Tolmuharja Kompl Swiffer Vars Lapid 4 Tk,,,,,,other,dry_other,fallback
+419472,Tolmulapid Tolmuharjale Swiffer 5 Tk,,,,,,other,dry_other,fallback
+419473,Tualetihari Koos Hoidikuga Home Expert,,,,,,other,dry_other,fallback
+419474,Universaalne Lapp Home Expert 6 Tk,,,,,,other,dry_other,fallback
+419475,Veekaabits Leifheit Teleskoopvarrega,,,,,,other,dry_other,fallback
+419476,Vinuulkindad Home Expert L 100 Tk 28130,,,,,,other,dry_other,fallback
+419477,Vinuulkindad Home Expert M 100 Tk 28129,,,,,,other,dry_other,fallback
+419478,Biolagunevate Jaatmete Prugikast 6 L,,,,,,sauces_oils,sauces_other,heuristic
+419479,Kasn 9 X 6 5 X 4 Cm 10 Tk,,,,,,other,dry_other,fallback
+419480,Kasn Scrub Daddy Orange,,,,,,other,dry_other,fallback
+419481,Kasn Scrub Daddy Original,,,,,,drinks,drinks_spirits,high
+419482,Koogisvamm Vortex 3 D Lainelised 5 Tk,,,,,,other,dry_other,fallback
+419483,Kuurimiskasn Home Expert 5 Tk,,,,,,other,dry_other,fallback
+419484,Kuurimiskasn Home Expert 5 Tk Must,,,,,,other,dry_other,fallback
+419485,Kuurimissvammid Vileda Ultra Fresh 3 Tk,,,,,,other,dry_other,fallback
+419486,Lehtratik Bloom 2 Kih 100 Leh,,,,,,other,dry_other,fallback
+419487,Lehtratik Grite Orchidea 2 Kih 120 Tk,,,,,,other,dry_other,fallback
+419488,Lehtratik Serla Orava 100 Tk 68346,,,,,,other,dry_other,fallback
+419489,Lehtratik Zewa Premium 2 Kih 120 Tk,,,,,,other,dry_other,fallback
+419490,Lohnast Prugikotid Home Expert 35 Lx 28 Tk,,,,,,other,dry_other,fallback
+419491,Lohnast Prugikotid Home Expert 60 Lx 16 Tk,,,,,,other,dry_other,fallback
+419492,Majapidamislapid Vileda Ultra Fresh 2 Tk,,,,,,household,hh_other,high
+419493,Majapidamispab Bloom Jumbo 400 L 2 Kih 1 Rl,,,,,,household,hh_other,high
+419494,Majapidamispaber Bloom Deluxe 3 Kih 1 Rl,,,,,,household,hh_paper,high
+419495,Majapidamispaber Bloom Deluxe 3 Kih 2 Rl,,,,,,household,hh_paper,high
+419496,Majapidamispaber Bloom Regular 2 Kih 2 Rl,,,,,,household,hh_paper,high
+419497,Majapidamispaber Kleenex Jumbo 500 L 1 Rl,,,,,,household,hh_paper,high
+419498,Majapidamispaber Kleenex Maxclean 1 Rl,,,,,,household,hh_paper,high
+419499,Majapidamispaber Kleenex Ultraclean 2 Rl,,,,,,household,hh_paper,high
+419500,Metallist Kuurimissvamm Spontex 3 Tk,,,,,,other,dry_other,fallback
+419501,Mikrofiiber Lapp Vortex 30 X 50 Cm 1 Tk,,,,,,other,dry_other,fallback
+419502,Mikrokiudlapid Vileda Ultra Fresh 3 Tk,,,,,,other,dry_other,fallback
+419503,Niisk Por Lapid Vortex Citrus Breeze 15 Tk,,,,,,other,dry_other,fallback
+419504,Niisk Por Lapid Vortex Tropic Oasis 15 Tk,,,,,,other,dry_other,fallback
+419505,Niisked Lapid Vileda 4 Tk,,,,,,other,dry_other,fallback
+419506,Ouehari Varreta Vileda 60102,,,,,,other,dry_other,fallback
+419507,Paberkater Bloom Jumbo 1 Rl 2 Kih 300 Leh,,,,,,other,dry_other,fallback
+419508,Paberkater Bloom Jumbo 1 Rl 2 Kih 500 Leh,,,,,,other,dry_other,fallback
+419509,Plastkauss Home Expert 16 L,,,,,,other,dry_other,fallback
+419510,Plastkauss Home Expert 8 L 75725,,,,,,other,dry_other,fallback
+419511,Poranda Tolmu Puhastam Kmpl Swiffer 2 In 1,,,,,,other,dry_other,fallback
+419512,Porandahari Varreta Vileda Universal,,,,,,other,dry_other,fallback
+419513,Prugikott Nooridega Alufix 35 L 25 Tk,,,,,,other,dry_other,fallback
+419514,Prugikott Nooridega Alufix 45 L 20 Tk,,,,,,other,dry_other,fallback
+419515,Prugikott Nooridega Alufix 60 L 20 Tk,,,,,,other,dry_other,fallback
+419516,Salvrat Karbis Bloom Comfort 2 Kih 150 Tk,,,,,,other,dry_other,fallback
+419517,Salvrat Karbis Bloom Comfort 3 Kih 90 Tk,,,,,,other,dry_other,fallback
+419518,Salvrat Karbis Bloom Comfort 4 Kih 100 Tk,,,,,,other,dry_other,fallback
+419519,Taskuratikud Bloom Comfort 3 Kih 10 Pk,,,,,,other,dry_other,fallback
+419520,Taskuratikud Bloom Deluxe 4 Kih 10 Pk,,,,,,other,dry_other,fallback
+419521,Universaal Puhastuslapid Home Expert 3 Tk,,,,,,household,hh_cleaners,high
+419522,Universaalsed Lapid Spontex 6 Tk,,,,,,other,dry_other,fallback
+419523,Wc Paber Bloom Comfort Chamom 3 Kih 8 Rl,,,,,,other,dry_other,fallback
+419524,Wc Paber Bloom Comfort Ecol 3 Kih 4 Rl,,,,,,other,dry_other,fallback
+419525,Wc Paber Bloom Comfort Ecol 3 Kih 8 Rl,,,,,,other,dry_other,fallback
+419526,Wc Paber Bloom Comfort Orange 3 Kih 16 Rl,,,,,,other,dry_other,fallback
+419527,Wc Paber Bloom Comfort Orange 3 Kih 4 Rl,,,,,,other,dry_other,fallback
+419528,Wc Paber Bloom Comfort Orange 3 Kih 8 Rl,,,,,,other,dry_other,fallback
+419529,Wc Paber Bloom Comfort White 3 Kih 8 Rl,,,,,,other,dry_other,fallback
+419530,Amber Leifheit Picobello 12 L,,,,,,other,dry_other,fallback
+419531,Biolagunev Prugikott Biobag 140 L 3 Tk,,,,,,other,dry_other,fallback
+419532,Biolagunev Prugikott Biobag 240 L 3 Tk,,,,,,other,dry_other,fallback
+419533,Biolagunev Prugikott Biobag 30 L 20 Tk,,,,,,other,dry_other,fallback
+419534,Biolagunev Prugikott Biobag 60 L 5 Tk,,,,,,other,dry_other,fallback
+419535,Biolagunevad Prugikotid Home Expert 10 L,,,,,,other,dry_other,fallback
+419536,Biolagunevad Prugikotid Home Expert 20 L,,,,,,other,dry_other,fallback
+419537,Harjade Kmpl Home Expert 3 Tk,,,,,,other,dry_other,fallback
+419538,Kasn Scrub Daddy Lemon Fresh,,,,,,other,dry_other,fallback
+419539,Klaaspindade Lapp Home Expert 2 Tk,,,,,,other,dry_other,fallback
+419540,Kokkupand Amber Home Expert 10 L 34 X 33 X 26,,,,,,other,dry_other,fallback
+419541,Kokkupandav Kauss Home Ex 37 5 X 37 5 X 15 3,,,,,,other,dry_other,fallback
+419542,Kuurimishari Home Expert 16 X 5 8 X 8 Cm,,,,,,other,dry_other,fallback
+419543,Kuurimissvamm Home Expert 5 Tk,,,,,,other,dry_other,fallback
+419544,Lohn Prugikotid Vortex Noorid 35 L 15 Tk,,,,,,other,dry_other,fallback
+419545,Lohn Prugikotid Vortex Noorid 60 L 10 Tk,,,,,,other,dry_other,fallback
+419546,Lohnast Prugikotid Home Expert 35 L 15 Tk 85078,,,,,,other,dry_other,fallback
+419547,Lohnast Prugikotid Home Expert 35 L 45 Tk,,,,,,other,dry_other,fallback
+419548,Lohnast Prugikotid Home Expert 60 L 10 Tk 85079,,,,,,other,dry_other,fallback
+419549,Lohnast Prugikotid Home Expert 60 L 30 Tk,,,,,,other,dry_other,fallback
+419550,Majapidamispaber Bloom Regular 2 Kih 300 L,,,,,,household,hh_paper,high
+419551,Majapidamispaber Zewa Jumbo 2 Kih 1 Rl,,,,,,household,hh_paper,high
+419552,Majapidamispaber Zewa Wisch Weg 4 Rulli,,,,,,household,hh_paper,high
+419553,Mikrokiudlapp Spontex 2 Tk,,,,,,other,dry_other,fallback
+419554,Mikrokiudlappide Kmpl Home Expert 2 Tk,,,,,,other,dry_other,fallback
+419555,Niisk Tualettpaber Bloom Aloe Chamo 60 Tk,,,,,,household,hh_paper,high
+419556,Niisk Tualettpaber Bloom Kids Banana 60 Tk,,,,,,household,hh_paper,high
+419557,Niisk Tualettpaberid Zewa Aloe Vera 42 Tk,,,,,,household,hh_paper,high
+419558,Niisk Tualettpaberid Zewa Pure 42 Tk,,,,,,household,hh_paper,high
+419559,Porandahari Varrega Home Expert,,,,,,other,dry_other,fallback
+419560,Porandamopi Amber Vileda,,,,,,other,dry_other,fallback
+419561,Porandamopp Home Expert Vahetus Lapiga,,,,,,other,dry_other,fallback
+419562,Porandapesija Leifheit Picobello M,,,,,,other,dry_other,fallback
+419563,Porandapesukomplekt Vileda Ultramax,,,,,,other,dry_other,fallback
+419564,Prugikotid Home Expert 120 Lx 10 Tk,,,,,,other,dry_other,fallback
+419565,Pudelihari Home Expert 35 X 5 Cm,,,,,,meat_fish,meat_other,heuristic
+419566,Puhastuslapid Spontex Multiroll 50 Tk,,,,,,household,hh_cleaners,high
+419567,Salvratikud Karbis Bloom 3 Kih 60 Tk,,,,,,other,dry_other,fallback
+419568,Mahkmed Pampers Harmonie Vp S 4 28 Tk,,,,,,baby,baby_diapers,high
+419569,Salvratikud Zewa Deluxe 3 Kih 150 Tk,,,,,,other,dry_other,fallback
+419570,Taskuratikud Bloom 4 Kih 6 Tk,,,,,,other,dry_other,fallback
+419571,Taskuratikud Grite Mint 3 Kih 10 X 10 Tk,,,,,,sweets_snacks,sweets_gums_mints,high
+419572,Tolmukasn Scrub Daddy Damp Duster Koll,,,,,,other,dry_other,fallback
+419573,Tolmukasn Scrub Daddy Damp Duster Roosa,,,,,,other,dry_other,fallback
+419574,Tolmukasn Scrub Daddy Damp Duster Sinine,,,,,,other,dry_other,fallback
+419575,Varumopp Home Expert 41 X 12 Cm,,,,,,drinks,drinks_spirits,high
+419576,Ventileerit Kompostikorv Biobag Max Air,,,,,,other,dry_other,fallback
+419577,Wc Paber Bloom Deluxe 3 Kih 10 Rl 92160,,,,,,other,dry_other,fallback
+419578,Wc Paber Bloom Regular 2 Kih 8 Rl,,,,,,other,dry_other,fallback
+419579,Wc Paber Grite Charisma 8 Rl 4 Kih,,,,,,other,dry_other,fallback
+419580,Wc Paber Grite Orchidea 3 Kih 4 Rl,,,,,,other,dry_other,fallback
+419581,Wc Paber Zewa Deluxe 3 Kih 16 Rl White,,,,,,other,dry_other,fallback
+419582,Wc Paber Zewa Everyday 3 Kih 6 Rl,,,,,,other,dry_other,fallback
+419587,Hirs Kaer Ploomi Salvest Ponnoko 110 G 6 K,,,,,,other,dry_other,fallback
+419588,Kaer Helb Mustika Oun Semper 120 G 6 K,,,,,,produce,produce_berries,high
+419589,Kaerapud Mustik Salvest Ponn Oko 190 G 6 K,,,,,,produce,produce_berries,high
+419590,Kaerapud Ploom Mus Sost Salvest 110 G 6 K,,,,,,other,dry_other,fallback
+419591,Kaerapuder Aprikoos Salvest Oko 200 G 6 K,,,,,,other,dry_other,fallback
+419592,Kaerapuder Milupa Oun Pirnidega 250 G 6,,,,,,produce,produce_apples_pears,high
+419593,Kaerapuder Semper Passioni 120 G 6 K,,,,,,other,dry_other,fallback
+419594,Kaerapudrupulber Bio Hipp 200 G 4 K,,,,,,other,dry_other,fallback
+419595,Mannapuder Banaan Virsik Milupa 250 G 6 K,,,,,,produce,produce_tropical,high
+419596,Mitmevil Puder Banaaniga Kabrita 180 G 6 K,,,,,,produce,produce_tropical,high
+419597,Mitmeviljapud Ouna Kan Oko Ponn 110 G 6 K,,,,,,other,dry_other,fallback
+419598,Mitmeviljapuder Hipp Oko 200 G 6 K,,,,,,other,dry_other,fallback
+419599,Mitmeviljapuder Oun Virsiksemper 120 G 8 K,,,,,,other,dry_other,fallback
+419600,Nisuhelbepuder Ban Aprik Kabrita 180 G 6 K,,,,,,other,dry_other,fallback
+419601,Nisuhelbepuder Pirn Oun Kabrita 180 G 5 K,,,,,,produce,produce_apples_pears,high
+419602,Piimapud Puuvilja Jogurtiga Hipp 250 G 8 K,,,,,,dairy_eggs_fats,dairy_yogurt_kefir,high
+419603,Piimapuder Banaani Kuiviku Hipp 250 G 4 K,,,,,,dairy_eggs_fats,dairy_milk,high
+419604,Piimapuder Kaera Ounaheadood Hipp 250 G 6 K,,,,,,dairy_eggs_fats,dairy_milk,high
+419605,Piimapuder Kupsistegaheadood Hipp 190 G 4 K,,,,,,dairy_eggs_fats,dairy_milk,high
+419606,Piimapuder Puuvil Head Ood Hipp 190 G 4 K,,,,,,dairy_eggs_fats,dairy_milk,high
+419607,Piimapudrupulber Beebikups Hipp 250 G 6 K,,,,,,dairy_eggs_fats,dairy_milk,high
+419608,Puder Banaan Head Ood Hipp 190 G 4 K,,,,,,produce,produce_tropical,high
+419609,Puree Kubus Baby Riisipud Puuv 100 G 6 K,,,,,,dry_preserves,dry_pasta_rice,high
+419610,Riisipudrupulber Bio Hipp 200 G 4 K,,,,,,dry_preserves,dry_pasta_rice,high
+419611,Taister Puuvil Piimapud Milupa 250 G 10 K,,,,,,dairy_eggs_fats,dairy_milk,high
+419612,Taistera 3 Viljapuder Holle 250 G 6 K,,,,,,other,dry_other,fallback
+419613,Taisterapud Ban Mustas Salvest Oko 200 G 6 K,,,,,,other,dry_other,fallback
+419614,Taisterapuder Milupa Maasikat 250 G 8,,,,,,produce,produce_berries,high
+419615,Tatra Piimapudrupulberhipp 250 G 4 K,,,,,,dairy_eggs_fats,dairy_milk,high
+419616,Tatra Puder Oun Aprik Kabrita 180 G 5 K,,,,,,other,dry_other,fallback
+419617,Tatrapuder Piimaga Milupa 225 G 4 K,,,,,,dairy_eggs_fats,dairy_milk,high
+419618,Teraviljapuder Ponn Oko Head Und 110 G 6,,,,,,other,dry_other,fallback
+419619,Valmispuder Maasikaga Semper 120 G 6 K,,,,,,produce,produce_berries,high
+419620,Valmispuder Oun Virsik 6 K Semper 120 G,,,,,,other,dry_other,fallback
+419621,Valmispuder Ouna Kaneeli Semper 120 G 6 K,,,,,,world_spices,spices_herbs_spice_mix,high
+419622,Valmispuder Pirn Aprikoos 6 K Semper 120 G,,,,,,produce,produce_apples_pears,high
+419623,Valmispuder Pirn Ploom 6 K Semper 120 G,,,,,,produce,produce_apples_pears,high
+419624,Valmispuder Puuviljadega 6 K Semper 120 G,,,,,,other,dry_other,fallback
+419625,Mahkmed Huggies Extra Care 1 2 5 Kg 50 Tk,,,,,,other,dry_other,fallback
+419626,Mahkmed Huggies Extra Care 2 3 6 Kg 24 Tk,,,,,,other,dry_other,fallback
+419627,Mahkmed Huggies Extra Care S 1 2 5 Kg 26 Tk,,,,,,other,dry_other,fallback
+419628,Mahkmed Moony Airfit L 9 14 Kg 54 Tk,,,,,,other,dry_other,fallback
+419629,Mahkmed Pampers Mp S 3 66 Tk,,,,,,baby,baby_diapers,high
+419630,Mahkmed Pampers Mp S 4 58 Tk,,,,,,baby,baby_diapers,high
+419631,Mahkmed Pampers Pc Mb S 3 120 Tk,,,,,,baby,baby_diapers,high
+419632,Mahkmed Pampers Pc Mb S 4 104 Tk,,,,,,baby,baby_diapers,high
+419633,Mahkmed Pampers Prem Care S 0 3 Kg 30 Tk,,,,,,baby,baby_diapers,high
+419634,Mahkmed Pampers Premium Care S 1 26 Tk,,,,,,baby,baby_diapers,high
+419635,Mahkmed Pampers Premium Care S 2 23 Tk,,,,,,baby,baby_diapers,high
+419636,Mahkmed Pampers Premium Care S 2 68 Tk,,,,,,baby,baby_diapers,high
+419637,Mahkmed Pampers Premium Care S 3 60 Tk,,,,,,baby,baby_diapers,high
+419638,Mahkmed Pampers Premium Care S 5 44 Tk,,,,,,baby,baby_diapers,high
+419639,Mahkmed Pampers Premium Care S 6 38 Tk,,,,,,baby,baby_diapers,high
+419640,Puksmahk Dry Nites Boy 4 7 A 17 30 Kg 10 Tk,,,,,,other,dry_other,fallback
+419641,Puksmahk Dry Nites Girl 4 7 A 17 30 Kg 10 Tk,,,,,,other,dry_other,fallback
+419642,Puksmahk Pampers Prem Care S 3 48 Tk 6 11,,,,,,baby,baby_diapers,high
+419643,Puksmahk Pampers Prem Care S 4 38 Tk 9 15,,,,,,baby,baby_diapers,high
+419644,Puksmahk Pampers Prem Care S 5 34 Tk 12 17,,,,,,baby,baby_diapers,high
+419645,Puksmahk Pampers Prem Care S 6 31 Tk 15,,,,,,baby,baby_diapers,high
+419646,Puksmahkm Huggies Extracare 3 6 11 Kg 48 Tk,,,,,,other,dry_other,fallback
+419647,Puksmahkm Huggies Extracare 4 9 14 Kg 38 Tk,,,,,,other,dry_other,fallback
+419648,Puksmahkm Huggies Extracare 5 12 17 Kg 34 Tk,,,,,,other,dry_other,fallback
+419649,Puksmahkmed Dry Nites Boy 30 48 Kg 9 Tk,,,,,,other,dry_other,fallback
+419650,Puksmahkmed Dry Nites Girl 30 48 Kg 9 Tk,,,,,,other,dry_other,fallback
+419651,Puksmahkmed Huggies Boy S 4 9 14 Kg 72 Tk,,,,,,other,dry_other,fallback
+419652,Puksmahkmed Huggies Boy S 5 12 17 Kg 68 Tk,,,,,,other,dry_other,fallback
+419653,Puksmahkmed Huggies Girl S 5 12 17 Kg 68 Tk,,,,,,other,dry_other,fallback
+419654,Puksmahkmed Huggies S 3 Mega Girl 58 Tk,,,,,,other,dry_other,fallback
+419655,Puksmahkmed Huggies S 4 Boy 9 14 Kg 36 Tk,,,,,,other,dry_other,fallback
+419656,Puksmahkmed Huggies S 4 Girl 9 14 Kg 36 Tk,,,,,,other,dry_other,fallback
+419657,Puksmahkmed Huggies S 4 Mega Boy 52 Tk,,,,,,other,dry_other,fallback
+419658,Puksmahkmed Huggies S 4 Mega Girl 52 Tk,,,,,,other,dry_other,fallback
+419659,Puksmahkmed Huggies S 5 Boy 12 17 Kg 48 Tk,,,,,,other,dry_other,fallback
+419660,Puksmahkmed Huggies S 5 Girl 12 17 Kg 34 Tk,,,,,,other,dry_other,fallback
+419661,Puksmahkmed Huggies S 6 Boy 15 25 Kg 44 Tk,,,,,,other,dry_other,fallback
+419662,Puksmahkmed Huggies S 6 Girl 15 25 Kg 44 Tk,,,,,,other,dry_other,fallback
+419663,Puksmahkmed Pampers Maxi Pack S 5 42 Tk,,,,,,baby,baby_diapers,high
+419664,Puksmahkmed Pampers Mp S 3 6 11 Kg 128 Tk,,,,,,baby,baby_diapers,high
+419665,Puksmahkmed Pampers Mp S 4 9 15 Kg 108 Tk,,,,,,baby,baby_diapers,high
+419666,Puksmahkmed Pampers Mp S 5 12 18 Kg 96 Tk,,,,,,baby,baby_diapers,high
+419667,Puksmahkmed Pampers Mp S 6 15 Kg 84 Tk,,,,,,baby,baby_diapers,high
+419668,Puksmahkmed Pampers S 4 52 Tk,,,,,,baby,baby_diapers,high
+419669,Puksmahkmed Pampers S 5 22 Tk,,,,,,baby,baby_diapers,high
+419670,Puksmahkmed Pampers S 5 48 Tk,,,,,,baby,baby_diapers,high
+419671,Puksmahkmed Pampers S 6 19 Tk,,,,,,baby,baby_diapers,high
+419672,Puksmahkmed Pampers S 6 44 Tk,,,,,,baby,baby_diapers,high
+419673,Ujum Puksid Huggies Swimmers 12 18 Kg 11 Tk,,,,,,other,dry_other,fallback
+419674,Ujum Puksid Huggies Swimmers 7 15 Kg 12 Tk,,,,,,other,dry_other,fallback
+419675,Ujumismahkmed Pampers S 3 4 6 11 Kg 12 Tk,,,,,,baby,baby_diapers,high
+419676,Ujumismahkmed Pampers S 4 5 9 15 Kg 11 Tk,,,,,,baby,baby_diapers,high
+419677,Mahkmed Huggies Extra Care 2 3 6 Kg 58 Tk,,,,,,other,dry_other,fallback
+419678,Mahkmed Huggies Extra Care 4 8 16 Kg 33 Tk,,,,,,other,dry_other,fallback
+419679,Mahkmed Huggies Extra Care S 1 2 5 Kg 84 Tk,,,,,,other,dry_other,fallback
+419680,Mahkmed Huggies Extra Care S 2 82 Tk,,,,,,other,dry_other,fallback
+419681,Mahkmed Huggies Extra Care S 3 72 Tk,,,,,,other,dry_other,fallback
+419682,Mahkmed Huggies Extra Care S 4 60 Tk,,,,,,other,dry_other,fallback
+419683,Mahkmed Huggies Extracare 5 11 25 Kg 50 Tk,,,,,,other,dry_other,fallback
+419684,Mahkmed Moony Airfit M 6 11 Kg 56 Tk,,,,,,other,dry_other,fallback
+419685,Mahkmed Moony Airfit S 4 8 Kg 70 Tk,,,,,,other,dry_other,fallback
+419686,Mahkmed Pampers Harmonie S 3 6 10 Kg 31 Tk,,,,,,baby,baby_diapers,high
+419687,Mahkmed Pampers Premium Care S 1 72 Tk,,,,,,baby,baby_diapers,high
+419688,Mahkmed Peppins Comfy S 2 4 8 Kg 30 Tk,,,,,,other,dry_other,fallback
+419689,Mahkmed Peppins Comfy S 3 6 10 Kg 49 Tk,,,,,,other,dry_other,fallback
+419690,Mahkmed Peppins Comfy S 5 11 16 35 Tk,,,,,,other,dry_other,fallback
+419691,Mahkmed Peppins Everyday S 4 9 14 Kg 28 Tk,,,,,,other,dry_other,fallback
+419692,Mahkmed Peppins Everyday S 4 9 14 Kg 56 Tk,,,,,,other,dry_other,fallback
+419693,Mahkmed Peppins Everyday S 5 11 16 Kg 24 Tk,,,,,,other,dry_other,fallback
+419694,Mahkmed Peppins Everyday S 5 11 16 Kg 50 Tk,,,,,,other,dry_other,fallback
+419695,Mahkmed Peppins Premium 11 16 Kg 44 Tk,,,,,,other,dry_other,fallback
+419696,Puksmahk Moony Airfit Boy L 9 14 Kg 44 Tk,,,,,,other,dry_other,fallback
+419697,Puksmahk Moony Airfit Girl L 9 14 Kg 44 Tk,,,,,,other,dry_other,fallback
+419698,Puksmahk Moony Airfitboy Xl 12 22 Kg 38 Tk,,,,,,other,dry_other,fallback
+419699,Puksmahk Moony Airfitgirl Xl 12 22 Kg 38 Tk,,,,,,other,dry_other,fallback
+419700,Puksmahk Peppins Up Play S 4 9 15 Kg 22 Tk,,,,,,other,dry_other,fallback
+419701,Puksmahk Peppins Up Play S 5 12 17 Kg 20 T,,,,,,other,dry_other,fallback
+419702,Puksmahk Peppins Up Play S 6 15 Kg 18 Tk,,,,,,other,dry_other,fallback
+419703,Puksmahkm Huggies Overnights S 4 26 Tk,,,,,,other,dry_other,fallback
+419704,Puksmahkm Huggies Overnights S 5 24 Tk,,,,,,other,dry_other,fallback
+419705,Puksmahkm Huggies Overnights S 6 22 Tk,,,,,,other,dry_other,fallback
+419706,Puksmahkmed Pampers Gp S 3 76 Tk,,,,,,baby,baby_diapers,high
+419707,Puksmahkmed Pampers Gp S 4 66 Tk,,,,,,baby,baby_diapers,high
+419708,Puksmahkmed Pampers Gp S 5 56 Tk,,,,,,baby,baby_diapers,high
+419709,Puksmahkmed Pampers Gp S 6 48 Tk,,,,,,baby,baby_diapers,high
+419710,Puksmahkmed Pampers Gp S 7 42 Tk,,,,,,baby,baby_diapers,high
+419711,Puksmahkmed Pampers Maxi Pack S 3 56 Tk,,,,,,baby,baby_diapers,high
+419712,Puksmahkmed Pampers Maxi Pack S 4 48 Tk,,,,,,baby,baby_diapers,high
+419713,Puksmahkmed Pampers Maxi Pack S 6 36 Tk,,,,,,baby,baby_diapers,high
+419714,Puksmahkmed Pampers Night Vp S 4 25 Tk,,,,,,baby,baby_diapers,high
+419715,Puksmahkmed Pampers Night Vp S 5 22 Tk,,,,,,baby,baby_diapers,high
+419716,Puksmahkmed Pampers Night Vp S 6 19 Tk,,,,,,baby,baby_diapers,high
+419717,Puksmahkmed Pampers Pc Jpp S 4 58 Tk,,,,,,baby,baby_diapers,high
+419718,Puksmahkmed Pampers Pc Jpp S 5 52 Tk,,,,,,baby,baby_diapers,high
+419719,Puksmahkmed Pampers Pc Jpp S 6 42 Tk,,,,,,baby,baby_diapers,high
+419720,Puksmahkmed Pampers Pc Vp S 7 27 Tk,,,,,,baby,baby_diapers,high
+419721,Puksmahkmed Pampers S 3 6 11 Kg 62 Tk,,,,,,baby,baby_diapers,high
+419722,Puksmahkmed Pampers S 4 9 15 Kg 25 Tk,,,,,,baby,baby_diapers,high
+419723,Puksmahkmed Pampers S 7 17 Kg 38 Tk,,,,,,baby,baby_diapers,high
+419724,Puksmahkmed Pampers S 8 32 Tk,,,,,,baby,baby_diapers,high
+419725,Puksmahkmed Peppins Premium 15 Kg 32 Tk,,,,,,other,dry_other,fallback
+419726,Ujum Puks Huggies Swim 2 3 3 8 Kg 12 Tk,,,,,,other,dry_other,fallback
+419727,Mahkmed Pampers Harmonie S 2 4 8 Kg 39 Tk,,,,,,baby,baby_diapers,high
+419728,Mahkmed Pampers Pc Mb S 2 136 Tk,,,,,,baby,baby_diapers,high
+419729,Mahkmed Pampers Premium Care S 4 52 Tk,,,,,,baby,baby_diapers,high
+419730,Mahkmed Peppins Comfy S 4 9 14 Kg 41 Tk,,,,,,other,dry_other,fallback
+419731,Mahkmed Peppins Premium 2 5 Kg 26 Tk,,,,,,other,dry_other,fallback
+419732,Mahkmed Peppins Premium 6 10 Kg 56 Tk,,,,,,other,dry_other,fallback
+419733,Mahkmed Peppins Premium 9 14 Kg 50 Tk,,,,,,other,dry_other,fallback
+419734,Mahkmed Peppins Premium Mini 4 8 Kg 42 Tk,,,,,,other,dry_other,fallback
+419735,Puksmahk Huggies Dryn Boy 49 60 Kg 13 9 Tk,,,,,,other,dry_other,fallback
+419736,Puksmahk Huggiesdryn Girl 49 60 Kg 13 9 Tk,,,,,,other,dry_other,fallback
+419737,Puksmahkm Huggies Extracare 6 15 25 Kg 30 Tk,,,,,,other,dry_other,fallback
+419738,Puksmahkmed Huggies Girl S 4 9 14 Kg 72 Tk,,,,,,other,dry_other,fallback
+419739,Puksmahkmed Huggies S 3 Mega Boy 58 Tk,,,,,,other,dry_other,fallback
+419740,Puksmahkmed Huggies S 5 Boy 12 17 Kg 34 Tk,,,,,,other,dry_other,fallback
+419741,Puksmahkmed Huggies S 5 Girl 12 17 Kg 48 Tk,,,,,,other,dry_other,fallback
+419742,Puksmahkmed Oopsies Go S 4 8 15 Kg 22 Tk,,,,,,other,dry_other,fallback
+419743,Puksmahkmed Oopsies Go S 5 12 17 Kg 20 Tk,,,,,,other,dry_other,fallback
+419744,Puksmahkmed Oopsies Go S 6 15 Kg 18 Tk,,,,,,other,dry_other,fallback
+419745,Puksmahkmed Peppins Premium 12 17 Kg 35 Tk,,,,,,other,dry_other,fallback
+419746,Puksmahkmed Peppins Premium 9 15 Kg 39 Tk,,,,,,other,dry_other,fallback
+419747,Aprikoosipuree Hipp Bio 125 G 4 K,,,,,,other,dry_other,fallback
+419748,Ban Ouna Mustikapuree Muuti 110 G Al 6 K,,,,,,produce,produce_berries,high
+419749,Ban Virs Mangopuree Muuti 110 G Al 12 K,,,,,,produce,produce_tropical,high
+419750,Banaanipuree Gerber 125 G 4 K,,,,,,produce,produce_tropical,high
+419751,Banaanpuree Kiivi Pirni Hipp Bio 100 G 6 K,,,,,,produce,produce_apples_pears,high
+419752,Banaanpuree Pirni Mango Hipp Bio 100 G 4 K,,,,,,produce,produce_apples_pears,high
+419753,Brok Pirni Hernep Ella S Kitchen 120 G 4 K,,,,,,produce,produce_apples_pears,high
+419754,Maasi Mustika Ounapur Fruktmums 110 G 6 K,,,,,,produce,produce_berries,high
+419755,Maasika Ounapuree Ella S Kitchen 120 G 4 K,,,,,,produce,produce_berries,high
+419756,Maasikasmuuti Oko Salvest 110 G 6 K,,,,,,produce,produce_berries,high
+419757,Mag Kartul Kor Oun Must Puree Ek 120 Gr 4 K,,,,,,produce,produce_root_veg,high
+419758,Mango Porg Astelp Puree Muuti 110 G Al 6 K,,,,,,produce,produce_tropical,high
+419759,Mangopuree Oko Salvest 100 G 4 K,,,,,,produce,produce_tropical,high
+419760,Mustika Ounapuree Oko Salvest 100 G 4 K,,,,,,produce,produce_berries,high
+419761,Okol Ouna Ban Apr Puree Ovko 190 G 4 K,,,,,,other,dry_other,fallback
+419762,Org Puree Virsik Ban Mang Hipp 100 G 6 K,,,,,,other,dry_other,fallback
+419763,Ouna Abrik Ban Puree Gerber 125 G 6 K,,,,,,other,dry_other,fallback
+419764,Ouna Ban Virs Puree Kups Hipp 100 G Al 1 A,,,,,,other,dry_other,fallback
+419765,Ouna Banaanipuree Kupsis Hippbio 100 G 4 K,,,,,,produce,produce_tropical,high
+419766,Ouna Mango Ananas Puree Semper 110 G 6 K,,,,,,produce,produce_tropical,high
+419767,Ouna Pirni Banaanipuree Hipp Bio 100 G 4 K,,,,,,produce,produce_apples_pears,high
+419768,Ouna Por Ban Puree Ovko 90 G 6 K,,,,,,other,dry_other,fallback
+419769,Ouna Vaarikapuree Granaat Hipp 100 G 1 A,,,,,,produce,produce_berries,high
+419770,Ouna Virsikupuree Ploomi Hipp 100 G Al 1 A,,,,,,other,dry_other,fallback
+419771,Ounapur Ban Vaar Teravil Hippbio 100 G 6 K,,,,,,other,dry_other,fallback
+419772,Ounapuree Banaani Mustikabebivita 90 G 4 K,,,,,,produce,produce_berries,high
+419773,Ounapuree Banaaniga Hipp Bio 100 G 4 K,,,,,,produce,produce_tropical,high
+419774,Ounapuree Maasik Banaan Hippbio 100 G 4 K,,,,,,produce,produce_berries,high
+419775,Ounapuree Virs Metsamar Hippbio 100 G 4 K,,,,,,other,dry_other,fallback
+419776,Ount Porg Ja Ban Puree Ovko 120 G 6 K,,,,,,other,dry_other,fallback
+419777,Pirni Ounapuree Hipp Bio 100 G 4 K,,,,,,produce,produce_apples_pears,high
+419778,Pirni Vaarika Ban Puree Muuti 110 G Al 6 K,,,,,,produce,produce_berries,high
+419779,Pirnipuree Gerber 125 G 4 K,,,,,,produce,produce_apples_pears,high
+419780,Pirnipuree Oko Salvest 100 G 4 K,,,,,,produce,produce_apples_pears,high
+419781,Pirnipuree Williams Bio Hipp 125 G 4 K,,,,,,produce,produce_apples_pears,high
+419782,Ploomipur Mustsost Pirni Hippbio 100 G 6 K,,,,,,produce,produce_apples_pears,high
+419783,Ploomipuree Hipp Bio 125 G 4 K,,,,,,other,dry_other,fallback
+419784,Ploomipuree Salvest Ponn Oko 100 G 4 K,,,,,,other,dry_other,fallback
+419785,Puree Kabrita Oun Metsamarjad 100 G 6 K,,,,,,produce,produce_berries,high
+419786,Puree Oun Ban Ja Virs Ovko 120 G 6 K,,,,,,other,dry_other,fallback
+419787,Puree Oun Banaan Bebivita 90 G 4 K,,,,,,produce,produce_tropical,high
+419788,Puuviljapur Oun Vaar Ban 6 K Semper 110 G,,,,,,other,dry_other,fallback
+419789,Puuviljapur Pir Banaan Man 6 K Semper,,,,,,produce,produce_tropical,high
+419790,Puuviljapur Virs Oun Ban 6 K Semper 110 G,,,,,,other,dry_other,fallback
+419791,Puuviljapuree Marjadega Hipp 100 G Al 1 A,,,,,,produce,produce_berries,high
+419792,Puuviljapuree Oun Virsik Bebivita 90 G 4 K,,,,,,other,dry_other,fallback
+419793,Puuviljapuree Ovko 120 G 6 K,,,,,,other,dry_other,fallback
+419794,Puuviljapuree Ovko 90 G 6 K,,,,,,other,dry_other,fallback
+419795,Puuviljasmuuti Oko Salvest Ponn 110 G 6,,,,,,produce,produce_smoothies_fresh_juices,high
+419796,Smuuti Banaan Riisipud Kubus Baby 5 K 100 G,,,,,,dry_preserves,dry_pasta_rice,high
+419797,Smuuti Oko Puuv Jogurt Kups Ponn 110 G 6,,,,,,dairy_eggs_fats,dairy_yogurt_kefir,high
+419798,Smuuti Ouna Banaani Kubus Baby 4 K 100 G,,,,,,produce,produce_tropical,high
+419799,Jogurtidessert Virs Pirni Plasmon 85 G 6 K,,,,,,dairy_eggs_fats,dairy_yogurt_kefir,high
+419800,Korvitsapuree Ponn Okoloogiline 125 G,,,,,,other,dry_other,fallback
+419801,Mang Kookos Smuut Salvest Ponn Oko 110 G 6 K,,,,,,bakery,bakery_cakes_pastries,high
+419802,Mangopuree Ban Oun Porg Hipp 100 G 4 K,,,,,,produce,produce_tropical,high
+419803,Mangopuree Oko Gerber 80 G 4 K,,,,,,produce,produce_tropical,high
+419804,Mitmeviljapuder Oun Maas Semper 120 G 8 K,,,,,,other,dry_other,fallback
+419805,Neljaviljapuder Salvest Ounmango 110 G 6 K,,,,,,produce,produce_tropical,high
+419806,Ok Aedm Ouna Must Pur Organix 100 G 6 K,,,,,,other,dry_other,fallback
+419807,Ok Virs Ouna Mangopuree Organix 100 G 12 K,,,,,,produce,produce_tropical,high
+419808,Okol Puuviljasegupuree Ovko 190 G 4 K,,,,,,other,dry_other,fallback
+419809,Ouna Banaanipuree Spelta Bebivita 90 G 1 A,,,,,,produce,produce_tropical,high
+419810,Ouna Mango Mustasos Puree Muuti Oko 110 G,,,,,,produce,produce_tropical,high
+419811,Ouna Must Ban Puree Gerber 80 G 6 K,,,,,,other,dry_other,fallback
+419812,Ounapuree Oko Gerber 80 G 4 K,,,,,,other,dry_other,fallback
+419813,Puree Kabrita Ban Aedm 100 G 6 K,,,,,,other,dry_other,fallback
+419814,Puree Kabrita Mango Ouna 100 G 6 K,,,,,,produce,produce_tropical,high
+419815,Puree Kabrita Puuv Kokt 100 G 6 K,,,,,,other,dry_other,fallback
+419816,Puree Kubus Baby Oun Aedm Por 100 G 6 K,,,,,,other,dry_other,fallback
+419817,Puree Kubus Baby Por Oun Mango 100 G 6 K,,,,,,produce,produce_tropical,high
+419818,Puree Oun Ploom Porg Gerber 80 G 6 K,,,,,,other,dry_other,fallback
+419819,Puree Semper Yummies Mango 120 G 12 K,,,,,,produce,produce_tropical,high
+419820,Puuviljapur Kaera Must Semper 110 G 6 K,,,,,,other,dry_other,fallback
+419821,Puuviljapuree Ovko Plus Oun 120 G,,,,,,other,dry_other,fallback
+419822,Puuviljapuree Ovko Plus Oun Pirn 120 G,,,,,,produce,produce_apples_pears,high
+419823,Puuviljapuree Ovko Plus Oun Ploom 120 G,,,,,,other,dry_other,fallback
+419824,Puuviljapuree Ovko Plus Oun Virsik 120 G,,,,,,other,dry_other,fallback
+419825,Smuuti Banaan Virsiku Kubus Baby 6 K 100 G,,,,,,produce,produce_tropical,high
+419826,Niisk Salv Huggies All Over Clear 56 Tk,,,,,,other,dry_other,fallback
+419827,Niisk Salvr Huggies Sensitive Extra 56 Tk,,,,,,other,dry_other,fallback
+419828,Niisk Salvr Pampers Aqua Paw Patr 3 X 48 Tk,,,,,,baby,baby_diapers,high
+419829,Niisk Salvratik Baby Lindo Niisutav 80 Tk,,,,,,other,dry_other,fallback
+419830,Niisk Salvratik Pampers Harmonie 3 X 48 Tk,,,,,,baby,baby_diapers,high
+419831,Niisk Salvratikud Pampers Harm Pf 3 X 44 Tk,,,,,,baby,baby_diapers,high
+419832,Niisk Salvratikud Pampers Harmon Pf 44 Tk,,,,,,baby,baby_diapers,high
+419833,Niisk Salvratikud Pampers Harmonie 48 Tk,,,,,,baby,baby_diapers,high
+419834,Niisk Salvratikud Pampers Sens Pf 4 X 52 Tk,,,,,,baby,baby_diapers,high
+419835,Niisked Salvr Huggies Extra Sens 3 X 56 Tk,,,,,,baby,baby_wipes,high
+419836,Niisked Salvr Huggies Naturalcare 3 X 56 Tk,,,,,,baby,baby_wipes,high
+419837,Niisked Salvr Huggies Naturalcare 56 Tk,,,,,,baby,baby_wipes,high
+419838,Niisked Salvr Pampers Harmonie Pf 3 X 46 Tk,,,,,,baby,baby_diapers,high
+419839,Niisked Salvrat Go Wipes Water Aloe 50 Tk,,,,,,baby,baby_wipes,high
+419840,Niisked Salvrat Pampers Harmonie 4 X 46 Tk,,,,,,baby,baby_diapers,high
+419841,Niisked Salvrat Pure Baby Organic 70 Tk,,,,,,baby,baby_wipes,high
+419842,Niisked Salvratik Pampers Sensit Pf 52 Tk,,,,,,baby,baby_diapers,high
+419843,Niisked Salvratikud Hipp Baby Sanft 50 Tk,,,,,,baby,baby_wipes,high
+419844,Niisked Salvratikud Huggies Pure 3 X 56 Tk,,,,,,baby,baby_wipes,high
+419845,Niisked Salvratikud Huggies Pure 56 Tk,,,,,,baby,baby_wipes,high
+419846,Niisked Salvratikud Kindii Lastele 60 Tk,,,,,,baby,baby_wipes,high
+419847,Niisked Salvratikud Neutral 0 Proc 52 Tk,,,,,,baby,baby_wipes,high
+419848,Niisked Salvratikud Pampers Harmonie 46 Tk,,,,,,baby,baby_diapers,high
+419849,Niisked Salvratikud Peppins Everyday 72 Tk 78993,,,,,,baby,baby_wipes,high
+419850,Niisked Salvratikud Peppins Sensit 80 Tk 78985,,,,,,baby,baby_wipes,high
+419851,Aedv Pastar Kana Salvest Ponnoko 120 G 8 K,,,,,,dry_preserves,dry_pasta_rice,high
+419852,Aedv Pastaroog Salvest Veiselih 190 G 8 M,,,,,,dry_preserves,dry_pasta_rice,high
+419853,Aedv Puree Kanafile Salvest Oko 190 G 6 K,,,,,,meat_fish,meat_poultry,high
+419854,Aedvilja Nuudliroog Singiga Hipp 8 K 220 G,,,,,,dry_preserves,dry_pasta_rice,high
+419855,Haut Veisel Kartul Ella S Kitchen 130 G 7 K,,,,,,meat_fish,meat_beef_lamb_game,high
+419856,Juurv Nuudlipuree Kanagahipp Bio 220 G 1 A,,,,,,dry_preserves,dry_pasta_rice,high
+419857,Juurv Puree Kalkunilih Bio Hipp 220 G 1 A,,,,,,meat_fish,meat_poultry,high
+419858,Juurvil Puree Vasikalih Hipp Bio 220 G 8 K,,,,,,other,dry_other,fallback
+419859,Juurviljapuree Hipp Bio 125 G 4 K,,,,,,other,dry_other,fallback
+419860,Juurviljapuree Loomal Ga Hipp 220 G 8 K,,,,,,other,dry_other,fallback
+419861,Kalkuniliha Koogiv Ja Riis Ovko 190 G 7 K,,,,,,dry_preserves,dry_pasta_rice,high
+419862,Kalkunilihapuree Hipp Bio 125 G 4 K,,,,,,meat_fish,meat_poultry,high
+419863,Kanafil Koogiv Ja Riisiga Ovko 190 G 7 K,,,,,,dry_preserves,dry_pasta_rice,high
+419864,Kanalihapuree Salvest Ponn Oko 120 G 6 K,,,,,,meat_fish,meat_poultry,high
+419865,Koogiv Pur Sea File Salvest Oko 110 G 6,,,,,,other,dry_other,fallback
+419866,Koogiv Puree Kanalih Oko Salvest 110 G 6 K,,,,,,meat_fish,meat_poultry,high
+419867,Koogiv Puree Veisel Oko Salvest 110 G 6 K,,,,,,meat_fish,meat_beef_lamb_game,high
+419868,Koogiv Supp Kana Ja Riisiga Ovko 190 G 6 K,,,,,,dry_preserves,dry_pasta_rice,high
+419869,Koogivil Puree Veis Salvest Oko 190 G 6 K,,,,,,meat_fish,meat_beef_lamb_game,high
+419870,Koogivil Risoto Kalkunil Hipp 250 G 12 K,,,,,,meat_fish,meat_poultry,high
+419871,Koogiviljasegu Lohega Ovko 190 G 7 K,,,,,,other,dry_other,fallback
+419872,Korv Kartuli Ja Maheveis Hipp 190 G 5 K,,,,,,meat_fish,meat_beef_lamb_game,high
+419873,Korvit Bat Mangopur Salvest Ponn 110 G 6,,,,,,produce,produce_tropical,high
+419874,Lambalihapuree Ella S Kitchen 130 G 7 K,,,,,,meat_fish,meat_beef_lamb_game,high
+419875,Makaroni Juustu Veiselih Okoponn 130 G 7 K,,,,,,dairy_eggs_fats,dairy_cheese_slices,high
+419876,Makaronid Kalaga Koorekast Hipp 220 G 8 K,,,,,,dairy_eggs_fats,dairy_cream_sourcream,high
+419877,Okol Kana Porgandipuree Ovko 190 G 4 K,,,,,,meat_fish,meat_poultry,high
+419878,Pirni Teraviljapuree Plasmon 2 X 120 G 6 K,,,,,,produce,produce_apples_pears,high
+419879,Porg Kartulipuree Lohega Hipp 190 G 4 K,,,,,,produce,produce_root_veg,high
+419880,Porg Puree Kartuliga Hipp Bio 125 G 4 K,,,,,,produce,produce_root_veg,high
+419881,Puree Vasika Nuudlitega Gerber 190 G 9 K,,,,,,dry_preserves,dry_pasta_rice,high
+419882,Puuvilja Teravilj Puree Plasmon 2 X 120 G 6 K,,,,,,other,dry_other,fallback
+419883,Riisi Porg Puree Kalk Lih Biohipp 220 G 8 K,,,,,,dry_preserves,dry_pasta_rice,high
+419884,Riisipuree Juurvilja Kanalih Hipp 190 G 4 K,,,,,,dry_preserves,dry_pasta_rice,high
+419885,Spagetid Bolognese Hipp Bio 190 G 4 K,,,,,,dry_preserves,dry_pasta_rice,high
+419886,Spagetid Tomat Mozzarel Hipp 220 G 8 K,,,,,,dry_preserves,dry_pasta_rice,high
+419887,Sparg Kapsa Risotto Kuulikul Hipp 220 G 8 K,,,,,,produce,produce_root_veg,high
+419888,Suvikorvitsap Kartuliga Hipp 125 G 4 Oko,,,,,,produce,produce_root_veg,high
+419889,Tomati Nuudlipuree Vasikalih Hipp 220 G 1 A,,,,,,dry_preserves,dry_pasta_rice,high
+419890,Tomatisupp Riisi Kalkun Gerber 190 G 8 K,,,,,,dry_preserves,dry_pasta_rice,high
+419891,Toortatraroog Veiselih Salvest 190 G 8 K,,,,,,meat_fish,meat_beef_lamb_game,high
+419892,Uhepajatoit Sealihaga Oko Ponn 130 G 7 K,,,,,,meat_fish,meat_pork,high
+419893,Veiselihapuree Hipp Bio 125 G 4 K,,,,,,meat_fish,meat_beef_lamb_game,high
+419894,Veisepuree Salvest Ponn Oko 120 G 6 K,,,,,,meat_fish,meat_beef_lamb_game,high
+419895,Riivsai paprikaga CITY TASTE 350g,,,"Barbora, Maxima",,,bakery,bakery_buns_croissants,high
+419896,"Koorejäätis ERITI RAMMUS karamelli, 480g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+419897,"Külm.peekoni-munapir.EESTI PAGAR,390g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_eggs,high
+419898,Hele õlu CRONUS Pilsner 4.8% 500ml,CRONUS,,"Barbora, Maxima",,,drinks,drinks_beer_cider,high
+419899,Salatisegu Harmony WELL DONE 100g,,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+419900,"Hele õlu Saku Kuld 5,2% 12*0,33L prk",SAKU,,"Barbora, Maxima",,,drinks,drinks_beer_cider,high
+419901,Terav Kaste Guacamole 150 G,,,,,,sauces_oils,sauces_other,high
+419902,Roheline tee HYLEYS 25x1.5g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+419903,"Hele õlu Saku Originaal4,7% 12x0,33l prk",SAKU,,"Barbora, Maxima",,,drinks,drinks_beer_cider,high
+419904,Kohviuba JACOBS Selection 1kg,JACOBS,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high
+419905,KPN kuiv vein MAYBACH Riesling 750ml,MAYBACH,,"Barbora, Maxima",,,drinks,drinks_wine,high
+419906,KPN poolkuiv vein MAYBACH Riesling 750ml,MAYBACH,,"Barbora, Maxima",,,drinks,drinks_wine,high
+419907,Salatisegu Vivid WELL DONE 100g,,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+419908,Liköör JÄGERMEISTER 35% 500ml,JÄGERMEISTER,,,,,other,dry_other,fallback
+419909,Liköör VANA TALLINN 40% 500ml,VANA TALLINN,,,,,other,dry_other,fallback
+419910,"Mineraalvesi SAN PELLEGRINO 1L ,g-tud",SAN PELLEGRINO,,"Barbora, Maxima",,,drinks,drinks_water,high
+419911,"Koorejäätis PREMIA 47% vähe suhkr.,240g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+419912,"Külm.friikartul. sakiline EXTRA LINE,1kg",,,"Barbora, Maxima",,,frozen_food,frozen_potato_products,high
+419913,Mineraalvesi SAN PELLEGRINO 6x1l gas-tud,SAN PELLEGRINO,,"Barbora, Maxima",,,drinks,drinks_water,high
+419914,"Külm. kana-juustu pitsa PREMIA, 355g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high
+419915,"Külm.pitsa VICI suits.pepperoniga,300g",,,"Barbora, Maxima",,,other,dry_other,fallback
+419916,"Külm.pitsarull EESTI PAGAR,400g",,,"Barbora, Maxima",,,other,dry_other,fallback
+419917,Cappuccino LA FESTA vanil.10x12.5g,,,"Barbora, Maxima",,,other,dry_other,fallback
+419918,Muu.alk.jk. APEROL Aperitivo 11% 700ml,APEROL,,"Barbora, Maxima",,,other,dry_other,fallback
+419919,Muu piir.jook RIGA BLACK BALSAM 45% 0.2l,RIGA BALSAM,,,,,other,dry_other,fallback
+419920,Whisky Chivas Regal 12 Yo 40 Proc 700 Ml,,,,,,drinks,drinks_spirits,high
+419921,Whisky J Walker Red Label 40 Proc 500 Ml,,,,,,drinks,drinks_spirits,high
+419922,Muu piir.jook RIGA BLACK BALSAM 45% 0.5l,RIGA BALSAM,,,,,other,dry_other,fallback
+419923,Whisky SCOTTISH LEADER 40% 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+419924,Whisky J Walker Red Label 40 Proc 700 Ml,,,,,,drinks,drinks_spirits,high
+419925,Must tee Scottish Breakf.HYLEYS 25x1.5g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+419926,Piiritusjook METAXA 5* 38% 700ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+419927,Nisuõlu CRONUS 5.3% 500ml,CRONUS,,"Barbora, Maxima",,,drinks,drinks_beer_cider,high
+419928,"Rumm BACARDI Superior 37,5% 500ml",BACARDI,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+419929,Vein Andes Cabernet Sauvignon 750ml,ANDES,,"Barbora, Maxima",,,drinks,drinks_wine,high
+419930,Viin ABSOLUT 40% 700ml,ABSOLUT,,,,,drinks,drinks_spirits,high
+419931,"Külm. Lõhemass VICI, 1kg",,,"Barbora, Maxima",,,meat_fish,fish_fresh,high
+419933,GT vein ANTINORI Villa Bianco Tosc.750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+419934,GT vein ANTINORI Villa Rosso Tosc.750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+419935,Arom. veinijook TAKARA Plum 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+419937,"Šokolaadiplombiir MIO&RIO, 65g",,,"Barbora, Maxima",,,sweets_snacks,sweets_chocolate_bars,high
+419939,GT vein FRONTERA Chardonnay 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+419940,Kartul Pestud Villeri Pakitud 2 Kg,,,,,,produce,produce_root_veg,high
+419941,Ploominektar AURA 1L,,,"Barbora, Maxima",,,drinks,drinks_juices,high
+419942,"Vanilliplombiir MIO&RIO, 65g",,,"Barbora, Maxima",,,other,dry_other,fallback
+419943,Karastusjook Coca Cola 1 5 L 89166,,,,,,drinks,drinks_soft_soda,high
+419945,Viin ABSOLUT Vodka 40% 500 ml,ABSOLUT,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+419946,Viin ZUBROWKA Biala 40% 500 ml,ZUBROWKA,,,,,drinks,drinks_spirits,high
+419947,Whisky CHIVAS REGAL 12 YO 40% 700ml,CHIVAS REGAL,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+419948,Cognac MARTELL VS 40% 700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+419949,Cognac MEUKOW VS 40% 200ml,,,,,,drinks,drinks_spirits,high
+419952,Whisky J.WALKER Red Label 40% 500ml,JOHNNIE WALKER,,,,,drinks,drinks_spirits,high
+419953,Whisky J.WALKER Red Label 40% 700ml,JOHNNIE WALKER,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+419954,Mineraalvesi San Pellegrino 6 X 1 L Gas Tud,,,,,,drinks,drinks_water,high
+419955,Whisky TULLAMORE 40% 700ml,TULLAMORE,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+419956,"Külm.tiigerkrevetid 16/20 p-ta toor,300g",,,"Barbora, Maxima",,,other,dry_other,fallback
+419957,"Külm.Itaalia segu BAUER, 400g",,,"Barbora, Maxima",,,other,dry_other,fallback
+419958,Apelsinimahl AURA 1L,AURA,,,,,drinks,drinks_juices,high
+419959,"Külm. kalapulgad Muumi VICI, 250g",,,"Barbora, Maxima",,,meat_fish,fish_fresh,high
+419960,Bitter CAMPARI BITTER 25% 700ml,CAMPARI,,,,,other,dry_other,fallback
+419962,"Külm.pannk.kohupiimatäidisega EXTRA LINE, 400g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cottage_quark,high
+419963,Cappuccino LA FESTA klassik 10x12.5g,LA FESTA,,"Barbora, Maxima",,,other,dry_other,fallback
+419964,Cappuccino LA FESTA vanil.10x12.5g,LA FESTA,,"Barbora, Maxima",,,other,dry_other,fallback
+419965,KPN vein TORRES Sangre de Toro 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+419966,Lahustuv kohv Cronat Gold JACOBS 100g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+419967,Lahustuv kohv Cronat Gold JACOBS 200g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+419968,Cognac MARTELL VS 40% 700ml,MARTELL,,,,,drinks,drinks_spirits,high
+419969,Cognac REMY MARTIN VSOP 40% 700ml,REMY MARTIN,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+419970,GT vein ANTINORI Villa Bianco Tosc.750ml,VILLA ANTINORI,,"Barbora, Maxima",,,drinks,drinks_wine,high
+419971,GT vein ANTINORI Villa Rosso Tosc.750ml,ANTINOR,,"Barbora, Maxima",,,drinks,drinks_wine,high
+419972,GT vein C. DEL DIABLO Black Chard. 750ml,CASILLERO DEL DIABLO,,"Barbora, Maxima",,,drinks,drinks_wine,high
+419973,Kohvioad Arabica Selected Paulig 1 Kg,,,,,,drinks,drinks_coffee_beans_capsules,high
+419974,GT vein FRONTERA Chardonnay 750ml,FRONTERA,,"Barbora, Maxima",,,drinks,drinks_wine,high
+419975,GT vein FRONTERA Sauvignon Blanc 750ml,FRONTERA,,"Barbora, Maxima",,,drinks,drinks_wine,high
+419976,Hele õlu BUDWEISER Budvar 5% 500ml,BUDWEISER BUDVAR,,,,,drinks,drinks_beer_cider,high
+419977,Must tee Yellow Label LIPTON 25x2g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+419979,Kohvioad Barista Crema Jacobs 1 Kg,,,,,,drinks,drinks_coffee_beans_capsules,high
+419980,"Jäätis vanillimaits&šok.glas.MIO&RIO,34g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high
+419981,Must tee Yellow Label LIPTON 50x2g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+419983,Muu piir.jook CASINO Superior 50% 500ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+419984,Piir.jookCAPTAIN MORGAN Spiced 35% 700ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+419985,Poolkuiv vein MATEUS Rose 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+419986,Rumm CAPTAIN MORGAN Dark rum 40%700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+419987,"Külm.pelmeenid sea&veiseliha BIMAR,500g",,,"Barbora, Maxima",,,meat_fish,meat_beef_lamb_game,high
+419988,"Külm.pelmeenid lihatäidisega XXL GERMES,1kg",,,"Barbora, Maxima",,,meat_fish,meat_other,heuristic
+419989,Jahvatatud kohv Espresso LAVAZZA 250g,LAVAZZA,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high
+419990,Jahvatatud kohv KRÖNUNG 250g,JACOBS,,,,,drinks,drinks_tea_coffee,high
+419991,Jahvatatud kohv LAVAZZA Espresso 250g,LAVAZZA,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high
+419992,Jahvatatud kohv LAVAZZA Qualita Oro 250g,LAVAZZA,,,,,drinks,drinks_coffee_beans_capsules,high
+419993,Jahvatatud kohv Oro LAVAZZA 250g,LAVAZZA,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high
+419994,Jahvatatud kohv Presidentti PAULIG 500g,PAULIG,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+419995,Karastusjook SPRITE 500ml,SPRITE,,,,,drinks,drinks_soft_soda,high
+419996,KGT pun.vein B&G Cabernet Sauvignon750ml,BARTON & GUESTIER,,"Barbora, Maxima",,,drinks,drinks_wine,high
+419997,"Küpsisejäätis küpsik VÄIKE TOM, 75g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high
+419998,KGT vein B&G Bordeaux Chardonnay 750ml,BARTON & GUESTIER,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420000,Jaat Stracciatella Koon Super Viva 96 G,,,,,,other,dry_other,fallback
+420001,Kohvioad Arabica PAULIG 1kg,PAULIG,,,,,drinks,drinks_coffee_beans_capsules,high
+420002,"Jäätis kakaobiskviit SUPER VIVA, 66g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high
+420003,Murulauk WELL DONE 20g,,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+420004,"Jäätis kreembrülee koon SUPER VIVA, 100g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high
+420005,"Jäätis MAGNUM karam.multipakk 6tk, 282g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high
+420006,KP vein B&G Rose D'AnjouGroll.-Gam.750ml,BARTON & GUESTIER,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420007,KPN ar.kv. vahuvein MARTINI ASTI 750ml,MARTINI ASTI,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420008,"Kapsasalat kurkumiga, 450g",,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+420009,Gin BOMBAY SAPPHIRE 40%0.7l,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420011,KGT vein DREAMER Chardonnay 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420012,KPN kv.vah. FREIXENET Semi Seco 750ml,FREIXENET,,"Barbora, Maxima",,,other,dry_other,fallback
+420013,KPN vah. CODORNIU Clas.Brut Cava 750ml,CODORNIU,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420014,KPN vein TORRES Sangre de Toro 750ml,TORRES,,,,,drinks,drinks_wine,high
+420015,Lahustuv kohv NESCAFÉ® CLASSIC 100g,NESCAFE,,,,,drinks,drinks_tea_coffee,high
+420016,Lahustuv kohv Aroma JACOBS 200g,JACOBS,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+420017,Lahustuv kohv Cronat Gold  JACOBS 100g,JACOBS,,,,,drinks,drinks_tea_coffee,high
+420018,Lahustuv kohv Cronat Gold  JACOBS 200g,JACOBS,,,,,drinks,drinks_tea_coffee,high
+420019,Lahustuv kohv Krönung JACOBS 100g,JACOBS,,,,,drinks,drinks_tea_coffee,high
+420021,Jahvatatud kohv KRÖNUNG 250g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+420022,KPN kv.vah.MOET&CHANDON Nectar Imp.750ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+420023,KPN kv.vahuv.MOET&CHANDON Brut I. 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420024,KPN kv.vahuvein MARTINI Asti 1.5L,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420025,Rumm BACARDI Carta Blanca 37.5% 1L,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420026,Rumm BACARDI Carta Blanca 37.5%700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420027,Viin SAAREMAA 40% 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420029,Whisky JAMESON IRISH 40% 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420030,Jahvatatud kohv LAVAZZA Espresso 250g,,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high
+420031,"Jäätis MILKA, 319g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_milk,high
+420032,"Koorejäätis šokolaad.ONU ESKIMO,80g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+420033,"Koorejäätis van.šok.ONU ESKIMO,80g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+420034,Liköör DISARONNO Originale 28% 500ml,DISARONNO,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420035,Looduslik mineraalvesi EVIAN 1.5L,EVIAN,,,,,drinks,drinks_water,high
+420036,Multinektar AURA 1L,AURA,,,,,drinks,drinks_juices,high
+420037,Must lehetee DILMAH karp 100g,DILMAH,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+420038,Must tee DILMAH 100g,DILMAH,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+420039,Must tee Yellow Label LIPTON 25x2g,LIPTON,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+420040,Must tee Yellow Label LIPTON 50x2g,LIPTON,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+420041,Cognac RENAULT Avec 40% 700ml,,,,,,drinks,drinks_spirits,high
+420042,Whisky J.WALKER Black Label 40%700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420043,Brandy GRAND CAVALIER 38% 500ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420044,"Gruusia rahvusleib Puri EP, 330 g",,,"Barbora, Maxima",,,bakery,bakery_bread_loaves,high
+420045,Külm. pitsa Diavola RISTORANTE 350g,,,"Barbora, Maxima",,,other,dry_other,fallback
+420046,Must tee DILMAH 100g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+420047,"Külm.pitsa Mozzarella RISTORANTE, 355g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high
+420048,Brandy GRAND CAVALIER 38% 700ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420049,Vermut Martini Extra Dry 1L,,,"Barbora, Maxima",,,other,dry_other,fallback
+420050,"Külm.pitsa Prosciutto RISTORANTE, 340g",,,"Barbora, Maxima",,,other,dry_other,fallback
+420051,Brandy St Remy Authentic Xo 40 Proc 700 Ml,,,,,,other,dry_other,fallback
+420052,Piir.jookCAPTAIN MORGAN Spiced 35% 700ml,CAPTAIN MORGAN,,"Barbora, Maxima",,,other,dry_other,fallback
+420053,Poolkuiv vein MATEUS Rose 750ml,MATEUS,,,,,drinks,drinks_wine,high
+420054,Rumm CAPTAIN MORGAN Dark rum 40%700ml,CAPTAIN MORGAN,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420055,Tomatimahl AURA 1L,AURA,,,,,drinks,drinks_juices,high
+420056,"Tume õlu GUINNESS Draught 4.2% 440ml,prk",GUINNESS,,"Barbora, Maxima",,,drinks,drinks_beer_cider,high
+420057,Vermut MARTINI Bianco 15% 1L,MARTINI,,,,,other,dry_other,fallback
+420058,Vermut Martini Extra Dry 1L,MARTINI,,,,,other,dry_other,fallback
+420059,Viin ABSOLUT Vodka 40% 1L,ABSOLUT,,,,,drinks,drinks_spirits,high
+420060,Viin FINLANDIA 40% 500ml,FINLANDIA,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420061,Viin ABSOLUT Vodka 40% 1L,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420062,Viin FINLANDIA 40% 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420063,Whisky JIM BEAM White Label 4YO40% 700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420064,Hele leib ciabatta 271g,,,"Barbora, Maxima",,,bakery,bakery_bread_loaves,high
+420065,GT vein CASA VENERDI Rosso 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420066,"Heeringafilee Tradits. VICI,190g",,,"Barbora, Maxima",,,meat_fish,fish_fresh,high
+420067,GT vein CONO SUR Bicic.Caber.Sauv. 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420068,"Külm.pelmeenid UVIC Hiina spec.edit,400g",,,"Barbora, Maxima",,,other,dry_other,fallback
+420069,"Külm.pelmeenid veise,sea&kana UVIC, 400g",,,"Barbora, Maxima",,,meat_fish,meat_poultry,high
+420070,Pulgajäätised,,,,,,frozen_food,frozen_desserts_icecream,high
+420071,"Külm.praadimissegu kart.HÄRMAVILI,400g",,,"Barbora, Maxima",,,other,dry_other,fallback
+420072,"Külm.sibularõngad AVIKO, 450g",,,"Barbora, Maxima",,,produce,produce_root_veg,high
+420073,Whisky JIM BEAM White Label 4YO40% 700ml,JIM BEAM,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420074,Whisky SCOTTISH LEADER 40% 500ml,SCOTTISH LEADER,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420075,Whisky TULLAMORE 40% 1L,TULLAMORE,,,,,drinks,drinks_spirits,high
+420076,GT vein FRONTERA Cab.Sauv. 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420077,GT vein.GATO NEGRO Cabern.Sauvign.750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420078,GT vein GATO NEGRO Chardonnay 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420079,Bitter STUMBRAS STARKA 43% 0.5L,STUMBRAS,,"Barbora, Maxima",,,other,dry_other,fallback
+420080,Cognac Courvoisier Vs 40 Proc 350 Ml,,,,,,drinks,drinks_spirits,high
+420081,Itaalia suupiste singiga 114g,,,"Barbora, Maxima",,,other,dry_other,fallback
+420082,KPN vah.vein MENESTRELLO Prosecco 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420084,"Kirsi sorbetipallid MINI MELTS, 72g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high
+420085,Kookos Kg,,,,,,bakery,bakery_cakes_pastries,high
+420086,Topsi- ja koonusjäätised,,,,,,frozen_food,frozen_desserts_icecream,high
+420087,Kurk Pikk Kiles Kg,,,,,,produce,produce_root_veg,high
+420088,Kuuslauk Kg,,,,,,other,dry_other,fallback
+420089,Sampinjonid Pakitud 250 G,,,,,,other,dry_other,fallback
+420090,Sibul Kg,,,,,,produce,produce_root_veg,high
+420091,Melon Piel De Sapo Kg,,,,,,produce,produce_tropical,high
+420092,Virsik 1 Kl Kg,,,,,,other,dry_other,fallback
+420093,Cognac HENNESSY VS 40% 350ml,HENNESSY,,,,,drinks,drinks_spirits,high
+420094,Cognac HENNESSY VSOP 40% 350ml,HENNESSY,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420095,Gin BEEFEATER 40% 700ml,BEEFEATER,,,,,drinks,drinks_spirits,high
+420096,Liköör KÄNNU KUKK 45% 500ml karbis,,,"Barbora, Maxima",,,other,dry_other,fallback
+420097,Liköör MALIBU 21% 500ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+420098,Gin BOMBAY SAPPHIRE 40%0.7l,BOMBAY,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420099,GT vein C.DEL DIABLO Cab.Sauv.Black750ml,CASILLERO,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420100,GT vein CARSON`S Caber.Sauv.Shiraz 750ml,CARSON`S,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420101,GT vein CARSON`S Chardonnay 750ml,CARSON`S,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420102,GT vein CASA VENERDI Bianco 750ml,CASA VENERDI,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420103,GT vein CASA VENERDI Rosso 750ml,CASA VENERDI,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420104,GT vein CONO SUR Bicic.Caber.Sauv. 750ml,CONO SUR,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420105,GT vein FRONTERA Cab.Sauv. 750ml,FRONTERA,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420106,GT vein.GATO NEGRO Cabern.Sauvign.750ml,GATO NEGRO,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420107,Liköör SHERIDAN`S 15.5% 500ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+420108,GT vein GATO NEGRO Chardonnay 750ml,GATO NEGRO,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420109,"Kreeka jogurt SAARE 10%, 380g",,,,,,dairy_eggs_fats,dairy_yogurt_kefir,high
+420110,"Täissuitsuvorst juustuga Moskva NÕO,250g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high
+420112,"Külm.köögivil.segu Vahemere BAUER,400g",,,"Barbora, Maxima",,,other,dry_other,fallback
+420113,Whisky J.WALKER Red Label 40% 350ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420114,"Külm.minipelmeenid sealih.RAKVERE, 350g",,,"Barbora, Maxima",,,other,dry_other,fallback
+420115,Whisky JIM BEAM White Label 40% 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420116,Brandy BELÕJ AIST 5* 40% 500ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+420117,KGT vein DREAMER cab.sauv. 750ml,DREAMER,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420118,Koriander potis Hansa Herbs,,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+420123,KGT vein DREAMER Chardonnay 750ml,DREAMER,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420124,KP-kv.vahuveinVEUVE Clic.P.Br.750ml+karp,VEUVE CLICQUOT,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420125,KPN kv.vah. FREIXENET Brut 750ml,FREIXENET,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420126,KPN kv.vah.MOET&CHANDON Nectar Imp.750ml,MOËT & CHANDON,,"Barbora, Maxima",,,other,dry_other,fallback
+420127,KPN kv.vahuv.MOET&CHANDON Brut I. 750ml,MOËT & CHANDON,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420128,KPN kv.vahuvein MARTINI Asti 1.5L,MARTINI ASTI,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420129,KPN-kv. vein EL COTO Crianza 750ml,EL COTO,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420131,KPN vein EL COTO Blanco Rioja 750ml,EL COTO,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420132,KPN vein MURVIEDRO Crianza 750ml,MURVIEDRO,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420133,Liköör BAILEYS Irish Cream 17% 700ml,BAILEYS,,,,,other,dry_other,fallback
+420134,Liköör JÄGERMEISTER 35% 350ml,JÄGERMEISTER,,,,,other,dry_other,fallback
+420135,Liköör MALIBU 21% 500ml,MALIBU,,,,,other,dry_other,fallback
+420136,Liköör SHERIDAN`S 15.5% 500ml,SHERIDAN`S,,"Barbora, Maxima",,,other,dry_other,fallback
+420137,Liköör VANA TALLINN Cream 16% 500ml,VANA TALLINN,,,,,other,dry_other,fallback
+420138,Muu alk. jook PINA COLADA 14.5% 700ml,DE KUYPER,,"Barbora, Maxima",,,drinks,drinks_soft_soda,high
+420139,Piiritusjook CHAMPION 38%500ml,CHAMPION,,"Barbora, Maxima",,,other,dry_other,fallback
+420140,Rumm BACARDI BLACK 40% 500ml,BACARDI,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420141,Vahuvein CINZANO Sweet Edit.Dolce 750ml,CINZANO,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420142,Vermut MARTINI Rosato 15% 1L,MARTINI,,"Barbora, Maxima",,,other,dry_other,fallback
+420143,Viin FINLANDIA 40% 1L,FINLANDIA,,,,,drinks,drinks_spirits,high
+420144,Viin FINLANDIA 40% 700ml,FINLANDIA,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420145,Viin SMIRNOFF Red 37.5% 500ml,SMIRNOFF,,,,,drinks,drinks_spirits,high
+420146,Viin SMIRNOFF Red 40% 700ml,SMIRNOFF,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420147,Whisky BALLANTINES FINEST 40% 500ml,BALLANTINES,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420148,Whisky BALLANTINES FINEST 40% 700ml,BALLANTINES,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420149,Whisky CANADIAN SPECIAL OLD 40% 700ml,CANADIAN SPECIAL OLD,,,,,drinks,drinks_spirits,high
+420150,Whisky GLENFIDDICH 12YO Sin.Malt40%700ml,GLENFIDDICH,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420151,Whisky GLENFIDDICH 15YO S.Malt 40% 700ml,GLENFIDDICH,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420152,Maitsestatud veed,,,,,,other,dry_other,fallback
+420153,Whisky GRANT'S 40% 700ml,GRANTS,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420154,Whisky J.WALKER Black  Label 40% 500ml,JOHNNIE WALKER,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420155,Whisky J.WALKER Black Label 40%700ml,JOHNNIE WALKER,,,,,drinks,drinks_spirits,high
+420156,Whisky J.WALKER Red Label 40% 350ml,JOHNNIE WALKER,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420157,Whisky JAMESON IRISH 40% 700ml,JAMESON,,,,,drinks,drinks_spirits,high
+420158,Whisky JIM BEAM White Label 40% 500ml,JIM BEAM,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420159,Alk.vaba õlu WARSTEINER Fresh 330ml,WARSTEINER,,"Barbora, Maxima",,,drinks,drinks_beer_cider,high
+420160,Brandy FERNANDO DE CASTILLA S.R.36%700ml,FERNANDO DE CASTILLA,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420161,Brandy GRAND CAVALIER 38% 500ml,GRAND CAVALIER,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420162,Brandy GRAND CAVALIER 38% 700ml,GRAND CAVALIER,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420163,Brandy ST-REMY Authentic XO 40% 700ml,ST.REMY,,,,,other,dry_other,fallback
+420164,Brandy TORRES 10 Gran Reserva 38% 700ml,TORRES,,"Barbora, Maxima",,,other,dry_other,fallback
+420165,"Cognac LARSEN V.S.O.P. 40% 350ml, karp",LARSEN,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420166,Cognac LARSEN VS 40% 500ml,LARSEN,,,,,drinks,drinks_spirits,high
+420167,Viin LAUA 40% 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420168,Whisky MAKER´S MARK Bourbon 45% 700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420169,"Whisky SCOTTISH LEADER 40% 0,2l",,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420170,Whisky TULLAMORE 12YO 40% 700ml+karp,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420171,Cognac LARSEN VSOP 40% 700ml,LARSEN,,,,,drinks,drinks_spirits,high
+420172,Cognac MEUKOW VS 40% 700ml karp,MEUKOW,,,,,drinks,drinks_spirits,high
+420173,GT kuiv vein ANDES Merlot 750ml,ANDES,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420174,GT pun.vein TRAPICHE Variet.Malbec 750ml,TRAPICHE,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420175,GT vein HARDYS VR Chardonnay 750ml,HARDYS,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420176,GT vein OLD TBILISI Alazani punane 750ml,ALAZANI,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420177,GT vein OLD TBILISI Alazani valge 750ml,ALAZANI,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420178,"Hele õlu LAPIN KULTA 5,2% 0.5L prk",LAPIN KULTA,,"Barbora, Maxima",,,drinks,drinks_beer_cider,high
+420179,"Jahv.kohv mas.Krönung Grand JACOBS, 100g",JACOBS,,"Barbora, Maxima",,,drinks,drinks_other,heuristic
+420181,"Jahvatatud kohv Fine Aroma DAVIDOFF,250g",DAVIDOFF,,,,,drinks,drinks_tea_coffee,high
+420182,"Jahvatatud kohv Rich Aroma DAVIDOFF,250g",DAVIDOFF,,,,,drinks,drinks_tea_coffee,high
+420183,Kakaopulber VILMA 150g,KALEV,,"Barbora, Maxima",,,drinks,drinks_syrups_powders,high
+420184,Kaktuse maits.multimahlajook TYMBARK 1L,TYMBARK,,"Barbora, Maxima",,,drinks,drinks_juices,high
+420185,KGT valge vein B&G Sauvignon Blanc 750ml,BARTON & GUESTIER,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420186,KGT vein TRAPICHE Malbec 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420187,Kohviuba ILLY Classic 250g,ILLY,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high
+420188,Kohvivalgendaja COFFEETA 200g,COFFEETA,,,,,drinks,drinks_other,heuristic
+420189,KPN vein CESARI SOAVE Essere 750ml,CESARI,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420190,KPN vein CHATEAU RAGON BEL-AIR 750ml,CHATEU,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420191,KPN vein FAUSTINO V Reserva 750ml,FAUSTINO,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420192,KPN vein TORRES S.Valent.Parel. 750ml,TORRES,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420193,KPN vein VINA ALBALI Reserva 750ml,VIÑA ALBALI,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420194,Liköör BECHEROVKA 38% 500ml,BECHEROVKA,,"Barbora, Maxima",,,other,dry_other,fallback
+420195,Liköör KÄNNU KUKK 45% 500ml karbis,LIVIKO,,"Barbora, Maxima",,,other,dry_other,fallback
+420196,Kulm Itaal Koogiviljad Hortex 400 G,,,,,,other,dry_other,fallback
+420197,Viinamari Hele Seem Ta Sultana 1 Kl Kg,,,,,,drinks,drinks_spirits,high
+420198,Beebispinat pestud WELL DONE 70g,,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+420201,Võisalat potis HANSA HERBS,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_butter_margarine,high
+420202,"Avokaado Ready to eat WELL DONE, 2tk",,,"Barbora, Maxima",,,other,dry_other,fallback
+420204,Liköör STROH Jagertee 40% 500ml,STROH,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+420205,Likoor Blue Curacao 20 Proc 700 Ml,,,,,,dairy_eggs_fats,dairy_cream_sourcream,high
+420206,Liköör VANA TALLINN 45% 500ml,VANA TALLINN,,,,,other,dry_other,fallback
+420207,Maits.viin NEMIROFF Hon.Pepp. 40% 500ml,Nemiroff,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420208,Muu piir.jook PIPRA KIBE NAPS 35% 350ml,PIPRA NAPS,,"Barbora, Maxima",,,other,dry_other,fallback
+420209,Muu piir.jook PIPRA KIBE NAPS 35% 500ml,PIPRA NAPS,,"Barbora, Maxima",,,other,dry_other,fallback
+420210,Õunamahl AURA 100% 1L,AURA,,,,,drinks,drinks_juices,high
+420211,Piir.jook SIERRA Tequila Repos.38% 500ml,SIERRA,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420212,Rumm CAPTAIN MORGAN Dark 40% 500ml,CAPTAIN MORGAN,,,,,drinks,drinks_spirits,high
+420213,Vahuvein MARTINI Brut 750ml,MARTINI,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420214,Vahuvein TÖRLEY CHARMANT 750ml,TÖRLEY,,,,,drinks,drinks_wine,high
+420215,Vahuvein TÖRLEY Muscateller 750ml,TÖRLEY,,,,,drinks,drinks_wine,high
+420216,Vahuvein TÖRLEY TALISMAN 750ml,TÖRLEY,,,,,drinks,drinks_wine,high
+420217,Viin LAUA 40% 500ml,LAUA VIIN,,,,,drinks,drinks_spirits,high
+420218,Viin VIRU VALGE 40% 1L,VIRU VALGE,,,,,drinks,drinks_spirits,high
+420219,Viin VIRU VALGE 40% 350ml,VIRU VALGE,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420220,Külm. Kentucky broileriribad 250g,,,"Barbora, Maxima",,,meat_fish,meat_poultry,high
+420221,Peakapsa Kimchi 300g,,,"Barbora, Maxima",,,produce,produce_root_veg,high
+420223,Punase peakapsa Kimchi 300g,,,"Barbora, Maxima",,,produce,produce_root_veg,high
+420224,Kpn Vein Baron Rosen Riesling 750 Ml,,,,,,drinks,drinks_wine,high
+420226,Mineraalvesi VÄRSKA originaal 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420227,Muu alk.jook PINA COLADA Retro 14% 700ml,,,"Barbora, Maxima",,,drinks,drinks_soft_soda,high
+420228,Muu piir.jook METAXA 5* 38% 500ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+420229,Kulm Ukraina Bors Segu Bauer 400 G,,,,,,other,dry_other,fallback
+420230,Viin VIRU VALGE 40% 500ml,VIRU VALGE,,,,,drinks,drinks_spirits,high
+420231,Whisky BALLANTINES FINEST 40% 1L,BALLANTINES,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420232,Whisky BUSHMILLS 10YO SM 40% 700ml box,BUSHMILLS,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420233,Whisky BUSHMILLS Original 40% 700ml,BUSHMILLS,,,,,drinks,drinks_spirits,high
+420234,Arom.puuv.vein MONTE CRISTO punane 750ml,MONTE CRISTO,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420235,Arom.puuv.vein MONTE CRISTO valge 750ml,MONTE CRISTO,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420236,Arom.puuvilja vein BOLLINO punane 750ml,BOLLINO,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420237,Arom.puuvilja vein BOLLINO valge 750ml,BOLLINO,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420238,Salatisegu Home WELL DONE 150g,,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+420239,Beebispinat WELL DONE 200g,,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+420240,Brandy BEEHIVE VSOP 40% 500ml,BEEHIVE,,,,,other,dry_other,fallback
+420241,Brandy IBIS X.O 36% 500ml,IBIS,,,,,other,dry_other,fallback
+420242,Brandy TORRES 5 38% 700ml,TORRES,,"Barbora, Maxima",,,other,dry_other,fallback
+420243,Cognac COURVOISIER VS 40% 700ml,COURVOISIER,,,,,drinks,drinks_spirits,high
+420244,"Hapukapsas pakitud KADARBIKU, 900g",,,"Barbora, Maxima",,,produce,produce_root_veg,high
+420245,Salad mix RAINBOW WELL DONE 150g,,,"Barbora, Maxima",,,other,dry_other,fallback
+420246,Jahvatatud Kohv Jacobs Kronung 500 G,,,,,,drinks,drinks_tea_coffee,high
+420247,Karastusjook Coca Cola Zero 1 5 L 89167,,,,,,drinks,drinks_soft_soda,high
+420248,Karastusjook Fanta Apelsini 1 5 L 89168,,,,,,drinks,drinks_soft_soda,high
+420249,Karastusjook Fanta Apelsini 500 Ml,,,,,,drinks,drinks_soft_soda,high
+420251,Karastusjook Sprite 1 5 L 89169,,,,,,drinks,drinks_soft_soda,high
+420252,"Gin BEEFEATER Pink 37,5% 700ml",,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420253,Kgt Vein J P Chenet Moelleux Blanc 750 Ml,,,,,,drinks,drinks_wine,high
+420254,Kohvioad Arabica Espresso Paulig 1 Kg,,,,,,drinks,drinks_coffee_beans_capsules,high
+420255,Kohvioad Barista Espresso Jacobs 1 Kg,,,,,,drinks,drinks_coffee_beans_capsules,high
+420256,Kohvioad Jacobs Baristacrema Italiano 1 Kg,,,,,,drinks,drinks_coffee_beans_capsules,high
+420257,"Hele õlu Saku Kuld 5,2% 12*0,33L prk",,,"Barbora, Maxima",,,drinks,drinks_beer_cider,high
+420258,Cognac HENNESSY VS 40% 500ml,HENNESSY,,,,,drinks,drinks_spirits,high
+420259,"Hele õlu Saku Originaal4,7% 12x0,33l prk",,,"Barbora, Maxima",,,drinks,drinks_beer_cider,high
+420260,KGT vein AUSSIE Rules Chardonnay 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420261,Cognac HENNESSY XO 40% 350ml karp,HENNESSY,,,,,drinks,drinks_spirits,high
+420262,Cognac LARSEN VS 40% 700ml,LARSEN,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420263,Cognac LARSEN VSOP 40% 500ml,LARSEN,,,,,drinks,drinks_spirits,high
+420264,"Coqnac COURVOISIER XO 40% 700ml, karp",COURVOISIER,,"Barbora, Maxima",,,other,dry_other,fallback
+420265,"Külm.pelmeenid praesibulaga RAKVERE,400g",,,"Barbora, Maxima",,,produce,produce_root_veg,high
+420267,"Täissuitsuvorst Moskva OSKAR, 210g",,,,,,meat_fish,meat_sausages,high
+420268,Kohvioad Qualita Rossa Lavazza 1 Kg,,,,,,drinks,drinks_coffee_beans_capsules,high
+420269,Kohviuba Jacobs Origins Brazil Colom 1 Kg,,,,,,drinks,drinks_spirits,high
+420270,Kohviuba Jacobs Selection 1 Kg,,,,,,drinks,drinks_coffee_beans_capsules,high
+420271,Kpn Kuiv Vein Maybach Riesling 750 Ml,,,,,,drinks,drinks_wine,high
+420272,Kpn Poolkuiv Vein Maybach Riesling 750 Ml,,,,,,drinks,drinks_wine,high
+420273,Likoor Jagermeister 35 Proc 500 Ml,,,,,,dairy_eggs_fats,dairy_cream_sourcream,high
+420274,Muu Piir Jook Riga Black Balsam 45 Proc 0 2 L,,,,,,other,dry_other,fallback
+420275,Vein Chamboustin Punane 3 L,,,,,,drinks,drinks_wine,high
+420276,Vein Chamboustin Valge 3 L,,,,,,drinks,drinks_wine,high
+420277,Viin Absolut 40 Proc 700 Ml,,,,,,drinks,drinks_spirits,high
+420278,KGT vein DREAMER cab.sauv. 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420279,GT vein TBILVINO Kindzmarauli 750ml,TBILVINO,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420280,Hele õlu PILSNER URQUELL 4.4% 500ml prk,PILSNER URQUELL,,,,,drinks,drinks_beer_cider,high
+420281,Jahv.kohv LÖFBERGS keskmine röst 500g,LÖFBERGS,,"Barbora, Maxima",,,drinks,drinks_other,heuristic
+420282,Jahv.kohv LÖFBERGS presskannu 500g,LÖFBERGS,,"Barbora, Maxima",,,drinks,drinks_other,heuristic
+420283,Jahvatatud kohv 777 Original 500g,777,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420284,Jahvatatud kohv Rossa LAVAZZA 250g,LAVAZZA,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high
+420285,Jõhvikajook AURA 1L,AURA,,,,,produce,produce_berries,high
+420286,Karastusjook COCA-COLA 330ml,COCA-COLA,,,,,drinks,drinks_soft_soda,high
+420287,KGT vein TOMMASI Pinot Grigio 750ml,TOMMASI,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420288,KPN kuiv vein TOMMASI Valpolicella 750ml,TOMMASI,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420289,KPN vein FAUSTINO VII Tinto 750ml,FAUSTINO,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420290,KPN vein TOKAJI Furmint Semisweet 750ml,TOKAJI,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420292,Liköör GABRIEL 45% 500ml,GABRIEL,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high
+420293,Liköör JÄGERMEISTER 35% 100ml,JÄGERMEISTER,,"Barbora, Maxima",,,other,dry_other,fallback
+420294,Liköör VANA TALLINN 40% 200ml,VANA TALLINN,,"Barbora, Maxima",,,other,dry_other,fallback
+420295,KP-kv.vahuveinVEUVE Clic.P.Br.750ml+karp,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420296,Liköör BAILEYS Irish Cream 17% 700ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+420297,Liköör VANA TALLINN Cream 16% 500ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+420298,"Must purutee TWININGS Earl Grey,100g",TWININGS,,,,,drinks,drinks_tea_coffee,high
+420299,"Must tee Earl Grey LIPTON,50x1.5g",LIPTON,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+420300,Must tee Engl. AristocraticHYLEYS25x2g,HYLEYS,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+420301,Must tee English Aristocratic HYLEYS100g,HYLEYS,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+420302,Must tee Sc. Breakfast HYLEYS 100x1.5g,HYLEYS,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+420303,Must tee Scottish Breakf.HYLEYS 25x1.5g,HYLEYS,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+420304,Viin Zubrowka Biala 40 Proc 500 Ml,,,,,,drinks,drinks_spirits,high
+420305,Whisky Tullamore 40 Proc 1 L,,,,,,drinks,drinks_spirits,high
+420306,Piiritusjook CHAMPION 38%500ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+420307,Rumm BACARDI BLACK 40% 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420308,Vahuvein CINZANO Sweet Edit.Dolce 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420309,Whisky GLENFIDDICH 15YO S.Malt 40% 700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420310,Whisky J.WALKER Black Label 40% 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420311,Alk.vaba õlu WARSTEINER Fresh 330ml,,,"Barbora, Maxima",,,drinks,drinks_beer_cider,high
+420312,Brandy Fernando De Castilla S R 36 Proc 700 Ml,,,,,,drinks,drinks_wine,high
+420313,Kaktuse maits.multimahlajook TYMBARK 1L,,,"Barbora, Maxima",,,drinks,drinks_juices,high
+420315,Kohviuba ILLY Classic 250g,,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high
+420316,Liköör STROH Jagertee 40% 500ml,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+420317,Maits.viin NEMIROFF Hon.Pepp. 40% 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420318,Muu piir.jook PIPRA KIBE NAPS 35% 350ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+420319,Õunamahl AURA 100% 1L,,,"Barbora, Maxima",,,drinks,drinks_juices,high
+420320,Vahuvein TÖRLEY TALISMAN 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420321,Whisky BALLANTINES FINEST 40% 1L,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420322,Cognac COURVOISIER VS 40% 700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420323,Cognac HENNESSY VS 40% 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420324,KPN kuiv vein TOMMASI Valpolicella 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+420325,Liköör GABRIEL 45% 500ml,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high
+420326,Must tee Sc. Breakfast HYLEYS 100x1.5g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+420327,Whisky SCOTTISH LEADER 40% 350ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+420328,Cognac LARSEN VSOP 40% 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high

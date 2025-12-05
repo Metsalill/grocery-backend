@@ -1,0 +1,901 @@
+product_id,name,brand,size_text,stores_sample,current_food_group,current_sub_code,food_group_corrected,new_sub_code,confidence
+307410,Blitz Riesling 75 cl,AVALLONE AS,,Selver,,,drinks,drinks_wine,high
+307411,"Blue Nun alkoholivaba, BLUE NUN, 750 ml",MEDIATO AS,,"Barbora, Coop, Maxima, Selver",,,dry_preserves,dry_cereals_muesli,high
+307412,Blue Nun Original 75 cl,DEKANTER OÜ,,"Coop, Selver",,,drinks,drinks_spirits,high
+307413,Bollino Bianco Sweet 75 cl,DUNKER ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback
+307414,Bollino Rosso Sweet 75 cl,DUNKER ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback
+307415,Bonacchi Chianti Riserva 75 cl,KOCH OÜ,,Selver,,,other,dry_other,fallback
+307416,"Brändi ARARAT 3YO, 50 cl",PERNOD RICARD ESTONIA OÜ,,Selver,,,drinks,drinks_spirits,high
+307417,"Brändi ARARAT Ani 7 YO, 50 cl",PERNOD RICARD ESTONIA OÜ,,Selver,,,drinks,drinks_spirits,high
+307418,"Brändi FERNANDO DE CASTILLA Solera Reserva de Jerez, 70 cl",PRIKE AS,,Selver,,,drinks,drinks_wine,high
+307419,"Brändi ST. REMY Authentic, 70 cl",LIVIKO AS,,Selver,,,drinks,drinks_spirits,high
+307420,"Brändi ST. REMY Authentic pet, 50 cl",LIVIKO AS,,"Coop, Selver",,,drinks,drinks_spirits,high
+307421,"Brändi ST. REMY Authentic XO, 70 cl",LIVIKO AS,,"Barbora, Maxima, Selver",,,drinks,drinks_spirits,high
+307422,Campo Viejo Cava Brut Reserva 75 cl,PERNOD RICARD ESTONIA OÜ,,Selver,,,drinks,drinks_wine,high
+307423,Campo Viejo Crianza 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback
+307424,Carmen Cabernet Sauvignon 75 cl,LIVIKO AS,,Selver,,,drinks,drinks_wine,high
+307425,Cavas Hill 1887 Brut Cava 75 cl,HENKELL FREIXENET EESTI AS,,Selver,,,drinks,drinks_wine,high
+307426,Cesari Amarone Della Valpolicella,PRIKE AS,,Selver,,,other,dry_other,fallback
+307427,Chateau d'Arcins 75 cl,AVALLONE AS,,Selver,,,other,dry_other,fallback
+307428,Chateau Des Landes Lussac-St Emilion 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback
+307429,Chateau Latour Camblanes Prem. 75 cl,AVALLONE AS,,Selver,,,other,dry_other,fallback
+307430,"Chateau Le Mayne Bordeaux Superieur, 75 cl",LTT AS,,Selver,,,other,dry_other,fallback
+307431,Chateau Rocher-Calon 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback
+307432,Codorniu Classico Brut Nature Cava 75 cl,PRIKE AS,,Selver,,,drinks,drinks_wine,high
+307433,Cono Sur icicleta Reserva Pinot Noir 75 cl,LIVIKO AS,,Selver,,,drinks,drinks_wine,high
+307434,Coto de Imaz Coto de Imaz Rioja Gran Reserva 75 cl,MEDIATO AS,,Selver,,,other,dry_other,fallback
+307435,Desom Grand Premier Cru Auxerrois 75 cl,TRIDENS AS,,Selver,,,other,dry_other,fallback
+307436,Desom Premier Cru Rivaner 75 cl,TRIDENS AS,,Selver,,,other,dry_other,fallback
+307437,Despassino Vinho Verde Branco 75 cl,PRIKE AS,,Selver,,,drinks,drinks_wine,high
+307438,"Doktorivorst, NÕO LIHAVÜRST, kg",NÕO LIHATÖÖSTUS OÜ,,Selver,,,meat_fish,meat_sausages,high
+307439,Dreamer Late Harvest Cabernet Sauvignon 75 cl,DUNKER ESTONIA OÜ,,Selver,,,drinks,drinks_wine,high
+307440,Dreamer Late Harvest Cabernet Sauvignon BIB 3 L,BALMERK ESTONIA OÜ,,Selver,,,drinks,drinks_wine,high
+307441,Dreamer Late Harvest Chardonnay 75 cl,DUNKER ESTONIA OÜ,,Selver,,,drinks,drinks_wine,high
+307442,Dreamer Late Harvest Chardonnay BIB 3 L,BALMERK ESTONIA OÜ,,Selver,,,drinks,drinks_wine,high
+307443,Dulong Cremant de Bordeaux Brut 75 cl,DUNKER ESTONIA OÜ,,Selver,,,drinks,drinks_wine,high
+307444,"Džinn BEEFEATER, 50 cl",PERNOD RICARD ESTONIA OÜ,,Selver,,,meat_fish,meat_beef_lamb_game,high
+307445,"Džinn JUNIMPERIUM Blended Dry, 70 cl",PRIKE AS,,Selver,,,other,dry_other,fallback
+307446,"Džinn JUNIMPERIUM Rhubarb Edition, 70 cl",PRIKE AS,,Selver,,,other,dry_other,fallback
+307447,"Džinn KINGSMILL, 100 cl",LIVIKO AS,,"Prisma, Selver",,,other,dry_other,fallback
+307448,"Džinn MONKEY47 Schwarzwald Dry, 50 cl",PERNOD RICARD ESTONIA OÜ,,Selver,,,other,dry_other,fallback
+307449,"Džinn TANQUERAY, 100 cl",PRIKE AS,,Selver,,,other,dry_other,fallback
+307450,"Džinn TANQUERAY No Ten, 70 cl",PRIKE AS,,Selver,,,other,dry_other,fallback
+307451,"Džinn TOHI London Dry Ginger & Sichuan Pepper, 50 cl",MOMENTIN EESTI OÜ,,Selver,,,drinks,drinks_spirits,high
+307452,"Eesti pralineekompvek india pähkliga, KALEV, 500 g",ORKLA EESTI AS,,Selver,,,sweets_snacks,sweets_nuts_driedfruit,high
+307453,"Energiajook Apricot Edition, RED BULL, 250 ml",TRIDENS AS,,"Rimi, Selver",,,drinks,drinks_energy,high
+307454,"Energiajook Battery, BATTERY, 330 ml",SAKU ÕLLETEHASE AS,,Selver,,,drinks,drinks_energy,high
+307455,"Energiajook Energy, MONSTER, 500 ml",COCA-COLA HBC EESTI AS,,Selver,,,drinks,drinks_energy,high
+307456,"Energiajook Juiced Mango Loco, MONSTER, 500 ml",COCA-COLA HBC EESTI AS,,"Coop, Selver",,,drinks,drinks_energy,high
+307457,"Energiajook Mega, MONSTER, 553 ml",COCA-COLA HBC EESTI AS,,Selver,,,drinks,drinks_energy,high
+307458,"Energiajook Monster Ultra Zero, MONSTER, 500 ml",COCA-COLA HBC EESTI AS,,"Rimi, Selver",,,drinks,drinks_energy,high
+307459,"Energiajook Red Edition, RED BULL, 250 ml",TRIDENS AS,,"Coop, Rimi, Selver",,,drinks,drinks_energy,high
+307460,"Energiajook suhkruvaba magusainetega, RED BULL, 250 ml",TRIDENS AS,,"Coop, Rimi, Selver",,,drinks,drinks_energy,high
+307461,"Energiajook suhkruvaba magusainetega, RED BULL, 355 ml",TRIDENS AS,,"Coop, Rimi, Selver",,,drinks,drinks_energy,high
+307462,"Energiajook Summer Edition Forest Fruits, RED BULL, 250 ml",TRIDENS AS,,"Coop, Selver",,,drinks,drinks_energy,high
+307463,"Energiajook Ultra Mega, MONSTER, 553 ml",COCA-COLA HBC EESTI AS,,Selver,,,drinks,drinks_energy,high
+307464,"Energiajook Virsiku, RED BULL, 250 ml",TRIDENS AS,,"Coop, Selver",,,drinks,drinks_energy,high
+307465,"Energiajook Yellow Edition, RED BULL, 250 ml",TRIDENS AS,,"Barbora, Coop, Maxima, Rimi, Selver",,,drinks,drinks_energy,high
+307466,Ernest Rapeneau Champagne Brut 75 cl,LIVIKO AS,,Selver,,,drinks,drinks_wine,high
+307467,"Funktsionaalne jook ""Berruba"" magusainetega, NOCCO, 330 ml",GKR TRADE OÜ,,Selver,,,bakery,bakery_buns_croissants,high
+307468,"Funktsionaalne jook ""Ramonade"" magusainetega, NOCCO, 330 ml",GKR TRADE OÜ,,Selver,,,bakery,bakery_buns_croissants,high
+307469,"AB-jogurt maasika Laktoosivaba, TERE, 150g",TERE AS,,"Coop, Selver",,,dairy_eggs_fats,dairy_yogurt_kefir,high
+307470,"Aeduba, HÄRMAVILI, 400 g",BALBIINO AS,,Selver,,,other,dry_other,fallback
+307471,"Aedviljasegu Fitlap, HÄRMAVILI, 400 g",BALBIINO AS,,"Coop, Selver",,,other,dry_other,fallback
+307472,"Ahjuköögiviljad, HÄRMAVILI, 700 g",BALBIINO AS,,"Coop, Selver",,,other,dry_other,fallback
+307473,"Aleksandri kook, SELVERI KÖÖK, 260 g",KULINAARIA OÜ,,Selver,,,bakery,bakery_cakes_pastries,high
+307474,"Aleksandri kook, SELVERI KÖÖK, 520 g",KULINAARIA OÜ,,Selver,,,bakery,bakery_cakes_pastries,high
+307475,"Ameerika köögiviljasegu, FIRST PRICE, 600 g",SELVER AS,,Selver,,,other,dry_other,fallback
+307476,"Astelpajumarjad, MARJAMAA TALU, 400 g",MARJAMAA TALU OÜ,,Selver,,,dry_preserves,dry_other,high
+307477,"Babybel juusturattakesed, BEL, 60 g",EUGESTA EESTI OÜ,,"Rimi, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+307478,"Baileys´e šokolaadikook kirsi ja soolakaramelliga, GOURMET CLUB, 450 g",GURMEEKLUBI OÜ,,Selver,,,bakery,bakery_cakes_pastries,high
+307479,"Banaanikook pähklitega vegan, SELVERI KÖÖK, 180 g",KULINAARIA OÜ,,Selver,,,bakery,bakery_cakes_pastries,high
+307480,"Brita kihiline beseekook vaarikate ja vahukoorega, SELVERI KÖÖK, 540 g",KULINAARIA OÜ,,Selver,,,dairy_eggs_fats,dairy_cream_sourcream,high
+307481,"Cheddar juust Vintage, SOMERDALE, 200 g",DELINE OÜ,,Selver,,,dairy_eggs_fats,dairy_cheese_slices,high
+307482,"Gaseerimata kirsimaitseline vesi, VICHY FRESH, 1,5 L",SAKU ÕLLETEHASE AS,,"Rimi, Selver",,,drinks,drinks_water,high
+307483,"Gaseeritud sidrunimaitseline vesi, VICHY CLASSIQUE, 1,5 L",SAKU ÕLLETEHASE AS,,Selver,,,drinks,drinks_water,high
+307484,"Gaseeritud sidrunimaitseline vesi, VICHY FRESH BUBBLES, 1,5 L",SAKU ÕLLETEHASE AS,,Selver,,,drinks,drinks_water,high
+307485,"Gaseeritud vesi pohlamaitseline, AURA, 500 ml",A. LE COQ AS,,Selver,,,drinks,drinks_water,high
+307486,"Gorgonzola DOP, FORMAGIA, 100 g",SELVER AS,,Selver,,,dairy_eggs_fats,dairy_cheese_slices,high
+307487,"Greibinektar 55%, GRANINI, 1 L",TRIDENS AS,,Selver,,,drinks,drinks_juices,high
+307488,"HULGI Apelsinimahl 100% 3tk, PHANNER, 3 x 2 L",SELVER AS,,Selver,,,drinks,drinks_juices,high
+307489,"HULGI Grilljuust 3tk, NOPRI, 3 x 200g",NOPRI TALUMEIEREI OÜ,,Selver,,,dairy_eggs_fats,dairy_cheese_slices,high
+307490,"HULGI Halvaa india pähklitega 3tk, MARMITON, 3 x 100g",SVENSKY KAUBANDUSE AS,,Selver,,,sweets_snacks,sweets_nuts_driedfruit,high
+307491,"HULGI Jogurt leiva-pähkli 3tk, FARMI, 3 x 400g",FARMI PIIMATÖÖSTUS AS,,"Barbora, Maxima, Selver",,,dairy_eggs_fats,dairy_yogurt_kefir,high
+307492,"HULGI Karamell Vähid 5tk, ROSHEN, 5 x 126 g",EUGESTA EESTI AS,,Selver,,,sweets_snacks,sweets_candies,high
+307493,"HULGI Koorene jogurt virsikutega 3tk, FARMI, 3 x 400g",FARMI PIIMATÖÖSTUS AS,,Selver,,,dairy_eggs_fats,dairy_yogurt_kefir,high
+307494,"HULGI Meiereivõi soolata 2tk, VALIO, 2 x 500 g",VALIO EESTI AS,,Selver,,,dairy_eggs_fats,dairy_butter_margarine,high
+307495,"HULGI Multivitamiininektar 3tk, PHANNER, 3 x 2L",SELVER AS,,Selver,,,drinks,drinks_juices,high
+307496,"HULGI Pralinee india pähkliga 3tk, KALEV, 3 x 175g",ORKLA EESTI AS,,Selver,,,sweets_snacks,sweets_nuts_driedfruit,high
+307497,"HULGI Pralineekompvek Maiuspala 3tk, KALEV, 3 x 175g",ORKLA EESTI AS,,Selver,,,other,dry_other,fallback
+307498,"HULGI Rohelise õuna jook 3tk, PHANNER, 3 x 2 L",SELVER AS,,Selver,,,produce,produce_apples_pears,high
+307499,"HULGI Vitamiinijook Upgrade 12tk, VITAMIN WELL, 12 x 500g",GKR TRADE OÜ,,Selver,,,other,dry_other,fallback
+307500,"Jäätee virsiku, NESTEA, 1,5 L",OSAMA EESTI OÜ,,"Coop, Selver",,,drinks,drinks_tea_coffee,high
+307501,"Jogurtijook maasika 4x100g, ACTIMEL, 400 g",NUTRICIA SIA,,"Barbora, Coop, Maxima, Rimi, Selver",,,dairy_eggs_fats,dairy_yogurt_kefir,high
+307502,"Jogurtijook metsamarja 8x100g, ACTIMEL, 800 g",NUTRICIA SIA,,"Barbora, Coop, Maxima, Selver",,,dairy_eggs_fats,dairy_yogurt_kefir,high
+307503,"Jogurtijook metsmarja 4x100g, ACTIMEL, 400 g",NUTRICIA SIA,,"Coop, Selver",,,dairy_eggs_fats,dairy_yogurt_kefir,high
+307504,"Juubelitort, SELVERI KÖÖK, 770 g",KULINAARIA OÜ,,Selver,,,bakery,bakery_cakes_pastries,high
+307505,"Juustukolmnurgad, FLORA, 115g",SELVER AS,,Selver,,,dairy_eggs_fats,dairy_cheese_slices,high
+307506,"Kanafilee võileib tšillikastmega, SELVERI KÖÖK, 165 g",KULINAARIA OÜ,,Selver,,,dairy_eggs_fats,dairy_butter_margarine,high
+307507,"Karboniseerimata mineraalvesi, NEPTUNAS, 1,5 L",COCA COLA HBC EESTI AS,,"Rimi, Selver",,,drinks,drinks_water,high
+307508,"Karboniseeritud mineraalvesi Mündi, NEPTUNAS, 1,5 L",COCA COLA HBC EESTI AS,,Selver,,,drinks,drinks_water,high
+307509,"Karboniseeritud mineraalvesi Mündi, NEPTUNAS, 500 ml",COCA COLA HBC EESTI AS,,Selver,,,drinks,drinks_water,high
+307510,"Kartulikrõps Kettle Cooked Habanero tšilli maitseline, NUBLIK,",STARCHIPZ OÜ,,Selver,,,sweets_snacks,sweets_snacks_salty,high
+307511,"Kartulikrõps Kettle Cooked hapukoore-sibula maitseline, NUBLIK,",STARCHIPZ OÜ,,Selver,,,dairy_eggs_fats,dairy_cream_sourcream,high
+307512,"Kartulikrõps Strong juustu- ja Cayenne maitselised, LAY'S, 120 g",PEPSICO EESTI AS,,Selver,,,dairy_eggs_fats,dairy_cheese_slices,high
+307513,"Kartulikrõpsud klassikalised, LORENZ, 100 g",D.T.L. CONSUMER PRODUCTS EESTI AS,,Selver,,,sweets_snacks,sweets_snacks_salty,high
+307514,"Kartulikrõpsud Kurgi ja hapukooremaitsega, ESTRELLA,",SELVER AS,,Selver,,,dairy_eggs_fats,dairy_cream_sourcream,high
+307515,"Kartulisektor küüslauguga, AVIKO, 600 g",SANITEX OÜ,,Selver,,,produce,produce_root_veg,high
+307516,"Kitsepiimajuust Merci Chef, MERCI CHEF, 110 g",SVENSKY KAUBANDUSE AS,,Selver,,,dairy_eggs_fats,dairy_cheese_slices,high
+307517,"Koduviiner (kooritud), MAKS&MOORITS, kg, ettetellimisel",ATRIA EESTI AS,,Selver,,,drinks,drinks_spirits,high
+307518,"Konjak BACHE GABRIELSEN VS Tre Kors, 70 cl",MV EESTI OÜ,,Selver,,,dairy_eggs_fats,dairy_cheese_slices,high
+307519,"Konjak HENNESSY VS flask, 20 cl",PRIKE AS,,"Coop, Selver",,,other,dry_other,fallback
+307520,"Konjak HENNESSY VSOP, 35 cl",PRIKE AS,,Selver,,,other,dry_other,fallback
+307521,"Konjak HENNESSY VSOP flask, 20 cl",PRIKE AS,,Selver,,,other,dry_other,fallback
+307522,"Konjak HENNESSY VSOP karbis, 50 cl",PRIKE AS,,"Coop, Selver",,,other,dry_other,fallback
+307523,"Konjak HENNESSY VSOP karbis, 70 cl",PRIKE AS,,"Coop, Selver",,,other,dry_other,fallback
+307524,"Konjak HENNESSY X.O. karbis, 35 cl",PRIKE AS,,Selver,,,other,dry_other,fallback
+307525,"Konjak MARTELL VSOP, 70 cl",PERNOD RICARD ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback
+307526,"Konjak MAXIME TRIJOL VSOP karbis, 70 cl",GOLDBERGER OÜ,,Selver,,,other,dry_other,fallback
+307527,"Kookoskreem, THAI CHOICE, 400 ml",D.T.L. CONSUMER PRODUCTS EESTI AS,,"Coop, Selver",,,bakery,bakery_cakes_pastries,high
+307528,"Kookosvesi gaseerimata, GREPPO, 320 ml",LANCOSTER OÜ,,"Coop, Selver",,,drinks,drinks_water,high
+307529,"Koorekaste, SELVERI KÖÖK, 280 g",KULINAARIA OÜ,,Selver,,,dairy_eggs_fats,dairy_cream_sourcream,high
+307530,"Kõrrejook suvistest marjadest, PEPPA PIG, 200 ml",MARIS GILDEN AS,,Selver,,,produce,produce_berries,high
+307531,"Kõrrejook troopilistest viljadest, PEPPA PIG, 200 ml",MARIS GILDEN AS,,Selver,,,other,dry_other,fallback
+307532,"Krõbe paneering kanale, SANTA MARIA, 50 g",SANTA MARIA AS,,"Coop, Selver",,,meat_fish,meat_poultry,high
+307533,"Kruubipuder sealihaga, SELVERI KÖÖK, 350 g",KULINAARIA OÜ,,Selver,,,meat_fish,meat_pork,high
+307535,"7 Days mini multipakk kakaomaitseline, 7DAYS, 185 g",ABESTOCK AS,,"Coop, Selver",,,other,dry_other,fallback
+307536,"Apelsini-šokolaadikeeks, RÕNGU PAGAR, 300 g",RÕNGU PAGAR OÜ,,Selver,,,sweets_snacks,sweets_chocolate_bars,high
+307537,"Banaani-piimapuder täisterahelve, HOLLE, 250 g",GOLDBERGER OÜ,,Selver,,,dairy_eggs_fats,dairy_milk,high
+307538,"Banaanipüree pirni ja mangoga mahe 4+, HIPP, 100 g",LTT AS,,Selver,,,produce,produce_apples_pears,high
+307539,"Diffuser Blue Eucalyptus & Cedarwood, AIR WICK, 42 ml",EUGESTA EESTI OÜ,,Selver,,,other,dry_other,fallback
+307540,"Diffuser Cherry Blossom & Raspberry, AIR WICK, 42 ml",EUGESTA EESTI OÜ,,Selver,,,other,dry_other,fallback
+307541,"Difuuser Morning Dew & Blackberries, AIR WICK, 40 ml",EUGESTA EESTI OÜ,,Selver,,,other,dry_other,fallback
+307542,"Difuuser Pear & Cinnamon, AIR WICK, 40 ml",EUGESTA EESTI OÜ,,Selver,,,world_spices,spices_herbs_spice_mix,high
+307543,"Filotaigen, KANAKI, 250 g",REATON OÜ,,Selver,,,meat_fish,meat_poultry,high
+307544,"Grand Sour, NOCCO, 330 ml",GKR TRADE OÜ,,Selver,,,other,dry_other,fallback
+307545,"Grissiinid seesamiseemnetega, STIRATINI, 250 g",ESTINVAIT OÜ,,Selver,,,sweets_snacks,sweets_nuts_driedfruit,high
+307546,"Hallituse eemaldaja, CILLIT, 750 ml",EUGESTA EESTI AS,,Selver,,,other,dry_other,fallback
+307547,"Hari + kühvel pika varrega, VILEDA,",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback
+307548,"Head Ööd piimapudrupulber kaera-õuna mahe 6+, HIPP, 250 g",LTT AS,,Selver,,,dairy_eggs_fats,dairy_milk,high
+307549,"Herne-suhkrumaisi maisipallid, ELLA'S KITCHEN, 36g",GOLDBERGER OÜ,,Selver,,,drinks,drinks_spirits,high
+307550,"HULGI Hapukoore- ja sibulamaitselised kuivküpsised 3tk, TUC, 3 x 100g",ABESTOCK AS,,Selver,,,dairy_eggs_fats,dairy_cream_sourcream,high
+307551,"HULGI Juicy Melba 24tk, NOCCO, 24 x 330ml",GKR TRADE OÜ,,Selver,,,other,dry_other,fallback
+307552,"HULGI Kalev klassikalised martsipanikommid 3tk, KALEV, 3 x 150g",ORKLA EESTI AS,,Selver,,,sweets_snacks,sweets_candies,high
+307553,"HULGI Kiviahjupitsa Superiore for Meat Lovers 3tk, GRANDIOSA, 3 x 350g",ORKLA EESTI AS,,Selver,,,other,dry_other,fallback
+307554,"HULGI Kodujuust 5% 2tk, ALMA, 2 x 500 g",VALIO EESTI AS,,Selver,,,dairy_eggs_fats,dairy_cottage_quark,high
+307555,"HULGI Maasikaküpsised 4 tk, MAIASMOKK, 4 x 130 g",ABESTOCK AS,,Selver,,,sweets_snacks,sweets_biscuits_cookies,high
+307556,"HULGI Õuna-mango-mustasõstrapüree 6+, mahe (rebane) 6tk, MUUTI, 6 x 110g",SALVEST AS,,Selver,,,produce,produce_apples_pears,high
+307557,"HULGI Pohla-mustika-rukkipuder 8+ Mahe 6 tk, MUUTI, 6 x 110g",SALVEST AS,,Selver,,,produce,produce_berries,high
+307558,"HULGI Soolakõrsikud 5tk, LORENZ, 5 x 150g",D.T.L. CONSUMER PRODUCTS EESTI AS,,Selver,,,world_spices,spices_basic_salt_pepper,high
+307559,"HULGI Toonik Pink Mixer 9tk, SCHWEPPES, 9 x 1,5l",COCA-COLA HBC EESTI AS,,Selver,,,drinks,drinks_soft_soda,high
+307560,"HULGI Toonik Tonic 9tk, SCHWEPPES, 9 x 1,5l",COCA-COLA HBC EESTI AS,,Selver,,,drinks,drinks_soft_soda,high
+307561,"Imiku piimasegu Comfort Combiotic(puhituste ja kõhukinnisuse puhul) 0+, HIPP, 300 g",LTT AS,,Selver,,,dairy_eggs_fats,dairy_milk,high
+307562,"Ingverijook Dark Ginger, ROCHESTER, 725 ml",TALMAN KAUBANDUS OÜ,,Selver,,,drinks,drinks_spirits,high
+307563,"Ingverijook, ROCHESTER, 725 ml",TALMAN KAUBANDUS OÜ,,"Barbora, Maxima, Rimi, Selver",,,other,dry_other,fallback
+307564,"Jätkupiimasegu 2 BIO Combiotik 6+, HIPP, 200 g",LTT AS,,"Coop, Selver",,,dairy_eggs_fats,dairy_milk,high
+307565,"Kaerahelbeküpsised, FLORA, 300 g",SELVER AS,,Selver,,,sweets_snacks,sweets_biscuits_cookies,high
+307566,"Kaerahelbeküpsised mandli ja šokolaaditükikestega, FLORA, 300 g",SELVER AS,,Selver,,,sweets_snacks,sweets_chocolate_bars,high
+342142,"Jäätee tsitrusviljade maitsega roheline Rimi 1,5l",Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342143,"Sink Jamon Serrano, viilutatud Selection by Rimi 80g",Selection By Rimi,,,,,dry_preserves,dry_other,high
+342144,Himaalaja roosa sool Selection by Rimi 100g,Selection By Rimi,,Rimi,,,world_spices,spices_basic_salt_pepper,high
+342145,"Ökoloogiline kookosjook I LOVE ECO, 400 ml",I Love Eco,,Rimi,,,bakery,bakery_cakes_pastries,high
+342146,"Sealihavorst keedetud, viilutatud Rimi 270g",Rimi,,Rimi,,,meat_fish,meat_sausages,high
+342147,Keeduvorst Rimi Smart 1kg,Rimi Smart,,Rimi,,,meat_fish,meat_sausages,high
+342148,Kalafilee juustuga Rimi 300g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342149,Karamelliseeritud magustatud kondenspiim Rimi 397g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_milk,high
+342150,Mikropopkorn soolane Rimi 90g,Rimi,,Rimi,,,world_spices,spices_basic_salt_pepper,high
+342151,Pähkli ja suupiste segu Ica Asia 140g,ICA,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342152,"Porgandinektar Rimi 0,33l",Rimi,,Rimi,,,drinks,drinks_juices,high
+342153,Püree maasikate ja banaanidega ICA 120g,ICA,,Rimi,,,produce,produce_berries,high
+342154,Kuivpärm Rimi Smart 12g,Rimi Smart,,Rimi,,,dry_preserves,dry_flour_sugar_baking,high
+342155,Bataadi friikartulid Rimi sügavkülmutatud 450g,Rimi,,Rimi,,,frozen_food,frozen_potato_products,high
+342156,Kauss kinoa ja kanaga 290g,Rimi,,Rimi,,,meat_fish,meat_poultry,high
+342157,Mahe kuivatatud aprikoos I Love Eco 200g,I Love Eco,,,,,other,dry_other,fallback
+342158,Makaronid tomati&basiilikuga Trottole Tricolor Selection by Rimi 500g,Selection By Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342159,Passionikook Rimi 350g,Rimi,,Rimi,,,bakery,bakery_cakes_pastries,high
+342160,Jäätis jogurti-maasika Rimi 1kg/2L,Rimi,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high
+342161,Toorjuust küüslaugu ja ürtidega ICA 23% 200g,ICA,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342162,Magushapu kaste ananassiga Rimi 480g,Rimi,,,,,produce,produce_tropical,high
+342163,Pitsa Royale Rimi 570g,Rimi,,,,,other,dry_other,fallback
+342164,Kultuurmustikad Rimi 300g,Rimi,,Rimi,,,produce,produce_berries,high
+342165,Karastusjook Rimi apelsinilimonaad 2l,Rimi,,Rimi,,,drinks,drinks_soft_soda,high
+342166,Tuunikala purustatud soolvees Rimi Smart 185g/130g,Rimi Smart,,Rimi,,,dry_preserves,dry_canned_meat_fish,high
+342167,Marineeritud heeringafilee tükid peediga majoneesis Rimi Smart 200g,Rimi Smart,,Rimi,,,sauces_oils,sauces_ketchup_mayo,high
+342168,Toiduželatiin Rimi Smart 20g,Rimi Smart,,Rimi,,,other,dry_other,fallback
+342169,Mandli-võiküpsised Almond Thins Selection by Rimi 100g,Selection By Rimi,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high
+342170,Basiilikupesto Selection By Rimi 185g,Selection By Rimi,,Rimi,,,sauces_oils,sauces_pasta_cooking,high
+342171,Pasta Durum 500g Penne Rimi,Rimi,,Rimi,,,drinks,drinks_spirits,high
+342172,Nektar ananassi Rimi 1l,Rimi,,Rimi,,,drinks,drinks_juices,high
+342173,Kookoshelbed Rimi 150g,Rimi,,Rimi,,,bakery,bakery_cakes_pastries,high
+342174,Viinamari hele s-ta SUGRAONE 1kl 500g,Rimi,,,,,drinks,drinks_spirits,high
+342175,Pitsa küpsetussegu Rimi 400g,Rimi,,Rimi,,,dry_preserves,dry_flour_sugar_baking,high
+342176,Aedoad valged Rimi 400g/240g,Rimi,,Rimi,,,other,dry_other,fallback
+342177,Jäätis vanillimaits. Rimi Smart 1l/450g,Rimi Smart,,Rimi,,,frozen_food,frozen_desserts_icecream,high
+342178,Šokolaadibatoon sarapuupähkli täidisega Rimi 46g,Rimi,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high
+342179,Rohelised oliivid Rimi Smart kivideta 280g/110g,Rimi Smart,,Rimi,,,other,dry_other,fallback
+342180,Rosolje 500g,Rimi,,Rimi,,,other,dry_other,fallback
+342181,"Broileri poolkoivatükid, värske Rimi 500g",Rimi,,Rimi,,,meat_fish,meat_poultry,high
+342182,Maisisnäkk I Love Eco banaani-maasika 8k 20g,I Love Eco,,Rimi,,,dry_preserves,dry_canned_veg,high
+342183,Majapidamispaber Rimi 2-kihiline 400 lehte,Rimi,,Rimi,,,household,hh_paper,high
+342184,Nisujahu I Love Eco 2kg,I Love Eco,,Rimi,,,dry_preserves,dry_flour_sugar_baking,high
+342185,Maisihelbed mee ja maapähklitega krõbedad Rimi 300g,Rimi,,Rimi,,,dry_preserves,dry_cereals_muesli,high
+342186,Võioad Rimi 400g/240g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high
+342187,Pasta-suitsukanasalat 300g,Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342188,Mango vahepala 160g,Rimi,,Rimi,,,produce,produce_tropical,high
+342189,Kohvikoor Rimi 10% 10x10g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high
+342190,"Kuldne meriahven, roogitud, ilma peata, sulatatud, kg",Rimi,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback
+342191,Värske pasta Ravioolid seentega ICA 250g,ICA,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342192,"Pannkoogid Rimi veiselihaga 4x90g, 360g",Rimi,,Rimi,,,meat_fish,meat_beef_lamb_game,high
+342193,Tomatid tükeldatud Rimi 400g,Rimi,,Rimi,,,produce,produce_root_veg,high
+342194,Maksapasteet 200g Rimi,Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342195,"Õuna-, passiooni- ja ingverimahl Selection by Rimi 125ml",Selection By Rimi,,Rimi,,,drinks,drinks_juices,high
+342196,Sea kaelakarbonaad kondita Rimi kg,Rimi,,Rimi,,,other,dry_other,fallback
+342197,Sealiha- ja linnulihavorstid cheddari juustumaitselise täidisega Rimi Kabanos 95g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342198,Pähkli-rosina segu Rimi kg,Rimi,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342199,Aedoad tomatikastmes Rimi 400g/200g,Rimi,,Rimi,,,produce,produce_root_veg,high
+342200,Vahukoor Rimi 35% 200ml,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high
+342201,Laimimahl kontsentraadist ICA 200ml,ICA,,Rimi,,,drinks,drinks_juices,high
+342202,Maisipulgad traditsioonilised Rimi 130g,Rimi,,,,,dry_preserves,dry_canned_veg,high
+342203,Krabimaitseline riisisalat 900g,Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342204,Pasta-suitsukanasalat 700g,Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342205,Vahtrasiirup ICA 250g,ICA,,Rimi,,,drinks,drinks_syrups_powders,high
+342206,Mahe Kreeka Pähkel I Love Eco 100g,I Love Eco,,Rimi,,,other,dry_other,fallback
+342207,Kummeli tee Rimi 20x1g,Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342208,Küpsised kirsimaitselise täidisega Rimi 160g,Rimi,,Rimi,,,sweets_snacks,sweets_biscuits_cookies,high
+342209,Itaaliapärane maitseainesegu Selection by Rimi 50g,Selection By Rimi,,Rimi,,,world_spices,spices_herbs_spice_mix,high
+342210,Makaronid Gigli Selection by Rimi 500g,Selection By Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342211,"Kalkuni rinnafilee, värske, A-klass Rimi kg",Rimi,,Rimi,,,meat_fish,meat_poultry,high
+342212,Püree I Love Eco pirni alates 4. kuust 90g,I Love Eco,,,,,produce,produce_apples_pears,high
+342213,Chia seemned Rimi 150g,Rimi,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342214,Hiinapärane köögiviljasegu praadimiseks Rimi 400 g,Rimi,,,,,other,dry_other,fallback
+342215,"Näkileib kaerajahuga Rimi, 100g",Rimi,,,,,bakery,bakery_bread_loaves,high
+342216,"Tomatimahl Rimi 0,33l",Rimi,,Rimi,,,drinks,drinks_juices,high
+342217,Maisihelbed Rimi suhkruglasuuriga 500g,Rimi,,Rimi,,,dry_preserves,dry_cereals_muesli,high
+342218,Makaronid Spirali Rimi 500g,Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342219,Tee roheline piparmündi Rimi 20x2g,Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342220,Kookospähkliõli külmpressitud Extra Virgin I Love Eco 250ml,I Love Eco,,Rimi,,,drinks,drinks_spirits,high
+342221,"Vinnutatud sink Prosciutto Crudo, viilutatud Selection by Rimi 250g",Selection By Rimi,,Rimi,,,meat_fish,meat_hams,high
+342222,Maisisnäkk I Love Eco õun-kaneel 8k 20g,I Love Eco,,,,,dry_preserves,dry_canned_veg,high
+342223,Toorjuust küüslaugu-ürtidega Rimi 150g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342224,Kanaviinerid  kuumsuisutatud Rimi Kidino 2x90g,Rimi,,Rimi,,,drinks,drinks_spirits,high
+342225,Pune Rimi Smart 10g,Rimi Smart,,Rimi,,,other,dry_other,fallback
+342226,Purustatud ananassid mahlas ICA 425g/268g,ICA,,Rimi,,,drinks,drinks_juices,high
+342227,Riis pikateraline Rimi 4x125g,Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342228,Šampinjon pruun Rimi 250g,Rimi,,Rimi,,,produce,produce_mushrooms,high
+342229,Tomatimahl Rimi Smart 100% 1l,Rimi Smart,,Rimi,,,drinks,drinks_juices,high
+342230,"Mozzarella juust, riivitud Rimi 150g",Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342231,"Pistaatsiapähklid röstitud, soolatud Rimi 700g",Rimi,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342232,Kaeraküpsised ICA šokolaadiga 600g,ICA,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high
+342233,Värsked juustupallid tomati ja basiilikuga rapsiõlis Rimi 240/150g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342234,Teriyaki-seesami lõhe Rimi kg,Rimi,,,,,world_spices,spices_asian,high
+342235,Mandlilaastud Rimi 100g,Rimi,,Rimi,,,other,dry_other,fallback
+342236,Linna pelmeenid Rimi Smart 1 kg,Rimi Smart,,Rimi,,,other,dry_other,fallback
+342237,Surimi pulgad Rimi Smart 300g,Rimi Smart,,Rimi,,,other,dry_other,fallback
+342238,Ekstra väärisoliiviõli Rimi 1l,Rimi,,,,,sauces_oils,oils_olive,high
+342239,"Päevalillekimp Rimi 50cm, 5 vart",Rimi,,Rimi,,,other,dry_other,fallback
+342240,Sprotid tomatikastmes Rimi klaaspurk 250g/175g,Rimi,,Rimi,,,produce,produce_root_veg,high
+342241,Külmutatud vaarikad Rimi 400g,Rimi,,Rimi,,,produce,produce_berries,high
+342242,Tee must Ceylon Rimi 20x2g,Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342243,Või Rimi Smart 82% 180g,Rimi Smart,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high
+342244,Mustad Hojiblanca oliivid Rimi kivideta 345g/160g,Rimi,,Rimi,,,other,dry_other,fallback
+342245,Singi-šampinjonipitsa Rimi TK,Rimi,,,,,produce,produce_mushrooms,high
+342246,Pastakaste suvikõrvitsa-paprika Selection by Rimi 350g,Selection By Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342247,Makrell Rimi kuumsuitsu harilik vp kg,Rimi,,Rimi,,,meat_fish,fish_salted_smoked,high
+342248,Võiküpsised Selection by Rimi juustuga 100g,Selection By Rimi,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high
+342249,Küpsised valge šokolaadi ja magustatud kuivatatud jõhvikatega,Rimi,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high
+342250,Aprikoos kuivatatud Rimi 200g,Rimi,,Rimi,,,other,dry_other,fallback
+342251,Pikkuim-tuuni steikid Rimi MSC 250g,Rimi,,Rimi,,,other,dry_other,fallback
+342252,Mooniseemned Rimi 150g,Rimi,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342253,Tee ürdi piparmündi Rimi 50g,Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342254,Tume sojakaste Rimi 150ml,Rimi,,Rimi,,,world_spices,spices_asian,high
+342255,Krabimaitseline riisisalat 200g,Rimi,,"Barbora, Maxima, Rimi",,,dry_preserves,dry_pasta_rice,high
+342256,Tatratang Rimi Smart 800g,Rimi Smart,,Rimi,,,other,dry_other,fallback
+342257,Jäätis vahtrasiirupi Rimi 120ml/73g,Rimi,,,,,drinks,drinks_syrups_powders,high
+342258,Vööttuunifilee soolvees Rimi MSC 240g/168g,Rimi,,Rimi,,,world_spices,spices_basic_salt_pepper,high
+342259,"Keefir Rimi 2,5% 1kg",Rimi,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high
+342260,Präänikud meega Rimi Smart 200g,Rimi Smart,,Rimi,,,other,dry_other,fallback
+342261,Makrellifilee tomatikastmes Rimi 170g/102g,Rimi,,Rimi,,,produce,produce_root_veg,high
+342262,"Vaikse ookeani mintaifilee, nahata, ilma sabata Rimi, sügavkülmutatud MSC 380g",Rimi,,Rimi,,,sweets_snacks,sweets_gums_mints,high
+342263,Jäätis vanillimaitseline mango- ja passionitäidisega Rimi 330g/500ml,Rimi,,Rimi,,,frozen_food,frozen_desserts_icecream,high
+342264,Teraviljaküpsised šokolaadi ja kakaoga Rimi 300g,Rimi,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high
+342265,"Broileri poolkoivatükid, värske Rimi, kg",Rimi,,Rimi,,,meat_fish,meat_poultry,high
+342266,"Lõhefilee Rimi kondita, nahata 250g",Rimi,,Rimi,,,meat_fish,fish_fresh,high
+342267,Sealihast minutipihv lihameistritelt,Rimi,,Rimi,,,meat_fish,meat_pork,high
+342268,Kohvikapslid Lungo Rimi 16x7g,Rimi,,Rimi,,,drinks,drinks_coffee_beans_capsules,high
+342269,Röstitud maapähklid Rimi tükeldatud 90g,Rimi,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342270,Krabimaitselised pulgad Rimi 300g,Rimi,,Rimi,,,other,dry_other,fallback
+342271,Vikerforellimari Rimi 50g,Rimi,,Rimi,,,meat_fish,fish_fresh,high
+342272,Kanamunad kodumaine Rimi M 10tk,Rimi,,,,,dairy_eggs_fats,dairy_eggs,high
+342273,Päevalilleseemnehalvaa Rimi 200g,Rimi,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342274,Frankfurter Rimi 210g,Rimi,,Rimi,,,other,dry_other,fallback
+342275,Tomatikaste Rimi 480g,Rimi,,Rimi,,,sauces_oils,sauces_pasta_cooking,high
+342276,Tuunikala tükid õlis Rimi MSC 185g/130g,Rimi,,Rimi,,,dry_preserves,dry_canned_meat_fish,high
+342277,Tee roheline Green Rimi 20x2g,Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342278,Kiirnuudlid peekonimaitselised Rimi Smart 60g,Rimi Smart,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342279,Vahukommid Rimi BBQ Marshmallows 700g,Rimi,,Rimi,,,sweets_snacks,sweets_candies,high
+342280,"Segumahlajook vitamiinidega Rimi Ace 1,5l",Rimi,,Rimi,,,drinks,drinks_juices,high
+342281,"Karboniseerimata alkoholivaba õunamaitseline jook Rimi 1,5l",Rimi,,Rimi,,,dry_preserves,dry_cereals_muesli,high
+342282,Spagetid Rimi Smart 400g,Rimi Smart,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342283,Rohelised oliivid Rimi sidruniga 235g/142g,Rimi,,Rimi,,,produce,produce_tropical,high
+342284,Sea välisfilee kondita kg,Rimi,,Rimi,,,other,dry_other,fallback
+342285,Mustad Queen oliivid Selection by Rimi kivideta 345g/160g,Selection By Rimi,,Rimi,,,other,dry_other,fallback
+342286,Jasmiini riis I Love Eco 1kg,I Love Eco,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342287,Paisutatud riis šokolaadis Rimi Chococrisps 250g,Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342288,Makaronid nuudlid Rimi Smart 400g,Rimi Smart,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342289,Oliivid kivideta Kreeka ICA 227g,ICA,,Rimi,,,other,dry_other,fallback
+342290,Juust Rimi Tilsit viilutatud 45% 500g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342291,Tomatid tükeldatud basiilikuga Rimi 400g,Rimi,,Rimi,,,produce,produce_herbs_salads_sprouts,high
+342292,Kartulikrõpsud hapukoore- ja sibulamaitselised ICA 175g,ICA,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high
+342293,Lõhefilee sinepikreemis Rimi 170g,Rimi,,Rimi,,,meat_fish,fish_fresh,high
+342294,Sünnipäevasalat 200g,Rimi,,"Barbora, Maxima, Rimi",,,produce,produce_herbs_salads_sprouts,high
+342295,Rohelised Hojiblanca oliivid Rimi kivideta 935g/455g,Rimi,,Rimi,,,other,dry_other,fallback
+342296,Tagliatelle munapasta I Love Eco 500g,I Love Eco,,Rimi,,,dairy_eggs_fats,dairy_eggs,high
+342297,"Hakklihasegu sealihast, jahutatud Rimi Smart 350g",Rimi Smart,,Rimi,,,dry_preserves,dry_flour_sugar_baking,high
+342298,"Sealihasink keedetud, kuumsuitsutatud, viilutatud Rimi 200g",Rimi,,Rimi,,,meat_fish,meat_hams,high
+342299,"Salat Bistro Rimi 1kl, 150g",Rimi,,Rimi,,,produce,produce_herbs_salads_sprouts,high
+342300,Palsamiäädikakreem Aceto Balsamico di Modena IGP Rimi 250ml,Rimi,,Rimi,,,sauces_oils,oils_vinegar,high
+342301,Lõhefilee vürtsikas kreemis Rimi 170g,Rimi,,Rimi,,,world_spices,spices_herbs_spice_mix,high
+342302,Tee roheline jasmiini Rimi 80g,Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342303,"Vannamei viburhännak 40/50, sul. Rimi, ASC 300g",Rimi,,Rimi,,,other,dry_other,fallback
+342304,Soolapulgad juustuga Rimi 125g,Rimi,,,,,dairy_eggs_fats,dairy_cheese_slices,high
+342305,"Allikavesi karboniseerimata Rimi Kids 0,5l",Rimi,,Rimi,,,drinks,drinks_water,high
+342306,Seesamipulgad Rimi 150g,Rimi,,Rimi,,,other,dry_other,fallback
+342307,Paella kanaga Rimi 350g,Rimi,,Rimi,,,meat_fish,meat_poultry,high
+342308,Nisujahu Rimi Smart tüüp 812 2kg,Rimi Smart,,Rimi,,,dry_preserves,dry_flour_sugar_baking,high
+342309,Kauss kinoa ja kuumsuitsukalaga 270g,Rimi,,Rimi,,,meat_fish,fish_salted_smoked,high
+342310,Kodujuust rõõsa koorega 3% Rimi 500g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cottage_quark,high
+342311,Oad valged I Love Eco 380g,I Love Eco,,,,,other,dry_other,fallback
+342312,Nektar ploomi Rimi 1l,Rimi,,Rimi,,,drinks,drinks_juices,high
+342313,Marineeritud Atlandi heeringafilee tükid marineeritud kurkidega valges kastmes Rimi 300g,Rimi,,Rimi,,,meat_fish,fish_fresh,high
+342314,Kurk mahe I Love Eco 300g,I Love Eco,,Rimi,,,produce,produce_root_veg,high
+342315,Basiilik Rimi 6g,Rimi,,Rimi,,,produce,produce_herbs_salads_sprouts,high
+342316,"Mähkmed I Love Eco Mini 3-6kg S2, 33tk",I Love Eco,,,,,baby,baby_diapers,high
+342317,Sibul mahe I Love Eco 500g,I Love Eco,,Rimi,,,produce,produce_root_veg,high
+342318,"Ploomtomat punane mini Rimi 1kl, 250g",Rimi,,Rimi,,,produce,produce_root_veg,high
+342319,"Multipuuvilja mahlajook Rimi Smart vitamiinidega A, E, C 1l",Rimi Smart,,Rimi,,,drinks,drinks_juices,high
+342320,Pähklihalvaa pistaatsiapähklitega Rimi 60g,Rimi,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342321,Kohv röstitud jahvatatud Brazil Selection by Rimi 250g,Selection By Rimi,,Rimi,,,drinks,drinks_other,heuristic
+342322,Päikesekuivatatud tomatid I Love Eco 135g,I Love Eco,,Rimi,,,produce,produce_root_veg,high
+342323,Nätsukommid Rimi 150g,Rimi,,Rimi,,,sweets_snacks,sweets_candies,high
+342324,Makaronid Vermicelli Rimi 500g,Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342325,Jäätis šokolaadi Rimi Smart 65g/120ml,Rimi Smart,,Rimi,,,frozen_food,frozen_desserts_icecream,high
+342326,Kurgid marineeritud 3-6cm Rimi 670g/370g,Rimi,,Rimi,,,other,dry_other,fallback
+342327,Rohelised Queen oliivid Selection by Rimi kividega 345g/200g,Selection By Rimi,,Rimi,,,other,dry_other,fallback
+342328,"Broileri poolkoivad, värske, A-klass Rimi 500g",Rimi,,Rimi,,,meat_fish,meat_poultry,high
+342329,Cappuccino ICA 200g,ICA,,Rimi,,,other,dry_other,fallback
+342330,Sealiha hautatud Rimi 250g,Rimi,,"Barbora, Maxima, Rimi",,,meat_fish,meat_pork,high
+342331,Till Rimi 7g,Rimi,,Rimi,,,produce,produce_herbs_salads_sprouts,high
+342332,Müsli Extra Fruits and Berries Rimi 375g,Rimi,,,,,dry_preserves,dry_cereals_muesli,high
+342333,Tee ürdi kummeli Rimi 30g,Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342334,Karri Rimi 25g,Rimi,,Rimi,,,other,dry_other,fallback
+342335,Rapsiõli I Love Eco 500ml,I Love Eco,,Rimi,,,sauces_oils,oils_other,high
+342336,Nektar banaani Rimi 1l,Rimi,,Rimi,,,drinks,drinks_juices,high
+342337,"Kalkuni rinnafilee hakkliha Rimi, jahutatud 500g",Rimi,,Rimi,,,dry_preserves,dry_flour_sugar_baking,high
+342338,Rimi jää puhastatud veest 1kg,Rimi,,Rimi,,,other,dry_other,fallback
+342339,Kanapitsa Rimi TK,Rimi,,,,,meat_fish,meat_poultry,high
+342340,Porgandi-ananassisalat 250g,Rimi,,Rimi,,,produce,produce_herbs_salads_sprouts,high
+342341,"Banaanid Cavendish I Love Eco 1kl, kg",I Love Eco,,Rimi,,,produce,produce_tropical,high
+342342,Lasagne Bolognese Rimi 400g,Rimi,,Rimi,,,other,dry_other,fallback
+342343,Kaeraküpsised Rimi Smart 500g,Rimi Smart,,Rimi,,,sweets_snacks,sweets_biscuits_cookies,high
+342344,"Püree köögivilja- ja puuviljaga I Love Eco porgandi, õuna, mango, granadillimahl, lastele alates 6 kuust 90 g",I Love Eco,,,,,drinks,drinks_juices,high
+342345,"Vikerforelli filee, kg",Rimi,,Rimi,,,meat_fish,fish_fresh,high
+342346,Hambapasta lastele ICA 75ml,ICA,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342347,Viinamarjaseemneõli rafineeritud Rimi 750ml,Rimi,,,,,drinks,drinks_spirits,high
+342348,"Küpsised piima-, tumeda ja valge šokolaadi tükkidega",Rimi,,Rimi,,,dairy_eggs_fats,dairy_milk,high
+342349,Purustatud tomatid ICA 390g,ICA,,Rimi,,,produce,produce_root_veg,high
+342350,Kaerapuder karamellimaitseline õuntega Rimi 55g,Rimi,,Rimi,,,sweets_snacks,sweets_candies,high
+342351,Siirup Metsmaasikamaitseline Rimi Smart 1l,Rimi Smart,,Rimi,,,drinks,drinks_syrups_powders,high
+342352,Maasikamoos I Love Eco 400g,I Love Eco,,Rimi,,,dry_preserves,dry_other,high
+342353,Peet õunamahlas Rimi 480g/295g,Rimi,,Rimi,,,drinks,drinks_juices,high
+342354,Müsli puuvilja 45% ICA 750g,ICA,,Rimi,,,dry_preserves,dry_cereals_muesli,high
+342355,Ahjukartul 350g,Rimi,,Rimi,,,produce,produce_root_veg,high
+342356,Kohvioad Selection by Rimi Colombia 1kg,Selection By Rimi,,,,,drinks,drinks_coffee_beans_capsules,high
+342357,Kummikommid LLama mix Rimi 100g,Rimi,,Rimi,,,sweets_snacks,sweets_candies,high
+342358,Riisivahvlid Rimi juustuga 25g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342359,Küpsised Brownie Rimi 200g,Rimi,,Rimi,,,sweets_snacks,sweets_biscuits_cookies,high
+342360,"Püree puuvilja ja teraviljadega I Love Eco virsik,õun,kaer ja oder, alates 6 kuust 120g",I Love Eco,,,,,produce,produce_apples_pears,high
+342361,"Mahlajook Rimi apelsini, banaani, virsiku 200ml",Rimi,,Rimi,,,drinks,drinks_juices,high
+342362,Kohupiimakreem maasika Rimi 150g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cottage_quark,high
+342363,"Valik kanalihavorste, viilutatud Rimi 150g",Rimi,,Rimi,,,meat_fish,meat_poultry,high
+342364,"Porgandinektar Rimi 0,75l",Rimi,,Rimi,,,drinks,drinks_juices,high
+342365,Salatijuust Rimi 40% 500g,Rimi,,,,,dairy_eggs_fats,dairy_cheese_slices,high
+342366,Konserveeritud roheline hernes Rimi 200g/140g,Rimi,,Rimi,,,dry_preserves,dry_other,heuristic
+342367,Kommid puuviljamaitselised Rimi 16g,Rimi,,Rimi,,,dry_preserves,dry_other,high
+342368,Vanillimaitseline jäätis jõhvikatäidisega vahvlikoonuses Rimi 120g/200ml,Rimi,,Rimi,,,frozen_food,frozen_desserts_icecream,high
+342369,Juust Maasdam viilutatud Rimi 150g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342370,Nisujahu 405d Rimi 1kg,Rimi,,Rimi,,,dry_preserves,dry_flour_sugar_baking,high
+342371,Must pipar Selection by Rimi 45g,Selection By Rimi,,Rimi,,,world_spices,spices_basic_salt_pepper,high
+342372,"Kuumsuitsutatud broilerikoib Rimi Smart, kg",Rimi Smart,,Rimi,,,meat_fish,meat_poultry,high
+342373,Maasikad Rimi 450g,Rimi,,Rimi,,,produce,produce_berries,high
+342374,Kummikommid Karukesed Rimi 100g,Rimi,,Rimi,,,sweets_snacks,sweets_candies,high
+342375,Kilud tomatikastmes Rimi Smart 240g,Rimi Smart,,Rimi,,,dry_preserves,dry_canned_meat_fish,high
+342376,Maapähklihalvaa maasikatega Rimi 60g,Rimi,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342377,Kakaopulber vähendatud rasvasisaldusega Rimi 100g,Rimi,,Rimi,,,drinks,drinks_syrups_powders,high
+342378,Leivapulgad rukki Rimi 200g,Rimi,,Rimi,,,other,dry_other,fallback
+342379,"Kõrvitsaseemned Rimi röstitud, koorimata, soolaga 200g",Rimi,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high
+342380,Konserveeritud ananassiviilud siirupis Rimi 825g/490g,Rimi,,Rimi,,,drinks,drinks_syrups_powders,high
+342381,Makaronid kinoaga Penne Selection by Rimi 500g,Selection By Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342382,Suupiste I Love Eco maisi 90g,I Love Eco,,Rimi,,,dry_preserves,dry_canned_veg,high
+342383,Broilerirull mozzarellaga Rimi lihameistrid,Rimi,,,,,dairy_eggs_fats,dairy_cheese_slices,high
+342384,Kuskuss I Love Eco 500g,I Love Eco,,Rimi,,,other,dry_other,fallback
+342385,"Kuumsuitsu seavälisfilee, viilutatud 250g",Rimi,,Rimi,,,meat_fish,fish_salted_smoked,high
+342386,Pistaatsiapähklid Rimi röstitud ja soolatud 400g,Rimi,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342387,Pannkoogid singi ja juustuga 360g Rimi,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342388,"Püree köögivilja-, riisi- ja kana I Love Eco alates 6 kuust 120g",I Love Eco,,,,,dry_preserves,dry_pasta_rice,high
+342389,Õunamahlajook Rimi 200ml,Rimi,,Rimi,,,drinks,drinks_juices,high
+342390,Meresool Selection By Rimi 100g,Selection By Rimi,,Rimi,,,world_spices,spices_basic_salt_pepper,high
+342391,Sea küljetükk keedetud kuumsuitsutatud Rimi vaakumpakendis kg,Rimi,,Rimi,,,meat_fish,fish_salted_smoked,high
+342392,Poolitatud mandlid Rimi 150g,Rimi,,Rimi,,,other,dry_other,fallback
+342393,Kartulikrõpsud soolaga ICA 175g,ICA,,Rimi,,,sweets_snacks,sweets_snacks_salty,high
+342394,Baguette tomati ja basiilikuga 155g,Rimi,,Rimi,,,produce,produce_herbs_salads_sprouts,high
+342395,"Majapidamispaber Rimi 3- kihiline, 300 lehte",Rimi,,Rimi,,,household,hh_paper,high
+342396,Aedoad punased I Love Eco 380g,I Love Eco,,Rimi,,,other,dry_other,fallback
+342397,Oliivijääkõli Rimi Smart 1l,Rimi Smart,,Rimi,,,sauces_oils,oils_other,high
+342398,Makaronid hakklihaga 350g,Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342399,Külms. Lõhefilee viilud Rimi 100g,Rimi,,Rimi,,,meat_fish,fish_fresh,high
+342400,Köögiviljamahl Rimi 100% 1l,Rimi,,Rimi,,,drinks,drinks_juices,high
+342401,Vikerforellifilee portsjonid 250g,Rimi,,Rimi,,,meat_fish,fish_fresh,high
+342402,Kõva juust Rimi 37% 36 kuud 180g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342403,Tumeda šokolaadi plaadid piparmündikreemi täidisega Royal mints Rimi 200g,Rimi,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high
+342404,Veise kaelaliha Rimi kg,Rimi,,Rimi,,,meat_fish,meat_beef_lamb_game,high
+342405,Tee must Ceylon Rimi 80g,Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342406,Granaatõunamahl Rimi 1l,Rimi,,Rimi,,,drinks,drinks_juices,high
+342407,"Sea kaelakarbonaad kondita, viilutatud Rimi 340g",Rimi,,Rimi,,,other,dry_other,fallback
+342408,Maisivahvlid Rimi Smart 115g,Rimi Smart,,Rimi,,,dry_preserves,dry_canned_veg,high
+342409,Keta kalamari Rimi MSC 100g,Rimi,,Rimi,,,meat_fish,fish_fresh,high
+342410,Vormiküpsised šokolaadi maitselised Rimi Smart 160g,Rimi Smart,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high
+342411,Valge veini äädikas Rimi 250ml,Rimi,,Rimi,,,drinks,drinks_wine,high
+342412,Vanillijäätis küpsisetükkide ja šokolaaditükkidega Rimi 500ml/400g,Rimi,,Rimi,,,frozen_food,frozen_desserts_icecream,high
+342413,Rukki näkileivad hapukoorega Rimi 200g,Rimi,,,,,dairy_eggs_fats,dairy_cream_sourcream,high
+342414,Sealiha Šašlõkk kimchi marinaadis Lihameister Rimi,Rimi,,Rimi,,,sauces_oils,sauces_marinades,high
+342415,Kooritud kreeka pähkel Rimi kg,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high
+342416,Pastakaste Rimi küüslauguga 390g,Rimi,,,,,dry_preserves,dry_pasta_rice,high
+342417,Martsipan ICA 400g,ICA,,Rimi,,,other,dry_other,fallback
+342418,Pakslaup-pangaasiuse filee sulatatud kg,Rimi,,Rimi,,,other,dry_other,fallback
+342419,"Kohupiimaküpsis kirsitäidisega Rimi, kg",Rimi,,Rimi,,,dairy_eggs_fats,dairy_cottage_quark,high
+342420,Siirup Kirsimaitseline Rimi Smart 1l,Rimi Smart,,Rimi,,,drinks,drinks_syrups_powders,high
+342421,Soolakringlid Rimi 150g,Rimi,,Rimi,,,world_spices,spices_basic_salt_pepper,high
+342422,"Kuldmerikoger, rookimata, peaga, Rimi,kg",Rimi,,Rimi,,,other,dry_other,fallback
+342423,Vasikapuljong ICA 180ml,ICA,,Rimi,,,world_spices,spices_broth_stock,high
+342424,Küpsetussegu Rimi vanilliiniga muffinite ja keeksi 400g,Rimi,,Rimi,,,dry_preserves,dry_flour_sugar_baking,high
+342425,Tee must Earl Grey Rimi 20x2g,Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342426,Sprotid õlis Rimi klaaspurk 250g/175g,Rimi,,Rimi,,,sauces_oils,oils_other,high
+342427,Jõhvika-mannavaht 600g,Rimi,,Rimi,,,produce,produce_berries,high
+342428,Juust Gruyere ICA 200g,ICA,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342429,Mahl tomati Rimi 3l,Rimi,,Rimi,,,drinks,drinks_juices,high
+342430,Palsamiäädikakreem Aceto balsamico di Modena IGP apelsini maitsega Rimi 250ml,Rimi,,Rimi,,,sauces_oils,oils_vinegar,high
+342431,Kuninglik segu Rimi 150g,Rimi,,Rimi,,,other,dry_other,fallback
+342432,Juust Rimi Tilsit 45% 500g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342433,Pitsa Capricciosa Rimi 370g,Rimi,,,,,other,dry_other,fallback
+342434,"Looduslik mineraalvesi Rimi karboniseeritud 0,5l",Rimi,,Rimi,,,drinks,drinks_water,high
+342435,Puuviljade ja pähklite segu Fancy Rimi 500g,Rimi,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342436,Vahukommid Belgia šokolaadis 160g,Rimi,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high
+342437,Kummikomm Burgerid Rimi 100g,Rimi,,Rimi,,,sweets_snacks,sweets_candies,high
+342438,"Karboniseerimata alkoholivaba sidrunimaitseline jook Rimi 1,5l",Rimi,,Rimi,,,dry_preserves,dry_cereals_muesli,high
+342439,Odratang Rimi Smart 800g,Rimi Smart,,Rimi,,,other,dry_other,fallback
+342440,Salaami viilutatud külmsuitsutatud Rimi Smart 100g,Rimi Smart,,Rimi,,,meat_fish,fish_salted_smoked,high
+342441,Datlid pehmed ICA öko 200g,I Love Eco,,Rimi,,,other,dry_other,fallback
+342442,"Jäätee virsikumaitsega must Rimi 1,5l",Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342443,Pastakaste päikesekuivatatud tomatitega Selection by Rimi 350g,Selection By Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342444,Küpsised Caramel Rimi 175g,Rimi,,,,,sweets_snacks,sweets_biscuits_cookies,high
+342445,Tomatipasta Rimi 100% 500g,Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342446,Mesi erinevate lillede Rimi 300g,Rimi,,Rimi,,,other,dry_other,fallback
+342447,Rapsiõli Rimi 1l,Rimi,,Rimi,,,sauces_oils,oils_other,high
+342448,Tudengi eine Rimi 150g,Rimi,,Rimi,,,other,dry_other,fallback
+342449,Küpsised Rimi Liblikad kg,Rimi,,Rimi,,,sweets_snacks,sweets_biscuits_cookies,high
+342450,"Maisikrõpsud juustuga ""Cheese balls"" Rimi 60g",Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342451,Linnu- ja sealihavorstid juustuga Kabanos 120g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342452,"Karpkala roogitud, kg",Rimi,,Rimi,,,meat_fish,fish_fresh,high
+342453,Tomatid kooritud Rimi Smart 800g,Rimi Smart,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high
+342454,Õrrekanade munad A/M Nr.2 Rimi Smart 10tk,Rimi Smart,,Rimi,,,dairy_eggs_fats,dairy_eggs,high
+342455,Lõhe jahutatud 2-4kg,Rimi,,Rimi,,,dry_preserves,dry_flour_sugar_baking,high
+342456,Röstsai mitmevilja Rimi Smart 500g,Rimi Smart,,Rimi,,,bakery,bakery_buns_croissants,high
+342457,"Allikavesi karboniseerimata Rimi 0,5l",Rimi,,Rimi,,,drinks,drinks_water,high
+342458,Sinihallitusjuust Gold viilutatud 50% Rimi 100g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342459,Šokolaadikompvekid Rimi Seashells 250g,Rimi,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high
+342460,Küpsised Apple Pie Rimi 200g,Rimi,,,,,sweets_snacks,sweets_biscuits_cookies,high
+342461,"Mineraalvesi Rimi karboniseerimata 1,5l",Rimi,,Rimi,,,drinks,drinks_water,high
+342462,Kartuli-lihasalat 500g,Rimi,,Rimi,,,produce,produce_herbs_salads_sprouts,high
+342463,Mozzarella mini Rimi 100g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342464,"Broileri rinnafilee, värske Rimi, kg",Rimi,,Rimi,,,meat_fish,meat_poultry,high
+342465,Värske pasta Fettuccine ICA 250g,ICA,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342466,Tee roheline Selection by Rimi Sencha 80g,Selection By Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342467,Peet marineeritud Rimi Smart 450g/350g,Rimi Smart,,Rimi,,,produce,produce_root_veg,high
+342468,"Mahlaapelsin Salustiana 1kl 1,5kg",Rimi,,,,,drinks,drinks_juices,high
+342469,Juustukuubikud õlis vürtsiseguga ICA  100g,ICA,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342470,"Salaami pipraga, viilutatud Rimi 105g",Rimi,,Rimi,,,other,dry_other,fallback
+342471,Porgandid Crispy 200g I Love ECO,I Love Eco,,Rimi,,,produce,produce_root_veg,high
+342472,Seaprae viilud 285g,Rimi,,Rimi,,,other,dry_other,fallback
+342473,Mahe Puuviljapüree Õunte Ja Kookosega I Love Eco 90g,I Love Eco,,,,,bakery,bakery_cakes_pastries,high
+342474,Soolaheeringafilee õlita Rimi 150g,Rimi,,Rimi,,,world_spices,spices_basic_salt_pepper,high
+342475,Kummikommid maasikamaitselised Teeth Rimi 200g,Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342476,Mandlid valge šokolaadi ja kaneeliga Rimi 100g,Rimi,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high
+342477,Keefirimarinaadis šašlõkk Rimi lihameistrid,Rimi,,,,,dairy_eggs_fats,dairy_yogurt_kefir,high
+342478,Vahvlid maapähklikreemiga Rimi 180g,Rimi,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342479,Või Eesti Rimi 82% 200g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high
+342480,Vahvlirullid vanillimaitselise täidisega Rimi 280g,Rimi,,Rimi,,,other,dry_other,fallback
+342481,"Tualettpaber Rimi 16 rulli, 3 kihiline",Rimi,,Rimi,,,household,hh_paper,high
+342482,"Hambahari ICA pehme, lastele 5-10a",ICA,,Rimi,,,personal_care,pcare_oral_care,high
+342483,Lõhe Rimi sidruni maitsega 170g/119g,Rimi,,Rimi,,,meat_fish,fish_fresh,high
+342484,Britta kook Rimi 300g,Rimi,,Rimi,,,bakery,bakery_cakes_pastries,high
+342485,"Ajvar kaste ICA röstitud paprika ja baklažaanidega, vürtsikas 350g",ICA,,Rimi,,,world_spices,spices_herbs_spice_mix,high
+342486,"Kalkuniliha kotlettide valmistamiseks, jahutatud Rimi 500g",Rimi,,Rimi,,,dry_preserves,dry_flour_sugar_baking,high
+342487,Purustatud kookospähkel I Love Eco 200g,I Love Eco,,Rimi,,,bakery,bakery_cakes_pastries,high
+342488,Küpsised Rimi rosinatega kg,Rimi,,Rimi,,,sweets_snacks,sweets_biscuits_cookies,high
+342489,"Rimi Grillvorstid, kuumsuitsu, 500g",Rimi,,Rimi,,,meat_fish,meat_sausages,high
+342490,Kohvijook lahustuv 3in1 Rimi Express 18g,Rimi,,Rimi,,,drinks,drinks_other,heuristic
+342491,Vahukoor laktoosivaba ICA 36% 250ml,ICA,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high
+342492,Hautatud hapukapsas Rimi 500g,Rimi,,Rimi,,,produce,produce_root_veg,high
+342493,"Püree puuvilja ja teraviljadega I Love Eco punased marjad, kaer ja oder, alates 6 kuust 120g",I Love Eco,,,,,produce,produce_berries,high
+342494,Köögiviljasegu Havai Rimi 400g,Rimi,,,,,other,dry_other,fallback
+342495,Minipaprikad Rimi 200g,Rimi,,Rimi,,,produce,produce_root_veg,high
+342496,Kaneel Rimi Smart 10g,Rimi Smart,,Rimi,,,world_spices,spices_herbs_spice_mix,high
+342497,Jäätis soolakaramelli ja sarapuupähklitega Rimi 310g/500ml,Rimi,,Rimi,,,frozen_food,frozen_desserts_icecream,high
+342498,Vormiküpsised kondenspiimaga Rimi Smart 160g,Rimi Smart,,Rimi,,,dairy_eggs_fats,dairy_milk,high
+342499,Pruun suhkur Rimi 500g,Rimi,,Rimi,,,dry_preserves,dry_flour_sugar_baking,high
+342500,India pähkel Rimi kg,Rimi,,Rimi,,,other,dry_other,fallback
+342501,Makaronid Fusilloni Selection by Rimi 500g,Selection By Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342502,Leivapulgad mini sibulaga Rimi 360g,Rimi,,Rimi,,,produce,produce_root_veg,high
+342503,Viinamari tume seemneteta Midnight beauty 1kl 400g,Rimi,,,,,drinks,drinks_spirits,high
+342504,Sinihallitusjuust Silver viilutatud 50% Rimi 100g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342505,"Kalakotletid vikerforellist, sulatatud Rimi 200g",Rimi,,Rimi,,,meat_fish,fish_fresh,high
+342506,Hapukoor Rimi 10% 500g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high
+342507,Kaerapuder virsikutega Rimi 55g,Rimi,,Rimi,,,other,dry_other,fallback
+342508,Rohelised Hojiblanca oliivid Rimi kivideta 350g/150g,Rimi,,Rimi,,,other,dry_other,fallback
+342509,"Sea välisfilee kondita, viilutatud Rimi 310g",Rimi,,Rimi,,,other,dry_other,fallback
+342510,Keedetud kikerherned Rimi 250g,Rimi,,Rimi,,,dry_preserves,dry_groats_beans,high
+342511,Veisemaks Rimi Smart kg,Rimi Smart,,Rimi,,,meat_fish,meat_beef_lamb_game,high
+342512,Leivapulgad mini juustuga Rimi 360g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342513,Kohupiimakreem mustika Rimi 150g,Rimi,,"Barbora, Maxima, Rimi",,,dairy_eggs_fats,dairy_cottage_quark,high
+342514,Hernes roheline konserveeritud Rimi Smart 690g/450g,Rimi Smart,,Rimi,,,dry_preserves,dry_other,heuristic
+342515,Viineripitsa Rimi TK,Rimi,,,,,drinks,drinks_spirits,high
+342516,Põldmarjadžemm ICA 400g,ICA,,Rimi,,,dry_preserves,dry_other,high
+342517,Kartuli-lihasalat 200g,Rimi,,"Barbora, Maxima, Rimi",,,produce,produce_herbs_salads_sprouts,high
+342518,Sünnipäevasalat 500g,Rimi,,Rimi,,,produce,produce_herbs_salads_sprouts,high
+342519,"Keetmata vannamei viburhännak, sulatatud, maitsetaimede-küüslaugu marinaadis Rimi ASC 300g",Rimi,,Rimi,,,sauces_oils,sauces_marinades,high
+342520,Hakkliha pitsa Rimi TK,Rimi,,,,,meat_fish,meat_minced,high
+342521,Puuviljade ja pähklite segu Exotic Rimi 500g,Rimi,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342522,Mahe maapähklikreem ilma lisatud soola ja suhkruta I Love Eco 350g,I Love Eco,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342523,Hapu kummikomm Koola Rimi 100g,Rimi,,Rimi,,,sweets_snacks,sweets_candies,high
+342524,Tüümian Rimi Smart 10g,Rimi Smart,,Rimi,,,other,dry_other,fallback
+342525,Täistera riisivahvlid meresoolaga Rimi 100g,Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342526,Pastakaste Rimi Napoletana 390g,Rimi,,,,,dry_preserves,dry_pasta_rice,high
+342527,Sushiriis Selection by Rimi 500g,Selection By Rimi,,,,,dry_preserves,dry_pasta_rice,high
+342528,Vahvlid piimakreemiga Rimi 180g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_milk,high
+342529,Kartul mahe I Love Eco 900g,I Love Eco,,Rimi,,,produce,produce_root_veg,high
+342530,"Kalkuni rinnafilee lõigud, värske, A-klass Rimi 360g",Rimi,,Rimi,,,meat_fish,meat_poultry,high
+342531,"Broileri kintsuliha Kreeka marinaadis, värske, A-klass Rimi 850g",Rimi,,Rimi,,,sauces_oils,sauces_marinades,high
+342532,Marjasegu Rimi külmutatud 400g,Rimi,,Rimi,,,frozen_food,frozen_other,heuristic
+342533,Heeringafileetükid ananassiga Rimi 240g,Rimi,,Rimi,,,meat_fish,fish_fresh,high
+342534,Mango kiirkülmutatud Rimi 1kg,Rimi,,Rimi,,,produce,produce_tropical,high
+342535,Krabimaitseline riisisalat 500g,Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342536,4-viljahelbed Rimi 500g,Rimi,,Rimi,,,dry_preserves,dry_cereals_muesli,high
+342537,Mahetomatid tükeldatud I Love Eco 390g,I Love Eco,,Rimi,,,produce,produce_root_veg,high
+342538,Kartulikrõpsud hapukoore- ja sibulamaitselised ICA 200g,ICA,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high
+342539,Lehttaigna pirukas juustu ja singiga 105g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342540,Munaküpsised suhkrukattega Savoiardi Ladyfingers Rimi 200g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_eggs,high
+342541,Püree pudruga I Love Eco mustikate ja banaanidega 120g,I Love Eco,,Rimi,,,produce,produce_berries,high
+342542,Tomatipesto päikesekuivatatud tomatitest Selection by Rimi 130g,Selection By Rimi,,Rimi,,,sauces_oils,sauces_pasta_cooking,high
+342543,Joogivesi karboniseerimata Rimi Smart 5l,Rimi Smart,,Rimi,,,drinks,drinks_water,high
+342544,Metspähklikreem Rimi Smart 400g,Rimi Smart,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342545,Aprikoos Rimi kuivatatud kg,Rimi,,Rimi,,,other,dry_other,fallback
+342546,Suvikõrvits roheline mahe 200g,I Love Eco,,Rimi,,,other,dry_other,fallback
+342547,"Päikesekuivatatud tomatid Rimi õlis, poolitatud 280g/180g",Rimi,,,,,sauces_oils,oils_other,high
+342548,"Porgandi-õuna-maasikanektar Rimi vitamiiniga C 0,75l",Rimi,,Rimi,,,drinks,drinks_juices,high
+342549,Täistera riisivahvlid Rimi Smart 100g,Rimi Smart,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342550,Hapukapsas porgandiga Rimi 800g,Rimi,,"Barbora, Maxima, Rimi",,,produce,produce_root_veg,high
+342551,Pruun kaste ICA 3x22g,ICA,,Rimi,,,sauces_oils,sauces_other,heuristic
+342552,Juust Roquefort ICA 100g,ICA,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342553,Seesamiõli ICA Asia 150ml,ICA,,,,,sauces_oils,oils_other,high
+342554,"Kalkuni kintsuliha kondi ja nahata, värske, A-klass Rimi kg",Rimi,,Rimi,,,meat_fish,meat_poultry,high
+342555,"Friikartulid Rimi Smart 2,5kg",Rimi Smart,,Rimi,,,frozen_food,frozen_potato_products,high
+342556,"Piparmündilehetee Rimi 20x1,5g",Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342557,Hommikusöögihelbed Duo Balls Rimi 250g,Rimi,,Rimi,,,dry_preserves,dry_cereals_muesli,high
+342558,Krevetid sabadega riivsaias praetud Torpedo Rimi ASC 200g,Rimi,,Rimi,,,bakery,bakery_buns_croissants,high
+342559,Ribi jahutatud Rimi kg,Rimi,,Rimi,,,dry_preserves,dry_flour_sugar_baking,high
+342560,"Soomuslest Rimi, sulatatud, kg",Rimi,,Rimi,,,other,dry_other,fallback
+342561,Juust Selection by Rimi Grana Padano 200g,Selection By Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342562,"Mähkmed I Love Eco Maxi S4 7-17kg, 40tk",I Love Eco,,,,,baby,baby_diapers,high
+342563,pähklibatoon pekaanipähklitega,Rimi,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high
+342564,Minimais ICA Asia 425/225g,ICA,,Rimi,,,dry_preserves,dry_canned_veg,high
+342565,Herned poolitatud Rimi Smart 800g,Rimi Smart,,Rimi,,,dry_preserves,dry_canned_veg,high
+342566,"Karastusjook karboniseeritud Pink Tonic Rimi 1,5l",Rimi,,Rimi,,,drinks,drinks_soft_soda,high
+342567,Sealiha šašlõkk Traditsiooniline 1kg,Rimi,,Rimi,,,meat_fish,meat_pork,high
+342568,Nisu meega Rimi Honey pops 200g,Rimi,,Rimi,,,other,dry_other,fallback
+342569,Mahe India pähklid I Love Eco 100g,I Love Eco,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342570,Müsli maasikatega röstitud Rimi 375g,Rimi,,Rimi,,,dry_preserves,dry_cereals_muesli,high
+342571,Fuet vorstikesed Selection by Rimi 150g,Selection By Rimi,,Rimi,,,meat_fish,meat_sausages,high
+342572,Röstitud jahvatatud kohv Espresso 500g,Selection By Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342573,Kookosjook ICA Asia 200ml,ICA,,Rimi,,,bakery,bakery_cakes_pastries,high
+342574,Õuna - apelsini - aprikoosimahl Selection by Rimi 1l,Selection By Rimi,,Rimi,,,drinks,drinks_juices,high
+342575,"Tualettpaber Rimi 24 rulli, 3 kihiline",Rimi,,Rimi,,,household,hh_paper,high
+342576,"Leedriõiesiirup I Love Eco 0,5l",I Love Eco,,Rimi,,,drinks,drinks_syrups_powders,high
+342577,Puljongikuubikud juurvilja Rimi 120g,Rimi,,Rimi,,,world_spices,spices_broth_stock,high
+342578,Lillkapsas sügavkülmutatud Rimi 400G,Rimi,,Rimi,,,produce,produce_root_veg,high
+342579,Maasika-jogurtikook Rimi 350g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high
+342580,Datlibatoon india pähklite ja amarandiga Rimi 30g,Rimi,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high
+342581,Oliivijääkõli Rimi 1l,Rimi,,Rimi,,,sauces_oils,oils_other,high
+342582,Pastakaste mascarpone-rukolaga Selection by Rimi 350g,Selection By Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342583,Sulatatud juust Rimi Smart Cheddar 150g,Rimi Smart,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342584,Küpsised Rimi vanillimaitselise täidisega 500g,Rimi,,Rimi,,,sweets_snacks,sweets_biscuits_cookies,high
+342585,Pitsa Quattro Formaggi Rimi 570g,Rimi,,,,,other,dry_other,fallback
+342586,Tuunikala tomatikastmes Rimi MSC 185g,Rimi,,Rimi,,,dry_preserves,dry_canned_meat_fish,high
+342587,Mandlijook magustamata Ica 1l,ICA,,Rimi,,,dairy_eggs_fats,dairy_plant_drinks,high
+342588,"Broiler, värske, A-klass Rimi kg",Rimi,,Rimi,,,meat_fish,meat_poultry,high
+342589,Küpsetussegu šokolaadimuffinite ja kookide valmistamiseks Rim 400g,Rimi,,Rimi,,,bakery,bakery_cakes_pastries,high
+342590,Universaalne vürtsisegu Rimi Smart 250g,Rimi Smart,,Rimi,,,world_spices,spices_herbs_spice_mix,high
+342591,Kilufilee vürtsidega Rimi 150g/125g,Rimi,,Rimi,,,world_spices,spices_herbs_spice_mix,high
+342592,Kartulikrõpsud tillimaitselised ICA 200g,ICA,,Rimi,,,sweets_snacks,sweets_snacks_salty,high
+342593,Toorjuustu-sõstramaius 140g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342594,Pitsapirukas 120g,Rimi,,Rimi,,,bakery,bakery_cakes_pastries,high
+342595,"Hibiskiõietee Rimi Smart 20 x 1,5g",Rimi Smart,,Rimi,,,drinks,drinks_tea_coffee,high
+342596,Oliivid kivideta Kalamon ICA 240g,ICA,,Rimi,,,meat_fish,fish_fresh,high
+342597,"Mahe õuna-, pirni- ja maasikajook I Love Eco 3x200ml",I Love Eco,,Rimi,,,produce,produce_berries,high
+342598,Makrellifilee taimses õlis Rimi 170g/119g,Rimi,,Rimi,,,sauces_oils,oils_other,high
+342599,"Pitsa peekoni BBQ Rimi, külmutatud 450g",Rimi,,Rimi,,,meat_fish,meat_pork,high
+342600,Kaera näkileivad jogurti-tšilli Rimi 120g,Rimi,,,,,dairy_eggs_fats,dairy_yogurt_kefir,high
+342601,Ekstra väärisoliiviõli Rimi 500ml,Rimi,,,,,sauces_oils,oils_olive,high
+342602,Selection by Rimi Fuet Artesano vorst 2x160g,Selection By Rimi,,Rimi,,,meat_fish,meat_sausages,high
+342603,Makaronid Spaghetti Rimi 500g,Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342604,Šokolaadijäätis šok.tk Rimi 120ml/65g,Rimi,,,,,frozen_food,frozen_desserts_icecream,high
+342605,"Sea küljeliha kondita, viilutatud Rimi 320g",Rimi,,Rimi,,,meat_fish,meat_other,heuristic
+342606,Küpsised Golden Ring Rimi 160g,Rimi,,Rimi,,,sweets_snacks,sweets_biscuits_cookies,high
+342607,Tee roheline jasmiini Rimi 20x2g,Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342608,"Viburhännak, keedetud (60/80) sulatatud, kg",Rimi,,Rimi,,,other,dry_other,fallback
+342609,Veiseliha hautatud Rimi 250g,Rimi,,Rimi,,,meat_fish,meat_beef_lamb_game,high
+342610,"Ploomtomatid kollased Rimi 1kl, 450g",Rimi,,Rimi,,,produce,produce_root_veg,high
+342611,Kohvikapslid Espresso Intenso Rimi 16x7g,Rimi,,Rimi,,,drinks,drinks_coffee_beans_capsules,high
+342612,Pekanipähkel Rimi 150g,Rimi,,Rimi,,,other,dry_other,fallback
+342613,Skandinaavia leib kuumsuitsulõhega,Rimi,,Rimi,,,bakery,bakery_bread_loaves,high
+342614,Valged oad Rimi Smart 400g,Rimi Smart,,Rimi,,,other,dry_other,fallback
+342615,Värsked datlid Selection by Rimi 600g,Selection By Rimi,,,,,other,dry_other,fallback
+342616,Ekstra väärisoliiviõli basiilikuga Selection 250ml,Selection By Rimi,,Rimi,,,sauces_oils,oils_olive,high
+342617,"Majapidamispaber Rimi Smart 2 rulli, 2 kihiline, 50 lehte",Rimi Smart,,Rimi,,,household,hh_paper,high
+342618,Juust Rimi Smart Tilsit 45% 250g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342619,Kaera näkileivad Rimi 120g,Rimi,,,,,other,dry_other,fallback
+342620,Loorberilehed Rimi 4g,Rimi,,Rimi,,,other,dry_other,fallback
+342621,Tumeda šokolaadi nööbid Rimi 100g,Rimi,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high
+342622,"Ploomtomat mini oranz Rimi 1kl, 250g",Rimi,,Rimi,,,produce,produce_root_veg,high
+342623,Sidrunhape Rimi Smart 30g,Rimi Smart,,Rimi,,,produce,produce_tropical,high
+342624,Bruschetta tomati ja oreganoga Rimi 150g,Rimi,,Rimi,,,produce,produce_root_veg,high
+342625,"Karboniseeritud karastusjook limonaad Rimi 1,5l",Rimi,,"Barbora, Maxima, Rimi",,,drinks,drinks_soft_soda,high
+342626,"Lehträtikud Rimi Smart, 2 kihiline, 120tk",Rimi,,Rimi,,,other,dry_other,fallback
+342627,Piimakaramellid Rimi 100g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_milk,high
+342628,Maisipulgad sidrunimaitselised Rimi 150g,Rimi,,,,,dry_preserves,dry_canned_veg,high
+342629,Teriyaki kaste ICA Asia 300ml,ICA,,Rimi,,,world_spices,spices_asian,high
+342630,Belgia šokolaadikompvekkide assortii Rimi 250g,Rimi,,,,,sweets_snacks,sweets_chocolate_bars,high
+342631,"Kaitstud päritolunimetusega vein Weinhaus Steffen 11,5%vol 0,75l",Selection By Rimi,,Rimi,,,drinks,drinks_wine,high
+342632,Lahustuv kohv kofeiinivaba Rimi 100g,Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342633,Vanillimaitseline jäätis mango-passionitäidisega vahvlitopsis Rimi 65g/120ml,Rimi,,Rimi,,,frozen_food,frozen_desserts_icecream,high
+342634,"Maasikasiirup I Love Eco 0,5l",I Love Eco,,Rimi,,,drinks,drinks_syrups_powders,high
+342635,"Kaitstud päritolunimetusega vein Ihringer Winklerberg Chardonnay Kabinett 0,75l",Selection By Rimi,,Rimi,,,drinks,drinks_wine,high
+342636,Mango-passioni tort Rimi 720g,Rimi,,Rimi,,,bakery,bakery_cakes_pastries,high
+342637,Juustulips salaamiga 100g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342638,Mokapala kook Rimi 250g,Rimi,,Rimi,,,bakery,bakery_cakes_pastries,high
+342639,Kartulikrõpsud grillimaitselised ICA 200g,ICA,,Rimi,,,sweets_snacks,sweets_snacks_salty,high
+342640,Jõhvikarull Rimi 300g,Rimi,,Rimi,,,produce,produce_berries,high
+342641,Juust Hollandi viilutatud Rimi 45% 500g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342642,Avokaado pakitud Rimi 750g,Rimi,,Rimi,,,other,dry_other,fallback
+342643,Himaalaja roosa sool Rimi jäme 500g,Rimi,,Rimi,,,world_spices,spices_basic_salt_pepper,high
+342644,Sulatatud juust Rimi Smart Gouda 150g,Rimi Smart,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342645,Kreemisai Rimi pagaritelt 50g,Rimi,,Rimi,,,bakery,bakery_buns_croissants,high
+342646,Kanapuljong I Love Eco 66g,I Love Eco,,Rimi,,,world_spices,spices_broth_stock,high
+342647,Mozzarellasalat kg,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342648,"Mahe beebispinat 2kl, 65g I Love Eco",I Love Eco,,Rimi,,,produce,produce_herbs_salads_sprouts,high
+342649,Hele sojakaste Rimi 150ml,Rimi,,Rimi,,,world_spices,spices_asian,high
+342650,Küüslauguleivakesed kg,Rimi,,Rimi,,,other,dry_other,fallback
+342651,Õrrekanade munad Rimi A/M No.2 6 tk.,Rimi,,Rimi,,,dairy_eggs_fats,dairy_eggs,high
+342652,Hapukoor Rimi 20% 500g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high
+342653,Maisihelbed Rimi 250g,Rimi,,Rimi,,,dry_preserves,dry_cereals_muesli,high
+342654,"Pitsa salaami, Edam juustu ja Mozzarella juustuga Rimi Smart 340g",Rimi Smart,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342655,Kreemjas toorjuust Rimi 20% 150g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342656,Bambusevõrsed ICA Asia viilutatud 227g/142g,ICA,,Rimi,,,other,dry_other,fallback
+342657,Roheline tee Selection by Rimi Gunpowder 90g,Selection By Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342658,Süvameregarneel kooritud 250/300 Rimi 180g MSC,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high
+342659,Spinat hakitud Rimi 400g,Rimi,,Rimi,,,produce,produce_herbs_salads_sprouts,high
+342660,Adžika Rimi 260g,Rimi,,,,,other,dry_other,fallback
+342661,Soolakõrsikud ICA 250g,ICA,,Rimi,,,world_spices,spices_basic_salt_pepper,high
+342662,Schwarzwaldi sink Selection 100g,Selection By Rimi,,,,,meat_fish,meat_hams,high
+342663,Pitsa kebabi Rimi 380g,Rimi,,,,,other,dry_other,fallback
+342664,Palsamikreem Aceto Balsamico di Modena IGP-ga I Love Eco 180g,I Love Eco,,Rimi,,,sauces_oils,oils_vinegar,high
+342665,Aeduba külmutatud Rimi 400g,Rimi,,Rimi,,,frozen_food,frozen_other,heuristic
+342666,Vanillijäätis Rimi 1l/500g,Rimi,,Rimi,,,frozen_food,frozen_desserts_icecream,high
+342667,"Vannamei viburhännak keetmata, kooritud Rimi ASC 400g",Rimi,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high
+342668,Klaasnuudlid ICA 100g,ICA,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342669,Girasoli Selection by Rimi lõhega 250g,Selection By Rimi,,Rimi,,,meat_fish,fish_fresh,high
+342670,Šokolaadikaste ICA 300g,ICA,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high
+342671,Suitsutatud magus paprika Rimi 25g,Rimi,,Rimi,,,meat_fish,fish_salted_smoked,high
+342672,"Salat Rooma Rimi 1kl, 200g",Rimi,,Rimi,,,produce,produce_herbs_salads_sprouts,high
+342673,"Biskviitbatoon Rimi piimakreemi 50% ja kakaokreemi 10% täidisega, kaetud kakao glasuuriga 25% 30g",Rimi,,Rimi,,,dairy_eggs_fats,dairy_milk,high
+342674,Metsapähkel puhastatud Rimi 150g,Rimi,,Rimi,,,other,dry_other,fallback
+342675,"Singivalik Rimi keedetud, viilutatud 70g",Selection By Rimi,,Rimi,,,other,dry_other,fallback
+342676,Nisutang Rimi Smart 800g,Rimi Smart,,Rimi,,,other,dry_other,fallback
+342677,Pähklite-rosinate segu Rimi 700g,Rimi,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342678,Lahustuv kohv Selection by Rimi Colombia 100% araabika 100g,Selection By Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342679,Teraviljarõngad meega Rimi Honey rings 250g,Rimi,,Rimi,,,other,dry_other,fallback
+342680,Lõhe omas mahlas Rimi 170g/119g,Rimi,,Rimi,,,drinks,drinks_juices,high
+342681,Segujahu banaanikeeks Rimi 500g,Rimi,,,,,dry_preserves,dry_flour_sugar_baking,high
+342682,Tume šokolaad kirsiga Rimi 100g,Rimi,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high
+342683,Teraviljaküpsised müsliga Rimi 300g,Rimi,,Rimi,,,dry_preserves,dry_cereals_muesli,high
+342684,Kohvioad röstitud Guatemala Selection by Rimi 1kg,Selection By Rimi,,Rimi,,,drinks,drinks_coffee_beans_capsules,high
+342685,Kuivatatud goji marjad Rimi 100g,Rimi,,Rimi,,,produce,produce_berries,high
+342686,Maisigaletid chia seemnetega Rimi 120g,Rimi,,Rimi,,,dry_preserves,dry_canned_veg,high
+342687,Riivjuust kõva juust Rimi 80g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342688,Sünnipäevasalat 1kg,Rimi,,Rimi,,,produce,produce_herbs_salads_sprouts,high
+342689,Kauaküpsetatud searibi viski maitseline Rimi 600g,Rimi,,,,,drinks,drinks_spirits,high
+342690,"Vaikse ookeani tursafilee, nahata, Rimi, MSC, 380g",Rimi,,Rimi,,,other,dry_other,fallback
+342691,Pruun suhkur Rimi 1kg,Rimi,,Rimi,,,dry_preserves,dry_flour_sugar_baking,high
+342692,Kikerherned I Love Eco 380g,I Love Eco,,Rimi,,,dry_preserves,dry_groats_beans,high
+342693,Mikropopkorn võimaitseline Rimi 90g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high
+342694,BBQ-kanapitsa Rimi TK,Rimi,,,,,meat_fish,meat_poultry,high
+342695,Pähkli ja suupiste segu BBQ maitsega ICA 140g,ICA,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342696,"Püksmähkmed I love Eco Junior S5 11-20kg, 35tk",I Love Eco,,,,,baby,baby_diapers,high
+342697,Vanillijäätis maapähklitega Rimi Smart 6x110ml/6x67g,Rimi Smart,,Rimi,,,frozen_food,frozen_desserts_icecream,high
+342698,Maisisnäkk I Love Eco porgandi 8k 20g,I Love Eco,,,,,dry_preserves,dry_canned_veg,high
+342699,Piimašokolaad küpsetamiseks ICA 200g,ICA,,Rimi,,,dairy_eggs_fats,dairy_milk,high
+342700,Biskviitmaius piima-ja meekreemiga Rimi 28g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_milk,high
+342701,Kuumsuitsutatud peekon Rimi Smart 200g,Rimi Smart,,Rimi,,,meat_fish,meat_pork,high
+342702,Küpsis võiga Rimi 200g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high
+342703,Kohupiimakreem virsiku Rimi 150g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cottage_quark,high
+342704,Küpsised kringlid juustuga Selection by Rimi 100g,Selection By Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342705,Tatar Rimi Smart 4 x 100g,Rimi Smart,,Rimi,,,dry_preserves,dry_groats_beans,high
+342706,Segu maitsetaimede ja pipra Selection By Rimi 20g,Selection By Rimi,,Rimi,,,other,dry_other,fallback
+342707,Keedetud sealiharull vp Rimi kg,Rimi,,Rimi,,,meat_fish,meat_pork,high
+342708,"Mahe magus paprika I Love Eco 2kl, 200g",I Love Eco,,Rimi,,,produce,produce_root_veg,high
+342709,Riivsai Rimi 400g,Rimi,,Rimi,,,bakery,bakery_buns_croissants,high
+342710,Kummikomm Tropical mix 100g,Rimi,,Rimi,,,sweets_snacks,sweets_candies,high
+342711,Majonees Rimi Smart 18% 450g,Rimi Smart,,Rimi,,,sauces_oils,sauces_ketchup_mayo,high
+342712,"Ploomtomat Chocmato Rimi 1kl, 250g",Rimi,,Rimi,,,produce,produce_root_veg,high
+342713,Jäätis Spagnola-Zabaglione-kakao-pistaatsia Rimi 2l/1kg,Rimi,,Rimi,,,frozen_food,frozen_desserts_icecream,high
+342714,Margariin ICA 80% 500g,ICA,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high
+342715,"Pitsa singi, Edam juustu ja Mozzarellaga Rimi Smart 350g",Rimi Smart,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342716,Bifido jogurt kirsimoosi ja granolaga Rimi 200g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high
+342717,Paprika marinaadis röstitud Rimi 670g/395g,Rimi,,Rimi,,,sauces_oils,sauces_marinades,high
+342718,"Tomat Romantica Rimi 1kl, 400g",Rimi,,,,,produce,produce_root_veg,high
+342719,Marineeritud kornišon Rimi meega 350g/180g,Rimi,,Rimi,,,other,dry_other,fallback
+342720,Riis pikateraline aurutatud Rimi 1kg,Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342721,Meekook Rimi 350g,Rimi,,Rimi,,,bakery,bakery_cakes_pastries,high
+342722,Pärmitaigna lihapirukas Rimi pagaritelt 70g,Rimi,,Rimi,,,bakery,bakery_cakes_pastries,high
+342723,Mahe Kinoa Hautis I Love Eco 120g,I Love Eco,,,,,other,dry_other,fallback
+342724,Kohv jahvatatud Rimi kofeiinivaba 250g,Rimi,,Rimi,,,drinks,drinks_other,heuristic
+342725,Rohelised Hojiblanca oliivid Rimi kivideta 345g/160g,Rimi,,Rimi,,,other,dry_other,fallback
+342726,"Karboniseeritud joogivesi Rimi pohlamaitseline 1,5l",Rimi,,Rimi,,,drinks,drinks_water,high
+342727,Küpsised suhkrukattega piimašokolaadi ja tumeda šokolaadiga,Rimi,,Rimi,,,dairy_eggs_fats,dairy_milk,high
+342728,Kalakaste ICA Asia 200ml,ICA,,Rimi,,,meat_fish,fish_fresh,high
+342729,Vannamei viburhännak kooritud keedetud Rimi ASC 200g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high
+342730,Jäägrivorstid kuumsuitsu Rimi 350g,Rimi,,Rimi,,,meat_fish,meat_sausages,high
+342731,Lahustuv kohv Rimi Gold 200g,Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342732,Karamellivahvlid Rimi 252g,Rimi,,Rimi,,,sweets_snacks,sweets_candies,high
+342733,Meresool maitsetaimedega Selection by Rimi 90g,Selection By Rimi,,Rimi,,,world_spices,spices_basic_salt_pepper,high
+342734,Bataadikrõpsud I Love Eco 100g,I Love Eco,,Rimi,,,sweets_snacks,sweets_snacks_salty,high
+342735,Kohvikapslid Café Au Lait Rimi 16x10g,Rimi,,Rimi,,,drinks,drinks_coffee_beans_capsules,high
+342736,Lavaširullid praetud kanaga 215g,Rimi,,Rimi,,,meat_fish,meat_poultry,high
+342737,Smuuti I Love Eco õunte ja aprikoosidega 90g,I Love Eco,,Rimi,,,produce,produce_apples_pears,high
+342738,Avokaado suur Selection by Rimi tk,Selection By Rimi,,Rimi,,,other,dry_other,fallback
+342739,Šampinjonid Rimi 250g,Rimi,,,,,produce,produce_mushrooms,high
+342740,Küpsised 40% šokolaaditükkidega RIMI 150g,Rimi,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high
+342741,Mereandide salat ICA 200g,ICA,,Rimi,,,produce,produce_herbs_salads_sprouts,high
+342742,Hommikusöögihelbed kakaorõngad Rimi 250g,Rimi,,Rimi,,,dry_preserves,dry_cereals_muesli,high
+342743,Taimetee Rimi Relax 20x2g,Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342744,Võileib kanaga Rimi 150g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high
+342745,Klassikaline kaelakarbonaadi šašlõkk 1kg,Rimi,,Rimi,,,meat_fish,meat_pork,high
+342746,Mango sügavkülmutatud Rimi 400G,Rimi,,Rimi,,,produce,produce_tropical,high
+342747,Konserveeritud valged aedoad Rimi Smart 400/240g,Rimi Smart,,Rimi,,,dry_preserves,dry_other,heuristic
+342748,Linnu- ja sealihavorstid Rimi Kabanos 120g,Rimi,,Rimi,,,meat_fish,meat_sausages,high
+342749,Piimakommid Rimi Gotina kg,Rimi,,Rimi,,,dairy_eggs_fats,dairy_milk,high
+342750,Sinep meega Selection by Rimi 235g,Selection By Rimi,,Rimi,,,other,dry_other,fallback
+342751,Turisti hommikueine veiselihast Rimi 250g,Rimi,,Rimi,,,meat_fish,meat_beef_lamb_game,high
+342752,Soolatud vikerforellifilee Rimi 100g,Rimi,,Rimi,,,world_spices,spices_basic_salt_pepper,high
+342753,Kurgid marineeritud Rimi Smart 680g/350g,Rimi Smart,,Rimi,,,other,dry_other,fallback
+342754,Lehttainaküpsised Sfogliatine Rimi 200g,Rimi,,Rimi,,,sweets_snacks,sweets_biscuits_cookies,high
+342755,Ümarateraline riis Rimi 1kg,Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342756,"Broileritiivad, värske, A-klass Rimi kg",Rimi,,Rimi,,,meat_fish,meat_poultry,high
+342757,Mustad oliivid Rimi Smart kivideta 280g/110g,Rimi Smart,,Rimi,,,other,dry_other,fallback
+342758,Soovähk sulatatud kg,Rimi,,Rimi,,,other,dry_other,fallback
+342759,"ICA ökoloogiline maitsestatud must tee Madame Grey bergamoti ja apelsini maitsega, 20x2g (40g)",I Love Eco,,Rimi,,,drinks,drinks_tea_coffee,high
+342760,Mesi akaatsiaõite ICA 350g,ICA,,Rimi,,,other,dry_other,fallback
+342761,Küpsised täisterajahuga Rimi 300g,Rimi,,Rimi,,,dry_preserves,dry_flour_sugar_baking,high
+342762,Mahe Porgand I Love Eco 1kg,I Love Eco,,Rimi,,,produce,produce_root_veg,high
+342763,Broiler kuumsuitsutatud Rimi Smart vp kg,Rimi Smart,,Rimi,,,meat_fish,meat_poultry,high
+342764,"Roosikimp Rimi 50cm, 9 vart",Rimi,,Rimi,,,other,dry_other,fallback
+342765,Pikateraline riis aurutatud Rimi 4x125g,Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342766,"Banaaninektar Rimi 0,33l",Rimi,,Rimi,,,drinks,drinks_juices,high
+342767,Kohvikapslid Cappuccino Rimi 192g,Rimi,,Rimi,,,drinks,drinks_coffee_beans_capsules,high
+342768,Päevalilleõli Rimi 1l,Rimi,,Rimi,,,sauces_oils,oils_other,high
+342769,Konserveeritud ananassitükid siirupis Rimi 825g/490g,Rimi,,Rimi,,,drinks,drinks_syrups_powders,high
+342770,Rimi köögiviljasupisegu sügavkülmutatud 400G,Rimi,,Rimi,,,frozen_food,frozen_other,heuristic
+342771,Kodune hakkliha Rimi 500g,Rimi,,Rimi,,,meat_fish,meat_minced,high
+342772,Maheseedriseemned I Love Eco 60g,I Love Eco,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342773,Tee must Selection by Rimi Darjeeling 90g,Selection By Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342774,Rohelised oliivid Rimi paprikaga 235g/142g,Rimi,,Rimi,,,produce,produce_root_veg,high
+342775,Caesari salat kg,Rimi,,"Barbora, Maxima, Rimi",,,produce,produce_herbs_salads_sprouts,high
+342776,Taimetee immuunsuse tugevdamiseks Rimi 33g,Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342777,Vikerforellimari I love eco 80g,I Love Eco,,Rimi,,,meat_fish,fish_fresh,high
+342778,Virsiku-õunamahl Selection by Rimi 1l,Selection By Rimi,,Rimi,,,drinks,drinks_juices,high
+342779,"Mineraalvesi Rimi karboniseeritud 1,5l",Rimi,,Rimi,,,drinks,drinks_water,high
+342780,Valge šokolaadi nööbid Rimi 100g,Rimi,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high
+342781,Jäätis marjatäidisega Rimi 120ml/72g,Rimi,,,,,frozen_food,frozen_desserts_icecream,high
+342782,"Mähkmed I love Eco Midi S3 4-9kg, 46tk",I Love Eco,,,,,baby,baby_diapers,high
+342783,Krüsanteemide mix potis Rimi 12cm,Rimi,,Rimi,,,drinks,drinks_tea_coffee,high
+342784,"Lõhefilee RIMI luudeta, nahata 500g",Rimi,,Rimi,,,meat_fish,fish_fresh,high
+342785,Viie erinevat pipart koriandriga Selection by Rimi 40g,Selection By Rimi,,Rimi,,,world_spices,spices_basic_salt_pepper,high
+342786,Must sool Selection by Rimi 100g,Selection By Rimi,,Rimi,,,world_spices,spices_basic_salt_pepper,high
+342787,Bifido jogurt maasikamoosi ja granolaga Rimi 200g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high
+342788,Puuviljade ja pähklite segu Imperial Rimi 500g,Rimi,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342789,Biskviitküpsised kirsimaitselise želeega Jaffa 135g,Rimi,,Rimi,,,sweets_snacks,sweets_biscuits_cookies,high
+342790,Rosin Jumbo seemneteta Rimi 200g,Rimi,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342791,Veisesüda Rimi Smart kg,Rimi Smart,,Rimi,,,meat_fish,meat_beef_lamb_game,high
+342792,Juust Gouda viilutatud Rimi 150g,Rimi,,"Barbora, Maxima, Rimi",,,dairy_eggs_fats,dairy_cheese_slices,high
+342793,Broilerikoiva hakkliha Rimi 400g,Rimi,,Rimi,,,meat_fish,meat_poultry,high
+342794,Segujahu sidrunikeeks glasuuriga Rimi 470g,Rimi,,,,,dry_preserves,dry_flour_sugar_baking,high
+342795,Vaarikad 225g,Rimi,,Rimi,,,produce,produce_berries,high
+342796,"Kaitstud päritolunimetusega vein Santa Sofia Chiaretto Bardolino Classico 0,75l",Selection By Rimi,,Rimi,,,drinks,drinks_wine,high
+342797,Margariin piimavaba ICA 70% 400g,ICA,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high
+342798,"Broilerikintsuliha kondi ja nahata, värske Rimi, kg",Rimi,,Rimi,,,meat_fish,meat_poultry,high
+342799,"Tee ürdi piparmündi Rimi Smart 20x1,5g",Rimi Smart,,Rimi,,,drinks,drinks_tea_coffee,high
+342800,Võileivatort singiga 1kg,Rimi,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high
+342801,Küpsetussegu Rimi Brownie kook 500g,Rimi,,,,,bakery,bakery_cakes_pastries,high
+342802,Kergelt suitsutatud kilud õlis Rimi 120g/84g,Rimi,,Rimi,,,dry_preserves,dry_canned_meat_fish,high
+342803,"Karboniseeritud alkoholivaba karastusjook Rimi Party 0,75l",Rimi,,Rimi,,,drinks,drinks_soft_soda,high
+342804,Surimi pulgad Rimi Smart 150g,Rimi Smart,,Rimi,,,other,dry_other,fallback
+342805,Peedi-küüslaugusalat 200g,Rimi,,Rimi,,,produce,produce_herbs_salads_sprouts,high
+342806,Aprikoosi Ekstra džemm Rimi 450g,Rimi,,Rimi,,,dry_preserves,dry_other,high
+342807,Makaronid Lumacoli Selection by Rimi 500g,Selection By Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342808,Ravioolid ricotta ja spinatiga 250g,Selection By Rimi,,Rimi,,,produce,produce_herbs_salads_sprouts,high
+342809,Vanillisuhkur I Love Eco 100g,I Love Eco,,Rimi,,,dry_preserves,dry_flour_sugar_baking,high
+342810,Vahukommid Mini Marshmallows Rimi 150g,Rimi,,Rimi,,,sweets_snacks,sweets_candies,high
+342811,Kreemikook Pastel de Nata 57g,Rimi,,Rimi,,,bakery,bakery_cakes_pastries,high
+342812,"Sulatatud juust Cheddariga, viilutatud Rimi 200g",Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342813,Jäätis Rimi mini hearts mix 12 tk. 375g/555ml,Rimi,,,,,frozen_food,frozen_desserts_icecream,high
+342814,Kiirkaerahelbed Rimi 450g,Rimi,,Rimi,,,dry_preserves,dry_cereals_muesli,high
+342815,Kräsupea kook Rimi 320g,Rimi,,Rimi,,,bakery,bakery_cakes_pastries,high
+342816,Tortiljakrõpsud soolatud I Love Eco öko 125g,I Love Eco,,Rimi,,,bakery,bakery_flatbreads_wraps,high
+342817,"Kalagratään tillikastmega ICA, MSC 600g",ICA,,Rimi,,,meat_fish,fish_fresh,high
+342818,Kanamunad I Love Eco LM 10tk,I Love Eco,,Rimi,,,dairy_eggs_fats,dairy_eggs,high
+342819,Hiidaustrid,Rimi,,Rimi,,,other,dry_other,fallback
+342820,Kooritud mandel Rimi kg,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high
+342821,"Krõbe müsli jogurtitükkide, banaanilaastude, täispiima- ja tumeda šokolaadi tükkidega ja mandlitega 375 g",Rimi,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high
+342822,Kartuli Gnocchi ICA 400g,ICA,,Rimi,,,produce,produce_root_veg,high
+342823,Veise tagaosasteik Rimi 200g,Rimi,,Rimi,,,meat_fish,meat_beef_lamb_game,high
+342824,Püree mango ja ananassiga ICA 120g,I Love Eco,,Rimi,,,produce,produce_tropical,high
+342825,Külmutatud kirsid kivideta Rimi 400g,Rimi,,Rimi,,,frozen_food,frozen_other,heuristic
+342826,Maapähklihalvaa Rimi 300g,Rimi,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342827,Õuna- ja kirsinektar Rimi 50% 1l,Rimi,,Rimi,,,drinks,drinks_juices,high
+342828,Vorst Salchichon viilut. Selection 80g,Selection By Rimi,,Rimi,,,meat_fish,meat_sausages,high
+342829,"Salat Spinat Rimi 1kl, 65g",Rimi,,Rimi,,,produce,produce_herbs_salads_sprouts,high
+342830,Soolatud Atlandi heeringafilee õlis Rimi 240g/192g,Rimi,,Rimi,,,world_spices,spices_basic_salt_pepper,high
+342831,"Tee must Rimi Smart 20x1,5g",Rimi Smart,,Rimi,,,drinks,drinks_tea_coffee,high
+342832,"Võileb magusa tšillikastme, kana, paprika ja spinatiga Rimi 170g",Rimi,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high
+342833,Marineeritud Atlandi heeringafilee tükid sinepikastmes Rimi 300g,Rimi,,Rimi,,,meat_fish,fish_fresh,high
+342834,Pähklite segu Rimi 150g,Rimi,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342835,Türgi uba Rimi 150g,Rimi,,Rimi,,,other,dry_other,fallback
+342836,Juustu- seesamipallid Rimi kg,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342837,Roheline karripasta ICA 114g,ICA,,,,,dry_preserves,dry_pasta_rice,high
+342838,Õunanektar 50% Rimi Smart 2l,Rimi Smart,,Rimi,,,drinks,drinks_juices,high
+342839,Krevetid riivsaias praetud Scampi Fritti Rimi ASC 200g,Rimi,,Rimi,,,bakery,bakery_buns_croissants,high
+342840,Makrell sulatatud rookimata kg,Rimi,,Rimi,,,other,dry_other,fallback
+342841,Smuuti I Love Eco banaanide ja mangoga 90g,I Love Eco,,Rimi,,,produce,produce_tropical,high
+342842,Paprika punane marinaadis Rimi 680g/350g,Rimi,,Rimi,,,sauces_oils,sauces_marinades,high
+342843,"Kartulilõigud, eelpraetud, kiirkülmutatud Rimi 1kg",Rimi,,Rimi,,,produce,produce_root_veg,high
+342844,Basiilikupesto I Love Eco 130g,I Love Eco,,Rimi,,,sauces_oils,sauces_pasta_cooking,high
+342845,"Karastusjook Rimi apelsinilimonaad 0,5l",Rimi,,Rimi,,,drinks,drinks_soft_soda,high
+342846,Vanillimaitseline jäätis Rimi metsamarja täidisega vahvlikoonuses 200ml/120g,Rimi,,Rimi,,,frozen_food,frozen_desserts_icecream,high
+342847,"Keedetud harilik süvameregarneel, koorimata Rimi 90/120, 1000g/900g MSC",Rimi,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high
+342848,"Kikerherned röstitud, soolatud Rimi 150g",Rimi,,Rimi,,,dry_preserves,dry_groats_beans,high
+342849,Minirõngikud vanillimaitselised Rimi 220g,Rimi,,Rimi,,,other,dry_other,fallback
+342850,Kohv röstitud jahvatatud Colombia Selection by Rimi 250g,Selection By Rimi,,Rimi,,,drinks,drinks_other,heuristic
+342851,Veise välisfilee steik Rimi 200g,Rimi,,,,,meat_fish,meat_beef_lamb_game,high
+342852,Kartulipuder piimaga Rimi 200g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_milk,high
+342853,Kaerapuder kirssidega Rimi 55g,Rimi,,Rimi,,,other,dry_other,fallback
+342854,Maisihelbed Rimi 500g,Rimi,,Rimi,,,dry_preserves,dry_cereals_muesli,high
+342855,Jäätis vanilli vahvlitops Rimi 120ml/65g,Rimi,,,,,frozen_food,frozen_desserts_icecream,high
+342856,Peedi-küüslaugusalat 500g,Rimi,,Rimi,,,produce,produce_herbs_salads_sprouts,high
+342857,Kurgid marineeritud 6-9cm Rimi 670g/370g,Rimi,,Rimi,,,other,dry_other,fallback
+342858,Singirullid 160g,Rimi,,Rimi,,,other,dry_other,fallback
+342859,Karastusjook Rimi sidruni limonaad 2l,Rimi,,Rimi,,,drinks,drinks_soft_soda,high
+342860,"Karboniseeritud sidruni karastusjook Rimi 0,5l",Rimi,,Rimi,,,drinks,drinks_soft_soda,high
+342861,"Pakslaup-haipangaasiuse filee Rimi, kg",Rimi,,Rimi,,,other,dry_other,fallback
+342862,Rosin Jumbo seemneteta Rimi 500g,Rimi,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342863,Kaneelirull 65g Rimi pagaritelt,Rimi,,Rimi,,,world_spices,spices_herbs_spice_mix,high
+342864,Näkileib rukkijahuga Rimi 100g,Rimi,,,,,bakery,bakery_bread_loaves,high
+342865,Siirup kirsimaitseline Rimi 320ml,Rimi,,Rimi,,,drinks,drinks_syrups_powders,high
+342866,India pähklid Rimi 700g,Rimi,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high
+342867,Must pipar Rimi Smart 20g,Rimi Smart,,Rimi,,,world_spices,spices_basic_salt_pepper,high
+342868,Püree juurvilja- ja lõhe I Love Eco lastele alates 6 kuust 120g,I Love Eco,,,,,meat_fish,fish_fresh,high
+342869,Leivapulgad täistera Rimi 200g,Rimi,,Rimi,,,other,dry_other,fallback
+342870,Mango- ja avokaadosmuuti Selection by Rimi 500ml,Selection By Rimi,,Rimi,,,produce,produce_tropical,high
+342871,Krõbe šokolaadimüsli 375 g,Rimi,,Rimi,,,dry_preserves,dry_cereals_muesli,high
+342872,Kondenspiim suhkruga Rimi 397g,Rimi,,Rimi,,,dairy_eggs_fats,dairy_milk,high
+342873,Makaron Cornetti Rimi 500g,Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342874,Vahvlikoonused vanillimaitselised ICA 120g,ICA,,Rimi,,,other,dry_other,fallback
+342875,Kikerhernes Rimi 400g,Rimi,,Rimi,,,dry_preserves,dry_groats_beans,high
+342876,"Joogivesi karboniseerimata Rimi Smart 1,5L PET",Rimi Smart,,Rimi,,,drinks,drinks_water,high
+342877,"Punased läätsed, poolitatud Rimi 400g",Rimi,,Rimi,,,dry_preserves,dry_groats_beans,high
+342878,Palsamiäädikakreem Aceto balsamico di Modena IGP valge trühvli maitsega Rimi 250ml,Rimi,,Rimi,,,sauces_oils,oils_vinegar,high
+342879,Panna cotta vaarikatega 150g,Rimi,,Rimi,,,produce,produce_berries,high
+342880,Makaronid Strozzapreti Selection by Rimi 500g,Selection By Rimi,,Rimi,,,dry_preserves,dry_pasta_rice,high
+342881,Kolme juustu pitsa Rimi TK,Rimi,,,,,dairy_eggs_fats,dairy_cheese_slices,high
+342882,Mascarpone juustu maitseline jäätis pohlatäidisega vahvlitopsis Rimi 70g/120ml,Rimi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high
+342883,Vinnutatud Hispaania lihatoodete valik Selection by Rimi 110g,Selection By Rimi,,Rimi,,,meat_fish,meat_other,heuristic
+342884,Keedetud aedoad Rimi 300g,Rimi,,Rimi,,,other,dry_other,fallback
+342885,Soolatud vikerforellifilee sidrunimaitseline Rimi 100g,Rimi,,Rimi,,,world_spices,spices_basic_salt_pepper,high

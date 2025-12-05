@@ -1,0 +1,901 @@
+product_id,name,brand,size_text,stores_sample,current_food_group,current_sub_code,food_group_corrected,new_sub_code,confidence
+306,"Aura Spring Gaasiga vesi, 500 ml",Aura Spring,500 ml,Prisma,,,drinks,drinks_water,high
+308,"Evian mineraalvesi 6x1,5L",Evian,1.5L,Prisma,,,drinks,drinks_water,high
+316,"Borjomi karboniseeritud looduslik mineraalvesi 1,25L",Borjomi,1.25L,"Coop, Prisma, Rimi, Selver",,,drinks,drinks_water,high
+326,"Borjomi karboniseeritud looduslik mineraalvesi 6x1,25L",Borjomi,1.25L,Prisma,,,drinks,drinks_water,high
+327,Karboniseerimata mineraalvesi,Karboniseerimata,,"Prisma, Selver",,,drinks,drinks_water,high
+382,"Borjomi Mineraalvesi 0,5L",Borjomi Mineraalvesi,0.5L,"Coop, Prisma, Selver",,,drinks,drinks_water,high
+392,Kotimaista Vichy mineraalvesi 12x330ml,Kotimaista Vichy,12x330ml,Prisma,,,drinks,drinks_water,high
+427,"Vichy Still vesi, 1,5l",Vichy Still,1.5l,Prisma,,,drinks,drinks_water,high
+458,"Värska Mineraal 6-pakk, 9l",Värska Mineraal,9l,"Coop, Prisma, Selver",,,other,dry_other,fallback
+480,Aura gaseeritud Mg vesi 750ml,Aura,750ml,"Coop, Prisma, Rimi, Selver",,,drinks,drinks_water,high
+490,"Värska mineraal 1,5L",Värska,1.5L,"Coop, Prisma, Selver",,,other,dry_other,fallback
+501,VYTAUTAS MINERAALVESI 500 ML KARBONISEERITUD,VYTAUTAS MINERAALVESI,500 ML,"Coop, Prisma",,,drinks,drinks_water,high
+507,Värska Orginaal mineraalvesi 12x350 ml,Värska Orginaal,12x350 ml,Prisma,,,drinks,drinks_spirits,high
+123725,"Ämber 10l, KEEEPER, 1 tk",,,Selver,,,other,dry_other,fallback
+123726,"Ämber 5l, KEEEPER, 1 tk",ETC KODU OÜ,,Selver,,,other,dry_other,fallback
+123727,"Sea kaelakarbonaad, RAKVERE LK, kg",MAAG EESTI AS,,"Rimi, Selver",,,other,dry_other,fallback
+123728,"Funktsionaalne jook ""Ramonade"" magusainetega, NOCCO, 330 ml",GKR TRADE OÜ,,"Coop, Selver",,,bakery,bakery_buns_croissants,high
+123729,"Ananassikuubikud, TAKE1 REGULAR, 150 g",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,produce,produce_tropical,high
+123730,"Füsioloogiline lahus (nina, silmad), BEL BABY, 30 tk",URSUS OÜ,,Selver,,,other,dry_other,fallback
+123731,Gato Blanco Sauvignon Blanc 75 cl,MEDIATO AS,,Selver,,,other,dry_other,fallback
+123732,"Mugulsibul, kg",Määramata,,Selver,,,produce,produce_root_veg,high
+123733,"Hiina kapsas, kg",Määramata,,"Barbora, Maxima, Rimi, Selver",,,produce,produce_root_veg,high
+123734,"Spargelkapsas ehk brokoli, kg",Määramata,,Selver,,,produce,produce_root_veg,high
+123735,"Soolapeekon, NÕO, kg",,,Selver,,,world_spices,spices_basic_salt_pepper,high
+123736,"Õun Kanzi, kg",Määramata,,Selver,,,produce,produce_apples_pears,high
+123737,"Kuldne grillribi eelküpsetatud, RANNAROOTSI, 900 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Rimi, Selver",,,meat_fish,meat_pork,high
+123738,"Porgandi-astelpajumahl, KADARBIKU KÖÖGIVILI, 500 ml",KADARBIKU KÖÖGIVILI OÜ,,"Coop, Selver",,,drinks,drinks_juices,high
+123739,"Peekon, RAKVERE LK, kg",MAAG EESTI AS,,Selver,,,meat_fish,meat_pork,high
+123740,"Keedupeet vaakumis, VIIBERGI, 400 g",Määramata,,"Coop, Rimi, Selver",,,produce,produce_root_veg,high
+123741,Gato Negro Cabernet Sauvignon 75 cl,MEDIATO AS,,Selver,,,drinks,drinks_wine,high
+123742,"Sea välisfilee kamaraga, RAKVERE LK, kg",RAKVERE LIHAKOMBINAAT AS,,Selver,,,meat_fish,meat_other,heuristic
+123743,"Grill-liha BBQ mureli kaelakarbonaadist, RANNAROOTSI, 500 g",,,Selver,,,meat_fish,meat_other,heuristic
+123744,"Sea välisfilee, RAKVERE, kg",MAAG EESTI AS,,"Rimi, Selver",,,other,dry_other,fallback
+123745,Gato Negro Chardonnay 75 cl,MEDIATO AS,,Selver,,,drinks,drinks_wine,high
+123746,"HULGI Kaerajook 6tk, DEARY, 6 x 1l",,,Selver,,,dairy_eggs_fats,dairy_plant_drinks,high
+123747,"Jogurt kirsi-ploomi, HELLUS, 350 g",TERE AS,,"Coop, Rimi, Selver",,,dairy_eggs_fats,dairy_yogurt_kefir,high
+123748,"Jogurt leiva-pähkli laktoosivaba, FARMI, 400 g",FARMI PIIMATÖÖSTUS AS,,"Coop, Rimi, Selver",,,dairy_eggs_fats,dairy_yogurt_kefir,high
+123749,"Sea välisfilee karulaugumarinaadis, SELVER, kg",SELVER AS,,Selver,,,sauces_oils,sauces_marinades,high
+123750,"Juustupikuke singiga, MAMMA, 135 g",SAARIOINEN EESTI OÜ,,"Coop, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+123751,Gato Negro Pinot Grigio 75 cl,MEDIATO AS,,Selver,,,drinks,drinks_wine,high
+123752,"Lühike kurk pakitud, PEIPSIÄÄRE, kg",Määramata,,Selver,,,produce,produce_root_veg,high
+123753,"Õuna, sidruni, piparmündi värskelt pressitud mahl, KADARBIKU KÖÖGIVILI, 250 ml",KADARBIKU KÖÖGIVILI OÜ,,"Coop, Selver",,,drinks,drinks_juices,high
+123754,Gato Negro Sweet Moscato 75cl,MEDIATO AS,,Selver,,,drinks,drinks_wine,high
+123755,"Šašlõkk Kodune, SELVER, kg",SELVER AS,,Selver,,,meat_fish,meat_pork,high
+123756,"Sea välisfileest minutipihvid, SELVER, kg",SELVER AS,,Selver,,,other,dry_other,fallback
+123757,"Minikoot küüslaugu-ürdimarinaadis, SELVER, kg",SELVER AS,,Selver,,,sauces_oils,sauces_marinades,high
+123758,Geargian Valleys Saperavi 75 cl,PRIKE AS,,Selver,,,other,dry_other,fallback
+123759,"Kohviuba Qualita Oro Gran Riserva, LAVAZZA, 1 kg",SELVER AS,,Selver,,,drinks,drinks_coffee_beans_capsules,high
+123760,"Kõrvitsakuubid, PÕLTSAMAA, 3,1 kg, ettetellimisel",ORKLA EESTI AS,,Selver,,,other,dry_other,fallback
+123761,"Suvikõrvits roheline, kg",Määramata,,"Barbora, Maxima, Rimi, Selver",,,other,dry_other,fallback
+123762,"Kobartomat, kg",Määramata,,Selver,,,produce,produce_root_veg,high
+123763,"Rebitud sealiha argentiina marinaadis, RAKVERE, 300 g",MAAG EESTI AS,,Selver,,,sauces_oils,sauces_marinades,high
+123764,Georgian Valleys Alazani Valley red 75 cl,PRIKE AS,,Selver,,,other,dry_other,fallback
+123765,"Külmutatud EHE mini-pelmeenid, RANNAROOTSI EHE, 350 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Barbora, Coop, Maxima, Rimi, Selver",,,meat_fish,meat_other,heuristic
+123766,"Külmutatud kanaliha kotletid kaerakliidega, UVIC/FITLAP, 390 g",ECOTRADE OÜ,,"Coop, Selver",,,meat_fish,meat_poultry,high
+123767,"Küpsise ja kakaoga pallikesed, SELVERI KÖÖK, 200 g",KULINAARIA OÜ,,Selver,,,sweets_snacks,sweets_biscuits_cookies,high
+123768,Laugel Alsace Riesling 75 cl,SVENSKY KAUBANDUSE AS,,Selver,,,drinks,drinks_wine,high
+123769,"Peekonilõigud, SELVER, kg",SELVER AS,,Selver,,,meat_fish,meat_pork,high
+123770,"Magus muretainas, EESTI PAGAR, 500 g",EESTI PAGAR AS,,Selver,,,other,dry_other,fallback
+123771,"Macaroni makaronid, PANZANI, 3 kg",ABESTOCK AS,,Selver,,,dry_preserves,dry_pasta_rice,high
+123773,"Cajuni vürts, MEIRA, 32 g",MEIRA EESTI OÜ,,Selver,,,world_spices,spices_herbs_spice_mix,high
+123774,Giotti Pinot Grigio Delle Venezie DOC 75 cl,KOCH OÜ,,Selver,,,drinks,drinks_wine,high
+123775,"Vaarikatomat karbis, , 450 g",Määramata,,Selver,,,produce,produce_berries,high
+123776,"Punase peakapsa Kimchi, KADARBIKU KÖÖGIVILI, 300g",KADARBIKU KÖÖGIVILI OÜ,,"Barbora, Maxima, Rimi, Selver",,,produce,produce_root_veg,high
+123777,"Mahe mugulsibul, KOPRA SAHVER, 500g",Määramata,,Selver,,,produce,produce_root_veg,high
+123778,"Minikurk, PÕLTSAMAA, 2,85 kg, ettetellimisel",ORKLA EESTI AS,,Selver,,,produce,produce_root_veg,high
+123779,"Kaukaasia šašlõkk, SELVER, kg",SELVER AS,,Selver,,,meat_fish,meat_pork,high
+123780,"Suitsune särtsakas grill-liha, SELVER, kg",SEVER AS,,Selver,,,meat_fish,fish_salted_smoked,high
+123781,"Triibuliha, SELVER, kg",SELVER AS,,Selver,,,meat_fish,meat_pork,high
+123782,"Lihameistri šašlõkk, SELVER, kg",SELVER AS,,Selver,,,meat_fish,meat_pork,high
+123783,"Gluteenivabad soolakringlid, SCHÄR, 60 g",EUGESTA EESTI OÜ,,"Coop, Selver",,,drinks,drinks_tea_coffee,high
+123784,Goru Blanco 75 cl,ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback
+123785,"Sinepine sealihašašlõkk, LINNAMÄE LIHATÖÖSTUS, 600 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_pork,high
+123786,"Kaukaasiapärane grill-liha seavälisfileest, RAKVERE, 600 g",MAAG EESTI AS,,Selver,,,meat_fish,meat_other,heuristic
+123787,"Kaukaasia šašlõkk, RAKVERE, 800g",MAAG EESTI AS,,Selver,,,meat_fish,meat_pork,high
+123788,"Valge redis pakitud, kg",Määramata,,Selver,,,other,dry_other,fallback
+123789,"Ämber 5l, KEEEPER, 1 tk",ETC KODU OÜ,,Selver,,,other,dry_other,fallback
+123790,"Koorene sidrunikaste, FOODSTUDIO, 230 ml",ABESTOCK AS,,Selver,,,dairy_eggs_fats,dairy_cream_sourcream,high
+123791,"Suitsune särtsakas grillribi, SELVER, kg",SELVER AS,,Selver,,,meat_fish,meat_pork,high
+123792,"Grillšašlõkk, KARNI, 600 g",ARKE LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_pork,high
+123793,"Grillsteik sea kaelakarbonaadist, SELVER, kg",,,Selver,,,other,dry_other,fallback
+123794,Goru Red 75 cl,ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback
+123795,"Ingveri-Sidrun, CAPTAIN KOMBUCHA, 400 ml",GKR TRADE OÜ,,"Coop, Selver",,,produce,produce_tropical,high
+123796,"Banaani- ja šokolaadi-koorejäätis glasuuris, ONU ESKIMO, 90 g",BALBIINO AS,,Selver,,,dairy_eggs_fats,dairy_cream_sourcream,high
+123797,"Aknapesija teleskoopvarrega, SAUBER, 1 tk",ETC KODU OÜ,,Selver,,,other,dry_other,fallback
+123798,"Seljakarbonaad Toscana marinaadis, SELVER AS, kg",,,Selver,,,sauces_oils,sauces_marinades,high
+123799,"Mahe rohumaaveise osso bucco, LIIVIMAA LIHAVEIS, kg",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_beef_lamb_game,high
+123800,"Valge paprika, kg",Määramata,,"Barbora, Maxima, Rimi, Selver",,,produce,produce_root_veg,high
+123801,"Apelsiniküpsis, PAGARIPOISID, 120 g",PAGARIPOISID OÜ,,Selver,,,sweets_snacks,sweets_biscuits_cookies,high
+123802,"Amaretti küpsised, MATILDE VICENZI, 175 g",ABESTOCK AS,,Selver,,,sweets_snacks,sweets_biscuits_cookies,high
+123804,"Gouda juusturingid peekoni ja sibulaga, FRIPOZO, 250 g",,,"Coop, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+123805,"Minutipihv Eesti rohumaaveis, KARNI, 200 g",,,Selver,,,meat_fish,meat_beef_lamb_game,high
+123806,"Nuikapsas, kg",Määramata,,Selver,,,produce,produce_root_veg,high
+123807,"Grillribi punases marinaadis, MAKS&MOORITS, kg",ATRIA EESTI AS,,Selver,,,sauces_oils,sauces_marinades,high
+123808,"Nektariin, kg",Määramata,,"Barbora, Maxima, Rimi, Selver",,,drinks,drinks_juices,high
+123809,"Küüslauk, kg",Määramata,,"Barbora, Maxima, Rimi, Selver",,,produce,produce_root_veg,high
+123810,"Gran Castillo Cabernet-Shiraz, 300 cl",BALMERK ESTONIA OÜ,,Selver,,,drinks,drinks_wine,high
+123811,"Keeduvorst Laste, RAKVERE LK, 300 g",MAAG EESTI AS,,"Coop, Selver",,,meat_fish,meat_sausages,high
+123813,"Veise välisfilee, MAKS&MOORITS, kg",ATRIA EESTI AS,,Selver,,,meat_fish,meat_beef_lamb_game,high
+123814,"Mahe rohumaaveise sisefilee steik (laagertatud), LIIVIMAA LIHAVEIS, 240 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_beef_lamb_game,high
+123815,"Minikartuli mix, 1kg",Määramata,,Selver,,,produce,produce_root_veg,high
+123816,Gran Castillo Shiraz 75 cl,DUNKER ESTONIA OÜ,,Selver,,,drinks,drinks_wine,high
+123817,"Supersmuuti Mustika-Vaarika-Mündi, AURA , 330 ML",,,Selver,,,produce,produce_berries,high
+123818,"Ökoloogiline Mustasõstra-kookosesmuuti, SMUSHIE, 170 g",SALVEST AS,,"Coop, Selver",,,bakery,bakery_cakes_pastries,high
+123819,"5 oa segu, HEINZ, 415g",,,"Coop, Selver",,,dry_preserves,dry_canned_veg,high
+123820,"Keedusalaami Vasalli, NÕO, 105 g",NÕO LIHATÖÖSTUS OÜ,,"Barbora, Coop, Maxima, Rimi, Selver",,,meat_fish,meat_other,heuristic
+123821,"Keeduvorst Doktori, RAKVERE LK, 300 g",MAAG EESTI AS,,"Coop, Selver",,,meat_fish,meat_sausages,high
+123822,Gran Mirador Dark Blend 75 cl,DUNKER ESTONIA OÜ,,Selver,,,other,dry_other,fallback
+123823,"Keeduvorst Juustu, RAKVERE LK, 300 g",MAAG EESTI AS,,"Coop, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+123824,"Grand Sour, NOCCO, 330 ml",GKR TRADE OÜ,,"Coop, Selver",,,other,dry_other,fallback
+123825,"Gratään kartuli, koore ja emmentaliga, NORDIC SEAFOOD, 360 g",KAPTEN GRANT OÜ,,Selver,,,dairy_eggs_fats,dairy_cream_sourcream,high
+123826,Gratien&Meyer Brut Cremant de Loire 75 cl,HENKELL FREIXENET EESTI AS,,Selver,,,drinks,drinks_wine,high
+123827,"Greibi-sidrunheina maitseline gaseeritud jook, BELIEF, 530 ml",GOLDBERGER OÜ,,"Coop, Selver",,,produce,produce_tropical,high
+123828,"Grisiinid päevalilleõli ja rosmariiniga., ROBERTO, 250 g",ESTINVAIT OÜ,,Selver,,,sauces_oils,oils_other,high
+123829,"Ingverijook Dark Ginger, ROCHESTER, 725 ml",TALMAN KAUBANDUS OÜ,,"Coop, Selver",,,drinks,drinks_spirits,high
+123830,"Lihakas Suitsujuustuvorst, RAKVERE LK, 360 g",MAAG EESTI AS,,"Rimi, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+123831,"Juustuvorst viilutatud, RAKVERE LK, 190 g",MAAG EESTI AS,,"Coop, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+123832,"Ananassitükid kerges siirupis, SUNFOOD, 227 g bruto",INTERALTUS OÜ,,"Coop, Rimi, Selver",,,drinks,drinks_wine,high
+123833,"Aurutatud läätsed, BONDUELLE, 425 ml",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,dry_preserves,dry_groats_beans,high
+123834,"Maasuitsusardell, MAKS&MOORITS, 375 g",ATRIA EESTI AS,,Selver,,,meat_fish,meat_sausages,high
+123835,"Lihakas Krakov, RAKVERE LK, 300 g",MAAG EESTI AS,,"Coop, Selver",,,meat_fish,meat_sausages,high
+123836,"Aurutatud punased oad, BONDUELLE, 425 ml",,,Selver,,,dry_preserves,dry_canned_veg,high
+123837,"Hapukapsas porgandiga, KADARBIKU KÖÖGIVILI, 500 g",KADARBIKU KÖÖGIVILI OÜ,,"Coop, Selver",,,produce,produce_root_veg,high
+123838,"Mango-apels-ananassi smuuti, PAI, 200 ml",ORKLA EESTI AS,,"Coop, Selver",,,produce,produce_tropical,high
+123839,"Grisiinid päevalilleõli ja soolagagristallidega., ROBERTO, 250 g",,,Selver,,,world_spices,spices_basic_salt_pepper,high
+123840,"Kirss-tomat grillimiseks, 350 g",,,Selver,,,produce,produce_root_veg,high
+123841,"Kimchi salat, DIMDINI, 450 g",Määramata,,"Coop, Selver",,,produce,produce_herbs_salads_sprouts,high
+123843,"Grissinid Rustici, VALLEDORO, 100 g",STOCKMASTER OÜ,,Selver,,,other,dry_other,fallback
+123844,"Grissinid soolased, VALLEDORO, 100 g",STOCKMASTER OÜ,,Selver,,,world_spices,spices_basic_salt_pepper,high
+123845,"Anneke piimašokolaad, KALEV, 270 g",ORKLA EESTI AS,,Selver,,,dairy_eggs_fats,dairy_milk,high
+123846,"Grissinid Tornesi, VALLEDORO, 100 g",STOCKMASTER OÜ,,Selver,,,other,dry_other,fallback
+123847,Grüner Veltliner 100 cl,MOE OÜ,,Selver,,,other,dry_other,fallback
+123848,"Aprikoosimoos, PÕLTSAMAA, 380 g",,,Selver,,,dry_preserves,dry_other,high
+123849,"Apuulia ekstra-väärisoliiviõli frantoio muraglia keskmiselt puuviljane, MURAGLIA, 500 ml",BBQ ENTERTAINMENT OÜ,,"Coop, Selver",,,sauces_oils,oils_olive,high
+123850,"Grüner Veltliner Seewinkel, 300 cl",LTT AS,,Selver,,,other,dry_other,fallback
+123851,"Apuulia ekstra-väärisoliiviõli frantoio muraglia sidruniga, MURAGLIA, 200 ml",BBQ ENTERTAINMENT OÜ,,Selver,,,sauces_oils,oils_olive,high
+123852,Brändi St. Remy Signature 70 cl,LIVIKO AS,,Selver,,,drinks,drinks_spirits,high
+123853,"Pepperoni Super snäkk, MAKS&MOORITS, 85 g",ATRIA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback
+123855,"Suitsutatud Juustuvorst, MAKS&MOORITS, 500 g",ATRIA EESTI AS,,"Coop, Rimi, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+123856,"Sidrun Eureka, kg",Määramata,,Selver,,,produce,produce_tropical,high
+123857,"Ingver, kg",Määramata,,"Rimi, Selver",,,other,dry_other,fallback
+123858,"Kirssploomtomat, 250 g",Määramata,,"Coop, Selver",,,produce,produce_root_veg,high
+123859,"Adžika gruusiapärane kaste, MAADLEX, 200 g",MAADLEX OÜ,,Selver,,,sauces_oils,sauces_other,heuristic
+123860,"Ananassi tükid, GREEN, 565 g",PRALINEE OÜ,,Selver,,,produce,produce_tropical,high
+123861,"Põdra snäkk, KARNI, 85 g",ARKE LIHATÖÖSTUS AS,,"Rimi, Selver",,,meat_fish,meat_other,heuristic
+123862,"Redis pakitud, 125 g",Määramata,,"Rimi, Selver",,,other,dry_other,fallback
+123863,"Tomat lahtine, INTSU, kg",,,Selver,,,produce,produce_root_veg,high
+123864,"Melon roheline, kg",Määramata,,Selver,,,produce,produce_tropical,high
+123865,"Peet, kg",Määramata,,Selver,,,produce,produce_root_veg,high
+123866,"Balsamico salatikaste, KÜHNE, 250 ml",KAUPMEES & KO AS,,Selver,,,sauces_oils,sauces_salad_dressings,high
+123867,"Lihaveise täissuitsuvorst, RANNAROOTSI, 240 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Rimi, Selver",,,meat_fish,meat_sausages,high
+123868,"Gruusia leib Sothi, KILIKIA, 330 g",WORKSTAR OÜ,,"Coop, Selver",,,bakery,bakery_bread_loaves,high
+123869,"Barbarissimaitseline karamell, KALEV, 120 g",ORKLA EESTI AS,,"Coop, Rimi, Selver",,,sweets_snacks,sweets_candies,high
+123870,"Gruusia rahvusleib Puri, KILIKIA, 330 g",WORKSTAR OÜ,,"Barbora, Coop, Maxima, Rimi, Selver",,,bakery,bakery_bread_loaves,high
+123871,"Hallituse eemaldaja, CILLIT, 750 ml",EUGESTA EESTI AS,,Selver,,,other,dry_other,fallback
+123872,"Hapukoore-sibula maitselised maapähklid, ESTRELLA, 140 g",SELVER AS,,"Coop, Selver",,,dairy_eggs_fats,dairy_cream_sourcream,high
+123873,Hardy's Cabernet Sauvignon 75 cl,LIVIKO AS,,Selver,,,drinks,drinks_wine,high
+123874,"Sealihasnäkk, SELVER, 85 g",NÕO LIHATÖÖSTUS OÜ,,Selver,,,meat_fish,meat_pork,high
+123875,"Poolsuitsuvorst Krakovi, NÕO, 270 g",NÕO LIHATÖÖSTUS OÜ,,"Coop, Rimi, Selver",,,meat_fish,meat_sausages,high
+123876,"Aprikoos, kg",,,"Rimi, Selver",,,other,dry_other,fallback
+123877,"Apelsinimaitseline täidisega karamell, KALEV, 120 g",ORKLA EESTI AS,,"Coop, Rimi, Selver",,,sweets_snacks,sweets_candies,high
+123878,Hardy`s Crest Sauvignon Blanc 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback
+123880,Hardy`s Crest Shiraz 75 cl,LIVIKO AS,,Selver,,,drinks,drinks_wine,high
+123881,"Frankfurter, RANNAROOTSI, 500 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Barbora, Coop, Maxima, Rimi, Selver",,,meat_fish,meat_other,heuristic
+123882,"Ässä Mix piimašokolaad, KARL FAZER, 200 g",FAZER EESTI OÜ,,"Coop, Selver",,,dairy_eggs_fats,dairy_milk,high
+123883,"Aurutatud kikerherned, BONDUELLE, 425 ml",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,dry_preserves,dry_groats_beans,high
+123884,Hardy`s Mill Shiraz Main Road 202 75 cl,LIVIKO AS,,Selver,,,drinks,drinks_wine,high
+123885,"Baklazaanipüree, VERES, 500 g",INTERALTUS OÜ,,Selver,,,other,dry_other,fallback
+123886,"Brändi TORRES 10 Years Imperial, 50 cl",AMBER DISTRIBUTION ESTONIA OÜ,,Selver,,,drinks,drinks_spirits,high
+123887,"Broilerilihast Jerky Sticks Parmigiano Reggiano juustuga, NÕO, 70 g",NÕO LIHATÖÖSTUS OÜ,,Selver,,,dairy_eggs_fats,dairy_cheese_slices,high
+123888,"Broilerimaitseaine, ilma lisatud soolata, SANTA MARIA, 37 g",SANTA MARIA AS,,"Coop, Selver",,,world_spices,spices_basic_salt_pepper,high
+123889,Hardy's Nottage Hill Chardonnay 75 cl,LIVIKO AS,,Selver,,,drinks,drinks_wine,high
+123890,"7 lemmikut kommisegu, KALEV, 500 g",ORKLA EESTI AS,,"Coop, Rimi, Selver",,,sweets_snacks,sweets_candies,high
+123891,"Marineeritud kapsas porgandiga, DIMDINI, 650g",Määramata,,"Coop, Selver",,,produce,produce_root_veg,high
+123892,"Shiitake seened, 150 g",Määramata,,Selver,,,produce,produce_mushrooms,high
+123893,"Lastevorst XL, MAKS&MOORITS, 300 g",ATRIA EESTI AS,,"Coop, Rimi, Selver",,,meat_fish,meat_sausages,high
+123894,"Hardy's Shiraz Cabernet Sauvignon 18,7 cl",LIVIKO AS,,Selver,,,drinks,drinks_wine,high
+123895,"American lentils piimašokolaad šokolaadidražeedega, KARL FAZER, 180 g",FAZER EESTI OÜ,,"Rimi, Selver",,,dairy_eggs_fats,dairy_milk,high
+123896,"Pepperoni täissuitsuvorst, OSKAR, 210 g",OSKAR LT AS,,"Rimi, Selver",,,meat_fish,meat_sausages,high
+123897,"Apelsinimaitseline pall tumedas šokolaadis, KALEV, 140 g",ORKLA EESTI AS,,"Coop, Rimi, Selver",,,sweets_snacks,sweets_chocolate_bars,high
+123898,"Hardy`s Stamp Semillon Chardonnay 18,7 cl",LIVIKO AS,,Selver,,,drinks,drinks_wine,high
+123899,Hardy`s Variental Range Pinot Grigio 75 cl,LIVIKO AS,,Selver,,,drinks,drinks_wine,high
+123900,Hardy's VR Chardonnay 75 cl,LIVIKO AS,,Selver,,,drinks,drinks_wine,high
+123901,"Lihakas Lastevorst, RAKVERE LK, 360 g",MAAG EESTI AS,,"Coop, Selver",,,meat_fish,meat_sausages,high
+123902,Hardy's VR Shiraz 75 cl,LIVIKO AS,,Selver,,,drinks,drinks_wine,high
+123903,"Aurutatud riis kotis 4x125 g, FIRST PRICE, 500 g",SELVER AS,,Selver,,,dry_preserves,dry_pasta_rice,high
+123904,Hardys BIN 141 Colombard Char. 75 cl,LIVIKO AS,,"Coop, Selver",,,other,dry_other,fallback
+123905,"Kalevi poolsuitsuvorst, RANNAROOTSI, 330 g",RANNAROOTSI LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_sausages,high
+123906,"Aurutatud valged oad, BONDUELLE, 425 ml",JUNGENT ESTONIA OÜ,,"Coop, Rimi, Selver",,,dry_preserves,dry_canned_veg,high
+123907,"Avokaadoõli, rafineerimata, GLORIA, 250 ml",LARINGO OÜ,,Selver,,,sauces_oils,oils_other,high
+123908,"Hari+vars 3 Action, VILEDA, 1 kmpl",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback
+123909,"Lastevorst, MAKS&MOORITS, 600 g",,,"Coop, Selver",,,meat_fish,meat_sausages,high
+123910,"Caesari wrap kanaga, SELVERI KÖÖK, 200g",KULINAARIA OÜ,,Selver,,,bakery,bakery_flatbreads_wraps,high
+123911,"Head ööd! Banaan-kuivik piimapuder mahe 4+, HIPP, 250 g",LTT AS,,"Coop, Rimi, Selver",,,dairy_eggs_fats,dairy_milk,high
+123912,"Fuet salaami Nobleza, ELPOZO, 200 g",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback
+123913,"Smuuti roheline, GRANINI, 250 ml",,,Selver,,,produce,produce_smoothies_fresh_juices,high
+123914,"Suitsuvorst juustuga, MATSIMOKA, 240 g",MATSIMOKA OÜ,,"Barbora, Coop, Maxima, Rimi, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+123915,"Täissuitsuvorst E-vaba, OSKAR, 120 g",OSKAR LT AS,,Selver,,,meat_fish,meat_sausages,high
+123916,"Head ööd piimapuder küpsistega mahe 4+, HIPP, 190 g",LTT AS,,"Coop, Rimi, Selver",,,dairy_eggs_fats,dairy_milk,high
+123917,"Tšilli salaami, MATSIMOKA, 150 g",MATSIMOKA OÜ,,"Coop, Rimi, Selver",,,other,dry_other,fallback
+123918,"Basmati riis, FIRST PRICE, 1 kg",SELVER AS,,Selver,,,dry_preserves,dry_pasta_rice,high
+123919,"Bataadikrõpsud, SNAQS, 75g",LTT AS,,Selver,,,sweets_snacks,sweets_snacks_salty,high
+123920,"Bio kanapuljong, MAGGI, 80 g",SELVER AS,,Selver,,,world_spices,spices_broth_stock,high
+123921,"Café Crema kohvioad, MÖVENPICK, 1 kg",SELVER AS,,Selver,,,drinks,drinks_coffee_beans_capsules,high
+123922,"Cajuni maitseainesegu, SANTA MARIA, 34 g",SANTA MARIA AS,,Selver,,,world_spices,spices_herbs_spice_mix,high
+123923,"California uramaki, SELVERI KÖÖK, 220 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback
+123924,"Cannelloni torud, PANZANI, 250 g",ABESTOCK AS,,Selver,,,other,dry_other,fallback
+123925,"Caporale Kitsejuust trühvliga, ANDRI-PEEDO, 150 g",NOPRI TALUMEIEREI OÜ,,Selver,,,dairy_eggs_fats,dairy_cheese_slices,high
+123926,"Põdra snäkk, LINNAMÄE LIHATÖÖSTUS, 85 g",LINNAMÄE LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic
+123927,"Saaremaa lehtkapsas ehk Kale, RAUTSI TALU, 200 g",Määramata,,"Coop, Selver",,,produce,produce_root_veg,high
+123928,"Smuuti mustika ja vaarika, FROOSH, 250 ml",FAIRFOOD OÜ,,"Coop, Selver",,,produce,produce_berries,high
+123929,"Salatisegu, 75 g",Määramata,,Selver,,,produce,produce_herbs_salads_sprouts,high
+123930,"Täissuitsu hirvevorst Trühvline, LINNAMÄE LIHATÖÖSTUS, 230 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_sausages,high
+123931,"Head ööd! Piimapudrupulber beebiküpsistega ÖKO al. 6k (karbis), HIPP, 250 g",LTT AS,,"Coop, Selver",,,dairy_eggs_fats,dairy_milk,high
+123932,"Head Ööd piimapudrupulber kaera-õuna mahe 6+, HIPP, 250 g",LTT AS,,Selver,,,dairy_eggs_fats,dairy_milk,high
+123933,"Head ööd teraviljapuder piimasegu ja banaaniga mahe 4+, HIPP, 190 g",LTT AS,,"Coop, Rimi, Selver",,,dairy_eggs_fats,dairy_milk,high
+123934,"Head ööd teraviljapuder piimasegu ja puuviljadega mahe 4+, HIPP, 190 g",LTT AS,,Selver,,,dairy_eggs_fats,dairy_milk,high
+123935,"Põdralihast täissuitsuvorst juustuga Eesti Uluk, RANNAROOTSI, 180 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Rimi, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+123936,"HULGI Coca-Cola 6-pakk, 4tk, COCA-COLA, 4 x 6-pakk",COCA-COLA HBC EESTI AS,,Selver,,,drinks,drinks_soft_soda,high
+123937,"Salaami trühvliga viilutatud, GIANNI NEGRINI, 80 g",DELINE OÜ,,Selver,,,other,dry_other,fallback
+123938,"HULGI Coca-Cola Zero 6-pakk, 4tk, COCA-COLA, 4 x 6-pakk",COCA-COLA HBC EESTI AS,,Selver,,,drinks,drinks_soft_soda,high
+123939,"Ameerikapärane burgerikaste, HEINZ, 400ml",EUGESTA EESTI OÜ,,"Coop, Selver",,,dry_preserves,dry_canned_veg,high
+123940,"Täissuitsuvorst Mündi, OSKAR, 210 g",OSKAR LT AS,,Selver,,,meat_fish,meat_sausages,high
+123941,"Täissuitsu põdravorst, LINNAMÄE LIHATÖÖSTUS, 105 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_sausages,high
+123942,"HULGI India pähkel 3tk, PÄHKLINÄPP, 3 x 500 g",,,Selver,,,sweets_snacks,sweets_nuts_driedfruit,high
+123943,"Angel Hair piimašokolaad, GERMIYAN,",SELVER AS,,Selver,,,dairy_eggs_fats,dairy_milk,high
+123944,"Granaatõunaseemned, 130 g",Määramata,,Selver,,,sweets_snacks,sweets_nuts_driedfruit,high
+123945,"Bolognese pastakaste hakklihaga,TARTU MILL, 340 g",TARTU MILL AS,,"Coop, Selver",,,dry_preserves,dry_pasta_rice,high
+123946,"Cappuccinokook, PAGARINI, 220 g",EESTI PAGAR AS,,"Rimi, Selver",,,bakery,bakery_cakes_pastries,high
+123947,"Lihatoodete duo (Fiocco, Salaami Milano), NEGRONI, 85 g",SELVER AS,,Selver,,,meat_fish,meat_other,heuristic
+123948,"Salaamilõigud Emmentali juustuga, lainelised, NÕO, 100 g",NÕO LIHATÖÖSTUS OÜ,,Selver,,,dairy_eggs_fats,dairy_cheese_slices,high
+123949,"Vinnutatud veiseliha Bresaola, NEGRONI, 90 g",SELVER AS,,Selver,,,meat_fish,meat_beef_lamb_game,high
+123950,"Till potis, GRÜNE FEE, tk",Määramata,,"Coop, Rimi, Selver",,,produce,produce_herbs_salads_sprouts,high
+123951,"Täissuitsu metsseavorst jalapenoga, LINNAMÄE LIHATÖÖSTUS, 230 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_sausages,high
+123952,"HULGI Koduviiner 2tk, MAKS&MOORITS, 2 x 500 g",,,Selver,,,drinks,drinks_spirits,high
+123953,"Lihakas doktorivorst, RAKVERE, 170 g",MAAG EESTI AS,,"Coop, Selver",,,meat_fish,meat_sausages,high
+123954,"Keeduvorst Laste, RAKVERE, kg",,,Selver,,,meat_fish,meat_sausages,high
+123955,"Kadakamari, SANTA MARIA, 21 g",SANTA MARIA AS,,Selver,,,other,dry_other,fallback
+123956,"Kalamaitseaine sidruniga, SANTA MARIA, 23 g",SANTA MARIA AS,,"Coop, Selver",,,world_spices,spices_herbs_spice_mix,high
+123957,"Kalamaitseaine tilliga, ilma lisatud soolata, SANTA MARIA, 23 g",SANTA MARIA AS,,Selver,,,world_spices,spices_basic_salt_pepper,high
+123958,"Koriander potis, GRÜNE FEE, tk",Määramata,,"Coop, Rimi, Selver",,,produce,produce_herbs_salads_sprouts,high
+123959,"Rooma salat, kg",Määramata,,Selver,,,produce,produce_herbs_salads_sprouts,high
+123960,"BIO 003 spagetid / Spaghetti, PASTA ZARA, 500 g",SVENSKY KAUBANDUSE AS,,Selver,,,dry_preserves,dry_pasta_rice,high
+123961,"Maksapasteet lahtine, SELVERI KÖÖK, kg",KULINAARIA OÜ,,Selver,,,drinks,drinks_tea_coffee,high
+123962,"Maksapasteet, PIHLAKA, 150 g",PIHLAKA AS,,Selver,,,drinks,drinks_tea_coffee,high
+123963,"Brändi IMPERIAL XII VSOP, 70 cl",MV EESTI OÜ,,Selver,,,drinks,drinks_spirits,high
+123964,"Brändi J.P. CHENET VSOP, 20 cl",DUNKER ESTONIA OÜ,,Selver,,,drinks,drinks_spirits,high
+123965,"Brändi J.P. Chenet VSOP, 50 cl",DUNKER ESTONIA OÜ,,"Coop, Selver",,,drinks,drinks_spirits,high
+123966,"Brändi J.P. Chenet VSOP, 70 cl",DUNKER ESTONIA OÜ,,"Rimi, Selver",,,drinks,drinks_spirits,high
+123967,"Cayenne'i piprakaste, FRANKS´RED HOT, 148 ml",KARIA OÜ,,Selver,,,sauces_oils,sauces_other,heuristic
+123968,"7 lemmikut kaalu, KALEV, 1 kg",ORKLA EESTI AS,,"Rimi, Selver",,,other,dry_other,fallback
+123969,"Kalamaitseaine tsitruse-ingveriga, MEIRA, 25 g",MEIRA EESTI OÜ,,Selver,,,world_spices,spices_herbs_spice_mix,high
+123970,"Kanasült Fitlap, NÕO LIHAVÜRST, 300 g",NÕO LIHATÖÖSTUS OÜ,,"Coop, Selver",,,meat_fish,meat_poultry,high
+123971,"Vasikalihasült, RANNAROOTSI, 330 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic
+123972,"Kaneel jahvatatud, SANTA MARIA, 210 g",SANTA MARIA AS,,Selver,,,world_spices,spices_herbs_spice_mix,high
+123973,"Suitsutatud seakeel, NÕO, 200 g",NÕO LIHATÖÖSTUS OÜ,,"Coop, Selver",,,meat_fish,fish_salted_smoked,high
+123974,"Maarahva sült, RANNAROOTSI, 330 g",RANNAROOTSI LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_other,heuristic
+123975,"Kaneel (jahvatatud), SANTA MARIA, 22 g",SANTA MARIA AS,,"Coop, Selver",,,world_spices,spices_herbs_spice_mix,high
+123976,"Aprikoosi dzemm, NAOUSSA, 500 g",MAIC KAUBANDUSE AS,,"Coop, Selver",,,other,dry_other,fallback
+123977,"Praetud seamaksaribad, KARNI, 150 g",ARKE LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_other,heuristic
+123978,"Kodusült, MAKS&MOORITS, 300 g",ATRIA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback
+123979,"Pasteet murulauguga, MAKS&MOORITS, 210 g",ATRIA EESTI AS,,"Rimi, Selver",,,drinks,drinks_tea_coffee,high
+123980,"Tüümian potis, GRÜNE FEE, tk",Määramata,,"Coop, Selver",,,other,dry_other,fallback
+123981,"Fileetasku juustu- ja singitäidisega, MAKS&MOORITS, 260 g",ATRIA EESTI AS,,"Coop, Rimi, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+123982,"Brändi LEGENDA ARMENII 3 YO, 50 cl",LIVIKO AS,,Selver,,,drinks,drinks_spirits,high
+123983,"Brändi ROMANCE Hors d'Age XO pet, 50 cl",AVALLONE AS,,Selver,,,drinks,drinks_spirits,high
+123984,"Cheddar riivjuust laktoosivaba, E-PIIM, 250 g",E-PIIM TOOTMINE AS,,Selver,,,dairy_eggs_fats,dairy_cheese_slices,high
+123985,"Cheddari juustu maitselised kartulikrõpsud, ESTRELLA, 250 g",SELVER AS,,"Rimi, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+123986,"Cheddari juustu viilud, ALBENIZ, 65 g",DELINE OÜ,,Selver,,,dairy_eggs_fats,dairy_cheese_slices,high
+123987,"Chia Seemnetega mahe maapähklivõie, NATTY ORIGINAL, 333g",,,Selver,,,drinks,drinks_spirits,high
+123988,"Choco Love A Fair jäätis, BEN&JERRY´S, 402 g",UNILEVER EESTI AS,,Selver,,,frozen_food,frozen_desserts_icecream,high
+123989,"Fuetec trühvliga, ELPOZO, 150 g",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback
+123990,"Kaneel jahvatatud, SANTA MARIA, 40 g",SANTA MARIA AS,,"Coop, Selver",,,world_spices,spices_herbs_spice_mix,high
+123991,"Mahe Tšillipipar punane, 75 g",Määramata,,Selver,,,world_spices,spices_basic_salt_pepper,high
+123992,"Avokaadoõli sprei, MANTOVA, 200 ml",SELVER AS,,Selver,,,sauces_oils,oils_other,high
+123993,"Kaneelikoor pakk, SANTA MARIA, 22g",SANTA MARIA AS,,"Coop, Prisma, Selver",,,dairy_eggs_fats,dairy_cream_sourcream,high
+123994,"Meliss potis, GRÜNE FEE, tk",Määramata,,"Coop, Selver",,,other,dry_other,fallback
+123995,"Chunky Burger kaste, HELLMANN'S, 250 ml",UNILEVER EESTI OÜ,,"Coop, Selver",,,sauces_oils,sauces_other,heuristic
+123996,"Coleslaw salat, SELVERI KÖÖK, 2 kg, ettetellimisel",KULINAARIA OÜ,,Selver,,,produce,produce_herbs_salads_sprouts,high
+123997,"Paneeritud seašnitsel Fitlap, NÕO, 220 g",NÕO LIHATÖÖSTUS OÜ,,Selver,,,meat_fish,meat_other,heuristic
+123998,"Coleslaw salat, SELVERI KÖÖK, 200 g",Määramata,,Selver,,,produce,produce_herbs_salads_sprouts,high
+123999,"Kodune sült, KARNI, 500 g",ARKE LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic
+124000,"Kardemon jahvatatud, 35g, SANTA MARIA",SANTA MARIA AS,,"Coop, Selver",,,other,dry_other,fallback
+124001,"Snäkk pro Chilli pork jerky, RAKVERE LK, 50 g",MAAG EESTI AS,,Selver,,,other,dry_other,fallback
+124002,"Cracker Red Pepper, DR. KARG, 85 g",SELVER AS,,Selver,,,other,dry_other,fallback
+124003,"Ribisnäkk SNÄKK pro, RAKVERE LK, 300 g",MAAG EESTI AS,,"Coop, Selver",,,meat_fish,meat_pork,high
+124004,"Põdramaksa pasteet, LINNAMÄE LIHATÖÖSTUS, 200 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,drinks,drinks_tea_coffee,high
+124005,"Kardemoni seemned, MEIRA, 8 g",MEIRA EESTI OÜ,,Selver,,,sweets_snacks,sweets_nuts_driedfruit,high
+124006,"Croissant aprikoosi täidisega, SELVERI PAGARID, 75 g",MANTINGA EESTI OÜ,,Selver,,,bakery,bakery_buns_croissants,high
+124007,"Sealihasült, RANNAROOTSI, 700 g",RANNAROOTSI LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_pork,high
+124008,"Karri 0% soola, MEIRA, 25 g",MEIRA EESTI OÜ,,Selver,,,world_spices,spices_basic_salt_pepper,high
+124009,"Dallase saiake, SELVERI PAGARID, 90 g",SELVER AS,,Selver,,,bakery,bakery_buns_croissants,high
+124010,"Prosciutto crudo musta pipraga, SAN MICHELE, 90 g",DELINE OÜ,,Selver,,,other,dry_other,fallback
+124011,"Prosciutto crudo maitsestatud rosmariiniga, SAN MICHELE, 90 g",DELINE OÜ,,Selver,,,other,dry_other,fallback
+124012,"Suitsukana pooltiib, TALLEGG, 600 g",MAAG EESTI AS,,"Coop, Prisma, Selver",,,meat_fish,meat_poultry,high
+124013,"Karri, FIRST PRICE, 90 g",SELVER AS,,Selver,,,other,dry_other,fallback
+124014,"Vinnutatud veiseliha Teriyaki, BEEF JERKY, 50 g",PINUS AS,,Selver,,,world_spices,spices_asian,high
+124015,"Suitsukont, RANNAROOTSI, kg",RANNAROOTSI LIHATÖÖSTUS AS,,Selver,,,meat_fish,fish_salted_smoked,high
+124016,"Kanamaksapasteet tšilli ja röstsibulaga, LINNAMÄE LIHATÖÖSTUS, 200 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,drinks,drinks_tea_coffee,high
+124017,"Brõnsa juust, E-PIIM, 200 g",E-PIIM TOOTMINE AS,,"Coop, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+124018,"Brookies and cream jäätis, BEN&JERRY´S, 388 g",UNILEVER EESTI AS,,"Barbora, Maxima, Rimi, Selver",,,frozen_food,frozen_desserts_icecream,high
+124019,"Brownie küpsetussegu, BETT`R, 400 g",BIOMARKET OÜ,,Selver,,,dry_preserves,dry_flour_sugar_baking,high
+124021,"Bucatini, REGGIA, 500 g",M&V TRADE OÜ,,"Coop, Selver",,,other,dry_other,fallback
+124022,"Bulgur, jämejahvatus, DURU, 500 g",REATON OÜ,,Selver,,,other,dry_other,fallback
+124023,"Bulgur, peenjahvatus, DURU, 500 g",REATON OÜ,,Selver,,,other,dry_other,fallback
+124024,"Caesari salat kanaga, SELVERI KÖÖK, 290 g",KULINAARIA OÜ,,Selver,,,meat_fish,meat_poultry,high
+124025,"Serrano sink, EMBUTIDOS CAULA, 100 g",SELVER AS,,Selver,,,meat_fish,meat_hams,high
+124026,"Karri ja mango maitseainesegu, SANTA MARIA, 41 g",SANTA MARIA AS,,Selver,,,world_spices,spices_herbs_spice_mix,high
+124027,"Karri, SANTA MARIA, 34 g",SANTA MARIA AS,,"Coop, Selver",,,other,dry_other,fallback
+124028,"Kanafilee kotlet, SELVERI KÖÖK, 270 g",KULINAARIA OÜ,,Selver,,,meat_fish,meat_poultry,high
+124029,"Kartuliglasuur ürtidega, MEIRA, 35 g",MEIRA EESTI OÜ,,Selver,,,produce,produce_root_veg,high
+124030,"Suitsupõsk, NÕO, kg",NÕO LIHATÖÖSTUS OÜ,,Selver,,,meat_fish,fish_salted_smoked,high
+124031,"Vinnutatud veiseliha, BEEF JERKY, 50 g",PINUS AS,,Selver,,,meat_fish,meat_beef_lamb_game,high
+124032,"Kartulimaitseaine Ameerika moodi, 30g, KOTANYI",EUGESTA EESTI AS,,"Coop, Selver",,,world_spices,spices_herbs_spice_mix,high
+124033,"Kartulimaitseaine, SANTA MARIA, 57 g",SANTA MARIA AS,,Selver,,,world_spices,spices_herbs_spice_mix,high
+124034,"Suitsutatud seakoot, OSKAR, kg",OSKAR LT AS,,Selver,,,meat_fish,fish_salted_smoked,high
+124035,"Kiievi kotlet, SELVERI KÖÖK, 280 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback
+124036,"Kergelt suitsutatud tofuviinerid, BON VEGAN, 220g",BON VEGAN OÜ,,"Rimi, Selver",,,drinks,drinks_spirits,high
+124037,"Kuivatatud veiseliha, LINNAMÄE LIHATÖÖSTUS, 50 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_beef_lamb_game,high
+124038,"Kartulitärklis, ALOJAS, 400 g",ABESTOCK AS,,"Coop, Rimi, Selver",,,produce,produce_root_veg,high
+124039,"Kastmepaksendaja heledatele kastmetele, RUF, 250 g",KAUPMEES & KO AS,,Selver,,,sauces_oils,sauces_other,heuristic
+124040,"Ketšup original, HEINZ, 1 kg",EUGESTA EESTI AS,,"Coop, Selver",,,drinks,drinks_spirits,high
+124041,"Marineeritud suitsutatud broilerikintsuliha, RANNAMÕISA, 300 g",POULTRY MEAT OÜ,,"Coop, Selver",,,meat_fish,meat_poultry,high
+124042,"Hautatud veiselihaga konserv, FRANK POTT, 240 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_beef_lamb_game,high
+124043,"Ketšup original, HEINZ, 460 g",EUGESTA EESTI AS,,"Coop, Selver",,,drinks,drinks_spirits,high
+124044,"Tüümian suures potis, 1 tk",Määramata,,Selver,,,other,dry_other,fallback
+124045,"Baklažaan, kg",Määramata,,"Barbora, Maxima, Selver",,,other,dry_other,fallback
+124046,"Roheline sibul potis, GRÜNE FEE, kg",Määramata,,Selver,,,produce,produce_root_veg,high
+124047,"Aedoad tomatikastmes, SALVEST, 530 g",SALVEST AS,,"Coop, Selver",,,produce,produce_root_veg,high
+124048,"Ananassi seibid, GREEN, 565 g",PRALINEE OÜ,,Selver,,,produce,produce_tropical,high
+124049,"Mahe küüslauk, KOPRA SAHVER, 200 g",Määramata,,Selver,,,produce,produce_root_veg,high
+124050,"Arbuus, kg",Määramata,,"Barbora, Maxima, Rimi, Selver",,,produce,produce_tropical,high
+124051,"Maasika Kombucha, KARU KOMBUCHA, 330 ml",EESTIMAA VILJAD OÜ,,Selver,,,produce,produce_berries,high
+124052,"Mahe varajane kartul, KOPRA SAHVER, 1 kg",EESTIMAA VILJAD OÜ,,Selver,,,produce,produce_root_veg,high
+124053,"Aprikoosi pooled kooritud, GREEN, 240g neto",PRALINEE OÜ,,"Coop, Selver",,,dairy_eggs_fats,dairy_cream_sourcream,high
+124054,"Erinevad tomatid karbis, 500 g",Määramata,,Selver,,,produce,produce_root_veg,high
+124055,"Brändi IBIS XO pet, 50 cl",,,Selver,,,drinks,drinks_spirits,high
+124056,"Dekooride valik Kuld ja hõbe, DR.OETKER, 81 g",JUNGENT ESTONIA OÜ,,Selver,,,dairy_eggs_fats,dairy_cream_sourcream,high
+124057,"Dipikastmesegu American Ranch, SANTA MARIA, 14 g",SANTA MARIA AS,,"Coop, Selver",,,sauces_oils,sauces_other,heuristic
+124058,"Datlid Sweet Peach, TRUE DATES, 100 g",GKR TRADE OÜ,,"Rimi, Selver",,,other,dry_other,fallback
+124059,Brändi J.P.Chenet VSOP PET 50 cl,BALMERK ESTONIA OÜ,,Selver,,,drinks,drinks_spirits,high
+124060,"Vürtsikas lihaveise liha, LIIVIMAA LIHAVEIS, 240 g",LINNAMÄE LIHATÖÖSTUS AS,,"Coop, Selver",,,world_spices,spices_herbs_spice_mix,high
+124061,"Ketšup, SALVEST, 270 g",SALVEST AS,,"Coop, Selver",,,sauces_oils,sauces_ketchup_mayo,high
+124062,"Marineeritud suitsutatud broileripooltiivad, RANNAMÕISA, 300 g",POULTRY MEAT OÜ,,"Coop, Selver",,,meat_fish,meat_poultry,high
+124063,"Hirveliha pasteet, RANNAROOTSI, 170 g",RANNAROOTSI LIHATÖÖSTUS AS,,Selver,,,drinks,drinks_tea_coffee,high
+124064,"Bucatini Bronzo No6, DELVERDE, 500 g",REMECOM OÜ,,Selver,,,drinks,drinks_wine,high
+124065,"Brownie tükkidega šokolaadijäätis, BEN&JERRY´S, 408 g",UNILEVER EESTI AS,,"Rimi, Selver",,,frozen_food,frozen_desserts_icecream,high
+124066,"Brüleekreem banaani-mangokastmega, SELVERI KÖÖK, 160 g",KULINAARIA OÜ,,Selver,,,produce,produce_tropical,high
+124067,"Ketšup, SALVEST, 360g",SALVEST AS,,"Coop, Rimi, Selver",,,sauces_oils,sauces_ketchup_mayo,high
+124068,"Carbonara pastakaste, PANZANI, 370 g",ABESTOCK AS,,Selver,,,dry_preserves,dry_pasta_rice,high
+124069,"Cayenne'i pipar, 30g, SANTA MARIA",SANTA MARIA AS,,Selver,,,world_spices,spices_basic_salt_pepper,high
+124070,"Cracker Cheese & Onion, DR. KARG, 85 g",,,Selver,,,other,dry_other,fallback
+124071,"Ketšup suitsupeekonimaitseline, HEINZ, 400 ml",EUGESTA EESTI OÜ,,Selver,,,dry_preserves,dry_canned_veg,high
+124073,"Ketšup, tšilliga, GUSTOV, 270g",MAADLEX OÜ,,Selver,,,sauces_oils,sauces_ketchup_mayo,high
+124074,"Kuivatatud mahe veiseliha tükid, traditsiooniline, LIIVIMAA LIHAVEIS, 40 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_beef_lamb_game,high
+124075,"Dipikastmesegu juustu, SANTA MARIA, 15 g",SANTA MARIA AS,,"Coop, Rimi, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+124076,"Devil´s Red Pepper Jam, DEVIL´S, 260 g",,,Selver,,,dry_preserves,dry_other,high
+124077,"Sojapallid, BON VEGAN, 250 g",BON VEGAN OÜ,,Selver,,,sauces_oils,sauces_soy_worcester,high
+124078,"Broileri rinnafilee mango-tšillimarinaadis, SELVER, kg",Määramata,,Selver,,,sauces_oils,sauces_marinades,high
+124079,"Mustikas, 300 g",,,Selver,,,produce,produce_berries,high
+124080,"Till taldrikul, GRÜNE FEE, 1 tk",Määramata,,Selver,,,produce,produce_herbs_salads_sprouts,high
+124081,"Broilerikints ürdi-laimimarinaadis, SELVER, kg",,,Selver,,,sauces_oils,sauces_marinades,high
+124082,"Broilerikintsuliha musta küüslaugu-ingveri- vürtsi marinaadis, KIKAS, 600 g",,,Selver,,,world_spices,spices_herbs_spice_mix,high
+124083,"Broilerikintsuliha röstitud küüslauguga, KIKAS, 600 g",KIKAS OÜ,,Selver,,,meat_fish,meat_poultry,high
+124084,"Dumle vahvlibatoon, KISMET, 55 g",FAZER EESTI OÜ,,"Coop, Rimi, Selver",,,sweets_snacks,sweets_chocolate_bars,high
+124085,"Petersell kähar taldrikul, GRÜNE FEE, 1 tk",Määramata,,Selver,,,produce,produce_herbs_salads_sprouts,high
+124087,"Baked Rolls küüslaugumaitselised saiakrõpsud, TUC, 80 g",ABESTOCK AS,,Selver,,,bakery,bakery_buns_croissants,high
+124088,Brändi Georgian Valleys 5* 50 cl,PRIKE AS,,Selver,,,drinks,drinks_spirits,high
+124089,"Bruschetta-krõpsud röstitud küüslauguga, MARETTI, 70 g",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,sweets_snacks,sweets_snacks_salty,high
+124090,"Cornflakes maisihelbed, CERERA, 500 g",LTT AS,,Selver,,,dry_preserves,dry_cereals_muesli,high
+124091,"Duo piima-šokolaadikreem, CEBE, 400 g",SVENSKY KAUBANDUSE AS,,Selver,,,dairy_eggs_fats,dairy_milk,high
+124092,"Fuet Extra, EMBUTIDOS CAULA, 150 g",SELVER AS,,Selver,,,other,dry_other,fallback
+124093,"Kettle Cooked hapukoore-sibulamaitselised kartulikrõpsud, ESTRELLA, 120 g",SELVER AS,,"Coop, Selver",,,dairy_eggs_fats,dairy_cream_sourcream,high
+124094,"Dijoni teravamaitseline sinep, VILUX, 200 g",EKTONI HULGIKAUBANDUS OÜ,,Selver,,,other,dry_other,fallback
+124095,"Draakoni vaarika-mustikajook kõrrega, PÕLTSAMAA, 200 ml",ORKLA EESTI AS,,"Coop, Selver",,,produce,produce_berries,high
+124096,"Kettle Cooked soolaga kartulikrõpsud, ESTRELLA, 120 g",SELVER AS,,"Coop, Selver",,,sweets_snacks,sweets_snacks_salty,high
+124097,"Lõhe liblikfilee karulaugumarinaadis, SELVER, kg",SELVER AS,,Selver,,,sauces_oils,sauces_marinades,high
+124098,"Viru poolsuitsuvorst, MAKS&MOORITS, 300 g",ATRIA EESTI AS,,"Coop, Selver",,,meat_fish,meat_sausages,high
+124099,"Dijoni sinep, FIRST PRICE, 370 g",SELVER AS,,Selver,,,other,dry_other,fallback
+124100,"Poolsuitsuvorst Servelaat, RAKVERE LK, 500 g",MAAG EESTI AS,,"Barbora, Maxima, Rimi, Selver",,,meat_fish,meat_sausages,high
+124101,"Praetud räimed tomatikastmes, BRIIS, 270 g",DGM SHIPPING AS,,"Barbora, Maxima, Rimi, Selver",,,dry_preserves,dry_pasta_rice,high
+124102,"Paneeritud kanafileešnitsel, MAKS&MOORITS, 340 g",ATRIA EESTI AS,,"Coop, Selver",,,meat_fish,meat_poultry,high
+124103,"Täissuitsu Põdravorst suitsujuustuga, LINNAMÄE LIHATÖÖSTUS, 230 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,dairy_eggs_fats,dairy_cheese_slices,high
+124104,"Aprikoosimoos steviaga, GOOD GOOD, 330g",REMECOM OÜ,,"Coop, Selver",,,dry_preserves,dry_other,high
+124105,"Mustikas karbis, 500 g",,,Selver,,,produce,produce_berries,high
+124106,"Basmati riis, VESKI MATI, 500 g",SELVER AS,,"Coop, Rimi, Selver",,,dry_preserves,dry_pasta_rice,high
+124107,"Coquillette väikesed sarvekesed, PANZANI, 3 kg",ABESTOCK AS,,"Rimi, Selver",,,other,dry_other,fallback
+124108,"Crunchy šokolaadibatoon, GEISHA, 50 g",FAZER EESTI OÜ,,"Coop, Rimi, Selver",,,sweets_snacks,sweets_chocolate_bars,high
+124109,"Datlid Sour Watermelon, TRUE DATES,",GKR TRADE OÜ,,"Rimi, Selver",,,produce,produce_tropical,high
+124110,"HULGI Pitsasink 2tk, MAKS&MOORITS, 2 x 250g",ATRIA EESTI AS,,Selver,,,meat_fish,meat_hams,high
+124111,"Draakonvilimahlajook gaseeritud, GREPPO, 320 ml",LANCOSTER OÜ,,"Coop, Selver",,,drinks,drinks_juices,high
+124112,"Drako maasikamaitselised närimiskommid, KALEV, 110 g",ORKLA EESTI AS,,"Coop, Rimi, Selver",,,sweets_snacks,sweets_candies,high
+124113,Maasikas karbis 500 g,,,Selver,,,produce,produce_berries,high
+124114,"Drako õunamaitselised närimiskommid, KALEV, 110 g",ORKLA EESTI AS,,"Coop, Selver",,,sweets_snacks,sweets_candies,high
+124115,"Fit Minutipihv broileririnnafileest BBQ-marinaadis, TALLEGG, 350 g",MAAG EESTI AS,,"Rimi, Selver",,,sauces_oils,sauces_marinades,high
+124116,"Delikatessviiner, RANNAROOTSI, 250 g",,,Selver,,,drinks,drinks_spirits,high
+124117,"Ananassi tükid omas mahlas, FIRST PRICE, 567 g",SELVER AS,,Selver,,,drinks,drinks_juices,high
+124118,"Paprika Ramiro, 2 tk",Määramata,,Selver,,,produce,produce_root_veg,high
+124119,"Maamehe suitsusink, NÕO, 105 g",NÕO LIHATÖÖSTUS OÜ,,"Barbora, Coop, Maxima, Rimi, Selver",,,meat_fish,meat_hams,high
+124120,"Täissuitsuvorst Moskva, NÕO, 250 g",NÕO LIHATÖÖSTUS OÜ,,"Barbora, Coop, Maxima, Rimi, Selver",,,meat_fish,meat_sausages,high
+124121,"Maamehesink, MAKS&MOORITS, kg",ATRIA EESTI AS,,Selver,,,meat_fish,meat_hams,high
+124122,"Tuunikala suured tükid soolvees, KAPTEN GRANT, 185 g",KAPTEN GRANT OÜ,,"Coop, Selver",,,dry_preserves,dry_canned_meat_fish,high
+124123,"Toorsuitsu panniliha, NÕO, 105 g",NÕO LIHATÖÖSTUS OÜ,,Selver,,,meat_fish,fish_salted_smoked,high
+124124,"Turistieine, FRANK POTT, 325 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic
+124125,"Tuunikalapasteet, DELAMARIS, 95 g",MAKRO TRADE BALTIC OÜ,,"Coop, Selver",,,drinks,drinks_tea_coffee,high
+124127,"Delikatesskurk, SALVEST, 330 g",SALVEST AS,,"Coop, Rimi, Selver",,,produce,produce_root_veg,high
+124128,"Tuunikala tükid õlis tšilliga, KAPTEN GRANT, 185 g",KAPTEN GRANT OÜ,,Selver,,,dry_preserves,dry_canned_meat_fish,high
+124129,"Vikerforellifilee B-trim, HÄRJANURME, kg",Määramata,,Selver,,,meat_fish,fish_fresh,high
+124130,"Lõhe roogitud, jahutatud, M.V.WOOL, kg",Määramata,,Selver,,,dry_preserves,dry_flour_sugar_baking,high
+124131,"Bitter 70% tume šokolaad, KALEV, 190 g",ORKLA EESTI AS,,"Coop, Selver",,,sweets_snacks,sweets_chocolate_bars,high
+124132,"Brändi ARARAT Coffee karbis, 50 cl",,,Selver,,,drinks,drinks_spirits,high
+124133,"Brazil XXL grillsteik, SELVER, kg",SELVER AS,,Selver,,,other,dry_other,fallback
+124134,"Brie valgehallitusjuust kreeka pähklitega, PRESIDENT, 125 g",ESTOVER OÜ,,"Coop, Rimi, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+124135,"Brownie karamelli metspähkli batoon, KALEV, 50 g",ORKLA EESTI AS,,"Coop, Selver",,,sweets_snacks,sweets_chocolate_bars,high
+124136,"Caesari kaste, SELVERI KÖÖK, 230 g",KULINAARIA OÜ,,Selver,,,sauces_oils,sauces_other,heuristic
+124137,"Croissant, SELVERI PAGARID, ca 70 g",EESTI PAGAR AS,,Selver,,,bakery,bakery_buns_croissants,high
+124138,"Datlid Cookie Dough, TRUE DATES, 100 g",GKR TRADE OÜ,,"Coop, Rimi, Selver",,,other,dry_other,fallback
+124140,"Lestafilee jahutatud, KALAMAJAKAS, kg",KALAMAJAKAS OÜ,,Selver,,,dry_preserves,dry_flour_sugar_baking,high
+124142,"Veise pipraliha, KARNI, 120 g",ARKE LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_beef_lamb_game,high
+124143,"Küüslaugu pekk, OSKAR, 120 g",OSKAR LT AS,,"Rimi, Selver",,,other,dry_other,fallback
+124144,"Salatikrevett soolvees, KALURI, 280 g",LÄÄTSA KALATÖÖSTUS AS,,Selver,,,dry_preserves,dry_groats_beans,high
+124145,"Kevadrullid tšillikastmega, SELVERI KÖÖK, 200 g",KULINAARIA OÜ,,Selver,,,sauces_oils,sauces_other,heuristic
+124146,"Aedviljapüree kalaga 6+, PÕNN, 190 g",SALVEST AS,,"Coop, Selver",,,meat_fish,fish_fresh,high
+124147,"Ahjupuhastusvahend All-Care, MAYERI, 500 ml",KODUPABER AS,,"Coop, Selver",,,household,hh_cleaners,high
+124148,"Adžika, FELIX, 260 g",ORKLA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback
+124149,"Traditsiooniline angerjasupp, VÄNDRA KALATOOTED, 450 g",FOR ANGULA OÜ,,Selver,,,meat_fish,fish_fresh,high
+124150,"Räim kuumsuitsu, kg",TERMOLOGISTIC OÜ,,Selver,,,meat_fish,fish_salted_smoked,high
+124151,"Tarbatu keedusalaami, NÕO, 105 g",NÕO LIHATÖÖSTUS OÜ,,"Coop, Rimi, Selver",,,meat_fish,meat_other,heuristic
+124152,"2 jätkupiimasegu kitsepiimast al. 6 kuust, HIPP, 400 g",LTT AS,,Selver,,,dairy_eggs_fats,dairy_milk,high
+124153,"7-viljapuder küpsistega, 6K+, MILUPA, 250 g",NUTRICIA SIA,,Selver,,,sweets_snacks,sweets_biscuits_cookies,high
+124154,"Hapukapsas pakitud, JAAGUMÄE TALU, 1 kg",Määramata,,Selver,,,produce,produce_root_veg,high
+124155,"Hapukapsas porgandiga, KADARBIKU, 900 g",KADARBIKU KÖÖGIVILI OÜ,,"Coop, Selver",,,produce,produce_root_veg,high
+124156,"Tuunikala tükid tomatikastmes, KAPTEN GRANT, 185 g",KAPTEN GRANT OÜ,,"Coop, Selver",,,dry_preserves,dry_canned_meat_fish,high
+124157,"Külmsuitsu heeringafilee, M.V.WOOL, kg",M.V.WOOL AS,,Selver,,,meat_fish,fish_salted_smoked,high
+124158,"Mais vaakumis, 600 g",Määramata,,Selver,,,dry_preserves,dry_canned_veg,high
+124159,"Täissuitsuvorst Parmigiano-Reggiano, NÕO, 105 g",NÕO LIHATÖÖSTUS OÜ,,Selver,,,meat_fish,meat_sausages,high
+124161,"Füüsal puhastatud, EAT ME, 125 g",Määramata,,Selver,,,other,dry_other,fallback
+124162,"Mango karbis, EAT ME, 2 tk",,,Selver,,,produce,produce_tropical,high
+124163,"Banaan, kg",Määramata,,"Barbora, Maxima, Selver",,,produce,produce_tropical,high
+124164,"Tomat, kg",Määramata,,"Rimi, Selver",,,produce,produce_root_veg,high
+124165,"Kuivatatud mahe veiseliha tükid, teryaki, LIIVIMAA LIHAVEIS, 40 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_beef_lamb_game,high
+124166,"Fitlap passioni broileristeigid, NÕO, 460 g",NÕO LIHATÖÖSTUS OÜ,,Selver,,,meat_fish,meat_poultry,high
+124167,"Külmsuitsu lõhefilee viilutatud, VICI, 100 g",VICIUNAI BALTIC OÜ,,Selver,,,meat_fish,fish_salted_smoked,high
+124169,"Broilerikintsuliha vahemere ürdimarinaad, KIKAS, 600 g",KIKAS OÜ,,Selver,,,sauces_oils,sauces_marinades,high
+124170,"Broilerišašlõkk mustika, RANNAMÕISA, 700 g",POULTRY MEAT OÜ,,"Coop, Selver",,,meat_fish,meat_poultry,high
+124171,"Broilerikoivaliha šašlõkk äädikamarinaadis, TALLEGG, 700 g",MAAG EESTI AS,,Selver,,,sauces_oils,sauces_marinades,high
+124172,"Sealiha omas mahlas, LINNAMÄE LIHATÖÖSTUS, 240 g",LINNAMÄE LIHATÖÖSTUS AS,,"Coop, Selver",,,drinks,drinks_juices,high
+124173,"Pardiliha omas mahlas, LINNAMÄE LIHATÖÖSTUS, 240 g",LINNAMÄE LIHATÖÖSTUS AS,,"Rimi, Selver",,,drinks,drinks_juices,high
+124175,"Suitsusardell, RAKVERE LK, 500 g",RAKVERE LIHAKOMBINAAT AS,,"Coop, Selver",,,meat_fish,meat_sausages,high
+124176,"Tallinna kilud, KAPTEN GRANT, 240g",KAPTEN GRANT OÜ,,"Coop, Selver",,,dry_preserves,dry_canned_meat_fish,high
+124177,"Kalmaar vähesoolane, MSDM, 36 g",EUROASIA GMBH EESTI FILIAAL,,Selver,,,world_spices,spices_basic_salt_pepper,high
+124178,"Sea kaelakarbonaad ürdimarinaadis, SELVER, kg",SELVER AS,,Selver,,,sauces_oils,sauces_marinades,high
+124179,"Seatagakoot, RAKVERE LK, kg",,,Selver,,,other,dry_other,fallback
+124180,"Suitsuheeringasalat, SELVER, kg",SELVER AS,,Selver,,,meat_fish,fish_salted_smoked,high
+124181,"Külmsuitsu lõheviilud, AVEKTRA, 100 g",AVEKTRA OÜ,,Selver,,,meat_fish,fish_salted_smoked,high
+124183,"Pangaasiuse filee nahata, sulatatud, kg",KALAMAJAKAS OÜ,,Selver,,,meat_fish,fish_fresh,high
+124184,"Vinnutatud veiseliha Hot, KARNI, 50 g",ARKE LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_beef_lamb_game,high
+124185,"Heeringafilee tükid, KALURI, 250g",LÄÄTSA KALATÖÖSTUS AS,,"Prisma, Selver",,,dry_preserves,dry_groats_beans,high
+124186,"Vürtsikilud laevuke, KALURI, 500g",LÄÄTSA KALATÖÖSTUS AS,,"Coop, Selver",,,dry_preserves,dry_groats_beans,high
+124187,"Lihaveise liha omas mahlas, LIIVIMAA LIHAVEIS, 240 g",LINNAMÄE LIHATÖÖSTUS AS,,"Coop, Selver",,,drinks,drinks_juices,high
+124188,"Maakodu suitsusink, MAKS&MOORITS, kg",ATRIA EESTI AS,,"Rimi, Selver",,,meat_fish,meat_hams,high
+124190,"Hirveliha sink Eesti Uluk, RANNAROOTSI, 100 g",RANNAROOTSI LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_hams,high
+124191,"Lihapihvid juustuga, MAKS&MOORITS, 400 g",ATRIA EESTI AS,,"Coop, Rimi, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+124192,"Praetud kohafilee punases marinaadis, AVIKALA, 330g",AVIKALA OÜ,,Selver,,,sauces_oils,sauces_marinades,high
+124193,"Praetud ahvenafilee punases marinaadis, AVIKALA, 330g",AVIKALA OÜ,,Selver,,,sauces_oils,sauces_marinades,high
+124194,"Täissuitsuvorst Parmigiano Reggiano juustuga, KARNI, 250 g",ARKE LIHATÖÖSTUS AS,,"Coop, Rimi, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+124195,"Hautatud sealiha, FRANK POTT, 240 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_pork,high
+124196,"Minikoot, NÕO, kg",NÕO LIHATÖÖSTUS OÜ,,Selver,,,meat_fish,meat_other,heuristic
+124197,"Külmsuitsu forellifilee tükk, AVIKALA, kg",AVIKALA OÜ,,Selver,,,meat_fish,fish_salted_smoked,high
+124198,"Toorvorstid Gruusia, RANNAROOTSI, 400 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_sausages,high
+124199,"Kuumsuitsu angerjas marinaadis, VÄNDRA KALATOOTED, 250 g",FOR ANGULA OÜ,,"Coop, Selver",,,sauces_oils,sauces_marinades,high
+124200,"Suitsulõhemääre, SELVER, kg",SELVER AS,,Selver,,,meat_fish,fish_salted_smoked,high
+124201,"Lainelised singilõigud, NÕO, 100 g",NÕO LIHATÖÖSTUS OÜ,,Selver,,,meat_fish,meat_other,heuristic
+124202,"Broileripooltiivad BBQ-rabamarjamarinaadis, TALLEGG, 800 g",MAAG EESTI AS,,"Rimi, Selver",,,dry_preserves,dry_other,high
+124203,"Grillvorstid Jäägri, NÕO, 365 g",NÕO LIHATÖÖSTUS OÜ,,"Coop, Rimi, Selver",,,meat_fish,meat_sausages,high
+124204,"Kuumsuitsu heik, M.V.WOOL, kg",M.V.WOOL AS,,"Rimi, Selver",,,meat_fish,fish_salted_smoked,high
+124205,"Tofu kroket ürtidega, BON VEGAN, 200 g",BON VEGAN OÜ,,"Coop, Selver",,,other,dry_other,fallback
+124206,"Vikerforell roogitud, jahutatud, HÄRJANURMES, kg",Määramata,,Selver,,,dry_preserves,dry_flour_sugar_baking,high
+124207,"Eestimaine broileririnnafilee, TALLEGG, 400 g",MAAG EESTI AS,,"Rimi, Selver",,,meat_fish,meat_poultry,high
+124208,"Vinkuampsud juustuga SNÄKK pro, RAKVERE LK, 300 g",MAAG EESTI AS,,"Coop, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+124209,"Heeringafilee marineeritud, VICI, 240 g",VICIUNAI BALTIC OÜ,,Selver,,,meat_fish,fish_fresh,high
+124210,"Täissuitsuvorst Wabariigi, NÕO, 250 g",NÕO LIHATÖÖSTUS OÜ,,"Barbora, Coop, Maxima, Rimi, Selver",,,meat_fish,meat_sausages,high
+124211,"Vutiliha konserv, JÄRVEOTSA, 200 g",JÄRVEOTSA VUTIFARM OÜ,,"Rimi, Selver",,,meat_fish,meat_other,heuristic
+124212,"Kiirkaerahelbed, ELOVENA, 500 g",CLAIRE FOODS OÜ,,"Coop, Rimi, Selver",,,dry_preserves,dry_cereals_muesli,high
+124213,"Graavilõhe viilutatud, SELVER, kg",SELVER AS,,Selver,,,meat_fish,fish_fresh,high
+124214,"Selveri äkiline, SELVER, kg",SELVER AS,,Selver,,,other,dry_other,fallback
+124215,"Tuunikala tomatis, ELDORADO, 185 g",KAUPMEES & KO AS,,Selver,,,dry_preserves,dry_canned_meat_fish,high
+124216,"Küüslaugupekk viilutatud, MATSIMOKA, 110 g",,,Selver,,,other,dry_other,fallback
+124217,"Täissuitsu metsseavorst, LINNAMÄE LIHATÖÖSTUS, 230 g",LINNAMÄE LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_sausages,high
+124218,"Kodune ahjupraad, RAKVERE LK, kg",,,Selver,,,other,dry_other,fallback
+124219,"Veise abaliha kondita, RAKVERE LK, kg",MAAG EESTI AS,,Selver,,,meat_fish,meat_beef_lamb_game,high
+124220,"Latikafilee tomatimarinaadis, PEIPSI KALATÖÖSTUS, 330 g",BALTIC PREMIER GROUP OÜ,,"Coop, Selver",,,sauces_oils,sauces_marinades,high
+124221,"Kalkunifilee sink, MAKS&MOORITS, 170 g",ATRIA EESTI AS,,"Coop, Rimi, Selver",,,meat_fish,meat_poultry,high
+124222,"Terava maitsega snäkk, NÕO, 85 g",NÕO LIHATÖÖSTUS OÜ,,"Coop, Selver",,,meat_fish,meat_other,heuristic
+124223,"Kiirkaerapuder õuna,mustika ja vaarika, NORDIC, 35 g",CLAIRE FOODS OÜ,,Selver,,,produce,produce_berries,high
+124224,"Vürtsikas grillpeekon, SELVER, kg",SELVER AS,,Selver,,,world_spices,spices_herbs_spice_mix,high
+124225,"Sealiha omas mahlas, RANNAROOTSI, 240 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,drinks,drinks_juices,high
+124226,"Turistieine, RANNAROOTSI, 240 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Rimi, Selver",,,meat_fish,meat_other,heuristic
+124227,"Marineeritud angerjas, VÄNDRA KALATOOTED, 250 g",FOR ANGULA OÜ,,"Coop, Selver",,,meat_fish,fish_fresh,high
+124228,"HULGI Seahakkliha 2tk, MAKS&MOORITS, 2 x 500g",,,Selver,,,meat_fish,meat_minced,high
+124229,"Lihameistri steik, SELVER, kg",SELVER AS,,Selver,,,meat_fish,meat_other,heuristic
+124230,"Šašlõkk punases marinaadis, ARMEENIA GRILL, kg",HOGG INVEST OÜ,,Selver,,,sauces_oils,sauces_marinades,high
+124231,"Dražeed Crazy Sours, SKITTLES, 38 g",SELVER AS,,"Coop, Selver",,,other,dry_other,fallback
+124232,"Kiirkaerapuder vaarika, NORDIC, 35 g",CLAIRE FOODS OÜ,,Selver,,,produce,produce_berries,high
+124233,"Suitsutatud täislihaviiner, NÕO, 310 g",NÕO LIHATÖÖSTUS OÜ,,Selver,,,drinks,drinks_spirits,high
+124234,"Maksikrevetid surimist soolvees, VICI, 320 g",VIČIUNAI BALTIC OÜ,,"Coop, Selver",,,world_spices,spices_basic_salt_pepper,high
+124235,"HULGI Maitselt mahedad grillvorstid 2 tk, MAKS&MOORITS, 2 x 900g",ATRIA EESTI AS,,Selver,,,meat_fish,meat_sausages,high
+124236,"Kiirkartulipuder, FIRST PRICE, 345 g",SELVER AS,,Selver,,,produce,produce_root_veg,high
+124237,"Müncheni broilerikints, SELVER, kg",Määramata,,Selver,,,meat_fish,meat_poultry,high
+124238,"Moskva täissuitsuvorst, OSKAR, 210 g",OSKAR LT AS,,"Barbora, Maxima, Rimi, Selver",,,meat_fish,meat_sausages,high
+124239,"Vinnutatud veiseliha Classic, BEEF JERKY, 50 g",PINUS AS,,Selver,,,meat_fish,meat_beef_lamb_game,high
+124240,"Räimerullid rosèpipra-küüslaugu marinaadis, KALURI, 300 g",LÄÄTSA KALATÖÖSTUS AS,,"Coop, Selver",,,dry_preserves,dry_groats_beans,high
+124242,"Sisefilee trühvlimarinaadis, SELVER, kg",SELVER AS,,Selver,,,sauces_oils,sauces_marinades,high
+124243,"Räimerullid küüslaugumarinaadis, VIRU RAND, 400 g",VIRU RAND OÜ,,"Coop, Selver",,,sauces_oils,sauces_marinades,high
+124244,"Kana kintsuliha omas mahlas, LINNAMÄE LIHATÖÖSTUS, 240 g",LINNAMÄE LIHATÖÖSTUS AS,,"Coop, Selver",,,drinks,drinks_juices,high
+124245,"Lihaveise täissuitsuvorst juustuga, LIIVIMAA LIHAVEIS, 230 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,dairy_eggs_fats,dairy_cheese_slices,high
+124246,"Pihvid juustuga, RAKVERE, 400 g",MAAG EESTI AS,,"Barbora, Maxima, Rimi, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+124247,"Tursk suitsutatud, MSDM, 36 g",EUROASIA GMBH EESTI FILIAAL,,"Coop, Selver",,,meat_fish,fish_salted_smoked,high
+124248,"Kalmaari ribad, MSDM, 36 g",,,Selver,,,other,dry_other,fallback
+124249,"Sea kaelakarbonaadi lõigud, SELVER, kg",SELVER AS,,Selver,,,other,dry_other,fallback
+124250,"Soolalõhefilee viilutatud, SELVER, kg",SELVER AS,,Selver,,,world_spices,spices_basic_salt_pepper,high
+124251,"Skumbria õliga, RANNAKÜLA, 240 g",MOBEC AS,,Selver,,,sauces_oils,oils_other,high
+124252,"Hirveliha äkis metsaseentega (vajab külma), LINNAMÄE LIHATÖÖSTUS, 110 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,produce,produce_mushrooms,high
+124253,"Hispaaniapärane chorizo viilutatud Ehe, RANNAROOTSI, 100 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic
+124254,"Lihaveise sink pipradekooriga, LINNAMÄE LIHATÖÖSTUS, 100 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,dairy_eggs_fats,dairy_cream_sourcream,high
+124255,"Sinine rannakarp (elus), KALAMAJAKAS, kg",KALAMAJAKAS OÜ,,Selver,,,meat_fish,fish_fresh,high
+124256,"Jahutatud broilerikintsud, TALLEGG, kg",,,Selver,,,dry_preserves,dry_flour_sugar_baking,high
+124257,"Piknikusink, viilutatud, KARNI, 150 g",,,Selver,,,meat_fish,meat_hams,high
+124258,"Delikatess suitsusink, MAKS&MOORITS, kg",ATRIA EESTI AS,,Selver,,,meat_fish,meat_hams,high
+124260,"Kergsuitsu seasink, RANNAROOTSI, kg",,,Selver,,,meat_fish,meat_hams,high
+124261,"Täissuitsu Hirvevorst lepasuitsujuustuga, LINNAMÄE LIHATÖÖSTUS, 230 g",LINNAMÄE LIHATÖÖSTUS AS,,"Coop, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+124262,"Serrano sink, RAKVERE LK, 105 g",MAAG EESTI AS,,"Coop, Selver",,,meat_fish,meat_hams,high
+124263,"Grill-liha suitsuse paprika marinaadis, LINNAMÄE LIHATÖÖSTUS, 500 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,sauces_oils,sauces_marinades,high
+124264,"Grill sardiinid õlis, EPINELL, 140g",DGM SHIPPING AS,,Selver,,,dry_preserves,dry_canned_meat_fish,high
+124265,"Broileritiivad mango-chilli marinaadis, SELVER, kg",SELVER AS,,Selver,,,sauces_oils,sauces_marinades,high
+124266,"Hirveliha omas mahlas, RANNAROOTSI, 240 g",,,Selver,,,drinks,drinks_juices,high
+124267,"Juustuvorst, MAKS&MOORITS, 300 g",ATRIA EESTI AS,,"Coop, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+124268,"Grillvorstid Kodu, MAKS&MOORITS, 600 g",ATRIA EESTI AS,,"Barbora, Coop, Maxima, Rimi, Selver",,,meat_fish,meat_sausages,high
+124269,"Poolsuitsuvorst Mini, NÕO, 135 g",NÕO LIHATÖÖSTUS OÜ,,"Barbora, Coop, Maxima, Rimi, Selver",,,meat_fish,meat_sausages,high
+124270,"Suitsutatud Juustuvorst, NÕO, 170 g",NÕO LIHATÖÖSTUS OÜ,,Selver,,,dairy_eggs_fats,dairy_cheese_slices,high
+124271,"Maasuitsu külg, RANNAROOTSI, kg",RANNAROOTSI LIHATÖÖSTUS AS,,Selver,,,meat_fish,fish_salted_smoked,high
+124272,"Lest roogitud, KALAMAJAKAS, kg",KALAMAJAKAS OÜ,,Selver,,,meat_fish,fish_fresh,high
+124273,"Talurulaad, RAKVERE LK, 350 g",MAAG EESTI AS,,"Coop, Selver",,,meat_fish,meat_hams,high
+124274,"Mini surimipulgad sriracha majoneesiga, VICI, 200g",VIČIUNAI BALTIC OÜ,,Selver,,,sauces_oils,sauces_ketchup_mayo,high
+124275,"Texase grilllõhe, SELVER, kg",,,Selver,,,meat_fish,fish_fresh,high
+124276,"Veise antrekoot, RAKVERE LK, kg",MAAG EESTI AS,,Selver,,,meat_fish,meat_beef_lamb_game,high
+124277,"Kalkunisink Fitlap, NÕO LIHAVÜRST, 105 g",NÕO LIHATÖÖSTUS OÜ,,"Barbora, Maxima, Rimi, Selver",,,meat_fish,meat_poultry,high
+124278,"Vürtsikilufileed, VIRU RAND, 100 g",VIRU RAND OÜ,,"Coop, Selver",,,world_spices,spices_herbs_spice_mix,high
+124279,"Lõhe omas mahlas EO, KAPTEN GRANT, 230 g",KAPTEN GRANT OÜ,,"Barbora, Maxima, Selver",,,drinks,drinks_juices,high
+124280,"Lõhe liblikfilee jahutatud, SELVER, kg",SELVER AS,,Selver,,,dry_preserves,dry_flour_sugar_baking,high
+124281,"Maksapasteet, SELVERI KÖÖK, 150 g",KULINAARIA OÜ,,Selver,,,drinks,drinks_tea_coffee,high
+124282,"Täissuitsu põdravorst, LINNAMÄE LIHATÖÖSTUS, 230 g",LINNAMÄE LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_sausages,high
+124283,"Kanafileefriikad juustuga, TALLEGG, 300 g",MAAG EESTI AS,,"Coop, Rimi, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+124284,"Seamaksaribad röstitud, NÕO, 200 g",NÕO LIHATÖÖSTUS OÜ,,Selver,,,meat_fish,meat_other,heuristic
+124285,"Tursamaks naturaalne, 250 g",CLAIRE FOODS OÜ,,Selver,,,other,dry_other,fallback
+124286,"Dražeed dekoratsiooniks 6tk, WERNER`S DECO, 150 g",NENALY TRADE OÜ,,Selver,,,other,dry_other,fallback
+124287,"Dražeed Fruits, SKITTLES, 38 g",SELVER AS,,"Coop, Selver",,,other,dry_other,fallback
+124288,"Drazeed hapud puuviljamaitselised närimiskommid, SKITTLES, 152 g",SELVER AS,,Selver,,,dry_preserves,dry_other,high
+124289,"Drazeed, SKITTLES, 95 g",SELVER AS,,"Coop, Selver",,,other,dry_other,fallback
+124290,"Vöner, viilutatud, VÖNER, 200 g",,,Selver,,,other,dry_other,fallback
+124291,"Sisefilee grillimiseks, SELVER, kg",SELVER AS,,Selver,,,other,dry_other,fallback
+124292,"Rullsink, RANNAROOTSI, kg",RANNAROOTSI LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_hams,high
+124293,"Kodune läätsekotlet, MARTA KULINAARIA, 240 g",EUROLEIB AS,,Selver,,,bakery,bakery_bread_loaves,high
+124294,"Praetud maks marinaadis, KARNI, 270 g",ARKE LIHATÖÖSTUS AS,,"Coop, Selver",,,sauces_oils,sauces_marinades,high
+124295,"Snäkk pro Mini õllesigar juustu , RAKVERE LK, 300 g",MAAG EESTI AS,,"Coop, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+124296,"Põhjapõdramaksa patee, LINNAMÄE LIHATÖÖSTUS, 160 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,drinks,drinks_tea_coffee,high
+124297,"Praetud heeringafilee tomatimarinaadis, VIRU RAND, 430 g",,,Selver,,,sauces_oils,sauces_marinades,high
+124298,"Dubai piimašokolaad, GERMIYAN, 100 g",SELVER AS,,"Coop, Selver",,,dairy_eggs_fats,dairy_milk,high
+124299,"Kanafilee hakksnitsel, TALLEGG, 340 g",MAAG EESTI AS,,Selver,,,meat_fish,meat_poultry,high
+124300,"Kuld-merikoger ehk Dorada roogitud, jahutatud, kg",Määramata,,Selver,,,dry_preserves,dry_flour_sugar_baking,high
+124301,"Vinnutatud veiseliha Teriyaki, KARNI, 50 g",ARKE LIHATÖÖSTUS AS,,"Coop, Selver",,,world_spices,spices_asian,high
+124302,"Poolsuitsuvorst, VALLA, 240 g",MAAG EESTI AS,,Selver,,,meat_fish,meat_sausages,high
+124303,"Tofuvorst Lemmik 250 g, BON VEGAN, 1 tk",BON VEGAN OÜ,,"Rimi, Selver",,,meat_fish,meat_sausages,high
+124304,"Grillpeekon BBQ, KARNI, 450 g",ARKE LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_pork,high
+124305,"Suitsutatud Doktorivorst, MAKS&MOORITS, 500 g",ATRIA EESTI AS,,"Coop, Selver",,,meat_fish,meat_sausages,high
+124306,"Forellimari, KAPTEN GRANT, 100 g",KAPTEN GRANT OÜ,,"Coop, Selver",,,meat_fish,fish_fresh,high
+124307,"Vinnutatud särg, KALURI, 200 g",LÄÄTSA KALATÖÖSTUS AS,,"Rimi, Selver",,,dry_preserves,dry_groats_beans,high
+124308,"Heeringafileetükid marinaadis Maie 130 g neto, SAARE HÕBE, 300 g",LÄÄTSA KALATÖÖSTUS AS,,Selver,,,dry_preserves,dry_groats_beans,high
+124310,"Salaami pähklitega, AOSTE, 150 g",DELINE OÜ,,Selver,,,sweets_snacks,sweets_nuts_driedfruit,high
+124311,"Suitsusardell, RANNAROOTSI, 500 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Barbora, Coop, Maxima, Rimi, Selver",,,meat_fish,meat_sausages,high
+124312,"Graavilõhe viilutatud, M.V.WOOL, 350 g",,,Selver,,,meat_fish,fish_fresh,high
+124313,"Juustulõige viilutatud, RANNAROOTSI, 150 g",RANNAROOTSI LIHATÖÖSTUS AS,,Selver,,,dairy_eggs_fats,dairy_cheese_slices,high
+124314,"Suitsupeekon, OSKAR, 120 g",OSKAR LT AS,,Selver,,,meat_fish,meat_pork,high
+124315,"Maksapasteet Oskari, OSKAR, 200 g",OSKAR LT AS,,Selver,,,drinks,drinks_tea_coffee,high
+124316,"Toorvorstid paprika ja tšilliga E-Vaba, MATSIMOKA, 300 g",MATSIMOKA OÜ,,Selver,,,meat_fish,meat_sausages,high
+124317,"Verivorst Memme (seasooles), MAKS&MOORITS, 500 g",ATRIA EESTI AS,,"Coop, Rimi, Selver",,,world_spices,spices_basic_salt_pepper,high
+124318,"Kartulikotlet maisi ja hernega, MARTA PAGAR, 240g",EUROLEIB AS,,Selver,,,bakery,bakery_bread_loaves,high
+124319,"Sea kulinaarne ribi, RAKVERE LK, kg",MAAG EESTI AS,,"Rimi, Selver",,,meat_fish,meat_pork,high
+124320,"Suflee lõhefileest, AVEKTRA, 220 g",AVEKTRA OÜ,,Selver,,,meat_fish,fish_fresh,high
+124321,"Poolsuitsuvorst Tamula, WÕRO, 350 g",ATRIA EESTI AS,,"Coop, Selver",,,meat_fish,meat_sausages,high
+124322,"Fit Broilerifileešašlõkk greibi ja mineraalveega, TALLEGG, 800 g",MAAG EESTI AS,,Selver,,,meat_fish,meat_poultry,high
+124323,"Kohafilee nahaga,jahutatud, KALAMAJAKAS, kg",KALAMAJAKAS OÜ,,Selver,,,dry_preserves,dry_flour_sugar_baking,high
+124324,"Kuumsuitsu lõhe/forelliribid, M.V.WOOL, kg",M.V.WOOL AS,,Selver,,,meat_fish,meat_pork,high
+124325,"Vürtsikilu fileed õlis, BRIIS, 160 g",DGM SHIPPING AS,,"Coop, Rimi, Selver",,,dry_preserves,dry_pasta_rice,high
+124326,"Lihakas doktorivorst, RAKVERE LK, 360 g",MAAG EESTI AS,,Selver,,,meat_fish,meat_sausages,high
+124327,"Põdralihaga pasteet, LINNAMÄE LIHATÖÖSTUS, 240 g",LINNAMÄE LIHATÖÖSTUS AS,,"Coop, Selver",,,drinks,drinks_tea_coffee,high
+124328,"Eesti Uluk Metssealihast täissuitsuvorst, RANNAROOTSI, 180 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_sausages,high
+124329,"Sprotid õlis, AMBERFISH, 250 g",CLAIRE FOODS OÜ,,Selver,,,sauces_oils,oils_other,high
+124330,"Kuumsuitsu vikerforellifilee portsjon pipraga, SAARE KALA, 120 g",SAARE KALA TOOTMINE OÜ,,Selver,,,meat_fish,fish_salted_smoked,high
+124331,"Põdraliha äkis (vajab külma), LINNAMÄE LIHATÖÖSTUS, 110 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_other,heuristic
+124332,"Supersmuuti kookose-ananassi-banaani, AURA, 330 ml",A. LE COQ AS,,"Coop, Rimi, Selver",,,bakery,bakery_cakes_pastries,high
+124333,"Smuuti vaarika ja mustika, PAI, 750 ml",ORKLA EESTI AS,,"Coop, Selver",,,produce,produce_berries,high
+124334,"Grill-liha BBQ mureli kaelakarbonaadist, RANNAROOTSI, 500 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic
+124335,"Porgandi-õunamahl, FRUUTI, 250 ml",GKR TRADE OÜ,,"Coop, Selver",,,drinks,drinks_juices,high
+124336,"Koorene piprakaste, FOODSTUDIO, 230 ml",ABESTOCK AS,,"Prisma, Rimi, Selver",,,dairy_eggs_fats,dairy_cream_sourcream,high
+124337,"Ökoloogiline passioni-mangopüree basiilikuga, SMUSHIE, 170 g",SALVEST AS,,"Coop, Selver",,,produce,produce_herbs_salads_sprouts,high
+124338,"Päevalille võrsed, VÄIKE MAHETALU, 50 g",LÕUNA-EESTI TOIDUVÕRGUSTIK TÜ,,Selver,,,produce,produce_apples_pears,high
+124339,"Korea salat, DIMDINI, 380 g",Määramata,,"Coop, Selver",,,produce,produce_herbs_salads_sprouts,high
+124340,"Smuuti Focus mustsõstra, maasika ja acai, FROOSH, 235 ml",FAIRFOOD OÜ,,"Coop, Rimi, Selver",,,produce,produce_berries,high
+124341,"Melon kollane, kg",Määramata,,Selver,,,produce,produce_tropical,high
+124342,"Paprika punane, kg",Määramata,,"Barbora, Maxima, Rimi, Selver",,,produce,produce_root_veg,high
+124343,"Lillkapsas, kg",Määramata,,Selver,,,produce,produce_root_veg,high
+124344,"Salatisibul, kg",Määramata,,"Barbora, Maxima, Rimi, Selver",,,produce,produce_herbs_salads_sprouts,high
+124345,"Tšillipipar punane lahtine, kg",Määramata,,Selver,,,world_spices,spices_basic_salt_pepper,high
+124346,"Koorene juustukaste, FOODSTUDIO, 230ml",ABESTOCK AS,,"Rimi, Selver",,,dairy_eggs_fats,dairy_cream_sourcream,high
+124347,"Porgand pestud, kg",Määramata,,Selver,,,produce,produce_root_veg,high
+124348,"Kookospähkel, kg",Määramata,,Selver,,,bakery,bakery_cakes_pastries,high
+124349,"Granaatõun, kg",,,"Rimi, Selver",,,produce,produce_apples_pears,high
+124350,"Mahe Idusalat (Lutserni, Mungoa- ja Läätse idud), RÜÜTS, 140 g",FRINGILLA OÜ,,"Coop, Selver",,,dry_preserves,dry_groats_beans,high
+124351,"Porgand pakitud, 1 kg",,,Selver,,,produce,produce_root_veg,high
+124352,"Koorene seenekaste puravikest, FOODSTUDIO, 230ml",ABESTOCK AS,,Selver,,,dairy_eggs_fats,dairy_cream_sourcream,high
+124353,"Õun Royal Gala, kg",Määramata,,"Rimi, Selver",,,produce,produce_apples_pears,high
+124354,"Tomat, kg",,,Selver,,,produce,produce_root_veg,high
+124355,"Kurk poolpikk, kg",Määramata,,Selver,,,produce,produce_root_veg,high
+124356,"Võrsetesegu, VÄIKE MAHETALU, 50 g",LÕUNA-EESTI TOIDUVÕRGUSTIK TÜ,,Selver,,,produce,produce_apples_pears,high
+124358,"Mahe Läätse idusalat (Beluga-ja Rohelise läätse idud), RÜÜTS, 140 g",FRINGILLA OÜ,,Selver,,,dry_preserves,dry_groats_beans,high
+124359,"Smuuti roheline, GRANINI, 250 ml",MOBEC AS,,Selver,,,produce,produce_smoothies_fresh_juices,high
+124360,"Pastinaak, kg",Määramata,,Selver,,,drinks,drinks_wine,high
+124361,"Peedimahl, KADARBIKU KÖÖGIVILI, 330 ml",KADARBIKU KÖÖGIVILI OÜ,,"Coop, Selver",,,drinks,drinks_juices,high
+124362,"Viinamari hele seemneteta, SELVER, 500 g",,,Selver,,,drinks,drinks_spirits,high
+124363,"Kookose-karri kaste, gluteenivaba, laktoosivaba, FOODSTUDIO, 350 ml",ABESTOCK AS,,"Rimi, Selver",,,drinks,drinks_tea_coffee,high
+124364,"Sinine ploom Lepotica, kg",Määramata,,Selver,,,other,dry_other,fallback
+124365,"Peakapsa Kimchi, KADARBIKU KÖÖGIVILI, 300g",KADARBIKU KÖÖGIVILI OÜ,,"Barbora, Maxima, Rimi, Selver",,,produce,produce_root_veg,high
+124366,"Supersmuuti mango-banaani-peedi, AURA, 330 ml",A. LE COQ AS,,"Coop, Rimi, Selver",,,produce,produce_tropical,high
+124367,"Spargel roheline, 450 g",Määramata,,Selver,,,other,dry_other,fallback
+124368,"Maasika, banaani ja guajaavi smuuti, FROOSH, 250 ml",FAIRFOOD OÜ,,Selver,,,produce,produce_berries,high
+124369,"Värskelt pressitud mahl, KADARBIKU KÖÖGIVILI, 250 ml",KADARBIKU KÖÖGIVILI OÜ,,Selver,,,drinks,drinks_juices,high
+124370,"Muskaatkõrvits, kg",,,Selver,,,other,dry_other,fallback
+124371,"Porrulauk, kg",Määramata,,"Barbora, Maxima, Rimi, Selver",,,other,dry_other,fallback
+124372,"Virsik, kg",Määramata,,Selver,,,other,dry_other,fallback
+124373,"Mahe Mungoa-Redise idusalat, RÜÜTS, 140 g",FRINGILLA OÜ,,Selver,,,produce,produce_herbs_salads_sprouts,high
+124374,"Roheline sibul pakitud, kg",Määramata,,"Barbora, Maxima, Rimi, Selver",,,produce,produce_root_veg,high
+124375,"Melon Kesk-Aasia, kg",Määramata,,"Barbora, Maxima, Selver",,,produce,produce_tropical,high
+124377,"Šampinjonid pruunid, 230 g",Määramata,,"Coop, Selver",,,produce,produce_mushrooms,high
+124378,"Troopiline segumahl mango ja passioniviljaga, GOD MORGON, 1,75 L",MOBEC AS,,Selver,,,drinks,drinks_juices,high
+124379,"Mahe idusalat, LÕUNAIDU, 150 g",Määramata,,"Coop, Selver",,,produce,produce_herbs_salads_sprouts,high
+124380,"Kapsasalat kurkumiga, EESTI AND, 450 g",EESTI AND OÜ,,"Barbora, Maxima, Rimi, Selver",,,produce,produce_herbs_salads_sprouts,high
+124381,"Jahubanaan, kg",Määramata,,Selver,,,dry_preserves,dry_flour_sugar_baking,high
+124382,"Supersmuuti Astelpaju-Porgandi-Mango, AURA , 330 ml",A. LE COQ AS,,"Coop, Rimi, Selver",,,produce,produce_tropical,high
+124383,"Ingveri Shot, FRANKLY, 60 ml",FAIRFOOD OÜ,,"Coop, Selver",,,other,dry_other,fallback
+124384,"Roheline sibul, 100 g",Määramata,,Selver,,,produce,produce_root_veg,high
+124386,"Smuuti maasika-kirsi, PAI, 200 g",ORKLA EESTI AS,,Selver,,,produce,produce_berries,high
+124387,"Pudelkõrvits, kg",,,Selver,,,other,dry_other,fallback
+124388,"Smuuti õuna, pirni ja ingveri Immunity, FROOSH, 235ml",FAIRFOOD OÜ,,"Coop, Selver",,,produce,produce_apples_pears,high
+124389,"Õun Granny Smith, kg",Määramata,,Selver,,,produce,produce_apples_pears,high
+124390,"Peakapsas varajane, kg",Määramata,,Selver,,,produce,produce_root_veg,high
+124391,"Kaalikas, kg",,,"Rimi, Selver",,,other,dry_other,fallback
+124392,"Mahe Lutserni idud, RÜÜTS, 100 g",FRINGILLA OÜ,,"Rimi, Selver",,,produce,produce_herbs_salads_sprouts,high
+124393,"Käharkapsas, kg",Määramata,,Selver,,,produce,produce_root_veg,high
+124394,"Porgand, RAUTSI TALU, 500 g",Määramata,,"Coop, Selver",,,produce,produce_root_veg,high
+124395,"Pirn Conference, kg",Määramata,,Selver,,,produce,produce_apples_pears,high
+124396,"Spargelkartul pakendatud, 1 kg",Määramata,,Selver,,,produce,produce_root_veg,high
+124397,"Hernevõrsed, VÄIKE MAHETALU, 50 g",LÕUNA-EESTI TOIDUVÕRGUSTIK TÜ,,Selver,,,produce,produce_apples_pears,high
+124398,"Smuuti mango ja apelsini, PAI, 750 ml",ORKLA EESTI AS,,"Coop, Selver",,,produce,produce_tropical,high
+124399,"Virsiku ja granadilli smuuti, FROOSH, 250 ml",FAIRFOOD OÜ,,"Coop, Rimi, Selver",,,produce,produce_smoothies_fresh_juices,high
+124400,"Kanapuljong Tai moodi, FOODSTUDIO, 350 ml",ABESTOCK AS,,Selver,,,world_spices,spices_broth_stock,high
+124401,"Brokoli võrsed, VÄIKE MAHETALU, 40 g",LÕUNA-EESTI TOIDUVÕRGUSTIK TÜ,,Selver,,,produce,produce_apples_pears,high
+124402,"Avokaado, kg",Määramata,,"Barbora, Maxima, Rimi, Selver",,,other,dry_other,fallback
+124403,"Mango Palmer, kg",Määramata,,Selver,,,produce,produce_tropical,high
+124404,"Mahe Mungoa idud, RÜÜTS, 140 g",FRINGILLA OÜ,,"Rimi, Selver",,,produce,produce_herbs_salads_sprouts,high
+124405,"Õun Paulared, kg",Määramata,,Selver,,,produce,produce_apples_pears,high
+124406,"Õun Jonagored/Jonagold, kg",,,Selver,,,produce,produce_apples_pears,high
+124407,"Petersell potis, GRÜNE FEE, tk",Määramata,,"Coop, Rimi, Selver",,,produce,produce_herbs_salads_sprouts,high
+124408,"Rukola potis, GRÜNE FEE, tk",Määramata,,Selver,,,produce,produce_herbs_salads_sprouts,high
+124409,"Frillis potis, GRÜNE FEE, tk",Määramata,,"Coop, Selver",,,other,dry_other,fallback
+124410,"Virsik Paraguayo, kg",Määramata,,"Barbora, Maxima, Rimi, Selver",,,other,dry_other,fallback
+124411,"Laim Tahiti, kg",Määramata,,Selver,,,produce,produce_tropical,high
+124412,"Salat Mangold, VITA VERDE , 100g",Määramata,,Selver,,,drinks,drinks_wine,high
+124414,"Šampinjonid valged, 230 g",Määramata,,"Coop, Selver",,,produce,produce_mushrooms,high
+124415,"Mahe Banaan, kg",Määramata,,Selver,,,produce,produce_tropical,high
+124416,"Ploomtomat karbis, 500g",Määramata,,Selver,,,produce,produce_root_veg,high
+124417,"Ploomtomat kollane karbis, , 500g",Määramata,,Selver,,,produce,produce_root_veg,high
+124418,"Mango, banaani, õuna värskelt pressitud mahl, KADARBIKU KÖÖGIVILI, 750 ml",KADARBIKU KÖÖGIVILI OÜ,,Selver,,,drinks,drinks_juices,high
+124419,"Mango-apelsini smuuti, FROOSH, 250 ml",FAIRFOOD OÜ,,"Coop, Selver",,,produce,produce_tropical,high
+124420,"Smuuti kollane(mango, õun, apelsin, banaan, acerola), GRANINI, 250 ml",MOBEC AS,,Selver,,,produce,produce_apples_pears,high
+124421,"Ingveri, kurkumi ja tšilli Shot, FRANKLY, 60 ml",FAIRFOOD OÜ,,"Coop, Selver",,,produce,produce_root_veg,high
+124422,"Smuuti meloni ja passiooni, PAI, 280 ml",ORKLA EESTI AS,,"Coop, Selver",,,produce,produce_tropical,high
+124424,"Maitsestatud tomatimahlajook ""Bloody Mary Virgin"", DIMDINI, 250 ml",Määramata,,"Coop, Rimi, Selver",,,drinks,drinks_spirits,high
+124425,"Hele viinamari Sultana, kg",Määramata,,Selver,,,drinks,drinks_spirits,high
+124426,"Viilutatud soolakurk tšilliga, SÄGA-AAVIKU TALU, 500 g",EESTIMAA VILJAD OÜ,,Selver,,,world_spices,spices_basic_salt_pepper,high
+124427,"Ökoloogiline Õuna-spinatipüree chia seemnetega, SMUSHIE, 170 g",SALVEST AS,,"Coop, Rimi, Selver",,,sweets_snacks,sweets_nuts_driedfruit,high
+124428,"Granadill lahtine, kg",Määramata,,Selver,,,other,dry_other,fallback
+124429,"Smuuti õuna, maasika ja sidruni, FROOSH, 250 ml",FAIRFOOD OÜ,,Selver,,,produce,produce_berries,high
+124430,"Eriti Vürtsikas Peakapsa Kimchi, KRIMCHI, 400 g",FERMENCY OÜ,,Selver,,,world_spices,spices_herbs_spice_mix,high
+124431,"Hiinakapsa Kimchi, KRIMCHI, 400 g",FERMENCY OÜ,,"Coop, Selver",,,produce,produce_root_veg,high
+124432,"Suitsune Kimchi Lillkapsaga, KRIMCHI, 400 g",FERMENCY OÜ,,Selver,,,meat_fish,fish_salted_smoked,high
+124433,"Peakapsa Kimchi, KRIMCHI, 400 g",FERMENCY OÜ,,Selver,,,produce,produce_root_veg,high
+124434,"Tume viinamari Moldova, kg",Määramata,,Selver,,,drinks,drinks_spirits,high
+124435,"Juurseller, kg",Määramata,,"Barbora, Maxima, Selver",,,other,dry_other,fallback
+124436,"Mahe Piparmündi kombucha, SÄSI, 330 ml",SÄSI PRUULIKODA OÜ,,Selver,,,world_spices,spices_basic_salt_pepper,high
+124437,"Paprika mix, 500 g",Määramata,,Selver,,,produce,produce_root_veg,high
+124438,"Rosmariin suures potis, tk",Määramata,,"Coop, Selver",,,other,dry_other,fallback
+124439,"Puuviljasalat, 300 g",Määramata,,Selver,,,produce,produce_fruit_salads,high
+124440,"Piparmünt potis, GRÜNE FEE, tk",Määramata,,"Rimi, Selver",,,world_spices,spices_basic_salt_pepper,high
+124441,"Salat Rukola, VITA VERDE, 100 g",Määramata,,Selver,,,drinks,drinks_wine,high
+124442,"Värske soolakurk redisega, SÄGA-AAVIKU TALU, 500 g",EESTIMAA VILJAD OÜ,,Selver,,,world_spices,spices_basic_salt_pepper,high
+124443,"Õun Eesti, erinevad sordid, kg",EESTIMAA VILJAD OÜ,,Selver,,,produce,produce_apples_pears,high
+124444,"Koorene Kukeseene kaste, FOODSTUDIO, 230ml",ABESTOCK AS,,Selver,,,dairy_eggs_fats,dairy_cream_sourcream,high
+124445,"Pirn Guyot, kg",Määramata,,"Barbora, Maxima, Rimi, Selver",,,produce,produce_apples_pears,high
+124446,"Smuuti maasika-mango kaera Fitlap, PAI+, 280 ml",ORKLA EESTI AS,,"Coop, Rimi, Selver",,,produce,produce_berries,high
+124447,"Mahe suvikõrvits, KOPRA SAHVER , kg",EESTIMAA VILJAD OÜ,,Selver,,,other,dry_other,fallback
+124448,"Marineeritud küüslauk tšilliga, 160 g",Määramata,,"Coop, Rimi, Selver",,,produce,produce_root_veg,high
+124449,"Eriti Vürtsikas Hiinakapsa Kimchi, KRIMCHI, 400 g",FERMENCY OÜ,,Selver,,,world_spices,spices_herbs_spice_mix,high
+124450,"Kiivi, kg",Määramata,,"Barbora, Maxima, Rimi, Selver",,,produce,produce_tropical,high
+124451,"Kurk Luunja, GRÜNE FEE, kg",GRÜNE FEE EESTI AS,,"Barbora, Maxima, Rimi, Selver",,,produce,produce_root_veg,high
+124452,"Jääsalat, kg",Määramata,,Selver,,,produce,produce_herbs_salads_sprouts,high
+124453,"Pirn Conference, 1 kg",Määramata,,Selver,,,produce,produce_apples_pears,high
+124454,"Varsseller, kg",Määramata,,Selver,,,other,dry_other,fallback
+124455,"Hapukurk Peipsi, GERMANI TALU, 500 g",Määramata,,"Coop, Selver",,,produce,produce_root_veg,high
+124456,"Porgandi-õunamahl, FRUUTI, 750 ml",GKR TRADE OÜ,,"Coop, Rimi, Selver",,,drinks,drinks_juices,high
+124457,"Smuuti mango-guajaavi, PAI, 750 ml",ORKLA EESTI AS,,"Rimi, Selver",,,produce,produce_tropical,high
+124458,"Maitseroheline pakitud, kg",Määramata,,Selver,,,other,dry_other,fallback
+124459,"Ananass, kg",Määramata,,"Barbora, Maxima, Selver",,,produce,produce_tropical,high
+124460,"Punane viinamari Red Globe, kg",Määramata,,Selver,,,drinks,drinks_spirits,high
+124461,"Kurk lühike, kg",Määramata,,"Rimi, Selver",,,produce,produce_root_veg,high
+124462,"Värske soolakurk ämbris, VIIBERGI, 350 g",Määramata,,"Rimi, Selver",,,world_spices,spices_basic_salt_pepper,high
+124463,"Mango-apelsini smuuti, PAI, 280 ml",ORKLA EESTI AS,,"Barbora, Coop, Maxima, Rimi, Selver",,,produce,produce_tropical,high
+124464,"Punase veini kaste, FOODSTUDIO, 230 ml",ABESTOCK AS,,"Rimi, Selver",,,drinks,drinks_wine,high
+124465,"Smuuti maasika ja banaani, PAI, 750 ml",ORKLA EESTI AS,,"Coop, Selver",,,produce,produce_berries,high
+124466,"Hapendatud kasemahl mahe, KASEVETEKOHIN, 330 ml",SÄSI PRUULIKODA OÜ,,Selver,,,drinks,drinks_juices,high
+124467,"Värske lehtsalatite mix, EESTIMAA VILJAD, 100 g",EESTIMAA VILJAD OÜ,,Selver,,,produce,produce_herbs_salads_sprouts,high
+124468,"Värviline grillsalat, SÄGA-AAVIKU TALU, 500 g",EESTIMAA VILJAD OÜ,,Selver,,,produce,produce_herbs_salads_sprouts,high
+124469,"Mündi ja sidrunheina kombucha, KARU KOMBUCHA, 330 ml",EESTIMAA VILJAD OÜ,,Selver,,,produce,produce_tropical,high
+124470,"Varajane kartul, ENN KULL, 1 kg",,,Selver,,,produce,produce_root_veg,high
+124471,"Smuuti mango-kookos münt Fitlap, PAI+, 280 ml",ORKLA EESTI AS,,"Coop, Selver",,,bakery,bakery_cakes_pastries,high
+124472,"Smuuti mango-passion, DON SIMON, 750ml",BALMERK ESTONIA OÜ MEDIATO ÄRIDIVISJON,,Selver,,,produce,produce_tropical,high
+124473,"Smuuti marja segu, DON SIMON, 750 ml",BALMERK ESTONIA OÜ MEDIATO ÄRIDIVISJON,,Selver,,,produce,produce_smoothies_fresh_juices,high
+124474,"Koriander, 50 g",Määramata,,Selver,,,produce,produce_herbs_salads_sprouts,high
+124475,"Loorber, 50 g",Määramata,,Selver,,,other,dry_other,fallback
+124476,"Kiivi kollane karbis, 500 g",Määramata,,Selver,,,produce,produce_tropical,high
+124477,"Rukola, 75 g",Määramata,,Selver,,,produce,produce_herbs_salads_sprouts,high
+124478,"Rosmariin, 50 g",Määramata,,"Coop, Selver",,,other,dry_other,fallback
+124479,"Tamarind, 450 g",Määramata,,Selver,,,other,dry_other,fallback
+124480,"Sidrunhein pakis, EAT ME, 50 g",Määramata,,"Coop, Selver",,,produce,produce_tropical,high
+124481,"Paksoi pakis, EAT ME, 2 tk",Määramata,,Selver,,,other,dry_other,fallback
+124482,"Tšillipipar Cayenne mix, EAT ME, 75 g",Määramata,,"Coop, Selver",,,world_spices,spices_basic_salt_pepper,high
+124483,"Padrone pipar pakitud, EAT ME, 200 g",Määramata,,Selver,,,world_spices,spices_basic_salt_pepper,high
+124484,"Habanero pipra MIX, EAT ME, 50 g",Määramata,,Selver,,,other,dry_other,fallback
+124485,"Varajane kartul, kg",,,Selver,,,produce,produce_root_veg,high
+124486,"Mustikad karbis, 1 kg",ANTALIS OÜ,,"Coop, Selver",,,produce,produce_berries,high
+124487,"Õun Golden, kg",KODUPABER AS,,Selver,,,produce,produce_apples_pears,high
+124489,"Apteegitilli tee, 5+ kuud, BEBIVITA, 200 g",LTT AS,,Selver,,,drinks,drinks_tea_coffee,high
+124490,"Assortiikarp After dinner, JAKOBSEN, 140 g",,,Selver,,,other,dry_other,fallback
+124491,"Banaani lõigud, TAKE1 REGULAR, 100 g",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,produce,produce_tropical,high
+124492,"Banaani-piimapuder täisterahelve, HOLLE, 250 g",GOLDBERGER OÜ,,Selver,,,dairy_eggs_fats,dairy_milk,high
+124493,"Banaanikrõpsud, SEEBERGER, 150 g",SELVER AS,,"Coop, Selver",,,sweets_snacks,sweets_snacks_salty,high
+124494,"Banaanilaastud ÖKO, KOMMI ASEMEL, 100 g",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,sweets_snacks,sweets_candies,high
+124495,"Banaanipüree pirni ja mangoga mahe 4+, HIPP, 100 g",,,Selver,,,produce,produce_apples_pears,high
+124496,"Beebi šampoon & vanni-ja pesugeel, NEUTRAL, 250 ml",EUGESTA EESTI OÜ,,"Rimi, Selver",,,baby,baby_care,high
+124497,"Beebi vanni- ja dušigeel Sensitive Skin, NEUTRAL, 250 ml",,,Selver,,,baby,baby_other,high
+124498,"Beebiküpsis Mahe 6+, HIPP, 180g",LTT AS,,"Coop, Selver",,,sweets_snacks,sweets_biscuits_cookies,high
+124499,"Beebinõude pesuvahend, MAM, 500ml",LTT AS,,Selver,,,baby,baby_other,high
+124500,"Beebipuuder SOS talgivaba, BÜBCHEN, 80 g",GERMAN PRODUCTS ESTONIA OÜ,,Selver,,,baby,baby_other,high
+124501,"Biolagunevad prügikotid, 20l, MCLEAN, 10 tk",PRIME PARTNER AS,,Selver,,,other,dry_other,fallback
+124502,"Biolagunevad prügikotid 75l, DREAMHOME, 10 tk",PRIME PARTNER AS,,Selver,,,other,dry_other,fallback
+124503,"Biskviit šokolaaditäidisega, BARNI, 150 g",,,"Rimi, Selver",,,sweets_snacks,sweets_chocolate_bars,high
+124504,"Biskviitküpsis, LÕUNA PAGARID, 200 g",LÕUNA PAGARID AS,,Selver,,,sweets_snacks,sweets_biscuits_cookies,high
+124505,"Brasiilia pähkel, PÄHKLINÄPP, 200 g",ALIS CO ESTONIA OÜ,,"Coop, Selver",,,sweets_snacks,sweets_nuts_driedfruit,high
+124506,"Breezer Orange, BACARDI, 275 ml",LIVIKO AS,,"Coop, Selver",,,other,dry_other,fallback
+124507,"Breezer Watermelon, BACARDI, 275 ml",LIVIKO AS,,"Coop, Selver",,,produce,produce_tropical,high
+124508,"Brioche burgerikukkel, LEIBUR, 280 g",LEIBUR AS,,"Barbora, Coop, Maxima, Rimi, Selver",,,bakery,bakery_bread_loaves,high
+124509,"Broileri kintsuliha mango-tüümianimarinaadis, SELVER, kg",SELVER AS,,Selver,,,sauces_oils,sauces_marinades,high
+124510,"Broileri poolkoivatükid mango-kookose marinaadis, TALLEGG, 800 g",,,Selver,,,bakery,bakery_cakes_pastries,high
+124511,"Broileri pooltiib mango-tüümianimarinaadis, SELVER, kg",SELVER AS,,Selver,,,sauces_oils,sauces_marinades,high
+124512,"Broileri pooltiivad mango-tšillimarinaadis, SELVER, kg",SELVER AS,,Selver,,,sauces_oils,sauces_marinades,high
+124513,"Broileri pooltiivad Tsitruse-tšilli, LINNAMÄE LIHATÖÖSTUS, 500 g",,,Selver,,,meat_fish,meat_poultry,high
+124514,"Broileri rinnafilee ananassimarinaadis, MATSIMOKA, 500 g",,,Selver,,,sauces_oils,sauces_marinades,high
+124515,"Durumjahust täistera penned, TARTU MILL, 500 g",TARTU MILL AS,,"Coop, Selver",,,drinks,drinks_spirits,high
+124516,"Durumjahust täistera Spagetid, TARTU MILL, 500 g",TARTU MILL AS,,"Coop, Selver",,,drinks,drinks_spirits,high
+124517,"Durumnisujahupasta Fusilli, TARTU MILL, 500 g",TARTU MILL AS,,"Coop, Rimi, Selver",,,drinks,drinks_spirits,high
+124518,"Durumnisujahupasta Puntine Grand, TARTU MILL, 500 g",TARTU MILL AS,,"Coop, Selver",,,drinks,drinks_spirits,high
+124519,"Durumnisumannast pasta ""autod"" tomati ja spinatiga, DALLA, 300 g",LOODUSVÄGI OÜ,,Selver,,,drinks,drinks_spirits,high
+124520,"Durumnisumannast pasta ""printsess"" tomati ja spinatiga, DALLA, 300 g",LOODUSVÄGI OÜ,,Selver,,,drinks,drinks_spirits,high
+124521,"Džinn BEEFEATER, 50 cl",PERNOD RICARD ESTONIA OÜ,,Selver,,,meat_fish,meat_beef_lamb_game,high
+124522,"Džinn BEEFEATER London Dry, 70 cl",,,Selver,,,meat_fish,meat_beef_lamb_game,high
+124523,"Džinn BEEFEATER Pink, 70 cl",PERNOD RICARD ESTONIA OÜ,,Selver,,,meat_fish,meat_beef_lamb_game,high
+124524,"Džinn BOMBAY SAPPHIRE Dry, 70 cl",LIVIKO AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback
+124525,"Džinn BOTANIST Islay Dry, 70 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback
+124526,"Džinn CRAFTERS Aromatic Flower, 70 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback
+124527,"Džinn GORDON´S London Dry, 70 cl",PRIKE AS,,"Coop, Selver",,,other,dry_other,fallback
+124528,"Džinn GORDON'S Mediterranean Orange, 70cl",PRIKE AS,,Selver,,,other,dry_other,fallback
+124529,Džinn GORDON'S Passionfruit 70 cl,PRIKE AS,,Selver,,,other,dry_other,fallback
+124530,"Džinn GORDON`S Pink, 70 cl",PRIKE AS,,Selver,,,other,dry_other,fallback
+124531,"Džinn GORDON´S Sicilian Lemon, 70cl",PRIKE AS,,Selver,,,other,dry_other,fallback
+124532,"Džinn JUNIMPERIUM Summer Edition, 70 cl",PRIKE AS,,Selver,,,other,dry_other,fallback
+124533,Džinn Juniper Island London Dry 70 cl,BALMERK ESTONIA OÜ,,Selver,,,other,dry_other,fallback
+124534,Džinn Juniper Island Nordic Rhubarb 70 cl,BALMERK ESTONIA OÜ,,Selver,,,other,dry_other,fallback
+124535,Džinn Kada Kirsi 50 cl,PRIKE AS,,Selver,,,other,dry_other,fallback
+124536,Džinn Kada Longero Gin 50cl,PRIKE AS,,Selver,,,drinks,drinks_spirits,high
+124537,Džinn Kada Pihlaka 50 cl,PRIKE AS,,Selver,,,other,dry_other,fallback
+124538,"Džinn KINGSMILL, 20 cl",LIVIKO AS,,"Coop, Selver",,,other,dry_other,fallback
+124539,"Džinn KINGSMILL Pink Raspberry, 50 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback
+124540,"Džinn MALFY Originale, 70 cl",PERNOD RICARD ESTONIA OÜ,,Selver,,,drinks,drinks_spirits,high
+124541,"Džinn MALFY Rosa, 70 cl",PERNOD RICARD ESTONIA OÜ,,Selver,,,other,dry_other,fallback
+124542,"Guljašš, SALVEST, 530 g",SALVEST AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback
+124543,"Dzinn NORDIC SPIRITS LAB Mediterranean, 50 cl",ANORA ESTONIA AS,,"Rimi, Selver",,,other,dry_other,fallback
+124544,Džinn Normindia Biologique 70 cl,TRIDENS AS,,Selver,,,other,dry_other,fallback
+124545,Džinn Normindia Orange 70 cl,TRIDENS AS,,Selver,,,other,dry_other,fallback
+124546,"Džinn SAARE crafted, 50 cl",AMBER DISTRIBUTION ESTONIA OÜ,,Selver,,,other,dry_other,fallback
+124547,"Džinn SAAREMAA, 50 cl",ANORA ESTONIA AS,,"Coop, Selver",,,other,dry_other,fallback
+124548,Džinn SKAGERRAK Nordic Dry 70cl,ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback
+124549,Džinn Sünk London Dry 50 cl,NORDISTA OÜ,,Selver,,,other,dry_other,fallback
+124550,"Džinn TANQUERAY Blackcurrant Royale, 70 cl",PRIKE AS,,Selver,,,other,dry_other,fallback
+124551,"Džinn TANQUERAY Flor de Sevilla, 70 cl",PRIKE AS,,Selver,,,other,dry_other,fallback
+124552,"Džinn TANQUERAY No Ten, 70 cl",PRIKE AS,,Selver,,,other,dry_other,fallback
+124553,Džinn TOHI Aronia Infused 50cl,MOMENTIN EESTI OÜ,,Selver,,,other,dry_other,fallback
+124554,"Džinn TOHI London Dry Ginger & Sichuan Pepper, 50 cl",MOMENTIN EESTI OÜ,,Selver,,,drinks,drinks_spirits,high
+124555,"Džinn TOHI Nordic Dry Cloudberry, 50 cl",MOMENTIN EESTI OÜ,,Selver,,,other,dry_other,fallback
+124556,"Earl Grey Fantasy must tee 25 x 2 g, GREENFIELD, 50 g",CLAIRE FOODS OÜ,,"Coop, Selver",,,drinks,drinks_tea_coffee,high
+124557,"Earl Grey purutee, TWININGS, 100 g",FESTIVAL OÜ,,"Barbora, Maxima, Rimi, Selver",,,drinks,drinks_tea_coffee,high
+124558,"Edam juust laktoosivaba, E-PIIM, 350 g",E-PIIM TOOTMINE AS,,"Coop, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+124559,"Edam juust viil laktoosivaba, MO SAAREMAA, 450 g",PINUS AS,,"Coop, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+124560,"Eelkeedetud sõmer riis, TARTU MILL, 1 kg",TARTU MILL AS,,"Coop, Selver",,,dry_preserves,dry_pasta_rice,high
+124561,"Eesti juust laktoosivaba, VALIO, 350 g",VALIO EESTI AS,,"Coop, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+124562,"Eesti juust Light viilutatud + Edam juust viilutatud (kombopakend), E-PIIM, 450 g",,,Selver,,,dairy_eggs_fats,dairy_cheese_slices,high
+124563,"Eesti juust viil laktoosivaba, MO SAAREMAA, 450 g",PINUS AS,,Selver,,,dairy_eggs_fats,dairy_cheese_slices,high
+124565,"Eesti Juust viilud, ESTOVER, 500 g",,,"Rimi, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+124566,"Eesti Õiemesi, SELVER, 1 kg",LÕUNA-EESTI MESI OÜ,,Selver,,,produce,produce_apples_pears,high
+124567,"Eesti Uluk Põdralihapelmeenid, RANNAROOTSI, 350 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_beef_lamb_game,high
+124568,"EHE linnuliha mini-frikadellid (E-vaba), RANNAROOTSI, 350 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic
+124569,"EHE linnuliha pelmeenid (E-vaba), RANNAROOTSI, 350 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic
+124570,"EHE pelmeenid (E-vaba), RANNAROOTSI, 600 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Prisma, Selver",,,meat_fish,meat_other,heuristic
+124571,"Ehe rabarberikook, SELVERI KÖÖK, 250 g",KULINAARIA OÜ,,Selver,,,bakery,bakery_cakes_pastries,high
+124572,"Ehe rabarberikook, SELVERI KÖÖK, 500 g",KULINAARIA OÜ,,Selver,,,bakery,bakery_cakes_pastries,high
+124573,"Ehtne suvesalat, SELVERI KÖÖK, 1,2 kg, ettetellimisel",KULINAARIA OÜ,,Selver,,,produce,produce_herbs_salads_sprouts,high
+124574,"Eine bulguri ja köögiviljadega Lunch Bowl, BONDUELLE, 250g",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,dry_preserves,dry_canned_veg,high
+124575,"Eine kinoa ja köögiviljadega Lunch Bowl, BONDUELLE, 250g",JUNGENT ESTONIA OÜ,,Selver,,,dry_preserves,dry_canned_veg,high
+124576,"Eine spelta ja köögiviljadega Lunch Bowl, BONDUELLE, 250g",JUNGENT ESTONIA OÜ,,Selver,,,dry_preserves,dry_canned_veg,high
+124577,"Ekstra väärisoliiviõli, AENAON, 500 ml",TYCHE INDUSTRIES OÜ,,Selver,,,sauces_oils,oils_olive,high
+124578,"Ekstra väärisoliiviõli basiilikuga sprei, MANTOVA, 200 ml",SELVER AS,,Selver,,,sauces_oils,oils_olive,high
+124579,"Ekstra väärisoliiviõli, FILIPPO BERIO, 500 ml",SVENSKY KAUBANDUSE AS,,"Coop, Prisma, Selver",,,sauces_oils,oils_olive,high
+124580,"Ekstra väärisoliiviõli First Harvest, BORGES, 500 ml",LEJOS EESTI OÜ,,Selver,,,sauces_oils,oils_olive,high
+124581,"Ekstra-väärisoliiviõli Frantoio, MURAGLIA, 500 ml",BBQ ENTERTAINMENT OÜ,,Selver,,,sauces_oils,oils_olive,high
+124582,"Ekstra väärisoliiviõli, GOURMANTE, 500 ml",SANITEX OÜ,,Selver,,,sauces_oils,oils_olive,high
+124583,"Ekstra väärisoliiviõli musta trühvliga, DANTE, 250 ml",KAUPMEES & KO AS,,Selver,,,sauces_oils,oils_olive,high
+124584,"Ekstra väärisoliiviõli, OLEUM CRETE, 1 l",TYCHE INDUSTRIES OÜ,,Selver,,,sauces_oils,oils_olive,high
+124585,"Ekstra väärisoliiviõli rosmariiniga sprei, MANTOVA, 200 ml",SELVER AS,,Selver,,,sauces_oils,oils_olive,high
+124586,"Ekstra väärisoliiviõli, SALVADORI, 500 ml",M&V TRADE OÜ,,"Coop, Selver",,,sauces_oils,oils_olive,high
+124587,"Ekstra väärisoliiviõli sidruniga, GOCCIA D'ORO, 250 ml",MAKRO TRADE BALTIC OÜ,,Selver,,,sauces_oils,oils_olive,high
+124588,"Ekstra väärisoliiviõli sprei, MANTOVA, 200 ml",SELVER AS,,Selver,,,sauces_oils,oils_olive,high
+124589,"Ekstra väärisoliiviõli trühvlitega, GOCCIA D'ORO, 250 ml",MAKRO TRADE BALTIC OÜ,,Selver,,,sauces_oils,oils_olive,high
+124590,"Ekstra väärisoliivõli pihustiga, GOURMANTE, 100 ml",SANITEX OÜ,,"Coop, Selver",,,sauces_oils,oils_other,high
+124591,"Ekstratume küpsetusšokolaad 70%, FAZER, 100 g",,,Selver,,,dry_preserves,dry_flour_sugar_baking,high
+124592,"Emma jäätisemaitseline jogurt kommidega, EMMA, 145 g",TERE AS,,"Coop, Rimi, Selver",,,dairy_eggs_fats,dairy_yogurt_kefir,high
+124593,"Emma Jogurt riisikuulidega šokolaadis, EMMA, 145 g",TERE AS,,"Coop, Selver",,,dairy_eggs_fats,dairy_yogurt_kefir,high
+124594,"Eriti pikk Sella Basmati aururiis XXL, BANNO, 500 g",ARTONIS OÜ,,Selver,,,dry_preserves,dry_pasta_rice,high
+124595,"Essenza Dark Morello Cherry & Pomegranate, SANPELLEGRINO, 330 ml",SVENSKY KAUBANDUSE AS,,Selver,,,other,dry_other,fallback
+124596,"Essenza Tangerine & Wild Strawberry, SANPELLEGRINO, 330 ml",SVENSKY KAUBANDUSE AS,,Selver,,,other,dry_other,fallback
+124597,"Estragon, MEIRA, 9 g",MEIRA EESTI OÜ,,Selver,,,other,dry_other,fallback
+124598,"Eukalüpti-mentoolimaitseline täidisega karamell, KALEV, 120 g",ORKLA EESTI AS,,"Coop, Rimi, Selver",,,sweets_snacks,sweets_candies,high
+124599,"Euphoria pulgajäätis, MAGNUM, 69,5 g",UNILEVER EESTI AS,,Selver,,,frozen_food,frozen_desserts_icecream,high
+124600,"Fajita maitseainesegu, SANTA MARIA, 28 g",SANTA MARIA AS,,"Coop, Rimi, Selver",,,world_spices,spices_herbs_spice_mix,high
+124601,"Farfalle la RUVIDA Bronze, REGGIA, 500 g",,,Selver,,,other,dry_other,fallback
+124602,"Kohvipadjad Strong, SENSEO, 36tk",SELVER AS,,Selver,,,drinks,drinks_other,heuristic
+124603,"Feel More pressitud granaatõunamahl, DIMES, 700 ml",INTERALTUS OÜ,,"Coop, Selver",,,drinks,drinks_juices,high
+124604,"Fermenteeritud maitsestamata kaerakreem laktoosivaba, FRIENDLY VIKING´S, 200 g",ABESTOCK AS,,"Coop, Selver",,,drinks,drinks_tea_coffee,high
+124605,"Fermenteeritud sojatoode maitsestamata, ALPRO, 400 g",NUTRICIA SIA,,"Rimi, Selver",,,drinks,drinks_tea_coffee,high
+124606,"Fetajuust, OLYMPUS, 150 g",VALIO EESTI AS,,"Coop, Rimi, Selver",,,dairy_eggs_fats,dairy_cheese_slices,high
+124607,"Filtri-ja presskannukohv Prodomo, DALLMAYR, 500 g",GERMAN PRODUCTS ESTONIA OÜ,,Selver,,,drinks,drinks_other,heuristic
+124608,"Filtri-,kannu-ja presskannukohv Mellan keskmine röst, ARVID NORDQUIST, 500 g",MAIC KAUBANDUSE AS,,"Coop, Selver",,,drinks,drinks_other,heuristic
+124609,"Filtrikohv 103 Mellemristet, MERRILD, 500 g",SELVER AS,,"Coop, Selver",,,drinks,drinks_other,heuristic
+124611,"Filtrikohv Luxus, LUXUS, 500 g",PRIKE AS,,"Coop, Selver",,,drinks,drinks_other,heuristic
+124612,"Filtrikohv Presidentti Gold, PAULIG, 500 g",PAULIG COFFEE ESTONIA AS,,"Coop, Prisma, Selver",,,drinks,drinks_other,heuristic
+124613,"Filtrikohv Presidentti Original, PAULIG, 250 g",PAULIG COFFEE ESTONIA AS,,Selver,,,drinks,drinks_spirits,high
+124614,"FIT tervisepada, MAAHÄRRA, 400 g",PREMIA TALLINNA KÜLMHOONE AS,,Selver,,,other,dry_other,fallback
+124615,"Fitlap Koorejäätis, BALBIINO, 52 g",BALBIINO AS,,"Coop, Selver",,,dairy_eggs_fats,dairy_cream_sourcream,high
+124616,"Fitlap täisterarukkileib D-vitamiiniga, LEIBUR, 390 g",LEIBUR AS,,"Coop, Selver",,,bakery,bakery_bread_loaves,high
+124617,"Fitlapi laktoosivaba šokolaadi-koorejäätis, BALBIINO, 52 g",BALBIINO AS,,"Coop, Selver",,,dairy_eggs_fats,dairy_cream_sourcream,high
+124618,"FIX Carbonara, KNORR, 47g",SELVER AS,,Selver,,,other,dry_other,fallback
+124619,"FIX Lasagne kastmesegu, KNORR, 43 g",SELVER AS,,"Coop, Selver",,,sauces_oils,sauces_other,heuristic
+124620,"Franzi kaneelisaiake, SELVERI PAGARID, 115 g",BALT-HELLIN OÜ,,Selver,,,bakery,bakery_buns_croissants,high
+124621,"Friikartul sirge 10 mm, FANTASY, 1 kg",BALBIINO AS,,Selver,,,drinks,drinks_soft_soda,high
+124622,"Friikartulimaitseaine, MEIRA, 120 g",MEIRA EESTI OÜ,,"Coop, Selver",,,frozen_food,frozen_potato_products,high
+124623,"Fritüürõli, OILIO, 1 l",CLAIRE FOODS OÜ,,"Coop, Selver",,,sauces_oils,oils_other,high
+124624,"Frozen maasikamahlajook ülletusmunaga, SUPRISE DRINKS, 300 ml",INTERALTUS OÜ,,"Coop, Selver",,,drinks,drinks_juices,high
+124625,"Fuet Extra musta pipraga, EMBUTIDOS CAULA, 150 g",SELVER AS,,Selver,,,other,dry_other,fallback
+124626,"Fusilli, DELVERDE, 500 g",REMECOM OÜ,,Selver,,,drinks,drinks_wine,high
+124627,"Fusilli, FIRST PRICE, 500 g",SELVER AS,,Selver,,,other,dry_other,fallback
+124628,"Fusilli, PANZANI, 1 kg",ABESTOCK AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback
+124629,"Galett kikerherne, LESTELLO, 135 g",M&V TRADE OÜ,,Selver,,,dry_preserves,dry_groats_beans,high
+124630,"Gaseerimata apelsini-mangomaitseline vesi, VICHY FRESH, 1,5 L",SAKU ÕLLETEHASE AS,,"Coop, Selver",,,drinks,drinks_water,high
+124631,"Gaseerimata joogivesi, SELVER, 1,5 L",SELVER AS,,Selver,,,drinks,drinks_water,high
+124632,"Gaseerimata kirsimaitseline vesi, VICHY FRESH, 1,5 L",SAKU ÕLLETEHASE AS,,"Coop, Selver",,,drinks,drinks_water,high
+124633,"Gaseerimata sidruni-laimimaitseline vesi, VICHY FRESH, 1,5 L",SAKU ÕLLETEHASE AS,,"Coop, Rimi, Selver",,,drinks,drinks_water,high
+124634,"Gaseerimata sidruni-laimimaitseline vesi, VICHY FRESH, 500 ml",SAKU ÕLLETEHASE AS,,"Rimi, Selver",,,drinks,drinks_water,high
+124635,"Gaseerimata vesi Granadill, AURA FRUIT, 500 ml",A. LE COQ AS,,"Coop, Selver",,,drinks,drinks_water,high
+124636,"Gaseerimata vesi Spring, AURA, 1,5 L",A. LE COQ AS,,"Coop, Selver",,,drinks,drinks_water,high
+124637,"Gaseerimata vesi, VICHY CLASSIQUE, 500 ml",SAKU ÕLLETEHASE AS,,Selver,,,drinks,drinks_water,high
+124638,"Gaseeritud apelsinimaitseline vesi, VICHY FRESH BUBBLES, 1,5 L",SAKU ÕLLETEHASE AS,,"Coop, Selver",,,drinks,drinks_water,high
+124639,"Gaseeritud joogivesi 6-pakk, SELVER, 9 L",SELVER AS,,Selver,,,drinks,drinks_water,high

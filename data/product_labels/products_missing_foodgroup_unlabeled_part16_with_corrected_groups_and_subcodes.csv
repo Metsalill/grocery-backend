@@ -1,0 +1,901 @@
+product_id,name,brand,size_text,stores_sample,current_food_group,current_sub_code,food_group_corrected,new_sub_code,confidence
+418495,Tampoonid Bella Teens Super 16 Tk,,,,,,drinks,drinks_tea_coffee,high
+418496,Tampoonid O B Extra Protect Normal 16 Tk,,,,,,other,dry_other,fallback
+418497,Tampoonid O B Extra Protect Super 16 Tk 86259,,,,,,other,dry_other,fallback
+418498,Tampoonid O B Extra Protect Super 42 Tk,,,,,,other,dry_other,fallback
+418499,Tampoonid O B Procomfort Super 54 Tk,,,,,,other,dry_other,fallback
+418500,Tampoonid O B Procomfort Superplus 32 Tk,,,,,,other,dry_other,fallback
+418501,Tampoonid Tampax Regular 18 Tk,,,,,,other,dry_other,fallback
+418502,Tampoonid Tampax Super 18 Tk,,,,,,other,dry_other,fallback
+418503,Uriinipid Sidem Seni Lady Extraplus 15 Tk,,,,,,other,dry_other,fallback
+418504,Uriinipid Sidem Seni Lady Night 12 Tk,,,,,,other,dry_other,fallback
+418505,Hug Sidem Always Sensitive Night S 3 14 Tk,,,,,,other,dry_other,fallback
+418506,Hug Sidemed Always Platinum Night S 5 8 Tk,,,,,,other,dry_other,fallback
+418507,Hug Sidemed Always Platinumnight S 4 20 Tk,,,,,,other,dry_other,fallback
+418508,Hug Sidemed Bella Teens Sens Night 16 Tk,,,,,,drinks,drinks_tea_coffee,high
+418509,Hug Sidemed Bella Teensenergy Night 16 Tk,,,,,,drinks,drinks_tea_coffee,high
+418510,Hug Sidemed Naturella Classic Maxi 16 Tk,,,,,,other,dry_other,fallback
+418511,Hug Sidemed Naturella Ultranight S 5 24 Tk,,,,,,other,dry_other,fallback
+418512,Hug Sidemed Vuokkoset 100 Proc Bio Night 9 Tk,,,,,,other,dry_other,fallback
+418513,Hugieeniside Bella Perfecta Pure N 20 Tk,,,,,,other,dry_other,fallback
+418514,Hugieenisidemed Always Platinum S 1 16 Tk,,,,,,other,dry_other,fallback
+418515,Hugieenisidemed Always Platinum S 1 30 Tk,,,,,,other,dry_other,fallback
+418516,Hugieenisidemed Always Platinum S 5 16 Tk,,,,,,other,dry_other,fallback
+418517,Hugieenisidemed Always Ultra S 3 28 Tk,,,,,,other,dry_other,fallback
+418518,Hugieenisidemed Always Ultra S 3 7 Tk,,,,,,other,dry_other,fallback
+418519,Hugieenisidemed Bella Normal 20 Tk,,,,,,other,dry_other,fallback
+418520,Hugieenitampoonid Freedom Normal 3 Tk,,,,,,other,dry_other,fallback
+418521,Intiimpesugeel Bella Hydronatural 300 Ml,,,,,,household,hh_laundry,high
+418522,Pesukaitsm Carefree Cottonfresh Norm 76 Tk,,,,,,other,dry_other,fallback
+418523,Pesukaitsm Naturella Camomilenormal 74 Tk,,,,,,other,dry_other,fallback
+418524,Pesukaitsmed Always Long 0 Proc 48 Tk,,,,,,other,dry_other,fallback
+418525,Pesukaitsmed Always Normal 80 Tk,,,,,,other,dry_other,fallback
+418526,Pesukaitsmed Always Normal Fresh 30 Tk,,,,,,other,dry_other,fallback
+418527,Pesukaitsmed Always Normal Fresh 76 Tk,,,,,,other,dry_other,fallback
+418528,Pesukaitsmed Bella Panty Classic 20 Tk,,,,,,other,dry_other,fallback
+418529,Pesukaitsmed Carefree Cotton Fresh 20 Tk 60449,,,,,,other,dry_other,fallback
+418530,Pesukaitsmed Carefree Cotton Normal 56 Tk,,,,,,other,dry_other,fallback
+418531,Pesukaitsmed Carefree Fl Form Fresh 30 Tk,,,,,,other,dry_other,fallback
+418532,Pesukaitsmed Carefree Flexi Fresh 56 Tk,,,,,,other,dry_other,fallback
+418533,Pesukaitsmed Carefree Plus Fresh L 48 Tk,,,,,,other,dry_other,fallback
+418534,Pesukaitsmed Carefree Plus Light L 48 Tk,,,,,,other,dry_other,fallback
+418535,Pesukaitsmed Discreet Deo Waterlily 60 Tk,,,,,,other,dry_other,fallback
+418536,Pesukaitsmed Discreet Normal Plus 52 Tk,,,,,,other,dry_other,fallback
+418537,Tampoonid O B Extra Protect Super 36 Tk,,,,,,other,dry_other,fallback
+418538,Tampoonid Tampax Compak Regular 16 Tk,,,,,,other,dry_other,fallback
+418539,Tampoonid Tampax Super Plus 18 Tk,,,,,,other,dry_other,fallback
+418540,Uriinipidamatuse Sid Tena Maxi Night 6 Tk,,,,,,other,dry_other,fallback
+418541,Higiplekkide Eemaldi Dr Beckmann 250 Ml,,,,,,other,dry_other,fallback
+418542,Majapidamisseep Sila 72 Proc 180 G,,,,,,personal_care,pcare_soap,high
+418543,Pesugeel Frosch Baby Universal 1 5 L,,,,,,household,hh_laundry,high
+418544,Pesugeel Frosch Sooda 1 5 L 22 Pk,,,,,,household,hh_laundry,high
+418545,Pesugeel Frosch Zeroproc 1 5 L 22 Pk,,,,,,household,hh_laundry,high
+418546,Pesugeel Mayeri Dark Denim Wash 1 L,,,,,,household,hh_laundry,high
+418547,Pesugeel Mayeri Sens Color Taide 1 5 L 25 Pk,,,,,,household,hh_laundry,high
+418548,Pesugeel Mayeri Sensitiv Taide 25 Pk 1 5 L,,,,,,household,hh_laundry,high
+418549,Pesugeel Mayeri Spordiriietele 19 Pk 1 5 L,,,,,,household,hh_laundry,high
+418550,Pesugeel Mulieres Lohnastamata 1 5 L,,,,,,household,hh_laundry,high
+418551,Pesugeel Mulieres Pohjamaine Mets 1 5 L,,,,,,dry_preserves,dry_other,high
+418552,Pesugeel Mulieres Roosiaed 1 5 L,,,,,,household,hh_laundry,high
+418553,Pesugeel Mulieres Varske Tsitrus 1 5 L,,,,,,household,hh_laundry,high
+418554,Pesugeel Neutral Black Wash 20 Pk 1 L,,,,,,household,hh_laundry,high
+418555,Pesugeel Neutral Color 20 Pk 1 L,,,,,,household,hh_laundry,high
+418556,Pesugeel Neutral White 20 Pk 1 L,,,,,,household,hh_laundry,high
+418557,Pesugeel Neutral Wool Silk 20 Pk 1 L,,,,,,household,hh_laundry,high
+418558,Pesugeel Tri Bio Sensitive 1 42 L,,,,,,household,hh_laundry,high
+418559,Pesukapslid Mayeri Sensitive Pouch 32 Tk,,,,,,produce,produce_root_veg,high
+418560,Pesulop Vahend Coccolino Sens Soft 1 7 L,,,,,,other,dry_other,fallback
+418561,Pesulop Vahend Frosch Aloe Vera 750 Ml,,,,,,other,dry_other,fallback
+418562,Pesulop Vahend Frosch Zeroproc 31 Pk 750 Ml,,,,,,other,dry_other,fallback
+418563,Pesuloputusvah Frosch Baby 750 Ml,,,,,,household,hh_laundry,high
+418564,Pesuloputusvahend Frosch Cotton Flower 1 L,,,,,,household,hh_laundry,high
+418565,Pesuloputusvahend Frosch Lavendel 750 Ml,,,,,,household,hh_laundry,high
+418566,Pesuloputusvahend Frosch Mandel 1 L,,,,,,household,hh_laundry,high
+418567,Pesuloputusvahend Lovela Baby 33 Pk 2 L,,,,,,household,hh_laundry,high
+418568,Pesuloputusvahend Mayeri Sensitive 750 Ml,,,,,,household,hh_laundry,high
+418569,Pesumasina Puh Pulber Dr Beckmann 250 G,,,,,,other,dry_other,fallback
+418570,Pesumasina Puh Vedelik Dr Beckmann 250 Ml,,,,,,other,dry_other,fallback
+418571,Pesumasina Puhastusvahend K 2 R 2 X 75 G,,,,,,household,hh_cleaners,high
+418572,Pesuvahend Woolite Black 4 5 L 75 Pk,,,,,,other,dry_other,fallback
+418573,Pesuvahend Woolite Color 4 5 L 75 Pk,,,,,,other,dry_other,fallback
+418574,Pesuvahend Woolite Fruity 4 5 L,,,,,,other,dry_other,fallback
+418575,Pesuvalgendi Dr Beckmann 2 X 40 G,,,,,,other,dry_other,fallback
+418576,Pesuvalgendi Mayeri White 500 G,,,,,,other,dry_other,fallback
+418577,Plekieemald Eelpesuks Vanish Gold 200 Ml,,,,,,other,dry_other,fallback
+418578,Plekieemald Eelpesuks Vanish Spray 500 Ml,,,,,,other,dry_other,fallback
+418579,Plekieemald Vanish Oxi Act Regular 470 G,,,,,,other,dry_other,fallback
+418580,Plekieemaldaja Kh 7 750 Ml,,,,,,other,dry_other,fallback
+418581,Plekieemaldaja Mayeri Color 500 G,,,,,,other,dry_other,fallback
+418582,Plekieemaldaja Vanish Regular 1 L,,,,,,other,dry_other,fallback
+418583,Plekieemaldaja Vanish White 1 L,,,,,,other,dry_other,fallback
+418584,Plekieemaldi Dr Beckmann Sapiseep 250 Ml,,,,,,personal_care,pcare_soap,high
+418585,Valgendaja Ace Lemon 1 L,,,,,,other,dry_other,fallback
+418586,Valgendaja Ace Regular 1 L,,,,,,other,dry_other,fallback
+418587,Varvipuudja Dr Beckmann White 15 Tk,,,,,,other,dry_other,fallback
+418588,Varvipuudja Vanish Gold 32 Tk,,,,,,other,dry_other,fallback
+418589,Veepehmendi Calgon 1 Kg,,,,,,other,dry_other,fallback
+418590,Veepehmendi Calgon 500 G,,,,,,other,dry_other,fallback
+418591,Veepehmendi Calgon 750 Ml,,,,,,other,dry_other,fallback
+418592,Veepehmendustabletid Calgon 15 Tk,,,,,,other,dry_other,fallback
+418593,Desinfits Vahend Sanytol Tekstiil 1 L,,,,,,household,hh_cleaners,high
+418594,Lehtpesupulber Dr Beckmann Color 25 Tk,,,,,,household,hh_laundry,high
+418595,Lehtpesupulber Dr Beckmann Universal 25 Tk,,,,,,household,hh_laundry,high
+418596,Majapidamisseep Dalan Citron Frais 200 G,,,,,,personal_care,pcare_soap,high
+418597,Majapidamisseep Roxy Plekkieemal 2 X 125 G,,,,,,personal_care,pcare_soap,high
+418598,Pesuaadikas Mayeri Rhubarb Apple 500 Ml,,,,,,produce,produce_apples_pears,high
+418599,Pesugeel Lovela Baby Color 1 45 L 16 Pk,,,,,,household,hh_laundry,high
+418600,Pesugeel Lovela Baby Color 32 Pk 2 9 L,,,,,,household,hh_laundry,high
+418601,Pesugeel Lovela Baby White 16 Pk 1 45 L,,,,,,household,hh_laundry,high
+418602,Pesugeel Lovela Baby White 2 9 L,,,,,,household,hh_laundry,high
+418603,Pesugeel Mayeri All Care Color 1 65 L,,,,,,household,hh_laundry,high
+418604,Pesugeel Mayeri Mint Herb 900 Ml,,,,,,sweets_snacks,sweets_gums_mints,high
+418605,Pesugeel Mayeri Sensitive 1 65 L,,,,,,household,hh_laundry,high
+418606,Pesugeel Persil Color 44 Pk 1 98 L,,,,,,household,hh_laundry,high
+418607,Pesugeel Persil Universal 44 Pk 1 98 L,,,,,,household,hh_laundry,high
+418608,Pesugeel Woolite Black 0 9 L 15 Pk,,,,,,household,hh_laundry,high
+418609,Pesugeel Woolite Black 1 8 L 30 Pk,,,,,,household,hh_laundry,high
+418610,Pesugeel Woolite Black 45 Pk 2 7 L,,,,,,household,hh_laundry,high
+418611,Pesugeel Woolite Color 0 9 L 15 Pk,,,,,,household,hh_laundry,high
+418612,Pesugeel Woolite Color 1 8 L 30 Pk,,,,,,household,hh_laundry,high
+418613,Pesugeel Woolite Color 45 Pk 2 7 L,,,,,,household,hh_laundry,high
+418614,Pesugeel Woolite Delicate 0 9 L 15 Pk,,,,,,household,hh_laundry,high
+418615,Pesugeel Woolite Delicate 1 8 L 30 Pk,,,,,,household,hh_laundry,high
+418616,Pesugeel Woolite Pro Care 1 8 L 30 Pk,,,,,,household,hh_laundry,high
+418617,Pesukapslid Bonux Ice Fresh 12 Tk,,,,,,produce,produce_root_veg,high
+418618,Pesukapslid Bonux Magnolia 12 Tk,,,,,,produce,produce_root_veg,high
+418619,Pesukapslid Mayeri Universal 10 Tk T P,,,,,,produce,produce_root_veg,high
+418620,Pesukapslid Woolite Black 33 Tk,,,,,,produce,produce_root_veg,high
+418621,Pesukapslid Woolite Color 33 Tk,,,,,,produce,produce_root_veg,high
+418622,Pesukapslid Woolite Pro Care 33 Tk,,,,,,produce,produce_root_veg,high
+418623,Pesuloputusvahend Neutral Sensitive 1 L,,,,,,household,hh_laundry,high
+418624,Pesuloputusvahend Silan Cool Fresh 770 Ml,,,,,,household,hh_laundry,high
+418625,Pesuloputusvahend Silan Fresh Sky 880 Ml,,,,,,household,hh_laundry,high
+418626,Pesumas Varskenduskaps Dr Beckmann 3 X 20 G,,,,,,produce,produce_root_veg,high
+418627,Pesupulber Ariel Color 20 Pk 1 1 Kg,,,,,,household,hh_laundry,high
+418628,Pesupulber Ariel Mountain Spring 1 1 Kg,,,,,,household,hh_laundry,high
+418629,Pesupulber Frosch Aloe Vera 22 Pk 1 45 Kg,,,,,,household,hh_laundry,high
+418630,Pesupulber Frosch Granaatoun 22 Pk 1 45 Kg,,,,,,household,hh_laundry,high
+418631,Pesupulber Lovela Baby Color 1 3 Kg,,,,,,household,hh_laundry,high
+418632,Pesupulber Mayeri Sensitive 1 65 Kg,,,,,,household,hh_laundry,high
+418633,Pesupulber Mayeri Sensitive Color 1 65 Kg,,,,,,household,hh_laundry,high
+418634,Pesupulber Neutral Colour 1 188 Kg 18 Pk,,,,,,household,hh_laundry,high
+418635,Pesupulber Neutral White 1 188 Kg 18 Pk,,,,,,household,hh_laundry,high
+418636,Plekieemaldaja Mayeri Sensitive 250 Ml,,,,,,other,dry_other,fallback
+418637,Plekieemaldaja Vanish Regular 3 L,,,,,,other,dry_other,fallback
+418638,Plekieemaldaja Vanish White 3 L,,,,,,other,dry_other,fallback
+418639,Varvi Mustus Lapid Dr Beckmann 3 In 1 40 Tk,,,,,,other,dry_other,fallback
+418640,Varvi Mustusekog Lapid Dr Beckmann 20 Tk,,,,,,other,dry_other,fallback
+418641,Varvipuudja K 2 R Catch Revive White 18 Tk,,,,,,other,dry_other,fallback
+418642,Varvipuudja K 2 R Colour 40 Tk 12532,,,,,,other,dry_other,fallback
+418643,Varvipuudja Vanish 60 Tk,,,,,,other,dry_other,fallback
+418644,Veepehmendi Calgon Hygiene 750 Ml,,,,,,other,dry_other,fallback
+418645,Noudepesumasina Sool 2 Kg,,,,,,world_spices,spices_basic_salt_pepper,high
+418646,Pesugeel Frosch Granaatoun 1 5 L,,,,,,household,hh_laundry,high
+418647,Pesugeel Persil Color 22 Pk 990 Ml,,,,,,household,hh_laundry,high
+418648,Pesugeel Persil Lavendercolor 20 Pk 900 Ml,,,,,,household,hh_laundry,high
+418649,Pesugeel Persil Sensitive 20 Pk 900 Ml,,,,,,household,hh_laundry,high
+418650,Pesugeel Persil Universal 22 Pk 990 Ml,,,,,,household,hh_laundry,high
+418651,Pesugeel Perwoll Black 75 Pk 3 75 L,,,,,,household,hh_laundry,high
+418652,Pesugeel Perwoll Blossom 40 Pk 2 L,,,,,,household,hh_laundry,high
+418653,Pesugeel Rex Lotus Universal 20 Pk 900 Ml,,,,,,household,hh_laundry,high
+418654,Pesugeel Woolite Fruity 1 8 L,,,,,,household,hh_laundry,high
+418655,Pesukapslid Helper White Color 20 Tk 44493,,,,,,produce,produce_root_veg,high
+418656,Pesukapslid Mayeri All Care Color 25 Tk,,,,,,produce,produce_root_veg,high
+418657,Pesukapslid Mayeri All Care Univers 25 Tk,,,,,,produce,produce_root_veg,high
+418658,Pesukapslid Mayeri Sensitive 25 Tk,,,,,,produce,produce_root_veg,high
+418659,Pesukapslid Rex Lotus Almond Oil 36 Tk,,,,,,produce,produce_root_veg,high
+418660,Pesukapslid Rex Orchid Oil Color 36 Tk,,,,,,produce,produce_root_veg,high
+418661,Pesul Vah Silan Dreamylotus 2 772 L 126 Pk,,,,,,other,dry_other,fallback
+418662,Pesul Vah Silan Fasc Jungle 2 772 L 126 Pk,,,,,,other,dry_other,fallback
+418663,Pesulop Vah Coccolino Blue Splash 975 Ml,,,,,,other,dry_other,fallback
+418664,Pesulop Vah Coccolino Happy Yellow 975 Ml,,,,,,other,dry_other,fallback
+418665,Pesulop Vah Coccolino Perfume Care 925 Ml,,,,,,other,dry_other,fallback
+418666,Pesulop Vah Coccolino Purple Orch 1 275 L,,,,,,other,dry_other,fallback
+418667,Pesulop Vah Coccolino Tiare Fruit 1 275 L,,,,,,other,dry_other,fallback
+418668,Pesulop Vah Mayeri Angel Kiss 750 Ml,,,,,,other,dry_other,fallback
+418669,Pesulop Vah Mayeri Sensitive Taide 900 Ml,,,,,,other,dry_other,fallback
+418670,Pesulop Vah Silan Blossom 46 Pk 1 012 L,,,,,,other,dry_other,fallback
+418671,Pesulop Vah Silan Coconut Mineral 770 Ml,,,,,,other,dry_other,fallback
+418672,Pesulop Vah Silan Elegance 46 Pk 1 012 L,,,,,,other,dry_other,fallback
+418673,Pesulop Vah Silan Fascin Frangipani 770 Ml,,,,,,other,dry_other,fallback
+418674,Pesulop Vah Silan Fascinatingjungle 770 Ml,,,,,,other,dry_other,fallback
+418675,Pesulop Vah Silan Fresh Ocean 54 Pk 594 Ml,,,,,,other,dry_other,fallback
+418676,Pesulop Vah Silan Fresh Sky 2 86 L 130 Pk,,,,,,other,dry_other,fallback
+418677,Pesulop Vah Silan Fresh Sky 68 Pk 748 Ml,,,,,,other,dry_other,fallback
+418678,Pesulop Vah Silan Glamour 46 Pk 1 012 L,,,,,,other,dry_other,fallback
+418679,Pesulop Vah Silan Lavender Spring 880 Ml,,,,,,other,dry_other,fallback
+418680,Pesulop Vah Silan Romance 46 Pk 1 012 L,,,,,,other,dry_other,fallback
+418681,Pesulop Vah Silan Sensitive 2 86 L 130 Pk,,,,,,other,dry_other,fallback
+418682,Pesulop Vahend Coccolino Bluesplash 1 7 L,,,,,,other,dry_other,fallback
+418683,Pesulop Vahend Coccolino Sensitive 975 Ml,,,,,,other,dry_other,fallback
+418684,Pesulop Vahend Coccolino Silk Lily 1 7 L,,,,,,other,dry_other,fallback
+418685,Pesulop Vahend Silan Dreamy Lotus 770 Ml,,,,,,other,dry_other,fallback
+418686,Pesulop Vahend Silan Floral Crisp 770 Ml,,,,,,other,dry_other,fallback
+418687,Pesulop Vahend Silan Magicmagnolia 770 Ml,,,,,,other,dry_other,fallback
+418688,Pesulop Vahend Silan Ylang Vetiver 770 Ml,,,,,,other,dry_other,fallback
+418689,Pesuloputusvahend Silan Sensitive 880 Ml,,,,,,household,hh_laundry,high
+418690,Pesupulb Mayeri Allcare Universal 1 65 Kg,,,,,,other,dry_other,fallback
+418691,Pesupulb Persil Fresh Silan 36 Pk 1 98 Kg,,,,,,other,dry_other,fallback
+418692,Pesupulber Persil Color 20 Pk 1 1 Kg,,,,,,household,hh_laundry,high
+418693,Pesupulber Persil Sensitive 18 Pk 0 99 Kg,,,,,,household,hh_laundry,high
+418694,Plekieemalduspulb Helper Oxygen 750 G,,,,,,other,dry_other,fallback
+418695,Varvipuudja Helper 20 Tk,,,,,,other,dry_other,fallback
+418696,Veepehm Pulber Helper Ant Calc 750 G 30 Tk,,,,,,other,dry_other,fallback
+418697,Pesugeel Bonux Pure Magnolia 18 Pk 900 Ml,,,,,,household,hh_laundry,high
+418698,Pesugeel Bonux Pure Magnolia 36 Pk 1 8 L,,,,,,household,hh_laundry,high
+418699,Pesugeel Bonux Radiant Rose 900 Ml 18 Pk,,,,,,drinks,drinks_wine,high
+418700,Pesugeel Neutral Colour 39 Pk 1 95 L,,,,,,household,hh_laundry,high
+418701,Pesugeel Persil Freshnesssilan 40 Pk 1 8 L,,,,,,household,hh_laundry,high
+418702,Pesugeel Persil Lavender Color 40 Pk 1 8 L,,,,,,household,hh_laundry,high
+418703,Pesugeel Persil Sensitive 40 Pk 1 8 L,,,,,,household,hh_laundry,high
+418704,Pesugeel Perwoll Black 20 Pk 1 L,,,,,,household,hh_laundry,high
+418705,Pesugeel Perwoll Black 40 Pk 2 L,,,,,,household,hh_laundry,high
+418706,Pesugeel Perwoll Black 60 Pk 3 L,,,,,,household,hh_laundry,high
+418707,Pesugeel Perwoll Blossom 20 Pk 1 L,,,,,,household,hh_laundry,high
+418708,Pesugeel Perwoll Blossom 60 Pk 3 L,,,,,,household,hh_laundry,high
+418709,Pesugeel Perwoll Blossom 75 Pk 3 75 L,,,,,,household,hh_laundry,high
+418710,Pesugeel Perwoll Color 2 Pk 1 L,,,,,,household,hh_laundry,high
+418711,Pesugeel Perwoll Color 40 Pk 2 L,,,,,,household,hh_laundry,high
+418712,Pesugeel Perwoll Color 60 Pk 3 L,,,,,,household,hh_laundry,high
+418713,Pesugeel Perwoll Color 75 Pk 3 75 L,,,,,,household,hh_laundry,high
+418714,Pesugeel Perwoll Dark Bloom 40 Pk 2 L,,,,,,household,hh_laundry,high
+418715,Pesugeel Perwoll Wool 20 Pk 1 L,,,,,,household,hh_laundry,high
+418716,Pesugeel Perwoll Wool 40 Pk 2 L,,,,,,household,hh_laundry,high
+418717,Pesugeel Rex Color 22 Pk 990 Ml,,,,,,household,hh_laundry,high
+418718,Pesugeel Rex Orchid Color 20 Pk 900 Ml,,,,,,household,hh_laundry,high
+418719,Pesugeel Woolite Fruity 2 7 L,,,,,,household,hh_laundry,high
+418720,Pesukapslid Persil Discs Color 26 Tk,,,,,,produce,produce_root_veg,high
+418721,Pesukapslid Persil Discs Color 40 Tk,,,,,,produce,produce_root_veg,high
+418722,Pesukapslid Persil Discs Stain Rem 11 Pk,,,,,,produce,produce_root_veg,high
+418723,Pesukapslid Persil Power Color 29 Tk,,,,,,produce,produce_root_veg,high
+418724,Pesukapslid Persil Power Color 44 Tk,,,,,,produce,produce_root_veg,high
+418725,Pesukapslid Perwoll Black 23 Tk,,,,,,produce,produce_root_veg,high
+418726,Pesukapslid Perwoll Color 23 Tk,,,,,,produce,produce_root_veg,high
+418727,Pesukapslid Rex Lotus Almond Oil 13 Tk,,,,,,produce,produce_root_veg,high
+418728,Pesukapslid Rex Orchid Oil Color 13 Tk,,,,,,produce,produce_root_veg,high
+418729,Pesulop Vah Silan Dreamy Lotus 50 Pk 1 1 L,,,,,,other,dry_other,fallback
+418730,Pesulop Vah Silan Frangipani 50 Pk 1 1 L,,,,,,other,dry_other,fallback
+418731,Pesulop Vah Silan Jungle 50 Pk 1 1 L,,,,,,other,dry_other,fallback
+418732,Pesulop Vah Silan Lav Spring 64 Pk 1 408 L,,,,,,other,dry_other,fallback
+418733,Pesulop Vah Silan Magic Magn 50 Pk 1 1 L,,,,,,other,dry_other,fallback
+418734,Pesulop Vah Silan Maldives 50 Pk 1 1 L,,,,,,other,dry_other,fallback
+418735,Pesulop Vah Silan Sens Derma 50 Pk 1 1 L,,,,,,other,dry_other,fallback
+418736,Pesulop Vah Silan Sensitive 64 Pk 1 408 L,,,,,,other,dry_other,fallback
+418737,Pesum Puhastusvahend Lanza Express 250 Ml,,,,,,household,hh_cleaners,high
+418738,Pesum Puhastusvahend Lanza Original 250 Ml,,,,,,drinks,drinks_spirits,high
+418739,Pesupulber Bonux Magnolia 1 17 Kg 18 Pk,,,,,,household,hh_laundry,high
+418740,Pesupulber Persil Color 4 Pk 0 22 Kg,,,,,,household,hh_laundry,high
+418741,Pesupulber Persil Color 40 Pk 2 2 Kg,,,,,,household,hh_laundry,high
+418742,Pesupulber Persil Color 80 Pk 4 4 Kg,,,,,,household,hh_laundry,high
+418743,Pesupulber Persil Fresh Silan 18 Pk 0 99 Kg,,,,,,household,hh_laundry,high
+418744,Pesupulber Persil Sensitive 36 Pk 1 98 Kg,,,,,,household,hh_laundry,high
+418745,Pesupulber Persil Universal 20 Pk 1 1 Kg,,,,,,household,hh_laundry,high
+418746,Pesupulber Rex Amazonia Freshness 1 1 Kg,,,,,,household,hh_laundry,high
+418747,Pesupulber Rex Orchid Color 18 Pk 990 G,,,,,,household,hh_laundry,high
+418748,Pesupulber Rex Orchid Color 4 Pk 220 G,,,,,,household,hh_laundry,high
+418749,Majapidamis Vedelseep Sila 600 Ml,,,,,,personal_care,pcare_soap,high
+418750,Pesuaadikas Mayeri Sweetgrapefruit 500 Ml,,,,,,other,dry_other,fallback
+418751,Pesugeel Bonux Radiant Rose 1 8 L 36 Pk,,,,,,drinks,drinks_wine,high
+418752,Pesugeel Frosch Almond 40 Pk 1 5 L,,,,,,household,hh_laundry,high
+418753,Pesugeel Frosch Aloe Vera 22 Pk 1 5 L,,,,,,household,hh_laundry,high
+418754,Pesugeel Frosch Citrus 22 Pk 1 5 L,,,,,,household,hh_laundry,high
+418755,Pesugeel Frosch Pomegranate 22 Pk 1 5 L,,,,,,household,hh_laundry,high
+418756,Pesugeel Frosch Universal 22 Pk 1 5 L,,,,,,household,hh_laundry,high
+418757,Pesugeel Mayeri Color Taitepakk 1 5 L,,,,,,household,hh_laundry,high
+418758,Pesugeel Perwoll Light Colors 20 Pk 1 L,,,,,,household,hh_laundry,high
+418759,Pesugeel Perwoll Light Colors 40 Pk 2 L,,,,,,household,hh_laundry,high
+418760,Pesugeel Perwoll Light Colors 75 Pk 3 75 L,,,,,,household,hh_laundry,high
+418761,Pesukapslid Ariel Amethyst Flower 38 Pk,,,,,,produce,produce_root_veg,high
+418762,Pesukapslid Ariel Color 12 Pk,,,,,,produce,produce_root_veg,high
+418763,Pesukapslid Ariel Color 44 Pk,,,,,,produce,produce_root_veg,high
+418764,Pesukapslid Ariel Color 50 Pk,,,,,,produce,produce_root_veg,high
+418765,Pesukapslid Ariel Color 70 Pk,,,,,,produce,produce_root_veg,high
+418766,Pesukapslid Ariel Extra 38 Pk,,,,,,produce,produce_root_veg,high
+418767,Pesukapslid Ariel Extra 44 Pk,,,,,,produce,produce_root_veg,high
+418768,Pesukapslid Ariel Extra 60 Pk,,,,,,produce,produce_root_veg,high
+418769,Pesukapslid Ariel Fresh Air Lenor 38 Pk,,,,,,produce,produce_root_veg,high
+418770,Pesukapslid Ariel Fresh Air Lenor 44 Pk,,,,,,produce,produce_root_veg,high
+418771,Pesukapslid Ariel Mountain Spring 22 Pk,,,,,,produce,produce_root_veg,high
+418772,Pesukapslid Ariel Mountain Spring 30 Pk,,,,,,produce,produce_root_veg,high
+418773,Pesukapslid Ariel Mountain Spring 44 Pk,,,,,,produce,produce_root_veg,high
+418774,Pesukapslid Ariel Mountain Spring 50 Pk,,,,,,produce,produce_root_veg,high
+418775,Pesukapslid Lovela Baby Geelkaps 11 Tk,,,,,,produce,produce_root_veg,high
+418776,Pesukapslid Mayeri Univers Hypoall 32 Tk,,,,,,produce,produce_root_veg,high
+418777,Pesukapslid Minirisk Universal 25 Tk,,,,,,produce,produce_root_veg,high
+418778,Pesukapslid Neutral Colour 24 Tk,,,,,,produce,produce_root_veg,high
+418779,Pesukapslid Omo Rose Blossom 42 Tk,,,,,,drinks,drinks_wine,high
+418780,Pesukapslid Persil Color 68 Tk,,,,,,produce,produce_root_veg,high
+418781,Pesukapslid Persil Discs Universal 26 Tk,,,,,,produce,produce_root_veg,high
+418782,Pesukapslid Persil Discs Universal 40 Tk,,,,,,produce,produce_root_veg,high
+418783,Pesukapslid Persil Power Universal 29 Tk,,,,,,produce,produce_root_veg,high
+418784,Pesukapslid Persil Power Universal 44 Tk,,,,,,produce,produce_root_veg,high
+418785,Pesukapslid Persil Universal 68 Tk,,,,,,produce,produce_root_veg,high
+418786,Pesulop Vah Frosch Sens Hibiscus 40 Pk 1 L,,,,,,other,dry_other,fallback
+418787,Pesulop Vah Lenor Rubyjasmine 59 Pk 1 23 L,,,,,,other,dry_other,fallback
+418788,Pesulop Vah Lenor Sicilia 59 Pk 1 23 L,,,,,,other,dry_other,fallback
+418789,Pesuloputusvah Tesori Persiandream 760 Ml,,,,,,household,hh_laundry,high
+418790,Pesuloputusvahend Tesori Byzantium 760 Ml,,,,,,household,hh_laundry,high
+418791,Pesuloputusvahend Tesori Hammam 760 Ml,,,,,,household,hh_laundry,high
+418792,Pesupulber Ariel Alpine Color 6 Pk 330 G,,,,,,household,hh_laundry,high
+418793,Pesupulber Ariel Alpinecolor 30 Pk 1 65 Kg,,,,,,household,hh_laundry,high
+418794,Pesupulber Ariel Alpinefresh 30 Pk 1 65 Kg,,,,,,household,hh_laundry,high
+418795,Pesupulber Ariel Alpinefresh 50 Pk 2 75 Kg,,,,,,household,hh_laundry,high
+418796,Pesupulber Ariel Color 50 Pk 2 75 Kg,,,,,,household,hh_laundry,high
+418797,Pesupulber Bonux Radiantrose 18 Pk 1 17 Kg,,,,,,drinks,drinks_wine,high
+418798,Plekieemald Vanish Oxi Act Regular 970 G,,,,,,other,dry_other,fallback
+418799,Plekieemald Vanish Oxi Act White 970 G,,,,,,other,dry_other,fallback
+418800,Varvipuudja K 2 R Colour Protect 22 Tk,,,,,,other,dry_other,fallback
+418801,Lohnagraanulid Lenor Ariel 270 G,,,,,,other,dry_other,fallback
+418802,Lohnagraanulid Lenor Floral 22 Pk 270 G,,,,,,other,dry_other,fallback
+418803,Lohnagraanulid Lenor Fresh 270 G,,,,,,other,dry_other,fallback
+418804,Lohnagraanulid Lenor Fresh 495 G,,,,,,other,dry_other,fallback
+418805,Lohnagraanulid Lenor Orchid Vanilla 270 G,,,,,,other,dry_other,fallback
+418806,Lohnagraanulid Lenor Orchid Vanilla 495 G,,,,,,other,dry_other,fallback
+418807,Lohnagraanulid Lenor Spring Aw 22 Pk 270 G,,,,,,other,dry_other,fallback
+418808,Lohnagraanulid Lenor Spring Awake 495 G,,,,,,other,dry_other,fallback
+418809,Pesugeel Ariel Amethystflower 30 Pk 1 35 L,,,,,,household,hh_laundry,high
+418810,Pesugeel Ariel Color 25 Pk 1 125 L,,,,,,household,hh_laundry,high
+418811,Pesugeel Ariel Color 40 Pk 1 8 L,,,,,,household,hh_laundry,high
+418812,Pesugeel Ariel Color 60 Pk 2 7 L,,,,,,household,hh_laundry,high
+418813,Pesugeel Ariel Color 70 Pk 3 15 L,,,,,,household,hh_laundry,high
+418814,Pesugeel Ariel Extra 30 Pk 1 35 L,,,,,,household,hh_laundry,high
+418815,Pesugeel Ariel Extra 50 Pk 2 25 L,,,,,,household,hh_laundry,high
+418816,Pesugeel Ariel Freshair Lenor 30 Pk 1 35 L,,,,,,household,hh_laundry,high
+418817,Pesugeel Ariel Mountain Spring 40 Pk 1 8 L,,,,,,household,hh_laundry,high
+418818,Pesugeel Ariel Mountain Spring 60 Pk 2 7 L,,,,,,household,hh_laundry,high
+418819,Pesugeel Ariel Mountainspring 25 Pk 1 125 L,,,,,,household,hh_laundry,high
+418820,Pesugeel Ariel Mountainspring 70 Pk 3 15 L,,,,,,household,hh_laundry,high
+418821,Pesugeel Ariel Sensitive 25 Pk 1 125 L,,,,,,household,hh_laundry,high
+418822,Pesugeel Ariel Sensitive 50 Pk 2 25 L,,,,,,household,hh_laundry,high
+418823,Pesugeel Ariel Sensitive 60 Pk 2 7 L,,,,,,household,hh_laundry,high
+418824,Pesukapslid Ariel Color 22 Pk,,,,,,produce,produce_root_veg,high
+418825,Pesukapslid Ariel Color 30 Pk,,,,,,produce,produce_root_veg,high
+418826,Pesukapslid Ariel Extra Clean 19 Pk,,,,,,produce,produce_root_veg,high
+418827,Pesukapslid Ariel Extra Clean 26 Pk,,,,,,produce,produce_root_veg,high
+418828,Pesukapslid Ariel Fresh Air Lenor 19 Pk,,,,,,produce,produce_root_veg,high
+418829,Pesukapslid Ariel Fresh Air Lenor 26 Pk,,,,,,produce,produce_root_veg,high
+418830,Pesukapslid Ariel Sensitive 30 Pk,,,,,,produce,produce_root_veg,high
+418831,Pesulop Vah Lenor Cherry 32 Pk 675 Ml,,,,,,other,dry_other,fallback
+418832,Pesulop Vah Lenor Cherry Sage 59 Pk 1 23 L,,,,,,other,dry_other,fallback
+418833,Pesulop Vah Lenor Floral Bouq 32 Pk 675 Ml,,,,,,other,dry_other,fallback
+418834,Pesulop Vah Lenor Floral Bouq 59 Pk 1 2 L,,,,,,other,dry_other,fallback
+418835,Pesulop Vah Lenor Fresh Wind 50 Pk 700 Ml,,,,,,other,dry_other,fallback
+418836,Pesulop Vah Lenor L Eclatante 59 Pk 1 2 L,,,,,,other,dry_other,fallback
+418837,Pesulop Vah Lenor Ladesirable 59 Pk 1 23 L,,,,,,other,dry_other,fallback
+418838,Pesulop Vah Lenor Lotus Diam 32 Pk 675 Ml,,,,,,other,dry_other,fallback
+418839,Pesulop Vah Lenor Lotus Diam 59 Pk 1 2 L,,,,,,other,dry_other,fallback
+418840,Pesulop Vah Lenor N Solstice 50 Pk 700 Ml,,,,,,other,dry_other,fallback
+418841,Pesulop Vah Lenor Orchid Van 32 Pk 675 Ml,,,,,,other,dry_other,fallback
+418842,Pesulop Vah Lenor Orchid Van 59 Pk 1 23 L,,,,,,other,dry_other,fallback
+418843,Pesulop Vah Lenor Pinkblossom 50 Pk 700 Ml,,,,,,other,dry_other,fallback
+418844,Pesulop Vah Lenor Sens Cotton 59 Pk 1 23 L,,,,,,other,dry_other,fallback
+418845,Pesulop Vah Lenor Sensitive 38 Pk 798 Ml,,,,,,other,dry_other,fallback
+418846,Pesulop Vah Lenor Sensitive 50 Pk 700 Ml,,,,,,other,dry_other,fallback
+418847,Pesulop Vah Lenor Sensitive 71 Pk 1 49 L,,,,,,other,dry_other,fallback
+418848,Pesulop Vah Lenor Spring Awak 38 Pk 798 Ml,,,,,,other,dry_other,fallback
+418849,Pesulop Vah Lenor Springawake 71 Pk 1 49 L,,,,,,other,dry_other,fallback
+418850,Pesulop Vah Lenor Summerbreeze 71 Pk 1 49 L,,,,,,other,dry_other,fallback
+418851,Pesulop Vah Lenor Sunset 50 Pk 700 Ml,,,,,,other,dry_other,fallback
+418852,Pesuloputusvahend Lenor Capri 59 Pk 1 23 L,,,,,,household,hh_laundry,high
+418853,Kapslid Finish Ultimate Lemon 40 Tk,,,,,,produce,produce_root_veg,high
+418854,Noudep M Kaps Finish Quantum Lemon 100 Tk,,,,,,produce,produce_root_veg,high
+418855,Noudepesum Hooldusvahend Somat 250 Ml,,,,,,personal_care,pcare_other,high
+418856,Noudepesum Lop Vahend Finish Lemon 400 Ml,,,,,,other,dry_other,fallback
+418857,Noudepesum Lop Vahend Finish Lemon 800 Ml,,,,,,other,dry_other,fallback
+418858,Noudepesum Loputusvahend Finish 400 Ml,,,,,,household,hh_laundry,high
+418859,Noudepesum Loputusvahend Finish 800 Ml,,,,,,household,hh_laundry,high
+418860,Noudepesum Loputusvahend Somat 750 Ml,,,,,,household,hh_laundry,high
+418861,Noudepesum Puh Vahend Finish Hyg 250 Ml,,,,,,other,dry_other,fallback
+418862,Noudepesum Puh Vahend Finish Lemon 250 Ml,,,,,,other,dry_other,fallback
+418863,Noudepesum Puhastuskapslid Somat 3 Pk,,,,,,produce,produce_root_veg,high
+418864,Kodulohnastaja Odoro Sandalwood 90 Ml,,,,,,other,dry_other,fallback
+418865,Noudepesum Puhastustabletid Finish 3 X 17 G,,,,,,household,hh_cleaners,high
+418866,Noudepesum Tabletid Mayeri All In 1 40 Tk,,,,,,other,dry_other,fallback
+418867,Noudepesumas Geel Finish Ai 1 Lemon 900 Ml,,,,,,other,dry_other,fallback
+418868,Noudepesumas Geel Somat Gold 30 Pk 540 Ml,,,,,,other,dry_other,fallback
+418869,Noudepesumas Ohuvarsk Finish Citrus 1 Tk,,,,,,other,dry_other,fallback
+418870,Noudepesumas Puh Pulber Dr Beckmann 75 G,,,,,,other,dry_other,fallback
+418871,Noudepesumasina Sool Finish 1 5 Kg,,,,,,world_spices,spices_basic_salt_pepper,high
+418872,Noudepesumasina Sool Finish 4 Kg,,,,,,world_spices,spices_basic_salt_pepper,high
+418873,Noudepesumasina Sool Somat 1 5 Kg,,,,,,world_spices,spices_basic_salt_pepper,high
+418874,Noudepesumasina Tabletid Oro 40 X 18 G,,,,,,other,dry_other,fallback
+418875,Noudepesumasina Tabletid Tri Bio 25 Tk,,,,,,other,dry_other,fallback
+418876,Noudepesupalsam Frosch Aloe Vera 500 Ml,,,,,,personal_care,pcare_shampoo_cond,high
+418877,Noudepesupalsam Frosch Granaatoun 500 Ml,,,,,,personal_care,pcare_shampoo_cond,high
+418878,Noudepesupalsam Frosch Sidruniga 500 Ml,,,,,,produce,produce_tropical,high
+418879,Noudepesuvah Fairy Lemon 2 X 900 Ml,,,,,,other,dry_other,fallback
+418880,Noudepesuvah Fairy Sens Chamom 2 X 900 Ml,,,,,,other,dry_other,fallback
+418881,Noudepesuvahend Fairy Aloe Pink 900 Ml,,,,,,other,dry_other,fallback
+418882,Noudepesuvahend Fairy Apple 450 Ml,,,,,,produce,produce_apples_pears,high
+418883,Noudepesuvahend Fairy Apple 900 Ml,,,,,,produce,produce_apples_pears,high
+418884,Noudepesuvahend Fairy Lemon 1350 Ml,,,,,,other,dry_other,fallback
+418885,Noudepesuvahend Fairy Lemon 450 Ml,,,,,,other,dry_other,fallback
+418886,Noudepesuvahend Fairy Lemon 900 Ml,,,,,,other,dry_other,fallback
+418887,Noudepesuvahend Fairy Pomegranate 450 Ml,,,,,,other,dry_other,fallback
+418888,Noudepesuvahend Fairy Sens Teatree 1350 Ml,,,,,,other,dry_other,fallback
+418889,Noudepesuvahend Fairy Sens Teatree 450 Ml,,,,,,other,dry_other,fallback
+418890,Noudepesuvahend Fairy Sens Teatree 900 Ml,,,,,,other,dry_other,fallback
+418891,Noudepesuvahend Fairy Sensit Cham 900 Ml,,,,,,other,dry_other,fallback
+418892,Noudepesuvahend Frosch Baby 500 Ml,,,,,,other,dry_other,fallback
+418893,Noudepesuvahend Frosch Sidruniga 1 L,,,,,,produce,produce_tropical,high
+418894,Noudepesuvahend Frosch Sidruniga 500 Ml,,,,,,produce,produce_tropical,high
+418895,Noudepesuvahend Frosch Zeroproc 500 Ml,,,,,,other,dry_other,fallback
+418896,Noudepesuvahend Mayeri Sensitiv 500 Ml,,,,,,other,dry_other,fallback
+418897,Piimapuder Sokolaadituk Milupa 250 G 8 K,,,,,,dairy_eggs_fats,dairy_milk,high
+418898,Noudepesuvahend Mayeri Sensitive 900 Ml,,,,,,other,dry_other,fallback
+418899,Noudepesuvahend Pur Aloe Vera 450 Ml,,,,,,other,dry_other,fallback
+418900,Noudepesuvahend Pur Aloe Vera 750 Ml,,,,,,other,dry_other,fallback
+418901,Noudepesuvahend Pur Hands Nails 450 Ml,,,,,,other,dry_other,fallback
+418902,Noudepesuvahend Pur Hands Nails 750 Ml,,,,,,other,dry_other,fallback
+418903,Noudepesuvahend Pur Pomegranate 750 Ml,,,,,,other,dry_other,fallback
+418904,Noudepesuvahend Pur Raspberry 450 Ml,,,,,,other,dry_other,fallback
+418905,Noudepesuvahend Pur Raspberry 750 Ml,,,,,,other,dry_other,fallback
+418906,Noudepesuvahend Tri Bio 420 Ml,,,,,,other,dry_other,fallback
+418907,Kapslid Fairy Ai 1 Lemon 116 Tk,,,,,,produce,produce_root_veg,high
+418908,Kapslid Fairy Ai 1 Lemon 56 Tk,,,,,,produce,produce_root_veg,high
+418909,Kapslid Fairy Ai 1 Lemon 71 Tk,,,,,,produce,produce_root_veg,high
+418910,Kapslid Fairy Ain 1 Lemon 100 Tk,,,,,,produce,produce_root_veg,high
+418911,Kapslid Fairy Platinum 71 Tk,,,,,,produce,produce_root_veg,high
+418912,Kapslid Fairy Platinum Lemon 113 Tk,,,,,,produce,produce_root_veg,high
+418913,Kapslid Fairy Platinum Lemon 36 Tk,,,,,,produce,produce_root_veg,high
+418914,Kapslid Fairy Platinum Lemon 40 Tk 55194,,,,,,produce,produce_root_veg,high
+418915,Kapslid Fairy Platinum Lemon 45 Tk,,,,,,produce,produce_root_veg,high
+418916,Kapslid Fairy Platinum Lemon 51 Tk,,,,,,produce,produce_root_veg,high
+418917,Kapslid Fairy Platinum Lemon 71 Tk,,,,,,produce,produce_root_veg,high
+418918,Kapslid Fairy Platinum Lemon 81 Tk,,,,,,produce,produce_root_veg,high
+418919,Kapslid Fairy Platinum Lemon 88 Tk,,,,,,produce,produce_root_veg,high
+418920,Kapslid Finish Quantum 35 Tk,,,,,,produce,produce_root_veg,high
+418921,Kapslid Finish Quantum Ai 1 80 Tk,,,,,,produce,produce_root_veg,high
+418922,Kapslid Finish Ultimate 0 Proc 45 Tk,,,,,,produce,produce_root_veg,high
+418923,Kapslid Finish Ultimate Lemon 45 Tk,,,,,,produce,produce_root_veg,high
+418924,Kapslid Finish Ultimate Lemon 50 Tk,,,,,,produce,produce_root_veg,high
+418925,Kapslid Finish Ultimate Lemon 70 Tk,,,,,,produce,produce_root_veg,high
+418926,Kapslid Finish Ultimate Plus Lemon 62 Tk,,,,,,produce,produce_root_veg,high
+418927,Kapslid Somat Excellence 3 In 1 60 Tk,,,,,,produce,produce_root_veg,high
+418928,Kapslid Somat Excellence 3 In 1 88 Tk,,,,,,produce,produce_root_veg,high
+418929,Kapslid Somat Excellence 4 In 1 50 Tk,,,,,,produce,produce_root_veg,high
+418930,Kapslid Somat Excellence 4 In 1 60 Tk,,,,,,produce,produce_root_veg,high
+418931,Kapslid Somat Excellencepremium 5 I 1 54 Tk,,,,,,produce,produce_root_veg,high
+418932,Noudep Kaps Somat Excellence 4 In 1 30 Tk,,,,,,produce,produce_root_veg,high
+418933,Noudep Mas Kapslid Finish Quantum 60 Tk,,,,,,produce,produce_root_veg,high
+418934,Noudep Sool 1 5 Kg Lop Vah 400 Ml Finish,,,,,,world_spices,spices_basic_salt_pepper,high
+418935,Noudepesum Loputusvahend Mayeri 500 Ml,,,,,,household,hh_laundry,high
+418936,Noudepesum Tab Finish Power E Lem 90 2 Tk,,,,,,other,dry_other,fallback
+418937,Noudepesum Tab Somat Exc Prem 5 In 1 42 Tk,,,,,,other,dry_other,fallback
+418938,Noudepesum Tabletid Finish Power 85 Tk,,,,,,other,dry_other,fallback
+418939,Noudepesum Tabletid Frosch Ai 1 Soda 30 Tk,,,,,,other,dry_other,fallback
+418940,Noudepesum Tabletid Somat Ai 1 Extra 75 Tk,,,,,,other,dry_other,fallback
+418941,Noudepesumas Geel Finish Ai 1 Eco 900 Ml,,,,,,other,dry_other,fallback
+418942,Noudepesumas Geel Mayeri Lem Mint 600 Ml,,,,,,sweets_snacks,sweets_gums_mints,high
+418943,Noudepesumas Geel Mayeri Lemongrass 600 Ml,,,,,,other,dry_other,fallback
+418944,Noudepesumasina Sool Somat 2 5 Kg,,,,,,world_spices,spices_basic_salt_pepper,high
+418945,Noudepesuvah L Arbre Vert Aloevera 500 Ml,,,,,,other,dry_other,fallback
+418946,Noudepesuvahend Fairy Apple 1 35 L,,,,,,produce,produce_apples_pears,high
+418947,Noudepesuvahend Fairy Citrus 650 Ml,,,,,,other,dry_other,fallback
+418948,Noudepesuvahend Fairy Extra Citrus 900 Ml,,,,,,other,dry_other,fallback
+418949,Noudepesuvahend Fairy Extra Lilac 900 Ml,,,,,,other,dry_other,fallback
+418950,Noudepesuvahend Fairy Forest Fruit 650 Ml,,,,,,other,dry_other,fallback
+418951,Noudepesuvahend Fairy Lilac 650 Ml,,,,,,other,dry_other,fallback
+418952,Noudepesuvahend Helper Apple 500 Ml,,,,,,produce,produce_apples_pears,high
+418953,Noudepesuvahend Helper Lemon 1 L 91681,,,,,,other,dry_other,fallback
+418954,Noudepesuvahend Mayeri Cranberry 500 Ml,,,,,,other,dry_other,fallback
+418955,Noudepesuvahend Mayeri Lemongrass 500 Ml,,,,,,other,dry_other,fallback
+418956,Noudepesuvahend Neutral Sensitive 500 Ml,,,,,,other,dry_other,fallback
+418957,Noudepesuvahend Pur Bal Calendula 750 Ml,,,,,,other,dry_other,fallback
+418958,Puhastussooda Mayeri Organic 500 G,,,,,,household,hh_cleaners,high
+418959,Noudepesum Tabletid Finish Ultimate 30 Tk,,,,,,other,dry_other,fallback
+418960,Noudepesumas Geel Somat Ai 1 Lemon 990 Ml,,,,,,other,dry_other,fallback
+418961,Noudepesumas Loputusvahend Frosch 750 Ml,,,,,,household,hh_laundry,high
+418962,Ahjupuhastusvahend Cif Perfect 435 Ml,,,,,,household,hh_cleaners,high
+418963,Feromoonpuunis Roomavat Pruss Bros 1 Tk,,,,,,other,dry_other,fallback
+418964,Katlakivieemaldi Mayeri 500 Ml,,,,,,other,dry_other,fallback
+418965,Klaasipuh Vahend Ajax Crystal 500 Ml,,,,,,other,dry_other,fallback
+418966,Klaasipuh Vahend Ajax Lilyofvall 500 Ml,,,,,,other,dry_other,fallback
+418967,Klaasipuh Vahend Ajax Triple Act 500 Ml,,,,,,other,dry_other,fallback
+418968,Klaasipuhastusvahend Frosch 500 Ml,,,,,,household,hh_cleaners,high
+418969,Klaasipuhastusvahend Frosch Taide 1 L,,,,,,household,hh_cleaners,high
+418970,Kleepelint Toidukoidele Bros 2 Tk,,,,,,other,dry_other,fallback
+418971,Kodulohnastaja Aw Freesie Jasmine 30 Ml,,,,,,other,dry_other,fallback
+418972,Koitorjevahend Bros Riputatav Pakend,,,,,,other,dry_other,fallback
+418973,Ohuvarsk Air Wick Citrus Taide 250 Ml,,,,,,other,dry_other,fallback
+418974,Ohuvarsk Air Wick Flowers Taide 250 Ml,,,,,,other,dry_other,fallback
+418975,Ohuvarsk Air Wick Linen Taide 250 Ml,,,,,,other,dry_other,fallback
+418976,Ohuvarsk Air Wick Moon Lily Taide 250 Ml,,,,,,other,dry_other,fallback
+418977,Ohuvarsk Air Wick Peach Apric Taide 250 Ml,,,,,,other,dry_other,fallback
+418978,Ohuvarskendaja Glade Lemon Taide 10 Ml,,,,,,other,dry_other,fallback
+418979,Prussakaloks Bros,,,,,,other,dry_other,fallback
+418980,Puh Kreem Cif Citrus Harmony 1001 G,,,,,,other,dry_other,fallback
+418981,Puhastusvaht Domestos Bleach 435 Ml,,,,,,household,hh_cleaners,high
+418982,Torupuhastusvahend Toru Siil 1 L,,,,,,household,hh_cleaners,high
+418983,Uldpuh Vahend Ajax Floral Fiesta 1 L Roh,,,,,,other,dry_other,fallback
+418984,Uldpuh Vahend Ajax Floralfiesta Lilac 1 L,,,,,,other,dry_other,fallback
+418985,Uldpuh Vahend Cillit Bang Active 600 Ml,,,,,,other,dry_other,fallback
+418986,Uldpuhastusvahend Frosch Soodaga 500 Ml,,,,,,household,hh_cleaners,high
+418987,Univ Puhastusvahend Cillit Magic 450 Ml,,,,,,household,hh_cleaners,high
+418988,Vannitoa Puh Vah Frosch Grape Acid 500 Ml,,,,,,other,dry_other,fallback
+418989,Vannitoa Puhastusvahend Ajax 500 Ml,,,,,,household,hh_cleaners,high
+418990,Wc Geel Duck Fresh Discs Lime 36 Ml,,,,,,other,dry_other,fallback
+418991,Wc Geel Harpic Active Lemon 750 Ml,,,,,,other,dry_other,fallback
+418992,Wc Geel Mayeri Ocean 750 Ml,,,,,,other,dry_other,fallback
+418993,Wc Lop Kasti Tabletid Bref Duo 2 I 1 2 X 50 G,,,,,,drinks,drinks_wine,high
+418994,Wc Lop Kasti Tabletid Lu Blue Easy 4 Tk,,,,,,drinks,drinks_wine,high
+418995,Wc Puh Vahend Domestos Atlantic 750 Ml,,,,,,other,dry_other,fallback
+418996,Wc Puh Vahend Domestos Citrusfresh 750 Ml,,,,,,other,dry_other,fallback
+418997,Wc Puh Vahend Domestos Lime Fresh 750 Ml,,,,,,other,dry_other,fallback
+418998,Wc Puh Vahend Domestos Pine Fresh 750 Ml,,,,,,other,dry_other,fallback
+418999,Wc Puh Vahend Domestos Zero Blue 750 Ml,,,,,,other,dry_other,fallback
+419000,Wc Puh Vahend Harpic Max Citrus 750 Ml,,,,,,other,dry_other,fallback
+419001,Wc Puh Vahend Harpic Max Original 750 Ml,,,,,,drinks,drinks_spirits,high
+419002,Wc Puh Vahend Harpic Max Spring 750 Ml,,,,,,other,dry_other,fallback
+419003,Wc Puh Vahend Harpic Power Hygiene 750 Ml,,,,,,other,dry_other,fallback
+419004,Wc Puhastusvahend Frosch Citrus 750 Ml,,,,,,household,hh_cleaners,high
+419005,Wc Puhastusvahend Frosch Lavender 750 Ml,,,,,,household,hh_cleaners,high
+419006,Wc Puhastusvahend Harpic Original 750 Ml,,,,,,drinks,drinks_spirits,high
+419007,Wc Puhastusvahend Sanit 500 Ml,,,,,,household,hh_cleaners,high
+419008,Wc Varskendaja Bref Arctic Ocean 2 X 42 G,,,,,,other,dry_other,fallback
+419009,Wc Varskendaja Bref Pa Lemon 3 X 50 G,,,,,,other,dry_other,fallback
+419010,Wc Varskendaja Bref Pa Pine 2 X 50 G,,,,,,other,dry_other,fallback
+419011,Wc Varskendaja Bref Spring Rain 2 X 42 G,,,,,,other,dry_other,fallback
+419012,Wc Varskendaja Bref Spring Rain 3 X 42 G,,,,,,other,dry_other,fallback
+419013,Wc Varskendaja Domestos P 5 Magnolia 3 X 50 G,,,,,,other,dry_other,fallback
+419014,Hallituse Eemaldaja Cillit Bang 750 Ml,,,,,,other,dry_other,fallback
+419015,Hiireloks Bros Puidust 2 Tk,,,,,,other,dry_other,fallback
+419016,Katlakivieemaldaja Cif 750 Ml,,,,,,other,dry_other,fallback
+419017,Katlakivieemaldaja Frosch Raspberry 500 Ml,,,,,,other,dry_other,fallback
+419018,Katlakivieemaldaja Kh 7 750 Ml,,,,,,other,dry_other,fallback
+419019,Katlakivieemalduspulber Oro 2 X 25 G,,,,,,other,dry_other,fallback
+419020,Klaasipuh Vahend Clin Windows Blue 500 Ml,,,,,,other,dry_other,fallback
+419021,Klaasipuh Vahend Mayeri Sensitive 500 Ml,,,,,,other,dry_other,fallback
+419022,Klaasipuhastusvahend Clin Anti Fog 500 Ml,,,,,,household,hh_cleaners,high
+419023,Klaasipuhastusvahend Clin Apple 500 Ml,,,,,,produce,produce_apples_pears,high
+419024,Klaasipuhastusvahend Clin Citrus 500 Ml,,,,,,household,hh_cleaners,high
+419025,Kodulohnastaja Aw Mint Berry 30 Ml,,,,,,sweets_snacks,sweets_gums_mints,high
+419026,Kodulohnastaja Aw Myst Garden 30 Ml,,,,,,other,dry_other,fallback
+419027,Koogipuhastusvahend Frosch Greip 500 Ml,,,,,,produce,produce_tropical,high
+419028,Koogipuhastusvahend Sanytol 500 Ml,,,,,,household,hh_cleaners,high
+419029,Ohuvarsk Air Wick Jasmine Taide 250 Ml,,,,,,other,dry_other,fallback
+419030,Ohuvarsk Air Wick Myst Garden Taide 250 Ml,,,,,,other,dry_other,fallback
+419031,Ohuvarskendaja Air Wick Purecherry 250 Ml,,,,,,other,dry_other,fallback
+419032,Ohuvarskendaja Air Wick Purespring 250 Ml,,,,,,other,dry_other,fallback
+419033,Ohuvarskendaja Glade Fresh Lemon 10 Ml,,,,,,other,dry_other,fallback
+419034,Puh Kreem Cif Max Power Mikroos 1001 G,,,,,,other,dry_other,fallback
+419035,Puhastuskreem Cif Lemon Mikroos 300 G,,,,,,household,hh_cleaners,high
+419036,Puhastuskreem Cif Lemon Mikroos 540 G,,,,,,household,hh_cleaners,high
+419037,Puhastuskreem Cif Lila Flower Mikr 780 G,,,,,,household,hh_cleaners,high
+419038,Puhastuskreem Cif Pink Flower Mikr 780 G,,,,,,household,hh_cleaners,high
+419039,Puhastuskreem Cif Regular Mikroos 540 G,,,,,,household,hh_cleaners,high
+419040,Puhastuskreem Cif Sidrun Kristal 780 G,,,,,,produce,produce_tropical,high
+419041,Puhastuskreem Cif Ultrawhite Mikr 693 G,,,,,,household,hh_cleaners,high
+419042,Puhastusvahend Domestos Ocean 700 Ml,,,,,,household,hh_cleaners,high
+419043,Rasvaeemaldaja Cillit Bang Spray 750 Ml,,,,,,other,dry_other,fallback
+419044,Rasvaeemaldaja Kh 7 750 Ml,,,,,,other,dry_other,fallback
+419045,Uldpuh Vah Cillit Bang Bleach Hyg 750 Ml,,,,,,other,dry_other,fallback
+419046,Uldpuh Vahend Clin 3 I 1 Multi Shine 500 Ml,,,,,,other,dry_other,fallback
+419047,Uldpuhastusvahend Frosch Apelsin 500 Ml,,,,,,produce,produce_tropical,high
+419048,Uldpuhastusvahend Sanytol 1 L,,,,,,household,hh_cleaners,high
+419049,Uldpuhastusvahend Sanytol 500 Ml,,,,,,household,hh_cleaners,high
+419050,Uldpuhastuvahend Mayeri Sensitive 500 Ml,,,,,,other,dry_other,fallback
+419051,Univ Puh Geel Ace Pow Floral Perf 750 Ml,,,,,,other,dry_other,fallback
+419052,Univ Puh Geel Ace Power Lemon 750 Ml,,,,,,other,dry_other,fallback
+419053,Vannitoa Puh Vahend Cillit Bang 750 Ml,,,,,,other,dry_other,fallback
+419054,Vannitoa Puhastusvahend Kh 7 750 Ml,,,,,,household,hh_cleaners,high
+419055,Vannitoa Puhastusvahend Sanytol 500 Ml,,,,,,household,hh_cleaners,high
+419056,Wc Geel Duck Fresh Lime 2 X 36 Ml,,,,,,other,dry_other,fallback
+419057,Wc Geel Duck Ocean Breeze 2 X 36 Ml,,,,,,other,dry_other,fallback
+419058,Wc Puhastusvahend Ace Lavender 750 Ml,,,,,,household,hh_cleaners,high
+419059,Wc Puhastusvahend Helper Ocean 750 Ml,,,,,,household,hh_cleaners,high
+419060,Wc Varskendaja Bref Ca Eucalyptus 2 X 50 G,,,,,,other,dry_other,fallback
+419061,Wc Varskendaja Bref Ca Eucalyptus 3 X 50 G,,,,,,other,dry_other,fallback
+419062,Wc Varskendaja Bref Ca Flower 2 X 50 G,,,,,,other,dry_other,fallback
+419063,Wc Varskendaja Bref Ca Flower 3 X 50 G,,,,,,other,dry_other,fallback
+419064,Wc Varskendaja Bref Lavander 3 X 50 G,,,,,,other,dry_other,fallback
+419065,Piimapuder Teravil Kupsisegamilupa 250 G 6 K,,,,,,dairy_eggs_fats,dairy_milk,high
+419066,Wc Varskendaja Bref Pa Lavender 2 X 50 G,,,,,,other,dry_other,fallback
+419067,El Ohuvarsk Ambi Pur Spring Taide 20 Ml,,,,,,other,dry_other,fallback
+419068,El Ohuvarskendaja Ambi Pur Spring 20 Ml,,,,,,other,dry_other,fallback
+419069,Hallituse Eemald Vahend Astonish 750 Ml,,,,,,other,dry_other,fallback
+419070,Hiire Ja Rotimurk Teravili Bros 120 G,,,,,,other,dry_other,fallback
+419071,Katlakivi Eemaldamisvah Astonish 750 Ml,,,,,,other,dry_other,fallback
+419072,Katlakivieemaldaja Cif Trigger 435 Ml,,,,,,other,dry_other,fallback
+419073,Katlakivieemaldi Puhas Kodu 500 Ml,,,,,,other,dry_other,fallback
+419074,Keraam Pliidi Puhastusvahend Frosch 300 Ml,,,,,,household,hh_cleaners,high
+419075,Klaasipuhastusvahend L Arbre Vert 740 Ml,,,,,,household,hh_cleaners,high
+419076,Kodulohnastaja Aw White Flowers 25 Ml,,,,,,other,dry_other,fallback
+419077,Koitorjekuulid Bros Lavendel 20 Tk,,,,,,other,dry_other,fallback
+419078,Koogipuhastusvahend Cillit Bang 750 Ml,,,,,,household,hh_cleaners,high
+419079,Ohuvarsk Air Wick Carib Sandalwood 236 Ml,,,,,,other,dry_other,fallback
+419080,Ohuvarsk Air Wick Mandarin Taide 250 Ml,,,,,,other,dry_other,fallback
+419081,Ohuvarsk Air Wick Mint Grapefruit 236 Ml,,,,,,sweets_snacks,sweets_gums_mints,high
+419082,Ohuvarskendaja Airwick Freshwaters 300 Ml,,,,,,other,dry_other,fallback
+419083,Ohuvarskendaja Tango Citrus 300 Ml,,,,,,other,dry_other,fallback
+419084,Ohuvarskendaja Tango Ocean 300 Ml,,,,,,other,dry_other,fallback
+419085,Poranda Puh Vahend Astonish Lavender 1 L,,,,,,other,dry_other,fallback
+419086,Puhastussprei Hallitusele Cif 435 Ml,,,,,,household,hh_cleaners,high
+419087,Rasvaeemaldusvahend Astonish 750 Ml,,,,,,other,dry_other,fallback
+419088,Torugeel Puhas Kodu 500 Ml,,,,,,other,dry_other,fallback
+419089,Torupuhastusvahend Helper Graanulid 500 G,,,,,,household,hh_cleaners,high
+419090,Torupuhastusvahend Puhas Kodu 500 Ml,,,,,,household,hh_cleaners,high
+419091,Torupuhastusvahend Tiret Turbo 1 L,,,,,,household,hh_cleaners,high
+419092,Uldpuhastusvahend Ajax Soda Lemon 500 Ml,,,,,,household,hh_cleaners,high
+419093,Uldpuhastusvahend Ajax Spray 750 Ml,,,,,,household,hh_cleaners,high
+419094,Uldpuhastusvahend Astonish 750 Ml,,,,,,household,hh_cleaners,high
+419095,Uldpuhastusvahend Sanytol Greip 500 Ml,,,,,,produce,produce_tropical,high
+419096,Univ Puh Vahend Puhas Kodu Sanit 500 Ml,,,,,,other,dry_other,fallback
+419097,Univ Puhastuslapid Sanytol Desinf 72 Tk,,,,,,household,hh_cleaners,high
+419098,Vaibapuh Vahend Vanish Gold Regular 500 Ml,,,,,,other,dry_other,fallback
+419099,Vannitoa Puh Vah Cillit Bang Lemon 750 Ml,,,,,,other,dry_other,fallback
+419100,Vannitoa Puh Vah Cillit Bang Ultra 750 Ml,,,,,,other,dry_other,fallback
+419101,Vannitoa Puh Vahend L Arbre Vert 740 Ml,,,,,,other,dry_other,fallback
+419102,Vannitoa Puhastusvahend Astonish 750 Ml,,,,,,household,hh_cleaners,high
+419103,Wc Geel Bref 10 Xeffect Lime Scale 700 Ml,,,,,,other,dry_other,fallback
+419104,Wc Geel Bref 10 Xeffect Max White 700 Ml,,,,,,other,dry_other,fallback
+419105,Wc Geel Bref 10 Xeffect Total Prot 700 Ml,,,,,,other,dry_other,fallback
+419106,Wc Geel Bref Floraldelight 700 Ml,,,,,,other,dry_other,fallback
+419107,Wc Geel Bref Fresh Mist 700 Ml,,,,,,other,dry_other,fallback
+419108,Wc Geel Bref Lemonitta Power 700 Ml,,,,,,other,dry_other,fallback
+419109,Wc Geel Puhas Kodu 500 Ml,,,,,,other,dry_other,fallback
+419110,Wc Ohuvarsk Ambi Pur Cotton Flower 7 5 Ml,,,,,,other,dry_other,fallback
+419111,Wc Puhastusvahend Domestos Citrus 1 L,,,,,,household,hh_cleaners,high
+419112,Wc Puhastusvahend Frosch Raspberry 750 Ml,,,,,,household,hh_cleaners,high
+419113,Wc Varskendaja Brait Hygiene Lilac 3 X 45 G,,,,,,other,dry_other,fallback
+419114,Wc Varskendaja Bref Arctic Ocean 3 X 42 G,,,,,,other,dry_other,fallback
+419115,Wc Varskendaja Bref Ca Lavander 2 X 50 G,,,,,,other,dry_other,fallback
+419116,Wc Varskendaja Bref Deluxe Jasmine 2 X 50 G,,,,,,other,dry_other,fallback
+419117,Wc Varskendaja Bref Deluxe Magnolia 2 X 50 G,,,,,,other,dry_other,fallback
+419118,Wc Varskendaja Bref Deluxe Magnolia 3 X 50 G,,,,,,other,dry_other,fallback
+419119,El Ohuvarsk Air Wick Smooth Satin 250 Ml,,,,,,other,dry_other,fallback
+419120,El Ohuvarsk Taide Ambi Pur Cotton 20 Ml,,,,,,other,dry_other,fallback
+419121,El Ohuvarskendaja Ambi Pur Cotton 20 Ml,,,,,,other,dry_other,fallback
+419122,Klaasipuhastusvahend Lesta Home 500 Ml,,,,,,household,hh_cleaners,high
+419123,Kodulohnastaja Areon P Leather 150 Ml,,,,,,other,dry_other,fallback
+419124,Kodulohnastaja Aw Melonfrangipani 40 Ml,,,,,,produce,produce_tropical,high
+419125,Kodulohnastaja Aw Morn Dew Blackber 40 Ml,,,,,,other,dry_other,fallback
+419126,Kodulohnastaja Aw Pear Cinnamon 40 Ml,,,,,,world_spices,spices_herbs_spice_mix,high
+419127,Kodulohnastaja Aw Sandalwoodvanilla 30 Ml,,,,,,other,dry_other,fallback
+419128,Kodulohnastaja Aw Spicesbloodorange 30 Ml,,,,,,other,dry_other,fallback
+419129,Kodulohnastaja Ilaja 100 Ml,,,,,,other,dry_other,fallback
+419130,Kodulohnastaja Odoro Champagnehouse 90 Ml,,,,,,other,dry_other,fallback
+419131,Kodulohnastaja Odoro Cuban Soul 90 Ml,,,,,,other,dry_other,fallback
+419132,Kodulohnastaja Odoro Magnolia 90 Ml,,,,,,other,dry_other,fallback
+419133,Kodulohnastaja Odoro Marvelous 90 Ml,,,,,,other,dry_other,fallback
+419134,Kodulohnastaja Odoro Orange Chilli 90 Ml,,,,,,other,dry_other,fallback
+419135,Koogi Ahju Puhastus Vah Lesta Home 500 Ml,,,,,,household,hh_cleaners,high
+419136,Nahapuhastusvahend Lesta Home 500 Ml,,,,,,household,hh_cleaners,high
+419137,Niisked Koogi Puhastuslapid Vortex 48 Tk,,,,,,household,hh_cleaners,high
+419138,Niisked Moobli Puhastuslapid Vortex 48 Tk,,,,,,household,hh_cleaners,high
+419139,Niisked Vannitoa Puhastuslap Vortex 48 Tk,,,,,,household,hh_cleaners,high
+419140,Ohuvarsk Air Wick Jasm Bouq Taide 228 Ml,,,,,,other,dry_other,fallback
+419141,Ohuvarskendaja Air Wick Af Jasmine 228 Ml,,,,,,other,dry_other,fallback
+419142,Ohuvarskendaja Air Wick Eucalyptus 237 Ml,,,,,,other,dry_other,fallback
+419143,Ohuvarskendaja Air Wick Jasmine 237 Ml,,,,,,other,dry_other,fallback
+419144,Ohuvarskendaja Air Wick Raspberry 237 Ml,,,,,,other,dry_other,fallback
+419145,Plekieemaldaja Kh 7 Oxy Effect 750 Ml,,,,,,other,dry_other,fallback
+419146,Porandapuh Vah Ace Talcum White Musk 1 L,,,,,,other,dry_other,fallback
+419147,Porandapuhastus Vahend Ace Lavender 1 L,,,,,,household,hh_cleaners,high
+419148,Porandapuhastusvahend Lesta Home 500 Ml,,,,,,household,hh_cleaners,high
+419149,Ruumisprei Odoro Champagne House 200 Ml,,,,,,other,dry_other,fallback
+419150,Ruumisprei Odoro Cuban Soul 200 Ml,,,,,,other,dry_other,fallback
+419151,Ruumisprei Odoro Magnolia 200 Ml,,,,,,other,dry_other,fallback
+419152,Ruumisprei Odoro Orange Chilli 200 Ml,,,,,,other,dry_other,fallback
+419153,Ruumisprei Odoro Sandalwood 200 Ml,,,,,,other,dry_other,fallback
+419154,Tekstiili Puh Vahend Lesta Home 500 Ml,,,,,,other,dry_other,fallback
+419155,Universaalne Puh Vahend Lesta Home 500 Ml,,,,,,other,dry_other,fallback
+419156,Universaalsed Puh Lapid Mayeri Sens 30 Tk,,,,,,other,dry_other,fallback
+419157,Vannitoa Puh Vahend Lesta Home 500 Ml,,,,,,other,dry_other,fallback
+419158,Wc Lop Kasti Tabletid Kolorado Meri 2 X 45 G,,,,,,drinks,drinks_wine,high
+419159,Wc Ohuvarsk Ambi Pur Lenor Spring 7 5 Ml,,,,,,other,dry_other,fallback
+419160,Wc Varskendaja Brait Hygiene Ocean 3 X 45 G,,,,,,other,dry_other,fallback
+419161,Wc Varskendaja Brait Hygiene Pine 3 X 45 G,,,,,,other,dry_other,fallback
+419162,Wc Varskendaja Bref Harmony 2 X 50 G,,,,,,other,dry_other,fallback
+419163,Wc Varskendaja Bref Harmony 3 X 50 G,,,,,,other,dry_other,fallback
+419164,Wc Varskendaja Bref Pa Lemon 2 X 50 G,,,,,,other,dry_other,fallback
+419165,Wc Varskendaja Bref Serenity 2 X 50 G,,,,,,other,dry_other,fallback
+419166,Wc Varskendaja Bref Serenity 3 X 50 G,,,,,,other,dry_other,fallback
+419167,Wc Varskendaja Bref Vitality 2 X 50 G,,,,,,other,dry_other,fallback
+419168,Wc Varskendaja Bref Vitality 3 X 50 G,,,,,,other,dry_other,fallback
+419169,Wc Varskendaja Gel Alpine Bref 3 X 42 G,,,,,,other,dry_other,fallback
+419170,Kodulohnastaja Bolsius Ts Magnolia 60 Ml,,,,,,other,dry_other,fallback
+419171,Kodulohnastaja Bolsius Ts Pomegr 60 Ml,,,,,,other,dry_other,fallback
+419172,Kodulohnastaja Bolsius Ts Vanilla 60 Ml,,,,,,other,dry_other,fallback
+419173,Kodulohnastaja Odoro Gentleman 90 Ml,,,,,,other,dry_other,fallback
+419174,Koogipuhastusvahend Cif 500 Ml,,,,,,household,hh_cleaners,high
+419175,Koogipuhastusvahend Helper 750 Ml 71318,,,,,,household,hh_cleaners,high
+419176,Niisk Puh Lapid Klaaspindad Vortex 48 Tk,,,,,,other,dry_other,fallback
+419177,Ohuvarsk Air Wick Breeze Taide 228 Ml,,,,,,other,dry_other,fallback
+419178,Ohuvarsk Air Wick Grapefruit Taide 228 Ml,,,,,,other,dry_other,fallback
+419179,Ohuvarsk Air Wick Jasmine Taide 19 Ml,,,,,,other,dry_other,fallback
+419180,Ohuvarsk Air Wick Sandalw Vanilla 250 Ml,,,,,,other,dry_other,fallback
+419181,Ohuvarsk Air Wick Sandalw Vanilla 250 Ml 64365,,,,,,other,dry_other,fallback
+419182,Ohuvarsk Ambi Pur Flowers Spring 185 Ml,,,,,,other,dry_other,fallback
+419183,Ohuvarsk Ambi Pur Fruity Tropics 185 Ml,,,,,,other,dry_other,fallback
+419184,Ohuvarsk Ambi Pur Spring Awakening 185 Ml,,,,,,other,dry_other,fallback
+419185,Ohuvarskendaja Air Wick Breeze 228 Ml,,,,,,other,dry_other,fallback
+419186,Ohuvarskendaja Ambi Pur Goldorchid 185 Ml,,,,,,other,dry_other,fallback
+419187,Ohuvarskendaja Ambi Pur Ocean Mist 185 Ml,,,,,,other,dry_other,fallback
+419188,Ohuvarskendaja Brait Moon Garden 300 Ml,,,,,,other,dry_other,fallback
+419189,Ohuvarskendaja Brait Relax Moments 300 Ml,,,,,,other,dry_other,fallback
+419190,Puhastuspasta Dr Beckmann 550 G,,,,,,dry_preserves,dry_pasta_rice,high
+419191,Puhastussprei Ajax Strong Safe 500 Ml,,,,,,household,hh_cleaners,high
+419192,Puhastusvaht Ajax Anti Limescale 500 Ml,,,,,,household,hh_cleaners,high
+419193,Puhastusvaht Ajax Multi Surface 500 Ml,,,,,,household,hh_cleaners,high
+419194,Puhastusvaht Domestos Floral Fresh 435 Ml,,,,,,household,hh_cleaners,high
+419195,Puidu Ja Nahahooldusvahend Kh 7 750 Ml,,,,,,personal_care,pcare_other,high
+419196,Uldpuhastusvahend Ajax Strong Safe 1 L,,,,,,household,hh_cleaners,high
+419197,Universaalne Puhastusvahend Cif 500 Ml,,,,,,household,hh_cleaners,high
+419198,Vannitoa Puhastusvahend Cif 500 Ml 55809,,,,,,household,hh_cleaners,high
+419199,Wc Lop Kasti Tabl Kolorado Forest 2 X 45 G,,,,,,drinks,drinks_wine,high
+419200,Wc Loputuskasti Tablett Brait Blue 4 X 50 G,,,,,,drinks,drinks_wine,high
+419201,Wc Puh Vaht Domestos Arctic Fresh 435 Ml,,,,,,other,dry_other,fallback
+419202,Wc Puh Vaht Domestos Citrus Blast 435 Ml,,,,,,other,dry_other,fallback
+419203,Wc Puhastusvah Domestos Original 1 L,,,,,,drinks,drinks_spirits,high
+419204,Wc Seep Brait Sweet Flowers 3 X 45 G,,,,,,personal_care,pcare_soap,high
+419205,Wc Seep Brait Volcano Ice 3 X 45 G,,,,,,personal_care,pcare_soap,high
+419206,Wc Varskendaja Brait Green Lagoon 40 G 47138,,,,,,other,dry_other,fallback
+419207,Wc Varskendaja Bref Pa Lemon 6 X 50 G,,,,,,other,dry_other,fallback
+419208,Wc Varskendaja Bref Pa Pine 6 X 50 G,,,,,,other,dry_other,fallback
+419209,Wc Varskendaja Domestos Citrus Taide 35 G,,,,,,other,dry_other,fallback
+419210,Wc Varskendaja Domestos Lavender 3 X 50 G,,,,,,other,dry_other,fallback
+419211,Wc Varskendaja Domestos Magnolia 2 X 48 G,,,,,,other,dry_other,fallback
+419212,Wc Varskendaja Domestos Ocean 35 G,,,,,,other,dry_other,fallback
+419213,Wc Varskendaja Domestos P 5 Lime 2 X 50 G,,,,,,other,dry_other,fallback
+419214,Wc Varskendaja Domestos P 5 Lime 3 X 50 G,,,,,,other,dry_other,fallback
+419215,Wc Varskendaja Domestos P 5 Ocean 2 X 50 G,,,,,,other,dry_other,fallback
+419216,Wc Varskendaja Domestos P 5 Ocean 3 X 50 G,,,,,,other,dry_other,fallback
+419217,Wc Varskendaja Domestos P 5 Pine 2 X 50 G,,,,,,other,dry_other,fallback
+419218,Wc Varskendaja Domestos P 5 Pine 3 X 50 G,,,,,,other,dry_other,fallback
+419219,Wc Varskendaja Domestos Pine Taide 35 G,,,,,,other,dry_other,fallback
+419220,Wc Varskendaja Domestos White Rose 3 X 50 G,,,,,,drinks,drinks_wine,high
+419221,Wc Varskendaja Kolorado Lavender 40 G,,,,,,other,dry_other,fallback
+419222,Dekoratiivohuvarskendi Brait Lake 100 Ml,,,,,,other,dry_other,fallback
+419223,Dekoratiivohuvarskendi Brait Valley 100 Ml,,,,,,other,dry_other,fallback
+419224,El Ohuvarsk Air Wick Jasmine Bloom 19 Ml,,,,,,other,dry_other,fallback
+419225,El Ohuvarsk Air Wick Ocean Taide 19 Ml,,,,,,other,dry_other,fallback
+419226,El Ohuvarsk Air Wick Peony Jas Taide 19 Ml,,,,,,other,dry_other,fallback
+419227,El Ohuvarsk Air Wick Peony Jasmine 19 Ml,,,,,,other,dry_other,fallback
+419228,Klaasipuhastusvahend Gold Drop 750 Ml,,,,,,household,hh_cleaners,high
+419229,Klaasipuhastusvahend Helper 750 Ml,,,,,,household,hh_cleaners,high
+419230,Kodulohnastaja Aroma 50 Ml Apelsin,,,,,,produce,produce_tropical,high
+419231,Kodulohnastaja Aroma 50 Ml Maasikas,,,,,,produce,produce_berries,high
+419232,Kodulohnastaja Aroma 50 Ml Mango,,,,,,produce,produce_tropical,high
+419233,Kodulohnastaja Tesori Ayurveda 200 Ml,,,,,,other,dry_other,fallback
+419234,Kodulohnastaja Tesori Hammam 200 Ml,,,,,,other,dry_other,fallback
+419235,Kodulohnastaja Tesori White Musk 200 Ml,,,,,,other,dry_other,fallback
+419236,Koogipuhastusvahend Mayeri Citrus 500 Ml,,,,,,household,hh_cleaners,high
+419237,Niisked Salvr Helper Fresh Floral 80 Tk,,,,,,baby,baby_wipes,high
+419238,Ohuvarsk Air Wick Eucalyptus Taide 20 Ml,,,,,,other,dry_other,fallback
+419239,Ohuvarsk Air Wick Linen Orchid Taide 20 Ml,,,,,,other,dry_other,fallback
+419240,Ohuvarsk Air Wick Sandalw Oak Taide 228 Ml,,,,,,other,dry_other,fallback
+419241,Ohuvarskendaja Airwick Magn Cherry 300 Ml,,,,,,other,dry_other,fallback
+419242,Ohuvarskendaja Ambi Pur Morningdew 185 Ml,,,,,,other,dry_other,fallback
+419243,Ohuvarskendi Brait Choco Dream 300 Ml,,,,,,other,dry_other,fallback
+419244,Puhastuskreem Cif Original Spray 750 Ml,,,,,,drinks,drinks_spirits,high
+419245,Puhastuslapid Mayeri Pomergranate 30 Tk,,,,,,household,hh_cleaners,high
+419246,Puhastusvah Cif Cream Spray Lemon 750 Ml,,,,,,household,hh_cleaners,high
+419247,Puhastusvaht Domestos Limescale 435 Ml,,,,,,household,hh_cleaners,high
+419248,Puhastusvaht Kh 7 Induktsioonpliit 750 Ml 78562,,,,,,household,hh_cleaners,high
+419249,Ruumisprei Tesori Ayurveda 250 Ml,,,,,,other,dry_other,fallback
+419250,Ruumisprei Tesori Hammam 250 Ml,,,,,,other,dry_other,fallback
+419251,Ruumisprei Tesori Whitemusk 250 Ml,,,,,,other,dry_other,fallback
+419252,Torupuhastusgraanulid Mayeri 500 G,,,,,,household,hh_cleaners,high
+419253,Torupuhastusvahend Helper 1 L 71317,,,,,,household,hh_cleaners,high
+419254,Torupuhastusvahend Tiret Turbo 500 Ml,,,,,,household,hh_cleaners,high
+419255,Uldpuhastusvahend Ajax Peach Blossom 1 L,,,,,,household,hh_cleaners,high
+419256,Uldpuhastusvahend Mayeri Rhubarb 500 Ml,,,,,,household,hh_cleaners,high
+419257,Universaalne Puhastusvah Gold Drop 750 Ml,,,,,,household,hh_cleaners,high
+419258,Universaalne Puhastusvahend Helper 750 Ml,,,,,,household,hh_cleaners,high
+419259,Vaibapuh Vahend Vanish Gold Spray 500 Ml,,,,,,other,dry_other,fallback
+419260,Vaibapuhastusvaht Vanish 600 Ml,,,,,,household,hh_cleaners,high
+419261,Vannitoa Puh Vah Mayeri Freshbreeze 500 Ml,,,,,,other,dry_other,fallback
+419262,Vannitoa Puhastusvahend Helper 750 Ml 71322,,,,,,household,hh_cleaners,high
+419263,Vannitoapuhastusvahend Gold Drop 750 Ml,,,,,,household,hh_cleaners,high
+419264,Wc Puh Vahend Domestos Power Lime 700 Ml,,,,,,other,dry_other,fallback
+419265,Wc Varskendaja Bref Pa Flower 3 X 50 G,,,,,,other,dry_other,fallback
+419266,Wc Varskendaja Domestos Unicorn 2 X 50 G,,,,,,other,dry_other,fallback
+419267,Wc Varskendaja Domestos Unicorn 3 X 50 G,,,,,,other,dry_other,fallback
+419268,Wc Varskendaja Kolorado Exoticflowers 40 G,,,,,,other,dry_other,fallback
+419269,Aknapesija 3 In 1 Leifheit Teleskoopvar,,,,,,other,dry_other,fallback
+419270,Aknapesija 3 In 1 Vahetuskate Leifheit,,,,,,other,dry_other,fallback
+419271,Aknapuhastaja Home Expert,,,,,,other,dry_other,fallback
+419272,Harjavars Home Expert 110 Cm,,,,,,other,dry_other,fallback
+419273,Kasn Vileda Pur Activ 2 Tk,,,,,,other,dry_other,fallback
+419274,Piimapudrupul Maisi Puuvil Hipp 250 G 6 K,,,,,,dairy_eggs_fats,dairy_milk,high
+419275,Kummikindad Vileda Sensitive L,,,,,,other,dry_other,fallback
+419276,Kummikindad Vileda Sensitive M,,,,,,other,dry_other,fallback
+419277,Kummikindad Vileda Super Grip L,,,,,,other,dry_other,fallback
+419278,Kummikindad Vileda Super Grip M,,,,,,other,dry_other,fallback
+419279,Kuurimissvamm Spontex 5 Tk,,,,,,other,dry_other,fallback
+419280,Kuurimissvamm Vileda Glitzi 2 1 Tk,,,,,,other,dry_other,fallback
+419281,Latekskindad Home Expert M 10 Tk,,,,,,other,dry_other,fallback
+419282,Lehtratik Zewa Easy Valge 2 Kih 120 Tk,,,,,,other,dry_other,fallback
+419283,Majapidamislapp Vileda,,,,,,household,hh_other,high
+419284,Majapidamislapp Vileda 00023,,,,,,household,hh_other,high
+419285,Majapidamispaber Zewa Premium 2 Kih 2 Rl,,,,,,household,hh_paper,high
+419286,Majapidamispaber Zewa Wisch Weg 2 Rl,,,,,,household,hh_paper,high
+419287,Mikrofiiber Mopp Vileda Vahetuskate,,,,,,other,dry_other,fallback
+419288,Mikrofiiberlapp Spontex Multi Universal,,,,,,other,dry_other,fallback
+419289,Mopp Activemax Vileda,,,,,,other,dry_other,fallback
+419290,Noudepesukasnad Vileda 2 Tk,,,,,,other,dry_other,fallback
+419291,Noudepesukasnad Vileda Rainbow 10 Tk,,,,,,other,dry_other,fallback
+419292,Porandahari Kuhvliga Home Expert,,,,,,other,dry_other,fallback
+419293,Porandalapp Home Expert,,,,,,other,dry_other,fallback
+419294,Porandamopp Home Expert,,,,,,other,dry_other,fallback
+419295,Porandamopp Mikropluusist Home Expert,,,,,,other,dry_other,fallback
+419296,Prugikotid Home Expert 100 Lx 10 Tk 35 Um,,,,,,other,dry_other,fallback
+419297,Prugikotid Home Expert 140 Lx 10 Tk 40 Um,,,,,,other,dry_other,fallback
+419298,Prugikotid Home Expert 160 Lx 10 Tk 50 Um,,,,,,other,dry_other,fallback
+419299,Prugikotid Home Expert 20 L 20 Tk 6 5 My,,,,,,other,dry_other,fallback
+419300,Prugikotid Home Expert 240 Lx 5 Tk 50 Um,,,,,,other,dry_other,fallback
+419301,Prugikotid Home Expert 30 L 20 Tk 30 Um,,,,,,other,dry_other,fallback
+419302,Prugikotid Home Expert 30 Lx 20 Tk 6 5 My,,,,,,other,dry_other,fallback
+419303,Prugikotid Home Expert 35 Lx 15 Tk 30 Um,,,,,,other,dry_other,fallback
+419304,Prugikotid Home Expert 50 Lx 10 Tk 30 Um,,,,,,other,dry_other,fallback
+419305,Prugikotid Home Expert 60 L 10 Tk 30 Um,,,,,,other,dry_other,fallback
+419306,Prugikotid Home Expert 60 Lx 10 Tk 30 Um,,,,,,other,dry_other,fallback
+419307,Prugikotid Home Expert 60 Lx 25 Tk 13 My,,,,,,other,dry_other,fallback
+419308,Puhastuskasn Spontex Twist,,,,,,household,hh_cleaners,high
+419309,Salvratikud Karbis Zewa Deluxe 3 Kih 90 Tk,,,,,,other,dry_other,fallback
+419310,Salvratikud Zewa Softis Box 4 Kih 80 Tk,,,,,,other,dry_other,fallback
+419311,Spiraalsvamm Vileda 2 Tk,,,,,,other,dry_other,fallback
+419312,Svamm Vileda Tip Top Kmpl 3 Tk,,,,,,other,dry_other,fallback
+419313,Svammlapp Spontex Top Tex 10 Tk,,,,,,other,dry_other,fallback
+419314,Taskuratikud Grite Blossom 3 Kih 10 X 10 Tk,,,,,,other,dry_other,fallback
+419315,Teleskoopvarrega Aknapesija Vileda,,,,,,other,dry_other,fallback
+419316,Varulapp Mopile Vileda Ultramax,,,,,,other,dry_other,fallback
+419317,Wc Paber Grite Family 3 Kih 8 Rl,,,,,,other,dry_other,fallback
+419318,Wc Paber Zewa Deluxe Camomille 3 Kih 8 Rl,,,,,,other,dry_other,fallback
+419319,Wc Paber Zewa Deluxe Valge 3 Kih 32 Rul,,,,,,other,dry_other,fallback
+419320,Wc Paber Zewa Deluxe Valge 3 Kih 4 Rl,,,,,,other,dry_other,fallback
+419321,Wc Paber Zewa Deluxe Valge 3 Kih 8 Rl,,,,,,other,dry_other,fallback
+419322,Aknapuhastushari Telesk Varregaa Spontex,,,,,,household,hh_cleaners,high
+419323,Biolagunevad Prugikotid Mclean 10 L 10 Tk,,,,,,other,dry_other,fallback
+419324,Biolagunevad Prugikotid Mclean 20 L 10 Tk,,,,,,other,dry_other,fallback
+419325,Hari Kuhvliga Leifheit,,,,,,other,dry_other,fallback
+419326,Kasiharja Komplekt Leiheit Classic,,,,,,other,dry_other,fallback
+419327,Kuhvel Ja Hari Spontex,,,,,,other,dry_other,fallback
+419328,Kummikindad Spontex L,,,,,,other,dry_other,fallback
+419329,Kummikindad Spontex M,,,,,,other,dry_other,fallback
+419330,Kummikindad Spontex S,,,,,,other,dry_other,fallback
+419331,Kuurimisnuustik Vileda Glitzi Power 2 Tk,,,,,,other,dry_other,fallback
+419332,Kuurimisnuustik Vileda Puractive,,,,,,other,dry_other,fallback
+419333,Kuurimissvamm Spontex 10 Tk,,,,,,other,dry_other,fallback
+419334,Kuurimissvamm Spontex Supermax 3 Tk,,,,,,other,dry_other,fallback
+419335,Latekskindad Home Expert L 10 Tk,,,,,,other,dry_other,fallback
+419336,Lehtratik Grite Blossom 120 Tk,,,,,,other,dry_other,fallback
+419337,Majap Paber Grite Orchid Chef 3 Kih 1 Rl,,,,,,other,dry_other,fallback
+419338,Majapidamispaber Grite Family 2 Kih 2 Rl,,,,,,household,hh_paper,high
+419339,Majapidamispaber Grite Orchidea 3 Kih 2 Rl,,,,,,household,hh_paper,high
+419340,Mikrofiiber Mopp Vileda Pet Pro Vah Kate,,,,,,other,dry_other,fallback
+419341,Mikrofiiberlapp Spontex Window Wonder,,,,,,other,dry_other,fallback
+419342,Niisked Puhatuslapid Vileda 5 1 Tk,,,,,,other,dry_other,fallback
+419343,Plaskauss Home Expert 9 L 36 X 36 X 15 Cm,,,,,,other,dry_other,fallback
+419344,Plastik Amber Home Expert 12 L,,,,,,drinks,drinks_wine,high
+419345,Porandahari Varrega Spontex,,,,,,other,dry_other,fallback
+419346,Porandahari Varrega Spontex 37751,,,,,,other,dry_other,fallback
+419347,Porandamopi Varukasn Home Expert,,,,,,other,dry_other,fallback
+419348,Porandamopp Home Expert 19217,,,,,,other,dry_other,fallback
+419349,Porandamopp Spontex Abrasiiv,,,,,,other,dry_other,fallback
+419350,Porandamopp Vileda Style Pet Pro,,,,,,other,dry_other,fallback
+419351,Porandapesija Leifheit Classic,,,,,,other,dry_other,fallback
+419352,Porandapesija Vahetuskate Leifheit,,,,,,other,dry_other,fallback
+419353,Prugikotid Home Expert 100 Lx 10 Tk,,,,,,other,dry_other,fallback
+419354,Prugikotid Home Expert 100 Lx 25 Tk 18 My,,,,,,other,dry_other,fallback
+419355,Prugikotid Home Expert 80 Lx 10 Tk,,,,,,other,dry_other,fallback
+419356,Seot Prugikotid Home Expert 40 L 15 Tk Sin,,,,,,other,dry_other,fallback
+419357,Seotavad Prugikotid 20 L Home Expert 20 Tk,,,,,,other,dry_other,fallback
+419358,Seotavad Prugikotid Home Expert 20 L 20 Tk,,,,,,other,dry_other,fallback
+419359,Seotavad Prugikotid Home Expert 35 Lx 14 Tk,,,,,,other,dry_other,fallback
+419360,Seotavad Prugikotid Home Expert 40 L 15 Tk 96185,,,,,,other,dry_other,fallback
+419361,Seotavad Prugikotid Home Expert 40 Lx 12 Tk,,,,,,other,dry_other,fallback
+419362,Seotavad Prugikotid Home Expert 55 Lx 12 Tk,,,,,,other,dry_other,fallback
+419363,Seotavad Prugikotid Home Expert 60 L 10 Tk,,,,,,other,dry_other,fallback
+419364,Seotavad Prugikotid Home Expert 60 Lx 12 Tk,,,,,,other,dry_other,fallback
+419365,Seotavad Prugikotid Home Expert 70 Lx 12 Tk,,,,,,other,dry_other,fallback
+419366,Svammid Vileda Miraclean 2 Tk,,,,,,other,dry_other,fallback
+419367,Svammslapp Spontex Natura 3 Tk,,,,,,other,dry_other,fallback
+419368,Tolmupuhkija Leifheit,,,,,,other,dry_other,fallback
+419369,Vahetuskate Leifheit Picobello M,,,,,,other,dry_other,fallback
+419370,Viskoos Kuurimissvamm Spontex Soft 2 Tk,,,,,,other,dry_other,fallback
+419371,Wc Paber Grite Orchidea 3 Kih 8 Rl,,,,,,other,dry_other,fallback
+419372,Wc Paber Zewa Deluxe Lavender 3 Kih 8 Rl,,,,,,other,dry_other,fallback
+419373,Wc Paber Zewa Moll Valge 3 Kih 12 Rl,,,,,,other,dry_other,fallback
+419374,Aktiivkiuga Puhastuslapp Vileda,,,,,,household,hh_cleaners,high
+419375,Amber Home Expert 10 L,,,,,,other,dry_other,fallback
+419376,Antibakter Koogikasn Home Expert 5 Tk,,,,,,other,dry_other,fallback
+419377,Kasnad Home Expert 10 Tk 69068,,,,,,other,dry_other,fallback
+419378,Kummikindad Home Expert L,,,,,,other,dry_other,fallback
+419379,Kummikindad Home Expert M,,,,,,other,dry_other,fallback
+419380,Kummikindad Home Expert S,,,,,,other,dry_other,fallback
+419381,Kummikindad Home Expert Xl,,,,,,other,dry_other,fallback
+419382,Kuurimiskasn Home Expert 3 Tk,,,,,,other,dry_other,fallback
+419383,Kuurimisnuustik Spontex Steelmax Xl,,,,,,drinks,drinks_tea_coffee,high
+419384,Kuurimispadi Spontex Magic Hallo 6 Tk,,,,,,other,dry_other,fallback
+419385,Kuurimissvamm Spontex Top Clean 2 Tk,,,,,,other,dry_other,fallback
+419386,Lehtratik Grite Ecological 150 Tk,,,,,,other,dry_other,fallback
+419387,Majap Paber Grite Blossom Xl 2 Kih 1 Rl,,,,,,other,dry_other,fallback
+419388,Majap Paber Grite Family Xl 2 Kih 1 Rl,,,,,,other,dry_other,fallback
+419389,Majapidamislapp Spontex Multiuso 10 Tk,,,,,,household,hh_other,high
+419390,Majapidamislapp Universaalne 3 Tk,,,,,,household,hh_other,high
+419391,Majapidamispab Zewa Jumbo Prem 3 Kih 1 Rl,,,,,,household,hh_other,high
+419392,Majapidamispaber Grite Blossom 2 Kih 2 Rl,,,,,,household,hh_paper,high
+419393,Metallnuustikud Home Expert 3 Tk,,,,,,other,dry_other,fallback
+419394,Mikrofiib Porandamopp Spontex Multi,,,,,,other,dry_other,fallback

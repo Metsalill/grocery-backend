@@ -1,0 +1,901 @@
+product_id,name,brand,size_text,stores_sample,current_food_group,current_sub_code,food_group_corrected,new_sub_code,confidence
+417522,Vahuvein ALITA Sweet 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+417523,"Koorejäätis ERITI RAMMUS banaan&šok,110g",ERITI RAMMUS,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417524,"Koorejäätis ERITI RAMMUS kondensp.,100g",ERITI RAMMUS,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417525,"Koorejäätis must.vaar.ONU ESKIMO,480g",BALBIINO,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417526,Vahuvein FREIXENET Cav.C.Neg.Br. 200ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+417527,"Koorejäätis ONU ESKIMO šoko.tops,65g",ONU ESKIMO,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417528,"Koorejäätis šoko.tk.ONU ESKIMO,65g",ONU ESKIMO,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417529,"Koorejäätis šokolaad.ONU ESKIMO,80g",ONU ESKIMO,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417530,"Koorejäätis van.šok.ONU ESKIMO,80g",ONU ESKIMO,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417531,"Koorejäätis vanil.ONU ESKIMO,65g",ONU ESKIMO,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417532,"Külm.pannkoogid lihaga EXTRA LINE, 400g",,,"Barbora, Maxima",,,meat_fish,meat_other,heuristic
+417533,KPN vein EL COTO Blanco Rioja 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+417534,"Jäät.karam.&päh.topsis SUPER VIVA, 95g",,,"Barbora, Maxima",,,other,dry_other,fallback
+417535,Jaat Maas Vanil Topsis Super Viva 98 G,,,,,,other,dry_other,fallback
+417536,"Koorejäätis vanil.ONU ESKIMO,80g",ONU ESKIMO,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417537,"Koorejäätis vanillim.ONU ESKIMO,57g",ONU ESKIMO,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417538,"Koorejäätis vanillim.RAKS toruke, 68g",RAKS,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417539,"Külm.hinkaalid RANNAROOTSI, 420g",RANNAROOTSI,,"Barbora, Maxima",,,other,dry_other,fallback
+417541,"Külm.kanaliha frik.kaerakliid.UVIC, 350g",UVIC,,"Barbora, Maxima",,,meat_fish,meat_poultry,high
+417542,Külm.kaneelirull kardemoniga EP 1.2kg,EESTI PAGAR,,"Barbora, Maxima",,,world_spices,spices_herbs_spice_mix,high
+417543,"Külm.köögivil.segu Go Green BAUER,400g",BAUER,,"Barbora, Maxima",,,other,dry_other,fallback
+417544,"Külm.köögivil.segu Rooma suvi BAUER,400g",BAUER,,"Barbora, Maxima",,,other,dry_other,fallback
+417545,"Külm.köögivil.segu Vahemere BAUER,400g",BAUER,,"Barbora, Maxima",,,other,dry_other,fallback
+417546,"Külm.köögivilj.HÄRMAVILI läätsedega,400g",HÄRMAVILI,,"Barbora, Maxima",,,dry_preserves,dry_groats_beans,high
+417548,Liköör VANA TALLINN 40% 500ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+417549,Whisky Glenfiddich 12 Yo Sin Malt 40 Proc 700 Ml,,,,,,drinks,drinks_spirits,high
+417550,"Külm.köögiviljas.Tervist HÄRMAVILI,400g",HÄRMAVILI,,"Barbora, Maxima",,,other,dry_other,fallback
+417551,"Salaami traditsiooniline MATSIMOKA,150g",,,,,,other,dry_other,fallback
+417552,"Külmutatud mehhiko segu WELL DONE, 400g",,,"Barbora, Maxima",,,frozen_food,frozen_other,heuristic
+417553,"Külm.kultuurmustikad HARMAVILI,300g",HÄRMAVILI,,"Barbora, Maxima",,,produce,produce_berries,high
+417554,GT vein TBILVINO Alaz.Vall. valge 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+417555,"Cognac LARSEN V.S.O.P. 40% 350ml, karp",,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+417556,Külm.mini mitmevilja-croissant EP 1.05kg,EESTI PAGAR,,"Barbora, Maxima",,,bakery,bakery_buns_croissants,high
+417557,"Külm.pelmeenid Sib.Col.lambalihaga,350g",UVIC,,"Barbora, Maxima",,,meat_fish,meat_beef_lamb_game,high
+417558,"Külm.pelmeenid Sib.Col.sea&veise,350g",UVIC,,"Barbora, Maxima",,,meat_fish,meat_beef_lamb_game,high
+417560,"Külm.lihapirukas EESTI PAGAR, 1kg",,,"Barbora, Maxima",,,bakery,bakery_cakes_pastries,high
+417561,"Külm.krabisõrad VICI surimi pulgal,245g",,,"Barbora, Maxima",,,other,dry_other,fallback
+417562,"Külm.pelmeenid Sib.Col.veiselihaga,350g",UVIC,,"Barbora, Maxima",,,meat_fish,meat_beef_lamb_game,high
+417563,"Külm.marjasegu vaarikatega HORTEX, 300g",,,"Barbora, Maxima",,,produce,produce_berries,high
+417564,Kohvioad Arabica PAULIG 1kg,,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high
+417565,KP vein B&G Rose D'AnjouGroll.-Gam.750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+417566,KPN kv.vah. FREIXENET Semi Seco 750ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+417567,Cognac LARSEN VSOP 40% 700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+417568,"Koorejäätis vanil.ONU ESKIMO,65g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417569,Külm. pitsa Diavola RISTORANTE 350g,DR.OETKER,,"Barbora, Maxima",,,other,dry_other,fallback
+417570,"Külm.pitsa Mozzarella RISTORANTE, 355g",DR.OETKER,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high
+417571,"Külm.pitsa Prosciutto RISTORANTE, 340g",DR.OETKER,,,,,other,dry_other,fallback
+417572,"Külm.pitsa RISTORANTE Speciale, 345g",DR.OETKER,,,,,other,dry_other,fallback
+417573,"Külm.põdraliha pelmeenid,350g",RANNAROOTSI,,"Barbora, Maxima",,,meat_fish,meat_other,heuristic
+417574,Hambapasta Biomed Citrus Fresh 100 G,,,,,,dry_preserves,dry_pasta_rice,high
+417575,"Jahv.kohv mas.Krönung Grand JACOBS, 100g",,,"Barbora, Maxima",,,drinks,drinks_other,heuristic
+417576,Jahvat.kohv ILLY Classic 250g,,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high
+417577,"Jahvatatud kohv Fine Aroma DAVIDOFF,250g",,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+417578,Külmutatud valmistoidud ja snäkid,,,,,,produce,produce_herbs_salads_sprouts,high
+417579,"Jahvatatud kohv Rich Aroma DAVIDOFF,250g",,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+417581,Kuumsuitsuräimed rookimata OCEAN 400g,,,"Barbora, Maxima",,,meat_fish,fish_salted_smoked,high
+417582,"Külm.Ukr.borš köögiv.segu HORTEX, 450g",,,"Barbora, Maxima",,,other,dry_other,fallback
+417583,"Külmutatud kalapulgad OCEAN, 450g",,,"Barbora, Maxima",,,frozen_food,frozen_fish,high
+417584,"Koorejäätis vanil.ONU ESKIMO,80g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417585,KGT valge vein B&G Sauvignon Blanc 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+417586,"Koorejäätis vanillim.ONU ESKIMO,57g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417587,"Külm.praadimissegu kart.HÄRMAVILI,400g",HÄRMAVILI,,"Barbora, Maxima",,,other,dry_other,fallback
+417590,"Seahakkliha RAKVERE, 400g",,,,,,meat_fish,meat_minced,high
+417591,"Lahustuv kohvijook 3in1 MONTE PERO 17,5g",,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+417592,"Sea šašlõkk Armeenia grill, kg",,,,,,meat_fish,meat_pork,high
+417593,Joogivesi AURA ga-tud 500ml,,,"Barbora, Maxima",,,drinks,drinks_water,high
+417594,Kohvivalgendaja COFFEETA 200g,,,"Barbora, Maxima",,,drinks,drinks_other,heuristic
+417596,"Külm.šokolaadisaiake EESTI PAGAR, 240g",EESTI PAGAR,,,,,bakery,bakery_buns_croissants,high
+417597,"Külm.vaarikad, mustikad HÄRMAVILI, 300g",HÄRMAVILI,,"Barbora, Maxima",,,produce,produce_berries,high
+417598,Jahvatatud kohv AROMA Gold Classic 250g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+417599,"Jäätis pistaatsia ja šokol.CLASSIC, 64g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high
+417600,"Jäätis pistaatsia mandlikr.CLASSIC, 380g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high
+417601,"Koorejäätis BALBIINO glasuuris, 6x35g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417602,"Koorejäätis kohv&liköör VANA TALLINN,64g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417603,"Koorejäätis kohv&liköörVANA TALLINN,380g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417604,"Koorejäätis RAKS piparmündi, 56g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417605,"Külm.vareen. UVIC Vanaema kohupiim.,400g",UVIC,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cottage_quark,high
+417606,Külmutatud Ananassi Kuubikud BAUER 300g,BAUER,,"Barbora, Maxima",,,produce,produce_tropical,high
+417607,Külmutatud meloni pallid BAUER 300g,BAUER,,"Barbora, Maxima",,,produce,produce_tropical,high
+417608,"Mango sorbetipallid MINI MELTS, 72g",MINI MELTS,,,,,frozen_food,frozen_desserts_icecream,high
+417609,"Külm.pelmeenid UVIC Ivan Poltavskie,500g",,,"Barbora, Maxima",,,other,dry_other,fallback
+417610,Lahustuv kohv MERRILD Classic 200g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+417611,"Skumbria tomatikastm.MARINE ABC, EO 240g",,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417612,"Sojagrillkotlet BON SOYA, 250g",,,"Barbora, Maxima",,,sauces_oils,sauces_soy_worcester,high
+417613,"Kaktusvili suurevilj.viigikaktus, 500g",,,"Barbora, Maxima",,,other,dry_other,fallback
+417614,"Siberi tuuramari ,25g",,,"Barbora, Maxima",,,other,dry_other,fallback
+417615,"Arbuus, kg",,,,,,produce,produce_tropical,high
+417617,"Kiivi kollane karbis, 500g",,,,,,produce,produce_tropical,high
+417618,"Kimchi salat, 450g",,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417619,"Münt WELL DONE, 20g",,,"Barbora, Maxima",,,other,dry_other,fallback
+417620,Paprika pikk punane WELL DONE 250g,,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417621,"Köögiviljasegu Coleslaw WELL DONE, 300g",,,"Barbora, Maxima",,,other,dry_other,fallback
+417622,"Õun pakitud 1kl., kg",,,"Barbora, Maxima",,,produce,produce_apples_pears,high
+417623,KPN vein CESARI SOAVE Essere 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+417626,Jääsalat 1tk min 400g,,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417628,Porgand 200g valmis söömiseks!,,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417629,"Kaalikas, kg",,,"Barbora, Maxima",,,other,dry_other,fallback
+417630,"Kartul pakitud varajane, kg",,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417631,"Kartul pestud Villeri pakitud, 2kg",LAHEOTSA,,,,,produce,produce_root_veg,high
+417632,"Kartul varajane, lahtine,kg",,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417633,"Keedupeet vaakumis Jovaige, 500g",JOVAIGE,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417634,Kirss-kobartomat 500g,,,,,,produce,produce_root_veg,high
+417635,"Kurk lühike, kg",,,,,,produce,produce_root_veg,high
+417636,"Kurk Luunja, kg",,,,,,produce,produce_root_veg,high
+417638,"Melon HONEY DEW, kg",,,"Barbora, Maxima",,,produce,produce_tropical,high
+417639,"Külm.Mozzarella pulgad paneer.SALUD,250g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high
+417640,Jahvatatud Kohv Jacobs Kronung Mild 500 G,,,,,,drinks,drinks_tea_coffee,high
+417641,"Koorejäätis ONU ESKIMO šoko.tops,65g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417642,"Mango sorbetipallid MINI MELTS, 72g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high
+417643,"Melon PIEL DE SAPO, kg",,,"Barbora, Maxima",,,produce,produce_tropical,high
+417644,"Õun GOLDEN Delicious suur 1kl., kg",,,"Barbora, Maxima",,,produce,produce_apples_pears,high
+417645,"Gin GORDON`S 37,5% 700ml",,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+417646,GT vein TBILVINO AlazaniValley pun.750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+417647,"Külm.sojaoad Edamame SHIRAKIKU, 400g",,,"Barbora, Maxima",,,sauces_oils,sauces_soy_worcester,high
+417648,GT vein TBILVINO Saperavi punane 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+417649,GT vein TBILVINO Tsinandali valge 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+417650,Hele õlu CRONUS Pilsner 4.8% 500ml,,,"Barbora, Maxima",,,drinks,drinks_beer_cider,high
+417651,"Õun Paulared 1kl., kg",,,"Barbora, Maxima",,,produce,produce_apples_pears,high
+417653,"Petersell kiles,30g",,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417654,Muu Alk J Sinebrychoff Grape 5 5 Proc 0 5 L,,,,,,other,dry_other,fallback
+417656,"Porgand lahtine,kg",,,,,,produce,produce_root_veg,high
+417657,Muu Alk Jk Aperol Aperitivo 11 Proc 700 Ml,,,,,,other,dry_other,fallback
+417659,Liköör JÄGERMEISTER 35% 350ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+417660,Redis Punane Kg,,,,,,other,dry_other,fallback
+417661,"Riivitud keedupeet vaakumis Jovaige, 500",JOVAIGE,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417662,Salat Potis Tk,,,,,,produce,produce_herbs_salads_sprouts,high
+417663,"Külm.paneer.krevetid sabaga Torpedo,300g",,,"Barbora, Maxima",,,other,dry_other,fallback
+417664,"Külm.paneeritud kalapulgad FINDUS, 450g",,,"Barbora, Maxima",,,meat_fish,fish_fresh,high
+417665,"Salatisibul,kg",,,,,,produce,produce_herbs_salads_sprouts,high
+417666,"Külm.pannkoogid šoko.täidis. VICI ,340g",,,"Barbora, Maxima",,,other,dry_other,fallback
+417667,"Külm.pelmeenid Fitlap kanaga, 400g",,,"Barbora, Maxima",,,meat_fish,meat_poultry,high
+417668,"Külm. pitsa FELICIANA Speciale, 335g",,,"Barbora, Maxima",,,other,dry_other,fallback
+417669,"Punane paprika 1.kl.,kg",,,,,,produce,produce_root_veg,high
+417670,Punane Sibul Kg,,,,,,produce,produce_root_veg,high
+417671,"Koorejäätis piparmündi&šoko. PREMIA, 75g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417674,Sibul Vorgus Kg,,,,,,produce,produce_root_veg,high
+417675,"Valge paprika 1.kl.,kg",,,,,,produce,produce_root_veg,high
+417676,"Viinamari punane Red Globe 1kl., kg",,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+417677,"Viinamari tume 1kl., kg",,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+417678,"Virsik 1kl., kg",,,"Barbora, Maxima",,,other,dry_other,fallback
+417679,"Ananass, kg",,,,,,produce,produce_tropical,high
+417680,Riivitud Keedupeet Vaakumis Jovaige 500,,,,,,produce,produce_root_veg,high
+417681,"Roheline sibul , kg (pakitud)",,,,,,produce,produce_root_veg,high
+417682,Salatisibul Kg,,,,,,produce,produce_herbs_salads_sprouts,high
+417684,"Šampinjonid pakitud, 400g",,,"Barbora, Maxima",,,produce,produce_mushrooms,high
+417686,"Külm.Wokmix Orient köög.segu BAUER,400g",,,"Barbora, Maxima",,,other,dry_other,fallback
+417687,"Külm.Wokmix Thai köögiv.segu BAUER, 400g",,,"Barbora, Maxima",,,other,dry_other,fallback
+417689,"Jäätis B&J Netflix, 405g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high
+417691,"Apelsin väike 1kl., kg",,,"Barbora, Maxima",,,produce,produce_tropical,high
+417692,"Aurutatud punapeet KADARBIKU,500g",KADARBIKU,,,,,produce,produce_root_veg,high
+417693,"Avokaado HASS võrgus, 750g",,,"Barbora, Maxima",,,other,dry_other,fallback
+417695,"Apelsin suur 1kl., kg",,,"Barbora, Maxima",,,produce,produce_tropical,high
+417696,Salat Rooma 300 G,,,,,,produce,produce_herbs_salads_sprouts,high
+417697,"Aurutatud punapeet KADARBIKU,500g",,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417698,"Füüsal, 100g",,,,,,other,dry_other,fallback
+417699,Dattel 200g,,,,,,other,dry_other,fallback
+417700,"Eesti küüslaugu küüned pakitud, 100g",,,,,,household,hh_candles_airfresh,high
+417702,"Granaatõun, kg",,,,,,produce,produce_apples_pears,high
+417703,"Soolakurk küüslauguga, 300g",,,"Barbora, Maxima",,,world_spices,spices_basic_salt_pepper,high
+417704,Kohviuba JACOBS Origins Brazil&Colom.1kg,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+417706,"Suits. broilerikoib vaakum TALLEGG,kg",,,"Barbora, Maxima",,,meat_fish,meat_poultry,high
+417707,Kulm Pelmeenid Uvic Ivan Kazanskie 500 G,,,,,,other,dry_other,fallback
+417708,"Avokaado, kg",,,,,,other,dry_other,fallback
+417710,"Hiina kapsas, kg",,,,,,produce,produce_root_veg,high
+417711,"Ingverijuur, kg",,,"Barbora, Maxima",,,other,dry_other,fallback
+417712,"Juurseller, kg",,,,,,other,dry_other,fallback
+417713,Muu alk. jook PINA COLADA 14.5% 700ml,,,"Barbora, Maxima",,,drinks,drinks_soft_soda,high
+417714,Liköör BECHEROVKA 38% 500ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+417715,Viin SMIRNOFF Red 40% 700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+417716,Kulm Pihvid Rakvere 530 G,,,,,,other,dry_other,fallback
+417717,Kulm Pitsapohjad 2 Tk Vici 320 G,,,,,,other,dry_other,fallback
+417718,Kulm Tsaari Salat Bauer 400 G,,,,,,produce,produce_herbs_salads_sprouts,high
+417719,Kulm Tukeldatud Aeduba Hortex 400 G,,,,,,other,dry_other,fallback
+417721,"Greip punane suur Star Ruby 1kl, kg",,,,,,produce,produce_tropical,high
+417722,"Hapukurk ämbris PEIPSI, 500g",PEIPSI,,,,,produce,produce_root_veg,high
+417723,"Hapukurk PEIPSI, 400g",PEIPSI,,,,,produce,produce_root_veg,high
+417724,Idusalat mahe150g,,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417725,"Jäätis MAGNUM kuld karamell, 71g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high
+417726,Viin ZUBROWKA Biala 40% 500 ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+417727,Whisky JAMESON 40% 1L,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+417728,"Külm.hinkaalid RANNAROOTSI, 420g",,,"Barbora, Maxima",,,other,dry_other,fallback
+417729,"Suits. marin. broileri kintsul. M&M,300g",,,"Barbora, Maxima",,,meat_fish,meat_poultry,high
+417730,"Külm.hinkaalid lambalihaga VICI, 350g",,,,,,meat_fish,meat_beef_lamb_game,high
+417731,"Külm.köögivilj.HÄRMAVILI läätsedega,400g",,,"Barbora, Maxima",,,dry_preserves,dry_groats_beans,high
+417732,Porgand pestud pakitud KADARBIKU 500g,,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417733,Kartul Pakitud Varajane Kg,,,,,,produce,produce_root_veg,high
+417734,Kartul Varajane Lahtine Kg,,,,,,produce,produce_root_veg,high
+417735,Muu Piir Jook Riga Black Balsam 45 Proc 0 5 L,,,,,,other,dry_other,fallback
+417736,Viin FINLANDIA 40% 1L,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+417737,Vanillijaatis Baltija 95 G,,,,,,other,dry_other,fallback
+417738,"Kartul pestud  pakitud LAHEOTSA, 2kg",LAHEOTSA,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417739,"Kartul pestud Solist, 2.5kg",TALUKARTUL,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417740,"Kesk-Aasia melon, kg",,,,,,produce,produce_tropical,high
+417741,"Kiivi 1kl., kg",,,,,,produce,produce_tropical,high
+417742,"Kimchi salat, 450g",DIMDIŅI,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417743,"Koreapärane salat, 380g",DIMDIŅI,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417744,"Hapukurk ämbris PEIPSI, 500g",,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417745,Jahvatatud kohv LAVAZZA Qualita Oro 250g,,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high
+417746,Jahvatatud kohv Oro LAVAZZA 250g,,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high
+417747,Alk.vaba nisuõlu WEIHENSTEPHANER 500ml,,,"Barbora, Maxima",,,drinks,drinks_beer_cider,high
+417748,"Koorejäätis PREMIA stracciatella, 245g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417749,"Külm.kultuurmustikad HARMAVILI,300g",,,"Barbora, Maxima",,,produce,produce_berries,high
+417750,Kulm Baguette Kuus Voi Eesti Pagar 175 G,,,,,,other,dry_other,fallback
+417751,Kobartomat 1 Kl Kg,,,,,,produce,produce_root_veg,high
+417752,"Koorejäätis ERITI RAMMUS vanilli, 100g",,,,,,dairy_eggs_fats,dairy_cream_sourcream,high
+417753,"Koorejäätis PREMIA piparmündi, 245g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high
+417754,"Laim 1kl, kg",,,"Barbora, Maxima",,,produce,produce_tropical,high
+417755,"Lehtpetersell taldrikul, pakitud, kg",,,,,,produce,produce_herbs_salads_sprouts,high
+417757,"Kartul pestud Solist, 2.5kg",,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417758,"Šampinjon lahtine, kg",,,,,,produce,produce_mushrooms,high
+417759,"Maasik-metskaktus(Pitaia) pakitud, 200g",,,"Barbora, Maxima",,,produce,produce_berries,high
+417760,Keedupeet Vaakumis Jovaige 500 G,,,,,,produce,produce_root_veg,high
+417761,Kirss Kobartomat 500 G,,,,,,produce,produce_root_veg,high
+417762,Mahe šampinjonid pakitud 250g,AUGA,,"Barbora, Maxima",,,produce,produce_mushrooms,high
+417763,"Kartul pestud pakitud LAHEOTSA, 2kg",,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417765,"Maitseroheline taldrikul, kg",,,"Barbora, Maxima",,,other,dry_other,fallback
+417767,"Hapendatud täispiim FARMI 3,8-4,2%, 1kg",,,,,,dairy_eggs_fats,dairy_milk,high
+417768,KPN kv.vah LANSON Bl.L.Brut 750ml k.karp,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+417769,KPN kv.vah. MOET&CHAN. Br.Rose Im. 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+417771,Kasn Scrub Daddy Scrub Mommy,,,,,,other,dry_other,fallback
+417774,Kulm Baguette Urdivoiga Eesti Pagar 175 G,,,,,,other,dry_other,fallback
+417775,"Külm.šokolaadisaiake EESTI PAGAR, 240g",,,"Barbora, Maxima",,,bakery,bakery_buns_croissants,high
+417776,Külmutatud meloni pallid BAUER 300g,,,"Barbora, Maxima",,,produce,produce_tropical,high
+417777,Kulm Friikart Farm Frites Sakiline 750 G,,,,,,frozen_food,frozen_potato_products,high
+417778,Kulm Friikart Sakiline Kullakesed 750 G,,,,,,frozen_food,frozen_potato_products,high
+417779,"Marineeritud punane sibul, 400g",DIMDIŅI,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417781,Lillkapsas Kg,,,,,,produce,produce_root_veg,high
+417782,"Värske soolakurk ämbris PEIPSI, 500g",,,"Barbora, Maxima",,,world_spices,spices_basic_salt_pepper,high
+417783,Liköör VANA TALLINN 45% 500ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+417786,"Külm.merluus ESVA Argentiina peata, 595g",,,"Barbora, Maxima",,,other,dry_other,fallback
+417787,Pestud porgand KADARBIKU 1kg,KADARBIKU,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417790,Lahustuv kohvijook 2in1 MONTE PERO 14g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+417791,"Suits.pardifilee LINNAMÄE,70g viil",,,"Barbora, Maxima",,,other,dry_other,fallback
+417792,Jahv. kohv French Classic PAULIG 500g,,,"Barbora, Maxima",,,drinks,drinks_other,heuristic
+417793,Cognac LARSEN VS 40% 700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+417794,Lahustuv kohv Krönung JACOBS 200g,,,,,,drinks,drinks_tea_coffee,high
+417797,Kulm Friikartul Maaharra Sakiline 750 G,,,,,,frozen_food,frozen_potato_products,high
+417799,Basiilik potis HANSA HERBS,,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417800,Kulm Friikartul Sakiline Aviko 1 5 Kg,,,,,,frozen_food,frozen_potato_products,high
+417801,Kulm Kala Juurviljaburger Esva 365 G,,,,,,meat_fish,fish_fresh,high
+417802,"Basiilik WELL DONE, 20g",,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417803,"Suitsune kanasnäkk TALLEGG, 80g",,,"Barbora, Maxima",,,meat_fish,meat_poultry,high
+417804,"Hapukurk PEIPSI, 400g",,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417806,Korvits Kg,,,,,,other,dry_other,fallback
+417807,Porgand pestud pakitud KADARBIKU 500g,KADARBIKU,,,,,produce,produce_root_veg,high
+417809,KPN vein TORRES S.Valent.Parel. 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+417811,Salat Frillice pakis GRÜNE FEE,GRÜNE FEE,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417814,"Suitsukanavõie pasteet KARNI, 190g",,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+417815,Vermut VIVIANO Rosso 1L,,,,,,other,dry_other,fallback
+417816,GT vein C.DEL DIABLO Cab.Sauv.Black750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+417817,"Fitness broil.fileehakkliha TALLEGG,300g",,,"Barbora, Maxima",,,dry_preserves,dry_cereals_muesli,high
+417818,Kulm Pelmeen Bravissimo Itaal Uvic 400 G,,,,,,other,dry_other,fallback
+417819,"Suitsupeekon Ehe RANNAROOTSI,120g viil",,,,,,meat_fish,meat_pork,high
+417820,"Kirss-ploomtomatid ämbris, 500g",,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417821,"Koreapärane salat, 380g",,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417822,"Koriander WELL DONE, 20g",,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417823,Lambsalat WELL DONE 100g,,,"Barbora, Maxima",,,meat_fish,meat_beef_lamb_game,high
+417824,Paprika kolmevärv. WELL DONE 500g,,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417825,Marineeritud Sampinjonid 500 G,,,,,,other,dry_other,fallback
+417826,Kulmutatud Kalapulgad Esva 250 G,,,,,,meat_fish,fish_fresh,high
+417827,Kulm Paneeritud Krabisorg Vici 250 G,,,,,,other,dry_other,fallback
+417828,"Võikeeks EESTI PAGAR, 250g",,,,,,dairy_eggs_fats,dairy_butter_margarine,high
+417829,Kulm Pelmeenid Maitsvad 400 G,,,,,,other,dry_other,fallback
+417830,Kulm Pelmeenid Pealinna 350 G,,,,,,other,dry_other,fallback
+417831,Redis Punane Pakitud 125 G,,,,,,other,dry_other,fallback
+417833,"Tšilli pipar punane väike TASTY HOME,50g",TASTY HOME,,"Barbora, Maxima",,,world_spices,spices_basic_salt_pepper,high
+417838,"Viinamari tume seemneteta, 500g",,,,,,drinks,drinks_spirits,high
+417839,Karastusjook COCA-COLA 6x330ml,,,"Barbora, Maxima",,,drinks,drinks_soft_soda,high
+417841,"Mandariin 1kl., kg",,,,,,produce,produce_tropical,high
+417842,Virsik Paraguayo pakitud 500g,,,"Barbora, Maxima",,,other,dry_other,fallback
+417843,Algpiimasegu Nestle Nan Optipro 650 G 0,,,,,,dairy_eggs_fats,dairy_milk,high
+417844,Imiku Piimaseg Nestle Nan 1 Opti 800 G 0,,,,,,dairy_eggs_fats,dairy_milk,high
+417845,Imiku Piimasegu 1 Nuppi 350 G 0 6 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417846,Imiku Piimasegu Comforthipp 300 G Sunnist,,,,,,dairy_eggs_fats,dairy_milk,high
+417847,Imiku Piimasegu Hipp 1 Bio 200 Ml Al Sun,,,,,,dairy_eggs_fats,dairy_milk,high
+417848,Jatkupiimasegu 2 Nuppi 350 G 6 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417849,Jatkupiimasegu Aptamil 2 1 2 Kg 6 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417850,Jatkupiimasegu Aptamil 2 400 G 6 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417851,Jatkupiimasegu Aptamil 2 6 K 800 G,,,,,,dairy_eggs_fats,dairy_milk,high
+417852,Jatkupiimasegu Aptamil Comfort 2 400 G 6 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417853,Jatkupiimasegu Combiotic 1 Hipp 800 G Sun,,,,,,dairy_eggs_fats,dairy_milk,high
+417854,Jatkupiimasegu Combiotic 2 Bio Hipp 800 G 6 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417855,Jatkupiimasegu Friso Gold 2 6 12 K 800 G,,,,,,dairy_eggs_fats,dairy_milk,high
+417856,Jatkupiimasegu Gold 3 Nuppi 350 G 12 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417857,Jatkupiimasegu Hipp 2 Bio 200 Ml Al 6 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417858,Jatkupiimasegu Tutteli 2 300 G 6 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417859,Jatkupiimasegu Tutteli 2 650 G 6 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417860,Kitsepiim Jatk Kabrita 800 G 0 6 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417861,Kitsepiim Jatk Kabrita Follow On 800 G 6 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417862,Kitsepiim Jatk Kabrita Grow Up 800 G 12 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417863,Oko Kitsepiimasegu Hipp 2 400 G 6 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417864,Oko Kitsepiimasegu Hipp Pre 400 G Sunn,,,,,,dairy_eggs_fats,dairy_milk,high
+417865,Piim Poh Piimasegu Aptamil 1 Al Sun 400 G,,,,,,dairy_eggs_fats,dairy_milk,high
+417866,Piim Poh Piimasegu Aptamil 1 Al Sun 800 G,,,,,,dairy_eggs_fats,dairy_milk,high
+417867,Piimajook Aptamil 12 200 Ml,,,,,,dairy_eggs_fats,dairy_milk,high
+417868,Piimajook Aptamil 3 12 1 2 Kg,,,,,,dairy_eggs_fats,dairy_milk,high
+417869,Piimajook Aptamil 3 12 K 800 G,,,,,,dairy_eggs_fats,dairy_milk,high
+417870,Piimajook Aptamil 4 24 K 800 G,,,,,,dairy_eggs_fats,dairy_milk,high
+417871,Piimajook Friso Gold 3 Al 12 K 800 G,,,,,,dairy_eggs_fats,dairy_milk,high
+417872,Piimajook Junior Tutteli 3 300 G 12 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417873,Piimajook Junior Tutteli 3 650 G 12 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417874,Piimajook Junior Tutteli 4 300 G 24 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417875,Piimasegu Aptamil Laktoosivaba 400 G 0,,,,,,dairy_eggs_fats,dairy_milk,high
+417876,Piimasegu Ar Aptamil 400 G Sunnist,,,,,,dairy_eggs_fats,dairy_milk,high
+417877,Piimasegu Comfort 1 Aptamil 400 G Sunnist,,,,,,dairy_eggs_fats,dairy_milk,high
+417878,Piimasegu Friso Gold 1 Al 0 6 K 800 G,,,,,,dairy_eggs_fats,dairy_milk,high
+417879,Piimasegu Hipp 3 Combiotic 500 G 12,,,,,,dairy_eggs_fats,dairy_milk,high
+417880,Piimasegu Laktoosivaba Friso 400 G 0 12 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417881,Piimasegu Nestle Nan 2 Optipro 650 G 6 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417882,Piimasegu Nestle Nan 2 Optipro 800 G 6 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417883,Piimasegu Nestle Nan 3 Optipro 650 G 12 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417884,Piimasegu Nestle Nan 3 Optipro 800 G 12 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417885,Piimasegu Nestle Nan 4 Optipro 650 G 2 A,,,,,,dairy_eggs_fats,dairy_milk,high
+417886,Piimasegu Nestle Nan 4 Optipro 800 G 2 A,,,,,,dairy_eggs_fats,dairy_milk,high
+417887,Piimasegu Nestle Nan 5 Optipro 800 G 2 5 A,,,,,,dairy_eggs_fats,dairy_milk,high
+417888,Piimasegu Tutteli 1 300 G 0 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417889,Piimasegu Tutteli 1 650 G 0 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417890,Valmis Piimasegu 1 Aptamil 2 X 200 Ml Sunn,,,,,,dairy_eggs_fats,dairy_milk,high
+417891,Valmis Piimasegu 2 Aptamil 2 X 200 Ml 6 K,,,,,,dairy_eggs_fats,dairy_milk,high
+417892,Kulm Hiina Koogiv Segu Bauer 400 G,,,,,,other,dry_other,fallback
+417893,"Pirnid NAŠI, kg",,,"Barbora, Maxima",,,produce,produce_apples_pears,high
+417895,"Rosmariin WELL DONE, 20g",,,"Barbora, Maxima",,,other,dry_other,fallback
+417896,"Avokaado suur WELL DONE 12/14, 1tk 250g",WELL DONE,,"Barbora, Maxima",,,other,dry_other,fallback
+417897,Piir.jook SIERRA Tequila Repos.38% 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+417898,Basiilik potis HANSA HERBS,HANSA HERBS,,,,,produce,produce_herbs_salads_sprouts,high
+417899,"Külm.kaneelisaiake EESTI PAGAR,320g",,,,,,bakery,bakery_buns_croissants,high
+417900,"Basiilik WELL DONE, 20g",WELL DONE,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417901,Beebispinat pestud WELL DONE 70g,WELL DONE,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417902,Beebispinat WELL DONE 100g,WELL DONE,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417903,Tsillipipar Mix Well Done 75 G,,,,,,world_spices,spices_basic_salt_pepper,high
+417904,"Nektariin pakitud, 500g",,,"Barbora, Maxima",,,drinks,drinks_juices,high
+417905,Mahe šampinjonid pakitud 250g,,,"Barbora, Maxima",,,produce,produce_mushrooms,high
+417906,Rukola WELL DONE 200g,,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417907,Sidrunmeliss potis HANSA HERBS,,,"Barbora, Maxima",,,produce,produce_tropical,high
+417908,"Tomat kollane 1 kl. , kg",,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417909,"Tšillipipar Jalapeno WELL DONE, 50g",,,"Barbora, Maxima",,,world_spices,spices_basic_salt_pepper,high
+417911,"Sidrun 1.kl., kg",,,"Barbora, Maxima",,,produce,produce_tropical,high
+417912,Kulm Vip Salatisegu Hortex 400 G,,,,,,produce,produce_herbs_salads_sprouts,high
+417913,Beebispinat WELL DONE 200g,WELL DONE,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417914,"Grill šampinjonid, 500g",,,"Barbora, Maxima",,,produce,produce_mushrooms,high
+417915,"Hapukapsas porgandiga EESTI AND, 800g",EESTI AND,,,,,produce,produce_root_veg,high
+417916,"Hapukurgi kuubikud, 500g",PEIPSI,,"Barbora, Maxima",,,other,dry_other,fallback
+417917,"Hautatud kapsas, 700g",DIMDIŅI,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417918,Lahustuv kohv NESCAFE 2IN1 8g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+417920,"Kapsas porgandiga, marin. SMAILIE, 650g",SMAILIE,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417921,"Kapsasalat kurkumiga, 450g",EESTI AND,,,,,produce,produce_herbs_salads_sprouts,high
+417922,"Kartul varajane pestud LEA, 2kg",,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417925,"Juust Maasdam FARM MILK 45%, 200g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high
+417926,"Nuikapsas, kg",,,,,,produce,produce_root_veg,high
+417927,Whisky BUSHMILLS 10YO SM 40% 700ml box,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+417928,Whisky BUSHMILLS Original 40% 700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+417929,Whisky JAMESON IRISH 40% 700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+417930,Arom.puuv.vein MONTE CRISTO punane 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+417931,Arom Puuv Vein Monte Cristo Valge 750 Ml,,,,,,drinks,drinks_wine,high
+417932,Arom Puuvilja Vein Bollino Punane 750 Ml,,,,,,drinks,drinks_wine,high
+417933,"Kirss-ploomtomat WELL DONE, 250g",WELL DONE,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417934,Brandy BEEHIVE VSOP 40% 500ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+417935,Brandy IBIS X.O 36% 500ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+417937,"Tomat tume 1kl., kg",,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417938,"Koriander WELL DONE, 20g",WELL DONE,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417939,Lambsalat WELL DONE 100g,WELL DONE,,"Barbora, Maxima",,,meat_fish,meat_beef_lamb_game,high
+417941,Paprika kolmevärv. WELL DONE 500g,WELL DONE,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417942,"Paprika oranž 1.kl.,kg",,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417943,Paprika pikk punane WELL DONE 250g,WELL DONE,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417944,Peakapsa Kimchi 300g,KADARBIKU,,,,,produce,produce_root_veg,high
+417947,"Porrulauk, kg",,,,,,other,dry_other,fallback
+417948,Külm.kartulisek.maits.Tex-Mex AVIKO 600g,,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417949,Punase peakapsa Kimchi 300g,KADARBIKU,,,,,produce,produce_root_veg,high
+417951,"Toorvorstid juustuga Laste NÕO,400g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high
+417952,"Jäätis VÄIKE TOM šokolaadiga, 60g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high
+417953,Eesti Sibul Vorgus 1 Kg,,,,,,produce,produce_root_veg,high
+417956,"Tüümian WELL DONE, 20g",,,"Barbora, Maxima",,,other,dry_other,fallback
+417957,Cognac HENNESSY XO 40% 350ml karp,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+417958,"Coqnac COURVOISIER XO 40% 700ml, karp",,,"Barbora, Maxima",,,other,dry_other,fallback
+417959,"Jäätis VÄIKE TOM vanillimaits., 60g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high
+417960,"Suitsurulaad keele, šamp. NÕO 100g viil",,,"Barbora, Maxima",,,meat_fish,meat_hams,high
+417962,Oun Kanzi 1 Kl Kg,,,,,,other,dry_other,fallback
+417963,Rukola pestud WELL DONE 70g,WELL DONE,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417964,"Külm.lihapirukas EESTI PAGAR, 400g",,,"Barbora, Maxima",,,bakery,bakery_cakes_pastries,high
+417965,Rukola WELL DONE 200g,WELL DONE,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417966,Salad mix RAINBOW WELL DONE 150g,WELL DONE,,"Barbora, Maxima",,,other,dry_other,fallback
+417967,"Salat Baby Pak Choi, 70g",,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417968,"Külm. metsaseenesupp BAUER, 400g",,,"Barbora, Maxima",,,produce,produce_mushrooms,high
+417970,Hambapasta Biomed Super White 100 G,,,,,,dry_preserves,dry_pasta_rice,high
+417971,"Juust täispiimast EESTI viilutatud, 450g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high
+417972,"Melon Obinavot, kg",,,"Barbora, Maxima",,,produce,produce_tropical,high
+417973,GT vein TBILVINO Kindzmarauli 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+417974,Jahv.kohv LÖFBERGS presskannu 500g,,,"Barbora, Maxima",,,drinks,drinks_other,heuristic
+417975,Jahvatatud kohv 777 Original 500g,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+417976,Jahvatatud kohv Rossa LAVAZZA 250g,,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high
+417978,Salatisegu Harmony WELL DONE 100g,WELL DONE,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417979,Salatisegu Home WELL DONE 150g,WELL DONE,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417980,Jõhvikajook AURA 1L,,,"Barbora, Maxima",,,produce,produce_berries,high
+417981,Karastusjook COCA-COLA 330ml,,,"Barbora, Maxima",,,drinks,drinks_soft_soda,high
+417982,KGT vein TOMMASI Pinot Grigio 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+417983,Salatisegu Lattughini WELL DONE 100g,WELL DONE,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417984,Salatisegu Spring WELL DONE 120g,WELL DONE,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417985,Salatisegu Summer Garden WELL DONE 150g,WELL DONE,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417986,Salatisegu Vivid WELL DONE 100g,WELL DONE,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417987,"Külm.mustsõstar BAUER, 300g",,,"Barbora, Maxima",,,produce,produce_berries,high
+417988,Sidrunmeliss potis HANSA HERBS,HANSA HERBS,,"Barbora, Maxima",,,produce,produce_tropical,high
+417989,"Suvikõrvits roheline, kg",,,,,,other,dry_other,fallback
+417990,"Till kiles, 30g",,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+417991,"Tomat Sunstream WELL DONE, 300g",WELL DONE,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417992,"Tšillipipar Jalapeno WELL DONE, 50g",WELL DONE,,"Barbora, Maxima",,,world_spices,spices_basic_salt_pepper,high
+417993,"Tšillipiprad Habanero WELL DONE, 50g",WELL DONE,,"Barbora, Maxima",,,other,dry_other,fallback
+417995,"Hautatud kapsas, 700g",,,"Barbora, Maxima",,,produce,produce_root_veg,high
+417996,Külm.friikartulid EXTRA LINE 1kg,,,"Barbora, Maxima",,,frozen_food,frozen_potato_products,high
+417998,Mineraalvesi San Pellegrino 1 L G Tud,,,,,,drinks,drinks_water,high
+417999,Eksootilised viljad,,,,,,other,dry_other,fallback
+418000,Nisuolu Cronus 5 3 Proc 500 Ml,,,,,,other,dry_other,fallback
+418001,Rumm Bacardi Superior 37 5 Proc 500 Ml,,,,,,drinks,drinks_spirits,high
+418002,"Külm. frikadellid RAKVERE, 400g",,,"Barbora, Maxima",,,other,dry_other,fallback
+418003,KPN vein FAUSTINO VII Tinto 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+418004,"Külm.hinkaalid lambalihaga VANAEMA,390g",,,"Barbora, Maxima",,,meat_fish,meat_beef_lamb_game,high
+418005,KPN vein TOKAJI Furmint Semisweet 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high
+418006,Kreemipulber MOKATE Carmen 200g,,,"Barbora, Maxima",,,other,dry_other,fallback
+418007,Liköör JÄGERMEISTER 35% 100ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+418008,"Tüümian WELL DONE, 20g",WELL DONE,,"Barbora, Maxima",,,other,dry_other,fallback
+418009,"Virsik pakitud, 500g",,,"Barbora, Maxima",,,other,dry_other,fallback
+418010,"Avokaado Ready to eat WELL DONE, 2tk",WELL DONE,,"Barbora, Maxima",,,other,dry_other,fallback
+418011,Beebiporgand Kadarbiku 250 G,,,,,,produce,produce_root_veg,high
+418013,"Hapukapsas pakitud KADARBIKU, 900g",KADARBIKU,,,,,produce,produce_root_veg,high
+418014,"Suitsutatud juustuvorst LINNAMÄE, 450g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high
+418015,Haputaina Pehmik EESTI PAGAR 240g,,,"Barbora, Maxima",,,other,dry_other,fallback
+418016,"Külm.viineripirukas EESTI PAGAR, 360g",,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+418018,Kurk Luhike Kg,,,,,,produce,produce_root_veg,high
+418019,"Kaste Guacamole, 150g",NATIVE,,"Barbora, Maxima",,,sauces_oils,sauces_other,high
+418022,Vein Andes Cabernet Sauvignon 750 Ml,,,,,,drinks,drinks_wine,high
+418023,"Marineeritud kukeseen, 500g",EESTI AND,,"Barbora, Maxima",,,produce,produce_mushrooms,high
+418024,Marineeritud šampinjonid 500g,EESTI AND,,,,,produce,produce_mushrooms,high
+418025,Murulauk WELL DONE 20g,WELL DONE,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+418026,Rukola WELL DONE 100g,WELL DONE,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+418027,Liköör VANA TALLINN 40% 200ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+418028,"Must purutee TWININGS Earl Grey,100g",,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+418029,"Must tee Earl Grey LIPTON,50x1.5g",,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+418030,Must tee Engl. AristocraticHYLEYS25x2g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+418031,Must tee English Aristocratic HYLEYS100g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+418032,Viin VIRU VALGE 40% 350ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+418033,"Salvei WELL DONE, 20g",WELL DONE,,"Barbora, Maxima",,,other,dry_other,fallback
+418034,Brandy TORRES 5 38% 700ml,,,"Barbora, Maxima",,,other,dry_other,fallback
+418035,"Soolakurk küüslauguga, 300g",EESTI AND,,,,,world_spices,spices_basic_salt_pepper,high
+418036,"Terav kaste Guacamole, 150g",NATIVE,,"Barbora, Maxima",,,sauces_oils,sauces_other,high
+418037,"Till taldrikul, pakitud, kg",,,,,,produce,produce_herbs_salads_sprouts,high
+418039,Cognac HENNESSY VS 40% 700ml,HENNESSY,,,,,drinks,drinks_spirits,high
+418040,"Gin BEEFEATER Pink 37,5% 700ml",BEEFEATER,,,,,drinks,drinks_spirits,high
+418041,"Gin GORDON`S 37,5% 700ml",GORDON'S,,"Barbora, Maxima",,,drinks,drinks_spirits,high
+418042,"Kodune maksapasteet NÕO, 200g",,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high
+418043,"Jäätis VANA TOOMAS šokolaadiplomb., 90g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high
+418044,Gin SAAREMAA Ore 38% 500ml,SAAREMAA GIN,,,,,drinks,drinks_spirits,high
+418045,GT vein TBILVINO Alaz.Vall. valge 750ml,TBILVINO,,"Barbora, Maxima",,,drinks,drinks_wine,high
+418046,Salatisegu Lattughini WELL DONE 100g,,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+418047,Salatisegu Summer Garden WELL DONE 150g,,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high
+418048,"Kakaoplombiir NOSTALGIA Bronze, 70g",,,"Barbora, Maxima",,,other,dry_other,fallback
+418049,GT vein TBILVINO AlazaniValley pun.750ml,ALAZANI,,"Barbora, Maxima",,,drinks,drinks_wine,high
+418050,GT vein TBILVINO Saperavi punane 750ml,TBILVINO,,"Barbora, Maxima",,,drinks,drinks_wine,high
+418051,GT vein TBILVINO Tsinandali valge 750ml,TBILVINO,,"Barbora, Maxima",,,drinks,drinks_wine,high
+418052,Hambapasta Colgate Adv Wh Charcoal 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418053,Hambapasta Colgate M White Charcoal 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418054,Hambapasta Colgate M White Luminous 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418055,Hambapasta Colgate Max White 125 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418056,Hambapasta Colgate Max White Exp Wh 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418057,Hambapasta Colgate Max White One 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418058,Hambapasta Colgate Total Original 20 Ml,,,,,,drinks,drinks_spirits,high
+418059,Hambapasta Colgate Total Original 75 Ml,,,,,,drinks,drinks_spirits,high
+418060,Hambapasta Colgate Total Whitening 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418061,Hambapasta Ecodenta Black Whitenin 100 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418062,Hambapasta Ecodenta Sensit Relief 100 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418063,Hambapasta Ecodenta Triple Force 100 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418064,Hambapasta Ecodenta Valgendav Munt 100 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418065,Hambapasta Elmex Caries Protection 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418066,Hambapasta Elmex Enamel Protection 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418067,Hambapasta Elmex Sensitive 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418068,Hambapasta Elmex Sensitive Profes 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418069,Hambapasta Himalaya Granaatoun 100 G,,,,,,dry_preserves,dry_pasta_rice,high
+418070,Hambapasta Himalaya Mint Fresh 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418071,Hambapasta Himalaya Sparkly White 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418072,Hambapasta Himalaya Stain Away 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418073,Hambapasta Jordan Caries Defence 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418074,Hambapasta Jordan Fresh Breath 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418075,Hambapasta Jordan White Smile 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418076,Hambapasta Ns Kamchatka Mineral 100 G,,,,,,dry_preserves,dry_pasta_rice,high
+418077,Hambapasta Ns Siberian Pearl 100 G,,,,,,dry_preserves,dry_pasta_rice,high
+418078,Hambapasta Parodontax Classic 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418079,Hambapasta Parodontax Compl Fresh 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418080,Hambapasta Parodontax Fluoride 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418081,Hambapasta Parodontax Protect White 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418082,Hambapasta Sensodyne Compl Protect 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418083,Hambapasta Sensodyne Deep Clean 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418084,Hambapasta Sensodyne Extra Fresh 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418085,Hambapasta Sensodyne Extrawhitening 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418086,Hambapasta Sensodyne Fluoride 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418087,Hambapasta Sensodyne Fresh 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418088,Hambapasta Sensodyne Multi Care 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418089,Hambapasta Sensodyne Pronamel 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418090,Hambapasta Sensodyne Repair P Whit 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418091,Hambapasta Sensodyne Repair Protect 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418092,Hambapasta Sensodyne Sensit Gum 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418093,Hambapasta Sensodyne Sensitivity G 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418094,Hambapasta Splat Active 100 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418095,Hambapasta Splat Biocalcium 100 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418096,Hambapasta Splat Medical Herbs 100 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418097,Hambapasta Splat Sensitive 100 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418098,Hambapasta Splat White Plus 100 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418099,Hambapasta Woom Family Valgendav 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418100,Ham Pasta Blend A Med C 7 Compl Orig 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418101,Hambap Colgate Max White Byestains 75 Ml,,,,,,other,dry_other,fallback
+418102,Hambap Pearl Drops Last Flawless 75 Ml,,,,,,produce,produce_apples_pears,high
+418103,Hambap Pearl Drops Luminous Bright 75 Ml,,,,,,produce,produce_apples_pears,high
+418104,Hambapas Pearl Drops Instant Boost 50 Ml,,,,,,produce,produce_apples_pears,high
+418105,Hambapast Sensodyne Clinical Repair 75 Ml,,,,,,other,dry_other,fallback
+418106,Hambapasta Aloe Vera Woom 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418107,Hambapasta Bam 3 D White 75 Ml 31450,,,,,,dry_preserves,dry_pasta_rice,high
+418108,Hambapasta Bam 3 D White Charcoal 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418109,Hambapasta Bam 3 D White Cool Water 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418110,Hambapasta Bam 3 Dwhite Arctic Fresh 75 Ml 31458,,,,,,dry_preserves,dry_pasta_rice,high
+418111,Hambapasta Bam Longlasting Ex Fresh 75 Ml,,,,,,drinks,drinks_wine,high
+418112,Hambapasta Blend A Med Compl Fresh 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418113,Hambapasta Colgate Advanced White 125 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418114,Hambapasta Colgate Advanced White 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418115,Hambapasta Colgate Cavity Prot Wh 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418116,Hambapasta Colgate Cavity Protect 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418117,Hambapasta Colgate Cooling Crystals 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418118,Hambapasta Colgate Max White Foam 50 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418119,Hambapasta Colgate Maxwhite Purple 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418120,Hambapasta Colgate Maxwhite Ultra 50 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418121,Hambapasta Colgate Mineral Scrub 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418122,Hambapasta Colgate Multi Protect 50 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418123,Hambapasta Colgate Sparkle Diamonds 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418124,Hambapasta Colgate Total Antitartar 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418125,Hambapasta Colgate Total Gum Care 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418126,Hambapasta Colgate Triple Action 125 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418127,Hambapasta Colgate Triple Action 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418128,Hambapasta Colgate White Crystals 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418129,Hambapasta Divus Fresh Breath 100 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418130,Hambapasta Elmex Caries Prot Whiten 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418131,Hambapasta Elmex Sens Plus Gum Care 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418132,Hambapasta Elmex Sensitive Plus 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418133,Hambapasta Elmex Sensitivewhitening 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418134,Hambapasta Himalaya Kurkum Kook Ol 75 Ml,,,,,,bakery,bakery_cakes_pastries,high
+418135,Hambapasta Jordan Cavity Protection 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418136,Hambapasta Jordan Green Clean White 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418137,Hambapasta Jordan Stay Fresh Sens 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418138,Hambapasta Oral B Sensitive 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418139,Hambapasta Parodontax Act Gum Rep 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418140,Hambapasta Parodontax Gum Str Prot 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418141,Hambapasta Pearl Drops Inst Natural 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418142,Hambapasta Pierrot Aaloe 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418143,Hambapasta Pierrot Valgendav 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418144,Hambapasta Sensodyne Daily Protect 100 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418145,Hambapasta Woom Carbon Valgendav 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418146,Hambapasta Woom Family Total Care 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418147,Hambapasta Woom Family Tundlik 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418148,Hambapasta Woom Sensitive 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418149,Hambapasta Woom Total Kompleksne 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418150,Hambapasta Woom White Valgendav 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418151,Hambavalgendus Geelpliiats Absolute 1 8 G,,,,,,other,dry_other,fallback
+418152,Hambapasta Colgate Adv White Purple 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418153,Hambapasta Colgate Total Original 125 Ml,,,,,,drinks,drinks_spirits,high
+418154,Hambapasta Divus Whitening 100 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418155,Hambapasta Oral B Healthy White 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418156,Hambapasta Oral B Prof Protection 75 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418157,Hambapasta Splat Ultracomplex 100 Ml,,,,,,dry_preserves,dry_pasta_rice,high
+418158,Depileer Kreem Veet Aloe Vera 100 Ml,,,,,,other,dry_other,fallback
+418159,Depileer Kreem Veet Sensitive 100 Ml,,,,,,other,dry_other,fallback
+418160,Hab Aj Jarg Pals Nivea Men Silv Pr 100 Ml,,,,,,other,dry_other,fallback
+418161,Hab Aj Jarg Palsam Gillette 2 In 1 100 Ml,,,,,,personal_care,pcare_shampoo_cond,high
+418162,Hab Aj Jarg Palsam Nivea Prot Care 100 Ml,,,,,,personal_care,pcare_shampoo_cond,high
+418163,Hab Aj Jarg Palsam Nivea Sensitive 100 Ml,,,,,,personal_care,pcare_shampoo_cond,high
+418164,Hab Aj Jargne Naovesi Denim Black 100 Ml,,,,,,drinks,drinks_water,high
+418165,Habem Geel Nivea Men Protect Care 200 Ml,,,,,,other,dry_other,fallback
+418166,Habem Geel Nivea Men Sensitive 200 Ml,,,,,,other,dry_other,fallback
+418167,Habem Vaht Nivea Men Sensitive 200 Ml,,,,,,other,dry_other,fallback
+418168,Habemeaj Geel Gillette Series Sens 75 Ml,,,,,,personal_care,pcare_shaving,high
+418169,Naiste Raseerijad Venus 3 Colors 3 Tk,,,,,,personal_care,pcare_shaving,high
+418170,Naovesi Gillette Arctic Ice 100 Ml,,,,,,drinks,drinks_water,high
+418171,Naovesi Gillette Splashrevitalizing 100 Ml,,,,,,drinks,drinks_water,high
+418172,Naovesi Gillette Storm Force 100 Ml,,,,,,drinks,drinks_water,high
+418173,Naovesi Nivea Men Sensitive 100 Ml,,,,,,drinks,drinks_water,high
+418174,Naovesi Old Spice Original 100 Ml,,,,,,drinks,drinks_spirits,high
+418175,Naovesi Old Spice Whitewater 100 Ml,,,,,,drinks,drinks_water,high
+418176,Naovesi Old Spice Wolfthorn 100 Ml,,,,,,drinks,drinks_water,high
+418177,Pardel Bic Black Metal 5 Tk,,,,,,other,dry_other,fallback
+418178,Ras Geel Satin Care Avocado Twist 200 Ml,,,,,,other,dry_other,fallback
+418179,Ras Geel Satin Care Lavender Touch 200 Ml,,,,,,other,dry_other,fallback
+418180,Ras Geel Satin Care Sens Aloe Vera 200 Ml,,,,,,other,dry_other,fallback
+418181,Ras Geel Satin Care Sheabuttersilk 200 Ml,,,,,,other,dry_other,fallback
+418182,Raseer Geel Gillette Series Sen 200 Ml,,,,,,personal_care,pcare_shaving,high
+418183,Raseerija Bic Pardel Flex 3 3 Tk,,,,,,personal_care,pcare_shaving,high
+418184,Raseerija Bic Pardel Twin Comfort 5 Tk,,,,,,personal_care,pcare_shaving,high
+418185,Raseerija Bic Twin Lady Naistele 5 Tk,,,,,,personal_care,pcare_shaving,high
+418186,Raseerija Gillette Blue Ii 5 Tk,,,,,,personal_care,pcare_shaving,high
+418187,Raseerija Gillette Blue Ii Plus 5 Tk,,,,,,personal_care,pcare_shaving,high
+418188,Raseerija Gillette Fusion 5 2 Tk,,,,,,personal_care,pcare_shaving,high
+418189,Raseerija Gillette Mach 3 2 Tera,,,,,,personal_care,pcare_shaving,high
+418190,Raseerija Gillette Styler 4 In 1,,,,,,personal_care,pcare_shaving,high
+418191,Raseerija Venus Breeze 2 Tera,,,,,,personal_care,pcare_shaving,high
+418192,Raseerija Venus Extra Smooth 1 Tera,,,,,,personal_care,pcare_shaving,high
+418193,Raseerija Venus Smooth 2 Tera,,,,,,personal_care,pcare_shaving,high
+418194,Raseerijad Gillette Blue 3 3 Tk,,,,,,personal_care,pcare_shaving,high
+418195,Raseerijad Gillette Ii Meestele 5 Tk,,,,,,personal_care,pcare_shaving,high
+418196,Raseerijad Venus Simply 2 4 Tk 2 Tk,,,,,,personal_care,pcare_shaving,high
+418197,Raseerimisgeel Gillette Moisturis 200 Ml,,,,,,personal_care,pcare_shaving,high
+418198,Terad Gillette Fusion 4 Tk,,,,,,other,dry_other,fallback
+418199,Terad Gillette Fusion 5 8 Tk,,,,,,other,dry_other,fallback
+418200,Terad Gillette Fusion Power 4 Tk,,,,,,other,dry_other,fallback
+418201,Terad Gillette Mach 3 8 Tk,,,,,,other,dry_other,fallback
+418202,Terad Gillette Proglide 4 Tk,,,,,,other,dry_other,fallback
+418203,Terad Gillette Proglide Power 4 Tk,,,,,,other,dry_other,fallback
+418204,Uhekordsed Raseerijad Bic 3 Sensitive 4 Tk,,,,,,personal_care,pcare_shaving,high
+418205,Vahaplaaster Veet Sensitive 12 Tk,,,,,,other,dry_other,fallback
+418206,Varuterad Venus Breeze 4 Tk,,,,,,other,dry_other,fallback
+418207,Varuterad Venus Extra Smooth 4 Tk,,,,,,other,dry_other,fallback
+418208,Varuterad Venus Smooth 4 Tk,,,,,,other,dry_other,fallback
+418209,Ziletiterad Bic Chrome Platinum 5 Tk,,,,,,other,dry_other,fallback
+418210,Dep Kreem Eveline Just Epil 125 Ml,,,,,,other,dry_other,fallback
+418211,Depil Kreem Veet Inshower Sensit 135 Ml,,,,,,other,dry_other,fallback
+418212,Depileerimiskreem Bj Velvesilk 5 1 125 Ml,,,,,,drinks,drinks_water,high
+418213,Depileerimiskreem Eveline Meremin 125 Ml,,,,,,other,dry_other,fallback
+418214,Depileerimiskreem Eveline Q 10 9 In 1 75 Ml,,,,,,other,dry_other,fallback
+418215,Hab Aj Jarg Palsam Nivea Men Sens 100 Ml,,,,,,personal_care,pcare_shampoo_cond,high
+418216,Habem Geel Nivea Cool Sensitive 200 Ml,,,,,,other,dry_other,fallback
+418217,Habem Geel Nivea Men Deep 200 Ml,,,,,,other,dry_other,fallback
+418218,Habem Geel Nivea Men Fresh Kick 200 Ml,,,,,,other,dry_other,fallback
+418219,Habem Geel Nivea Men Sens 3 P Habe 200 Ml,,,,,,other,dry_other,fallback
+418220,Habem Vaht Nivea Cool Sensitive 200 Ml,,,,,,other,dry_other,fallback
+418221,Habem Vaht Nivea Men Fresh Kick 200 Ml,,,,,,other,dry_other,fallback
+418222,Habemetrimmer Henske Dt 100,,,,,,other,dry_other,fallback
+418223,Naovesi La Rive Cabana 100 Ml,,,,,,drinks,drinks_water,high
+418224,Naovesi Nivea Men Deep 100 Ml,,,,,,drinks,drinks_water,high
+418225,Naovesi Nivea Men Protect Care 100 Ml,,,,,,drinks,drinks_water,high
+418226,Pardel Bic 3 Action 4 Tk,,,,,,other,dry_other,fallback
+418227,Pardel Bic Flex 3 Comfort 3 Tk,,,,,,other,dry_other,fallback
+418228,Pardel Bic Flex 4 Comfort 3 Tk,,,,,,other,dry_other,fallback
+418229,Pardel Bic Pure 3 Pink 4 2 Tk,,,,,,other,dry_other,fallback
+418230,Pardel Henske Rscx 902,,,,,,other,dry_other,fallback
+418231,Ras Geel Gillette Fusion 5 X Cocoa 200 Ml,,,,,,other,dry_other,fallback
+418232,Ras Geel Gillette Fusion Sensitive 200 Ml,,,,,,other,dry_other,fallback
+418233,Ras Geel Gillette Fusion Sensitive 75 Ml,,,,,,other,dry_other,fallback
+418234,Ras Geel Satin Care Vanilla Cashm 200 Ml,,,,,,other,dry_other,fallback
+418235,Raseerija Bic Flex 3 Sensitive 3 Tk,,,,,,personal_care,pcare_shaving,high
+418236,Raseerija Bic Miss Soleil Color 4 Tk,,,,,,personal_care,pcare_shaving,high
+418237,Raseerija Bic Pardel Pure 3 Lady 6 Tk,,,,,,personal_care,pcare_shaving,high
+418238,Raseerija Gillette Blue 3 Comfort 6 2 Tk,,,,,,personal_care,pcare_shaving,high
+418239,Raseerija Gillette Blue 3 Football 8 Tk,,,,,,personal_care,pcare_shaving,high
+418240,Raseerija Gillette Blue 3 Plus 6 2 Tk,,,,,,personal_care,pcare_shaving,high
+418241,Raseerija Gillette Blue Ii 10 4 Tk,,,,,,personal_care,pcare_shaving,high
+418242,Raseerija Gillette Proglide Flexb 1 Tera,,,,,,personal_care,pcare_shaving,high
+418243,Raseerija Gillette Proglide Flexb 2 Tera,,,,,,personal_care,pcare_shaving,high
+418244,Raseerija Venus 3 Simply Yellow 6 Tk,,,,,,personal_care,pcare_shaving,high
+418245,Raseerija Venus Simply 3 Smooth 4 Tk,,,,,,personal_care,pcare_shaving,high
+418246,Raseerija Venus Swirl 1 Tk,,,,,,personal_care,pcare_shaving,high
+418247,Raseerijad Bic Miss Soleil Sensitive 3 Tk,,,,,,personal_care,pcare_shaving,high
+418248,Raseerijad Sword Xtreme 3 3 1 Tk Wilkinson,,,,,,personal_care,pcare_shaving,high
+418249,Raseerijad Venus 3 Sensitive 6 Tk,,,,,,personal_care,pcare_shaving,high
+418250,Raseerijad Venus Simply Smooth 8 Tk,,,,,,personal_care,pcare_shaving,high
+418251,Raseerimisgeel Gillette Cool Sens 200 Ml,,,,,,personal_care,pcare_shaving,high
+418252,Raseerimisjargne Geel Ns Yak Yeti 150 Ml,,,,,,personal_care,pcare_shaving,high
+418253,Terad Gillette Mach 3 Kaepide 5 Terad,,,,,,other,dry_other,fallback
+418254,Terad Gillette Mach 3 Terad 5 Tk,,,,,,other,dry_other,fallback
+418255,Vahet Terad Raseerija Bic H Sens 3 1 4 Tk,,,,,,personal_care,pcare_shaving,high
+418256,Vahet Terad Raseerija Bic Hybrid 3 1 4 Tk,,,,,,personal_care,pcare_shaving,high
+418257,Vahet Terad Raseerija Bic Hybrid 5 1 2 Tk,,,,,,personal_care,pcare_shaving,high
+418258,Varuterad Gillette Proglide 8 Tk,,,,,,other,dry_other,fallback
+418259,Varuterad Venus Breeze 8 Tk,,,,,,other,dry_other,fallback
+418260,Varuterad Venus Extra Smooth Sensit 4 Tk,,,,,,other,dry_other,fallback
+418261,Varuterad Venus Smooth 8 Tk,,,,,,other,dry_other,fallback
+418262,Hab Aj Jarg Palsam Nivea Hyaluron 100 Ml,,,,,,personal_care,pcare_shampoo_cond,high
+418263,Hug Sidemed Libresse Invis Norm Duo 20 Tk,,,,,,other,dry_other,fallback
+418264,Hab Aj Jargne Naovesi Genius Ice 100 Ml,,,,,,drinks,drinks_water,high
+418265,Hab Aj Jargne Naovesi La Rive Cash 100 Ml,,,,,,drinks,drinks_water,high
+418266,Habemeajamisvaht Gillette Regular 200 Ml,,,,,,dry_preserves,dry_other,high
+418267,Habemeajamisvaht Gillette Sensitiv 300 Ml,,,,,,dry_preserves,dry_other,high
+418268,Jalg Keha Vaharibad Veet Minima 12 Tk,,,,,,other,dry_other,fallback
+418269,Pardel Henske Qcs 0605,,,,,,other,dry_other,fallback
+418270,Pardel Philips Oneblade Qp 1324 20,,,,,,other,dry_other,fallback
+418271,Ras Geel Gillette Mach 3 Extra Comf 200 Ml,,,,,,other,dry_other,fallback
+418272,Raseer Vaht Gillette Soothing Aloe 200 Ml,,,,,,personal_care,pcare_shaving,high
+418273,Raseerija Gillette Fusion 5 5 Tera,,,,,,personal_care,pcare_shaving,high
+418274,Raseerija Gillette King C 5 Tera,,,,,,personal_care,pcare_shaving,high
+418275,Raseerija Gillette Mach 3 Charcoal 2 Tera,,,,,,personal_care,pcare_shaving,high
+418276,Raseerija Gillette Mach 3 Charcoal 6 Tera,,,,,,personal_care,pcare_shaving,high
+418277,Raseerija Gillette Proglide 4 Tera,,,,,,personal_care,pcare_shaving,high
+418278,Raseerija Venus Rosegold Sensitive,,,,,,drinks,drinks_wine,high
+418279,Raseerija Venus Simply 3 Miami 8 Tera,,,,,,personal_care,pcare_shaving,high
+418280,Raseerija Venus Sugarberry Miami 1 Tk,,,,,,personal_care,pcare_shaving,high
+418281,Raseerijad Venus 3 Dragonfruit 6 Tk,,,,,,personal_care,pcare_shaving,high
+418282,Raseerijad Venus Tropical 3 Tk,,,,,,personal_care,pcare_shaving,high
+418283,Raseerijad Wilkinson Xtr 3 Sensitive 4 Tk,,,,,,personal_care,pcare_shaving,high
+418284,Raseerijagillette Sensor 3 Comfort 8 Tera,,,,,,personal_care,pcare_shaving,high
+418285,Raseerijavenus Comfortglide Breeze 4 Tera,,,,,,personal_care,pcare_shaving,high
+418286,Raseerimisgeel Gillette Original 200 Ml,,,,,,drinks,drinks_spirits,high
+418287,Raseerimisgeel Gillette Skinsensit 200 Ml,,,,,,personal_care,pcare_shaving,high
+418288,Raseerimisgeel Ns Men Arctic Wolf 150 Ml,,,,,,personal_care,pcare_shaving,high
+418289,Raseerimisvaht Gillette Condit 250 Ml,,,,,,personal_care,pcare_shaving,high
+418290,Terad Gillette Platinum 5 Tk,,,,,,other,dry_other,fallback
+418291,Terad Venus Swirl 4 Tk,,,,,,other,dry_other,fallback
+418292,Vaharibad Byphasse Kehale 24 Tk,,,,,,other,dry_other,fallback
+418293,Vaharibad Byphasse Naole 24 Tk,,,,,,other,dry_other,fallback
+418294,Varuterad Bic Hybrid Flex 3 Sensit 4 Tk,,,,,,other,dry_other,fallback
+418295,Varuterad Gillette Mach 3 Charcoal 5 Tk,,,,,,other,dry_other,fallback
+418296,Varuterad Gillette Sensor 3 Comfort 8 Tk,,,,,,other,dry_other,fallback
+418297,Varuterad Venus Sugarberry 3 Tk,,,,,,other,dry_other,fallback
+418298,Mahkmed Pampers Harmonie Vp S 5 24 Tk,,,,,,baby,baby_diapers,high
+418299,Hug Sidemed Libresse Invis Normal 10 Tk,,,,,,other,dry_other,fallback
+418300,Hug Sidemed Libresse Natural Care 10 Tk,,,,,,other,dry_other,fallback
+418301,Hug Sidemed Libresse Natural Care 20 Tk,,,,,,other,dry_other,fallback
+418302,Hugieenisidemed Always Sensitive S 1 20 Tk,,,,,,other,dry_other,fallback
+418303,Hugieenisidemed Always Sensitive S 2 16 Tk,,,,,,other,dry_other,fallback
+418304,Hugieenisidemed Always Ultra S 1 10 Tk,,,,,,other,dry_other,fallback
+418305,Hugieenisidemed Always Ultra S 1 20 Tk,,,,,,other,dry_other,fallback
+418306,Hugieenisidemed Always Ultra S 1 40 Tk,,,,,,other,dry_other,fallback
+418307,Hugieenisidemed Always Ultra S 2 16 Tk,,,,,,other,dry_other,fallback
+418308,Hugieenisidemed Always Ultra S 2 32 Tk,,,,,,other,dry_other,fallback
+418309,Hugieenisidemed Always Ultra S 3 14 Tk,,,,,,other,dry_other,fallback
+418310,Hugieenisidemed Always Ultrasuper S 2 8 Tk,,,,,,other,dry_other,fallback
+418311,Hugieenisidemed Bella Classic Nova 10 Tk,,,,,,other,dry_other,fallback
+418312,Hugieenisidemed Bella Normal Soft 10 Tk,,,,,,other,dry_other,fallback
+418313,Hugieenisidemed Bella Novamaxi Soft 10 Tk,,,,,,other,dry_other,fallback
+418314,Hugieenisidemed Libresse Maxinight 10 Tk,,,,,,other,dry_other,fallback
+418315,Hugieenisidemed Naturella Classicn 2 10 Tk,,,,,,other,dry_other,fallback
+418316,Hugieenisidemed Naturella Ultra N 1 10 Tk,,,,,,other,dry_other,fallback
+418317,Hugieenisidemed Naturella Ultra S 1 20 Tk,,,,,,other,dry_other,fallback
+418318,Hugieenisidemed Naturella Ultra S 3 16 Tk,,,,,,other,dry_other,fallback
+418319,Pesukaitsmed Bella Panty Mini 36 Tk,,,,,,other,dry_other,fallback
+418320,Pesukaitsmed Bella Panty Soft 60 Tk,,,,,,other,dry_other,fallback
+418321,Pesukaitsmed Bella Pantysoft Normal 20 Tk,,,,,,other,dry_other,fallback
+418322,Pesukaitsmed Discreet Air 60 Tk,,,,,,other,dry_other,fallback
+418323,Pesukaitsmed Discreet Normal 20 Tk,,,,,,other,dry_other,fallback
+418324,Pesukaitsmed Discreet Normal 60 Tk,,,,,,other,dry_other,fallback
+418325,Pesukaitsmed Discreet Waterlily 20 Tk,,,,,,other,dry_other,fallback
+418326,Pesukaitsmed Libresse Classic 50 Tk,,,,,,other,dry_other,fallback
+418327,Pesukaitsmed Libresse Naturalnormal 40 Tk,,,,,,other,dry_other,fallback
+418328,Pesukaitsmed Libresse Normal 40 Tk,,,,,,other,dry_other,fallback
+418329,Pesukaitsmed Libresse String 30 Tk,,,,,,other,dry_other,fallback
+418330,Pesukaitsmed Naturella Light Kummel 20 Tk,,,,,,other,dry_other,fallback
+418331,Pesukaitsmed Tena Discreet Mini 34 Tk,,,,,,other,dry_other,fallback
+418332,Pesukaitsmed Tena Discreetultramini 28 Tk,,,,,,other,dry_other,fallback
+418333,Tampoonid Bella Regular 16 Tk,,,,,,other,dry_other,fallback
+418334,Tampoonid O B Original Normal 16 Tk,,,,,,drinks,drinks_spirits,high
+418335,Tampoonid O B Original Normal 32 Tk,,,,,,drinks,drinks_spirits,high
+418336,Tampoonid O B Original Super 16 Tk,,,,,,drinks,drinks_spirits,high
+418337,Tampoonid O B Original Super Plus 16 Tk,,,,,,drinks,drinks_spirits,high
+418338,Tampoonid O B Pro Comfort Mini 16 Tk,,,,,,other,dry_other,fallback
+418339,Tampoonid O B Pro Comfort Normal 16 Tk,,,,,,other,dry_other,fallback
+418340,Tampoonid O B Pro Comfort Normal 32 Tk,,,,,,other,dry_other,fallback
+418341,Tampoonid O B Pro Comfort Super 16 Tk,,,,,,other,dry_other,fallback
+418342,Tampoonid O B Pro Comfort Super 32 Tk,,,,,,other,dry_other,fallback
+418343,Tampoonid O B Procomfort Mini 8 Tk,,,,,,other,dry_other,fallback
+418344,Tampoonid Tampax Compak Super 16 Tk,,,,,,other,dry_other,fallback
+418345,Tampoonid Tampax Compak Super Plus 16 Tk,,,,,,other,dry_other,fallback
+418346,Uriinipid Sidem Seni Lady Slim Extra 15 Tk,,,,,,other,dry_other,fallback
+418347,Uriinipid Sidem Seni Lady Slim Mini 20 Tk,,,,,,other,dry_other,fallback
+418348,Uriinipid Sidem Seni Ladyslim Normal 20 Tk,,,,,,other,dry_other,fallback
+418349,Uriinipidamatuse Sidemed Tena Extra 10 Tk,,,,,,other,dry_other,fallback
+418350,Hug Sidem Naturella Classicnight S 4 14 Tk,,,,,,other,dry_other,fallback
+418351,Hug Sidemed Always Ultra Night S 4 12 Tk,,,,,,other,dry_other,fallback
+418352,Hug Sidemed Bella Idealeultra Night 14 Tk,,,,,,other,dry_other,fallback
+418353,Hug Sidemed Bella Perfecta Night Drai 7 Tk,,,,,,other,dry_other,fallback
+418354,Hug Sidemed Bella Perfecta Rose Deo 10 Tk,,,,,,drinks,drinks_wine,high
+418355,Hug Sidemed Bella Perfectanight Soft 7 Tk,,,,,,other,dry_other,fallback
+418356,Hug Sidemed Bella Perfectanightsoft 14 Tk,,,,,,other,dry_other,fallback
+418357,Hug Sidemed Bella Perfectaultra Blue 32 Tk,,,,,,other,dry_other,fallback
+418358,Hug Sidemed Bella Teens Ultra Relax 10 Tk,,,,,,drinks,drinks_tea_coffee,high
+418359,Hug Sidemed Bella Teens Ultra Sens 10 Tk,,,,,,drinks,drinks_tea_coffee,high
+418360,Hug Sidemed Libresse Super Wing 36 Tk,,,,,,other,dry_other,fallback
+418361,Hug Sidemed Libresse Ultra Long 16 Tk,,,,,,other,dry_other,fallback
+418362,Hug Sidemed Libresse Ultra Normal 10 Tk,,,,,,other,dry_other,fallback
+418363,Hug Sidemed Libresse Ultra Thin Long 8 Tk,,,,,,other,dry_other,fallback
+418364,Hug Sidemed Libresse Ultranightlong 8 Tk,,,,,,other,dry_other,fallback
+418365,Hug Sidemed Vuokkoset Normal 14 Tk,,,,,,other,dry_other,fallback
+418366,Hugieeniside Bella Herbs Verbena 12 Tk,,,,,,other,dry_other,fallback
+418367,Hugieenisidemed Always Paltinum S 1 8 Tk,,,,,,other,dry_other,fallback
+418368,Hugieenisidemed Always Platinum S 2 14 Tk,,,,,,other,dry_other,fallback
+418369,Hugieenisidemed Always Platinum S 2 7 Tk,,,,,,other,dry_other,fallback
+418370,Hugieenisidemed Always Platinum S 3 12 Tk,,,,,,other,dry_other,fallback
+418371,Hugieenisidemed Always Platinum S 3 6 Tk,,,,,,other,dry_other,fallback
+418372,Hugieenisidemed Bella Herbs Tilia 12 Tk,,,,,,other,dry_other,fallback
+418373,Hugieenisidemed Bella Ideale Regular 20 Tk,,,,,,other,dry_other,fallback
+418374,Hugieenisidemed Naturella Ultra S 1 40 Tk,,,,,,other,dry_other,fallback
+418375,Intiimsalvratid Bella Medica G Tea 20 Tk,,,,,,other,dry_other,fallback
+418376,Pesukaitsmed Always Extra Long 44 Tk,,,,,,other,dry_other,fallback
+418377,Pesukaitsmed Always Normal 60 Tk,,,,,,other,dry_other,fallback
+418378,Pesukaitsmed Always Normal Deo 58 Tk,,,,,,other,dry_other,fallback
+418379,Pesukaitsmed Bella Panty Herbs Tilia 60 Tk,,,,,,other,dry_other,fallback
+418380,Pesukaitsmed Bella Panty Light Aroma 20 Tk,,,,,,other,dry_other,fallback
+418381,Pesukaitsmed Bella Panty Sens Eleg 60 Tk,,,,,,other,dry_other,fallback
+418382,Pesukaitsmed Bella Panty Sensitive 20 Tk,,,,,,other,dry_other,fallback
+418383,Pesukaitsmed Bella Panty Soft Deo 60 Tk,,,,,,other,dry_other,fallback
+418384,Pesukaitsmed Bella Teens Panty Sens 20 Tk,,,,,,drinks,drinks_tea_coffee,high
+418385,Pesukaitsmed Carefree Aloe Vera 76 Tk,,,,,,other,dry_other,fallback
+418386,Pesukaitsmed Carefree Cotton 76 Tk,,,,,,other,dry_other,fallback
+418387,Pesukaitsmed Discreet Air 100 Tk,,,,,,other,dry_other,fallback
+418388,Pesukaitsmed Discreet Normal 100 Tk,,,,,,other,dry_other,fallback
+418389,Pesukaitsmed Discreet Spring Breeze 100,,,,,,other,dry_other,fallback
+418390,Pesukaitsmed Discreet Waterlily 100 Tk,,,,,,other,dry_other,fallback
+418391,Pesukaitsmed Libresse So Slim 30 Tk,,,,,,other,dry_other,fallback
+418392,Pesukaitsmed Naturella Light Camom 100 Tk,,,,,,other,dry_other,fallback
+418393,Pesukaitsmed Vuokkoset Normal 30 Tk,,,,,,other,dry_other,fallback
+418394,Tampoonid Kotex Normal 16 Tk,,,,,,other,dry_other,fallback
+418395,Tampoonid Kotex Super 16 Tk,,,,,,other,dry_other,fallback
+418396,Tampoonid Kotex Super 32 Tk,,,,,,other,dry_other,fallback
+418397,Tampoonid O B Procomfort Super Plus 16 Tk,,,,,,other,dry_other,fallback
+418398,Uriinipid Sidem Seni Lady Plus 15 Tk,,,,,,other,dry_other,fallback
+418399,Uriinipid Sidem Seni Lady Super 15 Tk,,,,,,other,dry_other,fallback
+418400,Uriinipidamatuse Sidemed Tena Norm 12 Tk,,,,,,other,dry_other,fallback
+418401,Hug Sidemed Always Platinumnight S 4 10 Tk,,,,,,other,dry_other,fallback
+418402,Hug Sidemed Always Ultra Night S 5 10 Tk,,,,,,other,dry_other,fallback
+418403,Hug Sidemed Bella Perfecta Ult Blue 20 Tk,,,,,,other,dry_other,fallback
+418404,Hug Sidemed Bella Perfectault Green 20 Tk,,,,,,other,dry_other,fallback
+418405,Hug Sidemed Naturella Classic N 2 18 Tk,,,,,,other,dry_other,fallback
+418406,Hug Sidemed Naturella Ultranight S 4 14 Tk,,,,,,other,dry_other,fallback
+418407,Hug Sidemed Vuokkoset Bio Normal 12 Tk,,,,,,other,dry_other,fallback
+418408,Hugieenisidemed Bella Ideale Night 14 Tk,,,,,,other,dry_other,fallback
+418409,Hugieenisidemed Bella Ideale Normal 20 Tk,,,,,,other,dry_other,fallback
+418410,Hugieenisidemed Kotex Ultra Night 12 Tk,,,,,,other,dry_other,fallback
+418411,Hugieenisidemed Kotex Ultra Night 6 Tk,,,,,,other,dry_other,fallback
+418412,Hugieenisidemed Kotex Ultra Normal 16 Tk,,,,,,other,dry_other,fallback
+418413,Hugieenisidemed Kotex Ultra Normal 8 Tk,,,,,,other,dry_other,fallback
+418414,Hugieenisidemed Kotex Ultra Super 12 Tk,,,,,,other,dry_other,fallback
+418415,Hugieenisidemed Kotex Ultra Super 7 Tk,,,,,,other,dry_other,fallback
+418416,Hugieenisidemed Naturella Ultra S 2 18 Tk,,,,,,other,dry_other,fallback
+418417,Intiimpesugeel Bella Sensitive 300 Ml,,,,,,household,hh_laundry,high
+418418,Intiimpesugeel Ziaja Kaitsev 500 Ml,,,,,,household,hh_laundry,high
+418419,Intiimpesugeel Ziaja Niisutav 500 Ml,,,,,,household,hh_laundry,high
+418420,Intiimpesuvahend Neutral Sens Skin 250 Ml,,,,,,other,dry_other,fallback
+418421,Intiimsalvratid Sophie 20 Tk,,,,,,other,dry_other,fallback
+418422,Niisked Salvratikud Seni Care 80 Tk,,,,,,baby,baby_wipes,high
+418423,Pesukaitsmed Always Flexi Style 58 Tk,,,,,,other,dry_other,fallback
+418424,Pesukaitsmed Always Large 26 Tk,,,,,,other,dry_other,fallback
+418425,Pesukaitsmed Always To Go Fresh 20 Tk,,,,,,other,dry_other,fallback
+418426,Pesukaitsmed Bella Panty Ideale L 20 Tk,,,,,,other,dry_other,fallback
+418427,Pesukaitsmed Bella Panty Ideale N 28 Tk,,,,,,other,dry_other,fallback
+418428,Pesukaitsmed Carefree Cotton Fresh 56 Tk,,,,,,other,dry_other,fallback
+418429,Pesukaitsmed Carefree Large Fresh 20 Tk,,,,,,other,dry_other,fallback
+418430,Pesukaitsmed Carefree Long Light 40 Tk,,,,,,other,dry_other,fallback
+418431,Pesukaitsmed Discreet Pluswaterlily 52 Tk,,,,,,other,dry_other,fallback
+418432,Pesukaitsmed Libresse Black Normal 30 Tk,,,,,,other,dry_other,fallback
+418433,Pesukaitsmed Libresse Dailies Normal 58 Tk,,,,,,other,dry_other,fallback
+418434,Pesukaitsmed Libresse Extra Protect 24 Tk,,,,,,other,dry_other,fallback
+418435,Pesukaitsmed Libresse Longextraprot 22 Tk,,,,,,other,dry_other,fallback
+418436,Pesukaitsmed Libresse Micro 44 Tk,,,,,,other,dry_other,fallback
+418437,Pesukaitsmed Libresse Naturalnormal 58 Tk,,,,,,other,dry_other,fallback
+418438,Pesukaitsmed Naturella Camom Light 100 Tk,,,,,,other,dry_other,fallback
+418439,Pesukaitsmed Naturella Camom Light 52 Tk,,,,,,other,dry_other,fallback
+418440,Pesukaitsmed Naturella Camom Normal 20 Tk,,,,,,other,dry_other,fallback
+418441,Pesukaitsmed Naturella Camom Normal 44 Tk,,,,,,other,dry_other,fallback
+418442,Pesukaitsmed Naturella To Go Camom 20 Tk,,,,,,other,dry_other,fallback
+418443,Pesukaitsmed Tena Discreet Mini 20 Tk,,,,,,other,dry_other,fallback
+418444,Pesukaitsmed Vuokkoset Bio Normal 26 Tk,,,,,,other,dry_other,fallback
+418445,Tampoonid Kotex Active Normal 16 Tk,,,,,,other,dry_other,fallback
+418446,Tampoonid Kotex Active Super 16 Tk,,,,,,other,dry_other,fallback
+418447,Tampoonid O B Extra Protect Super 16 Tk,,,,,,other,dry_other,fallback
+418448,Tampoonid O B Organic Normal 16 Tk,,,,,,other,dry_other,fallback
+418449,Tampoonid O B Organic Super 16 Tk,,,,,,other,dry_other,fallback
+418450,Tampoonid Tampax Compak Pearl Regul 16 Tk,,,,,,produce,produce_apples_pears,high
+418451,Tampoonid Tampax Compak Pearl Super 16 Tk,,,,,,produce,produce_apples_pears,high
+418452,Tampoonid Tampax Compak Pearlsuper 16 Tk,,,,,,produce,produce_apples_pears,high
+418453,Hug Side Bella Perfecta Pure Maxi 16 Tk,,,,,,other,dry_other,fallback
+418454,Hug Side Bella Perfecta Pure Night 14 Tk,,,,,,other,dry_other,fallback
+418455,Hug Sidemed Always Ultra Night 24 Tk,,,,,,other,dry_other,fallback
+418456,Hug Sidemed Always Ultra Night S 4 6 Tk,,,,,,other,dry_other,fallback
+418457,Hug Sidemed Always Ultra Night S 5 20 Tk,,,,,,other,dry_other,fallback
+418458,Hug Sidemed Libresse Ultra Night L 26 Tk,,,,,,other,dry_other,fallback
+418459,Hug Sidemed Libresse Ultra Wing 38 Tk,,,,,,other,dry_other,fallback
+418460,Hug Sidemed Libresse Ultragoodnight 16 Tk,,,,,,other,dry_other,fallback
+418461,Hug Sidemed Naturella Ultranight S 4 28 Tk,,,,,,other,dry_other,fallback
+418462,Hug Sidemed Naturella Ultranight S 5 12 Tk,,,,,,other,dry_other,fallback
+418463,Hugieenisid Vuokkoset Plant Normal 12 Tk,,,,,,other,dry_other,fallback
+418464,Hugieeniside Bella Bio Based Normal 10 Tk,,,,,,other,dry_other,fallback
+418465,Hugieenisidemed Always Platinum S 2 26 Tk,,,,,,other,dry_other,fallback
+418466,Hugieenisidemed Always Platinum S 3 22 Tk,,,,,,other,dry_other,fallback
+418467,Hugieenisidemed Bella Herbs Aloe N 20 Tk,,,,,,other,dry_other,fallback
+418468,Hugieenisidemed Kotex Natural Night 6 Tk,,,,,,other,dry_other,fallback
+418469,Hugieenisidemed Kotex Natural Normal 8 Tk,,,,,,other,dry_other,fallback
+418470,Hugieenisidemed Libresse Ultra Night 8 Tk,,,,,,other,dry_other,fallback
+418471,Hugieenisidemed Naturella Ultra S 2 36 Tk,,,,,,other,dry_other,fallback
+418472,Hugieenisidemed Naturella Ultra S 3 32 Tk,,,,,,other,dry_other,fallback
+418473,Hugieenisidemed Vuokkoset Plantnight 9 Tk,,,,,,other,dry_other,fallback
+418474,Hugieenitampoonid Freedom Mini 3 Tk,,,,,,other,dry_other,fallback
+418475,Intiimpesugeel Bella Control 300 Ml,,,,,,household,hh_laundry,high
+418476,Intiimpesugeel Bella Teens Sens 300 Ml,,,,,,drinks,drinks_tea_coffee,high
+418477,Intiimpesuvaht Ziaja Daisy 250 Ml,,,,,,other,dry_other,fallback
+418478,Intiimsalvratikud Valentina 20 Tk,,,,,,other,dry_other,fallback
+418479,Pesukaitsmed Always Long Fresh 48 Tk,,,,,,other,dry_other,fallback
+418480,Pesukaitsmed Always Long Fresh 64 Tk,,,,,,other,dry_other,fallback
+418481,Pesukaitsmed Always Long Unscented 52 Tk,,,,,,other,dry_other,fallback
+418482,Pesukaitsmed Always Normal 0 Proc 30 Tk,,,,,,other,dry_other,fallback
+418483,Pesukaitsmed Always Normal 0 Proc 80 Tk,,,,,,other,dry_other,fallback
+418484,Pesukaitsmed Always Xl Fresh 40 Tk,,,,,,other,dry_other,fallback
+418485,Pesukaitsmed Bella Panty New 60 Tk,,,,,,other,dry_other,fallback
+418486,Pesukaitsmed Bella Panty Normal 20 Tk,,,,,,other,dry_other,fallback
+418487,Pesukaitsmed Bella Ultra Extra Long 16 Tk,,,,,,other,dry_other,fallback
+418488,Pesukaitsmed Carefree Aloe 20 Tk,,,,,,other,dry_other,fallback
+418489,Pesukaitsmed Carefree Cotton Extract 20 Tk,,,,,,other,dry_other,fallback
+418490,Pesukaitsmed Carefree Plus Aloe L 48 Tk,,,,,,other,dry_other,fallback
+418491,Pesukaitsmed Kotex 100 Proc Cotton N 20 Tk,,,,,,other,dry_other,fallback
+418492,Pesukaitsmed Kotex 100 Proc Cotton N 40 Tk,,,,,,other,dry_other,fallback
+418493,Tampoonid Bella Teens Mini 16 Tk,,,,,,drinks,drinks_tea_coffee,high
+418494,Tampoonid Bella Teens Regular 16 Tk,,,,,,drinks,drinks_tea_coffee,high

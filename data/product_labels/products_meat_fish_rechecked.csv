@@ -1,0 +1,677 @@
+product_id,name,brand,size_text,food_group,stores_sample,current_sub_code,new_sub_code,food_group_corrected,food_group_corrected_prev,new_sub_code_prev,confidence
+315367,Abba Heeringas Sinepikastmes 230 G,Abba Heeringas,230 g,meat_fish,"Coop, Prisma, Rimi",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+34862,Ajinomoto oyakata ramen sealihamaitseline kiirnuudlisupp 63g,Ajinomoto,63 g,meat_fish,"Prisma, Selver",,meat_pork,meat_fish,dry_preserves,dry_soups_noodles,high
+7023,"Ameerikapärane grill-liha, MAKS&MOORITS, 500 g",Ameerikapärane,500 g,meat_fish,"Prisma, Rimi, Selver",,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic
+83432,"Apelsinimahl viljalihaga, DON SIMON, 1 L",Don Simon,1 l,meat_fish,"Coop, Prisma, Rimi, Selver",,produce_tropical,produce,drinks,drinks_other,high
+58376,"Apetit lõhesupp, 400 g",Apetit,400 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_processed,high
+32370,"Armeenia Grill Broileri Kintsuliha Šašlõkk, Kg",Armeenia Grill,,meat_fish,"Barbora, Maxima, Prisma, Rimi, Selver",,meat_pork,meat_fish,meat_fish,meat_grill_blood_sausages,high
+3546,"Armeenia grill-Liha, kg",Armeenia,,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic
+9675,ATRIA BBQ kanapitsa 200 g,ATRIA BBQ,200 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_grill_blood_sausages,high
+6030,Atria Hornet kananagitsad 600 g,Atria Hornet,600 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+271,Atria Hornet krõbedad kanatiivad 650 g,Atria Hornet,650 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+160,Atria Hornet marineeritud kanatiivad 900 g,Atria Hornet,900 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+38730,"Beefeater Blood Orange Gin piiritusjook 37,5%vol 700ml",Beefeater Blood,700 ml,meat_fish,"Prisma, Rimi, Selver",,produce_tropical,produce,drinks,drinks_spirits,high
+2729,Beefeater London Dry Gin 40%vol 1L,Beefeater London,1 l,meat_fish,"Prisma, Rimi, Selver",,meat_beef_lamb_game,meat_fish,drinks,drinks_spirits,high
+85652,Beefeater London Dry Gin 40%vol 700ml,Beefeater London,700 ml,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_beef_lamb_game,meat_fish,drinks,drinks_spirits,high
+5927,"Blå Band, väikese laktoosisisaldusega kalakastme koostisained, 3 × 26 g","Blå Band,",3x26 g,meat_fish,Prisma,,fish_fresh,meat_fish,sauces_oils,sauces_other,high
+67134,"Black Angus konserv, LINNAMÄE, 240 g",Linnamäe,240 g,meat_fish,"Prisma, Rimi, Selver",,dry_canned_veg,dry_preserves,meat_fish,meat_gourmet,high
+54101,Bong touch of taste kanaleem 180 ml,Bong,180 ml,meat_fish,"Prisma, Selver",,meat_poultry,meat_fish,drinks,drinks_beer_cider,high
+2604,Bong touch of taste msc kalaleem 180 ml,Bong,180 ml,meat_fish,Prisma,,fish_fresh,meat_fish,drinks,drinks_beer_cider,high
+6784,"Broilerikintsuliha Caesari kastmes, LINNAMÄE LIHATÖÖSTUS, 600 g",Caesari,600 g,meat_fish,"Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+21755,Calvo tuunikala filee soolvees 160 g,Calvo,160 g,meat_fish,"Prisma, Selver",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+65087,Calvo tuunikala vees 3x 80/56 g,Calvo,56 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+1239,CESAR einekausike veiseliha/maks 150g,CESAR,150 g,meat_fish,Coop,,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+78157,Charles Vincent Champagne Brut KPN kvaliteetvahuvein 750ml,Charles Vincent,750 ml,meat_fish,Prisma,,meat_hams,meat_fish,drinks,drinks_wine,high
+10863,CHEF LUNDEN Grillkauss kanaga 275 g,CHEF LUNDEN,275 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+2862,Chef Lunden Kana Caesari Ciabatta 200 G,Chef Lunden,200 g,meat_fish,"Barbora, Coop, Maxima, Prisma",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+12587,CHEF LUNDEN Kanakebabi burrito 240 g,CHEF LUNDEN,240 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+11078,CHEF LUNDEN Kana peekoni wrap 200 g,CHEF LUNDEN,200 g,meat_fish,Prisma,,meat_pork,meat_fish,meat_fish,meat_hams,high
+3227,Chicken chips kanasnäkk 45 g,Chicken,45 g,meat_fish,"Coop, Prisma, Selver",,meat_poultry,meat_fish,sweets_snacks,sweets_snacks_salty,high
+6832,Chill-Dill grill-liha 450 g,Chill-Dill,450 g,meat_fish,Prisma,,produce_herbs_salads_sprouts,produce,meat_fish,meat_grill_blood_sausages,high
+40739,Coop apelsinimahl viljalihaga 900ml,Coop,900 ml,meat_fish,Prisma,,produce_tropical,produce,drinks,drinks_other,high
+7993,Coop crispy chicken vürtsi- ja paneerimissegu 50g,Coop,50 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_other,high
+611883,"Coop hambavahepuhasti 0,6mm 6tk",Coop,6 pcs,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_other,high
+137187,Coop Kalapulgad 450 g,Coop Kalapulgad,450 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_processed,high
+3940,"Coop kalatükid tempura taignas, 220g",Coop,220 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+1367,Coop Kananagitsad 200 G,Coop Kananagitsad,200 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+30141,"Coop kanapuljongikuubik 12 tk (10 g), 120 g",Coop,10 g,meat_fish,Prisma,,meat_poultry,meat_fish,world_spices,spices_broth_stock,high
+10462,Coop Kana Punases Karri Kastmes 400 G,Coop Kana,400 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+64437,Coop Kana Püreesupp 300 G,Coop Kana,300 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+11045,Coop Kana Tikka Masala 400 G,Coop Kana,400 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+30813,Coop Kanawrap Texmex 200g,Coop Kanawrap,200 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+8221,Coop kontsentreeritud veiselihafond 96g (4x24g),Coop,4x24 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+1990,Coop krõbedad kalapalad 480g,Coop,480 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+601376,Coop kulduim-tuunikala tükid vees 160/112g,Coop,112 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+50381,Coop Lihapirukas 150 g,Coop Lihapirukas,150 g,meat_fish,Prisma,,bakery_cakes_pastries,bakery,meat_fish,meat_other,high
+3022,Coop Lõhefilee 2X150 G,Coop Lõhefilee,2x150 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+493260,Coop Lõhemedaljonid 300G,Coop Lõhemedaljonid,300 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+6190,"Coop loomalihapuljongikuubik 12 tk (10 g), 120 g",Coop,10 g,meat_fish,Prisma,,spices_broth_stock,world_spices,world_spices,spices_broth_stock,high
+3514,"Coop magus-hapu kana jasmiiniriisiga, 350 g",Coop,350 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+372572,"Coop magus tšilli-teriyaki kana, 320 g",Coop,320 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+20131,Coop Matjes-heeringafileed 150g,Coop Matjes-heeringafileed,150 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+20596,Coop nuudlid (91%) vürtsisegu ja kana maitsega (9%) 65g,Coop,65 g,meat_fish,Prisma,,meat_poultry,meat_fish,dry_preserves,dry_pasta_rice,high
+1853,"Coop panang karrikana jasmiiniriisiga, 350 g",Coop,350 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+65937,Coop pasta bolognese tomati ja veiselihaga 68 g,Coop,68 g,meat_fish,Prisma,,produce_root_veg,produce,meat_fish,meat_beef_lamb_game,high
+2378,Coop pitsa amerikana 340G,Coop,340 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+410522,Coop Punane Karrikana Riisiga 350 G,Coop Punane,350 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+3357,Coop suured tuunikalatükid karrikastmes msc 185g,Coop,185 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+3759,Coop suured tuunikalatükid magusas tšillikastmes msc 185g,Coop,185 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+2546,"Coop suured tuunikalatükid maisi, punaste kidney ubade ja sibulaga 185g",Coop,185 g,meat_fish,Prisma,,produce_root_veg,produce,meat_fish,fish_fresh,high
+238,Coop suured tuunikalatükid tomatikastmes msc 185g,Coop,185 g,meat_fish,Prisma,,produce_root_veg,produce,meat_fish,fish_fresh,high
+34483,Coop tuunikala tükid päevalilleõlis 240/168g,Coop,168 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+20817,Coop tuunikalatükid väheses päevalilleõlis msc 130/116g,Coop,116 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+217,Coop tuunikala tükid vees 150/105g,Coop,105 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+92522,Dals Kitchen Kana Tikka Masala Riisiga 300 G,Dals Kitchen,300 g,meat_fish,"Prisma, Rimi",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+8718,Dava fajita-vürtsiga taimne kanalihaasendaja 130 g,Dava,130 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+28499,Dava taimne veiselihaasendaja 130 g,Dava,130 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+45112,DON SIMON 100% apelsinimahl viljalihaga (klaaspdl) 20cl,DON SIMON,20 cl,meat_fish,Prisma,,produce_tropical,produce,drinks,drinks_other,high
+54553,Drogheria bbq maitseainesegu lihalõikudele ja burgerile veskis 115g,Drogheria,115 g,meat_fish,Prisma,,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+13325,Dušigeel ja shampoon frosch senses lastele 300ml,Dušigeel,300 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_shampoo_cond,high
+94752,Eesti Pagar Suitsulihapirukas 320 G,Eesti Pagar,320 g,meat_fish,Prisma,,fish_salted_smoked,meat_fish,meat_fish,meat_other,high
+13772,"EHS sport sisu 3in1 meeste shampoon, pal&higeel 300ml",EHS,300 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_shampoo_cond,high
+1964,Eine kana tikka masala 320 g,Eine,320 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+64191,"Ella´s Kitchen kanaroog riisiga 130 g, öko, alates 7-elukuust",Ella´s Kitchen,130 g,meat_fish,"Prisma, Selver",,meat_poultry,meat_fish,baby,baby_other,high
+41628,"Ella´s Kitchen veiselihapüree kartuliga 130 g, öko, alates 7-elukuust",Ella´s Kitchen,130 g,meat_fish,"Prisma, Selver",,produce_root_veg,produce,baby,baby_other,high
+16478,Elmex 2-6 a. laste hambapasta 50ml,Elmex,50 ml,meat_fish,"Prisma, Rimi",,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+15509,Elmex sensitive professional hambapasta 75ml,Elmex,75 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+46518,Erlandia Lihapirukas Õlis 2tk. 160 G,Erlandia Lihapirukas,160 g,meat_fish,Prisma,,bakery_cakes_pastries,bakery,meat_fish,meat_other,high
+3491,ESVA kalapulgad kiles 400g,ESVA,400 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,fish_fresh,meat_fish,meat_fish,fish_processed,high
+2731,"Esva Silver kalapulgad, 250g",Esva Silver,250 g,meat_fish,"Barbora, Maxima, Prisma, Rimi, Selver",,fish_fresh,meat_fish,meat_fish,fish_processed,high
+28875,Fairy nõudepesuvahend Sensitive Chamomile 900ml,Fairy,900 ml,meat_fish,"Coop, Prisma",,meat_hams,meat_fish,meat_fish,meat_other,high
+3764,"Findus kalafileepulgad, 250 g",Findus,250 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+1801,Findus paneeritud kalafileed 225g,Findus,225 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+71938,"Firmapasteet, PROFI, 131 g",Profi,135 g,meat_fish,"Prisma, Selver",,drinks_tea_coffee,drinks,meat_fish,meat_other,high
+2959,Flint craft grenki vürtsikad vinnutatud liha maitselised lainelised leivakesed 90g,Flint,90 g,meat_fish,Prisma,,spices_herbs_spice_mix,world_spices,meat_fish,meat_other,high
+28344,Flint grenki vasikaliha ja adžikamaitselised leivakesed 80g,Flint,80 g,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_other,heuristic
+29762,Flint punase lõhemarjamaitselised kuivikud 35 g,Flint,35 g,meat_fish,"Prisma, Rimi",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+3750,Food Studio Kanapuljong 350Ml,Food Studio,350 ml,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+3881,Food Studio Kanapuljong 750Ml,Food Studio,750 ml,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+124376,Food Studio Koorene Hakklihakaste 350 Ml,Food Studio,350 ml,meat_fish,"Coop, Prisma, Selver",,meat_minced,meat_fish,meat_fish,meat_minced,high
+290948,Food Studio Koorene Praekaste Bechamel 350 Ml,Food Studio,350 ml,meat_fish,Prisma,,meat_hams,meat_fish,sauces_oils,sauces_other,high
+66988,Frank pott hautatud kanalihaga konserv 240g,Frank,240 g,meat_fish,"Coop, Prisma",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+16208,Frantsila naturaalne hambapasta 75ml,Frantsila,75 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+43362,Frapin VSOP Cognac Grande Champagne karbis 500ml,Frapin VSOP,500 ml,meat_fish,Prisma,,meat_hams,meat_fish,drinks,drinks_wine,high
+5216,Gallina blanca gb loomalihamaitseline puljongikuubik 8 x 10 g,Gallina,8x10 g,meat_fish,"Coop, Prisma",,meat_hams,meat_fish,world_spices,spices_broth_stock,high
+5979,Gallina Blanca kanapuljong 15 x 10 g,Gallina Blanca,15x10 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+570788,Gallina Blanca kanapuljong 8*10g,Gallina Blanca,10 g,meat_fish,"Coop, Prisma",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+14958,Gliss shampoon split hair miracle 250ml,Gliss,250 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_shampoo_cond,high
+1460,"Gourmet Perle Gravy Delight kassitoiduvalik kanaliha, grillkana 85g",Gourmet Perle,85 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+22292,"Graavilõhe, viilutatud 200 g","Graavilõhe,",200 g,meat_fish,"Coop, Prisma",,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+126449,"Grandiosa meat lovers superiore kiviahjupitsa, 350 g",Grandiosa,350 g,meat_fish,"Coop, Prisma, Selver",,meat_other,meat_fish,meat_fish,meat_other,heuristic
+1792,Grandiosa perepitsa hakklihaga 525 g,Grandiosa,525 g,meat_fish,Prisma,,meat_minced,meat_fish,meat_fish,meat_minced,high
+78753,Granini apelsinimahl viljalihaga 1L,Granini,1 l,meat_fish,Prisma,,produce_tropical,produce,drinks,drinks_other,high
+231,"Grillitud broilerikintsu grill-liha kollase ploomiga, kg",Grillitud,,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_grill_blood_sausages,high
+220,"Grillitud kirsisuitsune grill-liha seavälisfileest, kg",Grillitud,,meat_fish,Prisma,,fish_salted_smoked,meat_fish,meat_fish,meat_grill_blood_sausages,high
+148,"Grillitud koore-pipramaitseline grill-liha, kg",Grillitud,,meat_fish,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,meat_fish,meat_grill_blood_sausages,high
+199,"Grillitud ROUTE 66 grill-liha seakaelakarbonaadist, kg",Grillitud ROUTE,,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic
+6444,"Grill-liha Armeenia, MAKS&MOORITS, 500 g",Armeenia,500 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic
+8043,"Grill-liha Cola BBQ, KARNI, 450 g",Cola,450 g,meat_fish,"Prisma, Selver",,drinks_soft_soda,drinks,meat_fish,meat_grill_blood_sausages,high
+8152,"Grill-liha seavälisfileest röstitud küüslaugu marinaadis, RANNAROOTSI, 400 g",Küüslaugu,400 g,meat_fish,"Prisma, Selver",,sauces_marinades,sauces_oils,meat_fish,meat_grill_blood_sausages,high
+4030,Gustav Catering .Spaghetti Bolognese Lihapallidega 300 G,Gustav Catering,300 g,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_other,heuristic
+1830,"Gyoza pelmeenid BBQ lihaga, Korea stiilis 300 g",Gyoza,300 g,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic
+55341,Gyoza pelmeenid kimtši-sealihaga Korea stiilis 300 g,Gyoza,300 g,meat_fish,Prisma,,meat_pork,meat_fish,meat_fish,meat_pork,high
+12283,Hakkliha ciabatta pizza 225 g,Hakkliha,225 g,meat_fish,Prisma,,meat_minced,meat_fish,meat_fish,meat_minced,high
+16354,Hambahari Brush Eco,Hambahari Brush,,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_other,high
+16144,Hambahari classic soft 2tk,Hambahari,,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_other,high
+14792,Hambahari Expert Clean Soft,Hambahari Expert,,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_other,high
+15668,Hambahari Individual Reach soft,Hambahari Individual,,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_other,high
+17111,Hambahari Invigorate soft,Hambahari Invigorate,,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_other,high
+17197,"Hambahari Jordan Step by Step soft, lastele 3-5 a.",Hambahari Jordan,,meat_fish,"Coop, Prisma, Rimi",,meat_hams,meat_fish,personal_care,pcare_other,high
+12931,Hambahari Max White soft,Hambahari Max,,meat_fish,"Coop, Prisma",,meat_hams,meat_fish,personal_care,pcare_other,high
+14251,Hambahari ökoloogiline green clean medium,Hambahari,,meat_fish,Coop,,meat_hams,meat_fish,personal_care,pcare_other,high
+16088,Hambahari Pepsodent lastele 1-6 a,Hambahari Pepsodent,,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_other,high
+12860,Hambahari professional medium,Hambahari,,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_other,high
+16355,Hambahari Slim Charcoal soft,Hambahari Slim,,meat_fish,"Coop, Prisma",,meat_hams,meat_fish,personal_care,pcare_other,high
+16262,"Hambahari Step by Step extra soft, lastele 0-2 a.",Hambahari Step,,meat_fish,"Prisma, Rimi",,meat_hams,meat_fish,personal_care,pcare_other,high
+15027,Hambahari White System Medium,Hambahari White,,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_other,high
+15943,"Hambaniit Essential Floss Mint 50 m, vahatatud",Hambaniit Essential,,meat_fish,"Coop, Prisma",,meat_hams,meat_fish,personal_care,pcare_other,high
+13362,Hambapasta bam 3d white 75ml,Hambapasta,75 ml,meat_fish,"Coop, Prisma",,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+13575,"Hambapasta Biorepair Kids viinamari 50 ml,lastele 0-6 a",Hambapasta Biorepair,50 ml,meat_fish,Prisma,,produce_tropical,produce,personal_care,pcare_oral_care,high
+226048,Hambapasta Colgate Triple Action 75ml,Hambapasta Colgate,75 ml,meat_fish,"Coop, Prisma",,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+16256,Hambapasta Extra Black valgendav 100ml,Hambapasta Extra,100 ml,meat_fish,"Coop, Prisma",,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+16588,Hambapasta Fast Sensitive 75ml,Hambapasta Fast,75 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+15171,Hambapasta Fresh Breath 75 ml,Hambapasta Fresh,75 ml,meat_fish,"Coop, Prisma",,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+16486,Hambapasta Max Fresh Cooling Crystals 75 ml,Hambapasta Max,75 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+16667,"Hambapasta Muumi 50 ml, lastele 3-5a",Hambapasta Muumi,50 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+15420,Hambapasta Pepsodent Xylitol 125 ml,Hambapasta Pepsodent,125 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+16447,Hambapasta Pro-Expert prof protection 2x75ml,Hambapasta Pro-Expert,2x75 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+15789,Hambapasta Sensodyne Original 75 ml,Hambapasta Sensodyne,75 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+14786,Hambapasta Total Protective Repair 75 ml,Hambapasta Total,75 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+17187,Hambatikud Elise 200tk topsis,Hambatikud Elise,200 pcs,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_other,high
+13689,"Hambavahepuhasti 0,5mm 6tk",Hambavahepuhasti,,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_other,high
+15241,Hambavahepuhasti 30tk,Hambavahepuhasti,,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_other,high
+1648,Hamburgeritasku pabergrill house 10tk,Hamburgeritasku,10 pcs,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_other,high
+50409,Hamle&aramellivahvlid hamlet 230 g,Hamle&aramellivahvlid,230 g,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_other,high
+19924,"Heeringafilee rasvane, VICI, 240 g","Heeringafilee,",240 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+27225,"Heeringafilee rollmops kurgiga, KAPTEN GRANT, 250 g",Heeringafilee Rollmops,250 g,meat_fish,"Coop, Prisma, Selver",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+22900,Heeringafilee Skandinaaviapärane Matjes 240 g,Heeringafilee Skandinaaviapärane,240 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+25110,Heeringafilee Skandinaaviapärane vähesoolane 240 g,Heeringafilee Skandinaaviapärane,240 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+166,"Heeringafilee traditsiooniline, VICI, 190 g","Heeringafilee,",190 g,meat_fish,"Coop, Prisma, Rimi, Selver",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+25034,"Heeringafilee traditsiooniline, VICI, 240 g",Heeringafilee,240 g,meat_fish,"Coop, Prisma, Selver",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+23890,"Heeringafilee traditsiooniline, VICI, 400 g",Heeringafilee,400 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+22691,"Heeringafileetükid juurviljadega, KALURI, 400g",Heeringafilee,400 g,meat_fish,"Coop, Prisma, Selver",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+20223,"Heeringafileetükid koorekastmes sibulaga, KAPTEN GRANT, 150 g",Heeringafilee,150 g,meat_fish,"Coop, Prisma, Rimi, Selver",,produce_root_veg,produce,meat_fish,fish_fresh,high
+35201,"Heeringafilee ürdikastmes, marineeritud, VICI, 250 g",Heeringafilee,250 g,meat_fish,"Coop, Prisma, Selver",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+587252,"Herkku delikatess kammkarbiliha, 180 g",Herkku,180 g,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_other,heuristic
+11793,Herkku Kana Caesari ciabatta,Herkku Kana,,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+3107,Herkku Lihatäidisega tortelliinid 250 g,Herkku Lihatäidisega,250 g,meat_fish,Prisma,,bakery_cakes_pastries,bakery,meat_fish,meat_other,high
+63700,HiPP Aedviljad riisi ja vasikalihaga ÖKO al. 8k,HiPP Aedviljad,,meat_fish,"Prisma, Selver",,dry_pasta_rice,dry_preserves,baby,baby_other,high
+62547,"Hipp brokolirisoto küülikulihaga 220 g, alates 8-elukuust",Hipp,220 g,meat_fish,"Coop, Prisma",,produce_root_veg,produce,baby,baby_other,high
+126274,"Hipp kalkunilihapüree 125g, alates 4-elukuust",Hipp,125 g,meat_fish,"Prisma, Selver",,meat_poultry,meat_fish,baby,baby_other,high
+42055,"HiPP mangochutney bulguri ja kanaga 220g, alates 1-eluaastast",HiPP,220 g,meat_fish,Prisma,,produce_tropical,produce,baby,baby_other,high
+64340,Hipp pastaroog muskaatkõrvitsa ja kanaga mahe 8k 190g,Hipp,190 g,meat_fish,Prisma,,produce_root_veg,produce,baby,baby_other,high
+42480,HIPP PÜREE RISOT-PORG-LÕHE 190G 8K,HIPP PÜREE,190 g,meat_fish,Prisma,,fish_fresh,meat_fish,baby,baby_other,high
+44667,HIPP RISOTO KANAGA 250G 12K,HIPP RISOTO,250 g,meat_fish,Prisma,,meat_poultry,meat_fish,baby,baby_other,high
+19541,"Hipp veiselihapüree 125g, alates 5-elukuust",Hipp,125 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,baby,baby_other,high
+68906,"Hirveliha konserv, LINNAMÄE LIHATÖÖSTUS, 240 g",Linnamäe,240 g,meat_fish,"Barbora, Maxima, Prisma, Rimi, Selver",,dry_canned_veg,dry_preserves,meat_fish,meat_beef_lamb_game,high
+128927,"Hirveliha omas mahlas, RANNAROOTSI, 240 g",Rannarootsi,240 g,meat_fish,"Coop, Prisma",,drinks_juices,drinks,drinks,drinks_other,high
+33489,Hirvelihasink 350 g,Hirvelihasink,350 g,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_hams,high
+6357,Hirveliha steik 240 G,Hirveliha,240 g,meat_fish,"Barbora, Maxima, Prisma",,meat_other,meat_fish,meat_fish,meat_beef_lamb_game,heuristic
+2956,HK Hamburger 100G,HK Hamburger,100 g,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_other,high
+4325,HK Koorene Kartulipuder Kanaga 300 G,HK Koorene,300 g,meat_fish,Prisma,,produce_root_veg,produce,meat_fish,meat_poultry,high
+3711,HK Lindströmi Lihapallid Kartulipudruga,HK Lindströmi,300 g,meat_fish,Prisma,,produce_root_veg,produce,meat_fish,meat_other,high
+4948,Hot Dog lihaviiner 350 g,Hot Dog,350 g,meat_fish,Coop,,meat_sausages,meat_fish,meat_fish,meat_sausages,high
+52339,Hoviruoka Lihapirukas 10 Tk,Hoviruoka Lihapirukas,10 pcs,meat_fish,Prisma,,bakery_cakes_pastries,bakery,meat_fish,meat_other,high
+52608,Hoviruoka Lihapirukas 4tk/400g,Hoviruoka Lihapirukas,400 g,meat_fish,Prisma,,bakery_cakes_pastries,bakery,meat_fish,meat_other,high
+16686,Ibero juukseklamber 2 tk metall,Ibero,,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,personal_care,pcare_other,high
+16013,Ibero juukseklambrid 6 tk,Ibero,,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_other,high
+3971,"Jalostaja hernesupp lihaga, 550 ml",Jalostaja,550 ml,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_other,heuristic
+4384,Jerky Pork Chilli 50 g,Jerky Pork,50 g,meat_fish,"Coop, Prisma",,meat_pork,meat_fish,meat_fish,meat_other,high
+3781,Joel Ostrat Koorene Kanapasta 300 G,Joel Ostrat,300 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+609621,Joel Ostrat M&eese Tandoori Kanaga 300 G,Joel Ostrat,300 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+15956,JORDAN HAMBATIKUD CLEAN BETWEEN,JORDAN HAMBATIKUD,,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_other,high
+16387,Jordan hambavahepuhasti täitepakk 20tk,Jordan,,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_other,high
+15842,Jordan puidust hambatikud 2-poolsed105tk,Jordan,,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_other,high
+12961,Juukseklamber must 8cm,Juukseklamber,,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,personal_care,pcare_other,high
+15983,Juukseklambrid must 4tk,Juukseklambrid,,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_other,high
+2098,Kalafilee krõbedas paneeringus 400g,Kalafilee,400 g,meat_fish,"Coop, Prisma, Rimi, Selver",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+22063,Kalaneuvos viilutatud külmsuitsutatud vikerforellifilee 150g,Kalaneuvos,150 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+4338,"Kalapallid, külmutatud 200g","Kalapallid,",200 g,meat_fish,Prisma,,fish_fresh,meat_fish,frozen_food,frozen_fish,high
+1967,"Kalapulgad, 250 g","Kalapulgad,",250 g,meat_fish,"Coop, Prisma, Selver",,fish_fresh,meat_fish,meat_fish,fish_processed,high
+25138,"Kalapuljong, FOODSTUDIO, 350 ml",FOODSTUDIO Kalapuljong,350 ml,meat_fish,"Prisma, Selver",,fish_fresh,meat_fish,meat_fish,meat_other,high
+3985,Kalkunikintsuliha aasiapärases marinaadis 600 g,Kalkunikintsuliha,600 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+55636,Kalkunikintsuliha bbq apelsini marinaadis 600 g,Kalkunikintsuliha,600 g,meat_fish,Prisma,,produce_tropical,produce,meat_fish,meat_grill_blood_sausages,high
+7895,Kalkunikintsuliha röstitud paprika 600G,Kalkunikintsuliha,600 g,meat_fish,Prisma,,produce_root_veg,produce,meat_fish,meat_poultry,high
+124259,Kaluri Praetud Räimed Tomatikastmes 500G,Kaluri Praetud,500 g,meat_fish,"Prisma, Selver",,produce_root_veg,produce,meat_fish,fish_fresh,high
+11313,Kanakotlet 290 g,Kanakotlet,290 g,meat_fish,"Coop, Prisma",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+3504,"Kanalihaga pelmeenid, 400 g",Kanalihaga,400 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+64787,"Kanaliha omas mahlas, RANNAROOTSI, 240 g",Rannarootsi,240 g,meat_fish,"Coop, Prisma, Selver",,meat_poultry,meat_fish,drinks,drinks_other,high
+33613,"Kanalihasült, MAKS&MOORITS, 300 g",Kanalihasült,300 g,meat_fish,"Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+33150,Kanamaksapasteet 200 g,Kanamaksapasteet,200 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+9657,"Kanapallid, TALLEGG, 360 g",TALLEGG Kanapallid,360 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+571051,Kanarbik Erica 12 cm,Kanarbik Erica,,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+359282,Kanarbik Trio 17 cm,Kanarbik Trio,,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+291320,Kanarbik TWIN 12 cm,Kanarbik TWIN,,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+31190,"Kanasigar, TALLEGG, 200 g",Kanasigar,200 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+115727,Kanasupp kartuliklimpidega 300 g,Kanasupp,300 g,meat_fish,"Coop, Prisma",,produce_root_veg,produce,meat_fish,meat_poultry,high
+577463,Kana tikka masala 400g,Kana,400 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+4738,"Kanaviiner, MAKS&MOORITS, 500 g",Ma&orits Kanaviiner,500 g,meat_fish,"Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_sausages,high
+20527,Kapten Grant Heeringafilee Vähesoolane 240 G,Kapten Grant,240 g,meat_fish,"Prisma, Rimi, Selver",,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+2907,Kapten Grant lõhetükid tomatikastmes 230g,Kapten Grant,230 g,meat_fish,"Barbora, Maxima, Prisma",,produce_root_veg,produce,meat_fish,fish_fresh,high
+143,Kapten Grant purustatud tuunikala tükid soolvees 185 g,Kapten Grant,185 g,meat_fish,"Prisma, Rimi",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+23332,Kapten grant tuunikala purustatud tükid õlis 185 g,Kapten,185 g,meat_fish,"Coop, Prisma",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+165,Kapten Grant tuunikala suured tükid õlis 185 g,Kapten Grant,185 g,meat_fish,"Coop, Prisma, Rimi, Selver",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+201,Kapten Grant tuunikala suured tükid soolvees 185 g,Kapten Grant,185 g,meat_fish,"Coop, Prisma, Rimi, Selver",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+1665,Kariniemen Kalkuni Hakkliha 400 G,Kariniemen Kalkuni,400 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_minced,high
+555951,Kariniemi Kana Krõbed Tiivad 700 G,Kariniemi Kana,700 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+3409,Karni Broileri Rinnalihasink Viil 300 G,Karni Broileri,300 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_hams,high
+21028,KARNI Kanafileepallid 340 g,KARNI Kanafileepallid,340 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+509847,"Karni Sealihakuubikud Pruunis Kastmes, 300 G",Karni Sealihakuubikud,300 g,meat_fish,Prisma,,meat_pork,meat_fish,meat_fish,meat_pork,high
+32894,Karni Täissuitsu Kanasnack 85G,Karni Täissuitsu,85 g,meat_fish,Prisma,,meat_poultry,meat_fish,sweets_snacks,sweets_snacks_salty,high
+7329,Kauaküpsetatud rebitud sealiha 240 g,Kauaküpsetatud,240 g,meat_fish,Prisma,,meat_pork,meat_fish,meat_fish,meat_pork,high
+6973,"Kauaküpsetatud Teriyaki kanapoolkoib, TALLEGG, 500 g",Kauaküpsetatud Teriyaki,500 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+6564,Kikas .Br.Kintsuliha Itaalia Marinaadis 600 G,Kikas,600 g,meat_fish,Prisma,,sauces_marinades,sauces_oils,meat_fish,meat_other,high
+121060,Kikas Broilerikintsuliha Bbq Apelsini Marinaad,Kikas Broilerikintsuliha,600 g,meat_fish,Prisma,,produce_tropical,produce,meat_fish,meat_grill_blood_sausages,high
+53780,Kikas Kalkunikintsuliha Kanepi-Mee Marinaadis,Kikas Kalkunikintsuliha,600 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+5917,Kikas Summer Smoked Honey Broilerikintsuliha 6,Kikas Summer,600 g,meat_fish,"Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+6953,"Kirsi-rummimarinaadis grill-liha seavälisfileest, RAKVERE LK, 580 g",Grill-liha,580 g,meat_fish,"Prisma, Rimi, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high
+63485,Klassikaline Lambakarree 400 g,Klassikaline Lambakarree,400 g,meat_fish,"Prisma, Rimi",,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+7694,Klassikaline veiselihaburger 220 g,Klassikaline,220 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+1994,Knorr Fond „du Chef” Beef veisepuljongikontsentraadi portsjonid 4 x 28 g,Knorr Fond,4x28 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+2585,Knorr Fond „du Chef” Chicken kanapuljongikontsentraadi portsjonid 4 × 28 g,Knorr Fond,4x28 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+6303,Knorr Fond „du Chef” kanapuljongikontsentraadi portsjonid 8x28g,Knorr Fond,8x28 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+5630,Knorr fond „du chef” veiselihapuljongikontsentraadi portsjonid 8x28g,Knorr,8x28 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+1716,"Knorr kalapuljongi kuubikud, 10 x 10 g",Knorr,10x10 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+5075,"Knorr kanapuljongi kuubikud, 10 x 10 g",Knorr,10x10 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+5327,Knorr kanapuljongikuubikud 20 × 10 g,Knorr,20x10 g,meat_fish,Prisma,,meat_poultry,meat_fish,world_spices,spices_broth_stock,high
+48722,Knorr kanapüreesupp krutoonidega 16g,Knorr,16 g,meat_fish,"Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+61932,Knorr kanasupp nuudlitega 12 g,Knorr,12 g,meat_fish,"Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+3310,Knorr kiirnuudlid kanamaitselised 61g,Knorr,61 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,dry_preserves,dry_pasta_rice,high
+4626,"Knorr lihapuljongi kuubikud, 10 x 10 g",Knorr,10x10 g,meat_fish,Prisma,,spices_broth_stock,world_spices,meat_fish,meat_other,high
+18455,Knorr shampinjonipüreesupp 15g,Knorr,15 g,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_other,high
+66607,Koduküla hautatud lambaliha 250g / lihasisaldus 75%,Koduküla,250 g,meat_fish,"Barbora, Maxima, Prisma, Rimi",,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+23665,"Kodused kalakotletid tilliga, SAARE KALA, 200 g",Kodused,200 g,meat_fish,Selver,,produce_herbs_salads_sprouts,produce,meat_fish,fish_fresh,high
+602816,Kokkikartano Kiievi kanakotlett kartulipüreega 350g,Kokkikartano Kiievi,350 g,meat_fish,Prisma,,produce_root_veg,produce,meat_fish,meat_poultry,high
+489674,Kotimaista Broilerikintsuliha 300G,Kotimaista Broilerikintsuliha,300 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+4660,Kotimaista grillkomplekt marineeritud kanast kg,Kotimaista,,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+2235,Kotimaista Kanafileeribad Maitsestamata 300 G,Kotimaista Kanafileeribad,300 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+7066,"Kotimaista kanašnitsel vürtsiõlis, 800 g",Kotimaista,800 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+275171,Kotimaista Kartulipudru-Loomaliha Vorm 350 G,Kotimaista Kartulipudru-Loomaliha,350 g,meat_fish,Prisma,,produce_root_veg,produce,meat_fish,meat_beef_lamb_game,high
+499589,Kotimaista Kartul Puikala 1kg,Kotimaista Kartul,1 kg,meat_fish,Prisma,,produce_root_veg,produce,meat_fish,fish_fresh,high
+3879,Kotimaista lihatükid 600 g,Kotimaista,600 g,meat_fish,Prisma,,dry_canned_veg,dry_preserves,meat_fish,meat_other,high
+5309,"Kotimaista maitsestatud kanakoivad, 600 g",Kotimaista,600 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+490081,Kotimaista Sea-Ja Veisehakkliha 23% 400G,Kotimaista Sea-Ja,400 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_minced,high
+1874,Kotimaista Sea-Ja Veise Hakkliha 23% 700G 60/40,Kotimaista Sea-Ja,700 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_minced,high
+1698,Kotimaista veisehakkliha 17% 400 g,Kotimaista,400 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_minced,high
+1885,Kotimaista Veise -Ja Seahakkliha 20% 700G 50/50,Kotimaista Veise,700 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_minced,high
+2484,Kotimaista Veiseliha Kuubikud 500 G,Kotimaista Veiseliha,500 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+32450,"Kotimaista vürtsikad kanatiivad, 600 g",Kotimaista,600 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+2722,"Kreekapärased broilerilihast toorvorstid, MAKS&MOORITS, 400 g",Ma&orits Kreekapärased,400 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_sausages,high
+10334,Krõbe seenevalgust kanata šnitsel 170 g,Krõbe,170 g,meat_fish,Prisma,,produce_mushrooms,produce,meat_fish,meat_poultry,high
+2363,Kron pudelihari 5cm,Kron,,meat_fish,Prisma,,meat_other,meat_fish,household,hh_other,heuristic
+3860,Kucharek kanapuljong 60gr,Kucharek,,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+2538,Kuhovar kanalihamaitselise puljongiga kiirnuudlid 60g,Kuhovar,60 g,meat_fish,Prisma,,meat_poultry,meat_fish,dry_preserves,dry_pasta_rice,high
+22462,"Külmsuitsuforell, viilutatud Mati Kala 90 g","Külmsuitsuforell,",90 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+21868,"Külmsuitsu lõhefilee, sulatatud, viilutatud, kg",Külmsuitsu,,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+20264,"Külmsuitsulõhe, viilutatud 500 g","Külmsuitsulõhe,",500 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+2880,"Külmutatud räim peaga, 500 g",Külmutatud,500 g,meat_fish,"Coop, Prisma",,fish_fresh,meat_fish,frozen_food,frozen_fish,high
+27383,"Kuumsuitsu lõhefilee 1,2-1,5 kg",Kuumsuitsu,1.5 kg,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+5665,"Küüslaugu grill-liha kaelakarbonaadist, RAKVERE, 500 g",Küüslaugu,500 g,meat_fish,"Prisma, Rimi, Selver",,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic
+113466,Leibur Kuldne Graham 500 g,Leibur Kuldne,500 g,meat_fish,"Barbora, Maxima, Prisma, Selver",,meat_hams,meat_fish,meat_fish,meat_other,high
+34688,"Lihakas lastevorst, RAKVERE, 170 g",Rakvere Lihakas,170 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Selver",,meat_sausages,meat_fish,meat_fish,meat_sausages,high
+11035,"Lihakas lihapall, RAKVERE LK, 300 g",RAKVERE Lihakas,300 g,meat_fish,"Coop, Prisma, Selver",,meat_other,meat_fish,meat_fish,meat_other,heuristic
+137954,"Lihakas suitsusardell, 400 g",Lihakas,400 g,meat_fish,"Coop, Prisma",,meat_sausages,meat_fish,meat_fish,meat_sausages,high
+2954,"Lihapirukas, 400 g","Lihapirukas,",400 g,meat_fish,"Coop, Prisma",,bakery_cakes_pastries,bakery,meat_fish,meat_other,high
+1131,Lihapirukas 85 g,Lihapirukas,85 g,meat_fish,Prisma,,bakery_cakes_pastries,bakery,meat_fish,meat_other,high
+34006,"Liharibad, NÕO, 140 g",Meat,140 g,meat_fish,"Prisma, Selver",,meat_other,meat_fish,meat_fish,meat_other,heuristic
+132640,Lihatomat Grifone I klass,Lihatomat Grifone,,meat_fish,Prisma,,produce_root_veg,produce,meat_fish,meat_other,high
+23433,Lihatomat Soome I klass,Lihatomat Soome,,meat_fish,Prisma,,produce_root_veg,produce,meat_fish,meat_other,high
+534305,Liivimaa Lihaveis Böfstrogonov 300G,Liivimaa Lihaveis,300 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+2466,Liivimaa Lihaveis Mahe Lihaveise Lihalõiked 390 G,Liivimaa Lihaveis,390 g,meat_fish,"Prisma, Rimi, Selver",,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+31219,Liivimaa Lihaveis Mahe Rohumaaveise Antrekoodi Steik 240 G,Liivimaa Lihaveis,240 g,meat_fish,"Coop, Prisma, Selver",,meat_beef_lamb_game,meat_fish,meat_fish,meat_gourmet,high
+2894,Liivimaa Lihaveis Mahe Rohumaaveise Burgeripihv 170G,Liivimaa Lihaveis,170 g,meat_fish,"Prisma, Rimi, Selver",,meat_beef_lamb_game,meat_fish,meat_fish,meat_gourmet,high
+3716,Liivimaa Lihaveis Mahe Rohumaaveise Denver Steik 220G,Liivimaa Lihaveis,220 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_gourmet,high
+2986,Liivimaa Lihaveis Mahe Rohumaaveise Hakkliha 300 G,Liivimaa Lihaveis,300 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_beef_lamb_game,meat_fish,meat_fish,meat_minced,high
+2463,Liivimaa Lihaveis Mahe Rohumaaveise Minutisteik 220 G,Liivimaa Lihaveis,220 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_beef_lamb_game,meat_fish,meat_fish,meat_gourmet,high
+2266,Liivimaa Lihaveis Mahe Rohumaaveise Picanha Steik 220 G,Liivimaa Lihaveis,220 g,meat_fish,"Prisma, Rimi, Selver",,meat_beef_lamb_game,meat_fish,meat_fish,meat_gourmet,high
+3924,Liivimaa Lihaveis Mahe Rohumaaveise Piprasteik 240G,Liivimaa Lihaveis,240 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_gourmet,high
+3245,Liivimaa Lihaveis Mahe Rohumaaveise Proteiinihakkliha 300G,Liivimaa Lihaveis,300 g,meat_fish,"Prisma, Selver",,meat_beef_lamb_game,meat_fish,meat_fish,meat_minced,high
+2216,Liivimaa Lihaveis Mahe Rohumaaveise Romsteek 240G,Liivimaa Lihaveis,240 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_gourmet,high
+2582,Liivimaa Lihaveis Mahe Rohumaaveise Välisfilee Steik 240G,Liivimaa Lihaveis,240 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_gourmet,high
+556317,Liivimaa Lihaveis Medaljonid 400G,Liivimaa Lihaveis,400 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+1669,Liivimaa Lihaveis Veise Grillsteik 255 G,Liivimaa Lihaveis,255 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+6977,Lingham´s ingveri-küüslaugu-tšillikaste 280 ml,Lingham´s,280 ml,meat_fish,"Prisma, Selver",,meat_hams,meat_fish,sauces_oils,sauces_other,high
+7563,Lingham´s Tai tšillikaste 280 ml,Lingham´s Tai,280 ml,meat_fish,"Prisma, Selver",,meat_hams,meat_fish,sauces_oils,sauces_other,high
+493417,Linnamäe Lihatööst Hõrk Peakoka Pardirinnafilee u 400G,Linnamäe Lihatööst,400 g,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_other,heuristic
+13880,Listerine suuvesi naturals hambaemaili kaitseks 500ml,Listerine,500 ml,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_other,high
+130,"Lõhefilee jahutatud, kg",Lõhefilee,,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+21987,"Lõhefilee portsjon grillitud, SAARE KALA, 120 g",Grillitud,120 g,meat_fish,"Prisma, Selver",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+4444,Lõhefilee suitsutatud kg,Lõhefilee,,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+2905,"Lõhe jahutatud, roogitud, kg",Lõhe,,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+20058,"Lõhe, külmsuitsu, viilutatud 200 g","Lõhe,",200 g,meat_fish,"Coop, Prisma",,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+3285,"Lõheliblikas jahutatud, kg",Lõheliblikas,,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+33877,Lõhemass külmutatud 1 kg,Lõhemass,1 kg,meat_fish,"Coop, Prisma, Rimi",,fish_fresh,meat_fish,frozen_food,frozen_fish,high
+33042,Lõhe moussee 130 g,Lõhe,130 g,meat_fish,"Coop, Prisma",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+24487,"Lõhepasteet MSC, ASC, ABBA, 145 g",Abba,145 g,meat_fish,"Coop, Prisma, Rimi, Selver",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+26432,LÕHERIBID KUUMSUITSU 1 KG,LÕHERIBID KUUMSUITSU,1 kg,meat_fish,Prisma,,meat_pork,meat_fish,meat_fish,fish_salted_smoked,high
+20094,LÕHERULL KUUMSUITSU 1 KG,LÕHERULL KUUMSUITSU,1 kg,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+188,"Lõhesteigid jahutatud, kg",Lõhesteigid,,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+62726,LoveMade ökoloogiline kartuli-loomalihapada 8k+ 185g,LoveMade,185 g,meat_fish,Prisma,,produce_root_veg,produce,baby,baby_other,high
+3692,Lysi Omega-3 Forte kalaõlikaplsid 80 tk 109 g,Lysi Omega-3,109 g,meat_fish,Prisma,,fish_fresh,meat_fish,personal_care,pcare_other,high
+29490,MAAPÄHKLIHALVAA NIKOLAJEVSKAJA 150G,MAAPÄHKLIHALVAA NIKOLAJEVSKAJA,150 g,meat_fish,Prisma,,sweets_nuts_driedfruit,sweets_snacks,meat_fish,meat_other,high
+189997,Mac and Cheese tandoorikanaga,Mac,,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+3583,Maggi kanapuljong 120 g,Maggi,120 g,meat_fish,"Coop, Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+2685,Maggi kanapuljong 80g,Maggi,80 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+3617,Maggi kanapuljong tilli ja peterselliga 120 g,Maggi,120 g,meat_fish,"Coop, Prisma, Rimi, Selver",,produce_herbs_salads_sprouts,produce,meat_fish,meat_poultry,high
+1218,Maggi kanapüree kiirsupp 16 g,Maggi,16 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+18169,Maggi kanasupp nuudlitega 12 g,Maggi,12 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+3515,Maggi kastmepulber kanalihale koore-ürdikastmes idea 30 g,Maggi,30 g,meat_fish,"Coop, Prisma",,meat_poultry,meat_fish,drinks,drinks_syrups_powders,high
+7265,Maggi lihapuljongikuubikud 168 g,Maggi,168 g,meat_fish,Prisma,,spices_broth_stock,world_spices,world_spices,spices_broth_stock,high
+2037,Maggi vedel kanapuljong 160g,Maggi,160 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+55298,Maggi veiselihapuljong 80g,Maggi,80 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+4328,Maggi veiselihapuljong kostilja 120 g,Maggi,120 g,meat_fish,"Coop, Prisma, Selver",,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+12053,"Maisikattega vürtsikas kanatiib, TALLEGG, 300 g",TALLEGG Maisikattega,300 g,meat_fish,"Coop, Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+27322,"Maitseaine Vegeta Natur kalale, PODRAVKA, 20 g",Podravka Vegeta,20 g,meat_fish,"Coop, Prisma, Rimi, Selver",,fish_fresh,meat_fish,drinks,drinks_beer_cider,high
+10896,MAITSEELAMUSED Kanavrapp Caesari-kastmega 280 g,MAITSEELAMUSED Kanavrapp,280 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+8795,MAITSEELAMUSED Rebitud liha ciabatta pizza 225 g,MAITSEELAMUSED Rebitud,225 g,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_other,heuristic
+10291,MAITSEELAMUSED Sealihavrapp BBQ-kastmega 280 g,MAITSEELAMUSED Sealihavrapp,280 g,meat_fish,Prisma,,meat_pork,meat_fish,meat_fish,meat_pork,high
+221805,Maks ja Moorits Broileri Ahjukintsuliha 800G,Maks,800 g,meat_fish,"Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+7473,Maks ja Moorits Chicken Super Snack 85G (Palmik),Maks,85 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,sweets_snacks,sweets_snacks_salty,high
+2004,Maks ja Moorits Delikatesshakkliha 300G,Maks,300 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_minced,meat_fish,meat_fish,meat_minced,high
+2302,Maks ja Moorits Delikatess Seahakkliha 300G,Maks,300 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_minced,meat_fish,meat_fish,meat_minced,high
+3460,Maks ja Moorits Jerky Pork Classic 50G,Maks,50 g,meat_fish,"Coop, Prisma",,meat_pork,meat_fish,meat_fish,meat_other,high
+2231,Maks ja Moorits Kanafileenagitsad 230 G,Maks,230 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+4002,Maks ja Moorits Kanafileesink 150G,Maks,150 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_hams,high
+1251,Maks ja Moorits Kanafileesink Kuubikud 250G,Maks,250 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_hams,high
+493820,Maks ja Moorits Kauaküpsenud Koodiliha Kondita ~1Kg,Maks,1 kg,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_other,heuristic
+1696,Maks ja Moorits Kodune Hakkliha 500G,Maks,500 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_minced,meat_fish,meat_fish,meat_minced,high
+1815,Maks ja Moorits Lihakõrsiku Snäkk 250 G,Maks,250 g,meat_fish,"Coop, Prisma, Rimi",,meat_other,meat_fish,sweets_snacks,sweets_other,heuristic
+17605,Maks ja Moorits Lihapallid 350G,Maks,350 g,meat_fish,"Coop, Prisma",,meat_other,meat_fish,meat_fish,meat_other,heuristic
+9014,Maks ja Moorits Lihapihvid 400G,Maks,400 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_other,meat_fish,meat_fish,meat_other,heuristic
+1652,Maks ja Moorits MjaM Seahakkliha 500G,Maks,500 g,meat_fish,"Coop, Prisma",,meat_minced,meat_fish,meat_fish,meat_minced,high
+4054,Maks ja Moorits Paneeritud Kanapihv 400G,Maks,400 g,meat_fish,"Barbora, Maxima, Prisma",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+2743,Maks ja Moorits Sea- Ja Veisehakkliha 500G,Maks,500 g,meat_fish,"Barbora, Maxima, Prisma, Rimi",,meat_beef_lamb_game,meat_fish,meat_fish,meat_minced,high
+1925,Maks ja Moorits Sealihaguljašš 400G,Maks,400 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_pork,meat_fish,meat_fish,meat_pork,high
+4439,Maks ja Moorits Sealiharibad 400G,Maks,400 g,meat_fish,"Coop, Prisma",,meat_pork,meat_fish,meat_fish,meat_pork,high
+3670,Maks ja Moorits Toored Grillvorstid Lambasooles 400G,Maks,400 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_beef_lamb_game,meat_fish,meat_fish,meat_grill_blood_sausages,high
+28368,Maks ja Moorits Väike Kanaviiner 300G,Maks,300 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_sausages,high
+21726,Mama idamaised kanamaiselised kiirnuudlid 6x55g,Mama,6x55 g,meat_fish,Prisma,,meat_poultry,meat_fish,dry_preserves,dry_pasta_rice,high
+65432,"Mama riisinuudlid kana maitsega, gluteenivaba, 55g",Mama,55 g,meat_fish,Prisma,,meat_poultry,meat_fish,dry_preserves,dry_pasta_rice,high
+71645,"Mama riisinuudlid Stew Beef, gluteenivaba, 55g",Mama,55 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,dry_preserves,dry_pasta_rice,high
+12008,MAMMA Aasiapärane kana nuudlitega 300 g,MAMMA Aasiapärane,300 g,meat_fish,"Coop, Prisma",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+8958,MAMMA Caesari-kana-wrap 220 g,MAMMA Caesari-kana-wrap,220 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+2630,Mamma Hakklihakaste Kartulipüreega 300 G,Mamma Hakklihakaste,300 g,meat_fish,"Coop, Prisma, Rimi",,produce_root_veg,produce,meat_fish,meat_minced,high
+11601,MAMMA Hapukapsaborš lihaga 300 g,MAMMA Hapukapsaborš,300 g,meat_fish,"Coop, Prisma",,meat_other,meat_fish,meat_fish,meat_other,heuristic
+18715,MAMMA Kanasupp 1 kg,MAMMA Kanasupp,1 kg,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+22322,Mamma Kanasupp 300G,Mamma Kanasupp,300 g,meat_fish,"Coop, Prisma, Rimi",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+3558,Mamma Koorene Kanapasta 300G,Mamma Koorene,300 g,meat_fish,"Coop, Prisma",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+2487,Mamma Lasanje Veiselihaga 290 G,Mamma Lasanje,290 g,meat_fish,"Barbora, Coop, Maxima, Prisma",,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+22252,MAMMA Lihakas seljanka 300 g,MAMMA Lihakas,300 g,meat_fish,"Coop, Prisma, Rimi",,meat_other,meat_fish,meat_fish,meat_other,heuristic
+3744,Mamma Lihapallid Ahjukartuli Ja Kastmega 400G,Mamma Lihapallid,400 g,meat_fish,"Prisma, Rimi",,produce_root_veg,produce,meat_fish,meat_other,high
+10485,MAMMA Pannkoogid kanatäidisega 200 g,MAMMA Pannkoogid,200 g,meat_fish,"Coop, Prisma",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+2118,Mamma Pannkoogid Merevaigu-Suitsukana 200G,Mamma Pannkoogid,200 g,meat_fish,"Coop, Prisma",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+3226,Mamma Pannkoogid Rebitud Liha Ja Bbq-Kastmega,Mamma Pannkoogid,200 g,meat_fish,"Coop, Prisma",,meat_other,meat_fish,meat_fish,meat_other,heuristic
+10271,Mamma Pasta Lihapallidega 300 G,Mamma Pasta,300 g,meat_fish,Prisma,,dry_pasta_rice,dry_preserves,meat_fish,meat_other,high
+10635,Mamma Rassolnik Kanalihaga 300 G,Mamma Rassolnik,300 g,meat_fish,"Coop, Prisma, Rimi",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+12177,"MAMMA Värskekapsaborš lihaga, supipõhi 500 g",MAMMA Värskekapsaborš,500 g,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_other,heuristic
+6851,Mango-tšilli br.kintsulihašašlõkk 800G,Mango-tšilli,800 G,meat_fish,Prisma,,produce_tropical,produce,meat_fish,meat_grill_blood_sausages,high
+3731,Ma&orits Broileri Kintsuliha Šašlõkk Ploomimarin,Ma&orits Broileri,800 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_pork,meat_fish,meat_fish,meat_grill_blood_sausages,high
+1549,Ma&orits Delikatess-Sink 170 G Tailihast,Ma&orits Delikatess-Sink,170 g,meat_fish,"Prisma, Rimi, Selver",,meat_hams,meat_fish,meat_fish,meat_hams,high
+2519,Ma&orits Välisfilee Grill-Liha Mustika 500G,Ma&orits Välisfilee,500 g,meat_fish,Prisma,,produce_berries,produce,meat_fish,meat_grill_blood_sausages,high
+20096,"Marineeritud heeringafileetükid 150 g, õlivaba",Marineeritud,150 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+22635,Marineeritud heeringas,Marineeritud,,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+21929,Marineeritud heeringas karri kastmes,Marineeritud,,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+20126,Marineeritud heeringas prantsuse sibulaga,Marineeritud,,meat_fish,Prisma,,produce_root_veg,produce,meat_fish,fish_fresh,high
+19886,"Marineeritud heeringas, sibulaga",Marineeritud,,meat_fish,Prisma,,produce_root_veg,produce,meat_fish,fish_fresh,high
+22978,"Marineeritud heeringas, sibulaga 125 g",Marineeritud,125 g,meat_fish,Prisma,,produce_root_veg,produce,meat_fish,fish_fresh,high
+20765,Marineeritud heeringas sinepikastmes,Marineeritud,,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+28712,Marta Pagar Kodune Lihapirukas 2x100 G,Marta Pagar,2x100 g,meat_fish,Prisma,,bakery_cakes_pastries,bakery,meat_fish,meat_other,high
+51203,Marta Pagar Liha-Riisipirukas 120 G,Marta Pagar,120 g,meat_fish,Prisma,,bakery_cakes_pastries,bakery,meat_fish,meat_other,high
+29299,Marta Pagar Liha-Riisipirukas Õlis 2x100 G,Marta Pagar,2x100 g,meat_fish,Prisma,,bakery_cakes_pastries,bakery,meat_fish,meat_other,high
+500100,"Matsimoka Ahjuliha Talvises Marinaadis, 700G",Matsimoka Ahjuliha,700 g,meat_fish,Prisma,,sauces_marinades,sauces_oils,meat_fish,meat_other,high
+4178,Matsimoka Delikatesshakkliha 300G,Matsimoka Delikatesshakkliha,300 g,meat_fish,Prisma,,meat_minced,meat_fish,meat_fish,meat_minced,high
+45542,Matsimoka Hernesupp Suitsulihaga 1 Kg,Matsimoka Hernesupp,1 kg,meat_fish,"Coop, Prisma",,fish_salted_smoked,meat_fish,meat_fish,meat_other,high
+3796,"Matsimoka suitsukana, kg",Matsimoka,,meat_fish,"Prisma, Rimi",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+125223,"Matsimoka Suitsuliha, Viilutatud 110 G","Matsimoka Suitsuliha,",110 g,meat_fish,"Coop, Prisma, Rimi, Selver",,fish_salted_smoked,meat_fish,meat_fish,meat_other,high
+123879,Matsimoka Tailihaviiner 250 G,Matsimoka Tailihaviiner,250 g,meat_fish,"Barbora, Maxima, Prisma, Rimi, Selver",,meat_sausages,meat_fish,meat_fish,meat_sausages,high
+34932,"Meremari must, kalamarjamaitseline toode, 113 g",Meremari,113 g,meat_fish,"Coop, Prisma",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+25080,"Meremari punane, kalamarjamaitseline toode, 113 g",Meremari,113 g,meat_fish,"Coop, Prisma, Rimi",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+68862,"Metskitse konserv, LINNAMÄE, 240 g",Linnamäe,240 g,meat_fish,"Prisma, Selver",,dry_canned_veg,dry_preserves,meat_fish,meat_other,high
+1078,Mini liha-riisipirukas,Mini,,meat_fish,Prisma,,bakery_cakes_pastries,bakery,meat_fish,meat_other,high
+1082,Minipitsa suitsukanaga,Minipitsa,,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+72864,Minu de lux kanaliha 525g,Minu,525 g,meat_fish,"Barbora, Coop, Maxima, Prisma",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+67214,Minu de lux turistieine sealihast 525g,Minu,525 g,meat_fish,"Barbora, Coop, Maxima, Prisma",,meat_pork,meat_fish,meat_fish,meat_pork,high
+66088,Minu hautatud sealiha 250 g,Minu,250 g,meat_fish,"Barbora, Coop, Maxima, Prisma",,meat_pork,meat_fish,meat_fish,meat_pork,high
+66571,Minu hautatud veiseliha 250 g,Minu,250 g,meat_fish,"Barbora, Maxima, Prisma",,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+65242,Minu kanaliha želees 250 g,Minu,250 g,meat_fish,"Barbora, Coop, Maxima, Prisma",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+574452,Minu lõhe omas mahlas - supikogu 240g,Minu,240 g,meat_fish,"Coop, Prisma",,fish_fresh,meat_fish,drinks,drinks_other,high
+164,Minu praetud räimed tomatikastmes 240 g,Minu,240 g,meat_fish,"Coop, Prisma, Rimi, Selver",,produce_root_veg,produce,meat_fish,fish_fresh,high
+72773,Minu premium hautatud sealiha 92% 325g,Minu,325 g,meat_fish,"Coop, Prisma",,meat_pork,meat_fish,meat_fish,meat_pork,high
+68356,Minu sealiha de lux 85% 525 g,Minu,525 g,meat_fish,"Coop, Prisma",,meat_pork,meat_fish,meat_fish,meat_pork,high
+132864,Minu turisti eine sealihast 250 g,Minu,250 g,meat_fish,"Coop, Prisma, Rimi",,meat_pork,meat_fish,meat_fish,meat_pork,high
+65968,Minu turisti eine veiselihast 250 g,Minu,250 g,meat_fish,"Coop, Prisma",,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+70513,Minu veiseliha de lux 85% 525 g,Minu,525 g,meat_fish,"Coop, Prisma",,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+16954,Mjuuk refresh kuivshampoon 50ml,Mjuuk,50 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_shampoo_cond,high
+59789,"Moilas hamburgerikuklid,gluteenivabad 2 tk, 160 g",Moilas,160 g,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_other,high
+4027,Möller 86G Omega-3 väikesed kalakesed,Möller,86 G,meat_fish,Prisma,,fish_fresh,meat_fish,personal_care,pcare_other,high
+3151,Möller Omega-3 kalaõlikaplsid 70 tk 90 g,Möller Omega-3,90 g,meat_fish,Prisma,,fish_fresh,meat_fish,personal_care,pcare_other,high
+2271,Mr. Panini BBQ kana-peekonipanini 235 g,Mr. Panini,235 g,meat_fish,Prisma,,meat_pork,meat_fish,meat_fish,meat_grill_blood_sausages,high
+1160,Mr.Panini kanapanini 235g,Mr.Panini,235 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+4170,MUU Jauhis Hakklihaasendaja 280 G,MUU Jauhis,280 g,meat_fish,Prisma,,meat_minced,meat_fish,meat_fish,meat_minced,high
+1827,"M.V.Wool Heeringafilee Sinepikastmes, Kg",M.V.Wool Heeringafilee,,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+3200,M.V.Wool Heeringafilee Sulatatud,M.V.Wool Heeringafilee,,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+20387,"M.V.Wool Külmsuitsulõhe, Viilutatud 100 G","M.V.Wool Külmsuitsulõhe,",100 g,meat_fish,"Coop, Prisma, Selver",,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+1575,M.V.Wool Lõhefilee Apelsini Marinaadis 300 G,M.V.Wool Lõhefilee,300 g,meat_fish,Prisma,,produce_tropical,produce,meat_fish,fish_fresh,high
+1578,"M.V.Wool Räimefileed Marinaadis, Kg",M.V.Wool Räimefileed,,meat_fish,"Prisma, Rimi",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+26399,"M.V.Wool Soolaforell Mati Kala, Viilutatud 90 G",M.V.Wool Soolaforell,90 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+22636,"M.V.Wool Soolalõhe, Viilutatud Mati Kala 90 G","M.V.Wool Soolalõhe,",90 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+170,M.V.Wool Viilutatud Soolalõhe 100 G,M.V.Wool Viilutatud,100 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Selver",,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+2450,"Natur Compagnie orgaaniline kanapuljong suhkruvaba, 8 kuubikut, 88g",Natur Compagnie,88 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+1534,Nõo Fitlap Kanasink 105 G,Nõo Fitlap,105 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_hams,high
+8093,Nõo Röstitud Kanafilee Viilud 200 G,Nõo Röstitud,200 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+3749,"Odrajahust pelmeenid kanakintsulihaga, 400g",Odrajahust,400 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+21123,"Õllekrõps lõhe nahast, M.V.WOOL, 50 g",Õllekrõps,50 g,meat_fish,"Prisma, Selver",,fish_fresh,meat_fish,sweets_snacks,sweets_snacks_salty,high
+2385,Oriola reformi lihapuljongikuubik 96g mahe,Oriola,96 g,meat_fish,Prisma,,spices_broth_stock,world_spices,world_spices,spices_broth_stock,high
+3926,Oriola reformi mahe kanapuljongikuubik 88g / 8tk,Oriola,88 g,meat_fish,Prisma,,meat_poultry,meat_fish,world_spices,spices_broth_stock,high
+123803,Oskar Kebab Lambalihaga 400G,Oskar Kebab,400 g,meat_fish,"Barbora, Maxima, Prisma, Selver",,meat_beef_lamb_game,meat_fish,meat_fish,meat_gourmet,high
+3497,Oskar Lihaviiner E-Vaba 125 G,Oskar Lihaviiner,125 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_sausages,meat_fish,meat_fish,meat_sausages,high
+607838,Oskar Mango-Tšilli Broilerikintsuliha 600G,Oskar Mango-Tšilli,600 g,meat_fish,Prisma,,produce_tropical,produce,meat_fish,meat_poultry,high
+3339,Oskar Viiner Lambasooles Päris 350G,Oskar Viiner,350 g,meat_fish,"Barbora, Maxima, Prisma, Rimi",,meat_beef_lamb_game,meat_fish,meat_fish,meat_sausages,high
+586376,"Otepää Lihatoostus Edgari Sink, Kg",Otepää Lihatoostus,,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_hams,high
+4096,Otepää Lihatoostus Lambaliha Kondiga Ürdises Kastmes 450G,Otepää Lihatoostus,450 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+1785,Otepää Lihatoostus Lambaliha Rosmariiniga Kg,Otepää Lihatoostus,,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+4433,"Otepää Lihatoostus Otepää Kerasink, Kg",Otepää Lihatoostus,,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_hams,high
+195514,Pad Thai kana ja nuudlitega,Pad Thai,,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+1928,"Paneeritud kala hakitud fileest, 800g",Paneeritud,800 g,meat_fish,"Coop, Prisma, Rimi, Selver",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+33730,"Pasteet suitsulihakõrnetega, MATSIMOKA, 220 g",Pasteet,220 g,meat_fish,"Coop, Prisma, Rimi, Selver",,fish_salted_smoked,meat_fish,meat_fish,meat_other,high
+272956,Pealinna Minifrikadellid kanalihaga 350g,Pealinna Minifrikadellid,350 g,meat_fish,"Coop, Prisma, Rimi",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+1559,Pealinna minipelmeenid kanalihaga 350g,Pealinna,350 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+9373,Pekingi kana 300 g,Pekingi,300 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+2163,Pelmeenid broilerilihaga 400g,Pelmeenid,400 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+593091,Pepsodent hambapasta Xylitol 75ml,Pepsodent,75 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+17076,Pepsodent ultra reach medium hambahari,Pepsodent,,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_other,high
+20512,Pesto Kanapasta 300 g,Pesto Kanapasta,300 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+53024,Piiraskartano Lihapirukas 4 tk/400 g,Piiraskartano Lihapirukas,400 g,meat_fish,Prisma,,bakery_cakes_pastries,bakery,meat_fish,meat_other,high
+41816,"Pillti lastetoit kartul ja lõhe kreemjas kastmes 250 g, alates 12-elukuust",Pillti,250 g,meat_fish,Prisma,,produce_root_veg,produce,baby,baby_other,high
+62708,"Piltti bataadi ja kanaga lastetoit 190 g, alates 6-elukuust",Piltti,190 g,meat_fish,Prisma,,meat_poultry,meat_fish,baby,baby_other,high
+18828,"Piltti bataat veiselihaga 190g, alates 6-elukuust",Piltti,190 g,meat_fish,Prisma,,produce_root_veg,produce,baby,baby_other,high
+41819,"Piltti kartuli-lihapada lastetoit 190 g, alates 8-elukuust",Piltti,190 g,meat_fish,Prisma,,produce_root_veg,produce,baby,baby_other,high
+45225,"Piltti kartulipuder lõhega lastetoit 200 g, alates 8-elukuust",Piltti,200 g,meat_fish,Prisma,,produce_root_veg,produce,baby,baby_other,high
+116566,"Piltti kartulipüree-hakklihavorm 1-3 aastastele lastele, 190 g",Piltti,190 g,meat_fish,Prisma,,produce_root_veg,produce,baby,baby_other,high
+63620,"Piltti kartulipüree lihapallidega ja pohladega lastele alates 8- elukuust, 190 g",Piltti,190 g,meat_fish,Prisma,,produce_berries,produce,baby,baby_other,high
+117997,"Piltti kuskuss lõhega 190g, alates 1-eluaastast",Piltti,190 g,meat_fish,Prisma,,fish_fresh,meat_fish,baby,baby_other,high
+44795,PILTTI täisterapasta veiseliha 250G 1-3a,PILTTI,250 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+21775,Pirn Packham I klass,Pirn Packham,,meat_fish,Prisma,,produce_apples_pears,produce,meat_fish,meat_other,high
+20494,Pirn Packham I klass 500 g MAHE,Pirn Packham,500 g,meat_fish,Prisma,,produce_apples_pears,produce,meat_fish,meat_other,high
+13972,Plackers hambavahepuhasti 0.5mm 24tk,Plackers,,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_other,high
+14731,Plackers hambavahepuhasti 0.6mm 24tk,Plackers,,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_other,high
+64772,"Põdraliha konserv, LINNAMÄE LIHATÖÖSTUS, 240 g",Linnamäe,240 g,meat_fish,"Barbora, Maxima, Prisma, Rimi, Selver",,dry_canned_veg,dry_preserves,meat_fish,meat_beef_lamb_game,high
+21935,Podravka kanasupp nuudlitega 62 g,Podravka,62 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+11368,Põltsamaa hapukapsaborš sealihaga 530 g,Põltsamaa,530 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_pork,meat_fish,meat_fish,meat_pork,high
+17522,Põltsamaa hernesupp suitsulihaga 530g,Põltsamaa,530 g,meat_fish,"Coop, Selver",,fish_salted_smoked,meat_fish,meat_fish,meat_other,high
+1394,Põltsamaa pilaff kanalihaga Fitlap 520g,Põltsamaa,520 g,meat_fish,"Coop, Prisma",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+144440,Põltsamaa rassolnik sealihaga 530 g,Põltsamaa,530 g,meat_fish,"Coop, Prisma",,meat_pork,meat_fish,meat_fish,meat_pork,high
+12475,Põltsamaa värskekapsaborš lihata 530 g,Põltsamaa,530 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_other,meat_fish,meat_fish,meat_other,heuristic
+2690,Põltsamaa värskekapsaborš veiselihaga 530 g,Põltsamaa,530 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+42664,PÕNN Ökoloogiline Aedvilja-pastaroog kanalihaga 120 g 8+ 120g,PÕNN Ökoloogiline,120 g,meat_fish,"Coop, Prisma",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+42899,"Põnn Ökoloogiline Aedvilja-pastaroog veiselihaga 190 g, alates 8-elukuust",Põnn Ökoloogiline,190 g,meat_fish,"Coop, Prisma, Selver",,meat_beef_lamb_game,meat_fish,baby,baby_other,high
+17877,Põnn ökoloogiline aedviljapüree kanafileega 190 g 6+,Põnn,190 g,meat_fish,"Coop, Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+22232,PÕNN Ökoloogiline Kanalihapüree 120 g 6+ 120g,PÕNN Ökoloogiline,120 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+42984,PÕNN Ökoloogiline Ühepajatoit sealihaga 7+ 130g,PÕNN Ökoloogiline,130 g,meat_fish,"Coop, Prisma",,meat_pork,meat_fish,meat_fish,meat_pork,high
+562778,PÕNN Ökoloogiline Veiselihapüree 120 g 6+ 120g,PÕNN Ökoloogiline,120 g,meat_fish,"Coop, Prisma",,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+56744,Porokylän gluteenivaba lihapirukas 2x190 g,Porokylän,2x190 g,meat_fish,Prisma,,bakery_cakes_pastries,bakery,meat_fish,meat_other,high
+47696,Praetud heeringafilee pallikesed tomatikastmes 430 g,Praetud,430 g,meat_fish,"Coop, Prisma",,produce_root_veg,produce,meat_fish,fish_fresh,high
+23539,"Praetud heeringafilee tomatikastmes, KALURI, 500 g",Praetud,500 g,meat_fish,"Prisma, Rimi, Selver",,produce_root_veg,produce,meat_fish,fish_fresh,high
+22261,"Praetud räimed koduses marinaadis, KALURI, 500 g",Praetud,500 g,meat_fish,"Barbora, Maxima, Prisma, Rimi, Selver",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+43606,Presto kanakarri riisiga 300g,Presto,300 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+42896,Presto koorene kanapasta 300g,Presto,300 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+287,"Presto kõrvitsa risoto rebitud kanalihaga 350g, gluteenivaba",Presto,350 g,meat_fish,"Coop, Prisma, Selver",,produce_root_veg,produce,meat_fish,meat_poultry,high
+17343,Presto taipärane karri sealihaga 300g,Presto,300 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Selver",,meat_pork,meat_fish,meat_fish,meat_pork,high
+140982,Presto tomatine veiselihapasta 300g,Presto,300 g,meat_fish,"Coop, Prisma, Selver",,produce_root_veg,produce,meat_fish,meat_beef_lamb_game,high
+13609,Pulkdeodorant David Beckham Respect 75ml,Pulkdeodorant David,75 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_deo,high
+41017,Pure apelsinimahl viljalihaga 1L,Pure,1 l,meat_fish,"Coop, Prisma, Rimi, Selver",,produce_tropical,produce,drinks,drinks_other,high
+13814,Raffini juukseklamber pruun 48 mm 24 tk,Raffini,,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,personal_care,pcare_other,high
+20976,"Räimed tomatimarinaadis, praetud 430 g",Räimed,430 g,meat_fish,"Prisma, Rimi, Selver",,produce_root_veg,produce,meat_fish,fish_fresh,high
+272590,"Räimefilee, kg","Räimefilee,",,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+55543,"Räimesült, VIRU RAND, 270 g",Räimesült,270 g,meat_fish,"Coop, Prisma, Selver",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+1657,"Räim, kuumsuitsu, kg","Räim,",,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+53484,"Rainbow kananagitsad, 440 g",Rainbow,440 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+20895,"Rainbow täisteralasanjeplaadid 500 g, mahe, ei sisalda kanamune",Rainbow,500 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+53262,Rakvere Grill-Liha Punase Veini Marinaadis 500G,Rakvere Grill-Liha,500 g,meat_fish,"Barbora, Maxima, Prisma, Selver",,drinks_wine,drinks,drinks,drinks_wine,high
+3367,Rakvere Hakkliha Sea-Ja Veiselihast 400 G,Rakvere Hakkliha,400 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_minced,high
+1776,Rakvere Kodune Hakkliha 400G,Rakvere Kodune,400 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_minced,meat_fish,meat_fish,meat_minced,high
+2533,Rakvere Kodune Hakkliha 600G,Rakvere Kodune,600 g,meat_fish,"Barbora, Coop, Maxima, Prisma",,meat_minced,meat_fish,meat_fish,meat_minced,high
+4440,Rakvere Kooreses Marinaadis Grill-Liha 500G,Rakvere Kooreses,500 g,meat_fish,"Prisma, Selver",,dairy_cream_sourcream,dairy_eggs_fats,meat_fish,meat_grill_blood_sausages,high
+2834,Rakvere Lihakas Viiner 260 G,Rakvere Lihakas,260 g,meat_fish,"Prisma, Selver",,meat_sausages,meat_fish,meat_fish,meat_sausages,high
+1741,Rakvere Mini Lihapallid 300G,Rakvere Mini,300 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_other,meat_fish,meat_fish,meat_other,heuristic
+2408,Rakvere Mustika Grill-Liha 500G,Rakvere Mustika,500 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Selver",,produce_berries,produce,meat_fish,meat_grill_blood_sausages,high
+2713,Rakvere Perehakklihasegu 300G,Rakvere Perehakklihasegu,300 g,meat_fish,"Barbora, Coop, Maxima, Prisma",,meat_minced,meat_fish,meat_fish,meat_minced,high
+11225,Rakvere Pere Lihapallid 300 G,Rakvere Pere,300 g,meat_fish,"Barbora, Maxima, Prisma, Selver",,meat_other,meat_fish,meat_fish,meat_other,heuristic
+1948,"Rakvere Sea Abaliha Kondita, Kg",Rakvere Sea,,meat_fish,"Prisma, Rimi",,meat_other,meat_fish,meat_fish,meat_pork,heuristic
+3045,Rakvere Seahakkliha 400G,Rakvere Seahakkliha,400 g,meat_fish,"Barbora, Coop, Maxima, Prisma",,meat_minced,meat_fish,meat_fish,meat_minced,high
+1811,Rakvere Taine Seahakkliha 300 G,Rakvere Taine,300 g,meat_fish,"Coop, Prisma, Selver",,meat_minced,meat_fish,meat_fish,meat_minced,high
+2152,Rakvere Teriyaki-Mustika Pork Jerky 50 G,Rakvere Teriyaki-Mustika,50 g,meat_fish,"Barbora, Maxima, Prisma",,produce_berries,produce,meat_fish,meat_other,high
+3348,Rakvere Ürdi Grill-Liha Kaelakarbonaadist 500G,Rakvere Ürdi,500 g,meat_fish,"Prisma, Selver",,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic
+2354,Rakvere Veisehakkliha 300G,Rakvere Veisehakkliha,300 g,meat_fish,"Coop, Prisma",,meat_beef_lamb_game,meat_fish,meat_fish,meat_minced,high
+2855,Rakvere Veisekaelaliha 1 Kg,Rakvere Veisekaelaliha,1 kg,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+6669,Rannamoisa Broileri Kintsuliha 500G,Rannamoisa Broileri,500 g,meat_fish,"Coop, Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+4467,Rannamõisa Hakklihasegu Kanafileest 450 G,Rannamõisa Hakklihasegu,450 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_minced,high
+8085,Rannamoisa Hot Dog Vorstike Kanalihast 455G,Rannamoisa Hot,455 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_sausages,high
+6639,Rannamoisa Kalkunikintsuliha Kg,Rannamoisa Kalkunikintsuliha,,meat_fish,"Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+3600,Rannamoisa Kalkuniliha Hakitud 400 G,Rannamoisa Kalkuniliha,400 g,meat_fish,"Coop, Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+1631,"Rannamoisa Kanamaks, Jahutatud 450G","Rannamoisa Kanamaks,",450 g,meat_fish,"Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+4213,Rannamoisa Krõbedad Kanafileešnitslid 180 G,Rannamoisa Krõbedad,180 g,meat_fish,"Coop, Prisma",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+2038,Rannarootsi Ehe Grill-Liha Seavälisfileest 400 G,Rannarootsi Ehe,400 g,meat_fish,"Prisma, Rimi, Selver",,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic
+1637,Rannarootsi Ehe Triibuliha Soola Ja Musta Pipraga 25,Rannarootsi Ehe,250 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Selver",,spices_basic_salt_pepper,world_spices,meat_fish,meat_other,high
+2452,Rannarootsi Jäägriribid Metssealihast Eelküpsetatud,Rannarootsi Jäägriribid,600 g,meat_fish,"Coop, Prisma, Selver",,meat_pork,meat_fish,meat_fish,meat_pork,high
+9366,Rännukas rebitud kana ja basiiliku majoneesiga 215 g,Rännukas,215 g,meat_fish,Prisma,,produce_herbs_salads_sprouts,produce,meat_fish,meat_poultry,high
+2787,Ravioolid Teriyaki kanaga 250 g,Ravioolid Teriyaki,250 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+33866,"Rebitud kanaliha punases kastmes, MAKS&MOORITS, 200 g",Rebitud,200 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+52393,"Rebitud sealiha BBQ kastmes, MAKS&MOORITS, 200 g",Rebitud,200 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_pork,meat_fish,meat_fish,meat_grill_blood_sausages,high
+121677,RED BAND SWEDISH FISH 100G,RED BAND,100 g,meat_fish,"Coop, Prisma",,fish_fresh,meat_fish,meat_fish,meat_other,high
+21012,Reeva kiirnuudlid kanalihamaitselised 60g,Reeva,60 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,dry_preserves,dry_pasta_rice,high
+1749,Rizzoli Naturaalne Tuunikala 3X65 G,Rizzoli Naturaalne,3x65 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+2473,Rizzoli Oliiviõlis Tuunikala 3X65 G,Rizzoli Oliiviõlis,3x65 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+32253,"ROUTE 66 grill-liha seakaelakarbonaadist, kg",ROUTE,,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic
+602572,"Ruinart Brut Champagne KPN kvaliteetvahuvein 12,5%vol 750 ml",Ruinart Brut,750 ml,meat_fish,Prisma,,meat_hams,meat_fish,drinks,drinks_wine,high
+2751,"Saare Fish räim 1,0kg",Saare Fish,1.0 kg,meat_fish,"Prisma, Selver",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+325866,Saare Kala Vikerforellifilee Õrnsool.Viil 90G,Saare Kala,90 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+9033,SAARIOINEN Grahami Lihapirukas 280 g,SAARIOINEN Grahami,280 g,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_other,high
+8660,SAARIOINEN Grahami Lihapirukas 630 g,SAARIOINEN Grahami,630 g,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_other,high
+22311,Saarioinen Hakklihapitsa 200G,Saarioinen Hakklihapitsa,200 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi",,meat_minced,meat_fish,meat_fish,meat_minced,high
+2382,Saarioinen Kana-Nuudlipada 300 G,Saarioinen Kana-Nuudlipada,300 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+496408,Saarioinen Punane Tai Karri- Kanapada 300 G,Saarioinen Punane,300 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+17932,SAARIOINEN Tuunikalapitsa 200 g,SAARIOINEN Tuunikalapitsa,200 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+27068,Salvest Bolognese hakklihaga 460 g,Salvest Bolognese,460 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_minced,meat_fish,meat_fish,meat_minced,high
+1525,Salvest hapukapsaborš veiselihaga 530 g,Salvest,530 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+124836,Salvest hapukapsasupp 530 g sealihaga,Salvest,530 g,meat_fish,"Coop, Prisma, Rimi, Selver",,produce_root_veg,produce,meat_fish,meat_pork,high
+2283,Salvest hernesupp suitsuribilihaga 560 g,Salvest,560 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_pork,meat_fish,meat_fish,meat_other,high
+1890,Salvest kana-nuudlisupp 530g,Salvest,530 g,meat_fish,Prisma,,meat_poultry,meat_fish,dry_preserves,dry_soups_noodles,high
+1752,Salvest kanasupp 530g,Salvest,530 g,meat_fish,"Coop, Prisma",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+130806,Salvest põldoasupp sealihaga 530 g,Salvest,530 g,meat_fish,"Coop, Prisma, Selver",,meat_pork,meat_fish,meat_fish,meat_pork,high
+1517,Salvest rassolnik veiselihaga 530 g,Salvest,530 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+137835,Salvest seljanka suitsuribilihaga 530 g,Salvest,530 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_pork,meat_fish,meat_fish,meat_other,high
+18182,Salvest ühepajatoit sealihaga 530 g,Salvest,530 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_pork,meat_fish,meat_fish,meat_pork,high
+1589,Salvest värskekapsaborš veiselihaga 530 g,Salvest,530 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+22375,Samyang korea ramen kiirnuudlid tuline kana carbonara 130g,Samyang,130 g,meat_fish,"Coop, Prisma",,meat_poultry,meat_fish,dry_preserves,dry_pasta_rice,high
+2029,Sana-Sol Omega-3 kalaõlikapslid 2x150tk,Sana-Sol Omega-3,,meat_fish,Prisma,,fish_fresh,meat_fish,personal_care,pcare_other,high
+32147,Santa Maria hakklihamaitseaine 30 g,Santa Maria,30 g,meat_fish,"Coop, Prisma, Selver",,meat_minced,meat_fish,world_spices,spices_herbs_spice_mix,high
+54615,Santa Maria hakklihamaitseaine 80 g,Santa Maria,80 g,meat_fish,"Coop, Prisma, Selver",,meat_minced,meat_fish,world_spices,spices_herbs_spice_mix,high
+5501,Santa Maria hakklihamaitseaine itaaliapärane 32 g,Santa Maria,32 g,meat_fish,Prisma,,meat_minced,meat_fish,world_spices,spices_herbs_spice_mix,high
+6051,Santa Maria klassikaline kanamarinaad 75 g,Santa Maria,75 g,meat_fish,"Coop, Prisma",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+1996,Santa Maria krõbe paneering kanale 50 g,Santa Maria,50 g,meat_fish,"Prisma, Rimi, Selver",,meat_poultry,meat_fish,drinks,drinks_beer_cider,high
+106907,Santa Maria lihamaitseaine ürdi-küüslaugu 20 g,Santa Maria,20 g,meat_fish,Prisma,,meat_hams,meat_fish,world_spices,spices_herbs_spice_mix,high
+107307,Santa Maria liha üldmaitseaine 51 g,Santa Maria,51 g,meat_fish,"Prisma, Rimi, Selver",,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+7813,Santa Maria liha üldmaitseaine 70 g,Santa Maria,70 g,meat_fish,Prisma,,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+20253,Santa Maria taco maitseainesegu kanale 28 g,Santa Maria,28 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,drinks,drinks_beer_cider,high
+26505,Santa Maria tuline lihamaitseaine 20 g,Santa Maria,20 g,meat_fish,"Prisma, Selver",,meat_hams,meat_fish,world_spices,spices_herbs_spice_mix,high
+34537,Šašlõkimaitseline grill-liha 450 g,Šašlõkimaitseline,450 g,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic
+8090,"Šašlõkivorstid broilerilihast, TALLEGG, 400 g",Šašlõkivorstid,400 g,meat_fish,"Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_sausages,high
+43560,"Šašlõkivorstid lambasooles, kg",Šašlõkivorstid,,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_sausages,high
+8840,Sealiha kapsarullid 300 g,Sealiha,300 g,meat_fish,Prisma,,meat_pork,meat_fish,meat_fish,meat_pork,high
+113391,"Sealihasardell, RANNAROOTSI, 500 g",Sealihasardell,500 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_pork,meat_fish,meat_fish,meat_sausages,high
+35117,"Sealihasült, MAKS&MOORITS, 300 g",Sealihasült,300 g,meat_fish,"Coop, Prisma, Selver",,meat_pork,meat_fish,meat_fish,meat_pork,high
+54441,"Sealihasült, OSKAR, 330 g",Sealihasült,330 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_pork,meat_fish,meat_fish,meat_pork,high
+546804,Sea Treasures Soolalõhelõigud 150 G,Sea Treasures,150 g,meat_fish,"Coop, Prisma",,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+22509,Sea Treasures Soolalõhelõigud Sidrunpipraga 150 G,Sea Treasures,150 g,meat_fish,"Coop, Prisma",,produce_tropical,produce,meat_fish,fish_salted_smoked,high
+189879,Selge kalasupp,Selge,,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_processed,high
+134485,Seljanka lihata 3Min 480 g,Seljanka,480 g,meat_fish,"Coop, Prisma, Selver",,meat_other,meat_fish,meat_fish,meat_other,heuristic
+42319,Semper bataadi-kana ja läätse püree 12k 235g,Semper,235 g,meat_fish,Prisma,,meat_poultry,meat_fish,baby,baby_other,high
+41760,Semper EKO pasta kana ja ubadega mahe lastetoit 1a 235g,Semper EKO,235 g,meat_fish,Prisma,,meat_poultry,meat_fish,baby,baby_other,high
+42356,Semper hautis kala ja ubadega 6k 190g,Semper,190 g,meat_fish,Prisma,,fish_fresh,meat_fish,baby,baby_other,high
+42471,"Semper juurvilja-kanapada küüslauguga 190 g, alates 8-elukuust",Semper,190 g,meat_fish,Prisma,,meat_poultry,meat_fish,baby,baby_other,high
+44334,"Semper kartuli-kana pajaroog ürtidega 235 g, alates 1-eluaastast",Semper,235 g,meat_fish,Prisma,,produce_root_veg,produce,baby,baby_other,high
+42407,Semper Öko bataat veiseliha ja läätsedega 1a 235g,Semper Öko,235 g,meat_fish,Prisma,,produce_root_veg,produce,baby,baby_other,high
+45493,"Semper spagetid hakklihakastmega 235 g, alates 1-eluaastast",Semper,235 g,meat_fish,Prisma,,meat_minced,meat_fish,baby,baby_other,high
+592889,Sensodyne hambapasta Extra Fresh 75ml,Sensodyne,75 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+15811,Sensodyne pro-emalj hambapasta 75ml,Sensodyne,75 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+16598,Shampoon Anti-Dandruff 400 ml kõõmavastane,Shampoon Anti-Dandruff,400 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_shampoo_cond,high
+14985,Shampoon Fructis Aloe 250 ml,Shampoon Fructis,250 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_shampoo_cond,high
+13287,Shampoon Fructis Goodbye Damage 250 ml,Shampoon Fructis,250 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_shampoo_cond,high
+15654,Shampoon greip 250ml värskendav,Shampoon,250 ml,meat_fish,Prisma,,produce_tropical,produce,personal_care,pcare_shampoo_cond,high
+16726,Shampoon meestele 400 ml,Shampoon,400 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_shampoo_cond,high
+15885,Shampoon nõges 250 ml toitev,Shampoon,250 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_shampoo_cond,high
+16072,Shampoon rep&e 400ml,Shampoon,400 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_shampoo_cond,high
+7555,Snack chicken 85 g,Snack,85 g,meat_fish,"Coop, Prisma",,meat_poultry,meat_fish,sweets_snacks,sweets_snacks_salty,high
+3914,"Snäkk pro Beef jerky, RAKVERE LK, 50 g",Rakvere Beef,50 g,meat_fish,"Prisma, Rimi, Selver",,meat_beef_lamb_game,meat_fish,sweets_snacks,sweets_other,high
+22503,"Soolaheeringa filee, kg",Soolaheeringa,,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+2874,"Soola heeringafilee, nahata 200 g",Soola,200 g,meat_fish,"Coop, Prisma, Rimi",,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+20228,"Soolaheeringas, kg","Soolaheeringas,",,meat_fish,"Barbora, Maxima, Prisma, Rimi",,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+583217,Splat hambapasta biocalcium 100ml,Splat,100 ml,meat_fish,"Coop, Prisma",,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+15858,Splat hambapasta white plus 100ml,Splat,100 ml,meat_fish,"Coop, Prisma",,meat_hams,meat_fish,personal_care,pcare_oral_care,high
+56028,"Sügavkülmutatud veiselihapüree kuubikud, 200g",Sügavkülmutatud,200 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_beef_lamb_game,meat_fish,frozen_food,frozen_other,high
+33243,"Suitsukanakints, TALLEGG, kg",Suitsutatud,,meat_fish,"Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+2352,Swiss Ovit kalaõli - Omega 3 N30,Swiss Ovit,,meat_fish,Prisma,,fish_fresh,meat_fish,personal_care,pcare_other,high
+35454,Tallegg Broilerikintsuliha Aasia Marinaadis 400,Tallegg Broilerikintsuliha,400 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+2663,Tallegg Broileri Kintsulihašašlõkk Metsmustikas,Tallegg Broileri,800 g,meat_fish,"Coop, Prisma",,produce_berries,produce,meat_fish,meat_grill_blood_sausages,high
+3091,Tallegg Broileri Kintsulihašašlõkk Tomati 700G,Tallegg Broileri,700 g,meat_fish,"Prisma, Rimi, Selver",,produce_root_veg,produce,meat_fish,meat_grill_blood_sausages,high
+3217,Tallegg Delikatess Kana Hakklihasegu 300G,Tallegg Delikatess,300 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_minced,high
+1425,Tallegg Eestimaine Broilerikintsuliha Jahut. 1Kg,Tallegg Eestimaine,1 kg,meat_fish,"Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+7698,Tallegg Fit! Bbq-Maitseline Rebitud Kanafilee 30,Tallegg Fit!,300 g,meat_fish,"Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+3387,Tallegg Fit! Broileririnnafilee Hakkliha 300G,Tallegg Fit!,300 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_minced,high
+2888,Tallegg Fit! Kanafileesink 130 G,Tallegg Fit!,130 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_hams,high
+4383,Tallegg Jahutatud Broileri Lihasmagu 500 G,Tallegg Jahutatud,500 g,meat_fish,"Coop, Prisma",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+9292,"TALLEGG Kanaburgeri pihv, 660 g",TALLEGG Kanaburgeri,660 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+3125,Tallegg Kanafileenagitsad 300 G,Tallegg Kanafileenagitsad,300 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+3774,Tallegg Kanafilee Suitsutatud 1 Kg,Tallegg Kanafilee,1 kg,meat_fish,"Barbora, Maxima, Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+4034,Tallegg Kanapihvid 320G,Tallegg Kanapihvid,320 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+18007,Tallegg Kanasink Tilliga 130 G,Tallegg Kanasink,130 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,produce_herbs_salads_sprouts,produce,meat_fish,meat_hams,high
+4184,Tallegg Kanasink Viil 300G,Tallegg Kanasink,300 g,meat_fish,"Barbora, Coop, Maxima, Prisma",,meat_poultry,meat_fish,meat_fish,meat_hams,high
+1762,Tallegg Kana Snäkid 80G,Tallegg Kana,80 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+2135,Tallegg Kana Suitsuliha Kuubikud 300G,Tallegg Kana,300 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+2179,Tallegg Kanaviiner 400 G,Tallegg Kanaviiner,400 g,meat_fish,"Coop, Prisma",,meat_poultry,meat_fish,meat_fish,meat_sausages,high
+1891,Tallegg Maisikattega Kanafilee 280 G,Tallegg Maisikattega,280 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+28312,TALLEGG Maisikattega kanapulgad 280 g,TALLEGG Maisikattega,280 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+497262,Tallegg Pool Suitsukana U 800G,Tallegg Pool,800 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+2716,Tallegg Suits.Kana Kintsuliha Kg,Tallegg Suits.Kana,,meat_fish,"Prisma, Rimi, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+2739,Tallegg Suitsutatud Kanakoib 1 Kg,Tallegg Suitsutatud,1 kg,meat_fish,"Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+14916,Tepe hambatikk xs/s 36tk,Tepe,,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_other,high
+20178,Thai Choice kiirnuudlid kanamaitselised 85 g,Thai Choice,85 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,dry_preserves,dry_pasta_rice,high
+69790,Thai choice kiirnuudlid veiselihamaitselised 85 g,Thai,85 g,meat_fish,"Coop, Prisma, Selver",,meat_beef_lamb_game,meat_fish,dry_preserves,dry_pasta_rice,high
+4607,Thormi Taimevalgu Haks Kanamaitseline 200 G,Thormi Taimevalgu,200 g,meat_fish,"Coop, Prisma",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+2781,Thormi taimne rebitud kanatu 200 g,Thormi,200 g,meat_fish,"Barbora, Maxima, Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+17041,Tõrvashampoon 300 ml,Tõrvashampoon,300 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_shampoo_cond,high
+6308,Triibuliha grillmarinaadis e- vaba 450g,Triibuliha,450 g,meat_fish,Prisma,,sauces_marinades,sauces_oils,meat_fish,meat_other,high
+6082,"Triibuliha šašlõkk, MAKS&MOORITS, 600 g",Triibuliha,600 g,meat_fish,"Coop, Prisma, Selver",,meat_pork,meat_fish,meat_fish,meat_grill_blood_sausages,high
+43154,"Tropicana apelsinimahl viljalihaga, 250 ml",Tropicana,250 ml,meat_fish,Prisma,,produce_tropical,produce,drinks,drinks_other,high
+20634,"Tšillidekooriga kuumsuitsulõhe kogufilee 1,2-1,5 kg",Tšillidekooriga,1.5 kg,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+16497,Tualettvesi David Beckham Respect 40 ml,Tualettvesi David,40 ml,meat_fish,Prisma,,meat_hams,meat_fish,drinks,drinks_beer_cider,high
+20176,"Tuunikalapasteet MSC, ABBA, 145 g",Abba MSC,145 g,meat_fish,"Coop, Prisma, Rimi, Selver",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+15847,Urtekram shampoon tundlikule peanahale lõhnatu 250ml,Urtekram,250 ml,meat_fish,Prisma,,meat_hams,meat_fish,personal_care,pcare_shampoo_cond,high
+2574,USIN Hakklihakaste tatraga 400 g,USIN Hakklihakaste,400 g,meat_fish,Prisma,,meat_minced,meat_fish,meat_fish,meat_minced,high
+4454,USIN Makaronid hakklihaga 350 g,USIN Makaronid,350 g,meat_fish,Prisma,,meat_minced,meat_fish,meat_fish,meat_minced,high
+4303,USIN Pannkoogid hakklihaga 400 g,USIN Pannkoogid,400 g,meat_fish,Prisma,,meat_minced,meat_fish,meat_fish,meat_minced,high
+503824,USIN Plov Sealihaga 500 g,USIN Plov,500 g,meat_fish,Prisma,,meat_pork,meat_fish,meat_fish,meat_pork,high
+3994,USIN Plov sealihast 300 g,USIN Plov,300 g,meat_fish,Prisma,,meat_pork,meat_fish,meat_fish,meat_pork,high
+3875,USIN Sealiha guljašš kartulipüreega 450 g,USIN Sealiha,450 g,meat_fish,Prisma,,produce_root_veg,produce,meat_fish,meat_pork,high
+90806,UVIC Beefy Bourguignon minikartulitega 300 g,UVIC Beefy,300 g,meat_fish,Prisma,,produce_root_veg,produce,meat_fish,meat_other,high
+10976,UVIC Praetud pelmeenid lihaga 350 g,UVIC Praetud,350 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_other,meat_fish,meat_fish,meat_other,heuristic
+54367,UVIC Praetud tšeburekid lambalihaga 250 g,UVIC Praetud,250 g,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+13884,Väikesed juukseklambrid karbis lilled 6tk,Väikesed,,meat_fish,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_other,high
+4725,Valezs kanapuljong 100g,Valezs,100 g,meat_fish,Prisma,,meat_poultry,meat_fish,drinks,drinks_beer_cider,high
+28119,Valezs loomalihapuljong 100g,Valezs,100 g,meat_fish,Prisma,,spices_broth_stock,world_spices,drinks,drinks_beer_cider,high
+9621,Valla Kananagitsad 800G,Valla Kananagitsad,800 g,meat_fish,"Coop, Prisma, Rimi",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+5055,Värska grillliha kaelakarbonaadist 500G,Värska,500 g,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic
+2096,"Veiselihaga pelmeenid, 400 g",Veiselihaga,400 g,meat_fish,"Coop, Prisma",,meat_beef_lamb_game,meat_fish,meat_fish,meat_beef_lamb_game,high
+66023,"Veiseliha omas mahlas, RANNAROOTSI, 240 g",Rannarootsi,240 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_beef_lamb_game,meat_fish,drinks,drinks_other,high
+55611,"Veiseliha rohumaaveise puljongis, LIIVIMAA LIHAVEIS, 330 g",Veiseliha,330 g,meat_fish,"Prisma, Selver",,meat_beef_lamb_game,meat_fish,meat_fish,meat_gourmet,high
+2021,"Vici Heeringafilee Traditsiooniline, Kg",Vici Heeringafilee,,meat_fish,"Barbora, Maxima, Prisma",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+2500,Vici Heeringafilee Traditsioonil. Õlita 500G,Vici Heeringafilee,500 g,meat_fish,"Barbora, Coop, Maxima, Prisma",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+4360,"Vici Heeringafilee Tükid Mädarõikakastmes, Kg",Vici Heeringafilee,,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+32570,Vici Heeringafilee Tükid Sinepikastmes 200G,Vici Heeringafilee,200 g,meat_fish,"Coop, Prisma",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+2886,"Vici Heeringarullid Marineeritud Kurgiga, Kg",Vici Heeringarullid,,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+3704,Vici Kalapulgad 250g,Vici Kalapulgad,250 g,meat_fish,"Barbora, Maxima, Prisma",,fish_fresh,meat_fish,meat_fish,fish_processed,high
+10892,"Vici Lumekrabi Surimist Liha, Jahut.120G",Vici Lumekrabi,120 g,meat_fish,"Barbora, Maxima, Prisma, Rimi, Selver",,fish_processed,meat_fish,meat_fish,meat_other,high
+3028,Vici paneeritud lõheburger 250g,Vici,250 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Selver",,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+406157,"Vici pelmeenid lihaga, 1 kg",Vici,1 kg,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_other,heuristic
+3638,"Vici Praetud Heeringafilee Sinepimarinaadis,K",Vici Praetud,,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+2800,"Vici Praetud Räim Tomatikastmes, Kg",Vici Praetud,,meat_fish,Prisma,,produce_root_veg,produce,meat_fish,fish_fresh,high
+32745,Vici Soolalõhefilee Tükk 160 G,Vici Soolalõhefilee,160 g,meat_fish,"Prisma, Selver",,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+32424,"Vinnutatud veiseliha Original, KARNI, 50 g",Beef Ground,50 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_beef_lamb_game,meat_fish,drinks,drinks_spirits,high
+2053,"Vürtsikad broilerifileeribad kuivatatud, TALLEGG, 80 g",Tallegg Spice,80 g,meat_fish,"Coop, Prisma, Selver",,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+71451,"Vürtsine sealiha, RANNAROOTSI, 240 g",Rannarootsi,240 g,meat_fish,"Prisma, Rimi, Selver",,meat_pork,meat_fish,meat_fish,meat_pork,high
+66524,"Vürtsisealiha, FRANK POTT, 325 g",Frank,325 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_pork,meat_fish,meat_fish,meat_pork,high
+269516,Waffa Sofi kreeker Kreete kuldkalake 150 g,Waffa Sofi,150 g,meat_fish,"Coop, Prisma",,fish_fresh,meat_fish,sweets_snacks,sweets_other,high
+153105,William Saurin Risoto kanaga ja seentega 280 g,William Saurin,280 g,meat_fish,Prisma,,produce_mushrooms,produce,meat_fish,meat_poultry,high
+19405,Wõro Lihapallid 600 G,Wõro Lihapallid,600 g,meat_fish,"Coop, Prisma",,meat_other,meat_fish,meat_fish,meat_other,heuristic
+38868,W&raham's Extra Dry Port KPN liköörvein 19%vol 750ml,W&raham's Extra,750 ml,meat_fish,Prisma,,meat_hams,meat_fish,drinks,drinks_wine,high
+65135,Xtra hakitud tuunikala päevalilleõlis 150/105 g,Xtra,105 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+4017,Xtra hakklihamaitseaine 100 g,Xtra,100 g,meat_fish,Prisma,,meat_minced,meat_fish,world_spices,spices_herbs_spice_mix,high
+31964,Xtra Kalamarjamääre 250G,Xtra Kalamarjamääre,250 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_processed,high
+2560,"Xtra kananagitsad, 500 g",Xtra,500 g,meat_fish,Prisma,,meat_poultry,meat_fish,meat_fish,meat_poultry,high
+3353,"Xtra paneeritud kalafilee, 600 g",Xtra,600 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+233,Xtra purustatud tuunikala vees 150/105 g,Xtra,105 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high
+594274,Xtra soft hambaharjad 3tk,Xtra,3 pcs,meat_fish,Prisma,,meat_hams,meat_fish,meat_fish,meat_other,high
+22484,X-tra viilutatud graavilõhe 100g,X-tra,100 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+21577,X-tra viilutatud külmsuitsulõhe 100 g,X-tra,100 g,meat_fish,Prisma,,fish_fresh,meat_fish,meat_fish,fish_salted_smoked,high
+50640,Yoodles noodles kanamaitselised nuudlid 85 g,Yoodles,85 g,meat_fish,Prisma,,meat_poultry,meat_fish,dry_preserves,dry_pasta_rice,high
