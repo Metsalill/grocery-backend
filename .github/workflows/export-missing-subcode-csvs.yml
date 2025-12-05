@@ -37,8 +37,8 @@ jobs:
 
       - name: Export missing sub_code into 900-row CSV parts
         run: |
-          TOTAL=${{ steps.count.outputs.TOTAL }}
-          MAX_PER_FILE=${MAX_PER_FILE}
+          TOTAL="${{ steps.count.outputs.TOTAL }}"
+          MAX_PER_FILE="${MAX_PER_FILE}"
 
           if [ -z "$TOTAL" ] || [ "$TOTAL" -eq 0 ]; then
             echo "No missing sub_code rows to export."
@@ -55,31 +55,32 @@ jobs:
 
             echo "Writing $OUTFILE (rows $START..$END)"
 
-            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<SQL
-\\copy (
-  SELECT
-    id AS product_id,
-    name,
-    brand,
-    size_text,
-    food_group AS current_food_group,
-    sub_code AS current_sub_code,
-    category_1,
-    category_2,
-    category_3,
-    source_url,
-    image_url,
-    last_seen_utc
-  FROM (
-    SELECT
-      p.*,
-      row_number() OVER (ORDER BY p.id) AS rn
-    FROM products p
-    WHERE p.sub_code IS NULL OR p.sub_code = ''
-  ) s
-  WHERE s.rn BETWEEN ${START} AND ${END}
-) TO '${OUTFILE}' WITH CSV HEADER;
-SQL
+            SQL="
+              SELECT
+                id AS product_id,
+                name,
+                brand,
+                size_text,
+                food_group AS current_food_group,
+                sub_code AS current_sub_code,
+                category_1,
+                category_2,
+                category_3,
+                source_url,
+                image_url,
+                last_seen_utc
+              FROM (
+                SELECT
+                  p.*,
+                  row_number() OVER (ORDER BY p.id) AS rn
+                FROM products p
+                WHERE p.sub_code IS NULL OR p.sub_code = ''
+              ) s
+              WHERE s.rn BETWEEN ${START} AND ${END}
+            "
+
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 \
+              -c "\copy ( $SQL ) TO '${OUTFILE}' WITH CSV HEADER"
           done
 
       - name: Upload artifact
