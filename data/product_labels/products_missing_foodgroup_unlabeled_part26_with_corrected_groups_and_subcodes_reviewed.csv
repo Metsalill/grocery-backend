@@ -1,0 +1,901 @@
+product_id,name,brand,size_text,stores_sample,current_food_group,current_sub_code,food_group_corrected,new_sub_code,confidence,final_food_group,final_sub_code,final_confidence,change_reason
+583050,Libresse Natural Care Reg Wings h/s 20tk,Libresse,20tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583051,Dailies Natural Care Reg p/kaitse 40tk,Dailies,40tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583052,Libresse Ultra Long Wings Duo h/s 2*8tk,Libresse,8tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583053,Libresse Ultra Long Wings h/side 8tk,Libresse,8tk,Coop,,,other,dry_other,fallback,personal_care,pcare_feminine_hygiene,high,proposed_group_invalid;override_with_name_rules
+583054,Zewa Kids Box t/rätikud 60tk karbis,Zewa,60tk ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583055,Libresse Goodnight Maxi Win h/side 10tk,Libresse,10tk,Coop,,,other,dry_other,fallback,personal_care,pcare_feminine_hygiene,high,proposed_group_invalid;override_with_name_rules
+583056,Libresse Dailies Fresh Reg Deo p/k 30tk,Libresse,30tk,Coop,,,other,dry_other,fallback,personal_care,pcare_deo,high,proposed_group_invalid;override_with_name_rules
+583057,Tena Lady Normal uriinipid/side 12tk,Tena,12tk,Coop,,,other,dry_other,fallback,personal_care,pcare_feminine_hygiene,high,proposed_group_invalid;override_with_name_rules
+583058,Tena Discreet Mini uriinipid/side 20tk,Tena,20tk,Coop,,,other,dry_other,fallback,personal_care,pcare_feminine_hygiene,high,proposed_group_invalid;override_with_name_rules
+583059,Libresse Goodnight Ultra X-large h/s 8tk,Libresse,8tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583060,Zewa Softis Sensitive taskurätikud 10*9,Zewa,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583061,Libresse Ult Thin Goodnight h/side 8tk,Libresse,8tk,Coop,,,other,dry_other,fallback,personal_care,pcare_feminine_hygiene,high,proposed_group_invalid;override_with_name_rules
+583062,Zewa Wisch&Weg majap/paber 2tk 2kih,Zewa,2tk ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583063,Tena Discreet p/kaitse Ultra Mini 28tk,Tena,28tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583064,Zewa Softis taskurätikud 4kih 10*9tk,Zewa,9tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583065,Zewa Softis taskurätikud 4kih 9tk,Zewa,9tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583066,Zewa Softis taskurätikud 4kih 6*9tk,Zewa,9tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583067,Zewa Exclusive UltraSoft t/paber 4tk val,Zewa,4tk ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583068,Zewa Exclusive NaturalSoft t/paber 8tk,Zewa,8tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583069,Libresse Dailies Fresh&Pro p/kaitse 80tk,Libresse,80tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583070,Libresse Dailies Long Ext p/kaitse 42tk,Libresse,42tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583071,Bla Band Mehhiko pajaroog 188g,Bla,188g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583072,Barebells prot.batoon 55g küpsise-kreemi,Barebells,55g ,Coop,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+583073,Barebells prot.batoon 55g soolapähkli,Barebells,55g ,Coop,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+583074,Barebells prot.bat.55g valge shok-mandli,Barebells,55g ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583075,Barebells prot.batoon 55g karamelli-shok,Barebells,55g ,Coop,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+583076,Barebells prot.batoon Coco Choco 55g,Barebells,55g,Coop,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+583077,Nocco Stellar Blend karb-tud fun.j.0.33L,Nocco,0.33L,"Coop, Prisma",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583078,Vitamin Well Zero Vaarika vit.jook 0.5L,Vitamin,0.5L,Coop,,,produce,produce_berries,high,produce,produce_berries,high,
+583079,Vitamin Well Zero Ananassi vit.jook 0.5L,Vitamin,0.5L,Coop,,,produce,produce_tropical,high,produce,produce_tropical,high,
+583080,Le Royal lahustuv kakaojoogipulber 25g,Le,25g,Coop,,,drinks,drinks_syrups_powders,high,drinks,drinks_syrups_powders,high,
+583081,Vitamin Well Awake vitamiinijook 0.5L,Vitamin,0.5L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583082,Vitamin Well Recover vitamiinijook 0.5L,Vitamin,0.5L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583083,Vitamin Well Elevate vitamiinijook 0.5L,Vitamin,0.5L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583084,Nicks Vaniljejäätis krõbeda mandliga 76g,Nicks,76g,Coop,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+583085,Nicks Piimashok.75g krõbeda karamelliga,Nicks,75g ,Coop,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_candies,high,override_with_name_rules
+583086,Nicks Piimashok.75g krõb.sarapuupähkli,Nicks,75g ,Coop,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+583087,Nicks Mango passion pulgajäätis 90ml/76g,Nicks,90ml,Coop,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+583088,Nicks maapähkli-karamell maits.jäätis49g,Nicks,,Coop,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+583089,Abba heeringas Prantsuse sibula mar.240g,Abba,240g,Coop,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+583090,Froosh smuuti maas.-mustsõstra-õuna750ml,Froosh,,Coop,,,produce,produce_apples_pears,high,produce,produce_smoothies_fresh_juices,high,override_with_name_rules
+583091,Froosh smuuti mango-granadilli-õuna750ml,Froosh,,Coop,,,produce,produce_apples_pears,high,produce,produce_smoothies_fresh_juices,high,override_with_name_rules
+583092,Froosh smuuti õuna-pirni-leedriõie 750ml,Froosh,750ml,Coop,,,produce,produce_apples_pears,high,produce,produce_smoothies_fresh_juices,high,override_with_name_rules
+583093,MAM silikoonlutt Original 6-16k 2tk sin,MAM,2tk ,Coop,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+583094,MAM öölutt 6-16k 2tk silikoon roosa,MAM,2tk ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583095,Bambino joogitops 220ml tilkumisvaba,Bambino,220ml ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583096,Ceylon Jambo Grand must tee 100g,Ceylon,100g,Coop,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+583097,Kopparberg Pear perry 4.5% 0.5L,Kopparberg,0.5L,Coop,,,produce,produce_apples_pears,high,produce,produce_apples_pears,high,
+583098,Piraat nisukrõps suitsupeekoniga 150g,Piraat,150g,Coop,,,sweets_snacks,sweets_snacks_salty,high,sweets_snacks,sweets_snacks_salty,high,
+583099,Dulsweet Agaavisiirup Bio 345g,Dulsweet,345g,Coop,,,drinks,drinks_syrups_powders,high,drinks,drinks_syrups_powders,high,
+583100,Colgate Max White Exp Cool Mint h/p 75ml,Colgate,75ml,Coop,,,sweets_snacks,sweets_gums_mints,high,sweets_snacks,sweets_gums_mints,high,
+583101,Elmex Sensitive Extra Soft h/hari,Elmex,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583102,Bacardi Spiced piiritusjook 35% 0.7L,Bacardi,0.7L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583103,Bacardi Breezer Lime muu alk.jook 0.275L,Bacardi,0.275L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583104,Colgate Zig Zag hambahari Medium,Colgate,,Coop,,,personal_care,pcare_oral_care,high,personal_care,pcare_oral_care,high,
+583105,Isostar Spordijoogipulber 400g sidruni,Isostar,400g ,Coop,,,drinks,drinks_syrups_powders,high,drinks,drinks_syrups_powders,high,
+583106,Isostar Spordijoogipulber 400g greibi,Isostar,400g ,Coop,,,drinks,drinks_syrups_powders,high,drinks,drinks_syrups_powders,high,
+583107,Gourmet Gold kons.kassile 85gkanapasteet,Gourmet,,Coop,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+583108,"Gourmet Gold kons.kassile 85g lõhe,kana",Gourmet,85g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583109,Gourmet Gold tuunikalapasteet kassile85g,Gourmet,,Coop,,,drinks,drinks_tea_coffee,high,dry_preserves,dry_canned_meat_fish,high,override_with_name_rules
+583110,"Friskies kuivt.kassile 300g kana,maks,jv",Friskies,300g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583111,Friskies Junior kuivt.kassile 300g kana,Friskies,300g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583112,ONE Kuivt.ster-tud kassile 800g,ONE,800g,Coop,,,pet,pet_other,heuristic,pet,pet_other,heuristic,
+583113,Maggi Idea kartuli-hakklihavormile 42g,Maggi,42g,Coop,,,meat_fish,meat_minced,high,meat_fish,meat_minced,high,
+583114,ONE Kuivt.kassile Junior 800g kana-täist,ONE,800g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583115,Gourmet Gold kons.kassile 85g loomal.pas,Gourmet,85g ,Coop,,,pet,pet_other,heuristic,pet,pet_other,heuristic,
+583116,"Gourmet Perle kiisueine85g forell,spinat",Gourmet,,Coop,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+583117,"Gourmet Perle kiisueine 85g uluk,aedvilj",Gourmet,85g ,Coop,,,meat_fish,meat_beef_lamb_game,high,meat_fish,meat_beef_lamb_game,high,
+583118,"Darling kuivt.koerale 3kg v.liha,juurv.",Darling,3kg ,Coop,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+583119,"Darling kuivt.koerale 10kg v.liha,juurv.",Darling,10kg ,Coop,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+583120,Gourmet Gold kons.kassi 4*85g kastmes,Gourmet,85g ,Coop,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+583121,ONE kuivt.kassile Urinary Care 800g kana,ONE,800g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583122,ONE Kuivt.kassile Coat&Hairball800g kana,ONE,,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583123,ONE kuivt.koerale Mini Adult 1.5kg looma,ONE,1.5kg ,Coop,,,pet,pet_other,heuristic,pet,pet_other,heuristic,
+583124,Nescafe Classic Crema lah.kohv 200g,Nescafe,200g,Coop,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+583125,ONE kuivt.koerale Mini Delic.1.5kg lõhe,ONE,1.5kg ,Coop,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+583126,Nescafe Classic Crema lah.kohv 100g,Nescafe,100g,Coop,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+583127,"Darling kuivt.koerale 3kg linnuliha,jv",Darling,3kg ,Coop,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+583128,"Darling kuivt.koerale 10kg linnuliha,jv",Darling,10kg ,Coop,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+583129,ONE Kuivt.ster-tud kassile1.5kglõhe-nisu,ONE,,Coop,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+583130,ONE Kuivt.ster-tud kassile1.5kg loomliha,ONE,5kg ,Coop,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+583131,Gourmet Gold SC kons.kassi 85g loomaliha,Gourmet,85g ,Coop,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+583132,Gourmet Gold SC kons.kassi 85g lambaliha,Gourmet,85g ,Coop,,,meat_fish,meat_beef_lamb_game,high,meat_fish,meat_beef_lamb_game,high,
+583133,ONE Adult Kuivt.kassile1.5kg kana-t.nisu,ONE,5kg ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583134,Adventuros maius koerale 120g pühvel,Adventuros,120g ,Coop,,,pet,pet_other,heuristic,pet,pet_other,heuristic,
+583135,Adventuros maius koerale 90g metssiga,Adventuros,90g ,Coop,,,pet,pet_other,heuristic,pet,pet_other,heuristic,
+583136,Adventuros maius koerale 90g hirv,Adventuros,90g ,Coop,,,pet,pet_other,heuristic,pet,pet_other,heuristic,
+583137,Nestle Müsli Fitness Granola 300g shok.,Nestle,300g ,Coop,,,dry_preserves,dry_cereals_muesli,high,dry_preserves,dry_cereals_muesli,high,
+583138,Nestle Müsli Fitness Granola 300g meega,Nestle,300g ,Coop,,,dry_preserves,dry_cereals_muesli,high,dry_preserves,dry_cereals_muesli,high,
+583139,"Friskies kuivt.kassile1kg kana,maks,jv",Friskies,,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583140,"Friskies kuivt.kassile 1kg lõhe,tuuni,jv",Friskies,1kg ,Coop,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+583141,"Friskies kuivt.kassile1kg loomaliha,kana",Friskies,,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583142,One Sterilcat Kiisueine 4*85g lõhe-porg,One,85g ,Coop,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+583143,One Adult Kiisueine 4*85g kana-roh.ubade,One,85g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583144,Felix Maius kassile Play 50g kana-maksa,Felix,50g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583145,Felix Maius kassile Play 50g kala-krevet,Felix,50g ,Coop,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+583146,Felix Maius kassile Play50g kalkuni-sink,Felix,,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_hams,high,override_with_name_rules
+583147,Dentalife närimispulgad Med 12-25kg 115g,Dentalife,25kg ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583148,Dentalife närimispulgad Large 25kg 142g,Dentalife,25kg ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583149,After Eight k.karp 200g apelsini,After,200g ,Coop,,,produce,produce_tropical,high,produce,produce_tropical,high,
+583150,Friskies kiisueine 4*85g lihavalik tükid,Friskies,85g ,Coop,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+583151,Friskies kiisueine 4*85g kalavalik tükid,Friskies,85g ,Coop,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+583152,Friskies kiisueine 4*85g kanaga kastmes,Friskies,85g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583153,Maggi Kartulipüree 59g sibulaga ja saiak,Maggi,59g ,"Coop, Prisma",,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+583154,Maggi Nuudlid kooreses tom.kastmes 62g,Maggi,62g,Coop,,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+583155,Maggi kiirnuudlid 59.2g kanalihamaits.,Maggi,59.2g ,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583156,Lion White Shok.batoon 2Pack 60g,Lion,60g,Coop,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+583157,Felix Fantastic kiisueine 85g kanaliha,Felix,85g ,Coop,,,drinks,drinks_wine,high,drinks,drinks_soft_soda,high,override_with_name_rules
+583158,Felix Fantas.kassip.kiisueine 85g kana,Felix,85g ,Coop,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+583159,Felix Fantastic kiisueine 85g lõhega,Felix,85g ,Coop,,,drinks,drinks_wine,high,drinks,drinks_soft_soda,high,override_with_name_rules
+583160,Felix Kiisueine Fantastic 85g küülik,Felix,85g ,Coop,,,drinks,drinks_wine,high,drinks,drinks_soft_soda,high,override_with_name_rules
+583161,"Felix Fantastic kiisueine4*85g kana,loom",Felix,85g ,Coop,,,drinks,drinks_wine,high,drinks,drinks_soft_soda,high,override_with_name_rules
+583162,"Felix Fantastic kiisueine4*85g lõhe,lesT",Felix,85g ,Coop,,,drinks,drinks_wine,high,drinks,drinks_soft_soda,high,override_with_name_rules
+583163,Felix Sensat.kiisueine 4*85g kalkuniga,Felix,85g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583164,Felix Sensations kiisueine 4*85g kala,Felix,85g ,Coop,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+583165,Felix Fantas.kassip.kiisueine 4*85g kana,Felix,85g ,Coop,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+583166,Felix Sen.kiisueine 4*85g kala tarrendis,Felix,85g ,Coop,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+583167,Felix Sen.kiisueine 4*85g liha tarrendis,Felix,85g ,Coop,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+583168,Felix Maius kassile Mixed 60g veise-kana,Felix,60g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583169,Felix Maius kassile Party Mix Ocean 60g,Felix,60g,Coop,,,pet,pet_other,heuristic,pet,pet_other,heuristic,
+583170,Felix Maius kassile Party Mix Origin.60g,Felix,60g,Coop,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+583171,Felix Tasty Shreds kiisue4*80g lihavalik,Felix,80g ,Coop,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+583172,Felix Tasty Shreds kiisue4*80g kalavalik,Felix,80g ,Coop,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+583173,ONE Junior Kiisueine 4*85g kana-porgandi,ONE,85g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583174,Gourmet Perle kiisueine 85g loomaliha,Gourmet,85g ,Coop,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+583175,Gourmet Perle kiisueine 85g kanaliha,Gourmet,85g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583176,ONE Senior Kiisueine 4*85g kana-uba-veis,ONE,85g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583177,One Kiisueine 4*85g kana-veis-r.uba,One,85g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583178,Toblerone piimasok.100g,Toblerone,100g,Coop,,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+583179,Milka Piimashok.100g maasikatäidisega,Milka,100g ,Coop,,,dairy_eggs_fats,dairy_milk,high,produce,produce_berries,high,override_with_name_rules
+583180,Milka Shokolaadi-pähklikreem 350g,Milka,350g,Coop,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+583181,Milka Brookie küpsis 132g,Milka,132g,Coop,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_biscuits_cookies,high,override_with_name_rules
+583182,Milka Chocolate Dessert piimashok.100g,Milka,100g,Coop,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+583183,Milka piimash.270g pähklikreemi-karamell,Milka,270g ,Coop,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_candies,high,override_with_name_rules
+583184,Marabou Daim piimashokolaad 220g,Marabou,220g,Coop,,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+583185,7 Days Double Croissant van.-maasika 60g,Mondelez Baltic UAB,60g,Coop,,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+583186,Tuc Bake Rolls 80g pitsamaitseline,Tuc,80g ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583187,Oreo Küpsis Vanilla Mini 160g,Oreo,160g,Coop,,,sweets_snacks,sweets_biscuits_cookies,high,sweets_snacks,sweets_biscuits_cookies,high,
+583188,Milka Piimashok.95g tervete pähklitega,Milka,95g ,Coop,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+583189,Daim drazee 150g,Daim,150g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583190,Milka Alpine Milk Vanilla k.karp 330g,Milka,330g,Coop,,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+583191,Milka Piimashokolaad Biscoff 90g,Milka,90g,Coop,,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+583192,Milka piimashok.45g,Milka,45g,Coop,,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+583193,Milka Oreo piimashokolaad 100g,Milka,100g,Coop,,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+583194,Marabou Küpsis 184g tum.shokolaadiga,Marabou,184g ,Coop,,,sweets_snacks,sweets_biscuits_cookies,high,sweets_snacks,sweets_biscuits_cookies,high,
+583195,Jacobs Original 3in1 lah.kohvij.20*15.2g,Jacobs,15.2g,Coop,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+583196,Belvita küpsis 300g pähklite-meega,Belvita,300g ,Coop,,,sweets_snacks,sweets_biscuits_cookies,high,sweets_snacks,sweets_biscuits_cookies,high,
+583197,Prince Polo Classic vahvlibatoon 50g,Prince,50g,Coop,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+583198,Belvita küpsis 300g metsamarja,Belvita,300g ,Coop,,,sweets_snacks,sweets_biscuits_cookies,high,sweets_snacks,sweets_biscuits_cookies,high,
+583199,Milka Piimashokolaad Bubbly 90g,Milka,90g,Coop,,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+583200,Milka k.karp I Love 110g pähklitega,Milka,110g ,Coop,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+583201,Prince Polo Coconut vahvlibatoon 50g,Prince,50g,Coop,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+583202,Milka k.karp miniassortii 138g,Milka,138g,Coop,,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+583203,Oreo Küpsis Golden 176g,Oreo,176g,Coop,,,sweets_snacks,sweets_biscuits_cookies,high,sweets_snacks,sweets_biscuits_cookies,high,
+583204,Marabou Komm Oreo Bites 140g,Marabou,140g,Coop,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+583205,Marabou drazee Daimiga 67g piimashok.,Marabou,67g ,Coop,,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+583206,Milka piimashok.300g toffee-pähklitega,Milka,300g ,Coop,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+583207,Milka Daim shok.100g kar.mandlitükkidega,Milka,100g ,Coop,,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+583208,Tuc Mini kreeker 100g peekon,Tuc,100g ,Coop,,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+583209,Jacobs Krönung lahustuv kohv 100g,Jacobs,100g,Coop,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+583210,Martini Bianco Vermut 0.75L,Martini,0.75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583211,Holle 6K täistera kaerapuder 250g,Holle,250g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583212,Canderel Gr.loodus.suhkruasen.pulber 40g,Canderel,40g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583213,Canderel suhkruasen.N40+N10 stevia 75g,Canderel,75g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583214,Evolu Simple Digitaalne DMT4132 t/meeter,Evolu,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583215,Holle Org.12K Müslibatoon 25g õuna-ban,Holle,25g ,Coop,,,dry_preserves,dry_cereals_muesli,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+583216,Holle Org.12K Müslibatoon 25g pirni-õuna,Holle,25g ,Coop,,,dry_preserves,dry_cereals_muesli,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+583218,Splat-Medical Herbs hambapasta 100ml,Splat-Medical,100ml,Coop,,,dry_preserves,dry_pasta_rice,high,personal_care,pcare_oral_care,high,override_with_name_rules
+583219,Holle2 6K kitsepiimasegu 400g,Holle2,400g,Coop,,,dairy_eggs_fats,dairy_milk,high,baby,baby_formula,high,override_with_name_rules
+583220,Holle 3 10K kitsepiimasegu 400g,Holle,400g,Coop,,,dairy_eggs_fats,dairy_milk,high,baby,baby_formula,high,override_with_name_rules
+583221,Gillette Satin Care 200ml dep/geel,Gillette,200ml ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583222,Gillette Venus Simply3 Plus 3tk,Gillette,3tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583223,Gillette Venus Simply2 raseerija 4+2tk,Gillette,2tk,Coop,,,personal_care,pcare_shaving,high,personal_care,pcare_shaving,high,
+583224,Gillette Fusion ProGlide terad 4tk,Gillette,4tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583225,Satin Care Lavender Touch dep/geel 200ml,Satin,200ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583226,Gillette Mach3 Iritation Defence 200ml,Gillette,200ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583227,Gillette Venus Extra Smooth raseerija,Gillette,,Coop,,,personal_care,pcare_shaving,high,personal_care,pcare_shaving,high,
+583228,Gillette Venus Smooth 8tk terad,Gillette,8tk ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583229,Gillette Fusion Flexball raseerija +2ter,Gillette,,Coop,,,personal_care,pcare_shaving,high,personal_care,pcare_shaving,high,
+583230,Satin Care Vanilla Dream ras/geel 200ml,Satin,200ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583231,Gillette Mach3 Extra Comf ras/geel 200ml,Gillette,200ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583232,Gillette Venus Simply3 Multicol ras 6tk,Gillette,6tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583233,Gillette Blue3 Cool ras 3tk ühekordne,Gillette,3tk ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583234,Gillette Series Cool ras/geel 200ml,Gillette,200ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583235,Gillette Fusion Ul Moist ras/geel 200ml,Gillette,200ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583236,Gillette Blue3 Comfort raseerija 3tk,Gillette,3tk,Coop,,,personal_care,pcare_shaving,high,personal_care,pcare_shaving,high,
+583237,Gillette Blue3 Comfort 6tk+2tk raseerija,Gillette,6tk,Coop,,,personal_care,pcare_shaving,high,personal_care,pcare_shaving,high,
+583238,Gillette Blue3 Sensitive ras 3tk,Gillette,3tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583239,Gillette Venus Extra Smooth Sen terad4tk,Gillette,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583240,Gillette Blue3 UCL ras 3tk ühekordne,Gillette,3tk ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583241,Gillette Blue3 Red ras 6+2tk ühekordne,Gillette,2tk ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583242,Gillette Mach3 terad 5tk,Gillette,5tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583243,Gillette Mach3 ras+5tera,Gillette,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583244,Gillette Fusion Ul Sensit ras/geel 200ml,Gillette,200ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583245,Gillette Sensitive ras/vaht 200+100ml,Gillette,100ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583246,Gillette Series Arctic Ice näovesi 100ml,Gillette,100ml,Coop,,,drinks,drinks_water,high,drinks,drinks_water,high,
+583247,Gillette Series Cool Wave näovesi 100ml,Gillette,100ml,Coop,,,drinks,drinks_water,high,drinks,drinks_water,high,
+583248,Gillette Fusion raseerija+2tera,Gillette,,Coop,,,personal_care,pcare_shaving,high,personal_care,pcare_shaving,high,
+583249,Gillette Fusion terad 4tk,Gillette,4tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583250,Gillette Fusion Power terad 4tk,Gillette,4tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583251,Gillette Venus Breeze raseerija +2tera,Gillette,,Coop,,,personal_care,pcare_shaving,high,personal_care,pcare_shaving,high,
+583252,Gillette Venus Breeze terad 4tk,Gillette,4tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583253,Halls Honey-Lemon kurgupastill 33.5g,Halls,33.5g,Coop,,,drinks,drinks_wine,high,sweets_snacks,sweets_gums_mints,high,override_with_name_rules
+583254,Halls Extra Strong kurgupastill 33.5g,Halls,33.5g,Coop,,,drinks,drinks_wine,high,sweets_snacks,sweets_gums_mints,high,override_with_name_rules
+583255,Vv Caracter Chenin-Chardonnay 0.75L,Vv,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583256,Pv Bisquertt Petirrojo Cab.Sauv.Res0.75L,Pv,75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583257,Vv Bisquertt Petirrojo Sauv.Bl.Res.0.75L,Vv,0.75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583258,Vv Bisquertt Petirrojo Chard.Res.0.75L,Vv,0.75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583259,Pv Bisquertt Petirrojo Carmenere R.0.75L,Pv,0.75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583260,Pv Casa Solis Cabernet Sauvignon 0.75L,Pv,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583261,Vv Casa Solis Sauvignon Blanc 0.75L,Vv,0.75L,Coop,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+583262,Vv Casa Solis Chardonnay 0.75L,Vv,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583263,Pv Casa Solis Carmenere 0.75L,Pv,0.75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583264,Colgate Triple Action h/pasta 125ml,Colgate,125ml,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583265,Cinzano Dry Edition Secco vahuvein 0.75L,Cinzano,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583266,Lavazza Caffe Decaffeinato jah/kohv 250g,Lavazza,250g,Coop,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+583267,Cirio Tükeldatud tomatid 400g,Cirio,400g,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583268,Victoria keedetud läätsed 400g,Victoria,400g,Coop,,,dry_preserves,dry_groats_beans,high,dry_preserves,dry_groats_beans,high,
+583269,TicTac Fresh Mint drazee 54g,TicTac,54g,Coop,,,sweets_snacks,sweets_gums_mints,high,sweets_snacks,sweets_gums_mints,high,
+583270,Rocher k.karp T8 100g,Rocher,100g,"Coop, Prisma",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583271,Raffaello valge shok.90g kookose-mandlit,Raffaello,90g ,Coop,,,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+583272,Kinder Bueno jäätis vahvlikoonuses 62g,Kinder,62g,Coop,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+583273,Kinder Bueno White jäätis vahvlikoon.62g,Kinder,62g,Coop,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+583274,Nutella jäätis 470ml/230g,Nutella,470ml,Coop,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+583275,Raffaello Jäätis virsiku hibiskuse 40g,Raffaello,40g,Coop,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+583276,Citres Päikesekuiv.tom.päevalilleõl.290g,Citres,290g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583277,Fiordimaso Mascarpone 250g,Fiordimaso,250g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583278,Ponti Päikesekuiv.tomatid Ponti 300g,Ponti,300g,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583279,Plasmon 6K Beebiküpsis 60g,Plasmon,60g,Coop,,,sweets_snacks,sweets_biscuits_cookies,high,sweets_snacks,sweets_biscuits_cookies,high,
+583280,Discreet Normal pesukaitse 60tk,Discreet,60tk,Coop,,,other,dry_other,fallback,personal_care,pcare_feminine_hygiene,high,proposed_group_invalid;override_with_name_rules
+583281,Discreet Deo Waterlily pesukaitse 60tk,Discreet,60tk,Coop,,,other,dry_other,fallback,personal_care,pcare_deo,high,proposed_group_invalid;override_with_name_rules
+583282,Gillette 3in1 ProGlide AS palsam 50ml,Gillette,50ml,Coop,,,personal_care,pcare_shampoo_cond,high,personal_care,pcare_shampoo_cond,high,
+583283,Always Ultra Platinum Normal Duo 16tk,Always,16tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583284,Always Ultra Platinum Super Plus Duo14tk,Always,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583285,Always Ultra Platinum Night Duo 12tk,Always,12tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583286,Naturella Ultra Night Duo h/side 14tk,Naturella,14tk,Coop,,,other,dry_other,fallback,personal_care,pcare_feminine_hygiene,high,proposed_group_invalid;override_with_name_rules
+583287,Naturella Ultra Normal Duo h/side 20tk,Naturella,20tk,Coop,,,other,dry_other,fallback,personal_care,pcare_feminine_hygiene,high,proposed_group_invalid;override_with_name_rules
+583288,Naturella Ultra Super Duo h/side 16tk,Naturella,16tk,Coop,,,other,dry_other,fallback,personal_care,pcare_feminine_hygiene,high,proposed_group_invalid;override_with_name_rules
+583289,Naturella Normal kummel p/kaitse 52tk,Naturella,52tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583290,BAM Complete Extra Fresh Long h/p 75ml,BAM,75ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583291,Oral-B Gum&Enamel Extra Fresh h/p 75ml,Oral-B,75ml,Coop,,,other,dry_other,fallback,sweets_snacks,sweets_gums_mints,high,proposed_group_invalid;override_with_name_rules
+583292,Fairy Sensitive Aloe&Pink nõudep/v 900ml,Fairy,900ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583293,Coop Grissinid 300g,Coop,300g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583294,Pv Assieme Sangiovese Merlot 0.75L,Pv,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583295,Assieme Pignoletto Frizzante 0.75L,Assieme,0.75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583296,Coop Kartulikrõps 320g soolaga,Coop,320g ,Coop,,,sweets_snacks,sweets_snacks_salty,high,sweets_snacks,sweets_snacks_salty,high,
+583297,Assieme Ribolla Gialla Extra Dry 0.75L,Assieme,0.75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583298,Coop Day Tech h/p25ml&h/hari reisikmpl,Coop,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583299,Coop Day Tech hambahari,Coop,,Coop,,,personal_care,pcare_oral_care,high,personal_care,pcare_oral_care,high,
+583300,Coop DayTech Sensitive hambahari,Coop,,Coop,,,personal_care,pcare_oral_care,high,personal_care,pcare_oral_care,high,
+583301,Coop DayTech ekstra lame hambaniit 50m,Coop,,Coop,,,other,dry_other,fallback,personal_care,pcare_oral_care,high,proposed_group_invalid;override_with_name_rules
+583302,Coop DayTech Repair h/pasta 75ml,Coop,75ml,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583303,Coop punase veini äädikas 7.1% 0.5L,Coop,0.5L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583304,Coop valge veini äädikas 7.1% 0.5L,Coop,0.5L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583305,Coop Küpsis Savoiardi 3*100g,Coop,100g,Coop,,,sweets_snacks,sweets_biscuits_cookies,high,sweets_snacks,sweets_biscuits_cookies,high,
+583306,Fior Fiore Rohelised oliivid 560g kiviga,Fior,560g ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583307,Coop Riisijook 1L kaltsiumi ja D vitam,Coop,1L ,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583308,Coop Bruschetta 150g oliivõli&rosmariini,Coop,150g ,Coop,,,sauces_oils,oils_other,high,sauces_oils,oils_other,high,
+583309,Coop Mereannikaste spagettidele400g külm,Coop,,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583310,Coop Mereannikaste risottole 400g külmt.,Coop,400g ,Coop,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+583311,Coop ananassimahl 1L,Coop,1L,Coop,,,drinks,drinks_juices,high,produce,produce_tropical,high,override_with_name_rules
+583312,Coop Riisijook 1L mahe,Coop,1L ,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583313,Tagliatelle Larghe 299 a.Uovo Coop 250g,Tagliatelle,250g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583314,Coop Päikesekuiv.kirsstom.õlis 280g,Coop,280g,Coop,,,sauces_oils,oils_other,high,sauces_oils,oils_other,high,
+583315,Coop Krõb.pan.tursafileed400g külmutatud,Coop,,Coop,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+583316,Coop palsamiäädikas Modena I.G.P. 0.25L,Coop,0.25L,Coop,,,sauces_oils,oils_vinegar,high,personal_care,pcare_shampoo_cond,high,override_with_name_rules
+583317,Coop Köögiv.supp herneste ja ubadega600g,Coop,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583318,Ace Regular pesuvalgendaja 1L,Ace,1L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583319,Ace Lavender&Essen Oil põrandapuh/vah 1L,Ace,1L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583320,Always FlexiStyle p/kaitse 58tk,Always,58tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583321,Tampax Compak Super Plus tamp 16tk,Tampax,16tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583322,Always Platinum Secure Night 10tk,Always,10tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583323,Oral-B Sensitive&Gum Calm Wh h/p 75ml,Oral-B,75ml,Coop,,,other,dry_other,fallback,sweets_snacks,sweets_gums_mints,high,proposed_group_invalid;override_with_name_rules
+583324,Vileda kummikindad 588 Sensitive M,Vileda,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583325,Vileda kummikindad 589 Sensitive L,Vileda,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583326,Vileda Mopi varu 228 Active Max,Vileda,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583327,Riidepuhastusrulli varurull Vileda 2tk,Riidepuhastusrulli,2tk,Coop,,,household,hh_cleaners,high,household,hh_cleaners,high,
+583328,ONE kuivt.kassile 800g lõhe&täisteranisu,ONE,800g ,Coop,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+583329,ONE kuivt.kassile 800g kana&täisteranisu,ONE,800g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583330,Mild&Light Filippo 0.5L raf.tud/väärisol,MildLight,0.5L ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583331,Organic Foods Tükeldatud tomat.400g mahe,Organic,400g ,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583332,Organic Foods Võioad vees 400g,Organic,400g,Coop,,,dairy_eggs_fats,dairy_butter_margarine,high,dairy_eggs_fats,dairy_butter_margarine,high,
+583333,Organic Foods Kooritud tomatid 400g mahe,Organic,400g ,Coop,,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+583334,Crostini Krutoonid vahemerepärased 100g,Crostini,100g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583335,Konserviavaja magnetiga,Konserviavaja,,Coop,,,dry_preserves,dry_other,heuristic,dry_preserves,dry_other,heuristic,
+583336,Granarolo Pihustatav vahukoor 250g,Granarolo,250g,Coop,,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+583337,47 Anno Domini Pros.Rose Bio 0.75L,47,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583338,47 Anno Domini Pros.Extra Dry Bio 0.75L,47,0.75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583339,Goccia Doro Ekstra väärisoliiviõli 0.5L,Goccia,0.5L,Coop,,,sauces_oils,oils_olive,high,sauces_oils,oils_olive,high,
+583340,Cantina del Garda Rose Prosecco 0.75L,Cantina,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583341,Vv Cantina del Garda Lugana 0.75L,Vv,0.75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583342,Vv Cantina del Garda Pinot Grigio 0.75L,Vv,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583343,Cantina del Garda Prosecco 0.75L,Cantina,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583344,Vv Cantina Castelnuovo P.Grigio 3L BIB,Vv,3L ,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583345,Pv Cantina del Garda Bardolino 0.75L,Pv,0.75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583346,Pv Cantina del Garda Valpol.Ripasso0.75L,Pv,75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583347,Pv Cantina delGarda Amarone Valpol.0.75L,Pv,0.75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583348,Vv Cantina Del Garda Soave 0.75L,Vv,0.75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583349,Kassiliiva kühvel Stefanplast 25*11*2cm,Kassiliiva,,Coop,,,pet,pet_litter_sand,high,pet,pet_litter_sand,high,
+583350,Regina Camomilla tualettpaber 8tk,Regina,8tk,Coop,,,drinks,drinks_spirits,high,household,hh_paper,high,override_with_name_rules
+583351,Regina Camomille kosm salvrätikud 96tk,Regina,96tk,Coop,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+583352,Pasta Zara pasta Tähekesed Stelle 500g,Pasta,500g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583353,Pasta Zara pasta Risini 500g,Pasta,500g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583354,Pasta Zara Pasta Gramigna 500g,Pasta,500g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583355,Pasta Zara pasta Gramignone Rigato 500g,Pasta,500g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583356,Pasta Zara Ditali Rigati 500g,Pasta,500g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583357,Pasta Zara pasta Gnocchi 500g,Pasta,500g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583358,Pasta Zara pasta Lasagne Gialle 500g,Pasta,500g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583359,Pasta Zara Pasta Cannelloni 250g,Pasta,250g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583360,Montorsi Coppa toorsuitsusink 100g viil,Montorsi,100g ,Coop,,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+583361,Contarini Pros.Millesimato Ext.Dry 0.75L,Contarini,0.75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583362,Coop Apelsinimarmelaad 380g,Coop,380g,Coop,,,produce,produce_tropical,high,produce,produce_tropical,high,
+583363,Coop Mini-Mix jäätiste assortii 9*33.3g,Coop,33.3g,Coop,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+583364,Coop Delizie jäätiste valik 6*50g/300g,Coop,50g,Coop,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+583365,Coop Nelja-juustupizza 340g külmutatud,Coop,340g ,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583366,Coop Tom.kaste400g seapeekon.Amatriciana,Coop,,Coop,,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+583367,Coop Tom.kaste 400g tshillip.Arrabbiata,Coop,400g ,Coop,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+583368,Coop Tomatikaste 400g sea-ja veiselihaga,Coop,400g ,Coop,,,sauces_oils,sauces_pasta_cooking,high,meat_fish,meat_beef_lamb_game,high,override_with_name_rules
+583369,Coop Tomatikaste 400g basiiliku.Basilico,Coop,400g ,Coop,,,sauces_oils,sauces_pasta_cooking,high,produce,produce_herbs_salads_sprouts,high,override_with_name_rules
+583370,Coop mahlajäät.Fruttolosi maas.õun 6*60g,Coop,60g,Coop,,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+583371,Coop shok.kaetud van.jäätis iirisega250g,Coop,,Coop,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+583372,Coop Vivi Verde õunaäädikas 5% 0.5L,Coop,0.5L,Coop,,,drinks,drinks_wine,high,produce,produce_apples_pears,high,override_with_name_rules
+583373,Coop Hapu kirsi ekstra dzemm 370g,Coop,370g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583374,Coop Aprikoosi ekstra džemm 370g,Coop,370g,Coop,,,dry_preserves,dry_other,high,dry_preserves,dry_other,high,
+583375,Coop Virsiku ekstra dzemm 370g,Coop,370g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583376,Coop Maasika ekstra džemm 370g,Coop,370g,Coop,,,dry_preserves,dry_other,high,produce,produce_berries,high,override_with_name_rules
+583377,Coop Pesto 190g Alla Genovese basiiliku,Coop,190g ,Coop,,,sauces_oils,sauces_pasta_cooking,high,produce,produce_herbs_salads_sprouts,high,override_with_name_rules
+583378,Coop Pan.mozzarellapallid 240g külmut.,Coop,240g ,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583379,Valsoia jäätis vegan 120ml/84g,Valsoia,120ml,Coop,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+583380,Valsoia Soja köögikreem 0.2L,Valsoia,0.2L,Coop,,,sauces_oils,sauces_soy_worcester,high,sauces_oils,sauces_soy_worcester,high,
+583381,Valsoia India pähkli-mandlijook 1L,Valsoia,1L,Coop,,,dairy_eggs_fats,dairy_plant_drinks,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+583382,Mionetto Prestige alk.vaba vahuvein0.75L,Mionetto,75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583383,Always Ultra Super Night h/side 10tk,Always,10tk,Coop,,,other,dry_other,fallback,personal_care,pcare_feminine_hygiene,high,proposed_group_invalid;override_with_name_rules
+583384,Naturella Ultra Norm Reg Deo h/side 9tk,Naturella,9tk,Coop,,,other,dry_other,fallback,personal_care,pcare_deo,high,proposed_group_invalid;override_with_name_rules
+583385,Naturella Ultra Norm Reg Deo h/side 18tk,Naturella,18tk,Coop,,,other,dry_other,fallback,personal_care,pcare_deo,high,proposed_group_invalid;override_with_name_rules
+583386,Naturella Normal pesukaitse kummel 44tk,Naturella,44tk,Coop,,,other,dry_other,fallback,personal_care,pcare_feminine_hygiene,high,proposed_group_invalid;override_with_name_rules
+583387,Swiffer tolmuharjakmpl lüh.vars+4lappi,Swiffer,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583388,Swiffer tolmulapp tolmuharjale 5tk,Swiffer,5tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583389,Fairy Forest Fruit nõudep/vah 650ml,Fairy,650ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583390,Fairy Lilac nõudep/vah 650ml,Fairy,650ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583391,Pampers Harmonie PF s/rätikud 48tk,Pampers,48tk,Coop,,,baby,baby_diapers,high,baby,baby_diapers,high,
+583392,Pampers Sensitive s/rätikud 52tk,Pampers,52tk,Coop,,,baby,baby_diapers,high,baby,baby_diapers,high,
+583393,Always Dailies Liners XPr p/kaitse 48tk,Always,48tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583394,Always Extra Long Scented p/kaitse 40tk,Always,40tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583395,Oral-B El.hambahari Vitality 3+ Frozen,Oral-B,,Coop,,,personal_care,pcare_oral_care,high,personal_care,pcare_oral_care,high,
+583396,Oral-B El.hambahari Vitality 3+ Spiderma,Oral-B,,Coop,,,personal_care,pcare_oral_care,high,personal_care,pcare_oral_care,high,
+583397,Always Long Unscented p/kaitse 52tk,Always,52tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583398,BAM 3D White Arctic Fresh h/p 75ml,BAM,75ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583399,BAM 3D White Cool Water h/p 75ml,BAM,75ml,Coop,,,other,dry_other,fallback,drinks,drinks_water,high,proposed_group_invalid;override_with_name_rules
+583401,BAM Anti-Cavity Original h/p 75ml,BAM,75ml,Coop,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+583402,Costa dOro Ekstra-väärisoliiviõli 0.75L,Costa,0.75L,Coop,,,sauces_oils,oils_olive,high,sauces_oils,oils_olive,high,
+583403,Costa D Ooro viinamarjaseemneõli 750ml,Costa,750ml,Coop,,,drinks,drinks_spirits,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+583404,Salvadori ekstra väärisoliiviõli 1L,Salvadori,1L,Coop,,,sauces_oils,oils_olive,high,sauces_oils,oils_olive,high,
+583405,Schär Maisihelbed 250g glut.vaba lakt.v.,Schär,250g ,Coop,,,dry_preserves,dry_cereals_muesli,high,dry_preserves,dry_cereals_muesli,high,
+583406,Schär Hommikusöögipallid 250g sok.mait.,Schär,250g ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583407,Schär hamburgerikuklid 4tk 300g gl.vaba,Schär,4tk ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583408,"Schär Müsli 375g puuviljadega, glut.vaba",Schär,375g ,Coop,,,dry_preserves,dry_cereals_muesli,high,dry_preserves,dry_cereals_muesli,high,
+583409,Pasta Reggia pasta Capellini 500g,Pasta,500g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583410,Pasta Reggia Pasta Pennettine 500g,Pasta,500g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583411,Pasta Reggia pasta Riso 500g,Pasta,500g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583412,Pasta Reggia Pasta Chifferi Rigati 500g,Pasta,500g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583413,Denim Black deodorant 150ml meeste,Denim,150ml ,Coop,,,personal_care,pcare_deo,high,personal_care,pcare_deo,high,
+583414,Denim Black AS näovesi 100ml,Denim,100ml,Coop,,,drinks,drinks_water,high,drinks,drinks_water,high,
+583415,Denim Black dushigeel 250ml,Denim,250ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583416,Arix aknapuhastuslapp 27*36cm,Arix,,Coop,,,household,hh_cleaners,high,household,hh_cleaners,high,
+583417,Arix üldpuh/lapp 38*60cm mustriga 3tk,Arix,3tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583418,il Molino Panna cotta 100g metsamarja,il,100g ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583419,il Molino Karamellipuding 200g,il,200g,Coop,,,dairy_eggs_fats,dairy_desserts,high,sweets_snacks,sweets_candies,high,override_with_name_rules
+583420,il Molino Kondiitrikreem 150g,il,150g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583421,Italpasta Pasta Tagliatelline 500g,Italpasta,500g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583422,Italpasta Pasta Lasagne 500g,Italpasta,500g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583423,Heidrun Toidukarp Polar Frost 1.2L,Heidrun,1.2L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583424,Heidrun Toidukarp Polar Frost 0.75L,Heidrun,0.75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583425,Corte Delle Calli Prosecco Extra Dry1.5L,Corte,5L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583426,Fiordimaso mozzarella 100g,Fiordimaso,100g,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583427,Juust Parmigiano Reggiano DOP 200g,Juust,200g,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583428,Fiordimaso Riivjuust Grana Padano 100g,Fiordimaso,100g,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583429,Fiordimaso Juust Toma Piemontese DOP150g,Fiordimaso,,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583430,Fiordimaso Juust Edamer 130g viilutatud,Fiordimaso,130g ,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583431,Fiordimaso Juust Emmental 130g viil,Fiordimaso,130g ,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583432,Fiordimaso Juust Maasdam 130g viilutatud,Fiordimaso,130g ,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583433,Fiordimaso Juustulaast Grana Padano 150g,Fiordimaso,150g,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583434,Fiordimaso juustu-oliivi mix 160g,Fiordimaso,160g,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583435,Conte Fosco Cuvee Brut vahuvein 0.75L,Conte,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583436,Conte Fosco Cuvee Dolce vahuvein 0.75L,Conte,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583437,Vv Aurosia Vino Bianco Medium Sweet0.75L,Vv,75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583438,Red Band Kummikomm Bubble Pop 100g,Red,100g,Coop,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+583439,Sophie intiimpuh/rätid 20tk vees lagunev,Sophie,20tk ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583440,Gorgonzola Dolce S/h.juust 200g,Gorgonzola,200g,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583441,Fiordimaso Ricotta Fresca 250g,Fiordimaso,250g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583442,Laurieri Amaretti küpsis 200g,Laurieri,200g,Coop,,,sweets_snacks,sweets_biscuits_cookies,high,sweets_snacks,sweets_biscuits_cookies,high,
+583443,Laurieri Cantuccin küpsis 200g mandli,Laurieri,200g ,Coop,,,sweets_snacks,sweets_biscuits_cookies,high,sweets_snacks,sweets_biscuits_cookies,high,
+583444,Cirio Ketshup 340g,Cirio,340g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583445,Col Blanc Frizzante poolvahuvein 0.75L,Col,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583446,Fiordimaso juust Gorgonzola/Mascarp.150g,Fiordimaso,150g,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583447,Biorepair Kids h/pasta 50ml,Biorepair,50ml,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583448,Medrull Aloe Vera plaaster 20tk,Medrull,20tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583449,Pharmadoct kõrvatropid 4tk karbis,Pharmadoct,4tk ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583450,Parmigiano Reggiano juust riivitud 100g,Parmigiano,100g,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583451,Limmi Sidrunimahl 0.2L,Limmi,0.2L,Coop,,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+583452,Limmi Laimimahl 0.2L,Limmi,0.2L,Coop,,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+583453,Koriander 50g Itaalia,Koriander,50g ,Coop,,,produce,produce_herbs_salads_sprouts,high,produce,produce_herbs_salads_sprouts,high,
+583454,Pv Barone Montalto PassiventoRosso3L BIB,Pv,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583455,Kinder Joy üllatusmuna 20g,Kinder,20g,Coop,,,dairy_eggs_fats,dairy_eggs,high,dairy_eggs_fats,dairy_eggs,high,
+583456,Sauber Pesulõksud plastik M 10tk värvil.,Sauber,10tk ,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583457,Pomi tomatipasta 8% 200g,Pomi,200g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583458,La bella mozzarella di Bufala 125g,La,125g,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583459,La bella mozzarella di Bufala kirsi 200g,La,200g,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583460,Frantoio Muraglia ekst.väärisol.õli 0.5L,Frantoio,0.5L,Coop,,,sauces_oils,oils_other,high,sauces_oils,oils_other,high,
+583461,Casa Giona Prosecco Extra Dry 0.75L,Casa,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583462,Valsoia Vegan shok-pähklikreem 200g,Valsoia,200g,Coop,,,sweets_snacks,sweets_nuts_driedfruit,high,sweets_snacks,sweets_nuts_driedfruit,high,
+583463,Pv Calecara Primitivo Puglia 0.75L,Pv,0.75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583464,Vv Calecara Fiano Puglia 0.75L,Vv,0.75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583465,Bob Teejook mullidega 0.36L marjamaits.,Bob,0.36L ,Coop,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+583466,Beebad Original energiajook 0.25L,Beebad,0.25L,Coop,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+583467,Becher vinnut.snäkk I Pippi suitsut.100g,Becher,100g,Coop,,,meat_fish,fish_salted_smoked,high,meat_fish,fish_salted_smoked,high,
+583468,Kinder Bueno White shok.batoon 39g,Kinder,39g,Coop,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+583469,Barilla Pasta Gnocchi 500g,Barilla,500g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583470,Valsoia Vegan shok-pähklikreem200g kaera,Valsoia,,Coop,,,sweets_snacks,sweets_nuts_driedfruit,high,sweets_snacks,sweets_nuts_driedfruit,high,
+583471,Codorniu La Rosca Cava Rose Brut 0.75L,Codorniu,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583472,Codorniu La Rosca Cava Brut 0.75L,Codorniu,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583473,Diffuser AW Reeds Pear&Cinnamon 40ml,Diffuser,40ml,Coop,,,world_spices,spices_herbs_spice_mix,high,produce,produce_apples_pears,high,override_with_name_rules
+583474,Diffuser AW Reeds Melon&Frangipani 40ml,Diffuser,40ml,Coop,,,produce,produce_tropical,high,produce,produce_tropical,high,
+583475,Brandy Torres 10 Gran Reserva 38% 0.5L,Brandy,0.5L,Coop,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+583476,Fragata Rohelised oliivid 200g sidruni,Fragata,200g ,Coop,,,produce,produce_tropical,high,produce,produce_tropical,high,
+583477,Fragata Roh.oliivid 200g küüslaugutäidis,Fragata,200g ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583478,Whiskas kiisueine 4*85g kalavalik,Whiskas,85g ,Coop,,,meat_fish,fish_fresh,high,drinks,drinks_spirits,high,override_with_name_rules
+583479,Figaro Küüslaauguküüned marinaadis 100g,Figaro,100g,Coop,,,sauces_oils,sauces_marinades,high,sauces_oils,sauces_marinades,high,
+583480,Borges rohelised oliivid 230g paprikaga,Borges,230g ,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583481,Pv Castillo Lagomar Red Medium Sw. 0.75L,Pv,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583482,Vv Castillo Lagomar White Medium Sw0.75L,Vv,75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583483,Don Simon kõrrejook apelsini 100% 0.2L,Don,0.2L,Coop,,,produce,produce_tropical,high,produce,produce_tropical,high,
+583484,Don Simon kõrrejook virs-viinamarja 0.2L,Don,0.2L,Coop,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+583485,Don Simon kõrrejook anan-viinamarja 0.2L,Don,0.2L,Coop,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+583486,Don Simon smuuti mango granadilli 330ml,Don,330ml,Coop,,,produce,produce_tropical,high,produce,produce_smoothies_fresh_juices,high,override_with_name_rules
+583487,Don Simon smuuti marja segu 330ml,Don,330ml,Coop,,,produce,produce_smoothies_fresh_juices,high,produce,produce_smoothies_fresh_juices,high,
+583488,"Gallina Blan.kanapulj.8*10g tilli,peters",Gallina,10g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583489,Yatekomo kiirnuudlid 61g idamaised,Yatekomo,61g ,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583490,Yatekomo Yakisoba kiirnuudel 93g kanaga,Yatekomo,93g ,Coop,,,meat_fish,meat_poultry,high,dry_preserves,dry_soups_noodles,high,override_with_name_rules
+583491,Yatekomo Yakisoba kiirnuudel 93g klassik,Yatekomo,93g ,Coop,,,other,dry_other,fallback,dry_preserves,dry_soups_noodles,high,proposed_group_invalid;override_with_name_rules
+583492,Pv Castillo de Liria Red 3L BIB,Pv,3L ,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583493,Vv Castillo de Liria White 3L BIB,Vv,3L ,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583494,Pv Castillo de Liria Red 0.75L,Pv,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583495,Vv Castillo de Liria White 0.75L,Vv,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583496,Castillo de Liria Brut vahuvein 0.75L,Castillo,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583497,Gullon Hookies küpsis 250g kakao lak.v,Gullon,250g ,Coop,,,sweets_snacks,sweets_biscuits_cookies,high,sweets_snacks,sweets_biscuits_cookies,high,
+583498,Gullon Küpsis 200g gluteenivaba,Gullon,200g ,Coop,,,drinks,drinks_tea_coffee,high,sweets_snacks,sweets_biscuits_cookies,high,override_with_name_rules
+583499,Gullon kaneeliküpsis Creme Canela 470g,Gullon,470g,Coop,,,sweets_snacks,sweets_biscuits_cookies,high,sweets_snacks,sweets_biscuits_cookies,high,
+583500,"Gullon Küpsis125g suhkruvaba,shok.krõps",Gullon,,Coop,,,sweets_snacks,sweets_biscuits_cookies,high,sweets_snacks,sweets_biscuits_cookies,high,
+583501,Gullon Suhkruvaba kakaoküpsis 210g vanil,Gullon,210g ,Coop,,,sweets_snacks,sweets_biscuits_cookies,high,sweets_snacks,sweets_biscuits_cookies,high,
+583502,Freixenet alk.vaba vahuvein 0.75L,Freixenet,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583503,Fini Watermelon närimiskumm 5g,Fini,5g,Coop,,,sweets_snacks,sweets_gums_mints,high,drinks,drinks_water,high,override_with_name_rules
+583504,Fini Cola Bottle Närimiskumm 5g,Fini,5g,Coop,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+583505,Vv Castillo De Albai Blanco Rioja 0.187L,Vv,0.187L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583506,Noel Salchichon Extra salaami 80g viil,Noel,80g ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583507,Elpozo paprikasalaami mahe Chorizo 200g,Elpozo,200g,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583508,Elpozo Fuete salaami vahemerepärane 150g,Elpozo,150g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583509,Elpozo Serrano sink 80g viil,Elpozo,80g ,Coop,,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+583510,Cava Jaume Serra Brut Nature 0.2L,Cava,0.2L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583511,Cava Jaume Serra Rosado Brut 0.75L,Cava,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583512,Vidal Lacreme maasika 80g suhkruvaba,Vidal,80g ,Coop,,,produce,produce_berries,high,produce,produce_berries,high,
+583513,Carmencita Himaalaja r/sool 3pipra 312g,Carmencita,312g,Coop,,,world_spices,spices_basic_salt_pepper,high,world_spices,spices_basic_salt_pepper,high,
+583514,Simon Coll shok.ükssarviku vihmavari15g,Simon,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583515,Oro Verde roh.oliivid 350g sidrunitäidis,Oro,350g ,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583516,Fripozo Cheddari juustu amps jalapen250g,Fripozo,,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583517,KH7 induktsioonpliidile puh.kreem 450ml,KH7,450ml,Coop,,,other,dry_other,fallback,personal_care,pcare_cosmetics,high,proposed_group_invalid;override_with_name_rules
+583518,KH-7 katlakivieemaldaja 750ml,KH-7,750ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583519,KH-7 rasvaeemaldaja 750ml,KH-7,750ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583520,Hispaania jõevähid valge veini kastm500g,Hispaania,,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583521,Embutidos Caula vorst Chorizo 200g,Embutidos,200g,Coop,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+583522,Haribo Miami Fizz kummikomm 85g,Haribo,85g,Coop,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+583523,Cava Clos Amador Brut Ecologic Res.0.75L,Cava,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583524,Cava Clos Amador Semi Sec Classic 0.75L,Cava,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583525,Cava Mas Pere Brut Reserva 0.75L,Cava,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583526,Ecomil Kookoskoor 200ml,Ecomil,200ml,Coop,,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+583527,Meresool 1kg,Meresool,1kg,Coop,,,world_spices,spices_basic_salt_pepper,high,world_spices,spices_basic_salt_pepper,high,
+583528,Islamar Kalmaarirõngad taignas 1kg külm.,Islamar,1kg ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583529,Byphasse niisutav h/palsam 2tk,Byphasse,2tk,Coop,,,personal_care,pcare_shampoo_cond,high,personal_care,pcare_shampoo_cond,high,
+583530,Byphasse niisutav SPF30 h/palsam 2tk,Byphasse,2tk,Coop,,,personal_care,pcare_shampoo_cond,high,personal_care,pcare_shampoo_cond,high,
+583531,Byphasse 48H Byphasse Sw.almond oil50ml,Byphasse,,Coop,,,other,dry_other,fallback,sweets_snacks,sweets_nuts_driedfruit,high,proposed_group_invalid;override_with_name_rules
+583532,Byphasse 48h Bambuse rulldeo 50ml,Byphasse,50ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583533,Byphasse 48H Groovy Par rulldeo 50ml,Byphasse,50ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583534,Byphasse Coconut d/geel-kreem 1L,Byphasse,1L,Coop,,,other,dry_other,fallback,personal_care,pcare_cosmetics,high,proposed_group_invalid;override_with_name_rules
+583535,Byphasse Vanilla d/kreem 1L,Byphasse,1L,Coop,,,other,dry_other,fallback,personal_care,pcare_cosmetics,high,proposed_group_invalid;override_with_name_rules
+583536,Pv Care Tinto Sobre Lias 0.75L,Pv,0.75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583537,Vv Care Blanco Sobre Lias 0.75L,Vv,0.75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583538,Vv Capellana Macabeo Ecologic 0.75L,Vv,0.75L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583539,Naturgreen Agaavi siirup hele 500ml,Naturgreen,500ml,Coop,,,drinks,drinks_syrups_powders,high,drinks,drinks_syrups_powders,high,
+583540,Cava Cabaret Brut 0.75L,Cava,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583541,Cava Cabaret Organic Brut 0.75L,Cava,0.75L,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583542,Paltavo Avokaado maj.kaste mahe mait200g,Paltavo,,Coop,,,sauces_oils,sauces_other,heuristic,produce,produce_tropical,high,override_with_name_rules
+583543,ONE Steril Weight kuivt.kassi 1.5kg kana,ONE,1.5kg ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583544,ONE kuivt.steril.kassile 800g kana,ONE,800g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583545,ONE Senior kuivt.kassi800g kana-täistera,ONE,,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583546,Maggi Idea mahlastele ribidele 42g,Maggi,42g,Coop,,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+583547,Felix lihasupp kassile 6*48g veis-kana,Felix,48g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583548,Felix kalasupp kassile6*48g tursk-tuunik,Felix,48g ,Coop,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+583549,ONE Mini Active koeraeine4*85g veis-pard,ONE,85g ,Coop,,,meat_fish,meat_beef_lamb_game,high,meat_fish,meat_beef_lamb_game,high,
+583550,ONE Mini Adult koeraeine4*85g veis-kana,ONE,85g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583551,Gourmet Gold kons.kassile 85g kana,Gourmet,85g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583552,Gourmet Gold kons.kassile 85g loomaliha,Gourmet,85g ,Coop,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+583553,Gourmet Gold kons.kassile 85g kala,Gourmet,85g ,Coop,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+583554,ONE Dual kuivt.kassile 750g kalkun-spiru,ONE,750g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583555,Felix Del.kiisueine 4*85g liha tarrendis,Felix,85g ,Coop,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+583556,Felix Del.kiisueine 4*85g kala tarrendis,Felix,85g ,Coop,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+583557,Maison Perrier Sidrun&Guajaava 0.25L,Maison,0.25L,Coop,,,dry_preserves,dry_canned_veg,high,dry_preserves,dry_canned_veg,high,
+583558,Maison Perrier Ananass&Mango 0.25L,Maison,0.25L,Coop,,,dry_preserves,dry_canned_veg,high,produce,produce_tropical,high,override_with_name_rules
+583559,Maison Perrier Virsik&Kirss 0.25L,Maison,0.25L,Coop,,,dry_preserves,dry_canned_veg,high,dry_preserves,dry_canned_veg,high,
+583560,Maggi pasta Pad Thai kastmele 65g,Maggi,65g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583561,Maggi pasta Tikka Masala kastmele 65g,Maggi,65g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583562,Maggi pasta Teriyaki kastmele 65g,Maggi,65g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583563,Chupa Chups XXL pulgakomm 29g,Chupa,29g,Coop,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+583564,Maggi kanapuljong 12*10g,Maggi,10g,Coop,,,world_spices,spices_broth_stock,high,world_spices,spices_broth_stock,high,
+583565,Maggi Idea kanale 4-juustu kastmes 32g,Maggi,32g,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583566,Silmatilgad Ocuflash N1 10ml,Silmatilgad,10ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583567,Madeta juust Maasdam 100g viil,Madeta,100g ,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583568,Red Greip Magnesia Vaarika gas.jook 1.5L,Red,1.5L,Coop,,,produce,produce_berries,high,produce,produce_berries,high,
+583569,Finish nõudep/masina puh.vah 250ml,Finish,250ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583570,Finish nõudep/masina sool 1.5kg,Finish,1.5kg,Coop,,,world_spices,spices_basic_salt_pepper,high,world_spices,spices_basic_salt_pepper,high,
+583571,Surprise gas-mata allikavesi0.3L+ül.muna,Surprise,3L,Coop,,,drinks,drinks_water,high,dairy_eggs_fats,dairy_eggs,high,override_with_name_rules
+583572,Bonavita Röst.müsli Granola 500g shok.,Bonavita,500g ,Coop,,,dry_preserves,dry_cereals_muesli,high,dry_preserves,dry_cereals_muesli,high,
+583573,Nestea Lemon jäätee 0.5L sidrunimaits.,Nestea,0.5L ,Coop,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+583574,Nestea Peach jäätee 0.5L virsikumaits.,Nestea,0.5L ,Coop,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+583575,Pikantne kikerhernehummus 200g Serbia,Pikantne,200g ,Coop,,,dry_preserves,dry_groats_beans,high,dry_preserves,dry_groats_beans,high,
+583576,Nestle Pirulo arbuusi mahlajää 73ml/67g,Nestle,73ml,Coop,,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+583577,Oreo Jäätis ballcone 100ml/66g,Oreo,100ml,Coop,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+583578,Ecolatier Organic Aloe Vera H&F sh 250ml,Ecolatier,250ml,Coop,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+583579,Ecolatier Org Aloe Vera H&F pals 250ml,Ecolatier,250ml,Coop,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+583580,Ecolatier Organic Cannabis Vol& sh 250ml,Ecolatier,250ml,Coop,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+583581,Ecolatier Organic Can Vol&Gr pals 250ml,Ecolatier,250ml,Coop,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+583582,Ecolatier UR Res Damaged Hair pals 400ml,Ecolatier,400ml,Coop,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+583583,Ecolatier UR Volume Thin Hair pals 400ml,Ecolatier,400ml,Coop,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+583584,Ecolatier UR Volume Thin Hair sh 600ml,Ecolatier,600ml,Coop,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+583585,Ecolatier UR for Damaged Hair sh 600ml,Ecolatier,600ml,Coop,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+583586,Ecolatier Urban Jojoba&Papaya d/g 600ml,Ecolatier,600ml,Coop,,,drinks,drinks_soft_soda,high,drinks,drinks_spirits,high,override_with_name_rules
+583587,Ecolatier Urban Grapefruit&Cle d/g 600ml,Ecolatier,600ml,Coop,,,drinks,drinks_soft_soda,high,drinks,drinks_spirits,high,override_with_name_rules
+583588,Ecolatier Urban Argana&Vanilla d/g 600ml,Ecolatier,600ml,Coop,,,drinks,drinks_soft_soda,high,drinks,drinks_spirits,high,override_with_name_rules
+583589,Ecolatier Clementine köögi v/seep 600ml,Ecolatier,600ml,Coop,,,drinks,drinks_soft_soda,high,personal_care,pcare_soap,high,override_with_name_rules
+583590,"Germund Pistaatsiapähkel 200g röst,sool",Germund,200g ,Coop,,,world_spices,spices_basic_salt_pepper,high,world_spices,spices_basic_salt_pepper,high,
+583591,Germund Aprikoos 200g kuivat.,Germund,200g ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583592,Germund Rosin Sultan 200g,Germund,200g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583593,Germund Metspähkel 200g,Germund,200g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583594,Dimes Moments Apelsinimahl 0.7L pressit.,Dimes,0.7L ,Coop,,,drinks,drinks_juices,high,produce,produce_tropical,high,override_with_name_rules
+583595,Dimes Granaatõunamahl 100% 0.25L,Dimes,0.25L,"Coop, Prisma",,,drinks,drinks_juices,high,produce,produce_tropical,high,override_with_name_rules
+583596,Tango Citrus õhuvärsk. 300ml,Tango,300ml,Coop,,,household,hh_candles_airfresh,high,household,hh_candles_airfresh,high,
+583597,Elvan keeks Today Donut 50g karmelli,Elvan,50g ,Coop,,,bakery,bakery_sweet_buns_donuts,high,bakery,bakery_sweet_buns_donuts,high,
+583598,Elvan keeks Today Donut 50g maasika,Elvan,50g ,Coop,,,bakery,bakery_sweet_buns_donuts,high,bakery,bakery_sweet_buns_donuts,high,
+583599,Gold Care kingakreem+läige must 60ml,Gold,60ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583600,Gold Care kingakreem+läige värvitu 60ml,Gold,60ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583601,Gold Care niiskusekaitse jalatsite 200ml,Gold,200ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583602,Jalatsisvamm Gold Care Easy Shine must,Jalatsisvamm,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583603,Jalatsisvamm Gold Care Easy Shine värvi.,Jalatsisvamm,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583604,Gold Care Sport kingaläige valge 75ml,Gold,75ml,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583605,Naturella Ultra Tender Prot Sup h/s 14tk,Naturella,14tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583606,Naturella Ultra Tender Prot Nor h/s 16tk,Naturella,16tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583607,Gillette Mach3 Charcoal terad 5tk,Gillette,5tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583608,Gillette Mach3 terad 8tk,Gillette,8tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583609,Oral-B Junior hambapasta 75ml,Oral-B,75ml,Coop,,,dry_preserves,dry_pasta_rice,high,personal_care,pcare_oral_care,high,override_with_name_rules
+583610,Oral-B Kids hambapasta 50ml,Oral-B,50ml,Coop,,,dry_preserves,dry_pasta_rice,high,personal_care,pcare_oral_care,high,override_with_name_rules
+583611,Oral-B Pro Expert Advanced h/p 75ml,Oral-B,75ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583612,Oral-B Pro Expert Deep Clean h/p 75ml,Oral-B,75ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583613,Oral-B Pro-Expert Sensitive h/p 75ml,Oral-B,75ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583614,Oral-B Pro-Expert Prof.Protect. h/p 75ml,Oral-B,75ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583615,Gillette Venus&Olay Sugarberry raseerija,Gillette,,Coop,,,personal_care,pcare_shaving,high,personal_care,pcare_shaving,high,
+583616,Gillette Venus Simply3 raseerija 4tk,Gillette,4tk,Coop,,,personal_care,pcare_shaving,high,personal_care,pcare_shaving,high,
+583617,Gillette Blue3 Plus ras 12tk ühekordne,Gillette,12tk ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583618,Always Ultra Normal Plus Duo h/side 20tk,Always,20tk,Coop,,,other,dry_other,fallback,personal_care,pcare_feminine_hygiene,high,proposed_group_invalid;override_with_name_rules
+583619,Always Ultra Plus Quattro h/side 40tk,Always,40tk,Coop,,,other,dry_other,fallback,personal_care,pcare_feminine_hygiene,high,proposed_group_invalid;override_with_name_rules
+583620,Fairy Platinum Plus Lemon kapslid 71tk,Fairy,71tk,Coop,,,produce,produce_root_veg,high,drinks,drinks_coffee_beans_capsules,high,override_with_name_rules
+583621,Fairy Fairy Platinum Lemon kaps 96tk,Fairy,96tk,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583622,Fairy Fairy Platinum Lemon kaps 81tk,Fairy,81tk,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583623,Gillette Fusion terad 5tk+käepide,Gillette,5tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583624,Gillette Sensor3 Black terad 8tk,Gillette,8tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583625,Discreet Normal Plus p/kaitse 52tk,Discreet,52tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583626,Gillette Sensitive AS palsam 100ml,Gillette,100ml,Coop,,,personal_care,pcare_shampoo_cond,high,personal_care,pcare_shampoo_cond,high,
+583627,Gillette Sensor3 Black terad 8tk+käepide,Gillette,8tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583628,Gillette Venus&Olay Sugarberry terad 3tk,Gillette,3tk,Coop,,,other,dry_other,fallback,produce,produce_berries,high,proposed_group_invalid;override_with_name_rules
+583629,Ariel Fresh Air p/geel 1.35L 30pesu,Ariel,1.35L ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583630,Ariel Amethyst Flower p/geel 1.35L 30p,Ariel,1.35L ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583631,Ariel Extra Clean p/geel 1.35L 30pesu,Ariel,1.35L ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583632,Ariel Extra Col&Fib Prot p/g 1.35L 30p,Ariel,1.35L ,Coop,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+583633,Ariel Color pesugeel 1.8L 40pesu,Ariel,1.8L ,Coop,,,household,hh_laundry,high,household,hh_laundry,high,
+583634,Ariel Color pesugeel 1.125L 25pesu,Ariel,1.125L ,Coop,,,household,hh_laundry,high,household,hh_laundry,high,
+583635,Lenor Fresh l/graanul 270g 22pesukorda,Lenor,270g ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583636,Lenor Lotus F&D Figs pesul/vah 675ml 32p,Lenor,675ml ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583637,Lenor Lotus F&D Figs pesul/v 1.239L 59p,Lenor,1.239L ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583638,Lenor Gold Orchid&Vanill pesul/vah 675ml,Lenor,675ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583639,Lenor Floral Bouquet pesul/vah 675ml 32p,Lenor,675ml ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583640,Lenor Sensitive pesul/vah 1.491L 71pesu,Lenor,1.491L ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583641,Lenor Spring Awakening lop/vah 1.491L,Lenor,1.491L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583642,Lenor Gold Orchid&Vanilla pesul/v 1.239L,Lenor,1.239L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583643,Lenor La Desirable pesul/vah 1.239L 59p,Lenor,1.239L ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583644,Lenor Spring Awakening lop/vah 798ml 38p,Lenor,798ml ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583645,Lenor Ruby Jasmine pesul/vah 1.239L 59p,Lenor,1.239L ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583646,Lenor Sicilia pesul/vah 1.239L 59pesu,Lenor,1.239L ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583647,Ariel Color pesupulber 330g 6pesu,Ariel,330g ,Coop,,,household,hh_laundry,high,household,hh_laundry,high,
+583648,Ariel Color pesupulber 1.65kg 30pesu,Ariel,1.65kg ,Coop,,,household,hh_laundry,high,household,hh_laundry,high,
+583649,Ariel Mountain Sp p/pulber 1.65kg 30pesu,Ariel,1.65kg ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583650,Ariel Mountain Sp pesupulber 330g 6pesu,Ariel,330g ,Coop,,,household,hh_laundry,high,household,hh_laundry,high,
+583651,Gillette Venus Miami raseerija 3tk,Gillette,3tk,Coop,,,personal_care,pcare_shaving,high,personal_care,pcare_shaving,high,
+583652,Ariel Extra Clean p/geel-kaps 38tk,Ariel,38tk,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583653,Ariel Extra Color&Fiber p/geel-kaps 38tk,Ariel,38tk,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583654,Ariel Color p/geel-kaps 44tk,Ariel,44tk,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583655,Ariel Mountain Spring p/geel-kaps 44tk,Ariel,44tk,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583656,Ariel Color p/geel-kaps 12tk,Ariel,12tk,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583657,Ariel Extra Clean p/geel-kaps 26tk,Ariel,26tk,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583658,Ariel Color p/geel-kaps 22tk,Ariel,22tk,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583659,Ariel Mountain Spring p/geel-kaps 22tk,Ariel,22tk,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583660,Ariel Mountain Spring p/geel-kaps 30tk,Ariel,30tk,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583661,Ariel Amethyst Flower p/geel-kaps 26tk,Ariel,26tk,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583662,Ariel Fresh Air p/geel-kaps 19tk,Ariel,19tk,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583663,Ariel Sensitive p/geel-kaps 30tk,Ariel,30tk,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583664,Ariel Extra Color&Fiber p/geel-kaps 26tk,Ariel,26tk,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583665,Ariel Color p/geel-kaps 30tk,Ariel,30tk,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583666,Always Ultra Night Duo h/side 14tk,Always,14tk,Coop,,,other,dry_other,fallback,personal_care,pcare_feminine_hygiene,high,proposed_group_invalid;override_with_name_rules
+583667,Always Ultra Super Plus Duo h/side 16tk,Always,16tk,Coop,,,other,dry_other,fallback,personal_care,pcare_feminine_hygiene,high,proposed_group_invalid;override_with_name_rules
+583668,Always Ultra normal h/side 10tk,Always,10tk,Coop,,,other,dry_other,fallback,personal_care,pcare_feminine_hygiene,high,proposed_group_invalid;override_with_name_rules
+583669,Always Ultra Quattro Night h/side 28tk,Always,28tk,Coop,,,other,dry_other,fallback,personal_care,pcare_feminine_hygiene,high,proposed_group_invalid;override_with_name_rules
+583670,Always Ultra Super Quat Pack h/side 32tk,Always,32tk,Coop,,,other,dry_other,fallback,personal_care,pcare_feminine_hygiene,high,proposed_group_invalid;override_with_name_rules
+583671,Gillette Sensor3 Comfort terad 8tk+käep.,Gillette,8tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583672,Gillette Sensor3 Comfort terad 8tk,Gillette,8tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583673,Philips Avent tass tilaga 300ml sin,Philips,300ml ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583674,Philips Avent tass tilaga 300ml violetne,Philips,300ml ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583675,Avent Cl tilaga tops 200ml 6k+ roosa,Avent,200ml ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583676,Philips Avent Nat toitmispudel 260ml 1+,Philips,260ml 1,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583677,Cif Perfect Fin Oven&Gril puh/vah 435ml,Cif,435ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583678,Cif Cream Ultra White puh/vah 695g,Cif,695g,Coop,,,other,dry_other,fallback,dairy_eggs_fats,dairy_cream_sourcream,high,proposed_group_invalid;override_with_name_rules
+583679,Aviko Sibularõngad 450g külmutatud,Aviko,450g ,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583680,Aviko Friikartul Original 750+150g,Aviko,150g,Coop,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+583681,Aviko Friikartul Grip n Dip 600g külmut.,Aviko,600g ,Coop,,,frozen_food,frozen_potato_products,high,frozen_food,frozen_potato_products,high,
+583682,Aviko jalapeno pallid 300g külmutatud,Aviko,300g ,Coop,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+583683,Neutral Sensit Skin puh/vah 750ml pihust,Neutral,750ml ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583684,Nusica pähklikreem Duo 400g,Nusica,400g,Coop,,,sweets_snacks,sweets_nuts_driedfruit,high,sweets_snacks,sweets_nuts_driedfruit,high,
+583685,Kitty Friend Budget kassiliiv 10L/6.6kg,Kitty,10L,Coop,,,pet,pet_litter_sand,high,pet,pet_litter_sand,high,
+583686,Cricket Fireflex Tulesüütaja,Cricket,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583687,Bakker Joop vahvel 315g karamellitäidis,Bakker,315g ,Coop,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+583688,Mentos Fruit nätsukomm 38g puuviljam.,Mentos,38g ,Coop,,,dry_preserves,dry_other,high,dry_preserves,dry_other,high,
+583689,Rokus kons.koerale 415g kanaliha,Rokus,415g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583690,Rokus kons.koerale 415g veiseliha,Rokus,415g ,Coop,,,meat_fish,meat_beef_lamb_game,high,meat_fish,meat_beef_lamb_game,high,
+583691,Rokus kons.koerale 1.24kg kanaliha,Rokus,1.24kg ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583692,Rokus kons.koerale 1.24kg loomaliha,Rokus,1.24kg ,Coop,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+583693,Rokus kons.kutsikale 415g kanaliha,Rokus,415g ,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583694,Cif Power&Shine puh/vah 750ml,Cif,750ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583695,Cif Lemon puhastuskreem 300g,Cif,300g,Coop,,,household,hh_cleaners,high,household,hh_cleaners,high,
+583696,Cif Lemon puhastuskreem 540g,Cif,540g,Coop,,,household,hh_cleaners,high,household,hh_cleaners,high,
+583697,Domestos Power 5 Ocean WC värsk 3*55g,Domestos,55g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583698,ProChamp shampinjonid 195g viilutatud,ProChamp,195g ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583699,LOR Kohviuba Forza 1kg,LOR,1kg,Coop,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+583700,Jacobs Krönung filtrikohv 250g,Jacobs,250g,Coop,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+583701,Jacobs Selection kohviuba 1kg,Jacobs,1kg,Coop,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+583702,Jacobs Selection Crema Italiano kohv500g,Jacobs,,Coop,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+583703,Jacobs k/uba Barista Crema Italiano 1kg,Jacobs,1kg,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583704,Jacobs kohviuba Barista Espresso 1kg,Jacobs,1kg,Coop,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+583705,Kingasvamm 2tk,Kingasvamm,2tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583706,Kingalusikas seljasügajaga,Kingalusikas,,Coop,,,other,dry_other,fallback,household,hh_kitchenware,high,proposed_group_invalid;override_with_name_rules
+583707,B&J koorejäätis Cookie Vermont-ster 324g,BJ,324g,Coop,,,dairy_eggs_fats,dairy_cream_sourcream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+583708,Choice Lovely Vanilli koonus 150ml/87g,Choice,150ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583709,Super Viva banaani-maapähklijäätis442.5g,Super,5g,Coop,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+583710,Ben&Jerry Karamellimaits.jäätis 392g,BenJerry,392g,Coop,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+583711,B&J Soolakaramelli-brownie jäätised 150g,BJ,150g,Coop,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+583712,Super Viva valge shok-mango jäätis 79g,Super,79g,Coop,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+583713,Magnum Pulgajäätis Vegan Chill 90ml/70g,Magnum,90ml,Coop,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+583714,Magnum Choco crunchy jäätis 91g koonus,Magnum,91g ,Coop,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+583715,Knorr Kana kiirsupp 12g nuudlitega,Knorr,12g ,Coop,,,dry_preserves,dry_pasta_rice,high,meat_fish,meat_poultry,high,override_with_name_rules
+583716,Knorr Kanapüree kiirsupp16g krutoonidega,Knorr,,Coop,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+583718,Knorr Kiirroog seenepasta 59g,Knorr,59g,Coop,,,dry_preserves,dry_pasta_rice,high,produce,produce_mushrooms,high,override_with_name_rules
+583719,Neutral Sensit Skin White p/p 1.188kg,Neutral,1.188kg,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583720,Organix 6K Maisirõngad 20g,Organix,20g,Coop,,,dry_preserves,dry_canned_veg,high,dry_preserves,dry_canned_veg,high,
+583721,Organix 7K Maisirõngad 20g tomati,Organix,20g ,Coop,,,dry_preserves,dry_canned_veg,high,dry_preserves,dry_canned_veg,high,
+583722,Red Band Kummikomm Nöörid Sour Apple100g,Red,,Coop,,,sweets_snacks,sweets_candies,high,produce,produce_apples_pears,high,override_with_name_rules
+583723,Kaltsiumisnäkk koertele Antos 100g,Kaltsiumisnäkk,100g,Coop,,,pet,pet_other,heuristic,pet,pet_other,heuristic,
+583724,Antos Lõhemaius koerale 200g,Antos,200g,Coop,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+583725,Colgate Twister Medium h/hari 2-pakk,Colgate,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583726,Colgate Cool Mint suuvesi 500ml,Colgate,500ml,Coop,,,drinks,drinks_water,high,sweets_snacks,sweets_gums_mints,high,override_with_name_rules
+583727,Colgate suuvesi Cool Mint sinine 250ml,Colgate,250ml,Coop,,,drinks,drinks_water,high,sweets_snacks,sweets_gums_mints,high,override_with_name_rules
+583728,Colgate Max White One Luminous h/p 75ml,Colgate,75ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583729,Elmex Waxed Mint hambaniit 50m,Elmex,,Coop,,,sweets_snacks,sweets_gums_mints,high,personal_care,pcare_oral_care,high,override_with_name_rules
+583730,Elmex Sensitive Whitening h/pasta 75ml,Elmex,75ml,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583731,Colgate Total suuvesi 500ml,Colgate,500ml,Coop,,,drinks,drinks_water,high,drinks,drinks_water,high,
+583732,Heinz ketshup original 700g,Heinz,700g,Coop,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+583733,Liköör Pisang Ambon 17% 0.7L,Liköör,0.7L,Coop,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+583734,Friso Gold 3 12K piimasegu 800g,Friso,800g,Coop,,,dairy_eggs_fats,dairy_milk,high,baby,baby_formula,high,override_with_name_rules
+583735,Domestos Lime WC katlakivi eemald.750ml,Domestos,750ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583736,Sinepi ja tilli kaste juustule 190ml,Sinepi,190ml,Coop,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+583737,Bolsius Lauaküünal 15h 80/48mm h.roh,Bolsius,,Coop,,,household,hh_candles_airfresh,high,household,hh_candles_airfresh,high,
+583738,Bolsius Lauaküünal 15h 80/48mm kollane,Bolsius,,Coop,,,household,hh_candles_airfresh,high,household,hh_candles_airfresh,high,
+583739,Bols. L/teeküünal Maxi 8h 8tk granaatõun,Bols,8tk ,Coop,,,drinks,drinks_tea_coffee,high,household,hh_candles_airfresh,high,override_with_name_rules
+583740,Bols. L/teeküünal M. True 8h 8tk roh.tee,Bols,8tk ,Coop,,,drinks,drinks_tea_coffee,high,household,hh_candles_airfresh,high,override_with_name_rules
+583741,Bols. L/teeküünal MaxiTrue 8h 8tk virsik,Bols,8tk ,Coop,,,drinks,drinks_tea_coffee,high,household,hh_candles_airfresh,high,override_with_name_rules
+583742,Bolsius Õli-kalmuküünal 2.5päeva valge,Bolsius,,Coop,,,sauces_oils,oils_other,high,household,hh_candles_airfresh,high,override_with_name_rules
+583743,Bols.Kalmuküünal kaanega 50h valge,BolsKalmuküünal,,Coop,,,household,hh_candles_airfresh,high,household,hh_candles_airfresh,high,
+583744,Bolsius kalmuküünal kaanega 70h valge,Bolsius,,Coop,,,household,hh_candles_airfresh,high,household,hh_candles_airfresh,high,
+583745,Bolsius kalmuküünal 36h 120*61mm valge,Bolsius,,Coop,,,household,hh_candles_airfresh,high,household,hh_candles_airfresh,high,
+583746,Domestos Zero Blue WC katlak/eem 750ml,Domestos,750ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583747,Aptamil Comfort 2 6K jätkupiimasegu 400g,Aptamil,400g,Coop,,,dairy_eggs_fats,dairy_milk,high,baby,baby_formula,high,override_with_name_rules
+583748,Mänguasi kassile Papillon,Mänguasi,,Coop,,,pet,pet_other,heuristic,household,hh_other,low_oos,override_with_name_rules
+583749,LED lamp E27 7W=60W A60 matt Philips,LED,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583750,LED lamp E27 75W A60 matt klaas Philips,LED,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583751,LED lamp E27 10.5W A60 matt Philips,LED,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583752,LED lamp GLS 13W A60 1350lm Philips,LED,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583753,LED lamp E14 6.5W B35 filament Philips,LED,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583754,LED lamp E14 6.5W P45 filament Philips,LED,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583755,Colgate h/hari 360 Black Medium,Colgate,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583756,Colgate Total Original h/p 75ml,Colgate,75ml,Coop,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+583757,Colgate Total Whitening h/pasta 75ml,Colgate,75ml,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583758,Colgate Max White Charcoal h/p 75ml,Colgate,75ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583759,Colgate Advanced White Charcoal h/p 75ml,Colgate,75ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583760,Ajax puhastusvahend vannitoale750ml spry,Ajax,,Coop,,,household,hh_cleaners,high,household,hh_cleaners,high,
+583761,Ajax puhastusvahend universaalne 750ml,Ajax,750ml,Coop,,,household,hh_cleaners,high,household,hh_cleaners,high,
+583762,Colgate Advanced White h/p 75ml,Colgate,75ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583763,Colgate Max Fresh Cool Cryst h/p 75ml,Colgate,75ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583764,Colgate Max White White Cryst h/p 75ml,Colgate,75ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583765,Ajax Boost Charcoal üldpuh/vah 1L,Ajax,1L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583766,Colgate High Density Char Soft h/h 2tk,Colgate,2tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583767,Colgate hambahari Max White Charcoal 2tk,Colgate,2tk,Coop,,,personal_care,pcare_oral_care,high,personal_care,pcare_oral_care,high,
+583768,Colgate High Density Sup Soft h/hari 3tk,Colgate,3tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583769,Colgate 360 Freshn Protect h/hari 2tk,Colgate,2tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583770,Colgate Barbie h/hari patareidega laste,Colgate,,Coop,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+583771,Colgate Max White Ultra Active h/p 50ml,Colgate,50ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583772,Colgate Ultra Soft hambahari 2tk,Colgate,2tk,Coop,,,personal_care,pcare_oral_care,high,personal_care,pcare_oral_care,high,
+583773,Colgate Max White Purple Re h/pasta 75ml,Colgate,75ml,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583774,Colgate 360 Soft hambahari 2-pakk,Colgate,,Coop,,,personal_care,pcare_oral_care,high,personal_care,pcare_oral_care,high,
+583775,Colgate Max Wh Ultra Multi Prot h/p 50ml,Colgate,50ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583776,Ajax Strong&Safe puhastussprei 500ml,Ajax,500ml,Coop,,,household,hh_cleaners,high,household,hh_cleaners,high,
+583777,Ajax Strong&Safe üldpuh/vah 1L,Ajax,1L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583778,Colgate Big Kids Smiles 6-9a h/p 50ml,Colgate,50ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583779,Ajax Power Anti-Limescale puh/vaht 500ml,Ajax,500ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583780,Ajax Power Multi-Surface puh/vaht 500ml,Ajax,500ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583781,Colgate High Density Charcoa h/hari soft,Colgate,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583782,Colgate Total Anti-Tartar h/pasta 75ml,Colgate,75ml,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583783,Colgate Max White Spar Diamon h/p 75ml,Colgate,75ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583784,Colgate Total Gum Care&Sensitivih/p 75ml,Colgate,75ml,Coop,,,other,dry_other,fallback,sweets_snacks,sweets_gums_mints,high,proposed_group_invalid;override_with_name_rules
+583785,Ajax Ultra Lavender üldpuh/vah 1L,Ajax,1L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583786,Ajax Ultra Fresh üldpuh/vah 1L,Ajax,1L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583787,Colgate Advanced White Purple h/p 75ml,Colgate,75ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583788,Fruitfun Puuviljasnäkk 4*20g krõbe õuna,Fruitfun,20g ,Coop,,,produce,produce_apples_pears,high,produce,produce_apples_pears,high,
+583789,Fruitfun Puuviljasnäkk 4*20g maasika,Fruitfun,20g ,Coop,,,produce,produce_berries,high,produce,produce_berries,high,
+583790,Fruitfun Puuviljasnäkk 10*10g õuna,Fruitfun,10g ,Coop,,,produce,produce_apples_pears,high,produce,produce_apples_pears,high,
+583791,Rama Vispi Kreem 31% 1L,Rama,1L,Coop,,,other,dry_other,fallback,personal_care,pcare_cosmetics,high,proposed_group_invalid;override_with_name_rules
+583792,Rama Köögikreem 15% 1L madala laktoosi,Rama,1L ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583793,Rama Classic rasvavõie 59% 225g,Rama,225g,Coop,,,dairy_eggs_fats,dairy_butter_margarine,high,dairy_eggs_fats,dairy_butter_margarine,high,
+583794,Fruitfun Puuviljasnäkk 10*10g maasika,Fruitfun,10g ,Coop,,,produce,produce_berries,high,produce,produce_berries,high,
+583795,LED lamp E14 6W B35 620lm 15000h Philips,LED,,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583797,Neutral Sensit Skin Silk&WoolWash p/g 1L,Neutral,1L,Coop,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+583798,Neutral Sensit Skin White Wash p/geel 1L,Neutral,1L,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583799,Neutral Sensit Skin Colour Wash p/g 1L,Neutral,1L,Coop,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+583800,Dove Invisible Care deo 150ml naiste,Dove,150ml ,Coop,,,other,dry_other,fallback,personal_care,pcare_deo,high,proposed_group_invalid;override_with_name_rules
+583801,Dove Men Clean Comfort d/geel 250ml,Dove,250ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583802,Dove Men Extra Fresh d/geel 250ml,Dove,250ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583803,Dove Men Clean Comfort d/geel 400ml,Dove,400ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583804,Cif Perfect Finish Steel puh/vah 435ml,Cif,435ml,Coop,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+583805,Domestos Pine Fresh WC puh/vahend 750ml,Domestos,750ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583806,Domestos 24h Atlantic WC puh/vah 750ml,Domestos,750ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583807,Domestos Citrus WC puh/vahend 750ml,Domestos,750ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583808,Dove Eucalyptus+Mint d/geel 400ml,Dove,400ml,Coop,,,sweets_snacks,sweets_gums_mints,high,sweets_snacks,sweets_gums_mints,high,
+583809,Dove Deeply Nourishing d/geel 400ml,Dove,400ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583810,Dove Nourishing Silk d/geel 400ml,Dove,400ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583811,Dove Deeply Nourishing d/geel 225ml,Dove,225ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583812,Dove Fresh Care d/geel 250ml,Dove,250ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583813,Dove Nourishing Argan Oil kreemseep 90g,Dove,90g,Coop,,,personal_care,pcare_soap,high,personal_care,pcare_soap,high,
+583814,Dove kreemseep kooriv 90g,Dove,90g,Coop,,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+583815,Dove Fresh Touch kreemseep 90g,Dove,90g,Coop,,,personal_care,pcare_soap,high,personal_care,pcare_soap,high,
+583816,Dove kreemseep 90g,Dove,90g,Coop,,,personal_care,pcare_soap,high,personal_care,pcare_soap,high,
+583817,Domestos Power Fresh Lime wc geel 700ml,Domestos,700ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583818,Knorr Lasagnette+kastme valm.kompl.270g,Knorr,270g,Coop,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+583819,Domestos Power Foam Citrus p/vaht 435ml,Domestos,435ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583820,Domestos Power Foam Arctic p/vaht 435ml,Domestos,435ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583821,Domestos Power Foam Floral p/vaht 435ml,Domestos,435ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583822,Cif puh/vah köögile 500ml,Cif,500ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583823,Cif puh/vah vannitoa 500ml,Cif,500ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583824,Domestos Power5 WC värsk Lime 50g,Domestos,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583825,Domestos Power5 WC värsk Ocean 50g,Domestos,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583826,Soilmates Avokaadoõli 0.5L,Soilmates,0.5L,Coop,,,sauces_oils,oils_other,high,produce,produce_tropical,high,override_with_name_rules
+583827,Ayuko Udon nuudlid 300g,Ayuko,300g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583828,Ayuko Ramen nuudlid 300g,Ayuko,300g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_soups_noodles,high,override_with_name_rules
+583829,Lipton marjatee 20*1.6g vaarika-jōhvika,Lipton,1.6g ,Coop,,,drinks,drinks_tea_coffee,high,produce,produce_berries,high,override_with_name_rules
+583830,Lipton marjatee 20*1.7g mango-mustsōstra,Lipton,1.7g ,Coop,,,drinks,drinks_tea_coffee,high,produce,produce_tropical,high,override_with_name_rules
+583831,Lipton marjatee 20*1.7g grapefruit-apels,Lipton,1.7g ,Coop,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+583832,Boba Bubble tee kiirkmpl.3*85g kakao,Boba,85g ,Coop,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+583833,Boba Bubble tee kiirkmpl 3*85g maasika,Boba,85g ,Coop,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+583834,Boba Bubble tee kmpl3*85g kookos-ananass,Boba,85g ,Coop,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+583835,Samyang Ramen kiirnuudlid 135g habanero,Samyang,135g ,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_soups_noodles,high,override_with_name_rules
+583836,Thai Choice Magus tshillikaste Hot 270ml,Thai,270ml,Coop,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+583837,Thai Choice sojakaste 300ml,Thai,300ml,Coop,,,world_spices,spices_asian,high,sauces_oils,sauces_soy_worcester,high,override_with_name_rules
+583838,Thai Sriracha tshilli-küüsl.kaste 200ml,Thai,200ml,Coop,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+583839,Thai Choice Riisinuudlid 200g,Thai,200g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583840,Thai Choice Traditsion.nuudlid 250g,Thai,250g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583841,Flying Goose Tom Yum supp 400ml,Flying,400ml,"Coop, Prisma",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583842,Flying Goose Tom Kha supp 400ml,Flying,400ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583843,Kara Kookoskreem 200ml,Kara,200ml,Coop,,,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+583844,Kara Kookoskreem 1L,Kara,1L,Coop,,,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+583845,Rumm Old Monk Rum 42.8% 0.7L,Rumm,0.7L,Coop,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+583846,Hello Riisinuudlid 76g kanalihamaits.,Hello,76g ,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583847,Hello Riisinuudlid 76g veiselihamaits.,Hello,76g ,Coop,,,dry_preserves,dry_pasta_rice,high,meat_fish,meat_beef_lamb_game,high,override_with_name_rules
+583848,Hello Riisinuudlid 76g küüsl- ja sibula,Hello,76g ,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583849,Thuong Hang riisipaber 22cm 500g,Thuong,500g,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583850,Vinut Kookosvesi 0.33L prk,Vinut,0.33L ,Coop,,,drinks,drinks_water,high,drinks,drinks_water,high,
+583851,Franko Ananassitükid 565g,Franko,565g,Coop,,,produce,produce_tropical,high,produce,produce_tropical,high,
+583852,Fa Men Sport rulldeo 50ml meeste,Fa,50ml ,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583853,Fa Men Xtra Cool deodorant 150ml,Fa,150ml,Coop,,,personal_care,pcare_deo,high,personal_care,pcare_deo,high,
+583854,Bref Power Aktiv Lemon WC värsk 50g,Bref,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583855,Fa Mystic Moments deo 150ml naiste,Fa,150ml ,Coop,,,other,dry_other,fallback,personal_care,pcare_deo,high,proposed_group_invalid;override_with_name_rules
+583856,Fa d/geel Pirate 250ml laste,Fa,250ml ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583857,Fa d/geel Mermaid 250ml laste,Fa,250ml ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583858,Fa Energy Boost d/geel 250ml meeste,Fa,250ml ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583859,Fa Men Sport Energy Boost rulldeo 50ml,Fa,50ml,Coop,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+583860,Bref Power Active Lemon WC värsk 3*50g,Bref,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583861,Fa Men Xtreme Invisible deo 150ml,Fa,150ml,Coop,,,other,dry_other,fallback,personal_care,pcare_deo,high,proposed_group_invalid;override_with_name_rules
+583862,Fa Men Xtreme Invisible rulldeo 50ml,Fa,50ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583863,Fa Men Attraction Force deo 150ml,Fa,150ml,Coop,,,other,dry_other,fallback,personal_care,pcare_deo,high,proposed_group_invalid;override_with_name_rules
+583864,Clin Multi Shine puh/vah klaaspind 500ml,Clin,500ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583865,Bref Power Aktiv Blue Eucal WC värsk 50g,Bref,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583866,Bref Duo Cubes Original WC värsk 2*50g,Bref,50g,Coop,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+583867,Fa Fresh&Dry Green Tea rulldeo 50ml,Fa,50ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583868,Fa Fresh&Dry Green Tea deo 150ml,Fa,150ml,Coop,,,other,dry_other,fallback,personal_care,pcare_deo,high,proposed_group_invalid;override_with_name_rules
+583869,Bref Power Aktiv Lavender WC värsk 3*50g,Bref,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583870,Somat nõudep/puhastusvahend 3tk,Somat,3tk,Coop,,,household,hh_cleaners,high,household,hh_cleaners,high,
+583871,Fa Coconut Milk d/geel 250ml,Fa,250ml,Coop,,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+583872,Bref Power Akt Bl.Eucalyp WC värsk 3*50g,Bref,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583873,Bref Blue Aktiv Fresh Fl WC värsk 3*50g,Bref,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583874,Bref Blue Aktiv Fresh Flow WC värsk 50g,Bref,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583875,Bref Power Akt Blue Fresh WC värsk 2*50g,Bref,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583876,Fa Divine Moments d/geel 400ml,Fa,400ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583877,Fa Island Vibes Fidji Dream deo 150ml,Fa,150ml,Coop,,,other,dry_other,fallback,personal_care,pcare_deo,high,proposed_group_invalid;override_with_name_rules
+583878,Fa Fresh&Dry Peony Sorbet deo 150ml,Fa,150ml,Coop,,,frozen_food,frozen_desserts_icecream,high,personal_care,pcare_deo,high,override_with_name_rules
+583879,Fa Fresh&Dry Peony Sorbet rulldeo 50ml,Fa,50ml,Coop,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+583880,Fa Invisible Fresh rulldeo 50ml,Fa,50ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583881,Bref Excellence Gel Lime. WC geel 700ml,Bref,700ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583882,Bref Excellence Gel Dirt WC geel 700ml,Bref,700ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583883,Bref Pow Aktiv Gel Ocean WC puh/g 700ml,Bref,700ml,Coop,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+583884,Bref Pow Akt Gel Lemon WC puh/geel 700ml,Bref,700ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583885,Pur Power Raspberry&Red nõudep/vah 450ml,Pur,450ml,Coop,,,other,dry_other,fallback,produce,produce_berries,high,proposed_group_invalid;override_with_name_rules
+583886,Pur Balsam Aloe Vera nõude/pesuvah 750ml,Pur,750ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583887,Bref Pro Nature Grape WC värsk 3*50g,Bref,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583888,Bref DeLuxe Magnolia WC värsk 3*50g,Bref,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583889,Bref DeLuxe Magnolia WC värsk 2*50g,Bref,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583890,Bref DeLuxe Jasmine WC värsk 2*50g,Bref,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583891,Bref Pro Nature Grapefruit WC geel 700ml,Bref,700ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583892,Bref Brilliant Spr Rain WC värsk 3*42g,Bref,42g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583893,Bref Brilliant Arc Ocean WC värsk 3*42g,Bref,42g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583894,Bref Brilliant Arc.Ocean WC värsk 2*42g,Bref,42g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583895,Bref Brilliant Spr Rain WC värsk 2*42g,Bref,42g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583896,Bref Power Aktiv Lavender WC värsk 2*50g,Bref,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583897,Bref Power Aktiv Lemon Duo-Pack 2*50g,Bref,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583898,Power Aktiv Pine WC värsk 2*50g,Power,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583899,K2r Col Cat+Revive Colours v/püüdja 18tk,K2r,18tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583900,Persil Lavender Color pesugeel 1.8L 40p,Persil,1.8L ,Coop,,,household,hh_laundry,high,household,hh_laundry,high,
+583901,Silan Fresh Sky pesul/vah 880ml 40pesu,Silan,880ml ,"Coop, Prisma",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583902,Silan Magic Magnolia pesul/vah 770ml,Silan,770ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583903,Silan Fascinating Frang pesul/vah 770ml,Silan,770ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583904,Silan Relaxing Maldives pesul/vah 770ml,Silan,770ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583905,Silan Fascinating Jungle pesul/vah 770ml,Silan,770ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583906,Silan Floral Crisp pesul/vah 770ml,Silan,770ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583907,Bref Wellness Harmony WC värsk 3*50g,Bref,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583908,Bref Spa Moments Serenity WC värsk 3*50g,Bref,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583909,Bref Wellness Vitality WC värsk 2*50g,Bref,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583910,Bref Spa Moments Vitality WC värsk 3*50g,Bref,50g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583911,Persil Lavender Color p/g 2.7L 60pesu,Persil,2.7L ,Coop,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+583912,Persil Color pesugeel 990ml 22pesu,Persil,990ml ,Coop,,,household,hh_laundry,high,household,hh_laundry,high,
+583913,Persil Universal pesugeel-kapslid 26tk,Persil,26tk,Coop,,,produce,produce_root_veg,high,household,hh_laundry,high,override_with_name_rules
+583914,Rex Color pesugeel 990ml 20pesukorda,Rex,990ml ,Coop,,,household,hh_laundry,high,household,hh_laundry,high,
+583915,Fa Men Chedarwood deo 150ml,Fa,150ml,Coop,,,other,dry_other,fallback,personal_care,pcare_deo,high,proposed_group_invalid;override_with_name_rules
+583916,Fa Men Chedarwood rulldeo 50ml,Fa,50ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583917,Fa Men Kick Off 150ml,Fa,150ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583918,Fa Oriental Moments deo 150ml,Fa,150ml,Coop,,,other,dry_other,fallback,personal_care,pcare_deo,high,proposed_group_invalid;override_with_name_rules
+583919,Fa Feel Refreshed deo 150ml,Fa,150ml,Coop,,,other,dry_other,fallback,personal_care,pcare_deo,high,proposed_group_invalid;override_with_name_rules
+583920,Fa Men Spicy Bergamot deo 150ml,Fa,150ml,Coop,,,other,dry_other,fallback,personal_care,pcare_deo,high,proposed_group_invalid;override_with_name_rules
+583921,Persil Universal pesugeel-kapslid 13tk,Persil,13tk,Coop,,,produce,produce_root_veg,high,household,hh_laundry,high,override_with_name_rules
+583922,Persil Stain Remov pesugeel-kapslid 11tk,Persil,11tk,Coop,,,produce,produce_root_veg,high,household,hh_laundry,high,override_with_name_rules
+583923,Rex Lotus&Almond Oil p/geel-kaps 36tk,Rex,36tk,Coop,,,produce,produce_root_veg,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+583924,Rex Orchid Oil Color p/geel-kaps 36tk,Rex,36tk,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+583925,Persil Color p/pulber 1.1kg 20pesu,Persil,1.1kg ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583926,Persil Sensitive p/geel 900ml 20pesu,Persil,900ml ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583927,Somat Excel Premium 5in1 n/tabletid 24tk,Somat,24tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583928,Perwoll Wool p/g 2L 40pesu,Perwoll,2L ,Coop,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+583929,Perwoll Color p/geel 1L 20pesu,Perwoll,1L ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583930,Perwoll Black p/geel 1L 20pesu,Perwoll,1L ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583931,Perwoll Blossom p/geel 1L 20pesu,Perwoll,1L ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583932,Perwoll Color pesugeel 2L 40pesu,Perwoll,2L ,Coop,,,household,hh_laundry,high,household,hh_laundry,high,
+583933,Perwoll Dark Bloom p/g 1L 20pesukorda,Perwoll,1L ,Coop,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+583934,Somat Excellen Anti-Gr n/mas geel 684ml,Somat,684ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583935,K2r Color Catcher värvipüüdja 22tk,K2r,22tk,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583936,Persil Expert Stain Removal kapslid 23tk,Persil,23tk,Coop,,,produce,produce_root_veg,high,drinks,drinks_coffee_beans_capsules,high,override_with_name_rules
+583937,Casali Double Choc k.k.300g ban-shok.gl.,Casali,300g ,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583938,Casali shok.pallid 100g rummi-kookose,Casali,100g ,Coop,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+583939,Kotanyi Ribimaitseaine 40g,Kotanyi,40g,Coop,,,world_spices,spices_herbs_spice_mix,high,world_spices,spices_herbs_spice_mix,high,
+583940,Kotanyi kaneelipulgad 12g,Kotanyi,12g,Coop,,,world_spices,spices_herbs_spice_mix,high,world_spices,spices_herbs_spice_mix,high,
+583941,Kotanyi must pipar veskis 36g,Kotanyi,36g,Coop,,,world_spices,spices_basic_salt_pepper,high,world_spices,spices_basic_salt_pepper,high,
+583942,Kotanyi nelja pipra segu 16g,Kotanyi,16g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583943,Kotanyi provansaali ürdisegu 17g,Kotanyi,17g,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583944,Kotanyi kanamaitseaine küüslauguga 30g,Kotanyi,30g,Coop,,,world_spices,spices_herbs_spice_mix,high,world_spices,spices_herbs_spice_mix,high,
+583945,Teekanne Tee Organic 20*1.8g mündiga,Teekanne,1.8g ,Coop,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+583946,Teekanne Tee Organic 20*2.5g metsamarja,Teekanne,2.5g ,Coop,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+583947,Frosch Sensitiv nõudep/vah 500ml,Frosch,500ml,Coop,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+583948,Shocn Rice 150g shok. paisutatud riisiga,Shocn,150g ,Coop,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+583949,Haribo Sauerbrenner kummikomm 160g,Haribo,160g,Coop,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+583950,Haribo Jelly Beans zeleekomm 160g,Haribo,160g,Coop,,,dry_preserves,dry_canned_veg,high,dry_preserves,dry_groats_beans,high,override_with_name_rules
+583951,Pedigree Biscrok maius koerale 200g,Pedigree,200g,Coop,,,pet,pet_other,heuristic,pet,pet_other,heuristic,
+583952,Pedigree Markies maius koerale 150g,Pedigree,150g,Coop,,,pet,pet_other,heuristic,pet,pet_other,heuristic,
+583953,Sonnentor Kurkum jahvatatud 40g,Sonnentor,40g,Coop,,,produce,produce_root_veg,high,produce,produce_root_veg,high,

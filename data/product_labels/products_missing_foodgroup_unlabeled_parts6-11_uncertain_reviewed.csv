@@ -1,0 +1,890 @@
+product_id,name,brand,size_text,stores_sample,current_food_group,current_sub_code,food_group_corrected,new_sub_code,confidence,final_food_group,final_sub_code,final_confidence,change_reason
+307413,Bollino Bianco Sweet 75 cl,DUNKER ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307414,Bollino Rosso Sweet 75 cl,DUNKER ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307415,Bonacchi Chianti Riserva 75 cl,KOCH OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307423,Campo Viejo Crianza 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307426,Cesari Amarone Della Valpolicella,PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307427,Chateau d'Arcins 75 cl,AVALLONE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307428,Chateau Des Landes Lussac-St Emilion 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307429,Chateau Latour Camblanes Prem. 75 cl,AVALLONE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307430,"Chateau Le Mayne Bordeaux Superieur, 75 cl",LTT AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307431,Chateau Rocher-Calon 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307434,Coto de Imaz Coto de Imaz Rioja Gran Reserva 75 cl,MEDIATO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307435,Desom Grand Premier Cru Auxerrois 75 cl,TRIDENS AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307436,Desom Premier Cru Rivaner 75 cl,TRIDENS AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307445,"Džinn JUNIMPERIUM Blended Dry, 70 cl",PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307446,"Džinn JUNIMPERIUM Rhubarb Edition, 70 cl",PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307447,"Džinn KINGSMILL, 100 cl",LIVIKO AS,,"Prisma, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307448,"Džinn MONKEY47 Schwarzwald Dry, 50 cl",PERNOD RICARD ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307449,"Džinn TANQUERAY, 100 cl",PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307450,"Džinn TANQUERAY No Ten, 70 cl",PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307470,"Aeduba, HÄRMAVILI, 400 g",BALBIINO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307471,"Aedviljasegu Fitlap, HÄRMAVILI, 400 g",BALBIINO AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307472,"Ahjuköögiviljad, HÄRMAVILI, 700 g",BALBIINO AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307475,"Ameerika köögiviljasegu, FIRST PRICE, 600 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307497,"HULGI Pralineekompvek Maiuspala 3tk, KALEV, 3 x 175g",ORKLA EESTI AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307499,"HULGI Vitamiinijook Upgrade 12tk, VITAMIN WELL, 12 x 500g",GKR TRADE OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307519,"Konjak HENNESSY VS flask, 20 cl",PRIKE AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307520,"Konjak HENNESSY VSOP, 35 cl",PRIKE AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307521,"Konjak HENNESSY VSOP flask, 20 cl",PRIKE AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307522,"Konjak HENNESSY VSOP karbis, 50 cl",PRIKE AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307523,"Konjak HENNESSY VSOP karbis, 70 cl",PRIKE AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307524,"Konjak HENNESSY X.O. karbis, 35 cl",PRIKE AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307525,"Konjak MARTELL VSOP, 70 cl",PERNOD RICARD ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307526,"Konjak MAXIME TRIJOL VSOP karbis, 70 cl",GOLDBERGER OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307531,"Kõrrejook troopilistest viljadest, PEPPA PIG, 200 ml",MARIS GILDEN AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307535,"7 Days mini multipakk kakaomaitseline, 7DAYS, 185 g",ABESTOCK AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307539,"Diffuser Blue Eucalyptus & Cedarwood, AIR WICK, 42 ml",EUGESTA EESTI OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307540,"Diffuser Cherry Blossom & Raspberry, AIR WICK, 42 ml",EUGESTA EESTI OÜ,,Selver,,,other,dry_other,fallback,produce,produce_berries,high,proposed_group_invalid;override_with_name_rules
+307541,"Difuuser Morning Dew & Blackberries, AIR WICK, 40 ml",EUGESTA EESTI OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307544,"Grand Sour, NOCCO, 330 ml",GKR TRADE OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307546,"Hallituse eemaldaja, CILLIT, 750 ml",EUGESTA EESTI AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307547,"Hari + kühvel pika varrega, VILEDA,",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307551,"HULGI Juicy Melba 24tk, NOCCO, 24 x 330ml",GKR TRADE OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307553,"HULGI Kiviahjupitsa Superiore for Meat Lovers 3tk, GRANDIOSA, 3 x 350g",ORKLA EESTI AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307563,"Ingverijook, ROCHESTER, 725 ml",TALMAN KAUBANDUS OÜ,,"Barbora, Maxima, Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342157,Mahe kuivatatud aprikoos I Love Eco 200g,I Love Eco,,,,,other,dry_other,fallback,sweets_snacks,sweets_nuts_driedfruit,high,proposed_group_invalid;override_with_name_rules
+342163,Pitsa Royale Rimi 570g,Rimi,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342168,Toiduželatiin Rimi Smart 20g,Rimi Smart,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342176,Aedoad valged Rimi 400g/240g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342179,Rohelised oliivid Rimi Smart kivideta 280g/110g,Rimi Smart,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342180,Rosolje 500g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342190,"Kuldne meriahven, roogitud, ilma peata, sulatatud, kg",Rimi,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dairy_eggs_fats,dairy_cheese_slices,high,proposed_group_invalid;override_with_name_rules
+342196,Sea kaelakarbonaad kondita Rimi kg,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342206,Mahe Kreeka Pähkel I Love Eco 100g,I Love Eco,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342214,Hiinapärane köögiviljasegu praadimiseks Rimi 400 g,Rimi,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+342225,Pune Rimi Smart 10g,Rimi Smart,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342235,Mandlilaastud Rimi 100g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342236,Linna pelmeenid Rimi Smart 1 kg,Rimi Smart,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342237,Surimi pulgad Rimi Smart 300g,Rimi Smart,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342239,"Päevalillekimp Rimi 50cm, 5 vart",Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342244,Mustad Hojiblanca oliivid Rimi kivideta 345g/160g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342250,Aprikoos kuivatatud Rimi 200g,Rimi,,Rimi,,,other,dry_other,fallback,sweets_snacks,sweets_nuts_driedfruit,high,proposed_group_invalid;override_with_name_rules
+342251,Pikkuim-tuuni steikid Rimi MSC 250g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342256,Tatratang Rimi Smart 800g,Rimi Smart,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342260,Präänikud meega Rimi Smart 200g,Rimi Smart,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342270,Krabimaitselised pulgad Rimi 300g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342274,Frankfurter Rimi 210g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342284,Sea välisfilee kondita kg,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342285,Mustad Queen oliivid Selection by Rimi kivideta 345g/160g,Selection By Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342289,Oliivid kivideta Kreeka ICA 227g,ICA,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342295,Rohelised Hojiblanca oliivid Rimi kivideta 935g/455g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342303,"Vannamei viburhännak 40/50, sul. Rimi, ASC 300g",Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342306,Seesamipulgad Rimi 150g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342311,Oad valged I Love Eco 380g,I Love Eco,,,,,other,dry_other,fallback,dry_preserves,dry_groats_beans,high,proposed_group_invalid;override_with_name_rules
+342321,Kohv röstitud jahvatatud Brazil Selection by Rimi 250g,Selection By Rimi,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+342326,Kurgid marineeritud 3-6cm Rimi 670g/370g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342327,Rohelised Queen oliivid Selection by Rimi kividega 345g/200g,Selection By Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342329,Cappuccino ICA 200g,ICA,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342334,Karri Rimi 25g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342338,Rimi jää puhastatud veest 1kg,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342342,Lasagne Bolognese Rimi 400g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342366,Konserveeritud roheline hernes Rimi 200g/140g,Rimi,,Rimi,,,dry_preserves,dry_other,heuristic,dry_preserves,dry_canned_veg,high,override_with_name_rules
+342378,Leivapulgad rukki Rimi 200g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342384,Kuskuss I Love Eco 500g,I Love Eco,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342392,Poolitatud mandlid Rimi 150g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342396,Aedoad punased I Love Eco 380g,I Love Eco,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342407,"Sea kaelakarbonaad kondita, viilutatud Rimi 340g",Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342417,Martsipan ICA 400g,ICA,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342418,Pakslaup-pangaasiuse filee sulatatud kg,Rimi,,Rimi,,,other,dry_other,fallback,dairy_eggs_fats,dairy_cheese_slices,high,proposed_group_invalid;override_with_name_rules
+342422,"Kuldmerikoger, rookimata, peaga, Rimi,kg",Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342431,Kuninglik segu Rimi 150g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342433,Pitsa Capricciosa Rimi 370g,Rimi,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342439,Odratang Rimi Smart 800g,Rimi Smart,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342441,Datlid pehmed ICA öko 200g,I Love Eco,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342446,Mesi erinevate lillede Rimi 300g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342448,Tudengi eine Rimi 150g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342470,"Salaami pipraga, viilutatud Rimi 105g",Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342472,Seaprae viilud 285g,Rimi,,Rimi,,,other,dry_other,fallback,meat_fish,meat_pork,high,proposed_group_invalid;override_with_name_rules
+342480,Vahvlirullid vanillimaitselise täidisega Rimi 280g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342490,Kohvijook lahustuv 3in1 Rimi Express 18g,Rimi,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+342494,Köögiviljasegu Havai Rimi 400g,Rimi,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342500,India pähkel Rimi kg,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342507,Kaerapuder virsikutega Rimi 55g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342508,Rohelised Hojiblanca oliivid Rimi kivideta 350g/150g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342509,"Sea välisfilee kondita, viilutatud Rimi 310g",Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342514,Hernes roheline konserveeritud Rimi Smart 690g/450g,Rimi Smart,,Rimi,,,dry_preserves,dry_other,heuristic,dry_preserves,dry_other,heuristic,
+342524,Tüümian Rimi Smart 10g,Rimi Smart,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342532,Marjasegu Rimi külmutatud 400g,Rimi,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+342545,Aprikoos Rimi kuivatatud kg,Rimi,,Rimi,,,other,dry_other,fallback,sweets_snacks,sweets_nuts_driedfruit,high,proposed_group_invalid;override_with_name_rules
+342546,Suvikõrvits roheline mahe 200g,I Love Eco,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342551,Pruun kaste ICA 3x22g,ICA,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+342560,"Soomuslest Rimi, sulatatud, kg",Rimi,,Rimi,,,other,dry_other,fallback,dairy_eggs_fats,dairy_cheese_slices,high,proposed_group_invalid;override_with_name_rules
+342568,Nisu meega Rimi Honey pops 200g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342585,Pitsa Quattro Formaggi Rimi 570g,Rimi,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342605,"Sea küljeliha kondita, viilutatud Rimi 320g",Rimi,,Rimi,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+342608,"Viburhännak, keedetud (60/80) sulatatud, kg",Rimi,,Rimi,,,other,dry_other,fallback,dairy_eggs_fats,dairy_cheese_slices,high,proposed_group_invalid;override_with_name_rules
+342612,Pekanipähkel Rimi 150g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342614,Valged oad Rimi Smart 400g,Rimi Smart,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_groats_beans,high,proposed_group_invalid;override_with_name_rules
+342615,Värsked datlid Selection by Rimi 600g,Selection By Rimi,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342619,Kaera näkileivad Rimi 120g,Rimi,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342620,Loorberilehed Rimi 4g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342626,"Lehträtikud Rimi Smart, 2 kihiline, 120tk",Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342642,Avokaado pakitud Rimi 750g,Rimi,,Rimi,,,other,dry_other,fallback,produce,produce_tropical,high,proposed_group_invalid;override_with_name_rules
+342650,Küüslauguleivakesed kg,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342656,Bambusevõrsed ICA Asia viilutatud 227g/142g,ICA,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342660,Adžika Rimi 260g,Rimi,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342663,Pitsa kebabi Rimi 380g,Rimi,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342665,Aeduba külmutatud Rimi 400g,Rimi,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+342674,Metsapähkel puhastatud Rimi 150g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342675,"Singivalik Rimi keedetud, viilutatud 70g",Selection By Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342676,Nisutang Rimi Smart 800g,Rimi Smart,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342679,Teraviljarõngad meega Rimi Honey rings 250g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342690,"Vaikse ookeani tursafilee, nahata, Rimi, MSC, 380g",Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342706,Segu maitsetaimede ja pipra Selection By Rimi 20g,Selection By Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342719,Marineeritud kornišon Rimi meega 350g/180g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342723,Mahe Kinoa Hautis I Love Eco 120g,I Love Eco,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342724,Kohv jahvatatud Rimi kofeiinivaba 250g,Rimi,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+342725,Rohelised Hojiblanca oliivid Rimi kivideta 345g/160g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342738,Avokaado suur Selection by Rimi tk,Selection By Rimi,,Rimi,,,other,dry_other,fallback,produce,produce_tropical,high,proposed_group_invalid;override_with_name_rules
+342747,Konserveeritud valged aedoad Rimi Smart 400/240g,Rimi Smart,,Rimi,,,dry_preserves,dry_other,heuristic,dry_preserves,dry_canned_veg,high,override_with_name_rules
+342750,Sinep meega Selection by Rimi 235g,Selection By Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342753,Kurgid marineeritud Rimi Smart 680g/350g,Rimi Smart,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342757,Mustad oliivid Rimi Smart kivideta 280g/110g,Rimi Smart,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342758,Soovähk sulatatud kg,Rimi,,Rimi,,,other,dry_other,fallback,dairy_eggs_fats,dairy_cheese_slices,high,proposed_group_invalid;override_with_name_rules
+342760,Mesi akaatsiaõite ICA 350g,ICA,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342764,"Roosikimp Rimi 50cm, 9 vart",Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342770,Rimi köögiviljasupisegu sügavkülmutatud 400G,Rimi,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+342804,Surimi pulgad Rimi Smart 150g,Rimi Smart,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342819,Hiidaustrid,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342825,Külmutatud kirsid kivideta Rimi 400g,Rimi,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+342835,Türgi uba Rimi 150g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342840,Makrell sulatatud rookimata kg,Rimi,,Rimi,,,other,dry_other,fallback,dairy_eggs_fats,dairy_cheese_slices,high,proposed_group_invalid;override_with_name_rules
+342849,Minirõngikud vanillimaitselised Rimi 220g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342850,Kohv röstitud jahvatatud Colombia Selection by Rimi 250g,Selection By Rimi,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+342853,Kaerapuder kirssidega Rimi 55g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342857,Kurgid marineeritud 6-9cm Rimi 670g/370g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342858,Singirullid 160g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342861,"Pakslaup-haipangaasiuse filee Rimi, kg",Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342869,Leivapulgad täistera Rimi 200g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342874,Vahvlikoonused vanillimaitselised ICA 120g,ICA,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342883,Vinnutatud Hispaania lihatoodete valik Selection by Rimi 110g,Selection By Rimi,,Rimi,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+342884,Keedetud aedoad Rimi 300g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342893,India pähkel Rimi 150g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342902,"Keedetud vannamei viburhännak, sulatatud Rimi ASC 350g",Rimi,,Rimi,,,other,dry_other,fallback,dairy_eggs_fats,dairy_cheese_slices,high,proposed_group_invalid;override_with_name_rules
+342908,Püree Spaghetti Bolognese I Love Eco lastele alates 6 kuust 120g,I Love Eco,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342916,Sinep Rimi 190g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342931,Aedoad punased Rimi 400g/240g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342935,Seamaks Rimi Smart kg,Rimi Smart,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342941,Fuet Artesano Selection by Rimi,Selection By Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342945,Kuivatatud dattel kivita Rimi 200g,Rimi,,Rimi,,,other,dry_other,fallback,sweets_snacks,sweets_nuts_driedfruit,high,proposed_group_invalid;override_with_name_rules
+342951,Aedoad pruunid Rimi 400g/240g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342954,Lasanjeplaadid I Love Eco 500g,I Love Eco,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342957,Aedoad punased tšillikastmes Rimi 400g/200g,Rimi,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+342960,Rosinakuivikud Rimi 200g,Rimi,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342965,Kuivatatud kirsid Rimi 150g,Rimi,,Rimi,,,other,dry_other,fallback,sweets_snacks,sweets_nuts_driedfruit,high,proposed_group_invalid;override_with_name_rules
+342966,"Salaami Spianata, viilutatud Rimi 70g",Selection By Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342973,Marineeritud kurgid Rimi viilutatud 540g/330g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342983,Mandlid Rimi 700g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+342997,Salsakaste I Love Eco 300g,I Love Eco,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+343003,Sarapuupähkel Rimi kg,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343004,Manna Rimi 800g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343014,Fuet tapas Selection by Rimi 80g,Selection By Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343018,Euroopa kilu ICA 100g/65g,ICA,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343019,Mahe sarapuupähkel I Love Eco 100g,I Love Eco,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343023,Kirsid hapud Rimi 680g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343024,Singipitsa Rimi TK,Rimi,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343028,"Roheline aeduba, tükeldatud sügavkülmutatud Rimi 400G",Rimi,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+343041,Bulgur Rimi 400g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343044,Mitmeviljavahvlid Rimi 100g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343047,Konserveeritud puuviljakokteil ICA 830/480g,ICA,,Rimi,,,dry_preserves,dry_other,heuristic,dry_preserves,dry_canned_fruit,high,override_with_name_rules
+343050,Armeeniapärane seavälisfilee,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343053,Püree taimse lasanje I Love Eco lastele alates 6 kuust 120g,I Love Eco,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343056,Pancetta sea küljeliha 100g,Selection By Rimi,,Rimi,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+343058,Kohvijook lahustuv 3in1 Rimi 180g,Rimi,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+343070,Prantsuse sinep Selection by Rimi 210g,Selection By Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343081,Oad Rimi Cannellini 400g/240g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_groats_beans,high,proposed_group_invalid;override_with_name_rules
+343084,"Salaamivalik Milano Rimi, viilutatud 70g",Selection By Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343089,"Kali Rimi 1,5l",Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343127,Tofu ICA 230g,ICA,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343130,Oliivisegu Kreeka ICA 240g,ICA,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343132,Sea välisfilee kondita viilutatud Rimi 720g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343137,Präänikud vaniljemaitselised Rimi Smart 200g,Rimi Smart,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343150,Kuivatatud ploomid kivideta Rimi 500g,Rimi,,Rimi,,,other,dry_other,fallback,sweets_snacks,sweets_nuts_driedfruit,high,proposed_group_invalid;override_with_name_rules
+343157,Kurgid marineeritud 2-5cm Rimi 670g/370g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343160,Hernes roheline Rimi 400g/280g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343173,Suvine köögiviljasegu praadimiseks Rimi 400G,Rimi,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343177,Kinoa valge Rimi 400g,Rimi,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343191,Mustad Queen oliivid Selection by Rimi kividega 345g/200g,Selection By Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343197,Béarni kaste ICA 3x23g,ICA,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+343204,Pitsakaste Rimi 390g,Rimi,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+343207,Kuivatatud ploom kivita Rimi 200g,Rimi,,Rimi,,,other,dry_other,fallback,sweets_snacks,sweets_nuts_driedfruit,high,proposed_group_invalid;override_with_name_rules
+343216,Kolme köögivilja segu Rimi sügavkülmutatud 400G,Rimi,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+343225,Suhkruhernes Rimi 150g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343239,Mesi erinevate lillede Rimi Smart 1kg,Rimi Smart,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343241,Kreekapitsa Rimi TK,Rimi,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343257,Mesi erinevate lillede Rimi 500g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343279,Oliivide segu I Love Eco 370g/215g,I Love Eco,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343290,Rohelised Queen oliivid Selection by Rimi kivideta 345g/160g,Selection By Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343292,Punane karri kõrvitsaga ICA Asia 400ml,ICA,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343298,Vahvlid kakaokreemiga Rimi 180g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343300,Mädarõigas Rimi Smart 165g,Rimi Smart,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343304,"ICA orhidee Phalaenopsis, 3 stiebai",ICA,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343310,Sea guljašš Rimi 390g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343311,Kohv lahustuv FD Rimi 100g,Rimi,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+343312,Rohelised oliivid Rimi Smart kivideta 180g/70g,Rimi Smart,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343318,Mesi I Love Eco 350g,I Love Eco,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343325,Vanillikuivikud Rimi 500 g,Rimi,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+343328,Gorbuušamari Rimi MSC 100g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343332,Karrikaste tai Rimi 480g,Rimi,,,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+343335,Sõrnikud 320g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343337,Ploom pakitud I Love Eco 500g,I Love Eco,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343339,Mikropopkorn magus Rimi 90g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343343,Seakaelakarbonaadi lõigud kondita 800g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343350,Dijoni sinep Selection by Rimi 210g,Selection By Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343352,Paneeritud seašnitsel 250g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343353,Oad Cannellini I Love Eco 380g,I Love Eco,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_groats_beans,high,proposed_group_invalid;override_with_name_rules
+343374,Kohv röstitud jahvatatud Ethiopia Selection by Rimi 250g,Selection By Rimi,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+343376,"Hernes konserveer, Rimi Smart 400g/280g",Rimi Smart,,Rimi,,,dry_preserves,dry_other,heuristic,dry_preserves,dry_other,heuristic,
+343389,Oad mustad I Love Eco 380g,I Love Eco,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_groats_beans,high,proposed_group_invalid;override_with_name_rules
+343396,Marineeritud kornišonid Rimi 1650g/900g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343405,"Lasanje Bolognese kastmega Rimi, 1kg",Rimi,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+343406,Popkorn ICA 500g,ICA,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343410,Pilaff 500g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343416,Penne bolognese 350g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343419,"Niiluse vääristilaapia filee ilma naha- ja luudeta Rimi, kg",Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343422,Krevetimääre ICA Skagenröra MSC 200g,ICA,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343430,Avokaado söömisküps Rimi 4tk 500g,Rimi,,Rimi,,,other,dry_other,fallback,produce,produce_tropical,high,proposed_group_invalid;override_with_name_rules
+343438,Kapparid Rimi 100g/60g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343439,"Tursafilee nahata, sulatatud, kg",Rimi,,Rimi,,,other,dry_other,fallback,dairy_eggs_fats,dairy_cheese_slices,high,proposed_group_invalid;override_with_name_rules
+343441,Varsseller Rimi 450g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343446,Ploomid pehmed ICA öko 200g,I Love Eco,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343447,Armeeniapärane grill-liha Rimi lihameistrid,Rimi,,,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+343448,Paneng karri ICA Asia 400ml,ICA,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343468,Vinegrett 300g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343470,Mahe mandel I Love Eco 100g,I Love Eco,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343477,Kaste Sambal Oelek ICA Asia 100 g,ICA,,Rimi,,,sauces_oils,sauces_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+343488,Kohv lahustuv FD Rimi 200g,Rimi,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+343490,Oad Rimi mustad 400g/240g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_groats_beans,high,proposed_group_invalid;override_with_name_rules
+343491,WOK köögiviljadega ICA Asia 410/220g,ICA,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343494,Kohv röstitud jahvatatud Rimi 500g,Rimi,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+343506,Näkileivad õhukesed ICA 250g,ICA,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343510,Mandel puhastatud Rimi 150g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343514,Kuivatatud ploom kivita Rimi kg,Rimi,,Rimi,,,other,dry_other,fallback,sweets_snacks,sweets_nuts_driedfruit,high,proposed_group_invalid;override_with_name_rules
+343515,Kevadine köögivilja segu Rimi 400g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343517,Rukki näkileivad küüslauguga Rimi 150g,Rimi,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343521,Mustad Hojiblanca oliivid Rimi kivideta 350g/150g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+343522,Mustad Hojiblanca oliivid Rimi kivideta 935g/455g,Rimi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375558,Juuksehari Martinelia Unicorn Detangle 1tk,Martinelia,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375562,"Liköör Koskenkorva Salmiakki 30%vol 0,5l",Koskenkorva,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+375577,"Patisoni, kg",Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375585,Mänguasi Lauamäng 2ühes Trefl 01896T,Trefl,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+375597,Šveitsi šnitsel seavälisfileest Rannarootsi 400g,Rannarootsi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375598,Ben&Jerry's Non-Dairy Sundae Oat of the swirled 427ml,Ben & Jerry,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375602,Pehme kõristi-pall BO 8035ML,Bo,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375604,Kosmiline kombinesoon 122-128/134-140,,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375610,Kohv jahvatatud Presidentti Gold Label Paulig 500g,Presidentti,,,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+375626,Pajaroog Mehhiko Blå Band 190g,Bla Band,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375628,Konstruktor Lego Merisea Mänguväljak 42640,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+375629,Kõrvitsa pannkoogitaigen Mamma 750g,Mamma,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375634,Konstruktor Lego Kollane Esilaadur 60450,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+375635,Nukk Soengupea Sparkle Girlz,Sparkle Girlz,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375636,"Käsnlapp Spontex Top Tex 3 tk 15,5x18,5cm",Spontex,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375638,Kompvekiassortii Pergale Dark Tallinn 348g,Pergale,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375642,Mask Martinelia Sweet Dreams 1tk,Martinelia,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375645,Mänguasi Tähtedega käevõrud Make It Real 1205,Make It Real,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+375653,Mandlid Arimex 300g,Arimex,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375660,Hot´n wild snack Nõo 85g,Nõo,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375664,Kohv lahustuv 3in1 strong Nescafé 16g,Nescafe,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+375666,Näkileivad Hi-Fibre kandilised 200g,Finn Crisp,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375667,Niisked salvätikud Clerit vannitoale 36tk,Clerit,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375691,Tordipõhi hele Dance cake 400g,Dance Cake,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375702,Basseini päikeseklubi 122x25cm SB25,Sunclub,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375714,"Toonik Margarita Mixer Fever Tree 0,5l",Fever Tree,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375717,Kohv jahvatud Paulig Classic Aromatico 500g,Paulig,,,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+375719,Konstruktor Lego Armas Jänku 31162,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+375738,Mänguasi Zoggo lilla tulnukas,Bouncibles,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+375739,Mängukaardid Uno Deluxe,Uno,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375744,Vermut Martini Rosso 15% 1l,Martini,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375746,Loogikamõistatus Brain Games Cats & Boxes,Brain Games,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375747,"Liköör Koskenkorva Strawberry Liqueur 21%vol 0,5l",Koskenkorva,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+375751,Mahe marmelaad ebaküdoonia Minna 150g,Minna,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375759,Ahjusegu Kadarbiku 700g,Kadarbiku,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375768,Kõrrega joogitops 300ml 12 kuud roheline,Philips Avent,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375771,Mänguasi Lego politseijaoskond 60316,Lego,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+375774,Kaste magushapu Rimi Planet 500g,Rimi Planet,,,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+375785,"Toonik Pink Grapefruit Fever Tree 0,5l",Fever Tree,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375788,Konstruktor Lego Laadurekskavaator 42197,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+375804,Konstruktor Lego Lootoseõied 40647,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+375809,Vannivaht Johnsoni 2in1 500ml,Johnsons,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375814,"Liköör Vana Tallinn 45% 0,5l",Vana Tallinn,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+375820,Marineeritud hõbeheik 250g/150g,M. V. Wool,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375825,Mandlitoode pistaatsia Valsoia 2*125g,Valsoia,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375828,Konstruktor Lego Relvakoda 21252,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+375834,Kreekerid kliidega Arcor 200g,Hogarenas,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375847,"Pesuvedelik luttidele ja pudelitele Canpol Babies 1/500, 500ml",Canpol Babies,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375856,"Piiritusjook Barracuda Raspberry Spiced 30%vol 0,7l",Barracuda,,Rimi,,,other,dry_other,fallback,produce,produce_berries,high,proposed_group_invalid;override_with_name_rules
+375860,Orgaaniline täistera kaerahelbepuder FLEUR ALPINE alates 5.kuust 175g,Fleur Alpine,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375863,Astelpaju-ingveri shot Semu mahe 330ml,Semu,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375867,Seebi difuusor 300ml AW25,Koopman Brand,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375868,"Brandy Bartender´s Club 38%vol 0,5l",Bartender's Club,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+375869,"Brandy Bartender´s Club 38%vol 0,2l",Bartender's Club,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+375872,Kaardimäng CollectO!,CollectO,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375874,"Pardirinnafilee nahaga, värske, A-klass Reinuvaderi kg",Reinuvaderi Pidusöök,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375875,Toonik Elderblossom Orn Craft 1l pet,Orn Craft,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375876,Konstruktor Lego Kosmoselaev Ja Asteroidi Avastamine 60429,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+375884,Pelmeenid Hiina Uvic 700g,Uvic,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375885,"Piiritusjook Dead Man´s Fingers Passion Fruit 37,5% 0,7l",Dead Man's Fingers,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375892,"Kali Karl Friedrich 0,5l",Saku,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375896,Sea saba Rakvere 600g,Rakvere,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375903,Tu:nikauss vegan Chef Lunden 340g,Chef Lunden,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375908,Mahe Mesi Muhe 200g,Muhe Mesi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375912,"Liköör Koskenkorva Creme Caramel Cream 15%vol 0,5l",Koskenkorva,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+375913,"Searaguu Maks&Moorits 1,2kg",Maks & Moorits,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375917,Konserv hirvelihaga Sirloin 330g,Sirloin,,Rimi,,,meat_fish,meat_other,heuristic,dry_preserves,dry_canned_meat_fish,high,override_with_name_rules
+375924,Mahe marmelaad Metsade maitsed Minna 140g,Minna,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375927,Kohv jahvatatud Davidoff Fine Aroma 250g,Davidoff,,"Barbora, Maxima, Rimi",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+375929,Hernesupp singiga Rimi Express 470g,Rimi Express,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375930,Külmsupp koduaiaürtidega Farmi 750g,Farmi,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,world_spices,spices_herbs_spice_mix,high,proposed_group_invalid;override_with_name_rules
+375931,Minutipihv seakaelakarbonaadist Maks&Moorits 400g,Maks & Moorits,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375948,"Vermut Martini Bianco 15% 0,75l",Martini,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375949,"Muu piiritusjook Star Dollar 3* 30%vol 0,5l",Star Dollar,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375955,Konstruktor Lego Burgeriauto 60404,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+375962,Libisemiskindel silikoon taldrik Babyono 1 tk.,Babyono,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375975,Kraanahaaratsiga ehitussõiduk Rubble&Crew Charger 6066726,Batman,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375976,"Toonik Moijto Mixer Fever Tree 0,5l",Fever Tree,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375984,Prügikotid Eco Line 60l 15tk,Paclan,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+375986,"Külmutatud vutid, peata, 2x220g",Prims,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+376013,"Külmutatud merluus, ilma peata 800g",Määramata,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+376014,"Liköör Vana Tallinn Toffee Caramel 35%vol 0,5l",Vana Tallinn,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+376031,Sinep kange Põltsamaa 65g,Põltsamaa,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376035,Interaktiivne mänguasi võtmed Bo 8026ML,Bo,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+376043,Kohv lahustuv Jacobs Barista Americano 170g,Jacobs,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+376057,Vannivaht Crazy Kids Magic Sparkle 300ml,Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376066,Roheline jalapeno Rimi Planet viilutatud 335/160g,Rimi Planet,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376069,"Toonik Wild Berry Thomas Henry 0,75l",Thomas Henry,,Rimi,,,other,dry_other,fallback,produce,produce_berries,high,proposed_group_invalid;override_with_name_rules
+376073,Tarretisepulber mesimurakamaitseline Mikaado 80g,Mikaado,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376074,Kanepi - tatrakama Tarmere 250g,Tarmere,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376076,"Liköör Liviko Liqueur Kirss 21%vol 0,5l",Liviko,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+376079,Vahvlid Kooli Marmiton 110g,Marmiton,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376096,Vadakuvalk vanilje IconFit 1000g,Iconfit,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376097,Mänguasi Otto pruun saarmas,Bouncibles,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+376099,Kuivatatud dattel kivita Awake 150g,Awake,,Rimi,,,other,dry_other,fallback,sweets_snacks,sweets_nuts_driedfruit,high,proposed_group_invalid;override_with_name_rules
+376101,Prantsuse ploomi-martsipanikeeks Gurmeeklubi 400g,Gourmet Club,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376103,Immuno eliksiir kibuvits 250ml,,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376108,Konstruktor Lego Fawkes™: Dumbledore'i Fööniks 76448,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+376113,Mänguasi Basic rajakomplekt Hot Wheels Track Builder,Hot Wheels,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+376120,"Piiritusjook Bacardi Spiced 35% 0,7l",Bacardi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376143,"Aloe Vera jook Aleo Premium 0,5l",Aleo,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376144,Mängukomplekt Klotsikast Lego,Lego,,,,,sauces_oils,sauces_other,heuristic,household,hh_other,low_oos,override_with_name_rules
+376150,"Brandy Ibis XO 36% 0,5l",Ibis,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+376151,Konstruktor Lego 9/50076321 76321,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+376172,"Kohv röstitud, jahvatatud Vespucci 500g",Vespucci,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+376176,Joogipudel tilaga lastele Philips Avent sinine 200ml,Philips Avent,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376181,Kaardimäng Uno Junior 2.0,Uno,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376184,Konstruktor Lego Lilled Kastekannus 31149,Lego,,Rimi,,,sauces_oils,sauces_other,heuristic,household,hh_other,low_oos,override_with_name_rules
+376189,Mäng Spinmaster Games Paw Patrol 6067571,Spinmaster Games,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376226,Täisterakaerapadjakesed Rimi 375g,Rimi GreatLife,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376251,"Vaikse ookeani merluusifilee, kiirkülmutatud, Northland MSC 800g",Northland,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+376261,Mäng Brains Games Flow,Brain Games,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376265,Kohv lahustuv Aroma Gold 200g,Määramata,,"Barbora, Maxima, Rimi",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+376266,Paneeritud surimist krabisõrg pulgal 245g,Vici,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376277,Kuivatatud aprikoosid Seeberger 125g,Seeberger,,Rimi,,,other,dry_other,fallback,sweets_snacks,sweets_nuts_driedfruit,high,proposed_group_invalid;override_with_name_rules
+376278,Parfüüm Martinelia Unicorn 15ml,Martinelia,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376281,Kõrsikud magusad Hellar& Pojad 250g,Hellar & Pojad,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376285,Liköör Jägermeister 35% 1l,Jägermeister,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+376286,Konstruktor Lego Tbd-City-Alicia-60464 60464,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+376287,Konstruktor Lego Kohtumine Ülevaatajaga 21274,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+376298,Mahe metsamesi Loodusvägi 150g,Loodusvägi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376305,Kalmaari kombitsad viilutatud vaakum külmutatud RSeafood Gold 200g,R Seafood,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+376313,Supi köögiviljasegu ubadega Ukraina Borš Bauer 400g,Bauer,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376314,Nukk Disney Princess,Disney,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376320,Vahemere köögiviljasegu Bauer 400g,Bauer,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376330,Liköör Kohvi 21% 0.5l,Liviko,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+376336,"Karboniseeritud jook vitamiinide ja kofeiiniga virsiku-vanilje For Me 0,5l",A. Le Coq,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376338,Tiigerkreveti sabad toored 16/20 Vannamei ASC 300g,R Seafood,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376341,Pitsa Suprema Salame Romano 487g,Dr.Oetker,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376344,"Piiritusjook Aramis XO 0,2l",Aramis,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376349,"Brandy St. Remy Authentic VSOP 36% 0,7l",St. Remy,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+376366,Mahe ghee Pajumäe 300g,Pajumäe Talu,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376371,Ujumiskäevõrud Sun Club 23x15cm SB25,Sunclub,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376375,Konstruktor Lego Puhkuseseikluse Autosuvila 60454,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+376385,Kodune sült 900g,Karni,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376389,Magus koreapärane BBQ kaste Santa Maria 250ml,Santa Maria,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+376393,Taimne määre Provence'i ürtidega Tartare Vegetal 140g,Tartare Vegetal,,Rimi,,,other,dry_other,fallback,world_spices,spices_herbs_spice_mix,high,proposed_group_invalid;override_with_name_rules
+376398,Vasika tagatükk kondita Rimi kg,Rimi GreatLife,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376399,Mereandide kokteil külmutatud Frutti Di Mare 350g,R Seafood,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+376403,Hirss Veski Mati 500g,Veski Mati,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376412,Kohvijook lahustuv 3in1 Jacobs 304g,Jacobs,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+376432,"Liköör Tullamore Honey 35% 0,7l",Tullamore Dew,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+376438,Mänguasi Electra lilla kass,Bouncibles,,Rimi,,,pet,pet_other,heuristic,household,hh_other,low_oos,override_with_name_rules
+376449,Jää Druvas Ledus 500g,Druva,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376454,What the fruit marja öko 35g,What The Fruit,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376459,Kreekerid krevettidega Rimi Planet 150g,Rimi Planet,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376461,Kõrrega joogitops 200ml 9 kuud lilla,Philips Avent,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376463,Mahe toorkakao-datli-tatra ampstükk 35g,Ampstükk,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376469,Chicken snack Nõo 85g,Nõo,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376470,Sorgo Rimi Free From 375g,Rimi Free From,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376471,Vahvlitops vanil-šok.tk. Väike Tom 125ml,Väike Tom,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376476,Datlid Eco 150g,Salem,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376481,Multi puuvilja jook Pfanner Vitamin Reload 2l,Pfanner,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376486,Hommikueine Lion 600G,Nestle,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376487,Mahe astelp-viigim-tatra ampstükk 35g,Ampstükk,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376488,Laste sokid Mywear 5p 25/27 AW25,MyWear,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376493,Kuskuss Rimi Planet 500g,Rimi Planet,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376498,Konstruktor Lego Mängiv Kass 31163,Lego,,Rimi,,,pet,pet_other,heuristic,household,hh_other,low_oos,override_with_name_rules
+376499,"Huuleläige Martinelia 5,8g",Martinelia,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376503,Mandlimaiustused Ferrero Raffaello 40g,Raffaello,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376530,Salvei Hansa Herb 1tk,Määramata,,Rimi,,,other,dry_other,fallback,produce,produce_herbs_salads_sprouts,high,proposed_group_invalid;override_with_name_rules
+376548,Muffinid Dan Cake 4tk 300g,Dan Cake,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376554,Mänguasi Eddy Toys Kevad 5x5x15cm AW25,Eddy Toys,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+376556,Limakäsi,Krass,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376557,"Kohvijoook lahustuv 3in1 pruuni suhkruga Nescafe 16,5g",Nescafe,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+376562,Mesi Nordmel 250g,Nordmel,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376564,Pitsa Suprema Calabrese Nduja 520g,Dr.Oetker,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376567,Kleepuv kaheksajalg,Krass,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376568,Astronaudi kombinesoon 122-128 /134-140,,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376569,Õppekomplekt I Dig it! Mineraalid,Kosmos,,Rimi,,,other,dry_other,fallback,drinks,drinks_water,high,proposed_group_invalid;override_with_name_rules
+376575,Hummus Rimi Planet oliividega 180g,Rimi Planet,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376588,"Marjapüree astelpaju, joogi valmistamiseks Mashie 40ml",Mashie,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376594,Konstruktor Lego The Creeper™ 21276,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+376597,Kohv jahvatatud filtri keskmiselt rösti. Luxus 500g,Luxus,,,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+376603,Mänguasi Mäng Twister 2 98831,Twister,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+376612,Türgi uba 500g,Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376613,Toidusöötja Britton lastele 1tk.,Britton,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376618,Kohvijook lahustuv 2in1 Nescafé 8g,Nescafe,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+376627,Kabatšokk kg,Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376636,Konstruktor Lego Ükssarviku Ja Flamingo Basseinipidu 42658,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+376642,Interaktiivne mängurool BO 8019ML,Bo,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376644,"Brandy Ararat 5YO Brandy 40% 0,2l",Ararat,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+376655,Skyr virsikutega Farmi 150g,Farmi,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376665,Taimse päritoluga vegan toode Gourmet Green 150g,Gourmet Green,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376666,Kaardimäng Catuto! Mini,Catuto,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376667,"Brandy Torres 10 Years 38%vol 0,7l",Torres,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+376686,Prügikotid biolagunevad Paclan 12l 15tk,Paclan,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376688,Kliisarveke rosinatega Pärnamäed 200g,Pärnamäed,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376689,Punane toiduvärv Dr.Oetker 10g,Dr.Oetker,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376690,Vannigeel Ziaja Baby alates 3. elukuust 300ml,Ziaja,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376692,Kohv jahvatatud filtri- ja presskannu Brazil Paulig 500g,Paulig,,,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+376708,Kodune kotlet 350g,,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376723,"Vitamiinijook Vitamin Well Prepare 0,5l",Vitamin Well,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376729,Hari pudelitele ja luttidele Babyono 720,Babyono,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376734,BBQ-maitseline rebitud liha määre Mamma 150g,Mamma,,Rimi,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+376738,"Brandy Bartender's Club VSOP, Alk 36% vol, 0,7l",Bartender's Club,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+376742,Taimsed nagitsad sügavkülmutatud V-Ego 200g,V - Ego,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+376745,"Liköör Jägermeister 35% 0,5l",Jägermeister,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+376750,Pihv taimsest valgust Thormi 2tk 200g,Thormi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376752,Mängukomplekt Hot Wheels City T-Rex tuletõrjejaamas,Hot Wheels,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376789,Kohv lahustuv Nescafe Gold 100g,Nescafe,,"Barbora, Maxima, Rimi",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+376810,"Seapraad kondita, kamarata Rakvere kg",Rakvere,,Rimi,,,other,dry_other,fallback,meat_fish,meat_pork,high,proposed_group_invalid;override_with_name_rules
+376813,"Gaseerimata jook Vitamin Well Upgrade 0,5l vitamiinide ja mineraalainetega",Vitamin Well,,,,,other,dry_other,fallback,drinks,drinks_water,high,proposed_group_invalid;override_with_name_rules
+376817,"Piiritusjook Dad Joke Spiced Reserve 40%vol 0,7l",Dad Joke,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376832,Konstruktor Lego Rüüstajate Eelpost Ja Laastaja 21278,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+376861,Angersäga marineeritud Wool 250g/150g,M. V. Wool,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376871,Konstruktor Lego Kiirabiauto Juht 10447,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+376874,Konstruktor Lego Kaose Draakon Thunderfang 71832,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+376891,Kohv jahvatatud Hard Pack Aroma Gold 500g,Määramata,,"Barbora, Maxima, Rimi",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+376903,Mänguasi Jurassic World Wlid Roar SS25,Jurassic World,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+376909,Meritint kuivatatud 36g,MSDM,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,sweets_snacks,sweets_nuts_driedfruit,high,proposed_group_invalid;override_with_name_rules
+376910,Konstruktor Lego Nartsissid 40747,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+376923,Merevetika snäkk kimchi Samplip 12g,Samlip,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376925,Konstruktor Lego Rõõmsad Taimed 10349,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+376949,Frikadellisupp 300g,Mamma,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376950,Jalapeno roheline Santa Maria 215g,Santa Maria,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376954,"Kobarnelk 50cm, 10tk",,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376962,"Energiajook Starter 0,5l",Starter,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376969,"Brandy Torres 10 Years 38%vol 0,5l",Torres,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+376970,Röstitasku Street Food Fazer 330g,Street Food,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376979,Tordipõhi tume Dan Cake 400g,Dance Cake,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+376989,Mahe mesi metsaõite Aasa 350g,Aasa Mesi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377010,Minitosca Reval Kondiiter  240g,Reval Kondiiter,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377011,Kohv lahustuv Vespucci 200g,Vespucci,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+377016,Singivalik viilutatud Argal 120g,Argal,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377024,"Liköör Vana Tallinn 40% vol 0,2L",Vana Tallinn,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+377025,Pehmed nisutakod Rimi Planet 240g,Rimi Planet,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377027,Turbankõrvits kg,Määramata,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377030,Pelmeenid Bravissimo Uvic 400g,Uvic,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377031,Mänguasi Lego rebasemajake 21178,Lego,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+377035,"Marjapüree astelpaju, joogi valmistamiseks Mashie 500ml",Mashie,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377042,"Safran Kotany 0,12g",Kotanyi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377060,Figuur Funko ast 10989F,Funko,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377066,Kaerakliid Veski Mati 1kg,Veski Mati,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377071,Tume Röst rukkihelvestega Fazer 450g,Fazer,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377072,Pune Santa Maria 5g,Santa Maria,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377074,Rukki näkileivad magusa tšilliga Ruissipsi Linkosuo 150g,Linkosuo,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377091,Maitserohelise segu Grüne Fee 75g,Grüne Fee,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377097,Konstruktor Lego Mesilaste Ja Mesitarude Eest Hoolitsemine 10419,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+377102,Shot kollageeniga Nutri Beauty 100ml,Nutri Shot,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377105,Vegan peedikotletid 300g,Veganic,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377109,Hirss Rimi Free From 375g,Rimi Free From,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377111,Loogika kuubik Magic Snake,Krass,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377125,Mänguasi venivad tegelased Craze Legendid,Craze,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+377129,Mänguasi Kippy hall koaala,Bouncibles,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+377134,Täidetud oliivid krevettidega El Faro 370ml/150g,El Faro,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377148,Mudelauto Hot Wheels retromudelid,Hot Wheels,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377162,"FREIXENET CARTA NEVADA MEDIUM DRY 11,5% 0,75L",Freixenet,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377181,Veemäng Cute Pet,Krass,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377186,Ebaküdoonia sukaad Hiie Mari 150g,Hiie Mari,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377194,"Kali Tērvete Godu 0,5l",Tervetes,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377206,"Vitamiinijook Vitamin Well Recover 0,5l",Vitamin Well,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377207,Õppekomplekt I Dig it! Dinos,Kosmos,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377234,Lehttaigen Mantinga 500g,Mantinga,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377237,Kuivatatud aprikoos kivita Awake 400g,Awake,,Rimi,,,other,dry_other,fallback,sweets_snacks,sweets_nuts_driedfruit,high,proposed_group_invalid;override_with_name_rules
+377240,Burger Garden Gourmet 2tk 150g,Garden Gourmet,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377248,Paberrätikud Zewa Everyday 4 rulli,Zewa,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377252,Mini Tosca rabarberiga Eesti Pagar 225g,Eesti Pagar,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377253,"Liköör Koskenkorva Rhubarb 21%vol 0,5l",Koskenkorva,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+377255,Bataat kg,Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377258,Mesi Otepää 600g,Otepää Mesi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377259,Hommikusöögisegu Awake 400g,Awake,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377260,Rukkikorvike ovaalne 30tk Eesti Leivatööstus 360g,Eesti Leivatööstus,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377264,Kohv lahustuv Davidoff Rich Aroma 100g,Davidoff,,"Barbora, Maxima, Rimi",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+377272,Mänguasi Ruubiku kuubik 3X3 Rubik's RUB3025,Rubiks Cube,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+377276,Mesi Salla-Pringi mesilast 500g,Salla-Pringi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377280,Kaardimäng Phase 10,Phase,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377284,Näo ja keha läige Martinelia 16g,Martinelia,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377289,Piiritusjook Bacardi Spiced 35%vol 1l,Bacardi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377294,Mängukomplekt Veok ja roomikekskavaator LEGO 10931,Lego,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+377302,"Sinimerekarbid 40/60 ASC, külmutatud, Tšiili 1kg",R Seafood,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+377303,Salaami Milano Beretta 100g,Beretta,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377304,Mahe kaeratera Koksvere 1kg,Koksvere Veski,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377309,Mahe nisuterad Koksvere 1kg,Koksvere Veski,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377317,Täisterapuder Milupa puuviljadega 10k+ 250g,Milupa,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377327,Nukk Sweetyz Mini Doll & Unicorn 12cm,Sweetyz,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377344,Pelmeenid BBQ lihaga Korea stiilis Gyoza Vici 300g,Vici,,Rimi,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+377359,Mesi Mesikuma 700g,Mesikuma,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377361,Mahe Idutrio 150g,Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377367,"Muu piiritusjook Star Dollar 5 30%vol 0,2l",Star Dollar,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377369,Kohv lahustuv Nescafé Classic 100g,Nescafe,,"Barbora, Maxima, Rimi",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+377372,Joonistuskriidid Genio Kids 21 tk,Genio Kids,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+377389,Lutipudel Nuk First Choice Plus temperatuuri mõõtev pudel silikoon 0-6 kuud 150ml,Nuk,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377393,Spaghetti Carbonara Maitseelamused 300g,Maitseelamused,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377407,"Kali kirsi Karl Friedrich 0,5l purk",Saku,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377408,"Brandy Ibis XO 0,2l",Ibis,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+377409,Konstruktor Lego Punane Sportauto 60448,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+377411,Mahe marmelaad metsamarja Minna 150g,Minna,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377455,Meremari must Kriskal 130g,Meremari,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377466,Baklažaan Japanese 300g,Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377470,Mahe toortatra-peedipüree BabyCool 200g,Babycool,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377475,Pavlova põhjad Reval Kondiiter 8x22g,Reval Kondiiter,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377485,Konstruktor Lego Kutsikate Mänguväljak 42665,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+377487,Prantsuse baguette Medomi 250g,Mantinga,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377498,Suhkrukaunistused Dr.Oetker 80g,Dr.Oetker,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377505,Ürdikrutoonid Land Leben 100g,Land Leben,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377509,Metsapähkel röstitud 200g,Germund,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377512,Fuet salaami Tapas Argal 80g,Argal,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377514,Lutt Nuk Space 18-36 kuud silikoon 2tk,Nuk,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377517,"Madala kalorsusega jook virsikumaitseline Belief gaseeritud 0,53l PET",Belief,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377528,Keto pitsapõhi Rimi Free From 150g,Rimi Free From,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377532,"Roosikimp 30cm, 15 vart",Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377537,"Taskurätikud Zewa Soft&Sensitive, 4kihti 80tk",Zewa,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377541,"Muu piiritusjook 5* Metaxa 38% 0,5l",Metaxa,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377547,Kaerakäkk Kodune 400g,Marmiton,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377551,Mängu arstikott AW25,Simba,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+377553,Mahe marmelaad kodumarja Minna 150g,Minna,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377577,Haputaina Pehmik 240g,Eesti Pagar,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377583,Latikafilee sulatatud,Peipsi Aare,,Rimi,,,other,dry_other,fallback,dairy_eggs_fats,dairy_cheese_slices,high,proposed_group_invalid;override_with_name_rules
+377602,Pitsa Ristorante Salame Vegano 295g,Dr.Oetker,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377634,Mahe Rediseidu 85g,Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377635,Huuleläige Martinelia 4ml,Martinelia,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377640,Näomask Martinelia Kitten niisutav 1tk,Martinelia,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377641,Cordon bleu vegan 220g,Valsoia,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377644,Õppetass Canpol Babies Exotic Animals 6k+ 270ml,Canpol Babies,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377651,Manna Tartu Mill 1kg,Kalew,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377666,Rosinad Arimex 500g,Arimex,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377667,Kohv jahvatatud Selection Intense Jacobs 500g,Jacobs,,"Barbora, Maxima, Rimi",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+377669,Konstruktor Lego 10445 Duplo Town 10445,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+377671,Lehträtik Grite blossom 120tk,Grite,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377675,Tšillikaste teravamaitseline Sriracha Uni-Eagle 230g,Uni-Eagle,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+377676,Kreekerid seesamiga Stiratini 250g,Snackline,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377680,Paella Frosta 400g,Frosta,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377703,Nukk Miraculous koos tarvikutega 50355,Miraculous,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377710,Viie pipra segu Santa Maria 190g,Santa Maria,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377714,Mahe metsamesi Alutaguse 500g,Alutaguse,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377715,Aluslinad Sanaset soft 40x60 n30,SanaSet,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377739,"Piiritusjook Pipra Naps Ingveriga 35%vol 0,35l",Liviko,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377744,Söögisooda Lombardi 500g,Lombardi Claudio,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377753,"Muu piiritusjook Riga Black Balsam 45% 0,2l",Black Balsam,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377771,Kohv jahvatatud Dallmayr Classic Kraftig 500g,Dallmayr,,"Barbora, Maxima, Rimi",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+377772,Panna Cotta Vanilje Nopri 150g,Nopri,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377777,Kohv lahustuv Nescafé Classic Crema 100g,Nescafe,,"Barbora, Maxima, Rimi",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+377783,Lauamäng BO Õpime lugema 2258EE,Bo,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+377785,Ninapump-aspiraator BabyOno valge 04301,Babyono,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377787,Hummus naturaalne Noa 175g,Noa,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377788,Mesi Saaremaine 500g,Saaremaine,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377799,Seavälisfileest minutipihv Rakvere 380g,Rakvere,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377805,Küüslaugupekk Matsimoka viil 110g,Matsimoka,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377823,Marja duo mix 250g,Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377826,Maagiline lima Üllatus figuuriga Unicorn,Craze,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377827,Veemäng Cute Cats,Krass,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377835,"Mänguasi helikopter Revolt R/C AIRWOLF, S5H",Airwolf,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+377840,Mänguasi komplekt Play Doh Mikroskoop G0494,Play Doh,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+377853,Küüslaugumaitseline kaste Santa Maria 250ml,Santa Maria,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+377869,Konstruktor Lego Tuletõrje päästepaat 60373,Lego,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+377874,Bandiidi Burger Maitseelamused 230g,Maitseelamused,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377890,Astelpaju marmelaad Villagu 210g,Villagu,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377892,"Liköör Valhalla Herb Liquer by Koskenkorva 35%vol 0,5l",Koskenkorva,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+377896,Lauamäng Doomino kotis Ambassador,Ambassador,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+377899,"Pardikoivad, värske, A-klass Reinuvaderi Pidusöök kg",Reinuvaderi Pidusöök,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377909,Mahe toortatra kama Tõrvaaugu 300g,Tõrvaaugu,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377914,Mesi kreemjas Sangaste 300g,Sangaste Mesi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377915,"Liköör Vana Tallinn  Ice Cream  0,5l",Vana Tallinn,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+377923,Konstruktor Lego Koenigsegg Jesko Absolut Grey Hypercar 42173,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+377933,"Mänguasi nebulous stars Temporary Tattoos - Asst., 11410",Nebulous Stars,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+377939,Mahe mesi Tõlluste 500g,Tõlluste,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377944,"Multijook Limpa 0,25l",Limpa,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377955,Muretaigen Eesti Leivatööstus 500g,Eesti Leivatööstus,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377960,Kompvekiassortii Pergale Dark Classic 171g,Pergale,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377970,"Piiritusjook Grant's Tropical Fiesta 30%vol 0,7l",Grant's,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377971,Ingver Rhumveld 150g,Rhumveld,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377976,Püree Hipp juurvilja ja vasikalihaga 8k öko 220g,Hipp,,Rimi,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+377978,Mänguasi Lego ujuv loomade rong 10965,Lego,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+377982,"Liköör Ürdimeister Remedia 35% 0,5l",Remedia,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+377985,Mesi Sangaste 300g,Sangaste Mesi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377992,Mahe marmelaad Rabade maitsed Minna 140g,Minna,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+377994,Haug roogitud sulatatud,Peipsi Aare,,Rimi,,,other,dry_other,fallback,dairy_eggs_fats,dairy_cheese_slices,high,proposed_group_invalid;override_with_name_rules
+377996,Kuivatatud ploomid kivideta Arimex 140g,Arimex,,Rimi,,,other,dry_other,fallback,sweets_snacks,sweets_nuts_driedfruit,high,proposed_group_invalid;override_with_name_rules
+378003,Mesi Aaviku 500g,Aaviku Mesila,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378006,Suvesupp Põltsamaa 530g,Põltsamaa,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378015,Pusle Minu kodu Puzzlika,Puzzlika,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378029,"Bitter Beloff Pipranaps 35% 0,5l",Beloff,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378035,Mänguasi komplekt Lima Canal Toys SSC243CL,Canal Toys,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378036,"Karboniseeritud jook Vichy Fresh Bubbles Raspberry 1,5l PET",Vichy,,Rimi,,,other,dry_other,fallback,produce,produce_berries,high,proposed_group_invalid;override_with_name_rules
+378042,Figuur Paw Patrol Air Rescue Action Pup Chase 6071655,Paw Patrol,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378050,Võrkpall 9cm Gerardo's Toys,Gerardos Toys,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378053,"Brandy Bartender's Club VSOP, Alk 36% vol, 0,5l",Bartender's Club,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+378064,Mänguhobune 60cm,Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378067,Liköör kirsi 21% 0.5l,Liviko,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+378072,"Toonik Fever Tree Indian 0,2l",Fever Tree,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378083,Tüümian Kotanyi 14g,Kotanyi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378087,Pangasiuse filee nahata Nowaco külmutatud ASC 560g,Nowaco,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+378089,"Fenkol, 1tk",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378093,Kimchi Panchan 300g,Panchan,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378129,Pagari Kaeraröst Eesti Pagar 430g,Eesti Pagar,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378131,Magusa tšilli ja küüslaugu vokikaste Santa Maria 100g,Santa Maria,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+378153,"Taskurätikud Zewa Softis, 4kihti 10x9tk",Zewa,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378156,Kohv lahustuv Davidoff Fine Aroma 100g,Davidoff,,"Barbora, Maxima, Rimi",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+378162,Vaniljekaun 13/15cm 10g,Gemoss,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378164,Mängukaardid UNO klassikaline,Uno,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378167,"Liköör Fireball 33%vol 0,7l",Fireball,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+378168,"Vermut Martini Bianco 15% 0,5l",Martini,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378170,Hambaharja komplekt Baboo 6k+ 2tk,Baby's Kingdom,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378174,Pusle Spinmaster Games Paw Patrol Cube 6067572,Spinmaster Games,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378175,India pähkel röstitud Premium 300g,Germund,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378180,Magusa tšilli maitseline kaste Santa Maria 250ml,Santa Maria,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+378186,Mänguasi Theia mitmevärviline kass,Bouncibles,,Rimi,,,pet,pet_other,heuristic,household,hh_other,low_oos,override_with_name_rules
+378193,Konstruktor Lego Kerglennuk 42198,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378198,Taimne määre küüslaugu ja ürtidega Tartare Vegetal 140g,Tartare Vegetal,,Rimi,,,other,dry_other,fallback,world_spices,spices_herbs_spice_mix,high,proposed_group_invalid;override_with_name_rules
+378199,Tahvelarvuti BO 82031EE,Bo,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378200,Kohvijook lahustuv pakikeses 3in1 Classic Nescafe 330g,Nescafe,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+378203,Martsipanikeerd 60g,Mantinga,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378205,Delikatess-sült Nõo 300g,Nõo,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378207,Kali A.Le.Coq Klassikaline 1l,A. Le Coq,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378211,"Lutt Nuk First Choice+ suurus M, silikoon 6-18k 2 tk.",Nuk,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378217,Roheline toiduvärv Dr.Oetker 10g,Dr.Oetker,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378222,Magus tšillikaste Rimi Planet 700ml,Rimi Planet,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+378223,Austrikaste Thai Choice 200ml,Thai Choice,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+378240,Kohv jahvatud keskmine röst Lofbergs In Cup 500g,Löfbergs,,,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+378249,Paberkäterätt WHITE RABBIT Grite 1r.,Grite,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378257,Mänguasi Bubbles roosa aksolotl,Bouncibles,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378265,Pelmeenid Hiina Uvic 2kg,Uvic,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378267,"Liköör Vana Tallinn Coffee Espresso 35%vol 0,5l",Vana Tallinn,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+378269,Taimsed burgerid sügavkülmutatud V-Ego 200g,V - Ego,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+378276,Vanilliplombiir Onu Eskimo Balbiino 1l/480g,Onu Eskimo,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378281,Pitsa Ristorante Speciale 345g,Dr.Oetker,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378286,Lauamäng Monopoly Grab&Go Hasbro,Monopoly,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378297,"Liköör Vana Tallinn 40%vol 0,2l",Vana Tallinn,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+378307,Konstruktor Lego Metsloom: Roosa Flamingo 31170,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378311,Konstruktor Lego Metsalillede kimp 10313,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378323,"Brandy Ciornij Aist 38%vol 0,2l",Ciornij Aist,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+378329,5-viljaröst täisterahelvestega Fazer 450g,Fazer,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378331,Komplekt Happy People Süda 5564,Happy People,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378337,Vahemere kauss Chef Lunden 280g,Chef Lunden,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378343,"Mullinäts Big babol Tutti Frutti Chupa Chups 27,6g",Chupa Chups,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378361,Pelmeenid pere Rakvere 600g,Rakvere,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378363,Konstruktor Lego Heartlake Linna Kohvik 42649,Lego,,Rimi,,,drinks,drinks_other,heuristic,household,hh_other,low_oos,override_with_name_rules
+378369,"Brandy Torres 5 Years 38%vol 0,5l",Torres,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+378371,Konstruktor Lego Sõpruse Matkaauto 42659,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378384,Pitsapõhi Quelli della Pizza 2x280g,Quelli della Pizza,,Rimi,,,other,dry_other,fallback,frozen_food,frozen_pizza,high,proposed_group_invalid;override_with_name_rules
+378403,Kohvijook Salted Caramel Iced Espresso Bold 250ml,Bold,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+378413,Pehme mänguasi Rakett,,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378416,Õietolm Sangaste 100g,Sangaste Mesi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378421,Kodupakk Maias Mari Ecomari 300g,Ecomari,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378425,Pitsa salaami ja chorizo Feliciana Dr.Oetker 320g,Dr.Oetker,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378444,"Vermut Bellissimo Rosso 14,5%vol 1l",Bellissimo,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378445,"Minifiguur Godzilla 2"" assortii 35760",Godzilla x Kong,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378454,"Brandy Ciornij Aist 40%vol 0,5l",Ciornij Aist,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+378464,"Muu piiritusjook Riga Black Balsam 45% 0,5l",Black Balsam,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378466,Vahvlid vanillimaitselise täidisega Happy 100g,Happy,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378477,Kapparid varrega Citres 290g,Citres,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378491,Mänguasi Matchbox lennuvahendid,Matchbox,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378493,Troopiliste puuviljade segu Arimex 200g,Arimex,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378496,Pagariröst täistera Eesti Pagar 430g,Eesti Pagar,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378500,Mahe Kiviveski täistera rukkimanna Tammejuure 700g,Tammejuure,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378507,Liköör Vana Tallinn 50% 0.5L,Vana Tallinn,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+378509,Pehme mänguasi Sweetyz Scented Scoops 8,Sweetyz,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378522,Mänguasi vinüülpall,Määramata,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378536,Mänguasi Boofa valge jeti,Bouncibles,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378540,Hummus Rimi Planet peediga 180g,Rimi Planet,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378554,"Liköör Jägermeister 35% 0,1l",Jägermeister,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+378556,"Brandy Imperial XII V.S.O.P 36% 0,2l",Imperial,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+378560,Filotainas koduseks küpsetamiseks Valesto 400g,Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_flour_sugar_baking,high,proposed_group_invalid;override_with_name_rules
+378562,Pehme mänguasi õhupintsliga Canal Toys 249CL,Canal Toys,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378577,"Liköör Jagdtraum 30%vol 0,7l",Jagdtraum,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+378585,"Lutipudel Philips Avent Koolikutevastane 260ml, aeglase vooluga lutt 1k+ 1tk.",Philips Avent,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378598,"Reisirahakott Martinelia 8,26g",Martinelia,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378602,Keedusalaami Paruni Nõo 90g,Nõo,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378604,India pähkel Awake 150g,Awake,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378606,Kaste Tikka Masala Rimi Planet 480g,Rimi Planet,,,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+378607,Svammid Vileda Tip-top 3tk,Vileda,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378612,Nukk Disney Princess lossitorniga,Disney,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378620,"Whiskey Connemara Peated Single Malt 0,7l kinkekarbis",Connemara,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+378624,"Muu piiritusjook Bartenders Club Spirit Drink 36%vol 0,2l",Bartender's Club,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378632,Prügikotid Paclan 60l 20tk,Paclan,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378639,Nectar Elmenhorster multivitamiin 50% 1l,Elmenhorster,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378647,Mänguasi Hot Wheels klassikalised trikirajad komplekt,Hot Wheels,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378649,Kaardimäng UNO Minecraft SS25,Mattel,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378659,"Muu piiritusjook Star Dollar 0,2l",Star Dollar,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378660,Kuivatatud Awake ploom kivita 400g,Awake,,Rimi,,,other,dry_other,fallback,sweets_snacks,sweets_nuts_driedfruit,high,proposed_group_invalid;override_with_name_rules
+378689,"Madala kalorsusega jook assionimaitseline Belief gaseeritud 0,53l PET",Belief,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378704,"Liköör Jägermeister 35% 0,7l",Jägermeister,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+378710,Kaste Hot pepper Santa Maria 85ml,Santa Maria,,,,,sauces_oils,sauces_other,heuristic,world_spices,spices_basic_salt_pepper,high,override_with_name_rules
+378714,"Brandy Askaneli 5* 40%vol 0,5l",Askaneli,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+378722,Kamapallid BalSnack 30g,Balsnack,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378750,FC+ Pudel nuk temperatuuri juhtimine 300ml 1SI,Nuk,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378753,Hernevõrsed potis Grüne Fee tk,Grüne Fee,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378756,Köömned Santa Maria 20g,Santa Maria,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378759,Konstruktor Lego Orhideed 10311,Lego,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378761,"Lasanje Bolognese kastmega Rimi Express, 400g",Rimi Express,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+378763,Taimne suupiste Piri-Piri Snack IT 90g,Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378769,Lauamäng Mistakos Trefl,Trefl,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378779,"Muu piiritusjook 7* Metaxa 40% 0,7l",Metaxa,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378786,Roos potis 14cm,Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378788,Mac and Cheese Maitseelamused 300g,Maitseelamused,,Rimi,,,other,dry_other,fallback,dairy_eggs_fats,dairy_cheese_slices,high,proposed_group_invalid;override_with_name_rules
+378789,Pudrupulber Hipp kaera bio 4kuud 200g,Hipp,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378790,Mänguasi Jurassic World karja dinosaurused,Jurassic World,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378792,Loorberileht Santa Maria 4g,Santa Maria,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378796,Astelpajumarmelaad Mahetark 180ml,Mahetark,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378799,Vinnutatud seafilee viilud Serrano 80g,Serrano,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378800,Konstruktor Lego Numbrirong – õpi loendama 10954,Lego,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378818,Konstruktor Lego Gabby 11204 11204,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378819,Ahjuköögiviljad 350g,,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378821,Oregano potis Grüne Fee tk,Grüne Fee,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378827,Korvpall 11cm Gerardo's Toys,Gerardos Toys,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378836,"Toidukreem vahustatav taimne Oddlygood 2,5 dl UHT 250g",Oddlygood,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378841,Mahe mesi metsaõite Aasa 500g,Aasa Mesi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378850,Konstruktor Lego Collectibles 71049,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+378855,Mahe mesi metsaõite Aasa 900g,Aasa Mesi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378871,"Piiritusjook Grant`S Summer Orange 35% 0,7l",Grant's,,Rimi,,,other,dry_other,fallback,produce,produce_tropical,high,proposed_group_invalid;override_with_name_rules
+378875,"Brandy Imperial XII V.S.O.P 36%vol 0,7l",Imperial,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+378880,Rinnahoidja padjad Baboo Premium 40 tk.,Baby's Kingdom,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378883,"Kuuking 1 vars, 6-8+ õit",Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378890,Rabarberi Lassi Maitseelamused 300g,Maitseelamused,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378898,Marmelaadikompvekid Julia Fazer 150g,Karl Fazer,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378915,Mahe kanepi proteiinipulber Tammejuure 250g,Tammejuure,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378923,"Muu piiritusjook Kraken Black Spiced 40%vol 0,7l",Kraken,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378927,Tšillikaste magus Exotic Food 870g,Exotic Food,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+378928,Mudelauto Hot Wheels autotööstuse pärlid,Hot Wheels,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378934,Taimne kohvivalgendaja Schlagfix 10% 10x10g,Schlagfix,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+378935,Skyr maitsestamata Farmi 400g,Farmi,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378938,Pangaasiusefilee Northland ASC 800g,Northland,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378950,"Kali klassikaline A.Le Coq 0,5l pet",A. Le Coq,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378962,"Brandy Adati 3 stars 40% 0,5l",Adati,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+378964,Creme Bonjour maitsestamata laktoosivaba 200g,Creme Bonjour,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378967,Rakvere chorizo 105g,Rakvere,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378973,Pehme mänguasi Astro koer,,,,,,pet,pet_other,heuristic,household,hh_other,low_oos,override_with_name_rules
+378978,Lehträtikud Zewa Easy 120 tk,Zewa,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378985,"Kombucha jook Captain Kombucha virsiku öko 0,4l PET",Captain Kombucha,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+378999,Suhkrust südamekesed Dr.Oetker 10g,Dr.Oetker,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379000,Mänguasi Hot Wheels retro stiilis HDG52,Hot Wheels,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379004,Vannitamisalus Badum pehme maxi uni,Badum,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379007,"Muu piiritusjook Pipra Kibe Naps 35% 0,5l",Liviko,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379014,"Liköör Vana Tallinn Coconut 16% vol 0,5l",Vana Tallinn,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+379019,Konstruktor Lego Loominguline Ranna- Ja Reisikohver 42672,Lego,,Rimi,,,drinks,drinks_other,heuristic,household,hh_other,low_oos,override_with_name_rules
+379035,Taimsed pallid brokkoliga sügavkülmutatud V-Ego 200g,V - Ego,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+379037,Mahe mesi Tõlluste 250g,Tõlluste,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379053,"Whiskey Maker's Mark 0,7l",Maker's Mark,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+379057,Mahe marmelaad rabarber Minna 150g,Minna,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379060,Mänguasi Fisher-Price mängupult,Fisher Price,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379073,"Mänguasi nebulous stars loovuskomplekt Nebulia ja hobune, 11421",Nebulous Stars,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379075,Kosmose kleebised,,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379088,Kaardimäng UNO Flip Side SS25,Mattel,,Rimi,,,other,dry_other,fallback,personal_care,pcare_feminine_hygiene,high,proposed_group_invalid;override_with_name_rules
+379090,Tsitrus-grillisegu Santa Maria 35g,Santa Maria,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379091,Nakkuva põhjaga taldrik BabyOno 6k,Babyono,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379093,Tudengi eine Premium 300g,Germund,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379096,Brokkolipüree rauaga Nogel öko 70g,Nogel,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379101,"Draakonivili kollane, kg",,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379104,Pitsa Ristorante Prosciutto 340g,Dr.Oetker,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379106,Kinkepakend Seitse Marja Ecomari 80g,Ecomari,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379109,Metsa ja soo mesi Otepää 400g,Otepää Mesi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379126,"Vitamiinijook Vitamin Well Enhance 0,5l",Vitamin Well,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379142,Mänguasi komplekt Play Doh Lilled G0492,Play Doh,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379150,Konstruktor Lego Roheline alusplaat 11023,Lego,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379159,Konstruktor Lego Punane Kahekordne Turistibuss 60407,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379163,Kohv jahvatatud filterkannu Paulig Classic 500g,Paulig,,,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+379164,"Ploom tume, kg",,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379177,Konstruktor Lego Maadeavastajate Arktika Ekspressrong 60470,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379191,Hummus musta küüslauguga Marta Pagar 150g,Marta Pagar,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379204,Konstruktor Lego politseiauto 60312,Lego,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379207,Lasanjeplaadid Panzani 500g,Panzani,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379210,Kohvijook Frezza Latte 250ml,Paulig,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+379212,Kohvijook Nescafe Mixes 3in1 Creamy Latte 15g,Nescafe,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+379215,Pitsa Dr. Oetker Ristorante Bolognese 375g,Dr.Oetker,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379228,"Aromatiseeritud jook Blossa Vinglögg 10%vol 0,75l",Blossa,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379231,Neljaviljapallid Balsnack 150g,Balsnack,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379238,Mahe mesi Tõlluste 150g,Tõlluste,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379241,Mahe metsamesi Loodusvägi 300g,Loodusvägi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379242,"Armagnac De La Maziere 40% 0,7l",Armagnac de la Mazziere,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379245,Kaera lapi leiva kuklid Fazer Street Food 500g,Fazer,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379254,Hummus Rimi Planet baklažaaniga 180g,Rimi Planet,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379273,Hartšoo Põltsamaa 530g,Põltsamaa,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379276,Krevetimääre avokaadoga Veladis 150g,Veladis,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379277,Vahvlitorud täidisega Pralinee kg,Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379280,"Mänguasi Eddy Toys Kevad 7x7x6,6cm AW25",Eddy Toys,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379285,Ingver marineeritud Fudo 200g,Fudo,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379290,Draakonivili kg,Määramata,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379291,"Liköör Vana Tallinn Heritage 40% 0,5l",Vana Tallinn,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+379293,"Tiigerkrevetid, puh-tud, keedetud, ASC, 31/40, Vannamei, külm., (P.Vannamei), R Seafood 300g",R Seafood,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379294,Takotaskud Rimi Planet 135g,Rimi Planet,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379316,"Liköör Koskenkorva Passionfruit 21%vol 0,5l",Koskenkorva,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+379319,Mahe suvikõrvitsapüree BabyCool 200g,Babycool,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379326,SproutKing Asian Mix Mikrovõrsed 30g,,,Rimi,,,other,dry_other,fallback,produce,produce_herbs_salads_sprouts,high,proposed_group_invalid;override_with_name_rules
+379337,"Liköör Casa Charlize Limoncello Liqueur 26%vol 0,5l",Casa Charlize,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+379338,Tatrapuder Fleur Alpine täistera alates 4 kuust Bio 175g,Fleur Alpine,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379344,Kodune seljanka Raaret 700g,Jäämari,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379347,Mehhiko köögiviljasegu kastmega Rimi Planet 450g,Rimi Planet,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+379348,Taimne Kiievi kotlet NotChicken Atlantika 230g,Atlantika,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379352,Mänguasi Ziko pruun koer,Bouncibles,,Rimi,,,pet,pet_other,heuristic,household,hh_other,low_oos,override_with_name_rules
+379362,Nukk printsess Dreameez mini 81041F,Dreameez,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379389,Delikatess-krevetimääre Veladis 150g,Veladis,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379391,Kosmosealbum EE,,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379392,"Kali põldmarja A. Le Coq 0,5l purk",A. Le Coq,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379393,"Vitamiinijook Vitamin Well Awake 0,5l",Vitamin Well,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379394,Konstruktor Lillekimp - ehituskomplekt 10280 Lego,Lego,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379395,Oregano Kotanyi 8g,Kotanyi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379399,Ingveritükid suhkrustatud Zelta Rieksts 100g,Zelta Rieksts,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379424,Papaia Formosa kg,Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379425,Konstruktor Lego Netheri Laavalahing 21266,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379449,Datlid kivideta Arimex Premium 300g,Arimex,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379458,"Piiritusjook Pipra Naps 35%vol 0,35l",Liviko,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379461,Mahe toortatratang Tõrvaaugu 1kg,Tõrvaaugu,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379464,Konstruktor Lego 2 Fast 2 Furious Nissan Skyline GT-R (R34) 76917,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379467,Verev oblikas potis Grüne Fee tk,Grüne Fee,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379471,Salaami Milano Veroni viilutatud 70g,Veroni,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379473,Multi puuvilja jook Pfanner Morning Boost 2l,Pfanner,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379479,Mahe odramanna Koksvere 500g,Koksvere Veski,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379480,"Kali Rukkilinnase A. Le Coq 0,5l purk",A. Le Coq,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379484,Lauamäng BO Õpime arvutama 2257EE,Bo,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379500,"Brandy Gocha Askaneli 5 YO 40%vol 0,5l",Askaneli,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+379502,Austrikaste Santa Maria 200ml,Santa Maria,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+379504,"Jook Vitamin Well Celebrate 0,5l",Vitamin Well,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379507,Seebimullid DULCOP Stitch 60ml,Dulcop,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379519,"Kaktusvili, kg",Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379522,Mänguasi Mimi roosa flamingo,Bouncibles,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379523,Kohv jahvatatud Dallmayr Classic 500g,Dallmayr,,,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+379528,"Bitter Beloff Pipranaps 35% 0,2l",Beloff,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379530,Mänguasi Nukk Barbie moodne Ken,Ken,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379531,Kohv jahvatatud Davidoff Rich Aroma 250g,Davidoff,,"Barbora, Maxima, Rimi",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+379536,Avokaado pakitud mahe 2tk,Määramata,,Rimi,,,other,dry_other,fallback,produce,produce_tropical,high,proposed_group_invalid;override_with_name_rules
+379553,Mahe speltanisumanna Koksvere 500g,Koksvere Veski,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379562,Kohv jahvatatud masina Jacobs Kronung Decaff kofeiinivaba 250g,Jacobs,,,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+379568,Juuksehari Martinelia,Martinelia,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379572,Moonirull 70g,Eesti Pagar,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379580,"Toonik Pink Grapefruit Thomas Henry 0,75l",Thomas Henry,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379581,Mänguasi komplekt Play Doh Väike Kokk F6904,Play Doh,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379585,Mooni-martsipanirull külmutatud Eesti Pagar 320g,Eesti Pagar,,,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_bakery,high,override_with_name_rules
+379586,Kalmaarirõngad taignas Nowaco külmutatud 500g,Nowaco,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+379606,Vahvlid kakaotäidisega Happy 100g,Happy,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379615,Jalgpall 9 cm Gerardo's Toys,Gerardos Toys,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379621,Säga filee nahaga 200g,Žuvėja,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379638,Konstruktor Lego Racer 42141,Lego,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules

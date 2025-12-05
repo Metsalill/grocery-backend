@@ -1,0 +1,82 @@
+product_id,name,brand,size_text,food_group,stores_sample,current_sub_code,new_sub_code,food_group_corrected,food_group_corrected_prev,new_sub_code_prev,confidence,final_food_group,final_sub_code,final_confidence,change_reason
+3130,Alma kohuke kakao kakaoglasuuris 40g,Alma,40 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi",,dry_other,other,dairy_eggs_fats,dairy_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+3115,Alma kohuke vanilli kakaoglasuuris 40g,Alma,40 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dry_other,other,dairy_eggs_fats,dairy_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+11085,"Gouda Karulauguga, NOPRI, 250 g",Gouda,250 g,dairy_eggs_fats,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dry_other,other,dairy_eggs_fats,dairy_cheese_slices,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+9051,"Laktoosivaba vanilli glasuurkohuke, 40 g",Laktoosivaba,40 g,dairy_eggs_fats,"Coop, Prisma, Rimi, Selver",,dry_other,other,dairy_eggs_fats,dairy_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+38386,"Magija karamelliga kohuke, 45g",Magija,45 g,dairy_eggs_fats,Prisma,,dry_other,other,sweets_snacks,sweets_candies,fallback,sweets_snacks,sweets_candies,high,proposed_group_invalid;override_with_name_rules
+40184,"Magija shokolaadikohuke, 45 g",Magija,45 g,dairy_eggs_fats,Prisma,,dry_other,other,sweets_snacks,sweets_chocolate_bars,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+2227,Tere Kohuke vanilli laktoosivaba 40g,Tere Kohuke,40 g,dairy_eggs_fats,"Barbora, Maxima, Prisma",,dry_other,other,dairy_eggs_fats,dairy_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+16105,Juuksegeel Got2b Glued Water Res 150 ml,Juuksegeel Got2b,150 ml,drinks,Prisma,,dry_other,other,personal_care,pcare_other,fallback,drinks,drinks_water,high,proposed_group_invalid;override_with_name_rules
+15422,Pesukaitse discreet waterlily 100tk,Pesukaitse,,drinks,Prisma,,hh_other,household,personal_care,pcare_feminine_hygiene,heuristic,personal_care,pcare_feminine_hygiene,high,override_with_name_rules
+29962,Rainbow Blue Water wc-värskendaja 40 g,Rainbow Blue,40 g,drinks,Prisma,,dry_other,other,household,hh_candles_airfresh,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+1772,Balsnack kamapallid 150 g,Balsnack,150 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_other,other,dry_preserves,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+22246,Coop lasanjeplaadid ja kastmepulber 247g,Coop,247 g,dry_preserves,Prisma,,sauces_other,sauces_oils,dry_preserves,dry_other,heuristic,sauces_oils,sauces_other,heuristic,
+20740,Coop suured hiidkrevetid kastmes 350/170g,Coop,170 g,dry_preserves,Prisma,,sauces_other,sauces_oils,dry_preserves,dry_other,heuristic,sauces_oils,sauces_other,heuristic,
+19883,Il molino panna cotta karamellikastmega 90g,Il,90 g,dry_preserves,Prisma,,sauces_other,sauces_oils,sweets_snacks,sweets_candies,heuristic,sweets_snacks,sweets_candies,high,override_with_name_rules
+26297,Knorr 3 pipra kuivkastme segu 3x32g,Knorr,3x32 g,dry_preserves,Prisma,,sauces_other,sauces_oils,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+24205,"Knorr karrikastme pulber, 3x24 g",Knorr,3x24 g,dry_preserves,Prisma,,sauces_other,sauces_oils,sauces_oils,sauces_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+1944,Macedonian seesami snack 100 g,Macedonian,100 g,dry_preserves,Prisma,,dry_other,other,dry_preserves,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+131734,Maizena valge kastmepulber 250 g,Maizena,250 g,dry_preserves,Prisma,,sauces_other,sauces_oils,dry_preserves,dry_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+123854,Maks ja Moorits Classic Super Snack 85 G,Maks,85 g,dry_preserves,"Coop, Prisma, Selver",,dry_other,other,dry_preserves,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+54137,Ma&orits Snack Sticks Tradit.85G,Ma&orits Snack,85 g,dry_preserves,"Coop, Prisma",,dry_other,other,dry_preserves,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+3434,RANA Lasanje bolognese kastmega 350 g,RANA Lasanje,350 g,dry_preserves,Prisma,,sauces_other,sauces_oils,dry_preserves,dry_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+5786,Texas pete hotsauce tsillikaste 177ml,Texas,177 ml,dry_preserves,Prisma,,sauces_other,sauces_oils,dry_preserves,dry_other,heuristic,sauces_oils,sauces_other,heuristic,
+8707,ZOTT Monte snack 29g,ZOTT Monte,29 g,dry_preserves,Prisma,,dry_other,other,dry_preserves,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+1738,Astelpaju külmutatud 350 g,Astelpaju,350 g,frozen_food,Prisma,,frozen_other,frozen_food,frozen_food,frozen_berries_fruit,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+54747,"Belgia vahvlid vanillikreemi täidisega, külmutatud, 4 x 80g",Belgia,4x80 g,frozen_food,Prisma,,frozen_other,frozen_food,frozen_food,frozen_desserts_icecream,heuristic,frozen_food,frozen_other,heuristic,
+219126,"Dr.Oetker külmutatud singipitsa hawaii, 355 g",Dr.Oetker,355 g,frozen_food,Prisma,,frozen_other,frozen_food,frozen_food,frozen_pizza,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+1462,Istmekõrgendus Frozen R129,Istmekõrgendus Frozen,,frozen_food,Prisma,,frozen_other,frozen_food,household,hh_other,heuristic,frozen_food,frozen_other,heuristic,
+3074,Pannkoogid õhukesed 500g külmutatud,Pannkoogid,500 g,frozen_food,"Coop, Prisma, Selver",,frozen_other,frozen_food,frozen_food,frozen_bakery,heuristic,frozen_food,frozen_other,heuristic,
+2308,Xtra marjasegu sügavkülmutatud 500g,Xtra,500 g,frozen_food,Prisma,,frozen_other,frozen_food,frozen_food,frozen_berries_fruit,heuristic,frozen_food,frozen_other,heuristic,
+7023,"Ameerikapärane grill-liha, MAKS&MOORITS, 500 g",Ameerikapärane,500 g,meat_fish,"Prisma, Rimi, Selver",,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+3546,"Armeenia grill-Liha, kg",Armeenia,,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic,meat_fish,meat_other,heuristic,
+28344,Flint grenki vasikaliha ja adžikamaitselised leivakesed 80g,Flint,80 g,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+126449,"Grandiosa meat lovers superiore kiviahjupitsa, 350 g",Grandiosa,350 g,meat_fish,"Coop, Prisma, Selver",,meat_other,meat_fish,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+199,"Grillitud ROUTE 66 grill-liha seakaelakarbonaadist, kg",Grillitud ROUTE,,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic,meat_fish,meat_other,heuristic,
+6444,"Grill-liha Armeenia, MAKS&MOORITS, 500 g",Armeenia,500 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+4030,Gustav Catering .Spaghetti Bolognese Lihapallidega 300 G,Gustav Catering,300 g,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+1830,"Gyoza pelmeenid BBQ lihaga, Korea stiilis 300 g",Gyoza,300 g,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+587252,"Herkku delikatess kammkarbiliha, 180 g",Herkku,180 g,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+6357,Hirveliha steik 240 G,Hirveliha,240 g,meat_fish,"Barbora, Maxima, Prisma",,meat_other,meat_fish,meat_fish,meat_beef_lamb_game,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+3971,"Jalostaja hernesupp lihaga, 550 ml",Jalostaja,550 ml,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+2363,Kron pudelihari 5cm,Kron,,meat_fish,Prisma,,meat_other,meat_fish,household,hh_other,heuristic,meat_fish,meat_other,heuristic,
+5665,"Küüslaugu grill-liha kaelakarbonaadist, RAKVERE, 500 g",Küüslaugu,500 g,meat_fish,"Prisma, Rimi, Selver",,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+11035,"Lihakas lihapall, RAKVERE LK, 300 g",RAKVERE Lihakas,300 g,meat_fish,"Coop, Prisma, Selver",,meat_other,meat_fish,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+34006,"Liharibad, NÕO, 140 g",Meat,140 g,meat_fish,"Prisma, Selver",,meat_other,meat_fish,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+493417,Linnamäe Lihatööst Hõrk Peakoka Pardirinnafilee u 400G,Linnamäe Lihatööst,400 g,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+8795,MAITSEELAMUSED Rebitud liha ciabatta pizza 225 g,MAITSEELAMUSED Rebitud,225 g,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+493820,Maks ja Moorits Kauaküpsenud Koodiliha Kondita ~1Kg,Maks,1 kg,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+1815,Maks ja Moorits Lihakõrsiku Snäkk 250 G,Maks,250 g,meat_fish,"Coop, Prisma, Rimi",,meat_other,meat_fish,sweets_snacks,sweets_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+17605,Maks ja Moorits Lihapallid 350G,Maks,350 g,meat_fish,"Coop, Prisma",,meat_other,meat_fish,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+9014,Maks ja Moorits Lihapihvid 400G,Maks,400 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_other,meat_fish,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+11601,MAMMA Hapukapsaborš lihaga 300 g,MAMMA Hapukapsaborš,300 g,meat_fish,"Coop, Prisma",,meat_other,meat_fish,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+22252,MAMMA Lihakas seljanka 300 g,MAMMA Lihakas,300 g,meat_fish,"Coop, Prisma, Rimi",,meat_other,meat_fish,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+3226,Mamma Pannkoogid Rebitud Liha Ja Bbq-Kastmega,Mamma Pannkoogid,200 g,meat_fish,"Coop, Prisma",,meat_other,meat_fish,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+12177,"MAMMA Värskekapsaborš lihaga, supipõhi 500 g",MAMMA Värskekapsaborš,500 g,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+12475,Põltsamaa värskekapsaborš lihata 530 g,Põltsamaa,530 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_other,meat_fish,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+1741,Rakvere Mini Lihapallid 300G,Rakvere Mini,300 g,meat_fish,"Coop, Prisma, Rimi, Selver",,meat_other,meat_fish,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+11225,Rakvere Pere Lihapallid 300 G,Rakvere Pere,300 g,meat_fish,"Barbora, Maxima, Prisma, Selver",,meat_other,meat_fish,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+1948,"Rakvere Sea Abaliha Kondita, Kg",Rakvere Sea,,meat_fish,"Prisma, Rimi",,meat_other,meat_fish,meat_fish,meat_pork,heuristic,meat_fish,meat_other,heuristic,
+3348,Rakvere Ürdi Grill-Liha Kaelakarbonaadist 500G,Rakvere Ürdi,500 g,meat_fish,"Prisma, Selver",,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic,meat_fish,meat_other,heuristic,
+2038,Rannarootsi Ehe Grill-Liha Seavälisfileest 400 G,Rannarootsi Ehe,400 g,meat_fish,"Prisma, Rimi, Selver",,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+32253,"ROUTE 66 grill-liha seakaelakarbonaadist, kg",ROUTE,,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic,meat_fish,meat_other,heuristic,
+34537,Šašlõkimaitseline grill-liha 450 g,Šašlõkimaitseline,450 g,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+134485,Seljanka lihata 3Min 480 g,Seljanka,480 g,meat_fish,"Coop, Prisma, Selver",,meat_other,meat_fish,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+10976,UVIC Praetud pelmeenid lihaga 350 g,UVIC Praetud,350 g,meat_fish,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_other,meat_fish,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+5055,Värska grillliha kaelakarbonaadist 500G,Värska,500 g,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_grill_blood_sausages,heuristic,meat_fish,meat_other,heuristic,
+406157,"Vici pelmeenid lihaga, 1 kg",Vici,1 kg,meat_fish,Prisma,,meat_other,meat_fish,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+19405,Wõro Lihapallid 600 G,Wõro Lihapallid,600 g,meat_fish,"Coop, Prisma",,meat_other,meat_fish,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+94408,Balsnack küüslauguleivad 80 g,Balsnack,80 g,bakery,"Coop, Prisma, Rimi, Selver",,dry_other,other,bakery,bakery_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+28407,Dan cake mini shokolaadikoogid 150 g,Dan,150 g,bakery,Prisma,,dry_other,other,sweets_snacks,sweets_chocolate_bars,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+45838,Fazer Street Food Lapi leivad kuklid 330 g,Fazer Street,330 g,bakery,Prisma,,dry_other,other,bakery,bakery_buns_croissants,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+3143,Finn Crisp Multigrain õhukesed näkileivad 175 g,Finn Crisp,175 g,bakery,"Prisma, Rimi",,dry_other,other,bakery,bakery_bread_loaves,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+48361,Finn Crisp Traditional näkileivad 200 g,Finn Crisp,200 g,bakery,"Barbora, Maxima, Prisma, Selver",,dry_other,other,bakery,bakery_bread_loaves,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+105286,"Funcakes söödavad karikakrakujulised kaunistused, valged, 16 tk",Funcakes,16 pcs,bakery,Prisma,,dry_other,other,bakery,bakery_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+146271,Leksands maitsestatud näkileivad 200 g,Leksands,200 g,bakery,Prisma,,dry_other,other,bakery,bakery_bread_loaves,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+151015,Leksands traditsioonilised kolmnurknäkileivad 200 g,Leksands,200 g,bakery,Prisma,,dry_other,other,bakery,bakery_bread_loaves,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+3315,Marmiton küüslauguleivad ämbris 300g,Marmiton,300 g,bakery,"Coop, Prisma, Rimi, Selver",,dry_other,other,bakery,bakery_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+48860,Marmiton küüslauguleivad topsis 150 g,Marmiton,150 g,bakery,"Prisma, Rimi, Selver",,dry_other,other,bakery,bakery_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+3527,Marmiton topelt küüslaugused leivad 140g,Marmiton,140 g,bakery,Prisma,,dry_other,other,bakery,bakery_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+3480,ÕHUKESED NÄKILEIVAD KÖÖMNETEGA 200G,ÕHUKESED NÄKILEIVAD,200 G,bakery,"Prisma, Selver",,dry_other,other,bakery,bakery_bread_loaves,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+30107,"Oululainen näkileivad, 740 g",Oululainen,740 g,bakery,Prisma,,dry_other,other,bakery,bakery_bread_loaves,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+29035,Polar näkileivad 280g,Polar,280 g,bakery,Prisma,,dry_other,other,bakery,bakery_bread_loaves,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent

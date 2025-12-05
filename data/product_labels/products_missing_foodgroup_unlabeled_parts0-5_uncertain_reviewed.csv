@@ -1,0 +1,1019 @@
+product_id,name,brand,size_text,stores_sample,current_food_group,current_sub_code,food_group_corrected,new_sub_code,confidence,final_food_group,final_sub_code,final_confidence,change_reason
+458,"Värska Mineraal 6-pakk, 9l",Värska Mineraal,9l,"Coop, Prisma, Selver",,,other,dry_other,fallback,drinks,drinks_water,high,proposed_group_invalid;override_with_name_rules
+490,"Värska mineraal 1,5L",Värska,1.5L,"Coop, Prisma, Selver",,,other,dry_other,fallback,drinks,drinks_water,high,proposed_group_invalid;override_with_name_rules
+123725,"Ämber 10l, KEEEPER, 1 tk",,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123726,"Ämber 5l, KEEEPER, 1 tk",ETC KODU OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123727,"Sea kaelakarbonaad, RAKVERE LK, kg",MAAG EESTI AS,,"Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123730,"Füsioloogiline lahus (nina, silmad), BEL BABY, 30 tk",URSUS OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123731,Gato Blanco Sauvignon Blanc 75 cl,MEDIATO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+123742,"Sea välisfilee kamaraga, RAKVERE LK, kg",RAKVERE LIHAKOMBINAAT AS,,Selver,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+123743,"Grill-liha BBQ mureli kaelakarbonaadist, RANNAROOTSI, 500 g",,,Selver,,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+123744,"Sea välisfilee, RAKVERE, kg",MAAG EESTI AS,,"Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123756,"Sea välisfileest minutipihvid, SELVER, kg",SELVER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123758,Geargian Valleys Saperavi 75 cl,PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123760,"Kõrvitsakuubid, PÕLTSAMAA, 3,1 kg, ettetellimisel",ORKLA EESTI AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123761,"Suvikõrvits roheline, kg",Määramata,,"Barbora, Maxima, Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123764,Georgian Valleys Alazani Valley red 75 cl,PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123765,"Külmutatud EHE mini-pelmeenid, RANNAROOTSI EHE, 350 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Barbora, Coop, Maxima, Rimi, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+123770,"Magus muretainas, EESTI PAGAR, 500 g",EESTI PAGAR AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+123784,Goru Blanco 75 cl,ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123786,"Kaukaasiapärane grill-liha seavälisfileest, RAKVERE, 600 g",MAAG EESTI AS,,Selver,,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+123788,"Valge redis pakitud, kg",Määramata,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123789,"Ämber 5l, KEEEPER, 1 tk",ETC KODU OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123793,"Grillsteik sea kaelakarbonaadist, SELVER, kg",,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123794,Goru Red 75 cl,ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123797,"Aknapesija teleskoopvarrega, SAUBER, 1 tk",ETC KODU OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123820,"Keedusalaami Vasalli, NÕO, 105 g",NÕO LIHATÖÖSTUS OÜ,,"Barbora, Coop, Maxima, Rimi, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+123822,Gran Mirador Dark Blend 75 cl,DUNKER ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123824,"Grand Sour, NOCCO, 330 ml",GKR TRADE OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123843,"Grissinid Rustici, VALLEDORO, 100 g",STOCKMASTER OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+123846,"Grissinid Tornesi, VALLEDORO, 100 g",STOCKMASTER OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+123847,Grüner Veltliner 100 cl,MOE OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123850,"Grüner Veltliner Seewinkel, 300 cl",LTT AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123853,"Pepperoni Super snäkk, MAKS&MOORITS, 85 g",ATRIA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+123857,"Ingver, kg",Määramata,,"Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123859,"Adžika gruusiapärane kaste, MAADLEX, 200 g",MAADLEX OÜ,,Selver,,,sauces_oils,sauces_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+123861,"Põdra snäkk, KARNI, 85 g",ARKE LIHATÖÖSTUS AS,,"Rimi, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+123862,"Redis pakitud, 125 g",Määramata,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+123871,"Hallituse eemaldaja, CILLIT, 750 ml",EUGESTA EESTI AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123876,"Aprikoos, kg",,,"Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123878,Hardy`s Crest Sauvignon Blanc 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+123881,"Frankfurter, RANNAROOTSI, 500 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Barbora, Coop, Maxima, Rimi, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+123885,"Baklazaanipüree, VERES, 500 g",INTERALTUS OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+123904,Hardys BIN 141 Colombard Char. 75 cl,LIVIKO AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123908,"Hari+vars 3 Action, VILEDA, 1 kmpl",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123912,"Fuet salaami Nobleza, ELPOZO, 200 g",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+123917,"Tšilli salaami, MATSIMOKA, 150 g",MATSIMOKA OÜ,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+123923,"California uramaki, SELVERI KÖÖK, 220 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+123924,"Cannelloni torud, PANZANI, 250 g",ABESTOCK AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+123926,"Põdra snäkk, LINNAMÄE LIHATÖÖSTUS, 85 g",LINNAMÄE LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+123937,"Salaami trühvliga viilutatud, GIANNI NEGRINI, 80 g",DELINE OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+123947,"Lihatoodete duo (Fiocco, Salaami Milano), NEGRONI, 85 g",SELVER AS,,Selver,,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+123955,"Kadakamari, SANTA MARIA, 21 g",SANTA MARIA AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+123967,"Cayenne'i piprakaste, FRANKS´RED HOT, 148 ml",KARIA OÜ,,Selver,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+123968,"7 lemmikut kaalu, KALEV, 1 kg",ORKLA EESTI AS,,"Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123971,"Vasikalihasült, RANNAROOTSI, 330 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+123974,"Maarahva sült, RANNAROOTSI, 330 g",RANNAROOTSI LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+123976,"Aprikoosi dzemm, NAOUSSA, 500 g",MAIC KAUBANDUSE AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+123977,"Praetud seamaksaribad, KARNI, 150 g",ARKE LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+123978,"Kodusült, MAKS&MOORITS, 300 g",ATRIA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+123980,"Tüümian potis, GRÜNE FEE, tk",Määramata,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123989,"Fuetec trühvliga, ELPOZO, 150 g",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+123994,"Meliss potis, GRÜNE FEE, tk",Määramata,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+123995,"Chunky Burger kaste, HELLMANN'S, 250 ml",UNILEVER EESTI OÜ,,"Coop, Selver",,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+123997,"Paneeritud seašnitsel Fitlap, NÕO, 220 g",NÕO LIHATÖÖSTUS OÜ,,Selver,,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+123999,"Kodune sült, KARNI, 500 g",ARKE LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124000,"Kardemon jahvatatud, 35g, SANTA MARIA",SANTA MARIA AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124001,"Snäkk pro Chilli pork jerky, RAKVERE LK, 50 g",MAAG EESTI AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124002,"Cracker Red Pepper, DR. KARG, 85 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124010,"Prosciutto crudo musta pipraga, SAN MICHELE, 90 g",DELINE OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124011,"Prosciutto crudo maitsestatud rosmariiniga, SAN MICHELE, 90 g",DELINE OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124013,"Karri, FIRST PRICE, 90 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124021,"Bucatini, REGGIA, 500 g",M&V TRADE OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124022,"Bulgur, jämejahvatus, DURU, 500 g",REATON OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124023,"Bulgur, peenjahvatus, DURU, 500 g",REATON OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124027,"Karri, SANTA MARIA, 34 g",SANTA MARIA AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124035,"Kiievi kotlet, SELVERI KÖÖK, 280 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124039,"Kastmepaksendaja heledatele kastmetele, RUF, 250 g",KAUPMEES & KO AS,,Selver,,,sauces_oils,sauces_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124044,"Tüümian suures potis, 1 tk",Määramata,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124045,"Baklažaan, kg",Määramata,,"Barbora, Maxima, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124057,"Dipikastmesegu American Ranch, SANTA MARIA, 14 g",SANTA MARIA AS,,"Coop, Selver",,,sauces_oils,sauces_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124058,"Datlid Sweet Peach, TRUE DATES, 100 g",GKR TRADE OÜ,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124070,"Cracker Cheese & Onion, DR. KARG, 85 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124092,"Fuet Extra, EMBUTIDOS CAULA, 150 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124094,"Dijoni teravamaitseline sinep, VILUX, 200 g",EKTONI HULGIKAUBANDUS OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124099,"Dijoni sinep, FIRST PRICE, 370 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124107,"Coquillette väikesed sarvekesed, PANZANI, 3 kg",ABESTOCK AS,,"Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124124,"Turistieine, FRANK POTT, 325 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic,household,hh_kitchenware,high,override_with_name_rules
+124133,"Brazil XXL grillsteik, SELVER, kg",SELVER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124136,"Caesari kaste, SELVERI KÖÖK, 230 g",KULINAARIA OÜ,,Selver,,,sauces_oils,sauces_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124138,"Datlid Cookie Dough, TRUE DATES, 100 g",GKR TRADE OÜ,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124143,"Küüslaugu pekk, OSKAR, 120 g",OSKAR LT AS,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124145,"Kevadrullid tšillikastmega, SELVERI KÖÖK, 200 g",KULINAARIA OÜ,,Selver,,,sauces_oils,sauces_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124148,"Adžika, FELIX, 260 g",ORKLA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124151,"Tarbatu keedusalaami, NÕO, 105 g",NÕO LIHATÖÖSTUS OÜ,,"Coop, Rimi, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124161,"Füüsal puhastatud, EAT ME, 125 g",Määramata,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124179,"Seatagakoot, RAKVERE LK, kg",,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124196,"Minikoot, NÕO, kg",NÕO LIHATÖÖSTUS OÜ,,Selver,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+124201,"Lainelised singilõigud, NÕO, 100 g",NÕO LIHATÖÖSTUS OÜ,,Selver,,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124205,"Tofu kroket ürtidega, BON VEGAN, 200 g",BON VEGAN OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124211,"Vutiliha konserv, JÄRVEOTSA, 200 g",JÄRVEOTSA VUTIFARM OÜ,,"Rimi, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124214,"Selveri äkiline, SELVER, kg",SELVER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124216,"Küüslaugupekk viilutatud, MATSIMOKA, 110 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124218,"Kodune ahjupraad, RAKVERE LK, kg",,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124222,"Terava maitsega snäkk, NÕO, 85 g",NÕO LIHATÖÖSTUS OÜ,,"Coop, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124226,"Turistieine, RANNAROOTSI, 240 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Rimi, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124229,"Lihameistri steik, SELVER, kg",SELVER AS,,Selver,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+124231,"Dražeed Crazy Sours, SKITTLES, 38 g",SELVER AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124248,"Kalmaari ribad, MSDM, 36 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124249,"Sea kaelakarbonaadi lõigud, SELVER, kg",SELVER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124253,"Hispaaniapärane chorizo viilutatud Ehe, RANNAROOTSI, 100 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124284,"Seamaksaribad röstitud, NÕO, 200 g",NÕO LIHATÖÖSTUS OÜ,,Selver,,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124285,"Tursamaks naturaalne, 250 g",CLAIRE FOODS OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124286,"Dražeed dekoratsiooniks 6tk, WERNER`S DECO, 150 g",NENALY TRADE OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124287,"Dražeed Fruits, SKITTLES, 38 g",SELVER AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124289,"Drazeed, SKITTLES, 95 g",SELVER AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124290,"Vöner, viilutatud, VÖNER, 200 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124291,"Sisefilee grillimiseks, SELVER, kg",SELVER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124331,"Põdraliha äkis (vajab külma), LINNAMÄE LIHATÖÖSTUS, 110 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124334,"Grill-liha BBQ mureli kaelakarbonaadist, RANNAROOTSI, 500 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124364,"Sinine ploom Lepotica, kg",Määramata,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124367,"Spargel roheline, 450 g",Määramata,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124370,"Muskaatkõrvits, kg",,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124371,"Porrulauk, kg",Määramata,,"Barbora, Maxima, Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124372,"Virsik, kg",Määramata,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124383,"Ingveri Shot, FRANKLY, 60 ml",FAIRFOOD OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124387,"Pudelkõrvits, kg",,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124391,"Kaalikas, kg",,,"Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124402,"Avokaado, kg",Määramata,,"Barbora, Maxima, Rimi, Selver",,,other,dry_other,fallback,produce,produce_tropical,high,proposed_group_invalid;override_with_name_rules
+124409,"Frillis potis, GRÜNE FEE, tk",Määramata,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124410,"Virsik Paraguayo, kg",Määramata,,"Barbora, Maxima, Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124428,"Granadill lahtine, kg",Määramata,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124435,"Juurseller, kg",Määramata,,"Barbora, Maxima, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124438,"Rosmariin suures potis, tk",Määramata,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124447,"Mahe suvikõrvits, KOPRA SAHVER , kg",EESTIMAA VILJAD OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124454,"Varsseller, kg",Määramata,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124458,"Maitseroheline pakitud, kg",Määramata,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124475,"Loorber, 50 g",Määramata,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124478,"Rosmariin, 50 g",Määramata,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124479,"Tamarind, 450 g",Määramata,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124481,"Paksoi pakis, EAT ME, 2 tk",Määramata,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124484,"Habanero pipra MIX, EAT ME, 50 g",Määramata,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124490,"Assortiikarp After dinner, JAKOBSEN, 140 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124501,"Biolagunevad prügikotid, 20l, MCLEAN, 10 tk",PRIME PARTNER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124502,"Biolagunevad prügikotid 75l, DREAMHOME, 10 tk",PRIME PARTNER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124506,"Breezer Orange, BACARDI, 275 ml",LIVIKO AS,,"Coop, Selver",,,other,dry_other,fallback,produce,produce_tropical,high,proposed_group_invalid;override_with_name_rules
+124524,"Džinn BOMBAY SAPPHIRE Dry, 70 cl",LIVIKO AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124525,"Džinn BOTANIST Islay Dry, 70 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124526,"Džinn CRAFTERS Aromatic Flower, 70 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124527,"Džinn GORDON´S London Dry, 70 cl",PRIKE AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124528,"Džinn GORDON'S Mediterranean Orange, 70cl",PRIKE AS,,Selver,,,other,dry_other,fallback,produce,produce_tropical,high,proposed_group_invalid;override_with_name_rules
+124529,Džinn GORDON'S Passionfruit 70 cl,PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124530,"Džinn GORDON`S Pink, 70 cl",PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124531,"Džinn GORDON´S Sicilian Lemon, 70cl",PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124532,"Džinn JUNIMPERIUM Summer Edition, 70 cl",PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124533,Džinn Juniper Island London Dry 70 cl,BALMERK ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124534,Džinn Juniper Island Nordic Rhubarb 70 cl,BALMERK ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124535,Džinn Kada Kirsi 50 cl,PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124537,Džinn Kada Pihlaka 50 cl,PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124538,"Džinn KINGSMILL, 20 cl",LIVIKO AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124539,"Džinn KINGSMILL Pink Raspberry, 50 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,produce,produce_berries,high,proposed_group_invalid;override_with_name_rules
+124541,"Džinn MALFY Rosa, 70 cl",PERNOD RICARD ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124542,"Guljašš, SALVEST, 530 g",SALVEST AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124543,"Dzinn NORDIC SPIRITS LAB Mediterranean, 50 cl",ANORA ESTONIA AS,,"Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124544,Džinn Normindia Biologique 70 cl,TRIDENS AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124545,Džinn Normindia Orange 70 cl,TRIDENS AS,,Selver,,,other,dry_other,fallback,produce,produce_tropical,high,proposed_group_invalid;override_with_name_rules
+124546,"Džinn SAARE crafted, 50 cl",AMBER DISTRIBUTION ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124547,"Džinn SAAREMAA, 50 cl",ANORA ESTONIA AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124548,Džinn SKAGERRAK Nordic Dry 70cl,ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124549,Džinn Sünk London Dry 50 cl,NORDISTA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124550,"Džinn TANQUERAY Blackcurrant Royale, 70 cl",PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124551,"Džinn TANQUERAY Flor de Sevilla, 70 cl",PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124552,"Džinn TANQUERAY No Ten, 70 cl",PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124553,Džinn TOHI Aronia Infused 50cl,MOMENTIN EESTI OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124555,"Džinn TOHI Nordic Dry Cloudberry, 50 cl",MOMENTIN EESTI OÜ,,Selver,,,other,dry_other,fallback,produce,produce_berries,high,proposed_group_invalid;override_with_name_rules
+124568,"EHE linnuliha mini-frikadellid (E-vaba), RANNAROOTSI, 350 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124569,"EHE linnuliha pelmeenid (E-vaba), RANNAROOTSI, 350 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124570,"EHE pelmeenid (E-vaba), RANNAROOTSI, 600 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Prisma, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124595,"Essenza Dark Morello Cherry & Pomegranate, SANPELLEGRINO, 330 ml",SVENSKY KAUBANDUSE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124596,"Essenza Tangerine & Wild Strawberry, SANPELLEGRINO, 330 ml",SVENSKY KAUBANDUSE AS,,Selver,,,other,dry_other,fallback,produce,produce_berries,high,proposed_group_invalid;override_with_name_rules
+124597,"Estragon, MEIRA, 9 g",MEIRA EESTI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124601,"Farfalle la RUVIDA Bronze, REGGIA, 500 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124602,"Kohvipadjad Strong, SENSEO, 36tk",SELVER AS,,Selver,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+124607,"Filtri-ja presskannukohv Prodomo, DALLMAYR, 500 g",GERMAN PRODUCTS ESTONIA OÜ,,Selver,,,drinks,drinks_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124608,"Filtri-,kannu-ja presskannukohv Mellan keskmine röst, ARVID NORDQUIST, 500 g",MAIC KAUBANDUSE AS,,"Coop, Selver",,,drinks,drinks_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124609,"Filtrikohv 103 Mellemristet, MERRILD, 500 g",SELVER AS,,"Coop, Selver",,,drinks,drinks_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124611,"Filtrikohv Luxus, LUXUS, 500 g",PRIKE AS,,"Coop, Selver",,,drinks,drinks_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124612,"Filtrikohv Presidentti Gold, PAULIG, 500 g",PAULIG COFFEE ESTONIA AS,,"Coop, Prisma, Selver",,,drinks,drinks_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124614,"FIT tervisepada, MAAHÄRRA, 400 g",PREMIA TALLINNA KÜLMHOONE AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124618,"FIX Carbonara, KNORR, 47g",SELVER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124619,"FIX Lasagne kastmesegu, KNORR, 43 g",SELVER AS,,"Coop, Selver",,,sauces_oils,sauces_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124625,"Fuet Extra musta pipraga, EMBUTIDOS CAULA, 150 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124627,"Fusilli, FIRST PRICE, 500 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124628,"Fusilli, PANZANI, 1 kg",ABESTOCK AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124650,"Geeltoiduvärv kollane, DR.OETKER, 10 g",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124651,"Geeltoiduvärv punane, DR.OETKER, 10 g",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124652,"Geeltoiduvärv roheline, DR.OETKER, 10 g",JUNGENT ESTONIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124653,"Geeltoiduvärv sinine, DR.OETKER, 10 g",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124689,"Grillitud köögiviljad, BAUER, 400 g",BIMAR OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124695,"Gruusia adžika, MAADLEX, 350 g",MAADLEX OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124703,"Burgeripihvid, FIRST PRICE, 400 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124709,"Cali Blanc, Snoop Dog 75 cl",ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124715,Campo Tordi Corvina Veneto 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124717,Campo Viejo Crianza 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124718,Campo Viejo Reserva 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124719,Canti Gavi 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124727,Carmen Reserva Carmenere 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124729,Carmen Sauvignon Blanc 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+124730,Carmen Sauvignon Blanc Left Wave 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+124731,Carmenere Maule Valley 75 cl,3BS ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124732,Casa Charlize Cuvée Forte Toscana Rosso IGT 300 cl,BALMERK ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124733,Casa Charlize Cuvée Forte Toscana Rosso IGT 75 cl,DUNKER ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124736,Casa Charlize Passonata Puglia 75cl,DUNKER ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124737,Casa Charlize Primitivo Puglia IGT 75 cl,DUNKER ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124741,Casillero del Diablo Carmenere 75 cl,AMBER DISTRIBUTION ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124742,Castellani Chianti 75 cl,MEDIATO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124743,Castellani Chianti Classico Riserva 75 cl,MEDIATO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124744,Castellani Chianti Riserva 75 cl,MEDIATO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124748,Cesari Chianti DOCG 75 cl,PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124751,Cesari Soave DOC 75 cl,PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124754,Chapel Hill Sauvignon Blanc 75 cl,HENKELL FREIXENET EESTI AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+124757,Chateau Beauregard Ducasse Graves Red 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124758,Chateau d'Arcins 75 cl,AVALLONE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124759,Chateau Des Landes Lussac-St Emilion 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124760,Chateau Latour Camblanes Prem. 75 cl,AVALLONE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124761,"Chateau Le Mayne Bordeaux Superieur, 75 cl",LTT AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124762,Chateau Malbec 75 cl,AVALLONE AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+124763,Chateau Rocher-Calon 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124765,Chateau Timberlay Bordeaux Supérieur 75 cl,SVENSKY KAUBANDUSE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124768,"Chill Out Chenin Blanc 1,5 L",ANORA ESTONIA AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124772,Cinzano Sweet Edition Dolce 75 cl,ANORA ESTONIA AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124782,"Cono Sur Organico Sauvignon Blanc 2012, Cono Sur, 75 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+124793,Coq du Matin Sauvignon Blanc 75 cl,AVALLONE AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+124794,Cosmopolitan Diva 75cl,AMBER DISTRIBUTION ESTONIA OÜ,,"Coop, Prisma, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124795,Cotes du Rhone Villages 75 cl,MEDIATO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124796,Coto de Imaz Coto de Imaz Rioja Gran Reserva 75 cl,MEDIATO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124797,"Craft Toonik Wild Lingonberry, ØRN, 1 L",A. LE COQ AS,,Selver,,,other,dry_other,fallback,produce,produce_berries,high,proposed_group_invalid;override_with_name_rules
+124799,Crianza Tempranillo DOC 75 cl,BESTWINE OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124800,Crudo Catarratto Zibibbo 75 cl,MEDIATO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124801,Cut Malbec 75cl,LTT AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+124802,Cuvee Alba 75 cl,DUNKER ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124803,D. Bauhaud Secret Des Vignes Chenin 75 cl,TRIDENS AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124806,Desom Grand Premier Cru Auxerrois 75 cl,TRIDENS AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124807,Desom Premier Cru Rivaner 75 cl,TRIDENS AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124810,Diablo Dark Red 75 cl,AMBER DISTRIBUTION ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124811,"Difuuser Morning Dew & Blackberries, AIR WICK, 40 ml",EUGESTA EESTI OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124817,Doppio Passo Primitivo 75 cl,MV GROUP DISTRIBUTION EE OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124818,Doppio Passo Primitivo di Manduria Riserva 75 cl,MV GROUP DISTRIBUTION EE OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124819,Dreamer Chiller White tetra 100 cl,DUNKER ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124843,"Hapukurgid, MÕISAPROUA, 1kg",INTERALTUS OÜ,,"Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124845,"Haputaina Pehmik, EESTI PAGAR, 240 g",EESTI PAGAR AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124863,"Hele tordipõhi 3-kihiline, KUCHENMEISTER, 400 g",INTERALTUS OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124869,"Hernes kollane poolik, BALTIX, 1 kg",WORLDLINE OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124877,"Hiina kaste (poolmagus), FELIX, 500 g",ORKLA EESTI AS,,"Coop, Selver",,,sauces_oils,sauces_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124878,"Hiinapärane kaste poolmagus, FELIX, 1,7 kg, ettetellimisel",ORKLA EESTI AS,,Selver,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+124879,"Hinkaalid, RANNAROOTSI, 420 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124880,"Hirss, VESKI MATI, 500 g",SELVER AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124882,"Hoisin kaste, THAI CHOICE, 340 g",D.T.L. CONSUMER PRODUCTS EESTI AS,,Selver,,,sauces_oils,sauces_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124910,"Hommikusöök Cini-Minis, NESTLÉ, 375 g",SELVER AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124919,"Hommikusöök Lion, NESTLÉ, 400 g",SELVER AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124940,"HULGI Klassikaline hummus 3tk, GOURMENT CLUB, 3 x 200g",GURMEEKLUBI OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124941,"HULGI Klassikalised pelmeenid 3tk, MAKS&MOORITS, 3 x 400 g",ATRIA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124950,"HULGI Külmutatud EHE mini-frikadellid 3tk, RANNAROOTSI, 3 x 350 g",,,Selver,,,frozen_food,frozen_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+124968,"HULGI Penne Rigate torukesed 2tk, BARILLA, 2 x 500g",EUGESTA EESTI AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124974,"HULGI Shampinjonid viilutatud, 4tk, PRO CHAMP, 4 x 155g (neto)",SVENSKY KAUBANDUSE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+124995,"Hummus, NOA, 175 g",SVENSKY KAUBANDUSE AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+124999,Ibis X.O. 35 cl,ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125009,"Jääkohv vanilli UHT, ODDLYGOOD, 1 l",ODDLYGOOD ESTONIA OÜ,,Selver,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+125010,"Jääkuubikud topsis, külmutatud, ICE CUP, 130 g",,,Selver,,,frozen_food,frozen_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+125021,"Jacobs Cafe Latte 3in1, JACOBS, 10x12,5g",,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125023,"Jahimehesegu, 220g, SANTA MARIA",SANTA MARIA AS,,"Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125024,"Jahimehesegu, SANTA MARIA, 30 g",SANTA MARIA AS,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125028,"Jahvatatud filtrikohv Classic, PAULIG, 100 g",PAULIG COFFEE ESTONIA AS,,"Coop, Selver",,,drinks,drinks_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+125029,"Jahvatatud ingver, SANTA MARIA, 20 g",SANTA MARIA AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125044,"Jahvatatud mahekohv Organic, LÖFBERGS, 450 g",SELVER AS,,Selver,,,drinks,drinks_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+125045,"Jahvatatud muskaatpähkel, MEIRA, 32 g",MEIRA EESTI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125047,"Jahvatatud tassikohv In-Cup, MERRILD, 400 g",SELVER AS,,"Coop, Selver",,,drinks,drinks_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+125048,"Jalapeño täidisega oliivid, EXPLANADA GOURMET, 370 ml",SELVER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125049,"Jalapeno viilud, SANTA MARIA, 215 g",SANTA MARIA AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125099,"Kinoa must, JUST NATURE, 500 g",GEMOSS EESTI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125100,"Kinoa punane, JUST NATURE, 500 g",GEMOSS EESTI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125101,"Kinoa, segu, SMART ORGANIC, 300 g",BIOMARKET OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125102,"Kinoa valge, JUST NATURE, 500 g",GEMOSS EESTI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125103,"Kinoa, valge, SMART ORGANIC, 300 g",BIOMARKET OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125105,"Kirju suhkruströssel, RUF, 200 g",KAUPMEES & KO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125110,"Kirsi-aroonia kannujook, PÕLTSAMAA, 200 ml",ORKLA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125117,"Kirsid kivideta, HÄRMAVILI, 400 g",BALBIINO AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125122,"Tulised tiivad, SELVER, kg",SELVER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125125,"Kirsimaitseline tarretis, DR.OETKER, 72 g",JUNGENT ESTONIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125132,"Kiss-Kiss iiris, KALEV, 150 g",ORKLA EESTI AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125134,"Kiss-Kiss pehme iiris, KALEV, 150 g",ORKLA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125140,"Ungari pekk, OSKAR, kg",OSKAR LT AS,,"Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125145,"Kivideta rohelised oliivid, GOURMANTE, 360 g",SANITEX OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125148,"Kiviveski täistera nisumanna, TAMMEJUURE MAHETALU, 700 g",TAMMEJUURE MAHE TULUNDUSÜHISTU,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125159,"Klassikaline okroška, SELVERI KÖÖK, 400 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125161,"Šašlõki kabanossid, NÕO, 375 g",NÕO LIHATÖÖSTUS OÜ,,"Coop, Rimi, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+125163,"Klassikalised pelmeenid, MAKS&MOORITS, 400 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125165,"Säinaäkis, Selver, kg",SELVER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125172,"Merevetika meremari, AKI, 100g",KAVIALE SIA,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125185,"Kodupelmeenid, MAKS&MOORITS, 700 g",ATRIA EESTI AS,,"Barbora, Coop, Maxima, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125186,"Kofeiinivaba kohv, JACOBS, 250 g",SELVER AS,,"Coop, Selver",,,drinks,drinks_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+125201,"Vannamei krevetid tšill-küüslaugu, MARWI, 100g",JP FOODS AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125208,"Kummikindad M, MCLEAN, 1 paar",PRIME PARTNER AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125209,"Must kaaviar Oscietra, CLASSIC SELECTION, 50 g",KAVIALE SIA,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125221,"Kohvijook 3in1 (kott 10x12,6g ), JACOBS,",SELVER AS,,"Coop, Selver",,,drinks,drinks_other,heuristic,household,hh_other,low_oos,override_with_name_rules
+125224,"Kohvijook 3in1 (kott 20x12,6g), JACOBS,",SELVER AS,,Selver,,,drinks,drinks_other,heuristic,household,hh_other,low_oos,override_with_name_rules
+125225,"Kohvijook 3IN1 Strong, karp 28x16g, NESCAFE, 448g",SELVER AS,,Selver,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+125267,"Kohvikreem, SELVERI KÖÖK, 130 g",KULINAARIA OÜ,,Selver,,,drinks,drinks_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+125268,"Kohviliköör KAHLUA, 70 cl",PERNOD RICARD ESTONIA OÜ,,Selver,,,drinks,drinks_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+125300,"Kohvipadjad Classic, SENSEO, 36tk",SELVER AS,,Selver,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+125305,"HULGI Katlakivieemaldaja 3tk, SELVER, 3 x 500ml",KODUPABER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125307,"Kohuke toffe multipakk 7+1 8x40g, SAARE, 320 g",SAAREMAA DELIFOOD OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125309,"Pikkpoiss eelküpsetatud, RANNAROOTSI, 300 g",RANNAROOTSI LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+125314,"Metssea konserv, LINNAMÄE LIHATÖÖSTUS, 240 g",LINNAMÄE LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+125315,"Taimne steik, VEGANIC, 140g",ECOTRADE OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125316,"Pardilihavaht kuivatatud ploomi ja aprikoosiga, CUIT´S, 125 g",SELVER AS,,Selver,,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+125317,"Kuivatatud hirveliha, LINNAMÄE LIHATÖÖSTUS, 40 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+125320,"Põdraliha konserv, RANNAROOTSI, 240 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+125323,"Parditerriin oliividega, DUCS DE GASCOGNE, 65 g",DELINE OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125324,"Kiievi kotlet, TALLEGG, 1,2 kg, ettetellimisel",MAAG EESTI AS,,Selver,,,other,dry_other,fallback,dairy_eggs_fats,dairy_eggs,high,proposed_group_invalid;override_with_name_rules
+125326,"Seakõrvasnäkid, NÕO, 130 g",NÕO LIHATÖÖSTUS OÜ,,"Barbora, Coop, Maxima, Rimi, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+125329,"Tapas fuet, chorizo, oliivid, EMBUTIDOS CAULA, 120 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125330,"Salaami Milano, NEGRONI, 100 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125331,"Prosciutto Cotto, NEGRONI, 110 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125332,"Viilutatud Fuet, LA SELVA, 60 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125334,"Lihatoodete trio (Prosciutto, Coppa, Milano), NEGRONI, 120 g",SELVER AS,,Selver,,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+125335,"Prosciutto Di Parma, NEGRONI, 80 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125338,"Speck Delle Alpi, NEGRONI, 90 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125348,"Kuumsuits meriahven, M.V.WOOL, kg",M.V.WOOL AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125371,"Tursamaks, STEINHAUER, 190 g",BALTIC PREMIER GROUP OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125416,"Köögikaste laktoosivaba, ALPRO, 250 ml",NUTRICIA SIA,,"Barbora, Coop, Maxima, Rimi, Selver",,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+125438,"Kohvijook Frezza vanilla, FREZZA, 250 ml",ABESTOCK AS,,Selver,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+125443,"Kohvijook Ice Latte Macchiato, LÖFBERGS, 230 ml",SELVER AS,,Selver,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+125452,"Plant Protein vaniljejook laktoosivaba, ALPRO, 1 kg",NUTRICIA SIA,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125498,HM Borges Madeira 3Y Med.Sweet 75 cl,,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125513,"Panna Cotta tiramisu, NOPRI, 150 g",NOPRI TALUMEIEREI OÜ,,"Barbora, Maxima, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125520,Dreamer Selected Harvest Prestige Cuvee Red 75cl,DUNKER ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125522,Duboeuf Beaujolais-Villages 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125524,Dulong Moelleux Bordeaux 75 cl,DUNKER ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125525,Edoardo Miroglio Bio Viogner&Traminer 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125527,"Eksklusiivne segu, PREMIUM, 300 g",,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125528,El Cortez XO 75cl,MEDIATO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125529,El Coto Crianza 75 cl,MEDIATO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125530,El Coto Rioja Blanco 75 cl,MEDIATO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125531,El Coto Rioja Reserva 75 cl,MEDIATO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125532,"Elephant rõngik pitsamaitseline, 70g, ALKA",,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125533,Emporium Primitivo Di Manduria Doc 75 cl,TRIDENS AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125536,HM Borges Madeira 5Y 75cl,INTERALTUS OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125538,"Energiajook Dynami:t, DYNAMI:T, 355 ml",A. LE COQ AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125539,"Energiajook Dynami:t PWR 3, DYNAMI:T, 500 ml",A. LE COQ AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125540,"Energiajook Dynami:t PWR 7, DYNAMI:T, 500 ml",A. LE COQ AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125552,"Energiajook, STARTER, 500 ml",LIVIKO AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125556,"Energiajook X-tra Wild Cherry, STARTER, 500 ml",LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125557,"Eriti õrn ihukreem, JOIK ORGANIC, 150 ml",JOIK OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125561,Errazuriz Estate Sauvignon Blanc 75 cl,PRIKE AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+125564,Espiritu De Chile Intrepido Reserva Carmenere 75 cl,TRIDENS AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125566,Espiritu Gran Reserva Sauvignon Blanc 75 cl,TRIDENS AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+125567,Fashion Strawberry/Raspberry 75 cl,BALMERK ESTONIA OÜ,,Selver,,,other,dry_other,fallback,produce,produce_berries,high,proposed_group_invalid;override_with_name_rules
+125568,Faustino I Gran Reserva DOC 75 cl,PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125569,Faustino VII Red 75 cl,PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125572,Feudi di San Marzano Sessantanni Old Vines Primitivo di Manduria 75 cl,MV GROUP DISTRIBUTION EE OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125574,Fitzroy Bay Sauvignon Blanc 75 cl,AVALLONE AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+125579,Franz Hoffner Weisswein 75 cl,DUNKER ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125580,Freegold Moscatel 75 cl,INTERALTUS OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125582,Freixenet Carta Nevada 75 cl,HENKELL FREIXENET EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125584,Freixenet MIA Blanco 75 cl,HENKELL FREIXENET EESTI AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125586,"Freshmatic Energising täide, AIR WICK, 250 ml",EUGESTA EESTI AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125588,Frizzante Dolce 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125589,Frizzante Semiseco 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125597,"Funktsionaalne jook ""Juicy Melba"", NOCCO, 330 ml",GKR TRADE OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125598,"Funktsionaalne jook Limon, NOCCO, 330 ml",GKR TRADE OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125692,"Kalmaaripulgad 64%, VICI, 250 g",VICIUNAI BALTIC OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125694,"Kalmaarirõngad taignas, DAYSEADAY, 500 g",BALBIINO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125695,"Kalvados BOULARD VSOP karbis, 70 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125696,"Kalvados CHATEAU DU BREUIL Reserve des Seigneurs XO 20a**, 70 cl (ETTETELLIMISEGA 2 PÄEVA)",GOLDBERGER OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125697,"Kalvados COQUEREL VSOP, 50 cl",TRIDENS AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125700,"Kamapallid, BALSNACK, 30 g",BALSNACK INTERNATIONAL HOLDING AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125701,"Kamatahvel, KALEV, 100 g",ORKLA EESTI AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125702,"Kamavaht rabarberikastmega, SELVERI KÖÖK, 130g",KULINAARIA OÜ,,Selver,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+125723,"Kange sinep, FIRST PRICE, 400 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125726,"Kapparid, FIRST PRICE, 100 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125727,"Kapparid väikesed, DITTMANN, 35 g (neto)",KAUPMEES & KO AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125796,"Kaste FIX Bolognese, KNORR, 43 g",SELVER AS,,Selver,,,sauces_oils,sauces_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+125798,"Kasukas, SELVERI KÖÖK, 440 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125806,"Keskmiselt röstitud presskannukohv, LUXUS, 500 g",PRIKE AS,,"Coop, Selver",,,drinks,drinks_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+125828,"HULGI Rõngik Magus 3tk, VIKSTAL, 3 x 200 g",VIKSTAL OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125831,"HULGI WC-värskendaja Aroma Lux Dahlia Flower duopakk 2pk, DOMESTOS, 2 x 100 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125832,"HULGI WC-värskendaja Power Aktiv Lemon 2x100 g, BREF, 200 g",HENKEL LATVIA SIA,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125833,"HULGI WC-värskendaja Power Aktiv Lemon 4tk, BREF, 4 x 100g",HENKEL LATVIA SIA,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125841,"India pähkel, ARIMEX, 200 g",LTT AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125843,"India pähkel, PREMIUM, 300 g",GERMUND HULGI OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125844,"India pähkel röstitud Premium, GERMUND, 300 g",GERMUND HULGI OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125850,Italo Cescon Raboso 75 cl,AVALLONE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125852,J.P.Chenet White Medium Sweet 75 cl,DUNKER ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125856,Jacob´s Creek Cool Harvest Sauvignon Blanc 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+125867,Jean-Baptiste Audy Ch.Chantemerle Medoc AOC 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125868,Jean-Baptiste Audy Chateau Coutelin-Merville CruBourgeois 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125869,Jean-Marc Brocard Chablis 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125870,Jean-Marc Brocard Chablis Famille Brocard 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125879,"Juuretise Röst, FAZER, 450 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125897,"Kolmevärviline spiraal Fusilli, PANZANI, 500 g",ABESTOCK AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125901,"Kompvek Komeet, KALEV, 175 g",ORKLA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125904,"Kompvekid, DUMLE, 120 g",FAZER EESTI OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125905,"Kompvekid Kalev, KALEV, 175 g",ORKLA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125906,"Kompvekid, MARIANNE, 120 g",FAZER EESTI OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125907,"Kompvekid, MARIANNE, 220 g",FAZER EESTI OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125908,"Kompvekid Oravake, KALEV, 175 g",ORKLA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125909,"Kompvekid Tõmmu, KALEV, 175 g",ORKLA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125916,Konjak Chateau de Montifaud VSOP 35 cl,AVALLONE AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125917,"Konjak HENNESSY VS, 50 cl",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125918,"Konjak HENNESSY VSOP, 35 cl",PRIKE AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125919,Konjak Larsen VSOP Art Edition 70 cl,ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125920,"Konjak MARTELL VS, 35 cl",PERNOD RICARD ESTONIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125921,"Konjak MARTELL VSOP, 35 cl",PERNOD RICARD ESTONIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125922,"Konjak MARTELL VSOP karbis, 70 cl",PERNOD RICARD ESTONIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125923,Konjak MARTELL XO karbis 35 cl,PERNOD RICARD ESTONIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125924,"Konjak MAXIME TRIJOL Borderies Tres Vieilles puitkarbis**, 70 cl (ETTETELLIMISEGA 2 PÄEVA)",GOLDBERGER OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125925,"Konjak MAXIME TRIJOL Grande Champagne Dry Collection N°1**, 70 cl (ETTETELLIMISEGA 2 PÄEVA)",GOLDBERGER OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125926,"Konjak MAXIME TRIJOL VSOP karbis, 70 cl",GOLDBERGER OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125927,"Konjak MEUKOW VSOP, 35 cl",DUNKER ESTONIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125928,"Konjak MEUKOW VSOP, 70 cl",DUNKER ESTONIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125929,"Konjak REMY MARTIN VSOP, 70 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125930,"Konjak REMY MARTIN XO karbis**, 70 cl (ETTETELLIMISEGA 2 PÄEVA)",LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125933,"Köögiviljad praadimiseks, MAAHÄRRA, 400 g",PREMIA TALLINNA KÜLMHOONE AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125937,"Köögiviljapüree, SELVERI KÖÖK, 500 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125939,"Köögiviljasegu „GO Green“, BAUER, 400g",BIMAR OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125940,"Köögiviljasegu Italian Dish, BAUER, 400 g",BIMAR OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125941,"Köögiviljasegu „Wokmix Thai“, BAUER, 400 g",BIMAR OÜ,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125952,"Köömned, ANATOLS, 17 g",KAUPMEES & KO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125953,"Köömned, SANTA MARIA, 20 g",SANTA MARIA AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125954,"Köömneliköör KRISTALLKÜMMEL, 50 cl",PRIKE AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125979,"Korduvkasutatav ujumismähe 6-12 kuud, BABY PLANET, 1 tk",BABY PLANET OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125980,"Korduvkasutatav ujumismähe12-18 kuud, BABY PLANET, 1 tk",BABY PLANET OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+125987,"Kornishonid 1-4 cm marineeritud, GREEN, 370 g",PRALINEE OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+125990,"Kõrrejook troopilistest viljadest, PEPPA PIG, 200 ml",MARIS GILDEN AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126004,"Kreeka rohelised oliivid, GOURMANTE, 360 g",SANITEX OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126006,"Kreeka teravad terved pepperonid, ROYAL, 320 g",KAUPMEES & KO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126009,"Kreembrülee koonus, SUPER VIVA, 100 g",UNILEVER EESTI AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126012,"Kreemjas mesi, AARE JÕUMEES, 450 g",JÕUMEES OÜ,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126017,"Konjak HENNESSY VS karbis, 70 cl",PRIKE AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126018,"Konjak MAXIME TRIJOL Grande Champagne Ancestral puitkarbis**, 70 cl (ETTETELLIMISEGA 2 PÄEVA)",GOLDBERGER OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126019,"Konjak MEUKOW VS, 35 cl",DUNKER ESTONIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126020,"Konjak REMY MARTIN 1738 Royal tuubis, 70 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126040,"Külm.Pardi rinnafilee nahaga, MARKUS MAREK, kg",KARIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126046,"Külmsupp Suvi, SALVEST, 530 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126047,"Külmutatud EHE mini-frikadellid, RANNAROOTSI EHE, 350 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Barbora, Coop, Maxima, Rimi, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+126049,"Külmutatud hinkaalid, VICI, 400 g",VICIUNAI BALTIC OÜ,,"Coop, Rimi, Selver",,,frozen_food,frozen_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+126051,"Külmutatud kirsid kivideta, FIGURAATA, 1 kg",FIGURAATA OÜ,,"Coop, Selver",,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+126054,"Külmutatud pelmeenid, ISUKAS, 700 g",RANNAROOTSI LIHATÖÖSTUS AS,,"Coop, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+126055,"Külmutatud pikk uba, DUJARDIN, 450 g",VIČIUNAI BALTIC OÜ,,Selver,,,frozen_food,frozen_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+126056,"Külmutatud roheline hernes, DUJARDIN, 450 g",VIČIUNAI BALTIC OÜ,,Selver,,,frozen_food,frozen_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+126081,"Küpsetatud oad, CAMPAGNA, 400 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126097,"Kuskuss pärli kolmevärviline, SENC MAROC, 900 g",REATON OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126098,"Kuskuss pärli, SENC MAROC, 900 g",REATON OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126101,"Mesi kreemjas, MEVEDA, 500 g",MEVEDA OÜ,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126103,"Küüslaugu salsa, SANTA MARIA, 230 g",SANTA MARIA AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126104,"Küüslaugu-ürdi kaste, HELLMANN'S, 250 ml",UNILEVER EESTI OÜ,,"Coop, Selver",,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+126108,"Küüslaugukaste, FELIX, 275 g",ORKLA EESTI AS,,"Coop, Rimi, Selver",,,sauces_oils,sauces_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+126109,"Küüslaugukaste, FIRST PRICE, 400 ml",SELVER AS,,Selver,,,sauces_oils,sauces_other,heuristic,dry_preserves,dry_pasta_rice,high,override_with_name_rules
+126122,"Lagritsakompvekid Laku Sekoitus, MALACO, 250 g",TRIDENS AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126151,"Lahustuv sigur (pulber), SEVE, 100 g",MAADLEX OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126152,"Lahustuv viljakohv siguriga, SEVE, 100 g",,,Selver,,,drinks,drinks_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+126159,"Lasanje bolognese kastmega, SELVERI KÖÖK, 350 g",KULINAARIA OÜ,,Selver,,,sauces_oils,sauces_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+126160,"Lasanje, CAMPAGNA, 500 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126161,"Lasanjelehed, FIRST PRICE, 500 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126162,"Lasanjeplaadid, REGGIA, 500 g",M&V TRADE OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126163,"Laste pelmeenid, PEALINNA, 350 g",PREMIA TALLINNA KÜLMHOONE AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126167,"Laudlina 120x180cm, SUSY CARD, 1 tk",ANOBION HULGIMÜÜGI OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126170,"Lehträti hoidja, 1 tk",ANTALIS OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126171,"Lehträtikud, 2-kihiline, SERLA, 135 tk",ANTALIS OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126172,"Lehträtikud Blossom, 2-kihiline, GRITE, 120 tk",SELVER AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126175,"Leivajuuretis, NORDWISE®, 13 g",NORDWISE BIOTECH OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126179,"Leivasupp puuviljadega, TARTU MILL, 300 g",TARTU MILL AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126181,"Letsho Bulgarian, VERES, 530 g",INTERALTUS OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126182,"Letšo, MINU, 680 g",MAKRO TRADE BALTIC OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126190,"Liköör AMARETTO di Saronno, 50 cl",PRIKE AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126191,"Liköör BAILEYS Irish Cream, 50 cl",PRIKE AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126192,"Liköör BEVELAND Blue Curacao, 70 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126193,"Liköör BEVELAND Pisang, 70 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126197,Liköör FIREBALL 50 cl,,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126199,"Liköör JÄGERMEISTER, 10 cl",TRIDENS AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126200,"Liköör JÄGERMEISTER, 100 cl",TRIDENS AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126201,"Liköör JÄGERMEISTER, 35 cl",TRIDENS AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126202,"Liköör JÄGERMEISTER, 50 cl",TRIDENS AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126203,"Liköör JÄGERMEISTER, 70 cl",TRIDENS AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126204,"Liköör KOSKENKORVA Blueberry, 50 cl",ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126207,"Liköör KOSKENKORVA Rhubarb, 50 cl",ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126208,"Liköör KOSKENKORVA Salmiakki, 50 cl",ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126210,"Liköör LAPPONIA Muraka, 50 cl",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126211,"Liköör LIVIKO Coffee pet, 50 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126213,"Liköör LIVIKO Kännu Kukk (karbis), 50 cl",LIVIKO AS,,"Coop, Prisma, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126214,"Liköör LIVIKO Kirsi, 50 cl",LIVIKO AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126221,Liköör Luxardo Limoncello 70 cl,PRIKE AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126222,"Liköör MALIBU, 50 cl",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126226,"Liköör VANA TALLINN 40%, 20 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126227,"Liköör VANA TALLINN 40%, 50 cl",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126228,"Liköör VANA TALLINN 40% pet, 50 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126229,"Liköör VANA TALLINN 45%, 50 cl",LIVIKO AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126230,"Liköör VANA TALLINN 50%, 50 cl",LIVIKO AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126232,"Liköör VANA TALLINN Elegance karbis, 50 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126233,"Liköör VANA TALLINN Ice Cream, 50 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126234,"Liköör VANA TALLINN kinkekarp 2 klaasiga, 50 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126235,"Liköör VANA TALLINN Signature, 50 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126237,"Liköör VANA TALLINN tuubis, 50 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126238,Lillet Blanc 75 cl,,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126242,"Linguine la RUVIDA Bronze, REGGIA, 500 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126244,"Lintnuudel Linguine, REGGIA, 500 g",M&V TRADE OÜ,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126252,"Loorberilehed, KOTANYI, 4 g",EUGESTA EESTI AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126262,"Kaerapuder aprikoosiga mahe 6+, PÕNN, 200 g",SALVEST AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126268,"Kali Karl Friedrich, SAKU, 1,5 L",SAKU ÕLLETEHASE AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126269,"Kali Karl Friedrich, SAKU, 500 ml",SAKU ÕLLETEHASE AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126270,"Kali kirsimaitseline, KARL FRIEDRICH, 1,5 l",SAKU ÕLLETEHASE AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126271,"Kali klassikaline, A. LE COQ, 500 ml",A. LE COQ AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126272,"Kali Põldmarja, A.LE COQ, 500 ml",A. LE COQ AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126275,"Kaminatikk, HANSA CANDLE, tk",EUGESTA EESTI AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126308,"Loorberilehed kuivatatud, FIRST PRICE, 8 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126309,"Loorberilehed, SANTA MARIA, 4 g",SANTA MARIA AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126310,"Loorberileht, ANATOLS, 10 g",SPENCER OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126312,"LUXURADO Aperitivo, 75 cl",PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126340,"Mädarõigas delikatess, 170 g",MAKRO TRADE BALTIC OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126341,"Mädarõigas ekstra kange, MINU, 200 g",MAKRO TRADE BALTIC OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126352,"Magus sinep, FIRST PRICE, 400 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126372,"Mahe küüslaugupulber, SANTA MARIA, 46 g",SANTA MARIA AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126378,"Mahe pune, SANTA MARIA, 9 g",SANTA MARIA AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126385,"Mahe toortatra peentang, WIRU MILL, 500 g",WIRU MILL OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126387,"Mahedamaitseline salsa, WANTED, 260 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126420,"Karl Friedrich Starkbier, KARL FRIEDRICH, 568 ml purk",SAKU ÕLLETEHASE AS,,"Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126423,"Katlakivieemaldaja, SELVER, 500 ml",KODUPABER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126424,"Katlakivitabletid espressomasina, JURA, 3 tk",RICKMAN TRADE OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126438,"Kinder pingui kakao 4x30g, KINDER, 120 g",MOBEC AS,,"Barbora, Coop, Maxima, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126442,"Kirsiraks, PÕHJALA, 330 ml",PÕHJALA BREWING AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126446,"Kiviahjupitsa BBQ chicken, GRANDIOSA, 310 g",ORKLA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126447,"Kiviahjupitsa Hawaii, GRANDIOSA, 350 g",ORKLA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126448,"Kiviahjupitsa La Mia Grande ""Margherita"", DR.OETKER, 360 g",JUNGENT ESTONIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126450,"Kivideta datlid, SEEBERGER, 200 g",SELVER AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126454,"Klassikaline kali, A.LE COQ, 2 L",A. LE COQ AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126455,"Klassikalised trühvlid, KALEV, 160 g",ORKLA EESTI AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126462,"Kohuke vanilli kakaoglasuuris 7x40g, ALMA, 280 g",VALIO EESTI AS,,"Barbora, Maxima, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126463,"Kohuke vanilli multipakk 7x40g, TERE, 280 g",TERE AS,,"Barbora, Coop, Maxima, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126466,"Mahe kardemon, jahvatatud, SANTA MARIA, 32 g",SANTA MARIA AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126544,"Maksalõiked koertele, RAKVERE LK, 1 kg",MAAG EESTI AS,,"Coop, Selver",,,pet,pet_other,heuristic,pet,pet_other,heuristic,
+126545,"Maksastroganov, SELVERI KÖÖK, 2,2 kg, ettetellimisel",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126546,"Maksastroganov, SELVERI KÖÖK, 400 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126547,"Maksikrevetid 31/40 (sabaga, keedetud), VICI, 240 g",VICIUNAI BALTIC OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126548,"Malbe sinep (mahedamaitseline), FELIX, 430 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126570,"Mänguaasi + 2 täidet, PEZ, 17 g",D.T.L. CONSUMER PRODUCTS EESTI AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126574,"Marineeritud artišokid, CAMPAGNA, 314 ml",SELVER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126575,"Marineeritud kurgid 6-9 cm, SUNFOOD, 680 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126581,"Marjasegu, MAAHÄRRA, 300 g",PREMIA TALLINNA KÜLMHOONE AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126586,"Marmelaad hapu, MARMITON, 150 g",SVENSKY KAUBANDUSE AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126587,"Marmelaad Trulla, MARMITON, 160 g",SVENSKY KAUBANDUSE AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126590,"MARTINI Extra Dry, 100 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126591,"Martsipani-kirsi stritsel, SELVERI PAGARID, 470-480 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126593,"Martsipanimass mandliga, KALEV, Kg",ORKLA EESTI AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126596,"Meerõngad, LOTTE, 225 g",LTT AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126597,"Mehhiko segu, MAAHÄRRA, 400 g",PREMIA TALLINNA KÜLMHOONE AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126600,"Mereandide segu Frutti di Mare, MARINE, 150 g",BALBIINO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126601,"Merekarbid, PRESTO, 400 g",TARTU MILL AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126602,"Merekivid rosin suhkrus, KALEV, 160 g",ORKLA EESTI AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126607,"Merevetika snäkk kimchi-maitseline 3-pakk, DAECHUN, 12 g",D.T.L. CONSUMER PRODUCTS EESTI AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126611,"Mesi ingveriga, AARE JÕUMEES, 300 g",JÕUMEES OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126613,"Mesi, SALLA-PRINGI MESILA, 1 kg",SP TOOTED OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126614,"Mesi, SALLA-PRINGI MESILA, 500 g",SP TOOTED OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126615,"Mesi, SIRELI, 1kg",IKTOS OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126622,"Mesimurakatarretis, MIKAADO, 80 g",KAUPMEES & KO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126636,"Micropopcorn 3x100g, FIRST PRICE,",SELVER AS,,Selver,,,other,dry_other,fallback,sweets_snacks,sweets_snacks_salty,high,proposed_group_invalid;override_with_name_rules
+126658,"Mini Farfalle lipsuke, PANZANI, 500 g",ABESTOCK AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126660,"Mini Penne torud, PANZANI, 500 g",ABESTOCK AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126665,"Mini tosca rabarberiga 15x15g, EESTI PAGAR, 225 g",EESTI PAGAR AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126666,"Mini tosca , REVAL KONDIITER, 240 g",REVAL KONDIITER OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126670,"Miniburgerite valik, SELVERI KÖÖK, 450 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126672,"Minikurgid, CITRES, 290g",INTERALTUS OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126676,"Mirin, OTTOGI, 360 ml",UMAMI OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126679,"Mitmevilja ampsud, LESTELLO, 65g",M&V TRADE OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126683,"Mõrushok. Excellence Dark 70%, LINDT, 100 g",EUGESTA EESTI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126694,"Muhe Mesi, MUHE MESI, 450 g",MUHE KRAAM OÜ,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126696,"Mulgipuder, SELVERI KÖÖK, 2,5 kg, ettetellimisel",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126697,"Mulgipuder, SELVERI KÖÖK, 500 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126702,"Multi kõrrejook, LIMPA, 250 ml",A. LE COQ AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126716,"Murel, BIMAR, 300 g",BIMAR OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126719,"Kummikindad S, MCLEAN, 1 paar",PRIME PARTNER AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126768,"Mustad kivideta oliivid, BORGES, 220 g",LEJOS EESTI OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126769,"Mustad kivideta oliivid, EXPLANADA GOURMET, 370 ml",SELVER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126770,"Mustad kivideta oliivid, FIGARO, 142 g",IMEX TRADING GROUP AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126772,"Mustad oad vees, ORGANIC FOODS, 400 g",M&V TRADE OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126773,"Mustad oliivid kivideta, FIGARO, 240 g",IMEX TRADING GROUP AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126774,"Mustad oliivid kivideta, FIRST PRICE, 350 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126796,"Mustsõstrakangikesed, VERI BERI, 50 g",PROPOSITO OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126797,"Mustsõstram. marmelaadikompvek, KALEV, 175 g",ORKLA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126800,"Muu piiritusjook LIVIKO Pipra Naps, 10 cl",,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126817,"Nätsudrazeed Trashy Tony, CANDY GANGS, 30 g",ESTINVAIT OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126821,"Neljavilja krõbusk, BALSNACK, 200 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126823,"Nelk, SANTA MARIA, 10 g",SANTA MARIA AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126850,"Odratang, TARTU MILL, 1 kg",TARTU MILL AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126856,"Old saare 3 kuud laktoosivaba, MO SAAREMAA, 280 g",PINUS AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126876,"Organic Fusilli bronze Nr.260, CASA RINALDI, 500 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126877,"Organic Penne Rigate bronze Nr.244, CASA RINALDI, 500 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126878,"Organic Spaghetti bronze Nr.205, CASA RINALDI, 500 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126896,"Kokteil KOSKENKORVA Mojito, 50 cl",ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126903,"Kompvekid Rocher, FERRERO, 200g",MOBEC AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126913,"Koolajook, FRITZ-KOLA, 330 ml",CLUB-MATE EESTI OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126919,"Kõrvitsapüree, mahe 4+, PÕNN, 125g",SALVEST AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126922,"Kosmos, PÕHJALA, 440 ml",PÕHJALA BREWING AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126923,"Kreeka pähkel, SEEBERGER, 150 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126928,"Kreeker teraviljadega, ARCOR, 185 g",INTERALTUS OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126945,"Krobeline nöudesvamm Pur Active, VILEDA, 2 tk",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126946,"Kühvel+hari, SAUBER, 1 tk",ETC KODU OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126950,"Kuivatatud aprikoos, ARIMEX, 200 g",LTT AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126951,"Kuivatatud aprikoosid, SEEBERGER, 200 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126952,"Kuivatatud dattel Premium, ARIMEX, 500 g",LTT AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126959,"Kuivatatud ploomid kivideta, SEEBERGER, 200 g",SELVER AS,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126962,"Kuklid 10 tk, FIRST PRICE, 600 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126964,"Külmkapivärskendi Mister Magic, DR.BECKMANN, 40 g",URSUS OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+126965,"Kummikindad Sensitive S, VILEDA, 1 paar",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126966,"Kummikindad ühekordsed L, MCLEAN, 10 tk",PRIME PARTNER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126967,"Kummikindad ühekordsed M, MCLEAN, 10 tk",PRIME PARTNER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126968,"Kummikindad ühekordsed S, MCLEAN, 10 tk",PRIME PARTNER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126969,"Kummikindad XL, MCLEAN, 1 paar",PRIME PARTNER AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+126971,"Kuninglik segu, ARIMEX, 300 g",LTT AS,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127010,"Küürimisnuustik, TORO, 3 tk",ETC KODU OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127011,"Küürimispulber Lemon, AJAX, 450 g",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127012,"Küürimissvammid antibakteriaalsed Ultra Fresh, VILEDA, 3 tk",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127013,"Küürimissvammid Nordic Black Edition, ESTA, 10 tk",URSUS OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127014,"Küürimissvammid, SELVER, 3 tk",URSUS OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127015,"Küüslauguleivad, SELVERI KÖÖK, 200 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127016,"Küüslauguleivad, SELVERI PAGARID, 300 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127018,KWV Chenin Blanc 75 cl,TRIDENS AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127021,La Chablisienne Chablis 1Er Cru Mont De Milieu 75cl,ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127022,La Chablisienne Chablis Le Finage 75 cl,ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127028,La Fiole Cotes Du Rhone 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127029,La Gioiosa Ca Divo Spumante Extra Dry 75cl,DUNKER ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127032,La Mura Organic Grillo 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127033,La Mura Organic Nero d'Avola 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127034,La Posada Tempranillo Organic 75 cl,ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127035,LAB Red Reserva 75 cl,MEDIATO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127037,Lago dOro Garda Bianco DOC 75 cl,BALMERK ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127038,Lago Sagrado Lisboa Tinto 75 cl,DUNKER ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127039,Lago Sagrado Reserva 75 cl,DUNKER ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127044,Lands&Legends Sauvignon Blanc 75cl,ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+127047,Laroche Petit Chablis 75 cl,PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127049,"Laste hirsipulgad BIO 8k, HIPP,",LTT AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127050,"Laste vahujook Tom & Jerry, DISNEY, 750 ml",LTT AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127060,"Le Grand Noir Cremant de Limoux, 75 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127061,Le Grand Noir GSM 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127063,"Le Grand Noir Sauvignon Blanc 18,7 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+127064,Le Grand Noir Sauvignon Blanc 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+127066,"Lehttainas, SELVER, 500 g",EESTI PAGAR AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127067,"Leivapulgad naturaalsed, PANEALBA, 125 g",GEMOSS EESTI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127068,"Leivasegu, GERMUND, 100 g",GERMUND HULGI OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127069,"Lemmiksegu, ARIMEX, 300g",LTT AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127070,Les Dauphins Cotes du Rhone Reserve 75 cl,SERVAALI ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127073,Les Vignerons Rivaner 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127087,"Lindor Mini Pralinee, LINDT, 100 g",EUGESTA EESTI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127089,Lisboa Reserva Red 75 cl,LTT AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127090,Litoral blanco 1 L,LTT AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127091,"Lõhnakuulid puidust Home&spa ”Forever Fresh”, JOIK, 15 tk",JOIK OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127093,"Lõhnakuulid puidust Home&spa ”Primavera”, JOIK, 15 tk",,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127101,"Münt suures potis, 1tk",Määramata,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127118,"Paberkäterätikud, SELVER, 1 tk",SELVER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127119,"Paberkäterätt Jumbo 500 lehte 2-kihiline, KLEENEX, 1tk",,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127120,"Paberkäterätt Maxi Clean 1 rulli 94 lehte, KLEENEX, 1 tk",,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127121,"Paberkäterätt Ultra Clean 2 rulli 74 lehte, KLEENEX, 1 tk",,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127122,"Paberkäterätt White Rabbit XXL 2-kihiline, GRITE, 1 tk",SELVER AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127124,"Padjad kakaomaitselise täidisega, START, 250 g",ABESTOCK AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127125,"Padjakesed Lion Wildcrush, NESTLÉ, 360 g",SELVER AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127144,"Pajaroog Hawaii, BLA BAND, 195 g",ABESTOCK AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127145,"Pajaroog Napoli, BLA BAND, 170 g",ABESTOCK AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127156,"Paneeritud krabisõrad surimi, VICI, 250 g",VIČIUNAI BALTIC OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127157,"Paneeritud Krevetid surimist MINI, VICI, 170 g",VICIUNAI BALTIC OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127158,"Pangaasiusefilee nahata, COLUMBUS, 560 g",VICIUNAI BALTIC OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127159,"Panniroog, HÄRMAVILI, 400 g",BALBIINO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127174,"Part A-klass (ilma rupsita), 2,1 kg",MAAG HORECA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127218,"Peedi külmsupp, SELVERI KÖÖK, 400 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127225,"Peenestatud oregano, KOTANYI, 8 g",EUGESTA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127226,"Peenestatud tüümian, KOTANYI, 14 g",EUGESTA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127231,"Pehmed kompvekid hapud, RED BAND, 100 g",TRIDENS AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127236,"Pelmeenid köögiviljadega Gyoza, VICI, 400 g",VIČIUNAI BALTIC OÜ,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127237,"Pelmeenid lihaga Gyoza, VICI 400 g",VIČIUNAI BALTIC OÜ,,"Coop, Selver",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+127238,"Pelmeenid pardilihaga Traditsioonilised, VICI, 400 g",VIČIUNAI BALTIC OÜ,,Selver,,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+127242,"Penne Rigate, PANZANI, 1 kg",ABESTOCK AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127244,"Penne Rigate torukesed, BARILLA, 500 g",EUGESTA EESTI AS,,"Coop, Prisma, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127245,"Penne Ziti Rigate, REGGIA, 5 kg, ettetellitav",M&V TRADE OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127250,"Persillade , 48g, SANTA MARIA",SANTA MARIA AS,,"Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127257,"Philadelphia ehomaki, SELVERI KÖÖK, 240 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127258,"Philadelphia ja California Norimakid, SELVERI KÖÖK, 420 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+127288,Piiritusjook Aramis VS pet) 35 cl,BALMERK ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127289,"Piiritusjook ARAMIS XO, 20 cl",,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127290,"Piiritusjook BACARDI Oakheart Spiced, 100 cl",,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127291,Piiritusjook Bacardi Oakheart Spiced 50 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127292,"Piiritusjook BACARDI Spiced, 100 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127293,"Piiritusjook BALLANTINE`s Brasil, 70 cl",PERNOD RICARD ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127294,"Piiritusjook CAPTAIN MORGAN Spiced, 100 cl",PRIKE AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127295,"Piiritusjook Caribba Cherry, 50cl",LIVIKO AS,,"Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127296,"Piiritusjook CARIBBA Spiced, 50 cl",,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127297,"Piiritusjook CARIBBA Spiced, 70 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127298,"Piiritusjook HANDSA Organic Rye, 50 cl",MOE OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127299,"Piiritusjook Imperial XII VS, 50 cl",MV EESTI OÜ,,"Coop, Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127300,"Piiritusjook MAGISTR VS, 50 cl",MEDIATO AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127301,"Piiritusjook MARQUIS DE LEON, 20 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127302,"Piiritusjook METAXA 5*, 50 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127303,"Piiritusjook METAXA 5*, 70 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127304,"Piiritusjook Metaxa 5* Orange, 70cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,produce,produce_tropical,high,proposed_group_invalid;override_with_name_rules
+127305,"Piiritusjook RIGA BLACK BALSAM , 50 cl",AMBER DISTRIBUTION ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127307,Piiritusjook STAR DOLLAR 5 Rich Harmony 35 cl,LTT AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+127308,"Piiritusjook STAR DOLLAR Rich Harmony 5*, 20 cl",LTT AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+129174,"Pipra Naps ingveriga, LIVIKO, 35 cl",LIVIKO AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+129175,"Pipra Naps, LIVIKO, 20 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+129176,"Pipra Naps, LIVIKO, 35 cl",LIVIKO AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+129177,"Pipra Naps, LIVIKO, 50 cl",LIVIKO AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+129180,"Piprasegu, SANTA MARIA, 258 g",SANTA MARIA AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+129377,"Piprasegu, SANTA MARIA, 25 g",SANTA MARIA AS,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+130788,"Pitsarull, SELVERI PAGARID, 85 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+130789,"Pizzakaste, POMI, 400 g",IMEX TRADING GROUP AS,,Selver,,,sauces_oils,sauces_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+130794,"Plov, SELVERI KÖÖK, 1kg",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+130795,"Plov, SELVERI KÖÖK, 350 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+130824,"Portsjonkakao, LE ROYAL, 25 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+130825,"Potitreeningupüksid 2-3 a, BABY PLANET, 1 tk",BABY PLANET OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+130834,"Praetud kodune kotlet, SELVERI KÖÖK, 230 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+130835,"Pralineekompvek Maiuspala, KALEV, 175 g",ORKLA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+130836,"Prantsuse ürdisegu, SANTA MARIA, 6 g",SANTA MARIA AS,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+130849,"Presidentti Espresso uba, PAULIG, 1 kg",PAULIG COFFEE ESTONIA AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+130850,"Presidentti Ruby jahvatud kohv, PAULIG, 500 g",PAULIG ESTONIA AS,,"Prisma, Rimi, Selver",,,drinks,drinks_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+130852,"Prima Donna väikepakk, PRIMA DONNA, 180 g",DELINE OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+130855,"Psüllium, SALLISELTA, 100 g",KAUPMEES & KO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+130857,"Pühapäevapada, MAAHÄRRA, 400 g",PREMIA TALLINNA KÜLMHOONE AS,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+131122,"Punapeediviilud, PÕLTSAMAA, 570 g",ORKLA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+131123,"Punapeediviilud, PÕLTSAMAA, 8,9 kg, ettetellimisel",ORKLA EESTI AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+131128,"Punased kidney oad, CAMPAGNA, 400 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+131130,"Punased kokteilikirsid, OPIES, 125 g neto",GEMOSS EESTI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+131134,"Punasesõstra želee, FIRST PRICE, 400 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+131135,"Pune ehk oregano, FIRST PRICE, 25 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+131136,"Pune, SANTA MARIA, 5 g",SANTA MARIA AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+131137,"Puravikupüree kiirsupp, KNORR, 15g",SELVER AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,produce,produce_mushrooms,high,proposed_group_invalid;override_with_name_rules
+131138,"Purustatud linnuluud, TALLEGG, 1,5 kg",MAAG EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,dairy_eggs_fats,dairy_eggs,high,proposed_group_invalid;override_with_name_rules
+131159,"Rakvere pihvid, RAKVERE LK, 530 g",MAAG EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+131902,"Red Berries, KARL FAZER, 180 g",FAZER EESTI OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+131905,"Remulaad, FIRST PRICE, 400 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+131933,"Roheline hernes, HÄRMAVILI, 400 g",BALBIINO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+133785,"Rohelised oliivid kivideta, FIGARO, 142g",IMEX TRADING GROUP AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+133786,"Rohelised oliivid kivideta, FIGARO, 240 g",IMEX TRADING GROUP AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+133787,"Rohelised oliivid kivideta, FIRST PRICE, 350 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+133789,"Rohelised oliivid kivideta Manzilla, EXPLANADA GOURMET, 370 ml",SELVER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+133790,"Rohelised oliivid krevettidega 300g, GREEN, neto 120 g",PRALINEE OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+133791,"Rohelised oliivid mandlitega, GOURMANTE, 360 g",SANITEX OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+133800,"Rosmariin, FIRST PRICE, 45 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+133801,"Rosmariin, SANTA MARIA, 15 g",SANTA MARIA AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+133802,"Röstitud küüslaugu hummus, GOURMET CLUB, 200 g",GURMEEKLUBI OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+133809,"Röstitud punased maguspiprad, GOURMANTE, 450 g",PRIKE AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+133825,"Rukkileiva puiste, FIRST PRICE, 500 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+133826,"Rukkileivakesed kiluga, SELVERI KÖÖK, 300 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+133827,"Rukkileivakesed rebitud lihaga, SELVERI KÖÖK, 270 g",KULINAARIA OÜ,,Selver,,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+133828,"Rukkinööbid, LINKOSUO, 160 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+133855,"Safran, SANTA MARIA, 0,5 g",SANTA MARIA AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+133856,"Salaami-omleti-baguette, MAMMA, 190 g",SAARIOINEN EESTI OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+134467,"Šampiljonipüree kiirsupp, KNORR, 15g",SELVER AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+134470,"Sampinjonid viilutatud PRO CHAMP, 380 g",SVENSKY KAUBANDUSE AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+134472,"Sarveke Chifferini, PANZANI, 500 g",ABESTOCK AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+134473,"Seakamar, OK SNACKS, 150 g",SELVER AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+134475,"Seapraad klassikaline, RAKVERE, kg",,,Selver,,,other,dry_other,fallback,meat_fish,meat_pork,high,proposed_group_invalid;override_with_name_rules
+134487,"Kodune seljanka, SALVEST, 3 kg, ettetellimisel",SALVEST AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+134488,"Seljanka, SALVEST, 530 g",SALVEST AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+134489,"Seljanka, SELVERI KÖÖK, 400g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+134490,"Seljanka vaakumkotis, SELVERI KÖÖK, 3 kg, ettetellimisel",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+134491,"Seljankapõhi, SELVERI KÖÖK, 3 kg, ettetellimisel",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+134496,"Shot astelpaju ingveri, SEMU, 330 ml",TROCOS TRADE OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+134498,"Shot Ingver, RYNKEBY, 500 ml",MOBEC AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+134512,"Siidine pehme tofu, MORI-NU, 305 g",UMAMI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+134520,"Sinep, MAADLEX, 75 g",MAADLEX OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+134527,"Singirullid küüslauguga, SELVERI KÖÖK, 240g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+134528,"Singirullid mädarõikaga, SELVERI KÖÖK, 230 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+134529,"Singirullid maitserohelisega, SELVERI KÖÖK, 240 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+137804,"Söögisooda, MEIRA, 125 g",MEIRA EESTI OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+137805,"Söögisooda, MEIRA, 50 g",MEIRA EESTI OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+137814,"Sõstratarretis, SELVERI KÖÖK, 140 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+137818,"Spaghetti Tagliati, REGGIA, 5 kg, ettetellitav",M&V TRADE OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+137821,"Spiraal Fusilli international, PANZANI, 500 g",ABESTOCK AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+137825,"Street Food Küüslauguleivad, FAZER, 100 g",FAZER EESTI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+137846,"Supiköögiviljad Talv, HORTEX, 450 g",VIČIUNAI BALTIC OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+137847,"Surimipulgad tempura taignas, VICI, 300 g",VIČIUNAI BALTIC OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+137850,"Sushi Ingver roosa vaakumpakendis, JAPANESE CHOICE, 200 g",D.T.L. CONSUMER PRODUCTS EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+137851,"Sushi Ingver valge, JAPANESE CHOICE, 190 g",D.T.L. CONSUMER PRODUCTS EESTI AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+137852,"Sushi Nori lehed 5 tk, JAPANESE CHOICE, 14 g",D.T.L. CONSUMER PRODUCTS EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+137853,"Sushi pulgad, JAPANESE CHOICE, 1 pakk",D.T.L. CONSUMER PRODUCTS EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+137858,"Tabasco piprakaste, TABASCO, 57 ml",MAIC KAUBANDUSE AS,,"Rimi, Selver",,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+137860,"Tagliatelle, GRANORO, 500 g",KAUPMEES & KO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+139438,"Söögisooda, SALLISELTA, 900 g",KAUPMEES & KO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+139441,"Suhkruasendaja Erütritool 480g, Bioenergie",BIOMARKET OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+139442,"Supiköögiviljad, FIRST PRICE, 750 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+139443,"Suvine marjasegu, HÄRMAVILI, 300 g",BALBIINO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+139447,"Täidetud pannkoogid ploomitäidise ja vaniljekreemiga, SELVERI KÖÖK, 200 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+139461,"Taimevalgu pelmeenid Aasia stiilis, THORMI, 350 g",VEGESTAR OÜ,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+139462,"Taimevalgu pelmeenid Vahemere stiilis, THORMI, 350 g",VEGESTAR OÜ,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+139467,"Täistera kaerahelbepuder laktoosivaba, SELVERI KÖÖK, 250 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+139468,"Täistera kaerapannkoogid, TARTU MILL, 300 g",TARTU MILL AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+139500,"Tekiila OLMECA Altos Agave Plata, 70 cl",PERNOD RICARD ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+139501,"Tekiila OLMECA Altos Agave Reposado, 70 cl",PERNOD RICARD ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+139502,"Tekiila OLMECA Blanco, 70 cl",,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+139503,Tekiila SIERRA Blanco 50 cl,MV GROUP DISTRIBUTION EE OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+139504,"Tekiila TRES SOMBREROS Silver, 70 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+139506,"Terav Adžika, VERES, 530 g",INTERALTUS OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+139509,"Terav.padjakesed vanilje, VÄIKE VÄÄNIK, 250 g",MARIS GILDEN OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+139512,"Terav tšillikaste, FELIX, 350 g",ORKLA EESTI AS,,"Coop, Selver",,,sauces_oils,sauces_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+139520,"Texicana Salsa, MAGGI, 500 ml",SELVER AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+139525,"Thousand Island kaste, FIRST PRICE, 400 ml",SELVER AS,,Selver,,,sauces_oils,sauces_other,heuristic,dry_preserves,dry_pasta_rice,high,override_with_name_rules
+139529,"Tiramisu mandel kakaos, KALEV, 140 g",ORKLA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+140967,"Tofe (suur teokarp), REGGIA, 500 g",M&V TRADE OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+140968,"Tofu küüslauguga, BON VEGAN, 250 g",BON VEGAN OÜ,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+140995,"Toortoit koertele, RAX, 400 g",MAAG EESTI AS,,"Coop, Selver",,,pet,pet_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+141008,"TOTINO Lime, 100 cl",HENKELL FREIXENET EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+141011,"Trühvlitäidisega oliivid, EXPLANADA GOURMET, 370 ml",SELVER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+141013,"Tšillikurgid viilutatud, FRUTICO, 740 g",EKTONI HULGIKAUBANDUS OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+141019,"Tšillipulber, SANTA MARIA, 41 g",SANTA MARIA AS,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+141020,"Tsitrusmarmelaad, FIRST PRICE, 400 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+141038,"Tükeldatud jalapeno, WANTED, 240 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+141044,"Tume Ciabatta, SELVERI PAGARID, ca 320 g",MANTINGA EESTI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+141059,"Türgi oad küüslauguga, SELVERI KÖÖK, 200g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_groats_beans,high,proposed_group_invalid;override_with_name_rules
+141216,"Tüümian, FIRST PRICE, 30 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+141217,"Tüümian, SANTA MARIA, 10 g",SANTA MARIA AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+141220,"Ühepajatoit lihaga, SELVERI KÖÖK, 2,4 kg, ettetellimisel",KULINAARIA OÜ,,Selver,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+141221,"Ühepajatoit lihaga, SELVERI KÖÖK, 500 g",KULINAARIA OÜ,,Selver,,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+141222,"Ühepajatoit, PÕLTSAMAA VALMIS!, 380g",ORKLA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+141227,"Ukraina borš, SALVEST, 530 g",SALVEST AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+141234,"Ürdiaia segu , 29g, SANTA MARIA",SANTA MARIA AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+141235,"Ürdiliköör KOSKENKORVA Valhalla, 50 cl",ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+141236,"Ürdiliköör LIVIKO Herbert, 35 cl",LIVIKO AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+141237,"Ürdiliköör LIVIKO Herbert, 50 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+142987,"Vadouvan, TERRE EXOTIQUE, 50 g",UMAMI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+142990,"Vahemere ürdisegu, MEIRA, 9 g",MEIRA EESTI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+142992,"Vähendatud rasvasisaldusega kakaonööbid, FIRST PRICE, 100 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+143003,"Vahvlikompvek Mesikäpp, KALEV, 150 g",ORKLA EESTI AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+143004,"Vahvlikompvekid Tallinn, KALEV, 150 g",ORKLA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+143006,"Väikesed marmelaadikeeksid, VÄIKE VÄÄNIK, 300 g",MARIS GILDEN OÜ,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+143007,"Väikesed rosinakeeksid, VÄIKE VÄÄNIK, 300 g",MARIS GILDEN OÜ,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+143021,"Valged oad, CAMPAGNA, 400 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+144213,"Vanillikaun, 3g, SANTA MARIA",SANTA MARIA AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+144214,"Vanillikreemipulber, RUF, 65 g",KAUPMEES & KO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+144349,"Vanilliplombiir glasuuris, VÄIKE TOM, 60 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+144356,"Värviline nonparell, MEIRA, 60 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+144357,"Värviline strössel, MEIRA, 55 g",MEIRA EESTI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+145498,"Tere kool martsipanikoogid, SELVERI KÖÖK, 200 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+145499,"Vermut MARTINI Bianco, 100 cl",LIVIKO AS,,"Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+145500,"Vermut MARTINI Fiero, 100 cl",LIVIKO AS,,"Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+145501,"Vermut MARTINI Rosso, 75 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+145504,"Vichy Vitamix Daily, VICHY, 500 ml",SAKU ÕLLETEHASE AS,,"Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+145505,"Vichy Vitamix Sport, VICHY, 500 ml",SAKU ÕLLETEHASE AS,,"Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+145506,"Viie pipra segu, SANTA MARIA, 25 g",SANTA MARIA AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+145507,"Viie pipra veski, SANTA MARIA, 60 g",SANTA MARIA AS,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+148258,"Haputaina päts, SELVERI PAGARID, 330 g",EESTI PAGAR AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+148266,"Vinegrett, SELVERI KÖÖK, 200 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+148274,"Virsikud, SELVER, 850 ml",SELVER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+148275,"Virsikumaitseline tarretis, DR.OETKER, 72 g",JUNGENT ESTONIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+148276,"Virsikupüree 100%, BONNE, 500 ml",INTERALTUS OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+148295,Luigi Gighetti Valpolicella Ripasso CampoliettiI 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+148296,Lyngrove Collection Chenin Blanc 75 cl,BESTWINE OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+148299,"Maapähkel, SELVER, 400 g",ALIS CO ESTONIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+149338,"Vitamiinijook Active, VITAMIN WELL, 500 ml",GKR TRADE OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+149339,"Vitamiinijook Celebrate, VITAMIN WELL, 500 ml",GKR TRADE OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+149341,"Vitamiinijook Enhance, VITAMIN WELL, 500 ml",GKR TRADE OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+149345,"Vitamiinijook Prepare, VITAMIN WELL, 500 ml",GKR TRADE OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+149346,"Vitamiinijook Relax, VITAMINERAL, 500 ml",A. LE COQ AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+149349,"Vitaminijook Reload, VITAMIN WELL, 500 ml",GKR TRADE OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+149371,"Yakisoba kaste, AYUKO, 150 ml",UMAMI OÜ,,Selver,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+154429,"Mandel Premium, GERMUND, 300 g",GERMUND HULGI OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+154431,"Mandlid, FIRST PRICE, 200 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+154433,"Mandlilaastud, GERMUND, 100 g",GERMUND HULGI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+156607,Marani Ahasheni 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+156608,Marani Kindzmarauli 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+156609,Marani Saperavi 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+156610,Marani Tsinadali 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+156611,Marques de Caceres Vendimia Seleccionada 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+156612,Marques de Caceres Vino Ecologico Bio 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+156613,Marques De Crianza D.O. Ribera Rel Duero 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+156614,Marques de Riscal Arienzo Crianza 75 cl,BALMERK ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+156615,Marques de Riscal Rioja Reserva 75 cl,BALMERK ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+156616,Marques de Riscal Rueda 75 cl,BALMERK ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+156617,Marques de Riscal Vina Collada Tempranillo 75 cl,BALMERK ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+156623,Masca Del Tacco Susumaniello Puglia IGP 75 cl,ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+156629,Masi Campofiorin Ripasso 75 cl,ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+156630,Masi Masianco 75 cl,ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,world_spices,spices_asian,high,proposed_group_invalid;override_with_name_rules
+156634,"Külmutatud raguu, RAKVERE LK, 1,3 kg",MAAG EESTI AS,,"Coop, Selver",,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+163368,"Lemmikloomade lõhnaeemaldaja, TRI-BIO, 420 ml",,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+163371,"Lasanje bolognese kastmega, SELVERI KÖÖK, 1,7 kg, ettetellimisel",KULINAARIA OÜ,,Selver,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+163623,"Marmorkeeks, KUCHENMEISTER, 400 g",INTERALTUS OÜ,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+163625,Masi Rosa dei Masi 75 cl,ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+163626,Masi Valpolicella 75 cl,ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+163627,Masso Antico Primitivo del Salento IGT 75 cl,PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+163630,Matsu El Picaro 75 cl,MEDIATO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+163632,Matua Marlborough Sauv.Blanc 75 cl,ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+163634,Maxale Appassimento Primitivo 75cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+164468,"Mexicorn tšilli maitsega, MOGYI, 55 g",MOGYI EESTI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+164469,Michel Torino Cuma Malbec 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+164470,Michel Torino Malbec 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+164471,Michel Torino Sauvignon Blanc 2005 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+164472,Michel Torino Select Reserve Malbec 75 cl,LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+164473,"Mikrofiiber lapid, VILEDA, 4 tk",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+164474,"Mikrokiudlapid värvilised Ultra Fresh, VILEDA, 3 tk",JUNGENT ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+168453,"Minibaguetid 12 tk, FIRST PRICE, 750 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+170067,"Mustsõstratasku, EESTI LEIVATÖÖSTUS, 2x90 g",EESTI LEIVATÖÖSTUS AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+170085,"Rõngik Magus, VIKSTAL, 200 g",VIKSTAL OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+170086,"Rõngik Mooni, VIKSTAL, 200 g",VIKSTAL OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+170087,"Pekaanipähkel, GOLDEN NUT, 100 g",GEMOSS EESTI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+170091,"Pumpernikkel, REVAL KONDIITER, 165 g",REVAL KONDIITER OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+170096,"Rõngik Tavaline, VIKSTAL, 200 g",VIKSTAL OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+170098,"Premium Aprikoos, GERMUND, 300 g",GERMUND HULGI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+170107,"Pralinee Mozart, MANNER, 118g",,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+170108,"Valge röstitud mandel, PREMIUM, 300 g",GERMUND HULGI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+170118,"Tudengi eine Premium, GERMUND, 300 g",GERMUND HULGI OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+170122,"Pehmed vahvlid, PRALINE, 250 g",PRALINEE OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+170126,"Pistaatsiapähkel, GERMUND, 200 g",GERMUND HULGI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+170128,"Premium pistaatsia pähkel, GERMUND, 250 g",GERMUND HULGI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+171505,"Must ploom California, GERMUND, 200 g",GERMUND HULGI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+171506,"Premium tudengieine, ARIMEX, 500 g",LTT AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+171508,"Premium pekanipähkel, GERMUND, 250 g",GERMUND HULGI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+171512,"Rosin Jumbo Premium, GERMUND, 300 g",GERMUND HULGI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+171515,"Rosin Kuldne, ARIMEX, 200 g",LTT AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+171524,"Traditsioonilised Itaalia kreekerid Focacce, rosmariiniga, GOURMANTE, 150 g",SANITEX OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+171527,"Pehmed datlid, SEEBERGER, 200 g",SELVER AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+171550,"Traditsioonilised Itaalia kreekerid Bruschette, oregano ja küüslauguga, GOURMANTE, 150 g",SANITEX OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+171551,"Traditsioonilised Itaalia kreekerid Thin Crisps, rosmariiniga, GOURMANTE, 150 g",SANITEX OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+171556,"Rosinad, FIRST PRICE, 250 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+173687,"Pitsarull, EESTI PAGAR, 400 g",EESTI PAGAR AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+173689,"Sügavkülmutatud suvikõrvitsapüree kuubikud, BABYCOOL, 200 g",BABYCOOL OÜ,,"Coop, Rimi, Selver",,,frozen_food,frozen_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+173692,"Pitsataigen, EESTI PAGAR, 600 g",EESTI PAGAR AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+173697,"Pitsa Ristorante Hawaii, DR.OETKER, 355g",JUNGENT ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+173708,"Pannkoogid magusad, VICI, 500g",VIČIUNAI BALTIC OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+173709,"Pitsa Ristorante Speciale, DR.OETKER, 345g",JUNGENT ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+173710,"Pitsa Bolognese 3x300g, FIRST PRICE, 900 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+173711,"Taigen Gyoza, 38 tk, HAPPY BELLY, 300 g",REATON OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+173713,"Füüsal karbis, 100 g",Määramata,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+179781,"Krabinuudel surimi, VICI, 200 g",VICIUNAI BALTIC OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+181811,"Mannavaht, SELVERI KÖÖK, 600g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+187944,"Mündimaitselised dražeed, TIC TAC, 18 g",MOBEC AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+194007,"Mini multipakk kakao-vaniljemaitseline, 7DAYS, 185 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+194009,"Kodune rosolje, SELVERI KÖÖK, 200 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+221754,"Kõrvits, kg",Määramata,,"Barbora, Maxima, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+221757,"Redis pakitud, 125 g",Määramata,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+221769,"Valge redis pakitud, kg",Määramata,,"Barbora, Maxima, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+221788,"Maitserohelise segu taldrikul, GRÜNE FEE, 1 tk",Määramata,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+221802,"Sea välisfilee kamaraga, RAKVERE LK, kg",RAKVERE LIHAKOMBINAAT AS,,Selver,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+221811,"Ingveri Shot, FRANKLY, 60 ml",FAIRFOOD OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+221814,"Avokaado karbis, 2tk",Määramata,,Selver,,,other,dry_other,fallback,produce,produce_tropical,high,proposed_group_invalid;override_with_name_rules
+221817,"Dattel, 200 g",Määramata,,"Barbora, Coop, Maxima, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+221820,"Kaktusmari, 500 g",Määramata,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+221827,"Avokaado söömisküps, kg",Määramata,,Selver,,,other,dry_other,fallback,produce,produce_tropical,high,proposed_group_invalid;override_with_name_rules
+221831,"Avokaado lõikur, 1 tk",Määramata,,Selver,,,other,dry_other,fallback,produce,produce_tropical,high,proposed_group_invalid;override_with_name_rules
+221837,"HULGI Šveitsi šnitsel 2tk, RANNAROOTSI, 2 x 400g",RANNAROOTSI LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+221844,"HULGI Kodupihvid 2tk, MAKS&MOORITS, 2 x 400g",ATRIA EESTI AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+221845,"Fuet Extra, EMBUTIDOS CAULA, 150 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+221847,"Kuivatatud põdraliha, LINNAMÄE LIHATÖÖSTUS, 40 g",LINNAMÄE LIHATÖÖSTUS AS,,Selver,,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+221861,"Tursamaks, MARINE ABC, 240g",,,"Barbora, Maxima, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+221881,"Klassikaline verikäkk viilutatud, MAKS&MOORITS, 340 g",ATRIA EESTI AS,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+221888,"Kohuke vanilli laktoosivaba, TERE, 40 g",TERE AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+233652,Codici Primitivo Appassimento Salento 75 cl,MEDIATO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+233653,"Ditalini, REGGIA, 5 kg, ettetellitav",M&V TRADE OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+233654,"Džinn HOGARTH, 70 cl",DUNKER ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+233671,"Frikadellisupp, SELVERI KÖÖK, 400 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+233672,"Fusilli, REGGIA, 5 kg, ettetellitav",M&V TRADE OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+233682,"Kevadrullid köögiviljadega, VICI, 900 g",VIČIUNAI BALTIC OÜ,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+233687,"Piprakaste, TABASCO, 150 ml",MAIC KAUBANDUSE AS,,Selver,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+233696,"Kohvivalgendaja, COFFEETA, 400 g",OSAMA EESTI OÜ,,"Barbora, Maxima, Selver",,,drinks,drinks_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+233700,"Kuivatatud münt, NATCO, 30 g",,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+233701,"Purustatud ingver, SWAD, 300 g",UMAMI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+233709,"Kodune rosolje, SELVERI KÖÖK, 700 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+233715,"Lehttainas, EESTI LEIVATÖÖSTUS, 600g",EESTI LEIVATÖÖSTUS AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+233718,"Küüslaugu baguette, SELVERI PAGARID, ca 160 g",SELVER AS,,"Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+233719,"Liköör CHAMBORD Black Raspberry, 50 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+233723,"Mannavaht, SELVERI KÖÖK, 200 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+233727,"Marja-ja puuviljasegu, IGLOTEX, 450 g",BALBIINO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+233731,"Kodune seljanka, SALVEST, 3 kg, ettetellimisel",SALVEST AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+233735,"Muretainas, SELVERI KÖÖK, 500 g",Määramata,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+233743,"Kinder Paradiso, KINDER, 29 g",MOBEC AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+233750,"Vaniljemaitseline stevia tilk, NICKS, 50 ml",NJOM FOODS OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+233759,"Ploomid, SUNSWEET, 200 g",LEJOS EESTI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+233767,Monte Cristo White 75 cl,DUNKER ESTONIA OÜ,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+289442,"Kodune rosolje, SELVERI KÖÖK, 700 g",,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+289739,"Frikadellisupp, SELVERI KÖÖK, 400 g",,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+290052,"Mannavaht, SELVERI KÖÖK, 200 g",,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+290317,"Piprakaste, TABASCO, 150 ml",,,,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+290320,"Ploomid, SUNSWEET, 200 g",,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+290402,"Purustatud ingver, SWAD, 300 g",,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+290688,"Vaniljemaitseline stevia tilk, NICKS, 50 ml",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307221,"After dinner Classic multipakk 8x35ml, MAGNUM, 232 g",UNILEVER EESTI AS,,"Coop, Rimi, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307223,"Agar agar BIO, LIMA, 12 g",UMAMI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307224,"Agar agar, MEIRA, 60 g",MEIRA EESTI OÜ,,"Coop, Selver",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307228,"Ahjuköögiviljad, SELVERI KÖÖK, 300 g",KULINAARIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307233,"Almond mini multipakk 6 x 55ml, MAGNUM, 266 g",UNILEVER EESTI AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307240,"Austrikaste, THAI CHOICE, 200 ml",D.T.L. CONSUMER PRODUCTS EESTI AS,,"Coop, Selver",,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+307241,"Baguette Duchesse, SELVERI PAGARID, 250 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307242,"Baklazaanipüree, VERES, 500 g",INTERALTUS OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307255,"Buffalo Wings, FRANKS´RED HOT, 354 ml",KAUPMEES & KO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307256,"Cayenne'i piprakaste, FRANKS´RED HOT, 148 ml",KAUPMEES & KO AS,,Selver,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+307258,"Creme Brulee Klassikaline, JOEL OSTRAT, 125 g",MAITSEELAMUSED OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307260,"Ebaküdoonia, ARAN FRAMING, 300g",ARAN PM OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307267,"FIX Lasagne kastmesegu, KNORR, 43 g",SELVER AS,,Selver,,,sauces_oils,sauces_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+307269,"Hele Ciabatta, SELVERI PAGARID, 300 g",SELVER AS,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307272,"HULGI Frikadellid 3tk, RAKVERE, 3 x 400g",MAAG EESTI AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307288,"HULGI Pelmeenid 2tk, RAKVERE, 2 x 900g",MAAG EESTI AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307292,"HULGI Valged oad 6tk, CAMPAGNA, 6 x 400g",SELVER AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_groats_beans,high,proposed_group_invalid;override_with_name_rules
+307293,"Jahvatatud filtrikohv Classic, PAULIG, 100 g",PAULIG COFFEE ESTONIA AS,,Selver,,,drinks,drinks_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+307308,"5-viljaröst täisterahelvestega, FAZER, 450 g",FAZER EESTI OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+307311,African Winery Chenin Blanc 75cl,DUNKER ESTONIA OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307339,"Aloe Vera jook chia maitsega, ALEO, 500 ml",PROPOSITO OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307340,"Aloe Vera jook Premium, ALEO, 1,5 L",PROPOSITO OÜ,,"Coop, Rimi, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307341,Altano Duoro Tinto 75 cl,MV GROUP DISTRIBUTION EE OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307342,Amorale Tre Uva Bianco 75 cl,MEDIATO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307348,Anciano No.10 Rioja Gran Reserva 75 cl,LTT AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307349,Anciano No.7 Rioja Reserva 75 cl,LTT AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307350,"Aniisimaitseline piiritusjook METAXA Ouzo, 70 cl",LIVIKO AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307367,Armanjakk DAMBLAT XO karbis 50 cl,GOLDBERGER OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307368,Arne Pomegranate 75 cl,AVALLONE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307374,Bach Extrisimo Semi-Seco 75 cl,PRIKE AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307375,Badagoni Alazani Valley Red S/Sweet 75 cl,SALESPROFF OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307376,Badagoni Alazani Valley White S/Sweet 75 cl,SALESPROFF OÜ,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307378,Balatonboglar Muscat Cuvee 75 cl,HENKELL FREIXENET EESTI AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307380,Barcelona Sauvignon Blanc 75 cl,BALMERK ESTONIA OÜ,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+307387,Barone Montalto Passivento Bianco 75 cl,MEDIATO AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307388,Barone Montalto Passivento Rosso 75 cl,MEDIATO AS,,"Coop, Selver",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+307396,Barton & Guestier Sauvignon Blanc Reserve 75 cl,PRIKE AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+307403,Big Game Malbec 75 cl,MEDIATO AS,,Selver,,,other,dry_other,fallback,drinks,drinks_wine,high,proposed_group_invalid;override_with_name_rules
+307407,"Bitter CAMPARI, 70 cl",ANORA ESTONIA AS,,Selver,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent

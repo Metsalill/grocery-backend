@@ -1,0 +1,901 @@
+product_id,name,brand,size_text,food_group,stores_sample,current_sub_code,new_sub_code,food_group_corrected,food_group_corrected_prev,new_sub_code_prev,confidence,final_food_group,final_sub_code,final_confidence,change_reason
+41793,Jever Pilsner õlu 5%vol 330ml,Jever Pilsner,330 ml,other,Prisma,,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+41805,Lahustuv kohv Cappuccino 250 g,Lahustuv,250 g,other,Prisma,,drinks_tea_coffee,drinks,drinks,drinks_tea_coffee,high,drinks,drinks_spirits,high,override_with_name_rules
+41814,Limpa vesi+mahl vaarika maitsega 250ml,Limpa,250 ml,other,"Prisma, Selver",,produce_berries,produce,drinks,drinks_water,high,drinks,drinks_juices,high,override_with_name_rules
+41869,"Codici Primitivo Puglia KGT vein 13,5%vol 750ml",Codici Primitivo,750 ml,other,"Barbora, Maxima, Prisma, Selver",,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+41876,Hardy VSOP Cognac 40%vol 200 ml,Hardy VSOP,200 ml,other,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+41898,Guinness Original õlu 5%vol 330ml,Guinness Original,330 ml,other,"Prisma, Rimi",,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+41930,"Hipp aedviljapüree 4 kuud, gluteenivaba",Hipp,,other,"Prisma, Selver",,bakery_gluten_free,bakery,bakery,bakery_gluten_free,high,bakery,bakery_gluten_free,high,
+41931,ICONFIT L-Karnitiini Shot 60ML - Apelsin,ICONFIT L-Karnitiini,60 ml,other,Prisma,,produce_tropical,produce,produce,produce_tropical,high,produce,produce_tropical,high,
+41932,Red Bull Midsummer Big Moment energiajook 24x250 ml,Red Bull,24x250 ml,other,Prisma,,drinks_energy,drinks,drinks,drinks_energy,high,drinks,drinks_energy,high,
+41963,"Fuzetea blueberry-lavender jäätee 1,5L",Fuzetea,1.5 l,other,Prisma,,produce_berries,produce,drinks,drinks_tea_coffee,high,produce,produce_berries,high,
+41983,"Henry Westons British Vintage Medium Dry siider 7,3%vol 500 ml",Henry Westons,500 ml,other,Prisma,,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+41999,Flor De Cana 4 Extra Seco rumm 40%vol 700ml,Flor De,700 ml,other,"Prisma, Rimi, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+42029,Must purutee Ceylon 100 g,Must,100 g,other,"Coop, Prisma, Selver",,drinks_tea_coffee,drinks,drinks,drinks_tea_coffee,high,drinks,drinks_spirits,high,override_with_name_rules
+42058,"Johann Brunner Riesling Rheinhessen KPN vein 10,5%vol 750ml",Johann Brunner,750 ml,other,"Barbora, Maxima, Prisma, Selver",,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+42064,"Lahustuv kohv Clipper 100 g, Organic",Lahustuv,100 g,other,Prisma,,drinks_tea_coffee,drinks,drinks,drinks_tea_coffee,high,drinks,drinks_spirits,high,override_with_name_rules
+42069,Kohvikapslid Nescafe Dolce Gusto Cafe Au Lait 160 g,Kohvikapslid Nescafe,160 g,other,Prisma,,hh_laundry,household,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_spirits,high,override_with_name_rules
+42077,Aramis VSOP Piiritusjook 500ml,Aramis VSOP,500 ml,other,"Prisma, Rimi, Selver",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+42080,Hipp õunapüree virsiku ja metsamarja öko 4k,Hipp,,other,"Prisma, Rimi",,produce_apples_pears,produce,produce,produce_apples_pears,high,produce,produce_apples_pears,high,
+42089,"Nestea roheline jäätee tsitrusega 1,5L",Nestea,1.5 l,other,"Coop, Prisma",,drinks_tea_coffee,drinks,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+42104,Metsmaasika liköör 21%vol 500ml,Metsmaasika,500 ml,other,"Barbora, Maxima, Prisma, Rimi",,produce_berries,produce,produce,produce_berries,high,drinks,drinks_spirits,high,override_with_name_rules
+42105,ELLAS 16G mahe virsik-banaani maisipulgad 7K,ELLAS,16 g,other,Prisma,,produce_tropical,produce,produce,produce_tropical,high,produce,produce_tropical,high,
+42122,"Piltti mangopüree 125 g, alates 4-elukuust",Piltti,125 g,other,Prisma,,produce_tropical,produce,baby,baby_porridge_cereal,high,drinks,drinks_spirits,high,override_with_name_rules
+42131,Jameson Black Barrel Whisky 700ml,Jameson Black,700 ml,other,"Barbora, Maxima, Prisma, Rimi, Selver",,dry_other,dry_preserves,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+42162,Aura ökoloogiline filtreerimata õunamahl 1L,Aura,1 l,other,"Coop, Prisma, Rimi, Selver",,produce_apples_pears,produce,drinks,drinks_juices,high,produce,produce_apples_pears,high,
+42179,"Purtse Classic Series Brown ale õlu 5,5%vol 440ml",Purtse Classic,440 ml,other,Prisma,,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+42195,Cappy apelsininektar 1 l,Cappy,1 l,other,"Coop, Prisma, Selver",,produce_tropical,produce,drinks,drinks_juices,high,drinks,drinks_juices,high,override_with_name_rules
+42198,"A. Le Coq Porter tume õlu 6,5%vol 500ml",A. Le,500 ml,other,"Barbora, Coop, Maxima, Prisma",,drinks_wine,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,override_with_name_rules
+42210,Põltsamaa õuna-küdoonia mahlajook 1L,Põltsamaa,1 l,other,"Coop, Prisma, Rimi, Selver",,produce_apples_pears,produce,drinks,drinks_juices,high,drinks,drinks_juices,high,override_with_name_rules
+42217,Jacobs Senseo Gold kohvipadjad 250 g,Jacobs Senseo,250 g,other,Prisma,,drinks_other,drinks,other,,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+42222,Renault Avec Cognac 40%vol 700ml,Renault Avec,700 ml,other,"Barbora, Maxima, Prisma",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+42233,"Domkellerstolz Weisswein vein 9,5%vol 1l",Domkellerstolz Weisswein,1 l,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+42258,"Saku Tume õlu 6,7%vol 500ml",Saku Tume,500 ml,other,"Barbora, Coop, Maxima, Prisma",,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+42276,Imperial Extra Double Stout tume õlu 7%vol 400ml,Imperial Extra,400 ml,other,"Coop, Prisma, Rimi, Selver",,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+42285,"Hipp head ööd teraviljapuder banaaniga 190g, öko, alates 4-elukuust",Hipp,190 g,other,Prisma,,produce_tropical,produce,baby,baby_porridge_cereal,high,produce,produce_tropical,high,
+42298,J.Brunner Pinot Grigio Rose vein 12%vol 750ml,J.Brunner Pinot,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+42338,Ella’s Kitchen tomati-basiiliku maisipulgad mahe 16g,Ella’s Kitchen,16 g,other,Prisma,,produce_herbs_salads_sprouts,produce,produce,produce_root_veg,high,produce,produce_herbs_salads_sprouts,high,
+42365,"Pepsi maasika-, vanilli- ja koolamaitseline suhkruvaba 0.33L",Pepsi,0.33 l,other,Prisma,,produce_berries,produce,produce,produce_berries,high,produce,produce_berries,high,
+42366,PILTTI mustikapüree 4K 90G,PILTTI,90 g,other,Prisma,,produce_berries,produce,produce,produce_berries,high,produce,produce_berries,high,
+42381,Meira filtrikohv Saludo 450 g,Meira,450 g,other,Prisma,,drinks_other,drinks,other,,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+42395,Akvile mineraalvesi Kids gaasita 500ml,Akvile,500 ml,other,"Coop, Prisma, Selver",,drinks_water,drinks,drinks,drinks_water,high,drinks,drinks_water,high,
+42401,"A. Le Coq Premium hele õlu 4,7%vol 500ml",A. Le,500 ml,other,"Barbora, Coop, Maxima, Prisma, Selver",,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+42414,Dreamer Sweet White tetra aromatiseeritud veinijook 10%vol 1L,Dreamer Sweet,1 l,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+42420,"Semper kiivi-õuna-pirni püree 190 g, alates 8-elukuust",Semper,190 g,other,Prisma,,produce_apples_pears,produce,produce,produce_apples_pears,high,drinks,drinks_spirits,high,override_with_name_rules
+42447,"Gubernija Wheat Hefeweizen õlu 4,8%vol 568ml",Gubernija Wheat,568 ml,other,Prisma,,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+42467,"Pillti kalkuni-juurviljahautis lastele alates 8-elukuust, 190 g",Pillti,190 g,other,Prisma,,meat_poultry,meat_fish,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+42479,Bree Riesling KGT vein 10%vol 3L,Bree Riesling,3 l,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+42493,Rakvere Mahedad Toorvorstid Ploomidega 400G,Rakvere Mahedad,400 g,other,Prisma,,meat_sausages,meat_fish,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+42513,Voelkel hapukapsamahl 500ml,Voelkel,500 ml,other,Prisma,,drinks_juices,drinks,drinks,drinks_juices,high,drinks,drinks_juices,high,
+42545,"Despassino Vihno Verde Rose KPN vein 9,5%vol 750ml",Despassino Vihno,750 ml,other,"Prisma, Selver",,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+42554,Marcati Grappa Riserva 40%vol 700ml,Marcati Grappa,700 ml,other,Prisma,,pet_other,pet,other,,heuristic,pet,pet_other,heuristic,
+42560,"Piltti väikese meremehe hautis lastetoit 250 g, alates 15-elukuust",Piltti,250 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+42567,ICONFIT Pre Workout Shot 60ML - Marja,ICONFIT Pre,60 ml,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+42610,"Velkopopovisky Kozel Dark 3,8%vol 500ml",Velkopopovisky Kozel,500 ml,other,"Coop, Prisma, Rimi",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+42614,Grand Teeny apelsinijook 200 ml,Grand Teeny,200 ml,other,Prisma,,produce_tropical,produce,produce,produce_tropical,high,produce,produce_tropical,high,
+42618,Bonino Amaretto mandliliköör 21%vol 200ml,Bonino Amaretto,200 ml,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+42619,"Muuti Öko Pohla-mustika-rukkipuder 110 g, alates 8-elukuust",Muuti Öko,110 g,other,"Coop, Prisma",,produce_berries,produce,produce,produce_berries,high,drinks,drinks_spirits,high,override_with_name_rules
+42635,Karu Cabernet Sauvignon GT Vein 13%vol 750ml,Karu Cabernet,750 ml,other,"Prisma, Rimi, Selver",,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+42676,"Jaume Serra Cava Brut vahuvein 11,5%vol 750ml",Jaume Serra,750 ml,other,"Coop, Prisma, Selver",,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+42736,RED BULL 250 ML,RED BULL,250 ml,other,"Coop, Prisma, Selver",,drinks_energy,drinks,drinks,drinks_energy,high,drinks,drinks_energy,high,
+42748,Hennessy VS Cognac 40%vol 500ml,Hennessy VS,500 ml,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+42824,Värska Allikavesi 7L,Värska Allikavesi,7 l,other,"Coop, Prisma, Selver",,drinks_water,drinks,drinks,drinks_water,high,drinks,drinks_water,high,
+42841,Pepsi Max Mango karastusjook 6x330ml,Pepsi Max,6x330 ml,other,Prisma,,produce_tropical,produce,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,override_with_name_rules
+42852,Põnn Öko Ploomimehu 240 ml (4+),Põnn Öko,240 ml,other,"Coop, Prisma",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+42877,Don Simon 100% roosa greibi mahl 1L,Don Simon,1 l,other,"Coop, Prisma, Rimi, Selver",,drinks_juices,drinks,drinks,drinks_juices,high,drinks,drinks_juices,high,
+42902,"Dr. Active mango-apelsini mahlajook 1,5L",Dr. Active,1.5 l,other,"Coop, Prisma, Rimi, Selver",,produce_tropical,produce,drinks,drinks_juices,high,drinks,drinks_juices,high,override_with_name_rules
+42909,"Pajaroog, 400 g","Pajaroog,",400 g,other,"Coop, Prisma, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+42919,"Mull sauna light siider 3,9%vol 330ml",Mull,330 ml,other,Prisma,,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+42952,LIPTON virsiku-mango tee püramiid 20pk,LIPTON,20 pcs,other,Prisma,,produce_tropical,produce,drinks,drinks_tea_coffee,high,produce,produce_tropical,high,
+42976,Hiiumaa Köök Ja Pagar Tume Vormileib 240 G,Hiiumaa Köök,240 g,other,Prisma,,bakery_bread_loaves,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+42995,Hippo porgandinektar 750ml,Hippo,750 ml,other,Prisma,,produce_root_veg,produce,drinks,drinks_juices,high,drinks,drinks_juices,high,override_with_name_rules
+43001,"Acantus Tempranillo Cabernet Sauvignon KPN vein 12,5%vol 750ml",Acantus Tempranillo,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+43025,Heinz tomatimahl 290ml,Heinz,290 ml,other,"Coop, Prisma, Rimi, Selver",,produce_root_veg,produce,drinks,drinks_juices,high,produce,produce_root_veg,high,
+43033,"Maori Bay Shiraz Rose GT vein 12,5%vol 750ml",Maori Bay,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+43066,Aleo Aloe Vera jook mangoga 500ml,Aleo Aloe,500 ml,other,Prisma,,produce_tropical,produce,drinks,drinks_beer_cider,high,produce,produce_tropical,high,
+43074,Karksi õunasiider 500ml,Karksi,500 ml,other,"Coop, Prisma",,produce_apples_pears,produce,drinks,drinks_beer_cider,high,produce,produce_apples_pears,high,
+43090,Piltti 125g porg-pastinaagi püree 4k,Piltti,125 g,other,Prisma,,drinks_wine,drinks,other,,high,drinks,drinks_wine,high,
+43105,La Corrida Tempranillo vein 12%vol 750ml,La Corrida,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+43111,"Henkell Brut kvaliteetvahuvein 11,5%vol 750ml",Henkell Brut,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+43147,"Kohvijook Ice Espresso + milk, LÖFBERGS, 230 ml",Löfbergs ICE,230 ml,other,"Prisma, Selver",,dairy_milk,dairy_eggs_fats,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+43149,"Duvel Belgian Golden Ale õlu 8,5%vol 330ml",Duvel Belgian,330 ml,other,Prisma,,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+43182,Piltti 450g ploomi-õuna puder 6k,Piltti,450 g,other,Prisma,,produce_apples_pears,produce,produce,produce_apples_pears,high,produce,produce_apples_pears,high,
+43193,Änglamark änglamark rohelised maheoad 400g,Änglamark,400 g,other,Prisma,,dry_canned_veg,dry_preserves,dry_preserves,dry_groats_beans,high,dry_preserves,dry_canned_veg,high,
+43198,Spläsh Maasika-Kiivi Gaseeritud vesi 330ml,Spläsh Maasika-Kiivi,330 ml,other,"Coop, Prisma",,produce_tropical,produce,drinks,drinks_water,high,drinks,drinks_water,high,override_with_name_rules
+43208,"Saare Roosa Gin 37,5%vol 500ml",Saare Roosa,500 ml,other,"Prisma, Rimi, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+43215,Don Simon Sangria aromatiseeritud veinijook 7%vol 1L,Don Simon,1 l,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+43217,JACOBS Krönung Instant lahustuv kohv 200 g,JACOBS Krönung,200 g,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,drinks_tea_coffee,drinks,drinks,drinks_tea_coffee,high,drinks,drinks_spirits,high,override_with_name_rules
+43308,"Disel hele õlu 5,2%vol 2L",Disel,2 l,other,Prisma,,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+43330,"Pepsi Zero karastusjook 1,5L",Pepsi Zero,1.5 l,other,"Coop, Prisma",,drinks_soft_soda,drinks,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+43347,"Melitta Kohvifilter 1x4/80, pruun",Melitta Kohvifilter,,other,Prisma,,drinks_other,drinks,other,,heuristic,drinks,drinks_other,heuristic,
+43413,"Ökoloogiline Mango-apelsinismuuti, SMUSHIE, 170 g",Salvest Smushie,170 g,other,"Coop, Prisma, Selver",,produce_tropical,produce,produce,produce_tropical,high,drinks,drinks_spirits,high,override_with_name_rules
+43453,"Castell Llord Cava Brut KPN kvaliteetvahuvein 11,5%vol 750 ml",Castell Llord,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+43510,Captain kombucha originaal 400ml,Captain,400 ml,other,"Coop, Prisma, Rimi",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+43540,Kingsmill Rhubarb Gin 38%vol 500ml,Kingsmill Rhubarb,500 ml,other,"Prisma, Rimi, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+43546,Coop Peekoniribad 200 G,Coop Peekoniribad,200 g,other,Prisma,,meat_pork,meat_fish,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+43586,Salasar Cremant De Limoux Brut KPN vahuvein 12%vol 750ml,Salasar Cremant,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+43597,Pesuloputusvahend sensitive 880ml,Pesuloputusvahend,880 ml,other,"Coop, Prisma",,hh_laundry,household,other,,high,household,hh_laundry,high,
+43629,"Primitivo Puglia Rosato kuivatatud viinamarjadest valm.vein 12,5%vol 750ml",Primitivo Puglia,750 ml,other,Prisma,,produce_berries,produce,drinks,drinks_wine,high,drinks,drinks_wine,high,override_with_name_rules
+43642,Jose Cuervo Especial Reposado Tequila 35%vol 700 ml,Jose Cuervo,700 ml,other,"Prisma, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+43663,Orn Craft rose lemonade toonik 1L,Orn Craft,1 l,other,"Coop, Prisma",,produce_tropical,produce,other,,high,produce,produce_tropical,high,
+43668,Greene King Abbot Ale õlu 5%vol 500ml,Greene King,500 ml,other,Prisma,,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+43680,Galipette Rose siider 4%vol 330ml,Galipette Rose,330 ml,other,Prisma,,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+43709,Piltti 190g Köögiv-kalkunirisotto 1-3a,Piltti,190 g,other,Prisma,,meat_poultry,meat_fish,other,,high,meat_fish,meat_poultry,high,
+43739,Porto Cruz Late Bottled Vintage KPN liköörvein 20%vol 750ml,Porto Cruz,750 ml,other,"Coop, Prisma",,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_spirits,high,override_with_name_rules
+43748,Aura Morsikas apelsini-mango mahlajoogikontsentraat 1L,Aura Morsikas,1 l,other,"Coop, Prisma, Rimi, Selver",,produce_tropical,produce,drinks,drinks_juices,high,drinks,drinks_juices,high,override_with_name_rules
+43749,"Mango-banaani smuuti, PAI, 280 ml",Pai,280 ml,other,"Barbora, Coop, Maxima, Prisma, Selver",,produce_tropical,produce,produce,produce_tropical,high,produce,produce_smoothies_fresh_juices,high,override_with_name_rules
+43752,La Francette Cinsault Grenache vein 12%vol 750ml,La Francette,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+43758,"Holle täistera hirsipuder, 250g, alates 6-elukuust",Holle,250 g,other,"Prisma, Selver",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+43761,Reval Cafe Lemmikröst kohvioad 1kg,Reval Cafe,1 kg,other,Prisma,,dry_canned_veg,dry_preserves,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,override_with_name_rules
+43780,Coca-Cola zero karastusjook 500ml,Coca-Cola,500 ml,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,drinks_soft_soda,drinks,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+43808,Starbucks cappuccino kohvijook 220 ml,Starbucks,220 ml,other,Prisma,,drinks_other,drinks,other,,heuristic,drinks,drinks_other,heuristic,
+43851,"Teeling Small Batch Irish whisky 46%vol 700ml, tuubis",Teeling Small,700 ml,other,"Coop, Prisma",,drinks_spirits,drinks,other,,high,drinks,drinks_spirits,high,
+43865,Tanker Tume Lager õlu 5%vol 500ml,Tanker Tume,500 ml,other,"Prisma, Rimi",,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+43913,Orn Craft indian toonik 1L,Orn Craft,1 l,other,"Coop, Prisma",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+43917,"Saku Rock õlu 5,3%vol 568ml",Saku Rock,568 ml,other,"Coop, Prisma",,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+43923,"Leffe Brune õlu 6,5%vol 500ml",Leffe Brune,500 ml,other,"Prisma, Rimi",,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+43930,Põhjala Tume Laager õlu 5%vol 440ml,Põhjala Tume,440 ml,other,Prisma,,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+43932,"Piltti lastetoit porgandi, kartuli ja kõrvitsaga 125 g, alates 4-elukuust",Piltti,125 g,other,Prisma,,produce_root_veg,produce,baby,baby_porridge_cereal,high,drinks,drinks_spirits,high,override_with_name_rules
+43987,"Piltti mustika-vaarika püree 125 g, alates 5-elukuust",Piltti,125 g,other,Prisma,,produce_berries,produce,produce,produce_berries,high,drinks,drinks_spirits,high,override_with_name_rules
+43994,"Sovetskoje Igristoje vahuvein 11,5%vol 750ml",Sovetskoje Igristoje,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+44011,Teefilter 30 tk.,Teefilter,30 pcs,other,Prisma,,drinks_tea_coffee,drinks,other,,high,drinks,drinks_tea_coffee,high,
+44031,Nescafé Classic Strong 250g (tin),Nescafé Classic,250 g,other,"Coop, Prisma, Rimi, Selver",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+44033,Blue Nun alkoholivaba punane vein 750ml,Blue Nun,750 ml,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+44039,Nestlé NAN HA 2 võõrutuspreparaat 800g,Nestlé NAN,800 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+44045,Nescafe Dolce Gusto Flat White kapslid 16tk,Nescafe Dolce,16 pcs,other,"Barbora, Maxima, Prisma",,hh_laundry,household,other,,high,drinks,drinks_coffee_beans_capsules,high,override_with_name_rules
+44057,Coop apelsini-koola jook 200ml,Coop,200 ml,other,Prisma,,produce_tropical,produce,produce,produce_tropical,high,produce,produce_tropical,high,
+44064,Coop vaarika-maasika jook 200ml,Coop,200 ml,other,Prisma,,produce_berries,produce,produce,produce_berries,high,produce,produce_berries,high,
+44065,Imperial XII VSOP Brandy 36%vol 500ml,Imperial XII,500 ml,other,"Coop, Prisma, Rimi, Selver",,dry_other,other,drinks,drinks_spirits,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+44067,"Johann Brunner Riesling Mosel KPN vein 9,5%vol 3L",Johann Brunner,3 l,other,"Barbora, Maxima, Prisma",,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+44125,"Mehukatti metsmaasika suhkruvaba kontsentraat 1+3 1,5l",Mehukatti,1.5 l,other,Prisma,,produce_berries,produce,drinks,drinks_syrups_powders,high,produce,produce_berries,high,
+44156,"Kulta Katriina filtrikohv, 450 g",Kulta Katriina,450 g,other,"Coop, Prisma, Selver",,drinks_other,drinks,other,,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+44167,"Saku Originaal õlu, 24 x 330 ml",Saku Originaal,24x330 ml,other,Prisma,,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+44174,Sanpellegrino Zero Aranciata Rossa 330 ml,Sanpellegrino Zero,330 ml,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+44202,Aura tomatimahl 1L,Aura,1 l,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,produce_root_veg,produce,drinks,drinks_juices,high,produce,produce_root_veg,high,
+44203,"Westons Vintage Rese. siider 8,2%vol 500ml",Westons Vintage,500 ml,other,"Coop, Prisma",,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+44248,Kohvioad Merrild Crema 1 kg,Kohvioad Merrild,1 kg,other,"Barbora, Coop, Maxima, Prisma, Selver",,dry_canned_veg,dry_preserves,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,override_with_name_rules
+44249,"Põnn öko maisikrõbuskid mango,banaan 20g",Põnn,20 g,other,"Coop, Prisma, Rimi, Selver",,produce_tropical,produce,produce,produce_tropical,high,produce,produce_tropical,high,
+44254,Põltsamaa tomatimahl 100% 1L,Põltsamaa,1 l,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,produce_root_veg,produce,drinks,drinks_juices,high,produce,produce_root_veg,high,
+44302,"Savanha Rose GT vein 12,5%vol 750ml",Savanha Rose,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+44303,"Magners Original siider 4,5%vol 500ml",Magners Original,500 ml,other,Prisma,,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+44305,"Kopparberg Pear Cider Perry 4,5%vol 500ml",Kopparberg Pear,500 ml,other,Prisma,,produce_apples_pears,produce,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,override_with_name_rules
+44348,Roche Mazet Merlot KGT vein 13%vol 187ml,Roche Mazet,187 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+44362,PILTTI Wild West hautis lastele 1-3a250G,PILTTI Wild,,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+44402,Grain de Soleil Languedoc Rose KGT vein 750ml,Grain,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+44433,Green Planet Astronauts kakao-kaeraamps mahe 10k+ 100g,Green Planet,100 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+44452,Barnhills Zinfandel California GT vein 14%vol 750ml,Barnhills Zinfandel,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+44475,Dexal energiageeli karpalo-greppi 30g,Dexal,30 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+44476,"Jaanihanso Dry Naturel siider 5,5%vol 330ml",Jaanihanso Dry,330 ml,other,Prisma,,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+44489,Meukow VS Cognac 40%vol 200ml,Meukow VS,200 ml,other,"Barbora, Coop, Maxima, Prisma, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+44498,Põnn öko maisikrõbuskid maasika ja õunaga 20g alates 7-elukuust,Põnn,20 g,other,"Coop, Prisma, Rimi, Selver",,produce_apples_pears,produce,produce,produce_apples_pears,high,produce,produce_berries,high,override_with_name_rules
+44500,Põnn öko maisikrõbuskid porgandi ja tomatiga 20g alates 7-elukuust,Põnn,20 g,other,"Coop, Prisma, Selver",,produce_root_veg,produce,produce,produce_root_veg,high,produce,produce_root_veg,high,
+44560,Kagor Pastoral Garling liköörvein 16%vol 750 ml,Kagor Pastoral,750 ml,other,"Prisma, Selver",,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_spirits,high,override_with_name_rules
+44592,"Ql Vinho Verde KPN vein 9,5%vol 750ml",Ql Vinho,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+44609,Ballantine´s Blended Scotch Whisky 40%vol 1l,Ballantine´s Blended,1 l,other,"Coop, Prisma, Rimi",,drinks_spirits,drinks,other,,high,drinks,drinks_spirits,high,
+44617,RB Metsamarja joogikontsentraat suhkruvaba 500ml,RB Metsamarja,500 ml,other,Prisma,,dry_other,other,drinks,drinks_syrups_powders,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+44626,Doppio Passo Primitivo KGT vein 13%vol 750ml,Doppio Passo,750 ml,other,"Barbora, Maxima, Prisma, Rimi",,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+44661,"Coop koola karastusjook suhkruvaba 1,5 l",Coop,1.5 l,other,Prisma,,drinks_soft_soda,drinks,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+44681,Ella's Kitchen mango-pirno-papaiapüree mahe 4k+ 120g,Ella's Kitchen,120 g,other,Prisma,,produce_apples_pears,produce,produce,produce_tropical,high,produce,produce_apples_pears,high,
+44714,"Smuuti aprikoosi-banaani-porgandi, AURA, 330 ml",Aura,330 ml,other,"Coop, Prisma, Rimi, Selver",,produce_tropical,produce,produce,produce_root_veg,high,produce,produce_smoothies_fresh_juices,high,override_with_name_rules
+44716,Hipp pirnipüree ploomi ja musta sõstraga öko 6k,Hipp,,other,"Coop, Prisma, Selver",,produce_apples_pears,produce,other,,high,produce,produce_apples_pears,high,
+44722,"Saaremaa Passion gin 37,5%vol 500ml",Saaremaa Passion,500 ml,other,"Coop, Prisma, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+44740,Imperial XII Brandy 36%vol 200ml,Imperial XII,200 ml,other,Prisma,,dry_other,other,drinks,drinks_spirits,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+44751,Öun ingver-tšilli immuunsust toetav jook mahe 250ml,Öun,250 ml,other,"Coop, Prisma",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+44762,"Hoggys Pear siider 4,5%vol 1L",Hoggys Pear,1 l,other,"Coop, Prisma, Rimi",,produce_apples_pears,produce,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,override_with_name_rules
+44765,Pärnaõied 15 g,Pärnaõied,15 g,other,"Coop, Prisma",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+44776,"Saaremaa Dry London Gin 37,5%vol 700 ml",Saaremaa Dry,700 ml,other,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+44805,Koskenkorva Strawberry liköör 20%vol 500ml,Koskenkorva Strawberry,500 ml,other,Prisma,,produce_berries,produce,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+44806,TEHO taastusjook 330ml pohla-toffee,TEHO,330 ml,other,Prisma,,produce_berries,produce,other,,high,produce,produce_berries,high,
+44841,Jägermeister liköör 35%vol 350ml,Jägermeister,350 ml,other,"Barbora, Maxima, Prisma",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+44893,Belhaven Black Scottish Stout õlu 440ml,Belhaven Black,440 ml,other,Prisma,,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+44900,"Rekorderlig Maasika-Laimi siider 4,5%vol 500ml",Rekorderlig Maasika-Laimi,500 ml,other,Prisma,,produce_tropical,produce,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,override_with_name_rules
+44913,Larsen VSOP Cognac karbis 40%vol 700ml,Larsen VSOP,700 ml,other,"Barbora, Maxima, Prisma, Rimi, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+44922,Coop tomatimahl 1 l,Coop,1 l,other,Prisma,,produce_root_veg,produce,drinks,drinks_juices,high,produce,produce_root_veg,high,
+44926,"Saku Kirss tume kirsimaitseline õllejook 4,5%vol 500ml",Saku Kirss,500 ml,other,"Coop, Prisma, Selver",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+44930,Pühaste Tartu Pilsner õlu 5%vol 330ml,Pühaste Tartu,330 ml,other,Prisma,,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+44980,"Suitsupeekon Ehe, RANNAROOTSI, 120 g","EHE Suitsupeekon,",120 g,other,"Barbora, Coop, Maxima, Prisma, Selver",,meat_pork,meat_fish,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+45010,"Hipp aedvilja-nuudliroog singiga öko, 220g, alates 8-elukuust",Hipp,220 g,other,"Coop, Prisma",,dry_pasta_rice,dry_preserves,other,,high,dry_preserves,dry_pasta_rice,high,
+45014,Kohvioad Crema 1 kg,Kohvioad Crema,1 kg,other,"Barbora, Coop, Maxima, Prisma, Selver",,dry_canned_veg,dry_preserves,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,override_with_name_rules
+45018,Tchibo Exclusive medium roast kohviuba 1kg,Tchibo Exclusive,1 kg,other,"Prisma, Rimi, Selver",,meat_hams,meat_fish,other,,high,meat_fish,meat_hams,high,
+45028,Courvoisier VS Cognac 40%vol 500ml,Courvoisier VS,500 ml,other,"Prisma, Rimi",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+45036,UNDERBERG 3X20 ML 60 ML BITTER,UNDERBERG,3x20 ml,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+45052,Carrefour Bio kakaojoogipulber 500g,Carrefour Bio,500 g,other,Prisma,,drinks_syrups_powders,drinks,drinks,drinks_syrups_powders,high,drinks,drinks_syrups_powders,high,
+45060,Magistr VSOP Brandy 500ml,Magistr VSOP,500 ml,other,"Coop, Prisma, Selver",,dry_other,other,drinks,drinks_spirits,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+45085,"Crowmoor Dry Apple siider 4,7%vol 330ml",Crowmoor Dry,330 ml,other,"Coop, Prisma",,produce_apples_pears,produce,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,override_with_name_rules
+45109,Öun sidrunmeliss funktsionaalne jook mahe 250ml,Öun,250 ml,other,"Coop, Prisma, Rimi",,produce_tropical,produce,other,,high,produce,produce_tropical,high,
+45143,Ouzo 12 Muu Piiritusjook 38%vol 700ml,Ouzo,700 ml,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+45144,"Sardell 77,7%, MAKS&MOORITS, 375 g","77,7%",375 g,other,"Barbora, Maxima, Prisma, Rimi, Selver",,meat_sausages,meat_fish,meat_fish,meat_sausages,high,drinks,drinks_spirits,high,override_with_name_rules
+45184,Segafredo Crema Perfetto 900g kohvioad,Segafredo Crema,900 g,other,"Coop, Prisma, Selver",,dry_canned_veg,dry_preserves,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,override_with_name_rules
+45189,Shroomwell Focus State karastusjook 250 ml,Shroomwell Focus,250 ml,other,"Coop, Prisma, Rimi",,drinks_soft_soda,drinks,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+45191,"HiPP Mitmeviljapuder ÖKO al. 6 kuust, 200 g",HiPP Mitmeviljapuder,200 g,other,"Coop, Prisma, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+45223,Põnn Öko Porgandimehu 240 ml (4+),Põnn Öko,240 ml,other,"Coop, Prisma",,produce_root_veg,produce,produce,produce_root_veg,high,produce,produce_root_veg,high,
+45257,Mernaya Premium Tradition viin 40%vol 500ml,Mernaya Premium,500 ml,other,"Coop, Prisma",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+45312,Arctic Sport greip spordijook 750ml,Arctic Sport,750 ml,other,"Coop, Prisma, Rimi",,produce_tropical,produce,drinks,drinks_sport,high,drinks,drinks_sport,high,override_with_name_rules
+45336,Ventisquero Reserva Pinot Noir GT vein 13%vol 750ml,Ventisquero Reserva,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+45347,"Brazil apelsinimahl, 1l",Brazil,1 l,other,Prisma,,produce_tropical,produce,drinks,drinks_juices,high,produce,produce_tropical,high,
+45350,Coca-Cola zero karastusjook 330ml,Coca-Cola,330 ml,other,Prisma,,drinks_soft_soda,drinks,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+45352,Henry Westons Vintage Pear perry 6%vol 500 ml,Henry Westons,500 ml,other,Prisma,,produce_apples_pears,produce,other,,high,produce,produce_apples_pears,high,
+45390,"Smile Kohvifiltrid, valgendamata, nr. 4, 80tk","Smile Kohvifiltrid,",80 pcs,other,"Coop, Prisma, Selver",,drinks_other,drinks,other,,heuristic,drinks,drinks_other,heuristic,
+45391,Kohvipadjad Merrild Mellemristet 36 tk keskmine röst,Kohvipadjad Merrild,36 pcs,other,"Coop, Prisma, Selver",,drinks_other,drinks,other,,heuristic,drinks,drinks_other,heuristic,
+45494,Öun rabarber-lavendel funktsionaalne jook 250ml,Öun,250 ml,other,"Coop, Prisma, Rimi",,sweets_chocolate_bars,sweets_snacks,other,,high,sweets_snacks,sweets_chocolate_bars,high,
+45495,"Henkell Trocken Dry-Sec kvaliteetvahuvein 11,5%vol 750ml",Henkell Trocken,750 ml,other,"Prisma, Selver",,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+45501,Matsimoka Naturaalne Puljong 750 G,Matsimoka Naturaalne,750 g,other,Prisma,,spices_broth_stock,world_spices,dry_preserves,dry_soups_noodles,high,drinks,drinks_spirits,high,override_with_name_rules
+45505,Nescafé Gold lahustuv kohv klaaspak.100g,Nescafé Gold,100 g,other,"Coop, Prisma",,drinks_tea_coffee,drinks,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+45509,"I Heart Shiraz vein 12,5%vol 187ml",I Heart,187 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+45585,"Oivariini vähelaktoosine rasvasegu, 600 g",Oivariini,600 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+45623,Kotimaista kaeranööbid 150 g,Kotimaista,150 g,other,Prisma,,dry_canned_veg,dry_preserves,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+45632,"TRI-BIO sool nõudepesumasinatele 1,4 kg",TRI-BIO,1.4 kg,other,"Coop, Prisma",,spices_basic_salt_pepper,world_spices,world_spices,spices_herbs_spice_mix,high,household,hh_dishwashing,high,override_with_name_rules
+45645,Dr.Nature tatragaletid šokolaadiglasuuriga 48 g,Dr.Nature,48 g,other,Prisma,,sweets_chocolate_bars,sweets_snacks,drinks,drinks_beer_cider,high,drinks,drinks_spirits,high,override_with_name_rules
+45677,"Saaremaa Vodka Mustsõstar 37,5%vol 500ml",Saaremaa Vodka,500 ml,other,"Prisma, Selver",,produce_berries,produce,drinks,drinks_spirits,high,drinks,drinks_spirits,high,override_with_name_rules
+45682,Eesti Pagar Rukkisepik 300 G,Eesti Pagar,300 g,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,bakery_bread_loaves,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+45685,Eesti Pagar Rehe Rukkileib 390 G,Eesti Pagar,390 g,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,bakery_bread_loaves,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+45690,Kotimaista kaneelikringel 400g,Kotimaista,400 g,other,Prisma,,bakery_cakes_pastries,bakery,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+45743,"Halvaa Royal kakaoga, mandlite ja rosinatega 250g",Halvaa Royal,250 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+45751,Ella's Kitchen Magusmaisi-porgandi maisipulgad 16g,Ella's Kitchen,16 g,other,"Coop, Prisma",,produce_root_veg,produce,produce,produce_root_veg,high,produce,produce_root_veg,high,
+45777,Marta Pagar Õuna-Kaneelitasku 120 G,Marta Pagar,120 g,other,Prisma,,produce_apples_pears,produce,produce,produce_apples_pears,high,drinks,drinks_spirits,high,override_with_name_rules
+45788,Pärnamäed Kihilised kõrvakesed 120 g,Pärnamäed Kihilised,120 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+45801,"Alma keefir 2,5%, 1 kg",Alma,1 kg,other,Prisma,,dairy_yogurt_kefir,dairy_eggs_fats,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+45819,Eesti Pagar Mitmevilja Pehmik 240 G,Eesti Pagar,240 g,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+45855,"Maori Bay Sauvignon Blanc Marlborough vein 12,5%vol 750ml",Maori Bay,750 ml,other,"Barbora, Maxima, Prisma, Rimi, Selver",,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+45862,Leibur Kirde Sai 300 G,Leibur Kirde,300 g,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,bakery_bread_loaves,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+45866,Europagar Moonisai 2 tk 140 g,Europagar Moonisai,140 g,other,Prisma,,bakery_buns_croissants,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+45907,TUC hapukoore-sibula-leivakrõpsud 150 g,TUC,150 g,other,Prisma,,produce_root_veg,produce,sweets_snacks,sweets_snacks_salty,high,drinks,drinks_spirits,high,override_with_name_rules
+45972,Kolorado WC-seep Roll'Aroma Blue Aquatic duopakk 2x51 g,Kolorado WC-seep,2x51 g,other,Prisma,,pcare_soap,personal_care,personal_care,pcare_soap,high,personal_care,pcare_soap,high,
+45978,Alpro šokolaadimaitseline proteiiniga sojajook 1 l,Alpro,1 l,other,Prisma,,dairy_plant_drinks,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+46050,Laurieri scrocchi kreekerid rosmariiniga 175g,Laurieri,175 g,other,"Coop, Prisma, Rimi",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+46055,Kartulipirukas,Kartulipirukas,,other,Prisma,,produce_root_veg,produce,produce,produce_root_veg,high,bakery,bakery_cakes_pastries,high,override_with_name_rules
+46086,"Poppies minisõõrikud, 250 g",Poppies,250 g,other,Prisma,,bakery_sweet_buns_donuts,bakery,bakery,bakery_sweet_buns_donuts,high,drinks,drinks_spirits,high,override_with_name_rules
+46088,Reval Kondiiter Sotsnik 2tk/Pk (Liivat.) 150 G,Reval Kondiiter,150 g,other,"Coop, Prisma",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+46097,Mikrokiudmopp Streamy 1tk,Mikrokiudmopp Streamy,1 pcs,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+46102,Fazer carneval printsess piparkoogid 175 g,Fazer,175 g,other,Prisma,,spices_basic_salt_pepper,world_spices,world_spices,spices_herbs_spice_mix,high,drinks,drinks_spirits,high,override_with_name_rules
+46107,Jõhvika-vaaria-mustika-kaerabatoon 6x30 g,Jõhvika-vaaria-mustika-kaerabatoon,6x30 g,other,Prisma,,produce_berries,produce,produce,produce_berries,high,drinks,drinks_spirits,high,override_with_name_rules
+46111,Coop proteiinipuding soolakaramelli 150g,Coop,150 g,other,Prisma,,dairy_desserts,dairy_eggs_fats,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,override_with_name_rules
+46114,Väike Väänik vanillimaitselised präänikud 250 g,Väike Väänik,250 g,other,"Coop, Prisma, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+46133,Eesti Kondiiter Seesamiküpsis 200 g,Eesti Kondiiter,200 g,other,Prisma,,sweets_biscuits_cookies,sweets_snacks,sweets_snacks,sweets_biscuits_cookies,high,drinks,drinks_spirits,high,override_with_name_rules
+46136,Marta Pagar Pontšik 300 G,Marta Pagar,300 g,other,"Prisma, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+46172,"Sol õlu 4,5%vol 330ml",Sol,330 ml,other,"Prisma, Rimi",,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+46185,YOOK Kaerajook Chocolate 1L,YOOK Kaerajook,1 l,other,"Barbora, Coop, Maxima, Prisma, Selver",,dairy_plant_drinks,dairy_eggs_fats,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,override_with_name_rules
+46348,"Kaerajook Barista apelsin-kardemon laktoosivaba, YOOK, 1 l",Yook,1 l,other,"Prisma, Selver",,produce_tropical,produce,produce,produce_tropical,high,dairy_eggs_fats,dairy_plant_drinks,high,override_with_name_rules
+46362,Fazer fasupala dumle vahvlipala 175g,Fazer,175 g,other,"Coop, Prisma, Rimi, Selver",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+46436,"Kooreviili laktoosivaba, 200 g",Kooreviili,200 g,other,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+46470,Coop Rullbiskviit Vaarikakreemitäidisega 400 G,Coop Rullbiskviit,400 g,other,Prisma,,produce_berries,produce,produce,produce_berries,high,drinks,drinks_spirits,high,override_with_name_rules
+46510,"Tere Suvepuding mangoga, 200 g",Tere Suvepuding,200 g,other,Prisma,,produce_tropical,produce,produce,produce_tropical,high,drinks,drinks_spirits,high,override_with_name_rules
+46547,Coop krutoonid küüslauguga 100 g,Coop,100 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+46587,Vanajan šokolaadiküpsis 350g,Vanajan,350 g,other,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+46593,Kuchenmeister šokolaadikeeks 400 g,Kuchenmeister,400 g,other,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high,drinks,drinks_spirits,high,override_with_name_rules
+46614,Eesti Pagar Täisterasepik 500 G,Eesti Pagar,500 g,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,bakery_bread_loaves,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+46636,"Maitsestamata sojatoode, 400 g",Maitsestamata,400 g,other,Prisma,,spices_asian,world_spices,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+46687,Eesti Pagar Tume Ciabatta 300 G,Eesti Pagar,300 g,other,"Barbora, Coop, Maxima, Prisma",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+46694,Bon chance bruschetta krõpsud pitsa maitse 70g,Bon,70 g,other,"Coop, Prisma",,sweets_snacks_salty,sweets_snacks,sweets_snacks,sweets_snacks_salty,high,sweets_snacks,sweets_snacks_salty,high,
+46705,"Rohumaaveise rasv, 330g",Rohumaaveise,330 g,other,"Prisma, Selver",,meat_beef_lamb_game,meat_fish,meat_fish,meat_pork,high,meat_fish,meat_beef_lamb_game,high,
+46709,Coop grissiinid seesami seemnetega 125g,Coop,125 g,other,Prisma,,sweets_nuts_driedfruit,sweets_snacks,other,,high,sweets_snacks,sweets_nuts_driedfruit,high,
+46765,Gustav Makroonid 6tk karbis 100 g,Gustav Makroonid,100 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+46802,"Deary glasuuritud tofu vanillibatoonike, 40 g",Deary,40 g,other,"Coop, Prisma, Rimi, Selver",,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high,drinks,drinks_spirits,high,override_with_name_rules
+46828,Biscotti küpsis dolche mix 450g,Biscotti,450 g,other,Prisma,,sweets_biscuits_cookies,sweets_snacks,sweets_snacks,sweets_biscuits_cookies,high,sweets_snacks,sweets_biscuits_cookies,high,
+46840,Schär Magdalenas Muffin Aprikoosiga 50 G,Schär Magdalenas,50 g,other,Prisma,,dry_other,other,drinks,drinks_beer_cider,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+46880,COOP TORDIPÕHI 200 G,COOP TORDIPÕHI,200 g,other,Prisma,,sauces_other,sauces_oils,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+46926,Balconi kakaorullbiskviit 300 g,Balconi,300 g,other,Prisma,,dry_other,other,sweets_snacks,sweets_biscuits_cookies,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+46936,"Kotimaista mustsõstramaitseline hapendatud kaerajook, 400 g",Kotimaista,400 g,other,Prisma,,dairy_plant_drinks,dairy_eggs_fats,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+46981,Gullon suhkruvabad šokolaadivahvlid 60 g,Gullon,60 g,other,"Coop, Prisma",,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high,drinks,drinks_spirits,high,override_with_name_rules
+47068,Europagar Moonisüda 200 G,Europagar Moonisüda,200 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+47069,"Miniekleerid vahukoorega, EESTI KONDIITER, 200 g",Eesti Kondiiter,200 g,other,"Prisma, Rimi, Selver",,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_cream_sourcream,high,drinks,drinks_spirits,high,override_with_name_rules
+47103,"Flora By Milda laktoosivaba kaste toiduvalmistamiseks 15%, 250ml",Flora By,250 ml,other,Prisma,,sauces_other,sauces_oils,other,,heuristic,sauces_oils,sauces_other,heuristic,
+47118,"Pure mangokaste, 260 g",Pure,260 g,other,"Coop, Prisma",,produce_tropical,produce,produce,produce_tropical,high,drinks,drinks_spirits,high,override_with_name_rules
+47121,Selga šokolaadimaitseline vahvel 180 g,Selga,180 g,other,"Coop, Prisma, Rimi, Selver",,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high,drinks,drinks_spirits,high,override_with_name_rules
+47140,Leibur Ruks Täistera Vormileib 300 G,Leibur Ruks,300 g,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,bakery_bread_loaves,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+47195,Fazer Street Food Lapi leib täisteraga 450 g,Fazer Street,450 g,other,Prisma,,bakery_bread_loaves,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+47197,Eesti Kondiiter Küpsis Kihiline Karamelliga 400 G,Eesti Kondiiter,400 g,other,Prisma,,sweets_biscuits_cookies,sweets_snacks,sweets_snacks,sweets_candies,high,drinks,drinks_spirits,high,override_with_name_rules
+47211,Kalev Mesikäpp šokolaadimaitselise kreemiga vahvlid 250 g,Kalev Mesikäpp,250 g,other,"Coop, Prisma, Rimi, Selver",,sweets_chocolate_bars,sweets_snacks,drinks,drinks_beer_cider,high,drinks,drinks_spirits,high,override_with_name_rules
+47220,"Xtra kakaopuding vahukoorega, 200 g",Xtra,200 g,other,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_cream_sourcream,high,drinks,drinks_spirits,high,override_with_name_rules
+47252,Muru Baby maisi-pitsa rõngad 7k 20g,Muru Baby,20 g,other,Prisma,,dry_canned_veg,dry_preserves,other,,high,dry_preserves,dry_canned_veg,high,
+47296,Põltsamaa virsiku-guajaavi-mündi smuuti 280 ml,Põltsamaa,280 ml,other,"Prisma, Rimi, Selver",,produce_smoothies_fresh_juices,produce,other,,high,produce,produce_smoothies_fresh_juices,high,
+47305,Rainbow männiseep 1l,Rainbow,1 l,other,Prisma,,pcare_soap,personal_care,personal_care,pcare_soap,high,personal_care,pcare_soap,high,
+47326,"Fazer Aito taimne mangomaitseline kaeratoode, 400 g",Fazer Aito,400 g,other,Prisma,,produce_tropical,produce,produce,produce_tropical,high,drinks,drinks_spirits,high,override_with_name_rules
+47348,Fazer Kodusai Xxl 700 G,Fazer Kodusai,700 g,other,"Barbora, Maxima, Prisma, Rimi, Selver",,bakery_buns_croissants,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+47351,Gourmet Club Mango-vaarika tort 750 g,Gourmet Club,750 g,other,Prisma,,produce_tropical,produce,produce,produce_tropical,high,drinks,drinks_spirits,high,override_with_name_rules
+47386,"Oddlygood Dreamy kaeradessert karamelli, gluteenivaba, 130g",Oddlygood Dreamy,130 g,other,Prisma,,dairy_desserts,dairy_eggs_fats,bakery,bakery_gluten_free,high,sweets_snacks,sweets_candies,high,override_with_name_rules
+47398,"Virsikutega skyr, 150 g",Virsikutega,150 g,other,"Coop, Prisma",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+47435,Trube Soolakaramellitäidisega Magus Keerusai 350 g,Trube Soolakaramellitäidisega,350 g,other,Prisma,,bakery_buns_croissants,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+47498,Gandola ladyfingers 400 g,Gandola,400 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+47506,Väike Väänik piparmündimaitselised präänikud 250 g,Väike Väänik,250 g,other,"Coop, Prisma, Selver",,spices_basic_salt_pepper,world_spices,world_spices,spices_herbs_spice_mix,high,drinks,drinks_spirits,high,override_with_name_rules
+47507,Nikolajevskaja päevalilleseemnehalvaa 150g,Nikolajevskaja,150 g,other,"Coop, Prisma",,sweets_nuts_driedfruit,sweets_snacks,other,,high,sweets_snacks,sweets_nuts_driedfruit,high,
+47520,Maretti bruschetta-krõpsud krabimaitselised 70g,Maretti,70 g,other,Prisma,,fish_processed,meat_fish,sweets_snacks,sweets_snacks_salty,high,sweets_snacks,sweets_snacks_salty,high,override_with_name_rules
+47582,Dr beckmann pesumasina puhastuspulber 250g,Dr,250 g,other,Prisma,,hh_cleaners,household,other,,high,household,hh_cleaners,high,
+47624,Fazer Seemneröst 450 G,Fazer Seemneröst,450 g,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,sweets_nuts_driedfruit,sweets_snacks,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+47699,Lõuna Pagarid Kaerasai Jõhvikaga 300 G,Lõuna Pagarid,300 g,other,Prisma,,produce_apples_pears,produce,produce,produce_apples_pears,high,drinks,drinks_spirits,high,override_with_name_rules
+47715,Laktoosivaba toidukoor sibulaga 15% 200ml,Laktoosivaba,200 ml,other,Prisma,,produce_root_veg,produce,dairy_eggs_fats,dairy_cream_sourcream,high,produce,produce_root_veg,high,
+47763,Trube Magussai 500 g,Trube Magussai,500 g,other,Prisma,,bakery_buns_croissants,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+47781,"Alpro kõrge valgusisaldusega banaani-küpsisemaitseline kääritatud sojatoode, 200 g",Alpro,200 g,other,Prisma,,produce_tropical,produce,produce,produce_tropical,high,drinks,drinks_spirits,high,override_with_name_rules
+47798,Le pain des fleurs tatra näkileib 150 g gluteenivaba,Le,150 g,other,Prisma,,bakery_bread_loaves,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+47813,Hanerasv 210 g,Hanerasv,210 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+47815,"Piltti marjabatoon 25 g, alates 1-eluaastast",Piltti,25 g,other,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high,drinks,drinks_spirits,high,override_with_name_rules
+47818,"Kotimaista vähese laktoosisisaldusega toidukoor 15% UHT, 200 ml",Kotimaista,200 ml,other,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+47824,Leibur Isa Peenleib Seemnetega 390g,Leibur Isa,390 g,other,"Prisma, Selver",,bakery_bread_loaves,bakery,bakery,bakery_bread_loaves,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+47836,Wc geelkapslid Duck Lime 36ml,Wc,36 ml,other,Prisma,,produce_tropical,produce,other,,high,drinks,drinks_coffee_beans_capsules,high,override_with_name_rules
+47887,Reval Kondiiter Valeri Küpsis 200 G,Reval Kondiiter,200 g,other,Prisma,,sweets_biscuits_cookies,sweets_snacks,drinks,drinks_beer_cider,high,drinks,drinks_spirits,high,override_with_name_rules
+47904,"Fazer Aito taimne maitsestamata kaeratoode, 400 g",Fazer Aito,400 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+47908,"Coop Sidruni Muffin 2 Tk, 120 G",Coop Sidruni,120 g,other,Prisma,,produce_tropical,produce,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+47915,Marta Pagar Snäkk Soolane 50 G,Marta Pagar,50 g,other,"Coop, Prisma, Rimi, Selver",,spices_basic_salt_pepper,world_spices,world_spices,spices_herbs_spice_mix,high,drinks,drinks_spirits,high,override_with_name_rules
+47953,"Oddlygood mandlijook ilma lisatud suhkruta, 1l UHT",Oddlygood,1 l,other,Prisma,,dairy_plant_drinks,dairy_eggs_fats,other,,high,dairy_eggs_fats,dairy_plant_drinks,high,
+47958,Alpro mangomaitseline hapendatud sojatoode 400g,Alpro,400 g,other,"Prisma, Rimi, Selver",,produce_tropical,produce,produce,produce_tropical,high,produce,produce_tropical,high,
+48007,Pagarini Vaarika-shokolaadi tort 700 g,Pagarini Vaarika-shokolaadi,700 g,other,Prisma,,produce_berries,produce,produce,produce_berries,high,drinks,drinks_spirits,high,override_with_name_rules
+48059,"Elovena tumeda šokolaadiga kaerabatoon, 30 g",Elovena,30 g,other,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high,drinks,drinks_spirits,high,override_with_name_rules
+48141,Rõngu Pagar Rõngik Päevalilleseemnetega 250 G,Rõngu Pagar,250 g,other,Prisma,,sweets_nuts_driedfruit,sweets_snacks,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+48154,"Alpro Greek Style maasika sojatoode, 400g",Alpro Greek,400 g,other,Prisma,,produce_berries,produce,produce,produce_berries,high,produce,produce_berries,high,
+48197,Coop Kaneelitäidisega sai 350 g,Coop Kaneelitäidisega,350 g,other,Prisma,,bakery_buns_croissants,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+48216,Leibur Röstsai Kuldne Klassikaline 500 G,Leibur Röstsai,500 g,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,bakery_bread_loaves,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+48231,"Ingmariini laktoosivaba leivamääre, 500 g",Ingmariini,500 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+48275,Xtra kakao- ja vaniljemaitseline puding 150g,Xtra,150 g,other,Prisma,,dairy_desserts,dairy_eggs_fats,other,,high,dairy_eggs_fats,dairy_desserts,high,
+48276,Coop grissinid küüslaugu 125g,Coop,125 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+48284,Kiilto üldpuhastuslapid punane ristik 36tk,Kiilto,36 pcs,other,Prisma,,hh_cleaners,household,household,hh_cleaners,high,household,hh_cleaners,high,
+48317,Üldpuhastusvahend Boost so&run 1l,Üldpuhastusvahend Boost,1 l,other,Prisma,,hh_cleaners,household,household,hh_cleaners,high,household,hh_cleaners,high,
+48333,Xtra üldpuhastusaine 1l,Xtra,1 l,other,Prisma,,bakery_buns_croissants,bakery,other,,high,household,hh_cleaners,high,override_with_name_rules
+48344,Pihlaka Vaarika hõrgutis 260 g,Pihlaka Vaarika,260 g,other,"Prisma, Selver",,produce_berries,produce,produce,produce_berries,high,drinks,drinks_spirits,high,override_with_name_rules
+48427,Pagaripoisid Kolme Šokolaadi Tort 400 G,Pagaripoisid Kolme,400 g,other,Prisma,,bakery_cakes_pastries,bakery,bakery,bakery_cakes_pastries,high,drinks,drinks_spirits,high,override_with_name_rules
+48443,Pihlaka Sefiirikorvike 4tk 200 g,Pihlaka Sefiirikorvike,200 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+48524,Leibur Kuldne Brioche Röstsai Kurkumiga 260 G,Leibur Kuldne,260 g,other,"Coop, Prisma, Selver",,produce_root_veg,produce,produce,produce_root_veg,high,drinks,drinks_spirits,high,override_with_name_rules
+48615,"Schär Sidrunikeeks, gluteenivaba 250 g","Schär Sidrunikeeks,",250 g,other,Prisma,,produce_tropical,produce,bakery,bakery_gluten_free,high,drinks,drinks_spirits,high,override_with_name_rules
+48620,"Alpro Kohvijook soja ja karamelliga, 250 ml",Alpro Kohvijook,250 ml,other,Prisma,,spices_asian,world_spices,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,override_with_name_rules
+48641,Pagarini Dubai tort 510 g,Pagarini Dubai,510 g,other,Prisma,,bakery_cakes_pastries,bakery,bakery,bakery_cakes_pastries,high,drinks,drinks_spirits,high,override_with_name_rules
+48660,Marta Pagar Maasika-Vaniljekorp 2x60 G,Marta Pagar,2x60 g,other,Prisma,,produce_berries,produce,produce,produce_berries,high,drinks,drinks_spirits,high,override_with_name_rules
+48696,Marmiton vaniliiniga Kooli vahvel 110 g,Marmiton,110 g,other,"Coop, Prisma, Selver",,sweets_waffles_cakes,sweets_snacks,sweets_snacks,sweets_waffles_cakes,high,drinks,drinks_spirits,high,override_with_name_rules
+48700,Üldpuhastusvahendi kontsentraat 500ml,Üldpuhastusvahendi,500 ml,other,Prisma,,hh_cleaners,household,household,hh_cleaners,high,household,hh_cleaners,high,
+48723,Tasangon hõrgud sidrunimuffinid 400 g,Tasangon,400 g,other,Prisma,,produce_tropical,produce,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+48729,Semper mitmeviljasnäkid mangoga 9k 18g,Semper,18 g,other,"Coop, Prisma",,produce_tropical,produce,produce,produce_tropical,high,produce,produce_tropical,high,
+48733,Rõngu Pagar Kamatort 300 g,Rõngu Pagar,300 g,other,Prisma,,bakery_cakes_pastries,bakery,bakery,bakery_cakes_pastries,high,drinks,drinks_spirits,high,override_with_name_rules
+48825,Rõngu Pagar Beseed 100 G,Rõngu Pagar,100 g,other,"Prisma, Selver",,sweets_nuts_driedfruit,sweets_snacks,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+48890,Coop mini vahvlid kakao 180g,Coop,180 g,other,Prisma,,dry_other,other,sweets_snacks,sweets_waffles_cakes,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+48914,Karja Pagar Rukki Vormileib 350 G,Karja Pagar,350 g,other,"Prisma, Rimi",,bakery_bread_loaves,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+48957,Eesti Pagar Tosta! Röstisai 500 G,Eesti Pagar,500 g,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,bakery_buns_croissants,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+48981,Karja Pagar Rukki-Seemneleib 380 G,Karja Pagar,380 g,other,"Prisma, Rimi",,bakery_bread_loaves,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+49047,Bon chance bruschetta krõpsud hapukoore ja sibulaga 70g,Bon,70 g,other,"Coop, Prisma",,produce_root_veg,produce,sweets_snacks,sweets_snacks_salty,high,sweets_snacks,sweets_snacks_salty,high,override_with_name_rules
+49072,"Smuuti mango, pirni ja kaerahelvestega, CORNY, 120 g",Corny,120 g,other,"Coop, Prisma, Selver",,produce_apples_pears,produce,produce,produce_tropical,high,drinks,drinks_spirits,high,override_with_name_rules
+49073,"Schär Marmorkeeks, gluteenivaba 250 g","Schär Marmorkeeks,",250 g,other,Prisma,,bakery_gluten_free,bakery,bakery,bakery_gluten_free,high,drinks,drinks_spirits,high,override_with_name_rules
+49112,Kotimaista suhkrukuivik 400g,Kotimaista,400 g,other,Prisma,,dry_canned_veg,dry_preserves,other,,high,dry_preserves,dry_canned_veg,high,
+49115,Eesti Pagar Maasika-Rabarberi Kreemistritsel Kardemoniga 350 G,Eesti Pagar,350 g,other,Prisma,,produce_berries,produce,produce,produce_berries,high,drinks,drinks_spirits,high,override_with_name_rules
+49171,Elovena kaerajook kohvile 250ml,Elovena,250 ml,other,Prisma,,dairy_plant_drinks,dairy_eggs_fats,other,,high,dairy_eggs_fats,dairy_plant_drinks,high,
+49271,Trube Kaneelitäidisega Magus Keerusai 350 g,Trube Kaneelitäidisega,350 g,other,Prisma,,bakery_buns_croissants,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+49273,Dr. beckmann pesulehed magic leaves color 20tk,Dr.,20 pcs,other,Prisma,,hh_other,household,other,,heuristic,household,hh_other,heuristic,
+49298,Marmiton jäätisetuutu 120g,Marmiton,120 g,other,"Barbora, Maxima, Prisma, Selver",,frozen_desserts_icecream,frozen_food,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+49346,"Schär Ciabatta Eelküpsetatud, Gluteenita 200 G",Schär Ciabatta,200 g,other,Prisma,,drinks_tea_coffee,drinks,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+49381,Elgorriaga šokolaadiküpsis 500 g,Elgorriaga,500 g,other,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high,drinks,drinks_spirits,high,override_with_name_rules
+49382,Coop piparkoogid 175g,Coop,175 g,other,Prisma,,spices_basic_salt_pepper,world_spices,world_spices,spices_herbs_spice_mix,high,world_spices,spices_basic_salt_pepper,high,
+49384,Plasmon gluteenivaba kaerabatoon punaste marjade 20g,Plasmon,20 g,other,Prisma,,produce_berries,produce,bakery,bakery_gluten_free,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+49396,Rõngu Pagar Köömneküpsis 300 G,Rõngu Pagar,300 g,other,"Prisma, Selver",,sweets_biscuits_cookies,sweets_snacks,sweets_snacks,sweets_biscuits_cookies,high,drinks,drinks_spirits,high,override_with_name_rules
+49414,Panna Cotta Kohvi 150g FITLAP,Panna Cotta,150 g,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,drinks_other,drinks,other,,heuristic,drinks,drinks_other,heuristic,
+49441,Coop Vaarikamoosiga täidetud sõõrik 95 g,Coop Vaarikamoosiga,95 g,other,Prisma,,produce_berries,produce,produce,produce_berries,high,drinks,drinks_spirits,high,override_with_name_rules
+49445,"Fazer Aito taimne mustikamaitseline kaeratoode, 150 g",Fazer Aito,150 g,other,Prisma,,produce_berries,produce,produce,produce_berries,high,drinks,drinks_spirits,high,override_with_name_rules
+49456,Croco pitsamaitselised soolakreekerid 100 g,Croco,100 g,other,Prisma,,spices_basic_salt_pepper,world_spices,world_spices,spices_herbs_spice_mix,high,drinks,drinks_spirits,high,override_with_name_rules
+49522,Reval Kondiiter Šokolaadiglasuuriga ekleer 2tk 150 g,Reval Kondiiter,150 g,other,"Prisma, Selver",,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high,drinks,drinks_spirits,high,override_with_name_rules
+49647,Rõngu Pagar Pirnirull 300 G,Rõngu Pagar,300 g,other,Prisma,,produce_apples_pears,produce,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+49951,Kuchenmeister kiivi keeks 400 g,Kuchenmeister,400 g,other,Prisma,,produce_tropical,produce,produce,produce_tropical,high,drinks,drinks_spirits,high,override_with_name_rules
+49978,Marta Pagar Rummisai Kirsiga 2 Tk 140 G,Marta Pagar,140 g,other,"Prisma, Selver",,bakery_buns_croissants,bakery,drinks,drinks_spirits,high,drinks,drinks_spirits,high,override_with_name_rules
+49998,Elonen õunakoogimaitselised muffinid 200 g,Elonen,200 g,other,Prisma,,produce_apples_pears,produce,produce,produce_apples_pears,high,drinks,drinks_spirits,high,override_with_name_rules
+50019,Coop vanillitäidisega küpsis 176 g,Coop,176 g,other,Prisma,,sweets_biscuits_cookies,sweets_snacks,sweets_snacks,sweets_biscuits_cookies,high,drinks,drinks_spirits,high,override_with_name_rules
+50059,Wc-harja vahetusots,Wc-harja,,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+50097,7 Days vanilje-mureli sarvesai 60 g,7,60 g,other,"Coop, Prisma, Selver",,bakery_buns_croissants,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+50117,Coop Nisukuklid 4 Tk 300 G,Coop Nisukuklid,300 g,other,Prisma,,dry_other,other,bakery,bakery_buns_croissants,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+50159,Marta Pagar Kaneelirull 3x50 G,Marta Pagar,3x50 g,other,Prisma,,spices_herbs_spice_mix,world_spices,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+50196,Coop Mini Nisukuklid 6 Tk 300 G,Coop Mini,300 g,other,Prisma,,dry_other,other,bakery,bakery_buns_croissants,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+50416,Gourmet Club Red velvet kirssidega 700 g,Gourmet Club,700 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+50477,"Kuldne klassikaline röstsai, LEIBUR, 250 g",Leibur Röstsai,250 g,other,"Barbora, Coop, Maxima, Prisma, Selver",,bakery_bread_loaves,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+50746,Vahtusterad keraamilise pliidi puhastusterale 5tk,Vahtusterad,5 pcs,other,Prisma,,hh_cleaners,household,drinks,drinks_beer_cider,high,household,hh_cleaners,high,
+50851,Hägges suhkruvabad vanillimuffinid 200 g,Hägges,200 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+50854,Leibur Fitlap Täisterasepik 360 G,Leibur Fitlap,360 g,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,bakery_bread_loaves,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+50887,USIN Rosolje 200 g,USIN Rosolje,200 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+50964,Elonen topeltšokolaadiga muffinid 200 g,Elonen,200 g,other,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high,drinks,drinks_spirits,high,override_with_name_rules
+51046,"Racio cornies maisigaletid karulauguga, 115 g",Racio,115 g,other,Prisma,,dry_canned_veg,dry_preserves,drinks,drinks_beer_cider,high,drinks,drinks_spirits,high,override_with_name_rules
+51098,USIN Maksastrooganov ahjukartuliga 400 g,USIN Maksastrooganov,400 g,other,Prisma,,produce_root_veg,produce,produce,produce_root_veg,high,drinks,drinks_spirits,high,override_with_name_rules
+51107,Coop tume šokolaad 100 g,Coop,100 g,other,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high,drinks,drinks_spirits,high,override_with_name_rules
+51197,KINGALÄIGE INSTANT 50 ML MUST,KINGALÄIGE INSTANT,50 ml,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+51204,Milky Way Croissant 48 g,Milky Way,48 g,other,Prisma,,dairy_milk,dairy_eggs_fats,bakery,bakery_buns_croissants,high,drinks,drinks_spirits,high,override_with_name_rules
+51214,Meira sinepiseemned 41 g,Meira,41 g,other,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high,drinks,drinks_spirits,high,override_with_name_rules
+51364,Rainbow tordipõhi 200 g,Rainbow,200 g,other,Prisma,,sauces_other,sauces_oils,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+51368,Schär gluteenivabad šokolaadikettad 165 g,Schär,165 g,other,Prisma,,bakery_gluten_free,bakery,bakery,bakery_gluten_free,high,drinks,drinks_spirits,high,override_with_name_rules
+51442,Klaasipuhastusvahend Clin Lemon 500ml,Klaasipuhastusvahend Clin,500 ml,other,"Coop, Prisma, Selver",,produce_tropical,produce,household,hh_cleaners,high,household,hh_cleaners,high,override_with_name_rules
+51592,Fazer Juuretise Röst 450 G,Fazer Juuretise,450 g,other,"Barbora, Maxima, Prisma, Rimi, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+51597,Axa kiirkaerahelbepuder õuna ja kaneeli 40 g,Axa,40 g,other,"Coop, Prisma, Selver",,produce_apples_pears,produce,produce,produce_apples_pears,high,drinks,drinks_spirits,high,override_with_name_rules
+51637,DECOMORRENO kuum šokolaadijook 250g,DECOMORRENO,250 g,other,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+51688,Rainbow sanitaarsed niisked salvrätikud 40tk,Rainbow,40 pcs,other,Prisma,,baby_wipes,baby,other,,high,baby,baby_wipes,high,
+51749,Aknaklaasi puhastaja mopp+kaabits,Aknaklaasi,,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+51755,"Nõudepesuvahu täitepakend Tri-Bio 0,9l",Nõudepesuvahu,0.9 l,other,"Coop, Prisma",,hh_dishwashing,household,other,,high,household,hh_dishwashing,high,
+51843,"Filos laktoosivaba halloumi PDO, 150 g",Filos,150 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+51845,Linkosuo rukkisuupisted 160 g,Linkosuo,160 g,other,"Coop, Prisma, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+51852,"Europagar Muretaignakorvike Mini 16 Tk, 90 G",Europagar Muretaignakorvike,90 g,other,"Prisma, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+51931,Eesti Pagar Hele Ciabatta 300 G,Eesti Pagar,300 g,other,"Coop, Prisma",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+51981,Elonen Kaneelisai 350 g,Elonen Kaneelisai,350 g,other,Prisma,,bakery_buns_croissants,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+52024,Coop Nisubaguette 300 G,Coop Nisubaguette,300 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+52062,Schär Panini White Sai 130 G,Schär Panini,130 g,other,Prisma,,bakery_buns_croissants,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+52179,"Myllyn paras filotainas, 500 g",Myllyn,500 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+52214,"Go-tan sriracha tšillikaste, 215 ml",Go-tan,215 ml,other,Prisma,,sauces_other,sauces_oils,other,,heuristic,sauces_oils,sauces_other,heuristic,
+52232,"Kotimaista šokolaadi-koorejäätis, 1 l",Kotimaista,1 l,other,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+52269,"Prosciutto crudo maitsestatud basiilikuga, SAN MICHELE, 90 g",Prosciutto,90 g,other,"Prisma, Selver",,produce_herbs_salads_sprouts,produce,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+52358,"Coop toffee sõõrik 4tk, 400g",Coop,400 g,other,Prisma,,bakery_sweet_buns_donuts,bakery,bakery,bakery_sweet_buns_donuts,high,bakery,bakery_sweet_buns_donuts,high,
+52363,Kids kids mix jäätised 398ml/360g,Kids,398 ml,other,Prisma,,frozen_desserts_icecream,frozen_food,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+52368,Otepää klassikaline šaslõkk E-vaba 900 g,Otepää,900 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+52389,"Myllyn paras soolane ümmargune pirukatainas, 380 g",Myllyn,380 g,other,Prisma,,spices_basic_salt_pepper,world_spices,world_spices,spices_herbs_spice_mix,high,drinks,drinks_spirits,high,override_with_name_rules
+52391,Cirio tomatipüree basiilikuga 680 g,Cirio,680 g,other,Prisma,,produce_herbs_salads_sprouts,produce,produce,produce_root_veg,high,drinks,drinks_spirits,high,override_with_name_rules
+52394,"Minipelmeenid, 350 g","Minipelmeenid,",350 g,other,"Coop, Prisma, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+52412,Bakerika soolane šokolaaditükkidega küpsisetainas 210 g,Bakerika,210 g,other,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high,drinks,drinks_spirits,high,override_with_name_rules
+52421,"Smokey bbq grill-ribi ~ 1,3 kg",Smokey,1.3 kg,other,Prisma,,meat_pork,meat_fish,other,,high,meat_fish,meat_pork,high,
+52472,Coop kartulilõigud 750g,Coop,750 g,other,Prisma,,produce_root_veg,produce,produce,produce_root_veg,high,produce,produce_root_veg,high,
+52492,"Pesugeel Persil Color 1,98l",Pesugeel Persil,1.98 l,other,"Coop, Prisma",,hh_laundry,household,household,hh_laundry,high,household,hh_laundry,high,
+52498,"Pingviini koorejäätis trio, 1 l",Pingviini,1 l,other,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,drinks,drinks_spirits,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+52580,"Pingviini vanilli-koorejäätis ja mandlinugat, 1 l",Pingviini,1 l,other,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,drinks,drinks_spirits,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+52595,"Änglamark mahe ahjujuurviljad, 500 g",Änglamark,500 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+52632,"Sealihasült, RANNAROOTSI, 330 g",Sült Rannarootsi,330 g,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_pork,meat_fish,meat_fish,meat_pork,high,drinks,drinks_spirits,high,override_with_name_rules
+52654,Pealinna pelmeenid praesibulaga 350g,Pealinna,350 g,other,Prisma,,produce_root_veg,produce,other,,high,produce,produce_root_veg,high,
+52726,"Coop hakitud sibul, 450g",Coop,450 g,other,Prisma,,produce_root_veg,produce,other,,high,produce,produce_root_veg,high,
+52780,Santa Maria vokikaste pad thai 150 g,Santa Maria,150 g,other,"Coop, Prisma, Rimi, Selver",,sauces_other,sauces_oils,other,,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+52887,"Kotimaista vanillijäätis, 1 l",Kotimaista,1 l,other,Prisma,,dry_canned_veg,dry_preserves,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+52904,Coop Micro Popcorn soolaga 3-pakk,Coop Micro,,other,Prisma,,dry_canned_veg,dry_preserves,world_spices,spices_herbs_spice_mix,high,sweets_snacks,sweets_snacks_salty,high,override_with_name_rules
+52923,Viineripirukas 360 g,Viineripirukas,360 g,other,"Coop, Prisma, Rimi, Selver",,meat_sausages,meat_fish,drinks,drinks_spirits,high,drinks,drinks_spirits,high,override_with_name_rules
+52965,"Änglamark brokoliõisikud, mahe 400 g",Änglamark,400 g,other,Prisma,,produce_root_veg,produce,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+52990,"Jääkuubikud, 1 kg","Jääkuubikud,",1 kg,other,"Coop, Prisma",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+52992,"Vana Tallinn kohvijäätis, 380 g",Vana Tallinn,380 g,other,"Prisma, Rimi, Selver",,frozen_desserts_icecream,frozen_food,frozen_food,frozen_desserts_icecream,high,drinks,drinks_spirits,high,override_with_name_rules
+52994,Coop Taste of Asia wokiroog Malay 400g,Coop Taste,400 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+53008,"Kodune pasteet, RANNAROOTSI, 180 g",Kodune,180 g,other,"Barbora, Coop, Maxima, Prisma, Selver",,drinks_tea_coffee,drinks,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+53137,"Provena kaera-porgandikuklid, 400 g",Provena,400 g,other,Prisma,,produce_root_veg,produce,produce,produce_root_veg,high,drinks,drinks_spirits,high,override_with_name_rules
+53169,"Eesti Pagar XL Kaneelirull kardemoniga, 1,2kg",Eesti Pagar,1.2 kg,other,"Coop, Prisma, Selver",,spices_herbs_spice_mix,world_spices,other,,high,world_spices,spices_herbs_spice_mix,high,
+53182,"Piparmündi koorejäätis šokolaaditükkidega, 500 ml",Piparmündi,500 ml,other,"Coop, Prisma, Selver",,dairy_cream_sourcream,dairy_eggs_fats,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+53231,Dujardin Brüsseli kapsas 450g,Dujardin Brüsseli,450 g,other,"Prisma, Selver",,produce_root_veg,produce,other,,high,produce,produce_root_veg,high,
+53301,Hortex põldoad 400 g,Hortex,400 g,other,"Prisma, Selver",,dry_canned_veg,dry_preserves,dry_preserves,dry_groats_beans,high,drinks,drinks_spirits,high,override_with_name_rules
+53309,Pesugeel Sonett lavendel 2l,Pesugeel Sonett,2 l,other,Prisma,,hh_laundry,household,household,hh_laundry,high,household,hh_laundry,high,
+53433,"Delice makroonid 12tk, 144g",Delice,144 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+53481,"Maksapasteet E-vaba, OSKAR, 200 g",E-vaba,200 g,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,drinks_tea_coffee,drinks,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+53491,Coop vanillijäätis 1l/ 480g,Coop,1 l,other,Prisma,,frozen_desserts_icecream,frozen_food,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+53518,"Šokolaadi koorejäätis, 500 ml",Šokolaadi,500 ml,other,"Coop, Prisma, Selver",,dairy_cream_sourcream,dairy_eggs_fats,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+53558,"Vanillijäätis šokolaadilaastudega, 1 l",Vanillijäätis,1 l,other,"Coop, Prisma, Selver",,frozen_desserts_icecream,frozen_food,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+53572,Coop soolaga maisikrõpsud 150g,Coop,150 g,other,Prisma,,dry_canned_veg,dry_preserves,sweets_snacks,sweets_snacks_salty,high,sweets_snacks,sweets_snacks_salty,high,override_with_name_rules
+53623,"Coop Berliini sõõrik 4tk, 440g",Coop Berliini,440 g,other,Prisma,,bakery_sweet_buns_donuts,bakery,bakery,bakery_sweet_buns_donuts,high,bakery,bakery_sweet_buns_donuts,high,
+53637,MC porgandikuubikud 450 g,MC,450 g,other,Prisma,,produce_root_veg,produce,produce,produce_root_veg,high,drinks,drinks_spirits,high,override_with_name_rules
+53649,Tartu Mill kaerahelbepuder vaarika 35g,Tartu Mill,35 g,other,"Coop, Prisma, Selver",,produce_berries,produce,produce,produce_berries,high,produce,produce_berries,high,
+53680,"Pielispakari kaerapirukas 6 tk, 390 g",Pielispakari,390 g,other,Prisma,,bakery_cakes_pastries,bakery,bakery,bakery_cakes_pastries,high,drinks,drinks_spirits,high,override_with_name_rules
+53810,ESTRELLA Hapukoore-sibulamaitselised kartulikrõpsud 180 g,ESTRELLA Hapukoore-sibulamaitselised,180 g,other,"Coop, Prisma, Rimi, Selver",,produce_root_veg,produce,produce,produce_root_veg,high,drinks,drinks_spirits,high,override_with_name_rules
+53925,"Šašlõkk seasisefileest, ARMEENIA GRILL, kg",Seasisefilee,,other,"Prisma, Selver",,meat_pork,meat_fish,other,,high,meat_fish,meat_pork,high,
+53932,Kotimaista sibulakuubikud 200g,Kotimaista,200 g,other,Prisma,,produce_root_veg,produce,other,,high,produce,produce_root_veg,high,
+53938,MC rohelised herned 450 g,MC,450 g,other,Prisma,,dry_canned_veg,dry_preserves,dry_preserves,dry_groats_beans,high,drinks,drinks_spirits,high,override_with_name_rules
+53952,Rakvere Biifsteek Vasardatud 400 G,Rakvere Biifsteek,400 g,other,Prisma,,drinks_tea_coffee,drinks,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+54027,Salvest rohelised herned 690/450 g,Salvest,450 g,other,"Coop, Prisma, Rimi, Selver",,dry_canned_veg,dry_preserves,dry_preserves,dry_groats_beans,high,drinks,drinks_spirits,high,override_with_name_rules
+54041,Aviko Churrod 300 g,Aviko Churrod,300 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+54069,Lemmikvorst 300 g,Lemmikvorst,300 g,other,"Coop, Prisma, Rimi",,meat_sausages,meat_fish,meat_fish,meat_sausages,high,drinks,drinks_spirits,high,override_with_name_rules
+54087,PEZ FIZZY KIHISEVAD KOMMID GLUTEENIVABA,PEZ FIZZY,,other,"Coop, Prisma, Selver",,bakery_gluten_free,bakery,bakery,bakery_gluten_free,high,sweets_snacks,sweets_candies,high,override_with_name_rules
+54110,"Snäkk pro KabanossiSnäkk, RAKVERE LK, 120 g",Kabanossi-snäkk,120 g,other,"Prisma, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+54184,Porokylän kaerasüda gluteenivaba 4tk 200g,Porokylän,200 g,other,Prisma,,bakery_gluten_free,bakery,bakery,bakery_gluten_free,high,bakery,bakery_gluten_free,high,
+54214,Coop ubade segu 450g,Coop,450 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+54240,"Maitsesalaami, KARNI, 120 g",Maitsesalaami,120 g,other,"Coop, Prisma, Rimi, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+54299,"Eesti Pagar Viineripirukas XL 1,2 kg",Eesti Pagar,1.2 kg,other,"Prisma, Selver",,meat_sausages,meat_fish,drinks,drinks_spirits,high,bakery,bakery_cakes_pastries,high,override_with_name_rules
+54330,"Vanillijäätis, 1 l","Vanillijäätis,",1 l,other,Prisma,,frozen_desserts_icecream,frozen_food,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+54334,Vici Pitsapõhjad 320 g,Vici Pitsapõhjad,320 g,other,"Coop, Prisma, Rimi, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+54353,"Vanilli-koorejäätis šokolaaditükkidega, 500 ml",Vanilli-koorejäätis,500 ml,other,"Coop, Prisma, Selver",,dairy_cream_sourcream,dairy_eggs_fats,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+54419,Nutella nutella croissant 4tk 340g,Nutella,340 g,other,"Coop, Prisma",,bakery_buns_croissants,bakery,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+54467,"Eriti Rammus koorejäätis šokolaadilaastudega, 200 ml",Eriti Rammus,200 ml,other,"Coop, Prisma, Selver",,dairy_cream_sourcream,dairy_eggs_fats,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+54517,Dr.Oetker ristorante al salame vegano pitsa 295g,Dr.Oetker,295 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+54525,Pearl river bridge sojakaste light 150 ml,Pearl,150 ml,other,"Coop, Prisma, Selver",,produce_apples_pears,produce,world_spices,spices_other,high,produce,produce_apples_pears,high,
+54549,Taffel American dipisegu 20 g,Taffel American,20 g,other,Prisma,,sauces_other,sauces_oils,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+54601,"Mustika grill-ribi, RAKVERE LK, kg",Mustika,,other,"Barbora, Maxima, Prisma, Rimi, Selver",,produce_berries,produce,produce,produce_berries,high,produce,produce_berries,high,
+54627,"Apetit juurviljaribad, 180 g",Apetit,180 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+54650,Karni Picanhasteik 200G,Karni Picanhasteik,200 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+54678,"Pasteet Karni, KARNI, 170 g",Pasteet,170 g,other,"Coop, Prisma, Rimi, Selver",,drinks_tea_coffee,drinks,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+54679,"Ühepajatoit, 400 g","Ühepajatoit,",400 g,other,"Coop, Prisma, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+54691,UVIC Praetud VEGANIC Tseburekid 2tk/170 g,UVIC Praetud,170 g,other,"Prisma, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+54720,"Trühvli salaami, MATSIMOKA, 150 g",Trühvli,150 g,other,"Coop, Prisma, Rimi, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+54724,Twister Marshmallow 80ml/73g,Twister Marshmallow,80 ml,other,"Coop, Prisma, Rimi",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+54756,"Kotimaista juurviljasegu suppidele, 200 g",Kotimaista,200 g,other,Prisma,,dry_canned_veg,dry_preserves,dry_preserves,dry_soups_noodles,high,drinks,drinks_spirits,high,override_with_name_rules
+54771,Otepää hot-dogi vorstid 340 g,Otepää,340 g,other,Prisma,,meat_sausages,meat_fish,meat_fish,meat_sausages,high,drinks,drinks_spirits,high,override_with_name_rules
+54815,"Kreemjas kodupasteet, MAKS&MOORITS, 210 g",Kreemjas,210 g,other,"Coop, Prisma, Rimi, Selver",,drinks_tea_coffee,drinks,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+54884,Schär gluteenivaba lehttainas 250 g,Schär,250 g,other,Prisma,,bakery_gluten_free,bakery,bakery,bakery_gluten_free,high,drinks,drinks_spirits,high,override_with_name_rules
+54903,"Kotimaista pohlad, 200 g",Kotimaista,200 g,other,Prisma,,produce_berries,produce,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+54917,"Kotimaista gluteenivaba kaerajook, 1000 ml",Kotimaista,1000 ml,other,Prisma,,dairy_plant_drinks,dairy_eggs_fats,bakery,bakery_gluten_free,high,bakery,bakery_gluten_free,high,override_with_name_rules
+54923,"Santa Maria Chunky Salsa Mild, 230 g",Santa Maria,230 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+54935,"Grandiosa inspired by taffel broadway kiviahjupitsa, 330 g",Grandiosa,330 g,other,Prisma,,dry_canned_veg,dry_preserves,dry_preserves,dry_groats_beans,high,drinks,drinks_spirits,high,override_with_name_rules
+54964,Coop BBQ vigurkartulid 600g,Coop BBQ,600 g,other,Prisma,,produce_root_veg,produce,produce,produce_root_veg,high,produce,produce_root_veg,high,
+55001,HK õhuke Milano salaami 150 g,HK,150 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+55032,"Grill-ribi, RAKVERE LK, kg",Rakvere,,other,"Prisma, Selver",,meat_pork,meat_fish,other,,high,meat_fish,meat_pork,high,
+55084,"Felix suitsune bbq-mee kaste, 320g",Felix,320 g,other,"Coop, Prisma, Rimi, Selver",,fish_salted_smoked,meat_fish,other,,high,meat_fish,fish_salted_smoked,high,
+55102,"Fria kiudaineterikas leib, 500 g",Fria,500 g,other,Prisma,,bakery_bread_loaves,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+55139,DAECHUN Merevetika snäkk wasabi-maitseline 4g,DAECHUN Merevetika,4 g,other,Prisma,,spices_asian,world_spices,other,,high,world_spices,spices_asian,high,
+55141,"Eesti Pagar Ciabatta hele, 300g",Eesti Pagar,300 g,other,"Barbora, Maxima, Prisma, Rimi, Selver",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+55147,Coop Granaatõuna seemned 250g,Coop Granaatõuna,250 g,other,Prisma,,produce_apples_pears,produce,produce,produce_apples_pears,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+55161,Tutti Frutti Twists kommid 100g,Tutti Frutti,100 g,other,"Prisma, Rimi",,sweets_candies,sweets_snacks,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+55189,"Mr. Iceman purustatud jää, 2,0 kg",Mr. Iceman,2.0 kg,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+55203,Myllyn paras suur lehttaigen 600g,Myllyn,600 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+55223,Pingviini vanillijäätis šokolaaditükkidega laktoosivaba 1l,Pingviini,1 l,other,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+55231,"Poolsuitsuvorst Muhe, viilutatud, KARNI, 120 g",Poolsuitsuvorst Muhe,120 g,other,"Coop, Prisma, Selver",,meat_sausages,meat_fish,meat_fish,meat_sausages,high,drinks,drinks_spirits,high,override_with_name_rules
+55342,Veisemaksapasteet 180 g,Veisemaksapasteet,180 g,other,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_pork,high,drinks,drinks_spirits,high,override_with_name_rules
+55347,"Pez mänguasja täide 6-pakk, gluteenivabad 51 g",Pez,51 g,other,"Prisma, Rimi, Selver",,bakery_gluten_free,bakery,bakery,bakery_gluten_free,high,drinks,drinks_spirits,high,override_with_name_rules
+55379,"Eriti Rammus koorejäätis, 1 l",Eriti Rammus,1 l,other,"Prisma, Selver",,dairy_cream_sourcream,dairy_eggs_fats,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+55393,Coop guacamole dipikaste 300 g,Coop,300 g,other,Prisma,,sauces_other,sauces_oils,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+55400,"Kotimaista pirukatainas, 400 g",Kotimaista,400 g,other,Prisma,,dry_canned_veg,dry_preserves,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+55553,KALEV KARAKUM PRALINEEKOMPVEKID 175G,KALEV KARAKUM,175 g,other,"Coop, Prisma, Rimi, Selver",,dry_other,other,drinks,drinks_beer_cider,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+55714,Coop tükeldatud ananass 250g,Coop,250 g,other,Prisma,,produce_tropical,produce,produce,produce_tropical,high,produce,produce_tropical,high,
+55771,Nostalgia maksapasteet E-vaba 170 g,Nostalgia,170 g,other,Prisma,,drinks_tea_coffee,drinks,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+55781,Veisemaksapasteet 200 g,Veisemaksapasteet,200 g,other,"Coop, Prisma",,meat_beef_lamb_game,meat_fish,meat_fish,meat_pork,high,drinks,drinks_spirits,high,override_with_name_rules
+55868,Majonees Peakoka 380g,Majonees Peakoka,380 g,other,"Prisma, Selver",,sauces_ketchup_mayo,sauces_oils,sauces_oils,sauces_ketchup_mayo,high,sauces_oils,sauces_ketchup_mayo,high,
+55893,Halls Extra Strong kurgupastillid 33 g,Halls Extra,33 g,other,"Prisma, Rimi",,produce_herbs_salads_sprouts,produce,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+55897,Fazer gluteenivabad moosipallid 240g,Fazer,240 g,other,Prisma,,bakery_gluten_free,bakery,bakery,bakery_gluten_free,high,bakery,bakery_gluten_free,high,
+55970,Poco Loco Rolls maisisnäkk vürtsikas 125 g,Poco Loco,125 g,other,Prisma,,dry_canned_veg,dry_preserves,world_spices,spices_herbs_spice_mix,high,drinks,drinks_spirits,high,override_with_name_rules
+56020,Coop vanillijäätis nougat 6-pakk 480ml/390g,Coop,480 ml,other,Prisma,,frozen_desserts_icecream,frozen_food,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+56062,"Coop kuklid, 320 g",Coop,320 g,other,Prisma,,dry_other,other,bakery,bakery_buns_croissants,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+56077,"E-vaba suitsupeekon, OSKAR, 120 g",E-vaba,120 g,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,meat_pork,meat_fish,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+56105,"Viineripirukas sinepi-kurgitäidisega, 390 g",Viineripirukas,390 g,other,"Coop, Prisma, Rimi, Selver",,meat_sausages,meat_fish,drinks,drinks_spirits,high,drinks,drinks_spirits,high,override_with_name_rules
+56189,"Mintaifilee, nahata, 560 g","Mintaifilee,",560 g,other,"Coop, Prisma",,sweets_gums_mints,sweets_snacks,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+56220,Coop Küpsisejäätis 6-pakk 360 g/660 ml,Coop Küpsisejäätis,360 g,other,Prisma,,frozen_desserts_icecream,frozen_food,frozen_food,frozen_desserts_icecream,high,drinks,drinks_spirits,high,override_with_name_rules
+56226,VANILLA NINJA Koorejäätis glasuuris 7x110ml/80g,VANILLA NINJA,7x110 ml,other,"Coop, Prisma, Selver",,dairy_cream_sourcream,dairy_eggs_fats,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+56231,Maahärra Maasikad ja mustikad 300g,Maahärra Maasikad,300 g,other,Prisma,,produce_berries,produce,produce,produce_berries,high,produce,produce_berries,high,
+56440,Lillkapsas,Lillkapsas,,other,Prisma,,produce_root_veg,produce,other,,high,produce,produce_root_veg,high,
+56783,Muumi mustika-vaarika lagritsabatoon 20g,Muumi,20 g,other,Prisma,,produce_berries,produce,produce,produce_berries,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+57197,Kobartomat I klass,Kobartomat I,,other,Prisma,,produce_root_veg,produce,produce,produce_root_veg,high,produce,produce_root_veg,high,
+57353,"Vähendatud suhkrusisaldusega jäätis, 500 ml",Vähendatud,500 ml,other,"Coop, Prisma, Selver",,frozen_desserts_icecream,frozen_food,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+57379,"Ben ja Jerry's šokolaadi-vanillijäätis küpsise ja šokolaaditükkidega , 465 ml/406 g",Ben,465 ml,other,"Prisma, Selver",,frozen_desserts_icecream,frozen_food,frozen_food,frozen_desserts_icecream,high,drinks,drinks_spirits,high,override_with_name_rules
+57797,Pomito kaste pi&ta 500g,Pomito,500 g,other,"Coop, Prisma",,sauces_other,sauces_oils,other,,heuristic,sauces_oils,sauces_other,heuristic,
+58258,Fria gluteenivaba sai 500g,Fria,500 g,other,Prisma,,bakery_buns_croissants,bakery,bakery,bakery_bread_loaves,high,bakery,bakery_gluten_free,high,override_with_name_rules
+58388,Punane tsilli (medium),Punane,,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+58775,Mahe must küüslauk 75g,Mahe,75 g,other,"Prisma, Rimi",,produce_root_veg,produce,other,,high,produce,produce_root_veg,high,
+59038,Pändy LÄÄTSEKRÕPSUD HAPUKOORE JA SIBULA MAITSEGA 50g,Pändy LÄÄTSEKRÕPSUD,50 g,other,Prisma,,produce_root_veg,produce,sweets_snacks,sweets_snacks_salty,high,sweets_snacks,sweets_snacks_salty,high,override_with_name_rules
+59249,Fria hot dog kukkel gluteenivaba 210g,Fria,210 g,other,Prisma,,bakery_buns_croissants,bakery,bakery,bakery_buns_croissants,high,bakery,bakery_gluten_free,high,override_with_name_rules
+59375,Porokylän pizzataigen gluteenivaba 2tk 400g,Porokylän,400 g,other,Prisma,,bakery_gluten_free,bakery,bakery,bakery_gluten_free,high,bakery,bakery_gluten_free,high,
+59585,"Kotimaista muretainas, 400 g",Kotimaista,400 g,other,Prisma,,dry_canned_veg,dry_preserves,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+59654,"Hiina pelmeenid, 1 kg",Hiina,1 kg,other,"Prisma, Selver",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+59880,"Peekoni-munapirukas, 390 g","Peekoni-munapirukas,",390 g,other,"Coop, Prisma, Selver",,meat_pork,meat_fish,bakery,bakery_cakes_pastries,high,drinks,drinks_spirits,high,override_with_name_rules
+60152,Fattorie Giacobazzi palsamiäädikas 250ml,Fattorie Giacobazzi,250 ml,other,Prisma,,oils_vinegar,sauces_oils,personal_care,pcare_shampoo_cond,high,personal_care,pcare_shampoo_cond,high,override_with_name_rules
+60179,"Ben ja Jerry's vanillijäätis küpsise tükkidega, 465 ml/406 g",Ben,465 ml,other,"Prisma, Rimi, Selver",,frozen_desserts_icecream,frozen_food,frozen_food,frozen_desserts_icecream,high,drinks,drinks_spirits,high,override_with_name_rules
+60212,Coop supijuurviljad 450 g,Coop,450 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+60240,"Santa Maria Original Large tortilja, 12 tk 742 g",Santa Maria,742 g,other,Prisma,,bakery_flatbreads_wraps,bakery,drinks,drinks_spirits,high,drinks,drinks_spirits,high,override_with_name_rules
+60249,Tabasco sriracha tšilli-küüslaugu kaste 256ml,Tabasco,256 ml,other,Prisma,,sauces_other,sauces_oils,other,,heuristic,sauces_oils,sauces_other,heuristic,
+60360,"Kotimaista spinatisupp, 400 g",Kotimaista,400 g,other,Prisma,,produce_herbs_salads_sprouts,produce,produce,produce_herbs_salads_sprouts,high,drinks,drinks_spirits,high,override_with_name_rules
+60580,GREENFIELD Flying Dragon roheline tee 2g*25,GREENFIELD Flying,2 g,other,"Coop, Prisma",,drinks_tea_coffee,drinks,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+60590,Salvest mehhiko pada 530 g,Salvest,530 g,other,"Coop, Prisma, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+60669,"Snäkk pro Mini õllesigar , RAKVERE LK, 300 g",Mini,300 g,other,"Coop, Prisma, Rimi, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+60715,Hipp mahedad teraviljaampsud Mini Dinos 1–3a 30g,Hipp,30 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+60725,"Fazer Aito taimne vanillimaitseline kaeratoode, 150 g",Fazer Aito,150 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+60916,Kodune pasteet 200 g,Kodune,200 g,other,Prisma,,drinks_tea_coffee,drinks,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+60993,"Margariin 60%, 400 g",Margariin,400 g,other,Prisma,,dairy_butter_margarine,dairy_eggs_fats,dairy_eggs_fats,dairy_butter_margarine,high,drinks,drinks_spirits,high,override_with_name_rules
+61002,Milupa HEA UNE Kaerapuder õunte ja pirnidega 6+ 250 g,Milupa HEA,250 g,other,"Coop, Prisma, Selver",,produce_apples_pears,produce,produce,produce_apples_pears,high,drinks,drinks_spirits,high,override_with_name_rules
+61357,Minutipihv seakaelakarbonaadist 400g,Minutipihv,400 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+61416,Nordic Stream põrandamopi komplekt Streamy,Nordic Stream,,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+61490,Klassikaline šašlõkk 600 g,Klassikaline,600 g,other,"Coop, Prisma",,meat_pork,meat_fish,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+61617,"Xtra vanillipuding vahukoorega, 200 g",Xtra,200 g,other,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_cream_sourcream,high,drinks,drinks_spirits,high,override_with_name_rules
+61660,"Laua Viin 40%vol 500ml, PET",Laua Viin,500 ml,other,"Coop, Prisma, Rimi, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+61952,Nõudepesuvahend Fairy sensitive teat&t 450ml,Nõudepesuvahend Fairy,450 ml,other,"Coop, Prisma",,hh_dishwashing,household,household,hh_dishwashing,high,household,hh_laundry,high,override_with_name_rules
+62049,Glade Touch Fresh Peony Cherry täide 10 ml,Glade Touch,10 ml,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+62120,"Fazer Aito taimne mustikamaitseline kaeratoode, 400 g",Fazer Aito,400 g,other,Prisma,,produce_berries,produce,produce,produce_berries,high,drinks,drinks_spirits,high,override_with_name_rules
+62300,HiPP spagetid tomatite ja mozzarellaga öko 8.k 220g,HiPP,220 g,other,Prisma,,produce_root_veg,produce,produce,produce_root_veg,high,produce,produce_root_veg,high,
+62404,"Õhuline Viru sink, RAKVERE LK, 150 g",Õhuline Viru,150 g,other,"Barbora, Coop, Maxima, Prisma, Selver",,meat_hams,meat_fish,meat_fish,meat_hams,high,drinks,drinks_spirits,high,override_with_name_rules
+62443,"Raguu 1,3 kg",Raguu,1.3 kg,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+62483,"Grillpeekon, MAKS&MOORITS, 500 g",Grillpeekon,500 g,other,"Prisma, Rimi, Selver",,meat_pork,meat_fish,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+62515,AIR WICK PURE aerosool Spring Delight 250 ML,AIR WICK,250 ml,other,Prisma,,spices_basic_salt_pepper,world_spices,world_spices,spices_herbs_spice_mix,high,world_spices,spices_basic_salt_pepper,high,
+62561,"Puding vaarika-mascarpone maitseline, ALMA, 230 g",Alma,230 g,other,"Prisma, Rimi, Selver",,produce_berries,produce,produce,produce_berries,high,drinks,drinks_spirits,high,override_with_name_rules
+62608,Nõudepesumasina tabletid 50tk,Nõudepesumasina,50 pcs,other,Prisma,,hh_dishwashing,household,other,,high,household,hh_dishwashing,high,
+62650,"Milupa HEA UNE 7-viljapuder õunte ja prebiootikumidega, 8K+, 250g",Milupa HEA,250 g,other,"Coop, Prisma",,produce_apples_pears,produce,produce,produce_apples_pears,high,produce,produce_apples_pears,high,
+62686,"Metsmaasikatega Skyr, 150g","Metsmaasikatega Skyr,",150 g,other,"Coop, Prisma, Rimi, Selver",,produce_berries,produce,produce,produce_berries,high,produce,produce_berries,high,
+62746,"O’boy Kakaojoogipulber, 28 g","O’boy Kakaojoogipulber,",28 g,other,Prisma,,drinks_syrups_powders,drinks,drinks,drinks_syrups_powders,high,drinks,drinks_spirits,high,override_with_name_rules
+62752,"Ingmariini vähese laktoosisisaldusega leivamääre, 500 g",Ingmariini,500 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+62804,Coop täidispakk tolmuharjale 10tk,Coop,10 pcs,other,Prisma,,dry_other,other,drinks,drinks_beer_cider,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+62817,Veisestrooganov 380 g,Veisestrooganov,380 g,other,"Coop, Prisma",,meat_beef_lamb_game,meat_fish,meat_fish,meat_pork,high,drinks,drinks_spirits,high,override_with_name_rules
+62966,"Tofupasteet maksamaitseline, BON VEGAN, 150g",Tofupasteet,150 g,other,"Prisma, Rimi, Selver",,drinks_tea_coffee,drinks,other,,high,drinks,drinks_tea_coffee,high,
+63082,"Kotimaista metsamarjamaitseline hapendatud kaerajook, 400 g",Kotimaista,400 g,other,Prisma,,dairy_plant_drinks,dairy_eggs_fats,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+63268,"Põnn neljaviljapuder banaani ja mustikaga 110g, alates 6-elukuust",Põnn,110 g,other,"Coop, Prisma",,produce_tropical,produce,produce,produce_tropical,high,produce,produce_berries,high,override_with_name_rules
+63326,Salchichon salaami 100 g,Salchichon,100 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+63370,"MILUPA Mannapuder banaanide ja virsikutega, 6k+, 250g",MILUPA Mannapuder,250 g,other,"Coop, Prisma",,produce_tropical,produce,produce,produce_tropical,high,produce,produce_tropical,high,
+63414,"Alpro mango-grenadillimaitseline taimne jook, 755 g",Alpro,755 g,other,Prisma,,produce_tropical,produce,produce,produce_tropical,high,drinks,drinks_spirits,high,override_with_name_rules
+63423,"Milupa 3-vilja puder vaarikate ja maasikatega, 6+ 225 g",Milupa,225 g,other,"Coop, Prisma",,produce_berries,produce,produce,produce_berries,high,drinks,drinks_spirits,high,override_with_name_rules
+63478,Ehrmann Proteiini-šokolaadivaht 200g,Ehrmann Proteiini-šokolaadivaht,200 g,other,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+63488,Finish nõudepesumasina puhastusvahend 250 ml,Finish,250 ml,other,"Prisma, Rimi",,hh_dishwashing,household,household,hh_cleaners,high,household,hh_dishwashing,high,
+63572,"Moomin orgaanilised kaera ampsud 35g, alates 6-elukuust",Moomin,35 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+63661,Green Planet Astronauts ökoloogilised kaeraampsud kakao ja banaaniga 12k+ 25g,Green Planet,25 g,other,Prisma,,produce_tropical,produce,produce,produce_tropical,high,produce,produce_tropical,high,
+63974,Dr. Beckmann puhastusvahend keraam.pliidile,Dr. Beckmann,,other,Prisma,,hh_cleaners,household,household,hh_cleaners,high,household,hh_cleaners,high,
+63985,Bref power active wc-värskendaja ookean 50g,Bref,50 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+64165,Coop tolmuhari,Coop,,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+64207,Frosch nõudepesuvahend Aloe Vera 500 ml,Frosch,500 ml,other,Prisma,,hh_dishwashing,household,household,hh_dishwashing,high,household,hh_laundry,high,override_with_name_rules
+64324,"Veisemaksapasteet trühvline, LIIVIMAA LIHAVEIS, 200 g",Trühvline,200 g,other,"Prisma, Selver",,meat_beef_lamb_game,meat_fish,meat_fish,meat_pork,high,drinks,drinks_spirits,high,override_with_name_rules
+64369,Rakvere Veise Keel 1 Kg,Rakvere Veise,1 kg,other,Prisma,,meat_beef_lamb_game,meat_fish,meat_fish,meat_pork,high,meat_fish,meat_beef_lamb_game,high,
+64448,Milupa HEA UNE täisterapuder maasika-banaani 8+ 250 g,Milupa HEA,250 g,other,"Coop, Prisma",,produce_tropical,produce,produce,produce_tropical,high,drinks,drinks_spirits,high,override_with_name_rules
+64523,"Naturli' taimne ökoloogiline leivamääre, 450 g",Naturli',450 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+64526,"Alentaja kaltsiumiga margariin 60, 400 g",Alentaja,400 g,other,Prisma,,dairy_butter_margarine,dairy_eggs_fats,drinks,drinks_beer_cider,high,drinks,drinks_spirits,high,override_with_name_rules
+64611,Salvest praekapsas 900 g,Salvest,900 g,other,"Coop, Prisma, Selver",,produce_root_veg,produce,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+64738,Gogreen kikerherned 400g,Gogreen,400 g,other,Prisma,,dry_groats_beans,dry_preserves,dry_preserves,dry_groats_beans,high,dry_preserves,dry_groats_beans,high,
+64759,"Balbiino FITLAP Laktoosivaba koorejäätis 0,5 l/270 g",Balbiino FITLAP,0.5 l,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cream_sourcream,dairy_eggs_fats,frozen_food,frozen_desserts_icecream,high,drinks,drinks_spirits,high,override_with_name_rules
+64775,Marmelaadikommid Jelly 200g,Marmelaadikommid Jelly,200 g,other,"Coop, Prisma",,dry_other,dry_preserves,sweets_snacks,sweets_candies,high,dry_preserves,dry_other,high,
+64779,Minu odrakruup 1kg,Minu,1 kg,other,Prisma,,dry_groats_beans,dry_preserves,other,,high,dry_preserves,dry_groats_beans,high,
+64789,Nordmel mesi 450g,Nordmel,450 g,other,"Prisma, Rimi, Selver",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+64836,Dole ananassitükid omas mahlas 227/139 g,Dole,139 g,other,"Prisma, Selver",,produce_tropical,produce,drinks,drinks_juices,high,drinks,drinks_spirits,high,override_with_name_rules
+64846,KALEV Õuna marmelaadikommid 175g,KALEV Õuna,175 g,other,"Coop, Prisma",,produce_apples_pears,produce,drinks,drinks_beer_cider,high,produce,produce_apples_pears,high,
+64893,Moomin maasikamoos 850g,Moomin,850 g,other,Prisma,,produce_berries,produce,produce,produce_berries,high,produce,produce_berries,high,
+64896,Y.E.S. triibulised päevalilleseemned soolaga 150g,Y.E.S.,150 g,other,"Coop, Prisma, Selver",,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high,sweets_snacks,sweets_nuts_driedfruit,high,
+64932,Pesupulber mayeri sensitive color 650g,Pesupulber,650 g,other,Prisma,,hh_laundry,household,household,hh_laundry,high,household,hh_laundry,high,
+64989,Urtekram ökoloogilised mustad oad 300 g,Urtekram,300 g,other,Prisma,,dry_canned_veg,dry_preserves,dry_preserves,dry_groats_beans,high,drinks,drinks_spirits,high,override_with_name_rules
+65002,Vita gold poolitatud virsikud 850ml,Vita,850 ml,other,"Coop, Prisma, Selver",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+65063,Änglamark maheõunamoos 360 g,Änglamark,360 g,other,Prisma,,produce_apples_pears,produce,produce,produce_apples_pears,high,drinks,drinks_spirits,high,override_with_name_rules
+65069,USIN Kartulipüree 300 g,USIN Kartulipüree,300 g,other,Prisma,,produce_root_veg,produce,produce,produce_root_veg,high,drinks,drinks_spirits,high,override_with_name_rules
+65090,Panzani farfalle makaronid 500g,Panzani,500 g,other,"Prisma, Rimi, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+65097,"Herkkumaa õunamoos, 460 g",Herkkumaa,460 g,other,Prisma,,produce_apples_pears,produce,produce,produce_apples_pears,high,drinks,drinks_spirits,high,override_with_name_rules
+65101,Jõumees kärjemesi 200 g,Jõumees,200 g,other,"Prisma, Rimi, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+65119,"Mogyi päevalilleseemned röstitud, soolata 200 g",Mogyi,200 g,other,"Coop, Prisma, Selver",,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high,drinks,drinks_spirits,high,override_with_name_rules
+65129,Veski mati riivsai 300 g,Veski,300 g,other,"Coop, Prisma, Selver",,bakery_buns_croissants,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+65171,Riso Scotti parmesanirisoto 210 g,Riso Scotti,210 g,other,Prisma,,dairy_cheese_slices,dairy_eggs_fats,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+65265,Coop raameninuudlid 250 g,Coop,250 g,other,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_soups_noodles,high,drinks,drinks_spirits,high,override_with_name_rules
+65269,Coop punased läätsed soolvees 380/230g,Coop,230 g,other,Prisma,,dry_groats_beans,dry_preserves,dry_preserves,dry_groats_beans,high,dry_preserves,dry_groats_beans,high,
+65289,Robertson's lemon curd sidrunimääre 320g,Robertson's,320 g,other,Prisma,,produce_tropical,produce,other,,high,produce,produce_tropical,high,
+65344,Sireli mesi 30 g,Sireli,30 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+65505,Tartu mill durum p. macch. Lisci 500g,Tartu,500 g,other,"Coop, Prisma, Rimi, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+65521,"Coop virsiku jäätee suhkruvaba kontsentraat 1+3 0,9 l",Coop,0.9 l,other,Prisma,,drinks_tea_coffee,drinks,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+65522,"Bonne troopiline püree, 0,5 l",Bonne,0.5 l,other,"Prisma, Selver",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+65588,Bosto Bulgur 4x75g,Bosto Bulgur,4x75 g,other,"Prisma, Selver",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+65675,Loodusvägi punased läätsed poolitatud 500 g,Loodusvägi,500 g,other,"Coop, Prisma",,dry_groats_beans,dry_preserves,dry_preserves,dry_groats_beans,high,drinks,drinks_spirits,high,override_with_name_rules
+65728,"Torino kaeramakaronid, 500 g",Torino,500 g,other,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high,drinks,drinks_spirits,high,override_with_name_rules
+65745,Meveda kreemjas mesi 1kg,Meveda,1 kg,other,"Coop, Prisma",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+65781,Veski mati 8-viljahelbed kliidega 500 g,Veski,500 g,other,"Coop, Prisma, Rimi, Selver",,dry_cereals_muesli,dry_preserves,dry_preserves,dry_cereals_muesli,high,drinks,drinks_spirits,high,override_with_name_rules
+65782,"“MOHAPX” Päevalilleseemned, koorimata, röstitud",“MOHAPX”,,other,"Prisma, Selver",,dairy_cream_sourcream,dairy_eggs_fats,sweets_snacks,sweets_nuts_driedfruit,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+65818,"Torino tumedad sarvekesed, 400 g",Torino,400 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+65847,Coop jäätise mix 12tk 600g,Coop,600 g,other,Prisma,,frozen_desserts_icecream,frozen_food,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+65848,Linda hirss 4x100gr,Linda,,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+65939,Kotimaista riivsai 400 g,Kotimaista,400 g,other,Prisma,,bakery_buns_croissants,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+65943,Mesi Nektar 300 g,Mesi Nektar,300 g,other,Prisma,,drinks_juices,drinks,drinks,drinks_juices,high,drinks,drinks_spirits,high,override_with_name_rules
+65984,"Bazaro XXL mustad päevalilleseemned, 300 g",Bazaro XXL,300 g,other,"Coop, Prisma, Selver",,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high,drinks,drinks_spirits,high,override_with_name_rules
+65995,Tartu mill tatar 4 x 125 g,Tartu,4x125 g,other,"Coop, Prisma",,dry_groats_beans,dry_preserves,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+66015,Linda kartulitärklis 500g,Linda,500 g,other,Prisma,,produce_root_veg,produce,produce,produce_root_veg,high,produce,produce_root_veg,high,
+66087,Filos kreeka kirsimarmelaad 370g,Filos,370 g,other,Prisma,,dry_other,dry_preserves,other,,high,dry_preserves,dry_other,high,
+66101,Filosophy halloumikeerud 450g,Filosophy,450 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+66142,Dr.Oetker želatiinipulber 65 g,Dr.Oetker,65 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+66191,Tartu mill riivsai 400 g,Tartu,400 g,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,bakery_buns_croissants,bakery,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+66206,Hermesetas magusainetabletid 1200 tk,Hermesetas,1200 pcs,other,Prisma,,bakery_buns_croissants,bakery,other,,high,bakery,bakery_buns_croissants,high,
+66209,Fazer Alku kaerahelbepuder rukki ja päevalilleseemnetega 400 g,Fazer Alku,400 g,other,Prisma,,sweets_nuts_driedfruit,sweets_snacks,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+66211,Salvest õunakaste 530 g,Salvest,530 g,other,"Coop, Prisma, Selver",,produce_apples_pears,produce,produce,produce_apples_pears,high,drinks,drinks_spirits,high,override_with_name_rules
+66213,Coop ananassiviilud ananassimahlas 227/140g,Coop,140 g,other,Prisma,,produce_tropical,produce,drinks,drinks_juices,high,produce,produce_tropical,high,
+66272,"Apetit mais, 200 g",Apetit,200 g,other,Prisma,,dry_canned_veg,dry_preserves,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+66279,Kotimaista pitsataigen 4 x 170g,Kotimaista,4x170 g,other,Prisma,,dry_canned_veg,dry_preserves,other,,high,dry_preserves,dry_canned_veg,high,
+66294,Filos Kreeka apelsinimarmelaad 370 g,Filos Kreeka,370 g,other,Prisma,,produce_tropical,produce,produce,produce_tropical,high,drinks,drinks_spirits,high,override_with_name_rules
+66299,"Coop magus granola külmkuivatatud vaarikatükkidega 1,5% ja maasikatega 1,5% 500g",Coop,500 g,other,Prisma,,produce_berries,produce,produce,produce_berries,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+66315,Torino makaronid 400 g,Torino,400 g,other,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high,drinks,drinks_spirits,high,override_with_name_rules
+66342,Axa kiirkaerahelbepuder koore ja maasika 40 g,Axa,40 g,other,"Prisma, Selver",,produce_berries,produce,produce,produce_berries,high,drinks,drinks_spirits,high,override_with_name_rules
+66351,Greip punane Star Ruby I klass,Greip,,other,"Barbora, Maxima, Prisma",,produce_tropical,produce,produce,produce_tropical,high,produce,produce_tropical,high,
+66476,"Brokoli, 400 g","Brokoli,",400 g,other,"Barbora, Coop, Maxima, Prisma, Selver",,produce_root_veg,produce,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+66481,Coop tsüklamaadil ja sahhariinil põhinev lauamagusaine 72g,Coop,72 g,other,Prisma,,bakery_buns_croissants,bakery,other,,high,bakery,bakery_buns_croissants,high,
+66556,Tartu mill täistera röstitud kiirtatrahelbed 500 g,Tartu,500 g,other,"Coop, Prisma, Rimi, Selver",,dry_cereals_muesli,dry_preserves,dry_preserves,dry_cereals_muesli,high,drinks,drinks_spirits,high,override_with_name_rules
+66560,Minu ananassitükid kerges siirupis 227g,Minu,227 g,other,"Coop, Prisma",,produce_tropical,produce,drinks,drinks_syrups_powders,high,drinks,drinks_syrups_powders,high,override_with_name_rules
+66597,Kotimaista kartulitärklis 500 g,Kotimaista,500 g,other,Prisma,,produce_root_veg,produce,produce,produce_root_veg,high,drinks,drinks_spirits,high,override_with_name_rules
+66609,Soprano spagetid 400 g,Soprano,400 g,other,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high,drinks,drinks_spirits,high,override_with_name_rules
+66619,Vilma pitsapõhjapulber 400 g,Vilma,400 g,other,"Coop, Prisma, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+66622,Kotimaista kuivatatud herned 500 g,Kotimaista,500 g,other,Prisma,,dry_canned_veg,dry_preserves,dry_preserves,dry_groats_beans,high,drinks,drinks_spirits,high,override_with_name_rules
+66644,Bonne premium aprikoosipüree 100% 500ml,Bonne,500 ml,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+66647,"Kodune pärmitaigen 2x300g, HÄRMAVILI, 600 g",HÄRMAVILI Kodune,2x300 g,other,"Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high,drinks,drinks_spirits,high,override_with_name_rules
+66656,Riso Scotti trühvlirisoto 210 g,Riso Scotti,210 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+66680,"Its us greta´s maisimakaronid 200 g, gluteenivaba",Its,200 g,other,Prisma,,bakery_gluten_free,bakery,bakery,bakery_gluten_free,high,drinks,drinks_spirits,high,override_with_name_rules
+66705,Marmelaadisüdamed mahlaga 200g,Marmelaadisüdamed,200 g,other,Prisma,,dry_other,dry_preserves,drinks,drinks_juices,high,drinks,drinks_juices,high,override_with_name_rules
+66748,"Wiru mill toortatratang 500 g, mahe, gluteenivaba",Wiru,500 g,other,"Coop, Prisma",,bakery_gluten_free,bakery,bakery,bakery_gluten_free,high,drinks,drinks_spirits,high,override_with_name_rules
+66755,"Bonne Premium, mustikapüree, 0,5 l","Bonne Premium,",0.5 l,other,"Prisma, Selver",,produce_berries,produce,produce,produce_berries,high,produce,produce_berries,high,
+66779,Huxol suhkruasendaja 650 tk/ 39g,Huxol,39 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+66806,"Gogreen, mustad oad, 380 g","Gogreen,",380 g,other,Prisma,,dry_canned_veg,dry_preserves,dry_preserves,dry_groats_beans,high,drinks,drinks_spirits,high,override_with_name_rules
+66999,Dr.Oetker šokolaadikreemipulber 100 g,Dr.Oetker,100 g,other,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high,drinks,drinks_spirits,high,override_with_name_rules
+67016,Seemneleiva segu 150 g,Seemneleiva,150 g,other,Prisma,,sweets_nuts_driedfruit,sweets_snacks,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+67085,Kalev maasika-rabarberi marmelaadikommid 175g,Kalev,175 g,other,"Coop, Prisma, Rimi, Selver",,produce_berries,produce,drinks,drinks_beer_cider,high,produce,produce_berries,high,
+67091,Coop ananass ananassimahlas 567/340g,Coop,340 g,other,Prisma,,produce_tropical,produce,drinks,drinks_juices,high,produce,produce_tropical,high,
+67127,"Dr.Oetker suhkruglasuur, roheline, 125g",Dr.Oetker,125 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+67194,Chippy paisutatud nisu meega 250g,Chippy,250 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+67315,Aura vaarika maitsega siirup 750ml,Aura,750 ml,other,"Prisma, Rimi",,produce_berries,produce,drinks,drinks_syrups_powders,high,drinks,drinks_syrups_powders,high,override_with_name_rules
+67321,Myllärin gluteenivaba pannkoogi- ja vahvlisegu 250 g,Myllärin,250 g,other,Prisma,,bakery_gluten_free,bakery,bakery,bakery_gluten_free,high,drinks,drinks_spirits,high,override_with_name_rules
+67332,Salvest Ökoloogiline pirnipüree 450 g,Salvest Ökoloogiline,450 g,other,"Coop, Prisma, Rimi, Selver",,produce_apples_pears,produce,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+67333,Rainbow aprikoosimarmelaad 300 g,Rainbow,300 g,other,Prisma,,dry_other,dry_preserves,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+67346,Tartu mill täistera neljaviljahelbed 500 g,Tartu,500 g,other,"Coop, Prisma, Rimi, Selver",,dry_cereals_muesli,dry_preserves,dry_preserves,dry_cereals_muesli,high,drinks,drinks_spirits,high,override_with_name_rules
+67364,Rõngu vaarika-mustika mahlajoogikontsentraat 330ml,Rõngu,330 ml,other,"Coop, Prisma, Selver",,produce_berries,produce,drinks,drinks_juices,high,drinks,drinks_juices,high,override_with_name_rules
+67409,Meira mandlipulber 80 g,Meira,80 g,other,"Coop, Prisma, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+67432,Marmiton marmelaadi kuubikud 150g,Marmiton,150 g,other,"Coop, Prisma, Rimi, Selver",,dry_other,dry_preserves,other,,high,dry_preserves,dry_other,high,
+67474,Coop troopiline püree 500 ml,Coop,500 ml,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+67530,Foodin mahe erütritool 200 g,Foodin,200 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+67615,Coop vaarikane õunapüree 500 ml,Coop,500 ml,other,Prisma,,produce_apples_pears,produce,produce,produce_apples_pears,high,produce,produce_berries,high,override_with_name_rules
+67637,Küllus kirsimoos 400 g,Küllus,400 g,other,"Coop, Prisma, Rimi, Selver",,dry_other,dry_preserves,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+67710,Viinamari hele seemneteta 500 g,Viinamari,500 g,other,"Barbora, Maxima, Prisma",,produce_tropical,produce,drinks,drinks_spirits,high,drinks,drinks_spirits,high,override_with_name_rules
+67738,Dole ananassiviilud omas mahlas 227/139 g,Dole,139 g,other,Prisma,,produce_tropical,produce,drinks,drinks_juices,high,drinks,drinks_spirits,high,override_with_name_rules
+67846,Dr.Oetker ookeanisegu koogikaunistused 50 g,Dr.Oetker,50 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+67935,Kellogg's tresor m.choco padjakesed 410g,Kellogg's,410 g,other,"Prisma, Selver",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+67936,Tartu mill durum nuudlid filini piccoli 500 g,Tartu,500 g,other,"Coop, Prisma, Selver",,dry_pasta_rice,dry_preserves,drinks,drinks_spirits,high,drinks,drinks_spirits,high,override_with_name_rules
+68028,Veski mati odrakruup 500 g,Veski,500 g,other,Prisma,,dry_groats_beans,dry_preserves,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+68066,Vita gold ananassitükid 565g,Vita,565 g,other,"Coop, Prisma",,produce_tropical,produce,produce,produce_tropical,high,produce,produce_tropical,high,
+68101,Maple joe vahtrasiirup 312g,Maple,312 g,other,Prisma,,drinks_syrups_powders,drinks,drinks,drinks_syrups_powders,high,drinks,drinks_syrups_powders,high,
+68103,Salvest ökoloogiline mangopüree 450 g,Salvest,450 g,other,"Coop, Prisma, Rimi, Selver",,produce_tropical,produce,produce,produce_tropical,high,drinks,drinks_spirits,high,override_with_name_rules
+68116,"Hiidkrevetisabad kooritud keedetud 41/50, KAPTEN GRANT, 320 g neto",Kooritud,320 g,other,"Prisma, Selver",,dairy_cream_sourcream,dairy_eggs_fats,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+68130,Saarioinen apelsinimarmelaad 230 g,Saarioinen,230 g,other,Prisma,,produce_tropical,produce,produce,produce_tropical,high,drinks,drinks_spirits,high,override_with_name_rules
+68136,"Kalkunipasteet, PROFI, 131 g",Profi,135 g,other,"Prisma, Selver",,meat_poultry,meat_fish,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+68163,Lotus Biscoff Spread küpsisekreem 400 g,Lotus Biscoff,400 g,other,Prisma,,sweets_biscuits_cookies,sweets_snacks,sweets_snacks,sweets_biscuits_cookies,high,drinks,drinks_spirits,high,override_with_name_rules
+68195,Coop maisitärklis 400g,Coop,400 g,other,Prisma,,dry_canned_veg,dry_preserves,other,,high,dry_preserves,dry_canned_veg,high,
+68278,Coop vedel mesi 500g,Coop,500 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+68323,Myllärin maheodrahelbed 500 g,Myllärin,500 g,other,Prisma,,dry_cereals_muesli,dry_preserves,dry_preserves,dry_cereals_muesli,high,drinks,drinks_spirits,high,override_with_name_rules
+68324,"Rummo makaronid nr 128, 500 g",Rummo,500 g,other,Prisma,,dry_pasta_rice,dry_preserves,drinks,drinks_spirits,high,drinks,drinks_spirits,high,override_with_name_rules
+68360,MEIE MARI Vaarikamoos 310g,MEIE MARI,310 g,other,"Coop, Prisma, Selver",,produce_berries,produce,produce,produce_berries,high,produce,produce_berries,high,
+68365,Del Monte virsikupoolikud mahlas 415/235 g,Del Monte,235 g,other,Prisma,,drinks_juices,drinks,drinks,drinks_juices,high,drinks,drinks_spirits,high,override_with_name_rules
+68392,Panzani conchiglie rigate makaronid 500g,Panzani,500 g,other,"Coop, Prisma, Rimi, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+68412,"Dole väikesed ananassitükid ananassimahlas, 227 g",Dole,227 g,other,Prisma,,produce_tropical,produce,drinks,drinks_juices,high,drinks,drinks_spirits,high,override_with_name_rules
+68424,Marmiton Foor marmelaad 150 g,Marmiton Foor,150 g,other,"Coop, Prisma",,dry_other,dry_preserves,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+68474,Kalev Lily jõhvikamaitseline marmelaadikompvek 175 g,Kalev Lily,175 g,other,"Coop, Prisma, Rimi, Selver",,produce_berries,produce,drinks,drinks_beer_cider,high,drinks,drinks_spirits,high,override_with_name_rules
+68512,Coop vedel mesi 250 g,Coop,250 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+68542,Meira mandlilaastud 50g,Meira,50 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+68609,Coop tume shokolaad küpset. 200g,Coop,200 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_flour_sugar_baking,high,proposed_group_invalid;override_with_name_rules
+68616,Coop poolikud pirnid mahla 410/230g,Coop,230 g,other,Prisma,,produce_apples_pears,produce,drinks,drinks_juices,high,drinks,drinks_juices,high,override_with_name_rules
+68619,Coop täisteraspagetti 500g,Coop,500 g,other,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+68652,"Yes päevalilleseemned mustad, röstitud 150 g",Yes,150 g,other,"Coop, Prisma, Rimi, Selver",,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high,drinks,drinks_spirits,high,override_with_name_rules
+68657,Xtra õunapüree 720 g,Xtra,720 g,other,Prisma,,produce_apples_pears,produce,produce,produce_apples_pears,high,drinks,drinks_spirits,high,override_with_name_rules
+68722,Coop kartuli-gnocchid 500g,Coop,500 g,other,Prisma,,produce_root_veg,produce,produce,produce_root_veg,high,produce,produce_root_veg,high,
+68732,Coop karamellikaste 250 ml,Coop,250 ml,other,Prisma,,sauces_other,sauces_oils,sweets_snacks,sweets_candies,heuristic,sweets_snacks,sweets_candies,high,override_with_name_rules
+68765,Bonne ploomipüree 500 ml,Bonne,500 ml,other,"Prisma, Selver",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+68949,Finnamyl Kolmen Konstin kartulitärklis 500 g,Finnamyl Kolmen,500 g,other,Prisma,,produce_root_veg,produce,produce,produce_root_veg,high,drinks,drinks_spirits,high,override_with_name_rules
+68954,Xtra mesi 650g,Xtra,650 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+69054,Nordmel mesi 250 g,Nordmel,250 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+69059,TRUE DATES Sour Cola 100g,TRUE DATES,100 g,other,"Coop, Prisma, Rimi, Selver",,drinks_soft_soda,drinks,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+69206,"Maksapasteet, RANNAROOTSI, 240 g",Rannarootsi,240 g,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,drinks_tea_coffee,drinks,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+69347,"Dronningholm, vaarika-mustikamoos, 440 g","Dronningholm,",440 g,other,Prisma,,produce_berries,produce,produce,produce_berries,high,drinks,drinks_spirits,high,override_with_name_rules
+69364,"Kõrvitsaseemned, kooritud, röst, sool 70 g","Kõrvitsaseemned,",70 g,other,"Coop, Prisma",,produce_root_veg,produce,sweets_snacks,sweets_nuts_driedfruit,high,drinks,drinks_spirits,high,override_with_name_rules
+69383,"Bonne Premium, mangopüree, 0,5 l","Bonne Premium,",0.5 l,other,"Coop, Prisma, Selver",,produce_tropical,produce,produce,produce_tropical,high,produce,produce_tropical,high,
+69438,Scrub Daddy tolmusvamm roosa,Scrub Daddy,,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+69596,"Pleed Uni 130x170 cm, tumehall",Pleed Uni,,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+69817,Aura laimi-mündi mojito siirup 750ml,Aura,750 ml,other,"Coop, Prisma",,produce_tropical,produce,drinks,drinks_syrups_powders,high,drinks,drinks_syrups_powders,high,override_with_name_rules
+69929,Salliselta suhkruströssel mitmevärvilised 100g,Salliselta,100 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+69934,Coop ananassitükid ananassimahlas 227/140g,Coop,140 g,other,Prisma,,produce_tropical,produce,drinks,drinks_juices,high,produce,produce_tropical,high,
+70051,"Belin Kummelitee 30 x 1,3 g",Belin Kummelitee,30x1.3 g,other,Prisma,,drinks_tea_coffee,drinks,drinks,drinks_tea_coffee,high,drinks,drinks_spirits,high,override_with_name_rules
+70261,Rainbow nõudepesuhari,Rainbow,,other,Prisma,,hh_dishwashing,household,other,,high,household,hh_dishwashing,high,
+70373,Thai choice munanuudlid 200g,Thai,200 g,other,"Coop, Prisma, Selver",,dairy_eggs,dairy_eggs_fats,dairy_eggs_fats,dairy_eggs,high,dairy_eggs_fats,dairy_eggs,high,
+70632,Müller`s mühle läätsed 500 g,Müller`s,500 g,other,"Coop, Prisma",,dry_groats_beans,dry_preserves,dry_preserves,dry_groats_beans,high,drinks,drinks_spirits,high,override_with_name_rules
+70664,Kotimaista manna 1 kg,Kotimaista,1 kg,other,Prisma,,dry_canned_veg,dry_preserves,other,,high,dry_preserves,dry_canned_veg,high,
+70693,Bosto BIO Quinoa 4x75g,Bosto BIO,4x75 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+70774,"Filos Deluxe, viigimarjamoos, 240 g","Filos Deluxe,",240 g,other,Prisma,,dry_other,dry_preserves,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+70784,Põrandapesu komplekt mopp ja tolmuhari,Põrandapesu,,other,Prisma,,hh_other,household,other,,heuristic,household,hh_other,heuristic,
+70984,Kalev Mari marjamaitseline marmelaadikompvek 175 g,Kalev Mari,175 g,other,"Coop, Prisma, Selver",,dry_other,dry_preserves,drinks,drinks_beer_cider,high,drinks,drinks_spirits,high,override_with_name_rules
+71106,Helmi kartulimanna 400 g,Helmi,400 g,other,Prisma,,produce_root_veg,produce,produce,produce_root_veg,high,drinks,drinks_spirits,high,override_with_name_rules
+71363,"Coop magus granola kuivatatud õunatükkidega 6% ja kaneeliga 0,6% 500g",Coop,500 g,other,Prisma,,produce_apples_pears,produce,produce,produce_apples_pears,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+71367,Meira purpur nonparell 60 g,Meira,60 g,other,"Prisma, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+71487,Kalev kirsimaitseline marmelaadikompvek 175 g,Kalev,175 g,other,"Coop, Prisma, Rimi, Selver",,dry_other,dry_preserves,drinks,drinks_beer_cider,high,drinks,drinks_spirits,high,override_with_name_rules
+71516,Dansukker tume suhkrusiirup 750 g,Dansukker,750 g,other,"Coop, Prisma",,drinks_syrups_powders,drinks,drinks,drinks_syrups_powders,high,drinks,drinks_spirits,high,override_with_name_rules
+71571,Chippy teraviljarõngad meega 250 g,Chippy,250 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+71684,MEIE MARI Maasikamoos 310g,MEIE MARI,310 g,other,"Coop, Prisma, Selver",,produce_berries,produce,produce,produce_berries,high,produce,produce_berries,high,
+71769,"Meritalo õunamoos, 400 g",Meritalo,400 g,other,Prisma,,produce_apples_pears,produce,produce,produce_apples_pears,high,drinks,drinks_spirits,high,override_with_name_rules
+71854,FAZERMINT 41G täidetud šokolaadiga,FAZERMINT,41 g,other,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_gums_mints,high,override_with_name_rules
+71856,"Bonne pirnipüree, 0,5 l",Bonne,0.5 l,other,Prisma,,produce_apples_pears,produce,other,,high,produce,produce_apples_pears,high,
+72045,Coop õunapüree 500ml,Coop,500 ml,other,Prisma,,produce_apples_pears,produce,produce,produce_apples_pears,high,produce,produce_apples_pears,high,
+72078,Laurieri scrocchi kreekerid trühvliga 175g,Laurieri,175 g,other,"Coop, Prisma, Rimi",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+72166,Linda tatar 4*100g,Linda,100 g,other,Prisma,,dry_groats_beans,dry_preserves,other,,high,dry_preserves,dry_groats_beans,high,
+72175,Oho kuiv hommikusöök cookie pillows 175g,Oho,175 g,other,"Coop, Prisma, Selver",,sweets_biscuits_cookies,sweets_snacks,other,,high,sweets_snacks,sweets_biscuits_cookies,high,
+72454,Nestlé Lion šokolaadi ja toffee maitselised täisterahelbed 600 g,Nestlé Lion,600 g,other,Prisma,,dry_cereals_muesli,dry_preserves,sweets_snacks,sweets_chocolate_bars,high,drinks,drinks_spirits,high,override_with_name_rules
+72727,Baltix hirss 1 kg,Baltix,1 kg,other,"Prisma, Rimi, Selver",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+72946,Põltsamaa maasikamoos 600g,Põltsamaa,600 g,other,"Coop, Prisma, Rimi, Selver",,produce_berries,produce,produce,produce_berries,high,produce,produce_berries,high,
+73133,Finnamyl mahekartulitärklis 500 g,Finnamyl,500 g,other,Prisma,,produce_root_veg,produce,produce,produce_root_veg,high,drinks,drinks_spirits,high,override_with_name_rules
+73144,"Ella´s Kitchen kõrvitsa-õuna-mustikapüree 120 g, öko, alates 4-elukuust",Ella´s Kitchen,120 g,other,Prisma,,produce_apples_pears,produce,baby,baby_porridge_cereal,high,drinks,drinks_spirits,high,override_with_name_rules
+73213,"Axa kiirkaerahelbepuder koore, maasika ja banaaniga ilma lisatud suhkruta 40g",Axa,40 g,other,Prisma,,produce_tropical,produce,produce,produce_tropical,high,produce,produce_berries,high,override_with_name_rules
+73257,MAIZENA MAISITÄRKLIS 400G,MAIZENA MAISITÄRKLIS,400 g,other,Prisma,,dry_canned_veg,dry_preserves,other,,high,dry_preserves,dry_canned_veg,high,
+73289,Müller`s mühle maisitärklis 400 g,Müller`s,400 g,other,"Coop, Prisma",,dry_canned_veg,dry_preserves,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+73731,Pere grillvorstid 900 g,Pere,900 g,other,"Coop, Prisma",,meat_sausages,meat_fish,meat_fish,meat_sausages,high,drinks,drinks_spirits,high,override_with_name_rules
+73786,"Rainbow rosinad 250 g, öko",Rainbow,250 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+74007,Väike Tom DO-RE-MI šokoladi-koorejäätis vahvlitopsis 65g/120ml,Väike Tom,65 g,other,"Coop, Prisma, Rimi, Selver",,dairy_cream_sourcream,dairy_eggs_fats,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+74550,Dr.Oetker kuivatatud juuretis ja pärm 30g,Dr.Oetker,30 g,other,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+74653,Kotimaista metsamarjasmuuti 120 g,Kotimaista,120 g,other,Prisma,,produce_smoothies_fresh_juices,produce,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+74873,"Carrefour Mint roheline tee 50x1,6g",Carrefour Mint,50x1.6 g,other,Prisma,,drinks_tea_coffee,drinks,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+75035,Ben ja Jerry's DulceDe-lish Sundae 427ml,Ben,427 ml,other,"Coop, Prisma, Rimi, Selver",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+75210,YOOK Kaerajook Mango 1L,YOOK Kaerajook,1 l,other,"Coop, Prisma, Selver",,produce_tropical,produce,produce,produce_tropical,high,dairy_eggs_fats,dairy_plant_drinks,high,override_with_name_rules
+75305,Süütevedelik 1l,Süütevedelik,1 l,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+75386,HK küüslaugu salaami 150 g,HK,150 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+75568,"Kevadine keeduvorst, MAKS&MOORITS, 300 g",Kevadine,300 g,other,"Coop, Prisma, Selver",,meat_sausages,meat_fish,meat_fish,meat_sausages,high,drinks,drinks_spirits,high,override_with_name_rules
+75938,"Pingviini vanilli-koorejäätis ja rummirosinad, 1 l",Pingviini,1 l,other,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,drinks,drinks_spirits,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+75964,"Flora lahja ja paks kaste toiduvalmistamiseks 4%, 250 ml",Flora,250 ml,other,Prisma,,sauces_other,sauces_oils,other,,heuristic,sauces_oils,sauces_other,heuristic,
+76085,"Kinder Maxi King multipakk, 3 x 35 g",Kinder Maxi,3x35 g,other,"Barbora, Maxima, Prisma, Rimi",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+76091,"Sojajook Light 1,2%, 1 l",Sojajook Light,1 l,other,Prisma,,dairy_plant_drinks,dairy_eggs_fats,other,,high,dairy_eggs_fats,dairy_plant_drinks,high,
+76203,"Täissuitsuvorst E-vaba, OSKAR, 210 g",Täissuitsuvorst,210 g,other,"Barbora, Maxima, Prisma, Rimi, Selver",,meat_sausages,meat_fish,meat_fish,meat_sausages,high,drinks,drinks_spirits,high,override_with_name_rules
+76436,"Maheghee laktoosivaba, PAJUMÄE TALU, 200 g",Pajumäe Talu,200 g,other,"Prisma, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+76791,"Oatly vanillikaste, 250 ml",Oatly,250 ml,other,"Prisma, Rimi",,sauces_other,sauces_oils,other,,heuristic,sauces_oils,sauces_other,heuristic,
+76947,"Schär gluteenivabad croissant’id 4tk, 220g",Schär,220 g,other,Prisma,,bakery_buns_croissants,bakery,bakery,bakery_buns_croissants,high,bakery,bakery_gluten_free,high,override_with_name_rules
+77087,Rainbow Lemon üldpuhastusvahend 1 l,Rainbow Lemon,1 l,other,Prisma,,produce_tropical,produce,household,hh_cleaners,high,household,hh_cleaners,high,override_with_name_rules
+77252,PRESIDENT Vahukoor pihustiga 250g,PRESIDENT Vahukoor,250 g,other,"Prisma, Rimi, Selver",,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+77302,Coop miniporgandid 450 g,Coop,450 g,other,Prisma,,produce_root_veg,produce,produce,produce_root_veg,high,drinks,drinks_spirits,high,override_with_name_rules
+77324,"Sojajook lisatud kaltsiumi ja vitamiinidega laktoosivaba, ALPRO, 1 l","Sojajook Professionals,",1 l,other,"Prisma, Rimi, Selver",,dairy_plant_drinks,dairy_eggs_fats,other,,high,dairy_eggs_fats,dairy_plant_drinks,high,
+77513,Magustamata sojajook 1 l,Magustamata,1 l,other,Prisma,,dairy_plant_drinks,dairy_eggs_fats,other,,high,dairy_eggs_fats,dairy_plant_drinks,high,
+77957,Carl Jung Cabernet Sauvignon alkoholivaba vein 750ml,Carl Jung,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+78012,Chateau Puybarbe Annabel Bordeaux Rose KPN vein 14%vol 750ml,Chateau Puybarbe,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+78019,"Borgo San Leo Prosecco DOC Brut KPN vahuvein 10,5%vol 750 ml",Borgo San,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+78024,Ahmad must purutee Earl Grey 100g,Ahmad,100 g,other,"Coop, Prisma, Selver",,drinks_tea_coffee,drinks,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+78045,Põltsamaa mustsõstra-punasesõstra kannujook 1L,Põltsamaa,1 l,other,"Coop, Prisma, Rimi, Selver",,dry_other,other,drinks,drinks_juices,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+78051,Hardy VSOP Cognac 40%vol 500ml PET,Hardy VSOP,500 ml,other,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+78128,Legenda Armenii 5YO Brandy 40%vol 500ml,Legenda Armenii,500 ml,other,Prisma,,dry_other,other,drinks,drinks_spirits,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+78188,"Porgandimahl, KADARBIKU KÖÖGIVILI, 500 ml",Kadarbiku,500 ml,other,"Barbora, Coop, Maxima, Prisma, Selver",,produce_root_veg,produce,drinks,drinks_juices,high,produce,produce_root_veg,high,
+78283,Abavas Nordic Floral Medium Dry siider 5%vol 330 ml,Abavas Nordic,330 ml,other,"Prisma, Rimi",,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+78318,"Must tee ingveri ja meemaitseline 20 x 1,5 g",Must,20x1.5 g,other,"Coop, Prisma",,drinks_tea_coffee,drinks,drinks,drinks_tea_coffee,high,drinks,drinks_spirits,high,override_with_name_rules
+78352,Jose Cuervo Especial Silver Tequila piiritusjook 35%vol 700 ml,Jose Cuervo,700 ml,other,"Prisma, Rimi, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+78408,Dr. Beckmann kohvimasina puhastustabletid 6 tk,Dr. Beckmann,6 pcs,other,Prisma,,hh_cleaners,household,other,,high,household,hh_cleaners,high,
+78436,"Florecampo Primitivo Puglia 13,5%vol 750ml",Florecampo Primitivo,750 ml,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+78469,Meukow VS Cognac 40%vol 500ml,Meukow VS,500 ml,other,"Coop, Prisma",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+78475,Baron Rosen Vino Blanco Medium-Sweet vein 11%vol 1L,Baron Rosen,1 l,other,"Coop, Prisma",,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+78504,"Imperial XII VS muu piiritusjook 30%vol 500ml, PET",Imperial XII,500 ml,other,"Barbora, Maxima, Prisma",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+78518,"Rabarberi kombucha, KARU KOMBUCHA, 330 ml",Karu Kombucha,330 ml,other,"Prisma, Selver",,sweets_chocolate_bars,sweets_snacks,other,,high,sweets_snacks,sweets_chocolate_bars,high,
+78592,"Cal Y Canto Tempranillo KGT vein 13,5%vol 750ml",Cal Y,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+78781,Dr. Pepper kirsi- ja vanillimaitseline karastusjook 355 ml,Dr. Pepper,355 ml,other,Prisma,,produce_root_veg,produce,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,override_with_name_rules
+78929,Sun Lolly vaarika mahlajää 8x60ml,Sun Lolly,8x60 ml,other,Prisma,,produce_berries,produce,drinks,drinks_juices,high,drinks,drinks_juices,high,override_with_name_rules
+78957,"Jaume Serra Cava Brut Nature Vintage KPN kvaliteetvahuvein 11,5%vol 750ml",Jaume Serra,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+78961,"Sprotipasteet, MINU, 160 g",Minu,160 g,other,"Prisma, Rimi, Selver",,drinks_tea_coffee,drinks,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+78979,Royal Oporto Ruby Porto KPN liköörvein 19%vol 750ml,Royal Oporto,750 ml,other,"Barbora, Maxima, Prisma",,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_spirits,high,override_with_name_rules
+79000,Saku Kirsi-martsipani maitseline tume õlu 6%vol 500ml,Saku Kirsi-martsipani,500 ml,other,"Prisma, Rimi, Selver",,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+79037,Jelly Bean 36 maitset gurmee tuub 90g,Jelly Bean,90 g,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_groats_beans,high,proposed_group_invalid;override_with_name_rules
+79076,Martell VS Cognac 40%vol 700 ml,Martell VS,700 ml,other,"Barbora, Maxima, Prisma, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+79126,"Külmsuitsu leegitatud vikerforellifilee, viilutatud 90 g",Külmsuitsu,90 g,other,Prisma,,fish_fresh,meat_fish,meat_fish,fish_fresh,high,drinks,drinks_spirits,high,override_with_name_rules
+79168,DON SIMON TROOP.VILJADE,DON SIMON,,other,"Coop, Prisma, Selver",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+79320,Madeira 3Y Medium KPN liköörvein 18%vol 750ml,Madeira,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_spirits,high,override_with_name_rules
+79325,Hennessy VSOP Cognac 40%vol 200ml,Hennessy VSOP,200 ml,other,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+79353,Midsomer Cloudberry Gin 38%vol 500ml,Midsomer Cloudberry,500 ml,other,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+79355,Dr. Active õuna-arbuusi mahlajook 500ml,Dr. Active,500 ml,other,"Barbora, Maxima, Prisma",,produce_apples_pears,produce,drinks,drinks_juices,high,drinks,drinks_juices,high,override_with_name_rules
+79385,"Larser VS Cognac 40%vol 700ml, karbis",Larser VS,700 ml,other,"Prisma, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+79491,Aura õunamahl 1L,Aura,1 l,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,produce_apples_pears,produce,drinks,drinks_juices,high,produce,produce_apples_pears,high,
+79502,Choya Silver aromatiseeritud veinijook 10%vol 500ml,Choya Silver,500 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+79653,Coquerel VS Calvados 40%vol 500ml,Coquerel VS,500 ml,other,"Prisma, Rimi, Selver",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+79686,Hennessy VSOP Cognac 40%vol 700ml,Hennessy VSOP,700 ml,other,"Barbora, Maxima, Prisma, Rimi, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+79747,Grain de Soleil Coteaux d'Aix en Provence Rose KPN vein 750ml,Grain,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+79805,"Kuumsuitsu skumbriafilee nahaga, VICI, 175 g",Kuumsuitsu,175 g,other,"Barbora, Coop, Maxima, Prisma, Selver",,fish_salted_smoked,meat_fish,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+79837,"Änglamärk kofeiinivaba lahustuv kohv, mahe 100g",Änglamärk,100 g,other,Prisma,,drinks_tea_coffee,drinks,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+79844,Coop metsmarja suhkruvaba jook 200ml,Coop,200 ml,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+80207,Loodusvägi mahe multinektar 200ml,Loodusvägi,200 ml,other,"Coop, Prisma",,drinks_juices,drinks,drinks,drinks_juices,high,drinks,drinks_juices,high,
+80234,Kingsmill Distilled Gin 38%vol 700ml,Kingsmill Distilled,700 ml,other,"Coop, Prisma, Selver",,produce_herbs_salads_sprouts,produce,drinks,drinks_spirits,high,drinks,drinks_spirits,high,override_with_name_rules
+80284,"Caribba Blanco rumm 37,5%vol 1l",Caribba Blanco,1 l,other,"Coop, Prisma, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+80299,Must purutee Earl Grey 100 g,Must,100 g,other,"Coop, Prisma, Selver",,drinks_tea_coffee,drinks,drinks,drinks_tea_coffee,high,drinks,drinks_spirits,high,override_with_name_rules
+80316,Kohvifilter valge 1 x 4 200 tk.,Kohvifilter,200 pcs,other,Prisma,,drinks_other,drinks,other,,heuristic,drinks,drinks_other,heuristic,
+80321,"Luciente Semi Sweet Rosad vein 11,5%vol 750ml",Luciente Semi,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+80371,Deau Pineau Des Charentes Blanc KPN liköörvein 17%vol 750ml,Deau Pineau,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_spirits,high,override_with_name_rules
+80380,Jim Beam Bourbon Whisky 40%vol 1L,Jim Beam,1 l,other,"Prisma, Rimi",,drinks_spirits,drinks,other,,high,drinks,drinks_spirits,high,
+80393,COOP lahustuv kohv mahe 100g,COOP,100 g,other,Prisma,,drinks_tea_coffee,drinks,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+80500,"Tere Hapukoor 20%, 250 g",Tere Hapukoor,250 g,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dairy_cream_sourcream,dairy_eggs_fats,dairy_eggs_fats,dairy_cream_sourcream,high,drinks,drinks_spirits,high,override_with_name_rules
+80511,Mucho Mas Red vein 14%vol 750ml,Mucho Mas,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+80540,Laua Viin 40%vol 350ml,Laua Viin,350 ml,other,"Prisma, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+80545,Ibis XO Brandy 36%vol 700ml,Ibis XO,700 ml,other,"Barbora, Maxima, Prisma, Selver",,dry_other,other,drinks,drinks_spirits,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+80587,"Totino Music Edition Ru&sa Pina Colada muu alkohoolne jook 12,5%vol 1 l",Totino Music,1 l,other,Prisma,,drinks_soft_soda,drinks,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+80630,A. Le Coq tume kali 1L,A. Le,1 l,other,"Barbora, Coop, Maxima, Prisma, Selver",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+80635,"Eskimo Kohvifilter N:04 /100, pruun",Eskimo Kohvifilter,,other,Prisma,,drinks_other,drinks,other,,heuristic,drinks,drinks_other,heuristic,
+80642,Garage Hardcore Orange muu alkohoolne jook 6%vol 500ml,Garage Hardcore,500 ml,other,"Coop, Prisma, Selver",,produce_tropical,produce,other,,high,produce,produce_tropical,high,
+80736,Diamond Hill Shiraz Rose GT vein 13%vol 250ml,Diamond Hill,250 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+80782,"Somersby Pear siider 4,5%vol 4x500 ml",Somersby Pear,4x500 ml,other,Prisma,,produce_apples_pears,produce,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,override_with_name_rules
+80814,Royal Oporto LBV KPN liköörvein 20%vol 750ml,Royal Oporto,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_spirits,high,override_with_name_rules
+80817,Melitta Kohvifilter 1x4 /80,Melitta Kohvifilter,,other,Prisma,,drinks_other,drinks,other,,heuristic,drinks,drinks_other,heuristic,
+80866,Ararat 5YO Brandy 40%vol 500ml,Ararat,500 ml,other,"Barbora, Maxima, Prisma, Rimi, Selver",,dry_other,other,drinks,drinks_spirits,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+80883,"Pigoudet Premiere Rose KPN vein 12,5%vol 750ml",Pigoudet Premiere,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+80906,"Rainbow ananassi-apelsini-granadillimaisteline kontsentraat 1+7, Light, 500 ml",Rainbow,500 ml,other,Prisma,,produce_tropical,produce,drinks,drinks_syrups_powders,high,produce,produce_tropical,high,
+80924,Koskenkorva vodka 40%vol 500ml,Koskenkorva,500 ml,other,"Coop, Prisma, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+80930,"God Morgon mahe apelsinimahl, 850 ml",God Morgon,850 ml,other,Prisma,,produce_tropical,produce,drinks,drinks_juices,high,produce,produce_tropical,high,
+80981,Starbucks frappuccino caramel kohvijook 250ml,Starbucks,250 ml,other,"Prisma, Rimi",,drinks_other,drinks,other,,heuristic,drinks,drinks_other,heuristic,
+81022,"Hendrick's Gin 41,4%vol 700ml",Hendrick's Gin,700 ml,other,"Barbora, Coop, Maxima, Prisma, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+81056,Vana Tallinn liköör 40%vol 500ml,Vana Tallinn,500 ml,other,"Barbora, Coop, Maxima, Prisma",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+81126,"Rose D'Anjou KPN vein 10,5%vol 750ml",Rose D'Anjou,750 ml,other,"Prisma, Selver",,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+81183,"Caribba Negro rumm 37,5%vol 1l",Caribba Negro,1 l,other,"Barbora, Maxima, Prisma, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+81194,"Leonard Kreusch Pinot Noir KPN vein 13,5%vol 750ml",Leonard Kreusch,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+81217,"Vichy Classique vesi Tropical 1,5 l",Vichy Classique,1.5 l,other,"Coop, Prisma",,drinks_water,drinks,drinks,drinks_water,high,drinks,drinks_water,high,
+81357,"Caribba Negro rumm 37,5%vol 500ml",Caribba Negro,500 ml,other,"Barbora, Coop, Maxima, Prisma, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+81361,"Maori Bay Chardonnay KGT vein 12,5%vol 750ml",Maori Bay,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+81461,Obolon Barhatnoje tume õlu 1L,Obolon Barhatnoje,1 l,other,Prisma,,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+81491,Fanta apelsini zero karastusjook 330ml,Fanta,330 ml,other,"Prisma, Rimi, Selver",,produce_tropical,produce,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,override_with_name_rules
+81511,Johnnie Walker Red Label Scotch Whisky 40%vol 1L,Johnnie Walker,1 l,other,"Barbora, Maxima, Prisma, Rimi, Selver",,drinks_spirits,drinks,other,,high,drinks,drinks_spirits,high,
+81513,Divin St.Monty XO Brandy 40%vol 500ml,Divin St.Monty,500 ml,other,Prisma,,dry_other,other,drinks,drinks_spirits,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+81527,Riga Black Balsam muu piiritusjook 45%vol 200ml,Riga Black,200 ml,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+81612,Aura granaatõunajook 1L,Aura,1 l,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,produce_apples_pears,produce,produce,produce_apples_pears,high,produce,produce_tropical,high,override_with_name_rules
+81623,Aura Fresh jõhvikajook 2L,Aura Fresh,2 l,other,"Barbora, Coop, Maxima, Prisma, Selver",,produce_berries,produce,produce,produce_berries,high,produce,produce_berries,high,
+81649,Bunnahabhain Stiuireadair Single Malt Scotch Whisky 700ml,Bunnahabhain Stiuireadair,700 ml,other,Prisma,,drinks_spirits,drinks,other,,high,drinks,drinks_spirits,high,
+81657,Eskimo Kohvifilter N:4 /180,Eskimo Kohvifilter,,other,Prisma,,drinks_other,drinks,other,,heuristic,drinks,drinks_other,heuristic,
+81675,Mohn Poppy Gin 45%vol 700ml,Mohn Poppy,700 ml,other,"Prisma, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+81689,"Piparmündi-mustasõstratee 20 g, Öko",Piparmündi-mustasõstratee,20 g,other,Prisma,,drinks_tea_coffee,drinks,drinks,drinks_tea_coffee,high,drinks,drinks_spirits,high,override_with_name_rules
+81707,"Smuuti kiivi-ananassi-mango, AURA, 330 ml",Aura,330 ml,other,"Coop, Prisma, Rimi, Selver",,produce_tropical,produce,produce,produce_tropical,high,produce,produce_smoothies_fresh_juices,high,override_with_name_rules
+81863,"Königsmosel Riesling KPN vein 8,5%vol 3L",Königsmosel Riesling,3 l,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+81890,Aura mango-aprikoosi nektar 1L,Aura,1 l,other,"Coop, Prisma, Rimi, Selver",,produce_tropical,produce,drinks,drinks_juices,high,drinks,drinks_juices,high,override_with_name_rules
+81957,Zonin Ripasso Valpoliccela KPN vein 14%vol 750ml,Zonin Ripasso,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+82342,Plekieemaldussvamm Coop 12tk,Plekieemaldussvamm Coop,12 pcs,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+82364,Coop apelsinijook 200ml,Coop,200 ml,other,Prisma,,produce_tropical,produce,produce,produce_tropical,high,produce,produce_tropical,high,
+82447,MOZUMS Tee Karkade 100g(karp),MOZUMS Tee,100 g,other,"Coop, Prisma",,drinks_tea_coffee,drinks,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+82478,"Jacobs lahustuv kohvijook 2 In 1, 14 g",Jacobs,14 g,other,Prisma,,drinks_tea_coffee,drinks,drinks,drinks_tea_coffee,high,drinks,drinks_spirits,high,override_with_name_rules
+82678,"Castell Llord Cava Semi Seco KPN kvaliteetvahuvein 11,5%vol 750 ml",Castell Llord,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+82860,"Cafe Estoril Vinho Verde Rose Doc KPN vein 11,5%vol 750 ml",Cafe Estoril,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+82895,Vana Tallinn liköör 40%vol 1 l,Vana Tallinn,1 l,other,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+82919,Romanzero Limoncello liköör 25%vol 500ml,Romanzero Limoncello,500 ml,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+83039,Coop pirnijook suhkruvaba 1L,Coop,1 l,other,Prisma,,produce_apples_pears,produce,other,,high,produce,produce_apples_pears,high,
+83076,Nokian Panimo Italian Spritz alkoholivaba kokteil 330 ml,Nokian Panimo,330 ml,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+83178,Marli citrus mix suhruvaba mahlajook 1l,Marli,1 l,other,Prisma,,drinks_juices,drinks,drinks,drinks_juices,high,drinks,drinks_juices,high,
+83370,Pierre Devant VSOP piiritusjook 30%vol 100 ml,Pierre Devant,100 ml,other,Prisma,,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+83398,Raw Edge mango fermenteeritud jook 330ml,Raw Edge,330 ml,other,Prisma,,produce_tropical,produce,produce,produce_tropical,high,produce,produce_tropical,high,
+83453,Aito Õunamahl värskelt pressitud 1L,Aito Õunamahl,1 l,other,Prisma,,produce_apples_pears,produce,drinks,drinks_juices,high,produce,produce_apples_pears,high,
+83574,Põhjala Virmalised 0 alkoholivaba IPA 330ml,Põhjala Virmalised,330 ml,other,"Prisma, Rimi",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+83585,Lahustuv kohv Nescafe Basero 100 g,Lahustuv,100 g,other,Prisma,,drinks_tea_coffee,drinks,drinks,drinks_tea_coffee,high,drinks,drinks_spirits,high,override_with_name_rules
+83718,"VICHY FRESH GASEERIMATA JOOK SIDRUNI-LAIMI MAITSELINE 1,5L",VICHY FRESH,1.5 l,other,Prisma,,produce_tropical,produce,other,,high,produce,produce_tropical,high,
+83848,Rainbow jõhvikamahla kontsentraat 500ml,Rainbow,500 ml,other,Prisma,,produce_berries,produce,drinks,drinks_juices,high,produce,produce_berries,high,
+84044,"Tanker pirinimaitseline siider 4,8%vol 500 ml",Tanker,500 ml,other,Prisma,,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+84116,La Gioiosa Valdobbiadene Prosecco Superiore KPN vahuvein 11%vol 750ml,La Gioiosa,750 ml,other,"Barbora, Maxima, Prisma, Selver",,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_wine,high,
+84259,Red Bull Summer Cactus energiajook 250ml,Red Bull,250 ml,other,Prisma,,drinks_energy,drinks,drinks,drinks_energy,high,drinks,drinks_energy,high,
+84340,Legenda Armenii 7Yo Brandy 40%vol 500ml,Legenda Armenii,500 ml,other,"Prisma, Selver",,dry_other,other,drinks,drinks_spirits,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+84361,Planteray Original Dark rumm 40%vol 700 ml,Planteray Original,700 ml,other,"Prisma, Rimi, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+84564,Olmeca Altos 100% Agave Tequila piiritusjook 38%vol 700ml,Olmeca Altos,700 ml,other,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+84708,Royal Oporto Extra Dry White KPN liköörvein 19%vol 750ml,Royal Oporto,750 ml,other,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high,drinks,drinks_spirits,high,override_with_name_rules
+84907,Paulig Mokka kohviuba 1kg,Paulig Mokka,1 kg,other,"Coop, Prisma, Selver",,drinks_coffee_beans_capsules,drinks,other,,high,drinks,drinks_coffee_beans_capsules,high,
+84947,Star Dollar 5* Muu Piiritusjook 30%vol 500ml,Star Dollar,500 ml,other,"Coop, Prisma",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+85096,Latitude 53 Whisky 40%vol 500ml,Latitude,500 ml,other,"Prisma, Selver",,drinks_spirits,drinks,other,,high,drinks,drinks_spirits,high,
+85318,Aura Fresh ploomi-õuna mahlajook 2L,Aura Fresh,2 l,other,"Coop, Prisma, Rimi, Selver",,produce_apples_pears,produce,drinks,drinks_juices,high,drinks,drinks_juices,high,override_with_name_rules
+85606,"Grimbergen Ambree õlu 6,5%vol 500ml",Grimbergen Ambree,500 ml,other,Prisma,,drinks_beer_cider,drinks,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+85659,Jägermeister Orange liköör 33%vol 700 ml,Jägermeister Orange,700 ml,other,"Prisma, Rimi",,produce_tropical,produce,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+85952,Fruuti õunamahl 750ml,Fruuti,750 ml,other,"Coop, Prisma",,produce_apples_pears,produce,drinks,drinks_juices,high,produce,produce_apples_pears,high,
+86147,Poco Loco Rolls maisisnäkk tomatimaitseline 125 g,Poco Loco,125 g,other,Prisma,,produce_root_veg,produce,produce,produce_root_veg,high,drinks,drinks_spirits,high,override_with_name_rules
+87205,Rainbow viie pipra segu veskis 85 g,Rainbow,85 g,other,Prisma,,dry_other,other,other,,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+87392,Chorizo vinnutatud vorst 200 g,Chorizo,200 g,other,Prisma,,meat_sausages,meat_fish,meat_fish,meat_sausages,high,drinks,drinks_spirits,high,override_with_name_rules
+87796,"Kotimaista pitsapõhjad 4 tk, 360 g",Kotimaista,360 g,other,Prisma,,dry_canned_veg,dry_preserves,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+87965,Tualettpaber Soft Embo 32 rulli 3-kihiline,Tualettpaber Soft,,other,Prisma,,hh_paper,household,household,hh_paper,high,household,hh_paper,high,
+88322,Santa maria ananassisalsa 230g,Santa,230 g,other,"Prisma, Selver",,produce_tropical,produce,produce,produce_tropical,high,produce,produce_tropical,high,
+88431,"Fitlap maksapasteet, NÕO, 200 g",Fitlap,200 g,other,"Coop, Prisma, Rimi, Selver",,drinks_tea_coffee,drinks,other,,high,drinks,drinks_spirits,high,override_with_name_rules
+88521,Thai choice sriracha tšilli-küüslaugu kaste 435ml,Thai,435 ml,other,Prisma,,sauces_other,sauces_oils,other,,heuristic,sauces_oils,sauces_other,heuristic,
+89025,Elpozo Salaami viilutatud 80g,Elpozo Salaami,80 g,other,"Barbora, Coop, Maxima, Prisma",,dry_other,other,other,,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+89484,Santa maria magus ja tuline tšillikaste 200 ml,Santa,200 ml,other,Prisma,,sauces_other,sauces_oils,other,,heuristic,sauces_oils,sauces_other,heuristic,

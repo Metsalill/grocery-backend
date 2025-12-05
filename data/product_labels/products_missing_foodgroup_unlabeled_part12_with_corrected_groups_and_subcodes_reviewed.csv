@@ -1,0 +1,901 @@
+product_id,name,brand,size_text,stores_sample,current_food_group,current_sub_code,food_group_corrected,new_sub_code,confidence,final_food_group,final_sub_code,final_confidence,change_reason
+379640,"Vesi Aura Spring Gaasiga 1,5l",Aura,,Rimi,,,drinks,drinks_water,high,drinks,drinks_water,high,
+379641,"Viin Saaremaa 40% 0,2l",Saaremaa,,,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+379642,Proteiini küpsised šokolaadi-kakao Frank&Oil magusainetega 50g,Frank&Oli,,Rimi,,,bakery,bakery_buns_croissants,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+379643,Koorekompvekid Werthers Originaal 50g,Werther's Original,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+379644,Tee roheline ingveri-apelsini Teekanne 35g,Teekanne,,,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+379645,Silikoonhari hammastele ja igemetele BabyOno 723 värv ja kujundus võivad erineda,Babyono,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high,dairy_eggs_fats,dairy_butter_margarine,high,
+379646,"Õlu Staropramen Unfiltered 5%vol 0,5l purk",Staropramen,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+379647,Mahe teesegu Tervise Vägi Väetee 55g,Väetee,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+379648,"Õlu Karksi Blond Munk 6%vol 0,5l pdl",Karksi,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+379649,Punane paprika juustutäidisega Grikios 200g/150g,Grikios,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+379650,"Kaitstud geograafilise tähisega vein Anciens Temps Cabernet-Merlot 14%vol 0,75l",Anciens Temps,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379651,Burrata Viinamärdi 140g,Viinamärdi,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+379652,"Tatar, kooritud, röstimata Rimi Free From 375g",Rimi Free From,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high,dry_preserves,dry_groats_beans,high,override_with_name_rules
+379654,Rukkikrõpsud hapukoore ja tilliga Linkosuo 150g,Linkosuo,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high,sweets_snacks,sweets_snacks_salty,high,override_with_name_rules
+379655,Kartulivahvel juustu- ja sibula maitseline Balsnack 90g,Balsnack,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,sweets_snacks,sweets_waffles_cakes,high,override_with_name_rules
+379657,Pai meloni-passiooni smuuti 280ml,Pai,,Rimi,,,produce,produce_tropical,high,produce,produce_smoothies_fresh_juices,high,override_with_name_rules
+379658,Rosmariin Santa Maria 15g,Santa Maria,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379659,Artišokid grillitud Citres 230g/200g,Citres,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379660,Rukkileib Pärnu ELT 600g,Eesti Leivatööstus,,Rimi,,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+379661,Rassolnik Raaret 700g,Jäämari,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379662,Lasteseep kummeli ekstraktiga Uti Puti alates sünnist 75g,Uti Puti,,Rimi,,,personal_care,pcare_soap,high,personal_care,pcare_soap,high,
+379663,Püree kuivatatud ploomi Põnn 4kuud öko 100g,Põnn,,Rimi,,,other,dry_other,fallback,sweets_snacks,sweets_nuts_driedfruit,high,proposed_group_invalid;override_with_name_rules
+379664,"Smuutisegu vaarika-banaani-mustasõstra Pai 0,3kg",Pai,,Rimi,,,produce,produce_berries,high,produce,produce_smoothies_fresh_juices,high,override_with_name_rules
+379665,Kodujuust laktoosivaba Piimameister Otto 220g,Piimameister Otto,,Rimi,,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+379666,Peekon viilutatud Oskar 120g,Oskar,,Rimi,,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+379667,Marjade ja papaia segu Germund 300g,Germund,,Rimi,,,produce,produce_berries,high,produce,produce_berries,high,
+379668,"Maitsestatud viin Nemiroff Honey Pepper 40%vol 0,5l",Nemiroff,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+379669,Näomask Martinelia Unicorn niisutav 1tk,Martinelia,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379670,"Siider Somersby Blackberry 4,5%vol 1l pet",Somersby,,"Barbora, Maxima, Rimi",,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+379671,Šok.-koorejäätis koonusvah. Premia 100g,Eriti Rammus,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+379672,Kaitstud geograafilise tähisega vein Poggio Fiorito Primi. Puglia 13% 3l,Poggio Fiorito,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379673,Porgand Laheotsa 500g,Laheotsa,,Rimi,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+379674,Kohv jahvatatud Merrild In-Cup 500g,Merrild,,"Barbora, Maxima, Rimi",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+379675,Müslibatoon soolakaramelli Corny Classic 6-pakk 138g,Corny,,Rimi,,,dry_preserves,dry_cereals_muesli,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+379676,Kaerabatoon pistaatsiapähklitega Ma Baker Giant Bar 90g,Mabaker,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+379677,"Kaitstud päritolunimetusega aromaatne kvaliteetvahuvein Martini Asti 0,2l",Martini,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379678,"Kaitstud päritolunimetusega liköörvein Madere Cruz 0,75l",Cruz,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_spirits,high,override_with_name_rules
+379679,Mandlijook Valsoia 1L,Valsoia,,Rimi,,,dairy_eggs_fats,dairy_plant_drinks,high,dairy_eggs_fats,dairy_plant_drinks,high,
+379680,Mitmeviljatortiljad Rimi Planet 370g,Rimi Planet,,,,,bakery,bakery_flatbreads_wraps,high,bakery,bakery_flatbreads_wraps,high,
+379681,"Õlu A. Le Coq Premium Export 5,2%vol 0,33l purk",A. Le Coq,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_beer_cider,high,override_with_name_rules
+379683,"Muu piiritusjook Agavita Tequila Gold 38%vol 0,7l",Agavita,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+379685,Juustu snäkk hapukoore-sibulamaitseline Smiltene 60g,Smiltene,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+379686,"Gin Hogart Pink Gin 37,5%vol 0,7l",Hogarth,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+379687,Taimne määre Philadelphia 145g,Philadelphia,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379688,Hambapasta Aquafresh Little Teeth 50ml,Aquafresh,,Rimi,,,drinks,drinks_tea_coffee,high,personal_care,pcare_oral_care,high,override_with_name_rules
+379689,Pulgakomm The Best Of Chupa Chups 12g,Chupa Chups,,Rimi,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+379690,"Karastusjook toonik greibimaitseline A. Le Coq 1,5l",A. Le Coq,,Rimi,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+379691,Piimašokolaadikommid Daimiga Marabou 67g,Marabou,,Rimi,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+379692,Maasuitsu peekon kg Rebaseonu,Rebaseonu,,Rimi,,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+379693,Mahe kaerahelbed Koksvere 800g,Koksvere Veski,,Rimi,,,dry_preserves,dry_cereals_muesli,high,dry_preserves,dry_cereals_muesli,high,
+379694,Jäätis maapähklitega Sammontana 4x60g,Gruvi,,Rimi,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+379695,"Mänguasi nebulous stars Kristall soovihoidja, 11107",Nebulous Stars,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379696,Õunasiidriäädikas 375ml,Wösel,,Rimi,,,sauces_oils,oils_vinegar,high,produce,produce_apples_pears,high,override_with_name_rules
+379697,"Maisipulgad köögiviljadega Organix alates 7. elukuust, öko 15g",Organix,,Rimi,,,dry_preserves,dry_canned_veg,high,dry_preserves,dry_canned_veg,high,
+379698,Jäätis šokolaadi Vana Toomas 150ml/90g,Vana Toomas,,Rimi,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+379699,Šokolaadi sõõrik sulatatud 77g,Eesti Pagar,,"Barbora, Maxima, Rimi",,,bakery,bakery_sweet_buns_donuts,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+379700,Eelküps. BBQ-suitsune tagakoot M&M vp kg,Maks & Moorits,,"Barbora, Maxima, Rimi",,,meat_fish,fish_salted_smoked,high,meat_fish,fish_salted_smoked,high,
+379701,"Aloe vera jook mango maitseline Aleo 1,5l",Aleo,,Rimi,,,produce,produce_tropical,high,produce,produce_tropical,high,
+379702,Riivjuust Eesti E-Piim 26% 250g,Epiim,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_milk,high,override_with_name_rules
+379703,Rannakarbiliha 300/500 külmutatud vaakum 180g ASC,R Seafood,,Rimi,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+379704,Küpsis Merekarp Kuno Plaan 300g,Kuno Plaan & Kondiitrid,,Rimi,,,sweets_snacks,sweets_biscuits_cookies,high,sweets_snacks,sweets_biscuits_cookies,high,
+379705,"Muu alkohoolne jook Le Coq Alcoholic Cocktail Cuba Libre 4,7%vol 0,33l",A. Le Coq,,Rimi,,,dry_preserves,dry_cereals_muesli,high,dry_preserves,dry_cereals_muesli,high,
+379706,Sefiirikook banaanikreemiga Marta Pagar 260g,Marta Pagar,,Rimi,,,bakery,bakery_cakes_pastries,high,produce,produce_tropical,high,override_with_name_rules
+379707,Krõpsud Pringles Original 70g,Pringles,,Rimi,,,drinks,drinks_spirits,high,sweets_snacks,sweets_snacks_salty,high,override_with_name_rules
+379708,"Kohvikapslid Nescafe Dolce Gusto Dallmayr Crema Doro 16x7,5g",Nescafe,,Rimi,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+379709,"Õlu Oettinger Pils 4,7%vol 0,5l purk",Oettinger,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+379710,3-viljapuder vaarikate ja maasikatega Milupa alates 6. kuust 225g,Milupa,,,,,produce,produce_berries,high,produce,produce_berries,high,
+379711,"Jäätee karboniseeritud mate ekstraktiga Club-Mate 0,5l",Club-Mate,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+379712,Hambahari Oral-B Junior vanusele 6+,Oral-B,,Rimi,,,personal_care,pcare_oral_care,high,personal_care,pcare_oral_care,high,
+379713,"Kaitstud päritolunimetusega kvaliteetvahuvein Champagne Veuve Doussot Brut Rose 0,75l",Veuve Doussot,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379714,"Muu alkohoolne jook Sinebrychoff LD Cranberry 5,5%vol 0,5l purk",Sinebrychoff,,Rimi,,,dry_preserves,dry_cereals_muesli,high,produce,produce_berries,high,override_with_name_rules
+379716,"Salatisegu Fit & Easy ,,Active“ 120g",Fit&Easy,,Rimi,,,produce,produce_herbs_salads_sprouts,high,produce,produce_herbs_salads_sprouts,high,
+379717,Toorjuust Piimameister Otto 150g,Piimameister Otto,,"Barbora, Maxima, Rimi",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+379718,Kohuke šokolaadi tükkidega Aasa 40g,Aasa,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+379719,Kohvikoor Alma 10% 380ml,Alma,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+379720,"Gaseeritud puuviljavein Wõlu Kollane Ploom 6%vol 0,75l",Wõlu,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379721,Maisipallid iirises Eesti Wärk 225g,Eesti Wärk,,Rimi,,,dry_preserves,dry_canned_veg,high,dry_preserves,dry_canned_veg,high,
+379722,Õunapüree ICA Basic 720g,ICA Basic,,Rimi,,,produce,produce_apples_pears,high,produce,produce_apples_pears,high,
+379723,"Whisky Bushmills Original Bushmills 40% 0,7l",Bushmills,,"Barbora, Maxima, Rimi",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+379724,"Õlu Karl Friedrich Tsehhi Lager 5%vol 0,568l",Saku,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+379725,Sidrunikohuke Karums 45g,Karums,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+379726,Küpsised mandli-jõhvika The Beginnings 80g,The Beginnings,,Rimi,,,drinks,drinks_spirits,high,sweets_snacks,sweets_biscuits_cookies,high,override_with_name_rules
+379727,Baklažaan Storko 540g,Storko,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379728,Oliiviõli Borges Classic 500ml,Borges,,Rimi,,,sauces_oils,oils_olive,high,sauces_oils,oils_olive,high,
+379729,Koolijäätis Väike Tom 60g/90ml,Väike Tom,,Rimi,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+379730,"Kaitstud päritolunimetusega vein Ihringer Weiser Burgunder Trocken 12,5%vol 0,75l",Ihringer,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379731,Mereandide kokteil külmutatud ASC 210/170g,R Seafood,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+379732,"Geograafilise tähisega vein Umano Tsinandali 0,75l",Umano,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379734,"Liköör Vana Tallinn koore 16% 0,5l",Vana Tallinn,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high,drinks,drinks_spirits,high,override_with_name_rules
+379735,Paprikakaste Felix 275g,Felix,,"Barbora, Maxima, Rimi",,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+379736,Kompvekid piimašokolaadi Diablo magusainetega 40g,Diablo,,Rimi,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+379737,Hispaania värske lambapiimajuust El Pastro 54% kg,El Pastor,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,meat_fish,meat_beef_lamb_game,high,override_with_name_rules
+379738,Valgehallitusjuust Camembert Ile de France 125g,Ile De France,,"Barbora, Maxima, Rimi",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+379739,Kalmaarirõngad Nowaco Exclusive 300g,Nowaco,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379740,Meekook Eesti Pagar 1kg,Eesti Pagar,,"Barbora, Maxima, Rimi",,,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+379741,Jogurt kirsilisandiga Fantasia 118g,Fantasia,,"Barbora, Maxima, Rimi",,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+379742,Maasika-banaanijogurt tuubis Danonki 70g,Danonki,,"Barbora, Maxima, Rimi",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+379743,"Karastusjook maasika- ja kiivimaitseline Fanta 0,33l",Fanta,,Rimi,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+379744,Müslibatoon kookosega Corny 50g,Corny,,,,,bakery,bakery_cakes_pastries,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+379745,Rinnapadjad ühekordse kasutusega Philips Avent 60tk,Philips Avent,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379746,"Ökoloogiline smuuti mango-, õuna- ja banaanipüreega Relajante Be Plus 150g",Määramata,,Rimi,,,produce,produce_apples_pears,high,produce,produce_smoothies_fresh_juices,high,override_with_name_rules
+379747,Kukeseeneriis kanaga Mamma 300g,Mamma,,Rimi,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+379748,"Vahuvein Törley Talisman 11%vol 0,75l",Törley,,"Barbora, Maxima, Rimi",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379749,Printsessi mänguasi võlukepp Gerardo's Toy's,Gerardos Toys,,Rimi,,,drinks,drinks_beer_cider,high,household,hh_other,low_oos,override_with_name_rules
+379750,Mänguasi Chompy sinine hai,Bouncibles,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379752,"Vein Saint Clair Sauvignon Blanc 13% 0,75l",Saint Clair,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379753,Hirve täissuitsuvorst 240g,Rannarootsi,,Rimi,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+379754,Sinihallitusjuust Castello Danish Blue traditsiooniline 100g,Castello,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+379755,"Kohvikapslid Starbucks Smooth Caramel 10tk, 51g",Starbucks,,Rimi,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+379756,Hambapasta Sensodyne Pronamel Junior Mild Mint 6a+ 50ml,Sensodyne,,Rimi,,,dry_preserves,dry_pasta_rice,high,personal_care,pcare_oral_care,high,override_with_name_rules
+379757,"Kohvikapslid Starbucks House Blend 10tk, 57g",Starbucks,,Rimi,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+379758,Väikesed ekleerid maasikakreemiga Pärnamäed 300g,Pärnamäed,,Rimi,,,produce,produce_berries,high,produce,produce_berries,high,
+379759,Nisutortiljad Rimi Planet 320g,Rimi Planet,,,,,bakery,bakery_flatbreads_wraps,high,bakery,bakery_flatbreads_wraps,high,
+379760,"Karastusjook Blood Orange Bundaberg 0,375l",Bundaberg,,Rimi,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+379761,Kartulikrõpsud hapukoore-ja ürtidemaitselised Lay's 250g,Lay's,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high,sweets_snacks,sweets_snacks_salty,high,override_with_name_rules
+379762,Pastillid Citrus Multivitamin Mynthon 34g,Mynthon,,Rimi,,,drinks,drinks_wine,high,sweets_snacks,sweets_gums_mints,high,override_with_name_rules
+379763,Kohvikapslid Aroma Gold Tiramisu 256g,Määramata,,Rimi,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+379764,"Greip punane 1kl, kg",Määramata,,,,,produce,produce_tropical,high,produce,produce_tropical,high,
+379765,Kikerherned Rimi Planet 500g,Rimi Planet,,Rimi,,,dry_preserves,dry_groats_beans,high,dry_preserves,dry_groats_beans,high,
+379766,Broileririnnafileed sidruni ja ürtidega Tallegg Fitness! 500g,Tallegg,,Rimi,,,dry_preserves,dry_cereals_muesli,high,dairy_eggs_fats,dairy_eggs,high,override_with_name_rules
+379767,Vorst Doktor viilutatud Rakvere 190g,Rakvere,,Rimi,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+379768,"Kaitstud päritolunimetusega vein La Jaglerie Rose d'Anjou 0,75l",Marcel Martin,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379769,"Kaitstud geograadilise tähisega vein Masi Masianco 0,75l",Masi,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379770,Kohv lahustuv Nescafé Classic 200g,Nescafe,,"Barbora, Maxima, Rimi",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+379771,"Kaitstud geograafilise tähisega vein Le Grand Noir GSM 0,75l",Le Grand Noir,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379772,"Kõva juust riivitud, dehüdreerunud Gratino 40g",Gratino,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+379773,"Liköör Vana Tallinn Tiramisu Cream 16%vol 0,5l",Vana Tallinn,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+379774,Tee marja Sweet Cherry Loyd 20x2g,Loyd,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+379775,Mais Bonduelle 530g/360g,Bonduelle,,Rimi,,,dry_preserves,dry_canned_veg,high,dry_preserves,dry_canned_veg,high,
+379776,Mais magus Bonduelle 340g / 285g,Bonduelle,,Rimi,,,dry_preserves,dry_canned_veg,high,dry_preserves,dry_canned_veg,high,
+379777,Koorejäätis mango-passioni 40% vähema suhkruga Premia 50g/100ml,Premia,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+379778,Basiiliku-tomati marinaadis broilerišašlõkk Nõo 600g,Nõo,,Rimi,,,sauces_oils,sauces_marinades,high,meat_fish,meat_poultry,high,override_with_name_rules
+379779,Kummikommid hapu puuvili Red Band 100g,Red Band,,Rimi,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+379780,"Kook Pealinna Eesti Pagar 1,1kg",Eesti Pagar,,"Barbora, Maxima, Rimi",,,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+379781,Vorstid Hispaaniapärased Rimi Planet 300g,Rimi Planet,,Rimi,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+379783,Dessert Cappuccino Nopri 150g,Nopri,,Rimi,,,dairy_eggs_fats,dairy_desserts,high,dairy_eggs_fats,dairy_desserts,high,
+379784,"Vegankook kookose, mango ja passioniviljaga Gourmet Green 190g",Gourmet Green,,Rimi,,,bakery,bakery_cakes_pastries,high,produce,produce_tropical,high,override_with_name_rules
+379785,"Glasuuritud kohuke kakao ja šokolaaditükikestega Magija 23,4% rasva 45g",Magija,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+379786,Klii torud tumeda seesamiga ja juustuga Pärnamäed 100g,Liepkalni,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+379787,Mahekeefir Pajumäe 1l,Pajumäe Talu,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+379788,"Lahustuv kohvijook Jacobs 3in1 12,6g",Jacobs,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+379789,Pralineekommid pistaatsiapähklitega Kalev 175g,Kalev,,Rimi,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+379790,Pehme mänguasi Kosmiline kass,,,,,,pet,pet_other,heuristic,household,hh_other,low_oos,override_with_name_rules
+379791,Pai mango-apelsini smuuti 750ml,Pai,,Rimi,,,produce,produce_tropical,high,produce,produce_smoothies_fresh_juices,high,override_with_name_rules
+379792,"Kaitstud päritolunimetusega vein Zantho Grüner Veltliner 12%vol 0,25l",Zantho,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379793,"Kaitstud geograafilise tähisega vein JP. Chenet Moelleux Medium Sweet Blanc 12%vol 0,75l",J. P. Chenet,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379794,Mahe stressitee Ööbiku 20g,Ööbiku,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+379795,Passion kg,Määramata,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379796,Bambusmatt sushile Fudo 24cmx24cm,Fudo,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379797,Makaronid täistera Penne Rigate Rimi 500g,Rimi GreatLife,,,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+379798,Tee must Chinese Collection Pu-Erh Basilur 100g,Basilur,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+379799,"Mänguauto Hot Wheels erineva disaingia, värvi ja kujundus võivad erineda",Hot Wheels,,,,,dairy_eggs_fats,dairy_butter_margarine,high,dairy_eggs_fats,dairy_butter_margarine,high,
+379800,"Geograafilise tähisega vein Tarapaca Gran Reserva Chardonnay 0,75l",Tarapaca,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379801,"Brandy ST. Remy VSOP 36%vol 0,5l",St. Remy,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+379802,Doktorivorst naturaalne Oskar vp kg,Oskar,,Rimi,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+379803,Küpsised Milka Choco Brownie 150g,Milka,,Rimi,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_biscuits_cookies,high,override_with_name_rules
+379804,"Õlu Estrella De Levante 4,8%vol 0,5l prk",Estrella Damm,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+379805,Juust Tilsit viilutatud Valio 150g,Valio,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+379806,Juust lambapiimast Perail Papillon 150g,Papillon,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+379807,Kaeraküpsis võiga Eesti Wärk 180g,Eesti Wärk,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high,dairy_eggs_fats,dairy_butter_margarine,high,
+379808,Spargel roheline 250g,Määramata,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379809,Mahejogurt Saaremaa mustsõstardega 180g,Saare,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+379810,Püree Hipp õuna-banaani-küpsise 4k öko 100g,Hipp,,Rimi,,,sweets_snacks,sweets_biscuits_cookies,high,sweets_snacks,sweets_biscuits_cookies,high,
+379811,Whisky Black Ram 40%vol 200ml,Black Ram,,"Barbora, Maxima, Rimi",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+379812,Müslibatoon piimašokolaadiga ICA Basic 6x25g,ICA Basic,,Rimi,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+379813,Pajaroog Itaalia Bla Band 150g,Bla Band,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379814,Makaronid Penne Mezzane Pasta Reggia 500g,Reggia,,Rimi,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+379816,Küpsis Choc & Choc Milka 150g,Milka,,Rimi,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_biscuits_cookies,high,override_with_name_rules
+379817,Munad Nordic Egg A/LM Nr.2 10tk,Nordic Egg,,Rimi,,,dairy_eggs_fats,dairy_eggs,high,dairy_eggs_fats,dairy_eggs,high,
+379818,Kohupiimatasku võiga Eesti Pagar 150g,Eesti Pagar,,Rimi,,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+379819,"Kaitstud geograafilise tähisega vein Villa Antinori Toscana 0,75l",Antinori,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379820,"Mänguasi autot kinkekarbis 3tk HW, värvi ja kujundus võivad erineda",Hot Wheels,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high,household,hh_other,low_oos,override_with_name_rules
+379821,"Kaitstud päritolunimetusega kvaliteetvahuvein Veuve Doussot Blanc de Blancs Brut 12,5%vol 0,75l",Veuve Doussot,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379822,Filtrikohv Segafredo Pausa 450g,Segafredo,,"Barbora, Maxima, Rimi",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+379823,Tüümian potis Hansa Herbs,Hansa Herbs,,Rimi,,,other,dry_other,fallback,produce,produce_herbs_salads_sprouts,high,proposed_group_invalid;override_with_name_rules
+379824,"Juuksehari Canpol 2/417, värvi ja kujundus võivad erineda",Canpol Babies,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high,dairy_eggs_fats,dairy_butter_margarine,high,
+379826,Mahe õuna-pirni mahl BIB Dagö Berry 3l,Dagö Berry,,Rimi,,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+379827,Salaami Palermo Rakvere 110g,Rakvere,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379828,Sulatatud juust Laughing Cow 120g,La Vache Qui Rit,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+379829,"Piim Alma kile 2,5% 1l",Alma,,Rimi,,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+379830,Sprotid Rannaküla õlis 250g klaas,Rannaküla,,Rimi,,,sauces_oils,oils_other,high,sauces_oils,oils_other,high,
+379831,"Kaitstud päritolunimetusega vein Ruppertsberger Gewürztraminer Hofstück 0,75l",Ruppertsberger,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379832,"Muu alkohoolne jook Smirnoff Ice magusainetega 4%vol 0,275l",Smirnoff Ice,,Rimi,,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+379833,Mais duopakk Bonduelle 2x170g/2x140g,Bonduelle,,Rimi,,,dry_preserves,dry_canned_veg,high,dry_preserves,dry_canned_veg,high,
+379834,Koore-iiris Kass Artur 180g,Väike Väänik,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+379835,Kana-klimbisupp Mamma 300g,Mamma,,Rimi,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+379836,Juustusupp saiakuubikutega Maggi 19g,Maggi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+379837,Sinine toiduvärv Dr.Oetker 10g,Dr.Oetker,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379838,Šokolaaditahvel KitKat soolakaramelliga 99g,Kitkat,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+379839,"Banaan Cavendish 1kl, kg",Määramata,,Rimi,,,produce,produce_tropical,high,produce,produce_tropical,high,
+379840,Mereandide segu külmutatud blanšeeritud Nowaco 320g,Nowaco,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+379841,"Täismahl Semu mustika 0,5l",Semu,,Rimi,,,drinks,drinks_juices,high,produce,produce_berries,high,override_with_name_rules
+379842,Toorjuust vaniljega Piimameister Otto 400g,Piimameister Otto,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+379843,Taimne vorst Salami Milano Veganic 80g,Veganic,,Rimi,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+379844,Müsli sarapuupähklite ja datlitega Paul ns Granola 450g,Paulúns,,Rimi,,,dry_preserves,dry_cereals_muesli,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+379845,"Maitsestatud viin Saaremaa Apelsin 37,5% 0,5l",Saaremaa,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+379846,"Õlu Purtse Metsik Ida 6,7%vol 0,33l purk",Purtse,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+379847,"Kaitstud päritolunimetusega vein Montezovo Pinot Grigio 12,5%vol 0,75l",Monte Zovo,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379848,Jäätis Pirulo Cool Cola Tut 99ml/100g,Pirulo,,Rimi,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+379849,"Siirup Orange Spritz Teisseire suhkruvaba, magusainetega 0,6l",Teisseire,,Rimi,,,drinks,drinks_syrups_powders,high,drinks,drinks_syrups_powders,high,
+379850,"Rumm Barracuda Gold 38%vol 0,7l",Barracuda,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+379851,Närimiskommid puuviljamaitselised Drako 110g,Drako,,Rimi,,,dry_preserves,dry_other,high,dry_preserves,dry_other,high,
+379852,Taruvaik Sangaste 20g,Sangaste Mesi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379853,Tee punane mee ja Madagaskari vanilliga Loyd 20x2g,Loyd,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+379854,"Valge vein Kendermanns Crafted Collection Gewurztra 11% 0,75l",Kendermanns,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379855,Mähkmed Loving Touch junior 11-16kg 44tk,Loving Touch,,,,,baby,baby_diapers,high,baby,baby_diapers,high,
+379856,"Kaitstud geograafilise tähisega vein Le Grand Noir Sauvignon Blanc 0,75l",Le Grand Noir,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379857,Saialillest šampoon & kehapesu kreem Weleda baby 200 ml,Weleda,,,,,bakery,bakery_buns_croissants,high,personal_care,pcare_shampoo_cond,high,override_with_name_rules
+379858,Majapidamispaber Zewa Cklassik 2k. 2 rulli,Zewa,,Rimi,,,household,hh_paper,high,household,hh_paper,high,
+379859,Komplekt Happy People Lill 5567,Happy People,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379860,"Karboniseeritud jook Vichy Fresh Bubbles Orange 1,5l pet",Vichy,,Rimi,,,other,dry_other,fallback,produce,produce_tropical,high,proposed_group_invalid;override_with_name_rules
+379861,"Whisky Jack Daniel's Tennessee 40%vol 0,7l",Jack Daniel's,,"Barbora, Maxima, Rimi",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+379862,Teekook Marta Pagar 300g,Marta Pagar,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+379863,"Õlu Purtse Pale Ale 5,5%vol 0,33l purk",Purtse,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+379865,Heeringafilee juurviljamarinaadis 430g,Viru Rand,,Rimi,,,dry_preserves,dry_other,high,sauces_oils,sauces_marinades,high,override_with_name_rules
+379866,"Kombucha jook Captain Kombucha Originaal 0,4l",Captain Kombucha,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+379867,Mitme puuvilja nektar multivitamiin Pfanner 2l,Pfanner,,Rimi,,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+379868,"Viin Nemiroff Delikat 40%vol 0,5l",Nemiroff,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+379869,Be Active musta sõstra-mandli toorbatoon 35g,Be More,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+379870,Soolakurk küüslauguga Eesti And 500g/300g,Eesti And,,"Barbora, Maxima, Rimi",,,world_spices,spices_basic_salt_pepper,high,world_spices,spices_basic_salt_pepper,high,
+379871,Mahlajook Elmenhorster kaktus 1l,Elmenhorster,,Rimi,,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+379872,Mänguasi Hambaarst Play Doh F1259,Play Doh,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379873,Joogipudel tilaga lastele Philips Avent roheline 300ml,Philips Avent,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379874,"Piiritusjook Caribba Spiced 35%vol 0,5l",Caribba,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379875,Särav puuder Martinelia 6ml,Martinelia,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379876,Tšillipipar Habanero 50g,Määramata,,,,,world_spices,spices_basic_salt_pepper,high,world_spices,spices_basic_salt_pepper,high,
+379877,Juust Dor Blu 50% kg,Käserei Champignon,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+379878,Ämblikmehe figuur Spider Man 30 cm E7333,Spiderman,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379879,"Muu alkohoolne jook Salitos Original 5,9%vol 0,5l prk",Salitos,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+379880,"Õlu Karksi Must Nunn 6%vol 0,5l pdl",Karksi,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+379881,"Kaitstud päritolunimetusega vein Montezovo Bardolino Chiaretto 0,75l",Monte Zovo,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379882,Kaerabatoon jõhvikatega Ma Baker Giant Bar 90g,Mabaker,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+379884,"Vein With Love Culo&Camicia Sauvignon BIO 13%vol 0,75l",With Love,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379885,Batoon Lion Nestle 6x25g,CEREAL PARTNERS POLAND TORUN-PACIFIC S.p,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+379887,Koorejäätis RAKS küpsistega 110ml/56g,Raks,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+379888,"Tass Canpol 2/100, värvi ja kujundus võivad erineda",Canpol Babies,,,,,dairy_eggs_fats,dairy_butter_margarine,high,dairy_eggs_fats,dairy_butter_margarine,high,
+379889,Metsamesi Vormsi Mesila 950g,Vormsi Mesila,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379890,Kohupiimakreem murakas Nopri 200g,Nopri,,Rimi,,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+379891,Tortiljakrõpsud hapukoore ja juustumaitselised Rimi Planet 200g,Rimi Planet,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high,sweets_snacks,sweets_snacks_salty,high,override_with_name_rules
+379892,"Vein Plai Moldova Merlot Syrah 13%vol 0,75l",Plai Moldova,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379893,"Kaitstud geograafilise tähisega vein Grand Noir Viognier 12,5% 0,75l",Le Grand Noir,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379894,Adžika Felix 260g,Felix,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379895,BO Rustikaalne tume seemneleib Eesti Pagar 500g,Eesti Pagar,,Rimi,,,bakery,bakery_bread_loaves,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+379896,"Pulgajäätis maasikamaitseline, magusainetega Nicks 240ml/200g",Nick's,,Rimi,,,bakery,bakery_buns_croissants,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+379897,Mänguasi BO Karupoeg EST 8022EE,Bo,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379898,Küpsised juustumaitselised Tuc Mini 100g,Tuc,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,sweets_snacks,sweets_biscuits_cookies,high,override_with_name_rules
+379899,"Whisky Aerstone Single Malt 10YO Land 40% 0,7l",Aerstone,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+379900,Mahemunad Eggo M6,Eggo,,Rimi,,,dairy_eggs_fats,dairy_eggs,high,dairy_eggs_fats,dairy_eggs,high,
+379901,"Jäätis, vahtrasiirupi ja karamelliseeritud kreeka pähklitega Movenpick 900 ml",Mövenpick,,Rimi,,,drinks,drinks_syrups_powders,high,drinks,drinks_syrups_powders,high,
+379902,"Kaitstud päritolunimetusega vein Chablis 0,75l",Chablis,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379903,Nukk Barbie Dreamtopia merineitsi,Barbie,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379904,"Tsitrusemaitseline rohelise tee ekstraktiga karboniseerimata teejook suhkrute ja magusainega Fuze Tea 0,5l",Fuze Tea,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+379905,Must tee English Nr 1 Ahmad Tea 100x2g,Ahmad Tea,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+379906,Küpsised tumeda šokolaadiga Marabou 184g,Marabou,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+379907,Gaseerimata sport vesi mineraalidega Spläsh 765ml,Splash,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_water,high,override_with_name_rules
+379908,Prantsuse kohupiimakook Eesti Pagar 320g,Eesti Pagar,,Rimi,,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+379909,"Geograafilise tähisega vein Teliani Valley Saperavi 0,75l",Teliani,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379910,Koorene jogurt kiivi-tikri Farmi 400g,Farmi,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+379911,"Õlu Walter Original 4,2%vol 0,5l purk",Walter,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+379912,"Alkoholivaba vahujook Öun Rabarber-Kuusk Mahe 0,75l",Öun,,Rimi,,,dry_preserves,dry_cereals_muesli,high,dry_preserves,dry_cereals_muesli,high,
+379913,"Muu piiritusjook Stumbro Starka 43%vol 0,5l",Stumbro Starka,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379914,Jogurt metsamarja Activia 4x120g,Activia,,"Barbora, Maxima, Rimi",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+379916,Tortiljakrõpsud juustumaitselised Rimi Planet 200g,Rimi Planet,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,sweets_snacks,sweets_snacks_salty,high,override_with_name_rules
+379917,Õrrekanade munad Kodutalu M10,Kodutalu,,Rimi,,,dairy_eggs_fats,dairy_eggs,high,dairy_eggs_fats,dairy_eggs,high,
+379918,Rohelised oliivid juustutäidisega Grikios 200/150g,Grikios,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+379919,Mähkmed Pampers Pants Giant Pack S5 56tk,Pampers,,Rimi,,,baby,baby_diapers,high,baby,baby_diapers,high,
+379920,"Vahuvein Barco Prosecco Treviso DOC Extra Dry 11%vol 0,75l",Barco,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379921,Proteiinibatoon karamelli ja india pähklitega magusainetega Barebells 55g,Barebells,,Rimi,,,bakery,bakery_buns_croissants,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+379923,Mähkmed Loving Touch midi 4-9kg 56tk,Loving Touch,,,,,baby,baby_diapers,high,baby,baby_diapers,high,
+379924,"Viin Moskovskaja Osobaya 40%vol 0,2l",Moskovskaya,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+379925,Mahe kolmeviljahelbed Loona Talu 1kg,Loona Talu,,Rimi,,,dry_preserves,dry_cereals_muesli,high,dry_preserves,dry_cereals_muesli,high,
+379926,Keefir vaarika-mustika Gefilus 1kg,Valio Gefilus,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+379927,Mahe marmelaad astelpaju Minna 150g,Minna,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379928,Küpsise-kohupiimatort kirssidega Marta Pagar 800g,Marta Pagar,,Rimi,,,dairy_eggs_fats,dairy_cottage_quark,high,sweets_snacks,sweets_biscuits_cookies,high,override_with_name_rules
+379929,"Energiajook PWR 5 Dynami:t Zero magusainetega 0,5l PET",Dynamit,,Rimi,,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+379931,"Siirup mango-passionimaitseline Heliis magusainetega 1,5l",Heliis,,Rimi,,,drinks,drinks_syrups_powders,high,drinks,drinks_syrups_powders,high,
+379932,Soolaheeringa filee vp ca kg,M. V. Wool,,Rimi,,,world_spices,spices_basic_salt_pepper,high,world_spices,spices_basic_salt_pepper,high,
+379933,"Geograafilise tähisega vein Santa Carolina Cellar Chardonnay 0,75l",Santa Carolina,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379934,"Broileritiiva õlaosa, värske, A-klass Rannamõisa 500g",Rannamõisa,,Rimi,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+379935,Pralineekommid Kalev Oravake 175g,Kalev,,Rimi,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+379937,"Värviraamat Nebulous Stars, 11138",Nebulous Stars,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379938,Konstruktor Lego Lamborghini Revuelto Ja Hurac n Sto 77238,Lego,,Rimi,,,meat_fish,meat_beef_lamb_game,high,household,hh_other,low_oos,override_with_name_rules
+379939,Juurvilja mix Fit & Easy Coleslaw 300g,Fit&Easy,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379940,"Alkoholivaba jook Martini Floreale 0,75l",Martini,,Rimi,,,dry_preserves,dry_cereals_muesli,high,dry_preserves,dry_cereals_muesli,high,
+379941,"Õlu Walter Strong 7,0%vol 0,5l purk",Walter,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+379942,Jäätis Raffaello virsiku ja hibiski maitsega 60ml/46g,Raffaello,,Rimi,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+379943,Dessert šokolaadi Zott 175g,Zott,,Rimi,,,dairy_eggs_fats,dairy_desserts,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+379944,Laste toorvorstid juustuga Nõo 400g,Nõo,,"Barbora, Maxima, Rimi",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+379945,Keeleke Erlandia 220g,Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379946,Näkileib seesamiseemnetega Wasa 200g,Wasa,,Rimi,,,bakery,bakery_bread_loaves,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+379947,Konstruktor Lego Beebipõrsa Maja 21268,Lego,,Rimi,,,baby,baby_other,high,household,hh_other,low_oos,override_with_name_rules
+379948,"Kohvikapslid LOR Imola Ristretto 10x5,2g",L'or,,,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+379949,Kiirsupp herne ja krutoonidega Maggi 22g,Maggi,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379950,Vegan proteiinikrõpsud Popcrop hapukooremaitselised  magusainetega 60g,Popcrop,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high,sweets_snacks,sweets_snacks_salty,high,override_with_name_rules
+379951,Lambapiima juust viilutatud Sheep Farm 100g,Sheep Farm,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+379952,Vegan määre merevetika Patifu Veto 100g,Patifu,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379953,Ragbi pall 15cm Gerardo's Toys,Gerardos Toys,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379954,"Rumm Flor de Cana 12yo 40% 0,7l",Flor De Cana,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+379955,Ülesuitsutatud võileivavorst viil Wõro 300g,Wõro,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high,dairy_eggs_fats,dairy_butter_margarine,high,
+379956,"Funktsionaalne jook Nocco San Citro magusainega 0,33l purk",Nocco,,Rimi,,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+379958,Roheline tee Ahmad 100g,Ahmad Tea,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+379959,Mustika tee Rootsi Teekanne 45g,Teekanne,,,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+379960,Fitlap Talukodujuust murulauguga Nopri 300g,Nopri,,Rimi,,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+379961,Hortensiakimp 65cm 1 vars,Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379962,Karboniseeritudkarastusjook Fanta Lemon Zero magusainetega  500ml,Fanta,,Rimi,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+379963,"Vein With Love BBQ&Bistecca Syrah BIO 13,5%vol 0,75l",With Love,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379964,Kuivatatud veiseliha terav 50g,Karni,,Rimi,,,meat_fish,meat_beef_lamb_game,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+379965,"Kuuking 2 vars, 10+ õit",Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+379966,"Supersmuuti Mustika-vaarika-mündi 0,33l tetra",Aura,,Rimi,,,produce,produce_berries,high,produce,produce_smoothies_fresh_juices,high,override_with_name_rules
+379967,Mahe kohvišokolaad Mocca Namm 37g,Namm,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+379968,"Punase viinamarja nektar Loodusvägi mahe 0,2l",Loodusvägi,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_juices,high,override_with_name_rules
+379969,7-viljapuder Milupa õunte ja prebiootikumidega 8k+ 250g,Milupa,,Rimi,,,produce,produce_apples_pears,high,produce,produce_apples_pears,high,
+379970,Itaalia ürdid Kotanyi 14g,Kotanyi,,Rimi,,,world_spices,spices_herbs_spice_mix,high,world_spices,spices_herbs_spice_mix,high,
+379971,"Poolvahuvein Martini Frizzante Semiseco 10,5%vol 0,75l",Martini,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379972,Mustika-vaarika koorejäätis vahvlikoonuses Onu Eskimo 165ml/84g,Onu Eskimo,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+379973,Öko õunasiidriäädika Detox ingveri ja kurkumiga 500ml,Detox,,Rimi,,,produce,produce_apples_pears,high,produce,produce_apples_pears,high,
+379974,Seemnesegu salatile Awake 150g,Awake,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high,sweets_snacks,sweets_nuts_driedfruit,high,
+379975,Kreemjuust Castello küüslaugumaitseline 125g vahustatud,Castello,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+379976,Koorene jogurt apelsini-šokolaadi tükkidega Farmi 400g,Farmi,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+379977,Sojajook The Bridge Barista öko 1l,The Bridge,,Rimi,,,dairy_eggs_fats,dairy_plant_drinks,high,dairy_eggs_fats,dairy_plant_drinks,high,
+379978,"Muu alkohoolne jook Pikero Rhubarb Spritz 5,5%vol 0,75l",Pikero,,Rimi,,,dry_preserves,dry_cereals_muesli,high,dry_preserves,dry_cereals_muesli,high,
+379979,Juust Mozzarella Formagia 125g,Formagia,,"Barbora, Maxima, Rimi",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+379980,Räim külmutatud Saare Fishexport 1kg,Saare Fishexport,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379981,"Mintaifilee portsjonid, külmutatud Zigmas 4x100g MSC",Zigmas,,Rimi,,,sweets_snacks,sweets_gums_mints,high,sweets_snacks,sweets_gums_mints,high,
+379982,Õuna-mango-mustasõstrapüree Muuti ökoloogiline 110g,Muuti,,Rimi,,,produce,produce_apples_pears,high,produce,produce_apples_pears,high,
+379983,"Whisky Glen Moray 12YO 40% 0,7l",Glen Moray,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+379984,Maasuitsuliha kg Rebaseonu,Rebaseonu,,Rimi,,,meat_fish,fish_salted_smoked,high,meat_fish,fish_salted_smoked,high,
+379985,Piimašokolaad jogurtitäidisega Milka 100g,Milka,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+379986,"Alkoholivaba jook Koff Pink Grapefruit 0,33l purk",Koff,,Rimi,,,dry_preserves,dry_cereals_muesli,high,dry_preserves,dry_cereals_muesli,high,
+379987,"Kaitstud geograafilise tähisega vein Dehesa La Granja 0,75l",Dehesa La Granja,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379988,Mänguasi pusle 500tk 37095 Trefl,Trefl,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+379989,Kreeka pähkel Pähklinäpp 200g,Pähklinäpp,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high,sweets_snacks,sweets_nuts_driedfruit,high,
+379990,"Fruktmums mangopüree SEMPER 6+, 110g",Semper,,Rimi,,,produce,produce_tropical,high,produce,produce_tropical,high,
+379991,Sulatatud juust laktoosivaba Merevaik 200g,Merevaik,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+379992,"Liköör Vana Tallinn Marzipan Cream 16% vol 0,5l",Vana Tallinn,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+379993,Bulgaaria juust soolvees Brinza 43% 200g,Destan,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+379994,"Geograafilise tähisega vein Kiwi Island Sauvignon Blanc 13,5%vol 0,75l",Kiwi Island,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379995,Puuviljatee Skinni Vanilli Cupper öko 20tk 40g,Cupper,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+379996,Viinamari seemneteta Muscat Beauty 1kl 500g,,,,,,drinks,drinks_spirits,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+379997,Vanilli-koorejäätis vaarikamahlajää glasuuris Väike Tom Flamingo 60g/74ml,Väike Tom,,Rimi,,,drinks,drinks_juices,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+379998,"Kaitstud päritolunimetusega vein Campo Viejo Reserva 0,75L",Campo Viejo,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+379999,Mustikakangikesed Veri Beri 50g,Veri Beri,,Rimi,,,produce,produce_berries,high,produce,produce_berries,high,
+380000,Külmutatud köögiviljasegu Wokmix Orient 400g,Bauer,,Rimi,,,frozen_food,frozen_veg,high,frozen_food,frozen_veg,high,
+380002,Tee must Dilmah Premium 50x2g,Dilmah,,,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+380003,Röstitud maapähklid paprikamaitselised krõbeda kattega Estrella 260g,Estrella,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high,sweets_snacks,sweets_nuts_driedfruit,high,
+380004,"Püree Hipp tomati, nuudli ja vasikalihaga 12k öko 220g",Hipp,,Rimi,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+380005,Kooritud maapähkel Awake 400g,Awake,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+380006,"Kalafileepulgad paneeritud, külmutatud Vici 250g",Vici,,Rimi,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+380008,"Õlu Velkopopovicky Kozel Premium Lager 4,6%vol 0,5l purk",Velkopopovicky Kozel,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380009,Dessert vanilje Ehrmann 190g,Ehrmann,,Rimi,,,dairy_eggs_fats,dairy_desserts,high,dairy_eggs_fats,dairy_desserts,high,
+380010,Keefir metsmaasika Gefilus 1kg,Gefilus,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+380011,Lambapiimajogurt kookose Viinamärdi 350g,Viinamärdi,,Rimi,,,drinks,drinks_spirits,high,dairy_eggs_fats,dairy_yogurt_kefir,high,override_with_name_rules
+380012,Tume šokolaad tervete mandlitega Kalev 200g,Kalev,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+380013,"Viin Pööriöö 40%vol 0,5l",Saaremaa,,,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380014,"Kaitstud päritolunimetusega kvaliteetvahuvein Moet&Chandon Nectar Imperial 0,75l",Moët & Chandon,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380015,Lutid pudelile Philips Avent Natural Response silikonist 1k+ 2tk,Philips Avent,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380016,Kiirkaerahelbed Herkuless Bio 450g,Herkuless,,Rimi,,,dry_preserves,dry_cereals_muesli,high,dry_preserves,dry_cereals_muesli,high,
+380017,"Lutt Nuk First Choice+ suurus S, silikoon 0-6m 2 tk.",Nuk,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380019,Kuivatatud kanaliha 50g,Karni,,Rimi,,,meat_fish,meat_poultry,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+380020,"Kaitstud päritolunimetusega vein Peter Mertes Riesling Kabinett 0,75l",Peter Mertes,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380021,Kummikommid Trolli Apple Garden 175g,Trolli,,Rimi,,,sweets_snacks,sweets_candies,high,produce,produce_apples_pears,high,override_with_name_rules
+380022,Kartul pestud Villeri 2kg,Villeri,,"Barbora, Maxima, Rimi",,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+380023,Sink seljafilee viilutatud vaak. Oskar 105g,Oskar,,Rimi,,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+380024,"Vein Casa Venerdi poolmagus 11%vol 0,75l",Venezie,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380025,Klii torud kuivatatud tomati ja basiilikuga Pärnamäed 100g,Liepkalni,,Rimi,,,produce,produce_herbs_salads_sprouts,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+380026,Suitsusink Rakvere 350g,Rakvere,,"Barbora, Maxima, Rimi",,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+380027,"Viin Sila Prirodi Klassicheskaja 40%vol 0,7l",Sila Prirodi,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380028,"Viin Nemiroff Delikat 40% 0,7l",Nemiroff,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380029,Pulgakommid kotis Tonque Painter Chupa Chups 120g,Chupa Chups,,Rimi,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+380031,Nukk LOL ast 121336,LOL,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380032,"Astelpaju toormahla siirup, külmutatud Sepamäe 0,5l",Sepamäe,,Rimi,,,drinks,drinks_juices,high,drinks,drinks_syrups_powders,high,override_with_name_rules
+380033,"Muu alkohoolne jook Vana Tallinn Glögi 12%vol 0,75l",Vana Tallinn,,Rimi,,,dry_preserves,dry_cereals_muesli,high,dry_preserves,dry_cereals_muesli,high,
+380034,Laastmakaronid Nouilles Fines Panzani 500g,Panzani,,Rimi,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+380035,Kummikommid Haribo Marjad 100g,Haribo,,Rimi,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+380036,Tee must Yellow Label Lipton 100pk,Lipton,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+380037,"Kookosvesi Pfanner 0,5l",Pfanner,,Rimi,,,drinks,drinks_water,high,drinks,drinks_water,high,
+380038,Kaste hiinapärane poolmagus Felix 500g,Spilva,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+380039,Gin Strange Luve London Dry Gin 40% 0.7l,Strange Luve,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380040,"Õlu Kloostriõlu Valmiermuiža 6,7%vol 0,5l",Valmiermuižas,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380041,Kõrvitsapüree Põnn ökoloogiline 4+ 125g,Põnn,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380042,"Kaitstud päritolunimetusega vein Murviedro Crianza 0,75l",Murviedro,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380043,Närimiskumm eukalüptimaitseline Orbit 14g,Orbit,,Rimi,,,sweets_snacks,sweets_gums_mints,high,sweets_snacks,sweets_gums_mints,high,
+380044,Soolakaramellijäätis krõmpsuvate karamelliseeritud pähklitega Valsoia vegan 80g/110ml,Valsoia,,Rimi,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+380045,Täissuitsuvorst Moskva viil Oskar 80g,Oskar,,Rimi,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+380046,"Vein 3 Passo Bianco Bio 13%vol 0,75l",3 Passo,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380047,Pikk sai Prantsuse Fazer 220g,Fazer,,"Barbora, Maxima, Rimi",,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+380048,Rummi-rosinajäätis öko La Muu 400g/500ml,La Muu,,Rimi,,,drinks,drinks_spirits,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+380049,Müslibatoon jõhvika-vaarika Sante Crunchy 40g,Sante,,Rimi,,,dry_preserves,dry_cereals_muesli,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380050,"Kaitstud päritolunimetusega kvaliteetvahuvein Mademoiselle Marguerite AOC Crémant De Limoux Brut Rosé 12%vol 0,75l",Mademoiselle Marguerite,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380051,"Tee must vaarikamaitseline Dilmah niidiga kotis 20x1,5g",Dilmah,,,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+380052,"Joogivesi Saaremaa 0,5l",Saaremaa,,"Barbora, Maxima, Rimi",,,drinks,drinks_water,high,drinks,drinks_water,high,
+380053,Juust Gouda metsiku küüslauguga kg,Deli Q,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380054,Šokolaadibatoon Crunchy Dumle Soolakaramell 55g,Fazer Dumle,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+380056,Jogurt maitsestamata Farmi 5% 1kg,Farmi,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+380057,Jogurt mango-passioni Nopri 750ml,Nopri,,"Barbora, Maxima, Rimi",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+380058,Proteiinibatoon maapähklikreemiga magusainetega Nicks 50g,Nick's,,Rimi,,,bakery,bakery_buns_croissants,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380059,Mahe kohupiim rasvata Pajumäe 250g,Pajumäe Talu,,Rimi,,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+380060,Küpsetusmargariin EveSol 72% 250g,Evesol,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high,dairy_eggs_fats,dairy_butter_margarine,high,
+380061,"Riisipuder kookoskreemi, mango ja virsikuga Maitseelamused vegan 260g",Maitseelamused,,Rimi,,,bakery,bakery_cakes_pastries,high,produce,produce_tropical,high,override_with_name_rules
+380062,Kommid piparmündi ja šokolaaditäidisega Fazer Marianne 220g,Fazer Marianne,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+380063,"Geograafilise tähisega vein Frontera Sauvignon Blanc 0,75l",Frontera,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380064,Suitsujuustu broileririnnafilee minutipihv 350g,Tallegg,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,meat_fish,meat_poultry,high,override_with_name_rules
+380065,"Külmutatud salati köögiviljad ""vip"", ""hortex""400g",Hortex,,Rimi,,,produce,produce_herbs_salads_sprouts,high,frozen_food,frozen_veg,high,override_with_name_rules
+380066,Krõbe praetud sibul AJI 200g,AJI,,Rimi,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+380067,Koorejäätis karamelli metspähklitäidisega Väike Tom 70g/120ml,Väike Tom,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+380068,"Liköör Jägermeister 35%vol 0,2l",Jägermeister,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+380069,Kohvikapslid Espresso Roma Dolce Gusto Nescafe 16tk,Nescafe,,Rimi,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+380070,Jook Reload tsitruse/laimi Vitamin Well 50cl,Vitamin Well,,,,,produce,produce_tropical,high,produce,produce_tropical,high,
+380071,Basiilik Santa Maria 6g,Santa Maria,,,,,produce,produce_herbs_salads_sprouts,high,produce,produce_herbs_salads_sprouts,high,
+380072,"Kaitstud geograafilise tähisega vein Detective Sauvignon Blanc 11%vol 0,75l",Detective,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380073,Pulgajäätis Milka Mini Stick 6x50ml,Milka,,Rimi,,,dairy_eggs_fats,dairy_milk,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+380074,Merevetikad röstitud sushi jaoks 10lehte Fudo 28g,Fudo,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380075,Juustusnäkk Farmi õrnsuitsuvürtsidega 200g,Farmi,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,world_spices,spices_herbs_spice_mix,high,override_with_name_rules
+380076,Brita tort Gustav 900g,Gustav,,Rimi,,,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+380078,"Kaitstud geograafilise tähisega vein Barone Montalto Passivento Bianco 0,75l",Barone Montalto,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380079,Mahe Triinu õunamahl 3l,Triinu,,Rimi,,,drinks,drinks_juices,high,produce,produce_apples_pears,high,override_with_name_rules
+380080,"Karastusjook Traditional Lemonade Bundaberg 0,375l",Bundaberg,,Rimi,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+380081,Vinnutatud veiseliha terav Charki 50g,Charki,,Rimi,,,meat_fish,meat_beef_lamb_game,high,meat_fish,meat_beef_lamb_game,high,
+380082,Grillitud sardiinid pikantses kastmes Epinell 140g,Määramata,,Rimi,,,dry_preserves,dry_canned_meat_fish,high,dry_preserves,dry_canned_meat_fish,high,
+380083,"Hapendatud kasemahl Kasevetekohin 0,5l pet",Kasevetekohin,,Rimi,,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+380084,"Mänguauto üllatusmuna Welly 1:60, värvi ja kujundus võivad erineda",Welly,,,,,dairy_eggs_fats,dairy_butter_margarine,high,dairy_eggs_fats,dairy_butter_margarine,high,
+380085,"Roosa vein Matua Pinot Noir 13% 0,75l",Matua,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380086,Hommikusöögisegu Awake 150g,Awake,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380087,Kaerasepik Eesti Pagar 300g,Eesti Pagar,,"Barbora, Maxima, Rimi",,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+380088,"Õlu Pilsner Urquell 4,4%vol 0,5l purk",Pilsner Urquell,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380089,Friikartulid Aviko külmutatud 750g,Aviko,,Rimi,,,frozen_food,frozen_potato_products,high,frozen_food,frozen_potato_products,high,
+380090,Kaera-banaani minipannkook Justfood 150g,Just Food,,Rimi,,,bakery,bakery_cakes_pastries,high,produce,produce_tropical,high,override_with_name_rules
+380091,Püksmähkmed Loving Touch Maxi S4 9-15kg 39tk,Loving Touch,,Rimi,,,baby,baby_diapers,high,baby,baby_diapers,high,
+380092,"Destilleeritud gin Tanqueray Blackcurrant Royale 41,3%vol 0,7l",Tanqueray,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380093,Kaardimäng Catuto!,Catuto,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380094,Paneeritud broilerifilee Morliny 350g,Morliny,,Rimi,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+380095,Piimajook šokolaadi Aasa 450ml,Aasa,,Rimi,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380096,Konstruktor Lego Hall alusplaat 11024,Lego,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380098,Sefiirikorvike kohupiimaga Eesti Leivatööstus 2x43g,Eesti Leivatööstus,,Rimi,,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+380099,Mänguasi+ 2 täidet (alusel) Pez 17g,Pez,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380100,Tume šokolaad tervete mandlitega Kalev Leiger 300g,Kalev,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+380101,Gruusia rahvusleib Šoti Kilikia 330g,Kilikia,,Rimi,,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+380102,"Mahe indiapähklivõie ""Kašu"" 333g",Natty,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+380103,"Rumm Flor De Cana Gran Reserva 7yo 40% 0,7l",Flor De Cana,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380104,Joogijogurt metsamarja Activia 280g,Activia,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+380105,"Päevalilleseemned mustad, röstitud Bazaro soolaga 300g",Bazarnyje,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high,sweets_snacks,sweets_nuts_driedfruit,high,
+380106,"Kaitstud geograafilise tähisega vein Stile Naturale Rosso Organic 13,5%vol 0,75l",Stile Naturale,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380107,"Kaitstud päritolunimetusega vein Chevaux Patache Medoc 12,5%vol 0,75l",Les Chevaux de Patache d'Aux,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380108,"Glasuuritud kohuke soolase karamelliga Magija 24,3% rasva 40g",Magija,,Rimi,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+380109,Kohuke Tere kondenspiimaga multipakk 5x40g,Tere,,Rimi,,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+380110,Toonik Red Mixer Orn Craft 1l,Orn Craft,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380111,"Geograafilise tähisega vein Villa Maria Private Bin Riesling 11,5%vol 0,75l",Villa Maria,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380112,Tüümian Santa Maria 10g,Santa Maria,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380113,"Kaitstud päritolunimetusega vein Casal Garcia Vinho Verde 0,75l",Casal Garcia,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380114,Mänguasi Jurassic World ründedinosaurused,Jurassic World,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380115,Valge šokolaadi batoon Lion 2-pakk 60g,Lion,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+380116,Vahvlibatoon valges šokolaadis chunky KitKat 40g,Kitkat,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+380117,"Õlu Grimbergen Blonde 6,7%vol 0,5l",Grimbergen,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380118,Proteiinibatoon maapähkli Better 50g,Better,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+380119,"Aromatiseeritud veinijook Choya Original 0,75l",Choya,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380120,Karastusjook maasikas Mull Null 250ml,Mull Null,,Rimi,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+380121,LOR Mattinata kohv kapslites 10PC,L'or,,,,,produce,produce_root_veg,high,drinks,drinks_coffee_beans_capsules,high,override_with_name_rules
+380122,Lõhe omas mahlas supikogu Minu 240g/168g,Minu,,Rimi,,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+380123,"Mahe maapähklivõie chia seemnetega ""Tšiia"" 333g",Natty,,,,,dairy_eggs_fats,dairy_butter_margarine,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+380124,"Viin Danzka Vodka 40%vol 0,7l",Danzka,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380125,Krõspud juustu maitsega Ahoooy! 75g,Ahoooy,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380126,"Viin Moskovskaya Osobaya 40% 0,7l",Moskovskaya,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380127,Maisipallid kahes šokolaadis Mesikäpp 90g,Kalev,,Rimi,,,dry_preserves,dry_canned_veg,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380128,Marmelaadikommid mustsõstramaitseline Kalev 175g,Kalev,,Rimi,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+380129,Mahe tudraõli Tammejuure 100ml,Tammejuure,,Rimi,,,sauces_oils,oils_other,high,sauces_oils,oils_other,high,
+380130,Nektar Elmenhorster viinamarja 50% 1l,Elmenhorster,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_juices,high,override_with_name_rules
+380131,"Napoleoni kook Eesti Pagar 1,2kg",Eesti Pagar,,"Barbora, Maxima, Rimi",,,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+380132,Taimne vorst Ameerika Pepperoni Veganic 80g,Veganic,,Rimi,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+380133,Vegan võileivamääre ürtidega Valsoia 125g,Valsoia,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high,world_spices,spices_herbs_spice_mix,high,override_with_name_rules
+380135,"Munaliköör Kiiu Torn 15%vol 0,5l",Kiiu Torn,,Rimi,,,dairy_eggs_fats,dairy_eggs,high,drinks,drinks_spirits,high,override_with_name_rules
+380136,Vanillijäätis musta kirsi täidise (18%) ja suhkurdatud kirssidega 500g/800ml,Barattolino,,Rimi,,,dry_preserves,dry_flour_sugar_baking,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+380137,Köögiviljamahl Elmenhorster 100% 1l,Elmenhorster,,Rimi,,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+380138,Brokkoli võrsed Sprout King 30g,Määramata,,Rimi,,,other,dry_other,fallback,produce,produce_herbs_salads_sprouts,high,proposed_group_invalid;override_with_name_rules
+380139,WC värskendaja Bref Power Aktiv Lavender 3x50g,Bref,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380140,"Mintai ICA Basic, MSC 400g",ICA Basic,,Rimi,,,sweets_snacks,sweets_gums_mints,high,sweets_snacks,sweets_gums_mints,high,
+380141,"Alkoholivaba vahuvein Zonin Cuve Zero 0,75l",Zonin,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380142,Suitsutatud juustupats TopFood 150g,Top Food,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380143,Seesami- ja sojamaitseline kaste Santa Maria 250ml,Santa Maria,,Rimi,,,dry_preserves,dry_other,high,dry_preserves,dry_other,high,
+380144,Ingveri-Mee-Sidruni Shrub Wösel 500ml,Wösel,,Rimi,,,produce,produce_tropical,high,produce,produce_tropical,high,
+380145,Broilerifilee sidruni marinaadis kg Lihameister Rimi,Määramata,,Rimi,,,sauces_oils,sauces_marinades,high,meat_fish,meat_poultry,high,override_with_name_rules
+380146,"Valge sõõrik karamellitäidisega, sulatatud 70g",Mantinga,,Rimi,,,bakery,bakery_sweet_buns_donuts,high,sweets_snacks,sweets_candies,high,override_with_name_rules
+380147,Lauamäng Travel Neli ritta,Game Time,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380148,"Kaitstud päritolunimetusega vein Grimaldi Barbesco Manzola punane kuiv 15%vol 0,75l",Grimaldi,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380150,Kotlet kiievi Kikas 220g,Kikas,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380151,Valge šokolaad Nestle Damak pistaatsiapähklite ja krõbedate karamellitükkidega 60g,Nestle,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+380152,Prügikotid Paclan 35l 30tk,Paclan,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380153,Küpsisepallid piimašokolaadis Mesikäpp Küpsisenommid 120g,Mesikäpp,,Rimi,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380154,"Broileri kintsuliha, värske, A-klass Tallegg kg",Tallegg,,Rimi,,,meat_fish,meat_poultry,high,dairy_eggs_fats,dairy_eggs,high,override_with_name_rules
+380155,Luts roogitud sulatatud kg,Peipsi Aare,,Rimi,,,other,dry_other,fallback,dairy_eggs_fats,dairy_cheese_slices,high,proposed_group_invalid;override_with_name_rules
+380156,Jogurt mustikatega Almighurt Ehrmann 500g,Ehrmann,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+380157,Koduküla hautatud veiseliha 250g,Koduküla,,"Barbora, Maxima, Rimi",,,meat_fish,meat_beef_lamb_game,high,meat_fish,meat_beef_lamb_game,high,
+380159,Toorsuitsuvorst Rakvere 280g,Rakvere,,Rimi,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+380160,"Whisky Chivas Regal Extra 13YO Oloroso Sherry Cask 40%vol 0,7l karbis",Chivas Regal,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380161,Purustatud tuunikala õlis Northland 425g/298g,Northland,,Rimi,,,dry_preserves,dry_canned_meat_fish,high,dry_preserves,dry_canned_meat_fish,high,
+380162,Mahe marmelaad vaarikas Minna 150g,Minna,,Rimi,,,produce,produce_berries,high,produce,produce_berries,high,
+380163,Kreekerid mandliga The Beginnings 80g,The Beginnings,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380164,"Salatisegu Fit & Easy ,,Family“ 300g",Fit&Easy,,Rimi,,,produce,produce_herbs_salads_sprouts,high,produce,produce_herbs_salads_sprouts,high,
+380165,Paneeritud kanafileešnitsel 340g,Maks & Moorits,,Rimi,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+380166,"Viin Beloff 37,5%vol 0,7l",Beloff,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380167,Jäätis Ben&Jerrys Sundae Cookie Vermont-ster 427ml,Ben & Jerry,,Rimi,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+380168,Aedvilja-kuskussiroog sealihaga Põnn ökoloogiline 190g (al 8 kuud),Põnn,,,,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+380170,"Siirup Mojito Teisseire suhkruvaba, magusainetega 0,6l",Teisseire,,Rimi,,,drinks,drinks_syrups_powders,high,drinks,drinks_syrups_powders,high,
+380171,"Liköör SIERRA Tropical Chilli 18%vol 0,5l",Sierra Tequila,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380172,Kalapulgad mintai fileest Findus 420g,Findus,,Rimi,,,sweets_snacks,sweets_gums_mints,high,sweets_snacks,sweets_gums_mints,high,
+380173,Jook fermenteeritud kookose sidruni ja rohelise teega Lassi Planton 200g,Planton,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+380175,Pannkoogid passioni- mangotäidisega Vici 280g,Vici,,Rimi,,,produce,produce_tropical,high,produce,produce_tropical,high,
+380176,Kitsepiimajogurt mustika Andri-Peedo 500g,Määramata,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+380177,"Kaitstud päritolunimetusega vahuvein Pignoletto Vino Donelli 11%vol 0,75l",Donelli,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380178,Kohv lahustuv granuleeritud Vespucci 100g,Vespucci,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+380179,Karamelli kihiline küpsis Clara 145g,Clara,,Rimi,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+380180,"Karastusjook limonaad pirni Khiliani 0,5l",Khiliani,,Rimi,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+380181,Prantsuse poolpikk sai Pärnamäed 200g,Pärnamäed,,Rimi,,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+380182,Šokolaadikompvek soolakaramelli täidise ja šokolaadikattega Wavel kg,Wawel,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+380183,"Nukk barbie fashionistas, värvi ja kujundus võivad erineda",Barbie,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high,dairy_eggs_fats,dairy_butter_margarine,high,
+380184,Mahe marmelaad mustikas Minna 150g,Minna,,Rimi,,,produce,produce_berries,high,produce,produce_berries,high,
+380185,"Energiajook Battery Strawberry+Lime purk 0,5l",Battery,,Rimi,,,drinks,drinks_energy,high,produce,produce_berries,high,override_with_name_rules
+380186,Mänguasi Luma valge ükssarvik,Bouncibles,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380188,Kohuke vanilli laktoosivaba Rimi FreeFrom 40g,Rimi Free From,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380189,Küüslaugu- ja ingverimaitseline paneeringusegu Santa Maria 47g,Santa Maria,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380190,Batoonikesed Kalev Mesikäpp 150g,Kalev,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+380191,"Kaitstud päritolunimetusega vein Blue Nun Gewurztraminer 0,75l",Blue Nun,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380192,"Alkoholivaba õlu Saku Rock Zero 0,5l purk",Rock,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380193,Aluslinad Sleepy Sensitive 60x90cm 10tk,Sleepy,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380194,Pasta Farfalle Barilla 500g,Barilla,,Rimi,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+380196,Energiajook Hustler 500ml purk,Hustler,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380197,"Ökoloogiline smuuti õuna- ja pirnipüreega, köögiviljadega Detox Be Plus 150g",Määramata,,Rimi,,,produce,produce_apples_pears,high,produce,produce_smoothies_fresh_juices,high,override_with_name_rules
+380198,BBQ grillribi Linnamäe Lihatööstus 600g,Linnamäe,,Rimi,,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+380199,"Kaitstud päritolunimetusega vein Villa Haas Riesling 12,5%vol 0,75l",Villa Haas,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380200,Imavad linad Kindii Pure&Soft 60x60cm 10tk,Kindii,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380201,"Muu alkohoolne jook Koff Grapefruit 5,5%vol 0,5l purk",Koff,,Rimi,,,dry_preserves,dry_cereals_muesli,high,dry_preserves,dry_cereals_muesli,high,
+380202,Piimašokolaad tervete metspähklitega Kalev Piret 300g,Kalev,,Rimi,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380203,Hapukapsas Kadarbiku 900g,Kadarbiku,,"Barbora, Maxima, Rimi",,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+380204,"Sõõrik Very Peri marjakreemitäidisega, sulatatud Mantinga 70g",Mantinga,,Rimi,,,bakery,bakery_sweet_buns_donuts,high,bakery,bakery_sweet_buns_donuts,high,
+380205,"Funktsionaalne jook Nocco Blood Orange 0,33l",Nocco,,Rimi,,,other,dry_other,fallback,produce,produce_tropical,high,proposed_group_invalid;override_with_name_rules
+380206,Mahe kanapuljong Äntu Gurmee 500ml,Määramata,,Rimi,,,world_spices,spices_broth_stock,high,world_spices,spices_broth_stock,high,
+380207,Püksmähkmed Huggies Mega girl S3 6-11kg 58tk,Huggies,,Rimi,,,baby,baby_diapers,high,baby,baby_diapers,high,
+380208,Piprasalaami viil Oskar 80g,Oskar,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380209,Nukk Monster High® nukkude valik,Monster High,,Rimi,,,drinks,drinks_energy,high,drinks,drinks_energy,high,
+380210,Immuunsüsteemi tee Yogi Tea öko 17tk,Yogi Tea,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+380211,Hambahari Jordan 6-9aaastastele soft 1tk,Jordan,,Rimi,,,personal_care,pcare_oral_care,high,personal_care,pcare_oral_care,high,
+380213,Punapeediviilud klassikalises marinaadis Põltsamaa 570g/380g,Põltsamaa,,Rimi,,,sauces_oils,sauces_marinades,high,sauces_oils,sauces_marinades,high,
+380214,Konstruktor Lego Bugatti Bolide 42151,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380215,Kananagitsad paneeringus Qualiko Tempura 500g,Qualiko,,Rimi,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+380217,"Whisky Black Velvet Canadian 3YO 40%vol 0,7l",Black Velvet,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380218,"Õlu Saaremaa Tuulik 4,7%vol 0,5l purk",A. Le Coq,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380219,Vaarika-juustukook Pagarini 850g,Pagarini,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,produce,produce_berries,high,override_with_name_rules
+380220,"Roosikimp 40cm, 11vart",Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380221,Kohvijook Frezza Forte 250ml,Paulig,,,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+380222,Jäätis vanilli Jättis 195ml/96g,Jättis,,Rimi,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+380223,"Karboniseeritud vesi laimimaitseline Maison Perrier Forever Lime 0,5l",Perrier,,Rimi,,,drinks,drinks_water,high,drinks,drinks_water,high,
+380224,"Kalapulgad paneeritud, eelpraetud ICA Basic MSC, 450g",ICA Basic,,Rimi,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+380225,"Geograafilise tähisega vein Old Tbilisi Alazani White Semi Sweet Wine 0,75l",Old Tbilisi,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380226,Jogurtimaius mango Alma 200g,Alma,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+380227,"Kaitstud päritolunimetusega vein Louis Eschenauer Bordeaux Rouge 14,5%vol 0,75l",Eschenauer,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380228,Põdrakanepitee astelpajuga Estvita 30g,Estvita,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+380229,Kohvijook mandlitega Alpro 250ml,Alpro,,Rimi,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+380230,Puhastav tee Yogi Tea öko 17tk,Yogi Tea,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+380232,Vanilliplombiir Vana Toomas 90g/150ml,Vana Toomas,,"Barbora, Maxima, Rimi",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380233,"Dipikaste aiaürtidega Farmi 19,4% 200g",Farmi,,,,,sauces_oils,sauces_other,high,world_spices,spices_herbs_spice_mix,high,override_with_name_rules
+380234,Muffinid mustikamoosi täidisega 200g,Mr Brownie,,Rimi,,,dry_preserves,dry_other,high,produce,produce_berries,high,override_with_name_rules
+380235,"Vein Chill Out Chenin Blanc 1,5l bag",Chill Out,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380236,Mahe õunaäädikas Piesta 20cl,,,Rimi,,,sauces_oils,oils_vinegar,high,produce,produce_apples_pears,high,override_with_name_rules
+380237,Närimiskommid Mamba Sour 106g,Mamba,,Rimi,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+380238,"Viin Stumbras 40% 0,7L",Stumbras,,"Barbora, Maxima, Rimi",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380239,Mänguasi Mõõk pehme Gerardo's Toys,Gerardos Toys,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380240,Toscana köögiviljasegu kastmega Rimi Planet 450g,Rimi Planet,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+380241,"Liköör Fireball 33%vol 0,5l",Fireball,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+380242,Mahe kolme mündi tee Tammetalu 20g,Tammetalu,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+380243,"Vannivaht Crazy Hair lastele, vaarika aroomiga 300ml",Crazy Hair,,Rimi,,,produce,produce_berries,high,produce,produce_berries,high,
+380244,Smuuti puuvilja Põnn öko 6k 110g,Põnn,,Rimi,,,produce,produce_smoothies_fresh_juices,high,produce,produce_smoothies_fresh_juices,high,
+380245,"Karastusjook S.Pellegrino Naturali Aranciata 0,33l purk",Sanpellegrino,,Rimi,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+380246,Ökoloogiline Hirsi-kaerapuder kollase ploomi ja mangoga 6k+ Põnn 110g,Põnn,,Rimi,,,produce,produce_tropical,high,produce,produce_tropical,high,
+380247,Vegannagitsad sojavalgust Garden Gourmet 200g,Garden Gourmet,,Rimi,,,sauces_oils,sauces_soy_worcester,high,sauces_oils,sauces_soy_worcester,high,
+380248,"Kaitstud geograafilise tähisega vein LYV Rose 12%vol 0,75l",LYV,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380249,Törley alkoholivaba vahuvein 0.2l valge,Törley,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380250,Porteiinipuding kakaoga Ehrmann magusainetega 200g,Ehrmann,,Rimi,,,dairy_eggs_fats,dairy_desserts,high,dairy_eggs_fats,dairy_desserts,high,
+380251,"Õlu Obolon Svetloje 4,5%vol 1l",Obolon,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380252,Surimi pulgad gluteenivabad jahutatud Atlantika 250g,Atlantika,,Rimi,,,drinks,drinks_tea_coffee,high,bakery,bakery_gluten_free,high,override_with_name_rules
+380253,Kalapulgad eelküpsetatud sügavkülmutatud Nowaco 450g,Nowaco,,Rimi,,,meat_fish,fish_fresh,high,dry_preserves,dry_flour_sugar_baking,high,override_with_name_rules
+380254,Broileri rinnafileeribad klassikalises marinaadis Tallegg 500g,Tallegg,,Rimi,,,sauces_oils,sauces_marinades,high,dairy_eggs_fats,dairy_eggs,high,override_with_name_rules
+380256,Koorejäätis šokolaadi 15% Premia 480g/1l,Eriti Rammus,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+380257,"Õlu Nudist Reimo Noble Lager 5%vol 0,33l",Peenjoogivabrik Nudist,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380258,"Kanatiivad krõbedad, vürtsikad Qualiko 500g",Qualiko,,Rimi,,,world_spices,spices_herbs_spice_mix,high,world_spices,spices_herbs_spice_mix,high,
+380259,Atlandi heeringafilee õlita 200g,Vici,,Rimi,,,sauces_oils,oils_other,high,sauces_oils,oils_other,high,
+380260,"Arbuus, poolitatud kg",Määramata,,Rimi,,,produce,produce_tropical,high,produce,produce_tropical,high,
+380261,Ananassi-kookose jook Pfanner 1l,Pfanner,,Rimi,,,bakery,bakery_cakes_pastries,high,produce,produce_tropical,high,override_with_name_rules
+380263,Šokolaadikommid Fazer Geisha kg,Fazer Geisha,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+380264,Merevetika snäkk SEA CRUNCHY Teriyaki maitsega 10g,Sea Crunchy,,Rimi,,,world_spices,spices_asian,high,world_spices,spices_asian,high,
+380265,Oliivide segu marineeritud kivideta Gaea 150g,Gaea,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380266,Batoonikesed Kalev Kaseke kg,Kalev,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+380267,"Muu alkohoolne jook Metaxa Peach Spritz 5% 0,25l purk",Metaxa,,Rimi,,,dry_preserves,dry_cereals_muesli,high,dry_preserves,dry_cereals_muesli,high,
+380268,Inglise kõva juust Wyke Farms Cheddar Ivy's Vintage kuni 18 kuud laagerduv 200g,Wyke,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380269,Piimajook Aptamil 4 alates 24. kuust 800g,Aptamil,,,,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+380270,"Kokteilkobartomat 1kl, 500g",Määramata,,,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+380271,Minikookide valik Reval Kondiiter 12tk 260g,Reval Kondiiter,,Rimi,,,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+380272,Mänguasi Printsessi Kroon,Gerardos Toys,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380273,Merevetika snäkk Samlip 12g,Samlip,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380274,Piimasegu Aptamil 2 alates 6k 2x200ml,Aptamil,,,,,dairy_eggs_fats,dairy_milk,high,baby,baby_formula,high,override_with_name_rules
+380275,Konstruktor Lego Draakoni Spinjitzu Lahingukomplekt 71826,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380276,Salat Tammeleht potis Grüne Fee tk,Grüne Fee,,Rimi,,,produce,produce_herbs_salads_sprouts,high,produce,produce_herbs_salads_sprouts,high,
+380277,Mahe br. kotletid külm. Kikerikii 300g,Kikerikii,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380278,"Mionetto Prosecco DOC Rose Extra Dry 11%, 0.2l",Mionetto,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380279,Hambahari Woom Junior 4700 Ultra Soft,Woom,,Rimi,,,personal_care,pcare_oral_care,high,personal_care,pcare_oral_care,high,
+380280,Vegantoode punase kaaviari maitseline Atlantika 110g,Atlantika,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380281,Närimiskommid puuvilja Mentos 38g,Mentos,,Rimi,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+380282,Või MO Saaremaa küüsl.-soolakrist 150g,MO Saaremaa,,"Barbora, Maxima, Rimi",,,dairy_eggs_fats,dairy_butter_margarine,high,dairy_eggs_fats,dairy_butter_margarine,high,
+380283,"Whisky Bartender's Club 40% 0,2l",Bartender's Club,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380284,"Tomat kollane Võiste Aiand 1kl, kg",Määramata,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high,dairy_eggs_fats,dairy_butter_margarine,high,
+380285,Rõngik piimasokolaadiga kaetud Elephant 80g,Elephant,,Rimi,,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+380286,Viin Mernaya Na Moloke 40% 1l,Mernaya,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380287,Hapendatud kukeseened 380g,,,Rimi,,,produce,produce_mushrooms,high,produce,produce_mushrooms,high,
+380288,Kitsepiima keefir kama Andri-Peedo 330g,Määramata,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+380290,Makaronid tofe Pasta Reggia 500g,Reggia,,Rimi,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+380291,Seakaelakarbonaad sinepi-apelsinimaitselises marinaadis,,,,,,sauces_oils,sauces_marinades,high,produce,produce_tropical,high,override_with_name_rules
+380292,Tarretisepulber sidrunimaitseline Mikaado 80g,Mikaado,,Rimi,,,produce,produce_tropical,high,produce,produce_tropical,high,
+380293,"Õlu Paulaner Münchner Hell 4,9%vol 0,5l purk",Paulaner,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380294,"Kuningkrevetid sabaga Nowaco Exclusive keedetud, kooritud, külmutatud 31/40 ASC 300g",Nowaco,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+380295,Koorejäätis vaarika- ja valge šokolaadimaitseliselise täidisega vahvlikoonuses Onu Eskimo 84g,Onu Eskimo,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+380296,Pekaanipähklisaiake vahtrasiirupiga 91g,Määramata,,Rimi,,,drinks,drinks_syrups_powders,high,drinks,drinks_syrups_powders,high,
+380297,Konstruktor Lego Kosmosesüstik 31134,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380298,"Kaitstud päritolunimetusega vein Mandorla Pinot Grigio 11,5%vol 0,75l",Mandorla,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380299,Kreeka stiilis jogurt mango Alma puuviljadest suhkrutega 180g,Alma,,"Barbora, Maxima, Rimi",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+380300,Mahe kukeseen Berrymush  300g,Määramata,,Rimi,,,produce,produce_mushrooms,high,produce,produce_berries,high,override_with_name_rules
+380301,Mozzarella kirsid Piimameister Otto 125g,Piimameister Otto,,"Barbora, Maxima, Rimi",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380302,"Kaitstud päritolunimetusega vein Gerard Bertrand Cote des Roses Rosé 13%vol 0,75l",Cote Des Roses,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380303,Juust 1000 päeva laagerdunud Landana Gouda 180g,Landana,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380304,Mesi Meveda 500g,Meveda,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380305,Tordikaunistused šokolaadimaitselised Dr.Oetker 80g,Dr.Oetker,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+380306,"Mänguasi Maisto tech mudelauto kompaktne roomiklaadur Bobcat T590, 82183",Maisto,,,,,dry_preserves,dry_canned_veg,high,household,hh_other,low_oos,override_with_name_rules
+380307,Toorjuustu-vaarika rull Lõuna Pagarid 400g,Lõuna Pagarid,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,produce,produce_berries,high,override_with_name_rules
+380308,"Kaitstud geograafilise tähisega vein B&G Sauvignon Blanc Reserve 0,75l",Barton & Guestier,,,,,drinks,drinks_wine,high,drinks,drinks_spirits,high,override_with_name_rules
+380309,Visand raamat Make it real asst. värv ja kujundus võivad erineda,Make It Real,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high,household,hh_other,low_oos,override_with_name_rules
+380310,Mahe tume šokolaad Must 62% Namm 37g,Namm,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+380311,"Geograafilise tähisega vein Gato Negro 9 Lives Blanc 0,75l",Gato Negro,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380312,"Whisky Monkey Shoulder 40% 0,7l",Monkey Shoulder,,"Barbora, Maxima, Rimi",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380313,Automudelid Scania veoautod ja töömasinad Welly,Welly,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380314,Küpsised šokolaaditükkidega Diablo magusainega 130g,Diablo,,Rimi,,,bakery,bakery_buns_croissants,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380315,"Whisky Aerstone Single Malt 10YO Sea Cask 40% 0,7l",Aerstone,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380316,Forellikauss Chef Lunden 330g,Chef Lunden,,Rimi,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+380317,Rosinad sulfitite ja säilitusaineteta Seeberger 200g,Seeberger,,Rimi,,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+380318,"Vermut Bellissimo Bianco 14,5% 1l",Bellissimo,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380319,Kummikommid Haribo Goldbears 175g,Haribo,,Rimi,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+380321,"Mänguasi auto Maisto Tech 1:24 RC raadio teel juhitav Bugatti Divo, 82333",Maisto Tech,,Rimi,,,drinks,drinks_tea_coffee,high,household,hh_other,low_oos,override_with_name_rules
+380322,"Küürimissvamm Marine 10 tk 2,5x8x5cm",Marine,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380323,Jäätis Ben&Jerrys soolakaramelli brownie 160ml/150g,Ben & Jerry,,Rimi,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+380324,Eksklusiivne segu Germund 300g,Premium,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380325,Piimabatoonike tumedas šokolaadis Tume kiisu Miisu 150g,Miisu,,Rimi,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380326,Mänguasi Jumpi pruun känguru,Bouncibles,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380327,Konstruktor Lego Panda pelgupaik 21245,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380328,"Muu alkohoolne jook Strong Grapefruit Koff 8%vol 0,33l",Koff,,Rimi,,,dry_preserves,dry_cereals_muesli,high,dry_preserves,dry_cereals_muesli,high,
+380329,Veepüstol Nerf Torrent SS25,Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380330,Lambapiimajogurt Viinamärdi 350g,Viinamärdi,,Rimi,,,drinks,drinks_spirits,high,dairy_eggs_fats,dairy_yogurt_kefir,high,override_with_name_rules
+380331,"Lutipudel Canpol250ml 59/200, värvi ja kujundus võivad erineda",Canpol Babies,,,,,dairy_eggs_fats,dairy_butter_margarine,high,dairy_eggs_fats,dairy_butter_margarine,high,
+380332,Konstruktor Lego Tuletõrjeauto 10969,Lego,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380333,Friikartul Crinkle oven fries 750g,Farm Frites,,Rimi,,,frozen_food,frozen_potato_products,high,frozen_food,frozen_potato_products,high,
+380334,Mänguasi püramiid plastikust Playgro,Playgro,,Rimi,,,drinks,drinks_wine,high,household,hh_other,low_oos,override_with_name_rules
+380335,Moiva kalamarjamääre suitsulõhega Sudrablinis 160g,Sudrablinis,,Rimi,,,dry_preserves,dry_other,high,meat_fish,fish_salted_smoked,high,override_with_name_rules
+380336,Kaeraröstsai täistera Leibur 550g,Leibur,,"Barbora, Maxima, Rimi",,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+380337,"Lauamäng Pigasus, Brain Games",Brain Games,,,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380338,Pannkoogimoos vähendatud suhkrusisaldusega Rõngu Mahl 900g,Rõngu Mahl,,Rimi,,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+380339,Jogurt pirni Bakoma 150g,Bakoma,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+380340,Õuna-rabarberimahl Mahlametsa 3l,Mahlametsa,,Rimi,,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+380341,"Geograafilise tähisega vein Cono Sur Sauvignon Blanc 0,75l",Cono Sur,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380342,"Hapupiim Nopri 2,5% 1kg",Nopri,,"Barbora, Maxima, Rimi",,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+380343,Doktorivorst Rakvere 300g,Rakvere,,Rimi,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+380344,Suitsusardell Ehe Rannarootsi 375g,Rannarootsi,,Rimi,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+380345,Kookosjook Rimi Planet 400ml,Rimi Planet,,,,,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+380346,"Kõrvitsaseemned Awake, 150g",Awake,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high,sweets_snacks,sweets_nuts_driedfruit,high,
+380347,"Merluusifilee portsjonid riivsaias, külmutatud Zigmas 4x100g MSC",Zigmas,,Rimi,,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+380348,"Muu piiritusjook Riga Black Balzam Cherry 30%vol 0,5l",Black Balsam,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380349,Proteiinibatoon vanillimaitseline valge šokolaadi glasuuris Max Sport gluteenivaba 50g,Maxsport,,,,,drinks,drinks_wine,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380350,"Kaitstud päritolunimetusega vein Leth Grüner Veltliner Terrassen 12,5%vol 0,75l",Leth,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380351,"Roosikimp 50cm, 7vart",Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380352,Kohuke kookose Karums 45g,Karums,,"Barbora, Maxima, Rimi",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380353,Karamelliekleerid Reval 150g,Reval Kondiiter,,Rimi,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+380354,Jogurtijook metsamarja Actimel 8x100g,Actimel,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+380355,"Energiajook Battery 0,33l",Battery,,Rimi,,,drinks,drinks_energy,high,drinks,drinks_energy,high,
+380357,"Multinektar Aura 0,33l",Aura,,Rimi,,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+380358,"Smuuti Pai mango-kookose-mündi, chia-seemnetega 280ml",Pai,,Rimi,,,bakery,bakery_cakes_pastries,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+380359,"Viin Laua 40% 0,7l",Liviko,,"Barbora, Maxima, Rimi",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380360,Rukki näkileivad küüslauguga Linkosuo 150g,Linkosuo,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380361,"Maitsestatud viin Zubrowka Bison Grass 37,5%vol 0,5l",Zubrowka,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380362,Tomatipasta Felix 265g,Felix,,Rimi,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+380363,"Kombucha jook klassikaline Säsi mahe 0,33l pudel",Määramata,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380364,Juust Gouda Rimi Free From 150g,Rimi Free From,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380365,Maisipallid pitsamaitselised Taffel 165g,Taffel,,Rimi,,,dry_preserves,dry_canned_veg,high,dry_preserves,dry_canned_veg,high,
+380366,"Geograafilise tähisega vein Jacob's Creek Cool Harvest Sauvignon Blanc 11,5%vol 0,75l",Jacob's Creek,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380367,Piimašokolaadi batoon pähklikreemi ja karamelliga Mars 2-pakk 70g,Mars,,Rimi,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380368,Külmkuivatatud maasikad Laari Talu 20g,Laari Talu,,Rimi,,,produce,produce_berries,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+380369,Piimašokolaad Milka Sandwich Oreo 92g,Milka,,Rimi,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380370,Vatitikud Loving Touch karbis 60tk,Loving Touch,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380371,Valgehallitusjuust Brie Ile de France 125g,Ile De France,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380372,Glasuurkohuke vanilli multipakk Tere 7x40g,Tere,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380373,Juust Wensleydale aprikoosidega Ilchester 150g,Ilchester,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380374,"Beebipudel kõrrega Canpol 370ml, värvi ja kujundus võivad erineda",Canpol Babies,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high,dairy_eggs_fats,dairy_butter_margarine,high,
+380375,LOR Profondo kohv kapslites 10PC,L'or,,,,,world_spices,spices_broth_stock,high,drinks,drinks_coffee_beans_capsules,high,override_with_name_rules
+380376,Karboniseeritud looduslik mineraalvesi piparmündi-laimimaitseline Värska Mineraal 1l,Värska,,Rimi,,,drinks,drinks_water,high,drinks,drinks_water,high,
+380377,Sulatatud juust grillkanaga Hiirte 185g,Hiirte Juust,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380378,Croissant kakao-vanilje täidisega 7 Days Mini 185g,7 Days,,Rimi,,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+380379,Astelpajumoos Villagu 300g,Villagu,,Rimi,,,dry_preserves,dry_other,high,dry_preserves,dry_other,high,
+380380,Kohvivalgendaja Coffeeta 200g,Coffeeta,,"Barbora, Maxima, Rimi",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+380381,Kartuli-sibula päts Eesti Pagar 350g,Eesti Pagar,,Rimi,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+380382,Küpsised Oreo Original 176g,Oreo,,Rimi,,,drinks,drinks_spirits,high,sweets_snacks,sweets_biscuits_cookies,high,override_with_name_rules
+380383,Kuivatatud vorst Tapas Chorizo Argal 80g,Argal,,Rimi,,,meat_fish,meat_sausages,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+380384,Mänguasi komplekt Play Doh Fun Factory F8805,Play Doh,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380385,Tort šokolaadi-mousse Pagarini 430g,Pagarini,,Rimi,,,bakery,bakery_cakes_pastries,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380386,Jäätis maapähkli-šokolaadi M&M's 450ml/306g,M&M's,,"Barbora, Maxima, Rimi",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+380387,Mahe kreemjas mesi Aasa 500g,Aasa Mesi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380388,Taimnejäätis mango-ja maasika Valsoia magusainetega 280g,Valsoia,,Rimi,,,bakery,bakery_buns_croissants,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+380389,Kakaomääre sarapuupähkliga Valsoia 400g,Valsoia,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high,sweets_snacks,sweets_nuts_driedfruit,high,
+380390,Karamellid puuviljamaitselised Bon Pari Original 90g,Bon Pari,,Rimi,,,drinks,drinks_spirits,high,sweets_snacks,sweets_candies,high,override_with_name_rules
+380391,"Õlu Pühaste Mosaiik 6,9%vol 0,33l purk",Pühaste,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380392,Kontsentraat kaljavirde Maadlex 200g,Maadlex,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380393,"Viin Bartender´s Club Vodka 40% 0,5l",Bartender's Club,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380395,"Kaitstud päritolunimetusega poolvahuvein Donelli Lambrusco Reggiano öko 9%vol 0,75l",Donelli,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380396,Jäätis Specu-love Ben&Jerry's 465ml/392g,Ben & Jerry,,Rimi,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+380397,Maasuitsupeekon viilutatud Rebaseonu,Rebaseonu,,Rimi,,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+380398,Konstruktor Lego Tbd-Sh-2024-Marvel-2 76276,Lego,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380399,"Vitamiinijook Vitamin Well Active 0,5l",Vitamin Well,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380400,"Kaitstud päritolunimetusega vein Torres Sangre de Toro Blanco Clasico 12%vol 0,75l",Torres,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380401,Proteiinibatoon kookosega Go On magusainetega 50g,Go On,,Rimi,,,bakery,bakery_buns_croissants,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380402,Ökotee Seedimise Elujõud 20g,Energiatalu,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+380403,Jäätis Boujee Dubai Chocolate 330ml/220g,Boujee,,Rimi,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+380404,Lima Slimy Fruity collection ast 33711,Slimy,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380405,Jäätis Snickers 450ml/320g,Snickers,,"Barbora, Maxima, Rimi",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+380406,Joogipudel tilaga lastele Philips Avent roosa 200ml,Philips Avent,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380407,Majonees klassikaline Felix 830g,Felix,,"Barbora, Maxima, Rimi",,,sauces_oils,sauces_ketchup_mayo,high,sauces_oils,sauces_ketchup_mayo,high,
+380408,Kohvikapslid House Blend Starbucks by Nescafe Dolce Gusto 102g,Starbucks,,,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+380409,"Sõõrik Ring Of Sour maasika täidisega, sulatatud Mantinga 65g",Mantinga,,Rimi,,,bakery,bakery_sweet_buns_donuts,high,bakery,bakery_sweet_buns_donuts,high,
+380410,Kaste Tropical Salsa Rimi Planet 220g,Rimi Planet,,Rimi,,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+380411,Kissellimaius Mango-Aprikoosi Nopri 140g,Nopri,,Rimi,,,produce,produce_tropical,high,produce,produce_tropical,high,
+380412,"Mineraalvesi Naturaal Värska 0,7l",Värska,,Rimi,,,drinks,drinks_water,high,drinks,drinks_water,high,
+380413,Mahlajook Elmenhorster multivitamiin 20% magusainetega 2l,Elmenhorster,,Rimi,,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+380414,Odrakarask keefiriga 240g,Eesti Pagar,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+380415,Masin Monster Jam 1:72 Plastic Truck assortii 6071187,Monster Jam,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380417,"Liköör Limoncino Bottega 30%vol 0,5l",Bottega,,Rimi,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+380418,"Kaitstud päritolunimetusega vein Doppio Passo Pinot Grigio 12,5%vol 0,75l",Doppio Passo,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380419,Valik piimašokolaadikomme Kalev Aitäh 226g,Kalev,,Rimi,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380420,Magus maasikamoos steviaga magusainetega Good 330g,Good,,Rimi,,,bakery,bakery_buns_croissants,high,produce,produce_berries,high,override_with_name_rules
+380421,Mänguasi Hot Wheels Speed Graphics HWR60,Hot Wheels,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380422,Aluslinad Sanaset 60x60 30tk,SanaSet,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380423,Vahukommid maasikamaitselise suhkrukattega Haribo Primavera Erdbeeren 100g,Haribo,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380424,"Ekstra väärisoliiviõli Grande Uliveto, 1 l",Bono,,Rimi,,,sauces_oils,oils_olive,high,sauces_oils,oils_olive,high,
+380425,Dessert maasika Liegeois Zott 175g,Zott,,"Barbora, Maxima, Rimi",,,dairy_eggs_fats,dairy_desserts,high,dairy_eggs_fats,dairy_desserts,high,
+380426,Juust Cheddar Mature 200g,Lye Cross Farm,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380427,Kinoa Rimi Free From 375g,Rimi Free From,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380428,"Kaitstud päritolunimetusega vein Francois Martenot Bourgogne Chardonnay 12,5%vol 0,75l",Francois Martenot,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380429,Maapähklivõi-proteiini toorbatoon Be Fit 35g,Be More,,Rimi,,,dairy_eggs_fats,dairy_butter_margarine,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380430,Juust Forte Classico Valio kg,Valio Forte,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380431,"Whisky High Commissioner 40%vol 0,7l",High Commissioner,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380432,"Karboniseeritud vesi magneesiumiga Värska 0,5l",Värska,,Rimi,,,drinks,drinks_water,high,drinks,drinks_water,high,
+380433,"Kaitstud päritolunimetusega vein Barone Montalto Nero d'Avola 13,5%vol 0,187l",Barone Montalto,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380434,Pulgajäätis Karamelline kohvi Jäämari 80g,Jäämari,,Rimi,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+380435,Pelmeenid seente ja sibulaga 400g,Vegan,,Rimi,,,produce,produce_mushrooms,high,produce,produce_mushrooms,high,
+380436,"Karastusjook Fanta Orange Zero magusainetega 0,5l",Fanta Zero,,Rimi,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+380437,Kiirnuudlid RamenRoyal kanamaitselised 50g,RamenRoyal,,Rimi,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_soups_noodles,high,override_with_name_rules
+380438,"Õlu Pihtla Viikingi Karje 10,5%vol 0,33l purk",Pihtla,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380439,Šerbett metsapähklitega 165g,Eesti Wärk,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high,sweets_snacks,sweets_nuts_driedfruit,high,
+380440,Rõngiku keerud karamelliseeritud sibula maitselised Elephant 160g,Elephant,,Rimi,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+380441,Vinnutatud veiselihasnäkid klassikalised Snäkk pro Rakvere 50g,Rakvere,,Rimi,,,meat_fish,meat_beef_lamb_game,high,meat_fish,meat_beef_lamb_game,high,
+380442,Kirsid tumedas šokolaadis brändimaitsega Skriveru 150g,Skriveru,,Rimi,,,drinks,drinks_spirits,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380443,Kohuke vanilli ja Belgia šokolaadiga Aasa 40g,Aasa,,Rimi,,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+380444,Taimne suupiste Original Snack IT 90g,Määramata,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380445,"Alkoholivaba õlu A.Le Coq Fassbrause sidrun 0,5l purk",Fassbrause,,,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380446,Kitsepiima juust Ekte Geitost 33% Tine 250g,Tine,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380448,Juustupall Kikas 300g,Kikas,,"Barbora, Maxima, Rimi",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380449,Rosinad piimašokolaadis Kalev Nurr 70g,Kalev,,Rimi,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380450,Kummikommid Haribo Goldbears 100g,Haribo,,Rimi,,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+380451,"Kaitstud päritolunimetusega vein Sicilia Grillo-Viognier Feudo Laparello 13%vol 0,75l",Feudo Laparello,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380452,"Kaitstud geograafilise tähisega vein Les Mougeottes Reserve Speciale Rose Pays d'Oc 12,5%vol 0,75l",Les Mougeottes,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380453,Kaardimäng Tactic,Tactic,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380454,Viigimarjad kg,Määramata,,,,,produce,produce_berries,high,produce,produce_berries,high,
+380455,Lauamäng Humpty Dumpty,Game Time,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380456,"Madala kalorsusega jook mündimaitseline Belief gaseeritud 0,53l PET",Belief,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380457,Kondenspiim magustatud laktoosivaba Baltika 290g,Baltika Food,,Rimi,,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+380458,Maamehesink Maks & Moorits vaakumpakendis kg,Maks & Moorits,,Rimi,,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+380459,Piimašokolaad karamelli ja meresoolaga Geisha 100g,Fazer Geisha,,Rimi,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380460,"Kaitstud päritolunimetusega vahuvein Botter Prosecco Spumante DOC 11%vol 0,75l",Botter,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380461,Riisipuder aprikoosiga Aasa 200g,Aasa,,Rimi,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+380462,Läätsed aurutatud Bonduelle Vapeur 310g,Bonduelle,,Rimi,,,dry_preserves,dry_groats_beans,high,dry_preserves,dry_groats_beans,high,
+380463,"Kaitstud geograafilise tähisega vein Les Mougeottes Chardonnay 0,75l",Les Mougeottes,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380464,Närimiskumm maasikamaitseline Orbit magusainetega 14g,Orbit,,Rimi,,,bakery,bakery_buns_croissants,high,sweets_snacks,sweets_gums_mints,high,override_with_name_rules
+380465,Köögiviljasegu praadimiseks Hiina seentega Bauer Easy Wok 400g,Bauer,,Rimi,,,produce,produce_mushrooms,high,produce,produce_mushrooms,high,
+380466,"Õlu Saku Originaal 4,7%vol 0,5l pdl 6-pakk",Saku,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380467,Sulatatud juust lepasuitsu viilutatud E-Piim 150g,Epiim,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_milk,high,override_with_name_rules
+380468,Kalmaar vähesoolane kuivatatud 36g,MSDM,,Rimi,,,world_spices,spices_basic_salt_pepper,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+380469,"Kaitstud päritolunimetusega vein San Felice IL Grigio Chianti Claccico Riserva 13,5%vol 0,75l",San Felice,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380470,What the fruit maasika öko 35g,What The Fruit,,Rimi,,,produce,produce_berries,high,produce,produce_berries,high,
+380471,Kookospalmi suhkur 250g,Palmisuhkur,,Rimi,,,bakery,bakery_cakes_pastries,high,dry_preserves,dry_flour_sugar_baking,high,override_with_name_rules
+380472,Kiirnuudlid RamenRoyal kanamaitselised vürtsikad 50g,RamenRoyal,,Rimi,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_soups_noodles,high,override_with_name_rules
+380473,"Karastusjook Pepsi 0,33l",Pepsi,,Rimi,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+380474,"Must tee sidruni maasikamaitseliste mullidega LOL 0,275l",LOL,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+380475,"Kohvikapslid Cappuccino Nescafe Dolce Gusto 186,4g",Nescafe,,,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+380476,Kummikommid maasikamaitselised 4D 65g,4D,,Rimi,,,sweets_snacks,sweets_candies,high,produce,produce_berries,high,override_with_name_rules
+380477,Kiirnuudlid maguse tšilli maitselised Maggi 75g,Maggi,,Rimi,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+380478,Energiajook Nutri Energy Power magusainetega 100ml,Nutri Shot,,Rimi,,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+380479,Puuviljarull Bob Snail mango 60g,Bob Snail,,Rimi,,,produce,produce_tropical,high,produce,produce_tropical,high,
+380480,Riis lõhekuubikute ja köögiviljadega Oriental Rimi 350g,Rimi Planet,,Rimi,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+380481,"Juust kõva 12kuud Džiugas,viil. 40% 150g",Džiugas,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380482,"Õlu Saku Rock 5,3%vol 0,568l prk 6-pakk",Rock,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380483,Sulatatud suitsujuust kg,Määramata,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380485,Proteiinipuding topelt kakaoga Ehrmann magusainetega 200g,Ehrmann,,Rimi,,,dairy_eggs_fats,dairy_desserts,high,dairy_eggs_fats,dairy_desserts,high,
+380486,"Mahe rabarberisiirup Niliske 0,25l",Niliske,,Rimi,,,drinks,drinks_syrups_powders,high,drinks,drinks_syrups_powders,high,
+380487,Kana-peekonisalatiga leib Lunden Food 175g,Lunden Food,,Rimi,,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+380488,Vorstid mehhikopärased Rimi Planet 300g,Rimi Planet,,Rimi,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+380489,Pelmeenid kodused Uvic 400g,Uvic,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380490,Tursk sidruni-tilli marinaadis Rimi,Määramata,,Rimi,,,sauces_oils,sauces_marinades,high,sauces_oils,sauces_marinades,high,
+380491,Kohuke vaarikatäidisega kakaoglasuuris Alma 5x40g,Alma,,Rimi,,,produce,produce_berries,high,produce,produce_berries,high,
+380492,"Kohvikapslid Starbucks Espresso Roast 10tk, 57g",Starbucks,,Rimi,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+380493,Tume leib viilutatud Rimi Free From 250g,Rimi Free From,,Rimi,,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+380494,Mänguasi figuur Gabbys Dollhouse pimepakk 6060455,Gabby's Dollhouse,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380495,"Kaitstud päritolunimetusega vein Federico Paternina Rioja Gran Reserva 0,75l",Frederico Paternina,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380496,"Kaitstud päritolunimetusega vein Ramblas Reales Crianza 13%vol 0,75l",Ramblas Reales,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380497,Mahlajook Elmenhorster Mojito laimi-sidruni 1l,Elmenhorster,,Rimi,,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+380498,Juustu snäkk Hollandi juustuga Smiltene 60g,Smiltene,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380499,"Koorejäätis vahvlitopsis vanilli, limonaaditäidisega Väike Tom 70g/120ml",Väike Tom,,Rimi,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+380500,Suitsukanakoib Tallegg vaakumpakendis kg,Tallegg,,Rimi,,,meat_fish,meat_poultry,high,dairy_eggs_fats,dairy_eggs,high,override_with_name_rules
+380502,Juustuvorst Rakvere 300g,Rakvere,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380503,Šašlõkk Matsimoka 700g,Matsimoka,,Rimi,,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+380504,"Gin Beefeater Pink 37,5% 0,7l",Beefeater,,"Barbora, Maxima, Rimi",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380506,Koonusjäätis Super Viva mango 140ml/79g,Super Viva,,Rimi,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+380507,"Mänguasi droon Syma R/C Storm Quadcopter, Z4",Syma,,Rimi,,,other,dry_other,fallback,household,hh_other,low_oos,proposed_group_invalid;override_with_name_rules
+380508,Mahe Kiviveski nisumanna Tammejuure 700g,Tammejuure,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380509,"Mini pannkoogid sulatatud 8,5g",Eesti Pagar,,Rimi,,,other,dry_other,fallback,dairy_eggs_fats,dairy_cheese_slices,high,proposed_group_invalid;override_with_name_rules
+380510,Mandlimaiustused Ferrero Raffaello 260g,Raffaello,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380511,"Kaitstud päritolunimetusega vein Ricossa Barbaresco DOCG 14%vol 0,75l",Ricossa,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380512,Iiriskommid piimašokolaaditäidisega Milka kg,Milka,,Rimi,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380513,Kartulid köögiviljade ja seentega Bauer 400g,Bauer,,Rimi,,,produce,produce_mushrooms,high,produce,produce_mushrooms,high,
+380514,"Õlu Sandels 4,7%vol 0,5l purk",A. Le Coq,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380515,Köögiviljasegu Bauer Junior Mix 400g,Bauer,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380516,"Pastillid metsamarjamaitselised Halls 33,5g",Halls,,Rimi,,,drinks,drinks_wine,high,sweets_snacks,sweets_gums_mints,high,override_with_name_rules
+380517,Piimašokolaad sarapuupähklitega Marabou 220g,Marabou,,Rimi,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380518,Hapuoblikasupp singiga Rimi Express 470g,Rimi Express,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380519,Küpsised Doris Fazer 250g,Fazer,,Rimi,,,sweets_snacks,sweets_biscuits_cookies,high,sweets_snacks,sweets_biscuits_cookies,high,
+380520,"Õlu Rock Hopper 5,3%vol 0,568l purk",Rock,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380521,"Kaitstud geograafilise tähisega vein Rosso Puglia Passito Igt 15%vol 0,75l",Antale,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380522,Vorst Krakov Valla 450g,Valla,,"Barbora, Maxima, Rimi",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+380523,"Geograafilise tähisega vein Casillero Cabernet Sauvignon 0,75l",Casillero del Diablo,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380524,Räimefilee sibulaga Koduranna 436g/270g,Määramata,,Rimi,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+380525,Tervisetee Especha 65g,Especha,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+380526,"Õlu Rock Unikorn 5,3%vol 0,568l prk",Rock,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380527,Küpsis kihiline Kuno Plaan 300g,Kuno Plaan & Kondiitrid,,Rimi,,,sweets_snacks,sweets_biscuits_cookies,high,sweets_snacks,sweets_biscuits_cookies,high,
+380528,Kodujuustu-virsikutort Europagar 430g,Europagar,,Rimi,,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+380529,Täisterarukkileib pärmivaba Pärnamäed 400g,Pärnamäed,,Rimi,,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+380530,Riivjuust MO Saaremaa 400g,MO Saaremaa,,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380531,Vürtsid küüslaugu kanale Kotanyi 30g,Kotanyi,,Rimi,,,world_spices,spices_herbs_spice_mix,high,world_spices,spices_herbs_spice_mix,high,
+380532,Sarapuupähkli-šokolaadimääre Diablo magusainega 350g,Diablo,,Rimi,,,bakery,bakery_buns_croissants,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380533,Öko kaerahelbed Jahu-Jaan 900g,Jahu - Jaan,,Rimi,,,dry_preserves,dry_flour_sugar_baking,high,dry_preserves,dry_flour_sugar_baking,high,
+380534,Söögisool peeneteraline Santa Maria 92g,Santa Maria,,Rimi,,,world_spices,spices_basic_salt_pepper,high,world_spices,spices_basic_salt_pepper,high,
+380535,Pesugeel Bübchen pumbaga beebidele 400ml,Bübchen,,,,,baby,baby_other,high,household,hh_laundry,high,override_with_name_rules
+380536,Kook Käharpea Eesti Leivatööstus 280g,Eesti Leivatööstus,,Rimi,,,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+380537,"Kaitstud geograafilise tähisega vein Laroche Chardonnay Reserve 13%vol 0,75l",Laroche,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380538,Kohvioad keskmine röst Crema Jacobs 1kg,Jacobs,,,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+380539,Creme fraiche Baltais 500g,Baltais,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380541,Maisikrõpsud Cheetos ketšupi 165g,Cheetos,,Rimi,,,dry_preserves,dry_canned_veg,high,sweets_snacks,sweets_snacks_salty,high,override_with_name_rules
+380542,Ciabatta tume külmutatud Eesti Pagar 300g,Eesti Pagar,,Rimi,,,frozen_food,frozen_other,heuristic,frozen_food,frozen_bakery,high,override_with_name_rules
+380543,"Geograafilise tähisega vein Badgers Cr. Shiraz Cabern. 0,75l",Badgers Creek,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380544,Õllepunnid juustuga Isukas 500g,Rannarootsi,,"Barbora, Maxima, Rimi",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+380545,Maisikrõpsud Takis Blue Hear 100g,Takis,,Rimi,,,dry_preserves,dry_canned_veg,high,sweets_snacks,sweets_snacks_salty,high,override_with_name_rules
+380547,Taimetee Detox&Slim Apsara 20x2g,Apsara,,Rimi,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+380548,"Kaitstud geograafilise tähisega vein Umano Kindzmarauli 11,5%vol 0,75l",Umano,,Rimi,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+380549,"Perry Bellissimo 5,5%vol 0,75l",Bellissimo,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380550,"Õlu Staropramen Granat 4,8%vol 0,5l purk",Staropramen,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380551,"Vaikse ookeani mintaifilee nahata, sügavkülmutatud, 1kg",Määramata,,Rimi,,,sweets_snacks,sweets_gums_mints,high,sweets_snacks,sweets_gums_mints,high,
+380552,Tarretisepulber kirsimaitseline Mikaado 80g,Mikaado,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380553,Särtsakas peedisalat koriandriga Eesti And 450g,Eesti And,,Rimi,,,produce,produce_herbs_salads_sprouts,high,produce,produce_herbs_salads_sprouts,high,
+380554,Rabarberi-Itaalia marengi minitort Gourmet Club 220g,Gourmet Club,,Rimi,,,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+380555,Ketšup terav Hellmann's 470g,Hellmann's,,Rimi,,,sauces_oils,sauces_ketchup_mayo,high,sauces_oils,sauces_ketchup_mayo,high,
+380556,Grill-liha seakaelakarbonaadist mustikamarinaadis Rakvere 500g,Rakvere,,Rimi,,,sauces_oils,sauces_marinades,high,produce,produce_berries,high,override_with_name_rules
+380557,Mahe marmelaad puuvilja Minna 150g,Minna,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380558,Kartulikrõpsud grillitud juurviljade maitselised Lay's Oven Baked 110g,Lay's,,Rimi,,,sweets_snacks,sweets_snacks_salty,high,sweets_snacks,sweets_snacks_salty,high,
+380559,Kummikommid hapud maasikamaitselised Sour Patch Kids 80g,Sour Patch,,Rimi,,,sweets_snacks,sweets_candies,high,produce,produce_berries,high,override_with_name_rules
+380560,Gerbera potis 12cm,,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380561,"Mahl multipuuvilja Hohes C Super Shots Antiox E-vitamiini ja seleeniga 0,33l",Hohes C,,Rimi,,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+380562,Pastillid Halls Lemon Ice Tea magusainetega 32g,Halls,,Rimi,,,drinks,drinks_wine,high,sweets_snacks,sweets_gums_mints,high,override_with_name_rules
+380564,Kaardimäng Trefl Stitch 08978T,Trefl,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380565,"Siider Fizz Apple Dry 4,7% 0,33L PRK",Fizz,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380566,"Nuudlid magushapu kanaga Dal's Kitchen 0,318g",Dal's Kitchen,,Rimi,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+380567,Sai viilutatud Rimi Free From 250g,Rimi Free From,,Rimi,,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+380568,Vahvlikommid rummimaitselised Kalev Tallinn 150g,Kalev,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380569,Hambapasta Oral B Pro Junior 75ml,Oral-B,,Rimi,,,dry_preserves,dry_pasta_rice,high,personal_care,pcare_oral_care,high,override_with_name_rules
+380570,Jogurt maasika Zott Zottis 115g,Zott,,Rimi,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+380571,Öko odrajahu (täistera) Jahu-Jaan 750g,Jahu - Jaan,,Rimi,,,dry_preserves,dry_flour_sugar_baking,high,dry_preserves,dry_flour_sugar_baking,high,
+380573,Suir Sangaste 100g,Sangaste Mesi,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380574,Pähklite ja kuivatatud marjade segu Daily Dose Harmony 40g,Zelta Rieksts,,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,high,sweets_snacks,sweets_nuts_driedfruit,high,
+380575,Proteiinikohupiimakreem vanilli Valio ProFeel magusainega 200g,Valio Pro Feel,,Rimi,,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+380576,"Õlu Walter Kange 7%vol 0,5l",Walter,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380577,Vanillimaitseline koorejäätis kakaoküpsistega Oreo 425ml/245g,Oreo,,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+380578,Põllulillede mesi Vormsi Mesila 950g,Vormsi Mesila,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380579,"Piimašokolaadiglasuuriga kohuke küpsisemaitselise täidisega 21,6 % rasva Magija 40g",Magija,,Rimi,,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380580,"Tatrapuder pirni-suvikõrvitsa-lillkapsaga, rauaga Nogel öko 100g",Määramata,,Rimi,,,produce,produce_apples_pears,high,produce,produce_apples_pears,high,
+380581,Pudrupulber Hipp riisi bio 4kuud 200g,Hipp,,,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+380582,Kohupiimakreem šokolaaditükkidega Nopri 400g,Nopri,,Rimi,,,dairy_eggs_fats,dairy_cottage_quark,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+380583,Kirsi halvaa Marmiton 150g,Marmiton,,Rimi,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+380584,"Viin Hlibnij Kolos 40%vol 0,5l",Hlibnij Kolos,,Rimi,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+380585,"Õlu Tuborg 4,6%vol 0,33l pdl 6-pakk",Tuborg,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+380586,"Muu alkohoolne jook Hoggy's Gin long drink 5%vol 0,5l purk",Hoggy's,,Rimi,,,drinks,drinks_beer_cider,high,drinks,drinks_spirits,high,override_with_name_rules
+380589,"Kiirnuudlid veiselihamaitselised Maggi 59,2g",Maggi,,,,,dry_preserves,dry_pasta_rice,high,meat_fish,meat_beef_lamb_game,high,override_with_name_rules
+380603,Kohvioad Lavazza Caffe Espresso 1kg,Lavazza,,,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+380613,"Viin Vodka Arsenitch 40% 0,5l",Arsenitch,,,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,

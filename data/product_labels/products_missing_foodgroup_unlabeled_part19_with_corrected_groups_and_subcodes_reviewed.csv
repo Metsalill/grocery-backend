@@ -1,0 +1,901 @@
+product_id,name,brand,size_text,stores_sample,current_food_group,current_sub_code,food_group_corrected,new_sub_code,confidence,final_food_group,final_sub_code,final_confidence,change_reason
+421459,"Jogurt ALMA mango-virsik laktoosiv.,900g",,,,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421460,"Külm.vürtsik.juustu nagitsad SALUD, 250g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,world_spices,spices_herbs_spice_mix,high,override_with_name_rules
+421462,Liköör Mustika 18% 500ml,,,"Barbora, Maxima",,,produce,produce_berries,high,drinks,drinks_spirits,high,override_with_name_rules
+421463,Marjakook 370g,,,"Barbora, Maxima",,,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+421465,"Mini lavash LAMELEIB, 120g",,,"Barbora, Maxima",,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+421466,"Mereandide kokteil marineer. VICI,500g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421467,"Singipitsa SAARIOINEN, 200g",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421468,Mini õuna-pohlasaiake 32g,,,,,,bakery,bakery_buns_croissants,high,produce,produce_berries,high,override_with_name_rules
+421469,"Glasuurkohuke kookose, KARUMS, 45g",,,,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+421470,Liköör JÄGERMEISTER 35% 1.75L,,,"Barbora, Maxima",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+421471,"Sprotid õlis KAIJA, 190g",,,"Barbora, Maxima",,,sauces_oils,oils_other,high,sauces_oils,oils_other,high,
+421472,Liköör Minty 50% 500ml,,,"Barbora, Maxima",,,sweets_snacks,sweets_gums_mints,high,drinks,drinks_spirits,high,override_with_name_rules
+421473,M.alk.jook HARTWALL Orange5.5% 330ml prk,,,"Barbora, Maxima",,,other,dry_other,fallback,produce,produce_tropical,high,proposed_group_invalid;override_with_name_rules
+421474,Külm.pelmeenid praesibul.PEALINNA 350g,,,"Barbora, Maxima",,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+421475,Mandariini nektar AURA 1l,,,,,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+421476,"Minisarvesai kakao täid. 7DAYS,185g",,,"Barbora, Maxima",,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+421477,"Jäätis DAIM pulk, 64g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+421478,Alkoholivaba õlu CLAUSTHALER 330ml,,,,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+421479,"Moosipall puuviljat-ga.sul.,51g",,,"Barbora, Maxima",,,dry_preserves,dry_other,high,dry_preserves,dry_other,high,
+421480,Min.vesi AKVILE nõrg.gaas-tud 6x1.5L,,,"Barbora, Maxima",,,drinks,drinks_water,high,drinks,drinks_water,high,
+421481,"Min. vesi VYTAUTAS 1.5Lx6, g-tud",,,"Barbora, Maxima",,,drinks,drinks_water,high,drinks,drinks_spirits,high,override_with_name_rules
+421483,"Joogijogurt LIISU Shake plombiir, 250g",,,,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421485,"Joogijogurt LIISU Shake ploom, 250g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421488,Multipuuvilja jook MIO&RIO 1L,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421490,"Jäätis OREO, 287g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+421491,"Juust Cheddar veiniga, kg",,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421492,"Joogijogurt LIISU Shake õuna, 250g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421493,"Juust Cheddar WELL DONE Mild viil., 150g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421494,Kohvioad Caffe Espresso LAVAZZA 1kg,,,,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+421495,"Juust Eesti E-PIIM light viilutatud,300g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_milk,high,override_with_name_rules
+421496,"Juust Mozzarella kirsid OTTO, 245g/125g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421497,"Täisterasepik EESTI PAGAR, 500 g",,,,,,bakery,bakery_bread_loaves,high,drinks,drinks_spirits,high,override_with_name_rules
+421499,"Juust Maasdam Kroon, kg",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421500,Piir.jookCAPTAIN MORGAN Spiced 35% 500ml,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421501,Juust Mozzarella FORMAGIA 220g/125g,,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421502,Tallinna peenleib LEIBUR 490g,,,,,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+421504,Taimetee ingv.-sidrunim.LOYD pür.20x2g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+421505,"Koorejäätis ONU ESKIMO sidr.-vanil.,84g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+421506,Piir.jook CAPTAIN MORGAN Spiced 35% 1l,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421507,Liköör BLUE CURACAO 20% 700ml,,,"Barbora, Maxima",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+421509,"Juust Mascarpone FARM MILK, 250g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_milk,high,override_with_name_rules
+421510,"Juust Mascarpone lak.vaba Granarolo,250g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421511,"Koorejäätis pistaatsia PREMIA, 240g",,,,,,dairy_eggs_fats,dairy_cream_sourcream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+421513,"Tosca kook REVAL KONDIITER, 700g",,,,,,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+421514,"Juust Wensleydale mango-ingveriga, kg",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421515,"Kaerajook YOOK Vitamins&Calcium, 1L",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_plant_drinks,high,dairy_eggs_fats,dairy_plant_drinks,high,
+421516,"Juust Vene ESTOVER viilutatud, 500g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421517,"Kartulikaste FELIX, 220g",,,,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+421518,"Kartulikaste FELIX, 400g",,,,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+421519,Karastusjook FANTA Apelsini 1.5L,,,,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+421520,"J.jogurt aedm. m. WELL DONE 2%, 250g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421521,Kass Arturi Karamell BALTIKA 370g,,,"Barbora, Maxima",,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+421522,"Külm.köögiviljas.Wok kartulitega,400g",,,"Barbora, Maxima",,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+421523,"Juust ZOTT Toasty Hamburger viil.,120g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421524,KPN vein MURVIEDRO RESERVA 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421525,"Toorvorstid Gruusia RANNAROOTSI, 400g",,,,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+421526,"Külm.mintai fil.petersell FINDUS, 256g",,,"Barbora, Maxima",,,sweets_snacks,sweets_gums_mints,high,sweets_snacks,sweets_gums_mints,high,
+421527,KPN vein JOHANN BRUNNER Ries.Mosel 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421528,"Toorvorstid sibula-äädikaga NÕO,400g",,,,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+421529,"Toorvorstikesed cheddar juustuga, kg",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421532,Nisuõlu CRONUS 5.3% 500ml,,,"Barbora, Maxima",,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+421533,GT kuiv vein ANDES Chardonnay 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421534,"Jog.jook ACTIMEL maasika, 4x100g",,,,,,produce,produce_berries,high,produce,produce_berries,high,
+421535,Kodujuust mustika WELL DONE 150g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+421536,"K.juust WELL DONE PREMIUM 50%,viil,120g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421537,Vein J.P.CHENET Colomb.Chard. BIB 3l,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421538,"Kreeka jog.jook ALMA metsmaasika,275g",,,,,,produce,produce_berries,high,produce,produce_berries,high,
+421539,Alkoholivaba õlu CLAUSTHALER 500ml,,,,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+421541,Viinamarjanektar AURA 1L,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_juices,high,override_with_name_rules
+421542,T/s vorst broilerilihast TALLEGG 200g,,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,dairy_eggs_fats,dairy_eggs,high,override_with_name_rules
+421543,"T/s vorst hirve juustu LINNAMÄE, 230g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,meat_fish,meat_sausages,high,override_with_name_rules
+421544,Arom.vein APERITIF Bianco 1L,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421546,Kuldne graham röstsai LEIBUR 500g,,,,,,bakery,bakery_bread_loaves,high,meat_fish,meat_hams,high,override_with_name_rules
+421547,Arom.veinijook KÄFER Bellini peach 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421548,"Külm. pitsa Gourmet WELL DONE, 425g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421551,"Kodujuust ALMA creme brulee maits., 200g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+421552,"Viiner Ehe RANNAROOTSI, 330g",,,,,,drinks,drinks_spirits,high,meat_fish,meat_sausages,high,override_with_name_rules
+421553,"Broil.kintsuliha küüslaugu-jogurti,kg",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421554,"Tume leib ciabatta, väike 65g",,,"Barbora, Maxima",,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+421555,"Eestimain.br.rinnafilee A-kl TALLEGG, kg",,,"Barbora, Maxima",,,other,dry_other,fallback,dairy_eggs_fats,dairy_eggs,high,proposed_group_invalid;override_with_name_rules
+421556,"Broileri pooltiivad punases marin.,600g",,,,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+421557,"Fitlap toorvorstid kanalihaga NÕO, 400g",,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+421558,"Forellimari KODURANNA, 100g",,,"Barbora, Maxima",,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+421559,GI wine TORO D'ORO Res. Chardonnay 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421561,EHE Grillsteik seaseljakarbonaad.RR 500g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421562,"Broileritiib A-klass WELL DONE,kg",,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+421563,"Eestimain.br.kintsuliha A-kl TALLEGG, kg",,,"Barbora, Maxima",,,meat_fish,meat_other,heuristic,dairy_eggs_fats,dairy_eggs,high,override_with_name_rules
+421564,"Jogurtijook WELL DONE mitmepuuv., 6x100g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421565,GI wine TORO D'ORO Reserva Cab.S. 750ml,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421566,"Jogurtijook WELL DONE metsamar., 6x100g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421567,"Einepeekon M&M,kg-lett",,,"Barbora, Maxima",,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+421568,"Jogurtijook WELL DONE naturaalne, 6x100g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421569,Joogivesi SAAREMAA 500ml,,,"Barbora, Maxima",,,drinks,drinks_water,high,drinks,drinks_water,high,
+421570,"Kohuke MAGIJA vanilje-mooniga, 45g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421571,"Pasteet MATSIMOKA,170g",,,,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+421572,Viin HLIBNY DAR Wheat 40% 700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+421573,Viin HLIBNY DAR Winter Wheat 40% 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+421574,Vahvlitops LEKORNA 22g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421575,"Kohuke SAARE šokolaaditükkidega, 40g",,,"Barbora, Maxima",,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+421576,Vahvlitordikihid Rainbow LEKORNA 140g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421579,Vahvlitordikihid LEKORNA 140g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421580,Https Barbora Ee Toode Grill Liha Kaelakarbon Varska M M 500 G,,,"Barbora, Maxima",,,meat_fish,meat_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+421581,"Võiroos, 65g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_butter_margarine,high,dairy_eggs_fats,dairy_butter_margarine,high,
+421582,"Gorbuušamari IKRINKA, 100g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421583,"Fuet manchego juustuga WELL DONE, 150g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421584,"Kohuke TERE juustukoogi šok.glas., 40g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421585,"Külm. friikart.FARM FRITES sakiline,750g",,,"Barbora, Maxima",,,frozen_food,frozen_potato_products,high,frozen_food,frozen_potato_products,high,
+421588,Vahvlitordikihid kakao LEKORNA 140g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421589,"Gorbuušamari IKROFF, 95g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421590,"Kohuke TERE jõhvika multipakk, 5x40g",,,,,,produce,produce_berries,high,produce,produce_berries,high,
+421591,"Külm.pelmeenid BBQ lihaga VICI,300g",,,"Barbora, Maxima",,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+421592,"Grill-liha pun.veini marin. RAKVERE,500g",,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421593,Https Barbora Ee Toode Grill Liha Kooreses Marinad Rakvere 500 G,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high,drinks,drinks_spirits,high,override_with_name_rules
+421594,KGT vein J.P.CHENET Rose sw750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421595,"Hiidkrevetid soolvees KALURI, 250g",,,,,,world_spices,spices_basic_salt_pepper,high,world_spices,spices_basic_salt_pepper,high,
+421596,"Grill-liha šašlõki marinaadis NÕO,440g",,,"Barbora, Maxima",,,sauces_oils,sauces_marinades,high,sauces_oils,sauces_marinades,high,
+421597,"Heeringaf.tükid Caesari KODURANNA,270g",,,"Barbora, Maxima",,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+421598,"Hirveliha steik LINNAMÄE, 240g",,,,,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+421599,Külm.supisegu köögiv.-kart.MAAHÄRRA 400g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421601,"Külm.pitsa SUPREMA viie juustuga, 492g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421602,"Külm.rannakarbid keed.koorega WD,1kg",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+421604,"Grillpeekon M&M,500g",,,"Barbora, Maxima",,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+421606,"Külm.pitsa SUPREMA Calabrese&‘Nduja,520g",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421607,"Hernesupikogu RAKVERE, 800g",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421608,"Juust Mozzarella FARM MILK Mini,125/245g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_milk,high,override_with_name_rules
+421609,"Külm.Tsaari salat BAUER, 400g",,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high,produce,produce_herbs_salads_sprouts,high,
+421610,"Jah.sea esikoot WELL DONE, kg",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421611,Https Barbora Ee Toode Jahutatud Kuld Merikoger Kg,,,"Barbora, Maxima",,,dry_preserves,dry_flour_sugar_baking,high,dry_preserves,dry_flour_sugar_baking,high,
+421613,"Kohvikapslid LAVAZZA Delizioso 16x7,5g",,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+421614,"Järlepa kotlet TALLEGG, 480g",,,,,,other,dry_other,fallback,dairy_eggs_fats,dairy_eggs,high,proposed_group_invalid;override_with_name_rules
+421615,"Külmutatud mustikad WELL DONE, 400g",,,"Barbora, Maxima",,,frozen_food,frozen_berries_fruit,high,produce,produce_berries,high,override_with_name_rules
+421616,"Jah.seapeekon viilut.WELL DONE,330g",,,"Barbora, Maxima",,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+421618,"Kohuke TERE mustika multipakk, 5x40g",,,"Barbora, Maxima",,,produce,produce_berries,high,produce,produce_berries,high,
+421619,Https Barbora Ee Toode Koorejaatis Lumemarja Balbiino 480 G,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high,drinks,drinks_spirits,high,override_with_name_rules
+421620,"Kohup. MO SAAREMAA rasvatu lak.vaba,500g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421621,Külm. pitsa WELL DONE Margherita 350g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421622,"Külm.talvine supp WELL DONE, 400g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421623,"KPN vahuvein ZONIN Prosecco Cuvee, 200ml",,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421625,"Külm. Itaal. köögiviljad HORTEX, 400g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421626,"Külm.friikart.sakiline KULLAKESED,750g",,,"Barbora, Maxima",,,frozen_food,frozen_potato_products,high,frozen_food,frozen_potato_products,high,
+421627,"Keedusink Viru RAKVERE, kg-lett",,,"Barbora, Maxima",,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+421629,Hapukoorekook 2x80g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+421630,"Külm.köögiviljasegu Kevad HORTEX, 400g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421632,"Kõrgkuum.joogipiim TERE Latte 2,5%,1L",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+421634,"Juust Gouda E-PIIM viilutatud, 300g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_milk,high,override_with_name_rules
+421635,Juustumuhkel FAZER 200g,,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421636,"Kõrgkuum.joogipiim TERE Capuccino3,5%,1L",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+421637,Külm. pitsa Nelja Juustuga WD 570g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421640,Https Barbora Ee Toode Koogiviljamahl Cido 1 L,,,"Barbora, Maxima",,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+421641,"Keeduvorst Doktori RAKVERE, 300g",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+421642,"Külm.mintai kalapulgad FINDUS, 420g",,,,,,sweets_snacks,sweets_gums_mints,high,sweets_snacks,sweets_gums_mints,high,
+421643,"Külm.krevetid keedetud koorega, 700g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+421646,"Külm. krevetid keed. koor, 500/800,300g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+421649,"Külm. pelmeenid Maitsvad, 400g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421651,Külmutatud Atlandi Tursa Hakkliha 450g,,,,,,meat_fish,meat_minced,high,frozen_food,frozen_meat,high,override_with_name_rules
+421654,Liköör AMARETTO Italiano 25% 700ml,,,"Barbora, Maxima",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+421655,"Kabanoss kanalihast TARCZYNSKI, 220g",,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+421656,"Kabanoss Piri-Piri täidis.TARCZYNSKI,95g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421657,Ameerika burgerikaste HEINZ 418g/400ml,,,"Barbora, Maxima",,,dry_preserves,dry_canned_veg,high,dry_preserves,dry_canned_veg,high,
+421658,"Kanafileesink Fit TALLEGG, 130g viil",,,,,,meat_fish,meat_poultry,high,dairy_eggs_fats,dairy_eggs,high,override_with_name_rules
+421659,"Külmutatud friikartulid AVIKO, 900g",,,"Barbora, Maxima",,,frozen_food,frozen_potato_products,high,frozen_food,frozen_potato_products,high,
+421660,"Külm. Dallase saiake EESTI PAGAR, 480g",,,"Barbora, Maxima",,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+421661,"AB-jogurtSAARE Sipsik šok.riisipal.,165g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421662,"AB-jogurt SAARE Sipsik šok.kommid,165g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,sweets_snacks,sweets_candies,high,override_with_name_rules
+421663,Lauavesi ASET gas-tud sidrun 1.5L,,,"Barbora, Maxima",,,drinks,drinks_water,high,drinks,drinks_water,high,
+421664,Biskviitkook KINDER Pingui kakao 4x30g,,,,,,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+421665,"Külm/s heeringafilee roosakas VICI,240g",,,"Barbora, Maxima",,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+421667,"Kanafileenagitsad M&M, 230g",,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+421668,"Lastevorst XL M&M, 300g viil",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+421669,"Lemmikvorst M&M,300g",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+421670,Liköör ÜRDIMEISTER 35% 200ml,,,"Barbora, Maxima",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+421671,Lavaširullid surimiga 250g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421672,"Kanafileesink M&M, 150g viil",,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+421674,"Jogurt MIO&RIO maasikamaits.,150g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421675,"Kanafil.ribad praetud WELL DONE, 400g",,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+421676,Jogurt maasika-ban. lakt.vaba FARMI 1kg,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421677,"Jogurt maasika MIO RIO, 400g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421678,"Kanaliha krõpsud TALLEGG, 45g",,,"Barbora, Maxima",,,sweets_snacks,sweets_snacks_salty,high,sweets_snacks,sweets_snacks_salty,high,
+421679,"Jogurt mango, granola WELL DONE 6%200g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421681,"Külms. lõhefilee viil. M.V.WOOL,100g",,,"Barbora, Maxima",,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+421682,Kanahautis seenekast.WILLIAM SAURIN 400g,,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,produce,produce_mushrooms,high,override_with_name_rules
+421683,Liköör JÄGERMEISTER 35% 500ml,,,"Barbora, Maxima",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+421684,"Kana-juustupihvid TALLEGG, 320g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_eggs,high,override_with_name_rules
+421685,"Loomalihakonserv MINU De Lux, 525g",,,,,,dry_preserves,dry_canned_meat_fish,high,dry_preserves,dry_canned_meat_fish,high,
+421686,Liköör ÜRDIMEISTER 35% 0.5L,,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+421687,"Kanalihakonserv MINU De Lux, 525g",,,,,,dry_preserves,dry_canned_meat_fish,high,dry_preserves,dry_canned_meat_fish,high,
+421688,Liköör Muraka 18% 500ml,,,"Barbora, Maxima",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+421689,Liköör VANA TALLINN 50%500ml,,,"Barbora, Maxima",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+421691,"Külmutatud maasikad WELL DONE, 400g",,,"Barbora, Maxima",,,frozen_food,frozen_berries_fruit,high,produce,produce_berries,high,override_with_name_rules
+421692,"Jogurt maasika, dražeega, 135g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421693,"Kauaküps.suitsukoot OSKAR,kg",,,,,,meat_fish,fish_salted_smoked,high,meat_fish,fish_salted_smoked,high,
+421694,"Kanasink TALLEGG,300g viil",,,,,,meat_fish,meat_poultry,high,dairy_eggs_fats,dairy_eggs,high,override_with_name_rules
+421695,Kanapihv paneeritud M&M 400g,,,,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+421696,"Majonees HELLMANN'S Light, 405ml",,,,,,sauces_oils,sauces_ketchup_mayo,high,sauces_oils,sauces_ketchup_mayo,high,
+421697,"Jogurt TERE Emma maasika, 1kg",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421698,"Majonees HELLMANN'S Originaal, 210ml",,,"Barbora, Maxima",,,drinks,drinks_spirits,high,sauces_oils,sauces_ketchup_mayo,high,override_with_name_rules
+421699,"Kartuli-vorstisalat MK, kg",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+421700,"Kanalihasült M&M, 300g",,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+421701,Kanapasta koor.seen.WILLIM SAURIN 280g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+421702,"Majonees HELLMANN'S Original, 625ml",,,"Barbora, Maxima",,,drinks,drinks_spirits,high,sauces_oils,sauces_ketchup_mayo,high,override_with_name_rules
+421703,"Majonees FELIX Kerge, 870g",,,,,,sauces_oils,sauces_ketchup_mayo,high,sauces_oils,sauces_ketchup_mayo,high,
+421704,"Mahe Unetee YOGI 17x1,8g",,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+421705,"Jogurt TERE Emma banaani lakt.vaba, 110g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421706,M.alk.jook HARTWALL Long Drink5.5%330ml,,,"Barbora, Maxima",,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+421707,"Maits.viin VIRU VALGE Waterm. 37,5%500ml",,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+421708,"Mango-apelsini smuuti PAI, 280ml",,,,,,produce,produce_tropical,high,produce,produce_smoothies_fresh_juices,high,override_with_name_rules
+421709,Maitsest.must tee AUTUMN BASILUR 100g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+421710,"Maasika jäätisepallid MINI MELTS, 72g",,,,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+421711,"Maasuitsuribiliha NÕO, kg-lett",,,"Barbora, Maxima",,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+421712,"Maitselt mahed.toorvorstikesed M&M, 400g",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+421713,"Külmsupp koduaiaürtidega FARMI pure,750g",,,,,,other,dry_other,fallback,world_spices,spices_herbs_spice_mix,high,proposed_group_invalid;override_with_name_rules
+421714,Lahust.tee Tiger Spice DAVID RIO 398g,,,,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+421715,Lahustuv kohv Classic NESCAFE 200g,,,,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+421716,"Jogurt TERE Hellus mustasõstra, 350g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421717,"Jogurt TERE Hellus metsamarjadega, 350g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421718,Kodu grillvorstid MAKS&MOORITS 600g,,,,,,meat_fish,meat_sausages,high,meat_fish,meat_grill_blood_sausages,high,override_with_name_rules
+421720,Lah.kohvijook Classic 3in1NESCAFE 16.5g,,,"Barbora, Maxima",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+421721,"Vahemerepärane seakaelašašlõkk, kg",,,,,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+421722,"Külm. tükeldatud aeduba HORTEX, 400g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421723,"Mochi karam.&mustsõstratäid.BOUJEE,6x40g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421724,"Mini Belgia vahvel ,sulat.,35g",,,"Barbora, Maxima",,,sweets_snacks,sweets_waffles_cakes,high,sweets_snacks,sweets_waffles_cakes,high,
+421725,Lahustuv kohv Gold MERRILD 200g,,,,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+421726,"Kodujuustupannkook,aiaürtid. MAMMA 200g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+421729,"Külmutatud broilerimaks TALLEGG, 500g",,,,,,meat_fish,meat_poultry,high,dairy_eggs_fats,dairy_eggs,high,override_with_name_rules
+421730,"Külm.veisemaks NÕO,kg",,,"Barbora, Maxima",,,meat_fish,meat_beef_lamb_game,high,meat_fish,meat_beef_lamb_game,high,
+421731,"Õllemops juustuga WÕRO, 500g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421732,"Räimerullid küüslaugumar.VIRU RAND, 400g",,,"Barbora, Maxima",,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+421734,Mitmevilja-röstsai Tosta EESTI PAGAR500g,,,"Barbora, Maxima",,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+421735,"Jogurt vanilje, dražeega, 135g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421736,"Kodusardell M&M, 500g",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+421737,"Kodusink RAKVERE, kg",,,,,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+421738,"Rannakarbid catalane VILSUND BLUE, 350g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421739,Lahustuv kohv INDIAN GOLD siguriga 90g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+421740,Kons.hautatud sealiha MINU 250g,,,,,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+421741,"Seakaelakarbonaad ,kg",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421742,Lasanje Bolognese WILLIAM SAURIN 300g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421743,"Kuiv.kanafilee juustu CHICK&GO, 30g viil",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421745,"Snäkk Chicken NÕO, 85g",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421746,"Majonees SALVEST Kerge, 430g",,,,,,sauces_oils,sauces_ketchup_mayo,high,sauces_oils,sauces_ketchup_mayo,high,
+421747,Lahustuv kohv NESCAFE Gold 200g,,,,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+421748,"Sprotid õlis KAIJA, 240g",,,"Barbora, Maxima",,,sauces_oils,oils_other,high,sauces_oils,oils_other,high,
+421749,"Tagasink KARNI,120g viil",,,"Barbora, Maxima",,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+421750,"Täissuitsuvorst Moskva NÕO, 250g",,,,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+421751,"Külm.singi-juustu pitsa PREMIA, 340g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421753,Majonees SAAREMAA MAHEMUNAD 250g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_eggs,high,sauces_oils,sauces_ketchup_mayo,high,override_with_name_rules
+421754,"Kulduim-tuuni tükid päeval.õlis WD,400g",,,"Barbora, Maxima",,,sauces_oils,oils_other,high,sauces_oils,oils_other,high,
+421755,"Kuiv.sink Serrano WELL DONE,100g viil",,,"Barbora, Maxima",,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+421757,"Meiereivõi VALIO soolata, 500g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_butter_margarine,high,dairy_eggs_fats,dairy_butter_margarine,high,
+421758,Küüslaugu baguette 152g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421759,Mangonektar CIDO India 1L,,,"Barbora, Maxima",,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+421760,"Väikesed banaanid pakitud, 250g",,,,,,produce,produce_tropical,high,produce,produce_tropical,high,
+421761,"Külm.tiigerkrevetid keed.koorit.WD,225g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+421762,"Munavalged õrrekanade munadest, 1kg",,,,,,dairy_eggs_fats,dairy_eggs,high,dairy_eggs_fats,dairy_eggs,high,
+421763,"Naturaaalne mahejogurt WELL DONE 2%,140g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421764,"Ökomunad WELL DONE, 10tk",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_eggs,high,dairy_eggs_fats,dairy_eggs,high,
+421766,Marjatee LOYD maasika-vanil. pür 20x2g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,produce,produce_berries,high,override_with_name_rules
+421767,"Kuiv.vorstSpanishMix WELL DONE,120g viil",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+421768,"Külm. tursafilee nahata BIMAR, 360g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421769,"Lah.kohvijook AROMA GOLD 3in1, 17g",,,"Barbora, Maxima",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+421770,"Orgaaniline mandlijook WELL DONE, 1L",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_plant_drinks,high,dairy_eggs_fats,dairy_plant_drinks,high,
+421771,"Org.kaerajook WELL DONE Barista UHT, 1l",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_plant_drinks,high,dairy_eggs_fats,dairy_plant_drinks,high,
+421772,"Sealihašašlõkk keefirimarinaadis,kg",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421773,"Täissuitsuvorst Ordu küüslaugug.NÕO,250g",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+421774,"Toorvorstikesed LEMMIK,kg",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+421775,"Kulduim-tuun.tük.ol.õlisWELL DONE,2x120g",,,"Barbora, Maxima",,,sauces_oils,oils_other,high,sauces_oils,oils_other,high,
+421777,Karamellikook 370g,,,"Barbora, Maxima",,,bakery,bakery_cakes_pastries,high,sweets_snacks,sweets_candies,high,override_with_name_rules
+421778,"Pehme kohupiim MO SAAREMAA 5%, 500g",,,,,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+421779,Näkileivad Naturell glut-vaba WASA 240g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421780,Parim päts peenleib 310g,,,"Barbora, Maxima",,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+421781,"Külm.Ukraina borš segu BAUER, 400g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421782,"Külmutatud broilerikael TALLEGG,500g",,,,,,meat_fish,meat_poultry,high,dairy_eggs_fats,dairy_eggs,high,override_with_name_rules
+421783,Paprikakaste FELIX 275g,,,,,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+421784,"Pehme kitsejuust, kg",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421785,"Kulduim-tuun tomatikastmes WD, 180g",,,"Barbora, Maxima",,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+421788,"Tuunikalafilee õlis HAPPYSEA,EO 185g",,,"Barbora, Maxima",,,dry_preserves,dry_canned_meat_fish,high,dry_preserves,dry_canned_meat_fish,high,
+421789,"Tuunikala pur.taimeõlis HAPPYSEA,EO 185g",,,"Barbora, Maxima",,,dry_preserves,dry_canned_meat_fish,high,dry_preserves,dry_canned_meat_fish,high,
+421790,"Tuunikala purust.õlis OCEAN, EO 185g",,,"Barbora, Maxima",,,dry_preserves,dry_canned_meat_fish,high,dry_preserves,dry_canned_meat_fish,high,
+421791,"Panna Cotta NOPRI vaarika, 150g",,,,,,produce,produce_berries,high,produce,produce_berries,high,
+421792,Panna Cotta Tiramisu NOPRI 150g,,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421794,"Pehme salatijuust FARM MILK 40%, 200g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_milk,high,override_with_name_rules
+421796,Piimakõrred MilkyMood šokolaadimait.5x6g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_milk,high,sweets_snacks,sweets_chocolate_bars,high,override_with_name_rules
+421797,"Lihapallid M&M, 350g",,,"Barbora, Maxima",,,meat_fish,meat_other,heuristic,meat_fish,meat_other,heuristic,
+421798,"Külmutatud herned WELL DONE, 400g",,,"Barbora, Maxima",,,dry_preserves,dry_canned_veg,high,dry_preserves,dry_canned_veg,high,
+421799,"Piimajook VALIO EILA lak.vaba 1,5%, 1L",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+421800,"Kuums.lõhe kõhuääred OCEAN,500g",,,"Barbora, Maxima",,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+421801,"Kuums.kanarul.Pidupäeva KEKAVA,kg-lett",,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+421802,"Kuumsuitsuvorst Servelaat WELL DONE,300g",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+421804,Kuumsuitsuforelli salat 250g,,,"Barbora, Maxima",,,meat_fish,fish_salted_smoked,high,meat_fish,fish_salted_smoked,high,
+421806,"Täisterajahu lavašš,120g",,,"Barbora, Maxima",,,dry_preserves,dry_flour_sugar_baking,high,dry_preserves,dry_flour_sugar_baking,high,
+421807,Brandy BELÕI AIST 3* 40% 200ml,,,"Barbora, Maxima",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+421808,Tuunikala purust.om.mahlas OCEAN EO 185g,,,"Barbora, Maxima",,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+421810,"Vähes.heeringafilee õlis ZIGMAS, 240g",,,"Barbora, Maxima",,,sauces_oils,oils_other,high,sauces_oils,oils_other,high,
+421811,Vanillijäätis maasikaga WELL DONE 90g,,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+421812,"Kuumsuits.sink Kuningate KARNI,120g viil",,,"Barbora, Maxima",,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+421813,Vanillikreemiga saiake 78g,,,"Barbora, Maxima",,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+421814,"Arbuus seemneteta, kg",,,,,,sweets_snacks,sweets_nuts_driedfruit,high,sweets_snacks,sweets_nuts_driedfruit,high,
+421817,Https Barbora Ee Toode Sulatatud Pakslaup Pangaasius Filee Kg,,,,,,other,dry_other,fallback,dairy_eggs_fats,dairy_cheese_slices,high,proposed_group_invalid;override_with_name_rules
+421819,"Lõhesalat Prantsuse MARINE ABC, EO 240g",,,"Barbora, Maxima",,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+421820,Martsipanikeerd 60g,,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421821,"Lõhe Teriyakikastmes RANNAKÜLA,120g",,,"Barbora, Maxima",,,world_spices,spices_asian,high,world_spices,spices_asian,high,
+421822,"Piim FARM MILK 2% UHT, 1L",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+421823,"Piim FARM MILK 3,2%, 1L",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+421824,"Lõhesalat Mexicano KAIJA EO, 160g",,,"Barbora, Maxima",,,meat_fish,fish_fresh,high,world_spices,spices_mexican,high,override_with_name_rules
+421825,KPN vein Mukuzani kuiv punane 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421827,"Juust Edam MO SAAREMAA viil., 450g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421829,"Sulatatud roogitud kuldne meriahven, kg",,,,,,other,dry_other,fallback,dairy_eggs_fats,dairy_cheese_slices,high,proposed_group_invalid;override_with_name_rules
+421830,"Sulatatud skumbria, ilma peata, kg",,,"Barbora, Maxima",,,other,dry_other,fallback,dairy_eggs_fats,dairy_cheese_slices,high,proposed_group_invalid;override_with_name_rules
+421831,"Kohupiimakreem ALMA mango-virsiku,380g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+421832,KPN vein MAYBACH Weisser Burgunder 3L,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421833,"Piim laktoosi vaba WELL DONE 2,5% 1L",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+421834,"Vanillijäätis šok&kakaoküpsis.WD,310g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+421835,Lihapall.mag.-hapu köög. pastaga 300g,,,"Barbora, Maxima",,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+421836,"Juust Eesti E-PIIM viilutatud, 500g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_milk,high,override_with_name_rules
+421837,"Mahe rohumaaveise hakkliha LIIVIMAA,300g",,,,,,meat_fish,meat_minced,high,meat_fish,meat_minced,high,
+421839,"Maamehesink M&M,kg",,,"Barbora, Maxima",,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+421841,"Minikotlet MAKS&MOORITS, 300g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421842,Muu pir.jook PIPRA NAPS Meega 35% 500ml,,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421843,"Kohup.kreem ALMA metsamarjakissell, 140g",,,"Barbora, Maxima",,,other,dry_other,fallback,personal_care,pcare_cosmetics,high,proposed_group_invalid;override_with_name_rules
+421844,Naturaalne mineraalvesi AKVILE 0.5L g-ga,,,"Barbora, Maxima",,,drinks,drinks_water,high,drinks,drinks_spirits,high,override_with_name_rules
+421845,Maits. viin STUMBRAS Cranberry 40% 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+421846,"Piim TERE D-vitamiiniga 1,8%,1,5L PP",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+421847,"Kohup.kreem TERE Emma rabarberikis.,150g",,,"Barbora, Maxima",,,other,dry_other,fallback,personal_care,pcare_cosmetics,high,proposed_group_invalid;override_with_name_rules
+421848,"Kohvikapslid Mattinata L'OR 10x5,2g",,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+421849,"Maheveiseliha kuiv.tük.trad.LINNAMÄE,40g",,,"Barbora, Maxima",,,meat_fish,meat_beef_lamb_game,high,meat_fish,meat_beef_lamb_game,high,
+421851,"Veisepraad kondita,kg",,,,,,meat_fish,meat_beef_lamb_game,high,meat_fish,meat_beef_lamb_game,high,
+421852,"Merevet.õlis porg.koreea stiil.,kg-lett",,,"Barbora, Maxima",,,sauces_oils,oils_other,high,sauces_oils,oils_other,high,
+421853,Naturaalne mineraalvesi AKVILE 0.5L g-ta,,,"Barbora, Maxima",,,drinks,drinks_water,high,drinks,drinks_spirits,high,override_with_name_rules
+421854,KPN vein ARALDICA Barolo Flori 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421855,KPN vein TORRES San Valentin Parel.3L,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421856,Brandy TORRES 15 40% 700ml,,,"Barbora, Maxima",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+421857,Päik.k.tom.pesto veg.FILIPPO BERIO 190g,,,"Barbora, Maxima",,,sauces_oils,sauces_pasta_cooking,high,sauces_oils,sauces_pasta_cooking,high,
+421858,"Gruusia mini-leivake , sulatatud, 70g",,,"Barbora, Maxima",,,other,dry_other,fallback,dairy_eggs_fats,dairy_cheese_slices,high,proposed_group_invalid;override_with_name_rules
+421859,"Juust Hiirte ESTOVER täispiim.viil.,500g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421860,Pancetta Arrotolata WELL DONE 100g viil,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421861,Päik.kuiv.tom.pesto FILIPPO BERIO 190g,,,"Barbora, Maxima",,,sauces_oils,sauces_pasta_cooking,high,sauces_oils,sauces_pasta_cooking,high,
+421862,"Juust GRANAROLO Grana Padano, 150g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421863,"Veiserind OSKAR, 100g viil",,,,,,meat_fish,meat_beef_lamb_game,high,meat_fish,meat_beef_lamb_game,high,
+421864,"Paneeritud hakkšnitsel M&M, 400g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421865,"Paneer.kanafileešnitsel M&M,340g",,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+421866,"Külm.minipelm.broilerilih.TALLEGG, 350g",,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,dairy_eggs_fats,dairy_eggs,high,override_with_name_rules
+421867,"Veise vürtsisink OSKAR, 100g viil",,,"Barbora, Maxima",,,world_spices,spices_herbs_spice_mix,high,meat_fish,meat_beef_lamb_game,high,override_with_name_rules
+421868,"Paneeritud kanafileeburger TALLEGG, 340g",,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,dairy_eggs_fats,dairy_eggs,high,override_with_name_rules
+421870,"Juust Gouda WELL DONE viilutatud, 400g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421873,"Viini šnitsel seavälisfileest RR, 400 g",,,,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+421874,"Lah.kohvijook AROMA GOLD 3in1, 10x17g",,,"Barbora, Maxima",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+421875,"Vinnutatud vorst Hansa BIOVELA, 200g",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+421876,Roheline tee guanabanaga CHELTON 100g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+421877,Grilljuust Döner Kebab Kohvri NOPRI 200g,,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421878,"Juust KROON Maasdam, kg",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421879,"Külmutatud kapsarullid RUD, 1kg",,,"Barbora, Maxima",,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+421880,"Külmutatud mereannisegu FJORDS, 400g",,,"Barbora, Maxima",,,meat_fish,fish_fresh,high,frozen_food,frozen_fish,high,override_with_name_rules
+421882,"Grilljuust NÕO vürtsikas, 240g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,world_spices,spices_herbs_spice_mix,high,override_with_name_rules
+421883,"Külmutatud mereandide kokteil WD, 400g",,,"Barbora, Maxima",,,frozen_food,frozen_other,heuristic,frozen_food,frozen_other,heuristic,
+421884,"Hele õlu SAKU Rock 5.3% 0.568l, prk",,,,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+421885,Roh.tee Goji Mustika LIPTON pür.20x1.4g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+421886,Pasta Carbonara 300g,,,"Barbora, Maxima",,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+421887,Siider FIZZ Blueberry 4.5% 1.5l,,,,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+421888,Heeringafil.sool.maitseain.OCEAN 400g,,,"Barbora, Maxima",,,world_spices,spices_basic_salt_pepper,high,world_spices,spices_basic_salt_pepper,high,
+421889,"Pardifilee maitseain-ga KITCHEN ME,170g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421890,Siider FIZZ Blueberry 4.5% 500ml prk,,,,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+421891,"Piim WELL DONE 3,5% UHT, 1L",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+421892,"Poolkõva kitsejuust, kg",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421893,"Dipikaste TERE Dipp-Tops küüslaugu, 200",,,"Barbora, Maxima",,,sauces_oils,sauces_other,high,sauces_oils,sauces_other,high,
+421895,Poke kauss lõhega 275g,,,"Barbora, Maxima",,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+421896,"Külmutatud veise supikogu,kg",,,"Barbora, Maxima",,,meat_fish,meat_beef_lamb_game,high,frozen_food,frozen_meat,high,override_with_name_rules
+421897,"Grilljuust NOPRI tšilliga, 200g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421899,"Keeduvorst Juustu VALLA, 600g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,meat_fish,meat_sausages,high,override_with_name_rules
+421900,Poke krevetiga 275g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421901,Mineraalvesi SAN PELLEGRINO 6x1l gas-tud,,,"Barbora, Maxima",,,drinks,drinks_water,high,drinks,drinks_water,high,
+421902,"Poolsuitsuvorst Kalevi RANNAROOTSI,330g",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+421903,Grilljuust WELL DONE 43% 200g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421904,Praetud kala köögiviljariisiga 300g,,,"Barbora, Maxima",,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+421905,"Poolsuitsuvorst Siimu NÕO, 135g viil",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+421906,KGT vein ROCCA Pinot Grigio Veneto 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421907,"Hallitusjuust Remberter, kg",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421908,"Poolsuitsuvorst PORMET, 570g",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+421909,"Vinnutatud vorst Juubeli BIOVELA,200g",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+421910,"Praetud kilu kimchi BRIIS, 270g",,,"Barbora, Maxima",,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+421911,"Praetud kilu sinepis BRIIS, 270g",,,"Barbora, Maxima",,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+421912,"Praetud räimed tomatikastmes,270g",,,,,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+421913,"Hallitusjuust CARRE d’AURILLAC 51%, kg",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421914,"Tume õlu EICHBAUM EXTRA STOUT 7,5%0,5L",,,"Barbora, Maxima",,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+421915,"Juust Hiirte ESTOVER viilutatud, 200g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421916,KPN vein CONDE VILLAR Branco 750ml,,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421917,"Seaguljašš ,kg",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421918,"Juustukukkel EESTI PAGAR, 200g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421919,Kakao-hapukoorekook 350g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+421920,"Hapukoor FARM MILK 20%, 400g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_milk,high,override_with_name_rules
+421921,"Pr.sardiinid sinepikastm.BRIIS, EO 135g",,,"Barbora, Maxima",,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+421922,Hot Dog saiake LEIBUR 300g,,,,,,bakery,bakery_bread_loaves,high,meat_fish,meat_sausages,high,override_with_name_rules
+421923,KPN vein GRAN CASTILLO Reserve Cab.750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421924,"Pr.kilud koduses marinaadis KALURI,500g",,,"Barbora, Maxima",,,dry_preserves,dry_canned_meat_fish,high,sauces_oils,sauces_marinades,high,override_with_name_rules
+421925,"Pr.sardiinid pikantsed BRIIS, EO 140g",,,"Barbora, Maxima",,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+421926,"Hapendatud pett FARMI 0.2%, 1kg PP",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421927,Mineraalvesi VÄRSKA originaal 1l,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_water,high,override_with_name_rules
+421928,"Hapukoor FARMI 20%, 500g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+421930,Isa peenleib LEIBUR 355g,,,,,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+421931,"Hapukoor FARMI 20%, 200g kile",,,,,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+421932,Mineraalvesi VÄRSKA originaal 1l*6tk,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_water,high,override_with_name_rules
+421933,"Mineraalvesi VÄRSKA sidrun.0,5l,g-tud",,,"Barbora, Maxima",,,drinks,drinks_water,high,drinks,drinks_spirits,high,override_with_name_rules
+421934,Kodukandi rukkil.viil. EESTI PAGAR 390g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421935,KPN vein ROBERT CHARTON Bord.Blanc 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421936,"Mineraalvesi VÄRSKA sidrun.1,5l",,,,,,drinks,drinks_water,high,drinks,drinks_water,high,
+421937,Maasika-toorjuustusaiake EESTI PAGAR75g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,produce,produce_berries,high,override_with_name_rules
+421938,Kreemjas maksapasteet RAKVERE 300g,,,,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+421939,"VÄRSKA Naturaal Mullita 1,5L",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421940,"Pr.sardiinid tomatikastm.BRIIS, EO 140g",,,"Barbora, Maxima",,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+421941,Vein GRAND SUD Sauvignon 250ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421942,"P/s servelaat juustuga RGK,kg-lett",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421943,Keefiriröst kaltsiumiga FAZER 450g,,,,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421944,Keefirisai kaltsiumiga FAZER 350g,,,,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421945,"Jog.jookALMA Vita+ puuvil.lakt.v.,4x100g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421946,Vein I HEART Merlot kuiv punane 187ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421947,"P/s vorst Juustu RANNAROOTSI, kg-lett",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,meat_fish,meat_sausages,high,override_with_name_rules
+421948,"Pühajärve sink M&M,300g",,,"Barbora, Maxima",,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+421949,"Ribi ilma kondita M&M,kg",,,"Barbora, Maxima",,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+421950,"Koduviiner M&M,500g",,,"Barbora, Maxima",,,drinks,drinks_spirits,high,meat_fish,meat_sausages,high,override_with_name_rules
+421951,Paneer.helb.Panko JAPANESE CHOICE 150g,,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421952,"Jog.jook ALMA Vita+ metsmaasika, 4x100g",,,"Barbora, Maxima",,,produce,produce_berries,high,produce,produce_berries,high,
+421954,Kreemjuus vahestat. Castello pipraga125g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421955,Kartuli-röstsibula Pehmik EP 240g,,,"Barbora, Maxima",,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+421956,"Pärmivaba ciabatta, 270g",,,"Barbora, Maxima",,,dry_preserves,dry_flour_sugar_baking,high,dry_preserves,dry_flour_sugar_baking,high,
+421957,"Rukkiröst Tosta EESTI PAGAR, 390g",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421958,"Külm.ciabatta tume EESTI PAGAR,300g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421959,Külm.kartulisekt.krõbe.FARM FRITES 600g,,,"Barbora, Maxima",,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+421960,Juust MozzarellaLight WELL DONE 125/220g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421961,Juust oliiv tom.WELL DONE PREMIUM48%120g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421962,KPN vein BARON ROSEN Riesling 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421963,"Koorene jogurt FARMI mustikatega, 400g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+421965,"Juust täispiimast ALMA viilutatud, 500g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421966,Risoto kanaga seen.WILLIM SAURIN 280g,,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,produce,produce_mushrooms,high,override_with_name_rules
+421967,KPN vein VAUCHER Chablis 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+421968,Juust Mozzarella WELL DONE 125/210g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421970,Roheline pesto WELL DONE 190g,,,"Barbora, Maxima",,,sauces_oils,sauces_pasta_cooking,high,sauces_oils,sauces_pasta_cooking,high,
+421971,Külmutatud rannakarbiliha WELL DONE 200g,,,"Barbora, Maxima",,,meat_fish,meat_other,heuristic,frozen_food,frozen_meat,high,override_with_name_rules
+421972,"Krabimaitselised surimi pulgad, 150g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421973,"Salaami ELPOZO, kg-lett",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421974,"Külm.köögiviljad. Hiina stiilis, 400g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421975,Külm.köögiv.maitseain.ja papr.HORTEX400g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421976,M. tee virs.ja litšimaits.DILMAH 20x1.5g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+421977,Must tee assortii aromatis.BASILUR20x2g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+421978,"Must tee Earl Grey DILMAH,20x1,5g",,,,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+421979,"Rukkitasku EESTI PAGAR, 340g",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421980,Must tee 4 Seasons BASILUR 100g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+421981,Must tee English Breakfast LIPTON 25x2g,,,,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+421983,"Juustuampsud MO SAAREMAA, 200g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+421984,"Külm.mintaifilee pulgad FINDUS, 364g",,,"Barbora, Maxima",,,sweets_snacks,sweets_gums_mints,high,sweets_snacks,sweets_gums_mints,high,
+421985,Lauavesi ASET gaseerimata 1.5L,,,,,,drinks,drinks_water,high,drinks,drinks_water,high,
+421986,"Külm. paneeritud fileepala ESVA, 285g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421987,Särtsakas tagliatelle hakklihaga 300g,,,"Barbora, Maxima",,,meat_fish,meat_minced,high,meat_fish,meat_minced,high,
+421988,Külm.paneeritud kalafilee WELL DONE 440g,,,"Barbora, Maxima",,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+421989,"Sardiinid õlis KAPTEN GRANT,240g",,,"Barbora, Maxima",,,dry_preserves,dry_canned_meat_fish,high,dry_preserves,dry_canned_meat_fish,high,
+421990,"Salat surimi, riisi&köögivil.VICI, 200g",,,"Barbora, Maxima",,,dry_preserves,dry_pasta_rice,high,produce,produce_herbs_salads_sprouts,high,override_with_name_rules
+421991,"Must tee Earl Grey Lemon LIPTON,25x2g",,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+421992,"Külm. paneeritud krabisõrg VICI,250g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421993,"Külm.pitsa RISTORANTE Margherita, 550g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+421994,"Must tee Earl Grey HYLEYS,25x2g",,,,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+421995,"Sardiinid õlis MARINE ABC, EO 240g",,,"Barbora, Maxima",,,dry_preserves,dry_canned_meat_fish,high,dry_preserves,dry_canned_meat_fish,high,
+421996,"Sardiinid tomatikast.MARINE ABC, EO 240g",,,"Barbora, Maxima",,,dry_preserves,dry_canned_meat_fish,high,dry_preserves,dry_canned_meat_fish,high,
+421997,"Šašlõki toorvorstid RAKVERE,400g",,,,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+421998,Šašlõkk kartulisektoriga 300g,,,"Barbora, Maxima",,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+421999,Juust Tilsit 45% WELL DONE 200g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422001,"Kuumsuitsu heik vaakumis M.V.WOOL,kg",,,,,,meat_fish,fish_salted_smoked,high,meat_fish,fish_salted_smoked,high,
+422002,Viin HÕBE Mahe 39.2% 700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422003,"Lastevorst RAKVERE, 600g",,,,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+422004,"Juust Tilsit FARM MILK 45%, 250g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_milk,high,override_with_name_rules
+422005,"Juustupulgad Pik-Nik Twiller, 80g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422006,"Miniekleer.vahukoor.EESTI KONDIITER,200g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_cream_sourcream,high,
+422008,Ruks seemneleib LEIBUR 10% seemneid 390g,,,,,,bakery,bakery_bread_loaves,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+422009,"Lastevorst RAKVERE, kg-lett",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+422010,"Lemmikvorst nat. sooles UVIC, kg",,,"Barbora, Maxima",,,world_spices,spices_basic_salt_pepper,high,world_spices,spices_basic_salt_pepper,high,
+422011,"Lõhefil.tük.kreem.tomatik. KAIJA, 170g",,,"Barbora, Maxima",,,meat_fish,fish_fresh,high,personal_care,pcare_cosmetics,high,override_with_name_rules
+422012,"Maamehe suitsusink NÕO, 105g viil",,,,,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+422014,Rummikorvike 2x65g,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422015,Hele õlu Tuborg Green 4.6% 0.33L pudel,,,,,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+422018,"Rummilill EESTI KONDIITER, 480g",,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422019,Tosca kook 240g,,,"Barbora, Maxima",,,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+422020,"Rõõsk koor FARM MILK UHT 30%, 200ml",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high,dairy_eggs_fats,dairy_milk,high,override_with_name_rules
+422021,Jah.kohv LAVAZZA Caffe Decaffeinato 250g,,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+422022,Tosca kook kirssidega 210g,,,"Barbora, Maxima",,,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+422023,"Külm.pitsa SUPREMA Salame Romano, 487g",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422025,"Seakeel tarrendis NÕO,300g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422026,"Kaerajook YOOK Chocolate, 1L",,,,,,drinks,drinks_soft_soda,high,drinks,drinks_soft_soda,high,
+422027,"Keefir FARMI, 1kg PP",,,,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+422028,19765,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422029,Jahvatatud kohv Club LAVAZZA 250g,,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+422030,"Külm.pitsa RISTORANTE Prosciutto, 580g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422031,Viin PSHENICHNAJA 40% 0.35L,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422032,Jahvatatud kohv Classic PAULIG 500g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+422033,"Maasuitsuribiliha NÕO, 135g viil",,,"Barbora, Maxima",,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+422035,Jahvatatud kohv JACOBS Kronung 500g,,,,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+422036,Singirullid küüslauguga 300g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422037,"Külm.vareen. UVIC Vanaema, kirss,400g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422038,"Kitsepiimavõi GOAT FARM, 125g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_butter_margarine,high,dairy_eggs_fats,dairy_butter_margarine,high,
+422040,"Seašašlõkk mustika mar.RAKVERE,800g",,,"Barbora, Maxima",,,meat_fish,meat_pork,high,produce,produce_berries,high,override_with_name_rules
+422041,Seljanka salaamiga PRESTO 300g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422042,"Külm.porgandi&herne segu WELL DONE, 400g",,,"Barbora, Maxima",,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+422043,"Sea šašlõk.punases mar.Armeenia grill,kg",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422044,"Seaseljafilee NÕO, 105g viil",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422045,"Seljafilee sealih.KARNI,120g viil",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422046,"Sinihallitusjuust Memel Blue, kg",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422047,Whisky JAMESON Caskmates 40% 700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422049,"77,7% Lastevorst M&M,350g",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+422050,"Maitselt mahe grillvorst M&M, 900g",,,,,,meat_fish,meat_sausages,high,meat_fish,meat_grill_blood_sausages,high,override_with_name_rules
+422051,"Skyr FARMI naturaalne, 400g",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422052,"Skyr FARMI virsikutega, 150g",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422053,"Maksapasteet linnulihast NÕO, 200g",,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+422054,"Soolatud sealiha peekon vürtsidega WELL DONE, kg",,,"Barbora, Maxima",,,world_spices,spices_basic_salt_pepper,high,meat_fish,meat_pork,high,override_with_name_rules
+422058,Sink Prosciutto Cotto WELL DONE 100g,,,"Barbora, Maxima",,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+422059,Sink Vinnutatud BAJORU 110g viil,,,"Barbora, Maxima",,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+422060,"Sink Prosciutto Crudo WELL DONE,80g viil",,,"Barbora, Maxima",,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+422061,"Soolaheeringafilee õlis WD, 240g",,,"Barbora, Maxima",,,world_spices,spices_basic_salt_pepper,high,world_spices,spices_basic_salt_pepper,high,
+422062,"Maksarõngas RAKVERE, 300g",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422063,Skyr maasika FARMI 300g,,,,,,produce,produce_berries,high,produce,produce_berries,high,
+422064,"Soolaheeringafilee õlis WD, 450g",,,"Barbora, Maxima",,,world_spices,spices_basic_salt_pepper,high,world_spices,spices_basic_salt_pepper,high,
+422065,Külm. suvine marjasegu HÄRMAVILI 300g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422067,Ingverijook ROCHESTER Ginger 725ml,,,,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422068,"Keefir FARM MILK, 1kg kile",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_milk,high,override_with_name_rules
+422069,Näkileiv.rukkist Hi-Fibre FINNCRISP 200g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422070,Näkileiv.rukkist MultigrainFINNCRISP175g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422071,Ahjuvorstid šampinjon. MATSIMOKA 365g,,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+422072,Whisky JAMESON Crested 40% 700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422073,"Ahjukartul MK, 300g",,,"Barbora, Maxima",,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+422074,Näkileiv.rukkist Original FINNCRISP 200g,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422075,"Lastevorst RAKVERE, 190g viil",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+422076,"Kakaopuding TERE laktoosivaba, 200g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_desserts,high,dairy_eggs_fats,dairy_desserts,high,
+422077,"Steik kintsulihast kolme juustuga, 400g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422078,Lahustuv kohv NESCAFE Gold 100g,,,,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+422079,Merekapsasalat küüslauguga 240g,,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high,produce,produce_herbs_salads_sprouts,high,
+422080,Lapi leib Street Food FAZER 140g,,,,,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+422081,"Ahjubroiler klassikaline TALLEGG,kg",,,,,,meat_fish,meat_poultry,high,dairy_eggs_fats,dairy_eggs,high,override_with_name_rules
+422082,Karamelli kaera-sojajook ALPRO Barista 750ml,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_plant_drinks,high,sweets_snacks,sweets_candies,high,override_with_name_rules
+422083,GT vein Tbilvino TVISHI valge 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422084,"Jahv.kohv Classic DALLMAYR,500g",,,,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+422085,Suflee lõhefileest AVEKTRA 220g,,,"Barbora, Maxima",,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+422086,"Külmutatud kalapulgad ESVA, 450g",,,"Barbora, Maxima",,,frozen_food,frozen_fish,high,frozen_food,frozen_fish,high,
+422087,"Lihasnäkk Chili Pork Jerky RAKVERE, 50g",,,"Barbora, Maxima",,,meat_fish,meat_other,heuristic,meat_fish,meat_pork,high,override_with_name_rules
+422088,Whisky NIKKA Coffee Grain 45% 700ml karp,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422089,"Meremari punane KRISKAL, 113g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422090,"Anšoovis filee klassikaline BRIIS,145g",,,"Barbora, Maxima",,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+422091,"Mustika grill-ribi RAKVERE,kg",,,,,,meat_fish,meat_pork,high,produce,produce_berries,high,override_with_name_rules
+422092,Whisky SAILOR'S 40% 700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422093,Pealinna peenleib EESTI PAGAR 1kg,,,,,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+422094,"Sojajook ALPRO PlantProtein, 1L",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_plant_drinks,high,dairy_eggs_fats,dairy_plant_drinks,high,
+422095,"Anšoovis vähesoolane BRIIS,160g",,,"Barbora, Maxima",,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+422096,Whisky SCOTTISH LEADER 40% 1L,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422097,Jahv.kohv Prodomo DALLMAYR 500g,,,"Barbora, Maxima",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+422098,"Jäätis BOUNTY Ice Tube, 255g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422099,Whisky SILVERHORN Blended 40% 700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422100,Whisky THE GLENLIVET 15 YO SM40% 700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422101,Https Barbora Ee Toode Jaatis Ben Jerry Dulcede Lishsundae 350 G,,,"Barbora, Maxima",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+422102,Jahv.kohv DALLMAYR Prodomo 250g,,,"Barbora, Maxima",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+422103,Pere sai seesamiga sul. 329g,,,"Barbora, Maxima",,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+422104,Lauavesi ASET gaseerimata 5L,,,,,,drinks,drinks_water,high,drinks,drinks_water,high,
+422105,Whisky SCOTTISH LEADER 40% 700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422108,"Jäätis karamelliga plombiir WD, 90g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422109,"Jäätis karamelli belg.šok.&mandl.WD,81g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422110,"Hele õlu SAKU ROCK 5,3% 500ml PDL",,,"Barbora, Maxima",,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+422111,"Lõhe omas mahlas, 240g",,,"Barbora, Maxima",,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+422112,KPN vein KENDERMANNS Riesl.Kabin.750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422113,"Joogivesi AURA Fruit Sidruni ga-tud 1,5l",,,"Barbora, Maxima",,,drinks,drinks_water,high,drinks,drinks_water,high,
+422116,"Jäätis KINDER Bueno vahvlikoonuses, 62g",,,,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422117,"Suitsujuustuvorst Lihakas RAKVERE, 360g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422118,Jahvatatud kohv JACOBS Kronung Mild 500g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+422119,Piruk vahtrasiir pekpähkl 81g,,,"Barbora, Maxima",,,sweets_snacks,sweets_nuts_driedfruit,high,sweets_snacks,sweets_nuts_driedfruit,high,
+422120,"Õllesigar RAKVERE, 120g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422121,"Külmutatud vaarikad WELL DONE, 400g",,,"Barbora, Maxima",,,produce,produce_berries,high,produce,produce_berries,high,
+422122,Lood.min.vesi AKVILE 1.5L sidrunim.,,,"Barbora, Maxima",,,drinks,drinks_water,high,drinks,drinks_water,high,
+422123,Mahe kaerajook YOOK Barista 1L,,,,,,dairy_eggs_fats,dairy_plant_drinks,high,dairy_eggs_fats,dairy_plant_drinks,high,
+422124,Sojajook ALPRO Plant Protein vanilje 1L,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_plant_drinks,high,dairy_eggs_fats,dairy_plant_drinks,high,
+422125,Suitsu-kalkunifilee NÕO 105g,,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+422126,"Br.tiiva õlaosa A-klass WELL DONE,500g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422127,GT vein TELIANI Valley Saperavi 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422129,Https Barbora Ee Toode Armeeniaparane Sealiha Saslokk Kg,,,"Barbora, Maxima",,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+422130,"Jäätis maapähkli&šokolaaditük.NICKS,300g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422131,Liköör KOSKENKORVA Minttu 35% 500ml,,,"Barbora, Maxima",,,sweets_snacks,sweets_gums_mints,high,drinks,drinks_spirits,high,override_with_name_rules
+422132,Liköör Metsamaasika 18% 500ml PET,,,"Barbora, Maxima",,,produce,produce_berries,high,drinks,drinks_spirits,high,override_with_name_rules
+422133,"Metssealiha konserv LINNAMÄE, 240g",,,"Barbora, Maxima",,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+422134,"Suitsupõsk NÕO, kg",,,,,,meat_fish,fish_salted_smoked,high,meat_fish,fish_salted_smoked,high,
+422136,"Jäätis LION pulk, 62g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422138,"Sojapuding ALPRO PlantProtein šok.,200g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_desserts,high,dairy_eggs_fats,dairy_desserts,high,
+422139,"Mango-banaani smuuti PAI, 280ml",,,,,,produce,produce_tropical,high,produce,produce_smoothies_fresh_juices,high,override_with_name_rules
+422140,"Majonees BALTIKA Provansaal Klas.,300g",,,"Barbora, Maxima",,,sauces_oils,sauces_ketchup_mayo,high,sauces_oils,sauces_ketchup_mayo,high,
+422141,"Pannkook hakklihatäidisega MAMMA, 200g",,,"Barbora, Maxima",,,bakery,bakery_cakes_pastries,high,meat_fish,meat_minced,high,override_with_name_rules
+422142,"Sojapud.ALPRO PlantProtein vanill.,200 g",,,"Barbora, Maxima",,,sauces_oils,sauces_soy_worcester,high,drinks,drinks_spirits,high,override_with_name_rules
+422143,Suitsukanasalat ananassiga 200g,,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,produce,produce_tropical,high,override_with_name_rules
+422144,"Suitsukeedu sea seljafilee KARNI,kg-lett",,,"Barbora, Maxima",,,meat_fish,fish_salted_smoked,high,meat_fish,fish_salted_smoked,high,
+422145,"Kodujuust OTTO tomati-basiilikuga, 220g",,,,,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+422148,Https Barbora Ee Toode Melon Obinavot Kg,,,,,,produce,produce_tropical,high,produce,produce_tropical,high,
+422150,Liköör KIRSI 21% 500ml,,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+422152,"Baklažaanisalat maitserohelisega, kg",,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high,produce,produce_herbs_salads_sprouts,high,
+422153,Jäätis maasika.40%väh.suhk.PREMIA 50g,,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422154,"Jäätis maasika-kiivi MIO&RIO, 70g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422155,Mochi karamelli-pähkli RUD 50g,,,"Barbora, Maxima",,,sweets_snacks,sweets_candies,high,sweets_snacks,sweets_candies,high,
+422156,Mitmepuuviljajook MIO&RIO 200ml,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422158,Https Barbora Ee Toode Jaatis Magnum Euphoria Multipakk 6 X 43 G,,,"Barbora, Maxima",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+422159,Puuvilja-kohupiimatort 1.5kg,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+422160,Muu.alk.jk. APEROL Aperitivo 11% 700ml,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422162,"Sojatoode maasikamaitseline ALPRO,400g",,,"Barbora, Maxima",,,sauces_oils,sauces_soy_worcester,high,produce,produce_berries,high,override_with_name_rules
+422163,"Pannkook singi ja juustuga MAMMA, 200g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422164,"Sojatoode mangomaits. ALPRO,400g",,,,,,sauces_oils,sauces_soy_worcester,high,produce,produce_tropical,high,override_with_name_rules
+422165,Puuviljakook 370g,,,"Barbora, Maxima",,,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+422166,"Šokol.-sojajook ALPRO PlantProtein, 1L",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_plant_drinks,high,dairy_eggs_fats,dairy_plant_drinks,high,
+422167,Puuviljakorvike 2x140g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422168,Must Tseiloni tee DILMAH Premium 30x2g,,,,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+422169,Must Tseiloni tee Lady SilverDILMAH20x2g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+422171,"Sojatood.maits-ta laktoosivab.ALPRO,400g",,,"Barbora, Maxima",,,sauces_oils,sauces_soy_worcester,high,sauces_oils,sauces_soy_worcester,high,
+422172,"Suitsusink Delikatess M&M,kg",,,"Barbora, Maxima",,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+422174,"Suitsusink RAKVERE, 350g",,,,,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+422175,"Parmigiano-Reggiano cigar juust.,NÕO 85g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422176,"Poolsuitsuvorst Mini NÕO, 135g viil",,,,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+422177,"Požarski kotlet KIKAS, 300g",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422178,"Praetud pelmeenid UVIC, 350g",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422179,Muu alkohoolnejook G:N Turbo 5.5% 1.5l,,,"Barbora, Maxima",,,dry_preserves,dry_cereals_muesli,high,drinks,drinks_spirits,high,override_with_name_rules
+422180,"Röstsai Eesti Pagar juustuga, 430g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422181,Https Barbora Ee Toode Jaatis Manhattan Sokokook Ny Kupsis 707 G,,,"Barbora, Maxima",,,bakery,bakery_cakes_pastries,high,drinks,drinks_spirits,high,override_with_name_rules
+422182,KGT pun.vein MASI Campofiorin 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422184,"Suitsuvorst Tamula WÕRO,350g",,,,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+422185,Muu piir.jook METAXA 12* 40% 700ml,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422186,"Br.kintsuliha mango-kookose marin.,kg",,,"Barbora, Maxima",,,bakery,bakery_cakes_pastries,high,produce,produce_tropical,high,override_with_name_rules
+422187,"Sulatatud juust FARM MILK viil., 150g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_milk,high,override_with_name_rules
+422189,"Sulatatud juust HIIRTE JUUST, 185g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422190,Liköör VANA TALLINN Heritage 40% 500ml,,,,,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+422191,Borš 350g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422192,"Jäätis mandliga vegan MAGNUM, 72g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422193,"Röstsai FAZER mini, 240g",,,"Barbora, Maxima",,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+422194,"Jäätis mustika-põldmarja MIO&RIO, 70g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422198,Https Barbora Ee Toode Br Poolkoivad Suitsumaits Marinaadis Kg,,,"Barbora, Maxima",,,sauces_oils,sauces_marinades,high,sauces_oils,sauces_marinades,high,
+422199,"Br.kintsul.nahata A-klass WELL DONE,500g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422200,Jõhvikamahlajook AURA Fresh 2L,,,,,,drinks,drinks_juices,high,produce,produce_berries,high,override_with_name_rules
+422201,KGT vein VILLA PUCCINI Toscana 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422202,Jäätis nätsukommi. MIO&RIO 310g,,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422203,Jäätis mustika-jogurti BALBIINO 54g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+422204,"Surimipulgad sinepikastmega VICI,200g",,,"Barbora, Maxima",,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+422205,"Surimipulgad sriracha kastmega VICI,200g",,,"Barbora, Maxima",,,sauces_oils,sauces_other,heuristic,sauces_oils,sauces_other,heuristic,
+422206,"Sulat.juust HIIRTE JUUST suit.juust,185g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422207,"Sulat.määrdejuust FARM MILK, 150g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_milk,high,override_with_name_rules
+422208,"Rannakarbid äädikamar.VILSUND BLUE, 340g",,,"Barbora, Maxima",,,other,dry_other,fallback,sauces_oils,oils_vinegar,high,proposed_group_invalid;override_with_name_rules
+422209,"Juust Hiirte ESTOVER viilutatud, 500g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422210,Piparmünditee TETLEY 20x1.5g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+422211,Rohel.tee The Island of Tea BASILUR 100g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+422213,Muu piir.jook RIGA BLACK BALSAM 30%0.5l,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422214,Kodujuust kirsi WELL DONE 150g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+422215,"Röstsai Parim Päts, 500g",,,"Barbora, Maxima",,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+422216,"Jäätis popkorni plombiir šok. tük.WD,90g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422217,"Br.lihašašlõkk tomatimar.TALLEGG, 700 g",,,"Barbora, Maxima",,,meat_fish,meat_pork,high,drinks,drinks_spirits,high,override_with_name_rules
+422218,"Kirsstomat värvil. mix WELL DONE, 250g",,,"Barbora, Maxima",,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+422219,Https Barbora Ee Toode Br Saslokk Punases Marinaadis Kg,,,"Barbora, Maxima",,,sauces_oils,sauces_marinades,high,sauces_oils,sauces_marinades,high,
+422220,Suupistevalik röstsaial 400g,,,"Barbora, Maxima",,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+422221,Kirsijook AURA 1L,,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422222,"Suupistevorstid Mini Fuet ARGAL, 50g",,,,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+422223,Tee apels.-mandar.maits.LOYDpür.20x1.7g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+422224,"Broilerifilee hakklihamass KEKAVA,450g",,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,meat_fish,meat_minced,high,override_with_name_rules
+422225,Jäätis põldmarja ERITI RAMMUS 110g,,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422227,Jäätis popkorni. MIO&RIO 310g,,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422228,Röstitud kohv Chicory KLINGAI 250g,,,"Barbora, Maxima",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+422229,Kohuke vanilli WELL DONE 45G,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422230,"Rannakarbid soolvees VICI, 200g",,,,,,world_spices,spices_basic_salt_pepper,high,world_spices,spices_basic_salt_pepper,high,
+422231,Vein CASTILLO DE MUREVA valge 1L,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422232,Rannakarbid veinikast. VILSUND BLUE 340g,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422233,Kohviliköör 18% 500ml PET,,,"Barbora, Maxima",,,drinks,drinks_other,heuristic,drinks,drinks_spirits,high,override_with_name_rules
+422234,"Rumm BACARDI Superior 37,5% 500ml",,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422235,"Kirsstomat Zebrino WELL DONE, 250g",,,"Barbora, Maxima",,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+422236,Rum ANGOSTURA 7YO 40% 700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422237,"Vanillijäätis šok&küpsisetaign.WD,310g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422238,"Must põrandaleib FAZER, 390g",,,,,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+422239,"Broileri pooltiiv.vürts.mar.KEKAVA,500g",,,"Barbora, Maxima",,,world_spices,spices_herbs_spice_mix,high,meat_fish,meat_poultry,high,override_with_name_rules
+422240,"Doktori keeduvorst juust. WELL DONE,300g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422241,"Jäätis FERRERO ROCHER sarapuupähk.,50g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422242,"Doktori keeduvorst PORMET, 300g",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+422243,Lauavesi ASET gaseeritud 1.5L,,,,,,drinks,drinks_water,high,drinks,drinks_water,high,
+422244,"Kohup.hõrgutis ALMA mango-passion,150g",,,"Barbora, Maxima",,,produce,produce_tropical,high,produce,produce_tropical,high,
+422245,Muu piir.jook RIGA BLACK BALSAM 45% 0.2l,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422246,Taimne määre avokaado mait.NATURALE 200g,,,"Barbora, Maxima",,,other,dry_other,fallback,produce,produce_tropical,high,proposed_group_invalid;override_with_name_rules
+422247,Kohuke vanilli WELL DONE Protein 40g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422248,Must leib FAZER 600g,,,,,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+422249,Muu piir.jook RIGA BLACK BALSAM 45% 0.5l,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422250,Jäätis Hazelnut multipakk MAGNUM 6x46g,,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422251,"Rulaad NÕO, 135g viil",,,,,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+422253,Muu piir.jook STROH 40% 500ml,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422254,Täidetud korvikeste valik 375g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422255,"Külm.kevad.köögiviljad WELL DONE, 400g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422256,Vein PIACERE Sangiovese punane 1L,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422257,"Suur sült Memme NÕO, 500g",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422258,Vein MICHEL TORINO Sauvignon 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422259,"Vein MOREAU&FILS, Select Blanc 750ml",,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422260,Vein PIACERE Trebbiano valge 1L,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422261,Forellimari WELL DONE 200g,,,"Barbora, Maxima",,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+422263,Rustikaalne peenleib seemnetega 490g,,,"Barbora, Maxima",,,bakery,bakery_bread_loaves,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+422264,"Hallitusjuust Gorgonzola IGOR Dolce,200g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422265,"Kanasink tilliga TALLEGG, 130g viil",,,,,,meat_fish,meat_poultry,high,dairy_eggs_fats,dairy_eggs,high,override_with_name_rules
+422267,Jäätis šok.tükkidega VALSOIA 300g,,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422268,Jäätis soolakaramel. MIO&RIO 96g,,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422269,Taimsed šašlõkivorstid THORMI 300g,,,,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+422270,Muu p.j. ALMO PipranapsMeega35%0.1l,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422271,"Vein MOREAU&FILS, Select Rouge 750ml",,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422272,"Täissuitsuvorst Tooma M&M, 240g",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+422273,Kohvioad Espresso LÖFBERGS 1kg,,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+422275,Kohvioad JACOBS BaristaCrema Italiano1kg,,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+422276,Jahvat.kohv Kharisma LÖFBERGS 500g,,,"Barbora, Maxima",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+422277,Joogivesi AURA Fruit Sidruni ga-tud500ml,,,"Barbora, Maxima",,,drinks,drinks_water,high,drinks,drinks_water,high,
+422278,"Broileri rinnalihasink KARNI, 300g viil",,,,,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+422279,Taipärane karri sealihaga PRESTO 300g,,,,,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+422280,Vein punane PICCINI Memoro Ros.750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422282,Sepik seemnetega FAZER 250g,,,,,,bakery,bakery_bread_loaves,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+422284,Grillsteigid Armeeniapärased NÕO 430g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422285,Brokolisalat peekoniga 200g,,,"Barbora, Maxima",,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+422286,Kohvioad keskm.röst LÖFBERGS 1kg,,,,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+422287,"KeefirijookHELLUS maas.-rabar.-bat.,170g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+422288,"Broilerišašlõkk klassik.marinad.M&M,800g",,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+422289,"Seemneleib Kodu FAZER, 280g",,,,,,bakery,bakery_bread_loaves,high,sweets_snacks,sweets_nuts_driedfruit,high,override_with_name_rules
+422290,KGT vein FAT BASTARD Malbec 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422291,Sepik Õnne EESTI PAGAR 300g,,,,,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+422292,"Jäätis maasikam.valge šok.&mandl.WD,80g",,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422293,"Gruusia šašlõkk RANNAROOTSI, 1kg",,,,,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+422295,Https Barbora Ee Toode Virsik Paraguayo 1 Kl Kg,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422296,"Salat krabipul.brokol., kg-lett",,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high,produce,produce_herbs_salads_sprouts,high,
+422297,Maasika-õunajook Drako 200ml,,,,,,produce,produce_berries,high,produce,produce_berries,high,
+422298,Vein punane poolmag. Bost.Bl.Dok. 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422299,Vein ROBERTSON Natural Sweet Red 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422300,"Kohvioad LAVAZZA Crema e Aroma,1kg",,,,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+422301,"Kohuke LIISU šok.kook marmelaaditük.,38g",,,"Barbora, Maxima",,,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+422302,Vein ROBERTSON Natural Sweet Rose 750ml,,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422303,"Taimne dessert mango DEARY,150g",,,,,,dairy_eggs_fats,dairy_desserts,high,dairy_eggs_fats,dairy_desserts,high,
+422304,Vein S.A.Caracter Cab.Malbec'20 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422305,"Singi-juustupirukas pärmitaignast, 70g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,bakery,bakery_cakes_pastries,high,override_with_name_rules
+422306,"Kohupiimakreem ALMA mangokisselliga,140g",,,,,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+422307,"Heeringafilee vürtsidega kastmes, kg",,,"Barbora, Maxima",,,world_spices,spices_herbs_spice_mix,high,world_spices,spices_herbs_spice_mix,high,
+422308,"Sokolaadirull EESTI PAGAR, 350g",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422309,Heeringaf. ürtidega õlita WELL DONE 190g,,,"Barbora, Maxima",,,sauces_oils,oils_other,high,world_spices,spices_herbs_spice_mix,high,override_with_name_rules
+422310,Kohvioad Selezione Crema SEGAFREDO 1kg,,,,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+422311,"Taimne dessert mustsõst.DEARY,150g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_desserts,high,dairy_eggs_fats,dairy_desserts,high,
+422312,"Br.poolkoivad jogurti-tilli TALLEGG,800g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_eggs,high,override_with_name_rules
+422313,"Jäätis van.plombiir kondenspiim.WD, 65g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_milk,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+422314,Jäätis virsiku-hibiskuse RAFFAELLO 49g,,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422315,"Kohupiimakreem ALMA metsmustika, 150g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+422316,"Kookos, kg",,,"Barbora, Maxima",,,bakery,bakery_cakes_pastries,high,bakery,bakery_cakes_pastries,high,
+422317,Vein SANDHILLS Sauvignon Blanc 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422318,Vein TRAPICHE Varietals Sauv.Blanc 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422319,Jäätis maasika-piimašok.BALBIINO 94g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_milk,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+422320,Jäätis van-kor. kondenspiim. PREMIA 75g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_milk,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+422321,Vein TRAPICHE Varietals Pinot Grig.750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422322,Kohvivalgendaja COFFEETA 400g,,,,,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+422323,"Toorvorstikesed sealihast WD, 400g",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_pork,high,override_with_name_rules
+422324,"T/s põdrasnäkk KARNI, 85g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422326,Kohvioad LAVAZZA Espresso 500g,,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+422327,"Sokol. sõõrik sulatatud, 77g",,,,,,bakery,bakery_sweet_buns_donuts,high,bakery,bakery_sweet_buns_donuts,high,
+422328,Sõõrik maasikamaitse. sulatatud 70g,,,"Barbora, Maxima",,,bakery,bakery_sweet_buns_donuts,high,bakery,bakery_sweet_buns_donuts,high,
+422329,Jäätis martsipaniga ERITI RAMMUS 110g,,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422330,"Br.poolkoivad klassik.marin.TALLEGG,800g",,,"Barbora, Maxima",,,other,dry_other,fallback,dairy_eggs_fats,dairy_eggs,high,proposed_group_invalid;override_with_name_rules
+422331,"Br.poolkoivad klassikalises mar.M&M,600g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422332,"Kohupiim ALMA metsmaasika, 200g",,,,,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+422333,"Br.poolkoivad WELL DONE ABta,500g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422335,Vein VILLA MARIA SauvignonBlanc750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422336,"Kohvikapslid LAVAZZA Passionale 16x7,5g",,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+422337,Jäätis Madagaskari vanil. LA MUU 250g,,,,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422338,KPN kv.vah. MONISTROL Origin. Brut 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422339,Klassika. pelmeenid MAKS&MOORITS 400g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422340,Lahustuv kohvijook NESCAFÉ® 3in1 CLASSIC 20x16.5g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+422342,Vermut BELFIORE bianco 1L,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422344,"Jäätis MAGNUM Chill vegan,70g",,,,,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422347,"Juustuviiner MAKS&MOORITS, 300g",,,"Barbora, Maxima",,,drinks,drinks_spirits,high,meat_fish,meat_sausages,high,override_with_name_rules
+422348,"Koorejäätis ONU ESKIMO banaani-šok.,90g",,,,,,dairy_eggs_fats,dairy_cream_sourcream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+422349,Sõõrik mangotäidisega sulatatud 65g,,,"Barbora, Maxima",,,bakery,bakery_sweet_buns_donuts,high,bakery,bakery_sweet_buns_donuts,high,
+422350,KPN vein J. MOREAU & FILS Ch.Prem. 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422351,Sõõrik Ring of Sour maasikatäidis.sul65g,,,"Barbora, Maxima",,,bakery,bakery_sweet_buns_donuts,high,bakery,bakery_sweet_buns_donuts,high,
+422353,KPN lik.vein GRAHAM'S FI.Ruby Port 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422354,"Koorejäätis ONU ESKIMO ploomi-chia, 84g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cream_sourcream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+422356,"Taimne vanillibatoonik.glasuur.DEARY,40g",,,"Barbora, Maxima",,,sweets_snacks,sweets_chocolate_bars,high,sweets_snacks,sweets_chocolate_bars,high,
+422357,"Täispiimajogurt ALMA metsmaasika, 350g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+422358,"Kohupiimap.TERE sidr.-laimi lakt.v.,300g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+422359,"Kohupiim FARMI 5%, 200g",,,,,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+422361,"Sealiha omas mahlas RANNAROOTSI, 240g",,,"Barbora, Maxima",,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+422362,"Sealihasült M&M,300g",,,"Barbora, Maxima",,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+422363,Viin GREY GOOSE 40% 0.7L,,,,,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422364,Vesi AURA PLUS pohlamaits. 1.5L,,,"Barbora, Maxima",,,drinks,drinks_water,high,drinks,drinks_water,high,
+422365,"Tuunikala oliivõlis RIO MARE, 3x80g",,,,,,dry_preserves,dry_canned_meat_fish,high,dry_preserves,dry_canned_meat_fish,high,
+422366,Viin HLIBNY DAR Wheat 40% 200ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422367,Viin HLIBNY DAR Wheat 40% 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422369,"Suur Perenaise sai EESTI PAGAR, 500g",,,,,,bakery,bakery_buns_croissants,high,bakery,bakery_buns_croissants,high,
+422370,"Jäätis MILKA koonus, 69g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_milk,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+422371,"Külm.friikart.sakil. Zig Zag AVIKO, 750g",,,"Barbora, Maxima",,,frozen_food,frozen_potato_products,high,frozen_food,frozen_potato_products,high,
+422373,KPN veinVAUCHER CotesDuVent.Rouge 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422374,Õlu PAULANER Weissbier 5.5% 500ml,,,"Barbora, Maxima",,,drinks,drinks_beer_cider,high,drinks,drinks_beer_cider,high,
+422375,"Br.pooltiiva šašlõkk Armeenia grill, kg",,,"Barbora, Maxima",,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+422376,Tuunikala õlis KAIJA EO 160g,,,"Barbora, Maxima",,,dry_preserves,dry_canned_meat_fish,high,dry_preserves,dry_canned_meat_fish,high,
+422377,Külm. hakitud spinat Härmavili 300g,,,"Barbora, Maxima",,,produce,produce_herbs_salads_sprouts,high,produce,produce_herbs_salads_sprouts,high,
+422378,"Täispiimajogurt ALMA muraka, 350g",,,,,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+422380,Tuunikala pipra ja sidruniga KAIJA 160g,,,"Barbora, Maxima",,,dry_preserves,dry_canned_meat_fish,high,dry_preserves,dry_canned_meat_fish,high,
+422381,"Toorjuust OTTO, 150g",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422382,"Täispiim ALMA 3,8-4,2%, 1,5L",,,,,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+422383,"Sealihasült RANNAROOTSI, 330g",,,,,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+422384,"Seapraad kondita ,kg",,,"Barbora, Maxima",,,other,dry_other,fallback,meat_fish,meat_pork,high,proposed_group_invalid;override_with_name_rules
+422385,"Toorpiim pastör-ta 3,8 - 4,4% NOPRI 1L",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+422386,"Südamesepik täistera FAZER, 300g",,,,,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+422387,"Snäkk Drive NÕO, 85g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422388,Viin HLIBNY DAR Klassika 40% 1.75L,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422389,Viin KUPECKA 40% 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422390,Viin KOZATSKA RADA Klasichna 40% 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422391,Jäätis pistaatsiaga VALSOIA 300g,,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422392,Tume leib ciabatta 271g,,,"Barbora, Maxima",,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+422393,Tume tordipõhi 3-kih. KUCHENMEISTER 400g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422394,Vaarika-kodujuustukook 370g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+422395,Viin POOLIK 40% 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422396,"Br.tiiva õlaosa juustu mar.KEKAVA,500g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422397,"Kohuke SAARE muraka-sidruni, 40g",,,"Barbora, Maxima",,,produce,produce_tropical,high,produce,produce_tropical,high,
+422398,"Kohupiim JAUNPILS 5%, 275g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+422399,"Tuunikala purust. õlis KAPTEN GRANT,185g",,,"Barbora, Maxima",,,dry_preserves,dry_canned_meat_fish,high,dry_preserves,dry_canned_meat_fish,high,
+422400,"Kohupiim FARMI Lahja vaniliiniga, 200g",,,,,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+422401,"Kohupiim FARM MILK 0,2%, 250g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_milk,high,override_with_name_rules
+422402,"Tuunikala purust. vees KAPTEN GRANT,185g",,,"Barbora, Maxima",,,dry_preserves,dry_canned_meat_fish,high,dry_preserves,dry_canned_meat_fish,high,
+422403,Jäätis vaarika-valge šok.ONU ESKIMO 84g,,,"Barbora, Maxima",,,frozen_food,frozen_desserts_icecream,high,frozen_food,frozen_desserts_icecream,high,
+422404,Kalkuni guljašš ürdikartuliga 300g,,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+422405,Vab.peet.kanade munad M WELL DONE 10tk,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_eggs,high,dairy_eggs_fats,dairy_eggs,high,
+422406,Kanakarri riisiga PRESTO 300g,,,,,,dry_preserves,dry_pasta_rice,high,dry_preserves,dry_pasta_rice,high,
+422407,Kohvioad LÖFBERGS Crema 1kg,,,"Barbora, Maxima",,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+422408,Kohvioad Qualita Oro LAVAZZA 1kg,,,,,,drinks,drinks_coffee_beans_capsules,high,drinks,drinks_coffee_beans_capsules,high,
+422409,Viin PŠENICNAJA Lux 40% 500ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422410,"Sprotid õlis OCEAN, 240g",,,"Barbora, Maxima",,,sauces_oils,oils_other,high,sauces_oils,oils_other,high,
+422411,"Suitsusingike RAKVERE, 350g",,,,,,meat_fish,fish_salted_smoked,high,meat_fish,fish_salted_smoked,high,
+422412,"Suitsusardell RAKVERE, 500g",,,,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+422413,KPN vein GRAN CASTILLO Rose 750ml,,,,,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422414,"Br.toorvorstid ürtidega WELL DONE, 400g",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,world_spices,spices_herbs_spice_mix,high,override_with_name_rules
+422415,KPN vein R.CLERGET Chablis 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422417,"Suitsusardell RANNAROOTSI, 500g",,,,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+422418,"Suitsutatud kanafilee TALLEGG, kg",,,,,,meat_fish,meat_poultry,high,dairy_eggs_fats,dairy_eggs,high,override_with_name_rules
+422419,"Br.tiiva õlaosa WELL DONE ABta,500g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422421,"Hapupiimajook AIRAN 1%, 500g",,,,,,dairy_eggs_fats,dairy_milk,high,dairy_eggs_fats,dairy_milk,high,
+422422,"Jogurtikreem SAARE mango, 400g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+422426,"Surimi krabipulgad WELL DONE, 300g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422427,Bulguri köögiviljade segu BONDUELLE 250g,,,"Barbora, Maxima",,,dry_preserves,dry_canned_veg,high,dry_preserves,dry_canned_veg,high,
+422429,"Külm.friikart.kuld.krõbe MAAHÄRRA, 1.5kg",,,"Barbora, Maxima",,,frozen_food,frozen_potato_products,high,frozen_food,frozen_potato_products,high,
+422432,"Delikatesshakkliha MAKS&MOORITS, 300g",,,"Barbora, Maxima",,,meat_fish,meat_minced,high,meat_fish,meat_minced,high,
+422433,"Delikatess-sink tailihast M&M,170g viil",,,"Barbora, Maxima",,,meat_fish,meat_hams,high,meat_fish,meat_hams,high,
+422434,"Delikatess seahakkliha M&M, 300g",,,,,,meat_fish,meat_minced,high,meat_fish,meat_minced,high,
+422435,KPN-v.vein GRAN CASTILLO Viu.Chard.750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422436,"Juust Leet MO SAAREMAA viil., 150g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422437,"Külm.köögiviljad. Itaalia m.ain., 400g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422438,"Delikatessrulaad TALLEGG, 500g",,,,,,meat_fish,meat_hams,high,dairy_eggs_fats,dairy_eggs,high,override_with_name_rules
+422439,"Juust Wensleydale jõhvikatega, kg",,,,,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422440,KPN vein VITIS NOSTRA Montepul. 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422441,"Delikatess sea- ja veisehakkliha,kg",,,"Barbora, Maxima",,,meat_fish,meat_minced,high,meat_fish,meat_minced,high,
+422443,Juust Mozzarella FARM MILK 45% 125/200g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_milk,high,override_with_name_rules
+422444,"Delikatess seahakkliha,kg",,,"Barbora, Maxima",,,meat_fish,meat_minced,high,meat_fish,meat_minced,high,
+422445,"Juust Wensleydale mango-apelsini, kg",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422446,"Kodupihv.kreemja juustutäidisegaM&M,400g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422447,KPN vein VAUCHER Ventoux Blanc 750ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_wine,high,
+422448,Whisky FOUR ROSES Small Batch 45% 700ml,,,"Barbora, Maxima",,,drinks,drinks_wine,high,drinks,drinks_spirits,high,override_with_name_rules
+422450,"Delikatessviiner juustu RANNAROOTSI,250g",,,"Barbora, Maxima",,,drinks,drinks_spirits,high,meat_fish,meat_sausages,high,override_with_name_rules
+422451,"Õuna-peedimahl KADARBIKU, 0.33L",,,"Barbora, Maxima",,,drinks,drinks_juices,high,produce,produce_apples_pears,high,override_with_name_rules
+422452,"Doktori keeduvorst PORMET, 400g",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+422453,"Doktorivorst RAKVERE, 600g",,,,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+422454,"Juust Mozzarella ZOTTARELLA basiil.,200g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422456,"Doktorivorst RAKVERE,190g viil",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+422458,Külm.pan.kala kartulitega WELL DONE 350g,,,"Barbora, Maxima",,,meat_fish,fish_fresh,high,meat_fish,fish_fresh,high,
+422459,Külm.pärmi-lehttaig.võiga WELL DONE 400g,,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_butter_margarine,high,dry_preserves,dry_flour_sugar_baking,high,override_with_name_rules
+422460,"Külm.köögiv.seemnetega HÄRMAVILI, 400g",,,"Barbora, Maxima",,,sweets_snacks,sweets_nuts_driedfruit,high,sweets_snacks,sweets_nuts_driedfruit,high,
+422461,"Doktori keeduvorst WELL DONE, 300g",,,"Barbora, Maxima",,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+422462,Liköör JÄGERMEISTER 35% 200ml,,,"Barbora, Maxima",,,other,dry_other,fallback,drinks,drinks_spirits,high,proposed_group_invalid;override_with_name_rules
+422465,Õunajook PÕLTSAMAA 200ml,,,,,,produce,produce_apples_pears,high,produce,produce_apples_pears,high,
+422466,"Külm.mini croissant võiga WELL DONE,350g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_butter_margarine,high,dairy_eggs_fats,dairy_butter_margarine,high,
+422468,"Külm.minipelmeenid PEALINNA, 350g",,,,,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422470,"Delikatess veisehakkliha,kg",,,"Barbora, Maxima",,,meat_fish,meat_minced,high,meat_fish,meat_minced,high,
+422471,Õunajook MIO&RIO 200ml,,,"Barbora, Maxima",,,produce,produce_apples_pears,high,produce,produce_apples_pears,high,
+422472,"Eelküps.grillribid Teriyaki RR,900g",,,"Barbora, Maxima",,,world_spices,spices_asian,high,world_spices,spices_asian,high,
+422473,Eesti.br.rinfil.sisetk A-kl TALLEGG 400g,,,"Barbora, Maxima",,,other,dry_other,fallback,dairy_eggs_fats,dairy_eggs,high,proposed_group_invalid;override_with_name_rules
+422475,"Toors. salaami Kodune BIOVELA, 110g viil",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422476,"Turisti eine Frank Pott RANNAROOTSI,325g",,,"Barbora, Maxima",,,other,dry_other,fallback,household,hh_kitchenware,high,proposed_group_invalid;override_with_name_rules
+422477,"Kodujuust TERE lak.vaba jogurtiga, 300g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_yogurt_kefir,high,dairy_eggs_fats,dairy_yogurt_kefir,high,
+422478,"Kohupiimakreem ALMA metsmaasika, 300g",,,,,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+422479,"Külm.meriahvena filee nahaga, 600g",,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422480,"Lillkapsas, kg",,,"Barbora, Maxima",,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+422481,"Külm.täister.pelm.kanalih.PEALINNA, 350g",,,"Barbora, Maxima",,,meat_fish,meat_poultry,high,meat_fish,meat_poultry,high,
+422482,"Kohupiimakreem ALMA mustika, 300g",,,,,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+422483,"Eelküps. mustikamarin.ribi RAKVERE, 900g",,,"Barbora, Maxima",,,meat_fish,meat_pork,high,produce,produce_berries,high,override_with_name_rules
+422484,"Külmutatud kalapulgad SILVER, ESVA 250g",,,"Barbora, Maxima",,,frozen_food,frozen_fish,high,frozen_food,frozen_fish,high,
+422485,"Kodujuust FARM MILK 5%, 200g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_milk,high,override_with_name_rules
+422486,"Kodujuust OTTO hapukoorega, 330g",,,,,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+422487,"Eelküps.ribi, BBQ, mureli, RR,600g",,,,,,meat_fish,meat_pork,high,meat_fish,meat_pork,high,
+422488,Whisky GLENFIDDICH 12YO Sin.Malt40%700ml,,,"Barbora, Maxima",,,drinks,drinks_spirits,high,drinks,drinks_spirits,high,
+422491,"Maasikad, 500g",,,"Barbora, Maxima",,,produce,produce_berries,high,produce,produce_berries,high,
+422493,"E-vaba täissuitsuvorst OSKAR,210g",,,,,,meat_fish,meat_sausages,high,meat_fish,meat_sausages,high,
+422494,"Fileetasku juustu&singitäidis.M&M,260g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,dairy_eggs_fats,dairy_cheese_slices,high,
+422496,Leib juuretisega glut.vaba SCHAR 240g,,,"Barbora, Maxima",,,bakery,bakery_bread_loaves,high,bakery,bakery_bread_loaves,high,
+422497,Looduslik mineraalvesi DEVIN 1.5l,,,"Barbora, Maxima",,,drinks,drinks_water,high,drinks,drinks_water,high,
+422498,Lahustuv kohv GOLDEN BEAN 90g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+422499,Piir.jookCAPTAIN MORGAN Bl.Sp.35% 700ml,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422500,"Kohupiimakreem ALMA vanilli 2.5%, 300g",,,,,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+422501,"Kohupiimakreem ALMA šok.tükkidega, 150g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cottage_quark,high,dairy_eggs_fats,dairy_cottage_quark,high,
+422502,Piparmünditee TEEKANNE 20x2.25g,,,"Barbora, Maxima",,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+422503,"Emmentaliga täissuitsuvorst NÕO, 250g",,,"Barbora, Maxima",,,dairy_eggs_fats,dairy_cheese_slices,high,meat_fish,meat_sausages,high,override_with_name_rules
+422504,Looduslik karb.mineraalvesi BORJOMI 6x1L,,,"Barbora, Maxima",,,drinks,drinks_water,high,drinks,drinks_water,high,
+422505,Mahlajook CIDO Exclusive jõhvika 1L,,,"Barbora, Maxima",,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+422506,"Kohvivalgendaja ZOTT Gold 10%, 10gx7,5g",,,"Barbora, Maxima",,,drinks,drinks_other,heuristic,drinks,drinks_other,heuristic,
+422507,"Mahlajook mit.puuv. 10% Frutto CIDO,1.5l",,,"Barbora, Maxima",,,drinks,drinks_juices,high,drinks,drinks_juices,high,
+422508,"E-vaba maksapasteet OSKAR, 200g",,,,,,drinks,drinks_tea_coffee,high,drinks,drinks_tea_coffee,high,
+422509,Falafel GARDEN GOURMET Vegan 190g,,,"Barbora, Maxima",,,other,dry_other,fallback,dry_preserves,dry_other,medium,proposed_group_invalid;align_group_to_sub_parent
+422510,Külm.vareen kartuli-sibulaga BIMAR 400g,,,"Barbora, Maxima",,,produce,produce_root_veg,high,produce,produce_root_veg,high,
+422511,"Koorejäätis ERITI RAMMUS mango, 100g",,,,,,dairy_eggs_fats,dairy_cream_sourcream,high,frozen_food,frozen_desserts_icecream,high,override_with_name_rules
+422512,Maasika jook PFANNER 1l,,,"Barbora, Maxima",,,produce,produce_berries,high,produce,produce_berries,high,

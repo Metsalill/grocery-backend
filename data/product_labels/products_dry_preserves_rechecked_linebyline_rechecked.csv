@@ -1,0 +1,778 @@
+product_id,name,brand,size_text,food_group,stores_sample,current_sub_code,new_sub_code,food_group_corrected,food_group_corrected_prev,new_sub_code_prev,confidence
+1205,94042 lillhernes old spice mix,94042,,dry_preserves,Prisma,,other,other,dry_preserves,dry_other,low
+21329,Agnesi pasta Spaghetti no3 500g,Agnesi,500 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+154,"Ahven, roogitud, jahutatud, kg","Ahven,",,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,meat_fish,fish_other,high
+2691,Aito suhkur 1kg,Aito,1 kg,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+21862,Ajinomoto kiirnuudliroog vürtsika kastmega 93 g vegan,Ajinomoto,93 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,other,other,world_spices,spices_herbs_spice_mix,low
+73736,Al dente fusilli pasta 400g gluteenivaba,Al,400 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_pasta_rice,high
+23981,Al dente penne pasta 400g gluteenivaba,Al,400 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_pasta_rice,high
+12320,"Alpro No Sugars suhkruvaba fermenteeritud sojatoode, maitsestamata 400 g",Alpro No,400 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_other,high
+9879,ALPRO riisijook magustamata 1L,ALPRO,1 l,dry_preserves,Prisma,,dairy_plant_drinks,dairy_eggs_fats,dry_preserves,dry_pasta_rice,high
+23081,Amina pooleldi jämedateraline nisujahu 1 kg,Amina,1 kg,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+69539,Ananassikuubikud 85 g Pähklinäpp,Ananassikuubikud,85 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+23443,Änglamark jasmiiniriis 1 kg,Änglamark,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+5608,"Änglamark Kreeka esimese külmpressi oliiviõli 500 ml, mahe",Änglamark Kreeka,500 ml,dry_preserves,Prisma,,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+22357,Änglamark mahebasmatiriis 1 kg,Änglamark,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+4103,"Änglamark mahe külmpressitud oliiviõli (Hispaania) 0,5 l",Änglamark,0.5 l,dry_preserves,Prisma,,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+21440,Änglamark mandlijahu 200g,Änglamark,200 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+598303,Änglamark merisoolaga maitsestatud ökoloogilised riisigaletid 100g,Änglamark,100 g,dry_preserves,Prisma,,spices_basic_salt_pepper,world_spices,drinks,drinks_beer_cider,high
+2845,Änglamark orgaaniline teraline maapähklivõ 350g mahe,Änglamark,350 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+25077,Apelsiniõliga kontsentreeritud puhastusvahend 500ml,Apelsiniõliga,500 ml,dry_preserves,Prisma,,hh_cleaners,household,household,hh_cleaners,high
+3347,Ardo lillkapsariis 450g,Ardo,450 g,dry_preserves,"Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+64946,ARIMEX Everyday mix pähklite ja marjade segu 300g,ARIMEX Everyday,300 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+20424,ARIMEX Premium pistaatsiapähklid 250G,ARIMEX Premium,250 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+3714,"Arvid Nordquist Classic GRAN DIA KAFFE 500G Kesk.röst. Iiriselõhn. Täidlane, pähkl.mõrkj.100% Araabika: Bra/Kesk- Am/Col/Ida-Aafrika",Arvid Nordquist,500 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+18514,Astelpajuõli 150 ml,Astelpajuõli,150 ml,dry_preserves,"Coop, Prisma",,other,other,sauces_oils,oils_other,low
+4307,Astelpajusalv mesilasvaha ja astelpajuõliga,Astelpajusalv,,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+7125,"Baby back searibi, jahutatud, kg",Baby,,dry_preserves,"Prisma, Rimi",,baby_other,baby,dry_preserves,dry_flour_sugar_baking,medium
+39713,"Bacardi Oakheart Original Spiced piiritusjook 32,5%vol 700ml",Bacardi Oakheart,700 ml,dry_preserves,"Coop, Prisma, Rimi, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high
+138817,"Bacardi Oakheart Original Spiced Rum piiritujook 32,5%vol 1l",Bacardi Oakheart,1 l,dry_preserves,"Coop, Prisma",,drinks_spirits,drinks,drinks,drinks_spirits,high
+26685,Balsnack hapukoore- ja sibulamaitselised kartulivahvlid 90 g,Balsnack,90 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dairy_cream_sourcream,dairy_eggs_fats,sweets_snacks,sweets_snacks_salty,high
+3528,Balsnack hapukoore- ja tillimaitselised kartulivahvlid 90 g,Balsnack,90 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dairy_cream_sourcream,dairy_eggs_fats,sweets_snacks,sweets_snacks_salty,high
+1772,Balsnack kamapallid 150 g,Balsnack,150 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,other,other,dry_preserves,dry_other,low
+26037,Balsnack Ossi sinepimaitselised seakamarakrõpsud 40 g,Balsnack Ossi,40 g,dry_preserves,"Coop, Prisma",,sweets_snacks_salty,sweets_snacks,dry_preserves,dry_other,high
+51777,Balsnack tšilli- ja peekonimaitseline leib,Balsnack,,dry_preserves,Prisma,,bakery_bread_loaves,bakery,dry_preserves,dry_other,high
+23727,Baltix aurutatud riis 1 kg,Baltix,1 kg,dry_preserves,"Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+21890,Baltix aurutatud riis 4 x 100 g,Baltix,4x100 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+21551,Baltix pikateraline riis 1kg,Baltix,1 kg,dry_preserves,"Prisma, Rimi, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+66628,Baltix pikateraline riis 4 x 100 g,Baltix,4x100 g,dry_preserves,"Coop, Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+70556,Baltix pruun riis 4 x 100 g,Baltix,4x100 g,dry_preserves,"Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+20908,Baltix pudruriis 1kg,Baltix,1 kg,dry_preserves,"Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+22677,Baltix pudruriis 4x100g,Baltix,4x100 g,dry_preserves,"Coop, Prisma",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+23013,Baltix riisihelbed 500g,Baltix,500 g,dry_preserves,Prisma,,dry_cereals_muesli,dry_preserves,dry_preserves,dry_pasta_rice,high
+39976,Barbuda Spiced piiritusjook 35%vol 1L,Barbuda Spiced,1 l,dry_preserves,Prisma,,other,other,dry_preserves,dry_other,low
+17910,"Barebells pehme proteiinibatoon 55 g, soola maapähkli-karamelli",Barebells,55 g,dry_preserves,"Coop, Prisma, Rimi",,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+1909,Barebells Vegan pähkli-karamelli batoon 55g,Barebells Vegan,55 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+23403,"Barilla Collezione spinatiga tagliatelled, durumnisujahust pasta 500 g",Barilla Collezione,500 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+20062,Barilla pasta Cannelloni 250g,Barilla,250 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+20900,"Barilla pasta fettuccine, 500g",Barilla,500 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+127188,Barilla pasta fusilli 500 g,Barilla,500 g,dry_preserves,"Prisma, Rimi, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+5484,Barilla pastakaste basilico 400 g,Barilla,400 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,sauces_pasta_cooking,sauces_oils,dry_preserves,dry_pasta_rice,medium
+68408,"Barilla pasta Tagliatelle, 500g",Barilla,500 g,dry_preserves,"Coop, Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+5542,"BBQ broileripooltiivad, RANNAMÕISA, 500 g",Bbq,500 g,dry_preserves,"Prisma, Selver",,sauces_marinades,sauces_oils,sauces_oils,oils_other,medium
+12590,"Becel kerge taimne määre 38% oliiviõliga, 380 g",Becel,380 g,dry_preserves,Prisma,,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+23223,Ben's original basmatiriis keedukotikestes 8 × 125g,Ben's,8x125 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+20162,Ben's original boil-in-bag pikateraline riis 500 g,Ben's,500 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+19937,Ben's original boil-in-bag pikateraline riis 8x125g,Ben's,8x125 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+23647,Ben's original pikateraline riis 1 kg,Ben's,1 kg,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+67404,Ben's original täisterariis keedukotikestes 4×125 g,Ben's,4x125 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+66558,Ben’s Original Vahemerepärane valmisriis 220 g,Ben’s Original,220 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+192329,Billington's billington`s melassisuhkur 500g,Billington's,500 g,dry_preserves,"Coop, Prisma",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+2744,Billington's granuleeritud suhkur 1 kg,Billington's,1 kg,dry_preserves,"Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+2119,Billington's hele suhkur Muscovado 500g,Billington's,500 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+1359,Billington's rafineerimata demerara suhkur 1000g,Billington's,1000 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+3124,Billington's rafineerimata demerara suhkur 500g,Billington's,500 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+3425,Billington's rafineerimata küpsetussuhkur 1000g,Billington's,1000 g,dry_preserves,"Coop, Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+24890,"Blå Band, Béarni kastme koostisained, 3 × 32 g","Blå Band,",3x32 g,dry_preserves,Prisma,,bakery_buns_croissants,bakery,dry_preserves,dry_other,high
+7581,"Blå Band, gluteenivaba ja väikese laktoosisisaldusega koorekastme koostisained, 3 × 23 g","Blå Band,",3x23 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_other,high
+7867,"Blå Band, gluteenivaba ja väikese laktoosisisaldusega piprakastme koostisained, 3 × 28 g","Blå Band,",3x28 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_other,high
+6153,"Blå Band, laktoosivaba pruuni kastme koostisained, 3 × 23 g","Blå Band,",3x23 g,dry_preserves,Prisma,,bakery_buns_croissants,bakery,dry_preserves,dry_other,high
+25821,"Blå Band, väikese laktoosisisaldusega viie pipra kastme koostisained, 3 × 16 g","Blå Band,",3x16 g,dry_preserves,Prisma,,bakery_buns_croissants,bakery,dry_preserves,dry_other,high
+68456,Bona vita müsli kolme erineva šokolaadiga 375 g,Bona,375 g,dry_preserves,"Coop, Prisma, Selver",,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+2969,Bon Vegan Hakitud Soja Tomatikastmes 300G,Bon Vegan,300 g,dry_preserves,Prisma,,dairy_plant_drinks,dairy_eggs_fats,dry_preserves,dry_other,high
+7578,Borges ekstra väärisoliiviõli 1 l,Borges,1 l,dry_preserves,"Coop, Prisma, Rimi, Selver",,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+8162,Borges ekstra väärisoliiviõli 250 ml,Borges,250 ml,dry_preserves,"Coop, Prisma, Rimi, Selver",,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+1913,Borges ekstra väärisoliiviõli 500 ml,Borges,500 ml,dry_preserves,"Coop, Prisma, Rimi, Selver",,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+37278,"Borges ekstra väärisoliiviõli 500 ml, öko",Borges,500 ml,dry_preserves,"Coop, Prisma, Selver",,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+25490,Borges oliiviõli rafineeritud 500 ml,Borges,500 ml,dry_preserves,"Coop, Prisma, Rimi, Selver",,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+4386,Borges rapsiõli ja ekstra-väärisoliiviõli segu 1l,Borges,1 l,dry_preserves,"Coop, Prisma, Selver",,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+20454,Borges spagetid durumnisujahust 500g,Borges,500 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+4907,Borges viinamarjaseemneõli 500ml,Borges,500 ml,dry_preserves,"Coop, Prisma, Rimi, Selver",,sweets_nuts_driedfruit,sweets_snacks,sauces_oils,oils_other,high
+27770,Borges viinamarjaseemneõli borges 1l,Borges,1 l,dry_preserves,"Prisma, Selver",,sweets_nuts_driedfruit,sweets_snacks,sauces_oils,oils_other,high
+21393,Bosto aurutatud riis (parboiled) 4x125g,Bosto,4x125 g,dry_preserves,"Coop, Prisma, Rimi",,dry_pasta_rice,dry_preserves,sauces_oils,oils_other,high
+23594,Bosto basmati riis 4x125 g,Bosto,4x125 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+20266,Bosto basmati riis 4x75g,Bosto,4x75 g,dry_preserves,"Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+22758,Bosto bio basmati riis 4x75g,Bosto,4x75 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+73124,"Bosto metsiku riisi segu, 4 x 125 g",Bosto,4x125 g,dry_preserves,"Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+23352,Bosto pikateraline riis 4 x 125 g,Bosto,4x125 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+21668,Bosto pikateraline riis 8x125g,Bosto,8x125 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+23903,Bosto Poke bowl riis 500g,Bosto Poke,500 g,dry_preserves,"Coop, Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+20610,Bosto Pruun Basmati riis 4x125 g,Bosto Pruun,4x125 g,dry_preserves,"Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+23928,Bosto pruun riis 4 x 125 g,Bosto,4x125 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+66119,"Bosto pruun riis, kinoa ja teravili 4 x 75 g",Bosto,4x75 g,dry_preserves,"Coop, Prisma",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+21474,"Bosto pruun riis, spelta ja kinoa 4 x 75 g",Bosto,4x75 g,dry_preserves,"Coop, Prisma",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+23102,"Bosto risotto paella riis, 500 g",Bosto,500 g,dry_preserves,"Coop, Prisma",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+21962,Bosto tai jasmiiniriis 4 x 125 g,Bosto,4x125 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+66543,Bragagnolo 889 pasta Tagliatelle Con Archetto 500g,Bragagnolo,500 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+1931,Briis Balti Sardiinid Tomatis 140 G,Briis Balti,140 g,dry_preserves,Prisma,,fish_fresh,meat_fish,dry_preserves,dry_pasta_rice,high
+2319,Briis Balti Vürtsikilud 400G,Briis Balti,400 g,dry_preserves,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dry_pasta_rice,dry_preserves,world_spices,spices_herbs_spice_mix,high
+54236,"Broilerimaks, 500 g","Broilerimaks,",500 g,dry_preserves,"Coop, Prisma, Selver",,meat_poultry,meat_fish,sauces_oils,oils_other,high
+32080,"Broileri pooltiivad mustika, RANNAMÕISA, 400 g",Mustika,400 g,dry_preserves,"Prisma, Selver",,meat_poultry,meat_fish,sauces_oils,oils_other,high
+5418,Broileri pooltiivad punases marinaadis 600 g,Broileri,600 g,dry_preserves,"Barbora, Coop, Maxima, Prisma, Rimi",,sauces_marinades,sauces_oils,sauces_oils,sauces_marinades,medium
+7373,"Broileri pooltiivad särtsakad firecracker-marinaadis, TALLEGG, 800 g",Särtsakad,800 g,dry_preserves,"Prisma, Selver",,sauces_marinades,sauces_oils,sauces_oils,sauces_marinades,medium
+3280,"Broileri rinnafilee ananassimarinaadis, MATSIMOKA, 500 g",Matsimoka Broileri,500 g,dry_preserves,"Prisma, Rimi, Selver",,sauces_marinades,sauces_oils,sauces_oils,sauces_marinades,medium
+7446,"Broilerišašlõkk klassikalises marinaadis, MAKS&MOORITS, 800 g",Broilerišašlõkk,800 g,dry_preserves,"Prisma, Rimi, Selver",,sauces_marinades,sauces_oils,sauces_oils,sauces_marinades,medium
+33775,Broileritiivad 500g,Broileritiivad,500 g,dry_preserves,"Coop, Prisma",,meat_poultry,meat_fish,sauces_oils,oils_other,high
+4740,"Broileritiiva keskosa, RANNAMÕISA, 500 g",Broileritiiva,500 g,dry_preserves,"Prisma, Rimi, Selver",,meat_poultry,meat_fish,sauces_oils,oils_other,high
+5843,Broileritiiva õlaosa 500g,Broileritiiva,500 g,dry_preserves,Prisma,,meat_poultry,meat_fish,sauces_oils,oils_other,high
+8253,Broiler jahutatud kg,Broiler,,dry_preserves,Prisma,,meat_poultry,meat_fish,sauces_oils,oils_other,high
+44108,Captain Morgan Black Spiced rumm 40%vol 700ml,Captain Morgan,700 ml,dry_preserves,"Prisma, Rimi, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high
+45159,Captain Morgan Spiced Gold piiritusjook 35%vol 500ml,Captain Morgan,500 ml,dry_preserves,"Coop, Prisma, Rimi, Selver",,other,other,dry_preserves,dry_other,low
+43554,Captain Morgan Spiced Gold rumm 35%vol 700ml,Captain Morgan,700 ml,dry_preserves,"Coop, Prisma, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high
+142789,Caribba Spiced piiritusjook 35%vol 500ml,Caribba Spiced,500 ml,dry_preserves,"Coop, Prisma",,other,other,dry_preserves,dry_other,low
+1512,Carrefour Extra Demerara rafineerimata roosuhkur 500 g,Carrefour Extra,500 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+19694,CHEF LUNDEN Caesari kauss pasta ja broileriga 270 g,CHEF LUNDEN,270 g,dry_preserves,"Coop, Prisma",,meat_poultry,meat_fish,sauces_oils,oils_other,high
+3728,Chef Lunden Nuudlikauss Broileriga 280G,Chef Lunden,280 g,dry_preserves,Prisma,,meat_poultry,meat_fish,sauces_oils,oils_other,high
+1427,Chef Lunden Pasta Carbonara 250G,Chef Lunden,250 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+310253,Chef Lunden Riisikauss Broileriga 280 G,Chef Lunden,280 g,dry_preserves,"Prisma, Rimi",,meat_poultry,meat_fish,sauces_oils,oils_other,high
+21923,Chiavazza pitsajahu 1 kg,Chiavazza,1 kg,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+30602,Chipstar hapukoore- ja sibulamaitselised riisikrõpsud 60 g,Chipstar,60 g,dry_preserves,Prisma,,sweets_snacks_salty,sweets_snacks,dry_preserves,dry_pasta_rice,high
+120655,Chipstar tomatimaitselised riisikrõpsud 60 g,Chipstar,60 g,dry_preserves,Prisma,,sweets_snacks_salty,sweets_snacks,dry_preserves,dry_pasta_rice,high
+1086,Ciabatta india pähklite ja jõhvikatega,Ciabatta,,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+1688,Cirio kontsentreeritud tomatipasta 140 g,Cirio,140 g,dry_preserves,"Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+156817,Cirio pastakaste basiilikuga 420g,Cirio,420 g,dry_preserves,Prisma,,sauces_pasta_cooking,sauces_oils,dry_preserves,dry_pasta_rice,medium
+20825,City Taste Jahusegu Inglise šokolaadi brownie 400 g,City Taste,400 g,dry_preserves,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+2592,"Coca-Cola zero sugar, zero caffeine karastusjook 330ml",Coca-Cola,330 ml,dry_preserves,"Coop, Prisma, Rimi",,drinks_soft_soda,drinks,dry_preserves,dry_other,high
+23531,Coop basmati ja jasmiiniriis 1kg,Coop,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+7192,Coop BBQ maitseainesegu 120 g,Coop BBQ,120 g,dry_preserves,Prisma,,sauces_marinades,sauces_oils,world_spices,spices_herbs_spice_mix,medium
+55826,Coop blanšeeritud kartuliviilud koorekastmes 750g,Coop,750 g,dry_preserves,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,dry_preserves,dry_other,high
+2521,COOP chillimaitselised pähklid 150g,COOP,150 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+27583,Coop ekstra neitsioliiviõli 500 ml,Coop,500 ml,dry_preserves,Prisma,,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+5263,Coop ekstra-väärisoliivõli 200ml spray,Coop,200 ml,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+5536,Coop ekstra-väärisoliivõli 'classico' 500ml,Coop,500 ml,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+21077,Coop express basmatiriis 250g,Coop,250 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+22623,Coop express riis tomati ja ürtidega 250 g,Coop,250 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+1979,Coop fajita maitseainesegu 36 g,Coop,36 g,dry_preserves,Prisma,,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+68518,Coop farfalle durumpasta 500g,Coop,500 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+4191,Coop Fettucine Värske Pasta 300 G,Coop Fettucine,300 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+133003,Coop fusilli durumpasta tomati ja spinatiga 500g,Coop,500 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+7877,Coop garam masala maitseainesegu 33 g,Coop,33 g,dry_preserves,Prisma,,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+18298,Coop gnocchi durumpasta 500g,Coop,500 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+28269,Coop hapukoore- ja sibulamaitselised riisigaletid 125g,Coop,125 g,dry_preserves,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,drinks,drinks_beer_cider,high
+28937,Coop Haputaigna leib oliivõliga 230 g,Coop Haputaigna,230 g,dry_preserves,Prisma,,bakery_bread_loaves,bakery,sauces_oils,oils_other,high
+70933,"Coop helbed riisi, täisteranisu, täisteraodra, täisterakaera ning külmkuivatud kirsi-, maasika- ja vaarikatükkidega 375g",Coop,375 g,dry_preserves,Prisma,,dairy_plant_drinks,dairy_eggs_fats,dry_preserves,dry_pasta_rice,high
+20442,Coop india pähkli-maapähkli-pistaatsia segu 200g,Coop,200 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+4401,Coop klassikaline pastakaste 390 g,Coop,390 g,dry_preserves,Prisma,,sauces_pasta_cooking,sauces_oils,dry_preserves,dry_pasta_rice,medium
+1506,"Coop kokteil-riisipirukad, 675 g",Coop,675 g,dry_preserves,Prisma,,bakery_cakes_pastries,bakery,dry_preserves,dry_other,medium
+355556,Coop koorteta pistaatsiapähklid 70g,Coop,70 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+46585,Coop krutoonid oliiviõli ja meresoolaga 100g,Coop,100 g,dry_preserves,Prisma,,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+25421,Coop külmpressitud avokaadoõli 250ml,Coop,250 ml,dry_preserves,Prisma,,produce_tropical,produce,sauces_oils,oils_other,high
+23991,Coop külmpressitud linaseemneõli 250ml,Coop,250 ml,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sauces_oils,oils_other,high
+7825,Coop küüslaugumaitsega oliiviõli 250ml,Coop,250 ml,dry_preserves,Prisma,,sweets_gums_mints,sweets_snacks,sweets_snacks,sweets_gums_mints,high
+65363,Coop lasagne durumpasta munapasta 500g,Coop,500 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+22246,Coop lasanjeplaadid ja kastmepulber 247g,Coop,247 g,dry_preserves,Prisma,,other,other,dry_preserves,dry_other,low
+610069,Coop maapähklid 1 kg soolata,Coop,1 kg,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+4408,Coop makrellifileed tomatikastmes 125 g,Coop,125 g,dry_preserves,Prisma,,fish_fresh,meat_fish,dry_preserves,dry_canned_meat_fish,high
+21078,Coop mandlijahu 80g,Coop,80 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+5672,Coop massaman karripasta 100 g,Coop,100 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,world_spices,spices_asian,high
+4088,Coop meresoolaga riisigaletid 100g,Coop,100 g,dry_preserves,Prisma,,spices_basic_salt_pepper,world_spices,drinks,drinks_beer_cider,high
+3272,Coop müslibatoon-šokolaadi 45g,Coop,45 g,dry_preserves,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+1764,Coop müslibatoon šokolaadi-soolakaramell 45g,Coop,45 g,dry_preserves,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+2635,Coop müslibatoon šokolaadi soolakarmelli 138g,Coop,138 g,dry_preserves,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+3096,Coop naturaalsed kreeka pähklid 100g,Coop,100 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+3413,Coop õhuke näkileib täisterarukkijahuga 300g,Coop,300 g,dry_preserves,Prisma,,bakery_bread_loaves,bakery,dry_preserves,dry_flour_sugar_baking,high
+1529,Coop Õhukesed Broileriviilud 200G,Coop Õhukesed,200 g,dry_preserves,Prisma,,meat_poultry,meat_fish,sauces_oils,oils_other,high
+56061,Coop oliiviõli 500 ml,Coop,500 ml,dry_preserves,Prisma,,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+7689,Coop päevalilleõli 1 l,Coop,1 l,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+67249,Coop pähklibatoon datlitega 35g,Coop,35 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+147,Coop päikesekuivatatud tomati tükid õlis 285/145g,Coop,145 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sauces_oils,oils_other,high
+7143,Coop panang karripasta 100g,Coop,100 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,world_spices,spices_asian,high
+17672,"Coop paneeritud saidalõigud küüslaugukastmega, 300 g",Coop,300 g,dry_preserves,Prisma,,bakery_buns_croissants,bakery,dry_preserves,dry_other,high
+2919,"Coop paneeritud saidalõigud ürdikastmega, 300g",Coop,300 g,dry_preserves,Prisma,,spices_herbs_spice_mix,world_spices,dry_preserves,dry_other,high
+9756,Coop pastaroog tomati ja mozzarellaga 155g,Coop,155 g,dry_preserves,Prisma,,dairy_other,dairy_eggs_fats,dry_preserves,dry_pasta_rice,high
+21889,Coop pikateraline basmatiriis kotis 4x125g,Coop,4x125 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+21298,Coop pikateraline jasmiiniriis kotis 4x125g,Coop,4x125 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+21801,Coop pikateraline riis 1kg,Coop,1 kg,dry_preserves,"Prisma, Rimi",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+21883,Coop pikateraline täisterariis 1 kg,Coop,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+54837,Coop praadimis- ja frittimisõli 2 l,Coop,2 l,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+65459,Coop pudruriis 1kg,Coop,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+54510,Coop punane karripasta 100g,Coop,100 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,world_spices,spices_asian,high
+6807,Coop Rafineeritud orgaaniline päevalilleõli 500ml,Coop Rafineeritud,500 ml,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+5348,Coop rafineeritud viinamarjaseemneõli 500ml,Coop,500 ml,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sauces_oils,oils_other,high
+3444,Coop rapsiõli 2 l,Coop,2 l,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+3415,Coop rapsiõli ja ekstra-väärisoliiviõli segu 1l,Coop,1 l,dry_preserves,Prisma,,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+3733,Coop riisi-maisigaletid 100g,Coop,100 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,drinks,drinks_beer_cider,high
+22427,Coop riisinuudlid 250 g,Coop,250 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+24813,Coop riisipaber 200g,Coop,200 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+54301,"Coop riisipirukad, 360 g",Coop,360 g,dry_preserves,Prisma,,bakery_cakes_pastries,bakery,dry_preserves,dry_pasta_rice,medium
+3584,"Coop Riisipirukad 6 Tk, 390 G",Coop Riisipirukad,390 g,dry_preserves,Prisma,,bakery_cakes_pastries,bakery,dry_preserves,dry_pasta_rice,medium
+54539,"Coop riisipirukad, 720g",Coop,720 g,dry_preserves,Prisma,,bakery_cakes_pastries,bakery,dry_preserves,dry_pasta_rice,medium
+20281,Coop risottoriis 500g,Coop,500 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+360003,Coop röstitud ja soolata india pähklid 150g,Coop,150 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+4576,Coop röstitud seesamiõli 250ml,Coop,250 ml,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+563210,"Coop röstitud, soolatud pistaatsiapähklid 150 g",Coop,150 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+7493,Coop sidrunimaitsega oliiviõli 250ml,Coop,250 ml,dry_preserves,Prisma,,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+227143,COOP soolapähklid 500g,COOP,500 g,dry_preserves,Prisma,,sweets_snacks_salty,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+5469,Coop spagettikastmepulber 52g,Coop,52 g,dry_preserves,Prisma,,other,other,dry_preserves,dry_pasta_rice,low
+23121,Coop sushiriis 500g,Coop,500 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+20740,Coop suured hiidkrevetid kastmes 350/170g,Coop,170 g,dry_preserves,Prisma,,other,other,dry_preserves,dry_other,low
+68272,Coop tagliatelle durumpasta 500g,Coop,500 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+23455,Coop tagliatelle durumpasta munaga 500g,Coop,500 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+3332,Coop täisterarukkijahust näkileib 250g,Coop,250 g,dry_preserves,Prisma,,bakery_bread_loaves,bakery,dry_preserves,dry_flour_sugar_baking,high
+6482,Coop tako maitseainesegu 36 g,Coop,36 g,dry_preserves,Prisma,,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+587075,Coop tuhksuhkur 250g,Coop,250 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+4045,Coppelia rapsiõli 1l,Coppelia,1 l,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+5135,Costa d'oro ekstra väärisoliiviõli filtreerimata 500ml,Costa,500 ml,dry_preserves,"Coop, Prisma, Selver",,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+26763,Crudolio külmpressitud päevalilleõli mahe 1l,Crudolio,1 l,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+2803,Dansukker demerara suhkur fairtrade 500 g,Dansukker,500 g,dry_preserves,"Coop, Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+1355,Dansukker fariinsuhkur 500 g,Dansukker,500 g,dry_preserves,"Coop, Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+3790,Dansukker kaneelisuhkur 330 g,Dansukker,330 g,dry_preserves,"Prisma, Selver",,spices_herbs_spice_mix,world_spices,dry_preserves,dry_flour_sugar_baking,high
+3192,Dansukker karamellsuhkur pruun 500 g,Dansukker,500 g,dry_preserves,"Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,sweets_snacks,sweets_candies,high
+125998,Dansukker kõva tükksuhkur 500 g,Dansukker,500 g,dry_preserves,"Coop, Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+1231,Dansukker moosisuhkur 1 kg,Dansukker,1 kg,dry_preserves,"Coop, Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+3334,"Dansukker moosisuhkur mahetoode, 500 g",Dansukker,500 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+155094,Dansukker ökoloogiline peedisuhkur 750g,Dansukker,750 g,dry_preserves,"Coop, Prisma",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+23637,Dansukker pärlsuhkur 500 g,Dansukker,500 g,dry_preserves,"Coop, Prisma",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+1952,Dansukker pruun roosuhkur 750 g,Dansukker,750 g,dry_preserves,"Coop, Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+3417,Dansukker Siro peensuhkur 1 kg,Dansukker Siro,1 kg,dry_preserves,"Coop, Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+276,Dansukker suhkur 1 kg,Dansukker,1 kg,dry_preserves,"Prisma, Rimi, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+1209,Dansukker suhkur 1 kg mahe,Dansukker,1 kg,dry_preserves,"Coop, Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+137976,"Dansukker tarretisesuhkur, 350 g",Dansukker,350 g,dry_preserves,"Coop, Prisma",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+4364,Dansukker tuhksuhkur 500 g,Dansukker,500 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+1266,Dansukker tume tükksuhkur fairtrade 500 g,Dansukker,500 g,dry_preserves,"Coop, Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+6450,Dava oliiviõli sprei 200ml,Dava,200 ml,dry_preserves,"Coop, Prisma, Selver",,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+4044,Dava rapsiõli sprei 200ml,Dava,200 ml,dry_preserves,"Coop, Prisma, Selver",,other,other,sauces_oils,oils_other,low
+3840,Dava rapsiõli sprei küüslaugu 200ml,Dava,200 ml,dry_preserves,"Coop, Prisma, Selver",,other,other,sauces_oils,oils_other,low
+2849,Dava rapsiõli sprei sidruni 200ml,Dava,200 ml,dry_preserves,"Coop, Prisma, Selver",,produce_tropical,produce,sauces_oils,oils_other,high
+27950,Dava spreiõli kuumaõhu fritüürile 200 ml,Dava,200 ml,dry_preserves,"Coop, Prisma, Selver",,other,other,sauces_oils,oils_other,low
+23541,Delverde durumjahupasta tagliatelle 250 g,Delverde,250 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+285,Diamant valge suhkur 1 kg OSTUPIIRANG 10 PAKKI,Diamant,1 kg,dry_preserves,"Coop, Prisma",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+29223,Dr. Nature riisigaletid 120 g,Dr. Nature,120 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,drinks,drinks_beer_cider,high
+66773,"Dr.Oetker mandliõli, 30 ml",Dr.Oetker,30 ml,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+24976,DUMLE Snacks kommikott 100g,DUMLE Snacks,100 g,dry_preserves,"Coop, Prisma, Selver",,sweets_candies,sweets_snacks,sweets_snacks,sweets_candies,medium
+52390,DUMLE Snacks Mint kommikott 100g,DUMLE Snacks,100 g,dry_preserves,"Prisma, Selver",,sweets_candies,sweets_snacks,sweets_snacks,sweets_candies,medium
+13875,Duši- ja vanniõli 250ml,Duši-,250 ml,dry_preserves,Prisma,,pcare_body_wash,personal_care,sauces_oils,oils_other,high
+53176,"Eestimaine broileripooltiib, TALLEGG, 400 g",Eestimaine,400 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dairy_eggs,dairy_eggs_fats,sauces_oils,oils_other,high
+7586,"Eestimaine broileritiib, TALLEGG, kg",Eestimaine,,dry_preserves,"Prisma, Rimi, Selver",,dairy_eggs,dairy_eggs_fats,sauces_oils,oils_other,high
+8108,"Eestimaine broiler, TALLEGG, kg","Broiler,",,dry_preserves,"Barbora, Maxima, Prisma, Rimi, Selver",,dairy_eggs,dairy_eggs_fats,sauces_oils,oils_other,high
+11351,"Eleplant taimne vedel rapsiõlitoode, 500 ml",Eleplant,500 ml,dry_preserves,Prisma,,dairy_plant_drinks,dairy_eggs_fats,sauces_oils,oils_other,high
+2821,Elyzee premium valge suhkur 5g*50tk,Elyzee,5 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+21882,"Emco gluteenivaba pähklibatoon mandlite ja pistaatsiapähklitega, pooleldi kaetud tumeda šokolaadiga 35g",Emco,35 g,dry_preserves,"Prisma, Selver",,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+18755,"Energia datlibatoon GOOD CALORIES maapähklitega, 35g",Energia,35 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+29849,Erlandia Moosipirukas Õlis 2tk. 160 G,Erlandia Moosipirukas,160 G,dry_preserves,Prisma,,bakery_cakes_pastries,bakery,sauces_oils,oils_other,medium
+13028,Essie küüneõli On-a-Roll aprikoos,Essie,,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+20709,Fazer gluteenivaba jahusegu 500 g,Fazer,500 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_flour_sugar_baking,high
+68212,Fazer pannkoogijahusegu 150 g gluteenivaba,Fazer,150 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_flour_sugar_baking,high
+64925,"Felicia Bio mahepasta punasest läätsest, gluteenivaba 250 g",Felicia Bio,250 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_pasta_rice,high
+65430,"Felicia penne pasta tatrajahust 250 g, gluteenivaba mahetoode",Felicia,250 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_pasta_rice,high
+21396,Felicia Risoni ökoloogiline gluteenivaba kikerhernepasta 250 g,Felicia Risoni,250 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_pasta_rice,high
+6843,Felix pastakaste 500 g,Felix,500 g,dry_preserves,"Coop, Prisma, Selver",,sauces_pasta_cooking,sauces_oils,dry_preserves,dry_pasta_rice,medium
+7829,"Filippo Berio oliiviõli 750ml, klaaspudel",Filippo Berio,750 ml,dry_preserves,Prisma,,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+108670,Filos original väärisoliiviõli 500ml,Filos,500 ml,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+65856,Filos orzo terapasta 500 g,Filos,500 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+410475,Fingies Cheddar Jalopenos Dipikastmega 250 G,Fingies Cheddar,250 g,dry_preserves,Prisma,,dairy_other,dairy_eggs_fats,dry_preserves,dry_other,high
+411086,Fingies Mozzarella-Pulgad Dipikastmega 250 G,Fingies Mozzarella-Pulgad,250 g,dry_preserves,Prisma,,dairy_other,dairy_eggs_fats,dry_preserves,dry_other,high
+5873,"Fit Broileri minutipihv Caesari marinaadis, TALLEGG, 350 g",Fit! Broileririnnafileest,350 g,dry_preserves,"Prisma, Selver",,sauces_marinades,sauces_oils,sauces_oils,sauces_marinades,medium
+55283,"FIT! Minifrikadellid broileririnnafileest, 400 g",FIT! Minifrikadellid,400 g,dry_preserves,"Coop, Prisma, Selver",,meat_poultry,meat_fish,sauces_oils,oils_other,high
+1734,Foodin Collagen proteiinibatoon india pähklite ja vaniljaga 50g,Foodin Collagen,50 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+48807,"Friggs riisigaletid soolata mahe, 130 g",Friggs,130 g,dry_preserves,Prisma,,spices_basic_salt_pepper,world_spices,drinks,drinks_beer_cider,high
+28503,"Friggs vähesoolased riisivahvlid 130 g, gluteenivaba, mahe",Friggs,130 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,sweets_snacks,sweets_waffles_cakes,high
+20190,Germund kooritud Hiina maapähklid 200 g,Germund,200 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+1616,Germund metsapähklid 200 g,Germund,200 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+2158,Germund Premium jõhvika-pähklite segu 200g,Germund Premium,200 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+23088,Germund Premium Kreeka pähklid 200 g,Germund Premium,200 g,dry_preserves,"Coop, Prisma, Selver",,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+22799,Germund Premium pähklite segu 170g,Germund Premium,170 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+1907,Germund röstitud soolapähklid 200 g,Germund,200 g,dry_preserves,"Coop, Prisma, Selver",,sweets_snacks_salty,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+141903,Gloria kanepiõli 250 ml,Gloria,250 ml,dry_preserves,"Coop, Prisma",,other,other,sauces_oils,oils_other,low
+7295,Gloria kreeka pähkli õli 500 ml,Gloria,500 ml,dry_preserves,"Coop, Prisma",,sweets_nuts_driedfruit,sweets_snacks,sauces_oils,oils_other,high
+8284,Gloria päevalilleõli rafineerimata 750 ml,Gloria,750 ml,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+6268,Gloria seesamiõli rafineerimata 500 lm,Gloria,,dry_preserves,"Coop, Prisma",,other,other,sauces_oils,oils_other,low
+56844,Goccia d'oro oliivijääkõli 1 l,Goccia,1 l,dry_preserves,"Coop, Prisma, Selver",,other,other,sauces_oils,oils_other,low
+68853,"Gohar 1121 aurutatud basmatiriis, 1 kg",Gohar,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+21033,"Gohar 1121 aurutatud basmatiriis, 5 kg",Gohar,5 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+106333,"Gohar 1121 Royal basmatiriis, 1 kg",Gohar,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+1761,Golden Star vanillisuhkur 100 g,Golden Star,100 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+18942,GO ON Protein Crisp maapähkli-karamelli proteiinibatoon 50g,GO ON,50 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+103032,Gouda kreekapähkli 250g,Gouda,250 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+65840,Granarolo munapasta fettuccine 250 g,Granarolo,250 g,dry_preserves,Prisma,,dairy_eggs,dairy_eggs_fats,dry_preserves,dry_pasta_rice,high
+23870,Granarolo munapasta sorpresine 250g,Granarolo,250 g,dry_preserves,Prisma,,dairy_eggs,dairy_eggs_fats,dry_preserves,dry_pasta_rice,high
+65427,Granarolo munapasta tagliatelle 250g,Granarolo,250 g,dry_preserves,Prisma,,dairy_eggs,dairy_eggs_fats,dry_preserves,dry_pasta_rice,high
+1789,Green tomatipasta 28-30% 400g,Green,400 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+6982,"Grillbroiler, kg","Grillbroiler,",,dry_preserves,Prisma,,meat_poultry,meat_fish,sauces_oils,oils_other,high
+177,"Grillitud broileri pooltiivad punase veini marinaadis, kg",Grillitud,,dry_preserves,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high
+16721,Habemeõli Barber Club 30 ml,Habemeõli Barber,30 ml,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+15112,Habemeõli metsalõhnaline 30ml,Habemeõli,30 ml,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+273328,"Hartwall Jaffa Ananass suhkuruvaba karastusjook 1,5l",Hartwall Jaffa,1.5 l,dry_preserves,Prisma,,drinks_soft_soda,drinks,dry_preserves,dry_flour_sugar_baking,high
+146,"Haugifilee, jahutatud, kg","Haugifilee,",,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+128498,"Haug, roogitud, jahutatud, kg","Haug,",,dry_preserves,"Prisma, Rimi",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+45420,Havana Club Cuban Spiced Rum piiritusjook 35%vol 700ml,Havana Club,700 ml,dry_preserves,"Prisma, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high
+72898,"Heinz aedoad tomatikastmes, 415g",Heinz,415 g,dry_preserves,"Prisma, Rimi, Selver",,dry_canned_veg,dry_preserves,dry_preserves,dry_groats_beans,high
+7775,Heinz hp sauce maitsekaste 255 g,Heinz,255 g,dry_preserves,Prisma,,other,other,dry_preserves,dry_other,low
+20047,Helen riisihelbed 500 g,Helen,500 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_cereals_muesli,dry_preserves,dry_preserves,dry_pasta_rice,high
+22411,Herkku Lumache rigate durum pasta,Herkku Lumache,,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+23862,Herkku Spaghetti alla chitarra pasta 500g,Herkku Spaghetti,500 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+130265,Herkuless riisihelbepuder mustika ja koorega 40g,Herkuless,40 g,dry_preserves,Prisma,,baby_porridge_cereal,baby,dry_preserves,dry_pasta_rice,medium
+28599,"HiPP müslibatoon beebiküpsise õuna ja vaniljega ÖKO alates 1-eluaastast, 20 g",HiPP,20 g,dry_preserves,"Coop, Prisma",,baby_other,baby,baby,baby_other,medium
+30731,"HiPP Müslibatoon krõbe kaer õuna ja virsikuga ÖKO alates 1-eluaastast, 20g",HiPP Müslibatoon,20 g,dry_preserves,"Coop, Prisma",,dairy_plant_drinks,dairy_eggs_fats,sweets_snacks,sweets_chocolate_bars,high
+29288,"Hipp mustika riisivahlid 30 g, öko, alates 8-elukuust",Hipp,30 g,dry_preserves,"Prisma, Rimi",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+64472,Hipp ökoloogiline pasta bolognese 15k+ 250g,Hipp,250 g,dry_preserves,Prisma,,sauces_pasta_cooking,sauces_oils,dry_preserves,dry_pasta_rice,medium
+44479,"Hipp Pasta Bolognese mahe, 220g, alates 12-elukuust",Hipp Pasta,220 g,dry_preserves,Prisma,,sauces_pasta_cooking,sauces_oils,dry_preserves,dry_pasta_rice,medium
+28826,Hipp vaarika riisivahvlid BIO 30 g 8k,Hipp,30 g,dry_preserves,"Prisma, Rimi",,dry_pasta_rice,dry_preserves,sweets_snacks,sweets_waffles_cakes,high
+130184,Hungry chef pannkoogijahusegu 350 g,Hungry,350 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+3071,"Huntahven roogitud, jahutatud",Huntahven,,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,meat_fish,fish_other,high
+19883,Il molino panna cotta karamellikastmega 90g,Il,90 g,dry_preserves,Prisma,,dairy_desserts,dairy_eggs_fats,sweets_snacks,sweets_candies,medium
+20217,Its us kikerhernepasta fusilli 250g,Its,250 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+65254,Jahu-jaan öko nisujahu (täistera) 750 g,Jahu-jaan,750 g,dry_preserves,"Prisma, Rimi",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+23913,Jahu-jaan öko odrahelbed 500 g,Jahu-jaan,500 g,dry_preserves,"Prisma, Rimi, Selver",,dry_cereals_muesli,dry_preserves,dry_preserves,dry_cereals_muesli,high
+20431,Jahu-jaan öko rukkihelbed 500g,Jahu-jaan,500 g,dry_preserves,"Prisma, Rimi",,bakery_bread_loaves,bakery,dry_preserves,dry_cereals_muesli,high
+129976,Jahu-jaan öko rukkijahu (täistera) 750 g,Jahu-jaan,750 g,dry_preserves,"Prisma, Rimi",,bakery_bread_loaves,bakery,dry_preserves,dry_flour_sugar_baking,high
+65300,Jahu-jaan öko rukkilinnase jahu 500 g,Jahu-jaan,500 g,dry_preserves,"Prisma, Rimi, Selver",,bakery_bread_loaves,bakery,dry_preserves,dry_flour_sugar_baking,high
+66369,Jahu-jaan öko toortatrajahu 750 g,Jahu-jaan,750 g,dry_preserves,"Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+20767,Jahu-jaan öko toortatratang 750 g,Jahu-jaan,750 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+21782,Japanese choice poke riis 500g,Japanese,500 g,dry_preserves,"Coop, Prisma",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+22306,Japanese choice sushi riis 500g,Japanese,500 g,dry_preserves,"Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+15866,Juuksepasta texture clay 100ml,Juuksepasta,100 ml,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+1117,Kabanossipirukas tomatikastmega,Kabanossipirukas,,dry_preserves,Prisma,,bakery_cakes_pastries,bakery,dry_preserves,dry_other,medium
+127136,Kalev Pähklibatoon Tumedas Šokolaadis 40 g,Kalev Pähklibatoon,40 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,sweets_chocolate_bars,sweets_snacks,drinks,drinks_beer_cider,high
+127131,Kalev pähkli-marjabatoon tumeda šokolaadiga 42 g,Kalev,42 g,dry_preserves,"Coop, Prisma, Selver",,sweets_chocolate_bars,sweets_snacks,drinks,drinks_beer_cider,high
+127132,Kalev pähkli-seemnebatoon tumeda šokolaadiga 40 g,Kalev,40 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,sweets_chocolate_bars,sweets_snacks,drinks,drinks_beer_cider,high
+5783,Kalev tume šokolaad tervete metspähklitega 100g,Kalev,100 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,sweets_chocolate_bars,sweets_snacks,drinks,drinks_beer_cider,high
+2824,Kalew extra light oliiviõli 500ml,Kalew,500 ml,dry_preserves,"Coop, Prisma, Rimi, Selver",,oils_olive,sauces_oils,drinks,drinks_beer_cider,high
+2543,Kalew Extra väärisoliiviõli 500ml,Kalew Extra,500 ml,dry_preserves,"Coop, Prisma, Selver",,oils_olive,sauces_oils,drinks,drinks_beer_cider,high
+6337,Kalew Küpsetusõli 1 l,Kalew Küpsetusõli,1 l,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_flour_sugar_baking,dry_preserves,drinks,drinks_beer_cider,high
+2572,Kalew nisujahu t-405 1 kg,Kalew,1 kg,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_flour_sugar_baking,dry_preserves,drinks,drinks_beer_cider,high
+2423,Kalew nisujahu t-405 2 kg,Kalew,2 kg,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_flour_sugar_baking,dry_preserves,drinks,drinks_beer_cider,high
+2170,Kalew nisujahu t-550 1 kg,Kalew,1 kg,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_flour_sugar_baking,dry_preserves,drinks,drinks_beer_cider,high
+2061,Kalew nisujahu t-550 2 kg,Kalew,2 kg,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_flour_sugar_baking,dry_preserves,drinks,drinks_beer_cider,high
+7551,Kalew päevalilleõli 1l,Kalew,1 l,dry_preserves,"Coop, Prisma",,other,other,drinks,drinks_beer_cider,low
+2313,Kalew rapsiõli 1 l,Kalew,1 l,dry_preserves,"Coop, Prisma, Rimi, Selver",,other,other,drinks,drinks_beer_cider,low
+3181,Kalew rapsiõli 5l,Kalew,5 l,dry_preserves,Prisma,,other,other,drinks,drinks_beer_cider,low
+561462,Kapten Grant sardiinid õlis 240g,Kapten Grant,240 g,dry_preserves,Prisma,,fish_fresh,meat_fish,sauces_oils,oils_other,high
+124174,Kapten Grant skumbria tomatikastmes 240 g,Kapten Grant,240 g,dry_preserves,"Coop, Prisma, Selver",,produce_root_veg,produce,dry_preserves,dry_other,high
+125352,Kapten Grant sprotid õlis 240g,Kapten Grant,240 g,dry_preserves,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,other,other,sauces_oils,oils_other,low
+1899,"Karbid sinimere, valgeveinikastmes 454 g",Karbid,454 g,dry_preserves,Prisma,,drinks_wine,drinks,drinks,drinks_wine,high
+609544,"Kariniemen Broileritiivad, Maitsestatud 700G","Kariniemen Broileritiivad,",700 g,dry_preserves,Prisma,,meat_poultry,meat_fish,sauces_oils,oils_other,high
+276113,Kariniemi broileri meetiivad 700G,Kariniemi,700 g,dry_preserves,Prisma,,meat_poultry,meat_fish,sauces_oils,oils_other,high
+107915,KEIJU 3-õli rapsiõlimargariin 60% 400G,KEIJU,400 g,dry_preserves,Prisma,,dairy_butter_margarine,dairy_eggs_fats,sauces_oils,oils_other,high
+10532,"Keiju kaera ja rapsiõliga margariin 60%, 400 g",Keiju,400 g,dry_preserves,Prisma,,dairy_butter_margarine,dairy_eggs_fats,sauces_oils,oils_other,high
+2226,King of Spice kakaopulber 100 gr 10-12%,King,,dry_preserves,Prisma,,other,other,dry_preserves,dry_other,low
+70500,King of Spices Vanillisuhkur 500 g,King,500 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+23889,Kinnusen mylly rukkijahu 2 kg,Kinnusen,2 kg,dry_preserves,Prisma,,bakery_bread_loaves,bakery,dry_preserves,dry_flour_sugar_baking,high
+54725,"Kitchen joy panang-karribroiler jasmiiniriisiga, 350 g",Kitchen,350 g,dry_preserves,Prisma,,meat_poultry,meat_fish,sauces_oils,oils_other,high
+26297,Knorr 3 pipra kuivkastme segu 3x32g,Knorr,3x32 g,dry_preserves,Prisma,,other,other,sauces_oils,sauces_other,low
+4133,"Knorr Fond „du Chef” vedel seene-maitseainesegu, portsjonitena 4 x 28 g",Knorr Fond,4x28 g,dry_preserves,Prisma,,spices_broth_stock,world_spices,world_spices,spices_herbs_spice_mix,high
+24205,"Knorr karrikastme pulber, 3x24 g",Knorr,3x24 g,dry_preserves,Prisma,,other,other,sauces_oils,sauces_other,low
+6550,Knorr koore kuivkastme segu 3x32g,Knorr,3x32 g,dry_preserves,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,sauces_oils,sauces_other,high
+2140,Knorr kukeseenesupp pastaga 13 g,Knorr,13 g,dry_preserves,"Coop, Prisma",,dry_pasta_rice,dry_preserves,dry_preserves,dry_soups_noodles,high
+24874,"Knorr, rohelise pipra kastme koostisained, 3 × 22 g","Knorr,",3x22 g,dry_preserves,Prisma,,bakery_buns_croissants,bakery,dry_preserves,dry_other,high
+6996,"Knorr seenekastme pulber, 3x36 g",Knorr,3x36 g,dry_preserves,Prisma,,produce_mushrooms,produce,sauces_oils,sauces_other,high
+17441,Knorr tomatisupp pastaga 19g,Knorr,19 g,dry_preserves,"Coop, Prisma",,dry_pasta_rice,dry_preserves,dry_preserves,dry_soups_noodles,high
+2234,"Koha, jahutatud, roogitud, kg","Koha,",,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,meat_fish,fish_other,high
+11636,"Köögikaste päevalilleõli ja sojaga, 250 ml",Köögikaste,250 ml,dry_preserves,Prisma,,dairy_plant_drinks,dairy_eggs_fats,sauces_oils,oils_other,high
+2963,Kotanyi vaniljesuhkur 15 g,Kotanyi,15 g,dry_preserves,"Prisma, Rimi, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+491423,Kotimaista Broileri Rinnafileeribad 300G,Kotimaista Broileri,300 g,dry_preserves,Prisma,,meat_poultry,meat_fish,sauces_oils,oils_other,high
+20196,"Kotimaista jahusegu 1 kg, gluteenivaba",Kotimaista,1 kg,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_flour_sugar_baking,high
+20374,"Kotimaista kaerajahu 500 g, gluteenivaba",Kotimaista,500 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_flour_sugar_baking,high
+89049,Kotimaista kuklijahu 2 kg,Kotimaista,2 kg,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+3666,Kotimaista külmpressitud rüpsiõli 450 ml,Kotimaista,450 ml,dry_preserves,Prisma,,dry_canned_veg,dry_preserves,sauces_oils,oils_other,high
+3791,Kotimaista külmpressitud rüpsiõli 500 ml,Kotimaista,500 ml,dry_preserves,Prisma,,dry_canned_veg,dry_preserves,sauces_oils,oils_other,high
+160900,Kotimaista külmpressitud rüpsiõli sidruniga 250 ml,Kotimaista,250 ml,dry_preserves,Prisma,,dry_canned_veg,dry_preserves,sauces_oils,oils_other,high
+54390,Kotimaista laktoosivaba maasikamaitseline koorejäätis maasikakastmega (10%) 1l,Kotimaista,1 l,dry_preserves,Prisma,,frozen_desserts_icecream,frozen_food,frozen_food,frozen_food_other,high
+7623,"Kotimaista Marineeritud Broilerikoivad, Kg",Kotimaista Marineeritud,,dry_preserves,Prisma,,meat_poultry,meat_fish,sauces_oils,oils_other,high
+21416,"Kotimaista müsli, 1 kg",Kotimaista,1 kg,dry_preserves,Prisma,,dry_cereals_muesli,dry_preserves,dry_preserves,dry_cereals_muesli,high
+7009,"Kotimaista nisujahu 1 kg, organic",Kotimaista,1 kg,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+3740,Kotimaista nisujahu 2 kg,Kotimaista,2 kg,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+20332,Kotimaista nisujahu jahuparandajaga 2 kg,Kotimaista,2 kg,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+1502,Kotimaista Riisipuder 300 G,Kotimaista Riisipuder,300 g,dry_preserves,Prisma,,baby_porridge_cereal,baby,dry_preserves,dry_pasta_rice,medium
+3386,"Kotimaista rosmariini ja oliivõliga maitsestatud koorega kartulisektorrid, 450 g",Kotimaista,450 g,dry_preserves,Prisma,,dairy_cream_sourcream,dairy_eggs_fats,sauces_oils,oils_other,high
+22253,Kotimaista rukkijahu 1 kg,Kotimaista,1 kg,dry_preserves,Prisma,,bakery_bread_loaves,bakery,dry_preserves,dry_flour_sugar_baking,high
+20328,Kotimaista sepikujahu 2 kg,Kotimaista,2 kg,dry_preserves,Prisma,,bakery_bread_loaves,bakery,dry_preserves,dry_flour_sugar_baking,high
+20912,Kotletid kartulipüree ja punase kastmega 400 g,Kotletid,400 g,dry_preserves,"Coop, Prisma, Rimi",,baby_food_pouches,baby,dry_preserves,dry_other,medium
+134696,Krüger pähklikreem 400 g,Krüger,400 g,dry_preserves,"Coop, Prisma",,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+107382,Kubja supimaitseaine kubija ürditalu 30 g,Kubja,30 g,dry_preserves,Prisma,,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+7844,Kucharek maitseainetesegu 500gr,Kucharek,,dry_preserves,Prisma,,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+70714,Kuivatatud mango viilud 200g Pähklinäpp,Kuivatatud,200 g,dry_preserves,"Coop, Prisma, Selver",,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+144,"Kuldmerikoger, roogitud, jahutatud, kg","Kuldmerikoger,",,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+49037,Kupiec Fitos riisi-ja maisivahvlid iirisega 140g,Kupiec Fitos,140 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,sweets_snacks,sweets_waffles_cakes,high
+137987,Kupiec riisivahvlid seesami õhukesed 90 g,Kupiec,90 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,sweets_snacks,sweets_waffles_cakes,high
+46574,Lame Leib Täisterajahu Lavash 120 G,Lame Leib,120 g,dry_preserves,"Prisma, Rimi, Selver",,bakery_flatbreads_wraps,bakery,dry_preserves,dry_flour_sugar_baking,high
+5816,Lao gan ma tšilliõli krõbeda sibulaga 210g,Lao,210 g,dry_preserves,"Coop, Prisma, Selver",,produce_root_veg,produce,sauces_oils,oils_other,high
+1263,"Latikas roogitud, jahutatud",Latikas,,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+1755,Leibur Juuretisega Burgerikukkel Täisterajahuga,Leibur Juuretisega,,dry_preserves,"Coop, Prisma, Selver",,bakery_bread_loaves,bakery,dry_preserves,dry_flour_sugar_baking,high
+29792,Leibur Röst 100% Rukkijahu 550 G,Leibur Röst,550 g,dry_preserves,"Barbora, Maxima, Prisma, Rimi, Selver",,bakery_bread_loaves,bakery,dry_preserves,dry_flour_sugar_baking,high
+47089,Leibur Saib 100% Rukkijahust 370 G,Leibur Saib,370 g,dry_preserves,"Coop, Prisma, Rimi",,bakery_bread_loaves,bakery,dry_preserves,dry_flour_sugar_baking,high
+187,"Lestafilee n-ta, jahutatud",Lestafilee,,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+1626,"Ligouri, spiraalpasta fusilli, 500 g","Ligouri,",500 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+66802,"Liguori Pasta di Gragnano I.G.P. rigatoni nr 46, 500 g",Liguori Pasta,500 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+21463,Linda nisujahu T550 1 kg,Linda,1 kg,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+1300,Linda nisujahu T550 2 kg,Linda,2 kg,dry_preserves,"Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+19717,Linda pikateraline riis 4x100g,Linda,4x100 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+22131,Linda sõmer riis 4*100g,Linda,100 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+30315,"Loodusvägi öko riisivahvel tumeda šokolaadi 100 g, gluteenivaba",Loodusvägi,100 g,dry_preserves,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+68894,"Loodusvägi täistera riis, mahe, 500 g",Loodusvägi,500 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+12990,Lumene Lip Glow huuleõli 1 Sugar 10ml,Lumene Lip,10 ml,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+1944,Macedonian seesami snack 100 g,Macedonian,100 g,dry_preserves,Prisma,,other,other,dry_preserves,dry_other,low
+1837,Maggi kastmepulber pastale spaghetti bolognese idea 47 g,Maggi,47 g,dry_preserves,"Coop, Prisma, Selver",,sauces_pasta_cooking,sauces_oils,drinks,drinks_syrups_powders,medium
+8386,Maggi mix spagettikastme koostisosad 64g,Maggi,64 g,dry_preserves,Prisma,,other,other,dry_preserves,dry_pasta_rice,low
+41117,"Mahe broileri koib, kg",Mahe,,dry_preserves,Prisma,,meat_poultry,meat_fish,sauces_oils,oils_other,high
+138737,"Mahe broileri rinnafilee, kg",Mahe,,dry_preserves,Prisma,,meat_poultry,meat_fish,sauces_oils,oils_other,high
+5844,"Mahe broileri tiib, kg",Mahe,,dry_preserves,Prisma,,meat_poultry,meat_fish,sauces_oils,oils_other,high
+131734,Maizena valge kastmepulber 250 g,Maizena,250 g,dry_preserves,Prisma,,other,other,dry_preserves,dry_other,low
+68752,"Makedoonia tahiini seesamipasta, 300g",Makedoonia,300 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+78249,Maksirevetid tšillimaitselises õlis 320 g,Maksirevetid,320 g,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+296,Maks ja Moorits Broileri Poolkoivad Klassik.Marin.600G,Maks,600 g,dry_preserves,"Prisma, Rimi",,meat_poultry,meat_fish,sauces_oils,oils_other,high
+123854,Maks ja Moorits Classic Super Snack 85 G,Maks,85 g,dry_preserves,"Coop, Prisma, Selver",,other,other,dry_preserves,dry_other,low
+3356,Mamma Pasta Singi-Koorekastmes 300 G,Mamma Pasta,300 g,dry_preserves,"Coop, Prisma",,dairy_cream_sourcream,dairy_eggs_fats,dry_preserves,dry_pasta_rice,high
+3852,Mamma Riisipuder 300G,Mamma Riisipuder,300 g,dry_preserves,"Barbora, Coop, Maxima, Prisma, Rimi",,baby_porridge_cereal,baby,dry_preserves,dry_pasta_rice,medium
+509997,Männiriisikas soolatud 500g,Männiriisikas,500 g,dry_preserves,Prisma,,spices_basic_salt_pepper,world_spices,dry_preserves,dry_other,high
+4441,Ma&orits Broileri Pooltiivad Teriyaki-Chilli 600,Ma&orits Broileri,600 g,dry_preserves,"Coop, Prisma, Selver",,spices_asian,world_spices,sauces_oils,oils_other,medium
+5966,Ma&orits Parmigiano Reggiano Cheese Super Snack 8,Ma&orits Parmigiano,85 g,dry_preserves,"Coop, Prisma, Selver",,dairy_eggs,dairy_eggs_fats,dry_preserves,dry_other,high
+54137,Ma&orits Snack Sticks Tradit.85G,Ma&orits Snack,85 g,dry_preserves,"Coop, Prisma",,other,other,dry_preserves,dry_other,low
+2042,Marineeritud kuuseriisikas 450 g,Marineeritud,450 g,dry_preserves,"Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_other,high
+346640,Marineeritud männiriisikas 500 g,Marineeritud,500 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_other,high
+4375,Marmiton India pähklitega halvaa 100 g,Marmiton India,100 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+1347,Marmiton soolakaramellimaitseline halvaa pekaanipähklitega 150g,Marmiton,150 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_candies,high
+46073,Marta Pagar Kapsapirukas Õlis 2x85 G,Marta Pagar,2x85 g,dry_preserves,Prisma,,bakery_cakes_pastries,bakery,sauces_oils,oils_other,medium
+51690,Marta Pagar Õuna-kaneeli pirukas õlis 2x70 g,Marta Pagar,2x70 g,dry_preserves,Prisma,,spices_herbs_spice_mix,world_spices,sauces_oils,oils_other,high
+48227,Marta Pagar Singi-Riisipirukas Õlis 140 G,Marta Pagar,140 g,dry_preserves,Prisma,,bakery_cakes_pastries,bakery,sauces_oils,oils_other,medium
+495758,Marwi Mereandide Kokteil Õlis Tomat-Tšilli 1Kg,Marwi Mereandide,1 kg,dry_preserves,Prisma,,produce_root_veg,produce,sauces_oils,oils_other,high
+18070,MCT-õli 500ml,MCT-õli,500 ml,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+32716,Mee BBQ broileripooltiivad 400g,Mee BBQ,400 g,dry_preserves,Prisma,,sauces_marinades,sauces_oils,sauces_oils,oils_other,medium
+27902,Meira broilerimaitseaine 100 g,Meira,100 g,dry_preserves,Prisma,,spices_herbs_spice_mix,world_spices,sauces_oils,oils_other,high
+27197,"Meira india maitseainesegu 0% soola, 28 g",Meira,28 g,dry_preserves,"Prisma, Selver",,spices_basic_salt_pepper,world_spices,world_spices,spices_basic_salt_pepper,high
+26379,Meira kartulimaitseaine 120 g,Meira,120 g,dry_preserves,Prisma,,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+5030,Meira piparkoogimaitseaine 24g,Meira,24 g,dry_preserves,Prisma,,spices_basic_salt_pepper,world_spices,world_spices,spices_basic_salt_pepper,high
+2091,Meira pitsamaitseaine 10 g,Meira,10 g,dry_preserves,Prisma,,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+3837,Meira vanilliinsuhkur 100g,Meira,100 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+562759,Meira vanillisuhkur 40g,Meira,40 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+4413,Meira vanillisuhkur 85 g,Meira,85 g,dry_preserves,"Prisma, Rimi, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+23179,Melissa laste pasta minions 500 g,Melissa,500 g,dry_preserves,"Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+21306,Melissa laste pasta peppa pig 500 g,Melissa,500 g,dry_preserves,"Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+3142,Melissa primo gusto tomatipasta tuubis 130g,Melissa,130 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+2575,Melissa tomatipasta tomatera 500g,Melissa,500 g,dry_preserves,"Coop, Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+109875,Memmas Knossos väärisoliiviõli 500 ml,Memmas Knossos,500 ml,dry_preserves,Prisma,,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+1090,MINI RUKKI RIISIPIRUKAS 6 TK PAKK,MINI RUKKI,6 pcs,dry_preserves,Prisma,,bakery_bread_loaves,bakery,dry_preserves,dry_pasta_rice,high
+268,Minu kilu tomatikastmes 240 g,Minu,240 g,dry_preserves,"Coop, Prisma",,produce_root_veg,produce,dry_preserves,dry_other,high
+7337,"Minu päevalilleõli 1,0l",Minu,1.0 l,dry_preserves,"Prisma, Selver",,other,other,sauces_oils,oils_other,low
+68351,Minu pikateraline riis 1 kg,Minu,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+20234,Minu pudruriis 1kg,Minu,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+1866,Minu sprotid õlis 240 g,Minu,240 g,dry_preserves,"Coop, Prisma",,other,other,sauces_oils,oils_other,low
+1822,Miyata riisiäädikas 150 ml,Miyata,150 ml,dry_preserves,Prisma,,oils_vinegar,sauces_oils,sauces_oils,oils_vinegar,high
+7322,Miyata sushi riisiäädikas 150 ml,Miyata,150 ml,dry_preserves,Prisma,,oils_vinegar,sauces_oils,sauces_oils,oils_vinegar,high
+23660,"Mogyi india pähklid, röst, sool 70g",Mogyi,70 g,dry_preserves,"Coop, Prisma, Selver",,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+53233,Moilas free from porgandikukkel 5tk,Moilas,5 pcs,dry_preserves,Prisma,,bakery_buns_croissants,bakery,sauces_oils,oils_other,high
+2488,Moilas gluteenivaba ciabatta 200 g,Moilas,200 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,sauces_oils,oils_other,high
+134596,M& pähklitega kommid 200 g,M&,200 g,dry_preserves,"Prisma, Rimi, Selver",,sweets_candies,sweets_snacks,sweets_snacks,sweets_candies,medium
+16844,Mua värvimuutev õli huultele ja põsele,Mua,,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+5272,Müslibatoonid šokolaadi ja banaani 150 g 6-pakk,Müslibatoonid,150 g,dry_preserves,Selver,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+3025,Müslibatoon jõhvika 50 g,Müslibatoon,50 g,dry_preserves,Prisma,,dry_cereals_muesli,dry_preserves,sweets_snacks,sweets_chocolate_bars,high
+2784,Müslibatoon maapähkli 6 x 25 g,Müslibatoon,6x25 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+18880,"Muuti Öko Banaani-virsiku-mangopüree riisivalguga 110 g, alates 12-elukuust",Muuti Öko,110 g,dry_preserves,"Coop, Prisma, Rimi",,baby_food_pouches,baby,dry_preserves,dry_pasta_rice,medium
+23480,Myllärin gluteenivaba jahusegu hapuleiva valmistamiseks 500 g,Myllärin,500 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_flour_sugar_baking,high
+23450,Myllärin gluteenivaba pitsajahu 500 g,Myllärin,500 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_flour_sugar_baking,high
+23244,Myllärin mahetäisteranisujahu 1 kg,Myllärin,1 kg,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+2012,Myllyn Paras Emännän pooljäme nisujahu 2 kg,Myllyn Paras,2 kg,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+21248,Myllyn Paras erinisujahu 1 kg,Myllyn Paras,1 kg,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+2734,Myllyn Paras karamellipannkoogijahu 250 g,Myllyn Paras,250 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,sweets_snacks,sweets_candies,high
+22601,Myllyn Paras odrajahu 1 kg,Myllyn Paras,1 kg,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+2121,Myllyn Paras pannkoogi- ja vahvlijahu 250 g,Myllyn Paras,250 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+3961,Myllyn paras pasta sarveke 400 g,Myllyn,400 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+19792,Myllyn Paras perenaise täistera kaerajahu 1 kg,Myllyn Paras,1 kg,dry_preserves,Prisma,,dairy_plant_drinks,dairy_eggs_fats,dry_preserves,dry_flour_sugar_baking,high
+4203,Nestle müslibatoon maasika 35g,Nestle,35 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_cereals_muesli,dry_preserves,sweets_snacks,sweets_chocolate_bars,high
+3048,Nick's Almond maapähklibatoon 40g,Nick's Almond,40 g,dry_preserves,"Prisma, Rimi, Selver",,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+612898,"Nogel Mahe raudne riisipuder ploomi ja pirniga, 190 g",Nogel Mahe,190 g,dry_preserves,Prisma,,baby_porridge_cereal,baby,dry_preserves,dry_pasta_rice,medium
+6146,Nõo Sea Välisfilee Jahutatud 1 Kg,Nõo Sea,1 kg,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+577819,Nutella pähklikreem 350 g,Nutella,350 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+1981,"Nutella pähklikreem, 630g",Nutella,630 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+131656,Nuts about nature maapähklikreem 340g,Nuts,340 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+41079,"Oakheart Original Spiced muu piiritusjook 32,5%vol 500ml",Oakheart Original,500 ml,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+239740,"Oddlygood Barista kaerajook ilma lisatud suhkruta, pähklise vanillimaitsega, gluteenivaba, UHT 1l",Oddlygood Barista,1 l,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_flour_sugar_baking,high
+99042,"Oddlygood Barista kaerajook pumpkin spice maitseline, gluteenivaba, UHT 500 ml",Oddlygood Barista,500 ml,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_other,high
+3118,"Oddlygood Barista kaerajook vahtrasiirupi-kreekapähkli, gluteenivaba, UHT 750 ml",Oddlygood Barista,750 ml,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+65911,Oho maasikamaitselised riisihelbed 150g,Oho,150 g,dry_preserves,Prisma,,dry_cereals_muesli,dry_preserves,dry_preserves,dry_pasta_rice,high
+256224,Oho paisutatud riis šokolaadiga 150 g,Oho,150 g,dry_preserves,"Coop, Prisma",,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+67855,Oho šokolaadiga riis 500g,Oho,500 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+3064,Oilio arahhiisiõli 500 ml,Oilio,500 ml,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+58185,Oilio oliivijääkõli 1 l,Oilio,1 l,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+5677,Oilio õli omega 3-6-9 1 l,Oilio,1 l,dry_preserves,"Coop, Prisma, Selver",,other,other,sauces_oils,oils_other,low
+7650,Oilio päevalilleõli 1l,Oilio,1 l,dry_preserves,"Prisma, Rimi, Selver",,other,other,sauces_oils,oils_other,low
+3639,Oilio rapsiõli 1l,Oilio,1 l,dry_preserves,"Coop, Prisma, Selver",,other,other,sauces_oils,oils_other,low
+53471,Oilio toiduõli 1 l,Oilio,1 l,dry_preserves,"Coop, Prisma, Selver",,other,other,sauces_oils,oils_other,low
+24574,"Old El Paso fajita maitseainesegu, 30 g",Old El,30 g,dry_preserves,Prisma,,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+27818,Old el paso tako maitseainesegu 25 g,Old,25 g,dry_preserves,Prisma,,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+15620,Old spice dushigeel bearglove 400ml,Old,400 ml,dry_preserves,Prisma,,pcare_body_wash,personal_care,personal_care,pcare_body_wash,high
+36552,Oleum crete ekstra väärisoliiviõli 500ml,Oleum,500 ml,dry_preserves,"Prisma, Selver",,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+110050,Oliiviõli Extra Light Borges 1000 ml,Oliiviõli Extra,1000 ml,dry_preserves,"Coop, Prisma, Rimi, Selver",,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+8305,Olivia päevalilleõli 1 l,Olivia,1 l,dry_preserves,"Coop, Prisma, Rimi, Selver",,other,other,sauces_oils,oils_other,low
+2092,Olivia rapsiõli 1l,Olivia,1 l,dry_preserves,"Coop, Prisma, Rimi, Selver",,other,other,sauces_oils,oils_other,low
+4100,Olivia rapsiõli 1 l praadimiseks,Olivia,1 l,dry_preserves,"Coop, Prisma, Selver",,other,other,sauces_oils,oils_other,low
+4033,Olivia rapsiõli 500 ml,Olivia,500 ml,dry_preserves,"Coop, Prisma, Rimi, Selver",,other,other,sauces_oils,oils_other,low
+1803,Ovilo rapsiõli 1l,Ovilo,1 l,dry_preserves,"Coop, Prisma",,other,other,sauces_oils,oils_other,low
+58417,Pähklinäpp banaanilaastud 150 g,Pähklinäpp,150 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+4280,Pähklinäpp chia seemned 200 g,Pähklinäpp,200 g,dry_preserves,"Coop, Prisma, Selver",,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+591947,Pähklinäpp Fitlap suured mandlid 250 g,Pähklinäpp Fitlap,250 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+3060,Pähklinäpp india pähkel 250 g Fitlap,Pähklinäpp,250 g,dry_preserves,"Coop, Prisma",,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+125842,Pähklinäpp india pähkel 500g,Pähklinäpp,500 g,dry_preserves,"Prisma, Selver",,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+129387,Pähklinäpp kivita datlid 250 g,Pähklinäpp,250 g,dry_preserves,"Prisma, Selver",,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+2828,"Pähklinäpp kooritud kõrvitsaseemned 250g, Fitlap",Pähklinäpp,250 g,dry_preserves,"Coop, Prisma, Selver",,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+581970,Pähklinäpp kreeka pähkel 500g,Pähklinäpp,500 g,dry_preserves,"Coop, Prisma",,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+21452,Pähklinäpp mandlite ja marjade segu 200 g,Pähklinäpp,200 g,dry_preserves,"Prisma, Rimi, Selver",,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+2293,Pähklinäpp mustad ploomid 500 g,Pähklinäpp,500 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+21349,Pähklinäpp passionikuubikud 85 g,Pähklinäpp,85 g,dry_preserves,"Coop, Prisma, Rimi",,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+19961,Pähklinäpp pehmed aprikoosid 250 g,Pähklinäpp,250 g,dry_preserves,"Coop, Prisma, Selver",,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+20990,Pähklinäpp pistaatsiapähklid meresoolaga 200 g,Pähklinäpp,200 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+23905,Pähklinäpp röstitud India pähkel 200 g,Pähklinäpp,200 g,dry_preserves,"Coop, Prisma",,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+19962,Pähklinäpp röstitud metsapähklid 200 g,Pähklinäpp,200 g,dry_preserves,"Prisma, Rimi, Selver",,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+4200,Pähklinäpp röstitud valge mandel 200 g,Pähklinäpp,200 g,dry_preserves,"Coop, Prisma",,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+22949,Pähklinäpp seedermänniseemned 100 g,Pähklinäpp,100 g,dry_preserves,"Prisma, Selver",,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+23084,Pähklinäpp seemnete segu 200 g Fitlap,Pähklinäpp,200 g,dry_preserves,"Coop, Prisma, Selver",,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+171511,Pähklinäpp soolakaramellis maapähkel 200 g,Pähklinäpp,200 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_candies,high
+20079,Pähklinäpp vaarikakuubikud 85 g,Pähklinäpp,85 g,dry_preserves,"Coop, Prisma, Rimi",,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+20057,Pähklisegu rosinatega 300g,Pähklisegu,300 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+1115,Pähkli-šokolaadicroissant,Pähkli-šokolaadicroissant,,dry_preserves,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+21526,"Pähklite segu, 200 g",Pähklite,200 g,dry_preserves,"Coop, Prisma, Selver",,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+21263,"Panzani pasta coquillette 400 g, gluteenivaba",Panzani,400 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,drinks_tea_coffee,drinks,dry_preserves,dry_pasta_rice,high
+22210,Panzani pasta macaroni 500 g,Panzani,500 g,dry_preserves,"Coop, Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+21638,"Panzani pasta penne 400 g, gluteenivaba",Panzani,400 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,drinks_tea_coffee,drinks,dry_preserves,dry_pasta_rice,high
+2933,Panzani pasta penne 500 g,Panzani,500 g,dry_preserves,"Coop, Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+68366,Panzani pasta spaghetti 500 g,Panzani,500 g,dry_preserves,"Coop, Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+22571,Panzani Selezione Di Chef Tagliatelle pasta munaga 400 g,Panzani Selezione,400 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dairy_eggs,dairy_eggs_fats,dry_preserves,dry_pasta_rice,high
+68011,Panzani tagliatelle pastapesad 500g,Panzani,500 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+21606,Papa kikerherne jahu 1kg,Papa,1 kg,dry_preserves,"Coop, Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+12325,Pasta bolognese 335 g,Pasta,335 g,dry_preserves,Prisma,,sauces_pasta_cooking,sauces_oils,dry_preserves,dry_pasta_rice,medium
+2186,"Pastapliiats r-301 classic stickgrip 1.0, 3 sinist riputuspakis",Pastapliiats,,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+71533,Pasta sarveke 1 kg,Pasta,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+21560,Paulúns seemnemüsli 350g,Paulúns,350 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_cereals_muesli,high
+20005,PCD soolatud maapähklid 200 g,PCD,200 g,dry_preserves,"Coop, Prisma, Selver",,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+5188,„Piri-Piri“ broilerikoivad 600 g,„Piri-Piri“,600 g,dry_preserves,Prisma,,meat_poultry,meat_fish,sauces_oils,oils_other,high
+7566,Põhjamaine seakael truffee kastmes 450 g,Põhjamaine,450 g,dry_preserves,Prisma,,dry_other,dry_preserves,dry_preserves,dry_other,high
+3012,Pomi tomatipasta 200 g,Pomi,200 g,dry_preserves,"Prisma, Rimi, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+42546,PÕNN Ökoloogilised Riisivahvlid vaarika ja banaaniga 40 g 8+ 40g,PÕNN Ökoloogilised,40 g,dry_preserves,"Coop, Prisma, Rimi",,bakery_flatbreads_wraps,bakery,sweets_snacks,sweets_waffles_cakes,high
+6963,Pons väärisoliiviõli 500 ml,Pons,500 ml,dry_preserves,Prisma,,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+20542,Preah vihear jasmiiniriis 1kg,Preah,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+66356,Preah Vihear jasmiiniriis 5kg,Preah Vihear,5 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+44192,Presto pasta bolognese 300g,Presto,300 g,dry_preserves,"Barbora, Coop, Maxima, Prisma, Selver",,sauces_pasta_cooking,sauces_oils,dry_preserves,dry_pasta_rice,medium
+3921,Proteiinibatoon pähklitega 50 g,Proteiinibatoon,50 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+46530,"Proteiinipuding valge šokolaadi-pähklimaitseline, VALIO PROFEEL, 150g",Profeel,150 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+11628,"Puding Alma šokolaadi-metsapähkli maitseline, ALMA, 230 G",Puding,230 g,dry_preserves,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+26877,Puhastusõli Beauty of Joseon Ginsengi 210ml,Puhastusõli Beauty,210 ml,dry_preserves,Prisma,,hh_cleaners,household,drinks,drinks_spirits,high
+19654,Punase riisi tabletid N60,Punase,,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+3324,"Rääbis, roogitud, jahutatud","Rääbis,",,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+23627,Rainbow basmatiriis 1kg,Rainbow,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+44208,Rainbow bologna mahepasta 190g,Rainbow,190 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+20852,Rainbow jasmiiniriis 1 kg,Rainbow,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+67741,"Rainbow pähklite segu: india pähklid, maapähklid, pistaatsia 200g",Rainbow,200 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+43214,Rainbow Pasta Bolognese 12k,Rainbow Pasta,,dry_preserves,Prisma,,sauces_pasta_cooking,sauces_oils,dry_preserves,dry_pasta_rice,medium
+9619,Rainbow riisisuupiste õuna ja kaneeliga 175g,Rainbow,175 g,dry_preserves,Prisma,,spices_herbs_spice_mix,world_spices,dry_preserves,dry_pasta_rice,high
+7805,Rainbow tšillimaitseaine 120 g,Rainbow,120 g,dry_preserves,Prisma,,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+4214,Rainbow tuhksuhkur 250 g,Rainbow,250 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+270,Rainbow valged oad tomatikastmes 390g,Rainbow,390 g,dry_preserves,Prisma,,dry_canned_veg,dry_preserves,dry_preserves,dry_groats_beans,high
+21751,Raisio sunnuntai anni helena koogijahu 2 kg,Raisio,2 kg,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+3434,RANA Lasanje bolognese kastmega 350 g,RANA Lasanje,350 g,dry_preserves,Prisma,,sauces_pasta_cooking,sauces_oils,dry_preserves,dry_other,medium
+26328,"Rannakarbid Aperitif veinikastmes, VILSUNDBLUE, 350 g",Rannakarbid,200 g,dry_preserves,"Prisma, Selver",,drinks_wine,drinks,drinks,drinks_wine,high
+211,Rannaküla sprotid õlis 160 g,Rannaküla,160 g,dry_preserves,"Prisma, Selver",,other,other,sauces_oils,oils_other,low
+6283,"Rannamoisa Broilerikintsud, Kg","Rannamoisa Broilerikintsud,",,dry_preserves,Prisma,,meat_poultry,meat_fish,sauces_oils,oils_other,high
+4821,Rannamoisa Broilerikintsud Seljata 500G,Rannamoisa Broilerikintsud,500 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,meat_poultry,meat_fish,sauces_oils,oils_other,high
+32856,Rannamoisa Broilerikoivatükid 500G,Rannamoisa Broilerikoivatükid,500 g,dry_preserves,"Prisma, Selver",,meat_poultry,meat_fish,sauces_oils,oils_other,high
+8102,Rannamoisa Broileripoolkoivad 500 G,Rannamoisa Broileripoolkoivad,500 g,dry_preserves,"Coop, Prisma, Rimi",,meat_poultry,meat_fish,sauces_oils,oils_other,high
+1302,Rannamoisa Broileri Rinnafilee 500G,Rannamoisa Broileri,500 g,dry_preserves,"Coop, Prisma, Selver",,meat_poultry,meat_fish,sauces_oils,oils_other,high
+306271,Rannamoisa Broileri Rinnafileepalad 500G,Rannamoisa Broileri,500 g,dry_preserves,Prisma,,meat_poultry,meat_fish,sauces_oils,oils_other,high
+218,Rannamoisa Kergelt Vürtsikad Broileritiivad 400 G,Rannamoisa Kergelt,400 g,dry_preserves,"Prisma, Selver",,meat_poultry,meat_fish,sauces_oils,oils_other,high
+3015,Rannamoisa Pardimaks Jahutatud 500 G,Rannamoisa Pardimaks,500 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+124141,"Rannamoisa Pardi Rinnafilee Jahutatud, Nahaga, Kg",Rannamoisa Pardi,,dry_preserves,"Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+490543,Rannamõisa Pohla Broileripooltiivad 500G,Rannamõisa Pohla,500 g,dry_preserves,Prisma,,meat_poultry,meat_fish,sauces_oils,oils_other,high
+21113,Real Snacks Moomin maisipulgad 35 g,Real Snacks,35 g,dry_preserves,Prisma,,dry_canned_veg,dry_preserves,dry_preserves,dry_other,high
+68547,"Reservväelaste konserv, LINNAMÄE LIHATÖÖSTUS, 240 g",Linnamäe,240 g,dry_preserves,"Barbora, Coop, Maxima, Prisma, Selver",,dry_canned_veg,dry_preserves,dry_preserves,dry_other,high
+70729,Ricefield punane jasmiiniriis 1kg,Ricefield,1 kg,dry_preserves,"Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+48390,"Riisijook, 1 l","Riisijook,",1 l,dry_preserves,Prisma,,dairy_plant_drinks,dairy_eggs_fats,dry_preserves,dry_other,high
+29200,Riisipirukas,Riisipirukas,,dry_preserves,Prisma,,bakery_cakes_pastries,bakery,dry_preserves,dry_other,medium
+18030,Riisiproteiin mahe 650 g,Riisiproteiin,650 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_other,high
+20287,Risella basmati riis 1kg,Risella,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+20478,Risella söömisvalmis basmatiriis laimi ja koriandriga 200 g,Risella,200 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+72135,Risella söömisvalmis jasmiiniriis 200 g,Risella,200 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+70199,Risella söömisvalmis kleepuv riis 200 g,Risella,200 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+45754,Risifrutti maasika-riisi vahepala 175g,Risifrutti,175 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_other,high
+66530,Riso pasini arborio riis 500g,Riso,500 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+20766,"Riso Pasini Arborio risotoriis, 1 kg",Riso Pasini,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+23229,Riso Pasini Risotti risotoriis 1kg,Riso Pasini,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+21900,"Riso Pasini sushiriis, 500 g",Riso Pasini,500 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+23221,Riso scotti hakumaki sushi riis 500g,Riso,500 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+21739,Riso Scotti must valmis täisterariis 230 g,Riso Scotti,230 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+22170,"Riso Scotti, pikateraline riis, 1 kg","Riso Scotti,",1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+19829,Riso Scotti risotoriis 1 kg,Riso Scotti,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+23343,"Rummo Conchiglie Rigate Pasta # 42, 500 g",Rummo Conchiglie,500 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+130166,"Rummo Fusili Pasta # 48, 500 g",Rummo Fusili,500 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+68261,"Rummo gluteenivaba pasta fusilli no 48, 400 g",Rummo,400 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+23483,"Rummo Linguine Pasta # 13, 500 g",Rummo Linguine,500 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+65046,Rummo mezzi rigatoni pasta nr 51 500 g,Rummo,500 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+3004,Saarioinen Hele Suur Riisipirukas 630 G,Saarioinen Hele,630 g,dry_preserves,Prisma,,bakery_cakes_pastries,bakery,dry_preserves,dry_pasta_rice,medium
+239,"Saida filee nahata, jahutatud, kg",Saida,,dry_preserves,Prisma,,bakery_buns_croissants,bakery,dry_preserves,dry_flour_sugar_baking,high
+27608,Salvest Pastakaste ürtidega 460 g,Salvest Pastakaste,460 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,sauces_pasta_cooking,sauces_oils,dry_preserves,dry_pasta_rice,medium
+3066,Salvest tomatipasta 300 g,Salvest,300 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+2654,Salvest tomatipasta ürtidega 300 g,Salvest,300 g,dry_preserves,"Coop, Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+4241,Santa Maria broilerimaitseaine 30 g,Santa Maria,30 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,spices_herbs_spice_mix,world_spices,sauces_oils,oils_other,high
+5627,Santa Maria broilerimaitseaine 90 g,Santa Maria,90 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,spices_herbs_spice_mix,world_spices,sauces_oils,oils_other,high
+4556,Santa Maria burrito maitseainesegu 28 g,Santa Maria,28 g,dry_preserves,"Coop, Prisma",,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+5887,Santa Maria garam masala maitseainesegu 33g,Santa Maria,33 g,dry_preserves,"Coop, Prisma, Selver",,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+6616,Santa Maria guacamole-kastme maitseainesegu 15 g,Santa Maria,15 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,sauces_other,sauces_oils,world_spices,spices_herbs_spice_mix,high
+3734,"Santa Maria kaerajahu tortillad, 6 tk, 240 g",Santa Maria,240 g,dry_preserves,Prisma,,dairy_plant_drinks,dairy_eggs_fats,dry_preserves,dry_flour_sugar_baking,high
+55817,Santa Maria kartulimaitseaine 100 g,Santa Maria,100 g,dry_preserves,"Coop, Prisma, Selver",,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+31557,Santa Maria kartulimaitseaine 30 g,Santa Maria,30 g,dry_preserves,"Coop, Prisma, Selver",,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+5382,Santa Maria kartulimaitseaine 350 g,Santa Maria,350 g,dry_preserves,"Coop, Selver",,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+7290,"Santa Maria kirju aedoa pasta, 215 g",Santa Maria,215 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+7213,Santa Maria kotletimaitseaine 28 g,Santa Maria,28 g,dry_preserves,"Prisma, Selver",,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+7913,Santa Maria magus tšillikaste 500ml less sugar,Santa Maria,500 ml,dry_preserves,"Coop, Prisma, Rimi, Selver",,other,other,dry_preserves,dry_other,low
+2556,"Santa Maria maitseainesegu Tex Mex Taco Spice Mix, 28 g",Santa Maria,28 g,dry_preserves,Prisma,,spices_mexican,world_spices,world_spices,spices_herbs_spice_mix,medium
+28118,"Santa Maria maitseainesegu tortilja- ja takotäidistele, 3 × 28 g",Santa Maria,3x28 g,dry_preserves,Prisma,,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+127316,Santa Maria piparkoogimaitseaine 30 g,Santa Maria,30 g,dry_preserves,"Coop, Prisma, Selver",,spices_basic_salt_pepper,world_spices,world_spices,spices_basic_salt_pepper,high
+21276,Santa Maria riisinuudlid 180 g,Santa Maria,180 g,dry_preserves,"Coop, Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+5131,"Santa Maria Taco Hot Cayenne Spice Mix, maitseainesegu tortilja- ja takotäidistele, 28 g",Santa Maria,28 g,dry_preserves,Prisma,,spices_mexican,world_spices,world_spices,spices_herbs_spice_mix,medium
+3195,"Santa Maria Tex Mex maitseainesegu Fajita Original, 28 g",Santa Maria,28 g,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+4437,Santa Maria tikka masala maitseainesegu 35g,Santa Maria,35 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+28205,Santa Maria universaalne maitseaine 350 g,Santa Maria,350 g,dry_preserves,"Prisma, Selver",,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+144211,Santa Maria vanilliinsuhkur 35 g,Santa Maria,35 g,dry_preserves,"Coop, Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+144352,Santa Maria vanillisuhkur 20 g,Santa Maria,20 g,dry_preserves,"Coop, Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+3834,SANTE CRUNCHY banaani-müslibatoon šokolaadiga 40g,SANTE CRUNCHY,40 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+2193,"SANTE CRUNCHY ploomi müslibatoon, vaniljemaitselise glasuuriga 40g",SANTE CRUNCHY,40 g,dry_preserves,"Coop, Prisma",,dry_cereals_muesli,dry_preserves,sweets_snacks,sweets_chocolate_bars,high
+20171,"Sante fit granola pähkli-kakao, ilma lisatud suhkruta 300g",Sante,300 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_flour_sugar_baking,high
+21859,Sante go on protein granola röstitud müsli pähklite ja šokolaadiga 300 g,Sante,300 g,dry_preserves,"Coop, Prisma",,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+21689,Sante krõbe müsli maapähklite ja maapähklikreemiga granola 350 g,Sante,350 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_cereals_muesli,high
+70815,Sante krõbe müsli punaste marjadega granola premium 350 g,Sante,350 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_cereals_muesli,dry_preserves,dry_preserves,dry_cereals_muesli,high
+22034,Sante krõbe müsli tumeda šokolaadiga granola 350 g,Sante,350 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+23408,Sante protein granola müsli brownie-kirsi 300g,Sante,300 g,dry_preserves,"Coop, Prisma",,sweets_waffles_cakes,sweets_snacks,dry_preserves,dry_cereals_muesli,medium
+64849,Sante röstitud müsli banaani ja šokolaadiga 350 g,Sante,350 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+65321,Schär gluteenivaba jahu 500 g,Schär,500 g,dry_preserves,"Coop, Prisma, Selver",,drinks_tea_coffee,drinks,dry_preserves,dry_flour_sugar_baking,high
+21297,Schär mix c gluteenivaba küpsetiste jahusegu 1 kg,Schär,1 kg,dry_preserves,"Coop, Prisma, Selver",,drinks_tea_coffee,drinks,dry_preserves,dry_flour_sugar_baking,high
+53524,"Sea saba, jahutatud 600 g",Sea,600 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+46746,Seedwealth päevalilleseemnehalvaa maapähklitega 200g,Seedwealth,200 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+68511,"Semper Pofiber kartulikiujahu, gluteenivaba 120 g",Semper Pofiber,120 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_flour_sugar_baking,high
+45451,"Semper strooganov riisiga 235 g, alates 1-eluaastast",Semper,235 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+7567,"Sempio Korea tshillipasta, 170 g",Sempio Korea,170 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+70429,Sini-pellava linaseemnejahu 500g,Sini-pellava,500 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_flour_sugar_baking,high
+3795,Soilmates avokaado õli 500ml,Soilmates,500 ml,dry_preserves,"Prisma, Selver",,produce_tropical,produce,sauces_oils,oils_other,high
+49699,Sonko riisigaletid kõrvitsaseemnetega 130gr,Sonko,,dry_preserves,"Prisma, Selver",,sweets_nuts_driedfruit,sweets_snacks,drinks,drinks_beer_cider,high
+30517,Sonko riisigaletid meresoolaga 130gr,Sonko,,dry_preserves,"Prisma, Selver",,spices_basic_salt_pepper,world_spices,drinks,drinks_beer_cider,high
+593783,Spice up! Chow mein kaste 100g,Spice,100 g,dry_preserves,Prisma,,other,other,dry_preserves,dry_other,low
+26960,Spice up! Spice up tai magus tsillikaste 500ml,Spice,500 ml,dry_preserves,Prisma,,other,other,dry_preserves,dry_other,low
+3228,SportLife Nutrition Whey100 šokolaadi-maapähklimaitseline vadakuvalgupulber 700 g,SportLife Nutrition,700 g,dry_preserves,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+245,"Sprotid õlis, RANNAKÜLA, 100 g",Rannaküla,100 g,dry_preserves,"Coop, Prisma, Selver",,other,other,sauces_oils,oils_other,low
+68299,"Sprotid õlis, RANNAKÜLA, 160 g",Rannaküla Sprotid,160 g,dry_preserves,"Prisma, Selver",,other,other,sauces_oils,oils_other,low
+43661,Starbucks caffe latte no added sugar kohvijook 750ml,Starbucks,750 ml,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_other,medium
+21471,Start axa šokolaadimüsli 375 g,Start,375 g,dry_preserves,"Coop, Prisma, Selver",,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+1922,"Suitsukana poolkoib, TALLEGG, 600 g",Suitsutatud,600 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dairy_eggs,dairy_eggs_fats,dry_preserves,dry_other,high
+22633,Sunnuntai erinisujahu 2 kg,Sunnuntai,2 kg,dry_preserves,"Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+21052,"Sunnuntai jahu 1 kg, gluteenivaba, vähese proteiiniga",Sunnuntai,1 kg,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_flour_sugar_baking,high
+23424,Sunnuntai nisujahu 2 kg,Sunnuntai,2 kg,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+24075,Taffel Broadway dipikastmepulber 18g,Taffel Broadway,18 g,dry_preserves,Prisma,,dry_canned_veg,dry_preserves,dry_preserves,dry_groats_beans,high
+26805,"Taffel hapukoore-, sibula- ja murulaugumaitseline dipikastmepulber 15 g",Taffel,15 g,dry_preserves,"Coop, Prisma, Selver",,sweets_gums_mints,sweets_snacks,sweets_snacks,sweets_gums_mints,high
+25891,Taffel küüslaugumaitseline dipikastmepulber 14 g,Taffel,14 g,dry_preserves,"Coop, Prisma, Selver",,sweets_gums_mints,sweets_snacks,sweets_snacks,sweets_gums_mints,high
+27875,Taffel tillimaitseline dipikastmepulber 16 g,Taffel,16 g,dry_preserves,"Coop, Prisma, Selver",,produce_herbs_salads_sprouts,produce,dry_preserves,dry_other,high
+2145,Tajin klassikaline mehhikopärane maitseaine tšilliga 142 g,Tajin,142 g,dry_preserves,Prisma,,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+2985,Tallegg Broilerifilee Jahutatud Kg,Tallegg Broilerifilee,500 g,dry_preserves,"Prisma, Selver",,dairy_eggs,dairy_eggs_fats,meat_fish,meat_other,high
+1307,"Tallegg Broilerikoib, Jahutatud Kg","Tallegg Broilerikoib,",,dry_preserves,"Prisma, Selver",,dairy_eggs,dairy_eggs_fats,meat_fish,meat_other,high
+4342,Tallegg Broilerimaks Jahutatud 500G,Tallegg Broilerimaks,500 g,dry_preserves,"Barbora, Maxima, Prisma, Rimi, Selver",,dairy_eggs,dairy_eggs_fats,meat_fish,meat_other,high
+3376,Tallegg Broileri Poolkoivad 1 Kg Jahutatud,Tallegg Broileri,1 kg,dry_preserves,"Prisma, Selver",,dairy_eggs,dairy_eggs_fats,meat_fish,meat_other,high
+34309,Tallegg Broileripoolkoiva Tükid Osso-Bucco Kg,Tallegg Broileripoolkoiva,,dry_preserves,"Prisma, Selver",,dairy_eggs,dairy_eggs_fats,sauces_oils,oils_other,high
+3854,Tallegg Chick Snack Smoky 80 G,Tallegg Chick,80 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dairy_eggs,dairy_eggs_fats,dry_preserves,dry_other,high
+8019,Tallegg Eestimaine Broilerikints Jahutatud 1Kg,Tallegg Eestimaine,1 kg,dry_preserves,"Prisma, Rimi, Selver",,dairy_eggs,dairy_eggs_fats,meat_fish,meat_other,high
+2292,Tallegg Eestimaine Broileririnnak Jahutatud 1Kg,Tallegg Eestimaine,1 kg,dry_preserves,Prisma,,dairy_eggs,dairy_eggs_fats,meat_fish,meat_other,high
+124182,Tallegg Eestimaine Broilerisisefilee Jahut.400G,Tallegg Eestimaine,400 g,dry_preserves,"Coop, Prisma, Selver",,dairy_eggs,dairy_eggs_fats,sauces_oils,oils_other,high
+34126,Tallegg Eestimaise Broilerifilee Minutipihv 400G,Tallegg Eestimaise,400 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dairy_eggs,dairy_eggs_fats,sauces_oils,oils_other,high
+1945,Tallegg Eestimaise Broilerifilee Tükid 400G,Tallegg Eestimaise,400 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dairy_eggs,dairy_eggs_fats,sauces_oils,oils_other,high
+491994,Tallegg Fit Ahjupraad Broileririnnakust U 750G,Tallegg Fit,750 g,dry_preserves,Prisma,,dairy_eggs,dairy_eggs_fats,sauces_oils,oils_other,high
+1527,Tallegg Fit! Broileririnnafilee Caesari 500 G,Tallegg Fit!,500 g,dry_preserves,"Coop, Prisma",,dairy_eggs,dairy_eggs_fats,sauces_oils,oils_other,high
+1583,Tallegg Fit! Broileririnnafilee Mustikamarinaad,Tallegg Fit!,500 g,dry_preserves,"Prisma, Selver",,sauces_marinades,sauces_oils,sauces_oils,sauces_marinades,medium
+5500,Tallegg Jahutatud Broileri Seljatükk ~ 650 G,Tallegg Jahutatud,650 g,dry_preserves,Prisma,,dairy_eggs,dairy_eggs_fats,meat_fish,meat_other,high
+3786,Tallegg Jahutatud Broilerisüda 400 G,Tallegg Jahutatud,400 g,dry_preserves,"Coop, Prisma",,dairy_eggs,dairy_eggs_fats,meat_fish,meat_other,high
+3720,Tallegg Klassikaline Ahjubroiler Kg,Tallegg Klassikaline,,dry_preserves,"Barbora, Maxima, Prisma, Rimi, Selver",,dairy_eggs,dairy_eggs_fats,sauces_oils,oils_other,high
+571754,Tallegg Magus-Hapu Broileri Rinnafileeribad 500G,Tallegg Magus-Hapu,500 g,dry_preserves,Prisma,,dairy_eggs,dairy_eggs_fats,sauces_oils,oils_other,high
+489538,Tallegg Õrnsoolatud Broileripooltiib 700G,Tallegg Õrnsoolatud,700 g,dry_preserves,Prisma,,spices_basic_salt_pepper,world_spices,sauces_oils,oils_other,high
+124126,Tallegg Õrnsoolatud Broileri Rinnafileeribad 400,Tallegg Õrnsoolatud,,dry_preserves,"Prisma, Selver",,spices_basic_salt_pepper,world_spices,sauces_oils,oils_other,high
+2111,"Tammejuure rüpsiõli 500 ml, mahe",Tammejuure,500 ml,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+20013,Tammejuure täistera kaerajahu 700 g mahe,Tammejuure,700 g,dry_preserves,Prisma,,dairy_plant_drinks,dairy_eggs_fats,dry_preserves,dry_flour_sugar_baking,high
+5339,"Tartu Mill arrabbiata pastakaste 340 g, vegan, gluteenivaba, laktoosivaba",Tartu Mill,340 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,drinks_tea_coffee,drinks,dry_preserves,dry_pasta_rice,high
+23968,Tartu Mill aurutatud riis 4 x 125 g,Tartu Mill,4x125 g,dry_preserves,"Coop, Prisma",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+3752,Tartu Mill durumnisujahupasta chiffari lisci 500 g,Tartu Mill,500 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high
+1400,Tartu Mill durumnisujahupasta cornetti 500 g,Tartu Mill,500 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high
+4313,Tartu Mill durumnisujahupasta fusilli 1 kg,Tartu Mill,1 kg,dry_preserves,Prisma,,drinks_spirits,drinks,drinks,drinks_spirits,high
+1572,Tartu Mill durumnisujahupasta linguine 500 g,Tartu Mill,500 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high
+1798,Tartu Mill durumnisujahupasta penne 500 g,Tartu Mill,500 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high
+22809,Tartu Mill durumnisujahupasta spaghetti nr7 500 g,Tartu Mill,500 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high
+2769,Tartu Mill durum pasta farfalle 500g,Tartu Mill,500 g,dry_preserves,"Coop, Prisma",,drinks_spirits,drinks,drinks,drinks_spirits,high
+1927,Tartu Mill durum pasta fusilli tricolore 500g,Tartu Mill,500 g,dry_preserves,"Coop, Prisma",,drinks_spirits,drinks,drinks,drinks_spirits,high
+23804,Tartu mill durum pasta mini lasagne 400g,Tartu,400 g,dry_preserves,"Coop, Prisma, Selver",,drinks_spirits,drinks,drinks,drinks_spirits,high
+67566,Tartu Mill kamajahu 400 g,Tartu Mill,400 g,dry_preserves,"Coop, Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+1516,Tartu Mill õhukese pannkoogitaigna jahusegu 400 g,Tartu Mill,400 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+23241,"Tartu Mill Öko rukkitäisterajahu 1,5 kg",Tartu Mill,1.5 kg,dry_preserves,"Coop, Prisma, Rimi, Selver",,bakery_bread_loaves,bakery,dry_preserves,dry_flour_sugar_baking,high
+54588,Tartu Mill pärmitaigna pannkoogijahu 508 g,Tartu Mill,508 g,dry_preserves,"Coop, Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+69513,Tartu mill pikateraline riis 4 x 125 g,Tartu,4x125 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+1581,Tartu Mill pitsajahu 400 g,Tartu Mill,400 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+20404,Tartu mill riisihelbed 500 g,Tartu,500 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_cereals_muesli,dry_preserves,dry_preserves,dry_pasta_rice,high
+65408,Tartu Mill täistera nisujahu 1 kg,Tartu Mill,1 kg,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+1603,Tartu Mill täisterapasta fusilli 500 g,Tartu Mill,500 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+19954,"Tartu mill täistera rukkijahu 1,5 kg",Tartu,1.5 kg,dry_preserves,"Coop, Prisma, Selver",,bakery_bread_loaves,bakery,dry_preserves,dry_flour_sugar_baking,high
+36068,"Tartu mill toma&sil pastakaste 340g, vegan, gluteenivaba, laktoosivaba",Tartu,340 g,dry_preserves,"Coop, Prisma, Selver",,drinks_tea_coffee,drinks,dry_preserves,dry_pasta_rice,high
+58160,Tartu mill tom&ese pastakaste 340g,Tartu,340 g,dry_preserves,Prisma,,sauces_pasta_cooking,sauces_oils,dry_preserves,dry_pasta_rice,medium
+2296,Tartu Mill vahvlijahu 400 g,Tartu Mill,400 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+22134,Tayl&lledge vanillipasta 65g,Tayl&lledge,65 g,dry_preserves,"Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+5495,Terra delyssa väärisoliiviõli 750 ml,Terra,750 ml,dry_preserves,Prisma,,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+5786,Texas pete hotsauce tsillikaste 177ml,Texas,177 ml,dry_preserves,Prisma,,pet_other,pet,dry_preserves,dry_other,medium
+3871,Thai Choice riisiäädikas 300ml,Thai Choice,300 ml,dry_preserves,"Coop, Prisma, Rimi, Selver",,oils_vinegar,sauces_oils,sauces_oils,oils_vinegar,high
+26221,Thai choice seesamiõli 200 ml,Thai,200 ml,dry_preserves,"Coop, Prisma, Selver",,other,other,sauces_oils,oils_other,low
+23520,Torino Tricolori merikarbikujuline pasta 425 g,Torino Tricolori,425 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+65846,"Tuoppi magus linnasega leivajahu, kiudaineterikas, taimne toode 1 kg",Tuoppi,1 kg,dry_preserves,Prisma,,dairy_plant_drinks,dairy_eggs_fats,dry_preserves,dry_flour_sugar_baking,high
+2951,"Tursafilee, jahutatud, kg","Tursafilee,",,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+20500,Umami mandlijahu 300 g,Umami,300 g,dry_preserves,"Coop, Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+24718,Universal Stone puhastuspasta 650 g,Universal Stone,650 g,dry_preserves,Prisma,,hh_cleaners,household,dry_preserves,dry_pasta_rice,high
+6454,Ürdi-pipramaitseline broiler 1 kg,Ürdi-pipramaitseline,1 kg,dry_preserves,Prisma,,spices_herbs_spice_mix,world_spices,sauces_oils,oils_other,high
+3676,Urtekram kuldne maheroosuhkur 1 kg,Urtekram,1 kg,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+2799,Urtekram maheroosuhkur 500 g,Urtekram,500 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+65576,"Urtekram mahetäistera-basmatiriis, 500 g",Urtekram,500 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+28169,"Urtekram seesamiõli 500 ml, öko",Urtekram,500 ml,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+66173,"Urtekram seesamipasta tahini 350 g , mahe",Urtekram,350 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+9258,Urtekram vaniljejahu 10 g mahe,Urtekram,10 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+1426,USIN Pasta Bolognese 350 g,USIN Pasta,350 g,dry_preserves,Prisma,,sauces_pasta_cooking,sauces_oils,dry_preserves,dry_pasta_rice,medium
+216,"Väike Tom vanillijäätis pähklitäidise ja šokolaadiglasuuriga, 90 ml",Väike Tom,90 ml,dry_preserves,"Coop, Prisma, Rimi, Selver",,frozen_desserts_icecream,frozen_food,frozen_food,frozen_food_other,high
+1402,Valezs vaniljesuhkur 25g,Valezs,25 g,dry_preserves,"Coop, Prisma",,dry_flour_sugar_baking,dry_preserves,drinks,drinks_beer_cider,high
+12164,"Valio Oivariini rasvasegu oliiviõli ja meresoolaga, 400 g",Valio Oivariini,400 g,dry_preserves,Prisma,,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+23826,Vannamei krevetid Marwi mango-tšilli kastmes 280 g,Vannamei,280 g,dry_preserves,Prisma,,produce_tropical,produce,dry_preserves,dry_other,high
+20769,Vannamei krevetid õlis Marwi tšilli-küüslaugu 260 g,Vannamei,260 g,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+1541,Veski Mati eriti hea nisujahu 1kg,Veski Mati,1 kg,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+65095,Veski Mati isekerkiv jahu 1kg,Veski Mati,1 kg,dry_preserves,"Coop, Prisma",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+23688,Veski mati kaera- ja riisihelbe segu 500g,Veski,500 g,dry_preserves,"Coop, Selver",,dairy_plant_drinks,dairy_eggs_fats,dry_preserves,dry_pasta_rice,high
+2088,Veski mati maisijahu 1 kg,Veski,1 kg,dry_preserves,"Coop, Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+1297,Veski Mati nisujahu 2 kg,Veski Mati,2 kg,dry_preserves,"Coop, Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+66583,Veski mati pikateraline riis 500 g,Veski,500 g,dry_preserves,"Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+21258,Veski mati pruun täistera riis 400 g,Veski,400 g,dry_preserves,"Coop, Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+23959,Veski mati pudruriis 1 kg,Veski,1 kg,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+21996,Veski mati riisijahu 1 kg,Veski,1 kg,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_pasta_rice,high
+22988,Veski mati riisimanna 500 g,Veski,500 g,dry_preserves,"Coop, Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+21074,Veski mati risotoriis 500 g,Veski,500 g,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+104640,Veski mati sõmer riis 1 kg,Veski,1 kg,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+68441,Veski Mati speltajahu 1kg,Veski Mati,1 kg,dry_preserves,"Coop, Prisma",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+22916,Veski mati sushiriis 500 g,Veski,500 g,dry_preserves,"Coop, Prisma, Selver",,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+2668,Veski Mati Täistera kaerajahu 1 kg,Veski Mati,1 kg,dry_preserves,"Coop, Prisma, Rimi, Selver",,dairy_plant_drinks,dairy_eggs_fats,dry_preserves,dry_flour_sugar_baking,high
+22789,"Veski mati täistera rukkijahu 1,5 kg",Veski,1.5 kg,dry_preserves,"Coop, Prisma",,bakery_bread_loaves,bakery,dry_preserves,dry_flour_sugar_baking,high
+23617,Veski mati täisteraspeltajahu 1 kg,Veski,1 kg,dry_preserves,"Coop, Prisma, Rimi, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+2455,"Vici Surimist Pulgad, Jahutatud, 150G",Vici Surimist,150 g,dry_preserves,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+1965,"Vici Surimist Pulgad, Jahutatud, 300G",Vici Surimist,300 g,dry_preserves,"Barbora, Coop, Maxima, Prisma, Rimi, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+237,"Vikerforell jahutatud, kg",Vikerforell,,dry_preserves,Prisma,,fish_fresh,meat_fish,dry_preserves,dry_flour_sugar_baking,high
+21586,"Viljatuote pannkoogijahusegu 500 g, gluteenivaba",Viljatuote,500 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_flour_sugar_baking,high
+23053,"Viljatuote tume täisterariisijahu 500 g, gluteenivaba",Viljatuote,500 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_flour_sugar_baking,high
+20451,Vilma pannkoogijahu 400 g,Vilma,400 g,dry_preserves,"Coop, Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+68229,Vilma ülepannikoogijahu 400 g,Vilma,400 g,dry_preserves,"Coop, Prisma, Selver",,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+20026,Virtasalmen gluteenivaba riisijahu 500 g,Virtasalmen,500 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_pasta_rice,high
+22535,Virtasalmen gluteenivaba sorgojahusegu 500 g,Virtasalmen,500 g,dry_preserves,Prisma,,drinks_tea_coffee,drinks,dry_preserves,dry_flour_sugar_baking,high
+49242,"Vormiõli sprei, laktoosivaba, KEIJU, 400 ml",Keiju,400 ml,dry_preserves,"Prisma, Selver",,other,other,sauces_oils,oils_other,low
+65851,Wind mill tapioki jahu 400 g,Wind,400 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+68381,"Wiru mill mahe toortatra jahu 1 kg, gluteenivaba",Wiru,1 kg,dry_preserves,"Coop, Prisma",,drinks_tea_coffee,drinks,dry_preserves,dry_flour_sugar_baking,high
+20031,"Wiru mill toortatrajahu 500 g, mahe, gluteenivaba",Wiru,500 g,dry_preserves,"Coop, Prisma",,drinks_tea_coffee,drinks,dry_preserves,dry_flour_sugar_baking,high
+23639,Xtra aurtöödeldud (parboiled) pikateraline riis 2 kg,Xtra,2 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,sauces_oils,oils_other,high
+65500,Xtra basmatiriis 2kg,Xtra,2 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+1647,Xtra gnocchi pasta 1kg,Xtra,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+34439,Xtra grillimaitseaine 110g,Xtra,110 g,dry_preserves,Prisma,,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+22362,Xtra Jasmiini riis 1 kg,Xtra Jasmiini,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+30931,"Xtra kokteil-riisipirukad, 1,35 kg",Xtra,1.35 kg,dry_preserves,Prisma,,bakery_cakes_pastries,bakery,dry_preserves,dry_other,medium
+19843,X-tra maapähklid tšillimaitselise kattega 500 g,X-tra,500 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+4461,Xtra müslibatoon 126g,Xtra,126 g,dry_preserves,Prisma,,dry_cereals_muesli,dry_preserves,sweets_snacks,sweets_chocolate_bars,high
+2829,Xtra nisujahu 2 kg.,Xtra,2 kg,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+66544,Xtra pähkli-šokolaadikreem 400 g,Xtra,400 g,dry_preserves,Prisma,,sweets_chocolate_bars,sweets_snacks,sweets_snacks,sweets_chocolate_bars,high
+2184,X-tra pähklitesegu mandlite ja india pähkl 300g,X-tra,300 g,dry_preserves,Prisma,,sweets_nuts_driedfruit,sweets_snacks,dry_preserves,dry_other,high
+2678,Xtra pasta fusilli 1 kg,Xtra,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+4085,Xtra pastakaste basiilikuga 500 g,Xtra,500 g,dry_preserves,Prisma,,sauces_pasta_cooking,sauces_oils,dry_preserves,dry_pasta_rice,medium
+22552,Xtra pasta penne 1 kg,Xtra,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+3110,Xtra pasta sarveke 1 kg,Xtra,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+20892,Xtra pasta spaghetti 1 kg,Xtra,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+279,Xtra pikateraline riis 1 kg,Xtra,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+4667,Xtra pitsamaitseaine 30 g,Xtra,30 g,dry_preserves,Prisma,,spices_herbs_spice_mix,world_spices,world_spices,spices_herbs_spice_mix,high
+20733,Xtra pudruriis 1 kg lihvitud,Xtra,1 kg,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+5798,Xtra raf.õlist ja väärisoliiviõli valmistatud oliiviõli 1 l,Xtra,1 l,dry_preserves,Prisma,,oils_olive,sauces_oils,sauces_oils,oils_olive,high
+2166,Xtra rapsiõli 1 l,Xtra,1 l,dry_preserves,Prisma,,other,other,sauces_oils,oils_other,low
+1499,X-tra soolapähklid 1 kg,X-tra,1 kg,dry_preserves,Prisma,,sweets_snacks_salty,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+227120,X-tra soolapähklid 250 g,X-tra,250 g,dry_preserves,Prisma,,sweets_snacks_salty,sweets_snacks,sweets_snacks,sweets_nuts_driedfruit,high
+2745,Xtra taco spice mix 30g,Xtra,30 g,dry_preserves,Prisma,,spices_mexican,world_spices,dry_preserves,dry_other,medium
+19812,Xtra tagliatelle lintpasta 500g,Xtra,500 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+406165,Xtra valged oad tomatikastmes 390g,Xtra,390 g,dry_preserves,Prisma,,dry_canned_veg,dry_preserves,dry_preserves,dry_groats_beans,high
+3127,Xtra vanilliinsuhkur 225 g,Xtra,225 g,dry_preserves,Prisma,,dry_flour_sugar_baking,dry_preserves,dry_preserves,dry_flour_sugar_baking,high
+3031,Xtra Värske Pasta Fettuccine Naturaalne 500 G,Xtra Värske,500 g,dry_preserves,Prisma,,dry_pasta_rice,dry_preserves,dry_preserves,dry_pasta_rice,high
+8707,ZOTT Monte snack 29g,ZOTT Monte,29 g,dry_preserves,Prisma,,other,other,dry_preserves,dry_other,low
