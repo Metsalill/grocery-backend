@@ -18,51 +18,55 @@ jobs:
 
       - name: Export products with missing food_group
         run: |
-          mkdir -p exports/unlabeled
-          MAX_PER_FILE=${MAX_PER_FILE}
+          set -euo pipefail
 
-          # 1) How many rows need a main food_group?
+          mkdir -p exports/unlabeled
+
+          echo "Checking how many products are missing food_group..."
           TOTAL=$(psql "$DATABASE_URL" -t -A -c \
             "SELECT COUNT(*) FROM products WHERE food_group IS NULL OR food_group = ''")
           echo "Total rows with missing food_group: $TOTAL"
 
           if [ "$TOTAL" -eq 0 ]; then
-            echo "Nothing to export"; exit 0; fi
+            echo "Nothing to export."
+            exit 0
+          fi
 
-          # 2) How many CSV parts of <= MAX_PER_FILE rows?
+          MAX_PER_FILE=${MAX_PER_FILE}
           MAX_BATCH=$(( (TOTAL + MAX_PER_FILE - 1) / MAX_PER_FILE ))
-          echo "Will create $MAX_BATCH CSV parts"
+          echo "Will create $MAX_BATCH CSV files (max $MAX_PER_FILE rows each)."
 
           for B in $(seq 1 "$MAX_BATCH"); do
+            OFFSET=$(( (B - 1) * MAX_PER_FILE ))
             OUTFILE="exports/unlabeled/products_missing_foodgroup_unlabeled_part$((B-1)).csv"
-            echo "Writing $OUTFILE"
 
-            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<EOF
-\COPY (
-  WITH numbered AS (
-      SELECT
-          p.id AS product_id,
-          p.name,
-          p.brand,
-          p.size_text,
-          COALESCE(p.food_group, '') AS current_food_group,
-          p.sub_code AS current_sub_code,
-          (
-            SELECT string_agg(DISTINCT s.chain, ', ' ORDER BY s.chain)
-            FROM prices pr
-            JOIN stores s ON s.id = pr.store_id
-            WHERE pr.product_id = p.id
-          ) AS stores_sample,
-          row_number() OVER (ORDER BY p.id) AS rn
-      FROM products p
-      WHERE p.food_group IS NULL OR p.food_group = ''
-  )
-  SELECT
-      product_id,
-      name,
-      brand,
-      size_text,
-      stores_sample,
-      current_food_group,
-      current_sub_code,
-      ''::text AS food_group
+            echo "Writing $OUTFILE (offset $OFFSET)..."
+
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c "\copy (
+              SELECT
+                p.id AS product_id,
+                p.name,
+                p.brand,
+                p.size_text,
+                (
+                  SELECT string_agg(DISTINCT s.chain, ', ' ORDER BY s.chain)
+                  FROM prices pr
+                  JOIN stores s ON s.id = pr.store_id
+                  WHERE pr.product_id = p.id
+                ) AS stores_sample,
+                COALESCE(p.food_group, '') AS current_food_group,
+                p.sub_code AS current_sub_code,
+                ''::text AS food_group_corrected,
+                ''::text AS new_sub_code
+              FROM products p
+              WHERE p.food_group IS NULL OR p.food_group = ''
+              ORDER BY p.id
+              LIMIT $MAX_PER_FILE OFFSET $OFFSET
+            ) TO STDOUT WITH CSV HEADER" > "$OUTFILE"
+          done
+
+      - name: Upload CSVs as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: products-missing-foodgroup-unlabeled
+          path: exports/unlabeled/*.csv
