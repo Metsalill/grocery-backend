@@ -9,8 +9,9 @@ jobs:
 
     env:
       # Railway Postgres connection string
-      # Make sure this secret exists in GitHub:
+      # Make sure this secret exists in your GitHub repo:
       # Settings → Secrets and variables → Actions → New repository secret
+      # Name: RW_DATABASE_URL
       DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
 
     steps:
@@ -21,16 +22,21 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pandas psycopg2-binary
+          # If your label files are CSV only, openpyxl is harmless.
+          # If any are .xlsx, openpyxl is required.
+          pip install pandas psycopg2-binary openpyxl
 
-      - name: List product label files
+      - name: Sanity check product label files
         run: |
           echo "Listing data/product_labels/"
-          ls -la data/product_labels || true
+          ls -la data/product_labels
+          echo "File count:"
+          ls -1 data/product_labels | wc -l
 
       - name: Apply Excel categories to products table
         run: |
