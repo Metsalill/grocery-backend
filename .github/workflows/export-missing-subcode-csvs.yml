@@ -1,0 +1,89 @@
+name: Export products missing sub_code
+
+on:
+  workflow_dispatch:
+
+jobs:
+  export-missing-subcode:
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
+      MAX_PER_FILE: 900
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install psql
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Prepare export folders
+        run: |
+          mkdir -p exports/unlabeled
+
+      - name: Count products missing sub_code
+        id: count
+        run: |
+          TOTAL=$(psql "$DATABASE_URL" -t -A -v ON_ERROR_STOP=1 -c "
+            SELECT COUNT(*)
+            FROM products
+            WHERE sub_code IS NULL OR sub_code = '';
+          ")
+          echo "TOTAL=$TOTAL" >> $GITHUB_OUTPUT
+          echo "Missing sub_code total: $TOTAL"
+
+      - name: Export missing sub_code into 900-row CSV parts
+        run: |
+          TOTAL=${{ steps.count.outputs.TOTAL }}
+          MAX_PER_FILE=${MAX_PER_FILE}
+
+          if [ -z "$TOTAL" ] || [ "$TOTAL" -eq 0 ]; then
+            echo "No missing sub_code rows to export."
+            exit 0
+          fi
+
+          MAX_BATCH=$(( (TOTAL + MAX_PER_FILE - 1) / MAX_PER_FILE ))
+          echo "Will create $MAX_BATCH CSV parts (max $MAX_PER_FILE rows each)"
+
+          for ((B=0; B<MAX_BATCH; B++)); do
+            START=$(( B*MAX_PER_FILE + 1 ))
+            END=$(( (B+1)*MAX_PER_FILE ))
+            OUTFILE="exports/unlabeled/products_missing_subcode_part${B}.csv"
+
+            echo "Writing $OUTFILE (rows $START..$END)"
+
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<SQL
+\\copy (
+  SELECT
+    id AS product_id,
+    name,
+    brand,
+    size_text,
+    food_group AS current_food_group,
+    sub_code AS current_sub_code,
+    category_1,
+    category_2,
+    category_3,
+    source_url,
+    image_url,
+    last_seen_utc
+  FROM (
+    SELECT
+      p.*,
+      row_number() OVER (ORDER BY p.id) AS rn
+    FROM products p
+    WHERE p.sub_code IS NULL OR p.sub_code = ''
+  ) s
+  WHERE s.rn BETWEEN ${START} AND ${END}
+) TO '${OUTFILE}' WITH CSV HEADER;
+SQL
+          done
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: products-missing-subcode-csvs
+          path: exports/unlabeled/*.csv
