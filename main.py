@@ -33,7 +33,7 @@ from admin.routes import router as admin_router
 from basket_history import router as basket_history_router
 from api.upload_image import router as upload_image_router
 from admin.image_gallery import router as image_admin_router
-from categories import router as categories_router  # <-- NEW
+from api.categories import router as categories_router  # <-- UPDATED IMPORT PATH
 
 logger = logging.getLogger("uvicorn.error")
 os.makedirs(IMAGES_DIR, exist_ok=True)
@@ -55,15 +55,15 @@ app = FastAPI(
 
 
 class TraceLogMiddleware(BaseHTTPMiddleware):
-  async def dispatch(self, request, call_next):
-      try:
-          return await call_next(request)
-      except Exception:
-          logger.error("\n===== UNCAUGHT EXCEPTION =====")
-          logger.error("Path: %s %s", request.method, request.url.path)
-          logger.error(traceback.format_exc())
-          logger.error("===== END TRACE =====\n")
-          raise
+    async def dispatch(self, request, call_next):
+        try:
+            return await call_next(request)
+        except Exception:
+            logger.error("\n===== UNCAUGHT EXCEPTION =====")
+            logger.error("Path: %s %s", request.method, request.url.path)
+            logger.error(traceback.format_exc())
+            logger.error("===== END TRACE =====\n")
+            raise
 
 
 app.add_middleware(TraceLogMiddleware)
@@ -128,7 +128,7 @@ app.include_router(admin_router)
 app.include_router(basket_history_router)
 app.include_router(upload_image_router)       # /api/upload-image
 app.include_router(image_admin_router)        # /admin/images
-app.include_router(categories_router)         # /categories           <-- NEW
+app.include_router(categories_router)         # /categories
 if stores_router:
     app.include_router(stores_router)         # /stores
 
@@ -138,7 +138,7 @@ app.include_router(compare_router, prefix="/api")
 if stores_router:
     app.include_router(stores_router, prefix="/api")
 app.include_router(basket_history_router, prefix="/api")
-app.include_router(categories_router, prefix="/api")  # /api/categories  <-- NEW
+app.include_router(categories_router, prefix="/api")  # /api/categories
 
 
 @app.get("/robots.txt", response_class=PlainTextResponse)
@@ -150,7 +150,7 @@ async def robots():
         "Disallow: /search-products\n"
         "Disallow: /stores\n"
         "Disallow: /compare\n"
-        "Disallow: /categories\n"        # <-- NEW
+        "Disallow: /categories\n"
         "Disallow: /basket-history\n"
         "Disallow: /api/upload-image\n"
         "Disallow: /admin/images\n"
