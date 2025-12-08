@@ -23,20 +23,20 @@ async def list_main_categories(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
 ):
     """
-    Return all main categories with an approximate product_count.
+    Return all main categories with product_count.
 
-    product_count is currently based on products.food_group so that
-    you see real numbers even before product_categories is filled.
+    This uses product_categories (canonical mapping) rather than
+    products.food_group so counts reflect your new main+sub structure.
     """
     sql = """
         SELECT
             m.code,
             m.label_et,
             COALESCE(m.label_en, m.label_et) AS label_en,
-            COUNT(DISTINCT p.id) AS product_count
+            COUNT(DISTINCT pc.product_id) AS product_count
         FROM categories_main AS m
-        LEFT JOIN products AS p
-          ON p.food_group = m.code
+        LEFT JOIN product_categories AS pc
+          ON pc.main_id = m.id
         GROUP BY
             m.id, m.code, m.label_et, m.label_en, m.sort_order
         ORDER BY m.sort_order, m.id;
@@ -68,7 +68,6 @@ async def list_subcategories(
     Return subcategories for a given main category.
 
     Uses categories_sub + product_categories mapping.
-    No more reference to products.food_subgroup.
     """
     # Make sure main category exists
     main_row = await db.fetchrow(
