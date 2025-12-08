@@ -1,295 +1,224 @@
+# api/products.py
+
 from fastapi import APIRouter, Request, Query, HTTPException
-from typing import Optional
+from typing import Optional, List, Dict, Any
 from asyncpg import exceptions as pgerr
 
 from utils.throttle import throttle
 
 router = APIRouter()
 
-MAX_LIMIT = 50  # server-side cap
+MAX_LIMIT = 50  # server-side hard cap
 
 
-# ----------------------------- LIST (paged, NO PRICES) -----------------------------
+def _row_to_safe_product(row: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Normalize a DB row into a stable API shape.
+    We intentionally keep this minimal for the product list UI.
+    """
+    return {
+        "id": row.get("id"),
+        "name": row.get("name"),
+        # Optional fields if present in your table/view
+        "image_url": row.get("image_url"),
+        "brand": row.get("brand"),
+        "manufacturer": row.get("manufacturer"),
+        "size_text": row.get("size_text"),
+        "amount": row.get("amount"),
+        # Keep legacy fields if your frontend still references them
+        "food_group": row.get("food_group"),
+        "sub_code": row.get("sub_code"),
+    }
+
+
+async def _get_pool(request: Request):
+    pool = getattr(request.app.state, "db", None)
+    if pool is None:
+        raise HTTPException(status_code=500, detail="Database pool not initialized")
+    return pool
+
+
+# ----------------------------- LIST (paged) -----------------------------
 @router.get("/products")
 @throttle(limit=120, window=60)
 async def list_products(
     request: Request,
     q: Optional[str] = Query(
         "",
-        description="Search by product name (uses products + optional aliases); empty lists everything (paged).",
+        description=(
+            "Search by product name (ILIKE). "
+            "Empty lists everything (paged)."
+        ),
     ),
     offset: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=200),
     main_code: Optional[str] = Query(
         None,
-        description="Optional main category code (e.g. 'produce', 'meat_fish'). Matches products.food_group.",
+        description=(
+            "Optional main category code (e.g. 'produce', 'meat_fish'). "
+            "When provided, uses product_categories mapping."
+        ),
     ),
     sub_code: Optional[str] = Query(
         None,
-        description="Optional subcategory code (e.g. 'produce_apples_pears'). Uses product_categories when present.",
+        description=(
+            "Optional subcategory code (e.g. 'produce_apples_pears'). "
+            "When provided, uses product_categories mapping."
+        ),
     ),
-):
-    """
-    Lightweight catalogue:
-      - One row per product (from `products`).
-      - NO min/max/store price aggregation.
-      - Only include products that have at least one row in `prices`.
-      - Hide garbage names that are only digits (e.g. '19765').
+) -> Dict[str, Any]:
+    limit = min(limit, MAX_LIMIT)
 
-    Filters:
-      - q: name / alias search (LIKE).
-      - main_code: matches products.food_group (produce, meat_fish, ...).
-      - sub_code: requires at least one row in product_categories for that subcategory.
+    q = (q or "").strip()
+    main_code = (main_code or "").strip() or None
+    sub_code = (sub_code or "").strip() or None
 
-    Returned fields: id, product, brand, size_text, image_url (null for now).
-    """
-    limit = min(int(limit), MAX_LIMIT)
-    like = f"%{(q or '').strip()}%" if q is not None else "%"
+    pool = await _get_pool(request)
 
-    # With product_aliases (preferred)
-    SQL_COUNT_WITH_ALIASES = """
-      SELECT COUNT(*)
-      FROM products pr
-      WHERE pr.name !~ '^[0-9]+$'                    -- hide purely numeric "names"
-        AND EXISTS (SELECT 1 FROM prices p WHERE p.product_id = pr.id)
-        -- main category via products.food_group; ignored when $2 is NULL
-        AND ($2::text IS NULL OR pr.food_group = $2)
-        -- subcategory via product_categories; ignored when $3 is NULL
-        AND (
-          $3::text IS NULL OR EXISTS (
-            SELECT 1
-            FROM product_categories pc
-            JOIN categories_sub cs ON cs.id = pc.sub_id
-            WHERE pc.product_id = pr.id
-              AND cs.code = $3
-          )
-        )
-        AND (
-              LOWER(pr.name) LIKE LOWER($1)
-           OR EXISTS (
-                SELECT 1
-                FROM product_aliases a
-                WHERE a.product_id = pr.id AND LOWER(a.alias) LIKE LOWER($1)
-           )
-        )
-    """
+    # Build SQL dynamically but safely via positional params
+    params: List[Any] = []
+    where: List[str] = []
 
-    SQL_PAGE_WITH_ALIASES = """
-      SELECT
-        pr.id,
-        pr.name                               AS product,
-        COALESCE(pr.brand, '')                AS brand,
-        COALESCE(pr.size_text, '')            AS size_text,
-        NULL::text                            AS image_url
-      FROM products pr
-      WHERE pr.name !~ '^[0-9]+$'
-        AND EXISTS (SELECT 1 FROM prices p WHERE p.product_id = pr.id)
-        AND ($2::text IS NULL OR pr.food_group = $2)
-        AND (
-          $3::text IS NULL OR EXISTS (
-            SELECT 1
-            FROM product_categories pc
-            JOIN categories_sub cs ON cs.id = pc.sub_id
-            WHERE pc.product_id = pr.id
-              AND cs.code = $3
-          )
-        )
-        AND (
-              LOWER(pr.name) LIKE LOWER($1)
-           OR EXISTS (
-                SELECT 1
-                FROM product_aliases a
-                WHERE a.product_id = pr.id AND LOWER(a.alias) LIKE LOWER($1)
-           )
-        )
-      ORDER BY lower(pr.name), lower(brand), lower(size_text)
-      OFFSET $4
-      LIMIT  $5
-    """
+    # Category-filtered path (uses mapping tables)
+    if main_code or sub_code:
+        sql = """
+            SELECT p.*
+            FROM products p
+            JOIN product_categories pc ON pc.product_id = p.id
+            JOIN categories_main m ON m.id = pc.main_id
+            JOIN categories_sub  s ON s.id = pc.sub_id
+        """
 
-    # Fallback if product_aliases table is missing
-    SQL_COUNT_NO_ALIASES = """
-      SELECT COUNT(*)
-      FROM products pr
-      WHERE pr.name !~ '^[0-9]+$'
-        AND EXISTS (SELECT 1 FROM prices p WHERE p.product_id = pr.id)
-        AND ($2::text IS NULL OR pr.food_group = $2)
-        AND (
-          $3::text IS NULL OR EXISTS (
-            SELECT 1
-            FROM product_categories pc
-            JOIN categories_sub cs ON cs.id = pc.sub_id
-            WHERE pc.product_id = pr.id
-              AND cs.code = $3
-          )
-        )
-        AND LOWER(pr.name) LIKE LOWER($1)
-    """
+        if main_code:
+            params.append(main_code)
+            where.append(f"m.code = ${len(params)}")
 
-    SQL_PAGE_NO_ALIASES = """
-      SELECT
-        pr.id,
-        pr.name                               AS product,
-        COALESCE(pr.brand, '')                AS brand,
-        COALESCE(pr.size_text, '')            AS size_text,
-        NULL::text                            AS image_url
-      FROM products pr
-      WHERE pr.name !~ '^[0-9]+$'
-        AND EXISTS (SELECT 1 FROM prices p WHERE p.product_id = pr.id)
-        AND ($2::text IS NULL OR pr.food_group = $2)
-        AND (
-          $3::text IS NULL OR EXISTS (
-            SELECT 1
-            FROM product_categories pc
-            JOIN categories_sub cs ON cs.id = pc.sub_id
-            WHERE pc.product_id = pr.id
-              AND cs.code = $3
-          )
-        )
-        AND LOWER(pr.name) LIKE LOWER($1)
-      ORDER BY lower(pr.name), lower(brand), lower(size_text)
-      OFFSET $4
-      LIMIT  $5
-    """
+        if sub_code:
+            params.append(sub_code)
+            where.append(f"s.code = ${len(params)}")
 
-    async with request.app.state.db.acquire() as conn:
-        try:
-            total = await conn.fetchval(
-                SQL_COUNT_WITH_ALIASES, like, main_code, sub_code
-            ) or 0
-            rows = await conn.fetch(
-                SQL_PAGE_WITH_ALIASES, like, main_code, sub_code, offset, limit
-            )
-        except pgerr.UndefinedTableError:
-            # product_aliases or product_categories doesn’t exist – proceed without it
-            total = await conn.fetchval(
-                SQL_COUNT_NO_ALIASES, like, main_code, sub_code
-            ) or 0
-            rows = await conn.fetch(
-                SQL_PAGE_NO_ALIASES, like, main_code, sub_code, offset, limit
-            )
+    # Non-category path
+    else:
+        sql = """
+            SELECT p.*
+            FROM products p
+        """
 
-    items = [
-        {
-            "id": r["id"],
-            "product": r["product"],
-            "brand": r["brand"],
-            "size_text": r["size_text"],
-            "image_url": r["image_url"],  # null for now (app shows placeholder)
+    # Search filter (applies in both paths)
+    if q:
+        params.append(f"%{q}%")
+        where.append(f"p.name ILIKE ${len(params)}")
+
+    if where:
+        sql += "\nWHERE " + " AND ".join(where)
+
+    # Stable ordering
+    sql += "\nORDER BY p.name"
+
+    # Pagination
+    params.append(limit)
+    params.append(offset)
+    sql += f"\nLIMIT ${len(params)-1} OFFSET ${len(params)}"
+
+    try:
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(sql, *params)
+
+        items: List[Dict[str, Any]] = []
+        for r in rows:
+            d = dict(r)
+            items.append(_row_to_safe_product(d))
+
+        return {
+            "items": items,
+            "offset": offset,
+            "limit": limit,
+            "count": len(items),
+            "filters": {
+                "q": q or None,
+                "main_code": main_code,
+                "sub_code": sub_code,
+            },
         }
-        for r in rows
-    ]
 
-    return {"total": total, "offset": offset, "limit": limit, "items": items}
-
-
-# ----------------------------- LEGACY SUGGESTIONS (still light) -----------------------------
-@router.get("/search-products")
-@throttle(limit=30, window=60)
-async def search_products_legacy(
-    request: Request,
-    query: str = Query(..., min_length=2),
-):
-    """
-    Legacy suggestions for typeahead (name only).
-    Filters to products that have at least one price.
-    """
-    q = query.strip()
-    if not q or set(q) <= {"%", "*"}:
-        raise HTTPException(status_code=400, detail="Query too broad")
-    like = f"%{q}%"
-
-    async with request.app.state.db.acquire() as conn:
-        rows = await conn.fetch(
-            """
-            SELECT pr.name AS name
-            FROM products pr
-            WHERE pr.name !~ '^[0-9]+$'
-              AND EXISTS (SELECT 1 FROM prices p WHERE p.product_id = pr.id)
-              AND LOWER(pr.name) LIKE LOWER($1)
-            GROUP BY pr.name
-            ORDER BY lower(pr.name)
-            LIMIT 10
-            """,
-            like,
+    except pgerr.UndefinedTableError:
+        raise HTTPException(
+            status_code=500,
+            detail="Missing required tables for products/categories mapping",
         )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"List products error: {e}")
 
-    return [{"name": r["name"], "image": None} for r in rows]
 
-
-# ----------------------------- AUTOCOMPLETE (pg_trgm when available) -----------------------------
+# ----------------------------- SEARCH (lightweight) -----------------------------
 @router.get("/products/search")
-@throttle(limit=60, window=60)
-async def products_search(
+@throttle(limit=180, window=60)
+async def search_products(
     request: Request,
-    q: str = Query(..., min_length=1, max_length=64, description="Search text"),
+    q: str = Query(..., min_length=1, description="Search term"),
     limit: int = Query(10, ge=1, le=50),
-):
-    """
-    Autocomplete based on products.name (and product_aliases.alias when present).
-    Uses pg_trgm if available; otherwise falls back to LIKE.
-    """
-    term = q.strip()
-    if not term:
-        return []
+) -> Dict[str, Any]:
+    limit = min(limit, 50)
+    q = q.strip()
 
-    # pg_trgm + aliases
-    SQL_TRGM_WITH_ALIASES = """
-      SELECT p.id, p.name
-      FROM products p
-      LEFT JOIN product_aliases a ON a.product_id = p.id
-      WHERE p.name !~ '^[0-9]+$'
-        AND (
-              p.name ILIKE $1 || '%'
-           OR p.name % $1
-           OR p.name ILIKE '%' || $1 || '%'
-           OR a.alias ILIKE $1 || '%'
-           OR a.alias % $1
-           OR a.alias ILIKE '%' || $1 || '%'
-        )
-      GROUP BY p.id, p.name
-      ORDER BY
-        CASE WHEN p.name ILIKE $1 || '%' THEN 0 ELSE 1 END,
-        similarity(p.name, $1) DESC,
-        p.name ASC
-      LIMIT $2
+    pool = await _get_pool(request)
+
+    sql = """
+        SELECT p.*
+        FROM products p
+        WHERE p.name ILIKE $1
+        ORDER BY p.name
+        LIMIT $2
     """
 
-    # pg_trgm without aliases
-    SQL_TRGM_NO_ALIASES = """
-      SELECT p.id, p.name
-      FROM products p
-      WHERE p.name !~ '^[0-9]+$'
-        AND (
-              p.name ILIKE $1 || '%'
-           OR p.name % $1
-           OR p.name ILIKE '%' || $1 || '%'
-        )
-      ORDER BY
-        CASE WHEN p.name ILIKE $1 || '%' THEN 0 ELSE 1 END,
-        similarity(p.name, $1) DESC,
-        p.name ASC
-      LIMIT $2
+    try:
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(sql, f"%{q}%", limit)
+
+        items = [_row_to_safe_product(dict(r)) for r in rows]
+
+        return {
+            "items": items,
+            "count": len(items),
+            "q": q,
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Search products error: {e}")
+
+
+# ----------------------------- PRODUCT DETAIL (optional but useful) -----------------------------
+@router.get("/products/{product_id}")
+@throttle(limit=120, window=60)
+async def get_product(
+    request: Request,
+    product_id: int,
+) -> Dict[str, Any]:
+    pool = await _get_pool(request)
+
+    sql = """
+        SELECT p.*
+        FROM products p
+        WHERE p.id = $1
+        LIMIT 1
     """
 
-    async with request.app.state.db.acquire() as conn:
-        try:
-            rows = await conn.fetch(SQL_TRGM_WITH_ALIASES, term, limit)
-        except (pgerr.UndefinedTableError, pgerr.UndefinedFunctionError):
-            try:
-                rows = await conn.fetch(SQL_TRGM_NO_ALIASES, term, limit)
-            except pgerr.UndefinedFunctionError:
-                rows = await conn.fetch(
-                    """
-                    SELECT id, name
-                    FROM products
-                    WHERE name !~ '^[0-9]+$'
-                      AND LOWER(name) LIKE LOWER($1)
-                    ORDER BY name
-                    LIMIT $2
-                    """,
-                    f"%{term}%",
-                    limit,
-                )
+    try:
+        async with pool.acquire() as conn:
+            row = await conn.fetchrow(sql, product_id)
 
-    return [{"id": r["id"], "name": r["name"]} for r in rows]
+        if not row:
+            raise HTTPException(status_code=404, detail="Product not found")
+
+        d = dict(row)
+
+        # Return more fields for detail view
+        return {
+            **_row_to_safe_product(d),
+            "raw": d,  # keeps debugging easy; remove later if you want a strict schema
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Get product error: {e}")
