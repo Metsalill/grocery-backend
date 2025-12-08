@@ -27,13 +27,15 @@ from middlewares.docs_guard import SwaggerAuthMiddleware
 # Routers
 from auth import router as auth_router
 from compare import router as compare_router
-from products import router as products_router
 from upload_prices import router as upload_router
 from admin.routes import router as admin_router
 from basket_history import router as basket_history_router
 from api.upload_image import router as upload_image_router
 from admin.image_gallery import router as image_admin_router
-from api.categories import router as categories_router  # <-- UPDATED IMPORT PATH
+
+# UPDATED IMPORT PATHS
+from api.categories import router as categories_router
+from api.products import router as products_router
 
 logger = logging.getLogger("uvicorn.error")
 os.makedirs(IMAGES_DIR, exist_ok=True)
