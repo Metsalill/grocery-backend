@@ -1,15 +1,28 @@
-name: Export products missing sub_code
+name: Export products for category review (50 per CSV)
 
 on:
   workflow_dispatch:
+    inputs:
+      export_scope:
+        description: "Which products to export"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - missing_sub_code
+          - unmatched_sub_code
+      max_per_file:
+        description: "Rows per CSV"
+        required: true
+        default: "50"
 
 jobs:
-  export-missing-subcode:
+  export-products-for-category-review:
     runs-on: ubuntu-latest
 
     env:
       DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}
-      MAX_PER_FILE: 900
 
     steps:
       - name: Checkout repo
@@ -22,36 +35,80 @@ jobs:
 
       - name: Prepare export folders
         run: |
-          mkdir -p exports/unlabeled
+          SCOPE="${{ inputs.export_scope }}"
+          mkdir -p "exports/category_review/${SCOPE}"
 
-      - name: Count products missing sub_code
+      - name: Resolve filter SQL for scope
+        id: filter
+        run: |
+          SCOPE="${{ inputs.export_scope }}"
+
+          if [ "$SCOPE" = "all" ]; then
+            FILTER_SQL="TRUE"
+          elif [ "$SCOPE" = "missing_sub_code" ]; then
+            FILTER_SQL="(p.sub_code IS NULL OR btrim(p.sub_code) = '')"
+          elif [ "$SCOPE" = "unmatched_sub_code" ]; then
+            FILTER_SQL="(
+              p.sub_code IS NOT NULL
+              AND btrim(p.sub_code) <> ''
+              AND NOT EXISTS (
+                SELECT 1 FROM categories_sub s WHERE s.code = p.sub_code
+              )
+            )"
+          else
+            echo "Unknown export_scope: $SCOPE"
+            exit 1
+          fi
+
+          echo "FILTER_SQL<<EOF" >> $GITHUB_OUTPUT
+          echo "$FILTER_SQL" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          echo "Using filter for scope '$SCOPE':"
+          echo "$FILTER_SQL"
+
+      - name: Count products for selected scope
         id: count
         run: |
+          FILTER_SQL="${{ steps.filter.outputs.FILTER_SQL }}"
+
           TOTAL=$(psql "$DATABASE_URL" -t -A -v ON_ERROR_STOP=1 -c "
             SELECT COUNT(*)
-            FROM products
-            WHERE sub_code IS NULL OR sub_code = '';
+            FROM products p
+            WHERE ${FILTER_SQL};
           ")
-          echo "TOTAL=$TOTAL" >> $GITHUB_OUTPUT
-          echo "Missing sub_code total: $TOTAL"
 
-      - name: Export missing sub_code into 900-row CSV parts
+          echo "TOTAL=$TOTAL" >> $GITHUB_OUTPUT
+          echo "Export total for scope: $TOTAL"
+
+      - name: Export products into 50-row CSV parts
         run: |
+          SCOPE="${{ inputs.export_scope }}"
           TOTAL="${{ steps.count.outputs.TOTAL }}"
-          MAX_PER_FILE="${MAX_PER_FILE}"
+          MAX_PER_FILE="${{ inputs.max_per_file }}"
 
           if [ -z "$TOTAL" ] || [ "$TOTAL" -eq 0 ]; then
-            echo "No missing sub_code rows to export."
+            echo "No rows to export for scope '$SCOPE'."
             exit 0
+          fi
+
+          FILTER_SQL="${{ steps.filter.outputs.FILTER_SQL }}"
+
+          # Safety: ensure MAX_PER_FILE is numeric and > 0
+          if ! [[ "$MAX_PER_FILE" =~ ^[0-9]+$ ]] || [ "$MAX_PER_FILE" -le 0 ]; then
+            echo "Invalid max_per_file: $MAX_PER_FILE"
+            exit 1
           fi
 
           MAX_BATCH=$(( (TOTAL + MAX_PER_FILE - 1) / MAX_PER_FILE ))
           echo "Will create $MAX_BATCH CSV parts (max $MAX_PER_FILE rows each)"
 
+          OUTDIR="exports/category_review/${SCOPE}"
+
           for ((B=0; B<MAX_BATCH; B++)); do
             START=$(( B*MAX_PER_FILE + 1 ))
             END=$(( (B+1)*MAX_PER_FILE ))
-            OUTFILE="exports/unlabeled/products_missing_subcode_part${B}.csv"
+            OUTFILE="${OUTDIR}/products_${SCOPE}_part${B}.csv"
 
             echo "Writing $OUTFILE (rows $START..$END)"
 
@@ -61,20 +118,21 @@ jobs:
                 name,
                 brand,
                 size_text,
+                ean,
                 food_group AS current_food_group,
-                sub_code AS current_sub_code,
-                category_1,
-                category_2,
-                category_3,
-                source_url,
-                image_url,
-                last_seen_utc
+                sub_code  AS current_sub_code
               FROM (
                 SELECT
-                  p.*,
+                  p.id,
+                  p.name,
+                  p.brand,
+                  p.size_text,
+                  p.ean,
+                  p.food_group,
+                  p.sub_code,
                   row_number() OVER (ORDER BY p.id) AS rn
                 FROM products p
-                WHERE p.sub_code IS NULL OR p.sub_code = ''
+                WHERE ${FILTER_SQL}
               ) s
               WHERE s.rn BETWEEN ${START} AND ${END}
             "
@@ -86,5 +144,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: products-missing-subcode-csvs
-          path: exports/unlabeled/*.csv
+          name: products-category-review-${{ inputs.export_scope }}
+          path: exports/category_review/${{ inputs.export_scope }}/*.csv
