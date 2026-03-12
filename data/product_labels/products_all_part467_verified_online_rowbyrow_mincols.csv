@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+418324,Pesukaitsmed Discreet Normal 60 Tk,Always,60 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418325,Pesukaitsmed Discreet Waterlily 20 Tk,Always,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418326,Pesukaitsmed Libresse Classic 50 Tk,Libresse,50 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418327,Pesukaitsmed Libresse Naturalnormal 40 Tk,Libresse,40 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418328,Pesukaitsmed Libresse Normal 40 Tk,Libresse,40 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418329,Pesukaitsmed Libresse String 30 Tk,Libresse,30 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418330,Pesukaitsmed Naturella Light Kummel 20 Tk,Naturella,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418331,Pesukaitsmed Tena Discreet Mini 34 Tk,Tena,34 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418332,Pesukaitsmed Tena Discreetultramini 28 Tk,Tena,28 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418333,Tampoonid Bella Regular 16 Tk,Bella,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418334,Tampoonid O B Original Normal 16 Tk,O.B.,16 tk,,drinks,drinks_spirits,personal_care,pcare_feminine_hygiene
+418335,Tampoonid O B Original Normal 32 Tk,O.B.,32 tk,,drinks,drinks_spirits,personal_care,pcare_feminine_hygiene
+418336,Tampoonid O B Original Super 16 Tk,O.B.,16 tk,,drinks,drinks_spirits,personal_care,pcare_feminine_hygiene
+418337,Tampoonid O B Original Super Plus 16 Tk,O.B.,16 tk,,drinks,drinks_spirits,personal_care,pcare_feminine_hygiene
+418338,Tampoonid O B Pro Comfort Mini 16 Tk,O.B.,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418339,Tampoonid O B Pro Comfort Normal 16 Tk,O.B.,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418340,Tampoonid O B Pro Comfort Normal 32 Tk,O.B.,32 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418341,Tampoonid O B Pro Comfort Super 16 Tk,O.B.,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418342,Tampoonid O B Pro Comfort Super 32 Tk,O.B.,32 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418343,Tampoonid O B Procomfort Mini 8 Tk,O.B.,8 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418344,Tampoonid Tampax Compak Super 16 Tk,Tampax,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418345,Tampoonid Tampax Compak Super Plus 16 Tk,Tampax,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418346,Uriinipid Sidem Seni Lady Slim Extra 15 Tk,Seni,15 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418347,Uriinipid Sidem Seni Lady Slim Mini 20 Tk,Seni,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418348,Uriinipid Sidem Seni Ladyslim Normal 20 Tk,Seni,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418349,Uriinipidamatuse Sidemed Tena Extra 10 Tk,Tena,10 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418350,Hug Sidem Naturella Classicnight S 4 14 Tk,Naturella,14 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418351,Hug Sidemed Always Ultra Night S 4 12 Tk,Always,12 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418352,Hug Sidemed Bella Idealeultra Night 14 Tk,Bella,14 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418353,Hug Sidemed Bella Perfecta Night Drai 7 Tk,Bella,7 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418354,Hug Sidemed Bella Perfecta Rose Deo 10 Tk,Bella,10 tk,,drinks,drinks_wine,personal_care,pcare_feminine_hygiene
+418355,Hug Sidemed Bella Perfectanight Soft 7 Tk,Bella,7 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418356,Hug Sidemed Bella Perfectanightsoft 14 Tk,Bella,14 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418357,Hug Sidemed Bella Perfectaultra Blue 32 Tk,Bella,32 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418358,Hug Sidemed Bella Teens Ultra Relax 10 Tk,Bella,10 tk,,drinks,drinks_tea_coffee,personal_care,pcare_feminine_hygiene
+418359,Hug Sidemed Bella Teens Ultra Sens 10 Tk,Bella,10 tk,,drinks,drinks_tea_coffee,personal_care,pcare_feminine_hygiene
+418360,Hug Sidemed Libresse Super Wing 36 Tk,Libresse,36 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418361,Hug Sidemed Libresse Ultra Long 16 Tk,Libresse,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418362,Hug Sidemed Libresse Ultra Normal 10 Tk,Libresse,10 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418363,Hug Sidemed Libresse Ultra Thin Long 8 Tk,Libresse,8 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418364,Hug Sidemed Libresse Ultranightlong 8 Tk,Libresse,8 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418365,Hug Sidemed Vuokkoset Normal 14 Tk,Vuokkoset,14 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418366,Hugieeniside Bella Herbs Verbena 12 Tk,Bella,12 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418367,Hugieenisidemed Always Paltinum S 1 8 Tk,Always,8 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418368,Hugieenisidemed Always Platinum S 2 14 Tk,Always,14 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418369,Hugieenisidemed Always Platinum S 2 7 Tk,Always,7 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418370,Hugieenisidemed Always Platinum S 3 12 Tk,Always,12 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418371,Hugieenisidemed Always Platinum S 3 6 Tk,Always,6 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418372,Hugieenisidemed Bella Herbs Tilia 12 Tk,Bella,12 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418373,Hugieenisidemed Bella Ideale Regular 20 Tk,Bella,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene

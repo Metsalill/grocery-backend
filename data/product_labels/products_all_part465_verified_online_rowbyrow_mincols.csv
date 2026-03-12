@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+418224,Naovesi Nivea Men Deep 100 Ml,Nivea,100 ml,,drinks,drinks_water,personal_care,pcare_shaving
+418225,Naovesi Nivea Men Protect Care 100 Ml,Nivea,100 ml,,drinks,drinks_water,personal_care,pcare_shaving
+418226,Pardel Bic 3 Action 4 Tk,Bic,4 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418227,Pardel Bic Flex 3 Comfort 3 Tk,Bic,3 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418228,Pardel Bic Flex 4 Comfort 3 Tk,Bic,3 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418229,Pardel Bic Pure 3 Pink 4 2 Tk,Bic,4+2 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418230,Pardel Henske Rscx 902,Henske,1 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418231,Ras Geel Gillette Fusion 5 X Cocoa 200 Ml,Gillette,200 ml,,dry_preserves,dry_other,personal_care,pcare_shaving
+418232,Ras Geel Gillette Fusion Sensitive 200 Ml,Gillette,200 ml,,dry_preserves,dry_other,personal_care,pcare_shaving
+418233,Ras Geel Gillette Fusion Sensitive 75 Ml,Gillette,75 ml,,dry_preserves,dry_other,personal_care,pcare_shaving
+418234,Ras Geel Satin Care Vanilla Cashm 200 Ml,Gillette,200 ml,,dry_preserves,dry_other,personal_care,pcare_shaving
+418235,Raseerija Bic Flex 3 Sensitive 3 Tk,Bic,3 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418236,Raseerija Bic Miss Soleil Color 4 Tk,Bic,4 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418237,Raseerija Bic Pardel Pure 3 Lady 6 Tk,Bic,6 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418238,Raseerija Gillette Blue 3 Comfort 6 2 Tk,Gillette,6+2 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418239,Raseerija Gillette Blue 3 Football 8 Tk,Gillette,8 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418240,Raseerija Gillette Blue 3 Plus 6 2 Tk,Gillette,6+2 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418241,Raseerija Gillette Blue Ii 10 4 Tk,Gillette,10+4 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418242,Raseerija Gillette Proglide Flexb 1 Tera,Gillette,1 tera,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418243,Raseerija Gillette Proglide Flexb 2 Tera,Gillette,2 tera,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418244,Raseerija Venus 3 Simply Yellow 6 Tk,Gillette,6 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418245,Raseerija Venus Simply 3 Smooth 4 Tk,Gillette,4 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418246,Raseerija Venus Swirl 1 Tk,Gillette,1 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418247,Raseerijad Bic Miss Soleil Sensitive 3 Tk,Bic,3 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418248,Raseerijad Sword Xtreme 3 3 1 Tk Wilkinson,Wilkinson,1 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418249,Raseerijad Venus 3 Sensitive 6 Tk,Gillette,6 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418250,Raseerijad Venus Simply Smooth 8 Tk,Gillette,8 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418251,Raseerimisgeel Gillette Cool Sens 200 Ml,Gillette,200 ml,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418252,Raseerimisjargne Geel Ns Yak Yeti 150 Ml,Nivea,150 ml,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418253,Terad Gillette Mach 3 Kaepide 5 Terad,Gillette,5 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418254,Terad Gillette Mach 3 Terad 5 Tk,Gillette,5 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418255,Vahet Terad Raseerija Bic H Sens 3 1 4 Tk,Bic,4 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418256,Vahet Terad Raseerija Bic Hybrid 3 1 4 Tk,Bic,4 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418257,Vahet Terad Raseerija Bic Hybrid 5 1 2 Tk,Bic,2 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418258,Varuterad Gillette Proglide 8 Tk,Gillette,8 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418259,Varuterad Venus Breeze 8 Tk,Gillette,8 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418260,Varuterad Venus Extra Smooth Sensit 4 Tk,Gillette,4 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418261,Varuterad Venus Smooth 8 Tk,Gillette,8 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418262,Hab Aj Jarg Palsam Nivea Hyaluron 100 Ml,Nivea,100 ml,,personal_care,pcare_shampoo_cond,personal_care,pcare_shaving
+418263,Hug Sidemed Libresse Invis Norm Duo 20 Tk,Libresse,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418264,Hab Aj Jargne Naovesi Genius Ice 100 Ml,,100 ml,,drinks,drinks_water,personal_care,pcare_shaving
+418265,Hab Aj Jargne Naovesi La Rive Cash 100 Ml,La Rive,100 ml,,drinks,drinks_water,personal_care,pcare_shaving
+418266,Habemeajamisvaht Gillette Regular 200 Ml,Gillette,200 ml,,dry_preserves,dry_other,personal_care,pcare_shaving
+418267,Habemeajamisvaht Gillette Sensitiv 300 Ml,Gillette,300 ml,,dry_preserves,dry_other,personal_care,pcare_shaving
+418268,Jalg Keha Vaharibad Veet Minima 12 Tk,Veet,12 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418269,Pardel Henske Qcs 0605,Henske,1 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418270,Pardel Philips Oneblade Qp 1324 20,Philips,1 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418271,Ras Geel Gillette Mach 3 Extra Comf 200 Ml,Gillette,200 ml,,dry_preserves,dry_other,personal_care,pcare_shaving
+418272,Raseer Vaht Gillette Soothing Aloe 200 Ml,Gillette,200 ml,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418273,Raseerija Gillette Fusion 5 5 Tera,Gillette,5 tera,,personal_care,pcare_shaving,personal_care,pcare_shaving

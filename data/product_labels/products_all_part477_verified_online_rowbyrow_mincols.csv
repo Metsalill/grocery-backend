@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+418824,Pesukapslid Ariel Color 22 Pk,Ariel,22 tk,,produce,produce_root_veg,household,hh_laundry
+418825,Pesukapslid Ariel Color 30 Pk,Ariel,30 tk,,produce,produce_root_veg,household,hh_laundry
+418826,Pesukapslid Ariel Extra Clean 19 Pk,Ariel,19 tk,,produce,produce_root_veg,household,hh_laundry
+418827,Pesukapslid Ariel Extra Clean 26 Pk,Ariel,26 tk,,produce,produce_root_veg,household,hh_laundry
+418828,Pesukapslid Ariel Fresh Air Lenor 19 Pk,Ariel,19 tk,,produce,produce_root_veg,household,hh_laundry
+418829,Pesukapslid Ariel Fresh Air Lenor 26 Pk,Ariel,26 tk,,produce,produce_root_veg,household,hh_laundry
+418830,Pesukapslid Ariel Sensitive 30 Pk,Ariel,30 tk,,produce,produce_root_veg,household,hh_laundry
+418831,Pesulop Vah Lenor Cherry 32 Pk 675 Ml,Lenor,675 ml,,dry_preserves,dry_other,household,hh_laundry
+418832,Pesulop Vah Lenor Cherry Sage 59 Pk 1 23 L,Lenor,1.23 l,,dry_preserves,dry_other,household,hh_laundry
+418833,Pesulop Vah Lenor Floral Bouq 32 Pk 675 Ml,Lenor,675 ml,,dry_preserves,dry_other,household,hh_laundry
+418834,Pesulop Vah Lenor Floral Bouq 59 Pk 1 2 L,Lenor,1.2 l,,dry_preserves,dry_other,household,hh_laundry
+418835,Pesulop Vah Lenor Fresh Wind 50 Pk 700 Ml,Lenor,700 ml,,dry_preserves,dry_other,household,hh_laundry
+418836,Pesulop Vah Lenor L Eclatante 59 Pk 1 2 L,Lenor,1.2 l,,dry_preserves,dry_other,household,hh_laundry
+418837,Pesulop Vah Lenor Ladesirable 59 Pk 1 23 L,Lenor,1.23 l,,dry_preserves,dry_other,household,hh_laundry
+418838,Pesulop Vah Lenor Lotus Diam 32 Pk 675 Ml,Lenor,675 ml,,dry_preserves,dry_other,household,hh_laundry
+418839,Pesulop Vah Lenor Lotus Diam 59 Pk 1 2 L,Lenor,1.2 l,,dry_preserves,dry_other,household,hh_laundry
+418840,Pesulop Vah Lenor N Solstice 50 Pk 700 Ml,Lenor,700 ml,,dry_preserves,dry_other,household,hh_laundry
+418841,Pesulop Vah Lenor Orchid Van 32 Pk 675 Ml,Lenor,675 ml,,dry_preserves,dry_other,household,hh_laundry
+418842,Pesulop Vah Lenor Orchid Van 59 Pk 1 23 L,Lenor,1.23 l,,dry_preserves,dry_other,household,hh_laundry
+418843,Pesulop Vah Lenor Pinkblossom 50 Pk 700 Ml,Lenor,700 ml,,dry_preserves,dry_other,household,hh_laundry
+418844,Pesulop Vah Lenor Sens Cotton 59 Pk 1 23 L,Lenor,1.23 l,,dry_preserves,dry_other,household,hh_laundry
+418845,Pesulop Vah Lenor Sensitive 38 Pk 798 Ml,Lenor,798 ml,,dry_preserves,dry_other,household,hh_laundry
+418846,Pesulop Vah Lenor Sensitive 50 Pk 700 Ml,Lenor,700 ml,,dry_preserves,dry_other,household,hh_laundry
+418847,Pesulop Vah Lenor Sensitive 71 Pk 1 49 L,Lenor,1.49 l,,dry_preserves,dry_other,household,hh_laundry
+418848,Pesulop Vah Lenor Spring Awak 38 Pk 798 Ml,Lenor,798 ml,,dry_preserves,dry_other,household,hh_laundry
+418849,Pesulop Vah Lenor Springawake 71 Pk 1 49 L,Lenor,1.49 l,,dry_preserves,dry_other,household,hh_laundry
+418850,Pesulop Vah Lenor Summerbreeze 71 Pk 1 49 L,Lenor,1.49 l,,dry_preserves,dry_other,household,hh_laundry
+418851,Pesulop Vah Lenor Sunset 50 Pk 700 Ml,Lenor,700 ml,,dry_preserves,dry_other,household,hh_laundry
+418852,Pesuloputusvahend Lenor Capri 59 Pk 1 23 L,Lenor,1.23 l,,household,hh_laundry,household,hh_laundry
+418853,Kapslid Finish Ultimate Lemon 40 Tk,Finish,40 tk,,produce,produce_root_veg,household,hh_dishwashing
+418854,Noudep M Kaps Finish Quantum Lemon 100 Tk,Finish,100 tk,,produce,produce_root_veg,household,hh_dishwashing
+418855,Noudepesum Hooldusvahend Somat 250 Ml,Somat,250 ml,,personal_care,pcare_other,household,hh_dishwashing
+418856,Noudepesum Lop Vahend Finish Lemon 400 Ml,Finish,400 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418857,Noudepesum Lop Vahend Finish Lemon 800 Ml,Finish,800 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418858,Noudepesum Loputusvahend Finish 400 Ml,Finish,400 ml,,household,hh_laundry,household,hh_dishwashing
+418859,Noudepesum Loputusvahend Finish 800 Ml,Finish,800 ml,,household,hh_laundry,household,hh_dishwashing
+418860,Noudepesum Loputusvahend Somat 750 Ml,Somat,750 ml,,household,hh_laundry,household,hh_dishwashing
+418861,Noudepesum Puh Vahend Finish Hyg 250 Ml,Finish,250 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418862,Noudepesum Puh Vahend Finish Lemon 250 Ml,Finish,250 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418863,Noudepesum Puhastuskapslid Somat 3 Pk,Somat,3 tk,,produce,produce_root_veg,household,hh_dishwashing
+418864,Kodulohnastaja Odoro Sandalwood 90 Ml,Odoro,90 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+418865,Noudepesum Puhastustabletid Finish 3 X 17 G,Finish,3x17 g,,household,hh_cleaners,household,hh_dishwashing
+418866,Noudepesum Tabletid Mayeri All In 1 40 Tk,Mayeri,40 tk,,dry_preserves,dry_other,household,hh_dishwashing
+418867,Noudepesumas Geel Finish Ai 1 Lemon 900 Ml,Finish,900 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418868,Noudepesumas Geel Somat Gold 30 Pk 540 Ml,Somat,540 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418869,Noudepesumas Ohuvarsk Finish Citrus 1 Tk,Finish,1 tk,,dry_preserves,dry_other,household,hh_dishwashing
+418870,Noudepesumas Puh Pulber Dr Beckmann 75 G,Dr. Beckmann,75 g,,dry_preserves,dry_other,household,hh_dishwashing
+418871,Noudepesumasina Sool Finish 1 5 Kg,Finish,1.5 kg,,world_spices,spices_basic_salt_pepper,household,hh_dishwashing
+418872,Noudepesumasina Sool Finish 4 Kg,Finish,4 kg,,world_spices,spices_basic_salt_pepper,household,hh_dishwashing
+418873,Noudepesumasina Sool Somat 1 5 Kg,Somat,1.5 kg,,world_spices,spices_basic_salt_pepper,household,hh_dishwashing

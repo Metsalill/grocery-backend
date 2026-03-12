@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+419124,Kodulohnastaja Aw Melonfrangipani 40 Ml,Air Wick,40 ml,,produce,produce_tropical,household,hh_candles_airfresh
+419125,Kodulohnastaja Aw Morn Dew Blackber 40 Ml,Air Wick,40 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419126,Kodulohnastaja Aw Pear Cinnamon 40 Ml,Air Wick,40 ml,,world_spices,spices_herbs_spice_mix,household,hh_candles_airfresh
+419127,Kodulohnastaja Aw Sandalwoodvanilla 30 Ml,Air Wick,30 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419128,Kodulohnastaja Aw Spicesbloodorange 30 Ml,Air Wick,30 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419129,Kodulohnastaja Ilaja 100 Ml,Ilaja,100 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419130,Kodulohnastaja Odoro Champagnehouse 90 Ml,Odoro,90 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419131,Kodulohnastaja Odoro Cuban Soul 90 Ml,Odoro,90 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419132,Kodulohnastaja Odoro Magnolia 90 Ml,Odoro,90 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419133,Kodulohnastaja Odoro Marvelous 90 Ml,Odoro,90 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419134,Kodulohnastaja Odoro Orange Chilli 90 Ml,Odoro,90 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419135,Koogi Ahju Puhastus Vah Lesta Home 500 Ml,Lesta Home,500 ml,,household,hh_cleaners,household,hh_cleaners
+419136,Nahapuhastusvahend Lesta Home 500 Ml,Lesta Home,500 ml,,household,hh_cleaners,household,hh_cleaners
+419137,Niisked Koogi Puhastuslapid Vortex 48 Tk,Vortex,48 tk,,household,hh_cleaners,household,hh_cleaners
+419138,Niisked Moobli Puhastuslapid Vortex 48 Tk,Vortex,48 tk,,household,hh_cleaners,household,hh_cleaners
+419139,Niisked Vannitoa Puhastuslap Vortex 48 Tk,Vortex,48 tk,,household,hh_cleaners,household,hh_cleaners
+419140,Ohuvarsk Air Wick Jasm Bouq Taide 228 Ml,Air Wick,228 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419141,Ohuvarskendaja Air Wick Af Jasmine 228 Ml,Air Wick,228 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419142,Ohuvarskendaja Air Wick Eucalyptus 237 Ml,Air Wick,237 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419143,Ohuvarskendaja Air Wick Jasmine 237 Ml,Air Wick,237 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419144,Ohuvarskendaja Air Wick Raspberry 237 Ml,Air Wick,237 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419145,Plekieemaldaja Kh 7 Oxy Effect 750 Ml,KH-7,750 ml,,dry_preserves,dry_other,household,hh_laundry
+419146,Porandapuh Vah Ace Talcum White Musk 1 L,Ace,1 l,,dry_preserves,dry_other,household,hh_cleaners
+419147,Porandapuhastus Vahend Ace Lavender 1 L,Ace,1 l,,household,hh_cleaners,household,hh_cleaners
+419148,Porandapuhastusvahend Lesta Home 500 Ml,Lesta Home,500 ml,,household,hh_cleaners,household,hh_cleaners
+419149,Ruumisprei Odoro Champagne House 200 Ml,Odoro,200 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419150,Ruumisprei Odoro Cuban Soul 200 Ml,Odoro,200 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419151,Ruumisprei Odoro Magnolia 200 Ml,Odoro,200 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419152,Ruumisprei Odoro Orange Chilli 200 Ml,Odoro,200 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419153,Ruumisprei Odoro Sandalwood 200 Ml,Odoro,200 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419154,Tekstiili Puh Vahend Lesta Home 500 Ml,Lesta Home,500 ml,,dry_preserves,dry_other,household,hh_cleaners
+419155,Universaalne Puh Vahend Lesta Home 500 Ml,Lesta Home,500 ml,,dry_preserves,dry_other,household,hh_cleaners
+419156,Universaalsed Puh Lapid Mayeri Sens 30 Tk,Mayeri,30 tk,,dry_preserves,dry_other,household,hh_cleaners
+419157,Vannitoa Puh Vahend Lesta Home 500 Ml,Lesta Home,500 ml,,dry_preserves,dry_other,household,hh_cleaners
+419158,Wc Lop Kasti Tabletid Kolorado Meri 2 X 45 G,Kolorado,2x45 g,,drinks,drinks_wine,household,hh_cleaners
+419159,Wc Ohuvarsk Ambi Pur Lenor Spring 7 5 Ml,Ambi Pur,7.5 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419160,Wc Varskendaja Brait Hygiene Ocean 3 X 45 G,Brait,3x45 g,,dry_preserves,dry_other,household,hh_cleaners
+419161,Wc Varskendaja Brait Hygiene Pine 3 X 45 G,Brait,3x45 g,,dry_preserves,dry_other,household,hh_cleaners
+419162,Wc Varskendaja Bref Harmony 2 X 50 G,Bref,2x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419163,Wc Varskendaja Bref Harmony 3 X 50 G,Bref,3x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419164,Wc Varskendaja Bref Pa Lemon 2 X 50 G,Bref,2x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419165,Wc Varskendaja Bref Serenity 2 X 50 G,Bref,2x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419166,Wc Varskendaja Bref Serenity 3 X 50 G,Bref,3x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419167,Wc Varskendaja Bref Vitality 2 X 50 G,Bref,2x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419168,Wc Varskendaja Bref Vitality 3 X 50 G,Bref,3x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419169,Wc Varskendaja Gel Alpine Bref 3 X 42 G,Bref,3x42 g,,dry_preserves,dry_other,household,hh_cleaners
+419170,Kodulohnastaja Bolsius Ts Magnolia 60 Ml,Bolsius,60 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419171,Kodulohnastaja Bolsius Ts Pomegr 60 Ml,Bolsius,60 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419172,Kodulohnastaja Bolsius Ts Vanilla 60 Ml,Bolsius,60 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419173,Kodulohnastaja Odoro Gentleman 90 Ml,Odoro,90 ml,,dry_preserves,dry_other,household,hh_candles_airfresh

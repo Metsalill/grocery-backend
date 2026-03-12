@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+418724,Pesukapslid Persil Power Color 44 Tk,Persil,44 tk,,produce,produce_root_veg,household,hh_laundry
+418725,Pesukapslid Perwoll Black 23 Tk,Perwoll,23 tk,,produce,produce_root_veg,household,hh_laundry
+418726,Pesukapslid Perwoll Color 23 Tk,Perwoll,23 tk,,produce,produce_root_veg,household,hh_laundry
+418727,Pesukapslid Rex Lotus Almond Oil 13 Tk,Rex,13 tk,,produce,produce_root_veg,household,hh_laundry
+418728,Pesukapslid Rex Orchid Oil Color 13 Tk,Rex,13 tk,,produce,produce_root_veg,household,hh_laundry
+418729,Pesulop Vah Silan Dreamy Lotus 50 Pk 1 1 L,Silan,1.1 l,,dry_preserves,dry_other,household,hh_laundry
+418730,Pesulop Vah Silan Frangipani 50 Pk 1 1 L,Silan,1.1 l,,dry_preserves,dry_other,household,hh_laundry
+418731,Pesulop Vah Silan Jungle 50 Pk 1 1 L,Silan,1.1 l,,dry_preserves,dry_other,household,hh_laundry
+418732,Pesulop Vah Silan Lav Spring 64 Pk 1 408 L,Silan,1.408 l,,dry_preserves,dry_other,household,hh_laundry
+418733,Pesulop Vah Silan Magic Magn 50 Pk 1 1 L,Silan,1.1 l,,dry_preserves,dry_other,household,hh_laundry
+418734,Pesulop Vah Silan Maldives 50 Pk 1 1 L,Silan,1.1 l,,dry_preserves,dry_other,household,hh_laundry
+418735,Pesulop Vah Silan Sens Derma 50 Pk 1 1 L,Silan,1.1 l,,dry_preserves,dry_other,household,hh_laundry
+418736,Pesulop Vah Silan Sensitive 64 Pk 1 408 L,Silan,1.408 l,,dry_preserves,dry_other,household,hh_laundry
+418737,Pesum Puhastusvahend Lanza Express 250 Ml,Lanza,250 ml,,household,hh_cleaners,household,hh_laundry
+418738,Pesum Puhastusvahend Lanza Original 250 Ml,Lanza,250 ml,,drinks,drinks_spirits,household,hh_laundry
+418739,Pesupulber Bonux Magnolia 1 17 Kg 18 Pk,Bonux,1.17 kg,,household,hh_laundry,household,hh_laundry
+418740,Pesupulber Persil Color 4 Pk 0 22 Kg,Persil,0.22 kg,,household,hh_laundry,household,hh_laundry
+418741,Pesupulber Persil Color 40 Pk 2 2 Kg,Persil,2.2 kg,,household,hh_laundry,household,hh_laundry
+418742,Pesupulber Persil Color 80 Pk 4 4 Kg,Persil,4.4 kg,,household,hh_laundry,household,hh_laundry
+418743,Pesupulber Persil Fresh Silan 18 Pk 0 99 Kg,Persil,0.99 kg,,household,hh_laundry,household,hh_laundry
+418744,Pesupulber Persil Sensitive 36 Pk 1 98 Kg,Persil,1.98 kg,,household,hh_laundry,household,hh_laundry
+418745,Pesupulber Persil Universal 20 Pk 1 1 Kg,Persil,1.1 kg,,household,hh_laundry,household,hh_laundry
+418746,Pesupulber Rex Amazonia Freshness 1 1 Kg,Rex,1.1 kg,,household,hh_laundry,household,hh_laundry
+418747,Pesupulber Rex Orchid Color 18 Pk 990 G,Rex,990 g,,household,hh_laundry,household,hh_laundry
+418748,Pesupulber Rex Orchid Color 4 Pk 220 G,Rex,220 g,,household,hh_laundry,household,hh_laundry
+418749,Majapidamis Vedelseep Sila 600 Ml,Sila,600 ml,,personal_care,pcare_soap,household,hh_laundry
+418750,Pesuaadikas Mayeri Sweetgrapefruit 500 Ml,Mayeri,500 ml,,dry_preserves,dry_other,household,hh_laundry
+418751,Pesugeel Bonux Radiant Rose 1 8 L 36 Pk,Bonux,1.8 l,,drinks,drinks_wine,household,hh_laundry
+418752,Pesugeel Frosch Almond 40 Pk 1 5 L,Frosch,1.5 l,,household,hh_laundry,household,hh_laundry
+418753,Pesugeel Frosch Aloe Vera 22 Pk 1 5 L,Frosch,1.5 l,,household,hh_laundry,household,hh_laundry
+418754,Pesugeel Frosch Citrus 22 Pk 1 5 L,Frosch,1.5 l,,household,hh_laundry,household,hh_laundry
+418755,Pesugeel Frosch Pomegranate 22 Pk 1 5 L,Frosch,1.5 l,,household,hh_laundry,household,hh_laundry
+418756,Pesugeel Frosch Universal 22 Pk 1 5 L,Frosch,1.5 l,,household,hh_laundry,household,hh_laundry
+418757,Pesugeel Mayeri Color Taitepakk 1 5 L,Mayeri,1.5 l,,household,hh_laundry,household,hh_laundry
+418758,Pesugeel Perwoll Light Colors 20 Pk 1 L,Perwoll,1 l,,household,hh_laundry,household,hh_laundry
+418759,Pesugeel Perwoll Light Colors 40 Pk 2 L,Perwoll,2 l,,household,hh_laundry,household,hh_laundry
+418760,Pesugeel Perwoll Light Colors 75 Pk 3 75 L,Perwoll,3.75 l,,household,hh_laundry,household,hh_laundry
+418761,Pesukapslid Ariel Amethyst Flower 38 Pk,Ariel,38 tk,,produce,produce_root_veg,household,hh_laundry
+418762,Pesukapslid Ariel Color 12 Pk,Ariel,12 tk,,produce,produce_root_veg,household,hh_laundry
+418763,Pesukapslid Ariel Color 44 Pk,Ariel,44 tk,,produce,produce_root_veg,household,hh_laundry
+418764,Pesukapslid Ariel Color 50 Pk,Ariel,50 tk,,produce,produce_root_veg,household,hh_laundry
+418765,Pesukapslid Ariel Color 70 Pk,Ariel,70 tk,,produce,produce_root_veg,household,hh_laundry
+418766,Pesukapslid Ariel Extra 38 Pk,Ariel,38 tk,,produce,produce_root_veg,household,hh_laundry
+418767,Pesukapslid Ariel Extra 44 Pk,Ariel,44 tk,,produce,produce_root_veg,household,hh_laundry
+418768,Pesukapslid Ariel Extra 60 Pk,Ariel,60 tk,,produce,produce_root_veg,household,hh_laundry
+418769,Pesukapslid Ariel Fresh Air Lenor 38 Pk,Ariel,38 tk,,produce,produce_root_veg,household,hh_laundry
+418770,Pesukapslid Ariel Fresh Air Lenor 44 Pk,Ariel,44 tk,,produce,produce_root_veg,household,hh_laundry
+418771,Pesukapslid Ariel Mountain Spring 22 Pk,Ariel,22 tk,,produce,produce_root_veg,household,hh_laundry
+418772,Pesukapslid Ariel Mountain Spring 30 Pk,Ariel,30 tk,,produce,produce_root_veg,household,hh_laundry
+418773,Pesukapslid Ariel Mountain Spring 44 Pk,Ariel,44 tk,,produce,produce_root_veg,household,hh_laundry

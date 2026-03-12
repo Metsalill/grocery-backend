@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+419574,Tolmukasn Scrub Daddy Damp Duster Sinine,Scrub Daddy,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419575,Varumopp Home Expert 41 X 12 Cm,Home Expert,1 tk,,drinks,drinks_spirits,household,hh_kitchenware
+419576,Ventileerit Kompostikorv Biobag Max Air,BioBag,1 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419577,Wc Paber Bloom Deluxe 3 Kih 10 Rl,Bloom,10 rl,,dry_preserves,dry_other,household,hh_paper
+419578,Wc Paber Bloom Regular 2 Kih 8 Rl,Bloom,8 rl,,dry_preserves,dry_other,household,hh_paper
+419579,Wc Paber Grite Charisma 8 Rl 4 Kih,Grite,8 rl,,dry_preserves,dry_other,household,hh_paper
+419580,Wc Paber Grite Orchidea 3 Kih 4 Rl,Grite,4 rl,,dry_preserves,dry_other,household,hh_paper
+419581,Wc Paber Zewa Deluxe 3 Kih 16 Rl White,Zewa,16 rl,,dry_preserves,dry_other,household,hh_paper
+419582,Wc Paber Zewa Everyday 3 Kih 6 Rl,Zewa,6 rl,,dry_preserves,dry_other,household,hh_paper
+419587,Hirs Kaer Ploomi Salvest Ponnoko 110 G 6 K,Salvest,110 g,,dry_preserves,dry_other,baby,baby_porridge_cereal
+419588,Kaer Helb Mustika Oun Semper 120 G 6 K,Semper,120 g,,produce,produce_berries,baby,baby_porridge_cereal
+419589,Kaerapud Mustik Salvest Ponn Oko 190 G 6 K,Salvest,190 g,,produce,produce_berries,baby,baby_porridge_cereal
+419590,Kaerapud Ploom Mus Sost Salvest 110 G 6 K,Salvest,110 g,,dry_preserves,dry_other,baby,baby_porridge_cereal
+419591,Kaerapuder Aprikoos Salvest Oko 200 G 6 K,Salvest,200 g,,dry_preserves,dry_other,baby,baby_porridge_cereal
+419592,Kaerapuder Milupa Oun Pirnidega 250 G 6 K,Milupa,250 g,,produce,produce_apples_pears,baby,baby_porridge_cereal
+419593,Kaerapuder Semper Passioni 120 G 6 K,Semper,120 g,,dry_preserves,dry_other,baby,baby_porridge_cereal
+419594,Kaerapudrupulber Bio Hipp 200 G 4 K,Hipp,200 g,,dry_preserves,dry_other,baby,baby_porridge_cereal
+419595,Mannapuder Banaan Virsik Milupa 250 G 6 K,Milupa,250 g,,produce,produce_tropical,baby,baby_porridge_cereal
+419596,Mitmevil Puder Banaaniga Kabrita 180 G 6 K,Kabrita,180 g,,produce,produce_tropical,baby,baby_porridge_cereal
+419597,Mitmeviljapud Ouna Kan Oko Ponn 110 G 6 K,Salvest,110 g,,dry_preserves,dry_other,baby,baby_porridge_cereal
+419598,Mitmeviljapuder Hipp Oko 200 G 6 K,Hipp,200 g,,dry_preserves,dry_other,baby,baby_porridge_cereal
+419599,Mitmeviljapuder Oun Virsiksemper 120 G 8 K,Semper,120 g,,dry_preserves,dry_other,baby,baby_porridge_cereal
+419600,Nisuhelbepuder Ban Aprik Kabrita 180 G 6 K,Kabrita,180 g,,dry_preserves,dry_other,baby,baby_porridge_cereal
+419601,Nisuhelbepuder Pirn Oun Kabrita 180 G 5 K,Kabrita,180 g,,produce,produce_apples_pears,baby,baby_porridge_cereal
+419602,Piimapud Puuvilja Jogurtiga Hipp 250 G 8 K,Hipp,250 g,,dairy_eggs_fats,dairy_yogurt_kefir,baby,baby_porridge_cereal
+419603,Piimapuder Banaani Kuiviku Hipp 250 G 4 K,Hipp,250 g,,dairy_eggs_fats,dairy_milk,baby,baby_porridge_cereal
+419604,Piimapuder Kaera Ounaheadood Hipp 250 G 6 K,Hipp,250 g,,dairy_eggs_fats,dairy_milk,baby,baby_porridge_cereal
+419605,Piimapuder Kupsistegaheadood Hipp 190 G 4 K,Hipp,190 g,,dairy_eggs_fats,dairy_milk,baby,baby_porridge_cereal
+419606,Piimapuder Puuvil Head Ood Hipp 190 G 4 K,Hipp,190 g,,dairy_eggs_fats,dairy_milk,baby,baby_porridge_cereal
+419607,Piimapudrupulber Beebikups Hipp 250 G 6 K,Hipp,250 g,,dairy_eggs_fats,dairy_milk,baby,baby_porridge_cereal
+419608,Puder Banaan Head Ood Hipp 190 G 4 K,Hipp,190 g,,produce,produce_tropical,baby,baby_porridge_cereal
+419609,Puree Kubus Baby Riisipud Puuv 100 G 6 K,Kubus,100 g,,dry_preserves,dry_pasta_rice,baby,baby_porridge_cereal
+419610,Riisipudrupulber Bio Hipp 200 G 4 K,Hipp,200 g,,dry_preserves,dry_pasta_rice,baby,baby_porridge_cereal
+419611,Taister Puuvil Piimapud Milupa 250 G 10 K,Milupa,250 g,,dairy_eggs_fats,dairy_milk,baby,baby_porridge_cereal
+419612,Taistera 3 Viljapuder Holle 250 G 6 K,Holle,250 g,,dry_preserves,dry_other,baby,baby_porridge_cereal
+419613,Taisterapud Ban Mustas Salvest Oko 200 G 6 K,Salvest,200 g,,dry_preserves,dry_other,baby,baby_porridge_cereal
+419614,Taisterapuder Milupa Maasikat 250 G 8 K,Milupa,250 g,,produce,produce_berries,baby,baby_porridge_cereal
+419615,Tatra Piimapudrupulberhipp 250 G 4 K,Hipp,250 g,,dairy_eggs_fats,dairy_milk,baby,baby_porridge_cereal
+419616,Tatra Puder Oun Aprik Kabrita 180 G 5 K,Kabrita,180 g,,dry_preserves,dry_other,baby,baby_porridge_cereal
+419617,Tatrapuder Piimaga Milupa 225 G 4 K,Milupa,225 g,,dairy_eggs_fats,dairy_milk,baby,baby_porridge_cereal
+419618,Teraviljapuder Ponn Oko Head Und 110 G 6 K,Salvest,110 g,,dry_preserves,dry_other,baby,baby_porridge_cereal
+419619,Valmispuder Maasikaga Semper 120 G 6 K,Semper,120 g,,produce,produce_berries,baby,baby_porridge_cereal
+419620,Valmispuder Oun Virsik 6 K Semper 120 G,Semper,120 g,,dry_preserves,dry_other,baby,baby_porridge_cereal
+419621,Valmispuder Ouna Kaneeli Semper 120 G 6 K,Semper,120 g,,world_spices,spices_herbs_spice_mix,baby,baby_porridge_cereal
+419622,Valmispuder Pirn Aprikoos 6 K Semper 120 G,Semper,120 g,,produce,produce_apples_pears,baby,baby_porridge_cereal
+419623,Valmispuder Pirn Ploom 6 K Semper 120 G,Semper,120 g,,produce,produce_apples_pears,baby,baby_porridge_cereal
+419624,Valmispuder Puuviljadega 6 K Semper 120 G,Semper,120 g,,dry_preserves,dry_other,baby,baby_porridge_cereal
+419625,Mahkmed Huggies Extra Care 1 2 5 Kg 50 Tk,Huggies,50 tk,,dry_preserves,dry_other,baby,baby_diapers
+419626,Mahkmed Huggies Extra Care 2 3 6 Kg 24 Tk,Huggies,24 tk,,dry_preserves,dry_other,baby,baby_diapers
+419627,Mahkmed Huggies Extra Care S 1 2 5 Kg 26 Tk,Huggies,26 tk,,dry_preserves,dry_other,baby,baby_diapers

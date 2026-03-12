@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+419374,Aktiivkiuga Puhastuslapp Vileda,Vileda,1 tk,,household,hh_cleaners,household,hh_kitchenware
+419375,Amber Home Expert 10 L,Home Expert,10 l,,dry_preserves,dry_other,household,hh_kitchenware
+419376,Antibakter Koogikasn Home Expert 5 Tk,Home Expert,5 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419377,Kasnad Home Expert 10 Tk,Home Expert,10 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419378,Kummikindad Home Expert L,Home Expert,L,,dry_preserves,dry_other,household,hh_kitchenware
+419379,Kummikindad Home Expert M,Home Expert,M,,dry_preserves,dry_other,household,hh_kitchenware
+419380,Kummikindad Home Expert S,Home Expert,S,,dry_preserves,dry_other,household,hh_kitchenware
+419381,Kummikindad Home Expert Xl,Home Expert,XL,,dry_preserves,dry_other,household,hh_kitchenware
+419382,Kuurimiskasn Home Expert 3 Tk,Home Expert,3 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419383,Kuurimisnuustik Spontex Steelmax Xl,Spontex,1 tk,,drinks,drinks_tea_coffee,household,hh_kitchenware
+419384,Kuurimispadi Spontex Magic Hallo 6 Tk,Spontex,6 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419385,Kuurimissvamm Spontex Top Clean 2 Tk,Spontex,2 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419386,Lehtratik Grite Ecological 150 Tk,Grite,150 tk,,dry_preserves,dry_other,household,hh_paper
+419387,Majap Paber Grite Blossom Xl 2 Kih 1 Rl,Grite,1 rl,,dry_preserves,dry_other,household,hh_paper
+419388,Majap Paber Grite Family Xl 2 Kih 1 Rl,Grite,1 rl,,dry_preserves,dry_other,household,hh_paper
+419389,Majapidamislapp Spontex Multiuso 10 Tk,Spontex,10 tk,,household,hh_other,household,hh_kitchenware
+419390,Majapidamislapp Universaalne 3 Tk,,3 tk,,household,hh_other,household,hh_kitchenware
+419391,Majapidamispab Zewa Jumbo Prem 3 Kih 1 Rl,Zewa,1 rl,,household,hh_other,household,hh_paper
+419392,Majapidamispaber Grite Blossom 2 Kih 2 Rl,Grite,2 rl,,household,hh_paper,household,hh_paper
+419393,Metallnuustikud Home Expert 3 Tk,Home Expert,3 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419394,Mikrofiib Porandamopp Spontex Multi,Spontex,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419395,Mikrofiiberlapp Spontex 4 Tk,Spontex,4 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419396,Mikropluusist Lapid Vileda Colors 4 Tk,Vileda,4 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419397,Niisk Tualettpaberid Bella No 1 60 Tk,Bella,60 tk,,household,hh_paper,household,hh_paper
+419398,Niisk Tualettpaberid Zewa Kids 42 Tk,Zewa,42 tk,,household,hh_paper,household,hh_paper
+419399,Niisked Majapidamislapid Home Expert 3 Tk,Home Expert,3 tk,,household,hh_other,household,hh_kitchenware
+419400,Niiskust Imavad Lapid Home Expert 3 Tk,Home Expert,3 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419401,Noudepesukasn Home Expert 5 Tk,Home Expert,5 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419402,Noudepesukasnad Spontex 30 Tk,Spontex,30 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419403,Porandahari Varrega Turbocleaning Vileda,Vileda,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419404,Porandalapp Vileda 907 Ultra Max,Vileda,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419405,Porandalapp Vileda Microfiiber 48 5 X 60 Cm,Vileda,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419406,Porandamopp Promist Vileda,Vileda,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419407,Porandamopp Wring Clean Turbo Vileda,Vileda,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419408,Porandapesumopp Vileda 1 2 Spray Max,Vileda,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419409,Puhastuslapid Rullis Home Expert 50 Tk,Home Expert,50 tk,,household,hh_cleaners,household,hh_kitchenware
+419410,Salvratikud Zewa Soft Sens Box 4 Kih 80 Tk,Zewa,80 tk,,dry_preserves,dry_other,household,hh_paper
+419411,Svammlapp Spontex 5 Tk,Spontex,5 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419412,Svammlapp Spontex Antibakteriaalne 3 Tk,Spontex,3 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419413,Taskuratikud Zewa Softis 4 Kih 10 X 9 Tk,Zewa,10x9 tk,,dry_preserves,dry_other,household,hh_paper
+419414,Taskuratikud Zewa Softis 4 Kih 6 X 9 Tk,Zewa,6x9 tk,,dry_preserves,dry_other,household,hh_paper
+419415,Taskuratikud Zewa Softissens 4 Kih 10 X 9 Tk,Zewa,10x9 tk,,dry_preserves,dry_other,household,hh_paper
+419416,Uldotstarbelised Lapid Spontex 10 Tk,Spontex,10 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419417,Univers Svammlapp Spontex Fastwipes 3 Tk,Spontex,3 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419418,Universaalne Lapp Home Expert 3 Tk,Home Expert,3 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419419,Vaakumpump Spontex,Spontex,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419420,Wc Paber Grite Blossom 3 Kih 40 Rl,Grite,40 rl,,dry_preserves,dry_other,household,hh_paper
+419421,Wc Paber Grite Blossom 3 Kih 8 Rl,Grite,8 rl,,dry_preserves,dry_other,household,hh_paper
+419422,Wc Paber Grite Ecological 3 Kih 8 Rl,Grite,8 rl,,dry_preserves,dry_other,household,hh_paper
+419423,Wc Paber Grite Orch White 16 Rl 3 Kih,Grite,16 rl,,dry_preserves,dry_other,household,hh_paper

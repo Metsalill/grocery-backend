@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+419074,Keraam Pliidi Puhastusvahend Frosch 300 Ml,Frosch,300 ml,,household,hh_cleaners,household,hh_cleaners
+419075,Klaasipuhastusvahend L Arbre Vert 740 Ml,L'Arbre Vert,740 ml,,household,hh_cleaners,household,hh_cleaners
+419076,Kodulohnastaja Aw White Flowers 25 Ml,Air Wick,25 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419077,Koitorjekuulid Bros Lavendel 20 Tk,Bros,20 tk,,dry_preserves,dry_other,household,hh_other
+419078,Koogipuhastusvahend Cillit Bang 750 Ml,Cillit Bang,750 ml,,household,hh_cleaners,household,hh_cleaners
+419079,Ohuvarsk Air Wick Carib Sandalwood 236 Ml,Air Wick,236 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419080,Ohuvarsk Air Wick Mandarin Taide 250 Ml,Air Wick,250 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419081,Ohuvarsk Air Wick Mint Grapefruit 236 Ml,Air Wick,236 ml,,sweets_snacks,sweets_gums_mints,household,hh_candles_airfresh
+419082,Ohuvarskendaja Airwick Freshwaters 300 Ml,Air Wick,300 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419083,Ohuvarskendaja Tango Citrus 300 Ml,Tango,300 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419084,Ohuvarskendaja Tango Ocean 300 Ml,Tango,300 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419085,Poranda Puh Vahend Astonish Lavender 1 L,Astonish,1 l,,dry_preserves,dry_other,household,hh_cleaners
+419086,Puhastussprei Hallitusele Cif 435 Ml,Cif,435 ml,,household,hh_cleaners,household,hh_cleaners
+419087,Rasvaeemaldusvahend Astonish 750 Ml,Astonish,750 ml,,dry_preserves,dry_other,household,hh_cleaners
+419088,Torugeel Puhas Kodu 500 Ml,Puhas Kodu,500 ml,,dry_preserves,dry_other,household,hh_cleaners
+419089,Torupuhastusvahend Helper Graanulid 500 G,Helper,500 g,,household,hh_cleaners,household,hh_cleaners
+419090,Torupuhastusvahend Puhas Kodu 500 Ml,Puhas Kodu,500 ml,,household,hh_cleaners,household,hh_cleaners
+419091,Torupuhastusvahend Tiret Turbo 1 L,Tiret,1 l,,household,hh_cleaners,household,hh_cleaners
+419092,Uldpuhastusvahend Ajax Soda Lemon 500 Ml,Ajax,500 ml,,household,hh_cleaners,household,hh_cleaners
+419093,Uldpuhastusvahend Ajax Spray 750 Ml,Ajax,750 ml,,household,hh_cleaners,household,hh_cleaners
+419094,Uldpuhastusvahend Astonish 750 Ml,Astonish,750 ml,,household,hh_cleaners,household,hh_cleaners
+419095,Uldpuhastusvahend Sanytol Greip 500 Ml,Sanytol,500 ml,,produce,produce_tropical,household,hh_cleaners
+419096,Univ Puh Vahend Puhas Kodu Sanit 500 Ml,Puhas Kodu,500 ml,,dry_preserves,dry_other,household,hh_cleaners
+419097,Univ Puhastuslapid Sanytol Desinf 72 Tk,Sanytol,72 tk,,household,hh_cleaners,household,hh_cleaners
+419098,Vaibapuh Vahend Vanish Gold Regular 500 Ml,Vanish,500 ml,,dry_preserves,dry_other,household,hh_cleaners
+419099,Vannitoa Puh Vah Cillit Bang Lemon 750 Ml,Cillit Bang,750 ml,,dry_preserves,dry_other,household,hh_cleaners
+419100,Vannitoa Puh Vah Cillit Bang Ultra 750 Ml,Cillit Bang,750 ml,,dry_preserves,dry_other,household,hh_cleaners
+419101,Vannitoa Puh Vahend L Arbre Vert 740 Ml,L'Arbre Vert,740 ml,,dry_preserves,dry_other,household,hh_cleaners
+419102,Vannitoa Puhastusvahend Astonish 750 Ml,Astonish,750 ml,,household,hh_cleaners,household,hh_cleaners
+419103,Wc Geel Bref 10 Xeffect Lime Scale 700 Ml,Bref,700 ml,,dry_preserves,dry_other,household,hh_cleaners
+419104,Wc Geel Bref 10 Xeffect Max White 700 Ml,Bref,700 ml,,dry_preserves,dry_other,household,hh_cleaners
+419105,Wc Geel Bref 10 Xeffect Total Prot 700 Ml,Bref,700 ml,,dry_preserves,dry_other,household,hh_cleaners
+419106,Wc Geel Bref Floraldelight 700 Ml,Bref,700 ml,,dry_preserves,dry_other,household,hh_cleaners
+419107,Wc Geel Bref Fresh Mist 700 Ml,Bref,700 ml,,dry_preserves,dry_other,household,hh_cleaners
+419108,Wc Geel Bref Lemonitta Power 700 Ml,Bref,700 ml,,dry_preserves,dry_other,household,hh_cleaners
+419109,Wc Geel Puhas Kodu 500 Ml,Puhas Kodu,500 ml,,dry_preserves,dry_other,household,hh_cleaners
+419110,Wc Ohuvarsk Ambi Pur Cotton Flower 7 5 Ml,Ambi Pur,7.5 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419111,Wc Puhastusvahend Domestos Citrus 1 L,Domestos,1 l,,household,hh_cleaners,household,hh_cleaners
+419112,Wc Puhastusvahend Frosch Raspberry 750 Ml,Frosch,750 ml,,household,hh_cleaners,household,hh_cleaners
+419113,Wc Varskendaja Brait Hygiene Lilac 3 X 45 G,Brait,3x45 g,,dry_preserves,dry_other,household,hh_cleaners
+419114,Wc Varskendaja Bref Arctic Ocean 3 X 42 G,Bref,3x42 g,,dry_preserves,dry_other,household,hh_cleaners
+419115,Wc Varskendaja Bref Ca Lavander 2 X 50 G,Bref,2x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419116,Wc Varskendaja Bref Deluxe Jasmine 2 X 50 G,Bref,2x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419117,Wc Varskendaja Bref Deluxe Magnolia 2 X 50 G,Bref,2x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419118,Wc Varskendaja Bref Deluxe Magnolia 3 X 50 G,Bref,3x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419119,El Ohuvarsk Air Wick Smooth Satin 250 Ml,Air Wick,250 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419120,El Ohuvarsk Taide Ambi Pur Cotton 20 Ml,Ambi Pur,20 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419121,El Ohuvarskendaja Ambi Pur Cotton 20 Ml,Ambi Pur,20 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419122,Klaasipuhastusvahend Lesta Home 500 Ml,Lesta Home,500 ml,,household,hh_cleaners,household,hh_cleaners
+419123,Kodulohnastaja Areon P Leather 150 Ml,Areon,150 ml,,dry_preserves,dry_other,household,hh_candles_airfresh

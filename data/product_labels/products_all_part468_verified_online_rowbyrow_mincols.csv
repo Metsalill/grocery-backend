@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+418374,Hugieenisidemed Naturella Ultra S 1 40 Tk,Naturella,40 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418375,Intiimsalvratid Bella Medica G Tea 20 Tk,Bella,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418376,Pesukaitsmed Always Extra Long 44 Tk,Always,44 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418377,Pesukaitsmed Always Normal 60 Tk,Always,60 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418378,Pesukaitsmed Always Normal Deo 58 Tk,Always,58 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418379,Pesukaitsmed Bella Panty Herbs Tilia 60 Tk,Bella,60 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418380,Pesukaitsmed Bella Panty Light Aroma 20 Tk,Bella,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418381,Pesukaitsmed Bella Panty Sens Eleg 60 Tk,Bella,60 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418382,Pesukaitsmed Bella Panty Sensitive 20 Tk,Bella,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418383,Pesukaitsmed Bella Panty Soft Deo 60 Tk,Bella,60 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418384,Pesukaitsmed Bella Teens Panty Sens 20 Tk,Bella,20 tk,,drinks,drinks_tea_coffee,personal_care,pcare_feminine_hygiene
+418385,Pesukaitsmed Carefree Aloe Vera 76 Tk,Carefree,76 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418386,Pesukaitsmed Carefree Cotton 76 Tk,Carefree,76 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418387,Pesukaitsmed Discreet Air 100 Tk,Always,100 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418388,Pesukaitsmed Discreet Normal 100 Tk,Always,100 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418389,Pesukaitsmed Discreet Spring Breeze 100,Always,100 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418390,Pesukaitsmed Discreet Waterlily 100 Tk,Always,100 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418391,Pesukaitsmed Libresse So Slim 30 Tk,Libresse,30 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418392,Pesukaitsmed Naturella Light Camom 100 Tk,Naturella,100 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418393,Pesukaitsmed Vuokkoset Normal 30 Tk,Vuokkoset,30 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418394,Tampoonid Kotex Normal 16 Tk,Kotex,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418395,Tampoonid Kotex Super 16 Tk,Kotex,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418396,Tampoonid Kotex Super 32 Tk,Kotex,32 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418397,Tampoonid O B Procomfort Super Plus 16 Tk,O.B.,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418398,Uriinipid Sidem Seni Lady Plus 15 Tk,Seni,15 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418399,Uriinipid Sidem Seni Lady Super 15 Tk,Seni,15 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418400,Uriinipidamatuse Sidemed Tena Norm 12 Tk,Tena,12 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418401,Hug Sidemed Always Platinumnight S 4 10 Tk,Always,10 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418402,Hug Sidemed Always Ultra Night S 5 10 Tk,Always,10 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418403,Hug Sidemed Bella Perfecta Ult Blue 20 Tk,Bella,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418404,Hug Sidemed Bella Perfectault Green 20 Tk,Bella,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418405,Hug Sidemed Naturella Classic N 2 18 Tk,Naturella,18 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418406,Hug Sidemed Naturella Ultranight S 4 14 Tk,Naturella,14 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418407,Hug Sidemed Vuokkoset Bio Normal 12 Tk,Vuokkoset,12 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418408,Hugieenisidemed Bella Ideale Night 14 Tk,Bella,14 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418409,Hugieenisidemed Bella Ideale Normal 20 Tk,Bella,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418410,Hugieenisidemed Kotex Ultra Night 12 Tk,Kotex,12 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418411,Hugieenisidemed Kotex Ultra Night 6 Tk,Kotex,6 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418412,Hugieenisidemed Kotex Ultra Normal 16 Tk,Kotex,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418413,Hugieenisidemed Kotex Ultra Normal 8 Tk,Kotex,8 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418414,Hugieenisidemed Kotex Ultra Super 12 Tk,Kotex,12 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418415,Hugieenisidemed Kotex Ultra Super 7 Tk,Kotex,7 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418416,Hugieenisidemed Naturella Ultra S 2 18 Tk,Naturella,18 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418417,Intiimpesugeel Bella Sensitive 300 Ml,Bella,300 ml,,household,hh_laundry,personal_care,pcare_feminine_hygiene
+418418,Intiimpesugeel Ziaja Kaitsev 500 Ml,Ziaja,500 ml,,household,hh_laundry,personal_care,pcare_feminine_hygiene
+418419,Intiimpesugeel Ziaja Niisutav 500 Ml,Ziaja,500 ml,,household,hh_laundry,personal_care,pcare_feminine_hygiene
+418420,Intiimpesuvahend Neutral Sens Skin 250 Ml,Neutral,250 ml,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418421,Intiimsalvratid Sophie 20 Tk,Sophie,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418422,Niisked Salvratikud Seni Care 80 Tk,Seni Care,80 tk,,baby,baby_wipes,personal_care,pcare_other
+418423,Pesukaitsmed Always Flexi Style 58 Tk,Always,58 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+419828,Niisk Salvr Pampers Aqua Paw Patr 3 X 48 Tk,Pampers,3x48 tk,,baby,baby_diapers,baby,baby_wipes
+419829,Niisk Salvratik Baby Lindo Niisutav 80 Tk,Baby Lindo,80 tk,,dry_preserves,dry_other,baby,baby_wipes
+419830,Niisk Salvratik Pampers Harmonie 3 X 48 Tk,Pampers,3x48 tk,,baby,baby_diapers,baby,baby_wipes
+419831,Niisk Salvratikud Pampers Harm Pf 3 X 44 Tk,Pampers,3x44 tk,,baby,baby_diapers,baby,baby_wipes
+419832,Niisk Salvratikud Pampers Harmon Pf 44 Tk,Pampers,44 tk,,baby,baby_diapers,baby,baby_wipes
+419833,Niisk Salvratikud Pampers Harmonie 48 Tk,Pampers,48 tk,,baby,baby_diapers,baby,baby_wipes
+419834,Niisk Salvratikud Pampers Sens Pf 4 X 52 Tk,Pampers,4x52 tk,,baby,baby_diapers,baby,baby_wipes
+419835,Niisked Salvr Huggies Extra Sens 3 X 56 Tk,Huggies,3x56 tk,,baby,baby_wipes,baby,baby_wipes
+419836,Niisked Salvr Huggies Naturalcare 3 X 56 Tk,Huggies,3x56 tk,,baby,baby_wipes,baby,baby_wipes
+419837,Niisked Salvr Huggies Naturalcare 56 Tk,Huggies,56 tk,,baby,baby_wipes,baby,baby_wipes
+419838,Niisked Salvr Pampers Harmonie Pf 3 X 46 Tk,Pampers,3x46 tk,,baby,baby_diapers,baby,baby_wipes
+419839,Niisked Salvrat Go Wipes Water Aloe 50 Tk,Go Wipes,50 tk,,baby,baby_wipes,baby,baby_wipes
+419840,Niisked Salvrat Pampers Harmonie 4 X 46 Tk,Pampers,4x46 tk,,baby,baby_diapers,baby,baby_wipes
+419841,Niisked Salvrat Pure Baby Organic 70 Tk,Pure Baby,70 tk,,baby,baby_wipes,baby,baby_wipes
+419842,Niisked Salvratik Pampers Sensit Pf 52 Tk,Pampers,52 tk,,baby,baby_diapers,baby,baby_wipes
+419843,Niisked Salvratikud Hipp Baby Sanft 50 Tk,Hipp,50 tk,,baby,baby_wipes,baby,baby_wipes
+419844,Niisked Salvratikud Huggies Pure 3 X 56 Tk,Huggies,3x56 tk,,baby,baby_wipes,baby,baby_wipes
+419845,Niisked Salvratikud Huggies Pure 56 Tk,Huggies,56 tk,,baby,baby_wipes,baby,baby_wipes
+419846,Niisked Salvratikud Kindii Lastele 60 Tk,Kindii,60 tk,,baby,baby_wipes,baby,baby_wipes
+419847,Niisked Salvratikud Neutral 0 Proc 52 Tk,Neutral,52 tk,,baby,baby_wipes,baby,baby_wipes
+419848,Niisked Salvratikud Pampers Harmonie 46 Tk,Pampers,46 tk,,baby,baby_diapers,baby,baby_wipes
+419849,Niisked Salvratikud Peppins Everyday 72 Tk,Peppins,72 tk,,baby,baby_wipes,baby,baby_wipes
+419850,Niisked Salvratikud Peppins Sensit 80 Tk,Peppins,80 tk,,baby,baby_wipes,baby,baby_wipes
+419851,Aedv Pastar Kana Salvest Ponnoko 120 G 8 K,Salvest,120 g,,dry_preserves,dry_pasta_rice,baby,baby_food_jars
+419852,Aedv Pastaroog Salvest Veiselih 190 G 8 M,Salvest,190 g,,dry_preserves,dry_pasta_rice,baby,baby_food_jars
+419853,Aedv Puree Kanafile Salvest Oko 190 G 6 K,Salvest,190 g,,meat_fish,meat_poultry,baby,baby_food_jars
+419854,Aedvilja Nuudliroog Singiga Hipp 8 K 220 G,Hipp,220 g,,dry_preserves,dry_pasta_rice,baby,baby_food_jars
+419855,Haut Veisel Kartul Ella S Kitchen 130 G 7 K,Ella's Kitchen,130 g,,meat_fish,meat_beef_lamb_game,baby,baby_food_jars
+419856,Juurv Nuudlipuree Kanagahipp Bio 220 G 1 A,Hipp,220 g,,dry_preserves,dry_pasta_rice,baby,baby_food_jars
+419857,Juurv Puree Kalkunilih Bio Hipp 220 G 1 A,Hipp,220 g,,meat_fish,meat_poultry,baby,baby_food_jars
+419858,Juurvil Puree Vasikalih Hipp Bio 220 G 8 K,Hipp,220 g,,dry_preserves,dry_other,baby,baby_food_jars
+419859,Juurviljapuree Hipp Bio 125 G 4 K,Hipp,125 g,,dry_preserves,dry_other,baby,baby_food_pouches
+419860,Juurviljapuree Loomal Ga Hipp 220 G 8 K,Hipp,220 g,,dry_preserves,dry_other,baby,baby_food_jars
+419861,Kalkuniliha Koogiv Ja Riis Ovko 190 G 7 K,Ovko,190 g,,dry_preserves,dry_pasta_rice,baby,baby_food_jars
+419862,Kalkunilihapuree Hipp Bio 125 G 4 K,Hipp,125 g,,meat_fish,meat_poultry,baby,baby_food_jars
+419863,Kanafil Koogiv Ja Riisiga Ovko 190 G 7 K,Ovko,190 g,,dry_preserves,dry_pasta_rice,baby,baby_food_jars
+419864,Kanalihapuree Salvest Ponn Oko 120 G 6 K,Salvest,120 g,,meat_fish,meat_poultry,baby,baby_food_jars
+419865,Koogiv Pur Sea File Salvest Oko 110 G 6 K,Salvest,110 g,,dry_preserves,dry_other,baby,baby_food_jars
+419866,Koogiv Puree Kanalih Oko Salvest 110 G 6 K,Salvest,110 g,,meat_fish,meat_poultry,baby,baby_food_jars
+419867,Koogiv Puree Veisel Oko Salvest 110 G 6 K,Salvest,110 g,,meat_fish,meat_beef_lamb_game,baby,baby_food_jars
+419868,Koogiv Supp Kana Ja Riisiga Ovko 190 G 6 K,Ovko,190 g,,dry_preserves,dry_pasta_rice,baby,baby_food_jars
+419869,Koogivil Puree Veis Salvest Oko 190 G 6 K,Salvest,190 g,,meat_fish,meat_beef_lamb_game,baby,baby_food_jars
+419870,Koogivil Risoto Kalkunil Hipp 250 G 12 K,Hipp,250 g,,meat_fish,meat_poultry,baby,baby_food_jars
+419871,Koogiviljasegu Lohega Ovko 190 G 7 K,Ovko,190 g,,dry_preserves,dry_other,baby,baby_food_jars
+419872,Korv Kartuli Ja Maheveis Hipp 190 G 5 K,Hipp,190 g,,meat_fish,meat_beef_lamb_game,baby,baby_food_jars
+419873,Korvit Bat Mangopur Salvest Ponn 110 G 6 K,Salvest,110 g,,produce,produce_tropical,baby,baby_food_pouches
+419874,Lambalihapuree Ella S Kitchen 130 G 7 K,Ella's Kitchen,130 g,,meat_fish,meat_beef_lamb_game,baby,baby_food_jars
+419875,Makaroni Juustu Veiselih Okoponn 130 G 7 K,Ovko,130 g,,dairy_eggs_fats,dairy_cheese_slices,baby,baby_food_jars
+419876,Makaronid Kalaga Koorekast Hipp 220 G 8 K,Hipp,220 g,,dairy_eggs_fats,dairy_cream_sourcream,baby,baby_food_jars
+419877,Okol Kana Porgandipuree Ovko 190 G 4 K,Ovko,190 g,,meat_fish,meat_poultry,baby,baby_food_jars

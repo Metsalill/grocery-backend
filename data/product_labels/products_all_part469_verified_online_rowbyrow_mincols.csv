@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+418424,Pesukaitsmed Always Large 26 Tk,Always,26 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418425,Pesukaitsmed Always To Go Fresh 20 Tk,Always,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418426,Pesukaitsmed Bella Panty Ideale L 20 Tk,Bella,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418427,Pesukaitsmed Bella Panty Ideale N 28 Tk,Bella,28 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418428,Pesukaitsmed Carefree Cotton Fresh 56 Tk,Carefree,56 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418429,Pesukaitsmed Carefree Large Fresh 20 Tk,Carefree,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418430,Pesukaitsmed Carefree Long Light 40 Tk,Carefree,40 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418431,Pesukaitsmed Discreet Pluswaterlily 52 Tk,Always,52 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418432,Pesukaitsmed Libresse Black Normal 30 Tk,Libresse,30 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418433,Pesukaitsmed Libresse Dailies Normal 58 Tk,Libresse,58 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418434,Pesukaitsmed Libresse Extra Protect 24 Tk,Libresse,24 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418435,Pesukaitsmed Libresse Longextraprot 22 Tk,Libresse,22 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418436,Pesukaitsmed Libresse Micro 44 Tk,Libresse,44 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418437,Pesukaitsmed Libresse Naturalnormal 58 Tk,Libresse,58 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418438,Pesukaitsmed Naturella Camom Light 100 Tk,Naturella,100 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418439,Pesukaitsmed Naturella Camom Light 52 Tk,Naturella,52 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418440,Pesukaitsmed Naturella Camom Normal 20 Tk,Naturella,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418441,Pesukaitsmed Naturella Camom Normal 44 Tk,Naturella,44 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418442,Pesukaitsmed Naturella To Go Camom 20 Tk,Naturella,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418443,Pesukaitsmed Tena Discreet Mini 20 Tk,Tena,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418444,Pesukaitsmed Vuokkoset Bio Normal 26 Tk,Vuokkoset,26 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418445,Tampoonid Kotex Active Normal 16 Tk,Kotex,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418446,Tampoonid Kotex Active Super 16 Tk,Kotex,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418447,Tampoonid O B Extra Protect Super 16 Tk,O.B.,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418448,Tampoonid O B Organic Normal 16 Tk,O.B.,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418449,Tampoonid O B Organic Super 16 Tk,O.B.,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418450,Tampoonid Tampax Compak Pearl Regul 16 Tk,Tampax,16 tk,,produce,produce_apples_pears,personal_care,pcare_feminine_hygiene
+418451,Tampoonid Tampax Compak Pearl Super 16 Tk,Tampax,16 tk,,produce,produce_apples_pears,personal_care,pcare_feminine_hygiene
+418452,Tampoonid Tampax Compak Pearlsuper 16 Tk,Tampax,16 tk,,produce,produce_apples_pears,personal_care,pcare_feminine_hygiene
+418453,Hug Side Bella Perfecta Pure Maxi 16 Tk,Bella,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418454,Hug Side Bella Perfecta Pure Night 14 Tk,Bella,14 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418455,Hug Sidemed Always Ultra Night 24 Tk,Always,24 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418456,Hug Sidemed Always Ultra Night S 4 6 Tk,Always,6 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418457,Hug Sidemed Always Ultra Night S 5 20 Tk,Always,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418458,Hug Sidemed Libresse Ultra Night L 26 Tk,Libresse,26 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418459,Hug Sidemed Libresse Ultra Wing 38 Tk,Libresse,38 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418460,Hug Sidemed Libresse Ultragoodnight 16 Tk,Libresse,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418461,Hug Sidemed Naturella Ultranight S 4 28 Tk,Naturella,28 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418462,Hug Sidemed Naturella Ultranight S 5 12 Tk,Naturella,12 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418463,Hugieenisid Vuokkoset Plant Normal 12 Tk,Vuokkoset,12 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418464,Hugieeniside Bella Bio Based Normal 10 Tk,Bella,10 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418465,Hugieenisidemed Always Platinum S 2 26 Tk,Always,26 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418466,Hugieenisidemed Always Platinum S 3 22 Tk,Always,22 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418467,Hugieenisidemed Bella Herbs Aloe N 20 Tk,Bella,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418468,Hugieenisidemed Kotex Natural Night 6 Tk,Kotex,6 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418469,Hugieenisidemed Kotex Natural Normal 8 Tk,Kotex,8 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418470,Hugieenisidemed Libresse Ultra Night 8 Tk,Libresse,8 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418471,Hugieenisidemed Naturella Ultra S 2 36 Tk,Naturella,36 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418472,Hugieenisidemed Naturella Ultra S 3 32 Tk,Naturella,32 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418473,Hugieenisidemed Vuokkoset Plantnight 9 Tk,Vuokkoset,9 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene

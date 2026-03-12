@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+419524,Wc Paber Bloom Comfort Ecol 3 Kih 4 Rl,Bloom,4 rl,,dry_preserves,dry_other,household,hh_paper
+419525,Wc Paber Bloom Comfort Ecol 3 Kih 8 Rl,Bloom,8 rl,,dry_preserves,dry_other,household,hh_paper
+419526,Wc Paber Bloom Comfort Orange 3 Kih 16 Rl,Bloom,16 rl,,dry_preserves,dry_other,household,hh_paper
+419527,Wc Paber Bloom Comfort Orange 3 Kih 4 Rl,Bloom,4 rl,,dry_preserves,dry_other,household,hh_paper
+419528,Wc Paber Bloom Comfort Orange 3 Kih 8 Rl,Bloom,8 rl,,dry_preserves,dry_other,household,hh_paper
+419529,Wc Paber Bloom Comfort White 3 Kih 8 Rl,Bloom,8 rl,,dry_preserves,dry_other,household,hh_paper
+419530,Amber Leifheit Picobello 12 L,Leifheit,12 l,,dry_preserves,dry_other,household,hh_kitchenware
+419531,Biolagunev Prugikott Biobag 140 L 3 Tk,BioBag,3 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419532,Biolagunev Prugikott Biobag 240 L 3 Tk,BioBag,3 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419533,Biolagunev Prugikott Biobag 30 L 20 Tk,BioBag,20 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419534,Biolagunev Prugikott Biobag 60 L 5 Tk,BioBag,5 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419535,Biolagunevad Prugikotid Home Expert 10 L,Home Expert,10 l,,dry_preserves,dry_other,household,hh_bins_bags
+419536,Biolagunevad Prugikotid Home Expert 20 L,Home Expert,20 l,,dry_preserves,dry_other,household,hh_bins_bags
+419537,Harjade Kmpl Home Expert 3 Tk,Home Expert,3 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419538,Kasn Scrub Daddy Lemon Fresh,Scrub Daddy,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419539,Klaaspindade Lapp Home Expert 2 Tk,Home Expert,2 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419540,Kokkupand Amber Home Expert 10 L,Home Expert,10 l,,dry_preserves,dry_other,household,hh_kitchenware
+419541,Kokkupandav Kauss Home Expert,Home Expert,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419542,Kuurimishari Home Expert,Home Expert,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419543,Kuurimissvamm Home Expert 5 Tk,Home Expert,5 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419544,Lohn Prugikotid Vortex Noorid 35 L 15 Tk,Vortex,15 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419545,Lohn Prugikotid Vortex Noorid 60 L 10 Tk,Vortex,10 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419546,Lohnast Prugikotid Home Expert 35 L 15 Tk,Home Expert,15 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419547,Lohnast Prugikotid Home Expert 35 L 45 Tk,Home Expert,45 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419548,Lohnast Prugikotid Home Expert 60 L 10 Tk,Home Expert,10 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419549,Lohnast Prugikotid Home Expert 60 L 30 Tk,Home Expert,30 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419550,Majapidamispaber Bloom Regular 2 Kih 300 L,Bloom,1 rl,,household,hh_paper,household,hh_paper
+419551,Majapidamispaber Zewa Jumbo 2 Kih 1 Rl,Zewa,1 rl,,household,hh_paper,household,hh_paper
+419552,Majapidamispaber Zewa Wisch Weg 4 Rulli,Zewa,4 rl,,household,hh_paper,household,hh_paper
+419553,Mikrokiudlapp Spontex 2 Tk,Spontex,2 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419554,Mikrokiudlappide Kmpl Home Expert 2 Tk,Home Expert,2 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419555,Niisk Tualettpaber Bloom Aloe Chamo 60 Tk,Bloom,60 tk,,household,hh_paper,household,hh_paper
+419556,Niisk Tualettpaber Bloom Kids Banana 60 Tk,Bloom,60 tk,,household,hh_paper,household,hh_paper
+419557,Niisk Tualettpaberid Zewa Aloe Vera 42 Tk,Zewa,42 tk,,household,hh_paper,household,hh_paper
+419558,Niisk Tualettpaberid Zewa Pure 42 Tk,Zewa,42 tk,,household,hh_paper,household,hh_paper
+419559,Porandahari Varrega Home Expert,Home Expert,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419560,Porandamopi Amber Vileda,Vileda,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419561,Porandamopp Home Expert Vahetus Lapiga,Home Expert,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419562,Porandapesija Leifheit Picobello M,Leifheit,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419563,Porandapesukomplekt Vileda Ultramax,Vileda,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419564,Prugikotid Home Expert 120 Lx 10 Tk,Home Expert,10 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419565,Pudelihari Home Expert 35 X 5 Cm,Home Expert,1 tk,,meat_fish,meat_other,household,hh_kitchenware
+419566,Puhastuslapid Spontex Multiroll 50 Tk,Spontex,50 tk,,household,hh_cleaners,household,hh_kitchenware
+419567,Salvratikud Karbis Bloom 3 Kih 60 Tk,Bloom,60 tk,,dry_preserves,dry_other,household,hh_paper
+419568,Mahkmed Pampers Harmonie Vp S 4 28 Tk,Pampers,28 tk,,baby,baby_diapers,baby,baby_diapers
+419569,Salvratikud Zewa Deluxe 3 Kih 150 Tk,Zewa,150 tk,,dry_preserves,dry_other,household,hh_paper
+419570,Taskuratikud Bloom 4 Kih 6 Tk,Bloom,6 tk,,dry_preserves,dry_other,household,hh_paper
+419571,Taskuratikud Grite Mint 3 Kih 10 X 10 Tk,Grite,10x10 tk,,sweets_snacks,sweets_gums_mints,household,hh_paper
+419572,Tolmukasn Scrub Daddy Damp Duster Koll,Scrub Daddy,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419573,Tolmukasn Scrub Daddy Damp Duster Roosa,Scrub Daddy,1 tk,,dry_preserves,dry_other,household,hh_kitchenware

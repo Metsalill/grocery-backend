@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+419274,Piimapudrupul Maisi Puuvil Hipp 250 G 6 K,Hipp,250 g,,dairy_eggs_fats,dairy_milk,baby,baby_porridge_cereal
+419275,Kummikindad Vileda Sensitive L,Vileda,L,,dry_preserves,dry_other,household,hh_kitchenware
+419276,Kummikindad Vileda Sensitive M,Vileda,M,,dry_preserves,dry_other,household,hh_kitchenware
+419277,Kummikindad Vileda Super Grip L,Vileda,L,,dry_preserves,dry_other,household,hh_kitchenware
+419278,Kummikindad Vileda Super Grip M,Vileda,M,,dry_preserves,dry_other,household,hh_kitchenware
+419279,Kuurimissvamm Spontex 5 Tk,Spontex,5 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419280,Kuurimissvamm Vileda Glitzi 2 1 Tk,Vileda,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419281,Latekskindad Home Expert M 10 Tk,Home Expert,10 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419282,Lehtratik Zewa Easy Valge 2 Kih 120 Tk,Zewa,120 tk,,dry_preserves,dry_other,household,hh_paper
+419283,Majapidamislapp Vileda,Vileda,1 tk,,household,hh_other,household,hh_kitchenware
+419284,Majapidamislapp Vileda,Vileda,1 tk,,household,hh_other,household,hh_kitchenware
+419285,Majapidamispaber Zewa Premium 2 Kih 2 Rl,Zewa,2 rl,,household,hh_paper,household,hh_paper
+419286,Majapidamispaber Zewa Wisch Weg 2 Rl,Zewa,2 rl,,household,hh_paper,household,hh_paper
+419287,Mikrofiiber Mopp Vileda Vahetuskate,Vileda,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419288,Mikrofiiberlapp Spontex Multi Universal,Spontex,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419289,Mopp Activemax Vileda,Vileda,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419290,Noudepesukasnad Vileda 2 Tk,Vileda,2 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419291,Noudepesukasnad Vileda Rainbow 10 Tk,Vileda,10 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419292,Porandahari Kuhvliga Home Expert,Home Expert,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419293,Porandalapp Home Expert,Home Expert,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419294,Porandamopp Home Expert,Home Expert,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419295,Porandamopp Mikropluusist Home Expert,Home Expert,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419296,Prugikotid Home Expert 100 Lx 10 Tk 35 Um,Home Expert,10 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419297,Prugikotid Home Expert 140 Lx 10 Tk 40 Um,Home Expert,10 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419298,Prugikotid Home Expert 160 Lx 10 Tk 50 Um,Home Expert,10 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419299,Prugikotid Home Expert 20 L 20 Tk 6 5 My,Home Expert,20 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419300,Prugikotid Home Expert 240 Lx 5 Tk 50 Um,Home Expert,5 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419301,Prugikotid Home Expert 30 L 20 Tk 30 Um,Home Expert,20 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419302,Prugikotid Home Expert 30 Lx 20 Tk 6 5 My,Home Expert,20 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419303,Prugikotid Home Expert 35 Lx 15 Tk 30 Um,Home Expert,15 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419304,Prugikotid Home Expert 50 Lx 10 Tk 30 Um,Home Expert,10 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419305,Prugikotid Home Expert 60 L 10 Tk 30 Um,Home Expert,10 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419306,Prugikotid Home Expert 60 Lx 10 Tk 30 Um,Home Expert,10 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419307,Prugikotid Home Expert 60 Lx 25 Tk 13 My,Home Expert,25 tk,,dry_preserves,dry_other,household,hh_bins_bags
+419308,Puhastuskasn Spontex Twist,Spontex,1 tk,,household,hh_cleaners,household,hh_kitchenware
+419309,Salvratikud Karbis Zewa Deluxe 3 Kih 90 Tk,Zewa,90 tk,,dry_preserves,dry_other,household,hh_paper
+419310,Salvratikud Zewa Softis Box 4 Kih 80 Tk,Zewa,80 tk,,dry_preserves,dry_other,household,hh_paper
+419311,Spiraalsvamm Vileda 2 Tk,Vileda,2 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419312,Svamm Vileda Tip Top Kmpl 3 Tk,Vileda,3 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419313,Svammlapp Spontex Top Tex 10 Tk,Spontex,10 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419314,Taskuratikud Grite Blossom 3 Kih 10 X 10 Tk,Grite,10x10 tk,,dry_preserves,dry_other,household,hh_paper
+419315,Teleskoopvarrega Aknapesija Vileda,Vileda,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419316,Varulapp Mopile Vileda Ultramax,Vileda,1 tk,,dry_preserves,dry_other,household,hh_kitchenware
+419317,Wc Paber Grite Family 3 Kih 8 Rl,Grite,8 rl,,dry_preserves,dry_other,household,hh_paper
+419318,Wc Paber Zewa Deluxe Camomille 3 Kih 8 Rl,Zewa,8 rl,,dry_preserves,dry_other,household,hh_paper
+419319,Wc Paber Zewa Deluxe Valge 3 Kih 32 Rul,Zewa,32 rl,,dry_preserves,dry_other,household,hh_paper
+419320,Wc Paber Zewa Deluxe Valge 3 Kih 4 Rl,Zewa,4 rl,,dry_preserves,dry_other,household,hh_paper
+419321,Wc Paber Zewa Deluxe Valge 3 Kih 8 Rl,Zewa,8 rl,,dry_preserves,dry_other,household,hh_paper
+419322,Aknapuhastushari Telesk Varregaa Spontex,Spontex,1 tk,,household,hh_cleaners,household,hh_kitchenware
+419323,Biolagunevad Prugikotid Mclean 10 L 10 Tk,McLean,10 tk,,dry_preserves,dry_other,household,hh_bins_bags

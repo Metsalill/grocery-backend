@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+418874,Noudepesumasina Tabletid Oro 40 X 18 G,Oro,40x18 g,,dry_preserves,dry_other,household,hh_dishwashing
+418875,Noudepesumasina Tabletid Tri Bio 25 Tk,Tri-Bio,25 tk,,dry_preserves,dry_other,household,hh_dishwashing
+418876,Noudepesupalsam Frosch Aloe Vera 500 Ml,Frosch,500 ml,,personal_care,pcare_shampoo_cond,household,hh_dishwashing
+418877,Noudepesupalsam Frosch Granaatoun 500 Ml,Frosch,500 ml,,personal_care,pcare_shampoo_cond,household,hh_dishwashing
+418878,Noudepesupalsam Frosch Sidruniga 500 Ml,Frosch,500 ml,,produce,produce_tropical,household,hh_dishwashing
+418879,Noudepesuvah Fairy Lemon 2 X 900 Ml,Fairy,2x900 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418880,Noudepesuvah Fairy Sens Chamom 2 X 900 Ml,Fairy,2x900 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418881,Noudepesuvahend Fairy Aloe Pink 900 Ml,Fairy,900 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418882,Noudepesuvahend Fairy Apple 450 Ml,Fairy,450 ml,,produce,produce_apples_pears,household,hh_dishwashing
+418883,Noudepesuvahend Fairy Apple 900 Ml,Fairy,900 ml,,produce,produce_apples_pears,household,hh_dishwashing
+418884,Noudepesuvahend Fairy Lemon 1350 Ml,Fairy,1350 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418885,Noudepesuvahend Fairy Lemon 450 Ml,Fairy,450 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418886,Noudepesuvahend Fairy Lemon 900 Ml,Fairy,900 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418887,Noudepesuvahend Fairy Pomegranate 450 Ml,Fairy,450 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418888,Noudepesuvahend Fairy Sens Teatree 1350 Ml,Fairy,1350 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418889,Noudepesuvahend Fairy Sens Teatree 450 Ml,Fairy,450 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418890,Noudepesuvahend Fairy Sens Teatree 900 Ml,Fairy,900 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418891,Noudepesuvahend Fairy Sensit Cham 900 Ml,Fairy,900 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418892,Noudepesuvahend Frosch Baby 500 Ml,Frosch,500 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418893,Noudepesuvahend Frosch Sidruniga 1 L,Frosch,1 l,,produce,produce_tropical,household,hh_dishwashing
+418894,Noudepesuvahend Frosch Sidruniga 500 Ml,Frosch,500 ml,,produce,produce_tropical,household,hh_dishwashing
+418895,Noudepesuvahend Frosch Zeroproc 500 Ml,Frosch,500 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418896,Noudepesuvahend Mayeri Sensitiv 500 Ml,Mayeri,500 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418897,Piimapuder Sokolaadituk Milupa 250 G 8 K,Milupa,250 g,,dairy_eggs_fats,dairy_milk,baby,baby_porridge_cereal
+418898,Noudepesuvahend Mayeri Sensitive 900 Ml,Mayeri,900 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418899,Noudepesuvahend Pur Aloe Vera 450 Ml,Pur,450 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418900,Noudepesuvahend Pur Aloe Vera 750 Ml,Pur,750 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418901,Noudepesuvahend Pur Hands Nails 450 Ml,Pur,450 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418902,Noudepesuvahend Pur Hands Nails 750 Ml,Pur,750 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418903,Noudepesuvahend Pur Pomegranate 750 Ml,Pur,750 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418904,Noudepesuvahend Pur Raspberry 450 Ml,Pur,450 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418905,Noudepesuvahend Pur Raspberry 750 Ml,Pur,750 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418906,Noudepesuvahend Tri Bio 420 Ml,Tri-Bio,420 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418907,Kapslid Fairy Ai 1 Lemon 116 Tk,Fairy,116 tk,,produce,produce_root_veg,household,hh_dishwashing
+418908,Kapslid Fairy Ai 1 Lemon 56 Tk,Fairy,56 tk,,produce,produce_root_veg,household,hh_dishwashing
+418909,Kapslid Fairy Ai 1 Lemon 71 Tk,Fairy,71 tk,,produce,produce_root_veg,household,hh_dishwashing
+418910,Kapslid Fairy Ain 1 Lemon 100 Tk,Fairy,100 tk,,produce,produce_root_veg,household,hh_dishwashing
+418911,Kapslid Fairy Platinum 71 Tk,Fairy,71 tk,,produce,produce_root_veg,household,hh_dishwashing
+418912,Kapslid Fairy Platinum Lemon 113 Tk,Fairy,113 tk,,produce,produce_root_veg,household,hh_dishwashing
+418913,Kapslid Fairy Platinum Lemon 36 Tk,Fairy,36 tk,,produce,produce_root_veg,household,hh_dishwashing
+418914,Kapslid Fairy Platinum Lemon 40 Tk,Fairy,40 tk,,produce,produce_root_veg,household,hh_dishwashing
+418915,Kapslid Fairy Platinum Lemon 45 Tk,Fairy,45 tk,,produce,produce_root_veg,household,hh_dishwashing
+418916,Kapslid Fairy Platinum Lemon 51 Tk,Fairy,51 tk,,produce,produce_root_veg,household,hh_dishwashing
+418917,Kapslid Fairy Platinum Lemon 71 Tk,Fairy,71 tk,,produce,produce_root_veg,household,hh_dishwashing
+418918,Kapslid Fairy Platinum Lemon 81 Tk,Fairy,81 tk,,produce,produce_root_veg,household,hh_dishwashing
+418919,Kapslid Fairy Platinum Lemon 88 Tk,Fairy,88 tk,,produce,produce_root_veg,household,hh_dishwashing
+418920,Kapslid Finish Quantum 35 Tk,Finish,35 tk,,produce,produce_root_veg,household,hh_dishwashing
+418921,Kapslid Finish Quantum Ai 1 80 Tk,Finish,80 tk,,produce,produce_root_veg,household,hh_dishwashing
+418922,Kapslid Finish Ultimate 0 Proc 45 Tk,Finish,45 tk,,produce,produce_root_veg,household,hh_dishwashing
+418923,Kapslid Finish Ultimate Lemon 45 Tk,Finish,45 tk,,produce,produce_root_veg,household,hh_dishwashing

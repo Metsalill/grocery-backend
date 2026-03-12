@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+418624,Pesuloputusvahend Silan Cool Fresh 770 Ml,Silan,770 ml,,household,hh_laundry,household,hh_laundry
+418625,Pesuloputusvahend Silan Fresh Sky 880 Ml,Silan,880 ml,,household,hh_laundry,household,hh_laundry
+418626,Pesumas Varskenduskaps Dr Beckmann 3 X 20 G,Dr. Beckmann,3x20 g,,produce,produce_root_veg,household,hh_laundry
+418627,Pesupulber Ariel Color 20 Pk 1 1 Kg,Ariel,1.1 kg,,household,hh_laundry,household,hh_laundry
+418628,Pesupulber Ariel Mountain Spring 1 1 Kg,Ariel,1.1 kg,,household,hh_laundry,household,hh_laundry
+418629,Pesupulber Frosch Aloe Vera 22 Pk 1 45 Kg,Frosch,1.45 kg,,household,hh_laundry,household,hh_laundry
+418630,Pesupulber Frosch Granaatoun 22 Pk 1 45 Kg,Frosch,1.45 kg,,household,hh_laundry,household,hh_laundry
+418631,Pesupulber Lovela Baby Color 1 3 Kg,Lovela,1.3 kg,,household,hh_laundry,household,hh_laundry
+418632,Pesupulber Mayeri Sensitive 1 65 Kg,Mayeri,1.65 kg,,household,hh_laundry,household,hh_laundry
+418633,Pesupulber Mayeri Sensitive Color 1 65 Kg,Mayeri,1.65 kg,,household,hh_laundry,household,hh_laundry
+418634,Pesupulber Neutral Colour 1 188 Kg 18 Pk,Neutral,1.188 kg,,household,hh_laundry,household,hh_laundry
+418635,Pesupulber Neutral White 1 188 Kg 18 Pk,Neutral,1.188 kg,,household,hh_laundry,household,hh_laundry
+418636,Plekieemaldaja Mayeri Sensitive 250 Ml,Mayeri,250 ml,,dry_preserves,dry_other,household,hh_laundry
+418637,Plekieemaldaja Vanish Regular 3 L,Vanish,3 l,,dry_preserves,dry_other,household,hh_laundry
+418638,Plekieemaldaja Vanish White 3 L,Vanish,3 l,,dry_preserves,dry_other,household,hh_laundry
+418639,Varvi Mustus Lapid Dr Beckmann 3 In 1 40 Tk,Dr. Beckmann,40 tk,,dry_preserves,dry_other,household,hh_laundry
+418640,Varvi Mustusekog Lapid Dr Beckmann 20 Tk,Dr. Beckmann,20 tk,,dry_preserves,dry_other,household,hh_laundry
+418641,Varvipuudja K 2 R Catch Revive White 18 Tk,K2r,18 tk,,dry_preserves,dry_other,household,hh_laundry
+418642,Varvipuudja K 2 R Colour 40 Tk,K2r,40 tk,,dry_preserves,dry_other,household,hh_laundry
+418643,Varvipuudja Vanish 60 Tk,Vanish,60 tk,,dry_preserves,dry_other,household,hh_laundry
+418644,Veepehmendi Calgon Hygiene 750 Ml,Calgon,750 ml,,dry_preserves,dry_other,household,hh_laundry
+418645,Noudepesumasina Sool 2 Kg,,2 kg,,world_spices,spices_basic_salt_pepper,household,hh_dishwashing
+418646,Pesugeel Frosch Granaatoun 1 5 L,Frosch,1.5 l,,household,hh_laundry,household,hh_laundry
+418647,Pesugeel Persil Color 22 Pk 990 Ml,Persil,990 ml,,household,hh_laundry,household,hh_laundry
+418648,Pesugeel Persil Lavendercolor 20 Pk 900 Ml,Persil,900 ml,,household,hh_laundry,household,hh_laundry
+418649,Pesugeel Persil Sensitive 20 Pk 900 Ml,Persil,900 ml,,household,hh_laundry,household,hh_laundry
+418650,Pesugeel Persil Universal 22 Pk 990 Ml,Persil,990 ml,,household,hh_laundry,household,hh_laundry
+418651,Pesugeel Perwoll Black 75 Pk 3 75 L,Perwoll,3.75 l,,household,hh_laundry,household,hh_laundry
+418652,Pesugeel Perwoll Blossom 40 Pk 2 L,Perwoll,2 l,,household,hh_laundry,household,hh_laundry
+418653,Pesugeel Rex Lotus Universal 20 Pk 900 Ml,Rex,900 ml,,household,hh_laundry,household,hh_laundry
+418654,Pesugeel Woolite Fruity 1 8 L,Woolite,1.8 l,,household,hh_laundry,household,hh_laundry
+418655,Pesukapslid Helper White Color 20 Tk,Helper,20 tk,,produce,produce_root_veg,household,hh_laundry
+418656,Pesukapslid Mayeri All Care Color 25 Tk,Mayeri,25 tk,,produce,produce_root_veg,household,hh_laundry
+418657,Pesukapslid Mayeri All Care Univers 25 Tk,Mayeri,25 tk,,produce,produce_root_veg,household,hh_laundry
+418658,Pesukapslid Mayeri Sensitive 25 Tk,Mayeri,25 tk,,produce,produce_root_veg,household,hh_laundry
+418659,Pesukapslid Rex Lotus Almond Oil 36 Tk,Rex,36 tk,,produce,produce_root_veg,household,hh_laundry
+418660,Pesukapslid Rex Orchid Oil Color 36 Tk,Rex,36 tk,,produce,produce_root_veg,household,hh_laundry
+418661,Pesul Vah Silan Dreamylotus 2 772 L 126 Pk,Silan,2.772 l,,dry_preserves,dry_other,household,hh_laundry
+418662,Pesul Vah Silan Fasc Jungle 2 772 L 126 Pk,Silan,2.772 l,,dry_preserves,dry_other,household,hh_laundry
+418663,Pesulop Vah Coccolino Blue Splash 975 Ml,Coccolino,975 ml,,dry_preserves,dry_other,household,hh_laundry
+418664,Pesulop Vah Coccolino Happy Yellow 975 Ml,Coccolino,975 ml,,dry_preserves,dry_other,household,hh_laundry
+418665,Pesulop Vah Coccolino Perfume Care 925 Ml,Coccolino,925 ml,,dry_preserves,dry_other,household,hh_laundry
+418666,Pesulop Vah Coccolino Purple Orch 1 275 L,Coccolino,1.275 l,,dry_preserves,dry_other,household,hh_laundry
+418667,Pesulop Vah Coccolino Tiare Fruit 1 275 L,Coccolino,1.275 l,,dry_preserves,dry_other,household,hh_laundry
+418668,Pesulop Vah Mayeri Angel Kiss 750 Ml,Mayeri,750 ml,,dry_preserves,dry_other,household,hh_laundry
+418669,Pesulop Vah Mayeri Sensitive Taide 900 Ml,Mayeri,900 ml,,dry_preserves,dry_other,household,hh_laundry
+418670,Pesulop Vah Silan Blossom 46 Pk 1 012 L,Silan,1.012 l,,dry_preserves,dry_other,household,hh_laundry
+418671,Pesulop Vah Silan Coconut Mineral 770 Ml,Silan,770 ml,,dry_preserves,dry_other,household,hh_laundry
+418672,Pesulop Vah Silan Elegance 46 Pk 1 012 L,Silan,1.012 l,,dry_preserves,dry_other,household,hh_laundry
+418673,Pesulop Vah Silan Fascin Frangipani 770 Ml,Silan,770 ml,,dry_preserves,dry_other,household,hh_laundry

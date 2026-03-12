@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+418524,Pesukaitsmed Always Long 0 Proc 48 Tk,Always,48 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418525,Pesukaitsmed Always Normal 80 Tk,Always,80 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418526,Pesukaitsmed Always Normal Fresh 30 Tk,Always,30 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418527,Pesukaitsmed Always Normal Fresh 76 Tk,Always,76 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418528,Pesukaitsmed Bella Panty Classic 20 Tk,Bella,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418529,Pesukaitsmed Carefree Cotton Fresh 20 Tk,Carefree,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418530,Pesukaitsmed Carefree Cotton Normal 56 Tk,Carefree,56 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418531,Pesukaitsmed Carefree Fl Form Fresh 30 Tk,Carefree,30 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418532,Pesukaitsmed Carefree Flexi Fresh 56 Tk,Carefree,56 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418533,Pesukaitsmed Carefree Plus Fresh L 48 Tk,Carefree,48 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418534,Pesukaitsmed Carefree Plus Light L 48 Tk,Carefree,48 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418535,Pesukaitsmed Discreet Deo Waterlily 60 Tk,Always,60 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418536,Pesukaitsmed Discreet Normal Plus 52 Tk,Always,52 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418537,Tampoonid O B Extra Protect Super 36 Tk,O.B.,36 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418538,Tampoonid Tampax Compak Regular 16 Tk,Tampax,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418539,Tampoonid Tampax Super Plus 18 Tk,Tampax,18 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418540,Uriinipidamatuse Sid Tena Maxi Night 6 Tk,Tena,6 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418541,Higiplekkide Eemaldi Dr Beckmann 250 Ml,Dr. Beckmann,250 ml,,dry_preserves,dry_other,household,hh_laundry
+418542,Majapidamisseep Sila 72 Proc 180 G,Sila,180 g,,personal_care,pcare_soap,household,hh_laundry
+418543,Pesugeel Frosch Baby Universal 1 5 L,Frosch,1.5 l,,household,hh_laundry,household,hh_laundry
+418544,Pesugeel Frosch Sooda 1 5 L 22 Pk,Frosch,1.5 l,,household,hh_laundry,household,hh_laundry
+418545,Pesugeel Frosch Zeroproc 1 5 L 22 Pk,Frosch,1.5 l,,household,hh_laundry,household,hh_laundry
+418546,Pesugeel Mayeri Dark Denim Wash 1 L,Mayeri,1 l,,household,hh_laundry,household,hh_laundry
+418547,Pesugeel Mayeri Sens Color Taide 1 5 L 25 Pk,Mayeri,1.5 l,,household,hh_laundry,household,hh_laundry
+418548,Pesugeel Mayeri Sensitiv Taide 25 Pk 1 5 L,Mayeri,1.5 l,,household,hh_laundry,household,hh_laundry
+418549,Pesugeel Mayeri Spordiriietele 19 Pk 1 5 L,Mayeri,1.5 l,,household,hh_laundry,household,hh_laundry
+418550,Pesugeel Mulieres Lohnastamata 1 5 L,Mulieres,1.5 l,,household,hh_laundry,household,hh_laundry
+418551,Pesugeel Mulieres Pohjamaine Mets 1 5 L,Mulieres,1.5 l,,dry_preserves,dry_other,household,hh_laundry
+418552,Pesugeel Mulieres Roosiaed 1 5 L,Mulieres,1.5 l,,household,hh_laundry,household,hh_laundry
+418553,Pesugeel Mulieres Varske Tsitrus 1 5 L,Mulieres,1.5 l,,household,hh_laundry,household,hh_laundry
+418554,Pesugeel Neutral Black Wash 20 Pk 1 L,Neutral,1 l,,household,hh_laundry,household,hh_laundry
+418555,Pesugeel Neutral Color 20 Pk 1 L,Neutral,1 l,,household,hh_laundry,household,hh_laundry
+418556,Pesugeel Neutral White 20 Pk 1 L,Neutral,1 l,,household,hh_laundry,household,hh_laundry
+418557,Pesugeel Neutral Wool Silk 20 Pk 1 L,Neutral,1 l,,household,hh_laundry,household,hh_laundry
+418558,Pesugeel Tri Bio Sensitive 1 42 L,Tri-Bio,1.42 l,,household,hh_laundry,household,hh_laundry
+418559,Pesukapslid Mayeri Sensitive Pouch 32 Tk,Mayeri,32 tk,,produce,produce_root_veg,household,hh_laundry
+418560,Pesulop Vahend Coccolino Sens Soft 1 7 L,Coccolino,1.7 l,,dry_preserves,dry_other,household,hh_laundry
+418561,Pesulop Vahend Frosch Aloe Vera 750 Ml,Frosch,750 ml,,dry_preserves,dry_other,household,hh_laundry
+418562,Pesulop Vahend Frosch Zeroproc 31 Pk 750 Ml,Frosch,750 ml,,dry_preserves,dry_other,household,hh_laundry
+418563,Pesuloputusvah Frosch Baby 750 Ml,Frosch,750 ml,,household,hh_laundry,household,hh_laundry
+418564,Pesuloputusvahend Frosch Cotton Flower 1 L,Frosch,1 l,,household,hh_laundry,household,hh_laundry
+418565,Pesuloputusvahend Frosch Lavendel 750 Ml,Frosch,750 ml,,household,hh_laundry,household,hh_laundry
+418566,Pesuloputusvahend Frosch Mandel 1 L,Frosch,1 l,,household,hh_laundry,household,hh_laundry
+418567,Pesuloputusvahend Lovela Baby 33 Pk 2 L,Lovela,2 l,,household,hh_laundry,household,hh_laundry
+418568,Pesuloputusvahend Mayeri Sensitive 750 Ml,Mayeri,750 ml,,household,hh_laundry,household,hh_laundry
+418569,Pesumasina Puh Pulber Dr Beckmann 250 G,Dr. Beckmann,250 g,,dry_preserves,dry_other,household,hh_laundry
+418570,Pesumasina Puh Vedelik Dr Beckmann 250 Ml,Dr. Beckmann,250 ml,,dry_preserves,dry_other,household,hh_laundry
+418571,Pesumasina Puhastusvahend K 2 R 2 X 75 G,K2r,2x75 g,,household,hh_cleaners,household,hh_laundry
+418572,Pesuvahend Woolite Black 4 5 L 75 Pk,Woolite,4.5 l,,dry_preserves,dry_other,household,hh_laundry
+418573,Pesuvahend Woolite Color 4 5 L 75 Pk,Woolite,4.5 l,,dry_preserves,dry_other,household,hh_laundry

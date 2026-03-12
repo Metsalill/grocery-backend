@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+418274,Raseerija Gillette King C 5 Tera,Gillette,5 tera,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418275,Raseerija Gillette Mach 3 Charcoal 2 Tera,Gillette,2 tera,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418276,Raseerija Gillette Mach 3 Charcoal 6 Tera,Gillette,6 tera,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418277,Raseerija Gillette Proglide 4 Tera,Gillette,4 tera,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418278,Raseerija Venus Rosegold Sensitive,Venus,1 tk,,drinks,drinks_wine,personal_care,pcare_shaving
+418279,Raseerija Venus Simply 3 Miami 8 Tera,Venus,8 tera,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418280,Raseerija Venus Sugarberry Miami 1 Tk,Venus,1 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418281,Raseerijad Venus 3 Dragonfruit 6 Tk,Venus,6 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418282,Raseerijad Venus Tropical 3 Tk,Venus,3 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418283,Raseerijad Wilkinson Xtr 3 Sensitive 4 Tk,Wilkinson,4 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418284,Raseerijagillette Sensor 3 Comfort 8 Tera,Gillette,8 tera,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418285,Raseerijavenus Comfortglide Breeze 4 Tera,Venus,4 tera,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418286,Raseerimisgeel Gillette Original 200 Ml,Gillette,200 ml,,drinks,drinks_spirits,personal_care,pcare_shaving
+418287,Raseerimisgeel Gillette Skinsensit 200 Ml,Gillette,200 ml,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418288,Raseerimisgeel Ns Men Arctic Wolf 150 Ml,Natura Siberica,150 ml,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418289,Raseerimisvaht Gillette Condit 250 Ml,Gillette,250 ml,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418290,Terad Gillette Platinum 5 Tk,Gillette,5 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418291,Terad Venus Swirl 4 Tk,Venus,4 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418292,Vaharibad Byphasse Kehale 24 Tk,Byphasse,24 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418293,Vaharibad Byphasse Naole 24 Tk,Byphasse,24 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418294,Varuterad Bic Hybrid Flex 3 Sensit 4 Tk,Bic,4 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418295,Varuterad Gillette Mach 3 Charcoal 5 Tk,Gillette,5 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418296,Varuterad Gillette Sensor 3 Comfort 8 Tk,Gillette,8 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418297,Varuterad Venus Sugarberry 3 Tk,Venus,3 tk,,dry_preserves,dry_other,personal_care,pcare_shaving
+418298,Mahkmed Pampers Harmonie Vp S 5 24 Tk,Pampers,24 tk,,baby,baby_diapers,baby,baby_diapers
+418299,Hug Sidemed Libresse Invis Normal 10 Tk,Libresse,10 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418300,Hug Sidemed Libresse Natural Care 10 Tk,Libresse,10 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418301,Hug Sidemed Libresse Natural Care 20 Tk,Libresse,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418302,Hugieenisidemed Always Sensitive S 1 20 Tk,Always,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418303,Hugieenisidemed Always Sensitive S 2 16 Tk,Always,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418304,Hugieenisidemed Always Ultra S 1 10 Tk,Always,10 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418305,Hugieenisidemed Always Ultra S 1 20 Tk,Always,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418306,Hugieenisidemed Always Ultra S 1 40 Tk,Always,40 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418307,Hugieenisidemed Always Ultra S 2 16 Tk,Always,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418308,Hugieenisidemed Always Ultra S 2 32 Tk,Always,32 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418309,Hugieenisidemed Always Ultra S 3 14 Tk,Always,14 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418310,Hugieenisidemed Always Ultrasuper S 2 8 Tk,Always,8 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418311,Hugieenisidemed Bella Classic Nova 10 Tk,Bella,10 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418312,Hugieenisidemed Bella Normal Soft 10 Tk,Bella,10 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418313,Hugieenisidemed Bella Novamaxi Soft 10 Tk,Bella,10 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418314,Hugieenisidemed Libresse Maxinight 10 Tk,Libresse,10 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418315,Hugieenisidemed Naturella Classicn 2 10 Tk,Naturella,10 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418316,Hugieenisidemed Naturella Ultra N 1 10 Tk,Naturella,10 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418317,Hugieenisidemed Naturella Ultra S 1 20 Tk,Naturella,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418318,Hugieenisidemed Naturella Ultra S 3 16 Tk,Naturella,16 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418319,Pesukaitsmed Bella Panty Mini 36 Tk,Bella,36 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418320,Pesukaitsmed Bella Panty Soft 60 Tk,Bella,60 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418321,Pesukaitsmed Bella Pantysoft Normal 20 Tk,Bella,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418322,Pesukaitsmed Discreet Air 60 Tk,Always,60 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+418323,Pesukaitsmed Discreet Normal 20 Tk,Always,20 tk,,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene

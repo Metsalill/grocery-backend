@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+419987,Külm.pelmeenid sea&veiseliha BIMAR 500g,Bimar,500 g,,meat_fish,meat_beef_lamb_game,frozen_food,frozen_ready_meals
+419988,Külm.pelmeenid lihatäidisega XXL GERMES 1kg,Germes,1 kg,,meat_fish,meat_other,frozen_food,frozen_ready_meals
+419989,Jahvatatud kohv Espresso LAVAZZA 250g,Lavazza,250 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+419990,Jahvatatud kohv KRÖNUNG 250g,Jacobs,250 g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+419991,Jahvatatud kohv LAVAZZA Espresso 250g,Lavazza,250 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+419992,Jahvatatud kohv LAVAZZA Qualita Oro 250g,Lavazza,250 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+419993,Jahvatatud kohv Oro LAVAZZA 250g,Lavazza,250 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+419994,Jahvatatud kohv Presidentti PAULIG 500g,Paulig,500 g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+419995,Karastusjook SPRITE 500ml,Sprite,500 ml,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+419996,KGT pun.vein B&G Cabernet Sauvignon 750ml,Barton & Guestier,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+419997,Küpsisejäätis küpsik VÄIKE TOM 75g,Väike Tom,75 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+419998,KGT vein B&G Bordeaux Chardonnay 750ml,Barton & Guestier,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420000,Jäätis Stracciatella Koon Super Viva 96g,Super Viva,96 g,,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+420001,Kohvioad Arabica PAULIG 1kg,Paulig,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+420002,Jäätis kakaobiskviit SUPER VIVA 66g,Super Viva,66 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420003,Murulauk WELL DONE 20g,Well Done,20 g,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+420004,Jäätis kreembrülee koon SUPER VIVA 100g,Super Viva,100 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420005,Jäätis MAGNUM karam.multipakk 6tk 282g,Magnum,282 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420006,KP vein B&G Rose D'Anjou 750ml,Barton & Guestier,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420007,KPN ar.kv. vahuvein MARTINI ASTI 750ml,Martini Asti,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420008,Kapsasalat kurkumiga 450g,,450 g,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+420009,Gin BOMBAY SAPPHIRE 40% 0.7l,Bombay Sapphire,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420011,KGT vein DREAMER Chardonnay 750ml,Dreamer,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420012,KPN kv.vah. FREIXENET Semi Seco 750ml,Freixenet,750 ml,,dry_preserves,dry_other,drinks,drinks_wine
+420013,KPN vah. CODORNIU Clas.Brut Cava 750ml,Codorniu,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420014,KPN vein TORRES Sangre de Toro 750ml,Torres,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420015,Lahustuv kohv NESCAFÉ CLASSIC 100g,Nescafé,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420016,Lahustuv kohv Aroma JACOBS 200g,Jacobs,200 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420017,Lahustuv kohv Cronat Gold JACOBS 100g,Jacobs,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420018,Lahustuv kohv Cronat Gold JACOBS 200g,Jacobs,200 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420019,Lahustuv kohv Krönung JACOBS 100g,Jacobs,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420021,Jahvatatud kohv KRÖNUNG 250g,Jacobs,250 g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+420022,KPN kv.vah.MOET&CHANDON Nectar Imp.750ml,Moët & Chandon,750 ml,,dry_preserves,dry_other,drinks,drinks_wine
+420023,KPN kv.vahuv.MOET&CHANDON Brut I. 750ml,Moët & Chandon,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420024,KPN kv.vahuvein MARTINI Asti 1.5L,Martini Asti,1.5 l,,drinks,drinks_wine,drinks,drinks_wine
+420025,Rumm BACARDI Carta Blanca 37.5% 1L,Bacardi,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+420026,Rumm BACARDI Carta Blanca 37.5% 700ml,Bacardi,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420027,Viin SAAREMAA 40% 500ml,Saaremaa,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420029,Whisky JAMESON IRISH 40% 500ml,Jameson,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420030,Jahvatatud kohv LAVAZZA Espresso 250g,Lavazza,250 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+420031,Jäätis MILKA 319g,Milka,319 g,,dairy_eggs_fats,dairy_milk,frozen_food,frozen_desserts_icecream
+420032,Koorejäätis šokolaad.ONU ESKIMO 80g,Onu Eskimo,80 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+420033,Koorejäätis van.šok.ONU ESKIMO 80g,Onu Eskimo,80 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+420034,Liköör DISARONNO Originale 28% 500ml,Disaronno,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420035,Looduslik mineraalvesi EVIAN 1.5L,Evian,1.5 l,,drinks,drinks_water,drinks,drinks_water
+420036,Multinektar AURA 1L,Aura,1 l,,drinks,drinks_juices,drinks,drinks_juices
+420037,Must lehetee DILMAH karp 100g,Dilmah,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420038,Must tee DILMAH 100g,Dilmah,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420039,Must tee Yellow Label LIPTON 25x2g,Lipton,25x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420040,Must tee Yellow Label LIPTON 50x2g,Lipton,50x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee

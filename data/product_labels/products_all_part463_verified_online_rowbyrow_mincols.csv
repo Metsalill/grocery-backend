@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+418124,Hambapasta Colgate Total Antitartar 75 Ml,Colgate,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418125,Hambapasta Colgate Total Gum Care 75 Ml,Colgate,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418126,Hambapasta Colgate Triple Action 125 Ml,Colgate,125 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418127,Hambapasta Colgate Triple Action 75 Ml,Colgate,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418128,Hambapasta Colgate White Crystals 75 Ml,Colgate,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418129,Hambapasta Divus Fresh Breath 100 Ml,Divus,100 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418130,Hambapasta Elmex Caries Prot Whiten 75 Ml,Elmex,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418131,Hambapasta Elmex Sens Plus Gum Care 75 Ml,Elmex,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418132,Hambapasta Elmex Sensitive Plus 75 Ml,Elmex,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418133,Hambapasta Elmex Sensitivewhitening 75 Ml,Elmex,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418134,Hambapasta Himalaya Kurkum Kook Ol 75 Ml,Himalaya,75 ml,,bakery,bakery_cakes_pastries,personal_care,pcare_oral_care
+418135,Hambapasta Jordan Cavity Protection 75 Ml,Jordan,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418136,Hambapasta Jordan Green Clean White 75 Ml,Jordan,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418137,Hambapasta Jordan Stay Fresh Sens 75 Ml,Jordan,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418138,Hambapasta Oral B Sensitive 75 Ml,Oral-B,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418139,Hambapasta Parodontax Act Gum Rep 75 Ml,Parodontax,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418140,Hambapasta Parodontax Gum Str Prot 75 Ml,Parodontax,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418141,Hambapasta Pearl Drops Inst Natural 75 Ml,Pearl Drops,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418142,Hambapasta Pierrot Aaloe 75 Ml,Pierrot,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418143,Hambapasta Pierrot Valgendav 75 Ml,Pierrot,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418144,Hambapasta Sensodyne Daily Protect 100 Ml,Sensodyne,100 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418145,Hambapasta Woom Carbon Valgendav 75 Ml,Woom,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418146,Hambapasta Woom Family Total Care 75 Ml,Woom,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418147,Hambapasta Woom Family Tundlik 75 Ml,Woom,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418148,Hambapasta Woom Sensitive 75 Ml,Woom,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418149,Hambapasta Woom Total Kompleksne 75 Ml,Woom,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418150,Hambapasta Woom White Valgendav 75 Ml,Woom,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418151,Hambavalgendus Geelpliiats Absolute 1 8 G,,8 g,,dry_preserves,dry_other,personal_care,pcare_oral_care
+418152,Hambapasta Colgate Adv White Purple 75 Ml,Colgate,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418153,Hambapasta Colgate Total Original 125 Ml,Colgate,125 ml,,drinks,drinks_spirits,personal_care,pcare_oral_care
+418154,Hambapasta Divus Whitening 100 Ml,Divus,100 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418155,Hambapasta Oral B Healthy White 75 Ml,Oral-B,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418156,Hambapasta Oral B Prof Protection 75 Ml,Oral-B,75 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418157,Hambapasta Splat Ultracomplex 100 Ml,Splat,100 ml,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418158,Depileer Kreem Veet Aloe Vera 100 Ml,Veet,100 ml,,dry_preserves,dry_other,personal_care,pcare_shaving
+418159,Depileer Kreem Veet Sensitive 100 Ml,Veet,100 ml,,dry_preserves,dry_other,personal_care,pcare_shaving
+418160,Hab Aj Jarg Pals Nivea Men Silv Pr 100 Ml,Nivea,100 ml,,dry_preserves,dry_other,personal_care,pcare_shaving
+418161,Hab Aj Jarg Palsam Gillette 2 In 1 100 Ml,Gillette,100 ml,,personal_care,pcare_shampoo_cond,personal_care,pcare_shaving
+418162,Hab Aj Jarg Palsam Nivea Prot Care 100 Ml,Nivea,100 ml,,personal_care,pcare_shampoo_cond,personal_care,pcare_shaving
+418163,Hab Aj Jarg Palsam Nivea Sensitive 100 Ml,Nivea,100 ml,,personal_care,pcare_shampoo_cond,personal_care,pcare_shaving
+418164,Hab Aj Jargne Naovesi Denim Black 100 Ml,Denim,100 ml,,drinks,drinks_water,personal_care,pcare_shaving
+418165,Habem Geel Nivea Men Protect Care 200 Ml,Nivea,200 ml,,dry_preserves,dry_other,personal_care,pcare_shaving
+418166,Habem Geel Nivea Men Sensitive 200 Ml,Nivea,200 ml,,dry_preserves,dry_other,personal_care,pcare_shaving
+418167,Habem Vaht Nivea Men Sensitive 200 Ml,Nivea,200 ml,,dry_preserves,dry_other,personal_care,pcare_shaving
+418168,Habemeaj Geel Gillette Series Sens 75 Ml,Gillette,75 ml,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418169,Naiste Raseerijad Venus 3 Colors 3 Tk,Venus,3 tk,,personal_care,pcare_shaving,personal_care,pcare_shaving
+418170,Naovesi Gillette Arctic Ice 100 Ml,Gillette,100 ml,,drinks,drinks_water,personal_care,pcare_shaving
+418171,Naovesi Gillette Splashrevitalizing 100 Ml,Gillette,100 ml,,drinks,drinks_water,personal_care,pcare_shaving
+418172,Naovesi Gillette Storm Force 100 Ml,Gillette,100 ml,,drinks,drinks_water,personal_care,pcare_shaving
+418173,Naovesi Nivea Men Sensitive 100 Ml,Nivea,100 ml,,drinks,drinks_water,personal_care,pcare_shaving

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+418974,Ohuvarsk Air Wick Flowers Taide 250 Ml,Air Wick,250 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+418975,Ohuvarsk Air Wick Linen Taide 250 Ml,Air Wick,250 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+418976,Ohuvarsk Air Wick Moon Lily Taide 250 Ml,Air Wick,250 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+418977,Ohuvarsk Air Wick Peach Apric Taide 250 Ml,Air Wick,250 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+418978,Ohuvarskendaja Glade Lemon Taide 10 Ml,Glade,10 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+418979,Prussakaloks Bros,Bros,1 tk,,dry_preserves,dry_other,household,hh_other
+418980,Puh Kreem Cif Citrus Harmony 1001 G,Cif,1001 g,,dry_preserves,dry_other,household,hh_cleaners
+418981,Puhastusvaht Domestos Bleach 435 Ml,Domestos,435 ml,,household,hh_cleaners,household,hh_cleaners
+418982,Torupuhastusvahend Toru Siil 1 L,Toru Siil,1 l,,household,hh_cleaners,household,hh_cleaners
+418983,Uldpuh Vahend Ajax Floral Fiesta 1 L Roh,Ajax,1 l,,dry_preserves,dry_other,household,hh_cleaners
+418984,Uldpuh Vahend Ajax Floralfiesta Lilac 1 L,Ajax,1 l,,dry_preserves,dry_other,household,hh_cleaners
+418985,Uldpuh Vahend Cillit Bang Active 600 Ml,Cillit Bang,600 ml,,dry_preserves,dry_other,household,hh_cleaners
+418986,Uldpuhastusvahend Frosch Soodaga 500 Ml,Frosch,500 ml,,household,hh_cleaners,household,hh_cleaners
+418987,Univ Puhastusvahend Cillit Magic 450 Ml,Cillit Bang,450 ml,,household,hh_cleaners,household,hh_cleaners
+418988,Vannitoa Puh Vah Frosch Grape Acid 500 Ml,Frosch,500 ml,,dry_preserves,dry_other,household,hh_cleaners
+418989,Vannitoa Puhastusvahend Ajax 500 Ml,Ajax,500 ml,,household,hh_cleaners,household,hh_cleaners
+418990,Wc Geel Duck Fresh Discs Lime 36 Ml,Duck,36 ml,,dry_preserves,dry_other,household,hh_cleaners
+418991,Wc Geel Harpic Active Lemon 750 Ml,Harpic,750 ml,,dry_preserves,dry_other,household,hh_cleaners
+418992,Wc Geel Mayeri Ocean 750 Ml,Mayeri,750 ml,,dry_preserves,dry_other,household,hh_cleaners
+418993,Wc Lop Kasti Tabletid Bref Duo 2 I 1 2 X 50 G,Bref,2x50 g,,drinks,drinks_wine,household,hh_cleaners
+418994,Wc Lop Kasti Tabletid Lu Blue Easy 4 Tk,Lu,4 tk,,drinks,drinks_wine,household,hh_cleaners
+418995,Wc Puh Vahend Domestos Atlantic 750 Ml,Domestos,750 ml,,dry_preserves,dry_other,household,hh_cleaners
+418996,Wc Puh Vahend Domestos Citrusfresh 750 Ml,Domestos,750 ml,,dry_preserves,dry_other,household,hh_cleaners
+418997,Wc Puh Vahend Domestos Lime Fresh 750 Ml,Domestos,750 ml,,dry_preserves,dry_other,household,hh_cleaners
+418998,Wc Puh Vahend Domestos Pine Fresh 750 Ml,Domestos,750 ml,,dry_preserves,dry_other,household,hh_cleaners
+418999,Wc Puh Vahend Domestos Zero Blue 750 Ml,Domestos,750 ml,,dry_preserves,dry_other,household,hh_cleaners
+419000,Wc Puh Vahend Harpic Max Citrus 750 Ml,Harpic,750 ml,,dry_preserves,dry_other,household,hh_cleaners
+419001,Wc Puh Vahend Harpic Max Original 750 Ml,Harpic,750 ml,,drinks,drinks_spirits,household,hh_cleaners
+419002,Wc Puh Vahend Harpic Max Spring 750 Ml,Harpic,750 ml,,dry_preserves,dry_other,household,hh_cleaners
+419003,Wc Puh Vahend Harpic Power Hygiene 750 Ml,Harpic,750 ml,,dry_preserves,dry_other,household,hh_cleaners
+419004,Wc Puhastusvahend Frosch Citrus 750 Ml,Frosch,750 ml,,household,hh_cleaners,household,hh_cleaners
+419005,Wc Puhastusvahend Frosch Lavender 750 Ml,Frosch,750 ml,,household,hh_cleaners,household,hh_cleaners
+419006,Wc Puhastusvahend Harpic Original 750 Ml,Harpic,750 ml,,drinks,drinks_spirits,household,hh_cleaners
+419007,Wc Puhastusvahend Sanit 500 Ml,Sanit,500 ml,,household,hh_cleaners,household,hh_cleaners
+419008,Wc Varskendaja Bref Arctic Ocean 2 X 42 G,Bref,2x42 g,,dry_preserves,dry_other,household,hh_cleaners
+419009,Wc Varskendaja Bref Pa Lemon 3 X 50 G,Bref,3x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419010,Wc Varskendaja Bref Pa Pine 2 X 50 G,Bref,2x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419011,Wc Varskendaja Bref Spring Rain 2 X 42 G,Bref,2x42 g,,dry_preserves,dry_other,household,hh_cleaners
+419012,Wc Varskendaja Bref Spring Rain 3 X 42 G,Bref,3x42 g,,dry_preserves,dry_other,household,hh_cleaners
+419013,Wc Varskendaja Domestos P 5 Magnolia 3 X 50 G,Domestos,3x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419014,Hallituse Eemaldaja Cillit Bang 750 Ml,Cillit Bang,750 ml,,dry_preserves,dry_other,household,hh_cleaners
+419015,Hiireloks Bros Puidust 2 Tk,Bros,2 tk,,dry_preserves,dry_other,household,hh_other
+419016,Katlakivieemaldaja Cif 750 Ml,Cif,750 ml,,dry_preserves,dry_other,household,hh_cleaners
+419017,Katlakivieemaldaja Frosch Raspberry 500 Ml,Frosch,500 ml,,dry_preserves,dry_other,household,hh_cleaners
+419018,Katlakivieemaldaja Kh 7 750 Ml,KH-7,750 ml,,dry_preserves,dry_other,household,hh_cleaners
+419019,Katlakivieemalduspulber Oro 2 X 25 G,Oro,2x25 g,,dry_preserves,dry_other,household,hh_cleaners
+419020,Klaasipuh Vahend Clin Windows Blue 500 Ml,Clin,500 ml,,dry_preserves,dry_other,household,hh_cleaners
+419021,Klaasipuh Vahend Mayeri Sensitive 500 Ml,Mayeri,500 ml,,dry_preserves,dry_other,household,hh_cleaners
+419022,Klaasipuhastusvahend Clin Anti Fog 500 Ml,Clin,500 ml,,household,hh_cleaners,household,hh_cleaners
+419023,Klaasipuhastusvahend Clin Apple 500 Ml,Clin,500 ml,,produce,produce_apples_pears,household,hh_cleaners

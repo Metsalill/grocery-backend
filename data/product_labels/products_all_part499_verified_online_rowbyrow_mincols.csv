@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+419928,Rumm BACARDI Superior 37.5% 500ml,Bacardi,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+419929,Vein Andes Cabernet Sauvignon 750ml,Andes,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+419930,Viin ABSOLUT 40% 700ml,Absolut,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+419931,Külm. Lõhemass VICI 1kg,Vici,1 kg,,meat_fish,fish_fresh,frozen_food,frozen_fish
+419933,GT vein ANTINORI Villa Bianco Tosc.750ml,Antinori,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+419934,GT vein ANTINORI Villa Rosso Tosc.750ml,Antinori,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+419935,Arom. veinijook TAKARA Plum 750ml,Takara,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+419937,Šokolaadiplombiir MIO&RIO 65g,Mio&Rio,65 g,,sweets_snacks,sweets_chocolate_bars,frozen_food,frozen_desserts_icecream
+419939,GT vein FRONTERA Chardonnay 750ml,Frontera,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+419940,Kartul Pestud Villeri Pakitud 2 Kg,,2 kg,,produce,produce_root_veg,produce,produce_root_veg
+419941,Ploominektar AURA 1L,Aura,1 l,,drinks,drinks_juices,drinks,drinks_juices
+419942,Vanilliplombiir MIO&RIO 65g,Mio&Rio,65 g,,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+419943,Karastusjook Coca Cola 1.5L,,1.5 l,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+419945,Viin ABSOLUT Vodka 40% 500ml,Absolut,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+419946,Viin ZUBROWKA Biala 40% 500ml,Zubrowka,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+419947,Whisky CHIVAS REGAL 12 YO 40% 700ml,Chivas Regal,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+419948,Cognac MARTELL VS 40% 700ml,Martell,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+419949,Cognac MEUKOW VS 40% 200ml,Meukow,200 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+419952,Whisky J.WALKER Red Label 40% 500ml,Johnnie Walker,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+419953,Whisky J.WALKER Red Label 40% 700ml,Johnnie Walker,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+419954,Mineraalvesi San Pellegrino 6 X 1 L Gas Tud,San Pellegrino,6x1 l,,drinks,drinks_water,drinks,drinks_water
+419955,Whisky TULLAMORE 40% 700ml,Tullamore,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+419956,Külm.tiigerkrevetid 16/20 p-ta toor 300g,,300 g,,dry_preserves,dry_other,frozen_food,frozen_fish
+419957,Külm.Itaalia segu BAUER 400g,Bauer,400 g,,dry_preserves,dry_other,frozen_food,frozen_veg
+419958,Apelsinimahl AURA 1L,Aura,1 l,,drinks,drinks_juices,drinks,drinks_juices
+419959,Külm. kalapulgad Muumi VICI 250g,Vici,250 g,,meat_fish,fish_fresh,frozen_food,frozen_fish
+419960,Bitter CAMPARI BITTER 25% 700ml,Campari,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+419962,Külm.pannk.kohupiimatäidisega EXTRA LINE 400g,Extra Line,400 g,,dairy_eggs_fats,dairy_cottage_quark,frozen_food,frozen_bakery
+419963,Cappuccino LA FESTA klassik 10x12.5g,La Festa,10x12.5 g,,dry_preserves,dry_other,drinks,drinks_tea_coffee
+419964,Cappuccino LA FESTA vanil.10x12.5g,La Festa,10x12.5 g,,dry_preserves,dry_other,drinks,drinks_tea_coffee
+419965,KPN vein TORRES Sangre de Toro 750ml,Torres,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+419966,Lahustuv kohv Cronat Gold JACOBS 100g,Jacobs,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+419967,Lahustuv kohv Cronat Gold JACOBS 200g,Jacobs,200 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+419968,Cognac MARTELL VS 40% 700ml,Martell,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+419969,Cognac REMY MARTIN VSOP 40% 700ml,Remy Martin,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+419970,GT vein ANTINORI Villa Bianco Tosc.750ml,Antinori,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+419971,GT vein ANTINORI Villa Rosso Tosc.750ml,Antinori,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+419972,GT vein C. DEL DIABLO Black Chard. 750ml,Casillero del Diablo,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+419973,Kohvioad Arabica Selected Paulig 1 Kg,Paulig,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+419974,GT vein FRONTERA Chardonnay 750ml,Frontera,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+419975,GT vein FRONTERA Sauvignon Blanc 750ml,Frontera,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+419976,Hele õlu BUDWEISER Budvar 5% 500ml,Budweiser Budvar,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+419977,Must tee Yellow Label LIPTON 25x2g,Lipton,25x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+419979,Kohvioad Barista Crema Jacobs 1 Kg,Jacobs,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+419980,Jäätis vanillimaits&šok.glas.MIO&RIO 34g,Mio&Rio,34 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+419981,Must tee Yellow Label LIPTON 50x2g,Lipton,50x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+419983,Muu piir.jook CASINO Superior 50% 500ml,Casino,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+419984,Piir.jook CAPTAIN MORGAN Spiced 35% 700ml,Captain Morgan,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+419985,Poolkuiv vein MATEUS Rose 750ml,Mateus,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+419986,Rumm CAPTAIN MORGAN Dark rum 40% 700ml,Captain Morgan,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits

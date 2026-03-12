@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+419878,Pirni Teraviljapuree Plasmon 2 X 120 G 6 K,Plasmon,2x120 g,,produce,produce_apples_pears,baby,baby_porridge_cereal
+419879,Porg Kartulipuree Lohega Hipp 190 G 4 K,Hipp,190 g,,produce,produce_root_veg,baby,baby_food_jars
+419880,Porg Puree Kartuliga Hipp Bio 125 G 4 K,Hipp,125 g,,produce,produce_root_veg,baby,baby_food_pouches
+419881,Puree Vasika Nuudlitega Gerber 190 G 9 K,Gerber,190 g,,dry_preserves,dry_pasta_rice,baby,baby_food_jars
+419882,Puuvilja Teravilj Puree Plasmon 2 X 120 G 6 K,Plasmon,2x120 g,,dry_preserves,dry_other,baby,baby_porridge_cereal
+419883,Riisi Porg Puree Kalk Lih Biohipp 220 G 8 K,Hipp,220 g,,dry_preserves,dry_pasta_rice,baby,baby_food_jars
+419884,Riisipuree Juurvilja Kanalih Hipp 190 G 4 K,Hipp,190 g,,dry_preserves,dry_pasta_rice,baby,baby_food_jars
+419885,Spagetid Bolognese Hipp Bio 190 G 4 K,Hipp,190 g,,dry_preserves,dry_pasta_rice,baby,baby_food_jars
+419886,Spagetid Tomat Mozzarel Hipp 220 G 8 K,Hipp,220 g,,dry_preserves,dry_pasta_rice,baby,baby_food_jars
+419887,Sparg Kapsa Risotto Kuulikul Hipp 220 G 8 K,Hipp,220 g,,produce,produce_root_veg,baby,baby_food_jars
+419888,Suvikorvitsap Kartuliga Hipp 125 G 4 Oko,Hipp,125 g,,produce,produce_root_veg,baby,baby_food_pouches
+419889,Tomati Nuudlipuree Vasikalih Hipp 220 G 1 A,Hipp,220 g,,dry_preserves,dry_pasta_rice,baby,baby_food_jars
+419890,Tomatisupp Riisi Kalkun Gerber 190 G 8 K,Gerber,190 g,,dry_preserves,dry_pasta_rice,baby,baby_food_jars
+419891,Toortatraroog Veiselih Salvest 190 G 8 K,Salvest,190 g,,meat_fish,meat_beef_lamb_game,baby,baby_food_jars
+419892,Uhepajatoit Sealihaga Oko Ponn 130 G 7 K,Salvest,130 g,,meat_fish,meat_pork,baby,baby_food_jars
+419893,Veiselihapuree Hipp Bio 125 G 4 K,Hipp,125 g,,meat_fish,meat_beef_lamb_game,baby,baby_food_jars
+419894,Veisepuree Salvest Ponn Oko 120 G 6 K,Salvest,120 g,,meat_fish,meat_beef_lamb_game,baby,baby_food_jars
+419895,Riivsai paprikaga CITY TASTE 350g,City Taste,350 g,,bakery,bakery_buns_croissants,bakery,bakery_other
+419896,Koorejäätis ERITI RAMMUS karamelli 480g,,480 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+419897,Külm.peekoni-munapir.EESTI PAGAR 390g,Eesti Pagar,390 g,,dairy_eggs_fats,dairy_eggs,frozen_food,frozen_bakery
+419898,Hele õlu CRONUS Pilsner 4.8% 500ml,Cronus,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+419899,Salatisegu Harmony WELL DONE 100g,Well Done,100 g,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+419900,Hele õlu Saku Kuld 5.2% 12x0.33L prk,Saku,12x330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+419901,Terav Kaste Guacamole 150 G,,150 g,,sauces_oils,sauces_other,sauces_oils,sauces_other
+419902,Roheline tee HYLEYS 25x1.5g,Hyleys,25x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+419903,Hele õlu Saku Originaal 4.7% 12x0.33l prk,Saku,12x330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+419904,Kohviuba JACOBS Selection 1kg,Jacobs,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+419905,KPN kuiv vein MAYBACH Riesling 750ml,Maybach,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+419906,KPN poolkuiv vein MAYBACH Riesling 750ml,Maybach,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+419907,Salatisegu Vivid WELL DONE 100g,Well Done,100 g,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+419908,Liköör JÄGERMEISTER 35% 500ml,Jägermeister,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+419909,Liköör VANA TALLINN 40% 500ml,Vana Tallinn,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+419910,Mineraalvesi SAN PELLEGRINO 1L gas-tud,San Pellegrino,1 l,,drinks,drinks_water,drinks,drinks_water
+419911,Koorejäätis PREMIA 47% vähe suhkr. 240g,Premia,240 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+419912,Külm.friikartul. sakiline EXTRA LINE 1kg,Extra Line,1 kg,,frozen_food,frozen_potato_products,frozen_food,frozen_potato_products
+419913,Mineraalvesi SAN PELLEGRINO 6x1l gas-tud,San Pellegrino,6x1 l,,drinks,drinks_water,drinks,drinks_water
+419914,Külm. kana-juustu pitsa PREMIA 355g,Premia,355 g,,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_pizza
+419915,Külm.pitsa VICI suits.pepperoniga 300g,Vici,300 g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+419916,Külm.pitsarull EESTI PAGAR 400g,Eesti Pagar,400 g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+419917,Cappuccino LA FESTA vanil.10x12.5g,La Festa,10x12.5 g,,dry_preserves,dry_other,drinks,drinks_tea_coffee
+419918,Muu.alk.jk. APEROL Aperitivo 11% 700ml,Aperol,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+419919,Muu piir.jook RIGA BLACK BALSAM 45% 0.2l,Riga Balsam,200 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+419920,Whisky Chivas Regal 12 Yo 40% 700ml,Chivas Regal,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+419921,Whisky J Walker Red Label 40% 500ml,Johnnie Walker,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+419922,Muu piir.jook RIGA BLACK BALSAM 45% 0.5l,Riga Balsam,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+419923,Whisky SCOTTISH LEADER 40% 500ml,Scottish Leader,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+419924,Whisky J Walker Red Label 40% 700ml,Johnnie Walker,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+419925,Must tee Scottish Breakf.HYLEYS 25x1.5g,Hyleys,25x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+419926,Piiritusjook METAXA 5* 38% 700ml,Metaxa,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+419927,Nisuõlu CRONUS 5.3% 500ml,Cronus,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+419728,Mahkmed Pampers Pc Mb S 2 136 Tk,Pampers,136 tk,,baby,baby_diapers,baby,baby_diapers
+419729,Mahkmed Pampers Premium Care S 4 52 Tk,Pampers,52 tk,,baby,baby_diapers,baby,baby_diapers
+419730,Mahkmed Peppins Comfy S 4 9 14 Kg 41 Tk,Peppins,41 tk,,dry_preserves,dry_other,baby,baby_diapers
+419731,Mahkmed Peppins Premium 2 5 Kg 26 Tk,Peppins,26 tk,,dry_preserves,dry_other,baby,baby_diapers
+419732,Mahkmed Peppins Premium 6 10 Kg 56 Tk,Peppins,56 tk,,dry_preserves,dry_other,baby,baby_diapers
+419733,Mahkmed Peppins Premium 9 14 Kg 50 Tk,Peppins,50 tk,,dry_preserves,dry_other,baby,baby_diapers
+419734,Mahkmed Peppins Premium Mini 4 8 Kg 42 Tk,Peppins,42 tk,,dry_preserves,dry_other,baby,baby_diapers
+419735,Puksmahk Huggies Dryn Boy 49 60 Kg 13 Tk,Huggies,13 tk,,dry_preserves,dry_other,baby,baby_diapers
+419736,Puksmahk Huggiesdryn Girl 49 60 Kg 13 Tk,Huggies,13 tk,,dry_preserves,dry_other,baby,baby_diapers
+419737,Puksmahkm Huggies Extracare 6 15 25 Kg 30 Tk,Huggies,30 tk,,dry_preserves,dry_other,baby,baby_diapers
+419738,Puksmahkmed Huggies Girl S 4 9 14 Kg 72 Tk,Huggies,72 tk,,dry_preserves,dry_other,baby,baby_diapers
+419739,Puksmahkmed Huggies S 3 Mega Boy 58 Tk,Huggies,58 tk,,dry_preserves,dry_other,baby,baby_diapers
+419740,Puksmahkmed Huggies S 5 Boy 12 17 Kg 34 Tk,Huggies,34 tk,,dry_preserves,dry_other,baby,baby_diapers
+419741,Puksmahkmed Huggies S 5 Girl 12 17 Kg 48 Tk,Huggies,48 tk,,dry_preserves,dry_other,baby,baby_diapers
+419742,Puksmahkmed Oopsies Go S 4 8 15 Kg 22 Tk,Oopsies,22 tk,,dry_preserves,dry_other,baby,baby_diapers
+419743,Puksmahkmed Oopsies Go S 5 12 17 Kg 20 Tk,Oopsies,20 tk,,dry_preserves,dry_other,baby,baby_diapers
+419744,Puksmahkmed Oopsies Go S 6 15 Kg 18 Tk,Oopsies,18 tk,,dry_preserves,dry_other,baby,baby_diapers
+419745,Puksmahkmed Peppins Premium 12 17 Kg 35 Tk,Peppins,35 tk,,dry_preserves,dry_other,baby,baby_diapers
+419746,Puksmahkmed Peppins Premium 9 15 Kg 39 Tk,Peppins,39 tk,,dry_preserves,dry_other,baby,baby_diapers
+419747,Aprikoosipuree Hipp Bio 125 G 4 K,Hipp,125 g,,dry_preserves,dry_other,baby,baby_food_pouches
+419748,Ban Ouna Mustikapuree Muuti 110 G Al 6 K,Muuti,110 g,,produce,produce_berries,baby,baby_food_pouches
+419749,Ban Virs Mangopuree Muuti 110 G Al 12 K,Muuti,110 g,,produce,produce_tropical,baby,baby_food_pouches
+419750,Banaanipuree Gerber 125 G 4 K,Gerber,125 g,,produce,produce_tropical,baby,baby_food_pouches
+419751,Banaanpuree Kiivi Pirni Hipp Bio 100 G 6 K,Hipp,100 g,,produce,produce_apples_pears,baby,baby_food_pouches
+419752,Banaanpuree Pirni Mango Hipp Bio 100 G 4 K,Hipp,100 g,,produce,produce_apples_pears,baby,baby_food_pouches
+419753,Brok Pirni Hernep Ella S Kitchen 120 G 4 K,Ella's Kitchen,120 g,,produce,produce_apples_pears,baby,baby_food_pouches
+419754,Maasi Mustika Ounapur Fruktmums 110 G 6 K,Fruktmums,110 g,,produce,produce_berries,baby,baby_food_pouches
+419755,Maasika Ounapuree Ella S Kitchen 120 G 4 K,Ella's Kitchen,120 g,,produce,produce_berries,baby,baby_food_pouches
+419756,Maasikasmuuti Oko Salvest 110 G 6 K,Salvest,110 g,,produce,produce_berries,baby,baby_food_pouches
+419757,Mag Kartul Kor Oun Must Puree Ek 120 Gr 4 K,Ella's Kitchen,120 g,,produce,produce_root_veg,baby,baby_food_pouches
+419758,Mango Porg Astelp Puree Muuti 110 G Al 6 K,Muuti,110 g,,produce,produce_tropical,baby,baby_food_pouches
+419759,Mangopuree Oko Salvest 100 G 4 K,Salvest,100 g,,produce,produce_tropical,baby,baby_food_pouches
+419760,Mustika Ounapuree Oko Salvest 100 G 4 K,Salvest,100 g,,produce,produce_berries,baby,baby_food_pouches
+419761,Okol Ouna Ban Apr Puree Ovko 190 G 4 K,Ovko,190 g,,dry_preserves,dry_other,baby,baby_food_pouches
+419762,Org Puree Virsik Ban Mang Hipp 100 G 6 K,Hipp,100 g,,dry_preserves,dry_other,baby,baby_food_pouches
+419763,Ouna Abrik Ban Puree Gerber 125 G 6 K,Gerber,125 g,,dry_preserves,dry_other,baby,baby_food_pouches
+419764,Ouna Ban Virs Puree Kups Hipp 100 G Al 1 A,Hipp,100 g,,dry_preserves,dry_other,baby,baby_food_pouches
+419765,Ouna Banaanipuree Kupsis Hippbio 100 G 4 K,Hipp,100 g,,produce,produce_tropical,baby,baby_food_pouches
+419766,Ouna Mango Ananas Puree Semper 110 G 6 K,Semper,110 g,,produce,produce_tropical,baby,baby_food_pouches
+419767,Ouna Pirni Banaanipuree Hipp Bio 100 G 4 K,Hipp,100 g,,produce,produce_apples_pears,baby,baby_food_pouches
+419768,Ouna Por Ban Puree Ovko 90 G 6 K,Ovko,90 g,,dry_preserves,dry_other,baby,baby_food_pouches
+419769,Ouna Vaarikapuree Granaat Hipp 100 G 1 A,Hipp,100 g,,produce,produce_berries,baby,baby_food_pouches
+419770,Ouna Virsikupuree Ploomi Hipp 100 G Al 1 A,Hipp,100 g,,dry_preserves,dry_other,baby,baby_food_pouches
+419771,Ounapur Ban Vaar Teravil Hippbio 100 G 6 K,Hipp,100 g,,dry_preserves,dry_other,baby,baby_food_pouches
+419772,Ounapuree Banaani Mustikabebivita 90 G 4 K,Bebivita,90 g,,produce,produce_berries,baby,baby_food_pouches
+419773,Ounapuree Banaaniga Hipp Bio 100 G 4 K,Hipp,100 g,,produce,produce_tropical,baby,baby_food_pouches
+419774,Ounapuree Maasik Banaan Hippbio 100 G 4 K,Hipp,100 g,,produce,produce_berries,baby,baby_food_pouches
+419775,Ounapuree Virs Metsamar Hippbio 100 G 4 K,Hipp,100 g,,dry_preserves,dry_other,baby,baby_food_pouches
+419776,Ount Porg Ja Ban Puree Ovko 120 G 6 K,Ovko,120 g,,dry_preserves,dry_other,baby,baby_food_pouches
+419777,Pirni Ounapuree Hipp Bio 100 G 4 K,Hipp,100 g,,produce,produce_apples_pears,baby,baby_food_pouches

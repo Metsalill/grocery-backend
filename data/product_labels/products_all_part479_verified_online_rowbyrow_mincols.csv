@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+418924,Kapslid Finish Ultimate Lemon 50 Tk,Finish,50 tk,,produce,produce_root_veg,household,hh_dishwashing
+418925,Kapslid Finish Ultimate Lemon 70 Tk,Finish,70 tk,,produce,produce_root_veg,household,hh_dishwashing
+418926,Kapslid Finish Ultimate Plus Lemon 62 Tk,Finish,62 tk,,produce,produce_root_veg,household,hh_dishwashing
+418927,Kapslid Somat Excellence 3 In 1 60 Tk,Somat,60 tk,,produce,produce_root_veg,household,hh_dishwashing
+418928,Kapslid Somat Excellence 3 In 1 88 Tk,Somat,88 tk,,produce,produce_root_veg,household,hh_dishwashing
+418929,Kapslid Somat Excellence 4 In 1 50 Tk,Somat,50 tk,,produce,produce_root_veg,household,hh_dishwashing
+418930,Kapslid Somat Excellence 4 In 1 60 Tk,Somat,60 tk,,produce,produce_root_veg,household,hh_dishwashing
+418931,Kapslid Somat Excellencepremium 5 I 1 54 Tk,Somat,54 tk,,produce,produce_root_veg,household,hh_dishwashing
+418932,Noudep Kaps Somat Excellence 4 In 1 30 Tk,Somat,30 tk,,produce,produce_root_veg,household,hh_dishwashing
+418933,Noudep Mas Kapslid Finish Quantum 60 Tk,Finish,60 tk,,produce,produce_root_veg,household,hh_dishwashing
+418934,Noudep Sool 1 5 Kg Lop Vah 400 Ml Finish,Finish,1 pk,,world_spices,spices_basic_salt_pepper,household,hh_dishwashing
+418935,Noudepesum Loputusvahend Mayeri 500 Ml,Mayeri,500 ml,,household,hh_laundry,household,hh_dishwashing
+418936,Noudepesum Tab Finish Power E Lem 90 2 Tk,Finish,90+2 tk,,dry_preserves,dry_other,household,hh_dishwashing
+418937,Noudepesum Tab Somat Exc Prem 5 In 1 42 Tk,Somat,42 tk,,dry_preserves,dry_other,household,hh_dishwashing
+418938,Noudepesum Tabletid Finish Power 85 Tk,Finish,85 tk,,dry_preserves,dry_other,household,hh_dishwashing
+418939,Noudepesum Tabletid Frosch Ai 1 Soda 30 Tk,Frosch,30 tk,,dry_preserves,dry_other,household,hh_dishwashing
+418940,Noudepesum Tabletid Somat Ai 1 Extra 75 Tk,Somat,75 tk,,dry_preserves,dry_other,household,hh_dishwashing
+418941,Noudepesumas Geel Finish Ai 1 Eco 900 Ml,Finish,900 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418942,Noudepesumas Geel Mayeri Lem Mint 600 Ml,Mayeri,600 ml,,sweets_snacks,sweets_gums_mints,household,hh_dishwashing
+418943,Noudepesumas Geel Mayeri Lemongrass 600 Ml,Mayeri,600 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418944,Noudepesumasina Sool Somat 2 5 Kg,Somat,2.5 kg,,world_spices,spices_basic_salt_pepper,household,hh_dishwashing
+418945,Noudepesuvah L Arbre Vert Aloevera 500 Ml,L'Arbre Vert,500 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418946,Noudepesuvahend Fairy Apple 1 35 L,Fairy,1.35 l,,produce,produce_apples_pears,household,hh_dishwashing
+418947,Noudepesuvahend Fairy Citrus 650 Ml,Fairy,650 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418948,Noudepesuvahend Fairy Extra Citrus 900 Ml,Fairy,900 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418949,Noudepesuvahend Fairy Extra Lilac 900 Ml,Fairy,900 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418950,Noudepesuvahend Fairy Forest Fruit 650 Ml,Fairy,650 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418951,Noudepesuvahend Fairy Lilac 650 Ml,Fairy,650 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418952,Noudepesuvahend Helper Apple 500 Ml,Helper,500 ml,,produce,produce_apples_pears,household,hh_dishwashing
+418953,Noudepesuvahend Helper Lemon 1 L,Helper,1 l,,dry_preserves,dry_other,household,hh_dishwashing
+418954,Noudepesuvahend Mayeri Cranberry 500 Ml,Mayeri,500 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418955,Noudepesuvahend Mayeri Lemongrass 500 Ml,Mayeri,500 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418956,Noudepesuvahend Neutral Sensitive 500 Ml,Neutral,500 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418957,Noudepesuvahend Pur Bal Calendula 750 Ml,Pur,750 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418958,Puhastussooda Mayeri Organic 500 G,Mayeri,500 g,,household,hh_cleaners,household,hh_cleaners
+418959,Noudepesum Tabletid Finish Ultimate 30 Tk,Finish,30 tk,,dry_preserves,dry_other,household,hh_dishwashing
+418960,Noudepesumas Geel Somat Ai 1 Lemon 990 Ml,Somat,990 ml,,dry_preserves,dry_other,household,hh_dishwashing
+418961,Noudepesumas Loputusvahend Frosch 750 Ml,Frosch,750 ml,,household,hh_laundry,household,hh_dishwashing
+418962,Ahjupuhastusvahend Cif Perfect 435 Ml,Cif,435 ml,,household,hh_cleaners,household,hh_cleaners
+418963,Feromoonpuunis Roomavat Pruss Bros 1 Tk,Bros,1 tk,,dry_preserves,dry_other,household,hh_other
+418964,Katlakivieemaldi Mayeri 500 Ml,Mayeri,500 ml,,dry_preserves,dry_other,household,hh_cleaners
+418965,Klaasipuh Vahend Ajax Crystal 500 Ml,Ajax,500 ml,,dry_preserves,dry_other,household,hh_cleaners
+418966,Klaasipuh Vahend Ajax Lilyofvall 500 Ml,Ajax,500 ml,,dry_preserves,dry_other,household,hh_cleaners
+418967,Klaasipuh Vahend Ajax Triple Act 500 Ml,Ajax,500 ml,,dry_preserves,dry_other,household,hh_cleaners
+418968,Klaasipuhastusvahend Frosch 500 Ml,Frosch,500 ml,,household,hh_cleaners,household,hh_cleaners
+418969,Klaasipuhastusvahend Frosch Taide 1 L,Frosch,1 l,,household,hh_cleaners,household,hh_cleaners
+418970,Kleepelint Toidukoidele Bros 2 Tk,Bros,2 tk,,dry_preserves,dry_other,household,hh_other
+418971,Kodulohnastaja Aw Freesie Jasmine 30 Ml,Air Wick,30 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+418972,Koitorjevahend Bros Riputatav Pakend,Bros,1 tk,,dry_preserves,dry_other,household,hh_other
+418973,Ohuvarsk Air Wick Citrus Taide 250 Ml,Air Wick,250 ml,,dry_preserves,dry_other,household,hh_candles_airfresh

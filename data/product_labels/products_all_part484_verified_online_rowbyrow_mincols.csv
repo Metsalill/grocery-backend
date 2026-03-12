@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+419174,Koogipuhastusvahend Cif 500 Ml,Cif,500 ml,,household,hh_cleaners,household,hh_cleaners
+419175,Koogipuhastusvahend Helper 750 Ml,Helper,750 ml,,household,hh_cleaners,household,hh_cleaners
+419176,Niisk Puh Lapid Klaaspindad Vortex 48 Tk,Vortex,48 tk,,dry_preserves,dry_other,household,hh_cleaners
+419177,Ohuvarsk Air Wick Breeze Taide 228 Ml,Air Wick,228 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419178,Ohuvarsk Air Wick Grapefruit Taide 228 Ml,Air Wick,228 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419179,Ohuvarsk Air Wick Jasmine Taide 19 Ml,Air Wick,19 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419180,Ohuvarsk Air Wick Sandalw Vanilla 250 Ml,Air Wick,250 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419181,Ohuvarsk Air Wick Sandalw Vanilla 250 Ml,Air Wick,250 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419182,Ohuvarsk Ambi Pur Flowers Spring 185 Ml,Ambi Pur,185 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419183,Ohuvarsk Ambi Pur Fruity Tropics 185 Ml,Ambi Pur,185 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419184,Ohuvarsk Ambi Pur Spring Awakening 185 Ml,Ambi Pur,185 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419185,Ohuvarskendaja Air Wick Breeze 228 Ml,Air Wick,228 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419186,Ohuvarskendaja Ambi Pur Goldorchid 185 Ml,Ambi Pur,185 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419187,Ohuvarskendaja Ambi Pur Ocean Mist 185 Ml,Ambi Pur,185 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419188,Ohuvarskendaja Brait Moon Garden 300 Ml,Brait,300 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419189,Ohuvarskendaja Brait Relax Moments 300 Ml,Brait,300 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419190,Puhastuspasta Dr Beckmann 550 G,Dr. Beckmann,550 g,,dry_preserves,dry_pasta_rice,household,hh_cleaners
+419191,Puhastussprei Ajax Strong Safe 500 Ml,Ajax,500 ml,,household,hh_cleaners,household,hh_cleaners
+419192,Puhastusvaht Ajax Anti Limescale 500 Ml,Ajax,500 ml,,household,hh_cleaners,household,hh_cleaners
+419193,Puhastusvaht Ajax Multi Surface 500 Ml,Ajax,500 ml,,household,hh_cleaners,household,hh_cleaners
+419194,Puhastusvaht Domestos Floral Fresh 435 Ml,Domestos,435 ml,,household,hh_cleaners,household,hh_cleaners
+419195,Puidu Ja Nahahooldusvahend Kh 7 750 Ml,KH-7,750 ml,,personal_care,pcare_other,household,hh_cleaners
+419196,Uldpuhastusvahend Ajax Strong Safe 1 L,Ajax,1 l,,household,hh_cleaners,household,hh_cleaners
+419197,Universaalne Puhastusvahend Cif 500 Ml,Cif,500 ml,,household,hh_cleaners,household,hh_cleaners
+419198,Vannitoa Puhastusvahend Cif 500 Ml,Cif,500 ml,,household,hh_cleaners,household,hh_cleaners
+419199,Wc Lop Kasti Tabl Kolorado Forest 2 X 45 G,Kolorado,2x45 g,,drinks,drinks_wine,household,hh_cleaners
+419200,Wc Loputuskasti Tablett Brait Blue 4 X 50 G,Brait,4x50 g,,drinks,drinks_wine,household,hh_cleaners
+419201,Wc Puh Vaht Domestos Arctic Fresh 435 Ml,Domestos,435 ml,,dry_preserves,dry_other,household,hh_cleaners
+419202,Wc Puh Vaht Domestos Citrus Blast 435 Ml,Domestos,435 ml,,dry_preserves,dry_other,household,hh_cleaners
+419203,Wc Puhastusvah Domestos Original 1 L,Domestos,1 l,,drinks,drinks_spirits,household,hh_cleaners
+419204,Wc Seep Brait Sweet Flowers 3 X 45 G,Brait,3x45 g,,personal_care,pcare_soap,household,hh_cleaners
+419205,Wc Seep Brait Volcano Ice 3 X 45 G,Brait,3x45 g,,personal_care,pcare_soap,household,hh_cleaners
+419206,Wc Varskendaja Brait Green Lagoon 40 G,Brait,40 g,,dry_preserves,dry_other,household,hh_cleaners
+419207,Wc Varskendaja Bref Pa Lemon 6 X 50 G,Bref,6x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419208,Wc Varskendaja Bref Pa Pine 6 X 50 G,Bref,6x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419209,Wc Varskendaja Domestos Citrus Taide 35 G,Domestos,35 g,,dry_preserves,dry_other,household,hh_cleaners
+419210,Wc Varskendaja Domestos Lavender 3 X 50 G,Domestos,3x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419211,Wc Varskendaja Domestos Magnolia 2 X 48 G,Domestos,2x48 g,,dry_preserves,dry_other,household,hh_cleaners
+419212,Wc Varskendaja Domestos Ocean 35 G,Domestos,35 g,,dry_preserves,dry_other,household,hh_cleaners
+419213,Wc Varskendaja Domestos P 5 Lime 2 X 50 G,Domestos,2x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419214,Wc Varskendaja Domestos P 5 Lime 3 X 50 G,Domestos,3x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419215,Wc Varskendaja Domestos P 5 Ocean 2 X 50 G,Domestos,2x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419216,Wc Varskendaja Domestos P 5 Ocean 3 X 50 G,Domestos,3x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419217,Wc Varskendaja Domestos P 5 Pine 2 X 50 G,Domestos,2x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419218,Wc Varskendaja Domestos P 5 Pine 3 X 50 G,Domestos,3x50 g,,dry_preserves,dry_other,household,hh_cleaners
+419219,Wc Varskendaja Domestos Pine Taide 35 G,Domestos,35 g,,dry_preserves,dry_other,household,hh_cleaners
+419220,Wc Varskendaja Domestos White Rose 3 X 50 G,Domestos,3x50 g,,drinks,drinks_wine,household,hh_cleaners
+419221,Wc Varskendaja Kolorado Lavender 40 G,Kolorado,40 g,,dry_preserves,dry_other,household,hh_cleaners
+419222,Dekoratiivohuvarskendi Brait Lake 100 Ml,Brait,100 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+419223,Dekoratiivohuvarskendi Brait Valley 100 Ml,Brait,100 ml,,dry_preserves,dry_other,household,hh_candles_airfresh

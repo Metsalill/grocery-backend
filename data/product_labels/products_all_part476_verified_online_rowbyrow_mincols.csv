@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+418774,Pesukapslid Ariel Mountain Spring 50 Pk,Ariel,50 tk,,produce,produce_root_veg,household,hh_laundry
+418775,Pesukapslid Lovela Baby Geelkaps 11 Tk,Lovela,11 tk,,produce,produce_root_veg,household,hh_laundry
+418776,Pesukapslid Mayeri Univers Hypoall 32 Tk,Mayeri,32 tk,,produce,produce_root_veg,household,hh_laundry
+418777,Pesukapslid Minirisk Universal 25 Tk,Minirisk,25 tk,,produce,produce_root_veg,household,hh_laundry
+418778,Pesukapslid Neutral Colour 24 Tk,Neutral,24 tk,,produce,produce_root_veg,household,hh_laundry
+418779,Pesukapslid Omo Rose Blossom 42 Tk,Omo,42 tk,,drinks,drinks_wine,household,hh_laundry
+418780,Pesukapslid Persil Color 68 Tk,Persil,68 tk,,produce,produce_root_veg,household,hh_laundry
+418781,Pesukapslid Persil Discs Universal 26 Tk,Persil,26 tk,,produce,produce_root_veg,household,hh_laundry
+418782,Pesukapslid Persil Discs Universal 40 Tk,Persil,40 tk,,produce,produce_root_veg,household,hh_laundry
+418783,Pesukapslid Persil Power Universal 29 Tk,Persil,29 tk,,produce,produce_root_veg,household,hh_laundry
+418784,Pesukapslid Persil Power Universal 44 Tk,Persil,44 tk,,produce,produce_root_veg,household,hh_laundry
+418785,Pesukapslid Persil Universal 68 Tk,Persil,68 tk,,produce,produce_root_veg,household,hh_laundry
+418786,Pesulop Vah Frosch Sens Hibiscus 40 Pk 1 L,Frosch,1 l,,dry_preserves,dry_other,household,hh_laundry
+418787,Pesulop Vah Lenor Rubyjasmine 59 Pk 1 23 L,Lenor,1.23 l,,dry_preserves,dry_other,household,hh_laundry
+418788,Pesulop Vah Lenor Sicilia 59 Pk 1 23 L,Lenor,1.23 l,,dry_preserves,dry_other,household,hh_laundry
+418789,Pesuloputusvah Tesori Persiandream 760 Ml,Tesori,760 ml,,household,hh_laundry,household,hh_laundry
+418790,Pesuloputusvahend Tesori Byzantium 760 Ml,Tesori,760 ml,,household,hh_laundry,household,hh_laundry
+418791,Pesuloputusvahend Tesori Hammam 760 Ml,Tesori,760 ml,,household,hh_laundry,household,hh_laundry
+418792,Pesupulber Ariel Alpine Color 6 Pk 330 G,Ariel,330 g,,household,hh_laundry,household,hh_laundry
+418793,Pesupulber Ariel Alpinecolor 30 Pk 1 65 Kg,Ariel,1.65 kg,,household,hh_laundry,household,hh_laundry
+418794,Pesupulber Ariel Alpinefresh 30 Pk 1 65 Kg,Ariel,1.65 kg,,household,hh_laundry,household,hh_laundry
+418795,Pesupulber Ariel Alpinefresh 50 Pk 2 75 Kg,Ariel,2.75 kg,,household,hh_laundry,household,hh_laundry
+418796,Pesupulber Ariel Color 50 Pk 2 75 Kg,Ariel,2.75 kg,,household,hh_laundry,household,hh_laundry
+418797,Pesupulber Bonux Radiantrose 18 Pk 1 17 Kg,Bonux,1.17 kg,,drinks,drinks_wine,household,hh_laundry
+418798,Plekieemald Vanish Oxi Act Regular 970 G,Vanish,970 g,,dry_preserves,dry_other,household,hh_laundry
+418799,Plekieemald Vanish Oxi Act White 970 G,Vanish,970 g,,dry_preserves,dry_other,household,hh_laundry
+418800,Varvipuudja K 2 R Colour Protect 22 Tk,K2r,22 tk,,dry_preserves,dry_other,household,hh_laundry
+418801,Lohnagraanulid Lenor Ariel 270 G,Lenor,270 g,,dry_preserves,dry_other,household,hh_laundry
+418802,Lohnagraanulid Lenor Floral 22 Pk 270 G,Lenor,270 g,,dry_preserves,dry_other,household,hh_laundry
+418803,Lohnagraanulid Lenor Fresh 270 G,Lenor,270 g,,dry_preserves,dry_other,household,hh_laundry
+418804,Lohnagraanulid Lenor Fresh 495 G,Lenor,495 g,,dry_preserves,dry_other,household,hh_laundry
+418805,Lohnagraanulid Lenor Orchid Vanilla 270 G,Lenor,270 g,,dry_preserves,dry_other,household,hh_laundry
+418806,Lohnagraanulid Lenor Orchid Vanilla 495 G,Lenor,495 g,,dry_preserves,dry_other,household,hh_laundry
+418807,Lohnagraanulid Lenor Spring Aw 22 Pk 270 G,Lenor,270 g,,dry_preserves,dry_other,household,hh_laundry
+418808,Lohnagraanulid Lenor Spring Awake 495 G,Lenor,495 g,,dry_preserves,dry_other,household,hh_laundry
+418809,Pesugeel Ariel Amethystflower 30 Pk 1 35 L,Ariel,1.35 l,,household,hh_laundry,household,hh_laundry
+418810,Pesugeel Ariel Color 25 Pk 1 125 L,Ariel,1.125 l,,household,hh_laundry,household,hh_laundry
+418811,Pesugeel Ariel Color 40 Pk 1 8 L,Ariel,1.8 l,,household,hh_laundry,household,hh_laundry
+418812,Pesugeel Ariel Color 60 Pk 2 7 L,Ariel,2.7 l,,household,hh_laundry,household,hh_laundry
+418813,Pesugeel Ariel Color 70 Pk 3 15 L,Ariel,3.15 l,,household,hh_laundry,household,hh_laundry
+418814,Pesugeel Ariel Extra 30 Pk 1 35 L,Ariel,1.35 l,,household,hh_laundry,household,hh_laundry
+418815,Pesugeel Ariel Extra 50 Pk 2 25 L,Ariel,2.25 l,,household,hh_laundry,household,hh_laundry
+418816,Pesugeel Ariel Freshair Lenor 30 Pk 1 35 L,Ariel,1.35 l,,household,hh_laundry,household,hh_laundry
+418817,Pesugeel Ariel Mountain Spring 40 Pk 1 8 L,Ariel,1.8 l,,household,hh_laundry,household,hh_laundry
+418818,Pesugeel Ariel Mountain Spring 60 Pk 2 7 L,Ariel,2.7 l,,household,hh_laundry,household,hh_laundry
+418819,Pesugeel Ariel Mountainspring 25 Pk 1 125 L,Ariel,1.125 l,,household,hh_laundry,household,hh_laundry
+418820,Pesugeel Ariel Mountainspring 70 Pk 3 15 L,Ariel,3.15 l,,household,hh_laundry,household,hh_laundry
+418821,Pesugeel Ariel Sensitive 25 Pk 1 125 L,Ariel,1.125 l,,household,hh_laundry,household,hh_laundry
+418822,Pesugeel Ariel Sensitive 50 Pk 2 25 L,Ariel,2.25 l,,household,hh_laundry,household,hh_laundry
+418823,Pesugeel Ariel Sensitive 60 Pk 2 7 L,Ariel,2.7 l,,household,hh_laundry,household,hh_laundry
