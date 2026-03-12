@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+4159,O'Boy kakaojoogipulber 1 kg,O'Boy,1 kg,7310700673262,,,drinks,drinks_tea_coffee
+4160,"Pesuloputusvahend Silan Sensitive Derma Care 1,1l",Pesuloputusvahend Silan,1.1 l,9000101590661,,,household,hh_laundry
+4161,"Gourmet Club karulaugu hummus, 200g",Gourmet Club,200 g,4740670009717,,,dry_preserves,dry_ready_meals_jars
+4162,Meira peen meresool 800 g,Meira,800 g,6420101884714,,,world_spices,spices_basic_salt_pepper
+4163,Maks ja Moorits Kodune Kotletisegu 500G,Maks,500 g,4740171170022,,,meat_fish,meat_minced
+4166,Xtra jahvatatud paprika 100 g,Xtra,100 g,7340191109377,,,world_spices,spices_herbs_spice_mix
+4167,Trolli Sour Glowworms kummikommid 200 g,Trolli Sour,200 g,4000512010869,,,sweets_snacks,sweets_candies
+4168,Casali shokolaadimangod 150 g,Casali,150 g,9000332812402,,,sweets_snacks,sweets_chocolate_bars
+4169,"Bon Vegan Maitsestamata pehme tofu, 300 g",Bon Vegan,300 g,4742117001032,,,meat_fish,meat_other
+4170,MUU Jauhis Hakklihaasendaja 280 G,MUU Jauhis,280 g,6430078140300,meat_fish,meat_minced,meat_fish,meat_other
+4171,Superkangelase smuuti õun-mango-avokaado-spinat 500ml,Superkangelase,500 ml,7340191117891,,,drinks,drinks_juices
+4172,"Ribella kikerhernehummus Italiano tomati ja küüslauguga, 200 g",Ribella,200 g,8606011890238,,,dry_preserves,dry_ready_meals_jars
+4175,Mamma Kõrvitsa-Kohupiimapannkoogid 200 G,Mamma Kõrvitsa-Kohupiimapannkoogid,200 g,4740184600400,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_other
+4176,Vikstal kuivik tavaline 200g,Vikstal,200 g,4741469009376,,,bakery,bakery_other
+4177,Dr.Oetker pizza kiirpärm 26g,Dr.Oetker,26 g,5701073067932,,,dry_preserves,dry_flour_sugar_baking
+4178,Matsimoka Delikatesshakkliha 300G,Matsimoka Delikatesshakkliha,300 g,4744735010328,meat_fish,meat_minced,meat_fish,meat_minced
+4180,Minu herned 1 kg,Minu,1 kg,4743144006304,,,dry_preserves,dry_groats_beans
+4181,"Energiageel sidruni, 40 g",Energiageel,40 g,6430056591315,,,drinks,drinks_sport
+4182,Altin aslan kõva nisu tortilla 540g 6 tk,Altin,540 g,5708209201895,,,bakery,bakery_flatbreads_wraps
+4183,"Rullplaaster 2,5 cm X 500 cm",Rullplaaster,,4742225004765,,,personal_care,pcare_other
+4184,Tallegg Kanasink Viil 300G,Tallegg Kanasink,300 g,4740046012969,meat_fish,meat_hams,meat_fish,meat_other
+4185,Suur kana-juustu pitsa tomatikastmega 355 g,Suur,355 g,4740093824539,dairy_eggs_fats,dairy_other,frozen_food,frozen_pizza
+4186,TIC TAC Citrus Mix T1 18g,TIC TAC,18 g,80883586,,,sweets_snacks,sweets_gums_mints
+4189,Gourmante palsamikreem gourmante modena 250ml,Gourmante,250 ml,5200110730476,,,sauces_oils,oils_vinegar
+4190,Kotimaista neljaviljahelbed 750 g,Kotimaista,750 g,6415712002886,,,dry_preserves,dry_cereals_muesli
+4191,Coop Fettucine Värske Pasta 300 G,Coop Fettucine,300 g,7340011392347,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+4194,"Lipton must tee metsamarjadega 20 x 1,7 g",Lipton,20x1.7 g,8722700140542,,,drinks,drinks_tea_coffee
+4195,Cooler Green Apple 4%vol muu alkohoolne jook 275ml,Cooler Green,275 ml,4740050004417,,,drinks,drinks_other
+4197,Lay's Hapukooremaitselised Krõpsud 200g,Lay's Hapukooremaitselised,200 g,5900259128423,,,sweets_snacks,sweets_snacks_salty
+4198,Mo Saaremaa Juustukaste 400g,Mo Saaremaa,400 g,4740153200051,dairy_eggs_fats,dairy_other,sauces_oils,sauces_pasta_cooking
+4199,Meira lehtželatiin 20 g,Meira,20 g,6414203405397,,,dry_preserves,dry_flour_sugar_baking
+4200,Pähklinäpp röstitud valge mandel 200 g,Pähklinäpp,200 g,4744743011843,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+4201,Kotimaista Kartul Siikli 1 kg,Kotimaista Kartul,1 kg,6414893388116,,,produce,produce_root_veg
+4203,Nestle müslibatoon maasika 35g,Nestle,35 g,5900020027689,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+4204,"X-TRA piparmünditee 20 x 1,25 g",X-TRA,20x1.25 g,7340011424918,,,drinks,drinks_tea_coffee
+4206,Vadakuvalk Whey100 maitsestamata 700 g,Vadakuvalk Whey100,700 g,6430018361628,,,drinks,drinks_syrups_powders
+4207,Šampinjon,Šampinjon,,2060580400001,,,produce,produce_mushrooms
+4208,Coop vaarikamoos 400 g,Coop,400 g,7340191154421,,,dry_preserves,dry_canned_fruit
+4210,Tuc Original kreekerid 100 g,Tuc Original,100 g,5410041435702,,,sweets_snacks,sweets_snacks_salty
+4211,Leader perf whey protein chocolate 500g,Leader,500 g,6430067846695,,,drinks,drinks_syrups_powders
+4212,Möller Omega-3-kapsl&D vit. 100kaps,Möller Omega-3-kapsl&D,,5702071506904,,,personal_care,pcare_other
+4213,Rannamoisa Krõbedad Kanafileešnitslid 180 G,Rannamoisa Krõbedad,180 g,4742462001473,meat_fish,meat_poultry,meat_fish,meat_poultry
+4214,Rainbow tuhksuhkur 250 g,Rainbow,250 g,7340191102583,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+4216,Cooler Caribba &a muu alkohoolne jook 4%vol 275 ml,Cooler Caribba,275 ml,4740050005339,,,drinks,drinks_other
+4217,Saaremaa Rhu Spritz aromatiseeritud veinikokteil 750ml,Saaremaa Rhu,750 ml,4740054365019,,,drinks,drinks_other
+4219,Maahärra kartuli-sibulasegu 1 kg,Maahärra,1 kg,4740093340732,,,frozen_food,frozen_potato_products
+4220,Mikrofilter EF2 lõigatav,Mikrofilter EF2,,3023372005869,,,household,hh_other
+4221,Santa Maria minitortilla 200 g,Santa Maria,200 g,7311311021121,,,bakery,bakery_flatbreads_wraps
+4223,"Vadakuvalk Whey+ vanilli, 700 g",Vadakuvalk Whey+,700 g,6430018361581,,,drinks,drinks_syrups_powders
+4224,"Meistrite Gildi Pilsner õlu 4,5%vol 568ml",Meistrite Gildi,568 ml,4744136013119,,,drinks,drinks_beer_cider
+4225,COOP marja teede assortii 4x5tk 40g,COOP,40 g,7340191101340,,,drinks,drinks_tea_coffee
+4226,Coop müslibatoon jogurtipulbriga valge šokolaadi tükkidega 3% ja külmkuivatud maasikatükkidega 1% 138g,Coop,138 g,7340191153035,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+4228,"Farmi Kirssidega skyr, 150 g",Farmi Kirssidega,150 g,4740113091453,,,dairy_eggs_fats,dairy_yogurt_kefir
+4229,Kuivatatud kivipuravik 35 g,Kuivatatud,35 g,4742798003233,,,dry_preserves,dry_canned_veg
+4230,"Myllyn paras lehttainas, 500 g",Myllyn,500 g,6417700050299,,,frozen_food,frozen_bakery
+4233,Mamma Pannkook Singi Ja Juustu 200G,Mamma Pannkook,200 g,4740184512000,bakery,bakery_cakes_pastries,dry_preserves,dry_ready_meals_jars
+4234,Pealinna pelmeenid küüslauguga 350g,Pealinna,350 g,4740093000551,,,frozen_food,frozen_meat
+4235,"Rainbow kreeka stiilis laktoosivaba jogurt 10%, 500g",Rainbow,500 g,7340191127104,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+4237,Yook Barista Extra Creamy Kaerajook 1L,Yook Barista,1 l,4745010449109,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+4238,Kiivi I klass,Kiivi I,,2060492900002,,,produce,produce_tropical
+4241,Santa Maria broilerimaitseaine 30 g,Santa Maria,30 g,6418474118338,sauces_oils,oils_other,world_spices,spices_herbs_spice_mix
+4242,BOSCH tolmukott BBZ41FGall 4tk,BOSCH,4 pcs,4242002830414,,,household,hh_other
+4244,Eesti Pagar Burgerikukkel Seesamiseemnete 320 G,Eesti Pagar,320 g,4740086011519,,,bakery,bakery_buns_croissants
+4247,"Tere Vanilje kohupiimapasta, 300 g",Tere Vanilje,300 g,4740036008989,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_desserts
+4248,"Tanqueray gin 43,1%vol 1l",Tanqueray,1 l,5000291020805,,,drinks,drinks_spirits
+4251,Vici Krevetid Soolvees 180/360G,Vici Krevetid,360 g,4770190158558,,,meat_fish,fish_processed
+4252,Kukeseen 300g,Kukeseen,300 g,4748001005216,,,produce,produce_mushrooms
+4253,Coop Virsik I klass,Coop Virsik,,2060470400005,,,produce,produce_tropical
+4254,Texas juustumaitseline popcorn 60 g,Texas,60 g,4740053005657,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+4255,Pulkdeodorant Fitness Gel 65 g,Pulkdeodorant Fitness,65 g,8718951253995,,,personal_care,pcare_deo
+4256,"Heineken alkoholivaba õlu, 330 ml",Heineken,330 ml,8712000050146,,,drinks,drinks_beer_cider
+4257,Xtra vaarikad 400g,Xtra,400 g,7340191153332,,,frozen_food,frozen_berries_fruit
+4259,"Keiju Taimne soolane rasvavõie 70%, 400 g",Keiju Taimne,400 g,6438207011897,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+4260,Punch club! Elderflower spritz veinikokteil,Punch,,4744429013291,,,drinks,drinks_other
+4261,Mahe banaan EC-BIO-140,Mahe,,2060279200004,,,produce,produce_tropical
+4262,Mr muscle ahju ja grilli puhastusvahend,Mr,,6414405303002,,,household,hh_cleaners
+4263,"Voimix Vähendatud rasvasisaldusega margariin 60%, 400 g",Voimix Vähendatud,400 g,6438207011873,,,dairy_eggs_fats,dairy_butter_margarine
+4265,"Hartwall Original Long Drink muu alkohoolne jook 5,5%vol 24x330ml",Hartwall Original,24x330 ml,6413601055906,drinks,drinks_beer_cider,drinks,drinks_other
+4267,Monster juiced mango loco energiajook 500ml,Monster,500 ml,5060639121489,drinks,drinks_energy,drinks,drinks_energy
+4268,Xtra vaarikakissell 1 l,Xtra,1 l,7340011341611,,,dry_preserves,dry_other
+4269,Herkku Nelja juustu tortelliinid 250 g,Herkku Nelja,250 g,6415712714703,dairy_eggs_fats,dairy_cheese_slices,dry_preserves,dry_pasta_rice
+4270,Felix Kartulikaste 220g,Felix Kartulikaste,220 g,4740029048923,,,sauces_oils,sauces_pasta_cooking
+4271,glükoositropsid C-vit. Apelsini 39g,glükoositropsid,39 g,5997255706458,,,personal_care,pcare_other
+4275,Xtra sidrunipipar 90 g,Xtra,90 g,7340011425786,,,world_spices,spices_herbs_spice_mix
+4276,Barebells pehme proteiinibatoon soola ja šokolaadiga 55g,Barebells,55 g,7340001805093,,,sweets_snacks,sweets_chocolate_bars
+4279,"Noa Spread avokaado hummus, 175g",Noa Spread,175 g,4058094310099,,,dry_preserves,dry_ready_meals_jars
+4280,Pähklinäpp chia seemned 200 g,Pähklinäpp,200 g,4750195020593,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+4282,X-tra tume šokolaad 100 g,X-tra,100 g,7340191100732,,,sweets_snacks,sweets_chocolate_bars
+4286,"Grillsüsi 30 l, kõrgekvaliteediline lehtpuusüsi",Grillsüsi,30 l,6411960010208,produce,,household,hh_other
+4287,Dr.Oetker rummiaroom 38 ml,Dr.Oetker,38 ml,5701073063811,,,dry_preserves,dry_flour_sugar_baking
+4289,Coop tomatikaste küüslaugu ja tšilliga 390g,Coop,390 g,7340191156074,,,sauces_oils,sauces_pasta_cooking
+4292,Piraat hapukoore ja küüslaugumaitselised kartulikrõpsud XXL 220G,Piraat,220 g,4740053005695,,,sweets_snacks,sweets_snacks_salty
+4293,Red Bull energiajook White Edition 250 ml,Red Bull,250 ml,90435461,,,drinks,drinks_energy
+4294,"Energiageel sidrunimaitseline, 30 g",Energiageel,30 g,6409943800366,,,drinks,drinks_sport
+4295,Mayeri katlakivieemaldi 500ml,Mayeri,500 ml,4740060008054,,,household,hh_cleaners
+4296,Xtra tomatiketšup 1 kg,Xtra,1 kg,7340191135888,,,sauces_oils,sauces_ketchup_mayo
+4297,Coop tomatiketšup 750 g,Coop,750 g,7340191132382,,,sauces_oils,sauces_ketchup_mayo
+4298,"Alma Kreeka jogurt, 370 g",Alma Kreeka,370 g,4740125531213,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+4299,Margherita pitsa 300g,Margherita,300 g,4740093824607,,,frozen_food,frozen_pizza
+4301,Puhdistamo elektrolüütide pulber mango-apelsiini 120 g,Puhdistamo,120 g,6430039223370,,,drinks,drinks_sport
+4302,Kotimaista Tikker 250g,Kotimaista Tikker,250 g,6438574129065,,,produce,produce_berries
+4303,USIN Pannkoogid hakklihaga 400 g,USIN Pannkoogid,400 g,4740584000138,meat_fish,meat_minced,bakery,bakery_other
+4304,Grillitikud bambus 100 tk,Grillitikud,100 pcs,6412989963223,,,household,hh_kitchenware
+4306,Coop tomatisupp 49 g,Coop,49 g,7340191101494,,,dry_preserves,dry_soups_noodles
+4307,Astelpajusalv mesilasvaha ja astelpajuõliga,Astelpajusalv,,4744333010522,sauces_oils,oils_other,personal_care,pcare_other
+4309,Hellmann's -50% suhkrut 460g,Hellmann's,460 g,8720182818676,,,sauces_oils,sauces_ketchup_mayo
+4311,Kotimaista kiirkaerahelbed 750 g,Kotimaista,750 g,6415712003432,,,dry_preserves,dry_cereals_muesli
+4312,Coop Pecans natural 80g,Coop Pecans,80 g,7340191148321,,,sweets_snacks,sweets_nuts_driedfruit
+4313,Tartu Mill durumnisujahupasta fusilli 1 kg,Tartu Mill,1 kg,4740493004005,drinks,drinks_spirits,dry_preserves,dry_pasta_rice
+4314,"Dr.Oetker mozzarella pitsa, gluteenivaba, 370 g",Dr.Oetker,370 g,4001724022398,,,frozen_food,frozen_pizza
+4316,Seep Naturals Almond 90 g,Seep Naturals,90 g,8714789700052,,,personal_care,pcare_soap
+4320,Ribella Kikerhernehummus kõrvitsaseemnetega 200g,Ribella Kikerhernehummus,200 g,8606011898210,,,dry_preserves,dry_ready_meals_jars
+4321,Kotimaista mahe vegan hernesupp 435g,Kotimaista,435 g,6438460362743,,,dry_preserves,dry_ready_meals_jars
+4322,"Magnum Double Cherry pulgajäätis, 85ml/71g",Magnum Double,85 ml,8711327663961,,,frozen_food,frozen_desserts_icecream
+4325,HK Koorene Kartulipuder Kanaga 300 G,HK Koorene,300 g,6409100073633,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+4326,Joogitabletid Junior,Joogitabletid Junior,,5997255703297,,,drinks,drinks_syrups_powders
+4328,Maggi veiselihapuljong kostilja 120 g,Maggi,120 g,8585002469649,meat_fish,meat_beef_lamb_game,world_spices,spices_broth_stock
+4329,Ribella Naturaalne kikerhernehummus 200g,Ribella Naturaalne,200 g,8606011898197,,,dry_preserves,dry_ready_meals_jars
+4330,"Kreatiin, 200 g","Kreatiin,",200 g,6430018360461,,,personal_care,pcare_other
+4331,"Saare Muraka-sidruni koorene glasuurkohuke, 40 g",Saare Muraka-sidruni,40 g,4742231002151,dairy_eggs_fats,dairy_other,dairy_eggs_fats,dairy_desserts
+4333,"Coop Cheddar Vegan võileivaviilud, 200g",Coop Cheddar,200 g,7340191173835,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+4334,SINEPIPULBER VANNIDEKS 200G,SINEPIPULBER VANNIDEKS,200 G,4745090940978,,,personal_care,pcare_other
+4335,Tolmukott RB1800 4 tk,Tolmukott RB1800,4 pcs,7319599012305,,,household,hh_other
+4336,Vannisvamm lastele,Vannisvamm,,5905784315744,,,personal_care,pcare_other
+4337,Mo Saaremaa Hollandi leibjuust viilutatud 450g,Mo Saaremaa,450 g,4740153064011,bakery,bakery_bread_loaves,cheese,cheese_regular
+4338,"Kalapallid, külmutatud 200g","Kalapallid,",200 g,4740663999872,frozen_food,frozen_fish,frozen_food,frozen_fish
+4340,"Farmi Keefir täispiimast 3,8-4,2%, 1 kg",Farmi Keefir,1 kg,4740113091002,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+4341,"Coop küpsetusmargariin 80%, 500 g",Coop,500 g,7340191173842,,,dairy_eggs_fats,dairy_butter_margarine
+4342,Tallegg Broilerimaks Jahutatud 500G,Tallegg Broilerimaks,500 g,4740046010521,meat_fish,meat_other,meat_fish,meat_poultry
+4343,Friendly Vikings kaerajook 1l,Friendly Vikings,1 l,6408659990460,,,dairy_eggs_fats,dairy_plant_drinks
+4345,Klaasipuhastuslapid Coop 20tk,Klaasipuhastuslapid Coop,20 pcs,7340191168039,,,household,hh_cleaners
+4346,"Gourmet Club Aedpeedi hummus, 200 g",Gourmet Club,200 g,4740670009502,,,dry_preserves,dry_ready_meals_jars
+4350,"Oddlygood kaerakreem original, gluteenivaba, 200 ml",Oddlygood,200 ml,6430081490775,,,dairy_eggs_fats,dairy_plant_drinks
+4351,"Tere Kõrgkuumutatud cappuccino piim 3,5%, 1 l",Tere Kõrgkuumutatud,1 l,4740036009085,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+4354,Meira paprika 24 g,Meira,24 g,6414200136959,,,world_spices,spices_herbs_spice_mix
+4355,Mahe õun Juliet I klass FR-BIO-01,Mahe,,2060515700008,,,produce,produce_apples_pears
+4356,Hepa filter EF114 õhupuhastajale EAP300,Hepa,,7319599018079,,,household,hh_other
+4358,"Pergale assortiikarp Dessert, 113g",Pergale,113 g,4770179998366,,,sweets_snacks,sweets_chocolate_bars
+4359,Rakvere Sea Kaelakarbonaad Kg,Rakvere Sea,,2360331300001,,,meat_fish,meat_pork
+4360,"Vici Heeringafilee Tükid Mädarõikakastmes, Kg",Vici Heeringafilee,,2060425000007,meat_fish,fish_fresh,meat_fish,fish_processed
+4361,"Alpro magustamata mandlijook, 1 l",Alpro,1 l,5411188112709,,,dairy_eggs_fats,dairy_plant_drinks
+4362,"Corny big zero müslibatoon maapähklite ja piimašokolaadiga, magusainetega 40g",Corny,40 g,4011800001612,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+4364,Dansukker tuhksuhkur 500 g,Dansukker,500 g,5701259437122,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+4365,Taffel hapukoore-sibulamaitselised siledad kartulilaastud 180g,Taffel,180 g,4750024002974,,,sweets_snacks,sweets_snacks_salty
+4368,Van Houten kakaojoogipulber 125g,Van Houten,125 g,7340161402200,,,drinks,drinks_tea_coffee
+4369,Kotimaista maasikamoos 310 g,Kotimaista,310 g,6438460623196,,,dry_preserves,dry_canned_fruit
+4371,Merci Crispy assortiišokolaad krõbeda - mandliga 250g,Merci Crispy,250 g,4014400917956,,,sweets_snacks,sweets_chocolate_bars
+4372,"Energiageel koolamaitseline, 30 g",Energiageel,30 g,6409943800380,,,drinks,drinks_sport
+4373,Peipsi hapukurk 400g Germani talu,Peipsi,400 g,4744664010017,,,dry_preserves,dry_canned_veg
+4375,Marmiton India pähklitega halvaa 100 g,Marmiton India,100 g,4740062550612,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit

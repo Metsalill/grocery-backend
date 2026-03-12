@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+19868,"Mama riisinuudlid Creamy Tom Yum, gluteenivaba, 55g",Mama,55 g,8851876001682,dairy_eggs_fats,dairy_other,dry_preserves,dry_soups_noodles
+19883,Il molino panna cotta karamellikastmega 90g,Il,90 g,8009550006533,sweets_snacks,sweets_candies,dairy_eggs_fats,dairy_desserts
+19886,"Marineeritud heeringas, sibulaga",Marineeritud,,7340191153691,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+19888,Dr.Oetker maasikakreemipulber 100 g,Dr.Oetker,100 g,5701073024614,,,dry_preserves,dry_flour_sugar_baking
+19889,Myllärin maherukkihelbed 500 g,Myllärin,500 g,6415002506841,,,dry_preserves,dry_cereals_muesli
+19891,Coop kakaopallid täisterast 300g,Coop,300 g,7340191160279,,,dry_preserves,dry_cereals_muesli
+19905,Pirn Red Williams I klass,Pirn Red,,2060440300007,,,produce,produce_apples_pears
+19906,"Coop toiduvärv, sinine, 30 ml",Coop,30 ml,7340191150256,,,dry_preserves,dry_flour_sugar_baking
+19908,"Põnn mustika-õunapüree 100 g, öko, alates 4-elukuust",Põnn,100 g,4740073070901,,,baby,baby_food_jars
+19913,"Myllyn Paras Raketti Spagetti lühikesed spagetid, 350 g",Myllyn Paras,350 g,6417700050602,,,dry_preserves,dry_pasta_rice
+19922,Sidrun Iklass 500 g,Sidrun Iklass,500 g,4740669010106,,,produce,produce_tropical
+19923,Umami steviaga magusaine 300 g,Umami,300 g,4770082311580,,,dry_preserves,dry_flour_sugar_baking
+19924,"Heeringafilee rasvane, VICI, 240 g","Heeringafilee,",240 g,4770190378918,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+19935,Coop pitsa vegan 410 g,Coop,410 g,7340191146525,,,frozen_food,frozen_pizza
+19937,Ben's original boil-in-bag pikateraline riis 8x125g,Ben's,8x125 g,5410673005847,drinks,drinks_spirits,dry_preserves,dry_pasta_rice
+19939,Kokteiltomatid aroma tertussa 350g,Kokteiltomatid,350 g,8719189371512,,,produce,produce_root_veg
+19954,"Tartu mill täistera rukkijahu 1,5 kg",Tartu,1.5 kg,4740493555750,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+19955,Granoro kuskuss 1kg,Granoro,1 kg,8007290841698,,,dry_preserves,dry_groats_beans
+19961,Pähklinäpp pehmed aprikoosid 250 g,Pähklinäpp,250 g,4750195020203,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+19962,Pähklinäpp röstitud metsapähklid 200 g,Pähklinäpp,200 g,4750195020685,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+19980,Disas vikerforellimari 100g,Disas,100 g,6405405860008,,,meat_fish,fish_processed
+19983,"Rainbow täisteraspagetid 500 g, organic",Rainbow,500 g,6415712702267,,,dry_preserves,dry_pasta_rice
+19985,Must teraline valgumari 200 g,Must,200 g,4820040021669,,,sweets_snacks,sweets_nuts_driedfruit
+19999,Küüslaugu küüned 200g,Küüslaugu,200 g,768563266300,,,produce,produce_root_veg
+20001,Coop Greip valge I klass,Coop Greip,,2060505200006,,,produce,produce_tropical
+20005,PCD soolatud maapähklid 200 g,PCD,200 g,8710411011992,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+20013,Tammejuure täistera kaerajahu 700 g mahe,Tammejuure,700 g,4744150012457,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+20017,"Heliis punasesõstra-maasika siirup 1,5L",Heliis,1.5 l,4740077002632,,,drinks,drinks_syrups_powders
+20026,Virtasalmen gluteenivaba riisijahu 500 g,Virtasalmen,500 g,6430041080152,dry_preserves,dry_pasta_rice,dry_preserves,dry_flour_sugar_baking
+20028,"Põnn mangopüree 100g, öko, alates 4-elukuust",Põnn,100 g,4740073070888,,,baby,baby_food_jars
+20031,"Wiru mill toortatrajahu 500 g, mahe, gluteenivaba",Wiru,500 g,4742898010292,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+20034,"Rannakarbid marineeritud, VILSUNDBLUE, 350 g",Rannakarbid,200 g,5700003006317,,,meat_fish,fish_processed
+20042,"Coop krevetid, keskmine suurus, 180 g",Coop,180 g,7340191145900,,,meat_fish,fish_fresh
+20047,Helen riisihelbed 500 g,Helen,500 g,4740120000097,dry_preserves,dry_pasta_rice,dry_preserves,dry_cereals_muesli
+20050,Kotimaista külmsuitsu vikerforelliviil 150 g,Kotimaista,150 g,6438574272785,,,meat_fish,fish_salted_smoked
+20053,Nuikapsas,Nuikapsas,,2060523200002,,,produce,produce_root_veg
+20057,Pähklisegu rosinatega 300g,Pähklisegu,300 g,7340191148116,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+20058,"Lõhe, külmsuitsu, viilutatud 200 g","Lõhe,",200 g,4740192010529,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+20059,Dr.Oetker tumeda šokolaadi nööbid küpsetamiseks 100 g,Dr.Oetker,100 g,5701073061466,,,dry_preserves,dry_flour_sugar_baking
+20062,Barilla pasta Cannelloni 250g,Barilla,250 g,8076808070882,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+20063,Dr.Oetker vaniljekreemipulber 100 g,Dr.Oetker,100 g,5701073023983,,,dry_preserves,dry_flour_sugar_baking
+20074,"Linea Verde, täisterakuskuss, 500 g","Linea Verde,",500 g,6418675196333,,,dry_preserves,dry_groats_beans
+20079,Pähklinäpp vaarikakuubikud 85 g,Pähklinäpp,85 g,4744743011676,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+20081,Oho kolm sõpra 500g,Oho,500 g,4770149204152,,,dry_preserves,dry_cereals_muesli
+20094,LÕHERULL KUUMSUITSU 1 KG,LÕHERULL KUUMSUITSU,1 kg,2060317100006,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+20096,"Marineeritud heeringafileetükid 150 g, õlivaba",Marineeritud,150 g,4740590074475,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+20100,Finish power nõudepesutabletid kileta allin1 90tk,Finish,90 pcs,5714970006782,,,household,hh_dishwashing
+20102,Kommi Asemel Parim Valik Seedermänniseemned 100g,Kommi Asemel,100 g,4740085315205,,,sweets_snacks,sweets_nuts_driedfruit
+20103,Tartu mill odrakruup 1 kg,Tartu,1 kg,4750020030933,,,dry_preserves,dry_groats_beans
+20120,Coop valge kinoa 500g,Coop,500 g,7340191169975,,,dry_preserves,dry_groats_beans
+20122,"Myllyn paras eelkeedetud lasanjeplaadid, 500 g",Myllyn,500 g,6417700050527,,,dry_preserves,dry_pasta_rice
+20126,Marineeritud heeringas prantsuse sibulaga,Marineeritud,,7340191153738,meat_fish,fish_fresh,meat_fish,fish_processed
+20127,Linda kaerahelbepuder mustikatega 40g,Linda,40 g,4743144004126,,,dry_preserves,dry_cereals_muesli
+20130,Arbuus,Arbuus,,2060494500002,,,produce,produce_tropical
+20131,Coop Matjes-heeringafileed 150g,Coop Matjes-heeringafileed,150 g,6438574272341,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+20157,Bazaro mustad soolased päevalilleseemned 300g,Bazaro,300 g,4770266186348,,,sweets_snacks,sweets_nuts_driedfruit
+20158,Veski Mati Täistera 4-viljahelbe kiirpuder 45g,Veski Mati,45 g,4740281456474,,,dry_preserves,dry_cereals_muesli
+20162,Ben's original boil-in-bag pikateraline riis 500 g,Ben's,500 g,5410673006042,drinks,drinks_spirits,dry_preserves,dry_pasta_rice
+20166,Puhastusaine 400 g,Puhastusaine,400 g,6416571013402,,,household,hh_cleaners
+20171,"Sante fit granola pähkli-kakao, ilma lisatud suhkruta 300g",Sante,300 g,5900617037190,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_cereals_muesli
+20173,Maple Joe öko vahtrasiirup 250 g,Maple Joe,250 g,3088542500254,,,dry_preserves,dry_flour_sugar_baking
+20176,"Tuunikalapasteet MSC, ABBA, 145 g",Abba MSC,145 g,7350126088554,meat_fish,fish_fresh,meat_fish,fish_processed
+20177,Kuivatatud Mango viilud 500g,Kuivatatud Mango,500 g,4779041985831,,,sweets_snacks,sweets_nuts_driedfruit
+20178,Thai Choice kiirnuudlid kanamaitselised 85 g,Thai Choice,85 g,8851978805188,dry_preserves,dry_pasta_rice,dry_preserves,dry_soups_noodles
+20190,Germund kooritud Hiina maapähklid 200 g,Germund,200 g,4742155000165,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+20196,"Kotimaista jahusegu 1 kg, gluteenivaba",Kotimaista,1 kg,6415711425761,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+20199,"Dr.Oetker le&nge kaunistusdražeed, 50g",Dr.Oetker,50 g,5701073061183,,,dry_preserves,dry_flour_sugar_baking
+20201,Dansukker puuviljasuhkur 370 g,Dansukker,370 g,6414000521740,produce,,dry_preserves,dry_flour_sugar_baking
+20202,Yesdeli Karppisokeri® viinamarjasuhkrust valmistatud kalorivaba magusaine 430 g,Yesdeli Karppisokeri®,430 g,6430044204166,,,dry_preserves,dry_flour_sugar_baking
+20212,Porgand Crispy 200g,Porgand Crispy,200 g,4751006960169,,,produce,produce_root_veg
+20215,Coop krõbe granola aiamarjadega 750 g,Coop,750 g,7340191153134,,,dry_preserves,dry_cereals_muesli
+20217,Its us kikerhernepasta fusilli 250g,Its,250 g,5999568625051,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+20223,"Heeringafileetükid koorekastmes sibulaga, KAPTEN GRANT, 150 g",Heeringafilee,150 g,4740687001353,meat_fish,fish_fresh,meat_fish,fish_processed
+20228,"Soolaheeringas, kg","Soolaheeringas,",,2060244700003,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+20234,Minu pudruriis 1kg,Minu,1 kg,4743144006137,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+20243,"Avokaado võrgus, 700 g",Avokaado,700 g,4740669000626,,,produce,produce_tropical
+20248,"Torino kaera-porgandi-täisteramakaronid, 400 g",Torino,400 g,6411200110798,,,dry_preserves,dry_pasta_rice
+20249,Y.E.S. tšillimaitselised triibulised päevalilleseemned 150g,Y.E.S.,150 g,4770266129581,,,sweets_snacks,sweets_nuts_driedfruit
+20253,Santa Maria taco maitseainesegu kanale 28 g,Santa Maria,28 g,7311311013201,drinks,drinks_beer_cider,world_spices,spices_mexican
+20264,"Külmsuitsulõhe, viilutatud 500 g","Külmsuitsulõhe,",500 g,4740192010413,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+20265,Melissa lastemakaronid Paw Patrol 500g,Melissa,500 g,5201193206551,,,dry_preserves,dry_pasta_rice
+20266,Bosto basmati riis 4x75g,Bosto,4x75 g,5410106011247,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+20273,Hortex marjasegu vaarikatega külmutatud 300g,Hortex,300 g,5900477003939,frozen_food,frozen_berries_fruit,frozen_food,frozen_berries_fruit
+20280,Coop röstitud maisihelbed 500g,Coop,500 g,7340011353478,,,dry_preserves,dry_cereals_muesli
+20281,Coop risottoriis 500g,Coop,500 g,7340191143241,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+20286,Riso Scotti puravikurisoto 210 g,Riso Scotti,210 g,8001860257827,,,dry_preserves,dry_pasta_rice
+20287,Risella basmati riis 1kg,Risella,1 kg,8410184027793,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+20288,"Mereangerjas, marineeritud 250 g","Mereangerjas,",250 g,4740192000018,,,meat_fish,fish_processed
+20293,Paulúns Granola kakao ja vaarika 450 g,Paulúns Granola,450 g,7310240001785,,,dry_preserves,dry_cereals_muesli
+20294,SKUMBRIA KÜLMSUITSU 1 KG,SKUMBRIA KÜLMSUITSU,1 kg,2060324200003,,,meat_fish,fish_salted_smoked
+20320,Veski mati maisitang 500 g,Veski,500 g,4740281006648,,,dry_preserves,dry_groats_beans
+20327,HEIK KUUMSUITSU 1 KG,HEIK KUUMSUITSU,1 kg,2060334200000,,,meat_fish,fish_salted_smoked
+20328,Kotimaista sepikujahu 2 kg,Kotimaista,2 kg,6415712000219,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+20329,Mahe magus piklik paprika 200g,Mahe,200 g,6414893391086,,,produce,produce_root_veg
+20332,Kotimaista nisujahu jahuparandajaga 2 kg,Kotimaista,2 kg,6415712333454,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+20333,Baltix tatar 4 x 100 g,Baltix,4x100 g,4742298000145,,,dry_preserves,dry_groats_beans
+20340,Keegelkõrvits,Keegelkõrvits,,2060541900007,,,produce,produce_root_veg
+20350,"Jäämere mereannisalat, 200g",Jäämere,200 g,6406601090305,produce,,meat_fish,fish_processed
+20351,ARIMEX Organic linaseemned 200g,ARIMEX Organic,200 g,4771249822093,,,sweets_snacks,sweets_nuts_driedfruit
+20358,Dr. Benner hommikusöögihelbed Trio Mix 150g pall,Dr. Benner,150 g,4820132581248,,,dry_preserves,dry_cereals_muesli
+20359,Väike väänik teraviljapadjakesed kakao 250g,Väike,250 g,4740320001542,,,dry_preserves,dry_cereals_muesli
+20363,"Jakobsens orgaaniline agaavisiirup, 350 g",Jakobsens,350 g,5772739447313,,,drinks,drinks_syrups_powders
+20374,"Kotimaista kaerajahu 500 g, gluteenivaba",Kotimaista,500 g,6415715104136,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+20381,Pure puratos kohvisiirup karamelli 350 ml,Pure,350 ml,4750145000156,,,drinks,drinks_syrups_powders
+20387,"M.V.Wool Külmsuitsulõhe, Viilutatud 100 G","M.V.Wool Külmsuitsulõhe,",100 g,4740192010512,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+20390,"Carrefour Rooibos Orange ürditee 25x1,7g",Carrefour Rooibos,25x1.7 g,3560070824953,,,drinks,drinks_tea_coffee
+20392,Jõumees tatramesi 1 kg,Jõumees,1 kg,4742422008870,,,dry_preserves,dry_other
+20404,Tartu mill riisihelbed 500 g,Tartu,500 g,4740493031049,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+20416,Kuumsuitsu latikas kg,Kuumsuitsu,,2319221900005,,,meat_fish,fish_salted_smoked
+20424,ARIMEX Premium pistaatsiapähklid 250G,ARIMEX Premium,250 g,4771249819055,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+20425,Paprika oranz,Paprika,,2060515300000,,,produce,produce_root_veg
+20429,Hetki Sinule Segasalat 80 g,Hetki Sinule,80 g,6406510093558,produce,,produce,produce_herbs_salads_sprouts
+20431,Jahu-jaan öko rukkihelbed 500g,Jahu-jaan,500 g,4742981013421,dry_preserves,dry_cereals_muesli,dry_preserves,dry_flour_sugar_baking
+20433,ASTRI KÖÖK Punase kapsa salat 250 g,ASTRI KÖÖK,250 g,4740602007897,produce,,dry_preserves,dry_ready_meals_jars
+20442,Coop india pähkli-maapähkli-pistaatsia segu 200g,Coop,200 g,7340191168442,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+20451,Vilma pannkoogijahu 400 g,Vilma,400 g,4740012460282,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+20454,Borges spagetid durumnisujahust 500g,Borges,500 g,8410179007496,drinks,drinks_spirits,dry_preserves,dry_flour_sugar_baking
+20459,Meira mandlilaastud 140g,Meira,140 g,6420101885285,,,sweets_snacks,sweets_nuts_driedfruit
+20476,Herkku Viinamari Tume Sable 250g I klass,Herkku Viinamari,250 g,6438574113156,,,produce,produce_tropical
+20478,Risella söömisvalmis basmatiriis laimi ja koriandriga 200 g,Risella,200 g,8410184043243,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+20493,Dr.Oetker punane glasuur 125g,Dr.Oetker,125 g,5701073041369,,,dry_preserves,dry_flour_sugar_baking
+20494,Pirn Packham I klass 500 g MAHE,Pirn Packham,500 g,6414894037259,meat_fish,meat_other,produce,produce_apples_pears
+20496,"Schär saiapulber mix b 1 kg, gluteeni- ja laktoosivaba",Schär,1 kg,8008698004845,bakery,bakery_other,dry_preserves,dry_flour_sugar_baking
+20500,Umami mandlijahu 300 g,Umami,300 g,4770082322111,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+20505,"Külmsuitsu forellifilee, M.V.WOOL, 100 g","Külmsuitsuforell,",100 g,4740192011519,,,meat_fish,fish_salted_smoked
+20508,Coop hakitud mandlid 80g,Coop,80 g,7340191162228,,,sweets_snacks,sweets_nuts_driedfruit
+20512,Pesto Kanapasta 300 g,Pesto Kanapasta,300 g,4745010279904,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+20514,"Coop müsli täisterahelvestest, rosinatest 25%, viigimarjadest 8%, sarapuupähklid 4%, banaanilaastudest 2% ja kookoslaastud 2% 750g",Coop,750 g,7340191151468,bakery,bakery_cakes_pastries,dry_preserves,dry_cereals_muesli
+20523,Tartu Mill sidrunikeeksi kuivsegu 450 g,Tartu Mill,450 g,4750020041809,,,dry_preserves,dry_flour_sugar_baking
+20527,Kapten Grant Heeringafilee Vähesoolane 240 G,Kapten Grant,240 g,4740687000936,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+20528,"Rannakarbid tomatimarinaadis, KALURI, 250 g",Rannakarbid,250 g,4740590000658,,,meat_fish,fish_processed
+20542,Preah vihear jasmiiniriis 1kg,Preah,1 kg,713228378492,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+20559,Chippy maisihelbed 1 kg,Chippy,1 kg,4743144001576,,,dry_preserves,dry_cereals_muesli
+20562,Baltix 7-viljahelbed linaseemnetega 500 g,Baltix,500 g,4742298004129,,,dry_preserves,dry_flour_sugar_baking
+20568,Xtra pohlamoos 800 g,Xtra,800 g,7340011423195,,,dry_preserves,dry_other
+20570,"Tursk vähesoolane, MSDM, 36 g","Tursk,vähesoolane,kuivatatud,lõikudena",,4260147170295,,,meat_fish,fish_salted_smoked
+20573,"Keedetud koorimata hiidkrevetid 60/80, kg",Keedetud,,2060242500001,,,meat_fish,fish_processed
+20588,Aperol muu alkohoolne jook 11%vol 1l,Aperol,1 l,8002230000012,,,drinks,drinks_spirits
+20592,Take 1 mooniseemned 100 g,Take,100 g,4740085506023,,,dry_preserves,dry_flour_sugar_baking
+20596,Coop nuudlid (91%) vürtsisegu ja kana maitsega (9%) 65g,Coop,65 g,7340191139039,dry_preserves,dry_pasta_rice,dry_preserves,dry_soups_noodles
+20600,Ploomtomat I klass,Ploomtomat I,,2060291400000,,,produce,produce_root_veg
+20610,Bosto Pruun Basmati riis 4x125 g,Bosto Pruun,4x125 g,5410106018666,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+20624,Hunajainen sam ökoloogiline agaavisiirup 350 g,Hunajainen,350 g,6411410001244,,,drinks,drinks_syrups_powders
+20628,Nestle Cini Minis 645g,Nestle Cini,645 g,5900020027061,,,dry_preserves,dry_cereals_muesli
+20634,"Tšillidekooriga kuumsuitsulõhe kogufilee 1,2-1,5 kg",Tšillidekooriga,1.5 kg,2060218400007,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+20637,Herkku Viinamari hele Cotton Candy 250g,Herkku Viinamari,250 g,6438574113149,,,produce,produce_tropical
+20638,SteviaSweet magusainepulber 75 g,SteviaSweet,75 g,7610211149202,,,dry_preserves,dry_flour_sugar_baking
+20639,Coop pehmed datlid 200g,Coop,200 g,7340191161177,,,sweets_snacks,sweets_nuts_driedfruit
+20646,Änglamark mahedad maisikrõbuskid porgandi ja õunaga 15 g,Änglamark,15 g,7340191124820,,,baby,baby_snacks
+20653,Kotimaista Basiilik potis,Kotimaista Basiilik,,6414893388246,,,produce,produce_herbs_salads_sprouts

@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+34931,Pistaatsia-koorejäätis vahvlikoonuses 80g/165ml,Pistaatsia-koorejäätis,80 g,4740188019659,,,frozen_food,frozen_desserts_icecream
+34932,"Meremari must, kalamarjamaitseline toode, 113 g",Meremari,113 g,4740176021114,meat_fish,fish_fresh,meat_fish,fish_other
+34955,"Singivõie, KARNI, 190 g",Singivõie,190 g,4740579208303,dairy_eggs_fats,dairy_butter_margarine,meat_fish,meat_gourmet
+34958,"Matsimoka suitsupeekon viilutatud, 110g",Matsimoka,110 g,4744735010984,,,meat_fish,meat_pork
+34971,Külmsuitsuforell viilutatud 200 g,Külmsuitsuforell,200 g,4740192011533,,,meat_fish,fish_salted_smoked
+34979,Vanish plekieemaldaja 750ml,Vanish,750 ml,5701092110176,,,household,hh_laundry
+35013,Nõo grillvorstid juustuga 360 G,Nõo,360 g,4740574008540,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_grill_blood_sausages
+35070,Pepperoni salaami 110 g,Pepperoni,110 g,4740003017747,,,meat_fish,meat_sausages
+35093,"Veisemaksapasteet, MAKS&MOORITS, 210 g",Veisemaksapasteet,210 g,4740171181158,,,meat_fish,meat_gourmet
+35095,"Saiakate, 300g, RAKVERE",Saiakate,300 g,4740003011585,bakery,bakery_other,meat_fish,meat_gourmet
+35113,"Grillvorst suitsujuustuga Peipsi, WÕRO, 600 g",Peipsi,600 g,4740562069928,dairy_eggs_fats,dairy_other,meat_fish,meat_grill_blood_sausages
+35115,"Taimne suitsuvorst, BON VEGAN, 100 g",Taimne,100 g,4742117001209,,,meat_fish,meat_sausages
+35117,"Sealihasült, MAKS&MOORITS, 300 g",Sealihasült,300 g,4740171085951,meat_fish,meat_pork,meat_fish,meat_pork
+35127,Veisemaksapasteet 200 g,Veisemaksapasteet,200 g,4740574090101,,,meat_fish,meat_gourmet
+35162,"Poolsuitsuvorst Tõmmu, WÕRO, 350 g",Suitsuvorst Tõmmu,350 g,4740562003144,,,meat_fish,meat_sausages
+35163,"Vasikamaksapasteet, RANNAROOTSI, 180 g",Vasikamaksapasteet,180 g,4740296010401,,,meat_fish,meat_gourmet
+35201,"Heeringafilee ürdikastmes, marineeritud, VICI, 250 g",Heeringafilee,250 g,4770190044974,meat_fish,fish_fresh,meat_fish,fish_processed
+35215,Kalev maapähklibatoon karamelliga piimašokolaadis 50g,Kalev,50 g,4740012600312,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+35222,Pärsltomat punane 200g I klass,Pärsltomat,200 g,6416075931073,,,produce,produce_root_veg
+35225,Pastinaak 700 g EESTI,Pastinaak,700 g,752941860198,,,produce,produce_root_veg
+35249,Hartwall original long drink cranberry 330ml,Hartwall,330 ml,6413600091608,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+35271,Tolmukott RB1840 4 tk,Tolmukott RB1840,4 pcs,7319599012329,,,household,hh_other
+35273,Põltsamaa pilaff 520 g,Põltsamaa,520 g,4740029061595,,,dry_preserves,dry_ready_meals_jars
+35292,Felix Magus tšillikaste 355 g,Felix Magus,355 g,4740029072669,,,sauces_oils,sauces_marinades
+35296,"Landana juust 500 päeva, 180 g",Landana,180 g,8711842194728,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+35321,MARIENBURG väikesetükiline grillsüsi (lepp) 20 L kott,MARIENBURG,20 l,4751019170135,,,household,hh_other
+35363,X-tra puurikanade munad M 15 TK,X-tra,15 pcs,6414891802478,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+35364,Wc-seep power fresh ocean 39g,Wc-seep,39 g,5908241728279,,,household,hh_cleaners
+35385,"Coop salatijuustukuubikud õlis küüslaugu ja peterselliga, 100 g",Coop,100 g,7340191176140,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+35446,"KitKat Hazelnut šokolaad 41,5g",KitKat Hazelnut,41.5 g,8445290551641,,,sweets_snacks,sweets_chocolate_bars
+35454,Tallegg Broilerikintsuliha Aasia Marinaadis 400,Tallegg Broilerikintsuliha,400 g,4740046013881,meat_fish,meat_poultry,meat_fish,meat_poultry
+35504,"Eesti juust täispiimast, viilutatud, 180 g",Eesti,180 g,4740572005251,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+35526,Meira purustatud küüslauk 39g,Meira,39 g,6414201005056,,,world_spices,spices_herbs_spice_mix
+35572,Mo Saaremaa juust viilutatud 450g,Mo Saaremaa,450 g,4740153064028,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+35609,Kotimaista õrrekande munad omega M 6tk,Kotimaista,6 pcs,6414893095977,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+35650,"Kotimaista maheda maitsega sulatatud juustu viilud, 200 g",Kotimaista,200 g,6414893587779,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+35660,"Västerbottensost juust, 450 g",Västerbottensost,450 g,7310861081531,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+35683,"Elovena kaerajook kohvile, 1l",Elovena,1 l,6411200112747,,,dairy_eggs_fats,dairy_plant_drinks
+35693,"Granarolo Grana Padano juust 12k, 150g",Granarolo Grana,150 g,8002670050370,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+35750,"Brie valgehallitusjuust, 200 g",Brie,200 g,3228020232028,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+35789,Coop ekstraküps Gouda juust 400g,Coop,400 g,7340191163034,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+35795,Lapin maria nõgesepesto 140 g,Lapin,140 g,6430037238024,,,sauces_oils,sauces_pasta_cooking
+35814,"Kotimaista Edami juust, 325 g",Kotimaista Edami,325 g,6414893587649,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+35865,"Küüslauguvõie, 125g","Küüslauguvõie,",125 g,4740218000152,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+35959,Le Rustique brie juust 200 g,Le Rustique,200 g,3176582009964,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+35968,Coop ökoloogiline gluteenivaba sojakaste 150 ml,Coop,150 ml,7340191175075,,,sauces_oils,sauces_soy_worcester
+35969,Coop mascarpone toorjuust koorest 250g,Coop,250 g,7340191158078,dairy_eggs_fats,dairy_cottage_quark,cheese,cheese_regular
+36044,Tango õhuvärskendi Ocean 300 ml,Tango,300 ml,8692641002417,,,household,hh_candles_airfresh
+36068,"Tartu mill toma&sil pastakaste 340g, vegan, gluteenivaba, laktoosivaba",Tartu,340 g,4743303114000,dry_preserves,dry_pasta_rice,sauces_oils,sauces_pasta_cooking
+36082,Santa Maria paprika jahvatatud 22 g,Santa Maria,22 g,6418474118161,,,world_spices,spices_herbs_spice_mix
+36095,Bref blue active wc-värskendaja lill 50g,Bref,50 g,5201395121737,,,household,hh_candles_airfresh
+36117,Mesikäpp NeliPäkk kommisegu 500g,Mesikäpp NeliPäkk,500 g,4740012600701,,,sweets_snacks,sweets_chocolate_bars
+36120,"Kotimaista Black Label riivitud Emmentali juust, 150 g",Kotimaista Black,150 g,6414893386945,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+36122,"Farmi Rohke koorega kodujuust, 330 g",Farmi Rohke,330 g,4740113090388,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+36126,Moe Mahe viin 40%vol 700ml,Moe Mahe,700 ml,4742716000443,,,drinks,drinks_spirits
+36212,"Castello valgehallitusjuust punase tšilliga, 150 g",Castello,150 g,5711953036583,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+36217,Juustuampsud 200 g,Juustuampsud,200 g,4740153510143,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+36257,Absolut Vanilia maitsestatud viin 38%vol 700ml,Absolut Vanilia,700 ml,7312040060702,,,drinks,drinks_spirits
+36279,"Coop Gouda viilutatud juust, 450 g",Coop Gouda,450 g,7340191106321,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+36301,Õun Soome Raike I klass,Õun Soome,,2060223900004,,,produce,produce_apples_pears
+36306,"Mo Saaremaa Juust Saare Light, 150 g",Mo Saaremaa,150 g,4740153081858,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+36339,Fazer Suffeli batoon 21 g,Fazer Suffeli,21 g,6411401092282,,,sweets_snacks,sweets_chocolate_bars
+36341,"Gefilus Mango-banaani-chia jogurt, 380 g",Gefilus Mango-banaani-chia,380 g,4740125536232,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+36346,"Kodujuust Setomaa soolariisikatega, TERE, 300 g",Kodujuust Setomaa,300 g,4740036014409,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+36364,"Loco Taco tortillakrõpsud – hapukoor, talisibul ja jalapeño 150 g",Loco Taco,150 g,5714484001020,,,sweets_snacks,sweets_snacks_salty
+36399,"Kotimaista koorejuust, 500 g",Kotimaista,500 g,6438574113330,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+36411,Kiilto nõudepesumasina tabletid 68tk (lõhnavaba),Kiilto,68 pcs,6417964579048,,,household,hh_dishwashing
+36418,WC-värskendaja 40 g sinine,WC-värskendaja,40 g,7310619170005,,,household,hh_cleaners
+36472,Schär gluteenivabad kiudainerikkad minisaiad 150 g,Schär,150 g,8008698043134,bakery,bakery_gluten_free,bakery,bakery_gluten_free
+36493,"Violife taimne kreemine võileivamääre küüslaugu ja ürtidega, 150 g",Violife,150 g,5202390021510,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_other
+36551,COOP SALATIJUUSTUKUUBIKUD 150G,COOP SALATIJUUSTUKUUBIKUD,150 g,7340191149144,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+36552,Oleum crete ekstra väärisoliiviõli 500ml,Oleum,500 ml,5214000101079,sauces_oils,oils_olive,sauces_oils,oils_olive
+36585,"Nogel Mahe raudne tatrapuder pirniga, 190 g",Nogel Mahe,190 g,4742023680536,,,baby,baby_porridge_cereal
+36652,"Juust Atleet Light, viilutatud, 150 g",Juust Atleet,150 g,4740553000190,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+36659,Tolmukott RB4900 4 tk,Tolmukott RB4900,4 pcs,7319599012442,,,household,hh_other
+36666,Coop Chevre valgehallitusjuust kitsepiimast 180g,Coop Chevre,180 g,7340191162426,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+36838,Coop Vahvlid 250 G,Coop Vahvlid,250 g,7340191165090,,,sweets_snacks,sweets_waffles_cakes
+36853,"TRIBIO Universaalne 3in1 0,42l",TRIBIO Universaalne,0.42 l,853017004086,,,household,hh_cleaners
+36859,Granarolo Mozzarella juust 250g,Granarolo Mozzarella,250 g,8002670006612,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+36910,"Valio Juust Royal Gouda Yellow, 300 g",Valio Juust,300 g,4740553697406,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+36992,BREF PRONATURE MINT 2X50G,BREF PRONATURE,2x50 g,9000101360158,,,household,hh_candles_airfresh
+36999,Mamma Forellisupp 300 G,Mamma Forellisupp,300 g,4740184511072,,,baby,baby_food_jars
+37050,"Dilmah must tee mustasõstramaitseline 20 x 1,5 g",Dilmah,20x1.5 g,9312631142051,,,drinks,drinks_tea_coffee
+37062,"Coop Fetajuust, laktoosivaba, 150 g","Coop Fetajuust,",150 g,7340191174719,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+37083,Xtra tšillihelbed 50g,Xtra,50 g,7340191128927,,,world_spices,spices_herbs_spice_mix
+37092,"Thai choice külmpress kookosõli 200 g, organic",Thai,200 g,4747004000501,sauces_oils,oils_other,sauces_oils,oils_other
+37162,Meira ketsup 500g,Meira,500 g,6414202701001,,,sauces_oils,sauces_ketchup_mayo
+37168,"Coop toorjuust küüslaugu-ürdi, 200G",Coop,200 g,7340191162587,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+37174,Santa Maria must pipar purustatud 217g,Santa Maria,217 g,7311311026621,,,world_spices,spices_basic_salt_pepper
+37225,Coop juustukaste 300 g medium,Coop,300 g,7340191148833,dairy_eggs_fats,dairy_other,sauces_oils,sauces_pasta_cooking
+37243,Pärnamäed Gluteenivabad mandliküpsised 120 g,Pärnamäed Gluteenivabad,120 g,4751001267638,bakery,bakery_gluten_free,bakery,bakery_gluten_free
+37262,Schär gluteenivaba glasuuritud biskviitkook 35 g,Schär,35 g,8008698001318,bakery,bakery_cakes_pastries,bakery,bakery_gluten_free
+37278,"Borges ekstra väärisoliiviõli 500 ml, öko",Borges,500 ml,8410179100708,sauces_oils,oils_olive,sauces_oils,oils_olive
+37290,Kotimaista õrrekanade munad M 24tk,Kotimaista,24 pcs,6438574407101,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+37309,Üldpuhastuslapid Coop lemon 48tk,Üldpuhastuslapid Coop,48 pcs,7340191168336,,,household,hh_cleaners
+37322,"Granarolo Burratine, 3x50g","Granarolo Burratine,",3x50 g,8002670008739,,,cheese,cheese_regular
+37333,Mynthon Le&ey + Vitamiin C kurgupastillid 34 g,Mynthon Le&ey,34 g,8013399187216,,,sweets_snacks,sweets_gums_mints
+37489,Pesumasina puhastusgeel 250ml,Pesumasina,250 ml,4008455304212,,,household,hh_laundry
+37495,Schär gluteenivabad minimuffinid sidruniga 185 g,Schär,185 g,8008698049167,,,bakery,bakery_gluten_free
+37532,Kiilto köögi puhastussprei tsitrus 600ml,Kiilto,600 ml,6417964579857,,,household,hh_cleaners
+37561,"Eesti juust täispiimast, viilutatud, 450 g",Eesti,450 g,4740572005244,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+37601,Sempio koreapärane gochujang bulgogi kaste 60 g,Sempio,60 g,8801005931496,,,sauces_oils,sauces_pasta_cooking
+37607,"Atleet riivjuust küpsetistele, 200 g",Atleet,200 g,4740553690032,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+37629,"Tere Või 82%, 500 g",Tere Või,500 g,4740036017691,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+37668,"Xtra Gouda viilutatud juust 16%, 400 g",Xtra Gouda,400 g,7340011419969,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+37672,Xtra magus tšillikaste 730ml,Xtra,730 ml,7340191148185,,,sauces_oils,sauces_marinades
+37718,Gourmante traditsiooniline tomatipesto gourmante 190g,Gourmante,190 g,5200110732159,,,sauces_oils,sauces_pasta_cooking
+37736,Heinz mascarpone ja grana padano juustuga maitsestatud pastakaste 350 g,Heinz,350 g,8715700123707,dairy_eggs_fats,dairy_cottage_quark,sauces_oils,sauces_pasta_cooking
+37789,Rajamäen viigimarja-palsamiäädikakaste 250 ml,Rajamäen,250 ml,6414504727099,,,sauces_oils,oils_vinegar
+37790,"Herkku pestokaste, 190 g",Herkku,190 g,8009320026365,,,sauces_oils,sauces_pasta_cooking
+37827,"Apetina salatijuustupala, laktoosivaba, 200 g",Apetina,200 g,5760466851848,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+37828,Tere Kodujuust klassikaline 380 g,Tere Kodujuust,380 g,4740036016618,dairy_eggs_fats,dairy_cottage_quark,cheese,cheese_regular
+37835,"Kotimaista Sinileima Emmentali juust, 500 g",Kotimaista Sinileima,500 g,6414891802218,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+37841,Nuevo progreso kibepipra (habanero) maitselised maisikrõpsud 120 g,Nuevo,120 g,8594053680316,,,sweets_snacks,sweets_snacks_salty
+37905,"Riivjuust, 200 g","Riivjuust,",200 g,4740153594211,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+37921,Fairy nõudepesuvahend Apple 450ml,Fairy,450 ml,4015400956181,,,household,hh_dishwashing
+37944,Don Papa Masskara Rumm 40%vol 700ml,Don Papa,700 ml,4809015157183,,,drinks,drinks_spirits
+37951,Bache Gabrielsen VSOP Triple Cask Cognac 40%vol 500ml,Bache Gabrielsen,500 ml,3428681000626,,,drinks,drinks_spirits
+37953,Starbucks Pike Place röst 450g WB,Starbucks Pike,450 g,8445290183507,,,drinks,drinks_coffee_beans_capsules
+37954,LIPTON Vaarika-aroonia tee,LIPTON Vaarika-aroonia,,8720608014064,,,drinks,drinks_tea_coffee
+37972,"Ungheni Pinot Noir vein 14,5%vol 750 ml",Ungheni Pinot,750 ml,4840044010438,,,drinks,drinks_wine
+37975,Jack Daniel's Tennessee whiskey 40% 200 ml,Jack Daniel's,200 ml,5099873046173,,,drinks,drinks_spirits
+37979,"Xtra cola karastusjook suhkruvaba 1,5L",Xtra,1.5 l,6418785006089,,,drinks,drinks_soft_soda
+37984,"Upendo Cape Red vein 12,5%vol 750ml",Upendo Cape,750 ml,5704634104213,,,drinks,drinks_wine
+37993,"Artic Sport greibi spordijook 1,5L",Artic Sport,1.5 l,4740098078845,,,drinks,drinks_sport
+38018,Ahmad must purutee 100g,Ahmad,100 g,54881015677,,,drinks,drinks_tea_coffee
+38028,Cointreau liköör 40%vol 500ml,Cointreau,500 ml,3035542011365,,,drinks,drinks_spirits
+38030,Tullamore Dew Irish Whisky 40%vol 1L,Tullamore Dew,1 l,5011026108019,,,drinks,drinks_spirits
+38032,"FUN Light mandariinimaitseline joogikonsentraat 0,5 l",FUN Light,0.5 l,6417802389198,,,drinks,drinks_syrups_powders
+38037,Chill Out Rose vein 12%vol 3L,Chill Out,3 l,6412700775906,,,drinks,drinks_wine
+38038,"Kopparberg Mixed Fruit Tropical siider 4,5%vol 500ml",Kopparberg Mixed,500 ml,7393714898111,produce,,drinks,drinks_beer_cider
+38040,Barone Montalto Pinot Grigio KGT vein 12%vol 750ml,Barone Montalto,750 ml,8030423000730,,,drinks,drinks_wine
+38049,Coop segumahlajook 1L,Coop,1 l,6438574028450,,,drinks,drinks_juices
+38050,Jägermeister liköör 35%vol 500ml,Jägermeister,500 ml,4067700013057,,,drinks,drinks_spirits
+38052,Rudy's Kombucha ma&sion fruit 330ml,Rudy's Kombucha,330 ml,4751037280274,produce,,drinks,drinks_other
+38054,Lahustuv jääkohvijook MOKATE MOCHA 8gb. x 15g,Lahustuv,15 g,5900649070301,,,drinks,drinks_tea_coffee
+38056,Daos Pastoral Red Liqueur liköörvein 16%vol 750 ml,Daos Pastoral,750 ml,4840472010505,,,drinks,drinks_spirits
+38058,Cido jõhvikanektar 1L,Cido,1 l,4750042302711,,,drinks,drinks_juices
+38064,Belin ingveri-astelpajutee 20 x 2 g,Belin,20x2 g,5900675007845,,,drinks,drinks_tea_coffee
+38070,Kohvifilter 102 värvitu,Kohvifilter,,6415711051526,,,household,hh_kitchenware
+38071,Dovgan kasemahl piparmündimaitseline 1l,Dovgan,1 l,4032549012318,,,drinks,drinks_juices
+38078,Grand Õunamahl 100% 1L,Grand Õunamahl,1 l,5901088004728,,,drinks,drinks_juices
+38085,XTRA ÕUNANEKTAR 1L,XTRA ÕUNANEKTAR,1 l,7340011468462,,,drinks,drinks_juices
+38088,Karksi Blond Munk õlu 6%vol 500ml,Karksi Blond,500 ml,4740111011910,,,drinks,drinks_beer_cider
+38099,"Bacardi Carta Blanca rumm 37,5%vol 1L",Bacardi Carta,1 l,5010677012850,,,drinks,drinks_spirits
+38100,Nescafe 3in1 Creamy Latte lahustuv kohvijook 10x15g,Nescafe,10x15 g,8445290099785,dairy_eggs_fats,dairy_other,drinks,drinks_tea_coffee
+38120,Claude Chatelier XO Cognac 40%vol 700ml,Claude Chatelier,700 ml,3460410521583,,,drinks,drinks_spirits
+38121,Mynthon Xylitol Eucalyptus kurgupastillid 31 g,Mynthon Xylitol,31 g,6420256014479,,,sweets_snacks,sweets_gums_mints
+38127,"Tutteli 3 Junior piimajook alates 12 kuust, 300g",Tutteli,300 g,5900852061677,dairy_eggs_fats,dairy_milk,baby,baby_formula
+38138,"FRUIT MUSTIKA 1,5 L MAITSESTATUD VESI",FRUIT MUSTIKA,1.5 l,4740098079231,produce,,drinks,drinks_water

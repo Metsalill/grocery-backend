@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+274,Kotimaista varajane kartul 2 kg,Kotimaista,2 kg,6438574152728,,,produce,produce_root_veg
+275,Luunja pikk kurk kiles Grüne Fee,Luunja,,2060524500002,,,produce,produce_root_veg
+276,Dansukker suhkur 1 kg,Dansukker,1 kg,6414000023138,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+277,"Väike Tom vanillijäätis šokolaadilaastudega, 120 ml",Väike Tom,120 ml,4740093003941,,,frozen_food,frozen_desserts_icecream
+278,Balbiino mustika-jogurtijäätis jogurtiglasuuris 80ml/54g,Balbiino,80 ml,4740188012995,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+279,Xtra pikateraline riis 1 kg,Xtra,1 kg,7340191143470,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+280,Tere Kohuke vanilli šokolaadiglasuuriga 40g,Tere Kohuke,40 g,47430051,sweets_snacks,sweets_chocolate_bars,dairy_eggs_fats,dairy_desserts
+281,"Mango-maasika mahlajää, 70 ml",Mango-maasika,70 ml,4740093342019,,,frozen_food,frozen_desserts_icecream
+282,Eesti Pagar Kodukandi Koorikleib 4 X 75 G,Eesti Pagar,4x75 g,4740086019898,,,bakery,bakery_bread_loaves
+283,Rõngu Pagar Peenleib Viil 380 G,Rõngu Pagar,380 g,4742216005696,,,bakery,bakery_bread_loaves
+284,Lame Leib Lavash Classic 120 G,Lame Leib,120 g,4744158010424,,,bakery,bakery_flatbreads_wraps
+285,Diamant valge suhkur 1 kg OSTUPIIRANG 10 PAKKI,Diamant,1 kg,5907069000017,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+286,Kartul punane Laura 2kg Laheotsa,Kartul,2 kg,4743116000019,,,produce,produce_root_veg
+287,"Presto kõrvitsa risoto rebitud kanalihaga 350g, gluteenivaba",Presto,350 g,4740073078327,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+288,Banaan Chiquita,Banaan Chiquita,,2060400700007,,,produce,produce_tropical
+290,"Pere Pere piim 2,5% 1L kile",Pere Pere,1 l,4740125110036,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+291,Eesti Pagar Suur Perenaise Sai 500 G,Eesti Pagar,500 g,4740086008526,,,bakery,bakery_buns_croissants
+292,Coop Banaan,Coop Banaan,,2060279100007,,,produce,produce_tropical
+293,Coop šokolaadijäätis 6tk 415g,Coop,415 g,7340011475255,,,frozen_food,frozen_desserts_icecream
+294,"Jänks Kirsimaitseline tarretis, 150 g",Jänks Kirsimaitseline,150 g,4740113070106,,,dairy_eggs_fats,dairy_desserts
+295,Tere Kohuke jõhvika šokolaadiglasuuriga 40 g,Tere Kohuke,40 g,47432055,sweets_snacks,sweets_chocolate_bars,dairy_eggs_fats,dairy_desserts
+296,Maks ja Moorits Broileri Poolkoivad Klassik.Marin.600G,Maks,600 g,4740171178578,sauces_oils,oils_other,meat_fish,meat_poultry
+297,Porgand KG,Porgand KG,,2060512000002,,,produce,produce_root_veg
+303,"Akvile karboniseerimata mineraalvesi 6x1,5L",Akvile,6x1.5 l,4770405226430,,,drinks,drinks_water
+306,"Aura Spring Gaasiga vesi, 500 ml",Aura Spring,500 ml,4740098083443,drinks,drinks_water,drinks,drinks_water
+308,"Evian mineraalvesi 6x1,5L",Evian,1.5L,3068320040127,drinks,drinks_water,drinks,drinks_water
+314,"VÄRSKA MINERALISEERITUD VESI 1,5 L",VÄRSKA MINERALISEERITUD,1.5 l,4740098016076,,,drinks,drinks_water
+316,"Borjomi karboniseeritud looduslik mineraalvesi 1,25L",Borjomi,1.25L,4860019002091,drinks,drinks_water,drinks,drinks_water
+319,"Saaremaa Vesi joogivesi 6- pakk 1,5l",Saaremaa Vesi,1.5 l,4741122000221,,,drinks,drinks_water
+320,VÄRSKA ORIGINAAL 1L 6-PAKK,VÄRSKA ORIGINAAL,1 l,4740042900222,,,drinks,drinks_water
+326,"Borjomi karboniseeritud looduslik mineraalvesi 6x1,25L",Borjomi,1.25L,4860019002084,drinks,drinks_water,drinks,drinks_water
+327,Karboniseerimata mineraalvesi,Karboniseerimata,,3179732338648,drinks,drinks_water,drinks,drinks_water
+346,Evian looduslik mineraalvesi 500 ml,Evian,500 ml,3068320055008,,,drinks,drinks_water
+362,"Värska Originaal 1,5l 6-pakk 9l",Värska Originaal,1.5 l,4740042900000,,,drinks,drinks_water
+366,VÄRSKA MINERAAL LOODUSLIK MINERAALVESI 1L,VÄRSKA MINERAAL,1 l,4740198000234,,,drinks,drinks_water
+373,"VÄRSKA ORIGINAAL GAASITA 1,5 L LOODUSLIK MINERAALVESI",VÄRSKA ORIGINAAL,1.5 l,4740042000762,,,drinks,drinks_water
+382,"Borjomi Mineraalvesi 0,5L",Borjomi Mineraalvesi,0.5L,4860019001629,drinks,drinks_water,drinks,drinks_water
+392,Kotimaista Vichy mineraalvesi 12x330ml,Kotimaista Vichy,12x330ml,6415711803255,drinks,drinks_water,drinks,drinks_water
+394,Devin looduslik minaraalvesi 1L 6-pakk,Devin,1 l,4748001014270,,,drinks,drinks_water
+398,Lumiorav Magneesiumivesi kerge mulliga 568ml,Lumiorav Magneesiumivesi,568 ml,4745011008923,,,drinks,drinks_water
+424,"Evian looduslik mineraalvesi 1,5 L",Evian,1.5 l,3068320085005,,,drinks,drinks_water
+425,"Sanpellegrino mineraalvesi, 500 ml",Sanpellegrino,500 ml,8002270000201,,,drinks,drinks_water
+426,"Värska Originaal karboniseeritud mineraalvesi, 500 ml",Värska Originaal,500 ml,4740042100028,,,drinks,drinks_water
+427,"Vichy Still vesi, 1,5l",Vichy Still,1.5l,4740019112825,drinks,drinks_water,drinks,drinks_water
+430,"Aura Spring karboniseeritud vesi, 1,5L",Aura Spring,1.5 l,4740051476244,,,drinks,drinks_water
+446,Acqua Panna mineraalvesi karboniseerimata 1L,Acqua Panna,1 l,8000815245278,,,drinks,drinks_water
+449,"Aura Spring karboniseerimata vesi 1,5L",Aura Spring,1.5 l,4740051476275,,,drinks,drinks_water
+458,"Värska Mineraal 6-pakk, 9l",Värska Mineraal,9l,4740198000357,,,drinks,drinks_water
+466,SAAREMAA VESI 500 ML NÕRGALT GASEERITUD,SAAREMAA VESI,500 ml,4741122000061,,,drinks,drinks_water
+471,"SAAREMAA VESI 1,5 L",SAAREMAA VESI,1.5 l,4741122000092,,,drinks,drinks_water
+477,"Vichy Looduslik Mineraalvesi 1,5L PET",Vichy Looduslik,1.5 l,4740019014785,,,drinks,drinks_water
+480,Aura gaseeritud Mg vesi 750ml,Aura,750ml,4740051000159,drinks,drinks_water,drinks,drinks_water
+490,"Värska mineraal 1,5L",Värska,1.5L,4740198000340,,,drinks,drinks_water
+496,HÄÄDEMEESTE MINERAALVESI 1 L LOODUSLIK,HÄÄDEMEESTE MINERAALVESI,1 l,4742464000207,,,drinks,drinks_water
+498,VÄRSKA ORIGINAAL,VÄRSKA ORIGINAAL,,4740042000809,,,drinks,drinks_water
+501,VYTAUTAS MINERAALVESI 500 ML KARBONISEERITUD,VYTAUTAS MINERAALVESI,500 ML,4770405221015,drinks,drinks_water,drinks,drinks_water
+504,"Aura Spring gaasita vesi, 500 ml",Aura Spring,500 ml,4740051476282,,,drinks,drinks_water
+505,"DEVIN MINERAALVESI 1,5 L ALUSELINE",DEVIN MINERAALVESI,1.5 l,3800000600012,,,drinks,drinks_water
+507,Värska Orginaal mineraalvesi 12x350 ml,Värska Orginaal,12x350 ml,4740042700419,drinks,drinks_spirits,drinks,drinks_water
+510,"Värska Naturaal Gaseerimata vesi 1,5L",Värska Naturaal,1.5 l,4740042700464,,,drinks,drinks_water
+906,Eesti Pagar Pealinna Peenleib 490 G,Eesti Pagar,490 g,4740086001138,,,bakery,bakery_bread_loaves
+1078,Mini liha-riisipirukas,Mini,,2060275700003,meat_fish,meat_other,bakery,bakery_cakes_pastries
+1079,Ciabatta kõrvitsaseemnetega,Ciabatta,,4740103130360,,,bakery,bakery_bread_loaves
+1080,Pitsatasku 105 g,Pitsatasku,105 g,2060290600005,,,bakery,bakery_cakes_pastries
+1081,Karamellitäidisega pontšik glasuuriga,Karamellitäidisega,,2060272500002,,,bakery,bakery_sweet_buns_donuts
+1082,Minipitsa suitsukanaga,Minipitsa,,2060275600006,meat_fish,meat_poultry,bakery,bakery_cakes_pastries
+1084,Juuretiseleib 500 g,Juuretiseleib,500 g,4740103130728,,,bakery,bakery_bread_loaves
+1085,Dumle pontšik,Dumle,,2060272400005,,,bakery,bakery_sweet_buns_donuts
+1086,Ciabatta india pähklite ja jõhvikatega,Ciabatta,,4740103130353,dry_preserves,dry_other,bakery,bakery_bread_loaves
+1087,Kohupiimasõrnik,Kohupiimasõrnik,,2060273200000,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_sweet_buns_donuts
+1088,Juusturull mozzarellaga,Juusturull,,2060276100000,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_buns_croissants
+1089,Fazer Pitsaamps seenega 20 g,Fazer Pitsaamps,20 g,2060306600005,,,bakery,bakery_cakes_pastries
+1090,MINI RUKKI RIISIPIRUKAS 6 TK PAKK,MINI RUKKI,6 pcs,4740103160282,dry_preserves,dry_pasta_rice,bakery,bakery_cakes_pastries
+1091,Viinisai,Viinisai,,2060274100002,,,bakery,bakery_buns_croissants
+1092,Maasikakorp,Maasikakorp,,2060273400004,,,bakery,bakery_cakes_pastries
+1093,Focaccia päikesekuivatatud tomatitega,Focaccia,,4740103130476,,,bakery,bakery_flatbreads_wraps
+1094,Vahemere ciabatta,Vahemere,,4740103130421,,,bakery,bakery_bread_loaves
+1095,Vanilje-rosinarull 95 g,Vanilje-rosinarull,95 g,2060290300004,,,bakery,bakery_sweet_buns_donuts
+1096,Singi-juustupirukas,Singi-juustupirukas,,2060275300005,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+1097,Sepik rukkihelvestega,Sepik,,4740103110751,,,bakery,bakery_bread_loaves
+1098,Põhjamaine vormisai 440 g,Põhjamaine,440 g,4740103130605,,,bakery,bakery_bread_loaves
+1099,Fazer Salaami-Fetajuustu Minipitsa 110 g,Fazer Salaami-Fetajuustu,110 g,2060306300004,dairy_eggs_fats,dairy_other,bakery,bakery_cakes_pastries
+1100,Ciabatta,Ciabatta,,4740103130346,,,bakery,bakery_bread_loaves
+1101,Mustikapirukas 320 g,Mustikapirukas,320 g,6413467429002,,,bakery,bakery_cakes_pastries
+1102,Puuviljaleib,Puuviljaleib,,4740103130636,produce,,bakery,bakery_bread_loaves
+1103,Dumle Tippaleipä 230 g,Dumle Tippaleipä,230 g,6413467603402,,,bakery,bakery_sweet_buns_donuts
+1104,Baguette juustuga,Baguette,,4740103130339,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_buns_croissants
+1105,Vaarikatäidisega pontšik glasuuriga,Vaarikatäidisega,,2060272600009,,,bakery,bakery_sweet_buns_donuts
+1106,Fazer Original Tippaleipä 180 g,Fazer Original,180 g,6413467524103,,,bakery,bakery_sweet_buns_donuts
+1107,Fazer Brokoli Minipitsa 100 g,Fazer Brokoli,100 g,2060306400001,,,bakery,bakery_cakes_pastries
+1108,KULITŠ,KULITŠ,,4740103130551,,,bakery,bakery_sweet_buns_donuts
+1109,Baguette juustu-küüslaugu,Baguette,,2060278900004,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_buns_croissants
+1110,Rukkileib 310 g,Rukkileib,310 g,4740103112847,,,bakery,bakery_bread_loaves
+1111,"Geisha šokolaadivahukook, sulatatud 2 tk, 160 g",Geisha,160 g,6413467448508,sweets_snacks,sweets_chocolate_bars,bakery,bakery_cakes_pastries
+1112,Dallase sai,Dallase,,2060272800003,,,bakery,bakery_buns_croissants
+1113,Mini viineripirukas 5 tk,Mini,5 pcs,4740103160350,,,bakery,bakery_cakes_pastries
+1114,"Mascarpone, vaarika, granaatõuna saiake 550 g","Mascarpone,",550 g,2060286600002,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+1115,Pähkli-šokolaadicroissant,Pähkli-šokolaadicroissant,,2060273700005,sweets_snacks,sweets_chocolate_bars,bakery,bakery_buns_croissants
+1116,Banaani-toffee pontšik 106 g,Banaani-toffee,106 g,2060307700001,,,bakery,bakery_sweet_buns_donuts
+1117,Kabanossipirukas tomatikastmega,Kabanossipirukas,,2060277000002,dry_preserves,dry_other,bakery,bakery_cakes_pastries
+1118,Šokolaaditäidisega sõõrik,Šokolaaditäidisega,,2060273900009,,,bakery,bakery_sweet_buns_donuts
+1119,Tiramisu rull 450 g,Tiramisu,450 g,6413467604706,,,bakery,bakery_cakes_pastries
+1120,Tume baguette seemnetega,Tume,,4740103130407,,,bakery,bakery_bread_loaves
+1121,Viineripirukas,Viineripirukas,,2060275000004,,,bakery,bakery_cakes_pastries
+1122,Võisai,Võisai,,2060274700004,dairy_eggs_fats,dairy_other,bakery,bakery_buns_croissants
+1123,Rabarberikorp,Rabarberikorp,,2060273800002,,,bakery,bakery_cakes_pastries
+1124,3-juustu suitsukanapirukas 84 g,3-juustu,84 g,2060290700002,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+1125,Hele crookie 120 g,Hele,120 g,2060286400008,,,bakery,bakery_cakes_pastries
+1126,Mini viineripirukas 25 g,Mini,25 g,2060267900008,,,bakery,bakery_cakes_pastries
+1127,Mustika-vaarikapirukas 320 g,Mustika-vaarikapirukas,320 g,6413467429101,,,bakery,bakery_cakes_pastries
+1128,Suur võicroissant,Suur,,2060301300009,dairy_eggs_fats,dairy_other,bakery,bakery_buns_croissants
+1129,Ciabatta Röstsibulaga,Ciabatta Röstsibulaga,,4740103130483,,,bakery,bakery_bread_loaves
+1130,Fazer Pitsaamps Singiga 20 g,Fazer Pitsaamps,20 g,2060306500008,,,bakery,bakery_cakes_pastries
+1131,Lihapirukas 85 g,Lihapirukas,85 g,2060290200007,meat_fish,meat_other,bakery,bakery_cakes_pastries
+1132,"Marianne šokolaadrirull, sulatatud 485 g",Marianne,485 g,6413466078300,,,bakery,bakery_cakes_pastries
+1133,Fazer Rosina-toffeekeeks 330 g,Fazer Rosina-toffeekeeks,330 g,4740103130766,,,bakery,bakery_cakes_pastries
+1134,DOMINO VANILJEVAHUKOOK 2 TK 160 G,DOMINO VANILJEVAHUKOOK,160 g,6413467550003,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+1135,Spinatistruudel,Spinatistruudel,,2060275400002,,,bakery,bakery_cakes_pastries
+1136,"Passioni,juustukoogirull, sulatatud 485 g","Passioni,juustukoogirull,",485 g,6413467484209,dairy_eggs_fats,dairy_other,bakery,bakery_cakes_pastries
+1137,Gluteenivaba karamellikook,Gluteenivaba,,2060279000000,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+1138,Baguette,Baguette,,4740103130322,,,bakery,bakery_bread_loaves
+1140,Moonisai 165 g,Moonisai,165 g,2060286700009,,,bakery,bakery_sweet_buns_donuts
+1141,Päts cheddar juustuga,Päts,,4740103130391,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_bread_loaves
+1142,Pistaatsiacroissant 130 g,Pistaatsiacroissant,130 g,2060290100000,,,bakery,bakery_buns_croissants
+1143,Kohupiimatasku,Kohupiimatasku,,2060273300007,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_sweet_buns_donuts
+1144,Kaneelisai,Kaneelisai,,2060273100003,,,bakery,bakery_sweet_buns_donuts
+1145,Juustustritsel,Juustustritsel,,2060278700000,bakery,bakery_other,bakery,bakery_cakes_pastries
+1146,Täisteraleib,Täisteraleib,,4740103130445,,,bakery,bakery_bread_loaves
+1147,Must päts,Must,,4740103130452,,,bakery,bakery_bread_loaves
+1148,Tume ciabatta seemnetega,Tume,,4740103130414,,,bakery,bakery_bread_loaves
+1149,Juustucroissant,Juustucroissant,,2060275100001,dairy_eggs_fats,dairy_other,bakery,bakery_buns_croissants
+1150,Juurviljalõikur FP2020 200W,Juurviljalõikur FP2020,,4894369203464,,,household,hh_kitchenware
+1151,A. Le Coq g:n long drink grapefruit 500ml purk,A. Le,500 ml,4740098079026,drinks,drinks_beer_cider,drinks,drinks_other
+1153,"PEDIGREE Junior koeraeine kutsikatele kanalihaga tarrendis, 100 g",PEDIGREE Junior,100 g,5900951017247,meat_fish,,pet,pet_dog_wet
+1154,Söötmistool väikelastele plast/metall,Söötmistool,,8690089075512,,,baby,baby_other
+1155,Golden Star söögisooda 850g,Golden Star,850 g,6434800005660,,,dry_preserves,dry_flour_sugar_baking
+1156,"Farmi keefir 2,5%, 1 kg",Farmi,1 kg,4740123000933,,,dairy_eggs_fats,dairy_yogurt_kefir
+1157,Rainbow paakuv valge bentoniit liiv 5L,Rainbow,5 L,7340191124646,,,pet,pet_litter_sand
+1158,Kalev Ekstra vormiküpsised 180g,Kalev Ekstra,180 g,4740012600060,bakery,bakery_other,sweets_snacks,sweets_biscuits_cookies
+1159,"Täissööt kassidele kanaga, 50 g",Täissööt,50 g,6430069581211,meat_fish,,pet,pet_cat_dry
+1160,Mr.Panini kanapanini 235g,Mr.Panini,235 g,6405096008024,meat_fish,meat_poultry,bakery,bakery_other
+1163,Xtra küüslaugupulber 70 g,Xtra,70 g,7340011425847,,,world_spices,spices_herbs_spice_mix
+1164,Xtra Krevetid 330G/170G,Xtra Krevetid,330 g,7340191135819,,,meat_fish,fish_processed
+1165,Lõhnaküünal värske puuvill 97/85,Lõhnaküünal,,8717847190581,produce,,household,hh_candles_airfresh
+1166,"Pehme pall mänguasi kellukesega, kassidele",Pehme,,4008239398840,,,pet,pet_other
+1167,Coop piimašokolaadiga kaetud riisigaletid 100g,Coop,100 g,7340191145221,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_other
+1168,Vikstal kuivik rosina 200g,Vikstal,200 g,4741469009369,,,bakery,bakery_other
+1169,COOP Earl Grey tee 20x2g,COOP Earl,20x2 g,7340191164031,,,drinks,drinks_tea_coffee
+1170,Lehträtik Lotus 120tk,Lehträtik Lotus,120 pcs,6413200953221,,,household,hh_paper
+1171,Spaatel House,Spaatel House,,6438574174287,,,household,hh_kitchenware

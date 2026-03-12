@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+9635,"Valio PROfeel proteiini-mousse vaarika, laktoosivaba, 150 g",Valio PROfeel,150 g,6408432001123,,,dairy_eggs_fats,dairy_desserts
+9651,Hispaaniapärane juustuvalik 180 g,Hispaaniapärane,180 g,8413376025591,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+9657,"Kanapallid, TALLEGG, 360 g",TALLEGG Kanapallid,360 g,4740046011665,meat_fish,meat_poultry,meat_fish,meat_poultry
+9662,Rõõmusädeme smuuti 500 ml,Rõõmusädeme,500 ml,7340191171053,,,drinks,drinks_juices
+9664,"Gourmet Club Vürtsikas hummus, 200 g",Gourmet Club,200 g,4740670124984,,,sauces_oils,sauces_pasta_cooking
+9675,ATRIA BBQ kanapitsa 200 g,ATRIA BBQ,200 g,6407860062256,meat_fish,meat_grill_blood_sausages,dry_preserves,dry_ready_meals_jars
+9691,Alentaja margariin 60% 400g,Alentaja,400 g,6438207018803,,,dairy_eggs_fats,dairy_butter_margarine
+9719,"Rambyno suitsujuustu suupiste BBQ ja tšillipipraga Chipotle, 45% rasva kuivaines, 75g",Rambyno,75 g,4770299401135,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+9724,"Zott Kohvikoor 10%, 10 tk",Zott Kohvikoor,10 pcs,0000040145037,,,dairy_eggs_fats,dairy_cream_sourcream
+9728,Coop pirni-vanilliviili 200g,Coop,200 g,6438574042623,,,dairy_eggs_fats,dairy_yogurt_kefir
+9729,Herkku Mozzarella ciabatta,Herkku Mozzarella,,6438574278695,,,dry_preserves,dry_ready_meals_jars
+9731,Tallegg Kiievi Kotlet 300 G,Tallegg Kiievi,300 g,4740046011801,,,meat_fish,meat_poultry
+9736,"Fetajuust, 200 g","Fetajuust,",200 g,5202178003141,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+9749,"Alpro Plantgurt mango-õunamaitseline kääritatud sojatoode, suhkruvaba, 750 g",Alpro Plantgurt,750 g,5411188137702,,,dairy_eggs_fats,dairy_yogurt_kefir
+9750,Ma&orits Minikotlet 300 G,Ma&orits Minikotlet,300 g,4740171188942,,,meat_fish,meat_pork
+9756,Coop pastaroog tomati ja mozzarellaga 155g,Coop,155 g,7340191151772,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+9762,Alpro proteiinijook šokolaadimaitseline 250 ml,Alpro,250 ml,5411188133476,,,dairy_eggs_fats,dairy_plant_drinks
+9770,"Kohupiimakreem maasika-vahukommimaitseline, ALMA, 150g",Alma,150 g,4740125631449,sweets_snacks,sweets_candies,dairy_eggs_fats,dairy_cottage_quark
+9773,"Maitsestamata jogurt 2,5%, 380 g",Maitsestamata,380 g,4740125536096,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+9774,"Köögi toorjuust, 400 g",Köögi,400 g,4740113034849,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+9782,"Arla proteiinirikas kohvikohupiim, laktoosivaba, 200 g",Arla,200 g,6413300025972,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+9784,"Taastusjook banaani-šokolaadi, 330 ml",Taastusjook,330 ml,6419800120926,,,drinks,drinks_sport
+9837,Kariibi pajaroog 195 g,Kariibi,195 g,6415712002084,,,dry_preserves,dry_ready_meals_jars
+9844,"Mandlijook laktoosivaba, ALPRO, 1 l","Mandlijook,",1 l,5411188110835,,,dairy_eggs_fats,dairy_plant_drinks
+9847,"Kotimaista sulajuustuviilud, 400 g",Kotimaista,400 g,7340011432043,dairy_eggs_fats,dairy_other,cheese,dairy_cheese_slices
+9849,Juustumakaronid suitsupeekoniga 280 g,Juustumakaronid,280 g,4740376105744,dairy_eggs_fats,dairy_other,dry_preserves,dry_ready_meals_jars
+9857,"Kirsi proteiinijogurtijook, 275g",Kirsi,275 g,4740125582154,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+9862,ProBrands BCAA jook vaarikamaitseline 330 ml,ProBrands BCAA,330 ml,7350021424082,,,drinks,drinks_sport
+9872,"Alpro maasika-kirsimaitseline taimne jook, 755 g",Alpro,755 g,5411188138570,,,dairy_eggs_fats,dairy_yogurt_kefir
+9879,ALPRO riisijook magustamata 1L,ALPRO,1 l,5411188112549,dry_preserves,dry_pasta_rice,dairy_eggs_fats,dairy_plant_drinks
+9891,Suitsujuustune Kanapasta 300 g,Suitsujuustune Kanapasta,300 g,4745010279898,dairy_eggs_fats,dairy_other,dry_preserves,dry_ready_meals_jars
+9892,"Taastusjook šokolaadi, 330 ml",Taastusjook,330 ml,6419800120919,,,drinks,drinks_sport
+9903,Kohupiima minipannkook 150 g,Kohupiima,150 g,0752795137125,bakery,bakery_cakes_pastries,bakery,bakery_other
+9905,"Mustika keefir, 300 g",Mustika,300 g,4740125383034,,,dairy_eggs_fats,dairy_yogurt_kefir
+9914,"Kohupiimakreem mustika, ALMA, 300 g",Mustika,300 g,4740125612110,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+9919,Makula võileib Vöner 210g,Makula,210 g,6415712715878,bakery,bakery_bread_loaves,dry_preserves,dry_ready_meals_jars
+9932,"Isey Skyr Air sidrunimaitseline laktoosivaba piimatoode, 125 g",Isey Skyr,125 g,5690845003172,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_yogurt_kefir
+9949,"Rasvasegu võie Võideks light, MUMUU, 200 g",Võideks,200 g,4740065004501,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+9985,Violife originaalmaitseline riivitud taimne toode 150 g,Violife,150 g,5202390029516,,,cheese,cheese_regular
+10025,Alentaja lisatud kaaliumiga taimerasvavõie 400g,Alentaja,400 g,6438207018902,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+10030,"Arla Lempi tšillimaitselisega laktoosivaba toidukoor, 200 ml",Arla Lempi,200 ml,6413300026023,,,dairy_eggs_fats,dairy_cream_sourcream
+10033,"Skyr virsiku, FARMI, 300 g",Farmi,300 g,4740113097417,,,dairy_eggs_fats,dairy_yogurt_kefir
+10036,"Valio Forte Classico riivjuust, 80 g",Valio Forte,80 g,4740553698137,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10052,Be Plus Relajante smuuti 150 g,Be Plus,150 g,8410087611969,,,drinks,drinks_juices
+10055,"Marta Pagar apelsini-porgandi hummus, 150 g",Marta Pagar,150 g,4740667250313,,,sauces_oils,sauces_pasta_cooking
+10071,"Maasika-vaarika kohupiimakreem 0,2%, 150 g",Maasika-vaarika,150 g,6438574132515,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+10086,"Lemmik Juustu majonees, 200 g",Lemmik Juustu,200 g,4740502002381,dairy_eggs_fats,dairy_cheese_slices,sauces_oils,sauces_ketchup_mayo
+10092,"Castelli Parmigiano Reggiano juust, 200g",Castelli Parmigiano,200 g,8001868000876,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10097,"Sulatatud juust röstitud kanaga, 200 g",Sulatatud,200 g,4740500000228,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+10108,"Metsmaasika kohupiimakreem, 300 g",Metsmaasika,300 g,4740125612103,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+10129,Kalev tiramisumaitseline piimašokolaad küpsisega 100g,Kalev,100 g,4740012037637,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+10135,Joogijogurt Harmoonia maasika-pohla laktoosivaba 1kg,Joogijogurt Harmoonia,1 kg,4740125523096,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+10137,"Mozzarella juust Zottarella, 125 g",Mozzarella,125 g,4014500504407,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10150,Be Plus Energizante smuuti 150 g,Be Plus,150 g,8410087611945,,,drinks,drinks_juices
+10160,"Maitsestamata jogurt, 1 kg",Maitsestamata,1 kg,6415712614485,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+10161,ALPRO PLANTGURT pirni-vanilli 750g,ALPRO PLANTGURT,750 g,5411188138952,,,dairy_eggs_fats,dairy_yogurt_kefir
+10163,"Isey Skyr Air maasika-rabarberimaitseline toode, laktoosivaba, 125 g",Isey Skyr,125 g,5690845002618,,,dairy_eggs_fats,dairy_yogurt_kefir
+10172,"Valio PROfeel proteiini-mousse šokolaadi, laktoosivaba, 150 g",Valio PROfeel,150 g,6408432203398,,,dairy_eggs_fats,dairy_desserts
+10179,MAMMA Singi-juustubatoon 190 g,MAMMA Singi-juustubatoon,190 g,4740184530042,sweets_snacks,sweets_chocolate_bars,dry_preserves,dry_ready_meals_jars
+10189,Be Plus Antioxidante smuuti 150 g,Be Plus,150 g,8410087611938,,,drinks,drinks_juices
+10204,"Voimix Soolane 60%, VOIMIX, 400 g",Soolane,400 g,6438207017004,,,dairy_eggs_fats,dairy_butter_margarine
+10205,Emma kohupiimakreem maasika 150 g,Emma,150 g,4740294011196,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+10207,"E-Piim Juust Gouda, viilutatud, 300g",E-Piim Juust,300 g,4740142004219,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10212,"Farmi Kreeka jogurt 10%, laktoosivaba, 370 g",Farmi Kreeka,370 g,4740113035631,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+10215,La Belle Laitiere Brie 200g,La Belle,200 g,3176580020169,,,cheese,cheese_regular
+10218,Hiirte Sulatatud Juust maitserohelisega 185g,Hiirte Sulatatud,185 g,4740572006173,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+10229,Alma jogurt maasikas-banaan puuviljadest suhkrutega laktoosivaba 900g,Alma,900 g,4740125525311,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+10248,"Proteiinipuding piimašokolaadimaitseline, VALIO PROFEEL, 150g",Profeel,150 g,4740125534245,sweets_snacks,sweets_chocolate_bars,dairy_eggs_fats,dairy_desserts
+10250,"Coop riivjuust 4 juustu segu, 26% rasva, 150g",Coop,150 g,7340191149793,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10251,Mamma Punane Lihasalat 400G,Mamma Punane,400 g,4740184510310,produce,,dry_preserves,dry_ready_meals_jars
+10270,"Juust Grand, kg","Juust Grand,",,2316411100009,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10271,Mamma Pasta Lihapallidega 300 G,Mamma Pasta,300 g,4740184005656,meat_fish,meat_other,dry_preserves,dry_ready_meals_jars
+10281,"Gefilus metsmaasika keefir, 300 g",Gefilus,300 g,4740125383065,,,dairy_eggs_fats,dairy_yogurt_kefir
+10282,"Cambozola 70%, KÄSEREI, 150 g",Juust CAMBOZOLA,150 g,4000504133026,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+10285,Laktoosivaba toidukoor pipraga UHT 15% 200ml,Laktoosivaba,200 ml,6438460976025,,,dairy_eggs_fats,dairy_cream_sourcream
+10288,"Vahukoor 35% laktoosivaba, TERE, 200 ml",Vahukoor,200 ML,4740036001010,,,dairy_eggs_fats,dairy_cream_sourcream
+10291,MAITSEELAMUSED Sealihavrapp BBQ-kastmega 280 g,MAITSEELAMUSED Sealihavrapp,280 g,4745010587023,meat_fish,meat_pork,dry_preserves,dry_ready_meals_jars
+10293,"Margariin soolane poolrasvane 39%, DELMA, 450 g",Delma,450 g,8719200240728,,,dairy_eggs_fats,dairy_butter_margarine
+10301,Corona Cero alkoholivaba õlu 330ml,Corona Cero,330 ml,4740098002819,,,drinks,drinks_beer_cider
+10304,Õuna-pirni puuviljamix 400g,Õuna-pirni,400 g,8437010537080,produce,,drinks,drinks_juices
+10307,"Pajumäe Talu mahe-kohupiimakreem kakaoga, 190 g",Pajumäe Talu,190 g,4743135001394,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+10319,Coop fetajuust 150g,Coop,150 g,7340191150775,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10322,Royal Blu juust Dor Blu 55% 100g,Royal Blu,100 g,4000504215227,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10324,"Cessibon spreikreem, 250 g",Cessibon,250 g,8711900021010,,,dairy_eggs_fats,dairy_cream_sourcream
+10334,Krõbe seenevalgust kanata šnitsel 170 g,Krõbe,170 g,4745011041333,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+10339,Piimameister Otto Mozzarella kirsid 125 g,Piimameister Otto,125 g,4740588001018,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10361,"Brie valgehallitusjuust, PRESIDENT, 125 g",Brie,125 g,5906207520073,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10364,"Margariin Classic, RAMA, 400 g",Rama,400 g,8719200264854,,,dairy_eggs_fats,dairy_butter_margarine
+10371,"Sinihallitusjuust, 150 g","Sinihallitusjuust,",150 g,5740200001012,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10372,"Nopri Gouda Roheline Pesto, 250 g",Nopri Gouda,250 g,4740218004693,,,cheese,cheese_regular
+10373,"Oddlygood Organiline mandlijook ilma lisatud suhkruta, 1L",Oddlygood Organiline,1 L,6408430102433,,,dairy_eggs_fats,dairy_plant_drinks
+10382,"Laktoosivaba kohupiimapasta, 300 g",Laktoosivaba,300 g,4740036007319,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+10392,"Coop salatijuustukuubikud õlis tšilliga, 100 g",Coop,100 g,7340191176157,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+10394,Coop Cheddar punane 250g,Coop Cheddar,250 g,7340191161870,,,cheese,cheese_regular
+10403,Pesuloputusvahend Silan Supreme Romance Pink 1l,Pesuloputusvahend Silan,1 l,9000101579666,,,household,hh_cleaners
+10410,Kohupiimakreem šokolaaditükkidega 400g,Kohupiimakreem,400 g,4740218004396,sweets_snacks,sweets_chocolate_bars,dairy_eggs_fats,dairy_cottage_quark
+10412,ASTRI KÖÖK Poke kauss köögiviljadega (vegan)300 g,ASTRI KÖÖK,300 g,4740602008627,produce,,dry_preserves,dry_ready_meals_jars
+10418,Coop proteiinipuding kakao 150g,Coop,150 g,6438574132522,,,dairy_eggs_fats,dairy_desserts
+10424,Blue Diamond magustamata mandlijook (UHT) 1 l,Blue Diamond,1 l,41570112489,,,dairy_eggs_fats,dairy_plant_drinks
+10437,Kirsstomat punane I klass,Kirsstomat,,2060520400009,,,produce,produce_root_veg
+10462,Coop Kana Punases Karri Kastmes 400 G,Coop Kana,400 g,7340191168893,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+10468,"Sojajook shokolaadi, 1 l",Sojajook,1 l,5411188115458,,,dairy_eggs_fats,dairy_plant_drinks
+10469,Alpro proteiinijook karamelli-kohvimaitseline 250ml,Alpro,250 ml,5411188133490,,,dairy_eggs_fats,dairy_plant_drinks
+10473,Xtra Edam juust 500g,Xtra Edam,500 g,7340191172074,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10478,"Koorene šokolaadipuding, 230 g",Koorene,230 g,4740113090814,,,dairy_eggs_fats,dairy_desserts
+10483,"Coop margariin 60%, 600 g",Coop,600 g,7340191173866,,,dairy_eggs_fats,dairy_butter_margarine
+10485,MAMMA Pannkoogid kanatäidisega 200 g,MAMMA Pannkoogid,200 g,4740184520104,meat_fish,meat_poultry,bakery,bakery_other
+10492,Winiary kirsitarretis 71 g,Winiary,71 g,5900862217385,,,dry_preserves,dry_flour_sugar_baking
+10500,Golden Monarch sinihallitusjuust 100g,Golden Monarch,100 g,4740572006234,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10511,"Tere Kakao kohupiimapasta, 300 g",Tere Kakao,300 g,4740036014515,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+10531,Xtra riivitud juust 23% rasva 500g,Xtra,500 g,7340011300021,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10532,"Keiju kaera ja rapsiõliga margariin 60%, 400 g",Keiju,400 g,6438207019688,sauces_oils,oils_other,dairy_eggs_fats,dairy_butter_margarine
+10533,"Coop Edam juust 17 %, 800g",Coop Edam,800 g,7340191158399,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10540,"Searasv, LEMMIK, 200 g",Lemmik,200 g,5905477000056,,,dairy_eggs_fats,dairy_butter_margarine
+10558,Valio PROfeel proteiinikohupiimakreem maasika-banaani 200g,Valio PROfeel,200 g,4740125636178,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+10562,Rakvere Lihapallid Ürdi-Toorjuustutäidisega 300G,Rakvere Lihapallid,300 g,4740003014807,dairy_eggs_fats,dairy_other,meat_fish,meat_pork
+10581,"Alma Mandlitükkide ja šokolaadiga jogurt, 150 g",Alma Mandlitükkide,150 g,4740125539042,sweets_snacks,sweets_chocolate_bars,dairy_eggs_fats,dairy_yogurt_kefir
+10584,"Butero käsitöövõi küüslauguga, 150 g",Butero,150 g,0714084892160,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+10588,Coop Gouda Mature 400g,Coop Gouda,400 g,7340191163027,,,cheese,cheese_regular
+10624,Rakvere Perepihvid 400 G,Rakvere Perepihvid,400 g,4740003010601,,,meat_fish,meat_other
+10635,Mamma Rassolnik Kanalihaga 300 G,Mamma Rassolnik,300 g,4740184602619,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+10640,"BIG PRO Proteiinijook 0,33L banaani",BIG PRO,0.33 L,6430042025121,,,drinks,drinks_sport
+10675,Coop Tuunikalaga kolmnurk võileib 150g,Coop Tuunikalaga,150 g,6438574012770,bakery,bakery_bread_loaves,dry_preserves,dry_ready_meals_jars
+10682,Tere Deary taimne dessert maasika-arbuusi 130g,Tere Deary,130 g,4740036016953,,,dairy_eggs_fats,dairy_desserts
+10683,Rakvere Lihapallid toorjuustutäidisega 300 g,Rakvere Lihapallid,300 g,4740003014791,dairy_eggs_fats,dairy_other,meat_fish,meat_pork
+10685,SAARIOINEN Tomati-juustu pitsa 200 g,SAARIOINEN Tomati-juustu,200 g,6412000085453,dairy_eggs_fats,dairy_other,dry_preserves,dry_ready_meals_jars
+10688,"Joogijogurt banaani-maasika 1,5%, ALMA, 1 kg",Banaani-maasika,1 kg,4740125510072,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+10693,Toorjuustu dessert laimi ja valge šokolaadiga 150g,Toorjuustu,150 g,4740218004334,sweets_snacks,sweets_chocolate_bars,dairy_eggs_fats,dairy_desserts
+10703,"Mo Saaremaa Pehme kohupiim rasvatu, laktoosivaba 500 g",Mo Saaremaa,500 g,4740153101112,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+10727,"Filos vähendatud soolaga Halloumi juust, 200g",Filos,200 g,6416710300974,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10747,"Valio Juust Royal Gouda Black, 200 g",Valio Juust,200 g,4740553008875,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10748,"Xtra Gouda juust, 500g",Xtra Gouda,500 g,7340191133198,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10774,"Mauri Bontazola Gorgonzola DOP kreemine, 200 g",Mauri Bontazola,200 g,8000902004290,,,cheese,cheese_regular
+10785,USIN Vegan kartulisalat 200 g,USIN Vegan,200 g,4740584004822,produce,,dry_preserves,dry_ready_meals_jars
+10802,"Vanilli sojajook laktoosivaba, ALPRO, 250 ml",Alpro,250 ml,5411188082620,,,dairy_eggs_fats,dairy_plant_drinks
+10803,"Sportlife Juicy BCAA 0,33l",Sportlife Juicy,0.33 l,6430018363837,,,drinks,drinks_sport
+10804,"Tiigerkrevetid, puhastatud 400 g","Tiigerkrevetid,",400 g,4751001161233,,,meat_fish,meat_other
+10811,Juustoportti magustamata laktoosivaba mangojogurt 150 g,Juustoportti,150 g,6408652226641,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+10823,"Kitsepiimajuust, 150 g","Kitsepiimajuust,",150 g,4740187000115,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10827,"Proteiinišeik šokolaadi, 330 ml",Proteiinišeik,330 ml,7340001800944,,,drinks,drinks_sport
+10839,"Flora leivamääre, 1 kg",Flora,1 kg,8719200257979,,,dairy_eggs_fats,dairy_butter_margarine
+10841,"Coop Parmigiano Reggiano juust 30%, 125 g",Coop Parmigiano,125 g,7340191157057,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+10845,"Taimne šokolaadipuding, 150 g",Taimne,150 g,4740036015888,,,dairy_eggs_fats,dairy_desserts
+10851,"Flora taimne kreem (31%), 250 ml",Flora,250 ml,8719200284609,,,dairy_eggs_fats,dairy_cream_sourcream
+10863,CHEF LUNDEN Grillkauss kanaga 275 g,CHEF LUNDEN,275 g,4740376101722,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+10868,"Arla Lempi laktoosivaba toidukoor ürtidega, 200 ml",Arla Lempi,200 ml,6413300026016,,,dairy_eggs_fats,dairy_cream_sourcream
+10870,"E-Piim Edam juust, viilutatud, 1kg",E-Piim Edam,1 kg,4740142000907,dairy_eggs_fats,,cheese,cheese_regular
+10874,"Kamakeefir 2,2%, VALIO GEFILUS, 300 g",Kama,300 g,4740125383041,,,dairy_eggs_fats,dairy_yogurt_kefir
+10875,"Coop sulatatud juustuviilud 6%, 200g",Coop,200 g,7340191162563,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+10878,"Arla Apetina vahemerepärased salatijuustukuubikud õlis mustade oliividega, 100 g",Arla Apetina,100 g,5711953199349,dairy_eggs_fats,dairy_other,cheese,cheese_regular

@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+123,"Kartul pestud kollane 2,5 kg",Kartul,2.5 kg,4742050000109,,,produce,produce_root_veg
+124,Kartul kollane Colomba Laheotsa 2kg,Kartul,2 kg,4743116000163,,,produce,produce_root_veg
+125,"Twister Green sidruni-maasika mahlajää, vegan 71g",Twister Green,71 g,8711327575646,,,frozen_food,frozen_desserts_icecream
+126,"NORDIC SPRINGS 1,5 L KARBONISEERIMATA",NORDIC SPRINGS,1.5 l,4740042100783,,,drinks,drinks_water
+127,Leibur Rukkipala Idandatud Teradega 240 G,Leibur Rukkipala,240 g,4740072132518,,,bakery,bakery_bread_loaves
+128,"Karums Vanilli glasuurkohuke, 45 g",Karums Vanilli,45 g,4750050341405,dairy_eggs_fats,dairy_other,dairy_eggs_fats,dairy_desserts
+129,Eesti Pagar Pealinna Teraleib 390 G,Eesti Pagar,390 g,4740086020009,,,bakery,bakery_bread_loaves
+130,"Lõhefilee jahutatud, kg",Lõhefilee,,2060315900004,meat_fish,fish_fresh,meat_fish,fish_fresh
+131,Varajane pestud kartul Solist 1 kg,Varajane,1 kg,4740243474805,,,produce,produce_root_veg
+132,Pikk kurk kg,Pikk,,2060604700001,,,produce,produce_root_veg
+133,Perekurk terved 680/360 g,Perekurk,360 g,4740029040101,,,dry_preserves,dry_canned_veg
+134,"Koorejäätis Regatt, 120 ml","Koorejäätis Regatt,",120 ml,4740093161818,,,frozen_food,frozen_desserts_icecream
+135,Coop šokolaadi koonusjäätis 69g,Coop,69 g,7340191157569,,,frozen_food,frozen_desserts_icecream
+136,Salvest salatikurk 395 g,Salvest,395 g,4740073074220,produce,,dry_preserves,dry_canned_veg
+137,Coop oad soolvees 380g orgaaniline,Coop,380 g,7340191171794,,,dry_preserves,dry_canned_veg
+138,Kohupiimapall,Kohupiimapall,,2060301500003,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_sweet_buns_donuts
+139,"Tere Laktoosivaba piim 2,5%, 1 l",Tere Laktoosivaba,1 l,4740036014027,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+140,Tomat I klass,Tomat I,,2060472300006,,,produce,produce_root_veg
+141,Xtra hakitud tomatid pune ja basiilikuga 400g,Xtra,400 g,7340191171930,,,dry_preserves,dry_canned_veg
+142,"Limonaadijää, 70 ml","Limonaadijää,",70 ml,4740093005471,,,frozen_food,frozen_desserts_icecream
+143,Kapten Grant purustatud tuunikala tükid soolvees 185 g,Kapten Grant,185 g,4740590100242,meat_fish,fish_fresh,meat_fish,fish_processed
+144,"Kuldmerikoger, roogitud, jahutatud, kg","Kuldmerikoger,",,2060321800008,dry_preserves,dry_flour_sugar_baking,meat_fish,fish_fresh
+145,Värske soolakurk lahtine Germani talu,Värske,,2060580300004,,,produce,produce_root_veg
+146,"Haugifilee, jahutatud, kg","Haugifilee,",,2060197400005,dry_preserves,dry_flour_sugar_baking,meat_fish,fish_fresh
+147,Coop päikesekuivatatud tomati tükid õlis 285/145g,Coop,145 g,7340011466208,sauces_oils,oils_other,dry_preserves,dry_canned_veg
+148,"Grillitud koore-pipramaitseline grill-liha, kg",Grillitud,,2060164700008,meat_fish,meat_grill_blood_sausages,meat_fish,meat_pork
+149,SAAREMAA VESI 5 L,SAAREMAA VESI,5 l,4741122000023,,,drinks,drinks_water
+150,Kalev vanillimaitselised vormiküpsised 163g,Kalev,163 g,4740012600046,bakery,bakery_other,sweets_snacks,sweets_biscuits_cookies
+151,Xtra vanillijäätis 8tk,Xtra,8 pcs,7340011420330,,,frozen_food,frozen_desserts_icecream
+152,Rainbow purustatud tomatid 390g mahe,Rainbow,390 g,7340191170391,,,dry_preserves,dry_canned_veg
+153,Eesti Pagar Peremehe Leib 600 G,Eesti Pagar,600 g,4740086021211,,,bakery,bakery_bread_loaves
+154,"Ahven, roogitud, jahutatud, kg","Ahven,",,2060131400009,meat_fish,fish_other,meat_fish,fish_fresh
+155,Beebikartul pestud Ants muld 1kg,Beebikartul,1 kg,4743097000206,,,produce,produce_root_veg
+156,Eesti Pagar Must Vormileib 600 G,Eesti Pagar,600 g,4740086005068,,,bakery,bakery_bread_loaves
+157,Coop Toffeejäätis 6tk 415g,Coop Toffeejäätis,415 g,7340011475262,,,frozen_food,frozen_desserts_icecream
+158,"Alma Piim 2,5%, 1,5 l",Alma Piim,1.5 l,4740125120059,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+159,Xtra maasikad sügavkülmutatud 500g,Xtra,500 g,7340191150638,frozen_food,frozen_berries_fruit,frozen_food,frozen_berries_fruit
+160,Atria Hornet marineeritud kanatiivad 900 g,Atria Hornet,900 g,6407810016094,meat_fish,meat_poultry,meat_fish,meat_poultry
+161,Pomi purustatud tomatid 400 g,Pomi,400 g,8032793342335,,,dry_preserves,dry_canned_veg
+162,Coop kooritud tomatid tomatimahlas 400g,Coop,400 g,7340191170513,,,dry_preserves,dry_canned_veg
+163,Eesti Pagar Kanepiseemne Leib Rukkiteradega 500 G,Eesti Pagar,500 g,4740086013759,,,bakery,bakery_bread_loaves
+164,Minu praetud räimed tomatikastmes 240 g,Minu,240 g,4743144002528,meat_fish,fish_fresh,meat_fish,fish_processed
+165,Kapten Grant tuunikala suured tükid õlis 185 g,Kapten Grant,185 g,4740590100211,meat_fish,fish_fresh,meat_fish,fish_processed
+166,"Heeringafilee traditsiooniline, VICI, 190 g","Heeringafilee,",190 g,4770190044943,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+167,Mugulsibul,Mugulsibul,,2060521700009,,,produce,produce_root_veg
+168,"Vanilli-koorejäätis glasuuris, 110 ml",Vanilli-koorejäätis,110 ml,4740188000169,,,frozen_food,frozen_desserts_icecream
+169,"Saare Toffee koorene glasuurkohuke, 40 g",Saare Toffee,40 g,4742231002038,dairy_eggs_fats,dairy_other,dairy_eggs_fats,dairy_desserts
+170,M.V.Wool Viilutatud Soolalõhe 100 G,M.V.Wool Viilutatud,100 g,4740192010017,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+171,Leibur Ruks Täistera Pätsileib 390 G,Leibur Ruks,390 g,4740072116259,,,bakery,bakery_bread_loaves
+172,Eesti Pagar Rehe Rukkileib 600 G,Eesti Pagar,600 g,4740086008069,,,bakery,bakery_bread_loaves
+173,Mutti tomatipüree 130 g,Mutti,130 g,80042532,,,dry_preserves,dry_canned_veg
+174,Kotimaista õrrekanade munad M 10 TK,Kotimaista,10 pcs,6414893094918,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+175,Tallegg Pooltiivad Klassikalises Marinaadis 800G,Tallegg Pooltiivad,800 g,4740046006050,,,meat_fish,meat_poultry
+176,Mini sõõrik MIX 22 g,Mini,22 g,2060307600004,,,bakery,bakery_sweet_buns_donuts
+177,"Grillitud broileri pooltiivad punase veini marinaadis, kg",Grillitud,,2060176900007,drinks,drinks_wine,meat_fish,meat_poultry
+178,Fazer Must Leib 600 G,Fazer Must,600 g,4740103020203,,,bakery,bakery_bread_loaves
+179,"Pelisterka mineraalvesi loodusliku gaasiga, 1,5l",Pelisterka,1.5 l,5310064000027,,,drinks,drinks_water
+180,"VÄRSKA ORIGINAAL 1,5 L",VÄRSKA ORIGINAAL,1.5 l,4740042100011,,,drinks,drinks_water
+181,Leibur Mitmevilja Röst 470 G,Leibur Mitmevilja,470 g,4740072252858,,,bakery,bakery_bread_loaves
+182,"Šokolaaditükkidega kohuke, 40 g",Šokolaaditükkidega,40 g,4770265212918,sweets_snacks,sweets_chocolate_bars,dairy_eggs_fats,dairy_desserts
+183,Väike Tom Flamingo vanilli-koorejäätis vaarikajääga60g/74ml,Väike Tom,74 ml,4740093364325,,,frozen_food,frozen_desserts_icecream
+184,"Karums Kookose glasuurkohuke, 45 g",Karums Kookose,45 g,4750050341412,bakery,bakery_cakes_pastries,dairy_eggs_fats,dairy_desserts
+185,Väike Tom pirnimaitseline jäätis vahvlitopsis 85g/120ml,Väike Tom,85 g,4740093001930,,,frozen_food,frozen_desserts_icecream
+186,"Farmi Täispiim 3,6%-4,2%, 2 l",Farmi Täispiim,2 l,4740113091514,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+187,"Lestafilee n-ta, jahutatud",Lestafilee,,2060335000005,dry_preserves,dry_flour_sugar_baking,meat_fish,fish_fresh
+188,"Lõhesteigid jahutatud, kg",Lõhesteigid,,2060312100001,meat_fish,fish_fresh,meat_fish,fish_fresh
+189,Eesti Pagar Kodukandi Rukkileib 390 G,Eesti Pagar,390 g,4740086001497,,,bakery,bakery_bread_loaves
+190,Salvest maitselt mahe kurk 675/360 g,Salvest,360 g,4740073060346,,,dry_preserves,dry_canned_veg
+191,Bataat,Bataat,,2060500600009,,,produce,produce_root_veg
+192,"Karums Karamelli glasuurkohuke, 45 g",Karums Karamelli,45 g,4750050341481,sweets_snacks,sweets_candies,dairy_eggs_fats,dairy_desserts
+193,"Jeppi Glasuuritud kakaodessert šokolaaditäidisega, 38g",Jeppi Glasuuritud,38 g,47428140,,,dairy_eggs_fats,dairy_desserts
+194,Leibur Rukkipala 330 G,Leibur Rukkipala,330 g,4740072130514,,,bakery,bakery_bread_loaves
+195,Kartul pesemata Eesti,Kartul,,2060268000004,,,produce,produce_root_veg
+196,"SAAREMAA VESI NÕRGALT GASEERITUD 1,5L",SAAREMAA VESI,1.5 l,4741122000085,,,drinks,drinks_water
+197,Eesti Pagar Rukkitasku 340 G,Eesti Pagar,340 g,4740086009820,,,bakery,bakery_bread_loaves
+198,"Grilltiib, kg","Grilltiib,",,2060162000001,,,meat_fish,meat_poultry
+199,"Grillitud ROUTE 66 grill-liha seakaelakarbonaadist, kg",Grillitud ROUTE,,2060177000003,meat_fish,meat_grill_blood_sausages,meat_fish,meat_pork
+200,Coop supersweet magus mais 340/285g,Coop,285 g,7340191149564,,,dry_preserves,dry_canned_veg
+201,Kapten Grant tuunikala suured tükid soolvees 185 g,Kapten Grant,185 g,4740590100228,meat_fish,fish_fresh,meat_fish,fish_processed
+202,Coop mahe kikerherned soolvees 380g/230g,Coop,380 g,7340191171787,,,dry_preserves,dry_canned_veg
+203,Varajane kartul 1kg Kotimaista,Varajane,1 kg,6438574152704,,,produce,produce_root_veg
+205,"Jeppi Vanillimaitseline glasuuritud dessert vaarikatäidisega, 38 g",Jeppi Vanillimaitseline,38 g,47410145,,,dairy_eggs_fats,dairy_desserts
+206,Mutti purustatud tomatid,Mutti,,80042556,,,dry_preserves,dry_canned_veg
+207,SAAREMAA VESI 500 ML,SAAREMAA VESI,500 ml,4741122000078,,,drinks,drinks_water
+208,Kartul pesemata Solist 1kg,Kartul,1 kg,4740669012520,,,produce,produce_root_veg
+209,Kartul Soraya 3kg,Kartul Soraya,3 kg,4745010042041,,,produce,produce_root_veg
+210,"Grillkints, kg","Grillkints,",,2060162200005,,,meat_fish,meat_pork
+211,Rannaküla sprotid õlis 160 g,Rannaküla,160 g,4742835010064,sauces_oils,oils_other,meat_fish,fish_processed
+212,Kurk lühike kg,Kurk,,2060178800008,,,produce,produce_root_veg
+213,"Väike Tom hele küpsisejäätis, 75 g",Väike Tom,75 g,4740093623149,,,frozen_food,frozen_desserts_icecream
+214,Coop hakitud tomatid 390g,Coop,390 g,7340191170414,,,dry_preserves,dry_canned_veg
+215,"NORDIC SPRINGS 1,5 L KARBONISEERITUD",NORDIC SPRINGS,1.5 l,4740042100776,,,drinks,drinks_water
+216,"Väike Tom vanillijäätis pähklitäidise ja šokolaadiglasuuriga, 90 ml",Väike Tom,90 ml,4740093003330,frozen_food,frozen_food_other,frozen_food,frozen_desserts_icecream
+217,Coop tuunikala tükid vees 150/105g,Coop,105 g,7340191160071,meat_fish,fish_fresh,meat_fish,fish_processed
+218,Rannamoisa Kergelt Vürtsikad Broileritiivad 400 G,Rannamoisa Kergelt,400 g,4742462001336,sauces_oils,oils_other,meat_fish,meat_poultry
+219,"Grillpoolkoib, kg","Grillpoolkoib,",,2060162400009,,,meat_fish,meat_poultry
+220,"Grillitud kirsisuitsune grill-liha seavälisfileest, kg",Grillitud,,2060177200007,meat_fish,meat_grill_blood_sausages,meat_fish,meat_pork
+221,Sanpellegrino mineraalvesi 1L,Sanpellegrino,1 l,8002270000218,,,drinks,drinks_water
+222,"Soola vikerforellifilee, sulatatud, viilutatud, kg",Soola,,2060258700006,,,meat_fish,fish_salted_smoked
+223,Kartul pestud,Kartul,,2060501200000,,,produce,produce_root_veg
+224,"Šokolaadi-koorejäätis glasuuris, 110 ml",Šokolaadi-koorejäätis,110 ml,4740188000497,,,frozen_food,frozen_desserts_icecream
+225,Väike Tom vanilli-koorejäätis rosinatega vt 70g/120ml,Väike Tom,70 g,4740093005358,,,frozen_food,frozen_desserts_icecream
+226,"Salvest kaunvilja kauss kinoaga 530 g, vegan, gluteenivaba",Salvest,530 g,4740073078365,,,dry_preserves,dry_ready_meals_jars
+227,"Šeimininkes koorevõi 82%, 200g",Šeimininkes,200 g,4770299391412,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+228,"Presto chilli sin carne 350 g, vegan, gluteenivaba",Presto,350 g,4740073078303,,,dry_preserves,dry_ready_meals_jars
+229,Pere hapukoor 20% 500g kile,Pere,500 g,4740125410044,,,dairy_eggs_fats,dairy_cream_sourcream
+230,Tallegg Poolkoivad Klassikalises Marinaadis 800G,Tallegg Poolkoivad,800 g,4740046003790,,,meat_fish,meat_poultry
+231,"Grillitud broilerikintsu grill-liha kollase ploomiga, kg",Grillitud,,2060176800000,meat_fish,meat_grill_blood_sausages,meat_fish,meat_poultry
+232,Kartul punane pesemata Eesti kg,Kartul,,2060353600003,,,produce,produce_root_veg
+233,Xtra purustatud tuunikala vees 150/105 g,Xtra,105 g,7340011484714,meat_fish,fish_fresh,meat_fish,fish_processed
+234,Eesti Pagar Pealinna Peenleib 1 KG,Eesti Pagar,1 KG,4740086001145,,,bakery,bakery_bread_loaves
+235,LIMPSIPURIKAS Mullinätsu- ja vaarikamaitseline jää 60ml / 55g,LIMPSIPURIKAS Mullinätsu-,60 ml,4740188012889,,,frozen_food,frozen_desserts_icecream
+236,Pop vanillimaitseline jäätis 63 g / 120 ml,Pop,63 g,4770221360325,,,frozen_food,frozen_desserts_icecream
+237,"Vikerforell jahutatud, kg",Vikerforell,,2060336200008,dry_preserves,dry_flour_sugar_baking,meat_fish,fish_fresh
+238,Coop suured tuunikalatükid tomatikastmes msc 185g,Coop,185 g,7340191163881,meat_fish,fish_fresh,meat_fish,fish_processed
+239,"Saida filee nahata, jahutatud, kg",Saida,,2060197900000,dry_preserves,dry_flour_sugar_baking,meat_fish,fish_fresh
+240,"Alma Kohupiim Vanilli, 200 g",Alma Kohupiim,200 g,4740125638516,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+241,Coop Pitaleib 265 G,Coop Pitaleib,265 g,7340191167476,,,bakery,bakery_bread_loaves
+242,Xtra punased aedoad soolvees 380/230g,Xtra,230 g,7340191171534,,,dry_preserves,dry_canned_veg
+243,Coop magus mais 165/140 g,Coop,140 g,7340191149540,,,dry_preserves,dry_canned_veg
+244,Varajane kartul Annabelle 1kg,Varajane,1 kg,6415350017327,,,produce,produce_root_veg
+245,"Sprotid õlis, RANNAKÜLA, 100 g",Rannaküla,100 g,4742835010019,sauces_oils,oils_other,meat_fish,fish_processed
+246,ONU ESKIMO Vanillimaitseline koorejäätis kommitükkidega vahvlitopsis 125ml/65g,ONU ESKIMO,125 ml,4740188012353,,,frozen_food,frozen_desserts_icecream
+247,Eesti Pagar Teratasku 280 G,Eesti Pagar,280 g,4740086015395,,,bakery,bakery_bread_loaves
+248,Vytautas mineraalvesi 1 L,Vytautas,1 l,4770405226126,,,drinks,drinks_water
+249,"POP šokolaadimaitseline jäätis 120 ml, 63 g",POP,120 ml,4770221360752,,,frozen_food,frozen_desserts_icecream
+250,Õun Paulared I klass,Õun Paulared,,2060514600002,,,produce,produce_apples_pears
+251,Leibur Tallinna Peenleib 490 G,Leibur Tallinna,490 g,4740072116358,,,bakery,bakery_bread_loaves
+252,"Grillkoib, kg","Grillkoib,",,2060162100008,,,meat_fish,meat_poultry
+253,Väike Tom Prillo Maasika-ananassi-vanilli maitseline jäätis 75g/80ml,Väike Tom,75 g,4740093001107,,,frozen_food,frozen_desserts_icecream
+254,Grillitud sea kulinaarne ribi kg,Grillitud,,2060164900002,,,meat_fish,meat_pork
+255,Coop mustad oad soolvees 390/230 g,Coop,230 g,7340191171664,,,dry_preserves,dry_canned_veg
+256,"M.V.Wool Soolaforell, Viilutatud 100G","M.V.Wool Soolaforell,",100 g,4740192011014,,,meat_fish,fish_salted_smoked
+257,Röstsai 500 G,Röstsai,500 g,20614799,,,bakery,bakery_bread_loaves
+258,"Akvile Karboniseerimata Mineraalvesi 1,5L",Akvile Karboniseerimata,1.5 l,4770405226379,,,drinks,drinks_water
+259,Opera d'Oro kikerherned 400/240 g,Opera,240 g,4743144008483,,,dry_preserves,dry_canned_veg
+260,Coop Maasikajäätis 69g,Coop Maasikajäätis,69 g,7340191155985,,,frozen_food,frozen_desserts_icecream
+261,Austrid tk,Austrid,,2060309700009,,,meat_fish,fish_fresh
+262,Xtra kikerherned soolvees 380/230g,Xtra,230 g,7340191171527,,,dry_preserves,dry_canned_veg
+263,Coop püreestatud tomatid 200g,Coop,200 g,7340191170841,,,dry_preserves,dry_canned_veg
+264,"Karums Šokolaadi glasuurkohuke, 45 g",Karums Šokolaadi,45 g,4750050341511,sweets_snacks,sweets_chocolate_bars,dairy_eggs_fats,dairy_desserts
+265,Tere Kohuke juustukoogi šokolaadiglasuuriga 40 g,Tere Kohuke,40 g,47433052,sweets_snacks,sweets_chocolate_bars,dairy_eggs_fats,dairy_desserts
+266,Tere Kohuke kondenspiima ja karamelliglasuuriga 40 g,Tere Kohuke,40 g,47435056,sweets_snacks,sweets_candies,dairy_eggs_fats,dairy_desserts
+267,"Alma Piim 2,5%, 1 l",Alma Piim,1 l,4740125120011,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+268,Minu kilu tomatikastmes 240 g,Minu,240 g,4743144000760,dry_preserves,dry_other,meat_fish,fish_processed
+269,Presto veiseliha raguu köögiviljadega 350 g,Presto,350 g,4740073078341,produce,,dry_preserves,dry_ready_meals_jars
+270,Rainbow valged oad tomatikastmes 390g,Rainbow,390 g,7340191108851,dry_preserves,dry_groats_beans,dry_preserves,dry_canned_veg
+271,Atria Hornet krõbedad kanatiivad 650 g,Atria Hornet,650 g,6407800011160,meat_fish,meat_poultry,meat_fish,meat_poultry
+272,"GRILLITUD ŠASLÕKI GRILLVORSTID, KG",GRILLITUD ŠASLÕKI,,2060265300008,,,meat_fish,meat_grill_blood_sausages
+273,Vikerforellifilee C-trim,Vikerforellifilee C-trim,,2060323000000,,,meat_fish,fish_fresh

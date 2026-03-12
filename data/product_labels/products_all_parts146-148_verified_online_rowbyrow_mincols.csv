@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+46765,Gustav Makroonid 6tk karbis 100 g,Gustav Makroonid,100 g,4745091321806,,,bakery,bakery_cakes_pastries
+46772,Barni piimatäidisega biskviitküpsis 150 g,Barni,150 g,5906747318321,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+46787,"Isey Skyr vanillimaitseline piimatoode, laktoosivaba 125 g",Isey Skyr,125 g,5690845002410,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_yogurt_kefir
+46788,Pärnamäed Gluteenivaba Kookose-Kaneeliküpsis 120 G,Pärnamäed Gluteenivaba,120 g,4751001267560,bakery,bakery_cakes_pastries,sweets_snacks,sweets_biscuits_cookies
+46802,"Deary glasuuritud tofu vanillibatoonike, 40 g",Deary,40 g,4740036016427,,,dairy_eggs_fats,dairy_desserts
+46828,Biscotti küpsis dolche mix 450g,Biscotti,450 g,4820180814138,,,sweets_snacks,sweets_biscuits_cookies
+46840,Schär Magdalenas Muffin Aprikoosiga 50 G,Schär Magdalenas,50 g,8008698046616,,,bakery,bakery_cakes_pastries
+46880,COOP TORDIPÕHI 200 G,COOP TORDIPÕHI,200 g,7340191165052,,,bakery,bakery_cakes_pastries
+46900,Eesti Pagar Pealinna Kook 350 G,Eesti Pagar,350 g,4740086006799,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+46926,Balconi kakaorullbiskviit 300 g,Balconi,300 g,8001585002153,,,bakery,bakery_cakes_pastries
+46936,"Kotimaista mustsõstramaitseline hapendatud kaerajook, 400 g",Kotimaista,400 g,6438460602412,,,dairy_eggs_fats,dairy_yogurt_kefir
+46981,Gullon suhkruvabad šokolaadivahvlid 60 g,Gullon,60 g,8410376058826,,,sweets_snacks,sweets_waffles_cakes
+47068,Europagar Moonisüda 200 G,Europagar Moonisüda,200 g,4740507007312,,,bakery,bakery_bread_loaves
+47069,"Miniekleerid vahukoorega, EESTI KONDIITER, 200 g",Eesti Kondiiter,200 g,4740558004735,,,bakery,bakery_cakes_pastries
+47078,"Jogurtijook maasikas-granaatõun 4x100g, ACTIMEL, 400 g",Actimel,4x100 g,5900643051283,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+47089,Leibur Saib 100% Rukkijahust 370 G,Leibur Saib,370 g,4740072123653,dry_preserves,dry_flour_sugar_baking,bakery,bakery_bread_loaves
+47103,"Flora By Milda laktoosivaba kaste toiduvalmistamiseks 15%, 250ml",Flora By,250 ml,8719200303256,,,dairy_eggs_fats,dairy_cream_sourcream
+47118,"Pure mangokaste, 260 g",Pure,260 g,4750145046581,,,sauces_oils,sauces_marinades
+47121,Selga šokolaadimaitseline vahvel 180 g,Selga,180 g,4750007817809,,,sweets_snacks,sweets_waffles_cakes
+47139,"Saaremaa maitsestamata mahejogurt 6%, 300 g",Saaremaa,300 g,4742231005459,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+47140,Leibur Ruks Täistera Vormileib 300 G,Leibur Ruks,300 g,4740072126753,,,bakery,bakery_bread_loaves
+47143,Gefilus jogurtijook apelsini-mango C-vitamiiniga laktoosivaba 4x100g,Gefilus,4x100 g,4740125581195,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+47195,Fazer Street Food Lapi leib täisteraga 450 g,Fazer Street,450 g,4770068201133,,,bakery,bakery_bread_loaves
+47197,Eesti Kondiiter Küpsis Kihiline Karamelliga 400 G,Eesti Kondiiter,400 g,4740558006005,,,sweets_snacks,sweets_biscuits_cookies
+47210,"Kotimaista maitsestamata mahe AB-jogurt, 1 kg",Kotimaista,1 kg,6415712614461,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+47211,Kalev Mesikäpp šokolaadimaitselise kreemiga vahvlid 250 g,Kalev Mesikäpp,250 g,4740012370727,,,sweets_snacks,sweets_waffles_cakes
+47220,"Xtra kakaopuding vahukoorega, 200 g",Xtra,200 g,6414893095021,,,dairy_eggs_fats,dairy_desserts
+47252,Muru Baby maisi-pitsa rõngad 7k 20g,Muru Baby,20 g,6430067350789,,,baby,baby_snacks
+47294,Fazer Street Food Võileiva tasku 400 g,Fazer Street,400 g,4770068201102,dairy_eggs_fats,dairy_other,bakery,bakery_bread_loaves
+47296,Põltsamaa virsiku-guajaavi-mündi smuuti 280 ml,Põltsamaa,280 ml,4740029053057,,,produce,produce_smoothies_fresh_juices
+47305,Rainbow männiseep 1l,Rainbow,1 l,6415711692507,,,household,hh_cleaners
+47326,"Fazer Aito taimne mangomaitseline kaeratoode, 400 g",Fazer Aito,400 g,6410222013605,,,dairy_eggs_fats,dairy_yogurt_kefir
+47339,Marmiton glasuuriga kaeraküpsised 300 g,Marmiton,300 g,4740059081150,bakery,bakery_other,sweets_snacks,sweets_biscuits_cookies
+47346,Üldpuhastusvahend Grapefru&me + Mint herbal water 500ml,Üldpuhastusvahend Grapefru&me,500 ml,6430034674702,household,hh_cleaners,household,hh_cleaners
+47348,Fazer Kodusai Xxl 700 G,Fazer Kodusai,700 g,4740103010068,,,bakery,bakery_bread_loaves
+47351,Gourmet Club Mango-vaarika tort 750 g,Gourmet Club,750 g,4740670125059,,,bakery,bakery_cakes_pastries
+47376,Eesti Kondiiter Juustuküpsis 250 g,Eesti Kondiiter,250 g,4740558005626,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+47386,"Oddlygood Dreamy kaeradessert karamelli, gluteenivaba, 130g",Oddlygood Dreamy,130 g,6430081491321,,,dairy_eggs_fats,dairy_desserts
+47398,"Virsikutega skyr, 150 g",Virsikutega,150 g,4740113091446,,,dairy_eggs_fats,dairy_yogurt_kefir
+47414,"Alma Maitsestamata kohupiimakreem, 300 g",Alma Maitsestamata,300 g,4740125612066,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+47420,Rõngu Pagar Moorapea Kohupiimakreemiga 40 G,Rõngu Pagar,40 g,4742216008086,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+47435,Trube Soolakaramellitäidisega Magus Keerusai 350 g,Trube Soolakaramellitäidisega,350 g,6407790900796,,,bakery,bakery_sweet_buns_donuts
+47498,Gandola ladyfingers 400 g,Gandola,400 g,8008940900109,,,sweets_snacks,sweets_biscuits_cookies
+47506,Väike Väänik piparmündimaitselised präänikud 250 g,Väike Väänik,250 g,4740320004499,,,sweets_snacks,sweets_biscuits_cookies
+47507,Nikolajevskaja päevalilleseemnehalvaa 150g,Nikolajevskaja,150 g,4770266127839,,,sweets_snacks,sweets_candies
+47516,Reval Kondiiter Mini Pulgakook 180 G,Reval Kondiiter,180 g,4742581011001,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+47520,Maretti bruschetta-krõpsud krabimaitselised 70g,Maretti,70 g,3800205877349,,,sweets_snacks,sweets_snacks_salty
+47560,"Kookosjook kohvile, 1 l",Kookosjook,1 l,5411188119753,bakery,bakery_cakes_pastries,dairy_eggs_fats,dairy_plant_drinks
+47582,Dr beckmann pesumasina puhastuspulber 250g,Dr,250 g,4008455427416,,,household,hh_laundry
+47624,Fazer Seemneröst 450 G,Fazer Seemneröst,450 g,4740103011188,,,bakery,bakery_bread_loaves
+47696,Praetud heeringafilee pallikesed tomatikastmes 430 g,Praetud,430 g,4740041004082,meat_fish,fish_fresh,meat_fish,fish_processed
+47699,Lõuna Pagarid Kaerasai Jõhvikaga 300 G,Lõuna Pagarid,300 g,4740633000362,,,bakery,bakery_bread_loaves
+47715,Laktoosivaba toidukoor sibulaga 15% 200ml,Laktoosivaba,200 ml,6438460976056,,,dairy_eggs_fats,dairy_cream_sourcream
+47759,"Mo Saaremaa Või küüslaugu ja soolakristallidega, 150g",Mo Saaremaa,150 g,4740153040022,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+47763,Trube Magussai 500 g,Trube Magussai,500 g,6407790900505,,,bakery,bakery_sweet_buns_donuts
+47772,Marmiton Tallinn rosinaküpsised 180 g,Marmiton Tallinn,180 g,4740059081105,bakery,bakery_other,sweets_snacks,sweets_biscuits_cookies
+47780,Gourmet Club Dubai stiilis tumeda šokolaadi kook 180 g,Gourmet Club,180 g,4740670125028,sweets_snacks,sweets_chocolate_bars,bakery,bakery_cakes_pastries
+47781,"Alpro kõrge valgusisaldusega banaani-küpsisemaitseline kääritatud sojatoode, 200 g",Alpro,200 g,5411188141440,,,sweets_snacks,sweets_biscuits_cookies
+47798,Le pain des fleurs tatra näkileib 150 g gluteenivaba,Le,150 g,3380380092992,,,bakery,bakery_other
+47813,Hanerasv 210 g,Hanerasv,210 g,4740253000575,,,dairy_eggs_fats,dairy_butter_margarine
+47815,"Piltti marjabatoon 25 g, alates 1-eluaastast",Piltti,25 g,7613035785571,,,baby,baby_snacks
+47818,"Kotimaista vähese laktoosisisaldusega toidukoor 15% UHT, 200 ml",Kotimaista,200 ml,6414893358836,,,dairy_eggs_fats,dairy_cream_sourcream
+47824,Leibur Isa Peenleib Seemnetega 390g,Leibur Isa,390 g,4740072116853,,,bakery,bakery_bread_loaves
+47836,Wc geelkapslid Duck Lime 36ml,Wc,36 ml,5000204338683,,,household,hh_cleaners
+47887,Reval Kondiiter Valeri Küpsis 200 G,Reval Kondiiter,200 g,4742581001866,,,sweets_snacks,sweets_biscuits_cookies
+47904,"Fazer Aito taimne maitsestamata kaeratoode, 400 g",Fazer Aito,400 g,6410222013704,,,dairy_eggs_fats,dairy_yogurt_kefir
+47908,"Coop Sidruni Muffin 2 Tk, 120 G",Coop Sidruni,120 g,7340191165021,,,bakery,bakery_cakes_pastries
+47915,Marta Pagar Snäkk Soolane 50 G,Marta Pagar,50 g,4742036002370,,,sweets_snacks,sweets_snacks_salty
+47918,Fazer geisha küpsised 100 g,Fazer,100 g,6416453554474,bakery,bakery_other,sweets_snacks,sweets_biscuits_cookies
+47919,Delma margariin võileiva 20% 450g,Delma,450 g,8719200240902,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+47953,"Oddlygood mandlijook ilma lisatud suhkruta, 1l UHT",Oddlygood,1 l,6430081491307,,,dairy_eggs_fats,dairy_plant_drinks
+47958,Alpro mangomaitseline hapendatud sojatoode 400g,Alpro,400 g,5411188128625,,,dairy_eggs_fats,dairy_yogurt_kefir
+47961,"Metsamarja proteiinijogurtijook, 275 g",Metsamarja,275 g,4740125582130,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+48007,Pagarini Vaarika-shokolaadi tort 700 g,Pagarini Vaarika-shokolaadi,700 g,4744918010237,,,bakery,bakery_cakes_pastries
+48018,Balconi Kakaotäidisega Shokolaadikook 400 G,Balconi Kakaotäidisega,400 g,8001585004171,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_waffles_cakes
+48045,"Kantolan Kulta Marie küpsised, 200 g",Kantolan Kulta,200 g,7310521050303,bakery,bakery_other,sweets_snacks,sweets_biscuits_cookies
+48046,Elonen Toffee täidisega saiake 250 g,Elonen Toffee,250 g,6410580036841,bakery,bakery_buns_croissants,bakery,bakery_sweet_buns_donuts
+48052,"Arla Protein laktoosivaba mustikakohupiim, 200 g",Arla Protein,200 g,6413300017618,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+48059,"Elovena tumeda šokolaadiga kaerabatoon, 30 g",Elovena,30 g,6411200113591,,,sweets_snacks,sweets_chocolate_bars
+48085,"Karums Vanilli glasuurkohuke, 7 x 45 g",Karums Vanilli,7x45 g,4750050342211,dairy_eggs_fats,dairy_other,dairy_eggs_fats,dairy_desserts
+48087,Croissant singi ja juustuga,Croissant,,2060671200008,dairy_eggs_fats,dairy_cheese_slices,dry_preserves,dry_ready_meals_jars
+48117,Marta Pagar Võiroos 150 G,Marta Pagar,150 g,4742036000628,dairy_eggs_fats,dairy_other,bakery,bakery_cakes_pastries
+48118,Clara Kohupiimastritsel 380 G,Clara Kohupiimastritsel,380 g,4740373040628,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_buns_croissants
+48141,Rõngu Pagar Rõngik Päevalilleseemnetega 250 G,Rõngu Pagar,250 g,4742216005108,,,sweets_snacks,sweets_biscuits_cookies
+48154,"Alpro Greek Style maasika sojatoode, 400g",Alpro Greek,400 g,5411188128649,,,dairy_eggs_fats,dairy_yogurt_kefir
+48170,Maasika ja banaani jogurtijook L. casei Danone ning B6 ja D vitamiinidega 4x100g,Maasika,4x100 g,5997536134314,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+48197,Coop Kaneelitäidisega sai 350 g,Coop Kaneelitäidisega,350 g,6438574129003,,,bakery,bakery_sweet_buns_donuts
+48216,Leibur Röstsai Kuldne Klassikaline 500 G,Leibur Röstsai,500 g,4740072251554,,,bakery,bakery_bread_loaves
+48227,Marta Pagar Singi-Riisipirukas Õlis 140 G,Marta Pagar,140 g,4742036009027,sauces_oils,oils_other,bakery,bakery_other
+48231,"Ingmariini laktoosivaba leivamääre, 500 g",Ingmariini,500 g,7310865891259,,,dairy_eggs_fats,dairy_butter_margarine
+48275,Xtra kakao- ja vaniljemaitseline puding 150g,Xtra,150 g,7340191155022,,,dairy_eggs_fats,dairy_desserts
+48276,Coop grissinid küüslaugu 125g,Coop,125 g,7340011350040,,,bakery,bakery_other
+48284,Kiilto üldpuhastuslapid punane ristik 36tk,Kiilto,36 pcs,6417964576788,,,household,hh_cleaners
+48317,Üldpuhastusvahend Boost so&run 1l,Üldpuhastusvahend Boost,1 l,8718951190160,,,household,hh_cleaners
+48333,Xtra üldpuhastusaine 1l,Xtra,1 l,7340011402800,,,household,hh_cleaners
+48335,"Piltti puuviljabatoon 25 g, alates 1-eluaastast",Piltti,25 g,7613035326576,produce,,baby,baby_snacks
+48344,Pihlaka Vaarika hõrgutis 260 g,Pihlaka Vaarika,260 g,4742027007933,,,bakery,bakery_cakes_pastries
+48361,Finn Crisp Traditional näkileivad 200 g,Finn Crisp,200 g,6410500098270,bakery,bakery_bread_loaves,bakery,bakery_other
+48390,"Riisijook, 1 l","Riisijook,",1 l,6414893385511,dry_preserves,dry_other,dairy_eggs_fats,dairy_plant_drinks
+48403,Oxford vaniljekreemi täidisega (18%) krõbedad kakaoküpsised “vanilla” 56g,Oxford,56 g,5740001205046,bakery,bakery_other,sweets_snacks,sweets_waffles_cakes
+48427,Pagaripoisid Kolme Šokolaadi Tort 400 G,Pagaripoisid Kolme,400 g,4740429212412,,,bakery,bakery_cakes_pastries
+48443,Pihlaka Sefiirikorvike 4tk 200 g,Pihlaka Sefiirikorvike,200 g,4742027006400,,,sweets_snacks,sweets_waffles_cakes
+48513,"Joogijogurt metsamarjamaitseline, ALMA, 900 g",Metsamarja,900 g,4740125525236,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+48524,Leibur Kuldne Brioche Röstsai Kurkumiga 260 G,Leibur Kuldne,260 g,4740072254258,,,bakery,bakery_bread_loaves
+48563,"Maitsestamata rasvavaba jogurt, 1 kg",Maitsestamata,1 kg,6414893010123,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+48594,Kotimaista laktoosivaba rasvata piim 0% 1l,Kotimaista,1 l,6414893385245,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+48615,"Schär Sidrunikeeks, gluteenivaba 250 g","Schär Sidrunikeeks,",250 g,8008698013663,,,bakery,bakery_gluten_free
+48620,"Alpro Kohvijook soja ja karamelliga, 250 ml",Alpro Kohvijook,250 ml,5411188138839,,,drinks,drinks_soft_soda
+48641,Pagarini Dubai tort 510 g,Pagarini Dubai,510 g,4740086031234,,,bakery,bakery_cakes_pastries
+48653,"Arla Protein vanillimaitseline kohupiim, laktoosivaba, 200 g",Arla Protein,200 g,6413300026344,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+48660,Marta Pagar Maasika-Vaniljekorp 2x60 G,Marta Pagar,2x60 g,4742036003872,,,bakery,bakery_buns_croissants
+48662,Eesti Leivatööstus Sotsnik Kohupiimaga 140 G,Eesti Leivatööstus,140 g,4740064419368,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_buns_croissants
+48674,Lotus Biscoff karamelliseeritud küpsised 250 g,Lotus Biscoff,250 g,7312220096019,bakery,bakery_other,sweets_snacks,sweets_biscuits_cookies
+48696,Marmiton vaniliiniga Kooli vahvel 110 g,Marmiton,110 g,4740062750678,,,sweets_snacks,sweets_waffles_cakes
+48700,Üldpuhastusvahendi kontsentraat 500ml,Üldpuhastusvahendi,500 ml,6430034675983,,,household,hh_cleaners
+48711,"Emma Laktoosivaba mustikajogurt tuubis, 110 g",Emma Laktoosivaba,110 g,4740036015512,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+48721,Rainbow Türgi jogurt 500g,Rainbow Türgi,500 g,6414893394209,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+48722,Knorr kanapüreesupp krutoonidega 16g,Knorr,16 g,8712100866111,meat_fish,meat_poultry,dry_preserves,dry_soups_noodles
+48723,Tasangon hõrgud sidrunimuffinid 400 g,Tasangon,400 g,6411230013014,,,bakery,bakery_cakes_pastries
+48729,Semper mitmeviljasnäkid mangoga 9k 18g,Semper,18 g,7310100401052,,,baby,baby_snacks
+48733,Rõngu Pagar Kamatort 300 g,Rõngu Pagar,300 g,4742216003081,,,bakery,bakery_cakes_pastries
+48749,Marmiton krõbedad küpsised apelsinisukaadiga 150g,Marmiton,150 g,4740059008843,bakery,bakery_other,sweets_snacks,sweets_biscuits_cookies
+48755,"Rõngu Pagar Võiküpsis, Gluteenivaba 300 G",Rõngu Pagar,300 g,4742216002787,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+48807,"Friggs riisigaletid soolata mahe, 130 g",Friggs,130 g,7310186055637,drinks,drinks_beer_cider,sweets_snacks,sweets_snacks_salty
+48814,Nutella küpsis sarapuupähkli-kakaotäidisega 193 g,Nutella,193 g,8000500390306,produce,,sweets_snacks,sweets_biscuits_cookies
+48825,Rõngu Pagar Beseed 100 G,Rõngu Pagar,100 g,4742216001599,,,sweets_snacks,sweets_biscuits_cookies
+48836,"Metsmaasika kreeka jogurtijook, 275 g",Metsmaasika,275 g,4740125582048,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+48848,Fazer Minisaiakesed karamelliga 220 g,Fazer Minisaiakesed,220 g,4770068201089,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+48857,Vicenzi lehtküpsised piimakreemi täidisega 100g,Vicenzi,100 g,8000350008208,bakery,bakery_other,sweets_snacks,sweets_biscuits_cookies
+48860,Marmiton küüslauguleivad topsis 150 g,Marmiton,150 g,4740059024317,bakery,bakery_other,sweets_snacks,sweets_snacks_salty
+48890,Coop mini vahvlid kakao 180g,Coop,180 g,7340191126299,,,sweets_snacks,sweets_waffles_cakes
+48914,Karja Pagar Rukki Vormileib 350 G,Karja Pagar,350 g,4740466001529,,,bakery,bakery_bread_loaves
+48946,Coop juustumaitselised riisigaletid 125g gv,Coop,125 g,7340191158146,sweets_snacks,sweets_other,sweets_snacks,sweets_snacks_salty
+48957,Eesti Pagar Tosta! Röstisai 500 G,Eesti Pagar,500 g,4740086007222,,,bakery,bakery_bread_loaves
+48981,Karja Pagar Rukki-Seemneleib 380 G,Karja Pagar,380 g,4740466002014,,,bakery,bakery_bread_loaves
+48982,Belvita pähklite ja meega küpsised 300 g,Belvita,300 g,7622300443320,bakery,bakery_other,sweets_snacks,sweets_biscuits_cookies
+48997,"Mango-ananassi kohupiimakreem 0,2%, 150 g",Mango-ananassi,150 g,6438574132553,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+49029,Lu Digestive Classic küpsised 400 g,Lu Digestive,400 g,5906747309503,bakery,bakery_other,sweets_snacks,sweets_biscuits_cookies
+49037,Kupiec Fitos riisi-ja maisivahvlid iirisega 140g,Kupiec Fitos,140 g,5906747176600,sweets_snacks,sweets_waffles_cakes,sweets_snacks,sweets_waffles_cakes
+49047,Bon chance bruschetta krõpsud hapukoore ja sibulaga 70g,Bon,70 g,4770350024655,,,sweets_snacks,sweets_snacks_salty
+49069,Miltonas seenekesed šokolaadimaitselised küpsised 170 g,Miltonas,170 g,4779036940326,bakery,bakery_other,sweets_snacks,sweets_biscuits_cookies
+49072,"Smuuti mango, pirni ja kaerahelvestega, CORNY, 120 g",Corny,120 g,8410175078193,,,produce,produce_smoothies_fresh_juices
+49073,"Schär Marmorkeeks, gluteenivaba 250 g","Schär Marmorkeeks,",250 g,8008698009024,,,bakery,bakery_gluten_free
+49095,Fazer Domino fun dumle küpsised 120g,Fazer Domino,120 g,6416453075733,bakery,bakery_other,sweets_snacks,sweets_biscuits_cookies
+49102,Reval Kondiiter Kirsi-Kohupiima Sotsnik 2tk 150 G,Reval Kondiiter,150 g,4742581011339,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_buns_croissants
+49112,Kotimaista suhkrukuivik 400g,Kotimaista,400 g,6415712311209,,,sweets_snacks,sweets_biscuits_cookies
+49115,Eesti Pagar Maasika-Rabarberi Kreemistritsel Kardemoniga 350 G,Eesti Pagar,350 g,4740086028074,,,bakery,bakery_cakes_pastries
+49152,Kuchenmeister puuvilja keeks 400 g,Kuchenmeister,400 g,41015490,produce,,bakery,bakery_cakes_pastries
+49171,Elovena kaerajook kohvile 250ml,Elovena,250 ml,6411200000082,,,dairy_eggs_fats,dairy_plant_drinks
+49216,Plasmon Beebiküpsised 120g,Plasmon Beebiküpsised,120 g,8001040418291,bakery,bakery_other,baby,baby_snacks

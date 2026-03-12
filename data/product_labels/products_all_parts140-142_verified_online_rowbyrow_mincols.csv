@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+42338,Ella’s Kitchen tomati-basiiliku maisipulgad mahe 16g,Ella’s Kitchen,16 g,5060503505087,,,baby,baby_snacks
+42356,Semper hautis kala ja ubadega 6k 190g,Semper,190 g,7310100975355,baby,baby_other,baby,baby_food_jars
+42365,"Pepsi maasika-, vanilli- ja koolamaitseline suhkruvaba 0.33L",Pepsi,0.33 l,4745090382495,,,drinks,drinks_soft_soda
+42366,PILTTI mustikapüree 4K 90G,PILTTI,90 g,7613034392732,,,baby,baby_food_pouches
+42370,Vana Tallinn Tiramisu Cream liköör 16%vol 500ml,Vana Tallinn,500 ml,4740050007715,drinks,drinks_spirits,drinks,drinks_spirits
+42381,Meira filtrikohv Saludo 450 g,Meira,450 g,6420101443447,,,drinks,drinks_tea_coffee
+42395,Akvile mineraalvesi Kids gaasita 500ml,Akvile,500 ml,4770405227468,,,drinks,drinks_water
+42401,"A. Le Coq Premium hele õlu 4,7%vol 500ml",A. Le,500 ml,4740098076490,,,drinks,drinks_beer_cider
+42407,Semper Öko bataat veiseliha ja läätsedega 1a 235g,Semper Öko,235 g,7310100989703,baby,baby_other,baby,baby_food_jars
+42414,Dreamer Sweet White tetra aromatiseeritud veinijook 10%vol 1L,Dreamer Sweet,1 l,4740158002940,,,drinks,drinks_wine
+42420,"Semper kiivi-õuna-pirni püree 190 g, alates 8-elukuust",Semper,190 g,7312170095247,,,baby,baby_food_jars
+42447,"Gubernija Wheat Hefeweizen õlu 4,8%vol 568ml",Gubernija Wheat,568 ml,4770395229596,,,drinks,drinks_beer_cider
+42467,"Pillti kalkuni-juurviljahautis lastele alates 8-elukuust, 190 g",Pillti,190 g,6417900824003,,,baby,baby_food_jars
+42470,Piltti täistera pudrupulber troopiliste puuviljadega 1–3a 450g,Piltti,450 g,8445290805713,produce,,baby,baby_porridge_cereal
+42471,"Semper juurvilja-kanapada küüslauguga 190 g, alates 8-elukuust",Semper,190 g,7312170095636,baby,baby_other,baby,baby_food_jars
+42479,Bree Riesling KGT vein 10%vol 3L,Bree Riesling,3 l,4062073002448,,,drinks,drinks_wine
+42480,HIPP PÜREE RISOT-PORG-LÕHE 190G 8K,HIPP PÜREE,190 g,4062300311053,baby,baby_other,baby,baby_food_jars
+42493,Rakvere Mahedad Toorvorstid Ploomidega 400G,Rakvere Mahedad,400 g,4740003016092,,,meat_fish,meat_grill_blood_sausages
+42513,Voelkel hapukapsamahl 500ml,Voelkel,500 ml,4015533014536,,,drinks,drinks_juices
+42514,"Kanagrillvorst juustuga lambasooles, TALLEGG, 400 g",Kanagrillvorst,400 g,4740046013836,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_grill_blood_sausages
+42545,"Despassino Vihno Verde Rose KPN vein 9,5%vol 750ml",Despassino Vihno,750 ml,5600302596604,,,drinks,drinks_wine
+42546,PÕNN Ökoloogilised Riisivahvlid vaarika ja banaaniga 40 g 8+ 40g,PÕNN Ökoloogilised,40 g,4740073000632,sweets_snacks,sweets_waffles_cakes,baby,baby_snacks
+42551,"M&kt Vaarikas puuvilja- ja marjavein 13,6%vol 500ml",M&kt Vaarikas,500 ml,4744694010032,produce,,drinks,drinks_wine
+42554,Marcati Grappa Riserva 40%vol 700ml,Marcati Grappa,700 ml,8001305114005,,,drinks,drinks_spirits
+42560,"Piltti väikese meremehe hautis lastetoit 250 g, alates 15-elukuust",Piltti,250 g,7613031582822,,,baby,baby_food_jars
+42567,ICONFIT Pre Workout Shot 60ML - Marja,ICONFIT Pre,60 ml,4744130015546,,,drinks,drinks_sport
+42610,"Velkopopovisky Kozel Dark 3,8%vol 500ml",Velkopopovisky Kozel,500 ml,8594404008042,,,drinks,drinks_beer_cider
+42614,Grand Teeny apelsinijook 200 ml,Grand Teeny,200 ml,5901088004162,,,drinks,drinks_juices
+42618,Bonino Amaretto mandliliköör 21%vol 200ml,Bonino Amaretto,200 ml,4033209009013,,,drinks,drinks_spirits
+42619,"Muuti Öko Pohla-mustika-rukkipuder 110 g, alates 8-elukuust",Muuti Öko,110 g,4740073075357,,,baby,baby_food_pouches
+42635,Karu Cabernet Sauvignon GT Vein 13%vol 750ml,Karu Cabernet,750 ml,7804320306407,,,drinks,drinks_wine
+42664,PÕNN Ökoloogiline Aedvilja-pastaroog kanalihaga 120 g 8+ 120g,PÕNN Ökoloogiline,120 g,4740073000496,meat_fish,meat_poultry,baby,baby_food_jars
+42676,"Jaume Serra Cava Brut vahuvein 11,5%vol 750ml",Jaume Serra,750 ml,8411277205654,,,drinks,drinks_wine
+42704,"Sinebrychoff Long Drink ma&t muu alkohoolne jook 5,5%vol 500ml",Sinebrychoff Long,500 ml,4740019002430,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+42716,PÕNN Ökoloogiline Makaroni-juusturoog veiselihaga 7+ 130g,PÕNN Ökoloogiline,130 g,4740073001813,dairy_eggs_fats,dairy_other,baby,baby_food_jars
+42736,RED BULL 250 ML,RED BULL,250 ml,9002490100070,,,drinks,drinks_energy
+42748,Hennessy VS Cognac 40%vol 500ml,Hennessy VS,500 ml,3245990287407,,,drinks,drinks_spirits
+42824,Värska Allikavesi 7L,Värska Allikavesi,7 l,4740042700570,,,drinks,drinks_water
+42841,Pepsi Max Mango karastusjook 6x330ml,Pepsi Max,6x330 ml,6413605223943,,,drinks,drinks_soft_soda
+42852,Põnn Öko Ploomimehu 240 ml (4+),Põnn Öko,240 ml,4740073075531,,,baby,baby_snacks
+42874,"Agdam White kangestatud puuviljavein 19%vol 500ml, PET",Agdam White,500 ml,4770153228014,produce,,drinks,drinks_wine
+42877,Don Simon 100% roosa greibi mahl 1L,Don Simon,1 l,8410261613161,,,drinks,drinks_juices
+42896,Presto koorene kanapasta 300g,Presto,300 g,4740073001523,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+42899,"Põnn Ökoloogiline Aedvilja-pastaroog veiselihaga 190 g, alates 8-elukuust",Põnn Ökoloogiline,190 g,4740073076279,baby,baby_other,baby,baby_food_jars
+42902,"Dr. Active mango-apelsini mahlajook 1,5L",Dr. Active,1.5 l,4740051000449,,,drinks,drinks_juices
+42909,"Pajaroog, 400 g","Pajaroog,",400 g,4740188900704,,,frozen_food,frozen_ready_meals
+42919,"Mull sauna light siider 3,9%vol 330ml",Mull,330 ml,4742022092354,,,drinks,drinks_beer_cider
+42952,LIPTON virsiku-mango tee püramiid 20pk,LIPTON,20 pcs,5063270110942,,,drinks,drinks_tea_coffee
+42976,Hiiumaa Köök Ja Pagar Tume Vormileib 240 G,Hiiumaa Köök,240 g,4740541001017,,,bakery,bakery_bread_loaves
+42984,PÕNN Ökoloogiline Ühepajatoit sealihaga 7+ 130g,PÕNN Ökoloogiline,130 g,4740073001837,meat_fish,meat_pork,baby,baby_food_jars
+42995,Hippo porgandinektar 750ml,Hippo,750 ml,5907467900780,,,drinks,drinks_juices
+43001,"Acantus Tempranillo Cabernet Sauvignon KPN vein 12,5%vol 750ml",Acantus Tempranillo,750 ml,8411423999000,,,drinks,drinks_wine
+43025,Heinz tomatimahl 290ml,Heinz,290 ml,5900783002596,,,drinks,drinks_juices
+43026,Rainbow köögiviljad ja sealiha 12k püree,Rainbow,,7340191175914,produce,,baby,baby_food_jars
+43033,"Maori Bay Shiraz Rose GT vein 12,5%vol 750ml",Maori Bay,750 ml,4044551068436,,,drinks,drinks_wine
+43066,Aleo Aloe Vera jook mangoga 500ml,Aleo Aloe,500 ml,4779040220858,,,drinks,drinks_juices
+43074,Karksi õunasiider 500ml,Karksi,500 ml,4740098095385,,,drinks,drinks_beer_cider
+43090,Piltti 125g porg-pastinaagi püree 4k,Piltti,125 g,8445291373655,,,baby,baby_food_jars
+43105,La Corrida Tempranillo vein 12%vol 750ml,La Corrida,750 ml,4003301012259,,,drinks,drinks_wine
+43111,"Henkell Brut kvaliteetvahuvein 11,5%vol 750ml",Henkell Brut,750 ml,4003310011960,,,drinks,drinks_wine
+43147,"Kohvijook Ice Espresso + milk, LÖFBERGS, 230 ml",Löfbergs ICE,230 ml,7310050005188,,,drinks,drinks_soft_soda
+43149,"Duvel Belgian Golden Ale õlu 8,5%vol 330ml",Duvel Belgian,330 ml,4744485010920,,,drinks,drinks_beer_cider
+43154,"Tropicana apelsinimahl viljalihaga, 250 ml",Tropicana,250 ml,5410188030020,drinks,drinks_other,drinks,drinks_juices
+43182,Piltti 450g ploomi-õuna puder 6k,Piltti,450 g,8445290805416,,,baby,baby_porridge_cereal
+43193,Änglamark änglamark rohelised maheoad 400g,Änglamark,400 g,7340191112919,,,frozen_food,frozen_veg
+43198,Spläsh Maasika-Kiivi Gaseeritud vesi 330ml,Spläsh Maasika-Kiivi,330 ml,4745010069024,,,drinks,drinks_water
+43208,"Saare Roosa Gin 37,5%vol 500ml",Saare Roosa,500 ml,4740034015910,,,drinks,drinks_spirits
+43210,Plasmon Puuvilja ja teravilja püree 2*120g,Plasmon Puuvilja,120 g,8001040199107,produce,,baby,baby_food_jars
+43214,Rainbow Pasta Bolognese 12k,Rainbow Pasta,,7340191175617,dry_preserves,dry_pasta_rice,baby,baby_food_jars
+43215,Don Simon Sangria aromatiseeritud veinijook 7%vol 1L,Don Simon,1 l,8410261151106,,,drinks,drinks_wine
+43217,JACOBS Krönung Instant lahustuv kohv 200 g,JACOBS Krönung,200 g,8711000517949,,,drinks,drinks_tea_coffee
+43308,"Disel hele õlu 5,2%vol 2L",Disel,2 l,4740098076599,,,drinks,drinks_beer_cider
+43330,"Pepsi Zero karastusjook 1,5L",Pepsi Zero,1.5 l,4750042304869,,,drinks,drinks_soft_soda
+43347,"Melitta Kohvifilter 1x4/80, pruun",Melitta Kohvifilter,,4006508122394,,,household,hh_kitchenware
+43362,Frapin VSOP Cognac Grande Champagne karbis 500ml,Frapin VSOP,500 ml,3275852188504,drinks,drinks_wine,drinks,drinks_spirits
+43408,Frezza Mint Mighty Minty mündi-šokolaadimaitseline kohvijook piimaga 250 ml,Frezza Mint,250 ml,6408659611686,sweets_snacks,sweets_chocolate_bars,drinks,drinks_soft_soda
+43413,"Ökoloogiline Mango-apelsinismuuti, SMUSHIE, 170 g",Salvest Smushie,170 g,4740073072639,,,produce,produce_smoothies_fresh_juices
+43453,"Castell Llord Cava Brut KPN kvaliteetvahuvein 11,5%vol 750 ml",Castell Llord,750 ml,8411277204862,,,drinks,drinks_wine
+43510,Captain kombucha originaal 400ml,Captain,400 ml,5600787049046,,,drinks,drinks_other
+43520,Koskenkorva Salmiakki Cream liköör 15%vol 500 ml,Koskenkorva Salmiakki,500 ml,6412700357201,drinks,drinks_spirits,drinks,drinks_spirits
+43539,HIPP piimapudrupulber puuviljad jogurtiga BIO 250 g 8k,HIPP,250 g,9062300113867,dairy_eggs_fats,dairy_yogurt_kefir,baby,baby_porridge_cereal
+43540,Kingsmill Rhubarb Gin 38%vol 500ml,Kingsmill Rhubarb,500 ml,4740050007388,,,drinks,drinks_spirits
+43546,Coop Peekoniribad 200 G,Coop Peekoniribad,200 g,7340191171374,,,meat_fish,meat_hams
+43554,Captain Morgan Spiced Gold rumm 35%vol 700ml,Captain Morgan,700 ml,5000299223017,drinks,drinks_spirits,drinks,drinks_spirits
+43560,"Šašlõkivorstid lambasooles, kg",Šašlõkivorstid,,2060106800001,meat_fish,meat_sausages,meat_fish,meat_grill_blood_sausages
+43586,Salasar Cremant De Limoux Brut KPN vahuvein 12%vol 750ml,Salasar Cremant,750 ml,3300300630028,,,drinks,drinks_wine
+43597,Pesuloputusvahend sensitive 880ml,Pesuloputusvahend,880 ml,9000101590531,,,household,hh_laundry
+43606,Presto kanakarri riisiga 300g,Presto,300 g,4740073001042,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+43613,Rainbow köögivilja-kana maherisoto 220g,Rainbow,220 g,7340191143135,produce,,baby,baby_food_jars
+43629,"Primitivo Puglia Rosato kuivatatud viinamarjadest valm.vein 12,5%vol 750ml",Primitivo Puglia,750 ml,8009307016594,,,drinks,drinks_wine
+43642,Jose Cuervo Especial Reposado Tequila 35%vol 700 ml,Jose Cuervo,700 ml,7501035011304,,,drinks,drinks_spirits
+43661,Starbucks caffe latte no added sugar kohvijook 750ml,Starbucks,750 ml,4100290026479,dry_preserves,dry_other,drinks,drinks_soft_soda
+43663,Orn Craft rose lemonade toonik 1L,Orn Craft,1 l,4740098092025,,,drinks,drinks_soft_soda
+43668,Greene King Abbot Ale õlu 5%vol 500ml,Greene King,500 ml,5010549105604,,,drinks,drinks_beer_cider
+43680,Galipette Rose siider 4%vol 330ml,Galipette Rose,330 ml,4742024130443,,,drinks,drinks_beer_cider
+43688,Rainbow mahe köögivilja-kana 8k püree,Rainbow,,7340191175600,produce,,baby,baby_food_jars
+43709,Piltti 190g Köögiv-kalkunirisotto 1-3a,Piltti,190 g,8445291396128,,,baby,baby_food_jars
+43739,Porto Cruz Late Bottled Vintage KPN liköörvein 20%vol 750ml,Porto Cruz,750 ml,3147699116197,,,drinks,drinks_wine
+43748,Aura Morsikas apelsini-mango mahlajoogikontsentraat 1L,Aura Morsikas,1 l,4740098098423,,,drinks,drinks_syrups_powders
+43749,"Mango-banaani smuuti, PAI, 280 ml",Pai,280 ml,4740029052715,,,produce,produce_smoothies_fresh_juices
+43751,Hipp kalapada pasta ja köögiviljadega 12k+ 250g,Hipp,250 g,4062300365612,produce,,baby,baby_food_jars
+43752,La Francette Cinsault Grenache vein 12%vol 750ml,La Francette,750 ml,3560070800902,,,drinks,drinks_wine
+43756,Lindeman's Winemakers Release Shiraz Cabernet Sauvignon GT vein 13%vol 750ml,Lindeman's Winemakers,750 ml,9311218122479,drinks,drinks_wine,drinks,drinks_wine
+43758,"Holle täistera hirsipuder, 250g, alates 6-elukuust",Holle,250 g,7640104952596,,,baby,baby_porridge_cereal
+43761,Reval Cafe Lemmikröst kohvioad 1kg,Reval Cafe,1 kg,4742581010806,,,drinks,drinks_coffee_beans_capsules
+43780,Coca-Cola zero karastusjook 500ml,Coca-Cola,500 ml,5449000131836,,,drinks,drinks_soft_soda
+43808,Starbucks cappuccino kohvijook 220 ml,Starbucks,220 ml,5711953023996,,,drinks,drinks_soft_soda
+43851,"Teeling Small Batch Irish whisky 46%vol 700ml, tuubis",Teeling Small,700 ml,5391523275927,,,drinks,drinks_spirits
+43865,Tanker Tume Lager õlu 5%vol 500ml,Tanker Tume,500 ml,4744136010477,,,drinks,drinks_beer_cider
+43913,Orn Craft indian toonik 1L,Orn Craft,1 l,4740098092049,,,drinks,drinks_soft_soda
+43917,"Saku Rock õlu 5,3%vol 568ml",Saku Rock,568 ml,4740019121087,,,drinks,drinks_beer_cider
+43923,"Leffe Brune õlu 6,5%vol 500ml",Leffe Brune,500 ml,4770301238070,,,drinks,drinks_beer_cider
+43930,Põhjala Tume Laager õlu 5%vol 440ml,Põhjala Tume,440 ml,4742976015362,,,drinks,drinks_beer_cider
+43932,"Piltti lastetoit porgandi, kartuli ja kõrvitsaga 125 g, alates 4-elukuust",Piltti,125 g,7613037126914,,,baby,baby_food_jars
+43946,"Fuzetea watermelon-mint jäätee 1,5L",Fuzetea,1.5 l,5449000223869,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+43987,"Piltti mustika-vaarika püree 125 g, alates 5-elukuust",Piltti,125 g,7613035305236,,,baby,baby_food_jars
+43994,"Sovetskoje Igristoje vahuvein 11,5%vol 750ml",Sovetskoje Igristoje,750 ml,4750012421855,,,drinks,drinks_wine
+44011,Teefilter 30 tk.,Teefilter,30 pcs,6418401682901,,,household,hh_kitchenware
+44031,Nescafé Classic Strong 250g (tin),Nescafé Classic,250 g,7891000256831,,,drinks,drinks_tea_coffee
+44033,Blue Nun alkoholivaba punane vein 750ml,Blue Nun,750 ml,4022025534038,,,drinks,drinks_wine
+44039,Nestlé NAN HA 2 võõrutuspreparaat 800g,Nestlé NAN,800 g,8445291161511,,,baby,baby_formula
+44045,Nescafe Dolce Gusto Flat White kapslid 16tk,Nescafe Dolce,16 pcs,7613036596251,,,drinks,drinks_coffee_beans_capsules
+44057,Coop apelsini-koola jook 200ml,Coop,200 ml,6438460915062,,,drinks,drinks_juices
+44064,Coop vaarika-maasika jook 200ml,Coop,200 ml,6438460915192,,,drinks,drinks_juices
+44065,Imperial XII VSOP Brandy 36%vol 500ml,Imperial XII,500 ml,4770033226741,,,drinks,drinks_spirits
+44067,"Johann Brunner Riesling Mosel KPN vein 9,5%vol 3L",Johann Brunner,3 l,4044551037425,,,drinks,drinks_wine
+44108,Captain Morgan Black Spiced rumm 40%vol 700ml,Captain Morgan,700 ml,5000281033273,drinks,drinks_spirits,drinks,drinks_spirits
+44125,"Mehukatti metsmaasika suhkruvaba kontsentraat 1+3 1,5l",Mehukatti,1.5 l,6415130020127,,,drinks,drinks_syrups_powders
+44156,"Kulta Katriina filtrikohv, 450 g",Kulta Katriina,450 g,6420101883953,,,drinks,drinks_tea_coffee
+44167,"Saku Originaal õlu, 24 x 330 ml",Saku Originaal,24x330 ml,4740019016673,,,drinks,drinks_beer_cider
+44174,Sanpellegrino Zero Aranciata Rossa 330 ml,Sanpellegrino Zero,330 ml,8002270826948,,,drinks,drinks_soft_soda
+44192,Presto pasta bolognese 300g,Presto,300 g,4740073000885,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+44202,Aura tomatimahl 1L,Aura,1 l,4740051004287,,,drinks,drinks_juices
+44203,"Westons Vintage Rese. siider 8,2%vol 500ml",Westons Vintage,500 ml,5014201655414,,,drinks,drinks_beer_cider
+44208,Rainbow bologna mahepasta 190g,Rainbow,190 g,7340191124202,dry_preserves,dry_pasta_rice,baby,baby_food_jars
+44248,Kohvioad Merrild Crema 1 kg,Kohvioad Merrild,1 kg,8000070022904,,,drinks,drinks_coffee_beans_capsules
+44249,"Põnn öko maisikrõbuskid mango,banaan 20g",Põnn,20 g,4740073078433,,,baby,baby_snacks
+44254,Põltsamaa tomatimahl 100% 1L,Põltsamaa,1 l,4740029055051,,,drinks,drinks_juices
+44302,"Savanha Rose GT vein 12,5%vol 750ml",Savanha Rose,750 ml,6007498001759,,,drinks,drinks_wine
+44303,"Magners Original siider 4,5%vol 500ml",Magners Original,500 ml,5391516871402,,,drinks,drinks_beer_cider
+44305,"Kopparberg Pear Cider Perry 4,5%vol 500ml",Kopparberg Pear,500 ml,7393714130006,,,drinks,drinks_beer_cider
+44334,"Semper kartuli-kana pajaroog ürtidega 235 g, alates 1-eluaastast",Semper,235 g,7310100961983,baby,baby_other,baby,baby_food_jars
+44348,Roche Mazet Merlot KGT vein 13%vol 187ml,Roche Mazet,187 ml,3211209258407,,,drinks,drinks_wine
+44362,PILTTI Wild West hautis lastele 1-3a250G,PILTTI Wild,,7613032016555,,,baby,baby_food_jars
+44402,Grain de Soleil Languedoc Rose KGT vein 750ml,Grain,750 ml,3660989142855,,,drinks,drinks_wine
+44433,Green Planet Astronauts kakao-kaeraamps mahe 10k+ 100g,Green Planet,100 g,6430074540067,,,baby,baby_snacks
+44452,Barnhills Zinfandel California GT vein 14%vol 750ml,Barnhills Zinfandel,750 ml,4062073012935,,,drinks,drinks_wine
+44475,Dexal energiageeli karpalo-greppi 30g,Dexal,30 g,6409941306785,,,drinks,drinks_sport
+44476,"Jaanihanso Dry Naturel siider 5,5%vol 330ml",Jaanihanso Dry,330 ml,4744358010569,,,drinks,drinks_beer_cider
+44479,"Hipp Pasta Bolognese mahe, 220g, alates 12-elukuust",Hipp Pasta,220 g,4062300047457,dry_preserves,dry_pasta_rice,baby,baby_food_jars

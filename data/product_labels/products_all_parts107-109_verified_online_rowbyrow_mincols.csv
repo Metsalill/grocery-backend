@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+24352,Majapidamispaber Zewa Wi& 2-kih 4 rulli,Majapidamispaber Zewa,,7322541210841,,,household,hh_paper
+24356,Taffel Hearts Maitsestatud maisisüdamed 60 g,Taffel Hearts,60 g,6410381086328,,,sweets_snacks,sweets_snacks_salty
+24362,Rainbow pesemishari,Rainbow,,6415711405435,,,household,hh_dishwashing
+24379,Klaasipuhastusvahend antifog 500ml,Klaasipuhastusvahend,500 ml,9000100866576,,,household,hh_cleaners
+24384,Wc-harja komplekt must,Wc-harja,,7340191146884,,,household,hh_cleaners
+24386,"Philadelphia Original toorjuust, 500 g",Philadelphia Original,500 g,7622400005947,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+24390,Taskurätikud 100tk/3kihiline,Taskurätikud,100 pcs,7340191164239,,,household,hh_paper
+24396,Ploomtomat punane I klass 500g,Ploomtomat,500 g,4779017030268,,,produce,produce_root_veg
+24399,Meira sinep traditsiooniline 500 g,Meira,500 g,6414202500901,,,sauces_oils,sauces_ketchup_mayo
+24405,Kotimaista snäkiporgand 200g,Kotimaista,200 g,6415712713874,,,produce,produce_root_veg
+24407,Orbit White Vaarika-granaatõuna 14g,Orbit White,14 g,50173747,,,sweets_snacks,sweets_gums_mints
+24415,Pai vaarika-mustika smuuti 280ml,Pai,280 ml,4740029052708,,,drinks,drinks_juices
+24418,Paulig kohvioad Arabica keskmine röst 1 kg,Paulig,1 kg,6418474039008,,,drinks,drinks_coffee_beans_capsules
+24422,Sini põrandakuivataja 35 cm,Sini,,6423800034251,,,household,hh_cleaners
+24425,Kikkoman sojakaste 500ml,Kikkoman,500 ml,8715035110502,,,sauces_oils,sauces_soy_worcester
+24426,VILEDA DERMO PLUS KINDAD M,VILEDA DERMO,,4003790006654,,,household,hh_other
+24432,"Kuumsuitsu skumbria, kg",Kuumsuitsu,,2060244400002,,,meat_fish,fish_salted_smoked
+24436,Maiasmokk Lotte puuviljamaitselised kommid 16 g,Maiasmokk Lotte,16 g,4742267005249,produce,,sweets_snacks,sweets_candies
+24448,Läkerol Dents Sweetmint ksülitolipastillid 36 g,Läkerol Dents,36 g,6420256002131,,,sweets_snacks,sweets_gums_mints
+24455,Filos tume palsamiäädikakaste 250ml,Filos,250 ml,6416710510038,,,sauces_oils,oils_vinegar
+24465,Vanish White plekieemaldaja 1 l,Vanish White,1 l,5900627081831,,,household,hh_laundry
+24487,"Lõhepasteet MSC, ASC, ABBA, 145 g",Abba,145 g,7350126088615,meat_fish,fish_fresh,meat_fish,fish_processed
+24496,ANTIPERSPIRANT FRESH STEP 150ML,ANTIPERSPIRANT FRESH,150 ml,5038483668429,,,personal_care,pcare_deo
+24509,Popkorn Texas 100 g,Popkorn Texas,100 g,4740053000430,,,sweets_snacks,sweets_snacks_salty
+24520,Dr beckmann plekieemaldusseep 100g,Dr,100 g,4008455406213,,,household,hh_laundry
+24527,COOP PULGAKOMMID 200G,COOP PULGAKOMMID,200 g,7340191152649,,,sweets_snacks,sweets_candies
+24537,Kummikindad sensitive m,Kummikindad,,4003790006883,,,household,hh_cleaners
+24539,Orbit White Spearmint närimiskummid 14 g,Orbit White,14 g,42113164,,,sweets_snacks,sweets_gums_mints
+24557,VERI BERI KIRSIRIBAD 50G,VERI BERI,50 g,4779033190113,,,sweets_snacks,sweets_nuts_driedfruit
+24564,Figaro piri piri piprad äädikas 100/45g,Figaro,45 g,8410159308179,,,dry_preserves,dry_canned_veg
+24565,Sonett sapiseep 100 g,Sonett,100 g,4007547201026,,,household,hh_laundry
+24573,Podravka Vegeta 200 g,Podravka Vegeta,200 g,3850104236143,,,world_spices,spices_herbs_spice_mix
+24574,"Old El Paso fajita maitseainesegu, 30 g",Old El,30 g,8410076490711,world_spices,spices_herbs_spice_mix,world_spices,spices_mexican
+24579,WC-paper 3-kihiline 8 rulli,WC-paper,,6438574284030,,,household,hh_paper
+24598,"Roheline sibul, 100 g",Roheline,100 g,4740669029016,,,produce,produce_herbs_salads_sprouts
+24610,WC-paper Coop 3-kihiline 24 rulli,WC-paper Coop,,7340191154612,,,household,hh_paper
+24615,Jozo jodeeritud sool 600g,Jozo,600 g,8715800002278,,,world_spices,spices_basic_salt_pepper
+24629,Kikkoman magus sojakaste 250 ml,Kikkoman,250 ml,8715035220300,,,sauces_oils,sauces_soy_worcester
+24636,MYSNACK Hernesnäkid juustuga 80g,MYSNACK Hernesnäkid,80 g,4745010184048,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+24641,Kummikindad latex m/l 40tk,Kummikindad,40 pcs,4023103086456,,,household,hh_cleaners
+24666,Fazer Tutti Frutti Sour kummikommid 180 g,Fazer Tutti,180 g,6416453036413,,,sweets_snacks,sweets_candies
+24669,Kron riidepuhastus-varurull 5 m,Kron,,7312070255109,,,household,hh_cleaners
+24670,"Puuviljakokteil nr 2 (arbuus, ananass, melon) 400g",Puuviljakokteil,400 g,4742024310043,produce,,produce,produce_fruit_salads
+24675,Grite Blossom tualettpaber 8 rulli 3-kihiline,Grite Blossom,,4770023346749,,,household,hh_paper
+24684,Vanish Regular plekieemaldaja 1 l,Vanish Regular,1 l,5900627081824,,,household,hh_laundry
+24718,Universal Stone puhastuspasta 650 g,Universal Stone,650 g,6420618809514,dry_preserves,dry_pasta_rice,household,hh_cleaners
+24730,Sini nõudepesuhari,Sini,,6423800395567,,,household,hh_dishwashing
+24753,Red Bull energiajook 355ml,Red Bull,355 ml,9002490210939,,,drinks,drinks_energy
+24765,Werther's Original popkorn soolakaramelli 140g,Werther's Original,140 g,4014400935677,,,sweets_snacks,sweets_snacks_salty
+24767,Coop tšillilaastud 40 g,Coop,40 g,7340191158788,,,world_spices,spices_other
+24773,Coop dipisegu tomati-sibulamaitseline 20g,Coop,20 g,7340191156890,,,world_spices,spices_herbs_spice_mix
+24788,"Kodune mädarõigas, 200 g",Kodune,200 g,4750022472236,,,sauces_oils,sauces_ketchup_mayo
+24792,Nõudepesumasinatabletid allin1 28tk,Nõudepesumasinatabletid,28 pcs,8710847994944,,,household,hh_dishwashing
+24804,Heinz barbeque kaste klassikaline 480 g,Heinz,480 g,0000087157154,,,sauces_oils,sauces_marinades
+24813,Coop riisipaber 200g,Coop,200 g,7340191124134,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+24824,Puhastusvaht Nominelli 150ml,Puhastusvaht Nominelli,150 ml,6417037109882,,,household,hh_cleaners
+24828,Sini aknakuivataja 29 cm,Sini,,6423800034428,,,household,hh_cleaners
+24850,CHUPA CHUPS XXL PLAYLIST PULGAKOMM 29G,CHUPA CHUPS,29 g,0000084460547,,,sweets_snacks,sweets_candies
+24853,Chainkwo sriracha tsillikaste 530g,Chainkwo,530 g,6933362463050,,,sauces_oils,sauces_other
+24859,Tume viinamari I klass seem.-ta 500g,Tume,500 g,6414894500401,,,produce,produce_tropical
+24874,"Knorr, rohelise pipra kastme koostisained, 3 × 22 g","Knorr,",3x22 g,8710604750073,dry_preserves,dry_other,sauces_oils,sauces_pasta_cooking
+24885,Coop keskmise teravusega tomatisalsa 300 g,Coop,300 g,7340191148772,,,sauces_oils,sauces_other
+24889,Kingaläige TWIST&SHINE 50 ml värvitu,Kingaläige TWIST&SHINE,50 ml,8690757162049,,,household,hh_other
+24890,"Blå Band, Béarni kastme koostisained, 3 × 32 g","Blå Band,",3x32 g,7322550030256,dry_preserves,dry_other,sauces_oils,sauces_pasta_cooking
+24905,Taffel võimaitseline mikrolaineahjupopkorn 90g,Taffel,90 g,6410381095139,dairy_eggs_fats,dairy_other,sweets_snacks,sweets_snacks_salty
+24920,Maisipulgad naturaalne 200 g,Maisipulgad,200 g,4771395190497,,,sweets_snacks,sweets_snacks_salty
+24936,Medix puhastuslapp 18x20 cm,Medix,,4742215000012,,,household,hh_cleaners
+24944,Jääsalat I klass,Jääsalat I,,2060530600000,produce,,produce,produce_herbs_salads_sprouts
+24948,Rainbow põrandapesija varumopp-lapp,Rainbow,,6415711802678,,,household,hh_cleaners
+24952,Terra delyssa väärisoliiviõli 250 ml,Terra,250 ml,6191509900701,dry_preserves,,sauces_oils,oils_olive
+24961,"Rainbow puhastuslapid rullis 1,5 m, lõigatav",Rainbow,,6414893503090,,,household,hh_cleaners
+24965,Xtra viinamari hele Iklass 500g,Xtra,500 g,6438574049493,,,produce,produce_tropical
+24976,DUMLE Snacks kommikott 100g,DUMLE Snacks,100 g,6416453037601,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+24997,Coop kange sinep 125 g,Coop,125 g,6438574314676,,,sauces_oils,sauces_ketchup_mayo
+25014,Drogheria must terapipar veskis,Drogheria,,0000080273561,,,world_spices,spices_basic_salt_pepper
+25018,Fazer Tutti Frutti Passion kummikommid 180 g,Fazer Tutti,180 g,6416453036383,,,sweets_snacks,sweets_candies
+25022,Sini hari äravoolu trapist juuksekarvade eemaldamiseks 2 tk,Sini,2 pcs,6423800251443,,,household,hh_cleaners
+25026,Toonik Smuuti Skin Pear 130ml,Toonik Smuuti,130 ml,6429811202740,,,personal_care,pcare_other
+25034,"Heeringafilee traditsiooniline, VICI, 240 g",Heeringafilee,240 g,4770190035781,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+25040,Rainbow ühekordsed nitriilkindad M/L 50 tk,Rainbow,50 pcs,6414893502925,,,household,hh_cleaners
+25050,Filippo Berio päikesekuivatatud tomatitega pesto 190 g,Filippo Berio,190 g,8002210112704,,,sauces_oils,sauces_pasta_cooking
+25065,Tualettpaber 3-kihiline 32 rulli,Tualettpaber,,6438574284009,,,household,hh_paper
+25071,Punane sõstar 125 g,Punane,125 g,4740199000226,,,produce,produce_berries
+25077,Apelsiniõliga kontsentreeritud puhastusvahend 500ml,Apelsiniõliga,500 ml,4007547405547,household,hh_cleaners,household,hh_cleaners
+25080,"Meremari punane, kalamarjamaitseline toode, 113 g",Meremari,113 g,4740176022111,meat_fish,fish_fresh,meat_fish,fish_processed
+25084,Vileda SuperMocio 3Action varumopp,Vileda SuperMocio,,4023103072213,,,household,hh_cleaners
+25085,Tera pakitud suur rõngik seesami 375g,Tera,375 g,4820027551752,,,bakery,bakery_buns_croissants
+25087,SANTA MARIA Sidrunipipar 359g,SANTA MARIA,359 g,7311311025952,,,world_spices,spices_herbs_spice_mix
+25093,Bong touch of taste veiseleem punase veiniga 180 ml,Bong,180 ml,7322550052784,,,world_spices,spices_broth_stock
+25110,Heeringafilee Skandinaaviapärane vähesoolane 240 g,Heeringafilee Skandinaaviapärane,240 g,4740687002305,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+25111,Rainbow põrandapesumatt varrega,Rainbow,,6415711802647,,,household,hh_other
+25119,Sini WC-hari alusega,Sini WC-hari,,6423801635839,,,household,hh_cleaners
+25131,Granaatõun,Granaatõun,,2060430500004,,,produce,produce_tropical
+25135,Forellimari,Forellimari,,2060161900005,,,meat_fish,fish_processed
+25138,"Kalapuljong, FOODSTUDIO, 350 ml",FOODSTUDIO Kalapuljong,350 ml,4744481010429,meat_fish,meat_other,world_spices,spices_broth_stock
+25148,Rainbow majapidamiskindad L-suurus,Rainbow,,6414893503045,,,household,hh_other
+25159,Tume viinamari Sugra 16 II klass,Tume,500 g,4740669032504,,,produce,produce_tropical
+25161,Trolli Wurrli kummikommid 100g,Trolli Wurrli,100 g,4003084319460,,,sweets_snacks,sweets_candies
+25177,Avokaado Hass söömisküps,Avokaado Hass,,2060490600003,,,produce,produce_tropical
+25187,Zaini Paw Patrol üllatusmuna 20g,Zaini Paw,20 g,0000080710196,,,sweets_snacks,sweets_candies
+25201,Nõudepesumasina tabletid allin1 40tk,Nõudepesumasina,40 pcs,6414505188356,,,household,hh_dishwashing
+25209,Kooritud krevetid soolvees 250 g,Kooritud,250 g,4740590074826,,,meat_fish,fish_processed
+25211,Kuivatatud juustupallid Džiugas trühvli 40g,Kuivatatud,40 g,4770299403979,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+25225,TIC TAC Mint T1 18g,TIC TAC,18 g,80052043,,,sweets_snacks,sweets_gums_mints
+25247,Sini hari+kühvel keskmise varrega,Sini,,6423800321153,,,household,hh_cleaners
+25251,Mynthon apelsini-ingveri pastillid 31g,Mynthon,31 g,8713800143984,,,sweets_snacks,sweets_gums_mints
+25253,Fazer Tutti Frutti Yoghurt Splash kummikommid 350 g,Fazer Tutti,350 g,6411401037870,,,sweets_snacks,sweets_candies
+25273,X-tra purustatud metsapähklitega piimašokolaad 100 g,X-tra,100 g,7340191100756,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+25281,Coop basilikumaitsega oliiviõl 250ml,Coop,250 ml,7340191156852,,,sauces_oils,oils_olive
+25282,Tolmusvamm kollane,Tolmusvamm,,5060481022866,,,household,hh_cleaners
+25284,Kiivi kollane 500g I klass,Kiivi,500 g,5415191897790,,,produce,produce_tropical
+25297,Plekieemaldussool 80g,Plekieemaldussool,80 g,4008455567914,,,household,hh_laundry
+25300,ESTRELLA Mikropopkorn juustumaitseline 90 g,ESTRELLA Mikropopkorn,90 g,4779028343463,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+25304,"X-tra ühekordsed kummikindad 100 tk, lateks",X-tra,100 pcs,6414893502956,,,household,hh_cleaners
+25307,Corn puffies 80g šokolaadikott,Corn,80 g,7340191138261,,,sweets_snacks,sweets_chocolate_bars
+25310,Klaasipuhastusvahend Larbre Vert sprei 740ml,Klaasipuhastusvahend Larbre,740 ml,3450601013652,,,household,hh_cleaners
+25315,"Mahe Avokaado, 2 tk",Avokaado,2 pcs,4742818010630,,,produce,produce_tropical
+25323,ESTRELLA Mikropopkorn magus 90 g,ESTRELLA Mikropopkorn,90 g,4779028343166,,,sweets_snacks,sweets_snacks_salty
+25339,Leifheit Classic varumopp,Leifheit Classic,,4006501552112,,,household,hh_cleaners
+25341,Chupa Chups pulgakomm Fruit 12g,Chupa Chups,12 g,84196675,produce,,sweets_snacks,sweets_candies
+25350,"Aprikoosikook, EESTI PAGAR, 310 g",Eesti Pagar,310 g,4740086015692,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+25364,Danzka vodka 40%vol 500ml,Danzka,500 ml,5788686110019,,,drinks,drinks_spirits
+25383,Familia paberrätik 3-kihiline 2tk,Familia,2 pcs,8690536011247,,,household,hh_paper
+25392,Rainbow WC-hari alusega,Rainbow WC-hari,,6415711802524,,,household,hh_cleaners
+25393,"Elephant rõngikud mee-, sibula- ja sinepimaitselised 70g",Elephant,70 g,5949040202058,,,bakery,bakery_buns_croissants
+25421,Coop külmpressitud avokaadoõli 250ml,Coop,250 ml,7340191160989,sauces_oils,oils_other,sauces_oils,oils_other
+25429,"Garage Hard Lingonberry muu alkohoolne jook 4,6%vol 275ml",Garage Hard,275 ml,4740019003185,,,drinks,drinks_beer_cider
+25439,VILEDA Põrandapesumatt 1/2 Spray Max,VILEDA Põrandapesumatt,,4023103199200,,,household,hh_laundry
+25445,TAOKAENOI Merevetikas tempura originaal 25g,TAOKAENOI Merevetikas,25 g,8858702402187,,,sweets_snacks,sweets_snacks_salty
+25450,Rainbow parketi ja laminaadi puhastusvahend 1 l,Rainbow,1 l,7340011443964,,,household,hh_cleaners
+25455,Halls mee ja sidruniga kurgupastillid 33 g,Halls,33 g,50985104,,,sweets_snacks,sweets_gums_mints
+25457,Kalev Anneke piimašokolaad 20 g,Kalev Anneke,20 g,4740012035688,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+25460,Niiske tualettpaber Fresh Kleenex 42tk,Niiske,42 pcs,5029053577760,,,household,hh_paper
+25472,Werthers Original Classic Caramel popcorn 140 g,Werthers Original,140 g,4014400925319,,,sweets_snacks,sweets_snacks_salty
+25490,Borges oliiviõli rafineeritud 500 ml,Borges,500 ml,8410179300825,sauces_oils,oils_olive,sauces_oils,oils_olive
+25499,Estrella soolaga Mikropopkorn 3-pakk 240g,Estrella,240 g,7310532160909,,,sweets_snacks,sweets_snacks_salty
+25540,Drogheria jodeeritud vahemeresool veskis 90g,Drogheria,90 g,80273639,,,world_spices,spices_basic_salt_pepper
+25551,Sini aknapesija,Sini,,6423800025921,,,household,hh_cleaners
+25562,Lepasuitsu hiidkalmaari kombitsad 300 g,Lepasuitsu,300 g,4740357003724,,,meat_fish,fish_salted_smoked
+25571,ISH alkoholivaba kokteil Spritz 250ml,ISH,250 ml,5715008100038,,,drinks,drinks_other
+25589,Nõudepesuhari puidust käepidemega,Nõudepesuhari,,7394145133215,,,household,hh_dishwashing
+25618,Taffel Cheese Balls juustusnäkid 190g,Taffel Cheese,190 g,6410380049744,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+25620,Gallina Blanca puravikupuljong 8 x 10 g,Gallina Blanca,8x10 g,8410300236948,,,world_spices,spices_broth_stock
+25622,KINGALÄIGE INSTANT 50 ML VÄRVITU,KINGALÄIGE INSTANT,50 ml,8690757000020,,,household,hh_other
+25645,Rainbow hari ja kühvel,Rainbow,,6415711404704,,,household,hh_cleaners
+25651,MAHE TULINE VÕRSETESALAT 110G,MAHE TULINE,110 g,6430048012040,produce,,produce,produce_herbs_salads_sprouts
+25655,Patapata terassvammid 10tk,Patapata,10 pcs,7310790043471,,,household,hh_cleaners
+25656,Tera pakitud suur rõngik klassikaline 375g,Tera,375 g,4820027551011,,,bakery,bakery_buns_croissants
+25657,Elephant rõngikud tomati-ürdimaitselised 70g,Elephant,70 g,5949040203000,,,bakery,bakery_buns_croissants
+25670,"Santa Maria bbq kaste bourbon whiskey, 370g",Santa Maria,370 g,7311312006332,,,sauces_oils,sauces_marinades

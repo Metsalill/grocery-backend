@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+21536,Dr.Oetker Pitsa Prosciutto 340 g,Dr.Oetker Pitsa,340 g,4001724037606,,,frozen_food,frozen_pizza
+21548,Kotimaista Koriander potis,Kotimaista Koriander,,6414893388253,,,produce,produce_herbs_salads_sprouts
+21551,Baltix pikateraline riis 1kg,Baltix,1 kg,4742298001180,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+21553,Värviline porgand 1 kg,Värviline,1 kg,6430035370498,,,produce,produce_root_veg
+21560,Paulúns seemnemüsli 350g,Paulúns,350 g,6417801801240,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+21577,X-tra viilutatud külmsuitsulõhe 100 g,X-tra,100 g,7340191103771,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+21581,Dattel medjoul 400g,Dattel,400 g,7290002488590,,,produce,produce_tropical
+21586,"Viljatuote pannkoogijahusegu 500 g, gluteenivaba",Viljatuote,500 g,6430041080398,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+21587,Coop kuivatatud mango 100g,Coop,100 g,7340191149083,,,sweets_snacks,sweets_nuts_driedfruit
+21594,Myllyn Paras rukkihelbed 600 g,Myllyn Paras,600 g,6417700054495,,,dry_preserves,dry_cereals_muesli
+21602,Gogreen munguba 500 g,Gogreen,500 g,7312787710366,,,dry_preserves,dry_groats_beans
+21606,Papa kikerherne jahu 1kg,Papa,1 kg,5013531990523,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+21609,Fazer Alku linaseemnetega kaerapuder 500 g,Fazer Alku,500 g,6419811112309,,,dry_preserves,dry_cereals_muesli
+21613,MAMMA Retroburger 230 g,MAMMA Retroburger,230 g,4740184300775,,,dry_preserves,dry_ready_meals_jars
+21614,Soyappétit peenestatud hele soja 500 g,Soyappétit,500 g,4742382000112,,,dry_preserves,dry_groats_beans
+21628,Porgand Jumbo 500g,Porgand Jumbo,500 g,4751006960268,,,produce,produce_root_veg
+21633,Füüsal puhastatud 125 g,Füüsal,125 g,4740669004990,,,produce,produce_tropical
+21638,"Panzani pasta penne 400 g, gluteenivaba",Panzani,400 g,3038359004513,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+21651,Peipsi hapukurk Germani talu,Peipsi,,2060580900006,,,dry_preserves,dry_canned_veg
+21653,Coop Kana - Taco salat 300 g,Coop Kana,300 g,6438460949739,produce,,dry_preserves,dry_ready_meals_jars
+21659,"Õrnas soolas tilliga vikerforellifilee, viilutatud 90 g",Õrnas,90 g,4740663420291,,,meat_fish,fish_salted_smoked
+21663,Coop Hele viinamari I klass seem.-ta 500g,Coop Hele,500 g,6414894500609,,,produce,produce_tropical
+21665,"Graaviforell, viilutatud 200 g","Graaviforell,",200 g,4740192011120,,,meat_fish,fish_salted_smoked
+21668,Bosto pikateraline riis 8x125g,Bosto,8x125 g,5410106033904,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+21671,Viinamari hele Victoria I klass,Viinamari,,2060460900003,,,produce,produce_tropical
+21684,Coop Apelsin Navel I klass,Coop Apelsin,,2060268700003,,,produce,produce_tropical
+21685,Melon roheline,Melon,,2060493200002,,,produce,produce_tropical
+21686,Myllyn Paras neljaviljahelbed 850 g,Myllyn Paras,850 g,6417700052927,,,dry_preserves,dry_cereals_muesli
+21689,Sante krõbe müsli maapähklite ja maapähklikreemiga granola 350 g,Sante,350 g,5900617002976,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+21716,Coop Mini ploomtomat I klass 250g,Coop Mini,250 g,6414894500210,,,produce,produce_root_veg
+21718,Roheline jalopeno (medium),Roheline,,2060540700004,,,produce,produce_root_veg
+21726,Mama idamaised kanamaiselised kiirnuudlid 6x55g,Mama,6x55 g,8850987146619,dry_preserves,dry_pasta_rice,dry_preserves,dry_soups_noodles
+21728,Veski Mati täistera rukkihelbed 500g,Veski Mati,500 g,4740281003005,,,dry_preserves,dry_cereals_muesli
+21734,"Kuumsuitsu heik vaakumpakendis, M.V.WOOL, kg",Kuumsuitsu,,2319220900006,,,meat_fish,fish_salted_smoked
+21739,Riso Scotti must valmis täisterariis 230 g,Riso Scotti,230 g,8001860187711,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+21745,Fazer Alku mitmeviljapuder 500 g,Fazer Alku,500 g,6413466121907,,,dry_preserves,dry_cereals_muesli
+21751,Raisio sunnuntai anni helena koogijahu 2 kg,Raisio,2 kg,6411200102748,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+21754,Viinamari hele seemneteta 500 g,Viinamari,500 g,4740669002279,,,produce,produce_tropical
+21755,Calvo tuunikala filee soolvees 160 g,Calvo,160 g,8410090031549,meat_fish,fish_fresh,dry_preserves,dry_canned_meat_fish
+21759,Xtra Tume viinamari seemneteta 500g,Xtra Tume,500 g,6438574049486,,,produce,produce_tropical
+21764,Aura pirni maitsega siirup 750ml,Aura,750 ml,4740098098805,,,drinks,drinks_syrups_powders
+21772,Baklažaan,Baklažaan,,2060522100006,,,produce,produce_root_veg
+21775,Pirn Packham I klass,Pirn Packham,,2060324500004,meat_fish,meat_other,produce,produce_apples_pears
+21777,Maggi juustu kiirsupp 19 g,Maggi,19 g,7613032737115,dairy_eggs_fats,dairy_cheese_slices,dry_preserves,dry_soups_noodles
+21779,Intsu oranz ploomtomat I klass 250g,Intsu,250 g,4740407000116,,,produce,produce_root_veg
+21782,Japanese choice poke riis 500g,Japanese,500 g,4747004000266,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+21783,Aurutatud riivitud peet 400g,Aurutatud,400 g,4752052004807,,,dry_preserves,dry_ready_meals_jars
+21793,"Skumbria, külmsuitsu , kg","Skumbria,",,2319219500002,,,meat_fish,fish_salted_smoked
+21801,Coop pikateraline riis 1kg,Coop,1 kg,7340011352228,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+21811,"Till, pakitud alusel","Till,",,2060524000007,,,produce,produce_herbs_salads_sprouts
+21821,Sumila mesi 500 g,Sumila,500 g,0615435427645,,,dry_preserves,dry_other
+21825,Coop kuivatatud jõhvikad 150g,Coop,150 g,7340191162235,,,sweets_snacks,sweets_nuts_driedfruit
+21826,Melon kollane,Melon,,2060327800002,,,produce,produce_tropical
+21829,"RANNAKARBID PAPRIKA - KÜÜSLAUGU, 100G",RANNAKARBID PAPRIKA,100 g,4740173003458,,,meat_fish,fish_fresh
+21835,Lehtpetersell potis Kotimaista,Lehtpetersell,,6414893388352,,,produce,produce_herbs_salads_sprouts
+21841,Mugulsibul pakitud 1kg,Mugulsibul,1 kg,0768563266294,,,produce,produce_root_veg
+21842,"Ligouri, spagetid, 500 g","Ligouri,",500 g,8008912010034,,,dry_preserves,dry_pasta_rice
+21858,Suvikõrvits,Suvikõrvits,,2060521400008,,,produce,produce_root_veg
+21859,Sante go on protein granola röstitud müsli pähklite ja šokolaadiga 300 g,Sante,300 g,5900617039262,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+21860,"Juustu täidisega kuumsuitsulõhe kogufilee 1,2-1,5 kg",Juustu,1.5 kg,2060218300000,dairy_eggs_fats,dairy_other,meat_fish,fish_salted_smoked
+21861,"Koff Long Drink Mango 5,5%vol 330ml",Koff Long,330 ml,4740019005660,drinks,drinks_beer_cider,drinks,drinks_other
+21862,Ajinomoto kiirnuudliroog vürtsika kastmega 93 g vegan,Ajinomoto,93 g,5901384507794,world_spices,spices_herbs_spice_mix,dry_preserves,dry_soups_noodles
+21863,Umami kookosjahu 300 g,Umami,300 g,4770082323033,bakery,bakery_cakes_pastries,dry_preserves,dry_flour_sugar_baking
+21868,"Külmsuitsu lõhefilee, sulatatud, viilutatud, kg",Külmsuitsu,,2060258500002,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+21880,"Forellimari, M.V.WOOL, 135 g",Forellimari,135 g,4740192011823,,,meat_fish,fish_fresh
+21881,Kalew manna 1 kg,Kalew,1 kg,4740493000168,,,dry_preserves,dry_groats_beans
+21882,"Emco gluteenivaba pähklibatoon mandlite ja pistaatsiapähklitega, pooleldi kaetud tumeda šokolaadiga 35g",Emco,35 g,8595229910169,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+21883,Coop pikateraline täisterariis 1 kg,Coop,1 kg,7340011495109,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+21889,Coop pikateraline basmatiriis kotis 4x125g,Coop,4x125 g,7340191163171,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+21890,Baltix aurutatud riis 4 x 100 g,Baltix,4x100 g,4742298000121,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+21900,"Riso Pasini sushiriis, 500 g",Riso Pasini,500 g,8001655010972,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+21907,Meveda Suvine mesi 500g presstuubis,Meveda Suvine,500 g,4740250000660,,,dry_preserves,dry_other
+21921,Veski mati tatar 1 kg,Veski,1 kg,4740281006679,,,dry_preserves,dry_groats_beans
+21923,Chiavazza pitsajahu 1 kg,Chiavazza,1 kg,8009550007929,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+21924,"Äyriäistukku paneeritud kalmaarirõngad, 500 g",Äyriäistukku,500 g,8411076010589,,,meat_fish,fish_processed
+21929,Marineeritud heeringas karri kastmes,Marineeritud,,7340191153820,meat_fish,fish_fresh,meat_fish,fish_processed
+21932,Pure via steevia 370 g,Pure,370 g,7630486403366,,,dry_preserves,dry_flour_sugar_baking
+21935,Podravka kanasupp nuudlitega 62 g,Podravka,62 g,3850104003189,meat_fish,meat_poultry,dry_preserves,dry_soups_noodles
+21950,Sallinen mandlimass 150 g,Sallinen,150 g,6436501001101,,,dry_preserves,dry_flour_sugar_baking
+21951,Coop riivsai 400g,Coop,400 g,7340191167919,,,dry_preserves,dry_flour_sugar_baking
+21954,Panzani Vermicelli niitnuudlid 500g,Panzani Vermicelli,500 g,3038351161306,,,dry_preserves,dry_pasta_rice
+21957,Waffa Sofi kuivikud kessu kuivikud sukaadiga 500g,Waffa Sofi,500 g,4743144004645,,,sweets_snacks,sweets_biscuits_cookies
+21962,Bosto tai jasmiiniriis 4 x 125 g,Bosto,4x125 g,5410106033829,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+21963,"Küüslaugu küüned pakitud, 100 g",Küüslaugu,100 g,4740270000404,,,produce,produce_root_veg
+21970,Chippy teraviljapallid kakaoga 250g,Chippy,250 g,4743144001606,,,dry_preserves,dry_cereals_muesli
+21972,Brokoli kg,Brokoli,,2060302100004,,,produce,produce_root_veg
+21987,"Lõhefilee portsjon grillitud, SAARE KALA, 120 g",Grillitud,120 g,4740663720322,meat_fish,fish_fresh,meat_fish,fish_fresh
+21996,Veski mati riisijahu 1 kg,Veski,1 kg,4740281004620,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+22029,Coop kivideta ploomid 250g,Coop,250 g,7340191150201,,,sweets_snacks,sweets_nuts_driedfruit
+22034,Sante krõbe müsli tumeda šokolaadiga granola 350 g,Sante,350 g,5900617002983,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+22036,"Kotimaista kakaopallid, 320 g",Kotimaista,320 g,6415712714970,,,dry_preserves,dry_cereals_muesli
+22042,Kodune soolatomat 350g,Kodune,350 g,4745011037374,,,dry_preserves,dry_canned_veg
+22045,"Schär riivsai paneerimiseks, gluteenivaba 300g",Schär,300 g,8008698004753,,,bakery,bakery_gluten_free
+22051,"Küüslaugu idandid, LÕUNAIDU, 70 g",Küüslaugu,50 g,6416332001013,,,produce,produce_apples_pears
+22054,Mahe kurkum 50g,Mahe,50 g,7331353800089,,,world_spices,spices_herbs_spice_mix
+22063,Kalaneuvos viilutatud külmsuitsutatud vikerforellifilee 150g,Kalaneuvos,150 g,6408520009727,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+22071,Presto presto makaron cornetti 400g,Presto,400 g,4750020050351,,,dry_preserves,dry_pasta_rice
+22075,Honest nektar mesi tuubis 100g,Honest,100 g,4742023520368,,,dry_preserves,dry_other
+22076,Xtra granola choco crunchy 500g,Xtra,500 g,7340191159754,,,dry_preserves,dry_cereals_muesli
+22079,Müller`s mühle läätsed kiirkeedu 500 g,Müller`s,500 g,4000286221126,,,dry_preserves,dry_groats_beans
+22091,SteviaSweet magusainetabletid 300 tk,SteviaSweet,300 pcs,7610211158303,,,dry_preserves,dry_flour_sugar_baking
+22096,Paprika Duo 225g,Paprika Duo,225 g,6438574225323,,,produce,produce_root_veg
+22104,Canderel magusainepulbri täitepakend 90 g,Canderel,90 g,7630486404578,,,dry_preserves,dry_flour_sugar_baking
+22105,Hermesetas suhkruasendaja hermesetas 300 tk.,Hermesetas,300 pcs,7610211080604,,,dry_preserves,dry_flour_sugar_baking
+22115,Kirsstomat kollane 250g I klass,Kirsstomat,250 g,4740199000059,,,produce,produce_root_veg
+22116,Veski Mati Lõuna Eesti Tangud 1 kg,Veski Mati,1 kg,4740281006600,,,dry_preserves,dry_groats_beans
+22121,Chapel Hill Pinot Grigio vein 12%vol 750ml,Chapel Hill,750 ml,5015271016181,,,drinks,drinks_wine
+22131,Linda sõmer riis 4*100g,Linda,100 g,4743144003990,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+22134,Tayl&lledge vanillipasta 65g,Tayl&lledge,65 g,5701073067192,dry_preserves,dry_pasta_rice,dry_preserves,dry_flour_sugar_baking
+22138,Coop magusaine 300 ml,Coop,300 ml,6438574211180,,,dry_preserves,dry_flour_sugar_baking
+22140,Meira kookoshelbed 150g,Meira,150 g,6420101885278,dry_preserves,dry_cereals_muesli,dry_preserves,dry_flour_sugar_baking
+22142,Melon Cantaloupe,Melon Cantaloupe,,2060493600000,,,produce,produce_tropical
+22145,Umami valge šokolaadi nööbid 200 g,Umami,200 g,4770082316387,,,dry_preserves,dry_flour_sugar_baking
+22146,York varumopp Classic,York,,5903355070641,,,household,hh_other
+22154,Jõumees mesi õietolmu ja taruvaiguga 300 g,Jõumees,300 g,4742422000119,,,dry_preserves,dry_other
+22157,Baltix hernehelbed 500g,Baltix,500 g,4742298002750,,,dry_preserves,dry_groats_beans
+22162,Gold ei niitpesad munamakaron 500 g,Gold,500 g,4002966008041,,,dry_preserves,dry_pasta_rice
+22164,"Soolahake, kg","Soolahake,",,2060244600006,,,meat_fish,fish_salted_smoked
+22167,Arimex 1go kuivatatud puuviljade ja pähklite segu 50 g,Arimex,50 g,4771249819062,produce,,sweets_snacks,sweets_nuts_driedfruit
+22168,Piklik paprika 180g,Piklik,180 g,6414893391130,,,produce,produce_root_veg
+22170,"Riso Scotti, pikateraline riis, 1 kg","Riso Scotti,",1 kg,5941832000231,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+22186,Rainbow Valge sibul 3tk,Rainbow Valge,3 pcs,6414894500197,,,produce,produce_root_veg
+22193,Coop pastaroog juustuga 5% ja peekoniga 2% 155g,Coop,155 g,7340191151765,dairy_eggs_fats,dairy_cheese_slices,dry_preserves,dry_ready_meals_jars
+22196,KAHEKSAJALG ÕRNSUITSUMAITSELINE 100G,KAHEKSAJALG ÕRNSUITSUMAITSELINE,100 g,4740173001744,,,meat_fish,fish_processed
+22197,"FIT Smoothie batoon peet-mustsõstar 32 g, gluteenivaba",FIT Smoothie,32 g,8594002314538,,,sweets_snacks,sweets_chocolate_bars
+22204,"Kalles Kaviar MSC, ABBA, 190 g",Kalles,190 g,7350126088011,,,meat_fish,fish_other
+22209,Kotimaista mugulsibul võrgus 500g,Kotimaista,500 g,6414894502306,,,produce,produce_root_veg
+22210,Panzani pasta macaroni 500 g,Panzani,500 g,3038350013101,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+22212,Sangaste mesi mesi 1 kg,Sangaste,1 kg,4744098010133,,,dry_preserves,dry_other
+22227,Sangaste mesi mesi 500 g,Sangaste,500 g,4744098010102,,,dry_preserves,dry_other
+22232,PÕNN Ökoloogiline Kanalihapüree 120 g 6+ 120g,PÕNN Ökoloogiline,120 g,4740073079508,meat_fish,meat_poultry,baby,baby_food_jars
+22246,Coop lasanjeplaadid ja kastmepulber 247g,Coop,247 g,7340191153226,dry_preserves,dry_other,dry_preserves,dry_pasta_rice
+22250,Frosch Aloe Vera pesuloputusvahend 750 ml,Frosch Aloe,750 ml,4009175182661,,,household,hh_laundry
+22252,MAMMA Lihakas seljanka 300 g,MAMMA Lihakas,300 g,4740184500519,meat_fish,meat_other,dry_preserves,dry_ready_meals_jars
+22253,Kotimaista rukkijahu 1 kg,Kotimaista,1 kg,6415711426294,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+22261,"Praetud räimed koduses marinaadis, KALURI, 500 g",Praetud,500 g,4740590030327,meat_fish,fish_fresh,meat_fish,fish_processed
+22288,Spinat 150g,Spinat,150 g,6438574031986,,,produce,produce_herbs_salads_sprouts
+22292,"Graavilõhe, viilutatud 200 g","Graavilõhe,",200 g,4740192010567,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+22306,Japanese choice sushi riis 500g,Japanese,500 g,4747004000259,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+22310,"Wiru mill mahe toortatratang 1 kg, gluteenivaba",Wiru,1 kg,4742898010025,,,dry_preserves,dry_groats_beans
+22311,Saarioinen Hakklihapitsa 200G,Saarioinen Hakklihapitsa,200 g,6412000034505,meat_fish,meat_minced,dry_preserves,dry_ready_meals_jars
+22322,Mamma Kanasupp 300G,Mamma Kanasupp,300 g,4740184500427,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+22327,Sunshine Delights kuivatatud ananass 100g,Sunshine Delights,100 g,7090046314165,,,sweets_snacks,sweets_nuts_driedfruit
+22337,"Coop toiduvärv, roheline, 30 ml",Coop,30 ml,7340191150263,,,dry_preserves,dry_flour_sugar_baking
+22339,Kotlin mahe ketšup gluteenivaba 450g,Kotlin,450 g,5900385012573,,,sauces_oils,sauces_ketchup_mayo
+22345,Paulúns apelsini-mango-grenadilliga granola-tüüpi hommiksöögihelbed 450 g,Paulúns,450 g,6417801801288,,,dry_preserves,dry_cereals_muesli
+22349,Muhe mesi 1100 g,Muhe,1100 g,4744329010017,,,dry_preserves,dry_other
+22357,Änglamark mahebasmatiriis 1 kg,Änglamark,1 kg,7340011317203,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+22361,Coop spagettid 1 kg,Coop,1 kg,7340191144828,,,dry_preserves,dry_pasta_rice
+22362,Xtra Jasmiini riis 1 kg,Xtra Jasmiini,1 kg,7340191143487,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice

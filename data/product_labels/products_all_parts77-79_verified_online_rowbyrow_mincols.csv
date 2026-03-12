@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+13592,Vatipadjad Helmi 100 tk väike,Vatipadjad Helmi,100 pcs,6414100131054,,,personal_care,pcare_other
+13595,Coop kartulikrõpsud hapukoor-chilli 175g,Coop,175 g,7340191150676,,,sweets_snacks,sweets_snacks_salty
+13606,"Lumene meigipulk Radiant Glow 4,7g",Lumene,4.7 g,6412600814460,,,personal_care,pcare_cosmetics
+13607,MAMMA Pannkoogid suitsupeekoni ja mozzarellaga 200 g,MAMMA Pannkoogid,200 g,4740184602510,,,bakery,bakery_other
+13609,Pulkdeodorant David Beckham Respect 75ml,Pulkdeodorant David,75 ml,3616302931880,personal_care,pcare_deo,personal_care,pcare_deo
+13616,Libresse So Slim Duo pesukaitse 60 tk,Libresse So,,7322540802931,,,personal_care,pcare_feminine_hygiene
+13619,Küünelakieemaldi atsetoonivaba All-Care 200ml,Küünelakieemaldi,200 ml,4740060015939,,,personal_care,pcare_cosmetics
+13626,Libresse Ultra Long hügieeniside 36 tk,Libresse Ultra,,7322540536836,,,personal_care,pcare_feminine_hygiene
+13633,"Kotimaista mudakook, 400 g",Kotimaista,400 g,6414893173682,bakery,bakery_cakes_pastries,bakery,bakery_other
+13646,Discreet inkontinents plus large 8tk,Discreet,,8001090111685,,,personal_care,pcare_other
+13647,Loreal Infaillible Triangular kulmupliiats light brunette 5.0,Loreal Infaillible,,3600524054656,,,personal_care,pcare_cosmetics
+13650,Kiilto wc-geel sidrun 750ml,Kiilto,750 ml,6417964579475,,,household,hh_cleaners
+13651,Geellakk-sprei men full boost strong 150ml,Geellakk-sprei,150 ml,4064666587608,,,personal_care,pcare_other
+13652,Nahahooldusvahend Softcare 300 ml,Nahahooldusvahend Softcare,300 ml,6416977712701,,,household,hh_other
+13664,Dushigeel Cupuacu Crystalline 500 ml,Dushigeel Cupuacu,500 ml,5901887040156,,,personal_care,pcare_body_wash
+13667,Vedelseebi täitepakk Flower Shop hüpoallergeenne 900ml,Vedelseebi,900 ml,4740060015311,,,personal_care,pcare_soap
+13674,Tolmukott RB2001 4 tk,Tolmukott RB2001,4 pcs,7319599012350,,,household,hh_other
+13680,Kehapesusvamm õrn esta,Kehapesusvamm,,4743115008870,,,personal_care,pcare_other
+13687,Essie küünelakk 101 Lady Like,Essie,,0000030102583,,,personal_care,pcare_cosmetics
+13689,"Hambavahepuhasti 0,5mm 6tk",Hambavahepuhasti,,7340191156951,meat_fish,meat_other,personal_care,pcare_oral_care
+13693,Calgon veepehmendaja geel 750ml,Calgon,750 ml,5900627039467,,,household,hh_laundry
+13699,Xtra WC-puhastusvahend Ocean 1 l,Xtra WC-puhastusvahend,1 l,7340011459712,,,household,hh_cleaners
+13715,Koff Long Drink Strong Raspberry muu alkohoolne jook 8%vol 330 ml,Koff Long,330 ml,4740019003383,drinks,drinks_beer_cider,drinks,drinks_other
+13723,Pesuloputusvahend kontsentreeritud Fresh Sky 748ml,Pesuloputusvahend,748 ml,9000101597462,,,household,hh_laundry
+13729,Wc puhastusvahend Sonett seeder-tsitronella 750ml,Wc,750 ml,4007547300149,,,household,hh_cleaners
+13754,"Mentos Fanta Orange nätsukomm 37,5g",Mentos Fanta,37.5 g,0000087354348,,,sweets_snacks,sweets_gums_mints
+13756,Always Ultra Secure Night hügieeniside 16tk,Always Ultra,,8001841168623,,,personal_care,pcare_feminine_hygiene
+13772,"EHS sport sisu 3in1 meeste shampoon, pal&higeel 300ml",EHS,300 ml,6412203102230,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond
+13780,Näokreem Nivea Men sensitive spf30 50ml,Näokreem Nivea,50 ml,4006000159843,,,personal_care,pcare_cosmetics
+13781,Parfüümvesi Just On Time EDP 90 ml,Parfüümvesi Just,90 ml,5901832066842,,,personal_care,pcare_other
+13782,Vedelseep/täitepakk M&ey 500 ml,Vedelseep/täitepakk M&ey,500 ml,8003520029157,,,personal_care,pcare_soap
+13790,Riidepuhastusrulli täide 2tk,Riidepuhastusrulli,2 pcs,6410416013077,,,household,hh_laundry
+13794,Ibero laste juuksekumm 18tk,Ibero,,6413890042281,,,baby,baby_care
+13795,Dushigeel mango 1l,Dushigeel,1 l,7310610015039,,,personal_care,pcare_body_wash
+13810,Bref power aktiv wc-geel ocean 700ml,Bref,700 ml,9000101311570,,,household,hh_cleaners
+13814,Raffini juukseklamber pruun 48 mm 24 tk,Raffini,,6415715193901,personal_care,pcare_other,personal_care,pcare_other
+13817,Tena Discreet Ultra hügieeniside normal 16tk,Tena Discreet,16 pcs,7322541687919,,,personal_care,pcare_feminine_hygiene
+13821,Palmolive tükiseep Naturals Green Tea Cucumber 90g,Palmolive,90 g,8693495034111,,,personal_care,pcare_soap
+13829,O.B. procomfort normal tampoon 64 tk,O.B.,,3574661622774,,,personal_care,pcare_feminine_hygiene
+13833,Gillette labs habemeajamisvaht vit.b6 quick rinse 240ml,Gillette,240 ml,7702018609727,,,personal_care,pcare_shaving
+13840,Varutera 3 Comfortglide breeze 3-teraline 4tk,Varutera,,8700216498692,,,personal_care,pcare_shaving
+13849,Kiss bare but better kunstküüned nude glow,Kiss,,0731509865738,,,personal_care,pcare_cosmetics
+13850,Always ultra normal 1 hügieeniside 36 tk,Always,,8001841930626,,,personal_care,pcare_feminine_hygiene
+13875,Duši- ja vanniõli 250ml,Duši-,250 ml,6416952303917,sauces_oils,oils_other,personal_care,pcare_body_wash
+13880,Listerine suuvesi naturals hambaemaili kaitseks 500ml,Listerine,500 ml,3574661657455,meat_fish,meat_other,personal_care,pcare_oral_care
+13882,"Pik-Nik Rebitavad juustupulgad, 280 g",Pik-Nik Rebitavad,280 g,4770299046398,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+13884,Väikesed juukseklambrid karbis lilled 6tk,Väikesed,,6416274423003,meat_fish,meat_other,personal_care,pcare_other
+13886,Näogeel-kreem korgitamme ektraktiga 75ml,Näogeel-kreem,75 ml,5701058013053,,,personal_care,pcare_cosmetics
+13898,Kleenex Ultrasoft Mini salvrätid 4-kihiline 7x10tk,Kleenex Ultrasoft,,5029053563909,,,household,hh_cleaners
+13925,"Mf lauvärvi palett nude 3 rose nudes 6,5 g",Mf,6.5 g,3616302463886,,,personal_care,pcare_cosmetics
+13928,O.B. organic super tampoon 16 tk,O.B.,,3574661610979,,,personal_care,pcare_feminine_hygiene
+13946,Coop mustad kivideta oliivid 235/113g,Coop,113 g,7340191163843,,,dry_preserves,dry_canned_veg
+13952,Inkontinents pesukaitse normal 14tk,Inkontinents,,4009408044636,,,personal_care,pcare_other
+13954,Osis+ juukselakk freeze 500ml,Osis+,500 ml,4045787999280,,,personal_care,pcare_other
+13972,Plackers hambavahepuhasti 0.5mm 24tk,Plackers,,7319861021936,meat_fish,meat_other,personal_care,pcare_oral_care
+13976,Peitepulk Instant Anti Age Eraser 01 Light,Peitepulk Instant,,3600530733842,,,personal_care,pcare_cosmetics
+13999,Lumene overnight care silma- ja kulmuseerum,Lumene,,6412600835083,,,personal_care,pcare_cosmetics
+14001,Listerine suuvesi cl&sh 500ml,Listerine,500 ml,3574661630199,,,personal_care,pcare_oral_care
+14006,Listerine suuvesi total care 1l,Listerine,1 l,3574661226491,,,personal_care,pcare_oral_care
+14016,Vuokkoset Soft pesukaitse 2x42tk,Vuokkoset Soft,,6414100700397,,,personal_care,pcare_feminine_hygiene
+14018,Breathe right ninateip hingamiseks 10tk,Breathe,,0810071800276,,,personal_care,pcare_other
+14022,Saunahari bambus,Saunahari,,6418940053101,,,personal_care,pcare_other
+14035,Universaalsed niisked salvratikud 200tk,Universaalsed,,5900095027645,,,personal_care,pcare_other
+14040,Rulldeodorant Invincible Sport 50 ml,Rulldeodorant Invincible,50 ml,3600523438099,,,personal_care,pcare_deo
+14042,Dušigeel X-tra 500ml,Dušigeel X-tra,500 ml,7340011321552,,,personal_care,pcare_body_wash
+14055,"Puuder 5,7g Translucent",Puuder,5.7 g,5055402948523,produce,,personal_care,pcare_cosmetics
+14068,Parfüümvesi 5th Avenue EDP 30ml,Parfüümvesi,30 ml,6438574163960,,,personal_care,pcare_other
+14076,Raffini peenikesed juuksekummid must 10tk,Raffini,,6438460628665,,,personal_care,pcare_other
+14084,Juuksekumm pruun 15tk,Juuksekumm,,6438574120697,,,personal_care,pcare_other
+14093,Juukselakk 4 seasons super hold b5 265ml,Juukselakk,265 ml,5901815001600,,,personal_care,pcare_other
+14094,Vananemisvastane näokreem So Bio meeste 50ml,Vananemisvastane,50 ml,3517360022698,,,personal_care,pcare_cosmetics
+14108,Värvipüüdja lehed 32tk,Värvipüüdja,32 pcs,5908252015986,,,household,hh_laundry
+14111,Xtra Color pesugeel 2l,Xtra Color,2 l,7340011406846,,,household,hh_laundry
+14114,Ibero juukseehe,Ibero,,6413890011294,,,personal_care,pcare_other
+14116,Domestos Original WC-puhastusvahend 750 ml,Domestos Original,750 ml,3011610051570,,,household,hh_cleaners
+14131,Mayb Superstay Lumimatte jumestuskreem 98,Mayb Superstay,,3600531691950,,,personal_care,pcare_cosmetics
+14132,Seep meresoola apelsini 100g,Seep,100 g,4742946010069,,,personal_care,pcare_soap
+14138,Caroli inkontinents extra plus 10tk,Caroli,,4009408044674,,,personal_care,pcare_other
+14139,Parfüümvesi Green Tea Scent EDP 30ml,Parfüümvesi Green,30 ml,6438574163977,,,personal_care,pcare_other
+14143,Hügieeniside ultra normal jumbo 44tk,Hügieeniside,,7322541907444,,,personal_care,pcare_feminine_hygiene
+14149,Lumene Lip Glow huuleõli 3 Berry Cream 10ml,Lumene Lip,10 ml,6412600863734,dairy_eggs_fats,,personal_care,pcare_cosmetics
+14151,"Frosch pesugeel sooda 1,5l",Frosch,1.5 l,4009175936455,,,household,hh_laundry
+14186,NIVEA näokreem Anti-Age SPF15 50ml,NIVEA,50 ml,4005900822512,,,personal_care,pcare_cosmetics
+14196,Rb wc-geel 750ml,Rb,750 ml,7340191131750,,,household,hh_cleaners
+14197,Vedelseep metsamarja 300ml,Vedelseep,300 ml,7310618429043,,,personal_care,pcare_soap
+14202,Gillette sensitive raseerimisvaht 300ml,Gillette,300 ml,7702018094455,,,personal_care,pcare_shaving
+14204,Gillette labs raseerija+varutera+hoidja,Gillette,,7702018605255,,,personal_care,pcare_shaving
+14205,Juuksegeel strong 150ml,Juuksegeel,150 ml,6415711053872,,,personal_care,pcare_other
+14210,Tena Pants Plus Large inkontinents hügieeniside 8 tk,Tena Pants,,7322540574876,,,personal_care,pcare_other
+14218,Libresse String pesukaitse 30tk,Libresse String,,7310791193892,,,personal_care,pcare_feminine_hygiene
+14220,Method puhastussprei eukalüptus-mint 828ml,Method,828 ml,0817939005224,,,household,hh_cleaners
+14232,Hambapasta Parodontax Complete Protection 75 ml,Hambapasta Parodontax,75 ml,5054563098696,meat_fish,,personal_care,pcare_oral_care
+14243,Intiimpesugeel Ziaja kaitsev 500ml,Intiimpesugeel Ziaja,500 ml,5901887037125,,,personal_care,pcare_feminine_hygiene
+14249,Rev.Jelly huule-ja põsepuna värv Strawberry Pink,Rev.Jelly,,5057566857345,,,personal_care,pcare_cosmetics
+14251,Hambahari ökoloogiline green clean medium,Hambahari,,7046110028032,personal_care,pcare_other,personal_care,pcare_oral_care
+14257,Gillette fusion 5 Power varuteras 4tk,Gillette,,7702018852475,,,personal_care,pcare_shaving
+14258,"Ainu vannivaht, 300ml",Ainu,300 ml,6414505153262,,,personal_care,pcare_body_wash
+14270,"Rainbow Black pesugeel 1 l, 20 pesukorda",Rainbow Black,1 l,6415711692927,,,household,hh_laundry
+14280,Gillette labs habemeajamisgeel vit.b3 198ml,Gillette,198 ml,7702018609741,,,personal_care,pcare_shaving
+14286,Cailap juukseklambrid 10tk,Cailap,,6416274382744,meat_fish,,personal_care,pcare_other
+14288,Hambapasta 50ml 0-5a piimahammaste 50ml,Hambapasta,50 ml,7046110071519,personal_care,pcare_oral_care,baby,baby_care
+14294,Bic hybrid flex5 4 varutera,Bic,,3086123760455,,,personal_care,pcare_shaving
+14302,Essence gel küünelakk 72,Essence,,4059729491688,,,personal_care,pcare_cosmetics
+14305,Vahuseep Magic Softness vaarikas 250 ml,Vahuseep Magic,250 ml,8714789834252,,,personal_care,pcare_soap
+14322,Tena Lights Liner inkontinents hügieeniside 24 tk,Tena Lights,,7322540490268,,,personal_care,pcare_other
+14323,Lumene CC jumestuskreem Color Correcting SPF20 0 30ml,Lumene CC,30 ml,6412600848502,,,personal_care,pcare_cosmetics
+14332,Juukselakk 250 ml ultimate,Juukselakk,250 ml,9000100923071,,,personal_care,pcare_other
+14348,Hambahari Ultra Reach Sensitive extra soft,Hambahari Ultra,,8711600348424,meat_fish,,personal_care,pcare_oral_care
+14362,Mayb Superstay Lumimatte jumestuskreem 128,Mayb Superstay,,3600531691899,,,personal_care,pcare_cosmetics
+14373,Niisked salvrätid kätele ja näole 40 tk,Niisked,,6415711055456,,,personal_care,pcare_other
+14381,Mayb Sunkisser särapuuder All Star,Mayb Sunkisser,,3600531697419,produce,,personal_care,pcare_cosmetics
+14382,Ibero laste kaelekee ja käevõru,Ibero,,6413890079607,,,personal_care,pcare_other
+14385,Parfüümvesi paradiso 15ml,Parfüümvesi,15 ml,5907699485970,,,personal_care,pcare_other
+14407,Cailap peavõru,Cailap,,6416274382607,,,personal_care,pcare_other
+14414,Pulkdeodorant Old Spice Whitewater 50ml,Pulkdeodorant Old,50 ml,4084500490581,drinks,,personal_care,pcare_deo
+14419,Kalev Bitter 70% tume šokolaad 100 g,Kalev Bitter,100 g,4740012036173,,,sweets_snacks,sweets_chocolate_bars
+14424,Bref de luxe wc-seep magnolia 50g,Bref,50 g,5201395140431,,,household,hh_cleaners
+14425,Mayeri vahuseep Jasmine All-Care 300ml,Mayeri,300 ml,4740060011894,,,personal_care,pcare_soap
+14459,Mua lauvärvipalett blush nudes,Mua,,5055402980233,,,personal_care,pcare_cosmetics
+14460,Raffini silikoonist juuksekummid roosa 500tk,Raffini,,6438460628627,,,personal_care,pcare_other
+14467,Lumme pesugeel valge 750ml,Lumme,750 ml,7046110311639,,,household,hh_laundry
+14483,Tampax Compak Pearl Regular tampoonid 18 tk,Tampax Compak,,4015400690313,,,personal_care,pcare_feminine_hygiene
+14486,"Hambahari Junior Soft, lastele 7-13 a.",Hambahari Junior,,7311570403034,meat_fish,,baby,baby_care
+14494,Sanytol vannitoapuh.vahend desinfits.500 ml,Sanytol,500 ml,3045206393003,,,household,hh_cleaners
+14504,Väga vahune sidrunheinaseep 100g,Väga,100 g,4742763009499,,,personal_care,pcare_body_wash
+14507,Suuvesi Fresh Burst 500 ml,Suuvesi Fresh,500 ml,5010123703547,,,personal_care,pcare_oral_care
+14510,"Rakvere Seapraad Rakvere, Kg",Rakvere Seapraad,500 g,2360381900008,,,meat_fish,meat_pork
+14514,Normal inkontinents hügieeniside 12tk,Normal,,7340191143500,,,personal_care,pcare_other
+14515,Raseerija Fusion 5 5-tera+1 varutera,Raseerija Fusion,,7702018458110,,,personal_care,pcare_shaving
+14516,TABAC habemeajamisjärgne lotion 100ml,TABAC,100 ml,4011700431205,,,personal_care,pcare_shaving
+14526,Mua lauvärvi palett Neutral Wanderlust,Mua,,5055402980011,,,personal_care,pcare_cosmetics
+14540,Varutera 3 Smooth sensitive 3-teraline 4tk,Varutera,,8700216720403,,,personal_care,pcare_shaving
+14541,Dushigeel Aloe Vera 500 ml,Dushigeel Aloe,500 ml,5765228838327,,,personal_care,pcare_body_wash
+14560,Essence Polly Pocket kamm 01,Essence Polly,,4059729539755,,,personal_care,pcare_other
+14569,Vuokkoset Cotton Night hügieeniside 9 tk,Vuokkoset Cotton,,6414100895253,,,personal_care,pcare_feminine_hygiene
+14593,Laste spreipalsam Rainbow Kids 200 ml,Laste,200 ml,7340011441656,,,baby,baby_care
+14596,Parfüümvesi Britney Spears FANTASY EDP 30ml,Parfüümvesi Britney,30 ml,0719346065382,,,personal_care,pcare_other
+14607,Kampamies juuste massaazihari,Kampamies,,6434900141022,dairy_eggs_fats,,personal_care,pcare_other
+14610,Caroli inkonts pull-up medium 10tk,Caroli,,4009408044711,,,personal_care,pcare_other
+14618,Essie küünelakk 648 Summer Soul-Stice,Essie,,0000030175518,,,personal_care,pcare_cosmetics
+14620,Niisked salvrätikud Cleanic 15tk,Niisked,,5900095009153,,,personal_care,pcare_other
+14627,Modelleerimiskreem Barber Club Beard/Hair 75 ml,Modelleerimiskreem Barber,75 ml,3600523528691,,,personal_care,pcare_other
+14636,"Hambavahepuhasti 0,4mm 6tk",Hambavahepuhasti,,7340191156982,meat_fish,,personal_care,pcare_oral_care
+14646,Juuksehari delfiin,Juuksehari,,6438574120666,,,baby,baby_care
+14650,Vanish värvipüüdja 60 tk,Vanish,60 pcs,5908252010448,,,household,hh_laundry
+14661,Dushikreem Creamy Berry vaarikas 500 ml,Dushikreem Creamy,500 ml,7310614360074,dairy_eggs_fats,,personal_care,pcare_body_wash
+14664,Puhastusvedelik breketitele ja kapedele 250ml,Puhastusvedelik,250 ml,6430043960230,,,personal_care,pcare_oral_care
+14684,Revol.All Satin huulepulk Queen Pink,Revol.All Satin,,5057566659376,,,personal_care,pcare_cosmetics
+14691,Looduslik deodorant Sidrun + Eukalüpt 80 g,Looduslik,80 g,4742763006795,,,personal_care,pcare_deo
+14693,Ühekordsed raseerijad miss soleil 4tk,Ühekordsed,,3086123303843,,,personal_care,pcare_shaving

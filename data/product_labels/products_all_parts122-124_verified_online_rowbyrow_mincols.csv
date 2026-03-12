@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+31826,Vanish Gold Powergel plekieemaldaja eelpesuks 200 ml,Vanish Gold,200 ml,5900627069846,,,household,hh_laundry
+31879,"Toorvorstid merevaigu, RANNAROOTSI, 400 g",Merevaigu,400 g,4740296013075,,,meat_fish,meat_grill_blood_sausages
+31891,Saaremaa Vodka Mild 40%vol 500ml,Saaremaa Vodka,500 ml,4740054361950,,,drinks,drinks_spirits
+31898,"Lastevorst, MAKS&MOORITS, 300 g",Lastevorst,300 g,4740171187686,,,meat_fish,meat_sausages
+31923,XL pitsa 550 g,XL,550 g,9001536022734,,,frozen_food,frozen_pizza
+31928,Grillpadrunid 400 g,Grillpadrunid,400 g,4740569013108,,,meat_fish,meat_beef_lamb_game
+31964,Xtra Kalamarjamääre 250G,Xtra Kalamarjamääre,250 g,7340191147720,meat_fish,fish_processed,meat_fish,fish_processed
+31976,"Salaami seemnekattega, RAKVERE LK, 200 g",Seemnekattega,200 g,4740003016542,,,meat_fish,meat_sausages
+31977,Suitsukarbonaad kg,Suitsukarbonaad,,2357438400000,,,meat_fish,meat_hams
+31990,"Armeenia šašlõkk, MATSIMOKA, 500 g",Armeenia,500 g,4744735011509,,,meat_fish,meat_pork
+32011,"Soolapeekoni lõigud, MAKS&MOORITS, 400 g",Soolapeekoni,400 g,4740171070445,,,meat_fish,meat_hams
+32017,Heinz sinep mahe 240g/220ml,Heinz,240 g,0000050457403,,,sauces_oils,sauces_ketchup_mayo
+32033,Coop Kanalihaga kolmnurk võileib 150g,Coop Kanalihaga,150 g,6438574012800,bakery,bakery_bread_loaves,dry_preserves,dry_ready_meals_jars
+32058,P/s Šašlõkivorstike 450 g,P/s Šašlõkivorstike,450 g,4740579100737,,,meat_fish,meat_grill_blood_sausages
+32080,"Broileri pooltiivad mustika, RANNAMÕISA, 400 g",Mustika,400 g,4742462001176,sauces_oils,oils_other,meat_fish,meat_poultry
+32100,"Poolsuitsuvorst juustu, RANNAROOTSI, 150 g",Poolsuitsu,150 g,4740296007296,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+32129,Vasikamaksapasteet 200 g,Vasikamaksapasteet,200 g,4740376106666,,,meat_fish,meat_gourmet
+32144,Plekieemaldusgeel Sapiensüümiga Mayeri All-Care 250ml,Plekieemaldusgeel Sapiensüümiga,250 ml,4740060014116,,,household,hh_laundry
+32147,Santa Maria hakklihamaitseaine 30 g,Santa Maria,30 g,6418474118352,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+32205,Ma&orits Frankfurter 340 G,Ma&orits Frankfurter,340 g,4740171187884,,,meat_fish,meat_sausages
+32208,Vähisabad soolvees 330/170g,Vähisabad,170 g,7340191158252,,,meat_fish,fish_processed
+32244,"Chorizo salaami, MATSIMOKA, 150 g",Chorizo,150 g,4744735010953,,,meat_fish,meat_sausages
+32253,"ROUTE 66 grill-liha seakaelakarbonaadist, kg",ROUTE,,2060210800003,meat_fish,meat_grill_blood_sausages,meat_fish,meat_pork
+32256,"Suitsusardell juustuga, RANNAROOTSI, 500 g",Suitsusardell,500 g,4740296007883,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+32317,Meira küüslaugupulber 40 g,Meira,40 g,6414200137109,,,world_spices,spices_herbs_spice_mix
+32320,"Surimist pulgad Smart Choice, VICI, 250 g",Surimist,250 g,4770190049191,,,meat_fish,fish_processed
+32344,Chorizo viilud doux 100 g,Chorizo,100 g,3181454661430,,,meat_fish,meat_sausages
+32349,Keedusalaami Paruni 90 g,Keedusalaami Paruni,90 g,4740574080669,,,meat_fish,meat_sausages
+32355,"Suitsupeekon, RAKVERE LK, 130 g",Suitsupeekon,130 g,4740003010649,,,meat_fish,meat_hams
+32363,"Itaaliapärane salaami, RAKVERE, 130 g",Itaaliapärane,130 g,4740003017723,,,meat_fish,meat_sausages
+32370,"Armeenia Grill Broileri Kintsuliha Šašlõkk, Kg",Armeenia Grill,,2323109200002,meat_fish,meat_grill_blood_sausages,meat_fish,meat_poultry
+32401,Suitsujuustu-jalapeno grillvorst 600 g,Suitsujuustu-jalapeno,600 g,4740171189109,dairy_eggs_fats,dairy_other,meat_fish,meat_grill_blood_sausages
+32410,Elephant rõngik soolaga 80 g,Elephant,80 g,5949040201044,,,sweets_snacks,sweets_biscuits_cookies
+32424,"Vinnutatud veiseliha Original, KARNI, 50 g",Beef Ground,50 g,4740579104315,drinks,drinks_spirits,meat_fish,meat_gourmet
+32436,"HARIBO Pico Balla, kummikommid 160g",HARIBO Pico,160 g,8426617347468,,,sweets_snacks,sweets_candies
+32450,"Kotimaista vürtsikad kanatiivad, 600 g",Kotimaista,600 g,6414893500303,meat_fish,meat_poultry,meat_fish,meat_poultry
+32496,Klassikalised grillvorstid 600 g,Klassikalised,600 g,4740003017839,,,meat_fish,meat_grill_blood_sausages
+32498,Lemmikvorst 300 g,Lemmikvorst,300 g,4740567000049,,,meat_fish,meat_sausages
+32503,Peakapsas,Peakapsas,,2060291300003,,,produce,produce_root_veg
+32522,Passion,Passion,,2060217900003,,,produce,produce_tropical
+32549,Suitsupeekon viil 120 g,Suitsupeekon,120 g,4740579300014,,,meat_fish,meat_hams
+32570,Vici Heeringafilee Tükid Sinepikastmes 200G,Vici Heeringafilee,200 g,4770190140621,meat_fish,fish_fresh,meat_fish,fish_processed
+32591,Martapagar Kikerherne-Kapsa Kotletid 240 G Vegan,Martapagar Kikerherne-Kapsa,240 g,4740667249287,,,dry_preserves,dry_ready_meals_jars
+32601,Nõo sardell juustuga 450 G,Nõo,450 g,4740574093560,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+32612,"Küpsetatud maksapasteet rõõsa koorega, RAKVERE LK, 200 g",KÜPSETATUD MAKSAPASTEET,,4740003011301,,,meat_fish,meat_gourmet
+32635,"Seastrooganov, RAKVERE LK, 380 g",Seastrooganov,380 g,4740003015873,,,meat_fish,meat_pork
+32652,Rainbow Küüslauk 100g,Rainbow Küüslauk,100 g,6414894501255,,,produce,produce_root_veg
+32716,Mee BBQ broileripooltiivad 400g,Mee BBQ,400 g,4742462001169,sauces_oils,oils_other,meat_fish,meat_poultry
+32745,Vici Soolalõhefilee Tükk 160 G,Vici Soolalõhefilee,160 g,4770190122085,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+32804,"Tõmmu suitsuvorst juustuga, WÕRO, 350 g",Tõmmu,350 g,4740562062936,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+32828,"Palermo salaami , RAKVERE LK, 200 g",Itaaliapärane Parma,200 g,4.74E+12,,,meat_fish,meat_sausages
+32856,Rannamoisa Broilerikoivatükid 500G,Rannamoisa Broilerikoivatükid,500 g,4.74246E+12,sauces_oils,oils_other,meat_fish,meat_poultry
+32861,"Mini Kiievi kotlet juustuvõiga, TALLEGG, 300 g",TALLEGG Mini,300 g,4.74005E+12,dairy_eggs_fats,dairy_butter_margarine,meat_fish,meat_poultry
+32875,Mamma Kana-Köögiviljapüreesupp 300 G,Mamma Kana-Köögiviljapüreesupp,300 g,4.74018E+12,produce,,baby,baby_food_jars
+32882,Sini hari vannitoale,Sini,,6.4238E+12,,,household,hh_cleaners
+32894,Karni Täissuitsu Kanasnack 85G,Karni Täissuitsu,85 g,4.74058E+12,sweets_snacks,sweets_snacks_salty,meat_fish,meat_poultry
+32902,Grill-kabanoss 380 g,Grill-kabanoss,380 g,4.74062E+12,,,meat_fish,meat_sausages
+32928,"Rannakarbid soolvees 100 g neto, VICI, 200 g",Söödav,100 g,4.77019E+12,,,meat_fish,fish_processed
+32936,"Mustikamarinaadis ribi eelküpsetatud, RAKVERE LK, 900 g",Mustikamarinaadis,900 g,4.74E+12,,,meat_fish,meat_pork
+32983,Vasalli keedusalaami juustuga 90 g,Vasalli,90 g,4.74057E+12,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+33042,Lõhe moussee 130 g,Lõhe,130 g,4.74029E+12,meat_fish,fish_fresh,meat_fish,fish_processed
+33081,"Sült naturaalse kallerdisega, MATSIMOKA, 320 g",Matsimoka,320 g,4.74474E+12,,,meat_fish,meat_other
+33088,"Sea esijalad, RAKVERE LK, 800 g",Sea,800 g,4.74E+12,,,meat_fish,meat_pork
+33131,"Napoli maitsesalaami, 100 g",Napoli,100 g,4.74057E+12,,,meat_fish,meat_sausages
+33148,"Nõo Hommikupeekon, Viil. 135 G","Nõo Hommikupeekon,",135 g,4.74057E+12,,,meat_fish,meat_hams
+33150,Kanamaksapasteet 200 g,Kanamaksapasteet,200 g,4.74038E+12,meat_fish,meat_poultry,meat_fish,meat_gourmet
+33233,Nõudepesumasina tabletid platinum allin1 51tk,Nõudepesumasina,51 pcs,8.70022E+12,,,household,hh_dishwashing
+33243,"Suitsukanakints, TALLEGG, kg",Suitsutatud,,2.36403E+12,meat_fish,meat_poultry,meat_fish,meat_poultry
+33246,Prosciutto crudo maitsestatud trühvliga 90 g,Prosciutto,90 g,8.02309E+12,,,meat_fish,meat_hams
+33265,Rannarootsi Sea Välisfilee Suitsusink 150G,Rannarootsi Sea,150 g,4.7403E+12,,,meat_fish,meat_hams
+33295,Jalatsideodorant Coccine Eco 2 200 ml,Jalatsideodorant Coccine,200 ml,5.90095E+12,,,household,hh_other
+33313,Xtra Sinep 980 g,Xtra Sinep,980 g,7.34019E+12,,,sauces_oils,sauces_ketchup_mayo
+33315,Vileda taldmopp Ultramax,Vileda,,4.0231E+12,,,household,hh_cleaners
+33365,"Lastevorst 77,7%, MAKS&MOORITS, 350 g","77,7%",350 g,4.74017E+12,,,meat_fish,meat_sausages
+33400,Punane teraline valgumari 200 g,Punane,200 g,4.82004E+12,,,meat_fish,fish_processed
+33401,"Prosciutto peekon viilutatud, RAKVERE LK, 140 g",Prosciutto,140 g,4.74E+12,,,meat_fish,meat_hams
+33416,"Šašlõkk Kodune, MAKS&MOORITS, 800 g",Kodune,800 g,4.74017E+12,,,meat_fish,meat_pork
+33444,Ehe šašlõkk seakaelakarbonaadist 600 g,Ehe,600 g,4.7403E+12,,,meat_fish,meat_pork
+33489,Hirvelihasink 350 g,Hirvelihasink,350 g,2.36184E+12,meat_fish,meat_hams,meat_fish,meat_hams
+33500,Näopuhastusvaht Joik Organic Moisture Magnet Cos Nat 150ml,Näopuhastusvaht Joik,150 ml,4.74258E+12,,,personal_care,pcare_other
+33508,ORBIT sweetmint 50 g kott,ORBIT,50 g,4.0099E+12,,,sweets_snacks,sweets_gums_mints
+33511,"Romsteegi viil Eesti rohumaaveis, KARNI, 200 g",Romsteegi,200 g,4.74058E+12,,,meat_fish,meat_beef_lamb_game
+33531,Nõudepesuhari bambusest käepide,Nõudepesuhari,,4.74244E+12,,,household,hh_dishwashing
+33555,Muskaatkõrvits,Muskaatkõrvits,,2.06053E+12,,,produce,produce_root_veg
+33562,"Lastevorst, RAKVERE LK, 600 g",Lastevorst,600 g,4.74E+12,,,meat_fish,meat_sausages
+33577,Tallegg Poolkoivad Jogurti-Tilli Marinaadis 800G,Tallegg Poolkoivad,800 g,4.74005E+12,dairy_eggs_fats,dairy_yogurt_kefir,meat_fish,meat_poultry
+33613,"Kanalihasült, MAKS&MOORITS, 300 g",Kanalihasült,300 g,4.74017E+12,meat_fish,meat_poultry,meat_fish,meat_other
+33618,Pasteet 170 g,Pasteet,170 g,4.74474E+12,,,meat_fish,meat_gourmet
+33633,"Traditsiooniline salaami, MATSIMOKA, 150 g",Traditsiooniline,150 g,4.74474E+12,,,meat_fish,meat_sausages
+33653,WC-värskendaja Bref Spa Moments Serenity 2x50g,WC-värskendaja Bref,2x50 g,9.0001E+12,,,household,hh_cleaners
+33669,Grillpaprika Padron 200g,Grillpaprika Padron,200 g,6.41489E+12,,,produce,produce_root_veg
+33677,Rakvere Verivorst 500 G,Rakvere Verivorst,500 g,4.74E+12,,,meat_fish,meat_grill_blood_sausages
+33712,"Salaami Fuetec Iberico, ELPOZO, 150 g",Fuetec Iberico,150 g,8.41084E+12,,,meat_fish,meat_sausages
+33730,"Pasteet suitsulihakõrnetega, MATSIMOKA, 220 g",Pasteet,220 g,4.74474E+12,meat_fish,meat_other,meat_fish,meat_gourmet
+33735,Kummikindad sensitive l,Kummikindad,,4.00379E+12,,,household,hh_cleaners
+33775,Broileritiivad 500g,Broileritiivad,500 g,4.74246E+12,sauces_oils,oils_other,meat_fish,meat_poultry
+33809,Keefirimarinaadis šašlõkk 800 G,Keefirimarinaadis,800 g,4.74E+12,,,meat_fish,meat_pork
+33866,"Rebitud kanaliha punases kastmes, MAKS&MOORITS, 200 g",Rebitud,200 g,4.74017E+12,meat_fish,meat_poultry,meat_fish,meat_poultry
+33877,Lõhemass külmutatud 1 kg,Lõhemass,1 kg,4.77019E+12,frozen_food,frozen_fish,frozen_food,frozen_fish
+33892,"Pepperoni täissuitsuvorst, MAKS&MOORITS, 240 g",Pepperoni,240 g,4.74017E+12,,,meat_fish,meat_sausages
+33894,"Salaamivorst, viilutatud, gluteenivaba 200 g","Salaamivorst,",200 g,6438574012923,,,meat_fish,meat_sausages
+33934,Nõudepesumasina geel Somat Excellence Anti-Grease 540ml,Nõudepesumasina,540 ml,9000101344721,,,household,hh_dishwashing
+33968,Rannarootsi Röövliribi 330G,Rannarootsi Röövliribi,330 g,4740296002512,,,meat_fish,meat_beef_lamb_game
+34001,Kreemjas maksapasteet 300 g,Kreemjas,300 g,4740003010229,,,meat_fish,meat_gourmet
+34006,"Liharibad, NÕO, 140 g",Meat,140 g,4740574192317,meat_fish,meat_other,meat_fish,meat_sausages
+34038,Kotimaista grillvorst 400 g,Kotimaista,400 g,6415712902957,,,meat_fish,meat_sausages
+34047,Koff Long Drink Juiced Grapefruit muu alkohoolne jook 5%vol 330 ml,Koff Long,330 ml,4740019002881,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+34073,Nõudepesupalsam granaatõun 500ml,Nõudepesupalsam,500 ml,4001499964527,,,household,hh_dishwashing
+34104,Gourmet Club Värske pesto 140g,Gourmet Club,140 g,4740670124472,,,sauces_oils,sauces_pasta_cooking
+34108,"Paprikalõige, RANNAROOTSI, 150 g","Paprikalõige,",150 g,4740296010951,,,meat_fish,meat_hams
+34121,Röstitud küüslauguga grillribi 900 g eelküpsetatud,Röstitud,900 g,4740215000056,,,meat_fish,meat_beef_lamb_game
+34126,Tallegg Eestimaise Broilerifilee Minutipihv 400G,Tallegg Eestimaise,400 g,4740046007644,sauces_oils,oils_other,meat_fish,meat_poultry
+34143,Coop täisterarukkist näkileib 200 g,Coop,200 g,7340191112209,,,bakery,bakery_other
+34171,Mahedamaitseline sardell 500 g,Mahedamaitseline,500 g,4740579203926,,,meat_fish,meat_sausages
+34176,Coop Brokoli 300 g,Coop Brokoli,300 g,6414894501118,,,produce,produce_root_veg
+34246,Bon Vegan Seitan Pikantne 200 G,Bon Vegan,200 g,4742117001681,,,meat_fish,meat_other
+34262,Rakvere Peekon (Kamaraga) ~700 G,Rakvere Peekon,700 g,2360331800006,,,meat_fish,meat_pork
+34272,"Delikatess maksapasteet, NÕO, 200 g",Delikatess,200 g,4740574009318,,,meat_fish,meat_gourmet
+34274,Dekoratiivpadjapüür bellagio breeze,Dekoratiivpadjapüür,,6419835258694,,,household,hh_other
+34307,Täissuitsuvorst pepperoni 250 g,Täissuitsuvorst,250 g,4740579101550,,,meat_fish,meat_sausages
+34309,Tallegg Broileripoolkoiva Tükid Osso-Bucco Kg,Tallegg Broileripoolkoiva,,2364032200004,sauces_oils,oils_other,meat_fish,meat_poultry
+34333,"Grill-ribi teriyaki eelküpsetatud, RANNAROOTSI, 900 g","Grillribid Teriyaki,",900 g,4740215800038,,,meat_fish,meat_grill_blood_sausages
+34374,Nõudepesumasina geel Mini Risk 600ml,Nõudepesumasina,600 ml,6430034675945,,,household,hh_dishwashing
+34379,Surimi salat köögiviljadega 400 g,Surimi,400 g,4770190065528,produce,,meat_fish,fish_processed
+34387,Tallegg Kintsulihast Steik Kolme Juustuga 400 G,Tallegg Kintsulihast,400 g,4740046011726,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_poultry
+34416,"Rannarootsi miniribi, kg",Rannarootsi,,2329656000003,,,meat_fish,meat_grill_blood_sausages
+34421,EHE Juustuviiner 330 g,EHE Juustuviiner,330 g,4740296012023,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+34439,Xtra grillimaitseaine 110g,Xtra,110 g,7340191154926,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+34440,Pesuloputusvahend Softlan Vanilla ja Orchid 1l,Pesuloputusvahend Softlan,1 l,8718951563759,,,household,hh_laundry
+34450,"Toored koorimata hiidkrevetid 60/80, kg",Toored,,2060242600008,,,meat_fish,fish_other
+34476,"Grillsnäkk, kg","Grillsnäkk,",,2317183200003,,,meat_fish,meat_grill_blood_sausages
+34483,Coop tuunikala tükid päevalilleõlis 240/168g,Coop,168 g,7340191124318,meat_fish,fish_fresh,meat_fish,fish_processed
+34505,Coop Chorizo vürtsitatud vorst 130 g,Coop Chorizo,130 g,7340191163713,,,meat_fish,meat_sausages
+34521,Peekonilõigud 380 g,Peekonilõigud,380 g,4740003015798,,,meat_fish,meat_pork
+34537,Šašlõkimaitseline grill-liha 450 g,Šašlõkimaitseline,450 g,4740579577416,meat_fish,meat_grill_blood_sausages,meat_fish,meat_pork
+34552,Mahlaapelsin Valencia võrgus 1 kg,Mahlaapelsin Valencia,1 kg,8717591120339,,,produce,produce_tropical
+34560,Pledge Wood 5in1 mööblipuhastusvahend 250 ml,Pledge Wood,250 ml,6414400052837,,,household,hh_cleaners
+34582,"Itaaliapärane salaami viilutatud Ehe, RANNAROOTSI, 100 g",EHE Itaaliapärane,100 g,4740296012535,,,meat_fish,meat_sausages
+34601,"Doktorivorst, RAKVERE LK, 600 g",Doktorivorst,600 g,4740003002156,,,meat_fish,meat_sausages
+34662,"Vähisabad soolvees 125 g neto, KALURI, 250g",Vähisabad,250 g,4740590748307,,,meat_fish,fish_processed
+34665,Bbq mureli pehme ribi eelküpsetatud 600G,Bbq,600 g,4740296013044,,,meat_fish,meat_beef_lamb_game
+34688,"Lihakas lastevorst, RAKVERE, 170 g",Rakvere Lihakas,170 g,4740003017785,meat_fish,meat_sausages,meat_fish,meat_sausages
+34785,Maks ja Moorits Klassikaline Täissuitsuvorst 240G,Maks,240 g,4740171189154,,,meat_fish,meat_sausages
+34862,Ajinomoto oyakata ramen sealihamaitseline kiirnuudlisupp 63g,Ajinomoto,63 g,5901384504755,dry_preserves,dry_soups_noodles,dry_preserves,dry_soups_noodles
+34886,"Keeduvorst juustu, VALLA, 600 g",Juustuvorst,600 g,4740003011172,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+34888,"Sea kaelakarbonaadi lõigud, 600 g",Sea,600 g,4740579525158,,,meat_fish,meat_pork
+34894,Juuksevärv Natu&y 590 eebenipuu must,Juuksevärv Natu&y,,7332531096157,produce,,personal_care,pcare_cosmetics
+34900,"Fuetec salaami, ELPOZO, 170 g",Fuetec,170 g,8410843079613,,,meat_fish,meat_sausages
+34913,"Juustuvorst, RAKVERE LK, 600 g",Juustuvorst,600 g,4740003002163,dairy_eggs_fats,dairy_other,meat_fish,meat_sausages
+34916,Sibula-äädikamarinaadis šašlõkk 800 g,Sibula-äädikamarinaadis,800 g,4740618008611,,,meat_fish,meat_grill_blood_sausages

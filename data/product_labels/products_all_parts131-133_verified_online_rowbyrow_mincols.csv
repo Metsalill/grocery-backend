@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+39181,"Roheline tee Bouquet 20 x 1,5 g",Roheline,20x1.5 g,4792252001121,,,drinks,drinks_tea_coffee
+39202,Põltsamaa jõhvikajook 1L,Põltsamaa,1 l,4740029051084,,,drinks,drinks_juices
+39203,"Mull alkoholivaba õunasiider, 330ml",Mull,330 ml,4744166011635,,,drinks,drinks_beer_cider
+39208,Clan Mac Gregor Blended Scotch Whisky 40%vol 700 ml,Clan Mac,700 ml,5010327905105,,,drinks,drinks_spirits
+39221,"Hartwall Jaffa greip suhkruvaba karastusjook 1,5L",Hartwall Jaffa,1.5 l,6413600191469,,,drinks,drinks_soft_soda
+39227,Nescafé Dolce gusto Latte Macchiato,Nescafé Dolce,,7613037788228,,,drinks,drinks_coffee_beans_capsules
+39233,"Inycon Settesoli Pinot Grigio Organic KPN vein 12,5%vol 3L",Inycon Settesoli,3 l,8000254003187,,,drinks,drinks_wine
+39235,Villa Italia Aperitivo Original 11%vol muu alkohoolne jook 750ml,Villa Italia,750 ml,8594045652697,,,drinks,drinks_beer_cider
+39236,Karksi Leedri-Õuna aromatiseeritud puuviljavein 11%vol 750ml,Karksi Leedri-Õuna,750 ml,4740111012238,produce,,drinks,drinks_wine
+39237,Somersby Blackberry siider 500ml,Somersby Blackberry,500 ml,4770075447760,,,drinks,drinks_beer_cider
+39242,Wõlu Tikker gaseeritud puuviljavein 6%vol 750ml,Wõlu Tikker,750 ml,4740158008539,produce,,drinks,drinks_wine
+39246,Artic Sport maasika proteiinijook 330ml,Artic Sport,330 ml,4740098002123,,,drinks,drinks_sport
+39249,Bacardi Razz piiritusjook 27%vol 700 ml,Bacardi Razz,700 ml,7610113028124,,,drinks,drinks_spirits
+39255,Schär gluteenivaba viilutatud röstsai 300 g,Schär,300 g,8008698005576,,,bakery,bakery_gluten_free
+39256,Karksi Paradiisi Õuna-Rabarberi aromatiseeritud puuviljavein 11%vol 750ml,Karksi Paradiisi,750 ml,4740054364654,produce,,drinks,drinks_wine
+39257,Mokate lahustuv jääkohvijook Karamelli 15g x 8pcs,Mokate,15 g,5900649070271,,,drinks,drinks_tea_coffee
+39258,Gran Castillo Viura Chardonnay vein 11%vol 750ml,Gran Castillo,750 ml,4740158003602,,,drinks,drinks_wine
+39264,Trolli Playmouse kummikommid 200 g,Trolli Playmouse,200 g,4000512364443,,,sweets_snacks,sweets_candies
+39267,Orn Craft leedriõie toonik 1L,Orn Craft,1 l,4740098094920,,,drinks,drinks_soft_soda
+39273,God Morgon Õunamahl 250ml,God Morgon,250 ml,6415130089827,,,drinks,drinks_juices
+39282,A. Le Coq Baltic Porter õlu 6%vol 750ml,A. Le,750 ml,4740098091462,,,drinks,drinks_beer_cider
+39289,Monarque piiritusjook 30%vol 500ml,Monarque,500 ml,4740054361851,,,drinks,drinks_spirits
+39311,"Hartwall Original Long Drink Pineapple muu alkohoolne jook 5,5%vol 24x330ml",Hartwall Original,24x330 ml,6413601254590,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+39316,Kohvioad EKA Avasta Brasiilia 1kg,Kohvioad EKA,1 kg,4742650000110,,,drinks,drinks_coffee_beans_capsules
+39326,Paulig Classic Aromatico kohviuba 1kg,Paulig Classic,1 kg,6411300182220,,,drinks,drinks_coffee_beans_capsules
+39349,Plantation Barbados Grand Cru 5 YO rumm 40%vol 700ml,Plantation Barbados,700 ml,3460410527868,,,drinks,drinks_spirits
+39355,"Star Rubired Zinfandel vein 13,5%vol 3L",Star Rubired,3 l,5704634166082,,,drinks,drinks_wine
+39361,"Kopparberg Strawberry-Lime siider 4,5%vol 500ml",Kopparberg Strawberry-Lime,500 ml,7393714374004,,,drinks,drinks_beer_cider
+39369,"Hennessy XO Cognac 40%vol 350ml, karbis",Hennessy XO,350 ml,3245990013617,,,drinks,drinks_spirits
+39371,TEXAS võimaitseline popcorn 60g,TEXAS,60 g,4740053008726,dairy_eggs_fats,dairy_other,sweets_snacks,sweets_snacks_salty
+39378,"Bouchard A&s Pinot Noir vein 12,5%vol 750ml",Bouchard A&s,750 ml,3340180007299,,,drinks,drinks_wine
+39379,"Mustika-msõstra smuuti, PAI, 200 ml",Pai,200 ml,4740029053040,,,produce,produce_smoothies_fresh_juices
+39385,Schär Croissant gluteenivaba 220 g,Schär Croissant,220 g,8008698027974,,,bakery,bakery_gluten_free
+39387,Õllenaut Kaineken õlu alkoholivaba Ipa 330ml,Õllenaut Kaineken,330 ml,4744045010926,,,drinks,drinks_beer_cider
+39388,Rudy's Kombucha coco&eapple 330ml,Rudy's Kombucha,330 ml,4751037280281,,,drinks,drinks_other
+39390,"Purtse Siidisuka Sweet Stout õlu 6,3%vol 330ml",Purtse Siidisuka,330 ml,4744472010889,,,drinks,drinks_beer_cider
+39393,Simply 0 Red wine alkoholivaba vein 750ml,Simply,750 ml,4003301069048,drinks,drinks_wine,drinks,drinks_wine
+39397,"SAAREMAA VESI SIDRUNI- 1,5 L MAITSELINE GAASIGA",SAAREMAA VESI,1.5 l,4741122000146,,,drinks,drinks_water
+39406,Carl Jung Merlot alkoholivaba punane vein 750ml,Carl Jung,750 ml,4009427825148,,,drinks,drinks_wine
+39407,"Steenbrugge Brune õlu 6,5%vol 330ml",Steenbrugge Brune,330 ml,54112032,,,drinks,drinks_beer_cider
+39419,Aura magus apelsininektar 1L,Aura,1 l,4740051476985,,,drinks,drinks_juices
+39433,Florecampo Pinot Grigio Rose KGT vein 12%vol 750 ml,Florecampo Pinot,750 ml,4044551070125,,,drinks,drinks_wine
+39434,COOP Apelsinimahl 1L,COOP Apelsinimahl,1 l,7340191151079,,,drinks,drinks_juices
+39436,Põltsamaa õunajook 200ml,Põltsamaa,200 ml,4740029050025,,,drinks,drinks_juices
+39438,"Shahnazaryan Pomegranate puuvilja- ja marjavein 12,5%vol 750ml",Shahnazaryan Pomegranate,750 ml,4850010652555,produce,,drinks,drinks_wine
+39445,"Anderson Estoni Porter õlu 6,3%vol 330ml",Anderson Estoni,330 ml,4744175011510,,,drinks,drinks_beer_cider
+39457,"Kada Kadaka Gin 37,5%vol 500ml",Kada Kadaka,500 ml,4742883015851,,,drinks,drinks_spirits
+39468,"Pepsi cola laimimaitseline karastusjook 1,5L",Pepsi,1.5 l,4750042000747,,,drinks,drinks_soft_soda
+39482,"La Posada Verdejo Organic KGT vein 13%vol 2,25 l",La Posada,2.25 l,8421390011223,,,drinks,drinks_wine
+39490,Rynkeby ingverishot 500ml,Rynkeby,500 ml,5705010081272,,,drinks,drinks_juices
+39496,"Hartwall Jaffa Lemonade suhkruvaba karastusjook 1,5l",Hartwall Jaffa,1.5 l,6413600283614,,,drinks,drinks_soft_soda
+39523,"A.Le Coq Pilsner Õlu 4,2%vol 2L",A.Le Coq,2 l,4740098076582,,,drinks,drinks_beer_cider
+39525,"Benediktiner Weissbier Dunkel õlu 5,4%vol 500 ml",Benediktiner Weissbier,500 ml,4741341001894,,,drinks,drinks_beer_cider
+39532,Garage hardcore grapefruit 275ml,Garage,275 ml,4740019004120,produce,,drinks,drinks_beer_cider
+39537,Roheline purutee Chinese Collection Milk Oolong 100 g,Roheline,100 g,4792252937628,,,drinks,drinks_tea_coffee
+39539,Royal Club Ginger Ale toonik 330ml,Royal Club,330 ml,0000087156638,,,drinks,drinks_soft_soda
+39546,Clipper Organic Pure roheline tee 20x2g,Clipper Organic,20x2 g,5021991941634,,,drinks,drinks_tea_coffee
+39554,Jaanihanso Jääsiider puuvilja- ja marjavein 12%vol 375 ml,Jaanihanso Jääsiider,375 ml,4744358010170,produce,,drinks,drinks_wine
+39563,Põltsamaa maasika-punasesõstra jook 200ml,Põltsamaa,200 ml,4740029052319,,,drinks,drinks_juices
+39572,"Inycon Appassimento Shiraz KGT vein 13,5%vol 3L",Inycon Appassimento,3 l,8000254002487,,,drinks,drinks_wine
+39574,Singleton Malt Master's Single Malt Scotch Whisky karbis 40%vol 700 ml,Singleton Malt,700 ml,5000281051413,,,drinks,drinks_spirits
+39575,Änglamark õunamahl 1 l,Änglamark,1 l,7340191118317,,,drinks,drinks_juices
+39583,Melitta Kohvifilter 102/80,Melitta Kohvifilter,,4006508122400,,,household,hh_kitchenware
+39587,Martini Extra Dry vermut 15%vol 1L,Martini Extra,1 l,5010677935005,,,drinks,drinks_wine
+39595,"Violife taimnetoode, 400 g",Violife,400 g,5202390007934,,,dairy_eggs_fats,dairy_other
+39597,Casa Charlize Pinot Grigio BIB KGT vein 12%vol 3l,Casa Charlize,3 l,4740158008713,,,drinks,drinks_wine
+39601,Starbucks Caffè Latte laktoosivaba kohvijook ilma lisatud suhkruta 220 ml,Starbucks Caffè,220 ml,5760466995870,,,drinks,drinks_soft_soda
+39607,"Saaremaa Gin Kurk-Ingver 37,5%vol 500ml",Saaremaa Gin,500 ml,4740054362018,,,drinks,drinks_spirits
+39612,"Saare Gin 37,5%vol 500ml",Saare Gin,500 ml,4740034015095,,,drinks,drinks_spirits
+39617,"Bacardi Carta Blanca rumm 37,5%vol 700ml",Bacardi Carta,700 ml,5010677013147,,,drinks,drinks_spirits
+39620,"Aura Fruit granadillimaitseline vesi 1,5 l",Aura Fruit,1.5 l,4740051000609,produce,,drinks,drinks_water
+39621,Mokate kohvijook 2in1Classic kott 14g x 10,Mokate,14 g,5900649011144,,,drinks,drinks_tea_coffee
+39623,Paulig filtrikohv Juhla Mokka 500 g,Paulig,500 g,6411300000494,,,drinks,drinks_tea_coffee
+39624,Hoggys Pear Heaven siider 330ml,Hoggys Pear,330 ml,4740098091974,,,drinks,drinks_beer_cider
+39632,Pai kiivi-mango smuuti 280ml,Pai,280 ml,4740029052777,,,produce,produce_smoothies_fresh_juices
+39638,Taffel Nacho Juustupallid 60 g,Taffel Nacho,60 g,6410381091834,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+39640,"CROWMOOR DRY APPLE 4,7% 7,92 L SIIDER",CROWMOOR DRY,7.92 l,6415600511186,,,drinks,drinks_beer_cider
+39648,Carlsberg Pilsner õlu 5%vol 6-pakk 3L,Carlsberg Pilsner,3 l,4750049001730,,,drinks,drinks_beer_cider
+39652,BOLD Salted Caramel Iced Espresso kohvijook piimaga 250ml,BOLD Salted,250 ml,5745000625369,drinks,drinks_tea_coffee,drinks,drinks_soft_soda
+39662,Läätsekrõpsud Cheddar juustuga 100 g,Läätsekrõpsud Cheddar,100 g,4770149214571,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+39666,"X-Tra Kohvifilter 102/200 , pruun",X-Tra Kohvifilter,,7340011333692,,,household,hh_kitchenware
+39670,Sidrunimaitseline kergelt gaseeritud vesi,Sidrunimaitseline,,4740051476268,,,drinks,drinks_water
+39673,Canari Tiramisu liköör 15%vol 350 ml,Canari Tiramisu,350 ml,5901064766350,,,drinks,drinks_spirits
+39696,Lapponia Lakka liköör 21%vol 500ml,Lapponia Lakka,500 ml,6420614681657,,,drinks,drinks_spirits
+39703,"Porgandi-peedimahl, KADARBIKU KÖÖGIVILI, 330 ml",Kadarbiku,330 ml,4742368000761,,,drinks,drinks_juices
+39713,"Bacardi Oakheart Original Spiced piiritusjook 32,5%vol 700ml",Bacardi Oakheart,700 ml,7610113025437,drinks,drinks_spirits,drinks,drinks_spirits
+39714,"Talisker 10 YO Single M Scotch Whisky 45,8%vol 700ml",Talisker,700 ml,5000281005416,,,drinks,drinks_spirits
+39718,Karksi Tume Kirsiõlu 5%vol 500ml,Karksi Tume,500 ml,4740098094562,,,drinks,drinks_beer_cider
+39726,"Fizz Blueberry siider 4,5%vol 1,5L",Fizz Blueberry,1.5 l,4740098079187,,,drinks,drinks_beer_cider
+39740,Martini Bianco vermut 15%vol 500ml,Martini Bianco,500 ml,5010677922005,,,drinks,drinks_wine
+39743,"Santa Christina Sauvignon Blanc GT vein 13,5%vol 3L",Santa Christina,3 l,5710778000861,,,drinks,drinks_wine
+39776,Teekanne Ingveri-mee tee 35g,Teekanne Ingveri-mee,35 g,4009300530244,,,drinks,drinks_tea_coffee
+39785,Litoral Tinto vein 12%vol 1L,Litoral Tinto,1 l,8410775401513,,,drinks,drinks_wine
+39794,Larsen VSOP Cognac karbis 40%vol 350ml,Larsen VSOP,350 ml,3272512000350,,,drinks,drinks_spirits
+39808,"Lahustuv kohvijook JACOBS 3in1 Milka, 10x18g",Lahustuv,10x18 g,8711000458723,,,drinks,drinks_tea_coffee
+39811,"TEHO VAARIKA-ŠOKOLAADI TAASTUSJOOK 0,33L",TEHO VAARIKA-ŠOKOLAADI,0.33 l,6419800121572,,,drinks,drinks_sport
+39814,Pipra Naps muu piiritusjook 35%vol 500ml,Pipra Naps,500 ml,4742883011495,,,drinks,drinks_spirits
+39832,Koskenkorva Raspberry Daiquiri piiritusjook 15%vol 500ml,Koskenkorva Raspberry,500 ml,6412700342207,,,drinks,drinks_spirits
+39836,Connemara Peat 12Yo whisky 40%vol 700ml,Connemara Peat,700 ml,5099357002305,,,drinks,drinks_spirits
+39837,Aura vürtsikas tomatimahl 330ml,Aura,330 ml,4740051000456,,,drinks,drinks_juices
+39841,"Oa Kohviuba No.2 keskmine röst, 1kg",Oa Kohviuba,1 kg,4744364010812,,,drinks,drinks_coffee_beans_capsules
+39845,Gran Castillo Cabernet Sauvignon vein 12%vol 750ml,Gran Castillo,750 ml,4740158001936,,,drinks,drinks_wine
+39848,"HERBA kummelitee 31,3g",HERBA,31.3 g,4009300018193,produce,,drinks,drinks_tea_coffee
+39852,Kohvioad Löfbergs keskmine röst 1 kg,Kohvioad Löfbergs,1 kg,7310050012292,,,drinks,drinks_coffee_beans_capsules
+39858,Pepsi Max suhkruvaba karastusjook 6x330ml,Pepsi Max,6x330 ml,6413605015555,,,drinks,drinks_soft_soda
+39860,"Coop segujoogi suhkruvaba kontsentraat 1+3 1,5l",Coop,1.5 l,6438460883774,,,drinks,drinks_syrups_powders
+39868,TEXAS juustu- ja sibulamaitselised maisirõngas 50g,TEXAS,50 g,4740053008863,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+39869,"Fürst von Metternich Riesling Sekt kvaliteetvahuvein 12,5%vol 750 ml",Fürst,750 ml,4003310112001,,,drinks,drinks_wine
+39873,Club-Mate granaatõuna jäätee 500ml,Club-Mate,500 ml,4029764001401,,,drinks,drinks_soft_soda
+39875,Aramis XO piiritusjook 36%vol 500ml,Aramis XO,500 ml,4740158011027,,,drinks,drinks_spirits
+39879,"Melitta Kohvifilter 100/ 40, pruun",Melitta Kohvifilter,,4006508126033,,,household,hh_kitchenware
+39880,Martini Bianco vermut 15%vol 1L,Martini Bianco,1 l,5010677925006,,,drinks,drinks_wine
+39882,Mokate kohvijook 3in1 Irish 10x 17g,Mokate,10x17 g,5900649064683,,,drinks,drinks_tea_coffee
+39888,Cosmopolitan Diva alkoholivaba vahuvein 750ml,Cosmopolitan Diva,750 ml,4750012310852,,,drinks,drinks_wine
+39890,Chateau De Montifaud VSOP Cognac 700ml,Chateau De,700 ml,3550142057341,,,drinks,drinks_spirits
+39895,Frezza Mocca Choco Loco šokolaadimaitseline kohvijook piimaga 250 ml,Frezza Mocca,250 ml,6408659611631,sweets_snacks,sweets_chocolate_bars,drinks,drinks_soft_soda
+39901,FORSMAN Rooibos purutee 60g,FORSMAN Rooibos,60 g,6411020002358,,,drinks,drinks_tea_coffee
+39908,"Aura Fruit kasemahlaga õunamaitseline vesi 1,5L",Aura Fruit,1.5 l,4740098083924,produce,,drinks,drinks_water
+39911,Akvile mineraalvesi Sport gaasita 1L,Akvile,1 l,4770405226980,,,drinks,drinks_water
+39924,Dr. Active apelsini-ananassi-porgandi mahlajook 500ml,Dr. Active,500 ml,4740098088202,,,drinks,drinks_sport
+39926,SAAREMAA VESI SIDRUNI- 500 ML MAITSELINE GAASIGA,SAAREMAA VESI,500 ml,4741122000139,,,drinks,drinks_water
+39928,Sprite karastusjook 500ml,Sprite,500 ml,47407121,,,drinks,drinks_soft_soda
+39936,"Leffe Brune õlu 6,5%vol 330ml",Leffe Brune,330 ml,4770301238063,,,drinks,drinks_beer_cider
+39940,Koskenkorva Long Drink Bitter Lemon muu alkohoolne jook 5%vol 330 ml,Koskenkorva Long,330 ml,4740054002761,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+39945,VITAMINERAL POWER VESI 750 ML GRE&RUNHEINA MAITS.,VITAMINERAL POWER,750 ml,4740098082804,,,drinks,drinks_water
+39946,"Gordons Gin 37,5%vol 1L",Gordons Gin,1 l,5000289020800,,,drinks,drinks_spirits
+39948,"Pilsner Urquell õlu 4,4%vol 500ml",Pilsner Urquell,500 ml,4744485010890,,,drinks,drinks_beer_cider
+39963,"Vaat Witty Nelson õlu 5,2%vol 440 ml",Vaat Witty,440 ml,634154851944,,,drinks,drinks_beer_cider
+39975,"Saku Antvärk Karge Õun siider 5,8%vol 500 ml",Saku Antvärk,500 ml,4740019003376,,,drinks,drinks_beer_cider
+39976,Barbuda Spiced piiritusjook 35%vol 1L,Barbuda Spiced,1 l,4740034015958,dry_preserves,dry_other,drinks,drinks_spirits
+39979,Mokate matcha Latte Classic (14g*6)*5,Mokate,14 g,5900649083097,,,drinks,drinks_tea_coffee
+39983,"SOMERSBY PEAR SIIDER 0,33L EI TEL",SOMERSBY PEAR,0.33 l,4740019501124,,,drinks,drinks_beer_cider
+39985,Aura apelsinimahl 1L,Aura,1 l,4740051004270,,,drinks,drinks_juices
+39988,Coop segumahlajook porgandiga 1L,Coop,1 l,7340191150867,,,drinks,drinks_juices
+39992,Nestea mango jäätee 330 ml,Nestea,330 ml,8595646208627,,,drinks,drinks_soft_soda
+39993,"Mull° Null Barbara alkoholivaba jook, 750 ml",Mull° Null,750 ml,4742022090039,,,drinks,drinks_beer_cider
+39995,Jaanihanso Eau De Vie 40%vol Õuna- ja/või pirnisiidrist valmistatud piiritusjook 350ml,Jaanihanso Eau,350 ml,4744358010163,dairy_eggs_fats,dairy_butter_margarine,drinks,drinks_spirits
+39998,Wõlu Vahutav Maasikas gaseeritud puuviljavein 6%vol 750ml,Wõlu Vahutav,750 ml,4740158008492,produce,,drinks,drinks_wine
+39999,Coop vaarika-maasika suh.vaba jook 200ml,Coop,200 ml,6438460915017,,,drinks,drinks_juices
+40004,"BIG PRO proteiinijook 0,33L soolakaramelli",BIG PRO,0.33 l,6430042025343,,,drinks,drinks_sport
+40013,"Rekorderlig Mango-Vaarika siider 4,5%vol 500ml",Rekorderlig Mango-Vaarika,500 ml,7311100349009,,,drinks,drinks_beer_cider
+40022,"Somersby Blueber&mon light siider 4,5%vol 500ml",Somersby Blueber&mon,500 ml,4740019002706,,,drinks,drinks_beer_cider
+40025,Limpa õuna-kirsijook 250ml,Limpa,250 ml,4740098091264,,,drinks,drinks_juices
+40027,Barone Montalto Pinot Grigio Blush KGT vein 12%vol 750ml,Barone Montalto,750 ml,8030423005254,,,drinks,drinks_wine
+40033,Karksi Mustsõstra aromatiseeritud puuviljavein 11%vol 750ml,Karksi Mustsõstra,750 ml,4740111012184,produce,,drinks,drinks_wine
+40036,Rodenbach Grand Cru õlu 6%vol 330ml,Rodenbach Grand,330 ml,4744485010135,,,drinks,drinks_beer_cider
+40049,"A.Le Coq Porter alkoholivaba tume õlu, 330 ml",A.Le Coq,330 ml,4740098093015,,,drinks,drinks_beer_cider
+40051,Aura Fresh metsamarjajook 2 l,Aura Fresh,2 l,4740051001378,,,drinks,drinks_juices
+40054,Caffebo kohvioad Tõde 1kg,Caffebo,1 kg,4745010015014,,,drinks,drinks_coffee_beans_capsules
+40055,"Saaremaa Ore Gin 37,5%vol 500ml",Saaremaa Ore,500 ml,4740054364715,,,drinks,drinks_spirits
