@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+423629,Jogurtismuuti ALMA maas.-must.-vaar. 275g,Alma,275 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423630,Pardimaksapasteet CHEF LUNDEN 200g,Chef Lunden,200 g,,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+423631,Karb.mahlaj.VÄRSKA Vurtsvasser Õun 1L,Värska,1 l,,drinks,drinks_juices,drinks,drinks_juices
+423632,Juust RoyalGouda VALIO Yellow viil. 150g,Valio,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423633,Kakaokapslid NESCAFÉ Dolce Gusto Nesquik 16tk,Nescafé,16 tk,,dry_preserves,dry_cereals_muesli,drinks,drinks_coffee_beans_capsules
+423634,Juust Royal Gouda VALIO Yellow 300g,Valio,300 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423635,Külm.pannk.prosc.-mozzar. WELL DONE 400g,Well Done,400 g,,dry_preserves,dry_other,frozen_food,frozen_bakery
+423636,Jogurt koduaia marj. lakt.vaba FARMI 1kg,Farmi,1 kg,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423637,KGT val.vein 12E MEZZO Mal.del Sal. 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423638,KGT vein B.MONTALTO Pinot Grigio 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423640,KGT vein NERO MARONE Primitivo 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423641,KGT vein TÖRLEY TALISMAN dry furmint 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423642,KGT vein MASCA DEL TACO L`Uetta 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423643,Valge juust APETINA päikesek.tomat. 100g,Apetina,100 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423644,Kirsi-õuna-aroon. mahlajook PÕLTSAMAA 2L,Põltsamaa,2 l,,drinks,drinks_juices,drinks,drinks_juices
+423645,KGT Vein PASSIONE Malvasia Puglia 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423646,Kohuke TERE mustika šok.glasuur. 40g,Tere,40 g,,produce,produce_berries,dairy_eggs_fats,dairy_cottage_quark
+423647,KGT vein ROCCA PRIMITIVO Salento 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423648,KGT vein ZENSA Pinot Grigio 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423649,KGT vein ITALIA Sangiovese 187ml,,187 ml,,drinks,drinks_wine,drinks,drinks_wine
+423650,KGT vein Masca Del T. SUSUMANIELLO 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423651,Koh.jook Classic 3in1 NESCAFE karp 28x16.5g,Nescafé,28x16.5 g,,dry_preserves,dry_other,drinks,drinks_tea_coffee
+423652,KGT vein MASI Masianco 750ml,Masi,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423653,Kohvikapslid LAVAZZA Lungo Dolce 16x8g,Lavazza,16x8 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+423654,KGT vein PRINCIPI SANI Appassim. 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423655,Kohvikoor FARM MILK UHT 10% 200ml,Farm Milk,200 ml,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+423656,Kohupiimahõrgutis ALMA muraka 150g,Alma,150 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+423657,Kohvikoor FARM MILK UHT 10% 500ml,Farm Milk,500 ml,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+423658,Valge juust FITAKI Original 500g,Fitaki,500 g,,drinks,drinks_spirits,dairy_eggs_fats,dairy_cheese_slices
+423659,Kohvioad LAVAZZA Barista Perfetto 1kg,Lavazza,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+423660,Kohvioad Arabica MERRILD 1kg,Merrild,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+423661,Kohupiimakreem ALMA Creme Brulee 150g,Alma,150 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+423662,K/s karbonaad Gurmee ADAŽI kg-lett,Adaži,1 kg,,dry_preserves,dry_other,meat_fish,meat_pork
+423663,Kohvikapslid Ristretto L'OR 10x5.2g,L'Or,10x5.2 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+423664,Kohvioad Barista Crema JACOBS 1kg,Jacobs,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+423666,Kohvioad Classic Crema PAULIG 1kg,Paulig,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+423667,Kohvioad Mountain Grown LAVAZZA 1kg,Lavazza,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+423668,Kohvioad Espresso JACOBS 1kg,Jacobs,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+423669,Kohvioad MERRILD Crema 1kg,Merrild,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+423670,Kohupiimakreem ALMA brownie 380g,Alma,380 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+423671,Kondenspiim STEINHAUER keedetud 397g,Steinhauer,397 g,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+423672,Kohvikapslid Profondo L'OR 10x5.2g,L'Or,10x5.2 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+423673,Kohupiimakreem ALMA kakao 380g,Alma,380 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+423674,Vanillijäätis Baltija 95g,,95 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+423675,Kohvioad Caffe Crema MÖVENPICK 1kg,Mövenpick,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+423676,Vanillijäätis karamelliga WD 310g,Well Done,310 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+423677,Pasteet keed.kana maksast PORMET 300g,Pormet,300 g,,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+423678,Kohvipadjad Strong SENSEO 36x6.94g,Senseo,36x6.94 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+423679,Kohvioad OA No.2 1kg,,1 kg,,dry_preserves,dry_other,drinks,drinks_coffee_beans_capsules
+423680,Kohviuba Tambet TASUJA 1kg,Tasuja,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules

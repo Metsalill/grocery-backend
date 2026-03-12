@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+423887,Br.fil. nagitsad laste WELL DONE 300g,Well Done,300 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+423888,Juustu amps MO SAAREMAA päik.tomat. 200g,Saaremaa,200 g,,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+423889,Juust Tilsit FARM MILK viilutatud 150g,Farm Milk,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423890,Juust Tilsit FARM MILK viilutatud 500g,Farm Milk,500 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423891,Juustu snäkk FARMI õrnsuitsuvürts. 200g,Farmi,200 g,,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+423892,Kõva juust DŽIUGAS Delicate 24 kuud 180g,Džiugas,180 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423893,Külmsuit.lõhefilee viilud WELL DONE 100g,Well Done,100 g,,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+423894,Külmsuitsu Atlandi lõhefilee OCEAN 100g,Ocean,100 g,,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+423895,Juust Tilsit WELL DONE viilutatud 400g,Well Done,400 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423896,Külmsuitsulõhefilee WELL DONE 170g,Well Done,170 g,,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+423897,Külmsuitsu forellifilee viilud 100g,,100 g,,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+423898,Toorsuitsupeekon WELL DONE 100g viil,Well Done,100 g,,meat_fish,meat_pork,meat_fish,meat_pork
+423899,Praetud pikkpoiss PORMET 500g,Pormet,500 g,,dry_preserves,dry_other,dry_preserves,dry_canned_meat_fish
+423900,Panna Cotta Apelsini NOPRI 150g,Nopri,150 g,,produce,produce_tropical,dairy_eggs_fats,dairy_desserts
+423902,Hele õlu ALEXANDER 5.2% 6x500ml,,6x500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423903,GT vein TELIANI Khvanchkara 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423904,Br.kintsul.nahata WELL DONE ABta 500g,Well Done,500 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+423905,Hele õlu A.LE COQ Imperial Gold 4.8% 400ml,A.Le Coq,400 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423906,Br.koib seljaosaga A-klass WELL DONE kg,Well Done,1 kg,,dry_preserves,dry_other,meat_fish,meat_poultry
+423907,Panna Cotta NOPRI Fitlap kohvi 150g,Nopri,150 g,,drinks,drinks_other,dairy_eggs_fats,dairy_desserts
+423908,Hele õlu ALEXANDER 5.2% 568ml prk,,568 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423909,Br.kintsuliha šašlõkk Armeenia grill kg,,1 kg,,meat_fish,meat_pork,meat_fish,meat_poultry
+423910,Pr. kilud tomatikastmes RANNAKÜLA 240g,Rannaküla,240 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+423911,Kreemjuust TUREK kitsepiimast 150g,Turek,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423912,Piimabatoonike OREO 27g,Oreo,27 g,,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+423913,Hele õlu ALEXANDER 5.2% 568ml 6tk,,6x568 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423915,Piimajook Müllermilch kookos-pistaatsia 400g,Müllermilch,400 g,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+423916,Juustuvorst RAKVERE 190g viil,Rakvere,190 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+423917,Kreeka jogurt FARMI 10% 370g,Farmi,370 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423918,Kreeka jogurt FARM MILK natur.10% 400g,Farm Milk,400 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423919,Kreemjuust TARTARE lõhega 140g,Tartare,140 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423920,Kaaviarimääre kalmaariga WELL DONE 160g,Well Done,160 g,,dry_preserves,dry_other,meat_fish,fish_processed
+423921,Kabanoss Juustu WELL DONE 120g,Well Done,120 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+423923,KPN vein EPICURO Prim.di Manduria 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423924,Magustatud kondenspiim šokol. JAANI 250g,Jaani,250 g,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+423925,Mahetäispiim MO SAAREMAA Öko 3.8-4.4% 1L,Saaremaa,1 l,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+423926,Kabanoss Original WELL DONE 120g,Well Done,120 g,,drinks,drinks_spirits,meat_fish,meat_gourmet
+423927,Kaerajook YOOK Barista extra creamy 1l,Yook,1 l,,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+423928,Kuums.skumbriafilee pipraga VICI 175g,Vici,175 g,,dry_preserves,dry_other,meat_fish,fish_salted_smoked
+423929,Kuumsuit.makrell vaak. OCEAN kg,Ocean,1 kg,,dry_preserves,dry_other,meat_fish,fish_salted_smoked
+423930,Kuumsuitsu servelaat PORMET 280g,Pormet,280 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+423931,Broilerikints A-klass WELL DONE 500g,Well Done,500 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+423932,Caesari kauss pasta broil. CH.LUNDEN 270g,Chef Lunden,270 g,,dry_preserves,dry_pasta_rice,frozen_food,frozen_ready_meals
+423933,Mahejogurt aedmaasika WELL DONE 2.5% 140g,Well Done,140 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423934,Mahejogurt kirsiga WELL DONE 2.5% 140g,Well Done,140 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423935,Mahejogurt mustikaga WELL DONE 2.5% 140g,Well Done,140 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423936,Kuumsuitsu peekon PORMET kg,Pormet,1 kg,,meat_fish,meat_pork,meat_fish,meat_pork
+423937,Kuumsuitsu kuldne meriahven kg-lett,,1 kg,,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+423938,Caesari tasku kanaga 150g,,150 g,,meat_fish,meat_poultry,bakery,bakery_other
+423939,Eestimaine broiler TALLEGG kg,Tallegg,1 kg,,meat_fish,meat_poultry,meat_fish,meat_poultry

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+421912,Praetud räimed tomatikastmes 270g,,270 g,,meat_fish,fish_fresh,dry_preserves,dry_canned_meat_fish
+421913,Hallitusjuust CARRE d'AURILLAC 51% kg,,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421914,Tume õlu EICHBAUM EXTRA STOUT 7.5% 500ml,Eichbaum,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+421915,Juust Hiirte ESTOVER viilutatud 200g,Estover,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421916,KPN vein CONDE VILLAR Branco 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421917,Seaguljašš kg,,1 kg,,dry_preserves,dry_other,meat_fish,meat_pork
+421918,Juustukukkel EESTI PAGAR 200g,Eesti Pagar,200 g,,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_buns_croissants
+421919,Kakao-hapukoorekook 350g,,350 g,,dairy_eggs_fats,dairy_cream_sourcream,bakery,bakery_cakes_pastries
+421920,Hapukoor FARM MILK 20% 400g,Farm Milk,400 g,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+421921,Pr.sardiinid sinepikastm.BRIIS EO 135g,Briis,135 g,,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_meat_fish
+421922,Hot Dog saiake LEIBUR 300g,Leibur,300 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+421923,KPN vein GRAN CASTILLO Reserve Cab.750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421924,Pr.kilud koduses marinaadis KALURI 500g,Kaluri,500 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+421925,Pr.sardiinid pikantsed BRIIS EO 140g,Briis,140 g,,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_meat_fish
+421926,Hapendatud pett FARMI 0.2% 1kg,Farmi,1 kg,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cream_sourcream
+421927,Mineraalvesi VÄRSKA originaal 1l,Värska,1 l,,drinks,drinks_spirits,drinks,drinks_water
+421928,Hapukoor FARMI 20% 500g,Farmi,500 g,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+421930,Isa peenleib LEIBUR 355g,Leibur,355 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+421931,Hapukoor FARMI 20% 200g kile,Farmi,200 g,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+421932,Mineraalvesi VÄRSKA originaal 1l 6tk,Värska,6x1 l,,drinks,drinks_spirits,drinks,drinks_water
+421933,Mineraalvesi VÄRSKA sidrun. 500ml g-tud,Värska,500 ml,,drinks,drinks_water,drinks,drinks_water
+421934,Kodukandi rukkileib viil. EESTI PAGAR 390g,Eesti Pagar,390 g,,dry_preserves,dry_other,bakery,bakery_bread_loaves
+421935,KPN vein ROBERT CHARTON Bord.Blanc 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421936,Mineraalvesi VÄRSKA sidrun. 1.5l,Värska,1.5 l,,drinks,drinks_water,drinks,drinks_water
+421937,Maasika-toorjuustusaiake EESTI PAGAR 75g,Eesti Pagar,75 g,,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_buns_croissants
+421938,Kreemjas maksapasteet RAKVERE 300g,Rakvere,300 g,,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+421939,VÄRSKA Naturaal Mullita 1.5L,Värska,1.5 l,,dry_preserves,dry_other,drinks,drinks_water
+421940,Pr.sardiinid tomatikastm.BRIIS EO 140g,Briis,140 g,,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_meat_fish
+421941,Vein GRAND SUD Sauvignon 250ml,,250 ml,,drinks,drinks_wine,drinks,drinks_wine
+421942,P/s servelaat juustuga RGK kg-lett,RGK,1 kg,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+421943,Keefiriröst kaltsiumiga FAZER 450g,Fazer,450 g,,dairy_eggs_fats,dairy_yogurt_kefir,bakery,bakery_bread_loaves
+421944,Keefirisai kaltsiumiga FAZER 350g,Fazer,350 g,,dairy_eggs_fats,dairy_yogurt_kefir,bakery,bakery_bread_loaves
+421945,Jog.jook ALMA Vita+ puuvil.lakt.v. 4x100g,Alma,4x100 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_yogurt_kefir
+421946,Vein I HEART Merlot kuiv punane 187ml,,187 ml,,drinks,drinks_wine,drinks,drinks_wine
+421947,P/s vorst Juustu RANNAROOTSI kg-lett,Rannarootsi,1 kg,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+421948,Pühajärve sink M&M 300g,M&M,300 g,,meat_fish,meat_hams,meat_fish,meat_hams
+421949,Ribi ilma kondita M&M kg,M&M,1 kg,,meat_fish,meat_pork,meat_fish,meat_pork
+421950,Koduviiner M&M 500g,M&M,500 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+421951,Paneer.helb.Panko JAPANESE CHOICE 150g,,150 g,,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+421952,Jog.jook ALMA Vita+ metsmaasika 4x100g,Alma,4x100 g,,produce,produce_berries,dairy_eggs_fats,dairy_yogurt_kefir
+421954,Kreemjuus vahestat. Castello pipraga 125g,Castello,125 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cheese_slices
+421955,Kartuli-röstsibula pehmik EP 240g,Eesti Pagar,240 g,,produce,produce_root_veg,bakery,bakery_buns_croissants
+421956,Pärmivaba ciabatta 270g,,270 g,,dry_preserves,dry_flour_sugar_baking,bakery,bakery_bread_loaves
+421957,Rukkiröst Tosta EESTI PAGAR 390g,Eesti Pagar,390 g,,dry_preserves,dry_other,bakery,bakery_bread_loaves
+421958,Külm.ciabatta tume EESTI PAGAR 300g,Eesti Pagar,300 g,,dry_preserves,dry_other,bakery,bakery_bread_loaves
+421959,Külm.kartulisekt.krõbe.FARM FRITES 600g,Farm Frites,600 g,,produce,produce_root_veg,frozen_food,frozen_potato_products
+421960,Juust Mozzarella Light WELL DONE 125/220g,Well Done,220 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421961,Juust oliiv tom.WELL DONE PREMIUM48% 120g,Well Done,120 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421962,KPN vein BARON ROSEN Riesling 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421963,Koorene jogurt FARMI mustikatega 400g,Farmi,400 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir

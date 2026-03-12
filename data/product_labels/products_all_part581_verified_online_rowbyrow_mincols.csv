@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+424679,Keedusalaami Piiskopi RR kg-lett,Rannarootsi,1 kg,,dry_preserves,dry_other,meat_fish,meat_gourmet
+424680,Spagetid bolognesekastmega 300g,,300 g,,dry_preserves,dry_pasta_rice,frozen_food,frozen_ready_meals
+424681,Must meremari OCEAN 90g,Ocean,90 g,,dry_preserves,dry_other,meat_fish,fish_processed
+424682,Õhuline hommikusink RAKVERE 200g viil,Rakvere,200 g,,meat_fish,meat_hams,meat_fish,meat_hams
+424683,Õhuline Viru sink RAKVERE 150g viil,Rakvere,150 g,,meat_fish,meat_hams,meat_fish,meat_hams
+424684,Pasta Bolognese PRESTO 300g,Presto,300 g,,dry_preserves,dry_pasta_rice,frozen_food,frozen_ready_meals
+424685,Krevetimääre küüslauguga VELADIS 150g,Veladis,150 g,,dry_preserves,dry_other,meat_fish,fish_processed
+424686,KPN vein ARC DU RHONE Villages 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424687,Sea- ja veisehakkliha M&M 500g,M&M,500 g,,meat_fish,meat_minced,meat_fish,meat_minced
+424688,KPN poolvahuvein MASCHIO Prosecco 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424689,KPN Vahuvein MIONETTO Prosecco kuiv 200ml,Mionetto,200 ml,,drinks,drinks_wine,drinks,drinks_wine
+424690,Suits.keeduvorst ISUKAS RR 300g,Rannarootsi,300 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424691,Kuivatatud stauriid MSDM 36g,,36 g,,dry_preserves,dry_other,meat_fish,fish_processed
+424692,Suits.emmentali juust.snäkivorst NÕO 70g,Nõo,70 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+424693,KPN vahuvein ZONIN Prosecco Cuvee 1.5L,Zonin,1.5 l,,drinks,drinks_wine,drinks,drinks_wine
+424694,Krevetimääre VELADIS 150g,Veladis,150 g,,dry_preserves,dry_other,meat_fish,fish_processed
+424695,Suitsutatud seakeel NÕO 200g,Nõo,200 g,,meat_fish,fish_salted_smoked,meat_fish,meat_pork
+424696,Kuivatatud meritint MSDM 36g,,36 g,,dry_preserves,dry_other,meat_fish,fish_processed
+424697,Pereviiner RAKVERE 500g,Rakvere,500 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+424698,Suitsukana kintsuliha TALLEGG kg,Tallegg,1 kg,,meat_fish,meat_poultry,meat_fish,meat_poultry
+424699,Poolsuitsuvorst Talgu OSKAR 400g,Oskar,400 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424700,Põsesink lepasuitsu RAKVERE kg,Rakvere,1 kg,,meat_fish,meat_hams,meat_fish,meat_hams
+424701,Praetud kilu pikantne BRIIS 270g,Briis,270 g,,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_meat_fish
+424702,P/s vorst Lihakas Krakov RAKVERE 300g,Rakvere,300 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424703,Šašlõkk klassikalis.marinaadis M&M 600g,M&M,600 g,,sauces_oils,sauces_marinades,meat_fish,meat_pork
+424704,Seakaelakarbonaadi lõigud kg,,1 kg,,dry_preserves,dry_other,meat_fish,meat_pork
+424705,Sünnipäevasalat 200g,,200 g,,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+424706,Külms. Skilandine vorst PORMET 100g viil,Pormet,100 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424707,Suitsut. broileri pooltiib TALLEGG 600g,Tallegg,600 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+424708,Praetud meritint 200g,,200 g,,dry_preserves,dry_other,dry_preserves,dry_canned_meat_fish
+424709,Punane meremari OCEAN 90g,Ocean,90 g,,dry_preserves,dry_other,meat_fish,fish_processed
+424710,Punane pesto WELL DONE 190g,Well Done,190 g,,sauces_oils,sauces_pasta_cooking,sauces_oils,sauces_pasta_cooking
+424711,Rebitud kanatu THORMI 200g,Thormi,200 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+424712,Reservväelaste konserv LINNAMÄE 240g,Linnamäe,240 g,,dry_preserves,dry_other,dry_preserves,dry_canned_meat_fish
+424713,Ribiliha šampinjoni-seakeel.NÕO kg-lett,Nõo,1 kg,,meat_fish,meat_pork,meat_fish,meat_pork
+424714,Ribitükid punases marinaadis RAKVERE kg,Rakvere,1 kg,,sauces_oils,sauces_marinades,meat_fish,meat_pork
+424715,Salaami Chorizo MATSIMOKA 150g,Matsimoka,150 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+424716,Salaami trühvliga MATSIMOKA 110g viil,Matsimoka,110 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+424717,Salaami trühvliga MATSIMOKA 150g,Matsimoka,150 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+424718,Sardiinid tomatikastm.KAPTEN GRANT 240g,Kapten Grant,240 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+424719,Seakaelakarbonaadi lõig.WELL DONE 360g,Well Done,360 g,,dry_preserves,dry_other,meat_fish,meat_pork
+424720,Toorvorstid Hispaaniapärane RAKVERE 400g,Rakvere,400 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424721,Lihapall.sinepikastme ja makaron. 300g,,300 g,,dry_preserves,dry_pasta_rice,frozen_food,frozen_ready_meals
+424722,Triibuliha soola ja pipraga EHE 250g,Ehe,250 g,,world_spices,spices_basic_salt_pepper,meat_fish,meat_pork
+424723,Lõhefilee inglise sinepikast.KAIJA 170g,Kaija,170 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+424724,KPN vein CHT PIED D ARGENT Bord. 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424725,Lõhe omas mahlas MARINE ABC EO 240g,Marine ABC,240 g,,drinks,drinks_juices,dry_preserves,dry_canned_meat_fish
+424726,KPN vein Collezione Pinot Grigio 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424727,Lillkapsapüreesupp suitsuj-ga MAMMA 300g,Mamma,300 g,,meat_fish,fish_salted_smoked,dry_preserves,dry_soups_noodles
+424728,Lõhefilee salat Italiano KAIJA EO 160g,Kaija,160 g,,meat_fish,fish_fresh,meat_fish,fish_processed

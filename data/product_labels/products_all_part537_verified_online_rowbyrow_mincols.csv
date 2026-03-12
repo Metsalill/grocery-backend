@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+422200,Jõhvikamahlajook AURA Fresh 2L,Aura,2 l,,drinks,drinks_juices,drinks,drinks_juices
+422201,KGT vein VILLA PUCCINI Toscana 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422202,Jäätis nätsukommi. MIO&RIO 310g,Mio&Rio,310 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422203,Jäätis mustika-jogurti BALBIINO 54g,Balbiino,54 g,,dairy_eggs_fats,dairy_yogurt_kefir,frozen_food,frozen_desserts_icecream
+422204,Surimipulgad sinepikastmega VICI 200g,Vici,200 g,,sauces_oils,sauces_other,meat_fish,fish_processed
+422205,Surimipulgad sriracha kastmega VICI 200g,Vici,200 g,,sauces_oils,sauces_other,meat_fish,fish_processed
+422206,Sulat.juust HIIRTE JUUST suit.juust 185g,Hiirte Juust,185 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422207,Sulat.määrdejuust FARM MILK 150g,Farm Milk,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422208,Rannakarbid äädikamar.VILSUND BLUE 340g,Vilsund Blue,340 g,,dry_preserves,dry_other,dry_preserves,dry_canned_meat_fish
+422209,Juust Hiirte ESTOVER viilutatud 500g,Estover,500 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422210,Piparmünditee TETLEY 20x1.5g,Tetley,20x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422211,Rohel.tee The Island of Tea BASILUR 100g,Basilur,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422213,Muu piir.jook RIGA BLACK BALSAM 30% 500ml,Riga Black Balsam,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+422214,Kodujuust kirsi WELL DONE 150g,Well Done,150 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422215,Röstsai Parim Päts 500g,,500 g,,bakery,bakery_buns_croissants,bakery,bakery_bread_loaves
+422216,Jäätis popkorni plombiir šok. tük.WD 90g,Well Done,90 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422217,Br.lihašašlõkk tomatimar.TALLEGG 700g,Tallegg,700 g,,meat_fish,meat_pork,meat_fish,meat_poultry
+422218,Kirsstomat värvil. mix WELL DONE 250g,Well Done,250 g,,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+422219,Br. šašlõkk punases marinaadis kg,,1 kg,,sauces_oils,sauces_marinades,meat_fish,meat_poultry
+422220,Suupistevalik röstsaial 400g,,400 g,,bakery,bakery_buns_croissants,bakery,bakery_other
+422221,Kirsijook AURA 1L,Aura,1 l,,dry_preserves,dry_other,drinks,drinks_juices
+422222,Suupistevorstid Mini Fuet ARGAL 50g,Argal,50 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+422223,Tee apels.-mandar.maits.LOYD pür.20x1.7g,Loyd,20x1.7 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422224,Broilerifilee hakklihamass KEKAVA 450g,Kekava,450 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+422225,Jäätis põldmarja ERITI RAMMUS 110g,Premia,110 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422227,Jäätis popkorni. MIO&RIO 310g,Mio&Rio,310 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422228,Röstitud kohv Chicory KLINGAI 250g,Klingai,250 g,,drinks,drinks_other,drinks,drinks_tea_coffee
+422229,Kohuke vanilli WELL DONE 45g,Well Done,45 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+422230,Rannakarbid soolvees VICI 200g,Vici,200 g,,world_spices,spices_basic_salt_pepper,dry_preserves,dry_canned_meat_fish
+422231,Vein CASTILLO DE MUREVA valge 1L,,1 l,,drinks,drinks_wine,drinks,drinks_wine
+422232,Rannakarbid veinikast. VILSUND BLUE 340g,Vilsund Blue,340 g,,drinks,drinks_wine,dry_preserves,dry_canned_meat_fish
+422233,Kohviliköör 18% 500ml PET,,500 ml,,drinks,drinks_other,drinks,drinks_spirits
+422234,Rumm BACARDI Superior 37.5% 500ml,Bacardi,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422235,Kirsstomat Zebrino WELL DONE 250g,Well Done,250 g,,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+422236,Rum ANGOSTURA 7YO 40% 700ml,Angostura,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422237,Vanillijäätis šok&küpsisetaign.WD 310g,Well Done,310 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422238,Must põrandaleib FAZER 390g,Fazer,390 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+422239,Broileri pooltiiv.vürts.mar.KEKAVA 500g,Kekava,500 g,,world_spices,spices_herbs_spice_mix,meat_fish,meat_poultry
+422240,Doktori keeduvorst juust. WELL DONE 300g,Well Done,300 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+422241,Jäätis FERRERO ROCHER sarapuupähk. 50g,Ferrero Rocher,50 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422242,Doktori keeduvorst PORMET 300g,Pormet,300 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+422243,Lauavesi ASET gaseeritud 1.5L,Aset,1.5 l,,drinks,drinks_water,drinks,drinks_water
+422244,Kohup.hõrgutis ALMA mango-passion 150g,Alma,150 g,,produce,produce_tropical,dairy_eggs_fats,dairy_cottage_quark
+422245,Muu piir.jook RIGA BLACK BALSAM 45% 200ml,Riga Black Balsam,200 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+422246,Taimne määre avokaado mait.NATURALE 200g,Naturale,200 g,,dry_preserves,dry_other,sauces_oils,sauces_other
+422247,Kohuke vanilli WELL DONE Protein 40g,Well Done,40 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+422248,Must leib FAZER 600g,Fazer,600 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+422249,Muu piir.jook RIGA BLACK BALSAM 45% 500ml,Riga Black Balsam,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+422250,Jäätis Hazelnut multipakk MAGNUM 6x46g,Magnum,6x46 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422251,Rulaad NÕO 135g viil,Nõo,135 g,,meat_fish,meat_hams,meat_fish,meat_hams

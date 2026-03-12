@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+424316,Sulatatud kalmaarituubid 80-120g kg,,1 kg,,dry_preserves,dry_other,meat_fish,fish_fresh
+424317,Tofu maitsestamata BON VEGAN 250g,Bon Vegan,250 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_plant_drinks
+424318,Must tee English Strong CHELTON 25x1.5g,Chelton,25x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424319,Must tee Gold LIPTON 25x1.5g,Lipton,25x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424320,Must tee ingver HYLEYS 100g,Hyleys,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424321,Must tee Pu-erh BASILUR 100g,Basilur,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424322,Must tseil.tee DILMAH Premium 50x2g,Dilmah,50x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424323,Must tee Scot. Breakf. CHELTON 25x1.5g,Chelton,25x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424324,Muu piir.jook TRES SOMBREROS 38% 700ml,,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+424325,Muu al.jook Must tee&apels. 6.5% 250ml,,250 ml,,drinks,drinks_tea_coffee,drinks,drinks_beer_cider
+424326,Muu al.jook Rabarb.&hibisk 6.5% 250ml,,250 ml,,dry_preserves,dry_other,drinks,drinks_beer_cider
+424327,Muu al.jook Vaarik.&sencha 6.5% 250ml,,250 ml,,produce,produce_berries,drinks,drinks_beer_cider
+424328,Kohupiim ALMA vanilli 200g,Alma,200 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+424329,Muu alk.jook HOGGYS Gin 5% 500ml prk,Hoggys,500 ml,,drinks,drinks_spirits,drinks,drinks_beer_cider
+424330,Muu p.jook RIGA BLACK BALSAM Cur. 500ml 30%,Riga Black Balsam,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+424331,Must Tseil.tee DILMAH Premium 25x2g,Dilmah,25x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424332,Must.-jogurtismuuti kinoa SALVEST 170g,Salvest,170 g,,dairy_eggs_fats,dairy_yogurt_kefir,drinks,drinks_juices
+424333,Kohupiimapasta TERE kakao 300g,Tere,300 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+424334,Kanasink Fitlap NÕO 105g viil,Nõo,105 g,,meat_fish,meat_poultry,meat_fish,meat_hams
+424335,Toorjuust FARMI originaal 29.8% 150g,Farmi,150 g,,drinks,drinks_spirits,dairy_eggs_fats,dairy_cheese_slices
+424336,Muu alk.j.SINEBRYCHOFF Grape 5.5% 500ml,,500 ml,,dry_preserves,dry_other,drinks,drinks_beer_cider
+424337,Muu piir.jook GARLING Cherry 30% 500ml,,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+424338,Muu piir.jook IMPERIAL XII VS 30% 200ml,,200 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+424339,Kohupiim FARMI Lahja 0.5% 200g,Farmi,200 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+424340,Muu piir.jook PIPRA NAPS Meega 35% 200ml,,200 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+424341,Muu piir.jook ARAMIS VSOP 30% 200ml,,200 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+424342,Täissuitsuvorst Emmentali NÕO 105g viil,Nõo,105 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+424343,Muu piir.j. PIPRA NAPS Ingveriga 35% 350ml,,350 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+424344,Muu piir.j.ROOSTER ROJO Anejo 38% 700ml,,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+424345,Muu piir.j.ROOSTER ROJO Blanco 38% 700ml,,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+424346,Kohupiim FARM MILK 8% 250g,Farm Milk,250 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+424347,Naturaalne mineraalvesi AKVILE Kids 500ml,Akvile,500 ml,,drinks,drinks_water,drinks,drinks_water
+424348,Karamellikreem kirsimoosiga 130g,,130 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_desserts
+424349,Täissuitsuvorst Kalevipoja NÕO 250g,Nõo,250 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424350,Nisuõlu AMBER CITY 4.5% 500ml prk,,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424351,Toorjuusturull lõhega WELL DONE 100g,Well Done,100 g,,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_cakes_pastries
+424352,Nisuõlu PAULANER Weisbier 5.5% 500ml,Paulaner,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424353,Muu piir.jook PIPRA KIBE NAPS 35% 200ml,,200 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+424354,Toorjuust WELL DONE ürtidega 200g,Well Done,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424355,Nisuõlu AMBER CITY 5% 500ml,,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424356,Nisuõlu APOSTEL Dunkel 5.3% 500ml,Apostel,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424357,Nisuõlu APOSTEL Weissbier 5.3% 500ml,Apostel,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424358,Õuna-sidruni-piparmün.mahl KADARBIKU 250ml,Kadarbiku,250 ml,,drinks,drinks_juices,drinks,drinks_juices
+424359,Nisuõlu Kronenbourg Blanc Fruits 4.5% 500ml,Kronenbourg,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424360,Õlu BOCK Double 6% 2L,,2 l,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424361,Õuna-Kirsijook LIMPA 250ml,Limpa,250 ml,,produce,produce_apples_pears,drinks,drinks_juices
+424362,Perry SOMERSBY Pirni siider 4.5% 500ml prk,Somersby,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424363,Õunamahl MIO&RIO 1l,Mio&Rio,1 l,,drinks,drinks_juices,drinks,drinks_juices
+424364,Kohupiim laktoosi vaba WELL DONE 9% 180g,Well Done,180 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+424365,Õunanektar MIO&RIO 2l,Mio&Rio,2 l,,drinks,drinks_juices,drinks,drinks_juices

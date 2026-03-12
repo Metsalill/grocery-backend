@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+420532,Jogurt FANTASIA šokolaaditähekest. 102g,Fantasia,102 g,,drinks,drinks_soft_soda,dairy_eggs_fats,dairy_yogurt_kefir
+420533,Pagari röst täistera 430g,,430 g,,dry_preserves,dry_other,bakery,bakery_bread_loaves
+420534,Pähklitort 660g,,660 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+420535,Nisuõlu SCHÖFFERHOFER 5% 500ml,Schöfferhofer,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+420536,Jogurt GEFILUS mango-banaani-chia 380g,Gefilus,380 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+420538,Juustu ürdisnäkk FARMI 200g,Farmi,200 g,,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+420540,Juust Mozzarella WELL DONE 45% riiv.150g,Well Done,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+420541,Väike kotlet KIKAS 290g,Kikas,290 g,,dry_preserves,dry_other,meat_fish,meat_other
+420542,Näkileivad Original WASA 275g,Wasa,275 g,,drinks,drinks_spirits,bakery,bakery_bread_loaves
+420543,Keedusalaami Piiskopi RANN. 330g vac.,Rannarootsi,330 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+420544,Keedusalaami Vasalli NÕO 250g,Nõo,250 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+420545,Jäätis karamelli BALTIJA koon 83g,Baltija,83 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420546,Burger kanakotl.mar.kurgiga juustuga 220g,,220 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_poultry
+420547,Vähesoola forellifilee viilud 100g,,100 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked
+420548,Näkileivad sees.meresool.gl.v.WASA 240g,Wasa,240 g,,world_spices,spices_basic_salt_pepper,bakery,bakery_bread_loaves
+420549,Väike viiner M&M 260g,M&M,260 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+420550,Muu piir.jook STROH 60% 500ml,Stroh,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420551,Kohupiimavorm FARMI rosinatega 250g,Farmi,250 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+420552,Kummelitee TEEKANNE 20x1.5g,Teekanne,20x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420553,Sipelgapesa kook 2x70g,,2x70 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+420554,KGT vein PETER WEINBACH Riesl.Rh.75cl,Peter Weinbach,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420555,Kohupiim WELL DONE maasika 100g,Well Done,100 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+420556,Kohukese jäätis TERE jõhvika 55g,Tere,55 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420557,Kali GUBERNIJA White Bread 500ml,Gubernija,500 ml,,dry_preserves,dry_other,drinks,drinks_soft_soda
+420558,Kohupiimavorm FARMI traditsioonil. 250g,Farmi,250 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+420559,Kali TANHEISER Originaal 1.5L,Tanheiser,1.5 l,,drinks,drinks_spirits,drinks,drinks_soft_soda
+420560,Värskekapsaborš kanalihaga PRESTO 300g,Presto,300 g,,meat_fish,meat_poultry,dry_preserves,dry_soups_noodles
+420561,Piruk.filotaig. spinat/juust 80g,,80 g,,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_other
+420562,Kilufilee BRIIS Skandinaavia moodi 160g,Briis,160 g,,dry_preserves,dry_pasta_rice,meat_fish,fish_processed
+420563,KGT vein J.P.CHENET Moel.Rouge 750ml,J.P. Chenet,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420564,Koorejäätis CLASSIC vaarika-mustika 69g,Classic,69 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+420565,KPN vein RAOUL CLERGET Chardonnay 750ml,Raoul Clerget,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420566,Värskekapsasalat porgandiga 200g,,200 g,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+420567,Keta kalamari LEMBERG 150g,Lemberg,150 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+420568,Pohla-jogurtitort 540g,,540 g,,dairy_eggs_fats,dairy_yogurt_kefir,bakery,bakery_cakes_pastries
+420569,Paprika kollane 1.kl. kg,,1 kg,,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+420570,Vikerforellifilee õrnas soolas 200g,,200 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked
+420571,Vin. mini salaamivorst WELL DONE 80g,Well Done,80 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+420572,Vinn.sealihasn.Pork Jerky TARCZYNSKI 40g,Tarczynski,40 g,,meat_fish,meat_pork,meat_fish,meat_gourmet
+420573,Kohvipadjad Classic SENSEO 36x6.94g,Senseo,36 tk,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+420574,Lahustuv kohv TCHIBO Gold 100g,Tchibo,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420575,Vasikamaksapasteet CHEF LUNDEN 200g,Chef Lunden,200 g,,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+420576,Porgandipirukas 60g,,60 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+420578,Rebitavad juustupulgad HIIRTE JUUST 120g,Hiirte Juust,120 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+420579,Croissant võiga 24% 43g,,43 g,,dairy_eggs_fats,dairy_butter_margarine,bakery,bakery_buns_croissants
+420580,Kirsi-hapukoorekook 260g,,260 g,,dairy_eggs_fats,dairy_cream_sourcream,bakery,bakery_cakes_pastries
+420581,Külm.pelmeen.Bravissimo Itaal.UVIC 400g,Uvic,400 g,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+420584,Profitr.kohupiimakr.EESTI KONDIITER 250g,Eesti Kondiiter,250 g,,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+420585,Kohuke kondenspiimaga WELL DONE 45g,Well Done,45 g,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_cottage_quark
+420586,Kohvioad LAVAZZA Qualita Oro 500g,Lavazza,500 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules

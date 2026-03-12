@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+424520,Whisky LOCH LOMOND S.Malt 40% 700ml karp,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424522,Br.rin.filee mustikamar.Fit.TALLEGG 500g,Tallegg,500 g,,produce,produce_berries,meat_fish,meat_poultry
+424523,Koorejäätis ERITI RAMMUS maasika 480g,,480 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+424524,Külms.lõhe tükid OCEAN 100g,Ocean,100 g,,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+424525,Siider LA BRIQUE Brut DeNormandie 5% 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_beer_cider
+424526,Whisky CHIVAS REGAL Extra 40% 700ml karp,Chivas Regal,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424527,Whisky CASTLE HILL Blen.Scotch 40% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424528,Kuiv.kanafilee soja CHICK&GO 30g viil,Chick&Go,30 g,,sauces_oils,sauces_soy_worcester,meat_fish,meat_gourmet
+424529,Külmsuitsurv vorst WELL DONE 350g,Well Done,350 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424530,Külmutatud jõhvikad WELL DONE 400g,Well Done,400 g,,produce,produce_berries,frozen_food,frozen_berries_fruit
+424531,Whisky TULLAMORE 40% 1L,Tullamore,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+424532,Kuiv.kanafilee paprika CHICK&GO 30g viil,Chick&Go,30 g,,meat_fish,meat_poultry,meat_fish,meat_gourmet
+424533,Br.rinnafilee sisetk A-kl WELL DONE 400g,Well Done,400 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+424534,Külmutatud kalapulgad VICI 250g,Vici,250 g,,frozen_food,frozen_fish,frozen_food,frozen_fish
+424535,Whisky THE GLENLIVET Reserve SM 40% 700ml,The Glenlivet,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424536,Kodujuust OTTO klassikaline 440g,Otto,440 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+424538,Leibjuust Hollandi MO SAAREMAA viil.150g,Saaremaa,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424539,Br.rinnafileeribasid õrnsoolat.TALLEGG 400g,Tallegg,400 g,,world_spices,spices_basic_salt_pepper,meat_fish,meat_poultry
+424540,Kodujuust OTTO klassikaline 330g,Otto,330 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+424541,Whisky TULLAMORE 40% 700ml,Tullamore,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424542,Br.rinnafilee WELL DONE ABta 500g,Well Done,500 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+424543,Kodujuust TERE klassikaline 380g,Tere,380 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+424544,Kuiv.kanafilee tšilli CHICK&GO 30g viil,Chick&Go,30 g,,meat_fish,meat_poultry,meat_fish,meat_gourmet
+424545,Kohupiimakreem ALMA maasika-vahukom. 150g,Alma,150 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+424547,Koorejäätis ONU ESKIMO kirsi vahvlik. 87g,,87 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+424548,Vegan nagitsad GARDEN GOURMET 200g,Garden Gourmet,200 g,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+424549,Kohuke TERE jõhvika šok.glasuur. 40g,Tere,40 g,,produce,produce_berries,dairy_eggs_fats,dairy_cottage_quark
+424550,Küps.kanapihvid burgeritele PORMET 250g,Pormet,250 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+424552,Siider SOMERSBY Õun 4.5% 330ml,Somersby,330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424553,Kohuke TERE vanilli multipakk 7x40g,Tere,7x40 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+424554,Kuumsuit.heeringa seljad OCEAN MAP 400g,Ocean,400 g,,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+424555,Kohuke TERE vanilli šok.glas. 40g,Tere,40 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+424556,Majonees FELIX Klassikaline 45% 830g,Felix,830 g,,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+424557,Majonees TARPLAN Provansaal 50% 430g tops,Tarplan,430 g,,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+424558,Majonees TARPLAN Provansaal 50% 450g,Tarplan,450 g,,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+424559,Paprika GRIKIOS juustuga 200/150g,Grikios,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424560,Suitsujuust MO SAAREMAA Kadaka 500g,Saaremaa,500 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424561,Br.tiiva keskosa WELL DONE ABta 500g,Well Done,500 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+424563,Tarretis JÄNKS vaarikamaitseline 150g,Jänks,150 g,,produce,produce_berries,sweets_snacks,sweets_other
+424564,Kuumsuits. kanavorst PORMET 100g viil,Pormet,100 g,,meat_fish,meat_poultry,meat_fish,meat_gourmet
+424565,Br.šašlõkk jogurtimarin.RANNAMÕISA 680g,Rannamõisa,680 g,,dairy_eggs_fats,dairy_yogurt_kefir,meat_fish,meat_poultry
+424566,Br.tiivad.vürtsikas teriyak.mar.WD 400g,Well Done,400 g,,world_spices,spices_herbs_spice_mix,meat_fish,meat_poultry
+424567,Kuumsuitsuvorstikesed PORMET 350g,Pormet,350 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424568,Toorjuust CASTELLO ananas. 125g,Castello,125 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424569,Mannapuder MAMMA 300g,Mamma,300 g,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+424570,Toorjuust TARTARE Aperifrais 100g,Tartare,100 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424571,Küüslaugukülg OSKAR 200g viil,Oskar,200 g,,dry_preserves,dry_other,meat_fish,meat_hams
+424572,Toorjuustukreem PHILADELPHIA Milka 175g,Philadelphia,175 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424573,Küüslauguleivad juustukastmega 370g,,370 g,,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_bakery
+424574,Kuumsuitsu br.tiib köömnetega PORMET 300g,Pormet,300 g,,meat_fish,fish_salted_smoked,meat_fish,meat_poultry

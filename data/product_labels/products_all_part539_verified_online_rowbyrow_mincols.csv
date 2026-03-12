@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+422309,Heeringaf. ürtidega õlita WELL DONE 190g,Well Done,190 g,,sauces_oils,oils_other,meat_fish,fish_processed
+422310,Kohvioad Selezione Crema SEGAFREDO 1kg,Segafredo,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+422311,Taimne dessert mustsõst.DEARY 150g,Deary,150 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+422312,Br.poolkoivad jogurti-tilli TALLEGG 800g,Tallegg,800 g,,dairy_eggs_fats,dairy_yogurt_kefir,meat_fish,meat_poultry
+422313,Jäätis van.plombiir kondenspiim.WD 65g,Well Done,65 g,,dairy_eggs_fats,dairy_milk,frozen_food,frozen_desserts_icecream
+422314,Jäätis virsiku-hibiskuse RAFFAELLO 49g,Raffaello,49 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422315,Kohupiimakreem ALMA metsmustika 150g,Alma,150 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422316,Kookos kg,,1 kg,,bakery,bakery_cakes_pastries,produce,produce_tropical
+422317,Vein SANDHILLS Sauvignon Blanc 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422318,Vein TRAPICHE Varietals Sauv.Blanc 750ml,Trapiche,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422319,Jäätis maasika-piimašok.BALBIINO 94g,Balbiino,94 g,,dairy_eggs_fats,dairy_milk,frozen_food,frozen_desserts_icecream
+422320,Jäätis van-kor. kondenspiim. PREMIA 75g,Premia,75 g,,dairy_eggs_fats,dairy_milk,frozen_food,frozen_desserts_icecream
+422321,Vein TRAPICHE Varietals Pinot Grig.750ml,Trapiche,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422322,Kohvivalgendaja COFFEETA 400g,Coffeeta,400 g,,drinks,drinks_other,dry_preserves,dry_other
+422323,Toorvorstikesed sealihast WD 400g,Well Done,400 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+422324,T/s põdrasnäkk KARNI 85g,Karni,85 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+422326,Kohvioad LAVAZZA Espresso 500g,Lavazza,500 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+422327,Sokol. sõõrik sulatatud 77g,,77 g,,bakery,bakery_sweet_buns_donuts,bakery,bakery_sweet_buns_donuts
+422328,Sõõrik maasikamaitse. sulatatud 70g,,70 g,,bakery,bakery_sweet_buns_donuts,bakery,bakery_sweet_buns_donuts
+422329,Jäätis martsipaniga ERITI RAMMUS 110g,,110 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422330,Br.poolkoivad klassik.marin.TALLEGG 800g,Tallegg,800 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+422331,Br.poolkoivad klassikalises mar.M&M 600g,M&M,600 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+422332,Kohupiim ALMA metsmaasika 200g,Alma,200 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422333,Br.poolkoivad WELL DONE ABta 500g,Well Done,500 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+422335,Vein VILLA MARIA SauvignonBlanc 750ml,Villa Maria,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422336,Kohvikapslid LAVAZZA Passionale 16x7.5g,Lavazza,16x7.5 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+422337,Jäätis Madagaskari vanil. LA MUU 250g,La Muu,250 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422338,KPN kv.vah. MONISTROL Origin. Brut 750ml,Monistrol,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422339,Klassika. pelmeenid MAKS&MOORITS 400g,Maks&Moorits,400 g,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+422340,Lahustuv kohvijook NESCAFÉ 3in1 CLASSIC 20x16.5g,Nescafé,20x16.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422342,Vermut BELFIORE bianco 1L,Belfiore,1 l,,dry_preserves,dry_other,drinks,drinks_spirits
+422344,Jäätis MAGNUM Chill vegan 70g,Magnum,70 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422347,Juustuviiner MAKS&MOORITS 300g,Maks&Moorits,300 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+422348,Koorejäätis ONU ESKIMO banaani-šok. 90g,Onu Eskimo,90 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+422349,Sõõrik mangotäidisega sulatatud 65g,,65 g,,bakery,bakery_sweet_buns_donuts,bakery,bakery_sweet_buns_donuts
+422350,KPN vein J. MOREAU & FILS Ch.Prem. 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422351,Sõõrik Ring of Sour maasikatäidis.sul 65g,,65 g,,bakery,bakery_sweet_buns_donuts,bakery,bakery_sweet_buns_donuts
+422353,KPN lik.vein GRAHAM'S FI.Ruby Port 750ml,Graham's,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422354,Koorejäätis ONU ESKIMO ploomi-chia 84g,Onu Eskimo,84 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+422356,Taimne vanillibatoonik.glasuur.DEARY 40g,Deary,40 g,,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+422357,Täispiimajogurt ALMA metsmaasika 350g,Alma,350 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+422358,Kohupiimap.TERE sidr.-laimi lakt.v. 300g,Tere,300 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422359,Kohupiim FARMI 5% 200g,Farmi,200 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422361,Sealiha omas mahlas RANNAROOTSI 240g,Rannarootsi,240 g,,drinks,drinks_juices,dry_preserves,dry_canned_meat_fish
+422362,Sealihasült M&M 300g,M&M,300 g,,meat_fish,meat_pork,meat_fish,meat_other
+422363,Viin GREY GOOSE 40% 700ml,Grey Goose,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422364,Vesi AURA PLUS pohlamaits. 1.5L,Aura,1.5 l,,drinks,drinks_water,drinks,drinks_water
+422365,Tuunikala oliivõlis RIO MARE 3x80g,Rio Mare,3x80 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+422366,Viin HLIBNY DAR Wheat 40% 200ml,,200 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422367,Viin HLIBNY DAR Wheat 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits

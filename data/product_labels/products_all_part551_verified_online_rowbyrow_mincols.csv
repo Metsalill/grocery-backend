@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+423060,M.alk.jook SFF LD Grapefruit 5.5% 1.5L pet,,1.5 l,,dry_preserves,dry_other,drinks,drinks_beer_cider
+423061,Glas.kohup.dessert vanilli 38g,,38 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_cottage_quark
+423062,Glasuurkohuke KARUMS šok.tükkidega 45g,Karums,45 g,,drinks,drinks_spirits,dairy_eggs_fats,dairy_cottage_quark
+423063,Kanalihavorstid juustuga WELL DONE 270g,Well Done,270 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+423064,Glas.kohup.dessert jõhvika 38g,,38 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_cottage_quark
+423065,Poke kauss kanaga 275g,,275 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+423066,Kanal.kotlet ahjukart.ja sin.kastm. 300g,,300 g,,meat_fish,meat_poultry,frozen_food,frozen_ready_meals
+423067,Wilmarine tort MARTA PAGAR 600g,Marta Pagar,600 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+423068,Min.vesi VÄRSKA Naturaal mullita 0.5l,Värska,500 ml,,drinks,drinks_water,drinks,drinks_water
+423070,Multipuuvilja jook MIO&RIO 2L,Mio&Rio,2 l,,dry_preserves,dry_other,drinks,drinks_juices
+423071,Glas.dessert MIO RIO vanilje 35g,Mio&Rio,35 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_cottage_quark
+423072,Glasuurkohuke KARUMS karamelli 45g,Karums,45 g,,drinks,drinks_spirits,dairy_eggs_fats,dairy_cottage_quark
+423073,Sarvesai vaniljekreem.küpsis.7DAYS 60g,7Days,60 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+423074,Glas.kakaodessert šok.täid. 38g,,38 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_cottage_quark
+423075,Kanaliha želees MINU 250g,Minu,250 g,,meat_fish,meat_poultry,dry_preserves,dry_canned_meat_fish
+423076,Viin UKRAINKA 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423077,Viin UKRAINKA Platinum 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423078,Jäätis Brookies küpsise.BEN&JERRY'S 388g,Ben&Jerry's,388 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+423079,Kanalihavorstid WELL DONE 270g,Well Done,270 g,,meat_fish,meat_poultry,meat_fish,meat_sausages
+423080,Viin VECHIRNJA CHARKA Birch 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423081,Muu p.jook STAR DOLLAR 5*RichH. 500ml 30%,,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+423082,Glasuurkohuke MURR mascarpone 40g,Murr,40 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+423083,Glasuurkohuke MURR kondenspiim 40g,Murr,40 g,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_cottage_quark
+423084,Glasuurkohuke popkorni MURR 40g,Murr,40 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+423085,Külmutatud part ilma rupsita 2.2kg,,2.2 kg,,frozen_food,frozen_other,frozen_food,frozen_ready_meals
+423086,Seemneleib Jassi EESTI PAGAR 310g,Eesti Pagar,310 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+423088,Glasuurkohuke panna cotta MURR 40g,Murr,40 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+423089,Jäätis van.-kakao-aedmaasik.MIO&RIO 1kg,Mio&Rio,1 kg,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+423091,Seemneleib FAZER 400g,Fazer,400 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+423092,Šok.keeksibatoon Relax KUCHENMEISTER 32g,Kuchenmeister,32 g,,sweets_snacks,sweets_chocolate_bars,bakery,bakery_cakes_pastries
+423093,Jäätis LA MUU mango-passion vegan 250g,La Muu,250 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+423094,Naturaalne mineraalvesi AKVILE 1.5L g-ga,Akvile,1.5 l,,drinks,drinks_water,drinks,drinks_water
+423095,Sarvesai vanilje-murelimaits. 7DAYS 60g,7Days,60 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+423096,Kanamaksapasteet CHEF LUNDEN 200g,Chef Lunden,200 g,,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+423097,Võil. Focaccia singi juust.MANTINGA 210g,Mantinga,210 g,,dairy_eggs_fats,dairy_butter_margarine,bakery,bakery_other
+423098,Kanapallid WÕRO 1kg,Wõro,1 kg,,meat_fish,meat_poultry,meat_fish,meat_poultry
+423099,Whisky CHIVAS REGAL 12YO 40% 500ml,Chivas Regal,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423100,Naturaalne mineraalvesi AKVILE 1.5L g-ta,Akvile,1.5 l,,drinks,drinks_water,drinks,drinks_water
+423101,Whisky CHIVAS REGAL 12 YO 40% 700ml,Chivas Regal,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423102,Naturaalne mineraalvesi AKVILE Sport 1L,Akvile,1 l,,drinks,drinks_wine,drinks,drinks_water
+423103,Roheline tee Passion Fruit HYLEYS 100g,Hyleys,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+423104,Whisky GLENMORANGIE Original 40% 700ml,Glenmorangie,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423105,Whisky GRANT'S 40% 500ml,Grant's,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423107,Jäätis maasika-piimašok.BALBIINO 500g,Balbiino,500 g,,dairy_eggs_fats,dairy_milk,frozen_food,frozen_desserts_icecream
+423108,Šokolaadi-kirsitort 730g,,730 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+423109,Sõõrik piimašokolaadi glas-ga sulata. 55g,,55 g,,dairy_eggs_fats,dairy_milk,bakery,bakery_sweet_buns_donuts
+423111,Whisky GLENMORANGIE 14YO SM 46% 700ml,Glenmorangie,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423112,Teratasku Eesti Pagar 4tk 280g,Eesti Pagar,280 g,,dry_preserves,dry_other,bakery,bakery_buns_croissants
+423113,Kabanoss Tšilli WELL DONE 120g,Well Done,120 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+423114,Br. tiivad punases marinaadis kg,,1 kg,,sauces_oils,sauces_marinades,meat_fish,meat_poultry

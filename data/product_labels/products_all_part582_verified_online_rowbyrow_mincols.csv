@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+424729,Sealihahautis lääts.WILLIAM SAURIN 400g,,400 g,,dry_preserves,dry_groats_beans,dry_preserves,dry_canned_meat_fish
+424730,Lõhesalat Itaalia MARINE ABC EO 240g,Marine ABC,240 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+424731,Lõhesalat Mehhiko MARINE ABC EO 240g,Marine ABC,240 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+424732,Sealiha konserv PAMAPOL 280g,Pamapol,280 g,,meat_fish,meat_pork,dry_preserves,dry_canned_meat_fish
+424733,Searibid WELL DONE kg,Well Done,1 kg,,meat_fish,meat_pork,meat_fish,meat_pork
+424734,Seasink välisfilee RANNAROOTSI 120g viil,Rannarootsi,120 g,,meat_fish,meat_hams,meat_fish,meat_hams
+424735,Toorvorstid Laste RANNAROOTSI 400g,Rannarootsi,400 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424736,Maitsesalaami Napoli NÕO 100g viil,Nõo,100 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+424737,Makrellifilee õlis WELL DONE 170g,Well Done,170 g,,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+424738,KPN vein SENDERO ROYAL Tempran.Bl. 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424739,Marin. heeringas köögiv. WELL DONE 300g,Well Done,300 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+424740,KPN vein MURVIEDRO Col.Sauv. Blanc 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424741,KPN vein PETER WEINBACH Late Herv. 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424742,Marineeritud angersäga 250g,,250 g,,dry_preserves,dry_other,meat_fish,fish_processed
+424743,Tuunikalasalat Mehhiko KAIJA 160g,Kaija,160 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+424744,Makreellifilee tomatis WELL DONE 170g,Well Done,170 g,,produce,produce_root_veg,dry_preserves,dry_canned_meat_fish
+424745,Marineeritud tofu LUNTER 180g,Lunter,180 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_plant_drinks
+424746,Mango-vaarikadessert 100g,,100 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+424747,Mesine kanaroog riisiga 300g,,300 g,,dry_preserves,dry_pasta_rice,frozen_food,frozen_ready_meals
+424748,Seavälisfileesink M&M 150g viil,M&M,150 g,,meat_fish,meat_hams,meat_fish,meat_hams
+424749,Skumbria tomatikastmes KAPTEN GRANT 240g,Kapten Grant,240 g,,produce,produce_root_veg,dry_preserves,dry_canned_meat_fish
+424750,Soolatud lõhefilee OCEAN 120g,Ocean,120 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked
+424751,Sõrnikud BIMAR 300g,Bimar,300 g,,dry_preserves,dry_other,frozen_food,frozen_bakery
+424752,Sprotid õlis KAPTEN GRANT 250g,Kapten Grant,250 g,,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+424753,Sprotid õlis VICI EO 160g,Vici,160 g,,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+424754,Tuunitükid oliiviõlis WELL DONE 3x80g,Well Done,3x80 g,,sauces_oils,oils_olive,dry_preserves,dry_canned_meat_fish
+424755,Krakov p/s vorst Isukas RANNAROOTSI 270g,Rannarootsi,270 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424756,Kreeka jog.TERE maits.-ta lakt.vaba 350g,Tere,350 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_yogurt_kefir
+424757,Vähisabad soolvees KALURI 250g,Kaluri,250 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+424758,Kreeka jogurt ALMA mango 180g,Alma,180 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+424759,Värskekapsasalat porgandiga 500g,,500 g,,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+424760,Värskekapsaborš lihag.supipõhi MAMMA 500g,Mamma,500 g,,produce,produce_root_veg,dry_preserves,dry_soups_noodles
+424761,Vin. chorizo pulgad WELL DONE 50g,Well Done,50 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+424762,Miniviiner Ehe RANNAROOTSI 200g,Rannarootsi,200 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+424763,Minisardellid WELL DONE 450g,Well Done,450 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424764,Miniviiner RAKVERE 200g,Rakvere,200 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+424765,Suits.seavälisfilee RAKVERE 130g,Rakvere,130 g,,dry_preserves,dry_other,meat_fish,meat_pork
+424766,Suits.tuunikalatük. p.õlis CALVO 142g,Calvo,142 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+424767,Suitsukarbonaad NÕO kg,Nõo,1 kg,,meat_fish,fish_salted_smoked,meat_fish,meat_pork
+424768,Suitsuliha MATSIMOKA 110g viil,Matsimoka,110 g,,meat_fish,fish_salted_smoked,meat_fish,meat_pork
+424769,Suitsupeekon Külamehe NÕO 115g viil,Nõo,115 g,,meat_fish,meat_pork,meat_fish,meat_pork
+424770,Suitsupeekon MATSIMOKA 110g viil,Matsimoka,110 g,,meat_fish,meat_pork,meat_fish,meat_pork
+424771,Võileivapeekon RAKVERE 130g,Rakvere,130 g,,dairy_eggs_fats,dairy_butter_margarine,bakery,bakery_other
+424772,Võileib rebitud sealihaga MANTINGA 170g,Mantinga,170 g,,dairy_eggs_fats,dairy_butter_margarine,bakery,bakery_other
+424773,Võil.Shaslik kirsst.BBQkast.MANTINGA 235g,Mantinga,235 g,,dairy_eggs_fats,dairy_butter_margarine,bakery,bakery_other
+424774,Suitsusardell juustuga RANNAROOTSI 500g,Rannarootsi,500 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+424775,Peekoni kuubikud külmsuits.MORLINY 200g,Morliny,200 g,,meat_fish,meat_pork,meat_fish,meat_pork
+424776,Võil.kana-rooma salatigaPolar Bread 155g,Polar Bread,155 g,,dairy_eggs_fats,dairy_butter_margarine,bakery,bakery_other
+424777,Peedisalat küüslauguga kg,,1 kg,,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+424778,Vorst Choriz.Fort Pikant ELPOZO 200g,Elpozo,200 g,,meat_fish,meat_sausages,meat_fish,meat_sausages

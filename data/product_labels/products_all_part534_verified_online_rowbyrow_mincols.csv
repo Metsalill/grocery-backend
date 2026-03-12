@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+422022,Tosca kook kirssidega 210g,,210 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+422023,Külm.pitsa SUPREMA Salame Romano 487g,Suprema,487 g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+422025,Seakeel tarrendis NÕO 300g,Nõo,300 g,,dry_preserves,dry_other,meat_fish,meat_other
+422026,Kaerajook YOOK Chocolate 1L,Yook,1 l,,drinks,drinks_soft_soda,dairy_eggs_fats,dairy_plant_drinks
+422027,Keefir FARMI 1kg PP,Farmi,1 kg,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+422028,19765,,,,dry_preserves,dry_other,dry_preserves,dry_other
+422029,Jahvatatud kohv Club LAVAZZA 250g,Lavazza,250 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+422030,Külm.pitsa RISTORANTE Prosciutto 580g,Ristorante,580 g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+422031,Viin PSHENICHNAJA 40% 350ml,,350 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422032,Jahvatatud kohv Classic PAULIG 500g,Paulig,500 g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+422033,Maasuitsuribiliha NÕO 135g viil,Nõo,135 g,,meat_fish,meat_pork,meat_fish,meat_pork
+422035,Jahvatatud kohv JACOBS Kronung 500g,Jacobs,500 g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+422036,Singirullid küüslauguga 300g,,300 g,,dry_preserves,dry_other,meat_fish,meat_hams
+422037,Külm.vareen. UVIC Vanaema kirss 400g,Uvic,400 g,,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+422038,Kitsepiimavõi GOAT FARM 125g,Goat Farm,125 g,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+422040,Seašašlõkk mustika mar.RAKVERE 800g,Rakvere,800 g,,meat_fish,meat_pork,meat_fish,meat_pork
+422041,Seljanka salaamiga PRESTO 300g,Presto,300 g,,dry_preserves,dry_other,dry_preserves,dry_soups_noodles
+422042,Külm.porgandi&herne segu WELL DONE 400g,Well Done,400 g,,produce,produce_root_veg,frozen_food,frozen_veg
+422043,Sea šašlõk.punases mar.Armeenia grill kg,,1 kg,,dry_preserves,dry_other,meat_fish,meat_pork
+422044,Seaseljafilee NÕO 105g viil,Nõo,105 g,,dry_preserves,dry_other,meat_fish,meat_pork
+422045,Seljafilee sealih.KARNI 120g viil,Karni,120 g,,dry_preserves,dry_other,meat_fish,meat_pork
+422046,Sinihallitusjuust Memel Blue kg,,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422047,Whisky JAMESON Caskmates 40% 700ml,Jameson,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422049,77.7% Lastevorst M&M 350g,M&M,350 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+422050,Maitselt mahe grillvorst M&M 900g,M&M,900 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+422051,Skyr FARMI naturaalne 400g,Farmi,400 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_yogurt_kefir
+422052,Skyr FARMI virsikutega 150g,Farmi,150 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_yogurt_kefir
+422053,Maksapasteet linnulihast NÕO 200g,Nõo,200 g,,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+422054,Soolatud sealiha peekon vürtsidega WELL DONE kg,Well Done,1 kg,,world_spices,spices_basic_salt_pepper,meat_fish,meat_pork
+422058,Sink Prosciutto Cotto WELL DONE 100g,Well Done,100 g,,meat_fish,meat_hams,meat_fish,meat_hams
+422059,Sink Vinnutatud BAJORU 110g viil,Bajoru,110 g,,meat_fish,meat_hams,meat_fish,meat_hams
+422060,Sink Prosciutto Crudo WELL DONE 80g viil,Well Done,80 g,,meat_fish,meat_hams,meat_fish,meat_hams
+422061,Soolaheeringafilee õlis WD 240g,Well Done,240 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+422062,Maksarõngas RAKVERE 300g,Rakvere,300 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+422063,Skyr maasika FARMI 300g,Farmi,300 g,,produce,produce_berries,dairy_eggs_fats,dairy_yogurt_kefir
+422064,Soolaheeringafilee õlis WD 450g,Well Done,450 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+422065,Külm. suvine marjasegu HÄRMAVILI 300g,Härmavili,300 g,,dry_preserves,dry_other,frozen_food,frozen_berries_fruit
+422067,Ingverijook ROCHESTER Ginger 725ml,Rochester,725 ml,,drinks,drinks_spirits,drinks,drinks_soft_soda
+422068,Keefir FARM MILK 1kg kile,Farm Milk,1 kg,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+422069,Näkileiv.rukkist Hi-Fibre FINNCRISP 200g,Finncrisp,200 g,,dry_preserves,dry_other,bakery,bakery_bread_loaves
+422070,Näkileiv.rukkist Multigrain FINNCRISP 175g,Finncrisp,175 g,,dry_preserves,dry_other,bakery,bakery_bread_loaves
+422071,Ahjuvorstid šampinjon. MATSIMOKA 365g,Matsimoka,365 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+422072,Whisky JAMESON Crested 40% 700ml,Jameson,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422073,Ahjukartul MK 300g,MK,300 g,,produce,produce_root_veg,frozen_food,frozen_potato_products
+422074,Näkileiv.rukkist Original FINNCRISP 200g,Finncrisp,200 g,,drinks,drinks_spirits,bakery,bakery_bread_loaves
+422075,Lastevorst RAKVERE 190g viil,Rakvere,190 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+422076,Kakaopuding TERE laktoosivaba 200g,Tere,200 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+422077,Steik kintsulihast kolme juustuga 400g,,400 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_pork
+422078,Lahustuv kohv NESCAFE Gold 100g,Nescafé,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422079,Merekapsasalat küüslauguga 240g,,240 g,,produce,produce_herbs_salads_sprouts,dry_preserves,dry_canned_meat_fish

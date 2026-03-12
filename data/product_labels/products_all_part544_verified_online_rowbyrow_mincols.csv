@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+422607,Külm.lehttaigen WELL DONE 500g,Well Done,500 g,,dry_preserves,dry_other,frozen_food,frozen_bakery
+422611,Külm.põhjakrevett kooritud WD 225g,Well Done,225 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_fish
+422612,Küüslauk kg,,1 kg,,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+422613,Liköör HERBERT 35% 350ml,,350 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+422614,Viineriampsud juustuga NÕO 280g,Nõo,280 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+422615,Kohvioad Arabica Espresso PAULIG 1kg,Paulig,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+422616,Kali A. LE COQ KLASSIKALINE 1L,A.Le Coq,1 l,,dry_preserves,dry_other,drinks,drinks_soft_soda
+422617,Karastusjook DR.PEPPER 330ml,Dr.Pepper,330 ml,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+422619,Koorejogurt ALMA Muah creme brulee 380g,Alma,380 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+422620,Karastusjook LIMONAAD traditsioon. 1.5L,,1.5 l,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+422621,Külm.köögiv.kikerhernes.HÄRMAVILI 400g,Härmavili,400 g,,dry_preserves,dry_groats_beans,frozen_food,frozen_veg
+422622,Külm. krõbedad Gouda juustuampsud 300g,,300 g,,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+422623,Veiseliha omas mahlas RANNAROOTSI 240g,Rannarootsi,240 g,,drinks,drinks_juices,dry_preserves,dry_canned_meat_fish
+422624,Veisemaksapasteet NÕO 200g,Nõo,200 g,,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+422625,Külm.lillkapsad WELL DONE 400g,Well Done,400 g,,produce,produce_root_veg,frozen_food,frozen_veg
+422626,Puuviljatee metsamarjamaits. LOYD 20x2g,Loyd,20x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422630,Hele õlu PREMIUM A.Le Coq 4.7% 500ml,A.Le Coq,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+422631,Hele õlu SAKU Kuld 5.2% 500ml prk,Saku,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+422632,Valge šokolaadi ja küpsistega jäätisekommid. MAGNUM 168g,Magnum,168 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422633,Juust täispiimast EESTI viilutatud 180g,,180 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422634,Verikäkk RAKVERE 440g,Rakvere,440 g,,dry_preserves,dry_other,meat_fish,meat_sausages
+422635,Külm.linnuliha mini-frikadellid EHE 350g,Ehe,350 g,,meat_fish,meat_other,meat_fish,meat_poultry
+422636,Viil. vähesoolane lõhefilee kg-lett,,1 kg,,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked
+422637,Külm.lillkapsas ja brokoli MAAHÄRRA 400g,Maahärra,400 g,,produce,produce_root_veg,frozen_food,frozen_veg
+422638,Magus apelsininektar AURA 1L,Aura,1 l,,drinks,drinks_juices,drinks,drinks_juices
+422639,Mango kg,,1 kg,,produce,produce_tropical,produce,produce_tropical
+422640,Multimahlajook SURPRISE 300ml,,300 ml,,drinks,drinks_juices,drinks,drinks_juices
+422644,Pirn Conference 1kl. kg,,1 kg,,produce,produce_apples_pears,produce,produce_apples_pears
+422645,Külm.mintai fileed sid.&ürd.FINDUS 250g,Findus,250 g,,sweets_snacks,sweets_gums_mints,frozen_food,frozen_fish
+422646,Ploominektar PÕLTSAMAA 1L,Põltsamaa,1 l,,drinks,drinks_juices,drinks,drinks_juices
+422647,Puuv.vah. COSMOPOLITAN Diva 5.5% 750ml,,750 ml,,dry_preserves,dry_other,drinks,drinks_wine
+422648,Kanafileesink kuubikud M&M 250g,M&M,250 g,,meat_fish,meat_poultry,meat_fish,meat_hams
+422649,Puuv.vahuvein COSMO.Diva Berry 6% 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422650,Roheline tee Four Seasons BASILUR 100g,Basilur,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422651,Heeringafilee rasvane VICI 240g,Vici,240 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+422652,KGT poolvah. Friz. MASCHIO Pin.R. 750ml,Maschio,750 ml,,dry_preserves,dry_other,drinks,drinks_wine
+422653,Külm.minipelm.kanalihaga PEALINNA 350g,Pealinna,350 g,,meat_fish,meat_poultry,frozen_food,frozen_ready_meals
+422654,Kalakotlet 250g,,250 g,,meat_fish,fish_fresh,frozen_food,frozen_fish
+422655,Kiievi kotlet KIKAS 220g,Kikas,220 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+422656,Multipuuvilja mahlajook AURA Fresh 2L,Aura,2 l,,drinks,drinks_juices,drinks,drinks_juices
+422658,Heeringafilee sinepikastmes WD 300g,Well Done,300 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+422659,Must tee mustasõstramaits.DILMAH 20x1.5g,Dilmah,20x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422660,Napoleonikook EESTI KONDIITER 2x110g,Eesti Kondiiter,2x110 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+422661,Kodujuust OTTO küüslaugu-ürtidega 220g,Otto,220 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422665,Kohupiim JAUNPILS täispiimast 9% 275g,Jaunpils,275 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422668,Muu piiritusj. STAR DOLLAR 3* 30% 200ml,,200 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+422671,Pilaff PRESTO 300g,Presto,300 g,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+422672,Kodujuust ALMA hapukoorega 380g,Alma,380 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422673,Viil.vähesool.lõhefilee tilliga kg-lett,,1 kg,,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked
+422674,Viiner RAKVERE 500g,Rakvere,500 g,,drinks,drinks_spirits,meat_fish,meat_sausages

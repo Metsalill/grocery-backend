@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+420255,Kohvioad Barista Espresso Jacobs 1 Kg,Jacobs,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+420256,Kohvioad Jacobs Baristacrema Italiano 1 Kg,Jacobs,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+420257,Hele õlu Saku Kuld 5.2% 12x0.33L prk,Saku,12x330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+420258,Cognac HENNESSY VS 40% 500ml,Hennessy,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420259,Hele õlu Saku Originaal 4.7% 12x0.33l prk,Saku,12x330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+420260,KGT vein AUSSIE Rules Chardonnay 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420261,Cognac HENNESSY XO 40% 350ml karp,Hennessy,350 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420262,Cognac LARSEN VS 40% 700ml,Larsen,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420263,Cognac LARSEN VSOP 40% 500ml,Larsen,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420264,Cognac COURVOISIER XO 40% 700ml karp,Courvoisier,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420265,Külm.pelmeenid praesibulaga RAKVERE 400g,Rakvere,400 g,,produce,produce_root_veg,frozen_food,frozen_ready_meals
+420267,Täissuitsuvorst Moskva OSKAR 210g,Oskar,210 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+420268,Kohvioad Qualita Rossa Lavazza 1 Kg,Lavazza,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+420269,Kohviuba Jacobs Origins Brazil Colom 1 Kg,Jacobs,1 kg,,drinks,drinks_spirits,drinks,drinks_coffee_beans_capsules
+420270,Kohviuba Jacobs Selection 1 Kg,Jacobs,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+420271,Kpn Kuiv Vein Maybach Riesling 750 Ml,Maybach,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420272,Kpn Poolkuiv Vein Maybach Riesling 750 Ml,Maybach,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420273,Liköör JÄGERMEISTER 35% 500ml,Jägermeister,500 ml,,dairy_eggs_fats,dairy_cream_sourcream,drinks,drinks_spirits
+420274,Muu Piir Jook Riga Black Balsam 45% 0.2L,Riga Balsam,200 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420275,Vein Chamboustin Punane 3 L,Chamboustin,3 l,,drinks,drinks_wine,drinks,drinks_wine
+420276,Vein Chamboustin Valge 3 L,Chamboustin,3 l,,drinks,drinks_wine,drinks,drinks_wine
+420277,Viin Absolut 40% 700ml,Absolut,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420278,KGT vein DREAMER cab.sauv. 750ml,Dreamer,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420279,GT vein TBILVINO Kindzmarauli 750ml,Tbilvino,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420280,Hele õlu PILSNER URQUELL 4.4% 500ml prk,Pilsner Urquell,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+420281,Jahv.kohv LÖFBERGS keskmine röst 500g,Löfbergs,500 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+420282,Jahv.kohv LÖFBERGS presskannu 500g,Löfbergs,500 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+420283,Jahvatatud kohv 777 Original 500g,777,500 g,,drinks,drinks_spirits,drinks,drinks_coffee_beans_capsules
+420284,Jahvatatud kohv Rossa LAVAZZA 250g,Lavazza,250 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+420285,Jõhvikajook AURA 1L,Aura,1 l,,produce,produce_berries,drinks,drinks_juices
+420286,Karastusjook COCA-COLA 330ml,Coca-Cola,330 ml,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+420287,KGT vein TOMMASI Pinot Grigio 750ml,Tommasi,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420288,KPN kuiv vein TOMMASI Valpolicella 750ml,Tommasi,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420289,KPN vein FAUSTINO VII Tinto 750ml,Faustino,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420290,KPN vein TOKAJI Furmint Semisweet 750ml,Tokaji,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420292,Liköör GABRIEL 45% 500ml,Gabriel,500 ml,,dairy_eggs_fats,dairy_cheese_slices,drinks,drinks_spirits
+420293,Liköör JÄGERMEISTER 35% 100ml,Jägermeister,100 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420294,Liköör VANA TALLINN 40% 200ml,Vana Tallinn,200 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420295,KP-kv.vahuvein VEUVE CLICQUOT P.Br.750ml,Veuve Clicquot,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420296,Liköör BAILEYS Irish Cream 17% 700ml,Baileys,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420297,Liköör VANA TALLINN Cream 16% 500ml,Vana Tallinn,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420298,Must purutee TWININGS Earl Grey 100g,Twinings,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420299,Must tee Earl Grey LIPTON 50x1.5g,Lipton,50x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420300,Must tee Engl. Aristocratic HYLEYS 25x2g,Hyleys,25x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420301,Must tee English Aristocratic HYLEYS 100g,Hyleys,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420302,Must tee Sc. Breakfast HYLEYS 100x1.5g,Hyleys,100x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420303,Must tee Scottish Breakf.HYLEYS 25x1.5g,Hyleys,25x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420304,Viin Zubrowka Biala 40% 500ml,Zubrowka,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420305,Whisky Tullamore 40% 1L,Tullamore,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+420306,Piiritusjook CHAMPION 38% 500ml,Champion,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+422369,Suur Perenaise sai EESTI PAGAR 500g,Eesti Pagar,500 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+422370,Jäätis MILKA koonus 69g,Milka,69 g,,dairy_eggs_fats,dairy_milk,frozen_food,frozen_desserts_icecream
+422371,Külm.friikart.sakil. Zig Zag AVIKO 750g,Aviko,750 g,,frozen_food,frozen_potato_products,frozen_food,frozen_potato_products
+422373,KPN vein VAUCHER Cotes Du Vent.Rouge 750ml,Vaucher,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422374,Õlu PAULANER Weissbier 5.5% 500ml,Paulaner,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+422375,Br.pooltiiva šašlõkk Armeenia grill kg,,1 kg,,meat_fish,meat_pork,meat_fish,meat_poultry
+422376,Tuunikala õlis KAIJA EO 160g,Kaija,160 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+422377,Külm. hakitud spinat Härmavili 300g,Härmavili,300 g,,produce,produce_herbs_salads_sprouts,frozen_food,frozen_veg
+422378,Täispiimajogurt ALMA muraka 350g,Alma,350 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+422380,Tuunikala pipra ja sidruniga KAIJA 160g,Kaija,160 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+422381,Toorjuust OTTO 150g,Otto,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422382,Täispiim ALMA 3.8-4.2% 1.5L,Alma,1.5 l,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+422383,Sealihasült RANNAROOTSI 330g,Rannarootsi,330 g,,meat_fish,meat_pork,meat_fish,meat_other
+422384,Seapraad kondita kg,,1 kg,,dry_preserves,dry_other,meat_fish,meat_pork
+422385,Toorpiim pastör-ta 3.8-4.4% NOPRI 1L,Nopri,1 l,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+422386,Südamesepik täistera FAZER 300g,Fazer,300 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+422387,Snäkk Drive NÕO 85g,Nõo,85 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+422388,Viin HLIBNY DAR Klassika 40% 1.75L,,1.75 l,,drinks,drinks_spirits,drinks,drinks_spirits
+422389,Viin KUPECKA 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422390,Viin KOZATSKA RADA Klasichna 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422391,Jäätis pistaatsiaga VALSOIA 300g,Valsoia,300 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422392,Tume leib ciabatta 271g,,271 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+422393,Tume tordipõhi 3-kih. KUCHENMEISTER 400g,Kuchenmeister,400 g,,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+422394,Vaarika-kodujuustukook 370g,,370 g,,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+422395,Viin POOLIK 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422396,Br.tiiva õlaosa juustu mar.KEKAVA 500g,Kekava,500 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_poultry
+422397,Kohuke SAARE muraka-sidruni 40g,Saare,40 g,,produce,produce_tropical,dairy_eggs_fats,dairy_cottage_quark
+422398,Kohupiim JAUNPILS 5% 275g,Jaunpils,275 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422399,Tuunikala purust. õlis KAPTEN GRANT 185g,Kapten Grant,185 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+422400,Kohupiim FARMI Lahja vaniliiniga 200g,Farmi,200 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422401,Kohupiim FARM MILK 0.2% 250g,Farm Milk,250 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422402,Tuunikala purust. vees KAPTEN GRANT 185g,Kapten Grant,185 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+422403,Jäätis vaarika-valge šok.ONU ESKIMO 84g,Onu Eskimo,84 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422404,Kalkuni guljašš ürdikartuliga 300g,,300 g,,meat_fish,meat_poultry,frozen_food,frozen_ready_meals
+422405,Vab.peet.kanade munad M WELL DONE 10tk,Well Done,10 tk,,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+422406,Kanakarri riisiga PRESTO 300g,Presto,300 g,,dry_preserves,dry_pasta_rice,frozen_food,frozen_ready_meals
+422407,Kohvioad LÖFBERGS Crema 1kg,Löfbergs,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+422408,Kohvioad Qualita Oro LAVAZZA 1kg,Lavazza,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+422409,Viin PŠENICNAJA Lux 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422410,Sprotid õlis OCEAN 240g,Ocean,240 g,,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+422411,Suitsusingike RAKVERE 350g,Rakvere,350 g,,meat_fish,fish_salted_smoked,meat_fish,meat_hams
+422412,Suitsusardell RAKVERE 500g,Rakvere,500 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+422413,KPN vein GRAN CASTILLO Rose 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422414,Br.toorvorstid ürtidega WELL DONE 400g,Well Done,400 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+422415,KPN vein R.CLERGET Chablis 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422417,Suitsusardell RANNAROOTSI 500g,Rannarootsi,500 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+422418,Suitsutatud kanafilee TALLEGG kg,Tallegg,1 kg,,meat_fish,meat_poultry,meat_fish,meat_gourmet
+422419,Br.tiiva õlaosa WELL DONE ABta 500g,Well Done,500 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+422421,Hapupiimajook AIRAN 1% 500g,,500 g,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_yogurt_kefir
+422422,Jogurtikreem SAARE mango 400g,Saare,400 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+420852,Kodujuust ALMA 5% 200g,Alma,200 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+420853,Kohuke TERE vanilli laktoosivaba 40g,Tere,40 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+420854,Suitsutatud seakeel RAKVERE kg,Rakvere,1 kg,,meat_fish,fish_salted_smoked,meat_fish,meat_pork
+420855,Toorvorstid mustika RAKVERE 400g,Rakvere,400 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+420856,Toorvorstikesed Forte juustu M&M 400g,M&M,400 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+420857,Toorvorstikesed Pühajärve M&M 400g,M&M,400 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+420860,Kondenspiim JAANI karamell klassik. 190g,Jaani,190 g,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+420862,Moonirull 70g,,70 g,,dry_preserves,dry_other,bakery,bakery_buns_croissants
+420863,Muffin mustikatega sulat. 68g,,68 g,,produce,produce_berries,bakery,bakery_cakes_pastries
+420864,Pavlova beseek.põhjad REVAL KOND. 8x22g,Reval Kondiiter,8x22 g,,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+420865,Pealinna EESTI PAGAR teraleib 390g,Eesti Pagar,390 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+420866,Külmsuitsujuust Õige Juustupalmik 200g,,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+420867,Mustika-õunajook PÕLTSAMAA 1L,Põltsamaa,1 l,,produce,produce_berries,drinks,drinks_juices
+420868,GT vein TBILVINO Pirosmani punane 750ml,Tbilvino,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420870,Täissuitsuvorst Moskva RANNAROOTSI 240g,Rannarootsi,240 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+420871,Vaarika-mustika smuuti PAI 280ml,Pai,280 ml,,produce,produce_berries,drinks,drinks_juices
+420873,Liköör KENTUCKY JACK Honey&Bour.35% 700ml,,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420874,Kanasigar TALLEGG 200g,Tallegg,200 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+420875,Rosinakukkel EESTI PAGAR 4x45g,Eesti Pagar,4x45 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+420877,Liköör LIVIKO Kirss 21% 500ml,Liviko,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420878,Röstleib Kodu FAZER 340g,Fazer,340 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+420879,Kookosejäätis kakaoglasuur. MIO&RIO 46g,Mio&Rio,46 g,,bakery,bakery_cakes_pastries,frozen_food,frozen_desserts_icecream
+420880,Liköör JÄGERMEISTER Scharf 33% 700ml,Jägermeister,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420882,Piimabatoonike FARM MILK kokoose 30g,Farm Milk,30 g,,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+420885,Näkileib WASA tomati-basiiliku 40g,Wasa,40 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+420886,Röst 100% rukkijahu LEIBUR 550g,Leibur,550 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+420887,Piimabatoonike FARM MILK meega 28g,Farm Milk,28 g,,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+420888,Piim ALMA 0.05% 1L,Alma,1 l,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+420889,Tuunikalatükid tomatis KAPTEN GRANT 185g,Kapten Grant,185 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+420890,Liköör KRAUTMEISTER 35% 700ml,,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420891,Tuunikala oliiviõlis RIO MARE 160g,Rio Mare,160 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+420892,Tuunikalatk.päevalilleõlis CALVO EO 142g,Calvo,142 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+420893,Kurk pikk kiles kg,,1 kg,,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+420894,GT vein TELIANI Kindzmarauli 750ml,Teliani,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420895,Liköör LIVIKO Metsmaasikas 21% 500ml,Liviko,500 ml,,produce,produce_berries,drinks,drinks_spirits
+420896,Rukkileib seemnetega 390g,,390 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+420897,Kuumsuitsutatud broiler PORMET kg,Pormet,1 kg,,meat_fish,meat_poultry,meat_fish,meat_poultry
+420898,Rukkipala idandatud teradega 240g,,240 g,,dry_preserves,dry_other,bakery,bakery_bread_loaves
+420899,Piim FARM MILK 2.5% 1L kile,Farm Milk,1 l,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+420900,Vein CARACTER CheninChardon.750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420902,Liköör LÕUNAMAINE 40% 500ml,,500 ml,,produce,produce_apples_pears,drinks,drinks_spirits
+420903,Külm.tortelliinid kartuliga VICI 400g,Vici,400 g,,bakery,bakery_cakes_pastries,frozen_food,frozen_ready_meals
+420904,Tuunikalatük.vees CALVO EO 142g,Calvo,142 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+420905,Vein CASTILLO DE MUREVA punane 1L,,1 l,,drinks,drinks_wine,drinks,drinks_wine
+420907,Piim FARM MILK 2% 1L,Farm Milk,1 l,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+420909,Lah.kohvij.pr.suh-ga NESCAFE 3in1 28x16.5g,Nescafé,28x16.5 g,,drinks,drinks_other,drinks,drinks_tea_coffee
+420911,Vanillijäätis aedmaasika. MIO&RIO 96g,Mio&Rio,96 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420912,VÄRSKA Originaal aluseline 1.5L,Värska,1.5 l,,drinks,drinks_spirits,drinks,drinks_water
+420917,Värske valge redis kg,,1 kg,,dry_preserves,dry_other,produce,produce_root_veg
+420918,Külm.pannk.kana-seentega WELL DONE 400g,Well Done,400 g,,meat_fish,meat_poultry,frozen_food,frozen_bakery

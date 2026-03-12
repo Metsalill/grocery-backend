@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+423418,Mineraalvesi VYTAUTAS 500ml,Vytautas,500 ml,,drinks,drinks_water,drinks,drinks_water
+423419,Alk.jook COOLER Sour Rhubarb 4% 275ml,,275 ml,,dry_preserves,dry_other,drinks,drinks_beer_cider
+423420,Alk.Vaba õlu A.Le Coq Fassbr.Lemon 500ml,A.Le Coq,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423421,Külm. VIP salatisegu HORTEX 400g,Hortex,400 g,,produce,produce_herbs_salads_sprouts,frozen_food,frozen_veg
+423422,Joogijogurt LIISU Shake metsmaasika 250g,Liisu,250 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423424,Mini õllesigarid RAKVERE 300g,Rakvere,300 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+423425,Joogijogurt virsik MIO RIO 1kg,Mio&Rio,1 kg,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423426,Joogijogurt TERE mustika-vaarika 900g,Tere,900 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423429,Joogijogurt ALMA ploomi-jäätise 275g,Alma,275 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423431,Jäätis pistaatsia mandlikr Classic 380g,,380 g,,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+423432,Juust ATLEET Originaal viil. 150g,Atleet,150 g,,drinks,drinks_spirits,dairy_eggs_fats,dairy_cheese_slices
+423433,Alk.vaba õlu A LE COQ Premium 330ml pdl,A.Le Coq,330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423434,Magustatud kondenspiim klassikaline JAANI 250g,Jaani,250 g,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+423436,Alk. Vaba Õlu A. Le Coq Premium 500ml prk,A.Le Coq,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423437,Minifrikadellid MAKS&MOORITS 350g,Maks&Moorits,350 g,,dry_preserves,dry_other,meat_fish,meat_other
+423438,Soolakaramelli ja mandlitega jäätisekommid MAGNUM 168g,Magnum,168 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+423439,Hele õlu TUBORG Green 4.6% 6x330ml,Tuborg,6x330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423440,Juustampsud MO SAAREMAA ürtidega 200g,Saaremaa,200 g,,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+423441,Jogurtijäätis virsiku BALBIINO 54g,Balbiino,54 g,,dairy_eggs_fats,dairy_yogurt_kefir,frozen_food,frozen_desserts_icecream
+423442,Joogij. vaarikam. WELL DONE 2% 500g,Well Done,500 g,,produce,produce_berries,dairy_eggs_fats,dairy_yogurt_kefir
+423443,Juustulõige RANNAROOTSI 150g viil,Rannarootsi,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423444,Kabanossi-snäkk RAKVERE 120g,Rakvere,120 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+423445,Kabanoss PORMET 120g,Pormet,120 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+423447,Kanasigar juustu TALLEGG 200g,Tallegg,200 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+423449,Odapuder MAMMA 300g,Mamma,300 g,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+423450,Mochi soolakar.&mustsõstra RUD 50g,Rud,50 g,,world_spices,spices_basic_salt_pepper,frozen_food,frozen_desserts_icecream
+423451,Hele õlu SAKU Rock 5.3% 6x568ml prk,Saku,6x568 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423452,Nagitsad kanafil.praetud WELL DONE 300g,Well Done,300 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+423453,Oasalat 200g,,200 g,,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+423454,Alk.vaba õlu HEINEKEN 330ml pdl,Heineken,330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423455,Alk.vaba õlu GUBERNIJA Extra Lager 500ml,,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423456,Alk.vaba siider HOGGYS Apple 500ml prk,Hoggys,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423457,Arom.puuv.-marjavein KARSKI Kirss 750ml,Karski,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423458,Arom.puuv.vein.MONTE CRISTO Rose 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423459,Aloe vera jook ALEO Premium 1.5L,Aleo,1.5 l,,dry_preserves,dry_other,drinks,drinks_soft_soda
+423460,Alk.vaba õlu CLAUSTHALER Dry-Hop. 330ml,Clausthaler,330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423461,Sojadessert ALPRO vaniljemaits. 125g,Alpro,125 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_plant_drinks
+423462,Alk.vaba vahujook COSMOPOLITAN DIVA 75cl,,750 ml,,dry_preserves,dry_other,drinks,drinks_wine
+423463,Alk.vaba õlu AMBER CITY 500ml prk,,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423464,Apelsini-õuna mahl KADARBIKU 750ml,Kadarbiku,750 ml,,drinks,drinks_juices,drinks,drinks_juices
+423465,Alk.vaba õlu Saku Originaal 0.3% 500ml,Saku,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423466,Arom.puuv.-marjavein KARSKI Must s.750ml,Karski,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423467,Ananassipüree 100% BONNE 500ml,Bonne,500 ml,,produce,produce_tropical,drinks,drinks_juices
+423469,Ananasskookospähkli jook PFANNER 1l,Pfanner,1 l,,bakery,bakery_cakes_pastries,drinks,drinks_juices
+423470,Arom.puuv.-m.vein KARKSI leedri-õun 750ml,Karksi,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423471,Juust Camembert PRESIDENT naturaal 120g,Président,120 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423472,Brandy LEGION VSOP 5* 40% 500ml,,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+423473,Cognac COURVOISIER VSOP 40% 350ml +karp,Courvoisier,350 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423474,Juust Iberico Semicurado kg,,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423475,Energiajook RED BULL Coconut-Berry 250ml,Red Bull,250 ml,,drinks,drinks_energy,drinks,drinks_energy

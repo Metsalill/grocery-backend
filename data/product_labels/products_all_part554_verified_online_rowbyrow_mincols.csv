@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+423228,J.jogurt mustika m. WELL DONE 2% 500g,Well Done,500 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423229,Külm.pelmeenid PEALINNA 350g,Pealinna,350 g,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+423230,Külm.pelmeenid sea&veise EXTRA LINE 400g,Extra Line,400 g,,meat_fish,meat_beef_lamb_game,frozen_food,frozen_ready_meals
+423231,J.jogurt GEFILUS vaar.-pass.lakt.v. 1kg,Gefilus,1 kg,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423232,Viin STUMBRAS 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423233,Viin STUMBRAS 40% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423234,Puuviljajäätis pulgal MIO&RIO 70g,Mio&Rio,70 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+423235,Viin VIRU VALGE 40% 200ml,,200 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423236,Whiskey BUSHMILLS Black Bush 40% 700ml,Bushmills,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+423241,J.jogurt aedm. m. WELL DONE 2% 500g,Well Done,500 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423243,Whisky ABERLOUR 12YO 40% 700ml tuub,Aberlour,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423244,Whisky BALVENIE 12YO Doublew. 40% 700ml,Balvenie,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423245,Whisky BLACK RAM 40% 200ml,,200 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423246,Jog.jook ACTIMEL Marvel maas.-ban. 8x100g,Actimel,8x100 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_yogurt_kefir
+423249,Jog.jook ACTIMEL maasika-mustika 12x100g,Actimel,12x100 g,,produce,produce_berries,dairy_eggs_fats,dairy_yogurt_kefir
+423250,Kapsarullid kanalihaga CHEF LUNDEN 300g,Chef Lunden,300 g,,meat_fish,meat_poultry,frozen_food,frozen_ready_meals
+423251,Külm.pelmeenid UVIC Hiina 400g,Uvic,400 g,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+423252,Jogurt SAARE 5% maitsestamata 400g,Saare,400 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423254,Jogurt TERE Emma maasika lakt.vaba 110g,Tere,110 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423257,Jog.jook ACTIMEL maasika 8x100g,Actimel,8x100 g,,produce,produce_berries,dairy_eggs_fats,dairy_yogurt_kefir
+423258,Whisky BLACK RAM 40% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423259,Whisky BUSHMILLS Original 40% 500ml,Bushmills,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423260,Whisky CHIVAS REGAL 18YO 40% 700ml karp,Chivas Regal,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423261,Whisky CONNEMARA Irish S.Malt 40% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423262,Whisky FOUR ROSES Bourbon 40% 700ml,Four Roses,700 ml,,drinks,drinks_wine,drinks,drinks_spirits
+423263,Külm. pitsa Americana WELL DONE 420g,Well Done,420 g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+423264,Jog.jook ACTIMEL puuvilja 4x100g,Actimel,4x100 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_yogurt_kefir
+423267,Jog.jook ACTIMEL naturaalne 4x100g,Actimel,4x100 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_yogurt_kefir
+423268,Jahvatud filter kohv ILLY 250g,Illy,250 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+423270,Vinnutatud särg KALURI 200g,Kaluri,200 g,,dry_preserves,dry_other,meat_fish,fish_processed
+423271,Gin HENDRICK'S Gin 41.4% 700ml,Hendrick's,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423272,Jog.jook ACTIMEL metsamarja 4x100g,Actimel,4x100 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_yogurt_kefir
+423273,Kuiv.kanafilee sinep CHICK&GO 30g viil,Chick&Go,30 g,,meat_fish,meat_poultry,meat_fish,meat_gourmet
+423274,Veiseliha rebit.aegl.küps.WELL DONE 600g,Well Done,600 g,,meat_fish,meat_beef_lamb_game,dry_preserves,dry_canned_meat_fish
+423275,Gin HOGARTH Dry Gin 37.5% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423279,Jog.jook ACTIMEL metsamarja 8x100g,Actimel,8x100 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_yogurt_kefir
+423280,Jog.jook GEFILUS metsamarja 4x100g,Gefilus,4x100 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423281,Sarvesaiad val.kakao täidis.7DAYS 5x37g,7Days,5x37 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+423282,Jahv. kohv PELLINI Esp.Gusto Baar 250g,Pellini,250 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+423283,GT vein BODEGAS Caber.Sauvign. 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423285,J.jogurt mustika m. WELL DONE 2% 250g,Well Done,250 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423286,Kartulipuder MK 300g,MK,300 g,,produce,produce_root_veg,frozen_food,frozen_potato_products
+423287,Kartuli-vorstisalat 200g,,200 g,,meat_fish,meat_sausages,sauces_oils,sauces_other
+423288,Külm. pitsa FRYTASTIC veise-juustu 210g,Frytastic,210 g,,drinks,drinks_wine,frozen_food,frozen_pizza
+423290,Jogurt DANONKI banaani-maasika 70g,Danonki,70 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423292,Jogurt ALMA maasikas-ban. lakt.vaba 900g,Alma,900 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423294,Külm.pitsa FRYTASTIC kana-juustu 210g,Frytastic,210 g,,drinks,drinks_wine,frozen_food,frozen_pizza
+423296,Külm.pitsa Margherita LaMiaGrande 360g,,360 g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+423298,GT punane vein OLD GRUZIA Alaverdi 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423299,Eelküps kuldne grillribi RR 900g,Rannarootsi,900 g,,meat_fish,meat_pork,meat_fish,meat_pork

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+497262,Tallegg Pool Suitsukana 800g,Tallegg,800 g,2364008700002,meat_fish,meat_poultry,meat_fish,meat_poultry
+498983,Coop Kakaojoogipulber 800g,Coop,800 g,7340191173491,,,drinks,drinks_tea_coffee
+499589,Kotimaista Kartul Puikala 1kg,Kotimaista,1 kg,6414893388123,meat_fish,fish_fresh,produce,produce_root_veg
+500028,Punch club! Aperitivo Spritz veinikokteil 7% 250ml,,250 ml,4744429013901,,,drinks,drinks_wine
+500100,Matsimoka Ahjuliha Talvises Marinaadis 700g,Matsimoka,700 g,4744735011370,meat_fish,meat_other,meat_fish,meat_pork
+500240,Santa Maria Salsa Dip Medium 250g,Santa Maria,250 g,7311312002341,,,sauces_oils,sauces_other
+500554,Õun Krista I klass,,,2060432700006,,,produce,produce_apples_pears
+502741,Mustikas 250g,,250 g,4740669130415,,,produce,produce_berries
+503824,USIN Plov Sealihaga 500g,USIN,500 g,4740584001067,meat_fish,meat_pork,frozen_food,frozen_ready_meals
+504700,Hurmaa ekstra suur I klass,,,2060491100007,,,produce,produce_tropical
+508000,Mahe kartul Gala 2kg,,,4740243474034,,,produce,produce_root_veg
+509166,Ma&orits Kaelapraad Mahedas Pipramarinaadis 800g,Maks&Moorits,800 g,2317170400003,,,meat_fish,meat_pork
+509296,Pajakinnas Ruutu 16x32 M/V,,,6438460608247,,,household,hh_kitchenware
+509363,Pajakinnas Muumid V,,,6411801015706,,,household,hh_kitchenware
+509368,HIPP SMUUTI ÕUN-MANG-VIRS 100g 4K,HiPP,100 g,4062300307193,,,baby,baby_food_jars
+509426,Kartulisektor 500g,,500 g,4742063005788,,,produce,produce_root_veg
+509847,Karni Sealihakuubikud Pruunis Kastmes 300g,Karni,300 g,4740579598312,meat_fish,meat_pork,dry_preserves,dry_canned_meat_fish
+509997,Männiriisikas soolatud 500g,,500 g,4742798000010,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+510119,Ma&orits Ahjupeekon 500g,Maks&Moorits,500 g,4740171170633,,,meat_fish,meat_pork
+510451,Coop Sea Sisefilee Maitsestamata kg,Coop,,2396007700004,,,meat_fish,meat_pork
+510475,Pajakinnas 15x32 Argipäev,,,6438574104062,,,household,hh_kitchenware
+510578,Maks ja Moorits Veisesisefilee kg,Maks&Moorits,,2317121600001,,,meat_fish,meat_beef_lamb_game
+510666,Kultuurjõhvikad vees 360g,,360 g,4742063001070,,,produce,produce_berries
+511397,Prescott kakao advendikalender 480g,Prescott,480 g,5038635089430,,,sweets_snacks,sweets_chocolate_bars
+511598,Nordqvist Muumi teede advendikalender 40g,Nordqvist,40 g,6413440199908,,,drinks,drinks_tea_coffee
+512558,Grillhari u 40cm,,,6438574243884,,,household,hh_kitchenware
+512792,Coop külmveekrevetid keedetud ja kooritud sügavkülmutatud 180g,Coop,180 g,7340191146723,frozen_food,frozen_fish,meat_fish,fish_processed
+513315,Mahe õun Royal Gala I klass,,,2060333600009,,,produce,produce_apples_pears
+513837,Kurk pikk kiles,,,2060171400007,,,produce,produce_herbs_salads_sprouts
+514975,Õun Golden 1kg,,1 kg,4740669020051,,,produce,produce_apples_pears
+515202,Vikstal kreeker senjor batonio 350g,Vikstal,350 g,4741469009246,,,sweets_snacks,sweets_snacks_salty
+516341,Maks ja Moorits Peipsiääre Ahjupraad 800g,Maks&Moorits,800 g,2317171000004,,,meat_fish,meat_pork
+518350,Rakvere Kodune Ahjupraad 1.3kg,Rakvere,1.3 kg,2360370100006,,,meat_fish,meat_pork
+518806,Haribo Halloween Mix kommikott 500g,Haribo,500 g,4001686843413,,,sweets_snacks,sweets_candies
+520524,Coop Good night ürditee 20x1.5g,Coop,20x1.5 g,7340191164451,,,drinks,drinks_tea_coffee
+522683,Karni Hõrk Sea Sisefilee 450g,Karni,450 g,2357983300008,,,meat_fish,meat_pork
+522944,Coop kartulikrõpsud hapuk-sibul tuubis 170g,Coop,170 g,7340191117808,,,sweets_snacks,sweets_snacks_salty
+523672,Pajakinnas Expert,,,3616181102494,,,household,hh_kitchenware
+525831,Õun Tiina II klass,,,2060433300007,,,produce,produce_apples_pears
+526173,Karni Praelõigud Sinepikastmes 500g,Karni,500 g,4740579544777,dry_preserves,,dry_preserves,dry_canned_meat_fish
+527647,Rakvere Sinepine Seasisefilee 700g,Rakvere,700 g,4740003018010,,,meat_fish,meat_pork
+528980,Ma&orits Kodune Ahjupraad 800g,Maks&Moorits,800 g,2317160200002,,,meat_fish,meat_pork
+529429,Catrice Extreme Blur matistav primer,Catrice,,4059729587626,dry_preserves,,personal_care,pcare_cosmetics
+529471,Catrice huulepliiats Gel Glide Latte Lines 040,Catrice,,4059729588890,dry_preserves,,personal_care,pcare_cosmetics
+529523,Catrice Multiuse palett 010,Catrice,,4059729584304,dry_preserves,,personal_care,pcare_cosmetics
+529543,Catrice huuleleksiir Aura Drop 010,Catrice,,4059729591517,dry_preserves,,personal_care,pcare_cosmetics
+529569,Catrice huulepalsam Peptide Bliss Glossy Dew not Disturb 030,Catrice,,4059729591531,dry_preserves,,personal_care,pcare_cosmetics
+529637,Catrice huulepalsam Peptide Bliss Glossy Glazed ja Gorgeous 050,Catrice,,4059729591555,dry_preserves,,personal_care,pcare_cosmetics
+529643,Catrice huulepalsam Peptide Bliss Glossy Life in Rose 010,Catrice,,4059729588951,dry_preserves,,personal_care,pcare_cosmetics
+529662,Catrice põsepuna pulk Dewy 010,Catrice,,4059729583888,dry_preserves,,personal_care,pcare_cosmetics

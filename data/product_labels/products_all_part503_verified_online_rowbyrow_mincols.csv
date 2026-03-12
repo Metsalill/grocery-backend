@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+420148,Whisky BALLANTINES FINEST 40% 700ml,Ballantines,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420149,Whisky CANADIAN SPECIAL OLD 40% 700ml,Canadian Special Old,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420150,Whisky GLENFIDDICH 12YO Sin.Malt 40% 700ml,Glenfiddich,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420151,Whisky GLENFIDDICH 15YO S.Malt 40% 700ml,Glenfiddich,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420152,Maitsestatud veed,,1 pk,,dry_preserves,dry_other,drinks,drinks_water
+420153,Whisky GRANT'S 40% 700ml,Grant's,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420154,Whisky J.WALKER Black Label 40% 500ml,Johnnie Walker,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420155,Whisky J.WALKER Black Label 40% 700ml,Johnnie Walker,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420156,Whisky J.WALKER Red Label 40% 350ml,Johnnie Walker,350 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420157,Whisky JAMESON IRISH 40% 700ml,Jameson,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420158,Whisky JIM BEAM White Label 40% 500ml,Jim Beam,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420159,Alk.vaba õlu WARSTEINER Fresh 330ml,Warsteiner,330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+420160,Brandy FERNANDO DE CASTILLA S.R. 36% 700ml,Fernando de Castilla,700 ml,,drinks,drinks_wine,drinks,drinks_spirits
+420161,Brandy GRAND CAVALIER 38% 500ml,Grand Cavalier,500 ml,,drinks,drinks_wine,drinks,drinks_spirits
+420162,Brandy GRAND CAVALIER 38% 700ml,Grand Cavalier,700 ml,,drinks,drinks_wine,drinks,drinks_spirits
+420163,Brandy ST-REMY Authentic XO 40% 700ml,St-Remy,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420164,Brandy TORRES 10 Gran Reserva 38% 700ml,Torres,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420165,Cognac LARSEN V.S.O.P. 40% 350ml karp,Larsen,350 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420166,Cognac LARSEN VS 40% 500ml,Larsen,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420167,Viin LAUA 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420168,Whisky MAKER'S MARK Bourbon 45% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420169,Whisky SCOTTISH LEADER 40% 200ml,,200 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420170,Whisky TULLAMORE 12YO 40% 700ml+karp,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420171,Cognac LARSEN VSOP 40% 700ml,Larsen,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420172,Cognac MEUKOW VS 40% 700ml karp,Meukow,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420173,GT kuiv vein ANDES Merlot 750ml,Andes,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420174,GT pun.vein TRAPICHE Variet.Malbec 750ml,Trapiche,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420175,GT vein HARDYS VR Chardonnay 750ml,Hardys,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420176,GT vein OLD TBILISI Alazani punane 750ml,Alazani,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420177,GT vein OLD TBILISI Alazani valge 750ml,Alazani,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420178,Hele õlu LAPIN KULTA 5.2% 0.5L prk,Lapin Kulta,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+420179,Jahv.kohv mas.Krönung Grand JACOBS 100g,Jacobs,100 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+420181,Jahvatatud kohv Fine Aroma DAVIDOFF 250g,Davidoff,250 g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+420182,Jahvatatud kohv Rich Aroma DAVIDOFF 250g,Davidoff,250 g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+420183,Kakaopulber VILMA 150g,Kalev,150 g,,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+420184,Kaktuse maits.multimahlajook TYMBARK 1L,Tymbark,1 l,,drinks,drinks_juices,drinks,drinks_juices
+420185,KGT valge vein B&G Sauvignon Blanc 750ml,Barton & Guestier,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420186,KGT vein TRAPICHE Malbec 750ml,Trapiche,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420187,Kohviuba ILLY Classic 250g,Illy,250 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+420188,Kohvivalgendaja COFFEETA 200g,Coffeeta,200 g,,drinks,drinks_other,dry_preserves,dry_other
+420189,KPN vein CESARI SOAVE Essere 750ml,Cesari,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420190,KPN vein CHATEAU RAGON BEL-AIR 750ml,Chateau Ragon,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420191,KPN vein FAUSTINO V Reserva 750ml,Faustino,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420192,KPN vein TORRES S.Valent.Parel. 750ml,Torres,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420193,KPN vein VINA ALBALI Reserva 750ml,Viña Albali,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420194,Liköör BECHEROVKA 38% 500ml,Becherovka,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420195,Liköör KÄNNU KUKK 45% 500ml karbis,Liviko,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420196,Külm. Itaalia köögiviljad Hortex 400g,Hortex,400 g,,dry_preserves,dry_other,frozen_food,frozen_veg
+420197,Viinamari Hele Seem Ta Sultana 1 Kl Kg,,1 kg,,drinks,drinks_spirits,produce,produce_berries
+420198,Beebispinat pestud WELL DONE 70g,Well Done,70 g,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts

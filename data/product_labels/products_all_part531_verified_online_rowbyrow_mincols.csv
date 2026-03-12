@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+421856,Brandy TORRES 15 40% 700ml,Torres,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+421857,Päik.k.tom.pesto veg.FILIPPO BERIO 190g,Filippo Berio,190 g,,sauces_oils,sauces_pasta_cooking,sauces_oils,sauces_pasta_cooking
+421858,Gruusia mini-leivake sulatatud 70g,,70 g,,dry_preserves,dry_other,bakery,bakery_bread_loaves
+421859,Juust Hiirte ESTOVER täispiim.viil. 500g,Estover,500 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421860,Pancetta Arrotolata WELL DONE 100g viil,Well Done,100 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+421861,Päik.kuiv.tom.pesto FILIPPO BERIO 190g,Filippo Berio,190 g,,sauces_oils,sauces_pasta_cooking,sauces_oils,sauces_pasta_cooking
+421862,Juust GRANAROLO Grana Padano 150g,Granarolo,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421863,Veiserind OSKAR 100g viil,Oskar,100 g,,meat_fish,meat_beef_lamb_game,meat_fish,meat_beef_lamb_game
+421864,Paneeritud hakkšnitsel M&M 400g,M&M,400 g,,dry_preserves,dry_other,meat_fish,meat_other
+421865,Paneer.kanafileešnitsel M&M 340g,M&M,340 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+421866,Külm.minipelm.broilerilih.TALLEGG 350g,Tallegg,350 g,,meat_fish,meat_poultry,frozen_food,frozen_ready_meals
+421867,Veise vürtsisink OSKAR 100g viil,Oskar,100 g,,world_spices,spices_herbs_spice_mix,meat_fish,meat_hams
+421868,Paneeritud kanafileeburger TALLEGG 340g,Tallegg,340 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+421870,Juust Gouda WELL DONE viilutatud 400g,Well Done,400 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421873,Viini šnitsel seavälisfileest RR 400g,Rannarootsi,400 g,,drinks,drinks_spirits,meat_fish,meat_pork
+421874,Lah.kohvijook AROMA GOLD 3in1 10x17g,Aroma Gold,10x17 g,,drinks,drinks_other,drinks,drinks_tea_coffee
+421875,Vinnutatud vorst Hansa BIOVELA 200g,Biovela,200 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+421876,Roheline tee guanabanaga CHELTON 100g,Chelton,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421877,Grilljuust Döner Kebab Kohvri NOPRI 200g,Nopri,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421878,Juust KROON Maasdam kg,Kroon,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421879,Külmutatud kapsarullid RUD 1kg,Rud,1 kg,,produce,produce_root_veg,frozen_food,frozen_ready_meals
+421880,Külmutatud mereannisegu FJORDS 400g,Fjords,400 g,,meat_fish,fish_fresh,frozen_food,frozen_fish
+421882,Grilljuust NÕO vürtsikas 240g,Nõo,240 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421883,Külmutatud mereandide kokteil WD 400g,Well Done,400 g,,frozen_food,frozen_other,frozen_food,frozen_fish
+421884,Hele õlu SAKU Rock 5.3% 568ml prk,Saku,568 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+421885,Roh.tee Goji Mustika LIPTON pür.20x1.4g,Lipton,20x1.4 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421886,Pasta Carbonara 300g,,300 g,,dry_preserves,dry_pasta_rice,frozen_food,frozen_ready_meals
+421887,Siider FIZZ Blueberry 4.5% 1.5l,Fizz,1.5 l,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+421888,Heeringafil.sool.maitseain.OCEAN 400g,Ocean,400 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+421889,Pardifilee maitseain-ga KITCHEN ME 170g,Kitchen Me,170 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+421890,Siider FIZZ Blueberry 4.5% 500ml prk,Fizz,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+421891,Piim WELL DONE 3.5% UHT 1L,Well Done,1 l,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+421892,Poolkõva kitsejuust kg,,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421893,Dipikaste TERE Dipp-Tops küüslaugu 200g,Tere,200 g,,sauces_oils,sauces_other,sauces_oils,sauces_other
+421895,Poke kauss lõhega 275g,,275 g,,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+421896,Külmutatud veise supikogu kg,,1 kg,,meat_fish,meat_beef_lamb_game,meat_fish,meat_beef_lamb_game
+421897,Grilljuust NOPRI tšilliga 200g,Nopri,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421899,Keeduvorst Juustu VALLA 600g,Valla,600 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+421900,Poke krevetiga 275g,,275 g,,dry_preserves,dry_other,meat_fish,fish_processed
+421901,Mineraalvesi SAN PELLEGRINO 6x1l gas-tud,San Pellegrino,6x1 l,,drinks,drinks_water,drinks,drinks_water
+421902,Poolsuitsuvorst Kalevi RANNAROOTSI 330g,Rannarootsi,330 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+421903,Grilljuust WELL DONE 43% 200g,Well Done,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421904,Praetud kala köögiviljariisiga 300g,,300 g,,dry_preserves,dry_pasta_rice,frozen_food,frozen_ready_meals
+421905,Poolsuitsuvorst Siimu NÕO 135g viil,Nõo,135 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+421906,KGT vein ROCCA Pinot Grigio Veneto 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421907,Hallitusjuust Remberter kg,,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421908,Poolsuitsuvorst PORMET 570g,Pormet,570 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+421909,Vinnutatud vorst Juubeli BIOVELA 200g,Biovela,200 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+421910,Praetud kilu kimchi BRIIS 270g,Briis,270 g,,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_meat_fish
+421911,Praetud kilu sinepis BRIIS 270g,Briis,270 g,,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_meat_fish

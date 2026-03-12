@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+423681,KPN kv.vah.CHARLES SIMON Brut Sup. 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423682,Köögikoor FARMI 15% lakt.vaba 400ml,Farmi,400 ml,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+423683,Kohupiimakreem NOPRI šokolaaditükk. 200g,Nopri,200 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+423684,Kohviuba Jaanus TASUJA 1kg,Tasuja,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+423685,KPN kval.vah. VEUVE DELOYNES Brut 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423686,KPN kv.vah. D.DE COLMAR Crem.Rose 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423687,KPN kv.vah. D.DE COLMAR Cremant 750ml,,750 ml,,dry_preserves,dry_other,drinks,drinks_wine
+423688,KPN kv.vah. JAUME SERRA Cava Brut 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423689,Kohupiimakreem ALMA maitsestam. 3% 300g,Alma,300 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+423690,Kohupiimakreem TERE Emma kakao 150g,Tere,150 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+423692,Jogurt Mango-passioni NOPRI 750ml,Nopri,750 ml,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423693,Jogurt Natural jõhvikamüsliga TERE 150g,Tere,150 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423694,Kohupiimakreem TERE Emma vanilje 150g,Tere,150 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+423695,Karastusjook COCA-COLA Zero 500ml,Coca-Cola,500 ml,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+423696,Jogurt TERE Hellus mango-chia seem. 350g,Tere,350 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423697,Kohupiimakreem TERE Emma mustika 150g,Tere,150 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+423698,Kohupiimakreem TERE Emma maasika 150g,Tere,150 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+423699,KPN kv.vah. MONISTROL Orig. Br.R. 750ml,,750 ml,,dry_preserves,dry_other,drinks,drinks_wine
+423700,KPN Liköörvein LHERAUD Pineau 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423701,Kuivat.tursafileelõigud vürts.MSDM 36g,,36 g,,world_spices,spices_herbs_spice_mix,meat_fish,fish_processed
+423702,Juust Camembert WELL DONE jõhvikas 230g,Well Done,230 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423703,Kuivatatud vorst PORMET 200g,Pormet,200 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+423704,Juust CAMEMBERT PRESIDENT pähklit. 120g,Président,120 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423705,KPN kv.vahuvein R.CLERGET Cremant 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423706,Kuivatatud vorst Fuet WELL DONE 150g,Well Done,150 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+423707,Kuiv.kalmaari lõigud pikantsed MSDM 36g,,36 g,,dry_preserves,dry_other,meat_fish,fish_processed
+423708,Juust CHANSON DU FROMAGE Brie 200g,,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423709,Jogurt TERE Emma jäätisem.kommidega 145g,Tere,145 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423710,Juust CANTOREL Brie kg,,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423711,KPN vahuvein ITALIA Prosecco kuiv 200ml,,200 ml,,drinks,drinks_wine,drinks,drinks_wine
+423712,Kohupiim ALMA 4% 200g,Alma,200 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+423713,Kohupiimapasta TERE banaani 300g,Tere,300 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+423714,Köögitoorjuust FARMI 15% lak.vaba 400g,Farmi,400 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423715,Koorekaramellipuding TERE lak.vaba 200g,Tere,200 g,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_desserts
+423716,KPN vahuvein Fontessa Prosecco 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423717,KPN vah.MASCHIO Prosecco Sp.Ex.Dry 750ml,Maschio,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423718,KPN vahuvein CHIC Cava Brut 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423719,KPN vahuvein PIROVANO Prosecco 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423720,Majonees BALTIKA Provansaal Orig. 300g,Baltika,300 g,,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+423721,KPN vein Beatrice Montep.D`Abruzzo 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423722,Majonees HELLMANN'S Originaal 855ml,Hellmann's,855 ml,,drinks,drinks_spirits,sauces_oils,sauces_ketchup_mayo
+423723,KPN vahuvein S.GIUSEPPE Proseco 200ml,,200 ml,,drinks,drinks_wine,drinks,drinks_wine
+423724,KPN vahuvein Prosecco Col Mesian 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423725,KPN vein BOVIER ET FILS Chablis 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423726,KPN vahuvein CA'VAL Prosecco Sup. 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423727,Majonees BBQ LEMMIK 200g,Lemmik,200 g,,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+423728,Majonees HELLMANN'S Original 405ml,Hellmann's,405 ml,,drinks,drinks_spirits,sauces_oils,sauces_ketchup_mayo
+423729,Majonees LEMMIK Provansaal 210g,Lemmik,210 g,,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+423730,Külm.pelmeenid UVIC Ivan Kazanskie 500g,Uvic,500 g,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+423731,Majonees Provansaal Premium TARPLAN 210g,Tarplan,210 g,,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+422675,Muu piir.jook ARAMIS VSOP 30% 500ml,,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+422676,Vinnutatud forelliribad SEA SNACKS 30g,Sea Snacks,30 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+422677,Kodujuust FARM MILK 5% 500g,Farm Milk,500 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422678,Min. vesi AKVILE gaseerimata 1.5Lx6,Akvile,6x1.5 l,,drinks,drinks_water,drinks,drinks_water
+422680,Alk.jook BACARDI BREEZE Orange 4% 275ml,Bacardi,275 ml,,dry_preserves,dry_other,drinks,drinks_beer_cider
+422681,Jäätis pirnimaits.topsis VÄIKE TOM 85g,Väike Tom,85 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422683,Jäätis pistaatsia vegan multipakk 4x50g,,4x50 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422685,Kõva juust WELL DONE 18 kuud 180g,Well Done,180 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422686,Muu piir.jook TRES SOMBREROS Gold 38% 700ml,,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+422687,Vinn. viil. salch. vorst WELL DONE 80g,Well Done,80 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+422688,Kreeka jogurt ALMA maitsestamata 180g,Alma,180 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+422689,Kreeka jog.jook ALMA mango-maasika 275g,Alma,275 g,,produce,produce_berries,dairy_eggs_fats,dairy_yogurt_kefir
+422691,Vin.vorstid jalapeno juust NEMATEKAS 100g,Nematekas,100 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+422692,Vin. vorstid klass. NEMATEKAS 100g,Nematekas,100 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+422693,Vinnut.veiseliha Teriyaki KARNI 50g,Karni,50 g,,world_spices,spices_asian,meat_fish,meat_gourmet
+422694,Vinn.veisel.sn.Beef Jerky TARCZYNSKI 25g,Tarczynski,25 g,,meat_fish,meat_beef_lamb_game,meat_fish,meat_gourmet
+422695,Vinn. viil. chorizo vorst WELL DONE 80g,Well Done,80 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+422696,Külm.baguette küüs.või.EESTI PAGAR 175g,Eesti Pagar,175 g,,dairy_eggs_fats,dairy_butter_margarine,frozen_food,frozen_bakery
+422698,Kreeka jogurt virsiku LIISU 160g,Liisu,160 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+422699,Brandy FERNANDO DE CASTILLA S.R.36% 700ml,,700 ml,,drinks,drinks_wine,drinks,drinks_spirits
+422700,Brandy AMAZONIA 36% 500ml,,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+422703,Kreemjuus Castello küüslaugumait. 125g,Castello,125 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cheese_slices
+422704,Külm.paneeritud lõheburger VICI 250g,Vici,250 g,,meat_fish,fish_fresh,frozen_food,frozen_fish
+422705,Vin. vorstid magus tšilli NEMATEKAS 100g,Nematekas,100 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+422708,Viru sink RAKVERE 300g viil,Rakvere,300 g,,meat_fish,meat_hams,meat_fish,meat_hams
+422710,Heeringafilee suitsuaroom.ZIGMAS 240g,Zigmas,240 g,,meat_fish,fish_salted_smoked,meat_fish,fish_processed
+422711,Kreeka jogurt mustika LIISU 160g,Liisu,160 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+422712,Õun KANZI 1kl. kg,,1 kg,,produce,produce_apples_pears,produce,produce_apples_pears
+422715,Energiajook RED BULL 4x250ml,Red Bull,4x250 ml,,drinks,drinks_energy,drinks,drinks_energy
+422716,Või E-PIIM Eesti 82% 250g,E-Piim,250 g,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+422719,Heeringafilee suitsumaitseline VICI 240g,Vici,240 g,,meat_fish,fish_salted_smoked,meat_fish,fish_processed
+422720,Võileib mag.ch.kana papr. spinat. 170g,,170 g,,dairy_eggs_fats,dairy_butter_margarine,bakery,bakery_other
+422721,Või FARM MILK 82% 180g,Farm Milk,180 g,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+422723,Heeringafilee tk.sinep.VICI 200g,Vici,200 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+422724,Külm.baguette ürdivõiga EESTI PAGAR 175g,Eesti Pagar,175 g,,dairy_eggs_fats,dairy_butter_margarine,frozen_food,frozen_bakery
+422725,Külm.paneer.kalafil.küüsl.WELL DONE 220g,Well Done,220 g,,meat_fish,fish_fresh,frozen_food,frozen_fish
+422727,Energiajook RED BULL 250ml,Red Bull,250 ml,,drinks,drinks_energy,drinks,drinks_energy
+422728,Võileivamääre FARMI hapukur.-tilli 150g,Farmi,150 g,,dairy_eggs_fats,dairy_butter_margarine,sauces_oils,sauces_other
+422730,Gaseeritud vesi SAAREMAA 1.5L,Saaremaa,1.5 l,,drinks,drinks_water,drinks,drinks_water
+422731,Peakapsas kg,,1 kg,,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+422734,Poolvahuvein LAMBRUSCO Reggiano Am.750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422736,Heeringafil.sool.maits.OCEAN õlis 220g,Ocean,220 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+422737,Tume õlu EICHBAUM RED BEER 5.9% 500ml,Eichbaum,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+422738,Koorejäätis soola karam-šoko PREMIA 480g,Premia,480 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+422739,Tume õlu Guinness Original 33cl 5%,Guinness,330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+422741,Ploom punane kg,,1 kg,,dry_preserves,dry_other,produce,produce_tropical
+422745,Külm.pannkoogid õuna-kaneeli VICI 280g,Vici,280 g,,world_spices,spices_herbs_spice_mix,frozen_food,frozen_bakery
+422748,Redis punane kg,,1 kg,,dry_preserves,dry_other,produce,produce_herbs_salads_sprouts
+422756,Riivitud keedupeet vaakumis Jovaige 500g,Jovaige,500 g,,produce,produce_root_veg,produce,produce_root_veg
+422757,Redis punane pakitud 125g,,125 g,,dry_preserves,dry_other,produce,produce_herbs_salads_sprouts

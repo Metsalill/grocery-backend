@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+424417,Vahujook LIMPA Mullike 750ml,Limpa,750 ml,,dry_preserves,dry_other,drinks,drinks_soft_soda
+424418,Kohvikoor TERE 10% 380ml,Tere,380 ml,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+424419,Tseburekid klassikalised praetud 250g,,250 g,,dry_preserves,dry_other,frozen_food,frozen_bakery
+424420,Tseburekid praetud lambalihaga 250g,,250 g,,meat_fish,meat_beef_lamb_game,frozen_food,frozen_bakery
+424422,Vahuvein FREIXENET Prosecco DOC 750ml,Freixenet,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424423,Vahuvein ITALIA Brut 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424424,Hummus päik.kuiv.tomat-basiil.GC 200g,,200 g,,produce,produce_root_veg,sauces_oils,sauces_other
+424425,Vahuvein MIONETTO Vivo Dolce magus 750ml,Mionetto,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424426,Vahuvein MIONETTO Vivo Extra Dry 750ml,Mionetto,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424427,Vahuvein POLINI Treviso Prosecco 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424428,Kohvioad Krönung JACOBS 1kg,Jacobs,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+424429,Hautatud kanaliha KODUKÜLA 250g,Koduküla,250 g,,meat_fish,meat_poultry,dry_preserves,dry_canned_meat_fish
+424430,Vahuvein VEUVE DU VERNAY Rose Brut 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424431,Valge tee Chinese BASILUR 100g,Basilur,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424432,Valge vein KIA ORA Sauvignon Blanc 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424433,Valge vein MATUA Sauvignon Blanc 750ml,Matua,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424434,Pirni-õunamahlajook AURA Fresh 2L,Aura,2 l,,drinks,drinks_juices,drinks,drinks_juices
+424435,Vein ASIO OTUS Cab.Mer.Shiraz 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424436,Vein ASIO OTUS Chard.Sauv.Blanc 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424437,T/s.peekon Ameerikapär.RAKVERE 150g viil,Rakvere,150 g,,meat_fish,meat_pork,meat_fish,meat_pork
+424438,Piiritusjook CARIBBA Xtabla 35% 500ml,,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+424439,Fileerib.jogurti-tilli mar.TALLEGG 500g,Tallegg,500 g,,dairy_eggs_fats,dairy_yogurt_kefir,meat_fish,meat_poultry
+424440,Hautatud kanaliha MAAILU 240g,Maailu,240 g,,meat_fish,meat_poultry,dry_preserves,dry_canned_meat_fish
+424441,Vahuvein JULES LAROSE Brut 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424442,Vein BIG GAME Malbec 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424443,Vein CHIANTI ROCCIALTA 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424444,Vein GRAN CASTILLO Cab.-Shiraz 3L BIB,,3 l,,drinks,drinks_wine,drinks,drinks_wine
+424445,Vein GRAN CASTILLO V.&Chardonnay 3L BIB,,3 l,,drinks,drinks_wine,drinks,drinks_wine
+424446,Vein AUSSIE Rules Shiraz 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424447,Vein FRANZ HOFFNER Weisswein 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424448,Kirsimaitse. tarretis virsikutega 200g,,200 g,,dry_preserves,dry_other,sweets_snacks,sweets_other
+424449,Vein PRIMAVERA Rose 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424450,Keele-želeevorst OSKAR 120g viil,Oskar,120 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424451,Vein RIO LINDO Chardonnay 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424452,Vein RIO LINDO Syrah 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424453,Vein SILK & SPICE Red Blend 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424454,Vein Skywalker Sauvignon Blanc M. 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424455,Vein TALISMAN Grüner Veltliner 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424456,Jahimeh.kuumsuitsuvorstid WELL DONE 260g,Well Done,260 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424457,Jah. krabinuudel surimi VICI 200g,Vici,200 g,,dry_preserves,dry_other,meat_fish,fish_processed
+424458,Kaaviarimääre kalmaaridega NORVEN 160g,Norven,160 g,,dry_preserves,dry_other,meat_fish,fish_processed
+424459,Vermut VIVIANO Bianco 1L,Viviano,1 l,,dry_preserves,dry_other,drinks,drinks_wine
+424460,Kergsuitsu seasink RANNAROOTSI kg,Rannarootsi,1 kg,,meat_fish,meat_hams,meat_fish,meat_hams
+424461,Juurviljad juustukastmes 300g,,300 g,,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_veg
+424462,Klassikaline roheline pesto SACLA 190g,Sacla,190 g,,sauces_oils,sauces_pasta_cooking,sauces_oils,sauces_pasta_cooking
+424463,Kaaviarimääre suitsulõhega NORVEN 160g,Norven,160 g,,meat_fish,fish_salted_smoked,meat_fish,fish_processed
+424464,Vein GRAND SUD Chardonnay 250ml,,250 ml,,drinks,drinks_wine,drinks,drinks_wine
+424465,Vesi AURA FRUIT Maas.-Basiilik 500ml pet,Aura,500 ml,,drinks,drinks_water,drinks,drinks_water
+424466,Vesi AURA FRUIT Maas.-Basiilik 1.5l pet,Aura,1.5 l,,drinks,drinks_water,drinks,drinks_water
+424467,Kons.turistieine veiselihast MINU 250g,Minu,250 g,,meat_fish,meat_beef_lamb_game,dry_preserves,dry_canned_meat_fish

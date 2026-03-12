@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+420092,Virsik 1 Kl Kg,,1 kg,,dry_preserves,dry_other,produce,produce_tropical
+420093,Cognac HENNESSY VS 40% 350ml,Hennessy,350 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420094,Cognac HENNESSY VSOP 40% 350ml,Hennessy,350 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420095,Gin BEEFEATER 40% 700ml,Beefeater,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420096,Liköör KÄNNU KUKK 45% 500ml karbis,Kännu Kukk,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420097,Liköör MALIBU 21% 500ml,Malibu,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420098,Gin BOMBAY SAPPHIRE 40% 0.7l,Bombay Sapphire,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420099,GT vein C.DEL DIABLO Cab.Sauv.Black 750ml,Casillero del Diablo,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420100,GT vein CARSON`S Caber.Sauv.Shiraz 750ml,Carson's,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420101,GT vein CARSON`S Chardonnay 750ml,Carson's,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420102,GT vein CASA VENERDI Bianco 750ml,Casa Venerdi,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420103,GT vein CASA VENERDI Rosso 750ml,Casa Venerdi,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420104,GT vein CONO SUR Bicic.Caber.Sauv. 750ml,Cono Sur,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420105,GT vein FRONTERA Cab.Sauv. 750ml,Frontera,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420106,GT vein GATO NEGRO Cabern.Sauvign.750ml,Gato Negro,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420107,Liköör SHERIDAN`S 15.5% 500ml,Sheridan's,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420108,GT vein GATO NEGRO Chardonnay 750ml,Gato Negro,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420109,Kreeka jogurt SAARE 10% 380g,Saare,380 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+420110,Täissuitsuvorst juustuga Moskva NÕO 250g,Nõo,250 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+420112,Külm.köögivil.segu Vahemere BAUER 400g,Bauer,400 g,,dry_preserves,dry_other,frozen_food,frozen_veg
+420113,Whisky J.WALKER Red Label 40% 350ml,Johnnie Walker,350 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420114,Külm.minipelmeenid sealih.RAKVERE 350g,Rakvere,350 g,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+420115,Whisky JIM BEAM White Label 40% 500ml,Jim Beam,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420116,Brandy BELÕJ AIST 5* 40% 500ml,Belõj Aist,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420117,KGT vein DREAMER cab.sauv. 750ml,Dreamer,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420118,Koriander potis Hansa Herbs,Hansa Herbs,1 tk,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+420123,KGT vein DREAMER Chardonnay 750ml,Dreamer,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420124,KP-kv.vahuvein VEUVE CLICQUOT P.Br.750ml,Veuve Clicquot,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420125,KPN kv.vah. FREIXENET Brut 750ml,Freixenet,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420126,KPN kv.vah.MOET&CHANDON Nectar Imp.750ml,Moët & Chandon,750 ml,,dry_preserves,dry_other,drinks,drinks_wine
+420127,KPN kv.vahuv.MOET&CHANDON Brut I. 750ml,Moët & Chandon,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420128,KPN kv.vahuvein MARTINI Asti 1.5L,Martini Asti,1.5 l,,drinks,drinks_wine,drinks,drinks_wine
+420129,KPN-kv. vein EL COTO Crianza 750ml,El Coto,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420131,KPN vein EL COTO Blanco Rioja 750ml,El Coto,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420132,KPN vein MURVIEDRO Crianza 750ml,Murviedro,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420133,Liköör BAILEYS Irish Cream 17% 700ml,Baileys,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420134,Liköör JÄGERMEISTER 35% 350ml,Jägermeister,350 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420135,Liköör MALIBU 21% 500ml,Malibu,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420136,Liköör SHERIDAN`S 15.5% 500ml,Sheridan's,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420137,Liköör VANA TALLINN Cream 16% 500ml,Vana Tallinn,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420138,Muu alk. jook PINA COLADA 14.5% 700ml,De Kuyper,700 ml,,drinks,drinks_soft_soda,drinks,drinks_spirits
+420139,Piiritusjook CHAMPION 38% 500ml,Champion,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420140,Rumm BACARDI BLACK 40% 500ml,Bacardi,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420141,Vahuvein CINZANO Sweet Edit.Dolce 750ml,Cinzano,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420142,Vermut MARTINI Rosato 15% 1L,Martini,1 l,,dry_preserves,dry_other,drinks,drinks_spirits
+420143,Viin FINLANDIA 40% 1L,Finlandia,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+420144,Viin FINLANDIA 40% 700ml,Finlandia,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420145,Viin SMIRNOFF Red 37.5% 500ml,Smirnoff,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420146,Viin SMIRNOFF Red 40% 700ml,Smirnoff,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420147,Whisky BALLANTINES FINEST 40% 500ml,Ballantines,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits

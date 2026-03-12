@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+420201,Võisalat potis HANSA HERBS,Hansa Herbs,1 tk,,dairy_eggs_fats,dairy_butter_margarine,produce,produce_herbs_salads_sprouts
+420202,Avokaado Ready to eat WELL DONE 2tk,Well Done,2 tk,,dry_preserves,dry_other,produce,produce_tropical
+420204,Liköör STROH Jagertee 40% 500ml,Stroh,500 ml,,drinks,drinks_tea_coffee,drinks,drinks_spirits
+420205,Liköör Blue Curacao 20% 700ml,,700 ml,,dairy_eggs_fats,dairy_cream_sourcream,drinks,drinks_spirits
+420206,Liköör VANA TALLINN 45% 500ml,Vana Tallinn,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420207,Maits.viin NEMIROFF Hon.Pepp. 40% 500ml,Nemiroff,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420208,Muu piir.jook PIPRA KIBE NAPS 35% 350ml,Pipra Naps,350 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420209,Muu piir.jook PIPRA KIBE NAPS 35% 500ml,Pipra Naps,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420210,Õunamahl AURA 100% 1L,Aura,1 l,,drinks,drinks_juices,drinks,drinks_juices
+420211,Piir.jook SIERRA Tequila Repos. 38% 500ml,Sierra,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420212,Rumm CAPTAIN MORGAN Dark 40% 500ml,Captain Morgan,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420213,Vahuvein MARTINI Brut 750ml,Martini,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420214,Vahuvein TÖRLEY CHARMANT 750ml,Törley,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420215,Vahuvein TÖRLEY Muscateller 750ml,Törley,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420216,Vahuvein TÖRLEY TALISMAN 750ml,Törley,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420217,Viin LAUA 40% 500ml,Laua Viin,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420218,Viin VIRU VALGE 40% 1L,Viru Valge,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+420219,Viin VIRU VALGE 40% 350ml,Viru Valge,350 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420220,Külm. Kentucky broileriribad 250g,,250 g,,meat_fish,meat_poultry,frozen_food,frozen_meat
+420221,Peakapsa Kimchi 300g,,300 g,,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+420223,Punase peakapsa Kimchi 300g,,300 g,,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+420224,Kpn Vein Baron Rosen Riesling 750 Ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420226,Mineraalvesi VÄRSKA originaal 500ml,Värska,500 ml,,drinks,drinks_spirits,drinks,drinks_water
+420227,Muu alk.jook PINA COLADA Retro 14% 700ml,,700 ml,,drinks,drinks_soft_soda,drinks,drinks_spirits
+420228,Muu piir.jook METAXA 5* 38% 500ml,Metaxa,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420229,Külm. Ukraina borš segu BAUER 400g,Bauer,400 g,,dry_preserves,dry_other,frozen_food,frozen_veg
+420230,Viin VIRU VALGE 40% 500ml,Viru Valge,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420231,Whisky BALLANTINES FINEST 40% 1L,Ballantines,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+420232,Whisky BUSHMILLS 10YO SM 40% 700ml box,Bushmills,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420233,Whisky BUSHMILLS Original 40% 700ml,Bushmills,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420234,Arom.puuv.vein MONTE CRISTO punane 750ml,Monte Cristo,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420235,Arom.puuv.vein MONTE CRISTO valge 750ml,Monte Cristo,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420236,Arom.puuvilja vein BOLLINO punane 750ml,Bollino,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420237,Arom.puuvilja vein BOLLINO valge 750ml,Bollino,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420238,Salatisegu Home WELL DONE 150g,Well Done,150 g,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+420239,Beebispinat WELL DONE 200g,Well Done,200 g,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+420240,Brandy BEEHIVE VSOP 40% 500ml,Beehive,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420241,Brandy IBIS X.O 36% 500ml,Ibis,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420242,Brandy TORRES 5 38% 700ml,Torres,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420243,Cognac COURVOISIER VS 40% 700ml,Courvoisier,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420244,Hapukapsas pakitud KADARBIKU 900g,Kadarbiku,900 g,,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+420245,Salad mix RAINBOW WELL DONE 150g,Well Done,150 g,,dry_preserves,dry_other,produce,produce_herbs_salads_sprouts
+420246,Jahvatatud Kohv Jacobs Kronung 500g,Jacobs,500 g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+420247,Karastusjook Coca Cola Zero 1.5L,,1.5 l,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+420248,Karastusjook Fanta Apelsini 1.5L,,1.5 l,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+420249,Karastusjook Fanta Apelsini 500ml,,500 ml,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+420251,Karastusjook Sprite 1.5L,,1.5 l,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+420252,Gin BEEFEATER Pink 37.5% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420253,Kgt Vein J P Chenet Moelleux Blanc 750 Ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420254,Kohvioad Arabica Espresso Paulig 1 Kg,Paulig,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules

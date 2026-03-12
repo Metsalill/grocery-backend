@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+421794,Pehme salatijuust FARM MILK 40% 200g,Farm Milk,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421796,Piimakõrred MilkyMood šokolaadimait.5x6g,MilkyMood,5x6 g,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+421797,Lihapallid M&M 350g,M&M,350 g,,meat_fish,meat_other,meat_fish,meat_other
+421798,Külmutatud herned WELL DONE 400g,Well Done,400 g,,dry_preserves,dry_canned_veg,frozen_food,frozen_veg
+421799,Piimajook VALIO EILA lak.vaba 1.5% 1L,Valio,1 l,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+421800,Kuums.lõhe kõhuääred OCEAN 500g,Ocean,500 g,,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+421801,Kuums.kanarul.Pidupäeva KEKAVA kg-lett,Kekava,1 kg,,meat_fish,meat_poultry,meat_fish,meat_poultry
+421802,Kuumsuitsuvorst Servelaat WELL DONE 300g,Well Done,300 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+421804,Kuumsuitsuforrelli salat 250g,,250 g,,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+421806,Täisterajahu lavašš 120g,,120 g,,dry_preserves,dry_flour_sugar_baking,bakery,bakery_bread_loaves
+421807,Brandy BELÕI AIST 3* 40% 200ml,,200 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+421808,Tuunikala purust.om.mahlas OCEAN EO 185g,Ocean,185 g,,drinks,drinks_juices,dry_preserves,dry_canned_meat_fish
+421810,Vähes.heeringafilee õlis ZIGMAS 240g,Zigmas,240 g,,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+421811,Vanillijäätis maasikaga WELL DONE 90g,Well Done,90 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421812,Kuumsuits.sink Kuningate KARNI 120g viil,Karni,120 g,,meat_fish,meat_hams,meat_fish,meat_hams
+421813,Vanillikreemiga saiake 78g,,78 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+421814,Arbuus seemneteta kg,,1 kg,,sweets_snacks,sweets_nuts_driedfruit,produce,produce_tropical
+421817,Sulatatud pangaasius filee kg,,1 kg,,dry_preserves,dry_other,meat_fish,fish_fresh
+421819,Lõhesalat Prantsuse MARINE ABC EO 240g,Marine ABC,240 g,,meat_fish,fish_fresh,dry_preserves,dry_canned_meat_fish
+421820,Martsipanikeerd 60g,,60 g,,dry_preserves,dry_other,sweets_snacks,sweets_candies
+421821,Lõhe Teriyakikastmes RANNAKÜLA 120g,Rannaküla,120 g,,world_spices,spices_asian,meat_fish,fish_salted_smoked
+421822,Piim FARM MILK 2% UHT 1L,Farm Milk,1 l,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+421823,Piim FARM MILK 3.2% 1L,Farm Milk,1 l,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+421824,Lõhesalat Mexicano KAIJA EO 160g,Kaija,160 g,,meat_fish,fish_fresh,dry_preserves,dry_canned_meat_fish
+421825,KPN vein Mukuzani kuiv punane 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421827,Juust Edam MO SAAREMAA viil. 450g,Saaremaa,450 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421829,Sulatatud kuldne meriahven kg,,1 kg,,dry_preserves,dry_other,meat_fish,fish_fresh
+421830,Sulatatud skumbria ilma peata kg,,1 kg,,dry_preserves,dry_other,meat_fish,fish_fresh
+421831,Kohupiimakreem ALMA mango-virsiku 380g,Alma,380 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+421832,KPN vein MAYBACH Weisser Burgunder 3L,Maybach,3 l,,drinks,drinks_wine,drinks,drinks_wine
+421833,Piim laktoosi vaba WELL DONE 2.5% 1L,Well Done,1 l,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+421834,Vanillijäätis šok&kakaoküpsis.WD 310g,Well Done,310 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421835,Lihapall.mag.-hapu köög. pastaga 300g,,300 g,,dry_preserves,dry_pasta_rice,frozen_food,frozen_ready_meals
+421836,Juust Eesti E-PIIM viilutatud 500g,E-Piim,500 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421837,Mahe rohumaaveise hakkliha LIIVIMAA 300g,Liivimaa,300 g,,meat_fish,meat_minced,meat_fish,meat_minced
+421839,Maamehesink M&M kg,M&M,1 kg,,meat_fish,meat_hams,meat_fish,meat_hams
+421841,Minikotlet MAKS&MOORITS 300g,Maks&Moorits,300 g,,dry_preserves,dry_other,meat_fish,meat_other
+421842,Muu pir.jook PIPRA NAPS Meega 35% 500ml,,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+421843,Kohup.kreem ALMA metsamarjakissell 140g,Alma,140 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+421844,Naturaalne mineraalvesi AKVILE 0.5L g-ga,Akvile,500 ml,,drinks,drinks_water,drinks,drinks_water
+421845,Maits. viin STUMBRAS Cranberry 40% 500ml,Stumbras,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+421846,Piim TERE D-vitamiiniga 1.8% 1.5L,Tere,1.5 l,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+421847,Kohup.kreem TERE Emma rabarberikis. 150g,Tere,150 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+421848,Kohvikapslid Mattinata L'OR 10x5.2g,L'Or,10x5.2 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+421849,Maheveiseliha kuiv.tük.trad.LINNAMÄE 40g,Linnamäe,40 g,,meat_fish,meat_beef_lamb_game,meat_fish,meat_gourmet
+421851,Veisepraad kondita kg,,1 kg,,meat_fish,meat_beef_lamb_game,meat_fish,meat_beef_lamb_game
+421852,Merevet.õlis porg.koreea stiil. kg-lett,,1 kg,,sauces_oils,oils_other,produce,produce_herbs_salads_sprouts
+421853,Naturaalne mineraalvesi AKVILE 0.5L g-ta,Akvile,500 ml,,drinks,drinks_water,drinks,drinks_water
+421854,KPN vein ARALDICA Barolo Flori 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421855,KPN vein TORRES San Valentin Parel.3L,Torres,3 l,,drinks,drinks_wine,drinks,drinks_wine

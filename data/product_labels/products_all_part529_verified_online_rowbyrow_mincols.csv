@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+421736,Kodusardell M&M 500g,M&M,500 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+421737,Kodusink RAKVERE kg,Rakvere,1 kg,,meat_fish,meat_hams,meat_fish,meat_hams
+421738,Rannakarbid catalane VILSUND BLUE 350g,Vilsund Blue,350 g,,dry_preserves,dry_other,dry_preserves,dry_canned_meat_fish
+421739,Lahustuv kohv INDIAN GOLD siguriga 90g,,90 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421740,Kons.hautatud sealiha MINU 250g,Minu,250 g,,meat_fish,meat_pork,dry_preserves,dry_canned_meat_fish
+421741,Seakaelakarbonaad kg,,1 kg,,dry_preserves,dry_other,meat_fish,meat_pork
+421742,Lasanje Bolognese WILLIAM SAURIN 300g,William Saurin,300 g,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+421743,Kuiv.kanafilee juustu CHICK&GO 30g viil,Chick&Go,30 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+421745,Snäkk Chicken NÕO 85g,Nõo,85 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+421746,Majonees SALVEST Kerge 430g,Salvest,430 g,,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+421747,Lahustuv kohv NESCAFE Gold 200g,Nescafé,200 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421748,Sprotid õlis KAIJA 240g,Kaija,240 g,,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+421749,Tagasink KARNI 120g viil,Karni,120 g,,meat_fish,meat_hams,meat_fish,meat_hams
+421750,Täissuitsuvorst Moskva NÕO 250g,Nõo,250 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+421751,Külm.singi-juustu pitsa PREMIA 340g,Premia,340 g,,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_pizza
+421753,Majonees SAAREMAA MAHEMUNAD 250g,Saaremaa,250 g,,dairy_eggs_fats,dairy_eggs,sauces_oils,sauces_ketchup_mayo
+421754,Kulduim-tuuni tükid päevel.õlis WD 400g,Well Done,400 g,,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+421755,Kuiv.sink Serrano WELL DONE 100g viil,Well Done,100 g,,meat_fish,meat_hams,meat_fish,meat_gourmet
+421757,Meiereivõi VALIO soolata 500g,Valio,500 g,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+421758,Küüslaugu baguette 152g,,152 g,,dry_preserves,dry_other,bakery,bakery_bread_loaves
+421759,Mangonektar CIDO India 1L,Cido,1 l,,drinks,drinks_juices,drinks,drinks_juices
+421760,Väikesed banaanid pakitud 250g,,250 g,,produce,produce_tropical,produce,produce_tropical
+421761,Külm.tiigerkrevetid keed.koorit.WD 225g,Well Done,225 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_fish
+421762,Munavalged õrrekanade munadest 1kg,,1 kg,,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+421763,Naturaalne mahejogurt WELL DONE 2% 140g,Well Done,140 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+421764,Ökomunad WELL DONE 10tk,Well Done,10 tk,,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+421766,Marjatee LOYD maasika-vanil. pür 20x2g,Loyd,20x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421767,Kuiv.vorst Spanish Mix WELL DONE 120g viil,Well Done,120 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+421768,Külm. tursafilee nahata BIMAR 360g,Bimar,360 g,,dry_preserves,dry_other,frozen_food,frozen_fish
+421769,Lah.kohvijook AROMA GOLD 3in1 17g,Aroma Gold,17 g,,drinks,drinks_other,drinks,drinks_tea_coffee
+421770,Orgaaniline mandlijook WELL DONE 1L,Well Done,1 l,,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+421771,Org.kaerajook WELL DONE Barista UHT 1l,Well Done,1 l,,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+421772,Sealihašašlõkk keefirimarinaadis kg,,1 kg,,dairy_eggs_fats,dairy_yogurt_kefir,meat_fish,meat_pork
+421773,Täissuitsuvorst Ordu küüslaugug.NÕO 250g,Nõo,250 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+421774,Toorvorstikesed LEMMIK kg,Lemmik,1 kg,,meat_fish,meat_sausages,meat_fish,meat_sausages
+421775,Kulduim-tuun.tük.ol.õlis WELL DONE 2x120g,Well Done,2x120 g,,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+421777,Karamellikook 370g,,370 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+421778,Pehme kohupiim MO SAAREMAA 5% 500g,Saaremaa,500 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+421779,Näkileivad Naturell glut-vaba WASA 240g,Wasa,240 g,,dry_preserves,dry_other,bakery,bakery_bread_loaves
+421780,Parim päts peenleib 310g,,310 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+421781,Külm.Ukraina borš segu BAUER 400g,Bauer,400 g,,dry_preserves,dry_other,frozen_food,frozen_veg
+421782,Külmutatud broilerikael TALLEGG 500g,Tallegg,500 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+421783,Paprikakaste FELIX 275g,Felix,275 g,,produce,produce_root_veg,sauces_oils,sauces_other
+421784,Pehme kitsejuust kg,,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421785,Kulduim-tuun tomatikastmes WD 180g,Well Done,180 g,,produce,produce_root_veg,dry_preserves,dry_canned_meat_fish
+421788,Tuunikalafilee õlis HAPPYSEA EO 185g,Happysea,185 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+421789,Tuunikala pur.taimeõlis HAPPYSEA EO 185g,Happysea,185 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+421790,Tuunikala purust.õlis OCEAN EO 185g,Ocean,185 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+421791,Panna Cotta NOPRI vaarika 150g,Nopri,150 g,,produce,produce_berries,dairy_eggs_fats,dairy_desserts
+421792,Panna Cotta Tiramisu NOPRI 150g,Nopri,150 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_desserts

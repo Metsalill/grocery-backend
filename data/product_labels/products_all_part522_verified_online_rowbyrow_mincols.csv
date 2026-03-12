@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+421312,Kohuke ALMA kakao 40g,Alma,40 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+421313,Kohupiimahõrgutis ALMA kirsi 150g,Alma,150 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+421314,KPN vein CASAL GARCIA Rose Vin.V. 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421315,KPN vein CASAL GARCIA 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421316,KPN vein ANNA LAURE Gewurztraminer 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421317,Kohvioad Qualita Rossa LAVAZZA 1kg,Lavazza,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+421319,KGT vein VITIS NOSTRA Pinot Grigio 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421320,KPN vein ANNA LAURE Pinot Gris 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421321,Külm.kalafilee juustuga WELL DONE 220g,Well Done,220 g,,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_fish
+421322,KPN vein BATTISTINA Gavi 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421323,Sulat.juust HIIRTE JUUST grillkana 185g,Hiirte Juust,185 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421324,Sulat.juust Old Saare MO SAAREMAA 185g,Saaremaa,185 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421325,Sul.juust MEREVAIK singiga 200g,Merevaik,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421326,Sulat.juust VALIO kukeseenem.-ürdi 185g,Valio,185 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421328,KPN vein ANNA LAURE Pinot Blanc 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421329,Ruks vormileib LEIBUR 300g,Leibur,300 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+421330,Kõrvitsa-kohupiimapannkoogid MAMMA 200g,Mamma,200 g,,dairy_eggs_fats,dairy_cottage_quark,frozen_food,frozen_bakery
+421331,Joogijogurt TERE metsmaasika 900g,Tere,900 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+421332,KPN kv.vahuvein C.MONTAINE Brut 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421334,Looduslik karbon.mineraalvesi BORJOMI 1L,Borjomi,1 l,,drinks,drinks_water,drinks,drinks_water
+421335,Külm.kartulisektorid MAAHÄRRA 500g,Maahärra,500 g,,produce,produce_root_veg,frozen_food,frozen_potato_products
+421337,Sulat.määrdejuust FARM MILK singiga 150g,Farm Milk,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421339,Täispiimajogurt ALMA ahjuõuna 350g,Alma,350 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+421340,KPN vein CHT DES COMBES Grand Cru 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421341,Täispiim ALMA 3.8-4.2% 500ml,Alma,500 ml,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+421342,Suits.Doktorivorsti kuubikud M&M 250g,M&M,250 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+421343,Taluvõi ESTOVER Eesti 82% 150g,Estover,150 g,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+421344,Tofu tilli ja peterselliga BON SOYA 250g,Bon Soya,250 g,,sauces_oils,sauces_soy_worcester,dairy_eggs_fats,dairy_plant_drinks
+421345,Toidukoor Alma 20% 400ml,Alma,400 ml,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+421346,Külm.kartulisektor küüsl.AVIKO 600g,Aviko,600 g,,produce,produce_root_veg,frozen_food,frozen_potato_products
+421347,Toorjuust OTTO kurgi-tilliga 150g,Otto,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421348,Toorjuust OTTO küüslaugu-ürtidega 150g,Otto,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421349,Juust Cheddar Red kg,,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421350,Külm.mintaifilee nahata WELL DONE 500g,Well Done,500 g,,sweets_snacks,sweets_gums_mints,frozen_food,frozen_fish
+421351,Rummipall 2x90g,,2x90 g,,drinks,drinks_spirits,bakery,bakery_cakes_pastries
+421352,Poolkõva juust Maasdam kg,,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421353,Sarvesai vanilje-maasikaga 7DAYS 60g,7Days,60 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+421354,KPN vein BLUE NUN Riesling 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421355,Liköör Jõhvika 18% 500ml PET,,500 ml,,produce,produce_berries,drinks,drinks_spirits
+421356,Dessert ZOTT Monte šokolaadim. 150g,Zott,150 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+421357,Toorjuust Classic PHILADELPHIA 200g,Philadelphia,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421358,Toorjuust PIIMAMEISTER OTTO 400g,Otto,400 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421359,Mintaimari LEMBERG 100g,Lemberg,100 g,,sweets_snacks,sweets_gums_mints,meat_fish,fish_processed
+421360,Toorjuust WELL DONE 200g,Well Done,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421361,KPN vein Cht CARTILLON 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421362,KPN- vein GRAN CASTILLO CabSauv.750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421363,Pruunid šampinjonid pakitud 400g,,400 g,,produce,produce_mushrooms,produce,produce_mushrooms
+421364,Hapukoor TERE 20% lak.vaba 300g tops,Tere,300 g,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+421366,Seemneröst FAZER 450g,Fazer,450 g,,sweets_snacks,sweets_nuts_driedfruit,dry_preserves,dry_cereals_muesli
+421369,KPN vein GRAN CASTILLO Reserve Chard.750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine

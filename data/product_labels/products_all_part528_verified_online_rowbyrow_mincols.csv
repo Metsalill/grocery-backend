@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+421681,Külms. lõhefilee viil. M.V.WOOL 100g,M.V.Wool,100 g,,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+421682,Kanahautis seenekast.WILLIAM SAURIN 400g,William Saurin,400 g,,meat_fish,meat_poultry,dry_preserves,dry_canned_meat_fish
+421683,Liköör JÄGERMEISTER 35% 500ml,Jägermeister,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+421684,Kana-juustupihvid TALLEGG 320g,Tallegg,320 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_poultry
+421685,Loomalihakonserv MINU De Lux 525g,Minu,525 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+421686,Liköör ÜRDIMEISTER 35% 500ml,,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+421687,Kanalihakonserv MINU De Lux 525g,Minu,525 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+421688,Liköör Muraka 18% 500ml,,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+421689,Liköör VANA TALLINN 50% 500ml,Vana Tallinn,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+421691,Külmutatud maasikad WELL DONE 400g,Well Done,400 g,,frozen_food,frozen_berries_fruit,frozen_food,frozen_berries_fruit
+421692,Jogurt maasika dražeega 135g,,135 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+421693,Kauaküps.suitsukoot OSKAR kg,Oskar,1 kg,,meat_fish,fish_salted_smoked,meat_fish,meat_pork
+421694,Kanasink TALLEGG 300g viil,Tallegg,300 g,,meat_fish,meat_poultry,meat_fish,meat_hams
+421695,Kanapihv paneeritud M&M 400g,M&M,400 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+421696,Majonees HELLMANN'S Light 405ml,Hellmann's,405 ml,,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+421697,Jogurt TERE Emma maasika 1kg,Tere,1 kg,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+421698,Majonees HELLMANN'S Originaal 210ml,Hellmann's,210 ml,,drinks,drinks_spirits,sauces_oils,sauces_ketchup_mayo
+421699,Kartuli-vorstisalat MK kg,MK,1 kg,,meat_fish,meat_sausages,sauces_oils,sauces_other
+421700,Kanalihasült M&M 300g,M&M,300 g,,meat_fish,meat_poultry,meat_fish,meat_other
+421701,Kanapasta koor.seen.WILLIAM SAURIN 280g,William Saurin,280 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_ready_meals
+421702,Majonees HELLMANN'S Original 625ml,Hellmann's,625 ml,,drinks,drinks_spirits,sauces_oils,sauces_ketchup_mayo
+421703,Majonees FELIX Kerge 870g,Felix,870 g,,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+421704,Mahe Unetee YOGI 17x1.8g,Yogi,17x1.8 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421705,Jogurt TERE Emma banaani lakt.vaba 110g,Tere,110 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+421706,M.alk.jook HARTWALL Long Drink 5.5% 330ml,Hartwall,330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+421707,Maits.viin VIRU VALGE Waterm. 37.5% 500ml,Viru Valge,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+421708,Mango-apelsini smuuti PAI 280ml,Pai,280 ml,,produce,produce_tropical,drinks,drinks_juices
+421709,Maitsest.must tee AUTUMN BASILUR 100g,Basilur,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421710,Maasika jäätisepallid MINI MELTS 72g,Mini Melts,72 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421711,Maasuitsuribiliha NÕO kg-lett,Nõo,1 kg,,meat_fish,meat_pork,meat_fish,meat_pork
+421712,Maitselt mahed.toorvorstikesed M&M 400g,M&M,400 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+421713,Külmsupp koduaiaürtidega FARMI pure 750g,Farmi,750 g,,dry_preserves,dry_other,dry_preserves,dry_soups_noodles
+421714,Lahust.tee Tiger Spice DAVID RIO 398g,David Rio,398 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421715,Lahustuv kohv Classic NESCAFE 200g,Nescafé,200 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421716,Jogurt TERE Hellus mustasõstra 350g,Tere,350 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+421717,Jogurt TERE Hellus metsamarjadega 350g,Tere,350 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+421718,Kodu grillvorstid MAKS&MOORITS 600g,Maks&Moorits,600 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+421720,Lah.kohvijook Classic 3in1 NESCAFE 16.5g,Nescafé,16.5 g,,drinks,drinks_other,drinks,drinks_tea_coffee
+421721,Vahemerepärane seakaelašašlõkk kg,,1 kg,,meat_fish,meat_pork,meat_fish,meat_pork
+421722,Külm. tükeldatud aeduba HORTEX 400g,Hortex,400 g,,dry_preserves,dry_other,frozen_food,frozen_veg
+421723,Mochi karam.&mustsõstratäid.BOUJEE 6x40g,Boujee,6x40 g,,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+421724,Mini Belgia vahvel sulat. 35g,,35 g,,sweets_snacks,sweets_waffles_cakes,sweets_snacks,sweets_waffles_cakes
+421725,Lahustuv kohv Gold MERRILD 200g,Merrild,200 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421726,Kodujuustupannkook aiaürtidega MAMMA 200g,Mamma,200 g,,dairy_eggs_fats,dairy_cottage_quark,frozen_food,frozen_bakery
+421729,Külmutatud broilerimaks TALLEGG 500g,Tallegg,500 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+421730,Külm.veisemaks NÕO kg,Nõo,1 kg,,meat_fish,meat_beef_lamb_game,meat_fish,meat_beef_lamb_game
+421731,Õllemops juustuga WÕRO 500g,Wõro,500 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+421732,Räimerullid küüslaugumar.VIRU RAND 400g,Viru Rand,400 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+421734,Mitmevilja-röstsai Tosta EESTI PAGAR 500g,Eesti Pagar,500 g,,bakery,bakery_buns_croissants,bakery,bakery_bread_loaves
+421735,Jogurt vanilje dražeega 135g,,135 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+422546,Grill sardiinid õlis BRIIS EO 140g,Briis,140 g,,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_meat_fish
+422547,Külm.pelmeenid küüslauk PEALINNA 350g,Pealinna,350 g,,produce,produce_root_veg,frozen_food,frozen_ready_meals
+422548,Mandariini-kiivikorvike 2x140g,,2x140 g,,produce,produce_tropical,bakery,bakery_cakes_pastries
+422549,Hautatud sealiha MAAILU 325g,Maailu,325 g,,meat_fish,meat_pork,dry_preserves,dry_canned_meat_fish
+422550,Köögikaste ALPRO 250ml,Alpro,250 ml,,sauces_oils,sauces_other,dairy_eggs_fats,dairy_plant_drinks
+422551,Mineraalvesi SAN PELLEGRINO 1L g-tud,San Pellegrino,1 l,,drinks,drinks_water,drinks,drinks_water
+422553,Külm.kalafilee nagitsad WELL DONE 240g,Well Done,240 g,,meat_fish,fish_fresh,frozen_food,frozen_fish
+422554,Must pur.TWININGS English Breakfast 100g,Twinings,100 g,,dry_preserves,dry_other,drinks,drinks_tea_coffee
+422556,Must tee Earl Grey HYLEYS 100g,Hyleys,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422557,Hautatud veiseliha MAAILU 325g,Maailu,325 g,,meat_fish,meat_beef_lamb_game,dry_preserves,dry_canned_meat_fish
+422558,Hautatud kanaliha RANNAROOTSI 240g,Rannarootsi,240 g,,meat_fish,meat_poultry,dry_preserves,dry_canned_meat_fish
+422559,Kondenspiim STEINHAUER magustatud 397g,Steinhauer,397 g,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+422560,Must tee Earl Grey LIPTON 25x1.5g,Lipton,25x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422561,Külm. kalafileepulgad WELL DONE 450g,Well Done,450 g,,meat_fish,fish_fresh,frozen_food,frozen_fish
+422563,Hautatud veiseliha Frank Pott 240g,Rannarootsi,240 g,,meat_fish,meat_beef_lamb_game,dry_preserves,dry_canned_meat_fish
+422564,Taimne rasvavõie KEIJU soolane 70% 400g,Keiju,400 g,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+422565,Minilihapallid RAKVERE 300g,Rakvere,300 g,,meat_fish,meat_other,meat_fish,meat_other
+422566,Ülepannikoogid MAMMA 350g,Mamma,350 g,,dry_preserves,dry_other,frozen_food,frozen_bakery
+422568,Pasteet suitsul.kõrnetega MATSIMOKA 220g,Matsimoka,220 g,,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+422569,Heeringafilee marineeritud VICI 240g,Vici,240 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+422571,Mini maasikasõõrik sul. 21g,,21 g,,bakery,bakery_sweet_buns_donuts,bakery,bakery_sweet_buns_donuts
+422572,M.p.jook Star Dollar5 Rich Harm.30% 200ml,,200 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+422573,Must tee sidrunimaits.DILMAH 20x1.5g,Dilmah,20x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422574,Kohuke SAARE toffee 40g,Saare,40 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+422575,Heeringafilee pun.sibul.õlita VICI 200g,Vici,200 g,,sauces_oils,oils_other,meat_fish,fish_processed
+422576,Must tee vaarikamaits.DILMAH 20x1.5g,Dilmah,20x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422577,Külm.kartuli pannkoogid FARM FRITES 540g,Farm Frites,540 g,,produce,produce_root_veg,frozen_food,frozen_potato_products
+422578,Perešašlõkk sibul.äädikaga RAKVERE 600g,Rakvere,600 g,,meat_fish,meat_pork,meat_fish,meat_pork
+422579,Heeringafilee nahaga soolvees VICI 240g,Vici,240 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+422580,Vegan šnitsel GARDEN GOURMET 180g,Garden Gourmet,180 g,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+422581,Must tee vaarikaga HYLEYS 25x1.5g,Hyleys,25x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422583,Heeringafilee peedi&majonees.OCEAN 600g,Ocean,600 g,,sauces_oils,sauces_ketchup_mayo,meat_fish,fish_processed
+422585,Veiseguljašš WELL DONE 400g,Well Done,400 g,,meat_fish,meat_beef_lamb_game,dry_preserves,dry_canned_meat_fish
+422589,Veiseliha hautatud MINU 250g,Minu,250 g,,meat_fish,meat_beef_lamb_game,dry_preserves,dry_canned_meat_fish
+422590,Heeringafil. vürtsidega õlis ZIGMAS 240g,Zigmas,240 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+422592,Veiseliha Bresaola WELL DONE 80g viil,Well Done,80 g,,meat_fish,meat_beef_lamb_game,meat_fish,meat_gourmet
+422593,Joogivesi SAAREMAA 1.5Lx6 gas-ta,Saaremaa,6x1.5 l,,drinks,drinks_water,drinks,drinks_water
+422594,GT vein VENTISQUERO Res.Cab.Sauv. 750ml,Ventisquero,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422595,Kookosjook ALPRO Barista 1l,Alpro,1 l,,bakery,bakery_cakes_pastries,dairy_eggs_fats,dairy_plant_drinks
+422596,Joogivesi SAAREMAA sidr.maitseline 500ml,Saaremaa,500 ml,,drinks,drinks_water,drinks,drinks_water
+422597,Veise abaliha kondita kg,,1 kg,,meat_fish,meat_beef_lamb_game,meat_fish,meat_beef_lamb_game
+422598,Koorejog.ALMA Muah sidr.-juustukook 380g,Alma,380 g,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_yogurt_kefir
+422599,Jahv.kohv Krönung JACOBS kof.vaba 250g,Jacobs,250 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+422600,Joogivesi SAAREMAA sidr.maitseline 1.5L,Saaremaa,1.5 l,,drinks,drinks_water,drinks,drinks_water
+422601,Veise kaelaliha kondita kg,,1 kg,,meat_fish,meat_beef_lamb_game,meat_fish,meat_beef_lamb_game
+422602,Muffin šokolaaditäidisega sulatatud 115g,,115 g,,sweets_snacks,sweets_chocolate_bars,bakery,bakery_cakes_pastries
+422603,Must leib FAZER 300g,Fazer,300 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+422604,Kookose-mandlijook ALPRO 1L,Alpro,1 l,,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+422605,Näkileiv.rukkist Original FINNCRISP 400g,Finncrisp,400 g,,drinks,drinks_spirits,bakery,bakery_bread_loaves
+422606,Mustas.kook.smuuti chia seem.SALVEST 170g,Salvest,170 g,,bakery,bakery_cakes_pastries,drinks,drinks_juices

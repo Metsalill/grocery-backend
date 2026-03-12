@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+423529,GT vein TBILVINO Alaz.Valley Rose 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423530,Juust Vene ESTOVER viilutatud 150g,Estover,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423531,Kaerajook YOOK Barista apel.-kardemon 1l,Yook,1 l,,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+423532,J.jook ACTIVIA anan.virs.ban.suh-ta 270g,Activia,270 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_yogurt_kefir
+423533,GT vein TBILVINO Pirosmani valge 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423534,Jog.jook ACTIMEL+ gran.õun-maasika 4x100g,Actimel,4x100 g,,produce,produce_berries,dairy_eggs_fats,dairy_yogurt_kefir
+423535,GT vein DIABLO Dark Red 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423536,GT vein DIABLO Black Caber.Sauvig. 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423537,Juustupulgad PIK-NIK Original Kids 140g,Pik-Nik,140 g,,drinks,drinks_spirits,sweets_snacks,sweets_snacks_salty
+423538,GT vein The LAST STAND Shiraz 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423539,GT vein LOS FLAVORES Merlot 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423540,GT vein punane kuiv KÄFER Shiraz 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423541,J.Maasdam WELL DONE PREMIUM 45% viil.120g,Well Done,120 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cheese_slices
+423542,GT vein LOS FLAVORES Sauvig. Blanc 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423543,Hele õlu A.LE COQ Premium 4.7% 24x330ml,A.Le Coq,24x330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423544,Jog.jook ACTIMEL ban.&maasika 4x100g,Actimel,4x100 g,,produce,produce_berries,dairy_eggs_fats,dairy_yogurt_kefir
+423545,GT vein QVEVRIS Saperavi punane 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423546,Juust Vene ESTOVER 200g,Estover,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423547,Kodujuust OTTO hapukoorega 440g,Otto,440 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+423548,Hele õlu HEINEKEN 5% 568ml prk,Heineken,568 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423549,Jogurt ACTIVIA maasikatega 4x120g,Activia,4x120 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423550,Hele õlu PILSNER 4.2% 6x500ml prk,A.Le Coq,6x500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423551,Hele õlu PILSNER 4.2% 500ml prk,A.Le Coq,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423552,Paneerit. fileešnitsel M&M 280g,M&M,280 g,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+423553,Hele õlu BLOND MUNK 6% 500ml pdl,,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423554,Hele õlu CRONUS Lager 4.0% 500ml prk,,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423555,Jogurt ACTIVIA metsamarja 4x120g,Activia,4x120 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423556,Hele õlu Leffe Blonde 6.6% 500ml prk,Leffe,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423557,Jogurt ACTIVIA kirssidega 4x120g,Activia,4x120 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423558,Hele õlu CRONUS Lager 6.0% 500ml prk,,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423559,Jogurt ACTIVIA virsiku-müsliga 4x120g,Activia,4x120 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423560,Valgeh.juust Brie PRESIDENT pähkl. 125g,Président,125 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423561,Hele õlu AMBER CITY Lager 5% 500ml prk,,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423562,Hele õlu CARLSBERG 5% 500ml prk,Carlsberg,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423563,Hele õlu KRONENBOURG 1664 5% 330ml pdl,Kronenbourg,330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423564,Hele õlu KOZEL Premium Lager 4.6% 500ml,Kozel,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423565,Hele õlu KRONENBOURG Lag. 5% 500ml prk,Kronenbourg,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423566,Jäätee roheline MIO&RIO sidruni 1.5L,Mio&Rio,1.5 l,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+423567,Hele õlu SAKU ON ICE 5% 6x330ml pdl,Saku,6x330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423568,Hele õlu ZLATA PRAHA 4.7% 500ml prk,,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423569,Koorene kanapasta 300g,,300 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_ready_meals
+423570,Paneer. kana sisefileetükid MORLINY 350g,Morliny,350 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+423571,H.õlu Saku Originaal 4.7% 500ml prk,Saku,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423572,Jahvatatud kohv AROMA GOLD In Cup 250g,Aroma Gold,250 g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+423573,Jahvatatud kohv EILLES SELECTION 500g,Eilles,500 g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+423574,Hele õlu SAKU ON ICE 5% 330ml,Saku,330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423575,Jah.kohv Kulta Katr.filtri MEIRA 450g,Meira,450 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+423576,Jogurt GEFILUS virs.-papaya 2% lakt.vab. 380g,Gefilus,380 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423577,Jogurt FARMI leiva-pähkli lakt.vaba 400g,Farmi,400 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423578,Jogurt GEFILUS mustika 2% 380g,Gefilus,380 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir

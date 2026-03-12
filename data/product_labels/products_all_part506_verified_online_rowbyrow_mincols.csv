@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+420307,Rumm BACARDI BLACK 40% 500ml,Bacardi,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420308,Vahuvein CINZANO Sweet Edit.Dolce 750ml,Cinzano,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420309,Whisky GLENFIDDICH 15YO S.Malt 40% 700ml,Glenfiddich,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420310,Whisky J.WALKER Black Label 40% 500ml,Johnnie Walker,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420311,Alk.vaba õlu WARSTEINER Fresh 330ml,Warsteiner,330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+420312,Brandy Fernando De Castilla S.R. 36% 700ml,Fernando de Castilla,700 ml,,drinks,drinks_wine,drinks,drinks_spirits
+420313,Kaktuse maits.multimahlajook TYMBARK 1L,Tymbark,1 l,,drinks,drinks_juices,drinks,drinks_juices
+420315,Kohviuba ILLY Classic 250g,Illy,250 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+420316,Liköör STROH Jagertee 40% 500ml,Stroh,500 ml,,drinks,drinks_tea_coffee,drinks,drinks_spirits
+420317,Maits.viin NEMIROFF Hon.Pepp. 40% 500ml,Nemiroff,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420318,Muu piir.jook PIPRA KIBE NAPS 35% 350ml,Pipra Naps,350 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420319,Õunamahl AURA 100% 1L,Aura,1 l,,drinks,drinks_juices,drinks,drinks_juices
+420320,Vahuvein TÖRLEY TALISMAN 750ml,Törley,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420321,Whisky BALLANTINES FINEST 40% 1L,Ballantines,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+420322,Cognac COURVOISIER VS 40% 700ml,Courvoisier,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420323,Cognac HENNESSY VS 40% 500ml,Hennessy,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420324,KPN kuiv vein TOMMASI Valpolicella 750ml,Tommasi,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420325,Liköör GABRIEL 45% 500ml,Gabriel,500 ml,,dairy_eggs_fats,dairy_cheese_slices,drinks,drinks_spirits
+420326,Must tee Sc. Breakfast HYLEYS 100x1.5g,Hyleys,100x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420327,Whisky SCOTTISH LEADER 40% 350ml,Scottish Leader,350 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420328,Cognac LARSEN VSOP 40% 500ml,Larsen,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420329,GT punane vein K.JACKSON Zinfandel 750ml,Kendall-Jackson,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420330,Hele õlu STAROPRAMEN Prem.5% 500ml prk,Staropramen,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+420331,Karastusjook LIMONAAD traditsioon. 500ml,A. Le Coq,500 ml,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+420332,KGT vein GRAND SÜD Merlot 1L,Grand Sud,1 l,,drinks,drinks_wine,drinks,drinks_wine
+420334,Köögiviljamahl CIDO 1L,Cido,1 l,,drinks,drinks_juices,drinks,drinks_juices
+420335,KPN kv.vahuvein MUMM CordonRougeBr.750ml,Mumm,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420337,KPN punane vein ALBALI Crianza 750ml,Viña Albali,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420338,KPN v.v.PETER MERTES Liebfraumil. 3L BIB,Peter Mertes,3 l,,dry_preserves,dry_other,drinks,drinks_wine
+420339,KPN vein TORRE ORIA Reserva 750ml,Torre Oria,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420340,Liköör COINTREAU 40% 500ml,Cointreau,500 ml,,dairy_eggs_fats,dairy_cream_sourcream,drinks,drinks_spirits
+420341,Mineraalvesi VÄRSKA originaal 1.5L,Värska,1.5 l,,drinks,drinks_spirits,drinks,drinks_water
+420342,Muu piiritusjook METAXA 7* 40% 700ml,Metaxa,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420343,Piiritusjook STAR DOLLAR 3* 30% 500ml,Star Dollar,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420344,Kohvioad Kharisma LÖFBERGS 1kg,Löfbergs,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+420345,Jäätis Karamelli Baltija Koon 83g,,83 g,,sweets_snacks,sweets_candies,frozen_food,frozen_desserts_icecream
+420346,Piiritusjook METAXA 5* 38% 700ml,Metaxa,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420347,Ploominektar AURA 1L,Aura,1 l,,drinks,drinks_juices,drinks,drinks_juices
+420348,Punase apelsininektar PFANNER 2L,Pfanner,2 l,,drinks,drinks_juices,drinks,drinks_juices
+420349,Rumm BACARDI Carta Blanca 37.5% 1L,Bacardi,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+420350,Rumm BACARDI Carta Blanca 37.5% 700ml,Bacardi,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420351,Tomatimahl CIDO 1L,Vita,1 l,,drinks,drinks_juices,drinks,drinks_juices
+420352,Viin LAUA 40% 1L,Laua Viin,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+420353,Viin LAUA 40% 700ml,Laua Viin,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420354,Viin NEMIROFF Original 40% 500ml,Nemiroff,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420355,Cognac HENNESSY VS 40% 350ml,Hennessy,350 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420356,Cognac HENNESSY VSOP 40% 350ml,Hennessy,350 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420357,Cognac HENNESSY VSOP 40% 700ml karp,Hennessy,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420358,Gin BEEFEATER 40% 700ml,Beefeater,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420359,GT vein C. DEL DIABLO Black Chard. 750ml,Casillero del Diablo,750 ml,,drinks,drinks_wine,drinks,drinks_wine

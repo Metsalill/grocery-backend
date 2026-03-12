@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+420587,Rehe rukkileib vorm.EESTI PAGAR 600g,Eesti Pagar,600 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+420588,Riivsai TARTU MILL 400g,Tartu Mill,400 g,,bakery,bakery_buns_croissants,bakery,bakery_other
+420589,Koorejäätis ERITI RAMMUS soolakar. 110g,Premia,110 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+420590,Koorejäätis soolakaramell ONU ESKIMO 84g,Onu Eskimo,84 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+420591,Kohuke LIISU Sipelgapesa 38g,Liisu,38 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+420592,Pudelkõrvits kg,,1 kg,,dry_preserves,dry_other,produce,produce_herbs_salads_sprouts
+420593,Punane kapsas kg,,1 kg,,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+420594,Brandy J.P.CHENET VSOP 36% 500ml,J.P. Chenet,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420595,Kohuke šokolaadi WELL DONE Protein 40g,Well Done,40 g,,sweets_snacks,sweets_chocolate_bars,dairy_eggs_fats,dairy_cottage_quark
+420596,Kohupiimakreem ALMA rosina 380g,Alma,380 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+420597,Kobartomat 1.kl. kg,,1 kg,,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+420598,Sipelgapesa tort 1kg,,1 kg,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+420599,Rosinasai EESTI PAGAR 400g,Eesti Pagar,400 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+420600,Köögi toorjuust FARMI 400g,Farmi,400 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+420601,Vinn.sink Jamon Serrano ELPOZO 80g viil,Elpozo,80 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+420602,Koorejogurt ALMA Muah pistaatsiam. 380g,Alma,380 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+420604,Brandy IMPERIAL XII VSOP 36% 700ml,,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420606,Kookosejook ALPRO riisiga 1L,Alpro,1 l,,bakery,bakery_cakes_pastries,dairy_eggs_fats,dairy_plant_drinks
+420608,Võileib kanakeb.marin.kurgiga Mega 255g,Mega,255 g,,dairy_eggs_fats,dairy_butter_margarine,bakery,bakery_other
+420609,Grill sardiinid omas mahlas EPINELL 140g,Epinell,140 g,,drinks,drinks_juices,dry_preserves,dry_canned_meat_fish
+420610,Hele õlu SAKU Pilsner 4.2% 500ml,Saku,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+420612,Fazer Street Food Röstitasku 330g,Fazer,330 g,,dry_preserves,dry_other,bakery,bakery_other
+420613,Külm.pitsapõhjad 2tk VICI 320g,Vici,320 g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+420614,FitLap täisterasepik LEIBUR 360g,Leibur,360 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+420615,Eksootiline rull 300g,,300 g,,dry_preserves,dry_other,bakery,bakery_other
+420616,Võileib kanalihaga MK 160g,MK,160 g,,dairy_eggs_fats,dairy_butter_margarine,bakery,bakery_other
+420617,Võil.Big kanakeb.ter.kastm.MANTINGA 240g,Mantinga,240 g,,dairy_eggs_fats,dairy_butter_margarine,bakery,bakery_other
+420619,M.tee assortii Leaf of Ceylon BASILUR 20,Basilur,20 tk,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420621,Täistera kaeraröst Röst LEIBUR 550g,Leibur,550 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+420622,Võileib lõhega MK 165g,MK,165 g,,dairy_eggs_fats,dairy_butter_margarine,bakery,bakery_other
+420623,Võileib singiga MK 195g,MK,195 g,,dairy_eggs_fats,dairy_butter_margarine,bakery,bakery_other
+420625,Gruusiaparane seakaelasaslokk kg,,1 kg,,dry_preserves,dry_other,meat_fish,meat_pork
+420626,Kohviuba JACOBS Selection 1kg,Jacobs,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+420627,Koorejäätis pirni marmel.tük.PREMIA 480g,Premia,480 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+420628,Punane õlu SAKU Manchester 4.2% 500ml prk,Saku,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+420629,Kõva juust DŽIUGAS riivitud 100g,Džiugas,100 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+420630,Hapukoor TERE 20% 500g,Tere,500 g,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+420633,KPN vein LA CHASSE Du Rhone Rouge 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420634,Juustupall KIKAS 300g,Kikas,300 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+420636,Külm.pitsa salaami-sib. LaMiaGrande 305g,La Mia Grande,305 g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+420639,KPN vein Beatrice Primitivo Puglia 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420640,Alk.jook A.Le Coq LongDrink 5.5% 1.5L,A. Le Coq,1.5 l,,dry_preserves,dry_other,drinks,drinks_beer_cider
+420641,Külm. pitsa WELL DONE Tradizionale 310g,Well Done,310 g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+420642,Külm.rohelised oad WELL DONE 400g,Well Done,400 g,,dry_preserves,dry_other,frozen_food,frozen_veg
+420643,Karastusjook SPRITE 1.5L,Sprite,1.5 l,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+420644,Jäätis Green sidruni-maasika TWISTER 71g,Twister,71 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420645,Arom.puuvilja vein BOLLINO punane 750ml,Bollino,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420646,Jogurt ACTIVIA mustikatega 4x120g,Activia,4x120 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+420650,Basiilik WELL DONE 20g,Well Done,20 g,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+420651,Kohupiim WELL DONE 9% kg,Well Done,1 kg,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark

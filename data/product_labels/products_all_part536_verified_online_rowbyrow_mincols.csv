@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+422136,Jäätis LION pulk 62g,Lion,62 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422138,Sojapuding ALPRO PlantProtein šok. 200g,Alpro,200 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+422139,Mango-banaani smuuti PAI 280ml,Pai,280 ml,,produce,produce_tropical,drinks,drinks_juices
+422140,Majonees BALTIKA Provansaal Klas. 300g,Baltika,300 g,,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+422141,Pannkook hakklihatäidisega MAMMA 200g,Mamma,200 g,,bakery,bakery_cakes_pastries,frozen_food,frozen_bakery
+422142,Sojapud.ALPRO PlantProtein vanill. 200g,Alpro,200 g,,sauces_oils,sauces_soy_worcester,dairy_eggs_fats,dairy_plant_drinks
+422143,Suitsukanasalat ananassiga 200g,,200 g,,meat_fish,meat_poultry,sauces_oils,sauces_other
+422144,Suitsukeedu sea seljafilee KARNI kg-lett,Karni,1 kg,,meat_fish,fish_salted_smoked,meat_fish,meat_pork
+422145,Kodujuust OTTO tomati-basiilikuga 220g,Otto,220 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422148,Melon obinavot kg,,1 kg,,produce,produce_tropical,produce,produce_tropical
+422150,Liköör KIRSI 21% 500ml,,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+422152,Baklažaanisalat maitserohelisega kg,,1 kg,,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+422153,Jäätis maasika.40%väh.suhk.PREMIA 50g,Premia,50 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422154,Jäätis maasika-kiivi MIO&RIO 70g,Mio&Rio,70 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422155,Mochi karamelli-pähkli RUD 50g,Rud,50 g,,sweets_snacks,sweets_candies,frozen_food,frozen_desserts_icecream
+422156,Mitmepuuviljajook MIO&RIO 200ml,Mio&Rio,200 ml,,dry_preserves,dry_other,drinks,drinks_juices
+422158,Jäätis MAGNUM Euphoria multipakk 6x43g,Magnum,6x43 g,,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+422159,Puuvilja-kohupiimatort 1.5kg,,1.5 kg,,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+422160,Muu.alk.jk. APEROL Aperitivo 11% 700ml,Aperol,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+422162,Sojatoode maasikamaitseline ALPRO 400g,Alpro,400 g,,sauces_oils,sauces_soy_worcester,dairy_eggs_fats,dairy_plant_drinks
+422163,Pannkook singi ja juustuga MAMMA 200g,Mamma,200 g,,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_bakery
+422164,Sojatoode mangomaits. ALPRO 400g,Alpro,400 g,,sauces_oils,sauces_soy_worcester,dairy_eggs_fats,dairy_plant_drinks
+422165,Puuviljakook 370g,,370 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+422166,Šokol.-sojajook ALPRO PlantProtein 1L,Alpro,1 l,,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+422167,Puuviljakorvike 2x140g,,2x140 g,,dry_preserves,dry_other,bakery,bakery_cakes_pastries
+422168,Must Tseiloni tee DILMAH Premium 30x2g,Dilmah,30x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422169,Must Tseiloni tee Lady Silver DILMAH 20x2g,Dilmah,20x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422171,Sojatood.maits-ta laktoosivab.ALPRO 400g,Alpro,400 g,,sauces_oils,sauces_soy_worcester,dairy_eggs_fats,dairy_plant_drinks
+422172,Suitsusink Delikatess M&M kg,M&M,1 kg,,meat_fish,meat_hams,meat_fish,meat_hams
+422174,Suitsusink RAKVERE 350g,Rakvere,350 g,,meat_fish,meat_hams,meat_fish,meat_hams
+422175,Parmigiano-Reggiano cigar juust. NÕO 85g,Nõo,85 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422176,Poolsuitsuvorst Mini NÕO 135g viil,Nõo,135 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+422177,Požarski kotlet KIKAS 300g,Kikas,300 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+422178,Praetud pelmeenid UVIC 350g,Uvic,350 g,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+422179,Muu alkohoolne jook G:N Turbo 5.5% 1.5l,G:N,1.5 l,,dry_preserves,dry_cereals_muesli,drinks,drinks_beer_cider
+422180,Röstsai Eesti Pagar juustuga 430g,Eesti Pagar,430 g,,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_bread_loaves
+422181,Jäätis Manhattan šokolaadikook NY küpsis 707g,,707 g,,bakery,bakery_cakes_pastries,frozen_food,frozen_desserts_icecream
+422182,KGT pun.vein MASI Campofiorin 750ml,Masi,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422184,Suitsuvorst Tamula WÕRO 350g,Wõro,350 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+422185,Muu piir.jook METAXA 12* 40% 700ml,Metaxa,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+422186,Br.kintsuliha mango-kookose marin. kg,,1 kg,,bakery,bakery_cakes_pastries,meat_fish,meat_poultry
+422187,Sulatatud juust FARM MILK viil. 150g,Farm Milk,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422189,Sulatatud juust HIIRTE JUUST 185g,Hiirte Juust,185 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422190,Liköör VANA TALLINN Heritage 40% 500ml,Vana Tallinn,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+422191,Borš 350g,,350 g,,dry_preserves,dry_other,dry_preserves,dry_soups_noodles
+422192,Jäätis mandliga vegan MAGNUM 72g,Magnum,72 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422193,Röstsai FAZER mini 240g,Fazer,240 g,,bakery,bakery_buns_croissants,bakery,bakery_bread_loaves
+422194,Jäätis mustika-põldmarja MIO&RIO 70g,Mio&Rio,70 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422198,Br. poolkoivad suitsumaits. marinaadis kg,,1 kg,,sauces_oils,sauces_marinades,meat_fish,meat_poultry
+422199,Br.kintsul.nahata A-klass WELL DONE 500g,Well Done,500 g,,dry_preserves,dry_other,meat_fish,meat_poultry

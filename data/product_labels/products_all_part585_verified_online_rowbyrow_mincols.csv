@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+424889,Täissuitsuvorst metssealihast RR 180g,Rannarootsi,180 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424890,Veisesink Liivimaa NÕO 100g viil,Nõo,100 g,,meat_fish,meat_hams,meat_fish,meat_hams
+424891,Tume õlu SAKU PORTER 6.9% 500ml,Saku,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424892,T.õlu VELKOPOPOVICKY KOZEL 3.8% 500ml,,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424893,Vööttuunitükid omas mahlas OCEAN 185g,Ocean,185 g,,drinks,drinks_juices,dry_preserves,dry_canned_meat_fish
+424894,Tume õlu PORTER A.Le Coq 6.5% 500ml,A.Le Coq,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424895,Täissuitsuvorst Äge RAKVERE 210g,Rakvere,210 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424896,Täissuitsuvorst klassikaline M&M 240g,M&M,240 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424897,Täissuitsuvorst Mõnus RAKVERE 210g,Rakvere,210 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424899,Täissuitsuvorst Mündi OSKAR 210g,Oskar,210 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424901,Vinnut. sink Serrano ELPOZO 500g viil,Elpozo,500 g,,meat_fish,meat_hams,meat_fish,meat_hams
+424902,Vinnut.vorst Fuet con Pavo ELPOZO 150g,Elpozo,150 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424903,Vahuvein J.P.CHENET Ice Edition 750ml,J.P.Chenet,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424904,Vin. sealiha Chilli M&M 50g,M&M,50 g,,meat_fish,meat_pork,meat_fish,meat_gourmet
+424905,Vin. sink kondita komplekt ESPANA 1kg,,1 kg,,meat_fish,meat_hams,meat_fish,meat_hams
+424907,Vin. vorst Iberico Fuetec ELPOZO 150g,Elpozo,150 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424910,Vin. vorstivalik Tapas ELPOZO 120g,Elpozo,120 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424911,Võileib kana ja peekoniga MK 155g,MK,155 g,,dairy_eggs_fats,dairy_butter_margarine,bakery,bakery_other
+424912,Vahuvein J.P.CHENET Ice Rose 750ml,J.P.Chenet,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424913,Vitamiinisalat 200g,,200 g,,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+424914,Vahuvein NUA Brut 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424915,Vahuvein PRINCE HENRY Demi-Sec 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424917,Täissuitsuvorst Tõeline RAKVERE 210g,Rakvere,210 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424918,Tatrasalat suitsusingiga 200g,,200 g,,meat_fish,fish_salted_smoked,sauces_oils,sauces_other
+424919,Terav kanasalat 250g,,250 g,,meat_fish,meat_poultry,sauces_oils,sauces_other
+424920,Tomat.hakklihasupp Valmis PÕLTSAMAA 380g,Põltsamaa,380 g,,meat_fish,meat_minced,dry_preserves,dry_soups_noodles
+424921,Võileib singi-juustuga Polar Bread 155g,Polar Bread,155 g,,dairy_eggs_fats,dairy_butter_margarine,bakery,bakery_other
+424922,Täissuitsuvorst Mündi OSKAR 80g viil,Oskar,80 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424923,Täissuitsuvorst Pealinna NÕO 240g,Nõo,240 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424924,Täissuitsuvorst pepperoni M&M 240g,M&M,240 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424925,Tallinna kilud KALURI 250g,Kaluri,250 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+424926,Tallinna kilufileed VIRU RAND 100g,Viru Rand,100 g,,dry_preserves,dry_other,dry_preserves,dry_canned_meat_fish
+424927,Vahuvein VALLE CALDA Dolce 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424928,Talusink M&M 150g viil,M&M,150 g,,meat_fish,meat_hams,meat_fish,meat_hams
+424929,T/s põdravorst LINNAMÄE 105g viil,Linnamäe,105 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424930,T/s vorst hirve trühvli LINNAMÄE 230g,Linnamäe,230 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424931,Tursamaks Isl.natur.KAPTEN GRANT 120g,Kapten Grant,120 g,,dry_preserves,dry_other,dry_preserves,dry_canned_meat_fish
+424932,T/s vorst põdraliha RANNAROOTSI 180g,Rannarootsi,180 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424933,Turistieine sealihast MINU De Lux 525g,Minu,525 g,,meat_fish,meat_pork,dry_preserves,dry_canned_meat_fish
+424934,Tursamaksa võileivamääre RANNAKÜLA 120g,Rannaküla,120 g,,dairy_eggs_fats,dairy_butter_margarine,dry_preserves,dry_canned_meat_fish
+424935,Veiseburger WELL DONE 220g,Well Done,220 g,,meat_fish,meat_beef_lamb_game,meat_fish,meat_beef_lamb_game
+424936,Tuunikala tükid õlis KAPTEN GRANT 100g,Kapten Grant,100 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+424937,Tuunikala tükid soolvees VICI 3x80g,Vici,3x80 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+424938,Tuunikala tükid soolvees WELL DONE 185g,Well Done,185 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+424939,Tuunikalatükid tšilli KAPTEN GRANT 185g,Kapten Grant,185 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+424940,Tuunikala tük.omas mahlas WELL DONE 185g,Well Done,185 g,,drinks,drinks_juices,dry_preserves,dry_canned_meat_fish
+424941,Veiseliha omas mahlas RGK 325g,RGK,325 g,,drinks,drinks_juices,dry_preserves,dry_canned_meat_fish
+424942,Veiselihasink M&M 170g viil,M&M,170 g,,meat_fish,meat_hams,meat_fish,meat_hams
+424943,Veisemaksapasteet M&M 210g,M&M,210 g,,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+424944,Veiselihasalat 200g,,200 g,,meat_fish,meat_beef_lamb_game,sauces_oils,sauces_other

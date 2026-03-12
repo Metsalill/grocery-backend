@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+421135,Jäätis Do-re-mi šok.VÄIKE TOM tops 65g,Väike Tom,65 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421136,Prantsusepärane šokolaadisaiake 65g,,65 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+421137,Jahvatatud kohv Mövenpick Der Himmlische 500g,Mövenpick,500 g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+421138,Jahvatatud kohv In Cup MERRILD 250g,Merrild,250 g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+421139,Kaerasepik LEIBUR 360g,Leibur,360 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+421140,Karastusjook FENTIMANS Rose Lemona.275ml,Fentimans,275 ml,,drinks,drinks_wine,drinks,drinks_soft_soda
+421141,KPN kv.vah. BLASON Rouge Cr.De L. 750ml,,750 ml,,dry_preserves,dry_other,drinks,drinks_wine
+421142,Pr.saida tükid köögivilja.WELL DONE 300g,Well Done,300 g,,bakery,bakery_buns_croissants,meat_fish,meat_pork
+421143,Kartul küpsetamiseks 1kg,,1 kg,,produce,produce_root_veg,produce,produce_root_veg
+421144,Jäätis classic MAGNUM 81g,Magnum,81 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421145,Pr.saida tükid tomatikast.WELL DONE 300g,Well Done,300 g,,bakery,bakery_buns_croissants,meat_fish,meat_pork
+421146,Rassolnik KRONIS 530g,Kronis,530 g,,dry_preserves,dry_other,dry_preserves,dry_soups_noodles
+421147,Külm. kala-juurviljaburger ESVA 365g,Esva,365 g,,meat_fish,fish_fresh,frozen_food,frozen_fish
+421148,Riivjuust Cheddar Atleet VALIO 200g,Valio,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421149,Riivjuust EESTI JUUST 200g,Eesti Juust,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421150,KPN kv.vah. MOUTARD Brut Grande 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421151,Jäätis Fitlap BALBIINO lakt.vaba 52g,Balbiino,52 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421152,Taimne rasvavõie KEIJU sinine 50% 400g,Keiju,400 g,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+421154,Jäätis küpsisetükkidega NICKS 303g,Nicks,303 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421156,Kali A.LE COQ Klassikaline 500ml,A. Le Coq,500 ml,,dry_preserves,dry_other,drinks,drinks_soft_soda
+421157,Prantsuse pikk sai FAZER 220g,Fazer,220 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+421158,KGT vein SOLOURO Vinho Verde Rose 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421159,Jäätis küpsis&kakao kreem Mesikäpp 270g,Mesikäpp,270 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421160,Kaneelisai 160g,,160 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+421161,KPN v.vein JOHANN BRUNNER Ries.Mosel 3L,,3 l,,drinks,drinks_wine,drinks,drinks_wine
+421162,Kreekapärane värske salat kg,,1 kg,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+421163,Kreemistritsel vaar.-must. EP 350g,Eesti Pagar,350 g,,dry_preserves,dry_other,bakery,bakery_cakes_pastries
+421164,Prantsuse saiake 57g,,57 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+421165,Kuiv vein RIB TICKLER 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421166,Rosolje 200g,,200 g,,dry_preserves,dry_other,sauces_oils,sauces_other
+421167,Külm.kalaburgerid ESVA 250g,Esva,250 g,,meat_fish,fish_fresh,frozen_food,frozen_fish
+421168,Salaami juust.pistaats.päh.ADAŽI kg-lett,Adaži,1 kg,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+421170,Jahv. kohv In-Cup AROMA GOLD 500g,Aroma Gold,500 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+421171,Kohupiim OTTO Ricotta 200g,Otto,200 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+421172,Jäätis Hazelnut MAGNUM 310g,Magnum,310 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421173,Jäätis MINIONS multipakk 6x32g,,6x32 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421174,Jäätis M&M's maapähkli 306g,M&M's,306 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421176,Profitroolid kohupiimaga 195g,,195 g,,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+421177,Jäätis OREO koonus 66g,Oreo,66 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421178,Profitrool.karamell.EESTI KONDIITER 250g,Eesti Kondiiter,250 g,,sweets_snacks,sweets_candies,bakery,bakery_cakes_pastries
+421179,Jäätis öko karam&meresool.LA MUU 80g,La Muu,80 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421180,Sinihallitusjuustud MEMEL BLUE 100g,Memel Blue,100 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421181,Kohvioad Prodomo DALLMAYR 500g,Dallmayr,500 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+421182,Puuvilja-kohupiimakook 370g,,370 g,,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+421184,Jäätis mix mini multipakk MAGNUM 254g,Magnum,254 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421185,Keedusalaami juustuga NÕO 90g viil,Nõo,90 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+421186,Taimn.rasvavõie KEIJU 70% lakt.vaba 400g,Keiju,400 g,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+421187,Valgehall.juust Brie PRESIDENT nat. 125g,President,125 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421188,Karastusjook KELLUKE sidrunimaits. 500ml,,500 ml,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+421189,Keefirijook maasika-vanilje HELLUS 1kg,Hellus,1 kg,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir

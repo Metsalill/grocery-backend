@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+420722,Kuldne klassikaline röstsai LEIBUR 500g,Leibur,500 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+420723,Energiajook RED BULL 355ml,Red Bull,355 ml,,drinks,drinks_energy,drinks,drinks_energy
+420724,Jäätis KINDER šokolaadiglasuuriga 4x38g,Kinder,4x38 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420725,Külm. Argentiina merluus WELL DONE 700g,Well Done,700 g,,dry_preserves,dry_other,frozen_food,frozen_fish
+420727,Kartul pestud Laura pakitud 2kg,,2 kg,,produce,produce_root_veg,produce,produce_root_veg
+420728,Karamellirull 320g,,320 g,,sweets_snacks,sweets_candies,bakery,bakery_cakes_pastries
+420729,Punase viinamarjamahlajook AURA Fresh 2L,Aura,2 l,,drinks,drinks_spirits,drinks,drinks_juices
+420730,Keeduvorst Laste RAKVERE 300g,Rakvere,300 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+420732,KGT vein EPICURO Mont.d'Abruzzo 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420733,Tume Ciabatta EESTI PAGAR 300g,Eesti Pagar,300 g,,dry_preserves,dry_other,bakery,bakery_bread_loaves
+420735,Jäätis mandliga MAGNUM 83g,Magnum,83 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420736,Jäätis maasikam.valge šok.NICKS 200g,Nicks,200 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420737,Kirss-ploomtomat 250g,,250 g,,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+420741,Jahutatud pardikoivad A klass kg,,1 kg,,dry_preserves,dry_flour_sugar_baking,meat_fish,meat_poultry
+420742,Külm. kalapulgad kilepakendis ESVA 400g,Esva,400 g,,meat_fish,fish_fresh,frozen_food,frozen_fish
+420743,Gin TANQUERAY 43.1% 700ml,Tanqueray,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420744,Jäätis MAGNUM almond multipakk 6tk 276g,Magnum,276 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420746,GT vein TORO D'ORO Var. Carmenère 750ml,,750 ml,,dry_preserves,dry_other,drinks,drinks_wine
+420747,Gin SAARE 37.5% 500ml,Saare,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420748,Kohupiimakreem TERE Emma banaani 150g,Tere,150 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+420749,Kohupiimakreem TERE Emma rosina 150g,Tere,150 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+420750,Kõva juust DŽIUGAS laastudeks riiv. 100g,Džiugas,100 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+420751,Kõva juust DŽIUGAS Gourmed 36 kuud 180g,Džiugas,180 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+420753,Külm.kalmaarirõngad WELL DONE 500g,Well Done,500 g,,dry_preserves,dry_other,frozen_food,frozen_fish
+420754,Kohupiimatasku 2x70g,,2x70 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+420755,Lihapihvid juustuga M&M 400g,M&M,400 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_other
+420756,Kohvioad Classic PAULIG 1kg,Paulig,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+420757,Kohvioad Gran Crema LAVAZZA 1kg,Lavazza,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+420759,Roheline tee Tsitrus LIPTON 20x1.3g,Lipton,20x1.3 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420761,Lastevorst VALLA 600g,Valla,600 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+420763,Kodusai XXL FAZER 700g,Fazer,700 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+420764,Rohel.tee DILMAH Lemongr.&Lemon 20x1.5g,Dilmah,20x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420765,Kõva juust DŽIUGAS Mild 12 kuud 100g,Džiugas,100 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+420766,Kook Kräsupea EESTI PAGAR 320g,Eesti Pagar,320 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+420767,Jäätis PAW PATROL multipakk 6x32g,,6x32 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420768,Kohupiima-kõrvitsatort 560g,,560 g,,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+420769,Koriander WELL DONE 20g,Well Done,20 g,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+420770,Kõva juustu kuubikud WELL DONE 100g,Well Done,100 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+420772,Kondenspiim magustatud WELL DONE 385g,Well Done,385 g,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+420773,Kook Brita GUSTAV 300g,Gustav,300 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+420774,GT vein BODEGAS Chardonnay 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420775,M.alk.jook G:N Grapefruit 5.5% 500ml,,500 ml,,dry_preserves,dry_other,drinks,drinks_beer_cider
+420776,Jäätis OREO pulk 64g,Oreo,64 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420777,Jäätis PEPPA PIG multipakk 6x32g,,6x32 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420779,Kohupiima-pähklikook 370g,,370 g,,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+420780,Kõrvitsapüreesupp MAMMA 300g,Mamma,300 g,,dry_preserves,dry_other,dry_preserves,dry_soups_noodles
+420781,Rum ANGOSTURA 5YO 40% 700ml,Angostura,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420782,Šampinjonid pakitud 250g,,250 g,,produce,produce_mushrooms,produce,produce_mushrooms
+420783,KPN vein JOHANN BRUNNER Ries.Rhei.750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420784,Piprasalaami OSKAR 80g viil,Oskar,80 g,,dry_preserves,dry_other,meat_fish,meat_gourmet

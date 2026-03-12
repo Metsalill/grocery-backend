@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+424997,KPN vein ITALIA Montepulciano 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424998,Must tee Magic Nights BASILUR 100g,Basilur,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424999,Nisuõlu EICHBAUM Hefeweizen 5.2% 500ml,,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+425000,Porgandimahl KADARBIKU 500ml,Kadarbiku,500 ml,,drinks,drinks_juices,drinks,drinks_juices
+425001,Porgandi-õunamahl KADARBIKU 500ml,Kadarbiku,500 ml,,drinks,drinks_juices,drinks,drinks_juices
+425002,Porgandi-peedimahl KADARBIKU 330ml,Kadarbiku,330 ml,,drinks,drinks_juices,drinks,drinks_juices
+425003,Liköör VANA TALLINN Ice Cream 16% 500ml,Vana Tallinn,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+425004,Litši-marja maits.mahlajook TYMBARK 1L,Tymbark,1 l,,drinks,drinks_juices,drinks,drinks_juices
+425005,Maits.viin UKRAINKA Mee-Pipra 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+425006,M.alk.jook Saku on ICE Gran.õun 4% 330ml,Saku,330 ml,,produce,produce_apples_pears,drinks,drinks_beer_cider
+425007,M.alk.j.SINEBRYCHOFF CRANBERRY 5.5% 500ml,,500 ml,,dry_preserves,dry_other,drinks,drinks_beer_cider
+425008,Marjajook PÕLTSAMAA 1L,Põltsamaa,1 l,,dry_preserves,dry_other,drinks,drinks_juices
+425009,Smuuti FROOSH mustikas vaarikas 250ml,Froosh,250 ml,,produce,produce_berries,drinks,drinks_juices
+425010,Siirup MONIN mojito piparmündi 250ml,Monin,250 ml,,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+425011,Smuuti FROOSH anan.banaan kookos 250ml,Froosh,250 ml,,bakery,bakery_cakes_pastries,drinks,drinks_juices
+425012,Tee LOYD Pyr.Warming Sunny Orange 20x2g,Loyd,20x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+425013,Smuuti FROOSH mango apelsin 250ml,Froosh,250 ml,,produce,produce_tropical,drinks,drinks_juices
+425014,Vaarika-mustikajook Drako 200ml,,200 ml,,produce,produce_berries,drinks,drinks_juices
+425015,Vein CLOUD FACTORY Sauv.Blanc 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+425016,Vein CHAMBOUSTIN punane 3L,,3 l,,drinks,drinks_wine,drinks,drinks_wine
+425017,Vein CHAMBOUSTIN valge 3L,,3 l,,drinks,drinks_wine,drinks,drinks_wine
+425018,Vein GRAND SUD Sauvignon Blanc 1L,,1 l,,drinks,drinks_wine,drinks,drinks_wine
+425019,Veinikokteil KÄFER Spritz 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+425020,Vein LES MIROIRS Charlemagne kuiv 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+425021,Vein TOTINO Lime 12.5% 1L,,1 l,,drinks,drinks_wine,drinks,drinks_wine
+425022,Vein WEISS WEIN lieblich 1L,,1 l,,drinks,drinks_wine,drinks,drinks_wine
+425023,Viin HÕBE 39.2% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+425024,Viin STARIJ DRUZHE 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+425025,Viin STARIJ TRAKTIR 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+425026,Viin STARIJ TRAKTIR percovaja 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+425027,Viin STARQJ KNJAZ 40% 200ml,,200 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+425028,Whisky JAMESON Black Bar. 40% 700ml karp,Jameson,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+425029,Whisky KAVALAN Single Malt 40% 700ml,Kavalan,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+425030,Whisky MONKEY SHOULDER 40% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+425031,Whisky REDBREAST 12YO 40% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+425032,Whisky SINGLETON 12YO S.M. 40% 700ml karp,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+425034,Whisky SIR EDWARD'S 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+425035,Whisky TALISKER Sin.Malt 45.8% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+425036,Whisky THE GLENLIVET 12YO 40% 700ml karp,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+425037,Whisky TULLAMORE DEW 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+427064,Anthon Berg Cherry in Rum martsipanitäidisega 220g,Anthon Berg,220 g,5774540984452,,,sweets_snacks,sweets_chocolate_bars
+427335,Anthon Berg Strawberry in Sparkling Wine šokolaad 220g,Anthon Berg,220 g,5774540984056,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+429946,Anton Berg šokolaad aprikoosi ja matsipaniga 220g,Anton Berg,220 g,5774540984254,,,sweets_snacks,sweets_chocolate_bars
+430849,Maasikas 500g I klass,,500 g,4740199000349,,,produce,produce_berries
+430989,Anthon Berg Baileys in Marzipan šokolaad 175g,Anthon Berg,175 g,5774540991702,,,sweets_snacks,sweets_chocolate_bars
+432037,Jõhvikad 250g,,250 g,4744021010247,,,produce,produce_berries
+433822,Coop pirni-vanillijogurt 150g,Coop,150 g,6438574042647,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+434271,Piltti puder õuna-maasika-banaani 6x110g,Piltti,,8445291245716,,,baby,baby_food_jars
+438247,Kolorado geelõhuvärskendi Ocean Breeze 150g,Kolorado,150 g,5902506008403,,,household,hh_candles_airfresh
+438959,Glade õhuvärskendaja relaxing zen 300ml,Glade,300 ml,5000204771749,,,household,hh_candles_airfresh

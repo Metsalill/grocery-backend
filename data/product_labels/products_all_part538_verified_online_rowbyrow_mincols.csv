@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+422253,Muu piir.jook STROH 40% 500ml,Stroh,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+422254,Täidetud korvikeste valik 375g,,375 g,,dry_preserves,dry_other,bakery,bakery_cakes_pastries
+422255,Külm.kevad. köögiviljad WELL DONE 400g,Well Done,400 g,,dry_preserves,dry_other,frozen_food,frozen_veg
+422256,Vein PIACERE Sangiovese punane 1L,,1 l,,drinks,drinks_wine,drinks,drinks_wine
+422257,Suur sült Memme NÕO 500g,Nõo,500 g,,dry_preserves,dry_other,meat_fish,meat_other
+422258,Vein MICHEL TORINO Sauvignon 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422259,Vein MOREAU&FILS Select Blanc 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422260,Vein PIACERE Trebbiano valge 1L,,1 l,,drinks,drinks_wine,drinks,drinks_wine
+422261,Forellimari WELL DONE 200g,Well Done,200 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+422263,Rustikaalne peenleib seemnetega 490g,,490 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+422264,Hallitusjuust Gorgonzola IGOR Dolce 200g,Igor,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422265,Kanasink tilliga TALLEGG 130g viil,Tallegg,130 g,,meat_fish,meat_poultry,meat_fish,meat_hams
+422267,Jäätis šok.tükkidega VALSOIA 300g,Valsoia,300 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422268,Jäätis soolakaramel. MIO&RIO 96g,Mio&Rio,96 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422269,Taimsed šašlõkivorstid THORMI 300g,Thormi,300 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+422270,Muu p.j. ALMO Pipranaps Meega 35% 100ml,,100 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+422271,Vein MOREAU&FILS Select Rouge 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422272,Täissuitsuvorst Tooma M&M 240g,M&M,240 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+422273,Kohvioad Espresso LÖFBERGS 1kg,Löfbergs,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+422275,Kohvioad JACOBS BaristaCrema Italiano 1kg,Jacobs,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+422276,Jahvat.kohv Kharisma LÖFBERGS 500g,Löfbergs,500 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+422277,Joogivesi AURA Fruit Sidruni ga-tud 500ml,Aura,500 ml,,drinks,drinks_water,drinks,drinks_water
+422278,Broileri rinnalihasink KARNI 300g viil,Karni,300 g,,meat_fish,meat_poultry,meat_fish,meat_hams
+422279,Taipärane karri sealihaga PRESTO 300g,Presto,300 g,,meat_fish,meat_pork,dry_preserves,dry_canned_meat_fish
+422280,Vein punane PICCINI Memoro Ros.750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422282,Sepik seemnetega FAZER 250g,Fazer,250 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+422284,Grillsteigid Armeeniapärased NÕO 430g,Nõo,430 g,,dry_preserves,dry_other,meat_fish,meat_pork
+422285,Brokolisalat peekoniga 200g,,200 g,,meat_fish,meat_pork,sauces_oils,sauces_other
+422286,Kohvioad keskm.röst LÖFBERGS 1kg,Löfbergs,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+422287,KeefirijookHELLUS maas.-rabar.-bat. 170g,Hellus,170 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+422288,Broilerišašlõkk klassik.marinad.M&M 800g,M&M,800 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+422289,Seemneleib Kodu FAZER 280g,Fazer,280 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+422290,KGT vein FAT BASTARD Malbec 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422291,Sepik Õnne EESTI PAGAR 300g,Eesti Pagar,300 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+422292,Jäätis maasikam.valge šok.&mandl.WD 80g,Well Done,80 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422293,Gruusia šašlõkk RANNAROOTSI 1kg,Rannarootsi,1 kg,,meat_fish,meat_pork,meat_fish,meat_pork
+422295,Virsik Paraguayo 1kl kg,,1 kg,,dry_preserves,dry_other,produce,produce_tropical
+422296,Salat krabipul.brokol. kg-lett,,1 kg,,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+422297,Maasika-õunajook Drako 200ml,,200 ml,,produce,produce_berries,drinks,drinks_juices
+422298,Vein punane poolmag. Bost.Bl.Dok. 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422299,Vein ROBERTSON Natural Sweet Red 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422300,Kohvioad LAVAZZA Crema e Aroma 1kg,Lavazza,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+422301,Kohuke LIISU šok.kook marmelaaditük. 38g,Liisu,38 g,,bakery,bakery_cakes_pastries,dairy_eggs_fats,dairy_cottage_quark
+422302,Vein ROBERTSON Natural Sweet Rose 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422303,Taimne dessert mango DEARY 150g,Deary,150 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+422304,Vein S.A.Caracter Cab.Malbec 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422305,Singi-juustupirukas pärmitaignast 70g,,70 g,,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_other
+422306,Kohupiimakreem ALMA mangokisselliga 140g,Alma,140 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422307,Heeringafilee vürtsidega kastmes kg,,1 kg,,world_spices,spices_herbs_spice_mix,meat_fish,fish_processed
+422308,Šokolaadirull EESTI PAGAR 350g,Eesti Pagar,350 g,,dry_preserves,dry_other,bakery,bakery_cakes_pastries

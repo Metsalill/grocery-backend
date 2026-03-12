@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+422997,Viin DANZKA 40% 500ml,Danzka,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422998,Hapukoor TERE 20% 250g,Tere,250 g,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+422999,Näkileivad Fibre WASA 230g,Wasa,230 g,,dry_preserves,dry_other,bakery,bakery_bread_loaves
+423000,Näkileivad FINN CRISP Seesam-ga 250g,Finn Crisp,250 g,,dry_preserves,dry_other,bakery,bakery_bread_loaves
+423003,Näkileivad FINN CRISP Traditional 200g,Finn Crisp,200 g,,dry_preserves,dry_other,bakery,bakery_bread_loaves
+423004,Jahutatud veise koot kondig.WELL DONE kg,Well Done,1 kg,,dry_preserves,dry_flour_sugar_baking,meat_fish,meat_beef_lamb_game
+423005,Napoleoni kook EESTI PAGAR 1.2kg,Eesti Pagar,1.2 kg,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+423006,Heeringafilee suitsumaits. KGrant 240g,Kapten Grant,240 g,,meat_fish,fish_salted_smoked,meat_fish,fish_processed
+423007,Narva Peenleib EP 310g,Eesti Pagar,310 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+423009,Viin VIRU VALGE 40% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423010,Pagari kaeraröst EESTI PAGAR 430g,Eesti Pagar,430 g,,dry_preserves,dry_other,bakery,bakery_bread_loaves
+423011,Nektariin 1kl. kg,,1 kg,,drinks,drinks_juices,produce,produce_tropical
+423012,Pikk sai 220g,,220 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+423013,Jahutatud searaguu RAKVERE 1.3kg,Rakvere,1.3 kg,,dry_preserves,dry_flour_sugar_baking,meat_fish,meat_pork
+423015,Piruk.filotaig. juustu/singi 80g,,80 g,,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_other
+423016,Jahutatud surimist pulgad VICI 500g,Vici,500 g,,dry_preserves,dry_flour_sugar_baking,meat_fish,fish_processed
+423018,Red Velvet panna cotta tort 700g,,700 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+423019,Rehe rukkileib EESTI PAGAR 390g,Eesti Pagar,390 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+423020,Heeringafilee puravikuga WELL DONE 200g,Well Done,200 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+423021,Jahutatud surimist pulgad VICI 150g,Vici,150 g,,dry_preserves,dry_flour_sugar_baking,meat_fish,fish_processed
+423022,Rõõmurull 320g,,320 g,,dry_preserves,dry_other,bakery,bakery_cakes_pastries
+423028,Viin FINLANDIA Redberry 37.5% 500ml,Finlandia,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423030,Viin HLIBNY DAR Classic 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423031,Röstsai Tosta EESTI PAGAR 500g,Eesti Pagar,500 g,,bakery,bakery_buns_croissants,bakery,bakery_bread_loaves
+423032,Spinati-juustupirukas EESTI PAGAR 360g,Eesti Pagar,360 g,,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_other
+423034,Röst seemnetega FAZER 500g,Fazer,500 g,,sweets_snacks,sweets_nuts_driedfruit,bakery,bakery_bread_loaves
+423035,Rukki juuretise röst FAZER 450g,Fazer,450 g,,dry_preserves,dry_other,bakery,bakery_bread_loaves
+423036,Rukkileib 320g,,320 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+423037,Rukkileib köömnetega 490g,,490 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+423038,Mochi pistaatsiamaits.BOUJEE 6x40g,Boujee,6x40 g,,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+423039,Rukkileib Ruks LEIBUR 390g,Leibur,390 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+423040,Rukkisepik EESTI PAGAR 300g,Eesti Pagar,300 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+423041,Rehe Koorikleib EESTI PAGAR 200g,Eesti Pagar,200 g,,dairy_eggs_fats,dairy_cream_sourcream,bakery,bakery_bread_loaves
+423042,Jäätis vanilje.torus ESKIMOS 70g,Eskimos,70 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+423043,Hele õlu AMBER CITY 5.2% 500ml,,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423044,Sojatoode punaste puuviljad. ALPRO 400g,Alpro,400 g,,sauces_oils,sauces_soy_worcester,dairy_eggs_fats,dairy_plant_drinks
+423045,Juustuvorst RAKVERE kg-lett,Rakvere,1 kg,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+423046,Hele õlu EICHBAUM Pilsener 4.8% 500ml,Eichbaum,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423047,Jäätis vanilje-rosin. VÄIKE TOM 70g,Väike Tom,70 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+423048,Juustuvorst WÕRO 600g,Wõro,600 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+423049,Külmutatud kirsid WELL DONE 400g,Well Done,400 g,,frozen_food,frozen_other,frozen_food,frozen_berries_fruit
+423050,Hele õlu Holsten Premium 4.5% 500ml prk,Holsten,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423051,KGT vein LE GRAND NOIR Cabernet S. 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423053,Jäätis vanilje-šok.tükkidega MILKA 439g,Milka,439 g,,dairy_eggs_fats,dairy_milk,frozen_food,frozen_desserts_icecream
+423054,Külmutatud letšo HORTEX 400g,Hortex,400 g,,frozen_food,frozen_other,frozen_food,frozen_veg
+423055,Hele õlu PILSNER A.Le Coq 4.2% 500ml,A.Le Coq,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423056,Lahust.kohv Classic Crema NESCAFE 100g,Nescafé,100 g,,drinks,drinks_other,drinks,drinks_tea_coffee
+423057,Hele õlu Saku Hele 5.2% 500ml pdl,Saku,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423058,H.õlu Saku Originaal 4.7% 500ml pdl,Saku,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423059,Sarvesaiad van.kakao täidis.7DAYS 5x37g,7Days,5x37 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants

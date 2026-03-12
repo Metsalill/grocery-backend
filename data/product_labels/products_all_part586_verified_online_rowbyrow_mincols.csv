@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+424945,Veiseliha steik kondita WELL DONE 220g,Well Done,220 g,,meat_fish,meat_beef_lamb_game,meat_fish,meat_beef_lamb_game
+424946,Veisemaksapasteet CHEF LUNDEN 200g,Chef Lunden,200 g,,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+424947,Veisemaksapasteet trühvline 200g,,200 g,,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+424948,Veise välisfilee steik WELL DONE 240g,Well Done,240 g,,meat_fish,meat_beef_lamb_game,meat_fish,meat_beef_lamb_game
+424949,Vetikate salat Wakame IKRINKA 150g,Ikrinka,150 g,,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+424950,Vinnut.meriahvena ribad SEA SNACKS 30g,Sea Snacks,30 g,,dry_preserves,dry_other,meat_fish,fish_processed
+424951,Vinnut. tursafilee ribad SEA SNACKS 30g,Sea Snacks,30 g,,dry_preserves,dry_other,meat_fish,fish_processed
+424952,Vinnut.veiseliha Hot KARNI 50g,Karni,50 g,,meat_fish,meat_beef_lamb_game,meat_fish,meat_gourmet
+424953,Vinnut.veiseliha Original KARNI 50g,Karni,50 g,,drinks,drinks_spirits,meat_fish,meat_gourmet
+424954,Vürtsikas kanasnäkk TALLEGG 80g,Tallegg,80 g,,world_spices,spices_herbs_spice_mix,meat_fish,meat_gourmet
+424955,Valge vein BLUE NUN Original 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424956,Vorst Salchichon SOLA kg-lett,Sola,1 kg,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424958,Waldorfi salat kanaga MK kg,MK,1 kg,,meat_fish,meat_poultry,sauces_oils,sauces_other
+424959,Vürtsikilud KALURI 1kg,Kaluri,1 kg,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+424960,Vürtsikilufilee BRIIS 400g,Briis,400 g,,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_meat_fish
+424961,Vürtsikilufilee BRIIS 160g,Briis,160 g,,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_meat_fish
+424962,Vürtsikilufilee BRIIS õlisv. 160g,Briis,160 g,,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_meat_fish
+424963,Vürtsikilufileed VIRU RAND 100g,Viru Rand,100 g,,world_spices,spices_herbs_spice_mix,dry_preserves,dry_canned_meat_fish
+424964,Vürtsisealiha Frank Pott 325g,,325 g,,world_spices,spices_herbs_spice_mix,dry_preserves,dry_canned_meat_fish
+424965,Vürtsikad kanapooltiivad TALLEGG 400g,Tallegg,400 g,,world_spices,spices_herbs_spice_mix,meat_fish,meat_poultry
+424966,Cognac HARDY VS 40% 500ml PET,Hardy,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424967,Cognac Chat.de Mon.V.S.O.P.40% 700ml Tube,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424968,Arom.veinij.DREAMER Sweet White 1L tetra,,1 l,,drinks,drinks_wine,drinks,drinks_wine
+424969,Brandy ST-REMY Authentic XO 40% 700ml,,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+424970,Brandy IMPERIAL XII 36% 500ml,,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+424972,Cognac COURVOISIER VS 40% 350ml,Courvoisier,350 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424973,Cognac HARDY XO Kendo 40% karbis 700ml,Hardy,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424974,Cog. BACHE-GABRIELSEN VS TreKors 40% 700ml,,700 ml,,dairy_eggs_fats,dairy_cheese_slices,drinks,drinks_spirits
+424975,Kohvikapslid NESCAFE Dolce Gusto Cortado 16tk,Nescafe,16 tk,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+424976,Jahv.kohv MERRILD In cup 500g,Merrild,500 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+424977,Granuleer.must tee Classis TETLEY 100g,Tetley,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424978,GT vein MUD HOUSE Sauvignon Blanc 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424979,KGT vein BLUE LIGHT Riesling 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424980,Kookose-ananassi mahlajook PAI 280ml,Pai,280 ml,,drinks,drinks_juices,drinks,drinks_juices
+424981,KGT kuiv vein EPICURO Nero d'Avola 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424982,KGT vein ITALIA Pinot Grigio Rose 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424983,KPN vahuvein Prosecco MIONETTO Brut 750ml,Mionetto,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424984,KPN vahuvein TORREORIA Cava Brut 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424985,KPN vein ANNA LAURE Riesling 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424986,KGT kuiv vein KÄFER Pinot Grigio 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424987,KGT vein B&G Pinot Noir Reserve 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424988,KGT vein EPICURO Pinot Grigio 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424989,KGT kuiv vein KÄFER Nero d'Avola 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424990,KPN kuiv vahuvein NUA Prosecco 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424991,KPN vahuvein ROCCA 8 Prosecco 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424992,Lahustuv kohv MONTE PERO Gold 100g,,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424993,Lahustuv kohv MONTE PERO Gold 200g,,200 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424994,KPN vein GORU 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424995,KPN vein CEPPI Storici Barb.D'Asti 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424996,KPN vein TORRE ORIA Crianza 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine

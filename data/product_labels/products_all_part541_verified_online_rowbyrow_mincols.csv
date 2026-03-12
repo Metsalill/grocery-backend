@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+422426,Surimi krabipulgad WELL DONE 300g,Well Done,300 g,,dry_preserves,dry_other,meat_fish,fish_processed
+422427,Bulguri köögiviljade segu BONDUELLE 250g,Bonduelle,250 g,,dry_preserves,dry_canned_veg,dry_preserves,dry_pasta_rice
+422429,Külm.friikart.kuld.krõbe MAAHÄRRA 1.5kg,Maahärra,1.5 kg,,frozen_food,frozen_potato_products,frozen_food,frozen_potato_products
+422432,Delikatesshakkliha MAKS&MOORITS 300g,Maks&Moorits,300 g,,meat_fish,meat_minced,meat_fish,meat_minced
+422433,Delikatess-sink tailihast M&M 170g viil,M&M,170 g,,meat_fish,meat_hams,meat_fish,meat_hams
+422434,Delikatess seahakkliha M&M 300g,M&M,300 g,,meat_fish,meat_minced,meat_fish,meat_minced
+422435,KPN-v.vein GRAN CASTILLO Viu.Chard.750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422436,Juust Leet MO SAAREMAA viil. 150g,Saaremaa,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422437,Külm.köögiviljad. Itaalia m.ain. 400g,,400 g,,dry_preserves,dry_other,frozen_food,frozen_veg
+422438,Delikatessrulaad TALLEGG 500g,Tallegg,500 g,,meat_fish,meat_hams,meat_fish,meat_hams
+422439,Juust Wensleydale jõhvikatega kg,,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422440,KPN vein VITIS NOSTRA Montepul. 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422441,Delikatess sea- ja veisehakkliha kg,,1 kg,,meat_fish,meat_minced,meat_fish,meat_minced
+422443,Juust Mozzarella FARM MILK 45% 125/200g,Farm Milk,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422444,Delikatess seahakkliha kg,,1 kg,,meat_fish,meat_minced,meat_fish,meat_minced
+422445,Juust Wensleydale mango-apelsini kg,,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422446,Kodupihv.kreemja juustutäidisegaM&M 400g,M&M,400 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_other
+422447,KPN vein VAUCHER Ventoux Blanc 750ml,Vaucher,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422448,Whisky FOUR ROSES Small Batch 45% 700ml,Four Roses,700 ml,,drinks,drinks_wine,drinks,drinks_spirits
+422450,Delikatessviiiner juustu RANNAROOTSI 250g,Rannarootsi,250 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+422451,Õuna-peedimahl KADARBIKU 330ml,Kadarbiku,330 ml,,drinks,drinks_juices,drinks,drinks_juices
+422452,Doktori keeduvorst PORMET 400g,Pormet,400 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+422453,Doktorivorst RAKVERE 600g,Rakvere,600 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+422454,Juust Mozzarella ZOTTARELLA basiil. 200g,Zottarella,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422456,Doktorivorst RAKVERE 190g viil,Rakvere,190 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+422458,Külm.pan.kala kartulitega WELL DONE 350g,Well Done,350 g,,meat_fish,fish_fresh,frozen_food,frozen_fish
+422459,Külm.pärmi-lehttaig.võiga WELL DONE 400g,Well Done,400 g,,dairy_eggs_fats,dairy_butter_margarine,frozen_food,frozen_bakery
+422460,Külm.köögiv.seemnetega HÄRMAVILI 400g,Härmavili,400 g,,sweets_snacks,sweets_nuts_driedfruit,frozen_food,frozen_veg
+422461,Doktori keeduvorst WELL DONE 300g,Well Done,300 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+422462,Liköör JÄGERMEISTER 35% 200ml,Jägermeister,200 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+422465,Õunajook PÕLTSAMAA 200ml,Põltsamaa,200 ml,,produce,produce_apples_pears,drinks,drinks_juices
+422466,Külm.mini croissant võiga WELL DONE 350g,Well Done,350 g,,dairy_eggs_fats,dairy_butter_margarine,frozen_food,frozen_bakery
+422468,Külm.minipelmeenid PEALINNA 350g,Pealinna,350 g,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+422470,Delikatess veisehakkliha kg,,1 kg,,meat_fish,meat_minced,meat_fish,meat_minced
+422471,Õunajook MIO&RIO 200ml,Mio&Rio,200 ml,,produce,produce_apples_pears,drinks,drinks_juices
+422472,Eelküps.grillribid Teriyaki RR 900g,Rannarootsi,900 g,,world_spices,spices_asian,meat_fish,meat_pork
+422473,Eesti.br.rinfil.sisetk A-kl TALLEGG 400g,Tallegg,400 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+422475,Toors. salaami Kodune BIOVELA 110g viil,Biovela,110 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+422476,Turisti eine Frank Pott RANNAROOTSI 325g,Rannarootsi,325 g,,dry_preserves,dry_other,dry_preserves,dry_canned_meat_fish
+422477,Kodujuust TERE lak.vaba jogurtiga 300g,Tere,300 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_cottage_quark
+422478,Kohupiimakreem ALMA metsmaasika 300g,Alma,300 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422479,Külm.meriahvena filee nahaga 600g,,600 g,,dry_preserves,dry_other,frozen_food,frozen_fish
+422480,Lillkapsas kg,,1 kg,,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+422481,Külm.täister.pelm.kanalih.PEALINNA 350g,Pealinna,350 g,,meat_fish,meat_poultry,frozen_food,frozen_ready_meals
+422482,Kohupiimakreem ALMA mustika 300g,Alma,300 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422483,Eelküps. mustikamarin.ribi RAKVERE 900g,Rakvere,900 g,,meat_fish,meat_pork,meat_fish,meat_pork
+422484,Külmutatud kalapulgad SILVER ESVA 250g,Esva,250 g,,frozen_food,frozen_fish,frozen_food,frozen_fish
+422485,Kodujuust FARM MILK 5% 200g,Farm Milk,200 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422486,Kodujuust OTTO hapukoorega 330g,Otto,330 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422487,Eelküps.ribi BBQ mureli RR 600g,Rannarootsi,600 g,,meat_fish,meat_pork,meat_fish,meat_pork

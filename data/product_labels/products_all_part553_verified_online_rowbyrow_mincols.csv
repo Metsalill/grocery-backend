@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+423173,Brandy ARARAT Akhtamar 10YO 40% 500ml krp,Ararat,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+423174,Jogurt FANTASIA kirsilisandiga 118g,Fantasia,118 g,,drinks,drinks_soft_soda,dairy_eggs_fats,dairy_yogurt_kefir
+423175,Jogurt DANONKI vanilje 70g,Danonki,70 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423176,Keeduvorst Doktori NÕO kg-lett,Nõo,1 kg,,meat_fish,meat_sausages,meat_fish,meat_sausages
+423177,Vahuvein JULES LAROSE SemiDry 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423178,Piimadessert ZOTT Monte šok&pähkl. 55g,Zott,55 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+423181,Külm.baguette küüsl.võiga WELL DONE 350g,Well Done,350 g,,dairy_eggs_fats,dairy_butter_margarine,frozen_food,frozen_bakery
+423182,Pelmeenid lambalihaga LIDO 360g,Lido,360 g,,meat_fish,meat_beef_lamb_game,frozen_food,frozen_ready_meals
+423183,Külm.kaneelisaiake võiga WELL DONE 350g,Well Done,350 g,,dairy_eggs_fats,dairy_butter_margarine,frozen_food,frozen_bakery
+423184,Salat Frillice pakis GRÜNE FEE,,1 pk,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+423185,Piimajook Müllermilch banaani 400g,Müllermilch,400 g,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+423186,Vahuvein VEUVE DU VERNAY Ice 750ml,Veuve du Vernay,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423187,Kanatiib maisikattega vürts.TALLEGG 300g,Tallegg,300 g,,dry_preserves,dry_canned_veg,meat_fish,meat_poultry
+423188,Salatikorvike LEKORNA 138g,Lekorna,138 g,,produce,produce_herbs_salads_sprouts,bakery,bakery_cakes_pastries
+423189,Brandy ST. REMY AUTHENTIC VSOP 36% 700ml,St. Rémy,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+423191,Jogurt FARMI maasika-arbuusi l.vaba 130g,Farmi,130 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423192,Tallegg klassikaline kanarulaad 400g,Tallegg,400 g,,meat_fish,meat_poultry,meat_fish,meat_hams
+423193,Kodune kotlet kartulipudruga 330g,,330 g,,produce,produce_root_veg,frozen_food,frozen_ready_meals
+423194,Kodune hakkliha RAKVERE 600g,Rakvere,600 g,,meat_fish,meat_minced,meat_fish,meat_minced
+423195,Salatikorvike SAPNU SALA 20tk 60g,,20x60 g,,produce,produce_herbs_salads_sprouts,bakery,bakery_cakes_pastries
+423196,Jah.kohv Kulta Katriina kannu MEIRA 450g,Meira,450 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+423198,Brandy ST.REMY AUTHENTIC VSOP 36% 500ml pet,St. Rémy,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+423199,Jogurt FARMI metsamarja rukkikamaga 380g,Farmi,380 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423200,Brandy IMPERIAL XII VSOP 36% 200ml,,200 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+423201,Vahuvein VEUVE DU VERNAY Ice Rose 750ml,Veuve du Vernay,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423202,Salatikorvike LEKORNA 70g,Lekorna,70 g,,produce,produce_herbs_salads_sprouts,bakery,bakery_cakes_pastries
+423203,Värska Naturaal Mulliga 1.5L,Värska,1.5 l,,dry_preserves,dry_other,drinks,drinks_water
+423204,Vein I HEART Pinot Grigio kuiv 187ml,,187 ml,,drinks,drinks_wine,drinks,drinks_wine
+423205,Glas.dessert MIO RIO maasika 35g,Mio&Rio,35 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_cottage_quark
+423206,Plombiir maapähk. ja karam.MIO&RIO 46g,Mio&Rio,46 g,,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+423207,Vein LA COMIDA punane kuiv 3L,,3 l,,drinks,drinks_wine,drinks,drinks_wine
+423208,Täissuitsuvorst veise RANNAROOTSI 230g,Rannarootsi,230 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+423209,Viin ABSOLUT Vodka 40% 500ml,Absolut,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423210,Glasuurkohuke WELL DONE Protein maas. 40g,Well Done,40 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+423211,Vein LA COMIDA valge kuiv 3L,,3 l,,drinks,drinks_wine,drinks,drinks_wine
+423212,Tomatine veiselihapasta PESTO 300g,Pesto,300 g,,dry_preserves,dry_pasta_rice,frozen_food,frozen_ready_meals
+423213,Külm.pelmeenid Aasia stiilis vegan 350g,,350 g,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+423214,Vein PARIS SEDUCTION magus punane 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423215,Vein PARIS SEDUCTION magus valge 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423216,Vein punane poolkuiv NERO MARONE 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423217,Glas.dessert MIO RIO šokolaadi 35g,Mio&Rio,35 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_cottage_quark
+423218,Brandy TORRES 10 Gran Reserva 38% 1l,Torres,1 l,,dry_preserves,dry_other,drinks,drinks_spirits
+423219,Viin HLIBNY DAR Grain Sprouts 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423220,Jahvatatud kohv MERRILD 500g,Merrild,500 g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+423221,Külm.pärmi-lehttaigen WELL DONE 500g,Well Done,500 g,,dry_preserves,dry_flour_sugar_baking,frozen_food,frozen_bakery
+423222,Brandy TORRES 10 Gran Reserva 38% 500ml,Torres,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+423223,Viin NEMIROFF Birch 40% 500ml,Nemiroff,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423224,Viin PŠENICNAJA Lux 40% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+423225,Viin SAAREMAA 40% 1L,,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+423226,Tursamaks RANNAKÜLA 121g,Rannaküla,121 g,,dry_preserves,dry_other,dry_preserves,dry_canned_meat_fish

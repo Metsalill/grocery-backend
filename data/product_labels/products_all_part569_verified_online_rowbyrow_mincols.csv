@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+424045,Prot.puding VALIO PROfeel tiramisu 150g,Valio,150 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+424048,Rasvasegu võie Võideks Spread 66% 200g,,200 g,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+424050,Suvepuding TERE mango 200g,Tere,200 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+424051,Sul.juust MEREVAIK nat. 370g,Merevaik,370 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424052,Kauaküps.broiler BEST BUTCHER kg,Best Butcher,1 kg,,meat_fish,meat_poultry,meat_fish,meat_poultry
+424055,Taimne puding kookos-chia DEARY 150g,Deary,150 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+424056,Makrellifilee tomatik.OCEAN EO 170g,Ocean,170 g,,produce,produce_root_veg,dry_preserves,dry_canned_meat_fish
+424057,Liköör VANA TALLINN SIGNATURE 40% 500ml,Vana Tallinn,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+424061,Puding ALMA šokolaadi-metsapähkli 230g,Alma,230 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+424062,Külmutatud searasv RAKVERE 200g,Rakvere,200 g,,frozen_food,frozen_other,frozen_food,frozen_other
+424063,Puding ALMA vaarika-mascarpon 230g,Alma,230 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+424064,Hirveliha äkis metsaseen. LINNAMÄE 110g,Linnamäe,110 g,,produce,produce_mushrooms,dry_preserves,dry_canned_meat_fish
+424065,Hummus Italia.-tomatite&küüslauguga 200g,,200 g,,produce,produce_root_veg,sauces_oils,sauces_other
+424066,Talumaius NOPRI Kräsupea 150g,Nopri,150 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_desserts
+424067,Talumaius NOPRI Küpsisekook 150g,Nopri,150 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+424068,M.alk.jook A.LeCoq G:N 5.5% 500ml pet,A.Le Coq,500 ml,,dry_preserves,dry_other,drinks,drinks_beer_cider
+424069,Hot Dog viinerid PORMET 650g,Pormet,650 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+424070,Hummus karamellistatud küüslauguga 200g,,200 g,,sweets_snacks,sweets_candies,sauces_oils,sauces_other
+424071,M.alk.jook A.LeCoq G:N Mohhiito 5.5% 1.5L,A.Le Coq,1.5 l,,dry_preserves,dry_other,drinks,drinks_beer_cider
+424072,Keefir FARMI 2.5% 1kg kile,Farmi,1 kg,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+424073,Tarretis JÄNKS kiivimaitseline 150g,Jänks,150 g,,produce,produce_tropical,sweets_snacks,sweets_other
+424074,Maits.Viin ZUBROWKA Bis.Grass 37.5% 500ml,Zubrowka,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424075,Jäätis MILKA multipakk pulk 6x37.5g,Milka,6x37.5 g,,dairy_eggs_fats,dairy_milk,frozen_food,frozen_desserts_icecream
+424076,Salatikrevett soolvees KALURI 280g,Kaluri,280 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+424077,Hummus avokaadoga NOA 175g,Noa,175 g,,dry_preserves,dry_other,sauces_oils,sauces_other
+424078,Riivjuust Atleet VALIO küpsetistele 200g,Valio,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424079,Seahakkliha M&M 500g,M&M,500 g,,meat_fish,meat_minced,meat_fish,meat_minced
+424080,TarreJänks Tutti-Frutti tarretis 150g,Jänks,150 g,,dry_preserves,dry_other,sweets_snacks,sweets_other
+424081,M.alk.jook G:N Red Orange 5.5% 1.5L PET,,1.5 l,,dry_preserves,dry_other,drinks,drinks_beer_cider
+424082,M.al.jook A.LE COQ Cub.Lib. 4.7% 330ml pdl,A.Le Coq,330 ml,,dry_preserves,dry_other,drinks,drinks_beer_cider
+424083,Šašlõkk broilerikintsulihast kg,,1 kg,,meat_fish,meat_poultry,meat_fish,meat_poultry
+424085,Keedupeet vaakumis Jovaige 500g,Jovaige,500 g,,produce,produce_root_veg,produce,produce_root_veg
+424086,Seahakkliha WELL DONE 400g,Well Done,400 g,,meat_fish,meat_minced,meat_fish,meat_minced
+424087,Hummus natural NOA 175g,Noa,175 g,,dry_preserves,dry_other,sauces_oils,sauces_other
+424088,Hummus naturaalne 200g,,200 g,,dry_preserves,dry_other,sauces_oils,sauces_other
+424089,Riivjuust Eesti VALIO 500g,Valio,500 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424090,Seakõrvasnäkid NÕO 130g,Nõo,130 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+424091,Riivjuust E-PIIM Light 250g,E-Piim,250 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424092,Mango maits.multimahlajook TYMBARK 1L,Tymbark,1 l,,drinks,drinks_juices,drinks,drinks_juices
+424093,Sealihakonserv MINU De Lux 525g,Minu,525 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+424094,Itaal.salaami Ehe RANNAROOTSI 100g viil,Rannarootsi,100 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+424095,Riivjuust MO SAAREMAA 200g,Saaremaa,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424097,Must tee DILMAH maasika 20x1.5g,Dilmah,20x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424098,Sealihaguljašš M&M 400g,M&M,400 g,,meat_fish,meat_pork,meat_fish,meat_pork
+424099,Sifoonvahukoor PRESIDENT 250g,Président,250 g,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+424100,Riivjuust WELL DONE pitsale 200g,Well Done,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424101,Rjazenka FARMI 400g,Farmi,400 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_yogurt_kefir
+424102,Sinihallitusjuust Danablu kg,,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424103,Hummus kõrvitsaseemnetega 200g,,200 g,,sweets_snacks,sweets_nuts_driedfruit,sauces_oils,sauces_other
+424104,Sinihallitusjuust BERGADER Gourmet 100g,Bergader,100 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+424832,Sealihasült OSKAR 330g,Oskar,330 g,,meat_fish,meat_pork,dry_preserves,dry_canned_meat_fish
+424833,Sealihaviinerid WELL DONE 520g,Well Done,520 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+424834,Sealihasardell RANNAROOTSI 500g,Rannarootsi,500 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424836,Sealihasnäkk Classic M&M 340g,M&M,340 g,,meat_fish,meat_pork,meat_fish,meat_gourmet
+424838,Sealihaviilud tagaos.ABta WELL DONE 360g,Well Done,360 g,,meat_fish,meat_pork,meat_fish,meat_pork
+424839,Searibid BBQ marinaadis WELL DONE kg,Well Done,1 kg,,sauces_oils,sauces_marinades,meat_fish,meat_pork
+424840,Taim.pasteet musta trühvliga THORMI 150g,Thormi,150 g,,drinks,drinks_tea_coffee,sauces_oils,sauces_other
+424841,Taimsed viinerid BON SOYA 250g,Bon Soya,250 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+424842,Täislihaviiner suitsutatud NÕO 310g,Nõo,310 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+424843,Täissuitsu põdravorst LINNAMÄE 230g,Linnamäe,230 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424844,Täissuitsuvorst Eesti juustuga NÕO 250g,Nõo,250 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+424845,Täissuitsuvorst Hirve RANNAROOTSI 240g,Rannarootsi,240 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424846,Täissuitsuvorst Kuningate KARNI 250g,Karni,250 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424847,Täissuitsuvorst parm. juust. KARNI 250g,Karni,250 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+424848,Täissuitsuvorst Pepperoni OSKAR 210g,Oskar,210 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424851,Soolapekk Kodune jahutatud RGK kg-lett,RGK,1 kg,,dry_preserves,dry_flour_sugar_baking,meat_fish,meat_pork
+424852,Soolatud Atlandi lõhefilee OCEAN 100g,Ocean,100 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked
+424853,Teriyaki-mustika pork jerky RAKVERE 50g,Rakvere,50 g,,world_spices,spices_asian,meat_fish,meat_gourmet
+424855,Toor/s.peekon Inglise RAKVERE 150g viil,Rakvere,150 g,,meat_fish,meat_pork,meat_fish,meat_pork
+424856,Soolalõhefilee WELL DONE 170g,Well Done,170 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked
+424859,Soolapeekon NÕO kg,Nõo,1 kg,,world_spices,spices_basic_salt_pepper,meat_fish,meat_pork
+424860,Toorsalaami Tarbatu NÕO 105g viil,Nõo,105 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+424861,Toorsuitsu panniliha NÕO 105g viil,Nõo,105 g,,meat_fish,fish_salted_smoked,meat_fish,meat_pork
+424862,Tšillisalaami MATSIMOKA 150g,Matsimoka,150 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+424863,Tursamaks loorberi-pipra RANNAKÜLA 115g,Rannaküla,115 g,,dry_preserves,dry_other,dry_preserves,dry_canned_meat_fish
+424864,Tursamaks STEINHAUER 190g,Steinhauer,190 g,,dry_preserves,dry_other,dry_preserves,dry_canned_meat_fish
+424865,Suitsutatud doktorivorst M&M 500g,M&M,500 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424866,Suitsutatud juustuvorst M&M 500g,M&M,500 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+424867,Tursamaks suitsutatud STEINHAUER 120g,Steinhauer,120 g,,meat_fish,fish_salted_smoked,dry_preserves,dry_canned_meat_fish
+424868,Tuunikala soolvees RIO MARE 160g,Rio Mare,160 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+424869,Tuunikalatük.õlis jalapeno CALVO EO 142g,Calvo,142 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+424870,Tuunisalat lääts.teriyaki kast.KAIJA 160g,Kaija,160 g,,dry_preserves,dry_groats_beans,dry_preserves,dry_canned_meat_fish
+424871,Tuunitükid päeval.õlis WELL DONE 3x80g,Well Done,3x80 g,,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+424872,Väike kanaviiner M&M 300g,M&M,300 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+424873,Värske küüliku kintsuliha 200g,,200 g,,pet,pet_small_animals,meat_fish,meat_other
+424874,Värske pardikoivaliha LAPINO PUOTA 340g,,340 g,,meat_fish,meat_other,meat_fish,meat_poultry
+424875,Veiseliha äkis LINNAMÄE 110g,Linnamäe,110 g,,meat_fish,meat_beef_lamb_game,dry_preserves,dry_canned_meat_fish
+424876,Vin. fuet pulgad WELL DONE 50g,Well Done,50 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+424877,Vinnutatud latikapulgad ZIGMAS 40g,Zigmas,40 g,,dry_preserves,dry_other,meat_fish,fish_processed
+424878,Vinnutatud merluusipulgad ZIGMAS 40g,Zigmas,40 g,,dry_preserves,dry_other,meat_fish,fish_processed
+424879,Vinnutatud tursapulgad ZIGMAS 40g,Zigmas,40 g,,dry_preserves,dry_other,meat_fish,fish_processed
+424880,Suitsusink M&M 170g viil,M&M,170 g,,meat_fish,meat_hams,meat_fish,meat_hams
+424881,Tursamari LEMBERG 100g,Lemberg,100 g,,dry_preserves,dry_other,dry_preserves,dry_canned_meat_fish
+424882,Tuunikala pur.soolvees HAPPYSEA EO 185g,Happysea,185 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+424883,Veisepuljong FOODSTUDIO 750ml,Foodstudio,750 ml,,world_spices,spices_broth_stock,world_spices,spices_broth_stock
+424884,Vin.vorst Fuetec Salaami ELPOZO 170g,Elpozo,170 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424885,Tume õlu BUDWEISER Budvar 4.7% 500ml,Budvar,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424886,Vööttuunitükid õlis OCEAN 185g,Ocean,185 g,,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+424887,Tseiloni tee 9 maitseline HYLEYS 150g,Hyleys,150 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424888,Võil.Combo kana peek-i kast.MANTINGA 240g,Mantinga,240 g,,dairy_eggs_fats,dairy_butter_margarine,bakery,bakery_other

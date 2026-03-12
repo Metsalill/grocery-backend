@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+421370,Poolsuitsuvorst küüslaug.Moskva RGK 400g,RGK,400 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+421371,Požarski kotlet TALLEGG 350g,Tallegg,350 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+421372,KPN vein GRAN CASTILLO Shiraz 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421374,Punapeet kg,,1 kg,,produce,produce_root_veg,produce,produce_root_veg
+421375,Peipsi sibulagrill WÕRO 900g,Wõro,900 g,,produce,produce_root_veg,meat_fish,meat_pork
+421377,Perepihvid RAKVERE 400g,Rakvere,400 g,,dry_preserves,dry_other,meat_fish,meat_other
+421378,Külm. köögivil. praadimiseks HORTEX 400g,Hortex,400 g,,dry_preserves,dry_other,frozen_food,frozen_veg
+421379,Vanillipuding TERE laktoosivaba 200g,Tere,200 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+421380,Või TERE 82% 200g,Tere,200 g,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+421381,Lihapallid kartulipüreega NÕO 300g,Nõo,300 g,,produce,produce_root_veg,frozen_food,frozen_ready_meals
+421382,Külm.mandlikook Daimiga ALMONDY 400g,Almondy,400 g,,bakery,bakery_cakes_pastries,frozen_food,frozen_desserts_icecream
+421383,Leib Peremehe EESTI PAGAR 600g,Eesti Pagar,600 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+421385,Juusuvorst NÕO 400g,Nõo,400 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+421387,KPN vein PIERRE BREVIN Rose d'Anjou 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421388,Praetud kanapallid PORMET 1kg,Pormet,1 kg,,meat_fish,meat_poultry,meat_fish,meat_poultry
+421389,Lihapirukas 60g,,60 g,,bakery,bakery_cakes_pastries,bakery,bakery_other
+421390,Praetud kilu puhastatud BRIIS 170g,Briis,170 g,,dry_preserves,dry_pasta_rice,meat_fish,fish_processed
+421391,Lahustuv kohv Rich Aroma DAVIDOFF 100g,Davidoff,100 g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+421392,Lapi leib kaer. FAZER street food 180g,Fazer,180 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+421393,Või TERE 82% laktoosivaba 200g,Tere,200 g,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+421394,Vutimunad WELL DONE 12tk,Well Done,12 tk,,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+421395,KPN vein pun. PICCINI Oro Chianti 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421396,KPN vein ROBERT CHARTON Bord.Rose 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421398,Külm.makr. BOUJEE mustika-pass. mix 240g,Boujee,240 g,,produce,produce_berries,frozen_food,frozen_desserts_icecream
+421399,Värske juust Burrata WELL DONE 125/260g,Well Done,260 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421400,Lastevorst M&M 600g,M&M,600 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+421401,Liköör JÄGERMEISTER 35% 1L,Jägermeister,1 l,,dry_preserves,dry_other,drinks,drinks_spirits
+421402,Kannujook PÕLTSAMAA Mustasõs.õun.vaar.1L,Põltsamaa,1 l,,produce,produce_apples_pears,drinks,drinks_juices
+421403,Sul.suitsujuustusnäkk RAMBYNO orig. 75g,Rambyno,75 g,,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+421404,Jäät.stracciatella koon SUPER VIVA 96g,Super Viva,96 g,,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+421405,Liköör CANARI Pina Colada 15% 350ml,Canari,350 ml,,drinks,drinks_soft_soda,drinks,drinks_spirits
+421407,Biskviitikook KINDER Pingui Choco 30g,Kinder,30 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+421408,Jäät.maas.&vanil.topsis SUPER VIVA 98g,Super Viva,98 g,,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+421409,Keedetud sardellid PORMET 600g,Pormet,600 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+421410,Liköör JACK DANIEL'S Fire 35% 700ml,Jack Daniel's,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+421411,Sefiirikorvike 2x70g,,2x70 g,,dry_preserves,dry_other,bakery,bakery_cakes_pastries
+421412,Liköör CANARI Tiramisu 16% 350ml,Canari,350 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+421413,Kohup.kreem ALMA maasika-banaani 150g,Alma,150 g,,produce,produce_berries,dairy_eggs_fats,dairy_cottage_quark
+421417,Külm.maasikad BAUER 400g,Bauer,400 g,,produce,produce_berries,frozen_food,frozen_berries_fruit
+421418,Liköör VANA TALLINN Coconut 16% 500ml,Vana Tallinn,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+421419,Dessert KINDER Maxi King 3x35g,Kinder,3x35 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+421420,Jäät.vaarikajääga Flamingo VÄIKE TOM 60g,Väike Tom,60 g,,produce,produce_berries,frozen_food,frozen_desserts_icecream
+421421,Magus õieke MARTA PAGAR 280g,Marta Pagar,280 g,,dry_preserves,dry_other,bakery,bakery_buns_croissants
+421422,Liköör VANA TALLINN Marzipan 16% 500ml,Vana Tallinn,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+421423,Dessert ZOTT Liegois maasika 175g,Zott,175 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+421424,Koorejäätis BALBIINO šok.lakt.vaba 52g,Balbiino,52 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+421425,Maits.viin PEREPJOLKA Domashn. 40% 500ml,Perepjolka,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+421429,Dessert ZOTT Liegois kakao vahuk. 175g,Zott,175 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+421430,Juust Cheddar ATLEET 250g,Atleet,250 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421432,Singi-juututritsel 306g,,306 g,,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_cakes_pastries

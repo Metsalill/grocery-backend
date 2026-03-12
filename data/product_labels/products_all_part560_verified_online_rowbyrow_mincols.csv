@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+423579,Valge juust APETINA küüslauguga 100g,Apetina,100 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423580,Jogurtijook ACTIMEL puuvilja 8x100g,Actimel,8x100 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423581,Hele õlu SAKU ROCK 5.3% 2l,Saku,2 l,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423582,Hele õlu TAURUS 6% 1L PET,,1 l,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423583,H.õlu Saku Originaal 4.7% 6x500ml prk,Saku,6x500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423584,Jahv.kohv LAVAZZA ORO 2x250g,Lavazza,2x250 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+423585,Jahv.kohv Pausa SEGAFREDO 450g,Segafredo,450 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+423586,Jogurt kirsi granola WELL DONE 6% 200g,Well Done,200 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423587,Joogijogurt ALMA metsamarjamaits. 900g,Alma,900 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423588,Jahv.kohv LÖFBERGS Brazil 450g,Löfbergs,450 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+423589,Jahv.kohv Mount.Grown LAVAZZA purk 250g,Lavazza,250 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+423590,Jahvatatud kohv Selection JACOBS 500g,Jacobs,500 g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+423591,Joogijogurt ALMA mangomaits. 900g,Alma,900 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423592,Jahv.kohv kesk.röst.In-Cup LÖFBERGS 500g,Löfbergs,500 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+423593,Kali AMBER CITY 500ml prk,,500 ml,,dry_preserves,dry_other,drinks,drinks_soft_soda
+423594,Joogijogurt maasika MIO RIO 1kg,Mio&Rio,1 kg,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423595,Jahv.kohv Mountain Grown LAVAZZA 250g,Lavazza,250 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+423596,Joogivesi SAAREMAA 1.5L,Saaremaa,1.5 l,,drinks,drinks_water,drinks,drinks_water
+423597,Jõhvika mahlajook PÕLTSAMAA 2L,Põltsamaa,2 l,,drinks,drinks_juices,drinks,drinks_juices
+423598,Kohuke ALMA mango 40g,Alma,40 g,,produce,produce_tropical,dairy_eggs_fats,dairy_cottage_quark
+423599,Kõrvitsapüreesupp kookosjoog.PRESTO 300g,Presto,300 g,,bakery,bakery_cakes_pastries,dry_preserves,dry_soups_noodles
+423600,Kohuke ALMA vaarika 5x40g,Alma,5x40 g,,produce,produce_berries,dairy_eggs_fats,dairy_cottage_quark
+423601,Liköör JAGDTRAUM 30% 700ml,,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+423602,Kohuke ALMA vaarika 40g,Alma,40 g,,produce,produce_berries,dairy_eggs_fats,dairy_cottage_quark
+423603,Külm.mahe rohum. hakkliha LIIVIMAA 500g,Liivimaa,500 g,,meat_fish,meat_minced,meat_fish,meat_minced
+423604,Külm. makroon RUD pistaatsia 60g,Rud,60 g,,dry_preserves,dry_other,bakery,bakery_cakes_pastries
+423605,Jogurt GEFILUS maitsestamata 2.5% 380g,Gefilus,380 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423606,Juust Feta WELL DONE 150g,Well Done,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423607,Juust EESTI viilutatud 200g,,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423608,Valge juust APETINA Original 200g,Apetina,200 g,,drinks,drinks_spirits,dairy_eggs_fats,dairy_cheese_slices
+423609,Kohvikapslid NESCAFÉ Dolce Gusto Café Au Lait Intenso 16tk,Nescafé,16 tk,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+423610,Kohvikapslid NESCAFÉ Dolce Gusto Cappuccino 16tk,Nescafé,16 tk,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+423611,Karastusj. Karl Friedrich Kali 1.5L pet,,1.5 l,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+423612,Kali IMPERIAL 400ml,,400 ml,,dry_preserves,dry_other,drinks,drinks_soft_soda
+423613,Kali TANHEISER tume Porter 1.5L,,1.5 l,,dry_preserves,dry_other,drinks,drinks_soft_soda
+423614,Kali RUGILE 1.5L,,1.5 l,,dry_preserves,dry_other,drinks,drinks_soft_soda
+423615,Juust ATLEET Light 200g,Atleet,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423616,Kapslid Cafe au Lait DG NESCAFE 16x10g,Nescafé,16x10 g,,produce,produce_root_veg,drinks,drinks_coffee_beans_capsules
+423617,Kohvikapslid NESCAFÉ Dolce Gusto Flat White 16tk,Nescafé,16 tk,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+423618,Kohuke ALMA vanilli 7x40g,Alma,7x40 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+423619,Juust Forte VALIO Classico 180g,Valio,180 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+423620,Kali Karl Friedrich 500ml,,500 ml,,dry_preserves,dry_other,drinks,drinks_soft_soda
+423621,Kotlet šamp.kastme kart.pudr. 330g,,330 g,,sauces_oils,sauces_other,frozen_food,frozen_ready_meals
+423622,Kohuke ALMA vanilli 40g,Alma,40 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+423623,Karb.looduslik.min.vesi BORJOMI 6x1.25L,Borjomi,6x1.25 l,,drinks,drinks_water,drinks,drinks_water
+423624,Parmesani juustu Super Snack M&M 85g,M&M,85 g,,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+423625,KGT vein Alto Piano Primit. Puglia 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423626,KGT vein CASA CHARLIZE Prim.Pugl. 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423627,Jogurt HELLUS maitsestamata 1kg,,1 kg,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423628,Karastusjook SPRITE Zero 500ml,Sprite,500 ml,,drinks,drinks_soft_soda,drinks,drinks_soft_soda

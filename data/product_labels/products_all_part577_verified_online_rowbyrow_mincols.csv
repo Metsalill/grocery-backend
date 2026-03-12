@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+424468,Kanafil.nagitsad praetud WELL DONE 300g,Well Done,300 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+424469,Vesi AURA sportkorgiga karb-ta 750ml,Aura,750 ml,,drinks,drinks_water,drinks,drinks_water
+424470,Kohupiimapannkoogid MAMMA 200g,Mamma,200 g,,dairy_eggs_fats,dairy_cottage_quark,frozen_food,frozen_bakery
+424471,Keeduviinerid PORMET 260g,Pormet,260 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+424472,Broil.rinnafilee palad A klass WD 400g,Well Done,400 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+424473,Klassik.pesto vegan FILIPPO BERIO 190g,Filippo Berio,190 g,,sauces_oils,sauces_pasta_cooking,sauces_oils,sauces_pasta_cooking
+424474,Viin FREITAG Premium 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424475,Viin HLIBNY DAR Ginger-Honey 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424476,Viin HLIBNY DAR Pr.Craft Corn 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424477,Viin HÕBE 39.2% 700ml tuubis,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424478,Kodune kotletisegu M&M 500g,M&M,500 g,,dry_preserves,dry_other,meat_fish,meat_minced
+424479,Viin KOSKENKORVA 40% 500ml,Koskenkorva,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424480,Viin LAUA 40% 100ml Pet,,100 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424481,Viin POOLIK 40% 100ml,,100 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424482,Vesi Aura Fruit õuna kasemahlaga 500ml,Aura,500 ml,,drinks,drinks_water,drinks,drinks_water
+424483,Roheline tee Jasmiin suurleh.HYLEYS 100g,Hyleys,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424484,Puuv.tee Hispaania apel.TEEKANNE 20x2.5g,Teekanne,20x2.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424486,Vesi Aura Fruit õuna kasemahlaga 1.5l,Aura,1.5 l,,drinks,drinks_water,drinks,drinks_water
+424487,Viin BELVEDERE Pure 40% 700ml,Belvedere,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424488,Konservid hautatud hirvelihast RGK 250g,RGK,250 g,,meat_fish,meat_other,dry_preserves,dry_canned_meat_fish
+424489,Koore. kukeseene kaste FOODSTUDIO 230ml,Foodstudio,230 ml,,dairy_eggs_fats,dairy_cream_sourcream,sauces_oils,sauces_pasta_cooking
+424490,Koodirulaad OSKAR kg,Oskar,1 kg,,meat_fish,meat_hams,meat_fish,meat_hams
+424491,Viin STUMBRAS Ebaküdoonia 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424492,Viin VALGE VIIN 40% 200ml,,200 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424493,Rumm CAPTAIN MORGAN White 37.5% 700ml,Captain Morgan,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424494,Viin VECHIRNJA CHARKA Milk 40% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424495,Köögiv.püreesupp kanafileega PRESTO 300g,Presto,300 g,,meat_fish,meat_poultry,dry_preserves,dry_soups_noodles
+424496,Krabipulga salat köögiviljad. VICI 400g,Vici,400 g,,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+424497,Viin VIRU VALGE Cranberry 37.5% 500ml,Viru Valge,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424498,Viin VIRU VALGE Green Apple 37.5% 500ml,Viru Valge,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424499,Rumm CARIBBA Blanco 37.5% 500ml,Caribba,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424500,Rumm CARIBBA Negro 37.5% 1l,Caribba,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+424501,Vitamiinijook VITAMIN WELL Awake 500ml,,500 ml,,dry_preserves,dry_other,drinks,drinks_soft_soda
+424502,Vitamiinij. VITAMIN WELL Celebrate 500ml,,500 ml,,dry_preserves,dry_other,drinks,drinks_soft_soda
+424503,Vitam.jook VITAMINERAL Detox 750ml pet,,750 ml,,dry_preserves,dry_other,drinks,drinks_soft_soda
+424504,Vitam.jook VITAMINERAL Wat.Well. 750ml pet,,750 ml,,dry_preserves,dry_other,drinks,drinks_soft_soda
+424505,Vitam.jook VITAMIN WELL Hydrate 500ml,,500 ml,,dry_preserves,dry_other,drinks,drinks_soft_soda
+424506,Whiskey THE POGUES Triple Dist. 40% 700ml,,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+424507,Rumm ANGOSTURA 1919 8YO Dark Rum 40% 700ml,Angostura,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424508,Rumm CARIBBA Negro 37.5% 500ml,Caribba,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424509,Rumm MATUSALEM Solero 7yo 40% 700ml,Matusalem,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424511,Krevetid Maxi soolvees VICI 200g,Vici,200 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+424512,Br.poolkoivad grillmaitsest.TALLEGG 1kg,Tallegg,1 kg,,dry_preserves,dry_other,meat_fish,meat_poultry
+424513,Kuiv.kalmaar lõigatud MSDM 36g,,36 g,,dry_preserves,dry_other,meat_fish,fish_processed
+424514,Külmsuitsutatud lõhefilee OCEAN 120g,Ocean,120 g,,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+424515,Brokolisalat peekoniga MK kg,MK,1 kg,,meat_fish,meat_pork,sauces_oils,sauces_other
+424516,Whisky JP WISER'S 10 YO 40% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424517,Rumm ZACAPA 23Y Solera 40% 700ml,Zacapa,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424518,Siider FIZZ Pear 4.5% 500ml,,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424519,Br.poolkoiva tükid WELL DONE ABta 500g,Well Done,500 g,,dry_preserves,dry_other,meat_fish,meat_poultry

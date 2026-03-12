@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+421555,Eestimain.br.rinnafilee A-kl TALLEGG kg,Tallegg,1 kg,,dry_preserves,dry_other,meat_fish,meat_poultry
+421556,Broileri pooltiivad punases marin. 600g,,600 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+421557,Fitlap toorvorstid kanalihaga NÕO 400g,Nõo,400 g,,meat_fish,meat_poultry,meat_fish,meat_sausages
+421558,Forellimari KODURANNA 100g,Koduranna,100 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+421559,GI wine TORO D'ORO Res. Chardonnay 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421561,EHE Grillsteik seaseljakarbonaad.RR 500g,Rannarootsi,500 g,,dry_preserves,dry_other,meat_fish,meat_pork
+421562,Broileritiib A-klass WELL DONE kg,Well Done,1 kg,,meat_fish,meat_poultry,meat_fish,meat_poultry
+421563,Eestimain.br.kintsuliha A-kl TALLEGG kg,Tallegg,1 kg,,meat_fish,meat_other,meat_fish,meat_poultry
+421564,Jogurtijook WELL DONE mitmepuuv. 6x100g,Well Done,6x100 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+421565,GI wine TORO D'ORO Reserva Cab.S. 750ml,,750 ml,,dry_preserves,dry_other,drinks,drinks_wine
+421566,Jogurtijook WELL DONE metsamar. 6x100g,Well Done,6x100 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+421567,Einepeekon M&M kg-lett,M&M,1 kg,,meat_fish,meat_pork,meat_fish,meat_pork
+421568,Jogurtijook WELL DONE naturaalne 6x100g,Well Done,6x100 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+421569,Joogivesi SAAREMAA 500ml,Saaremaa,500 ml,,drinks,drinks_water,drinks,drinks_water
+421570,Kohuke MAGIJA vanilje-mooniga 45g,Magija,45 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+421571,Pasteet MATSIMOKA 170g,Matsimoka,170 g,,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+421572,Viin HLIBNY DAR Wheat 40% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+421573,Viin HLIBNY DAR Winter Wheat 40% 500ml,,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+421574,Vahvlitops LEKORNA 22g,Lekorna,22 g,,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+421575,Kohuke SAARE šokolaaditükkidega 40g,Saare,40 g,,sweets_snacks,sweets_chocolate_bars,dairy_eggs_fats,dairy_cottage_quark
+421576,Vahvlitordikihid Rainbow LEKORNA 140g,Lekorna,140 g,,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+421579,Vahvlitordikihid LEKORNA 140g,Lekorna,140 g,,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+421580,Grill liha kaelakarbonaad Värska M&M 500g,M&M,500 g,,meat_fish,meat_other,meat_fish,meat_pork
+421581,Võiroos 65g,,65 g,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+421582,Gorbuušamari IKRINKA 100g,Ikrinka,100 g,,dry_preserves,dry_other,meat_fish,fish_processed
+421583,Fuet manchego juustuga WELL DONE 150g,Well Done,150 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+421584,Kohuke TERE juustukoogi šok.glas. 40g,Tere,40 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cottage_quark
+421585,Külm. friikart.FARM FRITES sakiline 750g,Farm Frites,750 g,,frozen_food,frozen_potato_products,frozen_food,frozen_potato_products
+421588,Vahvlitordikihid kakao LEKORNA 140g,Lekorna,140 g,,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+421589,Gorbuušamari IKROFF 95g,Ikroff,95 g,,dry_preserves,dry_other,meat_fish,fish_processed
+421590,Kohuke TERE jõhvika multipakk 5x40g,Tere,5x40 g,,produce,produce_berries,dairy_eggs_fats,dairy_cottage_quark
+421591,Külm.pelmeenid BBQ lihaga VICI 300g,Vici,300 g,,meat_fish,meat_other,frozen_food,frozen_ready_meals
+421592,Grill-liha pun.veini marin. RAKVERE 500g,Rakvere,500 g,,drinks,drinks_wine,meat_fish,meat_pork
+421593,Grill liha kooreses marinaadis RAKVERE 500g,Rakvere,500 g,,dairy_eggs_fats,dairy_cream_sourcream,meat_fish,meat_pork
+421594,KGT vein J.P.CHENET Rose sw 750ml,J.P. Chenet,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421595,Hiidkrevetid soolvees KALURI 250g,Kaluri,250 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+421596,Grill-liha šašlõki marinaadis NÕO 440g,Nõo,440 g,,sauces_oils,sauces_marinades,meat_fish,meat_pork
+421597,Heeringaf.tükid Caesari KODURANNA 270g,Koduranna,270 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+421598,Hirveliha steik LINNAMÄE 240g,Linnamäe,240 g,,meat_fish,meat_other,meat_fish,meat_beef_lamb_game
+421599,Külm.supisegu köögiv.-kart.MAAHÄRRA 400g,Maahärra,400 g,,dry_preserves,dry_other,frozen_food,frozen_veg
+421601,Külm.pitsa SUPREMA viie juustuga 492g,Suprema,492 g,,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_pizza
+421602,Külm.rannakarbid keed.koorega WD 1kg,Well Done,1 kg,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_fish
+421604,Grillpeekon M&M 500g,M&M,500 g,,meat_fish,meat_pork,meat_fish,meat_pork
+421606,Külm.pitsa SUPREMA Calabrese&'Nduja 520g,Suprema,520 g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+421607,Hernesupikogu RAKVERE 800g,Rakvere,800 g,,dry_preserves,dry_other,dry_preserves,dry_soups_noodles
+421608,Juust Mozzarella FARM MILK Mini 125/245g,Farm Milk,245 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421609,Külm.Tsaari salat BAUER 400g,Bauer,400 g,,produce,produce_herbs_salads_sprouts,frozen_food,frozen_veg
+421610,Jah.sea esikoot WELL DONE kg,Well Done,1 kg,,dry_preserves,dry_other,meat_fish,meat_pork
+421611,Jahutatud kuldne merikoger kg,,1 kg,,dry_preserves,dry_flour_sugar_baking,meat_fish,fish_fresh
+421613,Kohvikapslid LAVAZZA Delizioso 16x7.5g,Lavazza,16x7.5 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules

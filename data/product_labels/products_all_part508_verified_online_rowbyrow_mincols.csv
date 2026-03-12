@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+420410,Liköör JÄGERMEISTER 35% 700ml,Jägermeister,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420411,Mineraalvesi VÄRSKA originaal 1.5L,Värska,1.5 l,,drinks,drinks_spirits,drinks,drinks_water
+420412,Mineraalvesi VÄRSKA originaal 500ml,Värska,500 ml,,drinks,drinks_spirits,drinks,drinks_water
+420413,Muu alk.jook PINA COLADA Retro 14% 700ml,Pina Colada,700 ml,,drinks,drinks_soft_soda,drinks,drinks_spirits
+420414,Cognac MEUKOW VS 40% 700ml karp,Meukow,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420415,GT kuiv vein ANDES Merlot 750ml,Andes,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420416,GT pun.vein TRAPICHE Variet.Malbec 750ml,Trapiche,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420417,GT vein HARDYS VR Chardonnay 750ml,Hardys,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420419,Muu piir.jook METAXA 5* 38% 500ml,Metaxa,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420420,Muu piiritusjook METAXA 7* 40% 700ml,Metaxa,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420421,Piiritusjook STAR DOLLAR 3* 30% 500ml,Star Dollar,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420422,Punane vein LOS CARDOS Cab. Sauv. 750ml,Los Cardos,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420423,Punane vein LOS CARDOS Malbec 750ml,Los Cardos,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420424,Roheline tee HYLEYS 25x1.5g,Hyleys,25x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420425,Siirup MONIN grenadiini 250ml,Monin,250 ml,,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+420426,Siirup MONIN karamelli 250ml,Monin,250 ml,,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+420427,Vahuvein ALITA Dry 750ml,Alita,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420428,Vahuvein ALITA Medium Dry 750ml,Alita,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420429,Vahuvein ALITA Sweet 750ml,Alita,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420430,Vahuvein FREIXENET Cav.C.Neg.Br. 200ml,Freixenet,200 ml,,drinks,drinks_wine,drinks,drinks_wine
+420431,Rumm CAPTAIN MORGAN Dark 40% 500ml,Captain Morgan,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420432,Vahuvein MARTINI Brut 750ml,Martini,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420433,Vahuvein TÖRLEY CHARMANT 750ml,Törley,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420434,Vahuvein TÖRLEY Muscateller 750ml,Törley,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420435,Vesi AURA PLUS sidrunimaits.1.5L,Aura Plus,1.5 l,,drinks,drinks_water,drinks,drinks_water
+420436,Whisky GRANTS Triple Wood 40% 1L,Grant's,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+420437,Whisky JACK DANIEL'S Tennes. 40% 500ml,Jack Daniel's,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420438,Whisky JACK DANIEL'S Tennessee 40% 700ml,Jack Daniel's,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420439,Whisky JIM BEAM White Label 4YO 40% 1l,Jim Beam,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+420440,Whisky MAC CALLISTER 40% 700ml,Mac Callister,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420441,Vahuvein FREIXENET Cav.C.Nev.S. 200ml,Freixenet,200 ml,,drinks,drinks_wine,drinks,drinks_wine
+420442,Valge vein LOS CARDOS Chardonnay 750ml,Los Cardos,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420443,Vein TARAPACA Sauvignon Blanc 750ml,Tarapaca,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420444,Vein TOTINO Bianco 14.5% 1L,Totino,1 l,,drinks,drinks_wine,drinks,drinks_wine
+420445,Vein Trapiche Varietals Sauv Blanc 750ml,Trapiche,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420446,Vesi AURA PLUS pohlamaits. 1.5L,Aura Plus,1.5 l,,drinks,drinks_water,drinks,drinks_water
+420447,Vesi AURA PLUS sidr.maits. 500ml,Aura Plus,500 ml,,drinks,drinks_water,drinks,drinks_water
+420448,Vesi AURA PLUS sidrunimaits.1.5L,Aura Plus,1.5 l,,drinks,drinks_water,drinks,drinks_water
+420449,Whisky GRANTS Triple Wood 40% 1L,Grant's,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+420450,Whisky JACK DANIEL'S Tennes. 40% 500ml,Jack Daniel's,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420451,Whisky JACK DANIEL'S Tennessee 40% 700ml,Jack Daniel's,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420452,Küpsisejäätis RAKS 56g,Raks,56 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420453,Whisky JIM BEAM White Label 4YO 40% 1l,Jim Beam,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+420454,Whisky MAC CALLISTER 40% 700ml,Mac Callister,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420455,Jäätis VÄIKE TOM mingo-mango 60g,Väike Tom,60 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420456,Whisky MAKER'S MARK Bourbon 45% 700ml,Maker's Mark,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420457,Whisky SCOTTISH LEADER 40% 200ml,Scottish Leader,200 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420458,Hele õlu PILSNER URQUELL 4.4% 500ml prk,Pilsner Urquell,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+420459,Jahv.kohv LÖFBERGS keskmine röst 500g,Löfbergs,500 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+420460,Whisky TULLAMORE 12YO 40% 700ml+karp,Tullamore,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+421255,Piimajook Müllermilch šokolaadi 400g,Müllermilch,400 g,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+421256,Jah. sea sisefilee WELL DONE kg,Well Done,1 kg,,dry_preserves,dry_other,meat_fish,meat_pork
+421257,Brandy J.P.CHENET VSOP 36% 700ml,J.P. Chenet,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+421258,Lõhefilee KAIJA naturaalne EO 170g,Kaija,170 g,,meat_fish,fish_fresh,dry_preserves,dry_canned_meat_fish
+421259,Koorejäätis granaatõuna PREMIA 75g,Premia,75 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+421261,KPN kv.vahuvein C.MONTAINE D.Sec 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421262,Kuldne kodusai seesamise-ga FAZER 450g,Fazer,450 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+421263,Piimajook VÄIKE TOM UHT maasika 200ml,Väike Tom,200 ml,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+421264,Piim ALMA 2.5% 500ml,Alma,500 ml,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+421265,Piim WELL DONE 2.5% UHT 1L,Well Done,1 l,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+421266,Prot.koh.kreem VALIO Profeel kirsi 200g,Valio,200 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+421267,Prot.koh.kreem VALIO Profeel vanil. 200g,Valio,200 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+421268,Sulatatud juust VALIO krabimaits. 185g,Valio,185 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421269,Seapeekoni kuubikud WELL DONE 300g,Well Done,300 g,,meat_fish,meat_pork,meat_fish,meat_pork
+421270,Sulatatud juust VALIO 370g,Valio,370 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421271,Jog.jook GEFILUS apel.-mango l.v. 4x100g,Gefilus,4x100 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+421272,Sea šašlõkk majoneesiga WELL DONE 800g,Well Done,800 g,,sauces_oils,sauces_ketchup_mayo,meat_fish,meat_pork
+421273,Seašašlõkk tammesuitsum.WELL DONE 800g,Well Done,800 g,,meat_fish,meat_pork,meat_fish,meat_pork
+421274,KPN-kv.vein CESARI Chianti PRINCIPE 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421276,Seasisefilee šašlõkk Armeenia grill kg,,1 kg,,meat_fish,meat_pork,meat_fish,meat_pork
+421279,Skyr FARMI apelsini-stracciatella 150g,Farmi,150 g,,produce,produce_tropical,dairy_eggs_fats,dairy_yogurt_kefir
+421281,KPN kv.vein KÖNIGSMOSEL Riesling 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421282,KPN poolkuiv vein MAYBACH Riesling 750ml,Maybach,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421283,Külm.croissant võiga WELL DONE 360g,Well Done,360 g,,dairy_eggs_fats,dairy_butter_margarine,frozen_food,frozen_bakery
+421284,KPN vein VILLA MOLINO Amarone Doc 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421285,Skyr FARMI kirssidega 150g,Farmi,150 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_yogurt_kefir
+421286,Krabimaitseline riisisalat 200g,,200 g,,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+421287,Skyr FARMI mustikatega 150g,Farmi,150 g,,produce,produce_berries,dairy_eggs_fats,dairy_yogurt_kefir
+421288,Kanapihvid TALLEGG 320g,Tallegg,320 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+421289,Sulat.juust HIIRTE JUUST kukeseened 185g,Hiirte Juust,185 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421290,Karastusjook KELLUKE sidrunimaits. 1.5L,,1.5 l,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+421292,Liköör VANA TALLINN 40% Eesti 100 500ml,Vana Tallinn,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+421293,KPN Vahuvein BOTTER Prosecco 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421294,KPN punane vein CRUSE Bordeaux 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421295,KPN punane vein CRUSE MedocReserve 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421296,KPN vah. REBULI Sed. Valdobb. Sup. 750ml,,750 ml,,dry_preserves,dry_other,drinks,drinks_wine
+421297,Snäkkvorst Pepperoni M&M 85g,M&M,85 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+421298,Sulat.juust HIIRTE JUUST maitseroh. 185g,Hiirte Juust,185 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421299,KPN Vahuvein ITALIA Prosecco 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421301,KPN Vahuvein MARTINI Prosecco 750ml,Martini,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421302,Kuiv vahuvein CINZANO Secco 750ml,Cinzano,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421303,Šokolaadibatoonike KINDER Maxi King 35g,Kinder,35 g,,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+421304,Suitsujuust FARM MILK 330g,Farm Milk,330 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421305,Külm. Arg. merluusifilee WELL DONE 400g,Well Done,400 g,,dry_preserves,dry_other,frozen_food,frozen_fish
+421306,Sulatatud juust MEREVAIK Premium 170g,Merevaik,170 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421307,Sulatatud juust VALIO 185g,Valio,185 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421308,Liköör VANA TALLINN 40% 200ml Pet,Vana Tallinn,200 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+421309,Vahukoorerull 320g,,320 g,,dairy_eggs_fats,dairy_cream_sourcream,bakery,bakery_cakes_pastries
+421310,KPN valge vein LIEBFRAUMILCH 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421311,Maksikrevetid surimi soolvees 320g,,320 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed

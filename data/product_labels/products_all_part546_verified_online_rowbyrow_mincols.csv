@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+422758,Külm.friikartul MAAHÄRRA sakiline 750g,Maahärra,750 g,,frozen_food,frozen_potato_products,frozen_food,frozen_potato_products
+422759,Roheline tee assortii BASILUR 20x1.5g,Basilur,20x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422760,Külm. pelmeenid UVIC Hiina 1kg,Uvic,1 kg,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+422761,Hõrk pilaff kanaga 300g,,300 g,,meat_fish,meat_poultry,frozen_food,frozen_ready_meals
+422762,Alk.kokt.HARTWALL Oring.Strong 7.5% 330ml,Hartwall,330 ml,,dry_preserves,dry_other,drinks,drinks_beer_cider
+422763,Hommikusink OSKAR 300g viil,Oskar,300 g,,meat_fish,meat_hams,meat_fish,meat_hams
+422764,Salat potis tk,,1 tk,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+422765,Sibul kg,,1 kg,,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+422767,Terav kaste Guacamole 150g,,150 g,,sauces_oils,sauces_other,sauces_oils,sauces_other
+422768,Või MO SAAREMAA küüsl.&soolakrist. 150g,Saaremaa,150 g,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+422770,Jah.krabimaits.pulgad KAPTEN GRANT 250g,Kapten Grant,250 g,,dry_preserves,dry_other,meat_fish,fish_processed
+422772,Armeenia broileri šašlõkk WELL DONE 700g,Well Done,700 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+422774,Arom.puuv.vein MONTE CRISTO valge 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422775,Sibul võrgus kg,,1 kg,,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+422776,Võileivamääre FARMI karul.pestoga 150g,Farmi,150 g,,dairy_eggs_fats,dairy_butter_margarine,sauces_oils,sauces_other
+422777,Jahimeh.kuumsuitsuvorstid WELL DONE 520g,Well Done,520 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+422779,Külm.kalafilee spinatiga WELL DONE 220g,Well Done,220 g,,meat_fish,fish_fresh,frozen_food,frozen_fish
+422781,Sidr.maits.vesi SAAREMAA 1.5Lx6 gas-tud,Saaremaa,6x1.5 l,,drinks,drinks_water,drinks,drinks_water
+422782,Võileivasink NÕO 100g viil,Nõo,100 g,,dairy_eggs_fats,dairy_butter_margarine,meat_fish,meat_hams
+422783,Võileivavorst VALLA 240g viil,Valla,240 g,,dairy_eggs_fats,dairy_butter_margarine,meat_fish,meat_sausages
+422784,Basiilik potis Hansa Herbs,,1 tk,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+422785,Viiner lambasooles Päris OSKAR 350g,Oskar,350 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+422788,Brandy ARARAT 5YO 40% 500ml,Ararat,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+422791,Jahutatud broileri seljad A-klass WD kg,Well Done,1 kg,,dry_preserves,dry_flour_sugar_baking,meat_fish,meat_poultry
+422792,Külm.kompotiassorti BAUER 400g,Bauer,400 g,,dry_preserves,dry_other,frozen_food,frozen_berries_fruit
+422794,Magus kohupiim LIISU Tutti-Frutti 180g,Liisu,180 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422795,Vürtsisoola kilu kg-lett,,1 kg,,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+422796,Kohvioad Crema JACOBS 1kg,Jacobs,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+422797,Külm.köögiviljad. Tai stiilis 400g,,400 g,,dry_preserves,dry_other,frozen_food,frozen_veg
+422798,Tomat lahtine 1 kl. kg,,1 kg,,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+422800,Vinegrett 200g,,200 g,,dry_preserves,dry_other,sauces_oils,sauces_other
+422801,Viiner Pere RAKVERE 900g,Rakvere,900 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+422802,Magus pip.GRIKIOS toorjuus.l.v. 200/150g,Grikios,200 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cheese_slices
+422804,Aleksandri kook 175g,,175 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+422805,Vein MAORI BAY Sauvignon Blanc 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422806,Cappuccino LA FESTA klassik 10x12.5g,La Festa,10x12.5 g,,dry_preserves,dry_other,drinks,drinks_tea_coffee
+422807,Mahe kaerajook OATLY 1l,Oatly,1 l,,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+422808,Classic lavash LAMELEIB 120g,Lameleib,120 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+422809,Cognac COURVOISIER VSOP 40% 500ml +karp,Courvoisier,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422810,Cognac HENNESSY VS 40% 200ml,Hennessy,200 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422811,Külm.merluusifilee ports.nahata 600g,,600 g,,dry_preserves,dry_other,frozen_food,frozen_fish
+422813,Vahuvein TÖRLEY Charmant 200ml,Törley,200 ml,,drinks,drinks_wine,drinks,drinks_wine
+422814,Jahutatud lõhefilee C Trim kg,,1 kg,,dry_preserves,dry_flour_sugar_baking,meat_fish,fish_fresh
+422817,Riivsai Golden CITY TASTE 350g,City Taste,350 g,,bakery,bakery_buns_croissants,dry_preserves,dry_flour_sugar_baking
+422818,Broileritiivad BBQ marin.WELL DONE 500g,Well Done,500 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+422819,Jahutatud broilerisüda WELL DONE 400g,Well Done,400 g,,dry_preserves,dry_flour_sugar_baking,meat_fish,meat_poultry
+422820,Br.rin.fil.šašl.jog.mar.Fit.TALLEGG 800g,Tallegg,800 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+422821,Vahuvein TÖRLEY Charmant Rose 750ml,Törley,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422823,Majonees TARPLAN küüslauguga 210g,Tarplan,210 g,,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+422824,Hautatud sealiha MAAILU 240g,Maailu,240 g,,meat_fish,meat_pork,dry_preserves,dry_canned_meat_fish

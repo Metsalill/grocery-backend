@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+421060,Premium majonees FELIX 445g,Felix,445 g,,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+421061,Proteiinijogurt TERE Fit karamell 150g,Tere,150 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+421062,Hele ciabatta kukkel EESTI PAGAR 210g,Eesti Pagar,210 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+421063,Jõhvikajook PÕLTSAMAA 1L,Põltsamaa,1 l,,produce,produce_berries,drinks,drinks_juices
+421066,Jahv.kohv Top PELLINI 250g,Pellini,250 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+421067,Prot.jog.jook VALIO Profeel kirsi 275g,Valio,275 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_yogurt_kefir
+421069,Prot.jog.jook VALIO Profeel metsmar.275g,Valio,275 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_yogurt_kefir
+421070,Jogurt WELL DONE virsik 350g,Well Done,350 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+421071,Joogijogurt ALMA maasika-nektariini 900g,Alma,900 g,,drinks,drinks_juices,dairy_eggs_fats,dairy_yogurt_kefir
+421072,Peenleib juuretise FAZER 500g,Fazer,500 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+421073,Poolsuitsuvorst Tõmmu juustuga WÕRO 350g,Wõro,350 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+421074,Kohuke želeetükikestega WELL DONE 45g,Well Done,45 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+421075,Rosmariin WELL DONE 20g,Well Done,20 g,,dry_preserves,dry_other,produce,produce_herbs_salads_sprouts
+421076,Perenaisesai EESTI PAGAR 320g,Eesti Pagar,320 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+421077,Kohupiimakreem ALMA kirsikisselliga 140g,Alma,140 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+421080,Hele õlu DISEL A.Le Coq 5.2% 2L,A. Le Coq,2 l,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+421083,Prot.koh.kreem VALIO Profeel vaar. 200g,Valio,200 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+421085,Hele õlu KARL FRIEDRICH 5% 500ml,Karl Friedrich,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+421086,Joogivesi AURA kerg. ga-tud 1.5L,Aura,1.5 l,,drinks,drinks_water,drinks,drinks_water
+421090,Joogivesi SAAREMAA gas-ud 500ml,Saaremaa,500 ml,,drinks,drinks_water,drinks,drinks_water
+421091,Juust Camembert CHANSON DU FROMAGE 120g,Chanson du Fromage,120 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421092,Juustudipp MEREVAIK Originaal 200g,Merevaik,200 g,,drinks,drinks_spirits,dairy_eggs_fats,dairy_cheese_slices
+421093,Juustupulgad MEREVAIK 5x20g,Merevaik,5x20 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421096,Hele õlu GERMANIA Pilsner 4.8% 500ml,Germania,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+421098,Jahvatatud kohv In-Cup MERRILD 400g,Merrild,400 g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+421100,Võisalat potis Hansa Herbs,Hansa Herbs,1 tk,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+421102,GT vein VENTISQUERO Res.Sauv.Blanc 750ml,Ventisquero,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421103,Rasvavõie EXTRA LINE 25% 500g,Extra Line,500 g,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+421106,Hele õlu A.LE COQ Prem. 4.7% 6x500ml,A. Le Coq,6x500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+421107,Cognac MEUKOW VS 40% 700ml karp,Meukow,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+421109,Jahvatatud kohv Classic PAULIG 250g,Paulig,250 g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+421110,Jäätis anan.-maasika VÄIKE TOM 75g,Väike Tom,75 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421111,Puding FARMI koorene šok.maits. 230g,Farmi,230 g,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_desserts
+421112,Puding ALMA vanilli 230g,Alma,230 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+421114,Puding FARMI koorene vanilje 230g,Farmi,230 g,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_desserts
+421116,Jäätis Bubble Gum ESKIMOS 72g,Eskimos,72 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421118,Jäätis DAIM koonus 68.5g,Daim,68.5 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421120,Rasvavõie EXTRA LINE küpset.70% 500g,Extra Line,500 g,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+421121,KPN vein ZONIN Ripasso Valpolic. 750ml,Zonin,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421122,Külm. friikartul sakiline AVIKO 1.5kg,Aviko,1.5 kg,,frozen_food,frozen_potato_products,frozen_food,frozen_potato_products
+421123,Riivitud segu GOURMET GREEN 150g,Gourmet Green,150 g,,dry_preserves,dry_other,produce,produce_herbs_salads_sprouts
+421124,Lahustuv kohvijook NESCAFÉ 3in1 CLASSIC 10x16.5g,Nescafé,10x16.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421125,Pitsa snäkk sal&peek.s. m-ga 138g,,138 g,,dry_preserves,dry_other,sweets_snacks,sweets_snacks_salty
+421126,Riivitud toote segu 150g,,150 g,,dry_preserves,dry_other,produce,produce_herbs_salads_sprouts
+421127,Jäätis karamelliga VANILLA NINJA 80g,Vanilla Ninja,80 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421128,Juustukook punase sõstraga 660g,,660 g,,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_cakes_pastries
+421129,KGT vein EPICURO Chardonnay Fiano 750ml,Epicuro,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421130,Kanasült Fitlap NÕO 300g,Nõo,300 g,,meat_fish,meat_poultry,meat_fish,meat_other
+421133,Karastusj.FENTIMANS Cher.Tree Cola 275ml,Fentimans,275 ml,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+421134,Koorikleib Rukkipala LEIBUR 6tk 330g,Leibur,330 g,,dairy_eggs_fats,dairy_cream_sourcream,bakery,bakery_bread_loaves

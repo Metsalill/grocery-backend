@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+422080,Lapi leib Street Food FAZER 140g,Fazer,140 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+422081,Ahjubroiler klassikaline TALLEGG kg,Tallegg,1 kg,,meat_fish,meat_poultry,meat_fish,meat_poultry
+422082,Karamelli kaera-sojajook ALPRO Barista 750ml,Alpro,750 ml,,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+422083,GT vein Tbilvino TVISHI valge 750ml,Tbilvino,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422084,Jahv.kohv Classic DALLMAYR 500g,Dallmayr,500 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+422085,Suflee lõhefileest AVEKTRA 220g,Avektra,220 g,,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+422086,Külmutatud kalapulgad ESVA 450g,Esva,450 g,,frozen_food,frozen_fish,frozen_food,frozen_fish
+422087,Lihasnäkk Chili Pork Jerky RAKVERE 50g,Rakvere,50 g,,meat_fish,meat_other,meat_fish,meat_gourmet
+422088,Whisky NIKKA Coffee Grain 45% 700ml karp,Nikka,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422089,Meremari punane KRISKAL 113g,Kriskal,113 g,,dry_preserves,dry_other,meat_fish,fish_processed
+422090,Anšoovis filee klassikaline BRIIS 145g,Briis,145 g,,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_meat_fish
+422091,Mustika grill-ribi RAKVERE kg,Rakvere,1 kg,,meat_fish,meat_pork,meat_fish,meat_pork
+422092,Whisky SAILOR'S 40% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422093,Pealinna peenleib EESTI PAGAR 1kg,Eesti Pagar,1 kg,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+422094,Sojajook ALPRO PlantProtein 1L,Alpro,1 l,,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+422095,Anšoovis vähesoolane BRIIS 160g,Briis,160 g,,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_meat_fish
+422096,Whisky SCOTTISH LEADER 40% 1L,,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+422097,Jahv.kohv Prodomo DALLMAYR 500g,Dallmayr,500 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+422098,Jäätis BOUNTY Ice Tube 255g,Bounty,255 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422099,Whisky SILVERHORN Blended 40% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422100,Whisky THE GLENLIVET 15 YO SM 40% 700ml,The Glenlivet,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422101,Jäätis Ben&Jerry's Dulce de Leche Sundae 350g,Ben&Jerry's,350 g,,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+422102,Jahv.kohv DALLMAYR Prodomo 250g,Dallmayr,250 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+422103,Pere sai seesamiga sul. 329g,,329 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+422104,Lauavesi ASET gaseerimata 5L,Aset,5 l,,drinks,drinks_water,drinks,drinks_water
+422105,Whisky SCOTTISH LEADER 40% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422108,Jäätis karamelliga plombiir WD 90g,Well Done,90 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422109,Jäätis karamelli belg.šok.&mandl.WD 81g,Well Done,81 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422110,Hele õlu SAKU ROCK 5.3% 500ml PDL,Saku,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+422111,Lõhe omas mahlas 240g,,240 g,,drinks,drinks_juices,dry_preserves,dry_canned_meat_fish
+422112,KPN vein KENDERMANNS Riesl.Kabin.750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422113,Joogivesi AURA Fruit Sidruni ga-tud 1.5l,Aura,1.5 l,,drinks,drinks_water,drinks,drinks_water
+422116,Jäätis KINDER Bueno vahvlikoonuses 62g,Kinder,62 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422117,Suitsujuustuvorst Lihakas RAKVERE 360g,Rakvere,360 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+422118,Jahvatatud kohv JACOBS Kronung Mild 500g,Jacobs,500 g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+422119,Piruk vahtrasiir pekpähkl 81g,,81 g,,sweets_snacks,sweets_nuts_driedfruit,bakery,bakery_cakes_pastries
+422120,Õllesigar RAKVERE 120g,Rakvere,120 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+422121,Külmutatud vaarikad WELL DONE 400g,Well Done,400 g,,produce,produce_berries,frozen_food,frozen_berries_fruit
+422122,Lood.min.vesi AKVILE 1.5L sidrunim.,Akvile,1.5 l,,drinks,drinks_water,drinks,drinks_water
+422123,Mahe kaerajook YOOK Barista 1L,Yook,1 l,,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+422124,Sojajook ALPRO Plant Protein vanilje 1L,Alpro,1 l,,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+422125,Suitsu-kalkunifilee NÕO 105g,Nõo,105 g,,meat_fish,meat_poultry,meat_fish,meat_gourmet
+422126,Br.tiiva õlaosa A-klass WELL DONE 500g,Well Done,500 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+422127,GT vein TELIANI Valley Saperavi 750ml,Teliani Valley,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+422129,Armeeniapärane sealiha šašlõkk kg,,1 kg,,meat_fish,meat_pork,meat_fish,meat_pork
+422130,Jäätis maapähkli&šokolaaditük.NICKS 300g,Nicks,300 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422131,Liköör KOSKENKORVA Minttu 35% 500ml,Koskenkorva,500 ml,,sweets_snacks,sweets_gums_mints,drinks,drinks_spirits
+422132,Liköör Metsamaasika 18% 500ml PET,,500 ml,,produce,produce_berries,drinks,drinks_spirits
+422133,Metssealiha konserv LINNAMÄE 240g,Linnamäe,240 g,,meat_fish,meat_pork,dry_preserves,dry_canned_meat_fish
+422134,Suitsupõsk NÕO kg,Nõo,1 kg,,meat_fish,fish_salted_smoked,meat_fish,meat_pork

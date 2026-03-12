@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+420041,Cognac RENAULT Avec 40% 700ml,Renault,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420042,Whisky J.WALKER Black Label 40% 700ml,Johnnie Walker,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420043,Brandy GRAND CAVALIER 38% 500ml,Grand Cavalier,500 ml,,drinks,drinks_wine,drinks,drinks_spirits
+420044,Gruusia rahvusleib Puri EP 330g,EP,330 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+420045,Külm. pitsa Diavola RISTORANTE 350g,Ristorante,350 g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+420046,Must tee DILMAH 100g,Dilmah,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420047,Külm.pitsa Mozzarella RISTORANTE 355g,Ristorante,355 g,,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_pizza
+420048,Brandy GRAND CAVALIER 38% 700ml,Grand Cavalier,700 ml,,drinks,drinks_wine,drinks,drinks_spirits
+420049,Vermut Martini Extra Dry 1L,Martini,1 l,,dry_preserves,dry_other,drinks,drinks_spirits
+420050,Külm.pitsa Prosciutto RISTORANTE 340g,Ristorante,340 g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+420051,Brandy St Remy Authentic XO 40% 700ml,St Remy,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420052,Piir.jook CAPTAIN MORGAN Spiced 35% 700ml,Captain Morgan,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420053,Poolkuiv vein MATEUS Rose 750ml,Mateus,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420054,Rumm CAPTAIN MORGAN Dark rum 40% 700ml,Captain Morgan,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420055,Tomatimahl AURA 1L,Aura,1 l,,drinks,drinks_juices,drinks,drinks_juices
+420056,Tume õlu GUINNESS Draught 4.2% 440ml prk,Guinness,440 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+420057,Vermut MARTINI Bianco 15% 1L,Martini,1 l,,dry_preserves,dry_other,drinks,drinks_spirits
+420058,Vermut Martini Extra Dry 1L,Martini,1 l,,dry_preserves,dry_other,drinks,drinks_spirits
+420059,Viin ABSOLUT Vodka 40% 1L,Absolut,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+420060,Viin FINLANDIA 40% 500ml,Finlandia,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420061,Viin ABSOLUT Vodka 40% 1L,Absolut,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+420062,Viin FINLANDIA 40% 500ml,Finlandia,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420063,Whisky JIM BEAM White Label 4YO 40% 700ml,Jim Beam,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420064,Hele leib ciabatta 271g,,271 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+420065,GT vein CASA VENERDI Rosso 750ml,Casa Venerdi,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420066,Heeringafilee Tradits. VICI 190g,Vici,190 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+420067,GT vein CONO SUR Bicic.Caber.Sauv. 750ml,Cono Sur,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420068,Külm.pelmeenid UVIC Hiina spec.edit 400g,Uvic,400 g,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+420069,Külm.pelmeenid veise sea&kana UVIC 400g,Uvic,400 g,,meat_fish,meat_poultry,frozen_food,frozen_ready_meals
+420070,Pulgajäätised,,1 pk,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420071,Külm.praadimissegu kart.HÄRMAVILI 400g,Härmavili,400 g,,dry_preserves,dry_other,frozen_food,frozen_potato_products
+420072,Külm.sibularõngad AVIKO 450g,Aviko,450 g,,produce,produce_root_veg,frozen_food,frozen_potato_products
+420073,Whisky JIM BEAM White Label 4YO 40% 700ml,Jim Beam,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420074,Whisky SCOTTISH LEADER 40% 500ml,Scottish Leader,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420075,Whisky TULLAMORE 40% 1L,Tullamore,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+420076,GT vein FRONTERA Cab.Sauv. 750ml,Frontera,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420077,GT vein GATO NEGRO Cabern.Sauvign.750ml,Gato Negro,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420078,GT vein GATO NEGRO Chardonnay 750ml,Gato Negro,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420079,Bitter STUMBRAS STARKA 43% 0.5L,Stumbras,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420080,Cognac Courvoisier VS 40% 350ml,Courvoisier,350 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+420081,Itaalia suupiste singiga 114g,,114 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+420082,KPN vah.vein MENESTRELLO Prosecco 750ml,Menestrello,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420084,Kirsi sorbetipallid MINI MELTS 72g,Mini Melts,72 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420085,Kookos Kg,,1 kg,,bakery,bakery_cakes_pastries,produce,produce_tropical
+420086,Topsi- ja koonusjäätised,,1 pk,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420087,Kurk Pikk Kiles Kg,,1 kg,,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+420088,Kuuslauk Kg,,1 kg,,dry_preserves,dry_other,produce,produce_root_veg
+420089,Sampinjonid Pakitud 250 G,,250 g,,dry_preserves,dry_other,produce,produce_mushrooms
+420090,Sibul Kg,,1 kg,,produce,produce_root_veg,produce,produce_root_veg
+420091,Melon Piel De Sapo Kg,,1 kg,,produce,produce_tropical,produce,produce_tropical

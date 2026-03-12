@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+421965,Juust täispiimast ALMA viilutatud 500g,Alma,500 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421966,Risoto kanaga seen.WILLIM SAURIN 280g,William Saurin,280 g,,meat_fish,meat_poultry,dry_preserves,dry_canned_meat_fish
+421967,KPN vein VAUCHER Chablis 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421968,Juust Mozzarella WELL DONE 125/210g,Well Done,210 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421970,Roheline pesto WELL DONE 190g,Well Done,190 g,,sauces_oils,sauces_pasta_cooking,sauces_oils,sauces_pasta_cooking
+421971,Külmutatud rannakarbiliha WELL DONE 200g,Well Done,200 g,,meat_fish,meat_other,frozen_food,frozen_fish
+421972,Krabimaitselised surimi pulgad 150g,,150 g,,dry_preserves,dry_other,meat_fish,fish_processed
+421973,Salaami ELPOZO kg-lett,Elpozo,1 kg,,dry_preserves,dry_other,meat_fish,meat_gourmet
+421974,Külm.köögiviljad. Hiina stiilis 400g,,400 g,,dry_preserves,dry_other,frozen_food,frozen_veg
+421975,Külm.köögiv.maitseain.ja papr.HORTEX 400g,Hortex,400 g,,dry_preserves,dry_other,frozen_food,frozen_veg
+421976,M. tee virs.ja litšimaits.DILMAH 20x1.5g,Dilmah,20x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421977,Must tee assortii aromatis.BASILUR 20x2g,Basilur,20x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421978,Must tee Earl Grey DILMAH 20x1.5g,Dilmah,20x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421979,Rukkitasku EESTI PAGAR 340g,Eesti Pagar,340 g,,dry_preserves,dry_other,bakery,bakery_bread_loaves
+421980,Must tee 4 Seasons BASILUR 100g,Basilur,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421981,Must tee English Breakfast LIPTON 25x2g,Lipton,25x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421983,Juusuampsud MO SAAREMAA 200g,Saaremaa,200 g,,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+421984,Külm.mintaifilee pulgad FINDUS 364g,Findus,364 g,,sweets_snacks,sweets_gums_mints,frozen_food,frozen_fish
+421985,Lauavesi ASET gaseerimata 1.5L,Aset,1.5 l,,drinks,drinks_water,drinks,drinks_water
+421986,Külm. paneeritud fileepala ESVA 285g,Esva,285 g,,dry_preserves,dry_other,frozen_food,frozen_fish
+421987,Särtsakas tagliatelle hakklihaga 300g,,300 g,,meat_fish,meat_minced,frozen_food,frozen_ready_meals
+421988,Külm.paneeritud kalafilee WELL DONE 440g,Well Done,440 g,,meat_fish,fish_fresh,frozen_food,frozen_fish
+421989,Sardiinid õlis KAPTEN GRANT 240g,Kapten Grant,240 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+421990,Salat surimi riisi&köögivil.VICI 200g,Vici,200 g,,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_meat_fish
+421991,Must tee Earl Grey Lemon LIPTON 25x2g,Lipton,25x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421992,Külm. paneeritud krabisõrg VICI 250g,Vici,250 g,,dry_preserves,dry_other,frozen_food,frozen_fish
+421993,Külm.pitsa RISTORANTE Margherita 550g,Ristorante,550 g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+421994,Must tee Earl Grey HYLEYS 25x2g,Hyleys,25x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421995,Sardiinid õlis MARINE ABC EO 240g,Marine ABC,240 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+421996,Sardiinid tomatikast.MARINE ABC EO 240g,Marine ABC,240 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+421997,Šašlõki toorvorstid RAKVERE 400g,Rakvere,400 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+421998,Šašlõkk kartulisektoriga 300g,,300 g,,meat_fish,meat_pork,meat_fish,meat_pork
+421999,Juust Tilsit 45% WELL DONE 200g,Well Done,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422001,Kuumsuitsu heik vaakumis M.V.WOOL kg,M.V.Wool,1 kg,,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+422002,Viin HÕBE Mahe 39.2% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422003,Lastevorst RAKVERE 600g,Rakvere,600 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+422004,Juust Tilsit FARM MILK 45% 250g,Farm Milk,250 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422005,Juustupulgad Pik-Nik Twiller 80g,Pik-Nik,80 g,,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+422006,Miniekleer.vahukoor.EESTI KONDIITER 200g,Eesti Kondiiter,200 g,,dairy_eggs_fats,dairy_cream_sourcream,bakery,bakery_cakes_pastries
+422008,Ruks seemneleib LEIBUR 10% seemneid 390g,Leibur,390 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+422009,Lastevorst RAKVERE kg-lett,Rakvere,1 kg,,meat_fish,meat_sausages,meat_fish,meat_sausages
+422010,Lemmikvorst nat. sooles UVIC kg,Uvic,1 kg,,world_spices,spices_basic_salt_pepper,meat_fish,meat_sausages
+422011,Lõhefil.tük.kreem.tomatik. KAIJA 170g,Kaija,170 g,,meat_fish,fish_fresh,dry_preserves,dry_canned_meat_fish
+422012,Maamehe suitsusink NÕO 105g viil,Nõo,105 g,,meat_fish,meat_hams,meat_fish,meat_hams
+422014,Rummikorvike 2x65g,,2x65 g,,drinks,drinks_spirits,bakery,bakery_cakes_pastries
+422015,Hele õlu Tuborg Green 4.6% 330ml pudel,Tuborg,330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+422018,Rummilill EESTI KONDIITER 480g,Eesti Kondiiter,480 g,,drinks,drinks_spirits,bakery,bakery_cakes_pastries
+422019,Tosca kook 240g,,240 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+422020,Rõõsk koor FARM MILK UHT 30% 200ml,Farm Milk,200 ml,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+422021,Jah.kohv LAVAZZA Caffe Decaffeinato 250g,Lavazza,250 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules

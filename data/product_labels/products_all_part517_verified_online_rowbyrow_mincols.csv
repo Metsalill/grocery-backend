@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+420995,Croissant pähkli&šokolaaditäidisega 83g,,83 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+420997,KPN Liköörvein ROZES Tawny Port 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420999,KPN vein CHEMIN DES PAPES Cot.D.Rh.750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421000,Piimabatoonike FARM MILK kakao 30g,Farm Milk,30 g,,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+421001,Viin LAUA 40% 200ml,,200 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+421002,Viin SAAREMAA Rabarber 37.5% 500ml,Saaremaa,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+421003,Parim Päts sai 300g,,300 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+421006,Pealinna kook EESTI PAGAR 1.1kg,Eesti Pagar,1.1 kg,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+421009,Toorjuust PIIMAMEISTER OTTO vanilli 400g,Otto,400 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421010,Tšillimajonees FELIX 220g,Felix,220 g,,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+421012,GT vein DIDEBULI Tbilisi valge 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421013,KPN vein CHT LE VIEUX Fort Medoc 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421014,KPN-vein DR.LOOSEN Ries 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421015,Külm.pelmeenid veise sea&kana UVIC 400g,Uvic,400 g,,meat_fish,meat_poultry,frozen_food,frozen_ready_meals
+421016,Lavaširullid singi ja juustuga 250g,,250 g,,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_other
+421017,Viin SHUSTOV Klassicheskaja 40% 500ml,Shustov,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+421018,Lahustuv kohv NESCAFE Strong 250g,Nescafé,250 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421019,Piimakõrred MilkyMood maasikamaits.5x6g,MilkyMood,5x6 g,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+421020,Piimakõrred MilkyMood metsamarjamai.5x6g,MilkyMood,5x6 g,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+421022,Lahustuv kohvijook NESCAFÉ 2IN1 28x8g,Nescafé,28x8 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421023,Viin STOLI 40% 500ml,Stoli,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+421025,Pealinna peenleib EESTI PAGAR 490g,Eesti Pagar,490 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+421026,Lemmikvorst nat. soole UVIC kg-lett,Uvic,1 kg,,world_spices,spices_basic_salt_pepper,meat_fish,meat_sausages
+421027,Peedi-porgandi-pastinaagi pehmik EP 240g,Eesti Pagar,240 g,,drinks,drinks_wine,bakery,bakery_buns_croissants
+421028,KPN vein Principi SANI P.di Mand.750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421029,GT vein ROBERTSON Chardonnay 3L,,3 l,,drinks,drinks_wine,drinks,drinks_wine
+421030,KPN vein TERRA NOSTRA Chianti 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421031,Hommikupeekon NÕO 135g viil,Nõo,135 g,,meat_fish,meat_pork,meat_fish,meat_pork
+421032,Jäätis kondenspiim.koon. LA MUU 80g,La Muu,80 g,,dairy_eggs_fats,dairy_milk,frozen_food,frozen_desserts_icecream
+421036,Kuldne klassikaline röstsai LEIBUR 250g,Leibur,250 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+421037,GT vein SANTA CAROLINA C.S.Cab.Sa.750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421038,Jäätis maasika-vanilje ONU ESKIMO 84g,Onu Eskimo,84 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421039,Piim VÄIKE TOM UHT banaani&vitam. 200ml,Väike Tom,200 ml,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+421040,Piimajook VÄIKE TOM UHT šokolaad&vitam. 200ml,Väike Tom,200 ml,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+421041,GT vein MEERESTEIN ShirazMourvedre 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421042,Keedusalaami Vasalli NÕO 105 viil,Nõo,105 viil,,dry_preserves,dry_other,meat_fish,meat_gourmet
+421043,Külm.Alaska mintaifilee ZIGMAS 650g,Zigmas,650 g,,sweets_snacks,sweets_gums_mints,frozen_food,frozen_fish
+421044,Hele õlu ALEXANDER 5.2% 500ml,Alexander,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+421045,GT vein TELIANI VALLEY Alaz.V.Red 750ml,Teliani Valley,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421049,GT vein valg.ROBERTSON Nat.Sw.750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421050,Hele õlu A.Le Coq Special 5.2% 500ml,A. Le Coq,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+421051,Õun GRANNY SMITH 1kl. kg,,1 kg,,produce,produce_apples_pears,produce,produce_apples_pears
+421052,Jäätis soolakaramelli CLASSIC 69g,,69 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421053,GT vein TORO D'ORO Chardonnay 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421054,GT vein VINA MAIPO Chardonnay 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421055,Jäätis vanilje-limonaadi VÄIKE TOM 70g,Väike Tom,70 g,,drinks,drinks_soft_soda,frozen_food,frozen_desserts_icecream
+421056,Kartul pestud kollane Talukartul 2.5kg,,2.5 kg,,produce,produce_root_veg,produce,produce_root_veg
+421057,Memme verivorst M&M 500g,M&M,500 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+421058,Münt WELL DONE 20g,Well Done,20 g,,dry_preserves,dry_other,produce,produce_herbs_salads_sprouts
+421059,Premium majonees FELIX 235g,Felix,235 g,,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo

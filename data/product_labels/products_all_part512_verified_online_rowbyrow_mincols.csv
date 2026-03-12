@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+420653,Juust Cheddar ATLEET viilutatud 150g,Atleet,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+420654,Croissant aprikoositäidis. 75g,,75 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+420655,Gruusia rahvusleib šothi KILIKIA 330g,Kilikia,330 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+420656,Juust Brie CHANSON DU FROMAGE 125g,Chanson du Fromage,125 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+420657,Juust Diplomat trühvlitega kg,,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+420659,Koorejäätis vanilli šokolad.PREMIA 480g,Premia,480 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+420660,Külmsuitsulõhe tükid tilliga OCEAN 100g,Ocean,100 g,,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+420663,Lah.kohvij.pr.suh-ga NESCAFE 3in1 16.5g,Nescafé,16.5 g,,drinks,drinks_other,drinks,drinks_tea_coffee
+420664,Bitter PIPARU 35% 500ml,,500 ml,,world_spices,spices_basic_salt_pepper,drinks,drinks_spirits
+420665,Kodujuust FARMI hapukoorega 330g,Farmi,330 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+420666,Brandy AMAZONIA 36% 200ml,,200 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420668,KPN vein JOHANN BRUNNER Dornf.Rose 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420669,Croissant maasikamaits.täidis. 71g,,71 g,,produce,produce_berries,bakery,bakery_buns_croissants
+420671,KPN vein KÄFER Montepulc.dAbruzzo 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420672,Kitsepiima hallitusjuust CAPRA kg,Capra,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+420673,KPN vein LOMO ALTO Caber.Sauvignon 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420674,Küpsetusmargariin VILMA 80% 500g,Vilma,500 g,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+420675,Küpsisejäätis SUPER VIVA Choco Bar 59g,Super Viva,59 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420677,Külm.paneer.kalafil.juust.WELL DONE 440g,Well Done,440 g,,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_fish
+420678,Külm.pelmeenid kanaga EXTRA LINE 400g,Extra Line,400 g,,meat_fish,meat_poultry,frozen_food,frozen_ready_meals
+420683,Brandy TORRES 5 38% 500ml,Torres,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420686,Brandy TORRES 5 38% 1L,Torres,1 l,,dry_preserves,dry_other,drinks,drinks_spirits
+420687,Calvados COQUEREL VS 40% 700ml,Coquerel,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+420689,Koorene jogurt FARMI põldmar.l.vaba 150g,Farmi,150 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+420690,Jäätisetops MARMINTON 50g,Marminton,50 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420691,Kohupiim WELL DONE plombiir 100g,Well Done,100 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+420692,KPN vein TORRES Rioja Ibericos 750ml,Torres,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420693,KPN vein UGGIANO Chianti Ris.Rocc.750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420694,Kohupiim WELL DONE rosinatega 100g,Well Done,100 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+420695,Punane sibul kg,,1 kg,,produce,produce_root_veg,produce,produce_root_veg
+420696,Br. kintsulium küüslaugu-sidruni mar.WD 400g,Well Done,400 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+420699,Jäätisetort van&maasikas&šoko TANGO 480g,Tango,480 g,,bakery,bakery_cakes_pastries,frozen_food,frozen_desserts_icecream
+420700,Kakao-vahukoorekook 370g,,370 g,,dairy_eggs_fats,dairy_cream_sourcream,bakery,bakery_cakes_pastries
+420701,GT vein PICCINI Rosso Tosc.750ml,Piccini,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420702,Jäätis metspähkliga ERITI RAMMUS 100g,Premia,100 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420703,Jäätis õuna-arbuusi MIO&RIO 5x67g,Mio&Rio,5x67 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420704,Krevetimääre avokaadoga VELADIS 150g,Veladis,150 g,,dry_preserves,dry_other,sauces_oils,sauces_other
+420706,Kabatsokk kg,,1 kg,,dry_preserves,dry_other,produce,produce_herbs_salads_sprouts
+420708,Punase greibi nektar AURA 1L,Aura,1 l,,drinks,drinks_juices,drinks,drinks_juices
+420709,Punane vein BLUE NUN Alcohol-Free 750ml,Blue Nun,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+420711,Jäätis KINDER šokolaadiglasuuriga 38g,Kinder,38 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+420712,Karamelli-pähklikook 320g,,320 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+420713,Kalmaarid omas mahlas CALVO EO 115g,Calvo,115 g,,drinks,drinks_juices,dry_preserves,dry_canned_meat_fish
+420715,Kapsasalat tilliga 200g,,200 g,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+420716,Karastusjook COCA-COLA 330ml pdl,Coca-Cola,330 ml,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+420717,Kirsikorvike 2x95g,,2x95 g,,dry_preserves,dry_other,bakery,bakery_cakes_pastries
+420718,Karastusjook COCA-COLA 500ml,Coca-Cola,500 ml,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+420719,Puuviljatee ananass+pirn LOYD pür.20x2g,Loyd,20x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+420720,Kodujuustu-mustikatort 700g,,700 g,,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+420721,Puuviljatee maasika&rabarberi LOYD 20x2g,Loyd,20x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee

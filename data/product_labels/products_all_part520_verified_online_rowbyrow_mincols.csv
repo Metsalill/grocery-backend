@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+421190,Kohukese jäätis TERE 53g,Tere,53 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421192,Jäätis PREMIA Vaarika 40% väh.suhk. 50g,Premia,50 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421195,Jäätis RAFFAELLO kookos-mandel 4x47g,Raffaello,4x47 g,,bakery,bakery_cakes_pastries,frozen_food,frozen_desserts_icecream
+421196,Jäätis piparmündimaits.VANILLA NINJA 80g,Vanilla Ninja,80 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421197,Juusuvorst VALLA 240g viil,Valla,240 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+421198,Karastusjook õunamah-ga VALGE KLAAR 500ml,,500 ml,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+421199,Jäätis passion-virsik-mango CLASSIC 64g,,64 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421200,Karastusjook õunamah-ga VALGE KLAAR 1.5L,,1.5 l,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+421201,Külmsuitsuvorst PORMET 220g,Pormet,220 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+421202,Kuumsuitsu peekon WELL DONE 100g,Well Done,100 g,,meat_fish,meat_pork,meat_fish,meat_pork
+421203,KGT vein CODICI Primitivo Puglia 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421207,Jäätis RAFFAELLO kookose-mandliga 47g,Raffaello,47 g,,bakery,bakery_cakes_pastries,frozen_food,frozen_desserts_icecream
+421208,Armeenia grill-liha M&M 500g,M&M,500 g,,meat_fish,meat_other,meat_fish,meat_other
+421209,KPN punane vein ALBAI Rioja 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421210,Glasuurkohuke vaarika lakt.v.KARUMS 40g,Karums,40 g,,drinks,drinks_spirits,dairy_eggs_fats,dairy_cottage_quark
+421212,Jäätis SNICKERS Ice Tube 320g,Snickers,320 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421214,KGTvein DARLING CELLARS Sauv.Blanc 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421215,KGT vein B.MONTALTO Passiven.Rosso 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421218,Jäätis strawberry white MAGNUM 81g,Magnum,81 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421219,Jäätis šok.plombiir šok.tük.WD 65g,Well Done,65 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421220,Jäätis vahukommi TWISTER 73g,Twister,73 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421221,KGT vein FRANZ HOFFNER Riesling 3L BIB,,3 l,,drinks,drinks_wine,drinks,drinks_wine
+421222,Kodusült M&M 300g,M&M,300 g,,dry_preserves,dry_other,meat_fish,meat_other
+421223,Jäätis soolakaramelliga NICKS 292g,Nicks,292 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+421224,KGT vein B.MONTALTO Passiv. Bianco 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421225,Praha tort 570g,,570 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+421226,KGT vein DOPPIO PASSO Neg.Puglia 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421227,Riivsai Traditsioon CITY TASTE 350g,City Taste,350 g,,bakery,bakery_buns_croissants,bakery,bakery_other
+421228,E-vaba täissuitsuvorst OSKAR 120g viil,Oskar,120 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+421230,Koorejogurt Muah troopiline ALMA 180g,Alma,180 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+421232,Vein Andes Cabernet Sauvignon 750ml,Andes,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421234,Kaerajook DEARY Barista 1l,Deary,1 l,,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+421235,Šašlõkivorstid broilerilih.TALLEGG 400g,Tallegg,400 g,,meat_fish,meat_poultry,meat_fish,meat_sausages
+421236,Šašlõkk Gruusia MAKS&MOORITS 600g,Maks&Moorits,600 g,,meat_fish,meat_pork,meat_fish,meat_pork
+421237,KGT vein J.P.CHENET c/syrah 750ml,J.P. Chenet,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421239,Kohupiim WELL DONE 9% 275g,Well Done,275 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+421240,Seakaelašašlõkk kuivamarin.ürtid.WD.800g,Well Done,800 g,,meat_fish,meat_pork,meat_fish,meat_pork
+421241,KGT vein J.P.CHENET Cabernet Syrah 3l,J.P. Chenet,3 l,,drinks,drinks_wine,drinks,drinks_wine
+421242,Šok.batoonike Kinder Delice FERRERO 39g,Kinder,39 g,,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+421243,Šašlõkk kalkunilihast MK kg,MK,1 kg,,meat_fish,meat_poultry,meat_fish,meat_poultry
+421244,Kõrvits kg,,1 kg,,dry_preserves,dry_other,produce,produce_herbs_salads_sprouts
+421245,Majonees LEMMIK Provansaal 700g,Lemmik,700 g,,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+421246,Kõva juust E-PIIM Bresto light 200g,E-Piim,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421247,Kõva juust DŽIUGAS Mild 12 kuud 180g,Džiugas,180 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421248,Kõva juust WELL DONE 12 kuud 180g,Well Done,180 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421249,Gouda maitse viilud GOURMET GREEN 150g,Gourmet Green,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421250,Hele õlu WARSTEINER Premium 4.8% 500ml,Warsteiner,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+421251,J. Gouda WELL DONE PREMIUM48% viil.120g,Well Done,120 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421253,Piimabatoonike MILKA Choco snack 29g,Milka,29 g,,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+421254,Piimajook Müllermilch maasika 400g,Müllermilch,400 g,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk

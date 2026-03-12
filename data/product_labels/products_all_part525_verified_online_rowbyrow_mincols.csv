@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+421495,Juust Eesti E-PIIM light viilutatud 300g,E-Piim,300 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421496,Juust Mozzarella kirsid OTTO 245g,Otto,245 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421497,Täisterasepik EESTI PAGAR 500g,Eesti Pagar,500 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+421499,Juust Maasdam Kroon kg,,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421500,Piir.jook CAPTAIN MORGAN Spiced 35% 500ml,Captain Morgan,500 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+421501,Juust Mozzarella FORMAGIA 220g,Formagia,220 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421502,Tallinna peenleib LEIBUR 490g,Leibur,490 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+421504,Taimetee ingv.-sidrunim.LOYD pür.20x2g,Loyd,20x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+421505,Koorejäätis ONU ESKIMO sidr.-vanil. 84g,Onu Eskimo,84 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+421506,Piir.jook CAPTAIN MORGAN Spiced 35% 1l,Captain Morgan,1 l,,dry_preserves,dry_other,drinks,drinks_spirits
+421507,Liköör BLUE CURACAO 20% 700ml,,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+421509,Juust Mascarpone FARM MILK 250g,Farm Milk,250 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421510,Juust Mascarpone lak.vaba Granarolo 250g,Granarolo,250 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421511,Koorejäätis pistaatsia PREMIA 240g,Premia,240 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+421513,Tosca kook REVAL KONDIITER 700g,Reval Kondiiter,700 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+421514,Juust Wensleydale mango-ingveriga kg,,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421515,Kaerajook YOOK Vitamins&Calcium 1L,Yook,1 l,,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+421516,Juust Vene ESTOVER viilutatud 500g,Estover,500 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421517,Kartulikaste FELIX 220g,Felix,220 g,,produce,produce_root_veg,sauces_oils,sauces_other
+421518,Kartulikaste FELIX 400g,Felix,400 g,,produce,produce_root_veg,sauces_oils,sauces_other
+421519,Karastusjook FANTA Apelsini 1.5L,Fanta,1.5 l,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+421520,J.jogurt aedm. m. WELL DONE 2% 250g,Well Done,250 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+421521,Kass Arturi Karamell BALTIKA 370g,Baltika,370 g,,sweets_snacks,sweets_candies,bakery,bakery_cakes_pastries
+421522,Külm.köögiviljas.Wok kartulitega 400g,,400 g,,produce,produce_root_veg,frozen_food,frozen_veg
+421523,Juust ZOTT Toasty Hamburger viil. 120g,Zott,120 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421524,KPN vein MURVIEDRO RESERVA 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421525,Toorvorstid Gruusia RANNAROOTSI 400g,Rannarootsi,400 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+421526,Külm.mintai fil.petersell FINDUS 256g,Findus,256 g,,sweets_snacks,sweets_gums_mints,frozen_food,frozen_fish
+421527,KPN vein JOHANN BRUNNER Ries.Mosel 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421528,Toorvorstid sibula-äädikaga NÕO 400g,Nõo,400 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+421529,Toorvorstikesed cheddar juustuga kg,,1 kg,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+421532,Nisuõlu CRONUS 5.3% 500ml,Cronus,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+421533,GT kuiv vein ANDES Chardonnay 750ml,Andes,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421534,Jog.jook ACTIMEL maasika 4x100g,Actimel,4x100 g,,produce,produce_berries,dairy_eggs_fats,dairy_yogurt_kefir
+421535,Kodujuust mustika WELL DONE 150g,Well Done,150 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+421536,K.juust WELL DONE PREMIUM 50% viil 120g,Well Done,120 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+421537,Vein J.P.CHENET Colomb.Chard. BIB 3l,J.P. Chenet,3 l,,drinks,drinks_wine,drinks,drinks_wine
+421538,Kreeka jog.jook ALMA metsmaasika 275g,Alma,275 g,,produce,produce_berries,dairy_eggs_fats,dairy_yogurt_kefir
+421539,Alkoholivaba õlu CLAUSTHALER 500ml,Clausthaler,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+421541,Viinamarjanektar AURA 1L,Aura,1 l,,drinks,drinks_spirits,drinks,drinks_juices
+421542,T/s vorst broilerilihast TALLEGG 200g,Tallegg,200 g,,meat_fish,meat_poultry,meat_fish,meat_gourmet
+421543,T/s vorst hirve juustu LINNAMÄE 230g,Linnamäe,230 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+421544,Arom.vein APERITIF Bianco 1L,,1 l,,drinks,drinks_wine,drinks,drinks_wine
+421546,Kuldne graham röstsai LEIBUR 500g,Leibur,500 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+421547,Arom.veinijook KÄFER Bellini peach 750ml,Käfer,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+421548,Külm. pitsa Gourmet WELL DONE 425g,Well Done,425 g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+421551,Kodujuust ALMA creme brulee maits. 200g,Alma,200 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+421552,Viiner Ehe RANNAROOTSI 330g,Rannarootsi,330 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+421553,Broil.kintsuliha küüslaugu-jogurti kg,,1 kg,,dairy_eggs_fats,dairy_yogurt_kefir,meat_fish,meat_poultry
+421554,Tume leib ciabatta väike 65g,,65 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves

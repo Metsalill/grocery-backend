@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+423301,Lastevorst WÕRO 600g,Wõro,600 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+423302,Leivakate MAKS&MOORITS 210g,Maks&Moorits,210 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+423303,Külm. pitsa Salami WELL DONE 370g,Well Done,370 g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+423305,Külm. pitsa Speciale WD 325g,Well Done,325 g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+423306,Külm.vaarikad BIMAR 300g,Bimar,300 g,,produce,produce_berries,frozen_food,frozen_berries_fruit
+423308,GT vein DIDEBULI Kindzmaruli pun. 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423309,Jogurt GEFILUS maasika-yuzu lakt.v. 380g,Gefilus,380 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423311,J.jook ACTIVIA kirsi õun ban.suh-ta 270g,Activia,270 g,,produce,produce_apples_pears,dairy_eggs_fats,dairy_yogurt_kefir
+423312,Sarvesai kakao-kookospähkli 7DAYS 60g,7Days,60 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+423313,Külm. pitsa Singi & Seentega WD 570g,Well Done,570 g,,produce,produce_mushrooms,frozen_food,frozen_pizza
+423314,Jogurt FARM MILK Naturaalne 3% 400g,Farm Milk,400 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423315,Jääkuubikud NORVIL 1kg,Norvil,1 kg,,dry_preserves,dry_other,dry_preserves,dry_other
+423316,Külm.murel kivideta BIMAR 300g,Bimar,300 g,,dry_preserves,dry_other,frozen_food,frozen_berries_fruit
+423317,Jäätis aedmaasika-mango VALSOIA 280g,Valsoia,280 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+423318,Jogurtijook WELL DONE maasika 6x100g,Well Done,6x100 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423320,GT vein HARDYS BIN343 Cab.Shir. 750ml,Hardys,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423321,Heeringafil.sool.tradits.õlis OCEAN 1kg,Ocean,1 kg,,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+423322,Sarvesai kakaokreemiga 7DAYS 60g,7Days,60 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+423324,Sarvesai kakao-vaniljemaits. 7DAYS 60g,7Days,60 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+423325,Hirveliha konserv LINNAMÄE 240g,Linnamäe,240 g,,meat_fish,meat_other,dry_preserves,dry_canned_meat_fish
+423326,GT vein DIDEBULI Sachino punane 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423327,Keedetud seasink PORMET 100g viil,Pormet,100 g,,meat_fish,meat_hams,meat_fish,meat_hams
+423328,Jogurtikreem SAARE sidrun lakt.vaba 400g,Saare,400 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423329,Sarvesai pähklikreem.küpsis.7DAYS 60g,7Days,60 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+423331,GT vein HARDYS BIN141 Chard 750ml,Hardys,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423332,Sarvesai pähklimaitseline 7DAYS 60g,7Days,60 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+423333,Jäätis ALGIDA KidsMix multipakk 8x45g,Algida,8x45 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+423334,Lõhefilee õlis WELL DONE 170g,Well Done,170 g,,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+423335,Jog.jook ACTIMEL+ virsiku-passioni 4x100g,Actimel,4x100 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_yogurt_kefir
+423336,Jogurt kakaoküpsis MESIKÄPP 140g tops,Mesikäpp,140 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423338,Jäätis Cappuccino lakt.vab. LA MUU 250g,La Muu,250 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+423339,Jogurtismuuti ALMA ban.-maas.-kiivi 275g,Alma,275 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423340,Keedusalaami Paruni NÕO 90g viil,Nõo,90 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+423341,GT vein MEERESTEIN Pinot Grigio 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+423342,Jäätis Dubai šokolaadiga BOUJEE 55g,Boujee,55 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+423343,Jäätis Double Cherry MAGNUM 71g,Magnum,71 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+423344,Jogurtikreem SAARE vaarika-passioni 400g,Saare,400 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423345,Jogurt KARUMS seemn.-terad.lak.v. 350g,Karums,350 g,,drinks,drinks_spirits,dairy_eggs_fats,dairy_yogurt_kefir
+423346,Jäätis Double Hazelnut MAGNUM 71g,Magnum,71 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+423347,Jäätisetükid soolakar.BEN&JERRY'S 10x15g,Ben&Jerry's,10x15 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+423349,Jäätis kreeka pähkli vahtrasirup Classic 270g,,270 g,,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+423350,Hele õlu BARLEY Classic 4% 500ml prk,,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+423351,Jogurt Natural maitsestamata TERE 380g,Tere,380 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423352,Jäätis kookose-ananassi RUD 80g,Rud,80 g,,bakery,bakery_cakes_pastries,frozen_food,frozen_desserts_icecream
+423353,Jäätis kreembrülee.MIO&RIO 90g,Mio&Rio,90 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+423354,Jogurt Natural ananassimüsliga TERE 150g,Tere,150 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423355,Keeduvorst Doktori UVIC kg,Uvic,1 kg,,meat_fish,meat_sausages,meat_fish,meat_sausages
+423356,Jäätis küpsik vaarika. VÄIKE TOM 75g,Väike Tom,75 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+423357,Jogurt TERE Emma mustika 1kg,Tere,1 kg,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+423359,Keeduvorst Juustu RAKVERE 300g,Rakvere,300 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages

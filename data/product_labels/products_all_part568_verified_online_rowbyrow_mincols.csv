@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+423992,Piim WELL DONE 3.2% UHT laktoosivaba 1L,Well Done,1 l,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+423993,Poolrasv.margariin DELMA sool.39% 450g,Delma,450 g,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+423994,Lavaširullid lõhega 250g,,250 g,,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+423995,Rocket pesto WELL DONE 190g,Well Done,190 g,,sauces_oils,sauces_pasta_cooking,sauces_oils,sauces_pasta_cooking
+423997,Piim TERE D-vitamiin.lakt.vaba 2.5% 1L,Tere,1 l,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+423998,Hautatud lambaliha KODUKÜLA 250g,Koduküla,250 g,,meat_fish,meat_beef_lamb_game,dry_preserves,dry_canned_meat_fish
+423999,Heeringafilee ilma õlita VICI 200g,Vici,200 g,,sauces_oils,oils_other,meat_fish,fish_processed
+424000,Kanapuljong FOODSTUDIO 350ml,Foodstudio,350 ml,,world_spices,spices_broth_stock,world_spices,spices_broth_stock
+424001,KPN vein Le Vin Pinot Grigio 3L,,3 l,,drinks,drinks_wine,drinks,drinks_wine
+424002,Heeringafil.sool.tradits.OCEAN õlis 220g,Ocean,220 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+424003,Poolr.margariin EXTRA LINE võiga 40% 400g,Extra Line,400 g,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+424004,Prantsuse juust Emmental Cantorel kg,Cantorel,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424005,Proteiini puding TERE Fit vanilli 150g,Tere,150 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+424006,Prot.koh.kr.VALIO Profeel maas.-ban. 200g,Valio,200 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+424007,Prot.puding VALIO PROfeel piimašok. 150g,Valio,150 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+424008,Lahustuv kohv AROMA GOLD 200g,Aroma Gold,200 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424009,Lah.kohv MONTE PERO Classic 200g,,200 g,,drinks,drinks_other,drinks,drinks_tea_coffee
+424010,Lah.kohv MONTE PERO Classic 100g,,100 g,,drinks,drinks_other,drinks,drinks_tea_coffee
+424011,Heeringaf.tükid rollmops kur-ga KGrant 250g,Kapten Grant,250 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+424012,Kanapasta koorene PRESTO 300g,Presto,300 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_ready_meals
+424013,Proteiinijogurt TERE Fit mustika 150g,Tere,150 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+424014,Prot.jog.jook VALIO Profeel troopil. 275g,Valio,275 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_yogurt_kefir
+424015,Prot.jogurt VALIO Profeel ahjuõuna 200g,Valio,200 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+424016,Prot.jogurt VALIO Profeel mustasõs. 200g,Valio,200 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+424017,Prot.jogurt VALIO Profeel maasika 200g,Valio,200 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+424018,Lõhe omas mahlas KAPTEN GRANT EO 230g,Kapten Grant,230 g,,drinks,drinks_juices,dry_preserves,dry_canned_meat_fish
+424019,Roh.pepper. GRIKIOS toorjuust. 200/150g,Grikios,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424020,Salaami ELPOZO 80g viil,Elpozo,80 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+424021,Lahustuv kohv Fine Aroma DAVIDOFF 100g,Davidoff,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424022,Salatikaste TARPLAN Caesar 210g,Tarplan,210 g,,sauces_oils,sauces_salad_dressings,sauces_oils,sauces_salad_dressings
+424023,Heeringafil.sool.tradits.OCEAN õlis 400g,Ocean,400 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+424024,Kanaviiner M&M 500g,M&M,500 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+424025,Kapsahakklihahautis 300g,,300 g,,meat_fish,meat_minced,frozen_food,frozen_ready_meals
+424026,Lõhe õlis MARINE ABC EO 240g,Marine ABC,240 g,,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+424027,Rõõsakoorevõi 82% DZIUGAS 200g,Džiugas,200 g,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_butter_margarine
+424028,KPN vein ROBERT CHARTON Bord.Rouge 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424029,Heeringaf.tükid sibulaga KODURANNA 270g,Koduranna,270 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+424031,Suitsujuustusnäkk RAMBYNO BBQ-tšilli 75g,Rambyno,75 g,,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+424032,Puding ALMA karamelli 230g,Alma,230 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+424033,Puding ALMA kookose 230g,Alma,230 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+424034,Suitsujuust VALIO Kaval Ants 250g,Valio,250 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424035,Suitsune tšillikaste FELIX 270g,Felix,270 g,,meat_fish,fish_salted_smoked,sauces_oils,sauces_other
+424036,Karb-tud lood.min.vesi VÄRSKA 1L,Värska,1 l,,drinks,drinks_water,drinks,drinks_water
+424037,Heeringas omas mahlas MARINE ABC EO 240g,Marine ABC,240 g,,drinks,drinks_juices,dry_preserves,dry_canned_meat_fish
+424038,Kartulipuder guljaššiga 275g,,275 g,,produce,produce_root_veg,frozen_food,frozen_ready_meals
+424039,Prot.puding VALIO PROfeel šok.-pähk. 150g,Valio,150 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+424040,Heeringas tomatikastm.MARINE ABC EO 240g,Marine ABC,240 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+424041,Karastusjook FANTA apelsini 500ml,Fanta,500 ml,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+424042,Hernesupp sealihaga KRONIS 530g,Kronis,530 g,,meat_fish,meat_pork,dry_preserves,dry_soups_noodles
+424044,Sulatatud juust VALIO Forte juustu 185g,Valio,185 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices

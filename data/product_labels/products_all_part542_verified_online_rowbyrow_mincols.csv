@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+422488,Whisky GLENFIDDICH 12YO Sin.Malt 40% 700ml,Glenfiddich,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422491,Maasikad 500g,,500 g,,produce,produce_berries,produce,produce_berries
+422493,E-vaba täissuitsuvorst OSKAR 210g,Oskar,210 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+422494,Fileetasku juustu&singitäidis.M&M 260g,M&M,260 g,,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_other
+422496,Leib juuretisega glut.vaba SCHAR 240g,Schar,240 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+422497,Looduslik mineraalvesi DEVIN 1.5l,Devin,1.5 l,,drinks,drinks_water,drinks,drinks_water
+422498,Lahustuv kohv GOLDEN BEAN 90g,,90 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422499,Piir.jook CAPTAIN MORGAN Bl.Sp.35% 700ml,Captain Morgan,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+422500,Kohupiimakreem ALMA vanilli 2.5% 300g,Alma,300 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422501,Kohupiimakreem ALMA šok.tükkidega 150g,Alma,150 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+422502,Piparmünditee TEEKANNE 20x2.25g,Teekanne,20x2.25 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422503,Emmentaliga täissuitsuvorst NÕO 250g,Nõo,250 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+422504,Looduslik karb.mineraalvesi BORJOMI 6x1L,Borjomi,6x1 l,,drinks,drinks_water,drinks,drinks_water
+422505,Mahlajook CIDO Exclusive jõhvika 1L,Cido,1 l,,drinks,drinks_juices,drinks,drinks_juices
+422506,Kohvivalgendaja ZOTT Gold 10% 10gx7.5g,Zott,10x7.5 g,,drinks,drinks_other,dry_preserves,dry_other
+422507,Mahlajook mit.puuv. 10% Frutto CIDO 1.5l,Cido,1.5 l,,drinks,drinks_juices,drinks,drinks_juices
+422508,E-vaba maksapasteet OSKAR 200g,Oskar,200 g,,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+422509,Falafel GARDEN GOURMET Vegan 190g,Garden Gourmet,190 g,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+422510,Külm.vareen kartuli-sibulaga BIMAR 400g,Bimar,400 g,,produce,produce_root_veg,frozen_food,frozen_ready_meals
+422511,Koorejäätis ERITI RAMMUS mango 100g,,100 g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+422512,Maasika jook PFANNER 1l,Pfanner,1 l,,produce,produce_berries,drinks,drinks_juices
+422513,Magus kartul Bataat kg,,1 kg,,produce,produce_root_veg,produce,produce_root_veg
+422514,Tuunikalatükid õlis KAPTEN GRANT 185g,Kapten Grant,185 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+422515,Maits. viin ALMO Jõhvika 37.5% 100ml,,100 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422516,Grillribi punases marinaadis M&M kg,M&M,1 kg,,sauces_oils,sauces_marinades,meat_fish,meat_pork
+422518,Kondenspiim FARM MILK magustatud 385g,Farm Milk,385 g,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+422519,Maisikattega kana juustuga TALLEGG 300g,Tallegg,300 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_poultry
+422520,Tuunikalatükid vees KAPTEN GRANT 185g,Kapten Grant,185 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+422521,Maasika-banaani smuuti PAI 280ml,Pai,280 ml,,produce,produce_berries,drinks,drinks_juices
+422523,Mahlajook sidrun.laimi 15% CIDO 1l,Cido,1 l,,drinks,drinks_juices,drinks,drinks_juices
+422524,Grill-liha mustikamarin. RAKVERE 500g,Rakvere,500 g,,produce,produce_berries,meat_fish,meat_pork
+422525,Kohup.kreem TERE Emma vaarikakiss. 150g,Tere,150 g,,produce,produce_berries,dairy_eggs_fats,dairy_cottage_quark
+422526,Whisky J.WALKER Red Label 40% 500ml,Johnnie Walker,500 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422527,M.alk.jook A.LE COQ Mojito 4.7% 330ml pdl,A.Le Coq,330 ml,,dry_preserves,dry_other,drinks,drinks_beer_cider
+422528,Rõõsk koor FARM MILK 35% 200ml,Farm Milk,200 ml,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+422529,Valgeh.juust Brie PRESIDENT oliiv. 125g,Président,125 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422530,M.alk.jook A.Le Coq G:N 5.5% 330ml,A.Le Coq,330 ml,,dry_preserves,dry_other,drinks,drinks_beer_cider
+422531,Mõdu SAKU 4% 500ml,Saku,500 ml,,dry_preserves,dry_other,drinks,drinks_beer_cider
+422533,Koorene jogurt FARMI must.kirss. 400g,Farmi,400 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+422534,Min.vesi VÄRSKA Originaal 1.5Lx6 gas-tud,Värska,6x1.5 l,,drinks,drinks_spirits,drinks,drinks_water
+422535,Külm. Kalakroketid WELL DONE 250g,Well Done,250 g,,meat_fish,fish_fresh,frozen_food,frozen_fish
+422536,Whisky J.WALKER Red Label 40% 700ml,Johnnie Walker,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422537,Koorene jogurt FARMI virsikutega 400g,Farmi,400 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+422538,M.tee melissi piparmündigaHYLEYS 25x1.5g,Hyleys,25x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422539,Mustikad 250g,,250 g,,produce,produce_berries,produce,produce_berries
+422540,Maasuitsusardell M&M 375g,M&M,375 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+422541,Multimahlajook PÕLTSAMAA 200ml,Põltsamaa,200 ml,,drinks,drinks_juices,drinks,drinks_juices
+422542,Majonees FELIX laimi-aioli 220g,Felix,220 g,,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+422544,Grill sardiinid tomatikast.BRIIS EO 140g,Briis,140 g,,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_meat_fish
+422545,Mustikad 400g,,400 g,,produce,produce_berries,produce,produce_berries

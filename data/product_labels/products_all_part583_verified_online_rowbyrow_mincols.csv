@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+424779,Kreemisai 50g,,50 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+424780,Peekon MAKS&MOORITS 100g viil,Maks&Moorits,100 g,,meat_fish,meat_pork,meat_fish,meat_pork
+424781,Pelmeenid puljongis MAMMA 300g,Mamma,300 g,,world_spices,spices_broth_stock,frozen_food,frozen_ready_meals
+424782,K/s seaseljafilee PORMET kg-lett,Pormet,1 kg,,dry_preserves,dry_other,meat_fish,meat_pork
+424783,Suitsupeekon OSKAR 120g viil,Oskar,120 g,,meat_fish,meat_pork,meat_fish,meat_pork
+424784,Suitsurulaad RAKVERE 130g viil,Rakvere,130 g,,meat_fish,meat_hams,meat_fish,meat_hams
+424785,Vürtsikilud Balti BRIIS 400g,Briis,400 g,,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_meat_fish
+424786,Wild Jerky boar Snäkk LINNAMÄE 40g,Linnamäe,40 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+424787,Pr.kilud tomatikastmes KALURI 500g,Kaluri,500 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+424788,Täissuitsuvorst Wabariigi NÕO 250g,Nõo,250 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424789,Pr.räimed koduses marinaadis KALURI 500g,Kaluri,500 g,,sauces_oils,sauces_marinades,dry_preserves,dry_canned_meat_fish
+424790,Pr.räimed tomatikastmes KALURI 500g,Kaluri,500 g,,meat_fish,fish_fresh,dry_preserves,dry_canned_meat_fish
+424791,Tomatipüreesupp ürtidega PRESTO 300g,Presto,300 g,,produce,produce_root_veg,dry_preserves,dry_soups_noodles
+424792,Külm. Hiina köögiv.segu BAUER 400g,Bauer,400 g,,dry_preserves,dry_other,frozen_food,frozen_veg
+424793,Toorsuitsupeekoni kuubikud RAKVERE 140g,Rakvere,140 g,,meat_fish,meat_pork,meat_fish,meat_pork
+424795,Suitsusardell VALLA 500g,Valla,500 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424796,Prosciutto peekon RAKVERE 140g viil,Rakvere,140 g,,meat_fish,meat_pork,meat_fish,meat_pork
+424797,Pr.kilud tomatikastm.MARINE ABC EO 240g,Marine ABC,240 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+424798,Tomati.ricotta pesto FILIPPO BERIO 190g,Filippo Berio,190 g,,sauces_oils,sauces_pasta_cooking,sauces_oils,sauces_pasta_cooking
+424799,Talurulaad RAKVERE 350g,Rakvere,350 g,,meat_fish,meat_hams,meat_fish,meat_hams
+424800,Pr.sardiinid kimchi BRIIS EO 140g,Briis,140 g,,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_meat_fish
+424801,Suitsusingike RAKVERE 130g viil,Rakvere,130 g,,meat_fish,fish_salted_smoked,meat_fish,meat_hams
+424802,Räimefilee nõrgalt suitsumait.BRIIS 120g,Briis,120 g,,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_meat_fish
+424803,Rannakarbid soolvees KALURI 250g,Kaluri,250 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+424804,Räimerullid rose pipra küüsl. mar. 300g,,300 g,,drinks,drinks_wine,meat_fish,fish_processed
+424806,Külm.makr. BOUJEE karam.-pista. mix 240g,Boujee,240 g,,dry_preserves,dry_other,meat_fish,fish_fresh
+424807,Räimesült tarretis 270g,,270 g,,meat_fish,fish_fresh,dry_preserves,dry_canned_meat_fish
+424808,Räim tomatikastmes MARINE ABC EO 240g,Marine ABC,240 g,,meat_fish,fish_fresh,dry_preserves,dry_canned_meat_fish
+424809,Suitsutatud pepperoni snäkivorst NÕO 70g,Nõo,70 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424810,Suitsutatud sprotid õlis WELL DONE 190g,Well Done,190 g,,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+424811,Suitsutatud supikogu M&M kg,M&M,1 kg,,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+424812,Suitsutatud tsilli snäkivorst NÕO 70g,Nõo,70 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424813,Tuunikalafilee soolvees HAPPYSEA EO 185g,Happysea,185 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+424814,Külm.krevetid keed.koorega WELL DONE 800g,Well Done,800 g,,dairy_eggs_fats,dairy_cream_sourcream,meat_fish,fish_processed
+424815,Suitsuviiner M&M 300g,M&M,300 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+424816,Suitsuvorsti kuubikud OSKAR 250g,Oskar,250 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424817,Suitsuvorst juustuga MATSIMOKA 240g,Matsimoka,240 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+424818,Suitsuvorst kadakajuustuga NÕO 250g,Nõo,250 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+424819,Suitsuvorst Tamula WÕRO 150g,Wõro,150 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424820,Suits.vin. Krakovi vorst WELL DONE 275g,Well Done,275 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424821,Salaami seemnekattega RAKVERE 200g,Rakvere,200 g,,sweets_snacks,sweets_nuts_driedfruit,meat_fish,meat_gourmet
+424822,Külm.pitsa salaami LaMiaGrande 380g,,380 g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+424823,Salaami Palermo RAKVERE 110g viil,Rakvere,110 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+424824,Salaami PORMET 100g viil,Pormet,100 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+424825,Seakoot kg,,1 kg,,dry_preserves,dry_other,meat_fish,meat_pork
+424826,Tailihaviiner MATSIMOKA 250g,Matsimoka,250 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+424827,Taimne määre PHILADELPHIA 145g,Philadelphia,145 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cheese_slices
+424828,Külm. pitsa singi-seene EXTRA LINE 270g,Extra Line,270 g,,produce,produce_mushrooms,frozen_food,frozen_pizza
+424829,Taimne pasteet oliividega THORMI 150g,Thormi,150 g,,drinks,drinks_tea_coffee,sauces_oils,sauces_other
+424830,Taimne spread kikerhernestest NOA 175g,Noa,175 g,,dry_preserves,dry_groats_beans,sauces_oils,sauces_other

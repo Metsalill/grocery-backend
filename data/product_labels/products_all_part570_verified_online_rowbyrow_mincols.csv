@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+424105,Seenesupp KRONIS 530g,Kronis,530 g,,produce,produce_mushrooms,dry_preserves,dry_soups_noodles
+424106,Seljafilee OSKAR 105g viil,Oskar,105 g,,dry_preserves,dry_other,meat_fish,meat_hams
+424108,Toorjuust CHAVROUX kitsepiimast 150g,Chavroux,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424109,Seavälisfilee maitsestatud RAKVERE kg,Rakvere,1 kg,,dry_preserves,dry_other,meat_fish,meat_pork
+424110,KGT pun.vein 12E MEZZO Neg.del Sal. 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424111,Singi-šampin.lõige RANNAROOTSI 150g viil,Rannarootsi,150 g,,dry_preserves,dry_other,meat_fish,meat_hams
+424112,Jäätis NUTELLA 230g,Nutella,230 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+424113,Seljanka 350g,,350 g,,dry_preserves,dry_other,dry_preserves,dry_soups_noodles
+424114,Must tee karamellimaits.DILMAH 20x1.5g,Dilmah,20x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424115,Keefir FARMI täispiimast 3.8-4.2% 1kg,Farmi,1 kg,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+424117,Toorjuusturull mandli.anan.WELL DONE 100g,Well Done,100 g,,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_cakes_pastries
+424118,Toorjuust OTTO tomati-basiilikuga 150g,Otto,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424119,Sinkvorst XL M&M 300g viil,M&M,300 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424120,Sinihallitusjuust FOURME D'AMBERT kg,,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424121,Sinihallitusjuust Mould Danablu kg,,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424122,Sinihall.juust BERGADER Würzige 175g,Bergader,175 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424123,Toorjuust FARMI küüslauguga 150g,Farmi,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424124,Toorjuust FARMI murulauguga 29.4% 150g,Farmi,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424125,KGT vein DOPPIO PASSO Prim.Puglia 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424126,KGT vein GRAND SUD Chardonnay 1L,,1 l,,drinks,drinks_wine,drinks,drinks_wine
+424127,Jah.sea välisfilee lõigud WELL DONE 360g,Well Done,360 g,,dry_preserves,dry_other,meat_fish,meat_pork
+424128,Sinihall.juust CHANSON DU FROMAGE 100g,,100 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424130,Must tee Passion Fruit HYLEYS 25x2g,Hyleys,25x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424131,Skumbria KAIJA õlis 240g,Kaija,240 g,,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+424132,Sini-valgehall.juust Bavaria Blu 150g,,150 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424133,Must tee Yellow Label LIPTON 100x2g,Lipton,100x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424134,Skumbria õlis KAPTEN GRANT 240g,Kapten Grant,240 g,,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+424135,Skumbria õlis MARINE ABC EO 240g,Marine ABC,240 g,,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+424136,Must tee sidr.-laimimaits.DILMAH 20x1.5g,Dilmah,20x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424137,Skumbria omas mahlas MARINE ABC EO 240g,Marine ABC,240 g,,drinks,drinks_juices,dry_preserves,dry_canned_meat_fish
+424138,Skumbria KAIJA omas mahlas 240g,Kaija,240 g,,drinks,drinks_juices,dry_preserves,dry_canned_meat_fish
+424139,Jäätis PREMIA vanilli-šokol.vahvlit. 70g,Premia,70 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+424140,Skumbria KAIJA tomatikastmes 240g,Kaija,240 g,,produce,produce_root_veg,dry_preserves,dry_canned_meat_fish
+424141,Jah.surimipulgad Surimi Kama VICI 180g,Vici,180 g,,dry_preserves,dry_other,meat_fish,fish_processed
+424142,KGT vein CHARLIZE Toscana Rosso 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424144,Kohuke MAGIJA vanilje 45g,Magija,45 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+424146,Soolaheeringas kg-lett,,1 kg,,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+424147,KGT vein ZENSA Primitivo 750ml,,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424148,Jah. surimist liha Lumekrabi 120g,,120 g,,meat_fish,meat_other,meat_fish,fish_processed
+424149,Joogijogurt OGA kirsi 1kg,Oga,1 kg,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+424150,Soolalõhe viilutatud M.V.WOOL 100g,M.V.Wool,100 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked
+424151,Jah.surimist krabim.pulgad VICI 250g,Vici,250 g,,dry_preserves,dry_other,meat_fish,fish_processed
+424153,Roh. tee ingveri-apel. TEEKANNE 20x1.75g,Teekanne,20x1.75 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424154,Soolapekk küüslauguga ADAŽI kg-lett,Adaži,1 kg,,world_spices,spices_basic_salt_pepper,meat_fish,meat_pork
+424155,Kohuke MAGIJA šokolaadi-šok.tükkid. 45g,Magija,45 g,,sweets_snacks,sweets_chocolate_bars,dairy_eggs_fats,dairy_cottage_quark
+424156,Roh. tee mustikatega HYLEYS 25x1.5g,Hyleys,25x1.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424157,Rohutee Stomach Smoot. B&S TEEKANNE 20x2g,Teekanne,20x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424158,Kodujuust TERE klassikaline 4% 300g,Tere,300 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+424159,Skyr virsiku FARMI 300g,Farmi,300 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_yogurt_kefir
+424160,Soolalõhefilee viilud WELL DONE 100g,Well Done,100 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked

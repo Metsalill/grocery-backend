@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+424366,Pirni-kiivismuuti spirulin.SALVEST 170g,Salvest,170 g,,produce,produce_apples_pears,drinks,drinks_juices
+424367,Punane tee LOYD manuka meega 20x1.7g,Loyd,20x1.7 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424368,Broilerilihasült KARNI 270g,Karni,270 g,,meat_fish,meat_poultry,dry_preserves,dry_canned_meat_fish
+424369,Punan.õlu KARL FRIEDRICH Märzen 5% 568ml,Karl Friedrich,568 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424370,Puuv.tee LOYD jõhv.-vaarika pür 20x2g,Loyd,20x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424371,Puuv.tee Tai-ingv.mango TEEKANNE 20x2.25g,Teekanne,20x2.25 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424372,Kartuli-lihasalat 200g,,200 g,,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+424373,Kohupiim TERE rosinatega 200g,Tere,200 g,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+424374,Broilerikints WELL DONE ABta 500g,Well Done,500 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+424375,Kebab lambalihaga OSKAR 400g,Oskar,400 g,,meat_fish,meat_beef_lamb_game,meat_fish,meat_beef_lamb_game
+424376,Puuv.tee LOYD jõhv.-ingver pür 20x2g,Loyd,20x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424377,Vähend. rasvasis. margariin VOIMIX 400g,Voimix,400 g,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+424378,Vahukoor ALMA 35% 200ml PP,Alma,200 ml,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+424379,Puuv.tee vahemere virs. TEEKANNE 20x2.5g,Teekanne,20x2.5 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424380,Puuv.vah.COSMO.Diva Pass.Fruit 5.5% 750ml,,750 ml,,dry_preserves,dry_other,drinks,drinks_wine
+424381,Täissuitsuvorst Pepperoni OSKAR 80g viil,Oskar,80 g,,meat_fish,meat_sausages,meat_fish,meat_gourmet
+424382,Puuv. vein SHAHNAZARYAN Cherry 750ml,Shahnazaryan,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424383,Roheline jäätee NESTEA Sidruni 1.5l,Nestea,1.5 l,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424384,Roheline tee Jasmine BASILUR 25x2g,Basilur,25x2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424385,Roheline tee LIPTON vaarika-maas. 25x1.4g,Lipton,25x1.4 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424386,Roheline tee Milk Oolong BASILUR 100g,Basilur,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424387,Kohvikapslid Forza L'OR 10x5.2g,L'Or,10x5.2 g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+424388,Rohel tee Jasmine Green BASILUR 100g,Basilur,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424389,Valgehall.juust Camembert CASTELLO 125g,Castello,125 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424390,Roh.tee must sõst.PÕHJALA TEETALU 10x2.3g,,10x2.3 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424391,Rumm PLANTATION Barbados 5YO 40% 700ml,Plantation,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424392,Rumm The COLONIST Dark 40% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424393,Rumm The COLONIST Spiced Black 40% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+424394,Siider HOGGYS Dry Apple 4.5% 330ml pdl,Hoggys,330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424395,Vutimunad WELL DONE 18tk,Well Done,18 tk,,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+424396,Õlu PAULANER Münchener Hell 4.9% 500ml,Paulaner,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424397,Valgehall.juust PRESIDENT Brie pähkl. kg,Président,1 kg,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424398,Puuv.vein SHAHNAZARYAN Pomegranate 750ml,Shahnazaryan,750 ml,,drinks,drinks_wine,drinks,drinks_wine
+424399,Wrapikaste FELIX 395g,Felix,395 g,,bakery,bakery_flatbreads_wraps,sauces_oils,sauces_other
+424400,Organic jahv.kohv LÖFBERGS medium 450g,Löfbergs,450 g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+424401,Smuuti AURA Aprikoos-Banaani-Porg. 330ml,Aura,330 ml,,produce,produce_tropical,drinks,drinks_juices
+424402,Smuuti AURA Kiivi-Ananassi-Mango 330ml,Aura,330 ml,,produce,produce_tropical,drinks,drinks_juices
+424403,Smuuti AURA Mango-Apelsini 330ml,Aura,330 ml,,produce,produce_tropical,drinks,drinks_juices
+424404,Taimetee LOYD Hea Une Tee 20x1.2g,Loyd,20x1.2 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+424405,Siider SOMERSBY Blackberry 4.5% 1L PET,Somersby,1 l,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424406,Tomatimahl PÕLTSAMAA 2L,Põltsamaa,2 l,,drinks,drinks_juices,drinks,drinks_juices
+424407,Tume õlu Alexander Dunkel 4.2% 568ml prk,,568 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424408,Tume õlu AMBER CITY 5% Lager 500ml prk,,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424409,Toorsuitsupeekon NÕO 105g viil,Nõo,105 g,,meat_fish,meat_pork,meat_fish,meat_pork
+424410,Kohvioad Brazil LÖFBERGS 1kg,Löfbergs,1 kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+424411,Perry SOMERSBY Pirni siider 4.5% 330ml,Somersby,330 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424412,Tume õlu IMPERIAL Doub.stout 7% 400ml pdl,,400 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424413,Tume õlu Leffe Brune 6.5% 500ml prk,Leffe,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424414,Tume õlu MUST NUNN 6% 500ml pdl,,500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+424416,Ürditee YOGI Women's Balance 17x1.8g,Yogi,17x1.8 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee

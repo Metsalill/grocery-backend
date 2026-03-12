@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+422880,Orgaanil.riisi-kookosejook WELL DONE 1L,Well Done,1 l,,bakery,bakery_cakes_pastries,dairy_eggs_fats,dairy_plant_drinks
+422881,Gouda NOPRI musta küüslauguga 250g,Nopri,250 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422882,Jahutatud sea kaelakarbonaad kg,,1 kg,,dry_preserves,dry_flour_sugar_baking,meat_fish,meat_pork
+422883,Küpsisejäätis Almond MAGNUM 90g,Magnum,90 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422885,Õunamahl PÕLTSAMAA 1L,Põltsamaa,1 l,,drinks,drinks_juices,drinks,drinks_juices
+422886,Vesi AURA FRUIT Mustikas 1.5l,Aura,1.5 l,,drinks,drinks_water,drinks,drinks_water
+422887,Ekleer vaniljekreemiga 2x80g,,2x80 g,,dry_preserves,dry_other,bakery,bakery_cakes_pastries
+422888,Broil.ribad klassikalis.mar.TALLEGG 500g,Tallegg,500 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+422889,Vesi AURA FRUIT Mustikas 500ml,Aura,500 ml,,drinks,drinks_water,drinks,drinks_water
+422890,Pehme valge juust ATHENA Classic 200g,Athena,200 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+422891,Broileri pooltiivad BBQ kg,,1 kg,,meat_fish,meat_poultry,meat_fish,meat_poultry
+422892,Br.pooltiivad klassik.marin.TALLEGG 800g,Tallegg,800 g,,dry_preserves,dry_other,meat_fish,meat_poultry
+422894,Broileri poolkoib kuumsuits. PORMET kg,Pormet,1 kg,,meat_fish,meat_poultry,meat_fish,meat_poultry
+422895,Vesi AURA gaasita 500ml,Aura,500 ml,,drinks,drinks_water,drinks,drinks_water
+422896,Viin HLIBNY DAR Classic 40% 1L,,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+422897,Cappuccino-rull 300g,,300 g,,dry_preserves,dry_other,bakery,bakery_cakes_pastries
+422898,Viin HLIBNY DAR Classic 40% 700ml,,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422899,Gruusia rahvusleib Puri KILIKIA 330g,Kilikia,330 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+422901,Classic Super Snack M&M 85g,M&M,85 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+422902,Cappuccino-kook PAGARINI 220g,Pagarini,220 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+422903,Dallase saiake 85g,,85 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+422904,Külm.ribiliha NÕO kg,Nõo,1 kg,,meat_fish,meat_pork,meat_fish,meat_pork
+422905,Viin HLIBNY DAR Classic 40% 200ml,,200 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422906,Hamburgeri saiad 6x50g,,6x50 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+422907,Hot-dogi saiad 4x62.5g,,4x62.5 g,,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+422908,Viin KOSKENKORVA 40% 1L,Koskenkorva,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+422909,Viin KOSKENKORVA 40% 700ml,Koskenkorva,700 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422911,Juustukook punase sõstraga 1.28kg,,1.28 kg,,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_cakes_pastries
+422912,Forellimari LEMBERG 250g,Lemberg,250 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+422913,Juusturull 113g,,113 g,,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_buns_croissants
+422914,Roheline purutee TWININGS Gunpowder 100g,Twinings,100 g,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+422915,Vesi AURA Spring gaasita 1.5L,Aura,1.5 l,,drinks,drinks_water,drinks,drinks_water
+422916,Viin STOLI 40% 1.0L,Stolichnaya,1 l,,drinks,drinks_spirits,drinks,drinks_spirits
+422917,Jäätisetuutu MARMITON 120g,Marmiton,120 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+422918,Viin STUMBRAS 40% 200ml,,200 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422919,Juuretise Röst FAZER 450g,Fazer,450 g,,dry_preserves,dry_other,bakery,bakery_bread_loaves
+422921,Juuretisesai FAZER 500g,Fazer,500 g,,bakery,bakery_buns_croissants,bakery,bakery_bread_loaves
+422922,Coleslaw salat 200g,,200 g,,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+422923,Viin TALU 40% 10cl tops,,100 ml,,drinks,drinks_spirits,drinks,drinks_spirits
+422924,Kohuke šokolaaditükkidega WELL DONE 45g,Well Done,45 g,,sweets_snacks,sweets_chocolate_bars,dairy_eggs_fats,dairy_cottage_quark
+422925,Hele Ciabatta pilliseemn 271g,,271 g,,sweets_snacks,sweets_nuts_driedfruit,bakery,bakery_bread_loaves
+422926,Punase apelsininektar PFANNER 2L,Pfanner,2 l,,drinks,drinks_juices,drinks,drinks_juices
+422929,Proteiini puding TERE Fit soolakar. 150g,Tere,150 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+422930,Heeringafilee Skand.õlita WELL DONE 190g,Well Done,190 g,,sauces_oils,oils_other,meat_fish,fish_processed
+422931,Proteiini puding TERE Fit kakao 150g,Tere,150 g,,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+422932,Heeringafilee tk.mädarõik.VICI 200g,Vici,200 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+422934,Proteiini-mousse šoko.VALIO PROFEEL 150g,Valio,150 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_desserts
+422935,Kaerasepik EESTI PAGAR 300g,Eesti Pagar,300 g,,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+422936,Heeringafilee tk.sibul.õlis VICI 200g,Vici,200 g,,sauces_oils,oils_other,meat_fish,fish_processed
+422937,Proteiini-mousse vaar.VALIO PROFEEL 150g,Valio,150 g,,dry_preserves,dry_other,dairy_eggs_fats,dairy_desserts

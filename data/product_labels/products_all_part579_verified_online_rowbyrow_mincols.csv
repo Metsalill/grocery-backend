@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+424575,Kuumsuitsu kuldne meriahven 300g,,300 g,,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+424576,Kuums.kanarulaad Pidupäeva KEKAVA 450g,Kekava,450 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+424577,Kuumsuitsu skumbriafilee nahaga 175g,,175 g,,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+424578,Tarretis JÄNKS kirsimaitseline 150g,Jänks,150 g,,dry_preserves,dry_other,sweets_snacks,sweets_other
+424580,Doktorivorst RAKVERE kg-lett,Rakvere,1 kg,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424581,Lasteviiner RAKVERE 200g,Rakvere,200 g,,drinks,drinks_spirits,meat_fish,meat_sausages
+424582,Küüslaugupekk MATSIMOKA 110g viil,Matsimoka,110 g,,dry_preserves,dry_other,meat_fish,meat_pork
+424583,Delikatessrulaad TALLEGG 130g viil,Tallegg,130 g,,meat_fish,meat_hams,meat_fish,meat_hams
+424584,Laste toorvorstikesed MAKS&MOORITS 400g,Maks&Moorits,400 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424585,Doktorivorst Lihakas RAKVERE 170g viil,Rakvere,170 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424586,Eelküpset.BBQ-suitsune tagakoot M&M kg,M&M,1 kg,,meat_fish,fish_salted_smoked,meat_fish,meat_pork
+424587,Lastevorst Lihakas RAKVERE 170g viil,Rakvere,170 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424589,Küüslaugupekk UVIC kg,Uvic,1 kg,,dry_preserves,dry_other,meat_fish,meat_pork
+424590,Lastevorst M&M 300g,M&M,300 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424591,Lihapallid toorjuustuseguga RAKVERE 300g,Rakvere,300 g,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_other
+424592,Lihakonserv lemmik vorst Justas 300g,Justas,300 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+424593,Heeringafilee salat kartuliga VICI 400g,Vici,400 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+424594,Heeringafilee kergsoola õlis VICI 400g,Vici,400 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+424595,Heeringafilee sibulaga WELL DONE 200g,Well Done,200 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+424596,Heeringafilee tradits.õlita VICI 500g,Vici,500 g,,sauces_oils,oils_other,meat_fish,fish_processed
+424597,Hautis pardirasvaga WILLIAM SAURIN 400g,,400 g,,dry_preserves,dry_other,dry_preserves,dry_canned_meat_fish
+424598,Heeringafilee kergsoola VICI 220g,Vici,220 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+424599,Heeringafilee MATIAS õlis kg-lett,Matias,1 kg,,sauces_oils,oils_other,meat_fish,fish_processed
+424600,Heeringafilee köögiviljadega OCEAN 600g,Ocean,600 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+424601,Heeringafil.kodumarinaad. sibul. kg-lett,,1 kg,,sauces_oils,sauces_marinades,meat_fish,fish_processed
+424602,Koorejogurt Muah marja-plomb. ALMA 180g,Alma,180 g,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+424603,Marineer.heeringafilee HÄÄMEKK 500g,Häämekk,500 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+424604,Koorene jog. FARMI mandar.&mee l.v. 150g,Farmi,150 g,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_yogurt_kefir
+424605,Hautatud veiseliha KODUKÜLA 250g,Koduküla,250 g,,meat_fish,meat_beef_lamb_game,dry_preserves,dry_canned_meat_fish
+424606,Marineerit.heeringafilee rullm. kg-lett,,1 kg,,meat_fish,fish_fresh,meat_fish,fish_processed
+424607,Heeringafilee köögivilj.&paprika WD 300g,Well Done,300 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+424608,Marineeritud skumbria M.V.Wool 250g,M.V.Wool,250 g,,dry_preserves,dry_other,meat_fish,fish_processed
+424609,Mereandide kokteil soolvees KALURI 250g,Kaluri,250 g,,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+424610,Heeringaf.tükid sinepik.KODURANNA 270g,Koduranna,270 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+424611,Kõva juust DŽIUGAS Delicate 24 kuud 100g,Džiugas,100 g,,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+424612,Lastevorst VALLA 240g viil,Valla,240 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+424613,Nagitsad kanafileest RANNAMÕISA 250g,Rannamõisa,250 g,,meat_fish,meat_poultry,meat_fish,meat_poultry
+424614,Heeringas õlis MARINE ABC EO 240g,Marine ABC,240 g,,sauces_oils,oils_other,meat_fish,fish_processed
+424615,Heeringas õlis OCEAN 170g,Ocean,170 g,,sauces_oils,oils_other,meat_fish,fish_processed
+424616,Marin.lõhefilee viil.sidr.&pip.WD 100g,Well Done,100 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+424617,Marmorsink KARNI 120g viil,Karni,120 g,,meat_fish,meat_hams,meat_fish,meat_hams
+424618,Heeringas tomatikastmes OCEAN 170g,Ocean,170 g,,meat_fish,fish_fresh,meat_fish,fish_processed
+424619,Õrnsuitsu sisefilee kuubikud M&M 200g,M&M,200 g,,meat_fish,fish_salted_smoked,meat_fish,meat_pork
+424620,Marta juustupallid MARTA PAGAR 170g,Marta Pagar,170 g,,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_cakes_pastries
+424621,Munasalat krevettidega 250g,,250 g,,dairy_eggs_fats,dairy_eggs,sauces_oils,sauces_other
+424622,Lihakõrsiku snäkk M&M 250g,M&M,250 g,,meat_fish,meat_other,meat_fish,meat_gourmet
+424623,Lihapallid Pere RAKVERE 400g,Rakvere,400 g,,meat_fish,meat_other,meat_fish,meat_other
+424624,Marjasalat sinihallitusjuustuga 250g,,250 g,,dairy_eggs_fats,dairy_cheese_slices,sauces_oils,sauces_other
+424625,Lõhefilee tomatikastmes WELL DONE 170g,Well Done,170 g,,meat_fish,fish_fresh,dry_preserves,dry_canned_meat_fish
+424626,Peresink OSKAR kg,Oskar,1 kg,,meat_fish,meat_hams,meat_fish,meat_hams
