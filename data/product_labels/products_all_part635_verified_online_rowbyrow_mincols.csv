@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+582019,De Lux pelmeenid 700g külmutatud,De Lux,700g,4751010756833,frozen_food,frozen_other,frozen_food,frozen_ready_meals
+582020,DeLuxe pelmeenid Laste 400g külmutatud,DeLuxe,400g,4751010757182,frozen_food,frozen_other,frozen_food,frozen_ready_meals
+582021,Pure eksklusiivne trühvlite valik 265g,Pure,265g,4751011195181,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+582022,Pure kinkekarp šok.trühvel 120g mustsõstar,Pure,120g,4751011195570,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+582023,Pure kinkekarp piimaš ok.trühvel 120g jõhvikas,Pure,120g,4751011195594,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+582024,Pure kinkekarp šok.trühvel 120g mustika,Pure,120g,4751011195815,produce,produce_berries,sweets_snacks,sweets_chocolate_bars
+582025,Pure kinkekarp trühvlid 148g mustikajogurti,Pure,148g,4751011197154,dairy_eggs_fats,dairy_yogurt_kefir,sweets_snacks,sweets_chocolate_bars
+582026,Pure kinkekarp trühvlid 148g sidrunikreemi,Pure,148g,4751011197185,produce,produce_tropical,sweets_snacks,sweets_chocolate_bars
+582027,Smith&Williams Tonic Water 1.5L pet,Smith&Williams,1.5L,4751017121900,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+582028,Smith&Williams Red Mixer 1.5L,Smith&Williams,1.5L,4751017121917,dry_preserves,dry_other,drinks,drinks_soft_soda
+582029,Smith&Williams Rose Lemonade 1.5L,Smith&Williams,1.5L,4751017122051,drinks,drinks_wine,drinks,drinks_soft_soda
+582030,Top Food suitsujuust Õige juustupalmik 150g,Top Food,150g,4751024270011,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+582031,Top Food suitsujuust Juustupulgad 100g,Top Food,100g,4751024270028,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+582032,Mürbüdu A2 õunasiider poolkuiv 5% 330ml,Mürbüdu,330ml,4751026561520,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+582033,Mürbüdu arooniaga siider 5.2% 330ml,Mürbüdu,330ml,4751026561544,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+582034,Indian Instant Coffee lahustuv kohv 90g,Indian,90g,4751031800263,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+582035,Paira Mukaltiin hingamisteede tabl. N30,Paira,,4751033500512,drinks,drinks_tea_coffee,personal_care,pcare_other
+582036,Sabiribad granaatõunamahl 100% 1L,,1L,4760007300744,drinks,drinks_juices,drinks,drinks_juices
+582037,Sirab looduslik mineraalvesi 1L,Sirab,1L,4760023500609,drinks,drinks_water,drinks,drinks_water
+582038,Ecodenta Sensitive hambapasta 100ml valgendav,Ecodenta,100ml,4770001003206,dry_preserves,dry_other,personal_care,pcare_oral_care
+582039,Grite Ecologic lehtkäterätik 2kih 150leht,Grite,,4770023346688,drinks,drinks_tea_coffee,household,hh_paper
+582040,Grite Orchidea majapidamispaber 2tk,Grite,2tk,4770023348415,dry_preserves,dry_other,household,hh_paper
+582041,Grite Family XL paberkäterätik 1rull,Grite,,4770023348613,dry_preserves,dry_other,household,hh_paper
+582042,Grite Char.Jumbo majapidamispaber 3kih 1rull,Grite,,4770023350289,dry_preserves,dry_other,household,hh_paper
+582043,Grite Orchidea lehtkäterätik 2kih 120leht,Grite,,4770023351446,dry_preserves,dry_other,household,hh_paper
+582044,Grite White Rabbit tualettpaber 3kih 4tk,Grite,4tk,4770023351934,household,hh_paper,household,hh_paper
+582045,Grite Family tualettpaber 3kih 8tk,Grite,8tk,4770023481013,household,hh_paper,household,hh_paper
+582046,Mix Vodka&Watermelon alk.jook 4% 330ml,Mix,330ml,4770047233698,drinks,drinks_spirits,drinks,drinks_beer_cider
+582047,Mix Vodka Cactus&Green Apple 4% 330ml,Mix,330ml,4770047233711,drinks,drinks_spirits,drinks,drinks_beer_cider
+582048,Mix Vodka&Wild Berry alk.jook 4% 330ml,Mix,330ml,4770047233728,drinks,drinks_spirits,drinks,drinks_beer_cider
+582049,Mix Gin&Mango alk.jook 4% 330ml,Mix,330ml,4770047235852,drinks,drinks_spirits,drinks,drinks_beer_cider
+582050,Dansukker valge suhkur 1kg,Dansukker,1kg,4770074000010,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+582051,Biovela Salamini Originaal 80g,Biovela,80g,4770081172618,drinks,drinks_spirits,meat_fish,meat_gourmet
+582052,Biovela Salamini juustuga 80g,Biovela,80g,4770081172632,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+582053,Biovela kuivsuitsu kanaliha kabanossi pulgad 45g,Biovela,45g,4770081172649,meat_fish,meat_poultry,meat_fish,meat_gourmet
+582054,Biovela klassikalised kabanossi pulgad 300g,Biovela,300g,4770081176012,dry_preserves,dry_other,meat_fish,meat_gourmet
+582055,Biovela kuivsuitsu kabanossi pulgad puravik 100g,Biovela,100g,4770081176623,dry_preserves,dry_other,meat_fish,meat_gourmet
+582056,Biovela klassikalised kabanossi pulgad 100g,Biovela,100g,4770081176708,dry_preserves,dry_other,meat_fish,meat_gourmet
+582057,Biovela juustuga kabanossi pulgad 100g,Biovela,100g,4770081176715,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+582058,Biovela peekoniga kabanossi pulgad 100g,Biovela,100g,4770081176722,meat_fish,meat_pork,meat_fish,meat_gourmet
+582059,Biovela kanalihaga kabanossi pulgad 100g,Biovela,100g,4770081177620,meat_fish,meat_poultry,meat_fish,meat_gourmet
+582060,Biovela kuivsuitsu kabanossi pulgad hapukapsaga 100g,Biovela,100g,4770081180842,dry_preserves,dry_other,meat_fish,meat_gourmet
+582061,Alvo erütritool 300g,Alvo,300g,4770082323002,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+582062,Alvo ksülitool 300g,Alvo,300g,4770082323019,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+582063,Umami pruun roosuhkur 1kg,Umami,1kg,4770082325419,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+582064,Alvo apelsinikoore tükid 50g,Alvo,50g,4770082330628,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_nuts_driedfruit
+582065,Roshen Fizzy Boom karamell 102g,Roshen,102g,4770115181197,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+582066,Roshen Roxiukas karamelliassortii 100g,Roshen,100g,4770115181210,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+582067,Herbitum taimetee Bronchohera 20*1.5g,Herbitum,1.5g,4770161100296,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582068,Herbitum taimetee Nervus 20*1.5g,Herbitum,1.5g,4770161100302,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee

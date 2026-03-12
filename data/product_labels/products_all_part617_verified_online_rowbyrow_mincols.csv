@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+581119,Coop karboniseeritud joogivesi 1.5L pohla,Coop,1.5L,4740660010457,drinks,drinks_water,drinks,drinks_water
+581120,Coop karboniseerimata joogivesi 500ml,Coop,500ml,4740660010464,drinks,drinks_water,drinks,drinks_water
+581121,Coop karboniseeritud joogivesi 500ml,Coop,500ml,4740660010471,drinks,drinks_water,drinks,drinks_water
+581122,Coop karboniseeritud joogivesi 500ml sidrunim.,Coop,500ml,4740660010488,drinks,drinks_water,drinks,drinks_water
+581123,CK Kevadrullid kastmega 350g,CK,350g,4740660010532,sauces_oils,sauces_other,frozen_food,frozen_ready_meals
+581124,Hüva küpsis šokolaadis 150g apelsinimarm.,Hüva,150g,4740660010570,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+581125,Hüva küpsis šokolaadis 150g kirsimarmel.,Hüva,150g,4740660010587,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+581126,Hüva küpsis šokolaadis 150g vaarikamarmel.,Hüva,150g,4740660010594,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+581127,Hüva küpsis šokolaadis 150g mustasõstra,Hüva,150g,4740660010600,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+581128,Hüva must ploom Ashlock 500g,Hüva,500g,4740660010655,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+581129,Hüva rosinad Sultan 500g,Hüva,500g,4740660010679,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+581130,Hüva India pähklid 400g röstitud soolat.,Hüva,400g,4740660010686,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+581131,Hüva maapähklid 400g,Hüva,400g,4740660010693,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+581132,Hüva Tudengieine 400g,Hüva,400g,4740660010709,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+581133,Hüva maapähklid 500g röstitud soolatud,Hüva,500g,4740660010716,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+581134,Hüva pistaatsiapähklid 400g röst.soolat.,Hüva,400g,4740660010723,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+581135,Hüva kõrvitsaseemned 200g röst.soolat.,Hüva,200g,4740660010747,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+581136,Coop Pasta Penne Rigate 500g 100% durum,Coop,500g,4740660010778,drinks,drinks_spirits,dry_preserves,dry_pasta_rice
+581137,Coop Pasta Fusilli 500g 100% durum,Coop,500g,4740660010785,drinks,drinks_spirits,dry_preserves,dry_pasta_rice
+581138,Coop Pasta Spaghetti 500g 100% durum,Coop,500g,4740660010792,drinks,drinks_spirits,dry_preserves,dry_pasta_rice
+581139,Coop Pasta Macaroni 500g 100% durum,Coop,500g,4740660010808,drinks,drinks_spirits,dry_preserves,dry_pasta_rice
+581140,Coop Pasta Elbows 500g 100% durum,Coop,500g,4740660010815,drinks,drinks_spirits,dry_preserves,dry_pasta_rice
+581141,Coop Pasta Vermicelli 500g 100% durum,Coop,500g,4740660010822,drinks,drinks_spirits,dry_preserves,dry_pasta_rice
+581142,Coop Pasta Shells 500g 100% durum,Coop,500g,4740660010839,drinks,drinks_spirits,dry_preserves,dry_pasta_rice
+581143,Coop suitsupeekon 120g viilutatud,Coop,120g,4740660010853,meat_fish,meat_pork,meat_fish,meat_pork
+581144,Coop seavälisfilee 150g viilutatud,Coop,150g,4740660010884,dry_preserves,dry_other,meat_fish,meat_pork
+581145,Hüva täissuitsuvorst 240g,Hüva,240g,4740660010891,meat_fish,meat_sausages,meat_fish,meat_sausages
+581146,Hüva suitsusink 300g viil,Hüva,300g,4740660011003,meat_fish,meat_hams,meat_fish,meat_hams
+581147,Kirss-ploomtomat Kumato 250g I kl Holland,,250g,4740660011027,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+581148,Säästu küpsetuspaber 38cmx8m,Säästu,,4740660011300,dry_preserves,dry_flour_sugar_baking,household,hh_kitchenware
+581149,Säästu toidukile 28cmx30m,Säästu,,4740660011317,dry_preserves,dry_other,household,hh_kitchenware
+581150,Säästu alumiiniumfoolium 29cmx10m,Säästu,,4740660011324,dry_preserves,dry_other,household,hh_kitchenware
+581151,Coop küpsetuspaber 38cmx20m,Coop,,4740660011331,dry_preserves,dry_flour_sugar_baking,household,hh_kitchenware
+581152,Coop küpsetuspaberi lehed 24tk 38cmx42cm,Coop,24tk,4740660011348,dry_preserves,dry_flour_sugar_baking,household,hh_kitchenware
+581153,Coop toidukile 28cmx60m,Coop,,4740660011355,dry_preserves,dry_other,household,hh_kitchenware
+581154,Coop alumiiniumfoolium 29cmx20m,Coop,,4740660011362,dry_preserves,dry_other,household,hh_kitchenware
+581155,Coop alumiiniumfoolium 29cmx10m tugev,Coop,,4740660011379,dry_preserves,dry_other,household,hh_kitchenware
+581156,Coop kiirkaerahelbed 500g,Coop,500g,4740660011447,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+581157,Coop neljaviljahelbed 500g,Coop,500g,4740660011454,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+581158,Coop alkoholivaba hele õlu 500ml prk,Coop,500ml,4740660011485,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+581159,Coop friikartul sakiline 750g,Coop,750g,4740660011508,frozen_food,frozen_potato_products,frozen_food,frozen_potato_products
+581160,Säästu makaron Sarveke 400g,Säästu,400g,4740660011515,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+581161,Säästu makaron Spiraal 400g,Säästu,400g,4740660011522,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+581162,Coop Supreme pähkli-jõhvika segu 300g,Coop,300g,4740660011645,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+581163,Coop Supreme pähklisegu 300g,Coop,300g,4740660011652,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+581164,Coop Supreme pähkli-rosina segu 300g,Coop,300g,4740660011669,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+581165,Coop Supreme mandlid 300g,Coop,300g,4740660011676,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+581166,Coop Supreme pekanipähklid 240g,Coop,240g,4740660011683,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+581167,Paprika Red Palermo 200g Belgia,,200g,4740660011706,produce,produce_root_veg,produce,produce_root_veg
+581168,Coop majapidamispaber 3kih 4tk,Coop,4tk,4740660012185,household,hh_paper,household,hh_paper

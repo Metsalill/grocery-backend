@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+581919,Viin Moskovskaya Silver 40% 500ml,,500ml,4750021013225,drinks,drinks_spirits,drinks,drinks_spirits
+581920,Felix terav hiinapärane kaste 500g,Felix,500g,4750022419095,sauces_oils,sauces_other,sauces_oils,sauces_soy_worcester
+581921,Taffel röstitud maapähkel 140g hapukoore-sibulaga,Taffel,140g,4750024002417,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_nuts_driedfruit
+581922,Taffel kartulikrõps 180g šašlõki-röst.sibula,Taffel,180g,4750024002783,produce,produce_root_veg,sweets_snacks,sweets_snacks_salty
+581923,Taffel maisipallid 165g hapukoore-sibulaga,Taffel,165g,4750024002868,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_snacks_salty
+581924,Taffel kartulilaastud 180g tomatimaitsel.,Taffel,180g,4750024002950,produce,produce_root_veg,sweets_snacks,sweets_snacks_salty
+581925,Taffel kartulilaastud 180g soola-karamelli võimaitsel.,Taffel,180g,4750024002967,dairy_eggs_fats,dairy_butter_margarine,sweets_snacks,sweets_snacks_salty
+581926,Karums maasikakohuke maasikamaitseline gl. 45g,Karums,45g,4750025000528,drinks,drinks_spirits,dairy_eggs_fats,dairy_desserts
+581927,Karums bifidojogurt vaarikate-müsliga 350g,Karums,350g,4750025001396,drinks,drinks_spirits,dairy_eggs_fats,dairy_yogurt_kefir
+581928,Karums kohuke kummikommidega 45g,Karums,45g,4750025902723,drinks,drinks_spirits,dairy_eggs_fats,dairy_desserts
+581929,Cido mahlajook arbuusi-meloni 15% 1.5L,Cido,1.5L,4750042000136,drinks,drinks_juices,drinks,drinks_juices
+581930,Cido mahlajook kaeraga 200ml mango-banaan,Cido,200ml,4750042003359,drinks,drinks_juices,drinks,drinks_juices
+581931,Cido mahlajook kaeraga 200ml maasika-banaan,Cido,200ml,4750042003366,drinks,drinks_juices,drinks,drinks_juices
+581932,Cido granaatõunanektar 30% 1L,Cido,1L,4750042303336,drinks,drinks_juices,drinks,drinks_juices
+581933,Cido India mangonektar 40% 1L,Cido,1L,4750042303411,drinks,drinks_juices,drinks,drinks_juices
+581934,Cido punase apelsini jook 40% 1L,Cido,1L,4750042303619,produce,produce_tropical,drinks,drinks_juices
+581935,Pepsi Max karboniseeritud karastusjook 330ml,Pepsi,330ml,4750042304760,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+581936,Cido apelsinimahl 1L,Cido,1L,4750042804208,drinks,drinks_juices,drinks,drinks_juices
+581937,Cido õunamahl 100% 1L,Cido,1L,4750042804215,drinks,drinks_juices,drinks,drinks_juices
+581938,Cido tomatimahl 1L,Cido,1L,4750042804222,drinks,drinks_juices,drinks,drinks_juices
+581939,Cido virsikunektar 1L,Cido,1L,4750042804277,drinks,drinks_juices,drinks,drinks_juices
+581940,Cido mahlajook viinamarjaga 1L,Cido,1L,4750042804284,drinks,drinks_spirits,drinks,drinks_juices
+581941,Cido ananassinektar 1L,Cido,1L,4750042804321,drinks,drinks_juices,drinks,drinks_juices
+581942,Cido ploominektar 1L,Cido,1L,4750042884668,drinks,drinks_juices,drinks,drinks_juices
+581943,Super Manki karboniseeritud karastusjook 330ml,,330ml,4750049002898,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+581944,Super Manki BubbleGum karboniseeritud jook 330ml prk,,330ml,4750049004465,dry_preserves,dry_other,drinks,drinks_soft_soda
+581945,Super Manki BubbleGum karboniseeritud jook 500ml,,500ml,4750049004472,dry_preserves,dry_other,drinks,drinks_soft_soda
+581946,Baltais Türgi jogurt maitsestamata 300g,Baltais,300g,4750072413272,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+581947,Baltais leivajogurt musta ploomiga 380g,Baltais,380g,4750072414927,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+581948,Always Ultra Sensitive Normal+ Duo h/s 20tk,Always,20tk,4750100069983,dry_preserves,dry_other,personal_care,pcare_other
+581949,Ace Lemon pesuvalgendaja 1L,Ace,1L,4750100784619,dry_preserves,dry_other,household,hh_laundry
+581950,Herkuless müslibatoon 25g šok-küpsise,Herkuless,25g,4750121000347,dry_preserves,dry_cereals_muesli,sweets_snacks,sweets_chocolate_bars
+581951,Herkuless müslibatoon 25g šok-pähkli,Herkuless,25g,4750121134127,dry_preserves,dry_cereals_muesli,sweets_snacks,sweets_chocolate_bars
+581952,Herkuless müslibatoon 25g jogurt-metsamarja,Herkuless,25g,4750121134134,dairy_eggs_fats,dairy_yogurt_kefir,sweets_snacks,sweets_chocolate_bars
+581953,Herkuless müslibatoon 25g jogurti-maasika,Herkuless,25g,4750121134158,dairy_eggs_fats,dairy_yogurt_kefir,sweets_snacks,sweets_chocolate_bars
+581954,Long Chips kartulivahvel 75g krabimaitseline,Long Chips,75g,4750127000372,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+581955,Long Chips kartulivahvel 75g peekonimaitseline,Long Chips,75g,4750127300694,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+581956,Long Chips kartulivahvel 75g hapukoore,Long Chips,75g,4750127300748,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_snacks_salty
+581957,Valdo nisukliid 200g,Valdo,200g,4750133080160,dry_preserves,dry_other,dry_preserves,dry_cereals_muesli
+581958,Valdo rukkikliid 200g,Valdo,200g,4750133232026,dry_preserves,dry_other,dry_preserves,dry_cereals_muesli
+581959,Johnny Blooms Rose Lemonade 330ml,,330ml,4750142005376,drinks,drinks_wine,drinks,drinks_soft_soda
+581960,Pure kohvisiirup 350ml iiri kohvi maitseline,Pure,350ml,4750145000149,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+581961,Pure dessertkaste mango 300g,Pure,300g,4750145003386,dairy_eggs_fats,dairy_desserts,sauces_oils,sauces_other
+581962,Pure klassikaline tomatiketchup 500g,Pure,500g,4750145003584,produce,produce_root_veg,sauces_oils,sauces_ketchup_mayo
+581963,Pure apelsini-astelpajumoos 420g,Pure,420g,4750145022318,dry_preserves,dry_other,dry_preserves,dry_other
+581964,Pure viigimarjamoos 410g,Pure,410g,4750145023476,dry_preserves,dry_other,dry_preserves,dry_other
+581965,Pure Puratos granadillikaste 300g,Pure,300g,4750145046062,sauces_oils,sauces_other,sauces_oils,sauces_other
+581966,Pure Adzika kaukaasiapärane 260g,Pure,260g,4750145046789,dry_preserves,dry_other,sauces_oils,sauces_other
+581967,Pure Adzika gruusiapärane 260g,Pure,260g,4750145046796,dry_preserves,dry_other,sauces_oils,sauces_other
+581968,Premia jääkuubikud 500g,Premia,500g,4750159010004,dry_preserves,dry_other,frozen_food,frozen_other

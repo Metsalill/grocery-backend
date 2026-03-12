@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+582519,Nivea Men Fresh Kick habemeaeelgeel 200ml,Nivea,200ml,5900017078663,dry_preserves,dry_other,personal_care,pcare_other
+582520,Nivea Men Sensitive Pro Ultra habemeaeelvaht 200ml,Nivea,200ml,5900017080598,dry_preserves,dry_other,personal_care,pcare_other
+582521,Nestle Nesquik teraviljapallid 225g kakao,Nestle,225g,5900020016065,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+582522,Celiko lahustuv kakaojoogipulber 380g,Celiko,380g,5900038006201,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+582523,Lays kartulikrõps 130g soolamaitseline,Lays,130g,5900259127600,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+582524,Lays kartulikrõps 120g juustu-sibula,Lays,120g,5900259127754,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+582525,Lays kartulikrõps 120g tšilli-laimi,Lays,120g,5900259127778,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+582526,Lays kartulikrõps 250g tšilli-laimi,Lays,250g,5900259128355,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+582527,Lays kartulikrõps 130g hapukoore-ürdi,Lays,130g,5900259128409,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_snacks_salty
+582528,Lays Oven Baked 110g jogurti-ürdi,Lays,110g,5900259128843,dairy_eggs_fats,dairy_yogurt_kefir,sweets_snacks,sweets_snacks_salty
+582529,Lays kartulikrõps 250g sibulaga,Lays,250g,5900259128928,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+582530,Lays kartulikrõps 130g peekoni,Lays,130g,5900259130679,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+582531,Lays kartulikrõps 130g barbeque,Lays,130g,5900259130686,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+582532,Lays kartulikrõps 130g juustu,Lays,130g,5900259130693,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+582533,Lays kartulikrõps 250g hapukoore-ürdi,Lays,250g,5900259130747,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_snacks_salty
+582534,Colgate hambahari Extra Clean Medium,Colgate,,5900273001566,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+582535,Colgate 360 Max White Medium hambahari,Colgate,,5900273125941,dry_preserves,dry_other,personal_care,pcare_oral_care
+582536,Ajax Floral Fiesta Lilac Breeze üldpuhastusvahend,,,,5900273462213,dry_preserves,dry_other,household,hh_cleaners
+582537,Ajax Floral Fiesta klaasipuhastusvahend täitepudel 750ml,Ajax,750ml,5900273485137,dry_preserves,dry_other,household,hh_cleaners
+582538,Bonduelle šampinjonid traditsiooniline marineeritud 280g,Bonduelle,280g,5900281000568,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+582539,Bonduelle marineeritud šampinjonid tilliga 280g,Bonduelle,280g,5900281001930,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+582540,Bonduelle letšo 450g šampinjoniga,Bonduelle,450g,5900281002982,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+582541,Tymbark õuna-virsikujook 200ml,Tymbark,200ml,5900334002112,produce,produce_apples_pears,drinks,drinks_juices
+582542,Tymbark maasika-õuna-virsikujook 200ml,Tymbark,200ml,5900334007353,produce,produce_berries,drinks,drinks_juices
+582543,Tymbark multivitamiinijook 200ml,Tymbark,200ml,5900334013521,dry_preserves,dry_other,drinks,drinks_juices
+582544,Loyd marjatee 20*2g põldmarja-mustika,Loyd,2g,5900396016171,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582545,Loyd marjatee maasika-rabarber PYR 20*2g,Loyd,2g,5900396017284,,,drinks,drinks_tea_coffee
+582546,Loyd tee 20*2g sidruni-ingveri-mee,Loyd,2g,5900396018601,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582547,Loyd marjatee 20*2g kirsimaitseline,Loyd,2g,5900396026392,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582548,Loyd Pyramids tee värske apelsin 20*2.2g,Loyd,2.2g,5900396028372,,,drinks,drinks_tea_coffee
+582549,Loyd roheline tee 20*1.7g sidruni-laimi-ingveri,Loyd,1.7g,5900396030993,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582550,Loyd roheline tee Tea Of The World 20*1.5g,Loyd,1.5g,5900396032751,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582551,Dr.Oetker pitsa Salaami ja Chorizo 320g,Dr.Oetker,320g,5900437007151,dry_preserves,dry_other,frozen_food,frozen_pizza
+582552,Dr.Oetker Bourbon vanillipasta seemnetega 19g,Dr.Oetker,19g,5900437083117,dry_preserves,dry_pasta_rice,dry_preserves,dry_flour_sugar_baking
+582553,Hortex maasikad 300g,Hortex,300g,5900477003830,produce,produce_berries,frozen_food,frozen_fruit_berries
+582554,Hortex Kreeka köögiviljasegu praadimiseks 400g,Hortex,400g,5900477016021,dry_preserves,dry_other,frozen_food,frozen_vegetables
+582555,Suitsujuustu viilud 100g,,100g,5900486020040,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+582556,Lemmik sulatatud juust Gouda 100g,Lemmik,100g,5900486530044,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+582557,Danonki tuubijogurt maasika-banaanimaitseline 70g,Danonki,70g,59005322,produce,produce_berries,dairy_eggs_fats,dairy_yogurt_kefir
+582558,Sante Smooth maapähklikreem 350g,Sante,350g,5900617012197,sweets_snacks,sweets_nuts_driedfruit,sauces_oils,sauces_other
+582559,Go On proteiinibatoon 50g kakao-šokolaadi,Go On,50g,5900617013064,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+582560,Go On proteiinibatoon 50g vanilli-šok.,Go On,50g,5900617013101,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+582561,Go On proteiinibatoon 50g jõhvikas-goji-šok.,Go On,50g,5900617013149,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+582562,Go On Nutrition proteiinibatoon 50g soolane karamell,Go On,50g,5900617035905,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_chocolate_bars
+582563,Sante Raw puuviljabatoon 35g pähkli-chia,Sante,35g,5900617036391,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_nuts_driedfruit
+582564,Go On Nutrition 50g panna cotta-maasika,Go On,50g,5900617047076,produce,produce_berries,sweets_snacks,sweets_chocolate_bars
+582565,Calgon veepehmendaja pesumasinale 500g,Calgon,500g,5900627008203,dry_preserves,dry_other,household,hh_laundry
+582566,Vanish Gold Regular vaibapuhastusvahend 500ml,Vanish,500ml,5900627012910,dry_preserves,dry_other,household,hh_cleaners
+582567,Veet Cold Wax Sensitive vahaplaaster 12tk,Veet,12tk,5900627027259,dry_preserves,dry_other,personal_care,pcare_other
+582568,AW Fresh Smooth Satin & Moon Lily 250ml,AW,250ml,5900627047219,drinks,drinks_coffee_beans_capsules,personal_care,pcare_other

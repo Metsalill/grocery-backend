@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+583569,Finish nõudepesumasina puhastusvahend 250ml,Finish,250ml,8594002680138,dry_preserves,dry_other,household,hh_dishwashing
+583570,Finish nõudepesumasina sool 1.5kg,Finish,1.5kg,8594002682736,world_spices,spices_basic_salt_pepper,household,hh_dishwashing
+583571,Surprise gasseerimata allikavesi 300ml ja üllatusmuna,Surprise,300ml,8594023925607,drinks,drinks_water,drinks,drinks_water
+583572,Bonavita röstitud müsli Granola 500g shokolaadiga,Bonavita,500g,8595564510499,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+583573,Nestea Lemon jäätee 500ml sidrunimaitseline,Nestea,500ml,8595646203516,drinks,drinks_tea_coffee,drinks,drinks_soft_soda
+583574,Nestea Peach jäätee 500ml virsikumaitseline,Nestea,500ml,8595646203554,drinks,drinks_tea_coffee,drinks,drinks_soft_soda
+583575,Pikantne kikerhernehummus 200g Serbia,Pikantne,200g,8606011898234,dry_preserves,dry_groats_beans,sauces_oils,sauces_other
+583576,Nestle Pirulo arbuusi mahlajää 73ml,Nestle,73ml,8606018610921,drinks,drinks_juices,frozen_food,frozen_desserts_icecream
+583577,Oreo jäätis Ballcone 100ml,Oreo,100ml,8606018616091,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+583578,Ecolatier Organic Aloe Vera shampoonikreem 250ml,Ecolatier,250ml,8606032060191,drinks,drinks_soft_soda,personal_care,pcare_shampoo_cond
+583579,Ecolatier Organic Aloe Vera juuksepalsam 250ml,Ecolatier,250ml,8606032060214,drinks,drinks_soft_soda,personal_care,pcare_shampoo_cond
+583580,Ecolatier Organic Cannabis shampoonikreem 250ml,Ecolatier,250ml,8606032060283,drinks,drinks_soft_soda,personal_care,pcare_shampoo_cond
+583581,Ecolatier Organic Cannabis juuksepalsam 250ml,Ecolatier,250ml,8606032060290,drinks,drinks_soft_soda,personal_care,pcare_shampoo_cond
+583582,Ecolatier Urban Restore Damaged Hair palsam 400ml,Ecolatier,400ml,8606032060504,drinks,drinks_soft_soda,personal_care,pcare_shampoo_cond
+583583,Ecolatier Urban Volume Thin Hair palsam 400ml,Ecolatier,400ml,8606032060542,drinks,drinks_soft_soda,personal_care,pcare_shampoo_cond
+583584,Ecolatier Urban Volume Thin Hair shampoon 600ml,Ecolatier,600ml,8606032060641,drinks,drinks_soft_soda,personal_care,pcare_shampoo_cond
+583585,Ecolatier Urban Damaged Hair shampoon 600ml,Ecolatier,600ml,8606032060658,drinks,drinks_soft_soda,personal_care,pcare_shampoo_cond
+583586,Ecolatier Urban Jojoba&Papaya dushigeel 600ml,Ecolatier,600ml,8606032060719,drinks,drinks_soft_soda,personal_care,pcare_shower_soap
+583587,Ecolatier Urban Grapefruit&Clementin dushigeel 600ml,Ecolatier,600ml,8606032060726,drinks,drinks_soft_soda,personal_care,pcare_shower_soap
+583588,Ecolatier Urban Argana&Vanilla dushigeel 600ml,Ecolatier,600ml,8606032060733,drinks,drinks_soft_soda,personal_care,pcare_shower_soap
+583589,Ecolatier Clementine köögiveseep 600ml,Ecolatier,600ml,8606032060849,drinks,drinks_soft_soda,household,hh_dishwashing
+583590,Germund pistaatsiapähklid 200g röstitud soolaga,Germund,200g,8690535019985,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_nuts_driedfruit
+583591,Germund aprikoos 200g kuivatatud,Germund,200g,8690535020158,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+583592,Germund Rosin Sultan rosinad 200g,Germund,200g,8690535080411,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+583593,Germund metspähklid 200g,Germund,200g,8690535780113,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+583594,Dimes apelsinimahl 700ml pressitud,Dimes,700ml,8690558027974,drinks,drinks_juices,drinks,drinks_juices
+583595,Dimes granaatõunamahl 100% 250ml,Dimes,250ml,8690558030066,drinks,drinks_juices,drinks,drinks_juices
+583596,Tango Citrus õhuvärskendaja 300ml,Tango,300ml,8692641002240,household,hh_candles_airfresh,household,hh_candles_airfresh
+583597,Elvan keeks Today Donut 50g karamelli,Elvan,50g,8693029603172,bakery,bakery_sweet_buns_donuts,bakery,bakery_sweet_buns_donuts
+583598,Elvan keeks Today Donut 50g maasika,Elvan,50g,8693029607293,bakery,bakery_sweet_buns_donuts,bakery,bakery_sweet_buns_donuts
+583599,Gold Care kingakreem ja läige must 60ml,Gold Care,60ml,8697704011009,dry_preserves,dry_other,household,hh_other
+583600,Gold Care kingakreem ja läige värvitu 60ml,Gold Care,60ml,8697704011047,dry_preserves,dry_other,household,hh_other
+583601,Gold Care niiskusekaitse jalatsitele 200ml,Gold Care,200ml,8697704012846,dry_preserves,dry_other,household,hh_other
+583602,Gold Care Easy Shine jalatsissvamm must,Gold Care,,8697704013409,dry_preserves,dry_other,household,hh_other
+583603,Gold Care Easy Shine jalatsissvamm värvitu,Gold Care,,8697704013447,dry_preserves,dry_other,household,hh_other
+583604,Gold Care Sport kingaläige valge 75ml,Gold Care,75ml,8697704020537,drinks,drinks_wine,household,hh_other
+583605,Naturella Ultra Tender Protection Super hügieenisidem 14tk,Naturella,14tk,8700216045346,dry_preserves,dry_other,personal_care,pcare_other
+583606,Naturella Ultra Tender Protection Normal hügieenisidem 16tk,Naturella,16tk,8700216045414,dry_preserves,dry_other,personal_care,pcare_other
+583607,Gillette Mach3 Charcoal terad 5tk,Gillette,5tk,8700216062770,dry_preserves,dry_other,personal_care,pcare_shaving
+583608,Gillette Mach3 terad 8tk,Gillette,8tk,8700216066556,dry_preserves,dry_other,personal_care,pcare_shaving
+583609,Oral-B Junior hambapasta 75ml,Oral-B,75ml,8700216089654,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+583610,Oral-B Kids hambapasta 50ml,Oral-B,50ml,8700216089715,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+583611,Oral-B Pro Expert Advanced hambapasta 75ml,Oral-B,75ml,8700216106702,dry_preserves,dry_other,personal_care,pcare_oral_care
+583612,Oral-B Pro Expert Deep Clean hambapasta 75ml,Oral-B,75ml,8700216106733,dry_preserves,dry_other,personal_care,pcare_oral_care
+583613,Oral-B Pro-Expert Sensitive hambapasta 75ml,Oral-B,75ml,8700216106818,dry_preserves,dry_other,personal_care,pcare_oral_care
+583614,Oral-B Pro-Expert Professional Protection hambapasta 75ml,Oral-B,75ml,8700216106863,dry_preserves,dry_other,personal_care,pcare_oral_care
+583615,Gillette Venus&Olay Sugarberry raseerija,Gillette,,8700216130516,personal_care,pcare_shaving,personal_care,pcare_shaving
+583616,Gillette Venus Simply3 raseerija 4tk,Gillette,4tk,8700216143608,personal_care,pcare_shaving,personal_care,pcare_shaving
+583617,Gillette Blue3 Plus raseerija 12tk ühekordne,Gillette,12tk,8700216148092,dry_preserves,dry_other,personal_care,pcare_shaving
+583618,Always Ultra Normal Plus Duo hügieenisidem 20tk,Always,20tk,8700216171311,dry_preserves,dry_other,personal_care,pcare_other

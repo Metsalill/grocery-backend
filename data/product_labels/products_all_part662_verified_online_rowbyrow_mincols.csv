@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+583369,Coop tomatikaste 400g basiiliku Basilico,Coop,400g,8005781201778,sauces_oils,sauces_pasta_cooking,sauces_oils,sauces_pasta_cooking
+583370,Coop mahlajäätis Fruttolosi maasika-õun 6x60g,Coop,60g,8005781202232,drinks,drinks_juices,frozen_food,frozen_desserts_icecream
+583371,Coop shokolaadiga kaetud vaniljejäätis iirisega 250g,Coop,250g,8005781202249,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+583372,Coop Vivi Verde õunaäädikas 5% 500ml,Coop,500ml,8005781202454,drinks,drinks_wine,sauces_oils,oils_vinegar
+583373,Coop hapu kirsi ekstra džemm 370g,Coop,370g,8005781202461,dry_preserves,dry_other,dry_preserves,dry_other
+583374,Coop aprikoosi ekstra džemm 370g,Coop,370g,8005781202478,dry_preserves,dry_other,dry_preserves,dry_other
+583375,Coop virsiku ekstra džemm 370g,Coop,370g,8005781202485,dry_preserves,dry_other,dry_preserves,dry_other
+583376,Coop maasika ekstra džemm 370g,Coop,370g,8005781202904,dry_preserves,dry_other,dry_preserves,dry_other
+583377,Coop Pesto 190g Alla Genovese basiiliku,Coop,190g,8005781203109,sauces_oils,sauces_pasta_cooking,sauces_oils,sauces_pasta_cooking
+583378,Coop paneeritud mozzarellapallid 240g külmutatud,Coop,240g,8005781203291,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_ready_meals
+583379,Valsoia jäätis vegan 120ml,Valsoia,120ml,8006040033208,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+583380,Valsoia Soja köögikreem 200ml,Valsoia,200ml,8006040247001,sauces_oils,sauces_soy_worcester,dairy_eggs_fats,dairy_cream_sourcream
+583381,Valsoia India pähkli-mandlijook 1L,Valsoia,1L,8006040481061,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+583382,Mionetto Prestige alkoholivaba vahuvein 0.75L,Mionetto,0.75L,8006220003533,drinks,drinks_wine,drinks,drinks_wine
+583383,Always Ultra Super Night hügieenisidem 10tk,Always,10tk,8006540093849,dry_preserves,dry_other,personal_care,pcare_other
+583384,Naturella Ultra Normal Regular Deo hügieenisidem 9tk,Naturella,9tk,8006540098219,dry_preserves,dry_other,personal_care,pcare_other
+583385,Naturella Ultra Normal Regular Deo hügieenisidem 18tk,Naturella,18tk,8006540098257,dry_preserves,dry_other,personal_care,pcare_other
+583386,Naturella Normal pesukaitse kummel 44tk,Naturella,44tk,8006540100769,dry_preserves,dry_other,personal_care,pcare_other
+583387,Swiffer tolmuharjakomplekt lühike vars ja 4 lappi,Swiffer,,8006540307960,dry_preserves,dry_other,household,hh_cleaners
+583388,Swiffer tolmulapp tolmuharjale 5tk,Swiffer,5tk,8006540307991,dry_preserves,dry_other,household,hh_cleaners
+583389,Fairy Forest Fruit nõudepesuvahend 650ml,Fairy,650ml,8006540355220,dry_preserves,dry_other,household,hh_dishwashing
+583390,Fairy Lilac nõudepesuvahend 650ml,Fairy,650ml,8006540355305,dry_preserves,dry_other,household,hh_dishwashing
+583391,Pampers Harmonie märglapid 48tk,Pampers,48tk,8006540458563,baby,baby_diapers,baby,baby_other
+583392,Pampers Sensitive märglapid 52tk,Pampers,52tk,8006540523056,baby,baby_diapers,baby,baby_other
+583393,Always Dailies Liners XPro päevakaitse 48tk,Always,48tk,8006540688939,dry_preserves,dry_other,personal_care,pcare_other
+583394,Always Extra Long lõhnastatud päevakaitse 40tk,Always,40tk,8006540689011,dry_preserves,dry_other,personal_care,pcare_other
+583395,Oral-B elektriline hambahari Vitality 3+ Frozen,Oral-B,,8006540772591,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+583396,Oral-B elektriline hambahari Vitality 3+ Spiderman,Oral-B,,8006540772928,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+583397,Always Long lõhnastamata päevakaitse 52tk,Always,52tk,8006540791394,dry_preserves,dry_other,personal_care,pcare_other
+583398,BAM 3D White Arctic Fresh hambapasta 75ml,BAM,75ml,8006540793039,dry_preserves,dry_other,personal_care,pcare_oral_care
+583399,BAM 3D White Cool Water hambapasta 75ml,BAM,75ml,8006540793138,dry_preserves,dry_other,personal_care,pcare_oral_care
+583400,Ariel Color pesupulber 1.1kg,Ariel,1.1kg,8006540940259,,,household,hh_laundry
+583401,BAM Anti-Cavity Original hambapasta 75ml,BAM,75ml,8006540948071,drinks,drinks_spirits,personal_care,pcare_oral_care
+583402,Costa dOro ekstra väärisoliviõli 750ml,Costa dOro,750ml,8007270501017,sauces_oils,oils_olive,sauces_oils,oils_olive
+583403,Costa dOro viinamarjaseemneõli 750ml,Costa dOro,750ml,8007270999043,drinks,drinks_spirits,sauces_oils,oils_other
+583404,Salvadori ekstra väärisoliviõli 1L,Salvadori,1L,8008460533313,sauces_oils,oils_olive,sauces_oils,oils_olive
+583405,Schär maisihelbed 250g gluteenivaba laktoos.v,Schär,250g,8008698002223,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+583406,Schär hommikusöögipallid 250g shokolaadimaitseline,Schär,250g,8008698007709,dry_preserves,dry_other,dry_preserves,dry_cereals_muesli
+583407,Schär hamburgerikuklid 4tk 300g gluteenivaba,Schär,4tk,8008698012246,dry_preserves,dry_other,bakery,bakery_buns_croissants
+583408,Schär Müsli 375g puuviljadega gluteenivaba,Schär,375g,8008698020142,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+583409,Pasta Reggia pasta Capellini 500g,Pasta Reggia,500g,8008857200217,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583410,Pasta Reggia Pasta Pennettine 500g,Pasta Reggia,500g,8008857300405,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583411,Pasta Reggia pasta Riso 500g,Pasta Reggia,500g,8008857300764,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583412,Pasta Reggia Pasta Chifferi Rigati 500g,Pasta Reggia,500g,8008857300887,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583413,Denim Black deodorant 150ml meeste,Denim,150ml,8008970004242,personal_care,pcare_deo,personal_care,pcare_deo
+583414,Denim Black AS näovesi 100ml,Denim,100ml,8008970004327,drinks,drinks_water,personal_care,pcare_other
+583415,Denim Black dushigeel 250ml,Denim,250ml,8008970005157,dry_preserves,dry_other,personal_care,pcare_shower_soap
+583416,Arix aknapuhastuslapp 27x36cm,Arix,,8008990010919,household,hh_cleaners,household,hh_cleaners
+583417,Arix üldpuhastuslapp 38x60cm mustriga 3tk,Arix,3tk,8008990011930,dry_preserves,dry_other,household,hh_cleaners
+583418,il Molino Panna cotta 100g metsamarjaga,il Molino,100g,8009550000395,dry_preserves,dry_other,dairy_eggs_fats,dairy_desserts

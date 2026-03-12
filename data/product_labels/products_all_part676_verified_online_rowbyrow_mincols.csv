@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+595081,Kinder piimašokolaadifiguur piima- ja kakaoküpsisetükkidega 122g,Kinder,122g,8000500411278,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+595111,Nestlé NAN HA 1 piimasegu 800g,Nestlé NAN,800g,8445291160798,baby,baby_formula,baby,baby_formula
+595243,Red Bull Sea Blue energiajook 250ml,Red Bull,250ml,0000090454530,,,drinks,drinks_energy
+595262,Nutricia Nutrilon Nutriton piimasegu 135g alates sünnist,Nutricia,135g,5900852063374,baby,baby_formula,baby,baby_formula
+595447,Coop tomatikaste küüslauguga 390g,Coop,390g,7340191156128,,,sauces_oils,sauces_pasta_cooking
+595452,Beatos kakao magustoitudele 150g,Beatos,150g,4770082308467,,,dry_preserves,dry_flour_sugar_baking
+595902,Milky Mood šokolaadimaitselised piimakõrred 30g,Milky Mood,30g,4745010604058,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+595998,Fazer Muumi vaarikamaitselised pastillid 90g,Fazer,90g,6416453117617,,,sweets_snacks,sweets_candies
+596023,Fredman muffinivorm 24tk,Fredman,24tk,6418400067747,,,household,hh_kitchenware
+596091,Tutteli 1 imiku piimasegu sünnist 300g,Tutteli,300g,5900852063268,baby,baby_formula,baby,baby_formula
+596640,Kinder Milk Slice magustoit 28g,Kinder,28g,0000040084725,,,sweets_snacks,sweets_biscuits_cookies
+596885,Nestle NAN 2 piimasegu orgaaniline 500ml,Nestle NAN,500ml,8445291752207,baby,baby_formula,baby,baby_formula
+596890,Fredman kommivormid 20tk,Fredman,20tk,6418400067785,,,household,hh_kitchenware
+597344,Opera dOro valged cannelini oad 400g,Opera dOro,400g,4743144004997,,,dry_preserves,dry_canned_veg
+598303,Anglamark merisoolaga riisigaletid 100g,Änglamark,100g,7340011314615,drinks,drinks_beer_cider,bakery,bakery_crispbread
+598367,Pajakinnas Graafiline 15x32,Pajakinnas,,6438574220236,,,household,hh_kitchenware
+598467,MAOAM Halloween Mixx närimiskommid 300g,MAOAM,300g,4001686716618,,,sweets_snacks,sweets_gums_mints
+598538,Poco Loco Halloween juustumaitseline kartulisnäkk 75g,Poco Loco,75g,5412514937485,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+598784,BOSCH tolmukott BBZAFGALL 4tk,BOSCH,4tk,4242005135790,,,household,hh_other
+598883,Domkellerstolz Rosewein vein 9.5% 1L,Domkellerstolz,1L,4003301084539,,,drinks,drinks_wine
+598961,Pajakinnas Pinestripe 15x32,Pajakinnas,,6438574086467,,,household,hh_kitchenware
+599118,Santa Maria juustune tako vürtsisegu 28g,Santa Maria,28g,7311311028106,dairy_eggs_fats,dairy_cheese_slices,world_spices,spices_herbs_spice_mix
+599253,Pajakinnas Ilus 13x39,Pajakinnas,,6411720558520,,,household,hh_kitchenware
+599330,Filter X-Nano pestav,,,3221616048447,,,household,hh_other
+599377,Kotimaista või 80% soolane 500g,Kotimaista,500g,6438574493821,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+599504,Crest Halloween piimašokolaadi pulgakomm 20g,Crest,20g,8724900520490,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+599728,Teekanne talvetee Lumine unistus 40.5g,Teekanne,40.5g,4009300018070,,,drinks,drinks_tea_coffee
+599801,Mozart Chocolate Cream liköör 17% 500ml,Mozart,500ml,9013100007030,drinks,drinks_spirits,drinks,drinks_spirits
+600754,Wallbreck Cremant De Loire Brut vahuvein 12% 750ml,Wallbreck,750ml,4008106010592,,,drinks,drinks_wine
+600764,Sonett pesuvalgendaja 450g,Sonett,450g,4007547103924,,,household,hh_laundry
+600913,Shiitake seened 150g,,150g,4771085206385,,,produce,produce_mushrooms
+600981,Mucho Mas Extra Dry Sparkling vahuvein 12% 750ml,Mucho Mas,750ml,8410702064286,,,drinks,drinks_wine
+601329,Herkku grillitud seened 180g,Herkku,120g,8006743007551,,,produce,produce_mushrooms
+601376,Coop kulduim-tuunikala tükid vees 160g,Coop,112g,7340191160101,meat_fish,fish_fresh,meat_fish,fish_processed
+601478,Fazer Halloweeni marmelaadikuulid 260g,Fazer,260g,6416453043800,,,sweets_snacks,sweets_candies
+601561,After Eight piparmünditäidisega šokolaad 200g,After Eight,200g,5000189363069,,,sweets_snacks,sweets_chocolate_bars
+601592,Milky Mood maasikamaitselised piimakõrred 30g,Milky Mood,30g,4745010604041,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+601769,Kalev Draakon maasikamaitseline närimiskommid 110g,Kalev,110g,4740012023852,,,sweets_snacks,sweets_gums_mints
+602013,Coop küpsisesegu valge šokolaadi tükkidega 170g,Coop,170g,7340191176690,,,sweets_snacks,sweets_biscuits_cookies
+602572,Ruinart Brut Champagne vahuvein 12.5% 750ml,Ruinart,750ml,3185370283905,drinks,drinks_wine,drinks,drinks_wine
+602623,Coop röstitud sibul 200g,Coop,200g,7340191163201,,,produce,produce_root_veg
+602816,Kokkikartano Kiievi kanakotlett kartulipüreega 350g,Kokkikartano,350g,6419744005457,meat_fish,meat_poultry,frozen_food,frozen_ready_meals
+603072,Herkku Aafrika hele röst jahvatatud kohv 450g,Herkku,450g,6438460192753,,,drinks,drinks_coffee_beans_capsules
+605052,Teekanne talvetee Talveaeg 50g,Teekanne,50g,4009300019251,,,drinks,drinks_tea_coffee
+605068,Peroni Nastro Azzurro õlu 5% 330ml,Peroni,330ml,8008440222008,,,drinks,drinks_beer_cider
+605071,Mehukatti segumahla kontsentraat 1.5L 1+3,Mehukatti,1.5L,6415131404322,,,drinks,drinks_juices
+605279,Tartar kaste 180g,,180g,4820137173561,,,sauces_oils,sauces_ketchup_mayo
+605308,Xtra kuivatatud jahvatatud ingver 70g,Xtra,70g,7340191128958,,,world_spices,spices_herbs_spice_mix
+605708,Üldpuhastusvahendi stardipakett pudel ja 2 tabletti,,,6423800070235,,,household,hh_cleaners
+606080,Hulten Halloween kolju kommidega 333g,Hulten,333g,7350025828800,,,sweets_snacks,sweets_candies

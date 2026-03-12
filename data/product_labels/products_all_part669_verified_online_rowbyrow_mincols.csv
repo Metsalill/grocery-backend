@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+583719,Neutral Sensitive Skin White pesupulber 1.188kg,Neutral,1.188kg,8712561475693,dry_preserves,dry_other,household,hh_laundry
+583720,Organix 6K maisirõngad 20g,Organix,20g,8713500013150,dry_preserves,dry_canned_veg,baby,baby_food_pouches
+583721,Organix 7K maisirõngad 20g tomati,Organix,20g,8713500013167,dry_preserves,dry_canned_veg,baby,baby_food_pouches
+583722,Red Band kummikomm Nöörid Sour Apple 100g,Red Band,100g,8713800138539,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+583723,Kaltsiumisnäkk koertele Antos 100g,Antos,100g,8714414002087,pet,pet_other,pet,pet_dog_treats
+583724,Antos lõhemaius koerale 200g,Antos,200g,8714414008492,meat_fish,fish_fresh,pet,pet_dog_treats
+583725,Colgate Twister Medium hambahari 2-pakk,Colgate,,8714789139791,dry_preserves,dry_other,personal_care,pcare_oral_care
+583726,Colgate Cool Mint suuvesi 500ml,Colgate,500ml,8714789732671,drinks,drinks_water,personal_care,pcare_oral_care
+583727,Colgate suuvesi Cool Mint sinine 250ml,Colgate,250ml,8714789732732,drinks,drinks_water,personal_care,pcare_oral_care
+583728,Colgate Max White One Luminous hambapasta 75ml,Colgate,75ml,8714789867632,dry_preserves,dry_other,personal_care,pcare_oral_care
+583729,Elmex Waxed Mint hambaniit 50m,Elmex,,8714789900100,sweets_snacks,sweets_gums_mints,personal_care,pcare_oral_care
+583730,Elmex Sensitive Whitening hambapasta 75ml,Elmex,75ml,8714789926292,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+583731,Colgate Total suuvesi 500ml,Colgate,500ml,8714789967059,drinks,drinks_water,personal_care,pcare_oral_care
+583732,Heinz ketsup original 700g,Heinz,700g,87157260,drinks,drinks_spirits,sauces_oils,sauces_ketchup_mayo
+583733,Pisang Ambon liköör 17% 700ml,,700ml,8716000968869,dry_preserves,dry_other,drinks,drinks_spirits
+583734,Friso Gold 3 12K piimasegu 800g,Friso,800g,8716200731355,dairy_eggs_fats,dairy_milk,baby,baby_formula
+583735,Domestos Lime WC katlakivieemaldaja 750ml,Domestos,750ml,8717644186077,dry_preserves,dry_other,household,hh_cleaners
+583736,Sinep-till kaste juustule 190ml,,190ml,8717677366798,dairy_eggs_fats,dairy_cheese_slices,sauces_oils,sauces_other
+583737,Bolsius lauaküünal 15h 80/48mm heleroheline,Bolsius,,8717847037909,household,hh_candles_airfresh,household,hh_candles_airfresh
+583738,Bolsius lauaküünal 15h 80/48mm kollane,Bolsius,,8717847046239,household,hh_candles_airfresh,household,hh_candles_airfresh
+583739,Bolsius teeküünal Maxi 8h 8tk granaatõun,Bolsius,8tk,8717847137982,drinks,drinks_tea_coffee,household,hh_candles_airfresh
+583740,Bolsius teeküünal Maxi True 8h 8tk roheline tee,Bolsius,8tk,8717847151582,drinks,drinks_tea_coffee,household,hh_candles_airfresh
+583741,Bolsius teeküünal Maxi True 8h 8tk virsik,Bolsius,8tk,8717847161307,drinks,drinks_tea_coffee,household,hh_candles_airfresh
+583742,Bolsius õli-kalmuküünal 2.5-päeva valge,Bolsius,,8717847177308,sauces_oils,oils_other,household,hh_candles_airfresh
+583743,Bolsius kalmuküünal kaanega 50h valge,Bolsius,,8717847185686,household,hh_candles_airfresh,household,hh_candles_airfresh
+583744,Bolsius kalmuküünal kaanega 70h valge,Bolsius,,8717847185945,household,hh_candles_airfresh,household,hh_candles_airfresh
+583745,Bolsius kalmuküünal 36h 120x61mm valge,Bolsius,,8717847186010,household,hh_candles_airfresh,household,hh_candles_airfresh
+583746,Domestos Zero Blue WC katlakivieemaldaja 750ml,Domestos,750ml,8718114636788,dry_preserves,dry_other,household,hh_cleaners
+583747,Aptamil Comfort 2 6K jätkupiimasegu 400g,Aptamil,400g,8718117609253,dairy_eggs_fats,dairy_milk,baby,baby_formula
+583748,Kassi mänguasi Papillon,,,8718274089110,pet,pet_other,pet,pet_other
+583749,LED lamp E27 7W=60W A60 matt Philips,Philips,,8718696472187,dry_preserves,dry_other,household,hh_other
+583750,LED lamp E27 75W A60 matt klaas Philips,Philips,,8718696705551,dry_preserves,dry_other,household,hh_other
+583751,LED lamp E27 10.5W A60 matt Philips,Philips,,8718699704162,dry_preserves,dry_other,household,hh_other
+583752,LED lamp GLS 13W A60 1350lm Philips,Philips,,8718699745646,dry_preserves,dry_other,household,hh_other
+583753,LED lamp E14 6.5W B35 filament Philips,Philips,,8718699762193,dry_preserves,dry_other,household,hh_other
+583754,LED lamp E14 6.5W P45 filament Philips,Philips,,8718699762292,dry_preserves,dry_other,household,hh_other
+583755,Colgate hambahari 360 Black Medium,Colgate,,8718951033856,dry_preserves,dry_other,personal_care,pcare_oral_care
+583756,Colgate Total Original hambapasta 75ml,Colgate,75ml,8718951226715,drinks,drinks_spirits,personal_care,pcare_oral_care
+583757,Colgate Total Whitening hambapasta 75ml,Colgate,75ml,8718951226807,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+583758,Colgate Max White Charcoal hambapasta 75ml,Colgate,75ml,8718951250017,dry_preserves,dry_other,personal_care,pcare_oral_care
+583759,Colgate Advanced White Charcoal hambapasta 75ml,Colgate,75ml,8718951253827,dry_preserves,dry_other,personal_care,pcare_oral_care
+583760,Ajax puhastusvahend vannitoale 750ml spray,Ajax,750ml,8718951277434,household,hh_cleaners,household,hh_cleaners
+583761,Ajax puhastusvahend universaalne 750ml,Ajax,750ml,8718951277519,household,hh_cleaners,household,hh_cleaners
+583762,Colgate Advanced White hambapasta 75ml,Colgate,75ml,8718951312173,dry_preserves,dry_other,personal_care,pcare_oral_care
+583763,Colgate Max Fresh Cool Crystal hambapasta 75ml,Colgate,75ml,8718951313255,dry_preserves,dry_other,personal_care,pcare_oral_care
+583764,Colgate Max White White Crystal hambapasta 75ml,Colgate,75ml,8718951313835,dry_preserves,dry_other,personal_care,pcare_oral_care
+583765,Ajax Boost Charcoal üldpuhastusvahend 1L,Ajax,1L,8718951332225,dry_preserves,dry_other,household,hh_cleaners
+583766,Colgate High Density Charcoal Soft hambahari 2tk,Colgate,2tk,8718951369153,dry_preserves,dry_other,personal_care,pcare_oral_care
+583767,Colgate hambahari Max White Charcoal 2tk,Colgate,2tk,8718951382602,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+583768,Colgate High Density Super Soft hambahari 3tk,Colgate,3tk,8718951397811,dry_preserves,dry_other,personal_care,pcare_oral_care

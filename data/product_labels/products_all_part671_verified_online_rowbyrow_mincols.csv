@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+583819,Domestos Power Foam Citrus puhastusvahend 435ml,Domestos,435ml,8720182795595,dry_preserves,dry_other,household,hh_cleaners
+583820,Domestos Power Foam Arctic puhastusvahend 435ml,Domestos,435ml,8720182795601,dry_preserves,dry_other,household,hh_cleaners
+583821,Domestos Power Foam Floral puhastusvahend 435ml,Domestos,435ml,8720182795618,dry_preserves,dry_other,household,hh_cleaners
+583822,Cif puhastusvahend köögile 500ml,Cif,500ml,8720182870063,dry_preserves,dry_other,household,hh_cleaners
+583823,Cif puhastusvahend vannitoale 500ml,Cif,500ml,8720182870070,dry_preserves,dry_other,household,hh_cleaners
+583824,Domestos Power5 WC värskendaja Lime 50g,Domestos,50g,8720182905024,dry_preserves,dry_other,household,hh_cleaners
+583825,Domestos Power5 WC värskendaja Ocean 50g,Domestos,50g,8720182905048,dry_preserves,dry_other,household,hh_cleaners
+583826,Soilmates avokaadoõli 500ml,Soilmates,500ml,8720299223202,sauces_oils,oils_other,sauces_oils,oils_other
+583827,Ayuko Udon nuudlid 300g,Ayuko,300g,8720301108749,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583828,Ayuko Ramen nuudlid 300g,Ayuko,300g,8720301108770,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583829,Lipton marjatee 20x1.6g vaarika-jõhvika,Lipton,1.6g,8720608014071,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+583830,Lipton marjatee 20x1.7g mango-mustsõstar,Lipton,1.7g,8720608014231,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+583831,Lipton marjatee 20x1.7g grapefruit-apelsin,Lipton,1.7g,8720608014248,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+583832,Boba Bubble tee kiirkomplekt 3x85g kakao,Boba,85g,8720812770213,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+583833,Boba Bubble tee kiirkomplekt 3x85g maasika,Boba,85g,8720812770756,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+583834,Boba Bubble tee komplekt 3x85g kookos-ananass,Boba,85g,8720812771241,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+583835,Samyang Ramen kiirnuudlid 135g habanero,Samyang,135g,8801073115514,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+583836,Thai Choice magusat tsilllikaste Hot 270ml,Thai Choice,270ml,8851978800329,sauces_oils,sauces_other,sauces_oils,sauces_other
+583837,Thai Choice sojakaste 300ml,Thai Choice,300ml,8851978800626,world_spices,spices_asian,sauces_oils,sauces_soy_worcester
+583838,Thai Sriracha tšilli-küüslaugu kaste 200ml,Thai,200ml,8851978801050,sauces_oils,sauces_other,sauces_oils,sauces_other
+583839,Thai Choice riisinuudlid 200g,Thai Choice,200g,8851978805621,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583840,Thai Choice traditsioonilised nuudlid 250g,Thai Choice,250g,8851978805652,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583841,Flying Goose Tom Yum supp 400ml,Flying Goose,400ml,8853662044408,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+583842,Flying Goose Tom Kha supp 400ml,Flying Goose,400ml,8853662044415,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+583843,Kara kookoskreem 200ml,Kara,200ml,8886303210238,bakery,bakery_cakes_pastries,dairy_eggs_fats,dairy_cream_sourcream
+583844,Kara kookoskreem 1L,Kara,1L,8886303241003,bakery,bakery_cakes_pastries,dairy_eggs_fats,dairy_cream_sourcream
+583845,Old Monk rumm 42.8% 700ml,Old Monk,700ml,8901131170063,drinks,drinks_spirits,drinks,drinks_spirits
+583846,Hello riisinuudlid 76g kanamaitseline,Hello,76g,8934563282158,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+583847,Hello riisinuudlid 76g veiselihamaitseline,Hello,76g,8934563283155,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+583848,Hello riisinuudlid 76g küüslauk-sibul,Hello,76g,8934563284152,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+583849,Thuong Hang riisipaber 22cm 500g,Thuong Hang,500g,8936044400020,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583850,Vinut kookosvesi 330ml,Vinut,330ml,8936121111917,drinks,drinks_water,drinks,drinks_soft_soda
+583851,Franko ananassitükid 565g,Franko,565g,8938543122724,produce,produce_tropical,dry_preserves,dry_canned_veg
+583852,Fa Men Sport rulldeo 50ml meeste,Fa,50ml,9000100219877,drinks,drinks_wine,personal_care,pcare_deo
+583853,Fa Men Xtra Cool deodorant 150ml,Fa,150ml,9000100540186,personal_care,pcare_deo,personal_care,pcare_deo
+583854,Bref Power Aktiv Lemon WC värskendaja 50g,Bref,50g,9000100625197,dry_preserves,dry_other,household,hh_cleaners
+583855,Fa Mystic Moments deodorant 150ml naiste,Fa,150ml,9000100634113,dry_preserves,dry_other,personal_care,pcare_deo
+583856,Fa dushigeel Pirate 250ml laste,Fa,250ml,9000100662468,dry_preserves,dry_other,personal_care,pcare_shower_soap
+583857,Fa dushigeel Mermaid 250ml laste,Fa,250ml,9000100662550,dry_preserves,dry_other,personal_care,pcare_shower_soap
+583858,Fa Energy Boost dushigeel 250ml meeste,Fa,250ml,9000100729505,dry_preserves,dry_other,personal_care,pcare_shower_soap
+583859,Fa Men Sport Energy Boost rulldeo 50ml,Fa,50ml,9000100736817,drinks,drinks_wine,personal_care,pcare_deo
+583860,Bref Power Active Lemon WC värskendaja 3x50g,Bref,50g,9000100753371,dry_preserves,dry_other,household,hh_cleaners
+583861,Fa Men Xtreme Invisible deodorant 150ml,Fa,150ml,9000100760546,dry_preserves,dry_other,personal_care,pcare_deo
+583862,Fa Men Xtreme Invisible rulldeo 50ml,Fa,50ml,9000100760591,dry_preserves,dry_other,personal_care,pcare_deo
+583863,Fa Men Attraction Force deodorant 150ml,Fa,150ml,9000100798655,dry_preserves,dry_other,personal_care,pcare_deo
+583864,Clin Multi Shine puhastusvahend klaaspindadele 500ml,Clin,500ml,9000100866484,dry_preserves,dry_other,household,hh_cleaners
+583865,Bref Power Aktiv Blue Eucalyptus WC värskendaja 50g,Bref,50g,9000100889438,dry_preserves,dry_other,household,hh_cleaners
+583866,Bref Duo Cubes Original WC värskendaja 2x50g,Bref,50g,9000100897242,drinks,drinks_spirits,household,hh_cleaners
+583867,Fa Fresh&Dry Green Tea rulldeo 50ml,Fa,50ml,9000100935845,dry_preserves,dry_other,personal_care,pcare_deo
+583868,Fa Fresh&Dry Green Tea deodorant 150ml,Fa,150ml,9000100936125,dry_preserves,dry_other,personal_care,pcare_deo

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+582719,Diamant suhkur 1kg,Diamant,1kg,5907069029254,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+582720,Poltino tortelliinid köögiviljadega-seentega 450g,Poltino,450g,5907431389603,bakery,bakery_cakes_pastries,frozen_food,frozen_ready_meals
+582721,Poltino Türgi kebab köögiviljadega 450g,Poltino,450g,5907431389627,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+582722,Bimar vaarikad külmutatud 300g,Bimar,300g,5907433418028,produce,produce_berries,frozen_food,frozen_fruit_berries
+582723,Hippo porgandi-apelsini-õunanektar 750ml,Hippo,750ml,5907467911427,drinks,drinks_juices,drinks,drinks_juices
+582724,Hippo õuna-porgandi-maasika nektar 750ml,Hippo,750ml,5907467911434,drinks,drinks_juices,drinks,drinks_juices
+582725,Donegal rullhari antistatiline värviline,Donegal,,5907549200203,dry_preserves,dry_other,personal_care,pcare_other
+582726,Donegal taskupeegel 7cm,Donegal,,5907549205116,dry_preserves,dry_other,personal_care,pcare_other
+582727,Donegal hambaharja kate 2tk,Donegal,2tk,5907549260382,dry_preserves,dry_other,personal_care,pcare_oral_care
+582728,Dr.Oetker tordikaunistused 10g värvilised pärlid,Dr.Oetker,,5907707057175,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+582729,Dr.Oetker tordikaunistused 10g värvilised tähed,Dr.Oetker,,5907707057182,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+582730,Dr.Oetker tordikaunistused 10g südamed,Dr.Oetker,,5907707057205,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+582731,Tango jäätisetort soolakaramelliga 480g,Tango,480g,5907782913694,bakery,bakery_cakes_pastries,frozen_food,frozen_desserts_icecream
+582732,Snack!T taimne snäkk originaal vegan 90g,Snack!T,90g,5908230530265,drinks,drinks_spirits,sweets_snacks,sweets_snacks_salty
+582733,Snack!T taimne snäkk piri-piri vegan 90g,Snack!T,90g,5908230530272,dry_preserves,dry_other,sweets_snacks,sweets_snacks_salty
+582734,Snack!T taimne snäkk seemnetega vegan 90g,Snack!T,90g,5908230531101,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks_salty
+582735,Deodorant Jean Marc Mohito 75ml naiste,Jean Marc,75ml,5908241704792,personal_care,pcare_deo,personal_care,pcare_deo
+582736,Jean Marc Billioner AS näovesi 100ml,Jean Marc,100ml,5908241729351,drinks,drinks_water,personal_care,pcare_other
+582737,Finish All-in-1 Lemon nõudepesumasina geel 900ml,Finish,900ml,5908252000029,dry_preserves,dry_other,household,hh_dishwashing
+582738,Finish Ultimate nõudepesutabletid 30tk,Finish,30tk,5908252001071,dry_preserves,dry_other,household,hh_dishwashing
+582739,Air Wick Fresh Waters õhuvärskendaja 300ml,Air Wick,300ml,5908252002597,dry_preserves,dry_other,household,hh_candles_airfresh
+582740,Air Wick Magnolia&Ch Blos õhuvärskendaja 300ml,Air Wick,300ml,5908252002603,dry_preserves,dry_other,household,hh_candles_airfresh
+582741,Air Wick Cool Raspberries õhuvärskendaja 236ml,Air Wick,236ml,5908252004744,dry_preserves,dry_other,household,hh_candles_airfresh
+582742,Air Wick Rainy Eucalyptus & Fresh õhuvärskendaja 236ml,Air Wick,236ml,5908252004751,dry_preserves,dry_other,household,hh_candles_airfresh
+582743,Air Wick Fresh Dew&White õhuvärskendaja 236ml,Air Wick,236ml,5908252004768,dry_preserves,dry_other,household,hh_candles_airfresh
+582744,Finish Ultimate Lemon nõudepesutabletid 70tk,Finish,70tk,5908252004843,dry_preserves,dry_other,household,hh_dishwashing
+582745,Finish Quantum nõudepesutabletid 35tk,Finish,35tk,5908252005215,dry_preserves,dry_other,household,hh_dishwashing
+582746,Cillit Bang puhastusvahend vannitoale 750ml,Cillit Bang,750ml,5908252006243,dry_preserves,dry_other,household,hh_cleaners
+582747,Finish Power Essential Lemon tabletid 55tk,Finish,55tk,5908252011377,dry_preserves,dry_other,household,hh_dishwashing
+582748,Finish Power nõudepesumasina tabletid 65tk,Finish,65tk,5908252011551,dry_preserves,dry_other,household,hh_dishwashing
+582749,Woolite Fruity pesuvahend 1.8L 30pesu,Woolite,1.8L,5908252011919,dry_preserves,dry_other,household,hh_laundry
+582750,Harpic Max Citrus WC puhastusvahend 750ml,Harpic,750ml,5908252014057,dry_preserves,dry_other,household,hh_cleaners
+582751,Harpic Active Fresh Pine WC puhastusgeel 750ml,Harpic,750ml,5908252014088,dry_preserves,dry_other,household,hh_cleaners
+582752,Vanish Gold vaibapuhastusvahend 600ml,Vanish,600ml,5908252015245,dry_preserves,dry_other,household,hh_cleaners
+582753,Finish Ultimate Lemon nõudepesutabletid 50tk,Finish,50tk,5908252015931,dry_preserves,dry_other,household,hh_dishwashing
+582754,Cillit Bang rasvaeemaldaja 750ml,Cillit Bang,750ml,5908252016051,dry_preserves,dry_other,household,hh_cleaners
+582755,Vanish Regular plekieemaldusvahend 1L,Vanish,1L,5908252018024,dry_preserves,dry_other,household,hh_laundry
+582756,Vanish White plekieemaldusvahend 1L,Vanish,1L,5908252018031,dry_preserves,dry_other,household,hh_laundry
+582757,Vanish White plekieemaldusvahend 2L,Vanish,2L,5908252018055,dry_preserves,dry_other,household,hh_laundry
+582758,Harpic Max Spring WC puhastusvahend 750ml,Harpic,750ml,5908252018642,dry_preserves,dry_other,household,hh_cleaners
+582759,Harpic Active Fresh Citrus WC puhastusgeel 750ml,Harpic,750ml,5908252018659,dry_preserves,dry_other,household,hh_cleaners
+582760,Krowka piimakomm 300g,Krowka,300g,5908259342658,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_candies
+582761,Browin veinikäivitaja starter Vinistar 34g,Browin,34g,5908277709204,drinks,drinks_wine,drinks,drinks_wine
+582762,Kortos salatijuust ürtidega 160g,Kortos,160g,5909000031906,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+582763,Dove Advanced Care Original rulldeo 50ml,Dove,50ml,59095859,drinks,drinks_spirits,personal_care,pcare_deo
+582764,Croco mini soolakõrsik 250g,Croco,250g,5941194002898,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_biscuits_cookies
+582765,Sam Mills Spaghetti 500g maisijahust gluteenivaba,Sam Mills,500g,5948935002605,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_pasta_rice
+582766,Elephant rõngiku keerud 160g soola-mee,Elephant,160g,5949040203482,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_snacks_salty
+582767,Elephant rõngiku keerud 160g karamelliseeritud sibula,Elephant,160g,5949040203505,produce,produce_root_veg,sweets_snacks,sweets_snacks_salty
+582768,Elephant rõngiku keerud 160g tomati-köömnete,Elephant,160g,5949040203673,dry_preserves,dry_other,sweets_snacks,sweets_snacks_salty

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+582769,Alufix jääkuubikukott pallid 180tk,Alufix,180tk,5949509002809,dry_preserves,dry_other,household,hh_kitchenware
+582770,Friskies Junior Complete kuivtoit koerale 500g,Friskies,500g,5997204513199,pet,pet_other,pet,pet_dog_dry
+582771,Sana+ joogitabletid Multivitamiin 80g,Sana+,80g,5997255703280,dry_preserves,dry_other,personal_care,pcare_other
+582772,Sana+ joogitabletid Raud+C+foolhape+B6+B12 80g,,80g,5997255703761,dry_preserves,dry_other,personal_care,pcare_other
+582773,Ceresit Aero 360 niiskuseimaja 450g,Ceresit,450g,5997272386916,dry_preserves,dry_other,household,hh_other
+582774,Mogyi Mexicorn maisiterad 55g barbeque,Mogyi,55g,5997347540144,dry_preserves,dry_canned_veg,sweets_snacks,sweets_snacks_salty
+582775,Mogyi maapähkel 120g sibula-hapukoore kattega,Mogyi,120g,5997347540557,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+582776,Mogyi maapähkel 120g kaetud peekoni,Mogyi,120g,5997347540564,meat_fish,meat_pork,sweets_snacks,sweets_nuts_driedfruit
+582777,Mogyi pistaatsiapähkel 140g röstitud soolatud,Mogyi,140g,5997347541790,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_nuts_driedfruit
+582778,Mogyi maapähkel 85g röstitud soolatud,Mogyi,85g,5997347541974,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_nuts_driedfruit
+582779,Mogyi päevalilleseemned 200g röstitud soolatud,Mogyi,200g,5997347544166,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+582780,Mogyi päevalilleseemned 60g röstitud soolatud,Mogyi,60g,5997347555568,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+582781,Mogyi kõrvitsaseemned 50g röstitud soolatud,Mogyi,50g,5997347555599,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+582782,Mogyi röstitud päevalilleseemned 60g,Mogyi,60g,5997347555674,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+582783,Mogyi maapähkel koores 150g,Mogyi,150g,5997347566663,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_nuts_driedfruit
+582784,Mogyi Micropop popcorn 100g võimaitseline,Mogyi,100g,5997473544047,dairy_eggs_fats,dairy_butter_margarine,sweets_snacks,sweets_snacks_salty
+582785,Ooops Classic Sensitive tualettpaber 8tk 100% tselluloos,Ooops,8tk,5998648704310,dry_preserves,dry_other,household,hh_paper
+582786,Milka piimaš ok. Toffee 100g,Milka,100g,5998711723491,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+582787,Pedigree närimispulk 45g väikesele koerale,Pedigree,45g,5998749106877,pet,pet_other,pet,pet_dog_treats
+582788,Pedigree närimispulk 270g suurele koerale,Pedigree,270g,5998749109113,pet,pet_other,pet,pet_dog_treats
+582789,Dreamies suupiste kassile 60g pardiliha,Dreamies,60g,5998749116500,pet,pet_other,pet,pet_cat_treats
+582790,Dreamies suupiste kassile kanalihaga 60g,Dreamies,60g,5998749130834,meat_fish,meat_poultry,pet,pet_cat_treats
+582791,Dreamies suupiste kassile lõhega 60g,Dreamies,60g,5998749130858,meat_fish,fish_fresh,pet,pet_cat_treats
+582792,Dreamies suupiste kassile loomaliha 60g,Dreamies,60g,5998749130872,meat_fish,meat_other,pet,pet_cat_treats
+582793,Dreamies suupiste kassile juustuga 60g,Dreamies,60g,5998749130896,dairy_eggs_fats,dairy_cheese_slices,pet,pet_cat_treats
+582794,Pedigree maius koerale 123g veiselihaga,Pedigree,123g,5998749141007,meat_fish,meat_beef_lamb_game,pet,pet_dog_treats
+582795,Pedigree närimispulk 180g keskmisele koerale,Pedigree,180g,5998749141519,pet,pet_other,pet,pet_dog_treats
+582796,Pedigree Ranchos maius koerale 60g kana,Pedigree,60g,5998749141731,meat_fish,meat_poultry,pet,pet_dog_treats
+582797,Dreamies suupiste kassile 60g naistenõges,Dreamies,60g,5998749142875,pet,pet_other,pet,pet_cat_treats
+582798,Pedigree kuivtoit 500g kodulinnuliha-köögiviljad,Pedigree,500g,5998749143360,dry_preserves,dry_other,pet,pet_dog_dry
+582799,Whiskas kuivtoit kassile 800g kanalihaga,Whiskas,800g,5998749143933,meat_fish,meat_poultry,pet,pet_cat_dry
+582800,Whiskas kuivtoit kassile 800g veiselihaga,Whiskas,800g,5998749144145,meat_fish,meat_beef_lamb_game,pet,pet_cat_dry
+582801,Pedigree Rodeo maius koerale 123g kana,Pedigree,123g,5998749144299,meat_fish,meat_poultry,pet,pet_dog_treats
+582802,Pedigree Tasty maius koerale 140g veise,Pedigree,140g,5998749145333,meat_fish,meat_beef_lamb_game,pet,pet_dog_treats
+582803,Paw Patrol alkoholivaba puuviljajook 750ml,,750ml,5998818566700,dry_preserves,dry_other,drinks,drinks_soft_soda
+582804,Nestea Peach Zero jäätee 1.5L virsiku,Nestea,1.5L,5998821510868,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582805,Sana+ glükoositropsid C-vitamiin 39g apelsini,Sana+,39g,5999038508747,produce,produce_tropical,personal_care,pcare_other
+582806,Lanza puhastusvahend pesumasinale 250ml,Lanza,250ml,5999109521910,dry_preserves,dry_other,household,hh_laundry
+582807,AW lõhnaküünal Vanilla Cookie 220g,AW,220g,5999109543608,household,hh_candles_airfresh,household,hh_candles_airfresh
+582808,AW lõhnaküünal Apple&Cinnamon 220g,AW,220g,5999109543615,world_spices,spices_herbs_spice_mix,household,hh_candles_airfresh
+582809,Pure India Family Blend must tee 100g,Pure,100g,6056029700296,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582810,Mynthon Zipmint Menthol kurgupastill 30g,Mynthon,30g,64025131,drinks,drinks_wine,personal_care,pcare_other
+582811,Oddlygood kaerajook Barista 1L karamelliga,Oddlygood,1L,6408430102365,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+582812,Valio Eila piimajook 1.5% 1L laktoosivaba,Valio,1L,6408432086540,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+582813,Saima pihustipudel 500ml,Saima,500ml,6410412005717,bakery,bakery_buns_croissants,household,hh_cleaners
+582814,Saana küpsetuspaber fritüürile 50tk ümar,Saana,50tk,6410416279718,dry_preserves,dry_other,household,hh_kitchenware
+582815,Saana küpsetuspaber fritüürile 30tk,Saana,30tk,6410416335858,dry_preserves,dry_other,household,hh_kitchenware
+582816,Finn Crisp Original Taste näkileib 200g,Finn Crisp,200g,6410500091370,drinks,drinks_spirits,bakery,bakery_crispbread
+582817,Grillikarp BBQ 157*86*36cm 20tk,,20tk,6410600336654,dry_preserves,dry_other,household,hh_kitchenware
+582818,Herkkumaa sinep 7-pipra 300g,Herkkumaa,300g,6410840037427,dry_preserves,dry_other,sauces_oils,sauces_ketchup_mayo

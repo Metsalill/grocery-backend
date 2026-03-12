@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580669,Eriti Rammus maasika-koorejäätis m.toorm. 480g,Premia,480g,4740093000339,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+580670,Premia vaniljeplombiir 2.25kg,Premia,2.25kg,4740093000926,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+580671,Premia maasikamaitseline jäätis 2.25kg,Premia,2.25kg,4740093000988,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+580672,Vanilli koorejäätis šokolaaditukkudega 4.5L,,4.5L,4740093001428,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+580673,Premia Vanilli-koorejäätis kondenspiimaga 75g,Premia,75g,4740093001893,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+580674,Premia maasika koorejäätis 40% väh. 50g,Premia,50g,4740093001916,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+580675,Premia Limpa vanilli-koorejäätis limon.m.jää 60g,Premia,60g,4740093001954,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+580676,Säästu vanillijäätis 500g,Säästu,500g,4740093004504,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+580677,Säästu maasikajäätis toru 500g,Säästu,500g,4740093008397,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+580678,Säästu šokolaadijäätis toru 500g,Säästu,500g,4740093008472,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+580679,Maahärra kuldselt krõbe friikartul 1.5kg,Maahärra,1.5kg,4740093026834,frozen_food,frozen_potato_products,frozen_food,frozen_potato_products
+580680,Maahärra kodused friikartulid 500g,Maahärra,500g,4740093026957,frozen_food,frozen_potato_products,frozen_food,frozen_potato_products
+580681,Eriti Rammus karamelli-koorejäätis 100g,Eriti Rammus,100g,4740093032804,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+580682,Maahärra praekartul 500g külmutatud,Maahärra,500g,4740093036543,produce,produce_root_veg,frozen_food,frozen_potato_products
+580683,Vana Toomas van.plomb. soolakaramelli 90g,Premia,90g,4740093056435,sweets_snacks,sweets_candies,frozen_food,frozen_desserts_icecream
+580684,Eriti Rammus vaarika koorejäätis 110g,Eriti Rammus,110g,4740093093218,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+580685,Pealinna pelmeenid täisterajahuga kanalihaga 350g,Pealinna,350g,4740093112247,meat_fish,meat_poultry,frozen_food,frozen_ready_meals
+580686,Premia vanilli-karamelli koorejäätis šok.tk 480g,Premia,480g,4740093191297,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+580687,Väike Tom kõrgkuumutatud piimjook šokolaad 200ml,Premia,200ml,4740093333321,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+580688,Eriti Rammus kondenspiima koonusjäätis 100g,Eriti Rammus,100g,4740093364127,dairy_eggs_fats,dairy_milk,frozen_food,frozen_desserts_icecream
+580689,Maahärra supisegu köögivilja kartulitega 400g,Maahärra,400g,4740093364639,produce,produce_root_veg,frozen_food,frozen_veg
+580690,Maahärra porgand ja hernes 400g,Maahärra,400g,4740093364653,produce,produce_root_veg,frozen_food,frozen_veg
+580691,Eriti Rammus soolakaramellit.jäätis 110g,Eriti Rammus,110g,4740093364691,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+580692,Eriti Rammus pistaatsia koonusjäätis 100g,Eriti Rammus,100g,4740093364714,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+580693,Hoggys Plum siider 4.5% 355ml prk,Hoggys,355ml,4740098001515,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+580694,A.Le Coq Päikese Limonaad D-vitamiin 1.5L,A.Le Coq,1.5L,4740098001584,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+580695,Orn Craft Red Mixer toonik 1L pet,Orn,1L,4740098002031,dry_preserves,dry_other,drinks,drinks_soft_soda
+580696,Mulin Maasikas alk.vaba vahuvein 750ml,Mulin,750ml,4740098002246,drinks,drinks_wine,drinks,drinks_soft_soda
+580697,A.Le Coq Prem.Export hele õlu 5.2% 12x330ml,A.Le Coq,330ml,4740098002482,drinks,drinks_wine,drinks,drinks_beer_cider
+580698,A.Le Coq Oktoobripruul 5.3% 500ml prk,A.Le Coq,500ml,4740098002826,dry_preserves,dry_other,drinks,drinks_beer_cider
+580699,A.Le Coq Special hele õlu 5.2% 500ml,A.Le Coq,500ml,4740098003731,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+580700,A.Le Coq Väike Sass hele õlu 4.8% 330ml,A.Le Coq,330ml,4740098003748,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+580701,A.Le Coq Väike Sass 4.8% 6x330ml,A.Le Coq,330ml,4740098003755,dry_preserves,dry_other,drinks,drinks_beer_cider
+580702,A.Le Coq Special hele õlu 5.2% 6x500ml,A.Le Coq,500ml,4740098003762,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+580703,A.Le Coq Special hele õlu 5.2% 12x330ml prk,A.Le Coq,330ml,4740098003861,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+580704,Karksi õunasiider 5% 500ml prk,Karksi,500ml,4740098003885,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+580705,A.Le Coq Extra Ananass hele õlu 4% 330ml,A.Le Coq,330ml,4740098003915,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+580706,A.Le Coq Extra Lime hele õlu 4% 330ml pdl,A.Le Coq,330ml,4740098009825,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+580707,A.Le Coq Extra Ginger hele õlu 4% 330ml,A.Le Coq,330ml,4740098009832,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+580708,A.Le Coq Toonik Greibi karboniseeritud jook 1.5L,A.Le Coq,1.5L,4740098016106,dry_preserves,dry_other,drinks,drinks_soft_soda
+580709,A.Le Coq Alexander Export hele õlu 5.2% 330ml,A.Le Coq,330ml,4740098078432,dry_preserves,dry_other,drinks,drinks_beer_cider
+580710,A.Le Coq Imperial Gold hele õlu 4.8% 400ml pdl,A.Le Coq,400ml,4740098078890,dry_preserves,dry_other,drinks,drinks_beer_cider
+580711,A.Le Coq Klassikaline Kali kuni 0.5% 1L käärit.,A.Le Coq,1L,4740098079262,dry_preserves,dry_other,drinks,drinks_soft_soda
+580712,A.Le Coq Alexander Export hele õlu 5.2% 24x330ml,A.Le Coq,330ml,4740098079330,dry_preserves,dry_other,drinks,drinks_beer_cider
+580713,A.Le Coq Saaremaa Tuulik hele õlu 4.7% 500ml,A.Le Coq,500ml,4740098079835,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+580714,Fizz Pear siider 4.5% 1.5L pet,Fizz,1.5L,4740098080657,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+580715,Fizz Blueberry siider 4.5% 1.5L,Fizz,1.5L,4740098080664,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+580716,A.Le Coq Premium alkoholivaba õlu 330ml,A.Le Coq,330ml,4740098082545,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+580717,Vitamineral Mental vitamiinijook 750ml,Vitamineral,750ml,4740098082811,dry_preserves,dry_other,drinks,drinks_soft_soda
+580718,Kvass Imp. karboniseeritud traditsiooniline kali 0.5% 400ml,Kvass,400ml,4740098083092,dry_preserves,dry_other,drinks,drinks_soft_soda

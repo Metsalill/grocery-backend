@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+581669,Tervix kurgusiirup lastele Simmu 150ml,Tervix,150ml,4743114000509,drinks,drinks_syrups_powders,personal_care,pcare_other
+581670,Carino hambatikud 500tk,Carino,500tk,4743115003820,dry_preserves,dry_other,personal_care,pcare_oral_care
+581671,Casatrend koogivorm 26cm lahtikäiv,Casatrend,,4743115004261,dry_preserves,dry_other,household,hh_kitchenware
+581672,Casatrend pesukott S 24*45cm valge,Casatrend,,4743115008023,dry_preserves,dry_other,household,hh_laundry
+581673,Esta küürimissvammid 3tk,Esta,3tk,4743115008375,dry_preserves,dry_other,household,hh_dishwashing
+581674,Casatrend JumboPack lapid 10tk perfor.,Casatrend,10tk,4743115010880,dry_preserves,dry_other,household,hh_cleaners
+581675,For Home riiderulli varurullid 2tk,,2tk,4743115012204,dry_preserves,dry_other,household,hh_cleaners
+581676,For Home riiderulli vahetusotsikuga,,,4743115012211,dry_preserves,dry_other,household,hh_cleaners
+581677,For Home riidepuu plastik 3tk,,3tk,4743115012273,drinks,drinks_wine,household,hh_other
+581678,Minu mini karamell 100g puuviljamaitsel.,Minu,100g,4743144000111,dry_preserves,dry_other,sweets_snacks,sweets_candies
+581679,Minu tomat omas mahlas 680g,Minu,680g,4743144000548,drinks,drinks_juices,dry_preserves,dry_canned_veg
+581680,Minu kirsikompott 700g kivideta,Minu,700g,4743144000562,dry_preserves,dry_canned_fruit,dry_preserves,dry_canned_fruit
+581681,Minu sardiinid õlis 240g,Minu,240g,4743144000708,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+581682,Minu sardiin tomatikastmes 240g,Minu,240g,4743144000715,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+581683,Minu präänik 250g aprikoosi maits. täidisega,Minu,250g,4743144001941,dry_preserves,dry_other,sweets_snacks,sweets_biscuits_cookies
+581684,Minu präänik 250g vaarika maits. täidisega,Minu,250g,4743144001958,produce,produce_berries,sweets_snacks,sweets_biscuits_cookies
+581685,Minu Mehhiko salat 410g,Minu,410g,4743144002047,produce,produce_herbs_salads_sprouts,dry_preserves,dry_canned_veg
+581686,Minu tomatipasta 30% 185g,Minu,185g,4743144002092,dry_preserves,dry_pasta_rice,sauces_oils,sauces_pasta_cooking
+581687,Minu sinep terav 75g,Minu,75g,4743144002474,dry_preserves,dry_other,sauces_oils,sauces_ketchup_mayo
+581688,Minu sinepipulber 400g,Minu,400g,4743144002504,dry_preserves,dry_other,world_spices,spices_herbs_spice_mix
+581689,Pirate tuunikala suured tükid õlis 185g,Pirate,185g,4743144002566,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+581690,Pirate tuunikala suured tükid soolvees 185g,Pirate,185g,4743144002573,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+581691,Minu tomatikaste terav 500g,Minu,500g,4743144002801,sauces_oils,sauces_pasta_cooking,sauces_oils,sauces_pasta_cooking
+581692,Minu rapsiõli 1L,Minu,1L,4743144002887,sauces_oils,oils_other,sauces_oils,oils_other
+581693,Pirate suitsutatud sprotid tomatikastmes 250g,Pirate,250g,4743144003389,produce,produce_root_veg,dry_preserves,dry_canned_meat_fish
+581694,Minu skumbriafilee tomatikastmes köögiviljadega 190g,Minu,190g,4743144003587,sauces_oils,sauces_other,dry_preserves,dry_canned_meat_fish
+581695,Minu skumbriafilee tomatikastmes tilliga 190g,Minu,190g,4743144003594,produce,produce_herbs_salads_sprouts,dry_preserves,dry_canned_meat_fish
+581696,Elysee sufleekommid Luige Unistus 250g,Elysee,250g,4743144003952,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+581697,Minu hernes-porgand-mais 480g,Minu,480g,4743144004089,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+581698,Minu hapukurk 850g,Minu,850g,4743144004218,produce,produce_root_veg,dry_preserves,dry_canned_veg
+581699,Linda kartulitärklis 500g,Linda,500g,4743144004400,produce,produce_root_veg,dry_preserves,dry_flour_sugar_baking
+581700,Hippo porgandinektar 750ml,Hippo,750ml,4743144004850,drinks,drinks_juices,drinks,drinks_juices
+581701,Pirate sprotid suitsutatud 250g,Pirate,250g,4743144005277,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+581702,Elyzee küpsis 500g pähkli-seemne,Elyzee,500g,4743144005451,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+581703,Marakratt präänik Keeleke 1kg,Marakratt,1kg,4743144005475,dry_preserves,dry_other,sweets_snacks,sweets_biscuits_cookies
+581704,Minu lõhe tomatikastmes supikogu 240g,Minu,240g,4743144005864,meat_fish,fish_fresh,dry_preserves,dry_canned_meat_fish
+581705,Minu sprotid tomatikastmes 240g,Minu,240g,4743144006083,produce,produce_root_veg,dry_preserves,dry_canned_meat_fish
+581706,Marakratt kaeraküpsis 250g šok.tükkidega,Marakratt,250g,4743144007349,dry_preserves,dry_other,sweets_snacks,sweets_biscuits_cookies
+581707,Minu kalkuniliha De Lux 525g,Minu,525g,4743144007356,meat_fish,meat_poultry,dry_preserves,dry_canned_meat_fish
+581708,Rahwa tuunikala purustatud soolvees 185g,Rahwa,185g,4743144007882,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+581709,Rahwa tuunikala purustatud õlis 185g,Rahwa,185g,4743144007899,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+581710,Opera D Oro oad 400g tomatikastmes,Opera D Oro,400g,4743144008544,produce,produce_root_veg,dry_preserves,dry_groats_beans
+581711,Minu ananassiviilud 227g kerges siirupis,Minu,227g,4743144008681,drinks,drinks_syrups_powders,dry_preserves,dry_canned_fruit
+581712,Opera Doro purustatud tomatid 400g,Opera Doro,400g,4743144008773,produce,produce_root_veg,dry_preserves,dry_canned_veg
+581713,Nuppi 2 6K piimal põhinev jätkupiim 350g,Nuppi,350g,4743150000372,dairy_eggs_fats,dairy_milk,baby,baby_formula
+581714,Nuppi Gold 3 12K jätkupiimasegu 350g,Nuppi,350g,4743150000396,dairy_eggs_fats,dairy_milk,baby,baby_formula
+581715,Astelpaju toormahl 500ml Eesti,,500ml,4743162000018,drinks,drinks_juices,drinks,drinks_juices
+581716,Kitty Clean kassiliiv 3.8L/1.6kg ränih.,Kitty Clean,3.8L,4743171050011,pet,pet_litter_sand,pet,pet_litter_sand
+581717,Kitty Clean kassiliiv 5L/4.2kg paakuv,Kitty Clean,5L,4743171050127,pet,pet_litter_sand,pet,pet_litter_sand
+581718,Tere kohuke jõhvika šokolaadigl. 40g,Tere,40g,47432055,produce,produce_berries,dairy_eggs_fats,dairy_desserts

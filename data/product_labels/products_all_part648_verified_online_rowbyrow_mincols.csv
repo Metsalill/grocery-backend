@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+582669,Quickpack Vigo küpsetuskott Premium 3*29*15,Quickpack,,5902841451070,dry_preserves,dry_flour_sugar_baking,household,hh_kitchenware
+582670,Quickpack Vigo küpsetuskott 10tk S-XL,Quickpack,10tk,5902841451094,dry_preserves,dry_flour_sugar_baking,household,hh_kitchenware
+582671,Jääkuubikukott Quickpack Vigo 24*8tk,,8tk,5902841452121,dry_preserves,dry_other,household,hh_kitchenware
+582672,Vigo alumiiniumfoolium 29cm*10m 10mc,Vigo,,5902841452206,dry_preserves,dry_other,household,hh_kitchenware
+582673,Vigo kummikindad lateks S 10tk,Vigo,10tk,5902841471924,dry_preserves,dry_other,household,hh_cleaners
+582674,Vigo kummikindad lateks M 10tk,Vigo,10tk,5902841471931,dry_preserves,dry_other,household,hh_cleaners
+582675,Piper kiisueine steriliseeritud 100g tuunikalaga,Piper,100g,5902921302070,dry_preserves,dry_canned_meat_fish,pet,pet_cat_wet
+582676,Piper kiisueine steriliseeritud 100g küülikulihaga,Piper,100g,5902921302087,pet,pet_small_animals,pet,pet_cat_wet
+582677,Piper kiisueine 100g lõhega,Piper,100g,5902921302094,meat_fish,fish_fresh,pet,pet_cat_wet
+582678,Piper kiisueine 100g kanalihaga,Piper,100g,5902921302100,meat_fish,meat_poultry,pet,pet_cat_wet
+582679,Piper konserv koerale 400g ulukiliha-kõrvits,Piper,400g,5902921306535,meat_fish,meat_beef_lamb_game,pet,pet_dog_wet
+582680,Piper konserv koerale 400g kanasüda-spinat,Piper,400g,5902921306542,meat_fish,meat_poultry,pet,pet_dog_wet
+582681,Piper konserv koerale 400g veisemaksa-kartul,Piper,400g,5902921306559,meat_fish,meat_beef_lamb_game,pet,pet_dog_wet
+582682,Piper konserv koerale 400g lambaliha-porgand,Piper,400g,5902921306566,meat_fish,meat_beef_lamb_game,pet,pet_dog_wet
+582683,Piper konserv koerale 400g vutiliha-jõhvikas,Piper,400g,5902921306573,produce,produce_berries,pet,pet_dog_wet
+582684,Piper konserv koerale 800g lambaliha-porgand,Piper,800g,5902921306665,meat_fish,meat_beef_lamb_game,pet,pet_dog_wet
+582685,Piper konserv koerale 800g vutiliha-jõhvikas,Piper,800g,5902921306672,produce,produce_berries,pet,pet_dog_wet
+582686,Bauer Ukraina Borš 400g külmutatud,Bauer,400g,5903154541762,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+582687,Bauer sojaoad Edamame 400g,Bauer,400g,5903154542172,sauces_oils,sauces_soy_worcester,frozen_food,frozen_vegetables
+582688,Bauer mustsõstar 300g külmutatud,Bauer,300g,5903154544350,produce,produce_berries,frozen_food,frozen_fruit_berries
+582689,Calgon veepehmendaja 1kg,Calgon,1kg,5903267105219,dry_preserves,dry_other,household,hh_laundry
+582690,Canpol Babies vannitermomeeter,Canpol,,5903407027821,dry_preserves,dry_other,baby,baby_other
+582691,Canpol Babies ninapump,Canpol,,5903407091198,dry_preserves,dry_other,baby,baby_other
+582692,Canpol Babies käärid,Canpol,,5903407098135,dry_preserves,dry_other,baby,baby_other
+582693,Canpol pudeliutt silikoon kiire 1tk,Canpol,1tk,5903407217222,dry_preserves,dry_other,baby,baby_other
+582694,Canpol Babies lutt Pastelove 0-6k,Canpol,,5903407224220,dry_preserves,dry_other,baby,baby_other
+582695,Jovi Duet jogurtijook maasika-kiivi 350g,Jovi,350g,5903767000687,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+582696,Jovi Duet jogurtijook mustika-kirsi 350g,Jovi,350g,5903767000694,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+582697,Bi-es Barbie Sunsation dušigeel-šampoon 250ml,Bi-es,250ml,5904413312048,dry_preserves,dry_other,personal_care,pcare_shampoo_cond
+582698,Bi-es Hot Wheels Race dušigeel 250ml,Bi-es,250ml,5904413312062,dry_preserves,dry_other,personal_care,pcare_shampoo_cond
+582699,Kujawska söögisool 1kg,Kujawska,1kg,5904462001085,world_spices,spices_basic_salt_pepper,world_spices,spices_basic_salt_pepper
+582700,Gosia jääkuubikukott suur kuubik 9*24tk,Gosia,24tk,5904771004395,dry_preserves,dry_other,household,hh_kitchenware
+582701,Gosia jääkuubikukott purustatud jää 8*120tk,Gosia,120tk,5904771004401,dry_preserves,dry_other,household,hh_kitchenware
+582702,Gosia säilituskott 1.5L 16tk soonsulguriga,Gosia,1.5L,5904771004623,dry_preserves,dry_other,household,hh_kitchenware
+582703,Gosia säilituskott 3L 10tk soonsulguriga,Gosia,3L,5904771004630,dry_preserves,dry_other,household,hh_kitchenware
+582704,Gosia säilituskott valik 12tk soonsulguriga,Gosia,12tk,5904771008546,dry_preserves,dry_other,household,hh_kitchenware
+582705,Vita Aloe Original jook 500ml,Vita,500ml,5905133528702,drinks,drinks_spirits,drinks,drinks_soft_soda
+582706,Searasv Lemmik 200g jahutatud,,200g,5905477000032,dry_preserves,dry_flour_sugar_baking,meat_fish,meat_pork
+582707,Ice Box mango kuubikud 300g,,300g,5906190001689,produce,produce_tropical,frozen_food,frozen_fruit_berries
+582708,Galbani mozzarella riivjuust 150g,Galbani,150g,5906207475366,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+582709,Klaaspuhastusvedelik K2 Nuta 770ml,,770ml,5906534000248,household,hh_cleaners,household,hh_cleaners
+582710,K2 Nuta Wipes klaasipuhastuslapid 24tk,K2,24tk,5906534002204,household,hh_cleaners,household,hh_cleaners
+582711,K2 Polo Matt salongipuhastuslapid 24tk,K2,24tk,5906534019196,household,hh_cleaners,household,hh_cleaners
+582712,K2 Tapis tekstiilipuhastuslapid 24tk,K2,24tk,5906534019219,household,hh_cleaners,household,hh_cleaners
+582713,Teo kuivtoit koerale 1kg loomaliha,Teo,1kg,5906731501395,meat_fish,meat_other,pet,pet_dog_dry
+582714,Teo kuivtoit koerale 1kg linnuliha,Teo,1kg,5906731501869,meat_fish,meat_other,pet,pet_dog_dry
+582715,Kupiec riisivahvlid 60g tumeda šokolaadiga,Kupiec,60g,5906747179632,dry_preserves,dry_pasta_rice,sweets_snacks,sweets_snacks_salty
+582716,Halls Fresh Lime kurgupastill 33.5g,Halls,33.5g,59070689,drinks,drinks_wine,personal_care,pcare_other
+582717,Diamant suhkur 100tk*5g,Diamant,100tk,5907069000994,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+582718,Diamant pruun suhkur 500g,Diamant,500g,5907069015424,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking

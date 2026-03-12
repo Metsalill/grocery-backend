@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+561287,Vaarikas 125g,,125 g,8718226440051,,,produce,produce_berries
+561349,Käterätik aalto 2-p punane 50x70,,,,,,household,hh_other
+561378,Trolli silmamunad hapu täidisega 38g,Trolli,38 g,4000512222026,dairy_eggs_fats,dairy_eggs,sweets_snacks,sweets_candies
+561399,Malaco TVMIX Choco 280g,Malaco,280 g,6420256015285,,,sweets_snacks,sweets_candies
+561462,Kapten Grant sardiinid õlis 240g,Kapten Grant,240 g,4740687001827,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+561530,Jägermeister liköör 35% 1L,Jägermeister,1 l,4067700013002,,,drinks,drinks_spirits
+561553,Käterätik aalto 2-p punane 30x50,,,,,,household,hh_other
+561719,Käterätik aalto 2-p roheline 50x70,,,,,,household,hh_other
+562518,Kipslill sügiskimp,,,5714747101887,,,produce,produce_herbs_salads_sprouts
+562759,Meira vanillisuhkur 40g,Meira,40 g,6414203406202,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+562778,PÕNN Ökoloogiline Veiselihapüree 120g 6+,Põnn,120 g,4740073079485,meat_fish,meat_beef_lamb_game,baby,baby_food_jars
+563085,Herkku Aafrika tume röst jahvatatud kohv 450g,Herkku,450 g,6438460192760,,,drinks,drinks_coffee_beans_capsules
+563185,Õllenaut hele õlu 4.9% 500ml,,500 ml,4744045011008,,,drinks,drinks_beer_cider
+563210,Coop röstitud soolatud pistaatsiapähklid 150g,Coop,150 g,7340191140196,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+563240,Vaarikatomat I klass,,,2060168800001,,,produce,produce_herbs_salads_sprouts
+563532,Findus Tšilli-Juustupitsataskud 250g,Findus,250 g,7310500191225,dairy_eggs_fats,dairy_other,frozen_food,frozen_pizza
+563592,Õun Red Prince I klass,,,2060283400001,,,produce,produce_apples_pears
+563632,Omo pesupulber color 700g,Omo,700 g,8712561418942,,,household,hh_laundry
+563985,Fazer muumi šokolaadiküpsised 200g,Fazer,200 g,5708413023405,bakery,bakery_other,sweets_snacks,sweets_biscuits_cookies
+565331,Bosch HEPA filter BBZ156,Bosch,,4242002715797,,,household,hh_other
+565576,HiPP head ööd teraviljapuder piimasegu ja puuviljadega 190g,HiPP,190 g,9062300107422,baby,baby_formula,baby,baby_food_jars
+565598,El Cortez XO 75cl,,,8435742500365,dry_preserves,dry_other,drinks,drinks_spirits
+565599,Konjak HENNESSY VS 35cl,,,,,dry_preserves,dry_other,drinks,drinks_spirits
+566161,Marli Juissi pirnimahlajook suhkruvaba 1l,Marli,1 l,6415130028505,,,drinks,drinks_juices
+566164,Frosch WC puhastusvahend äädikas 750ml,Frosch,750 ml,4001499013782,,,household,hh_cleaners
+566167,Schluckwerder martsipan šokolaadis 100g,Schluckwerder,100 g,4023800062104,,,sweets_snacks,sweets_chocolate_bars
+566223,Alma sulatatud juust maitseürdiga 200g,Alma,200 g,4740553692814,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cheese_slices
+566472,Öko Lõhnatu Pesugeel Natuur 1.5L,,1.5 l,4743345600349,,,household,hh_laundry
+567063,Filter iRobot e/i/j High-Efficiency 3tk,,3 pcs,5060359287915,,,household,hh_other
+567682,Kotimaista kartul Colomba 1kg,Kotimaista,1 kg,6438460111693,,,produce,produce_root_veg
+567846,Grillnuga VBQ-MGB2042,,,,,,household,hh_kitchenware
+568307,Aprikoosimoos 380g,,380 g,4740029045489,,,dry_preserves,dry_other
+568497,Finish nõudepesumasina puhastustabletid 3tk,Finish,3 pcs,5701092114518,,,household,hh_cleaners
+568502,Nestle Nan pro 1 imiku piimasegu 500ml,Nestle,500 ml,8445290748072,baby,baby_formula,baby,baby_formula
+568586,SOMAT nõudepesumasina sool 1.5kg,Somat,1.5 kg,9000100147293,,,household,hh_cleaners
+568762,Õun erinevad sordid mahe II klass,,,4745010554551,,,produce,produce_apples_pears
+568899,Fairy nõudepesuvahend Lemon 450ml,Fairy,450 ml,4015400956082,,,household,hh_cleaners
+569226,Rannarootsi Eelküpsetatud Seakoot 1.4kg,Rannarootsi,1.4 kg,2329659200004,,,meat_fish,meat_pork
+569309,Fanta apelsini karastusjook 330ml,Fanta,330 ml,5449000214805,,,drinks,drinks_soft_soda
+569374,Kultuurmustikad karbis 500g,,500 g,5907623259653,,,produce,produce_berries
+569592,Coop Peedisalat 400g,Coop,400 g,6438460879159,produce,,sauces_oils,sauces_other
+569727,Mamma Proteiini-Sokolaadipannkoogid 200g,Mamma,200 g,4740184006301,,,frozen_food,frozen_bakery
+570011,Piltti õuna-virsiku puder 110g 6+,Piltti,110 g,8445290553973,,,baby,baby_food_jars
+570012,Wau Color pesugeel 1.5L,,1.5 l,6419642132118,,,household,hh_laundry
+570082,Vedelseep Puhas Loodus õun 500ml,,500 ml,4740006013210,,,household,hh_cleaners
+570275,Kiilto WC-puhastuslapid tsitrus 36tk,Kiilto,36 pcs,6417964577051,,,household,hh_cleaners
+570310,Lumene Invisible Illumination vedel põsepuna Berry Nectar 15ml,Lumene,15 ml,6412600836585,,,personal_care,pcare_cosmetics
+570357,Old Jamaica alkoholivaba ingveriõlu 330ml,,330 ml,4745090382518,,,drinks,drinks_beer_cider
+570382,Huhtamaki burgeritasku 50x150x155mm BBQ,Huhtamaki,,6410600337897,,,household,hh_other
+570403,Kotimaista vikeforelliribad meemarinaadis 250g,Kotimaista,250 g,6438574109227,,,meat_fish,fish_fresh

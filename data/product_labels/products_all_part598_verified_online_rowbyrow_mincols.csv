@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580169,Nestle šokolaadibatoon KitKat Chunky 40g,Nestle,40g,3800020423578,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+580170,LED lamp E27 8.5W A60 806lm 3tk V-Tac,,3tk,3800157680264,dry_preserves,dry_other,household,hh_other
+580171,Normal Clinic vatipadjad 150tk,,150tk,3800213309061,dry_preserves,dry_other,personal_care,pcare_other
+580172,Normal Clinic vatitikud 300tk,Normal Clinic,300tk,3800213311446,dry_preserves,dry_other,personal_care,pcare_other
+580173,Dragon Kanepiseemned kooritud 200g,Dragon,200g,3800225473156,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_nuts_driedfruit
+580174,Dragon Chiaseemned 200g,Dragon,200g,3800225476010,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+580175,Pastiri Grilljuust 200g,Pastiri,200g,3800232265201,drinks,drinks_wine,cheese,cheese_regular
+580176,Sensodyne Complete Protect Soft hambahari,Sensodyne,,3830029294756,dry_preserves,dry_other,personal_care,pcare_oral_care
+580177,Sensodyne Multi Care Medium hambahari,Sensodyne,,3830029296118,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+580178,Vileda Glitzi Crystal nõudepesusvamm,Vileda,,3838447000294,household,hh_dishwashing,household,hh_dishwashing
+580179,Fa Men Sport deodorant 150ml,Fa,150ml,3838824085272,drinks,drinks_wine,personal_care,pcare_deo
+580180,FA Pink Passion deo 150ml naiste,FA,150ml,3838824116204,dry_preserves,dry_other,personal_care,pcare_deo
+580181,Vileda Glitzi Plus küürimissvamm 3tk,Vileda,3tk,3838937221031,dry_preserves,dry_other,household,hh_dishwashing
+580182,Paloma Deluxe roheline tee tualettpaberiga 4tk,Paloma,4tk,3838952025904,drinks,drinks_tea_coffee,household,hh_paper
+580183,Vegeta maitseaine 250g,Vegeta,250g,3850104008597,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+580184,Podravka Tomatipüree Passata 500g,Podravka,500g,3850104073656,produce,produce_root_veg,sauces_oils,sauces_pasta_cooking
+580185,Podravka Vegeta Natur maitseaine sealihale 20g,Podravka,20g,3850104265686,meat_fish,meat_pork,world_spices,spices_herbs_spice_mix
+580186,Podravka Vegeta Natur maitseaine kartulile 20g,Podravka,20g,3850104265730,produce,produce_root_veg,world_spices,spices_herbs_spice_mix
+580187,Podravka Tomatipüree Passata 500g basiil,Podravka,500g,3856020242442,produce,produce_root_veg,sauces_oils,sauces_pasta_cooking
+580188,Viin Beluga Noble Vodka 40% 500ml,Beluga,500ml,3890000781057,drinks,drinks_spirits,drinks,drinks_spirits
+580189,Capri-Sun mahlajook Mystic Dragon 10x200ml,Capri-Sun,200ml,4000177030097,drinks,drinks_juices,drinks,drinks_juices
+580190,Capri-Sun mahlajook Mango&Maracuja 330ml,Capri-Sun,330ml,4000177172650,drinks,drinks_juices,drinks,drinks_juices
+580191,Schogetten valge šokolaad 100g pistaatsia,Schogetten,100g,4000415854713,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+580192,Schogetten valge šokolaad 100g,Schogetten,100g,4000415856601,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+580193,Viola Müsli 500g 5-puuvilja,Viola,500g,4000446027704,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+580194,Käserei Camembert juust 125g,Käserei,125g,4000504141724,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+580195,Käserei Juust Briette Creamy and Blue 125g,Käserei,125g,4000504149720,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+580196,Trolli Party Burger Minis kummikomm 100g,Trolli,100g,4000512004912,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+580197,Trolli kummikomm Burger 50g,Trolli,50g,4000512008903,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+580198,Trolli Multi Mix kummikomm 500g,Trolli,500g,4000512363200,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+580199,Frosch Lavendel küürimiskreem 500ml,Frosch,500ml,4001499162824,dry_preserves,dry_other,household,hh_cleaners
+580200,Frosch pesulõhnastaja mandlipiim 1L,Frosch,1L,4001499193255,dairy_eggs_fats,dairy_milk,household,hh_laundry
+580201,Frosch Apelsin üldpuhastusvahend 500ml,Frosch,500ml,4001499961540,produce,produce_tropical,household,hh_cleaners
+580202,Haribo kummikomm Tropi Frutti Jogurt 160g,Haribo,160g,4001686006733,dairy_eggs_fats,dairy_yogurt_kefir,sweets_snacks,sweets_candies
+580203,Haribo Pasta Frutta kummikomm 160g hapud,Haribo,160g,4001686009420,dry_preserves,dry_pasta_rice,sweets_snacks,sweets_candies
+580204,Haribo Mini Kuldkaru kummikomm 250g,Haribo,250g,4001686301524,dry_preserves,dry_other,sweets_snacks,sweets_candies
+580205,Haribo Konnad kummikomm 175g,Haribo,175g,4001686322536,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+580206,Haribo Vampiirid kummikomm 175g,Haribo,175g,4001686327456,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+580207,Haribo kummikomm Marjad 100g,Haribo,100g,4001686705315,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+580208,Dittmann kapparid 90g,Dittmann,90g,4002239380003,dry_preserves,dry_other,sauces_oils,sauces_other
+580209,Dittmann kapparid varrega 350g,Dittmann,350g,4002239392006,dry_preserves,dry_other,sauces_oils,sauces_other
+580210,Dittmann Küüslauguküüned Ajolix 230g tsh,Dittmann,230g,4002239663809,household,hh_candles_airfresh,dry_preserves,dry_canned_veg
+580211,Dittmann Küüslauguküüned Ajolix 230g ürdi,Dittmann,230g,4002239663908,household,hh_candles_airfresh,dry_preserves,dry_canned_veg
+580212,Nussa šokolaadipähklikreem 400g,Nussa,400g,4002309007083,sweets_snacks,sweets_nuts_driedfruit,dry_preserves,dry_other
+580213,Kalfany karamellikompvek 150g puuv.segu,Kalfany,150g,4002590000633,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+580214,Ruf Rummiessents taimeõliga 4x2ml,Ruf,2ml,4002809022494,drinks,drinks_spirits,dry_preserves,dry_flour_sugar_baking
+580215,Ruf Vanilliessents taimeõliga 4x2ml,Ruf,2ml,4002809022517,sauces_oils,oils_other,dry_preserves,dry_flour_sugar_baking
+580216,Cats Best SmartPellets kassiliiv 5L,Cats Best,5L,4002973202135,pet,pet_litter_sand,pet,pet_litter_sand
+580217,Cats Best Original kassiliiv 5L,Cats Best,5L,4002973302347,drinks,drinks_spirits,pet,pet_litter_sand
+580218,Hamker majonees Remoulade 66% 500ml,Hamker,500ml,4003035016226,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo

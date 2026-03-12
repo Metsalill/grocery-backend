@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+579969,Pearl River Bridge Hele sojakaste 150ml,Pearl River Bridge,150ml,0722337819000,world_spices,spices_asian,sauces_oils,sauces_soy_worcester
+579970,Bonzo kimchi 400g,Bonzo,400g,0753217681783,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+579971,Rumm Bumbu XO 40% 700ml,Bumbu,700ml,0813497006154,drinks,drinks_spirits,drinks,drinks_spirits
+579972,B&G Cremant de Bordeaux 750ml,,750ml,0816685012111,dry_preserves,dry_other,drinks,drinks_wine
+579973,Smartick puugieemaldaja,Smartick,,0850646000373,dry_preserves,dry_other,personal_care,pcare_other
+579974,Val De France gaseeritud gr.õunajook 750ml,Val De France,750ml,0851231000112,produce,produce_apples_pears,drinks,drinks_soft_soda
+579975,Val De France gaseeritud pirnimaits.j 750ml,Val De France,750ml,0851231000969,produce,produce_apples_pears,drinks,drinks_soft_soda
+579976,Tri-Bio Sensitive pesugeel 1.42L,Tri-Bio,1.42L,0853017004055,household,hh_laundry,household,hh_laundry
+579977,Tri-Bio deo jalanõudele 210ml,Tri-Bio,210ml,0853017004178,dry_preserves,dry_other,household,hh_other
+579978,Tri-Bio Balsam nõudepesuvahend 420ml,Tri-Bio,420ml,0853017004420,dry_preserves,dry_other,household,hh_dishwashing
+579979,Tri-Bio Color pesugeel 1.42L,Tri-Bio,1.42L,0853017004475,household,hh_laundry,household,hh_laundry
+579980,Tri-Bio White pesugeel 1.42L,Tri-Bio,1.42L,0853017004550,household,hh_laundry,household,hh_laundry
+579981,Tri-Bio veepehmendaja 940ml,Tri-Bio,940ml,0853017004611,dry_preserves,dry_other,household,hh_laundry
+579982,Tri-Bio puh/vah klaaspindadele 500ml,Tri-Bio,500ml,0856922005025,dry_preserves,dry_other,household,hh_cleaners
+579983,Tri-Bio Palsam nõudepesuvahend 840ml,Tri-Bio,840ml,0856922005094,personal_care,pcare_shampoo_cond,household,hh_dishwashing
+579984,Tri-Bio nõudepesuvahend 840ml,Tri-Bio,840ml,0856922005100,household,hh_dishwashing,household,hh_dishwashing
+579985,Tri-Bio Baby pesugeel 940ml,Tri-Bio,940ml,0856922005124,household,hh_laundry,household,hh_laundry
+579986,Tri-Bio Sensitive klaasipuh/vah 500ml,Tri-Bio,500ml,0856922005513,dry_preserves,dry_other,household,hh_cleaners
+579987,Tri-Bio Color plekieemaldi-tabletid 18tk,Tri-Bio,18tk,0856922005520,dry_preserves,dry_other,household,hh_laundry
+579988,Tri-Bio White plekieemaldi-tabletid 18tk,Tri-Bio,18tk,0856922005537,dry_preserves,dry_other,household,hh_laundry
+579989,Tri-Bio Bio põrandapesu/vah laminaat 840ml,Tri-Bio,840ml,0856922005575,dry_preserves,dry_other,household,hh_cleaners
+579990,Tri-Bio Bio põrandap/v lemmiklooma 840ml,Tri-Bio,840ml,0856922005582,dry_preserves,dry_other,household,hh_cleaners
+579991,Tri-Bio Bio vannitoapuhastusvahend 420ml,Tri-Bio,420ml,0856922005599,household,hh_cleaners,household,hh_cleaners
+579992,Tri-Bio WC puh/vah 710ml,Tri-Bio,710ml,0856922005667,dry_preserves,dry_other,household,hh_cleaners
+579993,Whisky Paddy Irish Whiskey 40% 700ml,Paddy,700ml,1210000100771,drinks,drinks_spirits,drinks,drinks_spirits
+579994,Hüva gl.kohup.dessert vaarikatäidis 38g,Hüva,38g,12100040,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+579995,Hüva gl.kohup.dessert van.maits. 38g,Hüva,38g,12100057,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+579996,Hüva gl.kohup.dessert shok. 38g,Hüva,38g,12100064,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+579997,Küülik külmutatud Poola ~1.1kg,Küülik,1.1kg,23014777,pet,pet_small_animals,meat_fish,meat_other
+579998,Õun Golden Del. kg II klass Itaalia,Õun,,23015058,produce,produce_apples_pears,produce,produce_apples_pears
+579999,Küülikukoib külmutatud ~340g 2tk,Küülikukoib,340g,23015999,pet,pet_small_animals,meat_fish,meat_other
+580000,Vaarikatomat kg Võiste Aiand I kl,Vaarikatomat,,23036158,dairy_eggs_fats,dairy_butter_margarine,produce,produce_herbs_salads_sprouts
+580001,Haapsalu Rukkijahuga ciabatta kg,Haapsalu,,23041007,dry_preserves,dry_flour_sugar_baking,bakery,bakery_bread_loaves
+580002,M&M seakaelakarbonaad ~2.5kg,M&M,2.5kg,23171212,dry_preserves,dry_other,meat_fish,meat_pork
+580003,RM Fitlap Broilerikints ~500g jahutatud,RM,500g,2322212804985,dry_preserves,dry_flour_sugar_baking,meat_fish,meat_poultry
+580004,RR suitsu-keedu Maasuitsu külg ~250g viil,RR,250g,23296281,meat_fish,fish_salted_smoked,meat_fish,meat_pork
+580005,M&M Lepasuitsupõsk ~300g,M&M,300g,23562777,meat_fish,fish_salted_smoked,meat_fish,meat_pork
+580006,Nõo puljongikont ~1.2kg külmutatud,Nõo,1.2kg,23574727,world_spices,spices_broth_stock,world_spices,spices_broth_stock
+580007,M&M Maamehesink ~400g,M&M,400g,23583160,meat_fish,meat_hams,meat_fish,meat_hams
+580008,RLK seapraad klassikaline ~1.4kg jahut.,RLK,1.4kg,23603814,dry_preserves,dry_flour_sugar_baking,meat_fish,meat_pork
+580009,Tallegg suits.broilerikoib kg ~0.3kg,Tallegg,0.3kg,23640042,meat_fish,meat_poultry,meat_fish,meat_poultry
+580010,Tallegg suits.broilerikints kg ~400g,Tallegg,400g,23640273,meat_fish,meat_poultry,meat_fish,meat_poultry
+580011,Tallegg Suitsutatud kanakintsuliha ~350g,Tallegg,350g,23640295,meat_fish,meat_poultry,meat_fish,meat_poultry
+580012,Tallegg suitsutatud broileririnnaf. ~350g,Tallegg,350g,23640761,meat_fish,meat_poultry,meat_fish,meat_poultry
+580013,Haapsalu Haapsalu seemneleib 680g,Haapsalu,680g,2603984100018,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+580014,Haapsalu Haapsalu rukkileib 630g,Haapsalu,630g,2603984200015,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+580015,Haapsalu Haapsalu seemneleib 320g,Haapsalu,320g,2603990200016,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+580016,Haapsalu Haapsalu rukkileib 300g,Haapsalu,300g,2603990300013,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+580017,Haapsalu Kohupiimapallid kg,Haapsalu,,27005026,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_other
+580018,Haapsalu Pärmitaigen kg,Haapsalu,,27005170,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking

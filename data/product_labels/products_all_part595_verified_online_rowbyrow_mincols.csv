@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580019,Brandy Beehive XO 40% 500ml,Beehive,500ml,3012993068483,dry_preserves,dry_other,drinks,drinks_spirits
+580020,Gillette Series Moistur raseerimissgeel 200ml,Gillette,200ml,3014260220051,dry_preserves,dry_other,personal_care,pcare_shaving
+580021,Satin Care Sensi Aloe V. raseerimissegel 200ml,Satin Care,200ml,3014260223007,dry_preserves,dry_other,personal_care,pcare_shaving
+580022,Gillette Regular raseerimisvaht 200ml,Gillette,200ml,3014260228668,dry_preserves,dry_other,personal_care,pcare_shaving
+580023,Gillette Venus raseerija +2tera,Gillette,,3014260262693,personal_care,pcare_shaving,personal_care,pcare_shaving
+580024,Gillette Venus for Women terad 4tk,Gillette,4tk,3014260262709,dry_preserves,dry_other,personal_care,pcare_shaving
+580025,Gillette Blue II raseerija 5tk,Gillette,5tk,3014260274016,personal_care,pcare_shaving,personal_care,pcare_shaving
+580026,Gillette 2 raseerija 5tk ühekordne,Gillette,5tk,3014260282684,personal_care,pcare_shaving,personal_care,pcare_shaving
+580027,Gillette Mach3 raseerija 2tera,Gillette,,3014260330859,personal_care,pcare_shaving,personal_care,pcare_shaving
+580028,Kinder T16 piimašokolaad 200g piimja täidisega,Kinder,200g,3017627101604,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+580029,Vein B&G Chardonnay Reserve 750ml,,750ml,3035130710106,drinks,drinks_wine,drinks,drinks_wine
+580030,Panzani Pasta Mini Serpentini 500g,Panzani,500g,3038350230904,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+580031,Panzani Munapasta Farfalle Di Chef 400g,Panzani,400g,3038359010156,dairy_eggs_fats,dairy_eggs,dry_preserves,dry_pasta_rice
+580032,Sanytol põrandatele puh/vahend 1L,Sanytol,1L,3045206312202,dry_preserves,dry_other,household,hh_cleaners
+580033,Lindt tume šokolaad Excellence 100g 70% kakao,Lindt,100g,3046920071086,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+580034,Air Wick Freshmatic Flowers täide 250ml,Air Wick,250ml,3059943009042,dry_preserves,dry_other,household,hh_candles_airfresh
+580035,Air Wick Freshmatic Citrus täide 250ml,Air Wick,250ml,3059943009066,dry_preserves,dry_other,household,hh_candles_airfresh
+580036,Sheba Cuisine kiisueine 85g lõhega,Sheba,85g,3065890098756,meat_fish,fish_fresh,pet,pet_cat_wet
+580037,Sheba Cuisine kiisueine 85g kanalihaga,Sheba,85g,3065890098770,meat_fish,meat_poultry,pet,pet_cat_wet
+580038,Evian gaasimata looduslik min.vesi 500ml,Evian,500ml,3068320009018,drinks,drinks_water,drinks,drinks_water
+580039,Evian gaasimata vesi 750ml sportpudel,Evian,750ml,3068320014067,drinks,drinks_water,drinks,drinks_water
+580040,Evian gaasimata looduslik min.vesi 330ml,Evian,330ml,3068320063010,drinks,drinks_water,drinks,drinks_water
+580041,Bonduelle väikesed rohelised herned 400g,Bonduelle,400g,3083680004053,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+580042,Bonduelle Roheline hernes 800g,Bonduelle,800g,3083680004275,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+580043,Bonduelle mais 670g,Bonduelle,670g,3083680009836,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+580044,Bonduelle herne-porgandi assortii 400g,Bonduelle,400g,3083680084345,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+580045,Bonduelle mais 340g,Bonduelle,340g,3083680086936,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+580046,Bonduelle valged oad tomatikastmes 430g,Bonduelle,430g,3083680483407,dry_preserves,dry_canned_veg,dry_preserves,dry_groats_beans
+580047,Bonduelle pun.oad maisiga Tex Mex 430g,Bonduelle,430g,3083680495882,dry_preserves,dry_canned_veg,dry_preserves,dry_groats_beans
+580048,Bonduelle mais-hernes 340g,Bonduelle,340g,3083680727006,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+580049,Bonduelle Vapeur Aurutatud pun.oad 310g,Bonduelle,310g,3083681012606,dry_preserves,dry_canned_veg,dry_preserves,dry_groats_beans
+580050,Bonduelle Valged oad karrikastmes 430g,Bonduelle,430g,3083681031171,dry_preserves,dry_canned_veg,dry_preserves,dry_groats_beans
+580051,Bonduelle mais-hernes-paprika 300g,Bonduelle,300g,3083681151930,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+580052,Bic Flex5 Hybrid +2tera raseerija,Bic,,3086123644922,personal_care,pcare_shaving,personal_care,pcare_shaving
+580053,Bic Flex3 Hybrid +4tera raseerija,Bic,,3086123644939,personal_care,pcare_shaving,personal_care,pcare_shaving
+580054,Bic Pure3 Lady raseerija 4+2tk,Bic,2tk,3086126727370,personal_care,pcare_shaving,personal_care,pcare_shaving
+580055,Bic tulesüütaja,Bic,,3086126788388,dry_preserves,dry_other,household,hh_other
+580056,Bic Comfort 2 raseerija 5tk,Bic,5tk,3086127500163,personal_care,pcare_shaving,personal_care,pcare_shaving
+580057,Bic New Twin Pastel raseerija 5tk,Bic,5tk,3086127500934,dry_preserves,dry_other,personal_care,pcare_shaving
+580058,Vileda 625 Slalom küürimissvamm 2tk,Vileda,2tk,3161460001406,dry_preserves,dry_other,household,hh_cleaners
+580059,Riga kuivtoit viirpapagoile 1kg,Riga,1kg,3166780001402,dry_preserves,dry_other,pet,pet_birds_fish
+580060,Riga Sticky söödapulk 110g pähkliga,Riga,110g,3166780026078,sweets_snacks,sweets_nuts_driedfruit,pet,pet_birds_fish
+580061,Riga kuivtoit närilistele 1kg,Riga,1kg,3166780188165,dry_preserves,dry_other,pet,pet_small_animals
+580062,Pasquier röstitud saiaviilud 80g,Pasquier,80g,3174506108557,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+580063,Isostar joogipudel 650ml,Isostar,650ml,3175681224087,dry_preserves,dry_other,household,hh_other
+580064,Aero 360 niiskusimaja täitetabletid 2x450g,Aero,450g,3178040666955,dry_preserves,dry_other,household,hh_other
+580065,Yplon antistaatik 300ml,Yplon,300ml,3179630012527,dry_preserves,dry_other,household,hh_laundry
+580066,Cognac Hennessy VS 40% 350ml,Hennessy,350ml,3245990819103,drinks,drinks_spirits,drinks,drinks_spirits
+580067,Cremant Du Jura Tissot Maire Brut 750ml,Tissot,750ml,3250250160307,drinks,drinks_wine,drinks,drinks_wine
+580068,Curver Toidukarpide komplekt Fresh&Go 3x0.8L,Curver,0.8L,3253928559120,dry_preserves,dry_other,household,hh_kitchenware

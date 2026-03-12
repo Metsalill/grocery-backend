@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+581319,Coop Supreme kuivatatud ananass 200g,Coop,200g,4740660018033,produce,produce_tropical,sweets_snacks,sweets_nuts_driedfruit
+581320,Hele viinamarjad Sugarone 500g I kl Itaalia,,500g,4740660018330,drinks,drinks_spirits,produce,produce_berries
+581321,Punased viinamarjad Fiametta seemneteta 500g,,500g,4740660018347,drinks,drinks_spirits,produce,produce_berries
+581322,Tumedad viinamarjad Summer Royal 500g I kl,,500g,4740660018354,drinks,drinks_spirits,produce,produce_berries
+581323,Seemneleib Coop 310g viil,Coop,310g,4740660018880,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+581324,Purgikaaned pildiga 82mm 10tk keeratavad,,10tk,4740660019030,dry_preserves,dry_other,household,hh_kitchenware
+581325,Klaaspurk komplekt 540ml 82mm kaanega 6tk,,540ml,4740660019108,dry_preserves,dry_other,household,hh_kitchenware
+581326,Klaaspurk komplekt 900ml 82mm kaanega 6tk,,900ml,4740660019122,dry_preserves,dry_other,household,hh_kitchenware
+581327,Coop maasika mahlajäätis 500ml/300g,Coop,500ml,4740660019191,drinks,drinks_juices,frozen_food,frozen_desserts_icecream
+581328,Coop mango mahlajäätis 500ml/300g,Coop,500ml,4740660019207,drinks,drinks_juices,frozen_food,frozen_desserts_icecream
+581329,Coop kohupiimakreem maasika-banaani 150g,Coop,150g,4740660019351,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+581330,Coop magus mais 340g,Coop,340g,4740660019511,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+581331,Hüva P/S vorst Krakov 270g,Hüva,270g,4740660019542,meat_fish,meat_sausages,meat_fish,meat_sausages
+581332,Coop kuumsuitsu peekon 120g viil,Coop,120g,4740660019559,meat_fish,meat_pork,meat_fish,meat_pork
+581333,Avokaado Hass võrgus 700g Peruu,,700g,4740660019566,dry_preserves,dry_other,produce,produce_tropical
+581334,Coop täissuitsuvorst 250g,Coop,250g,4740660019573,meat_fish,meat_sausages,meat_fish,meat_sausages
+581335,Coop Cola Zero karboniseeritud karastusjook 2L,Coop,2L,4740660019641,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+581336,Coop mitme puuvilja nektar 1L,Coop,1L,4740660019733,drinks,drinks_juices,drinks,drinks_juices
+581337,Hüva sarapuupähklid 800g,Hüva,800g,4740660019757,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+581338,Coop nõudepesumasin tabletid kõik ühes 24tk,Coop,24tk,4740660019924,dry_preserves,dry_other,household,hh_dishwashing
+581339,Coop nõudepesumasin tabletid kõik ühes 40tk,Coop,40tk,4740660019931,dry_preserves,dry_other,household,hh_dishwashing
+581340,Coop veisemaksapasteet 200g,Coop,200g,4740660020050,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+581341,Coop nisujahu T405 1kg,Coop,1kg,4740660020067,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+581342,Coop nisujahu T405 2kg,Coop,2kg,4740660020074,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+581343,Coop nisujahu T550 1kg,Coop,1kg,4740660020081,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+581344,Coop nisujahu T550 2kg,Coop,2kg,4740660020098,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+581345,Coop mikropopcorn 90g soolaga,Coop,90g,4740660020142,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_snacks_salty
+581346,Coop mikropopcorn 90g võimaitseline,Coop,90g,4740660020159,dairy_eggs_fats,dairy_butter_margarine,sweets_snacks,sweets_snacks_salty
+581347,Coop mikropopcorn 90g juustumaitseline,Coop,90g,4740660020166,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+581348,Coop mikropopcorn 3-pakk 270g soolaga,Coop,270g,4740660020180,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_snacks_salty
+581349,Coop mikropopcorn 3-pakk 270g võimaitseline,Coop,270g,4740660020197,dairy_eggs_fats,dairy_butter_margarine,sweets_snacks,sweets_snacks_salty
+581350,Säästu neljaviljahelbed 500g,Säästu,500g,4740660020678,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+581351,Prügikott biolagunev 10L 10tk,,10tk,4740660020814,household,hh_bins_bags,household,hh_bins_bags
+581352,Prügikott biolagunev 20L 10tk,,10tk,4740660020821,household,hh_bins_bags,household,hh_bins_bags
+581353,Prügikott biolagunev 140L 10tk,,10tk,4740660020838,household,hh_bins_bags,household,hh_bins_bags
+581354,Kirsstomat punane 500g I klass Holland,,500g,4740660020852,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+581355,Hüva kassieine 4x100g kanalihaga,Hüva,100g,4740660020869,meat_fish,meat_poultry,pet,pet_cat_wet
+581356,Hüva kassieine 4x100g kalaga,Hüva,100g,4740660020876,meat_fish,fish_fresh,pet,pet_cat_wet
+581357,Hüva kassieine 4x100g kalkuni-veise,Hüva,100g,4740660020883,meat_fish,meat_poultry,pet,pet_cat_wet
+581358,Hüva konserv kassile 400g kanaga,Hüva,400g,4740660020890,meat_fish,meat_poultry,pet,pet_cat_wet
+581359,Hüva konserv kassile 400g kalaga,Hüva,400g,4740660020906,meat_fish,fish_fresh,pet,pet_cat_wet
+581360,Hüva konserv koerale 1.25kg loomalihaga,Hüva,1.25kg,4740660020913,meat_fish,meat_other,pet,pet_dog_wet
+581361,Hüva konserv koerale 1.25kg kanaga,Hüva,1.25kg,4740660020920,meat_fish,meat_poultry,pet,pet_dog_wet
+581362,Coop koeraeine 500g lambalihaga,Coop,500g,4740660020975,meat_fish,meat_beef_lamb_game,pet,pet_dog_wet
+581363,Coop koeraeine 500g vasikalihaga,Coop,500g,4740660020982,meat_fish,meat_other,pet,pet_dog_wet
+581364,Coop koeraeine 500g veiselihaga,Coop,500g,4740660020999,meat_fish,meat_beef_lamb_game,pet,pet_dog_wet
+581365,CK lõhekauss 270g,CK,270g,4740660021149,meat_fish,fish_fresh,sauces_oils,sauces_other
+581366,Kiivi söömisvalmis 350g I klass Tsiili,,350g,4740660021262,produce,produce_tropical,produce,produce_tropical
+581367,Kassiliiv Silica 3.8L/1.6kg ränidioksiid,,3.8L,4740660021323,pet,pet_litter_sand,pet,pet_litter_sand
+581368,Kassiliiv Silica 6L/2.6kg ränidioksiid,,6L,4740660021378,pet,pet_litter_sand,pet,pet_litter_sand

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+579919,Haapsalu Rosolje 250g,Haapsalu,250g,0270010012182,dry_preserves,dry_other,sauces_oils,sauces_other
+579920,Haapsalu Kapsa-porgandisalat 250g,Haapsalu,250g,0270010012212,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+579921,Haapsalu Lihtne kartulisalat 250g,Haapsalu,250g,0270010013097,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+579922,Haapsalu Maksapasteet 200g,Haapsalu,200g,0270010013172,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+579923,Haapsalu Ühepajatoit 300g,Haapsalu,300g,0270010013523,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+579924,Haapsalu Plov 300g,Haapsalu,300g,0270010013530,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+579925,Haapsalu Kartuli-singisalat 250g,Haapsalu,250g,0270010013707,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+579926,Haapsalu Besee 150g,Haapsalu,150g,0270010013776,dry_preserves,dry_other,sweets_snacks,sweets_other
+579927,Haapsalu Merevaigumagustoit 150g,Haapsalu,150g,0270010013790,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+579928,Haapsalu Kerge makrasalat 250g,Haapsalu,250g,0270010014216,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+579929,Haapsalu Täidetud munad 150g,Haapsalu,150g,0270010014582,dairy_eggs_fats,dairy_eggs,sauces_oils,sauces_other
+579930,Haapsalu Singirullid 200g,Haapsalu,200g,0270010014605,dry_preserves,dry_other,meat_fish,meat_hams
+579931,Haapsalu Küpsis kihiline 250g,Haapsalu,250g,0270010014902,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+579932,Haapsalu Beseeküpsis 40g,Haapsalu,40g,0270010015015,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+579933,Haapsalu Kaneelistritsel 300g,Haapsalu,300g,0270010015367,world_spices,spices_herbs_spice_mix,bakery,bakery_sweet_buns_donuts
+579934,Haapsalu Hautatud hapukapsas 300g,Haapsalu,300g,0270010015602,produce,produce_root_veg,dry_preserves,dry_canned_veg
+579935,Haapsalu Kaneelikringel 500g,Haapsalu,500g,0270010016456,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+579936,Haapsalu Kohupiima-kirsikringel 500g,Haapsalu,500g,0270010016470,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+579937,Haapsalu Pidupäeva keeks 260g,Haapsalu,260g,0270010016654,dry_preserves,dry_other,bakery,bakery_cakes_pastries
+579938,Haapsalu Kala taignas kastmega 500g,Haapsalu,500g,0270010016777,meat_fish,fish_fresh,frozen_food,frozen_fish
+579939,Haapsalu Mannavaht 130g,Haapsalu,130g,0270010016906,dry_preserves,dry_other,dairy_eggs_fats,dairy_desserts
+579940,Haapsalu Saiavorm 230g,Haapsalu,230g,0270010016913,bakery,bakery_buns_croissants,bakery,bakery_cakes_pastries
+579941,Haapsalu Kaneeliküpsis 200g,Haapsalu,200g,0270010017163,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+579942,Haapsalu Küpsis keeleke 150g,Haapsalu,150g,0270010017187,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+579943,Haapsalu Juustuküpsis 200g,Haapsalu,200g,0270010017200,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_biscuits_cookies
+579944,Haapsalu Küpsis Seemnesnäkk 150g,Haapsalu,150g,0270010017224,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+579945,Haapsalu Leivavaht 250g,Haapsalu,250g,0270010018108,dry_preserves,dry_other,bakery,bakery_other
+579946,Haapsalu Küpsetatud besee 130g,Haapsalu,130g,0270010020897,dry_preserves,dry_other,sweets_snacks,sweets_other
+579947,Haapsalu Tomati-kokteilsalat 200g,Haapsalu,200g,0270010022181,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+579948,Haapsalu Rummisai 80g,Haapsalu,80g,0270010022754,drinks,drinks_spirits,bakery,bakery_sweet_buns_donuts
+579949,Haapsalu Kaneelirull shokolaadiga 90g,Haapsalu,90g,0270010022761,world_spices,spices_herbs_spice_mix,bakery,bakery_sweet_buns_donuts
+579950,Haapsalu Kreemisai 60g,Haapsalu,60g,0270010022778,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+579951,Haapsalu Kohupiimakorp 100g,Haapsalu,100g,0270010022785,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_sweet_buns_donuts
+579952,Haapsalu Kardemonisai suur 180g,Haapsalu,180g,0270010022808,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+579953,Haapsalu Sotsnik 70g,Haapsalu,70g,0270010022846,dry_preserves,dry_other,bakery,bakery_sweet_buns_donuts
+579954,Haapsalu Kohupiimasai 100g,Haapsalu,100g,0270010022853,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_buns_croissants
+579955,Haapsalu Liha-riisipirukas 65g,Haapsalu,65g,0270010022860,bakery,bakery_cakes_pastries,bakery,bakery_other
+579956,Haapsalu Porgandipirukas 65g,Haapsalu,65g,0270010022877,bakery,bakery_cakes_pastries,bakery,bakery_other
+579957,Haapsalu Roosisai 50g,Haapsalu,50g,0270010022891,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+579958,Mississippi Belle makaronid juustuga 206g,Mississippi,206g,0613668024709,dairy_eggs_fats,dairy_cheese_slices,dry_preserves,dry_pasta_rice
+579959,Argo Agro vabalt peet.kanade munad L 10tk,Argo,10 pcs,0615435425276,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+579960,Küüslauk pakis 200g,Küüslauk,200g,0615435425634,produce,produce_root_veg,produce,produce_root_veg
+579961,Marineeritud küüslaugu võrsed 320g,Marineeritud,320g,0615435425665,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+579962,Koon käpavaha koerale Orcanic 30g,Koon,30g,0634240249969,pet,pet_other,pet,pet_other
+579963,Elephant Vanilla Chai teejook vürts. 398g,Elephant,398g,0658564703983,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+579964,Mesi 1kg klaaspurgis,Mesi,1kg,0700686997006,dry_preserves,dry_other,dry_preserves,dry_other
+579965,Mesi 500g klaaspurgis,Mesi,500g,0700686997020,dry_preserves,dry_other,dry_preserves,dry_other
+579966,Happybet Mänguasi koerale 1tk köis ringi,Happybet,1tk,0701029162563,pet,pet_other,pet,pet_other
+579967,Happybet Mänguasi koerale pallivisk. 1tk,Happybet,1tk,0701029165106,pet,pet_other,pet,pet_other
+579968,Säsi Mustsõstra kombucha 330ml mahe,Säsi,330ml,0714983177849,dry_preserves,dry_other,drinks,drinks_soft_soda

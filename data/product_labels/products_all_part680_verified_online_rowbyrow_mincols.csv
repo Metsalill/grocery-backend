@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+614151,Nata sojalõigud mahedas marinaadis 300g,Nata,300g,4751037790209,sauces_oils,sauces_soy_worcester,dry_preserves,dry_groats_beans
+614152,Liivimaa Lihaveis veisepraad 500g,Liivimaa Lihaveis,500g,4740456001485,meat_fish,meat_beef_lamb_game,meat_fish,meat_beef_lamb_game
+614153,Kotimaista broilerifileeribad meemarinaadis 350g,Kotimaista,350g,6414893500549,dry_preserves,dry_canned_veg,meat_fish,meat_poultry
+614154,Coop Mandariin Primasole I klass mahe,Coop,,2060141200002,produce,produce_tropical,produce,produce_tropical
+614155,Wilfa blender BL-5002GO 0.6L 500W,Wilfa,0.6L,7044876099099,dry_preserves,dry_other,household,hh_other
+614156,Õun Krista I klass 1kg,,1kg,4744756010017,produce,produce_apples_pears,produce,produce_apples_pears
+614157,Linnamäe Lihatööst prantsuspärane eelküps. metssealiha 450g,Linnamäe,450g,4740618008789,meat_fish,meat_pork,meat_fish,meat_pork
+614158,Philips NA230/00 kuumaõhufritüür 6.2L,Philips,6.2L,8720389035173,dry_preserves,dry_other,household,hh_other
+614159,Remington AirVive 2in1 lokitangid AS8930,Remington,,5038061174700,dry_preserves,dry_other,personal_care,pcare_other
+614160,Russell Steam Genie Essentials rõivaste auruti,Russell,,5038061137644,dry_preserves,dry_other,household,hh_other
+614161,Fascia massažipüstol,,,6430062515176,dry_preserves,dry_other,household,hh_other
+614162,Rannamõisa part jahutatud ~1500-2400g,Rannamõisa,2400g,2322231300000,dry_preserves,dry_flour_sugar_baking,meat_fish,meat_poultry
+614163,Codorniu Clasico Cava Brut vahuvein 11% 750ml,Codorniu,750ml,8410013381010,drinks,drinks_wine,drinks,drinks_wine
+614164,ARTISAN metsamarja ja mee glögi alkoholivaba 500ml,ARTISAN,500ml,4744285011172,dry_preserves,dry_cereals_muesli,drinks,drinks_soft_soda
+614165,Marli Juissi suhkruvaba draakoniviljamahlajook 1L,Marli,1L,6415130103516,drinks,drinks_juices,drinks,drinks_juices
+614166,HIIUMAA KÖÖK toorjuustu-leivakreem pohlamoosiga 130g,HIIUMAA KÖÖK,130g,4740541008825,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_desserts
+614167,2026 aastalant Helmi-Tundra GR-G,,,6417635058476,dry_preserves,dry_other,household,hh_other
+614168,Jaanihanso Brut NO:12 puuviljavahuvein 12% 750ml,Jaanihanso,750ml,4744358010019,drinks,drinks_wine,drinks,drinks_wine
+614169,Air Wick Duo Fresh Freesia ja Jasmin õhuvärskendaja 2x250ml,Air Wick,2x250ml,5701092112682,household,hh_candles_airfresh,household,hh_candles_airfresh
+614170,Õun Liivika I klass,,,2060431300009,produce,produce_apples_pears,produce,produce_apples_pears
+614171,Fiskars Hard Face pann 28cm,Fiskars,,6424002019909,dry_preserves,dry_other,household,hh_kitchenware
+614172,COOP glögi alkoholivaba suhkruvaba 1L,COOP,1L,6438574166473,dry_preserves,dry_cereals_muesli,drinks,drinks_soft_soda
+614173,Dirhami vähesoolane lõhefilee viilud 150g,Dirhami,150g,4740285005043,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked
+614174,Tefal 24cm OnePickPot pann vanilje,Tefal,,3168430371293,dry_preserves,dry_other,household,hh_kitchenware
+614175,Iittala Essence punase veini klaas 45cl 4tk,Iittala,45cl,6428501120593,drinks,drinks_wine,household,hh_kitchenware
+614176,Mati Hõrgud seenefilee tükid 180g,Mati,180g,0752795133448,produce,produce_mushrooms,dry_preserves,dry_groats_beans
+614177,Magic Mirror LED meigipeegel hõbedane,,,6438340004725,dry_preserves,dry_other,household,hh_other
+614178,Fiskars Folken ahjupott 4L valuraud,Fiskars,4L,6424002020325,dry_preserves,dry_other,household,hh_kitchenware
+614179,Mandariin Bruno I klass,,,2060401200001,produce,produce_tropical,produce,produce_tropical
+614180,Joel Ostrat Mac & Cheese hakkliha ja ürtidega 300g,Joel Ostrat,300g,4745010587511,meat_fish,meat_minced,frozen_food,frozen_ready_meals
+614181,Tallegg broiler päikesekuivatatud tomatiga 350g,Tallegg,350g,4740046014024,meat_fish,meat_poultry,meat_fish,meat_poultry
+614182,Tallegg broileri ahjukintsuliha juustuga 700g,Tallegg,700g,4740046014031,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_poultry
+614183,Iittala Essence valge veini klaas 33cl 4tk,Iittala,33cl,6428501120586,drinks,drinks_wine,household,hh_kitchenware
+614184,Fiskars SnowXpert lumelabidas 52cm,Fiskars,,6411501410450,dry_preserves,dry_other,household,hh_other
+614185,Airam Smart 2000W õliradiaator,Airam,,6435200302397,sauces_oils,oils_other,household,hh_other
+614186,Eesti Pagar piparkoogitaigen 500g,Eesti Pagar,500g,4740086008465,world_spices,spices_basic_salt_pepper,bakery,bakery_sweet_buns_donuts
+614187,Fiskars Solid autolabidas,Fiskars,,6411501430731,dry_preserves,dry_other,household,hh_other
+614188,Fiskars SnowXpert lumesahk 75cm,Fiskars,,6411501430212,dry_preserves,dry_other,household,hh_other
+614189,Fiskars SnowXpert lumelabidas 35cm,Fiskars,,6411501410443,dry_preserves,dry_other,household,hh_other
+614190,Biomat biolagunev prügikott 30L 10tk,Biomat,30L,9007730005023,household,hh_bins_bags,household,hh_bins_bags
+614191,Kikas broiler vürtsika mee marinaadis 600g,Kikas,600g,4740625005177,world_spices,spices_herbs_spice_mix,meat_fish,meat_poultry
+614192,Honore Louis Cremant De Bourgogne Blanc Brut vahuvein 750ml,Honore Louis,750ml,3245390230379,drinks,drinks_wine,drinks,drinks_wine
+614193,Kulta Katriina filtrikohv 450g öko,Kulta Katriina,450g,6420101146447,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+614379,Estrella Damm Daura gluteenivaba õlu 5.4% 330ml,Estrella Damm,330ml,4740158008065,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+614380,Eesti Pagar roheline piparkoogiglasuur 90g,Eesti Pagar,90g,4740086021983,world_spices,spices_basic_salt_pepper,dry_preserves,dry_flour_sugar_baking
+614381,Alpin lumelabidas 49cm sinine puitvars,Alpin,,5905197140544,dry_preserves,dry_other,household,hh_other
+614382,Blue Dragon teriyaki-kaste 120g,Blue Dragon,120g,5010338405144,world_spices,spices_asian,sauces_oils,sauces_soy_worcester
+614383,Eesti Pagar valge piparkoogiglasuur 90g,Eesti Pagar,90g,4740086021952,world_spices,spices_basic_salt_pepper,dry_preserves,dry_flour_sugar_baking
+614384,HIIUMAA KÖÖK ananassiunelm 200g,HIIUMAA KÖÖK,200g,4740541001925,produce,produce_tropical,dairy_eggs_fats,dairy_desserts
+614385,Õliradiaator 7-ribi 1500W,,,4007872203290,sauces_oils,oils_other,household,hh_other

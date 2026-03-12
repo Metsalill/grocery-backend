@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580719,A.Le Coq G:N Red Orange 5% 1.5L pet,A.Le Coq,1.5L,4740098088561,dry_preserves,dry_other,drinks,drinks_beer_cider
+580720,Valge Klaar vahujook 750ml,Valge Klaar,750ml,4740098089629,dry_preserves,dry_other,drinks,drinks_soft_soda
+580721,Limpa Mullike vahujook 750ml,Limpa,750ml,4740098089636,dry_preserves,dry_other,drinks,drinks_soft_soda
+580722,A.Le Coq Pilsner hele õlu 4.2% 6x500ml,A.Le Coq,500ml,4740098090755,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+580723,A.Le Coq Premium õlu 4.7% 330ml,A.Le Coq,330ml,4740098091547,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+580724,A.Le Coq Alexander filtreerimata 5% 568ml,A.Le Coq,568ml,4740098092179,dry_preserves,dry_other,drinks,drinks_beer_cider
+580725,Dr.Active õuna-arbuusi mahlajook 1.5L,Dr.Active,1.5L,4740098092568,drinks,drinks_juices,drinks,drinks_juices
+580726,Vitamineral Immunity vitamiinijook 750ml,Vitamineral,750ml,4740098094722,dry_preserves,dry_other,drinks,drinks_soft_soda
+580727,A.Le Coq Premium Select 4.3% 12x355ml,A.Le Coq,355ml,4740098094845,dry_preserves,dry_other,drinks,drinks_beer_cider
+580728,Kelluke karboniseeritud karastusjook Ploom 500ml,Kelluke,500ml,4740098094883,dry_preserves,dry_other,drinks,drinks_soft_soda
+580729,A.Le Coq Virgin Margarita alkoholivaba 330ml,A.Le Coq,330ml,4740098095033,drinks,drinks_spirits,drinks,drinks_soft_soda
+580730,A.Le Coq Virgin Mojito alkoholivaba 330ml,A.Le Coq,330ml,4740098097150,drinks,drinks_spirits,drinks,drinks_soft_soda
+580731,Mulin Rabarber alkoholivaba vahuvein 750ml,Mulin,750ml,4740098097259,drinks,drinks_wine,drinks,drinks_soft_soda
+580732,Aura Infusion virsiku-rohelise tee 1L pet,Aura,1L,4740098098300,drinks,drinks_tea_coffee,drinks,drinks_soft_soda
+580733,Aura Infusion greibi-ženšenn 1L pet,Aura,1L,4740098098317,dry_preserves,dry_other,drinks,drinks_soft_soda
+580734,A.Le Coq Blood Orange 5% 355ml,A.Le Coq,355ml,4740098098645,dry_preserves,dry_other,drinks,drinks_beer_cider
+580735,Pant A plastpakend kuni 500ml,Pant,500ml,4740098099444,dry_preserves,dry_other,household,hh_other
+580736,Kodu seemneleib 280g Fazer,Fazer,280g,4740103023570,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+580737,Kartul varajane Heakartul 2kg pk Eesti,,2kg,4740112000036,produce,produce_root_veg,produce,produce_root_veg
+580738,Farmi koorene jogurt mustikaga 1kg,Farmi,1kg,4740113090272,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580739,Farmi keefir klassikaline 2.5% 1kg pure,Farmi,1kg,4740113091477,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580740,Farmi metsamarjajogurt rukkikamaga 380g,Farmi,380g,4740113091583,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580741,Farmi jogurt koduaia marjad 1kg lakt.vaba,Farmi,1kg,4740113097394,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580742,Farmi jogurt maasika-banaani 1kg lakt.vaba,Farmi,1kg,4740113097400,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580743,Farmi koorene kiivi-tikri jogurt 400g,Farmi,400g,4740113097561,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580744,Farmi piim 2.5% 1.5L pure,Farmi,1.5L,4740113097578,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+580745,Farmi kohvikoor 10% 200ml purepakk,Farmi,200ml,4740123000629,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+580746,Farmi hapukoor 20% 200g,Farmi,200g,4740123000766,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+580747,Alma hapukoor 10% 250g,Alma,250g,4740125410099,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+580748,Alma jogurt maasika-mustika 1kg,Alma,1kg,4740125521214,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580749,Alma jogurt mango 1kg,Alma,1kg,4740125521306,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580750,Alma jogurtimaius maasika 200g,Alma,200g,4740125532234,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580751,Alma jogurtimaius mango 200g,Alma,200g,4740125532241,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580752,Profeel proteiinijogurt mustasõstar 200g,Profeel,200g,4740125532456,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580753,Alma täispiimajogurt ahjuõuna 350g,Alma,350g,4740125535402,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580754,Alma täispiimajogurt metsmaasika 350g,Alma,350g,4740125535440,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580755,Alma koorejogurt Muah pistaatsiam. 380g,Alma,380g,4740125535952,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580756,Gefilus jogurt maasika-yuzu 380g,Gefilus,380g,4740125536256,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580757,Alma koorejogurt Muah barbariss 180g,Alma,180g,4740125539158,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580758,Alma jogurtijook Vita+ puuvilja 4x100g,Alma,100g,4740125581249,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580759,Alma jogurtijook kreeka mango-maasika 275g,Alma,275g,4740125582000,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580760,Alma kohupiimahõrgutis muraka 150g,Alma,150g,4740125632460,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+580761,Alma kodujuust hapukoorega 200g,Alma,200g,4740125633177,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+580762,Tartu Mill riivsai 400g,Tartu Mill,400g,4740126080024,bakery,bakery_buns_croissants,bakery,bakery_other
+580763,Tartu Mill Kamajahu 400g,Tartu Mill,400g,4740126080222,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+580764,Mull Rose maasika ja rabarberi 750ml,Mull,750ml,4740136006175,drinks,drinks_wine,drinks,drinks_soft_soda
+580765,Mikaado tarretisepulber 80g sidruni,Mikaado,80g,4740140200132,produce,produce_tropical,dry_preserves,dry_flour_sugar_baking
+580766,Mikaado köögiviljahoidiste paksendaja 30g,Mikaado,30g,4740140200279,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+580767,Mikaado maasika-banaanimait. tarretis 80g,Mikaado,80g,4740140200286,produce,produce_berries,dry_preserves,dry_flour_sugar_baking
+580768,Manni mannavahupulber 200g mustikamaitsel.,Manni,200g,4740140300054,produce,produce_berries,dry_preserves,dry_flour_sugar_baking

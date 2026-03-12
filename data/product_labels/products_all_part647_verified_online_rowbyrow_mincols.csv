@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+582619,Whiskas Sterile kuivtoit kassile 800g kana,Whiskas,800g,5900951305696,meat_fish,meat_poultry,pet,pet_cat_dry
+582620,Perfect Fit kuivtoit kassile 750g kanaga,Perfect Fit,750g,5900951307607,meat_fish,meat_poultry,pet,pet_cat_dry
+582621,Pedigree kuivtoit koerale 500g veise-köögiviljaga,Pedigree,500g,5900951310690,meat_fish,meat_beef_lamb_game,pet,pet_dog_dry
+582622,Pedigree Junior kuivtoit koera 500g kodulinnuliha,Pedigree,500g,5900951311987,pet,pet_other,pet,pet_dog_dry
+582623,M&Ms šokolaadiglasuuriga maapähklid 200g,M&Ms,200g,5900951317910,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_chocolate_bars
+582624,Whiskas Pure Junior kiisueine 4*85g kodulinnuliha,Whiskas,85g,5900951319198,dry_preserves,dry_other,pet,pet_cat_wet
+582625,Lactima sulatatud viilujuust Gouda 130g,Lactima,130g,5901126000835,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+582626,Lactima sulatatud viilujuust Toast 130g,Lactima,130g,5901126012630,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+582627,Kortos salatijuust 160g,Kortos,160g,5901390005987,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+582628,Turek sinihallitusjuust GrandBlue Rich&Creamy 100g,Turek,100g,5901390006410,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_blue
+582629,Turek valgehallitusjuust Brie Natural 125g,Turek,125g,5901390006540,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_white_mold
+582630,Gold Döner Kebab kanalihast 250g külmutatud,Gold,250g,5901540008172,meat_fish,meat_poultry,frozen_food,frozen_meat
+582631,Canpol Babies toiduvõrk puuvilja,Canpol,,5901691812765,dry_preserves,dry_other,baby,baby_other
+582632,Canpol Easy Start Bonjour lutipudel 120ml,Canpol,120ml,5901691844353,dry_preserves,dry_other,baby,baby_other
+582633,Canpol Easy Start lutipudel 120ml roosa,Canpol,120ml,5901691844360,dry_preserves,dry_other,baby,baby_other
+582634,Canpol Easy Start 3k+ lutipudel 240ml sinine,Canpol,240ml,5901691844377,dry_preserves,dry_other,baby,baby_other
+582635,Canpol Easy Start lutipudel 240ml roosa,Canpol,240ml,5901691844384,dry_preserves,dry_other,baby,baby_other
+582636,Canpol Babies I Love Mummy lutikett grey,Canpol,,5901691863989,dry_preserves,dry_other,baby,baby_other
+582637,Canpol Babies I Love Mummy lutikett roosa,Canpol,,5901691863996,dry_preserves,dry_other,baby,baby_other
+582638,Purk 1L klaaskaanega metallsulguriga,,1L,5901752000056,dry_preserves,dry_other,household,hh_kitchenware
+582639,Säilituspurgi sildid 10tk+10 kinnituskumm,,10tk,5901752501058,dry_preserves,dry_other,household,hh_kitchenware
+582640,Purgikomplekt 425ml 2tk+kaaned,,425ml,5901752501232,dry_preserves,dry_other,household,hh_kitchenware
+582641,Casa de Mexico rohelise jalapeño viilud 340g,Casa de Mexico,340g,5901752703971,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+582642,Multeana must tee 20*1.5g metsamarjadega,Multeana,1.5g,5901812230003,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582643,Multeana Multifruit must tee 20*1.5g,Multeana,1.5g,5901812230034,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582644,EDT Jean Mark Billioner 100ml meeste,Jean Mark,100ml,5901815016970,dry_preserves,dry_other,personal_care,pcare_other
+582645,Smile koogipaber 20cm 12tk valge,Smile,12tk,5901828267055,dry_preserves,dry_other,household,hh_kitchenware
+582646,Smile tassialus 11cm 50tk valge,Smile,50tk,5901828267079,dry_preserves,dry_other,household,hh_kitchenware
+582647,Delikatess mädarõigas 170g,Delikatess,170g,5901870110019,dry_preserves,dry_other,sauces_oils,sauces_ketchup_mayo
+582648,Eveline Just Epil! 3in1 depileerimiskreem 125ml,Eveline,125ml,5901964016555,dry_preserves,dry_other,personal_care,pcare_other
+582649,Candy Floss suhkruvatt Minions 50g banaan,Candy Floss,50g,5901986039198,dry_preserves,dry_other,sweets_snacks,sweets_candies
+582650,Kupiec riisivahvlid 120g meresoolaga,Kupiec,120g,5902172001555,dry_preserves,dry_pasta_rice,sweets_snacks,sweets_snacks_salty
+582651,Minu Kreeka salat 850g,Minu,850g,5902256002775,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+582652,Minu paprikaviilud 630g,Minu,630g,5902256002805,produce,produce_root_veg,dry_preserves,dry_canned_veg
+582653,Relaxeen Excitement õhuvärskendaja 300ml taimne,Relaxeen,300ml,5902315536173,dry_preserves,dry_other,household,hh_candles_airfresh
+582654,Relaxeen Harmony õhuvärskendaja 300ml taimne,Relaxeen,300ml,5902315536203,dry_preserves,dry_other,household,hh_candles_airfresh
+582655,Galbani toorjuust Mascarpone 500g,Galbani,500g,5902409701661,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cottage_quark
+582656,Raw Paleo kiisueine steriliseeritud 100g veiseliha,Raw Paleo,100g,5902414202887,meat_fish,meat_beef_lamb_game,pet,pet_cat_wet
+582657,Raw Paleo kiisueine steriliseeritud 100g ulukiliha,Raw Paleo,100g,5902414202894,meat_fish,meat_beef_lamb_game,pet,pet_cat_wet
+582658,Raw Paleo konserv koerale 150g kalkunipasteet,Raw Paleo,150g,5902414207929,drinks,drinks_tea_coffee,pet,pet_dog_wet
+582659,Raw Paleo konserv koerale 150g lambapasteet,Raw Paleo,150g,5902414210073,drinks,drinks_tea_coffee,pet,pet_dog_wet
+582660,Hauaküünal 25h valge,,25h,5902553013825,household,hh_candles_airfresh,household,hh_candles_airfresh
+582661,Gotszlik jäätisevahvel Filippo 80g värviline,Gotszlik,80g,5902729245524,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+582662,Nutella šokolaadi-pähklikreem 230g,Nutella,230g,59027904,sweets_snacks,sweets_nuts_driedfruit,sauces_oils,sauces_other
+582663,4Vets konserv vet.toit seedehäiretega koerale 185g,4Vets,185g,5902811741101,pet,pet_other,pet,pet_dog_wet
+582664,4Vets konserv vet.toit kuseteede häiretega kassile 185g,4Vets,185g,5902811741309,pet,pet_other,pet,pet_cat_wet
+582665,4Vets konserv vet.toit seedehäiretega kassile 185g,4Vets,185g,5902811741316,pet,pet_other,pet,pet_cat_wet
+582666,Vigo alumiiniumfoolium 28cm*20m 8mic,Vigo,,5902841450028,dry_preserves,dry_other,household,hh_kitchenware
+582667,Vigo küpsetuspaber 38cm*8m karbis,Vigo,,5902841450936,dry_preserves,dry_flour_sugar_baking,household,hh_kitchenware
+582668,Vigo küpsetuspaber 38*42cm 20lehte,Vigo,,5902841451025,dry_preserves,dry_flour_sugar_baking,household,hh_kitchenware

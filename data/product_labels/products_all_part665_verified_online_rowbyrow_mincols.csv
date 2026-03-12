@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+583519,KH-7 rasvaeemaldaja 750ml,KH-7,750ml,8420822121080,dry_preserves,dry_other,household,hh_cleaners
+583520,Hispaania jõevähid valge veini kastmes 500g,,500g,8424260200017,drinks,drinks_wine,frozen_food,frozen_fish
+583521,Embutidos Caula vorst Chorizo 200g,Embutidos Caula,200g,8424863000250,meat_fish,meat_sausages,meat_fish,meat_gourmet
+583522,Haribo Miami Fizz kummikomm 85g,Haribo,85g,8426617359850,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+583523,Cava Clos Amador Brut Ecologic Reserva 0.75L,Clos Amador,0.75L,8426998254751,drinks,drinks_wine,drinks,drinks_wine
+583524,Cava Clos Amador Semi Sec Classic 0.75L,Clos Amador,0.75L,8426998257592,drinks,drinks_wine,drinks,drinks_wine
+583525,Cava Mas Pere Brut Reserva 0.75L,Mas Pere,0.75L,8426998258759,drinks,drinks_wine,drinks,drinks_wine
+583526,Ecomil kookoskoor 200ml,Ecomil,200ml,8428532230092,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+583527,Meresool 1kg,,1kg,8428818000081,world_spices,spices_basic_salt_pepper,world_spices,spices_basic_salt_pepper
+583528,Islamar kalmaarirõngad taignas 1kg külmutatud,Islamar,1kg,8432145003639,dry_preserves,dry_other,frozen_food,frozen_fish
+583529,Byphasse niisutav juuksepalsam 2tk,Byphasse,2tk,8436097094189,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond
+583530,Byphasse niisutav SPF30 juuksepalsam 2tk,Byphasse,2tk,8436097094196,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond
+583531,Byphasse 48H Sweet Almond Oil rulldeo 50ml,Byphasse,50ml,8436097095131,dry_preserves,dry_other,personal_care,pcare_deo
+583532,Byphasse 48H Bambuse rulldeo 50ml,Byphasse,50ml,8436097095148,dry_preserves,dry_other,personal_care,pcare_deo
+583533,Byphasse 48H Groovy Paris rulldeo 50ml,Byphasse,50ml,8436097095391,dry_preserves,dry_other,personal_care,pcare_deo
+583534,Byphasse Coconut dushikreem 1L,Byphasse,1L,8436097095803,dry_preserves,dry_other,personal_care,pcare_shower_soap
+583535,Byphasse Vanilla dushikreem 1L,Byphasse,1L,8436097095810,dry_preserves,dry_other,personal_care,pcare_shower_soap
+583536,Pv Care Tinto Sobre Lias 0.75L,Care,0.75L,8437003701399,dry_preserves,dry_other,drinks,drinks_wine
+583537,Vv Care Blanco Sobre Lias 0.75L,Care,0.75L,8437003701849,dry_preserves,dry_other,drinks,drinks_wine
+583538,Vv Capellana Macabeo Ecologic 0.75L,Capellana,0.75L,8437007174014,dry_preserves,dry_other,drinks,drinks_wine
+583539,Naturgreen agaavisiirup hele 500ml,Naturgreen,500ml,8437011502094,drinks,drinks_syrups_powders,dry_preserves,dry_other
+583540,Cava Cabaret Brut 0.75L,Cabaret,0.75L,8437020585163,drinks,drinks_wine,drinks,drinks_wine
+583541,Cava Cabaret Organic Brut 0.75L,Cabaret,0.75L,8437020585408,drinks,drinks_wine,drinks,drinks_wine
+583542,Paltavo avokaado majoneesikaste mahe 200g,Paltavo,200g,8437021545036,sauces_oils,sauces_other,sauces_oils,sauces_ketchup_mayo
+583543,ONE Steril Weight kuivtoit kassile 1.5kg kana,ONE,1.5kg,8445290062871,meat_fish,meat_poultry,pet,pet_cat_dry
+583544,ONE kuivtoit steriliseeritud kassile 800g kana,ONE,800g,8445290073426,meat_fish,meat_poultry,pet,pet_cat_dry
+583545,ONE Senior kuivtoit kassile 800g kana-taistera,ONE,800g,8445290246691,meat_fish,meat_poultry,pet,pet_cat_dry
+583546,Maggi Idea mahlastele ribidele maitseainesegu 42g,Maggi,42g,8445290259714,drinks,drinks_juices,world_spices,spices_herbs_spice_mix
+583547,Felix lihasupp kassile 6x48g veiseliha-kana,Felix,48g,8445290290359,meat_fish,meat_poultry,pet,pet_cat_wet
+583548,Felix kalasupp kassile 6x48g tursk-tuunikala,Felix,48g,8445290290373,meat_fish,fish_fresh,pet,pet_cat_wet
+583549,ONE Mini Active koeraeine 4x85g veiseliha-part,ONE,85g,8445290299284,meat_fish,meat_beef_lamb_game,pet,pet_dog_wet
+583550,ONE Mini Adult koeraeine 4x85g veiseliha-kana,ONE,85g,8445290299369,meat_fish,meat_poultry,pet,pet_dog_wet
+583551,Gourmet Gold konserv kassile 85g kana,Gourmet Gold,85g,8445290502599,meat_fish,meat_poultry,pet,pet_cat_wet
+583552,Gourmet Gold konserv kassile 85g loomaliha,Gourmet Gold,85g,8445290502636,meat_fish,meat_other,pet,pet_cat_wet
+583553,Gourmet Gold konserv kassile 85g kala,Gourmet Gold,85g,8445290502650,meat_fish,fish_fresh,pet,pet_cat_wet
+583554,ONE Dual kuivtoit kassile 750g kalkun-spiruliina,ONE,750g,8445290522511,meat_fish,meat_poultry,pet,pet_cat_dry
+583555,Felix Delicious kiisueine 4x85g liha tarrendis,Felix,85g,8445290588388,meat_fish,meat_other,pet,pet_cat_wet
+583556,Felix Delicious kiisueine 4x85g kala tarrendis,Felix,85g,8445290588401,meat_fish,fish_fresh,pet,pet_cat_wet
+583557,Maison Perrier sidrun-guajaava 250ml,Maison Perrier,250ml,8445291047570,dry_preserves,dry_canned_veg,drinks,drinks_water
+583558,Maison Perrier ananass-mango 250ml,Maison Perrier,250ml,8445291047617,dry_preserves,dry_canned_veg,drinks,drinks_water
+583559,Maison Perrier virsik-kirss 250ml,Maison Perrier,250ml,8445291047655,dry_preserves,dry_canned_veg,drinks,drinks_water
+583560,Maggi pasta Pad Thai kastmele 65g,Maggi,65g,8445291189409,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+583561,Maggi pasta Tikka Masala kastmele 65g,Maggi,65g,8445291189836,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+583562,Maggi pasta Teriyaki kastmele 65g,Maggi,65g,8445291189850,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+583563,Chupa Chups XXL pulgakomm 29g,Chupa Chups,29g,84460547,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+583564,Maggi kanapuljong 12x10g,Maggi,10g,8585002468741,world_spices,spices_broth_stock,world_spices,spices_broth_stock
+583565,Maggi Idea kanale 4-juustu kastmes maitseainesegu 32g,Maggi,32g,8585002469663,dairy_eggs_fats,dairy_cheese_slices,world_spices,spices_herbs_spice_mix
+583566,Ocuflash N1 silmatilgad 10ml,Ocuflash,10ml,8588000227082,dry_preserves,dry_other,personal_care,pcare_other
+583567,Madeta juust Maasdam 100g viilutatud,Madeta,100g,8593803327501,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+583568,Red Greip Magnesia vaarika gasseeritud jook 1.5L,Red Greip,1.5L,8594001027040,produce,produce_berries,drinks,drinks_soft_soda

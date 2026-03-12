@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580569,Marmiton Kardemoniküpsis 300g,Marmiton,300g,4740059811764,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+580570,Mayeri destilleeritud vesi 1L,Mayeri,1L,4740060000089,drinks,drinks_water,household,hh_other
+580571,Mayeri Juss pesupulber tööriietele 600g,Mayeri,600g,4740060000614,household,hh_laundry,household,hh_laundry
+580572,Säästu WC puhastusvahend Sidrun 1L,Säästu,1L,4740060000911,produce,produce_tropical,household,hh_cleaners
+580573,Säästu WC puhastusvahend Merevärskus 1L,Säästu,1L,4740060000928,household,hh_cleaners,household,hh_cleaners
+580574,Mayeri Sanit WC puhastusvahend 500ml,Mayeri,500ml,4740060000966,household,hh_cleaners,household,hh_cleaners
+580575,Säästu klaasipuhastusvahend Värske 1L,Säästu,1L,4740060001000,household,hh_cleaners,household,hh_cleaners
+580576,Säästu nõudepesuvahend sidrun 1L,Säästu,1L,4740060001017,produce,produce_tropical,household,hh_dishwashing
+580577,Säästu klaasipuhastusvahend Värske 1L täide,Säästu,1L,4740060001666,household,hh_cleaners,household,hh_cleaners
+580578,Mayeri Sensitive Color pesugeel 1.5L,Mayeri,1.5L,4740060002519,household,hh_laundry,household,hh_laundry
+580579,Mayeri All-Care Color pesugeel,Mayeri,,4740060003332,household,hh_laundry,household,hh_laundry
+580580,Mayeri Sensitive Color pesugeel 1L,Mayeri,1L,4740060003851,household,hh_laundry,household,hh_laundry
+580581,Mayeri All-in-One Lemon nõudepesumasin geel 600ml,Mayeri,600ml,4740060004452,dry_preserves,dry_other,household,hh_dishwashing
+580582,Mayeri All-Care klaasipuhastusvahend 500ml,Mayeri,500ml,4740060004537,dry_preserves,dry_other,household,hh_cleaners
+580583,Mayeri All-in-One nõudepesumasina tabletid 40tk,Mayeri,40tk,4740060004612,dry_preserves,dry_other,household,hh_dishwashing
+580584,Mayeri puhastuslapid Pomegranate 30tk niisutatud,Mayeri,30tk,4740060004971,dry_preserves,dry_other,household,hh_cleaners
+580585,Säästu üldpuhastusvahend 1L pihustiga,Säästu,1L,4740060005657,household,hh_cleaners,household,hh_cleaners
+580586,Mayeri Organic roheline seep 500ml,Mayeri,500ml,4740060005985,personal_care,pcare_soap,personal_care,pcare_soap
+580587,Mayeri All-Care Ocean WC puhastusgeel,Mayeri,,4740060006531,household,hh_cleaners,household,hh_cleaners
+580588,Mayeri katlakivieemaldi 50g pulber,Mayeri,50g,4740060008436,dry_preserves,dry_other,household,hh_cleaners
+580589,Säästu roheline tee nõudepesuvahend 1L palsam,Säästu,1L,4740060008993,drinks,drinks_tea_coffee,household,hh_dishwashing
+580590,Mayeri Black&Dark pesugeel 1L,Mayeri,1L,4740060009235,household,hh_laundry,household,hh_laundry
+580591,Mayeri All-Care Fresh Mint puhastusvahend 750ml,Mayeri,750ml,4740060010644,sweets_snacks,sweets_gums_mints,household,hh_cleaners
+580592,Mayeri Sensitive pesugeel täitepakend 3L,Mayeri,3L,4740060013447,household,hh_laundry,household,hh_laundry
+580593,Mayeri All-Care Color pesupulber 650g,Mayeri,650g,4740060015007,household,hh_laundry,household,hh_laundry
+580594,Mayeri Sensitive pesupulber 650g,Mayeri,650g,4740060015021,household,hh_laundry,household,hh_laundry
+580595,Mayeri Sensitive Color pesupulber 1.65kg,Mayeri,1.65kg,4740060015106,household,hh_laundry,household,hh_laundry
+580596,Lays Coop multipakk kartulikrõps 2x130g,Lays,130g,4740061001276,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+580597,Marmiton vahvel Hommik 110g kohvikreemiga,Marmiton,110g,4740062750241,sweets_snacks,sweets_waffles_cakes,sweets_snacks,sweets_waffles_cakes
+580598,Pärnu leib viil 600g Eesti Leivatööstus,Eesti Leivatööstus,600g,4740064015355,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+580599,Trühvlitort 400g Clara,Clara,400g,4740064415629,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+580600,Šokolaadikompvekid Assortii kommikarp 160g,,160g,4740064580242,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+580601,Ruks hele seemneleib 290g Leibur,Leibur,290g,4740072125961,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+580602,Burgerikukkel seesamiseemnega 420g Leibur,Leibur,420g,4740072266268,bakery,bakery_bread_loaves,bakery,bakery_buns_croissants
+580603,Salvest hapukapsasupp 530g lihata,Salvest,530g,4740073000328,produce,produce_root_veg,dry_preserves,dry_ready_meals_jars
+580604,Meie Mari vaarika-mustasõstramoos 590g,Meie Mari,590g,4740073000465,dry_preserves,dry_other,dry_preserves,dry_other
+580605,Põnn 6K ökol. õuna-ananassipüree 100g,Põnn,100g,4740073000618,produce,produce_apples_pears,baby,baby_food_jars
+580606,Põnn öko 6K mango-kookosesmuuti 110g,Põnn,110g,4740073000731,bakery,bakery_cakes_pastries,baby,baby_food_pouches
+580607,Salvest rassolnik 530g,Salvest,530g,4740073050156,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+580608,Salvest praekapsas 530g,Salvest,530g,4740073050262,produce,produce_root_veg,dry_preserves,dry_canned_veg
+580609,Salvest Chilli con Carne 530g,Salvest,530g,4740073071502,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+580610,Põnn 6K ökoloogiline puuviljasmuuti 110g,Põnn,110g,4740073072226,produce,produce_smoothies_fresh_juices,baby,baby_food_pouches
+580611,Põnn 6K puuvilja-jogurtismuuti 110g ökol.,Põnn,110g,4740073072981,dairy_eggs_fats,dairy_yogurt_kefir,baby,baby_food_pouches
+580612,Põnn 6K neljaviljapuder Öko 200g vaarika,Põnn,200g,4740073075487,produce,produce_berries,baby,baby_porridge_cereal
+580613,Põnn 8K ökol. toortatraroog 190g veiseliha,Põnn,190g,4740073076811,meat_fish,meat_beef_lamb_game,baby,baby_food_jars
+580614,Põnn 6K pirn-virsik-kiivismuuti 110g ökol.,Põnn,110g,4740073078587,produce,produce_apples_pears,baby,baby_food_pouches
+580615,Põnn 6K neljav.puder Öko 110g õuna-mango,Põnn,110g,4740073078822,produce,produce_apples_pears,baby,baby_porridge_cereal
+580616,Salvest Seljanka Presto 300g salaamiga,Salvest,300g,4740073079003,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+580617,Muuti 6K õuna-mango-m.sõstrapüree 110g öko,Muuti,110g,4740073079164,produce,produce_apples_pears,baby,baby_food_pouches
+580618,Liköör Lõunamaine 40% 500ml,Lõunamaine,500ml,4740077001284,produce,produce_apples_pears,drinks,drinks_spirits

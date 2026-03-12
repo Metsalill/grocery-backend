@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+581369,Mango söömisvalmis 2tk Brasiilia,,2tk,4740660021446,produce,produce_tropical,produce,produce_tropical
+581370,Avokaado söömisvalmis 2tk Peruu,,2tk,4740660021453,dry_preserves,dry_other,produce,produce_tropical
+581371,Coop nisujahu T00 1kg,Coop,1kg,4740660021460,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+581372,CK sünnipäevasalat 600g,CK,600g,4740660021569,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+581373,CK kartuli-suitsuvorstisalat 600g,CK,600g,4740660021590,meat_fish,meat_sausages,sauces_oils,sauces_other
+581374,CK kartuli-singisalat 600g,CK,600g,4740660021606,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+581375,Coop marineeritud heeringafilee tükid juurviljadega 250g,Coop,250g,4740660021798,dry_preserves,dry_other,meat_fish,fish_processed
+581376,Coop klassikaline heeringafilee õlis 240g,Coop,240g,4740660021804,sauces_oils,oils_other,meat_fish,fish_processed
+581377,Coop klassik. heeringafilee tükid õlis 250g,Coop,250g,4740660021811,sauces_oils,oils_other,meat_fish,fish_processed
+581378,Coop heeringafilee tükid sibulaga õlis 250g,Coop,250g,4740660021828,sauces_oils,oils_other,meat_fish,fish_processed
+581379,Coop vitamiinijook 568ml vaarika ja greibi,Coop,568ml,4740660021859,produce,produce_berries,drinks,drinks_soft_soda
+581380,Coop vitamiinijook 568ml rohelise õuna ja kadaka,Coop,568ml,4740660021866,produce,produce_apples_pears,drinks,drinks_soft_soda
+581381,Coop vitamiinijook 568ml mündi ja laimi,Coop,568ml,4740660021897,produce,produce_tropical,drinks,drinks_soft_soda
+581382,Coop popcorni maisiterad 200g,Coop,200g,4740660022115,dry_preserves,dry_canned_veg,dry_preserves,dry_other
+581383,Säästu kanamunad M 10tk,Säästu,10tk,4740660022313,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+581384,Hüva kuivatatud jaka viilud 100g,Hüva,100g,4740660022337,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+581385,Coop Basmati riis 4x125g,Coop,125g,4740660022429,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+581386,Coop aurutatud riis 4x125g,Coop,125g,4740660022436,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+581387,Coop riisihelbed 500g,Coop,500g,4740660022443,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+581388,Coop tatar 4x125g,Coop,125g,4740660022450,dry_preserves,dry_groats_beans,dry_preserves,dry_groats_beans
+581389,Coop pruun riis 4x125g,Coop,125g,4740660022467,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+581390,Hüva kuivtoit koertele 10kg loomaliha,Hüva,10kg,4740660022740,meat_fish,meat_other,pet,pet_dog_dry
+581391,Hüva kuivtoit täiskasvanud kassile 1.5kg kana,Hüva,1.5kg,4740660022757,meat_fish,meat_poultry,pet,pet_cat_dry
+581392,Hüva kuivtoit täiskasvanud kassile 400g kana,Hüva,400g,4740660022764,meat_fish,meat_poultry,pet,pet_cat_dry
+581393,Coop brokoli 400g külmutatud,Coop,400g,4740660022801,produce,produce_root_veg,frozen_food,frozen_vegetables
+581394,Coop lillkapsas 400g külmutatud,Coop,400g,4740660022818,produce,produce_root_veg,frozen_food,frozen_vegetables
+581395,Coop roheline hernes 400g külmutatud,Coop,400g,4740660022825,frozen_food,frozen_other,frozen_food,frozen_vegetables
+581396,Coop tükeldatud aeduba 400g külmutatud,Coop,400g,4740660022832,frozen_food,frozen_other,frozen_food,frozen_vegetables
+581397,Coop kolme köögivilja segu 400g külmutatud,Coop,400g,4740660022849,dry_preserves,dry_other,frozen_food,frozen_vegetables
+581398,Coop suvine köögiviljasegu 400g külmutatud,Coop,400g,4740660022856,dry_preserves,dry_other,frozen_food,frozen_vegetables
+581399,Coop porgand-mais-hernes 400g külmutatud,Coop,400g,4740660022863,dry_preserves,dry_canned_veg,frozen_food,frozen_vegetables
+581400,Coop Wokisegu 400g külmutatud,Coop,400g,4740660022870,frozen_food,frozen_other,frozen_food,frozen_vegetables
+581401,Purgikaaned pildiga 82mm 10tk juurvili,,10tk,4740660022993,dry_preserves,dry_other,household,hh_kitchenware
+581402,CK Burger coleslawga 230g,CK,230g,4740660023020,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+581403,CK Burger juustuga 190g,CK,190g,4740660023037,dairy_eggs_fats,dairy_cheese_slices,dry_preserves,dry_ready_meals_jars
+581404,Coop minifrikadellid 350g külmutatud,Coop,350g,4740660023150,frozen_food,frozen_other,frozen_food,frozen_meat
+581405,Coop punased Kidney oad 400g,Coop,400g,4740660023297,dry_preserves,dry_other,dry_preserves,dry_groats_beans
+581406,Coop jook 568ml sidrunimaits. kofeiiniga,Coop,568ml,4740660023587,produce,produce_tropical,drinks,drinks_soft_soda
+581407,Coop jook 568ml rohelise õuna maits. kofeiiniga,Coop,568ml,4740660023594,produce,produce_apples_pears,drinks,drinks_soft_soda
+581408,Coop jook 568ml maasika-rabarber kofeiiniga,Coop,568ml,4740660023600,dry_preserves,dry_other,drinks,drinks_soft_soda
+581409,Saare Kala leegitatud kuumsuitsu vikerforellifilee ports. 120g,Saare Kala,120g,4740663720292,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+581410,Peipsi haugifilee tomatimarinaadis 330g,Peipsi,330g,4740665000637,sauces_oils,sauces_marinades,meat_fish,fish_processed
+581411,Peipsi ahvenafilee koduses marinaadis 330g,Peipsi,330g,4740665000668,sauces_oils,sauces_marinades,meat_fish,fish_processed
+581412,Hummus musta küüslauguga 150g Marta Kulin,,150g,4740667249010,dry_preserves,dry_other,sauces_oils,sauces_other
+581413,Maitseroheline 100g Eesti,,100g,4740669000169,dry_preserves,dry_other,produce,produce_herbs_salads_sprouts
+581414,Till 50g Itaalia,,50g,4740669500003,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+581415,Käharpetersell 50g Itaalia,,50g,4740669500010,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+581416,Lehtpetersell 50g Itaalia,,50g,4740669500119,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+581417,Gourmet Club röstitud küüslaugu majonees 180g,Gourmet Club,180g,4740670124946,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+581418,Gourmet Club päikesekuivatatud tomat majonees 180g,Gourmet Club,180g,4740670124953,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo

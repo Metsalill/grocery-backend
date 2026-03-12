@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+583469,Barilla Pasta Gnocchi 500g,Barilla,500g,8076802085851,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583470,Valsoia Vegan shok.-pahklikreem 200g kaera,Valsoia,200g,80841197,sweets_snacks,sweets_nuts_driedfruit,sauces_oils,sauces_other
+583471,Codorniu La Rosca Cava Rose Brut 0.75L,Codorniu,0.75L,8410013016851,drinks,drinks_wine,drinks,drinks_wine
+583472,Codorniu La Rosca Cava Brut 0.75L,Codorniu,0.75L,8410013993596,drinks,drinks_wine,drinks,drinks_wine
+583473,AW Reeds Pear&Cinnamon difuusor 40ml,AW,40ml,8410104157050,world_spices,spices_herbs_spice_mix,household,hh_candles_airfresh
+583474,AW Reeds Melon&Frangipani difuusor 40ml,AW,40ml,8410104889357,produce,produce_tropical,household,hh_candles_airfresh
+583475,Torres 10 Gran Reserva brändi 38% 500ml,Torres,500ml,8410113001733,dry_preserves,dry_other,drinks,drinks_spirits
+583476,Fragata rohelised oliivid 200g sidruni,Fragata,200g,8410134008353,produce,produce_tropical,dry_preserves,dry_canned_veg
+583477,Fragata rohelised oliivid 200g küüslaugutäidis,Fragata,200g,8410134107001,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+583478,Whiskas kiisueine 4x85g kalavalik,Whiskas,85g,8410136025433,meat_fish,fish_fresh,pet,pet_cat_wet
+583479,Figaro küüslaauguküüned marinaadis 100g,Figaro,100g,8410159306175,sauces_oils,sauces_marinades,dry_preserves,dry_canned_veg
+583480,Borges rohelised oliivid 230g paprikaga,Borges,230g,8410179011806,produce,produce_root_veg,dry_preserves,dry_canned_veg
+583481,Pv Castillo Lagomar Red Medium Sweet 0.75L,Castillo Lagomar,0.75L,8410261371023,drinks,drinks_wine,drinks,drinks_wine
+583482,Vv Castillo Lagomar White Medium Sweet 0.75L,Castillo Lagomar,0.75L,8410261373027,drinks,drinks_wine,drinks,drinks_wine
+583483,Don Simon apelsinimahl 100% 200ml,Don Simon,200ml,8410261608303,produce,produce_tropical,drinks,drinks_juices
+583484,Don Simon kõrrejook virsiku-viinamarjaga 200ml,Don Simon,200ml,8410261611150,drinks,drinks_spirits,drinks,drinks_juices
+583485,Don Simon kõrrejook ananassi-viinamarjaga 200ml,Don Simon,200ml,8410261611167,drinks,drinks_spirits,drinks,drinks_juices
+583486,Don Simon smuuti mango-granadilli 330ml,Don Simon,330ml,8410261768168,produce,produce_tropical,produce,produce_smoothies_fresh_juices
+583487,Don Simon smuuti marjasegu 330ml,Don Simon,330ml,8410261768175,produce,produce_smoothies_fresh_juices,produce,produce_smoothies_fresh_juices
+583488,Gallina Blanca kanapuljong 8x10g tilli-petersell,Gallina Blanca,10g,8410300208914,meat_fish,meat_poultry,world_spices,spices_broth_stock
+583489,Yatekomo kiirnuudlid 61g idamaised,Yatekomo,61g,8410300349976,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+583490,Yatekomo Yakisoba kiirnuudlid 93g kanaga,Yatekomo,93g,8410300352280,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+583491,Yatekomo Yakisoba kiirnuudlid 93g klassik,Yatekomo,93g,8410300352327,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+583492,Pv Castillo de Liria Red 3L BIB,Castillo de Liria,3L,8410310028021,drinks,drinks_wine,drinks,drinks_wine
+583493,Vv Castillo de Liria White 3L BIB,Castillo de Liria,3L,8410310028038,drinks,drinks_wine,drinks,drinks_wine
+583494,Pv Castillo de Liria Red 0.75L,Castillo de Liria,0.75L,8410310603907,drinks,drinks_wine,drinks,drinks_wine
+583495,Vv Castillo de Liria White 0.75L,Castillo de Liria,0.75L,8410310603914,drinks,drinks_wine,drinks,drinks_wine
+583496,Castillo de Liria Brut vahuvein 0.75L,Castillo de Liria,0.75L,8410310622717,drinks,drinks_wine,drinks,drinks_wine
+583497,Gullon Hookies küpsis 250g kakao laktoos.v,Gullon,250g,8410376002256,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+583498,Gullon küpsis 200g gluteenivaba,Gullon,200g,8410376017359,drinks,drinks_tea_coffee,sweets_snacks,sweets_biscuits_cookies
+583499,Gullon kaneeliküpsis Creme Canela 470g,Gullon,470g,8410376027693,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+583500,Gullon küpsis 125g suhkruvaba shokolaadikrõpsuga,Gullon,125g,8410376039719,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+583501,Gullon suhkruvaba kakaoküpsis 210g vanilj,Gullon,210g,8410376047011,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+583502,Freixenet alkoholivaba vahuvein 0.75L,Freixenet,0.75L,8410384003016,drinks,drinks_wine,drinks,drinks_wine
+583503,Fini Watermelon närimiskumm 5g,Fini,5g,8410525185281,sweets_snacks,sweets_gums_mints,sweets_snacks,sweets_gums_mints
+583504,Fini Cola Bottle närimiskumm 5g,Fini,5g,8410525200298,drinks,drinks_soft_soda,sweets_snacks,sweets_gums_mints
+583505,Vv Castillo De Albai Blanco Rioja 0.187L,Castillo De Albai,0.187L,8410702030007,drinks,drinks_wine,drinks,drinks_wine
+583506,Noel Salchichon Extra salaami 80g viilutatud,Noel,80g,8410783327171,dry_preserves,dry_other,meat_fish,meat_gourmet
+583507,Elpozo paprikasalaami mahe Chorizo 200g,Elpozo,200g,8410843116561,produce,produce_root_veg,meat_fish,meat_gourmet
+583508,Elpozo Fuet salaami vahemerepärane 150g,Elpozo,150g,8410843145028,dry_preserves,dry_other,meat_fish,meat_gourmet
+583509,Elpozo Serrano sink 80g viilutatud,Elpozo,80g,8410843155805,meat_fish,meat_hams,meat_fish,meat_hams
+583510,Cava Jaume Serra Brut Nature 0.2L,Jaume Serra,0.2L,8411277205029,drinks,drinks_wine,drinks,drinks_wine
+583511,Cava Jaume Serra Rosado Brut 0.75L,Jaume Serra,0.75L,8411277205692,drinks,drinks_wine,drinks,drinks_wine
+583512,Vidal Lacreme maasika 80g suhkruvaba,Vidal,80g,8413178266789,produce,produce_berries,sweets_snacks,sweets_candies
+583513,Carmencita Himaalaja roosasool 3 pipraga 312g,Carmencita,312g,8413700649462,world_spices,spices_basic_salt_pepper,world_spices,spices_basic_salt_pepper
+583514,Simon Coll shokolaad ükssarviku kujul 15g,Simon Coll,15g,8413907589400,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+583515,Oro Verde rohelised oliivid 350g sidrunitäidis,Oro Verde,350g,8414564101233,drinks,drinks_wine,dry_preserves,dry_canned_veg
+583516,Fripozo Cheddari juustu amps jalapeenoga 250g,Fripozo,250g,8420321690025,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_ready_meals
+583517,KH7 induktsioonpliidile puhastuskriim 450ml,KH7,450ml,8420822112903,dry_preserves,dry_other,household,hh_cleaners
+583518,KH-7 katlakivieemaldaja 750ml,KH-7,750ml,8420822121066,dry_preserves,dry_other,household,hh_cleaners

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580269,Raffaello kommikarp 260g,Raffaello,260g,4008400180724,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+580270,Kinder Pingui piimatäidisega biskviit 30g,Kinder,30g,4008400290126,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+580271,Kinder Surprise üllatusmuna T1 20g,Kinder,20g,40084107,dairy_eggs_fats,dairy_eggs,sweets_snacks,sweets_chocolate_bars
+580272,Cesar koeraeine 150g kalkun-veise,Cesar,150g,4008429041013,meat_fish,meat_poultry,pet,pet_dog_wet
+580273,Cesar koeraeine 150g kana-kalkuni,Cesar,150g,4008429061868,meat_fish,meat_poultry,pet,pet_dog_wet
+580274,Sheba kiisueine 85g kanalihaga,Sheba,85g,4008429084799,meat_fish,meat_poultry,pet,pet_cat_wet
+580275,Sheba kiisueine 85g vasikalihaga,Sheba,85g,4008429084843,meat_fish,meat_other,pet,pet_cat_wet
+580276,Sheba kiisueine 85g lõhega,Sheba,85g,4008429084867,meat_fish,fish_fresh,pet,pet_cat_wet
+580277,Pedigree Rodeo maius koerale 70g,Pedigree,70g,4008429090110,pet,pet_other,pet,pet_dog_treats
+580278,Pedigree Dentastix närimistoode Mini 68g,Pedigree,68g,4008429136382,drinks,drinks_wine,pet,pet_dog_treats
+580279,Sheba Creamy maius kassile 4x12g kana,Sheba,12g,4008429140662,meat_fish,meat_poultry,pet,pet_cat_treats
+580280,Sheba Creamy maius kassile 4x12g lõhe,Sheba,12g,4008429140723,meat_fish,fish_fresh,pet,pet_cat_treats
+580281,Cesar koeraeine 150g vasika-kodulinnuga,Cesar,150g,4008429158766,pet,pet_other,pet,pet_dog_wet
+580282,Perfect Fit kuivtoit kassile 750g veiselihaga,Perfect Fit,750g,4008429160233,meat_fish,meat_beef_lamb_game,pet,pet_cat_dry
+580283,Perfect Fit kuivtoit kassile 750g steril.kana,Perfect Fit,750g,4008429160271,meat_fish,meat_poultry,pet,pet_cat_dry
+580284,Dr.Beckmann pesuvahendi lehed Univ. 25tk,Dr.Beckmann,25tk,4008455088112,dry_preserves,dry_other,household,hh_laundry
+580285,Dr.Beckmann Magic Leaves Color 25tk,Dr.Beckmann,25tk,4008455088310,dry_preserves,dry_other,household,hh_laundry
+580286,Dr.Beckmann puhastuskreem 250ml,Dr.Beckmann,250ml,4008455096018,dry_preserves,dry_other,household,hh_cleaners
+580287,Dr.Beckmann puh/pulber pesumasinale 250g,Dr.Beckmann,250g,4008455561813,dry_preserves,dry_other,household,hh_laundry
+580288,Coroos pruunid oad 800g,Coroos,800g,4008596620219,dry_preserves,dry_other,dry_preserves,dry_groats_beans
+580289,Coroos oad tomatikastmes 800g,Coroos,800g,4008596631215,produce,produce_root_veg,dry_preserves,dry_groats_beans
+580290,Loreto mustad oliivid 300g kivideta,Loreto,300g,4008638275148,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+580291,Kaitsekott riietele 100x60cm läbipaistev,Kaitsekott,,4008838379271,dry_preserves,dry_other,household,hh_other
+580292,Star Dollar 3* 30% piiritusjook 200ml,Star,200ml,4008943808703,dry_preserves,dry_other,drinks,drinks_spirits
+580293,Liköör Amaretto Bonino 21% 200ml,Amaretto Bonino,200ml,4008943997704,dry_preserves,dry_other,drinks,drinks_spirits
+580294,Rücker Aristides salveikuubik õlis ürt 300g,Rücker,300g,4008960227815,sauces_oils,oils_other,dry_preserves,dry_canned_veg
+580295,Milupa 10K täisterapuder piimaga 250g,Milupa,250g,4008976071440,dairy_eggs_fats,dairy_milk,baby,baby_porridge_cereal
+580296,Milupa 8K riisipuder piimaga 250g šok.,Milupa,250g,4008976072515,dairy_eggs_fats,dairy_milk,baby,baby_porridge_cereal
+580297,Frosch WC Lavendel puhastusvahend 750ml,Frosch,750ml,4009175142740,household,hh_cleaners,household,hh_cleaners
+580298,Frosch Citrus nõudepesuvahend 500ml,Frosch,500ml,4009175176172,household,hh_dishwashing,household,hh_dishwashing
+580299,Frosch katlakivivahem. vaarikas 500ml,Frosch,500ml,4009175962133,produce,produce_berries,household,hh_cleaners
+580300,Teekanne Tee Organic 20x3g kibvitsa-puuv,Teekanne,3g,4009300007968,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+580301,Teekanne Itaalia sidruni tee 20x2.5g,Teekanne,2.5g,4009300014492,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+580302,Herbamedicus hobusepalsam kehale 500ml,Herbamedicus,500ml,4009737306337,personal_care,pcare_shampoo_cond,personal_care,pcare_other
+580303,Herbamedicus hobusepalsam HOT 500ml,Herbamedicus,500ml,4009737306689,personal_care,pcare_shampoo_cond,personal_care,pcare_other
+580304,Liköör Jagdtraum 30% 700ml,Jagdtraum,700ml,4009887260701,dry_preserves,dry_other,drinks,drinks_spirits
+580305,Skittles Crazy Sours dražee 95g,Skittles,95g,4009900510851,dry_preserves,dry_other,sweets_snacks,sweets_candies
+580306,Orbit Refreshers Tropical 15.6g,Orbit,15.6g,4009900540520,dry_preserves,dry_other,sweets_snacks,sweets_gums_mints
+580307,Athena konserv kassile 100g loomaliha,Athena,100g,4010492051141,meat_fish,meat_other,pet,pet_cat_wet
+580308,Athena konserv kassile 100g linnuliha,Athena,100g,4010492051165,meat_fish,meat_other,pet,pet_cat_wet
+580309,Athena konserv kassile 100g merekala-krevet,Athena,100g,4010492051189,meat_fish,fish_fresh,pet,pet_cat_wet
+580310,Athena konserv kassile 100g kana-kalkuni,Athena,100g,4010492051653,meat_fish,meat_poultry,pet,pet_cat_wet
+580311,Athena Junior konserv kassile 100g linnulih,Athena,100g,4010492057006,pet,pet_other,pet,pet_cat_wet
+580312,Athena konserv steril.kassile 100g kalkun-kart,Athena,100g,4010492958167,meat_fish,meat_poultry,pet,pet_cat_wet
+580313,Daya 4mix kuivtoit kassile 1kg kana-köögiv,Daya,1kg,4010492969255,meat_fish,meat_poultry,pet,pet_cat_dry
+580314,Daya 4mix kuivtoit kassile 1kg loomal-köögiv,Daya,1kg,4010492969262,pet,pet_other,pet,pet_cat_dry
+580315,Apollo närimispulk koerale 55g kanaliha,Apollo,55g,4010492973603,meat_fish,meat_poultry,pet,pet_dog_treats
+580316,Apollo närimispulk koerale 55g loomaliha,Apollo,55g,4010492973627,meat_fish,meat_other,pet,pet_dog_treats
+580317,Apollo närimisribad 20tk 200g kana-kalkun,Apollo,20tk,4010492973702,meat_fish,meat_poultry,pet,pet_dog_treats
+580318,Apollo närimisribad 20tk 200g loomal-maks,Apollo,20tk,4010492973726,dry_preserves,dry_other,pet,pet_dog_treats

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+581019,Kaluri kalmaarituubid 350g külmutatud,Kaluri,350g,4740590074178,dry_preserves,dry_other,frozen_food,frozen_fish
+581020,Kaluri heeringasült 300g,Kaluri,300g,4740590074314,meat_fish,fish_fresh,meat_fish,fish_processed
+581021,Kaluri praetud heeringas koduses marin. 280g,Kaluri,280g,4740590074376,meat_fish,fish_fresh,meat_fish,fish_processed
+581022,Kaluri praetud heeringas tomatikastmes 280g,Kaluri,280g,4740590074383,meat_fish,fish_fresh,meat_fish,fish_processed
+581023,Kaluri praetud kilud koduses marin. 1kg,Kaluri,1kg,4740590075052,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+581024,Kaluri praetud kilud tomatikastmes 1kg,Kaluri,1kg,4740590075069,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+581025,KGr heeringafilee 240g vähesoolane,KGr,240g,4740590810042,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked
+581026,KGr skumbria õlis 240g,KGr,240g,4740590876550,sauces_oils,oils_other,meat_fish,fish_processed
+581027,Linnamäe Pan. kodused hakk-kotletid 840g,Linnamäe,840g,4740618005306,dry_preserves,dry_other,frozen_food,frozen_meat
+581028,Linnamäe maasuitsu fileesink 135g viil,Linnamäe,135g,4740618005603,meat_fish,meat_hams,meat_fish,meat_hams
+581029,Linnamäe suitsutatud pardifilee 70g viil,Linnamäe,70g,4740618007140,meat_fish,fish_salted_smoked,meat_fish,meat_gourmet
+581030,Linnamäe veiseliha äkis 110g,Linnamäe,110g,4740618007461,meat_fish,meat_beef_lamb_game,meat_fish,meat_gourmet
+581031,Linnamäe P/S vorst juustuga hirvelih. 330g,Linnamäe,330g,4740618007751,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+581032,Linnamäe põdraliha steik 240g,Linnamäe,240g,4740618007768,meat_fish,meat_other,meat_fish,meat_gourmet
+581033,Linnamäe juustune grill-frankfurter 380g,Linnamäe,380g,4740618007843,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+581034,Linnamäe P/S vorst hirve-cheddar 100g,Linnamäe,100g,4740618008277,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+581035,Linnamäe Cheddar-jalapeno grillvorst 380g,Linnamäe,380g,4740618008536,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+581036,Kikas Kiievi kotlet 220g,Kikas,220g,4740625000998,dry_preserves,dry_other,frozen_food,frozen_meat
+581037,Kikas Pozarski kotlet 1kg/10tk jahutatud,Kikas,1kg,4740625002190,dry_preserves,dry_flour_sugar_baking,meat_fish,meat_minced
+581038,Kikas juustupall jalapenoga 300g,Kikas,300g,4740625003821,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_meat
+581039,Säästu magusad teraviljarõngad 200g,Säästu,200g,4740660000649,dry_preserves,dry_other,dry_preserves,dry_cereals_muesli
+581040,Säästu magusad terav.kausikesed 200g kakaoga,Säästu,200g,4740660001097,dry_preserves,dry_other,dry_preserves,dry_cereals_muesli
+581041,Säästu nisuterad 200g meega,Säästu,200g,4740660001103,dry_preserves,dry_other,dry_preserves,dry_cereals_muesli
+581042,Hüva vanillimaitseline koorejäätis 480g,Hüva,480g,4740660001646,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+581043,Hüva šokolaadi koorejäätis 1L/480g,Hüva,1L,4740660001653,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+581044,Hüva toored grillvorstid 500g lambasooltes,Hüva,500g,4740660001776,world_spices,spices_basic_salt_pepper,meat_fish,meat_sausages
+581045,Hüva toored grillvorstid 500g seasooltes,Hüva,500g,4740660001783,world_spices,spices_basic_salt_pepper,meat_fish,meat_sausages
+581046,CK kartulipüree 350g,CK,350g,4740660003985,produce,produce_root_veg,dry_preserves,dry_ready_meals_jars
+581047,CK mulgipuder 350g,CK,350g,4740660003992,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+581048,CK ühepajatoit 350g,CK,350g,4740660004005,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+581049,CK kapsa-hakklihahautis 300g,CK,300g,4740660004029,meat_fish,meat_minced,dry_preserves,dry_ready_meals_jars
+581050,CK Plov 300g,CK,300g,4740660004036,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+581051,CK Tatra-kanaroog 300g,CK,300g,4740660004166,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+581052,CK kartuli-suitsuvorstisalat 200g,CK,200g,4740660004180,meat_fish,meat_sausages,sauces_oils,sauces_other
+581053,CK kartuli-lihasalat 200g,CK,200g,4740660004197,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+581054,CK peedi-küüslaugusalat 200g,CK,200g,4740660004432,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+581055,CK Kirju salat 200g,CK,200g,4740660004524,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+581056,CK suitsukanavõie 220g,CK,220g,4740660004586,dairy_eggs_fats,dairy_butter_margarine,meat_fish,meat_poultry
+581057,Hüva kohupiim lahja vaniliiniga 200g,Hüva,200g,4740660004807,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+581058,Hüva kohupiim lahja rosinatega 200g,Hüva,200g,4740660004814,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+581059,Hüva kohupiim lahja 200g,Hüva,200g,4740660004821,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+581060,Hüva vanilli-koorejäätis 125ml/65g,Hüva,125ml,4740660004913,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+581061,Hüva šok.-koorejäätis 65g,Hüva,65g,4740660004920,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+581062,Säästu limonaad 1.5L magusainega,Säästu,1.5L,4740660005255,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+581063,Säästu tatar 1kg,Säästu,1kg,4740660005569,dry_preserves,dry_groats_beans,dry_preserves,dry_groats_beans
+581064,Hüva pelmeenid 400g külmutatud,Hüva,400g,4740660005866,frozen_food,frozen_other,frozen_food,frozen_ready_meals
+581065,Ehe Viin 40% 500ml,Ehe,500ml,4740660006153,drinks,drinks_spirits,drinks,drinks_spirits
+581066,Hüva šok. koorejäätis šok.maits. gl. 60g,Hüva,60g,4740660006344,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+581067,Hüva vanilli-koorejäätis šok.maits. gl. 60g,Hüva,60g,4740660006351,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+581068,Hüva metsamarjamaitseline joogijogurt 1kg,Hüva,1kg,4740660006375,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+583769,Colgate 360 Freshness Protect hambahari 2tk,Colgate,2tk,8718951439672,dry_preserves,dry_other,personal_care,pcare_oral_care
+583770,Colgate Barbie hambahari patareidega laste,Colgate,,8718951448162,dry_preserves,dry_other,personal_care,pcare_oral_care
+583771,Colgate Max White Ultra Active hambapasta 50ml,Colgate,50ml,8718951504752,dry_preserves,dry_other,personal_care,pcare_oral_care
+583772,Colgate Ultra Soft hambahari 2tk,Colgate,2tk,8718951518759,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+583773,Colgate Max White Purple Revive hambapasta 75ml,Colgate,75ml,8718951540033,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+583774,Colgate 360 Soft hambahari 2-pakk,Colgate,,8718951561410,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+583775,Colgate Max White Ultra Multi Protection hambapasta 50ml,Colgate,50ml,8718951563544,dry_preserves,dry_other,personal_care,pcare_oral_care
+583776,Ajax Strong&Safe puhastussprei 500ml,Ajax,500ml,8718951567825,household,hh_cleaners,household,hh_cleaners
+583777,Ajax Strong&Safe üldpuhastusvahend 1L,Ajax,1L,8718951567887,dry_preserves,dry_other,household,hh_cleaners
+583778,Colgate Big Kids Smiles 6-9a hambapasta 50ml,Colgate,50ml,8718951610613,dry_preserves,dry_other,personal_care,pcare_oral_care
+583779,Ajax Power Anti-Limescale puhastusvahend 500ml,Ajax,500ml,8718951643789,dry_preserves,dry_other,household,hh_cleaners
+583780,Ajax Power Multi-Surface puhastusvahend 500ml,Ajax,500ml,8718951644021,dry_preserves,dry_other,household,hh_cleaners
+583781,Colgate High Density Charcoal hambahari soft,Colgate,,8718951655720,dry_preserves,dry_other,personal_care,pcare_oral_care
+583782,Colgate Total Anti-Tartar hambapasta 75ml,Colgate,75ml,8718951656093,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+583783,Colgate Max White Sparkling Diamond hambapasta 75ml,Colgate,75ml,8718951688001,dry_preserves,dry_other,personal_care,pcare_oral_care
+583784,Colgate Total Gum Care&Sensitivity hambapasta 75ml,Colgate,75ml,8718951690592,dry_preserves,dry_other,personal_care,pcare_oral_care
+583785,Ajax Ultra Lavender üldpuhastusvahend 1L,Ajax,1L,8718951691988,dry_preserves,dry_other,household,hh_cleaners
+583786,Ajax Ultra Fresh üldpuhastusvahend 1L,Ajax,1L,8718951692015,dry_preserves,dry_other,household,hh_cleaners
+583787,Colgate Advanced White Purple hambapasta 75ml,Colgate,75ml,8718951702462,dry_preserves,dry_other,personal_care,pcare_oral_care
+583788,Fruitfun puuviljasnäkk 4x20g krõbe õuna,Fruitfun,20g,8719189354478,produce,produce_apples_pears,sweets_snacks,sweets_snacks_salty
+583789,Fruitfun puuviljasnäkk 4x20g maasika,Fruitfun,20g,8719189354560,produce,produce_berries,sweets_snacks,sweets_snacks_salty
+583790,Fruitfun puuviljasnäkk 10x10g õuna,Fruitfun,10g,8719189354614,produce,produce_apples_pears,sweets_snacks,sweets_snacks_salty
+583791,Rama Vispi vahukoor 31% 1L,Rama,1L,8719200053632,dry_preserves,dry_other,dairy_eggs_fats,dairy_cream_sourcream
+583792,Rama köögikreem 15% 1L madala laktoosiga,Rama,1L,8719200247826,dry_preserves,dry_other,dairy_eggs_fats,dairy_cream_sourcream
+583793,Rama Classic rasvavõie 59% 225g,Rama,225g,8719200264977,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+583794,Fruitfun puuviljasnäkk 10x10g maasika,Fruitfun,10g,8719325866445,produce,produce_berries,sweets_snacks,sweets_snacks_salty
+583795,LED lamp E14 6W B35 620lm 15000h Philips,Philips,,8719514313200,dry_preserves,dry_other,household,hh_other
+583796,Neutral Sensitive nõudepesuvahend 500ml,Neutral,500ml,8720181056734,,,household,hh_dishwashing
+583797,Neutral Sensitive Skin Silk&Wool pesugeel 1L,Neutral,1L,8720181212635,dry_preserves,dry_other,household,hh_laundry
+583798,Neutral Sensitive Skin White Wash pesugeel 1L,Neutral,1L,8720181212642,dry_preserves,dry_other,household,hh_laundry
+583799,Neutral Sensitive Skin Colour Wash pesugeel 1L,Neutral,1L,8720181212666,dry_preserves,dry_other,household,hh_laundry
+583800,Dove Invisible Care deodorant 150ml naiste,Dove,150ml,8720181291562,dry_preserves,dry_other,personal_care,pcare_deo
+583801,Dove Men Clean Comfort dushigeel 250ml,Dove,250ml,8720181313417,dry_preserves,dry_other,personal_care,pcare_shower_soap
+583802,Dove Men Extra Fresh dushigeel 250ml,Dove,250ml,8720181313431,dry_preserves,dry_other,personal_care,pcare_shower_soap
+583803,Dove Men Clean Comfort dushigeel 400ml,Dove,400ml,8720181313448,dry_preserves,dry_other,personal_care,pcare_shower_soap
+583804,Cif Perfect Finish Steel puhastusvahend 435ml,Cif,435ml,8720181338441,drinks,drinks_tea_coffee,household,hh_cleaners
+583805,Domestos Pine Fresh WC puhastusvahend 750ml,Domestos,750ml,8720181377242,dry_preserves,dry_other,household,hh_cleaners
+583806,Domestos 24h Atlantic WC puhastusvahend 750ml,Domestos,750ml,8720181377259,dry_preserves,dry_other,household,hh_cleaners
+583807,Domestos Citrus WC puhastusvahend 750ml,Domestos,750ml,8720181377266,dry_preserves,dry_other,household,hh_cleaners
+583808,Dove Eucalyptus+Mint dushigeel 400ml,Dove,400ml,8720181444678,sweets_snacks,sweets_gums_mints,personal_care,pcare_shower_soap
+583809,Dove Deeply Nourishing dushigeel 400ml,Dove,400ml,8720181457425,dry_preserves,dry_other,personal_care,pcare_shower_soap
+583810,Dove Nourishing Silk dushigeel 400ml,Dove,400ml,8720181457449,dry_preserves,dry_other,personal_care,pcare_shower_soap
+583811,Dove Deeply Nourishing dushigeel 225ml,Dove,225ml,8720181457494,dry_preserves,dry_other,personal_care,pcare_shower_soap
+583812,Dove Fresh Care dushigeel 250ml,Dove,250ml,8720181471759,dry_preserves,dry_other,personal_care,pcare_shower_soap
+583813,Dove Nourishing Argan Oil kreemseep 90g,Dove,90g,8720182258397,personal_care,pcare_soap,personal_care,pcare_shower_soap
+583814,Dove kreemseep kooriv 90g,Dove,90g,8720182258830,dairy_eggs_fats,dairy_cream_sourcream,personal_care,pcare_shower_soap
+583815,Dove Fresh Touch kreemseep 90g,Dove,90g,8720182259332,personal_care,pcare_soap,personal_care,pcare_shower_soap
+583816,Dove kreemseep 90g,Dove,90g,8720182264664,personal_care,pcare_soap,personal_care,pcare_shower_soap
+583817,Domestos Power Fresh Lime WC geel 700ml,Domestos,700ml,8720182431257,dry_preserves,dry_other,household,hh_cleaners
+583818,Knorr Lasagnette kastmega valmistamiskomplekt 270g,Knorr,270g,8720182572905,sauces_oils,sauces_other,dry_preserves,dry_ready_meals_jars

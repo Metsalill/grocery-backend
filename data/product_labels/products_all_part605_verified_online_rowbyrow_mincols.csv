@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580519,Hellus keefirimaius mango 200g,Hellus,200g,4740036018131,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580520,Hellus keefirimaius metsamarja 200g,Hellus,200g,4740036018148,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580521,VR vürtsikilu 500g,VR,500g,4740041000022,world_spices,spices_herbs_spice_mix,meat_fish,fish_salted_smoked
+580522,VR praetud heeringafilee pallikesed tom. 500g,VR,500g,4740041000039,meat_fish,fish_fresh,meat_fish,fish_processed
+580523,VR heeringafilee tomatimarinaadis 500g,VR,500g,4740041000060,sauces_oils,sauces_marinades,meat_fish,fish_processed
+580524,Viru Rand praetud heeringafilee kod.marin. 500g,Viru Rand,500g,4740041000084,dry_preserves,dry_other,meat_fish,fish_processed
+580525,VR heeringafileetükid juurviljadega 500g,VR,500g,4740041000091,meat_fish,fish_fresh,meat_fish,fish_processed
+580526,VR praetud räim koduses marinaadis 500g,VR,500g,4740041000107,sauces_oils,sauces_marinades,meat_fish,fish_processed
+580527,VR praetud räim tomati marinaadis 500g,VR,500g,4740041000114,sauces_oils,sauces_marinades,meat_fish,fish_processed
+580528,VR vürtsikad kilufileed 200g,VR,200g,4740041000268,world_spices,spices_herbs_spice_mix,meat_fish,fish_salted_smoked
+580529,VR kilufileed tilli ja sibulaga 200g,VR,200g,4740041000299,produce,produce_herbs_salads_sprouts,meat_fish,fish_salted_smoked
+580530,VR heeringafilee tükid pun.veini marin. 270g,VR,270g,4740041000473,drinks,drinks_wine,meat_fish,fish_processed
+580531,VR heeringafileetükid juurviljadega 400g,VR,400g,4740041000497,meat_fish,fish_fresh,meat_fish,fish_processed
+580532,VR ansoovis õlis 125g,VR,125g,4740041000930,sauces_oils,oils_other,meat_fish,fish_salted_smoked
+580533,Viru Rand heeringasült 270g,Viru Rand,270g,4740041001623,meat_fish,fish_fresh,meat_fish,fish_processed
+580534,Viru Rand heeringafileed õlis nahata 200g,Viru Rand,200g,4740041002194,sauces_oils,oils_other,meat_fish,fish_processed
+580535,VR praetud räimefileed tarrendis 390g,VR,390g,4740041004051,meat_fish,fish_fresh,meat_fish,fish_processed
+580536,Värska Naturaal Goji-Jõhvika 1.5L,Värska,1.5L,4740042702581,produce,produce_berries,drinks,drinks_soft_soda
+580537,Värska Naturaal Aloe Vera-Yuzu 1.5L,Värska,1.5L,4740042702598,dry_preserves,dry_other,drinks,drinks_soft_soda
+580538,Värska Naturaal Apelsin-Passion 1.5L,Värska,1.5L,4740042702925,produce,produce_tropical,drinks,drinks_soft_soda
+580539,Tallegg toorjuustutäidisega kanapall 300g,Tallegg,300g,4740046013256,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_meat
+580540,Tallegg paneeritud kanafileeburger 340g,Tallegg,340g,4740046013447,meat_fish,meat_poultry,frozen_food,frozen_meat
+580541,Tallegg broilerikoivaliha äädikamarinaadis 700g,Tallegg,700g,4740046013768,sauces_oils,sauces_marinades,meat_fish,meat_poultry
+580542,Ekstra Viin 40% 500ml,Ekstra,500ml,4740050003359,drinks,drinks_spirits,drinks,drinks_spirits
+580543,Liköör Vana Tallinn Heritage 40% 500ml,Vana Tallinn,500ml,4740050003861,dry_preserves,dry_other,drinks,drinks_spirits
+580544,Liköör Vana Tallinn 40% 200ml pet,Vana Tallinn,200ml,4740050003878,dry_preserves,dry_other,drinks,drinks_spirits
+580545,Pipra Naps Meega piiritusjook 35% 200ml,Pipra Naps,200ml,4740050004998,dry_preserves,dry_other,drinks,drinks_spirits
+580546,Ginger Duke ingverijook 750ml,Ginger Duke,750ml,4740050005766,drinks,drinks_spirits,drinks,drinks_soft_soda
+580547,Liköör Vana Tallinn Marzipan Cr. 16% 500ml,Vana Tallinn,500ml,4740050006374,dry_preserves,dry_other,drinks,drinks_spirits
+580548,Liköör Liviko Liqueur Ploom 21% 500ml,Liviko,500ml,4740050007708,dry_preserves,dry_other,drinks,drinks_spirits
+580549,Stellar karboniseeritud looduslik min.vesi 700ml,Stellar,700ml,4740050055174,drinks,drinks_water,drinks,drinks_water
+580550,Limpa mahlajook Peojook 2L õuna-maasika,Limpa,2L,4740051000135,drinks,drinks_juices,drinks,drinks_juices
+580551,For Me piparm.-rohelise tee jook 500ml kofeiiniga,For Me,500ml,4740051000548,drinks,drinks_tea_coffee,drinks,drinks_soft_soda
+580552,For Me virsik-vanilje 500ml kofeiiniga,For Me,500ml,4740051000555,dry_preserves,dry_other,drinks,drinks_soft_soda
+580553,For Me spordijook isotoonil. greibi 500ml,For Me,500ml,4740051000784,drinks,drinks_sport,drinks,drinks_sport
+580554,Aura smuuti mustika-vaarika-mündi 300ml,Aura,300ml,4740051001118,produce,produce_berries,produce,produce_smoothies_fresh_juices
+580555,Karksi kali traditsiooniline kääritatud 1L,Karksi,1L,4740051004393,dry_preserves,dry_other,drinks,drinks_soft_soda
+580556,Aura Infusion mustika-melissi 1L pet,Aura,1L,4740051999897,produce,produce_berries,drinks,drinks_soft_soda
+580557,Balsnack neljaviljapallid Krõbinad 150g,Balsnack,150g,4740053008986,dry_preserves,dry_other,sweets_snacks,sweets_snacks_salty
+580558,Piraat nisukrõps 150g sibula-ja juustuga,Piraat,150g,4740053008993,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+580559,Saaremaa Cur G&T 4.5% 275ml pdl,Saaremaa,275ml,4740054364739,dry_preserves,dry_other,drinks,drinks_beer_cider
+580560,Saaremaa Ras G&T 4.5% 275ml pdl,Saaremaa,275ml,4740054364975,dry_preserves,dry_other,drinks,drinks_beer_cider
+580561,Lummus Mustsõstra muu alkoholjook 8% 750ml,Lummus,750ml,4740054365194,dry_preserves,dry_other,drinks,drinks_spirits
+580562,Vici Smart Choice kalapulgad 700g,Vici,700g,4740056098083,meat_fish,fish_fresh,frozen_food,frozen_fish
+580563,Columbus kalapulgad 250g,Columbus,250g,4740056098250,meat_fish,fish_fresh,frozen_food,frozen_fish
+580564,Vici pannkoogid karamellitäidisega 340g,Vici,340g,4740056202046,sweets_snacks,sweets_candies,frozen_food,frozen_bakery
+580565,Vici pannkook šokolaaditäidisega 340g,Vici,340g,4740056913331,bakery,bakery_cakes_pastries,frozen_food,frozen_bakery
+580566,Marmiton kaeraküpsis 200g glasuuriga,Marmiton,200g,4740059082515,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+580567,Marmiton kakaoküpsis 130g šok.tükkidega,Marmiton,130g,4740059811696,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+580568,Marmiton võiküpsis 150g vaniljega,Marmiton,150g,4740059811719,dairy_eggs_fats,dairy_butter_margarine,sweets_snacks,sweets_biscuits_cookies

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+614792,Dr.Oetker Christmas Party Sprinkles 110g,Dr.Oetker,110g,4000521025717,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+614793,Kucharek kanalihapuljong 120g,Kucharek,120g,5901135011020,world_spices,spices_broth_stock,world_spices,spices_broth_stock
+614794,Wilton sugar decoration eyeballs 57g,Wilton,57g,0070896171795,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+614795,Kotimaista kanahakkliha 4% 400g,Kotimaista,400g,6414891801488,dry_preserves,dry_canned_veg,meat_fish,meat_minced
+614796,Broilerikintsud tzatziki kastmes 800g,,800g,4740171177601,meat_fish,meat_poultry,meat_fish,meat_poultry
+614797,Cinnamon ground kaneelipulber 70g,,70g,7340191109346,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+614798,Rosso baked feta-rigatone pasta 330g,Rosso,330g,6438574157174,dry_preserves,dry_pasta_rice,frozen_food,frozen_ready_meals
+614799,Breezer Lime 4% 275ml,Breezer,275ml,5010677551397,dry_preserves,dry_other,drinks,drinks_beer_cider
+614800,Piparkookide segu 12tk,,12tk,4742581007189,drinks,drinks_spirits,bakery,bakery_sweet_buns_donuts
+614801,Tulipunane Talleke vein 750ml,,750ml,4742024130887,dry_preserves,dry_other,drinks,drinks_wine
+614802,Verivorst Pöialpoiss e-vaba 500g,,500g,4740569006278,meat_fish,meat_sausages,meat_fish,meat_sausages
+614803,Absolut Drinks Raspberry Lemonade 275ml,Absolut,275ml,4748001008088,dry_preserves,dry_other,drinks,drinks_beer_cider
+614804,Juuretisega leiva küpsetamise komplekt,,,4745010637018,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+614805,Sheppys Organic siider 6% 500ml,Sheppys,500ml,5025268050081,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+614806,Majonees Kuldne provansaal 300g,,300g,4745010372124,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+614807,WcKukka puhastusgeel värske meri 750ml,WcKukka,750ml,7310619188765,,,household,hh_cleaners
+614808,Jenkki Professional värske maasika närimiskumm 90g,Jenkki,90g,6420256016824,,,sweets_snacks,sweets_gums_mints
+614809,Seakarree ahjupraad ürdimarinaadis 1kg,,1kg,4744735011554,,,meat_fish,meat_pork
+614810,Jõulukeeks 300g,,300g,4740086026605,,,bakery,bakery_cakes_pastries
+614811,Aura Glögi kirsi-aroonia 1L pakk,Aura,1L,4740051999798,,,drinks,drinks_soft_soda
+614812,Porgandivorm 400g,,400g,6412000030200,,,frozen_food,frozen_ready_meals
+614813,Fantasia koorene jogurt M&Ms 120g,Fantasia,120g,5900643049945,,,dairy_eggs_fats,dairy_yogurt_kefir
+614814,Doormat Hau 50x80cm,,,6419835260390,,,household,hh_other
+614815,Kotimaista lõhefilee külmutatud ASC 700-800g,Kotimaista,800g,2396012400005,,,frozen_food,frozen_fish
+614816,Coop lingon jam (pohlamoos) 400g,Coop,400g,7340191159846,,,dry_preserves,dry_other
+614817,Bosto pruun bulgur 4x75g,Bosto,4x75g,5410106070220,,,dry_preserves,dry_groats_beans
+614818,Kotimaista allikavesi 10L,Kotimaista,10L,6415712611064,,,drinks,drinks_water
+614819,Coop mandlijook (Almond drink),Coop,,7340191177741,,,dairy_eggs_fats,dairy_plant_drinks
+614820,Heineken õlu 6-pakk 5% 3L,Heineken,3L,4744136011344,,,drinks,drinks_beer_cider
+614821,Yellow Room difuusor 90ml tsitrusekoor,Yellow Room,90ml,5703855816844,,,household,hh_candles_airfresh
+614891,Ebaküpress taim 40cm,,,8717191529907,,,produce,produce_herbs_salads_sprouts
+614892,Blossa Alkoholfri Glögg 75cl,Blossa,75cl,5710778002513,,,drinks,drinks_soft_soda
+614893,Vileda SuperMocio ämber ja väänur,Vileda,,4003790105111,,,household,hh_cleaners
+614894,Coop Sprinkles Mixed kaunistused,Coop,,7340191160354,,,dry_preserves,dry_flour_sugar_baking
+614895,Klementiin Herkku I klass,,,2060312300005,,,produce,produce_tropical
+614896,Xtra karri 80g,Xtra,80g,7340191109353,,,world_spices,spices_herbs_spice_mix
+614897,Küpress Ellwood 60-70cm (taim),,,5407003460087,,,produce,produce_herbs_salads_sprouts
+614898,Birra Moretti Premium Lager õlu 330ml,Birra Moretti,330ml,8001435310018,,,drinks,drinks_beer_cider
+614899,Kotimaista kapsavorm 400g,Kotimaista,400g,6438574198238,,,frozen_food,frozen_ready_meals
+614900,Coop kartulikrõpsud soola ja äädikaga 175g,Coop,175g,7340191130623,,,sweets_snacks,sweets_snacks_salty
+614901,Klementiin lehtedega 1kg,,1kg,6438574556489,,,produce,produce_tropical
+614902,Coop roheline õun pesuloputusvahend 750ml,Coop,750ml,7340191172869,,,household,hh_laundry
+614903,Marjex soolaseentesegu 350g,Marjex,350g,4740536412507,,,dry_preserves,dry_canned_veg
+614904,Coop Silverskin onions (marineeritud sibulad) 320g,Coop,320g,7340191168954,,,dry_preserves,dry_canned_veg
+614905,Xtra tursatükid külmutatud MSC,Xtra,,7340191167056,,,frozen_food,frozen_fish
+614906,Valge tee mango-apelsin,,,4792252945142,,,drinks,drinks_tea_coffee
+614907,Kartul 5kg I Finland,,5kg,6414894500081,,,produce,produce_root_veg
+614908,Bio bataat 500g,,500g,8713037005079,,,produce,produce_root_veg
+614909,Kodulõhnastaja valge muskus ja vanilje 100ml,,100ml,6411635009612,,,household,hh_candles_airfresh
+614910,Keedetud homaar,,,2060333500002,,,meat_fish,fish_fresh

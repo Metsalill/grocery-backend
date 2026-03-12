@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+614436,USIN hapukapsasalat õuna ja jõhvikatega 300g,USIN,300g,4740584006628,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+614437,Kinder piimašokolaadiga kaetud šokolaadifiguurid piimatäidisega 122g,Kinder,122g,8000500409534,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+614438,USIN punase kapsa salat 300g,USIN,300g,4740584007670,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+614439,Lindt jõulu martsipani assortii 175g,Lindt,175g,4000539752506,dry_preserves,dry_other,sweets_snacks,sweets_candies
+614440,ASTRI rosolje 850g,ASTRI,850g,4740602004421,dry_preserves,dry_other,produce,produce_herbs_salads_sprouts
+614585,Hälsans Kök taimne fileepala 420g,Hälsans Kök,420g,8445291885356,dry_preserves,dry_other,dry_preserves,dry_groats_beans
+614586,Hartwall Original Long Drink Glögg 5.5% 330ml,Hartwall,330ml,6413600334743,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+614587,Vana Tallinn Cream šokolaad 104g,Vana Tallinn,104g,4740012037200,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+614588,Kalev Tuljak tume šokolaad täidisega 105g,Kalev,105g,4740012036494,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+614589,Larbre Vert Sensitive pesugeel 1.53L,Larbre Vert,1.53L,3450601046278,household,hh_laundry,household,hh_laundry
+614590,Magic Mirror LED meigipeegel kuldne,,,6438340004718,dry_preserves,dry_other,household,hh_other
+614591,Seentesegu 200g,,200g,5900378729310,produce,produce_mushrooms,produce,produce_mushrooms
+614592,Muumi advendikalender 75g,Muumi,75g,6430014651013,dry_preserves,dry_other,sweets_snacks,sweets_candies
+614593,Mandariin Klementiin I klass 1.5kg Hyvää Joulua,,1.5kg,8435091621964,produce,produce_tropical,produce,produce_tropical
+614594,Chef Lunden kartuli-metsaseenesalat 200g,Chef Lunden,200g,4740376001817,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+614595,Sokid 3-p must 39-41,,,6413034263367,dry_preserves,dry_other,household,hh_other
+614596,Coop vanilliga pirnimoos 85g,Coop,85g,7340191161627,dry_preserves,dry_other,dry_preserves,dry_other
+614597,Canderel kakaojook 250g,Canderel,250g,5601837553001,dry_preserves,dry_other,drinks,drinks_syrups_powders
+614598,Kotimaista kartul Argipäeva 1kg,Kotimaista,1kg,6438460111655,dry_preserves,dry_canned_veg,produce,produce_root_veg
+614599,Tymbark kirsi-õunajook 2L,Tymbark,2L,5900334001184,produce,produce_apples_pears,drinks,drinks_juices
+614600,Eesti Leivatööstus piparkoogitainas 500g,Eesti Leivatööstus,500g,4740064520057,world_spices,spices_basic_salt_pepper,bakery,bakery_sweet_buns_donuts
+614601,Minijõulutäht (taimne dekoratsioon),,,5055124707750,dry_preserves,dry_other,produce,produce_herbs_salads_sprouts
+614602,Dr.Oetker Ristorante Pepperoni-Salaami pitsa 320g,Dr.Oetker,320g,4001724039204,dry_preserves,dry_other,frozen_food,frozen_pizza
+614603,Galipette alkoholivaba siider 33cl,Galipette,33cl,3271470330936,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+614604,Amii Dreams kodulõhnastaja,Amii,,4744641015080,dry_preserves,dry_other,household,hh_candles_airfresh
+614605,Tupla minibatoonid karbis 256g,Tupla,256g,6420256016039,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+614606,NOCCO Skum Nisse energiajook 330ml,NOCCO,330ml,7340131602340,dry_preserves,dry_other,drinks,drinks_energy
+614607,Rainbow smuuti pirni-ploomi 110g 6k+,Rainbow,110g,7340191130869,produce,produce_apples_pears,baby,baby_food_pouches
+614608,Coop tuunikalatükid väheses päevalilleõlis 120g,Coop,105g,7340191174788,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+614609,Fazer Street Food minitortilla 8tk 240g,Fazer,240g,4750212903946,bakery,bakery_flatbreads_wraps,bakery,bakery_flatbreads_wraps
+614610,Klaasipesuvedelik talvine -20°C 5L kanister,,5L,6430034678823,dry_preserves,dry_other,household,hh_other
+614611,Uvic Fitlap odrajahust pelmeenid kanalihast 400g,Uvic Fitlap,400g,4745092370032,dry_preserves,dry_flour_sugar_baking,frozen_food,frozen_ready_meals
+614612,Kinder Mix advendikalender 351g,Kinder,351g,4008400312729,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+614613,Mandariin Marisol I klass 1kg talvepakend,,1kg,4742022670514,dry_preserves,dry_other,produce,produce_tropical
+614614,Oskar Kuldne marinaad broilerikintsud 600g,Oskar,600g,4740569013276,sauces_oils,sauces_marinades,meat_fish,meat_poultry
+614615,Kartul punane pestud,,,2060249500004,produce,produce_root_veg,produce,produce_root_veg
+614616,Merci Mousse assortiišokolaad 210g,Merci,210g,4014400923735,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+614617,Nokian Panimo Pina Colada alkoholivaba kokteil 330ml,Nokian Panimo,330ml,6417348171028,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+614618,Herkku Itaalia ekstra väärisoliiviõli 500ml,Herkku,500ml,6415711804641,sauces_oils,oils_olive,sauces_oils,oils_olive
+614619,Tefal Air 20cm/2.5L pott tumehall,Tefal,2.5L,3168430339477,dry_preserves,dry_other,household,hh_kitchenware
+614620,Tomat Soome I klass,,,2060520100008,produce,produce_root_veg,produce,produce_root_veg
+614621,Sokid 3-p bordoo mix 39-41,,,6413034263404,dry_preserves,dry_other,household,hh_other
+614622,WC Kukka Rosewater õhuvärskendaja 150ml,WC Kukka,150ml,6412203102803,drinks,drinks_wine,household,hh_candles_airfresh
+614623,Sovetskoje Igristoje vahuvein 12% 750ml,,750ml,4750012434855,dry_preserves,dry_other,drinks,drinks_wine
+614624,Paneeritud broilerikintsud 400g,,400g,4740569013092,meat_fish,meat_poultry,meat_fish,meat_poultry
+614625,Mandariin Klementiin I klass kinkekotis 1.5kg,,1.5kg,4740669000190,produce,produce_tropical,produce,produce_tropical
+614626,Pringles hapukoore-sibula krõpsud 185g,Pringles,185g,5053990167845,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_snacks_salty
+614627,Active Fresh Complete Jasmine Bouquet õhuvärskendaja 228ml,,228ml,5908252010011,dry_preserves,dry_other,household,hh_candles_airfresh
+614628,Premium piparkoogitaigen võiga 500g,,500g,4740086012769,dairy_eggs_fats,dairy_butter_margarine,bakery,bakery_sweet_buns_donuts
+614629,Aura glögi apple-mustsõstar 1L,Aura,1L,4740098083764,produce,produce_apples_pears,drinks,drinks_soft_soda

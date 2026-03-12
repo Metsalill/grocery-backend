@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580369,Vileda õuehari+vars 080+315,Vileda,,4023103105140,dry_preserves,dry_other,household,hh_other
+580370,Vileda 575 Aqua svammlapp 5+1tk,Vileda,6tk,4023103127975,dry_preserves,dry_other,household,hh_cleaners
+580371,Vileda Glitzi 930 küürimissvamm 2tk,Vileda,2tk,4023103140448,dry_preserves,dry_other,household,hh_dishwashing
+580372,Vileda Style Mikrokiudlapp 4tk,Vileda,4tk,4023103147232,dry_preserves,dry_other,household,hh_cleaners
+580373,Vileda põrandalapp mikrofiiber 48.5x60cm,Vileda,,4023103196506,dry_preserves,dry_other,household,hh_cleaners
+580374,Vileda Multi Latex kindad M/L 80+20tk,Vileda,20tk,4023103197961,dry_preserves,dry_other,household,hh_other
+580375,Vileda pesemismati ämber 917 Ultra,Vileda,,4023103201415,dry_preserves,dry_other,household,hh_other
+580376,Vileda 497 Inox spiraalsvamm 2tk,Vileda,2tk,4023103210370,dry_preserves,dry_other,household,hh_dishwashing
+580377,Elektrostaatiline karvaeemaldushari,,, 4023103247611,dry_preserves,dry_other,household,hh_other
+580378,Wilkinson Xtreme3 Sens. raseerija 3+1tk,Wilkinson,4tk,4027800710409,dry_preserves,dry_other,personal_care,pcare_shaving
+580379,Natrii Chloridum 0.9% loputuslahus 100ml,Natrii Chloridum,100ml,4030539076463,dry_preserves,dry_other,personal_care,pcare_other
+580380,Zottis piimadessert Fruit 0.3% 115g,Zottis,115g,40338576,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+580381,Medicura Spirulina tabletid 150tk,Medicura,150tk,4035129003416,dry_preserves,dry_other,personal_care,pcare_other
+580382,Medicura Kurkumikapslid 60tk,Medicura,60tk,4035129033512,produce,produce_root_veg,personal_care,pcare_other
+580383,Steevia vedel 50ml Govinda,Govinda,50ml,4038507001776,drinks,drinks_tea_coffee,dry_preserves,dry_flour_sugar_baking
+580384,Lotte dražee muuvilja mix XXL 46g,Lotte,46g,4044337123823,dry_preserves,dry_other,sweets_snacks,sweets_candies
+580385,Bel Baby rinnahoidjakaitse 30tk,Bel Baby,30tk,4046871004521,dry_preserves,dry_other,personal_care,pcare_other
+580386,Parodontax Classic hambapasta 75ml,Parodontax,75ml,4047400392041,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+580387,Vein Achim Maler Riesling Medium Dry 750ml,,750ml,4049366004631,drinks,drinks_wine,drinks,drinks_wine
+580388,Keeeper Fredo&Fresh karbikomplekt 5x500ml,Keeeper,500ml,4052396045871,dry_preserves,dry_other,household,hh_kitchenware
+580389,Keeeper Fredo&Fresh karbikomplekt 4x750ml,Keeeper,750ml,4052396045888,dry_preserves,dry_other,household,hh_kitchenware
+580390,Keeeper Fredo&Fresh karbikomplekt 3x1.25L,Keeeper,1.25L,4052396045901,dry_preserves,dry_other,household,hh_kitchenware
+580391,Diamant magusaine 300ml vedel,Diamant,300ml,4052700004952,bakery,bakery_buns_croissants,dry_preserves,dry_flour_sugar_baking
+580392,Diamant suhkruasendaja tablett 650tk,Diamant,650tk,4052700010816,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+580393,LED lamp E14 6W/827 B40 CL Osram Value,,, 4052899326453,dry_preserves,dry_other,household,hh_other
+580394,LED lamp E27 5W/827 A40 Osram Value,,,4052899326927,dry_preserves,dry_other,household,hh_other
+580395,LED lamp E27 13W/827 A100 Osram Value,,,4052899971097,dry_preserves,dry_other,household,hh_other
+580396,Clausthaler Lemon alkoholivaba õlu 500ml,Clausthaler,500ml,4053400204918,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+580397,Veet Sensitive depilatsioonikreem 100ml,Veet,100ml,4053700288205,dry_preserves,dry_other,personal_care,pcare_other
+580398,Spirit Garden G&T Sic.&Lemon 7.3% 750ml,Spirit Garden,750ml,4062073012270,dry_preserves,dry_other,drinks,drinks_spirits
+580399,Hipp Org. 12K köögiviljarisoto 250g kalkun,Hipp,250g,4062300036710,meat_fish,meat_poultry,baby,baby_food_jars
+580400,Hipp Bio 8K riisivahvlid mustikaga 30g,Hipp,30g,4062300256637,dry_preserves,dry_pasta_rice,baby,baby_snacks
+580401,Hipp Bio 5K veiselihapüree 125g,Hipp,125g,4062300266346,meat_fish,meat_beef_lamb_game,baby,baby_food_jars
+580402,Babysanft niisked tualettpaberid lastele 50tk,Babysanft,50tk,4062300267619,dry_preserves,dry_other,baby,baby_wipes
+580403,Hipp Bio 1A õuna-ban-virsikupüree küps. 100g,Hipp,100g,4062300319820,produce,produce_apples_pears,baby,baby_food_jars
+580404,Hipp Bio 1A smuutijook õuna-banaani 120ml,Hipp,120ml,4062300325050,produce,produce_apples_pears,baby,baby_food_pouches
+580405,Hipp Bio 1A smuutijook õuna-pirni 120ml,Hipp,120ml,4062300325111,produce,produce_apples_pears,baby,baby_food_pouches
+580406,Hipp Bio 1K õuna-pirnipüree draakonv. 100g,Hipp,100g,4062300342842,produce,produce_apples_pears,baby,baby_food_jars
+580407,Hipp BabySanft shampoon 200ml,Hipp,200ml,4062300419377,personal_care,pcare_shampoo_cond,baby,baby_care
+580408,Hipp BabySanft ihupiim 350ml,Hipp,350ml,4062300419421,dairy_eggs_fats,dairy_milk,baby,baby_care
+580409,Liköör Jägermeister 35% 700ml,Jägermeister,700ml,4067700031877,dry_preserves,dry_other,drinks,drinks_spirits
+580410,Orbit Sweet Mint närimiskumm 14g,Orbit,14g,42070009,sweets_snacks,sweets_gums_mints,sweets_snacks,sweets_gums_mints
+580411,Oral-B el.hambahari Vitality Pro Black,Oral-B,,4210201427124,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+580412,4Cats mänguasi kassile kaisupadi,,, 4260070650017,pet,pet_other,pet,pet_cat_treats
+580413,4Cats mänguasi kassile mängupadi,4Cats,,4260070652684,pet,pet_other,pet,pet_cat_treats
+580414,MSDM kalmaariribad suitsumaitselised 36g,MSDM,36g,4260147170509,meat_fish,fish_salted_smoked,meat_fish,fish_processed
+580415,One Touch Lights kondoom 3tk,One Touch,3tk,4260363470018,dry_preserves,dry_other,personal_care,pcare_other
+580416,One Touch Lights kondoom 12tk,One Touch,12tk,4260363470063,dry_preserves,dry_other,personal_care,pcare_other
+580417,One Touch Enjoy Maxx kondoom 12tk,One Touch,12tk,4260363471381,dry_preserves,dry_other,personal_care,pcare_other
+580418,Medrull Ultra-crepp elastne side 8cmx4m,Medrull,,4260363471961,dry_preserves,dry_other,personal_care,pcare_other

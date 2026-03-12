@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580069,Cognac Meukow De Luxe 40% 700ml,Meukow,700ml,3257150100266,drinks,drinks_spirits,drinks,drinks_spirits
+580070,Vein Ch Rousseau Bordeaux Red 750ml,,750ml,3263286314620,dry_preserves,dry_other,drinks,drinks_wine
+580071,Cognac Braastad Organic VSOP 40% 500ml,Braastad,500ml,3364048104128,drinks,drinks_spirits,drinks,drinks_spirits
+580072,Braastad Pineau des Char. KPN lik.v 750ml,Braastad,750ml,3364048108317,dry_preserves,dry_other,drinks,drinks_spirits
+580073,Vilux valge veini äädikas 6% 250ml,Vilux,250ml,3378240121029,drinks,drinks_wine,sauces_oils,oils_vinegar
+580074,Vilux punase veini äädikas 6% 250ml,Vilux,250ml,3378240122026,drinks,drinks_wine,sauces_oils,oils_vinegar
+580075,Nestle Cini Minis nisuruudud 250g kaneel,Nestle,250g,3387390122473,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+580076,Häagen-Dazs soolakaram.pulgajäätis 70g,Häagen-Dazs,70g,3415587422836,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+580077,Bauchet Origine Brut Champagne 750ml,Bauchet,750ml,3423620240101,drinks,drinks_wine,drinks,drinks_wine
+580078,Charlemagne Chardonnay Brut vahuvein 750ml,Charlemagne,750ml,3494530102124,drinks,drinks_wine,drinks,drinks_wine
+580079,Baron d'Arignac Blanc De Blancs Brut 750ml,Baron d'Arignac,750ml,3500610033353,drinks,drinks_wine,drinks,drinks_wine
+580080,Vein Ch Rousseau Bordeaux Medoc 750ml,,750ml,3500610087851,dry_preserves,dry_other,drinks,drinks_wine
+580081,Vein Ch Rousseau Bordeaux Medium Sw. 750ml,,750ml,3500610087868,dry_preserves,dry_other,drinks,drinks_wine
+580082,Humer Nasal 150ml aerosool lastele,Humer,150ml,3546895504034,world_spices,spices_basic_salt_pepper,personal_care,pcare_other
+580083,Reine De Dijon teraline sinep 350g,Reine De Dijon,350g,3563490017233,dry_preserves,dry_other,sauces_oils,sauces_other
+580084,Neutrogena huulepalsam blister 4.8g,Neutrogena,4.8g,3574660085563,personal_care,pcare_shampoo_cond,personal_care,pcare_cosmetics
+580085,Carefree Cotton aaloe pesukaitse 20tk,Carefree,20tk,3574660239010,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580086,Listerine Total Care suuvesi 250ml,Listerine,250ml,3574660537253,drinks,drinks_water,personal_care,pcare_oral_care
+580087,Neutrogena Intense Repair huulepalsam 15ml,Neutrogena,15ml,3574660602807,personal_care,pcare_shampoo_cond,personal_care,pcare_cosmetics
+580088,O.B. Pro Comfort Mini tampoonid 16tk,OB,16tk,3574661329833,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580089,O.B. Pro Comfort Normal tampoonid 16tk,OB,16tk,3574661329840,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580090,O.B. Pro Comfort Normal tampoonid 32tk,OB,32tk,3574661329871,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580091,O.B. Pro Comfort Super+ tampoonid 16tk,OB,16tk,3574661331157,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580092,O.B. Pro Comfort Super tampoonid 16tk,OB,16tk,3574661331164,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580093,O.B. Pro Comfort Super tampoonid 32tk,OB,32tk,3574661331171,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580094,O.B. Normal tampoonid 16tk,OB,16tk,3574661350134,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580095,O.B. Super tampoonid 16tk,OB,16tk,3574661350141,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580096,O.B. Normal tampoonid 32tk,OB,32tk,3574661350165,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580097,O.B. Pro Comfort Mini tampoonid 32tk,OB,32tk,3574661371290,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580098,Carefree Flexi Fresh pesukaitse 56tk,Carefree,56tk,3574661482187,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580099,Carefree pesukaitse Aloe 56tk,Carefree,56tk,3574661486307,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580100,Listerine Advanced White suuvesi 500ml,Listerine,500ml,3574661491875,drinks,drinks_water,personal_care,pcare_oral_care
+580101,Carefree Long Plus Fresh pesukaitse 40tk,Carefree,40tk,3574661500324,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580102,O.B. Pro Comfort Super tampoonid 54tk,OB,54tk,3574661582665,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580103,O.B. Pro Comfort Normal tampoonid 64tk,OB,64tk,3574661582689,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580104,O.B. Organic Normal tampoonid 16tk,OB,16tk,3574661619149,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580105,O.B. Organic Super tampoonid 16tk,OB,16tk,3574661619156,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580106,O.B. Extra Protect tampoonid 16tk,OB,16tk,3574661626055,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580107,O.B. Extra Protect Super tampoonid 16tk,OB,16tk,3574661626062,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580108,O.B. Extra Protect Super+ tampoonid 16tk,OB,16tk,3574661626079,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580109,Listerine Nat s/vesi igemete 500ml,Listerine,500ml,3574661657462,drinks,drinks_water,personal_care,pcare_oral_care
+580110,Johnsons Top-To-Toe pesuvahend 500ml,Johnsons,500ml,3574669909952,dry_preserves,dry_other,personal_care,pcare_body_wash
+580111,Findus Alaska mintaifileepulgad pan. 364g,Findus,364g,3599741003359,sweets_snacks,sweets_gums_mints,frozen_food,frozen_fish
+580112,Findus Pan.kalafileed Fish&Chips 240g,Findus,240g,3599741004653,sweets_snacks,sweets_snacks_salty,frozen_food,frozen_fish
+580113,Findus Kalaf.Fish&Chips soola-äädika 250g,Findus,250g,3599741004660,sweets_snacks,sweets_snacks_salty,frozen_food,frozen_fish
+580114,Findus Alaska mintaifilee seemnetega 250g,Findus,250g,3599741005605,sweets_snacks,sweets_nuts_driedfruit,frozen_food,frozen_fish
+580115,Elseve Color Vive shampoon 250ml,Elseve,250ml,3600520214924,dry_preserves,dry_other,personal_care,pcare_shampoo_cond
+580116,Elseve palsam Color Vive UV Filter 200ml,Elseve,200ml,3600520214931,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond
+580117,Elseve Color Vive shampoon 400ml,Elseve,400ml,3600520834191,dry_preserves,dry_other,personal_care,pcare_shampoo_cond
+580118,Elseve Total Repair 5 palsam 200ml,Elseve,200ml,3600521706329,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond

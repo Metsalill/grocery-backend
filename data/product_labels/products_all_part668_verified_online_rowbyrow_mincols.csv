@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+583669,Always Ultra Quattro Night hügieenisidem 28tk,Always,28tk,8700216861182,dry_preserves,dry_other,personal_care,pcare_other
+583670,Always Ultra Super Quattro Pack hügieenisidem 32tk,Always,32tk,8700216861199,dry_preserves,dry_other,personal_care,pcare_other
+583671,Gillette Sensor3 Comfort terad 8tk ja käepide,Gillette,8tk,8700216873284,dry_preserves,dry_other,personal_care,pcare_shaving
+583672,Gillette Sensor3 Comfort terad 8tk,Gillette,8tk,8700216873727,dry_preserves,dry_other,personal_care,pcare_shaving
+583673,Philips Avent tass tilaga 300ml sinine,Philips,300ml,8710103826286,dry_preserves,dry_other,baby,baby_other
+583674,Philips Avent tass tilaga 300ml violetne,Philips,300ml,8710103826316,dry_preserves,dry_other,baby,baby_other
+583675,Avent Classic tass tilaga 200ml 6k+ roosa,Avent,200ml,8710103854364,dry_preserves,dry_other,baby,baby_other
+583676,Philips Avent Natural toitmispudel 260ml 1k+,Philips,260ml,8710103990383,dry_preserves,dry_other,baby,baby_other
+583677,Cif Perfect Finish Oven&Grill puhastusvahend 435ml,Cif,435ml,8710447376133,dry_preserves,dry_other,household,hh_cleaners
+583678,Cif Cream Ultra White puhastusvahend 695g,Cif,695g,8710447430576,dry_preserves,dry_other,household,hh_cleaners
+583679,Aviko sibularõngad 450g külmutatud,Aviko,450g,8710449500765,produce,produce_root_veg,frozen_food,frozen_potato_products
+583680,Aviko friikartul Original 750g+150g,Aviko,750g,8710449945092,drinks,drinks_spirits,frozen_food,frozen_potato_products
+583681,Aviko friikartul Grip n Dip 600g külmutatud,Aviko,600g,8710449953714,frozen_food,frozen_potato_products,frozen_food,frozen_potato_products
+583682,Aviko jalapeño pallid 300g külmutatud,Aviko,300g,8710449955565,frozen_food,frozen_other,frozen_food,frozen_ready_meals
+583683,Neutral Sensitive Skin puhastusvahend 750ml pihustiga,Neutral,750ml,8710522805664,dry_preserves,dry_other,household,hh_cleaners
+583684,Nusica pähklikreem Duo 400g,Nusica,400g,8710573342767,sweets_snacks,sweets_nuts_driedfruit,sauces_oils,sauces_other
+583685,Kitty Friend Budget kassiliiv 10L,Kitty Friend,10L,8710673035064,pet,pet_litter_sand,pet,pet_litter_sand
+583686,Cricket Fireflex tulesüütaja,Cricket,,8710732230461,dry_preserves,dry_other,household,hh_other
+583687,Bakker Joop vahvel 315g karamellitäidis,Bakker Joop,315g,8710739300907,sweets_snacks,sweets_candies,sweets_snacks,sweets_biscuits_cookies
+583688,Mentos Fruit närimiskumm 38g puuviljam.,Mentos,38g,87108026,dry_preserves,dry_other,sweets_snacks,sweets_gums_mints
+583689,Rokus konserv koerale 415g kanaliha,Rokus,415g,8710862994516,meat_fish,meat_poultry,pet,pet_dog_wet
+583690,Rokus konserv koerale 415g veiseliha,Rokus,415g,8710862994523,meat_fish,meat_beef_lamb_game,pet,pet_dog_wet
+583691,Rokus konserv koerale 1.24kg kanaliha,Rokus,1.24kg,8710862994677,meat_fish,meat_poultry,pet,pet_dog_wet
+583692,Rokus konserv koerale 1.24kg loomaliha,Rokus,1.24kg,8710862994684,meat_fish,meat_other,pet,pet_dog_wet
+583693,Rokus konserv kutsikale 415g kanaliha,Rokus,415g,8710862994981,meat_fish,meat_poultry,pet,pet_dog_wet
+583694,Cif Power&Shine puhastusvahend 750ml,Cif,750ml,8710908448355,dry_preserves,dry_other,household,hh_cleaners
+583695,Cif Lemon puhastuskreem 300g,Cif,300g,8710908805448,household,hh_cleaners,household,hh_cleaners
+583696,Cif Lemon puhastuskreem 540g,Cif,540g,8710908808838,household,hh_cleaners,household,hh_cleaners
+583697,Domestos Power 5 Ocean WC värskendaja 3x55g,Domestos,55g,8710908811562,dry_preserves,dry_other,household,hh_cleaners
+583698,ProChamp šampinjonid 195g viilutatud,ProChamp,195g,8710911001264,dry_preserves,dry_other,produce,produce_mushrooms
+583699,LOR kohviuba Forza 1kg,LOR,1kg,8711000400760,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+583700,Jacobs Krönung filtrikohv 250g,Jacobs,250g,8711000518007,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+583701,Jacobs Selection kohviuba 1kg,Jacobs,1kg,8711000583500,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+583702,Jacobs Selection Crema Italiano kohv 500g,Jacobs,500g,8711000678152,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+583703,Jacobs kohviuba Barista Crema Italiano 1kg,Jacobs,1kg,8711000856000,dry_preserves,dry_other,drinks,drinks_coffee_beans_capsules
+583704,Jacobs kohviuba Barista Espresso 1kg,Jacobs,1kg,8711000895788,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+583705,Kingasvamm 2tk,,2tk,8711252057262,dry_preserves,dry_other,household,hh_other
+583706,Kingalusikas seljasügajaga,,,8711252899787,dry_preserves,dry_other,household,hh_other
+583707,Ben&Jerry koorejäätis Cookie Vermont-ster 324g,Ben&Jerry,324g,8711327539624,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+583708,Choice Lovely Vanilla koonus 150ml,Choice,150ml,8711327569102,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+583709,Super Viva banaani-maapähklijäätis 442.5g,Super Viva,442.5g,8711327619227,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+583710,Ben&Jerry karamellimaitseline jäätis 392g,Ben&Jerry,392g,8711327629394,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+583711,Ben&Jerry soolakaramelli-brownie jäätis 150g,Ben&Jerry,150g,8711327647930,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+583712,Super Viva valge šok.-mango jäätis 79g,Super Viva,79g,8711327662483,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+583713,Magnum pulgajäätis Vegan Chill 90ml,Magnum,90ml,8711327663756,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+583714,Magnum Choco crunchy jäätis 91g koonus,Magnum,91g,8711327679207,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+583715,Knorr kana kiirsupp 12g nuudlitega,Knorr,12g,8712100867620,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+583716,Knorr kanapüree kiirsupp 16g krutoonidega,Knorr,16g,8712100867804,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+583717,Aptamil spetsiaalne piimasegu laktoosivaba 0k+ 400g,Aptamil,400g,8712400736060,baby,baby_formula,baby,baby_formula
+583718,Knorr kiirroog seenepasta 59g,Knorr,59g,8712423024595,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars

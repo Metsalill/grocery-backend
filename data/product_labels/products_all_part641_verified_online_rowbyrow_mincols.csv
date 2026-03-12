@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+582319,Batiste Original kuivšampoon 200ml,Batiste,200ml,5010724527481,drinks,drinks_spirits,personal_care,pcare_shampoo_cond
+582320,Batiste XXL Volume kuivšampoon 200ml,Batiste,200ml,5010724529072,dry_preserves,dry_other,personal_care,pcare_shampoo_cond
+582321,Chewits Fruit Salad nätsukomm 30g,Chewits,30g,5010933011238,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+582322,Tunnocks vahvlibatoon 4*30g piimaš ok.,Tunnocks,30g,5010975010022,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_waffles_cakes
+582323,Tunnocks vahvlibatoon 4*24g šok.kreemi,Tunnocks,24g,5010975020021,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_waffles_cakes
+582324,Butchers kiisueine 100g veise,Butchers,100g,5011792001606,meat_fish,meat_beef_lamb_game,pet,pet_cat_wet
+582325,Butchers kiisueine 100g kana-maks,Butchers,100g,5011792001613,meat_fish,meat_poultry,pet,pet_cat_wet
+582326,Butchers konserv kassile 85g lõhe-krevetid,Butchers,85g,5011792001644,meat_fish,fish_fresh,pet,pet_cat_wet
+582327,Butchers konserv kassile 85g kana-kalkun,Butchers,85g,5011792001651,meat_fish,meat_poultry,pet,pet_cat_wet
+582328,Butchers konserv kassile 85g veise-maks,Butchers,85g,5011792001668,meat_fish,meat_beef_lamb_game,pet,pet_cat_wet
+582329,Whisky Scottish Leader Blended 40% 1L,,1L,5013261012113,drinks,drinks_spirits,drinks,drinks_spirits
+582330,Henry Westons Stowford Med Dry siider 4.5% 500ml,,500ml,5014201800890,dry_preserves,dry_other,drinks,drinks_beer_cider
+582331,Lockets kurgupastill 41g sidruni-mee,Lockets,41g,50159086,drinks,drinks_wine,personal_care,pcare_other
+582332,Delamere või valge kitsepiimast 82% 125g,Delamere,125g,5016860836128,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+582333,Orbit Strawberry närimiskumm 14g,Orbit,14g,50173464,sweets_snacks,sweets_gums_mints,sweets_snacks,sweets_gums_mints
+582334,Dentiplus Coolmint suuvärskendaja 25ml,Dentiplus,25ml,5020535003494,sweets_snacks,sweets_gums_mints,personal_care,pcare_oral_care
+582335,Sheppys Original Cloudy Cider 4.5% 500ml,Sheppys,500ml,5025268050067,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+582336,Sheppys Raspberry Cider 4% 500ml,Sheppys,500ml,5025268050227,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+582337,SiS GO energiageel 60ml sidruni-laimi,SiS,60ml,5025324010288,produce,produce_tropical,personal_care,pcare_other
+582338,SiS GO energiageel 60ml mustsõstra,SiS,60ml,5025324010318,dry_preserves,dry_other,personal_care,pcare_other
+582339,Brothers Apple&Pear siider 4% 500ml,Brothers,500ml,5027342006397,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+582340,Brothers Toffee Apple siider 4% 500ml,Brothers,500ml,5027342006588,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+582341,Kotex Ultra Sorb Normal tampoonid 16tk,Kotex,16tk,5029053532684,dry_preserves,dry_other,personal_care,pcare_other
+582342,Kotex Ultra Sorb Super tampoonid 16tk,Kotex,16tk,5029053532691,dry_preserves,dry_other,personal_care,pcare_other
+582343,Huggies Pure salvrätikud 56tk niisked,Huggies,56tk,5029053550039,household,hh_paper,household,hh_paper
+582344,Huggies Pure salvrätikud 2+1 3*56tk niisked,Huggies,56tk,5029053550091,dry_preserves,dry_other,household,hh_paper
+582345,Kotex Active Normal tampoonid 16tk,Kotex,16tk,5029053564494,dry_preserves,dry_other,personal_care,pcare_other
+582346,Kotex Active Super tampoonid 16tk,Kotex,16tk,5029053564500,dry_preserves,dry_other,personal_care,pcare_other
+582347,Kleenex Ultra Soft salvrätikud 64tk karbis,Kleenex,64tk,5029053565743,dry_preserves,dry_other,household,hh_paper
+582348,Huggies All Over Clean salvrätikud 56tk niisked,Huggies,56tk,5029053567822,dry_preserves,dry_other,household,hh_paper
+582349,Huggies Sensitive Extra salvrätikud 56tk niisked,Huggies,56tk,5029053568706,dry_preserves,dry_other,household,hh_paper
+582350,Kotex Ultra Normal hügieenisidemed 16tk,Kotex,16tk,5029053569086,dry_preserves,dry_other,personal_care,pcare_other
+582351,Kotex Ultra Night hügieenisidemed 12tk,Kotex,12tk,5029053569147,dry_preserves,dry_other,personal_care,pcare_other
+582352,Kleenex Allergy Comfort salvrätikud 56tk karbis,Kleenex,56tk,5029053573717,dry_preserves,dry_other,household,hh_paper
+582353,Kotex Natural 100% Cotton Normal hügieenisidemed 8tk,Kotex,8tk,5029053575322,dry_preserves,dry_other,personal_care,pcare_other
+582354,Kotex Natural 100% Cotton Super hügieenisidemed 7tk,Kotex,7tk,5029053575346,dry_preserves,dry_other,personal_care,pcare_other
+582355,Kotex Natural 100% Cotton Night hügieenisidemed 6tk,Kotex,6tk,5029053575360,dry_preserves,dry_other,personal_care,pcare_other
+582356,Fentimans Premium Indian Tonic Water 500ml,Fentimans,500ml,5029396000116,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+582357,Fentimans Pink Grapefruit Tonic Water 500ml,Fentimans,500ml,5029396000437,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+582358,Agaavisiirup tume 250ml,,250ml,5032722311596,drinks,drinks_syrups_powders,dry_preserves,dry_other
+582359,Kookosrasv küpsetamiseks 610ml,,610ml,5032722313590,bakery,bakery_cakes_pastries,sauces_oils,oils_other
+582360,Durex Performax Intense kondoom 10tk,Durex,10tk,5052197004984,dry_preserves,dry_other,personal_care,pcare_other
+582361,Durex Performax Intense kondoom 3tk,Durex,3tk,5052197005011,dry_preserves,dry_other,personal_care,pcare_other
+582362,Pringles kartulikrõpsud 165g juustu,Pringles,165g,5053990106981,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+582363,Sensodyne Deep Clean hambapasta 75ml,Sensodyne,75ml,5054563014658,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+582364,Corega Gum Care proteesiliim,Corega,,5054563016041,drinks,drinks_tea_coffee,personal_care,pcare_oral_care
+582365,Sensodyne Deep Clean Soft hambahari,Sensodyne,,5054563029669,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+582366,Sensodyne Multi Care Soft hambahari,Sensodyne,,5054563029720,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+582367,Sensodyne Repair&Protect Soft hambahari,Sensodyne,,5054563029768,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+582368,Parodontax Mouthwash suuvesi 500ml,Parodontax,500ml,5054563051332,drinks,drinks_water,personal_care,pcare_oral_care

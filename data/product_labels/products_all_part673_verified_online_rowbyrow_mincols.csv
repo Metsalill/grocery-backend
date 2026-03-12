@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+583919,Fa Feel Refreshed deodorant 150ml,Fa,150ml,9000101726732,dry_preserves,dry_other,personal_care,pcare_deo
+583920,Fa Men Spicy Bergamot deodorant 150ml,Fa,150ml,9000101729238,dry_preserves,dry_other,personal_care,pcare_deo
+583921,Persil Universal pesugeelkapslid 13tk,Persil,13tk,9000101800074,produce,produce_root_veg,household,hh_laundry
+583922,Persil Stain Remover pesugeelkapslid 11tk,Persil,11tk,9000101802436,produce,produce_root_veg,household,hh_laundry
+583923,Rex Lotus&Almond Oil pesugeelkapslid 36tk,Rex,36tk,9000101802818,produce,produce_root_veg,household,hh_laundry
+583924,Rex Orchid Oil Color pesugeelkapslid 36tk,Rex,36tk,9000101802849,produce,produce_root_veg,household,hh_laundry
+583925,Persil Color pesupulber 1.1kg 20pesu,Persil,1.1kg,9000101804744,dry_preserves,dry_other,household,hh_laundry
+583926,Persil Sensitive pesugeel 900ml 20pesu,Persil,900ml,9000101805871,dry_preserves,dry_other,household,hh_laundry
+583927,Somat Excel Premium 5in1 nõudepesumasina tabletid 24tk,Somat,24tk,9000101808230,dry_preserves,dry_other,household,hh_dishwashing
+583928,Perwoll Wool pesugeel 2L 40pesu,Perwoll,2L,9000101808506,dry_preserves,dry_other,household,hh_laundry
+583929,Perwoll Color pesugeel 1L 20pesu,Perwoll,1L,9000101810080,dry_preserves,dry_other,household,hh_laundry
+583930,Perwoll Black pesugeel 1L 20pesu,Perwoll,1L,9000101810141,dry_preserves,dry_other,household,hh_laundry
+583931,Perwoll Blossom pesugeel 1L 20pesu,Perwoll,1L,9000101810356,dry_preserves,dry_other,household,hh_laundry
+583932,Perwoll Color pesugeel 2L 40pesu,Perwoll,2L,9000101810479,household,hh_laundry,household,hh_laundry
+583933,Perwoll Dark Bloom pesugeel 1L 20pesu,Perwoll,1L,9000101810622,dry_preserves,dry_other,household,hh_laundry
+583934,Somat Excellence Anti-Grease nõudepesumasina geel 684ml,Somat,684ml,9000101816693,dry_preserves,dry_other,household,hh_dishwashing
+583935,K2r Color Catcher värvipüüdja 22tk,K2r,22tk,9000101822472,dry_preserves,dry_other,household,hh_laundry
+583936,Persil Expert Stain Removal kapslid 23tk,Persil,23tk,9000101829037,produce,produce_root_veg,household,hh_laundry
+583937,Casali Double Choc kummikomm 300g banaan-šokolaadiklaasuuriga,Casali,300g,9000332812167,dry_preserves,dry_other,sweets_snacks,sweets_candies
+583938,Casali šokolaadipallid 100g rummi-kookose,Casali,100g,9000332813607,drinks,drinks_spirits,sweets_snacks,sweets_chocolate_bars
+583939,Kotanyi ribimaitseaine 40g,Kotanyi,40g,9001414010181,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+583940,Kotanyi kaneelipulgad 12g,Kotanyi,12g,9001414015643,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+583941,Kotanyi must pipar veskis 36g,Kotanyi,36g,9001414041116,world_spices,spices_basic_salt_pepper,world_spices,spices_basic_salt_pepper
+583942,Kotanyi nelja pipra segu 16g,Kotanyi,16g,9001414115114,dry_preserves,dry_other,world_spices,spices_basic_salt_pepper
+583943,Kotanyi provansaali ürdisegu 17g,Kotanyi,17g,9001414200247,dry_preserves,dry_other,world_spices,spices_herbs_spice_mix
+583944,Kotanyi kanamaitseaine küüslauguga 30g,Kotanyi,30g,9001414418291,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+583945,Teekanne Organic tee 20x1.8g mündiga,Teekanne,1.8g,9001475047225,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+583946,Teekanne Organic tee 20x2.5g metsamarjaga,Teekanne,2.5g,9001475063454,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+583947,Frosch Sensitiv nõudepesuvahend 500ml,Frosch,500ml,9001531181597,dry_preserves,dry_other,household,hh_dishwashing
+583948,Shocn Rice 150g šokolaad paisutatud riisiga,Shocn,150g,9002859042584,dry_preserves,dry_pasta_rice,sweets_snacks,sweets_chocolate_bars
+583949,Haribo Sauerbrenner kummikomm 160g,Haribo,160g,9002975002516,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+583950,Haribo Jelly Beans zeleekomm 160g,Haribo,160g,9002975002523,dry_preserves,dry_canned_veg,sweets_snacks,sweets_candies
+583951,Pedigree Biscrok maius koerale 200g,Pedigree,200g,9003579302545,pet,pet_other,pet,pet_dog_treats
+583952,Pedigree Markies maius koerale 150g,Pedigree,150g,9003579302552,pet,pet_other,pet,pet_dog_treats
+583953,Sonnentor kurkum jahvatatud 40g,Sonnentor,40g,9004145003552,produce,produce_root_veg,world_spices,spices_herbs_spice_mix
+583954,Nivea Men Sensitive Cool järelhooldusbalsam 100ml,Nivea,100ml,9005800244631,personal_care,pcare_shampoo_cond,personal_care,pcare_shaving
+583955,Nivea Essential Lip Care hügieeniline huulepulk,Nivea,,9005800362915,dry_preserves,dry_other,personal_care,pcare_other
+583956,Nivea Hydra Care hügieeniline huulepulk,Nivea,,9005800362984,dry_preserves,dry_other,personal_care,pcare_other
+583957,Nivea Men Active Lip Care hügieeniline huulepulk,Nivea,,9005800363028,dry_preserves,dry_other,personal_care,pcare_other
+583958,Pur Balsam Aloe Vera nõudepesuvahend 450ml,Pur,450ml,90407055,dry_preserves,dry_other,household,hh_dishwashing
+583959,Pur Balsam Hands&Nails nõudepesuvahend 450ml,Pur,450ml,90407062,household,hh_dishwashing,household,hh_dishwashing
+583960,Red Bull White Edition 250ml,Red Bull,250ml,90435461,drinks,drinks_energy,drinks,drinks_energy
+583961,Pez mänguasja täide 6-pakk 51g,Pez,51g,9044400820777,dry_preserves,dry_other,sweets_snacks,sweets_candies
+583962,Pez kommijagaja + puuvilja täide 10tk,Pez,10tk,9044400822320,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+583963,Pez mänguasi + 2 täidet,Pez,,9044400919457,dry_preserves,dry_other,sweets_snacks,sweets_candies
+583964,Red Bull Green Edition energiajook 250ml,Red Bull,250ml,90448065,drinks,drinks_energy,drinks,drinks_energy
+583965,Red Bull Sea Blue Edition energiajook 250ml,Red Bull,250ml,90454530,drinks,drinks_energy,drinks,drinks_energy
+583966,Red Bull Ice Edition Gummy Bear 250ml,Red Bull,250ml,90457326,drinks,drinks_energy,drinks,drinks_energy
+583967,HiPP Combiotic 3 1A jätkupiimasegu 500g,HiPP,500g,9062300000037,dairy_eggs_fats,dairy_milk,baby,baby_formula
+583968,HiPP 4K kaerapudrupulber Bio 200g,HiPP,200g,9062300000792,dry_preserves,dry_other,baby,baby_food_pouches

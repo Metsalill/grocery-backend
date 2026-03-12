@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+581419,Hapukurk Peipsi Kurk 400g Eesti,,400g,4740684000014,produce,produce_root_veg,dry_preserves,dry_canned_veg
+581420,Kapten Grant külmsuitsulõhe lõik 150g,Kapten Grant,150g,4740687001094,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+581421,Kapten Grant soolatud lõhe lõik 150g,Kapten Grant,150g,4740687001209,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked
+581422,Kapten Grant tuunikala purustatud tükid õlis 185g,Kapten Grant,185g,4740687001896,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+581423,KGr tuunikala purustatud tükid soolvees 185g,KGr,185g,4740687001902,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+581424,Kapten Grant paneeritud liblikkrevetid 26/30 1kg,Kapten Grant,1kg,4740687002077,dry_preserves,dry_other,frozen_food,frozen_fish
+581425,Heeringafilee tükid valges kastmes tilli 220g,,220g,4740687002459,produce,produce_herbs_salads_sprouts,meat_fish,fish_processed
+581426,Kapten Grant räimefilee rullis äädikas 250g,Kapten Grant,250g,4740687700188,sauces_oils,oils_vinegar,meat_fish,fish_processed
+581427,Kapten Nemo tuunikala purustatud tükid õlis 185g,Kapten Nemo,185g,4740687985899,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+581428,Kapten Nemo tuunikala purustatud tükid soolvees 185g,Kapten Nemo,185g,4740687998899,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+581429,Avektra merluusifilee nahata 600g külmutatud,Avektra,600g,4740689001474,dry_preserves,dry_other,frozen_food,frozen_fish
+581430,Avektra lõhehakkliha 300g külmutatud,Avektra,300g,4740689990044,meat_fish,meat_minced,frozen_food,frozen_fish
+581431,Spinat potis Grüne Fee Eesti,,,,4741116000138,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+581432,Miisu piimabatoonikese Valge kiisu 150g,Miisu,150g,4741117001134,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+581433,KuKu batoonikese 120g maapähkli fruktoosiga,KuKu,120g,4741117017760,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+581434,Miisu Batoonikomm Tume Kiisu 150g t.šok.,Miisu,150g,4741117025772,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+581435,Küllus multinektar 56% 3L pouch,Küllus,3L,4741129010001,drinks,drinks_juices,drinks,drinks_juices
+581436,Rõngu mustasõstramoos 1kg,Rõngu,1kg,4741129017130,dry_preserves,dry_other,dry_preserves,dry_other
+581437,Rõngu mahl maasika-mustikamoos 1kg,Rõngu,1kg,4741129017178,drinks,drinks_juices,dry_preserves,dry_other
+581438,Rõngu aprikoosimoos 1kg küpsetuskindel,Rõngu,1kg,4741129017994,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_other
+581439,Küllus arooniamahl 100% Öko 330ml pdl,Küllus,330ml,4741129019349,drinks,drinks_juices,drinks,drinks_juices
+581440,Küllus metspohla nektar 40% Öko 330ml,Küllus,330ml,4741129019356,drinks,drinks_juices,drinks,drinks_juices
+581441,Küllus metsmustika nektar 45% Öko 330ml,Küllus,330ml,4741129019363,drinks,drinks_juices,drinks,drinks_juices
+581442,Küllus metsjõhvika mahlajook 20% Öko 330ml,Küllus,330ml,4741129019370,drinks,drinks_juices,drinks,drinks_juices
+581443,Küllus kiivimoos 400g,Küllus,400g,4741129019660,dry_preserves,dry_other,dry_preserves,dry_other
+581444,Rõngu pannkoogimoos 900g,Rõngu,900g,4741129019677,dry_preserves,dry_other,dry_preserves,dry_other
+581445,Küllus metsjõhvikamoos 410g,Küllus,410g,4741129020161,dry_preserves,dry_other,dry_preserves,dry_other
+581446,Küllus maasika-metsmustikamoos 400g,Küllus,400g,4741129030207,dry_preserves,dry_other,dry_preserves,dry_other
+581447,Paira Südametilgad 40ml,Paira,40ml,4741200001867,dry_preserves,dry_other,personal_care,pcare_other
+581448,Paira Analüüsitops 60ml,Paira,60ml,4741200004301,dry_preserves,dry_other,personal_care,pcare_other
+581449,Paira Pertussiin Hingamistee siirup 100ml,Paira,100ml,4741200006220,drinks,drinks_tea_coffee,personal_care,pcare_other
+581450,Palsam Kuldtäht 10g,Palsam,10g,4741200006848,personal_care,pcare_shampoo_cond,personal_care,pcare_other
+581451,Kaigert termomeeter elavhõbedavaba,Kaigert,,4741200010838,dry_preserves,dry_other,personal_care,pcare_other
+581452,HBF küpsis 155g fruktoosiga,HBF,155g,4741469008997,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+581453,Jalutusrihm koerale helkuriga 20mm*150cm,,,,4741569262244,pet,pet_other,pet,pet_other
+581454,D3-vitamiin 90tk 45g kanepipulber,,90tk,4741609341816,dry_preserves,dry_other,personal_care,pcare_other
+581455,Ecosh L-Arginiin+ mustikas N90,Ecosh,,4741609511141,drinks,drinks_spirits,personal_care,pcare_other
+581456,Ecosh Hea Une Kompleks N90,Ecosh,,4741609511813,dry_preserves,dry_other,personal_care,pcare_other
+581457,Ecosh Kuldjume N90,Ecosh,,4741609511912,dry_preserves,dry_other,personal_care,pcare_other
+581458,Ecosh Maksakompleks N90,Ecosh,,4741609512117,dry_preserves,dry_other,personal_care,pcare_other
+581459,Ecosh Life Kehapuhastus Detox 400g,Ecosh,400g,4741609513503,household,hh_cleaners,personal_care,pcare_other
+581460,Ecosh Para-Herb N120,Ecosh,,4741609513626,dry_preserves,dry_other,personal_care,pcare_other
+581461,Toidulisand Cordyceps 90tk 45g,,90tk,4741609522017,dry_preserves,dry_other,personal_care,pcare_other
+581462,Lions Mane N90,,,,4741609522116,dry_preserves,dry_other,personal_care,pcare_other
+581463,Ecosh Vererõhu kompleks N90,Ecosh,,4741609523519,dry_preserves,dry_other,personal_care,pcare_other
+581464,Testoboost N90,,,,4741609524035,dry_preserves,dry_other,personal_care,pcare_other
+581465,Ecosh Must pässik+must küüslauk N90,Ecosh,,4741609524103,produce,produce_root_veg,personal_care,pcare_other
+581466,Ashwagandha KSM-66 juure ekstrakt N90,,,,4741609525032,dry_preserves,dry_other,personal_care,pcare_other
+581467,Moringa kapslid 45g 90tk,,45g,4741609526015,produce,produce_root_veg,personal_care,pcare_other
+581468,Liigeste kompleks 45g 90tk,,45g,4741609531514,dry_preserves,dry_other,personal_care,pcare_other

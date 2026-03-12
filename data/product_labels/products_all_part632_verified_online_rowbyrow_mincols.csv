@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+581869,Pure punase greibi mahl 100% viljalihaga 1L,Pure,1L,4745010531026,drinks,drinks_juices,drinks,drinks_juices
+581870,Pure tomatimahl 100% meresoolaga 1L,Pure,1L,4745010531033,drinks,drinks_juices,drinks,drinks_juices
+581871,Maitseainesegu BBQ Rub 150g apelsinimaitsel.,,,150g,4745010675010,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+581872,Uvic pelmeenid küüslauguvõiga 500g,Uvic,500g,4745010692192,dairy_eggs_fats,dairy_butter_margarine,frozen_food,frozen_ready_meals
+581873,Uvic pelmeenid võiga 500g külmutatud,Uvic,500g,4745010692208,dairy_eggs_fats,dairy_butter_margarine,frozen_food,frozen_ready_meals
+581874,Koreapärane peet 300g Eesti,,300g,4745011020468,produce,produce_root_veg,sauces_oils,sauces_other
+581875,Kimchi 300g Eesti,,300g,4745011020482,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+581876,Baltika kondenspiim klassikaline 370g,Baltika,370g,4745011024374,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+581877,Porgandi-peedimahla fermenteeritud jook mustasõstar 330ml,,330ml,4745011029416,drinks,drinks_juices,drinks,drinks_soft_soda
+581878,Ananassimaitseline fermenteeritud porgandimahla jook 330ml,Raw Edge OÜ,330ml,4745011029423,drinks,drinks_juices,drinks,drinks_soft_soda
+581879,Draakonivili fermenteeritud porgandimahla jook 330ml,Raw Edge OÜ,330ml,4745011029430,drinks,drinks_juices,drinks,drinks_soft_soda
+581880,Paira toidulisand Validol N30,Paira,,4745090940893,dry_preserves,dry_other,personal_care,pcare_other
+581881,Paira probiootikum ProbiActive Daily N30,Paira,,4745090941111,dry_preserves,dry_other,personal_care,pcare_other
+581882,Paira vesinikperoksiidi lahus 3% 50ml,Paira,50ml,4745090941272,drinks,drinks_water,personal_care,pcare_other
+581883,Paira söetabletid N50,Paira,,4745090941418,dry_preserves,dry_other,personal_care,pcare_other
+581884,MySoya sojahelbed 170g,MySoya,170g,4747004000068,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+581885,MySoya sojakotlet 125g,MySoya,125g,4747004000105,sauces_oils,sauces_soy_worcester,dry_preserves,dry_other
+581886,Mõisaproua marineeritud kurk 1kg,Mõisaproua,1kg,4748001005261,produce,produce_root_veg,dry_preserves,dry_canned_veg
+581887,Mõisaproua tomat omas mahlas 1kg,Mõisaproua,1kg,4748001005285,drinks,drinks_juices,dry_preserves,dry_canned_veg
+581888,Mõisaproua kirsstomat jõhvikamarinaadis 530g,Mõisaproua,530g,4748001005292,produce,produce_berries,dry_preserves,dry_canned_veg
+581889,Biocard Baby New N1 rasedustest,Biocard,,4748001007555,dry_preserves,dry_other,personal_care,pcare_other
+581890,Sunfood punased Kidney oad 400g,Sunfood,400g,4748001008309,dry_preserves,dry_other,dry_preserves,dry_groats_beans
+581891,Tsilk nina- ja kurgusprei Värska 30ml,Tsilk,30ml,4748001011460,dry_preserves,dry_other,personal_care,pcare_other
+581892,Sunfood ananassitükid kerges siirupis 565g,Sunfood,565g,4748001013921,drinks,drinks_syrups_powders,dry_preserves,dry_canned_fruit
+581893,Eelkeedetud kartul tilliga 500g Eesti,,500g,4748001015031,produce,produce_herbs_salads_sprouts,produce,produce_root_veg
+581894,Natural granaatõuna mahlajook 1L,Natural,1L,4748001018575,drinks,drinks_juices,drinks,drinks_juices
+581895,Natural mustasõstra mahlajook 1L,Natural,1L,4748001018582,drinks,drinks_juices,drinks,drinks_juices
+581896,Natural kirsimahlajook 1L,Natural,1L,4748001018599,drinks,drinks_juices,drinks,drinks_juices
+581897,Lee taskurätikud 3kih 60tk kuubik,Lee,60tk,4748001022626,dry_preserves,dry_other,household,hh_paper
+581898,Vita Boost 4marja kompleks 90tk 45g,,90tk,4749876511215,dry_preserves,dry_other,personal_care,pcare_other
+581899,Detox toidulisand soolepuhastus 260g,,260g,4749876513004,world_spices,spices_basic_salt_pepper,personal_care,pcare_other
+581900,Paul D'Arco sipelgapuu koor 50ml,,50ml,4749876521054,dairy_eggs_fats,dairy_cream_sourcream,personal_care,pcare_other
+581901,Musta pähkli ekstrakt 90tk 45g,,90tk,4749876525601,sweets_snacks,sweets_nuts_driedfruit,personal_care,pcare_other
+581902,Kurkumi ekstrakt piperiiniga 45g N90,,45g,4749876527018,produce,produce_root_veg,personal_care,pcare_other
+581903,Magneesium glütsinaat-kelaat 50g N90,,50g,4749876532111,dry_preserves,dry_other,personal_care,pcare_other
+581904,Vitamiin D3 mahe kanepiõliga 10ml,,10ml,4749876541557,sauces_oils,oils_other,personal_care,pcare_other
+581905,D3-vitamiin kookosõliga 4000IU 10ml,,10ml,4749876541649,bakery,bakery_cakes_pastries,personal_care,pcare_other
+581906,Silmavitamiinid Pro Eyevision 45g N90,,45g,4749876543018,dry_preserves,dry_other,personal_care,pcare_other
+581907,Selga küpsis klassikaline 180g,Selga,180g,4750007101281,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+581908,Selga küpsis 180g šokolaadimaitseline,Selga,180g,4750007135286,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+581909,Selga küpsis 180g kondenspiima,Selga,180g,4750007688140,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_biscuits_cookies
+581910,Selga küpsis 180g banaanimaitseline,Selga,180g,4750007848360,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+581911,Selga küpsis 180g jõhvikamaitseline,Selga,180g,4750007899225,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+581912,Laima sefiir 200g maasikamaitseline,Laima,200g,4750011851516,produce,produce_berries,sweets_snacks,sweets_candies
+581913,Cosmopolitan Diva Passion Fruit 750ml,Cosmopolitan,750ml,4750012000289,dry_preserves,dry_other,drinks,drinks_wine
+581914,Säästu kaerahelbed 500g,Säästu,500g,4750020030872,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+581915,Tartu Mill pudruriis 1kg,Tartu Mill,1kg,4750020031046,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+581916,Tartu Mill kartulipuder 200g,Tartu Mill,200g,4750020041410,produce,produce_root_veg,dry_preserves,dry_ready_meals_jars
+581917,Viin Gradus Vodka 40% 500ml,,500ml,4750021010682,drinks,drinks_spirits,drinks,drinks_spirits
+581918,Cosmopolitan Diva Mojito Fusion 750ml,Cosmopolitan,750ml,4750021012983,dry_preserves,dry_other,drinks,drinks_wine

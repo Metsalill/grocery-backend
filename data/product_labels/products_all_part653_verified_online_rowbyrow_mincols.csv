@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+582919,PrimaCat kuivtoit steriliseeritud kassile 1.4kg kana,PrimaCat,1.4kg,6430069580597,meat_fish,meat_poultry,pet,pet_cat_dry
+582920,PrimaCat kassieine 4*50g tuunikala vees,PrimaCat,50g,6430069581266,dry_preserves,dry_canned_meat_fish,pet,pet_cat_wet
+582921,PrimaCat kassieine 4*50g kana vees,PrimaCat,50g,6430069581273,meat_fish,meat_poultry,pet,pet_cat_wet
+582922,PrimaCat kiisueine 4*50g tuunikal.-lõhe,PrimaCat,50g,6430069581280,meat_fish,fish_fresh,pet,pet_cat_wet
+582923,PrimaCat kanasupp kassile 40g,PrimaCat,40g,6430069581310,meat_fish,meat_poultry,pet,pet_cat_wet
+582924,PrimaCat tuunikalasupp kassile 40g,PrimaCat,40g,6430069581327,dry_preserves,dry_canned_meat_fish,pet,pet_cat_wet
+582925,PrimaDog koeraeine 260g kana,PrimaDog,260g,6430069581501,meat_fish,meat_poultry,pet,pet_dog_wet
+582926,PrimaDog koeraeine 260g lambaliha,PrimaDog,260g,6430069581518,meat_fish,meat_beef_lamb_game,pet,pet_dog_wet
+582927,PrimaDog koeraeine 260g liha,PrimaDog,260g,6430069581525,meat_fish,meat_other,pet,pet_dog_wet
+582928,PrimaCat Crunchy Anti-hairball 40g,PrimaCat,40g,6430069583789,dry_preserves,dry_other,pet,pet_cat_treats
+582929,PrimaCat Crunchy Skin&Coat 40g,PrimaCat,40g,6430069583796,dry_preserves,dry_other,pet,pet_cat_treats
+582930,PrimaCat kiisueine 85g kala kastmes,PrimaCat,85g,6430069586599,meat_fish,fish_fresh,pet,pet_cat_wet
+582931,PrimaCat Classic 85g linnuliha želees,PrimaCat,85g,6430069586605,meat_fish,meat_other,pet,pet_cat_wet
+582932,PrimaDog maius koerale 80g kalkun-hirv,PrimaDog,80g,6430069587657,meat_fish,meat_poultry,pet,pet_dog_treats
+582933,PrimaDog maius koerale 80g part-heeringas,PrimaDog,80g,6430069587664,pet,pet_other,pet,pet_dog_treats
+582934,PrimaDog maius koerale 80g lammas-lõhe,PrimaDog,80g,6430069587671,meat_fish,meat_beef_lamb_game,pet,pet_dog_treats
+582935,PrimaDog kuivtoit koerale 10kg lammas-kartul,PrimaDog,10kg,6430069588814,meat_fish,meat_beef_lamb_game,pet,pet_dog_dry
+582936,PrimaCat maius kassile 3*5g kana-maks,PrimaCat,5g,6430076890870,meat_fish,meat_poultry,pet,pet_cat_treats
+582937,PrimaCat maius kassile 3*5g lõhe-forell,PrimaCat,5g,6430076890894,meat_fish,fish_fresh,pet,pet_cat_treats
+582938,PrimaDog Mini Meal koeraeine 85g lambaliha,PrimaDog,85g,6430076891556,meat_fish,meat_beef_lamb_game,pet,pet_dog_wet
+582939,PrimaDog Mini Meal koeraeine 85g hirv,PrimaDog,85g,6430076891563,pet,pet_other,pet,pet_dog_wet
+582940,PrimaCat kiisueine 85g pardiliha kastmes,PrimaCat,85g,6430076891723,meat_fish,meat_other,pet,pet_cat_wet
+582941,PrimaCat kuivtoit steril. kassile 400g kalkun,PrimaCat,400g,6430076891990,meat_fish,meat_poultry,pet,pet_cat_dry
+582942,PrimaDog maius koerale 50g pardiliha,PrimaDog,50g,6430076892683,meat_fish,meat_other,pet,pet_dog_treats
+582943,HHC maius koerale delikaatne kanafilee 100g,HHC,100g,6430076893437,meat_fish,meat_poultry,pet,pet_dog_treats
+582944,HHC maius koerale delikaatne kanafilee 400g,HHC,400g,6430076893444,meat_fish,meat_poultry,pet,pet_dog_treats
+582945,HHC maius koerale delikaatne kanakeere 100g,HHC,100g,6430076893468,meat_fish,meat_poultry,pet,pet_dog_treats
+582946,Hau Hau maius koerale delikaatne pardifilee 100g,Hau Hau,100g,6430076893499,pet,pet_other,pet,pet_dog_treats
+582947,PrimaDog koeraeine 260g ulukiliha,PrimaDog,260g,6430076897992,meat_fish,meat_beef_lamb_game,pet,pet_dog_wet
+582948,PrimaDog koeraeine 600g ulukiliha,PrimaDog,600g,6430076898029,meat_fish,meat_beef_lamb_game,pet,pet_dog_wet
+582949,Hau-Hau kuivtoit koerale 2kg kana-riis-kaer,Hau-Hau,2kg,6430076898937,dry_preserves,dry_pasta_rice,pet,pet_dog_dry
+582950,Salliselta martsipanimass 250g roheline,Salliselta,250g,6436501000944,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+582951,Salliselta martsipanimass 250g valge,Salliselta,250g,6436501000975,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+582952,PrimaCat kiisueine kassipojale 85g kalkun,PrimaCat,85g,6438554000353,meat_fish,meat_poultry,pet,pet_cat_wet
+582953,HHC vorst koerale 500g veiseliha,HHC,500g,6438554000629,meat_fish,meat_sausages,pet,pet_dog_treats
+582954,HHC vorst koerale 500g linnuliha-lõhe,HHC,500g,6438554000681,meat_fish,meat_sausages,pet,pet_dog_treats
+582955,PrimaCat kiisueine steril.kassile 4*85g kalkun,PrimaCat,85g,6438554004634,meat_fish,meat_poultry,pet,pet_cat_wet
+582956,PrimaCat kiisueine steril.kassile 4*85g lõhe,PrimaCat,85g,6438554004665,meat_fish,fish_fresh,pet,pet_cat_wet
+582957,Prima Small Pets täistoit küülikutele 2kg,Prima Small Pets,2kg,6438554005273,pet,pet_small_animals,pet,pet_small_animals
+582958,PrimaSmall Pets täistoit merisigadele 1.5kg,Prima Small Pets,1.5kg,6438554005303,pet,pet_small_animals,pet,pet_small_animals
+582959,Prima Small Pets täistoit hamster-liivahiir 500g,Prima Small Pets,500g,6438554005334,dry_preserves,dry_other,pet,pet_small_animals
+582960,Prima Small Pets täistoit hiirtele-rottidele 500g,Prima Small Pets,500g,6438554005365,dry_preserves,dry_other,pet,pet_small_animals
+582961,Prima Small Pets seemnepulk närilistele 115g mee,Prima Small Pets,115g,6438554006591,sweets_snacks,sweets_nuts_driedfruit,pet,pet_small_animals
+582962,Prima Small Pets seemnepulk närilistele 115g pähkli,Prima Small Pets,115g,6438554006621,sweets_snacks,sweets_nuts_driedfruit,pet,pet_small_animals
+582963,Prima Small Pets seemnepulk närilistele 115g puuvilj,Prima Small Pets,115g,6438554006652,sweets_snacks,sweets_nuts_driedfruit,pet,pet_small_animals
+582964,Chupa Chups Crazy Dips 14g prõksuvat suhkruga,Chupa Chups,14g,6911316002388,dry_preserves,dry_other,sweets_snacks,sweets_candies
+582965,Colgate Cavity Protection White hambapasta 75ml,Colgate,75ml,6920354836091,dry_preserves,dry_other,personal_care,pcare_oral_care
+582966,Colgate Cavity Protection hambapasta 75ml,Colgate,75ml,6920354836176,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+582967,Dog Fest maius koerale 90g kanaliha palad,Dog Fest,90g,6921499711205,meat_fish,meat_poultry,pet,pet_dog_treats
+582968,Dog Fest maius koerale 45g pardiliha,Dog Fest,45g,6921499711557,meat_fish,meat_other,pet,pet_dog_treats

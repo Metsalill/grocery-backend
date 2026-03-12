@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+582819,Herkkumaa mangoraja majonees 320g,Herkkumaa,320g,6410840038431,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+582820,Keiju soolane taimne rasvavõie 70% 400g,Keiju,400g,6411200030614,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+582821,Elovena täistera kiirkaerahelbed 500g,Elovena,500g,6411200112983,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+582822,Voimix vähendatud rasvasisaldusega margariin 400g,Voimix,400g,6411204130297,dry_preserves,dry_other,dairy_eggs_fats,dairy_butter_margarine
+582823,Keiju vähendatud rasvasisaldusega margariin 60% 400g,Keiju,400g,6411204130518,dry_preserves,dry_other,dairy_eggs_fats,dairy_butter_margarine
+582824,Keiju Sinine taimne rasvavõie 50% 400g,Keiju,400g,6411204131171,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+582825,Paulig Arabica Dark kohviuba 1kg,Paulig,1kg,6411300166084,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+582826,Paulig Frezza kohvijook Forte 250ml,Paulig,250ml,6411300654543,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+582827,Pansool 450g,Pansool,450g,6411302050169,world_spices,spices_basic_salt_pepper,world_spices,spices_basic_salt_pepper
+582828,Doris küpsis 250g,Doris,250g,6411401032189,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+582829,Finlandia Jellies marmelaadikuulid 260g,Finlandia,260g,6411401042355,dry_preserves,dry_other,sweets_snacks,sweets_candies
+582830,Fazer kommikarp Liqueur Fills 150g,Fazer,150g,6411401072666,sweets_snacks,sweets_candies,sweets_snacks,sweets_chocolate_bars
+582831,Fazer Fazermint kinkekarp 150g,Fazer,150g,6411401072680,sweets_snacks,sweets_gums_mints,sweets_snacks,sweets_chocolate_bars
+582832,Havi lauaküünal 70*120mm oranž,Havi,,6411630722837,household,hh_candles_airfresh,household,hh_candles_airfresh
+582833,Havi lauaküünal 70*120mm ploom,Havi,,6411630723261,household,hh_candles_airfresh,household,hh_candles_airfresh
+582834,Havi lauaküünal 70*120mm pojeng,Havi,,6411630723322,household,hh_candles_airfresh,household,hh_candles_airfresh
+582835,Havi lauaküünal 70*120mm valge,Havi,,6411630790157,household,hh_candles_airfresh,household,hh_candles_airfresh
+582836,Havi lauaküünal 70*120mm kollane,Havi,,6411630790256,household,hh_candles_airfresh,household,hh_candles_airfresh
+582837,Havi lauaküünal 70*120mm punane,Havi,,6411630790355,household,hh_candles_airfresh,household,hh_candles_airfresh
+582838,Havi lauaküünal 70*120mm šampanja,Havi,,6411630791154,household,hh_candles_airfresh,household,hh_candles_airfresh
+582839,Havi lauaküünal 70*120mm kaseroheline,Havi,,6411630797163,household,hh_candles_airfresh,household,hh_candles_airfresh
+582840,Havi õuetuli 99mm 4-6h 2tk,Havi,2tk,6411630880124,dry_preserves,dry_other,household,hh_candles_airfresh
+582841,Rumm Barracuda Rum Gold 38% 700ml,,700ml,6412700165721,drinks,drinks_spirits,drinks,drinks_spirits
+582842,Rumm Barracuda Rum Silver 38% 700ml,,700ml,6412700165745,drinks,drinks_spirits,drinks,drinks_spirits
+582843,Gin Nordic Spirits Lab Gin 41% 500ml,,500ml,6412703011827,drinks,drinks_spirits,drinks,drinks_spirits
+582844,Hartwall Original Long Drink Cranberry 5.5% 330ml,Hartwall,330ml,6413600054870,drinks,drinks_spirits,drinks,drinks_beer_cider
+582845,Hartwall Original Long Drink Orange 5.5% 330ml,Hartwall,330ml,6413600196815,drinks,drinks_spirits,drinks,drinks_beer_cider
+582846,Hartwall Original Long Drink Red Grapefruit 5.5% 330ml,Hartwall,330ml,6413600234630,dry_preserves,dry_other,drinks,drinks_beer_cider
+582847,Hartwall Original Long Drink Pineapple 5.5% 330ml,Hartwall,330ml,6413600295747,drinks,drinks_spirits,drinks,drinks_beer_cider
+582848,Dansukker moosisuhkur 1kg,Dansukker,1kg,6414000023060,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+582849,Dansukker fariinsuhkur 500g,Dansukker,500g,6414000043051,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+582850,Helmi Baby voodikaitselina 5tk,Helmi,5tk,6414100136707,dry_preserves,dry_other,baby,baby_other
+582851,Vuokkoset Bio Normal perioodikaitsevaht 26tk,Vuokkoset,26tk,6414100700953,dry_preserves,dry_other,personal_care,pcare_other
+582852,Meira valge pipar jahvatatud 31g,Meira,31g,6414200137017,world_spices,spices_basic_salt_pepper,world_spices,spices_basic_salt_pepper
+582853,Meira koriander jahvatatud 24g,Meira,24g,6414201002079,produce,produce_herbs_salads_sprouts,world_spices,spices_herbs_spice_mix
+582854,Meira pipar cayenne 22g,Meira,22g,6414201800224,world_spices,spices_basic_salt_pepper,world_spices,spices_herbs_spice_mix
+582855,Meira kardemon 8g,Meira,8g,6414201800781,dry_preserves,dry_other,world_spices,spices_herbs_spice_mix
+582856,Meira majoraan 5g,Meira,5g,6414201800989,dry_preserves,dry_other,world_spices,spices_herbs_spice_mix
+582857,Meira must pipar purustatud 27g,Meira,27g,6414201801054,world_spices,spices_basic_salt_pepper,world_spices,spices_basic_salt_pepper
+582858,Meira pizzamaitseaine 10g,Meira,10g,6414201801207,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+582859,Meira sidrunipipar 32g 0% soola,Meira,32g,6414201801405,world_spices,spices_basic_salt_pepper,world_spices,spices_herbs_spice_mix
+582860,Meira ürdisegu vahemere 9g 0% soola,Meira,9g,6414201801559,world_spices,spices_basic_salt_pepper,world_spices,spices_herbs_spice_mix
+582861,Meira chillipulber 36g purgis 0% soola,Meira,36g,6414201810414,world_spices,spices_basic_salt_pepper,world_spices,spices_herbs_spice_mix
+582862,Meira kurkum 35g,Meira,35g,6414201810704,produce,produce_root_veg,world_spices,spices_herbs_spice_mix
+582863,Meira muskaatpähkel jahvatatud 32g,Meira,32g,6414201810759,dry_preserves,dry_other,world_spices,spices_herbs_spice_mix
+582864,Meira ketšup 950g,Meira,950g,6414202702008,dry_preserves,dry_other,sauces_oils,sauces_ketchup_mayo
+582865,Saga küpsetuspaber 10m,Saga,,6414300104292,,,household,hh_kitchenware
+582866,Trip kõrrejook vaarika 200ml,Trip,200ml,6415130118374,produce,produce_berries,drinks,drinks_juices
+582867,Trip kõrrejook maasika-vaarika suhkruvaba 200ml,Trip,200ml,6415130118398,dry_preserves,dry_other,drinks,drinks_juices
+582868,Havi õuetuli 9-10h 130*54mm,Havi,,6415400433008,dry_preserves,dry_other,household,hh_candles_airfresh

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580869,Veski Mati täisterakaerahelbed 500g,Veski Mati,500g,4740281003128,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+580870,Balti Veski täistera riivleib 350g,Balti Veski,350g,4740281003210,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+580871,Veski Mati täistera 5-viljahelbed 500g,Veski Mati,500g,4740281003333,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+580872,Veski Mati mitmevilja jahusegu 1.5kg,Veski Mati,1.5kg,4740281004583,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+580873,Veski Mati grahamjahu 1kg,Veski Mati,1kg,4740281004668,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+580874,Veski Mati kaerahelbe kiirpuder 45g maasika,Veski Mati,45g,4740281006402,dry_preserves,dry_other,dry_preserves,dry_cereals_muesli
+580875,Veski Mati riis pikateraline 1kg,Veski Mati,1kg,4740281006686,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+580876,Kulux säilituskarbid kaanega 350ml 5tk,Kulux,350ml,4740282004896,dry_preserves,dry_other,household,hh_kitchenware
+580877,Kulux säilituskarbid kaanega 500ml 5tk,Kulux,500ml,4740282004902,dry_preserves,dry_other,household,hh_kitchenware
+580878,Kulux säilituskarbid kaanega 750ml 5tk,Kulux,750ml,4740282004919,dry_preserves,dry_other,household,hh_kitchenware
+580879,Kulux säilituskarbid kaanega 1000ml 5tk,Kulux,1000ml,4740282004926,dry_preserves,dry_other,household,hh_kitchenware
+580880,Dirhami külmsuitsulõhefilee viilud 150g,Dirhami,150g,4740285015653,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+580881,Emma kohupiimakreem mustika 150g,Emma,150g,4740294011233,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+580882,Rannarootsi K/V Lastevorst 500g+100g,Rannarootsi,600g,4740296000716,meat_fish,meat_sausages,meat_fish,meat_sausages
+580883,Isukas Õllepunnid juustuga 500g,Isukas,500g,4740296003236,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+580884,Säästu Keedusink 300g kiles,Säästu,300g,4740296003335,meat_fish,meat_hams,meat_fish,meat_hams
+580885,RR P/S vorst metssealihast 300g,RR,300g,4740296003649,meat_fish,meat_sausages,meat_fish,meat_sausages
+580886,RR Jäägrisigarid cheddariga 150g,RR,150g,4740296003755,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+580887,Rannarootsi viiner 400g,Rannarootsi,400g,4740296008446,drinks,drinks_spirits,meat_fish,meat_sausages
+580888,RR T/S vorst Moskva 240g,RR,240g,4740296010753,meat_fish,meat_sausages,meat_fish,meat_sausages
+580889,Rannarootsi P/S vorst EHE Krakovi 270g,Rannarootsi,270g,4740296010982,meat_fish,meat_sausages,meat_fish,meat_sausages
+580890,RR Merevaigu grillvorst 750g,RR,750g,4740296011125,meat_fish,meat_sausages,meat_fish,meat_sausages
+580891,RR Seasink 150g viil,RR,150g,4740296012030,meat_fish,meat_hams,meat_fish,meat_hams
+580892,RR Põdraliha T/S rõngas Eesti Uluk 270g,RR,270g,4740296012061,meat_fish,meat_beef_lamb_game,meat_fish,meat_gourmet
+580893,RR T/S vorst metskitseliha Eesti Uluk 180g,RR,180g,4740296012207,meat_fish,meat_sausages,meat_fish,meat_gourmet
+580894,RR T/S vorst põdralihast Eesti Uluk 180g,RR,180g,4740296012221,meat_fish,meat_sausages,meat_fish,meat_gourmet
+580895,Isukas keeduvorst 300g suitsutatud,Isukas,300g,4740296012993,meat_fish,meat_sausages,meat_fish,meat_sausages
+580896,Isukas Suitsuviiner 300g,Isukas,300g,4740296013013,drinks,drinks_spirits,meat_fish,meat_sausages
+580897,Isukas grillvorst 400g,Isukas,400g,4740296013020,meat_fish,meat_sausages,meat_fish,meat_sausages
+580898,Don Caramello Kukekas pulgakomm 28g,Don Caramello,28g,4740298000608,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+580899,Hansa Candle teeküünal 4h 20tk valge plokis,Hansa Candle,20tk,4740302000013,drinks,drinks_tea_coffee,household,hh_candles_airfresh
+580900,Hansa Candle teeküünal 4h 50tk valge,Hansa Candle,50tk,4740302000020,drinks,drinks_tea_coffee,household,hh_candles_airfresh
+580901,Hansa Candle lauaküünal 40x60mm 6tk valge,Hansa Candle,6tk,4740302000228,household,hh_candles_airfresh,household,hh_candles_airfresh
+580902,Hansa Candle õueküünal 8-10h maxi,Hansa Candle,,4740302000556,household,hh_candles_airfresh,household,hh_candles_airfresh
+580903,HC kroonküünal 723202 170mm 6h 10tk pun,HC,10tk,4740302002970,household,hh_candles_airfresh,household,hh_candles_airfresh
+580904,Hansa Candle õueküünal Party-Light 10h,Hansa Candle,,4740302003366,household,hh_candles_airfresh,household,hh_candles_airfresh
+580905,Hansa Candle laternaküünal 4-pakk 20h,Hansa Candle,,4740302703846,household,hh_candles_airfresh,household,hh_candles_airfresh
+580906,Hansa Candle teeküünal 9h 12tk maxi,Hansa Candle,12tk,4740302705024,drinks,drinks_tea_coffee,household,hh_candles_airfresh
+580907,Hansa Candle küünal Veneetsia valge,Hansa Candle,,4740302712183,household,hh_candles_airfresh,household,hh_candles_airfresh
+580908,Pizzariiv 200g,,200g,4740311000134,dry_preserves,dry_other,cheese,dairy_cheese_slices
+580909,Maris Gilden Rõngik 200g mooniga,Maris Gilden,200g,4740320003683,dry_preserves,dry_other,bakery,bakery_sweet_buns_donuts
+580910,Maris Gilden Rõngik 200g glasuuriga,Maris Gilden,200g,4740320003690,dry_preserves,dry_other,bakery,bakery_sweet_buns_donuts
+580911,Maris Gilden Rõngik 200g,Maris Gilden,200g,4740320232243,dry_preserves,dry_other,bakery,bakery_sweet_buns_donuts
+580912,Väike Väänik präänik Vanaema 250g,Väike Väänik,250g,4740320500199,dry_preserves,dry_other,sweets_snacks,sweets_biscuits_cookies
+580913,Lunden Pardikauss 350g,Lunden,350g,4740376000155,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+580914,Lunden Pardimaksapasteet 200g,Lunden,200g,4740376030602,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+580915,Lunden Seamaksapasteet 200g,Lunden,200g,4740376103214,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+580916,Lunden Sushi salat lumekrabiga 250g,Lunden,250g,4740376104280,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+580917,Lunden Saaremaa kauss 280g,Lunden,280g,4740376106345,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+580918,Comfy Stretch plaaster Münt 10104 12tk,Comfy,12tk,4740423101040,dry_preserves,dry_other,personal_care,pcare_other

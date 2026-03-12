@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+583119,Darling kuivtoit koerale 10kg veiseliha-juurvili,Darling,10kg,7613032933807,meat_fish,meat_other,pet,pet_dog_dry
+583120,Gourmet Gold konserv kassile 4x85g kastmes,Gourmet Gold,85g,7613032959500,sauces_oils,sauces_other,pet,pet_cat_wet
+583121,ONE kuivtoit kassile Urinary Care 800g kana,ONE,800g,7613033294235,meat_fish,meat_poultry,pet,pet_cat_dry
+583122,ONE kuivtoit kassile Coat Hairball 800g kana,ONE,800g,7613034015730,meat_fish,meat_poultry,pet,pet_cat_dry
+583123,ONE kuivtoit koerale Mini Adult 1.5kg loomaliha,ONE,1.5kg,7613034146656,pet,pet_other,pet,pet_dog_dry
+583124,Nescafe Classic Crema lahustuv kohv 200g,Nescafe,200g,7613034483164,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+583125,ONE kuivtoit koerale Mini Delicious 1.5kg lohe,ONE,1.5kg,7613034546210,meat_fish,fish_fresh,pet,pet_dog_dry
+583126,Nescafe Classic Crema lahustuv kohv 100g,Nescafe,100g,7613034584236,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+583127,Darling kuivtoit koerale 3kg linnuliha-juurvili,Darling,3kg,7613034592781,meat_fish,meat_other,pet,pet_dog_dry
+583128,Darling kuivtoit koerale 10kg linnuliha-juurvili,Darling,10kg,7613034592873,meat_fish,meat_other,pet,pet_dog_dry
+583129,ONE kuivtoit steriliseeritud kassile 1.5kg lohe-nisu,ONE,1.5kg,7613035115439,meat_fish,fish_fresh,pet,pet_cat_dry
+583130,ONE kuivtoit steriliseeritud kassile 1.5kg loomaliha,ONE,1.5kg,7613035125346,meat_fish,meat_other,pet,pet_cat_dry
+583131,Gourmet Gold SC konserv kassile 85g loomaliha,Gourmet Gold,85g,7613035464032,meat_fish,meat_other,pet,pet_cat_wet
+583132,Gourmet Gold SC konserv kassile 85g lambaliha,Gourmet Gold,85g,7613035465695,meat_fish,meat_beef_lamb_game,pet,pet_cat_wet
+583133,ONE Adult kuivtoit kassile 1.5kg kana-taistera nisu,ONE,1.5kg,7613035514645,meat_fish,meat_poultry,pet,pet_cat_dry
+583134,Adventuros maius koerale 120g puhvel,Adventuros,120g,7613035516335,pet,pet_other,pet,pet_dog_treats
+583135,Adventuros maius koerale 90g metssiga,Adventuros,90g,7613035516458,pet,pet_other,pet,pet_dog_treats
+583136,Adventuros maius koerale 90g hirv,Adventuros,90g,7613035516472,pet,pet_other,pet,pet_dog_treats
+583137,Nestle müsli Fitness Granola 300g shokolaadiga,Nestle,300g,7613035619425,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+583138,Nestle müsli Fitness Granola 300g meega,Nestle,300g,7613035619456,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+583139,Friskies kuivtoit kassile 1kg kana-maks-jv,Friskies,1kg,7613036549943,meat_fish,meat_poultry,pet,pet_cat_dry
+583140,Friskies kuivtoit kassile 1kg lohe-tuunika-jv,Friskies,1kg,7613036549967,meat_fish,fish_fresh,pet,pet_cat_dry
+583141,Friskies kuivtoit kassile 1kg loomaliha-kana,Friskies,1kg,7613036549981,meat_fish,meat_poultry,pet,pet_cat_dry
+583142,One Sterilcat kiisueine 4x85g lohe-porgand,One,85g,7613036698733,meat_fish,fish_fresh,pet,pet_cat_wet
+583143,One Adult kiisueine 4x85g kana-rohelised oad,One,85g,7613036698856,meat_fish,meat_poultry,pet,pet_cat_wet
+583144,Felix maius kassile Play 50g kana-maksa,Felix,50g,7613036707381,meat_fish,meat_poultry,pet,pet_cat_treats
+583145,Felix maius kassile Play 50g kala-krevetid,Felix,50g,7613036707480,meat_fish,fish_fresh,pet,pet_cat_treats
+583146,Felix maius kassile Play 50g kalkuni-sink,Felix,50g,7613036707503,meat_fish,meat_poultry,pet,pet_cat_treats
+583147,Dentalife narimispulgad Med 12-25kg 115g,Dentalife,115g,7613036894449,dry_preserves,dry_other,pet,pet_dog_treats
+583148,Dentalife narimispulgad Large 25kg+ 142g,Dentalife,142g,7613036894470,dry_preserves,dry_other,pet,pet_dog_treats
+583149,After Eight kinkekarp 200g apelsini,After Eight,200g,7613036912488,produce,produce_tropical,sweets_snacks,sweets_chocolate_bars
+583150,Friskies kiisueine 4x85g lihavalik tükid,Friskies,85g,7613036987998,meat_fish,meat_other,pet,pet_cat_wet
+583151,Friskies kiisueine 4x85g kalavalik tükid,Friskies,85g,7613036988018,meat_fish,fish_fresh,pet,pet_cat_wet
+583152,Friskies kiisueine 4x85g kanaga kastmes,Friskies,85g,7613036988100,meat_fish,meat_poultry,pet,pet_cat_wet
+583153,Maggi kartulipüree 59g sibulaga ja saiakreekeriga,Maggi,59g,7613037003000,bakery,bakery_buns_croissants,dry_preserves,dry_ready_meals_jars
+583154,Maggi nuudlid kooreses tomatikastmes 62g,Maggi,62g,7613037003949,dairy_eggs_fats,dairy_cream_sourcream,dry_preserves,dry_ready_meals_jars
+583155,Maggi kiirnuudlid 59.2g kanalihamaitseline,Maggi,59.2g,7613037096002,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+583156,Lion White shokolaadibatoon 2Pack 60g,Lion,60g,7613037480009,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+583157,Felix Fantastic kiisueine 85g kanaliha,Felix,85g,7613039788097,drinks,drinks_wine,pet,pet_cat_wet
+583158,Felix Fantastic kassipoja kiisueine 85g kana,Felix,85g,7613039832189,drinks,drinks_soft_soda,pet,pet_cat_wet
+583159,Felix Fantastic kiisueine 85g lohega,Felix,85g,7613039832912,drinks,drinks_wine,pet,pet_cat_wet
+583160,Felix kiisueine Fantastic 85g küülik,Felix,85g,7613039835500,drinks,drinks_wine,pet,pet_cat_wet
+583161,Felix Fantastic kiisueine 4x85g kana-loomaliha,Felix,85g,7613039894361,drinks,drinks_wine,pet,pet_cat_wet
+583162,Felix Fantastic kiisueine 4x85g lohe-lestalõhe,Felix,85g,7613039894774,drinks,drinks_wine,pet,pet_cat_wet
+583163,Felix Sensations kiisueine 4x85g kalkuniga,Felix,85g,7613039916629,meat_fish,meat_poultry,pet,pet_cat_wet
+583164,Felix Sensations kiisueine 4x85g kala,Felix,85g,7613039916711,meat_fish,fish_fresh,pet,pet_cat_wet
+583165,Felix Fantastic kassipoja kiisueine 4x85g kana,Felix,85g,7613039917367,drinks,drinks_soft_soda,pet,pet_cat_wet
+583166,Felix Sensations kiisueine 4x85g kala tarrendis,Felix,85g,7613039917626,meat_fish,fish_fresh,pet,pet_cat_wet
+583167,Felix Sensations kiisueine 4x85g liha tarrendis,Felix,85g,7613039923016,meat_fish,meat_other,pet,pet_cat_wet
+583168,Felix maius kassile Mixed 60g veise-kana,Felix,60g,7613287631404,meat_fish,meat_poultry,pet,pet_cat_treats

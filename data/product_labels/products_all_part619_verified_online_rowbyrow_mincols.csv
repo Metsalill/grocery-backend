@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+581219,Coop karboniseeritud karastusjook Orange 2L,Coop,2L,4740660013274,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+581220,Coop šokolaaditükkidega küpsised 150g,Coop,150g,4740660013328,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+581221,Coop kolme šokolaadiga küpsised 150g,Coop,150g,4740660013335,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+581222,Coop maapähklivõi täidisega küpsised 210g,Coop,210g,4740660013342,dairy_eggs_fats,dairy_butter_margarine,sweets_snacks,sweets_biscuits_cookies
+581223,Coop karamelli täidisega küpsised 210g,Coop,210g,4740660013359,sweets_snacks,sweets_candies,sweets_snacks,sweets_biscuits_cookies
+581224,Coop hapukapsaborš 480g lihata,Coop,480g,4740660013403,produce,produce_root_veg,dry_preserves,dry_ready_meals_jars
+581225,Coop rassolnik 480g lihata,Coop,480g,4740660013410,meat_fish,meat_other,dry_preserves,dry_ready_meals_jars
+581226,Coop hernesupp 530g suitsulihaga,Coop,530g,4740660013427,meat_fish,fish_salted_smoked,dry_preserves,dry_ready_meals_jars
+581227,Coop hapukapsaborš 530g sealihaga,Coop,530g,4740660013434,meat_fish,meat_pork,dry_preserves,dry_ready_meals_jars
+581228,Coop Seljanka 530g lihaga,Coop,530g,4740660013441,meat_fish,meat_other,dry_preserves,dry_ready_meals_jars
+581229,Coop rassolnik 530g sealihaga,Coop,530g,4740660013458,meat_fish,meat_pork,dry_preserves,dry_ready_meals_jars
+581230,Coop praekapsas porgandiga 800g,Coop,800g,4740660013465,produce,produce_root_veg,dry_preserves,dry_canned_veg
+581231,Coop mulgikapsas 800g,Coop,800g,4740660013472,produce,produce_root_veg,dry_preserves,dry_canned_veg
+581232,Coop kikerherned 400g soolvees,Coop,400g,4740660013489,dry_preserves,dry_groats_beans,dry_preserves,dry_groats_beans
+581233,Coop taskurätikud 4kih 10x10tk,Coop,10tk,4740660013533,dry_preserves,dry_other,household,hh_paper
+581234,Hüva kanamunad M 10tk A-klass,Hüva,10tk,4740660013571,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+581235,Coop mandlid 150g,Coop,150g,4740660013588,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+581236,Coop pähklite ja rosinate segu 150g,Coop,150g,4740660013595,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+581237,Coop roheline hernes 420g,Coop,420g,4740660013618,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+581238,Säästu riis aurutatud 1kg,Säästu,1kg,4740660013908,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+581239,Säästu riis pikateraline 1kg,Säästu,1kg,4740660013915,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+581240,Hüva pehmed salvrätikud 3kih 90tk karbis,Hüva,90tk,4740660013991,household,hh_paper,household,hh_paper
+581241,Coop pehmed tugevad salvrätikud 4kih 100tk,Coop,100tk,4740660014004,household,hh_paper,household,hh_paper
+581242,CK juustu-küüslaugumääre 220g,CK,220g,4740660014189,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+581243,Coop Eesti riivjuust 250g,Coop,250g,4740660014219,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+581244,Coop Eesti juust 150g viil,Coop,150g,4740660014394,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+581245,Coop Eesti juust 400g viil,Coop,400g,4740660014400,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+581246,Säästu Univer pesupulber 3kg 40pesu,Säästu,3kg,4740660014448,household,hh_laundry,household,hh_laundry
+581247,Coop Color pesupulber 2kg 33pesukorda,Coop,2kg,4740660014455,household,hh_laundry,household,hh_laundry
+581248,Coop Color pesupulber 400g 7pesukorda,Coop,400g,4740660014462,household,hh_laundry,household,hh_laundry
+581249,Coop Sensitive pesupulber 400g 7pesu,Coop,400g,4740660014479,household,hh_laundry,household,hh_laundry
+581250,Coop Sensitive pesupulber 2kg 33pesu,Coop,2kg,4740660014486,household,hh_laundry,household,hh_laundry
+581251,Coop võileivakurk 530g,Coop,530g,4740660014691,dairy_eggs_fats,dairy_butter_margarine,dry_preserves,dry_canned_veg
+581252,Coop minikurk 350g,Coop,350g,4740660014707,produce,produce_root_veg,produce,produce_root_veg
+581253,Säästu karboniseeritud kar.jook 2L kaljamaits.,Säästu,2L,4740660014769,dry_preserves,dry_other,drinks,drinks_soft_soda
+581254,Hüva pesugeel 2L 40pesukorda,Hüva,2L,4740660014776,household,hh_laundry,household,hh_laundry
+581255,Coop Color pesugeel 1L 17pesukorda,Coop,1L,4740660014783,household,hh_laundry,household,hh_laundry
+581256,Coop Sensitive pesugeel 1L 17pesukorda,Coop,1L,4740660014790,household,hh_laundry,household,hh_laundry
+581257,Coop Color pesugeel 1.5L 25pesukorda,Coop,1.5L,4740660014806,household,hh_laundry,household,hh_laundry
+581258,Coop Sensitive pesugeel 1.5L 25pesukorda,Coop,1.5L,4740660014813,household,hh_laundry,household,hh_laundry
+581259,Coop tükeldatud tomatid 400g,Coop,400g,4740660014936,produce,produce_root_veg,dry_preserves,dry_canned_veg
+581260,Coop Itaaliapärane kõva juust 180g,Coop,180g,4740660015025,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+581261,Hüva Tilsit juust 500g viilutatud,Hüva,500g,4740660015032,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+581262,Hüva siirup 1L mustasõstra-vaarika,Hüva,1L,4740660015049,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+581263,Coop pesugeel-kapslid 3-in-1 18tk,Coop,18tk,4740660015056,produce,produce_root_veg,household,hh_laundry
+581264,Säästu traditsiooniline heeringas 250g,Säästu,250g,4740660015162,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+581265,Säästu traditsiooniline heeringas 400g,Säästu,400g,4740660015179,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+581266,Coop toorjuust 400g,Coop,400g,4740660015414,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cottage_quark
+581267,Coop kohupiimakreem vanilli 400g,Coop,400g,4740660015599,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+581268,Coop kohupiimakreem vanilli 150g,Coop,150g,4740660015605,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark

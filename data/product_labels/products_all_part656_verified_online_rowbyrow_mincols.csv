@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+583069,Libresse Dailies Fresh Pro paevakaitse 80tk,Libresse,80tk,7322541472065,dry_preserves,dry_other,personal_care,pcare_other
+583070,Libresse Dailies Long Extra paevakaitse 42tk,Libresse,42tk,7322541472133,dry_preserves,dry_other,personal_care,pcare_other
+583071,Bla Band Mehhiko pajaroog 188g,Bla Band,188g,7322550038320,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+583072,Barebells proteiinibatoon 55g kupsise-kreemi,Barebells,55g,7340001800470,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+583073,Barebells proteiinibatoon 55g soolapaehkli,Barebells,55g,7340001800883,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+583074,Barebells proteiinibatoon 55g valge shok-mandli,Barebells,55g,7340001801088,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+583075,Barebells proteiinibatoon 55g karamell-shok,Barebells,55g,7340001804522,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+583076,Barebells proteiinibatoon Coco Choco 55g,Barebells,55g,7340001805390,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+583077,Nocco Stellar Blend karboniseeritud funkts jook 330ml,Nocco,330ml,7340131605921,dry_preserves,dry_other,drinks,drinks_energy
+583078,Vitamin Well Zero vaarika vitamiinijook 500ml,Vitamin Well,500ml,7340222800686,produce,produce_berries,drinks,drinks_soft_soda
+583079,Vitamin Well Zero ananassi vitamiinijook 500ml,Vitamin Well,500ml,7340222800693,produce,produce_tropical,drinks,drinks_soft_soda
+583080,Le Royal lahustuv kakaojoogipulber 25g,Le Royal,25g,7350022392472,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+583081,Vitamin Well Awake vitamiinijook 500ml,Vitamin Well,500ml,7350042718429,dry_preserves,dry_other,drinks,drinks_soft_soda
+583082,Vitamin Well Recover vitamiinijook 500ml,Vitamin Well,500ml,7350042718559,dry_preserves,dry_other,drinks,drinks_soft_soda
+583083,Vitamin Well Elevate vitamiinijook 500ml,Vitamin Well,500ml,7350042719198,dry_preserves,dry_other,drinks,drinks_soft_soda
+583084,Nicks vaniljejaatis krobeda mandliga 76g,Nicks,76g,7350104402082,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+583085,Nicks piimashokolaad 75g krobeda karamelliga,Nicks,75g,7350104402235,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+583086,Nicks piimashokolaad 75g krobeda sarapuupahkliga,Nicks,75g,7350104402242,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+583087,Nicks mango passion pulgajaatis 90ml 76g,Nicks,90ml,7350104404116,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+583088,Nicks maapahkli-karamell maitseline jaatis 49g,Nicks,49g,7350104404673,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+583089,Abba heeringas Prantsuse sibulaga marineeritud 240g,Abba,240g,7350126081708,meat_fish,fish_fresh,meat_fish,fish_processed
+583090,Froosh smuuti maasika-mustsostara-ouna 750ml,Froosh,750ml,7350153720007,produce,produce_apples_pears,produce,produce_smoothies_fresh_juices
+583091,Froosh smuuti mango-granadilli-ouna 750ml,Froosh,750ml,7350153720045,produce,produce_apples_pears,produce,produce_smoothies_fresh_juices
+583092,Froosh smuuti ouna-pirni-leedrioie 750ml,Froosh,750ml,7350153720052,produce,produce_apples_pears,produce,produce_smoothies_fresh_juices
+583093,MAM silikoonlutt Original 6-16k 2tk sinine,MAM,2tk,7392855153509,drinks,drinks_spirits,baby,baby_other
+583094,MAM oolutt 6-16k 2tk silikoon roosa,MAM,2tk,7392855153547,dry_preserves,dry_other,baby,baby_other
+583095,Bambino joogitops 220ml tilkumisvaba,Bambino,220ml,7392855225053,dry_preserves,dry_other,baby,baby_other
+583096,Ceylon Jambo Grand must tee 100g,Ceylon,100g,7393439523619,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+583097,Kopparberg Pear perry 4.5pct 500ml,Kopparberg,500ml,7393714376008,produce,produce_apples_pears,drinks,drinks_beer_cider
+583098,Piraat nisukrops suitsupeekoniga 150g,Piraat,150g,7400530008812,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+583099,Dulsweet agaavisiirup Bio 345g,Dulsweet,345g,7503012779665,drinks,drinks_syrups_powders,dry_preserves,dry_other
+583100,Colgate Max White Expert Cool Mint hambapasta 75ml,Colgate,75ml,7509546064857,sweets_snacks,sweets_gums_mints,personal_care,pcare_oral_care
+583101,Elmex Sensitive Extra Soft hambahari,Elmex,,7610108043712,dry_preserves,dry_other,personal_care,pcare_oral_care
+583102,Bacardi Spiced piiritusjook 35pct 700ml,Bacardi,700ml,7610113007518,dry_preserves,dry_other,drinks,drinks_spirits
+583103,Bacardi Breezer Lime alkohoolne jook 275ml,Bacardi,275ml,7610113027585,dry_preserves,dry_other,drinks,drinks_beer_cider
+583104,Colgate Zig Zag hambahari Medium,Colgate,,7610196003544,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+583105,Isostar spordijoogipulber 400g sidruni,Isostar,400g,7612100034552,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+583106,Isostar spordijoogipulber 400g greip,Isostar,400g,7612100034910,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+583107,Gourmet Gold konserv kassile 85g kanapasteet,Gourmet Gold,85g,7613031806171,drinks,drinks_tea_coffee,pet,pet_cat_wet
+583108,Gourmet Gold konserv kassile 85g lohe-kana,Gourmet Gold,85g,7613031806201,meat_fish,meat_poultry,pet,pet_cat_wet
+583109,Gourmet Gold tuunikalapasteet kassile 85g,Gourmet Gold,85g,7613031808649,drinks,drinks_tea_coffee,pet,pet_cat_wet
+583110,Friskies kuivtoit kassile 300g kana-maks-jv,Friskies,300g,7613032248130,meat_fish,meat_poultry,pet,pet_cat_dry
+583111,Friskies Junior kuivtoit kassile 300g kana,Friskies,300g,7613032248253,meat_fish,meat_poultry,pet,pet_cat_dry
+583112,ONE kuivtoit steriliseeritud kassile 800g,ONE,800g,7613032531898,pet,pet_other,pet,pet_cat_dry
+583113,Maggi Idea kartuli-hakklihavormi maitseainesegu 42g,Maggi,42g,7613032601584,meat_fish,meat_minced,world_spices,spices_herbs_spice_mix
+583114,ONE kuivtoit kassile Junior 800g kana,ONE,800g,7613032619091,meat_fish,meat_poultry,pet,pet_cat_dry
+583115,Gourmet Gold konserv kassile 85g loomaliha pasteet,Gourmet Gold,85g,7613032816506,pet,pet_other,pet,pet_cat_wet
+583116,Gourmet Perle kiisueine 85g forell-spinat,Gourmet Perle,85g,7613032867782,meat_fish,fish_fresh,pet,pet_cat_wet
+583117,Gourmet Perle kiisueine 85g ulukiliha-aedvili,Gourmet Perle,85g,7613032867843,meat_fish,meat_beef_lamb_game,pet,pet_cat_wet
+583118,Darling kuivtoit koerale 3kg veiseliha-juurvili,Darling,3kg,7613032933760,meat_fish,meat_other,pet,pet_dog_dry

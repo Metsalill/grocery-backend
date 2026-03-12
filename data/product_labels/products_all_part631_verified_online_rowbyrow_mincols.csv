@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+581819,Marineeritud punane sibul 500g Eesti,,500g,4744749019126,produce,produce_root_veg,dry_preserves,dry_canned_veg
+581820,Marineeritud kukeseened 420g Eesti,,420g,4744749019140,produce,produce_mushrooms,dry_preserves,dry_canned_veg
+581821,Be More Be Beautiful 35g kookose-vaarika,Be More,35g,4744806010127,bakery,bakery_cakes_pastries,sweets_snacks,sweets_chocolate_bars
+581822,Be More toorkakao pulber 150g,Be More,150g,4744806010226,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+581823,Be More toorbatoon Collagen Ed. 35g kirsi,Be More,35g,4744806010509,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+581824,Be More datlipallid 100g mango,Be More,100g,4744806016891,produce,produce_tropical,sweets_snacks,sweets_candies
+581825,Nordmel pehme mesi 15*8g kotis Eesti,Nordmel,8g,4744808010552,dry_preserves,dry_other,dry_preserves,dry_other
+581826,BabyCool kõrvitsapüree kuubikud 200g,BabyCool,200g,4744848010031,dry_preserves,dry_other,baby,baby_food_pouches
+581827,BabyCool lillkapsapüree kuubikud 200g,BabyCool,200g,4744848010161,produce,produce_root_veg,baby,baby_food_pouches
+581828,Greppo karboniseeritud mahlajook guajaavi 320ml,Greppo,320ml,4744891013249,drinks,drinks_juices,drinks,drinks_soft_soda
+581829,Dagö Berry õuna-pirnimahl 3L BIB mahe,Dagö,3L,4744922010025,drinks,drinks_juices,drinks,drinks_juices
+581830,Spläsh gasseeritud vesi mango-mandariini 330ml,Spläsh,330ml,4745010069000,drinks,drinks_water,drinks,drinks_soft_soda
+581831,Spläsh gasseeritud vesi sidruni-laimi 330ml,Spläsh,330ml,4745010069017,drinks,drinks_water,drinks,drinks_soft_soda
+581832,Spläsh gasseeritud vesi pirni 330ml,Spläsh,330ml,4745010069031,drinks,drinks_water,drinks,drinks_soft_soda
+581833,Fruuti apelsinimahl viljalihaga 250ml,Fruuti,250ml,4745010069079,drinks,drinks_juices,drinks,drinks_juices
+581834,Spläsh gasseerimata mineraalvesi Sport 765ml,Spläsh,765ml,4745010069185,drinks,drinks_wine,drinks,drinks_water
+581835,Spläsh gasseerimata mineraalvesi 310ml,Spläsh,310ml,4745010069192,drinks,drinks_water,drinks,drinks_water
+581836,Spläsh gasseeritud vesi rabarber-virsiku 330ml,Spläsh,330ml,4745010069284,drinks,drinks_water,drinks,drinks_soft_soda
+581837,Maailu hautatud sealiha 240g konserv,Maailu,240g,4745010109430,meat_fish,meat_pork,dry_preserves,dry_canned_meat_fish
+581838,Maailu hautatud kanaliha 240g konserv,Maailu,240g,4745010109447,meat_fish,meat_poultry,dry_preserves,dry_canned_meat_fish
+581839,Maailu hautatud veiseliha 240g konserv,Maailu,240g,4745010109454,meat_fish,meat_beef_lamb_game,dry_preserves,dry_canned_meat_fish
+581840,Marine ABC lõhe omas mahlas 240g,Marine,240g,4745010109508,drinks,drinks_juices,dry_preserves,dry_canned_meat_fish
+581841,Marine Atlandi heeringas omas mahlas 240g,Marine,240g,4745010109591,drinks,drinks_juices,dry_preserves,dry_canned_meat_fish
+581842,Marine Atlandi heeringas õlis 240g,Marine,240g,4745010109607,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+581843,Marine Atlandi heeringas tomatikastmes 240g,Marine,240g,4745010109614,meat_fish,fish_fresh,dry_preserves,dry_canned_meat_fish
+581844,Mõisaproua klassikaline Ukraina Borš 460g,Mõisaproua,460g,4745010129179,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+581845,Mõisaproua kodune rassolnik 460g,Mõisaproua,460g,4745010129186,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+581846,Keedetud mais 450g vees pakitud India,,450g,4745010129414,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+581847,Värska Tsilgakõnõ nina- ja kurgusprei 30ml,Värska,30ml,4745010203039,dry_preserves,dry_other,personal_care,pcare_other
+581848,Revala jäätisepulber 400g vaniljamaitseline,Revala,400g,4745010242014,frozen_food,frozen_desserts_icecream,dry_preserves,dry_flour_sugar_baking
+581849,Koduranna heeringafilee tükid Caesari kastmes 270g,Koduranna,270g,4745010342011,sauces_oils,sauces_other,meat_fish,fish_processed
+581850,Koduranna heeringafilee marineeritud sibulaga 500g,Koduranna,500g,4745010342028,meat_fish,fish_fresh,meat_fish,fish_processed
+581851,Koduranna heeringafilee tükid sinepikastmes 270g,Koduranna,270g,4745010342035,sauces_oils,sauces_other,meat_fish,fish_processed
+581852,Koduranna heeringafilee tükid kolme sibulaga 270g,Koduranna,270g,4745010342042,produce,produce_root_veg,meat_fish,fish_processed
+581853,Koduranna räimefilee sibulaga 270g,Koduranna,270g,4745010342059,meat_fish,fish_fresh,meat_fish,fish_processed
+581854,Koduranna räimefilee sinepikastmes 270g,Koduranna,270g,4745010342967,meat_fish,fish_fresh,meat_fish,fish_processed
+581855,Koduranna räimefilee sibula kadakamari 270g,Koduranna,270g,4745010342998,meat_fish,fish_fresh,meat_fish,fish_processed
+581856,Thormi taimne kookose-karri kaste 350g,Thormi,350g,4745010359644,bakery,bakery_cakes_pastries,sauces_oils,sauces_other
+581857,Thormi taimne Tikka-masala kaste 350g,Thormi,350g,4745010359651,sauces_oils,sauces_other,sauces_oils,sauces_other
+581858,Thormi taimne magus-hapu kaste 350g,Thormi,350g,4745010359668,sauces_oils,sauces_other,sauces_oils,sauces_other
+581859,Baltika ketšup 500g terav,Baltika,500g,4745010372049,dry_preserves,dry_other,sauces_oils,sauces_ketchup_mayo
+581860,Baltika kondenspiim magustatud 370g,Baltika,370g,4745010372070,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+581861,Baltika kodune sinep kange 120g,Baltika,120g,4745010372094,dry_preserves,dry_other,sauces_oils,sauces_ketchup_mayo
+581862,Baltika ketšup Originaal 500g,Baltika,500g,4745010372971,drinks,drinks_spirits,sauces_oils,sauces_ketchup_mayo
+581863,Essential Well Nr.17 karboniseeritud mineraalvesi 1L,,1L,4745010379055,drinks,drinks_water,drinks,drinks_water
+581864,Japanese Choice Poke kaste 250ml,Japanese Choice,250ml,4745010394027,sauces_oils,sauces_other,sauces_oils,sauces_soy_worcester
+581865,Japanese Choice Sushi ingver 190g roosa,Japanese Choice,190g,4745010394300,dry_preserves,dry_other,world_spices,spices_herbs_spice_mix
+581866,Natty mandlivõie Almondo 333g mahe,Natty,333g,4745010436055,dairy_eggs_fats,dairy_butter_margarine,sauces_oils,sauces_other
+581867,Sunfly Natural päevalilleseemnekreem 330g,Sunfly,330g,4745010479014,sweets_snacks,sweets_nuts_driedfruit,sauces_oils,sauces_other
+581868,Sunfly Sweet&Salty päevalilleseemnekreem 330g,Sunfly,330g,4745010479045,sweets_snacks,sweets_nuts_driedfruit,sauces_oils,sauces_other

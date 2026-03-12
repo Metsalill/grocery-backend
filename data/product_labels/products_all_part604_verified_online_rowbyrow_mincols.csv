@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580469,Battery Strawberry&Lime energiajook 500ml prk,Battery,500ml,4740019003512,drinks,drinks_energy,drinks,drinks_energy
+580470,Somersby Apple siider 4.5% 500ml prk,Somersby,500ml,4740019003680,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+580471,Battery energiajook 500ml prk,Battery,500ml,4740019003772,drinks,drinks_energy,drinks,drinks_energy
+580472,Koff Lime&Vodka 5.5% 330ml prk,Koff,330ml,4740019003895,drinks,drinks_spirits,drinks,drinks_beer_cider
+580473,Somersby Strawberry&Lime alkoholivaba 500ml prk,Somersby,500ml,4740019004076,dry_preserves,dry_other,drinks,drinks_beer_cider
+580474,Saku Originaal alkoholivaba õlu 500ml prk,Saku,500ml,4740019004441,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+580475,Battery karboniseeritud jook kofeiinivaba 500ml,Battery,500ml,4740019004632,drinks,drinks_energy,drinks,drinks_soft_soda
+580476,Battery karboniseeritud jook Strawb.-Lime 500ml,Battery,500ml,4740019004649,drinks,drinks_energy,drinks,drinks_soft_soda
+580477,Garage Hard Lingonberry 4.6% 275ml,Garage,275ml,4740019503036,dry_preserves,dry_other,drinks,drinks_beer_cider
+580478,Garage Hard Californian Pear 4.6% 275ml,Garage,275ml,4740019503050,produce,produce_apples_pears,drinks,drinks_beer_cider
+580479,Somersby Apple siider 4.5% 330ml pdl,Somersby,330ml,4740019764017,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+580480,Super Manki karboniseeritud karastusjook 500ml,Super Manki,500ml,4740019782028,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+580481,Vichy Fresh Bubbles Raspberry 1.5L,Vichy,1.5L,4740019782110,dry_preserves,dry_other,drinks,drinks_soft_soda
+580482,Saku On Ice Mango alkoholivaba õllejook 500ml,Saku,500ml,4740019782318,produce,produce_tropical,drinks,drinks_beer_cider
+580483,Põltsamaa Adzikasalat suvikõrvitsaga 550g,Põltsamaa,550g,4740029042099,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+580484,Põltsamaa Letshosalat 550g,Põltsamaa,550g,4740029044499,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+580485,Felix klassikaline majonees 830g,Felix,830g,4740029048411,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+580486,Felix Kartulikaste 400g,Felix,400g,4740029048978,sauces_oils,sauces_other,sauces_oils,sauces_other
+580487,Felix Wrapikaste 395g,Felix,395g,4740029048992,bakery,bakery_flatbreads_wraps,sauces_oils,sauces_other
+580488,Põltsamaa apelsini-õunajook 200ml,Põltsamaa,200ml,4740029050063,produce,produce_apples_pears,drinks,drinks_juices
+580489,Drako maasika-õunajook 200ml,Drako,200ml,4740029051374,produce,produce_berries,drinks,drinks_juices
+580490,Põltsamaa Apelsini-viinam.-passioon 2L,Põltsamaa,2L,4740029051596,drinks,drinks_spirits,drinks,drinks_juices
+580491,Põltsamaa mahlajook õuna-küdoonia mündi 300ml,Põltsamaa,300ml,4740029051619,drinks,drinks_juices,drinks,drinks_juices
+580492,Põltsamaa multimahlajook 1L,Põltsamaa,1L,4740029055020,drinks,drinks_juices,drinks,drinks_juices
+580493,Põltsamaa multimahlajook 200ml,Põltsamaa,200ml,4740029055037,drinks,drinks_juices,drinks,drinks_juices
+580494,Põltsamaa tomatimahl 2L,Põltsamaa,2L,4740029055471,drinks,drinks_juices,drinks,drinks_juices
+580495,Põltsamaa õunamahl 2L,Põltsamaa,2L,4740029055556,drinks,drinks_juices,drinks,drinks_juices
+580496,Põltsamaa tomatimahl 300ml,Põltsamaa,300ml,4740029055631,drinks,drinks_juices,drinks,drinks_juices
+580497,Põltsamaa multimahla nektar 300ml,Põltsamaa,300ml,4740029055655,drinks,drinks_juices,drinks,drinks_juices
+580498,Põltsamaa Hartshoo 530g,Põltsamaa,530g,4740029061151,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+580499,Põltsamaa Praekapsas 520g,Põltsamaa,520g,4740029061496,produce,produce_root_veg,dry_preserves,dry_canned_veg
+580500,Põltsamaa Praekapsas 820g,Põltsamaa,820g,4740029061502,produce,produce_root_veg,dry_preserves,dry_canned_veg
+580501,Põltsamaa Valmis! Ehe pasta Bolognese 380g,Põltsamaa,380g,4740029063131,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+580502,Põltsamaa Valmis! Rikkalik hernesupp 380g,Põltsamaa,380g,4740029063155,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+580503,Põltsamaa Valmis! Tomat.hakklihasupp 380g,Põltsamaa,380g,4740029063193,meat_fish,meat_minced,dry_preserves,dry_ready_meals_jars
+580504,Felix Laimi-aioli majonees 220g,Felix,220g,4740029072713,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+580505,Tere kohvikoor 10% 380ml purepakk,Tere,380ml,4740036005094,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+580506,Tere kohupiimapasta rosina 300g,Tere,300g,4740036007357,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+580507,Merevaik juustudipp juustukaste 200g,Merevaik,200g,4740036014041,dairy_eggs_fats,dairy_cheese_slices,sauces_oils,sauces_other
+580508,Hellus keefir 2.5% +D-vitamiin 400g,Hellus,400g,4740036015499,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580509,Emma kohupiimakreem metsamarjadega 150g,Emma,150g,4740036015833,produce,produce_berries,dairy_eggs_fats,dairy_cottage_quark
+580510,Tere Deary taimne dessert mustsõstar 150g,Tere,150g,4740036016267,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+580511,Emma jogurt maisihelvestega jäätisem. 145g,Emma,145g,4740036016373,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580512,Merevaik sulatatud juust küüslauguga 200g,Merevaik,200g,4740036016540,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+580513,Tere sulatatud juust Sõprus 150g,Tere,150g,4740036016564,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+580514,Tere Deary gl. tofu jõhvikabatoonikene 40g,Tere,40g,4740036016991,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+580515,Merevaik juustupulgad 100g,Merevaik,100g,4740036017134,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+580516,Lotte Marja jogurtijook 6x100g,Lotte,100g,4740036018100,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580517,Merevaik sulatatud juust musta trühvliga 170g,Merevaik,170g,4740036018117,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+580518,Hellus keefirimaius vanilje 200g,Hellus,200g,4740036018124,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir

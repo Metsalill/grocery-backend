@@ -1,0 +1,50 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+583969,HiPP Bio 8K aedviljad riisi ja vasikalihaga 220g,HiPP,220g,9062300033318,dry_preserves,dry_pasta_rice,baby,baby_food_pouches
+583970,HiPP Bio 1A juurvilja-nuudlipüree 220g kanaliha,HiPP,220g,9062300036814,dry_preserves,dry_pasta_rice,baby,baby_food_pouches
+583971,HiPP 1A aedviljapüree 220g kalkuni-riis,HiPP,220g,9062300037118,dry_preserves,dry_pasta_rice,baby,baby_food_pouches
+583972,HiPP 4K aedviljapüree 125g mahe,HiPP,125g,9062300090311,dry_preserves,dry_other,baby,baby_food_pouches
+583973,HiPP Bio 4K ploomipüree 125g,HiPP,125g,9062300101314,dry_preserves,dry_other,baby,baby_food_pouches
+583974,HiPP Bio 8K riisi-porgandipüree 220g kalkun,HiPP,220g,9062300102922,dry_preserves,dry_pasta_rice,baby,baby_food_pouches
+583975,HiPP Bio 1A tomati-nuudlipüree 220g vasikaliha,HiPP,,9062300103523,dry_preserves,dry_pasta_rice,baby,baby_food_pouches
+583976,HiPP 8K makaronid kalaga 220g spargelkapsas,HiPP,,9062300105411,dry_preserves,dry_pasta_rice,baby,baby_food_pouches
+583977,HiPP Bio 4K porgandipüree 125g kartuliga,HiPP,125g,9062300106029,produce,produce_root_veg,baby,baby_food_pouches
+583978,HiPP Bio 4K piimapuder Head ööd 190g puuviljaga,HiPP,,9062300110286,dairy_eggs_fats,dairy_milk,baby,baby_food_pouches
+583979,HiPP 4K Spaghetti Bolognese Bio 190g,HiPP,190g,9062300130055,dry_preserves,dry_other,baby,baby_food_pouches
+583980,HiPP Bio 4K õunapüree virsiku-marjaga 100g,HiPP,100g,9062300131052,produce,produce_apples_pears,baby,baby_food_pouches
+583981,HiPP Bio 8K peedi-juurviljapüree 220g,HiPP,220g,9062300131342,dry_preserves,dry_other,baby,baby_food_pouches
+583982,HiPP Mama taimetee imetavale emale 200g,HiPP,200g,9062300133353,drinks,drinks_tea_coffee,baby,baby_other
+583983,HiPP Bio 4K pirni-õunapüree Hippis 100g,HiPP,100g,9062300133704,produce,produce_apples_pears,baby,baby_food_pouches
+583984,HiPP Bio 4K õuna-banaanipüree beebiküpsisega 100g,HiPP,,9062300133728,produce,produce_apples_pears,baby,baby_food_pouches
+583985,HiPP Bio 6K pirnipüree banaani-kiiviga 100g,HiPP,,9062300133797,produce,produce_apples_pears,baby,baby_food_pouches
+583986,HiPP Bio 6K õuna-banaanipüree vaarikaga 100g,HiPP,,9062300133803,produce,produce_berries,baby,baby_food_pouches
+583987,HiPP Bio 1K õuna-virsikupüree mirabellide-ploomiga 100g,HiPP,,9062300136972,produce,produce_apples_pears,baby,baby_food_pouches
+583988,HiPP Org 4K suvikõrvitsapüree 125g kartuliga,HiPP,125g,9062300137085,produce,produce_root_veg,baby,baby_food_pouches
+583989,HiPP 4K porgandi-kartulipüree 190g merilõhega,HiPP,,9062300137122,meat_fish,fish_fresh,baby,baby_food_pouches
+583990,HiPP 6K jätkupiimasegu Bio Combiotic 2 800g,HiPP,800g,9062300138051,dairy_eggs_fats,dairy_milk,baby,baby_formula
+583991,HiPP Bio 8K riisivahvlid vaarikaga 30g,HiPP,30g,9062300138259,dry_preserves,dry_pasta_rice,baby,baby_food_pouches
+583992,HiPP Bio 1A õuna-banaani-kaerabatoon 23g,HiPP,23g,9062300139010,sweets_snacks,sweets_chocolate_bars,baby,baby_food_pouches
+583993,HiPP Bio 1A õuna-banaanibatoon 23g vaarikaga,HiPP,,9062300139027,sweets_snacks,sweets_chocolate_bars,baby,baby_food_pouches
+583994,HiPP Bio 1A Puuviljasõber jogurt-kirss 23g,HiPP,23g,9062300139034,dry_preserves,dry_other,baby,baby_food_pouches
+583995,HiPP 6K 5-vilja piimapuder ploomiga 250g,HiPP,,9062300140061,dairy_eggs_fats,dairy_milk,baby,baby_food_pouches
+583996,HiPP piimapudrupulber maisi ja puuviljadega 6k+ 250g,HiPP,250g,9062300140085,dairy_eggs_fats,dairy_milk,baby,baby_food_pouches
+583997,HiPP 8K piimapuder prebiootik 250g puuviljadega,HiPP,250g,9062300140108,dairy_eggs_fats,dairy_milk,baby,baby_food_pouches
+583998,HiPP 6K kaera-õuna piimapudrupulber Bio 250g,HiPP,250g,9062300140245,dairy_eggs_fats,dairy_milk,baby,baby_food_pouches
+583999,HiPP Bio 4K õuna-pirni-banaanipüree 100g,HiPP,100g,9062300433743,produce,produce_apples_pears,baby,baby_food_pouches
+584000,HiPP Hippis 6K virsiku-banaanipüree mango 100g,HiPP,,9062300437000,produce,produce_tropical,baby,baby_food_pouches
+584001,Dilmah must tee 50g suureleheline,Dilmah,50g,9312631122268,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+584002,Dilmah Ceylon Gold must tee 25x2g,Dilmah,2g,9312631122718,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+584003,Dilmah must tee 20x1.5g sidrunimaitseline,Dilmah,1.5g,9312631142129,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+584004,Dilmah roheline tee 20x1.5g apelsiniga,Dilmah,1.5g,9312631163490,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+584005,Dilmah roheline tee 20x1.5g sidruniga,Dilmah,1.5g,9312631163506,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+584142,Aptamil Comfort 1 piimasegu 400g alates sünnist,Aptamil,400g,8718117601110,baby,baby_formula,baby,baby_formula
+584349,Yorkshire must tee 40tk 125g,Yorkshire,125g,0615357112001,,,drinks,drinks_tea_coffee
+584650,Finn Crisp tšiiaseemnete ja meresoolaga näkileib 195g,Finn Crisp,195g,6417700290855,bakery,bakery_bread_loaves,bakery,bakery_crispbread
+584728,Kalev Halloweeni kommikott 500g,Kalev,500g,4740012027690,,,sweets_snacks,sweets_candies
+585644,Biolagunev prügikott Biomat 10l 20tk,Biomat,10l,9007730004989,,,household,hh_other
+585961,Jenkki Fresh apelsinimaitseline ksülitooliga närimiskumm 70g,Jenkki,70g,6420256913727,,,sweets_snacks,sweets_gums_mints
+586216,Õun Auksis I klass,,,2060431600000,,,produce,produce_apples_pears
+586271,Vana Tallinn Coffee Espresso liköör 35% 500ml,Vana Tallinn,500ml,4740050007685,,,drinks,drinks_spirits
+586376,Otepää Lihatööstus Edgari sink kg,Otepää Lihatööstus,,2356713000003,meat_fish,meat_hams,meat_fish,meat_hams
+586784,Opera dOro võioad 400g,Opera dOro,400g,4743144003778,dairy_eggs_fats,dairy_other,dry_preserves,dry_canned_veg
+586894,Kultuurjõhvikad 200g,,200g,4742022670224,,,produce,produce_berries
+586903,Rainbow Regular pesugeel täitepakk 900ml,Rainbow,900ml,7340191149045,,,household,hh_laundry

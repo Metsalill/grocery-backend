@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+582219,Axa müslibatoon 30g šok-soolakaramelli,Axa,30g,4820237692139,dry_preserves,dry_cereals_muesli,sweets_snacks,sweets_chocolate_bars
+582220,Chick&Go kanalihasnäkk paprika-pipra 30g,Chick&Go,30g,4820243970214,meat_fish,meat_poultry,meat_fish,meat_gourmet
+582221,Chick&Go kanalihasnäkk tšilliga 30g,Chick&Go,30g,4820243970276,meat_fish,meat_poultry,meat_fish,meat_gourmet
+582222,Chick&Go kanalihasnäkk juustuga 30g,Chick&Go,30g,4820243970412,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+582223,Klim sefiir šokolaadiglasuuris 250g,Klim,250g,4820272981663,dry_preserves,dry_other,sweets_snacks,sweets_candies
+582224,Nezhin konserveeritud tomatid omas mahlas 920g,Nezhin,920g,4823006801251,drinks,drinks_juices,dry_preserves,dry_canned_veg
+582225,Nezhin letšo 450g,Nezhin,450g,4823006801435,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+582226,Nezhin baklazaanipüree 450g,Nezhin,450g,4823006802135,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+582227,Nezhin marineeritud kurk 450g,Nezhin,450g,4823006802234,produce,produce_root_veg,dry_preserves,dry_canned_veg
+582228,Nezhin kollased marineeritud tomatid 920g,Nezhin,920g,4823006804597,produce,produce_root_veg,dry_preserves,dry_canned_veg
+582229,Nezhin letšo ubadega 460g,Nezhin,460g,4823006805303,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+582230,GoWipes niiske tualettpaber 44tk,GoWipes,44tk,4823071657159,dry_preserves,dry_other,household,hh_paper
+582231,Roshen marmelaadikomm Crazy Bee 200g,Roshen,200g,4823077602863,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+582232,Roshen piimakomm Korivka 205g,Roshen,205g,4823077608513,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_candies
+582233,Roshen kinkekarp 145g šok.kommide assortii,Roshen,145g,4823077611933,sweets_snacks,sweets_candies,sweets_snacks,sweets_chocolate_bars
+582234,Roshen karamell 200g eukalüpti-mentooli,Roshen,200g,4823077612695,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+582235,Veres kabatšokipüree 500g,Veres,500g,4823084601026,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+582236,Chumak päevalilleõli 1L,Chumak,1L,4823096005126,sauces_oils,oils_other,sauces_oils,oils_other
+582237,Rud Mochi soola karamelli-mustsõstra 50g,Rud,50g,4823097813669,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+582238,Rud Mochi mangoga 50g,Rud,50g,4823097815175,produce,produce_tropical,sweets_snacks,sweets_candies
+582239,Veladis delikatess krevetimääre 150g,Veladis,150g,4823097900321,dry_preserves,dry_other,meat_fish,fish_processed
+582240,Veladis krevetimääre küüslauguga 150g,Veladis,150g,4823097900338,dry_preserves,dry_other,meat_fish,fish_processed
+582241,Veladis krevetimääre avokaadoga 150g,Veladis,150g,4823097900345,dry_preserves,dry_other,meat_fish,fish_processed
+582242,Veladis tursamarja pate 100g,Veladis,100g,4823097903179,dry_preserves,dry_other,meat_fish,fish_processed
+582243,Veres baklazaan adžikas 500g,Veres,500g,4823105400713,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+582244,Tea Moments must tee Berries Party 20*1.8g,Tea Moments,1.8g,4823118600230,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582245,Tea Moments must tee Choc.Truffle 20*1.8g,Tea Moments,1.8g,4823118600278,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582246,Tea Moments Mango Time roheline tee 20*1.7g,Tea Moments,1.7g,4823118600292,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582247,Tea Moments Mojito Breeze roheline tee 20*1.7g,Tea Moments,1.7g,4823118600339,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582248,Tea Moments Summer Melody puuviljatee 20*1.7g,Tea Moments,1.7g,4823118600377,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582249,Nefis kreeker Mix 200g,Nefis,200g,4840095000617,dry_preserves,dry_other,sweets_snacks,sweets_biscuits_cookies
+582250,Bucuria karamell Krabike 190g,Bucuria,190g,4840095015895,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+582251,Brandy Divin Saint Monty VSOP 40% 500ml,,500ml,4840195004089,bakery,bakery_buns_croissants,drinks,drinks_spirits
+582252,Saint Monty Espresso piiritusjook 30% 500ml,,500ml,4840195004171,bakery,bakery_buns_croissants,drinks,drinks_spirits
+582253,Brandy Ararat 5YO 40% 500ml,,500ml,4850001000037,dry_preserves,dry_other,drinks,drinks_spirits
+582254,Borjomi karboniseeritud looduslik mineraalvesi 1L,Borjomi,1L,4860019001360,drinks,drinks_water,drinks,drinks_water
+582255,Nabeghlavi looduslik mineraalvesi 1L,Nabeghlavi,1L,4865602001772,drinks,drinks_water,drinks,drinks_water
+582256,GP Lithium Cell patarei CR2016,GP,,4891199003707,dry_preserves,dry_other,household,hh_other
+582257,GP Lithium Cell patarei CR2025,GP,,4891199003714,dry_preserves,dry_other,household,hh_other
+582258,GP Lithium Cell patarei CR2430,GP,,4891199003738,dry_preserves,dry_other,household,hh_other
+582259,GP Remote Control patarei 23AE,GP,,4891199042119,dry_preserves,dry_other,household,hh_other
+582260,Chupa Chups pulgakomm The Best of 12g,Chupa Chups,12g,49814521,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+582261,Coca-Cola Zero karboniseeritud karastusjook 500ml,Coca-Cola,500ml,5000112614152,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+582262,Coca-Cola karboniseeritud karastusjook 500ml,Coca-Cola,500ml,5000112614466,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+582263,Coca-Cola karboniseeritud karastusjook 2L,Coca-Cola,2L,5000112651355,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+582264,Neptunas Lemon karboniseeritud lauavesi 1.5L,Neptunas,1.5L,5000112651553,drinks,drinks_water,drinks,drinks_soft_soda
+582265,Fuze Tea Lemon Lemongrass 1.5L,Fuze Tea,1.5L,5000112651614,dry_preserves,dry_other,drinks,drinks_tea_coffee
+582266,Fanta karboniseeritud karastusjook 2L apelsini,Fanta,2L,5000112651645,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+582267,Schweppes toonik 1.5L,Schweppes,1.5L,5000112651775,dry_preserves,dry_other,drinks,drinks_soft_soda
+582268,Sprite karboniseeritud karastusjook 330ml sidruni-laimi,Sprite,330ml,5000112651850,drinks,drinks_soft_soda,drinks,drinks_soft_soda

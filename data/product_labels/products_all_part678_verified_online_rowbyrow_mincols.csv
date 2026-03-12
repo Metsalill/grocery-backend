@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+613917,Basilur Merry Berries assortii roheline-must-puuviljatee 40tk,Basilur,40tk,4792252947412,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+613918,Marabou Big Taste Nutty Choco Wafer piimašokolaad 270g,Marabou,270g,7622201679637,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+613919,Dolfin Kummitus ja skeleti üllatusšokolaad 80g,Dolfin,80g,8002267024586,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+613920,Pesukauss 8L lilla,,8L,6411762062740,dry_preserves,dry_other,household,hh_kitchenware
+613921,Dave&Jons datlid kaneelisaiamaitselised 125g,Dave&Jons,125g,7350054797474,bakery,bakery_buns_croissants,sweets_snacks,sweets_nuts_driedfruit
+613922,Xtra Gouda viilutatud juust 400g,Xtra,400g,7340191172180,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+613923,Kotimaista küüslaugukoorekartulid 700g,Kotimaista,700g,6438460977602,dairy_eggs_fats,dairy_cream_sourcream,produce,produce_root_veg
+613924,Kucharek loomalihapuljong 120g,Kucharek,120g,5901135011051,world_spices,spices_broth_stock,world_spices,spices_broth_stock
+613925,Nordtempeh kollase herne tempeh 200g,Nordtempeh,200g,4745011029546,dry_preserves,dry_other,dry_preserves,dry_groats_beans
+613926,Pringles advendikalender,Pringles,,5053990186884,dry_preserves,dry_other,sweets_snacks,sweets_snacks_salty
+613927,Xtra kakao 1kg,Xtra,1kg,7340191156791,dry_preserves,dry_other,drinks,drinks_syrups_powders
+613928,Oddlygood Barista kaerajook sarapuupähkli maitseline gluteenivaba 1L,Oddlygood,1L,6408430102501,drinks,drinks_tea_coffee,dairy_eggs_fats,dairy_plant_drinks
+613929,Basilur must tee Joyful Celebrations 75g metallpurgis,Basilur,75g,4792252947382,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+613930,Remedia jõhvikaliköör 18% 500ml,Remedia,500ml,4740034013541,produce,produce_berries,drinks,drinks_spirits
+613931,Wrigleys Extra White Sweet Mint närimiskummid 29g,Wrigley,29g,4009900527897,sweets_snacks,sweets_gums_mints,sweets_snacks,sweets_gums_mints
+613932,Jim Beam Red Stag Black Cherry liköör 32.5% 700ml,Jim Beam,700ml,5060045589774,dry_preserves,dry_other,drinks,drinks_spirits
+613933,Coop texmex bataadisupp 570ml,Coop,570ml,7340191165687,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+613934,Activus öko kolme läätse supp 400g,Activus,400g,4779039732607,dry_preserves,dry_groats_beans,dry_preserves,dry_ready_meals_jars
+613935,Omo pesugeel active clean 920ml,Omo,920ml,8720181312397,household,hh_laundry,household,hh_laundry
+613936,Filter tolmuimejale X-Force 8.60 2tk,,2tk,3221616001329,dry_preserves,dry_other,household,hh_other
+613937,Mayeri Angel Kiss pesuloputusvahend hüpoallergeenne 750ml,Mayeri,750ml,4740060015342,household,hh_laundry,household,hh_laundry
+613938,Sallinen apelsinisukaad 100g,Sallinen,100g,6436501025862,produce,produce_tropical,sweets_snacks,sweets_nuts_driedfruit
+613939,Activus püreesupp kõrvits 400g,Activus,400g,4779039732614,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+613940,Xtra pesuloputusvahend 1L,Xtra,1L,7340191172937,household,hh_laundry,household,hh_laundry
+613941,Karums piparkoogi-mandarini kohuke 45g,Karums,45g,4750025001457,drinks,drinks_spirits,dairy_eggs_fats,dairy_desserts
+613942,Hulten jõulusokk kommidega 223g,Hulten,223g,7350164230670,dry_preserves,dry_other,sweets_snacks,sweets_candies
+613943,Fini Scary Box maiustuste karp 92g,Fini,,8410525260735,dry_preserves,dry_other,sweets_snacks,sweets_candies
+613944,Coop India pähklid 100g,Coop,100g,7340191168411,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+613945,Liivimaa Lihaveis veiseklops 300g,Liivimaa Lihaveis,300g,4740456001478,meat_fish,meat_beef_lamb_game,meat_fish,meat_beef_lamb_game
+613946,Mynthon Original õunamaitseline suhkruvaba C-vitamiiniga 39g,Mynthon,39g,6420256910870,drinks,drinks_spirits,sweets_snacks,sweets_gums_mints
+613947,Coop külmutatud lõhefilee kg,Coop,,2396012200001,meat_fish,fish_fresh,frozen_food,frozen_fish
+613948,Kalev riisikrõbinatega pralineekomm piimašokolaadis 150g,Kalev,150g,4740012601173,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+613949,Amii Winter Morning kodulõhnastaja 100ml,Amii,100ml,4744641015097,dry_preserves,dry_other,household,hh_candles_airfresh
+613950,LaBuble Cremant de Bordeaux Brut vahuvein 12% 750ml,LaBuble,750ml,3500611231666,drinks,drinks_wine,drinks,drinks_wine
+613951,Mahlapurikas apelsini-maasika-pirni-mango mahlajää 75g,,75g,4740188020235,drinks,drinks_juices,frozen_food,frozen_desserts_icecream
+613952,Tallegg broilerirulaad klassikaline 400g,Tallegg,400g,4740046001871,meat_fish,meat_poultry,meat_fish,meat_poultry
+613953,Bio Luvil Classic pesugeel 920ml,Bio Luvil,920ml,8710447328590,household,hh_laundry,household,hh_laundry
+613954,Neutral lõhnavaba seep 100g,Neutral,100g,8712561444439,personal_care,pcare_soap,personal_care,pcare_shower_soap
+614089,Coop želatiinilehed 20g,Coop,20g,7340191167933,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+614090,Rainbow mahe mustikamoos 360g,Rainbow,360g,7340191152434,dry_preserves,dry_other,dry_preserves,dry_other
+614091,Mull alkoholivaba siider rabarberiga,Mull,,4742022090053,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+614092,Õun Red Delicious I klass,,,2060516200002,produce,produce_apples_pears,produce,produce_apples_pears
+614093,Carlsberg hele õlu 5% 500ml,Carlsberg,500ml,4740019001570,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+614094,Jalostaja tomati-läätsesupp 550ml,Jalostaja,550ml,6409536651337,dry_preserves,dry_groats_beans,dry_preserves,dry_ready_meals_jars
+614095,USIN Mehhiko toorsalat 200g,USIN,200g,4740584000114,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+614096,Gustav Catering võikana riisiga 310g,Gustav Catering,310g,4742513006624,dairy_eggs_fats,dairy_butter_margarine,frozen_food,frozen_ready_meals
+614097,Cirio tomatipüree 680g,Cirio,680g,8000320010088,produce,produce_root_veg,sauces_oils,sauces_pasta_cooking
+614098,Fazer premium vaarika-jogurti pulgajäätis 66g,Fazer,66g,6430064403495,dairy_eggs_fats,dairy_yogurt_kefir,frozen_food,frozen_desserts_icecream
+614099,Coop tuunikalatükid väheses vees MSC 130g,Coop,116g,7340191170742,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+614100,Coop kaerajook 1L,Coop,1L,7340191177758,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks

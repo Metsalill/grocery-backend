@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+583019,Semper 6K banaan-mustika smuuti 90g jogurtiga,Semper,90g,7310100703002,produce,produce_berries,baby,baby_food_pouches
+583020,Semper 6K puuviljapüree 110g mango,Semper,110g,7310100709127,produce,produce_tropical,baby,baby_food_pouches
+583021,Semper 6K puuviljapüree 110g õun-banaan,Semper,110g,7310100718945,produce,produce_apples_pears,baby,baby_food_pouches
+583022,Felix tomatiketsup 980g vähendatud sool-suhkruga,Felix,980g,7310240650099,world_spices,spices_basic_salt_pepper,sauces_oils,sauces_ketchup_mayo
+583023,Glade One Touch Citrus õhuvärskendaja 10ml,Glade,10ml,7310250765103,dry_preserves,dry_other,household,hh_candles_airfresh
+583024,Glade OT õhuvärskendaja täide 10ml,Glade,10ml,7310250848400,household,hh_candles_airfresh,household,hh_candles_airfresh
+583025,Dansukker hele suhkrusiirup 750g,Dansukker,750g,7310340464435,drinks,drinks_syrups_powders,dry_preserves,dry_other
+583026,Zewa Everyday Jumbo majapidamispaber 1tk,Zewa,1tk,7310361165625,dry_preserves,dry_other,household,hh_paper
+583027,Marabou drazee 74g piimashokolaadi,Marabou,74g,7310510002122,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+583028,Jordan Stay Fresh Sensitive hambapasta 75ml,Jordan,75ml,7310610021252,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+583029,Jordan Green Clean Cavi Pro hambapasta 75ml,Jordan,75ml,7310610021269,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+583030,Jordan Green Clean Junior 6+ hambapasta 50ml,Jordan,50ml,7310610021283,dry_preserves,dry_other,personal_care,pcare_oral_care
+583031,Jordan Green Clean White hambapasta 75ml,Jordan,75ml,7310610026769,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+583032,Libresse Ultra nortiibadeta hügieenisidem 16tk,Libresse,16tk,7310790088311,dry_preserves,dry_other,personal_care,pcare_other
+583033,Ultra Normal Wings hügieenisidem 10tk,Ultra,10tk,7310790088731,dry_preserves,dry_other,personal_care,pcare_other
+583034,Libresse Ultra Normal Wings hügieenisidem 2x10tk,Libresse,10tk,7310791245607,dry_preserves,dry_other,personal_care,pcare_other
+583035,Santa Maria maitseainesegu roheline karri 40g,Santa Maria,40g,7311310034443,dry_preserves,dry_other,world_spices,spices_herbs_spice_mix
+583036,Santa Maria hele sojakaste 200ml,Santa Maria,200ml,7311310035792,world_spices,spices_asian,sauces_oils,sauces_soy_worcester
+583037,Santa Maria tuline piprakaste 85ml,Santa Maria,85ml,7311310038809,sauces_oils,sauces_other,sauces_oils,sauces_other
+583038,Santa Maria ananassi salsa 230g,Santa Maria,230g,7311310039257,produce,produce_tropical,sauces_oils,sauces_other
+583039,Santa Maria küüslaugupipar 70g,Santa Maria,70g,7311311005855,world_spices,spices_basic_salt_pepper,world_spices,spices_herbs_spice_mix
+583040,Santa Maria sidrunipipar 33g,Santa Maria,33g,7311311026256,world_spices,spices_basic_salt_pepper,world_spices,spices_herbs_spice_mix
+583041,Santa Maria universaalne maitseaine 78g,Santa Maria,78g,7311311026478,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+583042,Santa Maria tortiljakrõps 185g tšilliga,Santa Maria,185g,7311312008091,bakery,bakery_flatbreads_wraps,sweets_snacks,sweets_snacks_salty
+583043,Dogman Mini kakakotid 20tk erinevad,Dogman,20tk,7312137389204,dry_preserves,dry_other,pet,pet_other
+583044,Havi lauaküünal 35h 60x100mm valge,Havi,,7321011392490,household,hh_candles_airfresh,household,hh_candles_airfresh
+583045,Havi lauaküünal 35h 60x100mm sampanja,Havi,,7321011392520,household,hh_candles_airfresh,household,hh_candles_airfresh
+583046,Libresse Classic Protection Regular päevakaitse 50tk,Libresse,50tk,7322540009620,dry_preserves,dry_other,personal_care,pcare_other
+583047,Libresse Dailies Fresh Regular päevakaitse 20tk,Libresse,20tk,7322540077445,dry_preserves,dry_other,personal_care,pcare_other
+583048,Libresse Natural Care Regular Wings hügieenisidem 10tk,Libresse,10tk,7322540083064,dry_preserves,dry_other,personal_care,pcare_other
+583049,Dailies Fresh Regular päevakaitse 2x20tk,Dailies,20tk,7322540086201,dry_preserves,dry_other,personal_care,pcare_other
+583050,Libresse Natural Care Regular Wings hügieenisidem 20tk,Libresse,20tk,7322540137613,dry_preserves,dry_other,personal_care,pcare_other
+583051,Dailies Natural Care Regular päevakaitse 40tk,Dailies,40tk,7322540306392,dry_preserves,dry_other,personal_care,pcare_other
+583052,Libresse Ultra Long Wings Duo hügieenisidem 2x8tk,Libresse,8tk,7322540388442,dry_preserves,dry_other,personal_care,pcare_other
+583053,Libresse Ultra Long Wings hügieenisidem 8tk,Libresse,8tk,7322540388480,dry_preserves,dry_other,personal_care,pcare_other
+583054,Zewa Kids Box taskurätikud 60tk karbis,Zewa,60tk,7322540413977,dry_preserves,dry_other,household,hh_paper
+583055,Libresse Goodnight Maxi Wings hügieenisidem 10tk,Libresse,10tk,7322540576474,dry_preserves,dry_other,personal_care,pcare_other
+583056,Libresse Dailies Fresh Regular Deo päevakaitse 30tk,Libresse,30tk,7322540802979,dry_preserves,dry_other,personal_care,pcare_other
+583057,Tena Lady Normal uriinipidamatussidem 12tk,Tena,12tk,7322540852127,dry_preserves,dry_other,personal_care,pcare_other
+583058,Tena Discreet Mini uriinipidamatussidem 20tk,Tena,20tk,7322540853377,dry_preserves,dry_other,personal_care,pcare_other
+583059,Libresse Goodnight Ultra X-large hügieenisidem 8tk,Libresse,8tk,7322540918281,dry_preserves,dry_other,personal_care,pcare_other
+583060,Zewa Softis Sensitive taskurätikud 10x9tk,Zewa,,7322540926262,dry_preserves,dry_other,household,hh_paper
+583061,Libresse Ultra Thin Goodnight hügieenisidem 8tk,Libresse,8tk,7322540960235,dry_preserves,dry_other,personal_care,pcare_other
+583062,Zewa Wisch Weg majapidamispaber 2tk 2-kihiline,Zewa,2tk,7322540973112,dry_preserves,dry_other,household,hh_paper
+583063,Tena Discreet päevakaitse Ultra Mini 28tk,Tena,28tk,7322541079585,dry_preserves,dry_other,personal_care,pcare_other
+583064,Zewa Softis taskurätikud 4-kihiline 10x9tk,Zewa,9tk,7322541110776,dry_preserves,dry_other,household,hh_paper
+583065,Zewa Softis taskurätikud 4-kihiline 9tk,Zewa,9tk,7322541112268,dry_preserves,dry_other,household,hh_paper
+583066,Zewa Softis taskurätikud 4-kihiline 6x9tk,Zewa,9tk,7322541112275,dry_preserves,dry_other,household,hh_paper
+583067,Zewa Exclusive UltraSoft tualettpaber 4tk valge,Zewa,4tk,7322541188546,dry_preserves,dry_other,household,hh_paper
+583068,Zewa Exclusive NaturalSoft tualettpaber 8tk,Zewa,8tk,7322541361246,dry_preserves,dry_other,household,hh_paper

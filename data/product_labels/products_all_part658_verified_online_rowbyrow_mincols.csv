@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+583169,Felix maius kassile Party Mix Ocean 60g,Felix,60g,7613287631435,pet,pet_other,pet,pet_cat_treats
+583170,Felix maius kassile Party Mix Original 60g,Felix,60g,7613287631459,drinks,drinks_spirits,pet,pet_cat_treats
+583171,Felix Tasty Shreds kiisueine 4x80g lihavalik,Felix,80g,7613287650320,meat_fish,meat_other,pet,pet_cat_wet
+583172,Felix Tasty Shreds kiisueine 4x80g kalavalik,Felix,80g,7613287650948,meat_fish,fish_fresh,pet,pet_cat_wet
+583173,ONE Junior kiisueine 4x85g kana-porgand,ONE,85g,7613287795892,meat_fish,meat_poultry,pet,pet_cat_wet
+583174,Gourmet Perle kiisueine 85g loomaliha,Gourmet Perle,85g,7613287833075,meat_fish,meat_other,pet,pet_cat_wet
+583175,Gourmet Perle kiisueine 85g kanaliha,Gourmet Perle,85g,7613287833082,meat_fish,meat_poultry,pet,pet_cat_wet
+583176,ONE Senior kiisueine 4x85g kana-uba-veiseliha,ONE,85g,7613287893352,meat_fish,meat_poultry,pet,pet_cat_wet
+583177,One kiisueine 4x85g kana-veiseliha-rohelised oad,One,85g,7613287893390,meat_fish,meat_poultry,pet,pet_cat_wet
+583178,Toblerone piimashokolaad 100g,Toblerone,100g,7614500010013,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+583179,Milka piimashokolaad 100g maasikatäidisega,Milka,100g,7622200007332,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+583180,Milka shokolaadi-pahklikreem 350g,Milka,350g,7622201495572,dairy_eggs_fats,dairy_milk,sauces_oils,sauces_other
+583181,Milka Brookie küpsis 132g,Milka,132g,7622201513764,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_biscuits_cookies
+583182,Milka Chocolate Dessert piimashokolaad 100g,Milka,100g,7622201640897,drinks,drinks_soft_soda,sweets_snacks,sweets_chocolate_bars
+583183,Milka piimashokolaad 270g pahklikreemi-karamell,Milka,270g,7622201677855,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+583184,Marabou Daim piimashokolaad 220g,Marabou,220g,7622201733704,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+583185,7 Days Double Croissant vanilj-maasika 60g,7 Days,60g,7622202029042,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+583186,Tuc Bake Rolls 80g pitsamaitseline,Tuc,80g,7622202202537,dry_preserves,dry_other,sweets_snacks,sweets_snacks_salty
+583187,Oreo küpsis Vanilla Mini 160g,Oreo,160g,7622202249402,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+583188,Milka piimashokolaad 95g tervete pahklitega,Milka,95g,7622202262678,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+583189,Daim drazee 150g,Daim,150g,7622202265020,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+583190,Milka Alpine Milk Vanilla kinkekarp 330g,Milka,330g,7622202295621,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+583191,Milka piimashokolaad Biscoff 90g,Milka,90g,7622202305221,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+583192,Milka piimashokolaad 45g,Milka,45g,7622202323461,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+583193,Milka Oreo piimashokolaad 100g,Milka,100g,7622210078100,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+583194,Marabou küpsis 184g tumeda shokolaadiga,Marabou,184g,7622210081940,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+583195,Jacobs Original 3in1 lahustuv kohvijook 20x15.2g,Jacobs,15.2g,7622210089724,drinks,drinks_spirits,drinks,drinks_coffee_beans_capsules
+583196,Belvita küpsis 300g pahklite-meega,Belvita,300g,7622210194961,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+583197,Prince Polo Classic vahvlibatoon 50g,Prince Polo,50g,7622210309792,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+583198,Belvita küpsis 300g metsamarja,Belvita,300g,7622210346735,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+583199,Milka piimashokolaad Bubbly 90g,Milka,90g,7622210369444,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+583200,Milka kinkekarp I Love 110g pahklitega,Milka,110g,7622210597335,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+583201,Prince Polo Coconut vahvlibatoon 50g,Prince Polo,50g,7622210607874,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+583202,Milka kinkekarp miniassortii 138g,Milka,138g,7622210711472,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+583203,Oreo küpsis Golden 176g,Oreo,176g,7622210755506,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+583204,Marabou kommid Oreo Bites 140g,Marabou,140g,7622210871978,sweets_snacks,sweets_candies,sweets_snacks,sweets_chocolate_bars
+583205,Marabou drazee Daimiga 67g piimashokolaad,Marabou,67g,7622300223120,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+583206,Milka piimashokolaad 300g toffee-pahklitega,Milka,300g,7622300313357,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+583207,Milka Daim shokolaad 100g karamelli-mandlitükkidega,Milka,100g,7622300373115,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+583208,Tuc Mini kreeker 100g peekon,Tuc,100g,7622300570316,meat_fish,meat_pork,sweets_snacks,sweets_snacks_salty
+583209,Jacobs Krönung lahustuv kohv 100g,Jacobs,100g,7622400005589,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+583210,Martini Bianco Vermut 0.75L,Martini,0.75L,7630040409025,dry_preserves,dry_other,drinks,drinks_spirits
+583211,Holle 6K täistera kaerapuder 250g,Holle,250g,7640104952619,dry_preserves,dry_other,baby,baby_food_pouches
+583212,Canderel looduslik suhkruasendaja pulber 40g,Canderel,40g,7640110704264,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+583213,Canderel suhkruasendaja stevia 75g,Canderel,75g,7640110709733,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+583214,Evolu Simple digitaalne termomeeter DMT4132,Evolu,,7640160480255,dry_preserves,dry_other,personal_care,pcare_other
+583215,Holle Org 12K müslibatoon 25g õuna-banaan,Holle,25g,7640161879034,dry_preserves,dry_cereals_muesli,baby,baby_food_pouches
+583216,Holle Org 12K müslibatoon 25g pirni-õuna,Holle,25g,7640161879072,dry_preserves,dry_cereals_muesli,baby,baby_food_pouches
+583217,Splat hambapasta biocalcium 100ml,Splat,100ml,7640168930059,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+583218,Splat-Medical Herbs hambapasta 100ml,Splat-Medical,100ml,7640168930097,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care

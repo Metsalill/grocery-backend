@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+581269,Coop kohupiimakreem mustika 150g,Coop,150g,4740660015612,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+581270,Coop manna 1kg,Coop,1kg,4740660015650,dry_preserves,dry_other,dry_preserves,dry_cereals_muesli
+581271,Coop alkoholivaba õllejook 500ml sidruni,Coop,500ml,4740660015803,produce,produce_tropical,drinks,drinks_beer_cider
+581272,Hüva siirup 1L mustasõstar,Hüva,1L,4740660015810,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+581273,Hüva maisihelbed 500g,Hüva,500g,4740660015865,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+581274,Hüva siirup 1L jõhvikas,Hüva,1L,4740660015889,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+581275,Coop karboniseeritud joogivesi 1L,Coop,1L,4740660016107,drinks,drinks_water,drinks,drinks_water
+581276,Hüva vatipadjad 120tk,Hüva,120tk,4740660016152,dry_preserves,dry_other,personal_care,pcare_other
+581277,Coop vatipadjad kahepoolsed 70tk,Coop,70tk,4740660016169,dry_preserves,dry_other,personal_care,pcare_other
+581278,Coop vatipadjad 80tk orgaanilisest puuvillast,Coop,80tk,4740660016176,dry_preserves,dry_other,personal_care,pcare_other
+581279,Mugulsibul 1kg võrgus Poola,,1kg,4740660016183,produce,produce_root_veg,produce,produce_root_veg
+581280,Kiivi 1kg korvis I klass Tsiili,,1kg,4740660016237,produce,produce_tropical,produce,produce_tropical
+581281,Coop hernesupp 500g lihata,Coop,500g,4740660016305,meat_fish,meat_other,dry_preserves,dry_ready_meals_jars
+581282,Coop hapukapsasupp 480g lihata,Coop,480g,4740660016312,produce,produce_root_veg,dry_preserves,dry_ready_meals_jars
+581283,Coop broilerikintsuliha klassikalises mar. 1kg,Coop,1kg,4740660016329,meat_fish,meat_other,meat_fish,meat_poultry
+581284,Coop broileri poolkoivad marinaadis 560g,Coop,560g,4740660016343,sauces_oils,sauces_marinades,meat_fish,meat_poultry
+581285,Hüva praetud kilud tomatikastmes 240g,Hüva,240g,4740660016589,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+581286,Hüva skumbria õlis 240g,Hüva,240g,4740660016596,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+581287,Hüva skumbria tomatikastmes 240g,Hüva,240g,4740660016602,produce,produce_root_veg,dry_preserves,dry_canned_meat_fish
+581288,Hüva praetud räimed tomatikastmes 240g,Hüva,240g,4740660016619,meat_fish,fish_fresh,dry_preserves,dry_canned_meat_fish
+581289,Säästu katlakivivastased tabletid 16tk,Säästu,16tk,4740660016640,dry_preserves,dry_other,household,hh_cleaners
+581290,Säästu nõudepesumasin tabletid 7in1 16tk,Säästu,16tk,4740660016657,household,hh_dishwashing,household,hh_dishwashing
+581291,Säästu siirup 1L kirsimaitseline,Säästu,1L,4740660016701,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+581292,Klaaspurk komplekt 900ml 82mm keermega 6tk,,900ml,4740660016749,dry_preserves,dry_other,household,hh_kitchenware
+581293,Hüva vatitikud 200tk,Hüva,200tk,4740660016756,dry_preserves,dry_other,personal_care,pcare_other
+581294,Coop kartulikrõps 200g soolaga,Coop,200g,4740660016770,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+581295,Coop kartulikrõps 200g rohelise sibulaga,Coop,200g,4740660016787,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+581296,Coop kartulikrõps 200g sibula ja h.koorega,Coop,200g,4740660016794,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_snacks_salty
+581297,Coop kartulikrõps 200g juustu ja h.koorega,Coop,200g,4740660016817,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_snacks_salty
+581298,Coop õrrekanade munad M 10tk,Coop,10tk,4740660016831,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+581299,Säästu karboniseerimata joogivesi 5L,Säästu,5L,4740660016848,drinks,drinks_water,drinks,drinks_water
+581300,Frillis lõigatud pakitud kiles Soome,,,,4740660016855,dry_preserves,dry_other,produce,produce_herbs_salads_sprouts
+581301,Klaaspurk komplekt 540ml 82mm keermega 6tk,,540ml,4740660016879,dry_preserves,dry_other,household,hh_kitchenware
+581302,CK krabisõrad dipikastmega 285g,CK,285g,4740660016947,sauces_oils,sauces_other,sauces_oils,sauces_other
+581303,Coop Supreme külmsuitsutatud forellifilee viil 100g,Coop,100g,4740660017234,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+581304,Coop Supreme soolaforellifilee viil 100g,Coop,100g,4740660017241,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked
+581305,Coop karboniseeritud karastusjook Cola 500ml,Coop,500ml,4740660017272,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+581306,Coop karboniseeritud karastusjook Lemon 500ml,Coop,500ml,4740660017289,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+581307,Coop karboniseeritud karastusjook Orange 500ml,Coop,500ml,4740660017296,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+581308,Coop piimaš okolaad 100g,Coop,100g,4740660017364,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+581309,Coop tume šokolaad 100g,Coop,100g,4740660017371,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+581310,Kultuurmustikad 125g Väärt Viljad Peruu,,125g,4740660017593,produce,produce_berries,produce,produce_berries
+581311,Coop tualettpaberid 3kih 4tk 100% tselluloos,Coop,4tk,4740660017609,dry_preserves,dry_other,household,hh_paper
+581312,Coop tualettpaberid 3kih 8tk 100% tselluloos,Coop,8tk,4740660017616,dry_preserves,dry_other,household,hh_paper
+581313,Coop tualettpaberid 3kih 16tk 100% tselluloos,Coop,16tk,4740660017623,dry_preserves,dry_other,household,hh_paper
+581314,Hüva Jumbo majapidamispaber 2kih 1rull 400leht,Hüva,400leht,4740660017647,dry_preserves,dry_other,household,hh_paper
+581315,Lambsalat 125g Itaalia,,125g,4740660017678,meat_fish,meat_beef_lamb_game,produce,produce_herbs_salads_sprouts
+581316,Coop mahlajäätis maasikas 80ml/73g,Coop,80ml,4740660017746,drinks,drinks_juices,frozen_food,frozen_desserts_icecream
+581317,Coop köögiviljamahl 1L,Coop,1L,4740660017760,drinks,drinks_juices,drinks,drinks_juices
+581318,Coop Supreme kuivatatud mango 200g,Coop,200g,4740660018026,produce,produce_tropical,sweets_snacks,sweets_nuts_driedfruit

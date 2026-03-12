@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+582269,Sprite karboniseeritud karastusjook 2L sidruni-laimi,Sprite,2L,5000112651898,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+582270,Fuze Tea BT Peach Hibiscus 500ml,Fuze Tea,500ml,5000112651942,dry_preserves,dry_other,drinks,drinks_tea_coffee
+582271,Cappy Ice Fruit virsik-melon 500ml,Cappy,500ml,5000112655551,produce,produce_tropical,drinks,drinks_soft_soda
+582272,Neptunas karboniseeritud mineraalvesi 1.5L,Neptunas,1.5L,5000112658354,drinks,drinks_water,drinks,drinks_water
+582273,Schweppes Pink Mixer toonik 1L,Schweppes,1L,5000112664621,dry_preserves,dry_other,drinks,drinks_soft_soda
+582274,Schweppes Pink Mixer toonik 1.5L,Schweppes,1.5L,5000112664638,dry_preserves,dry_other,drinks,drinks_soft_soda
+582275,Heinz küpsetatud aedoad tomatikastmes 415g,Heinz,415g,5000157145413,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+582276,Snickers batoonijäätis 53ml/48g,Snickers,53ml,5000159343961,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+582277,Mars batoonijäätis 51ml/41.8g,Mars,51ml,5000159397360,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+582278,Masterfoods batoonijäätis Twix 40g/50ml,Masterfoods,40g,5000159484657,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+582279,Snickers pulgajäätis 73.5g,Snickers,73.5g,5000159515481,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+582280,Milky Way šok.batoon 21.5g vahustatud valge täidis,Milky Way,21.5g,5000159550567,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+582281,Maltesers dražee šokolaadipallid 135g,Maltesers,135g,5000159555692,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+582282,Bounty kookose-piimaijäätis piimaš ok. 272g,Bounty,272g,5000159558358,dairy_eggs_fats,dairy_milk,frozen_food,frozen_desserts_icecream
+582283,Snickers topsijäätis maapähkli-karamell 335g,Snickers,335g,5000159558587,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+582284,M&Ms topsijäätis maapähkli-piimaš ok. 306g,M&Ms,306g,5000159559225,dairy_eggs_fats,dairy_milk,frozen_food,frozen_desserts_icecream
+582285,M&Ms Crispy piimaš ok. värvilises glasuuris 187g,M&Ms,187g,5000159561686,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+582286,Gourmet Gold konserv kassile 4*85g,Gourmet Gold,85g,5000161029853,pet,pet_other,pet,pet_cat_wet
+582287,After Eight kinkekarp 400g,After Eight,400g,5000189983281,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+582288,Glade Touch&Fresh CleanLinen õhuvärskendaja täide 10ml,Glade,10ml,5000204076684,dry_preserves,dry_other,household,hh_candles_airfresh
+582289,Glade One Touch õhuvärskendaja Zen Garden täide 10ml,Glade,10ml,5000204078565,dry_preserves,dry_other,household,hh_candles_airfresh
+582290,Glade One Touch Lily õhuvärskendaja täide 10ml,Glade,10ml,5000204580761,dry_preserves,dry_other,household,hh_candles_airfresh
+582291,Sensodyne hambaniit 30m,Sensodyne,30m,5000347084065,dry_preserves,dry_other,personal_care,pcare_oral_care
+582292,Duracell liitiumpatarei 3V DL2025 2tk,Duracell,2tk,5000394045514,dry_preserves,dry_other,household,hh_other
+582293,Duracell liitiumpatarei 3V DL2016 2tk,Duracell,2tk,5000394045736,dry_preserves,dry_other,household,hh_other
+582294,Duracell patarei D LR20 2tk,Duracell,2tk,5000394076730,dry_preserves,dry_other,household,hh_other
+582295,Duracell patarei C LR14 2tk,Duracell,2tk,5000394076761,dry_preserves,dry_other,household,hh_other
+582296,Duracell patarei AA LR6 4tk,Duracell,4tk,5000394076952,dry_preserves,dry_other,household,hh_other
+582297,Duracell patarei AAA LR03 4tk,Duracell,4tk,5000394077164,dry_preserves,dry_other,household,hh_other
+582298,Duracell patarei 9V 6LR61,Duracell,,5000394077225,dry_preserves,dry_other,household,hh_other
+582299,Duracell patarei CR123 3V liitium,Duracell,,5000394123106,dry_preserves,dry_other,household,hh_other
+582300,Duracell Optimum patarei AA 4tk,Duracell,4tk,5000394158696,dry_preserves,dry_other,household,hh_other
+582301,Duracell Optimum patarei AAA 4tk,Duracell,4tk,5000394158726,dry_preserves,dry_other,household,hh_other
+582302,Duracell Optimum patarei AA 8tk,Duracell,8tk,5000394158931,dry_preserves,dry_other,household,hh_other
+582303,Duracell Optimum patarei AAA 8tk,Duracell,8tk,5000394178359,dry_preserves,dry_other,household,hh_other
+582304,Duracell patarei AA LR6 12tk,Duracell,12tk,5000394203334,dry_preserves,dry_other,household,hh_other
+582305,Duracell patarei AAA LR03 12tk,Duracell,12tk,5000394203389,dry_preserves,dry_other,household,hh_other
+582306,Duracell liitiumpatarei 3V DL2032 2tk,Duracell,2tk,5000394203921,dry_preserves,dry_other,household,hh_other
+582307,Duracell patarei 12V MN21 2tk,Duracell,2tk,5000394203969,dry_preserves,dry_other,household,hh_other
+582308,Duracell patarei 1.5V LR44 2tk,Duracell,2tk,5000394504424,dry_preserves,dry_other,household,hh_other
+582309,Vileda 687 teleskoopaknapesija,Vileda,,5010121002390,dry_preserves,dry_other,household,hh_cleaners
+582310,Listerine Freshburst suuvesi 250ml,Listerine,250ml,5010123703431,drinks,drinks_water,personal_care,pcare_oral_care
+582311,Listerine Cool Mint suuvesi 250ml,Listerine,250ml,5010123703509,drinks,drinks_water,personal_care,pcare_oral_care
+582312,Durex Classic kondoom 12tk,Durex,12tk,5010232964624,dry_preserves,dry_other,personal_care,pcare_other
+582313,Durex Elite N3 kondoom 3tk,Durex,3tk,5010232967823,dry_preserves,dry_other,personal_care,pcare_other
+582314,Gin Greenalls London Dry 40% 700ml,,700ml,5010296002980,drinks,drinks_spirits,drinks,drinks_spirits
+582315,Whisky Grants 40% 1L,,1L,5010327000039,drinks,drinks_spirits,drinks,drinks_spirits
+582316,Pedigree Dentastix närimispulk 110g väike,Pedigree,110g,5010394984577,drinks,drinks_wine,pet,pet_dog_treats
+582317,Pedigree küpsised koertele Biscrok 500g,Pedigree,500g,5010394996495,sweets_snacks,sweets_biscuits_cookies,pet,pet_dog_treats
+582318,Billingtons tuhksuhkur Golden Icing 500g,Billingtons,500g,5010651003515,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking

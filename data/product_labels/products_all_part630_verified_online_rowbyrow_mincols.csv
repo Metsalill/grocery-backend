@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+581769,Dr.Stern veisepuljong koerale 230ml kõrvi.,Dr.Stern,230ml,4744355010654,world_spices,spices_broth_stock,pet,pet_dog_wet
+581770,Dr.Stern kanapuljong koerale 230ml kanamaks,Dr.Stern,230ml,4744355010661,world_spices,spices_broth_stock,pet,pet_dog_wet
+581771,Dr.Stern biol. kassiliiv kast+puidugraanul 2.6L,Dr.Stern,2.6L,4744355011705,sauces_oils,sauces_other,pet,pet_litter_sand
+581772,Dr.Stern Eestimaine põhk närilistele 400g,Dr.Stern,400g,4744355011842,dry_preserves,dry_other,pet,pet_small_animals
+581773,Dr.Stern Eestimaine mahe heinagraanul 750g,Dr.Stern,750g,4744355011859,dry_preserves,dry_other,pet,pet_small_animals
+581774,Dr.Stern konserv kassile 85g kanalihapasteet,Dr.Stern,85g,4744355011873,drinks,drinks_tea_coffee,pet,pet_cat_wet
+581775,Dr.Stern konserv kassile 85g tuunikalapasteet,Dr.Stern,85g,4744355011897,drinks,drinks_tea_coffee,pet,pet_cat_wet
+581776,Dr.Stern kuivtoit koerale Premium 10kg,Dr.Stern,10kg,4744355014331,pet,pet_other,pet,pet_dog_dry
+581777,Dr.Stern vorst koerale 400g vasikaliha,Dr.Stern,400g,4744355018001,meat_fish,meat_sausages,pet,pet_dog_treats
+581778,Dr.Stern vorst koerale 400g linnu-looma,Dr.Stern,400g,4744355018100,meat_fish,meat_sausages,pet,pet_dog_treats
+581779,Dr.Stern konserv koerale 1.25kg kanaliha,Dr.Stern,1.25kg,4744355019190,meat_fish,meat_poultry,pet,pet_dog_wet
+581780,Dr.Stern konserv koerale 1.25kg lambaliha,Dr.Stern,1.25kg,4744355019206,meat_fish,meat_beef_lamb_game,pet,pet_dog_wet
+581781,Dr.Stern konserv koerale 1.25kg veiseliha,Dr.Stern,1.25kg,4744355019220,meat_fish,meat_beef_lamb_game,pet,pet_dog_wet
+581782,Muhu leib seemnetega 850g Muhu Pagarid,Muhu Pagarid,850g,4744372010019,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+581783,Muhu leib seemnetega 425g Muhu Pagarid,Muhu Pagarid,425g,4744372010026,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+581784,Belief jook 530ml passionimaitsel. kofeiiniga,Belief,530ml,4744433010064,dry_preserves,dry_other,drinks,drinks_soft_soda
+581785,Belief jook 530ml virsikumaitsel. kofeiiniga,Belief,530ml,4744433010163,dry_preserves,dry_other,drinks,drinks_soft_soda
+581786,Belief jook 530ml pirnimaitsel. kofeiiniga,Belief,530ml,4744433013652,produce,produce_apples_pears,drinks,drinks_soft_soda
+581787,Belief jook 530ml rohelise õuna kofeiiniga,Belief,530ml,4744433016547,produce,produce_apples_pears,drinks,drinks_soft_soda
+581788,Belief jook 530ml sidruni-laimi kofeiiniga,Belief,530ml,4744433017599,produce,produce_tropical,drinks,drinks_soft_soda
+581789,Belief jook 530ml mündimaitsel. kofeiiniga,Belief,530ml,4744433019111,dry_preserves,dry_other,drinks,drinks_soft_soda
+581790,Heavenly greip-sidrunhein 330ml,Heavenly,330ml,4744433019791,produce,produce_tropical,drinks,drinks_soft_soda
+581791,Berry White vahutav puuviljavein 750ml,Berry White,750ml,4744476010496,drinks,drinks_wine,drinks,drinks_wine
+581792,Figuraata ananassi kuubikud 1kg külmutatud,Figuraata,1kg,4744559010887,produce,produce_tropical,frozen_food,frozen_fruit_berries
+581793,Figuraata maasikaviilud 1kg külmutatud,Figuraata,1kg,4744559011044,produce,produce_berries,frozen_food,frozen_fruit_berries
+581794,Figuraata punane draakonivili 1kg külmutatud,Figuraata,1kg,4744559011068,frozen_food,frozen_other,frozen_food,frozen_fruit_berries
+581795,Figuraata murelid kivideta 1kg külmutatud,Figuraata,1kg,4744559011150,dry_preserves,dry_other,frozen_food,frozen_fruit_berries
+581796,Figuraata kiivi kuubikud 1kg külmutatud,Figuraata,1kg,4744559011228,produce,produce_tropical,frozen_food,frozen_fruit_berries
+581797,Figuraata virsiku kuubikud 1kg külmutatud,Figuraata,1kg,4744559011495,dry_preserves,dry_other,frozen_food,frozen_fruit_berries
+581798,Figuraata kultuurmustikad 1kg külmutatud,Figuraata,1kg,4744559011860,produce,produce_berries,frozen_food,frozen_fruit_berries
+581799,Candela kalmuküünal kaanega 40h valge,Candela,,4744561011728,household,hh_candles_airfresh,household,hh_candles_airfresh
+581800,Hapukurgi salat Peipsi Kurk 250g Eesti,,250g,4744664010048,produce,produce_herbs_salads_sprouts,dry_preserves,dry_canned_veg
+581801,Boost Yourself kohvikollageen segu 300g kaarob,Boost,300g,4744693010194,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+581802,Matsimoka küüslaugupekk 110g viilutatud,Matsimoka,110g,4744735010755,dry_preserves,dry_other,meat_fish,meat_pork
+581803,Matsimoka grillvorst mozzarella tomatiga 250g,Matsimoka,250g,4744735010847,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+581804,Matsimoka šašlõkivorst 365g,Matsimoka,365g,4744735010861,meat_fish,meat_sausages,meat_fish,meat_sausages
+581805,Matsimoka suitsuvorst küüslauguga 240g,Matsimoka,240g,4744735011240,meat_fish,meat_sausages,meat_fish,meat_sausages
+581806,Pähklinäpp pekaanipähkel 200g,Pähklinäpp,200g,4744743011119,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+581807,Pähklinäpp päevalilleseemned 250g koorit.,Pähklinäpp,250g,4744743011270,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_nuts_driedfruit
+581808,Pähklinäpp maasikakuubikud 85g,Pähklinäpp,85g,4744743011669,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+581809,Pähklinäpp kuivatatud kookose kettad 150g,Pähklinäpp,150g,4744743011836,bakery,bakery_cakes_pastries,sweets_snacks,sweets_nuts_driedfruit
+581810,Pähklinäpp apelsinikuubikud 85g,Pähklinäpp,85g,4744743012925,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+581811,Pähklinäpp kirsikuubikud 85g,Pähklinäpp,85g,4744743012932,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+581812,Pähklinäpp Hullult Hea pähkli- ja puuvili 1kg,Pähklinäpp,1kg,4744743013359,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+581813,Pähklinäpp mandel karamellis 200g,Pähklinäpp,200g,4744743013700,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+581814,Seeneletsho 500g Eesti,,500g,4744749015562,produce,produce_mushrooms,dry_preserves,dry_canned_veg
+581815,Marineeritud šampinjonid sibula-küüslauguga 500g,,500g,4744749018853,produce,produce_root_veg,dry_preserves,dry_canned_veg
+581816,Marineeritud šampinjonid paprika&sibula 500g,,500g,4744749018877,produce,produce_root_veg,dry_preserves,dry_canned_veg
+581817,Riisikad soolvees 430g purk Eesti,,430g,4744749018891,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_veg
+581818,Marineeritud metsaseened 420g purk Eesti,,420g,4744749019089,produce,produce_mushrooms,dry_preserves,dry_canned_veg

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580969,Nõo Itaaliapärane salaami 90g viil,Nõo,90g,4740574081062,dry_preserves,dry_other,meat_fish,meat_gourmet
+580970,Nõo Suitsurulaad keele-šampi 100g viil,Nõo,100g,4740574081383,meat_fish,meat_hams,meat_fish,meat_hams
+580971,Nõo Saksapärane salaami 90g viil,Nõo,90g,4740574081840,dry_preserves,dry_other,meat_fish,meat_gourmet
+580972,Nõo Fitlap P/S vorst broileri 105g viil,Nõo,105g,4740574081970,meat_fish,meat_poultry,meat_fish,meat_sausages
+580973,Nõo T/S vorst Emmentali 105g viil,Nõo,105g,4740574082434,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+580974,Nõo T/S vorst Ordu küüslauguga 250g,Nõo,250g,4740574090255,meat_fish,meat_sausages,meat_fish,meat_sausages
+580975,Nõo Snäkkvorstike Snack n Drive 85g,Nõo,85g,4740574090439,meat_fish,meat_sausages,meat_fish,meat_sausages
+580976,Nõo Hertsogi suitsusink 105g viil,Nõo,105g,4740574090767,meat_fish,meat_hams,meat_fish,meat_hams
+580977,Nõo Kodune maksapasteet 200g,Nõo,200g,4740574090774,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+580978,Nõo T/S vorst Eesti juustuga 250g,Nõo,250g,4740574091450,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+580979,Nõo Kiievi lihapallid võiga 300g,Nõo,300g,4740574092655,dairy_eggs_fats,dairy_butter_margarine,frozen_food,frozen_meat
+580980,Nõo krõbedad kanapulgad 250g,Nõo,250g,4740574093140,meat_fish,meat_poultry,frozen_food,frozen_meat
+580981,Nõo Laste grillviinerid 340g,Nõo,340g,4740574093171,drinks,drinks_spirits,meat_fish,meat_sausages
+580982,Nõo T/S vorst Ehtne 240g,Nõo,240g,4740574093294,meat_fish,meat_sausages,meat_fish,meat_sausages
+580983,Nõo Snäkkvorstid Emmentali juustuga 70g,Nõo,70g,4740574093454,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+580984,Nõo Snäkkvorstid tšilliga 70g,Nõo,70g,4740574093461,meat_fish,meat_sausages,meat_fish,meat_sausages
+580985,Nõo Ehtsad kotletid Muhu leivaga 350g,Nõo,350g,4740574093652,dry_preserves,dry_other,frozen_food,frozen_meat
+580986,Nõo Finest Pate 200g,Nõo,200g,4740574093812,dry_preserves,dry_other,meat_fish,meat_gourmet
+580987,Nõo Suitsuvorst kadakajuustuga 250g,Nõo,250g,4740574094215,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+580988,Nõo Fitlap broilerisingi kuubikud 200g,Nõo,200g,4740574096783,meat_fish,meat_poultry,meat_fish,meat_hams
+580989,Nõo krõbedad kanafileepalad 240g,Nõo,240g,4740574097476,meat_fish,meat_poultry,frozen_food,frozen_meat
+580990,Nõo Snäkkvorstid originaal 70g,Nõo,70g,4740574193437,drinks,drinks_spirits,meat_fish,meat_sausages
+580991,Nõo Memme minifrikadellid 350g külmutatud,Nõo,350g,4740574599963,frozen_food,frozen_other,frozen_food,frozen_meat
+580992,Karni T/S vorst Põdrapepperoni 250g,Karni,250g,4740579101451,meat_fish,meat_sausages,meat_fish,meat_gourmet
+580993,Karni P/S grillvorst Kuldne Klassika 450g,Karni,450g,4740579101796,meat_fish,meat_sausages,meat_fish,meat_sausages
+580994,Karni T/S vorst juustuga 120g viil,Karni,120g,4740579103233,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+580995,Karni kuivatatud kanalihast snäkk CGJ 50g,Karni,50g,4740579104711,meat_fish,meat_poultry,meat_fish,meat_gourmet
+580996,Karni P/S vorst Pealinna 120g viil,Karni,120g,4740579105138,meat_fish,meat_sausages,meat_fish,meat_sausages
+580997,Karni T/S vorst Kuningate 250g,Karni,250g,4740579105350,meat_fish,meat_sausages,meat_fish,meat_sausages
+580998,Karni P/S vorst Suitsurõngas 300g,Karni,300g,4740579112129,meat_fish,meat_sausages,meat_fish,meat_sausages
+580999,Karni T/S vorst Kuldne 250g,Karni,250g,4740579161660,meat_fish,meat_sausages,meat_fish,meat_sausages
+581000,Karni P/S vorst Peetri juustuga 120g viil,Karni,120g,4740579190318,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+581001,Karni P/S vorst Peetri 120g viil,Karni,120g,4740579190417,meat_fish,meat_sausages,meat_fish,meat_sausages
+581002,Karni P/S broileri grillikad 450g,Karni,450g,4740579195993,meat_fish,meat_poultry,meat_fish,meat_sausages
+581003,Karni kreemjas pasteet 190g,Karni,190g,4740579208204,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+581004,Karni Piknikusink 150g viilutatud,Karni,150g,4740579250548,meat_fish,meat_hams,meat_fish,meat_hams
+581005,Karni Marmorsink 120g viil,Karni,120g,4740579281986,meat_fish,meat_hams,meat_fish,meat_hams
+581006,Karni Keel tarrendis 230g,Karni,230g,4740579291312,dry_preserves,dry_other,meat_fish,meat_other
+581007,Karni Broileri rinnalihasink 300g,Karni,300g,4740579292494,meat_fish,meat_poultry,meat_fish,meat_hams
+581008,Karni suitsu-keedu sea tagasink 120g,Karni,120g,4740579303138,meat_fish,meat_hams,meat_fish,meat_hams
+581009,Karni S/k Poolkuusink 120g viilutatud,Karni,120g,4740579322290,meat_fish,meat_hams,meat_fish,meat_hams
+581010,Karni suitsu-keedu BBQ fileesink 120g,Karni,120g,4740579392538,meat_fish,meat_hams,meat_fish,meat_hams
+581011,Karni Toorvorstid Cheddari juustuga 400g,Karni,400g,4740579495406,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+581012,Karni Sõprade šašlõkk 600g,Karni,600g,4740579506942,dry_preserves,dry_other,meat_fish,meat_pork
+581013,Kõrveküla külmsuitsu skumbria steik 250g,Kõrveküla,250g,4740589005626,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+581014,Kaluri Vannamei viburhännak keedetud 750g,Kaluri,750g,4740590000177,dry_preserves,dry_other,frozen_food,frozen_fish
+581015,Kaluri koorimata krevetid 90/120 400g,Kaluri,400g,4740590000375,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_fish
+581016,Kaluri praetud kilud tomatikastmes 500g,Kaluri,500g,4740590030129,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+581017,Kaluri kooritud krevetid 250/350 200g,Kaluri,200g,4740590071375,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_fish
+581018,Kaluri õrnsoola heeringafilee 200g,Kaluri,200g,4740590072259,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked

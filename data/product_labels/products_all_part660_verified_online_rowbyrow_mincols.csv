@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+583269,TicTac Fresh Mint drazee 54g,TicTac,54g,8000500166697,sweets_snacks,sweets_gums_mints,sweets_snacks,sweets_gums_mints
+583270,Rocher kinkekarp T8 100g,Ferrero Rocher,100g,8000500192801,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+583271,Raffaello valge shokolaad 90g kookose-mandlitäidisega,Raffaello,90g,8000500359556,bakery,bakery_cakes_pastries,sweets_snacks,sweets_chocolate_bars
+583272,Kinder Bueno jaatis vahvlikoonuses 62g,Kinder,62g,8000500385081,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+583273,Kinder Bueno White jaatis vahvlikoonuses 62g,Kinder,62g,8000500385098,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+583274,Nutella jaatis 470ml,Nutella,470ml,8000500425183,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+583275,Raffaello jaatis virsiku-hibiskusega 40g,Raffaello,40g,8000500443897,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+583276,Citres päikesekuivatatud tomatid päevalilleõlis 290g,Citres,290g,8000523001173,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+583277,Fiordimaso Mascarpone 250g,Fiordimaso,250g,8000546008852,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+583278,Ponti päikesekuivatatud tomatid 300g,Ponti,300g,8001010039303,produce,produce_root_veg,dry_preserves,dry_canned_veg
+583279,Plasmon 6K beebiküpsis 60g,Plasmon,60g,8001040419281,sweets_snacks,sweets_biscuits_cookies,baby,baby_food_pouches
+583280,Discreet Normal pesukaitse 60tk,Discreet,60tk,8001090162076,dry_preserves,dry_other,personal_care,pcare_other
+583281,Discreet Deo Waterlily pesukaitse 60tk,Discreet,60tk,8001090170354,dry_preserves,dry_other,personal_care,pcare_other
+583282,Gillette 3in1 ProGlide järelhooldusbalsam 50ml,Gillette,50ml,8001090303929,personal_care,pcare_shampoo_cond,personal_care,pcare_shaving
+583283,Always Ultra Platinum Normal Duo 16tk,Always,16tk,8001090444912,dry_preserves,dry_other,personal_care,pcare_other
+583284,Always Ultra Platinum Super Plus Duo 14tk,Always,,8001090444998,dry_preserves,dry_other,personal_care,pcare_other
+583285,Always Ultra Platinum Night Duo 12tk,Always,12tk,8001090445070,dry_preserves,dry_other,personal_care,pcare_other
+583286,Naturella Ultra Night Duo hügieenisidem 14tk,Naturella,14tk,8001090585394,dry_preserves,dry_other,personal_care,pcare_other
+583287,Naturella Ultra Normal Duo hügieenisidem 20tk,Naturella,20tk,8001090585592,dry_preserves,dry_other,personal_care,pcare_other
+583288,Naturella Ultra Super Duo hügieenisidem 16tk,Naturella,16tk,8001090586032,dry_preserves,dry_other,personal_care,pcare_other
+583289,Naturella Normal kummel päevakaitse 52tk,Naturella,52tk,8001090604040,dry_preserves,dry_other,personal_care,pcare_other
+583290,BAM Complete Extra Fresh Long hambapasta 75ml,BAM,75ml,8001090716231,dry_preserves,dry_other,personal_care,pcare_oral_care
+583291,Oral-B Gum&Enamel Extra Fresh hambapasta 75ml,Oral-B,75ml,8001090794413,dry_preserves,dry_other,personal_care,pcare_oral_care
+583292,Fairy Sensitive Aloe&Pink nõudepesuvahend 900ml,Fairy,900ml,8001090975102,dry_preserves,dry_other,household,hh_dishwashing
+583293,Coop grissinid 300g,Coop,300g,8001120000088,dry_preserves,dry_other,bakery,bakery_crispbread
+583294,Pv Assieme Sangiovese Merlot 0.75L,Pv,0.75L,8001120596482,drinks,drinks_wine,drinks,drinks_wine
+583295,Assieme Pignoletto Frizzante vahuvein 0.75L,Assieme,0.75L,8001120596499,dry_preserves,dry_other,drinks,drinks_wine
+583296,Coop kartulikrõps 320g soolaga,Coop,320g,8001120596789,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+583297,Assieme Ribolla Gialla Extra Dry vahuvein 0.75L,Assieme,0.75L,8001120669759,dry_preserves,dry_other,drinks,drinks_wine
+583298,Coop Day Tech hambapasta 25ml ja hambahari reisikomplekt,Coop,,8001120692160,dry_preserves,dry_other,personal_care,pcare_oral_care
+583299,Coop Day Tech hambahari,Coop,,8001120702814,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+583300,Coop DayTech Sensitive hambahari,Coop,,8001120702838,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+583301,Coop DayTech ekstra lame hambaniit 50m,Coop,,8001120702845,dry_preserves,dry_other,personal_care,pcare_oral_care
+583302,Coop DayTech Repair hambapasta 75ml,Coop,75ml,8001120703033,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+583303,Coop punase veini äädikas 7.1% 500ml,Coop,500ml,8001120725219,drinks,drinks_wine,sauces_oils,oils_vinegar
+583304,Coop valge veini äädikas 7.1% 500ml,Coop,500ml,8001120725226,drinks,drinks_wine,sauces_oils,oils_vinegar
+583305,Coop küpsis Savoiardi 3x100g,Coop,100g,8001120777829,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+583306,Fior Fiore rohelised oliivid 560g kiviga,Fior Fiore,560g,8001120782328,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+583307,Coop riisijook 1L kaltsiumi ja D-vitamiiniga,Coop,1L,8001120783714,dry_preserves,dry_pasta_rice,dairy_eggs_fats,dairy_milk
+583308,Coop Bruschetta 150g oliivõli ja rosmariiniga,Coop,150g,8001120783905,sauces_oils,oils_other,bakery,bakery_crispbread
+583309,Coop mereannikaste spagettidele 400g külmutatud,Coop,400g,8001120821683,dry_preserves,dry_pasta_rice,frozen_food,frozen_ready_meals
+583310,Coop mereannikaste risottole 400g külmutatud,Coop,400g,8001120821690,meat_fish,fish_fresh,frozen_food,frozen_ready_meals
+583311,Coop ananassimahl 1L,Coop,1L,8001120829481,drinks,drinks_juices,drinks,drinks_juices
+583312,Coop riisijook 1L mahe,Coop,1L,8001120843975,dry_preserves,dry_pasta_rice,dairy_eggs_fats,dairy_milk
+583313,Tagliatelle Larghe 299 all Uovo Coop 250g,Coop,250g,8001120856135,dry_preserves,dry_other,dry_preserves,dry_pasta_rice
+583314,Coop päikesekuivatatud kirsitomatid õlis 280g,Coop,280g,8001120919007,sauces_oils,oils_other,dry_preserves,dry_canned_veg
+583315,Coop krõbedad paneeritud tursafileed 400g külmutatud,Coop,400g,8001120931467,frozen_food,frozen_other,frozen_food,frozen_fish
+583316,Coop palsamiäädikas Modena IGP 250ml,Coop,250ml,8001120935892,sauces_oils,oils_vinegar,sauces_oils,oils_vinegar
+583317,Coop köögiviljasuppherneste ja ubadega 600g,Coop,600g,8001120980724,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+583318,Ace Regular pesuvalgendaja 1L,Ace,1L,8001480022706,dry_preserves,dry_other,household,hh_laundry

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+583619,Always Ultra Plus Quattro hügieenisidem 40tk,Always,40tk,8700216171342,dry_preserves,dry_other,personal_care,pcare_other
+583620,Fairy Platinum Plus Lemon nõudepesumasina kapslid 71tk,Fairy,71tk,8700216236126,produce,produce_root_veg,household,hh_dishwashing
+583621,Fairy Platinum Lemon nõudepesumasina kapslid 96tk,Fairy,96tk,8700216236751,produce,produce_root_veg,household,hh_dishwashing
+583622,Fairy Platinum Lemon nõudepesumasina kapslid 81tk,Fairy,81tk,8700216236935,produce,produce_root_veg,household,hh_dishwashing
+583623,Gillette Fusion terad 5tk ja käepide,Gillette,5tk,8700216356794,dry_preserves,dry_other,personal_care,pcare_shaving
+583624,Gillette Sensor3 Black terad 8tk,Gillette,8tk,8700216356879,dry_preserves,dry_other,personal_care,pcare_shaving
+583625,Discreet Normal Plus päevakaitse 52tk,Discreet,52tk,8700216428590,dry_preserves,dry_other,personal_care,pcare_other
+583626,Gillette Sensitive järelhooldusbalsam 100ml,Gillette,100ml,8700216467346,personal_care,pcare_shampoo_cond,personal_care,pcare_shaving
+583627,Gillette Sensor3 Black terad 8tk ja käepide,Gillette,8tk,8700216639606,dry_preserves,dry_other,personal_care,pcare_shaving
+583628,Gillette Venus&Olay Sugarberry terad 3tk,Gillette,3tk,8700216674164,dry_preserves,dry_other,personal_care,pcare_shaving
+583629,Ariel Fresh Air pesugeel 1.35L 30pesu,Ariel,1.35L,8700216690966,dry_preserves,dry_other,household,hh_laundry
+583630,Ariel Amethyst Flower pesugeel 1.35L 30pesu,Ariel,1.35L,8700216691222,dry_preserves,dry_other,household,hh_laundry
+583631,Ariel Extra Clean pesugeel 1.35L 30pesu,Ariel,1.35L,8700216691390,dry_preserves,dry_other,household,hh_laundry
+583632,Ariel Extra Color&Fiber Protection pesugeel 1.35L 30pesu,Ariel,1.35L,8700216691529,dry_preserves,dry_other,household,hh_laundry
+583633,Ariel Color pesugeel 1.8L 40pesu,Ariel,1.8L,8700216691604,household,hh_laundry,household,hh_laundry
+583634,Ariel Color pesugeel 1.125L 25pesu,Ariel,1.125L,8700216691925,household,hh_laundry,household,hh_laundry
+583635,Lenor Fresh lõhnagraanulid 270g 22pesu,Lenor,270g,8700216708623,dry_preserves,dry_other,household,hh_laundry
+583636,Lenor Lotus F&D Figs pesuloputusvahend 675ml 32pesu,Lenor,675ml,8700216723664,dry_preserves,dry_other,household,hh_laundry
+583637,Lenor Lotus F&D Figs pesuloputusvahend 1.239L 59pesu,Lenor,1.239L,8700216723756,dry_preserves,dry_other,household,hh_laundry
+583638,Lenor Gold Orchid&Vanilla pesuloputusvahend 675ml,Lenor,675ml,8700216723862,dry_preserves,dry_other,household,hh_laundry
+583639,Lenor Floral Bouquet pesuloputusvahend 675ml 32pesu,Lenor,675ml,8700216723909,dry_preserves,dry_other,household,hh_laundry
+583640,Lenor Sensitive pesuloputusvahend 1.491L 71pesu,Lenor,1.491L,8700216723985,dry_preserves,dry_other,household,hh_laundry
+583641,Lenor Spring Awakening loputusvahend 1.491L,Lenor,1.491L,8700216724074,dry_preserves,dry_other,household,hh_laundry
+583642,Lenor Gold Orchid&Vanilla pesuloputusvahend 1.239L,Lenor,1.239L,8700216724081,dry_preserves,dry_other,household,hh_laundry
+583643,Lenor La Desirable pesuloputusvahend 1.239L 59pesu,Lenor,1.239L,8700216724203,dry_preserves,dry_other,household,hh_laundry
+583644,Lenor Spring Awakening loputusvahend 798ml 38pesu,Lenor,798ml,8700216724463,dry_preserves,dry_other,household,hh_laundry
+583645,Lenor Ruby Jasmine pesuloputusvahend 1.239L 59pesu,Lenor,1.239L,8700216724616,dry_preserves,dry_other,household,hh_laundry
+583646,Lenor Sicilia pesuloputusvahend 1.239L 59pesu,Lenor,1.239L,8700216724654,dry_preserves,dry_other,household,hh_laundry
+583647,Ariel Color pesupulber 330g 6pesu,Ariel,330g,8700216733427,household,hh_laundry,household,hh_laundry
+583648,Ariel Color pesupulber 1.65kg 30pesu,Ariel,1.65kg,8700216733571,household,hh_laundry,household,hh_laundry
+583649,Ariel Mountain Spring pesupulber 1.65kg 30pesu,Ariel,1.65kg,8700216733663,dry_preserves,dry_other,household,hh_laundry
+583650,Ariel Mountain Spring pesupulber 330g 6pesu,Ariel,330g,8700216733670,household,hh_laundry,household,hh_laundry
+583651,Gillette Venus Miami raseerija 3tk,Gillette,3tk,8700216756884,personal_care,pcare_shaving,personal_care,pcare_shaving
+583652,Ariel Extra Clean pesugeelkapslid 38tk,Ariel,38tk,8700216764254,produce,produce_root_veg,household,hh_laundry
+583653,Ariel Extra Color&Fiber pesugeelkapslid 38tk,Ariel,38tk,8700216764483,produce,produce_root_veg,household,hh_laundry
+583654,Ariel Color pesugeelkapslid 44tk,Ariel,44tk,8700216764544,produce,produce_root_veg,household,hh_laundry
+583655,Ariel Mountain Spring pesugeelkapslid 44tk,Ariel,44tk,8700216764667,produce,produce_root_veg,household,hh_laundry
+583656,Ariel Color pesugeelkapslid 12tk,Ariel,12tk,8700216764858,produce,produce_root_veg,household,hh_laundry
+583657,Ariel Extra Clean pesugeelkapslid 26tk,Ariel,26tk,8700216765305,produce,produce_root_veg,household,hh_laundry
+583658,Ariel Color pesugeelkapslid 22tk,Ariel,22tk,8700216765336,produce,produce_root_veg,household,hh_laundry
+583659,Ariel Mountain Spring pesugeelkapslid 22tk,Ariel,22tk,8700216765466,produce,produce_root_veg,household,hh_laundry
+583660,Ariel Mountain Spring pesugeelkapslid 30tk,Ariel,30tk,8700216765480,produce,produce_root_veg,household,hh_laundry
+583661,Ariel Amethyst Flower pesugeelkapslid 26tk,Ariel,26tk,8700216765862,produce,produce_root_veg,household,hh_laundry
+583662,Ariel Fresh Air pesugeelkapslid 19tk,Ariel,19tk,8700216765954,produce,produce_root_veg,household,hh_laundry
+583663,Ariel Sensitive pesugeelkapslid 30tk,Ariel,30tk,8700216766012,produce,produce_root_veg,household,hh_laundry
+583664,Ariel Extra Color&Fiber pesugeelkapslid 26tk,Ariel,26tk,8700216766128,produce,produce_root_veg,household,hh_laundry
+583665,Ariel Color pesugeelkapslid 30tk,Ariel,30tk,8700216766173,produce,produce_root_veg,household,hh_laundry
+583666,Always Ultra Night Duo hügieenisidem 14tk,Always,14tk,8700216861052,dry_preserves,dry_other,personal_care,pcare_other
+583667,Always Ultra Super Plus Duo hügieenisidem 16tk,Always,16tk,8700216861069,dry_preserves,dry_other,personal_care,pcare_other
+583668,Always Ultra Normal hügieenisidem 10tk,Always,10tk,8700216861120,dry_preserves,dry_other,personal_care,pcare_other

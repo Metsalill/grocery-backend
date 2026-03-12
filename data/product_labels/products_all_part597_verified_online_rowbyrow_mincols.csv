@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580119,Elseve Full Resist palsam 200ml,Elseve,200ml,3600522067207,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond
+580120,Elseve Extraordinary Oil palsam 200ml,Elseve,200ml,3600522971214,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond
+580121,Elseve Dream Long palsam 200ml,Elseve,200ml,3600523756179,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond
+580122,Elseve Dream Long shampoon 400ml,Elseve,400ml,3600523756186,dry_preserves,dry_other,personal_care,pcare_shampoo_cond
+580123,Elvital Dream Len Wonder Wat palsam 200ml,Elvital,200ml,3600523970605,dry_preserves,dry_other,personal_care,pcare_shampoo_cond
+580124,Elseve Dream Long shampoon 250ml,Elseve,250ml,3600523996797,dry_preserves,dry_other,personal_care,pcare_shampoo_cond
+580125,Elseve Hyaluron Plump palsam 200ml,Elseve,200ml,3600524029845,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond
+580126,Elseve Hyaluron Plump shampoon 400ml,Elseve,400ml,3600524029944,dry_preserves,dry_other,personal_care,pcare_shampoo_cond
+580127,Elseve Bond Repair palsam 150ml,Elseve,150ml,3600524074883,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond
+580128,Elseve Glycolic Gloss shampoon 200ml,Elseve,200ml,3600524127985,dry_preserves,dry_other,personal_care,pcare_shampoo_cond
+580129,Elseve Glycolic Gloss palsam 150ml,Elseve,150ml,3600524144029,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond
+580130,Elseve Color Vive palsam 400ml,Elseve,400ml,3600524173692,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond
+580131,Elseve Dream Long palsam 400ml,Elseve,400ml,3600524173708,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond
+580132,Elseve Hyaluron Plump palsam 400ml,Elseve,400ml,3600524173715,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond
+580133,Elseve Extraordinary Oil shampoon 250ml,Elseve,250ml,3600524173722,dry_preserves,dry_other,personal_care,pcare_shampoo_cond
+580134,Elseve Hyaluron Plump shampoon 250ml,Elseve,250ml,3600524173739,dry_preserves,dry_other,personal_care,pcare_shampoo_cond
+580135,Elseve Full Resist shampoon 250ml,Elseve,250ml,3600524175351,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond
+580136,Elseve Total Repair 5 shampoon 250ml,Elseve,250ml,3600524175368,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond
+580137,Fructis Color Resist shampoon 250ml,Fructis,250ml,3600542060752,dry_preserves,dry_other,personal_care,pcare_shampoo_cond
+580138,Fructis Color Resist shampoon 400ml värvitud,Fructis,400ml,3600542060790,dry_preserves,dry_other,personal_care,pcare_shampoo_cond
+580139,Fructis 2in1 shampoon 400ml,Fructis,400ml,3600542061193,dry_preserves,dry_other,personal_care,pcare_shampoo_cond
+580140,Fructis Aloe Hydra Bomb shampoon 400ml,Fructis,400ml,3600542134798,dry_preserves,dry_other,personal_care,pcare_shampoo_cond
+580141,Fructis Aloe Hydra Bomb palsam 200ml,Fructis,200ml,3600542134842,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond
+580142,Fructis Curls Method shampoon 200ml,Fructis,200ml,3600542571777,dry_preserves,dry_other,personal_care,pcare_shampoo_cond
+580143,N.A! Fruit Sticks snäkid 35g õuna-vaarika,N.A!,35g,3609200003070,produce,produce_berries,sweets_snacks,sweets_other
+580144,N.A! Fruit Sticks snäkid 35g õuna-maasika,N.A!,35g,3609200003087,produce,produce_berries,sweets_snacks,sweets_other
+580145,N.A! Fruit Sticks snäkid 35g mango,N.A!,35g,3609200008495,produce,produce_tropical,sweets_snacks,sweets_other
+580146,Adidas Pro Invisible rulldeo 50ml meeste,Adidas,50ml,3616303439972,dry_preserves,dry_other,personal_care,pcare_deo
+580147,Adidas Cool&Care Con rulldeo 50ml naiste,Adidas,50ml,3616303439989,dry_preserves,dry_other,personal_care,pcare_deo
+580148,Adidas Pro Invisible rulldeo 50ml naiste,Adidas,50ml,3616303439996,dry_preserves,dry_other,personal_care,pcare_deo
+580149,Adidas Pro Invisible deo 150ml meeste,Adidas,150ml,3616303440411,dry_preserves,dry_other,personal_care,pcare_deo
+580150,Adidas Fresh Endurance deo 150ml meeste,Adidas,150ml,3616303842307,dry_preserves,dry_other,personal_care,pcare_deo
+580151,Adidas 3in1 After Sport dušigeel 250ml,Adidas,250ml,3616304240423,drinks,drinks_wine,personal_care,pcare_body_wash
+580152,Adidas 3in1 Ice Dive dušigeel 250ml,Adidas,250ml,3616304240454,dry_preserves,dry_other,personal_care,pcare_body_wash
+580153,Adidas Pure Game 3in1 dušigeel 250ml,Adidas,250ml,3616304240485,dry_preserves,dry_other,personal_care,pcare_body_wash
+580154,Adidas 3in1 Victory League dušigeel 250ml,Adidas,250ml,3616304240539,dry_preserves,dry_other,personal_care,pcare_body_wash
+580155,Adidas 3in1 Team Force dušigeel 250ml,Adidas,250ml,3616304240560,dry_preserves,dry_other,personal_care,pcare_body_wash
+580156,Adidas 3in1 Power Booster dušigeel 250ml,Adidas,250ml,3616304240591,dry_preserves,dry_other,personal_care,pcare_body_wash
+580157,Adidas 3in1 Fresh Endurance dušigeel 250ml,Adidas,250ml,3616304240621,dry_preserves,dry_other,personal_care,pcare_body_wash
+580158,Adidas Invisible Control rulldeo 50ml,Adidas,50ml,3616305953100,dry_preserves,dry_other,personal_care,pcare_deo
+580159,Adidas Ultra Fresh Con rulldeo 50ml,Adidas,50ml,3616305953117,dry_preserves,dry_other,personal_care,pcare_deo
+580160,Adidas Sport Fresh rulldeo 50ml meeste,Adidas,50ml,3616305953124,drinks,drinks_wine,personal_care,pcare_deo
+580161,Adidas Ultra Fr Control deo 150ml naiste,Adidas,150ml,3616305953445,dry_preserves,dry_other,personal_care,pcare_deo
+580162,Adidas Sport Fresh AP deo 150ml meeste,Adidas,150ml,3616305953476,drinks,drinks_wine,personal_care,pcare_deo
+580163,Humer ninasprei lastele 150ml,Humer,150ml,3664492020211,dry_preserves,dry_other,personal_care,pcare_other
+580164,Humer Ninasprei täiskasvanutele 150ml,Humer,150ml,3664492020242,dry_preserves,dry_other,personal_care,pcare_other
+580165,Casa Azzurra Burrata ricotta täidis 125g,Casa Azzurra,125g,3760056266078,dry_preserves,dry_other,cheese,cheese_regular
+580166,Liköör Mamma Mia Limoncello 24% 700ml,Mamma Mia,700ml,3770019323038,dry_preserves,dry_other,drinks,drinks_spirits
+580167,Devin looduslik mineraalvesi 500ml,Devin,500ml,3800000600029,drinks,drinks_water,drinks,drinks_water
+580168,KitKat šokolaadibatoon White 41.5g,KitKat,41.5g,3800020401187,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars

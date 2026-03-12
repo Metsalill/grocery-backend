@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+581069,Kirsstomat punane 250g I klass Holland,,250g,4740660006696,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+581070,Hüva virsiku joogijogurt 1kg,Hüva,1kg,4740660006702,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+581071,Hüva joogijogurt maasika 1kg,Hüva,1kg,4740660006719,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+581072,Salat Rukola-Radisso mix 125g Itaalia,,125g,4740660006740,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+581073,Hüva sulatatud juust 200g,Hüva,200g,4740660006818,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+581074,Coop Supreme soolalõhefilee viilud 100g,Coop,100g,4740660006924,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked
+581075,Coop Supreme külmsuitsulõhefilee viilud 100g,Coop,100g,4740660006931,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+581076,CK Pasteedirull 150g,CK,150g,4740660007044,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+581077,Ehe Viin 37.5% 500ml,Ehe,500ml,4740660007204,drinks,drinks_spirits,drinks,drinks_spirits
+581078,Coop Hüva õhukesed pannkoogid jahusegu 400g,Coop,400g,4740660007235,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+581079,Coop Hüva muffinipulber 400g,Coop,400g,4740660007242,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+581080,Coop Hüva šokolaadimuffinipulber 400g,Coop,400g,4740660007259,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+581081,Rukola 125g Itaalia,,125g,4740660007914,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+581082,Beebispinat 125g Itaalia,,125g,4740660007921,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+581083,Lehtpeet 125g Itaalia,,125g,4740660007938,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+581084,Redis 500g pakitud Itaalia,,500g,4740660007952,dry_preserves,dry_other,produce,produce_root_veg
+581085,Hüva lehträtik 100tk 100% tselluloos,Hüva,100tk,4740660008386,dry_preserves,dry_other,household,hh_paper
+581086,Säästu soolaheeringafilee traditsiooniline õlita 190g,Säästu,190g,4740660008409,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked
+581087,Hüva grillvorst 500g,Hüva,500g,4740660008607,meat_fish,meat_sausages,meat_fish,meat_sausages
+581088,Coop Hüva Pasteet 200g karp,Coop,200g,4740660008638,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+581089,Coop kodujuust klassikaline 380g,Coop,380g,4740660009383,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+581090,Coop kodujuust hapukoorega 300g,Coop,300g,4740660009390,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+581091,Coop kodujuust hapukoorega kurgi-tilliga 300g,Coop,300g,4740660009406,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+581092,Salati mix Misticanza 125g Itaalia,,125g,4740660009437,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+581093,Salati mix Oriental 125g Itaalia,,125g,4740660009444,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+581094,Ploomtomat kollane 500g I klass Leedu,,500g,4740660009505,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+581095,Ploomtomat 500g I klass Leedu,,500g,4740660009512,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+581096,Tomat Kumato 500g I klass Leedu,,500g,4740660009529,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+581097,Aurutatud riivitud peet Hüva 500g Coop,,500g,4740660009536,produce,produce_root_veg,produce,produce_root_veg
+581098,Hapukapsas porgandiga Hüva 1kg Coop,,1kg,4740660009598,produce,produce_root_veg,dry_preserves,dry_canned_veg
+581099,Coop apelsinimahl 1L,Coop,1L,4740660009659,drinks,drinks_juices,drinks,drinks_juices
+581100,Coop õunamahl 1L,Coop,1L,4740660009666,drinks,drinks_juices,drinks,drinks_juices
+581101,Coop tomatimahl 1L,Coop,1L,4740660009673,drinks,drinks_juices,drinks,drinks_juices
+581102,Coop ploominektar 1L,Coop,1L,4740660009680,drinks,drinks_juices,drinks,drinks_juices
+581103,Coop kohuke 40g vanilli Belgia šok. gl.,Coop,40g,4740660009703,dry_preserves,dry_other,dairy_eggs_fats,dairy_desserts
+581104,Coop kohuke 40g jõhvika Belgia šok. gl.,Coop,40g,4740660009710,produce,produce_berries,dairy_eggs_fats,dairy_desserts
+581105,Coop kohuke 40g šok.tk Belgia šok. gl.,Coop,40g,4740660009727,dry_preserves,dry_other,dairy_eggs_fats,dairy_desserts
+581106,Rukkileib Coop 390g viil,Coop,390g,4740660009758,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+581107,Vormileib Coop 600g viil,Coop,600g,4740660009765,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+581108,Peenleib Coop 490g viil,Coop,490g,4740660009789,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+581109,Palaleib 6tk Coop 340g,Coop,340g,4740660009796,bakery,bakery_bread_loaves,bakery,bakery_buns_croissants
+581110,Sai Coop 500g viilutatud,Coop,500g,4740660009802,bakery,bakery_buns_croissants,bakery,bakery_bread_loaves
+581111,Röstsai Coop 500g viilutatud,Coop,500g,4740660009819,bakery,bakery_buns_croissants,bakery,bakery_bread_loaves
+581112,Sepik Coop 300g,Coop,300g,4740660009826,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+581113,Juustukukkel Coop 4tk 200g,Coop,200g,4740660009833,dairy_eggs_fats,dairy_cheese_slices,bakery,bakery_buns_croissants
+581114,Coop Kreeka jogurt 380g,Coop,380g,4740660009963,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+581115,Säästu karboniseerimata joogivesi 1.5L,Säästu,1.5L,4740660010389,drinks,drinks_water,drinks,drinks_water
+581116,Säästu karboniseeritud joogivesi 1.5L,Säästu,1.5L,4740660010402,drinks,drinks_water,drinks,drinks_water
+581117,Coop karboniseeritud joogivesi 1.5L sidrunim.,Coop,1.5L,4740660010433,drinks,drinks_water,drinks,drinks_water
+581118,Coop karboniseeritud joogivesi 6x1.5L sidrunim.,Coop,1.5L,4740660010440,drinks,drinks_water,drinks,drinks_water

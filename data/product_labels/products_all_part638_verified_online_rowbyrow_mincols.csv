@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+582169,Estrella kartulikrõps 130g juustumaitseline,Estrella,130g,4779028345825,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+582170,Estrella kartulikrõps 130g sibulamaitseline,Estrella,130g,4779028345986,produce,produce_root_veg,sweets_snacks,sweets_snacks_salty
+582171,Estrella maisikrõps 110g juustumaitseline,Estrella,110g,4779028347003,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+582172,Estrella läätsekrõps 100g paprika,Estrella,100g,4779028347126,dry_preserves,dry_groats_beans,sweets_snacks,sweets_snacks_salty
+582173,Estrella nisukrõps 110g peekoni,Estrella,110g,4779028347447,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+582174,Estrella kartuli snäkk Pom-Bear 65g juustu,Estrella,65g,4779028347652,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+582175,Fruuti mustsõstra-õunamahl 250ml,Fruuti,250ml,4779035930373,drinks,drinks_juices,drinks,drinks_juices
+582176,Fruuti õunamahl 250ml,Fruuti,250ml,4779035930380,drinks,drinks_juices,drinks,drinks_juices
+582177,Purgikaaned kuldne 82mm 10tk keeratavad,,10tk,4779047061065,dry_preserves,dry_other,household,hh_kitchenware
+582178,BonSu karboniseeritud mahlajook meloni 330ml,BonSu,330ml,4779052060145,drinks,drinks_juices,drinks,drinks_soft_soda
+582179,BonSu karboniseeritud mahlajook mango 330ml,BonSu,330ml,4779052060169,drinks,drinks_juices,drinks,drinks_soft_soda
+582180,BonSu karboniseeritud mahlajook arbuusi 330ml,BonSu,330ml,4779052060190,drinks,drinks_juices,drinks,drinks_soft_soda
+582181,BonSu karboniseeritud mahlajook apelsini 330ml,BonSu,330ml,4779052060992,drinks,drinks_juices,drinks,drinks_soft_soda
+582182,Vici tilaapiafileed nahata 500g külmutatud,Vici,500g,4779057510102,dry_preserves,dry_other,frozen_food,frozen_fish
+582183,Food Luck pitsa suupiste rebitud sealihaga 300g,Food Luck,300g,4779059021507,meat_fish,meat_pork,frozen_food,frozen_ready_meals
+582184,Kandyan Dancer English Breakfast 25*2g,Kandyan Dancer,2g,4791024020438,dry_preserves,dry_other,drinks,drinks_tea_coffee
+582185,Hyleys must tee English Aristocratic 25*2g,Hyleys,2g,4791045001584,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582186,Hyleys roheline tee 100g,Hyleys,100g,4791045002314,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582187,Hyleys roheline tee 25*1.5g,Hyleys,1.5g,4791045002628,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582188,Hyleys roheline tee 25*1.5g jasmiini,Hyleys,1.5g,4791045002635,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582189,Hyleys roheline tee 100g jasmiini,Hyleys,100g,4791045002642,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582190,Hyleys must tee Earl Grey 100g,Hyleys,100g,4791045003182,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582191,Hyleys must tee Passion Fruit 25*2g,Hyleys,2g,4791045003410,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582192,Start hommikusöögirõngad 250g banaan-maasika,Start,250g,4820008129598,dry_preserves,dry_other,dry_preserves,dry_cereals_muesli
+582193,Oscar Truff 4 You Millennium 300g,Oscar,300g,4820075503017,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+582194,Viin Hlibny Dar Classic Vodka 40% 200ml,,200ml,4820080721581,drinks,drinks_spirits,drinks,drinks_spirits
+582195,Lovare Royal Dessert tee 80g+teekotid,Lovare,80g,4820097814610,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582196,Lovare Cleopatras Night tee 80g+teekotid,Lovare,80g,4820097815549,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582197,Lovare Champagne Splashes 80g+teekotid,Lovare,80g,4820097815556,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582198,Lovare 1001 Nights tee 80g+teekotid,Lovare,80g,4820097815563,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582199,Maria vahvlitorud 450g kondenspiimaga,Maria,450g,4820141652977,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_waffles_cakes
+582200,Grona Crispy kreeker 600g soolane,Grona,600g,4820156636672,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_biscuits_cookies
+582201,Reeva kiirnuudlid 75g kanalihamaitseline tops,Reeva,75g,4820179253313,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+582202,Reeva kiirnuudlid 75g veiselihamaitseline,Reeva,75g,4820179253320,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+582203,Reeva kiirroog pasta Carbonara 70g topsis,Reeva,70g,4820179257212,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+582204,Reeva kiirroog seenepasta 70g topsis,Reeva,70g,4820179257229,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+582205,Reeva kiirroog pasta Bolognese 70g topsis,Reeva,70g,4820179257236,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+582206,Reeva kiirroog kanapasta 70g topsis,Reeva,70g,4820179257243,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+582207,Reeva kartulipüree 40g kanamaitseline,Reeva,40g,4820179257410,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+582208,Reeva kartulipüree 40g võimaitseline,Reeva,40g,4820179257427,dairy_eggs_fats,dairy_butter_margarine,dry_preserves,dry_ready_meals_jars
+582209,Bimar vareenikud kartuli-praetud sibulaga 400g,Bimar,400g,4820196535447,produce,produce_root_veg,frozen_food,frozen_ready_meals
+582210,Lovare Alpine Herbs tee 80g+teekotid,Lovare,80g,4820198871369,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582211,Lovare musta tee assortii 32*2g,Lovare,2g,4820198879648,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582212,Lovare rohelise tee assortii 32*1.5g,Lovare,1.5g,4820198879655,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582213,Lovare lilletee assortii 32*1.5g,Lovare,1.5g,4820198879686,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582214,Klim sefiir valge-roosa 250g,Klim,250g,4820218099292,dry_preserves,dry_other,sweets_snacks,sweets_candies
+582215,Viin Mernaya On Milk 40% 500ml,,500ml,4820225080368,drinks,drinks_spirits,drinks,drinks_spirits
+582216,Viin Khortytsa Platinum 40% 700ml,,700ml,4820229031311,drinks,drinks_spirits,drinks,drinks_spirits
+582217,Axa müslibatoon 25g šokolaadi-kookose,Axa,25g,4820237690678,bakery,bakery_cakes_pastries,sweets_snacks,sweets_chocolate_bars
+582218,Axa röstitud müsli 375g maasika-banaan,Axa,375g,4820237690708,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli

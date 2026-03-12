@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580919,Linnamäe Lihaveise T/S salat juust 180g,Linnamäe,180g,4740456001386,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+580920,Linnamäe Lihaveise T/S vorst juustuga 180g,Linnamäe,180g,4740456001393,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_gourmet
+580921,Linnu Talu kollased talumunad M 10tk,Linnu Talu,10tk,4740489000080,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+580922,Tartu Mill riis pikateraline 4x125g,Tartu Mill,125g,4740493666685,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+580923,Merevaik sulatatud juust krevettidega 200g,Merevaik,200g,4740500000112,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+580924,Merevaik sulatatud juust kukeseentega 200g,Merevaik,200g,4740500000211,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+580925,Maadlex äädikhape 30% 500ml,Maadlex,500ml,4740506000529,dry_preserves,dry_other,sauces_oils,oils_vinegar
+580926,Kaljavirde kontsentraat 200g linnaseekstrakt,Kaljavirde,200g,4740506100113,dry_preserves,dry_other,dry_preserves,dry_other
+580927,Maadlex äädikhape 30% 1L,Maadlex,1L,4740506100144,dry_preserves,dry_other,sauces_oils,oils_vinegar
+580928,Maadlex süldiäädikas 4% 330ml,Maadlex,330ml,4740506101004,sauces_oils,oils_vinegar,sauces_oils,oils_vinegar
+580929,Reynar granaatõunamahl 1L,Reynar,1L,4740506101707,drinks,drinks_juices,drinks,drinks_juices
+580930,Hiiu rukkileib seemne 350g Hiiumaa Pagar,Hiiumaa Pagar,350g,4740541003691,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+580931,Valio juust Edam 200g,Valio,200g,4740553005560,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+580932,Valio Eesti riivjuust 500g,Valio,500g,4740553690087,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+580933,Valio Tilsit juust 200g,Valio,200g,4740553691619,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+580934,Valio viilujuust Atleet Eesti 150g,Valio,150g,4740553692104,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+580935,Wõro keeduvorst Lastevorst 600g,Wõro,600g,4740562064534,meat_fish,meat_sausages,meat_fish,meat_sausages
+580936,Wõro keeduvorst Juustuvorst 600g,Wõro,600g,4740562064541,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+580937,Wõro võileivavorst ülesuitsutatud 300g,Wõro,300g,4740562064558,dairy_eggs_fats,dairy_butter_margarine,meat_fish,meat_sausages
+580938,Otepää Singirulli sink 100g viil,Otepää,100g,4740567000513,meat_fish,meat_hams,meat_fish,meat_hams
+580939,Otepää sült 300g e-vaba,Otepää,300g,4740567000896,dry_preserves,dry_other,meat_fish,meat_other
+580940,Oskar Seljafilee viil 105g,Oskar,105g,4740569002508,dry_preserves,dry_other,meat_fish,meat_pork
+580941,Oskar T/S vorst Mündi 80g viil,Oskar,80g,4740569009125,meat_fish,meat_sausages,meat_fish,meat_sausages
+580942,Oskar P/S vorst Viljandi 120g viil,Oskar,120g,4740569010022,meat_fish,meat_sausages,meat_fish,meat_sausages
+580943,Oskar Marmor sink 120g viil,Oskar,120g,4740569010060,meat_fish,meat_hams,meat_fish,meat_hams
+580944,Oskar Singikreem 200g,Oskar,200g,4740569010176,dry_preserves,dry_other,meat_fish,meat_hams
+580945,Oskar Küüslaugukülg 200g viil,Oskar,200g,4740569010749,dry_preserves,dry_other,meat_fish,meat_pork
+580946,Oskar Piprasalaami 80g viil,Oskar,80g,4740569010886,dry_preserves,dry_other,meat_fish,meat_gourmet
+580947,Oskar T/S vorst Moskva 80g viil,Oskar,80g,4740569011494,meat_fish,meat_sausages,meat_fish,meat_sausages
+580948,Oskar P/S vorst Tallinn 120g viil,Oskar,120g,4740569011944,meat_fish,meat_sausages,meat_fish,meat_sausages
+580949,Oskar Kukeseentega toorvorst 450g,Oskar,450g,4740569012507,meat_fish,meat_sausages,meat_fish,meat_sausages
+580950,Oskar T/S vorst Pizza pepperoni Päris 250g,Oskar,250g,4740569012811,meat_fish,meat_sausages,meat_fish,meat_gourmet
+580951,Estover Eesti Juust Light 200g viil,Estover,200g,4740572000119,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+580952,Eesti juust 400g väikepakk,,400g,4740572003165,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+580953,PM Otto kodujuust klassikaline 220g,PM Otto,220g,4740572004346,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+580954,PM Otto Mozzarella Kirsid basiiliku 125g,PM Otto,125g,4740572004575,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+580955,Estover PT Hiirte juust 350g viilutatud,Estover,350g,4740572005053,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+580956,PM Otto toorjuust vanilje 400g,PM Otto,400g,4740572005800,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cottage_quark
+580957,Deline lehmapiimajuust karulauguga 150g,Deline,150g,4740572005978,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+580958,Hiirte sulatatud juust grillkanaga 185g,Hiirte,185g,4740572006210,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+580959,PM Otto toorjuust kurgi ja tilliga 150g,PM Otto,150g,4740572006272,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cottage_quark
+580960,PM Otto toorjuust tomati-basiilikuga 150g,PM Otto,150g,4740572006289,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cottage_quark
+580961,PM Otto toorjuust 150g,PM Otto,150g,4740572006302,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cottage_quark
+580962,Hiirte juust täispiimast 500g viilutatud,Hiirte,500g,4740572006456,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+580963,Nõo tšilli-apelsini broilerikoivad 560g,Nõo,560g,4740574062771,produce,produce_tropical,meat_fish,meat_poultry
+580964,Nõo toorsuitsupeekoni kuubikud 140g,Nõo,140g,4740574067165,meat_fish,meat_pork,meat_fish,meat_pork
+580965,Nõo toorsuitsupeekon 105g viil,Nõo,105g,4740574068261,meat_fish,meat_pork,meat_fish,meat_pork
+580966,Nõo T/S vorst Vürsti 105g viil,Nõo,105g,4740574080799,meat_fish,meat_sausages,meat_fish,meat_sausages
+580967,Nõo Fitlap suitsutatud sealihasink 105g,Nõo,105g,4740574080850,meat_fish,meat_hams,meat_fish,meat_hams
+580968,Nõo Liivimaa veisesink 100g viil,Nõo,100g,4740574081024,meat_fish,meat_hams,meat_fish,meat_hams

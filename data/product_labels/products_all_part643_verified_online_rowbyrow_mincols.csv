@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+582419,Gourmante Modena palsamiäädikas 250ml,Gourmante,250ml,5200110731763,sauces_oils,oils_vinegar,sauces_oils,oils_vinegar
+582420,Gourmante küüslauguküüned 100g äädikas,Gourmante,100g,5200110732456,sauces_oils,oils_vinegar,dry_preserves,dry_canned_veg
+582421,Gourmante punased vürtsikad paprikad 320g toorjuustuga,Gourmante,320g,5200110733231,world_spices,spices_herbs_spice_mix,dry_preserves,dry_canned_veg
+582422,Gourmante rohelised vürtsikad paprikad 320g toorjuustuga,Gourmante,320g,5200110733248,world_spices,spices_herbs_spice_mix,dry_preserves,dry_canned_veg
+582423,Gourmante Kreeka pepperoni 320g toorjuustuga,Gourmante,320g,5200110733255,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+582424,Gourmante kirsspaprikad 320g vürtsikad toorjuustuga,Gourmante,320g,5200110733262,world_spices,spices_herbs_spice_mix,dry_preserves,dry_canned_veg
+582425,Gourmante grillitud seened 320g toorjuustuga,Gourmante,320g,5200110733279,produce,produce_mushrooms,dry_preserves,dry_canned_veg
+582426,Naoussa maasikadzemm 500g,Naoussa,500g,5201049302024,produce,produce_berries,dry_preserves,dry_other
+582427,Naoussa põldmarjadzemm 500g,Naoussa,500g,5201049309993,produce,produce_berries,dry_preserves,dry_other
+582428,Royal mahedad pepperonid 325g,Royal,325g,5201194000028,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+582429,Gourmante ekstra vääris oliiviõli 500ml,Gourmante,500ml,5201298400021,sauces_oils,oils_olive,sauces_oils,oils_olive
+582430,Harpic Max WC puhastusvahend 750ml,Harpic,750ml,5201347159085,dry_preserves,dry_other,household,hh_cleaners
+582431,7 Days Double sarvesai kookosekreemiga 60g,,60g,5201360523924,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+582432,Gaea Kalamata oliivid 150g kivideta,Gaea,150g,5201671802466,meat_fish,fish_fresh,dry_preserves,dry_canned_veg
+582433,Gaea marineeritud oliivide segu 150g kivideta,Gaea,150g,5201671802480,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+582434,Violife võileivaviilud Cheddari vegan 140g,Violife,140g,5202390017049,dairy_eggs_fats,dairy_butter_margarine,cheese,dairy_cheese_slices
+582435,Violife võileivaviilud suitsutatud vegan 140g,Violife,140g,5202390017056,dairy_eggs_fats,dairy_butter_margarine,cheese,dairy_cheese_slices
+582436,Violife võileivamääre Original vegan 150g,Violife,150g,5202390021121,drinks,drinks_spirits,cheese,dairy_cheese_slices
+582437,Green Cola karboniseeritud karastusjook 330ml prk,Green Cola,330ml,5206542007636,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+582438,Pelisterka karboniseerimata mineraalvesi 1.5L,Pelisterka,1.5L,5310064001000,drinks,drinks_water,drinks,drinks_water
+582439,Hamlet kinkekarp 125g kuldne,Hamlet,125g,5400265019055,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+582440,Hamlet küpsis kringlid 250g,Hamlet,250g,5400265024349,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+582441,Flamingo L küünetangid lemmikloomale,Flamingo,,5400585068436,household,hh_candles_airfresh,pet,pet_other
+582442,Flamingo Green hügieenikotid 2*25tk komp,Flamingo,25tk,5400585211979,dry_preserves,dry_other,pet,pet_other
+582443,Flamingo Bamboo M kraas lemmikloomale,Flamingo,,5400585234824,dry_preserves,dry_other,pet,pet_other
+582444,Flamingo hügieenikotid 4*15tk erinevad,Flamingo,15tk,5400585237429,dry_preserves,dry_other,pet,pet_other
+582445,Flamingo Bamboo L hari lemmikloomale,Flamingo,,5400585268102,dry_preserves,dry_other,pet,pet_other
+582446,Flamingo Bamboo kamm lemmikloomale,Flamingo,,5400585279771,dry_preserves,dry_other,pet,pet_other
+582447,Flamingo XL niisked salvrätikud lemmikloomale 40tk,Flamingo,40tk,5400585295603,dry_preserves,dry_other,pet,pet_other
+582448,Synnove mozzarella riivjuust 200g,Synnove,200g,5404015805530,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+582449,Versele-Laga maius väikeloomale 50g õuna,Versele-Laga,50g,5410340613023,produce,produce_apples_pears,pet,pet_small_animals
+582450,Versele-Laga maius väikeloomale 50g porgand,Versele-Laga,50g,5410340613030,dry_preserves,dry_other,pet,pet_small_animals
+582451,Haribo Mallow Mania vahukomm 175g,Haribo,175g,5410358473114,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+582452,Golden River friikartul 1kg külmutatud,Golden River,1kg,5410376822796,frozen_food,frozen_potato_products,frozen_food,frozen_potato_products
+582453,Eres puhastuspulber kohviautomaadile 2*25g,Eres,25g,5410458146253,drinks,drinks_other,household,hh_cleaners
+582454,Eres puhastusvahend ahjule 500ml pihustatav,Eres,500ml,5410458201556,dry_preserves,dry_other,household,hh_cleaners
+582455,Eres puhastusvahend keraamilisele pliidile 500ml,Eres,500ml,5410458203550,dry_preserves,dry_other,household,hh_cleaners
+582456,Eres vaibaplekieemaldusvahend 500ml pihust.,Eres,500ml,5410458205059,dry_preserves,dry_other,household,hh_cleaners
+582457,Greenhouse marineeritud pärlsibul 680g,Greenhouse,680g,5410524122105,produce,produce_root_veg,dry_preserves,dry_canned_veg
+582458,Greenhouse kirsikompott 680g kivideta,Greenhouse,680g,5410524720820,dry_preserves,dry_canned_fruit,dry_preserves,dry_canned_fruit
+582459,Alpro sojadessert 125g tumeda šok.maitseline,Alpro,125g,5411188094159,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+582460,Alpro Plant Protein vanillipuding 200g,Alpro,200g,5411188137740,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+582461,Ortis Propex Spray 24ml taruvaigu ekstrakt,Ortis,24ml,5411386882152,dry_preserves,dry_other,personal_care,pcare_other
+582462,Helen Harper 60*60cm N2 aluslinad 10tk,Helen Harper,10tk,5411416066927,dry_preserves,dry_other,personal_care,pcare_other
+582463,Epic merevetikasalat Wakame 250g külmutatud,Epic,250g,5411658011341,produce,produce_herbs_salads_sprouts,frozen_food,frozen_vegetables
+582464,Hottlet tuunikala steigid 800g külmutatud,Hottlet,800g,5411658080040,dry_preserves,dry_canned_meat_fish,frozen_food,frozen_fish
+582465,Poco Loco rohelise jalapeño viilud 225g,Poco Loco,225g,5412514937188,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+582466,Ace Colors plekieemaldusvahend värvilistele pesudele 1L,Ace,1L,5413149911314,dry_preserves,dry_other,household,hh_laundry
+582467,Raffaello kommi 4tk 40g,Raffaello,4tk,5413548040639,sweets_snacks,sweets_candies,sweets_snacks,sweets_chocolate_bars
+582468,Duvoplus kirbu- ja puugirihm kassile 35cm,Duvoplus,,5414365427962,pet,pet_other,pet,pet_other

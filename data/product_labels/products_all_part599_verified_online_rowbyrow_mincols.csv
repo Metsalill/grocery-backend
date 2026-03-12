@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580219,Sanotact C-vitamiin acerola kirsiga N30,Sanotact,,4003087410652,dry_preserves,dry_other,personal_care,pcare_other
+580220,Sanotact Laktase Direkt 7000 N90,Sanotact,,4003087432456,dry_preserves,dry_other,personal_care,pcare_other
+580221,Sanotact toidulisand sooletalitlusele N84,Sanotact,,4003087441458,world_spices,spices_basic_salt_pepper,personal_care,pcare_other
+580222,Sanotact Laktase Express 13000 N40,Sanotact,,4003087441953,dry_preserves,dry_other,personal_care,pcare_other
+580223,Steinhauer magustatud kondenspiim 397g,Steinhauer,397g,4003490093275,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+580224,Wettex 328 puhastuslapp,Wettex,,4003790000102,household,hh_cleaners,household,hh_cleaners
+580225,Wettex 122 puhastuslapp,Wettex,,4003790001994,household,hh_cleaners,household,hh_cleaners
+580226,Vileda 541 majapidamislapp 3tk,Vileda,3tk,4003790025419,household,hh_other,household,hh_cleaners
+580227,Tetra kala täissööt TetraMin Flakes 100ml,Tetra,100ml,4004218762701,meat_fish,fish_fresh,pet,pet_birds_fish
+580228,Tetra kalade täissööt TetraMin Flakes 12g,Tetra,12g,4004218766402,meat_fish,fish_fresh,pet,pet_birds_fish
+580229,Gloria Mandliõli 500ml,Gloria,500ml,4004597001484,sauces_oils,oils_other,sauces_oils,oils_other
+580230,Gloria Linaseemneõli 500ml,Gloria,500ml,4004597002283,sweets_snacks,sweets_nuts_driedfruit,sauces_oils,oils_other
+580231,Nivea Sensitive AS palsam 100ml,Nivea,100ml,4005808228706,personal_care,pcare_shampoo_cond,personal_care,pcare_shaving
+580232,Nivea Sensitive raseerimissgeel 200ml,Nivea,200ml,4005808257300,dry_preserves,dry_other,personal_care,pcare_shaving
+580233,Nivea Men Originals AS näovesi 100ml,Nivea,100ml,4005808753475,drinks,drinks_spirits,personal_care,pcare_shaving
+580234,Nivea Sensitive raseerimisvaht 200ml,Nivea,200ml,4005808817207,personal_care,pcare_shaving,personal_care,pcare_shaving
+580235,Rapunzel Makadaamiapähklikreem 250g,Rapunzel,250g,4006040003885,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+580236,Rapunzel Linaseemned 250g,Rapunzel,250g,4006040005476,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+580237,Rapunzel Päevalilleseemned 250g,Rapunzel,250g,4006040005490,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+580238,Rapunzel Kinoasegu 250g,Rapunzel,250g,4006040024217,dry_preserves,dry_other,dry_preserves,dry_groats_beans
+580239,Rapunzel Mündipastillid 50g,Rapunzel,50g,4006040065296,drinks,drinks_wine,sweets_snacks,sweets_candies
+580240,Rapunzel Sidrunipastillid 50g,Rapunzel,50g,4006040065777,drinks,drinks_wine,sweets_snacks,sweets_candies
+580241,Rapunzel Munguba 500g,Rapunzel,500g,4006040176114,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+580242,Rapunzel Agar-agar pulber 60g,Rapunzel,60g,4006040201915,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+580243,Rapunzel Kookosrasv 200g,Rapunzel,200g,4006040216216,bakery,bakery_cakes_pastries,sauces_oils,oils_other
+580244,Rapunzel Vahtrasiirup A hele 250ml,Rapunzel,250ml,4006040300014,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+580245,Rapunzel Vahtrasiirup C 375ml,Rapunzel,375ml,4006040300212,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+580246,Rapunzel Mõrušokolaadikr.eem 250g,Rapunzel,250g,4006040321392,dry_preserves,dry_other,dry_preserves,dry_other
+580247,Rapunzel Datlisiirup 250g,Rapunzel,250g,4006040350064,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+580248,Zewa Softis taskurätikud 9tk mentooliga,Zewa,9tk,4006670381124,dry_preserves,dry_other,household,hh_paper
+580249,Mikado Aprikoosid siirupis 825g kooritud,Mikado,825g,4007415005602,drinks,drinks_syrups_powders,dry_preserves,dry_canned_fruit
+580250,Mikado marineeritud Nameko seened 530g,Mikado,530g,4007415005961,produce,produce_mushrooms,dry_preserves,dry_canned_veg
+580251,Elmex Caries Protection hambapasta 75ml,Elmex,75ml,4007965560002,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+580252,Elmex Children 0-6a hambapasta 50ml,Elmex,50ml,4007965560101,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+580253,Elmex Sensitive hambapasta 75ml,Elmex,75ml,4007965560200,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+580254,Vitakraft Menu täissööt papagoile 1kg,Vitakraft,1kg,4008239106216,dry_preserves,dry_other,pet,pet_birds_fish
+580255,Vitakraft Menu täissööt küülikutele 1kg,Vitakraft,1kg,4008239106452,pet,pet_small_animals,pet,pet_small_animals
+580256,Vitakraft Menu täissööt hamstritele 400g,Vitakraft,400g,4008239106476,dry_preserves,dry_other,pet,pet_small_animals
+580257,Vitakraft Menu täissööt viirpapagoile 1kg,Vitakraft,1kg,4008239181022,dry_preserves,dry_other,pet,pet_birds_fish
+580258,Vitakraft Menu sööt kääbushamstritele 400g,Vitakraft,400g,4008239185570,dry_preserves,dry_other,pet,pet_small_animals
+580259,Vitakraft Kräcker maiuspulk viirpap. 60g,Vitakraft,60g,4008239212542,dry_preserves,dry_other,pet,pet_birds_fish
+580260,Vitakraft Life täissööt merisigadele 600g,Vitakraft,600g,4008239251091,pet,pet_small_animals,pet,pet_small_animals
+580261,Vitakraft Life täissööt küülikutele 600g,Vitakraft,600g,4008239251190,pet,pet_small_animals,pet,pet_small_animals
+580262,Vitakraft Vita täissööt tsintsiljade 600g,Vitakraft,600g,4008239258472,dry_preserves,dry_other,pet,pet_small_animals
+580263,Seeberger Pehme jõhvikas 125g magustatud,Seeberger,125g,4008258296004,produce,produce_berries,sweets_snacks,sweets_nuts_driedfruit
+580264,Seeberger Ploom 125g kivita,Seeberger,125g,4008258324110,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+580265,Seeberger Aprikoos 125g,Seeberger,125g,4008258358047,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+580266,Seeberger õunakrõpsud 60g,Seeberger,60g,4008258410011,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+580267,Seeberger Puuviljasegu 200g,Seeberger,200g,4008258419014,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+580268,La Comtesse Vahtrasiirup 250ml,La Comtesse,250ml,4008314178084,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders

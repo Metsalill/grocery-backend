@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+583419,il Molino karamellipuding 200g,il Molino,200g,8009550006526,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+583420,il Molino kondiitrikreem 150g,il Molino,150g,8009550006557,dry_preserves,dry_other,dairy_eggs_fats,dairy_desserts
+583421,Italpasta pasta Tagliatelline 500g,Italpasta,500g,8009940021023,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583422,Italpasta pasta Lasagne 500g,Italpasta,500g,8009940031428,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583423,Heidrun toidukarp Polar Frost 1.2L,Heidrun,1.2L,8010059017500,dry_preserves,dry_other,household,hh_kitchenware
+583424,Heidrun toidukarp Polar Frost 0.75L,Heidrun,0.75L,8010059017609,dry_preserves,dry_other,household,hh_kitchenware
+583425,Corte Delle Calli Prosecco Extra Dry 1.5L,Corte Delle Calli,1.5L,8010719005212,drinks,drinks_wine,drinks,drinks_wine
+583426,Fiordimaso mozzarella 100g,Fiordimaso,100g,8011425010446,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+583427,Parmigiano Reggiano DOP 200g,Parmigiano,200g,8011425112850,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+583428,Fiordimaso riivjuust Grana Padano 100g,Fiordimaso,100g,8011425113833,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+583429,Fiordimaso juust Toma Piemontese DOP 150g,Fiordimaso,150g,8011425114625,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+583430,Fiordimaso juust Edamer 130g viilutatud,Fiordimaso,130g,8011425115394,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+583431,Fiordimaso juust Emmental 130g viilutatud,Fiordimaso,130g,8011425115400,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+583432,Fiordimaso juust Maasdam 130g viilutatud,Fiordimaso,130g,8011425115417,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+583433,Fiordimaso juustulaastud Grana Padano 150g,Fiordimaso,150g,8011425116025,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+583434,Fiordimaso juustu-oliivi mix 160g,Fiordimaso,160g,8011425116919,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+583435,Conte Fosco Cuvee Brut vahuvein 0.75L,Conte Fosco,0.75L,8011510011112,drinks,drinks_wine,drinks,drinks_wine
+583436,Conte Fosco Cuvee Dolce vahuvein 0.75L,Conte Fosco,0.75L,8011510011129,drinks,drinks_wine,drinks,drinks_wine
+583437,Vv Aurosia Vino Bianco Medium Sweet 0.75L,Aurosia,0.75L,8011510013697,dry_preserves,dry_other,drinks,drinks_wine
+583438,Red Band kummikomm Bubble Pop 100g,Red Band,100g,8013399146312,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+583439,Sophie intiimpuhastusmärlapid 20tk vees lahustuv,Sophie,20tk,8014002002902,dry_preserves,dry_other,personal_care,pcare_other
+583440,Gorgonzola Dolce sinihallitusjuust 200g,Gorgonzola Dolce,200g,8014952255847,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_blue
+583441,Fiordimaso Ricotta Fresca 250g,Fiordimaso,250g,8015467000281,dry_preserves,dry_other,dairy_eggs_fats,dairy_cottage_quark
+583442,Laurieri Amaretti küpsis 200g,Laurieri,200g,8015565030012,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+583443,Laurieri Cantuccini küpsis 200g mandliga,Laurieri,200g,8015565030173,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+583444,Cirio ketsup 340g,Cirio,340g,80160281,dry_preserves,dry_other,sauces_oils,sauces_ketchup_mayo
+583445,Col Blanc Frizzante poolvahuvein 0.75L,Col Blanc,0.75L,8016045200253,drinks,drinks_wine,drinks,drinks_wine
+583446,Fiordimaso juust Gorgonzola-Mascarpone 150g,Fiordimaso,150g,8016792000366,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_blue
+583447,Biorepair Kids hambapasta 50ml,Biorepair,50ml,8017331097120,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+583448,Medrull Aloe Vera plaaster 20tk,Medrull,20tk,8017990085551,dry_preserves,dry_other,personal_care,pcare_other
+583449,Pharmadoct kõrvatropid 4tk karbis,Pharmadoct,4tk,8017990160715,dry_preserves,dry_other,personal_care,pcare_other
+583450,Parmigiano Reggiano juust riivitud 100g,Parmigiano,100g,8018817240108,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+583451,Limmi sidrunimahl 200ml,Limmi,200ml,8020542111110,drinks,drinks_juices,produce,produce_smoothies_fresh_juices
+583452,Limmi laimimahl 200ml,Limmi,200ml,8020542112018,drinks,drinks_juices,produce,produce_smoothies_fresh_juices
+583453,Koriander 50g Itaalia,,50g,8028495000376,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+583454,Pv Barone Montalto Passivento Rosso 3L BIB,Barone Montalto,3L,8030423003649,dry_preserves,dry_other,drinks,drinks_wine
+583455,Kinder Joy üllatusmuna 20g,Kinder,20g,80310891,dairy_eggs_fats,dairy_eggs,sweets_snacks,sweets_chocolate_bars
+583456,Sauber pesulõksud plastik M 10tk värvilised,Sauber,10tk,8032638011204,drinks,drinks_wine,household,hh_other
+583457,Pomi tomatipasta 8% 200g,Pomi,200g,8032793344308,dry_preserves,dry_pasta_rice,sauces_oils,sauces_pasta_cooking
+583458,La bella mozzarella di Bufala 125g,La bella,125g,8032891700129,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+583459,La bella mozzarella di Bufala kirsi 200g,La bella,200g,8032891706060,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+583460,Frantoio Muraglia ekstra väärisoliviõli 500ml,Frantoio Muraglia,500ml,8033928641491,sauces_oils,oils_other,sauces_oils,oils_olive
+583461,Casa Giona Prosecco Extra Dry 0.75L,Casa Giona,0.75L,8034108571195,drinks,drinks_wine,drinks,drinks_wine
+583462,Valsoia Vegan shok.-pahklikreem 200g,Valsoia,200g,80444916,sweets_snacks,sweets_nuts_driedfruit,sauces_oils,sauces_other
+583463,Pv Calecara Primitivo Puglia 0.75L,Calecara,0.75L,8052049650854,dry_preserves,dry_other,drinks,drinks_wine
+583464,Vv Calecara Fiano Puglia 0.75L,Calecara,0.75L,8052049651264,dry_preserves,dry_other,drinks,drinks_wine
+583465,Bob teejook mullidega 360ml marjamaitseline,Bob,360ml,8056249561002,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+583466,Beebad Original energiajook 250ml,Beebad,250ml,8056326433116,drinks,drinks_spirits,drinks,drinks_energy
+583467,Becher vinnutatud snäkk Pippi suitsutatud 100g,Becher,100g,80678649,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+583468,Kinder Bueno White shokolaadibatoon 39g,Kinder,39g,80761761,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars

@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+582969,Dog Fest maius koerale 90g pardifilee,Dog Fest,90g,6921499711793,pet,pet_other,pet,pet_dog_treats
+582970,Dog Fest maius koerale 55g pardifilee,Dog Fest,55g,6921499711809,pet,pet_other,pet,pet_dog_treats
+582971,Shan Wai Shan roheline jasmiinitee 50g,Shan Wai Shan,50g,6922163623831,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582972,Shan Wai Shan roheline oolong tee 50g,Shan Wai Shan,50g,6922163623848,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582973,Seasir sojakaste vähesoolane 150ml,Seasir,150ml,6923291133063,world_spices,spices_basic_salt_pepper,sauces_oils,sauces_soy_worcester
+582974,Seasir sojakaste Premium 150ml lauapudel,Seasir,150ml,6923291133070,world_spices,spices_asian,sauces_oils,sauces_soy_worcester
+582975,Yaki Nori sushi nori lehed 10tk 25g,Yaki Nori,25g,6923868216717,dry_preserves,dry_other,dry_preserves,dry_other
+582976,Medrull villiplaaster medium 6tk 41*62mm,Medrull,6tk,6926365593916,dry_preserves,dry_other,personal_care,pcare_other
+582977,Medrull villiplaaster 6tk mix small+medium,Medrull,6tk,6926365593923,dry_preserves,dry_other,personal_care,pcare_other
+582978,WuFuYuan mustad tapioki kiirpärlid 250g,WuFuYuan,250g,6927055989330,dry_preserves,dry_other,dry_preserves,dry_other
+582979,Amos kummikomm 4D 65g maasika,Amos,65g,6936756272177,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+582980,Amos kummikomm Peelerz 65g mango,Amos,65g,6936756272214,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+582981,Fluorecare SARS-CoV-2/A&B-gripi/RSV test,Fluorecare,,6971348761301,dry_preserves,dry_other,personal_care,pcare_other
+582982,Möllers kalamaksaõli 250ml sidrunimaitseline,Möllers,250ml,7028156630219,sauces_oils,oils_other,personal_care,pcare_other
+582983,Jordan Step hambahari lastele 6-9a+tops,Jordan,,7038516220301,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+582984,Jordan hambahari Clean Between Soft,Jordan,,7038516557308,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+582985,Jordan hambahari Clean Between Medium,Jordan,,7038516558305,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+582986,Jordan Flosser hambavahepuhastid 3in1 36tk,Jordan,36tk,7038516858108,dry_preserves,dry_other,personal_care,pcare_oral_care
+582987,Jordan Green Clean Soft hambahari,Jordan,,7046110028001,dry_preserves,dry_other,personal_care,pcare_oral_care
+582988,Jordan White Smile hambapasta 75ml,Jordan,75ml,7046110031025,dry_preserves,dry_other,personal_care,pcare_oral_care
+582989,Jordan Caries Defence hambapasta 75ml,Jordan,75ml,7046110031131,dry_preserves,dry_other,personal_care,pcare_oral_care
+582990,Jordan Green Clean lastele 5-10 Extra Soft hambahari,Jordan,,7046110031643,dry_preserves,dry_other,personal_care,pcare_oral_care
+582991,Elektrilise hambaharja lisaharjad Jordan Sensitive 2tk,,2tk,7046110035917,dry_preserves,dry_other,personal_care,pcare_oral_care
+582992,Elektrilise hambaharja lisaharjad Jordan White 2tk,,2tk,7046110036389,dry_preserves,dry_other,personal_care,pcare_oral_care
+582993,Jordan Green Clean hambaniit 30m,Jordan,,7046110037171,dry_preserves,dry_other,personal_care,pcare_oral_care
+582994,Jordan Green Clean hambatikud 100tk,Jordan,100tk,7046110037393,dry_preserves,dry_other,personal_care,pcare_oral_care
+582995,Jordan Expand hambaniit 25m paisuv,Jordan,,7046110052457,dry_preserves,dry_other,personal_care,pcare_oral_care
+582996,Jordan Smile elektriline hambahari must,Jordan,,7046110055533,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+582997,Jordan Ultralite Sensitive hambahari Ultrasoft,Jordan,,7046110058695,dry_preserves,dry_other,personal_care,pcare_oral_care
+582998,Jordan Ultralite Sensitive hambahari Soft,Jordan,,7046110058848,dry_preserves,dry_other,personal_care,pcare_oral_care
+582999,Jordan Target White hambahari Soft,Jordan,,7046110063620,dry_preserves,dry_other,personal_care,pcare_oral_care
+583000,Jordan Target White hambahari Medium,Jordan,,7046110063651,dry_preserves,dry_other,personal_care,pcare_oral_care
+583001,Jordan Target Sensitive hambahari Ultrasoft,Jordan,,7046110063682,dry_preserves,dry_other,personal_care,pcare_oral_care
+583002,Jordan hambahari Hello Smile 9+ vanusele,Jordan,,7046110069868,dry_preserves,dry_other,personal_care,pcare_oral_care
+583003,Jordan Junior 6-12a hambapasta 50ml,Jordan,50ml,7046110075562,dry_preserves,dry_other,personal_care,pcare_oral_care
+583004,Möllers kalamaksaõli 250ml Tutti-Frutti,Möllers,250ml,7070866004958,sauces_oils,oils_other,personal_care,pcare_other
+583005,Fits kohvifilter nr.4 200tk valgendamata,Fits,200tk,7090007112205,drinks,drinks_other,household,hh_kitchenware
+583006,Wasa täisteravilja küpsis 250g,Wasa,250g,7300400482554,sweets_snacks,sweets_biscuits_cookies,bakery,bakery_crispbread
+583007,Löfbergs Brazil NGCL jahvatatud kohv 450g,Löfbergs,450g,7310050003535,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+583008,Semper 6K kaera-riisipuder 120g puuvilja,Semper,120g,7310100690395,dry_preserves,dry_pasta_rice,baby,baby_food_pouches
+583009,Semper 6K kaera-riisipuder 120g õun-virsik,Semper,120g,7310100690470,dry_preserves,dry_pasta_rice,baby,baby_food_pouches
+583010,Semper 6K kaera-riisipuder 120g pirn-aprikoos,Semper,120g,7310100690548,dry_preserves,dry_pasta_rice,baby,baby_food_pouches
+583011,Semper 6K kaerapuder 120g maasika-banaan,Semper,120g,7310100690883,produce,produce_berries,baby,baby_food_pouches
+583012,Semper 8K mitmeviljapuder 120g õun-virsik-aprikoos,Semper,120g,7310100694683,produce,produce_apples_pears,baby,baby_food_pouches
+583013,Semper 8K mitmeviljapuder 120g õun-maasika-mustika,Semper,120g,7310100694768,produce,produce_apples_pears,baby,baby_food_pouches
+583014,Semper 6K kaerapuder 120g pirni-ploomi,Semper,120g,7310100697738,produce,produce_apples_pears,baby,baby_food_pouches
+583015,Semper 6K kaerapuder 120g õuna-kaneeli,Semper,120g,7310100697813,world_spices,spices_herbs_spice_mix,baby,baby_food_pouches
+583016,Semper 6K õuna-banaani smuuti 90g,Semper,90g,7310100701282,produce,produce_apples_pears,baby,baby_food_pouches
+583017,Semper 6K õuna-mango smuuti 90g,Semper,90g,7310100701367,produce,produce_apples_pears,baby,baby_food_pouches
+583018,Semper 6K õuna-maasika smuuti 90g,Semper,90g,7310100701442,produce,produce_berries,baby,baby_food_pouches

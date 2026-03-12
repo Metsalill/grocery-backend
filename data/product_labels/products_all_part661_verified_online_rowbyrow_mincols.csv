@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+583319,Ace Lavender põrandapuhastusvahend 1L,Ace,1L,8001480709867,dry_preserves,dry_other,household,hh_cleaners
+583320,Always FlexiStyle päevakaitse 58tk,Always,58tk,8001841230658,dry_preserves,dry_other,personal_care,pcare_other
+583321,Tampax Compak Super Plus tampoon 16tk,Tampax,16tk,8001841300399,dry_preserves,dry_other,personal_care,pcare_other
+583322,Always Platinum Secure Night 10tk,Always,10tk,8001841449906,dry_preserves,dry_other,personal_care,pcare_other
+583323,Oral-B Sensitive&Gum Calm White hambapasta 75ml,Oral-B,75ml,8001841520285,dry_preserves,dry_other,personal_care,pcare_oral_care
+583324,Vileda kummikindad Sensitive M,Vileda,,8001940003320,dry_preserves,dry_other,household,hh_cleaners
+583325,Vileda kummikindad Sensitive L,Vileda,,8001940003337,dry_preserves,dry_other,household,hh_cleaners
+583326,Vileda mopi varu Active Max,Vileda,,8001940006659,dry_preserves,dry_other,household,hh_cleaners
+583327,Riidepuhastusrull Vileda 2tk,Vileda,2tk,8001940007922,household,hh_cleaners,household,hh_cleaners
+583328,ONE kuivtoit kassile 800g lõhe ja täisteranisu,ONE,800g,8002205358902,meat_fish,fish_fresh,pet,pet_cat_dry
+583329,ONE kuivtoit kassile 800g kana ja täisteranisu,ONE,800g,8002205871371,meat_fish,meat_poultry,pet,pet_cat_dry
+583330,Mild&Light Filippo 500ml rafineeritud väärisoliviõli,Mild&Light,500ml,8002210506206,dry_preserves,dry_other,sauces_oils,oils_olive
+583331,Organic Foods tükeldatud tomatid 400g mahe,Organic Foods,400g,8002225650383,produce,produce_root_veg,dry_preserves,dry_canned_veg
+583332,Organic Foods võioad vees 400g,Organic Foods,400g,8002225650505,dairy_eggs_fats,dairy_butter_margarine,dry_preserves,dry_canned_veg
+583333,Organic Foods kooritud tomatid 400g mahe,Organic Foods,400g,8002225650659,dairy_eggs_fats,dairy_cream_sourcream,dry_preserves,dry_canned_veg
+583334,Crostini krutoonid vahemerepärased 100g,Crostini,100g,8002333009486,dry_preserves,dry_other,bakery,bakery_crispbread
+583335,Konserviavaja magnetiga,,,8002522503009,dry_preserves,dry_other,household,hh_kitchenware
+583336,Granarolo pihustatav vahukoor 250g,Granarolo,250g,8002670172652,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+583337,47 Anno Domini Prosecco Rose Bio 0.75L,47 Anno Domini,0.75L,8003030878238,drinks,drinks_wine,drinks,drinks_wine
+583338,47 Anno Domini Prosecco Extra Dry Bio 0.75L,47 Anno Domini,0.75L,8003030878955,dry_preserves,dry_other,drinks,drinks_wine
+583339,Goccia Doro ekstra väärisoliviõli 500ml,Goccia Doro,500ml,8003250001782,sauces_oils,oils_olive,sauces_oils,oils_olive
+583340,Cantina del Garda Rose Prosecco 0.75L,Cantina del Garda,0.75L,8003373011804,drinks,drinks_wine,drinks,drinks_wine
+583341,Vv Cantina del Garda Lugana 0.75L,Cantina del Garda,0.75L,8003373031406,dry_preserves,dry_other,drinks,drinks_wine
+583342,Vv Cantina del Garda Pinot Grigio 0.75L,Cantina del Garda,0.75L,8003373075431,drinks,drinks_wine,drinks,drinks_wine
+583343,Cantina del Garda Prosecco 0.75L,Cantina del Garda,0.75L,8003373092803,drinks,drinks_wine,drinks,drinks_wine
+583344,Vv Cantina Castelnuovo Pinot Grigio 3L BIB,Cantina Castelnuovo,3L,8003373167495,drinks,drinks_wine,drinks,drinks_wine
+583345,Pv Cantina del Garda Bardolino 0.75L,Cantina del Garda,0.75L,8003373310327,dry_preserves,dry_other,drinks,drinks_wine
+583346,Pv Cantina del Garda Valpolicella Ripasso 0.75L,Cantina del Garda,0.75L,8003373405009,dry_preserves,dry_other,drinks,drinks_wine
+583347,Pv Cantina del Garda Amarone Valpolicella 0.75L,Cantina del Garda,0.75L,8003373405108,dry_preserves,dry_other,drinks,drinks_wine
+583348,Vv Cantina Del Garda Soave 0.75L,Cantina del Garda,0.75L,8003373405207,dry_preserves,dry_other,drinks,drinks_wine
+583349,Kassiliiva kühvel Stefanplast 25x11x2cm,Stefanplast,,8003507963917,pet,pet_litter_sand,pet,pet_other
+583350,Regina Camomilla tualettpaber 8tk,Regina,8tk,8004260438506,drinks,drinks_spirits,household,hh_paper
+583351,Regina Camomilla kosmeetilised salvrätikud 96tk,Regina,96tk,8004260487900,drinks,drinks_spirits,household,hh_paper
+583352,Pasta Zara pasta Tähekesed Stelle 500g,Pasta Zara,500g,8004350130181,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583353,Pasta Zara pasta Risini 500g,Pasta Zara,500g,8004350130228,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583354,Pasta Zara Pasta Gramigna 500g,Pasta Zara,500g,8004350130266,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583355,Pasta Zara pasta Gramignone Rigato 500g,Pasta Zara,500g,8004350130273,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583356,Pasta Zara Ditali Rigati 500g,Pasta Zara,500g,8004350130389,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583357,Pasta Zara pasta Gnocchi 500g,Pasta Zara,500g,8004350130563,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583358,Pasta Zara pasta Lasagne Gialle 500g,Pasta Zara,500g,8004350131126,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583359,Pasta Zara Pasta Cannelloni 250g,Pasta Zara,250g,8004350141156,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+583360,Montorsi Coppa toorsuitsusink 100g viilutatud,Montorsi,100g,8005153004631,meat_fish,meat_hams,meat_fish,meat_hams
+583361,Contarini Prosecco Millesimato Extra Dry 0.75L,Contarini,0.75L,8005400904448,dry_preserves,dry_other,drinks,drinks_wine
+583362,Coop apelsinimarmelaad 380g,Coop,380g,8005781201204,produce,produce_tropical,dry_preserves,dry_other
+583363,Coop Mini-Mix jäätiste assortii 9x33.3g,Coop,33.3g,8005781201532,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+583364,Coop Delizie jäätiste valik 6x50g,Coop,50g,8005781201556,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+583365,Coop nelja-juustupitsa 340g külmutatud,Coop,340g,8005781201594,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_pizza
+583366,Coop tomatikaste 400g seapeekoni Amatriciana,Coop,400g,8005781201617,meat_fish,meat_pork,sauces_oils,sauces_pasta_cooking
+583367,Coop tomatikaste 400g tšillipipra Arrabbiata,Coop,400g,8005781201655,sauces_oils,sauces_other,sauces_oils,sauces_pasta_cooking
+583368,Coop tomatikaste 400g sea-ja veiselihaga,Coop,400g,8005781201754,sauces_oils,sauces_pasta_cooking,sauces_oils,sauces_pasta_cooking

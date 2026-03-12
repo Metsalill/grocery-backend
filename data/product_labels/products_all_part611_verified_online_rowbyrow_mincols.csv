@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580819,Mamma hernesupp lihaga 300g,Mamma,300g,4740184500113,meat_fish,meat_other,dry_preserves,dry_ready_meals_jars
+580820,Mamma punane lihasalat 800g,Mamma,800g,4740184510327,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+580821,Mamma Lets Go Caesari salat kanaga 270g,Mamma,270g,4740184510938,meat_fish,meat_poultry,sauces_oils,sauces_other
+580822,Mamma rukkileib singiga 140g,Mamma,140g,4740184530066,bakery,bakery_bread_loaves,bakery,bakery_other
+580823,Mamma Pasta bolognese 300g,Mamma,300g,4740184600417,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+580824,Mamma hapukapsasupp lihaga 300g,Mamma,300g,4740184600448,produce,produce_root_veg,dry_preserves,dry_ready_meals_jars
+580825,Mamma Pikkpoiss kartulipüree-kastmega 350g,Mamma,350g,4740184600905,produce,produce_root_veg,dry_preserves,dry_ready_meals_jars
+580826,Mamma grillburger 200g,Mamma,200g,4740184600936,dry_preserves,dry_other,meat_fish,meat_minced
+580827,Mamma Odrapuder 300g Fitlap,Mamma,300g,4740184602435,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+580828,Mamma pannkoogid vaarikamoosiga 200g,Mamma,200g,4740184602480,dry_preserves,dry_other,frozen_food,frozen_bakery
+580829,Mamma Mannapuder 300g,Mamma,300g,4740184602572,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+580830,Mamma lillkapsapüreesupp suitsujuustuga 300g,Mamma,300g,4740184602688,dairy_eggs_fats,dairy_cheese_slices,dry_preserves,dry_ready_meals_jars
+580831,Mamma Kukeseeneriis kanaga 300g,Mamma,300g,4740184602794,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+580832,Balbiino kokteilijäätis 2.25kg,Balbiino,2.25kg,4740188005706,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+580833,Raks vaarika-koorejäätis küpsistega 60g,Raks,60g,4740188012346,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+580834,Härmavili tom.-mozzar. täisterapitsa 300g,Härmavili,300g,4740188012957,dry_preserves,dry_other,frozen_food,frozen_pizza
+580835,Härmavili seene-sibula täisterapitsa 330g,Härmavili,330g,4740188012964,produce,produce_mushrooms,frozen_food,frozen_pizza
+580836,Marine kooritud hiidkrevetid sabaga 300g,Marine,300g,4740188018089,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_fish
+580837,Onu Eskimo vaarika-koorejäätis valge šok. 84g,Onu Eskimo,84g,4740188020082,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+580838,Balbiino vahukoorejäätis maasikatoormoos 6x70g,Balbiino,70g,4740188020112,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+580839,Sibul Shallot 250g Prantsusmaa,Sibul,250g,4740199000073,produce,produce_root_veg,produce,produce_root_veg
+580840,Redis 125g Holland,Redis,125g,4740199000110,dry_preserves,dry_other,produce,produce_root_veg
+580841,Rooskapsas 500g Holland,Rooskapsas,500g,4740199000134,produce,produce_root_veg,produce,produce_root_veg
+580842,Punane tšillipipar 50g Hispaania,Punane,50g,4740199001070,world_spices,spices_basic_salt_pepper,produce,produce_root_veg
+580843,Tšillipipar mix 50g Hispaania,Tšillipipar,50g,4740199001117,world_spices,spices_basic_salt_pepper,produce,produce_root_veg
+580844,Ingver 300g Hiina,Ingver,300g,4740199001131,dry_preserves,dry_other,produce,produce_root_veg
+580845,RR Jäägrisigarid tšilliga 150g,RR,150g,4740215000063,dry_preserves,dry_other,meat_fish,meat_gourmet
+580846,RR metssealiha omas mahlas konserv 240g,RR,240g,4740215240131,drinks,drinks_juices,dry_preserves,dry_canned_meat_fish
+580847,Nopri grilljuust ürtidega 200g,Nopri,200g,4740218003740,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+580848,Nopri Panna Cotta vanilje 150g,Nopri,150g,4740218004129,dry_preserves,dry_other,dairy_eggs_fats,dairy_desserts
+580849,Nopri kohupiimakreem rosinatega 400g,Nopri,400g,4740218004402,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+580850,Nopri talujogurt mustika 750ml,Nopri,750ml,4740218004433,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580851,Nopri talujogurt mango-passioni 750ml,Nopri,750ml,4740218004457,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580852,Nopri kissellimaius kiivi 140g,Nopri,140g,4740218004631,produce,produce_tropical,dairy_eggs_fats,dairy_desserts
+580853,Saare Hõbe Saare vürtsikilu 250g,Saare Hõbe,250g,4740219107218,world_spices,spices_herbs_spice_mix,meat_fish,fish_salted_smoked
+580854,Ösel Saare Hõbe silgu sült 300g,Ösel,300g,4740219109267,dry_preserves,dry_other,meat_fish,fish_processed
+580855,Uvic Khinkali Kalakuri sea-veiseliha 390g,Uvic,390g,4740223002677,meat_fish,meat_beef_lamb_game,frozen_food,frozen_ready_meals
+580856,Uvic Fitlap veiselihapihv 340g külmutatud,Uvic,340g,4740223002868,meat_fish,meat_beef_lamb_game,frozen_food,frozen_meat
+580857,Uvic Khinkali Mtiuluri lambalihaga 390g,Uvic,390g,4740223019736,meat_fish,meat_beef_lamb_game,frozen_food,frozen_ready_meals
+580858,Uvic pelmeenid praadimiseks 350g külmutatud,Uvic,350g,4740223022767,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+580859,Uvic Fitlap pelmeenid odrajahust kanaliha 800g,Uvic,800g,4740223024150,meat_fish,meat_poultry,frozen_food,frozen_ready_meals
+580860,Uvic Fitlap pelmeenid odrajahust 800g,Uvic,800g,4740223024167,dry_preserves,dry_flour_sugar_baking,frozen_food,frozen_ready_meals
+580861,Eggo peremunad M 18tk,Eggo,18tk,4740229011871,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+580862,Kartul varajane 5kg pk võrkkotis Eesti,,5kg,4740246030008,produce,produce_root_veg,produce,produce_root_veg
+580863,Meveda mesi 500g Eesti,Meveda,500g,4740250000035,dry_preserves,dry_other,dry_preserves,dry_other
+580864,Meveda mesi taruvaiguga 300g Eesti,Meveda,300g,4740250000059,dry_preserves,dry_other,dry_preserves,dry_other
+580865,Meveda õitemesi 200g Eesti,Meveda,200g,4740250000219,dry_preserves,dry_other,dry_preserves,dry_other
+580866,Kassiliiv Happy 5kg paakuv,Happy,5kg,4740260000704,pet,pet_litter_sand,pet,pet_litter_sand
+580867,Happy kassiliiv ookeanilõhnaline 5L/4.3kg,Happy,4.3kg,4740260000711,pet,pet_litter_sand,pet,pet_litter_sand
+580868,Coffeestar Vanilla Hazelnut kohviuba 200g,Coffeestar,200g,4740275000409,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules

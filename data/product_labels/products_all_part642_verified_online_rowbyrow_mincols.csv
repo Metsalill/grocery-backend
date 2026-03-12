@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+582369,Parodontax Complete Protection Soft hambahari,Parodontax,,5054563065711,dry_preserves,dry_other,personal_care,pcare_oral_care
+582370,Sensodyne Extra Fresh hambapasta 75ml,Sensodyne,75ml,5054563072931,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+582371,Sensodyne Repair&Protect Whitening hambapasta 75ml,Sensodyne,75ml,5054563103321,dry_preserves,dry_other,personal_care,pcare_oral_care
+582372,Sensodyne Rep&Prot Extra Fresh hambapasta 75ml,Sensodyne,75ml,5054563103482,dry_preserves,dry_other,personal_care,pcare_oral_care
+582373,Sensodyne Repair&Protect hambapasta 75ml,Sensodyne,75ml,5054563103567,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+582374,Parodontax Fluoride hambapasta 75ml,Parodontax,75ml,5054563150301,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+582375,Sensodyne Fluoride hambapasta 75ml,Sensodyne,75ml,5054563186904,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+582376,Sensodyne Multi Care hambapasta 75ml,Sensodyne,75ml,5054563187253,dry_preserves,dry_other,personal_care,pcare_oral_care
+582377,Sensodyne Pro Namel hambapasta 75ml,Sensodyne,75ml,5054563211088,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+582378,Sensodyne Daily Protection hambapasta 100ml,Sensodyne,100ml,5054563211699,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+582379,Corega proteesiliim eriti tugev 40g,Corega,40g,5054563221551,drinks,drinks_tea_coffee,personal_care,pcare_oral_care
+582380,Sensodyne Extra Whitening hambapasta 75ml,Sensodyne,75ml,5054563233585,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+582381,Sensodyne Complete Protect hambapasta 75ml,Sensodyne,75ml,5054563242921,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+582382,Sensodyne Cool Mint suuvesi 500ml,Sensodyne,500ml,5054563250445,drinks,drinks_water,personal_care,pcare_oral_care
+582383,Parodontax Complete Protect Whitening hambapasta 75ml,Parodontax,75ml,5054563948267,dry_preserves,dry_other,personal_care,pcare_oral_care
+582384,Parodontax Complete Protect Extra Fresh hambapasta 75ml,Parodontax,75ml,5054563948304,dry_preserves,dry_other,personal_care,pcare_oral_care
+582385,Chewits Strawberry nätsukomm 30g,Chewits,30g,50586868,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+582386,Kelloggs Unicorn Froot Loops 375g,Kelloggs,375g,5059319035543,dry_preserves,dry_other,dry_preserves,dry_cereals_muesli
+582387,The Pink Stuff vannitoapuhastusvahend 750ml,The Pink Stuff,750ml,5060033820117,dry_preserves,dry_other,household,hh_cleaners
+582388,The Pink Stuff klaasipuhastusvahend 750ml,The Pink Stuff,750ml,5060033820759,household,hh_cleaners,household,hh_cleaners
+582389,The Pink Stuff puhastuslasta 850g,The Pink Stuff,850g,5060033821114,dry_preserves,dry_pasta_rice,household,hh_cleaners
+582390,The Pink Stuff puhastuskriem 500ml,The Pink Stuff,500ml,5060033823675,dry_preserves,dry_other,household,hh_cleaners
+582391,The Pink Stuff universaalne puhastusvahend 750ml,The Pink Stuff,750ml,5060033823682,dry_preserves,dry_other,household,hh_cleaners
+582392,Chewits Juicy Bites 115g maasika,Chewits,115g,5060072652236,produce,produce_berries,sweets_snacks,sweets_candies
+582393,Chewits Juicy Bites Xtreme Sour 115g,Chewits,115g,5060072652250,dry_preserves,dry_other,sweets_snacks,sweets_candies
+582394,Ellas Kitchen 6K mahe puuvilajpüree 90g punane,Ellas Kitchen,90g,5060107330016,dry_preserves,dry_other,baby,baby_food_pouches
+582395,Ellas Kitchen 6K mahe puuviljapüree 90g roheline,Ellas Kitchen,90g,5060107330412,dry_preserves,dry_other,baby,baby_food_pouches
+582396,Ellas Kitchen 4K mahe ploomipüree 70g,Ellas Kitchen,70g,5060107336056,dry_preserves,dry_other,baby,baby_food_pouches
+582397,Ellas Kitchen 6K maisipulgad 20g tomatiga-porrulauk,Ellas Kitchen,20g,5060107337251,dry_preserves,dry_canned_veg,baby,baby_snacks
+582398,Pv Anciano No.5 Rioja Crianza 750ml,,750ml,5060108907118,dry_preserves,dry_other,drinks,drinks_wine
+582399,Encore konserv kassile 70g kanaga,Encore,70g,5060122490818,meat_fish,meat_poultry,pet,pet_cat_wet
+582400,Encore konserv kassile 70g sardiin-tuunikal,Encore,70g,5060122490863,dry_preserves,dry_canned_meat_fish,pet,pet_cat_wet
+582401,London Apelsinitee Fruit&Herb 20*2g,London,2g,5060123607819,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582402,London Fruit&Herb vaarikatee 20*2g,London,2g,5060123608113,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582403,LoofCo nõudepesukäsn,LoofCo,,5060175850515,household,hh_dishwashing,household,hh_dishwashing
+582404,LoofCo üldpuhastuskäsn,LoofCo,,5060175850553,household,hh_cleaners,household,hh_cleaners
+582405,LoofCo puhastushari kookoskiust,LoofCo,,5060175850720,bakery,bakery_cakes_pastries,household,hh_cleaners
+582406,Animalogy koerašampoon 250ml,Animalogy,250ml,5060180818869,personal_care,pcare_shampoo_cond,pet,pet_other
+582407,Encore konserv kassile 70g tuunikalafilee,Encore,70g,5060481895194,dry_preserves,dry_canned_meat_fish,pet,pet_cat_wet
+582408,Ellas Kitchen 6K maisipulgad 20g porgandi-pastinaak,Ellas Kitchen,20g,5060503500013,dry_preserves,dry_canned_veg,baby,baby_snacks
+582409,Ellas Kitchen 7K maisipulgad 16g virsiku,Ellas Kitchen,16g,5060503501744,dry_preserves,dry_canned_veg,baby,baby_snacks
+582410,Burn originaal energiajook 330ml prk,Burn,330ml,5060895742435,drinks,drinks_spirits,drinks,drinks_energy
+582411,Lipton must tee 20*1.7g metsamarjadega,Lipton,1.7g,5063270110881,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582412,Lipton Yellow Label must tee 25*2g,Lipton,2g,5063270118870,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582413,Lipton Yellow Label must tee 100*2g,Lipton,2g,5063270119068,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582414,Halls kurgupastill Forest Fruit 33.5g,Halls,33.5g,50960767,drinks,drinks_wine,personal_care,pcare_other
+582415,Water Wipes niisked salvrätikud 48tk,Water Wipes,48tk,5099514002247,dry_preserves,dry_other,household,hh_paper
+582416,Gourmante Kalamata oliivid 360g kivideta,Gourmante,360g,5200110730063,meat_fish,fish_fresh,dry_preserves,dry_canned_veg
+582417,Gourmante rohelised oliivid 360g küüslauguga,Gourmante,360g,5200110730087,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+582418,Gourmante Pasta Trecce dell orto 500g,Gourmante,500g,5200110731534,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice

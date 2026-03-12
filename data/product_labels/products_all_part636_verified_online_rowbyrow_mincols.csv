@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+582069,Herbitum taimetee Gastrus 20*1.5g,Herbitum,1.5g,4770161100326,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582070,Herbitum puuviljatee 20*2.5g piparm.-tsitruse,Herbitum,2.5g,4770161100913,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582071,Herbitum puuviljatee 20*2.5g õuna-kaneeli,Herbitum,2.5g,4770161100920,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582072,Herbitum puuviljatee 20*2.5g mustasõstra,Herbitum,2.5g,4770161100937,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582073,Herbitum puuviljatee 20*2.5g metsmaasika,Herbitum,2.5g,4770161101187,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582074,Herbitum puuviljatee 20*1.5g astelpaja-kummeli,Herbitum,1.5g,4770161102061,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582075,Dione Zero vanillijäätis šokolaadi-mandli 79g,Dione,79g,4770175483156,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+582076,Kar Kar vanilje jäätis kakaogl. Van.Duck 57g,Kar Kar,57g,4770175485495,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+582077,Dione Sitsiilia pistaatsiapähkli jäätis 68g,Dione,68g,4770175485655,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+582078,Dione vanillijäätis mango-passioni 70g,Dione,70g,4770175485662,produce,produce_tropical,frozen_food,frozen_desserts_icecream
+582079,Pergale Picks maasikas piimaš ok. 90g,Pergale,90g,4770179117002,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+582080,Pergale Picks kirss külmkuivatatud 90g šok.,Pergale,90g,4770179991374,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+582081,Pergale kinkekarp Tallinn 348g tume šok.,Pergale,348g,4770179998069,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+582082,Pergale kinkekarp Estonia 114g piimaš ok.,Pergale,114g,4770179998212,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+582083,Vici külmsuitsulõhefilee 100g,Vici,100g,4770190035040,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+582084,Vici maksikrevetid küüslaugumaitseline õlis 320g,Vici,320g,4770190066884,sauces_oils,oils_other,frozen_food,frozen_fish
+582085,Vici Smart Choice friikartul 1kg külmutatud,Vici,1kg,4770190067683,frozen_food,frozen_potato_products,frozen_food,frozen_potato_products
+582086,Vici mereandide kokteil marineeritud 500g,Vici,500g,4770190069700,dry_preserves,dry_other,frozen_food,frozen_fish
+582087,Vici pelmeenid õunte ja kaneeliga 400g,Vici,400g,4770190109048,world_spices,spices_herbs_spice_mix,frozen_food,frozen_ready_meals
+582088,Vici paneeritud krevetid sabaga Torpedo 300g,Vici,300g,4770190129930,dry_preserves,dry_other,frozen_food,frozen_fish
+582089,Vici heeringafilee tükid mädarõikakastmes 200g,Vici,200g,4770190140782,sauces_oils,sauces_other,meat_fish,fish_processed
+582090,Vici Atlandi heeringafilee tükid sibula õlis 200g,Vici,200g,4770190141147,sauces_oils,oils_other,meat_fish,fish_processed
+582091,Vici pelmeenid sealihaga Gyoza 200g,Vici,200g,4770190141260,meat_fish,meat_pork,frozen_food,frozen_ready_meals
+582092,Vici surimipulgad Surimi Kama 180g,Vici,180g,4770190150521,dry_preserves,dry_other,meat_fish,fish_processed
+582093,Baltix riis aurutatud 4*100g,Baltix,100g,4770205112261,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+582094,Aasa riisipuder aprikoosidega 200g,Aasa,200g,4770265048043,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+582095,Aasa riisipuder kirssidega 200g,Aasa,200g,4770265048050,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+582096,Aasa mannapuder maasikatega 200g,Aasa,200g,4770265048067,produce,produce_berries,dry_preserves,dry_ready_meals_jars
+582097,Aasa mahejogurt mustikatega 370g lakt.vaba,Aasa,370g,4770265214028,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+582098,Aasa Kreeka jogurt viigimarjaga 150g,Aasa,150g,4770265214455,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+582099,Aasa Kreeka jogurt musta kirsiga 150g,Aasa,150g,4770265214462,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+582100,Granex maapähklihalvaa 300g,Granex,300g,4770266127907,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_candies
+582101,Yes päevalilleseemned 150g sibulamaitseline,Yes,150g,4770266185747,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+582102,Foxi hommikusöögirõngad 420g küpsisemaitseline,Foxi,420g,4770266188274,sweets_snacks,sweets_biscuits_cookies,dry_preserves,dry_cereals_muesli
+582103,Bimar kapsarullid 1kg külmutatud,Bimar,1kg,4770274487475,produce,produce_root_veg,frozen_food,frozen_ready_meals
+582104,Hiirte juustu rebitavad juustupulgad 120g,Hiirte,120g,4770275048705,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+582105,Rambyno sulatatud viilujuust singiga 150g,Rambyno,150g,4770299047135,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+582106,Rambyno sulatatud juustusnäkk singiga 75g,Rambyno,75g,4770299394697,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+582107,Dziugas Pizza juustusegu 200g,Dziugas,200g,4770299400343,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+582108,Dziugas Pasta juustusegu 200g,Dziugas,200g,4770299400367,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+582109,Vichy Fresh Strawberry 1.5L pet,Vichy,1.5L,4770349231477,dry_preserves,dry_other,drinks,drinks_soft_soda
+582110,Vytautas karboniseeritud looduslik mineraalvesi 1.5L,Vytautas,1.5L,4770405222029,drinks,drinks_water,drinks,drinks_water
+582111,Akvile looduslik mineraalvesi 1.5L,Akvile,1.5L,4770405227017,drinks,drinks_water,drinks,drinks_water
+582112,Akvile karboniseerimata looduslik mineraalvesi 1.5L,Akvile,1.5L,4770405227024,drinks,drinks_water,drinks,drinks_water
+582113,Akvile nõrgalt gasseeritud vesi marja 1.5L,Akvile,1.5L,4770405227994,drinks,drinks_water,drinks,drinks_soft_soda
+582114,Akvile nõrgalt gasseeritud vesi laimi 1.5L,Akvile,1.5L,4770405228021,drinks,drinks_water,drinks,drinks_soft_soda
+582115,Hematogenas hematogeen Vita+Energy 50g,Hematogenas,50g,4770407305249,dry_preserves,dry_other,personal_care,pcare_other
+582116,Pepsi Cola karboniseeritud karastusjook 1L,Pepsi,1L,4770477231608,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+582117,Mountain Dew karboniseeritud karastusjook 1.5L,Mountain Dew,1.5L,4770477231660,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+582118,Pepsi Max Zero karboniseeritud karastusjook 1L,Pepsi,1L,4770477231875,drinks,drinks_soft_soda,drinks,drinks_soft_soda

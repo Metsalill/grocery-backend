@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+581969,Pähklinäpp jõhvikas 200g,Pähklinäpp,200g,4750195020227,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+581970,Pähklinäpp kreeka pähkel 500g,Pähklinäpp,500g,4750195020609,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+581971,Pähklinäpp rosin Kuldne 200g,Pähklinäpp,200g,4750195023006,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+581972,Fazer Juuretise Röst 450g,Fazer,450g,4750212903427,dry_preserves,dry_other,bakery,bakery_bread_loaves
+581973,Tanheiser naturaalne kali kuni 0.5% 1.5L,Tanheiser,1.5L,4750239000239,dry_preserves,dry_other,drinks,drinks_soft_soda
+581974,Tanheiser Porter tume kali kuni 1.2% 1.5L,Tanheiser,1.5L,4750239000437,dry_preserves,dry_other,drinks,drinks_soft_soda
+581975,Anatols kõrvitsa marineerimissegu 22g,Anatols,22g,4750280001872,dry_preserves,dry_other,world_spices,spices_herbs_spice_mix
+581976,Anatols liha maitseainesegu jämejahvatatud 10g,Anatols,10g,4750280102333,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+581977,Anatols hakklihamaitseaine 10g,Anatols,10g,4750280102357,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+581978,Anatols kotletimaitseaine 10g,Anatols,10g,4750280102425,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+581979,Anatols kartulimaitseaine 10g,Anatols,10g,4750280102449,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+581980,Anatols nelk 15g,Anatols,15g,4750280152185,dry_preserves,dry_other,world_spices,spices_herbs_spice_mix
+581981,Anatols želatiin 15g,Anatols,15g,4750280152710,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+581982,Anatols küpsetuspulber 15g,Anatols,15g,4750280200169,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+581983,Anatols karri 20g,Anatols,20g,4750280200541,dry_preserves,dry_other,world_spices,spices_herbs_spice_mix
+581984,Anatols sidrunipipar 10g,Anatols,10g,4750280406059,world_spices,spices_basic_salt_pepper,world_spices,spices_herbs_spice_mix
+581985,Peojook laste vahujook 750ml,,750ml,4750315200478,dry_preserves,dry_other,drinks,drinks_soft_soda
+581986,Valezs must pipar jahvatatud 15g,Valezs,15g,4750334000011,world_spices,spices_basic_salt_pepper,world_spices,spices_basic_salt_pepper
+581987,Valezs must terapipar 20g,Valezs,20g,4750334000028,world_spices,spices_basic_salt_pepper,world_spices,spices_basic_salt_pepper
+581988,Valezs vürts 15g,Valezs,15g,4750334000561,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+581989,Pelmeenid Maitsvad 400g külmutatud,,400g,4750385006475,frozen_food,frozen_other,frozen_food,frozen_ready_meals
+581990,Balticovo munavalge värske 500g,Balticovo,500g,4750456106493,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+581991,Bimar sõrnikud 14tk 500g külmutatud,Bimar,14tk,4750499005838,frozen_food,frozen_other,frozen_food,frozen_bakery
+581992,Bimar pelmeenid Nostalgia 1kg,Bimar,1kg,4750499005852,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+581993,Otrivin ninasprei Natural Plus 20ml,Otrivin,20ml,4750769000532,dry_preserves,dry_other,personal_care,pcare_other
+581994,Kapten Grant sinikarbid koorega 1kg külmutatud,Kapten Grant,1kg,4751001162834,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_fish
+581995,Stella Maris kalapall tomatikastmes 240g,Stella Maris,240g,4751001580614,meat_fish,fish_fresh,dry_preserves,dry_canned_meat_fish
+581996,Stella Maris sprotipasteet 240g,Stella Maris,240g,4751001586500,drinks,drinks_tea_coffee,dry_preserves,dry_canned_meat_fish
+581997,Punase peedi salat majoneesiga 380g Dimdini,,380g,4751001622512,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_other
+581998,Keedetud kikerhernes 250g Dimdini,,250g,4751001622994,dry_preserves,dry_groats_beans,dry_preserves,dry_groats_beans
+581999,Keedetud oad 300g Dimdini,,300g,4751001623007,dry_preserves,dry_other,dry_preserves,dry_groats_beans
+582000,Coleslaw salat 400g Dimdini,,400g,4751001623090,produce,produce_herbs_salads_sprouts,sauces_oils,sauces_other
+582001,Marineeritud peet riivitud 350g Dimdini,,350g,4751001624066,produce,produce_root_veg,sauces_oils,sauces_other
+582002,Dimdini hapukapsamahl 250ml,Dimdini,250ml,4751001624134,drinks,drinks_juices,drinks,drinks_juices
+582003,Kaija tuunikala salat teriyaki kastmes 160g,Kaija,160g,4751003925819,dry_preserves,dry_canned_meat_fish,sauces_oils,sauces_other
+582004,Kaija tuunikala salat Mehhikopärane 160g,Kaija,160g,4751003925826,dry_preserves,dry_canned_meat_fish,sauces_oils,sauces_other
+582005,Primus graanulid kuivkäimlale 500g,,500g,4751006680487,dry_preserves,dry_other,household,hh_other
+582006,Kaija sprotid õlis 160g,Kaija,160g,4751007730617,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+582007,Kaija kuumsuitsu lõhe kõhud 200g vaakum,Kaija,200g,4751007731539,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+582008,Kaija heeringafileed õlis Matje 250g,Kaija,250g,4751007731713,sauces_oils,oils_other,meat_fish,fish_processed
+582009,Kaija lõhefilee pikantses kreemis 170g,Kaija,170g,4751007732840,meat_fish,fish_fresh,meat_fish,fish_processed
+582010,Kaija lõhefilee sinepikreemis 170g,Kaija,170g,4751007732864,meat_fish,fish_fresh,meat_fish,fish_processed
+582011,Kaija Prantsuse salat Atlandi lõhega 220g,Kaija,220g,4751007733007,meat_fish,fish_fresh,sauces_oils,sauces_other
+582012,Kaija lõhefilee omas mahlas 170g,Kaija,170g,4751007734004,drinks,drinks_juices,dry_preserves,dry_canned_meat_fish
+582013,Skriveru kirsid tumedas šokolaadis 110g,Skriveru,110g,4751010575335,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+582014,Skriveru õunad piimaš okolaadis 100g,Skriveru,100g,4751010575342,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+582015,Hiiu Kokk koorekomm 250g klassikaline,Hiiu Kokk,250g,4751010579852,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_candies
+582016,Tiigerkrevetid puhastatud sabaga keedetud 400g,,400g,4751010750824,dry_preserves,dry_other,frozen_food,frozen_fish
+582017,Bimar Vaikse Ookeani tursafilee nahata 360g,Bimar,360g,4751010750985,dry_preserves,dry_other,frozen_food,frozen_fish
+582018,Bimar vareenikud kirssidega 400g külmutatud,Bimar,400g,4751010752026,dry_preserves,dry_other,frozen_food,frozen_ready_meals

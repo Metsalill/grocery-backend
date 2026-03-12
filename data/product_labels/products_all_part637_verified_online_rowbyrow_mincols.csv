@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+582119,Heineken 0.0% alkoholivaba õlu 500ml prk,Heineken,500ml,4770477232575,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+582120,Cult Blueberry Cake energiajook 500ml prk,Cult,500ml,4770477232650,dry_preserves,dry_other,drinks,drinks_energy
+582121,Cult Dragon Power energiajook 500ml prk,Cult,500ml,4770477232667,dry_preserves,dry_other,drinks,drinks_energy
+582122,Granini punase greibi nektar 55% 1L pet,Granini,1L,4770569915249,drinks,drinks_juices,drinks,drinks_juices
+582123,Granini tomatimahl 1L,Granini,1L,4770569915300,drinks,drinks_juices,drinks,drinks_juices
+582124,Granini multinektar 50% 1L pet,Granini,1L,4770569915737,drinks,drinks_juices,drinks,drinks_juices
+582125,Kitchen Masters majonees originaal 420g,Kitchen Masters,420g,4770583223900,drinks,drinks_spirits,sauces_oils,sauces_ketchup_mayo
+582126,Sheba kiisueine 4*85g lihaga kastmes,Sheba,85g,4770608257385,meat_fish,meat_other,pet,pet_cat_wet
+582127,Sheba kiisueine 4*85g linnulihaga kastmes,Sheba,85g,4770608257408,meat_fish,meat_other,pet,pet_cat_wet
+582128,Sheba kiisueine 4*85g kalavalik kastmes,Sheba,85g,4770608257422,meat_fish,fish_fresh,pet,pet_cat_wet
+582129,Sheba kiisueine 4*85g kodulinnuvalik,Sheba,85g,4770608258764,dry_preserves,dry_other,pet,pet_cat_wet
+582130,Sheba kiisueine 12*85g linnulihaga kastmes,Sheba,85g,4770608259273,meat_fish,meat_other,pet,pet_cat_wet
+582131,Pedigree koeraeine 4*100g veise-maksa,Pedigree,100g,4770608259365,meat_fish,meat_beef_lamb_game,pet,pet_dog_wet
+582132,Whiskas Tasty Mix kiisueine 4*85g Creamy,Whiskas,85g,4770608262679,dry_preserves,dry_other,pet,pet_cat_wet
+582133,Whiskas Tasty Mix kiisueine 4*85g veise,Whiskas,85g,4770608262686,meat_fish,meat_beef_lamb_game,pet,pet_cat_wet
+582134,Sheba Natures kiisueine 4*85g segavalik,Sheba,85g,4770608263218,dry_preserves,dry_other,pet,pet_cat_wet
+582135,Sheba Natures kiisueine 4*85g kodulinnu,Sheba,85g,4770608263270,dry_preserves,dry_other,pet,pet_cat_wet
+582136,Whiskas kiisueine 4*85g linnuliha,Whiskas,85g,4770608263676,meat_fish,meat_other,pet,pet_cat_wet
+582137,Sheba kiisueine 4*85g segamenüü žhelees,Sheba,85g,4770608263904,dry_preserves,dry_other,pet,pet_cat_wet
+582138,Sheba Kitten kiisueine 85g kanaga kastmes,Sheba,85g,4770608264543,meat_fish,meat_poultry,pet,pet_cat_wet
+582139,Sheba Kitten kiisueine 4*85g segavalik,Sheba,85g,4770608264659,dry_preserves,dry_other,pet,pet_cat_wet
+582140,Mantinga Filotainas 450g,Mantinga,450g,4771033007088,dry_preserves,dry_other,frozen_food,frozen_bakery
+582141,Mantinga Prantsuse baguette ürdivõiga 350g,Mantinga,350g,4771033018541,dairy_eggs_fats,dairy_butter_margarine,frozen_food,frozen_bakery
+582142,Mantinga Prantsuse Baguettid küüslauguga 350g,Mantinga,350g,4771033178108,dry_preserves,dry_other,frozen_food,frozen_bakery
+582143,Tiche looduslik mineraalvesi 1.5L,Tiche,1.5L,4771096224156,drinks,drinks_water,drinks,drinks_water
+582144,Tiche gasseeritud vesi mineraalidega 1.5L,Tiche,1.5L,4771096224217,drinks,drinks_water,drinks,drinks_water
+582145,Arimex Tudengieine Premium 300g,Arimex,300g,4771249816245,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+582146,Arimex kuivatatud marjade segu Kids 50g,Arimex,50g,4771249824738,produce,produce_berries,sweets_snacks,sweets_nuts_driedfruit
+582147,Lotte Nööpsud krõbedad helbed 225g piimaš ok.,Lotte,225g,4771395191869,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+582148,Taste Land punased marineeritud tomatid 660g,Taste Land,660g,4771459045954,produce,produce_root_veg,dry_preserves,dry_canned_veg
+582149,No Brand Niiluse vääristilaapia filee 700g,No Brand,700g,4771459049334,dry_preserves,dry_other,frozen_food,frozen_fish
+582150,Fjords rannakarbiliha aurutatud 450g,Fjords,450g,4771459068687,meat_fish,meat_other,frozen_food,frozen_fish
+582151,Fjords paneeritud kalmaari ribad 500g,Fjords,500g,4771459077757,dry_preserves,dry_other,frozen_food,frozen_fish
+582152,Fjords kevadrullid juurviljadega 450g,Fjords,450g,4771459694831,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+582153,Gardu puuvilja kokteil 375g külmutatud,Gardu,375g,4771634070436,frozen_food,frozen_other,frozen_food,frozen_fruit_berries
+582154,Gardu puuvilja-marja kokteil 375g külmutatud,Gardu,375g,4771634070443,dry_preserves,dry_other,frozen_food,frozen_fruit_berries
+582155,Herbitum taimetee Relax 20*1.5g,Herbitum,1.5g,4771645223029,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582156,Herbitum puuviljatee assortii 60*2.5g,Herbitum,2.5g,4771645223784,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582157,Suliko gasseeritud lauavesi mineraalidega 1.5L,Suliko,1.5L,4779018743204,drinks,drinks_water,drinks,drinks_water
+582158,Aqua Amber vannisool eukalüpt 500g,Aqua Amber,500g,4779022010644,world_spices,spices_basic_salt_pepper,personal_care,pcare_other
+582159,Aqua Amber lavendel vannisool 500g,Aqua Amber,500g,4779022010651,world_spices,spices_basic_salt_pepper,personal_care,pcare_other
+582160,Salatisegu Green&Red Fit&Easy 150g Leedu,,150g,4779027040721,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+582161,Salatisegu Family Fit&Easy 150g Leedu,,150g,4779027040899,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+582162,Salatisegu Active Fit&Easy 120g Leedu,,120g,4779027040905,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+582163,Salatisegu Gourmet Fit&Easy 150g Leedu,,150g,4779027041063,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+582164,Estrella maapähkel 140g soolatu röstitud,Estrella,140g,4779028344774,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_nuts_driedfruit
+582165,Estrella läätsekrõps 100g hapukoore-sibulaga,Estrella,100g,4779028345412,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_snacks_salty
+582166,Estrella Bites 110g grillkanamaitseline,Estrella,110g,4779028345665,meat_fish,meat_poultry,sweets_snacks,sweets_snacks_salty
+582167,Estrella kartulikrõps 130g hapukoore-sibulaga,Estrella,130g,4779028345740,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_snacks_salty
+582168,Estrella kartulikrõps 250g hapukoore-sibulaga,Estrella,250g,4779028345764,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_snacks_salty

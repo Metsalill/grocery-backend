@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580769,Manni mannavahupulber 200g maasikamaitse,Manni,200g,4740140300078,produce,produce_berries,dry_preserves,dry_flour_sugar_baking
+580770,Mikaado tuhksuhkur 70g värviline,Mikaado,70g,4740140600031,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+580771,Miku kissellipulber 170g maasikamaitseline,Miku,170g,4740140700168,produce,produce_berries,dry_preserves,dry_flour_sugar_baking
+580772,E-Piim Eesti juust 450g,E-Piim,450g,4740142000167,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+580773,E-Piim Guni juust 400g,E-Piim,400g,4740142003182,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+580774,E-Piim Hollandi juust 350g tükk,E-Piim,350g,4740142004042,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+580775,E-Piim Eesti juust Light 300g viil,E-Piim,300g,4740142004820,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+580776,E-Piim Eesti Leibjuust 200g viilutatud,E-Piim,200g,4740142004837,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+580777,E-Piim Rohe juust 150g viilutatud,E-Piim,150g,4740142005056,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+580778,MO Saaremaa juust Saare Leet 450g viil,MO,450g,4740153064059,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+580779,MO Saaremaa juust Cheddar White 150g viil,MO,150g,4740153082053,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+580780,MO Saaremaa juust Old Saare 3 kuud 150g,MO,150g,4740153082121,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+580781,MO Saaremaa Old Saare Sp. juust 12k 280g,MO,280g,4740153321275,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+580782,Monte Cristo Rose Sw. arom. puuviljavein 750ml,Monte Cristo,750ml,4740158007426,drinks,drinks_wine,drinks,drinks_wine
+580783,Monte Cristo Red arom. puuviljavein 750ml,Monte Cristo,750ml,4740158007440,drinks,drinks_wine,drinks,drinks_wine
+580784,Gin Hogart Pink 37.5% 700ml,Hogart,700ml,4740158008812,drinks,drinks_spirits,drinks,drinks_spirits
+580785,Vein Casa Charlize Cuvee Notte 750ml,,750ml,4740158010167,dry_preserves,dry_other,drinks,drinks_wine
+580786,Aramis VS piiritusjook 30% 500ml,Aramis,500ml,4740158010907,dry_preserves,dry_other,drinks,drinks_spirits
+580787,Aramis VSOP piiritusjook 30% 200ml,Aramis,200ml,4740158010921,dry_preserves,dry_other,drinks,drinks_spirits
+580788,Aramis VSOP piiritusjook 30% 500ml,Aramis,500ml,4740158010969,dry_preserves,dry_other,drinks,drinks_spirits
+580789,Liköör Villa Delicio Limoncello 25% 500ml,Villa Delicio,500ml,4740158011287,dry_preserves,dry_other,drinks,drinks_spirits
+580790,Tarplan majonees Provansaal 230g,Tarplan,230g,4740159000013,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+580791,Tarplan klassikaline majonees 450g,Tarplan,450g,4740159001775,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+580792,Kati Lõuna-Eesti tang 1kg,Kati,1kg,4740165000038,produce,produce_apples_pears,dry_preserves,dry_groats_beans
+580793,Kati maisimanna 1kg,Kati,1kg,4740165000151,dry_preserves,dry_canned_veg,dry_preserves,dry_groats_beans
+580794,Kati valge uba 1kg,Kati,1kg,4740165000229,dry_preserves,dry_other,dry_preserves,dry_groats_beans
+580795,Kati hirsitang 1kg,Kati,1kg,4740165000274,dry_preserves,dry_other,dry_preserves,dry_groats_beans
+580796,Kati roheline hernes 1kg lihvitud,Kati,1kg,4740165000335,dry_preserves,dry_other,dry_preserves,dry_groats_beans
+580797,Kati odrakruup 500g,Kati,500g,4740165000359,dry_preserves,dry_groats_beans,dry_preserves,dry_groats_beans
+580798,Kati nisutang 1kg,Kati,1kg,4740165000366,dry_preserves,dry_other,dry_preserves,dry_groats_beans
+580799,Teskatel linajahu 500g,Teskatel,500g,4740165000991,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+580800,Kati meresool 1kg,Kati,1kg,4740165001059,world_spices,spices_basic_salt_pepper,world_spices,spices_basic_salt_pepper
+580801,M&M kooreklops 600g,M&M,600g,4740171081717,dairy_eggs_fats,dairy_cream_sourcream,meat_fish,meat_beef_lamb_game
+580802,M&M lihapihvid 800g,M&M,800g,4740171086170,meat_fish,meat_other,meat_fish,meat_minced
+580803,M&M kodune hakkliha 1kg,M&M,1kg,4740171177519,meat_fish,meat_minced,meat_fish,meat_minced
+580804,M&M 77.7% pitsasink 250g,M&M,250g,4740171181479,meat_fish,meat_hams,meat_fish,meat_hams
+580805,M&M suitsutatud Doktorivorsti kuubikud 250g,M&M,250g,4740171188256,meat_fish,meat_sausages,meat_fish,meat_sausages
+580806,M&M Lihasnäkk Classic Super Snack 340g,M&M,340g,4740171188317,meat_fish,meat_other,meat_fish,meat_gourmet
+580807,M&M suitsutatud marin. broilerkintsuliha 300g,M&M,300g,4740171188829,meat_fish,fish_salted_smoked,meat_fish,meat_poultry
+580808,M&M küpsetatud kana pooltiivad 350g,M&M,350g,4740171188935,meat_fish,meat_poultry,meat_fish,meat_poultry
+580809,M&M leivakate 210g,M&M,210g,4740171188966,dry_preserves,dry_other,meat_fish,meat_gourmet
+580810,M&M tšillised grillvorstid 600g,M&M,600g,4740171189116,meat_fish,meat_sausages,meat_fish,meat_sausages
+580811,Marwi Vannamei krevetid soolvees 185g,Marwi,185g,4740173000891,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+580812,Marwi vähisabad tillimarinaadis 185g,Marwi,185g,4740173002475,sauces_oils,sauces_marinades,meat_fish,fish_processed
+580813,Marwi rannakarbid tšilli-küüslaugu 100g,Marwi,100g,4740173003489,dry_preserves,dry_other,meat_fish,fish_processed
+580814,Borsisegu 500g Eesti,,500g,4740175000264,dry_preserves,dry_other,produce,produce_root_veg
+580815,Mamma kana-mango chutney määre 150g,Mamma,150g,4740184000309,meat_fish,meat_poultry,meat_fish,meat_gourmet
+580816,Mamma tuunikalamääre 150g,Mamma,150g,4740184002815,dry_preserves,dry_canned_meat_fish,meat_fish,fish_processed
+580817,Mamma BBQ-maitsestatud rebitud liha määre 150g,Mamma,150g,4740184002839,meat_fish,meat_other,meat_fish,meat_gourmet
+580818,Mamma rukkileib pikkpoisiga 165g,Mamma,165g,4740184005946,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves

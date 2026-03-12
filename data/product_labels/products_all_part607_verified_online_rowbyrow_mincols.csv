@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580619,Heliis siirup jõhvikamaitseline 500ml,Heliis,500ml,4740077003738,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+580620,Heliis siirup troop.puuv.maits. 1.5L,Heliis,1.5L,4740077007729,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+580621,Sangaste Kali karboniseeritud kääritamata jook 1.5L,Sangaste,1.5L,4740077011283,dry_preserves,dry_other,drinks,drinks_soft_soda
+580622,Sangaste Kali karboniseeritud kääritamata jook 500ml,Sangaste,500ml,4740077013287,dry_preserves,dry_other,drinks,drinks_soft_soda
+580623,Hope Green Rabarber+Mg vitamiinijook 750ml,Hope Green,750ml,4740077014307,dry_preserves,dry_other,drinks,drinks_soft_soda
+580624,Hope Green Granaatõun+Mg vitamiinijook 750ml,Hope Green,750ml,4740077014352,produce,produce_apples_pears,drinks,drinks_soft_soda
+580625,Hope Green Greip+Mg ja kofeiin jook 750ml,Hope Green,750ml,4740077014369,produce,produce_tropical,drinks,drinks_soft_soda
+580626,Old Kalew Original Liqueur 40% 350ml,Old Kalew,350ml,4740077014376,drinks,drinks_spirits,drinks,drinks_spirits
+580627,Gin MidSomer Dry Gin 38% 500ml pet,MidSomer,500ml,4740077014413,drinks,drinks_spirits,drinks,drinks_spirits
+580628,Hope Green Passionvili+Mg vitamiinijook 750ml,Hope Green,750ml,4740077014598,dry_preserves,dry_other,drinks,drinks_soft_soda
+580629,Take 1 Kommi Asemel Öko kõrvitsaseemned 140g,Take 1,140g,4740085303639,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+580630,PCD soolapähkel 200g,PCD,200g,4740085304865,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_nuts_driedfruit
+580631,Take 1 Kommi Asemel sarapuupähkel 100g,Take 1,100g,4740085306777,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+580632,Take 1 Kommi Asemel kreeka pähkel 100g,Take 1,100g,4740085306791,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+580633,Take 1 Kommi Asemel india pähkel 100g,Take 1,100g,4740085306814,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+580634,Take 1 Kommi Asemel mandel 100g,Take 1,100g,4740085306852,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+580635,Take 1 Kommi Asemel seemnesegu mix 150g,Take 1,150g,4740085306937,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+580636,Take 1 Kommi Asemel puuvilja mix 150g,Take 1,150g,4740085306975,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+580637,Take 1 Kommi Asemel tervise eine 150g,Take 1,150g,4740085306999,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+580638,Take 1 Kommi Asemel maasikas ja sõbrad 200g,Take 1,200g,4740085307033,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+580639,Take 1 Kommi Asemel Chia seemned 200g,Take 1,200g,4740085308665,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+580640,Take 1 Kommi Asemel kanepiseemned 150g,Take 1,150g,4740085309044,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+580641,Take 1 Kommi Asemel Öko dattel 150g,Take 1,150g,4740085310712,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+580642,Take 1 Kommi Asemel Chia seemned Öko 150g,Take 1,150g,4740085310798,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+580643,Take 1 Kommi Asemel õunatükid 60g,Take 1,60g,4740085312686,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+580644,Köögis Asja Ette mandlijahu 350g,Köögis,350g,4740085313799,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+580645,Köögis valge kinoa 500g mahe,Köögis,500g,4740085314659,dry_preserves,dry_other,dry_preserves,dry_groats_beans
+580646,Take 1 rosinad 1kg,Take 1,1kg,4740085507013,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+580647,Kodukandi rukkileib viil 800g Eesti Pagar,Eesti Pagar,800g,4740086001480,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+580648,Napoleoni kook 400g Eesti Pagar,Eesti Pagar,400g,4740086006874,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+580649,Jõhvikarull 300g Eesti Pagar,Eesti Pagar,300g,4740086008212,produce,produce_berries,bakery,bakery_cakes_pastries
+580650,Britta kook 300g Eesti Pagar,Eesti Pagar,300g,4740086008229,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+580651,Rehe rukkileib 800g Eesti Pagar,Eesti Pagar,800g,4740086010314,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+580652,Rehe rukkileib 290g Eesti Pagar,Eesti Pagar,290g,4740086010826,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+580653,Hele ciabatta kukkel 210g Eesti Pagar,Eesti Pagar,210g,4740086012295,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+580654,Napoleoni kook 1.2kg Eesti Pagar,Eesti Pagar,1.2kg,4740086012554,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+580655,Mini mitmevilja-croissant XL 1.05kg,Eesti Pagar,1.05kg,4740086014824,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+580656,Eesti Pagar mitmeviljatortilja 6tk 360g,Eesti Pagar,6tk,4740086020122,bakery,bakery_flatbreads_wraps,bakery,bakery_flatbreads_wraps
+580657,Õunakook laktoosivaba 230g Eesti Pagar,Eesti Pagar,230g,4740086020238,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+580658,Šokolaadirull 350g Eesti Pagar,Eesti Pagar,350g,4740086020788,dry_preserves,dry_other,bakery,bakery_cakes_pastries
+580659,Maasika-kohupiima tort 730g Eesti Pagar,Eesti Pagar,730g,4740086021105,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+580660,Iirisetort 600g L-vaba Eesti Pagar,Eesti Pagar,600g,4740086021525,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+580661,Vaarikakook 650g Eesti Pagar,Eesti Pagar,650g,4740086022553,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+580662,Vaarikarull 300g Eesti Pagar,Eesti Pagar,300g,4740086022775,produce,produce_berries,bakery,bakery_cakes_pastries
+580663,Kirju kohupiimatort 830g Eesti Pagar,Eesti Pagar,830g,4740086025332,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+580664,Kohupiima-passioni sefiiritort 680g Eesti Pagar,Eesti Pagar,680g,4740086027244,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+580665,Mango-hapukoorekook 300g Eesti Pagar,Eesti Pagar,300g,4740086029668,dairy_eggs_fats,dairy_cream_sourcream,bakery,bakery_cakes_pastries
+580666,Dallase saiake 480g Eesti Pagar,Eesti Pagar,480g,4740086030275,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+580667,Väike Tom karamelli koorejäätis metsp. 70g,Premia,70g,4740093000063,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+580668,Premia vanilli-šokolaadi koorejäätis 70g,Premia,70g,4740093000131,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream

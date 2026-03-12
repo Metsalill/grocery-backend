@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+582569,Finish nõudepesumasina loputusvahend 400ml,Finish,400ml,5900627048346,household,hh_laundry,household,hh_dishwashing
+582570,Air Wick Freshmatic Maui Mango õhuvärskendaja 250ml,Air Wick,250ml,5900627057553,produce,produce_tropical,household,hh_candles_airfresh
+582571,Veet in Shower Sensitive depileerimiskreem 135ml,Veet,135ml,5900627060737,dry_preserves,dry_other,personal_care,pcare_other
+582572,Vanish värvipüüdja 10tk,Vanish,10tk,5900627061987,dry_preserves,dry_other,household,hh_laundry
+582573,Durex Intense kondoom 3tk,Durex,3tk,5900627068351,dry_preserves,dry_other,personal_care,pcare_other
+582574,Durex Intense kondoom 10tk,Durex,10tk,5900627068368,dry_preserves,dry_other,personal_care,pcare_other
+582575,AW Fresh compact komplekt Smooth S&M õhuvärskendaja,AW,,5900627076196,dry_preserves,dry_other,household,hh_candles_airfresh
+582576,Woolite Delicate pesuvahend 900ml 15pesu,Woolite,900ml,5900627090390,dry_preserves,dry_other,household,hh_laundry
+582577,Woolite Color pesuvahend 1.8L 30pesu,Woolite,1.8L,5900627090444,dry_preserves,dry_other,household,hh_laundry
+582578,Cillit Bang Natural Power vannitoa puhastusvahend 750ml,Cillit Bang,750ml,5900627093377,dry_preserves,dry_other,household,hh_cleaners
+582579,Cillit Bang Natural Power köögile puhastusvahend 750ml,Cillit Bang,750ml,5900627093384,dry_preserves,dry_other,household,hh_cleaners
+582580,Veet Minima Easy Gel vaharibad 12tk,Veet,12tk,5900627095876,dry_preserves,dry_other,personal_care,pcare_other
+582581,Durex Pleasuremax kondoom 10tk,Durex,10tk,5900627117707,dry_preserves,dry_other,personal_care,pcare_other
+582582,Durex Sensual kondoom 3tk,Durex,3tk,5900627118117,dry_preserves,dry_other,personal_care,pcare_other
+582583,Durex Sensual kondoom 10tk,Durex,10tk,5900627118124,dry_preserves,dry_other,personal_care,pcare_other
+582584,Durex Sensual No Latex kondoom 3tk,Durex,3tk,5900627118209,dry_preserves,dry_other,personal_care,pcare_other
+582585,Durex Sensual No Latex kondoom 10tk,Durex,10tk,5900627118216,dry_preserves,dry_other,personal_care,pcare_other
+582586,Durex Play 2in1 libesti Aloe Vera 200ml,Durex,200ml,5900627118933,dry_preserves,dry_other,personal_care,pcare_other
+582587,Durex Feel libesti 50ml,Durex,50ml,5900627118964,dry_preserves,dry_other,personal_care,pcare_other
+582588,Activia funktsionaalne jogurt metsamarjaga 4*120g,Activia,120g,5900643043318,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+582589,Actimel jogurtijook virsiku-passioniviljaga 4*100g,Actimel,100g,5900643051245,dry_preserves,dry_other,dairy_eggs_fats,dairy_yogurt_kefir
+582590,Mokate 3in1 lahustuv kohvijook 10*17g,Mokate,17g,5900649011052,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+582591,Mokate Milky kakaojook lahustuv 10*18g,Mokate,18g,5900649054868,dairy_eggs_fats,dairy_milk,drinks,drinks_syrups_powders
+582592,Mokate Latte Matcha Strawberry 6*14g,Mokate,14g,5900649083158,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+582593,Belin kummelitee 30*1.3g,Belin,1.3g,5900675007807,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582594,Belin piparmünditee 30*1.5g,Belin,1.5g,5900675007814,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+582595,Lemmik sulatatud toode singiga 100g,Lemmik,100g,5900746003042,dry_preserves,dry_other,cheese,dairy_cheese_slices
+582596,DecoMorreno kakaopulber 80g,DecoMorreno,80g,5900910000143,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+582597,Coffeeta kohvivalgendaja 200g fooliumsulguriga,Coffeeta,200g,5900910000433,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+582598,Paclan värvikogumislapid 15tk,Paclan,15tk,5900942137510,dry_preserves,dry_other,household,hh_laundry
+582599,Paclan Multitop prügikott 35L 36tk sinine,Paclan,35L,5900942341641,household,hh_bins_bags,household,hh_bins_bags
+582600,Pedigree koeraeine 100g loomaliha,Pedigree,100g,5900951017261,meat_fish,meat_other,pet,pet_dog_wet
+582601,KiteKat kuivtoit kassile 1.8kg loomaliha,KiteKat,1.8kg,5900951137877,meat_fish,meat_other,pet,pet_cat_dry
+582602,KiteKat kuivtoit kassile 1.8kg kanaliha,KiteKat,1.8kg,5900951137884,meat_fish,meat_poultry,pet,pet_cat_dry
+582603,Pedigree koeraeine 4*100g veise-maksa,Pedigree,100g,5900951249365,meat_fish,meat_beef_lamb_game,pet,pet_dog_wet
+582604,Cesar koeraeine 4*100g kana-köögiviljaraguu,Cesar,100g,5900951253553,meat_fish,meat_poultry,pet,pet_dog_wet
+582605,Cesar koeraeine 4*100g veise-köögivilja,Cesar,100g,5900951253577,meat_fish,meat_beef_lamb_game,pet,pet_dog_wet
+582606,Pedigree koeraeine 4*100g veise-lamba,Pedigree,100g,5900951293818,meat_fish,meat_beef_lamb_game,pet,pet_dog_wet
+582607,Pedigree koeraeine Junior 4*100g kana,Pedigree,100g,5900951293948,meat_fish,meat_poultry,pet,pet_dog_wet
+582608,Whiskas kiisueine eakale 4*85g linnuliha,Whiskas,85g,5900951301827,meat_fish,meat_other,pet,pet_cat_wet
+582609,Whiskas kiisueine 4*85g lihavalik,Whiskas,85g,5900951301865,meat_fish,meat_other,pet,pet_cat_wet
+582610,Whiskas Junior kiisueine 85g linnuliha,Whiskas,85g,5900951301971,meat_fish,meat_other,pet,pet_cat_wet
+582611,Whiskas kiisueine 85g kanaliha,Whiskas,85g,5900951302091,meat_fish,meat_poultry,pet,pet_cat_wet
+582612,Whiskas Pure kiisueine 4*85g kana-kalkun,Whiskas,85g,5900951303197,meat_fish,meat_poultry,pet,pet_cat_wet
+582613,Whiskas Pure Delight kiisueine 4*85g liha,Whiskas,85g,5900951303296,meat_fish,meat_other,pet,pet_cat_wet
+582614,Whiskas Pure kiisueine 4*85g kana-lõhe,Whiskas,85g,5900951303302,meat_fish,meat_poultry,pet,pet_cat_wet
+582615,Whiskas Junior kuivtoit kassile 800g kana,Whiskas,800g,5900951304361,meat_fish,meat_poultry,pet,pet_cat_dry
+582616,Whiskas Junior kiisueine 4*85g klassikaline,Whiskas,85g,5900951305122,dry_preserves,dry_other,pet,pet_cat_wet
+582617,Whiskas kuivtoit kassile 800g tuunikalaga,Whiskas,800g,5900951305559,dry_preserves,dry_canned_meat_fish,pet,pet_cat_dry
+582618,Whiskas Senior kuivtoit kassile 800g kana,Whiskas,800g,5900951305603,meat_fish,meat_poultry,pet,pet_cat_dry

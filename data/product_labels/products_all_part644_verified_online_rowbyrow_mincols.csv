@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+582469,Duvoplus kirbu- ja puugirihm koerale 70cm,Duvoplus,,5414365449780,pet,pet_other,pet,pet_other
+582470,Oilio punane pestokaste 130g kuivatatud tomatiga,Oilio,130g,5425006488402,sauces_oils,sauces_pasta_cooking,sauces_oils,sauces_pasta_cooking
+582471,Schweppes Tonic Water 1L,Schweppes,1L,5449000044808,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+582472,Neptunas Laimi-Vaarika karboniseeritud vesi 1.5L,Neptunas,1.5L,5449000329790,drinks,drinks_water,drinks,drinks_soft_soda
+582473,Cappy multivitamiininektar 1L,Cappy,1L,5449000337511,drinks,drinks_juices,drinks,drinks_juices
+582474,Nata Portugali kreemisai 240g külmutatud,Nata,240g,5600699792313,bakery,bakery_buns_croissants,frozen_food,frozen_bakery
+582475,Kombucha virsiku fermenteeritud karboniseeritud jook 400ml,Kombucha,400ml,5600821265616,dry_preserves,dry_other,drinks,drinks_soft_soda
+582476,Kombucha Lemonade fermenteeritud karboniseeritud jook 400ml,Kombucha,400ml,5600821267139,dry_preserves,dry_other,drinks,drinks_soft_soda
+582477,Fresh Selection kombucha vaarikas-limonaad 400ml,,400ml,5600821267498,dry_preserves,dry_other,drinks,drinks_soft_soda
+582478,Fresh Selection kombucha ananass-kookos 400ml,,400ml,5600821267696,bakery,bakery_cakes_pastries,drinks,drinks_soft_soda
+582479,Vv Casal Garcia Vinho Verde Branco 750ml,,750ml,5601096208308,drinks,drinks_wine,drinks,drinks_wine
+582480,Good Good maapähklikreem Crunchy 340g,Good Good,340g,5694230555598,sweets_snacks,sweets_nuts_driedfruit,sauces_oils,sauces_other
+582481,True Gum närimiskumm 21g piparmündi,True Gum,21g,5700002082503,sweets_snacks,sweets_gums_mints,sweets_snacks,sweets_gums_mints
+582482,True Gum närimiskumm 21g vaarika-vanilje,True Gum,21g,5700002082534,sweets_snacks,sweets_gums_mints,sweets_snacks,sweets_gums_mints
+582483,Red Band kummikomm Nöörid 100g maasika,Red Band,100g,5700417990455,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+582484,BF mänguasi koerale Frisbee lendav taldrik,BF,,5700551151590,pet,pet_other,pet,pet_other
+582485,BF kakakotid Gear hügieenikotid 40tk L,BF,40tk,5700551160073,dry_preserves,dry_other,pet,pet_other
+582486,BF kakakotid Gear hügieenikotid 40tk S,BF,40tk,5700551160080,dry_preserves,dry_other,pet,pet_other
+582487,Mänguasi kassile BF Chipper piiksuga,,,5700551250767,pet,pet_other,pet,pet_other
+582488,Mänguasi kassile Tracker,,,5700551250859,pet,pet_other,pet,pet_other
+582489,Mänguasi kassile BF Zippy valik,,,5700551251221,pet,pet_other,pet,pet_other
+582490,Dr.Oetker tordikaunistus Rainbow Mix 50g,Dr.Oetker,50g,5701073061077,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+582491,OK Snacks seakamar 150g,OK Snacks,150g,5701397024703,dry_preserves,dry_other,meat_fish,meat_gourmet
+582492,Gerimax Extreme Energy toidulisand N10,Gerimax,,5702071362524,dry_preserves,dry_other,personal_care,pcare_other
+582493,Livol Multi Naistele toidulisand N60,Livol,,5702071366546,dry_preserves,dry_other,personal_care,pcare_other
+582494,Livol multivitamiinid Family N90,Livol,,5702071386544,dry_preserves,dry_other,personal_care,pcare_other
+582495,Livol toidulisand Multi Meestele N60,Livol,,5702079111469,dry_preserves,dry_other,personal_care,pcare_other
+582496,Halls kurgupastill Colors 33.5g,Halls,33.5g,57030937,drinks,drinks_wine,personal_care,pcare_other
+582497,Bambo Nature salvrätikud 80tk niisked,Bambo Nature,80tk,5703538398148,household,hh_paper,household,hh_paper
+582498,Pv Bio Logico Organic Tempranillo 3L BIB,,3L,5704634168130,dry_preserves,dry_other,drinks,drinks_wine
+582499,Vv Bio Logico Organic White Wine 3L BIB,,3L,5704634168147,dry_preserves,dry_other,drinks,drinks_wine
+582500,Vv Cornerstone Chardonnay 750ml,,750ml,5704634183249,drinks,drinks_wine,drinks,drinks_wine
+582501,Rynkeby apelsinimahl No1 1L,Rynkeby,1L,5705001407708,drinks,drinks_juices,drinks,drinks_juices
+582502,Rynkeby õunamahl No1 1L,Rynkeby,1L,5705001407746,drinks,drinks_juices,drinks,drinks_juices
+582503,Rynkeby mahe apelsinimahl Organic 1L,Rynkeby,1L,5705001408279,drinks,drinks_juices,drinks,drinks_juices
+582504,Rynkeby ingveri-jõhvika shot 500ml,Rynkeby,500ml,5705010081548,produce,produce_berries,produce,produce_smoothies_fresh_juices
+582505,Fingies tortillarullid tšilli-juustuga 240g,Fingies,240g,5705518772009,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_ready_meals
+582506,Fingies tortillarullid kanaga 240g külmutatud,Fingies,240g,5705518772047,bakery,bakery_flatbreads_wraps,frozen_food,frozen_ready_meals
+582507,Cosmoplast Essential Care plaaster 20tk,Cosmoplast,20tk,5706636591930,dry_preserves,dry_other,personal_care,pcare_other
+582508,Fynbo maasikakeedis 400g,Fynbo,400g,5707446465008,produce,produce_berries,dry_preserves,dry_other
+582509,Fynbo vaarikakeedis 400g,Fynbo,400g,5707446465015,produce,produce_berries,dry_preserves,dry_other
+582510,Fynbo mustasõstrakeedis 400g,Fynbo,400g,5707446465022,dry_preserves,dry_other,dry_preserves,dry_other
+582511,Fynbo kirsikeedis 400g,Fynbo,400g,5707446465077,dry_preserves,dry_other,dry_preserves,dry_other
+582512,True Gum närimiskumm 21g sidruni vegan,True Gum,21g,5745000121045,sweets_snacks,sweets_gums_mints,sweets_snacks,sweets_gums_mints
+582513,Castello valgehallitusjuust Danish Camembert 125g,Castello,125g,5760466819411,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_white_mold
+582514,Castello valgehallitusjuust Danish Brie 125g,Castello,125g,5760466820059,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_white_mold
+582515,Taani broilerikints seljata 2.5kg külmutatud,,2.5kg,5760725200158,meat_fish,meat_poultry,frozen_food,frozen_meat
+582516,Viin Danzka Vodka 40% 1L,,1L,5788686123514,drinks,drinks_spirits,drinks,drinks_spirits
+582517,EveSol taimne rasvavõie 72% 250g,EveSol,250g,5900012004247,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+582518,EveSol taimne rasvavõie 72% 500g,EveSol,500g,5900012004261,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine

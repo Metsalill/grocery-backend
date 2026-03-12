@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580419,Medrull Ultraselu marliside 10cm,Medrull,,4260363472289,dry_preserves,dry_other,personal_care,pcare_other
+580420,Medrull Aqua Resist plaaster veekindel 20tk,Medrull,20tk,4260363473194,dry_preserves,dry_other,personal_care,pcare_other
+580421,Churu maius kassile Ciao 4x14g tuunikala,Churu,14g,4262365730817,dry_preserves,dry_canned_meat_fish,pet,pet_cat_treats
+580422,Churu maius kassile Ciao 4x14g kana-juust,Churu,14g,4262365730824,meat_fish,meat_poultry,pet,pet_cat_treats
+580423,Churu maius kassile Ciao 4x14g kana-krabi,Churu,14g,4262365730848,meat_fish,meat_poultry,pet,pet_cat_treats
+580424,IvyBears Womens Hair Vitamiinid kummikarud N60,IvyBears,,4262382642872,dry_preserves,dry_other,personal_care,pcare_other
+580425,Funny Hippo kõrremaius Jelly Straws 300g,Funny Hippo,300g,4711269687289,dry_preserves,dry_other,sweets_snacks,sweets_candies
+580426,Speshow kõrremaius Jelly Straws 300g,Speshow,300g,4711269691644,dry_preserves,dry_other,sweets_snacks,sweets_candies
+580427,RLK K/V suitsutatud Doktorivorst viil 190g,RLK,190g,4740003001524,meat_fish,meat_sausages,meat_fish,meat_sausages
+580428,RLK Kodune hakkliha 450g külmutatud,RLK,450g,4740003002446,meat_fish,meat_minced,frozen_food,frozen_meat
+580429,Rakvere toorsuitsuvorst 280g,Rakvere,280g,4740003007083,meat_fish,meat_sausages,meat_fish,meat_sausages
+580430,RLK Toorsuitsupeekon ameerikapärane 1kg,RLK,1kg,4740003009285,meat_fish,meat_pork,meat_fish,meat_pork
+580431,RLK Valla keeduvorst Lastevorst 240g viil,RLK,240g,4740003011141,meat_fish,meat_sausages,meat_fish,meat_sausages
+580432,RLK Valla P/S vorst Krakov 450g,RLK,450g,4740003011240,meat_fish,meat_sausages,meat_fish,meat_sausages
+580433,RLK Suitsuvorstike Valla 450g,RLK,450g,4740003011349,meat_fish,meat_sausages,meat_fish,meat_sausages
+580434,RLK Õllesigar kolme juustuga 120g,RLK,120g,4740003015552,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+580435,RLK Pepperoni salaami 200g,RLK,200g,4740003016948,dry_preserves,dry_other,meat_fish,meat_gourmet
+580436,Rakvere Milano salaamisigarid 150g,Rakvere,150g,4740003017563,dry_preserves,dry_other,meat_fish,meat_gourmet
+580437,Rakvere õhuline hommikusink 200g viil,Rakvere,200g,4740003017655,meat_fish,meat_hams,meat_fish,meat_hams
+580438,RLK suits.seakaelakarbonaad 130g viil,RLK,130g,4740003017686,dry_preserves,dry_other,meat_fish,meat_pork
+580439,Rakvere suitsusingike 130g viil,Rakvere,130g,4740003017693,meat_fish,fish_salted_smoked,meat_fish,meat_hams
+580440,Rakvere Suitsurulaad 130g viil,Rakvere,130g,4740003017716,meat_fish,meat_hams,meat_fish,meat_hams
+580441,Rakvere Laste Pelmeenid 350g,Rakvere,350g,4740003018072,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+580442,Flora seep-plekieemaldi 90g sapiga,Flora,90g,4740005003045,personal_care,pcare_soap,household,hh_laundry
+580443,Orto roheline seep 500ml pihustiga,Orto,500ml,4740006004263,personal_care,pcare_soap,personal_care,pcare_soap
+580444,Puhas Kodu katlakivieemaldi 500ml,Puhas Kodu,500ml,4740006008407,dry_preserves,dry_other,household,hh_cleaners
+580445,Orto Saniit-M happeline puh/vah 500ml,Orto,500ml,4740006008643,dry_preserves,dry_other,household,hh_cleaners
+580446,Kalev pralineekompvek 175g india pähkliga,Kalev,175g,4740012024064,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_chocolate_bars
+580447,Kalev pralineekompvek 175g pistaatsiapähkliga,Kalev,175g,4740012025566,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_chocolate_bars
+580448,Kalev Martsipanikompvek Limoncello 175g,Kalev,175g,4740012028260,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+580449,Kalev kommikarp martsipanikommid 300g klassik,Kalev,300g,4740012028512,sweets_snacks,sweets_candies,sweets_snacks,sweets_chocolate_bars
+580450,Kalev piimašokolaad 100g purustatud metspähkliga,Kalev,100g,4740012037613,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+580451,Kalev dražee mandel tumedas šok 140g,Kalev,140g,4740012052029,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+580452,Kalev dražee mandel suhkrugl. 140g rummi,Kalev,140g,4740012052074,drinks,drinks_spirits,sweets_snacks,sweets_chocolate_bars
+580453,Kalev vahvel Mesikäpp 250g van.maits.kr,Kalev,250g,4740012370710,sweets_snacks,sweets_waffles_cakes,sweets_snacks,sweets_waffles_cakes
+580454,Kalev närimiskompvek Drako 110g puuviljam.,Kalev,110g,4740012600190,dry_preserves,dry_other,sweets_snacks,sweets_candies
+580455,Kalev närimiskompvek Drako 110g koolamaits,Kalev,110g,4740012600206,dry_preserves,dry_other,sweets_snacks,sweets_candies
+580456,Kalev Caramell karamell 120g maasikamaits,Kalev,120g,4740012600299,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+580457,Kalev kommikarp Eesti 186g valik,Kalev,186g,4740012600343,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+580458,Kalev šokolaadipudelid 150g alk.täidis,Kalev,150g,4740012600350,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+580459,Kalev Limoncello martsipanikomm 150g liköör,Kalev,150g,4740012600602,sweets_snacks,sweets_candies,sweets_snacks,sweets_chocolate_bars
+580460,Kalev Bitter 56% tume šokolaad 190g,Kalev,190g,4740012600862,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+580461,Kalev tume šok. Suur Tõll 270g metspähkl,Kalev,270g,4740012601036,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_chocolate_bars
+580462,Kalev T/šok. Leiger 270g tervete mandlitega,Kalev,270g,4740012601050,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+580463,Kalev kamatahvel 190g,Kalev,190g,4740012601135,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+580464,Kalev küpsis pähklikreemi täidisega 410g,Kalev,410g,4740012601302,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+580465,Battery energiajook Juiced Bright 330ml,Battery,330ml,4740019002935,drinks,drinks_energy,drinks,drinks_energy
+580466,Karl Friedrich Kali Kirss 500ml prk,Karl Friedrich,500ml,4740019002966,dry_preserves,dry_other,drinks,drinks_soft_soda
+580467,Saku On Ice Laim-Münt alkoholivaba 500ml prk,Saku,500ml,4740019002997,produce,produce_tropical,drinks,drinks_beer_cider
+580468,Saku Antvärk Paljas Õun 4.5% 330ml pdl,Saku,330ml,4740019003321,produce,produce_apples_pears,drinks,drinks_beer_cider

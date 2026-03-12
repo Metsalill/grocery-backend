@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+581719,Tere kohuke juutukoogi šokolaadigl. 40g,Tere,40g,47433052,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_desserts
+581720,Koera söögikauss kummist äärega 700ml,,700ml,4743326110355,pet,pet_other,pet,pet_other
+581721,Veski Padjakesed 250g jäätisekr.maitsel.,Veski,250g,4743346300361,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+581722,Veski Padjakesed 250g kooreiirisekr.,Veski,250g,4743346300378,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+581723,Tere kohuke kondenspiima-karamelligl. 40g,Tere,40g,47435056,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_desserts
+581724,Must küüslauk 75g Eesti,,75g,4744117011202,produce,produce_root_veg,produce,produce_root_veg
+581725,Wokisegu Paprika-Brokkoli 500g Eesti,,500g,4744141010943,produce,produce_root_veg,frozen_food,frozen_vegetables
+581726,Wokisegu Kõrvitsa-Aedoa 500g Eesti,,500g,4744141010950,dry_preserves,dry_other,frozen_food,frozen_vegetables
+581727,Green mustad oliivid 300g kivideta,Green,300g,4744148010458,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+581728,Green mustad oliivid 300g kividega,Green,300g,4744148010465,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+581729,Green seeneassortii marineeritud 530g,Green,530g,4744148010908,produce,produce_mushrooms,dry_preserves,dry_canned_veg
+581730,Green troopiline puuviljakokteil 425g,Green,425g,4744148011271,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+581731,Green poolikud virsikud siirupis 425g,Green,425g,4744148011370,drinks,drinks_syrups_powders,dry_preserves,dry_canned_fruit
+581732,Green soolakurgid 977g,Green,977g,4744148011530,world_spices,spices_basic_salt_pepper,dry_preserves,dry_canned_veg
+581733,Green kornišon ja kirsstomat 680g,Green,680g,4744148011875,produce,produce_root_veg,dry_preserves,dry_canned_veg
+581734,Tukas marineeritud kurk 670g 6-9cm,Tukas,670g,4744148012117,produce,produce_root_veg,dry_preserves,dry_canned_veg
+581735,Mahe kanepiseemned 500g,,500g,4744150010125,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+581736,Lameleib Ümar Lavash 160g,,160g,4744158010653,bakery,bakery_bread_loaves,bakery,bakery_flatbreads_wraps
+581737,Mull siider kuiv 5.5% 750ml,,750ml,4744166011659,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+581738,Shroomwell Immuno eliksiir 250ml mustsõstar,Shroomwell,250ml,4744173011031,dry_preserves,dry_other,drinks,drinks_soft_soda
+581739,Põhjala Teetalu vaarika kummeliga 10*2.4g,Põhjala,2.4g,4744240010417,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+581740,Põhjala Teetalu Hea Une Tee 10*1.6g,Põhjala,1.6g,4744240010431,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+581741,Põhjala Teetalu roheline tee Fookus 10*2.5g,Põhjala,2.5g,4744240010455,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+581742,Fantaasia tahvel tume 100g,Fantaasia,100g,4744277010039,drinks,drinks_soft_soda,sweets_snacks,sweets_chocolate_bars
+581743,Fantaasia tahvel valge 100g,Fantaasia,100g,4744277010046,drinks,drinks_soft_soda,sweets_snacks,sweets_chocolate_bars
+581744,Otepää Mesi 450g Eesti,,450g,4744289010027,dry_preserves,dry_other,dry_preserves,dry_other
+581745,Otepää Mesi kreemjas mesi 500g Eesti,,500g,4744289010034,dry_preserves,dry_other,dry_preserves,dry_other
+581746,Otepää Mesi 600g Eesti,,600g,4744289010058,dry_preserves,dry_other,dry_preserves,dry_other
+581747,Otepää Mesi tatramesi 500g Eesti,,500g,4744289010140,dry_preserves,dry_other,dry_preserves,dry_other
+581748,Öun õunalimonaad 330ml mahe,Öun,330ml,4744317010074,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+581749,Öun rabarberilimonaad mahe 330ml,Öun,330ml,4744317010081,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+581750,Öun Yerba Mate karboniseeritud jook 250ml mahe,Öun,250ml,4744317010135,dry_preserves,dry_other,drinks,drinks_soft_soda
+581751,Öun matcha-kardemon karb-tud jook 250ml mahe,Öun,250ml,4744317010142,drinks,drinks_tea_coffee,drinks,drinks_soft_soda
+581752,Öun kirsilim onaad 330ml mahe,Öun,330ml,4744317010203,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+581753,Öun kurk-münt karboniseeritud jook 250ml mahe,Öun,250ml,4744317010562,produce,produce_root_veg,drinks,drinks_soft_soda
+581754,Öun-Kadakas alkoholivaba vahujook 750ml mahe,Öun,750ml,4744317013013,dry_preserves,dry_other,drinks,drinks_soft_soda
+581755,Öun rabarber-kuusk alk.v vahujook 750ml mahe,Öun,750ml,4744317013020,dry_preserves,dry_other,drinks,drinks_soft_soda
+581756,Öun kirss-vaher alk.v vahujook 750ml mahe,Öun,750ml,4744317013037,dry_preserves,dry_other,drinks,drinks_soft_soda
+581757,Mulieres looduslik äädikas värske tsitruse 450ml,Mulieres,450ml,4744325010264,sauces_oils,oils_vinegar,sauces_oils,oils_vinegar
+581758,Muhe mesi 500g Eesti,,500g,4744329010130,dry_preserves,dry_other,dry_preserves,dry_other
+581759,Muhe kanarbikumesi 200g Eesti,,200g,4744329010161,meat_fish,meat_poultry,dry_preserves,dry_other
+581760,Dr.Stern mahe hein merisigadele/küülikutele 500g,Dr.Stern,500g,4744355010319,pet,pet_small_animals,pet,pet_small_animals
+581761,Dr.Stern konserv kassile 100g kanapasteet,Dr.Stern,100g,4744355010548,drinks,drinks_tea_coffee,pet,pet_cat_wet
+581762,Dr.Stern konserv kassile 100g veisepasteet,Dr.Stern,100g,4744355010555,drinks,drinks_tea_coffee,pet,pet_cat_wet
+581763,Dr.Stern konserv kassipojale 100g veise-maksap.,Dr.Stern,100g,4744355010562,meat_fish,meat_beef_lamb_game,pet,pet_cat_wet
+581764,Dr.Stern konserv koerale 300g veise-maksap.,Dr.Stern,300g,4744355010579,meat_fish,meat_beef_lamb_game,pet,pet_dog_wet
+581765,Dr.Stern kiisueine 100g kanaliha kastmes,Dr.Stern,100g,4744355010593,meat_fish,meat_poultry,pet,pet_cat_wet
+581766,Dr.Stern kiisueine 100g veiseliha kastmes,Dr.Stern,100g,4744355010609,meat_fish,meat_beef_lamb_game,pet,pet_cat_wet
+581767,Dr.Stern lõhepuljong kassile 100ml kana,Dr.Stern,100ml,4744355010630,world_spices,spices_broth_stock,pet,pet_cat_wet
+581768,Dr.Stern linnulihapuljong kassile 100ml,Dr.Stern,100ml,4744355010647,world_spices,spices_broth_stock,pet,pet_cat_wet

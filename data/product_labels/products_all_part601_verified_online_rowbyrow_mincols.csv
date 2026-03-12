@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+580319,Athena närimispulgad kassile 50g kana,Athena,50g,4010492973764,meat_fish,meat_poultry,pet,pet_cat_treats
+580320,Athena närimispulgad kassile 50g lõhe,Athena,50g,4010492973788,meat_fish,fish_fresh,pet,pet_cat_treats
+580321,Athena piim kassile 200ml,Athena,200ml,4010492976215,dairy_eggs_fats,dairy_milk,pet,pet_cat_wet
+580322,Apollo konserv koerale 300g linnulihaga,Apollo,300g,4010492977564,meat_fish,meat_other,pet,pet_dog_wet
+580323,Apollo konserv koerale 300g loomalihaga,Apollo,300g,4010492977571,meat_fish,meat_other,pet,pet_dog_wet
+580324,Corny Big müslibatoon 40g maasika-v.šok.,Corny,40g,4011800000080,dry_preserves,dry_cereals_muesli,sweets_snacks,sweets_waffles_cakes
+580325,Corny proteiinibatoon 50g šokolaadi,Corny,50g,4011800295011,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+580326,Corny proteiinibatoon 50g kookose,Corny,50g,4011800295110,bakery,bakery_cakes_pastries,sweets_snacks,sweets_chocolate_bars
+580327,Corny proteiinibatoon 50g soolakaramelli,Corny,50g,4011800296117,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+580328,Corny müslibatoon 6x25g šokolaadi-banaani,Corny,25g,4011800532062,dry_preserves,dry_cereals_muesli,sweets_snacks,sweets_waffles_cakes
+580329,Corny müslibatoon 6x25g šokolaadi,Corny,25g,4011800534066,dry_preserves,dry_cereals_muesli,sweets_snacks,sweets_waffles_cakes
+580330,Corny Big müslibatoon 40g valge šok,Corny,40g,4011800566418,dry_preserves,dry_cereals_muesli,sweets_snacks,sweets_waffles_cakes
+580331,Corny Big müslibatoon 50g kookosega,Corny,50g,4011800568214,bakery,bakery_cakes_pastries,sweets_snacks,sweets_waffles_cakes
+580332,Corny Big müslibatoon 50g maapähkli ja šok,Corny,50g,4011800599515,dry_preserves,dry_cereals_muesli,sweets_snacks,sweets_waffles_cakes
+580333,Merci Finest Selection 250g tumedas šok,Merci,250g,4014400901412,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+580334,Werthers Original koorekompvek 135g,Werthers,135g,4014400909876,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_candies
+580335,Werthers Pehme kooreiiris Original 135g,Werthers,135g,4014400909937,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_candies
+580336,Storck Werthers Original koorekompvek 50g,Storck,50g,40144016,drinks,drinks_spirits,sweets_snacks,sweets_candies
+580337,Knoppers PeanutBar šokolaadibatoon 40g,Knoppers,40g,40144467,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+580338,Knoppers CoconutBar šokolaadibatoon 40g,Knoppers,40g,40144474,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+580339,Storck Knoppers vahvel 25g metspähklikr.,Storck,25g,40144559,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_waffles_cakes
+580340,Storck Knoppers vahvel 25g maapähkli,Storck,25g,40144627,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_waffles_cakes
+580341,Zott Zottis Fruit jogurt 400g,Zott,400g,4014500506821,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580342,Zott jogurt Jogobella Classic 150g,Zott,150g,4014500509914,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+580343,Fa Cream&Oil Cacao dušigeel 400ml,Fa,400ml,4015100723823,dry_preserves,dry_other,personal_care,pcare_body_wash
+580344,Always Ultra Night hügieeniside 7tk,Always,7tk,4015400012306,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580345,Discreet Air pesukaitse 60tk,Discreet,60tk,4015400107965,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580346,Discreet Deo Spring Breeze pesukaitse 60tk,Discreet,60tk,4015400179757,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580347,Naturella Ultra Normal Quattro h/side 40tk,Naturella,40tk,4015400197546,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580348,Always Ultra Sens Super Plus Duo 16tk,Always,16tk,4015400214038,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580349,Tampax Compak Regular tampoonid 16tk,Tampax,16tk,4015400219507,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580350,Tampax Compak Super tampoonid 16tk,Tampax,16tk,4015400219712,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580351,Discreet Waterlily pesukaitse 100tk,Discreet,100tk,4015400229735,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580352,Discreet Air pesukaitse 100tk,Discreet,100tk,4015400236061,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580353,Always Ultra Super hügieeniside 8tk,Always,8tk,4015400403845,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580354,Always Normal pesukaitse 60tk,Always,60tk,4015400563747,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580355,Always Extra Long Single pesukaitse 44tk,Always,44tk,4015400563846,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580356,Always Normal Deo pesukaitse 58tk,Always,58tk,4015400565574,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580357,Always Ultra Extra Night Protect Duo 12tk,Always,12tk,4015400612469,dry_preserves,dry_other,personal_care,pcare_feminine_hygiene
+580358,Fairy Sens.TeaTree&Mint nõudepesuvahend 900ml,Fairy,900ml,4015400958130,sweets_snacks,sweets_gums_mints,household,hh_dishwashing
+580359,Kalew T-550 nisujahu 1kg,Kalew,1kg,4015410120411,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+580360,Pomsticks kartulisnäkk 100g paprikaga,Pomsticks,100g,4017100722004,produce,produce_root_veg,sweets_snacks,sweets_snacks_salty
+580361,Lorenz soolakringlid Saltletts 150g,Lorenz,150g,4018077662614,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_snacks_salty
+580362,Pomsticks kartulisnäkk 100g hapukoorega,Pomsticks,100g,4018077721038,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_snacks_salty
+580363,Bebivita 5K Lasterõõm õunapüree 90g virsiku,Bebivita,90g,4018852034988,produce,produce_apples_pears,baby,baby_food_jars
+580364,Bebivita 1A õuna-banaani-mustika püree 90g,Bebivita,90g,4018852035145,produce,produce_berries,baby,baby_food_jars
+580365,Exquisa toorjuust 175g laktoosivaba,Exquisa,175g,4019300162130,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cottage_quark
+580366,Vileda mopp 227 Active Max,Vileda,,4023103000018,dry_preserves,dry_other,household,hh_cleaners
+580367,Vileda PurActive nõudepesussvamm suurem 2tk,Vileda,2tk,4023103070240,dry_preserves,dry_other,household,hh_dishwashing
+580368,Vileda 023 PurActive Mena svamm,Vileda,,4023103070325,dry_preserves,dry_other,household,hh_dishwashing

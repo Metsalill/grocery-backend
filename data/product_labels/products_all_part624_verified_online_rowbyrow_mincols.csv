@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+581469,Tsink-diglütsinaat 45g N90,,45g,4741609532214,meat_fish,meat_hams,personal_care,pcare_other
+581470,Seleen N90,,,,4741609532511,dry_preserves,dry_other,personal_care,pcare_other
+581471,Ecosh Mineralex 100ml,Ecosh,100ml,4741609533051,dry_preserves,dry_other,personal_care,pcare_other
+581472,C-vitamiin+kibuvits Ecosh Life N90,,,,4741609542015,dry_preserves,dry_other,personal_care,pcare_other
+581473,Ecosh bioaktiivne C-vitamiin acerolaga N90,Ecosh,,4741609542107,dry_preserves,dry_other,personal_care,pcare_other
+581474,Bioaktiivne vitamiin B12 N90,,,,4741609542718,dry_preserves,dry_other,personal_care,pcare_other
+581475,Biotiin B7 vitamiin N90,,,,4741609542763,dry_preserves,dry_other,personal_care,pcare_other
+581476,Foolhape bioaktiivne N90,,,,4741609542831,dry_preserves,dry_other,personal_care,pcare_other
+581477,Ecosh Mehe vägi N90,Ecosh,,4741609543814,dry_preserves,dry_other,personal_care,pcare_other
+581478,Ecosh Zen-dida N90,Ecosh,,4741609561719,dry_preserves,dry_other,personal_care,pcare_other
+581479,Bacillius Subtilis Plus N90,,,,4741609566110,dry_preserves,dry_other,personal_care,pcare_other
+581480,McLean prügikott 9L 50tk sinine HD,McLean,9L,4742002000096,household,hh_bins_bags,household,hh_bins_bags
+581481,Smile trühvlivormid 300tk pruun 24mm,Smile,300tk,4742002000447,dry_preserves,dry_other,household,hh_kitchenware
+581482,Elise säilituskott 1L 20tk soonsulgur,Elise,1L,4742002000485,dry_preserves,dry_other,household,hh_kitchenware
+581483,Elise säilituskott 2L 10tk soonsulgur,Elise,2L,4742002000492,dry_preserves,dry_other,household,hh_kitchenware
+581484,Smile küpsetuspaberi lehed 3D 16tk 38*42cm,Smile,16tk,4742002000980,dry_preserves,dry_flour_sugar_baking,household,hh_kitchenware
+581485,McLean-Prof. ehitusprügikott 200L 5tk,McLean,200L,4742002002014,household,hh_bins_bags,household,hh_bins_bags
+581486,McLean kilekott sangadega 3kg 250tk/rull,McLean,3kg,4742002002625,dry_preserves,dry_other,household,hh_kitchenware
+581487,Elise alumiiniumfooliumvormid 0.85L 6tk,Elise,0.85L,4742002002908,dry_preserves,dry_other,household,hh_kitchenware
+581488,Elise alumiiniumfooliumvormid 1.5L 4tk,Elise,1.5L,4742002003707,dry_preserves,dry_other,household,hh_kitchenware
+581489,Smile vatt zig-zag 100g,Smile,100g,4742002005015,dry_preserves,dry_other,personal_care,pcare_other
+581490,Kummikindad Elise L,Elise,,4742002005336,dry_preserves,dry_other,household,hh_cleaners
+581491,Smile küpsetusvormid 120tk valge,Smile,120tk,4742002005824,dry_preserves,dry_flour_sugar_baking,household,hh_kitchenware
+581492,Smile küpsetusvormid 120tk kollane,Smile,120tk,4742002005831,dry_preserves,dry_flour_sugar_baking,household,hh_kitchenware
+581493,Smile küpsetuskott 8tk 25*38cm 0-3kg,Smile,8tk,4742002005916,dry_preserves,dry_flour_sugar_baking,household,hh_kitchenware
+581494,Smile küpsetuskott 5tk 35*43cm 3-5kg,Smile,5tk,4742002005961,dry_preserves,dry_flour_sugar_baking,household,hh_kitchenware
+581495,Smile alumiiniumfoolium 45cm*10m kiles,Smile,,4742002005978,dry_preserves,dry_other,household,hh_kitchenware
+581496,LED lamp E27 GLS 8W 680lm soe valge Power,,,,4742002009563,dry_preserves,dry_other,household,hh_other
+581497,LED lamp E27 GLS 11W 990lm soe valge Power,,,,4742002009570,dry_preserves,dry_other,household,hh_other
+581498,LED lamp E27 P45 400lm golf Power,,,,4742002009655,dry_preserves,dry_other,household,hh_other
+581499,LED lamp 6W R50 480lm Power,,,,4742002009693,dry_preserves,dry_other,household,hh_other
+581500,McLean-Home prügikott tugev 250L 5tk,McLean,250L,4742002009815,household,hh_bins_bags,household,hh_bins_bags
+581501,Prügikott McLean-Home tugev 150L 5tk 50mic,,150L,4742002009860,household,hh_bins_bags,household,hh_bins_bags
+581502,Pikero Rhubarb Spritz kange jook 5.5% 750ml,Pikero,750ml,4742022090251,dry_preserves,dry_other,drinks,drinks_beer_cider
+581503,Salatisegu Segu 7 100g Eesti,,100g,4742022690208,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+581504,Salatisegu Grillisegu 100g Eesti,,100g,4742022690215,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+581505,Meiekandi mesi 1kg Eesti,,1kg,4742022910153,dry_preserves,dry_other,dry_preserves,dry_other
+581506,Haanja looduslik mineraalvesi mulliga 750ml,Haanja,750ml,4742023260103,drinks,drinks_water,drinks,drinks_water
+581507,Vormsi Originaal Rannamesi 950g,Vormsi,950g,4742023563334,drinks,drinks_spirits,dry_preserves,dry_other
+581508,Vormsi Metsamesi 950g,Vormsi,950g,4742023565550,dry_preserves,dry_other,dry_preserves,dry_other
+581509,Vormsi Põllulillede mesi 950g,Vormsi,950g,4742023567776,dry_preserves,dry_other,dry_preserves,dry_other
+581510,Nogel D3-vitamiin beebi oliiviõliga 440IU 10ml,Nogel,10ml,4742023680079,sauces_oils,oils_olive,personal_care,pcare_other
+581511,Nogel D3-vitamiin astelpajuõliga 4000IU 10ml,Nogel,10ml,4742023680116,sauces_oils,oils_other,personal_care,pcare_other
+581512,Nogel B12-tilgad kogu perele 500mc 10ml,Nogel,10ml,4742023680178,dry_preserves,dry_other,personal_care,pcare_other
+581513,Nogel 6K mahe tatrapuder rauaga 190g pirn,Nogel,190g,4742023680260,produce,produce_apples_pears,baby,baby_porridge_cereal
+581514,Nogel 6K mahe kaerapuder rauaga 190g apr.,Nogel,190g,4742023680444,dry_preserves,dry_other,baby,baby_porridge_cereal
+581515,Nogel 6K mahe riisipuder rauaga 190g pl.,Nogel,190g,4742023680475,dry_preserves,dry_pasta_rice,baby,baby_porridge_cereal
+581516,Nogel 6K mahe kaera-riisipuder rauaga 190g,Nogel,190g,4742023680482,dry_preserves,dry_pasta_rice,baby,baby_porridge_cereal
+581517,Nogel 6K mahe tatrapuder rauaga 100g pirni,Nogel,100g,4742023680918,produce,produce_apples_pears,baby,baby_porridge_cereal
+581518,Nogel 6K mahe 3-viljapuder rauaga 100g õuna,Nogel,100g,4742023680956,produce,produce_apples_pears,baby,baby_porridge_cereal

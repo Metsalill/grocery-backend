@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+581569,Kalli-Kalli iiris 150g assortii,Kalli-Kalli,150g,4742365000412,dry_preserves,dry_other,sweets_snacks,sweets_candies
+581570,Porgandi-õunamahl 500ml Kadarbiku,,500ml,4742368000747,drinks,drinks_juices,drinks,drinks_juices
+581571,Riivitud kapsas 250g Eesti,,250g,4742368001386,produce,produce_root_veg,produce,produce_root_veg
+581572,Riivitud porgand 250g Eesti,,250g,4742368001928,produce,produce_root_veg,produce,produce_root_veg
+581573,Kadarbiku ananassi-ingveri mahl püree 250ml,Kadarbiku,250ml,4742368001942,drinks,drinks_juices,produce,produce_smoothies_fresh_juices
+581574,Kadarbiku spinati-piparmündi mahl püree 250ml,Kadarbiku,250ml,4742368001966,drinks,drinks_juices,produce,produce_smoothies_fresh_juices
+581575,Kadarbiku mango-chia mahl püreega 250ml,Kadarbiku,250ml,4742368002017,drinks,drinks_juices,produce,produce_smoothies_fresh_juices
+581576,Delikatess suitsutatud juustupats 100g,Delikatess,100g,4742421003333,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+581577,Jõumees metsaõite mesi 1kg Eesti,Jõumees,1kg,4742422000027,dry_preserves,dry_other,dry_preserves,dry_other
+581578,Jõumees kreemjas mesi 1kg Eesti,Jõumees,1kg,4742422000065,dry_preserves,dry_other,dry_preserves,dry_other
+581579,Jõumees õietolm 80g Eesti,Jõumees,80g,4742422000881,dry_preserves,dry_other,dry_preserves,dry_other
+581580,McLean mikrokiudlapp 35*35cm mittekriimust.,McLean,,4742437000159,dry_preserves,dry_other,household,hh_cleaners
+581581,McLean Professional mikrokiudlapp sinine,McLean,,4742437000395,dry_preserves,dry_other,household,hh_cleaners
+581582,McLean üldpuhastuslapp 5tk niiske,McLean,5tk,4742437000418,dry_preserves,dry_other,household,hh_cleaners
+581583,Säästu nõudepesusvamm 10tk 8*5*2.5cm,Säästu,10tk,4742437000661,household,hh_dishwashing,household,hh_dishwashing
+581584,Säästu üldpuhastuslapp 3tk,Säästu,3tk,4742437000685,household,hh_cleaners,household,hh_cleaners
+581585,Säästu üldpuhastuslapp 3tk niiske,Säästu,3tk,4742437000692,dry_preserves,dry_other,household,hh_cleaners
+581586,Säästu metallnuustik 3tk 6*6*2cm,Säästu,3tk,4742437000708,dry_preserves,dry_other,household,hh_dishwashing
+581587,McLean köögirätik 40*60cm,McLean,,4742437000890,dry_preserves,dry_other,household,hh_cleaners
+581588,McLean nõudepesusvamm 5tk mittekriimust.,McLean,5tk,4742437002023,household,hh_dishwashing,household,hh_dishwashing
+581589,McLean aknakuivatuskumm 35cm,McLean,,4742437008476,dry_preserves,dry_other,household,hh_cleaners
+581590,Home prügikott 20L 30tk 40*60cm 25mic,Home,20L,4742437009114,household,hh_bins_bags,household,hh_bins_bags
+581591,Home prügikott 75L 10tk 65*100cm 31mic,Home,75L,4742437009145,household,hh_bins_bags,household,hh_bins_bags
+581592,Home prügikott 100L 10tk 71*115cm 35mic,Home,100L,4742437009152,household,hh_bins_bags,household,hh_bins_bags
+581593,Home prügikott 150L 10tk 75*115cm 35mic,Home,150L,4742437009169,household,hh_bins_bags,household,hh_bins_bags
+581594,Home prügikott 200L 10tk 75*140cm 35mic,Home,200L,4742437009176,household,hh_bins_bags,household,hh_bins_bags
+581595,Home prügikott 350L 5tk 105*150cm 50mic,Home,350L,4742437009190,household,hh_bins_bags,household,hh_bins_bags
+581596,Home prügikott 35L 15tk nööritavad 52*62cm,Home,35L,4742437009213,household,hh_bins_bags,household,hh_bins_bags
+581597,Home prügikott 60L 10tk nööritavad 60*72cm,Home,60L,4742437009220,household,hh_bins_bags,household,hh_bins_bags
+581598,Mopikomplekt 40cm teleskoopvars 120cm,,,,4742437009619,dry_preserves,dry_other,household,hh_cleaners
+581599,Mopikomplekt McLean-Home 40cm kahepoolne,,,,4742437009626,dry_preserves,dry_other,household,hh_cleaners
+581600,Mopp McLean-Home 40cm kahepoolne,,,,4742437009633,dry_preserves,dry_other,household,hh_cleaners
+581601,Mopp McLean-Home 40cm,,,,4742437009640,dry_preserves,dry_other,household,hh_cleaners
+581602,Ökomunad Kikerikii S 10tk Äntu Mõis,,10tk,4742442000038,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+581603,RM nagitsad kanafileest 250g,RM,250g,4742462000872,meat_fish,meat_poultry,frozen_food,frozen_meat
+581604,RM Kanarulaad 450g,RM,450g,4742462001237,meat_fish,meat_poultry,frozen_food,frozen_meat
+581605,RM Laste nagitsad kanafileest 260g,RM,260g,4742462001459,meat_fish,meat_poultry,frozen_food,frozen_meat
+581606,RM kanalihasardell suitsutatud 800g,RM,800g,4742462001480,meat_fish,meat_poultry,meat_fish,meat_sausages
+581607,RM kanaliha grillvorstikesed juustuga 270g,RM,270g,4742462001527,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+581608,Häädemeeste looduslik min.vesi gaasiga 1L,Häädemeeste,1L,4742464000221,drinks,drinks_water,drinks,drinks_water
+581609,Närimiskont Rex 1tk sõlmitud,,1tk,4742468000067,dry_preserves,dry_other,pet,pet_dog_treats
+581610,Rex maius koerale 100g kanafilee-lambalih.,Rex,100g,4742468000135,meat_fish,meat_poultry,pet,pet_dog_treats
+581611,Rex maius koerale 3tk kuivat. veisekõrvad,Rex,3tk,4742468000654,meat_fish,meat_beef_lamb_game,pet,pet_dog_treats
+581612,Närimiskont Rex 1tk pullipeenisega,,1tk,4742468007707,dry_preserves,dry_other,pet,pet_dog_treats
+581613,Lunden sushirullid kalamarja lõhe-wasabi 235g,Lunden,235g,4742476009762,meat_fish,fish_fresh,sauces_oils,sauces_other
+581614,Eesti Sai šokolaadisarv 420g,Eesti Sai,420g,4742494000475,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+581615,Eesti Sai vaniljekreemi toru 480g,Eesti Sai,480g,4742494000482,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+581616,Eesti Sai pirukas rebitud sealihaga 400g,Eesti Sai,400g,4742494000499,bakery,bakery_buns_croissants,bakery,bakery_other
+581617,Eesti Sai kirsi-kohupiimapirukas 480g,Eesti Sai,480g,4742494000505,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_other
+581618,Eesti Sai mitmevilja mozzarella pirukas 480g,Eesti Sai,480g,4742494000512,bakery,bakery_buns_croissants,bakery,bakery_other

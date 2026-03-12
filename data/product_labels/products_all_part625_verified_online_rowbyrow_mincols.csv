@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+581519,Nogel 6K mahe kaera-riisipuder rauaga 100g,Nogel,100g,4742023680987,dry_preserves,dry_pasta_rice,baby,baby_porridge_cereal
+581520,Nogel 6K mahe kaerapuder rauaga 100g porgand,Nogel,100g,4742023681182,dry_preserves,dry_other,baby,baby_porridge_cereal
+581521,Nogel Superraud acerola kirsiga N100,Nogel,,4742023681632,dry_preserves,dry_other,personal_care,pcare_other
+581522,Kodutalu kanamunad M 10tk,Kodutalu,10tk,4742024110049,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+581523,Kodutalu õrrekana munad M 10tk,Kodutalu,10tk,4742024110131,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+581524,Kodutalu vabalt peetud kanade munad M 10tk,Kodutalu,10tk,4742024110407,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+581525,Ecusson Brut Bio siider 5% 750ml,Ecusson,750ml,4742024130825,drinks,drinks_wine,drinks,drinks_beer_cider
+581526,Ecusson Doux Bio siider 2.5% 750ml,Ecusson,750ml,4742024130832,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+581527,Ecusson Rose siider 3% 750ml,Ecusson,750ml,4742024130849,drinks,drinks_wine,drinks,drinks_beer_cider
+581528,Ecusson Brut Bio siider 5% 330ml,Ecusson,330ml,4742024130856,drinks,drinks_wine,drinks,drinks_beer_cider
+581529,Ecusson Doux Bio siider 2.5% 330ml,Ecusson,330ml,4742024130863,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+581530,Semu astelpajumahl 100% 500ml,Semu,500ml,4742040001307,drinks,drinks_juices,drinks,drinks_juices
+581531,Semu arooniamahl 100% 500ml,Semu,500ml,4742040005114,drinks,drinks_juices,drinks,drinks_juices
+581532,Eesti Pakend arahhispähkel 500g,,500g,4742056002114,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+581533,Araabika filtrikohv 500g,,500g,4742056003258,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+581534,Kronopal saepurugraanul 5kg naturaalne,,5kg,4742058001016,dry_preserves,dry_other,pet,pet_litter_sand
+581535,Marineeritud küüslauk 120g Eesti,,120g,4742063004019,produce,produce_root_veg,dry_preserves,dry_canned_veg
+581536,Eltrum barankad 350g,Eltrum,350g,4742140002792,drinks,drinks_spirits,bakery,bakery_bread_loaves
+581537,Eltrum minirõngad 200g,Eltrum,200g,4742140002822,drinks,drinks_spirits,bakery,bakery_sweet_buns_donuts
+581538,Geralda kalmuküünal kaanega 36h valge,Geralda,,4742145006368,household,hh_candles_airfresh,household,hh_candles_airfresh
+581539,Autolipp Eesti 19011 25*39cm plastvardal,,,,4742149005237,dry_preserves,dry_other,household,hh_other
+581540,Germund mõnus mix 150g,Germund,150g,4742155000547,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+581541,Germund ingveri tropsid 100g suhkrustatud,Germund,100g,4742155001544,dry_preserves,dry_other,sweets_snacks,sweets_candies
+581542,Dr.Stern kuivtoit koerale Super Premium 10kg,Dr.Stern,10kg,4742189000339,pet,pet_other,pet,pet_dog_dry
+581543,Dr.Stern hein merisiga/küülikutele 500g,Dr.Stern,500g,4742189000407,pet,pet_small_animals,pet,pet_small_animals
+581544,Dr.Stern kuivtoit koerale Super Premium 2kg,Dr.Stern,2kg,4742189000476,pet,pet_other,pet,pet_dog_dry
+581545,Dr.Stern kassiliiv 15L/7.5kg kvartsteen.,Dr.Stern,15L,4742189005570,drinks,drinks_tea_coffee,pet,pet_litter_sand
+581546,Marmiton juustuvahvel 80g,Marmiton,80g,4742194000645,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_waffles_cakes
+581547,Maius koerale kuivatatud seakõrv 2tk,,2tk,4742212000015,pet,pet_other,pet,pet_dog_treats
+581548,Preemia maius koerale kuivatatud kops 80g,,80g,4742212001111,pet,pet_other,pet,pet_dog_treats
+581549,Maius koerale kuivatatud kanakael 100g,,100g,4742212002002,meat_fish,meat_poultry,pet,pet_dog_treats
+581550,Medrull pipraplaaster 10*18cm perf.,Medrull,,4742225001924,dry_preserves,dry_other,personal_care,pcare_other
+581551,Medrull Sensitive N1 plaaster 50*6cm 1tk,Medrull,1tk,4742225004574,dry_preserves,dry_other,personal_care,pcare_other
+581552,Medrull konnasilmaplaaster 6tk,Medrull,6tk,4742225008176,dry_preserves,dry_other,personal_care,pcare_other
+581553,Medrull aroomiplaaster My Little Nose 5tk,Medrull,5tk,4742225008466,dry_preserves,dry_other,personal_care,pcare_other
+581554,Medrull Ul.Pore 6*7cm plaaster ster. 5tk,Medrull,5tk,4742225008534,dry_preserves,dry_other,personal_care,pcare_other
+581555,Medrull soolatüükaplaaster 16tk,Medrull,16tk,4742225008886,world_spices,spices_basic_salt_pepper,personal_care,pcare_other
+581556,Medrull Herpes ohatiseplaaster 15tk,Medrull,15tk,4742225009203,dry_preserves,dry_other,personal_care,pcare_other
+581557,Saare jogurtikreem ahjuõunaga 400g,Saare,400g,4742231004124,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+581558,Saare hapukoor 20% 300g laktoosivaba,Saare,300g,4742231005312,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+581559,Saaremaa toorjuust 170g laktoosivaba,Saaremaa,170g,4742231005343,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cottage_quark
+581560,Saaremaa toorjuust karulaugu pestoga 170g,Saaremaa,170g,4742231005350,dairy_eggs_fats,dairy_cheese_slices,dairy_eggs_fats,dairy_cottage_quark
+581561,Baltix Basmati riis 4*100g,Baltix,100g,4742298000138,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+581562,Baltix bulgur 4*100g,Baltix,100g,4742298000503,dry_preserves,dry_other,dry_preserves,dry_groats_beans
+581563,Briis puhastatud praetud kilu 170g,Briis,170g,4742312003336,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_meat_fish
+581564,Briis vürtsikilufileed 400g,Briis,400g,4742312004814,dry_preserves,dry_pasta_rice,meat_fish,fish_salted_smoked
+581565,Saialilleõis taimetee 15g,,15g,4742322001698,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+581566,Energiatee ženšenniga taimetee 20g,,20g,4742322002138,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+581567,Kubja Ürditalu kummeliõis taimetee 25*1g,Kubja,1g,4742322009885,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+581568,Marjamaa Talu mustsõstramahl 750ml,Marjamaa,750ml,4742331001252,drinks,drinks_juices,drinks,drinks_juices

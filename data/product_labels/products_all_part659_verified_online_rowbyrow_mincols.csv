@@ -1,0 +1,51 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+583219,Holle 2 6K kitsepiimasegu 400g,Holle,400g,7640230491976,dairy_eggs_fats,dairy_milk,baby,baby_formula
+583220,Holle 3 10K kitsepiimasegu 400g,Holle,400g,7640230492096,dairy_eggs_fats,dairy_milk,baby,baby_formula
+583221,Gillette Satin Care depileerimiskreem 200ml,Gillette,200ml,7702018012466,dry_preserves,dry_other,personal_care,pcare_other
+583222,Gillette Venus Simply3 Plus raseerija 3tk,Gillette,3tk,7702018018116,dry_preserves,dry_other,personal_care,pcare_shaving
+583223,Gillette Venus Simply2 raseerija 4+2tk,Gillette,2tk,7702018069316,personal_care,pcare_shaving,personal_care,pcare_shaving
+583224,Gillette Fusion ProGlide terad 4tk,Gillette,4tk,7702018085514,dry_preserves,dry_other,personal_care,pcare_shaving
+583225,Satin Care Lavender Touch depileerimiskreem 200ml,Satin Care,200ml,7702018264735,dry_preserves,dry_other,personal_care,pcare_other
+583226,Gillette Mach3 Irritation Defence raseerimisvaht 200ml,Gillette,200ml,7702018290994,dry_preserves,dry_other,personal_care,pcare_shaving
+583227,Gillette Venus Extra Smooth raseerija,Gillette,,7702018323012,personal_care,pcare_shaving,personal_care,pcare_shaving
+583228,Gillette Venus Smooth terad 8tk,Gillette,8tk,7702018365067,dry_preserves,dry_other,personal_care,pcare_shaving
+583229,Gillette Fusion Flexball raseerija +2tera,Gillette,,7702018390816,personal_care,pcare_shaving,personal_care,pcare_shaving
+583230,Satin Care Vanilla Dream raseerimiskreem 200ml,Satin Care,200ml,7702018399567,dry_preserves,dry_other,personal_care,pcare_shaving
+583231,Gillette Mach3 Extra Comfort raseerimiskreem 200ml,Gillette,200ml,7702018405015,dry_preserves,dry_other,personal_care,pcare_shaving
+583232,Gillette Venus Simply3 Multicolor raseerija 6tk,Gillette,6tk,7702018426201,dry_preserves,dry_other,personal_care,pcare_shaving
+583233,Gillette Blue3 Cool raseerija 3tk ühekordne,Gillette,3tk,7702018457229,dry_preserves,dry_other,personal_care,pcare_shaving
+583234,Gillette Series Cool raseerimiskreem 200ml,Gillette,200ml,7702018457786,dry_preserves,dry_other,personal_care,pcare_shaving
+583235,Gillette Fusion Ultra Moisturizing raseerimiskreem 200ml,Gillette,200ml,7702018465156,dry_preserves,dry_other,personal_care,pcare_shaving
+583236,Gillette Blue3 Comfort raseerija 3tk,Gillette,3tk,7702018489619,personal_care,pcare_shaving,personal_care,pcare_shaving
+583237,Gillette Blue3 Comfort raseerija 6tk+2tk,Gillette,6tk,7702018489978,personal_care,pcare_shaving,personal_care,pcare_shaving
+583238,Gillette Blue3 Sensitive raseerija 3tk,Gillette,3tk,7702018490080,dry_preserves,dry_other,personal_care,pcare_shaving
+583239,Gillette Venus Extra Smooth Sensitive terad 4tk,Gillette,,7702018497416,dry_preserves,dry_other,personal_care,pcare_shaving
+583240,Gillette Blue3 UCL raseerija 3tk ühekordne,Gillette,3tk,7702018531813,dry_preserves,dry_other,personal_care,pcare_shaving
+583241,Gillette Blue3 Red raseerija 6+2tk ühekordne,Gillette,2tk,7702018536320,dry_preserves,dry_other,personal_care,pcare_shaving
+583242,Gillette Mach3 terad 5tk,Gillette,5tk,7702018552313,dry_preserves,dry_other,personal_care,pcare_shaving
+583243,Gillette Mach3 raseerija +5tera,Gillette,,7702018610181,dry_preserves,dry_other,personal_care,pcare_shaving
+583244,Gillette Fusion Ultra Sensitive raseerimiskreem 200ml,Gillette,200ml,7702018617098,dry_preserves,dry_other,personal_care,pcare_shaving
+583245,Gillette Sensitive raseerimisvaht 200+100ml,Gillette,100ml,7702018617234,dry_preserves,dry_other,personal_care,pcare_shaving
+583246,Gillette Series Arctic Ice näovesi 100ml,Gillette,100ml,7702018620180,drinks,drinks_water,personal_care,pcare_other
+583247,Gillette Series Cool Wave näovesi 100ml,Gillette,100ml,7702018620265,drinks,drinks_water,personal_care,pcare_other
+583248,Gillette Fusion raseerija +2tera,Gillette,,7702018866946,personal_care,pcare_shaving,personal_care,pcare_shaving
+583249,Gillette Fusion terad 4tk,Gillette,4tk,7702018866984,dry_preserves,dry_other,personal_care,pcare_shaving
+583250,Gillette Fusion Power terad 4tk,Gillette,4tk,7702018867219,dry_preserves,dry_other,personal_care,pcare_shaving
+583251,Gillette Venus Breeze raseerija +2tera,Gillette,,7702018886166,personal_care,pcare_shaving,personal_care,pcare_shaving
+583252,Gillette Venus Breeze terad 4tk,Gillette,4tk,7702018886364,dry_preserves,dry_other,personal_care,pcare_shaving
+583253,Halls Honey-Lemon kurgupastill 33.5g,Halls,33.5g,7702133218118,drinks,drinks_wine,personal_care,pcare_other
+583254,Halls Extra Strong kurgupastill 33.5g,Halls,33.5g,7702133218125,drinks,drinks_wine,personal_care,pcare_other
+583255,Vv Caracter Chenin-Chardonnay 0.75L,Vv,0.75L,7790762050032,drinks,drinks_wine,drinks,drinks_wine
+583256,Pv Bisquertt Petirrojo Cab.Sauv.Res 0.75L,Pv,0.75L,7804343004151,dry_preserves,dry_other,drinks,drinks_wine
+583257,Vv Bisquertt Petirrojo Sauv.Blanc Res 0.75L,Vv,0.75L,7804343004175,dry_preserves,dry_other,drinks,drinks_wine
+583258,Vv Bisquertt Petirrojo Chard.Res 0.75L,Vv,0.75L,7804343004182,dry_preserves,dry_other,drinks,drinks_wine
+583259,Pv Bisquertt Petirrojo Carmenere Res 0.75L,Pv,0.75L,7804343004250,dry_preserves,dry_other,drinks,drinks_wine
+583260,Pv Casa Solis Cabernet Sauvignon 0.75L,Pv,0.75L,7804664410143,drinks,drinks_wine,drinks,drinks_wine
+583261,Vv Casa Solis Sauvignon Blanc 0.75L,Vv,0.75L,7804664410167,dry_preserves,dry_other,drinks,drinks_wine
+583262,Vv Casa Solis Chardonnay 0.75L,Vv,0.75L,7804664410174,drinks,drinks_wine,drinks,drinks_wine
+583263,Pv Casa Solis Carmenere 0.75L,Pv,0.75L,7804664410303,dry_preserves,dry_other,drinks,drinks_wine
+583264,Colgate Triple Action hambapasta 125ml,Colgate,125ml,7891024128831,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+583265,Cinzano Dry Edition Secco vahuvein 0.75L,Cinzano,0.75L,8000020004226,drinks,drinks_wine,drinks,drinks_wine
+583266,Lavazza Caffe Decaffeinato jahvatatud kohv 250g,Lavazza,250g,8000070011052,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+583267,Cirio tükeldatud tomatid 400g,Cirio,400g,8000320010118,produce,produce_root_veg,dry_preserves,dry_canned_veg
+583268,Victoria keedetud läätsed 400g,Victoria,400g,8000483160002,dry_preserves,dry_groats_beans,dry_preserves,dry_groats_beans
