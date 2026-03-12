@@ -8,7 +8,7 @@ import psycopg2
 import psycopg2.extras
 
 LABEL_DIR = Path("data/product_labels")
-PATTERN = "products_all_parts*_verified_online_rowbyrow_mincols.csv"
+PATTERN = "products_all_part*_verified_online_rowbyrow_mincols.csv"
 
 
 def load_updates_from_file(path: Path):
@@ -83,6 +83,41 @@ def main():
             uncertain_chunks.append(uncertain)
 
     print(f"\nTotal prepared updates: {len(all_updates)} from {len(files)} files\n")
+
+    # --- diagnose ID matching before committing ---
+    conn = psycopg2.connect(db_url)
+    try:
+        with conn.cursor() as cur:
+            # Check what the actual PK column is called
+            cur.execute("""
+                SELECT column_name
+                FROM information_schema.columns
+                WHERE table_name = 'products'
+                ORDER BY ordinal_position
+                LIMIT 10;
+            """)
+            cols = [row[0] for row in cur.fetchall()]
+            print(f"products table columns (first 10): {cols}")
+
+            # Sample 5 IDs from DB
+            cur.execute("SELECT id FROM products LIMIT 5;")
+            db_ids = [row[0] for row in cur.fetchall()]
+            print(f"Sample DB product IDs: {db_ids}")
+
+            # Sample 5 IDs from our files
+            sample_file_ids = [u[0] for u in all_updates[:5]]
+            print(f"Sample file product_ids: {sample_file_ids}")
+
+            # Count how many file IDs exist in DB
+            file_ids = [u[0] for u in all_updates]
+            cur.execute(
+                "SELECT COUNT(*) FROM products WHERE id = ANY(%s::integer[])",
+                (file_ids,)
+            )
+            matched = cur.fetchone()[0]
+            print(f"File IDs that exist in DB: {matched} out of {len(file_ids)}\n")
+    finally:
+        conn.close()
 
     # --- apply updates to products ---
     conn = psycopg2.connect(db_url)
