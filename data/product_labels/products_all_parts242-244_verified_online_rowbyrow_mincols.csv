@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+127296,"Piiritusjook CARIBBA Spiced, 50 cl",,500 ml,,,,drinks,drinks_spirits
+127297,"Piiritusjook CARIBBA Spiced, 70 cl",Liviko AS,700 ml,4740050006145,,,drinks,drinks_spirits
+127298,"Piiritusjook HANDSA Organic Rye, 50 cl",Moe OÜ,500 ml,4742716001266,,,drinks,drinks_spirits
+127299,"Piiritusjook Imperial XII VS, 50 cl",MV Eesti OÜ,500 ml,4770033228028,,,drinks,drinks_spirits
+127300,"Piiritusjook MAGISTR VS, 50 cl",Mediato AS,500 ml,4840044010223,,,drinks,drinks_spirits
+127301,"Piiritusjook MARQUIS DE LEON, 20 cl",Liviko AS,200 ml,4740050006565,,,drinks,drinks_spirits
+127302,"Piiritusjook METAXA 5*, 50 cl",Liviko AS,500 ml,5202795120030,,,drinks,drinks_spirits
+127303,"Piiritusjook METAXA 5*, 70 cl",Liviko AS,700 ml,5202795120054,,,drinks,drinks_spirits
+127304,"Piiritusjook Metaxa 5* Orange, 70cl",Liviko AS,700 ml,5202795160777,produce,produce_tropical,drinks,drinks_spirits
+127305,"Piiritusjook RIGA BLACK BALSAM, 50 cl",Amber Distribution Estonia OÜ,500 ml,4750021101281,,,drinks,drinks_spirits
+127306,Riga Black Balsam Currant muu piiritusjook 30%vol 500ml,Riga Black,500 ml,4750021537288,,,drinks,drinks_spirits
+127307,Piiritusjook STAR DOLLAR 5 Rich Harmony 35 cl,LTT AS,350 ml,4033209006036,,,drinks,drinks_spirits
+127308,"Piiritusjook STAR DOLLAR Rich Harmony 5*, 20 cl",LTT AS,200 ml,4033209010019,,,drinks,drinks_spirits
+127309,"Pikateraline aurutatud riis 4*125g, MÜLLERŚ MÜHLE, 500 g",Claire Foods OÜ,500 g,4000286004668,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+127310,"Pikateraline riis, BALTIX, 1 kg",Worldline OÜ,1 kg,4742298000343,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+127311,"Pikateraline riis, TARTU MILL, 1 kg",Tartu Mill AS,1 kg,4750020030292,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+127312,"Pikateraline valge riis 4 x 125 g, FIRST PRICE, 500 g",Selver AS,500 g,7311041074756,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+127313,"Piknikukurk terve, PÕLTSAMAA, 680 g",Orkla Eesti AS,680 g,4740029040156,produce,produce_root_veg,dry_preserves,dry_canned_veg
+127314,"Piknikukurk (viilud), FELIX, 8,2 kg, ettetellimisel",Orkla Eesti AS,8.2 kg,4740029040293,produce,produce_root_veg,dry_preserves,dry_canned_veg
+127315,"Piknikukurk viiludena, PÕLTSAMAA, 680 g",Orkla Eesti AS,680 g,4740029040149,produce,produce_root_veg,dry_preserves,dry_canned_veg
+127316,Santa Maria piparkoogimaitseaine 30 g,Santa Maria,30 g,6418474118413,world_spices,spices_basic_salt_pepper,world_spices,spices_herbs_spice_mix
+127317,"Piparmündi-koorejäätis küpsisetükkidega, CLASSIC, 270 g",Balbiino AS,270 g,4740188012575,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+127318,"Piparmündi-koorejäätis küpsistega, RAKS, 56 g",Balbiino AS,56 g,4740188019437,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+127319,"Piparmündi-koorejäätis šokotükk vahvlitopsis, PREMIA, 75 g",Premia Tallinna Külmhoone AS,75 g,4740093942462,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+127320,"Piparmündimaitseline karamell, KALEV, 120 g",Orkla Eesti AS,120 g,4740012600114,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_candies
+127321,"Piparmündimaitseline koorejäätis glasuuris, VANILLA NINJA, 80 g",Balbiino AS,80 g,4740188020075,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+127438,Pagaripoisid Pidupäevatort 650 g,Pagaripoisid Pidupäevatort,650 g,4740429014276,,,bakery,bakery_cakes_pastries
+127444,Ch&ok grillrest 42x31cm CC-2047,Ch&ok,,4742777014519,,,household,hh_kitchenware
+127541,Piltti 450g Päikesepuder pulber 6k,Piltti,450 g,8445290805546,,,baby,baby_porridge_cereal
+127561,"Jäätee Virsiku-hibski, FUZETEA, 1,5 L",Coca-Cola HBC Eesti AS,1.5 l,5000112651621,drinks,drinks_tea_coffee,drinks,drinks_soft_soda
+127845,"Tutteli 1 piimal põhinev imiku piimasegu kasutamiseks sünnist, 650g",Tutteli,650 g,5900852063275,baby,baby_formula,baby,baby_formula
+127880,Salchichon Extra salaami All Natural 80 g,Salchichon Extra,80 g,8410843105114,,,meat_fish,meat_sausages
+128360,Meira värviline nonparell 60 g,Meira,60 g,6414203400651,,,dry_preserves,dry_flour_sugar_baking
+128498,"Haug, roogitud, jahutatud, kg",,,2060321000002,dry_preserves,dry_flour_sugar_baking,meat_fish,fish_fresh
+128839,Oranz kõrvits,Oranz,,2060354900003,,,produce,produce_root_veg
+128927,"Hirveliha omas mahlas, RANNAROOTSI, 240 g",Rannarootsi,240 g,4740296002680,drinks,drinks_other,dry_preserves,dry_canned_meat_fish
+129172,"Apelsin Navel, kg",Määramata,,2700002000005,produce,produce_tropical,produce,produce_tropical
+129173,TEEKANNE piparmünditee 45g,Teekanne,45 g,4009300522768,,,drinks,drinks_tea_coffee
+129174,"Pipra Naps ingveriga, LIVIKO, 35 cl",Liviko AS,350 ml,4740050004981,,,drinks,drinks_spirits
+129175,"Pipra Naps, LIVIKO, 20 cl",Liviko AS,200 ml,4740050001898,,,drinks,drinks_spirits
+129176,"Pipra Naps, LIVIKO, 35 cl",Liviko AS,350 ml,4740050001218,,,drinks,drinks_spirits
+129177,"Pipra Naps, LIVIKO, 50 cl",Liviko AS,500 ml,4740050001225,,,drinks,drinks_spirits
+129178,"Piprakurk, SALVEST, 675 g",Salvest AS,675 g,4740073060384,produce,produce_root_veg,dry_preserves,dry_canned_veg
+129179,"Pipramaitseaine ürdine 0% soola, MEIRA, 26 g",Meira Eesti OÜ,26 g,6414201005216,world_spices,spices_basic_salt_pepper,world_spices,spices_basic_salt_pepper
+129180,"Piprasegu, SANTA MARIA, 258 g",Santa Maria AS,258 g,7311311026225,,,world_spices,spices_basic_salt_pepper
+129181,"Piret piimašokolaad tervete metspähklitega, KALEV, 270 g",Orkla Eesti AS,270 g,4740012601043,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+129182,"Pirni-õunajook kõrrega Draakoni, PÕLTSAMAA, 200 ml",Orkla Eesti AS,200 ml,4740029051381,produce,produce_apples_pears,drinks,drinks_juices
+129183,"Pirni pooled kerges siirupis, GREEN, 230g neto",Pralinee OÜ,230 g,4744148011332,drinks,drinks_syrups_powders,dry_preserves,dry_canned_fruit
+129184,"Pirninektar, AURA, 1 l",A. Le Coq AS,1 l,4740051000173,drinks,drinks_juices,drinks,drinks_juices
+129185,"Pistaatsia-koorejäätis, PREMIA, 240 g",Premia Tallinna Külmhoone AS,240 g,4740093364578,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+129275,Elonen Briozza Tomati-basiiliku 275g,Elonen Briozza,275 g,6410580012869,,,bakery,bakery_sweet_buns_donuts
+129337,Liköörvein Kagor Pastoral storika 75cl,Respomar OÜ,750 ml,4840044010612,drinks,drinks_wine,drinks,drinks_wine
+129338,"Maitseaine Vegeta Natur kuldsele kanale, PODRAVKA, 20 g",Jungent Estonia OÜ,20 g,3850104083228,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+129377,"Piprasegu, SANTA MARIA, 25 g",Santa Maria AS,25 g,6418474118376,,,world_spices,spices_basic_salt_pepper
+129387,Pähklinäpp kivita datlid 250 g,Pähklinäpp,250 g,4750195020357,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+129515,Mulino bianco liivaküpsised galletti 350 g,Mulino,350 g,8076809572873,bakery,bakery_other,sweets_snacks,sweets_biscuits_cookies
+129535,Salla-pringi hea eestimaa mesi 1 kg,Salla-pringi,1 kg,0211100000184,,,dry_preserves,dry_flour_sugar_baking
+129541,"Hipp hea une puder küpsistega 190g, alates 4-elukuust",Hipp,190 g,9062300107408,,,baby,baby_porridge_cereal
+129604,Noor kookos,Noor,,4740199000240,bakery,bakery_cakes_pastries,produce,produce_tropical
+129617,Tolmukoguja,Tolmukoguja,,5060481022224,,,household,hh_other
+129677,Kronenbourg 1664 Blanc õlu 5%vol 24x330 ml kohver,Kronenbourg,24x330 ml,4740019002690,,,drinks,drinks_beer_cider
+129697,Panda Lakumix Toffee lagrits 250g,Panda Lakumix,250 g,6412500443210,,,sweets_snacks,sweets_candies
+129734,Viinamari hele seemneteta 500 g,Viinamari,500 g,4740199000028,,,produce,produce_tropical
+129745,Estrella sinihallitusjuustumaitseline dipikastmepulber 15g,Estrella,15 g,7310532131183,dairy_eggs_fats,dairy_other,sauces_oils,sauces_other
+129761,"Il Capolavoro Rosso Organico vein 13,5%vol 750ml",Il Capolavoro,750 ml,5704634185274,,,drinks,drinks_wine
+129813,Maadlex virsikumaitseline siirup 500ml,Maadlex,500 ml,4740506000734,,,drinks,drinks_syrups_powders
+129908,"Sallinen suhkrusüdamed, 100g",Sallinen,100 g,6436501028320,,,sweets_snacks,sweets_candies
+129914,PÕNN Ökoloogiline Täisterapuder banaani ja musta sõstraga 200 g 6+,PÕNN Ökoloogiline,200 g,4740073079652,,,baby,baby_porridge_cereal
+129976,Jahu-jaan öko rukkijahu (täistera) 750 g,Jahu-jaan,750 g,4742981013391,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+130166,"Rummo Fusili Pasta # 48, 500 g",Rummo Fusili,500 g,8008343200486,drinks,drinks_spirits,dry_preserves,dry_pasta_rice
+130182,Weetabix Minis šokolaadi-nisuhelbed 500 g,Weetabix Minis,500 g,5010029229134,,,dry_preserves,dry_cereals_muesli
+130184,Hungry chef pannkoogijahusegu 350 g,Hungry,350 g,6426000004499,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+130198,Tartu Mill täistera jämedad kaerahelbed 500 g,Tartu Mill,500 g,4740493004036,,,dry_preserves,dry_cereals_muesli
+130265,Herkuless riisihelbepuder mustika ja koorega 40g,Herkuless,40 g,4750121714954,dry_preserves,dry_pasta_rice,dry_preserves,dry_cereals_muesli
+130674,Hipp banaanipüree pirni ja mango öko 4k,Hipp,,9062300133766,,,baby,baby_food_pouches
+130689,Belin kibuvitsatee 20 x 2 g,Belin,40 g,5900675000181,,,drinks,drinks_tea_coffee
+130782,"Pistaatsiajäätis mandlikrokandiga, CLASSIC, 380 g",Balbiino AS,380 g,4740188019130,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+130783,"Pistaatsiajäätis mandlilaastudega, CLASSIC, 64 g",Balbiino AS,64 g,4740188019345,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+130784,"Pitsa ja pasta kaste, POMI, 500 g",,500 g,,dry_preserves,dry_pasta_rice,sauces_oils,sauces_pasta_cooking
+130785,"Pitsamaitseaine, 9g, SANTA MARIA",Santa Maria AS,9 g,7311311014956,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+130786,"Pitsamaitseaine, MEIRA, 32 g",Meira Eesti OÜ,32 g,6414201003809,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+130787,"Pitsamaitseaine, SANTA MARIA, 5 g",Santa Maria AS,5 g,6418474118109,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+130788,"Pitsarull, SELVERI PAGARID, 85 g",Selver AS,85 g,2615144000007,,,bakery,bakery_other
+130789,"Pizzakaste, POMI, 400 g",Imex Trading Group AS,400 g,8032793342670,,,sauces_oils,sauces_pasta_cooking
+130790,"Plaadikoogijahu, VILMA, 400g",,400 g,,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+130791,"Ploomid tumedas šokolaadis, SKRIVERU, 110 g",Selver AS,110 g,4751010575311,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+130792,"Ploomikompott, MINU, 680 g",Makro Trade Baltic OÜ,680 g,4743144000692,,,dry_preserves,dry_canned_fruit
+130793,"Ploomilisandi ja šokolaaditükkidega koorejäätis, ONU ESKIMO, 680 g",Balbiino AS,680 g,4740188012612,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+130794,"Plov, SELVERI KÖÖK, 1kg",Kulinaaria OÜ,1 kg,4740581110571,,,dry_preserves,dry_ready_meals_jars
+130795,"Plov, SELVERI KÖÖK, 350 g",Kulinaaria OÜ,350 g,4740581103955,,,dry_preserves,dry_ready_meals_jars
+130796,"Pohla- ja karamelli-koorejäätis, ONU ESKIMO, 680 g",Balbiino AS,680 g,4740188012919,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+130797,Külmutatud pohlad 350 g,Külmutatud,350 g,4742798008764,frozen_food,frozen_berries_fruit,frozen_food,frozen_berries_fruit
+130798,"Pohlamoos, FIRST PRICE, 400 g",Selver AS,400 g,7311041082959,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+130799,"Pohlamoos, MEIE MARI, 310g",Salvest AS,310 g,4740073000021,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+130800,"Pohlamoos, PÕLTSAMAA, 380 g",Orkla Eesti AS,380 g,4740029045496,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+130801,"Pohlamoos pudelis, PÕLTSAMAA, 385 g",Orkla Eesti AS,385 g,4740029045892,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+130802,"Pohlasalat, SALVEST, 310 g",Salvest AS,310 g,4740073030189,produce,produce_herbs_salads_sprouts,dry_preserves,dry_canned_fruit
+130803,"Poke-kauss forelliga, SELVERI KÖÖK, 350 g",Kulinaaria OÜ,350 g,4740581110182,meat_fish,fish_fresh,dry_preserves,dry_ready_meals_jars
+130804,"Poke-kauss kanaga, SELVERI KÖÖK, 350 g",Kulinaaria OÜ,350 g,4740581110151,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+130805,"Poke-kauss tuunikalaga, SELVERI KÖÖK, 350 g",Kulinaaria OÜ,350 g,4740581110168,meat_fish,fish_fresh,dry_preserves,dry_ready_meals_jars
+130806,Salvest põldoasupp sealihaga 530 g,Salvest,530 g,4740073040331,meat_fish,meat_pork,dry_preserves,dry_soups_noodles
+130807,"Põltsamaa Aprikoosimoos, PÕLTSAMAA, 3 kg, ettetellimisel",Orkla Eesti AS,3 kg,4740029045755,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+130808,"Põltsamaa Maasikamoos, PÕLTSAMAA, 3 kg, ettetellimisel",Orkla Eesti AS,3 kg,4740029045724,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+130809,"Põltsamaa Mustasõstramoos, PÕLTSAMAA, 3 kg, ettetellimisel",Orkla Eesti AS,3 kg,4740029045748,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+130810,"Poolitatud kooritud mungoad (mung dal), NATCO, 500 g",Umami OÜ,500 g,5013531621199,dairy_eggs_fats,dairy_cream_sourcream,dry_preserves,dry_groats_beans
+130811,"Popcorn Belgia šokolaadiga, NOCRAP, 65 g",Selver AS,65 g,5713719403004,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_snacks_salty
+130812,"Popcorn cheddar juustu, NOCRAP, 40 g",Selver AS,40 g,5713719061006,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+130813,"Popcorn karamell ja kookos, NOCRAP, 65 g",Selver AS,65 g,5713719416004,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+130814,"Popcorn karamell ja mandel, NOCRAP, 65 g",Selver AS,65 g,5713719415007,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+130815,"Porgand, lillkapsas, brokoli Fitlap, HÄRMAVILI, 400 g",Balbiino AS,400 g,4740188900735,produce,produce_root_veg,frozen_food,frozen_veg
+130816,"Porgandi-ananassisalat, SELVERI KÖÖK, 1 kg, ettetellimisel",Kulinaaria OÜ,1 kg,4740581112148,produce,produce_herbs_salads_sprouts,dry_preserves,dry_ready_meals_jars
+130817,"Porgandi-küüslaugusalat, SELVERI KÖÖK, 200 g",Kulinaaria OÜ,200 g,4740581112391,produce,produce_herbs_salads_sprouts,dry_preserves,dry_ready_meals_jars
+130818,"Porgandi-küüslaugusalat, SELVERI KÖÖK, 600 g",Kulinaaria OÜ,600 g,4740581112407,produce,produce_herbs_salads_sprouts,dry_preserves,dry_ready_meals_jars
+130819,"Porgandiga praekapsas, SALVEST, 3 kg, ettetellimisel",Salvest AS,3 kg,4740073071717,produce,produce_root_veg,dry_preserves,dry_canned_veg
+130820,"Porgandikook toorjuustuglasuuriga, SELVERI KÖÖK, 270 g",Kulinaaria OÜ,270 g,4740581104075,dairy_eggs_fats,dairy_other,bakery,bakery_cakes_pastries
+130821,"Porgandikook toorjuustuglasuuriga, SELVERI KÖÖK, 560 g",Kulinaaria OÜ,560 g,4740581104082,dairy_eggs_fats,dairy_other,bakery,bakery_cakes_pastries
+130822,"Porgandikuubikud, HÄRMAVILI, 300 g",Balbiino AS,300 g,4740188020174,produce,produce_root_veg,frozen_food,frozen_veg
+130823,"Porgandipirukas, SELVERI PAGARID, ca 60 g",Eesti Pagar AS,60 g,2611013000000,bakery,bakery_cakes_pastries,bakery,bakery_other
+130824,"Portsjonkakao, LE ROYAL, 25 g",,25 g,,,,drinks,drinks_syrups_powders
+130825,"Potitreeningupüksid 2-3 a, BABY PLANET, 1 tk",Baby Planet OÜ,1 pcs,0630606499856,baby,baby_other,baby,baby_diapers
+130826,"Praadimissegu kartuliga, HÄRMAVILI, 400 g",Balbiino AS,400 g,4740188900957,produce,produce_root_veg,frozen_food,frozen_veg
+130827,"Praejuust kitsepiimast, ANDRI-PEEDO, 150 g",Nopri Talumeierei OÜ,150 g,4740187222210,dairy_eggs_fats,dairy_other,cheese,cheese_delicatessen
+130828,"Praekapsas, FELIX, 3 kg, ettetellimisel",Orkla Eesti AS,3 kg,4740029066026,produce,produce_root_veg,dry_preserves,dry_canned_veg
+130829,"Praekapsas porgandiga, PÕLTSAMAA, 520 g",Orkla Eesti AS,520 g,4740029061533,produce,produce_root_veg,dry_preserves,dry_canned_veg
+130830,"Praekapsas porgandiga, PÕLTSAMAA, 820 g",Orkla Eesti AS,820 g,4740029061458,produce,produce_root_veg,dry_preserves,dry_canned_veg
+130831,"Praekapsas, SALVEST, 3 kg, ettetellimisel",Salvest AS,3 kg,4740073051030,produce,produce_root_veg,dry_preserves,dry_canned_veg
+130832,"Praetud kala basmatiriisi ja Türgi ubadega, SELVERI KÖÖK, 450 g",Kulinaaria OÜ,450 g,4740581112599,meat_fish,fish_fresh,dry_preserves,dry_ready_meals_jars
+130833,"Praetud kana maitsega kiirnuudlid, REEVA, 60 g",Selver AS,60 g,4820179258561,meat_fish,meat_poultry,dry_preserves,dry_soups_noodles
+130834,"Praetud kodune kotlet, SELVERI KÖÖK, 230 g",Kulinaaria OÜ,230 g,4740581106437,,,meat_fish,meat_other
+130835,"Pralineekompvek Maiuspala, KALEV, 175 g",Orkla Eesti AS,175 g,4740012027478,,,sweets_snacks,sweets_candies
+130836,"Prantsuse ürdisegu, SANTA MARIA, 6 g",Santa Maria AS,6 g,4740018175616,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+130837,"Prantsuse või, PAYSAN BRETON, 125 g",Deline OÜ,125 g,3412290011067,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+130838,"Premia -40% koorejäätis mango-passionviljalisandiga, PREMIA, 480 g",Premia Tallinna Külmhoone AS,480 g,4740093116955,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+130839,"Premia vaarika-brownie koorejäätis, PREMIA, 270 g",Premia Tallinna Külmhoone AS,270 g,4740093632455,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+130840,"Premium Apelsininektar, DON SIMON, 1,5 L",,1.5 l,,drinks,drinks_juices,drinks,drinks_juices
+130841,"Premium Majonees, FELIX, 235 g",Orkla Eesti AS,235 g,4740029700029,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+130842,"Premium Majonees, FELIX, 445 g",Orkla Eesti AS,445 g,4740029700036,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+130843,"Premium müsli marjadega, AXA, 330 g",Abestock AS,330 g,4820237692566,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+130844,"Premium müsli šokolaadi ja karamelliga, AXA, 330 g",Abestock AS,330 g,4820237692603,sweets_snacks,sweets_chocolate_bars,dry_preserves,dry_cereals_muesli
+130845,"Premium müsli troopiliste viljadega, AXA, 330 g",Abestock AS,330 g,4820237692528,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+130846,"Premium must tee niidiga kotis 50pk, DILMAH, 100 g",Jungent Estonia OÜ,100 g,9312631801552,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+130847,"Premium must tee niidita kotis 100pk, DILMAH, 200 g",Jungent Estonia OÜ,200 g,9312631106428,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+130848,"Premium tomatimahl, DON SIMON, 1 L",Mediato AS,1 l,8410261605180,drinks,drinks_juices,drinks,drinks_juices
+130849,"Presidentti Espresso uba, PAULIG, 1 kg",Paulig Coffee Estonia AS,1 kg,6411300169337,personal_care,pcare_feminine_hygiene,drinks,drinks_coffee_beans_capsules
+130850,"Presidentti Ruby jahvatud kohv, PAULIG, 500 g",Paulig Estonia AS,500 g,6411300176724,personal_care,pcare_feminine_hygiene,drinks,drinks_coffee_beans_capsules
+130851,"Presidentti Ruby kohviuba, PAULIG, 400 g",Paulig Estonia AS,400 g,6411300176748,personal_care,pcare_feminine_hygiene,drinks,drinks_coffee_beans_capsules
+130852,"Prima Donna väikepakk, PRIMA DONNA, 180 g",Deline OÜ,180 g,8715009220626,,,cheese,cheese_regular
+130853,"Pruun roosuhkur (rafineerimata), SOL MARRON, 500 g",Scandic Vector OÜ,500 g,3800100801166,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+130854,"Pruunid läätsed ilma vedelikuta, ACTIVUS, 150 g",Sanitex OÜ,150 g,4779039732911,dry_preserves,dry_groats_beans,dry_preserves,dry_groats_beans
+130855,"Psüllium, SALLISELTA, 100 g",Kaupmees & Ko AS,100 g,6436501057351,,,dry_preserves,dry_flour_sugar_baking

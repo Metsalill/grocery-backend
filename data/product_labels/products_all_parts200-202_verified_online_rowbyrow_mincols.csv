@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+125191,"Kalamarjamääre krabiga, VELADIS, 160g",KODURANNA TRV OÜ,,4823097905531,meat_fish,fish_fresh,meat_fish,fish_processed
+125192,"Kohupiima ahjukook õuntega, SELVERI KÖÖK, 600 g",KULINAARIA OÜ,,4740581112995,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+125193,"Kohupiima ahjukook rabarberiga, SELVERI KÖÖK, 550 g",KULINAARIA OÜ,,4740581111035,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+125194,"Toorvorst suviste vürtsidega, OSKAR, 450 g",OSKAR LT AS,,4740569013122,personal_care,pcare_feminine_hygiene,meat_fish,meat_grill_blood_sausages
+125195,"Kuldses marinaadis broilerišašlõkk, OSKAR, 900 g",OSKAR LT AS,,4740569013184,sauces_oils,sauces_marinades,meat_fish,meat_poultry
+125196,"Kohupiima-apelsini stritsel, SELVERI PAGARID, 480-490 g",SELVER AS,,2611092000007,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_sweet_buns_donuts
+125197,"Kohupiima-vaarika stritsel, SELVERI PAGARID, 500 g",SELVER AS,,2614940000006,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_sweet_buns_donuts
+125198,"Metssea välisfileesink, LINNAMÄE LIHATÖÖSTUS, 100 g",,,4740618007690,meat_fish,meat_hams,meat_fish,meat_hams
+125199,"Kohupiimakook rosinatega, RÕNGU PAGAR, 500 g",RÕNGU PAGAR OÜ,,4742216000653,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+125200,"Kohupiimarõngas, MARTA PAGAR, 400 g",EUROLEIB AS,,4742036000994,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+125201,"Vannamei krevetid tšill-küüslaugu, MARWI, 100g",JP FOODS AS,,4740173003472,,,meat_fish,fish_processed
+125202,"Masinkooritud krevetid marinaadis 185 g, MARWI, 100 g neto",JP FOODS AS,,4740173000518,sauces_oils,sauces_marinades,meat_fish,fish_processed
+125203,"Mango-tšilli broilerišašlõkk, OSKAR, 900 g",OSKAR LT AS,,4740569012996,meat_fish,meat_poultry,meat_fish,meat_poultry
+125204,"Kalkunikintsuliha röstitud küüslauguga, KIKAS, 600 g",KIKAS OÜ,,4740625004996,meat_fish,meat_poultry,meat_fish,meat_poultry
+125205,"Grillvorstid Sõprade, KARNI, 450 g",ARKE LIHATÖÖSTUS AS,,4740579171942,meat_fish,meat_grill_blood_sausages,meat_fish,meat_grill_blood_sausages
+125206,"Toorvorstid Chill-Dill, KARNI, 400 g",ARKE LIHATÖÖSTUS AS,,4740579545811,meat_fish,meat_sausages,meat_fish,meat_grill_blood_sausages
+125207,"Itaaliapärane broilerikintsulihašašlõkk, LINNAMÄE LIHATÖÖSTUS, 500 g",LINNAMÄE LIHATÖÖSTUS AS,,4740618008598,meat_fish,meat_poultry,meat_fish,meat_poultry
+125208,"Kummikindad M, MCLEAN, 1 paar",PRIME PARTNER AS,,4742002005329,,,household,hh_cleaners
+125209,"Must kaaviar Oscietra, CLASSIC SELECTION, 50 g",KAVIALE SIA,,4740409474199,,,meat_fish,fish_processed
+125210,"Šašlõkivorstid Lihakas, RAKVERE, 400 g",MAAG EESTI AS,,4740003016153,meat_fish,meat_sausages,meat_fish,meat_grill_blood_sausages
+125211,"Šašlõkivorst (80% liha) Ehe, RANNAROOTSI, 470 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296012870,meat_fish,meat_sausages,meat_fish,meat_grill_blood_sausages
+125212,"Õrrekanade munad, SELVER, 10tk",SELVER AS,,4740581410060,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+125213,"Forellimari, AVEKTRA, 250 g",AVEKTRA OÜ,,4740689900173,meat_fish,fish_fresh,meat_fish,fish_processed
+125214,"Kohupiimatasku võiga, SELVERI PAGARID, ca 130 g",EESTI PAGAR AS,,2611553000003,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_sweet_buns_donuts
+125215,"Vannamei krevetid 40/50, toored, koorimata, sulatatud, KALURI, kg",LÄÄTSA KALATÖÖSTUS AS,,2714687000007,dairy_eggs_fats,dairy_cream_sourcream,meat_fish,fish_fresh
+125216,"Suitsusingike, RAKVERE LK, 350 g",MAAG EESTI AS,,4740003005911,,,meat_fish,meat_hams
+125217,"Kohupiimataskud karbis, LÕUNA PAGARID, 250 g",LÕUNA PAGARID AS,,4740633481123,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_sweet_buns_donuts
+125218,"Kohupiimavaht maasikakastmega, SELVERI KÖÖK, 120 g",KULINAARIA OÜ,,4740581108240,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_desserts
+125219,"Toorvorstid sibula ja äädikaga E-vaba, MATSIMOKA, 300 g",,,4744735010298,meat_fish,meat_sausages,meat_fish,meat_sausages
+125220,"Kohvi-koorejäätis „Vana Tallinn“ likööriga tumedas Belgia šokolaadis, VANA TALLINN, 64 g",BALBIINO AS,,4740188019338,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+125221,"Kohvijook 3in1 (kott 10x12,6g ), JACOBS,",SELVER AS,,8711000571958,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+125222,"Sisefilee kuubikud õrnsuitsu, MAKS&MOORITS, 200 g",Ma&orits Õrnsuitsu,200 g,4740171181011,,,meat_fish,meat_hams
+125223,"Matsimoka Suitsuliha, Viilutatud 110 G","Matsimoka Suitsuliha,",110 g,4744735010625,meat_fish,meat_other,meat_fish,meat_hams
+125224,"Kohvijook 3in1 (kott 20x12,6g), JACOBS,",SELVER AS,,8711000571972,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+125225,"Kohvijook 3IN1 Strong, karp 28x16g, NESCAFE, 448g",SELVER AS,,8445291206885,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+125226,"Kohvikapslid A Modo Mio Decaf Cremoso, LAVAZZA, 16 tk",SELVER AS,,8000070086036,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125227,"Kohvikapslid A Modo Mio Delizioso, LAVAZZA, 16tk",SELVER AS,,8000070086012,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125228,"Kohvikapslid A Modo Mio Intenso, LAVAZZA, 16tk",SELVER AS,,8000070086029,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125229,"Troopiline lõhefilee, SELVER, kg",Määramata,,2713291000007,meat_fish,fish_fresh,meat_fish,fish_fresh
+125230,"Suitsutatud seavälisfilee, RAKVERE LK, kg",MAAG EESTI AS,,2374627900004,,,meat_fish,meat_hams
+125231,"Kohvikapslid A Modo Mio Lungo Dolce, LAVAZZA, 16tk",SELVER AS,,8000070086494,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125232,"Grillsteigid broileri rinnafileest Fitlap, NÕO, 350 g",NÕO LIHATÖÖSTUS OÜ,,4740574062184,meat_fish,meat_poultry,meat_fish,meat_poultry
+125233,"Kohvikapslid A Modo Mio Mountain Grown, LAVAZZA, 16 tk",SELVER AS,,8000070063372,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125234,"Kohvikapslid A Modo Mio Passionale, LAVAZZA, 16tk",SELVER AS,,8000070086005,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125235,"Kohvikapslid A Modo Mio Q Oro, LAVAZZA, 16tk",SELVER AS,,8000070063310,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125236,Rakvere Suitsutatud Seavälisfilee 130 G,Rakvere Suitsutatud,130 g,4740003017709,,,meat_fish,meat_hams
+125237,"Suitsusingike, RAKVERE, 130 g",,,,,,meat_fish,meat_hams
+125238,"Kohvikapslid A Modo Mio Q Rossa, LAVAZZA, 16tk",SELVER AS,,8000070088436,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125239,"Toorvorstikesed fetajuustu-spinati, MAKS&MOORITS, 400 g",ATRIA EESTI AS,,4740171177298,dairy_eggs_fats,dairy_other,meat_fish,meat_grill_blood_sausages
+125240,"Jäägri grillvorst cheddari ja tšilliga, RANNAROOTSI, 375 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296003724,dairy_eggs_fats,dairy_other,meat_fish,meat_poultry
+125241,"Kalkuni rinnafileest grill-liha, RANNAROOTSI, 400 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296003687,meat_fish,meat_poultry,meat_fish,meat_poultry
+125242,"Toorsuitsutatud seavälisfilee, RAKVERE, 110 g",MAAG EESTI AS,,4740003017808,,,meat_fish,meat_hams
+125243,"Pipramarinaadis broilerišašlõkk, RANNAMÕISA, 680 g",POULTRY MEAT OÜ,,4742462001497,sauces_oils,sauces_marinades,meat_fish,meat_poultry
+125244,"Hõrk broilerišašlõkk, RANNAMÕISA, 680 g",POULTRY MEAT OÜ,,4742462001503,meat_fish,meat_poultry,meat_fish,meat_poultry
+125245,"Jogurtimarinaadis broilerišašlõkk, RANNAMÕISA, 680 g",POULTRY MEAT OÜ,,4742462001510,sauces_oils,sauces_marinades,meat_fish,meat_poultry
+125246,"Linnulihapasteet tilliga, PROFI, 131 g",CLAIRE FOODS OÜ,,5901696000044,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+125247,"Forellimari suitsumaitseline, HÄÄMEKK, 100 g",TERMOLOGISTIC OÜ,,4745010109157,meat_fish,fish_salted_smoked,meat_fish,fish_processed
+125248,"Maitselt mahedad toorvorstikesed, MAKS&MOORITS, 400 g",ATRIA EESTI AS,,4740171177465,meat_fish,meat_sausages,meat_fish,meat_grill_blood_sausages
+125249,"Kohvikapslid Brazil, L´OR, 10 tk",SELVER AS,,8711000573501,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125250,"Kohvikapslid Caramel, L´OR, 10 tk",SELVER AS,,8711000488225,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125251,"Kohvikapslid Caramel Macchiato, STARBUCKS, 6+6 tk",SELVER AS,,7613036943529,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125252,"Kohvikapslid Dolce Gusto Caffe Au Lait, NESCAFE, 16 tk",SELVER AS,,7613033174704,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125253,"Kohvikapslid Dolce Gusto Flat White, NESCAFE, 16 tk",SELVER AS,,7613036595735,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125254,"Kohvikapslid Dolce Gusto Grande Intenso, NESCAFE, 16 tk",SELVER AS,,8445290448668,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125255,"Must kaaviar Original Blue, CLASSIC SELECTION, 100 g",KAVIALE SIA,,8008693009142,drinks,drinks_spirits,meat_fish,fish_processed
+125256,"Kohvikapslid Dolce Gusto Grande, NESCAFE, 16 tk",SELVER AS,,8445290446244,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125257,"Kohvikapslid Dolce Gusto Latte Macchiato, NESCAFE, 16 tk",SELVER AS,,7613037491159,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125258,"Tuunikala pasteet, RIO MARE, 100 g",VILANDRA UAB,,8004030069008,drinks,drinks_tea_coffee,meat_fish,fish_processed
+125259,"Lõhepasteet, RIO MARE, 100 g",VILANDRA UAB,,8004030070004,drinks,drinks_tea_coffee,meat_fish,fish_processed
+125260,"Kohvikapslid Dolce Gusto Lungo, NESCAFE, 16 tk",SELVER AS,,8445290871992,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125261,"Kohvikapslid Espresso Lungo, LAVAZZA, 10tk",SELVER AS,,8000070053571,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125262,"Kohvikapslid House Blend, STARBUCKS, 12 tk",SELVER AS,,7613036989268,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125263,"Kohvikapslid lungo keskmine röst, ILLY, 18 tk",DA VINCI FOOD OÜ,,8003753979076,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125264,"Kohvikapslid Mattinata, L´OR, 10 tk",SELVER AS,,8711000360545,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125265,"Kohvikapslid Profondo, L´OR, 10 tk",SELVER AS,,8711000360569,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125266,"Kohvikapslid Qualita Oro, LAVAZZA, 10tk",SELVER AS,,8000070053465,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125267,"Kohvikreem, SELVERI KÖÖK, 130 g",KULINAARIA OÜ,,4740581108257,drinks,drinks_tea_coffee,dairy_eggs_fats,dairy_desserts
+125268,"Kohviliköör KAHLUA, 70 cl",PERNOD RICARD ESTONIA OÜ,,7610594252148,drinks,drinks_spirits,drinks,drinks_spirits
+125269,"Kohvioad Arabica, MERRILD, 1 kg",SELVER AS,,8000070201347,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125270,"Kohvioad Barista Crema, JACOBS, 1 kg",SELVER AS,,8711000895849,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125271,"Kohvioad Barista Cremoso, MERRILD, 1 kg",SELVER AS,,8000070068681,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125272,"Kohvioad Barista Espresso, MERRILD, 1 kg",SELVER AS,,8000070068667,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125273,"Kohvioad Brazil, LÖFBERGS, 1 kg",SELVER AS,,7310050012544,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125274,"Kohvioad Classic, BEST BEANS, 1 kg",UBALA RÖSTIKODA OÜ,,4742650000103,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125275,"Kohvioad Classic keskmine röst, ARVID NORDQUIST, 500 g",MAIC KAUBANDUSE AS,,7310760041094,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125276,"Krevetid soolvees, FIRST PRICE, 170 g",SELVER AS,,7311041086254,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+125277,"Kohvioad Classic, L´OR, 1 kg",SELVER AS,,8711000400791,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125278,"Kohvioad Crema Dolce, LAVAZZA, 1 kg",SELVER AS,,8000070027435,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125279,"Kohvioad Crema Dolce, MERRILD, 1 kg",SELVER AS,,8000070076280,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125280,"Kohvioad Crema, LÖFBERGS, 1 kg",SELVER AS,,7310050012551,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125281,"Kohvioad Crème Brulée, COFFEESTAR, 200 g",COFFEESTAR OÜ,,4740275000416,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125282,"Kohvioad Der Himmlishe, MÖVENPICK, 1 kg",SELVER AS,,4006581205007,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125283,"Kohvioad Espresso Italiano Classico, LAVAZZA, 1 kg",SELVER AS,,8000070018747,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125284,"Kohvioad Guatemala Espresso, COFFEE PEOPLE, 500 g",ABESTOCK AS,,4744286010068,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125285,"Kohupiimakreem crème brulée maitseline, ALMA, 150 g",VALIO EESTI AS,,4740125631326,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_desserts
+125286,"Kohvioad Keskmine, CO.FFEE, 1 kg",OA COFFEE AS,,4744364010263,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125287,"Taimne rasvavõie 45% laktoosivaba, OPTIMA CARDIO, 225 g",,,,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+125288,"Kohvioad keskmine röst, EATNEAT, 1 kg",ALIS CO ESTONIA OÜ,,4744743019016,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125289,"Kohupiimakreem kakao, EMMA, 150 g",TERE AS,,4740036004967,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_desserts
+125290,"Kohupiimakreem vanilli, EMMA, 150 g",TERE AS,,4740036004998,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_desserts
+125291,"Kohvioad keskmine röst, LÖFBERGS, 1 kg",SELVER AS,,7310050012513,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125292,"Kohvioad Lavazza Espresso Barista Gran Crema , LAVAZZA, 1 kg",SELVER AS,,8000070024854,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125293,"Kohvioad Lavazza Espresso Barista Perfetto , LAVAZZA, 1 kg",SELVER AS,,8000070024816,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125294,"Kohvioad Presidentti Original Strong, PAULIG, 1 kg",PAULIG COFFEE ESTONIA AS,,6411300169344,personal_care,pcare_feminine_hygiene,drinks,drinks_coffee_beans_capsules
+125295,"Kohupiimakreem kakao 2,5% tops, ALMA, 380 g",VALIO EESTI AS,,4740125638066,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_desserts
+125296,"Kohvioad Qualita Oro Mountain Grown, LAVAZZA, 1kg",SELVER AS,,8000070030022,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125297,"Kohvioad Selezione Crema, SEGAFREDO ZANETTI, 1 kg",MEIRA EESTI OÜ,,9001810011607,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125298,"Kohvioad Supreme, BEST BEANS GOURMET COFFEE, 1 kg",UBALA RÖSTIKODA OÜ,,4742650000011,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125299,"Kohvioad Tiramisu, COFFEESTAR, 200 g",COFFEESTAR OÜ,,4740275000461,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125300,"Kohvipadjad Classic, SENSEO, 36tk",SELVER AS,,8711000341001,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+125301,"Kohvipadjad Crema e Aroma, LAVAZZA, 18 tk",SELVER AS,,8000070062528,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+125302,"Kohvipadjad Espresso Cremoso, LAVAZZA, 18 tk",SELVER AS,,8000070026964,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+125303,"Kohupiimakreem metsmaasika, ALMA, 150 g",VALIO EESTI AS,,4740125631371,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_desserts
+125304,"HULGI Kalev Ekstra teeküpsis 10 tk, KALEV, 10 x 180 g",ORKLA EESTI AS,,0215000001401,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+125305,"HULGI Katlakivieemaldaja 3tk, SELVER, 3 x 500ml",KODUPABER AS,,0224000001588,,,household,hh_cleaners
+125306,"HULGI Kirsiküpsised 4tk, MAIASMOKK, 4 x 130 g",,,0215000001722,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+125307,"Kohuke toffe multipakk 7+1 8x40g, SAARE, 320 g",SAAREMAA DELIFOOD OÜ,,4742231002229,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+125308,"HULGI Kodujuust karulaugupestoga 3tk, TERE, 3 x 300g",,,0210300001717,sauces_oils,sauces_pasta_cooking,dairy_eggs_fats,dairy_cottage_quark
+125309,"Pikkpoiss eelküpsetatud, RANNAROOTSI, 300 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296003601,,,meat_fish,meat_pork
+125310,"Vegan suitsuvorst Cervelaat, AMALA, 250g",KANPOL AS,,4779051480289,meat_fish,meat_sausages,dry_preserves,dry_other
+125311,"Kuivatatud mahe veiseliha tükid, piprane, LIIVIMAA LIHAVEIS, 40 g",LINNAMÄE LIHATÖÖSTUS AS,,4740618005962,sweets_snacks,sweets_nuts_driedfruit,meat_fish,meat_gourmet
+125312,"Prosciutto crudo maitsestatud sidruni ja musta pipraga, SAN MICHELE, 90 g",DELINE OÜ,,8023085090775,produce,produce_tropical,meat_fish,meat_hams
+125313,"Pardimaksa patee, LINNAMÄE LIHATÖÖSTUS, 160 g",LINNAMÄE LIHATÖÖSTUS AS,,4740618005283,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+125314,"Metssea konserv, LINNAMÄE LIHATÖÖSTUS, 240 g",LINNAMÄE LIHATÖÖSTUS AS,,4740618000691,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_meat_fish
+125315,"Taimne steik, VEGANIC, 140g",ECOTRADE OÜ,,4740223025256,dairy_eggs_fats,dairy_plant_drinks,dry_preserves,dry_other
+125316,"Pardilihavaht kuivatatud ploomi ja aprikoosiga, CUIT´S, 125 g",SELVER AS,,8413828104447,sweets_snacks,sweets_nuts_driedfruit,meat_fish,meat_gourmet
+125317,"Kuivatatud hirveliha, LINNAMÄE LIHATÖÖSTUS, 40 g",LINNAMÄE LIHATÖÖSTUS AS,,4740618002206,sweets_snacks,sweets_nuts_driedfruit,meat_fish,meat_gourmet
+125318,"Kanamaksapasteet, FRANK POTT, 240 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740215240254,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+125319,"Karamelliseeritud sibulapatee, CUIT´S, 125 g",SELVER AS,,8413828116075,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+125320,"Põdraliha konserv, RANNAROOTSI, 240 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740215240124,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_meat_fish
+125321,"Kuivatatud metssealiha, LINNAMÄE LIHATÖÖSTUS, 40 g",LINNAMÄE LIHATÖÖSTUS AS,,4740618002190,sweets_snacks,sweets_nuts_driedfruit,meat_fish,meat_gourmet
+125322,"Pärlkanaterriin rosmariiniga, DUCS DE GASCOGNE, 65 g",DELINE OÜ,,3382562830026,meat_fish,meat_poultry,meat_fish,meat_gourmet
+125323,"Parditerriin oliividega, DUCS DE GASCOGNE, 65 g",DELINE OÜ,,3382562820027,,,meat_fish,meat_gourmet
+125324,"Kiievi kotlet, TALLEGG, 1,2 kg, ettetellimisel",MAAG EESTI AS,,4740046011825,dairy_eggs_fats,dairy_eggs,meat_fish,meat_poultry
+125325,"Vürtsikad kanapooltiivad, TALLEGG, 400 g",MAAG EESTI AS,,4740046013980,dairy_eggs_fats,dairy_eggs,meat_fish,meat_poultry
+125326,"Seakõrvasnäkid, NÕO, 130 g",NÕO LIHATÖÖSTUS OÜ,,4740574095113,,,meat_fish,meat_gourmet
+125327,"Hele õlu Alexander 6-pakk, ALEXANDER, 6 x 500 ml pudel",A. LE COQ AS,,4740098078678,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125328,"Tapas fuet, chorizo, juust, EMBUTIDOS CAULA, 150 g",SELVER AS,,8424863655184,dairy_eggs_fats,dairy_other,meat_fish,meat_gourmet
+125329,"Tapas fuet, chorizo, oliivid, EMBUTIDOS CAULA, 120 g",SELVER AS,,8424863006665,,,meat_fish,meat_gourmet
+125330,"Salaami Milano, NEGRONI, 100 g",SELVER AS,,8028257008244,,,meat_fish,meat_sausages
+125331,"Prosciutto Cotto, NEGRONI, 110 g",SELVER AS,,8028257011497,,,meat_fish,meat_hams
+125332,"Viilutatud Fuet, LA SELVA, 60 g",SELVER AS,,8410973474258,,,meat_fish,meat_gourmet
+125333,"Prosciutto Crudo sink viil, I.B.I.S SPA, 500 g",DA VINCI FOOD OÜ,,8005214000589,meat_fish,meat_hams,meat_fish,meat_hams
+125334,"Lihatoodete trio (Prosciutto, Coppa, Milano), NEGRONI, 120 g",SELVER AS,,8028257008763,,,meat_fish,meat_hams
+125335,"Prosciutto Di Parma, NEGRONI, 80 g",SELVER AS,,8028257008312,,,meat_fish,meat_hams
+125336,"Prosciutto Crudo sink viil, I.B.I.S SPA, 500 g",,,,meat_fish,meat_hams,meat_fish,meat_hams
+125337,"Sink Coppa, NEGRONI, 100 g",SELVER AS,,8028257008350,meat_fish,meat_hams,meat_fish,meat_hams
+125338,"Speck Delle Alpi, NEGRONI, 90 g",SELVER AS,,8028257008343,,,meat_fish,meat_hams
+125339,"Pasteet serrano singiga, CUIT´S, 125 g",SELVER AS,,8413828104065,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+125340,"Õrnsoola lõhefilee viilud, AVEKTRA, 100 g",AVEKTRA OÜ,,4740689907165,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked

@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+170115,"Röstitud maapähklid meega, ESTRELLA, 140 g",SELVER AS,,7310532151549,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+170116,"Näkileivad laktoosivaba, PRIILEIB, 120 g",PRIILEIB OÜ,,4744348010098,bakery,bakery_bread_loaves,bakery,bakery_other
+170117,"Närimiskumm arbuusimaitseline, ORBIT, 64 g",SELVER AS,,4009900538206,sweets_snacks,sweets_gums_mints,sweets_snacks,sweets_gums_mints
+170118,"Tudengi eine Premium, GERMUND, 300 g",GERMUND HULGI OÜ,,4742155001988,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+170119,"Pistaatsia röstitud,soolatud, MOGYI, 60 g",MOGYI EESTI OÜ,,5997347542773,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_nuts_driedfruit
+170120,"Oreo Choc'o Brownie küpsis, OREO, 176 g",ABESTOCK AS,,7622210835338,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+170121,"Vana Tallinn liköörikreemi täidisega šokolaadikommid, KALEV, 122 g",ORKLA EESTI AS,,4740012028642,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_candies
+170122,"Pehmed vahvlid, PRALINE, 250 g",PRALINEE OÜ,,8720100989525,dry_preserves,dry_other,sweets_snacks,sweets_waffles_cakes
+170123,"Vahvlid ahjupiimamaitselised, VIKSTAL, 240 g",VIKSTAL OÜ,,4741469004128,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_waffles_cakes
+170124,"Vahvel Dessert, MARMITON, 110 g",SVENSKY KAUBANDUSE AS,,4740062750272,dairy_eggs_fats,dairy_desserts,sweets_snacks,sweets_waffles_cakes
+170125,"Piimašokolaadi pallid, LINDT, 200 g",EUGESTA EESTI OÜ,,7610400082549,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_candies
+170126,"Pistaatsiapähkel, GERMUND, 200 g",GERMUND HULGI OÜ,,4742155000080,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+170127,"Orbit Refreshers Spearmint, ORBIT, 15,6 g",SELVER AS,,4009900535519,sweets_snacks,sweets_gums_mints,sweets_snacks,sweets_gums_mints
+170128,"Premium pistaatsia pähkel, GERMUND, 250 g",GERMUND HULGI OÜ,,4742155002039,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+170295,Marjamix 250 g,Marjamix,250 g,6438574066032,,,produce,produce_berries
+171494,"Tuljak koorepumati täidisega käsitöökommid, KALEV, 189 g",ORKLA EESTI AS,,4740012028673,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_candies
+171495,"Šokolaadikattega küpsised, DOMINO, 180 g",FAZER EESTI OÜ,,6416453075481,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_biscuits_cookies
+171496,"Saltletts seemnetega kreekerid, LORENZ, 100 g",D.T.L. CONSUMER PRODUCTS EESTI AS,,4018077779930,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks_salty
+171497,"Rosinad seemneteta, SELVER, 400 g",LTT AS,,4740581010116,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+171498,"Röstitud maapähklid soolaga, ESTRELLA, 140 g",SELVER AS,,7310532151532,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+171499,"Soolakreeker ""TOP"" soolaga, CROCO, 150 g",M&V TRADE OÜ,,5941194003499,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_snacks_salty
+171500,"Mündi-marja besee, LÕUNA PAGARID, 80 g",LÕUNA PAGARID AS,,4740633471230,produce,produce_apples_pears,sweets_snacks,sweets_biscuits_cookies
+171501,"Proteiinirikas segu, PÄHKLINÄPP, 200 g",ALIS CO ESTONIA OÜ,,4744743011157,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+171502,Jenkki Peppermint närimiskummid ksülitoliga 100g,Jenkki Peppermint,100 g,6420256012673,,,sweets_snacks,sweets_gums_mints
+171503,"Riisiküpsised meresoola ja chia seemnetega, MITSUBA, 100 g",ASBA GRUPP OÜ,,8711299003109,dry_preserves,dry_pasta_rice,sweets_snacks,sweets_snacks_salty
+171504,"Pähklite ja puuviljade segu, KOMMI ASEMEL, 150 g",JUNGENT ESTONIA OÜ,,4740085301901,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+171505,"Must ploom California, GERMUND, 200 g",GERMUND HULGI OÜ,,4742155001001,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+171506,"Premium tudengieine, ARIMEX, 500 g",LTT AS,,4771249815729,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+171507,"Šokolaadiglasuuri ja piimatäidisega küpsised, MILKA, 150 g",ABESTOCK AS,,7622300441715,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_biscuits_cookies
+171508,"Premium pekanipähkel, GERMUND, 250 g",GERMUND HULGI OÜ,,4742155002008,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+171509,"Premium Pähklite segu, GERMUND, 250 g",GERMUND HULGI OÜ,,4742155002015,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+171510,"Seemnesegu, KOMMI ASEMEL, 100 G",JUNGENT ESTONIA OÜ,,4740085306951,sweets_snacks,sweets_candies,dry_preserves,dry_flour_sugar_baking
+171511,Pähklinäpp soolakaramellis maapähkel 200 g,Pähklinäpp,200 g,4744743011188,sweets_snacks,sweets_candies,sweets_snacks,sweets_snacks_salty
+171512,"Rosin Jumbo Premium, GERMUND, 300 g",GERMUND HULGI OÜ,,4742155001971,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+171513,"Päevalilleseemned kooritud, SELVER, 400 g",LTT AS,,4740581010093,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_nuts_driedfruit
+171514,"Tatraküpsis, VÄIKE VÄÄNIK, 250 g",MARIS GILDEN OÜ,,4740320006622,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+171515,"Rosin Kuldne, ARIMEX, 200 g",LTT AS,,4771249811592,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+171516,"Jogurtijook puuvilja 4x100g, ACTIMEL, 400 g",NUTRICIA SIA,,47500891,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+171517,"Pähkli- ja puuviljasegu, SELVER, 400 g",ALIS CO ESTONIA OÜ,,4740581010086,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+171518,"Vana Tallinn Cream liköörikreemi täidisega šokolaadikommid, KALEV, 122 g",ORKLA EESTI AS,,4740012028635,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_candies
+171519,"Vana Tallinna likööriga, Limoncello'ga, klassikaline valik martsipanikomme, KALEV, 300 g",ORKLA EESTI AS,,4740012028505,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+171520,"Vahvel vanillimaitselise kreemiga, MY MOTTO, 30 g",JUNGENT ESTONIA OÜ,,3800205876809,sweets_snacks,sweets_waffles_cakes,sweets_snacks,sweets_waffles_cakes
+171521,"Salatisegu taassuletav pakend, KOMMI ASEMEL, 130 g",JUNGENT ESTONIA OÜ,,4740085308764,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+171522,"Sarapuupähklid ÖKO, KOMMI ASEMEL, 150 g",JUNGENT ESTONIA OÜ,,4740085310644,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+171523,"Päevalilleseemned ÖKO, KOMMI ASEMEL, 150 g",JUNGENT ESTONIA OÜ,,4740085310705,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+171524,"Traditsioonilised Itaalia kreekerid Focacce, rosmariiniga, GOURMANTE, 150 g",SANITEX OÜ,,5200110731701,dry_preserves,dry_other,sweets_snacks,sweets_snacks_salty
+171525,"Pähkli- ja puuviljasegu Caribic, SEEBERGER, 200 g",SELVER AS,,4008258423011,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+171526,"Pähklisegu Luxury, SEEBERGER, 150 g",SELVER AS,,4008258150092,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+171527,"Pehmed datlid, SEEBERGER, 200 g",SELVER AS,,4008258293003,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+171528,"Piimašokolaadikompvekid, KARL FAZER, 250 g",FAZER EESTI OÜ,,6416453053113,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_candies
+171529,"Piimašokolaadikompvekid vaarikajogurtitäidisega, KARL FAZER, 250 g",FAZER EESTI OÜ,,6416453053199,dairy_eggs_fats,dairy_yogurt_kefir,sweets_snacks,sweets_candies
+171530,"Röstitud maapähklid soolaga, ESTRELLA, 240 g",SELVER AS,,4779028347362,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+171531,"Majonees, TARPLAN, 4,5kg, ettetellimisel",TARPLANI KAUBANDUSE OÜ,,4740159000129,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+171532,"Pastillid Halls mee-sidruni, HALLS, 34 g",ABESTOCK AS,,50985104,drinks,drinks_wine,sweets_snacks,sweets_gums_mints
+171533,"Röstitud soolatud maapähkel 400 g, SELVER, 400 g",ALIS CO ESTONIA OÜ,,4740581010062,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_nuts_driedfruit
+171534,"Premium pähklisegu, ARIMEX, 300 g",LTT AS,,4771249815996,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+171535,"Vahvlirullid Waffeletten piimašokolaadiga, BAHLSEN, 100 g",JUNGENT ESTONIA OÜ,,4017100219900,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_waffles_cakes
+171536,"Pistaatsiapähklid röstitud ja soolatud, SELVER, 400 g",LTT AS,,4740581010109,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+171537,"Tarallid oliivõliga, TERRE DEI TRULLI, 250 g",SELVER AS,,8034077712148,sauces_oils,oils_other,sweets_snacks,sweets_snacks_salty
+171538,"Mustad seesamiseemned, UMAMI, 100 g",UMAMI OÜ,,4770082328045,sweets_snacks,sweets_nuts_driedfruit,dry_preserves,dry_flour_sugar_baking
+171539,"Pistaatsiapähklid, FIRST PRICE, 200 g",SELVER AS,,7311041080863,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+171540,"Seesamiseemnned, FIRST PRICE, 250 g",SELVER AS,,7311041085745,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+171541,"Suur mandel, PÄHKLINÄPP, 500 g",ALIS CO ESTONIA OÜ,,4750195020821,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+171542,"Šokolaadikompvekid rukkileiva ja likööriga, EESTI LEIVATÖÖSTUS, 160 g",EESTI LEIVATÖÖSTUS AS,,4740064580341,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_candies
+171543,"Valeri küpsis, SELVERI KÖÖK, 200 g",KULINAARIA OÜ,,4740581105614,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+171544,"Organic chiaseemned, 200 g, ARIMEX",LTT AS,,4771249822147,sweets_snacks,sweets_nuts_driedfruit,dry_preserves,dry_flour_sugar_baking
+171545,"Tiramisu küpsised, MATILDE VICENZI, 200 g",ABESTOCK AS,,8000350000585,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+171546,"Rosinad ÖKO, KOMMI ASEMEL, 150 g",JUNGENT ESTONIA OÜ,,4740085310637,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+171547,"Šokolaadi kihiline küpsis, GUSTAV, 200 g",GUSTAV CAFE OÜ,,4742513000479,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_biscuits_cookies
+171548,"Mustasõstraküpsised marmelaadiga, MAIASMOKK, 130 g",ABESTOCK AS,,4742267006239,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+171549,"Vahvel sarapuupähkli ja kakaokreemiga, MY MOTTO, 30 g",JUNGENT ESTONIA OÜ,,3800205876861,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_waffles_cakes
+171550,"Traditsioonilised Itaalia kreekerid Bruschette, oregano ja küüslauguga, GOURMANTE, 150 g",SANITEX OÜ,,5200110731787,dry_preserves,dry_other,sweets_snacks,sweets_snacks_salty
+171551,"Traditsioonilised Itaalia kreekerid Thin Crisps, rosmariiniga, GOURMANTE, 150 g",SANITEX OÜ,,5200110731978,dry_preserves,dry_other,sweets_snacks,sweets_snacks_salty
+171552,"Parapähklid, KOMMI ASEMEL ÖKO, 150 g",JUNGENT ESTONIA OÜ,,4740085310675,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+171553,"Pekanipähklid, KOMMI ASEMEL, 100g",JUNGENT ESTONIA OÜ,,4740085312921,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+171554,"Pistaatsiapähklid kooritud, PREMIUM, 150 g",GERMUND HULGI OÜ,,4742155002329,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_nuts_driedfruit
+171555,"Seedermänni seemned, PREMIUM, 150 g",GERMUND HULGI OÜ,,4742155002978,sweets_snacks,sweets_nuts_driedfruit,dry_preserves,dry_flour_sugar_baking
+171556,"Rosinad, FIRST PRICE, 250 g",SELVER AS,,7311041087732,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+171557,"Original, FASUPALA, 199 g",FAZER EESTI OÜ,,6416453075931,drinks,drinks_spirits,sweets_snacks,sweets_biscuits_cookies
+171558,"Soolapulgad, FIRST PRICE, 250 g",SELVER AS,,7311041080993,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_snacks_salty
+171559,"Närimiskumm arbuusimaitseline, ORBIT, 50 g",MARS EESTI OÜ,,4009900552400,sweets_snacks,sweets_gums_mints,sweets_snacks,sweets_gums_mints
+171560,ORBIT spearmint 50 g kott,ORBIT,50 g,4009900552448,,,sweets_snacks,sweets_gums_mints
+171561,"Vahvlitorud sarapuupähklitega, FIRST PRICE, 400 g",SELVER AS,,7311041086995,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_waffles_cakes
+171562,"Päevalilleseemned, FIRST PRICE, 500 g",SELVER AS,,7311041087756,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+171563,"Suhkruvaba klassikaline vormiküpsis, KALEV, 163 g",ORKLA EESTI AS,,4740012601289,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+171786,Mentos Fruit Mix nätsukommid kotis 160 g,Mentos Fruit,160 g,8723400782100,produce,,sweets_snacks,sweets_candies
+172112,Bergen obsession šokolaadiglasuuriga soolakaramellitäidisega küpsis salty caramel 128 g,Bergen,128 g,5902379185737,,,sweets_snacks,sweets_biscuits_cookies
+172669,"Kõvajuust piquant, (laagerdunud 18k) laktoosivaba, DŽIUGAS, 180 g",SELVER AS,,4770299047883,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+172670,"Kohupiima-maasikatarretis, SELVERI KÖÖK, 160 g",KULINAARIA OÜ,,4740581108233,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_desserts
+172671,"Laktoosivaba maasika-koorejäätis, BALBIINO, 480 g",BALBIINO AS,,4740188019963,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+172672,"HULGI Juustu mix 3tk, FARMI, 3 x 200g",,,0210300003681,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+172924,Moomin muumi pannkoogimoos 850 g,Moomin,850 g,6410840073388,,,dry_preserves,dry_canned_fruit
+173680,"Sügavkülmutatud pastinaagipüree kuubikud, BABYCOOL, 200 g",BABYCOOL OÜ,,4744848010116,drinks,drinks_wine,baby,baby_food_jars
+173681,"Paneeritud juust, 200 g",Paneeritud,200 g,4740093963252,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_ready_meals
+173682,"Šokolaadisaiake võiga, EESTI PAGAR, 240 g",EESTI PAGAR AS,,4740086022379,dairy_eggs_fats,dairy_butter_margarine,frozen_food,frozen_bakery
+173683,"Prantsuse hot-dogi saiake 4tk, MANTINGA, 240 g",MANTINGA EESTI OÜ,,4771033002113,bakery,bakery_buns_croissants,frozen_food,frozen_bakery
+173684,"Sügavkülmutatud porgandipüree kuubikud, BABYCOOL, 200 g",BABYCOOL OÜ,,4744848010024,produce,produce_root_veg,baby,baby_food_jars
+173685,"Pärmi-lehttaigen, SELVER, 500 g",EESTI PAGAR AS,,4740086011526,dry_preserves,dry_flour_sugar_baking,frozen_food,frozen_bakery
+173686,"Võiroos, EESTI PAGAR, 400 g",EESTI PAGAR AS,,4740086023031,dairy_eggs_fats,dairy_butter_margarine,frozen_food,frozen_bakery
+173687,"Pitsarull, EESTI PAGAR, 400 g",EESTI PAGAR AS,,4740086017412,dry_preserves,dry_other,frozen_food,frozen_bakery
+173688,"Suitsukanapirukas murulauguga, EESTI PAGAR, 360 g",EESTI PAGAR AS,,4740086009707,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+173689,"Sügavkülmutatud suvikõrvitsapüree kuubikud, BABYCOOL, 200 g",BABYCOOL OÜ,,4744848010093,frozen_food,frozen_other,baby,baby_food_jars
+173690,"Pannkoogid maasikatäidisega, VICI, 280 g",VIČIUNAI BALTIC OÜ,,4740056912365,produce,produce_berries,frozen_food,frozen_ready_meals
+173691,"Suur hakkliha-juustu pitsa tomatikastmega, PEALINNA, 375 g",PREMIA TALLINNA KÜLMHOONE AS,,4740093824522,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_pizza
+173692,"Pitsataigen, EESTI PAGAR, 600 g",EESTI PAGAR AS,,4740086019164,dry_preserves,dry_other,frozen_food,frozen_bakery
+173693,"Pitsa Feliciana prosciutto ja pestoga, DR.OETKER, 360g",JUNGENT ESTONIA OÜ,,5900437007113,sauces_oils,sauces_pasta_cooking,frozen_food,frozen_pizza
+173694,"Ristorante Salaami gluteenivaba pitsa, DR.OETKER, 315 g",,,4001724027980,drinks,drinks_tea_coffee,frozen_food,frozen_pizza
+173695,"Vareenikud Ivan kartuli-seene, UVIC, 500 g",ECOTRADE OÜ,,4740223001786,produce,produce_mushrooms,frozen_food,frozen_ready_meals
+173696,"Riisipirukas 6x67g, MOILAS, 402 g",KAUPMEES & KO AS,,6431901640035,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+173697,"Pitsa Ristorante Hawaii, DR.OETKER, 355g",JUNGENT ESTONIA OÜ,,4001724037729,dry_preserves,dry_other,frozen_food,frozen_pizza
+173698,"Pärmi-lehttaigen (rullis), HÄRMAVILI, 500 g",BALBIINO AS,,4742296000048,dry_preserves,dry_flour_sugar_baking,frozen_food,frozen_bakery
+173699,"Vürtsikad Kentucky broileriribad, FRIPOZO, 250g",JUNGENT ESTONIA OÜ,,8420321679631,world_spices,spices_herbs_spice_mix,frozen_food,frozen_meat
+173700,"Sügavkülmutatud pirnipüree kuubikud, BABYCOOL, 200 g",BABYCOOL OÜ,,4744848010109,produce,produce_apples_pears,baby,baby_food_jars
+173701,"Pikksai maitserohelisega, EESTI PAGAR, 175 g",EESTI PAGAR AS,,4740086005563,bakery,bakery_buns_croissants,bakery,bakery_bread_loaves
+173702,"Pitsasuupiste salaami,kana,mozzarella, FOOD LUCK, 300 g",VIČIUNAI BALTIC OÜ,,4779059021460,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_ready_meals
+173703,"Pitsasuupiste salaami, mozzarella, FOOD LUCK, 300 g",VIČIUNAI BALTIC OÜ,,4779059021439,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_ready_meals
+173704,"Porgandikotlet, HÄRMAVILI, 400 g",BALBIINO AS,,4740188019819,produce,produce_root_veg,frozen_food,frozen_ready_meals
+173705,"Sügavkülmutatud õuna-mustikapüree kuubikud, BABYCOOL, 200 g",BABYCOOL OÜ,,4744848010178,produce,produce_berries,baby,baby_food_jars
+173706,Dr.Oetker Ristorante Pitsa 4 juustu 340 g,Dr.Oetker Ristorante,340 g,4001724037514,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_pizza
+173707,"Pitsa Ristorante Mozzarella, DR.OETKER, 335g",JUNGENT ESTONIA OÜ,,4001724037637,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_pizza
+173708,"Pannkoogid magusad, VICI, 500g",VIČIUNAI BALTIC OÜ,,4740056913430,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+173709,"Pitsa Ristorante Speciale, DR.OETKER, 345g",JUNGENT ESTONIA OÜ,,4001724037699,dry_preserves,dry_other,frozen_food,frozen_pizza
+173710,"Pitsa Bolognese 3x300g, FIRST PRICE, 900 g",SELVER AS,,7311041079058,dry_preserves,dry_other,frozen_food,frozen_pizza
+173711,"Taigen Gyoza, 38 tk, HAPPY BELLY, 300 g",REATON OÜ,,8888003071218,dry_preserves,dry_other,frozen_food,frozen_bakery
+173712,"Mozzarella pulgad, SALUD, 250 g",BIMAR OÜ,,8717154059922,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_ready_meals
+173713,"Füüsal karbis, 100 g",Määramata,,4740669005010,dry_preserves,dry_other,produce,produce_tropical
+173714,"Mini Rooma salat, 1 tk",Määramata,,4740608085899,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+173715,"Marineeritud šampinjonid, EESTI AND, 500 g",EESTI AND OÜ,,4742798003218,produce,produce_mushrooms,dry_preserves,dry_canned_veg
+173716,"Tuunikala suured tükid soolvees, KAPTEN GRANT, 185 g",,,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+173717,"Tuunikala suured tükid õlis, KAPTEN GRANT, 185 g",KAPTEN GRANT OÜ,,4740687002121,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+173930,Bradley paper kaustik a5 24 l ruut,Bradley,24 l,4740255024524,,,household,hh_other
+174289,Mahemuna M 10 tk,Mahemuna M,10 pcs,4745011001825,,,dairy_eggs_fats,dairy_eggs
+175268,Golden Chef rohelised mungoad 400g,Golden Chef,400 g,8850521672215,,,dry_preserves,dry_groats_beans
+175841,"Närimiskumm Winterfresh suhkruvaba magusainetega, ORBIT, 14 g",SELVER AS,,50173976,bakery,bakery_buns_croissants,sweets_snacks,sweets_gums_mints
+175860,HIIUMAA KÖÖK Kartuli-lihasalat 200 g,HIIUMAA KÖÖK,200 g,4740541001765,produce,,produce,produce_herbs_salads_sprouts
+175917,"Estover Eesti juust, viilutatud, 500 g",Estover Eesti,500 g,4740572000409,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+176521,Domestos Ocean WC-loputuspulgad 10tk,Domestos Ocean,10 pcs,8710522977408,,,household,hh_cleaners
+177638,Tolmukott RB1900 4 tk,Tolmukott RB1900,4 pcs,7319599012336,,,household,hh_other
+177746,"Grillisalat, FELIX, 3,2 kg, ettetellimisel",ORKLA EESTI AS,,4740029040521,produce,produce_herbs_salads_sprouts,dry_preserves,dry_canned_veg
+177977,Coop kimchi 190g,Coop,190 g,7340191149410,,,produce,produce_herbs_salads_sprouts
+178657,Vaasan Ranch rukkikrõpsud 150 g,Vaasan Ranch,150 g,7310130011771,,,sweets_snacks,sweets_snacks_salty
+179087,"Väike Tom vanillijäätis šokolaadiglasuuriga, 90 ml",Väike Tom,90 ml,4740093000216,,,frozen_food,frozen_desserts_icecream
+179481,"Kotimaista laktoosi- ja rasvavaba piimajook, 1 L",Kotimaista,1 l,6414893385658,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+179781,"Krabinuudel surimi, VICI, 200 g",VICIUNAI BALTIC OÜ,,4770190153942,dry_preserves,dry_other,meat_fish,fish_processed
+181023,Hipp õunapüree maasika-banaani öko 4k,Hipp,,9062300133759,,,baby,baby_food_pouches
+181405,USIN Hakkšnitsel ahjukartuliga 390 g,USIN Hakkšnitsel,390 g,4740584004280,,,dry_preserves,dry_ready_meals_jars
+181808,"Gaseeritud joogivesi, SELVER, 1,5 L",SELVER AS,,4740581010147,drinks,drinks_water,drinks,drinks_water
+181809,"Vaarika- ja granaatõunamaitseline suhkruvaba närimiskumm magusainetega, ORBIT, 14 g",SELVER AS,,50173747,bakery,bakery_buns_croissants,sweets_snacks,sweets_gums_mints
+181810,"Kana ja kuumsuitsuforelli uramakid, SELVERI KÖÖK, 440 g",KULINAARIA OÜ,,4740581113206,meat_fish,meat_poultry,meat_fish,fish_processed
+181811,"Mannavaht, SELVERI KÖÖK, 600g",KULINAARIA OÜ,,4740581110588,dry_preserves,dry_other,dairy_eggs_fats,dairy_desserts

@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+124287,"Dražeed Fruits, SKITTLES, 38 g",SELVER AS,,5000159376655,,,sweets_snacks,sweets_candies
+124288,"Drazeed hapud puuviljamaitselised närimiskommid, SKITTLES, 152 g",SELVER AS,,4009900513791,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+124289,"Drazeed, SKITTLES, 95 g",SELVER AS,,4009900510813,,,sweets_snacks,sweets_candies
+124290,"Vöner, viilutatud, VÖNER, 200 g",,,6430069070548,,,meat_fish,meat_grill_blood_sausages
+124291,"Sisefilee grillimiseks, SELVER, kg",SELVER AS,,2714293000002,meat_fish,meat_grill_blood_sausages,meat_fish,meat_grill_blood_sausages
+124292,"Rullsink, RANNAROOTSI, kg",RANNAROOTSI LIHATÖÖSTUS AS,,2329622500001,meat_fish,meat_hams,meat_fish,meat_hams
+124293,"Kodune läätsekotlet, MARTA KULINAARIA, 240 g",EUROLEIB AS,,4740667251105,dry_preserves,dry_groats_beans,dry_preserves,dry_other
+124294,"Praetud maks marinaadis, KARNI, 270 g",ARKE LIHATÖÖSTUS AS,,4740490294195,sauces_oils,sauces_marinades,meat_fish,meat_gourmet
+124295,"Snäkk pro Mini õllesigar juustu , RAKVERE LK, 300 g",MAAG EESTI AS,,4740003016603,dairy_eggs_fats,dairy_other,meat_fish,meat_sausages
+124296,"Põhjapõdramaksa patee, LINNAMÄE LIHATÖÖSTUS, 160 g",LINNAMÄE LIHATÖÖSTUS AS,,4740618005290,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+124297,"Praetud heeringafilee tomatimarinaadis, VIRU RAND, 430 g",,,,sauces_oils,sauces_marinades,meat_fish,fish_processed
+124298,"Dubai piimašokolaad, GERMIYAN, 100 g",SELVER AS,,8682665829022,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+124299,"Kanafilee hakksnitsel, TALLEGG, 340 g",MAAG EESTI AS,,4740046004711,dairy_eggs_fats,dairy_eggs,meat_fish,meat_poultry
+124300,"Kuld-merikoger ehk Dorada roogitud, jahutatud, kg",Määramata,,2710706000003,dry_preserves,dry_flour_sugar_baking,meat_fish,fish_fresh
+124301,"Vinnutatud veiseliha Teriyaki, KARNI, 50 g",ARKE LIHATÖÖSTUS AS,,4740579104513,world_spices,spices_asian,meat_fish,meat_gourmet
+124302,"Poolsuitsuvorst, VALLA, 240 g",MAAG EESTI AS,,4740003002088,meat_fish,meat_sausages,meat_fish,meat_sausages
+124303,"Tofuvorst Lemmik 250 g, BON VEGAN, 1 tk",BON VEGAN OÜ,,4742117007751,pet,pet_other,meat_fish,meat_sausages
+124304,"Grillpeekon BBQ, KARNI, 450 g",ARKE LIHATÖÖSTUS AS,,4740579577348,sauces_oils,sauces_marinades,meat_fish,meat_grill_blood_sausages
+124305,"Suitsutatud Doktorivorst, MAKS&MOORITS, 500 g",ATRIA EESTI AS,,4740171188003,meat_fish,meat_sausages,meat_fish,meat_sausages
+124306,"Forellimari, KAPTEN GRANT, 100 g",KAPTEN GRANT OÜ,,4740687238926,meat_fish,fish_fresh,meat_fish,fish_processed
+124307,"Vinnutatud särg, KALURI, 200 g",LÄÄTSA KALATÖÖSTUS AS,,4740590072235,,,meat_fish,fish_salted_smoked
+124308,"Heeringafileetükid marinaadis Maie 130 g neto, SAARE HÕBE, 300 g",LÄÄTSA KALATÖÖSTUS AS,,4740219113646,sauces_oils,sauces_marinades,meat_fish,fish_processed
+124309,Rakvere Suitsutatud Seakõrvaribad 300G,Rakvere Suitsutatud,300 g,4740003011684,,,meat_fish,meat_gourmet
+124310,"Salaami pähklitega, AOSTE, 150 g",DELINE OÜ,,3449865342752,sweets_snacks,sweets_nuts_driedfruit,meat_fish,meat_sausages
+124311,"Suitsusardell, RANNAROOTSI, 500 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296001379,,,meat_fish,meat_sausages
+124312,"Graavilõhe viilutatud, M.V.WOOL, 350 g",,,4740192010451,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+124313,"Juustulõige viilutatud, RANNAROOTSI, 150 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296010944,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+124314,"Suitsupeekon, OSKAR, 120 g",OSKAR LT AS,,4740569003116,meat_fish,meat_pork,meat_fish,meat_hams
+124315,"Maksapasteet Oskari, OSKAR, 200 g",OSKAR LT AS,,4740569009569,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+124316,"Toorvorstid paprika ja tšilliga E-Vaba, MATSIMOKA, 300 g",MATSIMOKA OÜ,,4744735010281,meat_fish,meat_sausages,meat_fish,meat_grill_blood_sausages
+124317,"Verivorst Memme (seasooles), MAKS&MOORITS, 500 g",ATRIA EESTI AS,,4740171187211,world_spices,spices_basic_salt_pepper,meat_fish,meat_grill_blood_sausages
+124318,"Kartulikotlet maisi ja hernega, MARTA PAGAR, 240g",EUROLEIB AS,,4740667251594,dry_preserves,dry_canned_veg,dry_preserves,dry_other
+124319,"Sea kulinaarne ribi, RAKVERE LK, kg",MAAG EESTI AS,,2711488000007,meat_fish,meat_grill_blood_sausages,meat_fish,meat_pork
+124320,"Suflee lõhefileest, AVEKTRA, 220 g",AVEKTRA OÜ,,4740689900210,meat_fish,fish_fresh,meat_fish,fish_processed
+124321,"Poolsuitsuvorst Tamula, WÕRO, 350 g",ATRIA EESTI AS,,4740562062950,meat_fish,meat_sausages,meat_fish,meat_sausages
+124322,"Fit Broilerifileešašlõkk greibi ja mineraalveega, TALLEGG, 800 g",MAAG EESTI AS,,4740046013034,dairy_eggs_fats,dairy_eggs,meat_fish,meat_poultry
+124323,"Kohafilee nahaga,jahutatud, KALAMAJAKAS, kg",KALAMAJAKAS OÜ,,2703282000000,meat_fish,fish_fresh,meat_fish,fish_fresh
+124324,"Kuumsuitsu lõhe/forelliribid, M.V.WOOL, kg",M.V.WOOL AS,,2703841000007,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+124325,"Vürtsikilu fileed õlis, BRIIS, 160 g",DGM SHIPPING AS,,4742312000298,dry_preserves,dry_pasta_rice,meat_fish,fish_processed
+124326,"Lihakas doktorivorst, RAKVERE LK, 360 g",MAAG EESTI AS,,4740003009186,meat_fish,meat_sausages,meat_fish,meat_sausages
+124327,"Põdralihaga pasteet, LINNAMÄE LIHATÖÖSTUS, 240 g",LINNAMÄE LIHATÖÖSTUS AS,,4740618005108,drinks,drinks_tea_coffee,dry_preserves,dry_canned_meat_fish
+124328,"Eesti Uluk Metssealihast täissuitsuvorst, RANNAROOTSI, 180 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296012627,meat_fish,meat_sausages,meat_fish,meat_sausages
+124329,"Sprotid õlis, AMBERFISH, 250 g",CLAIRE FOODS OÜ,,4751005703569,,,meat_fish,fish_processed
+124330,"Kuumsuitsu vikerforellifilee portsjon pipraga, SAARE KALA, 120 g",SAARE KALA TOOTMINE OÜ,,4740663720308,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+124331,"Põdraliha äkis (vajab külma), LINNAMÄE LIHATÖÖSTUS, 110 g",LINNAMÄE LIHATÖÖSTUS AS,,4740618007447,,,dry_preserves,dry_canned_meat_fish
+124332,"Supersmuuti kookose-ananassi-banaani, AURA, 330 ml",A. LE COQ AS,,4740098094142,dairy_eggs_fats,dairy_plant_drinks,produce,produce_smoothies_fresh_juices
+124333,"Smuuti vaarika ja mustika, PAI, 750 ml",ORKLA EESTI AS,,4740029052937,produce,produce_berries,produce,produce_smoothies_fresh_juices
+124334,"Grill-liha BBQ mureli kaelakarbonaadist, RANNAROOTSI, 500 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296011880,sauces_oils,sauces_marinades,meat_fish,meat_grill_blood_sausages
+124335,"Porgandi-õunamahl, FRUUTI, 250 ml",GKR TRADE OÜ,,4779035930359,drinks,drinks_juices,drinks,drinks_juices
+124336,"Koorene piprakaste, FOODSTUDIO, 230 ml",ABESTOCK AS,,4744481010283,dairy_eggs_fats,dairy_cream_sourcream,sauces_oils,sauces_pasta_cooking
+124337,"Ökoloogiline passioni-mangopüree basiilikuga, SMUSHIE, 170 g",SALVEST AS,,4740073078815,baby,baby_food_pouches,produce,produce_smoothies_fresh_juices
+124338,"Päevalille võrsed, VÄIKE MAHETALU, 50 g",LÕUNA-EESTI TOIDUVÕRGUSTIK TÜ,,4742023130536,,,produce,produce_herbs_salads_sprouts
+124339,"Korea salat, DIMDINI, 380 g",Määramata,,4751001623694,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+124340,"Smuuti Focus mustsõstra, maasika ja acai, FROOSH, 235 ml",FAIRFOOD OÜ,,7350020729706,produce,produce_berries,produce,produce_smoothies_fresh_juices
+124341,"Melon kollane, kg",Määramata,,2700012000002,,,produce,produce_tropical
+124342,"Paprika punane, kg",Määramata,,2700017000007,produce,produce_root_veg,produce,produce_root_veg
+124343,"Lillkapsas, kg",Määramata,,2700030000008,produce,produce_root_veg,produce,produce_root_veg
+124344,"Salatisibul, kg",Määramata,,2705393000009,produce,produce_herbs_salads_sprouts,produce,produce_root_veg
+124345,"Tšillipipar punane lahtine, kg",Määramata,,2711042000009,world_spices,spices_basic_salt_pepper,produce,produce_root_veg
+124346,"Koorene juustukaste, FOODSTUDIO, 230ml",ABESTOCK AS,,4744481011365,dairy_eggs_fats,dairy_other,sauces_oils,sauces_pasta_cooking
+124347,"Porgand pestud, kg",Määramata,,2700022000009,produce,produce_root_veg,produce,produce_root_veg
+124348,"Kookospähkel, kg",Määramata,,2700035000003,dairy_eggs_fats,dairy_plant_drinks,produce,produce_tropical
+124349,"Granaatõun, kg",,,,produce,produce_apples_pears,produce,produce_tropical
+124350,"Mahe Idusalat (Lutserni, Mungoa- ja Läätse idud), RÜÜTS, 140 g",FRINGILLA OÜ,,4744602010116,sweets_snacks,sweets_candies,produce,produce_herbs_salads_sprouts
+124351,"Porgand pakitud, 1 kg",,,4740669025513,produce,produce_root_veg,produce,produce_root_veg
+124352,"Koorene seenekaste puravikest, FOODSTUDIO, 230ml",ABESTOCK AS,,4744481011891,dairy_eggs_fats,dairy_cream_sourcream,sauces_oils,sauces_pasta_cooking
+124353,"Õun Royal Gala, kg",Määramata,,2701384000003,produce,produce_apples_pears,produce,produce_apples_pears
+124354,"Tomat, kg",,,,produce,produce_root_veg,produce,produce_root_veg
+124355,"Kurk poolpikk, kg",Määramata,,2704760000000,produce,produce_root_veg,produce,produce_root_veg
+124356,"Võrsetesegu, VÄIKE MAHETALU, 50 g",LÕUNA-EESTI TOIDUVÕRGUSTIK TÜ,,4742023139706,,,produce,produce_herbs_salads_sprouts
+124357,Kartul punane Laura 2kg,Kartul,2 kg,4743097000138,,,produce,produce_root_veg
+124358,"Mahe Läätse idusalat (Beluga-ja Rohelise läätse idud), RÜÜTS, 140 g",FRINGILLA OÜ,,4744602010093,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+124359,"Smuuti roheline, GRANINI, 250 ml",MOBEC AS,,4770569914952,,,produce,produce_smoothies_fresh_juices
+124360,"Pastinaak, kg",Määramata,,2709042000006,,,produce,produce_root_veg
+124361,"Peedimahl, KADARBIKU KÖÖGIVILI, 330 ml",KADARBIKU KÖÖGIVILI OÜ,,4742368000778,drinks,drinks_juices,drinks,drinks_juices
+124362,"Viinamari hele seemneteta, SELVER, 500 g",,,,sweets_snacks,sweets_nuts_driedfruit,produce,produce_tropical
+124363,"Kookose-karri kaste, gluteenivaba, laktoosivaba, FOODSTUDIO, 350 ml",ABESTOCK AS,,4744481010085,drinks,drinks_tea_coffee,sauces_oils,sauces_pasta_cooking
+124364,"Sinine ploom Lepotica, kg",Määramata,,2703851000004,,,produce,produce_tropical
+124365,"Peakapsa Kimchi, KADARBIKU KÖÖGIVILI, 300g",KADARBIKU KÖÖGIVILI OÜ,,4742368002048,world_spices,spices_asian,produce,produce_herbs_salads_sprouts
+124366,"Supersmuuti mango-banaani-peedi, AURA, 330 ml",A. LE COQ AS,,4740098094135,bakery,bakery_flatbreads_wraps,produce,produce_smoothies_fresh_juices
+124367,"Spargel roheline, 450 g",Määramata,,4740199000417,,,produce,produce_root_veg
+124368,"Maasika, banaani ja guajaavi smuuti, FROOSH, 250 ml",FAIRFOOD OÜ,,7350020728662,bakery,bakery_flatbreads_wraps,produce,produce_smoothies_fresh_juices
+124369,"Värskelt pressitud mahl, KADARBIKU KÖÖGIVILI, 250 ml",KADARBIKU KÖÖGIVILI OÜ,,4742368001010,drinks,drinks_juices,drinks,drinks_juices
+124370,"Muskaatkõrvits, kg",,,2707514000004,,,produce,produce_root_veg
+124371,"Porrulauk, kg",Määramata,,2700033000005,,,produce,produce_root_veg
+124372,"Virsik, kg",Määramata,,2700042000003,,,produce,produce_tropical
+124373,"Mahe Mungoa-Redise idusalat, RÜÜTS, 140 g",FRINGILLA OÜ,,4744602010154,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+124374,"Roheline sibul pakitud, kg",Määramata,,2300007500007,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+124375,"Melon Kesk-Aasia, kg",Määramata,,2707865000005,,,produce,produce_tropical
+124376,Food Studio Koorene Hakklihakaste 350 Ml,Food Studio,350 ml,4744481010917,meat_fish,meat_minced,sauces_oils,sauces_pasta_cooking
+124377,"Šampinjonid pruunid, 230 g",Määramata,,4742960010236,,,produce,produce_mushrooms
+124378,"Troopiline segumahl mango ja passioniviljaga, GOD MORGON, 1,75 L",MOBEC AS,,7313619001171,sweets_snacks,sweets_gums_mints,drinks,drinks_juices
+124379,"Mahe idusalat, LÕUNAIDU, 150 g",Määramata,,6416332001518,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+124380,"Kapsasalat kurkumiga, EESTI AND, 450 g",EESTI AND OÜ,,4742798000379,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+124381,"Jahubanaan, kg",Määramata,,2712530000006,bakery,bakery_flatbreads_wraps,produce,produce_tropical
+124382,"Supersmuuti Astelpaju-Porgandi-Mango, AURA , 330 ml",A. LE COQ AS,,4740098094760,produce,produce_tropical,produce,produce_smoothies_fresh_juices
+124383,"Ingveri Shot, FRANKLY, 60 ml",FAIRFOOD OÜ,,5713656004197,,,drinks,drinks_juices
+124384,"Roheline sibul, 100 g",Määramata,,4742798009860,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+124385,Värske soolakurk Peipsiääre 500g,Värske,500 g,4742014000145,,,dry_preserves,dry_canned_veg
+124386,"Smuuti maasika-kirsi, PAI, 200 g",ORKLA EESTI AS,,4740029053071,produce,produce_berries,produce,produce_smoothies_fresh_juices
+124387,"Pudelkõrvits, kg",,,,,,produce,produce_root_veg
+124388,"Smuuti õuna, pirni ja ingveri Immunity, FROOSH, 235ml",FAIRFOOD OÜ,,7350020729713,produce,produce_apples_pears,produce,produce_smoothies_fresh_juices
+124389,"Õun Granny Smith, kg",Määramata,,2700009000008,produce,produce_apples_pears,produce,produce_apples_pears
+124390,"Peakapsas varajane, kg",Määramata,,2700026000005,produce,produce_root_veg,produce,produce_root_veg
+124391,"Kaalikas, kg",,,,,,produce,produce_root_veg
+124392,"Mahe Lutserni idud, RÜÜTS, 100 g",FRINGILLA OÜ,,4744602010147,sweets_snacks,sweets_candies,produce,produce_herbs_salads_sprouts
+124393,"Käharkapsas, kg",Määramata,,2700067000002,produce,produce_root_veg,produce,produce_root_veg
+124394,"Porgand, RAUTSI TALU, 500 g",Määramata,,4744888010022,produce,produce_root_veg,produce,produce_root_veg
+124395,"Pirn Conference, kg",Määramata,,2701385000002,produce,produce_apples_pears,produce,produce_apples_pears
+124396,"Spargelkartul pakendatud, 1 kg",Määramata,,4740608084717,produce,produce_root_veg,produce,produce_root_veg
+124397,"Hernevõrsed, VÄIKE MAHETALU, 50 g",LÕUNA-EESTI TOIDUVÕRGUSTIK TÜ,,4742023130529,,,produce,produce_herbs_salads_sprouts
+124398,"Smuuti mango ja apelsini, PAI, 750 ml",ORKLA EESTI AS,,4740029052951,produce,produce_tropical,produce,produce_smoothies_fresh_juices
+124399,"Virsiku ja granadilli smuuti, FROOSH, 250 ml",FAIRFOOD OÜ,,7350020728655,,,produce,produce_smoothies_fresh_juices
+124400,"Kanapuljong Tai moodi, FOODSTUDIO, 350 ml",ABESTOCK AS,,4744481011594,world_spices,spices_broth_stock,world_spices,spices_broth_stock
+124401,"Brokoli võrsed, VÄIKE MAHETALU, 40 g",LÕUNA-EESTI TOIDUVÕRGUSTIK TÜ,,4742023130512,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+124402,"Avokaado, kg",Määramata,,2700014000000,produce,produce_tropical,produce,produce_tropical
+124403,"Mango Palmer, kg",Määramata,,2700015000009,produce,produce_tropical,produce,produce_tropical
+124404,"Mahe Mungoa idud, RÜÜTS, 140 g",FRINGILLA OÜ,,4744602010086,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+124405,"Õun Paulared, kg",Määramata,,2701371000009,produce,produce_apples_pears,produce,produce_apples_pears
+124406,"Õun Jonagored/Jonagold, kg",,,,produce,produce_apples_pears,produce,produce_apples_pears
+124407,"Petersell potis, GRÜNE FEE, tk",Määramata,,4741116000053,pet,pet_other,produce,produce_herbs_salads_sprouts
+124408,"Rukola potis, GRÜNE FEE, tk",Määramata,,4741116000145,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+124409,"Frillis potis, GRÜNE FEE, tk",Määramata,,4741116000169,,,produce,produce_herbs_salads_sprouts
+124410,"Virsik Paraguayo, kg",Määramata,,2704991000008,,,produce,produce_tropical
+124411,"Laim Tahiti, kg",Määramata,,2707963000006,produce,produce_tropical,produce,produce_tropical
+124412,"Salat Mangold, VITA VERDE , 100g",Määramata,,4740669040035,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+124413,Marineeritud kukeseen 500g,Marineeritud,500 g,4742798001123,,,produce,produce_mushrooms
+124414,"Šampinjonid valged, 230 g",Määramata,,4742960010021,,,produce,produce_mushrooms
+124415,"Mahe Banaan, kg",Määramata,,2360012100005,bakery,bakery_flatbreads_wraps,produce,produce_tropical
+124416,"Ploomtomat karbis, 500g",Määramata,,4740669030098,produce,produce_root_veg,produce,produce_root_veg
+124417,"Ploomtomat kollane karbis, , 500g",Määramata,,4779037250219,produce,produce_root_veg,produce,produce_root_veg
+124418,"Mango, banaani, õuna värskelt pressitud mahl, KADARBIKU KÖÖGIVILI, 750 ml",KADARBIKU KÖÖGIVILI OÜ,,4742368001478,drinks,drinks_juices,drinks,drinks_juices
+124419,"Mango-apelsini smuuti, FROOSH, 250 ml",FAIRFOOD OÜ,,7350020728624,produce,produce_tropical,produce,produce_smoothies_fresh_juices
+124420,"Smuuti kollane(mango, õun, apelsin, banaan, acerola), GRANINI, 250 ml",MOBEC AS,,4770569914969,bakery,bakery_flatbreads_wraps,produce,produce_smoothies_fresh_juices
+124421,"Ingveri, kurkumi ja tšilli Shot, FRANKLY, 60 ml",FAIRFOOD OÜ,,5713656004180,produce,produce_root_veg,drinks,drinks_juices
+124422,"Smuuti meloni ja passiooni, PAI, 280 ml",ORKLA EESTI AS,,4740029052968,,,produce,produce_smoothies_fresh_juices
+124423,Food Studio Ramen Puljong 350 Ml,Food Studio,350 ml,4744481011068,,,world_spices,spices_broth_stock
+124424,"Maitsestatud tomatimahlajook ""Bloody Mary Virgin"", DIMDINI, 250 ml",Määramata,,4751001624127,drinks,drinks_spirits,drinks,drinks_juices
+124425,"Hele viinamari Sultana, kg",Määramata,,2711425000008,drinks,drinks_spirits,produce,produce_tropical
+124426,"Viilutatud soolakurk tšilliga, SÄGA-AAVIKU TALU, 500 g",EESTIMAA VILJAD OÜ,,4745010554254,world_spices,spices_basic_salt_pepper,produce,produce_herbs_salads_sprouts
+124427,"Ökoloogiline Õuna-spinatipüree chia seemnetega, SMUSHIE, 170 g",SALVEST AS,,4740073001776,baby,baby_food_pouches,baby,baby_food_pouches
+124428,"Granadill lahtine, kg",Määramata,,2709200000008,,,produce,produce_tropical
+124429,"Smuuti õuna, maasika ja sidruni, FROOSH, 250 ml",FAIRFOOD OÜ,,7350153720199,produce,produce_berries,produce,produce_smoothies_fresh_juices
+124430,"Eriti Vürtsikas Peakapsa Kimchi, KRIMCHI, 400 g",FERMENCY OÜ,,4745011005625,world_spices,spices_asian,produce,produce_herbs_salads_sprouts
+124431,"Hiinakapsa Kimchi, KRIMCHI, 400 g",FERMENCY OÜ,,4745011005632,world_spices,spices_asian,produce,produce_herbs_salads_sprouts
+124432,"Suitsune Kimchi Lillkapsaga, KRIMCHI, 400 g",FERMENCY OÜ,,4745011005656,world_spices,spices_asian,produce,produce_herbs_salads_sprouts
+124433,"Peakapsa Kimchi, KRIMCHI, 400 g",FERMENCY OÜ,,4745011005618,world_spices,spices_asian,produce,produce_herbs_salads_sprouts
+124434,"Tume viinamari Moldova, kg",Määramata,,2700034000004,drinks,drinks_spirits,produce,produce_tropical
+124435,"Juurseller, kg",Määramata,,2700072000004,,,produce,produce_root_veg
+124436,"Mahe Piparmündi kombucha, SÄSI, 330 ml",SÄSI PRUULIKODA OÜ,,0714983177856,world_spices,spices_basic_salt_pepper,drinks,drinks_other

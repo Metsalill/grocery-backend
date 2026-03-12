@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+124738,Casa Charlize Prosecco Brut 75 cl,DUNKER ESTONIA OÜ,,4740158009215,drinks,drinks_wine,drinks,drinks_wine
+124739,Casal Garcia Vinho Verde Branco 75 cl,,,,,,drinks,drinks_wine
+124740,Casillero del Diablo Cabernet Sauvignon 75 cl,AMBER DISTRIBUTION ESTONIA OÜ,,7804320303178,drinks,drinks_wine,drinks,drinks_wine
+124741,Casillero del Diablo Carmenere 75 cl,AMBER DISTRIBUTION ESTONIA OÜ,,7804320087016,,,drinks,drinks_wine
+124742,Castellani Chianti 75 cl,MEDIATO AS,,8002153007006,,,drinks,drinks_wine
+124743,Castellani Chianti Classico Riserva 75 cl,MEDIATO AS,,8002153993088,,,drinks,drinks_wine
+124744,Castellani Chianti Riserva 75 cl,MEDIATO AS,,8002153008324,,,drinks,drinks_wine
+124745,Castellani Pinot Grigio 75 cl,MEDIATO AS,,8002153206010,,,drinks,drinks_wine
+124746,Castillo de Almanasa Reserva 75 cl,LIVIKO AS,,8414837010118,produce,produce_herbs_salads_sprouts,drinks,drinks_wine
+124747,Cavas Hill 1887 Brut Cava 75 cl,HENKELL FREIXENET EESTI AS,,8420418005053,drinks,drinks_wine,drinks,drinks_wine
+124748,Cesari Chianti DOCG 75 cl,PRIKE AS,,8000834309159,drinks,drinks_wine,drinks,drinks_wine
+124749,Cesari Essere Pinot Grigio DOC 75 cl,PRIKE AS,,8000834305991,drinks,drinks_wine,drinks,drinks_wine
+124750,Cesari Pinot Grigio dellevenezie 75 cl,PRIKE AS,,8000834305007,drinks,drinks_wine,drinks,drinks_wine
+124751,Cesari Soave DOC 75 cl,PRIKE AS,,8000834751101,drinks,drinks_wine,drinks,drinks_wine
+124752,Chapel-Hill Merlot 75 cl,HENKELL FREIXENET EESTI AS,,5015271004010,drinks,drinks_wine,drinks,drinks_wine
+124753,Chapel-Hill Rhine Riesling 75 cl,HENKELL FREIXENET EESTI AS,,5998813128675,drinks,drinks_wine,drinks,drinks_wine
+124754,Chapel Hill Sauvignon Blanc 75 cl,HENKELL FREIXENET EESTI AS,,5015271004119,,,drinks,drinks_wine
+124755,Chardonnay 75 cl,,,,drinks,drinks_wine,drinks,drinks_wine
+124756,Chardonnay-Torrontes 75 cl,LTT AS,,5727510620676,drinks,drinks_wine,drinks,drinks_wine
+124757,Chateau Beauregard Ducasse Graves Red 75 cl,LIVIKO AS,,3760178551144,drinks,drinks_tea_coffee,drinks,drinks_wine
+124758,Chateau d'Arcins 75 cl,AVALLONE AS,,3211209139232,drinks,drinks_tea_coffee,drinks,drinks_wine
+124759,Chateau Des Landes Lussac-St Emilion 75 cl,LIVIKO AS,,3364610052185,drinks,drinks_tea_coffee,drinks,drinks_wine
+124760,Chateau Latour Camblanes Prem. 75 cl,AVALLONE AS,,3211209136347,drinks,drinks_tea_coffee,drinks,drinks_wine
+124761,"Chateau Le Mayne Bordeaux Superieur, 75 cl",LTT AS,,3760061292512,drinks,drinks_tea_coffee,drinks,drinks_wine
+124762,Chateau Malbec 75 cl,AVALLONE AS,,3211203448378,drinks,drinks_tea_coffee,drinks,drinks_wine
+124763,Chateau Rocher-Calon 75 cl,LIVIKO AS,,3364610072350,drinks,drinks_tea_coffee,drinks,drinks_wine
+124764,Chateau Saint Germain Bordeaux Superieur 75 cl,MEDIATO AS,,3159560600100,drinks,drinks_tea_coffee,drinks,drinks_wine
+124765,Chateau Timberlay Bordeaux Supérieur 75 cl,SVENSKY KAUBANDUSE AS,,3500610138904,drinks,drinks_tea_coffee,drinks,drinks_wine
+124766,Chic Barcelona Brut Cava 75 cl,DUNKER ESTONIA OÜ,,8426998221753,drinks,drinks_wine,drinks,drinks_wine
+124767,Chic Barcelona Rose Semi Sec Cava 75 cl,DUNKER ESTONIA OÜ,,8426998222750,drinks,drinks_wine,drinks,drinks_wine
+124768,"Chill Out Chenin Blanc 1,5 L",ANORA ESTONIA AS,,5710778001851,drinks,drinks_wine,drinks,drinks_wine
+124769,"Chilli juustu nuggetid, SALUD, 250 g",BIMAR OÜ,,8717154059908,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+124770,"Chorizo grillvorstid juustuga, NÕO, 450 g",NÕO LIHATÖÖSTUS OÜ,,4740574193536,dairy_eggs_fats,dairy_other,meat_fish,meat_grill_blood_sausages
+124771,"Ciabatta Rustica eelküpsetatud mitmeviljasaiake, DR.SCHÄR, 200 g",EUGESTA EESTI OÜ,,8008698003152,bakery,bakery_buns_croissants,bakery,bakery_gluten_free
+124772,Cinzano Sweet Edition Dolce 75 cl,ANORA ESTONIA AS,,8000020005247,drinks,drinks_wine,drinks,drinks_wine
+124773,Clos Amador Cava Brut Delicat Reserva 75 cl,LIVIKO AS,,8426998257547,pet,pet_other,drinks,drinks_wine
+124774,Codorniu Classico Brut Nature Cava 75 cl,PRIKE AS,,8410013024290,drinks,drinks_wine,drinks,drinks_wine
+124775,"Cola magusainetega, NOCCO, 330 ml",GKR TRADE OÜ,,7340131608014,drinks,drinks_soft_soda,drinks,drinks_energy
+124776,Conde Villar Vinho Verde Rose 75cl,TRIDENS AS,,5603238133776,,,drinks,drinks_wine
+124777,"Cono Sur Bicicleta Cabernet Sauvignon 2012, Cono Sur, 75 cl",LIVIKO AS,,7804320753607,drinks,drinks_wine,drinks,drinks_wine
+124778,"Cono Sur Bicicleta Pinot Noir Rose, Cono Sur, 75 cl",LIVIKO AS,,7804320555959,,,drinks,drinks_wine
+124779,Cono Sur Bicicleta Reserva Chardonnay 75 cl,LIVIKO AS,,7804320753751,drinks,drinks_wine,drinks,drinks_wine
+124780,Cono Sur icicleta Reserva Pinot Noir 75 cl,LIVIKO AS,,7804320753454,,,drinks,drinks_wine
+124781,"Cono Sur Organico Cabernet Sauvignon Carmenere, Cono Sur, 75 cl",LIVIKO AS,,7804320127538,drinks,drinks_wine,drinks,drinks_wine
+124782,"Cono Sur Organico Sauvignon Blanc 2012, Cono Sur, 75 cl",LIVIKO AS,,7804320348063,,,drinks,drinks_wine
+124783,"Cono Sur Pinot Noir Organico, Cono Sur, 75 cl",LIVIKO AS,,7804320227382,,,drinks,drinks_wine
+124784,"Cono Sur Riesling Bicicleta, Cono Sur, 300 cl",LIVIKO AS,,7804320668765,drinks,drinks_wine,drinks,drinks_wine
+124785,"Cono Sur Riesling, Cono Sur, 75 cl",LIVIKO AS,,7804320156903,drinks,drinks_wine,drinks,drinks_wine
+124786,"Cono Sur Tocornal Cabernet Sauvignon 09, Cono Sur, 75 cl",LIVIKO AS,,7804320312101,drinks,drinks_wine,drinks,drinks_wine
+124787,"Cono Sur Tocornal Chardonnay 07, Cono Sur, 75 cl",LIVIKO AS,,7804320470450,drinks,drinks_wine,drinks,drinks_wine
+124788,Contarini Prosecco Treviso 75 cl,AVALLONE AS,,8005400790454,drinks,drinks_wine,drinks,drinks_wine
+124789,Coq du Matin Cabernet Sauvignon 75 cl,AVALLONE AS,,3437540053000,drinks,drinks_wine,drinks,drinks_wine
+124790,Coq du Matin Chardonnay 75 cl,AVALLONE AS,,3437540053086,drinks,drinks_wine,drinks,drinks_wine
+124791,Coq du Matin Moscato 75cl,AVALLONE AS,,3437540053949,pet,pet_other,drinks,drinks_wine
+124792,Coq du Matin Pinot Noir 75 cl,AVALLONE AS,,3437540053093,,,drinks,drinks_wine
+124793,Coq du Matin Sauvignon Blanc 75 cl,AVALLONE AS,,3437540053345,,,drinks,drinks_wine
+124794,Cosmopolitan Diva 75cl,AMBER DISTRIBUTION ESTONIA OÜ,,4750012029853,,,drinks,drinks_wine
+124795,Cotes du Rhone Villages 75 cl,MEDIATO AS,,3500610150609,,,drinks,drinks_wine
+124796,Coto de Imaz Coto de Imaz Rioja Gran Reserva 75 cl,MEDIATO AS,,8410537039626,,,drinks,drinks_wine
+124797,"Craft Toonik Wild Lingonberry, ØRN, 1 L",A. LE COQ AS,,4740098098539,produce,produce_berries,drinks,drinks_soft_soda
+124798,"Crafted Colledtion Pinot Grigio, KENDERMANNS, 75 cl",ANORA ESTONIA AS,,4069600019054,drinks,drinks_wine,drinks,drinks_wine
+124799,Crianza Tempranillo DOC 75 cl,BESTWINE OÜ,,8437008733029,,,drinks,drinks_wine
+124800,Crudo Catarratto Zibibbo 75 cl,MEDIATO AS,,7340048603201,pet,pet_other,drinks,drinks_wine
+124801,Cut Malbec 75cl,LTT AS,,5727510520679,,,drinks,drinks_wine
+124802,Cuvee Alba 75 cl,DUNKER ESTONIA OÜ,,4740158011164,drinks,drinks_wine,drinks,drinks_wine
+124803,D. Bauhaud Secret Des Vignes Chenin 75 cl,TRIDENS AS,,3221580065549,,,drinks,drinks_wine
+124805,"Delikatessrulaad, TALLEGG, 130 g",MAAG EESTI AS,,4740046013959,dairy_eggs_fats,dairy_eggs,meat_fish,meat_hams
+124806,Desom Grand Premier Cru Auxerrois 75 cl,TRIDENS AS,,5450190410953,,,drinks,drinks_wine
+124807,Desom Premier Cru Rivaner 75 cl,TRIDENS AS,,5450190410915,,,drinks,drinks_wine
+124808,"Dessertkommid, JAKOBSEN, 225 g",NOIRES HA OÜ,,5701049172202,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+124809,Devils Rock Riesling 75 cl,DUNKER ESTONIA OÜ,,4002301425700,drinks,drinks_wine,drinks,drinks_wine
+124810,Diablo Dark Red 75 cl,AMBER DISTRIBUTION ESTONIA OÜ,,7804320746104,,,drinks,drinks_wine
+124811,"Difuuser Morning Dew & Blackberries, AIR WICK, 40 ml",EUGESTA EESTI OÜ,,5908252010622,,,household,hh_candles_airfresh
+124812,"Difuuser Pear & Cinnamon, AIR WICK, 40 ml",EUGESTA EESTI OÜ,,5908252010639,produce,produce_apples_pears,household,hh_candles_airfresh
+124813,Dolce Cioccolato Rosato 75cl,MEDIATO AS,,4740158010358,drinks,drinks_soft_soda,drinks,drinks_wine
+124814,Dominio de Mudela Verdejo Airen 75 cl,BESTWINE OÜ,,8437002235925,,,drinks,drinks_wine
+124815,Don Simon Premium Chardonnay Airen 100 cl,MEDIATO AS,,8410261206158,drinks,drinks_wine,drinks,drinks_wine
+124816,Doppio Passo Pinot Grigio Friuli 75 cl,MV GROUP DISTRIBUTION EE OÜ,,8008863057874,,,drinks,drinks_wine
+124817,Doppio Passo Primitivo 75 cl,MV GROUP DISTRIBUTION EE OÜ,,8008863069457,,,drinks,drinks_wine
+124818,Doppio Passo Primitivo di Manduria Riserva 75 cl,MV GROUP DISTRIBUTION EE OÜ,,8008863070088,,,drinks,drinks_wine
+124819,Dreamer Chiller White tetra 100 cl,DUNKER ESTONIA OÜ,,4740158011362,drinks,drinks_wine,drinks,drinks_wine
+124820,Dreamer Late Harvest Cabernet Sauvignon 75 cl,DUNKER ESTONIA OÜ,,4740158010723,drinks,drinks_wine,drinks,drinks_wine
+124821,"Hakitud spinat, FIRST PRICE, 900 g",SELVER AS,,7311041085967,produce,produce_herbs_salads_sprouts,frozen_food,frozen_veg
+124822,"Hakitud spinati portsjonid Fitlap, HÄRMAVILI, 300 g",BALBIINO AS,,4740188018829,produce,produce_herbs_salads_sprouts,frozen_food,frozen_veg
+124823,"Hakitud till, KOTANYI, 11 g",EUGESTA EESTI AS,,9001414015100,produce,produce_herbs_salads_sprouts,world_spices,spices_herbs_spice_mix
+124824,"Hakklihakaste, SELVERI KÖÖK, 2,1 kg, ettetellimisel",KULINAARIA OÜ,,4740581112155,meat_fish,meat_minced,sauces_oils,sauces_pasta_cooking
+124825,"Hakklihakaste, SELVERI KÖÖK, 400 g",KULINAARIA OÜ,,4740581104808,meat_fish,meat_minced,sauces_oils,sauces_pasta_cooking
+124826,"Hakklihamaitseaine 0% soola, MEIRA, 35 g",MEIRA EESTI OÜ,,6414201001348,world_spices,spices_basic_salt_pepper,world_spices,spices_herbs_spice_mix
+124827,"Hakklihamaitseaine, ilma lisatud soolata, SANTA MARIA, 38 g",SANTA MARIA AS,,7311311025556,world_spices,spices_basic_salt_pepper,world_spices,spices_herbs_spice_mix
+124828,"Hakklihamaitseaine, SANTA MARIA, 280 g",SANTA MARIA AS,,7311311017254,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+124829,"Hakklihamaitseaine, SANTA MARIA, 630 g, ettetellimisel",SANTA MARIA AS,,7311311013089,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+124830,"Halvaa rummi ja rosinatega, MARMITON, 200 g",SVENSKY KAUBANDUSE AS,,4740062550254,drinks,drinks_spirits,sweets_snacks,sweets_candies
+124831,"Happy-cola, kummikommid, HARIBO, 175 g",INTERALTUS OÜ,,4001686327517,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+124832,"Hapud kummikommid arbuusilõigud, JAKE, 100 g",KOMMIKESKUS OÜ,,8412147570070,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+124833,HARIBO Sauerbrenner hapud kummikommid 160g,HARIBO Sauerbrenner,160 g,4001686327753,,,sweets_snacks,sweets_candies
+124834,"Hapud kummikommide mix, JAKE, 100 g",KOMMIKESKUS OÜ,,8412147571497,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+124835,"Hapukapsaborš sealihaga, SALVEST, 530 g",SALVEST AS,,4740073040096,meat_fish,meat_pork,dry_preserves,dry_ready_meals_jars
+124836,Salvest hapukapsasupp 530 g sealihaga,Salvest,530 g,4740073050422,meat_fish,meat_pork,dry_preserves,dry_ready_meals_jars
+124837,"Hapukoor 20%, FARMI, 500 g",FARMI PIIMATÖÖSTUS AS,,4740123000759,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+124838,"Hapukoor 20% kiles, ALMA, 250 g",,,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+124839,"Hapukoore- ja sibulamaitselised kartulilaastud, TAFFEL, 180g",ORKLA EESTI AS,,4750024002776,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_snacks_salty
+124840,"Hapukoorekaste, FIRST PRICE, 400 ml",SELVER AS,,7311041085226,dairy_eggs_fats,dairy_cream_sourcream,sauces_oils,sauces_pasta_cooking
+124841,"Hapukoorekook, 280g, SELVERI KÖÖK",KULINAARIA OÜ,,4740581108851,dairy_eggs_fats,dairy_cream_sourcream,bakery,bakery_cakes_pastries
+124842,"Hapukoorekook, 580g, SELVERI KÖÖK",KULINAARIA OÜ,,4740581108868,dairy_eggs_fats,dairy_cream_sourcream,bakery,bakery_cakes_pastries
+124843,"Hapukurgid, MÕISAPROUA, 1kg",INTERALTUS OÜ,,4748001009276,,,dry_preserves,dry_canned_veg
+124844,"Hapusaiajuuretis, NORDWISE®, 7 g",NORDWISE BIOTECH OÜ,,4744780015095,bakery,bakery_buns_croissants,dry_preserves,dry_flour_sugar_baking
+124845,"Haputaina Pehmik, EESTI PAGAR, 240 g",EESTI PAGAR AS,,4740086020719,,,bakery,bakery_bread_loaves
+124846,"Hariliku Maarjaohaka õli, GLORIA, 500 ml",LARINGO OU,,4004597001583,,,sauces_oils,oils_other
+124847,"Harmony viilujuust laktoosivaba, E-PIIM, 150 g",E-PIIM TOOTMINE AS,,4740142002048,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+124848,"Hautatud oad tomatikastmes, ORGANIC FOODS, 400 g",M&V TRADE OÜ,,8002225650352,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+124849,"Heeringafilee kergsoola, VICI, 220 g",VICIUNAI BALTIC OÜ,,4770190377669,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked
+124850,"Heeringafilee külmsuitsu roosakas, VICI, 240 g",VICIUNAI BALTIC OÜ,,4770190035903,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+124851,"Heeringafilee soolatud õlita, KAPTEN GRANT, 190 g",KAPTEN GRANT OÜ,,4740687957896,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked
+124852,"Heeringafilee tükid mahedas marinaadis, SAARE HÕBE, 300 g",LÄÄTSA KALATÖÖSTUS AS,,4740590074321,sauces_oils,sauces_marinades,meat_fish,fish_processed
+124853,"Heeringafileetükid klassikaline, KAPTEN GRANT, 210 g",KAPTEN GRANT OÜ,,4740687001735,meat_fish,fish_fresh,meat_fish,fish_processed
+124854,"Heeringafileetükid sinepi-majoneesi kastmes, KALURI, 300 g",LÄÄTSA KALATÖÖSTUS AS,,4740590074338,sauces_oils,sauces_ketchup_mayo,meat_fish,fish_processed
+124855,"Heeringas marinaadis, FIRST PRICE, 400 g",SELVER AS,,7311041086223,sauces_oils,sauces_marinades,meat_fish,fish_processed
+124856,"Heeringas vürtsidega, FIRST PRICE, 400 g",SELVER AS,,7311041088265,personal_care,pcare_feminine_hygiene,meat_fish,fish_processed
+124857,"Heeringasuupiste, SELVERI KÖÖK, 380 g",KULINAARIA OÜ,,4740581108585,meat_fish,fish_fresh,meat_fish,fish_processed
+124858,"Hele agaavisiirup, JAKOBSENS, 350 g",KAUPMEES & KO AS,,5772739449706,drinks,drinks_syrups_powders,dry_preserves,dry_other
+124859,"Hele kaerataskuleib Street Food, FAZER, 220 g",FAZER EESTI OÜ,,4750212903595,dairy_eggs_fats,dairy_plant_drinks,bakery,bakery_flatbreads_wraps
+124860,"Hele Muscovado suhkur, DAN SUKKER, 400 g",SELVER AS,,7310340002323,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+124861,"Hele suhkrusiirup, DAN SUKKER, 750 g",SELVER AS,,7310340464497,drinks,drinks_syrups_powders,dry_preserves,dry_other
+124862,"Hele teraleib seemnetega, SELVERI PAGARID, 400 g",MANTINGA EESTI OÜ,,2614270000004,sweets_snacks,sweets_nuts_driedfruit,bakery,bakery_bread_loaves
+124863,"Hele tordipõhi 3-kihiline, KUCHENMEISTER, 400 g",INTERALTUS OÜ,,4101540708510,,,bakery,bakery_cakes_pastries
+124864,"Herbamare ürdisool, A.VOGEL, 250 g",KAUPMEES & KO AS,,7610313412143,world_spices,spices_basic_salt_pepper,world_spices,spices_basic_salt_pepper
+124865,"Herby basiiliku salatikaste, FS GOODS, 200 ml",ABESTOCK AS,,4744481014403,sauces_oils,sauces_salad_dressings,sauces_oils,sauces_salad_dressings
+124866,"Herned, BONDUELLE, 212 ml",JUNGENT ESTONIA OÜ,,3083680538404,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+124867,"Herned, FIRST PRICE, 575 g",SELVER AS,,7311041080269,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+124868,"Hernes kollane kooritud, VESKI MATI, 500 g",SELVER AS,,4740281006907,dairy_eggs_fats,dairy_cream_sourcream,dry_preserves,dry_groats_beans
+124869,"Hernes kollane poolik, BALTIX, 1 kg",WORLDLINE OÜ,,4742298000381,,,dry_preserves,dry_groats_beans
+124870,"Hernesupp maasuitsusingiga, SELVERI KÖÖK, 400g",KULINAARIA OÜ,,4740581110434,,,dry_preserves,dry_ready_meals_jars
+124871,"Või 82%, SELVER, 200 g",VALIO EESTI AS,,4740581410039,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+124872,"Hernesupp maasuitsusingiga vaakumkotis, SELVERI KÖÖK, 3 kg, ettetellimisel",KULINAARIA OÜ,,4740581112452,,,dry_preserves,dry_ready_meals_jars
+124873,"Hernesupp sealihaga, SALVEST, 530 g",SALVEST AS,,4740073040423,meat_fish,meat_pork,dry_preserves,dry_ready_meals_jars
+124874,"Hernesupp suitsulihaga, SALVEST, 530 g",SALVEST AS,,4740073040447,,,dry_preserves,dry_ready_meals_jars
+124875,"Hibiskusetee arooniaga 20*1,5g, BELIN,",EKTONI HULGIKAUBANDUS OÜ,,5900675007838,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+124876,"Hiidkrevetisabad suitsuse tšilliga, SELVER, kg",,,2714371000009,,,meat_fish,fish_processed
+124877,"Hiina kaste (poolmagus), FELIX, 500 g",ORKLA EESTI AS,,4750022519115,,,sauces_oils,sauces_soy_worcester
+124878,"Hiinapärane kaste poolmagus, FELIX, 1,7 kg, ettetellimisel",ORKLA EESTI AS,,4750022519184,,,sauces_oils,sauces_soy_worcester
+124879,"Hinkaalid, RANNAROOTSI, 420 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296011774,,,frozen_food,frozen_ready_meals
+124880,"Hirss, VESKI MATI, 500 g",SELVER AS,,4740281006662,,,dry_preserves,dry_groats_beans
+124881,"Hmeli-Suneli vürtsisegu, ANATOLS, 10 g",KAUPMEES & KO AS,,4750280004217,,,world_spices,spices_herbs_spice_mix
+124882,"Hoisin kaste, THAI CHOICE, 340 g",D.T.L. CONSUMER PRODUCTS EESTI AS,,8851978801173,,,sauces_oils,sauces_soy_worcester
+124883,"Hollandi juust viilutatud, E-PIIM, 150 g",E-PIIM TOOTMINE AS,,4740142004059,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+124884,"Hollandi Leibjuust 25,2% viilutatud, ESTOVER, 300 g",ESTOVER OÜ,,4740572001352,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+124885,"Hollandi leibjuust 26% laktoosivaba, MO SAAREMAA, 500 g",PINUS AS,,4740153332059,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+124886,"Hommikuhelbed Corn Flakes, KELLOGG'S, 375g",SANITEX OÜ,,5059319014739,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+124887,"Hommikuhelbed Frosties, KELLOGG'S, 330 g",SANITEX OÜ,,5053827206907,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+124888,"Hommikusöögibatoon Chocapic, NESTLÉ, 25 g",SELVER AS,,8593893007468,dry_preserves,dry_cereals_muesli,sweets_snacks,sweets_chocolate_bars

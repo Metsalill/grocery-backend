@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+126093,"Kurgimajonees, HERKKUMAA, 320 g",KARIA OÜ,,6410840038417,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+126094,"Kurgisalat, PÕLTSAMAA, 280g",ORKLA EESTI AS,,4740029044505,produce,produce_herbs_salads_sprouts,dry_preserves,dry_canned_veg
+126095,"Kurkum jahvatatud, 20g, SANTA MARIA",SANTA MARIA AS,,7311311019852,produce,produce_root_veg,world_spices,spices_herbs_spice_mix
+126096,"Kurkum jahvatatud, SANTA MARIA, 32 g",SANTA MARIA AS,,7311311027376,produce,produce_root_veg,world_spices,spices_herbs_spice_mix
+126097,"Kuskuss pärli kolmevärviline, SENC MAROC, 900 g",REATON OÜ,,8720387052059,,,dry_preserves,dry_pasta_rice
+126098,"Kuskuss pärli, SENC MAROC, 900 g",REATON OÜ,,8720387052066,,,dry_preserves,dry_pasta_rice
+126099,"Kuskuss, PASTA ZARA, 500 g",SVENSKY KAUBANDUSE AS,,8004350131850,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+126100,"Küülik, terve, peata, külmutatud, kg",REATON OÜ,,2714691000000,frozen_food,frozen_other,frozen_food,frozen_meat
+126101,"Mesi kreemjas, MEVEDA, 500 g",MEVEDA OÜ,,4740250000189,,,dry_preserves,dry_other
+126102,"Kuumsuitsuforelli uramaki, SELVERI KÖÖK, 220 g",KULINAARIA OÜ,,4740581113169,meat_fish,fish_salted_smoked,meat_fish,fish_processed
+126103,"Küüslaugu salsa, SANTA MARIA, 230 g",SANTA MARIA AS,,7311312000989,world_spices,spices_mexican,sauces_oils,sauces_marinades
+126104,"Küüslaugu-ürdi kaste, HELLMANN'S, 250 ml",UNILEVER EESTI OÜ,,8711200473960,world_spices,spices_herbs_spice_mix,sauces_oils,sauces_other
+126105,"Küüslaugu-ürdi marinaad lihale, SANTA MARIA, 75 g",SANTA MARIA AS,,7311310295240,sauces_oils,sauces_marinades,sauces_oils,sauces_marinades
+126106,"Küüslaugud äädikas, GOURMANTE, 100 g",INTERALTUS OÜ,,80127208,sauces_oils,oils_vinegar,dry_preserves,dry_canned_veg
+126107,"Küüslauguga majonees, TARPLAN, 210 g",TARPLANI KAUBANDUSE OÜ,,4740159001874,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+126108,"Küüslaugukaste, FELIX, 275 g",ORKLA EESTI AS,,4740029048930,,,sauces_oils,sauces_other
+126109,"Küüslaugukaste, FIRST PRICE, 400 ml",SELVER AS,,7311041085943,,,sauces_oils,sauces_other
+126110,"Küüslaugukaste, HEINZ, 435 g",EUGESTA EESTI AS,,8715700110097,,,sauces_oils,sauces_other
+126111,"Küüslauguketšup, FELIX, 490 g",ORKLA EESTI AS,,7316110001169,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+126112,"Küüslaugukurk, SALVEST, 675 g",SALVEST AS,,4740073060483,produce,produce_root_veg,dry_preserves,dry_canned_veg
+126113,Chumak küüslaugumaitseline kaste 200g,Chumak,200 g,4823096002125,,,sauces_oils,sauces_other
+126114,"Küüslaugumajonees, HERKKUMAA, 320 g",KARIA OÜ,,6410840038448,sweets_snacks,sweets_gums_mints,sauces_oils,sauces_ketchup_mayo
+126115,"Küüslaugupipar, SANTA MARIA, 30 g",SANTA MARIA AS,,6418474130095,world_spices,spices_basic_salt_pepper,world_spices,spices_basic_salt_pepper
+126116,"Küüslauk tükeldatud, 25g, SANTA MARIA",SANTA MARIA AS,,7311311019869,produce,produce_root_veg,world_spices,spices_herbs_spice_mix
+126117,"Laastmakaron Nouilles Fines, PANZANI, 500 g",ABESTOCK AS,,3038350013200,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+126118,"Läätse-köögiviljasegu, mahe, KÖÖGIS ASJA ETTE, 350 g",JUNGENT ESTONIA OÜ,,4740085314802,dry_preserves,dry_groats_beans,dry_preserves,dry_groats_beans
+126119,"Läätsed tomatikastmes, CIRIO, 410g",GRANAROLO BALTICS OÜ,,8000320030086,dry_preserves,dry_groats_beans,dry_preserves,dry_canned_veg
+126120,"Läätsekarri basmatiriisiga, SELVERI KÖÖK, 300 g",KULINAARIA OÜ,,4740581114050,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+126121,"Läätsekrõpsud hapukoore ja tilliga, EAT REAL, 95 g",ABESTOCK AS,,5060878780430,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+126122,"Lagritsakompvekid Laku Sekoitus, MALACO, 250 g",TRIDENS AS,,6420256015742,,,sweets_snacks,sweets_candies
+126123,"Lahustuv jook maasikamaitseline, NESQUIK, 350 g",SELVER AS,,8445291306288,dry_preserves,dry_cereals_muesli,drinks,drinks_syrups_powders
+126124,"Lahustuv kakaojook, NESQUIK, 300 g",SELVER AS,,8445291227613,dry_preserves,dry_cereals_muesli,drinks,drinks_syrups_powders
+126125,"Lahustuv kakaojook, NESQUIK, 600g",SELVER AS,,8445291036192,dry_preserves,dry_cereals_muesli,drinks,drinks_syrups_powders
+126126,"Lahustuv kakaojook šokolaadi-sarapuupähklimaitseline, NESQUIK, 350 g",SELVER AS,,8445291175198,sweets_snacks,sweets_chocolate_bars,drinks,drinks_syrups_powders
+126127,"Lahustuv kohv 3 in1 Caramel, JACOBS,",SELVER AS,,8711000682371,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126128,"Lahustuv kohv 3 in1 Caramel (karp 10X11,2g), JACOBS,",SELVER AS,,8711000496343,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126129,"Lahustuv kohv Classic 3in1 16,5g, NESCAFE, 16,5 g",SELVER AS,,59945383,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126130,"Lahustuv kohv Classic 3in1 (kott), NESCAFE, 20x16,5 g",SELVER AS,,7613036872591,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126131,"Lahustuv kohv Classic 3in1, NESCAFE, 28x16,5 g",SELVER AS,,7613036842143,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126132,"Lahustuv kohv Classic (klaaspurk), NESCAFE, 100g",SELVER AS,,7613031918867,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126133,"Lahustuv kohv Classic (klaaspurk), NESCAFE, 200 g",SELVER AS,,8445290303080,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126134,"Lahustuv kohv Cronat Gold, JACOBS, 100g",SELVER AS,,8711000517857,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126135,"Lahustuv kohv Cronat Gold, JACOBS, 200 g",SELVER AS,,8711000517918,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126136,"Lahustuv kohv Cronat Gold, täitepakk, JACOBS, 150g",SELVER AS,,8711000578094,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126137,"Lahustuv kohv Gold, MERRILD, 200 g",SELVER AS,,8000070060913,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126138,"Lahustuv kohv Gold, NESCAFE, 200 g",SELVER AS,,7613036299459,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126139,"Lahustuv kohv Krönung, JACOBS, 100 g",SELVER AS,,8711000517888,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126140,"Lahustuv kohvi Caramel 3in1, NESCAFE, 160 g",SELVER AS,,8445291683815,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126141,"Lahustuv kohvijook 2in1 Classic, JACOBS,",SELVER AS,,8711000566695,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126142,"Lahustuv kohvijook 2in1 Classic (karp 20X12,4g), JACOBS,",SELVER AS,,8711000566688,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126143,"Lahustuv kohvijook 2in1 (kott 10x12.4g), JACOBS,",SELVER AS,,8711000574034,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126144,"Lahustuv kohvijook 3in1 10x12,4g Milka, JACOBS,",SELVER AS,,8711000496435,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126145,"Lahustuv kohvijook 3in1 Milka, JACOBS,",SELVER AS,,8711000682364,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126146,"Lahustuv kohvijook 3in1 Original (karp 20x12,6g), JACOBS, 252 g",SELVER AS,,8711000566657,drinks,drinks_spirits,drinks,drinks_tea_coffee
+126147,"Lahustuv kohvijook 3in1 Strong (kott)10x16g, NESCAFE, 160 g",SELVER AS,,8445291208445,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126148,"Lahustuv kohvijook Cappuccino 8x13.5g, NESCAFE,",SELVER AS,,8445291531581,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126149,"Lahustuv kohvijook Mild 3in1 (karp 20x11,1g), JACOBS, 222 g",SELVER AS,,8711000571934,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126150,"Lahustuv kohvijook Mild (kott 10x11,1g), JACOBS,",SELVER AS,,8711000571910,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126151,"Lahustuv sigur (pulber), SEVE, 100 g",MAADLEX OÜ,,4740506100366,,,drinks,drinks_tea_coffee
+126152,"Lahustuv viljakohv siguriga, SEVE, 100 g",,,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126153,"Laktoosivaba koorejäätis, BALBIINO, 480 g",BALBIINO AS,,4740188018973,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+126154,"Laktoosivaba melon-virsik-passioni-koorejäätis, BALBIINO, 480 g",BALBIINO AS,,4740188012926,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+126155,"Laktoosivaba panna cotta vaarikakastmega, SELVERI KÖÖK, 120 g",KULINAARIA OÜ,,4740581114029,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+126156,"Lambapiima juustu viilud, ALBENIZ, 55 g",DELINE OÜ,,8427298004725,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+126157,"Lapi leib kaeraga Street Food, FAZER, 180 g",Määramata,,4740103098103,dairy_eggs_fats,dairy_plant_drinks,bakery,bakery_bread_loaves
+126158,"Lapi leib Street Food, FAZER, 140 g",FAZER EESTI OÜ,,4750212903434,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+126159,"Lasanje bolognese kastmega, SELVERI KÖÖK, 350 g",KULINAARIA OÜ,,4740581107427,sauces_oils,sauces_pasta_cooking,dry_preserves,dry_ready_meals_jars
+126160,"Lasanje, CAMPAGNA, 500 g",SELVER AS,,8005391190431,,,dry_preserves,dry_pasta_rice
+126161,"Lasanjelehed, FIRST PRICE, 500 g",SELVER AS,,7311041085905,,,dry_preserves,dry_pasta_rice
+126162,"Lasanjeplaadid, REGGIA, 500 g",M&V TRADE OÜ,,8008857601052,dairy_eggs_fats,dairy_eggs,dry_preserves,dry_pasta_rice
+126163,"Laste pelmeenid, PEALINNA, 350 g",PREMIA TALLINNA KÜLMHOONE AS,,4740093094826,,,frozen_food,frozen_ready_meals
+126164,"Laua viin, LIVIKO, 10 cl",LIVIKO AS,,4740050006411,drinks,drinks_spirits,drinks,drinks_spirits
+126165,Laua viin 40%vol 1L,Laua,1 l,4740050002611,,,drinks,drinks_spirits
+126166,"Laua viin, LIVIKO, 70 cl",LIVIKO AS,,4740050002628,drinks,drinks_spirits,drinks,drinks_spirits
+126167,"Laudlina 120x180cm, SUSY CARD, 1 tk",ANOBION HULGIMÜÜGI OÜ,,4050498235008,,,household,hh_paper
+126168,"Laulu- ja tantsujäätis Koorejäätis maasika-mustika-vaarika vahvlitopsis, BALBIINO, 65 g",BALBIINO AS,,4740188020020,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+126169,"Lehmapiimajuust tšilliga, DELINE, 150g",DELINE OÜ,,4740572005374,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+126170,"Lehträti hoidja, 1 tk",ANTALIS OÜ,,6414300086994,,,household,hh_kitchenware
+126171,"Lehträtikud, 2-kihiline, SERLA, 135 tk",ANTALIS OÜ,,6414301087860,,,household,hh_paper
+126172,"Lehträtikud Blossom, 2-kihiline, GRITE, 120 tk",SELVER AS,,4770023346299,,,household,hh_paper
+126173,"Lehträtikud, LAMBI, 120 tk",ANTALIS OÜ,,6414301064908,meat_fish,meat_beef_lamb_game,household,hh_paper
+126174,"Leiger tume šokolaad tervete mandlitega, KALEV, 270 g",,,,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+126175,"Leivajuuretis, NORDWISE®, 13 g",NORDWISE BIOTECH OÜ,,4744780015064,,,dry_preserves,dry_flour_sugar_baking
+126176,"Leivakesed metsaseentega, SELVERI KÖÖK, 300 g",KULINAARIA OÜ,,4740581106604,produce,produce_mushrooms,sweets_snacks,sweets_snacks_salty
+126177,"Leivakrõpsud küüslaugu, BON CHANCE, 240 g",PROPOSITO OÜ,,4770350021074,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+126178,"Leivasiirup, DAN SUKKER, 750 g",SELVER AS,,7310340464442,drinks,drinks_syrups_powders,dry_preserves,dry_other
+126179,"Leivasupp puuviljadega, TARTU MILL, 300 g",TARTU MILL AS,,4750020041281,,,dry_preserves,dry_soups_noodles
+126180,"Leivasupp vahukoorekreemiga, SELVERI KÖÖK, 140 g",KULINAARIA OÜ,,4740581108325,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_desserts
+126181,"Letsho Bulgarian, VERES, 530 g",INTERALTUS OÜ,,4823105400737,,,dry_preserves,dry_canned_veg
+126182,"Letšo, MINU, 680 g",MAKRO TRADE BALTIC OÜ,,4743144000555,,,dry_preserves,dry_canned_veg
+126183,"Liha üldmaitseaine, SANTA MARIA, 290 g",SANTA MARIA AS,,7311311017278,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+126184,"Liha üldmaitseaine, SANTA MARIA, 35 g",SANTA MARIA AS,,6418474118291,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+126185,"Liha üldmaitseaine, SANTA MARIA, 70 g",SANTA MARIA AS,,7311311005527,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+126186,"Lihamaitseaine tüümianiga, SANTA MARIA, 25 g",SANTA MARIA AS,,4740018176408,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+126187,"Lihamaitseaine ürdi-küüslaugu, 230g, SANTA MARIA",SANTA MARIA AS,,7311311014130,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+126188,"Lihapallid kartulipudruga, SELVERI KÖÖK, 450 g",KULINAARIA OÜ,,4740581108172,produce,produce_root_veg,dry_preserves,dry_ready_meals_jars
+126189,"Lihapirukas lehttaignas, SELVERI PAGARID, ca 60 g",EESTI PAGAR AS,,2611008000008,bakery,bakery_cakes_pastries,bakery,bakery_other
+126190,"Liköör AMARETTO di Saronno, 50 cl",PRIKE AS,,8001110016372,drinks,drinks_spirits,drinks,drinks_spirits
+126191,"Liköör BAILEYS Irish Cream, 50 cl",PRIKE AS,,5011013100170,drinks,drinks_spirits,drinks,drinks_spirits
+126192,"Liköör BEVELAND Blue Curacao, 70 cl",LIVIKO AS,,8414771850252,drinks,drinks_spirits,drinks,drinks_spirits
+126193,"Liköör BEVELAND Pisang, 70 cl",LIVIKO AS,,8414771863931,drinks,drinks_spirits,drinks,drinks_spirits
+126194,"Liköör COINTREAU apelsini, 70 cl",LIVIKO AS,,3035542004206,drinks,drinks_spirits,drinks,drinks_spirits
+126195,Liköör Elix 24 Chokeberr & Juniper 70 cl,PENINUKI DISTILLERY OÜ,,4744387016617,drinks,drinks_spirits,drinks,drinks_spirits
+126196,Liköör Elix 24 Sea Buckthorn & Lemongrass 70 cl,PENINUKI DISTILLERY OÜ,,4744387016624,drinks,drinks_spirits,drinks,drinks_spirits
+126197,Liköör FIREBALL 50 cl,,,,drinks,drinks_spirits,drinks,drinks_spirits
+126198,"Liköör FLORIDAJUS Pina Colada, 70 cl",LIVIKO AS,,8414771850290,drinks,drinks_spirits,drinks,drinks_spirits
+126199,"Liköör JÄGERMEISTER, 10 cl",TRIDENS AS,,40677767,drinks,drinks_spirits,drinks,drinks_spirits
+126200,"Liköör JÄGERMEISTER, 100 cl",TRIDENS AS,,4067700028082,drinks,drinks_spirits,drinks,drinks_spirits
+126201,"Liköör JÄGERMEISTER, 35 cl",TRIDENS AS,,4067700014573,drinks,drinks_spirits,drinks,drinks_spirits
+126202,"Liköör JÄGERMEISTER, 50 cl",TRIDENS AS,,4067700028068,drinks,drinks_spirits,drinks,drinks_spirits
+126203,"Liköör JÄGERMEISTER, 70 cl",TRIDENS AS,,4067700028075,drinks,drinks_spirits,drinks,drinks_spirits
+126204,"Liköör KOSKENKORVA Blueberry, 50 cl",ANORA ESTONIA AS,,6412700335315,drinks,drinks_spirits,drinks,drinks_spirits
+126205,"Liköör KOSKENKORVA Minttu, 50 cl",ANORA ESTONIA AS,,6412700311203,sweets_snacks,sweets_gums_mints,drinks,drinks_spirits
+126206,Koskenkorva Passionfruit liköör 21%vol 500ml,Koskenkorva Passionfruit,500 ml,6412700335414,produce,,drinks,drinks_spirits
+126207,"Liköör KOSKENKORVA Rhubarb, 50 cl",ANORA ESTONIA AS,,6412700335209,drinks,drinks_spirits,drinks,drinks_spirits
+126208,"Liköör KOSKENKORVA Salmiakki, 50 cl",ANORA ESTONIA AS,,6412700392202,drinks,drinks_spirits,drinks,drinks_spirits
+126209,"Liköör LAPPONIA Jõhvika, 50 cl",TANKER BREWERY OÜ,,6420614681695,drinks,drinks_spirits,drinks,drinks_spirits
+126210,"Liköör LAPPONIA Muraka, 50 cl",,,,drinks,drinks_spirits,drinks,drinks_spirits
+126211,"Liköör LIVIKO Coffee pet, 50 cl",LIVIKO AS,,4740050004776,pet,pet_other,drinks,drinks_spirits
+126212,"Liköör LIVIKO Gabriel, 50 cl",LIVIKO AS,,4740050002994,drinks,drinks_spirits,drinks,drinks_spirits
+126213,"Liköör LIVIKO Kännu Kukk (karbis), 50 cl",LIVIKO AS,,4740050000457,drinks,drinks_spirits,drinks,drinks_spirits
+126214,"Liköör LIVIKO Kirsi, 50 cl",LIVIKO AS,,4740050004745,drinks,drinks_spirits,drinks,drinks_spirits
+126215,"Liköör LIVIKO Lõunamaine, 50 cl",LIVIKO AS,,4740050010043,drinks,drinks_spirits,drinks,drinks_spirits
+126216,"Liköör LIVIKO Metsmaasika, 50 cl",LIVIKO AS,,4740050004721,drinks,drinks_spirits,drinks,drinks_spirits
+126217,"Liköör LIVIKO Metsmaasika, 50 cl",LIVIKO AS,,4740050004714,drinks,drinks_spirits,drinks,drinks_spirits
+126218,"Liköör LIVIKO Metsmaasikas, 20 cl",LIVIKO AS,,4740050004707,drinks,drinks_spirits,drinks,drinks_spirits
+126219,"Liköör LIVIKO Minty, 50 cl",LIVIKO AS,,4740050003748,sweets_snacks,sweets_gums_mints,drinks,drinks_spirits
+126220,"Liköör LIVIKO Vaarika pet, 50 cl",LIVIKO AS,,4740050004813,pet,pet_other,drinks,drinks_spirits
+126221,Liköör Luxardo Limoncello 70 cl,PRIKE AS,,8000353006386,drinks,drinks_spirits,drinks,drinks_spirits
+126222,"Liköör MALIBU, 50 cl",,,,drinks,drinks_spirits,drinks,drinks_spirits
+126223,Liköör Minttu Cream Chocolate & Mint 50 cl,TANKER BREWERY OÜ,,6438324704122,sweets_snacks,sweets_chocolate_bars,drinks,drinks_spirits
+126224,"Liköör MINTTU Peppermint, 50 cl",TANKER BREWERY OÜ,,6420614681893,sweets_snacks,sweets_gums_mints,drinks,drinks_spirits
+126225,Liköör Minttu Twist Karamel 50 cl,TANKER BREWERY OÜ,,6438324702388,sweets_snacks,sweets_gums_mints,drinks,drinks_spirits
+126226,"Liköör VANA TALLINN 40%, 20 cl",LIVIKO AS,,4740050003199,drinks,drinks_spirits,drinks,drinks_spirits
+126227,"Liköör VANA TALLINN 40%, 50 cl",,,,drinks,drinks_spirits,drinks,drinks_spirits
+126228,"Liköör VANA TALLINN 40% pet, 50 cl",LIVIKO AS,,4740050002529,pet,pet_other,drinks,drinks_spirits
+126229,"Liköör VANA TALLINN 45%, 50 cl",LIVIKO AS,,4740050002116,drinks,drinks_spirits,drinks,drinks_spirits
+126230,"Liköör VANA TALLINN 50%, 50 cl",LIVIKO AS,,4740050002505,drinks,drinks_spirits,drinks,drinks_spirits
+126231,"Liköör VANA TALLINN Chocolate Cream, 50 cl",LIVIKO AS,,4740050006220,sweets_snacks,sweets_chocolate_bars,drinks,drinks_spirits
+126232,"Liköör VANA TALLINN Elegance karbis, 50 cl",LIVIKO AS,,4740050004868,drinks,drinks_spirits,drinks,drinks_spirits
+126233,"Liköör VANA TALLINN Ice Cream, 50 cl",LIVIKO AS,,4740050003595,frozen_food,frozen_desserts_icecream,drinks,drinks_spirits
+126234,"Liköör VANA TALLINN kinkekarp 2 klaasiga, 50 cl",LIVIKO AS,,4740050003144,drinks,drinks_spirits,drinks,drinks_spirits
+126235,"Liköör VANA TALLINN Signature, 50 cl",LIVIKO AS,,4740050004646,drinks,drinks_spirits,drinks,drinks_spirits
+126236,Vana Tallinn Toffee Caramel liköör 35%vol 500ml,Vana Tallinn,500 ml,4740050007586,,,drinks,drinks_spirits
+126237,"Liköör VANA TALLINN tuubis, 50 cl",LIVIKO AS,,4740050003083,drinks,drinks_spirits,drinks,drinks_spirits
+126238,Lillet Blanc 75 cl,,,,,,drinks,drinks_spirits
+126239,"Lillkapsas, HÄRMAVILI, 400 g",BALBIINO AS,,4740188900919,produce,produce_root_veg,frozen_food,frozen_veg
+126240,"Limoncello martsipanibatoon, KALEV, 40 g",ORKLA EESTI AS,,4740012600619,,,sweets_snacks,sweets_chocolate_bars
+126241,"Linda piimašokolaad purustatud metspähklitega, KALEV, 270 g",ORKLA EESTI AS,,4740012601012,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+126242,"Linguine la RUVIDA Bronze, REGGIA, 500 g",,,,dairy_eggs_fats,dairy_eggs,dry_preserves,dry_pasta_rice

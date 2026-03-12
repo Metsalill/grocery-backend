@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+125341,"Külmsuitsulõhe (viilutatud), M.V.WOOL, 350g",,350 g,4740192010406,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+125342,"Külmsuitsulõhe tükid, AVEKTRA, 100g",,100 g,4740332112106,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+125343,"Kuumsuitsu meriahven, M.V.WOOL, kg",M.V.WOOL AS,,2703337000009,,,meat_fish,fish_salted_smoked
+125344,"Külmsuitsu skumbria peata, VICI, kg",Viciunai Baltic OÜ,,2704938000009,,,meat_fish,fish_salted_smoked
+125345,"Külmsuitsu lõhefilee tükk, VICI, 160 g",Vičiunai Baltic OÜ,160 g,4770190122061,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+125346,"Lõherull kuumsuitsu, kg",Termologistic OÜ,,2711468000003,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+125347,"Külmsuitsu süvalest (paltus), M.V.WOOL, kg",M.V.WOOL AS,,2711247000002,,,meat_fish,fish_salted_smoked
+125348,"Kuumsuits meriahven, M.V.WOOL, kg",M.V.WOOL AS,,2319220500008,,,meat_fish,fish_salted_smoked
+125349,"Külmsuitsu lõhefilee tükk, AVIKALA, kg",Avikala OÜ,,2366622100008,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+125350,"Lõhefilee kuumsuitsutatud, SELVER, kg",Selver AS,,2712005000005,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+125351,"Soolatud forelli tükid, VICI, 200 g",Viciunai Baltic OÜ,200 g,4770594206619,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked
+125352,Kapten Grant sprotid õlis 240g,Kapten Grant,240 g,4740687001216,sauces_oils,oils_other,meat_fish,fish_processed
+125353,"Praetud kilud tomatikastmes, RANNAKÜLA, 240 g",Mobec AS,240 g,4742835010101,produce,produce_root_veg,meat_fish,fish_processed
+125354,"Vürtsikilu filee, BRIIS, 160 g",DGM Shipping AS,160 g,4742312000328,dry_preserves,dry_pasta_rice,meat_fish,fish_salted_smoked
+125355,"Suitsukala-majoneesisalat, SELVER, kg",Selver AS,,2712180000005,sauces_oils,sauces_ketchup_mayo,meat_fish,fish_processed
+125356,"Tuunikalatükid õlis Jalapeño pipraga, CALVO, 142 g",Mobec AS,142 g,8410090031471,meat_fish,fish_fresh,meat_fish,fish_processed
+125357,"Sprotid õlis, RANNAKÜLA, 250 g",Mobec AS,250 g,4742835010231,,,meat_fish,fish_processed
+125358,"Surimi salat riisi ja köögiviljadega, VICI, 200 g",Vičiunai Baltic OÜ,200 g,4770190141567,produce,produce_herbs_salads_sprouts,meat_fish,fish_processed
+125359,"Tuunikalatükid vees, CALVO, 142 g",Mobec AS,142 g,8410090031457,meat_fish,fish_fresh,meat_fish,fish_processed
+125360,"Räimed koduses marinaadis 215 g neto, VIRU RAND, 430 g",,430 g,,sauces_oils,sauces_marinades,meat_fish,fish_processed
+125361,"Sprotid tomatikastmes, RANNAKÜLA, 100 g",Mobec AS,100 g,4742835010040,produce,produce_root_veg,meat_fish,fish_processed
+125362,"Tallinna kilud, KALURI, 250 g",Läätsa Kalatööstus AS,250 g,4740590071146,,,meat_fish,fish_salted_smoked
+125363,"Tuunikala filee oliivõlis, CALVO, 160 g",Mobec AS,160 g,8410090043986,meat_fish,fish_fresh,meat_fish,fish_processed
+125364,"Saksapärane heeringasalat, SELVER, kg",Selver AS,,2712200000008,produce,produce_herbs_salads_sprouts,meat_fish,fish_processed
+125365,"Tuunikala filee tomatikastmes, CALVO, 160 g",Mobec AS,160 g,8410090011572,meat_fish,fish_fresh,meat_fish,fish_processed
+125366,"Wakame salat (sulatatud), SELVER, kg",Selver AS,,2710777000001,produce,produce_herbs_salads_sprouts,meat_fish,fish_processed
+125367,"Praetud heeringafilee koduses marinaadis, KALURI, 500 g",Läätsa Kalatööstus AS,500 g,4740590030228,sauces_oils,sauces_marinades,meat_fish,fish_processed
+125368,"Tuunikalatükid päevalilleõlis, CALVO, 142 g",Mobec AS,142 g,8410090031488,meat_fish,fish_fresh,meat_fish,fish_processed
+125369,"Vinnutatud meritint, KALURI, 100 g",Läätsa Kalatööstus AS,100 g,4740590072150,,,meat_fish,fish_other
+125370,"Praetud heeringarullid tarrendis, KAPTEN GRANT, 480 g",Kapten Grant OÜ,480 g,4740687001292,meat_fish,fish_fresh,meat_fish,fish_processed
+125371,"Tursamaks, STEINHAUER, 190 g",Baltic Premier Group OÜ,190 g,4030011310504,,,meat_fish,fish_processed
+125372,"Marineeritud heeringafilee Viking Matjes, KALAMAJAKAS, 510g",Kalamajakas OÜ,510 g,4740357000082,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+125373,"Saaremaa vürtsikilud, KALURI, 250 g",Läätsa Kalatööstus AS,250 g,4740590070552,,,meat_fish,fish_salted_smoked
+125374,"Tuunikala oliivõlis, RIO MARE, 160 g",Interaltus OÜ,160 g,8004030044005,meat_fish,fish_fresh,meat_fish,fish_processed
+125375,"Räimerullid juurviljadega marinaadis, VIRU RAND, 200 g",Viru Rand OÜ,200 g,4740041001180,sauces_oils,sauces_marinades,meat_fish,fish_processed
+125376,"Marineeritud angerjas, KALAMAJAKAS, 430g",Kalamajakas OÜ,430 g,4740357999898,meat_fish,fish_fresh,meat_fish,fish_processed
+125377,"Silmud marinaadis, SPARO, 440 g",Karia OÜ,440 g,4741259000132,sauces_oils,sauces_marinades,meat_fish,fish_processed
+125378,"Lutsufilee tomatimarinaadis, PEIPSI KALATÖÖSTUS, 330 g",Baltic Premier Group OÜ,330 g,4740665000699,sweets_snacks,sweets_candies,meat_fish,fish_processed
+125379,"Lõhepasteet, DELAMARIS, 95 g",Makro Trade Baltic OÜ,95 g,3838929551047,drinks,drinks_tea_coffee,meat_fish,fish_processed
+125380,"Praetud kohafilee koduses marinaadis, AVIKALA, 330g",Avikala OÜ,330 g,4745010322037,sauces_oils,sauces_marinades,meat_fish,fish_processed
+125381,"Tuunikalatükid vees, ELDORADO, 185 g",Kaupmees & Ko AS,185 g,6430075664564,meat_fish,fish_fresh,meat_fish,fish_processed
+125382,"Kohafilee marinaadis, AVIKALA, 330g",Avikala OÜ,330 g,4745010322013,sauces_oils,sauces_marinades,meat_fish,fish_processed
+125383,"Praetud ahvenafilee koduses marinaadis, AVIKALA, 330g",Avikala OÜ,330 g,4745010322068,sauces_oils,sauces_marinades,meat_fish,fish_processed
+125384,"Tuunikalamääre, SELVER, kg",Selver AS,,2715092000002,meat_fish,fish_fresh,meat_fish,fish_processed
+125385,"Lõhe sinepikastmes, RANNAKÜLA, 120 g",Mobec AS,120 g,4742835010712,meat_fish,fish_fresh,meat_fish,fish_processed
+125386,"Makrell tomatis, 3-pakk, FIRST PRICE, 375 g",Selver AS,375 g,7311041088951,meat_fish,fish_fresh,meat_fish,fish_processed
+125387,"Säina Jäss marineeritud tilli, vürtside ja sibulaga, KALAMAJAKAS, 500 g",,500 g,,personal_care,pcare_feminine_hygiene,meat_fish,fish_processed
+125388,"Kuumsuitsu kõhuääred, SELVER, kg",Selver AS,,2713123000007,,,meat_fish,fish_salted_smoked
+125389,"Vinnutatud kala valik, KODURANNA, 250 g",Koduranna TRV OÜ,250 g,4745010342172,meat_fish,fish_fresh,meat_fish,fish_other
+125390,"Vürtsikilufileed, KODURANNA, 100 g",Koduranna TRV OÜ,100 g,4745010342202,,,meat_fish,fish_salted_smoked
+125391,"Lõhefilee kimchi marinaadis, SELVER, kg",Selver AS,,2715211000005,sauces_oils,sauces_marinades,meat_fish,fish_fresh
+125392,"Praetud heeringafilee tomati kastmes, VICI, 340 g",Vičiunai Baltic OÜ,340 g,4770594205681,meat_fish,fish_fresh,meat_fish,fish_processed
+125393,"Praetud Atlandi heeringafilee marinaadis, VICI, 340 g",Vičiunai Baltic OÜ,340 g,4770594205728,sauces_oils,sauces_marinades,meat_fish,fish_processed
+125394,"Kuumsuitsu angerjas marinaadis, VÄNDRA KALATOOTED, 450 g",For Angula OÜ,450 g,4744423012023,sauces_oils,sauces_marinades,meat_fish,fish_processed
+125395,"Sinepiheeringas, SELVER, kg",Selver AS,,2715140000008,meat_fish,fish_fresh,meat_fish,fish_processed
+125396,"Säina Jäss marineeritud punase peedi, vürtside ja sibulaga, KALAMAJAKAS, 500 g",,500 g,,personal_care,pcare_feminine_hygiene,meat_fish,fish_processed
+125397,"Tuunikala soolvees, FIRST PRICE, 170g",Selver AS,170 g,7311041087008,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+125398,"Tuunikala õlis, FIRST PRICE, 170g",Selver AS,170 g,7311041087015,meat_fish,fish_fresh,meat_fish,fish_processed
+125399,"Vinnutatud marinaadiräim, PÕLDOTSA TALU, 75 g",Põldotsa Gurmee OÜ,75 g,795847144290,sauces_oils,sauces_marinades,meat_fish,fish_processed
+125400,"Vinnutatud veiniäädikaräim, PÕLDOTSA TALU, 75 g",Põldotsa Gurmee OÜ,75 g,795847144306,drinks,drinks_wine,meat_fish,fish_processed
+125401,"Vinnutatud vürtsikilu, PÕLDOTSA TALU, 75 g",Põldotsa Gurmee OÜ,75 g,795847144313,,,meat_fish,fish_salted_smoked
+125402,"Piim 2,5% kiles, FARMI, 1 L",Farmi Piimatööstus AS,1 l,4740123000872,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+125403,"Piim 2,5% pure, ALMA, 1 L",,1 l,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+125404,"Vahukoor 35%, ALMA, 400 ml",,400 ml,,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+125405,"Kohvikoor 10%, TERE, 380 ml",,380 ml,,drinks,drinks_tea_coffee,dairy_eggs_fats,dairy_cream_sourcream
+125406,"Väike Tom kõrgkuumutatud piimjook maasikalisandi ja vitamiinidega, 200 ml",Väike Tom,200 ml,4740093333314,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_desserts
+125407,"Kõrgkuum piimajook šokolaadi ja vitamiinidega, VÄIKE TOM, 200 ml",,200 ml,,sweets_snacks,sweets_chocolate_bars,dairy_eggs_fats,dairy_desserts
+125408,"Kõrgkuum piim banaanilisandi ja vitamiinidega, VÄIKE TOM, 200 ml",Premia Tallinna Külmhoone AS,200 ml,4740093333307,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_desserts
+125409,"Hele õlu Alexander, ALEXANDER, 500 ml pudel",A. Le Coq AS,500 ml,4740098078661,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125410,"Hele õlu Alexander Pint, ALEXANDER, 568 ml purk",A. Le Coq AS,568 ml,4740098017134,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125411,"Piim 2,5%, TERE, 1,5 L",,1.5 l,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+125412,"Piim rasvatu 0,05%, ALMA, 1 L",,1 l,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+125413,"Hele õlu Danish Pilsner, CARLSBERG, 500 ml purk",Saku Õlletehase AS,500 ml,4770075447821,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125414,"Kitsetoorpiim pastöriseerimata 3-5%, ANDRI-PEEDO, 500 ml",Nopri Talumeierei OÜ,500 ml,4740218001234,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+125415,Double Bock hele õlu 7%vol 500ml,Double Bock,500 ml,4740098080978,,,drinks,drinks_beer_cider
+125416,"Köögikaste laktoosivaba, ALPRO, 250 ml",Nutricia SIA,250 ml,5411188513483,,,sauces_oils,sauces_other
+125417,"Mahe-toorpiim, PAJUMÄE TALU, 500 ml",Pajumäe Talu OÜ,500 ml,4743135002063,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+125418,"Kondenspiim magustatud, BALTIKA, 290 g",Baltika Food OÜ,290 g,4745010372063,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_desserts
+125419,"Hele õlu Genuine, BUD, 330 ml pudel",Momentin Eesti OÜ,330 ml,18200001680,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125420,"Sojajook kaltsiumi ja vitamiinidega, magustamata laktoosivaba, ALPRO, 1 l",Nutricia SIA,1 l,5411188543398,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+125421,"Šokolaadi maitseline dessert kaltsiumiga laktoosivaba, ALPRO, 125 g",Nutricia SIA,125 g,5411188100188,sweets_snacks,sweets_chocolate_bars,dairy_eggs_fats,dairy_desserts
+125422,"Hele õlu Green 6-pakk, TUBORG, 6x330 ml pudel",Saku Õlletehase AS,6 x 330 ml,4740019122473,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125423,"Vanilli sojajook laktoosivaba, ALPRO, 1 l",Nutricia SIA,1 l,5411188081852,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+125424,"Taimne dessert mustsõstar laktoosivaba, DEARY, 150 g",,150 g,,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_desserts
+125425,"Sojajook kaltsiumiga laktoosivaba, ALPRO, 1 l",Nutricia SIA,1 l,5411188543381,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+125426,"Vanillimaitseline dessert kaltsiumiga laktoosivaba, ALPRO, 125 g",Nutricia SIA,125 g,5411188110521,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+125427,"Taimne dessert mango laktoosivaba, DEARY, 150 g",Deary OÜ,150 g,4740036016250,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_desserts
+125428,"Hele õlu Green, TUBORG, 330 ml pudel",Saku Õlletehase AS,330 ml,4770349226626,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125429,"Mandlijook magustamata, NATRUE, 1 L",,1 l,,,,dairy_eggs_fats,dairy_plant_drinks
+125430,"Šokolaadi sojajook laktoosivaba, ALPRO, 250 ml",Nutricia SIA,250 ml,5411188082637,sweets_snacks,sweets_chocolate_bars,dairy_eggs_fats,dairy_plant_drinks
+125431,"Piim 3,2% kõrgpastöriseeritud laktoosivaba, MLEKOVITA, 500 g",Kanpol AS,500 g,5900512982502,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+125432,"Mahe-hapukoor, PAJUMÄE TALU, 250ml",Pajumäe Talu OÜ,250 ml,4743135002209,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+125433,"Kitsepiim 2,5% UHT, DANMIS, 500 ml",Kanpol AS,500 ml,5901680000111,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+125434,"Kohvijook frezza mint, FREZZA, 250 ml",Abestock AS,250 ml,6411300654550,sweets_snacks,sweets_gums_mints,drinks,drinks_tea_coffee
+125435,"Kondenspiim šokolaadi, JAANI, 250 g",Polven Foods OÜ,250 g,4740502003302,sweets_snacks,sweets_chocolate_bars,dairy_eggs_fats,dairy_desserts
+125436,"UHT kohvikoor laktoosivaba, MINUS L, 165 ml",Svensky Kaubanduse AS,165 ml,4062800006206,drinks,drinks_tea_coffee,dairy_eggs_fats,dairy_cream_sourcream
+125437,"Taimne puding kookos-chia laktoosivaba, DEARY, 150 g",Deary OÜ,150 g,4740036017592,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_desserts
+125438,"Kohvijook Frezza vanilla, FREZZA, 250 ml",Abestock AS,250 ml,6411300654567,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+125439,"Hele õlu Hefe Weisbier, PAULANER, 500 ml pudel",Goldberger OÜ,500 ml,4066600611981,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125440,"Hele õlu Hefeweizen, SCHÖFFERHOFER, 500 ml pudel",Avallone AS,500 ml,4053400001838,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125441,"Plant protein šokolaadi sojapuding laktoosivaba, ALPRO, 200 g",Nutricia SIA,200 g,5411188137764,sweets_snacks,sweets_chocolate_bars,dairy_eggs_fats,dairy_desserts
+125442,"Laktoosivaba vahukoor UHT 38%, VALIO, 1 L",Valio Eesti AS,1 l,6408430014996,dairy_eggs_fats,dairy_cream_sourcream,dairy_eggs_fats,dairy_cream_sourcream
+125443,"Kohvijook Ice Latte Macchiato, LÖFBERGS, 230 ml",Selver AS,230 ml,7310050005171,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+125444,"O'gurt kaeradessert mango laktoosivaba, FRIENDLY VIKING'S, 350 g",Abestock AS,350 g,6408659991146,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_yogurt_kefir
+125445,"O'gurt kaeradessert vanilje laktoosivaba, FRIENDLY VIKING'S, 350 g",Abestock AS,350 g,6408659991160,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_yogurt_kefir
+125446,"Šokolaadi kaerajook laktoosivaba, OATLY, 1 l",Club-Mate Eesti OÜ,1 l,7394376615719,sweets_snacks,sweets_chocolate_bars,dairy_eggs_fats,dairy_plant_drinks
+125447,"Hele õlu Imperial Lager, KRUŚOVICE, 500 ml pudel",Tanker Brewery OÜ,500 ml,8594009923733,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125448,"Hele õlu Kange, SELVER, 2 L",A. Le Coq AS,2 l,4740098088790,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125449,"Hele õlu Karl Friedrich, SAKU, 500 ml pudel",Saku Õlletehase AS,500 ml,4740019500080,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125450,"Hele õlu Kuld, SAKU, 330 ml pudel",Saku Õlletehase AS,330 ml,4740019782103,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125451,"Plant protein sojatoode punaste marjadega laktoosivaba, ALPRO, 200 g",Nutricia SIA,200 g,5411188139560,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_yogurt_kefir
+125452,"Plant Protein vaniljejook laktoosivaba, ALPRO, 1 kg",Nutricia SIA,1 kg,5411188140368,,,dairy_eggs_fats,dairy_plant_drinks
+125453,"Vahustatav kaerajook Barista Edition, OATLY, 1 l",Club-Mate Eesti OÜ,1 l,7394376621666,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+125454,"Saku Kuld hele õlu 5,2%vol 500ml",Saku Kuld,500 ml,4740019113259,,,drinks,drinks_beer_cider
+125455,"Hele õlu Lager Beer, HEINEKEN, 500 ml purk",Tanker Brewery OÜ,500 ml,4744136011542,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125456,"Proteiinijogurt creme brulee, VALIO PROFEEL, 200 g",Valio Eesti AS,200 g,4740125532449,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125457,"Hele õlu Original, BUDWEISER, 500 ml pudel",Goldberger OÜ,500 ml,8594403110111,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125458,"Valio Profeel Ahjuõunajogurt, 200 g",Valio Profeel,200 g,4740125532401,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125459,"Proteiinijogurt maasika, VALIO PROFEEL, 200 g",Valio Eesti AS,200 g,4740125532425,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125460,"Maasikajogurt, DANONKI, 70 g",Nutricia SIA,70 g,4751008970371,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125461,"Hele õlu Pilsner, SELVER, 2 L",A. Le Coq AS,2 l,4740098088578,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125462,"Kreemjogurt šokolaadipallidega, FANTASIA, 100 g",Nutricia SIA,100 g,4751008970364,drinks,drinks_beer_cider,dairy_eggs_fats,dairy_yogurt_kefir
+125463,Tere FIT Proteiinijogurt mustika 150g,Tere FIT,150 g,4740036017554,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125464,"Täispiimajogurt muraka, ALMA, 350 g",Valio Eesti AS,350 g,4740125535419,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125465,"Hele õlu Pilsner, SELVER, 500 ml pudel",A. Le Coq AS,500 ml,4740098081050,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125466,"Maitsestamata jogurt, FARMI, 1 kg",Farmi Piimatööstus AS,1 kg,4740113091019,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125467,"Skyr mustikatega, FARMI, 150 g",Farmi Piimatööstus AS,150 g,4740113091101,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125468,"Mango-jogurtikreem 5%, SAARE, 400 g",Saaremaa Delifood OÜ,400 g,4742231004049,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125469,"Proteiinijogurtijook troopiline, VALIO PROFEEL, 275 g",Valio Eesti AS,275 g,4740125582147,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125470,"Hele õlu, PILSNER URQUELL, 500 ml pudel",Momentin Eesti OÜ,500 ml,8594404110110,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125471,"Hele õlu Premium 6-pakk, A. LE COQ, 6 x 500 ml pudel",A. Le Coq AS,6 x 500 ml,4740098078616,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125472,"Hele õlu Premium 6-pakk, A. LE COQ, 6 x 500 ml purk",,6 x 500 ml,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125473,"Hele õlu Premium, A. LE COQ, 500 ml purk",A. Le Coq AS,500 ml,4740098010005,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125474,"Hele õlu Rock, SAKU, 500 ml pudel",Saku Õlletehase AS,500 ml,4740019400014,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125475,"Hele õlu Special, A. LE COQ, 500 ml pudel",A. Le Coq AS,500 ml,4740098076636,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125476,"Hele õlu Special Edition, SANDELS, 500 ml",A. Le Coq AS,500 ml,6419800153382,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125477,"Hele õlu, WARSTEINER, 500 ml purk",A. Le Coq AS,500 ml,4000856003404,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+125478,Henri Ehrhart Alsace Pinot Blanc 75 cl,LTT AS,750 ml,3322721203650,,,drinks,drinks_wine
+125479,"Kreemjogurt kirsilisandiga, FANTASIA, 118 g",Nutricia SIA,118 g,5900643047347,drinks,drinks_soft_soda,dairy_eggs_fats,dairy_yogurt_kefir
+125480,"Täispiimajogurt metsamarja-rukkileiva, ALMA, 350 g",Valio Eesti AS,350 g,4740125535457,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125481,Henri Ehrhart Alsace Riesling 75 cl,LTT AS,750 ml,3322721203667,drinks,drinks_wine,drinks,drinks_wine
+125482,"Maitsestamata jogurt 5%, SAARE, 400 g",Saaremaa Delifood OÜ,400 g,4742231004032,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125483,"Herne-suhkrumaisi maisipallid, ELLA'S KITCHEN, 36g",,36 g,,drinks,drinks_spirits,baby,baby_snacks
+125484,"Vaniljejogurt kommidega, DANONE, 125 g",Nutricia SIA,125 g,5900643009710,sweets_snacks,sweets_candies,dairy_eggs_fats,dairy_yogurt_kefir
+125485,"Hiidmunad XL10 valged, EGGO, 10 tk",,10 pcs,4742002002885,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+125486,"Mustikajogurt, EMMA, 1 L",Tere AS,1 l,4740036017479,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125487,"Hippis õunapüree banaaniga BIO 4+, HIPP, 100 g",LTT AS,100 g,9062300133711,baby,baby_food_pouches,baby,baby_food_pouches
+125488,"Maasikajogurt, EMMA, 1 L",Tere AS,1 l,4740036017462,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125489,"Koorejogurt muah marja-plombiirimaitseline, ALMA, 180 g",Valio Eesti AS,180 g,4740125539165,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125490,"Koorejogurt muah troopiline, ALMA, 180 g",Valio Eesti AS,180 g,4740125539172,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir

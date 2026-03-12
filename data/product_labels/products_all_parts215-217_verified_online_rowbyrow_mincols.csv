@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+125942,"Kook Red Velvet laktoosivaba, GUSTAV, 350 g",Gustav Cafe OÜ,350 g,4742513009816,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+125943,"Kook Werneri Napoleon, GUSTAV, 450g",Gustav Cafe OÜ,450 g,4742513000165,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+125944,"Kookose šokolaad, NICKS, 40 g",Njom Foods OÜ,40 g,7350104401078,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+125945,"Kookosjook light 5-7%, FIRST PRICE, 400 ml",Selver AS,400 ml,7311041083925,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+125946,"Kookoskreem 17%, KARA, 1l",,1 l,,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+125947,"Kookoskreem 17%, KARA, 200 ml",,200 ml,,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+125948,"Kookoskreem kreemjas, THAI CHOICE, 400 ml",D.T.L. Consumer Products Eesti AS,400 ml,8851978803870,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+125949,"Kookosõli, FIRST PRICE, 220 ml",Selver AS,220 ml,7311041087190,dairy_eggs_fats,dairy_plant_drinks,sauces_oils,oils_other
+125950,"Kookosõli sprei, MANTOVA, 200 ml",Selver AS,200 ml,8006830994863,dairy_eggs_fats,dairy_plant_drinks,sauces_oils,oils_other
+125951,"Koolijäätis, PREMIA, 60 g",,60 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+125952,"Köömned, ANATOLS, 17 g",Kaupmees & Ko AS,17 g,4750280004279,,,world_spices,spices_herbs_spice_mix
+125953,"Köömned, SANTA MARIA, 20 g",Santa Maria AS,20 g,6418474152776,,,world_spices,spices_herbs_spice_mix
+125954,"Köömneliköör KRISTALLKÜMMEL, 50 cl",Prike AS,500 ml,4742181000016,drinks,drinks_spirits,drinks,drinks_spirits
+125955,"Koore-iiris, VÄIKE VÄÄNIK, 180 g",Maris Gilden OÜ,180 g,4740320003676,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_candies
+125956,"Koorega kartulisektorid, FIRST PRICE, 750 g",Selver AS,750 g,7311041084557,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_potato_products
+125957,"Koorejäätis glasuuris 6x60ml, BALBIINO, 210 g",Balbiino AS,210 g,4740188018942,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+125959,"Koorejäätis koonusvahvlis, PREMIA, 100 g",Premia Tallinna Külmhoone AS,100 g,4740093006973,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+125960,"Koorejäätis koonusvahvlis šokolaadiga, PREMIA, 100 g",Premia Tallinna Külmhoone AS,100 g,4740093006942,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+125961,"Koorejäätis küpsisetükkide ja kakaokreemiga, MESIKÄPP, 270 g",Balbiino AS,270 g,4740188019901,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+125962,"Koorejäätis põldmarjamoosiga, ERITI RAMMUS, 110 g",Premia Tallinna Külmhoone AS,110 g,4740093000742,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+125963,"Koorejäätis, REGATT, 480 g",,480 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+125964,"Koorejäätis šokolaaditükkidega vahvlikoonuses, 80g/165ml",Koorejäätis,80 g,4740188019642,,,frozen_food,frozen_desserts_icecream
+125965,"Koorekomm kondenspiima täidisega Milky Splash Toffifee, ROSHEN, 150 g",Eugesta Eesti AS,150 g,4823077623714,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_candies
+125966,"Koorekompvekid, WERTHER'S, 135 g",Mobec AS,135 g,4014400910063,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_candies
+125967,"Kooreliköör AMARULA Cream, 70 cl",MV Eesti OÜ,700 ml,6001495062577,drinks,drinks_spirits,drinks,drinks_spirits
+125968,"Kooreliköör VANA TALLINN Cream, 50 cl",Liviko AS,500 ml,4740050006206,drinks,drinks_spirits,drinks,drinks_spirits
+125969,"Koorene kartulivorm, SELVERI KÖÖK, 1,7 kg, ettetellimisel",Kulinaaria OÜ,1.7 kg,4740581112247,dairy_eggs_fats,dairy_cream_sourcream,dry_preserves,dry_ready_meals_jars
+125970,"Koorimata krevett 50/70, MARINE, 320 g",Balbiino AS,320 g,4740188018065,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_fish
+125971,"Koorimata toored hiidkrevetisabad Vannamei 21/25, MARINE, 240 g neto",Balbiino AS,240 g,4740188018072,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_fish
+125972,"Kooritud hiidkrevetid 16/20, KALURI, 240 g",Läätsa Kalatööstus AS,240 g,4740590073959,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_fish
+125973,"Kooritud krevetid 250/350, MARINE, 400 g",Balbiino AS,400 g,4740188801063,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_fish
+125974,"Kooritud krevetid 250/350, VIKING, 160 g",Premia Tallinna Külmhoone AS,160 g,4751001511328,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_fish
+125975,"Kooritud krevetid 500+, MARINE, 160 g",Balbiino AS,160 g,4740188801018,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_fish
+125976,"Kooritud mahe tomatid, FIRST PRICE, 400 g",Selver AS,400 g,7311041085349,dairy_eggs_fats,dairy_cream_sourcream,dry_preserves,dry_canned_veg
+125977,"Kooritud tomatid, CAMPAGNA, 400 g",Selver AS,400 g,8005391604068,dairy_eggs_fats,dairy_cream_sourcream,dry_preserves,dry_canned_veg
+125978,"Kooritud tomatid, REGGIA, 400 g",M&V Trade OÜ,400 g,8008857010021,dairy_eggs_fats,dairy_eggs,dry_preserves,dry_canned_veg
+125979,"Korduvkasutatav ujumismähe 6-12 kuud, BABY PLANET, 1 tk",Baby Planet OÜ,1 pcs,4745011032195,baby,baby_other,baby,baby_other
+125980,"Korduvkasutatav ujumismähe 12-18 kuud, BABY PLANET, 1 tk",Baby Planet OÜ,1 pcs,4745011032157,baby,baby_other,baby,baby_other
+125981,"Korea BBQ maitseaine, SANTA MARIA, 46 g",Santa Maria AS,46 g,7311311024870,sauces_oils,sauces_marinades,sauces_oils,sauces_marinades
+125982,"Korea porgandisalat, SELVERI KÖÖK, 200 g",,200 g,4740581104884,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+125983,"Korea ramen kiirnuudlid tuline kana Buldak, SAMYANG, 140 g",Umami OÜ,140 g,8801073116474,meat_fish,meat_poultry,dry_preserves,dry_soups_noodles
+125984,"Korea ramen kiirnuudlid tuline kana juustuga Buldak, SAMYANG, 140 g",,140 g,,dairy_eggs_fats,dairy_other,dry_preserves,dry_soups_noodles
+125985,"Koreapärane porgandisalat, SALVEST, 380g",Salvest AS,380 g,4740073079713,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+125986,"Koriander purustatud, SANTA MARIA, 20 g",Santa Maria AS,20 g,4740018175593,produce,produce_herbs_salads_sprouts,world_spices,spices_herbs_spice_mix
+125987,"Kornishonid 1-4 cm marineeritud, GREEN, 370 g",Pralinee OÜ,370 g,4744148011882,,,dry_preserves,dry_canned_veg
+125988,"Kõrrejook apelsininektar, PEPPA PIG, 200 ml",Maris Gilden AS,200 ml,5060318660780,drinks,drinks_juices,drinks,drinks_juices
+125989,"Kõrrejook suvistest marjadest, PEPPA PIG, 200 ml",Maris Gilden AS,200 ml,5060318667468,,,drinks,drinks_juices
+125990,"Kõrrejook troopilistest viljadest, PEPPA PIG, 200 ml",Maris Gilden AS,200 ml,5060318667420,,,drinks,drinks_juices
+125991,"Kõrvitsaõli, rafineerimata, GLORIA, 250 ml",Laringo OÜ,250 ml,4742959010285,,,sauces_oils,oils_other
+125992,"Kummikommid Kameeleon, HARIBO, 175 g",Interaltus OÜ,175 g,4001686442951,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+125993,"Kõrvitsapüreesupp kikerhernestega, SELVERI KÖÖK, 400g",Kulinaaria OÜ,400 g,4740581110328,baby,baby_food_pouches,dry_preserves,dry_soups_noodles
+125994,Salvest ökoloogiline kõrvitsapüreesupp kookospiimaga 300 g,Salvest,300 g,4740073073797,bakery,bakery_cakes_pastries,dry_preserves,dry_soups_noodles
+125995,Põltsamaa kõrvitsasalat 560/310 g,Põltsamaa,310 g,4740029043119,produce,,dry_preserves,dry_canned_veg
+125996,"Kõrvitsasalat, SALVEST, 560 g",Salvest AS,560 g,4740073030257,produce,produce_herbs_salads_sprouts,dry_preserves,dry_canned_veg
+125997,"Kõva juust Synnove Itaallane, SYNNOVE, 150 g",Synnove Finden International OÜ,150 g,4740311000202,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+125998,Dansukker kõva tükksuhkur 500 g,Dansukker,500 g,6414000420548,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+125999,"Kõvajuust 26% laktoosivaba, VALIO FORTE, kg",Valio Eesti AS,,4740553698205,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+126000,"Kõvajuust delicate (laagerdunud 24k) laktoosivaba, DŽIUGAS, 180 g",Selver AS,180 g,4770299392990,pet,pet_other,cheese,cheese_regular
+126001,"Kõvajuust proseccoga Sinfonia, FIORDIMASO, 150 g",Deline OÜ,150 g,8011425114175,drinks,drinks_wine,cheese,cheese_regular
+126002,"Krabimaitseline riisisalat, SELVERI KÖÖK, 200 g",Kulinaaria OÜ,200 g,4740581103818,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+126003,"Kräsupeakook kirssidega, SELVERI KÖÖK, 570 g",Kulinaaria OÜ,570 g,4740581108837,personal_care,pcare_feminine_hygiene,bakery,bakery_cakes_pastries
+126004,"Kreeka rohelised oliivid, GOURMANTE, 360 g",Sanitex OÜ,360 g,5200110730070,,,dry_preserves,dry_canned_veg
+126005,"Kreeka salat, SELVERI KÖÖK, 250 g",Kulinaaria OÜ,250 g,4740581114043,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+126006,"Kreeka teravad terved pepperonid, ROYAL, 320 g",Kaupmees & Ko AS,320 g,5201194004019,world_spices,spices_basic_salt_pepper,dry_preserves,dry_canned_veg
+126007,"Kreekapähkliõli, GLORIA, 250 ml",Laringo OÜ,250 ml,4742959010308,sweets_snacks,sweets_nuts_driedfruit,sauces_oils,oils_other
+126008,"Kreem sidruni Lemon Curd, BONNE MAMAN, 360 g",Reaton Food OÜ,360 g,3608580024408,produce,produce_tropical,dry_preserves,dry_canned_fruit
+126009,"Kreembrülee koonus, SUPER VIVA, 100 g",Unilever Eesti AS,100 g,8711327598362,,,frozen_food,frozen_desserts_icecream
+126010,"Kreemine riisipuder vanilliga, SELVERI KÖÖK, 250 g",Kulinaaria OÜ,250 g,4740581111356,baby,baby_porridge_cereal,dairy_eggs_fats,dairy_desserts
+126011,"Kreemjas mahe maapähklivõie, NATTY ORIGINAL, 333g",Nordista OÜ,333 g,4745010436017,sweets_snacks,sweets_nuts_driedfruit,dry_preserves,dry_other
+126012,"Kreemjas mesi, AARE JÕUMEES, 450 g",Jõumees OÜ,450 g,4742422000058,,,dry_preserves,dry_flour_sugar_baking
+126013,"Kreemjas mesi, SIRELI, 250g",Nektar Honey OÜ,250 g,4742022910054,,,dry_preserves,dry_flour_sugar_baking
+126014,"Kreemjas pesto basiiliku, PANZANI, 190 g",Abestock AS,190 g,3038359912351,sauces_oils,sauces_pasta_cooking,sauces_oils,sauces_pasta_cooking
+126015,"Kreemjas soja joogipulber, MYSOJA, 200 g",D.T.L Consumer Products Eesti AS,200 g,4747004000051,drinks,drinks_syrups_powders,dairy_eggs_fats,dairy_plant_drinks
+126016,"Kreveti maitsega kiirnuudlid, REEVA, 60 g",Selver AS,60 g,4820179258523,,,dry_preserves,dry_soups_noodles
+126017,"Konjak HENNESSY VS karbis, 70 cl",Prike AS,700 ml,3245990043317,drinks,drinks_spirits,drinks,drinks_spirits
+126018,"Konjak MAXIME TRIJOL Grande Champagne Ancestral puitkarbis, 70 cl",Goldberger OÜ,700 ml,3544680020608,drinks,drinks_wine,drinks,drinks_spirits
+126019,"Konjak MEUKOW VS, 35 cl",Dunker Estonia OÜ,350 ml,3257150100143,drinks,drinks_spirits,drinks,drinks_spirits
+126020,"Konjak REMY MARTIN 1738 Royal tuubis, 70 cl",Liviko AS,700 ml,3024480001781,drinks,drinks_spirits,drinks,drinks_spirits
+126021,"Kreveti-munasalat, SELVERI KÖÖK, 360 g",Kulinaaria OÜ,360 g,4740581100831,dairy_eggs_fats,dairy_eggs,produce,produce_herbs_salads_sprouts
+126022,"Krevett koorimata 90/120, MARINE, 360 g",Balbiino AS,360 g,4740188017433,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_fish
+126023,"Krõbe müsli Crunchy Choko&Nut, KELLOGG'S, 360 g",Sanitex OÜ,360 g,5059319020365,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+126024,"Krõbe müsli maasikaga, FIRST PRICE, 500 g",Selver AS,500 g,7311041080689,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+126025,"Krõbe müsli Nut Granola Classic, KELLOGG'S, 380 g",Sanitex OÜ,380 g,5059319020334,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+126026,"Krõbe müsli šokolaadiga, FIRST PRICE, 500 g",Selver AS,500 g,7311041080672,sweets_snacks,sweets_chocolate_bars,dry_preserves,dry_cereals_muesli
+126027,"Krõbeda karamelliga šokolaad, NICKS, 28 g",Njom Foods OÜ,28 g,7350104401108,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+126028,"Krõbedate vahvlite küpsetussegu, VESKI MATI, 400 g",Selver AS,400 g,4740281003715,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+126029,"Krõbisev mahe maapähklivõie, NATTY ORIGINAL, 333g",Nordista OÜ,333 g,4745010436024,sweets_snacks,sweets_nuts_driedfruit,dry_preserves,dry_other
+126030,"Krokojäätis, VÄIKE TOM, 75 g",Premia Tallinna Külmhoone AS,75 g,4740093942509,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+126031,"Krõpsud aafrikapärase kana maitsega, JERSIKA, 90 g",GKR Trade OÜ,90 g,4751026630196,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+126032,"Krõpsud balsamico äädikaga, LORENZ, 100 g",D.T.L. Consumer Products Eesti AS,100 g,4018077712593,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+126033,"Krutoonid küüslauk ja petersell, RIALTO, 75g",Proposito OÜ,75 g,5606439000564,pet,pet_other,bakery,bakery_other
+126034,"Krutoonid tomati-oregaano, RIALTO, 75 g",Proposito OÜ,75 g,5606439000571,produce,produce_root_veg,bakery,bakery_other
+126035,"Kuivatatud ploomi mahl, RYNKEBY, 1 L",Mobec AS,1 l,5705001405308,sweets_snacks,sweets_nuts_driedfruit,drinks,drinks_juices
+126036,"Kuivmarinaadisegu Beer Can Chicken, SANTA MARIA, 30 g",Santa Maria AS,30 g,7311310033316,drinks,drinks_beer_cider,sauces_oils,sauces_marinades
+126037,"Kuivmarinaadisegu ürtidega, SANTA MARIA, 22 g",Santa Maria AS,22 g,7311310028626,sauces_oils,sauces_marinades,sauces_oils,sauces_marinades
+126038,"Kuivpärm, NORDIC, 2x12 g",Estover OÜ,24 g,73500377,,,dry_preserves,dry_flour_sugar_baking
+126039,"Kukeseenemaitseline kartulikrõps Oven Baked, LAY'S, 110 g",Pepsico Eesti AS,110 g,5900259128546,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+126040,"Külm. Pardi rinnafilee nahaga, MARKUS MAREK, kg",Karia OÜ,,2300017100006,,,meat_fish,meat_poultry
+126041,"Külmkuivatatud Juustu Krõps köömnetega, SAIDAFARM, 40g",,40 g,,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+126042,"Külmkuivatatud Juustu Krõps, SAIDAFARM, 40g",,40 g,,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+126043,"Külmpressitud Kanepiseemneõli, OILIO, 250 ml",Claire Foods OÜ,250 ml,4744283011150,sweets_snacks,sweets_nuts_driedfruit,sauces_oils,oils_other
+126044,"Külmpressitud Linaseemneõli, OILIO, 250 ml",Claire Foods OÜ,250 ml,4744283010658,sweets_snacks,sweets_nuts_driedfruit,sauces_oils,oils_other
+126045,"Külmpressitud Seesamiseemneõli, OILIO, 250 ml",Claire Foods OÜ,250 ml,4744283010672,sweets_snacks,sweets_nuts_driedfruit,sauces_oils,oils_other
+126046,"Külmsupp Suvi, SALVEST, 530 g",,530 g,,,,dry_preserves,dry_ready_meals_jars
+126047,"Külmutatud EHE mini-frikadellid, RANNAROOTSI EHE, 350 g",Rannarootsi Lihatööstus AS,350 g,4740296011453,frozen_food,frozen_other,frozen_food,frozen_meat
+126048,"Külmutatud friikartul sakiline, FARM FRITES, 1.5 kg",Balbiino AS,1.5 kg,8710679101886,frozen_food,frozen_veg,frozen_food,frozen_potato_products
+126049,"Külmutatud hinkaalid, VICI, 400 g",Viciunai Baltic OÜ,400 g,4770190108249,frozen_food,frozen_other,frozen_food,frozen_ready_meals
+126050,"Külmutatud kanaliha frikadellid kaerakliidega, UVIC/FITLAP, 350 g",Ecotrade OÜ,350 g,4740223024211,dairy_eggs_fats,dairy_plant_drinks,frozen_food,frozen_meat
+126051,"Külmutatud kirsid kivideta, FIGURAATA, 1 kg",Figuraata OÜ,1 kg,4744559011211,frozen_food,frozen_other,frozen_food,frozen_berries_fruit
+126052,"Külmutatud mango kuubikud, FIGURAATA, 1 kg",Figuraata OÜ,1 kg,4744559010825,frozen_food,frozen_other,frozen_food,frozen_berries_fruit
+126053,"Külmutatud metsmustikad, FIGURAATA, 1 kg",Figuraata OÜ,1 kg,4744559010429,frozen_food,frozen_berries_fruit,frozen_food,frozen_berries_fruit
+126054,"Külmutatud pelmeenid, ISUKAS, 700 g",Rannarootsi Lihatööstus AS,700 g,4740296011057,frozen_food,frozen_other,frozen_food,frozen_ready_meals
+126055,"Külmutatud pikk uba, DUJARDIN, 450 g",Vičiunai Baltic OÜ,450 g,5411916252851,frozen_food,frozen_other,frozen_food,frozen_veg
+126056,"Külmutatud roheline hernes, DUJARDIN, 450 g",Vičiunai Baltic OÜ,450 g,5411916303850,frozen_food,frozen_other,frozen_food,frozen_veg
+126057,"Külmutatud tursa burgerid, KALURI, 250 g",Läätsa Kalatööstus AS,250 g,4740590073157,frozen_food,frozen_other,frozen_food,frozen_fish
+126058,"Külmutatud vaarikad, FIGURAATA, 1 kg",Figuraata OÜ,1 kg,4744559010481,frozen_food,frozen_berries_fruit,frozen_food,frozen_berries_fruit
+126059,TEEKANNE kummelitee 30g,Teekanne,30 g,4009300522782,,,drinks,drinks_tea_coffee
+126060,"Kummikad rõõmsate kummikommide segu, KALEV, 120 g",Orkla Eesti AS,120 g,4740012600084,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+126061,"Kummikad ussikujuliste kummikommide segu, KALEV, 120 g",Orkla Eesti AS,120 g,4740012600107,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+126062,"Kummikomm Rainbow belts, VIDAL, 90 g",Estinvait OÜ,90 g,8413178398244,,,sweets_snacks,sweets_candies
+126063,HARIBO Fantaasia kummikommid 175g,HARIBO Fantaasia,175 g,4001686322901,,,sweets_snacks,sweets_candies
+126064,"Kummikommid Harry Potter, HARIBO, 85 g",Interaltus OÜ,85 g,4001686017890,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+126065,"Kummikommid Kirsid, HARIBO, 175 g",Interaltus OÜ,175 g,4001686322871,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+126066,"Kummikommid Kisses, JAKE, 100 g",Kommikeskus OÜ,100 g,8412147570056,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+126067,"Kummikommid Kuldkarud, HARIBO, 100 g",Interaltus OÜ,100 g,4001686301555,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+126068,"Kummikommid Mini Choco, REMIX, 100 g",Fazer Eesti OÜ,100 g,6416453049376,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+126069,"Kummikommid Mini Minis, REMIX, 120 g",Fazer Eesti OÜ,120 g,6416453049383,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+126070,"Kummikommid Mini Sour, REMIX, 120 g",Fazer Eesti OÜ,120 g,6416453049390,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+126071,Katjes kummikommid Party Fred 175g,Katjes,175 g,4037400344164,,,sweets_snacks,sweets_candies
+126072,"Kummikommid Pico-Balla, HARIBO, 85 g",Interaltus OÜ,85 g,8426617002473,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+126073,"Kummikommid Sour Patch arbuusimaitselised, KENT, 160 g",,160 g,,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+126074,"Kummikommid Sour Patch Kids, KENT, 160 g",,160 g,,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+126075,Trolli Squiggle Twist Kummikommid 175G,Trolli Squiggle,175 g,4000512364962,,,sweets_snacks,sweets_candies
+126076,"Kummikommid TropiFrutti, HARIBO, 175 g",Interaltus OÜ,175 g,4001686322963,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+126077,"Kummikommid TUTTI FRUTTI, 180 g",Fazer Eesti OÜ,180 g,6416453038288,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+126078,"Kummikommid Ussid, HARIBO, 100 g",Interaltus OÜ,100 g,9002975377379,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+126079,"Kummikommid Wunderland Rainbow, KATJES, 175 g",Jungent Estonia OÜ,175 g,4037400344799,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+126080,"Küps Cheddar karamelliseeritud sibulaga (vahas), WYKE FARMS, 100 g",Deline OÜ,100 g,5021427909214,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+126081,"Küpsetatud oad, CAMPAGNA, 400 g",Selver AS,400 g,8005391302162,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+126082,"Küpsetusmargariin 72%, EVESOL, 500 g",Eugesta Eesti OÜ,500 g,5900247002674,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+126083,"Küpsetuspulber, DR.OETKER, 160 g",Jungent Estonia OÜ,160 g,5997381375788,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+126084,"Küpsise-halvaakook, SELVERI KÖÖK, 350 g",Kulinaaria OÜ,350 g,4740581113527,sweets_snacks,sweets_biscuits_cookies,bakery,bakery_cakes_pastries
+126085,"Küpsisejäätis, LA MUU, 250 g",Jungent Estonia OÜ,250 g,4742963012053,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+126086,"Küpsisemagustoit, SELVERI KÖÖK, 130 g",Kulinaaria OÜ,130 g,4740581108271,sweets_snacks,sweets_biscuits_cookies,dairy_eggs_fats,dairy_desserts
+126087,"Küpsisemaitseline jäätis iirise-karamelli kastme ja karamelliga, MAGNUM, 303 g",Unilever Eesti AS,303 g,8711327480438,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+126088,"Küpsisemaitseline jäätis pekanipähklimaitselise jäätise keeru ja soolakaramelli kastmega, MAGNUM, 71 g",,71 g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+126089,"Kurgi-sinepisalat, PÕLTSAMAA, 280g",Orkla Eesti AS,280 g,4740029044529,produce,produce_herbs_salads_sprouts,dry_preserves,dry_canned_veg
+126090,"Kurgid rich taste marinaadis, GREEN, 450 g neto",Pralinee OÜ,450 g,4744148012339,sauces_oils,sauces_marinades,dry_preserves,dry_canned_veg
+126091,"Kurgid sweet chili marinaadis, GREEN, 450 g neto",Pralinee OÜ,450 g,4744148012322,sauces_oils,sauces_marinades,dry_preserves,dry_canned_veg
+126092,Felix kurgikaste 275 g,Felix,275 g,4740029072522,,,sauces_oils,sauces_other

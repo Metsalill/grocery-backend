@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+307485,"Gaseeritud vesi pohlamaitseline, AURA, 500 ml",A. Le Coq AS,500 ml,,drinks,drinks_water,drinks,drinks_water
+307486,"Gorgonzola DOP, FORMAGIA, 100 g",Selver AS,100 g,,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_delicatessen
+307487,"Greibinektar 55%, GRANINI, 1 L",Tridens AS,1 l,,drinks,drinks_juices,drinks,drinks_juices
+307488,"HULGI Apelsinimahl 100% 3tk, PHANNER, 3 x 2 L",Selver AS,6 l,0216000000869,drinks,drinks_juices,drinks,drinks_juices
+307489,"HULGI Grilljuust 3tk, NOPRI, 3 x 200g",Nopri Talumeierei OÜ,600 g,0210300004312,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+307490,"HULGI Halvaa india pähklitega 3tk, MARMITON, 3 x 100g",Svensky Kaubanduse AS,300 g,0215000001845,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_candies
+307491,"HULGI Jogurt leiva-pähkli 3tk, FARMI, 3 x 400g",Farmi Piimatööstus AS,1.2 kg,0210300004305,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+307492,"HULGI Karamell Vähid 5tk, ROSHEN, 5 x 126 g",Eugesta Eesti AS,630 g,0215000001609,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+307493,"HULGI Koorene jogurt virsikutega 3tk, FARMI, 3 x 400g",Farmi Piimatööstus AS,1.2 kg,0210300003957,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+307494,"HULGI Meiereivõi soolata 2tk, VALIO, 2 x 500 g",Valio Eesti AS,1 kg,0210300004138,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+307495,"HULGI Multivitamiininektar 3tk, PHANNER, 3 x 2L",Selver AS,6 l,0216000000845,drinks,drinks_juices,drinks,drinks_juices
+307496,"HULGI Pralinee india pähkliga 3tk, KALEV, 3 x 175g",Orkla Eesti AS,525 g,0215000001814,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_candies
+307497,"HULGI Pralineekompvek Maiuspala 3tk, KALEV, 3 x 175g",Orkla Eesti AS,525 g,0215000001807,dry_preserves,dry_other,sweets_snacks,sweets_candies
+307498,"HULGI Rohelise õuna jook 3tk, PHANNER, 3 x 2 L",Selver AS,6 l,0216000000852,produce,produce_apples_pears,drinks,drinks_soft_soda
+307499,"HULGI Vitamiinijook Upgrade 12tk, VITAMIN WELL, 12 x 500g",GKR Trade OÜ,6 l,0216000000876,dry_preserves,dry_other,drinks,drinks_water
+307500,"Jäätee virsiku, NESTEA, 1,5 L",Osama Eesti OÜ,1.5 l,8595646203578,drinks,drinks_tea_coffee,drinks,drinks_soft_soda
+307501,"Jogurtijook maasika 4x100g, ACTIMEL, 400 g",Nutricia SIA,400 g,47500884,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+307502,"Jogurtijook metsamarja 8x100g, ACTIMEL, 800 g",Nutricia SIA,800 g,59070665,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+307503,"Jogurtijook metsmarja 4x100g, ACTIMEL, 400 g",Nutricia SIA,400 g,47500914,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+307504,"Juubelitort, SELVERI KÖÖK, 770 g",Kulinaaria OÜ,770 g,4740581114197,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+307505,"Juustukolmnurgad, FLORA, 115g",Selver AS,115 g,,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+307506,"Kanafilee võileib tšillikastmega, SELVERI KÖÖK, 165 g",Kulinaaria OÜ,165 g,4740581114159,dairy_eggs_fats,dairy_butter_margarine,dry_preserves,dry_ready_meals_jars
+307507,"Karboniseerimata mineraalvesi, NEPTUNAS, 1,5 L",Coca Cola HBC Eesti AS,1.5 l,,drinks,drinks_water,drinks,drinks_water
+307508,"Karboniseeritud mineraalvesi Mündi, NEPTUNAS, 1,5 L",Coca Cola HBC Eesti AS,1.5 l,,drinks,drinks_water,drinks,drinks_water
+307509,"Karboniseeritud mineraalvesi Mündi, NEPTUNAS, 500 ml",Coca Cola HBC Eesti AS,500 ml,,drinks,drinks_water,drinks,drinks_water
+307510,"Kartulikrõps Kettle Cooked Habanero tšilli maitseline, NUBLIK",Starchipz OÜ,,,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+307511,"Kartulikrõps Kettle Cooked hapukoore-sibula maitseline, NUBLIK",Starchipz OÜ,,,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_snacks_salty
+307512,"Kartulikrõps Strong juustu- ja Cayenne maitselised, LAY'S, 120 g",Pepsico Eesti AS,120 g,,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+307513,"Kartulikrõpsud klassikalised, LORENZ, 100 g",D.T.L. Consumer Products Eesti AS,100 g,4018077713231,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+307514,"Kartulikrõpsud Kurgi ja hapukooremaitsega, ESTRELLA",Selver AS,,4779028347690,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_snacks_salty
+307515,"Kartulisektor küüslauguga, AVIKO, 600 g",Sanitex OÜ,600 g,,produce,produce_root_veg,frozen_food,frozen_potato_products
+307516,"Kitsepiimajuust Merci Chef, MERCI CHEF, 110 g",Svensky Kaubanduse AS,110 g,,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_delicatessen
+307517,"Koduviiner (kooritud), MAKS&MOORITS, kg, ettetellimisel",Atria Eesti AS,,2356244400006,drinks,drinks_spirits,meat_fish,meat_sausages
+307518,"Konjak BACHE GABRIELSEN VS Tre Kors, 70 cl",MV Eesti OÜ,700 ml,,dairy_eggs_fats,dairy_cheese_slices,drinks,drinks_spirits
+307519,"Konjak HENNESSY VS flask, 20 cl",Prike AS,200 ml,3245990598206,dry_preserves,dry_other,drinks,drinks_spirits
+307520,"Konjak HENNESSY VSOP, 35 cl",Prike AS,350 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+307521,"Konjak HENNESSY VSOP flask, 20 cl",Prike AS,200 ml,3245999898000,dry_preserves,dry_other,drinks,drinks_spirits
+307522,"Konjak HENNESSY VSOP karbis, 50 cl",Prike AS,500 ml,3245990302216,dry_preserves,dry_other,drinks,drinks_spirits
+307523,"Konjak HENNESSY VSOP karbis, 70 cl",Prike AS,700 ml,3245999484319,dry_preserves,dry_other,drinks,drinks_spirits
+307524,"Konjak HENNESSY X.O. karbis, 35 cl",Prike AS,350 ml,3245990184416,dry_preserves,dry_other,drinks,drinks_spirits
+307525,"Konjak MARTELL VSOP, 70 cl",Pernod Ricard Estonia OÜ,700 ml,3219820005899,dry_preserves,dry_other,drinks,drinks_spirits
+307526,"Konjak MAXIME TRIJOL VSOP karbis, 70 cl",Goldberger OÜ,700 ml,,dry_preserves,dry_other,drinks,drinks_spirits
+307527,"Kookoskreem, THAI CHOICE, 400 ml",D.T.L. Consumer Products Eesti AS,400 ml,8851978804068,bakery,bakery_cakes_pastries,world_spices,spices_asian
+307528,"Kookosvesi gaseerimata, GREPPO, 320 ml",Lancoster OÜ,320 ml,4744891011795,drinks,drinks_water,drinks,drinks_water
+307529,"Koorekaste, SELVERI KÖÖK, 280 g",Kulinaaria OÜ,280 g,,dairy_eggs_fats,dairy_cream_sourcream,sauces_oils,sauces_pasta_cooking
+307530,"Kõrrejook suvistest marjadest, PEPPA PIG, 200 ml",Maris Gilden AS,200 ml,,produce,produce_berries,drinks,drinks_juices
+307531,"Kõrrejook troopilistest viljadest, PEPPA PIG, 200 ml",Maris Gilden AS,200 ml,,dry_preserves,dry_other,drinks,drinks_juices
+307532,"Krõbe paneering kanale, SANTA MARIA, 50 g",Santa Maria AS,50 g,7311311027338,meat_fish,meat_poultry,world_spices,spices_mexican
+307533,"Kruubipuder sealihaga, SELVERI KÖÖK, 350 g",Kulinaaria OÜ,350 g,,meat_fish,meat_pork,dry_preserves,dry_ready_meals_jars
+307534,"HARIBO Kuldkarud, kummikommid 175g",HARIBO Kuldkarud,175 g,4001686322840,,,sweets_snacks,sweets_candies
+307535,"7 Days mini multipakk kakaomaitseline, 7DAYS, 185 g",Abestock AS,185 g,5201360543205,dry_preserves,dry_other,bakery,bakery_buns_croissants
+307536,"Apelsini-šokolaadikeeks, RÕNGU PAGAR, 300 g",Rõngu Pagar OÜ,300 g,4742216005092,sweets_snacks,sweets_chocolate_bars,bakery,bakery_cakes_pastries
+307537,"Banaani-piimapuder täisterahelve, HOLLE, 250 g",Goldberger OÜ,250 g,,dairy_eggs_fats,dairy_milk,baby,baby_porridge_cereal
+307538,"Banaanipüree pirni ja mangoga mahe 4+, HIPP, 100 g",LTT AS,100 g,,produce,produce_apples_pears,baby,baby_food_jars
+307539,"Diffuser Blue Eucalyptus & Cedarwood, AIR WICK, 42 ml",Eugesta Eesti OÜ,42 ml,5908252018994,dry_preserves,dry_other,household,hh_candles_airfresh
+307540,"Diffuser Cherry Blossom & Raspberry, AIR WICK, 42 ml",Eugesta Eesti OÜ,42 ml,5908252018963,dry_preserves,dry_other,household,hh_candles_airfresh
+307541,"Difuuser Morning Dew & Blackberries, AIR WICK, 40 ml",Eugesta Eesti OÜ,40 ml,,dry_preserves,dry_other,household,hh_candles_airfresh
+307542,"Difuuser Pear & Cinnamon, AIR WICK, 40 ml",Eugesta Eesti OÜ,40 ml,,world_spices,spices_herbs_spice_mix,household,hh_candles_airfresh
+307543,"Filotaigen, KANAKI, 250 g",Reaton OÜ,250 g,,meat_fish,meat_poultry,frozen_food,frozen_bakery
+307544,"Grand Sour, NOCCO, 330 ml",GKR Trade OÜ,330 ml,,dry_preserves,dry_other,drinks,drinks_energy
+307545,"Grissiinid seesamiseemnetega, STIRATINI, 250 g",Estinvait OÜ,250 g,,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks_salty
+307546,"Hallituse eemaldaja, CILLIT, 750 ml",Eugesta Eesti AS,750 ml,,dry_preserves,dry_other,household,hh_cleaners
+307547,"Hari + kühvel pika varrega, VILEDA",Jungent Estonia OÜ,,4023103158313,dry_preserves,dry_other,household,hh_other
+307548,"Head Ööd piimapudrupulber kaera-õuna mahe 6+, HIPP, 250 g",LTT AS,250 g,,dairy_eggs_fats,dairy_milk,baby,baby_porridge_cereal
+307549,"Herne-suhkrumaisi maisipallid, ELLA'S KITCHEN, 36g",Goldberger OÜ,36 g,5060503505551,drinks,drinks_spirits,baby,baby_snacks
+307550,"HULGI Hapukoore- ja sibulamaitselised kuivküpsised 3tk, TUC, 3 x 100g",Abestock AS,300 g,0215000000558,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_snacks_salty
+307551,"HULGI Juicy Melba 24tk, NOCCO, 24 x 330ml",GKR Trade OÜ,7.92 l,0216000000913,dry_preserves,dry_other,drinks,drinks_energy
+307552,"HULGI Kalev klassikalised martsipanikommid 3tk, KALEV, 3 x 150g",Orkla Eesti AS,450 g,0215000001821,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+307553,"HULGI Kiviahjupitsa Superiore for Meat Lovers 3tk, GRANDIOSA, 3 x 350g",Orkla Eesti AS,1.05 kg,0212000002193,dry_preserves,dry_other,frozen_food,frozen_pizza
+307554,"HULGI Kodujuust 5% 2tk, ALMA, 2 x 500 g",Valio Eesti AS,1 kg,0210300004091,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+307555,"HULGI Maasikaküpsised 4 tk, MAIASMOKK, 4 x 130 g",Abestock AS,520 g,0215000001791,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+307556,"HULGI Õuna-mango-mustasõstrapüree 6+, mahe (rebane) 6tk, MUUTI, 6 x 110g",Salvest AS,660 g,0214200000504,produce,produce_apples_pears,baby,baby_food_pouches
+307557,"HULGI Pohla-mustika-rukkipuder 8+ Mahe 6 tk, MUUTI, 6 x 110g",Salvest AS,660 g,0214200000511,produce,produce_berries,baby,baby_porridge_cereal
+307558,"HULGI Soolakõrsikud 5tk, LORENZ, 5 x 150g",D.T.L. Consumer Products Eesti AS,750 g,0215000001852,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_snacks_salty
+307559,"HULGI Toonik Pink Mixer 9tk, SCHWEPPES, 9 x 1,5l",Coca-Cola HBC Eesti AS,13.5 l,0216000000890,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+307560,"HULGI Toonik Tonic 9tk, SCHWEPPES, 9 x 1,5l",Coca-Cola HBC Eesti AS,13.5 l,0216000000883,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+307561,"Imiku piimasegu Comfort Combiotic (puhituste ja kõhukinnisuse puhul) 0+, HIPP, 300 g",LTT AS,300 g,,dairy_eggs_fats,dairy_milk,baby,baby_formula
+307562,"Ingverijook Dark Ginger, ROCHESTER, 725 ml",Talman Kaubandus OÜ,725 ml,50499625,drinks,drinks_spirits,drinks,drinks_other
+307563,"Ingverijook, ROCHESTER, 725 ml",Talman Kaubandus OÜ,725 ml,,dry_preserves,dry_other,drinks,drinks_other
+307564,"Jätkupiimasegu 2 BIO Combiotik 6+, HIPP, 200 g",LTT AS,200 g,4062300465824,dairy_eggs_fats,dairy_milk,baby,baby_formula
+307565,"Kaerahelbeküpsised, FLORA, 300 g",Selver AS,300 g,,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+307566,"Kaerahelbeküpsised mandli ja šokolaaditükikestega, FLORA, 300 g",Selver AS,300 g,,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_biscuits_cookies
+307659,"Belgia merekarbid, kohvikreemiga 60 g",Belgia,60 g,5413121360673,,,sweets_snacks,sweets_candies
+308127,"Schär näkileib 150 g, vegan gl",Schär,150 g,8008698007303,,,bakery,bakery_other
+308981,Nestle kakaojoogipulber 192 g,Nestle,192 g,7613034041746,,,drinks,drinks_syrups_powders
+310253,Chef Lunden Riisikauss Broileriga 280 G,Chef Lunden,280 g,4740376026803,sauces_oils,oils_other,dry_preserves,dry_ready_meals_jars
+312996,Pajakinnas 15X32 Lehekontuurid,Pajakinnas,,6438574345793,,,household,hh_kitchenware
+314460,Sanka-Bioska Plus biolagunevad kotid 20l 15tk,Sanka-Bioska Plus,20 l,6414630025830,,,household,hh_bins_bags
+315367,Abba Heeringas Sinepikastmes 230 G,Abba Heeringas,230 g,7350126081739,meat_fish,fish_fresh,meat_fish,fish_processed
+315945,"SCHWEPPES PINK MIXER TOONIK 1,5L",Schweppes Pink,1.5 l,5000112614572,,,drinks,drinks_soft_soda
+316942,"Grandiosa pepperoni kiviahjupitsa, 340 g",Grandiosa,340 g,7310240071757,,,frozen_food,frozen_pizza
+320560,Smiltainis joonistusplokk a4 20l 120g,Smiltainis,20 l,4770644480068,,,household,hh_other
+322012,Hlibny Dar Classic vodka 40%vol 1L,Hlibny Dar,1 l,4820080722045,,,drinks,drinks_spirits
+324497,Nokian Panimo Mojito alkoholivaba kokteil 330 ml,Nokian Panimo,330 ml,6417348171035,,,drinks,drinks_soft_soda
+324574,Tartu Mill kaerahelbepuder mustasõstra 35g,Tartu Mill,35 g,4743303100041,,,dry_preserves,dry_cereals_muesli
+325666,Metaxa Peach Spritz muu alkohoolne jook 5%vol 250 ml,Metaxa Peach,250 ml,5202795210779,,,drinks,drinks_beer_cider
+325866,Saare Kala Vikerforellifilee Õrnsool.Viil 90G,Saare Kala,90 g,4740663420260,meat_fish,fish_fresh,meat_fish,fish_salted_smoked
+325940,"Kartul Columbia 1,5kg",Kartul Columbia,1.5 kg,4740112000029,,,produce,produce_root_veg
+326003,Šampinjon grill 500g,Šampinjon,500 g,4771085205555,,,produce,produce_mushrooms
+326416,Pajakinnas 15X32 Lehekontuurid,Pajakinnas,,6438574345878,,,household,hh_kitchenware
+326828,Xtra oregano 25 g,Xtra,25 g,7340191109360,,,world_spices,spices_herbs_spice_mix
+327570,Marineeritud kurk vaakum 400g,Marineeritud,400 g,4742063000981,,,dry_preserves,dry_canned_veg
+328036,Baileys Irish Cream liköör 17%vol 700ml,Baileys Irish,700 ml,5011013100156,drinks,drinks_spirits,drinks,drinks_spirits
+329338,Kartul pestud Solist 5kg,Kartul,5 kg,4740246030084,,,produce,produce_root_veg
+329922,Pohlad 250 g mahe EESTI,Pohlad,250 g,4748001005421,,,produce,produce_berries
+329938,Kartul pesemata punane Laura kg,Kartul,,2060327000006,,,produce,produce_root_veg
+332681,Pohlad vees 360 g,Pohlad,360 g,4742063000615,,,dry_preserves,dry_canned_fruit
+334133,Soolatud seente segu 1 Kg,Soolatud,1 kg,4740536415102,,,dry_preserves,dry_canned_veg
+335526,"Coop Rooibos vanilje 20x1,5g RFA",Coop Rooibos,20x1.5 g,7340191164376,,,drinks,drinks_tea_coffee
+335799,"Mayeri pesugeel vill, siid, cashmer mint 1l",Mayeri,1 l,4740060013744,,,household,hh_laundry
+336244,COOP Ricotta-seenetäidisega tortellinid 250g,COOP Ricotta-seenetäidisega,250 g,7340191157422,,,dry_preserves,dry_pasta_rice
+337005,"Kartul Red Lady 2,5kg TALUKARTUL",Kartul Red,2.5 kg,4742050000130,,,produce,produce_root_veg
+337710,Red Bull Summer Edition Curuba energiajook 250 ml,Red Bull,250 ml,0000090456268,,,drinks,drinks_energy
+337958,"Coop teede advendikalender 37,2g",Coop,37.2 g,7340191177666,,,drinks,drinks_tea_coffee
+338371,Herkku Kakaojoogipulber 250g,Herkku Kakaojoogipulber,250 g,6438460995491,,,dry_preserves,dry_flour_sugar_baking
+338955,"Grillitud šašlõkk kolme juustuga, kg",Grillitud,,2060227800003,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_grill_blood_sausages
+340610,"Forsman teede advendikalender org. 25x2,5g",Forsman,25x2.5 g,6411020069498,,,drinks,drinks_tea_coffee
+342142,"Jäätee tsitrusviljade maitsega roheline Rimi 1,5l",Rimi,1.5 l,,drinks,drinks_tea_coffee,drinks,drinks_soft_soda
+342143,"Sink Jamon Serrano, viilutatud Selection by Rimi 80g",Selection By Rimi,80 g,,dry_preserves,dry_other,meat_fish,meat_gourmet
+342144,Himaalaja roosa sool Selection by Rimi 100g,Selection By Rimi,100 g,,world_spices,spices_basic_salt_pepper,world_spices,spices_basic_salt_pepper
+342145,"Ökoloogiline kookosjook I LOVE ECO, 400 ml",I Love Eco,400 ml,,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+342146,"Sealihavorst keedetud, viilutatud Rimi 270g",Rimi,270 g,,meat_fish,meat_sausages,meat_fish,meat_sausages
+342147,Keeduvorst Rimi Smart 1kg,Rimi Smart,1 kg,,meat_fish,meat_sausages,meat_fish,meat_sausages
+342148,Kalafilee juustuga Rimi 300g,Rimi,300 g,,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_fish
+342149,Karamelliseeritud magustatud kondenspiim Rimi 397g,Rimi,397 g,,dairy_eggs_fats,dairy_milk,dairy_eggs_fats,dairy_milk
+342150,Mikropopkorn soolane Rimi 90g,Rimi,90 g,,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_snacks_salty
+342151,Pähkli ja suupiste segu Ica Asia 140g,ICA,140 g,,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+342152,"Porgandinektar Rimi 0,33l",Rimi,330 ml,,drinks,drinks_juices,drinks,drinks_juices
+342153,Püree maasikate ja banaanidega ICA 120g,ICA,120 g,,produce,produce_berries,baby,baby_food_pouches
+342154,Kuivpärm Rimi Smart 12g,Rimi Smart,12 g,,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+342155,Bataadi friikartulid Rimi sügavkülmutatud 450g,Rimi,450 g,,frozen_food,frozen_potato_products,frozen_food,frozen_potato_products
+342156,Kauss kinoa ja kanaga 290g,Rimi,290 g,,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+342157,Mahe kuivatatud aprikoos I Love Eco 200g,I Love Eco,200 g,,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+342158,Makaronid tomati&basiilikuga Trottole Tricolor Selection by Rimi 500g,Selection By Rimi,500 g,,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+342159,Passionikook Rimi 350g,Rimi,350 g,,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+342160,Jäätis jogurti-maasika Rimi 1kg/2L,Rimi,2 l,,dairy_eggs_fats,dairy_yogurt_kefir,frozen_food,frozen_desserts_icecream
+342161,Toorjuust küüslaugu ja ürtidega ICA 23% 200g,ICA,200 g,,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+342162,Magushapu kaste ananassiga Rimi 480g,Rimi,480 g,,produce,produce_tropical,sauces_oils,sauces_other
+342163,Pitsa Royale Rimi 570g,Rimi,570 g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+342164,Kultuurmustikad Rimi 300g,Rimi,300 g,,produce,produce_berries,produce,produce_berries
+342165,Karastusjook Rimi apelsinilimonaad 2l,Rimi,2 l,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+342166,Tuunikala purustatud soolvees Rimi Smart 185g/130g,Rimi Smart,185 g,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+342167,Marineeritud heeringafilee tükid peediga majoneesis Rimi Smart 200g,Rimi Smart,200 g,,sauces_oils,sauces_ketchup_mayo,meat_fish,fish_processed
+342168,Toiduželatiin Rimi Smart 20g,Rimi Smart,20 g,,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+342169,Mandli-võiküpsised Almond Thins Selection by Rimi 100g,Selection By Rimi,100 g,,dairy_eggs_fats,dairy_butter_margarine,sweets_snacks,sweets_biscuits_cookies
+342170,Basiilikupesto Selection By Rimi 185g,Selection By Rimi,185 g,,sauces_oils,sauces_pasta_cooking,sauces_oils,sauces_pasta_cooking
+342171,Pasta Durum 500g Penne Rimi,Rimi,500 g,,drinks,drinks_spirits,dry_preserves,dry_pasta_rice
+342172,Nektar ananassi Rimi 1l,Rimi,1 l,,drinks,drinks_juices,drinks,drinks_juices
+342173,Kookoshelbed Rimi 150g,Rimi,150 g,,bakery,bakery_cakes_pastries,dry_preserves,dry_flour_sugar_baking
+342174,Viinamari hele s-ta SUGRAONE 1kl 500g,Rimi,500 g,,drinks,drinks_spirits,produce,produce_tropical

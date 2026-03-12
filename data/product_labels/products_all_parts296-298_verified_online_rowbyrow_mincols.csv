@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+342325,Jäätis šokolaadi Rimi Smart 65g/120ml,Rimi Smart,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+342326,Kurgid marineeritud 3-6cm Rimi 670g/370g,Rimi,,,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+342327,Rohelised Queen oliivid Selection by Rimi kividega 345g/200g,Selection By Rimi,,,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+342328,"Broileri poolkoivad, värske, A-klass Rimi 500g",Rimi,,,meat_fish,meat_poultry,meat_fish,meat_poultry
+342329,Cappuccino ICA 200g,ICA,,,dry_preserves,dry_other,drinks,drinks_tea_coffee
+342330,Sealiha hautatud Rimi 250g,Rimi,,,meat_fish,meat_pork,dry_preserves,dry_canned_meat_fish
+342331,Till Rimi 7g,Rimi,,,produce,produce_herbs_salads_sprouts,world_spices,spices_herbs_spice_mix
+342332,Müsli Extra Fruits and Berries Rimi 375g,Rimi,,,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+342333,Tee ürdi kummeli Rimi 30g,Rimi,,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+342334,Karri Rimi 25g,Rimi,,,dry_preserves,dry_other,world_spices,spices_asian
+342335,Rapsiõli I Love Eco 500ml,I Love Eco,,,sauces_oils,oils_other,sauces_oils,oils_other
+342336,Nektar banaani Rimi 1l,Rimi,,,drinks,drinks_juices,drinks,drinks_juices
+342337,"Kalkuni rinnafilee hakkliha Rimi, jahutatud 500g",Rimi,,,dry_preserves,dry_flour_sugar_baking,meat_fish,meat_minced
+342338,Rimi jää puhastatud veest 1kg,Rimi,,,dry_preserves,dry_other,frozen_food,frozen_other
+342339,Kanapitsa Rimi TK,Rimi,,,meat_fish,meat_poultry,frozen_food,frozen_pizza
+342340,Porgandi-ananassisalat 250g,Rimi,,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+342341,"Banaanid Cavendish I Love Eco 1kl, kg",I Love Eco,,,produce,produce_tropical,produce,produce_tropical
+342342,Lasagne Bolognese Rimi 400g,Rimi,,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+342343,Kaeraküpsised Rimi Smart 500g,Rimi Smart,,,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+342344,"Püree köögivilja- ja puuviljaga I Love Eco porgandi, õuna, mango, granadillimahl, lastele alates 6 kuust 90 g",I Love Eco,,,drinks,drinks_juices,baby,baby_food_pouches
+342345,"Vikerforelli filee, kg",Rimi,,,meat_fish,fish_fresh,meat_fish,fish_fresh
+342346,Hambapasta lastele ICA 75ml,ICA,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+342347,Viinamarjaseemneõli rafineeritud Rimi 750ml,Rimi,,,drinks,drinks_spirits,sauces_oils,oils_other
+342348,"Küpsised piima-, tumeda ja valge šokolaadi tükkidega",Rimi,,,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_biscuits_cookies
+342349,Purustatud tomatid ICA 390g,ICA,,,produce,produce_root_veg,dry_preserves,dry_canned_veg
+342350,Kaerapuder karamellimaitseline õuntega Rimi 55g,Rimi,,,sweets_snacks,sweets_candies,dry_preserves,dry_cereals_muesli
+342351,Siirup Metsmaasikamaitseline Rimi Smart 1l,Rimi Smart,,,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+342352,Maasikamoos I Love Eco 400g,I Love Eco,,,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+342353,Peet õunamahlas Rimi 480g/295g,Rimi,,,drinks,drinks_juices,dry_preserves,dry_canned_veg
+342354,Müsli puuvilja 45% ICA 750g,ICA,,,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+342355,Ahjukartul 350g,Rimi,,,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+342356,Kohvioad Selection by Rimi Colombia 1kg,Selection By Rimi,,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+342357,Kummikommid LLama mix Rimi 100g,Rimi,,,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+342358,Riisivahvlid Rimi juustuga 25g,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+342359,Küpsised Brownie Rimi 200g,Rimi,,,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+342360,"Püree puuvilja ja teraviljadega I Love Eco virsik,õun,kaer ja oder, alates 6 kuust 120g",I Love Eco,,,produce,produce_apples_pears,baby,baby_food_pouches
+342361,"Mahlajook Rimi apelsini, banaani, virsiku 200ml",Rimi,,,drinks,drinks_juices,drinks,drinks_juices
+342362,Kohupiimakreem maasika Rimi 150g,Rimi,,,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_desserts
+342363,"Valik kanalihavorste, viilutatud Rimi 150g",Rimi,,,meat_fish,meat_poultry,meat_fish,meat_hams
+342364,"Porgandinektar Rimi 0,75l",Rimi,,,drinks,drinks_juices,drinks,drinks_juices
+342365,Salatijuust Rimi 40% 500g,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+342366,Konserveeritud roheline hernes Rimi 200g/140g,Rimi,,,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+342367,Kommid puuviljamaitselised Rimi 16g,Rimi,,,dry_preserves,dry_other,sweets_snacks,sweets_gums_mints
+342368,Vanillimaitseline jäätis jõhvikatäidisega vahvlikoonuses Rimi 120g/200ml,Rimi,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+342369,Juust Maasdam viilutatud Rimi 150g,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+342370,Nisujahu 405d Rimi 1kg,Rimi,,,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+342371,Must pipar Selection by Rimi 45g,Selection By Rimi,,,world_spices,spices_basic_salt_pepper,world_spices,spices_basic_salt_pepper
+342372,"Kuumsuitsutatud broilerikoib Rimi Smart, kg",Rimi Smart,,,meat_fish,meat_poultry,meat_fish,meat_hams
+342373,Maasikad Rimi 450g,Rimi,,,produce,produce_berries,produce,produce_berries
+342374,Kummikommid Karukesed Rimi 100g,Rimi,,,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+342375,Kilud tomatikastmes Rimi Smart 240g,Rimi Smart,,,dry_preserves,dry_canned_meat_fish,dry_preserves,dry_canned_meat_fish
+342376,Maapähklihalvaa maasikatega Rimi 60g,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_candies
+342377,Kakaopulber vähendatud rasvasisaldusega Rimi 100g,Rimi,,,drinks,drinks_syrups_powders,dry_preserves,dry_flour_sugar_baking
+342378,Leivapulgad rukki Rimi 200g,Rimi,,,dry_preserves,dry_other,sweets_snacks,sweets_snacks_salty
+342379,"Kõrvitsaseemned Rimi röstitud, koorimata, soolaga 200g",Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_nuts_driedfruit
+342380,Konserveeritud ananassiviilud siirupis Rimi 825g/490g,Rimi,,,drinks,drinks_syrups_powders,dry_preserves,dry_canned_fruit
+342381,Makaronid kinoaga Penne Selection by Rimi 500g,Selection By Rimi,,,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+342382,Suupiste I Love Eco maisi 90g,I Love Eco,,,dry_preserves,dry_canned_veg,sweets_snacks,sweets_snacks_salty
+342383,Broilerirull mozzarellaga Rimi lihameistrid,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_hams
+342384,Kuskuss I Love Eco 500g,I Love Eco,,,dry_preserves,dry_other,dry_preserves,dry_pasta_rice
+342385,"Kuumsuitsu seavälisfilee, viilutatud 250g",Rimi,,,meat_fish,fish_salted_smoked,meat_fish,meat_hams
+342386,Pistaatsiapähklid Rimi röstitud ja soolatud 400g,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+342387,Pannkoogid singi ja juustuga 360g Rimi,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,dry_preserves,dry_ready_meals_jars
+342388,"Püree köögivilja-, riisi- ja kana I Love Eco alates 6 kuust 120g",I Love Eco,,,dry_preserves,dry_pasta_rice,baby,baby_food_jars
+342389,Õunamahlajook Rimi 200ml,Rimi,,,drinks,drinks_juices,drinks,drinks_juices
+342390,Meresool Selection By Rimi 100g,Selection By Rimi,,,world_spices,spices_basic_salt_pepper,world_spices,spices_basic_salt_pepper
+342391,Sea küljetükk keedetud kuumsuitsutatud Rimi vaakumpakendis kg,Rimi,,,meat_fish,fish_salted_smoked,meat_fish,meat_hams
+342392,Poolitatud mandlid Rimi 150g,Rimi,,,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+342393,Kartulikrõpsud soolaga ICA 175g,ICA,,,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+342394,Baguette tomati ja basiilikuga 155g,Rimi,,,produce,produce_herbs_salads_sprouts,bakery,bakery_bread_loaves
+342395,"Majapidamispaber Rimi 3- kihiline, 300 lehte",Rimi,,,household,hh_paper,household,hh_paper
+342396,Aedoad punased I Love Eco 380g,I Love Eco,,,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+342397,Oliivijääkõli Rimi Smart 1l,Rimi Smart,,,sauces_oils,oils_other,sauces_oils,oils_olive
+342398,Makaronid hakklihaga 350g,Rimi,,,dry_preserves,dry_pasta_rice,dry_preserves,dry_ready_meals_jars
+342399,Külms. Lõhefilee viilud Rimi 100g,Rimi,,,meat_fish,fish_fresh,meat_fish,fish_fresh
+342400,Köögiviljamahl Rimi 100% 1l,Rimi,,,drinks,drinks_juices,drinks,drinks_juices
+342401,Vikerforellifilee portsjonid 250g,Rimi,,,meat_fish,fish_fresh,meat_fish,fish_fresh
+342402,Kõva juust Rimi 37% 36 kuud 180g,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+342403,Tumeda šokolaadi plaadid piparmündikreemi täidisega Royal mints Rimi 200g,Rimi,,,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+342404,Veise kaelaliha Rimi kg,Rimi,,,meat_fish,meat_beef_lamb_game,meat_fish,meat_beef_lamb_game
+342405,Tee must Ceylon Rimi 80g,Rimi,,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+342406,Granaatõunamahl Rimi 1l,Rimi,,,drinks,drinks_juices,drinks,drinks_juices
+342407,"Sea kaelakarbonaad kondita, viilutatud Rimi 340g",Rimi,,,dry_preserves,dry_other,meat_fish,meat_hams
+342408,Maisivahvlid Rimi Smart 115g,Rimi Smart,,,dry_preserves,dry_canned_veg,sweets_snacks,sweets_snacks_salty
+342409,Keta kalamari Rimi MSC 100g,Rimi,,,meat_fish,fish_fresh,meat_fish,fish_processed
+342410,Vormiküpsised šokolaadi maitselised Rimi Smart 160g,Rimi Smart,,,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_biscuits_cookies
+342411,Valge veini äädikas Rimi 250ml,Rimi,,,drinks,drinks_wine,sauces_oils,oils_vinegar
+342412,Vanillijäätis küpsisetükkide ja šokolaaditükkidega Rimi 500ml/400g,Rimi,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+342413,Rukki näkileivad hapukoorega Rimi 200g,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_snacks_salty
+342414,Sealiha Šašlõkk kimchi marinaadis Lihameister Rimi,Rimi,,,sauces_oils,sauces_marinades,meat_fish,meat_pork
+342415,Kooritud kreeka pähkel Rimi kg,Rimi,,,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_nuts_driedfruit
+342416,Pastakaste Rimi küüslauguga 390g,Rimi,,,dry_preserves,dry_pasta_rice,sauces_oils,sauces_pasta_cooking
+342417,Martsipan ICA 400g,ICA,,,dry_preserves,dry_other,sweets_snacks,sweets_candies
+342418,Pakslaup-pangaasiuse filee sulatatud kg,Rimi,,,dry_preserves,dry_other,meat_fish,fish_fresh
+342419,"Kohupiimaküpsis kirsitäidisega Rimi, kg",Rimi,,,dairy_eggs_fats,dairy_cottage_quark,sweets_snacks,sweets_biscuits_cookies
+342420,Siirup Kirsimaitseline Rimi Smart 1l,Rimi Smart,,,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+342421,Soolakringlid Rimi 150g,Rimi,,,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_snacks_salty
+342422,"Kuldmerikoger, rookimata, peaga, Rimi,kg",Rimi,,,dry_preserves,dry_other,meat_fish,fish_fresh
+342423,Vasikapuljong ICA 180ml,ICA,,,world_spices,spices_broth_stock,world_spices,spices_broth_stock
+342424,Küpsetussegu Rimi vanilliiniga muffinite ja keeksi 400g,Rimi,,,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+342425,Tee must Earl Grey Rimi 20x2g,Rimi,,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+342426,Sprotid õlis Rimi klaaspurk 250g/175g,Rimi,,,sauces_oils,oils_other,dry_preserves,dry_canned_meat_fish
+342427,Jõhvika-mannavaht 600g,Rimi,,,produce,produce_berries,dairy_eggs_fats,dairy_desserts
+342428,Juust Gruyere ICA 200g,ICA,,,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+342429,Mahl tomati Rimi 3l,Rimi,,,drinks,drinks_juices,drinks,drinks_juices
+342430,Palsamiäädikakreem Aceto balsamico di Modena IGP apelsini maitsega Rimi 250ml,Rimi,,,sauces_oils,oils_vinegar,sauces_oils,oils_vinegar
+342431,Kuninglik segu Rimi 150g,Rimi,,,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+342432,Juust Rimi Tilsit 45% 500g,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+342433,Pitsa Capricciosa Rimi 370g,Rimi,,,dry_preserves,dry_other,frozen_food,frozen_pizza
+342434,"Looduslik mineraalvesi Rimi karboniseeritud 0,5l",Rimi,,,drinks,drinks_water,drinks,drinks_water
+342435,Puuviljade ja pähklite segu Fancy Rimi 500g,Rimi,,,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+342436,Vahukommid Belgia šokolaadis 160g,Rimi,,,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_candies
+342437,Kummikomm Burgerid Rimi 100g,Rimi,,,sweets_snacks,sweets_candies,sweets_snacks,sweets_gums_mints
+342438,"Karboniseerimata alkoholivaba sidrunimaitseline jook Rimi 1,5l",Rimi,,,dry_preserves,dry_cereals_muesli,drinks,drinks_soft_soda
+342439,Odratang Rimi Smart 800g,Rimi Smart,,,dry_preserves,dry_other,dry_preserves,dry_groats_beans
+342440,Salaami viilutatud külmsuitsutatud Rimi Smart 100g,Rimi Smart,,,meat_fish,fish_salted_smoked,meat_fish,meat_sausages
+342441,Datlid pehmed ICA öko 200g,I Love Eco,,,dry_preserves,dry_other,sweets_snacks,sweets_candies
+342442,"Jäätee virsikumaitsega must Rimi 1,5l",Rimi,,,drinks,drinks_tea_coffee,drinks,drinks_soft_soda
+342443,Pastakaste päikesekuivatatud tomatitega Selection by Rimi 350g,Selection By Rimi,,,dry_preserves,dry_pasta_rice,sauces_oils,sauces_pasta_cooking
+342444,Küpsised Caramel Rimi 175g,Rimi,,,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+342445,Tomatipasta Rimi 100% 500g,Rimi,,,dry_preserves,dry_pasta_rice,sauces_oils,sauces_pasta_cooking
+342446,Mesi erinevate lillede Rimi 300g,Rimi,,,dry_preserves,dry_other,dry_preserves,dry_other
+342447,Rapsiõli Rimi 1l,Rimi,,,sauces_oils,oils_other,sauces_oils,oils_other
+342448,Tudengi eine Rimi 150g,Rimi,,,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+342449,Küpsised Rimi Liblikad kg,Rimi,,,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+342450,"Maisikrõpsud juustuga ""Cheese balls"" Rimi 60g",Rimi,,,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+342451,Linnu- ja sealihavorstid juustuga Kabanos 120g,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_sausages
+342452,"Karpkala roogitud, kg",Rimi,,,meat_fish,fish_fresh,meat_fish,fish_fresh
+342453,Tomatid kooritud Rimi Smart 800g,Rimi Smart,,,dairy_eggs_fats,dairy_cream_sourcream,dry_preserves,dry_canned_veg
+342454,Õrrekanade munad A/M Nr.2 Rimi Smart 10tk,Rimi Smart,,,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+342455,Lõhe jahutatud 2-4kg,Rimi,,,dry_preserves,dry_flour_sugar_baking,meat_fish,fish_fresh
+342456,Röstsai mitmevilja Rimi Smart 500g,Rimi Smart,,,bakery,bakery_buns_croissants,bakery,bakery_bread_loaves
+342457,"Allikavesi karboniseerimata Rimi 0,5l",Rimi,,,drinks,drinks_water,drinks,drinks_water
+342458,Sinihallitusjuust Gold viilutatud 50% Rimi 100g,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+342459,Šokolaadikompvekid Rimi Seashells 250g,Rimi,,,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+342460,Küpsised Apple Pie Rimi 200g,Rimi,,,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+342461,"Mineraalvesi Rimi karboniseerimata 1,5l",Rimi,,,drinks,drinks_water,drinks,drinks_water
+342462,Kartuli-lihasalat 500g,Rimi,,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+342463,Mozzarella mini Rimi 100g,Rimi,,,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+342464,"Broileri rinnafilee, värske Rimi, kg",Rimi,,,meat_fish,meat_poultry,meat_fish,meat_poultry
+342465,Värske pasta Fettuccine ICA 250g,ICA,,,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+342466,Tee roheline Selection by Rimi Sencha 80g,Selection By Rimi,,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+342467,Peet marineeritud Rimi Smart 450g/350g,Rimi Smart,,,produce,produce_root_veg,dry_preserves,dry_canned_veg
+342468,"Mahlaapelsin Salustiana 1kl 1,5kg",Rimi,,,drinks,drinks_juices,produce,produce_tropical
+342469,Juustukuubikud õlis vürtsiseguga ICA  100g,ICA,,,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+342470,"Salaami pipraga, viilutatud Rimi 105g",Rimi,,,dry_preserves,dry_other,meat_fish,meat_sausages
+342471,Porgandid Crispy 200g I Love ECO,I Love Eco,,,produce,produce_root_veg,produce,produce_root_veg
+342472,Seaprae viilud 285g,Rimi,,,dry_preserves,dry_other,meat_fish,meat_hams
+342473,Mahe Puuviljapüree Õunte Ja Kookosega I Love Eco 90g,I Love Eco,,,bakery,bakery_cakes_pastries,baby,baby_food_pouches
+342474,Soolaheeringafilee õlita Rimi 150g,Rimi,,,world_spices,spices_basic_salt_pepper,meat_fish,fish_salted_smoked

@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+53037,"Rainbow kalkuni-juustutäidisega kanašnitsel, 200 g",Rainbow,200 g,6414890141172,dairy_eggs_fats,dairy_other,frozen_food,frozen_meat
+53057,Hortex must sõstar külmutatud 300g,Hortex,300 g,5900477003892,frozen_food,frozen_berries_fruit,frozen_food,frozen_berries_fruit
+53129,MESIKÄPP riisiampsud piimašokolaadis 140g,MESIKÄPP,140 g,4740012600688,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_biscuits_cookies
+53137,"Provena kaera-porgandikuklid, 400 g",Provena,400 g,6411200107446,,,frozen_food,frozen_bakery
+53169,"Eesti Pagar XL Kaneelirull kardemoniga, 1,2kg",Eesti Pagar,1.2 kg,4740086021372,,,frozen_food,frozen_bakery
+53176,"Eestimaine broileripooltiib, TALLEGG, 400 g",Tallegg,400 g,4740046004810,sauces_oils,oils_other,meat_fish,meat_poultry
+53182,"Piparmündi koorejäätis šokolaaditükkidega, 500 ml",,500 ml,4740093072374,,,frozen_food,frozen_desserts_icecream
+53231,Dujardin Brüsseli kapsas 450g,Dujardin,450 g,5411916372856,,,frozen_food,frozen_veg
+53233,Moilas free from porgandikukkel 5tk,Moilas,5 pcs,6431903340339,sauces_oils,oils_other,frozen_food,frozen_bakery
+53248,"Alma kohuke metsmaasika kakaoglasuuris, 40g",Alma,40 g,4740125639148,dairy_eggs_fats,dairy_other,dairy_eggs_fats,dairy_desserts
+53262,Rakvere Grill-Liha Punase Veini Marinaadis 500G,Rakvere,500 g,4740003005324,drinks,drinks_wine,meat_fish,meat_pork
+53266,"Mysoda siirup õun-pirn, suhkruvaba 500 ml",Mysoda,500 ml,6430052001467,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+53301,Hortex põldoad 400 g,Hortex,400 g,5900477013235,,,frozen_food,frozen_veg
+53309,Pesugeel Sonett lavendel 2l,Sonett,2 l,4007547501027,,,household,hh_laundry
+53433,"Delice makroonid 12tk, 144g",Delice,144 g,3760126978795,,,frozen_food,frozen_bakery
+53440,"Köögiviljad seemnetega, Fitlap 400 g",Fitlap,400 g,4740188012551,produce,,frozen_food,frozen_veg
+53446,"Grillvorstid rohke juustuga, RAKVERE, 400 g",Rakvere,400 g,4740003016702,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_grill_blood_sausages
+53456,"Coop sarvesaiad, 330 g",Coop,330 g,7340191170018,bakery,bakery_other,frozen_food,frozen_bakery
+53471,Oilio toiduõli 1 l,Oilio,1 l,5412210104617,sauces_oils,oils_other,sauces_oils,oils_other
+53481,"Maksapasteet E-vaba, OSKAR, 200 g",Oskar,200 g,4740569009866,,,meat_fish,meat_gourmet
+53484,"Rainbow kananagitsad, 440 g",Rainbow,440 g,6414893188006,meat_fish,meat_poultry,frozen_food,frozen_meat
+53491,Coop vanillijäätis 1l/ 480g,Coop,1 l,7340191159662,,,frozen_food,frozen_desserts_icecream
+53518,"Šokolaadi koorejäätis, 500 ml",,500 ml,4740093001824,,,frozen_food,frozen_desserts_icecream
+53524,"Sea saba, jahutatud 600 g",,600 g,4740003012100,dry_preserves,dry_flour_sugar_baking,meat_fish,meat_other
+53558,"Vanillijäätis šokolaadilaastudega, 1 l",,1 l,4740093045675,,,frozen_food,frozen_desserts_icecream
+53572,Coop soolaga maisikrõpsud 150g,Coop,150 g,7340191144699,,,sweets_snacks,sweets_snacks_salty
+53623,"Coop Berliini sõõrik 4tk, 440g",Coop,440 g,6438574284627,,,frozen_food,frozen_bakery
+53637,MC porgandikuubikud 450 g,MC,450 g,5905784330723,,,frozen_food,frozen_veg
+53649,Tartu Mill kaerahelbepuder vaarika 35g,Tartu Mill,35 g,4743303100027,,,dry_preserves,dry_cereals_muesli
+53663,Beyond Meat Burger hernevalgupõhised köögiviljapihvid 2 tk 226 g,Beyond Meat,226 g,1230000068048,produce,,frozen_food,frozen_ready_meals
+53680,"Pielispakari kaerapirukas 6 tk, 390 g",Pielispakari,390 g,6417650058567,,,frozen_food,frozen_bakery
+53692,"Almondy mandlikook daim, 400 g",Almondy,400 g,7312930000382,bakery,bakery_cakes_pastries,frozen_food,frozen_bakery
+53780,Kikas Kalkunikintsuliha Kanepi-Mee Marinaadis,Kikas,600 g,4740625005290,meat_fish,meat_poultry,meat_fish,meat_poultry
+53810,ESTRELLA Hapukoore-sibulamaitselised kartulikrõpsud 180 g,ESTRELLA,180 g,4779028345757,,,sweets_snacks,sweets_snacks_salty
+53846,"Beldessert külmutatud Šokolaadi Laavakook, 2x90g",Beldessert,2x90 g,5414818033757,sweets_snacks,sweets_chocolate_bars,frozen_food,frozen_bakery
+53925,"Šašlõkk seasisefileest, ARMEENIA GRILL, kg",Armeenia Grill,,2323109100005,,,meat_fish,meat_pork
+53932,Kotimaista sibulakuubikud 200g,Kotimaista,200 g,6415712713805,,,frozen_food,frozen_veg
+53938,MC rohelised herned 450 g,MC,450 g,5905784342719,,,frozen_food,frozen_veg
+53952,Rakvere Biifsteek Vasardatud 400 G,Rakvere,400 g,4740003014111,,,meat_fish,meat_beef_lamb_game
+54021,Santa maria nacho juustudipp 250 g,Santa Maria,250 g,7311310038397,dairy_eggs_fats,dairy_other,sauces_oils,sauces_pasta_cooking
+54027,Salvest rohelised herned 690/450 g,Salvest,450 g,4740073141113,,,dry_preserves,dry_canned_veg
+54041,Aviko Churrod 300 g,Aviko,300 g,8710449955541,,,frozen_food,frozen_bakery
+54069,Lemmikvorst 300 g,,300 g,4740171187716,,,meat_fish,meat_sausages
+54087,PEZ FIZZY KIHISEVAD KOMMID GLUTEENIVABA,PEZ FIZZY,,9044400806092,,,sweets_snacks,sweets_gums_mints
+54101,Bong touch of taste kanaleem 180 ml,Bong,180 ml,7322550052722,drinks,drinks_beer_cider,world_spices,spices_broth_stock
+54110,"Snäkk pro KabanossiSnäkk, RAKVERE LK, 120 g",Rakvere,120 g,4740003010878,,,meat_fish,meat_other
+54137,Ma&orits Snack Sticks Tradit.85G,Maks&Moorits,85 g,4740171180045,dry_preserves,dry_other,meat_fish,meat_other
+54184,Porokylän kaerasüda gluteenivaba 4tk 200g,Porokylän,200 g,6416192083822,,,frozen_food,frozen_bakery
+54214,Coop ubade segu 450g,Coop,450 g,7340191152175,,,frozen_food,frozen_veg
+54236,"Broilerimaks, 500 g",,500 g,4740046006302,sauces_oils,oils_other,frozen_food,frozen_meat
+54240,"Maitsesalaami, KARNI, 120 g",Karni,120 g,4740579103431,,,meat_fish,meat_sausages
+54299,"Eesti Pagar Viineripirukas XL 1,2 kg",Eesti Pagar,1.2 kg,4740086013568,,,frozen_food,frozen_bakery
+54301,"Coop riisipirukad, 360 g",Coop,360 g,6438574170593,dry_preserves,dry_pasta_rice,frozen_food,frozen_bakery
+54330,"Vanillijäätis, 1 l",,1 l,6430064401453,,,frozen_food,frozen_desserts_icecream
+54334,Vici Pitsapõhjad 320 g,Vici,320 g,4740056011280,,,frozen_food,frozen_pizza
+54353,"Vanilli-koorejäätis šokolaaditükkidega, 500 ml",,500 ml,4740093001848,,,frozen_food,frozen_desserts_icecream
+54367,UVIC Praetud tšeburekid lambalihaga 250 g,UVIC,250 g,4740223017145,meat_fish,meat_beef_lamb_game,meat_fish,meat_other
+54390,Kotimaista laktoosivaba maasikamaitseline koorejäätis maasikakastmega (10%) 1l,Kotimaista,1 l,6415712715564,frozen_food,frozen_food_other,frozen_food,frozen_desserts_icecream
+54419,Nutella nutella croissant 4tk 340g,Nutella,340 g,8000500413654,,,frozen_food,frozen_bakery
+54441,"Sealihasült, OSKAR, 330 g",Oskar,330 g,4740569009965,meat_fish,meat_pork,meat_fish,meat_other
+54467,"Eriti Rammus koorejäätis šokolaadilaastudega, 200 ml",,200 ml,4740093364103,,,frozen_food,frozen_desserts_icecream
+54506,"Mysoda siirup Vaarikas, suhkruvaba 500ml",Mysoda,500 ml,6430052001429,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+54510,Coop punane karripasta 100g,Coop,100 g,7340191155596,world_spices,spices_asian,sauces_oils,sauces_pasta_cooking
+54517,Dr.Oetker ristorante al salame vegano pitsa 295g,Dr.Oetker,295 g,4001724043393,,,frozen_food,frozen_pizza
+54525,Pearl river bridge sojakaste light 150 ml,Pearl River Bridge,150 ml,6921180820001,,,sauces_oils,sauces_soy_worcester
+54539,"Coop riisipirukad, 720g",Coop,720 g,6438574170623,dry_preserves,dry_pasta_rice,frozen_food,frozen_bakery
+54549,Taffel American dipisegu 20 g,Taffel,20 g,6410381095368,,,sauces_oils,sauces_pasta_cooking
+54553,Drogheria bbq maitseainesegu lihalõikudele ja burgerile veskis 115g,Drogheria,115 g,8004708046461,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+54583,"Mademoiselle Desserts külmutatud Mini Tartlett Sidruniga, 8x20g",Mademoiselle Desserts,8x20 g,5414818041967,frozen_food,frozen_desserts_icecream,frozen_food,frozen_bakery
+54588,Tartu Mill pärmitaigna pannkoogijahu 508 g,Tartu Mill,508 g,4750020041250,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+54601,"Mustika grill-ribi, RAKVERE LK, kg",Rakvere,,2360364500003,,,meat_fish,meat_grill_blood_sausages
+54615,Santa Maria hakklihamaitseaine 80 g,Santa Maria,80 g,7311311005565,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+54622,Filosophy saiakesed feta-mee-seesami 450g,Filosophy,450 g,5205427015742,bakery,bakery_buns_croissants,frozen_food,frozen_bakery
+54627,"Apetit juurviljaribad, 180 g",Apetit,180 g,6430104920555,,,frozen_food,frozen_veg
+54647,"Külmutatud hakitud till, 100 g",,100 g,4744741011128,frozen_food,frozen_other,frozen_food,frozen_veg
+54650,Karni Picanhasteik 200G,Karni,200 g,4740579520917,,,meat_fish,meat_beef_lamb_game
+54678,"Pasteet Karni, KARNI, 170 g",Karni,170 g,4740579901617,,,meat_fish,meat_gourmet
+54679,"Ühepajatoit, 400 g",,400 g,4740188900193,,,frozen_food,frozen_ready_meals
+54691,UVIC Praetud VEGANIC Tseburekid 2tk/170 g,UVIC,170 g,4740223020299,,,frozen_food,frozen_bakery
+54720,"Trühvli salaami, MATSIMOKA, 150 g",Matsimoka,150 g,4744735010960,,,meat_fish,meat_sausages
+54724,Twister Marshmallow 80ml/73g,Twister,80 ml,8711327661509,,,frozen_food,frozen_desserts_icecream
+54725,"Kitchen joy panang-karribroiler jasmiiniriisiga, 350 g",Kitchen Joy,350 g,8858984830326,sauces_oils,oils_other,frozen_food,frozen_meat
+54747,"Belgia vahvlid vanillikreemi täidisega, külmutatud, 4 x 80g",,4x80 g,5425025281916,frozen_food,frozen_desserts_icecream,frozen_food,frozen_bakery
+54756,"Kotimaista juurviljasegu suppidele, 200 g",Kotimaista,200 g,6414893138216,,,frozen_food,frozen_veg
+54771,Otepää hot-dogi vorstid 340 g,Otepää,340 g,4740567999725,,,meat_fish,meat_sausages
+54802,"Kotimaista mudakook, 400 g",Kotimaista,400 g,6415712713904,bakery,bakery_cakes_pastries,frozen_food,frozen_bakery
+54815,"Kreemjas kodupasteet, MAKS&MOORITS, 210 g",Maks&Moorits,210 g,4740171181233,,,meat_fish,meat_gourmet
+54837,Coop praadimis- ja frittimisõli 2 l,Coop,2 l,7340011488989,sauces_oils,oils_other,sauces_oils,oils_other
+54868,"Külmutatud hakitud küüslauk, 100 g",,100 g,4744741014549,frozen_food,frozen_other,frozen_food,frozen_veg
+54884,Schär gluteenivaba lehttainas 250 g,Schär,250 g,8008698006931,,,frozen_food,frozen_bakery
+54903,"Kotimaista pohlad, 200 g",Kotimaista,200 g,6414893182745,,,frozen_food,frozen_berries_fruit
+54917,"Kotimaista gluteenivaba kaerajook, 1000 ml",Kotimaista,1000 ml,6438348001566,,,dairy_eggs_fats,dairy_plant_drinks
+54923,"Santa Maria Chunky Salsa Mild, 230 g",Santa Maria,230 g,7311312000859,,,sauces_oils,sauces_pasta_cooking
+54935,"Grandiosa inspired by taffel broadway kiviahjupitsa, 330 g",Grandiosa,330 g,7350126089544,,,frozen_food,frozen_pizza
+54964,Coop BBQ vigurkartulid 600g,Coop,600 g,7340191152090,,,frozen_food,frozen_potato_products
+55001,HK õhuke Milano salaami 150 g,HK,150 g,6409100043513,,,meat_fish,meat_sausages
+55032,"Grill-ribi, RAKVERE LK, kg",Rakvere,,2360311000006,,,meat_fish,meat_grill_blood_sausages
+55084,"Felix suitsune bbq-mee kaste, 320g",Felix,320 g,4740029072539,,,sauces_oils,sauces_marinades
+55102,"Fria kiudaineterikas leib, 500 g",Fria,500 g,7330242200047,,,frozen_food,frozen_bakery
+55139,DAECHUN Merevetika snäkk wasabi-maitseline 4g,DAECHUN,4 g,8809171520902,,,sweets_snacks,sweets_snacks_salty
+55141,"Eesti Pagar Ciabatta hele, 300g",Eesti Pagar,300 g,4740086020795,,,frozen_food,frozen_bakery
+55147,Coop Granaatõuna seemned 250g,Coop,250 g,7340011459644,,,frozen_food,frozen_berries_fruit
+55161,Tutti Frutti Twists kommid 100g,Tutti Frutti,100 g,8713800138812,,,sweets_snacks,sweets_candies
+55186,"Belgia vahvlid šokolaaditäidisega, külmutatud, 4 x 80 g",,4x80 g,5425025282081,frozen_food,,frozen_food,frozen_bakery
+55189,"Mr. Iceman purustatud jää, 2,0 kg",Mr. Iceman,2.0 kg,7090000830052,,,frozen_food,frozen_other
+55203,Myllyn paras suur lehttaigen 600g,Myllyn,600 g,6416577028851,,,frozen_food,frozen_bakery
+55223,Pingviini vanillijäätis šokolaaditükkidega laktoosivaba 1l,Pingviini,1 l,6430064405055,,,frozen_food,frozen_desserts_icecream
+55231,"Poolsuitsuvorst Muhe, viilutatud, KARNI, 120 g",Karni,120 g,4740579190332,,,meat_fish,meat_sausages
+55279,"Findus oreo kook, 400 g",Findus,400 g,7312930006735,bakery,bakery_cakes_pastries,frozen_food,frozen_bakery
+55283,"FIT! Minifrikadellid broileririnnafileest, 400 g",FIT!,400 g,4740046013669,sauces_oils,oils_other,frozen_food,frozen_meat
+55298,Maggi veiselihapuljong 80g,Maggi,80 g,8585002440242,meat_fish,meat_beef_lamb_game,world_spices,spices_broth_stock
+55341,Gyoza pelmeenid kimtši-sealihaga Korea stiilis 300 g,Gyoza,300 g,4770190159432,meat_fish,meat_pork,frozen_food,frozen_ready_meals
+55342,Veisemaksapasteet 180 g,,180 g,4742669000033,,,meat_fish,meat_gourmet
+55347,"Pez mänguasja täide 6-pakk, gluteenivabad 51 g",Pez,51 g,5997255708322,,,sweets_snacks,sweets_gums_mints
+55379,"Eriti Rammus koorejäätis, 1 l",,1 l,4740093006461,,,frozen_food,frozen_desserts_icecream
+55393,Coop guacamole dipikaste 300 g,Coop,300 g,7340191146068,,,sauces_oils,sauces_pasta_cooking
+55400,"Kotimaista pirukatainas, 400 g",Kotimaista,400 g,6414893387348,,,frozen_food,frozen_bakery
+55543,"Räimesült, VIRU RAND, 270 g",Viru Rand,270 g,4740041000176,meat_fish,fish_fresh,meat_fish,fish_processed
+55553,KALEV KARAKUM PRALINEEKOMPVEKID 175G,Kalev,175 g,4740012023692,,,sweets_snacks,sweets_candies
+55611,"Veiseliha rohumaaveise puljongis, LIIVIMAA LIHAVEIS, 330 g",Liivimaa Lihaveis,330 g,4740618006471,meat_fish,meat_gourmet,meat_fish,meat_gourmet
+55636,Kalkunikintsuliha bbq apelsini marinaadis 600 g,,600 g,4740625005276,meat_fish,meat_grill_blood_sausages,meat_fish,meat_poultry
+55714,Coop tükeldatud ananass 250g,Coop,250 g,7340011429203,,,frozen_food,frozen_berries_fruit
+55771,Nostalgia maksapasteet E-vaba 170 g,Nostalgia,170 g,4740567131095,,,meat_fish,meat_gourmet
+55781,Veisemaksapasteet 200 g,,200 g,4740376030701,,,meat_fish,meat_gourmet
+55807,Kotimaista apelsini-mudakook 400 g,Kotimaista,400 g,6438460838170,bakery,bakery_cakes_pastries,frozen_food,frozen_bakery
+55817,Santa Maria kartulimaitseaine 100 g,Santa Maria,100 g,7311311005534,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+55826,Coop blanšeeritud kartuliviilud koorekastmes 750g,Coop,750 g,7340191151888,dry_preserves,dry_other,frozen_food,frozen_potato_products
+55868,Majonees Peakoka 380g,Peakoka,380 g,4740159001867,,,sauces_oils,sauces_ketchup_mayo
+55893,Halls Extra Strong kurgupastillid 33 g,Halls,33 g,0000050985098,,,sweets_snacks,sweets_gums_mints
+55897,Fazer gluteenivabad moosipallid 240g,Fazer,240 g,6413467578113,,,frozen_food,frozen_bakery
+55970,Poco Loco Rolls maisisnäkk vürtsikas 125 g,Poco Loco,125 g,5412514931087,,,sweets_snacks,sweets_snacks_salty
+56020,Coop vanillijäätis nougat 6-pakk 480ml/390g,Coop,480 ml,7340191171091,,,frozen_food,frozen_desserts_icecream
+56028,"Sügavkülmutatud veiselihapüree kuubikud, 200g",,200 g,4744848010062,frozen_food,frozen_other,frozen_food,frozen_ready_meals
+56061,Coop oliiviõli 500 ml,Coop,500 ml,7340191146983,sauces_oils,oils_olive,sauces_oils,oils_olive
+56062,"Coop kuklid, 320 g",Coop,320 g,6438574157426,,,frozen_food,frozen_bakery
+56077,"E-vaba suitsupeekon, OSKAR, 120 g",Oskar,120 g,4740569009477,,,meat_fish,meat_pork
+56105,"Viineripirukas sinepi-kurgitäidisega, 390 g",,390 g,4740086008700,,,frozen_food,frozen_bakery
+56139,Kotimaista mündi-mudakook laktoosivaba 400g,Kotimaista,400 g,6438574014286,bakery,bakery_cakes_pastries,frozen_food,frozen_bakery
+56189,"Mintaifilee, nahata, 560 g",,560 g,4770190046107,,,frozen_food,frozen_fish
+56220,Coop Küpsisejäätis 6-pakk 360 g/660 ml,Coop,360 g,7340191170933,,,frozen_food,frozen_desserts_icecream
+56226,VANILLA NINJA Koorejäätis glasuuris 7x110ml/80g,Vanilla Ninja,7x110 ml,4740188019505,,,frozen_food,frozen_desserts_icecream
+56231,Maahärra Maasikad ja mustikad 300g,Maahärra,300 g,4740093000193,,,frozen_food,frozen_berries_fruit
+56440,Lillkapsas,,,2060521200004,,,produce,produce_root_veg
+56744,Porokylän gluteenivaba lihapirukas 2x190 g,Porokylän,2x190 g,6416192085055,meat_fish,meat_other,frozen_food,frozen_bakery
+56783,Muumi mustika-vaarika lagritsabatoon 20g,Muumi,20 g,6416453076761,,,sweets_snacks,sweets_candies
+56844,Goccia d'oro oliivijääkõli 1 l,Goccia d'oro,1 l,8003250000129,sauces_oils,oils_other,sauces_oils,oils_olive
+57197,Kobartomat I klass,,,2060471900009,,,produce,produce_root_veg
+57353,"Vähendatud suhkrusisaldusega jäätis, 500 ml",,500 ml,4740093010208,,,frozen_food,frozen_desserts_icecream
+57379,"Ben ja Jerry's šokolaadi-vanillijäätis küpsise ja šokolaaditükkidega, 465 ml",Ben & Jerry's,465 ml,8711327371002,,,frozen_food,frozen_desserts_icecream
+57449,"Puuviljakokteil nr 1 (ananass, kiivi, viinamari) 300g",,300 g,4742024310036,produce,,produce,produce_fruit_salads

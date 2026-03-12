@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+126243,"Linguine nr 11, DELVERDE, 500 g",Remecom OÜ,500 g,8006680040116,,,dry_preserves,dry_pasta_rice
+126244,"Lintnuudel Linguine, REGGIA, 500 g",M&V Trade OÜ,500 g,8008857200057,dairy_eggs_fats,dairy_eggs,dry_preserves,dry_pasta_rice
+126245,"Lintnuudlipesad, REGGIA, 500 g",M&V Trade OÜ,500 g,8008857406145,dairy_eggs_fats,dairy_eggs,dry_preserves,dry_pasta_rice
+126246,"Lintspagett Linguine, PANZANI, 500 g",Abestock AS,500 g,3038351128606,,,dry_preserves,dry_pasta_rice
+126247,"Lõhefilee portsjonid, AVEKTRA, 250 g",,250 g,,meat_fish,fish_fresh,frozen_food,frozen_fish
+126248,"Looduslik Himaalaja jäme sool, KORNITA, 500 g",D.T.L Consumer Products Eesti AS,500 g,4771506082017,world_spices,spices_basic_salt_pepper,world_spices,spices_basic_salt_pepper
+126249,"Looduslik mineraalvesi gaseerimata, EVIAN, 1,5 L",Eugesta Eesti AS,1.5 l,3068320048604,drinks,drinks_water,drinks,drinks_water
+126250,"Looduslik mineraalvesi karboniseeritud 6-pakk, VÄRSKA MINERAAL, 6 x 1 L",A. Le Coq AS,6 x 1 l,4740198000289,drinks,drinks_water,drinks,drinks_water
+126251,"Looduslike mineraalidega vesi piparmündi ja laimi, VÄRSKA MINERAAL, 1 L",A. Le Coq AS,1 l,4740198000333,drinks,drinks_water,drinks,drinks_water
+126252,"Loorberilehed, KOTANYI, 4 g",Eugesta Eesti AS,4 g,9001414015346,,,world_spices,spices_herbs_spice_mix
+126253,"Juustupallid, MARTA KULINAARIA, 300 g",Euroleib AS,300 g,4740667249515,dairy_eggs_fats,dairy_other,frozen_food,frozen_other
+126254,"Juustupulgad, VÄIKE VÄÄNIK, 140 g",Maris Gilden OÜ,140 g,4740320004987,dairy_eggs_fats,dairy_other,sweets_snacks,sweets_snacks_salty
+126255,"Kadaka sulatatud juust, MO SAAREMAA, 185 g",Pinus AS,185 g,4740153200020,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+126256,"Kaerahelbeküpsised, FLORA, 300 g",Selver AS,300 g,4750271106050,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+126257,"Kaerahelbeküpsised mandli ja šokolaaditükikestega, FLORA, 300 g",Selver AS,300 g,4750271106074,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_biscuits_cookies
+126258,"Kaerahelbeküpsised rosinatega, FLORA, 300 g",Selver AS,300 g,4750271300052,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+126259,"Kaeraküpsis, VÄIKE VÄÄNIK, 500 g",Maris Gilden OÜ,500 g,4740320001467,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+126260,"Kaeraküpsised jõhvikatega, MARMITON, 150 g",Svensky Kaubanduse AS,150 g,4740059812037,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+126261,"Kaeraküpsised kakaoga, FIRST PRICE, 300 g",Selver AS,300 g,7311041075791,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+126262,"Kaerapuder aprikoosiga mahe 6+, PÕNN, 200 g",Salvest AS,200 g,4740073075449,baby,baby_porridge_cereal,baby,baby_porridge_cereal
+126263,"Kaerapuder mustikaga 6+ Öko, PÕNN, 190 g",Salvest AS,190 g,4740073075579,baby,baby_porridge_cereal,baby,baby_porridge_cereal
+126264,"Kaerasepik D-vitamiiniga, FAZER, 350g",Määramata,350 g,4740103012369,dairy_eggs_fats,dairy_plant_drinks,bakery,bakery_bread_loaves
+126265,"Kakao kohupiim, SAIDA FARM, 200 g",Pajumäe Talu OÜ,200 g,4740464730209,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_desserts
+126266,"Kakaoküpsised, NESQUIK, 300 g",Selver AS,300 g,8000300422931,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+126267,"Kalev klassikalised martsipanikommid, KALEV, 150 g",Orkla Eesti AS,150 g,4740012600596,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+126268,"Kali Karl Friedrich, SAKU, 1,5 L",Saku Õlletehase AS,1.5 l,4740019015713,,,drinks,drinks_soft_soda
+126269,"Kali Karl Friedrich, SAKU, 500 ml",Saku Õlletehase AS,500 ml,4740019015706,,,drinks,drinks_soft_soda
+126270,"Kali kirsimaitseline, KARL FRIEDRICH, 1,5 l",Saku Õlletehase AS,1.5 l,4740019002973,,,drinks,drinks_soft_soda
+126271,"Kali klassikaline, A. LE COQ, 500 ml",A. Le Coq AS,500 ml,4740098077947,,,drinks,drinks_soft_soda
+126272,"Kali Põldmarja, A.LE COQ, 500 ml",A. Le Coq AS,500 ml,4740051001798,,,drinks,drinks_soft_soda
+126274,"Hipp kalkunilihapüree 125g, alates 4-elukuust",Hipp,125 g,9062300127796,baby,baby_other,baby,baby_food_jars
+126275,"Kaminatikk, HANSA CANDLE, tk",Eugesta Eesti AS,,4740302703266,,,household,hh_candles_airfresh
+126276,"Kanalihapüree BIO, HIPP, 125 g",LTT AS,125 g,4062300266353,baby,baby_food_pouches,baby,baby_food_jars
+126277,"Kanamunad M10, BALTICOVO, 10 tk",Selver AS,10 pcs,4750456004485,dairy_eggs_fats,dairy_eggs,dairy_eggs_fats,dairy_eggs
+126278,"Kaneelikeeris, PAGARIPOISID, 200 g",Pagaripoisid OÜ,200 g,4740429060679,world_spices,spices_herbs_spice_mix,bakery,bakery_sweet_buns_donuts
+126279,"Kaneeliküpsis, SELVERI KÖÖK, 250 g",Kulinaaria OÜ,250 g,4740581110755,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+126280,"Kaneeliküpsised, FIRST PRICE, 250 g",Selver AS,250 g,7311041085318,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+126281,"Kaneelirulli-juustutort, GUSTAV, 680 g",Gustav Café OÜ,680 g,4745091321974,world_spices,spices_herbs_spice_mix,bakery,bakery_cakes_pastries
+126282,"Kaneelirullid, GIFFLAR, 260 g",Svensky Kaubanduse AS,260 g,7311070017915,world_spices,spices_herbs_spice_mix,bakery,bakery_sweet_buns_donuts
+126283,"Kaneelisaiakesed, FINDUS, 700 g",Sanitex OÜ,700 g,7310500176833,world_spices,spices_herbs_spice_mix,frozen_food,frozen_bakery
+126284,"Kanepiseemned MAHE, TAMMEJUURE MAHETALU, 250 g",Tammejuure Mahe Tulundusühistu,250 g,4744150010163,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+126285,"Kannel šokolaadikommid, KALEV, 300 g",Orkla Eesti AS,300 g,4740012028604,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_candies
+126286,"Karastusjook 7UP sidruni-ja laimimaitseline, 7 UP, 1,5 L",Tanker Brewery OÜ,1.5 l,4770477231646,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126287,"Karastusjook Barbariss, BARBARISS, 1,5 L",A. Le Coq AS,1.5 l,4740098098126,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126288,"Karastusjook Barbariss, BARBARISS, 500 ml",A. Le Coq AS,500 ml,4740098098119,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126289,"Karastusjook Cherrytree Cola, FENTIMANS, 275 ml",Import OÜ,275 ml,5029396738736,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126290,"Karastusjook Coca-Cola 24-kast, COCA-COLA, 24 x 330 ml",Coca-Cola HBC Eesti AS,24 x 330 ml,0216000000470,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126291,"Karastusjook Coca-Cola, COCA-COLA, 1,5 l",Coca-Cola HBC Eesti AS,1.5 l,5000112651324,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126292,"Karastusjook Coca-Cola, COCA-COLA, 1 L",Coca-Cola HBC Eesti AS,1 l,5000112651300,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126293,"Karastusjook Coca-Cola, COCA-COLA, 200 ml",Coca-Cola HBC Eesti AS,200 ml,5000112651232,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126294,"Karastusjook Coca-Cola, COCA-COLA, 330 ml",,330 ml,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126295,"Karastusjook Coca-Cola Lime Zero, COCA-COLA ZERO, 500 ml",Coca-Cola HBC Eesti AS,500 ml,5449000242419,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126296,"Karastusjook Coca-Cola Zero 24-kast, COCA-COLA, 24 x 330 ml",Coca-Cola HBC Eesti AS,24 x 330 ml,0216000000487,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126297,"Karastusjook Coca-Cola Zero 6-pakk magusainetega, COCA-COLA ZERO, 6 x 330ml",Coca-Cola HBC Eesti AS,6 x 330 ml,5449000217165,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126298,"Karastusjook Coca-Cola Zero magusainetega, COCA-COLA, 1,5 l",Coca-Cola HBC Eesti AS,1.5 l,5000112651331,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126299,"Karastusjook Coca-Cola Zero magusainetega, COCA-COLA, 2 L",Coca-Cola HBC Eesti AS,2 l,5000112651348,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126300,"Karastusjook Coca-Cola Zero magusainetega, COCA-COLA, 330 ml",Coca-Cola HBC Eesti AS,330 ml,5000112651256,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126301,"Karastusjook Coca-Cola Zero magusainetega, COCA-COLA ZERO, 1 L",Coca-Cola HBC Eesti AS,1 l,5000112651379,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126302,"Karastusjook, DR.PEPPER, 330 ml",LTT AS,330 ml,5902860417095,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126303,"Karastusjook Elderflower, FENTIMANS, 275 ml",Liviko AS,275 ml,5029396739078,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126304,"Karastusjook Fanta, FANTA, 1 L",,1 l,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126305,"Karastusjook Fanta, FANTA, 330 ml",Coca-Cola HBC Eesti AS,330 ml,5000112651638,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126306,"Karastusjook Fanta Orange, FANTA, 1,5 l",Coca-Cola HBC Eesti AS,1.5 l,5000112651669,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126307,"Karastusjook Fanta Zero apelsini magusainetega, FANTA, 1,5L",Coca-Cola HBC Eesti AS,1.5 l,5000112651706,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+126308,"Loorberilehed kuivatatud, FIRST PRICE, 8 g",Selver AS,8 g,5701410416140,sweets_snacks,sweets_nuts_driedfruit,world_spices,spices_herbs_spice_mix
+126309,"Loorberilehed, SANTA MARIA, 4 g",Santa Maria AS,4 g,7311311005831,,,world_spices,spices_herbs_spice_mix
+126310,"Loorberileht, ANATOLS, 10 g",Spencer OÜ,10 g,4750280100742,,,world_spices,spices_herbs_spice_mix
+126311,"Lumache Rigate nr 39, DELVERDE, 500 g",Remecom OÜ,500 g,8006680040390,,,dry_preserves,dry_pasta_rice
+126312,"LUXURADO Aperitivo, 75 cl",Prike AS,750 ml,8000353003408,drinks,drinks_wine,drinks,drinks_spirits
+126313,"Maapähkli fudge, NICKS, 40 g",Njom Foods OÜ,40 g,7350104401085,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_chocolate_bars
+126314,"Maapähkli jäätis vesikringli keerdude ja brownie tükkidega, BEN&JERRY'S, 405 g",Unilever Eesti AS,405 g,8711327386334,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+126315,"Maapähklijahu, ALVO, 300 g",Umami OÜ,300 g,4770082321152,sweets_snacks,sweets_nuts_driedfruit,dry_preserves,dry_flour_sugar_baking
+126316,"Maapähklikreem creamy, LA COMTESSE, 350 g",Mobec AS,350 g,80177173,sweets_snacks,sweets_nuts_driedfruit,dry_preserves,dry_other
+126317,"Maapähklikreem crunchy, LA COMTESSE, 350 g",Svensky Kaubanduse AS,350 g,4008314177766,sweets_snacks,sweets_nuts_driedfruit,dry_preserves,dry_other
+126318,"Maapähklikreem Crunchy, SANTE, 350 g",Interaltus OÜ,350 g,5900617003454,sweets_snacks,sweets_nuts_driedfruit,dry_preserves,dry_other
+126319,"Maapähklikreemimaitseline jäätis šokolaaditükkide ja maapähklikreemiga, NICKS, 299 g",Njom Foods OÜ,299 g,7350104401726,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+126320,"Maasdam juust viilutatud, FRICO, 150 g",Deline OÜ,150 g,8710912640547,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+126321,"Maasika-banaani kaerajook mahlaga, CIDO, 1 l",Tanker Brewery OÜ,1 l,4750042003335,drinks,drinks_juices,drinks,drinks_juices
+126322,"Maasika ja suhkruvatimaitseline jäätis, SUPER VIVA, 442,5 g",Unilever Eesti AS,442.5 g,8711327619173,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+126323,Onu Eskimo maasika ja vanillimaitseline koorejäätis maasikaglasuuris 150ml/84g,Onu Eskimo,150 ml,4740188020136,,,frozen_food,frozen_desserts_icecream
+126324,"Maasika-kohupiimakook, SELVERI KÖÖK, 390 g",Kulinaaria OÜ,390 g,4740581104211,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+126325,"Maasika-kohupiimakook, SELVERI KÖÖK, 780 g",Kulinaaria OÜ,780 g,4740581104228,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+126326,"Maasika mahlajook, PFANNER, 1 L",Selver AS,1 l,9006900205690,drinks,drinks_juices,drinks,drinks_juices
+126327,"Maasika-puuviljasorbett, DRAAKON, 90 g",Balbiino AS,90 g,4740188015682,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+126328,"Maasika toormoos, MARJAMAA TALU, 300 g",Marjamaa Talu OÜ,300 g,4742331000798,dry_preserves,dry_other,frozen_food,frozen_berries_fruit
+126329,"Maasikad, HÄRMAVILI, 400 g",Balbiino AS,400 g,4740188910963,produce,produce_berries,frozen_food,frozen_berries_fruit
+126330,"Maasikamaitseline Aloe Vera jook, ALEO, 500 ml",Proposito OÜ,500 ml,4779040221558,produce,produce_berries,drinks,drinks_juices
+126331,"Maasikamaitseline Aloe Vera jook, ALOE, 1,5 L",Proposito OÜ,1.5 l,4779040221565,produce,produce_berries,drinks,drinks_juices
+126332,"Maasikamoos, FIRST PRICE, 400 g",Selver AS,400 g,7311041085769,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+126333,"Maasikamoos, FIRST PRICE, 800 g",Selver AS,800 g,7311041085813,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+126334,"Maasikamoos marjadega, RÕNGU, 1 kg",Rõngu Mahl AS,1 kg,4741129017123,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+126335,"Maasikamoos, PÕLTSAMAA, 380 g",,380 g,,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+126336,"Maasikamoos steviaga, GOOD GOOD, 330g",Remecom OÜ,330 g,5694230483006,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+126337,"Maasikapadjakesed kooretäidisega, START, 300 g",Abestock AS,300 g,4820237692863,dairy_eggs_fats,dairy_cream_sourcream,dry_preserves,dry_cereals_muesli
+126338,"Maasikas-rabarber, HÄRMAVILI, 300g",Balbiino AS,300 g,4740188020167,produce,produce_berries,frozen_food,frozen_berries_fruit
+126339,"Madagaskari vanilliga jäätis, laktoosivaba, LA MUU, 250 g",Jungent Estonia OÜ,250 g,4742963011216,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+126340,"Mädarõigas delikatess, 170 g",Makro Trade Baltic OÜ,170 g,4743144000975,,,sauces_oils,sauces_other
+126341,"Mädarõigas ekstra kange, MINU, 200 g",Makro Trade Baltic OÜ,200 g,4743144002856,,,sauces_oils,sauces_other
+126342,"Mädarõikamaitseline majonees, SALVEST, 430g",Salvest AS,430 g,4740073074756,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+126343,"Magneesiumi vesi gaasita, AURA SPORT, 750 ml",A. Le Coq AS,750 ml,4740098090540,drinks,drinks_water,drinks,drinks_water
+126344,"Magneesiumivesi õuna, LUMIORAV, 568 ml",Sanitex OÜ,568 ml,4745011008916,drinks,drinks_water,drinks,drinks_water
+126345,"Magus kurk SALVEST, 675 g",Salvest AS,675 g,4740073060360,produce,produce_root_veg,dry_preserves,dry_canned_veg
+126346,"Magus mais, BONDUELLE, 212 ml",Jungent Estonia OÜ,212 ml,3083680074094,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+126347,Bonduelle magus mais 340/285 g,Bonduelle,285 g,3083680025881,,,dry_preserves,dry_canned_veg
+126348,"Magus mais, FIRST PRICE, 340 g",Selver AS,340 g,7311041013601,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+126349,"Magus mais (klaaspurk), BONDUELLE, 580 ml",Jungent Estonia OÜ,580 ml,3083680015424,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+126350,"Magus mais, PÕLTSAMAA, neto 285g",Orkla Eesti AS,285 g,4740029044284,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+126351,"Magus paprika jahvatatud, ANATOLS, 10 g",Kaupmees & Ko AS,10 g,4750280004224,produce,produce_root_veg,world_spices,spices_herbs_spice_mix
+126352,"Magus sinep, FIRST PRICE, 400 g",Selver AS,400 g,7311041088340,,,sauces_oils,sauces_other
+126353,"Magus sojakaste - Kecap manis, A KETJAP, 250 ml",Umami OÜ,250 ml,8710819006811,sauces_oils,sauces_soy_worcester,sauces_oils,sauces_soy_worcester
+126354,"Magus tšillikaste, HEINZ, 400 ml",Eugesta Eesti OÜ,400 ml,5000157147516,,,sauces_oils,sauces_other
+126355,"Magus-vürtsikas köögiviljasalat, SALVEST, 380 g",Salvest AS,380 g,4740073071847,produce,produce_herbs_salads_sprouts,dry_preserves,dry_canned_veg
+126356,"Magusa Tšilli maitselised maisikrõpsud, CHEETOS, 165 g",Pepsico Eesti AS,165 g,5900259099129,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+126357,"Magusa tšilli maitselised maisikrõpsud, DORITOS, 100 g",Pepsico Eesti AS,100 g,5900259117564,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+126358,"Magusa tšilli maitselised maisikrõpsud, DORITOS, 180 g",Pepsico Eesti AS,180 g,5900259139405,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+126359,"Magusad herned porgandiga, FIRST PRICE, 750 g",Selver AS,750 g,7311041084649,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+126360,"Magushapu kaste ananassiga, BEN'S ORIGINAL, 400 g",Sanitex OÜ,400 g,4002359017148,drinks,drinks_spirits,sauces_oils,sauces_other
+126361,"Magushapu kaste, BEN'S ORIGINAL, 400 g",Sanitex OÜ,400 g,4002359017247,drinks,drinks_spirits,sauces_oils,sauces_other
+126362,"Mahe 4-vilja helbed (rukis, oder, spelta, kaer), JAHU-JAAN, 500 g",Selver AS,500 g,4745010371363,dairy_eggs_fats,dairy_plant_drinks,dry_preserves,dry_cereals_muesli
+126363,"Mahe 62% tume šokolaad Must, NAMM CHOCOLATE, 37g",Roosiku OÜ,37 g,4744644017296,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+126364,"Mahe Apelsinišokolaad 62% tume, NAMM CHOCOLATE, 37g",Roosiku OÜ,37 g,4744644017333,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+126365,"Mahe Earl Grey tee (20pk), FIRST PRICE",Selver AS,,7311041085295,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126366,"Mahe Elegantne ja kreemine tahvel Valge Daam, NAMM CHOCOLATE, 37g",Roosiku OÜ,37 g,4744644017227,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+126367,"Mahe gluteenivaba küpsetuspulber 3x17g, BIOVEGAN, 51 g",Nature Design OÜ,51 g,4005394285411,drinks,drinks_tea_coffee,dry_preserves,dry_flour_sugar_baking
+126368,"Mahe kartulitärklis, ALOJAS, 500 g",Abestock AS,500 g,4750073000549,produce,produce_root_veg,dry_preserves,dry_flour_sugar_baking
+126369,"Mahe kohvišokolaad Mocca, NAMM CHOCOLATE, 37g",Roosiku OÜ,37 g,4744644017043,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+126370,"Mahe kookosõli lõhnatu, LOODUSVÄGI, 500 ml",Loodusvägi OÜ,500 ml,4742824013236,dairy_eggs_fats,dairy_plant_drinks,sauces_oils,oils_other
+126371,"Mahe kummelitee, FIRST PRICE, 25 tk",Selver AS,25 pcs,7311041085301,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+126372,"Mahe küüslaugupulber, SANTA MARIA, 46 g",Santa Maria AS,46 g,7311311015403,,,world_spices,spices_herbs_spice_mix
+126373,"Mahe mustikašokolaad, NAMM CHOCOLATE, 37g",Roosiku OÜ,37 g,4744644017029,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+126374,"Mahe mustsõstrašokolaad, NAMM CHOCOLATE, 37g",Roosiku OÜ,37 g,4744644017104,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+126375,"Mahe Nisujahu (püül), JAHU-JAAN, 750 g",Selver AS,750 g,4745010371080,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+126376,"Mahe Nisuklii, JAHU-JAAN, 500 g",Selver AS,500 g,4745010371134,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+126377,"Mahe pipar, DITTMANN, 250 g",Kaupmees & Ko AS,250 g,4002239804004,world_spices,spices_basic_salt_pepper,world_spices,spices_herbs_spice_mix
+126378,"Mahe pune, SANTA MARIA, 9 g",Santa Maria AS,9 g,7311311015366,,,world_spices,spices_herbs_spice_mix
+126379,"Mahe rukkitäisterajahu, JAHU-JAAN, 750 g",Selver AS,750 g,4745010371141,bakery,bakery_bread_loaves,dry_preserves,dry_flour_sugar_baking
+126380,"Mahe speltajahu (täistera), JAHU-JAAN, 750 g",Selver AS,750 g,4745010371011,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+126381,"Mahe taco kaste, SANTA MARIA, 230 g",Santa Maria AS,230 g,7311312002075,world_spices,spices_mexican,sauces_oils,sauces_other
+126382,"Mahe täiesti tavaline tahvel Puhas Rõõm, NAMM CHOCOLATE, 37g",Roosiku OÜ,37 g,4744644017258,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+126383,"Mahe täistera jämedad kaerahelbed, TARTU MILL, 500 g",Tartu Mill AS,500 g,4740493006085,dairy_eggs_fats,dairy_plant_drinks,dry_preserves,dry_cereals_muesli
+126384,"MAHE Tatar 4x125g, TARTU MILL, 500 g",Tartu Mill AS,500 g,4740493006108,dry_preserves,dry_groats_beans,dry_preserves,dry_groats_beans
+126385,"Mahe toortatra peentang, WIRU MILL, 500 g",Wiru Mill OÜ,500 g,4742898010308,,,dry_preserves,dry_groats_beans
+126386,"Mahe Või, PAJUMÄE TALU, 150 g",Määramata,150 g,4743135002124,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+126387,"Mahedamaitseline salsa, WANTED, 260 g",Selver AS,260 g,5706386101847,world_spices,spices_mexican,sauces_oils,sauces_other
+126388,"Mahekookospähklilaastud, MEIRA, 70 g",Meira Eesti OÜ,70 g,6420101884592,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+126389,"Mahevõi paprika ja pipraseguga, PAJUMÄE TALU, 100 g",Pajumäe Talu OÜ,100 g,4743135002537,dairy_eggs_fats,dairy_butter_margarine,dairy_eggs_fats,dairy_butter_margarine
+126390,"Mahevõi peterselli ja küüslauguga, PAJUMÄE TALU, 100 g",Pajumäe Talu OÜ,100 g,4743135004890,pet,pet_other,dairy_eggs_fats,dairy_butter_margarine
+126391,"Mähkmed Extra Care 1 2-5kg, HUGGIES, 26 tk",Eugesta Eesti AS,26 pcs,5029053564876,baby,baby_diapers,baby,baby_diapers
+126392,"Mähkmed Extra Care 1 2-5kg, Huggies, 84tk",Eugesta Eesti OÜ,84 pcs,5029053578057,baby,baby_diapers,baby,baby_diapers
+126393,"Mähkmed Extra Care 2 3-6kg, HUGGIES, 58tk",Eugesta Eesti OÜ,58 pcs,5029053578071,baby,baby_diapers,baby,baby_diapers

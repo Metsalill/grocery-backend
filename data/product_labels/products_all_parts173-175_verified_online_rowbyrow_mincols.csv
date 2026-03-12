@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+123836,"Aurutatud punased oad, BONDUELLE, 425 ml",,,,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+123837,"Hapukapsas porgandiga, KADARBIKU KÖÖGIVILI, 500 g",KADARBIKU KÖÖGIVILI OÜ,,4740175000233,produce,produce_root_veg,produce,produce_root_veg
+123838,"Mango-apels-ananassi smuuti, PAI, 200 ml",ORKLA EESTI AS,,4740029053033,produce,produce_tropical,produce,produce_smoothies_fresh_juices
+123839,"Grisiinid päevalilleõli ja soolagagristallidega., ROBERTO, 250 g",,,8003490037206,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_snacks_salty
+123840,"Kirss-tomat grillimiseks, 350 g",,,4740608060797,meat_fish,meat_grill_blood_sausages,produce,produce_root_veg
+123841,"Kimchi salat, DIMDINI, 450 g",Määramata,,4751001623120,world_spices,spices_asian,produce,produce_herbs_salads_sprouts
+123842,Kartul pestud Gala Antsu 2kg,Kartul,2 kg,4743097000114,,,produce,produce_root_veg
+123843,"Grissinid Rustici, VALLEDORO, 100 g",STOCKMASTER OÜ,,8009280002720,,,sweets_snacks,sweets_snacks_salty
+123844,"Grissinid soolased, VALLEDORO, 100 g",STOCKMASTER OÜ,,8009280001570,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_snacks_salty
+123845,"Anneke piimašokolaad, KALEV, 270 g",ORKLA EESTI AS,,4740012601029,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+123846,"Grissinid Tornesi, VALLEDORO, 100 g",STOCKMASTER OÜ,,8009280002164,,,sweets_snacks,sweets_snacks_salty
+123847,Grüner Veltliner 100 cl,MOE OÜ,,9120039255019,,,drinks,drinks_wine
+123848,"Aprikoosimoos, PÕLTSAMAA, 380 g",,,,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+123849,"Apuulia ekstra-väärisoliiviõli frantoio muraglia keskmiselt puuviljane, MURAGLIA, 500 ml",BBQ ENTERTAINMENT OÜ,,8033928641484,sauces_oils,oils_olive,sauces_oils,oils_olive
+123850,"Grüner Veltliner Seewinkel, 300 cl",LTT AS,,4008005031513,,,drinks,drinks_wine
+123851,"Apuulia ekstra-väärisoliiviõli frantoio muraglia sidruniga, MURAGLIA, 200 ml",BBQ ENTERTAINMENT OÜ,,8033928641910,sauces_oils,oils_olive,sauces_oils,oils_olive
+123852,Brändi St. Remy Signature 70 cl,LIVIKO AS,,3035540010230,,,drinks,drinks_spirits
+123853,"Pepperoni Super snäkk, MAKS&MOORITS, 85 g",ATRIA EESTI AS,,4740171181226,world_spices,spices_basic_salt_pepper,meat_fish,meat_sausages
+123854,Maks ja Moorits Classic Super Snack 85 G,Maks,85 g,4740171181288,dry_preserves,dry_other,meat_fish,meat_sausages
+123855,"Suitsutatud Juustuvorst, MAKS&MOORITS, 500 g",ATRIA EESTI AS,,4740171188010,dairy_eggs_fats,dairy_other,meat_fish,meat_sausages
+123856,"Sidrun Eureka, kg",Määramata,,2700004000003,produce,produce_tropical,produce,produce_tropical
+123857,"Ingver, kg",Määramata,,2700021000000,,,produce,produce_root_veg
+123858,"Kirssploomtomat, 250 g",Määramata,,4740608060438,produce,produce_root_veg,produce,produce_root_veg
+123859,"Adžika gruusiapärane kaste, MAADLEX, 200 g",MAADLEX OÜ,,4740506000901,,,sauces_oils,sauces_marinades
+123860,"Ananassi tükid, GREEN, 565 g",PRALINEE OÜ,,4744148010748,produce,produce_tropical,dry_preserves,dry_canned_fruit
+123861,"Põdra snäkk, KARNI, 85 g",ARKE LIHATÖÖSTUS AS,,4740579103394,,,meat_fish,meat_gourmet
+123862,"Redis pakitud, 125 g",Määramata,,4740608089026,,,produce,produce_root_veg
+123863,"Tomat lahtine, INTSU, kg",,,,produce,produce_root_veg,produce,produce_root_veg
+123864,"Melon roheline, kg",Määramata,,2701141000000,,,produce,produce_tropical
+123865,"Peet, kg",Määramata,,2705843000009,produce,produce_root_veg,produce,produce_root_veg
+123866,"Balsamico salatikaste, KÜHNE, 250 ml",KAUPMEES & KO AS,,40122663,sauces_oils,sauces_salad_dressings,sauces_oils,sauces_salad_dressings
+123867,"Lihaveise täissuitsuvorst, RANNAROOTSI, 240 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296010760,meat_fish,meat_sausages,meat_fish,meat_sausages
+123868,"Gruusia leib Sothi, KILIKIA, 330 g",WORKSTAR OÜ,,4740480000010,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+123869,"Barbarissimaitseline karamell, KALEV, 120 g",ORKLA EESTI AS,,4740012600121,,,sweets_snacks,sweets_candies
+123870,"Gruusia rahvusleib Puri, KILIKIA, 330 g",WORKSTAR OÜ,,4740480000034,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+123871,"Hallituse eemaldaja, CILLIT, 750 ml",EUGESTA EESTI AS,,5900627067309,,,household,hh_cleaners
+123872,"Hapukoore-sibula maitselised maapähklid, ESTRELLA, 140 g",SELVER AS,,4779028345641,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_snacks_salty
+123873,Hardy's Cabernet Sauvignon 75 cl,LIVIKO AS,,9311043066887,drinks,drinks_wine,drinks,drinks_wine
+123874,"Sealihasnäkk, SELVER, 85 g",NÕO LIHATÖÖSTUS OÜ,,4740581411104,meat_fish,meat_pork,meat_fish,meat_gourmet
+123875,"Poolsuitsuvorst Krakovi, NÕO, 270 g",NÕO LIHATÖÖSTUS OÜ,,4740574080324,meat_fish,meat_sausages,meat_fish,meat_sausages
+123876,"Aprikoos, kg",,,2700077000009,,,produce,produce_tropical
+123877,"Apelsinimaitseline täidisega karamell, KALEV, 120 g",ORKLA EESTI AS,,4740012600138,produce,produce_tropical,sweets_snacks,sweets_candies
+123878,Hardy`s Crest Sauvignon Blanc 75 cl,LIVIKO AS,,5010134915823,,,drinks,drinks_wine
+123879,Matsimoka Tailihaviiner 250 G,Matsimoka Tailihaviiner,250 g,4744735010373,meat_fish,meat_sausages,meat_fish,meat_sausages
+123880,Hardy`s Crest Shiraz 75 cl,LIVIKO AS,,5010134915830,drinks,drinks_wine,drinks,drinks_wine
+123881,"Frankfurter, RANNAROOTSI, 500 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296001355,,,meat_fish,meat_sausages
+123882,"Ässä Mix piimašokolaad, KARL FAZER, 200 g",FAZER EESTI OÜ,,6416453014411,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+123883,"Aurutatud kikerherned, BONDUELLE, 425 ml",JUNGENT ESTONIA OÜ,,3083681003949,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+123884,Hardy`s Mill Shiraz Main Road 202 75 cl,LIVIKO AS,,5010134915779,drinks,drinks_wine,drinks,drinks_wine
+123885,"Baklazaanipüree, VERES, 500 g",INTERALTUS OÜ,,4823105400577,baby,baby_food_pouches,dry_preserves,dry_canned_veg
+123886,"Brändi TORRES 10 Years Imperial, 50 cl",AMBER DISTRIBUTION ESTONIA OÜ,,8410113000149,,,drinks,drinks_spirits
+123887,"Broilerilihast Jerky Sticks Parmigiano Reggiano juustuga, NÕO, 70 g",NÕO LIHATÖÖSTUS OÜ,,4740574093881,dairy_eggs_fats,dairy_eggs,meat_fish,meat_gourmet
+123888,"Broilerimaitseaine, ilma lisatud soolata, SANTA MARIA, 37 g",SANTA MARIA AS,,7311311025532,world_spices,spices_basic_salt_pepper,world_spices,spices_herbs_spice_mix
+123889,Hardy's Nottage Hill Chardonnay 75 cl,LIVIKO AS,,9311043039317,drinks,drinks_wine,drinks,drinks_wine
+123890,"7 lemmikut kommisegu, KALEV, 500 g",ORKLA EESTI AS,,4740012028369,pet,pet_other,sweets_snacks,sweets_candies
+123891,"Marineeritud kapsas porgandiga, DIMDINI, 650g",Määramata,,4751001624301,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+123892,"Shiitake seened, 150 g",Määramata,,4771085203476,produce,produce_mushrooms,produce,produce_mushrooms
+123893,"Lastevorst XL, MAKS&MOORITS, 300 g",ATRIA EESTI AS,,4740171084701,meat_fish,meat_sausages,meat_fish,meat_sausages
+123894,"Hardy's Shiraz Cabernet Sauvignon 18,7 cl",LIVIKO AS,,5010186019272,drinks,drinks_wine,drinks,drinks_wine
+123895,"American lentils piimašokolaad šokolaadidražeedega, KARL FAZER, 180 g",FAZER EESTI OÜ,,6416453014695,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+123896,"Pepperoni täissuitsuvorst, OSKAR, 210 g",OSKAR LT AS,,4740569011074,world_spices,spices_basic_salt_pepper,meat_fish,meat_sausages
+123897,"Apelsinimaitseline pall tumedas šokolaadis, KALEV, 140 g",ORKLA EESTI AS,,4740012052197,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_candies
+123898,"Hardy`s Stamp Semillon Chardonnay 18,7 cl",LIVIKO AS,,5010186019265,drinks,drinks_wine,drinks,drinks_wine
+123899,Hardy`s Variental Range Pinot Grigio 75 cl,LIVIKO AS,,5010186020070,,,drinks,drinks_wine
+123900,Hardy's VR Chardonnay 75 cl,LIVIKO AS,,9311043066863,drinks,drinks_wine,drinks,drinks_wine
+123901,"Lihakas Lastevorst, RAKVERE LK, 360 g",MAAG EESTI AS,,4740003006895,meat_fish,meat_sausages,meat_fish,meat_sausages
+123902,Hardy's VR Shiraz 75 cl,LIVIKO AS,,9311043037382,drinks,drinks_wine,drinks,drinks_wine
+123903,"Aurutatud riis kotis 4x125 g, FIRST PRICE, 500 g",SELVER AS,,7311041074763,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+123904,Hardys BIN 141 Colombard Char. 75 cl,LIVIKO AS,,9311043093319,,,drinks,drinks_wine
+123905,"Kalevi poolsuitsuvorst, RANNAROOTSI, 330 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296011255,meat_fish,meat_sausages,meat_fish,meat_sausages
+123906,"Aurutatud valged oad, BONDUELLE, 425 ml",JUNGENT ESTONIA OÜ,,3083681003901,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+123907,"Avokaadoõli, rafineerimata, GLORIA, 250 ml",LARINGO OÜ,,4742959010117,produce,produce_tropical,sauces_oils,oils_other
+123908,"Hari+vars 3 Action, VILEDA, 1 kmpl",JUNGENT ESTONIA OÜ,,4023103173118,,,household,hh_cleaners
+123909,"Lastevorst, MAKS&MOORITS, 600 g",,,4740171188843,meat_fish,meat_sausages,meat_fish,meat_sausages
+123910,"Caesari wrap kanaga, SELVERI KÖÖK, 200g",KULINAARIA OÜ,,4740581112698,bakery,bakery_flatbreads_wraps,dry_preserves,dry_ready_meals_jars
+123911,"Head ööd! Banaan-kuivik piimapuder mahe 4+, HIPP, 250 g",LTT AS,,9062300140214,baby,baby_porridge_cereal,baby,baby_porridge_cereal
+123912,"Fuet salaami Nobleza, ELPOZO, 200 g",JUNGENT ESTONIA OÜ,,8410843012306,,,meat_fish,meat_sausages
+123913,"Smuuti roheline, GRANINI, 250 ml",,,,,,produce,produce_smoothies_fresh_juices
+123914,"Suitsuvorst juustuga, MATSIMOKA, 240 g",MATSIMOKA OÜ,,4744735011257,dairy_eggs_fats,dairy_other,meat_fish,meat_sausages
+123915,"Täissuitsuvorst E-vaba, OSKAR, 120 g",OSKAR LT AS,,4740569009842,meat_fish,meat_sausages,meat_fish,meat_sausages
+123916,"Head ööd piimapuder küpsistega mahe 4+, HIPP, 190 g",LTT AS,,9062300133131,baby,baby_porridge_cereal,baby,baby_porridge_cereal
+123917,"Tšilli salaami, MATSIMOKA, 150 g",MATSIMOKA OÜ,,4744735010946,,,meat_fish,meat_sausages
+123918,"Basmati riis, FIRST PRICE, 1 kg",SELVER AS,,7311041085387,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+123919,"Bataadikrõpsud, SNAQS, 75g",LTT AS,,6095509043072,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+123920,"Bio kanapuljong, MAGGI, 80 g",SELVER AS,,8585002469915,world_spices,spices_broth_stock,world_spices,spices_broth_stock
+123921,"Café Crema kohvioad, MÖVENPICK, 1 kg",SELVER AS,,4006581017716,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+123922,"Cajuni maitseainesegu, SANTA MARIA, 34 g",SANTA MARIA AS,,7311311015915,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+123923,"California uramaki, SELVERI KÖÖK, 220 g",KULINAARIA OÜ,,4740581113190,,,dry_preserves,dry_ready_meals_jars
+123924,"Cannelloni torud, PANZANI, 250 g",ABESTOCK AS,,3038351480407,,,dry_preserves,dry_pasta_rice
+123925,"Caporale Kitsejuust trühvliga, ANDRI-PEEDO, 150 g",NOPRI TALUMEIEREI OÜ,,4740187111163,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+123926,"Põdra snäkk, LINNAMÄE LIHATÖÖSTUS, 85 g",LINNAMÄE LIHATÖÖSTUS AS,,4740618006310,,,meat_fish,meat_gourmet
+123927,"Saaremaa lehtkapsas ehk Kale, RAUTSI TALU, 200 g",Määramata,,4744888010145,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+123928,"Smuuti mustika ja vaarika, FROOSH, 250 ml",FAIRFOOD OÜ,,7350020728631,produce,produce_berries,produce,produce_smoothies_fresh_juices
+123929,"Salatisegu, 75 g",Määramata,,8012566023807,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+123930,"Täissuitsu hirvevorst Trühvline, LINNAMÄE LIHATÖÖSTUS, 230 g",LINNAMÄE LIHATÖÖSTUS AS,,4740618006884,meat_fish,meat_sausages,meat_fish,meat_gourmet
+123931,"Head ööd! Piimapudrupulber beebiküpsistega ÖKO al. 6k (karbis), HIPP, 250 g",LTT AS,,9062300140238,baby,baby_other,baby,baby_porridge_cereal
+123932,"Head Ööd piimapudrupulber kaera-õuna mahe 6+, HIPP, 250 g",LTT AS,,9062300130741,dairy_eggs_fats,dairy_plant_drinks,baby,baby_porridge_cereal
+123933,"Head ööd teraviljapuder piimasegu ja banaaniga mahe 4+, HIPP, 190 g",LTT AS,,9062300133018,baby,baby_formula,baby,baby_porridge_cereal
+123934,"Head ööd teraviljapuder piimasegu ja puuviljadega mahe 4+, HIPP, 190 g",LTT AS,,9062300132950,baby,baby_formula,baby,baby_porridge_cereal
+123935,"Põdralihast täissuitsuvorst juustuga Eesti Uluk, RANNAROOTSI, 180 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296012214,dairy_eggs_fats,dairy_other,meat_fish,meat_gourmet
+123936,"HULGI Coca-Cola 6-pakk, 4tk, COCA-COLA, 4 x 6-pakk",COCA-COLA HBC EESTI AS,,216000000715,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+123937,"Salaami trühvliga viilutatud, GIANNI NEGRINI, 80 g",DELINE OÜ,,8003948003357,,,meat_fish,meat_sausages
+123938,"HULGI Coca-Cola Zero 6-pakk, 4tk, COCA-COLA, 4 x 6-pakk",COCA-COLA HBC EESTI AS,,216000000722,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+123939,"Ameerikapärane burgerikaste, HEINZ, 400ml",EUGESTA EESTI OÜ,,8715700115832,,,sauces_oils,sauces_ketchup_mayo
+123940,"Täissuitsuvorst Mündi, OSKAR, 210 g",OSKAR LT AS,,4740569006025,meat_fish,meat_sausages,meat_fish,meat_sausages
+123941,"Täissuitsu põdravorst, LINNAMÄE LIHATÖÖSTUS, 105 g",LINNAMÄE LIHATÖÖSTUS AS,,4740618005610,meat_fish,meat_sausages,meat_fish,meat_sausages
+123942,"HULGI India pähkel 3tk, PÄHKLINÄPP, 3 x 500 g",,,215000000480,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+123943,"Angel Hair piimašokolaad, GERMIYAN,",SELVER AS,,8682665829053,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+123944,"Granaatõunaseemned, 130 g",Määramata,,4740199000592,sweets_snacks,sweets_nuts_driedfruit,produce,produce_tropical
+123945,"Bolognese pastakaste hakklihaga,TARTU MILL, 340 g",TARTU MILL AS,,4743303114048,sauces_oils,sauces_pasta_cooking,sauces_oils,sauces_pasta_cooking
+123946,"Cappuccinokook, PAGARINI, 220 g",EESTI PAGAR AS,,4744918010138,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+123947,"Lihatoodete duo (Fiocco, Salaami Milano), NEGRONI, 85 g",SELVER AS,,8028257004130,,,meat_fish,meat_gourmet
+123948,"Salaamilõigud Emmentali juustuga, lainelised, NÕO, 100 g",NÕO LIHATÖÖSTUS OÜ,,4740574092662,dairy_eggs_fats,dairy_other,meat_fish,meat_sausages
+123949,"Vinnutatud veiseliha Bresaola, NEGRONI, 90 g",SELVER AS,,8028257008329,meat_fish,meat_beef_lamb_game,meat_fish,meat_gourmet
+123950,"Till potis, GRÜNE FEE, tk",Määramata,,4741116000046,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+123951,"Täissuitsu metsseavorst jalapenoga, LINNAMÄE LIHATÖÖSTUS, 230 g",LINNAMÄE LIHATÖÖSTUS AS,,4740618006549,meat_fish,meat_sausages,meat_fish,meat_sausages
+123952,"HULGI Koduviiner 2tk, MAKS&MOORITS, 2 x 500 g",,,210100001580,drinks,drinks_spirits,meat_fish,meat_sausages
+123953,"Lihakas doktorivorst, RAKVERE, 170 g",MAAG EESTI AS,,4740003017792,meat_fish,meat_sausages,meat_fish,meat_sausages
+123954,"Keeduvorst Laste, RAKVERE, kg",,,2700333000002,meat_fish,meat_sausages,meat_fish,meat_sausages
+123955,"Kadakamari, SANTA MARIA, 21 g",SANTA MARIA AS,,7311311014727,,,world_spices,spices_herbs_spice_mix
+123956,"Kalamaitseaine sidruniga, SANTA MARIA, 23 g",SANTA MARIA AS,,6418474118369,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+123957,"Kalamaitseaine tilliga, ilma lisatud soolata, SANTA MARIA, 23 g",SANTA MARIA AS,,7311311025518,world_spices,spices_basic_salt_pepper,world_spices,spices_herbs_spice_mix
+123958,"Koriander potis, GRÜNE FEE, tk",Määramata,,4741116000398,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+123959,"Rooma salat, kg",Määramata,,2707495000000,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+123960,"BIO 003 spagetid / Spaghetti, PASTA ZARA, 500 g",SVENSKY KAUBANDUSE AS,,8004350005922,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+123961,"Maksapasteet lahtine, SELVERI KÖÖK, kg",KULINAARIA OÜ,,2700392000005,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+123962,"Maksapasteet, PIHLAKA, 150 g",PIHLAKA AS,,4742027000705,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+123963,"Brändi IMPERIAL XII VSOP, 70 cl",MV EESTI OÜ,,4770033227403,,,drinks,drinks_spirits
+123964,"Brändi J.P. CHENET VSOP, 20 cl",DUNKER ESTONIA OÜ,,3263280105620,drinks,drinks_wine,drinks,drinks_spirits
+123965,"Brändi J.P. Chenet VSOP, 50 cl",DUNKER ESTONIA OÜ,,3263280107198,drinks,drinks_wine,drinks,drinks_spirits
+123966,"Brändi J.P. Chenet VSOP, 70 cl",DUNKER ESTONIA OÜ,,3263280105552,drinks,drinks_wine,drinks,drinks_spirits
+123967,"Cayenne'i piprakaste, FRANKS´RED HOT, 148 ml",KARIA OÜ,,6410840037410,,,sauces_oils,sauces_marinades
+123968,"7 lemmikut kaalu, KALEV, 1 kg",ORKLA EESTI AS,,4740012028376,pet,pet_other,sweets_snacks,sweets_candies
+123969,"Kalamaitseaine tsitruse-ingveriga, MEIRA, 25 g",MEIRA EESTI OÜ,,6420101884011,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+123970,"Kanasült Fitlap, NÕO LIHAVÜRST, 300 g",NÕO LIHATÖÖSTUS OÜ,,4740574092693,meat_fish,meat_poultry,meat_fish,meat_gourmet
+123971,"Vasikalihasült, RANNAROOTSI, 330 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296010371,,,meat_fish,meat_gourmet
+123972,"Kaneel jahvatatud, SANTA MARIA, 210 g",SANTA MARIA AS,,7311311014109,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+123973,"Suitsutatud seakeel, NÕO, 200 g",NÕO LIHATÖÖSTUS OÜ,,4740574090606,,,meat_fish,meat_gourmet
+123974,"Maarahva sült, RANNAROOTSI, 330 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296008781,,,meat_fish,meat_gourmet
+123975,"Kaneel (jahvatatud), SANTA MARIA, 22 g",SANTA MARIA AS,,6418474118130,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+123976,"Aprikoosi dzemm, NAOUSSA, 500 g",MAIC KAUBANDUSE AS,,5201049302000,,,dry_preserves,dry_canned_fruit
+123977,"Praetud seamaksaribad, KARNI, 150 g",ARKE LIHATÖÖSTUS AS,,4740490294218,,,meat_fish,meat_gourmet
+123978,"Kodusült, MAKS&MOORITS, 300 g",ATRIA EESTI AS,,4740171187402,,,meat_fish,meat_gourmet
+123979,"Pasteet murulauguga, MAKS&MOORITS, 210 g",ATRIA EESTI AS,,4740171181196,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+123980,"Tüümian potis, GRÜNE FEE, tk",Määramata,,4741116000107,,,produce,produce_herbs_salads_sprouts
+123981,"Fileetasku juustu- ja singitäidisega, MAKS&MOORITS, 260 g",ATRIA EESTI AS,,4740171187853,dairy_eggs_fats,dairy_other,meat_fish,meat_gourmet
+123982,"Brändi LEGENDA ARMENII 3 YO, 50 cl",LIVIKO AS,,4850001921622,,,drinks,drinks_spirits
+123983,"Brändi ROMANCE Hors d'Age XO pet, 50 cl",AVALLONE AS,,4748001010647,pet,pet_other,drinks,drinks_spirits
+123984,"Cheddar riivjuust laktoosivaba, E-PIIM, 250 g",E-PIIM TOOTMINE AS,,4740142003076,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+123985,"Cheddari juustu maitselised kartulikrõpsud, ESTRELLA, 250 g",SELVER AS,,4779028345993,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty

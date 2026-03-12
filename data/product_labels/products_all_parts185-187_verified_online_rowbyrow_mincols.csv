@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+124437,"Paprika mix, 500 g",Määramata,,4740608078655,produce,produce_root_veg,produce,produce_root_veg
+124438,"Rosmariin suures potis, tk",Määramata,,4740669040776,,,produce,produce_herbs_salads_sprouts
+124439,"Puuviljasalat, 300 g",Määramata,,4740199000554,produce,produce_herbs_salads_sprouts,produce,produce_fruit_salads
+124440,"Piparmünt potis, GRÜNE FEE, tk",Määramata,,4741116000176,world_spices,spices_basic_salt_pepper,produce,produce_herbs_salads_sprouts
+124441,"Salat Rukola, VITA VERDE, 100 g",Määramata,,4740669040127,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+124442,"Värske soolakurk redisega, SÄGA-AAVIKU TALU, 500 g",EESTIMAA VILJAD OÜ,,4745010554315,world_spices,spices_basic_salt_pepper,produce,produce_herbs_salads_sprouts
+124443,"Õun Eesti, erinevad sordid, kg",EESTIMAA VILJAD OÜ,,4745010554407,produce,produce_apples_pears,produce,produce_apples_pears
+124444,"Koorene Kukeseene kaste, FOODSTUDIO, 230ml",ABESTOCK AS,,4744481010894,dairy_eggs_fats,dairy_cream_sourcream,sauces_oils,sauces_pasta_cooking
+124445,"Pirn Guyot, kg",Määramata,,2701451000004,produce,produce_apples_pears,produce,produce_apples_pears
+124446,"Smuuti maasika-mango kaera Fitlap, PAI+, 280 ml",ORKLA EESTI AS,,4740029700043,dairy_eggs_fats,dairy_plant_drinks,produce,produce_smoothies_fresh_juices
+124447,"Mahe suvikõrvits, KOPRA SAHVER , kg",EESTIMAA VILJAD OÜ,,2300018200002,produce,produce_root_veg,produce,produce_root_veg
+124448,"Marineeritud küüslauk tšilliga, 160 g",Määramata,,4742063001025,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+124449,"Eriti Vürtsikas Hiinakapsa Kimchi, KRIMCHI, 400 g",FERMENCY OÜ,,4745011005649,world_spices,spices_asian,produce,produce_herbs_salads_sprouts
+124450,"Kiivi, kg",Määramata,,2700007000000,produce,produce_tropical,produce,produce_tropical
+124451,"Kurk Luunja, GRÜNE FEE, kg",GRÜNE FEE EESTI AS,,2700013000001,produce,produce_root_veg,produce,produce_root_veg
+124452,"Jääsalat, kg",Määramata,,2700031000007,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+124453,"Pirn Conference, 1 kg",Määramata,,4740608030219,produce,produce_apples_pears,produce,produce_apples_pears
+124454,"Varsseller, kg",Määramata,,2700060000009,,,produce,produce_root_veg
+124455,"Hapukurk Peipsi, GERMANI TALU, 500 g",Määramata,,4744664010024,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+124456,"Porgandi-õunamahl, FRUUTI, 750 ml",GKR TRADE OÜ,,4779035930311,drinks,drinks_juices,drinks,drinks_juices
+124457,"Smuuti mango-guajaavi, PAI, 750 ml",ORKLA EESTI AS,,4740029052982,produce,produce_tropical,produce,produce_smoothies_fresh_juices
+124458,"Maitseroheline pakitud, kg",Määramata,,2300165400003,,,produce,produce_herbs_salads_sprouts
+124459,"Ananass, kg",Määramata,,2701876000009,produce,produce_tropical,produce,produce_tropical
+124460,"Punane viinamari Red Globe, kg",Määramata,,2705505000002,drinks,drinks_spirits,produce,produce_tropical
+124461,"Kurk lühike, kg",Määramata,,2706655000003,produce,produce_root_veg,produce,produce_root_veg
+124462,"Värske soolakurk ämbris, VIIBERGI, 350 g",Määramata,,4742063006549,world_spices,spices_basic_salt_pepper,produce,produce_herbs_salads_sprouts
+124463,"Mango-apelsini smuuti, PAI, 280 ml",ORKLA EESTI AS,,4740029052876,produce,produce_tropical,produce,produce_smoothies_fresh_juices
+124464,"Punase veini kaste, FOODSTUDIO, 230 ml",ABESTOCK AS,,4744481010078,drinks,drinks_wine,sauces_oils,sauces_pasta_cooking
+124465,"Smuuti maasika ja banaani, PAI, 750 ml",ORKLA EESTI AS,,4740029052944,bakery,bakery_flatbreads_wraps,produce,produce_smoothies_fresh_juices
+124466,"Hapendatud kasemahl mahe, KASEVETEKOHIN, 330 ml",SÄSI PRUULIKODA OÜ,,4745010001109,drinks,drinks_juices,drinks,drinks_other
+124467,"Värske lehtsalatite mix, EESTIMAA VILJAD, 100 g",EESTIMAA VILJAD OÜ,,4745010554643,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+124468,"Värviline grillsalat, SÄGA-AAVIKU TALU, 500 g",EESTIMAA VILJAD OÜ,,4745010554605,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+124469,"Mündi ja sidrunheina kombucha, KARU KOMBUCHA, 330 ml",EESTIMAA VILJAD OÜ,,4742022940068,produce,produce_tropical,drinks,drinks_other
+124470,"Varajane kartul, ENN KULL, 1 kg",,,4745010554148,produce,produce_root_veg,produce,produce_root_veg
+124471,"Smuuti mango-kookos münt Fitlap, PAI+, 280 ml",ORKLA EESTI AS,,4740029700050,dairy_eggs_fats,dairy_plant_drinks,produce,produce_smoothies_fresh_juices
+124472,"Smuuti mango-passion, DON SIMON, 750ml",BALMERK ESTONIA OÜ MEDIATO ÄRIDIVISJON,,8410261768090,produce,produce_tropical,produce,produce_smoothies_fresh_juices
+124473,"Smuuti marja segu, DON SIMON, 750 ml",BALMERK ESTONIA OÜ MEDIATO ÄRIDIVISJON,,8410261768106,,,produce,produce_smoothies_fresh_juices
+124474,"Koriander, 50 g",Määramata,,8019864000530,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+124475,"Loorber, 50 g",Määramata,,8028495000345,,,produce,produce_herbs_salads_sprouts
+124476,"Kiivi kollane karbis, 500 g",Määramata,,4740608050149,produce,produce_tropical,produce,produce_tropical
+124477,"Rukola, 75 g",Määramata,,8012566023760,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+124478,"Rosmariin, 50 g",Määramata,,8028495000598,,,produce,produce_herbs_salads_sprouts
+124479,"Tamarind, 450 g",Määramata,,8857121197032,,,produce,produce_tropical
+124480,"Sidrunhein pakis, EAT ME, 50 g",Määramata,,8854878000905,produce,produce_tropical,produce,produce_herbs_salads_sprouts
+124481,"Paksoi pakis, EAT ME, 2 tk",Määramata,,8718963051329,,,produce,produce_herbs_salads_sprouts
+124482,"Tšillipipar Cayenne mix, EAT ME, 75 g",Määramata,,8718963420460,world_spices,spices_basic_salt_pepper,produce,produce_root_veg
+124483,"Padrone pipar pakitud, EAT ME, 200 g",Määramata,,4740199000967,world_spices,spices_basic_salt_pepper,produce,produce_root_veg
+124484,"Habanero pipra MIX, EAT ME, 50 g",Määramata,,8718836086748,,,produce,produce_root_veg
+124485,"Varajane kartul, kg",,,,produce,produce_root_veg,produce,produce_root_veg
+124486,"Mustikad karbis, 1 kg",ANTALIS OÜ,,4748001022602,produce,produce_berries,produce,produce_berries
+124487,"Õun Golden, kg",KODUPABER AS,,8008583045724,produce,produce_apples_pears,produce,produce_apples_pears
+124488,APTAMIL3 PIIMASEGU 200G 12K,APTAMIL3 PIIMASEGU,200 g,5051594002975,baby,baby_formula,baby,baby_formula
+124489,"Apteegitilli tee, 5+ kuud, BEBIVITA, 200 g",LTT AS,,9007253102988,drinks,drinks_tea_coffee,baby,baby_other
+124490,"Assortiikarp After dinner, JAKOBSEN, 140 g",,,,,,sweets_snacks,sweets_candies
+124491,"Banaani lõigud, TAKE1 REGULAR, 100 g",JUNGENT ESTONIA OÜ,,4740085306678,bakery,bakery_flatbreads_wraps,sweets_snacks,sweets_nuts_driedfruit
+124492,"Banaani-piimapuder täisterahelve, HOLLE, 250 g",GOLDBERGER OÜ,,7640230493451,baby,baby_porridge_cereal,baby,baby_porridge_cereal
+124493,"Banaanikrõpsud, SEEBERGER, 150 g",SELVER AS,,4008258274019,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_nuts_driedfruit
+124494,"Banaanilaastud ÖKO, KOMMI ASEMEL, 100 g",JUNGENT ESTONIA OÜ,,4740085310736,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+124495,"Banaanipüree pirni ja mangoga mahe 4+, HIPP, 100 g",,,,baby,baby_food_pouches,baby,baby_food_pouches
+124496,"Beebi šampoon & vanni-ja pesugeel, NEUTRAL, 250 ml",EUGESTA EESTI OÜ,,8720181537851,household,hh_laundry,baby,baby_care
+124497,"Beebi vanni- ja dušigeel Sensitive Skin, NEUTRAL, 250 ml",,,,personal_care,pcare_body_wash,baby,baby_care
+124498,"Beebiküpsis Mahe 6+, HIPP, 180g",LTT AS,,9062300137276,baby,baby_other,baby,baby_snacks
+124499,"Beebinõude pesuvahend, MAM, 500ml",LTT AS,,7392855142015,household,hh_laundry,household,hh_dishwashing
+124500,"Beebipuuder SOS talgivaba, BÜBCHEN, 80 g",GERMAN PRODUCTS ESTONIA OÜ,,4065331004635,baby,baby_other,baby,baby_care
+124501,"Biolagunevad prügikotid, 20l, MCLEAN, 10 tk",PRIME PARTNER AS,,4742002002892,,,household,hh_bins_bags
+124502,"Biolagunevad prügikotid 75l, DREAMHOME, 10 tk",PRIME PARTNER AS,,4742002002861,,,household,hh_bins_bags
+124503,"Biskviit šokolaaditäidisega, BARNI, 150 g",,,,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_waffles_cakes
+124504,"Biskviitküpsis, LÕUNA PAGARID, 200 g",LÕUNA PAGARID AS,,4740633470479,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+124505,"Brasiilia pähkel, PÄHKLINÄPP, 200 g",ALIS CO ESTONIA OÜ,,4744743011102,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+124506,"Breezer Orange, BACARDI, 275 ml",LIVIKO AS,,7610113027592,produce,produce_tropical,drinks,drinks_beer_cider
+124507,"Breezer Watermelon, BACARDI, 275 ml",LIVIKO AS,,7610113027608,drinks,drinks_water,drinks,drinks_beer_cider
+124508,"Brioche burgerikukkel, LEIBUR, 280 g",LEIBUR AS,,4740072265919,bakery,bakery_bread_loaves,bakery,bakery_buns_croissants
+124509,"Broileri kintsuliha mango-tüümianimarinaadis, SELVER, kg",SELVER AS,,2715038000004,sauces_oils,sauces_marinades,meat_fish,meat_poultry
+124510,"Broileri poolkoivatükid mango-kookose marinaadis, TALLEGG, 800 g",,,4740046013973,sauces_oils,sauces_marinades,meat_fish,meat_poultry
+124511,"Broileri pooltiib mango-tüümianimarinaadis, SELVER, kg",SELVER AS,,2715039000003,sauces_oils,sauces_marinades,meat_fish,meat_poultry
+124512,"Broileri pooltiivad mango-tšillimarinaadis, SELVER, kg",SELVER AS,,2715000000001,sauces_oils,sauces_marinades,meat_fish,meat_poultry
+124513,"Broileri pooltiivad Tsitruse-tšilli, LINNAMÄE LIHATÖÖSTUS, 500 g",,,4740618008079,meat_fish,meat_poultry,meat_fish,meat_poultry
+124514,"Broileri rinnafilee ananassimarinaadis, MATSIMOKA, 500 g",,,,sauces_oils,sauces_marinades,meat_fish,meat_poultry
+124515,"Durumjahust täistera penned, TARTU MILL, 500 g",TARTU MILL AS,,4750020053147,drinks,drinks_spirits,dry_preserves,dry_pasta_rice
+124516,"Durumjahust täistera Spagetid, TARTU MILL, 500 g",TARTU MILL AS,,4750020053154,drinks,drinks_spirits,dry_preserves,dry_pasta_rice
+124517,"Durumnisujahupasta Fusilli, TARTU MILL, 500 g",TARTU MILL AS,,4750020050559,drinks,drinks_spirits,dry_preserves,dry_pasta_rice
+124518,"Durumnisujahupasta Puntine Grand, TARTU MILL, 500 g",TARTU MILL AS,,4750020050597,drinks,drinks_spirits,dry_preserves,dry_pasta_rice
+124519,"Durumnisumannast pasta ""autod"" tomati ja spinatiga, DALLA, 300 g",LOODUSVÄGI OÜ,,8016419400395,drinks,drinks_spirits,dry_preserves,dry_pasta_rice
+124520,"Durumnisumannast pasta ""printsess"" tomati ja spinatiga, DALLA, 300 g",LOODUSVÄGI OÜ,,8016419400371,drinks,drinks_spirits,dry_preserves,dry_pasta_rice
+124521,"Džinn BEEFEATER, 50 cl",PERNOD RICARD ESTONIA OÜ,,5000329002131,meat_fish,meat_beef_lamb_game,drinks,drinks_spirits
+124522,"Džinn BEEFEATER London Dry, 70 cl",,,,meat_fish,meat_beef_lamb_game,drinks,drinks_spirits
+124523,"Džinn BEEFEATER Pink, 70 cl",PERNOD RICARD ESTONIA OÜ,,5000299605950,meat_fish,meat_beef_lamb_game,drinks,drinks_spirits
+124524,"Džinn BOMBAY SAPPHIRE Dry, 70 cl",LIVIKO AS,,5010677714006,,,drinks,drinks_spirits
+124525,"Džinn BOTANIST Islay Dry, 70 cl",LIVIKO AS,,5055807400596,,,drinks,drinks_spirits
+124526,"Džinn CRAFTERS Aromatic Flower, 70 cl",LIVIKO AS,,4740050004967,,,drinks,drinks_spirits
+124527,"Džinn GORDON´S London Dry, 70 cl",PRIKE AS,,5000289925440,drinks,drinks_wine,drinks,drinks_spirits
+124528,"Džinn GORDON'S Mediterranean Orange, 70cl",PRIKE AS,,5000289933490,produce,produce_tropical,drinks,drinks_spirits
+124529,Džinn GORDON'S Passionfruit 70 cl,PRIKE AS,,5000289934800,drinks,drinks_wine,drinks,drinks_spirits
+124530,"Džinn GORDON`S Pink, 70 cl",PRIKE AS,,5000289929417,drinks,drinks_wine,drinks,drinks_spirits
+124531,"Džinn GORDON´S Sicilian Lemon, 70cl",PRIKE AS,,5000289932479,produce,produce_tropical,drinks,drinks_spirits
+124532,"Džinn JUNIMPERIUM Summer Edition, 70 cl",PRIKE AS,,4742022270035,drinks,drinks_wine,drinks,drinks_spirits
+124533,Džinn Juniper Island London Dry 70 cl,BALMERK ESTONIA OÜ,,4740158011713,,,drinks,drinks_spirits
+124534,Džinn Juniper Island Nordic Rhubarb 70 cl,BALMERK ESTONIA OÜ,,4740158011737,,,drinks,drinks_spirits
+124535,Džinn Kada Kirsi 50 cl,PRIKE AS,,4742883015639,drinks,drinks_wine,drinks,drinks_spirits
+124536,Džinn Kada Longero Gin 50cl,PRIKE AS,,4742883016773,drinks,drinks_spirits,drinks,drinks_spirits
+124537,Džinn Kada Pihlaka 50 cl,PRIKE AS,,4742883015646,drinks,drinks_wine,drinks,drinks_spirits
+124538,"Džinn KINGSMILL, 20 cl",LIVIKO AS,,4740050006435,,,drinks,drinks_spirits
+124539,"Džinn KINGSMILL Pink Raspberry, 50 cl",LIVIKO AS,,4740050006619,produce,produce_berries,drinks,drinks_spirits
+124540,"Džinn MALFY Originale, 70 cl",PERNOD RICARD ESTONIA OÜ,,5000299296028,drinks,drinks_spirits,drinks,drinks_spirits
+124541,"Džinn MALFY Rosa, 70 cl",PERNOD RICARD ESTONIA OÜ,,5000299296066,,,drinks,drinks_spirits
+124542,"Guljašš, SALVEST, 530 g",SALVEST AS,,4740073070437,,,dry_preserves,dry_ready_meals_jars
+124543,"Dzinn NORDIC SPIRITS LAB Mediterranean, 50 cl",ANORA ESTONIA AS,,6412703013876,drinks,drinks_wine,drinks,drinks_spirits
+124544,Džinn Normindia Biologique 70 cl,TRIDENS AS,,3559622202110,,,drinks,drinks_spirits
+124545,Džinn Normindia Orange 70 cl,TRIDENS AS,,3559622402213,produce,produce_tropical,drinks,drinks_spirits
+124546,"Džinn SAARE crafted, 50 cl",AMBER DISTRIBUTION ESTONIA OÜ,,4740034015354,,,drinks,drinks_spirits
+124547,"Džinn SAAREMAA, 50 cl",ANORA ESTONIA AS,,4740054361776,drinks,drinks_wine,drinks,drinks_spirits
+124548,Džinn SKAGERRAK Nordic Dry 70cl,ANORA ESTONIA AS,,7048352067527,drinks,drinks_wine,drinks,drinks_spirits
+124549,Džinn Sünk London Dry 50 cl,NORDISTA OÜ,,4748001024392,,,drinks,drinks_spirits
+124550,"Džinn TANQUERAY Blackcurrant Royale, 70 cl",PRIKE AS,,5000291025824,drinks,drinks_wine,drinks,drinks_spirits
+124551,"Džinn TANQUERAY Flor de Sevilla, 70 cl",PRIKE AS,,5000291023462,drinks,drinks_wine,drinks,drinks_spirits
+124552,"Džinn TANQUERAY No Ten, 70 cl",PRIKE AS,,5000291027576,drinks,drinks_wine,drinks,drinks_spirits
+124553,Džinn TOHI Aronia Infused 50cl,MOMENTIN EESTI OÜ,,4742022160770,,,drinks,drinks_spirits
+124554,"Džinn TOHI London Dry Ginger & Sichuan Pepper, 50 cl",MOMENTIN EESTI OÜ,,4742022160077,drinks,drinks_spirits,drinks,drinks_spirits
+124555,"Džinn TOHI Nordic Dry Cloudberry, 50 cl",MOMENTIN EESTI OÜ,,4742022160022,produce,produce_berries,drinks,drinks_spirits
+124556,"Earl Grey Fantasy must tee 25 x 2 g, GREENFIELD, 50 g",CLAIRE FOODS OÜ,,4751042360114,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+124557,"Earl Grey purutee, TWININGS, 100 g",FESTIVAL OÜ,,7017702,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+124558,"Edam juust laktoosivaba, E-PIIM, 350 g",E-PIIM TOOTMINE AS,,4740142000556,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+124559,"Edam juust viil laktoosivaba, MO SAAREMAA, 450 g",PINUS AS,,4740153064042,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+124560,"Eelkeedetud sõmer riis, TARTU MILL, 1 kg",TARTU MILL AS,,4750020030278,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+124561,"Eesti juust laktoosivaba, VALIO, 350 g",VALIO EESTI AS,,4740553000138,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+124562,"Eesti juust Light viilutatud + Edam juust viilutatud (kombopakend), E-PIIM, 450 g",,,4740142000174,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+124563,"Eesti juust viil laktoosivaba, MO SAAREMAA, 450 g",PINUS AS,,4740153064035,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+124564,"Estover Eesti juust, viilutatud, 350 g",Estover Eesti,350 g,4740572005046,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+124565,"Eesti Juust viilud, ESTOVER, 500 g",,,,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+124566,"Eesti Õiemesi, SELVER, 1 kg",LÕUNA-EESTI MESI OÜ,,4741332997281,,,dry_preserves,dry_other
+124567,"Eesti Uluk Põdralihapelmeenid, RANNAROOTSI, 350 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296012238,meat_fish,meat_beef_lamb_game,frozen_food,frozen_ready_meals
+124568,"EHE linnuliha mini-frikadellid (E-vaba), RANNAROOTSI, 350 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296012702,,,frozen_food,frozen_meat
+124569,"EHE linnuliha pelmeenid (E-vaba), RANNAROOTSI, 350 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296012696,,,frozen_food,frozen_ready_meals
+124570,"EHE pelmeenid (E-vaba), RANNAROOTSI, 600 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296012719,,,frozen_food,frozen_ready_meals
+124571,"Ehe rabarberikook, SELVERI KÖÖK, 250 g",KULINAARIA OÜ,,4740581102590,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+124572,"Ehe rabarberikook, SELVERI KÖÖK, 500 g",KULINAARIA OÜ,,4740581102583,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+124573,"Ehtne suvesalat, SELVERI KÖÖK, 1,2 kg, ettetellimisel",KULINAARIA OÜ,,4740581112124,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+124574,"Eine bulguri ja köögiviljadega Lunch Bowl, BONDUELLE, 250g",JUNGENT ESTONIA OÜ,,3083681139716,,,dry_preserves,dry_ready_meals_jars
+124575,"Eine kinoa ja köögiviljadega Lunch Bowl, BONDUELLE, 250g",JUNGENT ESTONIA OÜ,,3083681139709,dry_preserves,dry_groats_beans,dry_preserves,dry_ready_meals_jars
+124576,"Eine spelta ja köögiviljadega Lunch Bowl, BONDUELLE, 250g",JUNGENT ESTONIA OÜ,,3083681139723,,,dry_preserves,dry_ready_meals_jars
+124577,"Ekstra väärisoliiviõli, AENAON, 500 ml",TYCHE INDUSTRIES OÜ,,5213000302103,sauces_oils,oils_olive,sauces_oils,oils_olive
+124578,"Ekstra väärisoliiviõli basiilikuga sprei, MANTOVA, 200 ml",SELVER AS,,8006830991763,sauces_oils,oils_olive,sauces_oils,oils_olive
+124579,"Ekstra väärisoliiviõli, FILIPPO BERIO, 500 ml",SVENSKY KAUBANDUSE AS,,8002210500204,sauces_oils,oils_olive,sauces_oils,oils_olive
+124580,"Ekstra väärisoliiviõli First Harvest, BORGES, 500 ml",LEJOS EESTI OÜ,,8410179015125,sauces_oils,oils_olive,sauces_oils,oils_olive
+124581,"Ekstra-väärisoliiviõli Frantoio, MURAGLIA, 500 ml",BBQ ENTERTAINMENT OÜ,,8033928641507,sauces_oils,oils_olive,sauces_oils,oils_olive
+124582,"Ekstra väärisoliiviõli, GOURMANTE, 500 ml",SANITEX OÜ,,5200110730025,sauces_oils,oils_olive,sauces_oils,oils_olive
+124583,"Ekstra väärisoliiviõli musta trühvliga, DANTE, 250 ml",KAUPMEES & KO AS,,8033576194035,sauces_oils,oils_olive,sauces_oils,oils_olive
+124584,"Ekstra väärisoliiviõli, OLEUM CRETE, 1 l",TYCHE INDUSTRIES OÜ,,5214000101116,sauces_oils,oils_olive,sauces_oils,oils_olive
+124585,"Ekstra väärisoliiviõli rosmariiniga sprei, MANTOVA, 200 ml",SELVER AS,,8006830990711,sauces_oils,oils_olive,sauces_oils,oils_olive
+124586,"Ekstra väärisoliiviõli, SALVADORI, 500 ml",M&V TRADE OÜ,,8008460600114,sauces_oils,oils_olive,sauces_oils,oils_olive

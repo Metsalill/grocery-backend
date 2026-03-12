@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+126995,"Küpsised HIT sarapuupähkel, BAHLSEN, 220 g",JUNGENT ESTONIA OÜ,,5901414203955,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+126996,"Küpsised kakaokreemi täidisega, FIRST PRICE, 500 g",SELVER AS,,7311041084069,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+126997,"Küpsised kaneeli ja kardemoniga, JYVÄSHYVÄ, 320 g",FAZER EESTI OÜ,,6416453072466,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+126998,"Küpsised Lunch Clubs, LORENZ, 180 g",D.T.L. CONSUMER PRODUCTS EESTI AS,,4018077005824,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+126999,"Küpsised maasika-juustukoogimaitselise täidisega, OREO, 154 g",,,,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+127000,"Alkoholivaba kihisev puuviljajook, BACK TO SCHOOL , 750 ml",,,5999883580790,,,drinks,drinks_soft_soda
+127001,"Küpsised Oreo 4-pakk, OREO, 170 g",ABESTOCK AS,,7622210137234,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+127002,"Küpsised Parmesaniga, ROKA, 70 g",,,,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+127003,"Küpsised piimašokolaadiga, MARABOU, 184 g",SANITEX OÜ,,7622300589882,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_biscuits_cookies
+127004,"Küpsised pistaatsia pähklite ja kakaoga, DESEO, 200 g",SELVER AS,,8032532380390,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+127005,"Küpsised vaarika täidisega, MILKA, 147 g",ABESTOCK AS,,7622300434373,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+127006,"Küpsised vanillimaitselised 4-pakk, OREO, 176 g",ABESTOCK AS,,7622300444181,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+127007,"Küpsisepulgad küpsisetükkide ja valge šokolaadiga, PEPERO, 32 g",UMAMI OÜ,,8801062858347,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_biscuits_cookies
+127008,"Küpsiste segupakk, FIRST PRICE, 500 g",SELVER AS,,7311041085653,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+127009,"Küürimishari Brut, SAUBER, 1 tk",ETC KODU OÜ,,8008735477472,,,household,hh_cleaners
+127010,"Küürimisnuustik, TORO, 3 tk",ETC KODU OÜ,,8594005062863,,,household,hh_dishwashing
+127011,"Küürimispulber Lemon, AJAX, 450 g",JUNGENT ESTONIA OÜ,,8718951038912,produce,produce_tropical,household,hh_cleaners
+127012,"Küürimissvammid antibakteriaalsed Ultra Fresh, VILEDA, 3 tk",JUNGENT ESTONIA OÜ,,4023103239500,,,household,hh_dishwashing
+127013,"Küürimissvammid Nordic Black Edition, ESTA, 10 tk",URSUS OÜ,,4743115012815,,,household,hh_dishwashing
+127014,"Küürimissvammid, SELVER, 3 tk",URSUS OÜ,,4770784390920,,,household,hh_dishwashing
+127015,"Küüslauguleivad, SELVERI KÖÖK, 200 g",KULINAARIA OÜ,,4740581110823,,,bakery,bakery_other
+127016,"Küüslauguleivad, SELVERI PAGARID, 300 g",KULINAARIA OÜ,,2614927000005,,,bakery,bakery_other
+127017,KWV Cabernet Sauvignon 75 cl,TRIDENS AS,,6002323400332,drinks,drinks_wine,drinks,drinks_wine
+127018,KWV Chenin Blanc 75 cl,TRIDENS AS,,6002323410737,,,drinks,drinks_wine
+127019,KWV Classic Pinotage 75 cl,TRIDENS AS,,6002323400530,,,drinks,drinks_wine
+127020,L.Latour Saint Veran Les Deux Moulins 75 cl,TRIDENS AS,,3566921003638,bakery,bakery_buns_croissants,drinks,drinks_wine
+127021,La Chablisienne Chablis 1Er Cru Mont De Milieu 75cl,ANORA ESTONIA AS,,3332418000929,drinks,drinks_wine,drinks,drinks_wine
+127022,La Chablisienne Chablis Le Finage 75 cl,ANORA ESTONIA AS,,3332418001339,drinks,drinks_wine,drinks,drinks_wine
+127023,La Conda Cabernet Sauvignon 75 cl,PRIKE AS,,4101850102022,drinks,drinks_wine,drinks,drinks_wine
+127024,La Conda Chardonnay 75 cl,PRIKE AS,,4101850102220,drinks,drinks_wine,drinks,drinks_wine
+127025,La Finca Cabernet Sauvignon 75 cl,ANORA ESTONIA AS,,7798081667122,drinks,drinks_wine,drinks,drinks_wine
+127026,La Finca Chardonnay 75 cl,ANORA ESTONIA AS,,7798081668617,drinks,drinks_wine,drinks,drinks_wine
+127027,La Finca Pinot Grigio 75 cl,ANORA ESTONIA AS,,7798141877751,drinks,drinks_wine,drinks,drinks_wine
+127028,La Fiole Cotes Du Rhone 75 cl,LIVIKO AS,,3217661015343,,,drinks,drinks_wine
+127029,La Gioiosa Ca Divo Spumante Extra Dry 75cl,DUNKER ESTONIA OÜ,,8006805945012,drinks,drinks_wine,drinks,drinks_wine
+127030,La Gioiosa Prosecco Treviso DOC Spumante Brut 75 cl,DUNKER ESTONIA OÜ,,8006805399013,drinks,drinks_wine,drinks,drinks_wine
+127031,La Gioiosa Rose Vino Spumante Brut 75 cl,DUNKER ESTONIA OÜ,,8006805159013,drinks,drinks_wine,drinks,drinks_wine
+127032,La Mura Organic Grillo 75 cl,LIVIKO AS,,8003545803510,meat_fish,meat_grill_blood_sausages,drinks,drinks_wine
+127033,La Mura Organic Nero d'Avola 75 cl,LIVIKO AS,,8003545803534,,,drinks,drinks_wine
+127034,La Posada Tempranillo Organic 75 cl,ANORA ESTONIA AS,,8421390010189,drinks,drinks_wine,drinks,drinks_wine
+127035,LAB Red Reserva 75 cl,MEDIATO AS,,5604424349001,,,drinks,drinks_wine
+127036,LAB Vinho Verde 75 cl,MEDIATO AS,,5604885099408,,,drinks,drinks_wine
+127037,Lago dOro Garda Bianco DOC 75 cl,BALMERK ESTONIA OÜ,,4740158011843,,,drinks,drinks_wine
+127038,Lago Sagrado Lisboa Tinto 75 cl,DUNKER ESTONIA OÜ,,4740158010624,drinks,drinks_wine,drinks,drinks_wine
+127039,Lago Sagrado Reserva 75 cl,DUNKER ESTONIA OÜ,,4740158010600,drinks,drinks_wine,drinks,drinks_wine
+127040,"Lahja kohupiim rosinatega, FARMI, 200 g",FARMI PIIMATÖÖSTUS AS,,4740113034962,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_desserts
+127041,"Laimimaitselise täidisega küpsised, DOMINO, 350 g",FAZER EESTI OÜ,,6416453075917,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+127042,"Lambaroog köögiviljadega, ELLA'S KITCHEN, 130 g",GOLDBERGER OÜ,,5060107332034,meat_fish,meat_beef_lamb_game,baby,baby_food_pouches
+127043,Lambrusco Reggiano Amabile 75 cl,LIVIKO AS,,8002550500308,dairy_eggs_fats,dairy_eggs,drinks,drinks_wine
+127044,Lands&Legends Sauvignon Blanc 75cl,ANORA ESTONIA AS,,9415305220137,drinks,drinks_wine,drinks,drinks_wine
+127045,Lanson Black Label Brut 75 cl,LIVIKO AS,,3029440000286,,,drinks,drinks_wine
+127046,Laroche Chardonnay Reserve 75 cl,PRIKE AS,,3546680089388,drinks,drinks_wine,drinks,drinks_wine
+127047,Laroche Petit Chablis 75 cl,PRIKE AS,,3292060017914,pet,pet_other,drinks,drinks_wine
+127048,Laroche Rose 75 cl,PRIKE AS,,3546680076715,drinks,drinks_wine,drinks,drinks_wine
+127049,"Laste hirsipulgad BIO 8k, HIPP,",LTT AS,,4062300399570,,,baby,baby_snacks
+127050,"Laste vahujook Tom & Jerry, DISNEY, 750 ml",LTT AS,,5999559220364,,,drinks,drinks_soft_soda
+127051,"Lastekreem Saialill, KODUNE ARST, 42 ml",LAMINTO OÜ,,4823015918513,bakery,bakery_buns_croissants,baby,baby_care
+127052,"Lastešampoon, JOHNSON´S, 200 ml",KODUPABER AS,,3574669907866,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond
+127053,"Lastešampoon kummeliga, JOHNSON´S, 500 ml",KODUPABER AS,,3574669907620,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond
+127054,Laugel Alsace Pinot Gris 75 cl,SVENSKY KAUBANDUSE AS,,3183523550157,,,drinks,drinks_wine
+127055,"Le Grand Noir Cabernet-Syrah 1,5 L",LIVIKO AS,,3378631926233,drinks,drinks_wine,drinks,drinks_wine
+127056,"Le Grand Noir Cabernet-Syrah 18,7 cl",LIVIKO AS,,3437540053499,drinks,drinks_wine,drinks,drinks_wine
+127057,Le Grand Noir Cabernet-Syrah 3 L,LIVIKO AS,,3378632020244,drinks,drinks_wine,drinks,drinks_wine
+127058,Le Grand Noir Cabernet-Syrah 75 cl,LIVIKO AS,,3378632020220,drinks,drinks_wine,drinks,drinks_wine
+127059,Le Grand Noir Chardonnay/Viogner 2010 75 cl,LIVIKO AS,,3378632020121,drinks,drinks_wine,drinks,drinks_wine
+127060,"Le Grand Noir Cremant de Limoux, 75 cl",LIVIKO AS,,3378634820125,,,drinks,drinks_wine
+127061,Le Grand Noir GSM 75 cl,LIVIKO AS,,3378638120221,,,drinks,drinks_wine
+127062,Le Grand Noir Pinot Noir 75 cl,LIVIKO AS,,3378632920223,,,drinks,drinks_wine
+127063,"Le Grand Noir Sauvignon Blanc 18,7 cl",LIVIKO AS,,3437540053451,,,drinks,drinks_wine
+127064,Le Grand Noir Sauvignon Blanc 75 cl,LIVIKO AS,,3378639920127,,,drinks,drinks_wine
+127065,"Lehttaignatoruke kohupiimakreemiga, MARTA PAGAR, 2 x 75 g",EUROLEIB AS,,4742036003865,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+127066,"Lehttainas, SELVER, 500 g",EESTI PAGAR AS,,4740086011427,,,frozen_food,frozen_bakery
+127067,"Leivapulgad naturaalsed, PANEALBA, 125 g",GEMOSS EESTI OÜ,,8002333009165,,,sweets_snacks,sweets_snacks_salty
+127068,"Leivasegu, GERMUND, 100 g",GERMUND HULGI OÜ,,4742155004057,,,dry_preserves,dry_flour_sugar_baking
+127069,"Lemmiksegu, ARIMEX, 300g",LTT AS,,4771249830241,pet,pet_other,sweets_snacks,sweets_nuts_driedfruit
+127070,Les Dauphins Cotes du Rhone Reserve 75 cl,SERVAALI ESTONIA OÜ,,3179077470195,,,drinks,drinks_wine
+127071,Les Ormes de Cambras Cabernet Sauvignon 75 cl,AMBER DISTRIBUTION ESTONIA OÜ,,3211203420039,drinks,drinks_wine,drinks,drinks_wine
+127072,Les Ormes de Cambras Chardonnay 75 cl,AMBER DISTRIBUTION ESTONIA OÜ,,3211209212553,drinks,drinks_wine,drinks,drinks_wine
+127073,Les Vignerons Rivaner 75 cl,LIVIKO AS,,5450064932017,,,drinks,drinks_wine
+127074,"Lihapirukas 8x50g, SELVER, 400 g",EESTI PAGAR AS,,4740581410077,bakery,bakery_cakes_pastries,frozen_food,frozen_bakery
+127075,"Limonaad Briki, LIMONAAD, 330 ml",A. LE COQ AS,,4740098003953,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+127076,"Kelluke limonaad 1,5L",Kelluke,1.5 l,4740098016342,,,drinks,drinks_soft_soda
+127077,"Limonaad Lillepidu, TARTU 2024, 330 ml",A. LE COQ AS,,4740098002192,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+127078,"Limonaad Null magusainetega, LIMONAAD, 500 ml",A. LE COQ AS,,4740098002253,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+127079,"Limonaad traditsiooniline, A. LE COQ, 500 ml",A. LE COQ AS,,4740098078043,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+127080,"Limonaad Tšiki, LIMONAAD, 330 ml",A. LE COQ AS,,4740098003946,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+127081,"Limonaad vaarikamaitseline, KELLUKE, 1,5 l",A. LE COQ AS,,4740051001507,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+127082,"Limonaad vaarikamaitseline, KELLUKE, 500 ml",A. LE COQ AS,,4740051001514,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+127083,"Limoncello tort, PAGARINI, 760 g",EESTI PAGAR AS,,4740086025516,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+127084,"Linaseemned, FIRST PRICE, 250 g",SELVER AS,,7311041087114,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+127085,"Linaseemned, GERMUND, 200 g",GERMUND HULGI OÜ,,4742155004040,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+127086,Lindemans Chardonnay 75 cl,ANORA ESTONIA AS,,9311218007264,drinks,drinks_wine,drinks,drinks_wine
+127087,"Lindor Mini Pralinee, LINDT, 100 g",EUGESTA EESTI OÜ,,4000539103766,,,sweets_snacks,sweets_candies
+127088,Kalev linnupiimavalik 238g,Kalev,238 g,4740012028536,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_candies
+127089,Lisboa Reserva Red 75 cl,LTT AS,,5600879340495,,,drinks,drinks_wine
+127090,Litoral blanco 1 L,LTT AS,,8410775402510,,,drinks,drinks_wine
+127091,"Lõhnakuulid puidust Home&spa ”Forever Fresh”, JOIK, 15 tk",JOIK OÜ,,4742578004801,,,household,hh_candles_airfresh
+127092,"Lõhnakuulid puidust Home&spa ”Greip & Mandariin”, JOIK, 15 tk",,,4742578004795,produce,produce_tropical,household,hh_candles_airfresh
+127093,"Lõhnakuulid puidust Home&spa ”Primavera”, JOIK, 15 tk",,,4742578004818,,,household,hh_candles_airfresh
+127094,"Long Drink Grapefruit, A.LE COQ, 500 ml",,,4740098003687,produce,produce_tropical,drinks,drinks_other
+127095,"Long Drink grapefruit, alkoholivaba, G:N, 500 ml",A. LE COQ AS,,4740098092384,produce,produce_tropical,drinks,drinks_soft_soda
+127096,"Long Drink Grapefruit, KOFF, 330 ml",SAKU ÕLLETEHASE AS,,4740019003871,produce,produce_tropical,drinks,drinks_other
+127097,"Long drink Junibeer, RE-CRAFTED, 275 ml",LIVIKO AS,,4740050005742,drinks,drinks_beer_cider,drinks,drinks_other
+127098,"Long Drink Strong, LE COQ, 330 ml",A. LE COQ AS,,4740098002468,,,drinks,drinks_other
+127099,"Long drink Turbo, G:N, 1,5 l",A. LE COQ AS,,4740098002345,,,drinks,drinks_other
+127100,"Kodune kartul röstsibulaga, SELVERI KÖÖK, 250 g",,,4740581109001,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+127101,"Münt suures potis, 1tk",Määramata,,4740669000329,,,produce,produce_herbs_salads_sprouts
+127102,"Õuna-passionimoos, KÜLLUS, 400 g",RÕNGU MAHL AS,,4741129000118,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+127103,"Õuna-pirnimahl, MOUNTAIN JUICE, 750 ml",SELVER AS,,5904169487748,drinks,drinks_juices,drinks,drinks_juices
+127104,"Õuna-porgandimahl, MOUNTAIN JUICE, 750 ml",SELVER AS,,5904169487724,drinks,drinks_juices,drinks,drinks_juices
+127105,"Õuna-valge viinamarja nektar, PÕLTSAMAA, 300 ml",ORKLA EESTI AS,,4740029055648,drinks,drinks_spirits,drinks,drinks_juices
+127106,"Õunaäädikas, EKTONI HULGIKAUBANDUS, 500 ml",EKTONI HULGIKAUBANDUS OÜ,,4742007006307,sauces_oils,oils_vinegar,sauces_oils,oils_vinegar
+127107,"Õunaäädikas, IDEAFARM, 500 ml",METAKOR OÜ,,4744917010016,sauces_oils,oils_vinegar,sauces_oils,oils_vinegar
+127108,"Õunakaste, FIRST PRICE, 720 g",SELVER AS,,7311041074039,produce,produce_apples_pears,dry_preserves,dry_canned_fruit
+127109,"Õunamahl 100%, PFANNER, 2 l",SELVER AS,,9006900014025,drinks,drinks_juices,drinks,drinks_juices
+127110,"Õunamahl 100%, PURE, 1 L",JUNGENT ESTONIA OÜ,,4745010531125,drinks,drinks_juices,drinks,drinks_juices
+127111,"Õunamahl, AURA, 300 ml",A. LE COQ AS,,4740051001200,drinks,drinks_juices,drinks,drinks_juices
+127112,"Õunamahl, MOUNTAIN JUICE, 750 ml",SELVER AS,,5904169487717,drinks,drinks_juices,drinks,drinks_juices
+127113,"Õunamahl, SELVER, 1 L",A. LE COQ AS,,4740051475971,drinks,drinks_juices,drinks,drinks_juices
+127114,"Õunamahlajook 5x250ml, FIRST PRICE, 1,25 l",SELVER AS,,5701410333041,drinks,drinks_juices,drinks,drinks_juices
+127115,Suprise õunamahlajook 300 ml + üllatusmuna,Suprise,300 ml,8594023921050,,,drinks,drinks_juices
+127116,"Õunanektar, CAPPY, 1 l",COCA-COLA HBC EESTI AS,,5449000337559,drinks,drinks_juices,drinks,drinks_juices
+127117,"Õunanektar, FIRST PRICE, 1,5 l",SELVER AS,,5701410332228,drinks,drinks_juices,drinks,drinks_juices
+127118,"Paberkäterätikud, SELVER, 1 tk",SELVER AS,,4740581546219,,,household,hh_paper
+127119,"Paberkäterätt Jumbo 500 lehte 2-kihiline, KLEENEX, 1tk",,,5029053591124,,,household,hh_paper
+127120,"Paberkäterätt Maxi Clean 1 rulli 94 lehte, KLEENEX, 1 tk",,,5029053582481,,,household,hh_paper
+127121,"Paberkäterätt Ultra Clean 2 rulli 74 lehte, KLEENEX, 1 tk",,,5029053581620,,,household,hh_paper
+127122,"Paberkäterätt White Rabbit XXL 2-kihiline, GRITE, 1 tk",SELVER AS,,4770023346091,,,household,hh_paper
+127123,"Pad Thai nuudliroog, SELVERI KÖÖK, 300g",KULINAARIA OÜ,,4740581111592,,,dry_preserves,dry_ready_meals_jars
+127124,"Padjad kakaomaitselise täidisega, START, 250 g",ABESTOCK AS,,4820008125439,,,dry_preserves,dry_cereals_muesli
+127125,"Padjakesed Lion Wildcrush, NESTLÉ, 360 g",SELVER AS,,7613036673334,,,dry_preserves,dry_cereals_muesli
+127126,"Padjakesed piimatäidisega, START, 250 g",ABESTOCK AS,,4820008120496,dairy_eggs_fats,dairy_milk,dry_preserves,dry_cereals_muesli
+127127,"Päevalilleõli, FIRST PRICE, 1 l",SELVER AS,,7311041079713,,,sauces_oils,oils_other
+127128,"Päevalilleõli, NATURALISIMO, 1l",SELVER AS,,4779048080737,,,sauces_oils,oils_other
+127129,"Päevalilleõli, OLEINA, 1 l",SELVER AS,,5900012004483,,,sauces_oils,oils_other
+127130,"Päevalilleõli rafineerimata, NATURALISIMO, 1l",SELVER AS,,8588004691841,,,sauces_oils,oils_other
+127131,Kalev pähkli-marjabatoon tumeda šokolaadiga 42 g,Kalev,42 g,4740012027546,drinks,drinks_beer_cider,sweets_snacks,sweets_chocolate_bars
+127132,Kalev pähkli-seemnebatoon tumeda šokolaadiga 40 g,Kalev,40 g,4740012027539,drinks,drinks_beer_cider,sweets_snacks,sweets_chocolate_bars
+127133,"Pähklibatoon krõbe mandel, NICKS, 40 g",NJOM FOODS OÜ,,7350104401115,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_chocolate_bars
+127134,"Pähklibatoon šokolaadi ja banaaniga, EMCO, 35g",VILANDRA UAB,,8595229924074,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+127135,"Pähklibatoon šokolaadi ja meresoolaga, EMCO, 35g",VILANDRA UAB,,8595229924104,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+127136,Kalev Pähklibatoon Tumedas Šokolaadis 40 g,Kalev Pähklibatoon,40 g,4740012027805,drinks,drinks_beer_cider,sweets_snacks,sweets_chocolate_bars
+127137,"Pähklikook, SELVERI KÖÖK, 280 g",KULINAARIA OÜ,,4740581104259,sweets_snacks,sweets_nuts_driedfruit,bakery,bakery_cakes_pastries
+127138,"Pähklikreem, NUTELLA, 600 g",MOBEC AS,,8000500179864,sweets_snacks,sweets_nuts_driedfruit,sauces_oils,sauces_other
+127139,"Pähklikreemis küpsetatud pehme müsli mandlite ja datlitega, PAULUN´S, 375 g",ORKLA EESTI AS,,7310240406207,sweets_snacks,sweets_nuts_driedfruit,dry_preserves,dry_cereals_muesli
+127140,"Päikesekuivatatud tomatid, CAMPAGNA, 285 g",SELVER AS,,8005391209768,sweets_snacks,sweets_nuts_driedfruit,dry_preserves,dry_canned_veg
+127141,"Päikesekuivatatud tomatid, GOURMANTE, 150 g neto",PRIKE AS,,5200110730162,sweets_snacks,sweets_nuts_driedfruit,dry_preserves,dry_canned_veg
+127142,"Päikesekuivatatud tomatid õlis, FIRST PRICE, 280 g",SELVER AS,,7311041087503,sweets_snacks,sweets_nuts_driedfruit,dry_preserves,dry_canned_veg
+127143,"Päikesekuivatatud tomatid õlivabas kastmes, PONTI, 160 g",,,,sweets_snacks,sweets_nuts_driedfruit,dry_preserves,dry_canned_veg
+127144,"Pajaroog Hawaii, BLA BAND, 195 g",ABESTOCK AS,,7322550038313,,,dry_preserves,dry_ready_meals_jars

@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+131922,"Riisivahvlid õhukesed, KUPIEC, 90 g",Goldberger OÜ,90 g,5906747170479,dry_preserves,dry_pasta_rice,sweets_snacks,sweets_snacks_salty
+131923,"Riisivahvlid piimašokolaadi ja soolase karamelli tükkidega, KUPIEC, 70 g",,70 g,5906747175856,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+131924,"Riisivahvlid seesami õhukesed, KUPIEC, 90 g",,90 g,5902172001920,dry_preserves,dry_pasta_rice,sweets_snacks,sweets_snacks_salty
+131925,"Riisivahvlid, SONKO, 130 g",Selver AS,130 g,5902180010334,dry_preserves,dry_pasta_rice,sweets_snacks,sweets_snacks_salty
+131926,"Riivjuust, ITALIANA FORMAGGI, 80 g",Deline OÜ,80 g,8006207000081,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+131927,"Riivjuust laktoosivaba, MO SAAREMAA, 400 g",Pinus AS,400 g,4740153410078,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+131928,"Riivjuust laktoosivaba, VALIO GRAN REGALE, 200 g",Valio Eesti AS,200 g,4740553695747,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+131929,"Riivsai, FIRST PRICE, 500 g",Selver AS,500 g,7311041087336,bakery,bakery_buns_croissants,dry_preserves,dry_flour_sugar_baking
+131930,"Risotoriis Arborio, RISO SCOTTI, 500 g",Morelito OÜ,500 g,8001860201516,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+131931,"Risotoriis, ORIENTE, 1 kg",Kaupmees & Ko AS,1 kg,5601228221113,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+131932,"Roheline hernes, BONDUELLE, 425 ml",Jungent Estonia OÜ,425 ml,3083680047364,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+131933,"Roheline hernes, HÄRMAVILI, 400 g",Balbiino AS,400 g,4740188900926,dry_preserves,dry_other,frozen_food,frozen_veg
+131934,"Roheline jäätee tsitrusega, FUZETEA, 1,5 L",Coca-Cola HBC Eesti AS,1.5 l,5000112651843,drinks,drinks_tea_coffee,drinks,drinks_soft_soda
+131935,"Roheline karripasta, THAI CHOICE, 110 g",D.T.L. Consumer Products Eesti AS,110 g,8851978814067,dry_preserves,dry_pasta_rice,sauces_oils,sauces_other
+131936,"Roheline pesto basiilikuga, FIRST PRICE, 140 g",Selver AS,140 g,7311041087312,sauces_oils,sauces_pasta_cooking,sauces_oils,sauces_pasta_cooking
+131937,"Roheline purutee Bouquet Cream Fantacy, BASILUR, 100 g",Selver AS,100 g,4792252100213,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+131938,"Roheline purutee Gunpowder, AHMAD, 100 g",Abestock AS,100 g,54881007597,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+131939,"Roheline purutee Gunpowder, TWININGS, 100 g",,100 g,70177029784,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+131940,"Roheline purutee The Island of Tea, BASILUR, 100 g",Selver AS,100 g,4792252001169,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+131941,"Roheline tee BB Detox, mahe, KUSMI TEA, 100g",Rasa Trading Company AS,100 g,3585810091983,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+131942,"Roheline tee Citrus niidiga kotis 20pk, LIPTON, 26 g",Mobec AS,26 g,5063270105306,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+131943,"Roheline tee Classic niidiga kotis 20pk, LIPTON, 26 g",Mobec AS,26 g,5063270105399,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+131944,"Roheline tee ingveri-apelsini niidiga kotis 20pk, TEEKANNE, 35 g",Interaltus OÜ,35 g,4009300524281,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+131945,"Roheline tee ingveri ja sidruniga, mahe, KUSMI TEA, 100 g",Rasa Trading Company AS,100 g,3585810087757,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+131946,"Roheline tee mandarini/apelsini püramiid kotis 20pk, LIPTON, 36 g",Mobec AS,36 g,5063270108376,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+131947,"Roheline tee Mint niidiga kotis 20pk, LIPTON, 16 g",Mobec AS,16 g,5063270105368,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+131948,"Roheline tee mustsõstraga püramiid kotis 10pk, PÕHJALA TEETALU, 23 g",Põhjala Teetalu OÜ,23 g,4740098088479,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+131949,"Roheline tee raudürdi ja sidrunheinaga niidiga kotis 20pk, TEEKANNE, 35 g",Interaltus OÜ,35 g,4009300523048,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+131950,"Roheline tee sidrunheina ja sidruniga niidiga kotis 20pk, DILMAH, 30 g",Jungent Estonia OÜ,30 g,9312631143362,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+131951,"Roheline tee vaarika/granaatoõuna püramiid kotis 20pk, LIPTON, 28 g",Mobec AS,28 g,5063270108413,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+131952,"Roheline Tseiloni purutee, DILMAH, 100 g",Jungent Estonia OÜ,100 g,9312631152050,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+131953,"Rohelise õuna-mündi mahlajook, AURA ACTIVE, 1,5 L",A. Le Coq AS,1.5 l,4740098097488,drinks,drinks_juices,drinks,drinks_juices
+131961,Sumila mesi 250 g klaaspurgis,Sumila,250 g,615435427669,,,dry_preserves,dry_flour_sugar_baking
+131976,Reval Brita tort 450 g,Reval Brita,450 g,4742581011704,,,bakery,bakery_cakes_pastries
+132014,Gourmet Club Red Velvet Cookie'd 180 G,Gourmet Club,180 g,4740670124939,,,sweets_snacks,sweets_biscuits_cookies
+132134,Coop mustika- ja vanillimaitseline jäätis 6-pakk 660ml/420g,Coop,420 g,7340191171138,,,frozen_food,frozen_desserts_icecream
+132137,Gogreen rohelised läätsed 400 g,Gogreen,400 g,7312787710199,,,dry_preserves,dry_groats_beans
+132522,Ballantine's Finest Scotch Whisky 40%vol 200ml,Ballantine's Finest,200 ml,5010106113493,,,drinks,drinks_spirits
+132640,Lihatomat Grifone I klass,Lihatomat Grifone,,2060302500002,meat_fish,meat_other,produce,produce_root_veg
+132864,Minu turisti eine sealihast 250 g,Minu,250 g,4743144000661,meat_fish,meat_pork,dry_preserves,dry_canned_meat_fish
+133003,Coop fusilli durumpasta tomati ja spinatiga 500g,Coop,500 g,7340191144781,drinks,drinks_spirits,dry_preserves,dry_pasta_rice
+133024,"Bonne õunapüree, 0,5 l",Bonne,0.5 l,6420610111981,,,dry_preserves,dry_canned_fruit
+133249,AVASTA Honduras kohv 1 kg,AVASTA Honduras,1 kg,4742650000165,,,drinks,drinks_coffee_beans_capsules
+133332,Fazer kaerasüdamed 400g,Fazer,400 g,6419811101709,,,dry_preserves,dry_cereals_muesli
+133358,"Virsiku kohupiimakreem, 150 g",Virsiku,150 g,6438574132416,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+133781,"Rohelise õuna-mündi mahlajook, AURA ACTIVE, 500 ml",A. Le Coq AS,500 ml,4740098097471,drinks,drinks_juices,drinks,drinks_juices
+133782,"Rohelised herned 690g, PÕLTSAMAA, neto 450g",Orkla Eesti AS,450 g,4740029044277,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+133783,"Rohelised herned, PÕLTSAMAA, 400 g",Orkla Eesti AS,400 g,4740029044260,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+133784,"Rohelised läätsed, NATCO, 500 g",Umami OÜ,500 g,5013531381567,dry_preserves,dry_groats_beans,dry_preserves,dry_groats_beans
+133785,"Rohelised oliivid kivideta, FIGARO, 142g",Imex Trading Group AS,142 g,8410159044947,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+133786,"Rohelised oliivid kivideta, FIGARO, 240 g",Imex Trading Group AS,240 g,8410159047320,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+133787,"Rohelised oliivid kivideta, FIRST PRICE, 350 g",Selver AS,350 g,7311041087176,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+133788,"Rohelised oliivid kivideta, LORETO, 300 g bruto",Interaltus OÜ,300 g,8413552019215,drinks,drinks_wine,dry_preserves,dry_canned_veg
+133789,"Rohelised oliivid kivideta Manzilla, EXPLANADA GOURMET, 370 ml",Selver AS,370 ml,8410791118525,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+133790,"Rohelised oliivid krevettidega 300g, GREEN, neto 120 g",Pralinee OÜ,120 g,4744148011127,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+133791,"Rohelised oliivid mandlitega, GOURMANTE, 360 g",Sanitex OÜ,360 g,5200110730094,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+133792,"Rohelised oliivid paprika täidisega, FIRST PRICE, 350 g",Selver AS,350 g,7311041087169,produce,produce_root_veg,dry_preserves,dry_canned_veg
+133793,"Rohelised oliivid paprikaga, FIGARO, 240 g",Imex Trading Group AS,240 g,8410159044329,produce,produce_root_veg,dry_preserves,dry_canned_veg
+133794,"Roheliste teede segu 25x2g, TEA4U, 50 g",LTT AS,50 g,4791082077603,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+133795,Santa Maria rosee pipar 21 g,Santa Maria,21 g,7311311015793,,,world_spices,spices_basic_salt_pepper
+133796,"Rosepipar jahvatamata, MEIRA, 15 g",Meira Eesti OÜ,15 g,6414201003984,drinks,drinks_wine,world_spices,spices_basic_salt_pepper
+133797,"Rosina-õuna-kaneeli stritsel, SELVERI PAGARID, 470-480 g",Selver AS,475 g,2611090000009,world_spices,spices_herbs_spice_mix,bakery,bakery_sweet_buns_donuts
+133798,Nurr krõbinad rosinad piimašokolaadis 70g,Nurr,70 g,4740012051183,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+133799,"Rosinad šokolaadis, BEDO, 200 g",Svensky Kaubanduse AS,200 g,8714601009103,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+133800,"Rosmariin, FIRST PRICE, 45 g",Selver AS,45 g,5701410416072,dry_preserves,dry_other,world_spices,spices_herbs_spice_mix
+133801,"Rosmariin, SANTA MARIA, 15 g",Santa Maria AS,15 g,4740018172011,dry_preserves,dry_other,world_spices,spices_herbs_spice_mix
+133802,"Röstitud küüslaugu hummus, GOURMET CLUB, 200 g",Gurmeeklubi OÜ,200 g,4740670123406,dry_preserves,dry_other,sauces_oils,sauces_other
+133803,"Röstitud küüslauk-pipar veskis, SANTA MARIA, 80 g",Santa Maria AS,80 g,7311310026776,world_spices,spices_basic_salt_pepper,world_spices,spices_basic_salt_pepper
+133804,"Röstitud maapähkli puru, TAKE1 CHEF, 70 g",Jungent Estonia OÜ,70 g,4740085307095,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+133805,"Röstitud müsli puuviljadega, SANTE, 350 g",Interaltus OÜ,350 g,5900617002211,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+133806,"Röstitud müsli, SANTE, 350 g",Interaltus OÜ,350 g,5900617002228,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+133807,"Röstitud müsli valge šokolaadi-maasika Granola, SANTE, 350 g",Interaltus OÜ,350 g,5900617043160,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+133808,"Kapsa-porgandisalat, SELVERI KÖÖK, 500 g",Kulinaaria OÜ,500 g,4740581103313,produce,produce_herbs_salads_sprouts,dry_preserves,dry_ready_meals_jars
+133809,"Röstitud punased maguspiprad, GOURMANTE, 450 g",Prike AS,450 g,5200110730520,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+133810,"Röstitud saiaviilud, PASQUIER, 80 g",D.T.L. Consumer Products Eesti AS,80 g,3182180051014,bakery,bakery_buns_croissants,bakery,bakery_other
+133811,"Röstitud seakrõps, OK SNACKS, 50 g",,50 g,,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+133812,"Röstitud sibula ja tšilli maitselised kiirnuudlid (pakis), HAO HAO, 75 g",Interaltus OÜ,75 g,8934563712150,dry_preserves,dry_pasta_rice,dry_preserves,dry_soups_noodles
+133813,"Röstitud sibulad, FIRST PRICE, 100 g",Selver AS,100 g,7311041077146,produce,produce_root_veg,world_spices,spices_other
+133814,"Rubiin Müsli, TÄKUMETSA, 300 g",Wiru Mill OÜ,300 g,4742898011398,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+133815,"Rukki näkileivad hapukoore-tillimaitselised, LINKOSUO, 150 g",Selver AS,150 g,6420400000327,dairy_eggs_fats,dairy_cream_sourcream,bakery,bakery_other
+133816,"Rukki näkileivad meresoolaga, LINKOSUO, 150 g",Selver AS,150 g,6420400003915,world_spices,spices_basic_salt_pepper,bakery,bakery_other
+133817,"Rukki-riisipirukas, SELVERI PAGARID, ca 65 g",Lantmännen Unibake Estonia AS,65 g,2611016000007,bakery,bakery_cakes_pastries,bakery,bakery_other
+133818,"Kurgi-sinepisalat, PÕLTSAMAA, 3,2 kg, ettetellimisel",Orkla Eesti AS,3.2 kg,4740029041252,produce,produce_herbs_salads_sprouts,dry_preserves,dry_canned_veg
+133819,"Rukkikroovjahu, KALEW, 1,5 kg",Tartu Mill AS,1.5 kg,4740493884775,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+133820,"Rukkikrõpsud hapukoore ja sibulaga, LINKOSUO, 150 g",Selver AS,150 g,6420400002277,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_snacks_salty
+133821,"Rukkikrõpsud Poppamies chipotle-küüslauk, LINKOSUO, 120 g",Selver AS,120 g,6420400002222,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+133822,"Rukkikrõpsud Poppamies jalapeno-hapukoor, LINKOSUO, 120 g",Selver AS,120 g,6420400002109,dairy_eggs_fats,dairy_cream_sourcream,sweets_snacks,sweets_snacks_salty
+133823,"Rukkikrõpsud Poppamies tšilli-juustu, LINKOSUO, 120 g",Selver AS,120 g,6420400002284,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+133824,"Rukkileib Ruks, LEIBUR, 800 g",Leibur AS,800 g,4740072114750,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+133825,"Rukkileiva puiste, FIRST PRICE, 500 g",Selver AS,500 g,7311041076835,dry_preserves,dry_other,dry_preserves,dry_other
+133826,"Rukkileivakesed kiluga, SELVERI KÖÖK, 300 g",Kulinaaria OÜ,300 g,4740581100213,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+133827,"Rukkileivakesed rebitud lihaga, SELVERI KÖÖK, 270 g",Kulinaaria OÜ,270 g,4740581108578,meat_fish,meat_other,dry_preserves,dry_ready_meals_jars
+133828,"Rukkinööbid, LINKOSUO, 160 g",Selver AS,160 g,6420400008590,dry_preserves,dry_other,sweets_snacks,sweets_snacks_salty
+133829,Leibur Rukkipala Hõrk Ja Õhuke 195 G,Leibur Rukkipala,195 g,4740072132310,,,bakery,bakery_bread_loaves
+133830,"Rukkipala päevalilleseemnetega 6 tk, LEIBUR, 360 g",Leibur AS,360 g,4740072132815,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+133831,"Ruks Seemnepala, LEIBUR, 260 g",Leibur AS,260 g,4740072132211,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+133832,"Rullbiskviit kohupiimakreemiga, SELVERI KÖÖK, 360 g",Kulinaaria OÜ,360 g,4740581105638,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+133833,"Rumm BACARDI Carta Blanca, 35 cl",Liviko AS,350 ml,5010677012232,drinks,drinks_spirits,drinks,drinks_spirits
+133834,"Rumm BACARDI Carta Blanca, 50 cl",Liviko AS,500 ml,5010677012379,drinks,drinks_spirits,drinks,drinks_spirits
+133835,"Rumm BACARDI Carta Negra, 50 cl",Liviko AS,500 ml,5010677039079,drinks,drinks_spirits,drinks,drinks_spirits
+133836,"Rumm BACARDI Carta Negra, 70cl",Liviko AS,700 ml,7610113004814,drinks,drinks_spirits,drinks,drinks_spirits
+133837,"Rumm BUMBU The Original, 70 cl",,700 ml,0813497006215,drinks,drinks_spirits,drinks,drinks_spirits
+133838,"Rumm CAPTAIN MORGAN Dark, 100cl",Prike AS,1 l,0087000006935,drinks,drinks_spirits,drinks,drinks_spirits
+133839,"Rumm CAPTAIN MORGAN Jamaica, 70 cl",Prike AS,700 ml,0087000652286,drinks,drinks_spirits,drinks,drinks_spirits
+133840,"Rumm CARIBBA Negro, 70 cl",Liviko AS,700 ml,4740050006176,drinks,drinks_spirits,drinks,drinks_spirits
+133841,"Rumm Don Papa Baroko, DON PAPA, 70 cl",Prike AS,700 ml,4809015157480,drinks,drinks_spirits,drinks,drinks_spirits
+133842,Rumm FLOR DE CANA 12 YO 70 cl,Tridens AS,700 ml,7431008107003,drinks,drinks_spirits,drinks,drinks_spirits
+133843,"Rumm HAVANA CLUB 3YO, 70 cl",Pernod Ricard Estonia OÜ,700 ml,8501110088831,drinks,drinks_spirits,drinks,drinks_spirits
+133844,"Rumm HAVANA CLUB Anejo Especial, 70 cl",Pernod Ricard Estonia OÜ,700 ml,8501110086196,drinks,drinks_spirits,drinks,drinks_spirits
+133845,Rumm Peninuki Dark 70 cl,Peninuki Distillery OÜ,700 ml,4744387010592,drinks,drinks_spirits,drinks,drinks_spirits
+133846,Rumm Peninuki White 70 cl,Peninuki Distillery OÜ,700 ml,4744387010585,drinks,drinks_spirits,drinks,drinks_spirits
+133847,Rumm Planteray 3 Stars Artisanal 70 cl,Balmerk Estonia OÜ,700 ml,3460410538482,drinks,drinks_spirits,drinks,drinks_spirits
+133848,Rumm Planteray Barbados Grande Reserve 70 cl,Balmerk Estonia OÜ,700 ml,3460410538536,drinks,drinks_spirits,drinks,drinks_spirits
+133849,Rumm Planteray XO 20th Anniversary kinkekarbis 70 cl,Balmerk Estonia OÜ,700 ml,3460410538581,drinks,drinks_spirits,drinks,drinks_spirits
+133850,"Rumm THE DEMON'S SHARE, 70 cl",Amber Distribution Estonia OÜ,700 ml,8009366980379,drinks,drinks_spirits,drinks,drinks_spirits
+133851,"Rummimaitseline kook, SELVERI KÖÖK, 320 g",Kulinaaria OÜ,320 g,4740581106185,drinks,drinks_spirits,bakery,bakery_cakes_pastries
+133852,"Rummimaitselised kookosega pallikesed, SELVERI KÖÖK, 200 g",Kulinaaria OÜ,200 g,4740581110816,drinks,drinks_spirits,sweets_snacks,sweets_candies
+133853,"Saare Leet juust viilutatud laktoosivaba, MO SAAREMAA, 150 g",Pinus AS,150 g,4740153081841,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+133854,"Saarepiiga piimašokolaad leiva ja jõhvikatega, KALEV, 270 g",Orkla Eesti AS,270 g,4740012601067,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+133855,"Safran, SANTA MARIA, 0,5 g",Santa Maria AS,0.5 g,7311312002044,dry_preserves,dry_other,world_spices,spices_other
+133856,"Salaami-omleti-baguette, MAMMA, 190 g",Saarioinen Eesti OÜ,190 g,4740184602121,dry_preserves,dry_other,bakery,bakery_other
+133857,"Salat Tervist, SALVEST, 520 g",Salvest AS,520 g,4740073030080,produce,produce_herbs_salads_sprouts,dry_preserves,dry_canned_veg
+133858,"Salat Toome, SALVEST, 520 g",Salvest AS,520 g,4740073030707,produce,produce_herbs_salads_sprouts,dry_preserves,dry_canned_veg
+133859,"Salatijuust, ARISTIDES, 200 g",Synnove Finden International OÜ,200 g,4008960228065,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+133860,"Salatijuust laktoosivaba, VALIO EILA, 180 g",Valio Eesti AS,180 g,6408430337613,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+133861,"Salatijuust lambapiimast, OLYMPUS, 150g",Valio Eesti AS,150 g,5202178082153,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+133862,"Salatikaste Caesar, FELIX, 375 g",,375 g,,sauces_oils,sauces_salad_dressings,sauces_oils,sauces_salad_dressings
+133863,"Salatikaste Caesar, TARPLAN, 210 g",Tarplani Kaubanduse OÜ,210 g,4740159001881,sauces_oils,sauces_salad_dressings,sauces_oils,sauces_salad_dressings
+133864,"Salatikorvikesed, FIRST PRICE, 120 g",Selver AS,120 g,7311041082393,produce,produce_herbs_salads_sprouts,bakery,bakery_other
+133865,"Salatikurk 616 g, PÕLTSAMAA, 380 g neto",Orkla Eesti AS,380 g,4740029040774,produce,produce_herbs_salads_sprouts,dry_preserves,dry_canned_veg
+133866,"Salatimaitseaine ürtidega, SANTA MARIA, 30 g",Santa Maria AS,30 g,4740018156516,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+133867,"Salatiporgand, SALVEST, neto 400g",Salvest AS,400 g,4740073074268,produce,produce_herbs_salads_sprouts,dry_preserves,dry_canned_veg
+133868,"Salted caramel jäätis, Bonbons, MAGNUM, 168 g",Unilever Eesti AS,168 g,8711327640306,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+133869,"Salvrätikud 24x23cm, URMINOR, 55 tk",,55 pcs,4745091570501,household,hh_paper,household,hh_paper
+133870,"Salvrätikud 33x33 cm, 3-kihilised, FASANA, 25 tk (1)",Antalis OÜ,25 pcs,4064481006278,household,hh_paper,household,hh_paper
+133871,"Salvrätikud 33x33 cm, 3-kihilised, FASANA, 25 tk (2)",Antalis OÜ,25 pcs,4064481006179,household,hh_paper,household,hh_paper
+133872,"Salvrätikud 33x33 cm, 3-kihilised, FASANA, 25 tk (3)",Antalis OÜ,25 pcs,4064481006254,household,hh_paper,household,hh_paper
+133873,"Salvrätikud 33x33cm, 2-kihilised, hallid lehed, DAISY, 20 tk",Prime Partner AS,20 pcs,5901646050037,household,hh_paper,household,hh_paper
+133874,"Salvrätikud 33x33cm, 2-kihilised, roosid, DAISY, 20 tk",Prime Partner AS,20 pcs,5901646050013,household,hh_paper,household,hh_paper
+133875,"Salvrätikud 33x33cm, 3-kihiline, RUTA, 20 tk",,20 pcs,,household,hh_paper,household,hh_paper
+134216,Fazer Must Leib 300 G,Fazer Must,300 g,4740103020210,,,bakery,bakery_bread_loaves
+134361,Hlibny Dar Classic vodka 500 ml,Hlibny Dar,500 ml,4820080720577,,,drinks,drinks_spirits
+134400,Coop poolitatud virsikud siirupis 820/470g,Coop,470 g,7340191151703,,,dry_preserves,dry_canned_fruit
+134461,"Salvrätikud 33x33cm, 3-kihiline, RUTA, 20 tk (1)",Ursus OÜ,20 pcs,4820023741676,household,hh_paper,household,hh_paper
+134462,"Salvrätikud 33x33cm, 3-kihiline, RUTA, 20 tk (2)",Ursus OÜ,20 pcs,4820023741638,household,hh_paper,household,hh_paper
+134463,"Salvrätikud 33x33cm, 3-kihiline, RUTA, 20 tk (3)",Ursus OÜ,20 pcs,4820202892694,household,hh_paper,household,hh_paper
+134464,"Salvrätikud 33x33cm, 3-kihiline, RUTA, 20 tk (4)",Ursus OÜ,20 pcs,4820202892755,household,hh_paper,household,hh_paper
+134465,"Salvrätikud 33x33cm, 3-kihilised, FASANA, 20 tk (1)",Antalis OÜ,20 pcs,4064481002225,household,hh_paper,household,hh_paper
+134466,"Salvrätikud 33x33cm, 3-kihilised, FASANA, 20 tk (2)",Antalis OÜ,20 pcs,4064481002263,household,hh_paper,household,hh_paper
+134467,"Šampiljonipüree kiirsupp, KNORR, 15g",Selver AS,15 g,8712100868214,dry_preserves,dry_other,dry_preserves,dry_soups_noodles

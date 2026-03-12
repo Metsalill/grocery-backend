@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+233710,"Kohupiima-küpsisetort Lili, SELVERI KÖÖK, 700 g",KULINAARIA OÜ,,4740581111387,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+233711,"Kohupiimakook sidrunikreemiga, GUSTAV, 550 g",GUSTAV CAFE OÜ,,4742513006372,dairy_eggs_fats,dairy_cottage_quark,bakery,bakery_cakes_pastries
+233712,"Kohupiimapasta 5%, TERE, 5 kg, ettetellimisel",TERE AS,,4740036009375,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+233713,"Kreemisai, SELVERI PAGARID, ca 50 g",EESTI PAGAR AS,,2611027000003,bakery,bakery_buns_croissants,bakery,bakery_buns_croissants
+233714,"Kreemjuust kitsepiimast laktoosivaba, ALTENBURGER, 150 g",SYNNOVE FINDEN INTERNATIONAL OÜ,,4042089071249,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+233715,"Lehttainas, EESTI LEIVATÖÖSTUS, 600g",EESTI LEIVATÖÖSTUS AS,,4740064206128,dry_preserves,dry_other,bakery,bakery_other
+233716,"Toorjuust Gorgonzola, MIREE, 150 g",SVENSKY KAUBANDUSE AS,,40193045,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+233717,"Kurgisalat, FELIX, 3,2 kg, ettetellimisel",ORKLA EESTI AS,,4740029040514,produce,produce_herbs_salads_sprouts,dry_preserves,dry_canned_veg
+233718,"Küüslaugu baguette, SELVERI PAGARID, ca 160 g",SELVER AS,,2611034000003,dry_preserves,dry_other,bakery,bakery_bread_loaves
+233719,"Liköör CHAMBORD Black Raspberry, 50 cl",LIVIKO AS,,8004027034361,dry_preserves,dry_other,drinks,drinks_spirits
+233720,Louis Jadot Pinot Noir 75 cl,LIVIKO AS,,3535923060000,drinks,drinks_wine,drinks,drinks_wine
+233721,"Maasikamaitselised dražeed, TIC TAC, 18 g",MOBEC AS,,80800019,produce,produce_berries,sweets_snacks,sweets_gums_mints
+233722,"Makaroni-singisalat, SELVERI KÖÖK, 200 g",KULINAARIA OÜ,,4740581103528,dry_preserves,dry_pasta_rice,produce,produce_herbs_salads_sprouts
+233723,"Mannavaht, SELVERI KÖÖK, 200 g",KULINAARIA OÜ,,4740581108820,dry_preserves,dry_other,dairy_eggs_fats,dairy_desserts
+233724,"Närimiskumm Eucalyptus suhkruvaba magusainetega, ORBIT, 14 g",SELVER AS,,50173617,bakery,bakery_buns_croissants,sweets_snacks,sweets_gums_mints
+233725,"Närimiskumm maasikamaitseline suhkruvaba white magusainetega, ORBIT, 14 g",SELVER AS,,42203179,bakery,bakery_buns_croissants,sweets_snacks,sweets_gums_mints
+233726,"Maitselt mahe kurk, SALVEST, 4,2 kg, ettetellimisel",SALVEST AS,,4740073060247,produce,produce_root_veg,dry_preserves,dry_canned_veg
+233727,"Marja-ja puuviljasegu, IGLOTEX, 450 g",BALBIINO AS,,5902162393110,dry_preserves,dry_other,frozen_food,frozen_berries_fruit
+233728,"Toorjuust lõhega, MIREE, 150 g",SVENSKY KAUBANDUSE AS,,40193038,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+233729,"Aedviljapuljong, MAGGI, 120 g",SELVER AS,,8585002469977,world_spices,spices_broth_stock,world_spices,spices_broth_stock
+233730,"Alkoholivaba õlu, HEINEKEN, 330 ml",TANKER BREWERY OÜ,,8712000053819,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+233731,"Kodune seljanka, SALVEST, 3 kg, ettetellimisel",SALVEST AS,,,dry_preserves,dry_other,dry_preserves,dry_soups_noodles
+233732,"Lillkapsa-brokkolivorm, SELVERI KÖÖK, 300 g",KULINAARIA OÜ,,,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+233733,"Mitmevilja wrapid 25 cm x 4 tk, POCO LOCO, 245 g",LTT AS,,5412514932022,bakery,bakery_flatbreads_wraps,bakery,bakery_flatbreads_wraps
+233734,"Munaliköör GAROEDA Advocaat, 50 cl",HENKELL FREIXENET EESTI AS,,5901064776366,dairy_eggs_fats,dairy_eggs,drinks,drinks_spirits
+233735,"Muretainas, SELVERI KÖÖK, 500 g",Määramata,,4740581100503,dry_preserves,dry_other,bakery,bakery_other
+233736,"Närimiskumm Spearmint suhkruvaba magusainetega, ORBIT, 14 g",SELVER AS,,50173822,bakery,bakery_buns_croissants,sweets_snacks,sweets_gums_mints
+233737,"Närimiskumm Watermelon suhkruvaba magusainetega, ORBIT, 14 g",SELVER AS,,42113270,bakery,bakery_buns_croissants,sweets_snacks,sweets_gums_mints
+233738,"Nätsukomm Rainbow Vegan, FRUITTELLA, 41 g",JUNGENT ESTONIA OÜ,,87366310,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+233739,"Toorjuust, EXQUISA, 200 g",SVENSKY KAUBANDUSE AS,,40193151,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+233740,"Toorjuust mädarõikaga, MIREE, 150 g",SVENSKY KAUBANDUSE AS,,40193090,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+233741,"Alkoholivaba siider Pear, SOMERSBY, 500 ml",SAKU ÕLLETEHASE AS,,4740019003734,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+233742,"Andre Grand 3 kuud laktoosivaba, ANDRE FARM, kg",ANDRE JUUSTUFARM OÜ,,2711566000004,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+233743,"Kinder Paradiso, KINDER, 29 g",MOBEC AS,,80052807,dry_preserves,dry_other,sweets_snacks,sweets_chocolate_bars
+233744,"Monte šokolaadipuding, ZOTT, 55 g",SVENSKY KAUBANDUSE AS,,40145334,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+233745,"Närimiskumm Blueberry, ORBIT, 14 g",SELVER AS,,42123880,sweets_snacks,sweets_gums_mints,sweets_snacks,sweets_gums_mints
+233746,"Närimiskumm Sweet Mint suhkruvaba magusainetega, ORBIT, 14 g",SELVER AS,,50173808,bakery,bakery_buns_croissants,sweets_snacks,sweets_gums_mints
+233747,"Pastillid Spearmint Mints magusainetega, ORBIT, 28 g",SELVER AS,,42211501,drinks,drinks_wine,sweets_snacks,sweets_gums_mints
+233748,"Pulgakomm Fruit, CHUPA CHUPS, 12 g",JUNGENT ESTONIA OÜ,,84196675,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+233749,"Šokolaadibatoon Nutbar, KNOPPERS, 40 g",MOBEC AS,,40144450,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+233750,"Vaniljemaitseline stevia tilk, NICKS, 50 ml",NJOM FOODS OÜ,,0856991004486,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+233751,"Vanillisuhkur 10 x 8 g, RUF, 80 g",KAUPMEES & KO AS,,40352817,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+233752,Viski The Deacon 70 cl,PERNOD RICARD ESTONIA OÜ,,0813497003047,drinks,drinks_spirits,drinks,drinks_spirits
+233753,"Karamelli panna cotta koorejäätis küpsisetükkidega, PREMIA, 245 g",PREMIA TALLINNA KÜLMHOONE AS,,4740093191310,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+233754,"Moussaka kanaga Fitlap, SELVERI KÖÖK, 350 g",KULINAARIA OÜ,,4740581110021,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+233755,"Närimiskumm Tutti-Frutti, CHUPA CHUPS, 27,6 g",JUNGENT ESTONIA OÜ,,80759096,sweets_snacks,sweets_gums_mints,sweets_snacks,sweets_gums_mints
+233756,"Närimiskumm White Spearmint suhkruvaba magusainetega, ORBIT, 14 g",SELVER AS,,42113164,bakery,bakery_buns_croissants,sweets_snacks,sweets_gums_mints
+233757,"Patillid Citrus Mix, TIC TAC, 18 g",MOBEC AS,,80883586,produce,produce_herbs_salads_sprouts,sweets_snacks,sweets_gums_mints
+233758,"Piimavahvel Knoppers pähklitäidisega, STORCK, 25 g",MOBEC AS,,40144382,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_waffles_cakes
+233759,"Ploomid, SUNSWEET, 200 g",LEJOS EESTI OÜ,,0802763021533,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+233760,"Hollandi leibjuust viilutatud laktoosivaba, MO SAAREMAA, 300 g",PINUS AS,300 g,4740153072016,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+233761,"Juustumaitselised maisikrõpsud, DORITOS, 180 g",PEPSICO EESTI AS,180 g,5900259118639,dairy_eggs_fats,dairy_cheese_slices,sweets_snacks,sweets_snacks_salty
+233762,"Kaneeli-koorejäätis jõhvikalisandi ja Kreeka pähklitega, LUMEMARJA, 480 g",BALBIINO AS,480 g,4740188012582,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+233763,"Kartulivorm maasuitsusingiga, SELVERI KÖÖK, 2 kg, ettetellimisel",KULINAARIA OÜ,2 kg,,meat_fish,fish_salted_smoked,dry_preserves,dry_ready_meals_jars
+233764,"Kodune pärmi-lehttaigen võiga, HÄRMAVILI, 400g",BALBIINO AS,400 g,4740188012872,dairy_eggs_fats,dairy_butter_margarine,frozen_food,frozen_bakery
+233765,"Maasikatoormoos mustikatega, MARJAMAA TALU, 300 g",MARJAMAA TALU OÜ,300 g,4742331001795,dry_preserves,dry_other,frozen_food,frozen_berries_fruit
+233766,"Magus-vürtsikas köögiviljasalat, SALVEST, 3 kg, ettetellimisel",SALVEST AS,3 kg,4740073072172,world_spices,spices_herbs_spice_mix,dry_preserves,dry_canned_veg
+233767,Monte Cristo White 75 cl,DUNKER ESTONIA OÜ,75 cl,4740158007402,dry_preserves,dry_other,drinks,drinks_wine
+233768,"Mozzarella juust viilutatud, FIOR DI MASO, 130 g",SELVER AS,130 g,8011425115332,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+234439,Pajakinnas Muumid,Pajakinnas Muumid,1 tk,6411801015690,,,household,hh_kitchenware
+235440,7 up karastusjook 330ml,7,330 ml,4750042304746,,,drinks,drinks_soft_soda
+237456,SIMPL itaaliapärane köögiviljasegu 750 g,SIMPL,750 g,5905784311357,produce,,frozen_food,frozen_veg
+239740,"Oddlygood Barista kaerajook ilma lisatud suhkruta, pähklise vanillimaitsega, gluteenivaba, UHT 1l",Oddlygood Barista,1 l,6430081491291,dry_preserves,dry_flour_sugar_baking,dairy_eggs_fats,dairy_plant_drinks
+240278,"Põnn Ökoloogiline Köögiviljapüree lambalihaga 190 g, alates 6-elukuust",Põnn Ökoloogiline,190 g,4740073076231,produce,,baby,baby_food_jars
+241726,"Farm Frites kartulipallid, 450 g",Farm Frites,450 g,8710679760304,,,frozen_food,frozen_potato_products
+242526,"Rainbow Color pesugeel 1 l, 20 pesukorda",Rainbow Color,1 l,6415711437191,,,household,hh_laundry
+242633,Filter RBF9000 tolmuimejale,Filter RBF9000,1 tk,7319599012480,,,household,hh_kitchenware
+243130,Marjakorjaja teleskoopvarrega,Marjakorjaja,1 tk,6410416228983,,,household,hh_other
+243374,"Woolite Color pesugeel 0,9 l",Woolite Color,0.9 l,5900627090406,,,household,hh_laundry
+243425,Mionetto il Spriz aromatiseeritud veinijook 8%vol 200ml,Mionetto,200 ml,8006220002307,,,drinks,drinks_other
+243606,Söegrill 35 cm,Söegrill,35 cm,6438574244379,,,household,hh_kitchenware
+243638,Säilitusämber kaanega Marjad 3 l,Säilitusämber,3 l,6410416335360,,,household,hh_kitchenware
+243718,Mahlaaurutaja Marjukka 8 l,Mahlaaurutaja Marjukka,8 l,6410416367101,,,household,hh_kitchenware
+243732,"Korv 14,5x22x20,5 cm puit",Korv,"14,5x22x20,5cm",6410416421353,,,household,hh_kitchenware
+243915,"Korv 18x26,5x39 cm puitlaast",Korv,"18x26,5x39cm",6410416421360,,,household,hh_kitchenware
+244205,Ämber Nordiska 17 l pistaatsia,Ämber Nordiska,17 l,7318140024378,,,household,hh_other
+244362,"Ämber 5 l, läbipaistev",Ämber,5 l,7318141051052,,,household,hh_other
+244823,Lehter Marjukka 3 tk,Lehter Marjukka,3 pcs,6410416432007,,,household,hh_kitchenware
+245247,For Me Energy granaatõuna-ženženi 500ml,For Me,500 ml,4740051000562,,,drinks,drinks_energy
+245521,Ämber Nordiska 10 l pistaatsia EKO,Ämber Nordiska,10 l,7318140024552,,,household,hh_other
+246116,Säilitusmber kaanega Marjukka 10 l,Säilitusmber,10 l,6410416425115,,,household,hh_kitchenware
+247319,Seenenuga Fiskars 21cm oranz,Seenenuga Fiskars,21 cm,6424002019831,,,household,hh_other
+247579,Kitchen joy võikana,Kitchen,350 g,8858984837806,dairy_eggs_fats,dairy_other,frozen_food,frozen_ready_meals
+247911,"Ämber kaanega 5 l, valge",Ämber,5 l,5710255298507,,,household,hh_other
+248267,"Ämber 5 l, sinine",Ämber,5 l,7318141051069,,,household,hh_other
+248972,Ämber Nordiska 17 l helepunane,Ämber Nordiska,17 l,7318140024385,,,household,hh_other
+249331,Prügikott Coop valge 20l 25tk,Prügikott Coop,20 l,7340191170551,,,household,hh_bins_bags
+249593,Lillekimp värviline,Lillekimp,1 tk,6429830052210,,,household,hh_other
+249779,Põim-ronitatar,Põim-ronitatar,1 tk,6416719380182,,,household,hh_other
+249905,Xtra purustatud tomatid 400g,Xtra,400 g,7340011482772,,,dry_preserves,dry_canned_veg
+250361,Küllus suhkruvaba mahe metsmustikamoos marjadega,Küllus,400 g,4741129019844,,,dry_preserves,dry_canned_fruit
+250853,Coop punased aedoad soolvees 380/230 g,Coop,230 g,7340191144569,,,dry_preserves,dry_canned_veg
+251376,"Alma sulatatud juust, 200g",Alma,200 g,4740553692807,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+251752,Pohlad 250g,Pohlad,250 g,6411810006979,,,produce,produce_berries
+252095,Marineeritud sametpuravikud 500g,Marineeritud,500 g,4742798002342,,,produce,produce_herbs_salads_sprouts
+252120,Meira ketsup 1200g,Meira,1200 g,6420101882666,,,sauces_oils,sauces_ketchup_mayo
+252371,Väikekartulid 900 g,Väikekartulid,900 g,6415350019086,,,produce,produce_root_veg
+252772,Šampinjon Jumbo 350 g,Šampinjon Jumbo,350 g,6416250006794,,,produce,produce_mushrooms
+253647,Mustsõstar 250 g MAHE,Mustsõstar,250 g,6438574390038,,,produce,produce_berries
+253712,Mahe jõhvikas 250g,Mahe,250 g,4744749011236,,,produce,produce_berries
+254516,MIX Sex On The Beach muu alkohoolne jook 4%vol 330 ml,MIX Sex,330 ml,4770047234336,,,drinks,drinks_other
+255852,Kotimaista Kartul Annabelle 1kg,Kotimaista Kartul,1 kg,6438460111662,,,produce,produce_root_veg
+256083,Dals Kitchen Köögivilja Nuudlid 300 G,Dals Kitchen,300 g,4745010182334,produce,,dry_preserves,dry_pasta_rice
+256224,Oho paisutatud riis šokolaadiga 150 g,Oho,150 g,4770149202677,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+259815,Fazer Must tume leib juuretisega 500 g,Fazer Must,500 g,4740103022689,,,bakery,bakery_bread_loaves
+260456,Roshen õhuline tume šokolaad 80g,Roshen,80 g,4823077626203,,,sweets_snacks,sweets_chocolate_bars
+260656,Vihik 12l jooneline 23,Vihik,12 l,4740255012248,,,household,hh_other
+260992,"Lv pesugeel väikelaste 1,5l",Lv,1.5 l,6414505168136,,,household,hh_laundry
+261110,X-tra nõudepesuvahend 1 l,X-tra,1 l,7340011451150,,,household,hh_dishwashing
+261411,"Max Factor miracle pure küünelakk 155 coconut milk, 12 ml",Max Factor,12 ml,3616303252625,,,personal_care,pcare_cosmetics
+261489,Carrefour karboniseeritud allikavesi 500 ml,Carrefour,500 ml,5905784351353,,,drinks,drinks_water
+262393,Pohlad 250g Eesti,Pohlad,250 g,4744021010230,,,produce,produce_berries
+262721,Ebaküdoonia 300g,Ebaküdoonia,300 g,4744021010322,,,produce,produce_apples_pears
+264614,"Piltti pirni-banaani puder 110g, alates 6-elukuust",Piltti,110 g,8445290553942,,,baby,baby_food_jars
+266404,Chupa Chups Pulgakommid kotis Best of Bag 10tk,Chupa Chups,10 pcs,8410031132519,,,sweets_snacks,sweets_candies
+269447,Fazer Kismet šokolaadibatoon soolakaramelliga 41g,Fazer Kismet,41 g,6416453020061,,,sweets_snacks,sweets_chocolate_bars
+269516,Waffa Sofi kreeker Kreete kuldkalake 150 g,Waffa Sofi,150 g,4743144008599,sweets_snacks,sweets_other,sweets_snacks,sweets_snacks_salty
+269580,"Pesugeel Mulieres Rose Garden 1,5l",Pesugeel Mulieres,1.5 l,4744325010035,,,household,hh_laundry
+269626,HIIUMAA KÖÖKPorgandi-ananassisalat 160 g,HIIUMAA KÖÖKPorgandi-ananassisalat,160 g,4740541008931,produce,,produce,produce_herbs_salads_sprouts
+269675,"Oatly šokolaadi kaerajook, 250 ml",Oatly,250 ml,7394376614804,,,dairy_eggs_fats,dairy_plant_drinks
+270321,USIN Ahjukartul 300 g,USIN Ahjukartul,300 g,4740584001203,,,dry_preserves,dry_ready_meals_jars
+270535,Nordqvist muumi maitsestatud mustade teede valik 20tk 35g,Nordqvist,35 g,6413446010320,,,drinks,drinks_tea_coffee
+272208,"Alma sulatatud juust trühvlimaitseline, 200g",Alma,200 g,4740553692838,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+272590,"Räimefilee, kg","Räimefilee,",,2060108100000,meat_fish,fish_fresh,meat_fish,fish_fresh
+272795,Kikas Juustu-Kanarull 330 G,Kikas Juustu-Kanarull,330 g,4740625004330,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_hams
+272956,Pealinna Minifrikadellid kanalihaga 350g,Pealinna Minifrikadellid,350 g,4740093223349,meat_fish,meat_poultry,meat_fish,meat_poultry
+273328,"Hartwall Jaffa Ananass suhkuruvaba karastusjook 1,5l",Hartwall Jaffa,1.5 l,6413600018308,dry_preserves,dry_flour_sugar_baking,drinks,drinks_soft_soda
+273437,Mull° Null mulliga mahl vaarikas 250 ml,Mull° Null,250 ml,4742022090305,,,drinks,drinks_juices
+274760,Belgia merekarbid tumeda šokolaadiga,Belgia,,5413121360666,,,sweets_snacks,sweets_chocolate_bars
+274953,Canderel kakaojook 250G,Canderel,250 g,7640110707937,,,drinks,drinks_syrups_powders
+275171,Kotimaista Kartulipudru-Loomaliha Vorm 350 G,Kotimaista Kartulipudru-Loomaliha,350 g,6414893502116,meat_fish,meat_beef_lamb_game,dry_preserves,dry_ready_meals_jars
+275394,Nesquik kakao 700g,Nesquik,700 g,8445291570009,,,drinks,drinks_syrups_powders
+276113,Kariniemi broileri meetiivad 700G,Kariniemi,700 g,6409100024444,sauces_oils,oils_other,meat_fish,meat_poultry
+276329,Pajakinnas 15X34 Muumid viimaks kodus,Pajakinnas,,6411801022766,,,household,hh_kitchenware
+276435,Serto pesugeel tume 750ml,Serto,750 ml,6417964578393,,,household,hh_laundry
+276763,"Coop arbuusi-sidruni karastusjook suhkruvaba 1,5 l",Coop,1.5 l,6438574282784,,,drinks,drinks_soft_soda
+276817,Nesquik kakao 300g,Nesquik,300 g,8445291570085,,,drinks,drinks_syrups_powders
+277970,Lõhnagraanulid Lenor Gold Orchid ja Vanilla 495g,Lõhnagraanulid Lenor,495 g,8700216704809,,,household,hh_laundry
+283205,"Aptamil® NUTRIBIOTIK™ 4 piimajook alates 2 aasta vanusest, 800g",Aptamil® NUTRIBIOTIK™,800 g,4008976527206,baby,baby_other,baby,baby_formula
+283459,Hipp comfort eripiimasegu al.sünnist300g,Hipp,,9062300139454,baby,baby_formula,baby,baby_formula
+283592,COOP lahustuv kohv 100g,COOP,100 g,7340191173521,,,drinks,drinks_tea_coffee
+283748,A. Le Coq Premium Select õlu 4.3%vol 355ml,A. Le,355 ml,4740098094821,,,drinks,drinks_beer_cider
+283915,Tallegg Delikatessrulaad 500G,Tallegg Delikatessrulaad,500 g,4740046010477,,,meat_fish,meat_hams
+284679,USIN Praetud tšeburekid 220 g,USIN Praetud,220 g,4740584006840,,,bakery,bakery_other
+285612,El Taco Truck nisutortillad 144 g,El Taco,144 g,7350115945042,,,bakery,bakery_flatbreads_wraps
+289171,Kotimaista Forelliribad Ürdi-Küüslmar 250G,Kotimaista Forelliribad,250 g,6438574109210,,,meat_fish,fish_processed
+289441,"Kartulivorm maasuitsusingiga, SELVERI KÖÖK, 2 kg, ettetellimisel",,,4740581112209,meat_fish,fish_salted_smoked,dry_preserves,dry_ready_meals_jars
+289442,"Kodune rosolje, SELVERI KÖÖK, 700 g",,,4740581103474,dry_preserves,dry_other,produce,produce_herbs_salads_sprouts
+289739,"Frikadellisupp, SELVERI KÖÖK, 400 g",,,4740581111820,dry_preserves,dry_other,dry_preserves,dry_ready_meals_jars
+289766,"Õun Golden, kg",,,2701379000001,produce,produce_apples_pears,produce,produce_apples_pears

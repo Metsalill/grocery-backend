@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+125642,"Juustukaste Salsa Con Queso, POCO LOCO, 300 g",LTT AS,300 g,5412514999940,world_spices,spices_mexican,sauces_oils,sauces_other
+125643,"Juustukolmnurgad, FLORA, 115g",Selver AS,115 g,4750271109273,dairy_eggs_fats,dairy_other,bakery,bakery_cakes_pastries
+125644,"Juustukook, PAGARINI, 850 g",Eesti Pagar AS,850 g,4744918010176,dairy_eggs_fats,dairy_other,bakery,bakery_cakes_pastries
+125645,"Juustuküpsis, SELVERI PAGARID, 500 g",Selver AS,500 g,2614889000006,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+125646,"Juustumaitselised kartuliaastud, TAFFEL, 180g",Orkla Eesti AS,180 g,4750024002721,dairy_eggs_fats,dairy_other,sweets_snacks,sweets_snacks_salty
+125647,"Juusturibad küüslauguga, DELIKATESS, 100 g",Delikatess Food OÜ,100 g,4742421004446,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+125648,"Juusturibad tšillimaitselised, DELIKATESS, 100 g",Delikatess Food OÜ,100 g,4742421002121,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+125649,"Juusturull, SELVERI PAGARID, ca 115 g",Eesti Pagar AS,115 g,2611019000004,dairy_eggs_fats,dairy_other,bakery,bakery_buns_croissants
+125650,"Juustomstritsel, SELVERI PAGARID, 320-330 g",Selver AS,325 g,2611088000004,dairy_eggs_fats,dairy_other,bakery,bakery_other
+125651,"Kaelariputatav medal Nr.1 piimašokolaadist, STEENLAND, 23 g",LTT AS,23 g,87188653,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+125652,"Kaeradessert dreamy sidruni, VALIO ODDLYGOOD, 130 g",Oddlygood Estonia OÜ,130 g,6430081490850,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_desserts
+125653,"Kaerahelbed maapähklivõi ja meresoolaga, GRACI, 50 g",Bimar OÜ,50 g,4751019531059,sweets_snacks,sweets_nuts_driedfruit,dry_preserves,dry_cereals_muesli
+125654,"Kaerahelbed, mahe, JAHU-JAAN, 500 g",Selver AS,500 g,4745010371301,dairy_eggs_fats,dairy_plant_drinks,dry_preserves,dry_cereals_muesli
+125655,"Kaerahelbed, SELVER, 500 g",Selver AS,500 g,4740581300088,dairy_eggs_fats,dairy_plant_drinks,dry_preserves,dry_cereals_muesli
+125656,"Kaerahelbepuder maasikatega, tops, ACTIVUS, 60 g",Sanitex OÜ,60 g,4770107253444,baby,baby_porridge_cereal,dry_preserves,dry_cereals_muesli
+125657,"Kaerahelbepuder marjadega, tops, ACTIVUS, 60 g",Sanitex OÜ,60 g,4770107253499,baby,baby_porridge_cereal,dry_preserves,dry_cereals_muesli
+125658,"Kaerahelbepuder mustikatega, tops, ACTIVUS, 60 g",Sanitex OÜ,60 g,4770107256025,baby,baby_porridge_cereal,dry_preserves,dry_cereals_muesli
+125659,"Kaerahelbepuder õuntega, tops, ACTIVUS, 60 g",Sanitex OÜ,60 g,4770107253482,baby,baby_porridge_cereal,dry_preserves,dry_cereals_muesli
+125660,"Kaerahelbepuder vaarikatega, tops, ACTIVUS, 60 g",Sanitex OÜ,60 g,4770107253451,baby,baby_porridge_cereal,dry_preserves,dry_cereals_muesli
+125661,"Kaerajook 2,8%, vitamiinidega laktoosivaba, OATLY, 1 l",Club-Mate Eesti OÜ,1 l,7394376620683,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+125662,"Kaerajook barista vanillimaitseline UHT, VALIO ODDLYGOOD, 1 l",,1 l,,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+125663,"Kaerajook gluteenivaba, NATRUE, 1 L",D.T.L. Consumer Products Eesti AS,1 l,8423352400021,drinks,drinks_tea_coffee,dairy_eggs_fats,dairy_plant_drinks
+125664,"Kaerajook kaltsiumi ja vitamiinidega, magustamata laktoosivaba, ALPRO, 1 l",Nutricia SIA,1 l,5411188124689,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+125665,"Kaerajook organic laktoosivaba, YOOK, 1 l",Yook Production AS,1 l,4745010449024,dairy_eggs_fats,dairy_plant_drinks,dairy_eggs_fats,dairy_plant_drinks
+125666,"Kaerakrõpsud pitsamaitselised, LINKOSUO, 120 g",Selver AS,120 g,6420400004073,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125667,"Kaerasepik, LEIBUR, 360 g",Leibur AS,360 g,4740072224152,dairy_eggs_fats,dairy_plant_drinks,bakery,bakery_bread_loaves
+125668,"Kaeravahepala mango gluteenivaba, ODDLYGOOD, 1 kg",Oddlygood Estonia OÜ,1 kg,6430081490898,drinks,drinks_tea_coffee,dairy_eggs_fats,dairy_desserts
+125669,"Kaeravahepala vaarika gluteenivaba, ODDLYGOOD, 1 kg",Oddlygood Estonia OÜ,1 kg,6430081490881,drinks,drinks_tea_coffee,dairy_eggs_fats,dairy_desserts
+125670,"Kakao-ja karamellimaitselised helbed, OHO, 500 g",Maic Kaubanduse AS,500 g,4770149211327,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+125671,"Kakao-vaarikarull vahukoore-toorjuustukreemiga, SELVERI KÖÖK, 410 g",Kulinaaria OÜ,410 g,4740581112377,dairy_eggs_fats,dairy_other,bakery,bakery_cakes_pastries
+125672,"Kakaobatoonike Mesikäpp, KALEV, 150 g",Orkla Eesti AS,150 g,4740012025580,,,sweets_snacks,sweets_chocolate_bars
+125673,"Kakaoga teraviljahelbed, OHO!, 150 g",Maic Kaubanduse AS,150 g,4770149202639,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+125674,"Gellwe kakaojoogipulber Paw Patrol, 150g",Gellwe,150 g,5900552062479,,,drinks,drinks_syrups_powders
+125675,"Kakaokapslid Dolce Gusto Nesquik, NESCAFE, 16 tk",Selver AS,16 pcs,7613033157776,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125676,"Kakaopuding kirsikastmega, SELVERI KÖÖK, 160 g",Kulinaaria OÜ,160 g,4740581108219,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+125677,"Kala-juurviljaburger, ESVA, 375 g",Viciunai Baltic OÜ,375 g,4740056091657,meat_fish,fish_fresh,frozen_food,frozen_fish
+125678,"Kalaburgerid, ESVA, 250 g",Vičiunai Baltic OÜ,250 g,4740056096102,meat_fish,fish_fresh,frozen_food,frozen_fish
+125679,"Kalafileepalad tempura taignas, VICI, 300 g",Viciunai Baltic OÜ,300 g,4740056076630,meat_fish,fish_fresh,frozen_food,frozen_fish
+125680,"Kalafileepulgad Panko paneeringus, VICI, 285 g",Viciunai Baltic OÜ,285 g,4740056072106,meat_fish,fish_fresh,frozen_food,frozen_fish
+125681,"Kalakaste, THAI CHOICE, 200 ml",D.T.L. Consumer Products Eesti AS,200 ml,8851978801029,meat_fish,fish_fresh,sauces_oils,sauces_soy_worcester
+125682,"Kalamata Ekstra väärisoliiviõli, GOURMANTE, 500 ml",Sanitex OÜ,500 ml,5200110730018,sauces_oils,oils_olive,sauces_oils,oils_olive
+125683,"Kalapulgad Muumi, VICI, 250 g",Viciunai Baltic OÜ,250 g,4740056074865,meat_fish,fish_fresh,frozen_food,frozen_fish
+125684,"Kalapulgad Smart Choice, VICI, 250 g",Viciunai Baltic OÜ,250 g,4740056098595,meat_fish,fish_fresh,frozen_food,frozen_fish
+125685,"Kalasupp, SELVERI KÖÖK, 400 g",Kulinaaria OÜ,400 g,4740581111851,meat_fish,fish_fresh,dry_preserves,dry_ready_meals_jars
+125686,"Kalev piimašokolaadi medal, KALEV, 15 g",Orkla Eesti AS,15 g,4740012037828,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+125687,"Kalevipoeg piimašokolaad purustatud mandlitega, KALEV, 270 g",Orkla Eesti AS,270 g,4740012601005,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+125688,"Kalkuni-suvikõrvitsakotlet, SELVERI KÖÖK, 240 g",Kulinaaria OÜ,240 g,4740581112940,meat_fish,meat_poultry,meat_fish,meat_poultry
+125689,"Kalkuniguljašš kartuliga, SELVERI KÖÖK, 400 g",Kulinaaria OÜ,400 g,4740581108189,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+125690,"Kalkuniguljašš, SELVERI KÖÖK, 2,2 kg, ettetellimisel",Kulinaaria OÜ,2.2 kg,4740581112179,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+125691,"Kalkuniguljašš, SELVERI KÖÖK, 400 g",Kulinaaria OÜ,400 g,4740581104815,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+125692,"Kalmaaripulgad 64%, VICI, 250 g",Viciunai Baltic OÜ,250 g,4740056094948,,,frozen_food,frozen_fish
+125693,"Kalmaarirõngad, KALURI, 240 g",Läätsa Kalatööstus AS,240 g,4740590073966,,,frozen_food,frozen_fish
+125694,"Kalmaarirõngad taignas, DAYSEADAY, 500 g",Balbiino AS,500 g,8719214288914,,,frozen_food,frozen_fish
+125695,"Kalvados BOULARD VSOP karbis, 70 cl",Liviko AS,700 ml,3152900000820,,,drinks,drinks_spirits
+125696,"Kalvados CHATEAU DU BREUIL Reserve des Seigneurs XO, 70 cl",Goldberger OÜ,700 ml,3103821204002,drinks,drinks_tea_coffee,drinks,drinks_spirits
+125697,"Kalvados COQUEREL VSOP, 50 cl",Tridens AS,500 ml,3559627110618,,,drinks,drinks_spirits
+125698,"Kama-jogurtibatoonike, KALEV, 150 g",Orkla Eesti AS,150 g,4740012600015,dairy_eggs_fats,dairy_yogurt_kefir,sweets_snacks,sweets_chocolate_bars
+125699,"Kamajook mustika-vaarika, FARMI, 750 g",,750 g,,produce,produce_berries,dairy_eggs_fats,dairy_yogurt_kefir
+125700,"Kamapallid, BALSNACK, 30 g",Balsnack International Holding AS,30 g,4740053007040,,,sweets_snacks,sweets_snacks_salty
+125701,"Kamatahvel, KALEV, 100 g",Orkla Eesti AS,100 g,4740012600381,,,sweets_snacks,sweets_chocolate_bars
+125702,"Kamavaht rabarberikastmega, SELVERI KÖÖK, 130g",Kulinaaria OÜ,130 g,4740581110731,,,dairy_eggs_fats,dairy_desserts
+125703,"Kana-juustu pirukas filotaignas, SELVERI PAGARID, ca 87 g",Balt-Hellin OÜ,87 g,2611961000008,dairy_eggs_fats,dairy_other,bakery,bakery_cakes_pastries
+125704,"Kana-karrisalat, SELVERI KÖÖK, 200 g",Kulinaaria OÜ,200 g,4740581107977,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+125705,"Kana kiirsupp nuudlitega, MAGGI, 12 g",Selver AS,12 g,8445290057532,meat_fish,meat_poultry,dry_preserves,dry_soups_noodles
+125706,"Kana-kinoasalat ürdi-hapukoorekastmega Fitlap, SELVERI KÖÖK, 360g",Kulinaaria OÜ,360 g,4740581109650,world_spices,spices_herbs_spice_mix,produce,produce_herbs_salads_sprouts
+125707,"Kana magushapus kastmes, SELVERI KÖÖK, 2 kg, ettetellimisel",Kulinaaria OÜ,2 kg,4740581112537,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+125708,"Kana magushapus kastmes, SELVERI KÖÖK, 400 g",Kulinaaria OÜ,400 g,4740581112414,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+125709,"Kana uramaki, SELVERI KÖÖK, 220 g",Kulinaaria OÜ,220 g,4740581113152,meat_fish,meat_poultry,meat_fish,fish_processed
+125710,"Kanaborš, PÕLTSAMAA, 530 g",Orkla Eesti AS,530 g,4740029061656,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+125711,"Kanafilee kotlet riisi ja köögiviljadega, SELVERI KÖÖK, 450g",Kulinaaria OÜ,450 g,4740581109735,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+125712,"Kanafilee võileib, SELVERI KÖÖK, 100 g",Kulinaaria OÜ,100 g,4740581114067,dairy_eggs_fats,dairy_butter_margarine,bakery,bakery_other
+125713,"Kanafrikadelli supp, SALVEST, 520 g",Salvest AS,520 g,4740073001998,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+125714,"Kanalihamaitselised kiirnuudlid, DARYNA, 50 g",Selver AS,50 g,4820179259070,meat_fish,meat_hams,dry_preserves,dry_soups_noodles
+125715,"Kanapuljong 12x10g, KNORR, 120g",Selver AS,120 g,8711200355082,world_spices,spices_broth_stock,world_spices,spices_broth_stock
+125716,"Kanapüreesupp, SELVERI KÖÖK, 400 g",Kulinaaria OÜ,400 g,4740581113046,baby,baby_food_pouches,dry_preserves,dry_ready_meals_jars
+125717,"Kanasalat mee-sinepikastmega, SELVERI KÖÖK, 310 g",Kulinaaria OÜ,310 g,4740581109636,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+125718,"Kanasupp Fitlap, PÕLTSAMAA, 530 g",Orkla Eesti AS,530 g,4740029061694,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+125719,"Kanasupp nuudlitega, SELVERI KÖÖK, 400g",Kulinaaria OÜ,400 g,4740581110342,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+125720,"Kaneelirull, SELVERI PAGARID, ca 63 g",Eesti Pagar AS,63 g,2611021000009,world_spices,spices_herbs_spice_mix,bakery,bakery_sweet_buns_donuts
+125721,"Kanepiseemne leib rukkiteradega, EESTI PAGAR, 240 g",Eesti Pagar AS,240 g,4740086013766,sweets_snacks,sweets_nuts_driedfruit,bakery,bakery_bread_loaves
+125722,"Kanepiseemneõli, rafineerimata, GLORIA, 250 ml",,250 ml,,sweets_snacks,sweets_nuts_driedfruit,sauces_oils,oils_other
+125723,"Kange sinep, FIRST PRICE, 400 g",Selver AS,400 g,7311041084915,,,sauces_oils,sauces_other
+125724,"Kännuseened marineeritud, GREEN, 580 g",Pralinee OÜ,580 g,4744148010540,produce,produce_mushrooms,dry_preserves,dry_canned_veg
+125725,"Kapparid äädikas, GOURMANTE, 100 g",Sanitex OÜ,100 g,5200110732449,sauces_oils,oils_vinegar,dry_preserves,dry_canned_veg
+125726,"Kapparid, FIRST PRICE, 100 g",Selver AS,100 g,7311041072974,,,dry_preserves,dry_canned_veg
+125727,"Kapparid väikesed, DITTMANN, 35 g (neto)",Kaupmees & Ko AS,35 g,4002239390705,,,dry_preserves,dry_canned_veg
+125728,"Kapparid veiniäädikas, LOMBARDI, 212 g",Da Vinci Food OÜ,212 g,8008500012020,drinks,drinks_wine,dry_preserves,dry_canned_veg
+125729,"Kapsa-hakklihahautis, SELVERI KÖÖK, 2,1 kg, ettetellimisel",Kulinaaria OÜ,2.1 kg,4740581112186,meat_fish,meat_minced,dry_preserves,dry_ready_meals_jars
+125730,"Kapsa-hakklihahautis, SELVERI KÖÖK, 500 g",Kulinaaria OÜ,500 g,4740581104013,meat_fish,meat_minced,dry_preserves,dry_ready_meals_jars
+125731,"Kapsapirukas, SELVERI PAGARID, ca 62 g",Selver AS,62 g,2611014000009,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+125732,"Karamell Frutic Assortii, BUCURIA, 190 g",Estinvait OÜ,190 g,4840095018506,,,sweets_snacks,sweets_candies
+125733,"Karamell klassikaline, JAANI, 190 g",Polven Foods OÜ,190 g,4740502001728,,,sweets_snacks,sweets_candies
+125734,"Karamell piimatäidisega Sweet Drop, ROSHEN, 150 g",Eugesta Eesti AS,150 g,4823077623684,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_candies
+125735,"Karamelli dessertkaste, SCHWARTAU, 125 ml",D.T.L Consumer Products Eesti AS,125 ml,4011800049010,dairy_eggs_fats,dairy_desserts,sauces_oils,sauces_other
+125736,"Karamelli ja valge šokolaadi riisibatoonike, RICE UP, 18 g",Proposito OÜ,18 g,3800233074420,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+125737,"Karamelli-koorejäätis glasuuris, VANILLA NINJA, 80 g",Balbiino AS,80 g,4740188012308,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+125738,"Karamelli-koorejäätis, ONU ESKIMO, 57 g",Balbiino AS,57 g,4740188019727,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+125739,"Karamelli-pähkli tops, SUPER VIVA, 95 g",Unilever Eesti AS,95 g,8711327550155,sweets_snacks,sweets_nuts_driedfruit,frozen_food,frozen_desserts_icecream
+125740,"Karamelli-vanilli koorejäätis pohlamoosiga, PREMIA, 480 g",Premia Tallinna Külmhoone AS,480 g,4740093025837,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+125741,"Karamellijäätis, ERITI RAMMUS, 480 g",Premia Tallinna Külmhoone AS,480 g,4740093021235,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+125742,"Karamellimaitseline Tseiloni must tee niidiga kotis 20pk, DILMAH, 30 g",Jungent Estonia OÜ,30 g,9312631142075,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+125743,"Karamellipuding pohlakastmega, SELVERI KÖÖK, 160 g",Kulinaaria OÜ,160 g,4740581108226,dairy_eggs_fats,dairy_desserts,dairy_eggs_fats,dairy_desserts
+125744,"Karboniseerimata mineraalvesi, NEPTUNAS, 1,5 L",Coca Cola HBC Eesti AS,1.5 l,5000112651454,drinks,drinks_water,drinks,drinks_water
+125745,"Karboniseeritud looduslik mineraalvesi 6-pakk, BORJOMI, 6 x 1 L",Sanitex OÜ,6 x 1 l,4860019001322,drinks,drinks_water,drinks,drinks_water
+125746,"Karboniseeritud looduslik mineraalvesi, BORJOMI, 1 L",Sanitex OÜ,1 l,4860019001636,drinks,drinks_water,drinks,drinks_water
+125747,"Karboniseeritud looduslik mineraalvesi, PETER MIKHEIM, 1 L",Mediato AS,1 l,4740158009864,pet,pet_other,drinks,drinks_water
+125748,"Karboniseeritud mineraalvesi Mündi, NEPTUNAS, 1,5 L",,1.5 l,5000112651539,drinks,drinks_water,drinks,drinks_water
+125749,"Karboniseeritud mineraalvesi Mündi, NEPTUNAS, 500 ml",Coca Cola HBC Eesti AS,500 ml,5000112651546,drinks,drinks_water,drinks,drinks_water
+125750,"Kartuli-gnocchi, NONNA RINA, 500 g",Selver AS,500 g,8023022072055,produce,produce_root_veg,dry_preserves,dry_pasta_rice
+125751,"Kartuli hakklihavorm, SELVERI KÖÖK, 300 g",Kulinaaria OÜ,300 g,4740581113077,meat_fish,meat_minced,dry_preserves,dry_ready_meals_jars
+125752,"Kartuli-kanasalat, SELVERI KÖÖK, 700 g",,700 g,4740581113367,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+125753,"Kartulikrõps jogurti- ja ürdimaitseline Oven Baked, LAY'S, 180 g",Pepsico Eesti AS,180 g,5900259128836,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125754,"Kartulikrõps juustumaitseline, ESTRELLA, 180 g",Selver AS,180 g,4779028345832,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125755,"Kartulikrõps Kettle Cooked hapukoore-sibula, CRISPY, 150 g",Selver AS,150 g,5701397326531,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125756,"Kartulikrõps Kettle Cooked meresoola ja musta pipraga, CRISPY, 150 g",Selver AS,150 g,5701397300203,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125757,"Kartulikrõps Kettle Cooked Paprika, CRISPY, 150g",Selver AS,150 g,5701397326548,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125758,"Kartulikrõps kreemises kastmes kukeseene Oven Baked, LAY'S, 180 g",Pepsico Eesti AS,180 g,5900259128539,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125759,"Kartulikrõps Strong juustu- ja Cayenne maitselised, LAY'S, 120 g",Pepsico Eesti AS,120 g,5900259127747,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125760,"Kartulikrõps suitsupeekonimaitseline, ESTRELLA, 180 g",Selver AS,180 g,4779028345818,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125761,"Kartulikrõpsud Balsamico & tomati, KETTLE COOKED, 150 g",Selver AS,150 g,5701397326623,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125762,"Kartulikrõpsud Broadway hapukoore- ja sibulamaitselised Less Fat, TAFFEL, 260 g",Orkla Eesti AS,260 g,6410380042004,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125763,"Kartulikrõpsud Juustu-sibula, PRINGLES, 165 g",Sanitex OÜ,165 g,5053990101535,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125764,"Kartulikrõpsud Koore-Sibula, PRINGLES, 165 g",Sanitex OÜ,165 g,5053990101597,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125765,"Kartulikrõpsud kukeseente ja juustukastme maitselised, ESTRELLA, 170g",Selver AS,170 g,4779028347287,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125766,"Kartulikrõpsud magusa tšilli ja punase pipra, TYRRELL'S, 150 g",Remecom OÜ,150 g,5060042641413,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125767,"Kartulikrõpsud magushapu ploomimaitselised, KOIKEYA, 100 g",Estonian Dairy Products OÜ,100 g,4901335003963,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125768,"Kartulikrõpsud meresoolamaitselised, CRISPY, 150 g",,150 g,5701397396527,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125769,"Kartulikrõpsud Original, PRINGLES, 165 g",Sanitex OÜ,165 g,5053990101573,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125770,"Kartulikrõpsud Paprika, PRINGLES, 165 g",Sanitex OÜ,165 g,5053990161669,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125771,"Kartulikrõpsud Peekoni, PRINGLES, 165 g",Sanitex OÜ,165 g,5053990161690,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125772,"Kartulikrõpsud rosmariiniga, LORENZ, 100 g",D.T.L. Consumer Products Eesti AS,100 g,4018077711893,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125773,"Kartulikrõpsud sakilised Ranch, ESTRELLA, 250 g",Selver AS,250 g,4779028345856,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125774,"Kartulikrõpsud salsa-maitselised, LAY'S, 120 g",Pepsico Eesti AS,120 g,5900259135834,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125775,"Kartulikrõpsud siidriäädika ja meresoolaga, TYRRELLS, 150 g",Remecom OÜ,150 g,5060042641406,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125776,"Kartulikrõpsud sool & äädikas, PRINGLES, 165 g",Sanitex OÜ,165 g,5053990101580,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125777,"Kartulikrõpsud Spicy BBQ maitselised, ESTRELLA, 115 g",Selver AS,115 g,4779028347263,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125778,"Kartulikrõpsud Spicy Hapukoore-tšillimaitselised, ESTRELLA, 115 g",Selver AS,115 g,4779028347218,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125779,"Kartulikrõpsud Spicy juustu-Jalopeño maitselised, ESTRELLA, 115 g",Selver AS,115 g,4779028347232,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125780,"Kartulikrõpsud Terav ja vürtsikas, PRINGLES, 165 g",Sanitex OÜ,165 g,5053990101542,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125781,"Kartulikrõpsud teriyakimaitselised, KOIKEYA, 100 g",Estonian Dairy Products OÜ,100 g,4901335006087,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125782,"Kartulikrõpsud või ja soolamaitselised, ESTRELLA, 170g",,170 g,4779028347270,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125783,"Kartulimaitseaine, SANTA MARIA, 800 g, ettetellimisel",Santa Maria AS,800 g,7311311013102,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+125784,"Kartulipallid, AVIKO, 600 g",Sanitex OÜ,600 g,8710449001910,produce,produce_root_veg,frozen_food,frozen_potato_products
+125785,"Kartulipannkoogid Rosti, külmutatud, AVIKO, 750 g",Sanitex OÜ,750 g,8710449917341,frozen_food,frozen_veg,frozen_food,frozen_potato_products
+125786,"Kartulipannkoogid, TARTU MILL, 200 g",Tartu Mill AS,200 g,4740493000991,produce,produce_root_veg,dry_preserves,dry_flour_sugar_baking
+125787,"Kartulipuder peekoni ja saiakuubikutega, MAGGI, 53 g",Selver AS,53 g,7613037003307,baby,baby_porridge_cereal,dry_preserves,dry_other
+125788,"Kartulipuder piimaga, TARTU MILL, 35 g",Tartu Mill AS,35 g,4743303100133,baby,baby_porridge_cereal,dry_preserves,dry_other
+125789,"Kartulipüree juustu ja brokoliga, KNORR, 50 g",Selver AS,50 g,8714100395349,baby,baby_food_pouches,dry_preserves,dry_other
+125790,"Kartulipüree peekoni ja sibulaga, KNORR, 51 g",Selver AS,51 g,8584057005376,baby,baby_food_pouches,dry_preserves,dry_other
+125791,"Kartulipüree rõõsakoorega, MAGGI, 35 g",Selver AS,35 g,7613032210205,baby,baby_food_pouches,dry_preserves,dry_other

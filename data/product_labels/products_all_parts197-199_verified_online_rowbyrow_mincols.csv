@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+125040,"Jahvatatud kohv Krönung mild, JACOBS, 500 g",SELVER AS,,8711000708682,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+125041,"Jahvatatud kohv Pausa, SEGAFREDO, 450 g",MEIRA EESTI OÜ,,6420101882550,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+125042,Lavazza jahvatatud kohv Qualita Rossa 250 g,Lavazza,250 g,8000070035805,,,drinks,drinks_tea_coffee
+125043,"Jahvatatud kohv Selection, JACOBS, 500 g",SELVER AS,,8711000891568,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+125044,"Jahvatatud mahekohv Organic, LÖFBERGS, 450 g",SELVER AS,,7310050001791,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+125045,"Jahvatatud muskaatpähkel, MEIRA, 32 g",MEIRA EESTI OÜ,,6414201102205,,,world_spices,spices_herbs_spice_mix
+125046,"Jahvatatud must pipar, FIRST PRICE, 100 g",SELVER AS,,5701410416041,world_spices,spices_basic_salt_pepper,world_spices,spices_basic_salt_pepper
+125047,"Jahvatatud tassikohv In-Cup, MERRILD, 400 g",SELVER AS,,8000070060326,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+125048,"Jalapeño täidisega oliivid, EXPLANADA GOURMET, 370 ml",SELVER AS,,8410791137625,,,dry_preserves,dry_canned_veg
+125049,"Jalapeno viilud, SANTA MARIA, 215 g",SANTA MARIA AS,,7311310038403,,,dry_preserves,dry_canned_veg
+125050,"Jämedad kaerahelbed mahe, FIRST PRICE, 1 kg",SELVER AS,,7311041087664,dairy_eggs_fats,dairy_plant_drinks,dry_preserves,dry_cereals_muesli
+125051,"Jasmiiniriis, ALESIE, 1 kg",UMAMI OÜ,,6803573320186,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+125052,"Jasmiiniriis, FIRST PRICE, 1 kg",SELVER AS,,7311041080801,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+125053,"Jasmiiniriis, ORIENTE, 1 kg",KAUPMEES & KO AS,,5601228223117,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+125054,"Jasmiiniriis, VESKI MATI, 500 g",SELVER AS,,4740281006846,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+125055,"Jogurt astelpajumoosiga, SAIDAFARM, 300 ml",PAJUMÄE TALU OÜ,,4740464100132,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125056,"Jogurt kirsi 4x120g, ACTIVIA, 480 g",NUTRICIA SIA,,4751008970500,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125057,"Jogurt koorene mandariinide ja meega laktoosivaba, FARMI, 150 g",FARMI PIIMATÖÖSTUS AS,,4740113019150,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125058,"Jogurt koorene põldmarjadega laktoosivaba, FARMI, 150 g",FARMI PIIMATÖÖSTUS AS,,4740113097141,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125059,"Jogurt maasika 4x120g, ACTIVIA, 480 g",NUTRICIA SIA,,4751008970494,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125060,"Jogurt maasikalisandiga, FANTASIA, 118 g",NUTRICIA SIA,,5900643047378,drinks,drinks_soft_soda,dairy_eggs_fats,dairy_yogurt_kefir
+125061,"Jogurt mango ja chia seemnetega, HELLUS, 350 g",TERE AS,,4740036013884,sweets_snacks,sweets_nuts_driedfruit,dairy_eggs_fats,dairy_yogurt_kefir
+125062,"Jogurt metsamarja, 3-me bakteriga, HELLUS, 350 g",TERE AS,,4740036013280,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125063,"Jogurt metsmaasika 2%, ALMA, 1 kg",,,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125064,"Jogurt mustasõstra, HELLUS, 350 g",TERE AS,,4740036015598,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125065,"Gefilus Mustikajogurt, 380 g","Gefilus Mustikajogurt,",380 g,4740125536164,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125066,"Jogurt mustsõstrapüreega, SAIDAFARM, 300 ml",PAJUMÄE TALU OÜ,,4740464100125,baby,baby_food_pouches,dairy_eggs_fats,dairy_yogurt_kefir
+125067,"Jogurt Natural ananssimüsliga, laktoosivaba, TERE, 150 g",,,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125068,"Jogurt Natural jõhvikamüsliga, laktoosivaba, TERE, 150 g",NORDIC MILK OÜ,,4740036017677,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125069,"Jogurt Natural maitsestamata laktoosivaba, TERE, 380 g",,,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125070,"Jogurtijook banaani-maasika 4x100g laktoosivaba, VALIO GEFILUS, 400 g",,,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125071,"Jogurtijook banaanimaitseline maasika 8-pakk laktoosivaba, VALIO GEFILUS, 800 g",VALIO EESTI AS,,4740125581812,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125072,"Jogurtijook kreeka stiilis mustika-kirsi, ALMA, 275 g",VALIO EESTI AS,,4740125582079,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125073,"Jogurtijook kreeka vaarika-virsiku, ALMA, 275g",VALIO EESTI AS,,4740125582062,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125074,"Jogurtijook maasika 4x100g, HELLUS, 400 g",NORDIC MILK OÜ,,4740036009818,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+125075,"Kiirnuudlid juustu- ja peekonimaitselised, REEVA, 60 g",SELVER AS,,4820179256949,dairy_eggs_fats,dairy_other,dry_preserves,dry_soups_noodles
+125076,"Kiirnuudlid juustu- ja ürdimaitselised, KNORR, 61 g",SELVER AS,,8714100750629,world_spices,spices_herbs_spice_mix,dry_preserves,dry_soups_noodles
+125077,"Kiirnuudlid kanalihamaitsega, THAI CHOICE, 60 g",D.T.L CONSUMER PRODUCTS EESTI AS,,8851978805027,meat_fish,meat_hams,dry_preserves,dry_soups_noodles
+125078,"Kiirnuudlid kanamaitselised, NEGISAN, 65 g",SELVER AS,,3770032049892,meat_fish,meat_poultry,dry_preserves,dry_soups_noodles
+125079,"Kiirnuudlid kanamaitselised, REEVA, 85 g",SELVER AS,,4820179257007,meat_fish,meat_poultry,dry_preserves,dry_soups_noodles
+125080,"Kiirnuudlid kanamaitselised topsis, YATEKOMO, 60 g",SANITEX ESTONIA OÜ,,8410300349952,meat_fish,meat_poultry,dry_preserves,dry_soups_noodles
+125081,"Kiirnuudlid köögiviljamaitselised, MAGGI, 59,2 g",SELVER AS,,8445291528192,dry_preserves,dry_other,dry_preserves,dry_soups_noodles
+125082,"Kiirnuudlid tomatimaitselised, KNORR, 65 g",SELVER AS,,8714100750612,produce,produce_root_veg,dry_preserves,dry_soups_noodles
+125083,"Kiirnuudlid veiselihamaitselised, MAGGI, 59,2 g",,,,meat_fish,meat_hams,dry_preserves,dry_soups_noodles
+125084,"Kiirnuudlid veiselihamaitselised, REEVA, 60 g",SELVER AS,,4820179256925,meat_fish,meat_hams,dry_preserves,dry_soups_noodles
+125085,"Kiirnuudlid veiselihamaitselised, REEVA, 85 g",SELVER AS,,4820179257014,meat_fish,meat_hams,dry_preserves,dry_soups_noodles
+125086,"Kiirnuudlid vürtsika kanalihamaitselised, REEVA, 60 g",SELVER AS,,4820179256932,meat_fish,meat_hams,dry_preserves,dry_soups_noodles
+125087,"Kiirnuudlid vürtsikas-hapu, THAI CHOICE, 85 g",D.T.L CONSUMER PRODUCTS EESTI AS,,8851978805218,,,dry_preserves,dry_soups_noodles
+125088,"Kiirnuudliroog karrimaitselise kastmega, OYAKATA, 90 g",INTERALTUS OÜ,,5901384504878,,,dry_preserves,dry_soups_noodles
+125089,"Kiirnuudliroog Korea barbecue maitseline, OYAKATA, 93g",INTERALTUS OÜ,,5901384505417,sauces_oils,sauces_marinades,dry_preserves,dry_soups_noodles
+125090,"Kiirnuudliroog Pad Thai maitseline, OYAKATA, 93g",INTERALTUS OÜ,,5901384505387,,,dry_preserves,dry_soups_noodles
+125091,"Kiirpuder Jõhvika, VESKI MATI, 45 g",SELVER AS,,4740281006365,baby,baby_porridge_cereal,dry_preserves,dry_cereals_muesli
+125092,Veski Mati kiirkaerapuder mustika 45 g,Veski Mati,45 g,4740281006358,,,dry_preserves,dry_cereals_muesli
+125093,"Kiirpuder Õuna, VESKI MATI, 45 g",SELVER AS,,4740281006341,baby,baby_porridge_cereal,dry_preserves,dry_cereals_muesli
+125094,"Kikerherned, AL AMIER, 500 g",KAUPMEES & KO AS,,4013200387105,dry_preserves,dry_canned_veg,dry_preserves,dry_groats_beans
+125095,"Kikerherned, CAMPAGNA, 400 g",SELVER AS,,8005391303169,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+125096,"Kikerherned vees, ORGANIC FOODS, 400 g",M&V TRADE OÜ,,8002225650147,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+125097,"Kiluvürts, SANTA MARIA, 30 g",SANTA MARIA AS,,6418474118406,,,world_spices,spices_herbs_spice_mix
+125098,"Kimchi originaal HOT, RUNOLAND, 300 g",SOLARIN OÜ,,5901641001737,drinks,drinks_spirits,dry_preserves,dry_canned_veg
+125099,"Kinoa must, JUST NATURE, 500 g",GEMOSS EESTI OÜ,,4750323000190,dry_preserves,dry_groats_beans,dry_preserves,dry_groats_beans
+125100,"Kinoa punane, JUST NATURE, 500 g",GEMOSS EESTI OÜ,,4750323000183,dry_preserves,dry_groats_beans,dry_preserves,dry_groats_beans
+125101,"Kinoa, segu, SMART ORGANIC, 300 g",BIOMARKET OÜ,,3800225477963,dry_preserves,dry_groats_beans,dry_preserves,dry_groats_beans
+125102,"Kinoa valge, JUST NATURE, 500 g",GEMOSS EESTI OÜ,,4750323000206,dry_preserves,dry_groats_beans,dry_preserves,dry_groats_beans
+125103,"Kinoa, valge, SMART ORGANIC, 300 g",BIOMARKET OÜ,,3800225478267,dry_preserves,dry_groats_beans,dry_preserves,dry_groats_beans
+125104,"Veiselihasink Õhemast Õhem, MAKS&MOORITS, 170 g",,,,meat_fish,meat_hams,meat_fish,meat_hams
+125105,"Kirju suhkruströssel, RUF, 200 g",KAUPMEES & KO AS,,4002809004308,,,dry_preserves,dry_flour_sugar_baking
+125106,"Poolkoivad teravas marinaadis, SELVER, kg",SELVER AS,,2712215000000,sauces_oils,sauces_marinades,meat_fish,meat_poultry
+125107,"HULGI Kanafileesink 3tk, MAKS&MOORITS, 3 x 150g",ATRIA EESTI AS,,210100001351,meat_fish,meat_hams,meat_fish,meat_hams
+125108,"Keele zeleevorst, OSKAR, 120 g",OSKAR LT AS,,4740569004014,meat_fish,meat_sausages,meat_fish,meat_gourmet
+125109,"Veiserind, OSKAR, 100 g",OSKAR LT AS,,4740569009200,meat_fish,meat_beef_lamb_game,meat_fish,meat_hams
+125110,"Kirsi-aroonia kannujook, PÕLTSAMAA, 200 ml",ORKLA EESTI AS,,4740029058229,,,drinks,drinks_soft_soda
+125111,"Lõhefilee jahutatud C-trim, DTRIM GRUPP, kg",Määramata,,2703272000003,meat_fish,fish_fresh,meat_fish,fish_fresh
+125112,"Kirsi-koorejäätis vahvlikoonuses, ONU ESKIMO, 87 g",BALBIINO AS,,4740188012711,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+125113,"Tallegg Kolme Juustu Ahjubroiler U 1,8Kg",Tallegg Kolme,1.8 kg,2364028800003,dairy_eggs_fats,dairy_cheese_slices,meat_fish,meat_poultry
+125115,"Kergsuitsu seavälisfilee, RANNAROOTSI, kg",RANNAROOTSI LIHATÖÖSTUS AS,,2329625900006,,,meat_fish,meat_hams
+125116,"Kirsi-õuna-aroonia mahlajook, PÕLTSAMAA, 2 L",ORKLA EESTI AS,,4740029051480,drinks,drinks_juices,drinks,drinks_juices
+125117,"Kirsid kivideta, HÄRMAVILI, 400 g",BALBIINO AS,,4740188910970,,,frozen_food,frozen_berries_fruit
+125118,"Kirsikompott kivideta, GREENHOUSE, 680 g bruto",INTERALTUS OÜ,,5410524121047,,,dry_preserves,dry_canned_fruit
+125119,"Kirsikompott kivideta, SUVEL, 715 g",MOGYI EESTI OÜ,,4742896010010,,,dry_preserves,dry_canned_fruit
+125120,"Kirsikook, SELVERI KÖÖK, 600 g",KULINAARIA OÜ,,4740581113596,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+125121,"HULGI Seasink välisfileest Ehe 2tk, RANNAROOTSI, 2 x 120g",RANNAROOTSI LIHATÖÖSTUS AS,,210100001146,meat_fish,meat_hams,meat_fish,meat_hams
+125122,"Tulised tiivad, SELVER, kg",SELVER AS,,2714382000005,,,meat_fish,meat_poultry
+125123,"Kirsimaitseline siirup, HELIIS, 500 ml",EGUESTA EESTI AS,,4740077000683,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+125124,"Jahutatud broilerikintsud, TALLEGG, kg",MAAG EESTI AS,,2710879000008,dairy_eggs_fats,dairy_eggs,meat_fish,meat_poultry
+125125,"Kirsimaitseline tarretis, DR.OETKER, 72 g",JUNGENT ESTONIA OÜ,,5900437787916,,,dry_preserves,dry_flour_sugar_baking
+125126,"Maitselt mahedad grillvorstid, MAKS&MOORITS, 900 g",ATRIA EESTI AS,,4740171084114,meat_fish,meat_grill_blood_sausages,meat_fish,meat_grill_blood_sausages
+125127,"Kirsimoos marjadega, RÕNGU, 1 kg",RÕNGU MAHL AS,,4741129017277,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+125128,Premia kirsisorbett 73g/80ml,Premia,73 g,4740093000261,,,frozen_food,frozen_desserts_icecream
+125129,"Toorvorstid kanalihaga Fitlap, NÕO, 400 g",NÕO LIHATÖÖSTUS OÜ,,4740574061170,meat_fish,meat_sausages,meat_fish,meat_sausages
+125130,"Kanavardad Taipärased, RANNAMÕISA, 480 g",POULTRY MEAT OÜ,,4742462000605,meat_fish,meat_poultry,meat_fish,meat_poultry
+125131,"Kirsstomatid marinaadis, MINU, 370 g neto",MAKRO TRADE BALTIC OÜ,,4743144000678,sauces_oils,sauces_marinades,dry_preserves,dry_canned_veg
+125132,"Kiss-Kiss iiris, KALEV, 150 g",ORKLA EESTI AS,,4740012600152,,,sweets_snacks,sweets_candies
+125133,"Hiidkrevetid soolvees, KALURI, 400 g",LÄÄTSA KALATÖÖSTUS,,4740590000689,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+125134,"Kiss-Kiss pehme iiris, KALEV, 150 g",ORKLA EESTI AS,,4740012600169,,,sweets_snacks,sweets_candies
+125135,"Kitsejuust Tenente, ANDRI-PEEDO, 150 g",NOPRI TALUMEIEREI OÜ,,4740187000122,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+125136,"Deline Kitsepiimajuust, viilutatud, 150 g","Deline Kitsepiimajuust,",150 g,4740572003585,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+125137,"Suitsupeekon tükeldatud, FIRST PRICE, 300 g",SELVER AS,,5701410413286,meat_fish,meat_pork,meat_fish,meat_hams
+125138,"Kitsepiimajuust Merci Chef, MERCI CHEF, 110 g",SVENSKY KAUBANDUSE AS,,3523230041317,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+125139,"Tagasink ekstra suitsu, OSKAR, kg",OSKAR LT AS,,2356983300001,meat_fish,meat_hams,meat_fish,meat_hams
+125140,"Ungari pekk, OSKAR, kg",OSKAR LT AS,,2356992600000,,,meat_fish,meat_gourmet
+125141,"E-vaba fileesink, OSKAR, 105 g",OSKAR LT AS,,4740569009460,meat_fish,meat_hams,meat_fish,meat_hams
+125142,"Veisesink välisfileest Ehe, RANNAROOTSI, 120 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296010500,meat_fish,meat_hams,meat_fish,meat_hams
+125143,"Klaarsäga šašlõkk, SELVER, kg",SELVER AS,,2711933000002,meat_fish,meat_grill_blood_sausages,meat_fish,fish_fresh
+125144,"Kiudainesiirup meemaitseline, NICKS, 300 g",NJOM FOODS OÜ,,7350104400095,drinks,drinks_syrups_powders,dry_preserves,dry_other
+125145,"Kivideta rohelised oliivid, GOURMANTE, 360 g",SANITEX OÜ,,5200110731077,,,dry_preserves,dry_canned_veg
+125146,"Maitselt mahe grillvorst juustuga, MAKS&MOORITS, 600 g",ATRIA EESTI AS,,4740171085159,dairy_eggs_fats,dairy_other,meat_fish,meat_grill_blood_sausages
+125147,"Passion-vilja broilerikintsuliha šašlõkk, LINNAMÄE LIHATÖÖSTUS, 600 g",LINNAMÄE LIHATÖÖSTUS AS,,4740618007300,meat_fish,meat_poultry,meat_fish,meat_poultry
+125148,"Kiviveski täistera nisumanna, TAMMEJUURE MAHETALU, 700 g",TAMMEJUURE MAHE TULUNDUSÜHISTU,,4744150010071,,,dry_preserves,dry_flour_sugar_baking
+125149,"Klassikaline juustukook Lydia, SELVERI KÖÖK, 320 g",KULINAARIA OÜ,,4740581113862,dairy_eggs_fats,dairy_other,bakery,bakery_cakes_pastries
+125150,"Kalamarjamääre krevettidega, VELADIS, 160g",KODURANNA TRV OÜ,,4823097905524,meat_fish,fish_fresh,meat_fish,fish_processed
+125151,"Sealihasink Fitlap, NÕO, kg",NÕO LIHATÖÖSTUS OÜ,,2357438500007,meat_fish,meat_hams,meat_fish,meat_hams
+125152,"Klassikaline kanamarinaad, SANTA MARIA, 75 g",,,,sauces_oils,sauces_marinades,sauces_oils,sauces_marinades
+125153,"Klassikaline majonees, SALVEST, 430 g",SALVEST AS,,4740073074763,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+125154,"Kooritud krevetid soolvees 150 g neto, MARWI, 300 g",JP FOODS AS,,4740173000822,world_spices,spices_basic_salt_pepper,meat_fish,fish_processed
+125155,"Klassikaline martsipanibatoon, KALEV, 40 g",ORKLA EESTI AS,,4740012600626,,,sweets_snacks,sweets_chocolate_bars
+125156,"Grillvorst Kuldne, RANNAROOTSI, 800 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296007197,meat_fish,meat_grill_blood_sausages,meat_fish,meat_grill_blood_sausages
+125157,"Kanagrillvorstid riisiga Fitlap, NÕO, 210 g",NÕO LIHATÖÖSTUS OÜ,,4740574092808,meat_fish,meat_grill_blood_sausages,meat_fish,meat_grill_blood_sausages
+125158,"Talusink, MAKS&MOORITS, 150 g",ATRIA EESTI AS,,4740171188164,meat_fish,meat_hams,meat_fish,meat_hams
+125159,"Klassikaline okroška, SELVERI KÖÖK, 400 g",KULINAARIA OÜ,,4740581113855,,,dry_preserves,dry_ready_meals_jars
+125160,"Klassikaline Provansaal majonees, BALTIKA, 300 g",BALTIKA FOOD OÜ,,4745011024329,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+125161,"Šašlõki kabanossid, NÕO, 375 g",NÕO LIHATÖÖSTUS OÜ,,4740574095175,meat_fish,meat_sausages,meat_fish,meat_grill_blood_sausages
+125162,"Klassikalised martsipanikommid, KALEV, 175 g",ORKLA EESTI AS,,4740012028277,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+125163,"Klassikalised pelmeenid, MAKS&MOORITS, 400 g",,,,,,frozen_food,frozen_ready_meals
+125164,"Kodukeeksi jahusegu, TARTU MILL, 450 g",TARTU MILL AS,,4750020041236,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+125165,"Säinaäkis, Selver, kg",SELVER AS,,2714679000008,,,meat_fish,fish_fresh
+125166,"HULGI Hommikupeekon 3tk, NÕO, 3 x 135g",NÕO LIHATÖÖSTUS OÜ,,210100001498,meat_fish,meat_pork,meat_fish,meat_hams
+125167,"Kalkuni kintsulihast šašlõkk, RANNAROOTSI, 600 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296003694,meat_fish,meat_poultry,meat_fish,meat_hams
+125168,"Šašlõki toorvorstid, NÕO, 400 g",NÕO LIHATÖÖSTUS OÜ,,4740574065703,meat_fish,meat_sausages,meat_fish,meat_grill_blood_sausages
+125169,"Grillvorstid juustuga Sõprade, KARNI, 450 g",ARKE LIHATÖÖSTUS AS,,4740579196464,dairy_eggs_fats,dairy_other,meat_fish,meat_grill_blood_sausages
+125170,"Toorvorstid musta küüslauguga, LINNAMÄE LIHATÖÖSTUS, 350 g",LINNAMÄE LIHATÖÖSTUS,,4740618008499,meat_fish,meat_sausages,meat_fish,meat_grill_blood_sausages
+125171,"Mahlane veiseliha grillvorst, LINNAMÄE LIHATÖÖSTUS, 380 g",LINNAMÄE LIHATÖÖSTUS,,4740618008550,drinks,drinks_juices,meat_fish,meat_grill_blood_sausages
+125172,"Merevetika meremari, AKI, 100g",KAVIALE SIA,,4103550019587,,,meat_fish,fish_processed
+125173,"Vastsekuuste Ribi Kondita, Kg",Vastsekuuste Ribi,,2358314500005,,,meat_fish,meat_pork
+125174,"Suitsupeekon, KARNI, 300 g",ARKE LIHATÖÖSTUS AS,,4740579300045,meat_fish,meat_pork,meat_fish,meat_hams
+125175,"Jahutatud broileritiivad, TALLEGG, kg",MAAG EESTI AS,,2710882000002,dairy_eggs_fats,dairy_eggs,meat_fish,meat_poultry
+125176,"Kodune hernesupp saiakuubikutega, MAGGI, 22 g",SELVER AS,,7613036977791,bakery,bakery_buns_croissants,dry_preserves,dry_soups_noodles
+125177,"Jahutatud pardikoib, RANNAMÕISA, kg",POULTRY MEAT OÜ,,2322233200001,dry_preserves,dry_flour_sugar_baking,meat_fish,meat_poultry
+125178,"Kodune kartul röstsibulaga, SELVERI KÖÖK, 1,7 kg, ettetellimisel",KULINAARIA OÜ,,4740581112230,produce,produce_root_veg,produce,produce_herbs_salads_sprouts
+125179,"Toorvorstid tzatziki, RANNAROOTSI, 400 g",RANNAROOTSI LIHATÖÖSTUS AS,,4740296013082,meat_fish,meat_sausages,meat_fish,meat_grill_blood_sausages
+125180,"Lõhetasku mozzarellaga, SELVER, kg",SELVER AS,,2712212000003,dairy_eggs_fats,dairy_other,meat_fish,fish_fresh
+125181,"Kodune kartulisalat, SELVERI KÖÖK, 700 g",KULINAARIA OÜ,,4740581106314,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+125182,"Kodune kurk mädarõikaga, SALVEST, 675 g (neto)",,,4740073073117,produce,produce_root_veg,dry_preserves,dry_canned_veg
+125183,"Suitsurulaad tšilli-juustuga, NÕO, 100 g",NÕO LIHATÖÖSTUS OÜ,,4740574081000,dairy_eggs_fats,dairy_other,meat_fish,meat_hams
+125184,"Kodune sepik, LEIBUR, 360 g",LEIBUR AS,,4740072224459,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+125185,"Kodupelmeenid, MAKS&MOORITS, 700 g",ATRIA EESTI AS,,4740171188690,,,frozen_food,frozen_ready_meals
+125186,"Kofeiinivaba kohv, JACOBS, 250 g",SELVER AS,,8711000517451,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+125187,"Kohukesejäätis glasuuris, TERE, 53 g",BALBIINO AS,,4740188012339,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+125188,"Vannamei krevetid 40/50, keedetud, sulatatud, KALURI, kg",LÄÄTSA KALATÖÖSTUS AS,,2712185000000,,,meat_fish,fish_processed
+125189,"Kohukesejäätis jõhvikalisandiga, TERE, 55 g",BALBIINO AS,,4740188012681,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+125190,Oskar Veisevürtsisink 100 G,Oskar Veisevürtsisink,100 g,4740569009194,,,meat_fish,meat_hams

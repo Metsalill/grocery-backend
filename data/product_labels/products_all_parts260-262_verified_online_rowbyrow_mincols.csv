@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+141233,"Universaalne maitseaine, SANTA MARIA, 160 g",SANTA MARIA AS,,7311311006579,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+141234,"Ürdiaia segu , 29g, SANTA MARIA",SANTA MARIA AS,,7311311017216,dry_preserves,dry_other,world_spices,spices_herbs_spice_mix
+141235,"Ürdiliköör KOSKENKORVA Valhalla, 50 cl",ANORA ESTONIA AS,,6412700318202,dry_preserves,dry_other,drinks,drinks_spirits
+141236,"Ürdiliköör LIVIKO Herbert, 35 cl",LIVIKO AS,,4740050003755,dry_preserves,dry_other,drinks,drinks_spirits
+141237,"Ürdiliköör LIVIKO Herbert, 50 cl",LIVIKO AS,,4740050003793,dry_preserves,dry_other,drinks,drinks_spirits
+141238,"Vaarika-banaani-mustasõstra smuutisegu, PAI, 300 g",BALBIINO AS,,4740188012858,produce,produce_berries,frozen_food,frozen_berries_fruit
+141239,"Vaarika beseerull, REVAL KONDIITER, 300 g",REVAL KONDIITER OÜ,,4742581005086,produce,produce_berries,bakery,bakery_cakes_pastries
+141240,"Vaarika gurmeeäädikas, IDEAFARM, 200 ml",METAKOR OÜ,,4744917010092,sauces_oils,oils_vinegar,sauces_oils,oils_vinegar
+141241,"Vaarika- ja šokolaadi-koorejäätis, ONU ESKIMO, 680 g",BALBIINO AS,,4740188012605,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+141242,"Vaarika-koorejäätis valge šokolaadimaitselise täidisega vahvlikoonuses, ONU ESKIMO, 84 g",,,4740188020082,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+141243,"Vaarika-mangosorbett, DRAKO, 90 g",BALBIINO AS,,4740188012391,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+141244,"Vaarika-mustikakook, SELVERI KÖÖK, 600g",KULINAARIA OÜ,,4740581113411,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+141245,"Vaarikad, MAAHÄRRA, 300 g",PREMIA TALLINNA KÜLMHOONE AS,,4740093026483,produce,produce_berries,produce,produce_berries
+141246,"Vaarikad, MARJAMAA TALU, 300 g",MARJAMAA TALU OÜ,,4742331000255,dry_preserves,dry_other,produce,produce_berries
+141247,"Vaarikad, mustikad, HÄRMAVILI, 300 g",BALBIINO AS,,4740188018584,produce,produce_berries,produce,produce_berries
+141248,"Vaarikamaitseline tarretis, DR.OETKER, 72 g",JUNGENT ESTONIA OÜ,,5900437787770,produce,produce_berries,dry_preserves,dry_flour_sugar_baking
+141432,"Nõudepesuvaht Tri-Bio 0,3l",Nõudepesuvaht Tri-Bio,0.3 l,0856922005544,,,household,hh_dishwashing
+141515,"Caffebo kohvioad Õigus, 1 kg",Caffebo,1 kg,4745010015021,,,drinks,drinks_coffee_beans_capsules
+141677,Fazer Suur Kodusai 500 G,Fazer Suur,500 g,4740103010020,,,bakery,bakery_bread_loaves
+141739,Lillet Blanc liköörvein 17%vol 750ml,Lillet Blanc,750 ml,3057230000253,,,drinks,drinks_wine
+141879,"Kartulikrõpsud meresoolaga, 275 g",Kartulikrõpsud,275 g,7310532300169,,,sweets_snacks,sweets_snacks_salty
+141903,Gloria kanepiõli 250 ml,Gloria,250 ml,4004597001859,sauces_oils,oils_other,sauces_oils,oils_other
+142108,Nordqvist jahvatatud kohv Selection Solid 450 g,Nordqvist,450 g,7310760012506,,,drinks,drinks_tea_coffee
+142437,Küürimispulber ocean 500g,Küürimispulber,500 g,5905784328560,,,household,hh_cleaners
+142688,Sprite karastusjook 1L,Sprite,1 l,5000112651928,,,drinks,drinks_soft_soda
+142789,Caribba Spiced piiritusjook 35%vol 500ml,Caribba Spiced,500 ml,4740050006138,dry_preserves,dry_other,drinks,drinks_spirits
+142859,"Tori Siidritalu Poolkuiv siider 4,9%vol 330ml",Tori Siidritalu,330 ml,4744382010344,,,drinks,drinks_beer_cider
+142866,Sir Edward’s Scotch whisky 40%vol 200ml,Sir Edward’s,200 ml,3012993006492,,,drinks,drinks_spirits
+142980,"Vaarikamoos, FIRST PRICE, 400 g",SELVER AS,,7311041085776,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+142981,"Vaarikamoos marjadega, RÕNGU, 1 kg",RÕNGU MAHL AS,,4741129017161,drinks,drinks_juices,dry_preserves,dry_canned_fruit
+142982,"Vaarikamoos, PÕLTSAMAA, 3 kg, ettetellimisel",ORKLA EESTI AS,,4740029045731,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+142983,"Vaarikamoos, PÕLTSAMAA, 600 g",,,,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+142984,"Vaarikamoos steviaga, GOOD GOOD, 330 g",REMECOM OÜ,,5694230483037,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+142985,"Vaarikatarretis, SELVERI KÖÖK, 160 g",KULINAARIA OÜ,,4740581108134,produce,produce_berries,dairy_eggs_fats,dairy_desserts
+142986,"Väärisoliiviõli, FIRST PRICE, 500 ml",SELVER AS,,7311041082492,sauces_oils,oils_olive,sauces_oils,oils_olive
+142987,"Vadouvan, TERRE EXOTIQUE, 50 g",UMAMI OÜ,,3760063336825,dry_preserves,dry_other,world_spices,spices_herbs_spice_mix
+142988,"Vahemere salatikaste, FELIX, 375 g",ORKLA EESTI AS,,4740029072621,sauces_oils,sauces_salad_dressings,sauces_oils,sauces_salad_dressings
+142989,"Vahemere ürdisegu, ilma lisatud soolata, SANTA MARIA, 24 g",SANTA MARIA AS,,7311311025488,world_spices,spices_basic_salt_pepper,world_spices,spices_herbs_spice_mix
+142990,"Vahemere ürdisegu, MEIRA, 9 g",MEIRA EESTI OÜ,,6414201005209,dry_preserves,dry_other,world_spices,spices_herbs_spice_mix
+142991,"Vahemere virsiku puuviljatee niidiga kotis 20pk, TEEKANNE, 50 g",INTERALTUS OÜ,,4009300014164,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+142992,"Vähendatud rasvasisaldusega kakaonööbid, FIRST PRICE, 100 g",SELVER AS,,7311041083840,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+142993,"Vähendatud suhkruga laktoosivaba šokolaadi-koorejäätis, BALBIINO, 250 g",BALBIINO AS,,4740188018713,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+142994,"Väherasvane kookoskreem, THAI CHOICE, 400 ml",D.T.L. CONSUMER PRODUCTS EESTI AS,,8851978804075,bakery,bakery_cakes_pastries,dry_preserves,dry_other
+142995,"Vahtrasiirup Kanada Mahe, VERTMONT, 330 g",KAUPMEES & KO AS,,5708776000464,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+142996,"Vahtrasiirup steviaga, GOOD GOOD, 350 g",REMECOM OÜ,,5694230257584,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+142997,"Vahtrasiirupi-koorejäätis Kreeka pähklitega, CLASSIC, 270 g",BALBIINO AS,,4740188020044,drinks,drinks_syrups_powders,frozen_food,frozen_desserts_icecream
+142998,"Vahukommid, FUN, 175 g",IMEX TRADING GROUP AS,,5400265020082,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+142999,"Vahukommid grillimiseks, VAN DAMME, 300 g",LTT AS,,5901583330933,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+143000,"Vahukoorejäätis maasikatoormoosi ja piimašokolaaditükkidega, BALBIINO, 500 g",BALBIINO AS,,4740188020013,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+143001,"Vahukoorejäätis maasikatoormoosi ja piimašokolaaditükkidega vahvlikoonuses, BALBIINO, 94 g",BALBIINO AS,,4740188020105,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+143002,"Vahukoorejäätis šokolaaditükkidega, BALBIINO, 250 g",,,4740188013008,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+143003,"Vahvlikompvek Mesikäpp, KALEV, 150 g",ORKLA EESTI AS,,4740012023708,dry_preserves,dry_other,sweets_snacks,sweets_candies
+143004,"Vahvlikompvekid Tallinn, KALEV, 150 g",ORKLA EESTI AS,,4740012020370,dry_preserves,dry_other,sweets_snacks,sweets_candies
+143005,"Vahvlikook jõhvikamoosiga, SELVERI KÖÖK, 170 g",KULINAARIA OÜ,,4740581104594,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+143006,"Väikesed marmelaadikeeksid, VÄIKE VÄÄNIK, 300 g",MARIS GILDEN OÜ,,4740320232908,dry_preserves,dry_other,sweets_snacks,sweets_biscuits_cookies
+143007,"Väikesed rosinakeeksid, VÄIKE VÄÄNIK, 300 g",MARIS GILDEN OÜ,,4740320232892,dry_preserves,dry_other,bakery,bakery_cakes_pastries
+143008,"Valge juust päikesekuivatatud tomatitega, APETINA, 100 g",EUGESTA EESTI OÜ,,5711953136559,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+143009,"Valge juustu kuubikud salatile, FIRST PRICE, 325 g",SELVER AS,,7311041080238,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+143010,"Valge küpsetusšokolaad, FAZER, 100 g",FAZER EESTI OÜ,,6416453054561,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+143011,"Valge mango tee niidiga kotis 20pk, APSARA, 30 g",NENALY TRADE OÜ,,4750028404101,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+143012,"Valge šokolaad mustika ja õhitud riisiga, KALEV, 95 g",ORKLA EESTI AS,,4740012037675,dry_preserves,dry_pasta_rice,sweets_snacks,sweets_chocolate_bars
+143013,"Valge šokolaad õhitud riisi ja mustikaga, KALEV, 190 g",ORKLA EESTI AS,,4740012600930,dry_preserves,dry_pasta_rice,sweets_snacks,sweets_chocolate_bars
+143014,"Valge šokolaad, SCHOGETTEN, 100 g",DAISENA LATVIA SIA,,4000607167706,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+143015,"Valge šokolaad tervete metspähklitega, RITTER SPORT, 100 g",INTERALTUS OÜ,,4000417701008,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+143016,"Valge suhkur 10 pakk, DAN SUKKER, 10 kg",,,4770074000027,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+143017,"Valge uba tomatikastmes, BONDUELLE, 425 ml",JUNGENT ESTONIA OÜ,,3083680001793,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+143018,"Valge veini äädikas, GOURMANTE, 250 ml",KAUPMEES & KO AS,,40122403,drinks,drinks_wine,sauces_oils,oils_vinegar
+143019,"Valge viin, LIVIKO, 20 cl",LIVIKO AS,,4740050001799,drinks,drinks_spirits,drinks,drinks_spirits
+143021,"Valged oad, CAMPAGNA, 400 g",SELVER AS,,8005391306160,dry_preserves,dry_other,dry_preserves,dry_canned_veg
+143022,"Valged riisikad marineeritud, GREEN, 530 g",PRALINEE OÜ,,4744148010915,dry_preserves,dry_pasta_rice,dry_preserves,dry_canned_veg
+143023,"Valgehallitusjuust Brie, KÄSEREI, 125 g",SVENSKY KAUBANDUSE AS,,4000504141823,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+143024,"Valgehallitusjuust Brie sinihallitusjuustuga, ILE DE FRANCE, 125 g",SALES-STAR AS,,3161712996153,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+143025,"Valgehallitusjuust Camembert, MERCI CHEF, 125 g",SVENSKY KAUBANDUSE AS,,3523230053631,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+143249,Ibis XO Brandy 36%vol 500ml,Ibis XO,500 ml,3272519035508,,,drinks,drinks_spirits
+143315,Kartulikrõps Lay's Oven Baked Soola 110g,Kartulikrõps Lay's,110 g,5900259128652,,,sweets_snacks,sweets_snacks_salty
+143605,Estrella Kartulikrõpsud Ranch-Hapukoore 275 g,Estrella Kartulikrõpsud,275 g,7310532105382,,,sweets_snacks,sweets_snacks_salty
+144113,Koskenkorva Mojito piiritusjook 15%vol 500ml,Koskenkorva Mojito,500 ml,6412700088204,,,drinks,drinks_other
+144192,"Valgehallitusjuust Danish Brie, CASTELLO, 125 g",EUGESTA EESTI OÜ,,5760466736084,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+144193,"Valgehallitusjuust Danish Camembert, CASTELLO, 125 g",EUGESTA EESTI OÜ,,5760466736077,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+144194,"Valgehallitusjuust Le Lingot, BONS MAYENNAIS, 180 g",DELINE OÜ,,3275240313112,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+144195,"Vana Tallinn martsipanibatoon, KALEV, 40 g",ORKLA EESTI AS,,4740012600633,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+144196,"Vanaema Külmutatud pelmeenid kalkuniga, UVIC, 400 g",ECOTRADE OÜ,,4740223022828,meat_fish,meat_poultry,frozen_food,frozen_ready_meals
+144197,"Vanamehe topš soolakaramelliga, PREMIA, 75 g",PREMIA TALLINNA KÜLMHOONE AS,,4740093942448,sweets_snacks,sweets_candies,frozen_food,frozen_desserts_icecream
+144198,"Vanilje-koorejäätis, REGATT, 240 g",PREMIA TALLINNA KÜLMHOONE AS,,4740093156159,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+144199,"Vanilje pehme jäätise pulber, REVALA, 1 kg",MAIC KAUBANDUSE AS,,4745010242038,frozen_food,frozen_desserts_icecream,dry_preserves,dry_flour_sugar_baking
+144200,"Vanilli- ja mango-koorejäätis aprikoositäidisega, PREMIA, 400 g",PREMIA TALLINNA KÜLMHOONE AS,,4740093000452,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+144201,"Vanilli- ja metspähkli-koorejäätis pählikreemi ja pähklitega, PREMIA, 400 g",PREMIA TALLINNA KÜLMHOONE AS,,4740093000476,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+144202,"Vanilli- ja šokolaadi-koorejäätis, NURR, 90 g",BALBIINO AS,,4740188018287,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+144203,"Vanilli kohupiimavorm, FARMI, 250 g",FARMI PIIMATÖÖSTUS AS,,4740113090012,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_desserts
+144204,"Vanilli kohupiimavorm rosinatega, FARMI, 250 g",FARMI PIIMATÖÖSTUS AS,,4740113090029,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_desserts
+144205,"Vanilli koorejäätis glasuuris, SELVER, 50 g",BALBIINO AS,,4740581300231,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+144206,"Vanilli-koorejäätis limonaaditäidis vahvlitopsis, VÄIKE TOM, 70 g",PREMIA TALLINNA KÜLMHOONE AS,,4740093001879,drinks,drinks_soft_soda,frozen_food,frozen_desserts_icecream
+144207,"Vanilli koorejäätis, PREMIA, 480 g",PREMIA TALLINNA KÜLMHOONE AS,,4740093021549,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+144208,"Vanilli-koorejäätis šokolaaditükkidega vahvlitopsis 65g, ONU ESKIMO, 1tk",BALBIINO AS,,4740188019703,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+144209,"Vanilli-koorejäätis tumeda šokolaaditäidisega, PREMIA, 480 g",PREMIA TALLINNA KÜLMHOONE AS,,4740093364547,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+144210,"Vanilliinsuhkur, ANATOLS, 20 g",SPENCER OÜ,,4750280202477,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+144211,Santa Maria vanilliinsuhkur 35 g,Santa Maria,35 g,4740018133500,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+144212,"Vanillijäätis Classic, MAGNUM, 81 g",UNILEVER EESTI AS,,8711327612372,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+144213,"Vanillikaun, 3g, SANTA MARIA",SANTA MARIA AS,,7311311014758,dry_preserves,dry_other,world_spices,spices_herbs_spice_mix
+144214,"Vanillikreemipulber, RUF, 65 g",KAUPMEES & KO AS,,4002809019050,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+144215,"Vanillimaitseline jäätis pähklikreemiga (magusainetega), NICKS, 291 g",NJOM FOODS OÜ,,7350104400934,bakery,bakery_buns_croissants,frozen_food,frozen_desserts_icecream
+144216,"Vanillimaitseline koorejäätis, BALBIINO, 2,250 kg",BALBIINO AS,,4740188015613,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+144217,"Vanillimaitseline koorejäätis, ONU ESKIMO, 480 g",BALBIINO AS,,4740188000725,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+144218,"Vanillimaitseline koorejäätis, ONU ESKIMO, 57 g",BALBIINO AS,,4740188019673,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+144219,"Vanillimaitseline koorejäätis, SELVER, 500 g",BALBIINO AS,,4740188006888,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+144220,"Vanillimaitseline koorejäätis šokolaaditükkidega, BALBIINO, 2,250 kg",BALBIINO AS,,4740188015644,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+144221,"Vanillimaitseline koorejäätis vahvlikoonuses, ONU ESKIMO, 80 g",BALBIINO AS,,4740188019604,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+144222,"Vanillimaitseline koorejäätis vahvlitopsis, ONU ESKIMO, 65 g",BALBIINO AS,,4740188019697,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+144223,"Vanillimaitseline koorejäätis vahvlitorus, RAKS, 68 g",,,4740188019529,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+144307,Vihik 12 l abijoon,Vihik,12 l,4740255012330,,,household,hh_other
+144347,"Vanillimaitseline sefiir šokolaadis, LAIMA, 175 g",ORKLA EESTI AS,,4750011000587,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_candies
+144348,"Vanillimaitselised maisikepikesed, MÕNGEL, 100 g",BALSNACK INTERNATIONAL HOLDING AS,,4740053007606,dry_preserves,dry_canned_veg,sweets_snacks,sweets_snacks_salty
+144349,"Vanilliplombiir glasuuris, VÄIKE TOM, 60 g",,,,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+144350,"Vanilliplombiir šokolaadiglasuuriga, VANA TOOMAS, 90 g",PREMIA TALLINNA KÜLMHOONE AS,,4740093021020,sweets_snacks,sweets_chocolate_bars,frozen_food,frozen_desserts_icecream
+144351,"Vanillisuhkur, DR.OETKER, 160 g",JUNGENT ESTONIA OÜ,,5997381376099,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+144352,Santa Maria vanillisuhkur 20 g,Santa Maria,20 g,4740018133517,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+144353,"Värske pasta tagliatelle, NONNA RINA, 250 g",SELVER AS,,8000889201019,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+144354,"Värskekapsaborš kanalihaga, PRESTO, 300 g",SALVEST AS,,4740073001974,meat_fish,meat_poultry,dry_preserves,dry_ready_meals_jars
+144355,"Värskekapsasupp, SELVERI KÖÖK, 400 g",KULINAARIA OÜ,,4740581110878,produce,produce_root_veg,dry_preserves,dry_ready_meals_jars
+144356,"Värviline nonparell, MEIRA, 60 g",,,,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+144357,"Värviline strössel, MEIRA, 55 g",MEIRA EESTI OÜ,,6414203400552,dry_preserves,dry_other,dry_preserves,dry_flour_sugar_baking
+144358,"Värvilised maisirõngad, OHO, 100 g",MAIC KAUBANDUSE AS,,4770149217343,dry_preserves,dry_cereals_muesli,sweets_snacks,sweets_snacks_salty
+144359,"Vasabi ja seesami maitseainesegu, SANTA MARIA, 44 g",SANTA MARIA AS,,7311311015984,world_spices,spices_herbs_spice_mix,world_spices,spices_asian
+144360,"Vegan taimne majonees klaaspurgis, HELLMANN'S, 330 g",UNILEVER EESTI AS,,8721201922435,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+144361,"Veiselihaga rassolnik, SALVEST, 3 kg, ettetellimisel",SALVEST AS,,4740073041079,meat_fish,meat_beef_lamb_game,dry_preserves,dry_ready_meals_jars
+144362,"Veiselihamaitselised kiirnuudlid, DARYNA, 50 g",SELVER AS,,4820179259063,dry_preserves,dry_pasta_rice,dry_preserves,dry_soups_noodles
+144363,"Veiselihapuljong 8 tk, NATUR COMPAGNIE, 96 g",VILANDRA UAB,,4000345051138,world_spices,spices_broth_stock,world_spices,spices_broth_stock
+144364,"Vene juust 28,5% viilutatud, ESTOVER, 500 g",ESTOVER OÜ,,4740572001758,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+144440,Põltsamaa rassolnik sealihaga 530 g,Põltsamaa,530 g,4740029061106,meat_fish,meat_pork,dry_preserves,dry_ready_meals_jars
+144894,"Väike Tom šokolaadijäätis šokolaadiglasuuriga, 90 ml",Väike Tom,90 ml,4740093000223,,,frozen_food,frozen_desserts_icecream
+145494,"HULGI Juustu snäkk õrnsuitsuvürtsidega 3tk, FARMI, 3 x 200 g",FARMI PIIMATÖÖSTUS AS,,0210300003544,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+145495,"Biskviitkook Kinder Milk Slice, KINDER, 28 g",MOBEC AS,,40084725,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_chocolate_bars
+145498,"Tere kool martsipanikoogid, SELVERI KÖÖK, 200 g",,,,dry_preserves,dry_other,bakery,bakery_cakes_pastries
+145499,"Vermut MARTINI Bianco, 100 cl",LIVIKO AS,,7630040408820,dry_preserves,dry_other,drinks,drinks_spirits
+145500,"Vermut MARTINI Fiero, 100 cl",LIVIKO AS,,7630040409155,dry_preserves,dry_other,drinks,drinks_spirits
+145501,"Vermut MARTINI Rosso, 75 cl",LIVIKO AS,,7630040409162,dry_preserves,dry_other,drinks,drinks_spirits
+145502,"Vesi Originaal Aluseline, VÄRSKA, 500 ml",SAKU ÕLLETEHASE AS,,4740042702338,drinks,drinks_spirits,drinks,drinks_water
+145503,"Vesi Spring gaasita, AURA, 500 ml",A. LE COQ AS,,4740098083450,drinks,drinks_water,drinks,drinks_water
+145504,"Vichy Vitamix Daily, VICHY, 500 ml",SAKU ÕLLETEHASE AS,,4740019782004,dry_preserves,dry_other,drinks,drinks_sport
+145505,"Vichy Vitamix Sport, VICHY, 500 ml",SAKU ÕLLETEHASE AS,,4740019782011,dry_preserves,dry_other,drinks,drinks_sport
+145506,"Viie pipra segu, SANTA MARIA, 25 g",SANTA MARIA AS,,6418474118383,dry_preserves,dry_other,world_spices,spices_herbs_spice_mix
+145507,"Viie pipra veski, SANTA MARIA, 60 g",SANTA MARIA AS,,7311310026691,dry_preserves,dry_other,world_spices,spices_herbs_spice_mix
+145508,"Viieviljahelbed, ELOVENA, 600 g",CLAIRE FOODS OÜ,,6411200106722,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+145509,"Viigipuu marjade moos, ST.DALFOUR, 284 g",SELVER AS,,3492390013031,dry_preserves,dry_other,dry_preserves,dry_canned_fruit
+145510,"Viilukurk, SALVEST, 350g neto",,,,produce,produce_root_veg,dry_preserves,dry_canned_veg
+145511,"Viilutatud juust 25,2%, HIIRTE JUUST, 200 g",ESTOVER OÜ,,4740572000393,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+145512,"Viilutatud šampinjonid soolvees, FIRST PRICE, 280 g",SELVER AS,,7311041087343,world_spices,spices_basic_salt_pepper,dry_preserves,dry_canned_veg
+145513,Viin ABSOLUT 35 cl,PERNOD RICARD ESTONIA OÜ,,7312040017355,drinks,drinks_spirits,drinks,drinks_spirits
+145514,Absolut vodka 40%vol 500ml,Absolut,500 ml,7312040017072,,,drinks,drinks_spirits
+145515,"Viin ABSOLUT Citron, 70 cl",PERNOD RICARD ESTONIA OÜ,,7312040090709,drinks,drinks_spirits,drinks,drinks_spirits

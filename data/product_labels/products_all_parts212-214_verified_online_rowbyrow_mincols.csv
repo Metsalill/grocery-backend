@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+125792,"Kartulipüree tilliga tops, MAGGI, 50 g",MAGGI,50 g,7613037086546,baby,baby_food_pouches,dry_preserves,dry_soups_noodles
+125793,"Kartulisektor küüslauguga, AVIKO, 600 g",AVIKO,600 g,8710449954315,produce,produce_root_veg,frozen_food,frozen_potato_products
+125794,"Kartulisnack paprikaga, LORENZ, 100 g",LORENZ,100 g,4017100722004,produce,produce_root_veg,sweets_snacks,sweets_snacks_salty
+125795,"Kartuliviilud, FIRST PRICE, 750 g",FIRST PRICE,750 g,7311041084540,produce,produce_root_veg,frozen_food,frozen_potato_products
+125796,"Kaste FIX Bolognese, KNORR, 43 g",KNORR,43 g,8720182038944,sauces_oils,sauces_pasta_cooking,sauces_oils,sauces_pasta_cooking
+125797,"Kaste Sweet and Sour ananassiga, FELIX, 500 g",FELIX,500 g,4750022504098,produce,produce_tropical,sauces_oils,sauces_soy_worcester
+125798,"Kasukas, SELVERI KÖÖK, 440 g",SELVERI KÖÖK,440 g,4740581100879,,,produce,produce_herbs_salads_sprouts
+125799,"Keedetud basmatiriis, SELVERI KÖÖK, 1,5 kg, ettetellimisel",SELVERI KÖÖK,5 kg,4740581112216,dry_preserves,dry_pasta_rice,produce,produce_herbs_salads_sprouts
+125800,"Keedetud tatar, SELVERI KÖÖK, 1,5 kg, ettetellimisel",SELVERI KÖÖK,5 kg,4740581112223,dry_preserves,dry_groats_beans,produce,produce_herbs_salads_sprouts
+125801,"Keefir 2,5%, NOPRI, 1 kg",5%,1 kg,4740218001241,,,dairy_eggs_fats,dairy_yogurt_kefir
+125802,"Keefir, mahe, PAJUMÄE TALU, 500 ml",mahe,500 ml,4743135002445,,,dairy_eggs_fats,dairy_yogurt_kefir
+125803,"Keefir metsmaasika, VALIO GEFILUS, 1 kg",VALIO GEFILUS,1 kg,4740125321173,produce,produce_berries,dairy_eggs_fats,dairy_yogurt_kefir
+125804,"Gefilus keefir 1 kg, mustika",Gefilus,1 kg,4740125321166,,,dairy_eggs_fats,dairy_yogurt_kefir
+125805,"Kelmikas Creme Brulee kook, MARTA PAGAR, 120 g",MARTA PAGAR,120 g,4740667250283,bakery,bakery_cakes_pastries,bakery,bakery_cakes_pastries
+125806,"Keskmiselt röstitud presskannukohv, LUXUS, 500 g",LUXUS,500 g,6411300147137,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+125807,"Ketšup hapukurgimaitseline, HEINZ, 400 ml",HEINZ,400 ml,8715700127767,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+125808,"Ketšup Hot, HEINZ, 400 ml",HEINZ,400 ml,8715700126210,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+125809,"Ketšup mahedamaitseline, HELLMANN'S, 840g",HELLMANN'S,840 g,8711200398553,sauces_oils,sauces_ketchup_mayo,sauces_oils,sauces_ketchup_mayo
+125810,"Hõbeda puhastusvahend, ERES, 225 ml",ERES,225 ml,5410458306855,household,hh_cleaners,household,hh_cleaners
+125811,"Hommikupüree banaaniga, ELLA'S KITCHEN, 100 g",ELLA'S KITCHEN,100 g,5060107330788,baby,baby_food_pouches,baby,baby_food_pouches
+125812,"Hommikupüree mango, ELLA'S KITCHEN, 100 g",ELLA'S KITCHEN,100 g,5060107330764,baby,baby_food_pouches,baby,baby_food_pouches
+125813,"Hommikupüree mustika-pirni, ELLA'S KITCHEN, 100 g",ELLA'S KITCHEN,100 g,5060107330740,baby,baby_food_pouches,baby,baby_food_pouches
+125814,"HULGI Beebiniisked salvrätikud 0% 4tk, NEUTRAL, 4 x 52tk",NEUTRAL,4 x 52tk,223000000560,household,hh_paper,baby,baby_wipes
+125815,"HULGI Kodujuust klassikaline 3tk, PIIMAMEISTER OTTO, 3 x 440g",PIIMAMEISTER OTTO,3 x 440 g,210300003704,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+125816,"HULGI Kodujuust väherasvane laktoosivaba 3tk, TERE, 3 x 300g",TERE,3 x 300 g,210300003926,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_cottage_quark
+125817,"HULGI Kohupiimakreem 3% toru 3tk, ALMA, 3 x 300 g",ALMA,3 x 300 g,210300004213,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_desserts
+125818,"HULGI Kohupiimapasta banaanitoru 4,2% 3tk, TERE, 3 x 300 g",2% 3tk,3 x 300 g,210300004220,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_desserts
+125819,"HULGI Kohupiimapasta kakao 3tk, TERE, 3 x 300g",TERE,3 x 300 g,210300003742,dairy_eggs_fats,dairy_cottage_quark,dairy_eggs_fats,dairy_desserts
+125820,"HULGI Köögi toorjuust 2tk, FARMI, 2 x 400g",FARMI,2 x 400 g,0210300001113,dairy_eggs_fats,dairy_other,cheese,cheese_regular
+125821,"HULGI Kreeker Kalake Soolane 4tk, VIKSTAL, 4 x 150 g",VIKSTAL,4 x 150 g,215000001777,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_snacks_salty
+125822,"HULGI Maasikasmuuti 6+, mahe 6tk, PÕNN, 6 x 110g",mahe 6tk,6 x 110 g,214200000375,produce,produce_berries,baby,baby_food_pouches
+125823,"HULGI Maisikrõbuskid mango ja banaaniga 7+, mahe 3tk, PÕNN, 3 x 20g",mahe 3tk,3 x 20 g,214200000467,bakery,bakery_flatbreads_wraps,baby,baby_snacks
+125824,"HULGI Nõudepesuvahend Lemon 3tk, SELVER, 3 x 750ml",SELVER,3 x 750 ml,224000001625,household,hh_laundry,household,hh_dishwashing
+125825,"HULGI Originaal Alkoholivaba purk 6tk, SAKU, 6 x 500 ml",SAKU,6 x 500 ml,216000000814,drinks,drinks_spirits,drinks,drinks_beer_cider
+125826,"HULGI Pähklite ja puuviljade segu 3tk, PÄHKLINÄPP, 3 x 500g",PÄHKLINÄPP,3 x 500 g,215000000916,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+125827,"HULGI Puhastusvahend vannitoale 2tk, SELVER, 2 x 750ml",SELVER,2 x 750 ml,224000001595,household,hh_cleaners,household,hh_cleaners
+125828,"HULGI Rõngik Magus 3tk, VIKSTAL, 3 x 200 g",VIKSTAL,3 x 200 g,215000001760,,,bakery,bakery_sweet_buns_donuts
+125829,"HULGI Šokolaadibanaanid 2tk, CASALI, 2 x 150 g",CASALI,2 x 150 g,215000001630,sweets_snacks,sweets_chocolate_bars,sweets_snacks,sweets_chocolate_bars
+125830,"HULGI Toonik Indian Tonic Water 8tk, FEVER TREE, 8 x 500 ml",FEVER TREE,8 x 500 ml,216000000807,drinks,drinks_water,drinks,drinks_soft_soda
+125831,"HULGI WC-värskendaja Aroma Lux Dahlia Flower duopakk 2pk, DOMESTOS, 2 x 100 g",DOMESTOS,2 x 100 g,224000001946,,,household,hh_candles_airfresh
+125832,"HULGI WC-värskendaja Power Aktiv Lemon 2x100 g, BREF, 200 g",BREF,200 g,224000000598,produce,produce_tropical,household,hh_candles_airfresh
+125833,"HULGI WC-värskendaja Power Aktiv Lemon 4tk, BREF, 4 x 100g",BREF,4 x 100 g,224000000987,produce,produce_tropical,household,hh_candles_airfresh
+125834,"I heart Merlot 18,7 cl",HENKELL FREIXENET EESTI AS,7 cl,5060215331455,drinks,drinks_wine,drinks,drinks_wine
+125835,"I heart Pinot Grigio 18,7 cl",HENKELL FREIXENET EESTI AS,7 cl,5060215331356,,,drinks,drinks_wine
+125836,I heart Pinot Grigio 75 cl,HENKELL FREIXENET EESTI AS,IheartPinotGrigio75 cl,5060215330083,,,drinks,drinks_wine
+125837,Ibiza Bobal Moscto Rose 75 cl,BALMERK ESTONIA OÜ,IbizaBobalMosctoRose75 cl,4740158011584,,,drinks,drinks_wine
+125838,"Nuppi Gold 1, piimasegu, 350 g, alates 0-6 kuud",Nuppi Gold,350 g,4743150000402,baby,baby_formula,baby,baby_formula
+125839,"Imiku piimasegu 1 Organic Combiotic 0+, HIPP, 800 g",HIPP,800 g,9062300138037,baby,baby_formula,baby,baby_formula
+125840,"Imiku piimasegu Comfort Combiotic(puhituste ja kõhukinnisuse puhul) 0+, HIPP, 300 g",HIPP,300 g,9062300137634,baby,baby_formula,baby,baby_formula
+125841,"India pähkel, ARIMEX, 200 g",ARIMEX,200 g,4771249821492,,,sweets_snacks,sweets_nuts_driedfruit
+125842,Pähklinäpp india pähkel 500g,Pähklinäpp,500 g,4750195020463,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+125843,"India pähkel, PREMIUM, 300 g",GERMUND HULGI OÜ,,4742155002053,,,sweets_snacks,sweets_nuts_driedfruit
+125844,"India pähkel röstitud Premium, GERMUND, 300 g",GERMUND HULGI OÜ,,4742155001919,,,sweets_snacks,sweets_nuts_driedfruit
+125845,"India pähkel röstitud,soolatud, GERMUND, 150 g",GERMUND HULGI OÜ,,4742155007638,world_spices,spices_basic_salt_pepper,sweets_snacks,sweets_nuts_driedfruit
+125846,"India pähkli-mango segu, SEEBERGER, 150 g",SELVER AS,,4008258014004,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+125847,"India pähklid ÖKO, KOMMI ASEMEL, 150 g",JUNGENT ESTONIA OÜ,,4740085310668,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+125848,"Ingver, KOMMI ASEMEL, 150 g",JUNGENT ESTONIA OÜ,,4740085310507,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+125849,Italo Cescon Pinot Bianco 75 cl,AVALLONE AS,,8015543000280,,,drinks,drinks_wine
+125850,Italo Cescon Raboso 75 cl,AVALLONE AS,,8015543000105,,,drinks,drinks_wine
+125851,J.P Chenet Cabernet Syrah 75 cl,DUNKER ESTONIA OÜ,,3263286301323,drinks,drinks_wine,drinks,drinks_wine
+125852,J.P.Chenet White Medium Sweet 75 cl,DUNKER ESTONIA OÜ,,3263286321284,drinks,drinks_wine,drinks,drinks_wine
+125853,"Jäätisemaitseline kohuke mooniseemnetega, KARUMS, 45 g",PREMIA TALLINNA KÜLMHOONE AS,,4750025000665,frozen_food,frozen_desserts_icecream,dairy_eggs_fats,dairy_desserts
+125854,Jacob`s Creek Chardonnay 75 cl,LIVIKO AS,,9300727406002,drinks,drinks_wine,drinks,drinks_wine
+125855,Jacob´s Creek Cool Harvest Pinot Grigio 75 cl,LIVIKO AS,,9300727014412,,,drinks,drinks_wine
+125856,Jacob´s Creek Cool Harvest Sauvignon Blanc 75 cl,LIVIKO AS,,9300727013156,,,drinks,drinks_wine
+125857,Jacob´s Creek Double Barrel Shiraz 75 cl,LIVIKO AS,,9300727019578,drinks,drinks_wine,drinks,drinks_wine
+125858,Jacob`s Creek Pinot Grigio 75 cl,LIVIKO AS,,9300727008527,,,drinks,drinks_wine
+125859,Jacob's Creek Pinot Noir 75 cl,LIVIKO AS,,9300727004475,,,drinks,drinks_wine
+125860,Jacob's Creek Riesling 75 cl,LIVIKO AS,,9300727389275,drinks,drinks_wine,drinks,drinks_wine
+125861,Jacob`s Creek Shiraz Cabernet 75 cl,LIVIKO AS,,9300727453600,drinks,drinks_wine,drinks,drinks_wine
+125862,Jacob`s Creek Shiraz Rose 75 cl,LIVIKO AS,,9300727618016,drinks,drinks_wine,drinks,drinks_wine
+125863,Jammy Red Roo 75 cl,TRIDENS AS,,9322214011797,dry_preserves,dry_other,drinks,drinks_wine
+125864,Jammy White Roo 75 cl,TRIDENS AS,,9322214016051,dry_preserves,dry_other,drinks,drinks_wine
+125865,"Jätkupiimasegu 2 Organic Combiotic 6+, HIPP, 800 g",,,4062300339910,baby,baby_formula,baby,baby_formula
+125866,Jaume Serra Cava Semi Seco 75 cl,MEDIATO AS,,8411277205678,drinks,drinks_wine,drinks,drinks_wine
+125867,Jean-Baptiste Audy Ch.Chantemerle Medoc AOC 75 cl,LIVIKO AS,,3760070370164,,,drinks,drinks_wine
+125868,Jean-Baptiste Audy Chateau Coutelin-Merville CruBourgeois 75 cl,LIVIKO AS,,3364610031692,drinks,drinks_tea_coffee,drinks,drinks_wine
+125869,Jean-Marc Brocard Chablis 75 cl,LIVIKO AS,,3436802500016,,,drinks,drinks_wine
+125870,Jean-Marc Brocard Chablis Famille Brocard 75 cl,LIVIKO AS,,3436802314019,,,drinks,drinks_wine
+125871,Jim's Creek Chardonnay 75 cl,LTT AS,,5750000152715,drinks,drinks_wine,drinks,drinks_wine
+125872,Jim's Creek Shiraz Cabernet Sauvignon 75 cl,LTT AS,,5750000152685,drinks,drinks_wine,drinks,drinks_wine
+125873,"Jogurtileivake laktoosivaba, PRIILEIB, 200 g",PRIILEIB OÜ,,4744348010173,dairy_eggs_fats,dairy_yogurt_kefir,bakery,bakery_bread_loaves
+125874,"Johann Brunner Riesling Mosel KPN vein 9,5%vol 750ml",Johann Brunner,750 ml,4044551030211,,,drinks,drinks_wine
+125875,"Jõhvika-pähklite segu, GERMUND, 300 g",GERMUND HULGI OÜ,,4742155002077,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+125876,"Jõhvika-röstitud pähklite segu, PREMIUM, 300 g",GERMUND HULGI OÜ,,4742155002428,sweets_snacks,sweets_nuts_driedfruit,sweets_snacks,sweets_nuts_driedfruit
+125877,"Jõhvikas, KOMMI ASEMEL, 100 g",JUNGENT ESTONIA OÜ,,4740085307231,sweets_snacks,sweets_candies,sweets_snacks,sweets_nuts_driedfruit
+125878,"Juubelisai, EESTI PAGAR, 350 g",EESTI PAGAR AS,,4740086000476,bakery,bakery_buns_croissants,bakery,bakery_bread_loaves
+125879,"Juuretise Röst, FAZER, 450 g",,,4740103011256,,,bakery,bakery_bread_loaves
+125880,"Juurvilja-nuudlipüree kanalihaga, HIPP, 220 g",LTT AS,,9062300103424,baby,baby_food_pouches,baby,baby_food_jars
+125881,"Juurviljapüree kalkunilihaga mahe 12+, HIPP, 220 g",LTT AS,,9062300103479,baby,baby_food_pouches,baby,baby_food_jars
+125882,"Juustu-küüslaugumääre, SELVERI KÖÖK, 130 g",KULINAARIA OÜ,,4740581108370,sweets_snacks,sweets_gums_mints,sauces_oils,sauces_other
+125883,"Juustuküpsis laktoosivaba, PRIILEIB, 120 g",PRIILEIB OÜ,,4744348010135,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+125884,"Juustuküpsis, MARTA PAGAR, 280 g",EUROLEIB AS,,4742036000871,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+125885,"Kohviuba Arabica Espresso, PAULIG, 1 kg",PAULIG COFFEE ESTONIA AS,,6411300171057,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125886,"Kohviuba Arabica Selected, PAULIG, 1 kg",PAULIG COFFEE ESTONIA AS,,6411300177851,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125887,"Kohviuba Brazil&Colombia, JACOBS, 1 kg",SELVER AS,,8711000576885,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125888,"Kohviuba Espresso 1kg, JACOBS, 1 kg",SELVER AS,,8711000539187,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125889,"Kohviuba Espresso, LÖFBERGS, 1 kg",SELVER AS,,7310050012520,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125890,"Kohviuba Kharisma, LÖFBERGS, 1 kg",SELVER AS,,7310050012537,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125891,"Kohviuba Krönung, JACOBS, 1 kg",SELVER AS,,8711000539330,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125892,"Kohviuba Origins Uganda & Kenya, JACOBS, 1 kg",SELVER AS,,8711000591154,drinks,drinks_spirits,drinks,drinks_coffee_beans_capsules
+125893,"Kohviuba Qualita Oro, LAVAZZA, 1 kg",SELVER AS,,8000070020566,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125894,"Kohviuba Tambet, TASUJA, 1 kg",BESTBEANS OÜ,,4742650001049,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125895,"Kohviuba Wahur, TASUJA, 1 kg",BESTBEANS OÜ,,4742650001056,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+125896,"Kokteilijäätis, Vanillimaitseline koorejäätis, BALBIINO, 480 g",BALBIINO AS,,4740188012599,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+125897,"Kolmevärviline spiraal Fusilli, PANZANI, 500 g",ABESTOCK AS,,3038351483606,,,dry_preserves,dry_pasta_rice
+125898,"Kommid 36 Maitset Gurmee tuubis, JELLY BEAN, 90 g",TRIDENS AS,,8713800139307,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+125899,"Kommid Rainbow, NERDS, 141 g",SELVER AS,,1230000131384,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+125900,"Kommikott pulgakommidega Tongue Painter 10tk, CHUPA CHUPS, 120 g",JUNGENT ESTONIA OÜ,,8410031990584,sweets_snacks,sweets_candies,sweets_snacks,sweets_candies
+125901,"Kompvek Komeet, KALEV, 175 g",ORKLA EESTI AS,,4740012023531,,,sweets_snacks,sweets_candies
+125902,"Kompvek Teekonna, KALEV, 175 g",ORKLA EESTI AS,,4740012023555,drinks,drinks_tea_coffee,sweets_snacks,sweets_candies
+125903,"Kompvekid Ananassi, KALEV, 150 g",ORKLA EESTI AS,,4740012021445,produce,produce_tropical,sweets_snacks,sweets_candies
+125904,"Kompvekid, DUMLE, 120 g",FAZER EESTI OÜ,,6411404035187,,,sweets_snacks,sweets_candies
+125905,"Kompvekid Kalev, KALEV, 175 g",ORKLA EESTI AS,,4740012023678,,,sweets_snacks,sweets_candies
+125906,"Kompvekid, MARIANNE, 120 g",FAZER EESTI OÜ,,6416453435636,,,sweets_snacks,sweets_candies
+125907,"Kompvekid, MARIANNE, 220 g",FAZER EESTI OÜ,,6410803642019,,,sweets_snacks,sweets_candies
+125908,"Kompvekid Oravake, KALEV, 175 g",ORKLA EESTI AS,,4740012023685,,,sweets_snacks,sweets_candies
+125909,"Kompvekid Tõmmu, KALEV, 175 g",ORKLA EESTI AS,,4740012023760,,,sweets_snacks,sweets_candies
+125910,"Kondenspiima perejäätis, ERITI RAMMUS, 480 g",PREMIA TALLINNA KÜLMHOONE AS,,4740093191242,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+125911,"Kondenspiimajäätis, LA MUU, 250 g",JUNGENT ESTONIA OÜ,,4742963012015,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+125912,"Kondenspiimamaitselised kookosega pallikesed, SELVERI KÖÖK, 200 g",KULINAARIA OÜ,,4740581110786,dairy_eggs_fats,dairy_plant_drinks,sweets_snacks,sweets_candies
+125913,Konjak Bache Gabrielsen Tre Kors 35 cl,MV GROUP DISTRIBUTION EE OÜ,,3428681004204,drinks,drinks_spirits,drinks,drinks_spirits
+125914,"Konjak BACHE GABRIELSEN VS Tre Kors, 70 cl",MV EESTI OÜ,,3428681004174,drinks,drinks_spirits,drinks,drinks_spirits
+125915,"Konjak BACHE GABRIELSEN VSOP Triple Cask, 70 cl",MV GROUP DISTRIBUTION EE OÜ,,3428681000602,drinks,drinks_spirits,drinks,drinks_spirits
+125916,Konjak Chateau de Montifaud VSOP 35 cl,AVALLONE AS,,3550142054319,drinks,drinks_spirits,drinks,drinks_spirits
+125917,"Konjak HENNESSY VS, 50 cl",,,,drinks,drinks_spirits,drinks,drinks_spirits
+125918,"Konjak HENNESSY VSOP, 35 cl",PRIKE AS,,3245990098300,drinks,drinks_spirits,drinks,drinks_spirits
+125919,Konjak Larsen VSOP Art Edition 70 cl,ANORA ESTONIA AS,,3272510000529,drinks,drinks_spirits,drinks,drinks_spirits
+125920,"Konjak MARTELL VS, 35 cl",PERNOD RICARD ESTONIA OÜ,,3219820000115,drinks,drinks_spirits,drinks,drinks_spirits
+125921,"Konjak MARTELL VSOP, 35 cl",PERNOD RICARD ESTONIA OÜ,,3219820006124,drinks,drinks_spirits,drinks,drinks_spirits
+125922,"Konjak MARTELL VSOP karbis, 70 cl",PERNOD RICARD ESTONIA OÜ,,3219820005882,drinks,drinks_spirits,drinks,drinks_spirits
+125923,Konjak MARTELL XO karbis 35 cl,PERNOD RICARD ESTONIA OÜ,,3219820003710,drinks,drinks_spirits,drinks,drinks_spirits
+125924,"Konjak MAXIME TRIJOL Borderies Tres Vieilles puitkarbis**, 70 cl (ETTETELLIMISEGA 2 PÄEVA)",GOLDBERGER OÜ,,3544680022466,drinks,drinks_spirits,drinks,drinks_spirits
+125925,"Konjak MAXIME TRIJOL Grande Champagne Dry Collection N°1**, 70 cl (ETTETELLIMISEGA 2 PÄEVA)",GOLDBERGER OÜ,,3544680022527,drinks,drinks_wine,drinks,drinks_spirits
+125926,"Konjak MAXIME TRIJOL VSOP karbis, 70 cl",GOLDBERGER OÜ,,3544680011934,drinks,drinks_spirits,drinks,drinks_spirits
+125927,"Konjak MEUKOW VSOP, 35 cl",DUNKER ESTONIA OÜ,,3257150100396,drinks,drinks_spirits,drinks,drinks_spirits
+125928,"Konjak MEUKOW VSOP, 70 cl",DUNKER ESTONIA OÜ,,3257150043273,drinks,drinks_spirits,drinks,drinks_spirits
+125929,"Konjak REMY MARTIN VSOP, 70 cl",LIVIKO AS,,3024482270109,drinks,drinks_spirits,drinks,drinks_spirits
+125930,"Konjak REMY MARTIN XO karbis**, 70 cl (ETTETELLIMISEGA 2 PÄEVA)",LIVIKO AS,,3024480004522,drinks,drinks_spirits,drinks,drinks_spirits
+125931,"Konserveeritud herned, BONDUELLE, 720 ml",JUNGENT ESTONIA OÜ,,3083680613415,dry_preserves,dry_canned_veg,dry_preserves,dry_canned_veg
+125932,"Köögiviljad praadimiseks Aasia maitseainetega, MAAHÄRRA, 400 g",PREMIA TALLINNA KÜLMHOONE AS,,4740093022393,world_spices,spices_herbs_spice_mix,frozen_food,frozen_veg
+125933,"Köögiviljad praadimiseks, MAAHÄRRA, 400 g",PREMIA TALLINNA KÜLMHOONE AS,,4740093005273,,,frozen_food,frozen_veg
+125934,"Köögiviljad šampinjonidega, HÄRMAVILI, 400 g",GREENYARD FROZEN POLAND SP. Z O.O.,,4740188012322,,,frozen_food,frozen_veg
+125935,"Köögiviljakrõpsud meresoola ja musta pipra, EAT REAL, 110 g",ABESTOCK AS,,5060878780751,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_snacks_salty
+125936,"Köögiviljapuljong 12x10g, KNORR, 120g",SELVER AS,,8712423007727,world_spices,spices_broth_stock,world_spices,spices_broth_stock
+125937,"Köögiviljapüree, SELVERI KÖÖK, 500 g",KULINAARIA OÜ,,4740581103979,baby,baby_food_pouches,produce,produce_herbs_salads_sprouts
+125938,"Köögiviljapüreesupp kanafileega mahe, PRESTO, 300 g",SALVEST AS,,4740073073773,baby,baby_food_pouches,dry_preserves,dry_ready_meals_jars
+125939,"Köögiviljasegu „GO Green“, BAUER, 400g",BIMAR OÜ,,5903154547641,,,frozen_food,frozen_veg
+125940,"Köögiviljasegu Italian Dish, BAUER, 400 g",BIMAR OÜ,,5903154543087,,,frozen_food,frozen_veg
+125941,"Köögiviljasegu „Wokmix Thai“, BAUER, 400 g",BIMAR OÜ,,5903154545036,,,frozen_food,frozen_veg
