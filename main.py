@@ -43,7 +43,7 @@ os.makedirs(IMAGES_DIR, exist_ok=True)
 # Try to import stores router, but don't crash app if package isn't a module yet
 stores_router = None
 try:
-    from app.routers.stores import router as stores_router  # requires app/__init__.py etc.
+    from app.routers.stores import router as stores_router
 except Exception as e:
     logger.warning("Stores router not loaded (non-fatal): %s", e)
 
@@ -123,16 +123,16 @@ async def shutdown():
 
 # -------- Router mounts (root) --------
 app.include_router(auth_router)
-app.include_router(compare_router)            # /compare
-app.include_router(products_router)           # /products, /products/search, /search-products
+app.include_router(compare_router)
+app.include_router(products_router)
 app.include_router(upload_router)
 app.include_router(admin_router)
 app.include_router(basket_history_router)
-app.include_router(upload_image_router)       # /api/upload-image
-app.include_router(image_admin_router)        # /admin/images
-app.include_router(categories_router)         # /categories
+app.include_router(upload_image_router)
+app.include_router(image_admin_router)
+app.include_router(categories_router)
 if stores_router:
-    app.include_router(stores_router)         # /stores
+    app.include_router(stores_router)
 
 # -------- Duplicate mounts under /api --------
 app.include_router(products_router, prefix="/api")
@@ -140,7 +140,7 @@ app.include_router(compare_router, prefix="/api")
 if stores_router:
     app.include_router(stores_router, prefix="/api")
 app.include_router(basket_history_router, prefix="/api")
-app.include_router(categories_router, prefix="/api")  # /api/categories
+app.include_router(categories_router, prefix="/api")
 
 
 @app.get("/robots.txt", response_class=PlainTextResponse)
