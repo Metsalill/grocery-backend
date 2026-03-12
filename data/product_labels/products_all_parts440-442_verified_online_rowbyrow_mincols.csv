@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+407257,LaFesta kuum šokolaadijook piimašokolaadi maitsega 250gr,LaFesta,,5900910005179,sweets_snacks,sweets_chocolate_bars,drinks,drinks_syrups_powders
+410475,Fingies Cheddar Jalopenos Dipikastmega 250 G,Fingies Cheddar,250 g,5705518772481,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+410522,Coop Punane Karrikana Riisiga 350 G,Coop Punane,350 g,7340011456735,meat_fish,meat_poultry,frozen_food,frozen_ready_meals
+410559,Piltti puder õuna-mustika 6k 110g,Piltti,110 g,8445291381391,,,baby,baby_porridge_cereal
+411021,Vaarikad 225g,Vaarikad,225 g,8718226442055,,,produce,produce_berries
+411086,Fingies Mozzarella-Pulgad Dipikastmega 250 G,Fingies Mozzarella-Pulgad,250 g,5705518772450,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+411364,Day Seaday Külm.Hiidkrevetisabad Keedetud Kooritud 300 G 41/50,Day Seaday,300 g,8720088539989,,,frozen_food,frozen_fish
+411876,Apetit Porrulauk 150 G,Apetit Porrulauk,150 g,6430104921330,,,frozen_food,frozen_veg
+412032,Katjes kummikommid hapukad Wunderland 175g,Katjes,175 g,4037400344782,,,sweets_snacks,sweets_candies
+413029,Saku Kuld õlu 12x330ml kohver,Saku Kuld,12x330 ml,4740019769470,,,drinks,drinks_beer_cider
+413269,Tic-Tac Fresh Mint T110 54g,Tic-Tac Fresh,54 g,4008400395029,,,sweets_snacks,sweets_gums_mints
+414101,Glade One Touch Relaxing Zen õhuvärskendaja täide 10 ml,Glade One,10 ml,5000204818673,,,household,hh_candles_airfresh
+415025,Köögipuhastusvahend Mayeri All-Care 750ml,Köögipuhastusvahend Mayeri,750 ml,4740060010668,,,household,hh_cleaners
+415181,Coop prügikott 30l 25tk värviline,Coop,30 l,7340191170582,,,household,hh_bins_bags
+416504,Soolatud kukeseened 425 g,Soolatud,425 g,4740536322509,,,dry_preserves,dry_canned_veg
+416903,Jaatis Magnum Almond Multipakk 6 Tk 276 G,,,,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+416904,"Külm. hinkaalid VICI, 400g",,,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+416905,"Külm. pelmeenid sealihaga VANAEMA, 400g",,,,meat_fish,meat_pork,frozen_food,frozen_ready_meals
+416906,"Külm.vareen.seente-röstsib.VANAEMA,400g",,,,produce,produce_mushrooms,frozen_food,frozen_ready_meals
+416907,"Külmutatud searaguu RAKVERE, 1,3kg",,,,frozen_food,frozen_other,frozen_food,frozen_ready_meals
+416908,"Vanillijäätis MIO RIO, 65g",,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+416909,"Jäätis jõhvikamaitseline MIO&RIO, 120g",,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+416910,"Jäätis MIO RIO šokol.kr&kolme šokol.,480g",,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+416911,Jäätis metsamarjadega 525g,,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+416912,"Külm.pelmeenid UVIC Hiina lambaliha,400g",,,,meat_fish,meat_beef_lamb_game,frozen_food,frozen_ready_meals
+416913,"Külm.supiköögiviljad Talv HORTEX, 450g",,,,dry_preserves,dry_other,frozen_food,frozen_veg
+416914,Jaatis Mandliga Vegan Magnum 72 G,,,,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+416915,"Külm.krevetid 31/40 keed.saba VICI,300g",,,,dry_preserves,dry_other,frozen_food,frozen_fish
+416916,"Külm.krevetid 90/120 keed.k-ta VICI,350g",,,,dry_preserves,dry_other,frozen_food,frozen_fish
+416917,"Külm.lehttaigen EESTI PAGAR, 500g",,,,dry_preserves,dry_other,frozen_food,frozen_bakery
+416918,Glasuurkohuke virsiku lakt.v.KARUMS 40g,,,,drinks,drinks_spirits,dairy_eggs_fats,dairy_desserts
+416919,Hambapasta Ns Polaaroo 100 G,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+416920,"Külm.juusturull EESTI PAGAR,400g",,,,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_bakery
+416921,"Külm.magus muretaigen EESTI PAGAR,500g",,,,dry_preserves,dry_other,frozen_food,frozen_bakery
+416922,"Külm.vareenikud kohupiimaga GERMES, 450g",,,,dairy_eggs_fats,dairy_cottage_quark,frozen_food,frozen_ready_meals
+416923,"Külmutatud mini-frikadellid EHE, 350g",,,,frozen_food,frozen_other,frozen_food,frozen_ready_meals
+416924,"Külmutatud mini-pelmeenid EHE, 350g",,,,frozen_food,frozen_other,frozen_food,frozen_ready_meals
+416925,"Külmutatud pelmeenid EHE , 350g",,,,frozen_food,frozen_other,frozen_food,frozen_ready_meals
+416926,"Külmutatud viineripirukas EP, 1,2 kg",,,,drinks,drinks_spirits,frozen_food,frozen_bakery
+416927,"Sorbett melon&mustsõstar MIO&RIO,73g",,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+416928,"Vanilliplombiir pähklitega MIO&RIO,73g",,,,sweets_snacks,sweets_nuts_driedfruit,frozen_food,frozen_desserts_icecream
+416929,"Jäätis B&J küpsis. cookie dough, 406g",,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+416930,"Jäätis B&J küpsisetaigna&brownie,406g",,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+416931,Jäätis Bubble Gum ZEMNIEKU 65g,,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+416933,Jaatis Karamel Rost Mandl 505 G,,,,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+416935,"Grilljuust NÕO, 240g",,,,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+416936,Külm.pitsa prosciutto&pes.FELICIANA 360g,,,,dry_preserves,dry_other,frozen_food,frozen_pizza
+416937,"Koorejäätis šokolaadim.brikett 10%,80g",,,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+416938,"Koorejäätis vanillim.brikett 15%, 80g",,,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+416939,"Külm. bataadi MAAHÄRRA friikad, 500g",,,,frozen_food,frozen_potato_products,frozen_food,frozen_potato_products
+416940,"Külm.grillitud köögiviljad BAUER, 400g",,,,dry_preserves,dry_other,frozen_food,frozen_veg
+416941,Külm.pitsaRISTORANTE Mozzarella g.v.370g,,,,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_pizza
+416942,Maisitolvik Kg,,,,dry_preserves,dry_canned_veg,produce,produce_root_veg
+416943,"Külm.riis mereandidega GARDE MANGER,400g",,,,dry_preserves,dry_pasta_rice,frozen_food,frozen_ready_meals
+416944,"Jäätis brownie SUPER VIVA, 93g",,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+416945,"Jäätis SUPER VIVA Vegan rohel.smuuti,97g",,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+416946,"Koorejäätis ERITI RAMMUS kondensp.,100g",,,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+416947,"Koorejäätis šoko.tk.ONU ESKIMO,65g",,,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+416948,"Koorejäätis vanillim.RAKS toruke, 68g",,,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+416949,Kulm Mintaifilee Pulgad Findus 364 G,,,,sweets_snacks,sweets_gums_mints,frozen_food,frozen_fish
+416951,"Jog.jook GEFILUS mustika-banaani,4x100g",,,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+416952,Rukola WELL DONE 100g,,,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+416953,"Külm.Panko kalafileepulgad VICI,285g",,,,meat_fish,fish_fresh,frozen_food,frozen_fish
+416954,"Külm.pelm.VICI köögiviljadega Gyoza,400g",,,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+416955,"Külm. supipelmeenid UVIC Ivan, 500g",,,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+416956,"Külm.tiigerkrevet.keedetud,kooritud,300g",,,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_fish
+416957,Külmutatud Argentina merluusi rümp 800g,,,,frozen_food,frozen_other,frozen_food,frozen_fish
+416958,"Külm.kalmaarituubid, 350g/netokaal",,,,dry_preserves,dry_other,frozen_food,frozen_fish
+416959,Tsillipipar Punane Well Done 50 G,,,,world_spices,spices_basic_salt_pepper,produce,produce_root_veg
+416960,KPN Liköörvein QUINTA DO PEGO LBV 750ml,,,,drinks,drinks_wine,drinks,drinks_spirits
+416961,Arom. veinijook DREAMER Sweet Red 1L,,,,drinks,drinks_wine,drinks,drinks_other
+416962,Tšillipiprad Padron 200g,,,,dry_preserves,dry_other,produce,produce_root_veg
+416963,"Hernevõrsed , 25g",,,,dry_preserves,dry_other,produce,produce_herbs_salads_sprouts
+416964,"Jäätis karusmarjaga DRUVA, 70g",,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+416965,"Hele õlu SAKU Kuld 5,2% 6x0,5l",,,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+416966,"Tšillipiprad Habanero WELL DONE, 50g",,,,dry_preserves,dry_other,produce,produce_root_veg
+416967,"Kanakebabitükid WELL DONE, 350g",,,,meat_fish,meat_poultry,meat_fish,meat_poultry
+416968,Jäätis vanilje-limonaadi LIMPA 60g,,,,drinks,drinks_soft_soda,frozen_food,frozen_desserts_icecream
+416969,"Külmutatud maisikana SAVEL, 520g",,,,dry_preserves,dry_canned_veg,frozen_food,frozen_meat
+416970,"Külmutatud puravikud, 250g",,,,frozen_food,frozen_other,frozen_food,frozen_veg
+416971,"Külmutatud sea tagajalad NÕO,kg",,,,frozen_food,frozen_other,frozen_food,frozen_meat
+416972,Viinamari Punane Red Globe 1 Kl Kg,,,,drinks,drinks_spirits,produce,produce_berries
+416973,"Vanilla jäätis, 500g",,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+416974,"Brokoli, 400g",,,,produce,produce_root_veg,produce,produce_root_veg
+416975,"Avokaado suur WELL DONE 12/14, 1tk 250g",,,,dry_preserves,dry_other,produce,produce_tropical
+416976,"Heeringafil.suitsumaits. OCEAN õlis,220g",,,,sauces_oils,oils_other,meat_fish,fish_salted_smoked
+416978,Lutserniidu mahe 100g,,,,dry_preserves,dry_other,produce,produce_herbs_salads_sprouts
+416979,"Baklažaan,kg",,,,dry_preserves,dry_other,produce,produce_root_veg
+416980,Joogijog. ACTIVIA vaarika-granaatõun300g,,,,produce,produce_berries,dairy_eggs_fats,dairy_yogurt_kefir
+416981,Heeringafil.suitsumaits.õlis OCEAN 400g,,,,sauces_oils,oils_other,meat_fish,fish_salted_smoked
+416982,"Kanapuljong FOODSTUDIO, 750ml",,,,world_spices,spices_broth_stock,world_spices,spices_broth_stock
+416983,"Kõva juust DŽIUGAS viilutatud, 150g",,,,dairy_eggs_fats,dairy_cheese_slices,cheese,dairy_cheese_slices
+416984,Beebiporgand KADARBIKU 250g,,,,produce,produce_root_veg,produce,produce_root_veg
+416985,Karastusjook COCA-COLA 1.5L,,,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+416986,"Kreeka jog.jook ALMA mustika-kirsi, 275g",,,,produce,produce_berries,dairy_eggs_fats,dairy_yogurt_kefir
+416987,"Kreeka jogurt ALMA maitsestamata, 370g",,,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+416988,Kulm Kalaburgerid Esva 250 G,,,,meat_fish,fish_fresh,frozen_food,frozen_fish
+416989,Kulm Kompotiassorti Bauer 400 G,,,,dry_preserves,dry_other,frozen_food,frozen_berries_fruit
+416990,"Jäätis metsamarjadega MIO&RIO, 120g",,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+416991,"Koorejäätis ERITI RAMMUS karamelli, 100g",,,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+416992,"Külm.köögivil.segu Rooma suvi BAUER,400g",,,,dry_preserves,dry_other,frozen_food,frozen_veg
+416993,"Külm.köögiviljas.Tervist HÄRMAVILI,400g",,,,dry_preserves,dry_other,frozen_food,frozen_veg
+416994,Kulm Kalapulgad Kilepakendis Esva 400 G,,,,meat_fish,fish_fresh,frozen_food,frozen_fish
+416995,Pruunid Sampinjonid Pakitud 400 G,,,,dry_preserves,dry_other,produce,produce_mushrooms
+416996,"Kali AMBER CITY 1.5L, pet",,,,dry_preserves,dry_other,drinks,drinks_soft_soda
+416997,"Viinamari hele, seemneteta, 500g",,,,drinks,drinks_spirits,produce,produce_berries
+416998,"Külm. kartulipallid Noisettes AVIKO,600g",,,,produce,produce_root_veg,frozen_food,frozen_potato_products
+416999,"Vaarikad WELL DONE, 125g",,,,produce,produce_berries,produce,produce_berries
+417000,El Pardel Philips S 1142 00,,,,dry_preserves,dry_other,personal_care,pcare_shaving
+417001,Hab Aj Jarg Naov B Line Alex Sport 200 Ml,,,,drinks,drinks_wine,personal_care,pcare_shaving
+417002,Hab Aj Jarg Naov B Line Alex Vikin 200 Ml,,,,dry_preserves,dry_other,personal_care,pcare_shaving
+417003,Hab Aj Jarg Palsam Gillette Aloe 100 Ml,,,,personal_care,pcare_shampoo_cond,personal_care,pcare_shaving
+417004,Hab Aj Vaht B Line Alex Xxl Prince 400 Ml,,,,dry_preserves,dry_other,personal_care,pcare_shaving
+417005,Hab Aj Vaht B Line Alex Xxl Sensit 400 Ml,,,,dry_preserves,dry_other,personal_care,pcare_shaving
+417006,Hab Aj Vaht B Line Alex Xxl Viking 400 Ml,,,,dry_preserves,dry_other,personal_care,pcare_shaving
+417007,"Heeringaf.Tradicine õlis EDEGA,1kg",,,,sauces_oils,oils_other,meat_fish,fish_processed
+417008,Habem Aj Jarg Palsam Gillette 3 In 1 50 Ml,,,,personal_care,pcare_shampoo_cond,personal_care,pcare_shaving
+417009,Habem Vaht Nivea Men Ultra Calming 200 Ml,,,,dry_preserves,dry_other,personal_care,pcare_shaving
+417010,Habemepalsam Gillette King C 100 Ml,,,,personal_care,pcare_shampoo_cond,personal_care,pcare_shaving
+417011,Habemepesuvahend Gillette King C 350 Ml,,,,dry_preserves,dry_other,personal_care,pcare_shaving
+417012,Nao Habeme Palsam Gillette King C 100 Ml,,,,personal_care,pcare_shampoo_cond,personal_care,pcare_shaving
+417013,Nao Vaharibad Veet Minima Cold Wax 20 Tk,,,,dry_preserves,dry_other,personal_care,pcare_shaving
+417014,Naovesi Nivea Men Fresh Kick 100 Ml,,,,drinks,drinks_water,personal_care,pcare_shaving
+417015,Pardel Philips Oneblade Qp 2724 20,,,,dry_preserves,dry_other,personal_care,pcare_shaving
+417016,Pardel Philips Oneblade Qp 2734 20,,,,dry_preserves,dry_other,personal_care,pcare_shaving
+417017,Pardel Philips Oneblade Qp 2834 20,,,,dry_preserves,dry_other,personal_care,pcare_shaving
+417018,Ras Geel Satin Care Sens Aloe Vera 75 Ml,,,,dry_preserves,dry_other,personal_care,pcare_shaving
+417019,Raseer Vaht Gillette Revitalising 200 Ml,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417020,Raseerija Bic Soleilclick Sensit 2 Tera,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417021,Raseerija Gillette Blue 3 Regular 12 Tk,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417022,Raseerija Venus Sugarberry 1 Tk,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417023,Raseerija Wilkinson Intuition Complete,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417024,Raseerija Wilkinson Sword Hydro 5,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417025,Raseerijad Bic Soleil Click 5 1 2 Tk,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417026,Raseerijad Comfort Cocon Wilkinson 3 1 Tk,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417027,Raseerijad Divus Men Vit E Aloe Vera 4 Tk 38553,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417028,Raseerijad Divus Men Vit E Aloe Vera 5 Tk 38552,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417029,Raseerijad Divus Women Vit E Aloe 5 Tk 38562,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417030,Raseerijad Essen Extra 3 Wilkinson 4 2 Tk,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417031,Raseerijad Extra Essent Wilkinson 4 2 Tk,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417032,Raseerijad Smooth Sen Quat Wilkinson 3 Tk,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417033,Raseerijad Smooth Violet Wilkinson 3 Tk,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417034,Raseerijad Venus Sensitive 6 Tk,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417035,Raseerijad Wilkinson Xtreme 3 Black 3 1 Tk,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417036,Raseerimisgeel Gillette Cleansing 200 Ml,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417037,Raseerimisgeel Gillette Mach 3 Comf 240 Ml,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417038,Raseerimisgeel Gillette Pro Sensit 200 Ml,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417039,Raseerimisgeel Gillette Revitalis 200 Ml,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417040,Raseerimisgeel Gillette Sensitive 240 Ml,,,,personal_care,pcare_shaving,personal_care,pcare_shaving
+417041,Raseerimisvaht Gillette Sensitive 200 Ml,,,,personal_care,pcare_shaving,personal_care,pcare_shaving

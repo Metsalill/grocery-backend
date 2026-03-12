@@ -1,0 +1,151 @@
+﻿product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+417500,KPN kv.vah. FREIXENET Brut 750ml,,,,drinks,drinks_wine,drinks,drinks_wine
+417501,KPN-kv. vein EL COTO Crianza 750ml,,,,drinks,drinks_wine,drinks,drinks_wine
+417502,KPN kv.vein MOUTON CADET Rouge 750ml,,,,drinks,drinks_wine,drinks,drinks_wine
+417503,Tomatimahl AURA 1L,,,,drinks,drinks_juices,drinks,drinks_juices
+417504,Vermut MARTINI Rosato 15% 1L,,,,dry_preserves,dry_other,drinks,drinks_spirits
+417505,"Tume õlu GUINNESS Draught 4.2% 440ml,prk",,,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+417506,Vermut MARTINI Bianco 15% 1L,,,,dry_preserves,dry_other,drinks,drinks_spirits
+417507,"Jäätis MANHATTAN banaan&soko.pere,742g",MANHATTAN,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+417508,"Jäätis SNICKERS White, 41g",MARS,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+417509,"Jäätis brownie  SUPER VIVA, 93g",SUPER VIVA,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+417510,"Jäätis SUPER VIVA Vegan rohel.smuuti,97g",SUPER VIVA,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+417511,"Kiivi sorbetipallid MINI MELTS, 72g",MINI MELTS,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+417512,Vahuvein FREIXENET Cav.C.Nev.S. 200ml,,,,drinks,drinks_wine,drinks,drinks_wine
+417513,Külm. paneeritud juust PEALINNA 200g,,,,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_ready_meals
+417514,"Kirsi sorbetipallid MINI MELTS, 72g",MINI MELTS,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+417515,Maitsestatud veed,,,,dry_preserves,dry_other,drinks,drinks_soft_soda
+417517,"Külm.pelmeenid õunte&kaneeliga VICI,400g",,,,world_spices,spices_herbs_spice_mix,frozen_food,frozen_ready_meals
+417518,"Külm.pelmeenid smile factory GERMES,500g",,,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+417519,Külm.pitsa salaami&choriz.FELICIANA 320g,,,,dry_preserves,dry_other,frozen_food,frozen_pizza
+417520,Muu piir.jook PIPRA KIBE NAPS 35% 500ml,,,,dry_preserves,dry_other,drinks,drinks_spirits
+417521,"Külm. praekartul MAAHÄRRA, 500g",,,,produce,produce_root_veg,frozen_food,frozen_potato_products
+417522,Vahuvein ALITA Sweet 750ml,,,,drinks,drinks_wine,drinks,drinks_wine
+417523,"Koorejäätis ERITI RAMMUS banaan&šok,110g",ERITI RAMMUS,,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+417524,"Koorejäätis ERITI RAMMUS kondensp.,100g",ERITI RAMMUS,,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+417525,"Koorejäätis must.vaar.ONU ESKIMO,480g",BALBIINO,,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+417526,Vahuvein FREIXENET Cav.C.Neg.Br. 200ml,,,,drinks,drinks_wine,drinks,drinks_wine
+417527,"Koorejäätis ONU ESKIMO šoko.tops,65g",ONU ESKIMO,,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+417528,"Koorejäätis šoko.tk.ONU ESKIMO,65g",ONU ESKIMO,,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+417529,"Koorejäätis šokolaad.ONU ESKIMO,80g",ONU ESKIMO,,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+417530,"Koorejäätis van.šok.ONU ESKIMO,80g",ONU ESKIMO,,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+417531,"Koorejäätis vanil.ONU ESKIMO,65g",ONU ESKIMO,,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+417532,"Külm.pannkoogid lihaga EXTRA LINE, 400g",,,,meat_fish,meat_other,frozen_food,frozen_ready_meals
+417533,KPN vein EL COTO Blanco Rioja 750ml,,,,drinks,drinks_wine,drinks,drinks_wine
+417534,"Jäät.karam.&päh.topsis SUPER VIVA, 95g",,,,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+417535,Jaat Maas Vanil Topsis Super Viva 98 G,,,,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+417536,"Koorejäätis vanil.ONU ESKIMO,80g",ONU ESKIMO,,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+417537,"Koorejäätis vanillim.ONU ESKIMO,57g",ONU ESKIMO,,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+417538,"Koorejäätis vanillim.RAKS toruke, 68g",RAKS,,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+417539,"Külm.hinkaalid RANNAROOTSI, 420g",RANNAROOTSI,,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+417541,"Külm.kanaliha frik.kaerakliid.UVIC, 350g",UVIC,,,meat_fish,meat_poultry,frozen_food,frozen_ready_meals
+417542,Külm.kaneelirull kardemoniga EP 1.2kg,EESTI PAGAR,,,world_spices,spices_herbs_spice_mix,frozen_food,frozen_bakery
+417543,"Külm.köögivil.segu Go Green BAUER,400g",BAUER,,,dry_preserves,dry_other,frozen_food,frozen_veg
+417544,"Külm.köögivil.segu Rooma suvi BAUER,400g",BAUER,,,dry_preserves,dry_other,frozen_food,frozen_veg
+417545,"Külm.köögivil.segu Vahemere BAUER,400g",BAUER,,,dry_preserves,dry_other,frozen_food,frozen_veg
+417546,"Külm.köögivilj.HÄRMAVILI läätsedega,400g",HÄRMAVILI,,,dry_preserves,dry_groats_beans,frozen_food,frozen_veg
+417548,Liköör VANA TALLINN 40% 500ml,,,,dry_preserves,dry_other,drinks,drinks_spirits
+417549,Whisky Glenfiddich 12 Yo Sin Malt 40 Proc 700 Ml,,,,drinks,drinks_spirits,drinks,drinks_spirits
+417550,"Külm.köögiviljas.Tervist HÄRMAVILI,400g",HÄRMAVILI,,,dry_preserves,dry_other,frozen_food,frozen_veg
+417551,"Salaami traditsiooniline MATSIMOKA,150g",,,,dry_preserves,dry_other,meat_fish,meat_sausages
+417552,"Külmutatud mehhiko segu WELL DONE, 400g",,,,frozen_food,frozen_other,frozen_food,frozen_veg
+417553,"Külm.kultuurmustikad HARMAVILI,300g",HÄRMAVILI,300g,,produce,produce_berries,frozen_food,frozen_berries_fruit
+417554,GT vein TBILVINO Alaz.Vall. valge 750ml,,750ml,,drinks,drinks_wine,drinks,drinks_wine
+417555,"Cognac LARSEN V.S.O.P. 40% 350ml, karp",,350ml,,drinks,drinks_spirits,drinks,drinks_spirits
+417556,Külm.mini mitmevilja-croissant EP 1.05kg,EESTI PAGAR,1.05kg,,bakery,bakery_buns_croissants,frozen_food,frozen_bakery
+417557,"Külm.pelmeenid Sib.Col.lambalihaga,350g",UVIC,350g,,meat_fish,meat_beef_lamb_game,frozen_food,frozen_meat
+417558,"Külm.pelmeenid Sib.Col.sea&veise,350g",UVIC,350g,,meat_fish,meat_beef_lamb_game,frozen_food,frozen_meat
+417560,"Külm.lihapirukas EESTI PAGAR, 1kg",,1kg,,bakery,bakery_cakes_pastries,frozen_food,frozen_bakery
+417561,"Külm.krabisõrad VICI surimi pulgal,245g",,245g,,dry_preserves,dry_other,frozen_food,frozen_fish
+417562,"Külm.pelmeenid Sib.Col.veiselihaga,350g",UVIC,350g,,meat_fish,meat_beef_lamb_game,frozen_food,frozen_meat
+417563,"Külm.marjasegu vaarikatega HORTEX, 300g",,300g,,produce,produce_berries,frozen_food,frozen_berries_fruit
+417564,Kohvioad Arabica PAULIG 1kg,,1kg,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+417565,KP vein B&G Rose D'AnjouGroll.-Gam.750ml,,750ml,,drinks,drinks_wine,drinks,drinks_wine
+417566,KPN kv.vah. FREIXENET Semi Seco 750ml,,750ml,,dry_preserves,dry_other,drinks,drinks_wine
+417567,Cognac LARSEN VSOP 40% 700ml,,700ml,,drinks,drinks_spirits,drinks,drinks_spirits
+417568,"Koorejäätis vanil.ONU ESKIMO,65g",,65g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+417569,Külm. pitsa Diavola RISTORANTE 350g,DR.OETKER,350g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+417570,"Külm.pitsa Mozzarella RISTORANTE, 355g",DR.OETKER,355g,,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_pizza
+417571,"Külm.pitsa Prosciutto RISTORANTE, 340g",DR.OETKER,340g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+417572,"Külm.pitsa RISTORANTE Speciale, 345g",DR.OETKER,345g,,dry_preserves,dry_other,frozen_food,frozen_pizza
+417573,"Külm.põdraliha pelmeenid,350g",RANNAROOTSI,350g,,meat_fish,meat_other,frozen_food,frozen_meat
+417574,Hambapasta Biomed Citrus Fresh 100 G,,100G,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+417575,"Jahv.kohv mas.Krönung Grand JACOBS, 100g",,100g,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+417576,Jahvat.kohv ILLY Classic 250g,,250g,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+417577,"Jahvatatud kohv Fine Aroma DAVIDOFF,250g",,250g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+417578,Külmutatud valmistoidud ja snäkid,,,,produce,produce_herbs_salads_sprouts,frozen_food,frozen_ready_meals
+417579,"Jahvatatud kohv Rich Aroma DAVIDOFF,250g",,250g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+417581,Kuumsuitsuräimed rookimata OCEAN 400g,,400g,,meat_fish,fish_salted_smoked,meat_fish,fish_salted_smoked
+417582,"Külm.Ukr.borš köögiv.segu HORTEX, 450g",,450g,,dry_preserves,dry_other,frozen_food,frozen_veg
+417583,"Külmutatud kalapulgad OCEAN, 450g",,450g,,frozen_food,frozen_fish,frozen_food,frozen_fish
+417584,"Koorejäätis vanil.ONU ESKIMO,80g",,80g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+417585,KGT valge vein B&G Sauvignon Blanc 750ml,,750ml,,drinks,drinks_wine,drinks,drinks_wine
+417586,"Koorejäätis vanillim.ONU ESKIMO,57g",,57g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+417587,"Külm.praadimissegu kart.HÄRMAVILI,400g",HÄRMAVILI,400g,,dry_preserves,dry_other,frozen_food,frozen_potato_products
+417590,"Seahakkliha RAKVERE, 400g",,400g,,meat_fish,meat_minced,meat_fish,meat_minced
+417591,"Lahustuv kohvijook 3in1 MONTE PERO 17,5g",,"17,5g",,drinks,drinks_tea_coffee,drinks,drinks_syrups_powders
+417592,"Sea šašlõkk Armeenia grill, kg",,,,meat_fish,meat_pork,meat_fish,meat_pork
+417593,Joogivesi AURA ga-tud 500ml,,500ml,,drinks,drinks_water,drinks,drinks_water
+417594,Kohvivalgendaja COFFEETA 200g,,200g,,drinks,drinks_other,drinks,drinks_syrups_powders
+417596,"Külm.šokolaadisaiake EESTI PAGAR, 240g",EESTI PAGAR,240g,,bakery,bakery_buns_croissants,frozen_food,frozen_bakery
+417597,"Külm.vaarikad, mustikad HÄRMAVILI, 300g",HÄRMAVILI,300g,,produce,produce_berries,frozen_food,frozen_berries_fruit
+417598,Jahvatatud kohv AROMA Gold Classic 250g,,250g,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+417599,"Jäätis pistaatsia ja šokol.CLASSIC, 64g",,64g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+417600,"Jäätis pistaatsia mandlikr.CLASSIC, 380g",,380g,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+417601,"Koorejäätis BALBIINO glasuuris, 6x35g",,35g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+417602,"Koorejäätis kohv&liköör VANA TALLINN,64g",,64g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+417603,"Koorejäätis kohv&liköörVANA TALLINN,380g",,380g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+417604,"Koorejäätis RAKS piparmündi, 56g",,56g,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+417605,"Külm.vareen. UVIC Vanaema kohupiim.,400g",UVIC,400g,,dairy_eggs_fats,dairy_cottage_quark,frozen_food,frozen_ready_meals
+417606,Külmutatud Ananassi Kuubikud BAUER 300g,BAUER,300g,,produce,produce_tropical,frozen_food,frozen_berries_fruit
+417607,Külmutatud meloni pallid BAUER 300g,BAUER,300g,,produce,produce_tropical,frozen_food,frozen_berries_fruit
+417608,"Mango sorbetipallid MINI MELTS, 72g",MINI MELTS,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+417609,"Külm.pelmeenid UVIC Ivan Poltavskie,500g",,,,dry_preserves,dry_other,frozen_food,frozen_ready_meals
+417610,Lahustuv kohv MERRILD Classic 200g,,,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+417611,"Skumbria tomatikastm.MARINE ABC, EO 240g",,,,produce,produce_root_veg,dry_preserves,dry_canned_meat_fish
+417612,"Sojagrillkotlet BON SOYA, 250g",,,,sauces_oils,sauces_soy_worcester,dry_preserves,dry_other
+417613,"Kaktusvili suurevilj.viigikaktus, 500g",,,,dry_preserves,dry_other,produce,produce_tropical
+417614,"Siberi tuuramari ,25g",,,,dry_preserves,dry_other,meat_fish,fish_other
+417615,"Arbuus, kg",,,,produce,produce_tropical,produce,produce_tropical
+417617,"Kiivi kollane karbis, 500g",,,,produce,produce_tropical,produce,produce_tropical
+417618,"Kimchi salat, 450g",,,,produce,produce_herbs_salads_sprouts,dry_preserves,dry_canned_veg
+417619,"Münt WELL DONE, 20g",,,,dry_preserves,dry_other,produce,produce_herbs_salads_sprouts
+417620,Paprika pikk punane WELL DONE 250g,,,,produce,produce_root_veg,produce,produce_root_veg
+417621,"Köögiviljasegu Coleslaw WELL DONE, 300g",,,,dry_preserves,dry_other,produce,produce_root_veg
+417622,"Õun pakitud 1kl., kg",,,,produce,produce_apples_pears,produce,produce_apples_pears
+417623,KPN vein CESARI SOAVE Essere 750ml,,,,drinks,drinks_wine,drinks,drinks_wine
+417626,Jääsalat 1tk min 400g,,,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+417628,Porgand 200g valmis söömiseks!,,,,produce,produce_root_veg,produce,produce_root_veg
+417629,"Kaalikas, kg",,,,dry_preserves,dry_other,produce,produce_root_veg
+417630,"Kartul pakitud varajane, kg",,,,produce,produce_root_veg,produce,produce_root_veg
+417631,"Kartul pestud Villeri pakitud, 2kg",LAHEOTSA,,,produce,produce_root_veg,produce,produce_root_veg
+417632,"Kartul varajane, lahtine,kg",,,,produce,produce_root_veg,produce,produce_root_veg
+417633,"Keedupeet vaakumis Jovaige, 500g",JOVAIGE,,,produce,produce_root_veg,produce,produce_root_veg
+417634,Kirss-kobartomat 500g,,,,produce,produce_root_veg,produce,produce_root_veg
+417635,"Kurk lühike, kg",,,,produce,produce_root_veg,produce,produce_root_veg
+417636,"Kurk Luunja, kg",,,,produce,produce_root_veg,produce,produce_root_veg
+417638,"Melon HONEY DEW, kg",,,,produce,produce_tropical,produce,produce_tropical
+417639,"Külm.Mozzarella pulgad paneer.SALUD,250g",,,,dairy_eggs_fats,dairy_cheese_slices,frozen_food,frozen_ready_meals
+417640,Jahvatatud Kohv Jacobs Kronung Mild 500 G,,,,drinks,drinks_tea_coffee,drinks,drinks_coffee_beans_capsules
+417641,"Koorejäätis ONU ESKIMO šoko.tops,65g",,,,dairy_eggs_fats,dairy_cream_sourcream,frozen_food,frozen_desserts_icecream
+417642,"Mango sorbetipallid MINI MELTS, 72g",,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+417643,"Melon PIEL DE SAPO, kg",,,,produce,produce_tropical,produce,produce_tropical
+417644,"Õun GOLDEN Delicious suur 1kl., kg",,,,produce,produce_apples_pears,produce,produce_apples_pears
+417645,"Gin GORDON`S 37,5% 700ml",,,,drinks,drinks_spirits,drinks,drinks_spirits
+417646,GT vein TBILVINO AlazaniValley pun.750ml,,,,drinks,drinks_wine,drinks,drinks_wine
+417647,"Külm.sojaoad Edamame SHIRAKIKU, 400g",,,,sauces_oils,sauces_soy_worcester,frozen_food,frozen_veg
+417648,GT vein TBILVINO Saperavi punane 750ml,,,,drinks,drinks_wine,drinks,drinks_wine
+417649,GT vein TBILVINO Tsinandali valge 750ml,,,,drinks,drinks_wine,drinks,drinks_wine
+417650,Hele õlu CRONUS Pilsner 4.8% 500ml,,,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+417651,"Õun Paulared 1kl., kg",,,,produce,produce_apples_pears,produce,produce_apples_pears
+417653,"Petersell kiles,30g",,,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+417654,Muu Alk J Sinebrychoff Grape 5 5 Proc 0 5 L,,,,dry_preserves,dry_other,drinks,drinks_other
+417656,"Porgand lahtine,kg",,,,produce,produce_root_veg,produce,produce_root_veg
+417657,Muu Alk Jk Aperol Aperitivo 11 Proc 700 Ml,,,,dry_preserves,dry_other,drinks,drinks_spirits
+417659,Liköör JÄGERMEISTER 35% 350ml,,,,dry_preserves,dry_other,drinks,drinks_spirits
+417660,Redis Punane Kg,,,,dry_preserves,dry_other,produce,produce_root_veg
+417661,"Riivitud keedupeet vaakumis Jovaige, 500",JOVAIGE,,,produce,produce_root_veg,produce,produce_root_veg
+417662,Salat Potis Tk,,,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+417663,"Külm.paneer.krevetid sabaga Torpedo,300g",,,,dry_preserves,dry_other,frozen_food,frozen_fish
+417664,"Külm.paneeritud kalapulgad FINDUS, 450g",,,,meat_fish,fish_fresh,frozen_food,frozen_fish
+417665,"Salatisibul,kg",,,,produce,produce_herbs_salads_sprouts,produce,produce_root_veg

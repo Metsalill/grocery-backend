@@ -1,0 +1,51 @@
+﻿product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+418023,"Marineeritud kukeseen, 500g",EESTI AND,,,produce,produce_mushrooms,dry_preserves,dry_canned_veg
+418024,Marineeritud šampinjonid 500g,EESTI AND,,,produce,produce_mushrooms,dry_preserves,dry_canned_veg
+418025,Murulauk WELL DONE 20g,WELL DONE,,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+418026,Rukola WELL DONE 100g,WELL DONE,,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+418027,Liköör VANA TALLINN 40% 200ml,,,,dry_preserves,dry_other,drinks,drinks_spirits
+418028,"Must purutee TWININGS Earl Grey,100g",,,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+418029,"Must tee Earl Grey LIPTON,50x1.5g",,,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+418030,Must tee Engl. AristocraticHYLEYS25x2g,,,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+418031,Must tee English Aristocratic HYLEYS100g,,,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+418032,Viin VIRU VALGE 40% 350ml,,,,drinks,drinks_spirits,drinks,drinks_spirits
+418033,"Salvei WELL DONE, 20g",WELL DONE,,,dry_preserves,dry_other,produce,produce_herbs_salads_sprouts
+418034,Brandy TORRES 5 38% 700ml,,,,dry_preserves,dry_other,drinks,drinks_spirits
+418035,"Soolakurk küüslauguga, 300g",EESTI AND,,,world_spices,spices_basic_salt_pepper,dry_preserves,dry_canned_veg
+418036,"Terav kaste Guacamole, 150g",NATIVE,,,sauces_oils,sauces_other,sauces_oils,sauces_other
+418037,"Till taldrikul, pakitud, kg",,,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+418039,Cognac HENNESSY VS 40% 700ml,HENNESSY,,,drinks,drinks_spirits,drinks,drinks_spirits
+418040,"Gin BEEFEATER Pink 37,5% 700ml",BEEFEATER,,,drinks,drinks_spirits,drinks,drinks_spirits
+418041,"Gin GORDON`S 37,5% 700ml",GORDON'S,,,drinks,drinks_spirits,drinks,drinks_spirits
+418042,"Kodune maksapasteet NÕO, 200g",,,,drinks,drinks_tea_coffee,meat_fish,meat_gourmet
+418043,"Jäätis VANA TOOMAS šokolaadiplomb., 90g",,,,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+418044,Gin SAAREMAA Ore 38% 500ml,SAAREMAA GIN,,,drinks,drinks_spirits,drinks,drinks_spirits
+418045,GT vein TBILVINO Alaz.Vall. valge 750ml,TBILVINO,,,drinks,drinks_wine,drinks,drinks_wine
+418046,Salatisegu Lattughini WELL DONE 100g,,,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+418047,Salatisegu Summer Garden WELL DONE 150g,,,,produce,produce_herbs_salads_sprouts,produce,produce_herbs_salads_sprouts
+418048,"Kakaoplombiir NOSTALGIA Bronze, 70g",,,,dry_preserves,dry_other,frozen_food,frozen_desserts_icecream
+418049,GT vein TBILVINO AlazaniValley pun.750ml,ALAZANI,,,drinks,drinks_wine,drinks,drinks_wine
+418050,GT vein TBILVINO Saperavi punane 750ml,TBILVINO,,,drinks,drinks_wine,drinks,drinks_wine
+418051,GT vein TBILVINO Tsinandali valge 750ml,TBILVINO,,,drinks,drinks_wine,drinks,drinks_wine
+418052,Hambapasta Colgate Adv Wh Charcoal 75 Ml,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418053,Hambapasta Colgate M White Charcoal 75 Ml,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418054,Hambapasta Colgate M White Luminous 75 Ml,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418055,Hambapasta Colgate Max White 125 Ml,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418056,Hambapasta Colgate Max White Exp Wh 75 Ml,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418057,Hambapasta Colgate Max White One 75 Ml,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418058,Hambapasta Colgate Total Original 20 Ml,,,,drinks,drinks_spirits,personal_care,pcare_oral_care
+418059,Hambapasta Colgate Total Original 75 Ml,,,,drinks,drinks_spirits,personal_care,pcare_oral_care
+418060,Hambapasta Colgate Total Whitening 75 Ml,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418061,Hambapasta Ecodenta Black Whitenin 100 Ml,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418062,Hambapasta Ecodenta Sensit Relief 100 Ml,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418063,Hambapasta Ecodenta Triple Force 100 Ml,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418064,Hambapasta Ecodenta Valgendav Munt 100 Ml,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418065,Hambapasta Elmex Caries Protection 75 Ml,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418066,Hambapasta Elmex Enamel Protection 75 Ml,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418067,Hambapasta Elmex Sensitive 75 Ml,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418068,Hambapasta Elmex Sensitive Profes 75 Ml,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418069,Hambapasta Himalaya Granaatoun 100 G,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418070,Hambapasta Himalaya Mint Fresh 75 Ml,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418071,Hambapasta Himalaya Sparkly White 75 Ml,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418072,Hambapasta Himalaya Stain Away 75 Ml,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+418073,Hambapasta Jordan Caries Defence 75 Ml,,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care

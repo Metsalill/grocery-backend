@@ -1,0 +1,151 @@
+product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+388471,Kanamaitseaine kollane karri Santa Maria 24g,Santa Maria,,,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+388473,"Mänguasi Maisto die cast 1:24 mudelauto Lamborgini Urus, 32533",Maisto,,,drinks,drinks_spirits,household,hh_other
+388479,Pehme mänguasi Rakett,Määramata,,,dry_preserves,dry_other,household,hh_other
+388484,Siider Somersby Apple 1l pet,Somersby,,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+388485,Valge šokolaad mustika&õhitud riisiga Kalev 200g,Kalev,,,dry_preserves,dry_pasta_rice,sweets_snacks,sweets_chocolate_bars
+388492,Nõudepesuvahend Mayeri Sensitive 500ml,Mayeri,,,household,hh_dishwashing,household,hh_dishwashing
+388504,Nisutortiljad maisiga Rimi Planet 320g,Rimi Planet,,,bakery,bakery_flatbreads_wraps,bakery,bakery_flatbreads_wraps
+388505,"Kohvikapslid LOR Maranello Espresso 10x5,2g",L'or,,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+388506,"Piimasegu Aptamil 3 alates 12. kuust 1,2kg",Aptamil,,,dairy_eggs_fats,dairy_milk,baby,baby_formula
+388508,"Maitsestatud viin Viru Valge Watermelon 37,5%vol 0,5l",Viru Valge,,,drinks,drinks_spirits,drinks,drinks_spirits
+388515,Hambahari Elmex Training 0-3 Aastastele,Elmex,,,personal_care,pcare_oral_care,personal_care,pcare_oral_care
+388528,Amaranti seemned Rimi GreatLife 400g,Rimi GreatLife,,,sweets_snacks,sweets_nuts_driedfruit,dry_preserves,dry_groats_beans
+388536,"Kohvikapslid Espresso Cortado Nescafe Dolce Gusto 100,8g",Nescafe,,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+388562,Pagariröst täistera Eesti Pagar 430g,Eesti Pagar,,,dry_preserves,dry_other,bakery,bakery_bread_loaves
+388564,Piimajook Aptamil 3 alates 12 kuust 200ml,Aptamil,,,dairy_eggs_fats,dairy_milk,baby,baby_formula
+388568,"Mänguauto Welly 1:60-64, värvi ja kujundus võivad erineda",Welly,,,dairy_eggs_fats,dairy_butter_margarine,household,hh_other
+388583,"Vein Goru 0,75l",Goru,,,drinks,drinks_wine,drinks,drinks_wine
+388586,"Vein Johann Brunner Riesling Mosel 0,75l",Johann Brunner,,,drinks,drinks_wine,drinks,drinks_wine
+388620,"Liköör Jägermeister 35% 0,1l",Jägermeister,,,dry_preserves,dry_other,drinks,drinks_spirits
+388629,"Laim 1kl, kg",Määramata,,,produce,produce_tropical,produce,produce_tropical
+388632,Lastešampoon Schauma Raspberry 400ml,Schauma,,,personal_care,pcare_shampoo_cond,personal_care,pcare_shampoo_cond
+388656,"Maitsestatud viin Viru Valge Cranberry 37,5%vol 0,5l",Viru Valge,,,drinks,drinks_spirits,drinks,drinks_spirits
+388672,Kaste Tikka Masala Rimi Planet 480g,Rimi Planet,,,sauces_oils,sauces_other,sauces_oils,sauces_pasta_cooking
+388698,Prügikotid Paclan 60l 20tk,Paclan,,,dry_preserves,dry_other,household,hh_bins_bags
+388709,Võistlusfiguuri pakk Pokemon PKW95007,Pokemon,,,dairy_eggs_fats,dairy_butter_margarine,household,hh_other
+388744,Keskmiselt vürtsikas takokaste Rimi Planet 230g,Rimi Planet,,,world_spices,spices_herbs_spice_mix,sauces_oils,sauces_other
+388753,"Kiirunuudlid kanalihamaitselised Maggi 59,2g",Maggi,,,dry_preserves,dry_pasta_rice,dry_preserves,dry_soups_noodles
+388756,"Alkoholivaba õlu A.Le Coq Premium 0,0% 0,5l purk",A. Le Coq,,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+388764,"Õlu Reloaded Tanker 5,8%vol 0,44l purk",Tanker,,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+388770,"Liköör Jägermeister 35% 0,7l",Jägermeister,,,dry_preserves,dry_other,drinks,drinks_spirits
+388776,Kaste Hot pepper Santa Maria 85ml,Santa Maria,,,sauces_oils,sauces_other,sauces_oils,sauces_other
+388796,Valgehallitusjuust Camembert President 120g,President,,,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_delicatessen
+388807,Keefir Hellus pure 1kg,Hellus,,,dairy_eggs_fats,dairy_yogurt_kefir,dairy_eggs_fats,dairy_yogurt_kefir
+388811,Roosuhkur rafineerimata DanSukker 750g,Dan Sukker,,,dry_preserves,dry_flour_sugar_baking,dry_preserves,dry_flour_sugar_baking
+388814,Looduslikud nõudepesumasina tabletid Mulieres All in 1 25tk,Mulieres,,,household,hh_dishwashing,household,hh_dishwashing
+388818,Toonik Rose Tonic Lemonade Orn Craft 1l pet,Orn Craft,,,drinks,drinks_wine,drinks,drinks_soft_soda
+388822,Köömned Santa Maria 20g,Santa Maria,,,dry_preserves,dry_other,world_spices,spices_other
+388825,Konstruktor Lego Orhideed 10311,Lego,,,dry_preserves,dry_other,household,hh_other
+388835,Lauamäng Mistakos Trefl,Trefl,,,dry_preserves,dry_other,household,hh_other
+388846,Kohvijook piimaga Ice Latte Macchiatto Löfbergs 230ml,Löfbergs,,,dairy_eggs_fats,dairy_milk,drinks,drinks_coffee_beans_capsules
+388848,Mahe taimetee nurmenukuõied Ööbiku 10g,Ööbiku,,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+388855,Pudrupulber Hipp kaera bio 4kuud 200g,Hipp,,,dry_preserves,dry_other,baby,baby_porridge_cereal
+388866,Konstruktor Lego Numbrirong – õpi loendama 10954,Lego,,,dry_preserves,dry_other,household,hh_other
+388900,Makaronid täistera Spaghetti Rimi GreatLife 500g,Rimi GreatLife,,,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+388914,Hambapasta dosaatoriga Jordan lastele vanuses 6-12a. 150ml,Jordan,,,dry_preserves,dry_pasta_rice,personal_care,pcare_oral_care
+388923,Katlakivi eemaldusvahend Frosch vaarikas 500ml,Frosch,,,produce,produce_berries,household,hh_cleaners
+388930,Šampinjon Portobello 280g,Baltic Champignons,,,drinks,drinks_wine,produce,produce_mushrooms
+388944,"Siirup Blue Curacao Monin 0,25l",Monin,,,drinks,drinks_syrups_powders,drinks,drinks_syrups_powders
+388953,Ihupiim Bübchen beebile 200ml,Bübchen,,,dairy_eggs_fats,dairy_milk,baby,baby_care
+388981,Mahe kanepi proteiinipulber Tammejuure 250g,Tammejuure,,,dry_preserves,dry_other,drinks,drinks_syrups_powders
+389031,"Õlu Sauna Session Tanker 4,7%vol 0,44l purk",Tanker,,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+389032,"Kohvikapslid Caramel Latte Macchiato Dolce Gusto 145,6g",Nescafe,,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+389033,Rakvere chorizo 105g,Rakvere,,,dry_preserves,dry_other,meat_fish,meat_gourmet
+389036,"Vein Robertson Sauvignon Blanc 0,75l",Robertson,,,drinks,drinks_wine,drinks,drinks_wine
+389039,Pehme mänguasi Astro koer,Määramata,,,pet,pet_other,household,hh_other
+389041,"Vein M De Murviedro Reserva 0,75l",Murviedro,,,drinks,drinks_wine,drinks,drinks_wine
+389042,Juustudipp punase paprika ja jalapenoga Rimi Planet 300g,Rimi Planet,,,dairy_eggs_fats,dairy_cheese_slices,sauces_oils,sauces_other
+389045,"Vein Cono Sur Bicicleta Chardonnay 0,75l",Cono Sur,,,drinks,drinks_wine,drinks,drinks_wine
+389073,"Muu piiritusjook Pipra Kibe Naps 35% 0,5l",Liviko,,,dry_preserves,dry_other,drinks,drinks_spirits
+389083,"Vein Marani Akhasheni 0,75l",Marani,,,drinks,drinks_wine,drinks,drinks_wine
+389125,Juustukaste Mo Saaremaa 400g,MO Saaremaa,,,dairy_eggs_fats,dairy_cheese_slices,sauces_oils,sauces_other
+389126,Mänguasi Fisher-Price mängupult,Fisher Price,,,dry_preserves,dry_other,household,hh_other
+389127,Nisutortiljad porgandiga Santa Maria 240g,Santa Maria,,,bakery,bakery_flatbreads_wraps,bakery,bakery_flatbreads_wraps
+389141,Kosmose kleebised,Määramata,,,dry_preserves,dry_other,household,hh_other
+389151,"Nukk Barbie Chic, värvi ja kujundus võivad erineda",Barbie,,,dairy_eggs_fats,dairy_butter_margarine,household,hh_other
+389157,Nakkuva põhjaga taldrik BabyOno 6k,Babyono,,,dry_preserves,dry_other,baby,baby_care
+389177,"Tee must Earl Grey Dilmah niidiga kotis 20x1,5g",Dilmah,,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+389198,"Vein Tarapaca Gran Reserva Cabernet Sauvignon 0,75l",Tarapaca,,,drinks,drinks_wine,drinks,drinks_wine
+389216,Konstruktor Lego Roheline alusplaat 11023,Lego,,,dry_preserves,dry_other,household,hh_other
+389217,Suitsujuust Kaval Ants Valio 250g,Valio,,,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+389229,Kohv jahvatatud filterkannu Paulig Classic 500g,Paulig,,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+389238,Täisteranisutortiljad Rimi Planet 370g,Rimi Planet,,,bakery,bakery_flatbreads_wraps,bakery,bakery_flatbreads_wraps
+389251,Kolme kinoa segu Rimi GreatLife 400g,Rimi GreatLife,,,dry_preserves,dry_canned_veg,dry_preserves,dry_groats_beans
+389270,Konstruktor Lego politseiauto 60312,Lego,,,dry_preserves,dry_other,household,hh_other
+389290,Kiirseenesupp Maggi 22g,Maggi,,,produce,produce_mushrooms,dry_preserves,dry_soups_noodles
+389296,Kohvikapslid Espresso DEK Lavazza 10tk,Lavazza,,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+389298,"Kosmeetilised salvrätid Zewa, 2kihti 100tk",Zewa,,,personal_care,pcare_cosmetics,household,hh_paper
+389299,"Õlu Estrella Damm 4,6%vol 0,5l purk",Estrella Damm,,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+389334,"Karastusjook Coca-Cola 6x0,33l purk",Coca-Cola,,,drinks,drinks_soft_soda,drinks,drinks_soft_soda
+389336,Tee ürdi kummeli Teekanne 20x3g,Teekanne,,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+389348,"Vein Casillero Del Diablo Carmenere 2012 13,5%vol 0,75l",Casillero del Diablo,,,drinks,drinks_wine,drinks,drinks_wine
+389354,"Vein Cotes de Provence Rose Passep. B&G 0,75l",Barton & Guestier,,,drinks,drinks_wine,drinks,drinks_wine
+389356,Draakonivili kg,Määramata,,,dry_preserves,dry_other,produce,produce_tropical
+389360,Takotaskud Rimi Planet 135g,Rimi Planet,,,dry_preserves,dry_other,bakery,bakery_flatbreads_wraps
+389389,Nõudepesuvahend Mayeri Sensitive 900ml pouch,Mayeri,,,baby,baby_food_pouches,household,hh_dishwashing
+389394,"Tee must karamellimaitseline Dilmah niidiga kotis 20x1,5g",Dilmah,,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+389399,Sulatatud juust kukeseentega Merevaik 200g,Merevaik,,,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+389419,"Gaseeritud puuviljavein Rabarbra Mahe 11%vol 0,75l",Peenjoogivabrik Nudist,,,drinks,drinks_wine,drinks,drinks_wine
+389453,"Vahuvein Cava Clos Amador Brut Delicat Reserva 11,5%vol 0,75l",Clos Amador,,,drinks,drinks_wine,drinks,drinks_wine
+389457,Kosmosealbum EE,Määramata,,,dry_preserves,dry_other,household,hh_other
+389460,Konstruktor Lillekimp - ehituskomplekt 10280 Lego,Lego,,,dry_preserves,dry_other,household,hh_other
+389474,Pehme mänguasi Astro jänes,Määramata,,,pet,pet_small_animals,household,hh_other
+389479,Kohv jahvatatud Paulig Presidentti Original 500g,Paulig,,,drinks,drinks_spirits,drinks,drinks_coffee_beans_capsules
+389508,"Mänguauto Hot Wheels erineva disainiga, värvi ja kujundus võivad erineda",Hot Wheels,,,dairy_eggs_fats,dairy_butter_margarine,household,hh_other
+389524,"Piiritusjook Pipra Naps 35%vol 0,35l",Liviko,,,dry_preserves,dry_other,drinks,drinks_spirits
+389528,Kohvikapslid Cappucino Starbucks by Nescafe Dolce Gusto 120g,Starbucks,,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+389535,"Õlu Lapin Kulta 5,2%vol 0,5l purk",Lapin Kulta,,,drinks,drinks_beer_cider,drinks,drinks_beer_cider
+389570,"Jook Vitamin Well Celebrate 0,5l",Vitamin Well,,,dry_preserves,dry_other,drinks,drinks_water
+389571,"Mänguauto Welly 4.75, värvi ja kujundus võivad erineda",Welly,,,dairy_eggs_fats,dairy_butter_margarine,household,hh_other
+389578,Hommikuhelbed Rimi 375g,Rimi GreatLife,,,dry_preserves,dry_cereals_muesli,dry_preserves,dry_cereals_muesli
+389589,Kohv jahvatatud Dallmayr Classic 500g,Dallmayr,,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+389592,Kartulimaitseaine Santa Maria 350g,Santa Maria,,,world_spices,spices_herbs_spice_mix,world_spices,spices_herbs_spice_mix
+389626,PULS Treeningeelne shott marja 60ml,Puls Nutrition,,,bakery,bakery_buns_croissants,drinks,drinks_sport
+389628,Kohv jahvatatud masina Jacobs Kronung Decaff kofeiinivaba 250g,Jacobs,,,drinks,drinks_other,drinks,drinks_coffee_beans_capsules
+389630,Kohv jahvatatud Lavazza Espresso purgis 250g,Lavazza,,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+389631,"Tee must sidrunimaitseline Dilmah niidiga kotis 20x1,5g",Dilmah,,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+389651,Mooni-martsipanirull külmutatud Eesti Pagar 320g,Eesti Pagar,,,frozen_food,frozen_other,frozen_food,frozen_bakery
+389654,WC puhastusvahend Frosch vaarika 750ml,Frosch,,,produce,produce_berries,household,hh_cleaners
+389692,"Vitamiinivesi Oshee Zero 0,555l",Oshee,,,drinks,drinks_water,drinks,drinks_soft_soda
+389704,Konstruktor Lego Racer 42141,Lego,,,dry_preserves,dry_other,household,hh_other
+389707,"Viin Saaremaa 40% 0,2l",Saaremaa,,,drinks,drinks_spirits,drinks,drinks_spirits
+389710,Tee roheline ingveri-apelsini Teekanne 35g,Teekanne,,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+389724,Rosmariin Santa Maria 15g,Santa Maria,,,dry_preserves,dry_other,world_spices,spices_herbs_spice_mix
+389746,Mitmeviljatortiljad Rimi Planet 370g,Rimi Planet,,,bakery,bakery_flatbreads_wraps,bakery,bakery_flatbreads_wraps
+389761,"Mänguasi Nebulous Stars Kristall soovihoidja, 11107",Nebulous Stars,,,dry_preserves,dry_other,household,hh_other
+389776,3-viljapuder vaarikate ja maasikatega Milupa alates 6. kuust 225g,Milupa,,,produce,produce_berries,baby,baby_porridge_cereal
+389810,Müslibatoon kookosega Corny 50g,Corny,,,bakery,bakery_cakes_pastries,sweets_snacks,sweets_nuts_driedfruit
+389811,Rinnapadjad ühekordse kasutusega Philips Avent 60tk,Philips Avent,,,dry_preserves,dry_other,baby,baby_care
+389825,Nisutortiljad Rimi Planet 320g,Rimi Planet,,,bakery,bakery_flatbreads_wraps,bakery,bakery_flatbreads_wraps
+389830,"Greip punane 1kl, kg",Määramata,,,produce,produce_tropical,produce,produce_tropical
+389835,"Vein Masi Masianco 0,75l",Masi,,,drinks,drinks_wine,drinks,drinks_wine
+389837,"Vein Le Grand Noir GSM 0,75l",Le Grand Noir,,,drinks,drinks_wine,drinks,drinks_wine
+389856,Pehme mänguasi Kosmiline kass,Määramata,,,pet,pet_other,household,hh_other
+389861,Passion kg,Määramata,,,dry_preserves,dry_other,produce,produce_tropical
+389863,Makaronid täistera Penne Rigate Rimi 500g,Rimi GreatLife,,,dry_preserves,dry_pasta_rice,dry_preserves,dry_pasta_rice
+389865,"Mänguauto Hot Wheels erineva disainiga, värvi ja kujundus võivad erineda",Hot Wheels,,,dairy_eggs_fats,dairy_butter_margarine,household,hh_other
+389867,"Brandy ST. Remy VSOP 36%vol 0,5l",St. Remy,,,dry_preserves,dry_other,drinks,drinks_spirits
+389874,Spargel roheline 250g,Määramata,,,dry_preserves,dry_other,produce,produce_root_veg
+389905,"Banaan Cavendish 1kl, kg",Määramata,,,produce,produce_tropical,produce,produce_tropical
+389921,Mähkmed Loving Touch junior 11-16kg 44tk,Loving Touch,,,baby,baby_diapers,baby,baby_diapers
+389922,"Vein Le Grand Noir Sauvignon Blanc 0,75l",Le Grand Noir,,,drinks,drinks_wine,drinks,drinks_wine
+389923,Saialillest šampoon & kehapesu kreem Weleda baby 200 ml,Weleda,,,bakery,bakery_buns_croissants,baby,baby_care
+389940,"Piiritusjook Caribba Spiced 35%vol 0,5l",Caribba,,,dry_preserves,dry_other,drinks,drinks_spirits
+389942,Tšillipipar Habanero 50g,Määramata,,,world_spices,spices_basic_salt_pepper,produce,produce_root_veg
+389947,"Vein Montezovo Bardolino Chiaretto 0,75l",Monte Zovo,,,drinks,drinks_wine,drinks,drinks_wine
+389954,"Tass Canpol 2/100, värvi ja kujundus võivad erineda",Canpol Babies,,,dairy_eggs_fats,dairy_butter_margarine,baby,baby_care
+389959,"Vein Grand Noir Viognier 12,5% 0,75l",Le Grand Noir,,,drinks,drinks_wine,drinks,drinks_wine
+389968,"Vein Chablis 0,75l",Chablis,,,drinks,drinks_wine,drinks,drinks_wine
+389989,Mähkmed Loving Touch midi 4-9kg 56tk,Loving Touch,,,baby,baby_diapers,baby,baby_diapers
+389999,"Vein Santa Carolina Cellar Chardonnay 0,75l",Santa Carolina,,,drinks,drinks_wine,drinks,drinks_wine
+390014,"Kohvikapslid LOR Imola Ristretto 10x5,2g",L'or,,,drinks,drinks_coffee_beans_capsules,drinks,drinks_coffee_beans_capsules
+390015,Kiirsupp herne ja krutoonidega Maggi 22g,Maggi,,,dry_preserves,dry_other,dry_preserves,dry_soups_noodles
+390025,Mustika tee Rootsi Teekanne 45g,Teekanne,,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+390057,Sulatatud juust laktoosivaba Merevaik 200g,Merevaik,,,dairy_eggs_fats,dairy_cheese_slices,cheese,cheese_regular
+390062,Viinamari seemneteta Muscat Beauty 1kl 500g,Määramata,,,drinks,drinks_spirits,produce,produce_tropical
+390064,"Vein Campo Viejo Reserva 0,75L",Campo Viejo,,,drinks,drinks_wine,drinks,drinks_wine
+390068,Tee must Dilmah Premium 50x2g,Dilmah,,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
+390079,"Viin Pööriöö 40%vol 0,5l",Saaremaa,,,drinks,drinks_spirits,drinks,drinks_spirits
+390108,"Vein Murviedro Crianza 0,75l",Murviedro,,,drinks,drinks_wine,drinks,drinks_wine
+390117,"Tee must vaarikamaitseline Dilmah niidiga kotis 20x1,5g",Dilmah,,,drinks,drinks_tea_coffee,drinks,drinks_tea_coffee
