@@ -7,56 +7,46 @@ import pandas as pd
 import psycopg2
 import psycopg2.extras
 
-# <-- THIS is your existing folder with the Excel-edited files
 LABEL_DIR = Path("data/product_labels")
-PATTERN = "products_*_with_corrected_groups_and_subcodes*.csv"
+PATTERN = "products_all_parts*_verified_online_rowbyrow_mincols.csv"
 
 
 def load_updates_from_file(path: Path):
     print(f"Reading {path} ...")
-    df = pd.read_csv(path)
+    df = pd.read_csv(path, encoding="utf-8-sig")
 
-    if "product_id" not in df.columns:
-        raise RuntimeError(f"{path} is missing 'product_id' column")
+    required = {"product_id", "canonical_main_code", "canonical_sub_code"}
+    missing = required - set(df.columns)
+    if missing:
+        raise RuntimeError(f"{path} is missing columns: {missing}")
 
-    # food_group_corrected: what we want to write to products.food_group
-    if "food_group_corrected" not in df.columns:
-        if "food_group" in df.columns:
-            df["food_group_corrected"] = df["food_group"]
-        else:
-            raise RuntimeError(
-                f"{path} is missing 'food_group_corrected' (or 'food_group') column"
-            )
-
-    # new_sub_code: what we want to write to products.sub_code
-    if "new_sub_code" not in df.columns:
-        if "sub_code" in df.columns:
-            df["new_sub_code"] = df["sub_code"]
-        else:
-            df["new_sub_code"] = ""
-
-    df["food_group_corrected"] = (
-        df["food_group_corrected"].fillna("").astype(str).str.strip()
+    df["canonical_main_code"] = (
+        df["canonical_main_code"].fillna("").astype(str).str.strip()
     )
-    df["new_sub_code"] = df["new_sub_code"].fillna("").astype(str).str.strip()
+    df["canonical_sub_code"] = (
+        df["canonical_sub_code"].fillna("").astype(str).str.strip()
+    )
 
     updates = []
     for _, r in df.iterrows():
         pid = int(r["product_id"])
-        fg = r["food_group_corrected"] or None
-        sub = r["new_sub_code"] or None
-        updates.append((pid, fg, sub))
+        main = r["canonical_main_code"] or None
+        sub = r["canonical_sub_code"] or None
+        updates.append((pid, main, sub))
 
-    # "Not certain" = still 'other' OR sub_code empty
-    uncertain_mask = (df["food_group_corrected"].eq("other")) | (
-        df["new_sub_code"].eq("")
+    # Flag rows where either code is missing/empty as uncertain
+    uncertain_mask = (
+        df["canonical_main_code"].eq("")
+        | df["canonical_sub_code"].eq("")
+        | df["canonical_main_code"].isnull()
+        | df["canonical_sub_code"].isnull()
     )
     uncertain = df.loc[uncertain_mask].copy()
     uncertain["source_file"] = path.name
 
     print(
         f"  -> {len(df)} rows, {len(updates)} updates, "
-        f"{len(uncertain)} marked as uncertain"
+        f"{len(uncertain)} uncertain (missing main or sub code)"
     )
 
     return updates, uncertain
@@ -73,7 +63,15 @@ def main():
     files = sorted(LABEL_DIR.glob(PATTERN))
     if not files:
         print(f"No files matching {LABEL_DIR}/{PATTERN}, nothing to do.")
+        print("Files present in directory:")
+        for f in sorted(LABEL_DIR.iterdir()):
+            print(f"  {f.name}")
         return
+
+    print(f"Found {len(files)} files to process:\n")
+    for f in files:
+        print(f"  {f.name}")
+    print()
 
     all_updates = []
     uncertain_chunks = []
@@ -104,8 +102,9 @@ def main():
                 all_updates,
                 template=template,
             )
+            updated = cur.rowcount
         conn.commit()
-        print("✅ DB update committed.")
+        print(f"✅ DB update committed. Rows matched and updated: {updated}")
     except Exception as e:
         conn.rollback()
         print(f"❌ ERROR, rolled back: {e}", file=sys.stderr)
@@ -123,31 +122,50 @@ def main():
             cur.execute(
                 """
                 SELECT COUNT(*) FROM products
-                WHERE food_group IS NULL OR food_group = '' OR food_group = 'other';
+                WHERE food_group IS NULL OR food_group = '';
                 """
             )
             without_fg = cur.fetchone()[0]
 
             cur.execute(
-                "SELECT COUNT(*) FROM products WHERE sub_code IS NULL;"
+                """
+                SELECT COUNT(*) FROM products
+                WHERE sub_code IS NULL OR sub_code = '';
+                """
             )
             without_sub = cur.fetchone()[0]
 
+            cur.execute(
+                """
+                SELECT food_group, COUNT(*) as n
+                FROM products
+                WHERE food_group IS NOT NULL AND food_group != ''
+                GROUP BY food_group
+                ORDER BY n DESC
+                LIMIT 20;
+                """
+            )
+            top_groups = cur.fetchall()
+
         print("\n-- Post-update stats --")
-        print(f"total_products             = {total}")
-        print(f"without_food_group/other   = {without_fg}")
-        print(f"without_sub_code           = {without_sub}")
+        print(f"total_products           = {total}")
+        print(f"without food_group       = {without_fg}")
+        print(f"without sub_code         = {without_sub}")
+        print(f"\nTop food groups:")
+        for group, count in top_groups:
+            print(f"  {group:<35} {count}")
+
     finally:
         conn.close()
 
-    # --- write “not certain” file ---
+    # --- write uncertain rows to file ---
     if uncertain_chunks:
         uncertain_df = pd.concat(uncertain_chunks, ignore_index=True)
         out_path = LABEL_DIR / "products_uncertain_after_apply.csv"
         uncertain_df.to_csv(out_path, index=False)
         print(f"\n📄 Wrote {len(uncertain_df)} uncertain rows to {out_path}")
     else:
-        print("\nNo uncertain rows collected.")
+        print("\n✅ No uncertain rows — all products have both codes assigned.")
 
 
 if __name__ == "__main__":
