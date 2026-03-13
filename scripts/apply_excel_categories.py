@@ -13,7 +13,7 @@ PATTERN = "products_all_part*_verified_online_rowbyrow_mincols.csv"
 
 def load_updates_from_file(path: Path):
     print(f"Reading {path} ...")
-    df = pd.read_csv(path, encoding="utf-8-sig", on_bad_lines='warn')
+    df = pd.read_csv(path, encoding="utf-8-sig", on_bad_lines='warn', engine='python')
 
     required = {"product_id", "canonical_main_code", "canonical_sub_code"}
     missing = required - set(df.columns)
@@ -28,11 +28,19 @@ def load_updates_from_file(path: Path):
     )
 
     updates = []
+    skipped_pid = []
     for _, r in df.iterrows():
-        pid = int(r["product_id"])
+        try:
+            pid = int(r["product_id"])
+        except (ValueError, TypeError):
+            skipped_pid.append(str(r["product_id"])[:60])
+            continue
         main = r["canonical_main_code"] or None
         sub = r["canonical_sub_code"] or None
         updates.append((pid, main, sub))
+
+    if skipped_pid:
+        print(f"  ⚠️  Skipped {len(skipped_pid)} rows with non-integer product_id: {skipped_pid[:3]}")
 
     # Flag rows where either code is missing/empty as uncertain
     uncertain_mask = (
@@ -88,7 +96,6 @@ def main():
     conn = psycopg2.connect(db_url)
     try:
         with conn.cursor() as cur:
-            # Check what the actual PK column is called
             cur.execute("""
                 SELECT column_name
                 FROM information_schema.columns
@@ -99,16 +106,13 @@ def main():
             cols = [row[0] for row in cur.fetchall()]
             print(f"products table columns (first 10): {cols}")
 
-            # Sample 5 IDs from DB
             cur.execute("SELECT id FROM products LIMIT 5;")
             db_ids = [row[0] for row in cur.fetchall()]
             print(f"Sample DB product IDs: {db_ids}")
 
-            # Sample 5 IDs from our files
             sample_file_ids = [u[0] for u in all_updates[:5]]
             print(f"Sample file product_ids: {sample_file_ids}")
 
-            # Count how many file IDs exist in DB
             file_ids = [u[0] for u in all_updates]
             cur.execute(
                 "SELECT COUNT(*) FROM products WHERE id = ANY(%s::integer[])",
