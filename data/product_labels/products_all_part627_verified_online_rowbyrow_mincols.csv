@@ -1,0 +1,51 @@
+﻿product_id,name,brand,size_text,ean,current_food_group,current_sub_code,canonical_main_code,canonical_sub_code
+581619,Terviseks Kaltsium+Magn+Tsink D3 vit N100,,,4742591000521,meat_fish,meat_hams,personal_care,pcare_other
+581620,Tervisepüramiid vitamiin D3 100mcg N100,,,4742591003188,dry_preserves,dry_other,personal_care,pcare_other
+581621,Tervisepüramiid C-vitamiin 1000mg N60,,,4742591003409,dry_preserves,dry_other,personal_care,pcare_other
+581622,Lohe siirup lastele Immuno 150ml mustika,Lohe,150ml,4742591003461,drinks,drinks_syrups_powders,personal_care,pcare_other
+581623,Lohe hingamisteede siirup lastele 150ml,Lohe,150ml,4742591003539,drinks,drinks_tea_coffee,personal_care,pcare_other
+581624,Tervisepüramiid BeCalm melatoniiniga N30,,,4742591004109,dry_preserves,dry_other,personal_care,pcare_other
+581625,Indoneesia kookospalmi suhkur 250g,,250g,4742656005157,bakery,bakery_cakes_pastries,dry_preserves,dry_flour_sugar_baking
+581626,Indoneesia kookospalmi suhkur 1kg,,1kg,4742656005614,bakery,bakery_cakes_pastries,dry_preserves,dry_flour_sugar_baking
+581627,Argentiina merluusi rümp 800g kuivkülmutatud,,800g,4742668008276,dry_preserves,dry_other,frozen_food,frozen_fish
+581628,Värske soolakurk 1kg Eesti,,1kg,4742798000096,world_spices,spices_basic_salt_pepper,dry_preserves,dry_canned_veg
+581629,Eesti And marineeritud kurk magusa paprikaga 360g,,360g,4742798000362,produce,produce_root_veg,dry_preserves,dry_canned_veg
+581630,Tamme talu ürdiaed ürdisool kalale 85g,Tamme talu,85g,4742801000310,world_spices,spices_basic_salt_pepper,world_spices,spices_herbs_spice_mix
+581631,Tamme talu ürdiaed ürdisool lihale 85g,Tamme talu,85g,4742801000327,world_spices,spices_basic_salt_pepper,world_spices,spices_herbs_spice_mix
+581632,Tamme talu ürdiaed ürdisool salatile 85g,Tamme talu,85g,4742801000433,world_spices,spices_basic_salt_pepper,world_spices,spices_herbs_spice_mix
+581633,Benesca päikesekuivatatud tomatid õlis 290g,Benesca,290g,4742818011118,sauces_oils,oils_other,dry_preserves,dry_canned_veg
+581634,Loodusvägi riisivahvlid 100g meresoolaga,Loodusvägi,100g,4742824011607,dry_preserves,dry_pasta_rice,sweets_snacks,sweets_snacks_salty
+581635,Loodusvägi riisivahvlid 100g piimaš okolaadiga,Loodusvägi,100g,4742824011621,dairy_eggs_fats,dairy_milk,sweets_snacks,sweets_snacks_salty
+581636,Loodusvägi mahe õunanektar 200ml,Loodusvägi,200ml,4742824012208,drinks,drinks_juices,drinks,drinks_juices
+581637,Loodusvägi metsamesi mustikaga Öko 150g,Loodusvägi,150g,4742824012321,produce,produce_berries,dry_preserves,dry_other
+581638,Loodusvägi ingver tumedas šok. 60g mahe,Loodusvägi,60g,4742824013212,dry_preserves,dry_other,sweets_snacks,sweets_candies
+581639,Loodusvägi mahe punase viinamarja nektar 200ml,Loodusvägi,200ml,4742824013342,drinks,drinks_spirits,drinks,drinks_juices
+581640,Loodusvägi metsamesi kurkumi-ingveriga 150g,Loodusvägi,150g,4742824015124,produce,produce_root_veg,dry_preserves,dry_other
+581641,Loodusvägi vaarikad tumedas šok. Öko 50g,Loodusvägi,50g,4742824017289,produce,produce_berries,sweets_snacks,sweets_candies
+581642,Loodusvägi jõhvikad apelsinišokolaadis Öko 50g,Loodusvägi,50g,4742824017340,produce,produce_berries,sweets_snacks,sweets_candies
+581643,Rannaküla tursamaks 121g,Rannaküla,121g,4742835010521,dry_preserves,dry_other,dry_preserves,dry_canned_meat_fish
+581644,Rannaküla tursamaks loorberi-pipraga 115g,Rannaküla,115g,4742835010606,dry_preserves,dry_other,dry_preserves,dry_canned_meat_fish
+581645,Meki külmkuivatatud murel 25g,Meki,25g,4742886010303,dry_preserves,dry_other,sweets_snacks,sweets_nuts_driedfruit
+581646,Meki külmkuivatatud maasikas 15g,Meki,15g,4742886010600,produce,produce_berries,sweets_snacks,sweets_nuts_driedfruit
+581647,Meki külmkuivatatud mustikas 15g,Meki,15g,4742886010617,produce,produce_berries,sweets_snacks,sweets_nuts_driedfruit
+581648,Meki külmkuivatatud vaarikas 15g,Meki,15g,4742886010624,produce,produce_berries,sweets_snacks,sweets_nuts_driedfruit
+581649,Meki külmkuivatatud mango 15g,Meki,15g,4742886010648,produce,produce_tropical,sweets_snacks,sweets_nuts_driedfruit
+581650,Meki külmkuivatatud maasikakrõpsud 35g,Meki,35g,4742886014424,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_nuts_driedfruit
+581651,Meki külmkuivatatud vaarikakrõpsud 35g,Meki,35g,4742886014448,sweets_snacks,sweets_snacks_salty,sweets_snacks,sweets_nuts_driedfruit
+581652,Haage looduslik min.vesi mullita 750ml,Haage,750ml,4742897010170,drinks,drinks_water,drinks,drinks_water
+581653,Haanja looduslik min.vesi mulliga 1L,Haanja,1L,4742897013782,drinks,drinks_water,drinks,drinks_water
+581654,Wiru Mill mahe toortatra peentang 1kg,Wiru Mill,1kg,4742898010032,dry_preserves,dry_other,dry_preserves,dry_groats_beans
+581655,Täkumetsa kaneeliküpsis 150g glut.vaba,Täkumetsa,150g,4742898011282,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+581656,Täkumetsa kakaoküpsis 150g glut.vaba,Täkumetsa,150g,4742898011299,sweets_snacks,sweets_biscuits_cookies,sweets_snacks,sweets_biscuits_cookies
+581657,Täkumetsa näkileib Rubiin 70g,Täkumetsa,70g,4742898011596,bakery,bakery_bread_loaves,bakery,bakery_bread_loaves
+581658,Semu astelpaju-mustika nektar 500ml,Semu,500ml,4742942010315,drinks,drinks_juices,drinks,drinks_juices
+581659,Šampinjonid 450g Poola,,450g,4742960010045,dry_preserves,dry_other,produce,produce_mushrooms
+581660,La Muu mango-passioni jäätis 80g vegan,La Muu,80g,4742963010905,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+581661,La Muu kirsijäätis 250g vegan,La Muu,250g,4742963011919,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+581662,La Muu Cappuccino jäätis 250g lakt.vaba,La Muu,250g,4742963011933,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+581663,La Muu maasikajäätis koonuses 80g vegan,La Muu,80g,4742963012428,frozen_food,frozen_desserts_icecream,frozen_food,frozen_desserts_icecream
+581664,Tere kohuke vanilli šokolaadigl. 40g,Tere,40g,47430051,dry_preserves,dry_other,dairy_eggs_fats,dairy_desserts
+581665,Klaaspurk 1L 82mm keermega,,1L,4743099001645,dry_preserves,dry_other,household,hh_kitchenware
+581666,Tere kohuke mustika šokolaadigl. 40g,Tere,40g,47431058,produce,produce_berries,dairy_eggs_fats,dairy_desserts
+581667,Tervix hanerasvasalv 20g,Tervix,20g,4743114000097,dry_preserves,dry_other,personal_care,pcare_other
+581668,Tervix ninasalv 20g,Tervix,20g,4743114000486,dry_preserves,dry_other,personal_care,pcare_other
