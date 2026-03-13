@@ -13,7 +13,7 @@ PATTERN = "products_all_part*_verified_online_rowbyrow_mincols.csv"
 
 def load_updates_from_file(path: Path):
     print(f"Reading {path} ...")
-    df = pd.read_csv(path, encoding="utf-8-sig")
+    df = pd.read_csv(path, encoding="utf-8-sig", on_bad_lines='warn')
 
     required = {"product_id", "canonical_main_code", "canonical_sub_code"}
     missing = required - set(df.columns)
