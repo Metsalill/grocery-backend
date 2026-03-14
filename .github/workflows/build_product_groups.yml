@@ -6,6 +6,9 @@ on:
 jobs:
   build-groups:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}  # Public Railway URL
+      PGSSLMODE: require
 
     steps:
       - name: Checkout repo
@@ -17,11 +20,7 @@ jobs:
           sudo apt-get install -y postgresql-client
 
       - name: Run build_product_groups.sql
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          # Parse DATABASE_URL into psql-friendly env vars
-          # Expected format: postgresql://user:password@host:port/dbname
           psql "$DATABASE_URL" \
             --set ON_ERROR_STOP=1 \
             --echo-errors \
