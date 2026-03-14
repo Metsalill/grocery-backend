@@ -52,26 +52,27 @@ jobs:
           python -m playwright install --with-deps chromium
 
       - name: Patch bolt_crawler.py to use STORE_ID env directly
-        # The bolt crawler resolves store_id via stores.external_key which may not exist.
-        # We patch the _ingest_to_db function to use STORE_ID env as override.
-        shell: python
         run: |
-          import re, pathlib
+          python - <<'PYEOF'
+          import re, pathlib, os
           path = pathlib.Path("scripts/bolt_crawler.py")
           src = path.read_text(encoding="utf-8")
-          # Insert STORE_ID env override at the top of _ingest_to_db
+
           old = "async def _ingest_to_db(products: List[Product]) -> None:"
-          new = """async def _ingest_to_db(products: List[Product]) -> None:
-    # Allow STORE_ID env to override per-venue DB lookup
-    import os as _os
-    _env_store_id = int(_os.environ.get("STORE_ID", "0") or "0")"""
+          new = (
+              "async def _ingest_to_db(products: List[Product]) -> None:\n"
+              "    import os as _os\n"
+              "    _env_store_id = int(_os.environ.get('STORE_ID', '0') or '0')\n"
+          )
           src = src.replace(old, new, 1)
-          # Also patch the store_map lookup to use env override when available
+
           old2 = "store_id = store_map.get(p.venue_id)"
           new2 = "store_id = _env_store_id if _env_store_id > 0 else store_map.get(p.venue_id)"
           src = src.replace(old2, new2, 1)
+
           path.write_text(src, encoding="utf-8")
           print("Patched bolt_crawler.py to use STORE_ID env")
+          PYEOF
 
       - name: Run Bolt crawler + ingest
         run: |
