@@ -358,12 +358,13 @@ def is_banned_product_url(path: str) -> bool:
     return False
 
 def console_filter(msg):
+    # FIX: msg.type and msg.text are properties in newer Playwright, not methods
     t = msg.type.lower()
     if LOG_CONSOLE == "all":
-        print(f"[console:{t}] {msg.text()}")
+        print(f"[console:{t}] {msg.text}")
     elif LOG_CONSOLE == "warn":
         if t in ("warning","warn","error","assert"):
-            print(f"[console:{t}] {msg.text()}")
+            print(f"[console:{t}] {msg.text}")
 
 def block_junk(route, request):
     try:
@@ -535,11 +536,6 @@ def normalize_currency(cur: str) -> str:
 
 
 def bulk_ingest_to_db(rows: List[Dict[str, any]], store_id: int) -> None:
-    """
-    Push rows into Postgres by calling upsert_product_and_price(...) for each.
-    FIX: explicit ::type casts added to avoid psycopg2 type resolution errors
-         (double precision vs numeric, smallint vs integer).
-    """
     if store_id <= 0:
         print("[selver] STORE_ID not set or invalid, skipping DB ingest.", file=sys.stderr)
         return
@@ -555,7 +551,6 @@ def bulk_ingest_to_db(rows: List[Dict[str, any]], store_id: int) -> None:
 
     ts_now = datetime.datetime.now(datetime.timezone.utc)
 
-    # FIX: added explicit ::type casts so psycopg2 doesn't pass wrong types
     sql = """
         SELECT upsert_product_and_price(
             %s::text,      -- in_source
@@ -567,7 +562,7 @@ def bulk_ingest_to_db(rows: List[Dict[str, any]], store_id: int) -> None:
             %s::numeric,   -- in_price
             %s::text,      -- in_currency
             %s::integer,   -- in_store_id
-            %s,            -- in_seen_at (timestamptz — psycopg2 handles datetime natively)
+            %s,            -- in_seen_at
             %s::text       -- in_source_url
         );
     """
