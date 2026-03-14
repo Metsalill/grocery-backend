@@ -23,6 +23,12 @@ CLI you run in the Action:
     --city "tallinn" \
     --upsert-db 1 \
     --ingest-mode main
+
+  # crawl-only (no DB), for split crawl/ingest jobs:
+  python3 wolt_crawler.py \
+    --store-host "wolt:coop-lasnamae" \
+    --city "tallinn" \
+    --skip-ingest
 """
 
 import re
@@ -586,7 +592,7 @@ def write_csv(rows: Iterable[Dict[str, Any]], out_path: Path) -> None:
     ]
 
     with out_path.open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=fieldnames)
+        w = csv.DictWriter(f, fieldnames=fieldnames, lineterminator="\n")
         w.writeheader()
         for r in rows:
             clean = {k: r.get(k, "") for k in fieldnames}
@@ -749,6 +755,8 @@ def main():
     ap.add_argument("--upsert-db", default="1", help="default '1' = write to DB")
     ap.add_argument("--ingest-mode", default="main", choices=["main", "staging"],
                     help="fallback path if STORE_ID missing")
+    ap.add_argument("--skip-ingest", action="store_true",
+                    help="crawl and write CSV only — skip all DB ingest (for split crawl/ingest jobs)")
     # legacy flags (ignored)
     ap.add_argument("--max-products")
     ap.add_argument("--headless")
@@ -795,11 +803,12 @@ def main():
     cookies = _cookie_string(city, client_id, analytics_id)
     session = _base_requests_session(headers, cookies)
 
-    print(f"[info] Store URL:   {store_url}")
-    print(f"[info] Store host:  {store_host}")
-    print(f"[info] City tag:    {city}")
-    print(f"[info] Language:    {args.language}")
-    print(f"[info] ingest-mode: {args.ingest_mode}")
+    print(f"[info] Store URL:    {store_url}")
+    print(f"[info] Store host:   {store_host}")
+    print(f"[info] City tag:     {city}")
+    print(f"[info] Language:     {args.language}")
+    print(f"[info] ingest-mode:  {args.ingest_mode}")
+    print(f"[info] skip-ingest:  {args.skip_ingest}")
 
     try:
         session.get(store_url, timeout=20)
@@ -834,33 +843,34 @@ def main():
 
         all_rows_for_csv.extend(rows)
 
-        for r in rows:
-            all_rows_for_db.append(
-                dict(
-                    chain="Coop",
-                    channel="wolt",
-                    store_name=store_host.split(":", 1)[-1].replace("-", " "),
-                    store_host=store_host,
-                    city_path=city,
-                    category_name=r.get("category_name") or slug,
-                    ext_id=r.get("_ext_id"),
-                    name=r.get("name"),
-                    brand=None,
-                    manufacturer=None,
-                    size_text=None,
-                    price=(
-                        r.get("price")
-                        if isinstance(r.get("price"), (int, float))
-                        else None
-                    ),
-                    currency="EUR",
-                    image_url=r.get("image_url"),
-                    url=src_url or store_url,
-                    description=r.get("description"),
-                    ean_raw=r.get("barcode_gtin"),
-                    scraped_at=scraped_at,
+        if not args.skip_ingest:
+            for r in rows:
+                all_rows_for_db.append(
+                    dict(
+                        chain="Coop",
+                        channel="wolt",
+                        store_name=store_host.split(":", 1)[-1].replace("-", " "),
+                        store_host=store_host,
+                        city_path=city,
+                        category_name=r.get("category_name") or slug,
+                        ext_id=r.get("_ext_id"),
+                        name=r.get("name"),
+                        brand=None,
+                        manufacturer=None,
+                        size_text=None,
+                        price=(
+                            r.get("price")
+                            if isinstance(r.get("price"), (int, float))
+                            else None
+                        ),
+                        currency="EUR",
+                        image_url=r.get("image_url"),
+                        url=src_url or store_url,
+                        description=r.get("description"),
+                        ean_raw=r.get("barcode_gtin"),
+                        scraped_at=scraped_at,
+                    )
                 )
-            )
 
         print(f"[ok] {idx:>2}/{len(slugs)}  '{slug}' → {len(rows)} item(s)")
         time.sleep(0.12)
@@ -875,6 +885,11 @@ def main():
     )
     write_csv(all_rows_for_csv, out_path)
     print(f"[done] wrote {len(all_rows_for_csv)} item rows → {out_path}")
+
+    # If --skip-ingest was passed, stop here — ingest handled by a separate job
+    if args.skip_ingest:
+        print("[info] --skip-ingest set: skipping DB ingest. CSV is ready for ingest job.")
+        return
 
     if str(args.upsert_db) == "1":
         try:
