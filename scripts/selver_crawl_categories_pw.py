@@ -387,14 +387,51 @@ def safe_goto(page, url: str, timeout_ms: int = NAV_TIMEOUT_MS) -> bool:
             page.wait_for_timeout(800)
     return False
 
+def _is_product_url(url: str) -> bool:
+    """
+    Selver product URLs are root-level slugs: /oun-paulared-kg
+    They have exactly one path segment, contain a hyphen, and are NOT
+    a known navigation/category path.
+    """
+    parts = urlsplit(url)
+    path = parts.path.rstrip("/")
+    segments = [s for s in path.split("/") if s]
+    if len(segments) != 1:
+        return False
+    slug = segments[0]
+    # Must contain a hyphen (all product slugs do) and be slug-like
+    if "-" not in slug:
+        return False
+    # Reject known non-product single-segment paths
+    NON_PRODUCT_SLUGS = {
+        "ostukorv", "cart", "checkout", "otsi", "search", "konto",
+        "login", "logout", "registreeru", "kontakt", "blogi", "uudised",
+        "tootajad", "tingimused", "privaatsus", "kampaania", "kampaaniad",
+        "retseptid", "kinkekaardid", "kauplused", "app", "e-selver",
+        "selveri-kook", "kliendimangud", "selveekspress", "tule-toolle",
+    }
+    if slug in NON_PRODUCT_SLUGS:
+        return False
+    if any(kw in slug for kw in NON_PRODUCT_KEYWORDS):
+        return False
+    return True
+
 def scrape_product_links_on_category(page) -> List[str]:
     links: List[str] = []
+    # Cast a wide net — Selver now uses root-level slugs like /oun-paulared-kg
+    # Old /toode/ prefix is gone. We grab all internal <a> hrefs and filter.
     selectors = [
-        'a.product-card__link[href^="/"]',
-        'a[href^="/toode/"]',
+        # New style: product cards (data-testid may vary)
         '[data-testid="product-card"] a[href^="/"]',
-        'a[href*="/toode/"][data-testid]',
+        'a.product-card__link[href^="/"]',
+        # Broad fallback: any link in the product grid area
+        '.product-list a[href^="/"]',
+        '.products-grid a[href^="/"]',
+        'article a[href^="/"]',
+        # Last resort: all internal links (filtered by _is_product_url)
+        'main a[href^="/"]',
     ]
+    seen_local: Set[str] = set()
     for sel in selectors:
         try:
             for a in page.query_selector_all(sel):
@@ -404,17 +441,18 @@ def scrape_product_links_on_category(page) -> List[str]:
                 absu = _clean_abs(href)
                 if not absu:
                     continue
-                links.append(absu)
+                if not _is_product_url(absu):
+                    continue
+                if absu not in seen_local:
+                    seen_local.add(absu)
+                    links.append(absu)
         except Exception:
             pass
+        if links:
+            # Stop at first selector that yields results
+            break
 
-    out: List[str] = []
-    seen_local: Set[str] = set()
-    for u in links:
-        if u not in seen_local:
-            seen_local.add(u)
-            out.append(u)
-    return out
+    return links
 
 def paginate_category(page) -> bool:
     selectors = [
