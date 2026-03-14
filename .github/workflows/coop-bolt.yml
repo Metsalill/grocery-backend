@@ -3,29 +3,37 @@ name: Coop Bolt scrape + DB ingest
 on:
   workflow_dispatch:
   schedule:
-    - cron: "12 3 * * *"   # run nightly; tweak as you wish
+    - cron: "12 3 * * *"   # daily at 03:12 UTC
 
 jobs:
   scrape-bolt:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
         include:
           - city: tartu
             store: kvartali-coop-maksimarket
+            store_id: "559"   # Bolt: Kvartali COOP Maksimarket
             categories_file: data/bolt/2-tartu/kvartali-coop-maksimarket.txt
             out: out/bolt_kvartali.csv
-
           - city: tartu
             store: lounakeskuse-coop-maksimarket
+            store_id: "561"   # Bolt: Lõunakeskuse COOP Maksimarket
             categories_file: data/bolt/2-tartu/lounakeskuse-coop-maksimarket.txt
             out: out/bolt_lounakeskus.csv
-
           - city: tartu
             store: eedeni-coop-maksimarket
+            store_id: "560"   # Bolt: Eedeni COOP Maksimarket
             categories_file: data/bolt/2-tartu/eedeni-coop-maksimarket.txt
             out: out/bolt_eedeni.csv
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      PGSSLMODE: require
+      PYTHONUNBUFFERED: "1"
+      STORE_ID: ${{ matrix.store_id }}
 
     steps:
       - name: Checkout repo
@@ -39,9 +47,8 @@ jobs:
       - name: Install crawler deps
         run: |
           python -m pip install --upgrade pip
-          # tolerate missing requirements.txt
           pip install -r requirements.txt || true
-          pip install playwright selectolax beautifulsoup4 httpx[socks] tenacity pydantic asyncpg
+          pip install playwright selectolax beautifulsoup4 httpx tenacity pydantic asyncpg psycopg
           python -m playwright install --with-deps chromium
 
       - name: Run Bolt crawler + ingest
@@ -63,3 +70,5 @@ jobs:
         with:
           name: bolt-${{ matrix.store }}
           path: ${{ matrix.out }}
+          if-no-files-found: warn
+          retention-days: 7
