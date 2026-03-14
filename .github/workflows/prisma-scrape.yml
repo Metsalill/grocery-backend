@@ -3,8 +3,7 @@ name: Prisma DB Scrape + CSV Artifact
 on:
   workflow_dispatch: {}
   schedule:
-    # Every 5 hours (UTC)
-    - cron: "0 */24 * * *"
+    - cron: "0 3 * * *"   # Every day at 03:00 UTC (was broken: "0 */24 * * *")
 
 concurrency:
   group: prisma-db-scrape
@@ -13,13 +12,13 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    # Keep well below 4h; the chunk loop below totals ~150m of work
     timeout-minutes: 200
     env:
-      DATABASE_URL: ${{ secrets.RW_DATABASE_URL }}   # Railway URL secret
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}   # was RW_DATABASE_URL
+      PGSSLMODE: require
       PRODUCTS_TABLE: products
       PYTHONUNBUFFERED: "1"
-      STORE_ID: "14"
+      STORE_ID: "14"   # Prisma Online (Tallinn)
 
     steps:
       - name: Checkout
@@ -37,43 +36,31 @@ jobs:
           python -V
           pip install --upgrade pip
           pip install playwright psycopg2-binary
-          # If your repo has a requirements.txt, try it first (non-fatal if missing)
           pip install -r requirements.txt || true
 
       - name: Install Chromium + deps
         run: python -m playwright install --with-deps chromium
 
-      # --- Diagnostics: verify the secret and DB connectivity ---
       - name: Print DATABASE_URL host/db
         run: >
           python -c
           "import os,urllib.parse as u; x=u.urlparse(os.environ['DATABASE_URL']);
           print('DATABASE_URL host:', x.hostname, 'db:', x.path.lstrip('/'))"
 
-      - name: Ensure not Supabase
-        run: >
-          python -c
-          "import os,sys,urllib.parse as u; h=u.urlparse(os.environ['DATABASE_URL']).hostname;
-          (sys.exit(2) if (h and 'supabase.co' in h) else print('OK: Railway host detected'))"
-
       - name: Connect test (DB identity)
         run: >
           python -c
           "import os,psycopg2 as p;
           c=p.connect(os.environ['DATABASE_URL']);cur=c.cursor();
-          cur.execute('SELECT current_database(), inet_server_addr();');
+          cur.execute('SELECT current_database(), current_user;');
           print('DB identity:', cur.fetchone()); c.close()"
-      # ------------------------------------------------------------------------
 
-      # Run the big scrape as bounded chunks so we always finish the workflow.
-      # Each chunk is limited by a wall-clock timeout; non-zero exits won't fail the job.
-      # PRELOAD_DB* tells the scraper to fetch already-seen Prisma URLs and skip them.
       - name: Prisma → DB (UPSERT by EAN) in chunks
         shell: bash
         env:
-          CHUNKS: "6"             # number of passes
-          PER_CHUNK_LIMIT: "2200" # products per pass (script enforces --max-products)
-          CHUNK_TIMEOUT: "25m"    # wall-clock per pass (keeps total under ~150m)
+          CHUNKS: "6"
+          PER_CHUNK_LIMIT: "2200"
+          CHUNK_TIMEOUT: "25m"
           PRELOAD_DB: "1"
           PRELOAD_DB_QUERY: |
             SELECT DISTINCT p.source_url
@@ -84,8 +71,7 @@ jobs:
               AND p.source_url IS NOT NULL
               AND p.source_url <> ''
               AND p.collected_at > now() - interval '60 days';
-          PRELOAD_DB_LIMIT: "0"   # 0 = no cap
-          PGSSLMODE: "require"
+          PRELOAD_DB_LIMIT: "0"
         run: |
           set -euo pipefail
           echo "Running $CHUNKS chunks; limit=$PER_CHUNK_LIMIT; timeout=$CHUNK_TIMEOUT per chunk"
@@ -106,7 +92,6 @@ jobs:
               echo "Chunk $i completed."
             fi
             echo "::endgroup::"
-            # small pause between chunks to avoid bursty load on target
             sleep 5
           done
 
