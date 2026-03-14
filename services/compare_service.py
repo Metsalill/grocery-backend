@@ -384,7 +384,13 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                         "line_total": _round2(line_total),
                     })
 
-            total_price = _round2(total) if (not require_all or lines_found == required) else None
+            # None if: no items found, OR require_all and incomplete coverage
+            if lines_found == 0:
+                total_price = None
+            elif require_all and lines_found < required:
+                total_price = None
+            else:
+                total_price = _round2(total)
 
             result: Dict[str, Any] = {
                 "store_id": sid,
