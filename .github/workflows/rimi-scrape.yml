@@ -550,10 +550,12 @@ jobs:
 
       # -----------------------------------------------------------------------
       # Push Rimi prices → prices table
-      # FIX: DISTINCT ON (product_id) prevents "ON CONFLICT DO UPDATE command
-      # cannot affect row a second time" — caused by multiple rimi_candidates
-      # rows matching the same product via name_match, producing duplicate
-      # (product_id, store_id) pairs in a single INSERT batch.
+      # FIX: DISTINCT ON (rc.ext_id) in Step 1 ensures each ext_id maps to
+      # exactly one product_id before hitting ext_product_map, preventing the
+      # "ON CONFLICT DO UPDATE cannot affect row a second time" error caused
+      # by multiple candidates sharing the same name matching the same product.
+      # DISTINCT ON (product_id) in Step 2 further collapses any remaining
+      # duplicates before the final INSERT into prices.
       # -----------------------------------------------------------------------
       - name: Push Rimi prices → prices table
         if: ${{ env.DATABASE_URL != '' }}
@@ -562,30 +564,36 @@ jobs:
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
 
-          -- Step 1: map rimi_candidates → products via ext_product_map (name match)
+          -- Step 1: map rimi_candidates → products via ext_product_map
+          -- DISTINCT ON (rc.ext_id) ensures each ext_id maps to exactly one
+          -- product_id, preventing duplicate (source, ext_id) conflicts when
+          -- multiple products share the same name.
+          WITH mapped AS (
+            SELECT DISTINCT ON (rc.ext_id)
+              rc.ext_id,
+              p.id AS product_id
+            FROM public.rimi_candidates rc
+            JOIN public.products p
+              ON lower(trim(p.name)) = lower(trim(rc.name))
+            WHERE COALESCE(rc.price, 0) > 0
+              AND COALESCE(rc.name, '') <> ''
+            ORDER BY rc.ext_id, p.id ASC
+          )
           INSERT INTO public.ext_product_map (
             source, ext_id, product_id, reason, confidence, last_seen, updated_at
           )
           SELECT
-            'rimi',
-            rc.ext_id,
-            p.id,
-            'name_match',
-            0.8,
-            now(),
-            now()
-          FROM public.rimi_candidates rc
-          JOIN public.products p
-            ON lower(trim(p.name)) = lower(trim(rc.name))
-          WHERE COALESCE(rc.price, 0) > 0
-            AND COALESCE(rc.name, '') <> ''
+            'rimi', m.ext_id, m.product_id,
+            'name_match', 0.8, now(), now()
+          FROM mapped m
           ON CONFLICT (source, ext_id) DO UPDATE
             SET product_id = EXCLUDED.product_id,
                 last_seen  = EXCLUDED.last_seen,
                 updated_at = EXCLUDED.updated_at;
 
           -- Step 2: push prices → prices table
-          -- DISTINCT ON (product_id) collapses duplicates before INSERT
+          -- DISTINCT ON (product_id) collapses any remaining duplicates
+          -- (e.g. two ext_ids mapping to the same product_id) before INSERT
           -- so ON CONFLICT DO UPDATE never sees the same row twice.
           WITH rimi_store AS (
             SELECT id FROM public.stores
@@ -604,7 +612,7 @@ jobs:
               ON epm.ext_id = rc.ext_id AND epm.source = 'rimi'
             WHERE rc.price IS NOT NULL
               AND rc.price > 0
-            ORDER BY epm.product_id, rc.price ASC  -- pick lowest price on collision
+            ORDER BY epm.product_id, rc.price ASC
           )
           INSERT INTO public.prices (
             product_id, store_id, price, currency,
