@@ -1,14 +1,12 @@
 name: Coop Wolt Crawl + Ingest
-
 on:
   workflow_dispatch:
   schedule:
     - cron: "0 4 * * *"   # daily at 04:00 UTC (was every 6h - too frequent)
-
 jobs:
   crawl-wolt:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 70   # bumped from 45 — crawl takes ~40min, ingest needs headroom
     strategy:
       fail-fast: false
       matrix:
@@ -39,21 +37,17 @@ jobs:
       PGSSLMODE: require
       PYTHONUNBUFFERED: "1"
       STORE_ID: ${{ matrix.store_id }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
           pip install requests selectolax tenacity psycopg
-
       - name: Crawl & ingest this Wolt store
         run: |
           python3 scripts/wolt_crawler.py \
