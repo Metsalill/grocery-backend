@@ -94,6 +94,10 @@ NON_PRODUCT_KEYWORDS = {
 def normspace(s: str) -> str:
     return re.sub(r"\s+", " ", s or "").strip()
 
+def clean_field(s: str) -> str:
+    """Strip carriage returns and newlines from any scraped string value."""
+    return re.sub(r"[\r\n]+", " ", s or "").strip()
+
 def guess_size_from_title(title: str) -> str:
     t = normspace(title or "")
     if not t:
@@ -358,7 +362,6 @@ def is_banned_product_url(path: str) -> bool:
     return False
 
 def console_filter(msg):
-    # FIX: msg.type and msg.text are properties in newer Playwright, not methods
     t = msg.type.lower()
     if LOG_CONSOLE == "all":
         print(f"[console:{t}] {msg.text}")
@@ -412,23 +415,21 @@ def _is_product_url(url: str) -> bool:
     }
     if slug in NON_PRODUCT_SLUGS:
         return False
+    # Also reject slugs that match STRICT_ALLOWLIST category paths
+    if any(slug == allowed.strip("/") for allowed in STRICT_ALLOWLIST):
+        return False
     if any(kw in slug for kw in NON_PRODUCT_KEYWORDS):
         return False
     return True
 
 def scrape_product_links_on_category(page) -> List[str]:
     links: List[str] = []
-    # Cast a wide net — Selver now uses root-level slugs like /oun-paulared-kg
-    # Old /toode/ prefix is gone. We grab all internal <a> hrefs and filter.
     selectors = [
-        # New style: product cards (data-testid may vary)
         '[data-testid="product-card"] a[href^="/"]',
         'a.product-card__link[href^="/"]',
-        # Broad fallback: any link in the product grid area
         '.product-list a[href^="/"]',
         '.products-grid a[href^="/"]',
         'article a[href^="/"]',
-        # Last resort: all internal links (filtered by _is_product_url)
         'main a[href^="/"]',
     ]
     seen_local: Set[str] = set()
@@ -528,16 +529,16 @@ def scrape_product_page(page, url: str) -> Dict[str, any]:
     return {
         "ext_id": ext_id,
         "source_url": url,
-        "name": name_txt,
-        "brand": brand,
-        "ean_raw": ean_raw,
-        "ean_norm": ean_norm,
-        "sku_raw": sku_raw,
-        "size_text": size_text,
+        "name": clean_field(name_txt),
+        "brand": clean_field(brand),
+        "ean_raw": clean_field(ean_raw),
+        "ean_norm": clean_field(ean_norm),
+        "sku_raw": clean_field(sku_raw),
+        "size_text": clean_field(size_text),
         "price": price_val,
-        "currency": currency,
-        "category_path": cat_path,
-        "category_leaf": cat_leaf,
+        "currency": clean_field(currency),
+        "category_path": clean_field(cat_path),
+        "category_leaf": clean_field(cat_leaf),
     }
 
 def write_csv_header_if_needed(out_path: str):
@@ -545,7 +546,7 @@ def write_csv_header_if_needed(out_path: str):
     if need_header:
         os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
         with open(out_path, "w", newline="", encoding="utf-8") as f:
-            w = csv.writer(f)
+            w = csv.writer(f, lineterminator="\n")
             w.writerow([
                 "ext_id","source_url","name","brand","ean_raw","ean_norm","sku_raw",
                 "size_text","price","currency","category_path","category_leaf"
@@ -553,7 +554,7 @@ def write_csv_header_if_needed(out_path: str):
 
 def append_row(out_path: str, row: Dict[str, any]):
     with open(out_path, "a", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator="\n")
         w.writerow([
             row.get("ext_id",""), row.get("source_url",""), row.get("name",""),
             row.get("brand",""), row.get("ean_raw",""), row.get("ean_norm",""),
@@ -686,8 +687,8 @@ def crawl_category(page, category_url, seen_ext, writer_path, rows_for_ingest,
                 continue
 
             if not info.get("category_path"):
-                info["category_path"] = cat_breadcrumb
-                info["category_leaf"] = cat_leaf
+                info["category_path"] = clean_field(cat_breadcrumb)
+                info["category_leaf"] = clean_field(cat_leaf)
 
             append_row(writer_path, info)
             rows_for_ingest.append(info)
