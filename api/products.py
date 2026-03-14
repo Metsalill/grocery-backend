@@ -12,20 +12,14 @@ MAX_LIMIT = 50  # server-side hard cap
 
 
 def _row_to_safe_product(row: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Normalize a DB row into a stable API shape.
-    We intentionally keep this minimal for the product list UI.
-    """
     return {
         "id": row.get("id"),
         "name": row.get("name"),
-        # Optional fields if present in your table/view
         "image_url": row.get("image_url"),
         "brand": row.get("brand"),
         "manufacturer": row.get("manufacturer"),
         "size_text": row.get("size_text"),
         "amount": row.get("amount"),
-        # Keep legacy fields if your frontend still references them
         "food_group": row.get("food_group"),
         "sub_code": row.get("sub_code"),
     }
@@ -43,94 +37,57 @@ async def _get_pool(request: Request):
 @throttle(limit=120, window=60)
 async def list_products(
     request: Request,
-    q: Optional[str] = Query(
-        "",
-        description=(
-            "Search by product name (ILIKE). "
-            "Empty lists everything (paged)."
-        ),
-    ),
+    q: Optional[str] = Query("", description="Search by product name (ILIKE)."),
     offset: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=200),
-    main_code: Optional[str] = Query(
-        None,
-        description=(
-            "Optional main category code (e.g. 'produce', 'meat_fish'). "
-            "When provided, uses product_categories mapping."
-        ),
-    ),
-    sub_code: Optional[str] = Query(
-        None,
-        description=(
-            "Optional subcategory code (e.g. 'produce_apples_pears'). "
-            "When provided, uses product_categories mapping."
-        ),
-    ),
+    main_code: Optional[str] = Query(None, description="Main category code (e.g. 'produce')."),
+    sub_code: Optional[str] = Query(None, description="Subcategory code (e.g. 'produce_apples_pears')."),
 ) -> Dict[str, Any]:
     limit = min(limit, MAX_LIMIT)
-
     q = (q or "").strip()
     main_code = (main_code or "").strip() or None
     sub_code = (sub_code or "").strip() or None
 
     pool = await _get_pool(request)
 
-    # Build SQL dynamically but safely via positional params
+    # Build WHERE clauses — filter directly on products columns.
+    # products.sub_code and products.food_group are the canonical category fields.
     params: List[Any] = []
     where: List[str] = []
 
-    # Category-filtered path (uses mapping tables)
-    if main_code or sub_code:
-        sql = """
-            SELECT p.*
-            FROM products p
-            JOIN product_categories pc ON pc.product_id = p.id
-            JOIN categories_main m ON m.id = pc.main_id
-            JOIN categories_sub  s ON s.id = pc.sub_id
-        """
+    if sub_code:
+        params.append(sub_code)
+        where.append(f"p.sub_code = ${len(params)}")
+    elif main_code:
+        params.append(main_code)
+        where.append(f"p.food_group = ${len(params)}")
 
-        if main_code:
-            params.append(main_code)
-            where.append(f"m.code = ${len(params)}")
-
-        if sub_code:
-            params.append(sub_code)
-            where.append(f"s.code = ${len(params)}")
-
-    # Non-category path
-    else:
-        sql = """
-            SELECT p.*
-            FROM products p
-        """
-
-    # Search filter (applies in both paths)
     if q:
         params.append(f"%{q}%")
         where.append(f"p.name ILIKE ${len(params)}")
 
-    if where:
-        sql += "\nWHERE " + " AND ".join(where)
+    where_sql = ("\nWHERE " + " AND ".join(where)) if where else ""
 
-    # Stable ordering
-    sql += "\nORDER BY p.name"
+    base_sql = f"FROM products p{where_sql}"
 
-    # Pagination
-    params.append(limit)
-    params.append(offset)
-    sql += f"\nLIMIT ${len(params)-1} OFFSET ${len(params)}"
+    count_sql = f"SELECT COUNT(*) {base_sql}"
+    data_sql = f"SELECT p.* {base_sql}\nORDER BY p.name"
+
+    # Add pagination params
+    params_with_paging = params + [limit, offset]
+    data_sql += f"\nLIMIT ${len(params) + 1} OFFSET ${len(params) + 2}"
 
     try:
         async with pool.acquire() as conn:
-            rows = await conn.fetch(sql, *params)
+            total_row = await conn.fetchrow(count_sql, *params)
+            total = total_row[0] if total_row else 0
+            rows = await conn.fetch(data_sql, *params_with_paging)
 
-        items: List[Dict[str, Any]] = []
-        for r in rows:
-            d = dict(r)
-            items.append(_row_to_safe_product(d))
+        items = [_row_to_safe_product(dict(r)) for r in rows]
 
         return {
             "items": items,
+            "total": total,      # Flutter uses this for pagination
             "offset": offset,
             "limit": limit,
             "count": len(items),
@@ -141,11 +98,6 @@ async def list_products(
             },
         }
 
-    except pgerr.UndefinedTableError:
-        raise HTTPException(
-            status_code=500,
-            detail="Missing required tables for products/categories mapping",
-        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"List products error: {e}")
 
@@ -187,7 +139,7 @@ async def search_products(
         raise HTTPException(status_code=500, detail=f"Search products error: {e}")
 
 
-# ----------------------------- PRODUCT DETAIL (optional but useful) -----------------------------
+# ----------------------------- PRODUCT DETAIL -----------------------------
 @router.get("/products/{product_id}")
 @throttle(limit=120, window=60)
 async def get_product(
@@ -196,27 +148,17 @@ async def get_product(
 ) -> Dict[str, Any]:
     pool = await _get_pool(request)
 
-    sql = """
-        SELECT p.*
-        FROM products p
-        WHERE p.id = $1
-        LIMIT 1
-    """
-
     try:
         async with pool.acquire() as conn:
-            row = await conn.fetchrow(sql, product_id)
+            row = await conn.fetchrow(
+                "SELECT p.* FROM products p WHERE p.id = $1 LIMIT 1",
+                product_id,
+            )
 
         if not row:
             raise HTTPException(status_code=404, detail="Product not found")
 
-        d = dict(row)
-
-        # Return more fields for detail view
-        return {
-            **_row_to_safe_product(d),
-            "raw": d,  # keeps debugging easy; remove later if you want a strict schema
-        }
+        return _row_to_safe_product(dict(row))
 
     except HTTPException:
         raise
