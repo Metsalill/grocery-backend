@@ -2,11 +2,23 @@ name: Coop Wolt Crawl + Ingest
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 4 * * *"   # daily at 04:00 UTC (was every 6h - too frequent)
+    - cron: "0 4 * * *"   # daily at 04:00 UTC
+
+# ---------------------------------------------------------------------------
+# Job 1: crawl — one runner per store, no DB access, 90min timeout
+# Job 2: ingest — runs after all crawls succeed, loads each CSV into DB
+# Split because crawl alone takes ~70min leaving no headroom for ingest.
+# ---------------------------------------------------------------------------
+
 jobs:
-  crawl-wolt:
+
+  # -------------------------------------------------------------------------
+  # CRAWL: scrape each Wolt store, write CSV, upload as artifact
+  # -------------------------------------------------------------------------
+  crawl:
+    name: crawl (${{ matrix.store_host }})
     runs-on: ubuntu-latest
-    timeout-minutes: 70   # bumped from 45 — crawl takes ~40min, ingest needs headroom
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
@@ -33,25 +45,200 @@ jobs:
             city: "tallinn"
             store_host: "coop-mustakivi"
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}   # was RW_DATABASE_URL
-      PGSSLMODE: require
       PYTHONUNBUFFERED: "1"
       STORE_ID: ${{ matrix.store_id }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          pip install requests selectolax tenacity psycopg
-      - name: Crawl & ingest this Wolt store
+          pip install requests selectolax tenacity
+
+      - name: Crawl Wolt store (CSV only, no DB)
         run: |
           python3 scripts/wolt_crawler.py \
             --store-host "${{ matrix.store_host }}" \
             --city "${{ matrix.city }}" \
             --categories-file "data/wolt_categories_slugs.txt" \
-            --ingest-mode main
+            --skip-ingest
+
+      - name: Show CSV output
+        run: |
+          ls -lah out/ || true
+          for f in out/coop_wolt_*.csv; do
+            echo "--- $f ---"
+            wc -l "$f" || true
+            head -n 3 "$f" || true
+          done
+
+      - name: Upload CSV artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wolt-csv-${{ matrix.store_host }}-${{ github.run_id }}
+          path: out/coop_wolt_*.csv
+          if-no-files-found: warn
+          retention-days: 3
+
+  # -------------------------------------------------------------------------
+  # INGEST: download all CSVs and load into DB via upsert_product_and_price
+  # Runs after ALL crawl jobs finish (including partial failures)
+  # -------------------------------------------------------------------------
+  ingest:
+    name: ingest (all stores)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: crawl
+    # Run even if some crawl shards failed — ingest whatever landed
+    if: always()
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      PGSSLMODE: require
+      PYTHONUNBUFFERED: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install psycopg
+
+      - name: Download all crawl artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wolt-csv-*-${{ github.run_id }}
+          path: out/
+          merge-multiple: true
+
+      - name: Show downloaded CSVs
+        run: |
+          echo "Downloaded files:"
+          ls -lah out/ || echo "(none)"
+
+      - name: Ingest all CSVs into DB
+        run: |
+          python3 - <<'PYEOF'
+          import os, csv, glob, psycopg, datetime
+
+          db_url = os.environ["DATABASE_URL"]
+
+          # store_host -> store_id mapping (matches matrix above)
+          STORE_MAP = {
+              "coop-prnu":       551,
+              "coop-laagri":     552,
+              "konsum-juri":     553,
+              "coop-miiduranna": 554,
+              "coop-akadeemia":  555,
+              "coop-lasname":    556,
+              "coop-mustakivi":  557,
+          }
+
+          SQL = """
+          SELECT upsert_product_and_price(
+              %s::text, %s::text, %s::text, %s::text, %s::text,
+              %s::text, %s::numeric, %s::text, %s::integer, %s, %s::text
+          );
+          """
+
+          csvs = glob.glob("out/coop_wolt_*.csv")
+          if not csvs:
+              print("[warn] No CSVs found in out/ — nothing to ingest.")
+              raise SystemExit(0)
+
+          total_sent = 0
+          total_errors = 0
+          ts_now = datetime.datetime.now(datetime.timezone.utc)
+
+          with psycopg.connect(db_url) as conn:
+              with conn.cursor() as cur:
+                  for csv_path in sorted(csvs):
+                      print(f"[ingest] processing {csv_path}")
+                      with open(csv_path, newline="", encoding="utf-8") as f:
+                          reader = csv.DictReader(f)
+                          rows = list(reader)
+
+                      if not rows:
+                          print(f"  -> empty, skipping")
+                          continue
+
+                      # Derive store_host from store_host column in CSV
+                      sample_host = (rows[0].get("store_host") or "").replace("wolt:", "").strip()
+                      # Fallback: match from filename
+                      if sample_host not in STORE_MAP:
+                          for key in STORE_MAP:
+                              if key in csv_path:
+                                  sample_host = key
+                                  break
+
+                      store_id = STORE_MAP.get(sample_host)
+                      if not store_id:
+                          print(f"  -> [warn] unknown store_host '{sample_host}', skipping")
+                          continue
+
+                      sent = 0
+                      errors = 0
+                      for r in rows:
+                          price_raw = r.get("price") or ""
+                          try:
+                              price_val = float(price_raw)
+                          except (ValueError, TypeError):
+                              continue
+                          if price_val <= 0:
+                              continue
+
+                          ext_id = f"wolt:{r.get('item_id') or ''}" if r.get("item_id") else ""
+                          if not ext_id or ext_id == "wolt:":
+                              continue
+
+                          try:
+                              cur.execute(SQL, (
+                                  "wolt",
+                                  ext_id,
+                                  r.get("name") or "",
+                                  "",
+                                  r.get("unit_info") or "",
+                                  r.get("barcode_gtin") or "",
+                                  price_val,
+                                  "EUR",
+                                  store_id,
+                                  ts_now,
+                                  "",
+                              ))
+                              sent += 1
+                          except Exception as e:
+                              errors += 1
+                              if errors <= 3:
+                                  print(f"  [warn] upsert failed for {ext_id}: {e}")
+
+                      conn.commit()
+                      print(f"  -> store_id={store_id} ({sample_host}): {sent} upserted, {errors} errors")
+                      total_sent += sent
+                      total_errors += errors
+
+          print(f"\n[done] Total: {total_sent} rows upserted, {total_errors} errors")
+          PYEOF
+
+      - name: Verify prices in DB
+        run: |
+          psql "$DATABASE_URL" <<'SQL'
+          SELECT s.name, COUNT(p.id) AS prices, MAX(p.collected_at) AS last_seen
+          FROM public.stores s
+          LEFT JOIN public.prices p ON p.store_id = s.id
+          WHERE s.id IN (551, 552, 553, 554, 555, 556, 557)
+          GROUP BY s.name
+          ORDER BY s.name;
+          SQL
