@@ -1,10 +1,8 @@
 name: Coop Bolt scrape + DB ingest
-
 on:
   workflow_dispatch:
   schedule:
     - cron: "12 3 * * *"   # daily at 03:12 UTC
-
 jobs:
   scrape-bolt:
     runs-on: ubuntu-latest
@@ -15,26 +13,29 @@ jobs:
         include:
           - city: tartu
             store: kvartali-coop-maksimarket
+            venue_id: "1969"
             store_id: "559"
             categories_file: data/bolt/2-tartu/kvartali-coop-maksimarket.txt
             out: out/bolt_kvartali.csv
           - city: tartu
             store: lounakeskuse-coop-maksimarket
+            venue_id: "2281"
             store_id: "561"
             categories_file: data/bolt/2-tartu/lounakeskuse-coop-maksimarket.txt
             out: out/bolt_lounakeskus.csv
-          - city: tartu
-            store: eedeni-coop-maksimarket
-            store_id: "560"
-            categories_file: data/bolt/2-tartu/eedeni-coop-maksimarket.txt
-            out: out/bolt_eedeni.csv
-
+          # Eedeni disabled — store no longer available on Bolt Food
+          # TODO: reroute Eedeni physical store to nearest Bolt store prices
+          # - city: tartu
+          #   store: eedeni-coop-maksimarket
+          #   venue_id: "560"
+          #   store_id: "560"
+          #   categories_file: data/bolt/2-tartu/eedeni-coop-maksimarket.txt
+          #   out: out/bolt_eedeni.csv
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       PGSSLMODE: require
       PYTHONUNBUFFERED: "1"
       STORE_ID: ${{ matrix.store_id }}
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -51,13 +52,14 @@ jobs:
           pip install playwright selectolax beautifulsoup4 httpx tenacity pydantic asyncpg psycopg
           python -m playwright install --with-deps chromium
 
-      - name: Patch bolt_crawler.py to use STORE_ID env directly
+      - name: Patch bolt_crawler.py — force STORE_ID + fix source_url constraint
         run: |
           python - <<'PYEOF'
           import re, pathlib, os
           path = pathlib.Path("scripts/bolt_crawler.py")
           src = path.read_text(encoding="utf-8")
 
+          # Patch 1: Override store_id from env (original patch)
           old = "async def _ingest_to_db(products: List[Product]) -> None:"
           new = (
               "async def _ingest_to_db(products: List[Product]) -> None:\n"
@@ -70,9 +72,33 @@ jobs:
           new2 = "store_id = _env_store_id if _env_store_id > 0 else store_map.get(p.venue_id)"
           src = src.replace(old2, new2, 1)
 
+          # Patch 2: Skip rows where store_id is still 0/None after override
+          old3 = "if not store_id:"
+          new3 = "if not store_id or store_id == 0:"
+          src = src.replace(old3, new3, 1)
+
+          # Patch 3: Use ON CONFLICT DO UPDATE on source_url upsert to avoid constraint crash
+          # Replace INSERT INTO products ... ON CONFLICT DO NOTHING with DO UPDATE
+          src = re.sub(
+              r'ON CONFLICT \(source_url\) DO NOTHING',
+              'ON CONFLICT (source_url) DO UPDATE SET collected_at = now()',
+              src
+          )
+
           path.write_text(src, encoding="utf-8")
-          print("Patched bolt_crawler.py to use STORE_ID env")
+          print("Patched bolt_crawler.py")
           PYEOF
+
+      - name: Update categories file with correct venue_id
+        run: |
+          # Replace any old venue IDs in the categories file with the correct one
+          # This handles cases where Bolt renumbers their stores
+          VENUE_ID="${{ matrix.venue_id }}"
+          CATS_FILE="${{ matrix.categories_file }}"
+          # Normalize: replace any /p/NNNN/ pattern with the correct venue_id
+          sed -i -E "s|/p/[0-9]+-|/p/${VENUE_ID}-|g; s|/p/[0-9]+/|/p/${VENUE_ID}/|g; s|backPath=%2Fp%2F[0-9]+|backPath=%2Fp%2F${VENUE_ID}|g" "$CATS_FILE"
+          echo "Updated $CATS_FILE with venue_id=${VENUE_ID}"
+          head -3 "$CATS_FILE"
 
       - name: Run Bolt crawler + ingest
         run: |
