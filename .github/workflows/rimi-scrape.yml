@@ -26,13 +26,13 @@ on:
       req_delay:
         description: "Delay between page ops (sec)"
         required: false
-        default: "0.15"        # bumped default
+        default: "0.15"
       pdp_workers:
         description: "Number of Playwright pages to reuse for PDPs (>=1)"
         required: false
-        default: "4"           # bumped default
+        default: "4"
   schedule:
-    - cron: "19 3 * * 0"   # Sun at 03:19 UTC
+    - cron: "19 3 * * *"   # Every day at 03:19 UTC
 
 concurrency:
   group: rimi-category-crawl-${{ github.event.inputs.mode || 'prices' }}
@@ -42,13 +42,11 @@ jobs:
   crawl-and-upsert:
     name: crawl-and-upsert (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
-    # was 150; extend so shards + DB steps can complete
     timeout-minutes: 330
 
     strategy:
       fail-fast: false
       matrix:
-        # increase sharding to shorten each slice
         shard: [0, 1, 2, 3, 4, 5]
       max-parallel: 6
 
@@ -57,11 +55,11 @@ jobs:
       OUTPUT_CSV: data/rimi_products.csv
       SHARD: ${{ matrix.shard }}
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-      STORE_ID: "440"          # 👈 Add this line (Rimi ePood store_id in your DB)
+      PGSSLMODE: require
+      STORE_ID: "440"
       MODE: ${{ github.event.inputs.mode || 'prices' }}
       MODE_IS_PRICES: ${{ (github.event.inputs.mode || 'prices') == 'prices' }}
       MODE_IS_METADATA: ${{ (github.event.inputs.mode || 'prices') == 'metadata' }}
-      # Soft per-shard time budget so later steps still execute
       SOFT_TIME_BUDGET_MIN: "140"
 
     steps:
@@ -95,11 +93,8 @@ jobs:
           else
             echo "No requirements file found; proceeding with minimal deps"
           fi
-          # Hard requirements for the crawler:
           pip install --upgrade playwright beautifulsoup4 lxml
-          # Install Chromium and OS deps for Playwright
           python -m playwright install --with-deps chromium
-          # Sanity: verify imports (keep it to a single line)
           python -c "import bs4, lxml; from playwright import sync_api as _; print('Deps OK: bs4, lxml, playwright')"
 
       - name: Verify scraper exists
@@ -283,7 +278,6 @@ jobs:
 
           set +e
           set +o pipefail
-          # soft kill a bit before the job's global timeout so later steps run
           stdbuf -oL -eL timeout -k 90s "${TIME_BUDGET}m" \
             python -u scripts/rimi_crawl_categories_pw.py \
               --cats-file data/rimi_categories.txt \
@@ -504,14 +498,11 @@ jobs:
         run: |
           set -euo pipefail
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
-          -- show how many rows in staging
           SELECT COUNT(*) AS staging_rows FROM staging_rimi_products;
 
-          -- ensure conflict target
           CREATE UNIQUE INDEX IF NOT EXISTS uq_rimi_candidates_ext
             ON rimi_candidates(ext_id);
 
-          -- upsert (returns how many rows were touched)
           WITH up AS (
             INSERT INTO rimi_candidates AS c (
               ext_id, ean_raw, sku_raw, name, size_text,
@@ -544,10 +535,9 @@ jobs:
           )
           SELECT COUNT(*) AS upsert_rows FROM up;
 
-          -- housekeeping + refresh the view the target builder reads
           TRUNCATE staging_rimi_products;
           ANALYZE rimi_candidates;
-          -- refresh if you use the mat view; ignore if it doesn't exist
+
           DO $$
           BEGIN
             IF EXISTS (SELECT 1 FROM pg_matviews WHERE matviewname = 'rimi_candidates_norm') THEN
@@ -555,7 +545,6 @@ jobs:
             END IF;
           END$$;
 
-          -- optional target snapshot for logs (name or brand missing)
           DROP TABLE IF EXISTS tmp_rimi_target_missing;
           CREATE TEMP TABLE tmp_rimi_target_missing AS
           SELECT ext_id
@@ -597,3 +586,76 @@ jobs:
           $do$;
           SQL
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /tmp/adopt_rimi.sql
+
+      # -----------------------------------------------------------------------
+      # NEW STEP: Push rimi_candidates prices → prices table
+      # This is the missing link — previously prices never reached the prices
+      # table that compare_service.py reads. Runs after every crawl, daily.
+      # -----------------------------------------------------------------------
+      - name: Push Rimi prices → prices table
+        if: ${{ env.DATABASE_URL != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
+
+          -- Step 1: map rimi_candidates → products via ext_product_map
+          -- Uses ext_id match first (most reliable), falls back to name match
+          INSERT INTO public.ext_product_map (
+            source, ext_id, product_id, reason, confidence, last_seen, updated_at
+          )
+          SELECT
+            'rimi',
+            rc.ext_id,
+            p.id,
+            'name_match',
+            0.8,
+            now(),
+            now()
+          FROM public.rimi_candidates rc
+          JOIN public.products p
+            ON lower(trim(p.name)) = lower(trim(rc.name))
+          WHERE COALESCE(rc.price, 0) > 0
+            AND COALESCE(rc.name, '') <> ''
+          ON CONFLICT (source, ext_id) DO UPDATE
+            SET product_id = EXCLUDED.product_id,
+                last_seen  = EXCLUDED.last_seen,
+                updated_at = EXCLUDED.updated_at;
+
+          -- Step 2: push prices from rimi_candidates → prices table
+          WITH rimi_store AS (
+            SELECT id FROM public.stores
+            WHERE chain = 'Rimi' AND COALESCE(is_online, false) = true
+            ORDER BY id LIMIT 1
+          )
+          INSERT INTO public.prices (
+            product_id, store_id, price, currency,
+            collected_at, source, source_url
+          )
+          SELECT
+            epm.product_id,
+            (SELECT id FROM rimi_store),
+            rc.price,
+            COALESCE(NULLIF(rc.currency, ''), 'EUR'),
+            now(),
+            'rimi',
+            'https://www.rimi.ee/epood/ee/tooted/p/' || rc.ext_id
+          FROM public.rimi_candidates rc
+          JOIN public.ext_product_map epm
+            ON epm.ext_id = rc.ext_id AND epm.source = 'rimi'
+          WHERE rc.price IS NOT NULL
+            AND rc.price > 0
+          ON CONFLICT (product_id, store_id) DO UPDATE
+            SET price        = EXCLUDED.price,
+                currency     = EXCLUDED.currency,
+                collected_at = EXCLUDED.collected_at,
+                source       = EXCLUDED.source,
+                source_url   = EXCLUDED.source_url;
+
+          -- Step 3: report result
+          SELECT
+            COUNT(*) AS prices_for_rimi_online
+          FROM public.prices pr
+          JOIN public.stores s ON s.id = pr.store_id
+          WHERE s.chain = 'Rimi' AND COALESCE(s.is_online, false) = true;
+          SQL
