@@ -1,0 +1,28 @@
+name: Build Product Groups
+
+on:
+  workflow_dispatch:  # Manual trigger only — button in GitHub Actions tab
+
+jobs:
+  build-groups:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install psql client
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client
+
+      - name: Run build_product_groups.sql
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          # Parse DATABASE_URL into psql-friendly env vars
+          # Expected format: postgresql://user:password@host:port/dbname
+          psql "$DATABASE_URL" \
+            --set ON_ERROR_STOP=1 \
+            --echo-errors \
+            -f scripts/build_product_groups.sql
