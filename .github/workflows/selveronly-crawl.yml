@@ -6,7 +6,7 @@ on:
       mode:
         description: "metadata (only items missing brand/EAN) or prices"
         required: false
-        default: "metadata"
+        default: "prices"
       click_products:
         description: "Click into PDPs (1) vs direct links (0)"
         required: false
@@ -44,8 +44,8 @@ jobs:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       STORE_ID: "31"
       SHARD: ${{ matrix.shard }}
-      MODE: ${{ inputs.mode || 'metadata' }}
-      SHARDS: ${{ strategy.job-total }}   # keep shard slicing in sync
+      MODE: ${{ inputs.mode || 'prices' }}
+      SHARDS: ${{ strategy.job-total }}
 
     steps:
       - name: Checkout
@@ -108,6 +108,39 @@ jobs:
           psql "$DATABASE_URL" -c "SELECT current_database(), current_user, inet_server_addr(), inet_server_port();"
           psql "$DATABASE_URL" -c "\d prices" || true
 
+      # ── DIAGNOSTIC: show sample ext_ids so we can verify format ──────────
+      - name: Diagnose ext_id format (shard 0 only)
+        if: ${{ matrix.shard == 0 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "=== Sample selver_candidates ext_ids ==="
+          psql "$DATABASE_URL" -At <<'SQL'
+          SELECT ext_id FROM public.selver_candidates
+          ORDER BY last_seen DESC NULLS LAST
+          LIMIT 20;
+          SQL
+          echo "=== Sample staging_selver_products ext_ids ==="
+          psql "$DATABASE_URL" -At <<'SQL'
+          SELECT ext_id FROM public.staging_selver_products
+          ORDER BY collected_at DESC NULLS LAST
+          LIMIT 20;
+          SQL
+          echo "=== ext_id pattern analysis ==="
+          psql "$DATABASE_URL" -At <<'SQL'
+          SELECT
+            CASE
+              WHEN ext_id ~ '^T[0-9]+'         THEN 'SKU-style (T000001313)'
+              WHEN ext_id ~ '^[0-9]+'           THEN 'numeric'
+              WHEN ext_id ~ '^[a-z][a-z0-9-]+$' THEN 'slug-style (banaan-kg)'
+              ELSE 'other: ' || left(ext_id, 30)
+            END AS pattern,
+            COUNT(*) AS cnt
+          FROM public.selver_candidates
+          GROUP BY 1
+          ORDER BY cnt DESC;
+          SQL
+
       # MODE=prices → skip only if (priced) AND (brand already present)
       - name: Build skip list (priced & have brand)
         if: ${{ env.MODE == 'prices' }}
@@ -141,7 +174,6 @@ jobs:
           WHERE COALESCE(NULLIF(btrim(COALESCE(sc.brand, sp.brand, '')), ''), NULL) IS NOT NULL
           ORDER BY 1;
           SQL
-          # Extra hardening if any stray line:col sneaks through
           sed -E -i 's/:[0-9]+(:[0-9]+)?$//' data/selver_skip_ext_ids.txt || true
           echo "Skip list rows (priced & have brand): $(wc -l < data/selver_skip_ext_ids.txt)"
 
@@ -167,7 +199,6 @@ jobs:
             OR COALESCE(NULLIF(regexp_replace(COALESCE(sc.ean_raw, sp.ean_raw, ''), '[^0-9]', '', 'g'), ''), NULL) IS NULL
           ORDER BY 1;
           SQL
-          # Extra hardening: strip any trailing :line:col if present
           sed -E -i 's/:[0-9]+(:[0-9]+)?$//' data/selver_only_ext_ids.txt || true
           echo "ONLY list rows (missing metadata): $(wc -l < data/selver_only_ext_ids.txt)"
 
@@ -181,7 +212,6 @@ jobs:
           CATEGORIES_FILE: data/selver_categories.txt
           ALLOWLIST_ONLY: "1"
           USE_ROUTER: "1"
-          # if MODE=metadata -> 0, else honor input (default 1)
           CLICK_PRODUCTS: ${{ env.MODE == 'metadata' && '0' || (github.event_name == 'workflow_dispatch' && inputs.click_products || '1') }}
           LOG_CONSOLE: ${{ github.event_name == 'workflow_dispatch' && inputs.log_console || 'warn' }}
           NAV_TIMEOUT_MS: "90000"
@@ -278,7 +308,6 @@ jobs:
           psql "$DATABASE_URL" -v ON_ERROR_STOP=1 <<'SQL'
           BEGIN;
 
-          -- Staging with generated ean_norm (do NOT insert into ean_norm directly)
           CREATE TABLE IF NOT EXISTS public.staging_selver_products (
             ext_id        text PRIMARY KEY,
             name          text NOT NULL,
@@ -304,7 +333,6 @@ jobs:
           SELECT 'Selver e-Selver', 'Selver', TRUE
           WHERE NOT EXISTS (SELECT 1 FROM public.stores WHERE chain='Selver' AND is_online=TRUE);
 
-          -- Candidates
           CREATE TABLE IF NOT EXISTS public.selver_candidates (
             ext_id        text PRIMARY KEY,
             ean_norm      text,
@@ -329,7 +357,6 @@ jobs:
 
           COMMIT;
 
-          -- Keep only most recent price per (product,store)
           DO $$
           BEGIN
             WITH ranked AS (
@@ -373,7 +400,6 @@ jobs:
             exit 0
           fi
 
-          # Detect whether CSV has a 'brand' column
           HAS_BRAND=0
           if head -n1 data/selver.csv | grep -qiE '^ext_id,source_url,name,brand,'; then
             HAS_BRAND=1
