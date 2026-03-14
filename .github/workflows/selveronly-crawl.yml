@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3]   # increased parallelism
+        shard: [0, 1, 2, 3]
     env:
       TZ: Europe/Tallinn
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
@@ -108,7 +108,6 @@ jobs:
           psql "$DATABASE_URL" -c "SELECT current_database(), current_user, inet_server_addr(), inet_server_port();"
           psql "$DATABASE_URL" -c "\d prices" || true
 
-      # ── DIAGNOSTIC: show sample ext_ids so we can verify format ──────────
       - name: Diagnose ext_id format (shard 0 only)
         if: ${{ matrix.shard == 0 }}
         shell: bash
@@ -130,8 +129,8 @@ jobs:
           psql "$DATABASE_URL" -At <<'SQL'
           SELECT
             CASE
-              WHEN ext_id ~ '^T[0-9]+'         THEN 'SKU-style (T000001313)'
-              WHEN ext_id ~ '^[0-9]+'           THEN 'numeric'
+              WHEN ext_id ~ '^T[0-9]+'          THEN 'SKU-style (T000001313)'
+              WHEN ext_id ~ '^[0-9]+'            THEN 'numeric'
               WHEN ext_id ~ '^[a-z][a-z0-9-]+$' THEN 'slug-style (banaan-kg)'
               ELSE 'other: ' || left(ext_id, 30)
             END AS pattern,
@@ -141,7 +140,6 @@ jobs:
           ORDER BY cnt DESC;
           SQL
 
-      # MODE=prices → skip only if (priced) AND (brand already present)
       - name: Build skip list (priced & have brand)
         if: ${{ env.MODE == 'prices' }}
         shell: bash
@@ -177,7 +175,6 @@ jobs:
           sed -E -i 's/:[0-9]+(:[0-9]+)?$//' data/selver_skip_ext_ids.txt || true
           echo "Skip list rows (priced & have brand): $(wc -l < data/selver_skip_ext_ids.txt)"
 
-      # MODE=metadata → crawl only items missing brand/EAN
       - name: Build target list (missing brand/EAN)
         if: ${{ env.MODE == 'metadata' }}
         shell: bash
@@ -300,7 +297,6 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
-      # ---------------------- DB LOAD & ADOPT (unchanged) ---------------------
       - name: Prepare DB (staging & helper tables)
         shell: bash
         run: |
@@ -320,10 +316,14 @@ jobs:
             currency      text DEFAULT 'EUR',
             category_path text,
             category_leaf text,
+            source_url    text,
             collected_at  timestamptz DEFAULT now()
           );
+          -- Add source_url if it was missing from an older schema
           ALTER TABLE public.staging_selver_products
-            ADD COLUMN IF NOT EXISTS brand text;
+            ADD COLUMN IF NOT EXISTS brand      text;
+          ALTER TABLE public.staging_selver_products
+            ADD COLUMN IF NOT EXISTS source_url text;
 
           CREATE EXTENSION IF NOT EXISTS pg_trgm;
           CREATE INDEX IF NOT EXISTS ix_selver_ean       ON public.staging_selver_products (ean_norm);
@@ -400,10 +400,24 @@ jobs:
             exit 0
           fi
 
+          # Detect CSV shape from header
+          # New crawler (post-2026-03-14): ext_id,source_url,name,brand,ean_raw,ean_norm,sku_raw,size_text,price,currency,category_path,category_leaf
+          # Old crawler:                  ext_id,name,brand,ean_raw,...  (no source_url)
+          HEADER=$(head -n1 data/selver.csv)
+          echo "CSV header: $HEADER"
+
+          # Check for source_url in position 2 (new format)
+          HAS_SOURCE_URL=0
+          if echo "$HEADER" | grep -qiE '^ext_id,source_url,'; then
+            HAS_SOURCE_URL=1
+          fi
+
           HAS_BRAND=0
-          if head -n1 data/selver.csv | grep -qiE '^ext_id,source_url,name,brand,'; then
+          if echo "$HEADER" | grep -qiE 'brand'; then
             HAS_BRAND=1
           fi
+
+          echo "HAS_SOURCE_URL=$HAS_SOURCE_URL"
           echo "HAS_BRAND=$HAS_BRAND"
 
           cat > /tmp/selver_load.sql <<'SQL_A'
@@ -426,10 +440,16 @@ jobs:
           );
           SQL_A
 
-          if [ "$HAS_BRAND" -eq 1 ]; then
+          # Pick the right \copy column list based on CSV format
+          if [ "$HAS_SOURCE_URL" -eq 1 ]; then
+            # New format: all 12 columns in order
             echo "\copy tmp_staging_selver_products (ext_id,source_url,name,brand,ean_raw,ean_norm,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER" >> /tmp/selver_load.sql
+          elif [ "$HAS_BRAND" -eq 1 ]; then
+            # Old format with brand but no source_url
+            echo "\copy tmp_staging_selver_products (ext_id,name,brand,ean_raw,ean_norm,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER" >> /tmp/selver_load.sql
           else
-            echo "\copy tmp_staging_selver_products (ext_id,source_url,name,ean_raw,ean_norm,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER" >> /tmp/selver_load.sql
+            # Oldest format: no brand, no source_url
+            echo "\copy tmp_staging_selver_products (ext_id,name,ean_raw,ean_norm,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER" >> /tmp/selver_load.sql
           fi
           echo "" >> /tmp/selver_load.sql
 
@@ -441,7 +461,7 @@ jobs:
           WITH filtered AS (
             SELECT
               regexp_replace(ext_id, ':[0-9]+(?::[0-9]+)?$', '') AS ext_id,
-              regexp_replace(source_url, ':[0-9]+(?::[0-9]+)?$', '') AS source_url,
+              NULLIF(regexp_replace(COALESCE(source_url,''), ':[0-9]+(?::[0-9]+)?$', ''), '') AS source_url,
               name,
               NULLIF(brand,'') AS brand,
               ean_raw,
@@ -457,10 +477,12 @@ jobs:
 
           upsert_staging AS (
             INSERT INTO public.staging_selver_products (
-              ext_id, name, brand, ean_raw, sku_raw, size_text, price, currency, category_path, category_leaf
+              ext_id, name, brand, ean_raw, sku_raw, size_text, price, currency,
+              category_path, category_leaf, source_url
             )
             SELECT f.ext_id, f.name, f.brand, COALESCE(NULLIF(f.ean_raw,''), f.ean_norm),
-                   f.sku_raw, f.size_text, f.price, f.currency, f.category_path, f.category_leaf
+                   f.sku_raw, f.size_text, f.price, f.currency,
+                   f.category_path, f.category_leaf, f.source_url
             FROM filtered f
             ON CONFLICT (ext_id) DO UPDATE SET
               name          = EXCLUDED.name,
@@ -472,6 +494,7 @@ jobs:
               currency      = EXCLUDED.currency,
               category_path = EXCLUDED.category_path,
               category_leaf = EXCLUDED.category_leaf,
+              source_url    = COALESCE(EXCLUDED.source_url, public.staging_selver_products.source_url),
               collected_at  = now()
             RETURNING ext_id
           ),
@@ -481,7 +504,8 @@ jobs:
               COALESCE(m.product_id, pe.product_id) AS product_id,
               f.price,
               f.currency,
-              f.ext_id
+              f.ext_id,
+              f.source_url
             FROM filtered f
             LEFT JOIN public.product_eans    pe ON pe.ean_norm = f.ean_norm AND f.ean_norm <> ''
             LEFT JOIN public.ext_product_map m  ON m.ext_id   = f.ext_id
@@ -489,7 +513,7 @@ jobs:
           ),
           pick_one AS (
             SELECT DISTINCT ON (product_id)
-                   product_id, price, currency, ext_id
+                   product_id, price, currency, ext_id, source_url
             FROM joined
             ORDER BY product_id, price ASC, ext_id DESC
           )
@@ -500,7 +524,7 @@ jobs:
             p.price,
             p.currency,
             now(),
-            p.ext_id,
+            COALESCE(p.source_url, p.ext_id),
             'online'
           FROM pick_one p
           ON CONFLICT (product_id, store_id) DO UPDATE
@@ -514,7 +538,7 @@ jobs:
           WITH filtered AS (
             SELECT
               regexp_replace(ext_id, ':[0-9]+(?::[0-9]+)?$', '') AS ext_id,
-              regexp_replace(source_url, ':[0-9]+(?::[0-9]+)?$', '') AS source_url,
+              NULLIF(regexp_replace(COALESCE(source_url,''), ':[0-9]+(?::[0-9]+)?$', ''), '') AS source_url,
               name, NULLIF(brand,'') AS brand, ean_raw,
               NULLIF(regexp_replace(COALESCE(ean_norm, ean_raw, ''), '[^0-9]', '', 'g'),'') AS ean_norm,
               sku_raw, size_text, price, currency, category_path, category_leaf
