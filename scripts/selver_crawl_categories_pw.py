@@ -358,7 +358,7 @@ def is_banned_product_url(path: str) -> bool:
     return False
 
 def console_filter(msg):
-    t = msg.type().lower()
+    t = msg.type.lower()
     if LOG_CONSOLE == "all":
         print(f"[console:{t}] {msg.text()}")
     elif LOG_CONSOLE == "warn":
