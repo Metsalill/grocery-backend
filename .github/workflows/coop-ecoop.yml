@@ -42,7 +42,7 @@ jobs:
 
       - name: Run eCoop crawler (haapsalu | shard ${{ matrix.cat_index }})
         id: crawl
-        timeout-minutes: 40
+        timeout-minutes: 60
         run: |
           mkdir -p out
           OUT="out/ecoop_haapsalu_${{ matrix.cat_index }}.csv"
@@ -55,7 +55,7 @@ jobs:
             --cat-index  ${{ matrix.cat_index }} \
             --page-limit 9999 \
             --max-products 1000000 \
-            --req-delay 0.2 \
+            --req-delay 0.1 \
             --pdp-workers 2 \
             --goto-strategy networkidle \
             --headless 1 \
