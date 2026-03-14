@@ -15,17 +15,17 @@ jobs:
         include:
           - city: tartu
             store: kvartali-coop-maksimarket
-            store_id: "559"   # Bolt: Kvartali COOP Maksimarket
+            store_id: "559"
             categories_file: data/bolt/2-tartu/kvartali-coop-maksimarket.txt
             out: out/bolt_kvartali.csv
           - city: tartu
             store: lounakeskuse-coop-maksimarket
-            store_id: "561"   # Bolt: Lõunakeskuse COOP Maksimarket
+            store_id: "561"
             categories_file: data/bolt/2-tartu/lounakeskuse-coop-maksimarket.txt
             out: out/bolt_lounakeskus.csv
           - city: tartu
             store: eedeni-coop-maksimarket
-            store_id: "560"   # Bolt: Eedeni COOP Maksimarket
+            store_id: "560"
             categories_file: data/bolt/2-tartu/eedeni-coop-maksimarket.txt
             out: out/bolt_eedeni.csv
 
@@ -50,6 +50,28 @@ jobs:
           pip install -r requirements.txt || true
           pip install playwright selectolax beautifulsoup4 httpx tenacity pydantic asyncpg psycopg
           python -m playwright install --with-deps chromium
+
+      - name: Patch bolt_crawler.py to use STORE_ID env directly
+        # The bolt crawler resolves store_id via stores.external_key which may not exist.
+        # We patch the _ingest_to_db function to use STORE_ID env as override.
+        shell: python
+        run: |
+          import re, pathlib
+          path = pathlib.Path("scripts/bolt_crawler.py")
+          src = path.read_text(encoding="utf-8")
+          # Insert STORE_ID env override at the top of _ingest_to_db
+          old = "async def _ingest_to_db(products: List[Product]) -> None:"
+          new = """async def _ingest_to_db(products: List[Product]) -> None:
+    # Allow STORE_ID env to override per-venue DB lookup
+    import os as _os
+    _env_store_id = int(_os.environ.get("STORE_ID", "0") or "0")"""
+          src = src.replace(old, new, 1)
+          # Also patch the store_map lookup to use env override when available
+          old2 = "store_id = store_map.get(p.venue_id)"
+          new2 = "store_id = _env_store_id if _env_store_id > 0 else store_map.get(p.venue_id)"
+          src = src.replace(old2, new2, 1)
+          path.write_text(src, encoding="utf-8")
+          print("Patched bolt_crawler.py to use STORE_ID env")
 
       - name: Run Bolt crawler + ingest
         run: |
