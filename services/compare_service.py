@@ -24,10 +24,6 @@ def _norm(s: str) -> str:
 
 
 def _rv(r: asyncpg.Record, key: str) -> Any:
-    """
-    Safe record value getter. asyncpg.Record lets you use both
-    dict-style and attribute-style. We'll try both.
-    """
     try:
         return r[key]
     except Exception:
@@ -35,13 +31,8 @@ def _rv(r: asyncpg.Record, key: str) -> Any:
 
 
 async def _acquire(conn_or_pool: Any) -> Tuple[asyncpg.Connection, bool]:
-    """
-    Accept either an asyncpg.Connection or asyncpg.Pool, and return
-    a connection plus a flag telling whether we should release it.
-    """
     if isinstance(conn_or_pool, asyncpg.Connection):
         return conn_or_pool, False
-    # asyncpg pool duck-typing
     if hasattr(conn_or_pool, "acquire"):
         conn = await conn_or_pool.acquire()
         return conn, True
@@ -49,26 +40,12 @@ async def _acquire(conn_or_pool: Any) -> Tuple[asyncpg.Connection, bool]:
 
 
 # ---------------- product resolution ----------------
-#
-# Two paths now:
-#   1. We may get explicit product_id directly from the app.
-#   2. We may only get free-text names/EANs (legacy / suggestions).
-#
-# We'll support both. For #1 we just trust product_id and look up its
-# metadata by ID. For #2 we try to do fuzzy-ish resolution via aliases.
-#
 
 
 async def _resolve_products_by_name(
     conn: asyncpg.Connection,
     names: List[str],
 ) -> Dict[str, asyncpg.Record]:
-    """
-    Resolve user-provided product names (or EAN strings) to a product row.
-    Prefers product_aliases -> products by normalized name; falls back to
-    matching products.name; additionally accepts EAN-only strings.
-    Returns dict keyed by normalized original input.
-    """
     if not names:
         return {}
 
@@ -104,7 +81,6 @@ async def _resolve_products_by_name(
 
     by_norm: Dict[str, asyncpg.Record] = {_rv(r, "match_key"): r for r in rows}
 
-    # EAN fallback for unresolved
     unresolved = [k for k in keys if k not in by_norm]
     ean_candidates = [k for k in unresolved if k.isdigit() and 8 <= len(k) <= 14]
     if ean_candidates:
@@ -130,10 +106,6 @@ async def _fetch_products_by_id(
     conn: asyncpg.Connection,
     product_ids: Iterable[int],
 ) -> Dict[int, asyncpg.Record]:
-    """
-    Fetch canonical product metadata for a set of product_ids.
-    Returns { product_id -> row }.
-    """
     ids_list = sorted({int(pid) for pid in product_ids if pid is not None})
     if not ids_list:
         return {}
@@ -146,8 +118,7 @@ async def _fetch_products_by_id(
         """,
         ids_list,
     )
-    out: Dict[int, asyncpg.Record] = {int(_rv(r, "id")): r for r in rows}
-    return out
+    return {int(_rv(r, "id")): r for r in rows}
 
 
 # ---------------- stores ----------------
@@ -161,17 +132,6 @@ async def _candidate_stores(
     limit: int,
     offset: int,
 ) -> List[asyncpg.Record]:
-    """
-    Return *physical* stores within radius_km of (lat,lon) using haversine,
-    excluding:
-      - any store used as a host (appears as host_store_id in store_host_map)
-      - any store flagged as online (stores.is_online = true)
-
-    If lat/lon are None, return all physical stores (NULL distance) with the same filters.
-
-    Safe fallback: if store_host_map doesn't exist, we still filter by is_online.
-    """
-    # Common WHERE snippet – we format this into the queries below
     host_and_online_filter = """
       AND s.id NOT IN (SELECT DISTINCT host_store_id FROM store_host_map)
       AND COALESCE(s.is_online, false) = false
@@ -219,12 +179,10 @@ async def _candidate_stores(
             float(lat), float(lon), float(radius_km), int(offset), int(limit),
         )
 
-    # Choose path & handle fallback if store_host_map is missing
     if lat is None or lon is None:
         try:
             return await _query_no_coords(host_and_online_filter)
         except (pgerr.UndefinedTableError, pgerr.UndefinedObjectError):
-            # store_host_map missing – filter only online
             return await _query_no_coords(online_only_filter)
 
     try:
@@ -233,7 +191,7 @@ async def _candidate_stores(
         return await _query_haversine(online_only_filter)
 
 
-# ---------------- prices (effective) ----------------
+# ---------------- prices (OPTIMIZED) ----------------
 
 
 async def _latest_prices(
@@ -242,30 +200,29 @@ async def _latest_prices(
     store_ids: List[int],
 ) -> List[asyncpg.Record]:
     """
-    Latest price per (product_id, *physical* store_id), honoring store_host_map.
-    Tries v_latest_store_prices first (if present). Falls back to raw prices.
+    Latest price per (product_id, physical store_id), honoring store_host_map.
+
+    KEY OPTIMIZATION over the old version:
+    - Uses DISTINCT ON (product_id, store_id) with ORDER BY collected_at DESC
+      instead of ROW_NUMBER() window function — much faster with the index
+      idx_prices_pid_sid_date on prices(product_id, store_id, collected_at DESC)
+    - Fetches only the specific (product_id, store_id) pairs we need
+    - Tries v_latest_store_prices view first (fastest if it exists and is materialized)
     """
     if not product_ids or not store_ids:
         return []
 
+    # Path 1: use the view if it exists (likely already optimized)
     sql_using_view = """
     WITH effective_source AS (
       SELECT s.id AS physical_store_id,
              COALESCE(em.host_store_id, s.id) AS source_store_id
       FROM stores s
       LEFT JOIN (
-        SELECT store_id, host_store_id
-        FROM (
-          SELECT shm.*,
-                 ROW_NUMBER() OVER (
-                   PARTITION BY shm.store_id
-                   ORDER BY (CASE WHEN shm.active THEN 0 ELSE 1 END),
-                            COALESCE(shm.priority, 999999),
-                            shm.host_store_id
-                 ) AS rn
-          FROM store_host_map shm
-        ) z
-        WHERE rn = 1
+        SELECT DISTINCT ON (store_id) store_id, host_store_id
+        FROM store_host_map
+        WHERE active = true OR active IS NULL
+        ORDER BY store_id, COALESCE(priority, 999999), host_store_id
       ) em ON em.store_id = s.id
       WHERE s.id = ANY($2::int[])
     )
@@ -279,100 +236,58 @@ async def _latest_prices(
      AND lsp.product_id = ANY($1::int[]);
     """
 
-    sql_from_prices = """
+    # Path 2: DISTINCT ON — fast with the index, avoids full window scan
+    sql_distinct_on = """
     WITH effective_source AS (
       SELECT s.id AS physical_store_id,
              COALESCE(em.host_store_id, s.id) AS source_store_id
       FROM stores s
       LEFT JOIN (
-        SELECT store_id, host_store_id
-        FROM (
-          SELECT shm.*,
-                 ROW_NUMBER() OVER (
-                   PARTITION BY shm.store_id
-                   ORDER BY (CASE WHEN shm.active THEN 0 ELSE 1 END),
-                            COALESCE(shm.priority, 999999),
-                            shm.host_store_id
-                 ) AS rn
-          FROM store_host_map shm
-        ) z
-        WHERE rn = 1
+        SELECT DISTINCT ON (store_id) store_id, host_store_id
+        FROM store_host_map
+        WHERE active = true OR active IS NULL
+        ORDER BY store_id, COALESCE(priority, 999999), host_store_id
       ) em ON em.store_id = s.id
       WHERE s.id = ANY($2::int[])
     ),
     latest AS (
-      SELECT p.product_id, p.store_id, p.price, p.collected_at,
-             ROW_NUMBER() OVER (
-               PARTITION BY p.product_id, p.store_id
-               ORDER BY p.collected_at DESC
-             ) AS rn
+      SELECT DISTINCT ON (p.product_id, p.store_id)
+             p.product_id, p.store_id, p.price, p.collected_at
       FROM prices p
       WHERE p.product_id = ANY($1::int[])
         AND p.store_id IN (SELECT source_store_id FROM effective_source)
+      ORDER BY p.product_id, p.store_id, p.collected_at DESC
     )
     SELECT l.product_id,
            es.physical_store_id AS store_id,
-           l.price, l.collected_at
+           l.price,
+           l.collected_at
     FROM latest l
-    JOIN effective_source es ON es.source_store_id = l.store_id
-    WHERE l.rn = 1;
+    JOIN effective_source es ON es.source_store_id = l.store_id;
+    """
+
+    # Path 3: no store_host_map at all — simplest fast query
+    sql_no_host_map = """
+    SELECT DISTINCT ON (p.product_id, p.store_id)
+           p.product_id, p.store_id, p.price, p.collected_at
+    FROM prices p
+    WHERE p.product_id = ANY($1::int[])
+      AND p.store_id = ANY($2::int[])
+    ORDER BY p.product_id, p.store_id, p.collected_at DESC;
     """
 
     try:
         return await conn.fetch(sql_using_view, product_ids, store_ids)
     except (pgerr.UndefinedTableError, pgerr.UndefinedColumnError, pgerr.UndefinedObjectError):
-        return await conn.fetch(sql_from_prices, product_ids, store_ids)
+        pass
+
+    try:
+        return await conn.fetch(sql_distinct_on, product_ids, store_ids)
+    except (pgerr.UndefinedTableError, pgerr.UndefinedObjectError):
+        return await conn.fetch(sql_no_host_map, product_ids, store_ids)
 
 
-# ---------------- main service ----------------
-#
-# We now support TWO request shapes:
-#
-# NEW SHAPE (from /compare endpoint via Flutter):
-#   body = {
-#     "items": [
-#       {"product": "Piim ALMA 2,5%, 0,5L", "quantity": 1, "product_id": 421264},
-#       {"product": "Ruks seemnepala Leib, 260g", "quantity": 2, "product_id": 422013},
-#       ...
-#     ],
-#     "lat": ...,
-#     "lon": ...,
-#     "radius_km": ...,
-#     "limit_stores": ...,
-#     "offset_stores": ...,
-#     "include_lines": ...,
-#     "require_all_items": ...
-#   }
-#
-# LEGACY SHAPE (from compute_compare / basket_history etc.):
-#   body = {
-#     "items": [
-#       ("Piim ALMA 2,5%, 0,5L", 1),
-#       ("Ruks seemnepala Leib, 260g", 2),
-#       ...
-#     ],
-#     "lat": ...,
-#     "lon": ...,
-#     "radius_km": ...,
-#     ...
-#   }
-#
-# SUPER LEGACY (older code paths we keep graceful fallback for):
-#   body = {
-#     "grocery_list": {
-#        "items": [
-#           {"product": "Piim...", "quantity": 1},
-#           ...
-#        ]
-#     },
-#     "lat": ...,
-#     "lon": ...
-#   }
-#
-# We'll normalize all of these into a single internal basket spec:
-#    basket_lines = [ { "pid": <int product_id>, "qty": <int> }, ... ]
-# and also collect metadata per pid (name/ean...) for line details.
-#
+# ---------------- helpers ----------------
 
 
 def _as_int_or_none(v: Any) -> Optional[int]:
@@ -388,18 +303,13 @@ def _as_int_or_none(v: Any) -> Optional[int]:
         return None
 
 
-async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Perform location-based basket comparison.
+# ---------------- main service ----------------
 
-    We accept multiple possible shapes (see big comment above),
-    normalize them, look up candidate stores and latest prices,
-    then compute totals / cheapest store, etc.
-    """
+
+async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any]:
     conn, should_release = await _acquire(db)
     try:
         # ---- 1. Extract request fields ----
-        # lat/lon/radius/etc.
         lat = body.get("lat")
         lon = body.get("lon")
         radius_km = float(body.get("radius_km") or 5.0)
@@ -408,20 +318,15 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
         include_lines = bool(body.get("include_lines") or False)
         require_all = bool(body.get("require_all_items") or False)
 
-        # items can come in a few formats
-        # Prefer body["items"]; fallback to body["grocery_list"]["items"].
         raw_items = body.get("items")
         if raw_items is None and "grocery_list" in body:
             gl = body.get("grocery_list") or {}
             raw_items = gl.get("items")
-
         raw_items = raw_items or []
 
-        # ---- 2. Normalize items into dicts with product, quantity, product_id ----
+        # ---- 2. Normalize items ----
         normalized_items: List[Dict[str, Any]] = []
-
         for it in raw_items:
-            # case A: modern dict {product, quantity, product_id?}
             if isinstance(it, dict):
                 name = str(it.get("product", "") or "").strip()
                 if not name:
@@ -430,61 +335,28 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                 if qty <= 0:
                     continue
                 pid = _as_int_or_none(it.get("product_id"))
-                normalized_items.append(
-                    {
-                        "product": name,
-                        "quantity": qty,
-                        "product_id": pid,
-                    }
-                )
-                continue
-
-            # case B: legacy tuple/list ["Piim ...", 1]
-            if isinstance(it, (list, tuple)) and len(it) >= 1:
+                normalized_items.append({"product": name, "quantity": qty, "product_id": pid})
+            elif isinstance(it, (list, tuple)) and len(it) >= 1:
                 name = str(it[0] or "").strip()
                 if not name:
                     continue
-                qty_raw = it[1] if len(it) > 1 else 1
                 try:
-                    qty = int(qty_raw)
+                    qty = int(it[1]) if len(it) > 1 else 1
                 except Exception:
                     qty = 1
                 if qty <= 0:
                     continue
-                normalized_items.append(
-                    {
-                        "product": name,
-                        "quantity": qty,
-                        "product_id": None,
-                    }
-                )
-                continue
+                normalized_items.append({"product": name, "quantity": qty, "product_id": None})
 
-            # else: ignore unknown shapes
-
-        # short-circuit?
         if not normalized_items:
-            return {
-                "results": [],
-                "totals": {},
-                "stores": [],
-                "radius_km": radius_km,
-                "missing_products": [],
-            }
+            return {"results": [], "totals": {}, "stores": [], "radius_km": radius_km, "missing_products": []}
 
-        # ---- 3. Aggregate quantities by either product_id (preferred) or name ----
-        #
-        # We'll build:
-        #   qty_by_pid: { pid:int -> total_qty:int }
-        #   qty_by_name: { norm_name:str -> total_qty:int }  # only for lines w/o pid
-        #
+        # ---- 3. Aggregate by product_id or name ----
         qty_by_pid: Dict[int, int] = {}
         qty_by_name: Dict[str, int] = {}
         for it in normalized_items:
             pid = _as_int_or_none(it.get("product_id"))
-            qty = int(it.get("quantity") or 1)
-            qty = max(qty, 1)
-
+            qty = max(int(it.get("quantity") or 1), 1)
             if pid is not None:
                 qty_by_pid[pid] = qty_by_pid.get(pid, 0) + qty
             else:
@@ -492,67 +364,36 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                 if nm:
                     qty_by_name[nm] = qty_by_name.get(nm, 0) + qty
 
-        # ---- 4. Resolve name-only items into product_ids (via aliases/EAN) ----
+        # ---- 4. Resolve name-only items ----
         resolved_by_name = await _resolve_products_by_name(conn, list(qty_by_name.keys()))
-
-        missing_name_keys = [
-            k for k in qty_by_name.keys() if k not in resolved_by_name
-        ]
+        missing_name_keys = [k for k in qty_by_name.keys() if k not in resolved_by_name]
         missing_products = [{"input": k} for k in missing_name_keys]
 
-        # merge resolved name->id into qty_by_pid
         for nm, rec in resolved_by_name.items():
             pid = int(_rv(rec, "id"))
             qty = qty_by_name.get(nm, 0)
-            if qty <= 0:
-                continue
-            qty_by_pid[pid] = qty_by_pid.get(pid, 0) + qty
+            if qty > 0:
+                qty_by_pid[pid] = qty_by_pid.get(pid, 0) + qty
 
-        # After this, qty_by_pid represents ALL lines we can actually price.
         if not qty_by_pid:
-            # nothing priceable
-            return {
-                "results": [],
-                "totals": {},
-                "stores": [],
-                "radius_km": radius_km,
-                "missing_products": missing_products,
-            }
+            return {"results": [], "totals": {}, "stores": [], "radius_km": radius_km, "missing_products": missing_products}
 
-        # ---- 5. Fetch product metadata by pid (for *all* pids incl. direct pids) ----
-        #
-        # We already have some metadata for name-resolved ones in resolved_by_name,
-        # but for direct product_id lines we might not. So we load the union.
+        # ---- 5. Fetch product metadata ----
         all_pids = sorted(qty_by_pid.keys())
-
-        # metadata_from_id: {pid -> row}
         metadata_from_id = await _fetch_products_by_id(conn, all_pids)
-
-        # also fill in from resolved_by_name where we might not have from _fetch_products_by_id
         for nm, rec in resolved_by_name.items():
             pid = int(_rv(rec, "id"))
             if pid not in metadata_from_id:
                 metadata_from_id[pid] = rec
 
-        # For any pid where we *still* don't have metadata_from_id
-        # (extremely unlikely unless DB is inconsistent), we just won't
-        # produce nice line details but we can still total prices.
-
         # ---- 6. Candidate stores ----
         stores = await _candidate_stores(conn, lat, lon, radius_km, limit_stores, offset_stores)
         if not stores:
-            return {
-                "results": [],
-                "totals": {},
-                "stores": [],
-                "radius_km": radius_km,
-                "missing_products": missing_products,
-            }
+            return {"results": [], "totals": {}, "stores": [], "radius_km": radius_km, "missing_products": missing_products}
         store_ids = [int(_rv(s, "id")) for s in stores]
 
-        # ---- 7. Latest prices ----
+        # ---- 7. Latest prices (optimized) ----
         price_rows = await _latest_prices(conn, all_pids, store_ids)
-        # structure: (store_id -> product_id -> price)
         by_store: Dict[int, Dict[int, float]] = {}
         for r in price_rows:
             sid = int(_rv(r, "store_id"))
@@ -561,7 +402,7 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             by_store.setdefault(sid, {})[pid] = price
 
         # ---- 8. Build per-store results ----
-        required = len(all_pids)  # required lines = distinct products we're pricing
+        required = len(all_pids)
         results: List[Dict[str, Any]] = []
         best_total: Optional[float] = None
         best_store_id: Optional[int] = None
@@ -573,28 +414,23 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             total = 0.0
             lines_found = 0
 
-            # For each canonical product in the user's basket, compute extended price
             for pid, qty in qty_by_pid.items():
                 unit_price = s_prices.get(pid)
                 if unit_price is None:
                     continue
-
                 line_total = unit_price * qty
                 lines_found += 1
                 total += line_total
-
                 if include_lines:
                     meta = metadata_from_id.get(pid)
-                    lines.append(
-                        {
-                            "product_id": pid,
-                            "ean": _rv(meta, "ean") if meta else None,
-                            "product_name": _rv(meta, "name") if meta else f"#{pid}",
-                            "qty": qty,
-                            "unit_price": _round2(unit_price),
-                            "line_total": _round2(line_total),
-                        }
-                    )
+                    lines.append({
+                        "product_id": pid,
+                        "ean": _rv(meta, "ean") if meta else None,
+                        "product_name": _rv(meta, "name") if meta else f"#{pid}",
+                        "qty": qty,
+                        "unit_price": _round2(unit_price),
+                        "line_total": _round2(line_total),
+                    })
 
             total_price: Optional[float] = _round2(total) if (
                 not require_all or lines_found == required
@@ -604,38 +440,29 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                 "store_id": sid,
                 "chain": _rv(s, "chain"),
                 "store_name": _rv(s, "name"),
-                "distance_km": _round2(float(_rv(s, "distance_km")))
-                if _rv(s, "distance_km") is not None
-                else None,
+                "distance_km": _round2(float(_rv(s, "distance_km"))) if _rv(s, "distance_km") is not None else None,
                 "lines_found": lines_found,
                 "required_lines": required,
                 "total_price": total_price,
             }
             if include_lines:
                 result["lines"] = lines
-
             results.append(result)
 
-            if total_price is not None and (
-                best_total is None or total_price < best_total
-            ):
+            if total_price is not None and (best_total is None or total_price < best_total):
                 best_total = total_price
                 best_store_id = sid
 
-        # ---- 9. Sort stores ----
-        # sort: complete first, then lines_found, then price, then distance
+        # ---- 9. Sort results ----
         def sort_key(x: Dict[str, Any]) -> Tuple[int, int, float, float]:
-            complete = 1 if (
-                x.get("total_price") is not None
-                and x.get("lines_found") == x.get("required_lines")
-            ) else 0
+            complete = 1 if (x.get("total_price") is not None and x.get("lines_found") == x.get("required_lines")) else 0
             price = x.get("total_price") if x.get("total_price") is not None else float("inf")
             dist = x.get("distance_km") if x.get("distance_km") is not None else float("inf")
             return (-complete, -int(x.get("lines_found", 0)), price, dist)
 
         results.sort(key=sort_key)
 
-        # ---- 10. Totals / winner ----
+        # ---- 10. Totals ----
         totals: Dict[str, Any] = {}
         if best_total is not None and best_store_id is not None:
             win = next((r for r in results if r["store_id"] == best_store_id), None)
@@ -647,7 +474,7 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                     "cheapest_store_name": win["store_name"],
                 }
 
-        # ---- 11. Final envelope ----
+        # ---- 11. Return ----
         return {
             "results": results,
             "totals": totals,
@@ -656,9 +483,7 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                     "id": int(_rv(s, "id")),
                     "name": _rv(s, "name"),
                     "chain": _rv(s, "chain"),
-                    "distance_km": _round2(float(_rv(s, "distance_km")))
-                    if _rv(s, "distance_km") is not None
-                    else None,
+                    "distance_km": _round2(float(_rv(s, "distance_km"))) if _rv(s, "distance_km") is not None else None,
                     "lat": float(_rv(s, "lat")) if _rv(s, "lat") is not None else None,
                     "lon": float(_rv(s, "lon")) if _rv(s, "lon") is not None else None,
                 }
