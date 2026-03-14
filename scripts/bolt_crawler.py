@@ -4,20 +4,18 @@
 Bolt Food crawler (Coop venues) — now with direct DB upsert.
 
 What this script does now:
-1. Crawl Bolt Food categories for a single Coop venue (like "Wolt: Coop ..."/"Bolt: Coop ...").
-2. Build a list of Product objects.
-3. Write a CSV (unchanged, good for debugging / diffing).
-4. 💾 If DATABASE_URL is set:
-   - Look up the correct store_id in Postgres using the Bolt venue_id
-     (we store that venue_id in stores.external_key for those "Wolt: Coop ..." rows).
+1. Crawl Bolt Food categories for a single Coop venue (like "Bolt: Coop ...").
+2. Intercepts the getDishesById API response during Playwright navigation
+   to get the FULL product list per category (not just the 5 visible tiles).
+3. Build a list of Product objects.
+4. Write a CSV (unchanged, good for debugging / diffing).
+5. If DATABASE_URL is set:
+   - Look up the correct store_id in Postgres using the Bolt venue_id.
    - Call SELECT upsert_product_and_price(...) for every scraped product.
-     That auto-updates:
-       products
-       ext_product_map
-       prices (with the right store_id)
 
 Environment it expects in GitHub Actions:
     DATABASE_URL = postgres://...  (Railway RW URL)
+    STORE_ID = <stores.id>         (overrides venue_id lookup)
 Python deps:
     playwright, asyncpg
 """
@@ -42,7 +40,7 @@ from playwright.sync_api import sync_playwright, TimeoutError as PWTimeout
 PRICE_RE = re.compile(r"(\d+([.,]\d{1,2})?)\s*€")
 SPACE_RE = re.compile(r"\s+")
 SMC_ID_RE = re.compile(r"/smc/(\d+)")
-CITY_RE = re.compile(r"/et-EE/([^/]+)/p/(\d+)")
+CITY_RE = re.compile(r"/et-[Ee][Ee]/([^/]+)/p/(\d+)")
 CATEGORY_NAME_Q = "categoryName"
 
 
@@ -56,7 +54,7 @@ class Product:
     url: str
     store_url: str
     city_slug: str
-    venue_id: str          # Bolt venue numeric id from /p/<venue_id>
+    venue_id: str
     raw: Dict
 
 
@@ -75,20 +73,12 @@ def parse_price(text: str) -> Optional[float]:
 
 
 def extract_city_and_venue(url: str) -> Tuple[str, str]:
-    """
-    Given something like:
-      https://boltfood.com/et-EE/2-tartu/p/551?something...
-    we grab:
-      city_slug = "2-tartu"
-      venue_id  = "551"
-    """
     m = CITY_RE.search(url)
     if not m:
         return "", ""
     return m.group(1), m.group(2)
 
 
-# slug helpers for ext_id
 ESTONIAN_MAP = str.maketrans({
     "ä": "a", "ö": "o", "ü": "u", "õ": "o",
     "š": "s", "ž": "z",
@@ -98,9 +88,6 @@ ESTONIAN_MAP = str.maketrans({
 
 
 def slugify_for_ext(s: str) -> str:
-    """
-    Turn product name or unit text into a safe-ish slug to help build a stable ext_id.
-    """
     s2 = (s or "").translate(ESTONIAN_MAP).lower()
     s2 = re.sub(r"[^a-z0-9]+", "-", s2).strip("-")
     return s2
@@ -111,11 +98,6 @@ def _norm_for_match(s: str) -> str:
 
 
 def parse_categories_file(path: str) -> List[Tuple[str, str]]:
-    """
-    Accepts lines like:
-        Piimatooted -> https://boltfood.com/et-EE/2-tartu/p/551/smc/12345?categoryName=Piimatooted&backPath=...
-    or just the URL alone.
-    """
     out: List[Tuple[str, str]] = []
     with open(path, "r", encoding="utf-8") as f:
         for raw in f:
@@ -133,48 +115,117 @@ def parse_categories_file(path: str) -> List[Tuple[str, str]]:
 
 
 def find_categories_file(categories_dir: str, store_name: str, city: str = "") -> Optional[str]:
-    """
-    Resolve <categories-file> the same forgiving way we've been doing:
-      1) <dir>/<city>/<slugified_store>.txt
-      2) <dir>/<slugified_store>.txt
-      3) recursive walk of <dir> looking for any .txt whose normalized filename matches
-    """
     if not categories_dir or not store_name:
         return None
-
     want_slug = slugify_for_ext(store_name)
     want_norm = _norm_for_match(store_name)
-
-    # 1) city subfolder
     if city:
         candidate = os.path.join(categories_dir, city, f"{want_slug}.txt")
         if os.path.isfile(candidate):
             return candidate
-
-    # 2) top-level
     candidate = os.path.join(categories_dir, f"{want_slug}.txt")
     if os.path.isfile(candidate):
         return candidate
-
-    # 3) recursive search
-    best = None
     if os.path.isdir(categories_dir):
         for root, _, files in os.walk(categories_dir):
             for fn in files:
                 if not fn.lower().endswith(".txt"):
                     continue
                 if _norm_for_match(fn) == want_norm:
-                    best = os.path.join(root, fn)
-                    return best
-    return best
+                    return os.path.join(root, fn)
+    return None
+
+
+# ---------------------- API response parsing ---------------------- #
+def _cents_to_eur(val) -> Optional[float]:
+    """Convert cents integer to EUR float, or pass through if already EUR-range float."""
+    if val is None:
+        return None
+    if isinstance(val, (int, float)):
+        f = float(val)
+        # Bolt API returns cents for integers, but sometimes floats already in EUR range
+        if isinstance(val, int) and f > 100:
+            return f / 100.0
+        if isinstance(val, float) and f < 100:
+            return f  # already EUR
+        if isinstance(val, int) and f <= 100:
+            return f  # small int, assume EUR (e.g. price = 3)
+        return f / 100.0
+    return None
+
+
+def parse_dishes_response(data: dict, cat_name: str) -> List[Dict]:
+    """
+    Parse a getDishesById or getMenuDishes API response into a flat list of product dicts.
+    Bolt returns a nested structure: data -> sections -> items -> dishes
+    """
+    results = []
+
+    def _walk(obj):
+        if isinstance(obj, list):
+            for item in obj:
+                _walk(item)
+        elif isinstance(obj, dict):
+            # Check if this looks like a dish/product
+            if "name" in obj and ("price" in obj or "unitPrice" in obj or "unit_price" in obj):
+                name = obj.get("name") or ""
+                if not isinstance(name, str):
+                    name = str(name)
+                name = name.strip()
+                if not name:
+                    return
+
+                # Price: try various field names
+                price_raw = (
+                    obj.get("price")
+                    or obj.get("unitPrice")
+                    or obj.get("unit_price")
+                    or obj.get("displayPrice")
+                )
+                price_eur = None
+                if isinstance(price_raw, dict):
+                    # {amount: 119, currency: "EUR"} style
+                    amount = price_raw.get("amount") or price_raw.get("price")
+                    price_eur = _cents_to_eur(amount)
+                else:
+                    price_eur = _cents_to_eur(price_raw)
+
+                if price_eur is None or price_eur <= 0:
+                    return
+
+                # Image
+                image = ""
+                img_obj = obj.get("image") or obj.get("imageUrl") or obj.get("image_url")
+                if isinstance(img_obj, str):
+                    image = img_obj
+                elif isinstance(img_obj, dict):
+                    image = img_obj.get("url") or img_obj.get("src") or ""
+
+                # Unit text
+                unit_text = obj.get("unitText") or obj.get("unit_text") or obj.get("description") or ""
+                if not isinstance(unit_text, str):
+                    unit_text = ""
+
+                results.append({
+                    "name": name,
+                    "price_eur": price_eur,
+                    "unit_text": unit_text.strip(),
+                    "image": image,
+                    "category": cat_name,
+                    "raw_id": obj.get("id") or obj.get("_id") or "",
+                })
+                return  # don't recurse into product children
+
+            # Recurse into all values
+            for v in obj.values():
+                _walk(v)
+
+    _walk(data)
+    return results
 
 
 # ---------------------- Playwright helpers ---------------------- #
 def dismiss_popups(page) -> None:
-    """
-    Bolt sometimes drops cookie banners / app-install nags.
-    We'll just try-click a bunch of obvious things.
-    """
     selectors = [
         'button:has-text("Nõustun")',
         'button:has-text("Luba kõik")',
@@ -195,58 +246,11 @@ def dismiss_popups(page) -> None:
             pass
 
 
-def click_category_chip(page, category_name: str) -> bool:
-    """
-    Try to click a visible "chip" or menu link that matches `category_name`.
-    """
-    if not category_name:
-        return False
-    try:
-        chip = page.get_by_role("link", name=re.compile(rf"^{re.escape(category_name)}\b", re.I))
-        if chip.count():
-            chip.first.click()
-            page.wait_for_load_state("networkidle")
-            return True
-    except Exception:
-        pass
-    try:
-        chip = page.locator(f'//a[contains(normalize-space(.), "{category_name}")]')
-        if chip.count():
-            chip.first.click()
-            page.wait_for_load_state("networkidle")
-            return True
-    except Exception:
-        pass
-    return False
-
-
-def open_first_category_from_hc(page) -> bool:
-    """
-    If Bolt lands us on something like /hc/..., open the first real smc/<id> link.
-    """
-    try:
-        anchors = page.locator('a[href*="/smc/"]')
-        if anchors.count():
-            anchors.first.click()
-            page.wait_for_load_state("networkidle")
-            return True
-    except Exception:
-        pass
-    return False
-
-
 def wait_for_grid(page, timeout: int = 20000) -> None:
-    """
-    Wait until we see product tiles. We consider multiple possible layouts,
-    because Bolt keeps A/B testing.
-    """
     candidates = [
         '[data-testid="components.GridMenuDishBase.button"]',
         '[data-testid="components.GridMenuDishBase.view"]',
         '[data-testid="product-card"]',
-        '[data-test="product-card"]',
-        '[data-testid="productTile"]',
-        '[data-test="productTile"]',
         'article:has-text("€")',
         'div:has(> div >> text=/€/)',
     ]
@@ -259,13 +263,9 @@ def wait_for_grid(page, timeout: int = 20000) -> None:
             except Exception:
                 pass
         time.sleep(0.2)
-    raise PWTimeout("product grid not found")
 
 
-def auto_scroll(page, max_steps: int = 60, pause: float = 0.25) -> None:
-    """
-    Infinite-scroll style loader.
-    """
+def auto_scroll(page, max_steps: int = 30, pause: float = 0.2) -> None:
     page.evaluate(
         """
         ({ steps, pause }) => new Promise(async (res) => {
@@ -282,10 +282,7 @@ def auto_scroll(page, max_steps: int = 60, pause: float = 0.25) -> None:
 
 
 def extract_tiles_bolt(page) -> List[Dict]:
-    """
-    Bolt prefers 'GridMenuDishBase' components with testids.
-    We'll grab name / price / image from that.
-    """
+    """DOM tile fallback — used when API interception yields nothing."""
     return page.evaluate(
         """
         () => {
@@ -299,36 +296,17 @@ def extract_tiles_bolt(page) -> List[Dict]:
             const priceEl = btn.querySelector('[data-testid="components.GridMenuDishBase.price"]');
             const imgEl   = btn.querySelector('[data-testid="components.GridMenuDishBase.image"] img, img');
             const aria    = btn.getAttribute('aria-label') || '';
-
             let name = (nameEl?.textContent || aria || '').replace(/\\s+/g, ' ').trim();
-            if (!nameEl && /€/.test(name)) {
-              name = name.split('€')[0].trim().replace(/,\\s*$/, '');
-            }
-
+            if (!nameEl && /€/.test(name)) name = name.split('€')[0].trim().replace(/,\\s*$/, '');
             const rawPriceText = (priceEl?.textContent || aria || '').replace(/\\s+/g, ' ').trim();
             const m = rawPriceText.match(/(\\d+(?:[.,]\\d{1,2}))\\s*€/);
             const price_text = m ? (m[1] + ' €') : '';
-
-            const hrefEl = btn.closest('a') || btn.querySelector('a[href]');
-            const href = hrefEl?.getAttribute('href') || '';
-            const image = imgEl?.getAttribute('src')
-                        || imgEl?.getAttribute('data-src')
-                        || '';
-
+            const image = imgEl?.getAttribute('src') || imgEl?.getAttribute('data-src') || '';
             if (!name || !price_text) continue;
-
-            const key = name + '|' + price_text + '|' + image;
+            const key = name + '|' + price_text;
             if (seen.has(key)) continue;
             seen.add(key);
-
-            out.push({
-              name,
-              price_text,
-              unit_text: '',
-              image,
-              href,
-              text: btn.textContent || ''
-            });
+            out.push({ name, price_text, unit_text: '', image, href: '', text: btn.textContent || '' });
           }
           return out;
         }
@@ -336,83 +314,12 @@ def extract_tiles_bolt(page) -> List[Dict]:
     ) or []
 
 
-def extract_tiles_runtime(page) -> List[Dict]:
-    """
-    Generic fallback extractor if Bolt changes markup.
-    """
-    tiles = page.evaluate(
-        """
-        () => {
-          const result = [];
-          const cards = Array.from(document.querySelectorAll(
-            '[data-testid="product-card"],[data-test="product-card"],[data-testid="productTile"],[data-test="productTile"], article, div'
-          )).filter(el => /€/.test(el.textContent || ''));
-          const seen = new Set();
-          for (const el of cards) {
-            try {
-              const txt = (el.textContent || "").replace(/\\s+/g, " ").trim();
-              if (!/€/.test(txt)) continue;
-
-              let nameEl =
-                el.querySelector('[data-testid="product-name"],[data-test="product-name"]') ||
-                el.querySelector('h3,h4,strong') ||
-                el.querySelector('div[title]');
-              let name = nameEl ? (nameEl.getAttribute('title') || nameEl.textContent || '') : '';
-              name = name.replace(/\\s+/g, " ").trim();
-
-              if (!name) {
-                const parts = txt.split('€')[0].trim();
-                name = parts.split(' + ')[0].trim();
-              }
-              if (!name) continue;
-
-              let priceEl =
-                el.querySelector('[data-testid="product-price"],[data-test="product-price"]') ||
-                el.querySelector('span,div');
-              let priceText = priceEl ? priceEl.textContent || '' : txt;
-              priceText = priceText.replace(/\\s+/g, " ").trim();
-              const m = priceText.match(/(\\d+(?:[.,]\\d{1,2})?)\\s*€/);
-              if (!m) continue;
-              const price = m[1];
-
-              let imgEl = el.querySelector('img');
-              let img = imgEl ? (imgEl.getAttribute('src') || imgEl.getAttribute('data-src') || '') : '';
-
-              let linkEl = el.closest('a')
-                        || el.querySelector('a[href*="/p/"]')
-                        || el.querySelector('a[href*="/smc/"]');
-              let href = linkEl ? linkEl.getAttribute('href') : '';
-
-              const key = name + '|' + price + '|' + img;
-              if (seen.has(key)) continue;
-              seen.add(key);
-
-              result.push({
-                name,
-                price_text: price + ' €',
-                unit_text: '',
-                image: img || '',
-                href: href || '',
-                text: txt
-              });
-            } catch {}
-          }
-          return result;
-        }
-        """
-    )
-    return tiles or []
-
-
 def ensure_on_store_page(page, base_url: str, req_delay: float = 0.3) -> None:
-    """
-    Make sure we're sitting on the store root (/p/<venue_id>),
-    not some leftover /hc/... page.
-    """
     if not base_url:
         return
     try:
-        if "/p/" not in (page.url or "") or page.url.split("?")[0] != base_url:
+        current = page.url or ""
+        if "/p/" not in current or current.split("?")[0].rstrip("/") != base_url.rstrip("/"):
             page.goto(base_url, timeout=60_000, wait_until="domcontentloaded")
             time.sleep(req_delay)
             dismiss_popups(page)
@@ -422,56 +329,8 @@ def ensure_on_store_page(page, base_url: str, req_delay: float = 0.3) -> None:
         dismiss_popups(page)
 
 
-def open_category_via_page(page, base_url: str, href: str, cat_name: str, req_delay: float = 0.3) -> bool:
-    """
-    Try to click category links instead of direct navigation,
-    because Bolt sometimes uses client-side routing.
-    """
-    ensure_on_store_page(page, base_url, req_delay)
-
-    # direct href match
-    try:
-        locator = page.locator(f'a[href="{href}"]')
-        if locator.count():
-            locator.first.click()
-            page.wait_for_load_state("networkidle")
-            time.sleep(req_delay)
-            dismiss_popups(page)
-            return True
-    except Exception:
-        pass
-
-    # same smc/<id>
-    try:
-        m = SMC_ID_RE.search(href or "")
-        if m:
-            smc_id = m.group(1)
-            locator = page.locator(f'a[href*="/smc/{smc_id}"]')
-            if locator.count():
-                locator.first.click()
-                page.wait_for_load_state("networkidle")
-                time.sleep(req_delay)
-                dismiss_popups(page)
-                return True
-    except Exception:
-        pass
-
-    # chip fallback
-    if click_category_chip(page, cat_name):
-        time.sleep(req_delay)
-        dismiss_popups(page)
-        return True
-
-    return False
-
-
 # ---------------------- DB ingest ---------------------- #
 async def _ingest_to_db(products: List[Product]) -> None:
-    """
-    Push scraped rows straight into:
-      products / ext_product_map / prices
-    using the DB's upsert_product_and_price() function.
-    """
     db_url = os.environ.get("DATABASE_URL")
     if not db_url:
         print("[db] DATABASE_URL not set → skipping DB ingest.")
@@ -479,37 +338,31 @@ async def _ingest_to_db(products: List[Product]) -> None:
 
     conn = await asyncpg.connect(db_url)
     try:
-        # 1. resolve Bolt venue_id -> store_id from the stores table
-        #    We assume we stored each Bolt/Wolt venue's numeric ID in `stores.external_key`
-        #    and chain='Coop'. (That's how those online rows like "Wolt: Coop ..." are stored.)
         venue_ids = sorted({p.venue_id for p in products if p.venue_id})
         store_map: Dict[str, int] = {}
-        for v_id in venue_ids:
-            row = await conn.fetchrow(
-                """
-                SELECT id
-                FROM stores
-                WHERE chain = 'Coop'
-                  AND external_key = $1
-                LIMIT 1;
-                """,
-                v_id,
-            )
-            if row:
-                store_map[v_id] = row["id"]
-            else:
-                print(f"[db] WARNING: no matching store for venue_id={v_id} in stores.external_key")
 
-        # 2. loop products and call upsert_product_and_price()
+        # Check for STORE_ID env override first
+        env_store_id = int(os.environ.get("STORE_ID", "0") or "0")
+
+        for v_id in venue_ids:
+            if env_store_id > 0:
+                store_map[v_id] = env_store_id
+            else:
+                row = await conn.fetchrow(
+                    "SELECT id FROM stores WHERE chain = 'Coop' AND external_key = $1 LIMIT 1;",
+                    v_id,
+                )
+                if row:
+                    store_map[v_id] = row["id"]
+                else:
+                    print(f"[db] WARNING: no matching store for venue_id={v_id} in stores.external_key")
+
         total_inserted = 0
         for p in products:
             store_id = store_map.get(p.venue_id)
             if not store_id:
-                continue  # we warned above
+                continue
 
-            # Build deterministic ext_id for this SKU inside Bolt.
-            # We don't get a real EAN from Bolt, so ext_id is
-            #   bolt:<venue_id>:<slug(product_name)>[:<slug(unit_text)>]
             base_slug = slugify_for_ext(p.name)[:40]
             size_slug = slugify_for_ext(p.unit_text or "")[:20]
             if size_slug:
@@ -517,37 +370,19 @@ async def _ingest_to_db(products: List[Product]) -> None:
             else:
                 ext_id = f"bolt:{p.venue_id}:{base_slug}"
 
-            # timestamp with tz for seen_at / collected_at
             seen_at_ts = datetime.datetime.now(datetime.timezone.utc)
 
-            # upsert
             await conn.fetchval(
                 """
                 SELECT upsert_product_and_price(
-                    $1::text,          -- in_source (we keep 'coop' so Bolt + eCoop land in same chain)
-                    $2::text,          -- in_ext_id
-                    $3::text,          -- in_name
-                    $4::text,          -- in_brand
-                    $5::text,          -- in_size_text
-                    $6::text,          -- in_ean_raw (NULL ok)
-                    $7::numeric,       -- in_price
-                    $8::text,          -- in_currency
-                    $9::integer,       -- in_store_id
-                    $10::timestamptz,  -- in_seen_at
-                    $11::text          -- in_source_url
+                    $1::text, $2::text, $3::text, $4::text, $5::text,
+                    $6::text, $7::numeric, $8::text, $9::integer,
+                    $10::timestamptz, $11::text
                 );
                 """,
-                "coop",                   # in_source (chain label in ext_product_map.source)
-                ext_id,                   # in_ext_id
-                p.name,                   # in_name
-                "",                       # in_brand (Bolt doesn't expose real Coop brand cleanly)
-                p.unit_text or "",        # in_size_text
-                None,                     # in_ean_raw (Bolt doesn't usually expose barcodes)
-                p.price_eur,              # in_price
-                "EUR",                    # in_currency
-                store_id,                 # in_store_id
-                seen_at_ts,               # in_seen_at
-                p.url or p.store_url,     # in_source_url
+                "coop", ext_id, p.name, "", p.unit_text or "",
+                None, p.price_eur, "EUR", store_id,
+                seen_at_ts, p.url or p.store_url,
             )
             total_inserted += 1
 
@@ -561,15 +396,11 @@ def crawl(categories: List[Tuple[str, str]],
           out_path: str,
           headless: bool = True,
           req_delay: float = 0.35) -> List[Product]:
-    """
-    Crawl all given categories from a single Bolt venue.
-    Return the list of Product objects.
-    """
+
     if not categories:
         print("No categories to crawl.")
         return []
 
-    # Derive a stable "base_url" like https://boltfood.com/et-EE/<city_slug>/p/<venue_id>
     first_href = categories[0][1]
     if "/smc/" in first_href:
         base_url = first_href.split("/smc/")[0]
@@ -609,11 +440,10 @@ def crawl(categories: List[Tuple[str, str]],
             ),
             timezone_id="Europe/Tallinn",
             locale="et-EE",
-            geolocation={"latitude": 58.3776, "longitude": 26.7290},  # Tartu-ish
+            geolocation={"latitude": 58.3776, "longitude": 26.7290},
             permissions=["geolocation"],
             extra_http_headers={"Accept-Language": "et-EE,et;q=0.9,en;q=0.8"},
         )
-        # light stealth
         context.add_init_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined});")
         context.add_init_script("window.chrome = { runtime: {} };")
         context.add_init_script("Object.defineProperty(navigator, 'languages', {get: () => ['et-EE','et','en']});")
@@ -622,7 +452,7 @@ def crawl(categories: List[Tuple[str, str]],
         page = context.new_page()
         page.set_default_timeout(30_000)
 
-        # land on store root
+        # Land on store root
         page.goto(base_url, wait_until="domcontentloaded")
         time.sleep(req_delay)
         dismiss_popups(page)
@@ -630,122 +460,133 @@ def crawl(categories: List[Tuple[str, str]],
         for cat_name, href in categories:
             print(f"[cat] {cat_name} -> {href}")
 
-            ok = open_category_via_page(page, base_url, href, cat_name, req_delay=req_delay)
-            if not ok:
-                # fallback hard navigation
+            # ----------------------------------------------------------------
+            # API interception: capture getDishesById / getMenuDishes response
+            # This gives us ALL products, not just the 5 visible tiles.
+            # ----------------------------------------------------------------
+            captured_api_data: List[dict] = []
+
+            def _on_response(response):
                 try:
-                    page.goto(href, timeout=60_000, wait_until="domcontentloaded")
-                    time.sleep(req_delay)
-                    dismiss_popups(page)
+                    url = response.url
+                    if (
+                        "getDishesById" in url
+                        or "getMenuDishes" in url
+                        or "getDishesByCategory" in url
+                        or ("boltsvc.net" in url and "dishes" in url.lower())
+                        or ("boltsvc.net" in url and "menu" in url.lower())
+                    ):
+                        try:
+                            data = response.json()
+                            captured_api_data.append(data)
+                        except Exception:
+                            pass
                 except Exception:
                     pass
 
-            tiles: List[Dict] = []
-            for attempt in range(1, 4):
-                # if Bolt dumped us back to /hc/... etc, get back to root and try again
-                if "/p/" not in (page.url or ""):
-                    ensure_on_store_page(page, base_url, req_delay)
-                    click_category_chip(page, cat_name)
+            page.on("response", _on_response)
 
-                try:
-                    wait_for_grid(page, timeout=18_000)
-                except PWTimeout:
-                    pass
-
-                auto_scroll(page, max_steps=50, pause=0.22)
-                tiles = extract_tiles_bolt(page) or extract_tiles_runtime(page)
-                if tiles:
-                    print(f"[cat] parsed {len(tiles)} tiles")
-                    break
-
-                if "hc/" in (page.url or ""):
-                    if open_first_category_from_hc(page):
-                        auto_scroll(page, max_steps=40, pause=0.22)
-                        tiles = extract_tiles_bolt(page) or extract_tiles_runtime(page)
-                        if tiles:
-                            print(f"[cat] parsed {len(tiles)} tiles (from hc → first category)")
-                            break
-
-                print(f"[cat] attempt {attempt} failed: no tiles yet")
-                time.sleep(0.7)
+            # Navigate to category
+            try:
+                page.goto(href, timeout=60_000, wait_until="domcontentloaded")
+                time.sleep(req_delay)
                 dismiss_popups(page)
+                # Wait a bit more for XHR to fire
+                page.wait_for_timeout(2000)
+                auto_scroll(page, max_steps=15, pause=0.2)
+                page.wait_for_timeout(1000)
+            except Exception as e:
+                print(f"[warn] navigation failed for {cat_name}: {e}")
 
-            if not tiles:
-                print(f"[cat] gave up: {cat_name}")
-                ensure_on_store_page(page, base_url, req_delay)
-                continue
+            page.remove_listener("response", _on_response)
 
-            # build Product list
-            for t in tiles:
-                name = norm_space(t.get("name", ""))
-                price_val = parse_price(t.get("price_text") or t.get("text") or "")
-                unit_text = ""
-                img = t.get("image", "")
-                href_rel = t.get("href", "")
-                if href_rel and href_rel.startswith("/"):
-                    href_abs = (
-                        f"{urlparse(base_url).scheme}://"
-                        f"{urlparse(base_url).netloc}{href_rel}"
-                    )
-                else:
-                    href_abs = href_rel or page.url
+            # ----------------------------------------------------------------
+            # Parse API responses first (preferred — full product list)
+            # ----------------------------------------------------------------
+            api_products = []
+            for api_data in captured_api_data:
+                parsed = parse_dishes_response(api_data, cat_name)
+                api_products.extend(parsed)
 
-                if not name or price_val is None:
-                    continue
+            # Deduplicate by name
+            seen_names = set()
+            unique_api = []
+            for item in api_products:
+                key = item["name"].lower()
+                if key not in seen_names:
+                    seen_names.add(key)
+                    unique_api.append(item)
 
-                products.append(
-                    Product(
+            if unique_api:
+                print(f"[cat] parsed {len(unique_api)} products from API response")
+                for item in unique_api:
+                    products.append(Product(
+                        category=cat_name,
+                        name=item["name"],
+                        price_eur=item["price_eur"],
+                        unit_text=item.get("unit_text") or "",
+                        image=item.get("image") or "",
+                        url=href,
+                        store_url=base_url,
+                        city_slug=city_slug,
+                        venue_id=venue_id,
+                        raw=item,
+                    ))
+            else:
+                # ----------------------------------------------------------------
+                # Fallback: DOM tile scraping (gets only visible tiles, ~5 per cat)
+                # ----------------------------------------------------------------
+                print(f"[cat] no API data captured, falling back to DOM tile scraping")
+                wait_for_grid(page, timeout=10000)
+                tiles = extract_tiles_bolt(page)
+                print(f"[cat] parsed {len(tiles)} tiles from DOM")
+                for t in tiles:
+                    name = norm_space(t.get("name", ""))
+                    price_val = parse_price(t.get("price_text") or "")
+                    if not name or price_val is None:
+                        continue
+                    img = t.get("image", "")
+                    products.append(Product(
                         category=cat_name,
                         name=name,
                         price_eur=price_val,
-                        unit_text=unit_text,
+                        unit_text="",
                         image=img,
-                        url=href_abs,
+                        url=href,
                         store_url=base_url,
                         city_slug=city_slug,
                         venue_id=venue_id,
                         raw=t,
-                    )
-                )
+                    ))
 
-            # go "home" between categories so the next click works
+            # Return to store root between categories
             ensure_on_store_page(page, base_url, req_delay)
 
         browser.close()
 
-    # Write CSV for debugging / archives
+    # Write CSV
     if products:
         fieldnames = [
-            "city_slug",
-            "venue_id",
-            "store_url",
-            "category",
-            "name",
-            "price_eur",
-            "unit_text",
-            "image",
-            "url",
-            "raw_json",
+            "city_slug", "venue_id", "store_url", "category",
+            "name", "price_eur", "unit_text", "image", "url", "raw_json",
         ]
         os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
         with open(out_path, "w", encoding="utf-8", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=fieldnames)
+            w = csv.DictWriter(f, fieldnames=fieldnames, lineterminator="\n")
             w.writeheader()
             for p in products:
-                w.writerow(
-                    {
-                        "city_slug": p.city_slug,
-                        "venue_id": p.venue_id,
-                        "store_url": p.store_url,
-                        "category": p.category,
-                        "name": p.name,
-                        "price_eur": f"{p.price_eur:.2f}",
-                        "unit_text": p.unit_text,
-                        "image": p.image,
-                        "url": p.url,
-                        "raw_json": json.dumps(p.raw, ensure_ascii=False),
-                    }
-                )
+                w.writerow({
+                    "city_slug": p.city_slug,
+                    "venue_id": p.venue_id,
+                    "store_url": p.store_url,
+                    "category": p.category,
+                    "name": p.name,
+                    "price_eur": f"{p.price_eur:.2f}",
+                    "unit_text": p.unit_text,
+                    "image": p.image,
+                    "url": p.url,
+                    "raw_json": json.dumps(p.raw, ensure_ascii=False),
+                })
         print(f"[done] wrote {len(products)} rows → {out_path}")
     else:
         print("[done] no products extracted")
@@ -756,41 +597,29 @@ def crawl(categories: List[Tuple[str, str]],
 # ---------------------- CLI ---------------------- #
 def main():
     ap = argparse.ArgumentParser("bolt food store crawler")
-
-    # new style
     ap.add_argument("--categories-file", help="File with 'Name -> URL' lines (or raw URLs)")
-
-    # legacy style (kept for GH Actions backwards compat)
-    ap.add_argument("--categories-dir", help="Root dir with per-store .txt category files")
-    ap.add_argument("--city", help="City slug (like '2-tartu')", default="")
-    ap.add_argument("--store", help="Store name (used to pick <categories-dir>/<city>/<slug>.txt)")
-    ap.add_argument("--deep", help="ignored legacy flag", default="0")
-    ap.add_argument("--upsert-db", help="ignored legacy flag (DB ingest is automatic now)", default="1")
-
-    ap.add_argument("--out", required=True, help="Output CSV path")
-    ap.add_argument("--headless", type=int, default=1, help="1=headless (default), 0=show browser")
-    ap.add_argument("--req-delay", type=float, default=0.35, help="Delay after navigations (seconds)")
+    ap.add_argument("--categories-dir")
+    ap.add_argument("--city", default="")
+    ap.add_argument("--store")
+    ap.add_argument("--deep", default="0")
+    ap.add_argument("--upsert-db", default="1")
+    ap.add_argument("--out", required=True)
+    ap.add_argument("--headless", type=int, default=1)
+    ap.add_argument("--req-delay", type=float, default=0.35)
     args = ap.parse_args()
 
-    # figure out which categories file we should use
     categories_file = args.categories_file
     if not categories_file:
         categories_file = find_categories_file(
-            args.categories_dir or "",
-            args.store or "",
-            args.city or "",
+            args.categories_dir or "", args.store or "", args.city or ""
         )
 
     if not categories_file or not os.path.isfile(categories_file):
-        ap.error(
-            "the following arguments are required: --categories-file "
-            "(or provide --categories-dir AND --store, optionally --city)"
-        )
+        ap.error("--categories-file required (or --categories-dir + --store)")
 
     print(f"[info] using categories file: {categories_file}")
     categories = parse_categories_file(categories_file)
 
-    # crawl → get Product list
     products = crawl(
         categories=categories,
         out_path=args.out,
@@ -798,7 +627,6 @@ def main():
         req_delay=args.req_delay,
     )
 
-    # DB ingest (async) if DATABASE_URL is set
     try:
         if products:
             asyncio.run(_ingest_to_db(products))
