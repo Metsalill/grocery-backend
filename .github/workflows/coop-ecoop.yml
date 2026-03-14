@@ -1,30 +1,25 @@
 name: Coop eCoop scrape + upsert
-
 on:
   schedule:
     - cron: "17 3 * * *"   # daily at 03:17 UTC
   workflow_dispatch:
-
 jobs:
   scrape:
     name: scrape (haapsalu eCoop, shard ${{ matrix.cat_index }})
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 120   # job-level limit — step timeout removed so this is the only cap
     strategy:
       fail-fast: false
       matrix:
         cat_index: [0, 1, 2, 3, 4, 5, 6, 7]
-
     concurrency:
       group: coop-ecoop-haapsalu-${{ matrix.cat_index }}
       cancel-in-progress: false
-
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       PGSSLMODE: require
       PYTHONUNBUFFERED: "1"
       STORE_ID: "445"   # Haapsalu eCoop
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -42,7 +37,8 @@ jobs:
 
       - name: Run eCoop crawler (haapsalu | shard ${{ matrix.cat_index }})
         id: crawl
-        timeout-minutes: 60
+        # No step-level timeout — job timeout of 120min is the only cap.
+        # Previous 60min step timeout was killing the crawl mid-run.
         run: |
           mkdir -p out
           OUT="out/ecoop_haapsalu_${{ matrix.cat_index }}.csv"
