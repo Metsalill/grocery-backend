@@ -448,9 +448,6 @@ def scrape_product_links_on_category(page) -> List[str]:
                     links.append(absu)
         except Exception:
             pass
-        if links:
-            # Stop at first selector that yields results
-            break
 
     return links
 
@@ -650,6 +647,12 @@ def crawl_category(page, category_url, seen_ext, writer_path, rows_for_ingest,
         return
     if not safe_goto(page, url_abs):
         return
+
+    # Wait for the product grid to hydrate (Selver is a Vue SSR app)
+    try:
+        page.wait_for_load_state("networkidle", timeout=15000)
+    except Exception:
+        pass  # Timeout is fine — grab whatever rendered
 
     cat_breadcrumb, cat_leaf = parse_category_breadcrumb(page)
 
