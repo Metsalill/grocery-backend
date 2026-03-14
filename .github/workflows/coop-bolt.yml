@@ -6,7 +6,7 @@ on:
 jobs:
   scrape-bolt:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30   # API-only crawler, much faster than Playwright
     strategy:
       fail-fast: false
       matrix:
@@ -43,12 +43,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install crawler deps
+      - name: Install deps
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt || true
-          pip install playwright selectolax beautifulsoup4 httpx tenacity pydantic asyncpg psycopg
-          python -m playwright install --with-deps chromium
+          pip install requests asyncpg tenacity
 
       - name: Update categories file with correct venue_id
         run: |
@@ -66,10 +64,9 @@ jobs:
             --categories-file "${{ matrix.categories_file }}" \
             --city "${{ matrix.city }}" \
             --store "${{ matrix.store }}" \
-            --upsert-db main \
+            --upsert-db 1 \
             --out "${{ matrix.out }}" \
-            --headless 1 \
-            --req-delay 1
+            --req-delay 0.3
 
       - name: Upload CSV artifact
         if: always()
