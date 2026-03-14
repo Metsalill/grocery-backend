@@ -416,6 +416,8 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             dist = x.get("distance_km") if x.get("distance_km") is not None else float("inf")
             return (-complete, -int(x.get("lines_found", 0)), price, dist)
 
+        # Hide stores where no basket items matched — no value to user
+        results = [r for r in results if r.get("lines_found", 0) > 0]
         results.sort(key=sort_key)
 
         # 10. Totals
