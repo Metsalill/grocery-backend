@@ -70,10 +70,6 @@ async def resolve_user_id(user, pool: asyncpg.pool.Pool) -> Optional[str]:
 
 
 def _call_compare(pool, items_dicts, lat, lon, radius_km, require_all=False):
-    """
-    Build the body dict that compare_basket_service(db, body) expects
-    and return the coroutine.
-    """
     body = {
         "items": items_dicts,
         "lat": float(lat),
@@ -88,10 +84,6 @@ def _call_compare(pool, items_dicts, lat, lon, radius_km, require_all=False):
 
 
 def _winner_total(store_dict: dict) -> float:
-    """
-    Extract total from a store result — handles both
-    new shape (total_price) and legacy shape (total).
-    """
     v = store_dict.get("total_price") or store_dict.get("total")
     return float(v) if v is not None else float("inf")
 
@@ -124,20 +116,52 @@ class BasketSummaryOut(BaseModel):
     radius_km: Optional[float]
 
 
-class BasketDetailOut(BaseModel):
-    id: int
-    created_at: datetime
-    radius_km: Optional[float]
-    winner_store_id: Optional[int]
-    winner_store_name: Optional[str]
-    winner_total: Optional[float]
-    stores: Optional[List[dict]]
-    note: Optional[str]
-    items: List[dict]
-
-
 # ---------- Routes ----------
 
+# ---- LIST saved baskets ----
+@router.get("", response_model=List[BasketSummaryOut])
+async def list_baskets(
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    user=Depends(get_current_user),
+    pool: asyncpg.pool.Pool = Depends(get_db_pool),
+):
+    uid = await resolve_user_id(user, pool)
+    if not uid:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    try:
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                SELECT id, created_at, winner_store_name,
+                       winner_total::float8 AS winner_total,
+                       radius_km::float8 AS radius_km
+                FROM basket_history
+                WHERE user_id = $1::uuid
+                  AND deleted_at IS NULL
+                ORDER BY created_at DESC
+                LIMIT $2 OFFSET $3
+                """,
+                uid, limit, offset,
+            )
+        return [
+            BasketSummaryOut(
+                id=r["id"],
+                created_at=r["created_at"],
+                winner_store_name=r["winner_store_name"],
+                winner_total=float(r["winner_total"]) if r["winner_total"] is not None else None,
+                radius_km=float(r["radius_km"]) if r["radius_km"] is not None else None,
+            )
+            for r in rows
+        ]
+    except Exception as e:
+        print("LIST_BASKETS_ERROR:", type(e).__name__, str(e))
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Failed to list baskets: {e}")
+
+
+# ---- SAVE basket ----
 @router.post("", response_model=BasketSummaryOut)
 async def save_basket(
     payload: SaveBasketIn,
@@ -148,8 +172,6 @@ async def save_basket(
     if not uid:
         raise HTTPException(status_code=401, detail="Unauthorized")
 
-    # 1) Build items list for compare — include product_id if we had it
-    #    (BasketItemIn doesn't carry product_id so we use name-only path)
     items_dicts = [
         {"product": it.product, "quantity": int(it.quantity), "product_id": None}
         for it in payload.items
@@ -158,7 +180,6 @@ async def save_basket(
     if not items_dicts:
         raise HTTPException(status_code=400, detail="Basket is empty")
 
-    # 2) Run compare — require_all=False so partial matches still save
     try:
         cmp = await _call_compare(
             pool, items_dicts,
@@ -170,13 +191,10 @@ async def save_basket(
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Compare failed: {e}")
 
-    # 3) Get store results — new service returns results[], not stores[]
-    #    results has store_id, store_name, total_price, distance_km
     results = cmp.get("results") or []
     if not results:
         raise HTTPException(status_code=400, detail="No stores found within given radius")
 
-    # 4) Pick winner
     results_sorted = sorted(results, key=_winner_total)
     winner = None
     if payload.selected_store_id is not None:
@@ -192,7 +210,6 @@ async def save_basket(
     raw_total = _winner_total(winner)
     winner_total = max(0.0, min(round(raw_total, 2), 9999.99)) if raw_total != float("inf") else 0.0
 
-    # 5) Build stores snapshot for DB (use results list)
     stores_snapshot = [
         {
             "store_id": r.get("store_id"),
@@ -207,7 +224,6 @@ async def save_basket(
     ]
     stores_json = json.dumps(stores_snapshot, ensure_ascii=False)
 
-    # 6) Persist
     try:
         async with pool.acquire() as conn:
             async with conn.transaction():
@@ -232,15 +248,15 @@ async def save_basket(
                 )
                 basket_id = head["id"]
 
-                rows = []
-                for it in payload.items:
-                    rows.append((
+                rows = [
+                    (
                         basket_id, it.product, float(it.quantity), it.unit,
-                        None, None,  # price/line_total not available without include_lines
+                        None, None,
                         winner_store_id, winner_store_name,
                         it.image_url, it.brand, it.size_text,
-                    ))
-
+                    )
+                    for it in payload.items
+                ]
                 if rows:
                     await conn.executemany(
                         """
@@ -265,8 +281,7 @@ async def save_basket(
     )
 
 
-# ---------- GET saved basket ----------
-
+# ---- GET basket detail ----
 @router.get("/{basket_id}")
 async def get_basket(
     basket_id: int,
@@ -364,8 +379,38 @@ async def get_basket(
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-# ---------- Recompare and save as new ----------
+# ---- DELETE basket ----
+@router.delete("/{basket_id}")
+async def delete_basket(
+    basket_id: int,
+    user=Depends(get_current_user),
+    pool: asyncpg.pool.Pool = Depends(get_db_pool),
+):
+    uid = await resolve_user_id(user, pool)
+    if not uid:
+        raise HTTPException(status_code=401, detail="Unauthorized")
 
+    try:
+        async with pool.acquire() as conn:
+            result = await conn.execute(
+                """
+                UPDATE basket_history
+                SET deleted_at = NOW()
+                WHERE id=$1 AND user_id=$2::uuid AND deleted_at IS NULL
+                """,
+                basket_id, uid,
+            )
+        if result == "UPDATE 0":
+            raise HTTPException(status_code=404, detail="Basket not found")
+        return {"ok": True}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print("DELETE_BASKET_ERROR:", type(e).__name__, str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to delete basket: {e}")
+
+
+# ---- RECOMPARE and save as new ----
 class RecompareIn(BaseModel):
     lat: Optional[float] = None
     lon: Optional[float] = None
