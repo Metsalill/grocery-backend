@@ -113,6 +113,49 @@ async def _fetch_products_by_id(
     return {int(_rv(r, "id")): r for r in rows}
 
 
+# ---------------- product group expansion ----------------
+
+
+async def _expand_groups(
+    conn: asyncpg.Connection,
+    basket_pids: List[int],
+) -> Dict[int, List[int]]:
+    """
+    For each basket product_id that belongs to a product_group,
+    return a mapping: basket_pid -> [all member product_ids in that group].
+
+    Products not in any group are not included in the result —
+    callers should treat them as their own single-member group.
+    """
+    if not basket_pids:
+        return {}
+
+    try:
+        rows = await conn.fetch(
+            """
+            SELECT
+                pgm_basket.product_id  AS basket_pid,
+                pgm_all.product_id     AS member_pid
+            FROM product_group_members pgm_basket
+            JOIN product_group_members pgm_all
+              ON pgm_all.group_id = pgm_basket.group_id
+            WHERE pgm_basket.product_id = ANY($1::int[])
+            """,
+            basket_pids,
+        )
+    except (pgerr.UndefinedTableError, pgerr.UndefinedColumnError):
+        # product_groups tables don't exist yet — degrade gracefully
+        return {}
+
+    result: Dict[int, List[int]] = {}
+    for r in rows:
+        basket_pid = int(r["basket_pid"])
+        member_pid = int(r["member_pid"])
+        result.setdefault(basket_pid, []).append(member_pid)
+
+    return result
+
+
 # ---------------- stores ----------------
 
 
@@ -193,8 +236,6 @@ async def _latest_prices(
     if not product_ids or not store_ids:
         return []
 
-    # Fast path: DISTINCT ON uses ix_prices_latest index directly.
-    # Resolves store_host_map (source store → physical store mapping).
     sql_distinct_on = """
     WITH effective_source AS (
       SELECT s.id AS physical_store_id,
@@ -224,7 +265,6 @@ async def _latest_prices(
     JOIN effective_source es ON es.source_store_id = l.store_id;
     """
 
-    # Fallback: no store_host_map table at all
     sql_no_host_map = """
     SELECT DISTINCT ON (p.product_id, p.store_id)
            p.product_id, p.store_id, p.price, p.collected_at
@@ -332,29 +372,47 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             return {"results": [], "totals": {}, "stores": [], "radius_km": radius_km, "missing_products": missing_products}
 
         # 5. Product metadata
-        all_pids = sorted(qty_by_pid.keys())
-        metadata = await _fetch_products_by_id(conn, all_pids)
+        basket_pids = sorted(qty_by_pid.keys())
+        metadata = await _fetch_products_by_id(conn, basket_pids)
         for nm, rec in resolved_by_name.items():
             pid = int(_rv(rec, "id"))
             if pid not in metadata:
                 metadata[pid] = rec
 
-        # 6. Candidate stores
+        # 6. Expand product groups
+        # group_members: basket_pid -> [member_pids] (includes the basket_pid itself)
+        # For products not in any group, we treat them as solo (not in dict).
+        group_members: Dict[int, List[int]] = await _expand_groups(conn, basket_pids)
+
+        # Collect ALL product IDs we need prices for (basket + group members)
+        all_pids_for_prices: List[int] = sorted({
+            mid
+            for pid in basket_pids
+            for mid in group_members.get(pid, [pid])
+        })
+
+        # Fetch metadata for group members too (needed for line item names)
+        extra_pids = [p for p in all_pids_for_prices if p not in metadata]
+        if extra_pids:
+            extra_meta = await _fetch_products_by_id(conn, extra_pids)
+            metadata.update(extra_meta)
+
+        # 7. Candidate stores
         stores = await _candidate_stores(conn, lat, lon, radius_km, limit_stores, offset_stores)
         if not stores:
             return {"results": [], "totals": {}, "stores": [], "radius_km": radius_km, "missing_products": missing_products}
         store_ids = [int(_rv(s, "id")) for s in stores]
 
-        # 7. Latest prices (fast — skips slow view)
-        price_rows = await _latest_prices(conn, all_pids, store_ids)
+        # 8. Latest prices for ALL pids (basket + group members)
+        price_rows = await _latest_prices(conn, all_pids_for_prices, store_ids)
         by_store: Dict[int, Dict[int, float]] = {}
         for r in price_rows:
             sid = int(_rv(r, "store_id"))
             pid = int(_rv(r, "product_id"))
             by_store.setdefault(sid, {})[pid] = float(_rv(r, "price"))
 
-        # 8. Per-store results
-        required = len(all_pids)
+        # 9. Per-store results
+        required = len(basket_pids)
         results: List[Dict[str, Any]] = []
         best_total: Optional[float] = None
         best_store_id: Optional[int] = None
@@ -367,24 +425,38 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             lines_found = 0
 
             for pid, qty in qty_by_pid.items():
-                unit_price = s_prices.get(pid)
-                if unit_price is None:
-                    continue
-                line_total = unit_price * qty
+                members = group_members.get(pid, [pid])
+
+                # Pick the cheapest available member in this store
+                best_member_pid: Optional[int] = None
+                best_member_price: Optional[float] = None
+                for mid in members:
+                    p = s_prices.get(mid)
+                    if p is not None and (best_member_price is None or p < best_member_price):
+                        best_member_price = p
+                        best_member_pid = mid
+
+                if best_member_price is None:
+                    continue  # product not available in this store
+
+                line_total = best_member_price * qty
                 lines_found += 1
                 total += line_total
+
                 if include_lines:
-                    meta = metadata.get(pid)
+                    # Show the winning member's name, not the original basket product name
+                    meta = metadata.get(best_member_pid) if best_member_pid else metadata.get(pid)
                     lines.append({
-                        "product_id": pid,
+                        "product_id": best_member_pid,
+                        "basket_product_id": pid,  # original basket item
                         "ean": _rv(meta, "ean") if meta else None,
-                        "product_name": _rv(meta, "name") if meta else f"#{pid}",
+                        "product_name": _rv(meta, "name") if meta else f"#{best_member_pid}",
                         "qty": qty,
-                        "unit_price": _round2(unit_price),
+                        "unit_price": _round2(best_member_price),
                         "line_total": _round2(line_total),
+                        "matched_via_group": best_member_pid != pid,
                     })
 
-            # None if: no items found, OR require_all and incomplete coverage
             if lines_found == 0:
                 total_price = None
             elif require_all and lines_found < required:
@@ -409,18 +481,17 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                 best_total = total_price
                 best_store_id = sid
 
-        # 9. Sort
+        # 10. Sort
         def sort_key(x: Dict[str, Any]) -> Tuple[int, int, float, float]:
             complete = 1 if (x.get("total_price") is not None and x.get("lines_found") == x.get("required_lines")) else 0
             price = x.get("total_price") if x.get("total_price") is not None else float("inf")
             dist = x.get("distance_km") if x.get("distance_km") is not None else float("inf")
             return (-complete, -int(x.get("lines_found", 0)), price, dist)
 
-        # Hide stores where no basket items matched — no value to user
         results = [r for r in results if r.get("lines_found", 0) > 0]
         results.sort(key=sort_key)
 
-        # 10. Totals
+        # 11. Totals
         totals: Dict[str, Any] = {}
         if best_total is not None and best_store_id is not None:
             win = next((r for r in results if r["store_id"] == best_store_id), None)
