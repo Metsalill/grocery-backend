@@ -1,6 +1,6 @@
-ext_id,name,ean,size_text,price,currency
-S-0001,Pasta Spaghetti 500 g,8001040034514,500 g,1.19,EUR
-S-0002,Tomato Passata 700 ml,80004555,700 ml,1.49,EUR
-S-0003,Olive Oil Extra Virgin 1 l,8001234567890,1 l,7.99,EUR
-S-0004,Milk 2.5% 1 l,4740125000012,1 l,1.09,EUR
-S-0005,Butter 82% 200 g,4740125000029,200 g,2.49,EUR
+ext_id,source_url,name,brand,ean_raw,ean_norm,sku_raw,size_text,price,currency,category_path,category_leaf
+banaan-kg,https://www.selver.ee/banaan-kg,"Banaan, kg",Määramata,T000001313,000001313,T000001313,1 kg,1.29,EUR,Puu- ja köögiviljad > Puuviljad,Puuviljad
+porgand-pestud-kg,https://www.selver.ee/porgand-pestud-kg,"Porgand pestud, kg",Määramata,T000001332,000001332,T000001332,1 kg,0.45,EUR,Puu- ja köögiviljad > Köögiviljad juurviljad,Köögiviljad juurviljad
+piim-taispiim-3-5-lacto-free-1l-valio,https://www.selver.ee/piim-taispiim-3-5-lacto-free-1l-valio,"Piim täispiim 3,5% Lacto Free 1l, VALIO",VALIO,6408430160019,6408430160019,T000012345,1 l,1.89,EUR,Piimatooted munad void > Piim,Piim
+kohvioad-classic-best-beans-1-kg,https://www.selver.ee/kohvioad-classic-best-beans-1-kg,"Kohvioad Classic, BEST BEANS, 1 kg",BEST BEANS,,,,1 kg,8.99,EUR,Joogid > Kohv,Kohv
+filtrikohv-presidentti-original-paulig-250-g,https://www.selver.ee/filtrikohv-presidentti-original-paulig-250-g,"Filtrikohv Presidentti Original, PAULIG, 250 g",PAULIG,6411300169093,6411300169093,T000023456,250 g,3.49,EUR,Joogid > Kohv,Kohv
