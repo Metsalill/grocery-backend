@@ -97,7 +97,7 @@ jobs:
   ingest:
     name: ingest (all stores)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     needs: crawl
     # Run even if some crawl shards failed — ingest whatever landed
     if: always()
