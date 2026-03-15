@@ -120,7 +120,6 @@ def fetch_categories_from_api(
         "provider_id": venue_id,
         "delivery_lat": delivery_lat,
         "delivery_lng": delivery_lng,
-        "city_id": "2",
         "version": API_VERSION,
         "language": "et-EE",
         "session_id": session_id,
@@ -138,6 +137,8 @@ def fetch_categories_from_api(
             print(f"[categories] API returned {r.status_code}: {r.text[:200]}")
             return []
         data = r.json()
+        _top = data.get("data", {})
+        print(f"[categories] status=200 child_ids={len(_top.get('child_ids', []))} items={len(_top.get('items', {}))}")
     except Exception as e:
         print(f"[categories] API call failed: {e}")
         return []
@@ -160,6 +161,7 @@ def fetch_categories_from_api(
             return
         for sid in (ids or []):
             smc = str(sid)
+            # Try both string and int keys
             obj = items_map.get(smc) or items_map.get(sid)
             if not obj:
                 continue
@@ -167,10 +169,22 @@ def fetch_categories_from_api(
             name = _get_name(obj)
             if typ == "category" and name:
                 categories.append((name, smc))
+            elif typ == "category":
+                # category with no readable name — use smc as placeholder
+                categories.append((smc, smc))
             # Always recurse into child_ids
             _walk(obj.get("child_ids") or [], depth + 1)
 
     _walk(top.get("child_ids") or [])
+
+    # Fallback: if items map has no type=category entries, treat all child_ids as category IDs directly
+    if not categories:
+        print(f"[categories] _walk found nothing, falling back to raw child_ids")
+        for sid in (top.get("child_ids") or []):
+            smc = str(sid)
+            obj = items_map.get(smc) or items_map.get(sid) or {}
+            name = _get_name(obj) or smc
+            categories.append((name, smc))
 
     # Deduplicate preserving order
     seen = set()
