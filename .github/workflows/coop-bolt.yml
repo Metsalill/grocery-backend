@@ -1,4 +1,4 @@
-name: coop-bolt
+name: Coop-bolt
 
 on:
   schedule:
@@ -42,7 +42,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install requests asyncpg urllib3
+        run: pip install requests asyncpg urllib3 brotli
 
       - name: Run Bolt crawler + ingest
         env:
