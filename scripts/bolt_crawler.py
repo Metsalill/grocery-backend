@@ -120,10 +120,11 @@ def fetch_categories_from_api(
         "provider_id": venue_id,
         "delivery_lat": delivery_lat,
         "delivery_lng": delivery_lng,
+        "city_id": "2",
         "version": API_VERSION,
         "language": "et-EE",
         "session_id": session_id,
-        "distinct_id": f"%24device%3A{device_id}",
+        "distinct_id": f"$device:{device_id}",
         "country": "ee",
         "device_name": "web",
         "device_os_version": "web",
@@ -221,7 +222,7 @@ def fetch_category_products(
         "version": API_VERSION,
         "language": "et-EE",
         "session_id": session_id,
-        "distinct_id": f"%24device%3A{device_id}",
+        "distinct_id": f"$device:{device_id}",
         "country": "ee",
         "device_name": "web",
         "device_os_version": "web",
@@ -412,7 +413,7 @@ def crawl(
 ) -> List[Dict]:
 
     session_id = str(uuid.uuid4())
-    device_id = str(uuid.uuid4()).replace("-", "")[:32]
+    device_id = str(uuid.uuid4())   # full UUID with dashes, matching browser format
     session = _make_session()
 
     # Fetch categories dynamically if not provided via file
