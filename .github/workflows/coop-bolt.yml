@@ -1,4 +1,4 @@
-name: Coop - Bolt
+name: coop-bolt
 
 on:
   schedule:
@@ -46,7 +46,7 @@ jobs:
 
       - name: Run Bolt crawler + ingest
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
           STORE_ID: ${{ matrix.store_id }}
         run: |
           python scripts/bolt_crawler.py \
