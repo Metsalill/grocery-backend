@@ -94,7 +94,7 @@ def _make_session() -> requests.Session:
         "User-Agent": UA,
         "Accept": "*/*",
         "Accept-Language": "et-EE,et;q=0.9,en-US;q=0.8,en;q=0.7",
-        "Accept-Encoding": "gzip, deflate, br, zstd",
+        "Accept-Encoding": "gzip, deflate",
         "Origin": "https://food.bolt.eu",
         "Referer": "https://food.bolt.eu/",
         "Cache-Control": "no-cache",
@@ -134,12 +134,9 @@ def fetch_categories_from_api(
 
     try:
         r = session.get(CATEGORIES_API, params=params, timeout=30)
-        print(f"[categories] status={r.status_code} len={len(r.content)} url={r.url}")
-        print(f"[categories] response headers: {dict(r.headers)}")
-        print(f"[categories] raw body (first 500): {r.text[:500]!r}")
         if r.status_code != 200:
+            print(f"[categories] API returned {r.status_code}: {r.text[:200]}")
             return []
-
         data = r.json()
     except Exception as e:
         print(f"[categories] API call failed: {e}")
