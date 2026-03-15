@@ -3,24 +3,8 @@
 """
 Bolt Food crawler (Coop venues) — direct API version.
 
-Instead of using Playwright to scrape the DOM, this crawler calls Bolt's
-public getMenuDishes API directly. No browser needed, much faster.
-
-API endpoint (no auth required):
-  GET https://deliveryuser.live.boltsvc.net/deliveryClient/public/getMenuDishes
-      ?provider_id={venue_id}
-      &category_id={smc_id}
-      &delivery_lat=58.377983
-      &delivery_lng=26.729038
-      &version=FW.1.106
-      &language=et-EE
-      &session_id={uuid}
-      &distinct_id={uuid}
-      &country=ee
-      &device_name=web
-      &device_os_version=web
-      &deviceId={uuid}
-      &deviceType=web
+Fetches categories dynamically via getMenuCategories so SMC IDs are always
+current. No static category files needed (they go stale as Bolt rotates IDs).
 """
 
 import argparse
@@ -47,15 +31,15 @@ except ImportError:
     asyncpg = None
 
 # ---------------------- constants ---------------------- #
-API_BASE = "https://deliveryuser.live.boltsvc.net/deliveryClient/public/getMenuDishes"
-API_VERSION = "FW.1.106"
-DELIVERY_LAT = "58.377983"
-DELIVERY_LNG = "26.729038"
+API_BASE       = "https://deliveryuser.live.boltsvc.net/deliveryClient/public/getMenuDishes"
+CATEGORIES_API = "https://deliveryuser.live.boltsvc.net/deliveryClient/public/getMenuCategories"
+API_VERSION    = "FW.1.106"
+DELIVERY_LAT   = "58.377983"
+DELIVERY_LNG   = "26.729038"
 
-SMC_RE = re.compile(r"/smc/(\d+)")
-CITY_RE = re.compile(r"/et-[Ee][Ee]/([^/]+)/p/(\d+)")
-CATEGORY_NAME_Q = "categoryName"
-SPACE_RE = re.compile(r"\s+")
+SMC_RE      = re.compile(r"/smc/(\d+)")
+CITY_RE     = re.compile(r"/et-[Ee][Ee]/([^/]+)/p/(\d+)")
+SPACE_RE    = re.compile(r"\s+")
 
 UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
@@ -82,17 +66,6 @@ def slugify_for_ext(s: str) -> str:
     return s2
 
 
-def _norm_for_match(s: str) -> str:
-    return re.sub(r"[^a-z0-9]", "", slugify_for_ext(s))
-
-
-def extract_city_and_venue(url: str) -> Tuple[str, str]:
-    m = CITY_RE.search(url)
-    if not m:
-        return "", ""
-    return m.group(1), m.group(2)
-
-
 def _cents_to_eur(val) -> Optional[float]:
     if val is None:
         return None
@@ -106,49 +79,8 @@ def _cents_to_eur(val) -> Optional[float]:
     return f / 100.0
 
 
-# ---------------------- file parsing ---------------------- #
-def parse_categories_file(path: str) -> List[Tuple[str, str]]:
-    """Returns list of (category_name, full_url) pairs."""
-    out: List[Tuple[str, str]] = []
-    with open(path, "r", encoding="utf-8") as f:
-        for raw in f:
-            line = raw.strip()
-            if not line or line.startswith("#"):
-                continue
-            if "->" in line:
-                name, href = [x.strip() for x in line.split("->", 1)]
-                out.append((name, href))
-            else:
-                href = line
-                name = parse_qs(urlparse(href).query).get(CATEGORY_NAME_Q, [""])[0] or "Unknown"
-                out.append((name, href))
-    return out
-
-
-def find_categories_file(categories_dir: str, store_name: str, city: str = "") -> Optional[str]:
-    if not categories_dir or not store_name:
-        return None
-    want_slug = slugify_for_ext(store_name)
-    want_norm = _norm_for_match(store_name)
-    if city:
-        candidate = os.path.join(categories_dir, city, f"{want_slug}.txt")
-        if os.path.isfile(candidate):
-            return candidate
-    candidate = os.path.join(categories_dir, f"{want_slug}.txt")
-    if os.path.isfile(candidate):
-        return candidate
-    if os.path.isdir(categories_dir):
-        for root, _, files in os.walk(categories_dir):
-            for fn in files:
-                if not fn.lower().endswith(".txt"):
-                    continue
-                if _norm_for_match(fn) == want_norm:
-                    return os.path.join(root, fn)
-    return None
-
-
-# ---------------------- API client ---------------------- #
-def _make_session(session_id: str, device_id: str) -> requests.Session:
+# ---------------------- session ---------------------- #
+def _make_session() -> requests.Session:
     s = requests.Session()
     retries = Retry(
         total=5,
@@ -171,23 +103,123 @@ def _make_session(session_id: str, device_id: str) -> requests.Session:
     return s
 
 
+# ---------------------- dynamic category fetch ---------------------- #
+def fetch_categories_from_api(
+    session: requests.Session,
+    venue_id: str,
+    session_id: str,
+    device_id: str,
+    delivery_lat: str = DELIVERY_LAT,
+    delivery_lng: str = DELIVERY_LNG,
+) -> List[Tuple[str, str]]:
+    """
+    Call getMenuCategories to get current SMC IDs for this venue.
+    Returns list of (category_name, smc_id) pairs.
+    """
+    params = {
+        "provider_id": venue_id,
+        "delivery_lat": delivery_lat,
+        "delivery_lng": delivery_lng,
+        "version": API_VERSION,
+        "language": "et-EE",
+        "session_id": session_id,
+        "distinct_id": f"%24device%3A{device_id}",
+        "country": "ee",
+        "device_name": "web",
+        "device_os_version": "web",
+        "deviceId": device_id,
+        "deviceType": "web",
+    }
+
+    try:
+        r = session.get(CATEGORIES_API, params=params, timeout=30)
+        if r.status_code != 200:
+            print(f"[categories] API returned {r.status_code}: {r.text[:200]}")
+            return []
+
+        data = r.json()
+    except Exception as e:
+        print(f"[categories] API call failed: {e}")
+        return []
+
+    categories: List[Tuple[str, str]] = []
+
+    def _extract_cats(obj):
+        if isinstance(obj, list):
+            for item in obj:
+                _extract_cats(item)
+        elif isinstance(obj, dict):
+            # A category object typically has id + name
+            cat_id = str(obj.get("id") or obj.get("category_id") or "")
+            cat_name = norm_space(obj.get("name") or obj.get("title") or "")
+            if cat_id and cat_name and cat_id.isdigit():
+                categories.append((cat_name, cat_id))
+            # Recurse into sub-keys
+            for key, val in obj.items():
+                if isinstance(val, (dict, list)):
+                    _extract_cats(val)
+
+    _extract_cats(data)
+
+    # Deduplicate preserving order
+    seen = set()
+    unique = []
+    for name, smc in categories:
+        if smc not in seen:
+            seen.add(smc)
+            unique.append((name, smc))
+
+    print(f"[categories] found {len(unique)} categories via API for venue {venue_id}")
+    return unique
+
+
+# ---------------------- file parsing (kept as fallback) ---------------------- #
+def parse_categories_file(path: str) -> List[Tuple[str, str]]:
+    """
+    Returns list of (category_name, smc_id) pairs from a .txt file.
+    Accepts lines like:
+      https://food.bolt.eu/.../smc/1234567/?categoryName=Foo
+    and extracts the smc number.
+    """
+    out: List[Tuple[str, str]] = []
+    with open(path, "r", encoding="utf-8") as f:
+        for raw in f:
+            line = raw.strip()
+            if not line or line.startswith("#"):
+                continue
+            # Support "name -> url" format
+            if "->" in line:
+                name, href = [x.strip() for x in line.split("->", 1)]
+            else:
+                href = line
+                qs = parse_qs(urlparse(href).query)
+                name = qs.get("categoryName", [""])[0] or "Unknown"
+
+            m = SMC_RE.search(href)
+            if m:
+                out.append((name, m.group(1)))
+            else:
+                print(f"[warn] no smc ID in line: {line[:80]}")
+    return out
+
+
+# ---------------------- product fetching ---------------------- #
 def fetch_category_products(
     session: requests.Session,
     venue_id: str,
     category_id: str,
     session_id: str,
     device_id: str,
-    language: str = "et-EE",
-    req_delay: float = 0.5,
-) -> List[Dict]:
-    """Call getMenuDishes API and return list of product dicts."""
+    delivery_lat: str = DELIVERY_LAT,
+    delivery_lng: str = DELIVERY_LNG,
+) -> dict:
     params = {
         "provider_id": venue_id,
         "category_id": category_id,
-        "delivery_lat": DELIVERY_LAT,
-        "delivery_lng": DELIVERY_LNG,
+        "delivery_lat": delivery_lat,
+        "delivery_lng": delivery_lng,
         "version": API_VERSION,
-        "language": language,
+        "language": "et-EE",
         "session_id": session_id,
         "distinct_id": f"%24device%3A{device_id}",
         "country": "ee",
@@ -202,7 +234,7 @@ def fetch_category_products(
         if r.status_code == 200:
             return r.json()
         else:
-            print(f"  [warn] API returned {r.status_code} for category_id={category_id}")
+            print(f"  [warn] API returned {r.status_code} for category_id={category_id}: {r.text[:100]}")
             return {}
     except Exception as e:
         print(f"  [warn] API call failed for category_id={category_id}: {e}")
@@ -210,19 +242,16 @@ def fetch_category_products(
 
 
 def parse_menu_dishes_response(data: dict, cat_name: str, venue_id: str) -> List[Dict]:
-    """Parse getMenuDishes response into flat product list."""
     if not data or not isinstance(data, dict):
         return []
 
     products = []
 
     def _extract_items(obj):
-        """Recursively find item/dish arrays in the response."""
         if isinstance(obj, list):
             for item in obj:
                 _extract_items(item)
         elif isinstance(obj, dict):
-            # Look for arrays named 'items', 'dishes', 'products'
             for key in ("items", "dishes", "products", "data"):
                 val = obj.get(key)
                 if isinstance(val, list) and val:
@@ -231,7 +260,6 @@ def parse_menu_dishes_response(data: dict, cat_name: str, venue_id: str) -> List
                             _process_item(item)
                 elif isinstance(val, dict):
                     _extract_items(val)
-            # Also recurse into other dict values
             for key, val in obj.items():
                 if key not in ("items", "dishes", "products", "data") and isinstance(val, (dict, list)):
                     _extract_items(val)
@@ -241,7 +269,6 @@ def parse_menu_dishes_response(data: dict, cat_name: str, venue_id: str) -> List
         if not name:
             return
 
-        # Price
         price_raw = item.get("price")
         price_eur = None
         if isinstance(price_raw, dict):
@@ -253,7 +280,6 @@ def parse_menu_dishes_response(data: dict, cat_name: str, venue_id: str) -> List
         if price_eur is None or price_eur <= 0:
             return
 
-        # Image
         image = ""
         img = item.get("image") or item.get("imageUrl") or item.get("image_url") or ""
         if isinstance(img, str):
@@ -261,16 +287,11 @@ def parse_menu_dishes_response(data: dict, cat_name: str, venue_id: str) -> List
         elif isinstance(img, dict):
             image = img.get("url") or img.get("src") or ""
 
-        # Unit / size text
         unit_text = norm_space(
             item.get("unitText") or item.get("unit_text") or
             item.get("quantity") or item.get("size") or ""
         )
-
-        # EAN / barcode
         ean = item.get("barcode_gtin") or item.get("ean") or item.get("gtin") or ""
-
-        # Item ID
         item_id = str(item.get("id") or item.get("_id") or "")
 
         products.append({
@@ -286,10 +307,7 @@ def parse_menu_dishes_response(data: dict, cat_name: str, venue_id: str) -> List
 
     _extract_items(data)
 
-    # Deduplicate by item_id, then by name
-    seen_ids = set()
-    seen_names = set()
-    unique = []
+    seen_ids, seen_names, unique = set(), set(), []
     for p in products:
         if p["item_id"] and p["item_id"] in seen_ids:
             continue
@@ -385,49 +403,40 @@ async def _ingest_to_db(products: List[Dict]) -> None:
 
 # ---------------------- main crawl ---------------------- #
 def crawl(
-    categories: List[Tuple[str, str]],
+    venue_id: str,
     out_path: str,
+    categories: Optional[List[Tuple[str, str]]] = None,
+    delivery_lat: str = DELIVERY_LAT,
+    delivery_lng: str = DELIVERY_LNG,
     req_delay: float = 0.5,
 ) -> List[Dict]:
-    if not categories:
-        print("No categories to crawl.")
-        return []
 
-    # Derive venue_id and city from the first URL
-    first_href = categories[0][1]
-    city_slug, venue_id = extract_city_and_venue(first_href)
-    if not venue_id:
-        # Try extracting from /p/NNNN/ pattern
-        m = re.search(r"/p/(\d+)", first_href)
-        if m:
-            venue_id = m.group(1)
-    if not city_slug:
-        city_slug = "unknown"
-
-    print(f"[info] venue_id={venue_id}  city={city_slug}  categories={len(categories)}")
-
-    # Generate session IDs (random UUIDs, no auth needed)
     session_id = str(uuid.uuid4())
     device_id = str(uuid.uuid4()).replace("-", "")[:32]
+    session = _make_session()
 
-    session = _make_session(session_id, device_id)
+    # Fetch categories dynamically if not provided via file
+    if not categories:
+        print(f"[info] fetching categories dynamically for venue_id={venue_id}")
+        categories = fetch_categories_from_api(
+            session, venue_id, session_id, device_id, delivery_lat, delivery_lng
+        )
+
+    if not categories:
+        print("[error] no categories found, aborting.")
+        return []
+
+    print(f"[info] venue_id={venue_id}  categories={len(categories)}")
 
     all_products: List[Dict] = []
 
-    for idx, (cat_name, href) in enumerate(categories, 1):
-        # Extract category_id (smc number) from the URL
-        m = SMC_RE.search(href)
-        if not m:
-            print(f"[warn] no smc ID in URL: {href}")
-            continue
-        category_id = m.group(1)
-
+    for idx, (cat_name, category_id) in enumerate(categories, 1):
         print(f"[cat] {idx}/{len(categories)} '{cat_name}' (smc={category_id})")
 
         data = fetch_category_products(
             session, venue_id, category_id,
             session_id, device_id,
-            req_delay=req_delay,
+            delivery_lat, delivery_lng,
         )
 
         products = parse_menu_dishes_response(data, cat_name, venue_id)
@@ -436,7 +445,7 @@ def crawl(
 
         time.sleep(req_delay)
 
-    # Deduplicate across categories by item_id
+    # Deduplicate across categories
     seen = set()
     unique_all: List[Dict] = []
     for p in all_products:
@@ -447,23 +456,17 @@ def crawl(
 
     print(f"[done] {len(unique_all)} unique products across all categories")
 
-    # Write CSV
     if unique_all:
         os.makedirs(os.path.dirname(out_path) or ".", exist_ok=True)
         fieldnames = [
-            "venue_id", "city_slug", "category", "item_id",
+            "venue_id", "category", "item_id",
             "name", "price_eur", "unit_text", "ean", "image",
         ]
         with open(out_path, "w", encoding="utf-8", newline="") as f:
-            w = csv.DictWriter(
-                f, fieldnames=fieldnames,
-                extrasaction="ignore",
-                lineterminator="\n",
-            )
+            w = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore", lineterminator="\n")
             w.writeheader()
             for p in unique_all:
                 row = dict(p)
-                row["city_slug"] = city_slug
                 row["price_eur"] = f"{p['price_eur']:.2f}"
                 w.writerow(row)
         print(f"[csv] wrote {len(unique_all)} rows → {out_path}")
@@ -475,35 +478,35 @@ def crawl(
 
 # ---------------------- CLI ---------------------- #
 def main():
-    ap = argparse.ArgumentParser("bolt food store crawler (direct API)")
-    ap.add_argument("--categories-file", help="File with category URLs")
-    ap.add_argument("--categories-dir")
-    ap.add_argument("--city", default="")
-    ap.add_argument("--store")
+    ap = argparse.ArgumentParser("bolt food store crawler (direct API, dynamic categories)")
+    ap.add_argument("--venue-id", required=True, help="Bolt venue/provider ID (e.g. 2281)")
+    ap.add_argument("--delivery-lat", default=DELIVERY_LAT)
+    ap.add_argument("--delivery-lng", default=DELIVERY_LNG)
     ap.add_argument("--out", required=True)
     ap.add_argument("--req-delay", type=float, default=0.5)
     ap.add_argument("--upsert-db", default="1")
-    # legacy flags kept for YML compatibility
+    # Legacy / compat flags (ignored but kept so old YML doesn't break)
+    ap.add_argument("--categories-file", default="")
+    ap.add_argument("--categories-dir", default="")
+    ap.add_argument("--city", default="")
+    ap.add_argument("--store", default="")
     ap.add_argument("--headless", default="1")
     ap.add_argument("--deep", default="0")
     ap.add_argument("--ingest-mode", default="main")
     args = ap.parse_args()
 
-    categories_file = args.categories_file
-    if not categories_file:
-        categories_file = find_categories_file(
-            args.categories_dir or "", args.store or "", args.city or ""
-        )
-
-    if not categories_file or not os.path.isfile(categories_file):
-        ap.error("--categories-file required (or --categories-dir + --store)")
-
-    print(f"[info] using categories file: {categories_file}")
-    categories = parse_categories_file(categories_file)
+    # Optional: still support categories file as override for testing
+    categories = None
+    if args.categories_file and os.path.isfile(args.categories_file):
+        print(f"[info] using categories file override: {args.categories_file}")
+        categories = parse_categories_file(args.categories_file)
 
     products = crawl(
-        categories=categories,
+        venue_id=args.venue_id,
         out_path=args.out,
+        categories=categories,
+        delivery_lat=args.delivery_lat,
+        delivery_lng=args.delivery_lng,
         req_delay=args.req_delay,
     )
 
