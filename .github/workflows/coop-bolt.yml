@@ -2,7 +2,7 @@ name: Coop Bolt scrape + DB ingest
 on:
   workflow_dispatch:
   schedule:
-    - cron: "12 3 * * *"   # daily at 03:12 UTC
+    - cron: "30 7 * * *"   # daily at 07:30 UTC (10:30 Estonian — stores open 09:00-19:00)
 jobs:
   scrape-bolt:
     runs-on: ubuntu-latest
