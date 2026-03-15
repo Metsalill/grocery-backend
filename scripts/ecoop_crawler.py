@@ -4,19 +4,8 @@
 Coop eCoop crawler — fast requests+BeautifulSoup version.
 
 Scrapes category listing pages only (no PDP visits).
-All data needed (name, price, EAN/SKU, image) is present on the listing page.
-No Playwright needed — coophaapsalu.ee is server-side rendered WordPress/WooCommerce.
-
-Usage:
-  python3 ecoop_crawler.py \
-    --store-url https://coophaapsalu.ee \
-    --store-host coophaapsalu.ee \
-    --store-id 445 \
-    --categories-file data/coop_haapsalu_categories.txt \
-    --cat-shards 8 \
-    --cat-index 0 \
-    --out out/ecoop_haapsalu_0.csv \
-    --upsert-db main
+Handles subcategory containers recursively (up to depth 3).
+No Playwright needed — coophaapsalu.ee is server-side rendered WooCommerce.
 """
 
 import argparse
@@ -29,8 +18,8 @@ import re
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
-from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit, parse_qsl, urlencode
+from typing import Dict, List, Optional, Set, Tuple
+from urllib.parse import urljoin, urlparse
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -50,7 +39,6 @@ UA = (
 
 DIGITS_ONLY = re.compile(r"[^0-9]")
 SIZE_RE = re.compile(r"(\b\d+[\,\.]?\d*\s?(?:kg|g|l|ml|tk|pcs|x|×)\s?\d*\b)", re.IGNORECASE)
-PRICE_RE = re.compile(r"(\d+[.,]\d{2})")
 
 CSV_COLS = [
     "chain", "store_host", "channel", "ext_id", "ean_raw", "ean_norm",
@@ -144,7 +132,6 @@ def parse_price_text(text: str) -> Optional[float]:
             return float(m.group(1))
         except Exception:
             pass
-    # integer price like "3 €"
     m2 = re.search(r"(\d+)\s*€", text)
     if m2:
         try:
@@ -154,11 +141,41 @@ def parse_price_text(text: str) -> Optional[float]:
     return None
 
 
+def get_subcategory_links(soup: BeautifulSoup, current_url: str, base_host: str) -> List[str]:
+    """Find subcategory links on a page that shows category tiles instead of products."""
+    links = []
+    seen = set()
+
+    # WooCommerce subcategory tiles
+    for el in soup.select("a[href*='/tootekategooria/']"):
+        href = el.get("href", "")
+        if not href:
+            continue
+        abs_url = urljoin(current_url, href)
+        # Must be same host and a deeper category path
+        parsed = urlparse(abs_url)
+        if parsed.netloc.lower() != base_host.lower():
+            continue
+        # Must be different from current URL
+        abs_clean = abs_url.rstrip("/")
+        curr_clean = current_url.rstrip("/")
+        if abs_clean == curr_clean:
+            continue
+        # Must be a subcategory (longer path than current)
+        curr_path = urlparse(current_url).path.rstrip("/")
+        if not parsed.path.rstrip("/").startswith(curr_path + "/"):
+            continue
+        if abs_clean not in seen:
+            seen.add(abs_clean)
+            links.append(abs_url)
+
+    return links
+
+
 def scrape_product_cards(soup: BeautifulSoup, base_url: str, store_host: str) -> List[Dict]:
     """Extract all product cards from a category listing page."""
     products = []
 
-    # WooCommerce product cards — various selectors
     cards = (
         soup.select("li.product")
         or soup.select("div.product")
@@ -168,6 +185,11 @@ def scrape_product_cards(soup: BeautifulSoup, base_url: str, store_host: str) ->
     )
 
     for card in cards:
+        # Skip subcategory tiles (they have class 'product-category')
+        card_classes = card.get("class") or []
+        if "product-category" in card_classes:
+            continue
+
         # Name
         name = ""
         name_el = (
@@ -184,21 +206,30 @@ def scrape_product_cards(soup: BeautifulSoup, base_url: str, store_host: str) ->
 
         # URL
         url = ""
-        link_el = card.select_one("a.woocommerce-loop-product__link") or card.select_one("a[href*='/toode/']") or card.select_one("a")
+        link_el = (
+            card.select_one("a.woocommerce-loop-product__link")
+            or card.select_one("a[href*='/toode/']")
+            or card.select_one("a")
+        )
         if link_el:
             url = urljoin(base_url, link_el.get("href", ""))
 
-        # Price — WooCommerce uses .price .amount bdi
+        # Price — target WooCommerce structure specifically to avoid unit prices
         price = None
-        price_el = (
-            card.select_one(".price ins .amount bdi")  # sale price
-            or card.select_one(".price .amount bdi")
-            or card.select_one(".price .amount")
-            or card.select_one(".price")
-            or card.select_one("[data-testid='product-price']")
-        )
-        if price_el:
-            price = parse_price_text(price_el.get_text())
+        # First try sale price (ins .amount bdi)
+        sale_el = card.select_one(".price ins .amount bdi")
+        if sale_el:
+            price = parse_price_text(sale_el.get_text())
+        # Then regular price
+        if price is None:
+            regular_el = card.select_one(".price .woocommerce-Price-amount.amount bdi")
+            if regular_el:
+                price = parse_price_text(regular_el.get_text())
+        # Fallback to first .amount
+        if price is None:
+            amount_el = card.select_one(".price .amount")
+            if amount_el:
+                price = parse_price_text(amount_el.get_text())
 
         # Image
         image_url = ""
@@ -208,35 +239,31 @@ def scrape_product_cards(soup: BeautifulSoup, base_url: str, store_host: str) ->
             if image_url.startswith("//"):
                 image_url = "https:" + image_url
 
-        # EAN/SKU from data attributes or product link
+        # EAN/SKU from data attributes
         ean_raw = None
         sku = None
 
-        # WooCommerce often puts product id in class like "post-XXXX"
-        for cls in (card.get("class") or []):
+        # WooCommerce post ID from class
+        for cls in card_classes:
             m = re.match(r"post-(\d+)", cls)
             if m:
                 sku = m.group(1)
                 break
 
-        # Try data-product_id or data-product-id
         data_id = card.get("data-product_id") or card.get("data-product-id") or card.get("data-id")
         if data_id:
             sku = str(data_id)
 
-        # Try to extract EAN-like number from product URL slug
+        # Try EAN from URL slug
         if url:
             slug = url.rstrip("/").split("/")[-1]
-            # Look for a sequence of 8-13 digits in the slug
             digits_in_slug = re.findall(r"\d{8,14}", slug)
             if digits_in_slug:
                 ean_raw = digits_in_slug[0]
 
-        # ext_id: prefer EAN norm, then SKU, then slug
         ean_norm = normalize_ean(ean_raw)
         ext_id = ean_norm or sku or (url.rstrip("/").split("/")[-1] if url else "")
 
-        # size_text from name
         size_text = None
         if name:
             m = SIZE_RE.search(name)
@@ -267,8 +294,6 @@ def scrape_product_cards(soup: BeautifulSoup, base_url: str, store_host: str) ->
 
 
 def get_next_page_url(soup: BeautifulSoup, current_url: str) -> Optional[str]:
-    """Find the next page URL from pagination."""
-    # WooCommerce standard pagination
     next_el = (
         soup.select_one("a.next.page-numbers")
         or soup.select_one('a[rel="next"]')
@@ -279,31 +304,6 @@ def get_next_page_url(soup: BeautifulSoup, current_url: str) -> Optional[str]:
         href = next_el.get("href", "")
         if href:
             return urljoin(current_url, href)
-
-    # ?page= style pagination
-    current_page = 1
-    m = re.search(r"[?&]page=(\d+)", current_url)
-    if m:
-        current_page = int(m.group(1))
-
-    # Check if there's a "next" indicator in page numbers
-    page_nums = soup.select(".page-numbers")
-    for el in page_nums:
-        if "current" in (el.get("class") or []):
-            try:
-                curr = int(el.get_text(strip=True))
-                # Look for curr+1
-                for el2 in page_nums:
-                    try:
-                        if int(el2.get_text(strip=True)) == curr + 1:
-                            href = el2.get("href", "")
-                            if href:
-                                return urljoin(current_url, href)
-                    except Exception:
-                        pass
-            except Exception:
-                pass
-
     return None
 
 
@@ -312,11 +312,31 @@ def scrape_category(
     category_url: str,
     store_host: str,
     req_delay: float = 0.3,
+    visited: Optional[Set[str]] = None,
+    depth: int = 0,
+    max_depth: int = 3,
 ) -> List[Dict]:
-    """Scrape all products from a category, following pagination."""
+    """
+    Scrape all products from a category, following pagination.
+    If the category page shows subcategory tiles instead of products,
+    recurse into each subcategory (up to max_depth).
+    """
+    if visited is None:
+        visited = set()
+
+    clean_url = category_url.rstrip("/")
+    if clean_url in visited:
+        return []
+    visited.add(clean_url)
+
+    if depth > max_depth:
+        print(f"  [warn] max depth {max_depth} reached at {category_url}")
+        return []
+
     all_products = []
     url = category_url
     page_num = 0
+    base_host = urlparse(category_url).netloc
 
     while url:
         page_num += 1
@@ -327,14 +347,37 @@ def scrape_category(
             break
 
         products = scrape_product_cards(soup, category_url, store_host)
-        all_products.extend(products)
-        print(f"  -> {len(products)} products (total so far: {len(all_products)})")
 
-        next_url = get_next_page_url(soup, url)
-        if next_url and next_url != url:
-            url = next_url
-            time.sleep(req_delay)
+        if products:
+            all_products.extend(products)
+            print(f"  -> {len(products)} products (total so far: {len(all_products)})")
+
+            # Follow pagination
+            next_url = get_next_page_url(soup, url)
+            if next_url and next_url.rstrip("/") != url.rstrip("/"):
+                url = next_url
+                time.sleep(req_delay)
+            else:
+                break
+
         else:
+            # No products on this page — check for subcategory tiles
+            subcats = get_subcategory_links(soup, url, base_host)
+
+            if subcats:
+                print(f"  -> no products, found {len(subcats)} subcategories (depth={depth})")
+                for subcat_url in subcats:
+                    time.sleep(req_delay)
+                    sub_products = scrape_category(
+                        session, subcat_url, store_host,
+                        req_delay=req_delay,
+                        visited=visited,
+                        depth=depth + 1,
+                        max_depth=max_depth,
+                    )
+                    all_products.extend(sub_products)
+            else:
+                print(f"  -> no products and no subcategories found")
             break
 
     return all_products
@@ -455,11 +498,16 @@ async def main(args):
 
     session = _make_session()
     all_rows: List[Dict] = []
+    visited: Set[str] = set()
     ts_now = dt.datetime.now(dt.timezone.utc)
 
     for i, cat_url in enumerate(categories, 1):
         print(f"[cat] {i}/{len(categories)} {cat_url}")
-        products = scrape_category(session, cat_url, store_host, req_delay=args.req_delay)
+        products = scrape_category(
+            session, cat_url, store_host,
+            req_delay=args.req_delay,
+            visited=visited,
+        )
         if products:
             append_csv(products, out_path)
             all_rows.extend(products)
@@ -468,7 +516,7 @@ async def main(args):
 
     print(f"[done] total {len(all_rows)} rows → {out_path}")
 
-    # DB ingest
+    # DB ingest — only rows with a price
     rows_for_db: List[Tuple] = []
     for r in all_rows:
         price_val = r.get("price")
