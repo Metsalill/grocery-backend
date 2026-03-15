@@ -134,8 +134,10 @@ def fetch_categories_from_api(
 
     try:
         r = session.get(CATEGORIES_API, params=params, timeout=30)
+        print(f"[categories] status={r.status_code} len={len(r.content)} url={r.url}")
+        print(f"[categories] response headers: {dict(r.headers)}")
+        print(f"[categories] raw body (first 500): {r.text[:500]!r}")
         if r.status_code != 200:
-            print(f"[categories] API returned {r.status_code}: {r.text[:200]}")
             return []
 
         data = r.json()
