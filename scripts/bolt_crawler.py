@@ -138,6 +138,18 @@ def fetch_categories_from_api(
             print(f"[categories] API returned {r.status_code}: {r.text[:200]}")
             return []
         data = r.json()
+        # DEBUG
+        import json as _json
+        top_d = data.get("data", {})
+        print(f"[categories-debug] data keys: {list(top_d.keys()) if isinstance(top_d, dict) else type(top_d)}")
+        items_d = top_d.get("items", {})
+        print(f"[categories-debug] items type={type(items_d)} len={len(items_d) if isinstance(items_d, dict) else '?'}")
+        if isinstance(items_d, dict):
+            first_key = next(iter(items_d), None)
+            if first_key:
+                print(f"[categories-debug] first item key type={type(first_key)} val={_json.dumps(items_d[first_key])[:300]}")
+        child_ids = top_d.get("child_ids", [])
+        print(f"[categories-debug] root child_ids (first 5): {child_ids[:5]}, types: {[type(x).__name__ for x in child_ids[:3]]}")
     except Exception as e:
         print(f"[categories] API call failed: {e}")
         return []
