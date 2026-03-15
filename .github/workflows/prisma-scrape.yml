@@ -1,110 +1,29 @@
-name: Prisma DB Scrape + CSV Artifact
+name: prisma
 
 on:
-  workflow_dispatch: {}
   schedule:
-    - cron: "0 3 * * *"   # Every day at 03:00 UTC (was broken: "0 */24 * * *")
-
-concurrency:
-  group: prisma-db-scrape
-  cancel-in-progress: true
+    - cron: "0 3 * * *"   # 03:00 UTC daily
+  workflow_dispatch:
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 200
+    timeout-minutes: 30      # was 200 — new scraper needs ~3 min
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}   # was RW_DATABASE_URL
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       PGSSLMODE: require
-      PRODUCTS_TABLE: products
       PYTHONUNBUFFERED: "1"
-      STORE_ID: "14"   # Prisma Online (Tallinn)
+      STORE_ID: "14"
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
 
-      - name: Install deps
-        run: |
-          set -euo pipefail
-          python -V
-          pip install --upgrade pip
-          pip install playwright psycopg2-binary
-          pip install -r requirements.txt || true
+      - name: Install dependencies
+        run: pip install requests asyncpg urllib3
 
-      - name: Install Chromium + deps
-        run: python -m playwright install --with-deps chromium
-
-      - name: Print DATABASE_URL host/db
-        run: >
-          python -c
-          "import os,urllib.parse as u; x=u.urlparse(os.environ['DATABASE_URL']);
-          print('DATABASE_URL host:', x.hostname, 'db:', x.path.lstrip('/'))"
-
-      - name: Connect test (DB identity)
-        run: >
-          python -c
-          "import os,psycopg2 as p;
-          c=p.connect(os.environ['DATABASE_URL']);cur=c.cursor();
-          cur.execute('SELECT current_database(), current_user;');
-          print('DB identity:', cur.fetchone()); c.close()"
-
-      - name: Prisma → DB (UPSERT by EAN) in chunks
-        shell: bash
-        env:
-          CHUNKS: "6"
-          PER_CHUNK_LIMIT: "2200"
-          CHUNK_TIMEOUT: "25m"
-          PRELOAD_DB: "1"
-          PRELOAD_DB_QUERY: |
-            SELECT DISTINCT p.source_url
-            FROM public.prices p
-            JOIN public.stores s ON s.id = p.store_id
-            WHERE s.chain = 'Prisma'
-              AND s.is_online = TRUE
-              AND p.source_url IS NOT NULL
-              AND p.source_url <> ''
-              AND p.collected_at > now() - interval '60 days';
-          PRELOAD_DB_LIMIT: "0"
-        run: |
-          set -euo pipefail
-          echo "Running $CHUNKS chunks; limit=$PER_CHUNK_LIMIT; timeout=$CHUNK_TIMEOUT per chunk"
-          for i in $(seq 1 "$CHUNKS"); do
-            echo "::group::Chunk $i/$CHUNKS"
-            set +e
-            timeout -k 30s "$CHUNK_TIMEOUT" \
-              python scripts/prisma_food_scrape_to_db.py \
-                --max-products "$PER_CHUNK_LIMIT" \
-                --headless 1
-            status=$?
-            set -e
-            if [ "$status" -eq 124 ]; then
-              echo "::warning::Chunk $i timed out (expected). Continuing."
-            elif [ "$status" -ne 0 ]; then
-              echo "::warning::Chunk $i failed with exit $status; continuing."
-            else
-              echo "Chunk $i completed."
-            fi
-            echo "::endgroup::"
-            sleep 5
-          done
-
-      - name: Produce CSV export (DB → CSV)
-        run: |
-          set -euo pipefail
-          python scripts/db_export_csv.py prisma_foods.csv
-          echo "CSV line count (incl header):"; wc -l prisma_foods.csv || true
-          echo "Preview:"; head -n 5 prisma_foods.csv || true
-
-      - name: Upload CSV artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: prisma_foods.csv
-          path: prisma_foods.csv
-          if-no-files-found: error
+      - name: Run Prisma scraper
+        run: python scripts/prisma_scraper.py
