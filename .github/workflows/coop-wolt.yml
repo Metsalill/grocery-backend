@@ -44,6 +44,9 @@ jobs:
           - store_id: "557"
             city: "tallinn"
             store_host: "coop-mustakivi"
+          - store_id: "558"
+            city: "tallinn"
+            store_host: "konsum-saku"
     env:
       PYTHONUNBUFFERED: "1"
       STORE_ID: ${{ matrix.store_id }}
@@ -145,6 +148,7 @@ jobs:
               "coop-akadeemia":  555,
               "coop-lasname":    556,
               "coop-mustakivi":  557,
+              "konsum-saku":     558,
           }
 
           SQL = """
@@ -238,7 +242,7 @@ jobs:
           SELECT s.name, COUNT(p.id) AS prices, MAX(p.collected_at) AS last_seen
           FROM public.stores s
           LEFT JOIN public.prices p ON p.store_id = s.id
-          WHERE s.id IN (551, 552, 553, 554, 555, 556, 557)
+          WHERE s.id IN (551, 552, 553, 554, 555, 556, 557, 558)
           GROUP BY s.name
           ORDER BY s.name;
           SQL
