@@ -138,38 +138,39 @@ def fetch_categories_from_api(
             print(f"[categories] API returned {r.status_code}: {r.text[:200]}")
             return []
         data = r.json()
-        # Debug: print structure of first response to understand shape
-        import json as _json
-        print(f"[categories] response keys: {list(data.keys()) if isinstance(data, dict) else type(data)}")
-        print(f"[categories] raw (first 1000): {_json.dumps(data)[:1000]}")
     except Exception as e:
         print(f"[categories] API call failed: {e}")
         return []
 
     categories: List[Tuple[str, str]] = []
 
-    def _extract_cats(obj, depth=0):
-        if depth > 10:
-            return
-        if isinstance(obj, list):
-            for item in obj:
-                _extract_cats(item, depth + 1)
-        elif isinstance(obj, dict):
-            cat_id = str(obj.get("id") or obj.get("category_id") or "")
-            # name may be a string or a dict (e.g. {"et": "Piimatooted"})
-            raw_name = obj.get("name") or obj.get("title") or ""
-            if isinstance(raw_name, dict):
-                # pick localised value: prefer et, then first value
-                raw_name = raw_name.get("et") or raw_name.get("en") or next(iter(raw_name.values()), "")
-            cat_name = norm_space(str(raw_name))
-            if cat_id and cat_name and cat_id.isdigit():
-                categories.append((cat_name, cat_id))
-            # Recurse into sub-keys
-            for key, val in obj.items():
-                if isinstance(val, (dict, list)):
-                    _extract_cats(val, depth + 1)
+    # Response shape:
+    # {"code": 0, "data": {"child_ids": [id1, id2, ...], "items": {"id1": {"name": {"locale":..,"value":..}, "type": "category"|"item", "child_ids": [...]}}}}
+    top = data.get("data", {})
+    items_map = top.get("items", {})
 
-    _extract_cats(data)
+    def _get_name(obj):
+        n = obj.get("name") or {}
+        if isinstance(n, dict):
+            return norm_space(n.get("value") or n.get("et") or next(iter(n.values()), ""))
+        return norm_space(str(n))
+
+    def _walk(ids, depth=0):
+        if depth > 5:
+            return
+        for sid in (ids or []):
+            smc = str(sid)
+            obj = items_map.get(smc) or items_map.get(sid)
+            if not obj:
+                continue
+            typ = obj.get("type", "")
+            name = _get_name(obj)
+            if typ == "category" and name:
+                categories.append((name, smc))
+            # Always recurse into child_ids
+            _walk(obj.get("child_ids") or [], depth + 1)
+
+    _walk(top.get("child_ids") or [])
 
     # Deduplicate preserving order
     seen = set()
@@ -242,12 +243,7 @@ def fetch_category_products(
     try:
         r = session.get(API_BASE, params=params, timeout=30)
         if r.status_code == 200:
-            data = r.json()
-            if category_id == categories[0][1] if False else True:  # always debug first few
-                import json as _json
-                print(f"  [debug] product response keys: {list(data.keys()) if isinstance(data, dict) else type(data)}")
-                print(f"  [debug] raw (first 800): {_json.dumps(data)[:800]}")
-            return data
+            return r.json()
         else:
             print(f"  [warn] API returned {r.status_code} for category_id={category_id}: {r.text[:100]}")
             return {}
@@ -260,84 +256,90 @@ def parse_menu_dishes_response(data: dict, cat_name: str, venue_id: str) -> List
     if not data or not isinstance(data, dict):
         return []
 
+    # Response shape:
+    # {"code": 0, "data": {"root_id": ..., "items": {"smc_id": {"type": "category"|"item", "name": {"value":..}, "child_ids": [...], ...}}}}
+    top = data.get("data", {})
+    if not top:
+        return []
+
+    items_map = top.get("items", {})
+    if not items_map:
+        return []
+
     products = []
+    seen_ids = set()
 
-    def _extract_items(obj):
-        if isinstance(obj, list):
-            for item in obj:
-                _extract_items(item)
-        elif isinstance(obj, dict):
-            for key in ("items", "dishes", "products", "data"):
-                val = obj.get(key)
-                if isinstance(val, list) and val:
-                    for item in val:
-                        if isinstance(item, dict) and ("name" in item or "id" in item):
-                            _process_item(item)
-                elif isinstance(val, dict):
-                    _extract_items(val)
-            for key, val in obj.items():
-                if key not in ("items", "dishes", "products", "data") and isinstance(val, (dict, list)):
-                    _extract_items(val)
+    def _get_name(obj):
+        n = obj.get("name") or {}
+        if isinstance(n, dict):
+            return norm_space(n.get("value") or n.get("et") or next(iter(n.values()), ""))
+        return norm_space(str(n))
 
-    def _process_item(item: dict):
-        raw_name = item.get("name") or item.get("title") or ""
-        if isinstance(raw_name, dict):
-            raw_name = raw_name.get("et") or raw_name.get("en") or next(iter(raw_name.values()), "")
-        name = norm_space(str(raw_name))
-        if not name:
+    def _walk(ids, depth=0):
+        if depth > 5:
             return
+        for sid in (ids or []):
+            smc = str(sid)
+            if smc in seen_ids:
+                continue
+            seen_ids.add(smc)
+            obj = items_map.get(smc) or items_map.get(sid)
+            if not obj:
+                continue
+            typ = obj.get("type", "")
+            if typ == "category":
+                # recurse into sub-categories
+                _walk(obj.get("child_ids") or [], depth + 1)
+            else:
+                # it's a product/item
+                name = _get_name(obj)
+                if not name:
+                    continue
 
-        price_raw = item.get("price")
-        price_eur = None
-        if isinstance(price_raw, dict):
-            amount = price_raw.get("amount") or price_raw.get("value") or price_raw.get("price")
-            price_eur = _cents_to_eur(amount)
-        elif price_raw is not None:
-            price_eur = _cents_to_eur(price_raw)
+                # Price
+                price_eur = None
+                price_raw = obj.get("price")
+                if isinstance(price_raw, dict):
+                    amount = price_raw.get("amount") or price_raw.get("value") or price_raw.get("price")
+                    price_eur = _cents_to_eur(amount)
+                elif price_raw is not None:
+                    price_eur = _cents_to_eur(price_raw)
 
-        if price_eur is None or price_eur <= 0:
-            return
+                if price_eur is None or price_eur <= 0:
+                    continue
 
-        image = ""
-        img = item.get("image") or item.get("imageUrl") or item.get("image_url") or ""
-        if isinstance(img, str):
-            image = img
-        elif isinstance(img, dict):
-            image = img.get("url") or img.get("src") or ""
+                # Image
+                image = ""
+                img = obj.get("image") or obj.get("imageUrl") or obj.get("image_url") or ""
+                if isinstance(img, str):
+                    image = img
+                elif isinstance(img, dict):
+                    image = img.get("url") or img.get("src") or ""
 
-        unit_text = norm_space(
-            item.get("unitText") or item.get("unit_text") or
-            item.get("quantity") or item.get("size") or ""
-        )
-        ean = item.get("barcode_gtin") or item.get("ean") or item.get("gtin") or ""
-        item_id = str(item.get("id") or item.get("_id") or "")
+                unit_text = norm_space(
+                    obj.get("unitText") or obj.get("unit_text") or
+                    obj.get("quantity") or obj.get("size") or ""
+                )
+                ean = obj.get("barcode_gtin") or obj.get("ean") or obj.get("gtin") or ""
+                item_id = str(obj.get("id") or obj.get("_id") or smc)
 
-        products.append({
-            "item_id": item_id,
-            "name": name,
-            "price_eur": price_eur,
-            "unit_text": unit_text,
-            "image": image,
-            "ean": ean,
-            "category": cat_name,
-            "venue_id": venue_id,
-        })
+                products.append({
+                    "item_id": item_id,
+                    "name": name,
+                    "price_eur": price_eur,
+                    "unit_text": unit_text,
+                    "image": image,
+                    "ean": ean,
+                    "category": cat_name,
+                    "venue_id": venue_id,
+                })
 
-    _extract_items(data)
+    root_id = str(top.get("root_id", ""))
+    root_obj = items_map.get(root_id)
+    start_ids = (root_obj.get("child_ids") or []) if root_obj else list(items_map.keys())
+    _walk(start_ids)
 
-    seen_ids, seen_names, unique = set(), set(), []
-    for p in products:
-        if p["item_id"] and p["item_id"] in seen_ids:
-            continue
-        name_key = p["name"].lower()
-        if name_key in seen_names:
-            continue
-        if p["item_id"]:
-            seen_ids.add(p["item_id"])
-        seen_names.add(name_key)
-        unique.append(p)
-
-    return unique
+    return products
 
 
 # ---------------------- DB ingest ---------------------- #
@@ -445,10 +447,6 @@ def crawl(
         return []
 
     print(f"[info] venue_id={venue_id}  categories={len(categories)}")
-
-    # DEBUG: limit to 2 categories to inspect response structure
-    categories = categories[:2]
-    print(f"[debug] limiting to {len(categories)} categories for inspection")
 
     all_products: List[Dict] = []
 
