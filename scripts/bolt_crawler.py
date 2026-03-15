@@ -138,6 +138,10 @@ def fetch_categories_from_api(
             print(f"[categories] API returned {r.status_code}: {r.text[:200]}")
             return []
         data = r.json()
+        # Debug: print structure of first response to understand shape
+        import json as _json
+        print(f"[categories] response keys: {list(data.keys()) if isinstance(data, dict) else type(data)}")
+        print(f"[categories] raw (first 1000): {_json.dumps(data)[:1000]}")
     except Exception as e:
         print(f"[categories] API call failed: {e}")
         return []
@@ -238,7 +242,12 @@ def fetch_category_products(
     try:
         r = session.get(API_BASE, params=params, timeout=30)
         if r.status_code == 200:
-            return r.json()
+            data = r.json()
+            if category_id == categories[0][1] if False else True:  # always debug first few
+                import json as _json
+                print(f"  [debug] product response keys: {list(data.keys()) if isinstance(data, dict) else type(data)}")
+                print(f"  [debug] raw (first 800): {_json.dumps(data)[:800]}")
+            return data
         else:
             print(f"  [warn] API returned {r.status_code} for category_id={category_id}: {r.text[:100]}")
             return {}
@@ -436,6 +445,10 @@ def crawl(
         return []
 
     print(f"[info] venue_id={venue_id}  categories={len(categories)}")
+
+    # DEBUG: limit to 2 categories to inspect response structure
+    categories = categories[:2]
+    print(f"[debug] limiting to {len(categories)} categories for inspection")
 
     all_products: List[Dict] = []
 
