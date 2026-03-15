@@ -1,78 +1,58 @@
-name: Coop Bolt scrape + DB ingest
+name: scrape-bolt
+
 on:
-  workflow_dispatch:
   schedule:
-    - cron: "30 7 * * *"   # daily at 07:30 UTC (10:30 Estonian — stores open 09:00-19:00)
+    - cron: "30 7 * * *"   # 07:30 UTC = 09:30 Estonian (stores open 09:00)
+  workflow_dispatch:
+
 jobs:
   scrape-bolt:
     runs-on: ubuntu-latest
-    timeout-minutes: 30   # API-only crawler, much faster than Playwright
     strategy:
       fail-fast: false
       matrix:
         include:
-          - city: tartu
-            store: kvartali-coop-maksimarket
+          - name: "tartu, kvartali-coop-maksimarket, 1969, 559"
             venue_id: "1969"
             store_id: "559"
-            categories_file: data/bolt/2-tartu/kvartali-coop-maksimarket.txt
-            out: out/bolt_kvartali.csv
-          - city: tartu
-            store: lounakeskuse-coop-maksimarket
+            out_file: "data/bolt/2-tartu/kvartali-coop-maksimarket.csv"
+            delivery_lat: "58.377983"
+            delivery_lng: "26.729038"
+
+          - name: "tartu, lounakeskuse-coop-maksimarket, 2281, 561"
             venue_id: "2281"
             store_id: "561"
-            categories_file: data/bolt/2-tartu/lounakeskuse-coop-maksimarket.txt
-            out: out/bolt_lounakeskus.csv
-          - city: tartu
-            store: eedeni-coop-maksimarket
+            out_file: "data/bolt/2-tartu/lounakeskuse-coop-maksimarket.csv"
+            delivery_lat: "58.377983"
+            delivery_lng: "26.729038"
+
+          - name: "tartu, eedeni-coop-maksimarket, 1970, 560"
             venue_id: "1970"
             store_id: "560"
-            categories_file: data/bolt/2-tartu/eedeni-coop-maksimarket.txt
-            out: out/bolt_eedeni.csv
-    env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
-      PGSSLMODE: require
-      PYTHONUNBUFFERED: "1"
-      STORE_ID: ${{ matrix.store_id }}
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+            out_file: "data/bolt/2-tartu/eedeni-coop-maksimarket.csv"
+            delivery_lat: "58.356789"
+            delivery_lng: "26.693456"
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+    name: scrape-bolt (${{ matrix.name }})
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install deps
-        run: |
-          python -m pip install --upgrade pip
-          pip install requests asyncpg tenacity
-
-      - name: Update categories file with correct venue_id
-        run: |
-          VENUE_ID="${{ matrix.venue_id }}"
-          CATS_FILE="${{ matrix.categories_file }}"
-          sed -i -E "s|/p/[0-9]+-|/p/${VENUE_ID}-|g; s|/p/[0-9]+/|/p/${VENUE_ID}/|g; s|backPath=%2Fp%2F[0-9]+|backPath=%2Fp%2F${VENUE_ID}|g" "$CATS_FILE"
-          echo "Updated $CATS_FILE with venue_id=${VENUE_ID}"
-          head -3 "$CATS_FILE"
+      - name: Install dependencies
+        run: pip install requests asyncpg urllib3
 
       - name: Run Bolt crawler + ingest
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          STORE_ID: ${{ matrix.store_id }}
         run: |
-          set -euo pipefail
-          mkdir -p out
-          python3 scripts/bolt_crawler.py \
-            --categories-file "${{ matrix.categories_file }}" \
-            --city "${{ matrix.city }}" \
-            --store "${{ matrix.store }}" \
-            --upsert-db 1 \
-            --out "${{ matrix.out }}" \
-            --req-delay 0.3
-
-      - name: Upload CSV artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: bolt-${{ matrix.store }}
-          path: ${{ matrix.out }}
-          if-no-files-found: warn
-          retention-days: 7
+          python scripts/bolt_crawler.py \
+            --venue-id "${{ matrix.venue_id }}" \
+            --delivery-lat "${{ matrix.delivery_lat }}" \
+            --delivery-lng "${{ matrix.delivery_lng }}" \
+            --out "${{ matrix.out_file }}" \
+            --req-delay 0.5 \
+            --upsert-db 1
