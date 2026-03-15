@@ -254,8 +254,17 @@ def scrape_product_cards(soup: BeautifulSoup, base_url: str, store_host: str) ->
         if data_id:
             sku = str(data_id)
 
-        # Try EAN from URL slug
-        if url:
+        # Try EAN from image filename — coophaapsalu.ee uses EAN as image filename
+        # e.g. https://coophaapsalu.ee/wp-content/uploads/2025/03/8711327667020.png
+        if image_url:
+            img_filename = image_url.rstrip("/").split("/")[-1]
+            img_stem = re.sub(r"\.[^.]+$", "", img_filename)  # remove extension
+            digits = re.sub(r"[^0-9]", "", img_stem)
+            if len(digits) in (8, 12, 13, 14):
+                ean_raw = digits
+
+        # Fallback: try EAN from URL slug
+        if not ean_raw and url:
             slug = url.rstrip("/").split("/")[-1]
             digits_in_slug = re.findall(r"\d{8,14}", slug)
             if digits_in_slug:
