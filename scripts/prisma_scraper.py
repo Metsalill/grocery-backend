@@ -1,389 +1,819 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Prisma.ee scraper — __NEXT_DATA__ / Apollo cache version.
+Prisma.ee scraper -> Postgres via upsert_product_and_price()
 
-No Playwright. No PDP visits. Fetches HTML category pages, extracts
-the embedded Apollo cache from <script id="__NEXT_DATA__">, and pulls
-all product data directly. Fast (~2-3 min for full catalog).
+This script crawls Prisma's online store (food / household FMCG),
+discovers product URLs, visits each PDP, extracts:
+  - ext_id (Prisma SKU / URL slug tail)
+  - product name
+  - brand guess
+  - size_text
+  - EAN/barcode
+  - price (EUR)
+  - source_url (canonical PDP)
+and then calls the DB function upsert_product_and_price(
+    in_source      text,      -- 'prisma'
+    in_ext_id      text,      -- Prisma product code / slug
+    in_name        text,
+    in_brand       text,
+    in_size_text   text,
+    in_ean_raw     text,
+    in_price       numeric,
+    in_currency    text,      -- 'EUR'
+    in_store_id    integer,   -- stores.id for Prisma Online
+    in_seen_at     timestamptz,
+    in_source_url  text
+) RETURNS integer;
 
-Flow:
-  1. GET /tooted/ → discover all top-level category slugs
-  2. For each category, paginate through ?sivu=1..N
-  3. Extract products from Apollo cache (all data inline)
-  4. Upsert via upsert_product_and_price()
+That function is already created in Railway and is responsible for:
+ - creating / reusing canonical product in products
+ - inserting/extending ext_product_map
+ - inserting/merging price row in prices for the given store_id
+
+IMPORTANT:
+    Prisma Online (Tallinn) has store_id = 14 in your `stores` table.
+    We also allow overriding via env STORE_ID so we don't hardcode 14 forever.
 """
 
 from __future__ import annotations
 
-import asyncio
-import datetime
-import json
+import argparse
 import os
+import random
 import re
 import sys
 import time
-from typing import Dict, List, Optional
+from datetime import datetime, timezone
 from urllib.parse import urljoin, urlparse
+import json
+import psycopg2
+import psycopg2.extras
+from psycopg2.extensions import connection as PGConn
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeout
 
-import requests
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
+# ---------------------------------------------------------------------------
+# Global config / constants
 
-try:
-    import asyncpg
-except ImportError:
-    asyncpg = None
+BASE = "https://prismamarket.ee"
+SEEDS = ["/en/tooted/", "/tooted/"]  # root category listings to start crawling
+CATEGORY_PREFIXES = ("/en/tooted/", "/tooted/", "/en/food-market/", "/food-market/")
+PRODUCT_PREFIXES = ("/en/toode/", "/toode/")
 
-# ── constants ─────────────────────────────────────────────────────────────────
+# Regex helpers
+PACK_RE   = re.compile(r"(\d+)\s*[x×]\s*(\d+(?:[\.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
+SIMPLE_RE = re.compile(r"\b(\d+(?:[\.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
+PIECES_RE = re.compile(r"\b(\d+)\s*(?:tk|pcs?|pk|pack)\b", re.I)
+BONUS_RE  = re.compile(r"\+\s*\d+%")      # "500 g +20%"
+EAN_RE    = re.compile(r"(\d{8,14})$")
+PRICE_NUM_RE = re.compile(r"(\d+[\.,]\d+)")
 
-BASE_URL   = "https://www.prismamarket.ee"
-STORE_ID   = os.environ.get("STORE_ID", "14")
+# ---------------------------------------------------------------------------
+# Small utils
 
-# Root category page slugs to crawl (Estonian paths)
-# We discover sub-slugs dynamically from the navigation
-ROOT_CATEGORIES = [
-    "tooted/puu-ja-koogiviljad",
-    "tooted/liha-kala-ja-mereannid",
-    "tooted/piimatooted-munad-ja-rasvaained",
-    "tooted/pagaritooted",
-    "tooted/kuivtooted-ja-konservid",
-    "tooted/joogid",
-    "tooted/maiustused-ja-snackid",
-    "tooted/valmistoidud-ja-pooltooted",
-    "tooted/beebid-ja-lapsed",
-    "tooted/kodumajapidamine",
-    "tooted/isikuhooldus",
+def jitter(a: float = 0.6, b: float = 1.4) -> None:
+    """Polite random sleep between requests / actions."""
+    time.sleep(random.uniform(a, b))
+
+def clean(s: str | None) -> str:
+    return re.sub(r"\s+", " ", s or "").strip()
+
+def is_category_path(path: str) -> bool:
+    return any(path.startswith(p) for p in CATEGORY_PREFIXES)
+
+def is_product_path(path: str) -> bool:
+    p = path.lower()
+    return any(p.startswith(pref) for pref in PRODUCT_PREFIXES)
+
+# ---------------------------------------------------------------------------
+# Whitelist / blacklist filtering for categories
+
+EXCLUDED_CATEGORY_KEYWORDS = [
+    "sisustus","kodutekstiil","valgustus","kardin","jouluvalgustid","vaikesed-sisustuskaubad","kuunlad",
+    "kook-ja-lauakatmine","uhekordsed-noud","kirja-ja-kontoritarbed","remondi-ja-turvatooted",
+    "kulmutus-ja-kokkamisvahendid","omblus-ja-kasitootarbed","meisterdamine","ajakirjad","autojuhtimine",
+    "kotid","aed-ja-lilled","lemmikloom","sport","pallimangud","jalgrattasoit","ujumine","matkamine",
+    "tervisesport","manguasjad","lutid","lapsehooldus","ideed-ja-hooajad","kodumasinad","elektroonika",
+    "meelelahutuselektroonika","vaikesed-kodumasinad","lambid-patareid-ja-taskulambid",
+    "ilu-ja-tervis","kosmeetika","meigitooted","hugieen","loodustooted-ja-toidulisandid",
 ]
 
-UA = (
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-    "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-)
+def is_in_whitelist(url: str) -> bool:
+    """
+    We only want food / FMCG, not furniture, electronics etc.
+    """
+    path = urlparse(url).path.lower()
+    if not is_category_path(path):
+        return False
+    if any(ex in path for ex in EXCLUDED_CATEGORY_KEYWORDS):
+        return False
+    return True
 
-# ── HTTP session ───────────────────────────────────────────────────────────────
+# ---------------------------------------------------------------------------
+# Optional high-level food group classifier (not strictly needed for ingest)
 
-def make_session() -> requests.Session:
-    s = requests.Session()
-    retries = Retry(
-        total=4,
-        backoff_factor=1.0,
-        status_forcelist=(429, 500, 502, 503, 504),
-        allowed_methods=frozenset(["GET"]),
-    )
-    s.mount("https://", HTTPAdapter(max_retries=retries))
-    s.headers.update({
-        "User-Agent": UA,
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "et-EE,et;q=0.9,en;q=0.7",
-        "Accept-Encoding": "gzip, deflate, br",
-    })
-    return s
+def map_food_group(c1: str, c2: str, c3: str, title: str) -> str:
+    """
+    Best-effort mapping of category/keywords to a broad food group.
+    We keep this so we can re-use it later, but we don't push it
+    into upsert_product_and_price() because the DB function doesn't need it.
+    """
+    t = " ".join([c1, c2, c3, title]).lower()
 
+    def has(*keys): 
+        return any(k in t for k in keys)
 
-# ── __NEXT_DATA__ extraction ───────────────────────────────────────────────────
+    if has("joogid","drink","water","juice","soda","beer","wine","kõvad joogid"):
+        return "drinks"
+    if has("leivad","küpsised","kook","saia","bakery","pastry","biscuit","bread","cake"):
+        return "bakery"
+    if has("piim","juust","kohuke","kohupiim","või","jogurt","dairy","eggs","munad","cream"):
+        return "dairy_eggs"
+    if has("puu","köögivil","vegetable","fruit","salat","herb"):
+        return "produce"
+    if has("liha","meat","kana","chicken","beef","pork","lamb","veal","ham","saus"):
+        return "meat"
+    if has("kala","fish","lõhe","räim","heering","tuna","shrimp","kammkarp","mereann","seafood"):
+        return "fish"
+    if has("külmutatud","frozen"):
+        return "frozen"
+    if has("kuivtooted","pasta","riis","rice","jahu","flour","sugar","suhkur","oil","õli","konserv",
+           "canned","maitseaine","spice","kastme","sauce","teravili","cereal","snack","pähkl",
+           "müsl"):
+        return "pantry"
+    if has("valmistoit","prepared","ready"):
+        return "prepared"
+    return "other"
 
-NEXT_DATA_RE = re.compile(
-    r'<script[^>]+id=["\']__NEXT_DATA__["\'][^>]*>(.*?)</script>',
-    re.DOTALL,
-)
+# ---------------------------------------------------------------------------
+# DB helpers
 
-def fetch_next_data(session: requests.Session, url: str) -> Optional[dict]:
-    """Fetch a page and extract __NEXT_DATA__ JSON."""
+def get_database_url() -> str:
+    """
+    Pull DATABASE_URL from `settings.py` if present, else from env.
+    """
     try:
-        r = session.get(url, timeout=30)
-        if r.status_code != 200:
-            print(f"  [warn] {r.status_code} for {url}")
-            return None
-        m = NEXT_DATA_RE.search(r.text)
-        if not m:
-            print(f"  [warn] no __NEXT_DATA__ in {url}")
-            return None
-        return json.loads(m.group(1))
-    except Exception as e:
-        print(f"  [warn] fetch failed for {url}: {e}")
-        return None
+        import settings  # type: ignore
+        db = getattr(settings, "DATABASE_URL", None)
+        if db:
+            return db
+    except Exception:
+        pass
 
+    db = os.getenv("DATABASE_URL")
+    if not db:
+        raise RuntimeError("DATABASE_URL not set (env or settings.py)")
+    return db
 
-# ── product extraction from Apollo cache ──────────────────────────────────────
-
-def extract_products_from_apollo(apollo: dict, slug: str) -> List[Dict]:
+def db_connect() -> PGConn:
     """
-    Pull all Product:* entries from the Apollo cache.
-    Returns flat list of product dicts.
+    Connects to Postgres (autocommit).
+    We are NOT creating tables here anymore. The DB already has:
+      - products
+      - prices
+      - ext_product_map
+      - upsert_product_and_price(...)
     """
-    products = []
-    seen_eans = set()
+    dsn = get_database_url()
+    conn = psycopg2.connect(dsn)
+    conn.autocommit = True
+    return conn
 
-    for key, obj in apollo.items():
-        if not key.startswith("Product:"):
-            continue
-        if not isinstance(obj, dict):
-            continue
+def get_store_id_for_prisma() -> int:
+    """
+    Prisma Online (Tallinn) is store_id 14 in `stores`.
+    Allow override via env STORE_ID so we don't hardcode forever.
+    """
+    try:
+        return int(os.environ.get("STORE_ID", "14") or "14")
+    except Exception:
+        return 14
 
-        # Basic fields
-        name = (obj.get("name") or "").strip()
-        if not name:
-            continue
+# ---------------------------------------------------------------------------
+# PDP extraction helpers
 
-        ean = str(obj.get("ean") or "").strip()
-        price = obj.get("price")
+def extract_title(page) -> str:
+    try:
+        return clean(page.locator("h1").first.inner_text())
+    except Exception:
+        return ""
 
-        # Prefer pricing.currentPrice
-        pricing = obj.get("pricing") or {}
-        if isinstance(pricing, dict):
-            price = pricing.get("currentPrice") or pricing.get("regularPrice") or price
-
-        if not price or float(price) <= 0:
-            continue
-
-        # Deduplicate by EAN
-        if ean and ean in seen_eans:
-            continue
-        if ean:
-            seen_eans.add(ean)
-
-        # Brand
-        brand = (obj.get("brandName") or "").strip()
-
-        # Size text — from comparisonUnit / priceUnit
-        size_text = ""
-        comparison_unit = obj.get("comparisonUnit") or ""
-        price_unit = obj.get("priceUnit") or ""
-        # e.g. comparisonPrice=1.19, comparisonUnit=KG → size hint
-        # We don't have explicit size, use priceUnit as fallback
-        if price_unit and price_unit not in ("KPL", "PCE"):
-            size_text = price_unit.lower()
-
-        # Image URL
-        image = ""
+def extract_image_url(page) -> str:
+    sels = [
+        "main img[alt][src]",
+        "img[alt][src]",
+        "img[src]"
+    ]
+    for sel in sels:
         try:
-            details = obj.get("productDetails") or {}
-            imgs = details.get("productImages") or {}
-            main = imgs.get("mainImage") or {}
-            template = main.get("urlTemplate") or ""
-            if template:
-                image = template.replace("{MODIFIERS}", "q_auto,f_auto,w_400").replace("{EXTENSION}", "webp")
+            img = page.locator(sel).first
+            if img.count() > 0:
+                src = img.get_attribute("src")
+                if src:
+                    return urljoin(BASE, src)
+        except Exception:
+            continue
+    return ""
+
+def extract_label_value(page, labels: list[str]) -> str:
+    """
+    Try multiple strategies to find something like:
+    'EAN', 'Manufacturer', 'Country of origin', etc.
+    """
+    # exact text match -> nearest following element
+    for label in labels:
+        try:
+            lab = page.locator(
+                f"xpath=//*[normalize-space(.)='{label}']"
+            ).first
+            if lab.count() > 0:
+                sib = lab.locator(
+                    "xpath=following::*[self::div or self::span or self::p][1]"
+                )
+                if sib.count() > 0:
+                    return clean(sib.inner_text())
         except Exception:
             pass
 
-        # Category from hierarchyPath
-        category = ""
+    # contains(...) fuzzy match
+    for label in labels:
         try:
-            hp = obj.get("hierarchyPath") or []
-            if hp:
-                # last item is the most specific category
-                last_ref = hp[0].get("__ref", "") if hp else ""
-                m = re.search(r'"name":"([^"]+)"', last_ref)
-                if m:
-                    category = m.group(1)
+            lab = page.locator(
+                f"xpath=//*[contains(normalize-space(.), '{label}')]"
+            ).first
+            if lab.count() > 0:
+                sib = lab.locator(
+                    "xpath=following::*[self::div or self::span or self::p][1]"
+                )
+                if sib.count() > 0:
+                    return clean(sib.inner_text())
         except Exception:
             pass
 
-        # Source URL
-        product_slug = obj.get("slug") or ""
-        product_id = obj.get("id") or ean
-        source_url = f"{BASE_URL}/toode/{product_slug}/{product_id}" if product_slug else ""
+    # dl/dt/dd patterns
+    try:
+        for label in labels:
+            dt = page.locator(
+                "xpath=//dt[normalize-space()='{0}'] | //dt[contains(normalize-space(),'{0}')]"
+                .format(label)
+            ).first
+            if dt.count() > 0:
+                dd = dt.locator("xpath=following-sibling::dd[1]")
+                if dd.count() > 0:
+                    return clean(dd.inner_text())
+    except Exception:
+        pass
 
-        products.append({
-            "ext_id": str(product_id),
-            "name": name,
-            "brand": brand,
-            "size_text": size_text,
-            "ean": ean,
-            "price": float(price),
-            "image": image,
-            "category": category,
-            "source_url": source_url,
-        })
+    # fallback: regex in raw HTML
+    try:
+        html = page.content()
+        for label in labels:
+            m = re.search(
+                fr"{re.escape(label)}\s*:?\s*</?[^>]*>?(.*?)<",
+                html,
+                re.I | re.S
+            )
+            if m:
+                txt = re.sub(r"<[^>]+>", " ", m.group(1))
+                txt = clean(txt)
+                if txt:
+                    return txt
+    except Exception:
+        pass
 
-    return products
+    return ""
 
-
-# ── category pagination ────────────────────────────────────────────────────────
-
-def scrape_category(session: requests.Session, slug: str) -> List[Dict]:
+def extract_ean(page, url: str) -> str:
     """
-    Scrape all pages of a category. Returns all products found.
-    Prisma uses ?sivu=N for pagination (Finnish for 'page').
+    Prefer explicit EAN/Ribakood if Prisma shows it.
+    Otherwise try to grab digits from URL tail.
     """
-    all_products = []
-    seen_ext_ids = set()
-    page = 1
+    val = extract_label_value(page, ["EAN", "EAN-kood", "Ribakood", "EAN code"])
+    if val and re.fullmatch(r"\d{8,14}", val):
+        return val
 
-    while True:
-        if page == 1:
-            url = f"{BASE_URL}/{slug}"
-        else:
-            url = f"{BASE_URL}/{slug}?sivu={page}"
+    m = EAN_RE.search(url)
+    if m:
+        return m.group(1)
+    return ""
 
-        data = fetch_next_data(session, url)
-        if not data:
-            break
+def extract_country(page) -> str:
+    return extract_label_value(
+        page,
+        ["Country of manufacture", "Country of origin", "Valmistajariik", "Päritoluriik"]
+    )
 
-        apollo = (data.get("props") or {}).get("pageProps", {}).get("apolloState") or {}
-        if not apollo:
-            break
+def extract_manufacturer(page) -> str:
+    return extract_label_value(
+        page,
+        ["Manufacturer", "Tootja", "Producer", "Valmistaja"]
+    )
 
-        products = extract_products_from_apollo(apollo, slug)
-        if not products:
-            break
+def parse_amount_from_title(title: str) -> str:
+    """
+    Best effort parse of size text like:
+      '6x200 ml'
+      '390 g'
+      '1 l'
+      '12 pcs'
+    """
+    t = BONUS_RE.sub("", title)
 
-        # Detect if we're seeing the same products (end of pagination)
-        new_count = 0
-        for p in products:
-            if p["ext_id"] not in seen_ext_ids:
-                seen_ext_ids.add(p["ext_id"])
-                all_products.append(p)
-                new_count += 1
+    m = PACK_RE.search(t)
+    if m:
+        qty, num, unit = m.groups()
+        num = num.replace(",", ".")
+        return f"{qty}x{num} {unit}".replace(" .", " ")
 
-        print(f"  page {page}: {len(products)} products ({new_count} new)")
+    m = SIMPLE_RE.search(t)
+    if m:
+        num, unit = m.groups()
+        num = num.replace(",", ".")
+        return f"{num} {unit}"
 
-        if new_count == 0:
-            break
+    m = PIECES_RE.search(t)
+    if m:
+        return f"{m.group(1)} pcs"
 
-        # Check if there are more pages
-        # Look for pagination info in apollo cache
-        total_products = None
-        for key, obj in apollo.items():
-            if isinstance(obj, dict) and obj.get("__typename") == "SectionProducts":
-                total_products = obj.get("totalCount") or obj.get("count")
+    return ""
+
+def normalize_size_text(s: str) -> str:
+    """
+    Lowercase, collapse spaces, dot-decimals, unify units.
+    Return '' if not parseable.
+    """
+    if not s:
+        return ""
+    s = clean(s).lower().replace(",", ".")
+
+    m = PACK_RE.search(s)
+    if m:
+        qty, num, unit = m.groups()
+        return f"{int(qty)}x{num} {unit}"
+
+    m = SIMPLE_RE.search(s)
+    if m:
+        num, unit = m.groups()
+        return f"{num} {unit}"
+
+    m = PIECES_RE.search(s)
+    if m:
+        return f"{m.group(1)} pcs"
+
+    if re.search(r"\bkg\b", s):
+        return "kg"
+    if re.search(r"\bl\b", s):
+        return "l"
+
+    return ""
+
+def extract_size_text(page, title: str) -> str:
+    """
+    Try to read net quantity / volume from PDP labels.
+    Fallback to parsing the title.
+    """
+    lbl_val = extract_label_value(
+        page,
+        [
+            "Net weight", "Net quantity", "Net content", "Net mass",
+            "Kogus", "Maht", "Neto kogus", "Netokogus", "Pakendi suurus",
+            "Pakendi maht", "Suurus", "Kaal", "Weight", "Volume", "Size",
+            "Net weight / Net volume",
+        ],
+    )
+    size = normalize_size_text(lbl_val)
+    if size:
+        return size
+
+    # also attempt to mine JSON-LD blobs for something like "weight" / "size"
+    try:
+        scripts = page.locator("script[type='application/ld+json']")
+        for i in range(min(8, scripts.count())):
+            raw = scripts.nth(i).inner_text()
+            data = json.loads(raw)
+
+            def walk(obj):
+                if isinstance(obj, dict):
+                    for k, v in obj.items():
+                        if isinstance(v, (str, int, float)):
+                            if str(k).lower() in {
+                                "weight","netweight","size","contentsize",
+                                "packagesize","volume","netcontent",
+                                "netContent","packageSize","contentSize",
+                            }:
+                                cand = normalize_size_text(str(v))
+                                if cand:
+                                    return cand
+                        r = walk(v)
+                        if r:
+                            return r
+                elif isinstance(obj, list):
+                    for it in obj:
+                        r = walk(it)
+                        if r:
+                            return r
+                return ""
+            cand = walk(data)
+            if cand:
+                return cand
+    except Exception:
+        pass
+
+    # final fallback: parse the title itself
+    return normalize_size_text(parse_amount_from_title(title))
+
+def infer_brand_from_title(title: str) -> str:
+    """
+    Dumb brand guess: first word, or first two words if both Look TitleCase.
+    """
+    parts = title.split()
+    if not parts:
+        return ""
+    if len(parts) >= 2 and parts[0][:1].isupper() and parts[1][:1].isupper():
+        return f"{parts[0]} {parts[1]}"
+    return parts[0]
+
+def extract_price_eur(page) -> float:
+    """
+    Try to read the main product price (EUR) from the PDP.
+    We'll grab the first text node that looks like '1,59' or '2.35'
+    near common price selectors.
+    """
+    candidates = [
+        "[data-test='product-price']",
+        "[data-testid='product-price']",
+        "[class*='price']",
+        "span:has-text('€')",
+        "span:has-text('EUR')",
+    ]
+    for sel in candidates:
+        try:
+            loc = page.locator(sel)
+            if loc.count() == 0:
+                continue
+            txt = clean(loc.first.inner_text())
+            m = PRICE_NUM_RE.search(txt.replace("\u00a0", " "))
+            if m:
+                raw = m.group(1).replace(",", ".")
+                try:
+                    return float(raw)
+                except Exception:
+                    pass
+        except Exception:
+            continue
+    # fallback: try scanning entire page text
+    try:
+        txt = clean(page.inner_text("body"))
+        m = PRICE_NUM_RE.search(txt)
+        if m:
+            raw = m.group(1).replace(",", ".")
+            return float(raw)
+    except Exception:
+        pass
+    return 0.0
+
+def extract_ext_id_from_url(url: str) -> str:
+    """
+    Prisma PDP URLs usually look like
+      /en/toode/some-product-name-ABC123/123456
+    We'll just grab the last non-empty path segment.
+    """
+    path_parts = [p for p in urlparse(url).path.split("/") if p]
+    if not path_parts:
+        return url
+    return path_parts[-1]
+
+# ---------------------------------------------------------------------------
+# Crawling helpers (category pagination / URL discovery)
+
+def paginate_listing(page, max_pages: int = 80) -> None:
+    """
+    Scroll / click 'Load more' / 'Next' buttons to reveal products
+    in long category listings.
+    """
+    def page_height() -> int:
+        try:
+            return page.evaluate("document.body.scrollHeight")
+        except Exception:
+            return 0
+
+    load_more_selectors = [
+        "button:has-text('Load more')",
+        "button:has-text('Show more')",
+        "button:has-text('Load More')",
+        "[data-testid*='load'][data-testid*='more']",
+        "button[aria-label*='more']",
+        "[data-testid='load-more']",
+        "button:has-text('Load more products')",
+        "button:has-text('Show more products')",
+        "button:has-text('Näita rohkem')",
+    ]
+    next_selectors = [
+        "a[rel='next']",
+        "a.pagination__next",
+        "button:has-text('Next')",
+        "a:has-text('Next')",
+        "a.pagination-next",
+        "button[aria-label='Next page']",
+        "[data-testid='pagination-next']",
+    ]
+
+    pages_clicked = 0
+    prev_h = -1
+
+    while pages_clicked < max_pages:
+        progressed = False
+
+        # Try clicking any "load more" buttons
+        for sel in load_more_selectors:
+            try:
+                btn = page.locator(sel)
+                if btn.count() > 0 and btn.first.is_enabled():
+                    btn.first.click()
+                    page.wait_for_load_state("domcontentloaded")
+                    jitter(0.6, 1.2)
+
+                    new_h = page_height()
+                    if new_h > prev_h:
+                        prev_h = new_h
+                        progressed = True
+                        break
+            except Exception:
+                continue
+        if progressed:
+            continue
+
+        # Try just scrolling
+        try:
+            cur_h = page_height()
+            page.mouse.wheel(0, 20000)
+            jitter(0.5, 1.0)
+            new_h = page_height()
+            if new_h > cur_h:
+                prev_h = new_h
+                progressed = True
+        except Exception:
+            pass
+        if progressed:
+            continue
+
+        # Finally, try a "Next" pagination button / link
+        for sel in next_selectors:
+            try:
+                nxt = page.locator(sel)
+                if nxt.count() > 0 and nxt.first.is_enabled():
+                    nxt.first.click()
+                    page.wait_for_load_state("domcontentloaded")
+                    jitter(0.6, 1.2)
+
+                    new_h = page_height()
+                    if new_h >= prev_h:
+                        prev_h = new_h
+                        progressed = True
+                        pages_clicked += 1
+                        break
+            except Exception:
+                continue
+        if progressed:
+            continue
+
+        # no more progress
+        break
+
+def collect_links_from_listing(page, current_url: str) -> tuple[set[str], set[str]]:
+    """
+    Reads the current listing page (category page), scrolls/loads more,
+    and returns:
+        - product URLs discovered
+        - category URLs discovered
+    """
+    try:
+        page.wait_for_selector(
+            "a[href*='/toode/'], a[href*='/en/toode/']",
+            timeout=6000
+        )
+    except Exception:
+        pass
+
+    # attempt infinite scroll / pagination
+    try:
+        paginate_listing(page, max_pages=100)
+    except Exception:
+        pass
+
+    # a little more scrolling at the end, just in case
+    try:
+        last_h = 0
+        for _ in range(6):
+            page.mouse.wheel(0, 20000)
+            jitter(0.4, 0.9)
+            h = page.evaluate("document.body.scrollHeight")
+            if h == last_h:
+                break
+            last_h = h
+    except Exception:
+        pass
+
+    prod, cats = set(), set()
+    try:
+        anchors = page.locator("a[href]")
+        count = anchors.count()
+    except PlaywrightTimeout:
+        count = 0
+
+    for i in range(count):
+        try:
+            href = anchors.nth(i).get_attribute("href")
+            if not href:
+                continue
+            url = urljoin(BASE, href)
+            path = urlparse(url).path
+            if is_product_path(path):
+                prod.add(url)
+            elif is_category_path(path) and is_in_whitelist(url):
+                cats.add(url)
+        except Exception:
+            continue
+
+    return prod, cats
+
+# ---------------------------------------------------------------------------
+# Main crawl -> DB ingest
+
+def crawl_to_db(max_products: int = 500, headless: bool = True) -> None:
+    conn = db_connect()
+    store_id = get_store_id_for_prisma()
+
+    rows_written = 0
+    skipped_no_ean = 0
+    skipped_no_price = 0
+    product_urls: set[str] = set()
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=headless)
+        context = browser.new_context(user_agent=(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/124.0 Safari/537.36"
+        ))
+        page = context.new_page()
+
+        # best-effort cookie acceptor
+        def accept_cookies(pg):
+            for sel in [
+                "button:has-text('Accept all')",
+                "button:has-text('Accept cookies')",
+                "button:has-text('Nõustu')",
+                "button[aria-label*='accept']",
+                "button[aria-label*='Accept']",
+            ]:
+                try:
+                    btn = pg.locator(sel)
+                    if btn.count() > 0 and btn.first.is_enabled():
+                        btn.first.click()
+                        pg.wait_for_load_state("domcontentloaded")
+                        jitter(0.2, 0.6)
+                        return
+                except Exception:
+                    pass
+
+        accept_cookies(page)
+
+        # ---- Phase A: discover product links by crawling categories ----
+        seen_categories: set[str] = set()
+        to_visit = [urljoin(BASE, s) for s in SEEDS]
+
+        while to_visit and len(product_urls) < max_products:
+            cat_url = to_visit.pop(0)
+            if cat_url in seen_categories:
+                continue
+            seen_categories.add(cat_url)
+
+            try:
+                page.goto(cat_url, timeout=30000)
+                page.wait_for_load_state("domcontentloaded")
+                jitter()
+            except PlaywrightTimeout:
+                continue
+
+            prod, cats = collect_links_from_listing(page, cat_url)
+            product_urls.update(prod)
+
+            # queue newly discovered subcategories
+            for c in cats:
+                if c not in seen_categories and c not in to_visit:
+                    to_visit.append(c)
+
+            print(
+                f"[DISCOVER] {cat_url} -> +{len(prod)} products, "
+                f"+{len(cats)} cats (totals: products={len(product_urls)}, "
+                f"queue={len(to_visit)})"
+            )
+
+            if len(product_urls) >= max_products:
                 break
 
-        if total_products and len(seen_ext_ids) >= total_products:
-            break
+        # ---- Phase B: visit each product URL -> DB upsert via function ----
+        with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+            for url in list(product_urls)[:max_products]:
+                try:
+                    page.goto(url, timeout=30000)
+                    page.wait_for_load_state("domcontentloaded")
+                    jitter()
+                except PlaywrightTimeout:
+                    continue
 
-        page += 1
-        time.sleep(0.3)
+                title = extract_title(page)
+                ean = extract_ean(page, url)
 
-        # Safety limit
-        if page > 50:
-            break
+                # We need EAN for reliable canonical matching downstream.
+                if not ean:
+                    skipped_no_ean += 1
+                    continue
 
-    return all_products
+                size_text = extract_size_text(page, title)
+                brand = infer_brand_from_title(title)
+                manufacturer = extract_manufacturer(page)
+                country = extract_country(page)
+                image_url = extract_image_url(page)
 
+                # get price
+                price_val = extract_price_eur(page)
+                if not price_val or price_val <= 0:
+                    skipped_no_price += 1
+                    continue
 
-# ── subcategory discovery ──────────────────────────────────────────────────────
+                # ext_id for Prisma (SKU / last segment in URL)
+                ext_id = extract_ext_id_from_url(url)
 
-def discover_subcategories(session: requests.Session, slug: str) -> List[str]:
-    """
-    Fetch a top-level category page and find subcategory slugs
-    from the navigation section in Apollo cache.
-    """
-    url = f"{BASE_URL}/{slug}"
-    data = fetch_next_data(session, url)
-    if not data:
-        return []
+                # call DB function upsert_product_and_price(...)
+                try:
+                    cur.execute(
+                        """
+                        SELECT upsert_product_and_price(
+                            %s,  -- in_source ('prisma')
+                            %s,  -- in_ext_id
+                            %s,  -- in_name
+                            %s,  -- in_brand
+                            %s,  -- in_size_text
+                            %s,  -- in_ean_raw
+                            %s,  -- in_price
+                            %s,  -- in_currency
+                            %s,  -- in_store_id
+                            %s,  -- in_seen_at
+                            %s   -- in_source_url
+                        );
+                        """,
+                        (
+                            "prisma",
+                            ext_id,
+                            title,
+                            brand,
+                            size_text,
+                            ean,
+                            price_val,
+                            "EUR",
+                            store_id,
+                            datetime.now(timezone.utc),
+                            url,
+                        ),
+                    )
+                    rows_written += 1
+                except Exception as e:
+                    print(
+                        f"[prisma] upsert_product_and_price() failed for "
+                        f"{ext_id} / EAN {ean}: {e}"
+                    )
+                    # because autocommit=True we don't have to rollback manually
+                    # but we can continue to next product anyway
+                    continue
 
-    apollo = (data.get("props") or {}).get("pageProps", {}).get("apolloState") or {}
-    subcats = []
+        browser.close()
 
-    for key, obj in apollo.items():
-        if not isinstance(obj, dict):
-            continue
-        if obj.get("__typename") != "HierarchyItem":
-            continue
-        item_slug = obj.get("slug") or ""
-        if item_slug and item_slug != slug.replace("tooted/", ""):
-            full_slug = f"tooted/{item_slug}"
-            if full_slug not in subcats and full_slug != slug:
-                subcats.append(full_slug)
+    print(
+        f"[DONE] discovered {len(product_urls)} product URLs. "
+        f"Inserted/updated {rows_written} rows via upsert_product_and_price(). "
+        f"Skipped no-EAN: {skipped_no_ean}, skipped no-price: {skipped_no_price}."
+    )
 
-    return subcats
+# ---------------------------------------------------------------------------
+def main() -> None:
+    ap = argparse.ArgumentParser(
+        description="Prisma.ee food scrape -> Railway DB using upsert_product_and_price()"
+    )
+    ap.add_argument("--max-products", type=int, default=500,
+                    help="Max distinct product PDPs to visit")
+    ap.add_argument("--headless", type=int, default=1,
+                    help="1=headless browser, 0=show browser (debug)")
+    args = ap.parse_args()
 
-
-# ── DB ingest ──────────────────────────────────────────────────────────────────
-
-async def ingest_to_db(products: List[Dict]) -> None:
-    if not asyncpg:
-        print("[db] asyncpg not available")
-        return
-
-    db_url = os.environ.get("DATABASE_URL")
-    if not db_url:
-        print("[db] DATABASE_URL not set")
-        return
-
-    store_id = int(os.environ.get("STORE_ID", "14"))
-    conn = await asyncpg.connect(db_url)
-    total = errors = 0
-
-    try:
-        now = datetime.datetime.now(datetime.timezone.utc)
-        for p in products:
-            try:
-                await conn.fetchval(
-                    """
-                    SELECT upsert_product_and_price(
-                        $1::text, $2::text, $3::text, $4::text, $5::text,
-                        $6::text, $7::numeric, $8::text, $9::integer,
-                        $10::timestamptz, $11::text
-                    );
-                    """,
-                    "prisma",
-                    p["ext_id"],
-                    p["name"],
-                    p["brand"],
-                    p["size_text"],
-                    p["ean"],
-                    p["price"],
-                    "EUR",
-                    store_id,
-                    now,
-                    p["source_url"],
-                )
-                total += 1
-            except Exception as e:
-                errors += 1
-                if errors <= 5:
-                    print(f"[db] upsert failed for {p['ext_id']}: {e}")
-    finally:
-        await conn.close()
-
-    print(f"[db] upserted {total} rows (errors: {errors})")
-
-
-# ── main ───────────────────────────────────────────────────────────────────────
-
-def main():
-    session = make_session()
-    all_products: List[Dict] = []
-    seen_ext_ids: set = set()
-
-    print(f"[prisma] starting scrape of {len(ROOT_CATEGORIES)} root categories")
-
-    for root_slug in ROOT_CATEGORIES:
-        print(f"\n[cat] {root_slug}")
-
-        # Try direct category first
-        products = scrape_category(session, root_slug)
-
-        if not products:
-            # Try discovering subcategories
-            print(f"  no products directly, checking subcategories...")
-            subcats = discover_subcategories(session, root_slug)
-            print(f"  found {len(subcats)} subcategories")
-            for subcat in subcats:
-                print(f"  [subcat] {subcat}")
-                sub_products = scrape_category(session, subcat)
-                products.extend(sub_products)
-                time.sleep(0.3)
-
-        # Deduplicate globally
-        new = 0
-        for p in products:
-            if p["ext_id"] not in seen_ext_ids:
-                seen_ext_ids.add(p["ext_id"])
-                all_products.append(p)
-                new += 1
-
-        print(f"  → {new} new products (total so far: {len(all_products)})")
-
-    print(f"\n[prisma] total unique products: {len(all_products)}")
-
-    if all_products:
-        asyncio.run(ingest_to_db(all_products))
-
+    crawl_to_db(
+        max_products=args.max_products,
+        headless=bool(args.headless),
+    )
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.exit(130)
