@@ -1,4 +1,4 @@
-name: scrape-bolt
+name: coop-bolt
 
 on:
   schedule:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  scrape-bolt:
+  coop-bolt:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -33,7 +33,7 @@ jobs:
             delivery_lat: "58.356789"
             delivery_lng: "26.693456"
 
-    name: scrape-bolt (${{ matrix.name }})
+    name: coop-bolt (${{ matrix.name }})
     steps:
       - uses: actions/checkout@v4
 
