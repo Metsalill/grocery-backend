@@ -138,18 +138,6 @@ def fetch_categories_from_api(
             print(f"[categories] API returned {r.status_code}: {r.text[:200]}")
             return []
         data = r.json()
-        # DEBUG
-        import json as _json
-        top_d = data.get("data", {})
-        print(f"[categories-debug] data keys: {list(top_d.keys()) if isinstance(top_d, dict) else type(top_d)}")
-        items_d = top_d.get("items", {})
-        print(f"[categories-debug] items type={type(items_d)} len={len(items_d) if isinstance(items_d, dict) else '?'}")
-        if isinstance(items_d, dict):
-            first_key = next(iter(items_d), None)
-            if first_key:
-                print(f"[categories-debug] first item key type={type(first_key)} val={_json.dumps(items_d[first_key])[:300]}")
-        child_ids = top_d.get("child_ids", [])
-        print(f"[categories-debug] root child_ids (first 5): {child_ids[:5]}, types: {[type(x).__name__ for x in child_ids[:3]]}")
     except Exception as e:
         print(f"[categories] API call failed: {e}")
         return []
@@ -227,7 +215,10 @@ def parse_categories_file(path: str) -> List[Tuple[str, str]]:
 
 
 # ---------------------- product fetching ---------------------- #
-def fetch_category_products(
+DISHES_BY_IDS_API = "https://deliveryuser.live.boltsvc.net/deliveryClient/public/v2/getDishesByIds"
+
+
+def fetch_dish_ids_for_category(
     session: requests.Session,
     venue_id: str,
     category_id: str,
@@ -235,7 +226,8 @@ def fetch_category_products(
     device_id: str,
     delivery_lat: str = DELIVERY_LAT,
     delivery_lng: str = DELIVERY_LNG,
-) -> dict:
+) -> List[int]:
+    """Call getMenuDishes to get the list of dish IDs for a category."""
     params = {
         "provider_id": venue_id,
         "category_id": category_id,
@@ -254,102 +246,128 @@ def fetch_category_products(
 
     try:
         r = session.get(API_BASE, params=params, timeout=30)
-        if r.status_code == 200:
-            return r.json()
-        else:
-            print(f"  [warn] API returned {r.status_code} for category_id={category_id}: {r.text[:100]}")
-            return {}
+        if r.status_code != 200:
+            print(f"  [warn] getMenuDishes returned {r.status_code} for category_id={category_id}")
+            return []
+        data = r.json()
     except Exception as e:
-        print(f"  [warn] API call failed for category_id={category_id}: {e}")
+        print(f"  [warn] getMenuDishes failed for category_id={category_id}: {e}")
+        return []
+
+    top = data.get("data", {})
+    items_map = top.get("items", {})
+
+    # Collect all dish IDs (type == "dish") from the items map
+    dish_ids = []
+    for key, obj in items_map.items():
+        if isinstance(obj, dict) and obj.get("type") == "dish":
+            dish_ids.append(obj.get("id") or int(key))
+
+    return dish_ids
+
+
+def fetch_dishes_by_ids(
+    session: requests.Session,
+    venue_id: str,
+    dish_ids: List[int],
+    session_id: str,
+    device_id: str,
+    delivery_lat: str = DELIVERY_LAT,
+    delivery_lng: str = DELIVERY_LNG,
+) -> dict:
+    """POST to getDishesByIds to get full product details."""
+    params = {
+        "version": API_VERSION,
+        "language": "et-EE",
+        "session_id": session_id,
+        "distinct_id": f"$device:{device_id}",
+        "country": "ee",
+        "device_name": "web",
+        "device_os_version": "web",
+        "deviceId": device_id,
+        "deviceType": "web",
+    }
+    payload = {
+        "provider_id": int(venue_id),
+        "ids": dish_ids,
+        "delivery_lat": float(delivery_lat),
+        "delivery_lng": float(delivery_lng),
+    }
+
+    try:
+        r = session.post(
+            DISHES_BY_IDS_API,
+            params=params,
+            json=payload,
+            timeout=30,
+        )
+        if r.status_code != 200:
+            print(f"  [warn] getDishesByIds returned {r.status_code}: {r.text[:100]}")
+            return {}
+        return r.json()
+    except Exception as e:
+        print(f"  [warn] getDishesByIds failed: {e}")
         return {}
 
 
-def parse_menu_dishes_response(data: dict, cat_name: str, venue_id: str) -> List[Dict]:
+def parse_dishes_by_ids_response(data: dict, cat_name: str, venue_id: str) -> List[Dict]:
+    """Parse getDishesByIds response into flat product list."""
     if not data or not isinstance(data, dict):
         return []
 
-    # Response shape:
-    # {"code": 0, "data": {"root_id": ..., "items": {"smc_id": {"type": "category"|"item", "name": {"value":..}, "child_ids": [...], ...}}}}
-    top = data.get("data", {})
-    if not top:
-        return []
-
-    items_map = top.get("items", {})
+    items_map = data.get("data", {}).get("items", {})
     if not items_map:
         return []
 
     products = []
-    seen_ids = set()
+    for key, obj in items_map.items():
+        if not isinstance(obj, dict) or obj.get("type") != "dish":
+            continue
 
-    def _get_name(obj):
-        n = obj.get("name") or {}
-        if isinstance(n, dict):
-            return norm_space(n.get("value") or n.get("et") or next(iter(n.values()), ""))
-        return norm_space(str(n))
+        # Name
+        name_obj = obj.get("name") or {}
+        name = norm_space(name_obj.get("value") or name_obj.get("et") or "") if isinstance(name_obj, dict) else norm_space(str(name_obj))
+        if not name:
+            continue
 
-    def _walk(ids, depth=0):
-        if depth > 5:
-            return
-        for sid in (ids or []):
-            smc = str(sid)
-            if smc in seen_ids:
-                continue
-            seen_ids.add(smc)
-            obj = items_map.get(smc) or items_map.get(sid)
-            if not obj:
-                continue
-            typ = obj.get("type", "")
-            if typ == "category":
-                # recurse into sub-categories
-                _walk(obj.get("child_ids") or [], depth + 1)
-            else:
-                # it's a product/item
-                name = _get_name(obj)
-                if not name:
-                    continue
+        # Price — already in EUR as float
+        price_obj = obj.get("price") or {}
+        price_eur = float(price_obj.get("value", 0)) if isinstance(price_obj, dict) else None
+        if not price_eur or price_eur <= 0:
+            continue
 
-                # Price
-                price_eur = None
-                price_raw = obj.get("price")
-                if isinstance(price_raw, dict):
-                    amount = price_raw.get("amount") or price_raw.get("value") or price_raw.get("price")
-                    price_eur = _cents_to_eur(amount)
-                elif price_raw is not None:
-                    price_eur = _cents_to_eur(price_raw)
+        # Image — images.menu_item_list_v1.aspect_ratio_map.original.3x
+        image = ""
+        try:
+            image = obj["images"]["menu_item_list_v1"]["aspect_ratio_map"]["original"].get("3x") or \
+                    obj["images"]["menu_item_list_v1"]["aspect_ratio_map"]["original"].get("2x") or \
+                    obj["images"]["menu_item_list_v1"]["aspect_ratio_map"]["original"].get("1x") or ""
+        except (KeyError, TypeError):
+            pass
 
-                if price_eur is None or price_eur <= 0:
-                    continue
+        # EAN — product_id field (e.g. "4740125220117")
+        ean = obj.get("product_id") or ""
 
-                # Image
-                image = ""
-                img = obj.get("image") or obj.get("imageUrl") or obj.get("image_url") or ""
-                if isinstance(img, str):
-                    image = img
-                elif isinstance(img, dict):
-                    image = img.get("url") or img.get("src") or ""
+        # Unit text from description (contains "Suurus, maht: Xml")
+        unit_text = ""
+        desc_obj = obj.get("description") or {}
+        desc = desc_obj.get("value", "") if isinstance(desc_obj, dict) else str(desc_obj)
+        m = re.search(r"Suurus,?\s*maht[:\s]+([^\n]+)", desc or "")
+        if m:
+            unit_text = m.group(1).strip()
 
-                unit_text = norm_space(
-                    obj.get("unitText") or obj.get("unit_text") or
-                    obj.get("quantity") or obj.get("size") or ""
-                )
-                ean = obj.get("barcode_gtin") or obj.get("ean") or obj.get("gtin") or ""
-                item_id = str(obj.get("id") or obj.get("_id") or smc)
+        item_id = str(obj.get("id") or key)
 
-                products.append({
-                    "item_id": item_id,
-                    "name": name,
-                    "price_eur": price_eur,
-                    "unit_text": unit_text,
-                    "image": image,
-                    "ean": ean,
-                    "category": cat_name,
-                    "venue_id": venue_id,
-                })
-
-    root_id = str(top.get("root_id", ""))
-    root_obj = items_map.get(root_id)
-    start_ids = (root_obj.get("child_ids") or []) if root_obj else list(items_map.keys())
-    _walk(start_ids)
+        products.append({
+            "item_id": item_id,
+            "name": name,
+            "price_eur": price_eur,
+            "unit_text": unit_text,
+            "image": image,
+            "ean": ean,
+            "category": cat_name,
+            "venue_id": venue_id,
+        })
 
     return products
 
@@ -461,20 +479,37 @@ def crawl(
     print(f"[info] venue_id={venue_id}  categories={len(categories)}")
 
     all_products: List[Dict] = []
+    all_dish_ids: List[int] = []
 
+    # Step 1: collect all dish IDs across all categories
     for idx, (cat_name, category_id) in enumerate(categories, 1):
         print(f"[cat] {idx}/{len(categories)} '{cat_name}' (smc={category_id})")
-
-        data = fetch_category_products(
+        dish_ids = fetch_dish_ids_for_category(
             session, venue_id, category_id,
             session_id, device_id,
             delivery_lat, delivery_lng,
         )
+        print(f"  -> {len(dish_ids)} dish IDs")
+        all_dish_ids.extend(dish_ids)
+        time.sleep(req_delay)
 
-        products = parse_menu_dishes_response(data, cat_name, venue_id)
+    # Deduplicate dish IDs
+    unique_dish_ids = list(dict.fromkeys(all_dish_ids))
+    print(f"[info] {len(unique_dish_ids)} unique dish IDs to fetch")
+
+    # Step 2: fetch full product details in batches via getDishesByIds POST
+    BATCH_SIZE = 50
+    for i in range(0, len(unique_dish_ids), BATCH_SIZE):
+        batch = unique_dish_ids[i:i + BATCH_SIZE]
+        print(f"[fetch] batch {i // BATCH_SIZE + 1}: {len(batch)} dishes")
+        data = fetch_dishes_by_ids(
+            session, venue_id, batch,
+            session_id, device_id,
+            delivery_lat, delivery_lng,
+        )
+        products = parse_dishes_by_ids_response(data, "", venue_id)
         print(f"  -> {len(products)} products")
         all_products.extend(products)
-
         time.sleep(req_delay)
 
     # Deduplicate across categories
