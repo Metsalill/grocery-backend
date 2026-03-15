@@ -161,7 +161,6 @@ def fetch_categories_from_api(
             return
         for sid in (ids or []):
             smc = str(sid)
-            # Try both string and int keys
             obj = items_map.get(smc) or items_map.get(sid)
             if not obj:
                 continue
@@ -170,21 +169,22 @@ def fetch_categories_from_api(
             if typ == "category" and name:
                 categories.append((name, smc))
             elif typ == "category":
-                # category with no readable name — use smc as placeholder
                 categories.append((smc, smc))
-            # Always recurse into child_ids
             _walk(obj.get("child_ids") or [], depth + 1)
 
-    _walk(top.get("child_ids") or [])
-
-    # Fallback: if items map has no type=category entries, treat all child_ids as category IDs directly
-    if not categories:
-        print(f"[categories] _walk found nothing, falling back to raw child_ids")
-        for sid in (top.get("child_ids") or []):
-            smc = str(sid)
-            obj = items_map.get(smc) or items_map.get(sid) or {}
-            name = _get_name(obj) or smc
-            categories.append((name, smc))
+    root_child_ids = top.get("child_ids") or []
+    if root_child_ids:
+        _walk(root_child_ids)
+    else:
+        # No root child_ids — iterate items map directly
+        print(f"[categories] no root child_ids, scanning {len(items_map)} items directly")
+        for smc, obj in items_map.items():
+            if not isinstance(obj, dict):
+                continue
+            typ = obj.get("type", "")
+            name = _get_name(obj)
+            if typ == "category" and name:
+                categories.append((name, str(smc)))
 
     # Deduplicate preserving order
     seen = set()
