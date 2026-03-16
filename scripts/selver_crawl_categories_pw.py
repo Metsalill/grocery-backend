@@ -151,34 +151,62 @@ def norm_digits(s: str) -> str:
     return re.sub(r"\D+", "", s or "")
 
 def extract_price_and_currency(page) -> Tuple[float, str]:
+    """
+    Extract price from Selver product page.
+
+    Selver uses class="ProductPrice" with the price as a direct text node:
+        <div class="ProductPrice">
+            " 2,99 € "
+            <span class="ProductPrice__unit-price">2,99 €/kg</span>
+        </div>
+
+    We try selectors in priority order, then fall back to JSON-LD offers.
+    """
     price_val = 0.0
     curr = "€"
-    try:
-        el = page.query_selector('[data-testid="product-price"]') \
-          or page.query_selector('.product-price__value')
-        if el:
+
+    # Ordered by specificity — Selver's real selector first
+    SELECTORS = [
+        '.ProductPrice',                    # Selver (confirmed correct)
+        '[data-testid="product-price"]',    # generic / other stores
+        '.product-price__value',            # generic / other stores
+        '.price',                           # last-resort generic
+    ]
+
+    for sel in SELECTORS:
+        try:
+            el = page.query_selector(sel)
+            if not el:
+                continue
             txt = normspace(el.inner_text())
+            if not txt:
+                continue
             m = re.search(r"(\d+[.,]\d+)", txt)
             if m:
                 price_val = float(m.group(1).replace(",", "."))
-            cm = re.search(r"[€$A-Z]{1,4}", txt)
-            if cm:
-                curr = cm.group(0)
-            return price_val, curr
-    except Exception:
-        pass
+                cm = re.search(r"[€$A-Z]{1,4}", txt)
+                if cm:
+                    curr = cm.group(0)
+                if price_val > 0:
+                    return price_val, curr
+        except Exception:
+            pass
+
+    # Fallback: JSON-LD offers block (most reliable, store-agnostic)
     try:
-        el2 = page.query_selector('.price')
-        if el2:
-            txt = normspace(el2.inner_text())
-            m = re.search(r"(\d+[.,]\d+)", txt)
-            if m:
-                price_val = float(m.group(1).replace(",", "."))
-            cm = re.search(r"[€$A-Z]{1,4}", txt)
-            if cm:
-                curr = cm.group(0)
+        jld = extract_json_ld(page)
+        offers = jld.get("offers") or {}
+        if isinstance(offers, list):
+            offers = offers[0] if offers else {}
+        p = offers.get("price")
+        if p:
+            price_val = float(str(p).replace(",", "."))
+            curr = offers.get("priceCurrency", "EUR")
+            if price_val > 0:
+                return price_val, curr
     except Exception:
         pass
+
     return price_val, curr
 
 def extract_specs_table(page) -> Dict[str, str]:
@@ -391,21 +419,14 @@ def safe_goto(page, url: str, timeout_ms: int = NAV_TIMEOUT_MS) -> bool:
     return False
 
 def _is_product_url(url: str) -> bool:
-    """
-    Selver product URLs are root-level slugs: /oun-paulared-kg
-    They have exactly one path segment, contain a hyphen, and are NOT
-    a known navigation/category path.
-    """
     parts = urlsplit(url)
     path = parts.path.rstrip("/")
     segments = [s for s in path.split("/") if s]
     if len(segments) != 1:
         return False
     slug = segments[0]
-    # Must contain a hyphen (all product slugs do) and be slug-like
     if "-" not in slug:
         return False
-    # Reject known non-product single-segment paths
     NON_PRODUCT_SLUGS = {
         "ostukorv", "cart", "checkout", "otsi", "search", "konto",
         "login", "logout", "registreeru", "kontakt", "blogi", "uudised",
@@ -415,7 +436,6 @@ def _is_product_url(url: str) -> bool:
     }
     if slug in NON_PRODUCT_SLUGS:
         return False
-    # Also reject slugs that match STRICT_ALLOWLIST category paths
     if any(slug == allowed.strip("/") for allowed in STRICT_ALLOWLIST):
         return False
     if any(kw in slug for kw in NON_PRODUCT_KEYWORDS):
@@ -449,7 +469,6 @@ def scrape_product_links_on_category(page) -> List[str]:
                     links.append(absu)
         except Exception:
             pass
-
     return links
 
 def paginate_category(page) -> bool:
@@ -585,6 +604,16 @@ def bulk_ingest_to_db(rows: List[Dict[str, any]], store_id: int) -> None:
         print("[selver] nothing to ingest.", file=sys.stderr)
         return
 
+    # Filter out zero-price rows — don't overwrite good data with 0.00
+    valid_rows = [r for r in rows if float(r.get("price") or 0.0) > 0]
+    skipped = len(rows) - len(valid_rows)
+    if skipped > 0:
+        print(f"[selver] skipping {skipped} rows with price=0.00", file=sys.stderr)
+
+    if not valid_rows:
+        print("[selver] no valid rows to ingest after filtering zero prices.", file=sys.stderr)
+        return
+
     ts_now = datetime.datetime.now(datetime.timezone.utc)
 
     sql = """
@@ -604,7 +633,7 @@ def bulk_ingest_to_db(rows: List[Dict[str, any]], store_id: int) -> None:
     """
 
     payload: List[tuple] = []
-    for r in rows:
+    for r in valid_rows:
         payload.append((
             "selver",
             r.get("ext_id") or "",
@@ -649,11 +678,10 @@ def crawl_category(page, category_url, seen_ext, writer_path, rows_for_ingest,
     if not safe_goto(page, url_abs):
         return
 
-    # Wait for the product grid to hydrate (Selver is a Vue SSR app)
     try:
         page.wait_for_load_state("networkidle", timeout=15000)
     except Exception:
-        pass  # Timeout is fine — grab whatever rendered
+        pass
 
     cat_breadcrumb, cat_leaf = parse_category_breadcrumb(page)
 
