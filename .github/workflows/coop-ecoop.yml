@@ -7,7 +7,7 @@ jobs:
   scrape:
     name: scrape (haapsalu eCoop, shard ${{ matrix.cat_index }})
     runs-on: ubuntu-latest
-    timeout-minutes: 30   # requests+BS4 is much faster than Playwright — should finish in ~10min per shard
+    timeout-minutes: 45   # requests+BS4 is much faster than Playwright — should finish in ~10min per shard
     strategy:
       fail-fast: false
       matrix:
