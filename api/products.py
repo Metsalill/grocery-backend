@@ -50,8 +50,6 @@ async def list_products(
 
     pool = await _get_pool(request)
 
-    # Build WHERE clauses — filter directly on products columns.
-    # products.sub_code and products.food_group are the canonical category fields.
     params: List[Any] = []
     where: List[str] = []
 
@@ -68,14 +66,46 @@ async def list_products(
 
     where_sql = ("\nWHERE " + " AND ".join(where)) if where else ""
 
-    base_sql = f"FROM products p{where_sql}"
+    # Deduplicated subquery:
+    # DISTINCT ON (name, size_text) picks one representative per duplicate group.
+    # ORDER BY priority:
+    #   1. Preferred chain (prisma best, wolt worst — wolt duplicates same coop product per location)
+    #   2. Has image (products with images are more useful to display)
+    #   3. Has EAN (more complete data)
+    #   4. Lowest id (oldest/most stable record as tiebreaker)
+    dedup_sql = f"""
+        SELECT DISTINCT ON (p.name, COALESCE(p.size_text, ''))
+            p.*
+        FROM products p{where_sql}
+        ORDER BY
+            p.name,
+            COALESCE(p.size_text, ''),
+            CASE
+                WHEN p.source_url ILIKE '%prisma%'                              THEN 1
+                WHEN p.source_url ILIKE '%selver%'                              THEN 2
+                WHEN p.source_url ILIKE '%rimi%'                                THEN 3
+                WHEN p.source_url ILIKE '%barbora%'
+                  OR p.source_url ILIKE '%maxima%'                              THEN 4
+                WHEN p.source_url ILIKE '%ecoop%'
+                  OR (p.source_url ILIKE '%coop%'
+                      AND p.source_url NOT ILIKE '%wolt%')                      THEN 5
+                WHEN p.source_url ILIKE '%wolt%'                                THEN 6
+                WHEN p.source_url IS NULL OR p.source_url = ''                  THEN 7
+                ELSE 8
+            END,
+            CASE WHEN p.image_url IS NOT NULL AND p.image_url != '' THEN 0 ELSE 1 END,
+            CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
+            p.id
+    """
 
-    count_sql = f"SELECT COUNT(*) {base_sql}"
-    data_sql = f"SELECT p.* {base_sql}\nORDER BY p.name"
+    count_sql = f"SELECT COUNT(*) FROM ({dedup_sql}) AS deduped"
 
-    # Add pagination params
     params_with_paging = params + [limit, offset]
-    data_sql += f"\nLIMIT ${len(params) + 1} OFFSET ${len(params) + 2}"
+    data_sql = (
+        f"SELECT * FROM ({dedup_sql}) AS deduped\n"
+        f"ORDER BY name\n"
+        f"LIMIT ${len(params) + 1} OFFSET ${len(params) + 2}"
+    )
 
     try:
         async with pool.acquire() as conn:
@@ -87,7 +117,7 @@ async def list_products(
 
         return {
             "items": items,
-            "total": total,      # Flutter uses this for pagination
+            "total": total,
             "offset": offset,
             "limit": limit,
             "count": len(items),
@@ -115,11 +145,34 @@ async def search_products(
 
     pool = await _get_pool(request)
 
+    # Same deduplication applied to search
     sql = """
-        SELECT p.*
-        FROM products p
-        WHERE p.name ILIKE $1
-        ORDER BY p.name
+        SELECT * FROM (
+            SELECT DISTINCT ON (p.name, COALESCE(p.size_text, ''))
+                p.*
+            FROM products p
+            WHERE p.name ILIKE $1
+            ORDER BY
+                p.name,
+                COALESCE(p.size_text, ''),
+                CASE
+                    WHEN p.source_url ILIKE '%prisma%'                              THEN 1
+                    WHEN p.source_url ILIKE '%selver%'                              THEN 2
+                    WHEN p.source_url ILIKE '%rimi%'                                THEN 3
+                    WHEN p.source_url ILIKE '%barbora%'
+                      OR p.source_url ILIKE '%maxima%'                              THEN 4
+                    WHEN p.source_url ILIKE '%ecoop%'
+                      OR (p.source_url ILIKE '%coop%'
+                          AND p.source_url NOT ILIKE '%wolt%')                      THEN 5
+                    WHEN p.source_url ILIKE '%wolt%'                                THEN 6
+                    WHEN p.source_url IS NULL OR p.source_url = ''                  THEN 7
+                    ELSE 8
+                END,
+                CASE WHEN p.image_url IS NOT NULL AND p.image_url != '' THEN 0 ELSE 1 END,
+                CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
+                p.id
+        ) AS deduped
+        ORDER BY name
         LIMIT $2
     """
 
