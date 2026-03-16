@@ -55,17 +55,19 @@ CATEGORY_HREF_RE = re.compile(r"/venue/[^/]+/items/([^/?#]+)")
 
 def _normalize_city(cand: Optional[str]) -> str:
     if not cand:
-        return "parnu"
+        return "tallinn"
     c = cand.lower()
     if c.startswith("pär") or "parnu" in c or "pärnu" in c or "prnu" in c:
         return "parnu"
+    if "tartu" in c:
+        return "tartu"
     if (
         "tallinn" in c or "lasna" in c or "lasnamae" in c or "lasnamäe" in c
         or "laagri" in c or "jüri" in c or "juri" in c or "mustakivi" in c
         or "akadeemia" in c or "miiduranna" in c or "saku" in c
     ):
         return "tallinn"
-    return "parnu"
+    return "tallinn"
 
 
 def infer_city_from_string(s: str) -> str:
