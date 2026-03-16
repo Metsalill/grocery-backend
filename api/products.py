@@ -2,7 +2,6 @@
 
 from fastapi import APIRouter, Request, Query, HTTPException
 from typing import Optional, List, Dict, Any
-from asyncpg import exceptions as pgerr
 
 from utils.throttle import throttle
 
@@ -30,6 +29,47 @@ async def _get_pool(request: Request):
     if pool is None:
         raise HTTPException(status_code=500, detail="Database pool not initialized")
     return pool
+
+
+# Source priority: lower = preferred display representative
+SOURCE_PRIORITY_SQL = """
+    CASE
+        WHEN p.source_url ILIKE '%prisma%'                             THEN 1
+        WHEN p.source_url ILIKE '%selver%'                             THEN 2
+        WHEN p.source_url ILIKE '%rimi%'                               THEN 3
+        WHEN p.source_url ILIKE '%barbora%'
+          OR p.source_url ILIKE '%maxima%'                             THEN 4
+        WHEN p.source_url ILIKE '%ecoop%'
+          OR (p.source_url ILIKE '%coop%'
+              AND p.source_url NOT ILIKE '%wolt%')                     THEN 5
+        WHEN p.source_url ILIKE '%wolt%'                               THEN 6
+        WHEN p.source_url IS NULL OR p.source_url = ''                 THEN 7
+        ELSE 8
+    END
+"""
+
+
+def _build_dedup_sql(where_sql: str) -> str:
+    """
+    Returns one representative product per group.
+    Grouped products (same real-world item across chains) collapse to one card.
+    Ungrouped products each get their own card.
+    Within a group, picks the best representative by chain priority, image, EAN, id.
+    """
+    return f"""
+        SELECT DISTINCT ON (COALESCE(pgm.group_id::text, 'u_' || p.id::text))
+            p.*,
+            pgm.group_id
+        FROM products p
+        LEFT JOIN product_group_members pgm ON pgm.product_id = p.id
+        {where_sql}
+        ORDER BY
+            COALESCE(pgm.group_id::text, 'u_' || p.id::text),
+            {SOURCE_PRIORITY_SQL},
+            CASE WHEN p.image_url IS NOT NULL AND p.image_url != '' THEN 0 ELSE 1 END,
+            CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
+            p.id
+    """
 
 
 # ----------------------------- LIST (paged) -----------------------------
@@ -64,42 +104,10 @@ async def list_products(
         params.append(f"%{q}%")
         where.append(f"p.name ILIKE ${len(params)}")
 
-    where_sql = ("\nWHERE " + " AND ".join(where)) if where else ""
+    where_sql = ("WHERE " + " AND ".join(where)) if where else ""
 
-    # Deduplicated subquery:
-    # DISTINCT ON (name, size_text) picks one representative per duplicate group.
-    # ORDER BY priority:
-    #   1. Preferred chain (prisma best, wolt worst — wolt duplicates same coop product per location)
-    #   2. Has image (products with images are more useful to display)
-    #   3. Has EAN (more complete data)
-    #   4. Lowest id (oldest/most stable record as tiebreaker)
-    dedup_sql = f"""
-        SELECT DISTINCT ON (p.name, COALESCE(p.size_text, ''))
-            p.*
-        FROM products p{where_sql}
-        ORDER BY
-            p.name,
-            COALESCE(p.size_text, ''),
-            CASE
-                WHEN p.source_url ILIKE '%prisma%'                              THEN 1
-                WHEN p.source_url ILIKE '%selver%'                              THEN 2
-                WHEN p.source_url ILIKE '%rimi%'                                THEN 3
-                WHEN p.source_url ILIKE '%barbora%'
-                  OR p.source_url ILIKE '%maxima%'                              THEN 4
-                WHEN p.source_url ILIKE '%ecoop%'
-                  OR (p.source_url ILIKE '%coop%'
-                      AND p.source_url NOT ILIKE '%wolt%')                      THEN 5
-                WHEN p.source_url ILIKE '%wolt%'                                THEN 6
-                WHEN p.source_url IS NULL OR p.source_url = ''                  THEN 7
-                ELSE 8
-            END,
-            CASE WHEN p.image_url IS NOT NULL AND p.image_url != '' THEN 0 ELSE 1 END,
-            CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
-            p.id
-    """
-
+    dedup_sql = _build_dedup_sql(where_sql)
     count_sql = f"SELECT COUNT(*) FROM ({dedup_sql}) AS deduped"
-
     params_with_paging = params + [limit, offset]
     data_sql = (
         f"SELECT * FROM ({dedup_sql}) AS deduped\n"
@@ -145,33 +153,10 @@ async def search_products(
 
     pool = await _get_pool(request)
 
-    # Same deduplication applied to search
-    sql = """
-        SELECT * FROM (
-            SELECT DISTINCT ON (p.name, COALESCE(p.size_text, ''))
-                p.*
-            FROM products p
-            WHERE p.name ILIKE $1
-            ORDER BY
-                p.name,
-                COALESCE(p.size_text, ''),
-                CASE
-                    WHEN p.source_url ILIKE '%prisma%'                              THEN 1
-                    WHEN p.source_url ILIKE '%selver%'                              THEN 2
-                    WHEN p.source_url ILIKE '%rimi%'                                THEN 3
-                    WHEN p.source_url ILIKE '%barbora%'
-                      OR p.source_url ILIKE '%maxima%'                              THEN 4
-                    WHEN p.source_url ILIKE '%ecoop%'
-                      OR (p.source_url ILIKE '%coop%'
-                          AND p.source_url NOT ILIKE '%wolt%')                      THEN 5
-                    WHEN p.source_url ILIKE '%wolt%'                                THEN 6
-                    WHEN p.source_url IS NULL OR p.source_url = ''                  THEN 7
-                    ELSE 8
-                END,
-                CASE WHEN p.image_url IS NOT NULL AND p.image_url != '' THEN 0 ELSE 1 END,
-                CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
-                p.id
-        ) AS deduped
+    where_sql = "WHERE p.name ILIKE $1"
+    dedup_sql = _build_dedup_sql(where_sql)
+    sql = f"""
+        SELECT * FROM ({dedup_sql}) AS deduped
         ORDER BY name
         LIMIT $2
     """
