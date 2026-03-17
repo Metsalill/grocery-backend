@@ -285,8 +285,61 @@ def infer_brand_from_title(title: str) -> str:
     return parts[0]
 
 def extract_price_eur(page) -> float:
-    for sel in ["[data-test='product-price']", "[data-testid='product-price']",
-                "[class*='price']", "span:has-text('€')", "span:has-text('EUR')"]:
+    """
+    Extract price from Prisma product page.
+
+    Prisma always shows "umbes X,XX €" (approx) for both fixed-size and
+    weight products because the exact price requires selecting a store.
+
+    HTML structure:
+        <span data-test-id="product-price__dynamic-unitPrice">
+            <span aria-hidden="true">umbes</span>
+            <span>...</span>
+            <span aria-hidden="false" data-test-id="display-price">3,85 €</span>
+        </span>
+        <div data-test-id="comparison-price">
+            <span aria-hidden="true">7,70 €/kg</span>
+        </div>
+
+    We use display-price as the canonical price for all products
+    (0,50 € for apple, 3,85 € for hakkliha) — it's the best available
+    without store selection, and consistent across product types.
+    """
+
+    # Primary: Prisma's display-price element (confirmed correct selector)
+    try:
+        loc = page.locator("[data-test-id='display-price']")
+        if loc.count() > 0:
+            txt = clean(loc.first.inner_text())
+            m = PRICE_NUM_RE.search(txt.replace("\u00a0", " "))
+            if m:
+                val = float(m.group(1).replace(",", "."))
+                if val > 0:
+                    return val
+    except Exception:
+        pass
+
+    # Fallback 1: dynamic unit price container
+    try:
+        loc = page.locator("[data-test-id='product-price__dynamic-unitPrice']")
+        if loc.count() > 0:
+            txt = clean(loc.first.inner_text())
+            m = PRICE_NUM_RE.search(txt.replace("\u00a0", " "))
+            if m:
+                val = float(m.group(1).replace(",", "."))
+                if val > 0:
+                    return val
+    except Exception:
+        pass
+
+    # Fallback 2: generic price selectors
+    for sel in [
+        "[data-test='product-price']",
+        "[data-testid='product-price']",
+        "[class*='price']",
+        "span:has-text('€')",
+        "span:has-text('EUR')",
+    ]:
         try:
             loc = page.locator(sel)
             if loc.count() == 0:
@@ -294,16 +347,23 @@ def extract_price_eur(page) -> float:
             txt = clean(loc.first.inner_text())
             m = PRICE_NUM_RE.search(txt.replace("\u00a0", " "))
             if m:
-                return float(m.group(1).replace(",", "."))
+                val = float(m.group(1).replace(",", "."))
+                if val > 0:
+                    return val
         except Exception:
             continue
+
+    # Fallback 3: body text (last resort)
     try:
         txt = clean(page.inner_text("body"))
         m = PRICE_NUM_RE.search(txt)
         if m:
-            return float(m.group(1).replace(",", "."))
+            val = float(m.group(1).replace(",", "."))
+            if val > 0:
+                return val
     except Exception:
         pass
+
     return 0.0
 
 def extract_ext_id_from_url(url: str) -> str:
@@ -528,6 +588,7 @@ def crawl_to_db(max_products: int = 500, headless: bool = True) -> None:
 
                 if not price_val or price_val <= 0:
                     skipped_no_price += 1
+                    print(f"[warn] no price for {url} — skipping", file=sys.stderr)
                     continue
 
                 ext_id = extract_ext_id_from_url(url)
