@@ -24,7 +24,7 @@ on:
         required: false
         default: "0.6"
   schedule:
-    - cron: "19 3 * * 0"   # Sun at 03:19 UTC
+    - cron: "19 3 * * *"   # Daily at 03:19 UTC
 
 concurrency:
   group: ${{ github.event_name == 'workflow_dispatch' && format('selver-category-crawl-{0}', github.run_id) || 'selver-category-crawl' }}
@@ -319,7 +319,6 @@ jobs:
             source_url    text,
             collected_at  timestamptz DEFAULT now()
           );
-          -- Add source_url if it was missing from an older schema
           ALTER TABLE public.staging_selver_products
             ADD COLUMN IF NOT EXISTS brand      text;
           ALTER TABLE public.staging_selver_products
@@ -401,12 +400,9 @@ jobs:
           fi
 
           # Detect CSV shape from header
-          # New crawler (post-2026-03-14): ext_id,source_url,name,brand,ean_raw,ean_norm,sku_raw,size_text,price,currency,category_path,category_leaf
-          # Old crawler:                  ext_id,name,brand,ean_raw,...  (no source_url)
           HEADER=$(head -n1 data/selver.csv)
           echo "CSV header: $HEADER"
 
-          # Check for source_url in position 2 (new format)
           HAS_SOURCE_URL=0
           if echo "$HEADER" | grep -qiE '^ext_id,source_url,'; then
             HAS_SOURCE_URL=1
@@ -440,15 +436,11 @@ jobs:
           );
           SQL_A
 
-          # Pick the right \copy column list based on CSV format
           if [ "$HAS_SOURCE_URL" -eq 1 ]; then
-            # New format: all 12 columns in order
             echo "\copy tmp_staging_selver_products (ext_id,source_url,name,brand,ean_raw,ean_norm,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER" >> /tmp/selver_load.sql
           elif [ "$HAS_BRAND" -eq 1 ]; then
-            # Old format with brand but no source_url
             echo "\copy tmp_staging_selver_products (ext_id,name,brand,ean_raw,ean_norm,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER" >> /tmp/selver_load.sql
           else
-            # Oldest format: no brand, no source_url
             echo "\copy tmp_staging_selver_products (ext_id,name,ean_raw,ean_norm,sku_raw,size_text,price,currency,category_path,category_leaf) FROM 'data/selver.csv' CSV HEADER" >> /tmp/selver_load.sql
           fi
           echo "" >> /tmp/selver_load.sql
@@ -457,6 +449,10 @@ jobs:
 
           DELETE FROM tmp_staging_selver_products
           WHERE name ILIKE '%vabad ametikohad%';
+
+          -- Guard: remove zero or negative prices before any upsert
+          DELETE FROM tmp_staging_selver_products
+          WHERE COALESCE(price, 0) <= 0;
 
           WITH filtered AS (
             SELECT
@@ -527,12 +523,14 @@ jobs:
             COALESCE(p.source_url, p.ext_id),
             'online'
           FROM pick_one p
+          -- Never overwrite a good price with zero
           ON CONFLICT (product_id, store_id) DO UPDATE
             SET price        = EXCLUDED.price,
                 currency     = EXCLUDED.currency,
                 collected_at = EXCLUDED.collected_at,
                 source_url   = EXCLUDED.source_url,
-                source       = EXCLUDED.source;
+                source       = EXCLUDED.source
+            WHERE EXCLUDED.price > 0;
 
           CREATE TEMP TABLE tmp_missing_candidates AS
           WITH filtered AS (
