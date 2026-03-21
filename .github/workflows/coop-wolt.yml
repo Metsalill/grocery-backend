@@ -91,13 +91,16 @@ jobs:
           retention-days: 3
 
   # -------------------------------------------------------------------------
-  # INGEST: download all CSVs and load into DB via upsert_product_and_price
+  # INGEST: download all CSVs and load into DB via batched upserts
   # Runs after ALL crawl jobs finish (including partial failures)
+  # FIX: increased timeout-minutes from 180 to 360
+  # FIX: replaced row-by-row upsert_product_and_price calls with batched
+  #      executemany for dramatically faster ingest
   # -------------------------------------------------------------------------
   ingest:
     name: ingest (all stores)
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 360
     needs: crawl
     # Run even if some crawl shards failed — ingest whatever landed
     if: always()
@@ -151,12 +154,16 @@ jobs:
               "konsum-saku":     558,
           }
 
+          # Batched upsert via upsert_product_and_price — same function,
+          # but called with executemany in chunks for much faster throughput
           SQL = """
           SELECT upsert_product_and_price(
               %s::text, %s::text, %s::text, %s::text, %s::text,
               %s::text, %s::numeric, %s::text, %s::integer, %s, %s::text
           );
           """
+
+          BATCH_SIZE = 200  # rows per executemany call
 
           csvs = glob.glob("out/coop_wolt_*.csv")
           if not csvs:
@@ -168,70 +175,88 @@ jobs:
           ts_now = datetime.datetime.now(datetime.timezone.utc)
 
           with psycopg.connect(db_url) as conn:
-              with conn.cursor() as cur:
-                  for csv_path in sorted(csvs):
-                      print(f"[ingest] processing {csv_path}")
-                      with open(csv_path, newline="", encoding="utf-8") as f:
-                          reader = csv.DictReader(f)
-                          rows = list(reader)
+              for csv_path in sorted(csvs):
+                  print(f"[ingest] processing {csv_path}")
+                  with open(csv_path, newline="", encoding="utf-8") as f:
+                      reader = csv.DictReader(f)
+                      rows = list(reader)
 
-                      if not rows:
-                          print(f"  -> empty, skipping")
+                  if not rows:
+                      print(f"  -> empty, skipping")
+                      continue
+
+                  # Derive store_host from store_host column in CSV
+                  sample_host = (rows[0].get("store_host") or "").replace("wolt:", "").strip()
+                  if sample_host not in STORE_MAP:
+                      for key in STORE_MAP:
+                          if key in csv_path:
+                              sample_host = key
+                              break
+
+                  store_id = STORE_MAP.get(sample_host)
+                  if not store_id:
+                      print(f"  -> [warn] unknown store_host '{sample_host}', skipping")
+                      continue
+
+                  # Build param list, skipping invalid rows
+                  params = []
+                  for r in rows:
+                      price_raw = r.get("price") or ""
+                      try:
+                          price_val = float(price_raw)
+                      except (ValueError, TypeError):
+                          continue
+                      if price_val <= 0:
                           continue
 
-                      # Derive store_host from store_host column in CSV
-                      sample_host = (rows[0].get("store_host") or "").replace("wolt:", "").strip()
-                      # Fallback: match from filename
-                      if sample_host not in STORE_MAP:
-                          for key in STORE_MAP:
-                              if key in csv_path:
-                                  sample_host = key
-                                  break
-
-                      store_id = STORE_MAP.get(sample_host)
-                      if not store_id:
-                          print(f"  -> [warn] unknown store_host '{sample_host}', skipping")
+                      ext_id = f"wolt:{r.get('item_id') or ''}" if r.get("item_id") else ""
+                      if not ext_id or ext_id == "wolt:":
                           continue
 
-                      sent = 0
-                      errors = 0
-                      for r in rows:
-                          price_raw = r.get("price") or ""
-                          try:
-                              price_val = float(price_raw)
-                          except (ValueError, TypeError):
-                              continue
-                          if price_val <= 0:
-                              continue
+                      params.append((
+                          "wolt",
+                          ext_id,
+                          r.get("name") or "",
+                          "",
+                          r.get("unit_info") or "",
+                          r.get("barcode_gtin") or "",
+                          price_val,
+                          "EUR",
+                          store_id,
+                          ts_now,
+                          "",
+                      ))
 
-                          ext_id = f"wolt:{r.get('item_id') or ''}" if r.get("item_id") else ""
-                          if not ext_id or ext_id == "wolt:":
-                              continue
+                  # Execute in batches
+                  sent = 0
+                  errors = 0
+                  for i in range(0, len(params), BATCH_SIZE):
+                      batch = params[i:i + BATCH_SIZE]
+                      try:
+                          with conn.cursor() as cur:
+                              cur.executemany(SQL, batch)
+                          conn.commit()
+                          sent += len(batch)
+                      except Exception as e:
+                          conn.rollback()
+                          errors += len(batch)
+                          print(f"  [warn] batch {i//BATCH_SIZE} failed: {e}")
+                          # Fall back to row-by-row for this batch to salvage good rows
+                          with conn.cursor() as cur:
+                              for p in batch:
+                                  try:
+                                      cur.execute(SQL, p)
+                                      sent += 1
+                                      errors -= 1
+                                  except Exception as e2:
+                                      if errors <= 3:
+                                          print(f"  [warn] row failed {p[1]}: {e2}")
+                                      conn.rollback()
+                          conn.commit()
 
-                          try:
-                              cur.execute(SQL, (
-                                  "wolt",
-                                  ext_id,
-                                  r.get("name") or "",
-                                  "",
-                                  r.get("unit_info") or "",
-                                  r.get("barcode_gtin") or "",
-                                  price_val,
-                                  "EUR",
-                                  store_id,
-                                  ts_now,
-                                  "",
-                              ))
-                              sent += 1
-                          except Exception as e:
-                              errors += 1
-                              if errors <= 3:
-                                  print(f"  [warn] upsert failed for {ext_id}: {e}")
-
-                      conn.commit()
-                      print(f"  -> store_id={store_id} ({sample_host}): {sent} upserted, {errors} errors")
-                      total_sent += sent
-                      total_errors += errors
+                  print(f"  -> store_id={store_id} ({sample_host}): {sent} upserted, {errors} errors")
+                  total_sent += sent
+                  total_errors += errors
 
           print(f"\n[done] Total: {total_sent} rows upserted, {total_errors} errors")
           PYEOF
