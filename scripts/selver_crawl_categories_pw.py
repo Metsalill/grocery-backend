@@ -38,15 +38,16 @@ STRICT_ALLOWLIST = [
     "/leivad-saiad-kondiitritooted",
     "/valmistoidud",
     "/kuivained-hoidised",
-    "/kuivained-hommikusoogid-hoidised",
     "/maitseained-ja-puljongid",
-    "/maitseained-ja-puljongid/kastmed",
-    "/maitseained-ja-puljongid/olid-ja-aadikad",
-    "/suupisted-ja-maiustused",
+    "/kastmed-olid",
+    "/maiustused-kupsised-naksid",
     "/joogid",
-    "/sugavkylm",
     "/kulmutatud-toidukaubad",
     "/suurpakendid",
+    "/lastekaubad",
+    "/lemmiklooma-kaubad",
+    "/enesehooldustarbed",
+    "/majapidamis-ja-kodukaubad",
 ]
 ALLOWLIST_ONLY = int(os.getenv("ALLOWLIST_ONLY", "1")) == 1
 
@@ -54,13 +55,14 @@ BANNED_KEYWORDS = {
     "sisustus","kodutekstiil","valgustus","kardin","jouluvalgustid",
     "vaikesed-sisustuskaubad","kuunlad","kirja-ja-kontoritarbed",
     "remondi-ja-turvatooted","omblus-ja-kasitootarbed","meisterdamine",
-    "ajakirjad","autojuhtimine","kotid","aed-ja-lilled","lemmikloom",
+    "ajakirjad","autojuhtimine","kotid","aed-ja-lilled",
     "sport","pallimangud","jalgrattasoit","ujumine","matkamine",
-    "tervisesport","manguasjad","lutid","lapsehooldus","ideed-ja-hooajad",
+    "tervisesport","manguasjad","lutid","ideed-ja-hooajad",
     "kodumasinad","elektroonika","meelelahutuselektroonika",
     "vaikesed-kodumasinad","lambid-patareid-ja-taskulambid",
-    "ilu-ja-tervis","kosmeetika","meigitooted","hugieen",
-    "loodustooted-ja-toidulisandid",
+    "loodustooted-ja-toidulisandid","roivaste-ja-jalatsite-hooldus",
+    "muud-majapidamise-kaubad","koogitarbed","kodutehnika",
+    "vannitoa-ja-saunatarvikud","laste-sokid-sukad-pesu",
 }
 
 PACK_RE   = re.compile(r'(\d+)\s*[x×]\s*(\d+[.,]?\d*)\s*(ml|l|g|kg|cl|dl|tk|pcs)\b', re.I)
