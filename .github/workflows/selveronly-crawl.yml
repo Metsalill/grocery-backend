@@ -34,11 +34,11 @@ jobs:
   crawl-and-upsert:
     name: crawl-and-upsert (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
     env:
       TZ: Europe/Tallinn
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
@@ -234,7 +234,7 @@ jobs:
           fi
 
           set +e
-          stdbuf -oL -eL timeout -k 90s 75m \
+          stdbuf -oL -eL timeout -k 90s 105m \
             python -u scripts/selver_crawl_categories_pw.py \
               "${SKIP_FLAG[@]}" \
               "${ONLY_FLAG[@]}" \
@@ -399,7 +399,6 @@ jobs:
             exit 0
           fi
 
-          # Detect CSV shape from header
           HEADER=$(head -n1 data/selver.csv)
           echo "CSV header: $HEADER"
 
@@ -450,7 +449,6 @@ jobs:
           DELETE FROM tmp_staging_selver_products
           WHERE name ILIKE '%vabad ametikohad%';
 
-          -- Guard: remove zero or negative prices before any upsert
           DELETE FROM tmp_staging_selver_products
           WHERE COALESCE(price, 0) <= 0;
 
@@ -523,7 +521,6 @@ jobs:
             COALESCE(p.source_url, p.ext_id),
             'online'
           FROM pick_one p
-          -- Never overwrite a good price with zero
           ON CONFLICT (product_id, store_id) DO UPDATE
             SET price        = EXCLUDED.price,
                 currency     = EXCLUDED.currency,
