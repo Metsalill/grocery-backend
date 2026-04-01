@@ -48,9 +48,9 @@ jobs:
       - name: Prisma → DB (UPSERT by EAN) in chunks
         shell: bash
         env:
-          CHUNKS: "6"
-          PER_CHUNK_LIMIT: "2200"
-          CHUNK_TIMEOUT: "25m"
+          CHUNKS: "10"
+          PER_CHUNK_LIMIT: "1500"
+          CHUNK_TIMEOUT: "20m"
           PRELOAD_DB: "1"
           PRELOAD_DB_QUERY: |
             SELECT DISTINCT p.source_url
@@ -82,7 +82,7 @@ jobs:
               echo "Chunk $i completed."
             fi
             echo "::endgroup::"
-            sleep 5
+            sleep 15
           done
       - name: Produce CSV export (DB → CSV)
         run: |
