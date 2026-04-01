@@ -7,11 +7,11 @@ jobs:
   scrape:
     name: scrape (haapsalu eCoop, shard ${{ matrix.cat_index }})
     runs-on: ubuntu-latest
-    timeout-minutes: 120   # requests+BS4 is much faster than Playwright — should finish in ~10min per shard
+    timeout-minutes: 60   # requests+BS4 is much faster than Playwright — should finish in ~10min per shard
     strategy:
       fail-fast: false
       matrix:
-        cat_index: [0, 1, 2, 3, 4, 5, 6, 7]
+        cat_index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
     concurrency:
       group: coop-ecoop-haapsalu-${{ matrix.cat_index }}
       cancel-in-progress: false
@@ -44,8 +44,8 @@ jobs:
             --store-host coophaapsalu.ee \
             --store-id 445 \
             --categories-file data/coop_haapsalu_categories.txt \
-            --cat-shards 8 \
-            --cat-index  ${{ matrix.cat_index }} \
+            --cat-shards 16 \
+            --cat-index ${{ matrix.cat_index }} \
             --req-delay 0.2 \
             --out "$OUT" \
             --upsert-db main \
