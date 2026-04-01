@@ -239,7 +239,7 @@ async def _latest_prices(
     sql_distinct_on = """
     WITH effective_source AS (
       SELECT s.id AS physical_store_id,
-             COALESCE(em.host_store_id, s.id) AS source_store_id
+             COALESCE(sps.source_store_id, em.host_store_id, s.id) AS source_store_id
       FROM stores s
       LEFT JOIN (
         SELECT DISTINCT ON (store_id) store_id, host_store_id
@@ -247,6 +247,11 @@ async def _latest_prices(
         WHERE active = true OR active IS NULL
         ORDER BY store_id, COALESCE(priority, 999999), host_store_id
       ) em ON em.store_id = s.id
+      LEFT JOIN (
+        SELECT DISTINCT ON (store_id) store_id, source_store_id
+        FROM store_price_source
+        ORDER BY store_id, source_store_id
+      ) sps ON sps.store_id = s.id
       WHERE s.id = ANY($2::int[])
     ),
     latest AS (
