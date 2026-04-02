@@ -496,13 +496,60 @@ def scrape_product_links_on_category(page) -> List[str]:
     return links
 
 def paginate_category(page) -> bool:
-    selectors = [
-        'a[rel="next"]',
-        'button[aria-label*="järgmine"]',
-        'button[aria-label*="Next"]',
-        '.pagination__next button',
-    ]
-    for sel in selectors:
+    # Selver kasutab sf-pagination struktuuri:
+    #   <nav class="sf-pagination Pagination">
+    #     <div class="sf-pagination__item sf-pagination__item--prev">...</div>
+    #     <span class="sf-pagination__item sf-pagination__item--current">1</span>
+    #     <a href="/kategooria?page=2" class="sf-link sf-pagination__item">2</a>
+    #     <div class="sf-pagination__item sf-pagination__item--next">...</div>
+    #   </nav>
+    # Järgmine leht on <a> link sf-pagination__item--next divs sees.
+
+    # Peamine meetod: sf-pagination__item--next sees olev <a>
+    try:
+        next_div = page.query_selector('.sf-pagination__item--next')
+        if next_div:
+            next_a = next_div.query_selector('a[href]')
+            if next_a:
+                href = next_a.get_attribute('href')
+                if href:
+                    next_url = _clean_abs(href)
+                    if next_url:
+                        print(f"[pagination] next page: {next_url}", file=sys.stderr)
+                        page.goto(next_url, timeout=NAV_TIMEOUT_MS, wait_until='domcontentloaded')
+                        page.wait_for_timeout(800)
+                        return True
+    except Exception:
+        pass
+
+    # Fallback: aktiivse lehe järgmine <a> õde-element paginatsioonis
+    try:
+        current = page.query_selector('.sf-pagination__item--current')
+        if current:
+            next_href = page.evaluate('''(el) => {
+                let sib = el.nextElementSibling;
+                while (sib) {
+                    if (sib.tagName === 'A' && sib.getAttribute('href')) {
+                        return sib.getAttribute('href');
+                    }
+                    const a = sib.querySelector && sib.querySelector('a[href]');
+                    if (a) return a.getAttribute('href');
+                    sib = sib.nextElementSibling;
+                }
+                return null;
+            }''', current)
+            if next_href:
+                next_url = _clean_abs(next_href)
+                if next_url:
+                    print(f"[pagination] next page (fallback): {next_url}", file=sys.stderr)
+                    page.goto(next_url, timeout=NAV_TIMEOUT_MS, wait_until='domcontentloaded')
+                    page.wait_for_timeout(800)
+                    return True
+    except Exception:
+        pass
+
+    # Vana fallback nuppude jaoks (teised poed)
+    for sel in ['a[rel="next"]', 'button[aria-label*="Next"]', '.pagination__next button']:
         try:
             btn = page.query_selector(sel)
             if btn and btn.is_enabled():
@@ -511,6 +558,7 @@ def paginate_category(page) -> bool:
                 return True
         except Exception:
             pass
+
     return False
 
 def parse_category_breadcrumb(page) -> Tuple[str,str]:
@@ -727,7 +775,7 @@ def crawl_category(page, category_url, seen_ext, writer_path, rows_for_ingest,
     while True:
         pages_done += 1
         card_urls = scrape_product_links_on_category(page)
-        print(f"[debug] found {len(card_urls)} product links on page", file=sys.stderr)
+        print(f"[debug] found {len(card_urls)} product links on page {pages_done}", file=sys.stderr)
         if card_urls:
             print(f"[debug] first url: {card_urls[0]}", file=sys.stderr)
         else:
