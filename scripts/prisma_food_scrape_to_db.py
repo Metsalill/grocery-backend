@@ -235,23 +235,23 @@ def parse_apollo_products(apollo_state: dict) -> list[dict]:
 
 
 def find_total_pages(html: str) -> int:
-    """Find total pages from Prisma pagination."""
+    """Find total pages from Prisma pagination links in SSR HTML."""
     soup = BeautifulSoup(html, "lxml")
-    # "436 toodet  Leht 1 / 19"
-    m = re.search(r"Leht\s*\d+\s*/\s*(\d+)", soup.get_text())
-    if m:
-        return int(m.group(1))
-    # Try numbered pagination buttons
-    nums = []
-    for el in soup.find_all(["a", "button"]):
-        txt = el.get_text(strip=True)
-        try:
-            n = int(txt)
-            if 1 < n <= 500:
-                nums.append(n)
-        except Exception:
-            pass
-    return max(nums) if nums else 1
+    max_page = 1
+    # Prisma uses data-test-id="pagination-link" with href="/tooted/X?page=N"
+    for a in soup.find_all("a", attrs={"data-test-id": "pagination-link"}):
+        href = a.get("href", "")
+        m = re.search(r"[?&]page=(\d+)", href)
+        if m:
+            max_page = max(max_page, int(m.group(1)))
+    if max_page > 1:
+        return max_page
+    # Fallback: look for any page number links
+    for a in soup.find_all("a", href=re.compile(r"[?&]page=\d+")):
+        m = re.search(r"[?&]page=(\d+)", a.get("href", ""))
+        if m:
+            max_page = max(max_page, int(m.group(1)))
+    return max_page
 
 
 def scrape_category(cat_path: str, delay: float = 0.5) -> list[dict]:
