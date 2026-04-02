@@ -1,38 +1,32 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Prisma scraper v2 — requests + BeautifulSoup, no Playwright.
+Prisma scraper v3 — requests + __NEXT_DATA__ Apollo cache, no Playwright.
 
-Key insight: EAN is in the product URL slug, price is in the category
-listing page HTML (SSR). We never need to visit individual PDPs.
+Prisma uses Next.js. The page HTML contains a <script id="__NEXT_DATA__">
+JSON blob with an Apollo GraphQL cache. Products are stored as:
+  apolloState['Product:{"id":"EAN","storeId":"..."}'] = {ean, name, price, ...}
 
-URL pattern: /toode/{slug}/{EAN}
-Category listing: data-test-id="product-card" cards contain name + price.
+Price comes from ProductStoreEdge entries linked to each product.
 
-Strategy:
-  1. For each category page, fetch HTML with requests
-  2. Parse all product cards → name, price, EAN (from href), size
-  3. Upsert via upsert_product_and_price()
-  4. Paginate via ?page=N until no more products
-
-Run: python prisma_scraper_v2.py [--store-id 14] [--delay 0.5] [--shard N] [--shards M]
+Run: python prisma_food_scrape_to_db.py [--store-id 14] [--delay 0.5] [--shard N] [--shards M]
 """
 
 from __future__ import annotations
 
 import argparse
+import datetime
+import json
 import os
 import re
 import sys
 import time
-import datetime
 from typing import Optional
-from urllib.parse import urljoin, urlparse, urlencode, urlunparse, parse_qs, urlparse
+from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
 import psycopg2
-import psycopg2.extras
 
 # ---------------------------------------------------------------------------
 BASE = "https://prismamarket.ee"
@@ -86,10 +80,8 @@ HEADERS = {
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 }
 
-PRICE_RE = re.compile(r"(\d+[.,]\d+)")
-PACK_RE  = re.compile(r"(\d+)\s*[x×]\s*(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
+PACK_RE = re.compile(r"(\d+)\s*[x×]\s*(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
 SIZE_RE  = re.compile(r"\b(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
-EAN_RE   = re.compile(r"/(\d{8,14})(?:[/?#]|$)")
 
 SESSION = requests.Session()
 SESSION.headers.update(HEADERS)
@@ -119,13 +111,6 @@ def fetch_html(url: str, retries: int = 3, delay: float = 1.0) -> Optional[str]:
     return None
 
 
-def parse_ean_from_url(href: str) -> Optional[str]:
-    m = EAN_RE.search(href)
-    if m:
-        return m.group(1)
-    return None
-
-
 def parse_size_from_name(name: str) -> str:
     m = PACK_RE.search(name)
     if m:
@@ -138,136 +123,172 @@ def parse_size_from_name(name: str) -> str:
     return ""
 
 
-def parse_price(txt: str) -> Optional[float]:
-    # Remove "umbes" and other text, find first price number
-    txt = txt.replace("\xa0", " ").replace("umbes", "").strip()
-    m = PRICE_RE.search(txt)
-    if m:
-        val = float(m.group(1).replace(",", "."))
-        if val > 0:
-            return val
-    return None
+def extract_next_data(html: str) -> Optional[dict]:
+    """Extract __NEXT_DATA__ JSON from page HTML."""
+    m = re.search(
+        r'<script id="__NEXT_DATA__" type="application/json">(.*?)</script>',
+        html, re.S
+    )
+    if not m:
+        return None
+    try:
+        return json.loads(m.group(1))
+    except Exception as e:
+        print(f"[warn] __NEXT_DATA__ JSON parse error: {e}", file=sys.stderr)
+        return None
 
 
-def parse_category_page(html: str, cat_url: str) -> list[dict]:
-    soup = BeautifulSoup(html, "lxml")
-    products = []
+def parse_apollo_products(apollo_state: dict) -> list[dict]:
+    """
+    Extract products from Apollo GraphQL cache.
 
-    cards = soup.find_all(attrs={"data-test-id": "product-card"})
-    if not cards:
-        # Try alternative selector
-        cards = soup.find_all("article", attrs={"data-test-id": True})
-
-    for card in cards:
-        try:
-            # Product link — contains slug/EAN
-            link = card.find("a", class_=lambda c: c and "product-link" in c)
-            if not link:
-                link = card.find("a", href=re.compile(r"/toode/"))
-            if not link:
-                continue
-
-            href = link.get("href", "")
-            full_url = urljoin(BASE, href)
-            ean = parse_ean_from_url(full_url)
-            if not ean:
-                continue
-
-            # ext_id = last slug segment before EAN or EAN itself
-            path_parts = [p for p in urlparse(full_url).path.split("/") if p]
-            ext_id = ean  # EAN as ext_id — unique and stable
-
-            # Product name
-            name_el = card.find(attrs={"data-test-id": "product-card_productName"})
-            if not name_el:
-                name_el = card.find(class_=lambda c: c and "product-card_productname" in c.lower() if c else False)
-            if not name_el:
-                name_el = card.find("span", attrs={"data-test-id": lambda x: x and "productname" in x.lower() if x else False})
-            if not name_el:
-                # Try link text
-                name_el = link
-            name = name_el.get_text(strip=True) if name_el else ""
-            if not name:
-                continue
-
-            # Price — look for display-price element
-            price_el = card.find(attrs={"data-test-id": "display-price"})
-            if not price_el:
-                price_el = card.find(attrs={"data-test-id": lambda x: x and "price" in x.lower() if x else False})
-            price = None
-            if price_el:
-                price = parse_price(price_el.get_text())
-            if not price:
-                # Try any text with € in card
-                for el in card.find_all(string=re.compile(r"\d+[.,]\d+\s*€")):
-                    price = parse_price(el)
-                    if price:
-                        break
-
-            if not price:
-                continue
-
-            size_text = parse_size_from_name(name)
-
-            products.append({
-                "ext_id": ext_id,
-                "ean": ean,
-                "name": name,
-                "size_text": size_text,
-                "price": price,
-                "source_url": full_url,
-            })
-
-        except Exception as e:
-            print(f"[warn] card parse error: {e}", file=sys.stderr)
+    Structure:
+      'Product:{"id":"4740113093549","storeId":"542860184"}': {
+          ean: '4740113093549',
+          name: 'Farmi Kodujuust...',
+          slug: 'farmi-kodujuust-...',
+          price: 2.12,   (may be here or in ProductStoreEdge)
+          ...
+      }
+      'ProductStoreEdge:{"sorId":"941944000"}': {
+          price: 2.12,
+          product: {'__ref': 'Product:{"id":"..."}'},
+          ...
+      }
+    """
+    # First collect prices from ProductStoreEdge
+    prices_by_product_ref: dict[str, float] = {}
+    for key, val in apollo_state.items():
+        if not key.startswith("ProductStoreEdge:"):
             continue
+        if not isinstance(val, dict):
+            continue
+        price = val.get("price") or val.get("regularPrice") or val.get("campaignPrice")
+        if price is None:
+            continue
+        try:
+            price_f = float(price)
+        except Exception:
+            continue
+        if price_f <= 0:
+            continue
+        product_ref = val.get("product", {})
+        if isinstance(product_ref, dict):
+            ref_key = product_ref.get("__ref", "")
+            if ref_key:
+                # Keep lowest price if multiple edges per product
+                if ref_key not in prices_by_product_ref or price_f < prices_by_product_ref[ref_key]:
+                    prices_by_product_ref[ref_key] = price_f
+
+    products = []
+    for key, val in apollo_state.items():
+        if not key.startswith("Product:"):
+            continue
+        if not isinstance(val, dict):
+            continue
+        if val.get("__typename") != "Product":
+            continue
+
+        ean = str(val.get("ean") or val.get("id") or "").strip()
+        if not ean or len(ean) < 8:
+            continue
+
+        name = str(val.get("name") or "").strip()
+        if not name:
+            continue
+
+        # Price: try direct, then from ProductStoreEdge
+        price = None
+        for price_key in ["price", "regularPrice", "campaignPrice", "lowestPrice"]:
+            p = val.get(price_key)
+            if p is not None:
+                try:
+                    price = float(p)
+                    if price > 0:
+                        break
+                except Exception:
+                    pass
+        if not price:
+            price = prices_by_product_ref.get(key)
+        if not price or price <= 0:
+            continue
+
+        slug = str(val.get("slug") or val.get("urlSlug") or "").strip()
+        source_url = f"{BASE}/toode/{slug}/{ean}" if slug else f"{BASE}/toode/{ean}"
+        ext_id = ean
+
+        products.append({
+            "ext_id": ext_id,
+            "ean": ean,
+            "name": name,
+            "size_text": parse_size_from_name(name),
+            "price": price,
+            "source_url": source_url,
+        })
 
     return products
 
 
-def get_total_pages(html: str) -> int:
-    """Extract total page count from pagination."""
+def find_total_pages(html: str) -> int:
+    """Find total pages from Prisma pagination."""
     soup = BeautifulSoup(html, "lxml")
-    # Look for "Leht 1 / 45" pattern
+    # "436 toodet  Leht 1 / 19"
     m = re.search(r"Leht\s*\d+\s*/\s*(\d+)", soup.get_text())
     if m:
         return int(m.group(1))
-    # Try pagination links
-    pages = soup.find_all("a", attrs={"aria-label": re.compile(r"page|leht", re.I)})
+    # Try numbered pagination buttons
     nums = []
-    for p in pages:
+    for el in soup.find_all(["a", "button"]):
+        txt = el.get_text(strip=True)
         try:
-            nums.append(int(p.get_text(strip=True)))
+            n = int(txt)
+            if 1 < n <= 500:
+                nums.append(n)
         except Exception:
             pass
     return max(nums) if nums else 1
 
 
 def scrape_category(cat_path: str, delay: float = 0.5) -> list[dict]:
-    all_products = []
+    all_products: list[dict] = []
     seen_eans: set[str] = set()
 
     base_url = BASE + cat_path
-    page_num = 1
 
-    # Get first page to find total pages
-    first_url = f"{base_url}?page=1"
-    html = fetch_html(first_url)
+    # Fetch first page
+    html = fetch_html(base_url)
     if not html:
         print(f"[skip] {cat_path} — failed to fetch", file=sys.stderr)
         return []
 
-    total_pages = get_total_pages(html)
+    total_pages = find_total_pages(html)
     print(f"[cat] {cat_path} — {total_pages} pages", file=sys.stderr)
 
+    page_num = 1
     while page_num <= total_pages:
-        url = f"{base_url}?page={page_num}"
         if page_num > 1:
+            url = f"{base_url}?page={page_num}"
             html = fetch_html(url)
             if not html:
                 break
 
-        products = parse_category_page(html, url)
+        next_data = extract_next_data(html)
+        if not next_data:
+            print(f"[warn] no __NEXT_DATA__ on page {page_num}", file=sys.stderr)
+            break
+
+        apollo_state = (
+            next_data
+            .get("props", {})
+            .get("pageProps", {})
+            .get("apolloState", {})
+        )
+
+        if not apollo_state:
+            print(f"[warn] no apolloState on page {page_num}", file=sys.stderr)
+            break
+
+        products = parse_apollo_products(apollo_state)
         new_products = [p for p in products if p["ean"] not in seen_eans]
         for p in new_products:
             seen_eans.add(p["ean"])
@@ -279,7 +300,7 @@ def scrape_category(cat_path: str, delay: float = 0.5) -> list[dict]:
             file=sys.stderr
         )
 
-        if not products or len(new_products) == 0:
+        if not new_products:
             break
 
         page_num += 1
@@ -305,7 +326,7 @@ def upsert_batch(cur, rows: list[dict], store_id: int) -> tuple[int, int]:
                 "prisma",
                 row["ext_id"],
                 row["name"],
-                "",           # brand — inferred by DB or left empty
+                "",
                 row["size_text"],
                 row["ean"],
                 row["price"],
@@ -331,7 +352,6 @@ def main():
     ap.add_argument("--shards", type=int, default=int(os.getenv("SHARDS", "1")))
     args = ap.parse_args()
 
-    # Shard categories
     my_cats = [c for i, c in enumerate(CATEGORIES) if i % args.shards == args.shard]
     print(
         f"[info] shard {args.shard}/{args.shards} — "
@@ -350,21 +370,16 @@ def main():
     for cat in my_cats:
         products = scrape_category(cat, delay=args.delay)
         if not products:
+            print(f"[warn] {cat} → 0 products", file=sys.stderr)
             continue
         ok, errors = upsert_batch(cur, products, args.store_id)
         total_ok += ok
         total_errors += errors
-        print(
-            f"[done] {cat} → upserted {ok}, errors {errors}",
-            file=sys.stderr
-        )
+        print(f"[done] {cat} → upserted {ok}, errors {errors}", file=sys.stderr)
 
     cur.close()
     conn.close()
-    print(
-        f"[TOTAL] upserted {total_ok} rows, errors {total_errors}",
-        file=sys.stderr
-    )
+    print(f"[TOTAL] upserted {total_ok} rows, errors {total_errors}", file=sys.stderr)
 
 
 if __name__ == "__main__":
