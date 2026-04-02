@@ -57,7 +57,7 @@ jobs:
       - name: Scrape Selver categories (requests + BS4)
         run: |
           set -euo pipefail
-          python scripts/selver_scraper_v2.py \
+          python scripts/selver_crawl_categories_pw.py \
             --store-id "$STORE_ID" \
             --delay "$REQ_DELAY" \
             --shard "$SHARD" \
