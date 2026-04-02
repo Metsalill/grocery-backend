@@ -32,27 +32,62 @@ import psycopg2
 BASE = "https://prismamarket.ee"
 
 CATEGORIES = [
-    "/tooted/food-market",
-    "/tooted/puu-ja-koogiviljad",
-    "/tooted/leivad-kupsised-ja-kupsetised",
-    "/tooted/liha-ja-taimsed-valgud",
-    "/tooted/kala-ja-mereannid",
-    "/tooted/piim-munad-ja-rasvad",
-    "/tooted/juustud",
-    "/tooted/valmistoit",
-    "/tooted/olid-vurtsid-maitseained",
-    "/tooted/kuivtooted-ja-kupsetamine",
-    "/tooted/joogid",
-    "/tooted/kulmutatud-toidud",
-    "/tooted/maiustused-ja-suupisted",
+    # Food market
+    "/tooted/food-market/liha",
+    "/tooted/food-market/valmistoit",
+    "/tooted/food-market/kalalett",
+    # Puu- ja koogiviljad
+    "/tooted/puu-ja-koogiviljad/puuviljad",
+    "/tooted/puu-ja-koogiviljad/juurviljad",
+    "/tooted/puu-ja-koogiviljad/koogiviljad",
+    "/tooted/puu-ja-koogiviljad/marjad",
+    "/tooted/puu-ja-koogiviljad/seened",
+    # Leivad, küpsised ja küpsetised
+    "/tooted/leivad-kupsised-ja-kupsetised/gluteenivaba",
+    "/tooted/leivad-kupsised-ja-kupsetised/leivad",
+    "/tooted/leivad-kupsised-ja-kupsetised/kupsetusleti-tooted",
+    "/tooted/leivad-kupsised-ja-kupsetised/kupsetised",
+    "/tooted/leivad-kupsised-ja-kupsetised/kuivikud-ja-kringlid",
+    "/tooted/leivad-kupsised-ja-kupsetised/kuivikud-ja-nakileivad",
+    "/tooted/leivad-kupsised-ja-kupsetised/kupsised",
+    # Liha ja taimsed valgud
+    "/tooted/liha-ja-taimsed-valgud/hakkliha",
+    "/tooted/liha-ja-taimsed-valgud/veiseliha",
+    "/tooted/liha-ja-taimsed-valgud/sealiha",
+    "/tooted/liha-ja-taimsed-valgud/muu-liha",
+    "/tooted/liha-ja-taimsed-valgud/kana-broiler-ja-kalkun",
+    "/tooted/liha-ja-taimsed-valgud/singi-ja-vorstiloigud",
+    "/tooted/liha-ja-taimsed-valgud/vorstid-viinerid-ja-peekon",
+    "/tooted/liha-ja-taimsed-valgud/taimsed-valgud-ja-juustuvalgud",
+    "/tooted/liha-ja-taimsed-valgud/broiler-ja-kalkun",
+    "/tooted/liha-ja-taimsed-valgud/lambaliha-ja-ulukid",
+    # Kala ja mereannid
+    "/tooted/kala-ja-mereannid/mereannid",
+    "/tooted/kala-ja-mereannid/muud-kalatooted",
+    "/tooted/kala-ja-mereannid/kala",
+    # Piim, munad ja rasvad
+    "/tooted/piim-munad-ja-rasvad/piim-ja-hapupiim",
+    "/tooted/piim-munad-ja-rasvad/toiduvalmistustooted",
+    "/tooted/piim-munad-ja-rasvad/jogurtid",
+    "/tooted/piim-munad-ja-rasvad/taimsed-piimajoogid",
+    "/tooted/piim-munad-ja-rasvad/hapupiim",
+    "/tooted/piim-munad-ja-rasvad/koored",
+    "/tooted/piim-munad-ja-rasvad/kohupiim-puding-ja-magustoit",
+    "/tooted/piim-munad-ja-rasvad/rasvad",
+    "/tooted/piim-munad-ja-rasvad/munad",
+    "/tooted/piim-munad-ja-rasvad/kohupiim",
+    # Juustud
+    "/tooted/juustud/taimsed-juustud",
+    "/tooted/juustud/toidu-ja-gurmeejuustud",
+    "/tooted/juustud/tuki-ja-viilujuustud",
+    # Kosmeetika (jäävad paika)
     "/tooted/kosmeetika-ja-hugieen/juuksed-ja-juuksehooldus",
     "/tooted/kosmeetika-ja-hugieen/naohooldus",
     "/tooted/kosmeetika-ja-hugieen/nahahooldus",
     "/tooted/kosmeetika-ja-hugieen/intiimhugieen-ja-intiimtooted",
     "/tooted/kosmeetika-ja-hugieen/suuhooldus",
     "/tooted/kosmeetika-ja-hugieen/seebid-ja-pesuvahendid",
-    "/tooted/loodustooted-ja-toidulisandid",
-    "/tooted/kodu-ja-majapidamistarbed",
+    # Lapsed
     "/tooted/lapsed/emapiimaasendajad",
     "/tooted/lapsed/pudrud-ja-pureesupid",
     "/tooted/lapsed/lastetoidud",
@@ -61,13 +96,24 @@ CATEGORIES = [
     "/tooted/lapsed/puhastamine-ja-hugieen",
     "/tooted/lapsed/laste-vahepalad",
     "/tooted/lapsed/beebi-ja-lapsehooldusvahendid",
+    # Lemmikloomad
     "/tooted/lemmikloomad/koeratoit",
     "/tooted/lemmikloomad/kassitoit",
     "/tooted/lemmikloomad/muud-lemmikloomade-tarvikud",
     "/tooted/lemmikloomad/kassiliiv",
+    # Kodu
+    "/tooted/kodu-ja-majapidamistarbed",
     "/tooted/kodu-ja-vaba-aeg/pesupesemine",
     "/tooted/kodu-ja-vaba-aeg/tualettpaber",
     "/tooted/kodu-ja-vaba-aeg/kodupuhastusvahendid",
+    # Ülejäänud — lisame kui sa annad URLid
+    "/tooted/valmistoit",
+    "/tooted/olid-vurtsid-maitseained",
+    "/tooted/kuivtooted-ja-kupsetamine",
+    "/tooted/joogid",
+    "/tooted/kulmutatud-toidud",
+    "/tooted/maiustused-ja-suupisted",
+    "/tooted/loodustooted-ja-toidulisandid",
 ]
 
 HEADERS = {
