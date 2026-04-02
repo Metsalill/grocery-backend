@@ -447,6 +447,9 @@ def _is_product_url(url: str) -> bool:
 def scrape_product_links_on_category(page) -> List[str]:
     links: List[str] = []
     selectors = [
+        'a.ProductCard__link[href^="/"]',
+        '[data-testid="productlink"][href^="/"]',
+        '.ProductCard a[href^="/"]',
         '[data-testid="product-card"] a[href^="/"]',
         'a.product-card__link[href^="/"]',
         '.product-list a[href^="/"]',
@@ -684,6 +687,20 @@ def crawl_category(page, category_url, seen_ext, writer_path, rows_for_ingest,
         page.wait_for_load_state("networkidle", timeout=15000)
     except Exception:
         pass
+
+    # Wait for Vue.js to render product cards
+    for sel in [
+        'a.ProductCard__link',
+        '[data-testid="productlink"]',
+        '.ProductCard',
+        '.product-card',
+    ]:
+        try:
+            page.wait_for_selector(sel, timeout=8000)
+            break
+        except Exception:
+            pass
+    page.wait_for_timeout(1000)
 
     cat_breadcrumb, cat_leaf = parse_category_breadcrumb(page)
 
