@@ -1,636 +1,371 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Prisma.ee scraper -> Postgres via upsert_product_and_price()
+Prisma scraper v2 — requests + BeautifulSoup, no Playwright.
 
-KEY CHANGE: Loads known product URLs from DB first (Phase A bypass).
-Phase A (category crawling) only runs if DB has fewer URLs than max_products.
-This means after the first successful run, subsequent runs go straight to
-visiting PDPs and updating prices — much faster, fits in 25min chunks.
+Key insight: EAN is in the product URL slug, price is in the category
+listing page HTML (SSR). We never need to visit individual PDPs.
+
+URL pattern: /toode/{slug}/{EAN}
+Category listing: data-test-id="product-card" cards contain name + price.
+
+Strategy:
+  1. For each category page, fetch HTML with requests
+  2. Parse all product cards → name, price, EAN (from href), size
+  3. Upsert via upsert_product_and_price()
+  4. Paginate via ?page=N until no more products
+
+Run: python prisma_scraper_v2.py [--store-id 14] [--delay 0.5] [--shard N] [--shards M]
 """
 
 from __future__ import annotations
 
 import argparse
 import os
-import random
 import re
 import sys
 import time
-from datetime import datetime, timezone
-from urllib.parse import urljoin, urlparse
-import json
+import datetime
+from typing import Optional
+from urllib.parse import urljoin, urlparse, urlencode, urlunparse, parse_qs, urlparse
+
+import requests
+from bs4 import BeautifulSoup
 import psycopg2
 import psycopg2.extras
-from psycopg2.extensions import connection as PGConn
-from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeout
 
 # ---------------------------------------------------------------------------
 BASE = "https://prismamarket.ee"
-SEEDS = ["/en/tooted/", "/tooted/"]
-CATEGORY_PREFIXES = ("/en/tooted/", "/tooted/", "/en/food-market/", "/food-market/")
-PRODUCT_PREFIXES = ("/en/toode/", "/toode/")
 
-PACK_RE      = re.compile(r"(\d+)\s*[x×]\s*(\d+(?:[\.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
-SIMPLE_RE    = re.compile(r"\b(\d+(?:[\.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
-PIECES_RE    = re.compile(r"\b(\d+)\s*(?:tk|pcs?|pk|pack)\b", re.I)
-BONUS_RE     = re.compile(r"\+\s*\d+%")
-EAN_RE       = re.compile(r"(\d{8,14})$")
-PRICE_NUM_RE = re.compile(r"(\d+[\.,]\d+)")
-
-# ---------------------------------------------------------------------------
-def jitter(a: float = 0.6, b: float = 1.4) -> None:
-    time.sleep(random.uniform(a, b))
-
-def clean(s: str | None) -> str:
-    return re.sub(r"\s+", " ", s or "").strip()
-
-def is_category_path(path: str) -> bool:
-    return any(path.startswith(p) for p in CATEGORY_PREFIXES)
-
-def is_product_path(path: str) -> bool:
-    p = path.lower()
-    return any(p.startswith(pref) for pref in PRODUCT_PREFIXES)
-
-EXCLUDED_CATEGORY_KEYWORDS = [
-    "sisustus","kodutekstiil","valgustus","kardin","jouluvalgustid","vaikesed-sisustuskaubad","kuunlad",
-    "kook-ja-lauakatmine","uhekordsed-noud","kirja-ja-kontoritarbed","remondi-ja-turvatooted",
-    "kulmutus-ja-kokkamisvahendid","omblus-ja-kasitootarbed","meisterdamine","ajakirjad","autojuhtimine",
-    "kotid","aed-ja-lilled","lemmikloom","sport","pallimangud","jalgrattasoit","ujumine","matkamine",
-    "tervisesport","manguasjad","lutid","lapsehooldus","ideed-ja-hooajad","kodumasinad","elektroonika",
-    "meelelahutuselektroonika","vaikesed-kodumasinad","lambid-patareid-ja-taskulambid",
-    "ilu-ja-tervis","kosmeetika","meigitooted","hugieen","loodustooted-ja-toidulisandid",
+CATEGORIES = [
+    "/tooted/food-market",
+    "/tooted/puu-ja-koogiviljad",
+    "/tooted/leivad-kupsised-ja-kupsetised",
+    "/tooted/liha-ja-taimsed-valgud",
+    "/tooted/kala-ja-mereannid",
+    "/tooted/piim-munad-ja-rasvad",
+    "/tooted/juustud",
+    "/tooted/valmistoit",
+    "/tooted/olid-vurtsid-maitseained",
+    "/tooted/kuivtooted-ja-kupsetamine",
+    "/tooted/joogid",
+    "/tooted/kulmutatud-toidud",
+    "/tooted/maiustused-ja-suupisted",
+    "/tooted/kosmeetika-ja-hugieen/juuksed-ja-juuksehooldus",
+    "/tooted/kosmeetika-ja-hugieen/naohooldus",
+    "/tooted/kosmeetika-ja-hugieen/nahahooldus",
+    "/tooted/kosmeetika-ja-hugieen/intiimhugieen-ja-intiimtooted",
+    "/tooted/kosmeetika-ja-hugieen/suuhooldus",
+    "/tooted/kosmeetika-ja-hugieen/seebid-ja-pesuvahendid",
+    "/tooted/loodustooted-ja-toidulisandid",
+    "/tooted/kodu-ja-majapidamistarbed",
+    "/tooted/lapsed/emapiimaasendajad",
+    "/tooted/lapsed/pudrud-ja-pureesupid",
+    "/tooted/lapsed/lastetoidud",
+    "/tooted/lapsed/laste-pureed-ja-muud-vahepalad",
+    "/tooted/lapsed/mahkmed-ja-lapsehooldus",
+    "/tooted/lapsed/puhastamine-ja-hugieen",
+    "/tooted/lapsed/laste-vahepalad",
+    "/tooted/lapsed/beebi-ja-lapsehooldusvahendid",
+    "/tooted/lemmikloomad/koeratoit",
+    "/tooted/lemmikloomad/kassitoit",
+    "/tooted/lemmikloomad/muud-lemmikloomade-tarvikud",
+    "/tooted/lemmikloomad/kassiliiv",
+    "/tooted/kodu-ja-vaba-aeg/pesupesemine",
+    "/tooted/kodu-ja-vaba-aeg/tualettpaber",
+    "/tooted/kodu-ja-vaba-aeg/kodupuhastusvahendid",
 ]
 
-def is_in_whitelist(url: str) -> bool:
-    path = urlparse(url).path.lower()
-    if not is_category_path(path):
-        return False
-    if any(ex in path for ex in EXCLUDED_CATEGORY_KEYWORDS):
-        return False
-    return True
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/124.0.0.0 Safari/537.36"
+    ),
+    "Accept-Language": "et-EE,et;q=0.9,en;q=0.8",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+}
+
+PRICE_RE = re.compile(r"(\d+[.,]\d+)")
+PACK_RE  = re.compile(r"(\d+)\s*[x×]\s*(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
+SIZE_RE  = re.compile(r"\b(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|cl|dl)\b", re.I)
+EAN_RE   = re.compile(r"/(\d{8,14})(?:[/?#]|$)")
+
+SESSION = requests.Session()
+SESSION.headers.update(HEADERS)
+
 
 # ---------------------------------------------------------------------------
-def get_database_url() -> str:
-    try:
-        import settings  # type: ignore
-        db = getattr(settings, "DATABASE_URL", None)
-        if db:
-            return db
-    except Exception:
-        pass
-    db = os.getenv("DATABASE_URL")
-    if not db:
+def get_db_url() -> str:
+    url = os.getenv("DATABASE_URL")
+    if not url:
         raise RuntimeError("DATABASE_URL not set")
-    return db
+    return url
 
-def db_connect() -> PGConn:
-    conn = psycopg2.connect(get_database_url())
-    conn.autocommit = True
-    return conn
 
-def get_store_id_for_prisma() -> int:
-    try:
-        return int(os.environ.get("STORE_ID", "14") or "14")
-    except Exception:
-        return 14
-
-# ---------------------------------------------------------------------------
-def load_urls_from_db(conn: PGConn) -> list[str]:
-    """
-    Load known Prisma product URLs from DB.
-    Stored as source_url in prices during previous scrape runs.
-    """
-    query = """
-        SELECT DISTINCT p.source_url
-        FROM public.prices p
-        JOIN public.stores s ON s.id = p.store_id
-        WHERE s.chain = 'Prisma'
-          AND s.is_online = TRUE
-          AND p.source_url IS NOT NULL
-          AND p.source_url <> ''
-          AND p.source_url LIKE '%/toode/%'
-        ORDER BY p.source_url;
-    """
-    try:
-        with conn.cursor() as cur:
-            cur.execute(query)
-            rows = cur.fetchall()
-            urls = [r[0] for r in rows if r[0]]
-            print(f"[db] loaded {len(urls)} known product URLs from DB")
-            return urls
-    except Exception as e:
-        print(f"[db] failed to load URLs: {e}")
-        return []
-
-# ---------------------------------------------------------------------------
-def extract_title(page) -> str:
-    try:
-        return clean(page.locator("h1").first.inner_text())
-    except Exception:
-        return ""
-
-def extract_image_url(page) -> str:
-    for sel in ["main img[alt][src]", "img[alt][src]", "img[src]"]:
+def fetch_html(url: str, retries: int = 3, delay: float = 1.0) -> Optional[str]:
+    for attempt in range(retries):
         try:
-            img = page.locator(sel).first
-            if img.count() > 0:
-                src = img.get_attribute("src")
-                if src:
-                    return urljoin(BASE, src)
-        except Exception:
-            continue
-    return ""
+            r = SESSION.get(url, timeout=30)
+            if r.status_code == 200:
+                return r.text
+            if r.status_code == 404:
+                return None
+            print(f"[warn] HTTP {r.status_code} for {url}", file=sys.stderr)
+        except Exception as e:
+            print(f"[warn] fetch error ({attempt+1}/{retries}): {e}", file=sys.stderr)
+        if attempt < retries - 1:
+            time.sleep(delay * (attempt + 1))
+    return None
 
-def extract_label_value(page, labels: list[str]) -> str:
-    for label in labels:
-        try:
-            lab = page.locator(f"xpath=//*[normalize-space(.)='{label}']").first
-            if lab.count() > 0:
-                sib = lab.locator("xpath=following::*[self::div or self::span or self::p][1]")
-                if sib.count() > 0:
-                    return clean(sib.inner_text())
-        except Exception:
-            pass
-    for label in labels:
-        try:
-            lab = page.locator(f"xpath=//*[contains(normalize-space(.), '{label}')]").first
-            if lab.count() > 0:
-                sib = lab.locator("xpath=following::*[self::div or self::span or self::p][1]")
-                if sib.count() > 0:
-                    return clean(sib.inner_text())
-        except Exception:
-            pass
-    try:
-        for label in labels:
-            dt = page.locator(
-                "xpath=//dt[normalize-space()='{0}'] | //dt[contains(normalize-space(),'{0}')]"
-                .format(label)
-            ).first
-            if dt.count() > 0:
-                dd = dt.locator("xpath=following-sibling::dd[1]")
-                if dd.count() > 0:
-                    return clean(dd.inner_text())
-    except Exception:
-        pass
-    try:
-        html = page.content()
-        for label in labels:
-            m = re.search(fr"{re.escape(label)}\s*:?\s*</?[^>]*>?(.*?)<", html, re.I | re.S)
-            if m:
-                txt = re.sub(r"<[^>]+>", " ", m.group(1))
-                txt = clean(txt)
-                if txt:
-                    return txt
-    except Exception:
-        pass
-    return ""
 
-def extract_ean(page, url: str) -> str:
-    val = extract_label_value(page, ["EAN", "EAN-kood", "Ribakood", "EAN code"])
-    if val and re.fullmatch(r"\d{8,14}", val):
-        return val
-    m = EAN_RE.search(url)
+def parse_ean_from_url(href: str) -> Optional[str]:
+    m = EAN_RE.search(href)
     if m:
         return m.group(1)
-    return ""
+    return None
 
-def extract_country(page) -> str:
-    return extract_label_value(page, ["Country of manufacture", "Country of origin", "Valmistajariik", "Päritoluriik"])
 
-def extract_manufacturer(page) -> str:
-    return extract_label_value(page, ["Manufacturer", "Tootja", "Producer", "Valmistaja"])
-
-def parse_amount_from_title(title: str) -> str:
-    t = BONUS_RE.sub("", title)
-    m = PACK_RE.search(t)
+def parse_size_from_name(name: str) -> str:
+    m = PACK_RE.search(name)
     if m:
         qty, num, unit = m.groups()
-        return f"{qty}x{num.replace(',','.')} {unit}"
-    m = SIMPLE_RE.search(t)
+        return f"{qty}x{num.replace(',', '.')} {unit.lower()}"
+    m = SIZE_RE.search(name)
     if m:
         num, unit = m.groups()
-        return f"{num.replace(',','.')} {unit}"
-    m = PIECES_RE.search(t)
-    if m:
-        return f"{m.group(1)} pcs"
+        return f"{num.replace(',', '.')} {unit.lower()}"
     return ""
 
-def normalize_size_text(s: str) -> str:
-    if not s:
-        return ""
-    s = clean(s).lower().replace(",", ".")
-    m = PACK_RE.search(s)
+
+def parse_price(txt: str) -> Optional[float]:
+    # Remove "umbes" and other text, find first price number
+    txt = txt.replace("\xa0", " ").replace("umbes", "").strip()
+    m = PRICE_RE.search(txt)
     if m:
-        qty, num, unit = m.groups()
-        return f"{int(qty)}x{num} {unit}"
-    m = SIMPLE_RE.search(s)
-    if m:
-        num, unit = m.groups()
-        return f"{num} {unit}"
-    m = PIECES_RE.search(s)
-    if m:
-        return f"{m.group(1)} pcs"
-    if re.search(r"\bkg\b", s):
-        return "kg"
-    if re.search(r"\bl\b", s):
-        return "l"
-    return ""
+        val = float(m.group(1).replace(",", "."))
+        if val > 0:
+            return val
+    return None
 
-def extract_size_text(page, title: str) -> str:
-    lbl_val = extract_label_value(page, [
-        "Net weight", "Net quantity", "Net content", "Net mass",
-        "Kogus", "Maht", "Neto kogus", "Netokogus", "Pakendi suurus",
-        "Pakendi maht", "Suurus", "Kaal", "Weight", "Volume", "Size",
-        "Net weight / Net volume",
-    ])
-    size = normalize_size_text(lbl_val)
-    if size:
-        return size
-    try:
-        scripts = page.locator("script[type='application/ld+json']")
-        for i in range(min(8, scripts.count())):
-            raw = scripts.nth(i).inner_text()
-            data = json.loads(raw)
-            def walk(obj):
-                if isinstance(obj, dict):
-                    for k, v in obj.items():
-                        if isinstance(v, (str, int, float)):
-                            if str(k).lower() in {"weight","netweight","size","contentsize","packagesize","volume","netcontent"}:
-                                cand = normalize_size_text(str(v))
-                                if cand:
-                                    return cand
-                        r = walk(v)
-                        if r:
-                            return r
-                elif isinstance(obj, list):
-                    for it in obj:
-                        r = walk(it)
-                        if r:
-                            return r
-                return ""
-            cand = walk(data)
-            if cand:
-                return cand
-    except Exception:
-        pass
-    return normalize_size_text(parse_amount_from_title(title))
 
-def infer_brand_from_title(title: str) -> str:
-    parts = title.split()
-    if not parts:
-        return ""
-    if len(parts) >= 2 and parts[0][:1].isupper() and parts[1][:1].isupper():
-        return f"{parts[0]} {parts[1]}"
-    return parts[0]
+def parse_category_page(html: str, cat_url: str) -> list[dict]:
+    soup = BeautifulSoup(html, "lxml")
+    products = []
 
-def extract_price_eur(page) -> float:
-    """
-    Extract price from Prisma product page.
+    cards = soup.find_all(attrs={"data-test-id": "product-card"})
+    if not cards:
+        # Try alternative selector
+        cards = soup.find_all("article", attrs={"data-test-id": True})
 
-    Prisma always shows "umbes X,XX €" (approx) for both fixed-size and
-    weight products because the exact price requires selecting a store.
-
-    HTML structure:
-        <span data-test-id="product-price__dynamic-unitPrice">
-            <span aria-hidden="true">umbes</span>
-            <span>...</span>
-            <span aria-hidden="false" data-test-id="display-price">3,85 €</span>
-        </span>
-        <div data-test-id="comparison-price">
-            <span aria-hidden="true">7,70 €/kg</span>
-        </div>
-
-    We use display-price as the canonical price for all products
-    (0,50 € for apple, 3,85 € for hakkliha) — it's the best available
-    without store selection, and consistent across product types.
-    """
-
-    # Primary: Prisma's display-price element (confirmed correct selector)
-    try:
-        loc = page.locator("[data-test-id='display-price']")
-        if loc.count() > 0:
-            txt = clean(loc.first.inner_text())
-            m = PRICE_NUM_RE.search(txt.replace("\u00a0", " "))
-            if m:
-                val = float(m.group(1).replace(",", "."))
-                if val > 0:
-                    return val
-    except Exception:
-        pass
-
-    # Fallback 1: dynamic unit price container
-    try:
-        loc = page.locator("[data-test-id='product-price__dynamic-unitPrice']")
-        if loc.count() > 0:
-            txt = clean(loc.first.inner_text())
-            m = PRICE_NUM_RE.search(txt.replace("\u00a0", " "))
-            if m:
-                val = float(m.group(1).replace(",", "."))
-                if val > 0:
-                    return val
-    except Exception:
-        pass
-
-    # Fallback 2: generic price selectors
-    for sel in [
-        "[data-test='product-price']",
-        "[data-testid='product-price']",
-        "[class*='price']",
-        "span:has-text('€')",
-        "span:has-text('EUR')",
-    ]:
+    for card in cards:
         try:
-            loc = page.locator(sel)
-            if loc.count() == 0:
+            # Product link — contains slug/EAN
+            link = card.find("a", class_=lambda c: c and "product-link" in c)
+            if not link:
+                link = card.find("a", href=re.compile(r"/toode/"))
+            if not link:
                 continue
-            txt = clean(loc.first.inner_text())
-            m = PRICE_NUM_RE.search(txt.replace("\u00a0", " "))
-            if m:
-                val = float(m.group(1).replace(",", "."))
-                if val > 0:
-                    return val
-        except Exception:
-            continue
 
-    # Fallback 3: body text (last resort)
-    try:
-        txt = clean(page.inner_text("body"))
-        m = PRICE_NUM_RE.search(txt)
-        if m:
-            val = float(m.group(1).replace(",", "."))
-            if val > 0:
-                return val
-    except Exception:
-        pass
+            href = link.get("href", "")
+            full_url = urljoin(BASE, href)
+            ean = parse_ean_from_url(full_url)
+            if not ean:
+                continue
 
-    return 0.0
+            # ext_id = last slug segment before EAN or EAN itself
+            path_parts = [p for p in urlparse(full_url).path.split("/") if p]
+            ext_id = ean  # EAN as ext_id — unique and stable
 
-def extract_ext_id_from_url(url: str) -> str:
-    path_parts = [p for p in urlparse(url).path.split("/") if p]
-    return path_parts[-1] if path_parts else url
+            # Product name
+            name_el = card.find(attrs={"data-test-id": "product-card_productName"})
+            if not name_el:
+                name_el = card.find(class_=lambda c: c and "product-card_productname" in c.lower() if c else False)
+            if not name_el:
+                name_el = card.find("span", attrs={"data-test-id": lambda x: x and "productname" in x.lower() if x else False})
+            if not name_el:
+                # Try link text
+                name_el = link
+            name = name_el.get_text(strip=True) if name_el else ""
+            if not name:
+                continue
 
-# ---------------------------------------------------------------------------
-def paginate_listing(page, max_pages: int = 80) -> None:
-    def page_height() -> int:
-        try:
-            return page.evaluate("document.body.scrollHeight")
-        except Exception:
-            return 0
-
-    load_more_selectors = [
-        "button:has-text('Load more')", "button:has-text('Show more')",
-        "button:has-text('Load More')", "[data-testid*='load'][data-testid*='more']",
-        "button[aria-label*='more']", "[data-testid='load-more']",
-        "button:has-text('Load more products')", "button:has-text('Show more products')",
-        "button:has-text('Näita rohkem')",
-    ]
-    next_selectors = [
-        "a[rel='next']", "a.pagination__next", "button:has-text('Next')",
-        "a:has-text('Next')", "a.pagination-next", "button[aria-label='Next page']",
-        "[data-testid='pagination-next']",
-    ]
-
-    pages_clicked = 0
-    prev_h = -1
-
-    while pages_clicked < max_pages:
-        progressed = False
-        for sel in load_more_selectors:
-            try:
-                btn = page.locator(sel)
-                if btn.count() > 0 and btn.first.is_enabled():
-                    btn.first.click()
-                    page.wait_for_load_state("domcontentloaded")
-                    jitter(0.6, 1.2)
-                    new_h = page_height()
-                    if new_h > prev_h:
-                        prev_h = new_h
-                        progressed = True
+            # Price — look for display-price element
+            price_el = card.find(attrs={"data-test-id": "display-price"})
+            if not price_el:
+                price_el = card.find(attrs={"data-test-id": lambda x: x and "price" in x.lower() if x else False})
+            price = None
+            if price_el:
+                price = parse_price(price_el.get_text())
+            if not price:
+                # Try any text with € in card
+                for el in card.find_all(string=re.compile(r"\d+[.,]\d+\s*€")):
+                    price = parse_price(el)
+                    if price:
                         break
-            except Exception:
+
+            if not price:
                 continue
-        if progressed:
+
+            size_text = parse_size_from_name(name)
+
+            products.append({
+                "ext_id": ext_id,
+                "ean": ean,
+                "name": name,
+                "size_text": size_text,
+                "price": price,
+                "source_url": full_url,
+            })
+
+        except Exception as e:
+            print(f"[warn] card parse error: {e}", file=sys.stderr)
             continue
+
+    return products
+
+
+def get_total_pages(html: str) -> int:
+    """Extract total page count from pagination."""
+    soup = BeautifulSoup(html, "lxml")
+    # Look for "Leht 1 / 45" pattern
+    m = re.search(r"Leht\s*\d+\s*/\s*(\d+)", soup.get_text())
+    if m:
+        return int(m.group(1))
+    # Try pagination links
+    pages = soup.find_all("a", attrs={"aria-label": re.compile(r"page|leht", re.I)})
+    nums = []
+    for p in pages:
         try:
-            cur_h = page_height()
-            page.mouse.wheel(0, 20000)
-            jitter(0.5, 1.0)
-            new_h = page_height()
-            if new_h > cur_h:
-                prev_h = new_h
-                progressed = True
+            nums.append(int(p.get_text(strip=True)))
         except Exception:
             pass
-        if progressed:
-            continue
-        for sel in next_selectors:
-            try:
-                nxt = page.locator(sel)
-                if nxt.count() > 0 and nxt.first.is_enabled():
-                    nxt.first.click()
-                    page.wait_for_load_state("domcontentloaded")
-                    jitter(0.6, 1.2)
-                    new_h = page_height()
-                    if new_h >= prev_h:
-                        prev_h = new_h
-                        progressed = True
-                        pages_clicked += 1
-                        break
-            except Exception:
-                continue
-        if progressed:
-            continue
-        break
+    return max(nums) if nums else 1
 
-def collect_links_from_listing(page, current_url: str) -> tuple[set[str], set[str]]:
-    try:
-        page.wait_for_selector("a[href*='/toode/'], a[href*='/en/toode/']", timeout=6000)
-    except Exception:
-        pass
-    try:
-        paginate_listing(page, max_pages=100)
-    except Exception:
-        pass
-    try:
-        last_h = 0
-        for _ in range(6):
-            page.mouse.wheel(0, 20000)
-            jitter(0.4, 0.9)
-            h = page.evaluate("document.body.scrollHeight")
-            if h == last_h:
+
+def scrape_category(cat_path: str, delay: float = 0.5) -> list[dict]:
+    all_products = []
+    seen_eans: set[str] = set()
+
+    base_url = BASE + cat_path
+    page_num = 1
+
+    # Get first page to find total pages
+    first_url = f"{base_url}?page=1"
+    html = fetch_html(first_url)
+    if not html:
+        print(f"[skip] {cat_path} — failed to fetch", file=sys.stderr)
+        return []
+
+    total_pages = get_total_pages(html)
+    print(f"[cat] {cat_path} — {total_pages} pages", file=sys.stderr)
+
+    while page_num <= total_pages:
+        url = f"{base_url}?page={page_num}"
+        if page_num > 1:
+            html = fetch_html(url)
+            if not html:
                 break
-            last_h = h
-    except Exception:
-        pass
 
-    prod, cats = set(), set()
-    try:
-        anchors = page.locator("a[href]")
-        count = anchors.count()
-    except PlaywrightTimeout:
-        count = 0
+        products = parse_category_page(html, url)
+        new_products = [p for p in products if p["ean"] not in seen_eans]
+        for p in new_products:
+            seen_eans.add(p["ean"])
+        all_products.extend(new_products)
 
-    for i in range(count):
+        print(
+            f"[page] {cat_path} p{page_num}/{total_pages} "
+            f"→ {len(new_products)} new (total: {len(all_products)})",
+            file=sys.stderr
+        )
+
+        if not products or len(new_products) == 0:
+            break
+
+        page_num += 1
+        time.sleep(delay)
+
+    return all_products
+
+
+def upsert_batch(cur, rows: list[dict], store_id: int) -> tuple[int, int]:
+    ok = 0
+    errors = 0
+    ts_now = datetime.datetime.now(datetime.timezone.utc)
+
+    sql = """
+        SELECT upsert_product_and_price(
+            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+        );
+    """
+
+    for row in rows:
         try:
-            href = anchors.nth(i).get_attribute("href")
-            if not href:
-                continue
-            url = urljoin(BASE, href)
-            path = urlparse(url).path
-            if is_product_path(path):
-                prod.add(url)
-            elif is_category_path(path) and is_in_whitelist(url):
-                cats.add(url)
-        except Exception:
-            continue
-    return prod, cats
+            cur.execute(sql, (
+                "prisma",
+                row["ext_id"],
+                row["name"],
+                "",           # brand — inferred by DB or left empty
+                row["size_text"],
+                row["ean"],
+                row["price"],
+                "EUR",
+                store_id,
+                ts_now,
+                row["source_url"],
+            ))
+            ok += 1
+        except Exception as e:
+            errors += 1
+            if errors <= 5:
+                print(f"[warn] upsert failed {row['ext_id']}: {e}", file=sys.stderr)
 
-# ---------------------------------------------------------------------------
-def crawl_to_db(max_products: int = 500, headless: bool = True) -> None:
-    conn = db_connect()
-    store_id = get_store_id_for_prisma()
+    return ok, errors
 
-    rows_written = 0
-    skipped_no_ean = 0
-    skipped_no_price = 0
 
-    # ---- Load known URLs from DB first ----
-    db_urls = load_urls_from_db(conn)
-    product_urls: set[str] = set(db_urls)
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--store-id", type=int, default=int(os.getenv("STORE_ID", "14")))
+    ap.add_argument("--delay", type=float, default=float(os.getenv("REQ_DELAY", "0.5")))
+    ap.add_argument("--shard", type=int, default=int(os.getenv("SHARD", "0")))
+    ap.add_argument("--shards", type=int, default=int(os.getenv("SHARDS", "1")))
+    args = ap.parse_args()
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=headless)
-        context = browser.new_context(user_agent=(
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/124.0 Safari/537.36"
-        ))
-        page = context.new_page()
-
-        def accept_cookies(pg):
-            for sel in [
-                "button:has-text('Accept all')", "button:has-text('Accept cookies')",
-                "button:has-text('Nõustu')", "button[aria-label*='accept']",
-                "button[aria-label*='Accept']",
-            ]:
-                try:
-                    btn = pg.locator(sel)
-                    if btn.count() > 0 and btn.first.is_enabled():
-                        btn.first.click()
-                        pg.wait_for_load_state("domcontentloaded")
-                        jitter(0.2, 0.6)
-                        return
-                except Exception:
-                    pass
-
-        accept_cookies(page)
-
-        # ---- Phase A: only if DB didn't give us enough URLs ----
-        if len(product_urls) < max_products:
-            print(f"[phase-a] DB has {len(product_urls)} URLs, need {max_products} — crawling categories")
-            seen_categories: set[str] = set()
-            to_visit = [urljoin(BASE, s) for s in SEEDS]
-
-            while to_visit and len(product_urls) < max_products:
-                cat_url = to_visit.pop(0)
-                if cat_url in seen_categories:
-                    continue
-                seen_categories.add(cat_url)
-
-                try:
-                    page.goto(cat_url, timeout=30000)
-                    page.wait_for_load_state("domcontentloaded")
-                    jitter()
-                except PlaywrightTimeout:
-                    continue
-
-                prod, cats = collect_links_from_listing(page, cat_url)
-                product_urls.update(prod)
-
-                for c in cats:
-                    if c not in seen_categories and c not in to_visit:
-                        to_visit.append(c)
-
-                print(
-                    f"[DISCOVER] {cat_url} -> +{len(prod)} products, "
-                    f"+{len(cats)} cats (totals: products={len(product_urls)}, queue={len(to_visit)})"
-                )
-
-                if len(product_urls) >= max_products:
-                    break
-        else:
-            print(f"[phase-a] skipped — {len(product_urls)} URLs from DB, going straight to PDPs")
-
-        # ---- Phase B: visit PDPs and upsert ----
-        urls_to_visit = list(product_urls)[:max_products]
-        print(f"[phase-b] visiting {len(urls_to_visit)} PDPs")
-
-        with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
-            for i, url in enumerate(urls_to_visit):
-                try:
-                    page.goto(url, timeout=30000)
-                    page.wait_for_load_state("domcontentloaded")
-                    jitter()
-                except PlaywrightTimeout:
-                    continue
-
-                title = extract_title(page)
-                ean = extract_ean(page, url)
-
-                if not ean:
-                    skipped_no_ean += 1
-                    continue
-
-                size_text = extract_size_text(page, title)
-                brand = infer_brand_from_title(title)
-                price_val = extract_price_eur(page)
-
-                if not price_val or price_val <= 0:
-                    skipped_no_price += 1
-                    print(f"[warn] no price for {url} — skipping", file=sys.stderr)
-                    continue
-
-                ext_id = extract_ext_id_from_url(url)
-
-                try:
-                    cur.execute(
-                        """
-                        SELECT upsert_product_and_price(
-                            %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
-                        );
-                        """,
-                        (
-                            "prisma", ext_id, title, brand, size_text, ean,
-                            price_val, "EUR", store_id,
-                            datetime.now(timezone.utc), url,
-                        ),
-                    )
-                    rows_written += 1
-                    if rows_written % 100 == 0:
-                        print(f"[phase-b] {rows_written} upserted ({i+1}/{len(urls_to_visit)} visited)")
-                except Exception as e:
-                    print(f"[prisma] upsert failed for {ext_id} / EAN {ean}: {e}")
-                    continue
-
-        browser.close()
-
+    # Shard categories
+    my_cats = [c for i, c in enumerate(CATEGORIES) if i % args.shards == args.shard]
     print(
-        f"[DONE] visited {len(urls_to_visit)} URLs. "
-        f"Upserted {rows_written} rows. "
-        f"Skipped no-EAN: {skipped_no_ean}, no-price: {skipped_no_price}."
+        f"[info] shard {args.shard}/{args.shards} — "
+        f"{len(my_cats)}/{len(CATEGORIES)} categories, "
+        f"store_id={args.store_id}, delay={args.delay}s",
+        file=sys.stderr
     )
 
-# ---------------------------------------------------------------------------
-def main() -> None:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--max-products", type=int, default=500)
-    ap.add_argument("--headless", type=int, default=1)
-    args = ap.parse_args()
-    crawl_to_db(max_products=args.max_products, headless=bool(args.headless))
+    conn = psycopg2.connect(get_db_url())
+    conn.autocommit = True
+    cur = conn.cursor()
+
+    total_ok = 0
+    total_errors = 0
+
+    for cat in my_cats:
+        products = scrape_category(cat, delay=args.delay)
+        if not products:
+            continue
+        ok, errors = upsert_batch(cur, products, args.store_id)
+        total_ok += ok
+        total_errors += errors
+        print(
+            f"[done] {cat} → upserted {ok}, errors {errors}",
+            file=sys.stderr
+        )
+
+    cur.close()
+    conn.close()
+    print(
+        f"[TOTAL] upserted {total_ok} rows, errors {total_errors}",
+        file=sys.stderr
+    )
+
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        sys.exit(130)
+    main()
