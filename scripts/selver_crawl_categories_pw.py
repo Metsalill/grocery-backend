@@ -708,6 +708,20 @@ def crawl_category(page, category_url, seen_ext, writer_path, rows_for_ingest,
     while True:
         pages_done += 1
         card_urls = scrape_product_links_on_category(page)
+        print(f"[debug] found {len(card_urls)} product links on page", file=sys.stderr)
+        if card_urls:
+            print(f"[debug] first url: {card_urls[0]}", file=sys.stderr)
+        else:
+            # Try to see what links ARE on the page
+            try:
+                all_links = page.query_selector_all('a[href^="/"]')
+                sample = []
+                for a in all_links[:5]:
+                    href = a.get_attribute("href") or ""
+                    sample.append(href)
+                print(f"[debug] sample hrefs on page: {sample}", file=sys.stderr)
+            except Exception as e:
+                print(f"[debug] could not get links: {e}", file=sys.stderr)
 
         if CLICK_PRODUCTS:
             for card_sel in (
