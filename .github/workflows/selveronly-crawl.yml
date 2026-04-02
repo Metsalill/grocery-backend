@@ -140,40 +140,22 @@ jobs:
           ORDER BY cnt DESC;
           SQL
 
-      - name: Build skip list (priced & have brand)
+      - name: Build skip list (priced in last 20h)
         if: ${{ env.MODE == 'prices' }}
         shell: bash
         run: |
           set -euo pipefail
           : > data/selver_skip_ext_ids.txt
           psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/selver_skip_ext_ids.txt
-          WITH priced_from_prices AS (
-            SELECT DISTINCT (regexp_match(p.source_url, '/e/([0-9]+)'))[1] AS ext_id
-            FROM public.prices p
-            JOIN public.stores s ON s.id = p.store_id
-            WHERE s.chain='Selver' AND s.is_online = TRUE
-              AND p.source_url ~ '/e/[0-9]+'
-          ),
-          priced_from_candidates AS (
-            SELECT DISTINCT regexp_replace(ext_id::text, ':[0-9]+(?::[0-9]+)?$', '') AS ext_id
-            FROM public.selver_candidates
-            WHERE COALESCE(price,0) > 0
-              AND COALESCE(ext_id,'') <> ''
-          ),
-          priced AS (
-            SELECT ext_id FROM priced_from_prices
-            UNION
-            SELECT ext_id FROM priced_from_candidates
-          )
-          SELECT regexp_replace(pr.ext_id, ':[0-9]+(?::[0-9]+)?$', '')
-          FROM priced pr
-          LEFT JOIN public.selver_candidates sc ON sc.ext_id = pr.ext_id
-          LEFT JOIN public.staging_selver_products sp ON sp.ext_id = pr.ext_id
-          WHERE COALESCE(NULLIF(btrim(COALESCE(sc.brand, sp.brand, '')), ''), NULL) IS NOT NULL
+          SELECT DISTINCT (regexp_match(p.source_url, '/e/([a-z0-9-]+)'))[1] AS ext_id
+          FROM public.prices p
+          JOIN public.stores s ON s.id = p.store_id
+          WHERE s.chain='Selver' AND s.is_online = TRUE
+            AND p.source_url ~ '/e/[a-z0-9-]+'
+            AND p.collected_at > NOW() - INTERVAL '20 hours'
           ORDER BY 1;
           SQL
-          sed -E -i 's/:[0-9]+(:[0-9]+)?$//' data/selver_skip_ext_ids.txt || true
-          echo "Skip list rows (priced & have brand): $(wc -l < data/selver_skip_ext_ids.txt)"
+          echo "Skip list rows (priced in last 20h): $(wc -l < data/selver_skip_ext_ids.txt)"
 
       - name: Build target list (missing brand/EAN)
         if: ${{ env.MODE == 'metadata' }}
@@ -298,6 +280,7 @@ jobs:
           retention-days: 7
 
       - name: Prepare DB (staging & helper tables)
+        if: ${{ matrix.shard == 0 }}
         shell: bash
         run: |
           set -euo pipefail
@@ -387,6 +370,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+
+          # Shard 0 runs Prepare DB first; other shards wait to avoid conflicts
+          if [ "$SHARD" != "0" ]; then
+            echo "Shard $SHARD: waiting 90s for shard 0 to finish Prepare DB..."
+            sleep 90
+          fi
 
           if [ ! -s data/selver.csv ]; then
             echo "No rows in data/selver.csv — skipping."
