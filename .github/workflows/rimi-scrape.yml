@@ -159,41 +159,22 @@ jobs:
           echo "Slice count: $(wc -l < data/rimi_categories.txt)"
           head -12 data/rimi_categories.txt || true
 
-      - name: Build skip list (have NAME+BRAND)
+      - name: Build skip list (priced in last 20h)
         if: ${{ env.DATABASE_URL != '' && env.MODE_IS_PRICES == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
           : > data/rimi_skip_ext_ids.txt
           psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/rimi_skip_ext_ids.txt
-          WITH priced_from_prices AS (
-            SELECT DISTINCT (regexp_match(p.source_url, '/p/([0-9]+)'))[1] AS ext_id
-            FROM public.prices p
-            JOIN public.stores s ON s.id = p.store_id
-            WHERE s.chain='Rimi' AND s.is_online = TRUE
-              AND p.source_url ~ '/p/[0-9]+'
-          ),
-          priced_from_candidates AS (
-            SELECT DISTINCT ext_id::text
-            FROM public.rimi_candidates
-            WHERE COALESCE(price,0) > 0
-              AND COALESCE(ext_id,'') <> ''
-          ),
-          priced AS (
-            SELECT ext_id FROM priced_from_prices
-            UNION
-            SELECT ext_id FROM priced_from_candidates
-          )
-          SELECT pr.ext_id
-          FROM priced pr
-          LEFT JOIN public.rimi_candidates rc ON rc.ext_id = pr.ext_id
-          LEFT JOIN public.staging_rimi_products sp ON sp.ext_id = pr.ext_id
-          WHERE
-            COALESCE(NULLIF(btrim(COALESCE(rc.name,  sp.name,  '')),''), NULL) IS NOT NULL
-            AND COALESCE(NULLIF(btrim(COALESCE(rc.brand, sp.brand, '')),''), NULL) IS NOT NULL
+          SELECT DISTINCT (regexp_match(p.source_url, '/p/([0-9]+)'))[1] AS ext_id
+          FROM public.prices p
+          JOIN public.stores s ON s.id = p.store_id
+          WHERE s.chain='Rimi' AND s.is_online = TRUE
+            AND p.source_url ~ '/p/[0-9]+'
+            AND p.collected_at > NOW() - INTERVAL '20 hours'
           ORDER BY 1;
           SQL
-          echo "Skip list rows (priced & have NAME+BRAND): $(wc -l < data/rimi_skip_ext_ids.txt)"
+          echo "Skip list rows (priced in last 20h): $(wc -l < data/rimi_skip_ext_ids.txt)"
           echo "$(wc -l < data/rimi_skip_ext_ids.txt)" > data/_skip_count.txt
 
       - name: Build target list (missing NAME or BRAND)
