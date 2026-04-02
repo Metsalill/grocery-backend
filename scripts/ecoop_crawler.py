@@ -87,8 +87,8 @@ def _stable_bucket(s: str, buckets: int, salt: str = "") -> int:
 def _make_session() -> requests.Session:
     s = requests.Session()
     retries = Retry(
-        total=5,
-        backoff_factor=0.5,
+        total=3,
+        backoff_factor=1.0,
         status_forcelist=(429, 500, 502, 503, 504),
         allowed_methods=frozenset(["GET"]),
         raise_on_status=False,
@@ -111,7 +111,7 @@ def _make_session() -> requests.Session:
 
 def fetch_page(session: requests.Session, url: str) -> Optional[BeautifulSoup]:
     try:
-        r = session.get(url, timeout=30)
+        r = session.get(url, timeout=15)
         if r.status_code == 200:
             return BeautifulSoup(r.text, "html.parser")
         else:
@@ -416,7 +416,7 @@ def append_csv(rows: List[Dict], out_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
-# DB ingest
+# DB ingest — batched via executemany for speed
 # ---------------------------------------------------------------------------
 
 async def _bulk_ingest_to_db(rows: List[Tuple], store_id: int) -> None:
@@ -435,12 +435,14 @@ async def _bulk_ingest_to_db(rows: List[Tuple], store_id: int) -> None:
         print("[ecoop] DATABASE_URL not set, skipping DB ingest.")
         return
 
+    # upsert_product_and_price on olemasolev funktsioon DB-s
     sql = """
         SELECT upsert_product_and_price(
             $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11
         );
     """
 
+    print(f"[ecoop] connecting to DB to upsert {len(rows)} rows...")
     try:
         conn = await asyncpg.connect(dsn)
     except Exception as e:
@@ -449,16 +451,32 @@ async def _bulk_ingest_to_db(rows: List[Tuple], store_id: int) -> None:
 
     sent = 0
     errors = 0
+    BATCH = 50  # saada 50 korraga pipelined
     try:
-        for row in rows:
-            try:
-                await conn.fetchval(sql, *row)
-                sent += 1
-            except Exception as e:
-                errors += 1
-                if errors <= 3:
-                    print(f"[ecoop] upsert failed: {e}")
+        # Kasuta pipeline'i — saadab kõik päringud korraga ilma iga ack-i ootamata
+        async with conn.transaction():
+            for i in range(0, len(rows), BATCH):
+                batch = rows[i:i + BATCH]
+                try:
+                    # executemany saadab kõik batchis olevad read ühe round-tripiga
+                    await conn.executemany(
+                        """SELECT upsert_product_and_price(
+                            $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11
+                        )""",
+                        batch,
+                    )
+                    sent += len(batch)
+                    print(f"[ecoop] batch {i//BATCH + 1}: upserted {len(batch)} rows (total: {sent})")
+                except Exception as e:
+                    errors += len(batch)
+                    print(f"[ecoop] batch {i//BATCH + 1} failed: {e}")
+                    # Ära katkesta — jätka järgmise batchiga
+                    # (transaction rollback on automaatne kui exception propageerub,
+                    #  aga me tahame partial success, seega commit toimunud batchid)
+
         print(f"[ecoop] upserted {sent} rows (errors: {errors})")
+    except Exception as e:
+        print(f"[ecoop] transaction failed: {e}")
     finally:
         await conn.close()
 
