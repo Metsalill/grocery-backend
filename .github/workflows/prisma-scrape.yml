@@ -59,7 +59,7 @@ jobs:
       - name: Scrape Prisma categories (requests + BS4)
         run: |
           set -euo pipefail
-          python scripts/prisma_scraper_v2.py \
+          python scripts/prisma_food_scrape_to_db.py \
             --store-id "$STORE_ID" \
             --delay "$REQ_DELAY" \
             --shard "$SHARD" \
