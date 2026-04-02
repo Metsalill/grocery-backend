@@ -138,6 +138,11 @@ def extract_next_data(html: str) -> Optional[dict]:
         return None
 
 
+def get_build_id(next_data: dict) -> Optional[str]:
+    """Extract Next.js build ID from __NEXT_DATA__."""
+    return next_data.get("buildId")
+
+
 def parse_apollo_products(apollo_state: dict) -> list[dict]:
     """
     Extract products from Apollo GraphQL cache.
@@ -255,34 +260,58 @@ def scrape_category(cat_path: str, delay: float = 0.5) -> list[dict]:
 
     base_url = BASE + cat_path
 
-    # Fetch first page
+    # Fetch first page HTML to get build ID and total pages
     html = fetch_html(base_url)
     if not html:
         print(f"[skip] {cat_path} — failed to fetch", file=sys.stderr)
         return []
 
+    next_data = extract_next_data(html)
+    if not next_data:
+        print(f"[skip] {cat_path} — no __NEXT_DATA__", file=sys.stderr)
+        return []
+
+    build_id = get_build_id(next_data)
     total_pages = find_total_pages(html)
-    print(f"[cat] {cat_path} — {total_pages} pages", file=sys.stderr)
+    print(f"[cat] {cat_path} — {total_pages} pages (build: {build_id})", file=sys.stderr)
+
+    # Cat path for Next.js JSON API: /tooted/juustud -> et/tooted/juustud
+    # Next.js data URL: /_next/data/{buildId}/et{cat_path}.json
+    def get_page_data(page_num: int) -> Optional[dict]:
+        if page_num == 1:
+            # Use already fetched HTML
+            return next_data
+        if build_id:
+            # Use Next.js JSON API for subsequent pages
+            json_url = f"{BASE}/_next/data/{build_id}/et{cat_path}.json?page={page_num}"
+            resp = fetch_html(json_url)
+            if resp:
+                try:
+                    return json.loads(resp)
+                except Exception:
+                    pass
+        # Fallback: fetch HTML page
+        page_html = fetch_html(f"{base_url}?page={page_num}")
+        if page_html:
+            return extract_next_data(page_html)
+        return None
 
     page_num = 1
     while page_num <= total_pages:
-        if page_num > 1:
-            url = f"{base_url}?page={page_num}"
-            html = fetch_html(url)
-            if not html:
-                break
-
-        next_data = extract_next_data(html)
-        if not next_data:
-            print(f"[warn] no __NEXT_DATA__ on page {page_num}", file=sys.stderr)
+        page_data = get_page_data(page_num)
+        if not page_data:
+            print(f"[warn] no data on page {page_num}", file=sys.stderr)
             break
 
         apollo_state = (
-            next_data
+            page_data
             .get("props", {})
             .get("pageProps", {})
             .get("apolloState", {})
         )
+        # Next.js JSON API wraps in pageProps differently
+        if not apollo_state:
+            apollo_state = page_data.get("pageProps", {}).get("apolloState", {})
 
         if not apollo_state:
             print(f"[warn] no apolloState on page {page_num}", file=sys.stderr)
