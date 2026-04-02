@@ -140,26 +140,13 @@ jobs:
           ORDER BY cnt DESC;
           SQL
 
-      - name: Build skip list (priced in last 20h)
+      - name: Build skip list (disabled — scrape all)
         if: ${{ env.MODE == 'prices' }}
         shell: bash
         run: |
           set -euo pipefail
           : > data/selver_skip_ext_ids.txt
-          psql "$DATABASE_URL" -At -v ON_ERROR_STOP=1 <<'SQL' > data/selver_skip_ext_ids.txt
-          SELECT DISTINCT regexp_replace(
-            (regexp_match(p.source_url, 'selver\.ee/([a-z0-9-]+)'))[1],
-            ':[0-9]+(:[0-9]+)?$', ''
-          ) AS ext_id
-          FROM public.prices p
-          JOIN public.stores s ON s.id = p.store_id
-          WHERE s.chain='Selver' AND s.is_online = TRUE
-            AND p.source_url ~ 'selver\.ee/[a-z0-9-]+'
-            AND p.collected_at > NOW() - INTERVAL '20 hours'
-          ORDER BY 1;
-          SQL
-          sed -E -i 's/:[0-9]+(:[0-9]+)?$//' data/selver_skip_ext_ids.txt || true
-          echo "Skip list rows (priced in last 20h): $(wc -l < data/selver_skip_ext_ids.txt)"
+          echo "Skip list disabled — scraping all products"
 
       - name: Build target list (missing brand/EAN)
         if: ${{ env.MODE == 'metadata' }}
@@ -375,7 +362,6 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Shard 0 runs Prepare DB first; other shards wait to avoid conflicts
           if [ "$SHARD" != "0" ]; then
             echo "Shard $SHARD: waiting 90s for shard 0 to finish Prepare DB..."
             sleep 90
