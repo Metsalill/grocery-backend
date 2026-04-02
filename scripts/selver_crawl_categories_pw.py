@@ -327,24 +327,31 @@ def pick_ean_and_sku(json_ld, specs, page):
         digits = norm_digits(v)
         return len(digits) >= 8 and len(digits) <= 14
 
-    for key in ("gtin13","gtin8","gtin14","sku","gtin"):
+    # "sku" on TAHTLIKULT siit loopist EEMALDATUD — Selveri SKU (T000001660)
+    # läbib is_eanish() kontrolli (norm_digits annab 9 numbrit) ja kirjutaks
+    # vale väärtuse ean_raw-i. SKU käsitletakse allpool eraldi.
+    for key in ("gtin13", "gtin8", "gtin14", "gtin"):
         if key in json_ld:
             cand = str(json_ld[key])
             if is_eanish(cand):
                 ean_raw = cand
                 break
+
+    # SKU eraldi, ei kirjuta EAN-i üle
     if "sku" in json_ld:
         sku_raw = str(json_ld["sku"]).strip()
 
-    for k,v in specs.items():
+    # Specs tabelist — ribakood (EAN) ja SKU
+    for k, v in specs.items():
         lowk = k.lower()
         if "ribakood" in lowk or "barcode" in lowk or "ean" in lowk:
             if not ean_raw and is_eanish(v):
                 ean_raw = v
-        if any(x in lowk for x in ["tootekood","sku","artikkel","artikli nr","artikli number","article nr"]):
+        if any(x in lowk for x in ["sku", "tootekood", "artikkel", "artikli nr", "artikli number", "article nr"]):
             if not sku_raw:
                 sku_raw = v.strip()
 
+    # Fallback: itemprop gtin element
     if not ean_raw:
         try:
             m = page.query_selector('[itemprop^="gtin"]')
@@ -352,6 +359,18 @@ def pick_ean_and_sku(json_ld, specs, page):
                 txt = normspace(m.inner_text() or m.get_attribute("content") or "")
                 if is_eanish(txt):
                     ean_raw = txt
+        except Exception:
+            pass
+
+    # Viimane fallback: EAN pildi URL-ist (nt ...4740113093549_kuva1.webp)
+    if not ean_raw:
+        try:
+            img = page.query_selector('img[src*="_kuva"]')
+            if img:
+                src = img.get_attribute("src") or ""
+                m = re.search(r'/(\d{8,14})_kuva', src)
+                if m:
+                    ean_raw = m.group(1)
         except Exception:
             pass
 
