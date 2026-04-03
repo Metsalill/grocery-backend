@@ -1,0 +1,74 @@
+name: "Selver API Scrape"
+
+on:
+  workflow_dispatch:
+    inputs:
+      req_delay:
+        description: "Seconds between API requests"
+        required: false
+        default: "0.3"
+  schedule:
+    - cron: "19 3 * * *"   # Daily at 03:19 UTC
+
+concurrency:
+  group: ${{ github.event_name == 'workflow_dispatch' && format('selver-api-scrape-{0}', github.run_id) || 'selver-api-scrape' }}
+  cancel-in-progress: true
+
+jobs:
+  scrape:
+    name: scrape (shard ${{ matrix.shard }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+
+    env:
+      TZ: Europe/Tallinn
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      STORE_ID: "31"
+      SHARD: ${{ matrix.shard }}
+      SHARDS: ${{ strategy.job-total }}
+      REQ_DELAY: ${{ inputs.req_delay || '0.3' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-selver-api-v1
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install deps
+        run: pip install requests psycopg2-binary
+
+      - name: DB sanity check
+        shell: bash
+        run: |
+          sudo apt-get install -y --no-install-recommends postgresql-client 2>/dev/null
+          psql "$DATABASE_URL" -c "SELECT current_database(), current_user;"
+
+      - name: Run scraper
+        shell: bash
+        run: |
+          python scripts/selver_api_scraper.py
+
+      - name: Price count (shard 0 only)
+        if: ${{ matrix.shard == 0 }}
+        shell: bash
+        run: |
+          psql "$DATABASE_URL" -c "
+            SELECT COUNT(*) AS selver_prices
+            FROM prices
+            WHERE store_id = 31;
+          "
