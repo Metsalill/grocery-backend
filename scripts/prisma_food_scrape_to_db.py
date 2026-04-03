@@ -87,7 +87,7 @@ CATEGORIES = [
     "/tooted/valmistoit/vormiroad-pasta-ja-lasanje",
     "/tooted/valmistoit/valmistoidud-ja-supid",
     "/tooted/valmistoit/puder-ja-kissellid",
-    # Olid, vürtsid
+    # Olid, vurtsid
     "/tooted/olid-vurtsid-maitseained/maitsekastmed-ja-pastad",
     "/tooted/olid-vurtsid-maitseained/texmex",
     "/tooted/olid-vurtsid-maitseained/ketsupid-ja-sinepid",
@@ -126,7 +126,7 @@ CATEGORIES = [
     "/tooted/joogid/joogikontsentraadid",
     "/tooted/joogid/mahlad",
     "/tooted/joogid/kohv-ja-kohvifiltrid",
-    # Külmutatud
+    # Kulmutatud
     "/tooted/kulmutatud-toidud/kulmutatud-liha-ja-kala",
     "/tooted/kulmutatud-toidud/kulmutatud-eined",
     "/tooted/kulmutatud-toidud/kulmutatud-kupsetised-ja-leivad",
@@ -441,39 +441,46 @@ def scrape_category(cat_path: str, delay: float = 0.5) -> list[dict]:
     return all_products
 
 
-def upsert_batch(cur, rows: list[dict], store_id: int) -> tuple[int, int]:
-    ok = 0
-    errors = 0
-    ts_now = datetime.datetime.now(datetime.timezone.utc)
+def upsert_batch(conn, rows: list[dict], store_id: int) -> tuple[int, int]:
+    """
+    Upsert kõik tooted korraga ühe transactioniga — palju kiirem kui
+    ükshaaval, sest Railway latency ~80ms × N rida = liiga aeglane.
+    """
+    if not rows:
+        return 0, 0
 
+    ts_now = datetime.datetime.now(datetime.timezone.utc)
     sql = """
         SELECT upsert_product_and_price(
             %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
         );
     """
+    payload = [
+        (
+            "prisma",
+            row["ext_id"],
+            row["name"],
+            "",
+            row["size_text"],
+            row["ean"],
+            row["price"],
+            "EUR",
+            store_id,
+            ts_now,
+            row["source_url"],
+        )
+        for row in rows
+    ]
 
-    for row in rows:
-        try:
-            cur.execute(sql, (
-                "prisma",
-                row["ext_id"],
-                row["name"],
-                "",
-                row["size_text"],
-                row["ean"],
-                row["price"],
-                "EUR",
-                store_id,
-                ts_now,
-                row["source_url"],
-            ))
-            ok += 1
-        except Exception as e:
-            errors += 1
-            if errors <= 5:
-                print(f"[warn] upsert failed {row['ext_id']}: {e}", file=sys.stderr)
-
-    return ok, errors
+    try:
+        with conn.cursor() as cur:
+            cur.executemany(sql, payload)
+        conn.commit()
+        return len(payload), 0
+    except Exception as e:
+        conn.rollback()
+        print(f"[warn] batch upsert failed: {e}", file=sys.stderr)
+        return 0, len(payload)
 
 
 def main():
@@ -492,9 +499,9 @@ def main():
         file=sys.stderr
     )
 
+    # autocommit=False — kasutame eksplitsiitseid transactioneid per kategooria
     conn = psycopg2.connect(get_db_url())
-    conn.autocommit = True
-    cur = conn.cursor()
+    conn.autocommit = False
 
     total_ok = 0
     total_errors = 0
@@ -504,12 +511,11 @@ def main():
         if not products:
             print(f"[warn] {cat} → 0 products", file=sys.stderr)
             continue
-        ok, errors = upsert_batch(cur, products, args.store_id)
+        ok, errors = upsert_batch(conn, products, args.store_id)
         total_ok += ok
         total_errors += errors
         print(f"[done] {cat} → upserted {ok}, errors {errors}", file=sys.stderr)
 
-    cur.close()
     conn.close()
     print(f"[TOTAL] upserted {total_ok} rows, errors {total_errors}", file=sys.stderr)
 
