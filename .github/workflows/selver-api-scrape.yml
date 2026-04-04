@@ -18,7 +18,7 @@ jobs:
   scrape:
     name: scrape (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
