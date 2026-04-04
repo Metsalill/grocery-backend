@@ -1,49 +1,41 @@
 name: "Prisma DB Scrape + CSV Artifact"
-
 on:
   workflow_dispatch: {}
   schedule:
     - cron: "0 3 * * *"
-
 concurrency:
   group: prisma-db-scrape
   cancel-in-progress: true
-
 jobs:
   scrape:
     name: scrape (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 150
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3, 4, 5]
-
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       PGSSLMODE: require
       STORE_ID: "14"
       PYTHONUNBUFFERED: "1"
       SHARD: ${{ matrix.shard }}
-      SHARDS: "6"
+      SHARDS: "8"
       REQ_DELAY: "0.5"
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
-
       - name: Install deps
         run: |
           set -euo pipefail
           pip install --upgrade pip
           pip install requests beautifulsoup4 lxml psycopg2-binary
-
       - name: DB sanity check
         run: |
           pip install psycopg2-binary
@@ -55,7 +47,6 @@ jobs:
           print('DB identity:', cur.fetchone())
           c.close()
           "
-
       - name: Scrape Prisma categories (requests + BS4)
         run: |
           set -euo pipefail
@@ -64,7 +55,6 @@ jobs:
             --delay "$REQ_DELAY" \
             --shard "$SHARD" \
             --shards "$SHARDS"
-
       - name: Report prices count
         if: always()
         run: |
