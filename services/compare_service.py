@@ -168,7 +168,7 @@ async def _candidate_stores(
     offset: int,
 ) -> List[asyncpg.Record]:
     host_and_online_filter = """
-      AND s.id NOT IN (SELECT DISTINCT host_store_id FROM store_host_map)
+      AND s.id NOT IN (SELECT DISTINCT store_id FROM store_price_source)
       AND COALESCE(s.is_online, false) = false
     """
     online_only_filter = """
@@ -238,15 +238,12 @@ async def _latest_prices(
 
     sql_distinct_on = """
     WITH effective_source AS (
+      -- Füüsiline pood -> millise store_id hindasid vaadata
+      -- store_price_source ütleb: füüsilise poe hind tuleb teisest store_id-st
+      -- (nt Wolt/Bolt store on reaalne hinna allikas füüsilisele Coop poele)
       SELECT s.id AS physical_store_id,
-             COALESCE(sps.source_store_id, em.host_store_id, s.id) AS source_store_id
+             COALESCE(sps.source_store_id, s.id) AS source_store_id
       FROM stores s
-      LEFT JOIN (
-        SELECT DISTINCT ON (store_id) store_id, host_store_id
-        FROM store_host_map
-        WHERE active = true OR active IS NULL
-        ORDER BY store_id, COALESCE(priority, 999999), host_store_id
-      ) em ON em.store_id = s.id
       LEFT JOIN (
         SELECT DISTINCT ON (store_id) store_id, source_store_id
         FROM store_price_source
