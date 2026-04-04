@@ -146,22 +146,18 @@ def get_subcategory_links(soup: BeautifulSoup, current_url: str, base_host: str)
     links = []
     seen = set()
 
-    # WooCommerce subcategory tiles
     for el in soup.select("a[href*='/tootekategooria/']"):
         href = el.get("href", "")
         if not href:
             continue
         abs_url = urljoin(current_url, href)
-        # Must be same host and a deeper category path
         parsed = urlparse(abs_url)
         if parsed.netloc.lower() != base_host.lower():
             continue
-        # Must be different from current URL
         abs_clean = abs_url.rstrip("/")
         curr_clean = current_url.rstrip("/")
         if abs_clean == curr_clean:
             continue
-        # Must be a subcategory (longer path than current)
         curr_path = urlparse(current_url).path.rstrip("/")
         if not parsed.path.rstrip("/").startswith(curr_path + "/"):
             continue
@@ -185,7 +181,6 @@ def scrape_product_cards(soup: BeautifulSoup, base_url: str, store_host: str) ->
     )
 
     for card in cards:
-        # Skip subcategory tiles (they have class 'product-category')
         card_classes = card.get("class") or []
         if "product-category" in card_classes:
             continue
@@ -214,18 +209,15 @@ def scrape_product_cards(soup: BeautifulSoup, base_url: str, store_host: str) ->
         if link_el:
             url = urljoin(base_url, link_el.get("href", ""))
 
-        # Price — target WooCommerce structure specifically to avoid unit prices
+        # Price
         price = None
-        # First try sale price (ins .amount bdi)
         sale_el = card.select_one(".price ins .amount bdi")
         if sale_el:
             price = parse_price_text(sale_el.get_text())
-        # Then regular price
         if price is None:
             regular_el = card.select_one(".price .woocommerce-Price-amount.amount bdi")
             if regular_el:
                 price = parse_price_text(regular_el.get_text())
-        # Fallback to first .amount
         if price is None:
             amount_el = card.select_one(".price .amount")
             if amount_el:
@@ -239,11 +231,10 @@ def scrape_product_cards(soup: BeautifulSoup, base_url: str, store_host: str) ->
             if image_url.startswith("//"):
                 image_url = "https:" + image_url
 
-        # EAN/SKU from data attributes
+        # EAN/SKU
         ean_raw = None
         sku = None
 
-        # WooCommerce post ID from class
         for cls in card_classes:
             m = re.match(r"post-(\d+)", cls)
             if m:
@@ -254,11 +245,10 @@ def scrape_product_cards(soup: BeautifulSoup, base_url: str, store_host: str) ->
         if data_id:
             sku = str(data_id)
 
-        # Try EAN from image filename — coophaapsalu.ee uses EAN as image filename
-        # e.g. https://coophaapsalu.ee/wp-content/uploads/2025/03/8711327667020.png
+        # Try EAN from image filename
         if image_url:
             img_filename = image_url.rstrip("/").split("/")[-1]
-            img_stem = re.sub(r"\.[^.]+$", "", img_filename)  # remove extension
+            img_stem = re.sub(r"\.[^.]+$", "", img_filename)
             digits = re.sub(r"[^0-9]", "", img_stem)
             if len(digits) in (8, 12, 13, 14):
                 ean_raw = digits
@@ -325,11 +315,6 @@ def scrape_category(
     depth: int = 0,
     max_depth: int = 3,
 ) -> List[Dict]:
-    """
-    Scrape all products from a category, following pagination.
-    If the category page shows subcategory tiles instead of products,
-    recurse into each subcategory (up to max_depth).
-    """
     if visited is None:
         visited = set()
 
@@ -361,7 +346,6 @@ def scrape_category(
             all_products.extend(products)
             print(f"  -> {len(products)} products (total so far: {len(all_products)})")
 
-            # Follow pagination
             next_url = get_next_page_url(soup, url)
             if next_url and next_url.rstrip("/") != url.rstrip("/"):
                 url = next_url
@@ -370,7 +354,6 @@ def scrape_category(
                 break
 
         else:
-            # No products on this page — check for subcategory tiles
             subcats = get_subcategory_links(soup, url, base_host)
 
             if subcats:
@@ -416,7 +399,7 @@ def append_csv(rows: List[Dict], out_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
-# DB ingest — batched via executemany for speed
+# DB ingest — eraldi transaktion iga batchi jaoks + deadlock retry
 # ---------------------------------------------------------------------------
 
 async def _bulk_ingest_to_db(rows: List[Tuple], store_id: int) -> None:
@@ -435,7 +418,6 @@ async def _bulk_ingest_to_db(rows: List[Tuple], store_id: int) -> None:
         print("[ecoop] DATABASE_URL not set, skipping DB ingest.")
         return
 
-    # upsert_product_and_price on olemasolev funktsioon DB-s
     sql = """
         SELECT upsert_product_and_price(
             $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11
@@ -451,32 +433,35 @@ async def _bulk_ingest_to_db(rows: List[Tuple], store_id: int) -> None:
 
     sent = 0
     errors = 0
-    BATCH = 50  # saada 50 korraga pipelined
+    BATCH = 50
+    MAX_RETRIES = 3
+
     try:
-        # Kasuta pipeline'i — saadab kõik päringud korraga ilma iga ack-i ootamata
-        async with conn.transaction():
-            for i in range(0, len(rows), BATCH):
-                batch = rows[i:i + BATCH]
+        for i in range(0, len(rows), BATCH):
+            batch = rows[i:i + BATCH]
+            batch_num = i // BATCH + 1
+
+            for attempt in range(MAX_RETRIES):
                 try:
-                    # executemany saadab kõik batchis olevad read ühe round-tripiga
-                    await conn.executemany(
-                        """SELECT upsert_product_and_price(
-                            $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11
-                        )""",
-                        batch,
-                    )
+                    # Eraldi transaktion iga batchi jaoks — ei lukusta teisi sharde pikalt
+                    async with conn.transaction():
+                        await conn.executemany(sql, batch)
                     sent += len(batch)
-                    print(f"[ecoop] batch {i//BATCH + 1}: upserted {len(batch)} rows (total: {sent})")
+                    print(f"[ecoop] batch {batch_num}: upserted {len(batch)} rows (total: {sent})")
+                    break  # success
+                except asyncpg.DeadlockDetectedError:
+                    wait = 0.5 * (attempt + 1)
+                    print(f"[ecoop] batch {batch_num} deadlock (attempt {attempt+1}/{MAX_RETRIES}), retry in {wait}s...")
+                    await asyncio.sleep(wait)
+                    if attempt == MAX_RETRIES - 1:
+                        errors += len(batch)
+                        print(f"[ecoop] batch {batch_num} failed after {MAX_RETRIES} attempts, skipping")
                 except Exception as e:
                     errors += len(batch)
-                    print(f"[ecoop] batch {i//BATCH + 1} failed: {e}")
-                    # Ära katkesta — jätka järgmise batchiga
-                    # (transaction rollback on automaatne kui exception propageerub,
-                    #  aga me tahame partial success, seega commit toimunud batchid)
+                    print(f"[ecoop] batch {batch_num} failed: {e}")
+                    break  # muu viga, ära korda
 
         print(f"[ecoop] upserted {sent} rows (errors: {errors})")
-    except Exception as e:
-        print(f"[ecoop] transaction failed: {e}")
     finally:
         await conn.close()
 
@@ -486,7 +471,6 @@ async def _bulk_ingest_to_db(rows: List[Tuple], store_id: int) -> None:
 # ---------------------------------------------------------------------------
 
 async def main(args):
-    # Load categories
     categories: List[str] = []
     if args.categories_file and Path(args.categories_file).exists():
         categories = [
@@ -498,7 +482,6 @@ async def main(args):
         print("[error] No categories found.")
         sys.exit(2)
 
-    # Store config
     store_host = args.store_host or urlparse(args.store_url or "https://coophaapsalu.ee").netloc
     try:
         store_id = int(args.store_id) if args.store_id else 0
@@ -510,14 +493,12 @@ async def main(args):
         store_id = map_store_id(store_host)
     print(f"[ecoop] store_host={store_host} store_id={store_id}")
 
-    # Sharding
     cat_shards = max(1, args.cat_shards)
     cat_index = args.cat_index
     if cat_shards > 1:
         categories = [u for i, u in enumerate(categories) if i % cat_shards == cat_index]
         print(f"[shard] {len(categories)} categories for shard {cat_index}/{cat_shards}")
 
-    # Output
     out_path = Path(args.out)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     _ensure_csv_header(out_path)
@@ -543,7 +524,6 @@ async def main(args):
 
     print(f"[done] total {len(all_rows)} rows → {out_path}")
 
-    # DB ingest — only rows with a price
     rows_for_db: List[Tuple] = []
     for r in all_rows:
         price_val = r.get("price")
@@ -582,7 +562,7 @@ def parse_args():
     p.add_argument("--out", default="out/coop_ecoop.csv")
     p.add_argument("--req-delay", type=float, default=0.3)
     p.add_argument("--upsert-db", default="main")
-    # legacy flags kept for YML compatibility — ignored
+    # legacy flags kept for YML compatibility
     p.add_argument("--page-limit", type=int, default=0)
     p.add_argument("--max-products", type=int, default=0)
     p.add_argument("--headless", default="1")
