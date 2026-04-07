@@ -930,7 +930,12 @@ def crawl(args) -> None:
     with sync_playwright() as pw:
         def new_browser():
             b = pw.chromium.launch(headless=headless)
-            ctx = b.new_context(locale="et-EE")
+            ctx = b.new_context(
+                locale="et-EE",
+                timezone_id="Europe/Tallinn",
+                geolocation={"latitude": 59.4370, "longitude": 24.7536},
+                permissions=["geolocation"],
+            )
             return b, ctx, ctx.new_page()
 
         browser, ctx, page = new_browser()
