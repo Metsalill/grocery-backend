@@ -10,17 +10,17 @@ jobs:
   scrape:
     name: scrape (shard ${{ matrix.shard }})
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 180
     strategy:
       fail-fast: false
       matrix:
-        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29]
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
       PGSSLMODE: require
       PYTHONUNBUFFERED: "1"
       STORE_ID: "441"   # Barbora ePood
-      SOFT_TIMEOUT_MIN: "110"   # flush & exit before GH kills us
+      SOFT_TIMEOUT_MIN: "170"   # flush & exit before GH kills us
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -50,7 +50,7 @@ jobs:
             --max-pages-per-category 0 \
             --headless "${HEADLESS}" \
             --req-delay 0.5 \
-            --cat-shards 20 \
+            --cat-shards 30 \
             --cat-index ${{ matrix.shard }} \
             --output-csv out/barbora_products_${{ matrix.shard }}.csv \
             --upsert-db main
