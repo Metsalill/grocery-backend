@@ -8,14 +8,16 @@ Highlights
   SELECT upsert_product_and_price(...).
 - Default STORE_ID=441 (Barbora ePood). Can be overridden via env STORE_ID.
 - Time-budget friendly: SOFT_TIMEOUT_MIN env (e.g. "118") to stop early,
-  flush CSV, and still ingest before GH Actions’ cap.
+  flush CSV, and still ingest before GH Actions' cap.
 - Horizontal sharding:
     * Env: SHARD=<0..N-1>, SHARDS=<N>
     * CLI: --cat-index <i> and --cat-shards <N>  (CLI overrides env)
 - Tough pagination, price parsing, PDP extraction.
 - Backward-compatible CLI flags for your workflows:
     --out-csv (alias of --output-csv), --cat-shards, --cat-index, --upsert-db
-- Handles alcohol **age verification** popup (“Olen 18-aastane”).
+- Handles alcohol **age verification** popup ("Olen 18-aastane").
+- FIX: Per-row transactions with deadlock retry (3 attempts) to avoid
+  cross-shard deadlocks during parallel ingestion.
 
 YAML deps (example):
   pip install playwright asyncpg bs4 lxml selectolax
@@ -142,7 +144,6 @@ def handle_age_gate(page: Page) -> None:
     Dismiss Barbora 18+ modal if present, and set fallbacks to persist approval.
     """
     try:
-        # direct click on the confirm button (common copy)
         for sel in [
             "button:has-text('Olen 18-aastane')",
             "button:has-text('Olen 18 aastane')",
@@ -158,7 +159,6 @@ def handle_age_gate(page: Page) -> None:
     except Exception:
         pass
 
-    # storage/cookie fallbacks to keep the gate away
     try:
         page.add_init_script("""
             try {
@@ -798,11 +798,16 @@ def append_rows(path: str, rows: List[List[str]]) -> None:
 
 # ---------------------------------------------------------------------
 # DB ingest helper
+# FIX: Per-row transactions with deadlock retry to avoid cross-shard deadlocks.
+# Previously all rows were wrapped in one big transaction, causing deadlocks
+# when multiple shards tried to upsert overlapping products simultaneously.
+# Now each row gets its own transaction with up to 3 retry attempts on deadlock.
 # ---------------------------------------------------------------------
 
 async def _bulk_ingest_to_db(rows: List[Dict[str, object]], store_id: int) -> None:
     """
-    Call upsert_product_and_price(...) for each row.
+    Call upsert_product_and_price(...) for each row in its own transaction.
+    Retries up to 3 times on deadlock before skipping the row.
     """
     if store_id <= 0:
         print("[barbora] STORE_ID not set or invalid, skipping DB ingest.")
@@ -814,37 +819,63 @@ async def _bulk_ingest_to_db(rows: List[Dict[str, object]], store_id: int) -> No
         return
 
     conn = await asyncpg.connect(dsn)
-    try:
-        async with conn.transaction():
-            for r in rows:
-                price_val = None
-                try:
-                    ptxt = r.get("price")
-                    if ptxt not in (None, ""):
-                        price_val = float(ptxt)
-                except Exception:
-                    price_val = None
+    skipped = 0
+    ingested = 0
 
-                await conn.fetchval(
-                    """
-                    SELECT upsert_product_and_price(
-                        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11
-                    );
-                    """,
-                    DB_SOURCE_LABEL,                 # $1 in_source
-                    r.get("ext_id") or "",           # $2 in_ext_id
-                    r.get("name") or "",             # $3 in_name
-                    r.get("brand") or "",            # $4 in_brand
-                    r.get("size_text") or "",        # $5 in_size_text
-                    r.get("ean_raw") or "",          # $6 in_ean_raw
-                    price_val,                       # $7 in_price
-                    r.get("currency") or "EUR",      # $8 in_currency
-                    store_id,                        # $9 in_store_id
-                    r.get("seen_at"),                # $10 in_seen_at (aware datetime)
-                    r.get("source_url") or "",       # $11 in_source_url
-                )
+    try:
+        for r in rows:
+            price_val = None
+            try:
+                ptxt = r.get("price")
+                if ptxt not in (None, ""):
+                    price_val = float(ptxt)
+            except Exception:
+                price_val = None
+
+            ext_id = r.get("ext_id") or ""
+
+            for attempt in range(3):
+                try:
+                    async with conn.transaction():
+                        await conn.fetchval(
+                            """
+                            SELECT upsert_product_and_price(
+                                $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11
+                            );
+                            """,
+                            DB_SOURCE_LABEL,                 # $1 in_source
+                            ext_id,                          # $2 in_ext_id
+                            r.get("name") or "",             # $3 in_name
+                            r.get("brand") or "",            # $4 in_brand
+                            r.get("size_text") or "",        # $5 in_size_text
+                            r.get("ean_raw") or "",          # $6 in_ean_raw
+                            price_val,                       # $7 in_price
+                            r.get("currency") or "EUR",      # $8 in_currency
+                            store_id,                        # $9 in_store_id
+                            r.get("seen_at"),                # $10 in_seen_at (aware datetime)
+                            r.get("source_url") or "",       # $11 in_source_url
+                        )
+                    ingested += 1
+                    break  # success — move to next row
+
+                except asyncpg.exceptions.DeadlockDetectedError:
+                    if attempt == 2:
+                        print(f"[warn] deadlock after 3 attempts, skipping ext_id={ext_id}")
+                        skipped += 1
+                    else:
+                        # exponential backoff: 100ms, 200ms
+                        await asyncio.sleep(0.1 * (attempt + 1))
+
+                except Exception as e:
+                    print(f"[warn] DB ingest error for ext_id={ext_id}: {e}", file=sys.stderr)
+                    skipped += 1
+                    break
+
     finally:
         await conn.close()
+
+    if skipped:
+        print(f"[barbora] DB ingest: {ingested} ok, {skipped} skipped (deadlock/error)")
 
 # ---------------------------------------------------------------------
 # sharding utils
@@ -898,7 +929,7 @@ def crawl(args) -> None:
     )
 
     total = 0
-    headless = parse_bool_flag(args.headless)       # robust boolean parsing
+    headless = parse_bool_flag(args.headless)
     req_delay = float(args.req_delay)
     per_cat_page_limit = int(args.max_pages_per_category or "0")
 
@@ -1141,7 +1172,7 @@ def crawl(args) -> None:
                 pass
 
     # -----------------------------------------------------------------
-    # after crawling: DB ingest
+    # after crawling: DB ingest (per-row transactions, deadlock retry)
     # -----------------------------------------------------------------
     try:
         store_id_env = int(os.environ.get("STORE_ID", "441") or "441")
@@ -1169,10 +1200,9 @@ def build_argparser() -> argparse.ArgumentParser:
     p.add_argument("--max-products", default="0", help="Cap total PDPs visited (0=unlimited)")
     p.add_argument("--max-pages-per-category", default="0", help="Cap pages per category (0=unlimited)")
 
-    # Accept `--headless` (implied true) *or* `--headless false`
     p.add_argument(
         "--headless",
-        nargs="?",                # allow presence without value
+        nargs="?",
         const=str(DEFAULT_HEADLESS),
         default=str(DEFAULT_HEADLESS),
         help="1/0/true/false/yes/no (presence without value => default)",
@@ -1180,7 +1210,6 @@ def build_argparser() -> argparse.ArgumentParser:
 
     p.add_argument("--req-delay", default=str(DEFAULT_REQ_DELAY), help="Delay between steps in seconds")
 
-    # Accept both --output-csv and legacy --out-csv
     p.add_argument(
         "--output-csv", "--out-csv",
         dest="output_csv",
@@ -1192,7 +1221,6 @@ def build_argparser() -> argparse.ArgumentParser:
     p.add_argument("--only-ext-file", default="", help="File with ext_ids to INCLUDE exclusively")
     p.add_argument("--only-url-file", default="", help="File with PDP URLs to visit exclusively")
 
-    # Compatibility flags used by older YAMLs (ignored except for sharding)
     p.add_argument("--cat-shards", type=int, default=None, help="Total shards (CLI overrides env SHARDS)")
     p.add_argument("--cat-index", type=int, default=None, help="This shard index [0..N-1] (overrides env SHARD)")
     p.add_argument("--upsert-db", default="", help="Compat: ignored; ingest uses DATABASE_URL")
