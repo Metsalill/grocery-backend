@@ -11,6 +11,7 @@ MAX_LIMIT = 50  # server-side hard cap
 
 
 def _row_to_safe_product(row: Dict[str, Any]) -> Dict[str, Any]:
+    chains = row.get("available_chains") or []
     return {
         "id": row.get("id"),
         "name": row.get("name"),
@@ -21,6 +22,7 @@ def _row_to_safe_product(row: Dict[str, Any]) -> Dict[str, Any]:
         "amount": row.get("amount"),
         "food_group": row.get("food_group"),
         "sub_code": row.get("sub_code"),
+        "available_chains": sorted(list(set(chains))) if chains else [],
     }
 
 
@@ -55,11 +57,21 @@ def _build_dedup_sql(where_sql: str) -> str:
     Grouped products (same real-world item across chains) collapse to one card.
     Ungrouped products each get their own card.
     Within a group, picks the best representative by chain priority, image, EAN, id.
+    Also returns available_chains: all chains where any group member has a price.
     """
     return f"""
         SELECT DISTINCT ON (COALESCE(pgm.group_id::text, 'u_' || p.id::text))
             p.*,
-            pgm.group_id
+            pgm.group_id,
+            (
+                SELECT ARRAY_AGG(DISTINCT s.chain ORDER BY s.chain)
+                FROM product_group_members pgm2
+                JOIN prices pr ON pr.product_id = pgm2.product_id
+                JOIN stores s ON s.id = pr.store_id
+                WHERE pgm2.group_id = pgm.group_id
+                  AND s.chain IS NOT NULL
+                  AND s.chain != ''
+            ) AS available_chains
         FROM products p
         LEFT JOIN product_group_members pgm ON pgm.product_id = p.id
         {where_sql}
