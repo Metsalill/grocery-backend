@@ -144,7 +144,6 @@ async def _expand_groups(
             basket_pids,
         )
     except (pgerr.UndefinedTableError, pgerr.UndefinedColumnError):
-        # product_groups tables don't exist yet — degrade gracefully
         return {}
 
     result: Dict[int, List[int]] = {}
@@ -167,11 +166,10 @@ async def _candidate_stores(
     limit: int,
     offset: int,
 ) -> List[asyncpg.Record]:
-    host_and_online_filter = """
-      AND s.id NOT IN (SELECT DISTINCT store_id FROM store_price_source)
-      AND COALESCE(s.is_online, false) = false
-    """
-    online_only_filter = """
+    # Include all physical stores (is_online = false).
+    # store_price_source poed on füüsilised poed mis saavad hinnad teisest allikast
+    # (nt Selver füüsilised poed saavad hinnad e-Selverist) — need PEAVAD olema kandidaadid!
+    physical_filter = """
       AND COALESCE(s.is_online, false) = false
     """
 
@@ -206,14 +204,8 @@ async def _candidate_stores(
         )
 
     if lat is None or lon is None:
-        try:
-            return await _no_coords(host_and_online_filter)
-        except (pgerr.UndefinedTableError, pgerr.UndefinedObjectError):
-            return await _no_coords(online_only_filter)
-    try:
-        return await _haversine(host_and_online_filter)
-    except (pgerr.UndefinedTableError, pgerr.UndefinedObjectError):
-        return await _haversine(online_only_filter)
+        return await _no_coords(physical_filter)
+    return await _haversine(physical_filter)
 
 
 # ---------------- prices ----------------
@@ -382,18 +374,14 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                 metadata[pid] = rec
 
         # 6. Expand product groups
-        # group_members: basket_pid -> [member_pids] (includes the basket_pid itself)
-        # For products not in any group, we treat them as solo (not in dict).
         group_members: Dict[int, List[int]] = await _expand_groups(conn, basket_pids)
 
-        # Collect ALL product IDs we need prices for (basket + group members)
         all_pids_for_prices: List[int] = sorted({
             mid
             for pid in basket_pids
             for mid in group_members.get(pid, [pid])
         })
 
-        # Fetch metadata for group members too (needed for line item names)
         extra_pids = [p for p in all_pids_for_prices if p not in metadata]
         if extra_pids:
             extra_meta = await _fetch_products_by_id(conn, extra_pids)
@@ -429,7 +417,6 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
             for pid, qty in qty_by_pid.items():
                 members = group_members.get(pid, [pid])
 
-                # Pick the cheapest available member in this store
                 best_member_pid: Optional[int] = None
                 best_member_price: Optional[float] = None
                 for mid in members:
@@ -439,18 +426,17 @@ async def compare_basket_service(db: Any, body: Dict[str, Any]) -> Dict[str, Any
                         best_member_pid = mid
 
                 if best_member_price is None:
-                    continue  # product not available in this store
+                    continue
 
                 line_total = best_member_price * qty
                 lines_found += 1
                 total += line_total
 
                 if include_lines:
-                    # Show the winning member's name, not the original basket product name
                     meta = metadata.get(best_member_pid) if best_member_pid else metadata.get(pid)
                     lines.append({
                         "product_id": best_member_pid,
-                        "basket_product_id": pid,  # original basket item
+                        "basket_product_id": pid,
                         "ean": _rv(meta, "ean") if meta else None,
                         "product_name": _rv(meta, "name") if meta else f"#{best_member_pid}",
                         "qty": qty,
