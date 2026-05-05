@@ -22,26 +22,18 @@ async def list_main_categories(
     db=Depends(get_db),
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
 ):
-    """
-    Return all main categories with product_count.
-
-    This uses product_categories (canonical mapping) rather than
-    products.food_group so counts reflect your new main+sub structure.
-    """
     sql = """
         SELECT
             m.code,
             m.label_et,
             COALESCE(m.label_en, m.label_et) AS label_en,
-            COUNT(DISTINCT pc.product_id) AS product_count
-        FROM categories_main AS m
-        LEFT JOIN product_categories AS pc
-          ON pc.main_id = m.id
-        GROUP BY
-            m.id, m.code, m.label_et, m.label_en, m.sort_order
+            COUNT(DISTINCT p.id) AS product_count
+        FROM categories_main m
+        LEFT JOIN categories_sub s ON s.main_id = m.id
+        LEFT JOIN products p ON p.sub_code = s.code
+        GROUP BY m.id, m.code, m.label_et, m.label_en, m.sort_order
         ORDER BY m.sort_order, m.id;
     """
-
     rows = await db.fetch(sql)
     return [
         {
@@ -64,12 +56,6 @@ async def list_subcategories(
     db=Depends(get_db),
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
 ):
-    """
-    Return subcategories for a given main category.
-
-    Uses categories_sub + product_categories mapping.
-    """
-    # Make sure main category exists
     main_row = await db.fetchrow(
         "SELECT id, code, label_et FROM categories_main WHERE code = $1",
         main_code,
@@ -82,21 +68,15 @@ async def list_subcategories(
             s.code,
             s.label_et,
             COALESCE(s.label_en, s.label_et) AS label_en,
-            COUNT(DISTINCT pc.product_id) AS product_count
-        FROM categories_sub AS s
-        JOIN categories_main AS m
-          ON s.main_id = m.id
-        LEFT JOIN product_categories AS pc
-          ON pc.main_id = m.id
-         AND pc.sub_id  = s.id
+            COUNT(DISTINCT p.id) AS product_count
+        FROM categories_sub s
+        JOIN categories_main m ON s.main_id = m.id
+        LEFT JOIN products p ON p.sub_code = s.code
         WHERE m.code = $1
-        GROUP BY
-            s.id, s.code, s.label_et, s.label_en, s.sort_order
+        GROUP BY s.id, s.code, s.label_et, s.label_en, s.sort_order
         ORDER BY s.sort_order, s.id;
     """
-
     rows = await db.fetch(sql, main_code)
-
     return [
         {
             "code": r["code"],
