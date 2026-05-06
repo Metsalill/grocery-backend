@@ -36,11 +36,14 @@ from settings import DATABASE_URL, R2_PREFIX, r2_public_url
 from services.r2_client import upload_image_to_r2, image_exists_in_r2
 
 PRODUCT_ID_RE = re.compile(r"/p/(\d+)")
-CLOUDINARY_BASE = (
+CLOUDINARY_URLS = [
     "https://rimibaltic-res.cloudinary.com/image/upload/"
     "b_white,c_limit,f_auto,q_auto,w_350/"
-    "d_ecommerce:backend-fallback.png/MAT_{product_id}_PCE_EE"
-)
+    "d_ecommerce:backend-fallback.png/MAT_{product_id}_PCE_EE",
+    "https://rimibaltic-res.cloudinary.com/image/upload/"
+    "b_white,c_limit,f_auto,q_auto,w_350/"
+    "d_ecommerce:backend-fallback.png/MAT_{product_id}_KGH_EE",
+]
 
 SESSION = requests.Session()
 SESSION.headers.update({
@@ -62,8 +65,8 @@ def get_product_id(source_url: str) -> Optional[str]:
     return m.group(1) if m else None
 
 
-def build_cloudinary_url(product_id: str) -> str:
-    return CLOUDINARY_BASE.format(product_id=product_id)
+def build_cloudinary_urls(product_id: str) -> list[str]:
+    return [url.format(product_id=product_id) for url in CLOUDINARY_URLS]
 
 
 def download_image(url: str, timeout: int = 15) -> tuple[Optional[bytes], Optional[str]]:
@@ -144,15 +147,18 @@ def main():
                 except Exception:
                     pass
 
-            # Download from Cloudinary
-            cloudinary_url = build_cloudinary_url(product_id)
-
+            # Download from Cloudinary - try both suffixes
             if args.dry_run:
-                print(f"[DRY] [{pid}] {cloudinary_url} → {r2_key}")
+                print(f"[DRY] [{pid}] product_id={product_id} → {r2_key}")
                 uploaded += 1
                 continue
 
-            data, content_type = download_image(cloudinary_url)
+            data = None
+            content_type = None
+            for cloudinary_url in build_cloudinary_urls(product_id):
+                data, content_type = download_image(cloudinary_url)
+                if data:
+                    break
             if not data:
                 print(f"[{pid}] no image at {cloudinary_url}")
                 failed += 1
