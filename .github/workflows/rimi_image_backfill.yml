@@ -1,0 +1,36 @@
+name: Rimi Image Backfill
+
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Max products to process"
+        required: false
+        default: "10000"
+
+concurrency:
+  group: rimi-image-backfill
+  cancel-in-progress: true
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install psycopg2-binary
+
+      - name: Run Rimi image backfill
+        run: |
+          python scripts/rimi_image_backfill.py --limit ${{ github.event.inputs.limit || '10000' }}
