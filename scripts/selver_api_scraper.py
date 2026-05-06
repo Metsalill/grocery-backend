@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Selver scraper v2 - Vue Storefront Elasticsearch API, no Playwright.
-Category IDs verified from live API 2026-04-03.
+Selver scraper v3 - Vue Storefront Elasticsearch API, no Playwright.
+v3 changes vs v2:
+  - EAN: reads product_main_ean / ean_data instead of barcode (which API doesn't return)
+  - image_url: built from image/small_image/thumbnail path returned by API
+  - image_url written to DB after upsert (separate UPDATE, doesn't overwrite existing)
 """
 
 from __future__ import annotations
@@ -34,8 +37,6 @@ HEADERS = {
     "Referer": BASE + "/",
 }
 
-# Verified category IDs from /api/catalog/vue_storefront_catalog_et/category/_search
-# Using leaf-level categories (product_count > 0, no children).
 CATEGORIES = {
     # Puu- ja koogiviljad (parent 209)
     "ounad-pirnid":                          [210],
@@ -139,7 +140,7 @@ CATEGORIES = {
     "likoorid":                               [44],
     "muud-kanged-alkohoolsed-joogid":         [45],
 
-    # Kohv, tee, kakao (under joogid, parent 46)
+    # Kohv, tee, kakao
     "kohvid-joogid":                          [373],
     "teed":                                   [374],
     "kakaod-kakaojoogid":                     [375],
@@ -154,7 +155,7 @@ CATEGORIES = {
     "energiajoogid":                          [54],
     "alkoholivabad-joogid":                   [55],
 
-    # Spordijoogid (parent 56)
+    # Spordijoogid
     "spordijoogid":                           [57],
 
     # Kuivained (parent 9)
@@ -234,6 +235,32 @@ def parse_size(name: str) -> str:
     return ""
 
 
+def extract_ean(src: dict) -> str:
+    """Extract EAN — product_main_ean is most reliable, fallback to ean_data."""
+    ean = str(src.get("product_main_ean") or "").strip()
+    if not ean:
+        ean_data = src.get("ean_data") or []
+        if ean_data and isinstance(ean_data, list):
+            ean = str(ean_data[0].get("ean") or "").strip()
+    ean = re.sub(r"\D", "", ean)
+    return ean if len(ean) >= 8 else ""
+
+
+def extract_image_url(src: dict) -> str:
+    """Build full Selver CDN image URL from API image path."""
+    img_path = str(
+        src.get("image") or
+        src.get("small_image") or
+        src.get("thumbnail") or ""
+    ).strip()
+    if (img_path
+            and img_path.startswith("/")
+            and "placeholder" not in img_path.lower()
+            and img_path != "/"):
+        return f"https://www.selver.ee/img/310/300/resize{img_path}"
+    return ""
+
+
 def fetch_products_for_category(category_ids: list[int], from_: int = 0) -> Optional[dict]:
     query = {
         "query": {
@@ -250,8 +277,10 @@ def fetch_products_for_category(category_ids: list[int], from_: int = 0) -> Opti
             }
         },
         "_source": [
-            "sku", "name", "barcode", "price", "final_price",
+            "sku", "name", "price", "final_price",
             "prices", "brand", "manufacturer", "url_key",
+            "product_main_ean", "ean_data",
+            "image", "small_image", "thumbnail",
         ],
         "sort": [{"entity_id": {"order": "asc"}}],
     }
@@ -330,13 +359,12 @@ def scrape_category(slug: str, category_ids: list[int], delay: float = 0.3) -> l
             if not name:
                 continue
 
-            barcode = str(src.get("barcode") or "").strip()
-            ean_raw = barcode if len(re.sub(r"\D", "", barcode)) >= 8 else ""
-
             price = extract_price(src)
             if not price or price <= 0:
                 continue
 
+            ean_raw = extract_ean(src)
+            image_url = extract_image_url(src)
             brand = str(src.get("brand") or src.get("manufacturer") or "").strip()
             url_key = str(src.get("url_key") or "").strip()
             source_url = f"{BASE}/{url_key}" if url_key else f"{BASE}/toode/{sku}"
@@ -349,6 +377,7 @@ def scrape_category(slug: str, category_ids: list[int], delay: float = 0.3) -> l
                 "size_text": parse_size(name),
                 "price": price,
                 "source_url": source_url,
+                "image_url": image_url,
             })
 
         fetched = from_ + len(hits)
@@ -367,7 +396,9 @@ def upsert_batch(conn, rows: list[dict], store_id: int) -> tuple[int, int]:
         return 0, 0
 
     ts_now = datetime.datetime.now(datetime.timezone.utc)
-    sql = """
+
+    # Step 1: upsert product + price via existing function
+    sql_upsert = """
         SELECT upsert_product_and_price(
             %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
         );
@@ -391,13 +422,35 @@ def upsert_batch(conn, rows: list[dict], store_id: int) -> tuple[int, int]:
 
     try:
         with conn.cursor() as cur:
-            cur.executemany(sql, payload)
+            cur.executemany(sql_upsert, payload)
         conn.commit()
-        return len(payload), 0
     except Exception as e:
         conn.rollback()
         print(f"[warn] batch upsert failed: {e}", file=sys.stderr)
-        return 0, len(payload)
+        return 0, len(rows)
+
+    # Step 2: update image_url where missing
+    rows_with_image = [r for r in rows if r["image_url"]]
+    if rows_with_image:
+        sql_image = """
+            UPDATE products SET image_url = %s
+            WHERE id = (
+                SELECT product_id FROM ext_product_map
+                WHERE source = 'selver' AND ext_id = %s
+                LIMIT 1
+            )
+            AND (image_url IS NULL OR image_url = '')
+        """
+        img_payload = [(r["image_url"], r["ext_id"]) for r in rows_with_image]
+        try:
+            with conn.cursor() as cur:
+                cur.executemany(sql_image, img_payload)
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            print(f"[warn] image_url update failed: {e}", file=sys.stderr)
+
+    return len(rows), 0
 
 
 def main():
