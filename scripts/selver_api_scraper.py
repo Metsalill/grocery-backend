@@ -429,7 +429,28 @@ def upsert_batch(conn, rows: list[dict], store_id: int) -> tuple[int, int]:
         print(f"[warn] batch upsert failed: {e}", file=sys.stderr)
         return 0, len(rows)
 
-    # Step 2: update image_url where missing
+    # Step 2: update EAN where missing
+    rows_with_ean = [r for r in rows if r["ean_raw"]]
+    if rows_with_ean:
+        sql_ean = """
+            UPDATE products SET ean = %s
+            WHERE id = (
+                SELECT product_id FROM ext_product_map
+                WHERE source = 'selver' AND ext_id = %s
+                LIMIT 1
+            )
+            AND (ean IS NULL OR ean = '')
+        """
+        ean_payload = [(r["ean_raw"], r["ext_id"]) for r in rows_with_ean]
+        try:
+            with conn.cursor() as cur:
+                cur.executemany(sql_ean, ean_payload)
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            print(f"[warn] ean update failed: {e}", file=sys.stderr)
+
+    # Step 3: update image_url where missing
     rows_with_image = [r for r in rows if r["image_url"]]
     if rows_with_image:
         sql_image = """
