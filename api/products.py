@@ -12,17 +12,20 @@ MAX_LIMIT = 50  # server-side hard cap
 
 def _row_to_safe_product(row: Dict[str, Any]) -> Dict[str, Any]:
     chains = row.get("available_chains") or []
+    size_text = (row.get("size_text") or "").strip()
+    is_per_kg = size_text.lower() == "kg"
     return {
         "id": row.get("id"),
         "name": row.get("name"),
         "image_url": row.get("image_url"),
         "brand": row.get("brand"),
         "manufacturer": row.get("manufacturer"),
-        "size_text": row.get("size_text"),
+        "size_text": size_text,
         "amount": row.get("amount"),
         "food_group": row.get("food_group"),
         "sub_code": row.get("sub_code"),
         "available_chains": sorted(list(set(chains))) if chains else [],
+        "is_per_kg": is_per_kg,
     }
 
 
