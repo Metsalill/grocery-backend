@@ -3,13 +3,6 @@
 """
 Barbora image backfill → Cloudflare R2
 
-- Selects Barbora products with missing image_url but having source_url
-- Fetches the product page (Playwright for JS rendering)
-- Extracts image URL from JSON-LD or img[itemprop="image"]
-- Downloads image from cdn.barbora.ee
-- Uploads to R2 as products/barbora/{uuid}.webp
-- Updates products.image_url with the R2 public URL
-
 Run:
   python scripts/barbora_image_backfill_r2.py [--limit 5000] [--dry-run]
 """
@@ -52,11 +45,25 @@ def jitter(a=0.5, b=1.5):
     time.sleep(random.uniform(a, b))
 
 
-def extract_image_url_from_html(html: str) -> Optional[str]:
-    """Parsi pildi URL JSON-LD-st või img[itemprop=image]-st."""
+def is_valid_barbora_image(url: str) -> bool:
+    """Ainult cdn.barbora.ee pildid on päris pildid."""
+    return (
+        url
+        and url.startswith("http")
+        and "cdn.barbora.ee" in url
+        and "placeholder" not in url.lower()
+        and "no-image" not in url.lower()
+    )
 
-    # 1) JSON-LD
-    for m in re.finditer(r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>', html, re.DOTALL):
+
+def extract_image_url_from_html(html: str) -> Optional[str]:
+    """Parsi pildi URL — ainult cdn.barbora.ee URL-id."""
+
+    # 1) JSON-LD — kõige usaldusväärsem
+    for m in re.finditer(
+        r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>',
+        html, re.DOTALL
+    ):
         try:
             data = json.loads(m.group(1))
             items = data if isinstance(data, list) else [data]
@@ -66,29 +73,24 @@ def extract_image_url_from_html(html: str) -> Optional[str]:
                 img = item.get("image")
                 if isinstance(img, list):
                     img = img[0]
-                if isinstance(img, str) and img.startswith("http"):
+                if isinstance(img, str) and is_valid_barbora_image(img):
                     return img
         except Exception:
             continue
 
-    # 2) img[itemprop="image"]
-    m = re.search(r'<img[^>]+itemprop=["\']image["\'][^>]+src=["\']([^"\']+)["\']', html)
-    if m:
-        return m.group(1)
-
-    m = re.search(r'<img[^>]+src=["\']([^"\']+)["\'][^>]+itemprop=["\']image["\']', html)
-    if m:
-        return m.group(1)
-
-    # 3) cdn.barbora.ee/products/ URL
-    m = re.search(r'(https://cdn\.barbora\.ee/products/[^"\'>\s]+\.(?:png|jpg|jpeg|webp))', html)
-    if m:
-        return m.group(1)
-
-    # 4) data-b-item-id JSON blob
+    # 2) data-b-item JSON blob (Barbora lisab tooteinfot data atribuutidesse)
     m = re.search(r'"image"\s*:\s*"(https://cdn\.barbora\.ee/[^"]+)"', html)
-    if m:
+    if m and is_valid_barbora_image(m.group(1)):
         return m.group(1)
+
+    # 3) cdn.barbora.ee/products/ URL otse HTML-ist
+    for m in re.finditer(
+        r'(https://cdn\.barbora\.ee/products/[^"\'>\s]+\.(?:png|jpg|jpeg|webp))',
+        html
+    ):
+        url = m.group(1)
+        if is_valid_barbora_image(url):
+            return url
 
     return None
 
@@ -108,15 +110,26 @@ def download_image(url: str, timeout: int = 15) -> tuple[Optional[bytes], Option
 
 
 def r2_key_from_image_url(image_url: str) -> str:
-    """Võta UUID osa cdn.barbora.ee URL-ist."""
-    # https://cdn.barbora.ee/products/2653480e-27b4-4ed0-b46b-12dce558c8e4_m.png
     m = re.search(r'/products/([^/]+?)(?:_[sml])?\.(?:png|jpg|jpeg|webp)', image_url)
     if m:
         return f"{R2_PREFIX}barbora/{m.group(1)}.webp"
-    # fallback: hash URL
     import hashlib
     h = hashlib.md5(image_url.encode()).hexdigest()
     return f"{R2_PREFIX}barbora/{h}.webp"
+
+
+def new_browser(pw):
+    browser = pw.chromium.launch(headless=True)
+    ctx = browser.new_context(locale="et-EE", timezone_id="Europe/Tallinn")
+    page = ctx.new_page()
+    page.add_init_script("""
+        try {
+            localStorage.setItem('ageConfirmed', 'true');
+            localStorage.setItem('adult', 'true');
+            document.cookie = 'ageConfirmed=true; path=/; max-age=31536000';
+        } catch(e) {}
+    """)
+    return browser, ctx, page
 
 
 def main():
@@ -148,21 +161,7 @@ def main():
     failed = 0
 
     with sync_playwright() as pw:
-        browser = pw.chromium.launch(headless=True)
-        ctx = browser.new_context(
-            locale="et-EE",
-            timezone_id="Europe/Tallinn",
-        )
-        page = ctx.new_page()
-
-        # Age gate + cookies
-        page.add_init_script("""
-            try {
-                localStorage.setItem('ageConfirmed', 'true');
-                localStorage.setItem('adult', 'true');
-                document.cookie = 'ageConfirmed=true; path=/; max-age=31536000';
-            } catch(e) {}
-        """)
+        browser, ctx, page = new_browser(pw)
 
         with conn.cursor() as cur:
             for i, row in enumerate(rows):
@@ -172,11 +171,8 @@ def main():
                 try:
                     page.goto(source_url, timeout=30000, wait_until="domcontentloaded")
 
-                    # Tühjenda age gate
-                    for sel in [
-                        "button:has-text('Olen 18-aastane')",
-                        "button:has-text('Olen 18')",
-                    ]:
+                    # Age gate
+                    for sel in ["button:has-text('Olen 18-aastane')", "button:has-text('Olen 18')"]:
                         try:
                             loc = page.locator(sel)
                             if loc.count() and loc.first.is_visible():
@@ -184,8 +180,9 @@ def main():
                         except Exception:
                             pass
 
+                    # Oota kuni pilt laetud
                     try:
-                        page.wait_for_selector("img[itemprop='image']", timeout=5000)
+                        page.wait_for_selector("script[type='application/ld+json']", timeout=6000)
                     except PWTimeout:
                         pass
 
@@ -195,11 +192,18 @@ def main():
                 except Exception as e:
                     print(f"[{pid}] page load failed: {e}", file=sys.stderr)
                     failed += 1
+                    # Restardi brauser
+                    try:
+                        page.close(); ctx.close(); browser.close()
+                    except Exception:
+                        pass
+                    browser, ctx, page = new_browser(pw)
                     continue
 
                 if not image_url:
-                    print(f"[{pid}] no image found at {source_url}")
+                    print(f"[{pid}] no cdn.barbora.ee image found")
                     skipped += 1
+                    jitter(0.2, 0.5)
                     continue
 
                 if args.dry_run:
@@ -213,10 +217,7 @@ def main():
                 try:
                     if image_exists_in_r2(r2_key):
                         public_url = r2_public_url(r2_key)
-                        cur.execute(
-                            "UPDATE products SET image_url = %s WHERE id = %s",
-                            (public_url, pid)
-                        )
+                        cur.execute("UPDATE products SET image_url = %s WHERE id = %s", (public_url, pid))
                         uploaded += 1
                         if uploaded % 50 == 0:
                             conn.commit()
@@ -226,7 +227,6 @@ def main():
                 except Exception:
                     pass
 
-                # Lae pilt alla
                 data, content_type = download_image(image_url)
                 if not data:
                     print(f"[{pid}] download failed: {image_url}")
@@ -234,13 +234,9 @@ def main():
                     jitter(0.3, 0.8)
                     continue
 
-                # Lae R2-sse
                 try:
                     public_url = upload_image_to_r2(data, r2_key, content_type or "image/png")
-                    cur.execute(
-                        "UPDATE products SET image_url = %s WHERE id = %s",
-                        (public_url, pid)
-                    )
+                    cur.execute("UPDATE products SET image_url = %s WHERE id = %s", (public_url, pid))
                     uploaded += 1
                     print(f"[{pid}] ✅ {r2_key}")
                     if uploaded % 50 == 0:
@@ -250,31 +246,19 @@ def main():
                     print(f"[{pid}] R2 upload failed: {e}", file=sys.stderr)
                     failed += 1
 
-                jitter(0.5, 1.2)
+                jitter(0.5, 1.0)
 
                 # Restardi brauser iga 200 toote järel
                 if (i + 1) % 200 == 0:
                     try:
-                        page.close()
-                        ctx.close()
-                        browser.close()
+                        page.close(); ctx.close(); browser.close()
                     except Exception:
                         pass
-                    browser = pw.chromium.launch(headless=True)
-                    ctx = browser.new_context(locale="et-EE", timezone_id="Europe/Tallinn")
-                    page = ctx.new_page()
-                    page.add_init_script("""
-                        try {
-                            localStorage.setItem('ageConfirmed', 'true');
-                            document.cookie = 'ageConfirmed=true; path=/; max-age=31536000';
-                        } catch(e) {}
-                    """)
+                    browser, ctx, page = new_browser(pw)
                     print(f"[info] browser restarted after {i+1} products")
 
         try:
-            page.close()
-            ctx.close()
-            browser.close()
+            page.close(); ctx.close(); browser.close()
         except Exception:
             pass
 
