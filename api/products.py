@@ -62,38 +62,37 @@ def _build_dedup_sql(where_sql: str) -> str:
     else:
         combined_where = f"WHERE {price_filter}"
 
+    # Optimeeritud: available_chains arvutatakse ühe GROUP BY JOIN-iga,
+    # mitte kahe korreleeritud subquery-ga iga rea kohta.
     return f"""
-        SELECT DISTINCT ON (COALESCE(pgm.group_id::text, 'u_' || p.id::text))
-            p.*,
-            pgm.group_id,
-            COALESCE(
-                (
-                    SELECT ARRAY_AGG(DISTINCT s.chain ORDER BY s.chain)
-                    FROM product_group_members pgm2
-                    JOIN prices pr ON pr.product_id = pgm2.product_id
-                    JOIN stores s ON s.id = pr.store_id
-                    WHERE pgm2.group_id = pgm.group_id
-                      AND s.chain IS NOT NULL
-                      AND s.chain != ''
-                ),
-                (
-                    SELECT ARRAY_AGG(DISTINCT s.chain ORDER BY s.chain)
-                    FROM prices pr
-                    JOIN stores s ON s.id = pr.store_id
-                    WHERE pr.product_id = p.id
-                      AND s.chain IS NOT NULL
-                      AND s.chain != ''
-                )
-            ) AS available_chains
-        FROM products p
-        LEFT JOIN product_group_members pgm ON pgm.product_id = p.id
-        {combined_where}
-        ORDER BY
-            COALESCE(pgm.group_id::text, 'u_' || p.id::text),
-            {SOURCE_PRIORITY_SQL},
-            CASE WHEN p.image_url IS NOT NULL AND p.image_url != '' THEN 0 ELSE 1 END,
-            CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
-            p.id
+        WITH base AS (
+            SELECT DISTINCT ON (COALESCE(pgm.group_id::text, 'u_' || p.id::text))
+                p.*,
+                pgm.group_id,
+                COALESCE(pgm.group_id::text, 'u_' || p.id::text) AS dedup_key
+            FROM products p
+            LEFT JOIN product_group_members pgm ON pgm.product_id = p.id
+            {combined_where}
+            ORDER BY
+                COALESCE(pgm.group_id::text, 'u_' || p.id::text),
+                {SOURCE_PRIORITY_SQL},
+                CASE WHEN p.image_url IS NOT NULL AND p.image_url != '' THEN 0 ELSE 1 END,
+                CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
+                p.id
+        ),
+        group_chains AS (
+            SELECT
+                COALESCE(pgm.group_id::text, 'u_' || pr.product_id::text) AS dedup_key,
+                ARRAY_AGG(DISTINCT s.chain ORDER BY s.chain) AS chains
+            FROM prices pr
+            JOIN stores s ON s.id = pr.store_id
+            LEFT JOIN product_group_members pgm ON pgm.product_id = pr.product_id
+            WHERE s.chain IS NOT NULL AND s.chain != ''
+            GROUP BY COALESCE(pgm.group_id::text, 'u_' || pr.product_id::text)
+        )
+        SELECT b.*, gc.chains AS available_chains
+        FROM base b
+        LEFT JOIN group_chains gc ON gc.dedup_key = b.dedup_key
     """
 
 
