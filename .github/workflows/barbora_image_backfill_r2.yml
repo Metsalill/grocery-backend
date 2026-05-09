@@ -1,0 +1,46 @@
+name: Barbora Image Backfill R2
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Max products to process"
+        required: false
+        default: "5000"
+concurrency:
+  group: barbora-image-backfill-r2
+  cancel-in-progress: true
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      ENV: production
+      ENABLE_DOCS: "0"
+      LOG_REQUESTS: "0"
+      DATABASE_URL: ${{ secrets.DATABASE_URL_PUBLIC }}
+      DB_CONNECT_TIMEOUT: "10"
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+      R2_PUBLIC_BASE: ${{ secrets.R2_PUBLIC_BASE }}
+      R2_PREFIX: "products/"
+      RATE_LIMIT_PER_MINUTE: "300"
+      REDIS_URL: ""
+      APP_WEB_ORIGIN: ""
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          pip install -r requirements.txt || true
+          pip install psycopg2-binary boto3 requests playwright
+          playwright install --with-deps chromium
+      - name: Run Barbora image backfill to R2
+        run: |
+          python scripts/barbora_image_backfill_r2.py --limit ${{ github.event.inputs.limit || '5000' }}
