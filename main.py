@@ -36,6 +36,7 @@ from admin.image_gallery import router as image_admin_router
 # UPDATED IMPORT PATHS
 from api.categories import router as categories_router
 from api.products import router as products_router
+from api.selections import router as selections_router
 
 logger = logging.getLogger("uvicorn.error")
 os.makedirs(IMAGES_DIR, exist_ok=True)
@@ -125,6 +126,7 @@ async def shutdown():
 app.include_router(auth_router)
 app.include_router(compare_router)
 app.include_router(products_router)
+app.include_router(selections_router)
 app.include_router(upload_router)
 app.include_router(admin_router)
 app.include_router(basket_history_router)
@@ -136,6 +138,7 @@ if stores_router:
 
 # -------- Duplicate mounts under /api --------
 app.include_router(products_router, prefix="/api")
+app.include_router(selections_router, prefix="/api")
 app.include_router(compare_router, prefix="/api")
 if stores_router:
     app.include_router(stores_router, prefix="/api")
