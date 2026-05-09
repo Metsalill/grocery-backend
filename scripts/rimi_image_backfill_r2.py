@@ -43,6 +43,9 @@ CLOUDINARY_URLS = [
     "https://rimibaltic-res.cloudinary.com/image/upload/"
     "b_white,c_limit,f_auto,q_auto,w_350/"
     "d_ecommerce:backend-fallback.png/MAT_{product_id}_KGH_EE",
+    "https://rimibaltic-res.cloudinary.com/image/upload/"
+    "b_white,c_limit,f_auto,q_auto,w_350/"
+    "d_ecommerce:backend-fallback.png/MAT_{product_id}_KGM_EE",
 ]
 
 SESSION = requests.Session()
