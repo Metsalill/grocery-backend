@@ -52,29 +52,39 @@ SOURCE_PRIORITY_SQL = """
 
 
 def _build_dedup_sql(where_sql: str) -> str:
-    """
-    Returns one representative product per group.
-    Grouped products (same real-world item across chains) collapse to one card.
-    Ungrouped products each get their own card.
-    Within a group, picks the best representative by chain priority, image, EAN, id.
-    Also returns available_chains: all chains where any group member has a price.
-    """
+    price_filter = "EXISTS (SELECT 1 FROM prices pr WHERE pr.product_id = p.id)"
+
+    if where_sql.strip().upper().startswith("WHERE"):
+        combined_where = f"{where_sql} AND {price_filter}"
+    else:
+        combined_where = f"WHERE {price_filter}"
+
     return f"""
         SELECT DISTINCT ON (COALESCE(pgm.group_id::text, 'u_' || p.id::text))
             p.*,
             pgm.group_id,
-            (
-                SELECT ARRAY_AGG(DISTINCT s.chain ORDER BY s.chain)
-                FROM product_group_members pgm2
-                JOIN prices pr ON pr.product_id = pgm2.product_id
-                JOIN stores s ON s.id = pr.store_id
-                WHERE pgm2.group_id = pgm.group_id
-                  AND s.chain IS NOT NULL
-                  AND s.chain != ''
+            COALESCE(
+                (
+                    SELECT ARRAY_AGG(DISTINCT s.chain ORDER BY s.chain)
+                    FROM product_group_members pgm2
+                    JOIN prices pr ON pr.product_id = pgm2.product_id
+                    JOIN stores s ON s.id = pr.store_id
+                    WHERE pgm2.group_id = pgm.group_id
+                      AND s.chain IS NOT NULL
+                      AND s.chain != ''
+                ),
+                (
+                    SELECT ARRAY_AGG(DISTINCT s.chain ORDER BY s.chain)
+                    FROM prices pr
+                    JOIN stores s ON s.id = pr.store_id
+                    WHERE pr.product_id = p.id
+                      AND s.chain IS NOT NULL
+                      AND s.chain != ''
+                )
             ) AS available_chains
         FROM products p
         LEFT JOIN product_group_members pgm ON pgm.product_id = p.id
-        {where_sql}
+        {combined_where}
         ORDER BY
             COALESCE(pgm.group_id::text, 'u_' || p.id::text),
             {SOURCE_PRIORITY_SQL},
@@ -84,7 +94,6 @@ def _build_dedup_sql(where_sql: str) -> str:
     """
 
 
-# ----------------------------- LIST (paged) -----------------------------
 @router.get("/products")
 @throttle(limit=120, window=60)
 async def list_products(
@@ -92,8 +101,8 @@ async def list_products(
     q: Optional[str] = Query("", description="Search by product name (ILIKE)."),
     offset: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=200),
-    main_code: Optional[str] = Query(None, description="Main category code (e.g. 'produce')."),
-    sub_code: Optional[str] = Query(None, description="Subcategory code (e.g. 'produce_apples_pears')."),
+    main_code: Optional[str] = Query(None),
+    sub_code: Optional[str] = Query(None),
 ) -> Dict[str, Any]:
     limit = min(limit, MAX_LIMIT)
     q = (q or "").strip()
@@ -152,12 +161,11 @@ async def list_products(
         raise HTTPException(status_code=500, detail=f"List products error: {e}")
 
 
-# ----------------------------- SEARCH (lightweight) -----------------------------
 @router.get("/products/search")
 @throttle(limit=180, window=60)
 async def search_products(
     request: Request,
-    q: str = Query(..., min_length=1, description="Search term"),
+    q: str = Query(..., min_length=1),
     limit: int = Query(10, ge=1, le=50),
 ) -> Dict[str, Any]:
     limit = min(limit, 50)
@@ -179,17 +187,12 @@ async def search_products(
 
         items = [_row_to_safe_product(dict(r)) for r in rows]
 
-        return {
-            "items": items,
-            "count": len(items),
-            "q": q,
-        }
+        return {"items": items, "count": len(items), "q": q}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Search products error: {e}")
 
 
-# ----------------------------- PRODUCT DETAIL -----------------------------
 @router.get("/products/{product_id}")
 @throttle(limit=120, window=60)
 async def get_product(
