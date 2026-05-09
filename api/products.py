@@ -1,6 +1,6 @@
 # api/products.py
 
-from fastapi import APIRouter, Request, Query, HTTPException
+from fastapi import APIRouter, Request, Query, HTTPException, Header
 from typing import Optional, List, Dict, Any
 
 from utils.throttle import throttle
@@ -36,6 +36,28 @@ async def _get_pool(request: Request):
     return pool
 
 
+async def _get_user_id_from_token(conn, authorization: Optional[str]) -> Optional[int]:
+    """Vabatahtlik auth — tagastab user_id või None kui token puudub/kehtetu."""
+    if not authorization or not authorization.startswith("Bearer "):
+        return None
+    try:
+        import os
+        from jose import jwt, JWTError
+        token = authorization.split(" ")[1]
+        SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-key")
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        email = (payload.get("sub") or "").lower()
+        if not email:
+            return None
+        row = await conn.fetchrow(
+            "SELECT id FROM users WHERE LOWER(email) = LOWER($1) AND deleted_at IS NULL",
+            email,
+        )
+        return row["id"] if row else None
+    except Exception:
+        return None
+
+
 # Source priority: lower = preferred display representative
 SOURCE_PRIORITY_SQL = """
     CASE
@@ -62,8 +84,6 @@ def _build_dedup_sql(where_sql: str) -> str:
     else:
         combined_where = f"WHERE {price_filter}"
 
-    # Optimeeritud: available_chains arvutatakse ühe GROUP BY JOIN-iga,
-    # mitte kahe korreleeritud subquery-ga iga rea kohta.
     return f"""
         WITH base AS (
             SELECT DISTINCT ON (COALESCE(pgm.group_id::text, 'u_' || p.id::text))
@@ -72,6 +92,50 @@ def _build_dedup_sql(where_sql: str) -> str:
                 COALESCE(pgm.group_id::text, 'u_' || p.id::text) AS dedup_key
             FROM products p
             LEFT JOIN product_group_members pgm ON pgm.product_id = p.id
+            {combined_where}
+            ORDER BY
+                COALESCE(pgm.group_id::text, 'u_' || p.id::text),
+                {SOURCE_PRIORITY_SQL},
+                CASE WHEN p.image_url IS NOT NULL AND p.image_url != '' THEN 0 ELSE 1 END,
+                CASE WHEN p.ean      IS NOT NULL AND p.ean      != '' THEN 0 ELSE 1 END,
+                p.id
+        ),
+        group_chains AS (
+            SELECT
+                COALESCE(pgm.group_id::text, 'u_' || pr.product_id::text) AS dedup_key,
+                ARRAY_AGG(DISTINCT s.chain ORDER BY s.chain) AS chains
+            FROM prices pr
+            JOIN stores s ON s.id = pr.store_id
+            LEFT JOIN product_group_members pgm ON pgm.product_id = pr.product_id
+            WHERE s.chain IS NOT NULL AND s.chain != ''
+            GROUP BY COALESCE(pgm.group_id::text, 'u_' || pr.product_id::text)
+        )
+        SELECT b.*, gc.chains AS available_chains
+        FROM base b
+        LEFT JOIN group_chains gc ON gc.dedup_key = b.dedup_key
+    """
+
+
+def _build_personalized_sql(where_sql: str, user_id: int) -> str:
+    """Sama mis _build_dedup_sql aga sorteerib kasutaja valitud tooted ette."""
+    price_filter = "EXISTS (SELECT 1 FROM prices pr WHERE pr.product_id = p.id)"
+
+    if where_sql.strip().upper().startswith("WHERE"):
+        combined_where = f"{where_sql} AND {price_filter}"
+    else:
+        combined_where = f"WHERE {price_filter}"
+
+    return f"""
+        WITH base AS (
+            SELECT DISTINCT ON (COALESCE(pgm.group_id::text, 'u_' || p.id::text))
+                p.*,
+                pgm.group_id,
+                COALESCE(pgm.group_id::text, 'u_' || p.id::text) AS dedup_key,
+                COALESCE(ups.count, 0) AS selection_count
+            FROM products p
+            LEFT JOIN product_group_members pgm ON pgm.product_id = p.id
+            LEFT JOIN user_product_selections ups
+                ON ups.product_id = p.id AND ups.user_id = {user_id}
             {combined_where}
             ORDER BY
                 COALESCE(pgm.group_id::text, 'u_' || p.id::text),
@@ -105,6 +169,7 @@ async def list_products(
     limit: int = Query(20, ge=1, le=200),
     main_code: Optional[str] = Query(None),
     sub_code: Optional[str] = Query(None),
+    authorization: Optional[str] = Header(None),
 ) -> Dict[str, Any]:
     limit = min(limit, MAX_LIMIT)
     q = (q or "").strip()
@@ -129,17 +194,27 @@ async def list_products(
 
     where_sql = ("WHERE " + " AND ".join(where)) if where else ""
 
-    dedup_sql = _build_dedup_sql(where_sql)
-    count_sql = f"SELECT COUNT(*) FROM ({dedup_sql}) AS deduped"
-    params_with_paging = params + [limit, offset]
-    data_sql = (
-        f"SELECT * FROM ({dedup_sql}) AS deduped\n"
-        f"ORDER BY name\n"
-        f"LIMIT ${len(params) + 1} OFFSET ${len(params) + 2}"
-    )
-
     try:
         async with pool.acquire() as conn:
+            # Vabatahtlik auth personaliseeritud järjestuse jaoks
+            user_id = await _get_user_id_from_token(conn, authorization)
+
+            if user_id:
+                dedup_sql = _build_personalized_sql(where_sql, user_id)
+                # Personaliseeritud: valitud tooted ette, siis tähestiku järgi
+                order_clause = "ORDER BY selection_count DESC, name"
+            else:
+                dedup_sql = _build_dedup_sql(where_sql)
+                order_clause = "ORDER BY name"
+
+            count_sql = f"SELECT COUNT(*) FROM ({dedup_sql}) AS deduped"
+            params_with_paging = params + [limit, offset]
+            data_sql = (
+                f"SELECT * FROM ({dedup_sql}) AS deduped\n"
+                f"{order_clause}\n"
+                f"LIMIT ${len(params) + 1} OFFSET ${len(params) + 2}"
+            )
+
             total_row = await conn.fetchrow(count_sql, *params)
             total = total_row[0] if total_row else 0
             rows = await conn.fetch(data_sql, *params_with_paging)
