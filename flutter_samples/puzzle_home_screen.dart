@@ -105,23 +105,18 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 20),
               Expanded(
-                child: Center(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final size = constraints.maxWidth
-                          .clamp(0.0, constraints.maxHeight)
-                          .toDouble();
-
-                      return PuzzleGrid(
-                        size: size,
-                        itemCount: itemCount,
-                        onCompare: _navigateToCompare,
-                        onProducts: _navigateToProducts,
-                        onBasket: _navigateToBasket,
-                        onHistory: _navigateToBasketHistory,
-                      );
-                    },
-                  ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return PuzzleGrid(
+                      width: constraints.maxWidth,
+                      height: constraints.maxHeight,
+                      itemCount: itemCount,
+                      onCompare: _navigateToCompare,
+                      onProducts: _navigateToProducts,
+                      onBasket: _navigateToBasket,
+                      onHistory: _navigateToBasketHistory,
+                    );
+                  },
                 ),
               ),
             ],
@@ -135,7 +130,8 @@ class _HomeScreenState extends State<HomeScreen> {
 class PuzzleGrid extends StatelessWidget {
   const PuzzleGrid({
     super.key,
-    required this.size,
+    required this.width,
+    required this.height,
     required this.itemCount,
     required this.onCompare,
     required this.onProducts,
@@ -143,7 +139,8 @@ class PuzzleGrid extends StatelessWidget {
     required this.onHistory,
   });
 
-  final double size;
+  final double width;
+  final double height;
   final int itemCount;
   final VoidCallback onCompare;
   final VoidCallback onProducts;
@@ -152,34 +149,48 @@ class PuzzleGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pieceSize = size * 0.54;
-    final connectorSpace = pieceSize * 0.16;
+    final groupSizeByWidth = width * 0.98;
+    final groupSizeByHeight = height * 0.66;
+    final groupSize = groupSizeByWidth < groupSizeByHeight
+        ? groupSizeByWidth
+        : groupSizeByHeight;
+    final connectorSpace = groupSize * 0.07;
+    final pieceSize = (groupSize + (connectorSpace * 2)) / 2;
     final step = pieceSize - (connectorSpace * 2);
-    final fifthSize = size * 0.38;
-    final groupLeft = size * 0.01;
-    final groupTop = size * 0.01;
+    final groupWidth = step + pieceSize;
+    final fifthSize = groupSize * 0.40;
+    final fullHeight = groupWidth + fifthSize + connectorSpace;
+    final groupLeft = ((width - groupWidth) / 2).clamp(0.0, width).toDouble();
+    final groupTop = ((height - fullHeight) / 2)
+        .clamp(0.0, height - groupWidth)
+        .toDouble();
+    final fifthLeft = (groupLeft + groupWidth - (fifthSize * 0.95))
+        .clamp(0.0, width - fifthSize)
+        .toDouble();
+    final fifthTop = groupTop + groupWidth + (connectorSpace * 0.40);
 
-    return SizedBox.square(
-      dimension: size,
+    return SizedBox(
+      width: width,
+      height: height,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
           Positioned(
-            left: groupLeft,
-            top: groupTop,
+            left: groupLeft + step,
+            top: groupTop + step,
             child: PuzzlePieceButton(
-              icon: '📊',
-              label: 'Võrdle\nkorvi',
-              color: const Color(0xFFE8114B),
+              icon: '🕐',
+              label: 'Korvi ajalugu',
+              color: const Color(0xFF5CB85C),
               edges: const PuzzlePieceEdges(
                 top: PuzzleConnector.socket,
-                right: PuzzleConnector.knob,
+                right: PuzzleConnector.socket,
                 bottom: PuzzleConnector.socket,
                 left: PuzzleConnector.socket,
               ),
               size: pieceSize,
               connectorSpace: connectorSpace,
-              onPressed: onCompare,
+              onPressed: onHistory,
             ),
           ),
           Positioned(
@@ -187,7 +198,7 @@ class PuzzleGrid extends StatelessWidget {
             top: groupTop,
             child: PuzzlePieceButton(
               icon: '🛒',
-              label: 'Sirvi\ntooteid',
+              label: 'Sirvi tooteid',
               color: const Color(0xFF2196F3),
               edges: const PuzzlePieceEdges(
                 top: PuzzleConnector.socket,
@@ -202,10 +213,28 @@ class PuzzleGrid extends StatelessWidget {
           ),
           Positioned(
             left: groupLeft,
+            top: groupTop,
+            child: PuzzlePieceButton(
+              icon: '📊',
+              label: 'Võrdle korvi',
+              color: const Color(0xFFE8114B),
+              edges: const PuzzlePieceEdges(
+                top: PuzzleConnector.socket,
+                right: PuzzleConnector.knob,
+                bottom: PuzzleConnector.socket,
+                left: PuzzleConnector.socket,
+              ),
+              size: pieceSize,
+              connectorSpace: connectorSpace,
+              onPressed: onCompare,
+            ),
+          ),
+          Positioned(
+            left: groupLeft,
             top: groupTop + step,
             child: PuzzlePieceButton(
               icon: '🧺',
-              label: 'Ostukorv${itemCount > 0 ? "\n($itemCount)" : ""}',
+              label: 'Ostukorv${itemCount > 0 ? " ($itemCount)" : ""}',
               color: const Color(0xFFFFB703),
               edges: const PuzzlePieceEdges(
                 top: PuzzleConnector.knob,
@@ -219,28 +248,10 @@ class PuzzleGrid extends StatelessWidget {
             ),
           ),
           Positioned(
-            left: groupLeft + step,
-            top: groupTop + step,
-            child: PuzzlePieceButton(
-              icon: '🕐',
-              label: 'Korvi\najalugu',
-              color: const Color(0xFF5CB85C),
-              edges: const PuzzlePieceEdges(
-                top: PuzzleConnector.socket,
-                right: PuzzleConnector.socket,
-                bottom: PuzzleConnector.socket,
-                left: PuzzleConnector.socket,
-              ),
-              size: pieceSize,
-              connectorSpace: connectorSpace,
-              onPressed: onHistory,
-            ),
-          ),
-          Positioned(
-            left: size * 0.60,
-            top: size * 0.61,
+            left: fifthLeft,
+            top: fifthTop,
             child: Transform.rotate(
-              angle: -0.20,
+              angle: -0.16,
               child: PuzzlePieceButton(
                 icon: '🍲',
                 label: 'Retseptid',
@@ -301,10 +312,11 @@ class PuzzlePieceButton extends StatelessWidget {
       edges: edges,
       connectorSpace: connectorSpace,
     );
+    final filledSize = size - (connectorSpace * 2);
     final labelStyle = TextStyle(
       color: foregroundColor,
       fontWeight: FontWeight.w800,
-      fontSize: (size * 0.075).clamp(13.0, 18.0).toDouble(),
+      fontSize: (size * 0.085).clamp(14.0, 18.0).toDouble(),
       height: 1.12,
       shadows: [
         Shadow(
@@ -334,28 +346,38 @@ class PuzzlePieceButton extends StatelessWidget {
                   onTap: onPressed,
                   splashColor: _alphaColor(foregroundColor, 0.22),
                   highlightColor: _alphaColor(foregroundColor, 0.10),
-                  child: Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(size * 0.17),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            icon,
-                            style: TextStyle(
-                              fontSize:
-                                  (size * 0.15).clamp(24.0, 36.0).toDouble(),
-                            ),
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        left: connectorSpace + (filledSize * 0.08),
+                        top: connectorSpace + (filledSize * 0.34),
+                        width: filledSize * 0.84,
+                        height: filledSize * 0.32,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                icon,
+                                style: TextStyle(
+                                  fontSize: (size * 0.13)
+                                      .clamp(22.0, 32.0)
+                                      .toDouble(),
+                                ),
+                              ),
+                              SizedBox(width: size * 0.035),
+                              Text(
+                                label,
+                                maxLines: 1,
+                                overflow: TextOverflow.visible,
+                                style: labelStyle,
+                              ),
+                            ],
                           ),
-                          SizedBox(height: size * 0.02),
-                          Text(
-                            label,
-                            textAlign: TextAlign.center,
-                            style: labelStyle,
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ),
