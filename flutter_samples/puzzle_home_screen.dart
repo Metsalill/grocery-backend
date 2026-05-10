@@ -209,13 +209,14 @@ class PuzzlePieceButton extends StatelessWidget {
               clipper: clipper,
               color: color,
               elevation: 8,
-              shadowColor: Colors.black.withValues(alpha: 0.28),
+              shadowColor: _alphaColor(Colors.black, 0.28),
+              clipBehavior: Clip.antiAlias,
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
                   onTap: onPressed,
-                  splashColor: foregroundColor.withValues(alpha: 0.22),
-                  highlightColor: foregroundColor.withValues(alpha: 0.10),
+                  splashColor: _alphaColor(foregroundColor, 0.22),
+                  highlightColor: _alphaColor(foregroundColor, 0.10),
                   child: Center(
                     child: Text(
                       label,
@@ -257,6 +258,19 @@ class PuzzlePieceEdges {
   final PuzzleConnector right;
   final PuzzleConnector bottom;
   final PuzzleConnector left;
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is PuzzlePieceEdges &&
+            top == other.top &&
+            right == other.right &&
+            bottom == other.bottom &&
+            left == other.left;
+  }
+
+  @override
+  int get hashCode => Object.hash(top, right, bottom, left);
 }
 
 enum PuzzleConnector {
@@ -473,4 +487,8 @@ class PuzzlePieceBorderPainter extends CustomPainter {
   bool shouldRepaint(PuzzlePieceBorderPainter oldDelegate) {
     return clipper != oldDelegate.clipper || color != oldDelegate.color;
   }
+}
+
+Color _alphaColor(Color color, double opacity) {
+  return color.withAlpha((opacity.clamp(0, 1) * 255).round());
 }
