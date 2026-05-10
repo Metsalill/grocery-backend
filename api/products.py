@@ -37,7 +37,6 @@ async def _get_pool(request: Request):
 
 
 async def _get_user_id_from_token(conn, authorization: Optional[str]) -> Optional[int]:
-    """Vabatahtlik auth — tagastab user_id või None kui token puudub/kehtetu."""
     if not authorization or not authorization.startswith("Bearer "):
         return None
     try:
@@ -75,6 +74,29 @@ SOURCE_PRIORITY_SQL = """
     END
 """
 
+# image_url fallback: kui esindajal pole pilti, võta grupi teiselt liikmelt
+IMAGE_FALLBACK_SQL = """
+    COALESCE(
+        NULLIF(p.image_url, ''),
+        (
+            SELECT p2.image_url
+            FROM product_group_members pgm2
+            JOIN products p2 ON p2.id = pgm2.product_id
+            WHERE pgm2.group_id = pgm.group_id
+              AND p2.image_url IS NOT NULL
+              AND p2.image_url != ''
+            ORDER BY
+                CASE
+                    WHEN p2.source_url ILIKE '%prisma%' THEN 1
+                    WHEN p2.source_url ILIKE '%selver%' THEN 2
+                    WHEN p2.source_url ILIKE '%rimi%'   THEN 3
+                    ELSE 4
+                END
+            LIMIT 1
+        )
+    ) AS image_url
+"""
+
 
 def _build_dedup_sql(where_sql: str) -> str:
     price_filter = "EXISTS (SELECT 1 FROM prices pr WHERE pr.product_id = p.id)"
@@ -87,9 +109,12 @@ def _build_dedup_sql(where_sql: str) -> str:
     return f"""
         WITH base AS (
             SELECT DISTINCT ON (COALESCE(pgm.group_id::text, 'u_' || p.id::text))
-                p.*,
+                p.id, p.name, p.brand, p.manufacturer, p.size_text, p.amount,
+                p.food_group, p.sub_code, p.source_url, p.ean,
+                p.image_url AS original_image_url,
                 pgm.group_id,
-                COALESCE(pgm.group_id::text, 'u_' || p.id::text) AS dedup_key
+                COALESCE(pgm.group_id::text, 'u_' || p.id::text) AS dedup_key,
+                {IMAGE_FALLBACK_SQL}
             FROM products p
             LEFT JOIN product_group_members pgm ON pgm.product_id = p.id
             {combined_where}
@@ -117,7 +142,6 @@ def _build_dedup_sql(where_sql: str) -> str:
 
 
 def _build_personalized_sql(where_sql: str, user_id: int) -> str:
-    """Sama mis _build_dedup_sql aga sorteerib kasutaja valitud tooted ette."""
     price_filter = "EXISTS (SELECT 1 FROM prices pr WHERE pr.product_id = p.id)"
 
     if where_sql.strip().upper().startswith("WHERE"):
@@ -128,10 +152,13 @@ def _build_personalized_sql(where_sql: str, user_id: int) -> str:
     return f"""
         WITH base AS (
             SELECT DISTINCT ON (COALESCE(pgm.group_id::text, 'u_' || p.id::text))
-                p.*,
+                p.id, p.name, p.brand, p.manufacturer, p.size_text, p.amount,
+                p.food_group, p.sub_code, p.source_url, p.ean,
+                p.image_url AS original_image_url,
                 pgm.group_id,
                 COALESCE(pgm.group_id::text, 'u_' || p.id::text) AS dedup_key,
-                COALESCE(ups.count, 0) AS selection_count
+                COALESCE(ups.count, 0) AS selection_count,
+                {IMAGE_FALLBACK_SQL}
             FROM products p
             LEFT JOIN product_group_members pgm ON pgm.product_id = p.id
             LEFT JOIN user_product_selections ups
@@ -196,12 +223,10 @@ async def list_products(
 
     try:
         async with pool.acquire() as conn:
-            # Vabatahtlik auth personaliseeritud järjestuse jaoks
             user_id = await _get_user_id_from_token(conn, authorization)
 
             if user_id:
                 dedup_sql = _build_personalized_sql(where_sql, user_id)
-                # Personaliseeritud: valitud tooted ette, siis tähestiku järgi
                 order_clause = "ORDER BY selection_count DESC, name"
             else:
                 dedup_sql = _build_dedup_sql(where_sql)
