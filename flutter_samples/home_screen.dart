@@ -149,41 +149,36 @@ class PuzzleGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const pieceWidth = SvgPuzzlePieceClipper.sourceWidth;
-    const pieceHeight = SvgPuzzlePieceClipper.sourceHeight;
-    const stepX = SvgPuzzlePieceClipper.connectionStepX;
-    const stepY = SvgPuzzlePieceClipper.connectionStepY;
-
-    const groupSourceWidth = pieceWidth + stepX;
-    const groupSourceHeight = pieceHeight + stepY;
+    const pieceSourceSize = 300.0;
+    const connectorSourceSize = 42.0;
+    const stepSource = pieceSourceSize - (connectorSourceSize * 2);
+    const groupSourceSize = pieceSourceSize + stepSource;
     const fifthScaleFactor = 0.66;
     const gapSource = 26.0;
     const fullSourceHeight =
-        groupSourceHeight + gapSource + (pieceHeight * fifthScaleFactor);
+        groupSourceSize + gapSource + (pieceSourceSize * fifthScaleFactor);
 
-    final widthScale = (width * 0.98) / groupSourceWidth;
+    final widthScale = (width * 0.98) / groupSourceSize;
     final heightScale = (height * 0.96) / fullSourceHeight;
     final scale = widthScale < heightScale ? widthScale : heightScale;
 
-    final pieceW = pieceWidth * scale;
-    final pieceH = pieceHeight * scale;
-    final stepW = stepX * scale;
-    final stepH = stepY * scale;
-    final groupWidth = groupSourceWidth * scale;
-    final groupHeight = groupSourceHeight * scale;
-    final fifthW = pieceW * fifthScaleFactor;
-    final fifthH = pieceH * fifthScaleFactor;
+    final pieceSize = pieceSourceSize * scale;
+    final connectorSize = connectorSourceSize * scale;
+    final step = stepSource * scale;
+    final groupSize = groupSourceSize * scale;
+    final fifthSize = pieceSize * fifthScaleFactor;
+    final fifthConnectorSize = connectorSize * fifthScaleFactor;
     final fifthGap = gapSource * scale;
 
-    final groupLeft = ((width - groupWidth) / 2).clamp(0.0, width).toDouble();
-    final groupTop = ((height - (groupHeight + fifthGap + fifthH)) / 2)
-        .clamp(0.0, height - groupHeight)
+    final groupLeft = ((width - groupSize) / 2).clamp(0.0, width).toDouble();
+    final groupTop = ((height - (groupSize + fifthGap + fifthSize)) / 2)
+        .clamp(0.0, height - groupSize)
         .toDouble();
-    final fifthLeft = (groupLeft + ((groupWidth - fifthW) / 2))
-        .clamp(0.0, width - fifthW)
+    final fifthLeft = (groupLeft + ((groupSize - fifthSize) / 2))
+        .clamp(0.0, width - fifthSize)
         .toDouble();
-    final fifthTop = (groupTop + groupHeight + fifthGap)
-        .clamp(0.0, height - fifthH)
+    final fifthTop = (groupTop + groupSize + fifthGap)
+        .clamp(0.0, height - fifthSize)
         .toDouble();
 
     return SizedBox(
@@ -193,26 +188,38 @@ class PuzzleGrid extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           Positioned(
-            left: groupLeft + stepW,
+            left: groupLeft + step,
             top: groupTop,
             child: PuzzlePieceButton(
               icon: Icons.shopping_cart_rounded,
               label: 'Sirvi\ntooteid',
               color: const Color(0xFF1476C9),
-              width: pieceW,
-              height: pieceH,
+              edges: const PuzzlePieceEdges(
+                top: PuzzleConnector.socket,
+                right: PuzzleConnector.knob,
+                bottom: PuzzleConnector.knob,
+                left: PuzzleConnector.socket,
+              ),
+              size: pieceSize,
+              connectorSize: connectorSize,
               onPressed: onProducts,
             ),
           ),
           Positioned(
-            left: groupLeft + stepW,
-            top: groupTop + stepH,
+            left: groupLeft + step,
+            top: groupTop + step,
             child: PuzzlePieceButton(
               icon: Icons.history_rounded,
               label: 'Korvi\najalugu',
               color: const Color(0xFF55C600),
-              width: pieceW,
-              height: pieceH,
+              edges: const PuzzlePieceEdges(
+                top: PuzzleConnector.socket,
+                right: PuzzleConnector.socket,
+                bottom: PuzzleConnector.knob,
+                left: PuzzleConnector.socket,
+              ),
+              size: pieceSize,
+              connectorSize: connectorSize,
               onPressed: onHistory,
             ),
           ),
@@ -223,20 +230,34 @@ class PuzzleGrid extends StatelessWidget {
               icon: Icons.insert_chart_rounded,
               label: 'Võrdle\nkorvi',
               color: const Color(0xFFE91E63),
-              width: pieceW,
-              height: pieceH,
+              edges: const PuzzlePieceEdges(
+                top: PuzzleConnector.knob,
+                right: PuzzleConnector.knob,
+                bottom: PuzzleConnector.socket,
+                left: PuzzleConnector.socket,
+              ),
+              size: pieceSize,
+              connectorSize: connectorSize,
               onPressed: onCompare,
             ),
           ),
           Positioned(
             left: groupLeft,
-            top: groupTop + stepH,
+            top: groupTop + step,
             child: PuzzlePieceButton(
               icon: Icons.shopping_basket_rounded,
               label: 'Ostukorv${itemCount > 0 ? "\n($itemCount)" : ""}',
               color: const Color(0xFFFFD600),
-              width: pieceW,
-              height: pieceH,
+              foregroundColor: const Color(0xFF1A1A1A),
+              borderColor: const Color(0x55FFFFFF),
+              edges: const PuzzlePieceEdges(
+                top: PuzzleConnector.knob,
+                right: PuzzleConnector.knob,
+                bottom: PuzzleConnector.socket,
+                left: PuzzleConnector.knob,
+              ),
+              size: pieceSize,
+              connectorSize: connectorSize,
               onPressed: onBasket,
             ),
           ),
@@ -251,8 +272,14 @@ class PuzzleGrid extends StatelessWidget {
                 color: Colors.white,
                 foregroundColor: const Color(0xFF1A1A1A),
                 borderColor: const Color(0x66808080),
-                width: fifthW,
-                height: fifthH,
+                edges: const PuzzlePieceEdges(
+                  top: PuzzleConnector.knob,
+                  right: PuzzleConnector.knob,
+                  bottom: PuzzleConnector.socket,
+                  left: PuzzleConnector.socket,
+                ),
+                size: fifthSize,
+                connectorSize: fifthConnectorSize,
                 onPressed: () {
                   ScaffoldMessenger.of(context)
                     ..hideCurrentSnackBar()
@@ -275,8 +302,9 @@ class PuzzlePieceButton extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.color,
-    required this.width,
-    required this.height,
+    required this.edges,
+    required this.size,
+    required this.connectorSize,
     required this.onPressed,
     this.foregroundColor = Colors.white,
     this.borderColor = const Color(0x55FFFFFF),
@@ -287,23 +315,28 @@ class PuzzlePieceButton extends StatelessWidget {
   final Color color;
   final Color foregroundColor;
   final Color borderColor;
-  final double width;
-  final double height;
+  final PuzzlePieceEdges edges;
+  final double size;
+  final double connectorSize;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    const clipper = SvgPuzzlePieceClipper();
+    final clipper = RoundedPuzzlePieceClipper(
+      edges: edges,
+      connectorSize: connectorSize,
+    );
     final labelStyle = TextStyle(
       color: foregroundColor,
-      fontWeight: FontWeight.w800,
-      fontSize: (height * 0.145).clamp(16.0, 23.0).toDouble(),
-      height: 1.12,
+      fontWeight: FontWeight.w900,
+      fontSize: (size * 0.068).clamp(16.0, 24.0).toDouble(),
+      height: 1.04,
+      letterSpacing: -0.45,
       shadows: [
         Shadow(
-          color: _alphaColor(Colors.black, color == Colors.white ? 0.0 : 0.35),
+          color: _alphaColor(Colors.black, color == Colors.white ? 0.0 : 0.28),
           blurRadius: 3,
-          offset: const Offset(0, 2),
+          offset: const Offset(0, 1.4),
         ),
       ],
     );
@@ -311,9 +344,8 @@ class PuzzlePieceButton extends StatelessWidget {
     return Semantics(
       button: true,
       label: label.replaceAll('\n', ' '),
-      child: SizedBox(
-        width: width,
-        height: height,
+      child: SizedBox.square(
+        dimension: size,
         child: Stack(
           children: [
             PhysicalShape(
@@ -343,10 +375,10 @@ class PuzzlePieceButton extends StatelessWidget {
                     child: Stack(
                       children: [
                         Positioned(
-                          left: width * 0.20,
-                          top: height * 0.30,
-                          width: width * 0.52,
-                          height: height * 0.43,
+                          left: size * 0.22,
+                          top: size * 0.28,
+                          width: size * 0.50,
+                          height: size * 0.46,
                           child: FittedBox(
                             fit: BoxFit.scaleDown,
                             child: Column(
@@ -355,11 +387,11 @@ class PuzzlePieceButton extends StatelessWidget {
                                 Icon(
                                   icon,
                                   color: foregroundColor,
-                                  size: (height * 0.23)
-                                      .clamp(28.0, 44.0)
+                                  size: (size * 0.16)
+                                      .clamp(30.0, 46.0)
                                       .toDouble(),
                                 ),
-                                SizedBox(height: height * 0.012),
+                                SizedBox(height: size * 0.012),
                                 Text(
                                   label,
                                   maxLines: 2,
@@ -394,198 +426,217 @@ class PuzzlePieceButton extends StatelessWidget {
   }
 }
 
-class SvgPuzzlePieceClipper extends CustomClipper<Path> {
-  const SvgPuzzlePieceClipper();
+class PuzzlePieceEdges {
+  const PuzzlePieceEdges({
+    required this.top,
+    required this.right,
+    required this.bottom,
+    required this.left,
+  });
 
-  static const double sourceWidth = 549;
-  static const double sourceHeight = 358;
-  static const double connectionStepX = 444;
-  static const double connectionStepY = 253;
+  final PuzzleConnector top;
+  final PuzzleConnector right;
+  final PuzzleConnector bottom;
+  final PuzzleConnector left;
 
   @override
-  Path getClip(Size size) {
-    final scaleX = size.width / sourceWidth;
-    final scaleY = size.height / sourceHeight;
-
-    final path = Path()
-      ..moveTo(0.0, 105.0)
-      ..lineTo(165.0, 105.0)
-      ..cubicTo(
-        180.0,
-        105.0,
-        188.0,
-        91.0,
-        179.0,
-        79.0,
-      )
-      ..cubicTo(
-        168.0,
-        63.0,
-        169.0,
-        43.0,
-        185.0,
-        27.0,
-      )
-      ..cubicTo(
-        205.0,
-        7.0,
-        243.0,
-        0.0,
-        277.0,
-        11.0,
-      )
-      ..cubicTo(
-        299.0,
-        18.0,
-        306.0,
-        33.0,
-        294.0,
-        52.0,
-      )
-      ..cubicTo(
-        282.0,
-        71.0,
-        287.0,
-        105.0,
-        313.0,
-        105.0,
-      )
-      ..lineTo(444.0, 105.0)
-      ..lineTo(444.0, 171.0)
-      ..cubicTo(
-        444.0,
-        187.0,
-        460.0,
-        195.0,
-        473.0,
-        185.0,
-      )
-      ..cubicTo(
-        495.0,
-        169.0,
-        522.0,
-        185.0,
-        535.0,
-        215.0,
-      )
-      ..cubicTo(
-        549.0,
-        249.0,
-        537.0,
-        288.0,
-        513.0,
-        297.0,
-      )
-      ..cubicTo(
-        497.0,
-        303.0,
-        484.0,
-        294.0,
-        474.0,
-        281.0,
-      )
-      ..cubicTo(
-        464.0,
-        268.0,
-        444.0,
-        274.0,
-        444.0,
-        291.0,
-      )
-      ..lineTo(444.0, 358.0)
-      ..lineTo(313.0, 358.0)
-      ..cubicTo(
-        287.0,
-        358.0,
-        282.0,
-        324.0,
-        294.0,
-        305.0,
-      )
-      ..cubicTo(
-        306.0,
-        286.0,
-        299.0,
-        271.0,
-        277.0,
-        264.0,
-      )
-      ..cubicTo(
-        243.0,
-        253.0,
-        205.0,
-        260.0,
-        185.0,
-        280.0,
-      )
-      ..cubicTo(
-        169.0,
-        296.0,
-        168.0,
-        316.0,
-        179.0,
-        332.0,
-      )
-      ..cubicTo(
-        188.0,
-        344.0,
-        180.0,
-        358.0,
-        165.0,
-        358.0,
-      )
-      ..lineTo(0.0, 358.0)
-      ..lineTo(0.0, 291.0)
-      ..cubicTo(
-        0.0,
-        274.0,
-        20.0,
-        268.0,
-        30.0,
-        281.0,
-      )
-      ..cubicTo(
-        40.0,
-        294.0,
-        53.0,
-        303.0,
-        69.0,
-        297.0,
-      )
-      ..cubicTo(
-        93.0,
-        288.0,
-        105.0,
-        249.0,
-        91.0,
-        215.0,
-      )
-      ..cubicTo(
-        78.0,
-        185.0,
-        51.0,
-        169.0,
-        29.0,
-        185.0,
-      )
-      ..cubicTo(
-        16.0,
-        195.0,
-        0.0,
-        187.0,
-        0.0,
-        171.0,
-      )
-      ..lineTo(0.0, 105.0)
-      ..close();
-
-    return path.transform(
-      Matrix4.diagonal3Values(scaleX, scaleY, 1).storage,
-    );
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        other is PuzzlePieceEdges &&
+            top == other.top &&
+            right == other.right &&
+            bottom == other.bottom &&
+            left == other.left;
   }
 
   @override
-  bool shouldReclip(SvgPuzzlePieceClipper oldClipper) => false;
+  int get hashCode => Object.hash(top, right, bottom, left);
+}
+
+enum PuzzleConnector {
+  flat,
+  knob,
+  socket,
+}
+
+class RoundedPuzzlePieceClipper extends CustomClipper<Path> {
+  const RoundedPuzzlePieceClipper({
+    required this.edges,
+    required this.connectorSize,
+  });
+
+  final PuzzlePieceEdges edges;
+  final double connectorSize;
+
+  @override
+  Path getClip(Size size) {
+    final rect = Rect.fromLTWH(
+      connectorSize,
+      connectorSize,
+      size.width - (connectorSize * 2),
+      size.height - (connectorSize * 2),
+    );
+    final depth = connectorSize * 0.92;
+
+    final path = Path()..moveTo(rect.left, rect.top);
+
+    _drawHorizontalEdge(
+      path,
+      start: Offset(rect.left, rect.top),
+      end: Offset(rect.right, rect.top),
+      connector: edges.top,
+      depth: depth,
+      outwardSign: -1,
+    );
+    _drawVerticalEdge(
+      path,
+      start: Offset(rect.right, rect.top),
+      end: Offset(rect.right, rect.bottom),
+      connector: edges.right,
+      depth: depth,
+      outwardSign: 1,
+    );
+    _drawHorizontalEdge(
+      path,
+      start: Offset(rect.right, rect.bottom),
+      end: Offset(rect.left, rect.bottom),
+      connector: edges.bottom,
+      depth: depth,
+      outwardSign: 1,
+    );
+    _drawVerticalEdge(
+      path,
+      start: Offset(rect.left, rect.bottom),
+      end: Offset(rect.left, rect.top),
+      connector: edges.left,
+      depth: depth,
+      outwardSign: -1,
+    );
+
+    return path..close();
+  }
+
+  void _drawHorizontalEdge(
+    Path path, {
+    required Offset start,
+    required Offset end,
+    required PuzzleConnector connector,
+    required double depth,
+    required double outwardSign,
+  }) {
+    if (connector == PuzzleConnector.flat) {
+      path.lineTo(end.dx, end.dy);
+      return;
+    }
+
+    final direction = end.dx > start.dx ? 1.0 : -1.0;
+    final length = (end.dx - start.dx).abs();
+    final connectorStart = start.dx + (direction * length * 0.38);
+    final connectorEnd = start.dx + (direction * length * 0.62);
+    final center = start.dx + (direction * length * 0.50);
+    final side = connector == PuzzleConnector.knob ? outwardSign : -outwardSign;
+    final y = start.dy;
+
+    path
+      ..lineTo(connectorStart, y)
+      ..cubicTo(
+        connectorStart + (direction * length * 0.03),
+        y,
+        center - (direction * length * 0.11),
+        y + (side * depth * 0.08),
+        center - (direction * length * 0.11),
+        y + (side * depth * 0.46),
+      )
+      ..cubicTo(
+        center - (direction * length * 0.11),
+        y + (side * depth * 0.98),
+        center - (direction * length * 0.04),
+        y + (side * depth * 1.08),
+        center,
+        y + (side * depth * 1.08),
+      )
+      ..cubicTo(
+        center + (direction * length * 0.04),
+        y + (side * depth * 1.08),
+        center + (direction * length * 0.11),
+        y + (side * depth * 0.98),
+        center + (direction * length * 0.11),
+        y + (side * depth * 0.46),
+      )
+      ..cubicTo(
+        center + (direction * length * 0.11),
+        y + (side * depth * 0.08),
+        connectorEnd - (direction * length * 0.03),
+        y,
+        connectorEnd,
+        y,
+      )
+      ..lineTo(end.dx, end.dy);
+  }
+
+  void _drawVerticalEdge(
+    Path path, {
+    required Offset start,
+    required Offset end,
+    required PuzzleConnector connector,
+    required double depth,
+    required double outwardSign,
+  }) {
+    if (connector == PuzzleConnector.flat) {
+      path.lineTo(end.dx, end.dy);
+      return;
+    }
+
+    final direction = end.dy > start.dy ? 1.0 : -1.0;
+    final length = (end.dy - start.dy).abs();
+    final connectorStart = start.dy + (direction * length * 0.38);
+    final connectorEnd = start.dy + (direction * length * 0.62);
+    final center = start.dy + (direction * length * 0.50);
+    final side = connector == PuzzleConnector.knob ? outwardSign : -outwardSign;
+    final x = start.dx;
+
+    path
+      ..lineTo(x, connectorStart)
+      ..cubicTo(
+        x,
+        connectorStart + (direction * length * 0.03),
+        x + (side * depth * 0.08),
+        center - (direction * length * 0.11),
+        x + (side * depth * 0.46),
+        center - (direction * length * 0.11),
+      )
+      ..cubicTo(
+        x + (side * depth * 0.98),
+        center - (direction * length * 0.11),
+        x + (side * depth * 1.08),
+        center - (direction * length * 0.04),
+        x + (side * depth * 1.08),
+        center,
+      )
+      ..cubicTo(
+        x + (side * depth * 1.08),
+        center + (direction * length * 0.04),
+        x + (side * depth * 0.98),
+        center + (direction * length * 0.11),
+        x + (side * depth * 0.46),
+        center + (direction * length * 0.11),
+      )
+      ..cubicTo(
+        x + (side * depth * 0.08),
+        center + (direction * length * 0.11),
+        x,
+        connectorEnd - (direction * length * 0.03),
+        x,
+        connectorEnd,
+      )
+      ..lineTo(end.dx, end.dy);
+  }
+
+  @override
+  bool shouldReclip(RoundedPuzzlePieceClipper oldClipper) {
+    return edges != oldClipper.edges ||
+        connectorSize != oldClipper.connectorSize;
+  }
 }
 
 class PuzzlePieceBorderPainter extends CustomPainter {
@@ -594,7 +645,7 @@ class PuzzlePieceBorderPainter extends CustomPainter {
     required this.color,
   });
 
-  final SvgPuzzlePieceClipper clipper;
+  final RoundedPuzzlePieceClipper clipper;
   final Color color;
 
   @override
