@@ -8,6 +8,8 @@ JSON blob with an Apollo GraphQL cache. Products are stored as:
   apolloState['Product:{"id":"EAN","storeId":"..."}'] = {ean, name, price, ...}
 
 Price comes from ProductStoreEdge entries linked to each product.
+FIX: kg-toodetel (isApproximatePrice=true, comparisonUnit=KG) kasuta
+     comparisonPrice (€/kg) mitte price (tükihind).
 
 Run: python prisma_food_scrape_to_db.py [--store-id 14] [--delay 0.5] [--shard N] [--shards M]
 """
@@ -250,19 +252,8 @@ def parse_apollo_products(apollo_state: dict) -> list[dict]:
     """
     Extract products from Apollo GraphQL cache.
 
-    Structure:
-      'Product:{"id":"4740113093549","storeId":"542860184"}': {
-          ean: '4740113093549',
-          name: 'Farmi Kodujuust...',
-          slug: 'farmi-kodujuust-...',
-          price: 2.12,   (may be here or in ProductStoreEdge)
-          ...
-      }
-      'ProductStoreEdge:{"sorId":"941944000"}': {
-          price: 2.12,
-          product: {'__ref': 'Product:{"id":"..."}'},
-          ...
-      }
+    FIX: kg-toodetel (isApproximatePrice=true, comparisonUnit=KG) kasuta
+    comparisonPrice (€/kg) mitte price (tükihind).
     """
     # First collect prices from ProductStoreEdge
     prices_by_product_ref: dict[str, float] = {}
@@ -284,7 +275,6 @@ def parse_apollo_products(apollo_state: dict) -> list[dict]:
         if isinstance(product_ref, dict):
             ref_key = product_ref.get("__ref", "")
             if ref_key:
-                # Keep lowest price if multiple edges per product
                 if ref_key not in prices_by_product_ref or price_f < prices_by_product_ref[ref_key]:
                     prices_by_product_ref[ref_key] = price_f
 
@@ -321,15 +311,43 @@ def parse_apollo_products(apollo_state: dict) -> list[dict]:
         if not price or price <= 0:
             continue
 
+        # FIX: kg-toodetel kasuta comparisonPrice (€/kg) mitte tükihinda
+        is_approx = val.get("approxPrice") or val.get("isApproximatePrice") or False
+        pricing = val.get("pricing", {})
+        if isinstance(pricing, dict):
+            is_approx = is_approx or pricing.get("isApproximatePrice") or False
+        comparison_price = val.get("comparisonPrice")
+        comparison_unit = str(val.get("comparisonUnit") or "").upper()
+        if not comparison_price and isinstance(pricing, dict):
+            comparison_price = pricing.get("comparisonPrice")
+            comparison_unit = str(pricing.get("comparisonUnit") or "").upper()
+
+        if (
+            is_approx
+            and comparison_unit == "KG"
+            and comparison_price is not None
+        ):
+            try:
+                cp = float(comparison_price)
+                if cp > 0:
+                    price = cp
+            except Exception:
+                pass
+
         slug = str(val.get("slug") or val.get("urlSlug") or "").strip()
         source_url = f"{BASE}/toode/{slug}/{ean}" if slug else f"{BASE}/toode/{ean}"
         ext_id = ean
+
+        # size_text: kg-toodetel märgi 'kg'
+        size_text = parse_size_from_name(name)
+        if is_approx and comparison_unit == "KG" and not size_text:
+            size_text = "kg"
 
         products.append({
             "ext_id": ext_id,
             "ean": ean,
             "name": name,
-            "size_text": parse_size_from_name(name),
+            "size_text": size_text,
             "price": price,
             "source_url": source_url,
         })
@@ -341,7 +359,6 @@ def find_total_pages(html: str) -> int:
     """Find total pages from Prisma pagination links in SSR HTML."""
     soup = BeautifulSoup(html, "lxml")
     max_page = 1
-    # Prisma uses data-test-id="pagination-link" with href="/tooted/X?page=N"
     for a in soup.find_all("a", attrs={"data-test-id": "pagination-link"}):
         href = a.get("href", "")
         m = re.search(r"[?&]page=(\d+)", href)
@@ -349,7 +366,6 @@ def find_total_pages(html: str) -> int:
             max_page = max(max_page, int(m.group(1)))
     if max_page > 1:
         return max_page
-    # Fallback: look for any page number links
     for a in soup.find_all("a", href=re.compile(r"[?&]page=\d+")):
         m = re.search(r"[?&]page=(\d+)", a.get("href", ""))
         if m:
@@ -363,7 +379,6 @@ def scrape_category(cat_path: str, delay: float = 0.5) -> list[dict]:
 
     base_url = BASE + cat_path
 
-    # Fetch first page HTML to get build ID and total pages
     html = fetch_html(base_url)
     if not html:
         print(f"[skip] {cat_path} — failed to fetch", file=sys.stderr)
@@ -378,14 +393,10 @@ def scrape_category(cat_path: str, delay: float = 0.5) -> list[dict]:
     total_pages = find_total_pages(html)
     print(f"[cat] {cat_path} — {total_pages} pages (build: {build_id})", file=sys.stderr)
 
-    # Cat path for Next.js JSON API: /tooted/juustud -> et/tooted/juustud
-    # Next.js data URL: /_next/data/{buildId}/et{cat_path}.json
     def get_page_data(page_num: int) -> Optional[dict]:
         if page_num == 1:
-            # Use already fetched HTML
             return next_data
         if build_id:
-            # Use Next.js JSON API for subsequent pages
             json_url = f"{BASE}/_next/data/{build_id}/et{cat_path}.json?page={page_num}"
             resp = fetch_html(json_url)
             if resp:
@@ -393,7 +404,6 @@ def scrape_category(cat_path: str, delay: float = 0.5) -> list[dict]:
                     return json.loads(resp)
                 except Exception:
                     pass
-        # Fallback: fetch HTML page
         page_html = fetch_html(f"{base_url}?page={page_num}")
         if page_html:
             return extract_next_data(page_html)
@@ -412,7 +422,6 @@ def scrape_category(cat_path: str, delay: float = 0.5) -> list[dict]:
             .get("pageProps", {})
             .get("apolloState", {})
         )
-        # Next.js JSON API wraps in pageProps differently
         if not apollo_state:
             apollo_state = page_data.get("pageProps", {}).get("apolloState", {})
 
@@ -442,10 +451,6 @@ def scrape_category(cat_path: str, delay: float = 0.5) -> list[dict]:
 
 
 def upsert_batch(conn, rows: list[dict], store_id: int) -> tuple[int, int]:
-    """
-    Upsert kõik tooted korraga ühe transactioniga — palju kiirem kui
-    ükshaaval, sest Railway latency ~80ms × N rida = liiga aeglane.
-    """
     if not rows:
         return 0, 0
 
@@ -499,7 +504,6 @@ def main():
         file=sys.stderr
     )
 
-    # autocommit=False — kasutame eksplitsiitseid transactioneid per kategooria
     conn = psycopg2.connect(get_db_url())
     conn.autocommit = False
 
