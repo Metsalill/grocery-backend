@@ -165,7 +165,9 @@ class PuzzleGrid extends StatelessWidget {
     final groupTop = ((height - fullHeight) / 2)
         .clamp(0.0, height - groupWidth)
         .toDouble();
-    final fifthLeft = (groupLeft + ((groupWidth - fifthSize) / 2) + (connectorSpace * 0.35))
+    final fifthLeft = (groupLeft +
+            ((groupWidth - fifthSize) / 2) +
+            (connectorSpace * 0.35))
         .clamp(0.0, width - fifthSize)
         .toDouble();
     final fifthTop = (groupTop + groupWidth + fifthGap)
@@ -182,7 +184,7 @@ class PuzzleGrid extends StatelessWidget {
             left: groupLeft + step,
             top: groupTop + step,
             child: PuzzlePieceButton(
-              icon: '🕐',
+              icon: Icons.history_rounded,
               label: 'Korvi\najalugu',
               color: const Color(0xFF5CB85C),
               edges: const PuzzlePieceEdges(
@@ -200,7 +202,7 @@ class PuzzleGrid extends StatelessWidget {
             left: groupLeft + step,
             top: groupTop,
             child: PuzzlePieceButton(
-              icon: '🛒',
+              icon: Icons.shopping_cart_rounded,
               label: 'Sirvi\ntooteid',
               color: const Color(0xFF2196F3),
               edges: const PuzzlePieceEdges(
@@ -218,7 +220,7 @@ class PuzzleGrid extends StatelessWidget {
             left: groupLeft,
             top: groupTop,
             child: PuzzlePieceButton(
-              icon: '📊',
+              icon: Icons.insert_chart_rounded,
               label: 'Võrdle\nkorvi',
               color: const Color(0xFFE8114B),
               edges: const PuzzlePieceEdges(
@@ -236,7 +238,7 @@ class PuzzleGrid extends StatelessWidget {
             left: groupLeft,
             top: groupTop + step,
             child: PuzzlePieceButton(
-              icon: '🧺',
+              icon: Icons.shopping_basket_rounded,
               label: 'Ostukorv${itemCount > 0 ? "\n($itemCount)" : ""}',
               color: const Color(0xFFFFB703),
               edges: const PuzzlePieceEdges(
@@ -256,7 +258,7 @@ class PuzzleGrid extends StatelessWidget {
             child: Transform.rotate(
               angle: -0.10,
               child: PuzzlePieceButton(
-                icon: '🍲',
+                icon: Icons.restaurant_menu_rounded,
                 label: 'Retseptid',
                 color: Colors.white,
                 foregroundColor: const Color(0xFF1A1A1A),
@@ -299,7 +301,7 @@ class PuzzlePieceButton extends StatelessWidget {
     this.borderColor = const Color(0x55FFFFFF),
   });
 
-  final String icon;
+  final IconData icon;
   final String label;
   final Color color;
   final Color foregroundColor;
@@ -383,13 +385,12 @@ class PuzzlePieceButton extends StatelessWidget {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
+                                Icon(
                                   icon,
-                                  style: TextStyle(
-                                    fontSize: (size * 0.16)
-                                        .clamp(26.0, 38.0)
-                                        .toDouble(),
-                                  ),
+                                  color: foregroundColor,
+                                  size: (size * 0.17)
+                                      .clamp(28.0, 40.0)
+                                      .toDouble(),
                                 ),
                                 SizedBox(height: size * 0.018),
                                 Text(
@@ -719,11 +720,16 @@ class PlayfulPiecePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final stripePaint = Paint()
-      ..color = _alphaColor(isLightPiece ? Colors.black : color, isLightPiece ? 0.05 : 0.13)
+      ..color = _alphaColor(
+        isLightPiece ? Colors.black : color,
+        isLightPiece ? 0.05 : 0.13,
+      )
       ..style = PaintingStyle.stroke
       ..strokeWidth = size.width * 0.018;
 
-    for (double x = -size.width; x < size.width * 1.4; x += size.width * 0.22) {
+    for (double x = -size.width;
+        x < size.width * 1.4;
+        x += size.width * 0.22) {
       canvas.drawLine(
         Offset(x, size.height),
         Offset(x + size.width * 0.75, 0),
@@ -732,7 +738,10 @@ class PlayfulPiecePainter extends CustomPainter {
     }
 
     final dotPaint = Paint()
-      ..color = _alphaColor(isLightPiece ? Colors.black : color, isLightPiece ? 0.09 : 0.20);
+      ..color = _alphaColor(
+        isLightPiece ? Colors.black : color,
+        isLightPiece ? 0.09 : 0.20,
+      );
     final dotRadius = size.width * 0.018;
     final dots = [
       Offset(size.width * 0.24, size.height * 0.24),
