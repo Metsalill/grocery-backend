@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 """
 Rimi PDP image backfill — kraabib pildi URL-i otse Rimi toote lehelt.
-Kasutatakse toodete jaoks mille Cloudinary URL ei tööta (food market tooted).
 
 Run: python scripts/rimi_image_backfill_pdp.py [--limit 200] [--dry-run]
 """
@@ -22,7 +21,6 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 import psycopg2
-import psycopg2.extras
 import requests
 from bs4 import BeautifulSoup
 
@@ -40,7 +38,11 @@ SESSION.headers.update({
     "Referer": "https://www.rimi.ee/",
 })
 
-CLOUDINARY_BASE = "https://rimibaltic-res.cloudinary.com/image/upload/b_white,c_limit,f_auto,q_auto,w_350/d_ecommerce:backend-fallback.png/"
+CLOUDINARY_BASE = (
+    "https://rimibaltic-res.cloudinary.com/image/upload/"
+    "b_white,c_limit,f_auto,q_auto,w_350/"
+    "d_ecommerce:backend-fallback.png/"
+)
 
 
 def jitter(a=0.5, b=1.5):
@@ -48,33 +50,23 @@ def jitter(a=0.5, b=1.5):
 
 
 def extract_image_url_from_rimi_page(source_url: str) -> Optional[str]:
-    """Kraabi pildi URL Rimi toote lehelt."""
     try:
         r = SESSION.get(source_url, timeout=20)
         if r.status_code != 200:
             return None
         soup = BeautifulSoup(r.text, "html.parser")
-
-        # Otsi img src mis sisaldab rimibaltic-res.cloudinary.com
         for img in soup.find_all("img"):
             src = img.get("src", "") or img.get("data-src", "")
             if "rimibaltic-res.cloudinary.com" in src and "MAT_" in src:
-                # Võta MAT_ ID
                 m = re.search(r"MAT_(\d+)_(\w+)", src)
                 if m:
-                    mat_id = m.group(1)
-                    suffix = m.group(2)
-                    return f"{CLOUDINARY_BASE}MAT_{mat_id}_{suffix}"
-
-        # Fallback: otsi data-src atribuudist
-        for tag in soup.find_all(attrs={"data-src": re.compile(r"MAT_\d+")}):
+                    return f"{CLOUDINARY_BASE}MAT_{m.group(1)}_{m.group(2)}"
+        for tag in soup.find_all(attrs={"data-src": True}):
             src = tag.get("data-src", "")
-            m = re.search(r"MAT_(\d+)_(\w+)", src)
-            if m:
-                mat_id = m.group(1)
-                suffix = m.group(2)
-                return f"{CLOUDINARY_BASE}MAT_{mat_id}_{suffix}"
-
+            if "MAT_" in src:
+                m = re.search(r"MAT_(\d+)_(\w+)", src)
+                if m:
+                    return f"{CLOUDINARY_BASE}MAT_{m.group(1)}_{m.group(2)}"
     except Exception as e:
         print(f"  [warn] page fetch failed: {e}", file=sys.stderr)
     return None
@@ -108,13 +100,13 @@ def main():
     conn = psycopg2.connect(DATABASE_URL)
     conn.autocommit = False
 
-    with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+    with conn.cursor() as cur:
         cur.execute("""
             SELECT id, name, source_url
             FROM products
             WHERE chain = 'rimi'
               AND source_url IS NOT NULL
-              AND source_url ILIKE '%rimi.ee%'
+              AND source_url ILIKE '%%rimi.ee%%'
               AND (image_url IS NULL OR image_url = '')
             ORDER BY id ASC
             LIMIT %s
@@ -129,16 +121,13 @@ def main():
 
     with conn.cursor() as cur:
         for row in rows:
-            pid = row["id"]
-            source_url = row["source_url"]
-            name = row["name"]
+            pid, name, source_url = row[0], row[1], row[2]
 
-            print(f"[{pid}] {name[:50]}")
+            print(f"[{pid}] {(name or '')[:50]}")
 
-            # Kraabi pildi URL lehelt
             cloudinary_url = extract_image_url_from_rimi_page(source_url)
             if not cloudinary_url:
-                print(f"  → no image found on page")
+                print(f"  no image found on page")
                 skipped += 1
                 jitter(0.3, 0.8)
                 continue
@@ -148,7 +137,6 @@ def main():
                 uploaded += 1
                 continue
 
-            # R2 key product ID järgi
             product_id = get_product_id_from_url(source_url)
             if not product_id:
                 skipped += 1
@@ -156,7 +144,6 @@ def main():
 
             r2_key = f"{R2_PREFIX}rimi/{product_id}.webp"
 
-            # Kontrolli kas juba R2-s
             try:
                 if image_exists_in_r2(r2_key):
                     public_url = r2_public_url(r2_key)
@@ -169,10 +156,9 @@ def main():
             except Exception:
                 pass
 
-            # Lae alla ja R2-sse
             data, content_type = download_image(cloudinary_url)
             if not data:
-                print(f"  → download failed")
+                print(f"  download failed")
                 failed += 1
                 jitter(0.3, 0.8)
                 continue
@@ -185,7 +171,7 @@ def main():
                 if uploaded % 20 == 0:
                     conn.commit()
             except Exception as e:
-                print(f"  → R2 upload failed: {e}", file=sys.stderr)
+                print(f"  R2 upload failed: {e}", file=sys.stderr)
                 failed += 1
 
             jitter(0.5, 1.2)
