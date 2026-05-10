@@ -151,7 +151,9 @@ class PuzzleGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     const pieceSourceSize = 300.0;
     const connectorSourceSize = 42.0;
-    const stepSource = pieceSourceSize - (connectorSourceSize * 2);
+    const pieceGapSource = 6.0;
+    const stepSource =
+        pieceSourceSize - (connectorSourceSize * 2) + pieceGapSource;
     const groupSourceSize = pieceSourceSize + stepSource;
     const fifthScaleFactor = 0.66;
     const gapSource = 26.0;
@@ -189,24 +191,6 @@ class PuzzleGrid extends StatelessWidget {
         children: [
           Positioned(
             left: groupLeft + step,
-            top: groupTop,
-            child: PuzzlePieceButton(
-              icon: Icons.shopping_cart_rounded,
-              label: 'Sirvi\ntooteid',
-              color: const Color(0xFF1476C9),
-              edges: const PuzzlePieceEdges(
-                top: PuzzleConnector.socket,
-                right: PuzzleConnector.knob,
-                bottom: PuzzleConnector.knob,
-                left: PuzzleConnector.socket,
-              ),
-              size: pieceSize,
-              connectorSize: connectorSize,
-              onPressed: onProducts,
-            ),
-          ),
-          Positioned(
-            left: groupLeft + step,
             top: groupTop + step,
             child: PuzzlePieceButton(
               icon: Icons.history_rounded,
@@ -221,6 +205,24 @@ class PuzzleGrid extends StatelessWidget {
               size: pieceSize,
               connectorSize: connectorSize,
               onPressed: onHistory,
+            ),
+          ),
+          Positioned(
+            left: groupLeft + step,
+            top: groupTop,
+            child: PuzzlePieceButton(
+              icon: Icons.shopping_cart_rounded,
+              label: 'Sirvi\ntooteid',
+              color: const Color(0xFF1476C9),
+              edges: const PuzzlePieceEdges(
+                top: PuzzleConnector.socket,
+                right: PuzzleConnector.knob,
+                bottom: PuzzleConnector.knob,
+                left: PuzzleConnector.socket,
+              ),
+              size: pieceSize,
+              connectorSize: connectorSize,
+              onPressed: onProducts,
             ),
           ),
           Positioned(
@@ -249,7 +251,6 @@ class PuzzleGrid extends StatelessWidget {
               label: 'Ostukorv${itemCount > 0 ? "\n($itemCount)" : ""}',
               color: const Color(0xFFFFD600),
               foregroundColor: const Color(0xFF1A1A1A),
-              borderColor: const Color(0x55FFFFFF),
               edges: const PuzzlePieceEdges(
                 top: PuzzleConnector.knob,
                 right: PuzzleConnector.knob,
@@ -271,7 +272,6 @@ class PuzzleGrid extends StatelessWidget {
                 label: 'Retseptid',
                 color: Colors.white,
                 foregroundColor: const Color(0xFF1A1A1A),
-                borderColor: const Color(0x66808080),
                 edges: const PuzzlePieceEdges(
                   top: PuzzleConnector.knob,
                   right: PuzzleConnector.knob,
@@ -307,7 +307,7 @@ class PuzzlePieceButton extends StatelessWidget {
     required this.connectorSize,
     required this.onPressed,
     this.foregroundColor = Colors.white,
-    this.borderColor = const Color(0x55FFFFFF),
+    this.borderColor = const Color(0xD01A1A1A),
   });
 
   final IconData icon;
@@ -476,7 +476,7 @@ class RoundedPuzzlePieceClipper extends CustomClipper<Path> {
       size.width - (connectorSize * 2),
       size.height - (connectorSize * 2),
     );
-    final depth = connectorSize * 0.92;
+    final depth = connectorSize * 0.95;
 
     final path = Path()..moveTo(rect.left, rect.top);
 
@@ -531,8 +531,8 @@ class RoundedPuzzlePieceClipper extends CustomClipper<Path> {
 
     final direction = end.dx > start.dx ? 1.0 : -1.0;
     final length = (end.dx - start.dx).abs();
-    final connectorStart = start.dx + (direction * length * 0.38);
-    final connectorEnd = start.dx + (direction * length * 0.62);
+    final connectorStart = start.dx + (direction * length * 0.32);
+    final connectorEnd = start.dx + (direction * length * 0.68);
     final center = start.dx + (direction * length * 0.50);
     final side = connector == PuzzleConnector.knob ? outwardSign : -outwardSign;
     final y = start.dy;
@@ -540,33 +540,33 @@ class RoundedPuzzlePieceClipper extends CustomClipper<Path> {
     path
       ..lineTo(connectorStart, y)
       ..cubicTo(
-        connectorStart + (direction * length * 0.03),
+        connectorStart + (direction * length * 0.05),
         y,
-        center - (direction * length * 0.11),
-        y + (side * depth * 0.08),
-        center - (direction * length * 0.11),
+        center - (direction * length * 0.18),
+        y + (side * depth * 0.06),
+        center - (direction * length * 0.16),
         y + (side * depth * 0.46),
       )
       ..cubicTo(
-        center - (direction * length * 0.11),
-        y + (side * depth * 0.98),
-        center - (direction * length * 0.04),
-        y + (side * depth * 1.08),
+        center - (direction * length * 0.14),
+        y + (side * depth * 1.02),
+        center - (direction * length * 0.05),
+        y + (side * depth * 1.16),
         center,
-        y + (side * depth * 1.08),
+        y + (side * depth * 1.16),
       )
       ..cubicTo(
-        center + (direction * length * 0.04),
-        y + (side * depth * 1.08),
-        center + (direction * length * 0.11),
-        y + (side * depth * 0.98),
-        center + (direction * length * 0.11),
+        center + (direction * length * 0.05),
+        y + (side * depth * 1.16),
+        center + (direction * length * 0.14),
+        y + (side * depth * 1.02),
+        center + (direction * length * 0.16),
         y + (side * depth * 0.46),
       )
       ..cubicTo(
-        center + (direction * length * 0.11),
-        y + (side * depth * 0.08),
-        connectorEnd - (direction * length * 0.03),
+        center + (direction * length * 0.18),
+        y + (side * depth * 0.06),
+        connectorEnd - (direction * length * 0.05),
         y,
         connectorEnd,
         y,
@@ -589,8 +589,8 @@ class RoundedPuzzlePieceClipper extends CustomClipper<Path> {
 
     final direction = end.dy > start.dy ? 1.0 : -1.0;
     final length = (end.dy - start.dy).abs();
-    final connectorStart = start.dy + (direction * length * 0.38);
-    final connectorEnd = start.dy + (direction * length * 0.62);
+    final connectorStart = start.dy + (direction * length * 0.32);
+    final connectorEnd = start.dy + (direction * length * 0.68);
     final center = start.dy + (direction * length * 0.50);
     final side = connector == PuzzleConnector.knob ? outwardSign : -outwardSign;
     final x = start.dx;
@@ -599,33 +599,33 @@ class RoundedPuzzlePieceClipper extends CustomClipper<Path> {
       ..lineTo(x, connectorStart)
       ..cubicTo(
         x,
-        connectorStart + (direction * length * 0.03),
-        x + (side * depth * 0.08),
-        center - (direction * length * 0.11),
+        connectorStart + (direction * length * 0.05),
+        x + (side * depth * 0.06),
+        center - (direction * length * 0.18),
         x + (side * depth * 0.46),
-        center - (direction * length * 0.11),
+        center - (direction * length * 0.16),
       )
       ..cubicTo(
-        x + (side * depth * 0.98),
-        center - (direction * length * 0.11),
-        x + (side * depth * 1.08),
-        center - (direction * length * 0.04),
-        x + (side * depth * 1.08),
+        x + (side * depth * 1.02),
+        center - (direction * length * 0.14),
+        x + (side * depth * 1.16),
+        center - (direction * length * 0.05),
+        x + (side * depth * 1.16),
         center,
       )
       ..cubicTo(
-        x + (side * depth * 1.08),
-        center + (direction * length * 0.04),
-        x + (side * depth * 0.98),
-        center + (direction * length * 0.11),
+        x + (side * depth * 1.16),
+        center + (direction * length * 0.05),
+        x + (side * depth * 1.02),
+        center + (direction * length * 0.14),
         x + (side * depth * 0.46),
-        center + (direction * length * 0.11),
+        center + (direction * length * 0.16),
       )
       ..cubicTo(
-        x + (side * depth * 0.08),
-        center + (direction * length * 0.11),
+        x + (side * depth * 0.06),
+        center + (direction * length * 0.18),
         x,
-        connectorEnd - (direction * length * 0.03),
+        connectorEnd - (direction * length * 0.05),
         x,
         connectorEnd,
       )
@@ -654,7 +654,7 @@ class PuzzlePieceBorderPainter extends CustomPainter {
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.2;
+      ..strokeWidth = 2.4;
 
     canvas.drawPath(path, paint);
   }
