@@ -198,7 +198,7 @@ class PuzzleGrid extends StatelessWidget {
             child: PuzzlePieceButton(
               icon: Icons.shopping_cart_rounded,
               label: 'Sirvi\ntooteid',
-              color: const Color(0xFF2196F3),
+              color: const Color(0xFF1476C9),
               width: pieceW,
               height: pieceH,
               onPressed: onProducts,
@@ -210,7 +210,7 @@ class PuzzleGrid extends StatelessWidget {
             child: PuzzlePieceButton(
               icon: Icons.history_rounded,
               label: 'Korvi\najalugu',
-              color: const Color(0xFF5CB85C),
+              color: const Color(0xFF55C600),
               width: pieceW,
               height: pieceH,
               onPressed: onHistory,
@@ -222,7 +222,7 @@ class PuzzleGrid extends StatelessWidget {
             child: PuzzlePieceButton(
               icon: Icons.insert_chart_rounded,
               label: 'Võrdle\nkorvi',
-              color: const Color(0xFFE8114B),
+              color: const Color(0xFFE91E63),
               width: pieceW,
               height: pieceH,
               onPressed: onCompare,
@@ -234,7 +234,7 @@ class PuzzleGrid extends StatelessWidget {
             child: PuzzlePieceButton(
               icon: Icons.shopping_basket_rounded,
               label: 'Ostukorv${itemCount > 0 ? "\n($itemCount)" : ""}',
-              color: const Color(0xFFFFB703),
+              color: const Color(0xFFFFD600),
               width: pieceW,
               height: pieceH,
               onPressed: onBasket,
@@ -342,16 +342,6 @@ class PuzzlePieceButton extends StatelessWidget {
                     highlightColor: _alphaColor(foregroundColor, 0.10),
                     child: Stack(
                       children: [
-                        Positioned.fill(
-                          child: IgnorePointer(
-                            child: CustomPaint(
-                              painter: PlayfulPiecePainter(
-                                color: foregroundColor,
-                                isLightPiece: color == Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
                         Positioned(
                           left: width * 0.20,
                           top: height * 0.30,
@@ -596,58 +586,6 @@ class SvgPuzzlePieceClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(SvgPuzzlePieceClipper oldClipper) => false;
-}
-
-class PlayfulPiecePainter extends CustomPainter {
-  const PlayfulPiecePainter({
-    required this.color,
-    required this.isLightPiece,
-  });
-
-  final Color color;
-  final bool isLightPiece;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final stripePaint = Paint()
-      ..color = _alphaColor(
-        isLightPiece ? Colors.black : color,
-        isLightPiece ? 0.035 : 0.08,
-      )
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = size.width * 0.018;
-
-    for (double x = -size.width;
-        x < size.width * 1.4;
-        x += size.width * 0.22) {
-      canvas.drawLine(
-        Offset(x, size.height),
-        Offset(x + size.width * 0.75, 0),
-        stripePaint,
-      );
-    }
-
-    final dotPaint = Paint()
-      ..color = _alphaColor(
-        isLightPiece ? Colors.black : color,
-        isLightPiece ? 0.07 : 0.13,
-      );
-    final dotRadius = size.width * 0.018;
-    final dots = [
-      Offset(size.width * 0.24, size.height * 0.24),
-      Offset(size.width * 0.76, size.height * 0.22),
-      Offset(size.width * 0.72, size.height * 0.74),
-    ];
-
-    for (final dot in dots) {
-      canvas.drawCircle(dot, dotRadius, dotPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(PlayfulPiecePainter oldDelegate) {
-    return color != oldDelegate.color || isLightPiece != oldDelegate.isLightPiece;
-  }
 }
 
 class PuzzlePieceBorderPainter extends CustomPainter {
