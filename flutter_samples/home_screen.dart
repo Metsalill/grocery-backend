@@ -150,8 +150,8 @@ class PuzzleGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const pieceSourceSize = 300.0;
-    const connectorSourceSize = 34.0;
-    const pieceGapSource = -5.0;
+    const connectorSourceSize = 30.0;
+    const pieceGapSource = 5.0;
     const stepSource =
         pieceSourceSize - (connectorSourceSize * 2) + pieceGapSource;
     const groupSourceSize = pieceSourceSize + stepSource;
@@ -307,7 +307,7 @@ class PuzzlePieceButton extends StatefulWidget {
     required this.connectorSize,
     required this.onPressed,
     this.foregroundColor = Colors.white,
-    this.borderColor = const Color(0xCC000000),
+    this.borderColor = const Color(0xFFFFFFFF),
   });
 
   final IconData icon;
@@ -509,7 +509,7 @@ class RoundedPuzzlePieceClipper extends CustomClipper<Path> {
       size.width - (connectorSize * 2),
       size.height - (connectorSize * 2),
     );
-    final depth = connectorSize * 1.16;
+    final depth = connectorSize * 1.25;
 
     final path = Path()..moveTo(rect.left, rect.top);
 
@@ -564,8 +564,8 @@ class RoundedPuzzlePieceClipper extends CustomClipper<Path> {
 
     final length = (end.dx - start.dx).abs();
     final left = start.dx < end.dx ? start.dx : end.dx;
-    final connectorStart = left + (length * 0.32);
-    final connectorEnd = left + (length * 0.68);
+    final connectorStart = left + (length * 0.34);
+    final connectorEnd = left + (length * 0.66);
     final connectorLength = connectorEnd - connectorStart;
     final side = connector == PuzzleConnector.knob ? outwardSign : -outwardSign;
     final y = start.dy;
@@ -682,8 +682,8 @@ class RoundedPuzzlePieceClipper extends CustomClipper<Path> {
 
     final length = (end.dy - start.dy).abs();
     final top = start.dy < end.dy ? start.dy : end.dy;
-    final connectorStart = top + (length * 0.32);
-    final connectorEnd = top + (length * 0.68);
+    final connectorStart = top + (length * 0.34);
+    final connectorEnd = top + (length * 0.66);
     final connectorLength = connectorEnd - connectorStart;
     final side = connector == PuzzleConnector.knob ? outwardSign : -outwardSign;
     final x = start.dx;
@@ -804,12 +804,18 @@ class PuzzlePieceBorderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final path = clipper.getClip(size);
-    final paint = Paint()
+    final outlinePaint = Paint()
+      ..color = const Color(0xAA000000)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.65;
+    final separatorPaint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.45;
+      ..strokeWidth = 0.75;
 
-    canvas.drawPath(path, paint);
+    canvas
+      ..drawPath(path, outlinePaint)
+      ..drawPath(path, separatorPaint);
   }
 
   @override
