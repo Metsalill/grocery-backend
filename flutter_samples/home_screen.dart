@@ -151,7 +151,7 @@ class PuzzleGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     const pieceSourceSize = 300.0;
     const connectorSourceSize = 42.0;
-    const pieceGapSource = 6.0;
+    const pieceGapSource = 2.0;
     const stepSource =
         pieceSourceSize - (connectorSourceSize * 2) + pieceGapSource;
     const groupSourceSize = pieceSourceSize + stepSource;
@@ -307,7 +307,7 @@ class PuzzlePieceButton extends StatelessWidget {
     required this.connectorSize,
     required this.onPressed,
     this.foregroundColor = Colors.white,
-    this.borderColor = const Color(0xD01A1A1A),
+    this.borderColor = const Color(0x992A2522),
   });
 
   final IconData icon;
@@ -352,8 +352,8 @@ class PuzzlePieceButton extends StatelessWidget {
               clipper: clipper,
               clipBehavior: Clip.antiAlias,
               color: color,
-              elevation: 7,
-              shadowColor: _alphaColor(Colors.black, 0.25),
+              elevation: 4,
+              shadowColor: _alphaColor(Colors.black, 0.18),
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
@@ -476,7 +476,7 @@ class RoundedPuzzlePieceClipper extends CustomClipper<Path> {
       size.width - (connectorSize * 2),
       size.height - (connectorSize * 2),
     );
-    final depth = connectorSize * 0.95;
+    final depth = connectorSize * 0.82;
 
     final path = Path()..moveTo(rect.left, rect.top);
 
@@ -654,7 +654,7 @@ class PuzzlePieceBorderPainter extends CustomPainter {
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.4;
+      ..strokeWidth = 1.25;
 
     canvas.drawPath(path, paint);
   }
