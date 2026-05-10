@@ -682,8 +682,8 @@ class RoundedPuzzlePieceClipper extends CustomClipper<Path> {
 
     final length = (end.dy - start.dy).abs();
     final top = start.dy < end.dy ? start.dy : end.dy;
-    final connectorStart = top + (length * 0.28);
-    final connectorEnd = top + (length * 0.72);
+    final connectorStart = top + (length * 0.32);
+    final connectorEnd = top + (length * 0.68);
     final connectorLength = connectorEnd - connectorStart;
     final side = connector == PuzzleConnector.knob ? outwardSign : -outwardSign;
     final x = start.dx;
@@ -698,41 +698,41 @@ class RoundedPuzzlePieceClipper extends CustomClipper<Path> {
         ..lineTo(x, connectorStart)
         ..cubicTo(
           x,
-          yAt(0.13),
-          xAt(0.15),
-          yAt(0.20),
+          yAt(0.10),
+          xAt(0.14),
+          yAt(0.16),
           xAt(0.28),
-          yAt(0.12),
+          yAt(0.10),
         )
         ..cubicTo(
-          xAt(0.49),
-          yAt(-0.02),
-          xAt(0.74),
-          yAt(0.12),
-          xAt(0.87),
-          yAt(0.37),
+          xAt(0.44),
+          yAt(0.02),
+          xAt(0.64),
+          yAt(0.03),
+          xAt(0.80),
+          yAt(0.14),
         )
         ..cubicTo(
           xAt(1.00),
-          yAt(0.65),
+          yAt(0.27),
+          xAt(1.08),
+          yAt(0.53),
+          xAt(0.96),
+          yAt(0.76),
+        )
+        ..cubicTo(
           xAt(0.89),
-          yAt(0.98),
-          xAt(0.66),
-          yAt(1.05),
+          yAt(0.91),
+          xAt(0.73),
+          yAt(0.95),
+          xAt(0.54),
+          yAt(0.87),
         )
         ..cubicTo(
-          xAt(0.51),
-          yAt(1.10),
-          xAt(0.38),
-          yAt(1.03),
-          xAt(0.29),
-          yAt(0.92),
-        )
-        ..cubicTo(
-          xAt(0.19),
-          yAt(0.81),
+          xAt(0.35),
+          yAt(0.79),
           x,
-          yAt(0.86),
+          yAt(0.82),
           x,
           connectorEnd,
         )
@@ -744,41 +744,41 @@ class RoundedPuzzlePieceClipper extends CustomClipper<Path> {
       ..lineTo(x, connectorEnd)
       ..cubicTo(
         x,
-        yAt(0.86),
-        xAt(0.19),
-        yAt(0.81),
-        xAt(0.29),
-        yAt(0.92),
+        yAt(0.82),
+        xAt(0.35),
+        yAt(0.79),
+        xAt(0.54),
+        yAt(0.87),
       )
       ..cubicTo(
-        xAt(0.38),
-        yAt(1.03),
-        xAt(0.51),
-        yAt(1.10),
-        xAt(0.66),
-        yAt(1.05),
-      )
-      ..cubicTo(
+        xAt(0.73),
+        yAt(0.95),
         xAt(0.89),
-        yAt(0.98),
+        yAt(0.91),
+        xAt(0.96),
+        yAt(0.76),
+      )
+      ..cubicTo(
+        xAt(1.08),
+        yAt(0.53),
         xAt(1.00),
-        yAt(0.65),
-        xAt(0.87),
-        yAt(0.37),
+        yAt(0.27),
+        xAt(0.80),
+        yAt(0.14),
       )
       ..cubicTo(
-        xAt(0.74),
-        yAt(0.12),
-        xAt(0.49),
-        yAt(-0.02),
+        xAt(0.64),
+        yAt(0.03),
+        xAt(0.44),
+        yAt(0.02),
         xAt(0.28),
-        yAt(0.12),
+        yAt(0.10),
       )
       ..cubicTo(
-        xAt(0.15),
-        yAt(0.20),
+        xAt(0.14),
+        yAt(0.16),
         x,
-        yAt(0.13),
+        yAt(0.10),
         x,
         connectorStart,
       )
