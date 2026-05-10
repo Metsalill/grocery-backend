@@ -119,7 +119,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         onProducts: _navigateToProducts,
                         onBasket: _navigateToBasket,
                         onHistory: _navigateToBasketHistory,
-                        onLogout: _logout,
                       );
                     },
                   ),
@@ -142,7 +141,6 @@ class PuzzleGrid extends StatelessWidget {
     required this.onProducts,
     required this.onBasket,
     required this.onHistory,
-    required this.onLogout,
   });
 
   final double size;
@@ -151,14 +149,15 @@ class PuzzleGrid extends StatelessWidget {
   final VoidCallback onProducts;
   final VoidCallback onBasket;
   final VoidCallback onHistory;
-  final VoidCallback onLogout;
 
   @override
   Widget build(BuildContext context) {
-    final pieceSize = size * 0.42;
+    final pieceSize = size * 0.54;
     final connectorSpace = pieceSize * 0.16;
     final step = pieceSize - (connectorSpace * 2);
-    final fifthSize = size * 0.36;
+    final fifthSize = size * 0.38;
+    final groupLeft = size * 0.01;
+    final groupTop = size * 0.01;
 
     return SizedBox.square(
       dimension: size,
@@ -166,8 +165,8 @@ class PuzzleGrid extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           Positioned(
-            left: size * 0.04,
-            top: size * 0.02,
+            left: groupLeft,
+            top: groupTop,
             child: PuzzlePieceButton(
               icon: '📊',
               label: 'Võrdle\nkorvi',
@@ -184,8 +183,8 @@ class PuzzleGrid extends StatelessWidget {
             ),
           ),
           Positioned(
-            left: size * 0.04 + step,
-            top: size * 0.02,
+            left: groupLeft + step,
+            top: groupTop,
             child: PuzzlePieceButton(
               icon: '🛒',
               label: 'Sirvi\ntooteid',
@@ -202,8 +201,8 @@ class PuzzleGrid extends StatelessWidget {
             ),
           ),
           Positioned(
-            left: size * 0.04,
-            top: size * 0.02 + step,
+            left: groupLeft,
+            top: groupTop + step,
             child: PuzzlePieceButton(
               icon: '🧺',
               label: 'Ostukorv${itemCount > 0 ? "\n($itemCount)" : ""}',
@@ -220,8 +219,8 @@ class PuzzleGrid extends StatelessWidget {
             ),
           ),
           Positioned(
-            left: size * 0.04 + step,
-            top: size * 0.02 + step,
+            left: groupLeft + step,
+            top: groupTop + step,
             child: PuzzlePieceButton(
               icon: '🕐',
               label: 'Korvi\najalugu',
@@ -238,13 +237,13 @@ class PuzzleGrid extends StatelessWidget {
             ),
           ),
           Positioned(
-            left: size * 0.58,
-            top: size * 0.58,
+            left: size * 0.60,
+            top: size * 0.61,
             child: Transform.rotate(
-              angle: -0.22,
+              angle: -0.20,
               child: PuzzlePieceButton(
-                icon: '🚪',
-                label: 'Logi\nvälja',
+                icon: '🍲',
+                label: 'Retseptid',
                 color: Colors.white,
                 foregroundColor: const Color(0xFF1A1A1A),
                 borderColor: const Color(0x66808080),
@@ -256,7 +255,13 @@ class PuzzleGrid extends StatelessWidget {
                 ),
                 size: fifthSize,
                 connectorSpace: fifthSize * 0.16,
-                onPressed: onLogout,
+                onPressed: () {
+                  ScaffoldMessenger.of(context)
+                    ..hideCurrentSnackBar()
+                    ..showSnackBar(
+                      const SnackBar(content: Text('Retseptid tulekul!')),
+                    );
+                },
               ),
             ),
           ),
@@ -422,7 +427,7 @@ class PuzzlePieceClipper extends CustomClipper<Path> {
       size.width - (connectorSpace * 2),
       size.height - (connectorSpace * 2),
     );
-    final depth = connectorSpace * 0.95;
+    final depth = connectorSpace * 1.10;
 
     final path = Path()..moveTo(rect.left, rect.top);
 
@@ -445,25 +450,41 @@ class PuzzlePieceClipper extends CustomClipper<Path> {
       return;
     }
 
-    final start = rect.left + rect.width * 0.34;
-    final end = rect.left + rect.width * 0.66;
+    final start = rect.left + rect.width * 0.30;
+    final end = rect.left + rect.width * 0.70;
     final center = rect.center.dx;
     final direction = connector == PuzzleConnector.knob ? -1.0 : 1.0;
 
     path
       ..lineTo(start, rect.top)
       ..cubicTo(
-        start + rect.width * 0.04,
+        start + rect.width * 0.05,
         rect.top,
-        center - rect.width * 0.20,
-        rect.top + (direction * depth),
-        center,
-        rect.top + (direction * depth),
+        center - rect.width * 0.18,
+        rect.top + (direction * depth * 0.10),
+        center - rect.width * 0.17,
+        rect.top + (direction * depth * 0.52),
       )
       ..cubicTo(
-        center + rect.width * 0.20,
-        rect.top + (direction * depth),
-        end - rect.width * 0.04,
+        center - rect.width * 0.16,
+        rect.top + (direction * depth * 1.08),
+        center - rect.width * 0.06,
+        rect.top + (direction * depth * 1.18),
+        center,
+        rect.top + (direction * depth * 1.18),
+      )
+      ..cubicTo(
+        center + rect.width * 0.06,
+        rect.top + (direction * depth * 1.18),
+        center + rect.width * 0.16,
+        rect.top + (direction * depth * 1.08),
+        center + rect.width * 0.17,
+        rect.top + (direction * depth * 0.52),
+      )
+      ..cubicTo(
+        center + rect.width * 0.18,
+        rect.top + (direction * depth * 0.10),
+        end - rect.width * 0.05,
         rect.top,
         end,
         rect.top,
@@ -482,8 +503,8 @@ class PuzzlePieceClipper extends CustomClipper<Path> {
       return;
     }
 
-    final start = rect.top + rect.height * 0.34;
-    final end = rect.top + rect.height * 0.66;
+    final start = rect.top + rect.height * 0.30;
+    final end = rect.top + rect.height * 0.70;
     final center = rect.center.dy;
     final direction = connector == PuzzleConnector.knob ? 1.0 : -1.0;
 
@@ -491,17 +512,33 @@ class PuzzlePieceClipper extends CustomClipper<Path> {
       ..lineTo(rect.right, start)
       ..cubicTo(
         rect.right,
-        start + rect.height * 0.04,
-        rect.right + (direction * depth),
-        center - rect.height * 0.20,
-        rect.right + (direction * depth),
+        start + rect.height * 0.05,
+        rect.right + (direction * depth * 0.10),
+        center - rect.height * 0.18,
+        rect.right + (direction * depth * 0.52),
+        center - rect.height * 0.17,
+      )
+      ..cubicTo(
+        rect.right + (direction * depth * 1.08),
+        center - rect.height * 0.16,
+        rect.right + (direction * depth * 1.18),
+        center - rect.height * 0.06,
+        rect.right + (direction * depth * 1.18),
         center,
       )
       ..cubicTo(
-        rect.right + (direction * depth),
-        center + rect.height * 0.20,
+        rect.right + (direction * depth * 1.18),
+        center + rect.height * 0.06,
+        rect.right + (direction * depth * 1.08),
+        center + rect.height * 0.16,
+        rect.right + (direction * depth * 0.52),
+        center + rect.height * 0.17,
+      )
+      ..cubicTo(
+        rect.right + (direction * depth * 0.10),
+        center + rect.height * 0.18,
         rect.right,
-        end - rect.height * 0.04,
+        end - rect.height * 0.05,
         rect.right,
         end,
       )
@@ -519,25 +556,41 @@ class PuzzlePieceClipper extends CustomClipper<Path> {
       return;
     }
 
-    final start = rect.right - rect.width * 0.34;
-    final end = rect.left + rect.width * 0.34;
+    final start = rect.right - rect.width * 0.30;
+    final end = rect.left + rect.width * 0.30;
     final center = rect.center.dx;
     final direction = connector == PuzzleConnector.knob ? 1.0 : -1.0;
 
     path
       ..lineTo(start, rect.bottom)
       ..cubicTo(
-        start - rect.width * 0.04,
+        start - rect.width * 0.05,
         rect.bottom,
-        center + rect.width * 0.20,
-        rect.bottom + (direction * depth),
-        center,
-        rect.bottom + (direction * depth),
+        center + rect.width * 0.18,
+        rect.bottom + (direction * depth * 0.10),
+        center + rect.width * 0.17,
+        rect.bottom + (direction * depth * 0.52),
       )
       ..cubicTo(
-        center - rect.width * 0.20,
-        rect.bottom + (direction * depth),
-        end + rect.width * 0.04,
+        center + rect.width * 0.16,
+        rect.bottom + (direction * depth * 1.08),
+        center + rect.width * 0.06,
+        rect.bottom + (direction * depth * 1.18),
+        center,
+        rect.bottom + (direction * depth * 1.18),
+      )
+      ..cubicTo(
+        center - rect.width * 0.06,
+        rect.bottom + (direction * depth * 1.18),
+        center - rect.width * 0.16,
+        rect.bottom + (direction * depth * 1.08),
+        center - rect.width * 0.17,
+        rect.bottom + (direction * depth * 0.52),
+      )
+      ..cubicTo(
+        center - rect.width * 0.18,
+        rect.bottom + (direction * depth * 0.10),
+        end + rect.width * 0.05,
         rect.bottom,
         end,
         rect.bottom,
@@ -556,8 +609,8 @@ class PuzzlePieceClipper extends CustomClipper<Path> {
       return;
     }
 
-    final start = rect.bottom - rect.height * 0.34;
-    final end = rect.top + rect.height * 0.34;
+    final start = rect.bottom - rect.height * 0.30;
+    final end = rect.top + rect.height * 0.30;
     final center = rect.center.dy;
     final direction = connector == PuzzleConnector.knob ? -1.0 : 1.0;
 
@@ -565,17 +618,33 @@ class PuzzlePieceClipper extends CustomClipper<Path> {
       ..lineTo(rect.left, start)
       ..cubicTo(
         rect.left,
-        start - rect.height * 0.04,
-        rect.left + (direction * depth),
-        center + rect.height * 0.20,
-        rect.left + (direction * depth),
+        start - rect.height * 0.05,
+        rect.left + (direction * depth * 0.10),
+        center + rect.height * 0.18,
+        rect.left + (direction * depth * 0.52),
+        center + rect.height * 0.17,
+      )
+      ..cubicTo(
+        rect.left + (direction * depth * 1.08),
+        center + rect.height * 0.16,
+        rect.left + (direction * depth * 1.18),
+        center + rect.height * 0.06,
+        rect.left + (direction * depth * 1.18),
         center,
       )
       ..cubicTo(
-        rect.left + (direction * depth),
-        center - rect.height * 0.20,
+        rect.left + (direction * depth * 1.18),
+        center - rect.height * 0.06,
+        rect.left + (direction * depth * 1.08),
+        center - rect.height * 0.16,
+        rect.left + (direction * depth * 0.52),
+        center - rect.height * 0.17,
+      )
+      ..cubicTo(
+        rect.left + (direction * depth * 0.10),
+        center - rect.height * 0.18,
         rect.left,
-        end + rect.height * 0.04,
+        end + rect.height * 0.05,
         rect.left,
         end,
       )
