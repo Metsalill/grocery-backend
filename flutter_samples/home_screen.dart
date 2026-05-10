@@ -509,7 +509,7 @@ class RoundedPuzzlePieceClipper extends CustomClipper<Path> {
       size.width - (connectorSize * 2),
       size.height - (connectorSize * 2),
     );
-    final depth = connectorSize * 1.08;
+    final depth = connectorSize * 1.16;
 
     final path = Path()..moveTo(rect.left, rect.top);
 
@@ -804,12 +804,18 @@ class PuzzlePieceBorderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final path = clipper.getClip(size);
-    final paint = Paint()
+    final outlinePaint = Paint()
+      ..color = const Color(0xCC000000)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.35;
+    final separatorPaint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.25;
+      ..strokeWidth = 0.9;
 
-    canvas.drawPath(path, paint);
+    canvas
+      ..drawPath(path, outlinePaint)
+      ..drawPath(path, separatorPaint);
   }
 
   @override
