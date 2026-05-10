@@ -151,7 +151,7 @@ class PuzzleGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     const pieceSourceSize = 300.0;
     const connectorSourceSize = 34.0;
-    const pieceGapSource = 7.0;
+    const pieceGapSource = -5.0;
     const stepSource =
         pieceSourceSize - (connectorSourceSize * 2) + pieceGapSource;
     const groupSourceSize = pieceSourceSize + stepSource;
