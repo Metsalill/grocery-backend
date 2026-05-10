@@ -150,7 +150,7 @@ class PuzzleGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final groupSizeByWidth = width * 0.98;
-    final groupSizeByHeight = height * 0.66;
+    final groupSizeByHeight = height * 0.62;
     final groupSize = groupSizeByWidth < groupSizeByHeight
         ? groupSizeByWidth
         : groupSizeByHeight;
@@ -158,16 +158,17 @@ class PuzzleGrid extends StatelessWidget {
     final pieceSize = (groupSize + (connectorSpace * 2)) / 2;
     final step = pieceSize - (connectorSpace * 2);
     final groupWidth = step + pieceSize;
-    final fifthSize = groupSize * 0.36;
-    final fullHeight = groupWidth + (fifthSize * 0.58);
+    final fifthSize = groupSize * 0.34;
+    final fifthGap = connectorSpace * 0.55;
+    final fullHeight = groupWidth + fifthGap + fifthSize;
     final groupLeft = ((width - groupWidth) / 2).clamp(0.0, width).toDouble();
     final groupTop = ((height - fullHeight) / 2)
         .clamp(0.0, height - groupWidth)
         .toDouble();
-    final fifthLeft = (groupLeft + step + (pieceSize * 0.44))
+    final fifthLeft = (groupLeft + ((groupWidth - fifthSize) / 2) + (connectorSpace * 0.35))
         .clamp(0.0, width - fifthSize)
         .toDouble();
-    final fifthTop = (groupTop + step + (pieceSize * 0.52))
+    final fifthTop = (groupTop + groupWidth + fifthGap)
         .clamp(0.0, height - fifthSize)
         .toDouble();
 
@@ -253,7 +254,7 @@ class PuzzleGrid extends StatelessWidget {
             left: fifthLeft,
             top: fifthTop,
             child: Transform.rotate(
-              angle: -0.13,
+              angle: -0.10,
               child: PuzzlePieceButton(
                 icon: '🍲',
                 label: 'Retseptid',
@@ -342,45 +343,68 @@ class PuzzlePieceButton extends StatelessWidget {
               color: color,
               elevation: 7,
               shadowColor: _alphaColor(Colors.black, 0.25),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: onPressed,
-                  splashColor: _alphaColor(foregroundColor, 0.22),
-                  highlightColor: _alphaColor(foregroundColor, 0.10),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        left: connectorSpace + (filledSize * 0.12),
-                        top: connectorSpace + (filledSize * 0.16),
-                        width: filledSize * 0.76,
-                        height: filledSize * 0.68,
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                icon,
-                                style: TextStyle(
-                                  fontSize: (size * 0.16)
-                                      .clamp(26.0, 38.0)
-                                      .toDouble(),
-                                ),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      _lightenColor(color, color == Colors.white ? 0.0 : 0.18),
+                      color,
+                      _darkenColor(color, color == Colors.white ? 0.04 : 0.10),
+                    ],
+                  ),
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: onPressed,
+                    splashColor: _alphaColor(foregroundColor, 0.22),
+                    highlightColor: _alphaColor(foregroundColor, 0.10),
+                    child: Stack(
+                      children: [
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            child: CustomPaint(
+                              painter: PlayfulPiecePainter(
+                                color: foregroundColor,
+                                isLightPiece: color == Colors.white,
                               ),
-                              SizedBox(height: size * 0.018),
-                              Text(
-                                label,
-                                maxLines: 2,
-                                overflow: TextOverflow.visible,
-                                textAlign: TextAlign.center,
-                                style: labelStyle,
-                              ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                        Positioned(
+                          left: connectorSpace + (filledSize * 0.12),
+                          top: connectorSpace + (filledSize * 0.16),
+                          width: filledSize * 0.76,
+                          height: filledSize * 0.68,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  icon,
+                                  style: TextStyle(
+                                    fontSize: (size * 0.16)
+                                        .clamp(26.0, 38.0)
+                                        .toDouble(),
+                                  ),
+                                ),
+                                SizedBox(height: size * 0.018),
+                                Text(
+                                  label,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.visible,
+                                  textAlign: TextAlign.center,
+                                  style: labelStyle,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -683,6 +707,50 @@ class PuzzlePieceClipper extends CustomClipper<Path> {
   }
 }
 
+class PlayfulPiecePainter extends CustomPainter {
+  const PlayfulPiecePainter({
+    required this.color,
+    required this.isLightPiece,
+  });
+
+  final Color color;
+  final bool isLightPiece;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final stripePaint = Paint()
+      ..color = _alphaColor(isLightPiece ? Colors.black : color, isLightPiece ? 0.05 : 0.13)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = size.width * 0.018;
+
+    for (double x = -size.width; x < size.width * 1.4; x += size.width * 0.22) {
+      canvas.drawLine(
+        Offset(x, size.height),
+        Offset(x + size.width * 0.75, 0),
+        stripePaint,
+      );
+    }
+
+    final dotPaint = Paint()
+      ..color = _alphaColor(isLightPiece ? Colors.black : color, isLightPiece ? 0.09 : 0.20);
+    final dotRadius = size.width * 0.018;
+    final dots = [
+      Offset(size.width * 0.24, size.height * 0.24),
+      Offset(size.width * 0.76, size.height * 0.22),
+      Offset(size.width * 0.72, size.height * 0.74),
+    ];
+
+    for (final dot in dots) {
+      canvas.drawCircle(dot, dotRadius, dotPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(PlayfulPiecePainter oldDelegate) {
+    return color != oldDelegate.color || isLightPiece != oldDelegate.isLightPiece;
+  }
+}
+
 class PuzzlePieceBorderPainter extends CustomPainter {
   const PuzzlePieceBorderPainter({
     required this.clipper,
@@ -711,4 +779,22 @@ class PuzzlePieceBorderPainter extends CustomPainter {
 
 Color _alphaColor(Color color, double opacity) {
   return color.withAlpha((opacity.clamp(0, 1) * 255).round());
+}
+
+Color _lightenColor(Color color, double amount) {
+  return Color.fromARGB(
+    color.alpha,
+    color.red + ((255 - color.red) * amount).round(),
+    color.green + ((255 - color.green) * amount).round(),
+    color.blue + ((255 - color.blue) * amount).round(),
+  );
+}
+
+Color _darkenColor(Color color, double amount) {
+  return Color.fromARGB(
+    color.alpha,
+    (color.red * (1 - amount)).round(),
+    (color.green * (1 - amount)).round(),
+    (color.blue * (1 - amount)).round(),
+  );
 }
