@@ -307,7 +307,7 @@ class PuzzlePieceButton extends StatelessWidget {
     required this.connectorSize,
     required this.onPressed,
     this.foregroundColor = Colors.white,
-    this.borderColor = const Color(0x992A2522),
+    this.borderColor = const Color(0x99000000),
   });
 
   final IconData icon;
@@ -476,7 +476,7 @@ class RoundedPuzzlePieceClipper extends CustomClipper<Path> {
       size.width - (connectorSize * 2),
       size.height - (connectorSize * 2),
     );
-    final depth = connectorSize * 0.82;
+    final depth = connectorSize * 1.05;
 
     final path = Path()..moveTo(rect.left, rect.top);
 
@@ -533,41 +533,52 @@ class RoundedPuzzlePieceClipper extends CustomClipper<Path> {
     final length = (end.dx - start.dx).abs();
     final connectorStart = start.dx + (direction * length * 0.32);
     final connectorEnd = start.dx + (direction * length * 0.68);
-    final center = start.dx + (direction * length * 0.50);
+    final connectorLength = (connectorEnd - connectorStart).abs();
     final side = connector == PuzzleConnector.knob ? outwardSign : -outwardSign;
     final y = start.dy;
+
+    double xAt(double t) => connectorStart + (direction * connectorLength * t);
+    double yAt(double d) => y + (side * depth * d);
 
     path
       ..lineTo(connectorStart, y)
       ..cubicTo(
-        connectorStart + (direction * length * 0.05),
-        y,
-        center - (direction * length * 0.18),
-        y + (side * depth * 0.06),
-        center - (direction * length * 0.16),
-        y + (side * depth * 0.46),
+        xAt(0.10),
+        yAt(0.00),
+        xAt(0.16),
+        yAt(0.14),
+        xAt(0.10),
+        yAt(0.28),
       )
       ..cubicTo(
-        center - (direction * length * 0.14),
-        y + (side * depth * 1.02),
-        center - (direction * length * 0.05),
-        y + (side * depth * 1.16),
-        center,
-        y + (side * depth * 1.16),
+        xAt(0.02),
+        yAt(0.44),
+        xAt(0.03),
+        yAt(0.64),
+        xAt(0.14),
+        yAt(0.80),
       )
       ..cubicTo(
-        center + (direction * length * 0.05),
-        y + (side * depth * 1.16),
-        center + (direction * length * 0.14),
-        y + (side * depth * 1.02),
-        center + (direction * length * 0.16),
-        y + (side * depth * 0.46),
+        xAt(0.27),
+        yAt(1.00),
+        xAt(0.53),
+        yAt(1.08),
+        xAt(0.76),
+        yAt(0.96),
       )
       ..cubicTo(
-        center + (direction * length * 0.18),
-        y + (side * depth * 0.06),
-        connectorEnd - (direction * length * 0.05),
-        y,
+        xAt(0.91),
+        yAt(0.89),
+        xAt(0.95),
+        yAt(0.73),
+        xAt(0.87),
+        yAt(0.54),
+      )
+      ..cubicTo(
+        xAt(0.79),
+        yAt(0.35),
+        xAt(0.82),
+        yAt(0.00),
         connectorEnd,
         y,
       )
@@ -589,43 +600,54 @@ class RoundedPuzzlePieceClipper extends CustomClipper<Path> {
 
     final direction = end.dy > start.dy ? 1.0 : -1.0;
     final length = (end.dy - start.dy).abs();
-    final connectorStart = start.dy + (direction * length * 0.32);
-    final connectorEnd = start.dy + (direction * length * 0.68);
-    final center = start.dy + (direction * length * 0.50);
+    final connectorStart = start.dy + (direction * length * 0.28);
+    final connectorEnd = start.dy + (direction * length * 0.72);
+    final connectorLength = (connectorEnd - connectorStart).abs();
     final side = connector == PuzzleConnector.knob ? outwardSign : -outwardSign;
     final x = start.dx;
+
+    double xAt(double d) => x + (side * depth * d);
+    double yAt(double t) => connectorStart + (direction * connectorLength * t);
 
     path
       ..lineTo(x, connectorStart)
       ..cubicTo(
         x,
-        connectorStart + (direction * length * 0.05),
-        x + (side * depth * 0.06),
-        center - (direction * length * 0.18),
-        x + (side * depth * 0.46),
-        center - (direction * length * 0.16),
+        yAt(0.13),
+        xAt(0.15),
+        yAt(0.20),
+        xAt(0.28),
+        yAt(0.12),
       )
       ..cubicTo(
-        x + (side * depth * 1.02),
-        center - (direction * length * 0.14),
-        x + (side * depth * 1.16),
-        center - (direction * length * 0.05),
-        x + (side * depth * 1.16),
-        center,
+        xAt(0.49),
+        yAt(-0.02),
+        xAt(0.74),
+        yAt(0.12),
+        xAt(0.87),
+        yAt(0.37),
       )
       ..cubicTo(
-        x + (side * depth * 1.16),
-        center + (direction * length * 0.05),
-        x + (side * depth * 1.02),
-        center + (direction * length * 0.14),
-        x + (side * depth * 0.46),
-        center + (direction * length * 0.16),
+        xAt(1.00),
+        yAt(0.65),
+        xAt(0.89),
+        yAt(0.98),
+        xAt(0.66),
+        yAt(1.05),
       )
       ..cubicTo(
-        x + (side * depth * 0.06),
-        center + (direction * length * 0.18),
+        xAt(0.51),
+        yAt(1.10),
+        xAt(0.38),
+        yAt(1.03),
+        xAt(0.29),
+        yAt(0.92),
+      )
+      ..cubicTo(
+        xAt(0.19),
+        yAt(0.81),
         x,
-        connectorEnd - (direction * length * 0.05),
+        yAt(0.86),
         x,
         connectorEnd,
       )
