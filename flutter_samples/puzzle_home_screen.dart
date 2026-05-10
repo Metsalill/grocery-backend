@@ -1,149 +1,127 @@
 import 'package:flutter/material.dart';
+import 'package:grocery_app/providers/basket_provider.dart';
+import 'package:grocery_app/screens/categories_main_screen.dart';
+import 'package:grocery_app/services/auth_service.dart';
+import 'package:grocery_app/services/session.dart';
+import 'package:provider/provider.dart';
 
-void main() {
-  runApp(const PuzzleButtonsDemoApp());
-}
-
-class PuzzleButtonsDemoApp extends StatelessWidget {
-  const PuzzleButtonsDemoApp({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff1769aa)),
-        useMaterial3: true,
-      ),
-      home: const PuzzleHomeScreen(),
-    );
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String? userEmail;
+  String? firstName;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
   }
-}
 
-class PuzzleHomeScreen extends StatelessWidget {
-  const PuzzleHomeScreen({
-    super.key,
-    this.onPiecePressed,
-  });
+  Future<void> _loadProfile() async {
+    final profile = await AuthService().getProfile();
+    if (!mounted) return;
+    setState(() {
+      userEmail = profile?['email'] ?? 'Kasutaja';
+      firstName = profile?['first_name'] ?? '';
+    });
+  }
 
-  final ValueChanged<int>? onPiecePressed;
+  Future<void> _logout() async {
+    await AuthService().logout();
+    if (mounted) Navigator.pushReplacementNamed(context, '/login');
+  }
 
-  static const double _pieceSize = 250;
-  static const double _connectorSpace = 40;
-  static const double _baseSpan = _pieceSize - (_connectorSpace * 2);
+  void _navigateToCompare() => Navigator.pushNamed(context, '/compare');
+  void _navigateToBasket() => Navigator.pushNamed(context, '/basket');
+  void _navigateToProducts() => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const CategoriesMainScreen()),
+      );
+
+  Future<void> _navigateToBasketHistory() async {
+    final token = await Session.getToken();
+    if (!mounted) return;
+    if (token == null || token.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Palun logi sisse.')),
+      );
+      Navigator.pushNamed(context, '/login');
+    } else {
+      Navigator.pushNamed(context, '/basket-history');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final basketProvider = Provider.of<BasketProvider>(context);
+    final itemCount = basketProvider.totalQuantity;
+    final name = (firstName != null && firstName!.isNotEmpty)
+        ? firstName!
+        : (userEmail ?? '');
+
     return Scaffold(
-      backgroundColor: const Color(0xffeef3f8),
+      backgroundColor: const Color(0xFFF0EDE8),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFF0EDE8),
+        elevation: 0,
+        title: const Text(
+          'Hinnavõrdlus',
+          style: TextStyle(
+            color: Color(0xFF1A1A1A),
+            fontWeight: FontWeight.w800,
+            fontSize: 22,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout_rounded, color: Color(0xFF1A1A1A)),
+            onPressed: _logout,
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Choose a puzzle piece',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                'Tere tulemast,',
+                style: TextStyle(fontSize: 15, color: Colors.grey.shade600),
               ),
-              const SizedBox(height: 24),
+              Text(
+                name,
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xFF1A1A1A),
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 20),
               Expanded(
                 child: Center(
-                  child: FittedBox(
-                    fit: BoxFit.contain,
-                    child: SizedBox(
-                      width: 720,
-                      height: 570,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Positioned(
-                            left: 0,
-                            top: 0,
-                            child: PuzzlePieceButton(
-                              label: '1',
-                              color: const Color(0xffe91e63),
-                              edges: const PuzzlePieceEdges(
-                                top: PuzzleConnector.flat,
-                                right: PuzzleConnector.knob,
-                                bottom: PuzzleConnector.socket,
-                                left: PuzzleConnector.flat,
-                              ),
-                              onPressed: () => _handlePiecePressed(context, 1),
-                            ),
-                          ),
-                          Positioned(
-                            left: _baseSpan,
-                            top: 0,
-                            child: PuzzlePieceButton(
-                              label: '2',
-                              color: const Color(0xff1565c0),
-                              edges: const PuzzlePieceEdges(
-                                top: PuzzleConnector.flat,
-                                right: PuzzleConnector.knob,
-                                bottom: PuzzleConnector.knob,
-                                left: PuzzleConnector.socket,
-                              ),
-                              onPressed: () => _handlePiecePressed(context, 2),
-                            ),
-                          ),
-                          Positioned(
-                            left: 0,
-                            top: _baseSpan,
-                            child: PuzzlePieceButton(
-                              label: '3',
-                              color: const Color(0xffffca28),
-                              edges: const PuzzlePieceEdges(
-                                top: PuzzleConnector.knob,
-                                right: PuzzleConnector.knob,
-                                bottom: PuzzleConnector.socket,
-                                left: PuzzleConnector.knob,
-                              ),
-                              onPressed: () => _handlePiecePressed(context, 3),
-                            ),
-                          ),
-                          Positioned(
-                            left: _baseSpan,
-                            top: _baseSpan,
-                            child: PuzzlePieceButton(
-                              label: '4',
-                              color: const Color(0xff52c600),
-                              edges: const PuzzlePieceEdges(
-                                top: PuzzleConnector.socket,
-                                right: PuzzleConnector.socket,
-                                bottom: PuzzleConnector.socket,
-                                left: PuzzleConnector.socket,
-                              ),
-                              onPressed: () => _handlePiecePressed(context, 4),
-                            ),
-                          ),
-                          Positioned(
-                            left: 430,
-                            top: 280,
-                            child: Transform.rotate(
-                              angle: -0.18,
-                              child: PuzzlePieceButton(
-                                label: '5',
-                                color: Colors.white,
-                                foregroundColor: const Color(0xff263238),
-                                borderColor: const Color(0xff9e9e9e),
-                                edges: const PuzzlePieceEdges(
-                                  top: PuzzleConnector.knob,
-                                  right: PuzzleConnector.knob,
-                                  bottom: PuzzleConnector.socket,
-                                  left: PuzzleConnector.socket,
-                                ),
-                                onPressed: () =>
-                                    _handlePiecePressed(context, 5),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final size = constraints.maxWidth
+                          .clamp(0.0, constraints.maxHeight)
+                          .toDouble();
+
+                      return PuzzleGrid(
+                        size: size,
+                        itemCount: itemCount,
+                        onCompare: _navigateToCompare,
+                        onProducts: _navigateToProducts,
+                        onBasket: _navigateToBasket,
+                        onHistory: _navigateToBasketHistory,
+                        onLogout: _logout,
+                      );
+                    },
                   ),
                 ),
               ),
@@ -153,43 +131,164 @@ class PuzzleHomeScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  void _handlePiecePressed(BuildContext context, int pieceNumber) {
-    onPiecePressed?.call(pieceNumber);
+class PuzzleGrid extends StatelessWidget {
+  const PuzzleGrid({
+    super.key,
+    required this.size,
+    required this.itemCount,
+    required this.onCompare,
+    required this.onProducts,
+    required this.onBasket,
+    required this.onHistory,
+    required this.onLogout,
+  });
 
-    if (onPiecePressed != null) {
-      return;
-    }
+  final double size;
+  final int itemCount;
+  final VoidCallback onCompare;
+  final VoidCallback onProducts;
+  final VoidCallback onBasket;
+  final VoidCallback onHistory;
+  final VoidCallback onLogout;
 
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(content: Text('Puzzle piece $pieceNumber tapped')),
-      );
+  @override
+  Widget build(BuildContext context) {
+    final pieceSize = size * 0.42;
+    final connectorSpace = pieceSize * 0.16;
+    final step = pieceSize - (connectorSpace * 2);
+    final fifthSize = size * 0.36;
+
+    return SizedBox.square(
+      dimension: size,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Positioned(
+            left: size * 0.04,
+            top: size * 0.02,
+            child: PuzzlePieceButton(
+              icon: '📊',
+              label: 'Võrdle\nkorvi',
+              color: const Color(0xFFE8114B),
+              edges: const PuzzlePieceEdges(
+                top: PuzzleConnector.socket,
+                right: PuzzleConnector.knob,
+                bottom: PuzzleConnector.socket,
+                left: PuzzleConnector.socket,
+              ),
+              size: pieceSize,
+              connectorSpace: connectorSpace,
+              onPressed: onCompare,
+            ),
+          ),
+          Positioned(
+            left: size * 0.04 + step,
+            top: size * 0.02,
+            child: PuzzlePieceButton(
+              icon: '🛒',
+              label: 'Sirvi\ntooteid',
+              color: const Color(0xFF2196F3),
+              edges: const PuzzlePieceEdges(
+                top: PuzzleConnector.socket,
+                right: PuzzleConnector.knob,
+                bottom: PuzzleConnector.knob,
+                left: PuzzleConnector.socket,
+              ),
+              size: pieceSize,
+              connectorSpace: connectorSpace,
+              onPressed: onProducts,
+            ),
+          ),
+          Positioned(
+            left: size * 0.04,
+            top: size * 0.02 + step,
+            child: PuzzlePieceButton(
+              icon: '🧺',
+              label: 'Ostukorv${itemCount > 0 ? "\n($itemCount)" : ""}',
+              color: const Color(0xFFFFB703),
+              edges: const PuzzlePieceEdges(
+                top: PuzzleConnector.knob,
+                right: PuzzleConnector.knob,
+                bottom: PuzzleConnector.socket,
+                left: PuzzleConnector.knob,
+              ),
+              size: pieceSize,
+              connectorSpace: connectorSpace,
+              onPressed: onBasket,
+            ),
+          ),
+          Positioned(
+            left: size * 0.04 + step,
+            top: size * 0.02 + step,
+            child: PuzzlePieceButton(
+              icon: '🕐',
+              label: 'Korvi\najalugu',
+              color: const Color(0xFF5CB85C),
+              edges: const PuzzlePieceEdges(
+                top: PuzzleConnector.socket,
+                right: PuzzleConnector.socket,
+                bottom: PuzzleConnector.socket,
+                left: PuzzleConnector.socket,
+              ),
+              size: pieceSize,
+              connectorSpace: connectorSpace,
+              onPressed: onHistory,
+            ),
+          ),
+          Positioned(
+            left: size * 0.58,
+            top: size * 0.58,
+            child: Transform.rotate(
+              angle: -0.22,
+              child: PuzzlePieceButton(
+                icon: '🚪',
+                label: 'Logi\nvälja',
+                color: Colors.white,
+                foregroundColor: const Color(0xFF1A1A1A),
+                borderColor: const Color(0x66808080),
+                edges: const PuzzlePieceEdges(
+                  top: PuzzleConnector.knob,
+                  right: PuzzleConnector.knob,
+                  bottom: PuzzleConnector.socket,
+                  left: PuzzleConnector.socket,
+                ),
+                size: fifthSize,
+                connectorSpace: fifthSize * 0.16,
+                onPressed: onLogout,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
 class PuzzlePieceButton extends StatelessWidget {
   const PuzzlePieceButton({
     super.key,
+    required this.icon,
     required this.label,
     required this.color,
     required this.edges,
+    required this.size,
+    required this.connectorSpace,
     required this.onPressed,
     this.foregroundColor = Colors.white,
-    this.borderColor = const Color(0x55000000),
-    this.size = 250,
-    this.connectorSpace = 40,
+    this.borderColor = const Color(0x55FFFFFF),
   });
 
+  final String icon;
   final String label;
   final Color color;
   final Color foregroundColor;
   final Color borderColor;
   final PuzzlePieceEdges edges;
-  final VoidCallback onPressed;
   final double size;
   final double connectorSpace;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -197,20 +296,33 @@ class PuzzlePieceButton extends StatelessWidget {
       edges: edges,
       connectorSpace: connectorSpace,
     );
+    final labelStyle = TextStyle(
+      color: foregroundColor,
+      fontWeight: FontWeight.w800,
+      fontSize: (size * 0.075).clamp(13.0, 18.0).toDouble(),
+      height: 1.12,
+      shadows: [
+        Shadow(
+          color: _alphaColor(Colors.black, color == Colors.white ? 0.0 : 0.35),
+          blurRadius: 3,
+          offset: const Offset(0, 2),
+        ),
+      ],
+    );
 
     return Semantics(
       button: true,
-      label: 'Puzzle piece $label',
+      label: label.replaceAll('\n', ' '),
       child: SizedBox.square(
         dimension: size,
         child: Stack(
           children: [
             PhysicalShape(
               clipper: clipper,
-              color: color,
-              elevation: 8,
-              shadowColor: _alphaColor(Colors.black, 0.28),
               clipBehavior: Clip.antiAlias,
+              color: color,
+              elevation: 7,
+              shadowColor: _alphaColor(Colors.black, 0.25),
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
@@ -218,12 +330,26 @@ class PuzzlePieceButton extends StatelessWidget {
                   splashColor: _alphaColor(foregroundColor, 0.22),
                   highlightColor: _alphaColor(foregroundColor, 0.10),
                   child: Center(
-                    child: Text(
-                      label,
-                      style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                            color: foregroundColor,
-                            fontWeight: FontWeight.w800,
+                    child: Padding(
+                      padding: EdgeInsets.all(size * 0.17),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            icon,
+                            style: TextStyle(
+                              fontSize:
+                                  (size * 0.15).clamp(24.0, 36.0).toDouble(),
+                            ),
                           ),
+                          SizedBox(height: size * 0.02),
+                          Text(
+                            label,
+                            textAlign: TextAlign.center,
+                            style: labelStyle,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -478,7 +604,7 @@ class PuzzlePieceBorderPainter extends CustomPainter {
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.4;
+      ..strokeWidth = 2.2;
 
     canvas.drawPath(path, paint);
   }
