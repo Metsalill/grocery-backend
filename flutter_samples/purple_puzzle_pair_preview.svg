@@ -1,5 +1,5 @@
-<svg width="1120" height="520" viewBox="0 0 1120 520" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="1120" height="520" fill="#F7F4F0" />
+<svg width="980" height="430" viewBox="0 0 980 430" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="980" height="430" fill="#F7F4F0" />
   <defs>
     <path
       id="puzzle-piece"
@@ -32,48 +32,13 @@
          C162 240 135 224 113 240
          C100 250 84 242 84 226
          V160Z" />
-    <filter id="piece-shadow" x="0" y="0" width="1120" height="520" color-interpolation-filters="sRGB">
-      <feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#000000" flood-opacity="0.18" />
+    <filter id="piece-shadow" x="0" y="0" width="980" height="430" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="7" stdDeviation="6" flood-color="#000000" flood-opacity="0.16" />
     </filter>
   </defs>
 
   <g filter="url(#piece-shadow)">
-    <use href="#puzzle-piece" fill="#8D6AA0" transform="translate(20 10)" />
-    <use href="#puzzle-piece" fill="#B78BC9" transform="translate(464 10)" />
+    <use href="#puzzle-piece" fill="#B78BC9" transform="translate(398 -38)" />
+    <use href="#puzzle-piece" fill="#8D6AA0" transform="translate(-46 -38)" />
   </g>
-
-  <path
-    d="M84 160
-       H249
-       C264 160 272 146 263 134
-       C252 118 253 98 269 82
-       C289 62 327 55 361 66
-       C383 73 390 88 378 107
-       C366 126 371 160 397 160
-       H528
-       V226
-       C528 242 544 250 557 240
-       C579 224 606 240 619 270
-       C633 304 621 343 597 352
-       C581 358 568 349 558 336
-       C548 323 528 329 528 346
-       V413
-       H397
-       C371 413 366 379 378 360
-       C390 341 383 326 361 319
-       C327 308 289 315 269 335
-       C253 351 252 371 263 387
-       C272 399 264 413 249 413
-       H84
-       V346
-       C84 329 104 323 114 336
-       C124 349 137 358 153 352
-       C177 343 189 304 175 270
-       C162 240 135 224 113 240
-       C100 250 84 242 84 226
-       V160Z"
-    transform="translate(464 10)"
-    stroke="#FFFFFF"
-    stroke-width="3"
-    stroke-opacity="0.65" />
 </svg>
