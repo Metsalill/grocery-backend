@@ -158,16 +158,18 @@ class PuzzleGrid extends StatelessWidget {
     final pieceSize = (groupSize + (connectorSpace * 2)) / 2;
     final step = pieceSize - (connectorSpace * 2);
     final groupWidth = step + pieceSize;
-    final fifthSize = groupSize * 0.40;
-    final fullHeight = groupWidth + fifthSize + connectorSpace;
+    final fifthSize = groupSize * 0.36;
+    final fullHeight = groupWidth + (fifthSize * 0.58);
     final groupLeft = ((width - groupWidth) / 2).clamp(0.0, width).toDouble();
     final groupTop = ((height - fullHeight) / 2)
         .clamp(0.0, height - groupWidth)
         .toDouble();
-    final fifthLeft = (groupLeft + groupWidth - (fifthSize * 0.95))
+    final fifthLeft = (groupLeft + step + (pieceSize * 0.44))
         .clamp(0.0, width - fifthSize)
         .toDouble();
-    final fifthTop = groupTop + groupWidth + (connectorSpace * 0.40);
+    final fifthTop = (groupTop + step + (pieceSize * 0.52))
+        .clamp(0.0, height - fifthSize)
+        .toDouble();
 
     return SizedBox(
       width: width,
@@ -180,7 +182,7 @@ class PuzzleGrid extends StatelessWidget {
             top: groupTop + step,
             child: PuzzlePieceButton(
               icon: '🕐',
-              label: 'Korvi ajalugu',
+              label: 'Korvi\najalugu',
               color: const Color(0xFF5CB85C),
               edges: const PuzzlePieceEdges(
                 top: PuzzleConnector.socket,
@@ -198,7 +200,7 @@ class PuzzleGrid extends StatelessWidget {
             top: groupTop,
             child: PuzzlePieceButton(
               icon: '🛒',
-              label: 'Sirvi tooteid',
+              label: 'Sirvi\ntooteid',
               color: const Color(0xFF2196F3),
               edges: const PuzzlePieceEdges(
                 top: PuzzleConnector.socket,
@@ -216,7 +218,7 @@ class PuzzleGrid extends StatelessWidget {
             top: groupTop,
             child: PuzzlePieceButton(
               icon: '📊',
-              label: 'Võrdle korvi',
+              label: 'Võrdle\nkorvi',
               color: const Color(0xFFE8114B),
               edges: const PuzzlePieceEdges(
                 top: PuzzleConnector.socket,
@@ -234,7 +236,7 @@ class PuzzleGrid extends StatelessWidget {
             top: groupTop + step,
             child: PuzzlePieceButton(
               icon: '🧺',
-              label: 'Ostukorv${itemCount > 0 ? " ($itemCount)" : ""}',
+              label: 'Ostukorv${itemCount > 0 ? "\n($itemCount)" : ""}',
               color: const Color(0xFFFFB703),
               edges: const PuzzlePieceEdges(
                 top: PuzzleConnector.knob,
@@ -251,7 +253,7 @@ class PuzzleGrid extends StatelessWidget {
             left: fifthLeft,
             top: fifthTop,
             child: Transform.rotate(
-              angle: -0.16,
+              angle: -0.13,
               child: PuzzlePieceButton(
                 icon: '🍲',
                 label: 'Retseptid',
@@ -316,7 +318,7 @@ class PuzzlePieceButton extends StatelessWidget {
     final labelStyle = TextStyle(
       color: foregroundColor,
       fontWeight: FontWeight.w800,
-      fontSize: (size * 0.085).clamp(14.0, 18.0).toDouble(),
+      fontSize: (size * 0.092).clamp(15.0, 19.0).toDouble(),
       height: 1.12,
       shadows: [
         Shadow(
@@ -349,28 +351,29 @@ class PuzzlePieceButton extends StatelessWidget {
                   child: Stack(
                     children: [
                       Positioned(
-                        left: connectorSpace + (filledSize * 0.08),
-                        top: connectorSpace + (filledSize * 0.34),
-                        width: filledSize * 0.84,
-                        height: filledSize * 0.32,
+                        left: connectorSpace + (filledSize * 0.12),
+                        top: connectorSpace + (filledSize * 0.16),
+                        width: filledSize * 0.76,
+                        height: filledSize * 0.68,
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
-                          child: Row(
+                          child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
                                 icon,
                                 style: TextStyle(
-                                  fontSize: (size * 0.13)
-                                      .clamp(22.0, 32.0)
+                                  fontSize: (size * 0.16)
+                                      .clamp(26.0, 38.0)
                                       .toDouble(),
                                 ),
                               ),
-                              SizedBox(width: size * 0.035),
+                              SizedBox(height: size * 0.018),
                               Text(
                                 label,
-                                maxLines: 1,
+                                maxLines: 2,
                                 overflow: TextOverflow.visible,
+                                textAlign: TextAlign.center,
                                 style: labelStyle,
                               ),
                             ],
