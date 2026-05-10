@@ -3,12 +3,6 @@
 """
 Prisma.ee product image backfiller → Cloudflare R2
 
-- Selects products with empty image_url AND source_url on prismamarket.ee
-- Extracts the main product image from the product page
-- Uploads to R2 as <R2_PREFIX>prisma/<ean or id>.<ext>
-- Updates products.image_url with the public R2 URL
-- If a 'note' column exists and no image is found, sets: 'Kontrolli visuaali!'
-
 Run:
   pip install playwright psycopg2-binary
   python -m playwright install chromium
@@ -26,10 +20,6 @@ from typing import Optional, Tuple
 from urllib.parse import urljoin, urlparse
 from pathlib import Path
 
-# ---------------------------------------------------------------------------
-# Ensure repo root is importable so `settings.py` resolves even when CWD differs
-# (e.g. in GitHub Actions). This assumes the script lives in `<root>/scripts/`.
-# ---------------------------------------------------------------------------
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -44,13 +34,26 @@ from services.r2_client import upload_image_to_r2
 
 BASE = "https://prismamarket.ee"
 
-# -----------------------------------------------------------------------------
-# Small utils
+# Minimaalne pildi suurus — alla selle on placeholder
+MIN_IMAGE_BYTES = 5000
+
+# URL-id mida ei tohi kasutada
+BAD_URL_PATTERNS = [
+    "backend-fallback",
+    "placeholder",
+    "no-image",
+    "missing",
+    "default-product",
+]
+
+
 def jitter(a: float = 0.6, b: float = 1.4) -> None:
     time.sleep(random.uniform(a, b))
 
+
 def clean(s: Optional[str]) -> str:
     return re.sub(r"\s+", " ", (s or "")).strip()
+
 
 def guess_ext_from_mime(m: str) -> str:
     m = (m or "").lower()
@@ -62,7 +65,8 @@ def guess_ext_from_mime(m: str) -> str:
         return "webp"
     if "gif" in m:
         return "gif"
-    return "jpg"  # safe default
+    return "jpg"
+
 
 def is_prisma_url(u: str) -> bool:
     try:
@@ -70,12 +74,18 @@ def is_prisma_url(u: str) -> bool:
     except Exception:
         return False
 
-# -----------------------------------------------------------------------------
-# DB
+
+def is_bad_image_url(url: str) -> bool:
+    """Kontrolli kas URL on placeholder/fallback pilt."""
+    url_lower = url.lower()
+    return any(p in url_lower for p in BAD_URL_PATTERNS)
+
+
 def db_connect() -> PGConn:
     conn = psycopg2.connect(DATABASE_URL, connect_timeout=int(DB_CONNECT_TIMEOUT))
     conn.autocommit = True
     return conn
+
 
 def table_has_note_column(conn: PGConn) -> bool:
     with conn.cursor() as cur:
@@ -87,12 +97,10 @@ def table_has_note_column(conn: PGConn) -> bool:
         """)
         return cur.fetchone() is not None
 
+
 def select_missing_images(conn: PGConn, limit: int) -> list[dict]:
-    """
-    Pick Prisma rows where image_url is null/empty and we have a source_url.
-    """
     sql = """
-        SELECT id, ean, product_name, source_url
+        SELECT id, ean, name, source_url
         FROM products
         WHERE (image_url IS NULL OR image_url = '')
           AND source_url IS NOT NULL
@@ -105,22 +113,24 @@ def select_missing_images(conn: PGConn, limit: int) -> list[dict]:
         cur.execute(sql, (limit,))
         return [dict(r) for r in cur.fetchall()]
 
+
 def update_image_url(conn: PGConn, pid: int, url: str) -> None:
     with conn.cursor() as cur:
         cur.execute("UPDATE products SET image_url = %s WHERE id = %s", (url, pid))
+
 
 def set_note(conn: PGConn, pid: int, msg: str) -> None:
     with conn.cursor() as cur:
         cur.execute("UPDATE products SET note = %s WHERE id = %s", (msg, pid))
 
-# -----------------------------------------------------------------------------
-# Scraping helpers
+
 IMG_SELECTORS = [
-    "main img[alt][src]",          # primary product image in main area
-    "img[alt][src]",               # any alt+src image
-    "img.product-image[src]",      # common class patterns
-    "img[data-src]",               # lazy images
+    "main img[alt][src]",
+    "img[alt][src]",
+    "img.product-image[src]",
+    "img[data-src]",
 ]
+
 
 def accept_cookies(page) -> None:
     for sel in [
@@ -139,54 +149,64 @@ def accept_cookies(page) -> None:
         except Exception:
             pass
 
+
 def extract_image_src(page) -> Optional[str]:
-    # Try explicit img selectors
+    """Leia pildi URL — filtreeri välja placeholder URL-id."""
+    candidates = []
+
     for sel in IMG_SELECTORS:
         try:
-            img = page.locator(sel).first
-            if img.count() > 0:
-                src = img.get_attribute("src") or img.get_attribute("data-src")
-                if src and not src.startswith("data:"):
-                    return src
+            locs = page.locator(sel)
+            count = locs.count()
+            for i in range(min(count, 10)):
+                loc = locs.nth(i)
+                src = loc.get_attribute("src") or loc.get_attribute("data-src")
+                if src and not src.startswith("data:") and not is_bad_image_url(src):
+                    candidates.append(src)
         except Exception:
             continue
 
-    # Fallback to OpenGraph / link rel
+    # Eelistame prismamarket CDN URL-e
+    for src in candidates:
+        if "cdn.s-cloud.fi" in src or "prisma" in src.lower():
+            return src
+
+    # Fallback: esimene mis pole halb
+    if candidates:
+        return candidates[0]
+
+    # OpenGraph
     try:
         og = page.locator("meta[property='og:image']").first
         if og.count() > 0:
             content = og.get_attribute("content")
-            if content:
+            if content and not is_bad_image_url(content):
                 return content
-    except Exception:
-        pass
-    try:
-        link = page.locator("link[rel='image_src']").first
-        if link.count() > 0:
-            href = link.get_attribute("href")
-            if href:
-                return href
     except Exception:
         pass
 
     return None
 
+
 def fetch_image_bytes(context, url: str) -> Tuple[Optional[bytes], Optional[str]]:
-    """
-    Download image bytes using Playwright's request client.
-    Returns (bytes, content_type)
-    """
+    """Lae pilt — kontrolli suurus ja et pole placeholder."""
+    if is_bad_image_url(url):
+        return None, None
     try:
         resp = context.request.get(url, timeout=20000)
         if not resp.ok:
             return None, None
         content_type = resp.headers.get("content-type") or ""
-        return resp.body(), content_type
+        data = resp.body()
+        # Kontrolli minimaalne suurus
+        if len(data) < MIN_IMAGE_BYTES:
+            print(f"  [warn] image too small ({len(data)} bytes) — likely placeholder")
+            return None, None
+        return data, content_type
     except Exception:
         return None, None
 
-# -----------------------------------------------------------------------------
-# Main
+
 def backfill_images(limit: int = 500, headless: bool = True):
     conn = db_connect()
     rows = select_missing_images(conn, limit)
@@ -215,9 +235,11 @@ def backfill_images(limit: int = 500, headless: bool = True):
         for r in rows:
             pid = r["id"]
             ean = (r.get("ean") or "").strip()
+            name = (r.get("name") or "")[:50]
             src_url = r["source_url"]
 
-            # Safety filters
+            print(f"[{pid}] {name}")
+
             if not is_prisma_url(src_url):
                 skipped += 1
                 continue
@@ -226,7 +248,7 @@ def backfill_images(limit: int = 500, headless: bool = True):
                 page.goto(src_url, timeout=30000)
                 page.wait_for_load_state("domcontentloaded")
             except PlaywrightTimeout:
-                print(f"[{pid}] timeout loading page")
+                print(f"  timeout loading page")
                 failed += 1
                 if has_note:
                     set_note(conn, pid, "Kontrolli visuaali!")
@@ -236,18 +258,18 @@ def backfill_images(limit: int = 500, headless: bool = True):
 
             img_src = extract_image_src(page)
             if not img_src:
-                print(f"[{pid}] no image src found")
+                print(f"  no valid image src found")
                 failed += 1
                 if has_note:
                     set_note(conn, pid, "Kontrolli visuaali!")
                 continue
 
             img_url_abs = urljoin(BASE, img_src)
+            print(f"  → {img_url_abs[:80]}")
 
-            # Download bytes
             data, mime = fetch_image_bytes(context, img_url_abs)
             if not data:
-                print(f"[{pid}] failed to download image: {img_url_abs}")
+                print(f"  failed to download valid image")
                 failed += 1
                 if has_note:
                     set_note(conn, pid, "Kontrolli visuaali!")
@@ -257,23 +279,21 @@ def backfill_images(limit: int = 500, headless: bool = True):
             fname = f"{ean}.{ext}" if ean else f"id-{pid}.{ext}"
             key = f"{R2_PREFIX}prisma/{fname}"
 
-            # Upload → R2
             try:
                 public_url = upload_image_to_r2(data, key, mime or "image/jpeg")
             except Exception as e:
-                print(f"[{pid}] R2 upload failed: {e}")
+                print(f"  R2 upload failed: {e}")
                 failed += 1
                 if has_note:
                     set_note(conn, pid, "Kontrolli visuaali!")
                 continue
 
-            # Update DB
             try:
                 update_image_url(conn, pid, public_url or r2_public_url(key))
                 uploaded += 1
-                print(f"[{pid}] ✅ uploaded → {public_url or r2_public_url(key)}")
+                print(f"  ✅ {public_url or r2_public_url(key)}")
             except Exception as e:
-                print(f"[{pid}] DB update failed: {e}")
+                print(f"  DB update failed: {e}")
                 failed += 1
 
             jitter(0.6, 1.5)
@@ -282,14 +302,14 @@ def backfill_images(limit: int = 500, headless: bool = True):
 
     print(f"\nDone. Uploaded: {uploaded}, Failed: {failed}, Skipped: {skipped}.")
 
-# -----------------------------------------------------------------------------
+
 def main():
     ap = argparse.ArgumentParser(description="Prisma image backfill → R2")
     ap.add_argument("--limit", type=int, default=500, help="Max rows to process")
     ap.add_argument("--headless", type=int, default=1, help="Run browser headless (1/0)")
     args = ap.parse_args()
-
     backfill_images(limit=args.limit, headless=bool(args.headless))
+
 
 if __name__ == "__main__":
     main()
