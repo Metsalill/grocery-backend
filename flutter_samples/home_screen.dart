@@ -150,8 +150,8 @@ class PuzzleGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const pieceSourceSize = 300.0;
-    const connectorSourceSize = 36.0;
-    const pieceGapSource = 2.0;
+    const connectorSourceSize = 34.0;
+    const pieceGapSource = 1.0;
     const stepSource =
         pieceSourceSize - (connectorSourceSize * 2) + pieceGapSource;
     const groupSourceSize = pieceSourceSize + stepSource;
@@ -296,7 +296,7 @@ class PuzzleGrid extends StatelessWidget {
   }
 }
 
-class PuzzlePieceButton extends StatelessWidget {
+class PuzzlePieceButton extends StatefulWidget {
   const PuzzlePieceButton({
     super.key,
     required this.icon,
@@ -307,7 +307,7 @@ class PuzzlePieceButton extends StatelessWidget {
     required this.connectorSize,
     required this.onPressed,
     this.foregroundColor = Colors.white,
-    this.borderColor = const Color(0x99000000),
+    this.borderColor = const Color(0xFFFFFFFF),
   });
 
   final IconData icon;
@@ -321,20 +321,30 @@ class PuzzlePieceButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   @override
+  State<PuzzlePieceButton> createState() => _PuzzlePieceButtonState();
+}
+
+class _PuzzlePieceButtonState extends State<PuzzlePieceButton> {
+  bool _pressed = false;
+
+  @override
   Widget build(BuildContext context) {
     final clipper = RoundedPuzzlePieceClipper(
-      edges: edges,
-      connectorSize: connectorSize,
+      edges: widget.edges,
+      connectorSize: widget.connectorSize,
     );
     final labelStyle = TextStyle(
-      color: foregroundColor,
+      color: widget.foregroundColor,
       fontWeight: FontWeight.w900,
-      fontSize: (size * 0.068).clamp(16.0, 24.0).toDouble(),
+      fontSize: (widget.size * 0.068).clamp(16.0, 24.0).toDouble(),
       height: 1.04,
       letterSpacing: -0.45,
       shadows: [
         Shadow(
-          color: _alphaColor(Colors.black, color == Colors.white ? 0.0 : 0.28),
+          color: _alphaColor(
+            Colors.black,
+            widget.color == Colors.white ? 0.0 : 0.28,
+          ),
           blurRadius: 3,
           offset: const Offset(0, 1.4),
         ),
@@ -343,83 +353,106 @@ class PuzzlePieceButton extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: label.replaceAll('\n', ' '),
-      child: SizedBox.square(
-        dimension: size,
-        child: Stack(
-          children: [
-            PhysicalShape(
-              clipper: clipper,
-              clipBehavior: Clip.antiAlias,
-              color: color,
-              elevation: 4,
-              shadowColor: _alphaColor(Colors.black, 0.18),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      _lightenColor(color, color == Colors.white ? 0.0 : 0.18),
-                      color,
-                      _darkenColor(color, color == Colors.white ? 0.04 : 0.10),
-                    ],
+      label: widget.label.replaceAll('\n', ' '),
+      child: AnimatedScale(
+        duration: const Duration(milliseconds: 90),
+        curve: Curves.easeOut,
+        scale: _pressed ? 0.975 : 1,
+        child: AnimatedSlide(
+          duration: const Duration(milliseconds: 90),
+          curve: Curves.easeOut,
+          offset: _pressed ? const Offset(0, 0.012) : Offset.zero,
+          child: SizedBox.square(
+            dimension: widget.size,
+            child: Stack(
+              children: [
+                PhysicalShape(
+                  clipper: clipper,
+                  clipBehavior: Clip.antiAlias,
+                  color: widget.color,
+                  elevation: _pressed ? 1.5 : 4,
+                  shadowColor: _alphaColor(
+                    Colors.black,
+                    _pressed ? 0.10 : 0.18,
                   ),
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: onPressed,
-                    splashColor: _alphaColor(foregroundColor, 0.22),
-                    highlightColor: _alphaColor(foregroundColor, 0.10),
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          left: size * 0.22,
-                          top: size * 0.28,
-                          width: size * 0.50,
-                          height: size * 0.46,
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  icon,
-                                  color: foregroundColor,
-                                  size: (size * 0.16)
-                                      .clamp(30.0, 46.0)
-                                      .toDouble(),
-                                ),
-                                SizedBox(height: size * 0.012),
-                                Text(
-                                  label,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.visible,
-                                  textAlign: TextAlign.center,
-                                  style: labelStyle,
-                                ),
-                              ],
-                            ),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          _lightenColor(
+                            widget.color,
+                            widget.color == Colors.white ? 0.0 : 0.18,
                           ),
+                          widget.color,
+                          _darkenColor(
+                            widget.color,
+                            widget.color == Colors.white ? 0.04 : 0.10,
+                          ),
+                        ],
+                      ),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: widget.onPressed,
+                        onHighlightChanged: (highlighted) {
+                          setState(() => _pressed = highlighted);
+                        },
+                        splashColor: _alphaColor(widget.foregroundColor, 0.20),
+                        highlightColor:
+                            _alphaColor(widget.foregroundColor, 0.08),
+                        child: Stack(
+                          children: [
+                            Positioned(
+                              left: widget.size * 0.22,
+                              top: widget.size * 0.28,
+                              width: widget.size * 0.50,
+                              height: widget.size * 0.46,
+                              child: FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      widget.icon,
+                                      color: widget.foregroundColor,
+                                      size: (widget.size * 0.16)
+                                          .clamp(30.0, 46.0)
+                                          .toDouble(),
+                                    ),
+                                    SizedBox(height: widget.size * 0.012),
+                                    Text(
+                                      widget.label,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.visible,
+                                      textAlign: TextAlign.center,
+                                      style: labelStyle,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-            Positioned.fill(
-              child: IgnorePointer(
-                child: CustomPaint(
-                  painter: PuzzlePieceBorderPainter(
-                    clipper: clipper,
-                    color: borderColor,
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: CustomPaint(
+                      painter: PuzzlePieceBorderPainter(
+                        clipper: clipper,
+                        color: widget.borderColor,
+                      ),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -476,7 +509,7 @@ class RoundedPuzzlePieceClipper extends CustomClipper<Path> {
       size.width - (connectorSize * 2),
       size.height - (connectorSize * 2),
     );
-    final depth = connectorSize * 0.92;
+    final depth = connectorSize * 1.08;
 
     final path = Path()..moveTo(rect.left, rect.top);
 
