@@ -156,8 +156,8 @@ class PuzzleGrid extends StatelessWidget {
 
     const groupSourceWidth = pieceWidth + stepX;
     const groupSourceHeight = pieceHeight + stepY;
-    const fifthScaleFactor = 0.54;
-    const gapSource = 42.0;
+    const fifthScaleFactor = 0.66;
+    const gapSource = 26.0;
     const fullSourceHeight =
         groupSourceHeight + gapSource + (pieceHeight * fifthScaleFactor);
 
@@ -244,7 +244,7 @@ class PuzzleGrid extends StatelessWidget {
             left: fifthLeft,
             top: fifthTop,
             child: Transform.rotate(
-              angle: -0.10,
+              angle: -0.06,
               child: PuzzlePieceButton(
                 icon: Icons.restaurant_menu_rounded,
                 label: 'Retseptid',
@@ -297,7 +297,7 @@ class PuzzlePieceButton extends StatelessWidget {
     final labelStyle = TextStyle(
       color: foregroundColor,
       fontWeight: FontWeight.w800,
-      fontSize: (height * 0.12).clamp(14.0, 20.0).toDouble(),
+      fontSize: (height * 0.145).clamp(16.0, 23.0).toDouble(),
       height: 1.12,
       shadows: [
         Shadow(
@@ -353,10 +353,10 @@ class PuzzlePieceButton extends StatelessWidget {
                           ),
                         ),
                         Positioned(
-                          left: width * 0.25,
-                          top: height * 0.34,
-                          width: width * 0.43,
-                          height: height * 0.42,
+                          left: width * 0.20,
+                          top: height * 0.30,
+                          width: width * 0.52,
+                          height: height * 0.43,
                           child: FittedBox(
                             fit: BoxFit.scaleDown,
                             child: Column(
@@ -365,11 +365,11 @@ class PuzzlePieceButton extends StatelessWidget {
                                 Icon(
                                   icon,
                                   color: foregroundColor,
-                                  size: (height * 0.18)
-                                      .clamp(24.0, 38.0)
+                                  size: (height * 0.23)
+                                      .clamp(28.0, 44.0)
                                       .toDouble(),
                                 ),
-                                SizedBox(height: height * 0.018),
+                                SizedBox(height: height * 0.012),
                                 Text(
                                   label,
                                   maxLines: 2,
@@ -612,7 +612,7 @@ class PlayfulPiecePainter extends CustomPainter {
     final stripePaint = Paint()
       ..color = _alphaColor(
         isLightPiece ? Colors.black : color,
-        isLightPiece ? 0.05 : 0.13,
+        isLightPiece ? 0.035 : 0.08,
       )
       ..style = PaintingStyle.stroke
       ..strokeWidth = size.width * 0.018;
@@ -630,7 +630,7 @@ class PlayfulPiecePainter extends CustomPainter {
     final dotPaint = Paint()
       ..color = _alphaColor(
         isLightPiece ? Colors.black : color,
-        isLightPiece ? 0.09 : 0.20,
+        isLightPiece ? 0.07 : 0.13,
       );
     final dotRadius = size.width * 0.018;
     final dots = [
