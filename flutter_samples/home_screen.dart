@@ -71,9 +71,9 @@ class _HomeScreenState extends State<HomeScreen> {
         : (userEmail ?? '');
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF0EDE8),
+      backgroundColor: const Color(0xFFF4F0EA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF0EDE8),
+        backgroundColor: const Color(0xFFF4F0EA),
         elevation: 0,
         title: const Text(
           'Hinnavõrdlus',
@@ -121,7 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             buttonSize,
                             Icons.insert_chart_rounded,
                             'Võrdle korvi',
-                            const Color(0xFFE91E63),
+                            const Color(0xFFC94B7C),
                             Colors.white,
                             _navigateToCompare,
                           ),
@@ -130,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             buttonSize,
                             Icons.shopping_cart_rounded,
                             'Sirvi tooteid',
-                            const Color(0xFF1476C9),
+                            const Color(0xFF2F80A8),
                             Colors.white,
                             _navigateToProducts,
                           ),
@@ -143,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             buttonSize,
                             Icons.shopping_basket_rounded,
                             itemCount > 0 ? 'Ostukorv ($itemCount)' : 'Ostukorv',
-                            const Color(0xFFFFB703),
+                            const Color(0xFFF4B23E),
                             const Color(0xFF1A1A1A),
                             _navigateToBasket,
                           ),
@@ -152,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             buttonSize,
                             Icons.history_rounded,
                             'Korvi ajalugu',
-                            const Color(0xFF55C600),
+                            const Color(0xFF6FBF4A),
                             Colors.white,
                             _navigateToBasketHistory,
                           ),
@@ -185,16 +185,16 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Material(
         color: color,
         borderRadius: BorderRadius.circular(20),
-        elevation: 3,
-        shadowColor: color.withAlpha(80),
+        elevation: 2,
+        shadowColor: color.withAlpha(56),
         child: InkWell(
           onTap: onPressed,
           borderRadius: BorderRadius.circular(20),
-          splashColor: Colors.white24,
+          splashColor: Colors.white.withAlpha(45),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: fg, size: 40),
+              Icon(icon, color: fg, size: 38),
               const SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -204,7 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(
                     color: fg,
                     fontWeight: FontWeight.w800,
-                    fontSize: 15,
+                    fontSize: 15.5,
                     height: 1.2,
                   ),
                 ),
@@ -229,8 +229,8 @@ class _HomeScreenState extends State<HomeScreen> {
         Material(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          elevation: 2,
-          shadowColor: Colors.black.withAlpha(24),
+          elevation: 1,
+          shadowColor: Colors.black.withAlpha(18),
           child: InkWell(
             onTap: _showRecipesComingSoon,
             borderRadius: BorderRadius.circular(20),
@@ -253,7 +253,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const Icon(
                     Icons.restaurant_menu_rounded,
-                    color: Color(0xFFE91E63),
+                    color: Color(0xFFC94B7C),
                   ),
                 ],
               ),
@@ -283,6 +283,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(16),
+      elevation: 0.5,
+      shadowColor: Colors.black.withAlpha(10),
       child: InkWell(
         onTap: _showRecipesComingSoon,
         borderRadius: BorderRadius.circular(16),
@@ -296,7 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 28,
                 alignment: Alignment.center,
                 decoration: const BoxDecoration(
-                  color: Color(0xFFFFB703),
+                  color: Color(0xFFF4B23E),
                   shape: BoxShape.circle,
                 ),
                 child: Text(
