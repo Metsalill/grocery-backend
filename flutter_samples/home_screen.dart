@@ -56,6 +56,12 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _showRecipesComingSoon() {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(const SnackBar(content: Text('Retseptid tulekul!')));
+  }
+
   @override
   Widget build(BuildContext context) {
     final basketProvider = Provider.of<BasketProvider>(context);
@@ -85,8 +91,8 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -103,859 +109,222 @@ class _HomeScreenState extends State<HomeScreen> {
                   letterSpacing: -0.5,
                 ),
               ),
-              const SizedBox(height: 20),
-              Expanded(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return PuzzleGrid(
-                      width: constraints.maxWidth,
-                      height: constraints.maxHeight,
-                      itemCount: itemCount,
-                      onCompare: _navigateToCompare,
-                      onProducts: _navigateToProducts,
-                      onBasket: _navigateToBasket,
-                      onHistory: _navigateToBasketHistory,
-                    );
-                  },
-                ),
+              const SizedBox(height: 16),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final buttonSize = (constraints.maxWidth - 12) / 2;
+                  return Column(
+                    children: [
+                      Row(
+                        children: [
+                          _squareButton(
+                            buttonSize,
+                            Icons.insert_chart_rounded,
+                            'Võrdle korvi',
+                            const Color(0xFFE91E63),
+                            Colors.white,
+                            _navigateToCompare,
+                          ),
+                          const SizedBox(width: 12),
+                          _squareButton(
+                            buttonSize,
+                            Icons.shopping_cart_rounded,
+                            'Sirvi tooteid',
+                            const Color(0xFF1476C9),
+                            Colors.white,
+                            _navigateToProducts,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          _squareButton(
+                            buttonSize,
+                            Icons.shopping_basket_rounded,
+                            itemCount > 0 ? 'Ostukorv ($itemCount)' : 'Ostukorv',
+                            const Color(0xFFFFB703),
+                            const Color(0xFF1A1A1A),
+                            _navigateToBasket,
+                          ),
+                          const SizedBox(width: 12),
+                          _squareButton(
+                            buttonSize,
+                            Icons.history_rounded,
+                            'Korvi ajalugu',
+                            const Color(0xFF55C600),
+                            Colors.white,
+                            _navigateToBasketHistory,
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
               ),
+              const SizedBox(height: 18),
+              _recipeSearchSection(),
             ],
           ),
         ),
       ),
     );
   }
-}
 
-class PuzzleGrid extends StatelessWidget {
-  const PuzzleGrid({
-    super.key,
-    required this.width,
-    required this.height,
-    required this.itemCount,
-    required this.onCompare,
-    required this.onProducts,
-    required this.onBasket,
-    required this.onHistory,
-  });
-
-  final double width;
-  final double height;
-  final int itemCount;
-  final VoidCallback onCompare;
-  final VoidCallback onProducts;
-  final VoidCallback onBasket;
-  final VoidCallback onHistory;
-
-  @override
-  Widget build(BuildContext context) {
-    const pieceSourceSize = 300.0;
-    const connectorSourceSize = 30.0;
-    const pieceGapSource = 5.0;
-    const stepSource =
-        pieceSourceSize - (connectorSourceSize * 2) + pieceGapSource;
-    const groupSourceSize = pieceSourceSize + stepSource;
-    const recipeSourceHeight = 230.0;
-    const gapSource = 22.0;
-    const fullSourceHeight =
-        groupSourceSize + gapSource + recipeSourceHeight;
-
-    final widthScale = (width * 0.98) / groupSourceSize;
-    final heightScale = (height * 0.96) / fullSourceHeight;
-    final scale = widthScale < heightScale ? widthScale : heightScale;
-
-    final pieceSize = pieceSourceSize * scale;
-    final connectorSize = connectorSourceSize * scale;
-    final step = stepSource * scale;
-    final groupSize = groupSourceSize * scale;
-    final recipeGap = gapSource * scale;
-    final recipeSectionWidth = groupSize * 0.94;
-    final recipeSectionHeight = recipeSourceHeight * scale;
-
-    final groupLeft = ((width - groupSize) / 2).clamp(0.0, width).toDouble();
-    final groupTop =
-        ((height - (groupSize + recipeGap + recipeSectionHeight)) / 2)
-        .clamp(0.0, height - groupSize)
-        .toDouble();
-    final recipeLeft = (groupLeft + ((groupSize - recipeSectionWidth) / 2))
-        .clamp(0.0, width - recipeSectionWidth)
-        .toDouble();
-    final recipeTop = (groupTop + groupSize + recipeGap)
-        .clamp(0.0, height - recipeSectionHeight)
-        .toDouble();
-
+  Widget _squareButton(
+    double size,
+    IconData icon,
+    String label,
+    Color color,
+    Color fg,
+    VoidCallback onPressed,
+  ) {
     return SizedBox(
-      width: width,
-      height: height,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned(
-            left: groupLeft + step,
-            top: groupTop + step,
-            child: PuzzlePieceButton(
-              icon: Icons.history_rounded,
-              label: 'Korvi\najalugu',
-              color: const Color(0xFF55C600),
-              edges: const PuzzlePieceEdges(
-                top: PuzzleConnector.socket,
-                right: PuzzleConnector.socket,
-                bottom: PuzzleConnector.knob,
-                left: PuzzleConnector.socket,
-              ),
-              size: pieceSize,
-              connectorSize: connectorSize,
-              onPressed: onHistory,
-            ),
-          ),
-          Positioned(
-            left: groupLeft + step,
-            top: groupTop,
-            child: PuzzlePieceButton(
-              icon: Icons.shopping_cart_rounded,
-              label: 'Sirvi\ntooteid',
-              color: const Color(0xFF1476C9),
-              edges: const PuzzlePieceEdges(
-                top: PuzzleConnector.socket,
-                right: PuzzleConnector.knob,
-                bottom: PuzzleConnector.knob,
-                left: PuzzleConnector.socket,
-              ),
-              size: pieceSize,
-              connectorSize: connectorSize,
-              onPressed: onProducts,
-            ),
-          ),
-          Positioned(
-            left: groupLeft,
-            top: groupTop,
-            child: PuzzlePieceButton(
-              icon: Icons.insert_chart_rounded,
-              label: 'Võrdle\nkorvi',
-              color: const Color(0xFFE91E63),
-              edges: const PuzzlePieceEdges(
-                top: PuzzleConnector.knob,
-                right: PuzzleConnector.knob,
-                bottom: PuzzleConnector.socket,
-                left: PuzzleConnector.socket,
-              ),
-              size: pieceSize,
-              connectorSize: connectorSize,
-              onPressed: onCompare,
-            ),
-          ),
-          Positioned(
-            left: groupLeft,
-            top: groupTop + step,
-            child: PuzzlePieceButton(
-              icon: Icons.shopping_basket_rounded,
-              label: 'Ostukorv${itemCount > 0 ? "\n($itemCount)" : ""}',
-              color: const Color(0xFFFFD600),
-              foregroundColor: const Color(0xFF1A1A1A),
-              edges: const PuzzlePieceEdges(
-                top: PuzzleConnector.knob,
-                right: PuzzleConnector.knob,
-                bottom: PuzzleConnector.socket,
-                left: PuzzleConnector.knob,
-              ),
-              size: pieceSize,
-              connectorSize: connectorSize,
-              onPressed: onBasket,
-            ),
-          ),
-          Positioned(
-            left: recipeLeft,
-            top: recipeTop,
-            child: SizedBox(
-              width: recipeSectionWidth,
-              height: recipeSectionHeight,
-              child: const RecipeSearchPreview(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class RecipeSearchPreview extends StatelessWidget {
-  const RecipeSearchPreview({super.key});
-
-  static const _recipes = [
-    'Kana-riisi kauss',
-    'Tomatine pasta juustuga',
-    'Ahjukartul köögiviljadega',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Container(
-          height: 52,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: const Color(0x22000000)),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withAlpha(18),
-                blurRadius: 14,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Row(
+      width: size,
+      height: size,
+      child: Material(
+        color: color,
+        borderRadius: BorderRadius.circular(20),
+        elevation: 3,
+        shadowColor: color.withAlpha(80),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(20),
+          splashColor: Colors.white24,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.search_rounded, color: Colors.grey.shade700),
-              const SizedBox(width: 10),
-              Expanded(
+              Icon(icon, color: fg, size: 40),
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Text(
-                  'Otsi retsepte...',
+                  label,
+                  textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
+                    color: fg,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                    height: 1.2,
                   ),
                 ),
               ),
-              const Icon(
-                Icons.restaurant_menu_rounded,
-                color: Color(0xFFE91E63),
-              ),
             ],
           ),
         ),
-        const SizedBox(height: 12),
+      ),
+    );
+  }
+
+  Widget _recipeSearchSection() {
+    const recipes = [
+      'Kana-riisi kauss',
+      'Tomatine pasta juustuga',
+      'Ahjukartul köögiviljadega',
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          elevation: 2,
+          shadowColor: Colors.black.withAlpha(24),
+          child: InkWell(
+            onTap: _showRecipesComingSoon,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              height: 56,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Icon(Icons.search_rounded, color: Colors.grey.shade700),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Otsi retsepte...',
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const Icon(
+                    Icons.restaurant_menu_rounded,
+                    color: Color(0xFFE91E63),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
         const Text(
           'Populaarsed retseptid',
           style: TextStyle(
             color: Color(0xFF1A1A1A),
-            fontSize: 16,
+            fontSize: 17,
             fontWeight: FontWeight.w900,
             letterSpacing: -0.2,
           ),
         ),
-        const SizedBox(height: 7),
-        Expanded(
-          child: Column(
+        const SizedBox(height: 10),
+        for (var i = 0; i < recipes.length; i++) ...[
+          _recipeSuggestionTile(i + 1, recipes[i]),
+          if (i != recipes.length - 1) const SizedBox(height: 8),
+        ],
+      ],
+    );
+  }
+
+  Widget _recipeSuggestionTile(int index, String title) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: _showRecipesComingSoon,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          height: 48,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Row(
             children: [
-              for (var i = 0; i < _recipes.length; i++) ...[
-                Expanded(
-                  child: _RecipeSuggestionTile(
-                    index: i + 1,
-                    title: _recipes[i],
+              Container(
+                width: 28,
+                height: 28,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFFFB703),
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  '$index',
+                  style: const TextStyle(
+                    color: Color(0xFF1A1A1A),
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
-                if (i != _recipes.length - 1) const SizedBox(height: 7),
-              ],
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Color(0xFF1A1A1A),
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14.5,
+                  ),
+                ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: Color(0xFF77716B)),
             ],
           ),
         ),
-      ],
-    );
-  }
-}
-
-class _RecipeSuggestionTile extends StatelessWidget {
-  const _RecipeSuggestionTile({
-    required this.index,
-    required this.title,
-  });
-
-  final int index;
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFFFFF),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0x14000000)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 24,
-            height: 24,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              color: Color(0xFFFFD600),
-              shape: BoxShape.circle,
-            ),
-            child: Text(
-              '$index',
-              style: const TextStyle(
-                color: Color(0xFF1A1A1A),
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Color(0xFF1A1A1A),
-                fontWeight: FontWeight.w800,
-                fontSize: 14.5,
-              ),
-            ),
-          ),
-          const Icon(Icons.chevron_right_rounded, color: Color(0xFF77716B)),
-        ],
       ),
     );
   }
-}
-
-class PuzzlePieceButton extends StatefulWidget {
-  const PuzzlePieceButton({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.edges,
-    required this.size,
-    required this.connectorSize,
-    required this.onPressed,
-    this.foregroundColor = Colors.white,
-    this.borderColor = const Color(0xCC000000),
-  });
-
-  final IconData icon;
-  final String label;
-  final Color color;
-  final Color foregroundColor;
-  final Color borderColor;
-  final PuzzlePieceEdges edges;
-  final double size;
-  final double connectorSize;
-  final VoidCallback onPressed;
-
-  @override
-  State<PuzzlePieceButton> createState() => _PuzzlePieceButtonState();
-}
-
-class _PuzzlePieceButtonState extends State<PuzzlePieceButton> {
-  bool _pressed = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final clipper = RoundedPuzzlePieceClipper(
-      edges: widget.edges,
-      connectorSize: widget.connectorSize,
-    );
-    final labelStyle = TextStyle(
-      color: widget.foregroundColor,
-      fontWeight: FontWeight.w900,
-      fontSize: (widget.size * 0.068).clamp(16.0, 24.0).toDouble(),
-      height: 1.04,
-      letterSpacing: -0.45,
-      shadows: [
-        Shadow(
-          color: _alphaColor(
-            Colors.black,
-            widget.color == Colors.white ? 0.0 : 0.28,
-          ),
-          blurRadius: 3,
-          offset: const Offset(0, 1.4),
-        ),
-      ],
-    );
-
-    return Semantics(
-      button: true,
-      label: widget.label.replaceAll('\n', ' '),
-      child: AnimatedScale(
-        duration: const Duration(milliseconds: 90),
-        curve: Curves.easeOut,
-        scale: _pressed ? 0.975 : 1,
-        child: AnimatedSlide(
-          duration: const Duration(milliseconds: 90),
-          curve: Curves.easeOut,
-          offset: _pressed ? const Offset(0, 0.012) : Offset.zero,
-          child: SizedBox.square(
-            dimension: widget.size,
-            child: Stack(
-              children: [
-                PhysicalShape(
-                  clipper: clipper,
-                  clipBehavior: Clip.antiAlias,
-                  color: widget.color,
-                  elevation: _pressed ? 1.5 : 4,
-                  shadowColor: _alphaColor(
-                    Colors.black,
-                    _pressed ? 0.10 : 0.18,
-                  ),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          _lightenColor(
-                            widget.color,
-                            widget.color == Colors.white ? 0.0 : 0.18,
-                          ),
-                          widget.color,
-                          _darkenColor(
-                            widget.color,
-                            widget.color == Colors.white ? 0.04 : 0.10,
-                          ),
-                        ],
-                      ),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: widget.onPressed,
-                        onHighlightChanged: (highlighted) {
-                          setState(() => _pressed = highlighted);
-                        },
-                        splashColor: _alphaColor(widget.foregroundColor, 0.20),
-                        highlightColor:
-                            _alphaColor(widget.foregroundColor, 0.08),
-                        child: Stack(
-                          children: [
-                            Positioned(
-                              left: widget.size * 0.22,
-                              top: widget.size * 0.28,
-                              width: widget.size * 0.50,
-                              height: widget.size * 0.46,
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      widget.icon,
-                                      color: widget.foregroundColor,
-                                      size: (widget.size * 0.16)
-                                          .clamp(30.0, 46.0)
-                                          .toDouble(),
-                                    ),
-                                    SizedBox(height: widget.size * 0.012),
-                                    Text(
-                                      widget.label,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.visible,
-                                      textAlign: TextAlign.center,
-                                      style: labelStyle,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: CustomPaint(
-                      painter: PuzzlePieceBorderPainter(
-                        clipper: clipper,
-                        color: widget.borderColor,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class PuzzlePieceEdges {
-  const PuzzlePieceEdges({
-    required this.top,
-    required this.right,
-    required this.bottom,
-    required this.left,
-  });
-
-  final PuzzleConnector top;
-  final PuzzleConnector right;
-  final PuzzleConnector bottom;
-  final PuzzleConnector left;
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        other is PuzzlePieceEdges &&
-            top == other.top &&
-            right == other.right &&
-            bottom == other.bottom &&
-            left == other.left;
-  }
-
-  @override
-  int get hashCode => Object.hash(top, right, bottom, left);
-}
-
-enum PuzzleConnector {
-  flat,
-  knob,
-  socket,
-}
-
-class RoundedPuzzlePieceClipper extends CustomClipper<Path> {
-  const RoundedPuzzlePieceClipper({
-    required this.edges,
-    required this.connectorSize,
-  });
-
-  final PuzzlePieceEdges edges;
-  final double connectorSize;
-
-  @override
-  Path getClip(Size size) {
-    final rect = Rect.fromLTWH(
-      connectorSize,
-      connectorSize,
-      size.width - (connectorSize * 2),
-      size.height - (connectorSize * 2),
-    );
-    final depth = connectorSize * 1.25;
-
-    final path = Path()..moveTo(rect.left, rect.top);
-
-    _drawHorizontalEdge(
-      path,
-      start: Offset(rect.left, rect.top),
-      end: Offset(rect.right, rect.top),
-      connector: edges.top,
-      depth: depth,
-      outwardSign: -1,
-    );
-    _drawVerticalEdge(
-      path,
-      start: Offset(rect.right, rect.top),
-      end: Offset(rect.right, rect.bottom),
-      connector: edges.right,
-      depth: depth,
-      outwardSign: 1,
-    );
-    _drawHorizontalEdge(
-      path,
-      start: Offset(rect.right, rect.bottom),
-      end: Offset(rect.left, rect.bottom),
-      connector: edges.bottom,
-      depth: depth,
-      outwardSign: 1,
-    );
-    _drawVerticalEdge(
-      path,
-      start: Offset(rect.left, rect.bottom),
-      end: Offset(rect.left, rect.top),
-      connector: edges.left,
-      depth: depth,
-      outwardSign: -1,
-    );
-
-    return path..close();
-  }
-
-  void _drawHorizontalEdge(
-    Path path, {
-    required Offset start,
-    required Offset end,
-    required PuzzleConnector connector,
-    required double depth,
-    required double outwardSign,
-  }) {
-    if (connector == PuzzleConnector.flat) {
-      path.lineTo(end.dx, end.dy);
-      return;
-    }
-
-    final length = (end.dx - start.dx).abs();
-    final left = start.dx < end.dx ? start.dx : end.dx;
-    final connectorStart = left + (length * 0.34);
-    final connectorEnd = left + (length * 0.66);
-    final connectorLength = connectorEnd - connectorStart;
-    final side = connector == PuzzleConnector.knob ? outwardSign : -outwardSign;
-    final y = start.dy;
-
-    double xAt(double t) => connectorStart + (connectorLength * t);
-    double yAt(double d) => y + (side * depth * d);
-
-    final forward = end.dx > start.dx;
-
-    if (forward) {
-      path
-        ..lineTo(connectorStart, y)
-        ..cubicTo(
-          xAt(0.10),
-          yAt(0.00),
-          xAt(0.16),
-          yAt(0.14),
-          xAt(0.10),
-          yAt(0.28),
-        )
-        ..cubicTo(
-          xAt(0.02),
-          yAt(0.44),
-          xAt(0.03),
-          yAt(0.64),
-          xAt(0.14),
-          yAt(0.80),
-        )
-        ..cubicTo(
-          xAt(0.27),
-          yAt(1.00),
-          xAt(0.53),
-          yAt(1.08),
-          xAt(0.76),
-          yAt(0.96),
-        )
-        ..cubicTo(
-          xAt(0.91),
-          yAt(0.89),
-          xAt(0.95),
-          yAt(0.73),
-          xAt(0.87),
-          yAt(0.54),
-        )
-        ..cubicTo(
-          xAt(0.79),
-          yAt(0.35),
-          xAt(0.82),
-          yAt(0.00),
-          connectorEnd,
-          y,
-        )
-        ..lineTo(end.dx, end.dy);
-      return;
-    }
-
-    path
-      ..lineTo(connectorEnd, y)
-      ..cubicTo(
-        xAt(0.82),
-        yAt(0.00),
-        xAt(0.79),
-        yAt(0.35),
-        xAt(0.87),
-        yAt(0.54),
-      )
-      ..cubicTo(
-        xAt(0.95),
-        yAt(0.73),
-        xAt(0.91),
-        yAt(0.89),
-        xAt(0.76),
-        yAt(0.96),
-      )
-      ..cubicTo(
-        xAt(0.53),
-        yAt(1.08),
-        xAt(0.27),
-        yAt(1.00),
-        xAt(0.14),
-        yAt(0.80),
-      )
-      ..cubicTo(
-        xAt(0.03),
-        yAt(0.64),
-        xAt(0.02),
-        yAt(0.44),
-        xAt(0.10),
-        yAt(0.28),
-      )
-      ..cubicTo(
-        xAt(0.16),
-        yAt(0.14),
-        xAt(0.10),
-        yAt(0.00),
-        connectorStart,
-        y,
-      )
-      ..lineTo(end.dx, end.dy);
-  }
-
-  void _drawVerticalEdge(
-    Path path, {
-    required Offset start,
-    required Offset end,
-    required PuzzleConnector connector,
-    required double depth,
-    required double outwardSign,
-  }) {
-    if (connector == PuzzleConnector.flat) {
-      path.lineTo(end.dx, end.dy);
-      return;
-    }
-
-    final length = (end.dy - start.dy).abs();
-    final top = start.dy < end.dy ? start.dy : end.dy;
-    final connectorStart = top + (length * 0.34);
-    final connectorEnd = top + (length * 0.66);
-    final connectorLength = connectorEnd - connectorStart;
-    final side = connector == PuzzleConnector.knob ? outwardSign : -outwardSign;
-    final x = start.dx;
-
-    double xAt(double d) => x + (side * depth * d);
-    double yAt(double t) => connectorStart + (connectorLength * t);
-
-    final forward = end.dy > start.dy;
-
-    if (forward) {
-      path
-        ..lineTo(x, connectorStart)
-        ..cubicTo(
-          x,
-          yAt(0.10),
-          xAt(0.14),
-          yAt(0.16),
-          xAt(0.28),
-          yAt(0.10),
-        )
-        ..cubicTo(
-          xAt(0.44),
-          yAt(0.02),
-          xAt(0.64),
-          yAt(0.03),
-          xAt(0.80),
-          yAt(0.14),
-        )
-        ..cubicTo(
-          xAt(1.00),
-          yAt(0.27),
-          xAt(1.08),
-          yAt(0.53),
-          xAt(0.96),
-          yAt(0.76),
-        )
-        ..cubicTo(
-          xAt(0.89),
-          yAt(0.91),
-          xAt(0.73),
-          yAt(0.95),
-          xAt(0.54),
-          yAt(0.87),
-        )
-        ..cubicTo(
-          xAt(0.35),
-          yAt(0.79),
-          x,
-          yAt(0.82),
-          x,
-          connectorEnd,
-        )
-        ..lineTo(end.dx, end.dy);
-      return;
-    }
-
-    path
-      ..lineTo(x, connectorEnd)
-      ..cubicTo(
-        x,
-        yAt(0.82),
-        xAt(0.35),
-        yAt(0.79),
-        xAt(0.54),
-        yAt(0.87),
-      )
-      ..cubicTo(
-        xAt(0.73),
-        yAt(0.95),
-        xAt(0.89),
-        yAt(0.91),
-        xAt(0.96),
-        yAt(0.76),
-      )
-      ..cubicTo(
-        xAt(1.08),
-        yAt(0.53),
-        xAt(1.00),
-        yAt(0.27),
-        xAt(0.80),
-        yAt(0.14),
-      )
-      ..cubicTo(
-        xAt(0.64),
-        yAt(0.03),
-        xAt(0.44),
-        yAt(0.02),
-        xAt(0.28),
-        yAt(0.10),
-      )
-      ..cubicTo(
-        xAt(0.14),
-        yAt(0.16),
-        x,
-        yAt(0.10),
-        x,
-        connectorStart,
-      )
-      ..lineTo(end.dx, end.dy);
-  }
-
-  @override
-  bool shouldReclip(RoundedPuzzlePieceClipper oldClipper) {
-    return edges != oldClipper.edges ||
-        connectorSize != oldClipper.connectorSize;
-  }
-}
-
-class PuzzlePieceBorderPainter extends CustomPainter {
-  const PuzzlePieceBorderPainter({
-    required this.clipper,
-    required this.color,
-  });
-
-  final RoundedPuzzlePieceClipper clipper;
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final path = clipper.getClip(size);
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4
-      ..strokeJoin = StrokeJoin.round;
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(PuzzlePieceBorderPainter oldDelegate) {
-    return clipper != oldDelegate.clipper || color != oldDelegate.color;
-  }
-}
-
-Color _alphaColor(Color color, double opacity) {
-  return color.withAlpha((opacity.clamp(0, 1) * 255).round());
-}
-
-Color _lightenColor(Color color, double amount) {
-  return Color.fromARGB(
-    color.alpha,
-    color.red + ((255 - color.red) * amount).round(),
-    color.green + ((255 - color.green) * amount).round(),
-    color.blue + ((255 - color.blue) * amount).round(),
-  );
-}
-
-Color _darkenColor(Color color, double amount) {
-  return Color.fromARGB(
-    color.alpha,
-    (color.red * (1 - amount)).round(),
-    (color.green * (1 - amount)).round(),
-    (color.blue * (1 - amount)).round(),
-  );
 }
