@@ -307,7 +307,7 @@ class PuzzlePieceButton extends StatefulWidget {
     required this.connectorSize,
     required this.onPressed,
     this.foregroundColor = Colors.white,
-    this.borderColor = const Color(0xFFFFFFFF),
+    this.borderColor = const Color(0xCC000000),
   });
 
   final IconData icon;
@@ -804,18 +804,13 @@ class PuzzlePieceBorderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final path = clipper.getClip(size);
-    final outlinePaint = Paint()
-      ..color = const Color(0xAA000000)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.65;
-    final separatorPaint = Paint()
+    final paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.75;
+      ..strokeWidth = 1.4
+      ..strokeJoin = StrokeJoin.round;
 
-    canvas
-      ..drawPath(path, outlinePaint)
-      ..drawPath(path, separatorPaint);
+    canvas.drawPath(path, paint);
   }
 
   @override
