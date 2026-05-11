@@ -155,10 +155,10 @@ class PuzzleGrid extends StatelessWidget {
     const stepSource =
         pieceSourceSize - (connectorSourceSize * 2) + pieceGapSource;
     const groupSourceSize = pieceSourceSize + stepSource;
-    const fifthScaleFactor = 0.66;
-    const gapSource = 26.0;
+    const recipeSourceHeight = 230.0;
+    const gapSource = 22.0;
     const fullSourceHeight =
-        groupSourceSize + gapSource + (pieceSourceSize * fifthScaleFactor);
+        groupSourceSize + gapSource + recipeSourceHeight;
 
     final widthScale = (width * 0.98) / groupSourceSize;
     final heightScale = (height * 0.96) / fullSourceHeight;
@@ -168,19 +168,20 @@ class PuzzleGrid extends StatelessWidget {
     final connectorSize = connectorSourceSize * scale;
     final step = stepSource * scale;
     final groupSize = groupSourceSize * scale;
-    final fifthSize = pieceSize * fifthScaleFactor;
-    final fifthConnectorSize = connectorSize * fifthScaleFactor;
-    final fifthGap = gapSource * scale;
+    final recipeGap = gapSource * scale;
+    final recipeSectionWidth = groupSize * 0.94;
+    final recipeSectionHeight = recipeSourceHeight * scale;
 
     final groupLeft = ((width - groupSize) / 2).clamp(0.0, width).toDouble();
-    final groupTop = ((height - (groupSize + fifthGap + fifthSize)) / 2)
+    final groupTop =
+        ((height - (groupSize + recipeGap + recipeSectionHeight)) / 2)
         .clamp(0.0, height - groupSize)
         .toDouble();
-    final fifthLeft = (groupLeft + ((groupSize - fifthSize) / 2))
-        .clamp(0.0, width - fifthSize)
+    final recipeLeft = (groupLeft + ((groupSize - recipeSectionWidth) / 2))
+        .clamp(0.0, width - recipeSectionWidth)
         .toDouble();
-    final fifthTop = (groupTop + groupSize + fifthGap)
-        .clamp(0.0, height - fifthSize)
+    final recipeTop = (groupTop + groupSize + recipeGap)
+        .clamp(0.0, height - recipeSectionHeight)
         .toDouble();
 
     return SizedBox(
@@ -263,33 +264,151 @@ class PuzzleGrid extends StatelessWidget {
             ),
           ),
           Positioned(
-            left: fifthLeft,
-            top: fifthTop,
-            child: Transform.rotate(
-              angle: -0.06,
-              child: PuzzlePieceButton(
-                icon: Icons.restaurant_menu_rounded,
-                label: 'Retseptid',
-                color: Colors.white,
-                foregroundColor: const Color(0xFF1A1A1A),
-                edges: const PuzzlePieceEdges(
-                  top: PuzzleConnector.knob,
-                  right: PuzzleConnector.knob,
-                  bottom: PuzzleConnector.socket,
-                  left: PuzzleConnector.socket,
+            left: recipeLeft,
+            top: recipeTop,
+            child: SizedBox(
+              width: recipeSectionWidth,
+              height: recipeSectionHeight,
+              child: const RecipeSearchPreview(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class RecipeSearchPreview extends StatelessWidget {
+  const RecipeSearchPreview({super.key});
+
+  static const _recipes = [
+    'Kana-riisi kauss',
+    'Tomatine pasta juustuga',
+    'Ahjukartul köögiviljadega',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          height: 52,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: const Color(0x22000000)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(18),
+                blurRadius: 14,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.search_rounded, color: Colors.grey.shade700),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Otsi retsepte...',
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-                size: fifthSize,
-                connectorSize: fifthConnectorSize,
-                onPressed: () {
-                  ScaffoldMessenger.of(context)
-                    ..hideCurrentSnackBar()
-                    ..showSnackBar(
-                      const SnackBar(content: Text('Retseptid tulekul!')),
-                    );
-                },
+              ),
+              const Icon(
+                Icons.restaurant_menu_rounded,
+                color: Color(0xFFE91E63),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        const Text(
+          'Populaarsed retseptid',
+          style: TextStyle(
+            color: Color(0xFF1A1A1A),
+            fontSize: 16,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.2,
+          ),
+        ),
+        const SizedBox(height: 7),
+        Expanded(
+          child: Column(
+            children: [
+              for (var i = 0; i < _recipes.length; i++) ...[
+                Expanded(
+                  child: _RecipeSuggestionTile(
+                    index: i + 1,
+                    title: _recipes[i],
+                  ),
+                ),
+                if (i != _recipes.length - 1) const SizedBox(height: 7),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RecipeSuggestionTile extends StatelessWidget {
+  const _RecipeSuggestionTile({
+    required this.index,
+    required this.title,
+  });
+
+  final int index;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFFFFF),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0x14000000)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            alignment: Alignment.center,
+            decoration: const BoxDecoration(
+              color: Color(0xFFFFD600),
+              shape: BoxShape.circle,
+            ),
+            child: Text(
+              '$index',
+              style: const TextStyle(
+                color: Color(0xFF1A1A1A),
+                fontWeight: FontWeight.w900,
               ),
             ),
           ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Color(0xFF1A1A1A),
+                fontWeight: FontWeight.w800,
+                fontSize: 14.5,
+              ),
+            ),
+          ),
+          const Icon(Icons.chevron_right_rounded, color: Color(0xFF77716B)),
         ],
       ),
     );
