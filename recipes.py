@@ -56,7 +56,6 @@ SKIP_INGREDIENTS = {
     "mixed herbs", "seasoning", "oil spray",
 }
 
-# Otsingusõnad andmebaasis (eesti keeles)
 SEARCH_TERMS = {
     "spaghetti": ["spaghetti"],
     "fettuccine": ["fettuccine", "pasta"],
@@ -198,7 +197,6 @@ async def find_product_for_ingredient(db, ingredient_en: str):
                 p.image_url,
                 p.brand,
                 p.size_text,
-                p.is_per_kg,
                 MIN(pr.price) as min_price
             FROM products p
             JOIN prices pr ON pr.product_id = p.id
@@ -208,7 +206,7 @@ async def find_product_for_ingredient(db, ingredient_en: str):
                 'pcare_oral_care','pcare_other','pcare_feminine_hygiene',
                 'baby_diapers','pet_cat_wet','pet_dog_wet','pet_cat_dry','pet_dog_dry'
               )
-            GROUP BY p.id, p.name, p.chain, p.image_url, p.brand, p.size_text, p.is_per_kg
+            GROUP BY p.id, p.name, p.chain, p.image_url, p.brand, p.size_text
             ORDER BY min_price ASC
             LIMIT 1
         """, f"%{term}%")
@@ -222,7 +220,7 @@ async def find_product_for_ingredient(db, ingredient_en: str):
                 "image_url": r["image_url"] or "",
                 "brand": r["brand"] or "",
                 "size_text": r["size_text"] or "",
-                "is_per_kg": r["is_per_kg"] or False,
+                "is_per_kg": (r["size_text"] or "").lower() == "kg",
                 "price": float(r["min_price"]) if r["min_price"] else 0.0,
                 "quantity": 1,
             }
