@@ -5,33 +5,19 @@ router = APIRouter()
 
 THEMEALDB_BASE = "https://www.themealdb.com/api/json/v1/1"
 
-# 10 retsepti otsitakse nime järgi TheMealDB-st
-FEATURED_MEAL_NAMES = [
-    "Spaghetti Carbonara",
-    "Creme Brulee",
-    "Lasagne",
-    "Pizza Margherita",
-    "Buffalo Wings",
-    "Sushi",
-    "Mussels with Fennel",
-    "Beef and Mustard Pie",
-    "Stuffed Capsicum",
-    "Fettuccine Alfredo",
+# (otsingusõna TheMealDB-s, eestikeelne nimi)
+FEATURED_MEALS = [
+    ("Spaghetti Carbonara", "Spaghetti Carbonara"),
+    ("White chocolate creme brulee", "Creme Brûlée"),
+    ("Lasagne", "Lasanje"),
+    ("Pizza Express Margherita", "Margherita Pizza"),
+    ("Buffalo Wings", "Kanatiivad"),
+    ("Sushi", "Sushi"),
+    ("Mussels with Fennel", "Sinimerekarbid"),
+    ("Beef and Mustard Pie", "Ühepajatoit veiselihaga"),
+    ("Stuffed Capsicum", "Täidisega paprika"),
+    ("Fettuccine Alfredo", "Alfredo pasta"),
 ]
-
-# Eestikeelsed nimed
-ESTONIAN_NAMES = {
-    "Spaghetti Carbonara": "Spaghetti Carbonara",
-    "Creme Brulee": "Creme Brûlée",
-    "Lasagne": "Lasanje",
-    "Pizza Margherita": "Margherita Pizza",
-    "Buffalo Wings": "Kanatiivad",
-    "Sushi": "Sushi",
-    "Mussels with Fennel": "Sinimerekarbid",
-    "Beef and Mustard Pie": "Ühepajatoit veiselihaga",
-    "Stuffed Capsicum": "Täidisega paprika (kapsarullid)",
-    "Fettuccine Alfredo": "Alfredo pasta",
-}
 
 INGREDIENT_TRANSLATIONS = {
     "chicken": "kana",
@@ -68,25 +54,30 @@ INGREDIENT_TRANSLATIONS = {
     "cherry tomatoes": "kirsstomatid",
     "tomato puree": "tomatipasta",
     "tomato sauce": "tomatikaste",
+    "tomato paste": "tomatipasta",
     "tinned tomatoes": "konservtomatid",
     "chopped tomatoes": "hakitud tomatid",
     "olive oil": "oliiviõli",
     "oil": "õli",
     "vegetable oil": "taimeõli",
+    "rapeseed oil": "rapsiõli",
     "butter": "või",
     "milk": "piim",
     "cream": "koor",
     "double cream": "vahukoor",
     "heavy cream": "vahukoor",
     "whipping cream": "vahukoor",
+    "creme fraiche": "hapukoor",
     "egg": "muna",
     "eggs": "munad",
     "egg yolks": "munakollased",
     "egg yolk": "munakollane",
     "cheese": "juust",
     "parmesan": "parmesan",
+    "parmesan cheese": "parmesan",
     "pecorino": "pecorino",
     "mozzarella": "mozzarella",
+    "mozzarella balls": "mozzarella",
     "cheddar": "cheddar",
     "ricotta": "ricotta",
     "mascarpone": "mascarpone",
@@ -97,9 +88,10 @@ INGREDIENT_TRANSLATIONS = {
     "sugar": "suhkur",
     "caster sugar": "peensuhkur",
     "vanilla extract": "vaniljeekstrakt",
-    "vanilla sugar": "vanillsuhkur",
+    "vanilla": "vaniljekaun",
     "flour": "jahu",
     "plain flour": "nisujahu",
+    "puff pastry": "lehttainas",
     "water": "vesi",
     "stock": "puljong",
     "chicken stock": "kanapuljong",
@@ -116,6 +108,7 @@ INGREDIENT_TRANSLATIONS = {
     "green pepper": "roheline paprika",
     "capsicum": "paprika",
     "bell pepper": "paprika",
+    "green beans": "rohelised oad",
     "lemon": "sidrun",
     "lemon juice": "sidrunimahl",
     "lime": "laim",
@@ -123,6 +116,7 @@ INGREDIENT_TRANSLATIONS = {
     "cucumber": "kurk",
     "ginger": "ingver",
     "soy sauce": "sojakaste",
+    "rice wine": "riisivein",
     "rice vinegar": "riisiäädikas",
     "sesame oil": "seesamiõli",
     "sesame seeds": "seesamiseemned",
@@ -137,6 +131,7 @@ INGREDIENT_TRANSLATIONS = {
     "breadcrumbs": "riivsai",
     "bread": "leib",
     "basil": "basiilik",
+    "basil leaves": "basiilik",
     "parsley": "petersell",
     "oregano": "pune",
     "thyme": "tüümian",
@@ -145,7 +140,7 @@ INGREDIENT_TRANSLATIONS = {
     "mussels": "merekarbid",
     "white wine": "valge vein",
     "red wine": "punane vein",
-    "tomato paste": "tomatipasta",
+    "white chocolate chips": "valge šokolaad",
     "cinnamon": "kaneel",
     "nutmeg": "muskaatpähkel",
 }
@@ -177,23 +172,21 @@ def parse_ingredients(meal: dict) -> list[dict]:
 
 @router.get("/recipes")
 async def get_recipes():
-    """Tagastab 10 retsepti TheMealDB-st"""
     recipes = []
     async with httpx.AsyncClient(timeout=15.0) as client:
-        for meal_name in FEATURED_MEAL_NAMES:
+        for search_name, estonian_name in FEATURED_MEALS:
             try:
                 resp = await client.get(
                     f"{THEMEALDB_BASE}/search.php",
-                    params={"s": meal_name}
+                    params={"s": search_name}
                 )
                 data = resp.json()
                 if not data.get("meals"):
                     continue
                 meal = data["meals"][0]
-                name_et = ESTONIAN_NAMES.get(meal_name, meal["strMeal"])
                 recipes.append({
                     "id": meal["idMeal"],
-                    "name": name_et,
+                    "name": estonian_name,
                     "name_en": meal["strMeal"],
                     "category": meal["strCategory"],
                     "area": meal["strArea"],
@@ -209,20 +202,14 @@ async def get_recipes():
 
 @router.get("/recipes/{meal_id}")
 async def get_recipe(meal_id: str):
-    """Tagastab ühe retsepti täisdetailidega"""
     async with httpx.AsyncClient(timeout=10.0) as client:
         try:
             resp = await client.get(f"{THEMEALDB_BASE}/lookup.php?i={meal_id}")
             data = resp.json()
             meal = data["meals"][0]
-            name_et = next(
-                (et for en, et in ESTONIAN_NAMES.items()
-                 if en.lower() in meal["strMeal"].lower()),
-                meal["strMeal"]
-            )
             return {
                 "id": meal["idMeal"],
-                "name": name_et,
+                "name": meal["strMeal"],
                 "name_en": meal["strMeal"],
                 "category": meal["strCategory"],
                 "area": meal["strArea"],
