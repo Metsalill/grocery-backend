@@ -176,7 +176,7 @@ def parse_ingredients(meal: dict) -> list[dict]:
     return ingredients
 
 
-async def find_product_for_ingredient(db, ingredient_en: str) -> dict | None:
+async def find_product_for_ingredient(db, ingredient_en: str):
     name_lower = ingredient_en.lower().strip()
     if name_lower in SKIP_INGREDIENTS:
         return None
