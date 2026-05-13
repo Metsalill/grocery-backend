@@ -32,6 +32,7 @@ from admin.routes import router as admin_router
 from basket_history import router as basket_history_router
 from api.upload_image import router as upload_image_router
 from admin.image_gallery import router as image_admin_router
+from recipes import router as recipes_router
 
 # UPDATED IMPORT PATHS
 from api.categories import router as categories_router
@@ -133,6 +134,7 @@ app.include_router(basket_history_router)
 app.include_router(upload_image_router)
 app.include_router(image_admin_router)
 app.include_router(categories_router)
+app.include_router(recipes_router)
 if stores_router:
     app.include_router(stores_router)
 
@@ -140,10 +142,11 @@ if stores_router:
 app.include_router(products_router, prefix="/api")
 app.include_router(selections_router, prefix="/api")
 app.include_router(compare_router, prefix="/api")
-if stores_router:
-    app.include_router(stores_router, prefix="/api")
 app.include_router(basket_history_router, prefix="/api")
 app.include_router(categories_router, prefix="/api")
+app.include_router(recipes_router, prefix="/api")
+if stores_router:
+    app.include_router(stores_router, prefix="/api")
 
 
 @app.get("/robots.txt", response_class=PlainTextResponse)
