@@ -150,6 +150,115 @@ SEARCH_TERMS = {
     "rosemary": ["rosmariin"],
 }
 
+# Lubatud sub_code-d iga ingrediendi jaoks -- taksonoomia v2 jargi
+INGREDIENT_SUB_CODES = {
+    # Pasta, riis
+    "spaghetti":        ["dry_pasta_rice"],
+    "fettuccine":       ["dry_pasta_rice"],
+    "lasagne sheets":   ["dry_pasta_rice"],
+    "pasta":            ["dry_pasta_rice"],
+    "rice":             ["dry_pasta_rice"],
+    "sushi rice":       ["dry_pasta_rice"],
+    "basmati rice":     ["dry_pasta_rice"],
+    # Munad
+    "egg":              ["dairy_eggs"],
+    "eggs":             ["dairy_eggs"],
+    "egg yolks":        ["dairy_eggs"],
+    # Liha
+    "bacon":            ["meat_hams"],
+    "pancetta":         ["meat_hams"],
+    "chicken wings":    ["meat_poultry"],
+    "chicken breast":   ["meat_poultry"],
+    "chicken breasts":  ["meat_poultry"],
+    "chicken thighs":   ["meat_poultry"],
+    "whole chicken":    ["meat_poultry"],
+    "beef":             ["meat_beef_lamb_game"],
+    "minced beef":      ["meat_minced"],
+    "ground beef":      ["meat_minced"],
+    "pork":             ["meat_pork"],
+    # Kala
+    "salmon":           ["fish_fresh", "fish_salted_smoked"],
+    "clams":            ["fish_fresh", "fish_other", "fish_processed"],
+    "mussels":          ["fish_fresh", "fish_other", "fish_processed"],
+    # Piimatooted
+    "butter":           ["dairy_butter_margarine"],
+    "milk":             ["dairy_milk"],
+    "cream":            ["dairy_cream_sourcream"],
+    "double cream":     ["dairy_cream_sourcream"],
+    "heavy cream":      ["dairy_cream_sourcream"],
+    "creme fraiche":    ["dairy_cream_sourcream"],
+    # Juustud
+    "parmesan":         ["cheese_regular", "cheese_delicatessen"],
+    "parmesan cheese":  ["cheese_regular", "cheese_delicatessen"],
+    "pecorino":         ["cheese_regular", "cheese_delicatessen"],
+    "mozzarella":       ["cheese_regular"],
+    "mozzarella balls": ["cheese_regular"],
+    "cheddar":          ["cheese_regular"],
+    "cheese":           ["cheese_regular", "cheese_delicatessen"],
+    # Kuivained
+    "plain flour":      ["dry_flour_sugar_baking"],
+    "flour":            ["dry_flour_sugar_baking"],
+    "sugar":            ["dry_flour_sugar_baking"],
+    "caster sugar":     ["dry_flour_sugar_baking"],
+    "vanilla":          ["dry_flour_sugar_baking", "dry_other"],
+    "breadcrumbs":      ["dry_other", "bakery_other"],
+    "puff pastry":      ["frozen_bakery"],
+    # Mesi, puljong
+    "honey":            ["dry_other"],
+    "clear honey":      ["dry_other"],
+    "chicken stock":    ["spices_broth_stock"],
+    "beef stock":       ["spices_broth_stock"],
+    # Olid
+    "olive oil":        ["oils_olive"],
+    "rapeseed oil":     ["oils_other"],
+    "oil":              ["oils_other", "oils_olive"],
+    # Kastmed
+    "soy sauce":        ["sauces_soy_worcester"],
+    "mustard":          ["sauces_other", "sauces_marinades"],
+    "mayonnaise":       ["sauces_ketchup_mayo"],
+    "tomato puree":     ["sauces_pasta_cooking", "sauces_other"],
+    # Konservid
+    "chopped tomatoes": ["dry_canned_veg"],
+    "tinned tomatoes":  ["dry_canned_veg"],
+    "black olives":     ["dry_canned_veg"],
+    # Varsked koogiviljad
+    "cherry tomatoes":  ["produce_root_veg"],
+    "tomatoes":         ["produce_root_veg"],
+    "tomato":           ["produce_root_veg"],
+    "onion":            ["produce_root_veg"],
+    "onions":           ["produce_root_veg"],
+    "garlic":           ["produce_root_veg"],
+    "garlic cloves":    ["produce_root_veg"],
+    "carrot":           ["produce_root_veg"],
+    "carrots":          ["produce_root_veg"],
+    "potato":           ["produce_root_veg"],
+    "potatoes":         ["produce_root_veg"],
+    "celery":           ["produce_root_veg"],
+    "fennel":           ["produce_root_veg"],
+    "capsicum":         ["produce_root_veg"],
+    "red pepper":       ["produce_root_veg"],
+    "green beans":      ["produce_root_veg"],
+    "cabbage leaves":   ["produce_root_veg"],
+    "cabbage":          ["produce_root_veg"],
+    "cucumber":         ["produce_root_veg"],
+    "mushrooms":        ["produce_mushrooms"],
+    "mushroom":         ["produce_mushrooms"],
+    "lemon":            ["produce_tropical"],
+    # Veinid
+    "white wine":       ["drinks_wine"],
+    "red wine":         ["drinks_wine"],
+    # Maitseained
+    "rosemary":         ["spices_herbs_spice_mix"],
+    "basil":            ["spices_herbs_spice_mix", "produce_herbs_salads_sprouts"],
+    "basil leaves":     ["spices_herbs_spice_mix", "produce_herbs_salads_sprouts"],
+    "parsley":          ["spices_herbs_spice_mix", "produce_herbs_salads_sprouts"],
+    "thyme":            ["spices_herbs_spice_mix"],
+    "cumin seeds":      ["spices_herbs_spice_mix"],
+    "ginger":           ["spices_herbs_spice_mix"],
+    "balsamic vinegar": ["oils_vinegar"],
+    "white chocolate chips": ["sweets_chocolate_bars"],
+}
+
 
 def translate_ingredient(name: str) -> str:
     name_lower = name.lower().strip()
@@ -188,28 +297,51 @@ async def find_product_for_ingredient(db, ingredient_en: str):
         else:
             return None
 
+    sub_codes = INGREDIENT_SUB_CODES.get(name_lower)
+
     for term in search_terms:
-        rows = await db.fetch("""
-            SELECT
-                p.id,
-                p.name,
-                p.chain,
-                p.image_url,
-                p.brand,
-                p.size_text,
-                MIN(pr.price) as min_price
-            FROM products p
-            JOIN prices pr ON pr.product_id = p.id
-            WHERE p.name ILIKE $1
-              AND p.sub_code NOT IN (
-                'hh_other','hh_cleaners','hh_laundry','hh_dishwashing',
-                'pcare_oral_care','pcare_other','pcare_feminine_hygiene',
-                'baby_diapers','pet_cat_wet','pet_dog_wet','pet_cat_dry','pet_dog_dry'
-              )
-            GROUP BY p.id, p.name, p.chain, p.image_url, p.brand, p.size_text
-            ORDER BY min_price ASC
-            LIMIT 1
-        """, f"%{term}%")
+        if sub_codes:
+            rows = await db.fetch("""
+                SELECT
+                    p.id,
+                    p.name,
+                    p.chain,
+                    p.image_url,
+                    p.brand,
+                    p.size_text,
+                    MIN(pr.price) as min_price
+                FROM products p
+                JOIN prices pr ON pr.product_id = p.id
+                WHERE p.name ILIKE $1
+                  AND p.sub_code = ANY($2::text[])
+                  AND pr.price > 0
+                GROUP BY p.id, p.name, p.chain, p.image_url, p.brand, p.size_text
+                ORDER BY min_price ASC
+                LIMIT 1
+            """, f"%{term}%", sub_codes)
+        else:
+            rows = await db.fetch("""
+                SELECT
+                    p.id,
+                    p.name,
+                    p.chain,
+                    p.image_url,
+                    p.brand,
+                    p.size_text,
+                    MIN(pr.price) as min_price
+                FROM products p
+                JOIN prices pr ON pr.product_id = p.id
+                WHERE p.name ILIKE $1
+                  AND p.sub_code NOT IN (
+                    'hh_other','hh_cleaners','hh_laundry','hh_dishwashing',
+                    'pcare_oral_care','pcare_other','pcare_feminine_hygiene',
+                    'baby_diapers','pet_cat_wet','pet_dog_wet','pet_cat_dry','pet_dog_dry'
+                  )
+                  AND pr.price > 0
+                GROUP BY p.id, p.name, p.chain, p.image_url, p.brand, p.size_text
+                ORDER BY min_price ASC
+                LIMIT 1
+            """, f"%{term}%")
 
         if rows:
             r = rows[0]
@@ -221,7 +353,7 @@ async def find_product_for_ingredient(db, ingredient_en: str):
                 "brand": r["brand"] or "",
                 "size_text": r["size_text"] or "",
                 "is_per_kg": (r["size_text"] or "").lower() == "kg",
-                "price": float(r["min_price"]) if r["min_price"] else 0.0,
+                "price": float(r["min_price"]),
                 "quantity": 1,
             }
 
@@ -255,7 +387,7 @@ async def get_recipes():
 
 @router.get("/recipes/{meal_id}/basket")
 async def get_recipe_basket(meal_id: str, request: Request):
-    """Tagastab retsepti koostisosade põhjal päris tooted andmebaasist."""
+    """Tagastab retsepti koostisosade pohhjal paeris tooted andmebaasist."""
     db = request.app.state.db
     if not db:
         raise HTTPException(status_code=503, detail="DB unavailable")
