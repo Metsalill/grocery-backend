@@ -18,10 +18,9 @@ Highlights
 - Handles alcohol **age verification** popup ("Olen 18-aastane").
 - FIX: Per-row transactions with deadlock retry (3 attempts) to avoid
   cross-shard deadlocks during parallel ingestion.
-
-YAML deps (example):
-  pip install playwright asyncpg bs4 lxml selectolax
-  playwright install --with-deps chromium
+- FIX: Age gate cookies set on every new browser context so they persist
+  across browser restarts.
+- FIX: Rows with null price are skipped (not sent to DB).
 """
 
 from __future__ import annotations
@@ -71,6 +70,13 @@ SPEC_KEYS_MFR = {"tootja", "valmistaja", "manufacturer", "tarnija"}
 SPEC_KEYS_SIZE = {"kogus", "netokogus", "maht", "neto"}
 BAD_NAMES = {"pealeht"}  # "Home" in Estonian etc.
 
+# Age gate cookies to set on every new browser context
+AGE_GATE_COOKIES = [
+    {"name": "ageConfirmed", "value": "true", "domain": ".barbora.ee", "path": "/"},
+    {"name": "adult",        "value": "true", "domain": ".barbora.ee", "path": "/"},
+    {"name": "isAdult",      "value": "true", "domain": ".barbora.ee", "path": "/"},
+]
+
 # ---------------------------------------------------------------------
 # small helpers
 # ---------------------------------------------------------------------
@@ -95,10 +101,6 @@ def get_ext_id(url: str) -> str:
     return slug[-120:]
 
 def parse_bool_flag(v) -> bool:
-    """
-    Robust boolean parsing for CLI/env flags.
-    Accepts: 1/0, true/false, yes/no, on/off (any case), and booleans.
-    """
     if isinstance(v, bool):
         return v
     s = str(v).strip().lower()
@@ -799,15 +801,14 @@ def append_rows(path: str, rows: List[List[str]]) -> None:
 # ---------------------------------------------------------------------
 # DB ingest helper
 # FIX: Per-row transactions with deadlock retry to avoid cross-shard deadlocks.
-# Previously all rows were wrapped in one big transaction, causing deadlocks
-# when multiple shards tried to upsert overlapping products simultaneously.
-# Now each row gets its own transaction with up to 3 retry attempts on deadlock.
+# FIX: Rows with null price are skipped before attempting DB insert.
 # ---------------------------------------------------------------------
 
 async def _bulk_ingest_to_db(rows: List[Dict[str, object]], store_id: int) -> None:
     """
     Call upsert_product_and_price(...) for each row in its own transaction.
     Retries up to 3 times on deadlock before skipping the row.
+    Rows with no price are skipped entirely.
     """
     if store_id <= 0:
         print("[barbora] STORE_ID not set or invalid, skipping DB ingest.")
@@ -831,6 +832,12 @@ async def _bulk_ingest_to_db(rows: List[Dict[str, object]], store_id: int) -> No
                     price_val = float(ptxt)
             except Exception:
                 price_val = None
+
+            # FIX: skip rows with no price — DB has NOT NULL constraint on prices.price
+            if price_val is None:
+                print(f"[skip] no price for ext_id={r.get('ext_id')}, url={r.get('source_url')}")
+                skipped += 1
+                continue
 
             ext_id = r.get("ext_id") or ""
 
@@ -863,7 +870,6 @@ async def _bulk_ingest_to_db(rows: List[Dict[str, object]], store_id: int) -> No
                         print(f"[warn] deadlock after 3 attempts, skipping ext_id={ext_id}")
                         skipped += 1
                     else:
-                        # exponential backoff: 100ms, 200ms
                         await asyncio.sleep(0.1 * (attempt + 1))
 
                 except Exception as e:
@@ -875,14 +881,13 @@ async def _bulk_ingest_to_db(rows: List[Dict[str, object]], store_id: int) -> No
         await conn.close()
 
     if skipped:
-        print(f"[barbora] DB ingest: {ingested} ok, {skipped} skipped (deadlock/error)")
+        print(f"[barbora] DB ingest: {ingested} ok, {skipped} skipped (no price / deadlock / error)")
 
 # ---------------------------------------------------------------------
 # sharding utils
 # ---------------------------------------------------------------------
 
 def apply_shard(full_list: List[str], shard: Optional[int], shards: Optional[int]) -> List[str]:
-    """Return the subset of categories for this shard, using CLI overrides first, then env."""
     try:
         env_shard = int(os.environ.get("SHARD", "0"))
         env_shards = int(os.environ.get("SHARDS", "1"))
@@ -912,12 +917,12 @@ def crawl(args) -> None:
     cats_all = read_lines(args.cats_file)
     cats = apply_shard(cats_all, args.cat_index, args.cat_shards)
 
-    skip_ext: set[str] = (
+    skip_ext: set = (
         set(read_lines(args.skip_ext_file))
         if args.skip_ext_file and os.path.exists(args.skip_ext_file)
         else set()
     )
-    only_ext: set[str] = (
+    only_ext: set = (
         set(read_lines(args.only_ext_file))
         if args.only_ext_file and os.path.exists(args.only_ext_file)
         else set()
@@ -959,6 +964,8 @@ def crawl(args) -> None:
     rows_for_ingest: List[Dict[str, object]] = []
 
     with sync_playwright() as pw:
+        # FIX: age gate cookies are set on every new browser context so they
+        # persist across browser restarts (previously cookies were lost on restart).
         def new_browser():
             b = pw.chromium.launch(headless=headless)
             ctx = b.new_context(
@@ -967,6 +974,7 @@ def crawl(args) -> None:
                 geolocation={"latitude": 59.4370, "longitude": 24.7536},
                 permissions=["geolocation"],
             )
+            ctx.add_cookies(AGE_GATE_COOKIES)
             return b, ctx, ctx.new_page()
 
         browser, ctx, page = new_browser()
