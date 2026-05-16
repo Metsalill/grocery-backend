@@ -209,6 +209,10 @@ Return ONLY valid JSON for "{ingredient_en}":"""
             }
         )
         data = resp.json()
+        if "error" in data:
+            raise ValueError(f"API error: {data['error']}")
+        if "content" not in data:
+            raise ValueError(f"Unexpected response: {data}")
         text = data["content"][0]["text"].strip()
         text = text.replace("```json", "").replace("```", "").strip()
         return json.loads(text)
@@ -229,6 +233,7 @@ async def resolve_ingredient(db, ingredient_en: str) -> dict:
         result = await ask_claude_for_ingredient(ingredient_en)
     except Exception as e:
         print(f"[recipes] Claude API error for '{ingredient_en}': {e}")
+        import traceback; traceback.print_exc()
         result = {"search_terms": [name_lower], "sub_codes": []}
 
     await save_ingredient_cache(db, name_lower, result["search_terms"], result["sub_codes"])
