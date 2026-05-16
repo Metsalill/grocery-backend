@@ -297,9 +297,6 @@ async def find_products_per_store_for_ingredient(db, ingredient_en: str) -> dict
                     "quantity": 1,
                 }
 
-        if results_by_chain:
-            break
-
     return results_by_chain
 
 
