@@ -1,9 +1,13 @@
+import json
+import os
 import httpx
 from fastapi import APIRouter, HTTPException, Request
 
 router = APIRouter()
 
 THEMEALDB_BASE = "https://www.themealdb.com/api/json/v1/1"
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages"
 
 FEATURED_MEALS = [
     ("52982", "Spaghetti Carbonara"),
@@ -16,6 +20,40 @@ FEATURED_MEALS = [
     ("53305", "Kapsarullid"),
     ("53064", "Alfredo pasta"),
     ("52959", "Ahjulõhe apteegitilliga"),
+]
+
+SKIP_INGREDIENTS = {
+    "water", "salt", "black pepper", "pepper", "white pepper",
+    "mixed herbs", "seasoning", "oil spray", "to taste",
+}
+
+CHAIN_DISPLAY_NAMES = {
+    "rimi": "Rimi",
+    "selver": "Selver",
+    "prisma": "Prisma",
+    "coop": "Coop",
+    "maxima": "Maxima",
+    "barbora": "Maxima",
+}
+
+VALID_SUB_CODES = [
+    "dry_pasta_rice", "dairy_eggs", "dairy_milk", "dairy_butter_margarine",
+    "dairy_cream_sourcream", "dairy_yogurt_kefir", "cheese_regular",
+    "cheese_delicatessen", "dairy_cheese_slices", "meat_poultry", "meat_beef_lamb_game",
+    "meat_minced", "meat_pork", "meat_hams", "meat_sausages",
+    "fish_fresh", "fish_salted_smoked", "fish_other", "fish_processed",
+    "produce_root_veg", "produce_mushrooms", "produce_tropical",
+    "produce_herbs_salads_sprouts", "produce_smoothies_fresh_juices",
+    "dry_flour_sugar_baking", "dry_canned_veg", "dry_other", "dry_ready_meals_jars",
+    "frozen_bakery", "frozen_veg", "frozen_berries_fruit", "frozen_ready_meals",
+    "frozen_meat", "frozen_other", "frozen_desserts_icecream",
+    "oils_olive", "oils_other", "oils_vinegar",
+    "sauces_ketchup_mayo", "sauces_pasta_cooking", "sauces_soy_worcester",
+    "sauces_other", "sauces_marinades",
+    "spices_herbs_spice_mix", "spices_broth_stock",
+    "drinks_wine", "drinks_beer_cider", "drinks_soft_soda",
+    "sweets_chocolate_bars", "sweets_nuts_driedfruit",
+    "bakery_other", "bakery_bread_loaves",
 ]
 
 INGREDIENT_TRANSLATIONS = {
@@ -46,211 +84,10 @@ INGREDIENT_TRANSLATIONS = {
     "breadcrumbs": "riivsai", "basil leaves": "basiilik", "basil": "basiilik",
     "parsley": "petersell", "thyme": "tüümian", "cumin seeds": "köömned",
     "bay leaf": "loorberileht", "clams": "merekarbid", "mussels": "merekarbid",
-    "white wine": "valge vein", "red wine": "punane vein", "white chocolate chips": "valge šokolaad",
-    "ginger": "ingver", "black olives": "oliivid", "clear honey": "mesi",
-    "balsamic vinegar": "äädikas", "rosemary": "rosmariin", "basmati rice": "riis",
-}
-
-SKIP_INGREDIENTS = {
-    "water", "salt", "black pepper", "pepper", "white pepper",
-    "mixed herbs", "seasoning", "oil spray",
-}
-
-SEARCH_TERMS = {
-    "spaghetti": ["spaghetti"],
-    "fettuccine": ["fettuccine", "pasta"],
-    "lasagne sheets": ["lasanje", "lasagna"],
-    "pasta": ["pasta"],
-    "sushi rice": ["sushi riis"],
-    "rice": ["riis"],
-    "basmati rice": ["basmati"],
-    "egg yolks": ["muna"],
-    "eggs": ["muna"],
-    "egg": ["muna"],
-    "bacon": ["peekon"],
-    "pancetta": ["peekon"],
-    "chicken wings": ["kanatiivad", "kana tiib"],
-    "chicken breast": ["kanafileed"],
-    "chicken breasts": ["kanafileed"],
-    "chicken thighs": ["kanareis"],
-    "whole chicken": ["terve kana"],
-    "minced beef": ["veisehakkliha"],
-    "ground beef": ["veisehakkliha"],
-    "beef": ["veiseliha"],
-    "pork": ["sealiha"],
-    "salmon": ["lõhe"],
-    "clams": ["merekarbid"],
-    "mussels": ["merekarbid"],
-    "butter": ["või"],
-    "milk": ["piim"],
-    "double cream": ["vahukoor"],
-    "heavy cream": ["vahukoor"],
-    "cream": ["koor"],
-    "creme fraiche": ["hapukoor"],
-    "parmesan": ["parmesan"],
-    "parmesan cheese": ["parmesan"],
-    "pecorino": ["parmesan"],
-    "mozzarella": ["mozzarella"],
-    "mozzarella balls": ["mozzarella"],
-    "cheddar": ["cheddar"],
-    "cheese": ["juust"],
-    "plain flour": ["nisujahu"],
-    "flour": ["jahu"],
-    "puff pastry": ["lehttainas"],
-    "sugar": ["suhkur"],
-    "caster sugar": ["suhkur"],
-    "honey": ["mesi"],
-    "clear honey": ["mesi"],
-    "olive oil": ["oliiviõli"],
-    "rapeseed oil": ["rapsiõli"],
-    "oil": ["taimeõli"],
-    "soy sauce": ["sojakaste"],
-    "mustard": ["sinep"],
-    "mayonnaise": ["majonees"],
-    "tomato puree": ["tomatipasta"],
-    "chopped tomatoes": ["konservtomatid"],
-    "tinned tomatoes": ["konservtomatid"],
-    "cherry tomatoes": ["kirsstomat"],
-    "tomatoes": ["tomat"],
-    "tomato": ["tomat"],
-    "onion": ["sibul"],
-    "onions": ["sibul"],
-    "garlic": ["küüslauk"],
-    "garlic cloves": ["küüslauk"],
-    "carrot": ["porgand"],
-    "carrots": ["porgand"],
-    "celery": ["seller"],
-    "fennel": ["apteegitill"],
-    "mushrooms": ["seened"],
-    "mushroom": ["seened"],
-    "potatoes": ["kartul"],
-    "potato": ["kartul"],
-    "capsicum": ["paprika"],
-    "red pepper": ["punane paprika"],
-    "green beans": ["rohelised oad"],
-    "cabbage leaves": ["kapsas"],
-    "cabbage": ["kapsas"],
-    "lemon": ["sidrun"],
-    "cucumber": ["kurk"],
-    "basil leaves": ["basiilik"],
-    "basil": ["basiilik"],
-    "parsley": ["petersell"],
-    "thyme": ["tüümian"],
-    "cumin seeds": ["köömned"],
-    "ginger": ["ingver"],
-    "white wine": ["valge vein"],
-    "red wine": ["punane vein"],
-    "beef stock": ["veisepuljong"],
-    "chicken stock": ["kanapuljong"],
-    "vanilla": ["vanill"],
-    "white chocolate chips": ["valge šokolaad"],
-    "breadcrumbs": ["riivsai"],
-    "balsamic vinegar": ["balsamiäädikas"],
-    "black olives": ["oliivid"],
-    "rosemary": ["rosmariin"],
-}
-
-INGREDIENT_SUB_CODES = {
-    "spaghetti":        ["dry_pasta_rice"],
-    "fettuccine":       ["dry_pasta_rice"],
-    "lasagne sheets":   ["dry_pasta_rice"],
-    "pasta":            ["dry_pasta_rice"],
-    "rice":             ["dry_pasta_rice"],
-    "sushi rice":       ["dry_pasta_rice"],
-    "basmati rice":     ["dry_pasta_rice"],
-    "egg":              ["dairy_eggs"],
-    "eggs":             ["dairy_eggs"],
-    "egg yolks":        ["dairy_eggs"],
-    "bacon":            ["meat_hams"],
-    "pancetta":         ["meat_hams"],
-    "chicken wings":    ["meat_poultry"],
-    "chicken breast":   ["meat_poultry"],
-    "chicken breasts":  ["meat_poultry"],
-    "chicken thighs":   ["meat_poultry"],
-    "whole chicken":    ["meat_poultry"],
-    "beef":             ["meat_beef_lamb_game"],
-    "minced beef":      ["meat_minced"],
-    "ground beef":      ["meat_minced"],
-    "pork":             ["meat_pork"],
-    "salmon":           ["fish_fresh", "fish_salted_smoked"],
-    "clams":            ["fish_fresh", "fish_other", "fish_processed"],
-    "mussels":          ["fish_fresh", "fish_other", "fish_processed"],
-    "butter":           ["dairy_butter_margarine"],
-    "milk":             ["dairy_milk"],
-    "cream":            ["dairy_cream_sourcream"],
-    "double cream":     ["dairy_cream_sourcream"],
-    "heavy cream":      ["dairy_cream_sourcream"],
-    "creme fraiche":    ["dairy_cream_sourcream"],
-    "parmesan":         ["cheese_regular", "cheese_delicatessen"],
-    "parmesan cheese":  ["cheese_regular", "cheese_delicatessen"],
-    "pecorino":         ["cheese_regular", "cheese_delicatessen"],
-    "mozzarella":       ["cheese_regular"],
-    "mozzarella balls": ["cheese_regular"],
-    "cheddar":          ["cheese_regular"],
-    "cheese":           ["cheese_regular", "cheese_delicatessen"],
-    "plain flour":      ["dry_flour_sugar_baking"],
-    "flour":            ["dry_flour_sugar_baking"],
-    "sugar":            ["dry_flour_sugar_baking"],
-    "caster sugar":     ["dry_flour_sugar_baking"],
-    "vanilla":          ["dry_flour_sugar_baking", "dry_other"],
-    "breadcrumbs":      ["dry_other", "bakery_other"],
-    "puff pastry":      ["frozen_bakery"],
-    "honey":            ["dry_other"],
-    "clear honey":      ["dry_other"],
-    "chicken stock":    ["spices_broth_stock"],
-    "beef stock":       ["spices_broth_stock"],
-    "olive oil":        ["oils_olive"],
-    "rapeseed oil":     ["oils_other"],
-    "oil":              ["oils_other", "oils_olive"],
-    "soy sauce":        ["sauces_soy_worcester"],
-    "mustard":          ["sauces_other", "sauces_marinades"],
-    "mayonnaise":       ["sauces_ketchup_mayo"],
-    "tomato puree":     ["sauces_pasta_cooking", "sauces_other"],
-    "chopped tomatoes": ["dry_canned_veg"],
-    "tinned tomatoes":  ["dry_canned_veg"],
-    "black olives":     ["dry_canned_veg"],
-    "cherry tomatoes":  ["produce_root_veg"],
-    "tomatoes":         ["produce_root_veg"],
-    "tomato":           ["produce_root_veg"],
-    "onion":            ["produce_root_veg"],
-    "onions":           ["produce_root_veg"],
-    "garlic":           ["produce_root_veg"],
-    "garlic cloves":    ["produce_root_veg"],
-    "carrot":           ["produce_root_veg"],
-    "carrots":          ["produce_root_veg"],
-    "potato":           ["produce_root_veg"],
-    "potatoes":         ["produce_root_veg"],
-    "celery":           ["produce_root_veg"],
-    "fennel":           ["produce_root_veg"],
-    "capsicum":         ["produce_root_veg"],
-    "red pepper":       ["produce_root_veg"],
-    "green beans":      ["produce_root_veg"],
-    "cabbage leaves":   ["produce_root_veg"],
-    "cabbage":          ["produce_root_veg"],
-    "cucumber":         ["produce_root_veg"],
-    "mushrooms":        ["produce_mushrooms"],
-    "mushroom":         ["produce_mushrooms"],
-    "lemon":            ["produce_tropical"],
-    "white wine":       ["drinks_wine"],
-    "red wine":         ["drinks_wine"],
-    "rosemary":         ["spices_herbs_spice_mix"],
-    "basil":            ["spices_herbs_spice_mix", "produce_herbs_salads_sprouts"],
-    "basil leaves":     ["spices_herbs_spice_mix", "produce_herbs_salads_sprouts"],
-    "parsley":          ["spices_herbs_spice_mix", "produce_herbs_salads_sprouts"],
-    "thyme":            ["spices_herbs_spice_mix"],
-    "cumin seeds":      ["spices_herbs_spice_mix"],
-    "ginger":           ["spices_herbs_spice_mix"],
-    "balsamic vinegar": ["oils_vinegar"],
-    "white chocolate chips": ["sweets_chocolate_bars"],
-}
-
-# Kuvamiseks kasutatavad poenimed
-CHAIN_DISPLAY_NAMES = {
-    "rimi": "Rimi",
-    "selver": "Selver",
-    "prisma": "Prisma",
-    "coop": "Coop",
-    "maxima": "Maxima",
+    "white wine": "valge vein", "red wine": "punane vein",
+    "white chocolate chips": "valge šokolaad", "ginger": "ingver",
+    "black olives": "oliivid", "clear honey": "mesi", "balsamic vinegar": "äädikas",
+    "rosemary": "rosmariin", "basmati rice": "riis",
 }
 
 
@@ -278,24 +115,105 @@ def parse_ingredients(meal: dict) -> list[dict]:
     return ingredients
 
 
-async def find_products_per_store_for_ingredient(db, ingredient_en: str) -> dict:
-    """
-    Tagastab iga poe parima (odavaima) toote antud koostisosa jaoks.
-    Võti = chain, väärtus = tooteinfo dict.
-    """
+async def get_cached_ingredient(db, ingredient_en: str):
+    row = await db.fetchrow(
+        "SELECT search_terms, sub_codes FROM recipe_ingredient_cache WHERE ingredient_en = $1",
+        ingredient_en.lower().strip()
+    )
+    if row:
+        return {"search_terms": list(row["search_terms"]), "sub_codes": list(row["sub_codes"])}
+    return None
+
+
+async def save_ingredient_cache(db, ingredient_en: str, search_terms: list, sub_codes: list):
+    await db.execute(
+        """INSERT INTO recipe_ingredient_cache (ingredient_en, search_terms, sub_codes)
+           VALUES ($1, $2, $3)
+           ON CONFLICT (ingredient_en) DO UPDATE
+           SET search_terms = EXCLUDED.search_terms,
+               sub_codes = EXCLUDED.sub_codes,
+               created_at = NOW()""",
+        ingredient_en.lower().strip(), search_terms, sub_codes
+    )
+
+
+async def ask_claude_for_ingredient(ingredient_en: str) -> dict:
+    if not ANTHROPIC_API_KEY:
+        return {"search_terms": [ingredient_en.lower()], "sub_codes": []}
+
+    prompt = f"""You are helping match recipe ingredients to products in Estonian grocery stores (Rimi, Selver, Prisma, Coop, Maxima/Barbora).
+
+Ingredient: "{ingredient_en}"
+
+Estonian grocery stores use Estonian and sometimes Finnish/Swedish brand names. Examples:
+- "parmesan" → search "parmesan", "parmigiano", "grana padano", "džiugas" (hard aged cheeses sold in Estonia)
+- "bacon" → search "peekon"
+- "spaghetti" → search "spaghetti"
+- "eggs" or "egg yolks" → search "muna"
+- "cream" → search "koor", "vahukoor"
+- "chicken breast" → search "kanafileed", "kana filee"
+- "butter" → search "või"
+- "milk" → search "piim"
+
+Valid sub_codes:
+{json.dumps(VALID_SUB_CODES)}
+
+Return ONLY valid JSON (no markdown):
+{{"search_terms": ["term1", "term2"], "sub_codes": ["sub_code1"]}}
+
+Rules:
+- search_terms: 1-4 terms matching this ingredient in Estonian store product names
+- sub_codes: 1-3 most relevant sub_codes from the list
+- If ingredient should be skipped (water, salt, pepper, seasoning), return {{"search_terms": [], "sub_codes": []}}"""
+
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        resp = await client.post(
+            ANTHROPIC_API_URL,
+            headers={
+                "x-api-key": ANTHROPIC_API_KEY,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+            json={
+                "model": "claude-haiku-4-5-20251001",
+                "max_tokens": 200,
+                "messages": [{"role": "user", "content": prompt}],
+            }
+        )
+        data = resp.json()
+        text = data["content"][0]["text"].strip()
+        text = text.replace("```json", "").replace("```", "").strip()
+        return json.loads(text)
+
+
+async def resolve_ingredient(db, ingredient_en: str) -> dict:
+    """Cache → Claude API → salvesta cache."""
     name_lower = ingredient_en.lower().strip()
+
     if name_lower in SKIP_INGREDIENTS:
-        return {}
+        return {"search_terms": [], "sub_codes": []}
 
-    search_terms = SEARCH_TERMS.get(name_lower, [])
+    cached = await get_cached_ingredient(db, name_lower)
+    if cached:
+        return cached
+
+    try:
+        result = await ask_claude_for_ingredient(ingredient_en)
+    except Exception as e:
+        print(f"[recipes] Claude API error for '{ingredient_en}': {e}")
+        result = {"search_terms": [name_lower], "sub_codes": []}
+
+    await save_ingredient_cache(db, name_lower, result["search_terms"], result["sub_codes"])
+    return result
+
+
+async def find_products_per_store_for_ingredient(db, ingredient_en: str) -> dict:
+    resolved = await resolve_ingredient(db, ingredient_en)
+    search_terms = resolved.get("search_terms", [])
+    sub_codes = resolved.get("sub_codes", [])
+
     if not search_terms:
-        translated = translate_ingredient(ingredient_en)
-        if translated != ingredient_en:
-            search_terms = [translated]
-        else:
-            return {}
-
-    sub_codes = INGREDIENT_SUB_CODES.get(name_lower)
+        return {}
 
     results_by_chain = {}
 
@@ -303,12 +221,7 @@ async def find_products_per_store_for_ingredient(db, ingredient_en: str) -> dict
         if sub_codes:
             rows = await db.fetch("""
                 SELECT
-                    p.id,
-                    p.name,
-                    p.chain,
-                    p.image_url,
-                    p.brand,
-                    p.size_text,
+                    p.id, p.name, p.chain, p.image_url, p.brand, p.size_text,
                     MIN(pr.price) as min_price
                 FROM products p
                 JOIN prices pr ON pr.product_id = p.id
@@ -321,12 +234,7 @@ async def find_products_per_store_for_ingredient(db, ingredient_en: str) -> dict
         else:
             rows = await db.fetch("""
                 SELECT
-                    p.id,
-                    p.name,
-                    p.chain,
-                    p.image_url,
-                    p.brand,
-                    p.size_text,
+                    p.id, p.name, p.chain, p.image_url, p.brand, p.size_text,
                     MIN(pr.price) as min_price
                 FROM products p
                 JOIN prices pr ON pr.product_id = p.id
@@ -344,7 +252,6 @@ async def find_products_per_store_for_ingredient(db, ingredient_en: str) -> dict
         for r in rows:
             chain = (r["chain"] or "").lower()
             if chain not in results_by_chain:
-                # Võta ainult odavaim toode igast poest
                 results_by_chain[chain] = {
                     "product_id": r["id"],
                     "name": r["name"],
@@ -358,17 +265,15 @@ async def find_products_per_store_for_ingredient(db, ingredient_en: str) -> dict
                 }
 
         if results_by_chain:
-            break  # Esimene otsingutermin andis tulemusi, piisab
+            break
 
     return results_by_chain
 
 
 async def find_product_for_ingredient(db, ingredient_en: str):
-    """Tagastab odavaima toote (legacy endpoint jaoks)."""
     per_store = await find_products_per_store_for_ingredient(db, ingredient_en)
     if not per_store:
         return None
-    # Tagasta globaalselt odavaim
     return min(per_store.values(), key=lambda x: x["price"])
 
 
@@ -401,33 +306,7 @@ async def get_recipes():
 async def get_recipe_compare(meal_id: str, request: Request):
     """
     Tagastab retsepti hinna võrdluse poodide kaupa.
-
-    Vastus:
-    {
-      "meal_id": "...",
-      "recipe_name": "...",
-      "total_ingredients": 6,
-      "stores": [
-        {
-          "chain": "rimi",
-          "display_name": "Rimi",
-          "covered": 5,          // mitu koostisosa leiti
-          "total": 6,            // kokku koostisosasid
-          "total_price": 8.40,
-          "products": [
-            {
-              "ingredient_name": "spaghetti",
-              "product_id": 123,
-              "name": "Barilla Spaghetti 500g",
-              "price": 1.29,
-              ...
-            }
-          ],
-          "not_found": ["parmesan"]   // mis puudub sellest poest
-        },
-        ...
-      ]
-    }
+    Kasutab Claude Haiku't koostisosa matchimiseks (cache'itakse DB-sse).
     """
     db = request.app.state.db
     if not db:
@@ -447,8 +326,6 @@ async def get_recipe_compare(meal_id: str, request: Request):
         meal["strMeal"]
     )
 
-    # Leia iga koostisosa jaoks tooted poodide kaupa
-    # ingredient_results[i] = {chain: product_dict}
     ingredient_results = []
     for ing in ingredients:
         name_lower = ing["name_en"].lower().strip()
@@ -459,15 +336,13 @@ async def get_recipe_compare(meal_id: str, request: Request):
             "ingredient_name": ing["name_et"],
             "ingredient_name_en": ing["name_en"],
             "measure": ing["measure"],
-            "by_chain": per_store,  # {chain: product}
+            "by_chain": per_store,
         })
 
-    # Kogu kõik unikaalsed poed
     all_chains = set()
     for ir in ingredient_results:
         all_chains.update(ir["by_chain"].keys())
 
-    # Ehita iga poe jaoks kokkuvõte
     store_summaries = []
     for chain in all_chains:
         products = []
@@ -494,7 +369,6 @@ async def get_recipe_compare(meal_id: str, request: Request):
             "not_found": not_found,
         })
 
-    # Sorteeri: enim kaetud ees, seejärel odavaim
     store_summaries.sort(key=lambda x: (-x["covered"], x["total_price"]))
 
     return {
@@ -507,7 +381,7 @@ async def get_recipe_compare(meal_id: str, request: Request):
 
 @router.get("/recipes/{meal_id}/basket")
 async def get_recipe_basket(meal_id: str, request: Request):
-    """Legacy endpoint — tagastab globaalselt odavaima toote iga koostisosa jaoks."""
+    """Legacy endpoint."""
     db = request.app.state.db
     if not db:
         raise HTTPException(status_code=503, detail="DB unavailable")
