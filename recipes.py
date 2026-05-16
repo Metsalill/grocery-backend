@@ -141,30 +141,58 @@ async def ask_claude_for_ingredient(ingredient_en: str) -> dict:
     if not ANTHROPIC_API_KEY:
         return {"search_terms": [ingredient_en.lower()], "sub_codes": []}
 
-    prompt = f"""You are helping match recipe ingredients to products in Estonian grocery stores (Rimi, Selver, Prisma, Coop, Maxima/Barbora).
+    prompt = f"""You help match recipe ingredients to Estonian grocery store product names.
 
 Ingredient: "{ingredient_en}"
 
-Estonian grocery stores use Estonian and sometimes Finnish/Swedish brand names. Examples:
-- "parmesan" → search "parmesan", "parmigiano", "grana padano", "džiugas" (hard aged cheeses sold in Estonia)
-- "bacon" → search "peekon"
-- "spaghetti" → search "spaghetti"
-- "eggs" or "egg yolks" → search "muna"
-- "cream" → search "koor", "vahukoor"
-- "chicken breast" → search "kanafileed", "kana filee"
-- "butter" → search "või"
-- "milk" → search "piim"
+CRITICAL: search_terms MUST be Estonian words used in store databases. sub_codes MUST come from the list.
 
-Valid sub_codes:
-{json.dumps(VALID_SUB_CODES)}
+Estonian translations:
+- bacon, pancetta → "peekon"
+- egg, eggs, egg yolks → "muna"
+- spaghetti → "spaghetti"
+- parmesan, pecorino, hard cheese → "parmesan", "parmigiano", "grana padano", "dziugas"
+- butter → "või"
+- milk → "piim"
+- cream, double cream, heavy cream → "koor", "vahukoor"
+- chicken breast → "kanafileed"
+- chicken wings → "kanatiivad"
+- ground beef, minced beef → "veisehakkliha"
+- beef → "veiseliha"
+- pork → "sealiha"
+- salmon → "lõhe"
+- onion → "sibul"
+- garlic → "küüslauk"
+- tomato, tomatoes → "tomat"
+- cherry tomatoes → "kirsstomat"
+- carrot → "porgand"
+- potato → "kartul"
+- mushrooms → "seened"
+- olive oil → "oliiviõli"
+- flour, plain flour → "jahu"
+- sugar → "suhkur"
+- rice → "riis"
+- pasta → "pasta"
+- lemon → "sidrun"
+- cheese → "juust"
+- mozzarella → "mozzarella"
+- honey → "mesi"
+- mustard → "sinep"
+- soy sauce → "sojakaste"
+- white wine → "valge vein"
+- red wine → "punane vein"
 
-Return ONLY valid JSON (no markdown):
-{{"search_terms": ["term1", "term2"], "sub_codes": ["sub_code1"]}}
+Valid sub_codes: {json.dumps(VALID_SUB_CODES)}
 
-Rules:
-- search_terms: 1-4 terms matching this ingredient in Estonian store product names
-- sub_codes: 1-3 most relevant sub_codes from the list
-- If ingredient should be skipped (water, salt, pepper, seasoning), return {{"search_terms": [], "sub_codes": []}}"""
+Examples:
+- "bacon" → {{"search_terms": ["peekon"], "sub_codes": ["meat_hams"]}}
+- "egg yolks" → {{"search_terms": ["muna"], "sub_codes": ["dairy_eggs"]}}
+- "parmesan" → {{"search_terms": ["parmesan", "parmigiano", "grana padano", "dziugas"], "sub_codes": ["cheese_regular", "cheese_delicatessen"]}}
+- "spaghetti" → {{"search_terms": ["spaghetti"], "sub_codes": ["dry_pasta_rice"]}}
+- "water" → {{"search_terms": [], "sub_codes": []}}
+- "salt" → {{"search_terms": [], "sub_codes": []}}
+
+Return ONLY valid JSON for "{ingredient_en}":"""
 
     async with httpx.AsyncClient(timeout=10.0) as client:
         resp = await client.post(
